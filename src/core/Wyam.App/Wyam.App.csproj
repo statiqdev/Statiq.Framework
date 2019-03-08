@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Spectre.Cli" Version="0.20.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Wyam.Common\Wyam.Common.csproj" />
+    <ProjectReference Include="..\Wyam.Core\Wyam.Core.csproj" />
+    <ProjectReference Include="..\Wyam.Hosting\Wyam.Hosting.csproj" />
+  </ItemGroup>
+
+</Project>
