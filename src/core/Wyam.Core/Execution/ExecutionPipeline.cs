@@ -68,7 +68,7 @@ namespace Wyam.Core.Execution
         }
 
         // This is the main execute method called by the engine
-        public void Execute(Engine engine, Guid executionId)
+        public void Execute(Engine engine, Guid executionId, IServiceProvider serviceProvider)
         {
             if (_disposed)
             {
@@ -83,7 +83,7 @@ namespace Wyam.Core.Execution
 
             // Execute all modules in the pipeline
             IReadOnlyList<IDocument> resultDocuments;
-            using (ExecutionContext context = new ExecutionContext(engine, executionId, this))
+            using (ExecutionContext context = new ExecutionContext(engine, executionId, this, serviceProvider))
             {
                 ImmutableArray<IDocument> inputs = new[] { engine.DocumentFactory.GetDocument(context) }.ToImmutableArray();
                 resultDocuments = Execute(context, _modules, inputs);

@@ -1,4 +1,4 @@
-﻿namespace Wyam.App.Configuration
+﻿namespace Wyam.Common.Configuration
 {
     public interface IConfigurator<T>
         where T : class

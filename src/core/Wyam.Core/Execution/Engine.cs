@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using JavaScriptEngineSwitcher.Core;
+using Microsoft.Extensions.DependencyInjection;
 using Wyam.Common.Configuration;
 using Wyam.Common.Documents;
 using Wyam.Common.Execution;
@@ -196,8 +197,13 @@ namespace Wyam.Core.Execution
         /// <summary>
         /// Executes the engine. This is the primary method that kicks off generation.
         /// </summary>
-        public void Execute()
+        public void Execute(IServiceProvider serviceProvider)
         {
+            if (serviceProvider == null)
+            {
+                throw new ArgumentNullException(nameof(serviceProvider));
+            }
+
             CheckDisposed();
 
             Trace.Information($"Using {JsEngineSwitcher.Current.DefaultEngineName} as the JavaScript engine");
@@ -241,22 +247,26 @@ namespace Wyam.Core.Execution
                         System.Diagnostics.Stopwatch pipelineStopwatch = System.Diagnostics.Stopwatch.StartNew();
                         using (Trace.WithIndent().Information("Executing pipeline \"{0}\" ({1}/{2}) with {3} child module(s)", pipelineName, c, _pipelines.Count, pipeline.Count))
                         {
-                            try
+                            IServiceScopeFactory serviceScopeFactory = serviceProvider.GetRequiredService<IServiceScopeFactory>();
+                            using (IServiceScope serviceScope = serviceScopeFactory.CreateScope())
                             {
-                                ((ExecutionPipeline)pipeline).Execute(this, executionId);
-                                pipelineStopwatch.Stop();
-                                Trace.Information(
-                                    "Executed pipeline \"{0}\" ({1}/{2}) in {3} ms resulting in {4} output document(s)",
-                                    pipelineName,
-                                    c++,
-                                    _pipelines.Count,
-                                    pipelineStopwatch.ElapsedMilliseconds,
-                                    DocumentCollection.FromPipeline(pipelineName).Count());
-                            }
-                            catch (Exception)
-                            {
-                                Trace.Error("Error while executing pipeline {0}", pipelineName);
-                                throw;
+                                try
+                                {
+                                    ((ExecutionPipeline)pipeline).Execute(this, executionId, serviceScope.ServiceProvider);
+                                    pipelineStopwatch.Stop();
+                                    Trace.Information(
+                                        "Executed pipeline \"{0}\" ({1}/{2}) in {3} ms resulting in {4} output document(s)",
+                                        pipelineName,
+                                        c++,
+                                        _pipelines.Count,
+                                        pipelineStopwatch.ElapsedMilliseconds,
+                                        DocumentCollection.FromPipeline(pipelineName).Count());
+                                }
+                                catch (Exception)
+                                {
+                                    Trace.Error("Error while executing pipeline {0}", pipelineName);
+                                    throw;
+                                }
                             }
                         }
                     }

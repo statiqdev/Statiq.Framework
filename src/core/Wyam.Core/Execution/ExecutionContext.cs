@@ -11,6 +11,7 @@ using System.Threading.Tasks;
 using JavaScriptEngineSwitcher.Core;
 using JavaScriptEngineSwitcher.Jint;
 using JSPool;
+using Microsoft.Extensions.DependencyInjection;
 using Wyam.Common.Caching;
 using Wyam.Common.Configuration;
 using Wyam.Common.Documents;
@@ -35,6 +36,8 @@ namespace Wyam.Core.Execution
         private static readonly HttpMessageHandler _httpMessageHandler = new HttpClientHandler();
 
         private readonly ExecutionPipeline _pipeline;
+
+        private readonly IServiceProvider _serviceProvider;
 
         private bool _disposed;
 
@@ -62,11 +65,12 @@ namespace Wyam.Core.Execution
 
         public string ApplicationInput => Engine.ApplicationInput;
 
-        public ExecutionContext(Engine engine, Guid executionId, ExecutionPipeline pipeline)
+        public ExecutionContext(Engine engine, Guid executionId, ExecutionPipeline pipeline, IServiceProvider serviceProvider)
         {
-            Engine = engine;
+            Engine = engine ?? throw new ArgumentNullException(nameof(engine));
             ExecutionId = executionId;
-            _pipeline = pipeline;
+            _pipeline = pipeline ?? throw new ArgumentNullException(nameof(pipeline));
+            _serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
         }
 
         private ExecutionContext(ExecutionContext original, IModule module)
@@ -74,6 +78,7 @@ namespace Wyam.Core.Execution
             Engine = original.Engine;
             ExecutionId = original.ExecutionId;
             _pipeline = original._pipeline;
+            _serviceProvider = original._serviceProvider;
             Module = module;
         }
 
@@ -86,10 +91,7 @@ namespace Wyam.Core.Execution
         /// </summary>
         public void Dispose()
         {
-            if (_disposed)
-            {
-                _disposed = true;
-            }
+            _disposed = true;
         }
 
         private void CheckDisposed()
@@ -98,6 +100,12 @@ namespace Wyam.Core.Execution
             {
                 throw new ObjectDisposedException(nameof(ExecutionContext));
             }
+        }
+
+        private TResult CheckDisposed<TResult>(Func<TResult> func)
+        {
+            CheckDisposed();
+            return func();
         }
 
         public bool TryConvert<T>(object value, out T result) => TypeHelper.TryConvert(value, out result);
@@ -223,6 +231,18 @@ namespace Wyam.Core.Execution
 
         public IShortcodeResult GetShortcodeResult(Stream content, IEnumerable<KeyValuePair<string, object>> metadata = null)
             => new ShortcodeResult(content, metadata);
+
+        // DI
+
+        public object GetRequiredService(Type serviceType) => CheckDisposed(() => _serviceProvider.GetRequiredService(serviceType));
+
+        public T GetRequiredService<T>() => CheckDisposed(() => _serviceProvider.GetRequiredService<T>());
+
+        public T GetService<T>() => CheckDisposed(() => _serviceProvider.GetService<T>());
+
+        public IEnumerable<T> GetServices<T>() => CheckDisposed(() => _serviceProvider.GetServices<T>());
+
+        public IEnumerable<object> GetServices(Type serviceType) => CheckDisposed(() => _serviceProvider.GetServices(serviceType));
 
         // IMetadata
 

@@ -2,7 +2,11 @@
 
 namespace Wyam.App.Configuration
 {
-    public class AddCommandConfigurator<TCommand> : ICommandConfigurator
+    /// <summary>
+    /// Adds a specified command type to the CLI command set.
+    /// </summary>
+    /// <typeparam name="TCommand">The type of CLI command to add.</typeparam>
+    public class AddCommandConfigurator<TCommand> : Common.Configuration.IConfigurator<IConfigurator>
         where TCommand : class, ICommand
     {
         private readonly string _name;

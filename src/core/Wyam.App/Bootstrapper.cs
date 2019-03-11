@@ -2,34 +2,36 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using Microsoft.Extensions.DependencyInjection;
 using Spectre.Cli;
 using Wyam.App.Commands;
 using Wyam.App.Configuration;
 using Wyam.App.Tracing;
+using Wyam.Common.Configuration;
 using Wyam.Common.Execution;
 using Wyam.Core.Execution;
 
 namespace Wyam.App
 {
-    public class Bootstrapper : IBootstrapper
+    public class Bootstrapper : ICommandBootstrapper
     {
-        private Func<ICommandApp> _getCommandAppFunc = () => new CommandApp();
+        private readonly ConfiguratorCollection _configurators = new ConfiguratorCollection();
+
+        private Func<ServiceTypeRegistrar, ICommandApp> _getCommandAppFunc = x => new CommandApp(x);
 
         public Bootstrapper(string[] args)
         {
             Args = args ?? throw new ArgumentNullException(nameof(args));
         }
 
+        public IConfiguratorCollection Configurators => _configurators;
+
         public string[] Args { get; }
-
-        public ConfiguratorCollection<IEngine> EngineConfigurators { get; } = new ConfiguratorCollection<IEngine>();
-
-        public ConfiguratorCollection<IConfigurator> CommandConfigurators { get; } = new ConfiguratorCollection<IConfigurator>();
 
         public void SetDefaultCommand<TCommand>()
             where TCommand : class, ICommand
         {
-            _getCommandAppFunc = () => new CommandApp<TCommand>();
+            _getCommandAppFunc = x => new CommandApp<TCommand>(x);
         }
 
         public int Run()
@@ -40,12 +42,25 @@ namespace Wyam.App
             // It's not a serious console app unless there's some ASCII art
             OutputLogo();
 
+            // Run bootstraper configurators first
+            _configurators.Configure<IBootstrapper>(this);
+
+            // Create the engine and configure it
+            Engine engine = new Engine();
+            _configurators.Configure<IEngine>(engine);
+
+            // Create the service collection and configure it
+            ServiceCollection serviceCollection = new ServiceCollection();
+            serviceCollection.AddSingleton<IEngine>(engine);
+            _configurators.Configure<IServiceCollection>(serviceCollection);
+
             // Create the command line parser and run the command
-            ICommandApp app = _getCommandAppFunc();
+            ServiceTypeRegistrar registrar = new ServiceTypeRegistrar(serviceCollection);
+            ICommandApp app = _getCommandAppFunc(registrar);
             app.Configure(x =>
             {
                 x.ValidateExamples();
-                CommandConfigurators.Configure(x);
+                _configurators.Configure(x);
             });
             return app.Run(Args);
         }
@@ -71,35 +86,33 @@ namespace Wyam.App
              `*%RB@@@@@RRP`");
         }
 
-        public static IBootstrapper CreateDefault(string[] args) =>
-            CreateDefault(args, (IEngineConfigurator)null);
+        public static ICommandBootstrapper CreateDefault(string[] args) =>
+            CreateDefault(args, (Common.Configuration.IConfigurator<IEngine>)null);
 
-        public static IBootstrapper CreateDefault<TConfigurator>(string[] args)
-            where TConfigurator : IEngineConfigurator =>
+        public static ICommandBootstrapper CreateDefault<TConfigurator>(string[] args)
+            where TConfigurator : Common.Configuration.IConfigurator<IEngine> =>
             CreateDefault(args, Activator.CreateInstance<TConfigurator>());
 
-        public static IBootstrapper CreateDefault(string[] args, Action<IEngine> configureEngineAction) =>
+        public static ICommandBootstrapper CreateDefault(string[] args, Action<IEngine> configureEngineAction) =>
             CreateDefault(args, new DelegateConfigurator<IEngine>(configureEngineAction));
 
-        public static IBootstrapper CreateDefault(string[] args, IEngineConfigurator configurator) =>
-            CreateDefault(args, (Configuration.IConfigurator<IEngine>)configurator);
-
-        private static IBootstrapper CreateDefault(string[] args, Configuration.IConfigurator<IEngine> configurator)
+        private static ICommandBootstrapper CreateDefault(string[] args, Common.Configuration.IConfigurator<IEngine> configurator)
         {
             // Add a default trace listener and tracing for exceptions
             Common.Tracing.Trace.AddListener(new SimpleColorConsoleTraceListener { TraceOutputOptions = System.Diagnostics.TraceOptions.None });
             AppDomain.CurrentDomain.UnhandledException += UnhandledExceptionEvent;
 
             // Create the bootstrapper
-            IBootstrapper bootstrapper = new Bootstrapper(args);
+            ICommandBootstrapper bootstrapper = new Bootstrapper(args);
 
             // Add default commands
             bootstrapper.SetDefaultCommand<BuildCommand>();
-            bootstrapper.CommandConfigurators.AddCommand<BuildCommand>("build");
+            bootstrapper.AddCommand<BuildCommand>("build");
 
-            // Find and add configurators (add the passed-in one last if not null)
-            // Scan assembly?? Settings configurator
-            bootstrapper.EngineConfigurators.Add(configurator);
+            // Scan all dependencies for IBoostrapper configurators and add those
+
+            // Add the explicit engine configurator
+            bootstrapper.Configurators.Add(configurator);
 
             return bootstrapper;
         }

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 using Wyam.App.Tracing;
+using Wyam.Common.Configuration;
 using Wyam.Common.Execution;
 
 namespace Wyam.App.Configuration
