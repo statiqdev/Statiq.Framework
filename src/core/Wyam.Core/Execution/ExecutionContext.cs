@@ -232,7 +232,7 @@ namespace Wyam.Core.Execution
         public IShortcodeResult GetShortcodeResult(Stream content, IEnumerable<KeyValuePair<string, object>> metadata = null)
             => new ShortcodeResult(content, metadata);
 
-        // DI
+        // Service Provider
 
         public object GetRequiredService(Type serviceType) => CheckDisposed(() => _serviceProvider.GetRequiredService(serviceType));
 

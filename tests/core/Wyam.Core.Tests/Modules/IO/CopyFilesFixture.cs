@@ -6,14 +6,15 @@ using System.Threading;
 using NUnit.Framework;
 using Wyam.Common.Configuration;
 using Wyam.Common.Documents;
+using Wyam.Common.Execution;
 using Wyam.Common.IO;
 using Wyam.Common.Meta;
-using Wyam.Common.Execution;
 using Wyam.Common.Modules;
 using Wyam.Core.Documents;
-using Wyam.Core.Modules.IO;
 using Wyam.Core.Execution;
+using Wyam.Core.Modules.IO;
 using Wyam.Testing;
+using Wyam.Testing.Execution;
 using Wyam.Testing.IO;
 using ExecutionContext = Wyam.Core.Execution.ExecutionContext;
 
@@ -31,13 +32,14 @@ namespace Wyam.Core.Tests.Modules.IO
         [SetUp]
         public void SetUp()
         {
+            IServiceProvider serviceProvider = new TestServiceProvider();
             Engine = new Engine();
             Engine.FileSystem.FileProviders.Add(NormalizedPath.DefaultFileProvider.Scheme, GetFileProvider());
             Engine.FileSystem.RootPath = "/";
             Engine.FileSystem.InputPaths.Clear();
             Engine.FileSystem.InputPaths.Add("/TestFiles/Input");
             Pipeline = new ExecutionPipeline("Pipeline", (IModuleList)null);
-            Context = new ExecutionContext(Engine, Guid.Empty, Pipeline);
+            Context = new ExecutionContext(Engine, Guid.Empty, Pipeline, serviceProvider);
             Inputs = new[] { Context.GetDocument() };
         }
 

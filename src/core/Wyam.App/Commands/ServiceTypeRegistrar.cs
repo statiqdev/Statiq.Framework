@@ -8,11 +8,11 @@ namespace Wyam.App.Commands
 {
     internal class ServiceTypeRegistrar : ITypeRegistrar
     {
-        private readonly ServiceCollection _serviceCollection;
+        private readonly IServiceCollection _serviceCollection;
         private readonly Func<IServiceCollection, IServiceProvider> _buildServiceProvider;
 
         public ServiceTypeRegistrar(
-            ServiceCollection serviceCollection,
+            IServiceCollection serviceCollection,
             Func<IServiceCollection, IServiceProvider> buildServiceProvider)
         {
             _serviceCollection = serviceCollection ?? throw new ArgumentNullException(nameof(serviceCollection));

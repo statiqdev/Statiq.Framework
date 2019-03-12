@@ -7,6 +7,7 @@ using System.Net;
 using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.Extensions.DependencyInjection;
 using NUnit.Framework;
 using Wyam.Common.Caching;
 using Wyam.Common.Configuration;
@@ -186,6 +187,8 @@ namespace Wyam.Testing.Execution
 
         IReadOnlyShortcodeCollection IExecutionContext.Shortcodes => Shortcodes;
 
+        public IServiceProvider ServiceProvider { get; set; } = new TestServiceProvider();
+
         /// <inheritdoc/>
         public Stream GetContentStream(string content = null) =>
             string.IsNullOrEmpty(content) ? new MemoryStream() : new MemoryStream(Encoding.UTF8.GetBytes(content));
@@ -322,6 +325,20 @@ namespace Wyam.Testing.Execution
                 throw new NotImplementedException();
             }
         }
+
+        // Service Provider
+
+        public object GetRequiredService(Type serviceType) => ServiceProvider.GetRequiredService(serviceType);
+
+        public T GetRequiredService<T>() => ServiceProvider.GetRequiredService<T>();
+
+        public T GetService<T>() => ServiceProvider.GetService<T>();
+
+        public IEnumerable<T> GetServices<T>() => ServiceProvider.GetServices<T>();
+
+        public IEnumerable<object> GetServices(Type serviceType) => ServiceProvider.GetServices(serviceType);
+
+        // IMetadata
 
         /// <inheritdoc/>
         public IEnumerator<KeyValuePair<string, object>> GetEnumerator()

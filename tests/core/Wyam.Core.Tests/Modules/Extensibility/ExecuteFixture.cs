@@ -25,12 +25,13 @@ namespace Wyam.Core.Tests.Modules.Extensibility
             public void DoesNotThrowForNullResultWithDocumentConfig()
             {
                 // Given
+                IServiceProvider serviceProvider = new TestServiceProvider();
                 Engine engine = new Engine();
                 Execute execute = new Execute((d, c) => null);
                 engine.Pipelines.Add(execute);
 
                 // When
-                engine.Execute();
+                engine.Execute(serviceProvider);
 
                 // Then
             }
@@ -39,12 +40,13 @@ namespace Wyam.Core.Tests.Modules.Extensibility
             public void DoesNotThrowForNullResultWithContextConfig()
             {
                 // Given
+                IServiceProvider serviceProvider = new TestServiceProvider();
                 Engine engine = new Engine();
                 Execute execute = new Execute(c => null);
                 engine.Pipelines.Add(execute);
 
                 // When
-                engine.Execute();
+                engine.Execute(serviceProvider);
 
                 // Then
             }
@@ -53,12 +55,13 @@ namespace Wyam.Core.Tests.Modules.Extensibility
             public void ThrowsForObjectResultWithContextConfig()
             {
                 // Given
+                IServiceProvider serviceProvider = new TestServiceProvider();
                 Engine engine = new Engine();
                 Execute execute = new Execute(c => 1);
                 engine.Pipelines.Add(execute);
 
                 // When, Then
-                Assert.Throws<Exception>(() => engine.Execute());
+                Assert.Throws<Exception>(() => engine.Execute(serviceProvider));
             }
 
             [Test]
@@ -103,13 +106,14 @@ namespace Wyam.Core.Tests.Modules.Extensibility
             public void DoesNotRequireReturnValueForDocumentConfig()
             {
                 // Given
+                IServiceProvider serviceProvider = new TestServiceProvider();
                 int a = 0;
                 Engine engine = new Engine();
                 Execute execute = new Execute((d, c) => { a = a + 1; });
                 engine.Pipelines.Add(execute);
 
                 // When
-                engine.Execute();
+                engine.Execute(serviceProvider);
 
                 // Then
             }
@@ -118,13 +122,14 @@ namespace Wyam.Core.Tests.Modules.Extensibility
             public void DoesNotRequireReturnValueForContextConfig()
             {
                 // Given
+                IServiceProvider serviceProvider = new TestServiceProvider();
                 int a = 0;
                 Engine engine = new Engine();
                 Execute execute = new Execute(c => { a = a + 1; });
                 engine.Pipelines.Add(execute);
 
                 // When
-                engine.Execute();
+                engine.Execute(serviceProvider);
 
                 // Then
             }
@@ -133,13 +138,14 @@ namespace Wyam.Core.Tests.Modules.Extensibility
             public void ReturnsDocumentForSingleResultDocumentFromContextConfig()
             {
                 // Given
+                IServiceProvider serviceProvider = new TestServiceProvider();
                 Engine engine = new Engine();
                 IDocument document = new TestDocument();
                 Execute execute = new Execute(c => document);
                 engine.Pipelines.Add("Test", execute);
 
                 // When
-                engine.Execute();
+                engine.Execute(serviceProvider);
 
                 // Then
                 CollectionAssert.AreEquivalent(new[] { document }, engine.Documents["Test"]);
@@ -149,13 +155,14 @@ namespace Wyam.Core.Tests.Modules.Extensibility
             public void ReturnsDocumentForSingleResultDocumentFromDocumentConfig()
             {
                 // Given
+                IServiceProvider serviceProvider = new TestServiceProvider();
                 Engine engine = new Engine();
                 IDocument document = new TestDocument();
                 Execute execute = new Execute((d, c) => document);
                 engine.Pipelines.Add("Test", execute);
 
                 // When
-                engine.Execute();
+                engine.Execute(serviceProvider);
 
                 // Then
                 CollectionAssert.AreEquivalent(new[] { document }, engine.Documents["Test"]);

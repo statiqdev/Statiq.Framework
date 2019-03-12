@@ -9,6 +9,7 @@ using Wyam.Core.Modules.Control;
 using Wyam.Testing;
 using Wyam.Testing.Modules;
 using Wyam.Common.Execution;
+using Wyam.Testing.Execution;
 
 namespace Wyam.Core.Tests.Modules.Control
 {
@@ -22,6 +23,7 @@ namespace Wyam.Core.Tests.Modules.Control
             public void ReplacesContent()
             {
                 // Given
+                IServiceProvider serviceProvider = new TestServiceProvider();
                 Engine engine = new Engine();
                 CountModule a = new CountModule("A")
                 {
@@ -38,7 +40,7 @@ namespace Wyam.Core.Tests.Modules.Control
                     new Core.Modules.Metadata.Meta("Content", (doc, ctx) => doc.Content));
 
                 // When
-                engine.Execute();
+                engine.Execute(serviceProvider);
 
                 // Then
                 CollectionAssert.AreEqual(new[] { "21" }, engine.Documents["Test"].Select(x => x["Content"]));
@@ -48,6 +50,7 @@ namespace Wyam.Core.Tests.Modules.Control
             public void CombinesMetadata()
             {
                 // Given
+                IServiceProvider serviceProvider = new TestServiceProvider();
                 Engine engine = new Engine();
                 CountModule a = new CountModule("A")
                 {
@@ -60,7 +63,7 @@ namespace Wyam.Core.Tests.Modules.Control
                 engine.Pipelines.Add("Test", a, new Merge(b));
 
                 // When
-                engine.Execute();
+                engine.Execute(serviceProvider);
 
                 // Then
                 CollectionAssert.AreEqual(new[] { 11 }, engine.Documents["Test"].Select(x => x["A"]));
@@ -71,6 +74,7 @@ namespace Wyam.Core.Tests.Modules.Control
             public void CombinesAndOverwritesMetadata()
             {
                 // Given
+                IServiceProvider serviceProvider = new TestServiceProvider();
                 Engine engine = new Engine();
                 CountModule a = new CountModule("A")
                 {
@@ -83,7 +87,7 @@ namespace Wyam.Core.Tests.Modules.Control
                 engine.Pipelines.Add("Test", a, new Merge(b));
 
                 // When
-                engine.Execute();
+                engine.Execute(serviceProvider);
 
                 // Then
                 CollectionAssert.AreEqual(new[] { 21 }, engine.Documents["Test"].Select(x => x["A"]));
@@ -93,6 +97,7 @@ namespace Wyam.Core.Tests.Modules.Control
             public void SingleInputSingleResult()
             {
                 // Given
+                IServiceProvider serviceProvider = new TestServiceProvider();
                 Engine engine = new Engine();
                 CountModule a = new CountModule("A")
                 {
@@ -105,7 +110,7 @@ namespace Wyam.Core.Tests.Modules.Control
                 engine.Pipelines.Add("Test", a, new Merge(b));
 
                 // When
-                engine.Execute();
+                engine.Execute(serviceProvider);
 
                 // Then
                 Assert.AreEqual(1, a.OutputCount);
@@ -118,6 +123,7 @@ namespace Wyam.Core.Tests.Modules.Control
             public void SingleInputMultipleResults()
             {
                 // Given
+                IServiceProvider serviceProvider = new TestServiceProvider();
                 Engine engine = new Engine();
                 CountModule a = new CountModule("A")
                 {
@@ -131,7 +137,7 @@ namespace Wyam.Core.Tests.Modules.Control
                 engine.Pipelines.Add("Test", a, new Merge(b));
 
                 // When
-                engine.Execute();
+                engine.Execute(serviceProvider);
 
                 // Then
                 Assert.AreEqual(1, a.OutputCount);
@@ -144,6 +150,7 @@ namespace Wyam.Core.Tests.Modules.Control
             public void MultipleInputsSingleResult()
             {
                 // Given
+                IServiceProvider serviceProvider = new TestServiceProvider();
                 Engine engine = new Engine();
                 CountModule a = new CountModule("A")
                 {
@@ -157,7 +164,7 @@ namespace Wyam.Core.Tests.Modules.Control
                 engine.Pipelines.Add("Test", a, new Merge(b));
 
                 // When
-                engine.Execute();
+                engine.Execute(serviceProvider);
 
                 // Then
                 Assert.AreEqual(2, a.OutputCount);
@@ -170,6 +177,7 @@ namespace Wyam.Core.Tests.Modules.Control
             public void MultipleInputsMultipleResults()
             {
                 // Given
+                IServiceProvider serviceProvider = new TestServiceProvider();
                 Engine engine = new Engine();
                 CountModule a = new CountModule("A")
                 {
@@ -184,7 +192,7 @@ namespace Wyam.Core.Tests.Modules.Control
                 engine.Pipelines.Add("Test", a, new Merge(b));
 
                 // When
-                engine.Execute();
+                engine.Execute(serviceProvider);
 
                 // Then
                 Assert.AreEqual(2, a.OutputCount);
@@ -197,6 +205,7 @@ namespace Wyam.Core.Tests.Modules.Control
             public void SingleInputSingleResultForEachDocument()
             {
                 // Given
+                IServiceProvider serviceProvider = new TestServiceProvider();
                 Engine engine = new Engine();
                 CountModule a = new CountModule("A")
                 {
@@ -213,7 +222,7 @@ namespace Wyam.Core.Tests.Modules.Control
                     new Core.Modules.Metadata.Meta("Content", (doc, ctx) => doc.Content));
 
                 // When
-                engine.Execute();
+                engine.Execute(serviceProvider);
 
                 // Then
                 Assert.AreEqual(1, a.OutputCount);
@@ -225,6 +234,7 @@ namespace Wyam.Core.Tests.Modules.Control
             public void SingleInputMultipleResultsForEachDocument()
             {
                 // Given
+                IServiceProvider serviceProvider = new TestServiceProvider();
                 Engine engine = new Engine();
                 CountModule a = new CountModule("A")
                 {
@@ -242,7 +252,7 @@ namespace Wyam.Core.Tests.Modules.Control
                     new Core.Modules.Metadata.Meta("Content", (doc, ctx) => doc.Content));
 
                 // When
-                engine.Execute();
+                engine.Execute(serviceProvider);
 
                 // Then
                 Assert.AreEqual(1, a.OutputCount);
@@ -254,6 +264,7 @@ namespace Wyam.Core.Tests.Modules.Control
             public void MultipleInputsSingleResultForEachDocument()
             {
                 // Given
+                IServiceProvider serviceProvider = new TestServiceProvider();
                 Engine engine = new Engine();
                 CountModule a = new CountModule("A")
                 {
@@ -271,7 +282,7 @@ namespace Wyam.Core.Tests.Modules.Control
                     new Core.Modules.Metadata.Meta("Content", (doc, ctx) => doc.Content));
 
                 // When
-                engine.Execute();
+                engine.Execute(serviceProvider);
 
                 // Then
                 Assert.AreEqual(2, a.OutputCount);
@@ -283,6 +294,7 @@ namespace Wyam.Core.Tests.Modules.Control
             public void MultipleInputsMultipleResultsForEachDocument()
             {
                 // Given
+                IServiceProvider serviceProvider = new TestServiceProvider();
                 Engine engine = new Engine();
                 CountModule a = new CountModule("A")
                 {
@@ -301,7 +313,7 @@ namespace Wyam.Core.Tests.Modules.Control
                     new Core.Modules.Metadata.Meta("Content", (doc, ctx) => doc.Content));
 
                 // When
-                engine.Execute();
+                engine.Execute(serviceProvider);
 
                 // Then
                 Assert.AreEqual(2, a.OutputCount);

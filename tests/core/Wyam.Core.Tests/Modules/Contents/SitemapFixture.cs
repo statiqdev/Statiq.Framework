@@ -5,16 +5,17 @@ using System.Linq;
 using System.Threading;
 using NUnit.Framework;
 using Wyam.Common.Documents;
-using Wyam.Common.Meta;
 using Wyam.Common.Execution;
+using Wyam.Common.Meta;
 using Wyam.Common.Modules;
 using Wyam.Common.Modules.Contents;
 using Wyam.Common.Tracing;
 using Wyam.Core.Documents;
+using Wyam.Core.Execution;
 using Wyam.Core.Modules.Contents;
 using Wyam.Core.Modules.Metadata;
-using Wyam.Core.Execution;
 using Wyam.Testing;
+using Wyam.Testing.Execution;
 using ExecutionContext = Wyam.Core.Execution.ExecutionContext;
 
 namespace Wyam.Core.Tests.Modules.Contents
@@ -31,13 +32,14 @@ namespace Wyam.Core.Tests.Modules.Contents
             public void SitemapGeneratedWithSitemapItem(string hostname, string formatterString, string expected)
             {
                 // Given
+                IServiceProvider serviceProvider = new TestServiceProvider();
                 Engine engine = new Engine();
                 if (!string.IsNullOrWhiteSpace(hostname))
                 {
                     engine.Settings[Keys.Host] = hostname;
                 }
                 ExecutionPipeline contentPipeline = new ExecutionPipeline("Content", (IModuleList)null);
-                IExecutionContext context = new ExecutionContext(engine, Guid.Empty, contentPipeline);
+                IExecutionContext context = new ExecutionContext(engine, Guid.Empty, contentPipeline, serviceProvider);
 
                 IDocument doc = context.GetDocument(context.GetContentStream("Test"), new[]
                 {
@@ -77,13 +79,14 @@ namespace Wyam.Core.Tests.Modules.Contents
             public void SitemapGeneratedWithSitemapItemAsString(string hostname, string formatterString, string expected)
             {
                 // Given
+                IServiceProvider serviceProvider = new TestServiceProvider();
                 Engine engine = new Engine();
                 if (!string.IsNullOrWhiteSpace(hostname))
                 {
                     engine.Settings[Keys.Host] = hostname;
                 }
                 ExecutionPipeline contentPipeline = new ExecutionPipeline("Content", (IModuleList)null);
-                IExecutionContext context = new ExecutionContext(engine, Guid.Empty, contentPipeline);
+                IExecutionContext context = new ExecutionContext(engine, Guid.Empty, contentPipeline, serviceProvider);
 
                 IDocument doc = context.GetDocument(context.GetContentStream("Test"), new[]
                 {
@@ -123,13 +126,14 @@ namespace Wyam.Core.Tests.Modules.Contents
             public void SitemapGeneratedWhenNoSitemapItem(string hostname, string formatterString, string expected)
             {
                 // Given
+                IServiceProvider serviceProvider = new TestServiceProvider();
                 Engine engine = new Engine();
                 if (!string.IsNullOrWhiteSpace(hostname))
                 {
                     engine.Settings[Keys.Host] = hostname;
                 }
                 ExecutionPipeline contentPipeline = new ExecutionPipeline("Content", (IModuleList)null);
-                IExecutionContext context = new ExecutionContext(engine, Guid.Empty, contentPipeline);
+                IExecutionContext context = new ExecutionContext(engine, Guid.Empty, contentPipeline, serviceProvider);
 
                 IDocument doc = context.GetDocument(context.GetContentStream("Test"), new[]
                 {

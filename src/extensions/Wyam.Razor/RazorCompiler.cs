@@ -131,10 +131,7 @@ namespace Wyam.Razor
                         }));
 
             // Register the view location expander
-            serviceCollection.Configure<RazorViewEngineOptions>(options =>
-            {
-                options.ViewLocationExpanders.Add(new ViewLocationExpander());
-            });
+            serviceCollection.Configure<RazorViewEngineOptions>(x => x.ViewLocationExpanders.Add(new ViewLocationExpander()));
 
             // Add the default services _after_ adding our own
             // (most default registration use .TryAdd...() so they skip already registered types)

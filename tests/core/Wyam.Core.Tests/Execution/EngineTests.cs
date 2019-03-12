@@ -1,14 +1,16 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using NUnit.Framework;
-using Wyam.Core.Execution;
-using Wyam.Core.Modules.Extensibility;
-using Wyam.Testing;
-using Wyam.Testing.Modules;
 using Wyam.Common.Execution;
 using Wyam.Common.Meta;
 using Wyam.Common.Util;
+using Wyam.Core.Execution;
+using Wyam.Core.Modules.Extensibility;
+using Wyam.Testing;
+using Wyam.Testing.Execution;
+using Wyam.Testing.Modules;
 
 namespace Wyam.Core.Tests.Execution
 {
@@ -20,6 +22,7 @@ namespace Wyam.Core.Tests.Execution
         public void ExecuteResultsInCorrectCounts()
         {
             // Given
+            IServiceProvider serviceProvider = new TestServiceProvider();
             Engine engine = new Engine();
             CountModule a = new CountModule("A")
             {
@@ -36,7 +39,7 @@ namespace Wyam.Core.Tests.Execution
             engine.Pipelines.Add(a, b, c);
 
             // When
-            engine.Execute();
+            engine.Execute(serviceProvider);
 
             // Then
             Assert.AreEqual(1, a.ExecuteCount);
@@ -54,6 +57,7 @@ namespace Wyam.Core.Tests.Execution
         public void CompletedMetadataIsPopulatedAfterRun()
         {
             // Given
+            IServiceProvider serviceProvider = new TestServiceProvider();
             Engine engine = new Engine();
             int c = 0;
             engine.Pipelines.Add(
@@ -71,7 +75,7 @@ namespace Wyam.Core.Tests.Execution
                     }, false));
 
             // When
-            engine.Execute();
+            engine.Execute(serviceProvider);
 
             // Then
             Assert.AreEqual(2, engine.Documents.FromPipeline("Pipeline").Count());
@@ -95,6 +99,7 @@ namespace Wyam.Core.Tests.Execution
         public void CompletedContentIsPopulatedAfterRun()
         {
             // Given
+            IServiceProvider serviceProvider = new TestServiceProvider();
             Engine engine = new Engine();
             int c = 0;
             engine.Pipelines.Add(
@@ -112,7 +117,7 @@ namespace Wyam.Core.Tests.Execution
                 new Core.Modules.Metadata.Meta("Content", (x, y) => x.Content));
 
             // When
-            engine.Execute();
+            engine.Execute(serviceProvider);
 
             // Then
             Assert.AreEqual(2, engine.Documents.FromPipeline("Pipeline 1").Count());

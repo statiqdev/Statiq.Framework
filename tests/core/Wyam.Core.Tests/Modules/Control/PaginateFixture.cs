@@ -1,17 +1,19 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using NUnit.Framework;
 using Wyam.Common.Documents;
+using Wyam.Common.Execution;
 using Wyam.Common.Meta;
+using Wyam.Common.Util;
 using Wyam.Core.Documents;
 using Wyam.Core.Execution;
 using Wyam.Core.Meta;
 using Wyam.Core.Modules.Control;
 using Wyam.Core.Modules.Extensibility;
 using Wyam.Testing;
+using Wyam.Testing.Execution;
 using Wyam.Testing.Modules;
-using Wyam.Common.Execution;
-using Wyam.Common.Util;
 
 namespace Wyam.Core.Tests.Modules.Control
 {
@@ -30,6 +32,7 @@ namespace Wyam.Core.Tests.Modules.Control
                 List<int> totalItems = new List<int>();
                 List<bool> hasNextPage = new List<bool>();
                 List<bool> hasPreviousPage = new List<bool>();
+                IServiceProvider serviceProvider = new TestServiceProvider();
                 Engine engine = new Engine();
                 CountModule count = new CountModule("A")
                 {
@@ -49,7 +52,7 @@ namespace Wyam.Core.Tests.Modules.Control
                 engine.Pipelines.Add(paginate, gatherData);
 
                 // When
-                engine.Execute();
+                engine.Execute(serviceProvider);
 
                 // Then
                 CollectionAssert.AreEqual(new[] { 1, 2, 3 }, currentPage);
@@ -64,6 +67,7 @@ namespace Wyam.Core.Tests.Modules.Control
             {
                 // Given
                 List<IList<string>> content = new List<IList<string>>();
+                IServiceProvider serviceProvider = new TestServiceProvider();
                 Engine engine = new Engine();
                 CountModule count = new CountModule("A")
                 {
@@ -79,7 +83,7 @@ namespace Wyam.Core.Tests.Modules.Control
                 engine.Pipelines.Add(paginate, gatherData);
 
                 // When
-                engine.Execute();
+                engine.Execute(serviceProvider);
 
                 // Then
                 Assert.AreEqual(3, content.Count);
@@ -94,6 +98,7 @@ namespace Wyam.Core.Tests.Modules.Control
                 // Given
                 List<IList<string>> previousPages = new List<IList<string>>();
                 List<IList<string>> nextPages = new List<IList<string>>();
+                IServiceProvider serviceProvider = new TestServiceProvider();
                 Engine engine = new Engine();
                 CountModule count = new CountModule("A")
                 {
@@ -110,7 +115,7 @@ namespace Wyam.Core.Tests.Modules.Control
                 engine.Pipelines.Add(paginate, gatherData);
 
                 // When
-                engine.Execute();
+                engine.Execute(serviceProvider);
 
                 // Then
                 Assert.AreEqual(3, previousPages.Count);
@@ -128,6 +133,7 @@ namespace Wyam.Core.Tests.Modules.Control
             {
                 // Given
                 List<IList<string>> content = new List<IList<string>>();
+                IServiceProvider serviceProvider = new TestServiceProvider();
                 Engine engine = new Engine();
                 CountModule count = new CountModule("A")
                 {
@@ -143,7 +149,7 @@ namespace Wyam.Core.Tests.Modules.Control
                 engine.Pipelines.Add(paginate, gatherData);
 
                 // When
-                engine.Execute();
+                engine.Execute(serviceProvider);
 
                 // Then
                 Assert.AreEqual(3, content.Count);

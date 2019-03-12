@@ -1,9 +1,11 @@
-﻿using NUnit.Framework;
+﻿using System;
+using NUnit.Framework;
 using Wyam.Common.Execution;
 using Wyam.Common.Tracing;
 using Wyam.Core.Execution;
 using Wyam.Core.Modules.Control;
 using Wyam.Testing;
+using Wyam.Testing.Execution;
 using Wyam.Testing.Modules;
 
 namespace Wyam.Core.Tests.Modules.Control
@@ -18,6 +20,7 @@ namespace Wyam.Core.Tests.Modules.Control
             public void ResultsInCorrectCounts()
             {
                 // Given
+                IServiceProvider serviceProvider = new TestServiceProvider();
                 Engine engine = new Engine();
                 CountModule a = new CountModule("A")
                 {
@@ -34,7 +37,7 @@ namespace Wyam.Core.Tests.Modules.Control
                 engine.Pipelines.Add(a, new Branch(b), c);
 
                 // When
-                engine.Execute();
+                engine.Execute(serviceProvider);
 
                 // Then
                 Assert.AreEqual(1, a.ExecuteCount);
@@ -52,6 +55,7 @@ namespace Wyam.Core.Tests.Modules.Control
             public void ResultsInCorrectCountsWithPredicate()
             {
                 // Given
+                IServiceProvider serviceProvider = new TestServiceProvider();
                 Engine engine = new Engine();
                 CountModule a = new CountModule("A")
                 {
@@ -68,7 +72,7 @@ namespace Wyam.Core.Tests.Modules.Control
                 engine.Pipelines.Add(a, new Branch(b).Where((x, y) => x.Content == "1"), c);
 
                 // When
-                engine.Execute();
+                engine.Execute(serviceProvider);
 
                 // Then
                 Assert.AreEqual(1, a.ExecuteCount);

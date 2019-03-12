@@ -1,8 +1,10 @@
-﻿using NUnit.Framework;
+﻿using System;
+using NUnit.Framework;
 using Wyam.Common.Execution;
 using Wyam.Core.Execution;
 using Wyam.Core.Modules.Control;
 using Wyam.Testing;
+using Wyam.Testing.Execution;
 using Wyam.Testing.Modules;
 
 namespace Wyam.Core.Tests.Modules.Control
@@ -17,6 +19,7 @@ namespace Wyam.Core.Tests.Modules.Control
             public void SwitchResultsInCorrectCounts()
             {
                 // Given
+                IServiceProvider serviceProvider = new TestServiceProvider();
                 Engine engine = new Engine();
                 CountModule a = new CountModule("A") { AdditionalOutputs = 2 };
                 CountModule b = new CountModule("B");
@@ -26,7 +29,7 @@ namespace Wyam.Core.Tests.Modules.Control
                 engine.Pipelines.Add(a, new Switch((x, y) => x.Content).Case("1", b).Case("2", c).Default(d));
 
                 // When
-                engine.Execute();
+                engine.Execute(serviceProvider);
 
                 // Then
                 Assert.AreEqual(1, a.ExecuteCount);
@@ -39,6 +42,7 @@ namespace Wyam.Core.Tests.Modules.Control
             public void SwitchNoCasesResultsInCorrectCounts()
             {
                 // Given
+                IServiceProvider serviceProvider = new TestServiceProvider();
                 Engine engine = new Engine();
                 CountModule a = new CountModule("A") { AdditionalOutputs = 2 };
                 CountModule b = new CountModule("B");
@@ -47,7 +51,7 @@ namespace Wyam.Core.Tests.Modules.Control
                 engine.Pipelines.Add(a, new Switch((x, y) => x.Content).Default(b), c);
 
                 // When
-                engine.Execute();
+                engine.Execute(serviceProvider);
 
                 // Then
                 Assert.AreEqual(1, a.ExecuteCount);
@@ -61,6 +65,7 @@ namespace Wyam.Core.Tests.Modules.Control
             public void MissingDefaultResultsInCorrectCounts()
             {
                 // Given
+                IServiceProvider serviceProvider = new TestServiceProvider();
                 Engine engine = new Engine();
                 CountModule a = new CountModule("A") { AdditionalOutputs = 2 };
                 CountModule b = new CountModule("B");
@@ -69,7 +74,7 @@ namespace Wyam.Core.Tests.Modules.Control
                 engine.Pipelines.Add(a, new Switch((x, y) => x.Content).Case("1", b), c);
 
                 // When
-                engine.Execute();
+                engine.Execute(serviceProvider);
 
                 // Then
                 Assert.AreEqual(1, a.ExecuteCount);
@@ -83,6 +88,7 @@ namespace Wyam.Core.Tests.Modules.Control
             public void ArrayInCaseResultsInCorrectCounts()
             {
                 // Given
+                IServiceProvider serviceProvider = new TestServiceProvider();
                 Engine engine = new Engine();
                 CountModule a = new CountModule("A") { AdditionalOutputs = 2 };
                 CountModule b = new CountModule("B");
@@ -91,7 +97,7 @@ namespace Wyam.Core.Tests.Modules.Control
                 engine.Pipelines.Add(a, new Switch((x, y) => x.Content).Case(new string[] { "1", "2" }, b), c);
 
                 // When
-                engine.Execute();
+                engine.Execute(serviceProvider);
 
                 // Then
                 Assert.AreEqual(1, a.ExecuteCount);
@@ -105,6 +111,7 @@ namespace Wyam.Core.Tests.Modules.Control
             public void OmittingCasesAndDefaultResultsInCorrectCounts()
             {
                 // Given
+                IServiceProvider serviceProvider = new TestServiceProvider();
                 Engine engine = new Engine();
                 CountModule a = new CountModule("A") { AdditionalOutputs = 2 };
                 CountModule b = new CountModule("B");
@@ -112,7 +119,7 @@ namespace Wyam.Core.Tests.Modules.Control
                 engine.Pipelines.Add(a, new Switch((x, y) => x.Content), b);
 
                 // When
-                engine.Execute();
+                engine.Execute(serviceProvider);
 
                 // Then
                 Assert.AreEqual(3, b.InputCount);

@@ -12,6 +12,7 @@ using Wyam.Core.Documents;
 using Wyam.Core.Modules.Metadata;
 using Wyam.Core.Execution;
 using Wyam.Testing;
+using Wyam.Testing.Execution;
 
 namespace Wyam.Core.Tests.Modules.Metadata
 {
@@ -37,9 +38,10 @@ namespace Wyam.Core.Tests.Modules.Metadata
             public void FileNameIsConvertedCorrectly(string input, string output)
             {
                 // Given
+                IServiceProvider serviceProvider = new TestServiceProvider();
                 Engine engine = new Engine();
                 ExecutionPipeline pipeline = new ExecutionPipeline("Pipeline", (IModuleList)null);
-                IExecutionContext context = new ExecutionContext(engine, Guid.Empty, pipeline);
+                IExecutionContext context = new ExecutionContext(engine, Guid.Empty, pipeline, serviceProvider);
                 IDocument[] inputs =
                 {
                     context.GetDocument(new MetadataItems
@@ -63,9 +65,10 @@ namespace Wyam.Core.Tests.Modules.Metadata
                 const string input = "FileName With MiXeD CapS";
                 const string output = "filename-with-mixed-caps";
 
+                IServiceProvider serviceProvider = new TestServiceProvider();
                 Engine engine = new Engine();
                 ExecutionPipeline pipeline = new ExecutionPipeline("Pipeline", (IModuleList)null);
-                IExecutionContext context = new ExecutionContext(engine, Guid.Empty, pipeline);
+                IExecutionContext context = new ExecutionContext(engine, Guid.Empty, pipeline, serviceProvider);
                 IDocument[] inputs =
                 {
                     context.GetDocument(new MetadataItems
@@ -89,9 +92,10 @@ namespace Wyam.Core.Tests.Modules.Metadata
                 const string input = "this-is-a-.net-tag";
                 const string output = "this-is-a-.net-tag";
 
+                IServiceProvider serviceProvider = new TestServiceProvider();
                 Engine engine = new Engine();
                 ExecutionPipeline pipeline = new ExecutionPipeline("Pipeline", (IModuleList)null);
-                IExecutionContext context = new ExecutionContext(engine, Guid.Empty, pipeline);
+                IExecutionContext context = new ExecutionContext(engine, Guid.Empty, pipeline, serviceProvider);
                 IDocument[] inputs =
                 {
                     context.GetDocument(new MetadataItems
@@ -116,9 +120,10 @@ namespace Wyam.Core.Tests.Modules.Metadata
                 const string input = "this-is-a-.";
                 const string output = "thisisa.";
 
+                IServiceProvider serviceProvider = new TestServiceProvider();
                 Engine engine = new Engine();
                 ExecutionPipeline pipeline = new ExecutionPipeline("Pipeline", (IModuleList)null);
-                IExecutionContext context = new ExecutionContext(engine, Guid.Empty, pipeline);
+                IExecutionContext context = new ExecutionContext(engine, Guid.Empty, pipeline, serviceProvider);
                 IDocument[] inputs =
                 {
                     context.GetDocument(new MetadataItems
@@ -143,9 +148,10 @@ namespace Wyam.Core.Tests.Modules.Metadata
             public void FileNameIsConvertedCorrectlyWithReservedChar(string character)
             {
                 // Given
+                IServiceProvider serviceProvider = new TestServiceProvider();
                 Engine engine = new Engine();
                 ExecutionPipeline pipeline = new ExecutionPipeline("Pipeline", (IModuleList)null);
-                IExecutionContext context = new ExecutionContext(engine, Guid.Empty, pipeline);
+                IExecutionContext context = new ExecutionContext(engine, Guid.Empty, pipeline, serviceProvider);
                 string manyCharactersWow = new string(character[0], 10);
                 IDocument[] inputs =
                 {
@@ -171,9 +177,10 @@ namespace Wyam.Core.Tests.Modules.Metadata
             public void IgnoresNullOrWhiteSpaceStrings(string input)
             {
                 // Given
+                IServiceProvider serviceProvider = new TestServiceProvider();
                 Engine engine = new Engine();
                 ExecutionPipeline pipeline = new ExecutionPipeline("Pipeline", (IModuleList)null);
-                IExecutionContext context = new ExecutionContext(engine, Guid.Empty, pipeline);
+                IExecutionContext context = new ExecutionContext(engine, Guid.Empty, pipeline, serviceProvider);
                 IDocument[] inputs =
                 {
                     context.GetDocument(new MetadataItems
@@ -197,9 +204,10 @@ namespace Wyam.Core.Tests.Modules.Metadata
                 const string input = "myfile.html";
                 const string output = "myfile.html";
 
+                IServiceProvider serviceProvider = new TestServiceProvider();
                 Engine engine = new Engine();
                 ExecutionPipeline pipeline = new ExecutionPipeline("Pipeline", (IModuleList)null);
-                IExecutionContext context = new ExecutionContext(engine, Guid.Empty, pipeline);
+                IExecutionContext context = new ExecutionContext(engine, Guid.Empty, pipeline, serviceProvider);
                 IDocument[] inputs =
                 {
                     context.GetDocument(new MetadataItems
@@ -223,9 +231,10 @@ namespace Wyam.Core.Tests.Modules.Metadata
                 const string input = "   myfile.html   ";
                 const string output = "myfile.html";
 
+                IServiceProvider serviceProvider = new TestServiceProvider();
                 Engine engine = new Engine();
                 ExecutionPipeline pipeline = new ExecutionPipeline("Pipeline", (IModuleList)null);
-                IExecutionContext context = new ExecutionContext(engine, Guid.Empty, pipeline);
+                IExecutionContext context = new ExecutionContext(engine, Guid.Empty, pipeline, serviceProvider);
                 IDocument[] inputs =
                 {
                     context.GetDocument(new MetadataItems

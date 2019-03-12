@@ -4,7 +4,7 @@ using Wyam.Common.Execution;
 
 namespace Wyam.Common.Configuration
 {
-    public interface IBootstrapper
+    public interface IConfigurableBootstrapper
     {
         /// <summary>
         /// Holds configurators for specific configurable types as instances of
@@ -12,7 +12,7 @@ namespace Wyam.Common.Configuration
         /// configurable:
         /// <list type="bullet">
         ///     <item>
-        ///         <term><c>IBootstrapper</c></term>
+        ///         <term><c>IConfigurableBootstrapper</c></term>
         ///         <description>
         ///         These types of configurators are automatically discovered and added in all referenced libraries.
         ///         Use them to add other configurators that should always be run. Note that bootstrapper configurators
@@ -20,15 +20,15 @@ namespace Wyam.Common.Configuration
         ///         </description>
         ///     </item>
         ///     <item>
-        ///         <term><c>IEngine</c></term>
-        ///         <description>
-        ///         Used to add pipelines and otherwise configure the execution engine.
-        ///         </description>
-        ///     </item>
-        ///     <item>
         ///         <term><c>IServiceCollection</c></term>
         ///         <description>
         ///         Can add services to the dependency injection container.
+        ///         </description>
+        ///     </item>
+        ///     <item>
+        ///         <term><c>IEngine</c></term>
+        ///         <description>
+        ///         Used to add pipelines and otherwise configure the execution engine.
         ///         </description>
         ///     </item>
         ///     <item>

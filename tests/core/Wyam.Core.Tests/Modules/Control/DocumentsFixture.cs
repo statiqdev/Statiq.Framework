@@ -6,6 +6,7 @@ using Wyam.Core.Execution;
 using Wyam.Core.Modules.Extensibility;
 using Wyam.Testing;
 using Wyam.Common.Execution;
+using Wyam.Testing.Execution;
 
 namespace Wyam.Core.Tests.Modules.Control
 {
@@ -19,12 +20,13 @@ namespace Wyam.Core.Tests.Modules.Control
             public void CountReturnsCorrectDocuments()
             {
                 // Given
+                IServiceProvider serviceProvider = new TestServiceProvider();
                 Engine engine = new Engine();
                 Core.Modules.Control.Documents documents = new Core.Modules.Control.Documents(5);
                 engine.Pipelines.Add(documents);
 
                 // When
-                engine.Execute();
+                engine.Execute(serviceProvider);
 
                 // Then
                 Assert.AreEqual(5, engine.Documents.Count());
@@ -35,6 +37,7 @@ namespace Wyam.Core.Tests.Modules.Control
             {
                 // Given
                 List<string> content = new List<string>();
+                IServiceProvider serviceProvider = new TestServiceProvider();
                 Engine engine = new Engine();
                 Core.Modules.Control.Documents documents = new Core.Modules.Control.Documents("A", "B", "C", "D");
                 Execute gatherData = new Execute(
@@ -46,7 +49,7 @@ namespace Wyam.Core.Tests.Modules.Control
                 engine.Pipelines.Add(documents, gatherData);
 
                 // When
-                engine.Execute();
+                engine.Execute(serviceProvider);
 
                 // Then
                 Assert.AreEqual(4, content.Count);
@@ -58,6 +61,7 @@ namespace Wyam.Core.Tests.Modules.Control
             {
                 // Given
                 List<object> values = new List<object>();
+                IServiceProvider serviceProvider = new TestServiceProvider();
                 Engine engine = new Engine();
                 Core.Modules.Control.Documents documents = new Core.Modules.Control.Documents(
                     new Dictionary<string, object> { { "Foo", "a" } },
@@ -72,7 +76,7 @@ namespace Wyam.Core.Tests.Modules.Control
                 engine.Pipelines.Add(documents, gatherData);
 
                 // When
-                engine.Execute();
+                engine.Execute(serviceProvider);
 
                 // Then
                 Assert.AreEqual(3, values.Count);
@@ -85,6 +89,7 @@ namespace Wyam.Core.Tests.Modules.Control
                 // Given
                 List<string> content = new List<string>();
                 List<object> values = new List<object>();
+                IServiceProvider serviceProvider = new TestServiceProvider();
                 Engine engine = new Engine();
                 Core.Modules.Control.Documents documents = new Core.Modules.Control.Documents(
                     Tuple.Create("A", new Dictionary<string, object> { { "Foo", "a" } }.AsEnumerable()),
@@ -100,7 +105,7 @@ namespace Wyam.Core.Tests.Modules.Control
                 engine.Pipelines.Add(documents, gatherData);
 
                 // When
-                engine.Execute();
+                engine.Execute(serviceProvider);
 
                 // Then
                 Assert.AreEqual(3, content.Count);
@@ -114,6 +119,7 @@ namespace Wyam.Core.Tests.Modules.Control
             {
                 // Given
                 List<string> content = new List<string>();
+                IServiceProvider serviceProvider = new TestServiceProvider();
                 Engine engine = new Engine();
                 Execute gatherData = new Execute(
                     (d, c) =>
@@ -126,7 +132,7 @@ namespace Wyam.Core.Tests.Modules.Control
                 engine.Pipelines.Add(new Core.Modules.Control.Documents("Foo"), gatherData);
 
                 // When
-                engine.Execute();
+                engine.Execute(serviceProvider);
 
                 // Then
                 Assert.AreEqual(4, content.Count);
@@ -138,6 +144,7 @@ namespace Wyam.Core.Tests.Modules.Control
             {
                 // Given
                 List<string> content = new List<string>();
+                IServiceProvider serviceProvider = new TestServiceProvider();
                 Engine engine = new Engine();
                 Execute gatherData = new Execute(
                     (d, c) =>
@@ -150,7 +157,7 @@ namespace Wyam.Core.Tests.Modules.Control
                 engine.Pipelines.Add(new Core.Modules.Control.Documents(), gatherData);
 
                 // When
-                engine.Execute();
+                engine.Execute(serviceProvider);
 
                 // Then
                 Assert.AreEqual(6, content.Count);
@@ -162,6 +169,7 @@ namespace Wyam.Core.Tests.Modules.Control
             {
                 // Given
                 List<string> content = new List<string>();
+                IServiceProvider serviceProvider = new TestServiceProvider();
                 Engine engine = new Engine();
                 Execute gatherData = new Execute(
                     (d, c) =>
@@ -175,7 +183,7 @@ namespace Wyam.Core.Tests.Modules.Control
                 engine.Pipelines.Add(new Core.Modules.Control.Documents().FromPipelines("Foo", "Baz"), gatherData);
 
                 // When
-                engine.Execute();
+                engine.Execute(serviceProvider);
 
                 // Then
                 Assert.AreEqual(6, content.Count);
@@ -187,6 +195,7 @@ namespace Wyam.Core.Tests.Modules.Control
             {
                 // Given
                 List<string> content = new List<string>();
+                IServiceProvider serviceProvider = new TestServiceProvider();
                 Engine engine = new Engine();
                 Execute gatherData = new Execute(
                     (d, c) =>
@@ -200,7 +209,7 @@ namespace Wyam.Core.Tests.Modules.Control
                 engine.Pipelines.Add(new Core.Modules.Control.Documents("Foo").FromPipelines("Baz"), gatherData);
 
                 // When
-                engine.Execute();
+                engine.Execute(serviceProvider);
 
                 // Then
                 Assert.AreEqual(6, content.Count);
@@ -212,6 +221,7 @@ namespace Wyam.Core.Tests.Modules.Control
             {
                 // Given
                 List<string> content = new List<string>();
+                IServiceProvider serviceProvider = new TestServiceProvider();
                 Engine engine = new Engine();
                 Execute gatherData = new Execute(
                     (d, c) =>
@@ -225,7 +235,7 @@ namespace Wyam.Core.Tests.Modules.Control
                 engine.Pipelines.Add(new Core.Modules.Control.Documents("Baz").FromPipelines("Foo"), gatherData);
 
                 // When
-                engine.Execute();
+                engine.Execute(serviceProvider);
 
                 // Then
                 Assert.AreEqual(6, content.Count);

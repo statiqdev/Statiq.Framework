@@ -15,6 +15,7 @@ using Wyam.Core.Modules.IO;
 using Wyam.Core.Execution;
 using Wyam.Testing;
 using Wyam.Testing.IO;
+using Wyam.Testing.Execution;
 
 namespace Wyam.Core.Tests.Modules.IO
 {
@@ -30,13 +31,14 @@ namespace Wyam.Core.Tests.Modules.IO
         [SetUp]
         public void SetUp()
         {
+            IServiceProvider serviceProvider = new TestServiceProvider();
             Engine = new Engine();
             Engine.FileSystem.FileProviders.Add(NormalizedPath.DefaultFileProvider.Scheme, GetFileProvider());
             Engine.FileSystem.RootPath = "/";
             Engine.FileSystem.InputPaths.Clear();
             Engine.FileSystem.InputPaths.Add("/TestFiles/Input");
             Pipeline = new ExecutionPipeline("Pipeline", (IModuleList)null);
-            Context = new ExecutionContext(Engine, Guid.Empty, Pipeline);
+            Context = new ExecutionContext(Engine, Guid.Empty, Pipeline, serviceProvider);
             Inputs = new[] { Context.GetDocument() };
         }
 

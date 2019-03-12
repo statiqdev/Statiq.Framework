@@ -11,6 +11,7 @@ using Wyam.Core.Modules.Control;
 using Wyam.Core.Modules.Extensibility;
 using Wyam.Core.Modules.IO;
 using Wyam.Testing;
+using Wyam.Testing.Execution;
 using Wyam.Testing.Modules;
 
 namespace Wyam.Core.Tests.Modules.Control
@@ -25,6 +26,7 @@ namespace Wyam.Core.Tests.Modules.Control
             public void ChildModulesAreExecuted()
             {
                 // Given
+                IServiceProvider serviceProvider = new TestServiceProvider();
                 Engine engine = new Engine();
                 CountModule a = new CountModule("A")
                 {
@@ -41,7 +43,7 @@ namespace Wyam.Core.Tests.Modules.Control
                 engine.Pipelines.Add(a, new ModuleCollection(b, c));
 
                 // When
-                engine.Execute();
+                engine.Execute(serviceProvider);
 
                 // Then
                 Assert.AreEqual(1, a.ExecuteCount);

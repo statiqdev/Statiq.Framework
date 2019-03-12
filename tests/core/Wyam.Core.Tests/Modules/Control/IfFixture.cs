@@ -1,8 +1,10 @@
-﻿using NUnit.Framework;
+﻿using System;
+using NUnit.Framework;
 using Wyam.Common.Execution;
 using Wyam.Core.Execution;
 using Wyam.Core.Modules.Control;
 using Wyam.Testing;
+using Wyam.Testing.Execution;
 using Wyam.Testing.Modules;
 
 namespace Wyam.Core.Tests.Modules.Control
@@ -17,6 +19,7 @@ namespace Wyam.Core.Tests.Modules.Control
             public void IfResultsInCorrectCounts()
             {
                 // Given
+                IServiceProvider serviceProvider = new TestServiceProvider();
                 Engine engine = new Engine();
                 CountModule a = new CountModule("A")
                 {
@@ -33,7 +36,7 @@ namespace Wyam.Core.Tests.Modules.Control
                 engine.Pipelines.Add(a, new If((x, y) => x.Content == "1", b), c);
 
                 // When
-                engine.Execute();
+                engine.Execute(serviceProvider);
 
                 // Then
                 Assert.AreEqual(1, a.ExecuteCount);
@@ -51,6 +54,7 @@ namespace Wyam.Core.Tests.Modules.Control
             public void ElseIfResultsInCorrectCounts()
             {
                 // Given
+                IServiceProvider serviceProvider = new TestServiceProvider();
                 Engine engine = new Engine();
                 CountModule a = new CountModule("A")
                 {
@@ -75,7 +79,7 @@ namespace Wyam.Core.Tests.Modules.Control
                     d);
 
                 // When
-                engine.Execute();
+                engine.Execute(serviceProvider);
 
                 // Then
                 Assert.AreEqual(1, a.ExecuteCount);
@@ -96,6 +100,7 @@ namespace Wyam.Core.Tests.Modules.Control
             public void ElseResultsInCorrectCounts()
             {
                 // Given
+                IServiceProvider serviceProvider = new TestServiceProvider();
                 Engine engine = new Engine();
                 CountModule a = new CountModule("A")
                 {
@@ -120,7 +125,7 @@ namespace Wyam.Core.Tests.Modules.Control
                     d);
 
                 // When
-                engine.Execute();
+                engine.Execute(serviceProvider);
 
                 // Then
                 Assert.AreEqual(1, a.ExecuteCount);
@@ -141,6 +146,7 @@ namespace Wyam.Core.Tests.Modules.Control
             public void IfElseAndElseResultsInCorrectCounts()
             {
                 // Given
+                IServiceProvider serviceProvider = new TestServiceProvider();
                 Engine engine = new Engine();
                 CountModule a = new CountModule("A")
                 {
@@ -170,7 +176,7 @@ namespace Wyam.Core.Tests.Modules.Control
                     e);
 
                 // When
-                engine.Execute();
+                engine.Execute(serviceProvider);
 
                 // Then
                 Assert.AreEqual(1, a.ExecuteCount);
@@ -194,6 +200,7 @@ namespace Wyam.Core.Tests.Modules.Control
             public void IfWithContextResultsInCorrectCounts()
             {
                 // Given
+                IServiceProvider serviceProvider = new TestServiceProvider();
                 Engine engine = new Engine();
                 CountModule a = new CountModule("A")
                 {
@@ -210,7 +217,7 @@ namespace Wyam.Core.Tests.Modules.Control
                 engine.Pipelines.Add(a, new If(x => true, b), c);
 
                 // When
-                engine.Execute();
+                engine.Execute(serviceProvider);
 
                 // Then
                 Assert.AreEqual(1, a.ExecuteCount);
@@ -228,6 +235,7 @@ namespace Wyam.Core.Tests.Modules.Control
             public void FalseIfWithContextResultsInCorrectCounts()
             {
                 // Given
+                IServiceProvider serviceProvider = new TestServiceProvider();
                 Engine engine = new Engine();
                 CountModule a = new CountModule("A")
                 {
@@ -244,7 +252,7 @@ namespace Wyam.Core.Tests.Modules.Control
                 engine.Pipelines.Add(a, new If(x => false, b), c);
 
                 // When
-                engine.Execute();
+                engine.Execute(serviceProvider);
 
                 // Then
                 Assert.AreEqual(1, a.ExecuteCount);
@@ -262,6 +270,7 @@ namespace Wyam.Core.Tests.Modules.Control
             public void UnmatchedDocumentsAreAddedToResults()
             {
                 // Given
+                IServiceProvider serviceProvider = new TestServiceProvider();
                 Engine engine = new Engine();
                 CountModule a = new CountModule("A")
                 {
@@ -278,7 +287,7 @@ namespace Wyam.Core.Tests.Modules.Control
                 engine.Pipelines.Add(a, new If((doc, ctx) => false, b), c);
 
                 // When
-                engine.Execute();
+                engine.Execute(serviceProvider);
 
                 // Then
                 Assert.AreEqual(1, a.ExecuteCount);
@@ -296,6 +305,7 @@ namespace Wyam.Core.Tests.Modules.Control
             public void UnmatchedDocumentsAreNotAddedToResults()
             {
                 // Given
+                IServiceProvider serviceProvider = new TestServiceProvider();
                 Engine engine = new Engine();
                 CountModule a = new CountModule("A")
                 {
@@ -312,7 +322,7 @@ namespace Wyam.Core.Tests.Modules.Control
                 engine.Pipelines.Add(a, new If((doc, ctx) => false, b).WithoutUnmatchedDocuments(), c);
 
                 // When
-                engine.Execute();
+                engine.Execute(serviceProvider);
 
                 // Then
                 Assert.AreEqual(1, a.ExecuteCount);

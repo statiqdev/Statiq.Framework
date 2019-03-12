@@ -6,7 +6,7 @@ using Wyam.Common.Execution;
 
 namespace Wyam.App
 {
-    public interface ICommandBootstrapper : IBootstrapper
+    public interface IBootstrapper : IConfigurableBootstrapper
     {
         string[] Args { get; }
 

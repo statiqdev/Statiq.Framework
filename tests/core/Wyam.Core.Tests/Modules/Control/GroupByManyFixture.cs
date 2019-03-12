@@ -13,6 +13,7 @@ using Wyam.Core.Modules.Metadata;
 using Wyam.Testing;
 using Wyam.Testing.Modules;
 using Wyam.Common.Execution;
+using Wyam.Testing.Execution;
 
 namespace Wyam.Core.Tests.Modules.Control
 {
@@ -27,6 +28,7 @@ namespace Wyam.Core.Tests.Modules.Control
             {
                 // Given
                 List<int> groupKey = new List<int>();
+                IServiceProvider serviceProvider = new TestServiceProvider();
                 Engine engine = new Engine();
                 CountModule count = new CountModule("A")
                 {
@@ -42,7 +44,7 @@ namespace Wyam.Core.Tests.Modules.Control
                 engine.Pipelines.Add(groupByMany, gatherData);
 
                 // When
-                engine.Execute();
+                engine.Execute(serviceProvider);
 
                 // Then
                 CollectionAssert.AreEquivalent(new[] { 0, 1, 2, 3 }, groupKey);
@@ -53,6 +55,7 @@ namespace Wyam.Core.Tests.Modules.Control
             {
                 // Given
                 List<IList<string>> content = new List<IList<string>>();
+                IServiceProvider serviceProvider = new TestServiceProvider();
                 Engine engine = new Engine();
                 CountModule count = new CountModule("A")
                 {
@@ -69,7 +72,7 @@ namespace Wyam.Core.Tests.Modules.Control
                 engine.Pipelines.Add(groupByMany, orderBy, gatherData);
 
                 // When
-                engine.Execute();
+                engine.Execute(serviceProvider);
 
                 // Then
                 Assert.AreEqual(4, content.Count);
@@ -84,6 +87,7 @@ namespace Wyam.Core.Tests.Modules.Control
             {
                 // Given
                 List<int> groupKey = new List<int>();
+                IServiceProvider serviceProvider = new TestServiceProvider();
                 Engine engine = new Engine();
                 CountModule count = new CountModule("A")
                 {
@@ -100,7 +104,7 @@ namespace Wyam.Core.Tests.Modules.Control
                 engine.Pipelines.Add(groupByMany, gatherData);
 
                 // When
-                engine.Execute();
+                engine.Execute(serviceProvider);
 
                 // Then
                 CollectionAssert.AreEquivalent(new[] { 0, 1, 2, 3 }, groupKey);
@@ -111,6 +115,7 @@ namespace Wyam.Core.Tests.Modules.Control
             {
                 // Given
                 List<int> groupKey = new List<int>();
+                IServiceProvider serviceProvider = new TestServiceProvider();
                 Engine engine = new Engine();
                 CountModule count = new CountModule("A")
                 {
@@ -132,7 +137,7 @@ namespace Wyam.Core.Tests.Modules.Control
                 engine.Pipelines.Add(groupByMany, gatherData);
 
                 // When
-                engine.Execute();
+                engine.Execute(serviceProvider);
 
                 // Then
                 CollectionAssert.AreEquivalent(new[] { 1, 2, 3 }, groupKey);
@@ -143,6 +148,7 @@ namespace Wyam.Core.Tests.Modules.Control
             {
                 // Given
                 List<object> groupKey = new List<object>();
+                IServiceProvider serviceProvider = new TestServiceProvider();
                 Engine engine = new Engine();
                 Execute meta = new Execute(
                     (d, c) => new IDocument[]
@@ -164,7 +170,7 @@ namespace Wyam.Core.Tests.Modules.Control
                 engine.Pipelines.Add(groupByMany, gatherData);
 
                 // When
-                engine.Execute();
+                engine.Execute(serviceProvider);
 
                 // Then
                 CollectionAssert.AreEquivalent(new object[] { "A", "B", "b", "C", "c", 1, "1" }, groupKey);
@@ -175,6 +181,7 @@ namespace Wyam.Core.Tests.Modules.Control
             {
                 // Given
                 List<object> groupKey = new List<object>();
+                IServiceProvider serviceProvider = new TestServiceProvider();
                 Engine engine = new Engine();
                 Execute meta = new Execute(
                     (d, c) => new IDocument[]
@@ -196,7 +203,7 @@ namespace Wyam.Core.Tests.Modules.Control
                 engine.Pipelines.Add(groupByMany, gatherData);
 
                 // When
-                engine.Execute();
+                engine.Execute(serviceProvider);
 
                 // Then
                 CollectionAssert.AreEquivalent(new object[] { "A", "b", "C", 1 }, groupKey);
@@ -207,6 +214,7 @@ namespace Wyam.Core.Tests.Modules.Control
             {
                 // Given
                 List<int> groupKey = new List<int>();
+                IServiceProvider serviceProvider = new TestServiceProvider();
                 Engine engine = new Engine();
                 CountModule count = new CountModule("A")
                 {
@@ -223,7 +231,7 @@ namespace Wyam.Core.Tests.Modules.Control
                 engine.Pipelines.Add(groupByMany, gatherData);
 
                 // When
-                engine.Execute();
+                engine.Execute(serviceProvider);
 
                 // Then
                 CollectionAssert.AreEquivalent(new[] { 1, 2, 3 }, groupKey);

@@ -11,6 +11,7 @@ using Wyam.Core.Modules.Control;
 using Wyam.Testing;
 using Wyam.Testing.Modules;
 using Wyam.Common.Execution;
+using Wyam.Testing.Execution;
 
 namespace Wyam.Core.Tests.Execution
 {
@@ -24,6 +25,7 @@ namespace Wyam.Core.Tests.Execution
             public void ReprocessesPreviousDocumentsWithDistinctSources()
             {
                 // Given
+                IServiceProvider serviceProvider = new TestServiceProvider();
                 Engine engine = new Engine();
                 CountModule a = new CountModule("A")
                 {
@@ -43,8 +45,8 @@ namespace Wyam.Core.Tests.Execution
                 engine.Pipelines.Add("Count", a, b, c).WithProcessDocumentsOnce();
 
                 // When
-                engine.Execute();
-                engine.Execute();
+                engine.Execute(serviceProvider);
+                engine.Execute(serviceProvider);
 
                 // Then
                 Assert.AreEqual(24, engine.Documents.FromPipeline("Count").Count());
@@ -63,6 +65,7 @@ namespace Wyam.Core.Tests.Execution
             public void DoesNotProcessPreviousDocumentsWhenSameSource()
             {
                 // Given
+                IServiceProvider serviceProvider = new TestServiceProvider();
                 Engine engine = new Engine();
                 CountModule a = new CountModule("A")
                 {
@@ -80,9 +83,9 @@ namespace Wyam.Core.Tests.Execution
                 engine.Pipelines.Add("Count", a, b, c).WithProcessDocumentsOnce();
 
                 // When
-                engine.Execute();
+                engine.Execute(serviceProvider);
                 a.Value = 0; // Reset a.Value so output from a has same content
-                engine.Execute();
+                engine.Execute(serviceProvider);
 
                 // Then
                 Assert.AreEqual(24, engine.Documents.FromPipeline("Count").Count());
@@ -101,6 +104,7 @@ namespace Wyam.Core.Tests.Execution
             public void ReprocessPreviousDocumentsWithDifferentContent()
             {
                 // Given
+                IServiceProvider serviceProvider = new TestServiceProvider();
                 Engine engine = new Engine();
                 CountModule a = new CountModule("A")
                 {
@@ -118,8 +122,8 @@ namespace Wyam.Core.Tests.Execution
                 engine.Pipelines.Add("Count", a, b, c).WithProcessDocumentsOnce();
 
                 // When
-                engine.Execute();
-                engine.Execute();
+                engine.Execute(serviceProvider);
+                engine.Execute(serviceProvider);
 
                 // Then
                 Assert.AreEqual(24, engine.Documents.FromPipeline("Count").Count());
@@ -138,6 +142,7 @@ namespace Wyam.Core.Tests.Execution
             public void SameSourceIsIgnoredIfAlreadySet()
             {
                 // Given
+                IServiceProvider serviceProvider = new TestServiceProvider();
                 Engine engine = new Engine();
                 CountModule a = new CountModule("A")
                 {
@@ -150,7 +155,7 @@ namespace Wyam.Core.Tests.Execution
                 engine.Pipelines.Add("Count", a, b);
 
                 // When
-                engine.Execute();
+                engine.Execute(serviceProvider);
 
                 // Then
                 Assert.AreEqual(1, engine.Documents.FromPipeline("Count").Count());
@@ -166,6 +171,7 @@ namespace Wyam.Core.Tests.Execution
             public void SameSourceThrowsException()
             {
                 // Given
+                IServiceProvider serviceProvider = new TestServiceProvider();
                 Engine engine = new Engine();
                 CountModule a = new CountModule("A")
                 {
@@ -179,7 +185,7 @@ namespace Wyam.Core.Tests.Execution
                 engine.Pipelines.Add("Count", a, new Concat(b, c));
 
                 // When, Then
-                Assert.Throws<Exception>(() => engine.Execute());
+                Assert.Throws<Exception>(() => engine.Execute(serviceProvider));
             }
 
             [Test]
