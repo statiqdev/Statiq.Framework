@@ -9,10 +9,14 @@ namespace Wyam.App.Commands
     internal class ServiceTypeRegistrar : ITypeRegistrar
     {
         private readonly ServiceCollection _serviceCollection;
+        private readonly Func<IServiceCollection, IServiceProvider> _buildServiceProvider;
 
-        public ServiceTypeRegistrar(ServiceCollection serviceCollection)
+        public ServiceTypeRegistrar(
+            ServiceCollection serviceCollection,
+            Func<IServiceCollection, IServiceProvider> buildServiceProvider)
         {
             _serviceCollection = serviceCollection ?? throw new ArgumentNullException(nameof(serviceCollection));
+            _buildServiceProvider = buildServiceProvider ?? throw new ArgumentNullException(nameof(buildServiceProvider));
         }
 
         public void Register(Type service, Type implementation) =>
@@ -21,6 +25,6 @@ namespace Wyam.App.Commands
         public void RegisterInstance(Type service, object implementation) =>
             _serviceCollection.AddScoped(service, _ => implementation);
 
-        public ITypeResolver Build() => new ServiceTypeResolver(_serviceCollection.BuildServiceProvider());
+        public ITypeResolver Build() => new ServiceTypeResolver(_buildServiceProvider(_serviceCollection));
     }
 }

@@ -6,7 +6,6 @@ using Spectre.Cli;
 
 namespace Wyam.App.Commands
 {
-
     internal class ServiceTypeResolver : ITypeResolver
     {
         private readonly IServiceProvider _serviceProvider;

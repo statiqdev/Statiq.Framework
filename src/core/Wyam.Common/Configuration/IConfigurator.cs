@@ -3,6 +3,6 @@
     public interface IConfigurator<T>
         where T : class
     {
-        void Configure(T item);
+        void Configure(T configurable);
     }
 }

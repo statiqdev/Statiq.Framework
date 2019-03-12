@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using Microsoft.Extensions.DependencyInjection;
 using Wyam.App.Tracing;
 using Wyam.Common.Configuration;
 using Wyam.Common.Execution;
@@ -17,6 +18,6 @@ namespace Wyam.App.Configuration
             _action = action;
         }
 
-        public void Configure(T item) => _action?.Invoke(item);
+        public void Configure(T configurable) => _action?.Invoke(configurable);
     }
 }

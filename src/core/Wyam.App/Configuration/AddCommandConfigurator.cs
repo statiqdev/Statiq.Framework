@@ -16,7 +16,7 @@ namespace Wyam.App.Configuration
             _name = name;
         }
 
-        public void Configure(IConfigurator item) =>
-            item.AddCommand<TCommand>(_name);
+        public void Configure(IConfigurator configurable) =>
+            configurable.AddCommand<TCommand>(_name);
     }
 }
