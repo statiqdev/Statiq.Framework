@@ -211,7 +211,7 @@ namespace Wyam.Core.Execution
             // Make sure we've actually configured some pipelines
             if (_pipelines.Count == 0)
             {
-                Trace.Error("No pipelines are configured. Please supply a configuration file, specify a recipe, or configure programmatically");
+                Trace.Error("No pipelines are configured.");
                 return;
             }
 

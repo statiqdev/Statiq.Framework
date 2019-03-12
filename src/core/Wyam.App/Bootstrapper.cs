@@ -48,12 +48,8 @@ namespace Wyam.App
 
             // Configure the service collection
             IServiceCollection serviceCollection = CreateServiceCollection();
+            serviceCollection.AddSingleton<IConfigurableBootstrapper>(this);
             _configurators.Configure(serviceCollection);
-
-            // Create the engine and configure it
-            Engine engine = new Engine();
-            serviceCollection.AddSingleton<IEngine>(engine);
-            _configurators.Configure<IEngine>(engine);
 
             // Create the command line parser and run the command
             ServiceTypeRegistrar registrar = new ServiceTypeRegistrar(serviceCollection, x => BuildServiceProvider(x));

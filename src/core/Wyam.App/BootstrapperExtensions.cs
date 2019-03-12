@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Reflection;
 using Microsoft.Extensions.DependencyInjection;
 using Spectre.Cli;
 using Wyam.App.Commands;
@@ -22,7 +24,19 @@ namespace Wyam.App
             // Scan and add boostrapper configurators using a temporary service collection
             ServiceCollection serviceCollection = new ServiceCollection();
             serviceCollection.Scan(x => x
-                .FromApplicationDependencies()
+                .FromApplicationDependencies(a =>
+                {
+                    // Exclude assemblies that throw type load exceptions
+                    try
+                    {
+                        IEnumerable<TypeInfo> definedType = a.DefinedTypes;
+                    }
+                    catch (ReflectionTypeLoadException)
+                    {
+                        return false;
+                    }
+                    return true;
+                })
                 .AddClasses(c => c.AssignableTo<Common.Configuration.IConfigurator<IConfigurableBootstrapper>>())
                 .As<Common.Configuration.IConfigurator<IConfigurableBootstrapper>>()
                 .WithSingletonLifetime());

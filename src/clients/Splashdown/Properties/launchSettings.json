@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "Splashdown": {
+      "commandName": "Project",
+      "commandLineArgs": "-i a -i \"b c\" --input d"
+    }
+  }
+}

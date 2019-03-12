@@ -45,17 +45,5 @@ namespace Wyam.App.Configuration
             configurators = null;
             return false;
         }
-
-        public void Configure<T>(T item)
-            where T : class
-        {
-            if (TryGet(out IList<IConfigurator<T>> configurators))
-            {
-                foreach (IConfigurator<T> configurator in configurators)
-                {
-                    configurator?.Configure(item);
-                }
-            }
-        }
     }
 }
