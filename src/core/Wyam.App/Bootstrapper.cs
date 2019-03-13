@@ -4,18 +4,22 @@ using System.Linq;
 using System.Text;
 using Microsoft.Extensions.DependencyInjection;
 using Spectre.Cli;
-using Scrutor;
 using Wyam.App.Commands;
 using Wyam.App.Configuration;
 using Wyam.App.Tracing;
 using Wyam.Common.Configuration;
 using Wyam.Common.Execution;
 using Wyam.Core.Execution;
+using Wyam.Common.Shortcodes;
+using Wyam.Common.Modules;
+using Wyam.App.Assemblies;
 
 namespace Wyam.App
 {
     public class Bootstrapper : IBootstrapper
     {
+        private readonly ClassCatalog _classCatalog = new ClassCatalog();
+
         private readonly ConfiguratorCollection _configurators = new ConfiguratorCollection();
 
         private Func<ServiceTypeRegistrar, ICommandApp> _getCommandApp = x => new CommandApp(x);
@@ -24,6 +28,8 @@ namespace Wyam.App
         {
             Args = args ?? throw new ArgumentNullException(nameof(args));
         }
+
+        public IClassCatalog ClassCatalog => _classCatalog;
 
         public IConfiguratorCollection Configurators => _configurators;
 
@@ -43,12 +49,17 @@ namespace Wyam.App
             // It's not a serious console app unless there's some ASCII art
             OutputLogo();
 
-            // Run bootstraper configurators first using an intermediate service provider
+            // Populate the class catalog (if we haven't already)
+            _classCatalog.Populate();
+
+            // Run bootstraper configurators first
             _configurators.Configure<IConfigurableBootstrapper>(this);
+            _configurators.Configure<IBootstrapper>(this);
 
             // Configure the service collection
             IServiceCollection serviceCollection = CreateServiceCollection();
             serviceCollection.AddSingleton<IConfigurableBootstrapper>(this);
+            serviceCollection.AddSingleton<IBootstrapper>(this);
             _configurators.Configure(serviceCollection);
 
             // Create the command line parser and run the command
@@ -84,6 +95,8 @@ namespace Wyam.App
                 .AddDefaultTracing()
                 .AddDefaultConfigurators()
                 .AddDefaultCommands()
+                .AddDefaultShortcodes()
+                .AddDefaultNamespaces()
                 .AddConfigurator(configurator);
 
         private static void OutputLogo()

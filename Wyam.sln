@@ -154,7 +154,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Wyam.Feeds.Tests", "tests\e
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Splashdown", "src\clients\Splashdown\Splashdown.csproj", "{2E6B513A-D0D5-4484-8BDE-0EDFAE04E22F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Wyam.App", "src\core\Wyam.App\Wyam.App.csproj", "{056C5678-EE52-41FD-B5FE-80683DB025C8}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Wyam.App", "src\core\Wyam.App\Wyam.App.csproj", "{056C5678-EE52-41FD-B5FE-80683DB025C8}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Wyam.App.Tests", "tests\core\Wyam.App.Tests\Wyam.App.Tests.csproj", "{88191E90-14CF-490E-A9F3-8EF4D142AFBE}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -370,6 +372,10 @@ Global
 		{056C5678-EE52-41FD-B5FE-80683DB025C8}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{056C5678-EE52-41FD-B5FE-80683DB025C8}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{056C5678-EE52-41FD-B5FE-80683DB025C8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{88191E90-14CF-490E-A9F3-8EF4D142AFBE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{88191E90-14CF-490E-A9F3-8EF4D142AFBE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{88191E90-14CF-490E-A9F3-8EF4D142AFBE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{88191E90-14CF-490E-A9F3-8EF4D142AFBE}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -435,6 +441,7 @@ Global
 		{53711748-0274-4A01-B2DC-010DB2FD760F} = {2E5842F3-4797-4BB5-9A55-F3A005B434F8}
 		{2E6B513A-D0D5-4484-8BDE-0EDFAE04E22F} = {43F26311-B67F-4F8D-BBAC-9C6F4B9F5C52}
 		{056C5678-EE52-41FD-B5FE-80683DB025C8} = {4813B17D-EFCA-401D-B0E6-7B24B3946A70}
+		{88191E90-14CF-490E-A9F3-8EF4D142AFBE} = {12931CA5-E734-4CD9-883D-27D897512183}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {B0CD133C-B843-4178-8976-B04AE6B2021A}

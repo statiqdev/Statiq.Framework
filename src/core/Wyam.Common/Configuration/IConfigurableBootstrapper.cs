@@ -6,6 +6,8 @@ namespace Wyam.Common.Configuration
 {
     public interface IConfigurableBootstrapper
     {
+        IClassCatalog ClassCatalog { get; }
+
         /// <summary>
         /// Holds configurators for specific configurable types as instances of
         /// <see cref="IConfigurator{T}"/>. Right now the following types are

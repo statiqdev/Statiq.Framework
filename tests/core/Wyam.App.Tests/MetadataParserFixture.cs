@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using NUnit.Framework;
 using Wyam.Testing;
 
-namespace Wyam.Tests
+namespace Wyam.App.Tests
 {
     [TestFixture]
     [Parallelizable(ParallelScope.Self | ParallelScope.Children)]
