@@ -9,6 +9,7 @@ using Wyam.App.Configuration;
 using Wyam.App.Tracing;
 using Wyam.Common.Configuration;
 using Wyam.Common.Execution;
+using Wyam.Common.IO;
 using Wyam.Common.Modules;
 using Wyam.Common.Shortcodes;
 
@@ -49,6 +50,27 @@ namespace Wyam.App
                     if (shortcode.Equals(typeof(Core.Shortcodes.Metadata.Meta)))
                     {
                         engine.Shortcodes.Add("=", shortcode);
+                    }
+                }
+            });
+
+        public static IBootstrapper AddDefaultFileProviders(this IBootstrapper bootstrapper) =>
+            bootstrapper.Configure<IEngine>(engine =>
+            {
+                foreach (IFileProvider fileProvider in bootstrapper.ClassCatalog.GetInstances<IFileProvider>())
+                {
+                    string scheme = fileProvider.GetType().Name.ToLowerInvariant();
+                    if (scheme.EndsWith("fileprovider"))
+                    {
+                        scheme = scheme.Substring(0, scheme.Length - 12);
+                    }
+                    if (scheme.EndsWith("provider"))
+                    {
+                        scheme = scheme.Substring(0, 8);
+                    }
+                    if (!string.IsNullOrEmpty(scheme))
+                    {
+                        engine.FileSystem.FileProviders.Add(scheme, fileProvider);
                     }
                 }
             });
