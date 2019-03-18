@@ -7,6 +7,8 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\core\Wyam.App\Wyam.App.csproj" />
+    <ProjectReference Include="..\..\extensions\Wyam.Markdown\Wyam.Markdown.csproj" />
+    <ProjectReference Include="..\..\extensions\Wyam.Yaml\Wyam.Yaml.csproj" />
   </ItemGroup>
 
 </Project>

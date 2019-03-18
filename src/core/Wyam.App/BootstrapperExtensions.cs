@@ -144,5 +144,37 @@ namespace Wyam.App
             bootstrapper.Configurators.Add(configurator);
             return bootstrapper;
         }
+
+        public static IBootstrapper AddPipeline(
+            this IBootstrapper bootstrapper,
+            string name,
+            IModuleList modules) =>
+            bootstrapper.Configure<IEngine>(x => x.Pipelines.Add(name, modules));
+
+        public static IBootstrapper AddPipeline(
+            this IBootstrapper bootstrapper,
+            IPipeline pipeline) =>
+            bootstrapper.Configure<IEngine>(x => x.Pipelines.Add(pipeline));
+
+        public static IBootstrapper AddPipeline(
+            this IBootstrapper bootstrapper,
+            IModuleList modules) =>
+            bootstrapper.Configure<IEngine>(x => x.Pipelines.Add(modules));
+
+        public static IBootstrapper AddPipeline(
+            this IBootstrapper bootstrapper,
+            params IModule[] modules) =>
+            bootstrapper.Configure<IEngine>(x => x.Pipelines.Add(modules));
+
+        public static IBootstrapper AddPipeline(
+            this IBootstrapper bootstrapper,
+            string name,
+            params IModule[] modules) =>
+            bootstrapper.Configure<IEngine>(x => x.Pipelines.Add(name, modules));
+
+        public static IBootstrapper AddPipeline<TPipeline>(
+            this IBootstrapper bootstrapper)
+            where TPipeline : IPipeline =>
+            bootstrapper.Configure<IEngine>(x => x.Pipelines.Add<TPipeline>());
     }
 }

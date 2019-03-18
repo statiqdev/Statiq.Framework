@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using Wyam.Common.Modules;
 
 namespace Wyam.Common.Execution
@@ -35,6 +36,10 @@ namespace Wyam.Common.Execution
         /// <returns>The newly added pipeline.</returns>
         public static IPipeline Add(this IPipelineCollection pipelines, string name, params IModule[] modules) =>
             pipelines.Add(name, new ModuleList(modules));
+
+        public static IPipeline Add<TPipeline>(this IPipelineCollection pipelines)
+            where TPipeline : IPipeline =>
+            pipelines.Add(Activator.CreateInstance<TPipeline>());
 
         /// <summary>
         /// Inserts a new unnamed pipeline into the collection.
