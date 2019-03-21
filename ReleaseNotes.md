@@ -1,6 +1,10 @@
 # 3.0.0
 
 - **[Breaking Change]** Version 3 is a complete rewrite of the client capabilities of Wyam, please read the blog post at ... for details.
+- Client app/existing recipes moved to Splashdown
+- Wyam.App added
+- Target for libraries changed from netstandard to netcoreapp
+- Wyam.Configuration removed
 
 # 2.2.4
 

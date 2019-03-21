@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>netstandard2.0</TargetFramework>
+    <TargetFramework>netcoreapp2.2</TargetFramework>
     <Description>Wyam is a simple to use, highly modular, and extremely configurable static content generator. This library contains the blog recipe.</Description>
     <PackageTags>Wyam Static StaticContent StaticSite Blog BlogEngine</PackageTags>
     <RepositoryUrl>https://github.com/Wyamio/Wyam.git</RepositoryUrl>
