@@ -1,3 +1,7 @@
+# 3.0.0
+
+- **[Breaking Change]** Version 3 is a complete rewrite of the client capabilities of Wyam, please read the blog post at ... for details.
+
 # 2.2.4
 
 - [Feature] Updates JavaScriptEngineSwitcher to 3.0
