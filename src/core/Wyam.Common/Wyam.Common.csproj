@@ -5,6 +5,5 @@
     <PackageTags>Wyam Static StaticContent StaticSite Blog BlogEngine</PackageTags>
     <RepositoryUrl>https://github.com/Wyamio/Wyam.git</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
-    <DevelopmentDependency>true</DevelopmentDependency>
   </PropertyGroup>
 </Project>
