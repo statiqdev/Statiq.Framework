@@ -43,7 +43,7 @@ namespace Wyam.Core.Tests.Modules.Control
                 engine.Pipelines.Add(a, new ModuleCollection(b, c));
 
                 // When
-                engine.Execute(serviceProvider);
+                engine.ExecuteAsync(serviceProvider);
 
                 // Then
                 Assert.AreEqual(1, a.ExecuteCount);

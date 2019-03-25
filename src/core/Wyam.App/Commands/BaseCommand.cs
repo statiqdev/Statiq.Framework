@@ -19,10 +19,10 @@ using Trace = Wyam.Common.Tracing.Trace;
 
 namespace Wyam.App.Commands
 {
-    public abstract class BaseCommand<TSettings> : Command<TSettings>
+    public abstract class BaseCommand<TSettings> : AsyncCommand<TSettings>
         where TSettings : BaseSettings
     {
-        public sealed override int Execute(CommandContext context, TSettings settings)
+        public sealed override async Task<int> Execute(CommandContext context, TSettings settings)
         {
             // Set verbose tracing
             if (settings.Verbose)
@@ -71,9 +71,9 @@ namespace Wyam.App.Commands
                 Trace.AddListener(new SimpleFileTraceListener(settings.LogFile));
             }
 
-            return ExecuteCommand(context, settings);
+            return await ExecuteCommandAsync(context, settings);
         }
 
-        public abstract int ExecuteCommand(CommandContext context, TSettings settings);
+        public abstract Task<int> ExecuteCommandAsync(CommandContext context, TSettings settings);
     }
 }

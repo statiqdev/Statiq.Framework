@@ -26,7 +26,7 @@ namespace Wyam.Core.Tests.Modules.Control
                 engine.Pipelines.Add(documents);
 
                 // When
-                engine.Execute(serviceProvider);
+                engine.ExecuteAsync(serviceProvider);
 
                 // Then
                 Assert.AreEqual(5, engine.Documents.Count());
@@ -49,7 +49,7 @@ namespace Wyam.Core.Tests.Modules.Control
                 engine.Pipelines.Add(documents, gatherData);
 
                 // When
-                engine.Execute(serviceProvider);
+                engine.ExecuteAsync(serviceProvider);
 
                 // Then
                 Assert.AreEqual(4, content.Count);
@@ -76,7 +76,7 @@ namespace Wyam.Core.Tests.Modules.Control
                 engine.Pipelines.Add(documents, gatherData);
 
                 // When
-                engine.Execute(serviceProvider);
+                engine.ExecuteAsync(serviceProvider);
 
                 // Then
                 Assert.AreEqual(3, values.Count);
@@ -105,7 +105,7 @@ namespace Wyam.Core.Tests.Modules.Control
                 engine.Pipelines.Add(documents, gatherData);
 
                 // When
-                engine.Execute(serviceProvider);
+                engine.ExecuteAsync(serviceProvider);
 
                 // Then
                 Assert.AreEqual(3, content.Count);
@@ -132,7 +132,7 @@ namespace Wyam.Core.Tests.Modules.Control
                 engine.Pipelines.Add(new Core.Modules.Control.Documents("Foo"), gatherData);
 
                 // When
-                engine.Execute(serviceProvider);
+                engine.ExecuteAsync(serviceProvider);
 
                 // Then
                 Assert.AreEqual(4, content.Count);
@@ -157,7 +157,7 @@ namespace Wyam.Core.Tests.Modules.Control
                 engine.Pipelines.Add(new Core.Modules.Control.Documents(), gatherData);
 
                 // When
-                engine.Execute(serviceProvider);
+                engine.ExecuteAsync(serviceProvider);
 
                 // Then
                 Assert.AreEqual(6, content.Count);
@@ -183,7 +183,7 @@ namespace Wyam.Core.Tests.Modules.Control
                 engine.Pipelines.Add(new Core.Modules.Control.Documents().FromPipelines("Foo", "Baz"), gatherData);
 
                 // When
-                engine.Execute(serviceProvider);
+                engine.ExecuteAsync(serviceProvider);
 
                 // Then
                 Assert.AreEqual(6, content.Count);
@@ -209,7 +209,7 @@ namespace Wyam.Core.Tests.Modules.Control
                 engine.Pipelines.Add(new Core.Modules.Control.Documents("Foo").FromPipelines("Baz"), gatherData);
 
                 // When
-                engine.Execute(serviceProvider);
+                engine.ExecuteAsync(serviceProvider);
 
                 // Then
                 Assert.AreEqual(6, content.Count);
@@ -235,7 +235,7 @@ namespace Wyam.Core.Tests.Modules.Control
                 engine.Pipelines.Add(new Core.Modules.Control.Documents("Baz").FromPipelines("Foo"), gatherData);
 
                 // When
-                engine.Execute(serviceProvider);
+                engine.ExecuteAsync(serviceProvider);
 
                 // Then
                 Assert.AreEqual(6, content.Count);

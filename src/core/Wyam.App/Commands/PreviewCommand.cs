@@ -61,14 +61,14 @@ namespace Wyam.App.Commands
             _serviceProvider = serviceProvider;
         }
 
-        public override int ExecuteCommand(CommandContext context, Settings settings)
+        public override async Task<int> ExecuteCommandAsync(CommandContext context, Settings settings)
         {
             ExitCode exitCode = ExitCode.Normal;
 
             using (EngineManager engineManager = new EngineManager(_bootstrapper, settings))
             {
                 // Execute the engine for the first time
-                if (!engineManager.Execute(_serviceProvider))
+                if (!await engineManager.ExecuteAsync(_serviceProvider))
                 {
                     return (int)ExitCode.ExecutionError;
                 }
@@ -77,7 +77,7 @@ namespace Wyam.App.Commands
                 Dictionary<string, string> contentTypes = settings.ContentTypes?.Length > 0
                     ? GetContentTypes(settings.ContentTypes)
                     : new Dictionary<string, string>();
-                Server previewServer = StartPreviewServer(
+                Server previewServer = await StartPreviewServerAsync(
                     engineManager.Engine.FileSystem.GetOutputDirectory().Path,
                     settings.Port,
                     settings.ForceExt,
@@ -148,10 +148,10 @@ namespace Wyam.App.Commands
                     if (changedFiles.Count > 0)
                     {
                         Trace.Information("{0} files have changed, re-executing", changedFiles.Count);
-                        exitCode = engineManager.Execute(_serviceProvider)
+                        exitCode = await engineManager.ExecuteAsync(_serviceProvider)
                             ? ExitCode.Normal
                             : ExitCode.ExecutionError;
-                        previewServer.TriggerReloadAsync().GetAwaiter().GetResult();
+                        await previewServer.TriggerReloadAsync();
                     }
 
                     // Check one more time for exit
@@ -187,13 +187,13 @@ namespace Wyam.App.Commands
             return contentTypeDictionary;
         }
 
-        private static Server StartPreviewServer(DirectoryPath path, int port, bool forceExtension, DirectoryPath virtualDirectory, bool liveReload, IDictionary<string, string> contentTypes)
+        private static async Task<Server> StartPreviewServerAsync(DirectoryPath path, int port, bool forceExtension, DirectoryPath virtualDirectory, bool liveReload, IDictionary<string, string> contentTypes)
         {
             Server server;
             try
             {
                 server = new Server(path.FullPath, port, !forceExtension, virtualDirectory?.FullPath, liveReload, contentTypes, new TraceLoggerProvider());
-                server.Start();
+                await server.StartAsync();
             }
             catch (Exception ex)
             {
@@ -201,7 +201,7 @@ namespace Wyam.App.Commands
                 return null;
             }
 
-            string urlPath = server.VirtualDirectory == null ? string.Empty : server.VirtualDirectory;
+            string urlPath = server.VirtualDirectory ?? string.Empty;
             Trace.Information($"Preview server listening at http://localhost:{port}{urlPath} and serving from path {path}"
                 + (liveReload ? " with LiveReload support" : string.Empty));
             return server;

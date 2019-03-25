@@ -39,7 +39,7 @@ namespace Wyam.Core.Tests.Execution
             engine.Pipelines.Add(a, b, c);
 
             // When
-            engine.Execute(serviceProvider);
+            engine.ExecuteAsync(serviceProvider);
 
             // Then
             Assert.AreEqual(1, a.ExecuteCount);
@@ -75,7 +75,7 @@ namespace Wyam.Core.Tests.Execution
                     }, false));
 
             // When
-            engine.Execute(serviceProvider);
+            engine.ExecuteAsync(serviceProvider);
 
             // Then
             Assert.AreEqual(2, engine.Documents.FromPipeline("Pipeline").Count());
@@ -117,7 +117,7 @@ namespace Wyam.Core.Tests.Execution
                 new Core.Modules.Metadata.Meta("Content", (x, y) => x.Content));
 
             // When
-            engine.Execute(serviceProvider);
+            engine.ExecuteAsync(serviceProvider);
 
             // Then
             Assert.AreEqual(2, engine.Documents.FromPipeline("Pipeline 1").Count());

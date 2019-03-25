@@ -118,9 +118,7 @@ namespace Wyam.Hosting
         /// <inheritdoc />
         public void Dispose() => _host.Dispose();
 
-        /// <summary>
-        /// Start listening.
-        /// </summary>
+        /// <inheritdoc />
         public void Start() => _host.Start();
 
         /// <inheritdoc />

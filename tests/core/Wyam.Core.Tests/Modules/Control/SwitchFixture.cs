@@ -29,7 +29,7 @@ namespace Wyam.Core.Tests.Modules.Control
                 engine.Pipelines.Add(a, new Switch((x, y) => x.Content).Case("1", b).Case("2", c).Default(d));
 
                 // When
-                engine.Execute(serviceProvider);
+                engine.ExecuteAsync(serviceProvider);
 
                 // Then
                 Assert.AreEqual(1, a.ExecuteCount);
@@ -51,7 +51,7 @@ namespace Wyam.Core.Tests.Modules.Control
                 engine.Pipelines.Add(a, new Switch((x, y) => x.Content).Default(b), c);
 
                 // When
-                engine.Execute(serviceProvider);
+                engine.ExecuteAsync(serviceProvider);
 
                 // Then
                 Assert.AreEqual(1, a.ExecuteCount);
@@ -74,7 +74,7 @@ namespace Wyam.Core.Tests.Modules.Control
                 engine.Pipelines.Add(a, new Switch((x, y) => x.Content).Case("1", b), c);
 
                 // When
-                engine.Execute(serviceProvider);
+                engine.ExecuteAsync(serviceProvider);
 
                 // Then
                 Assert.AreEqual(1, a.ExecuteCount);
@@ -97,7 +97,7 @@ namespace Wyam.Core.Tests.Modules.Control
                 engine.Pipelines.Add(a, new Switch((x, y) => x.Content).Case(new string[] { "1", "2" }, b), c);
 
                 // When
-                engine.Execute(serviceProvider);
+                engine.ExecuteAsync(serviceProvider);
 
                 // Then
                 Assert.AreEqual(1, a.ExecuteCount);
@@ -119,7 +119,7 @@ namespace Wyam.Core.Tests.Modules.Control
                 engine.Pipelines.Add(a, new Switch((x, y) => x.Content), b);
 
                 // When
-                engine.Execute(serviceProvider);
+                engine.ExecuteAsync(serviceProvider);
 
                 // Then
                 Assert.AreEqual(3, b.InputCount);

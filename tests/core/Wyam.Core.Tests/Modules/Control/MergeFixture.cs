@@ -40,7 +40,7 @@ namespace Wyam.Core.Tests.Modules.Control
                     new Core.Modules.Metadata.Meta("Content", (doc, ctx) => doc.Content));
 
                 // When
-                engine.Execute(serviceProvider);
+                engine.ExecuteAsync(serviceProvider);
 
                 // Then
                 CollectionAssert.AreEqual(new[] { "21" }, engine.Documents["Test"].Select(x => x["Content"]));
@@ -63,7 +63,7 @@ namespace Wyam.Core.Tests.Modules.Control
                 engine.Pipelines.Add("Test", a, new Merge(b));
 
                 // When
-                engine.Execute(serviceProvider);
+                engine.ExecuteAsync(serviceProvider);
 
                 // Then
                 CollectionAssert.AreEqual(new[] { 11 }, engine.Documents["Test"].Select(x => x["A"]));
@@ -87,7 +87,7 @@ namespace Wyam.Core.Tests.Modules.Control
                 engine.Pipelines.Add("Test", a, new Merge(b));
 
                 // When
-                engine.Execute(serviceProvider);
+                engine.ExecuteAsync(serviceProvider);
 
                 // Then
                 CollectionAssert.AreEqual(new[] { 21 }, engine.Documents["Test"].Select(x => x["A"]));
@@ -110,7 +110,7 @@ namespace Wyam.Core.Tests.Modules.Control
                 engine.Pipelines.Add("Test", a, new Merge(b));
 
                 // When
-                engine.Execute(serviceProvider);
+                engine.ExecuteAsync(serviceProvider);
 
                 // Then
                 Assert.AreEqual(1, a.OutputCount);
@@ -137,7 +137,7 @@ namespace Wyam.Core.Tests.Modules.Control
                 engine.Pipelines.Add("Test", a, new Merge(b));
 
                 // When
-                engine.Execute(serviceProvider);
+                engine.ExecuteAsync(serviceProvider);
 
                 // Then
                 Assert.AreEqual(1, a.OutputCount);
@@ -164,7 +164,7 @@ namespace Wyam.Core.Tests.Modules.Control
                 engine.Pipelines.Add("Test", a, new Merge(b));
 
                 // When
-                engine.Execute(serviceProvider);
+                engine.ExecuteAsync(serviceProvider);
 
                 // Then
                 Assert.AreEqual(2, a.OutputCount);
@@ -192,7 +192,7 @@ namespace Wyam.Core.Tests.Modules.Control
                 engine.Pipelines.Add("Test", a, new Merge(b));
 
                 // When
-                engine.Execute(serviceProvider);
+                engine.ExecuteAsync(serviceProvider);
 
                 // Then
                 Assert.AreEqual(2, a.OutputCount);
@@ -222,7 +222,7 @@ namespace Wyam.Core.Tests.Modules.Control
                     new Core.Modules.Metadata.Meta("Content", (doc, ctx) => doc.Content));
 
                 // When
-                engine.Execute(serviceProvider);
+                engine.ExecuteAsync(serviceProvider);
 
                 // Then
                 Assert.AreEqual(1, a.OutputCount);
@@ -252,7 +252,7 @@ namespace Wyam.Core.Tests.Modules.Control
                     new Core.Modules.Metadata.Meta("Content", (doc, ctx) => doc.Content));
 
                 // When
-                engine.Execute(serviceProvider);
+                engine.ExecuteAsync(serviceProvider);
 
                 // Then
                 Assert.AreEqual(1, a.OutputCount);
@@ -282,7 +282,7 @@ namespace Wyam.Core.Tests.Modules.Control
                     new Core.Modules.Metadata.Meta("Content", (doc, ctx) => doc.Content));
 
                 // When
-                engine.Execute(serviceProvider);
+                engine.ExecuteAsync(serviceProvider);
 
                 // Then
                 Assert.AreEqual(2, a.OutputCount);
@@ -313,7 +313,7 @@ namespace Wyam.Core.Tests.Modules.Control
                     new Core.Modules.Metadata.Meta("Content", (doc, ctx) => doc.Content));
 
                 // When
-                engine.Execute(serviceProvider);
+                engine.ExecuteAsync(serviceProvider);
 
                 // Then
                 Assert.AreEqual(2, a.OutputCount);

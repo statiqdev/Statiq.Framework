@@ -59,11 +59,11 @@ namespace Wyam.App.Commands
             _serviceProvider = serviceProvider;
         }
 
-        public override int ExecuteCommand(CommandContext context, Settings settings)
+        public override async Task<int> ExecuteCommandAsync(CommandContext context, Settings settings)
         {
             using (EngineManager engineManager = new EngineManager(_bootstrapper, settings))
             {
-                return engineManager.Execute(_serviceProvider)
+                return await engineManager.ExecuteAsync(_serviceProvider)
                     ? (int)ExitCode.Normal
                     : (int)ExitCode.ExecutionError;
             }

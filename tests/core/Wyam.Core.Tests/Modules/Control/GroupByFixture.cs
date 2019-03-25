@@ -44,7 +44,7 @@ namespace Wyam.Core.Tests.Modules.Control
                 engine.Pipelines.Add(groupBy, gatherData);
 
                 // When
-                engine.Execute(serviceProvider);
+                engine.ExecuteAsync(serviceProvider);
 
                 // Then
                 CollectionAssert.AreEquivalent(new[] { 0, 1, 2 }, groupKey);
@@ -72,7 +72,7 @@ namespace Wyam.Core.Tests.Modules.Control
                 engine.Pipelines.Add(groupBy, orderBy, gatherData);
 
                 // When
-                engine.Execute(serviceProvider);
+                engine.ExecuteAsync(serviceProvider);
 
                 // Then
                 Assert.AreEqual(3, content.Count);
@@ -103,7 +103,7 @@ namespace Wyam.Core.Tests.Modules.Control
                 engine.Pipelines.Add(groupBy, gatherData);
 
                 // When
-                engine.Execute(serviceProvider);
+                engine.ExecuteAsync(serviceProvider);
 
                 // Then
                 CollectionAssert.AreEquivalent(new[] { 0, 1, 2 }, groupKey);
@@ -136,7 +136,7 @@ namespace Wyam.Core.Tests.Modules.Control
                 engine.Pipelines.Add(groupBy, gatherData);
 
                 // When
-                engine.Execute(serviceProvider);
+                engine.ExecuteAsync(serviceProvider);
 
                 // Then
                 CollectionAssert.AreEquivalent(new[] { 1, 2 }, groupKey);
@@ -164,7 +164,7 @@ namespace Wyam.Core.Tests.Modules.Control
                 engine.Pipelines.Add(groupBy, gatherData);
 
                 // When
-                engine.Execute(serviceProvider);
+                engine.ExecuteAsync(serviceProvider);
 
                 // Then
                 CollectionAssert.AreEquivalent(new[] { 1, 2 }, groupKey);

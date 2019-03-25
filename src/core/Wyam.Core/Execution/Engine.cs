@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using System.Threading.Tasks;
 using JavaScriptEngineSwitcher.Core;
 using Microsoft.Extensions.DependencyInjection;
 using Wyam.Common.Configuration;
@@ -19,6 +20,7 @@ using Wyam.Core.IO;
 using Wyam.Core.Meta;
 using Wyam.Core.Shortcodes;
 using Wyam.Core.Tracing;
+using Wyam.Core.Util;
 
 namespace Wyam.Core.Execution
 {
@@ -34,9 +36,7 @@ namespace Wyam.Core.Execution
         {
             get
             {
-                AssemblyInformationalVersionAttribute versionAttribute
-                    = Attribute.GetCustomAttribute(typeof(Engine).Assembly, typeof(AssemblyInformationalVersionAttribute)) as AssemblyInformationalVersionAttribute;
-                if (versionAttribute == null)
+                if (!(Attribute.GetCustomAttribute(typeof(Engine).Assembly, typeof(AssemblyInformationalVersionAttribute)) is AssemblyInformationalVersionAttribute versionAttribute))
                 {
                     throw new Exception("Something went terribly wrong, could not determine Wyam version");
                 }
@@ -197,8 +197,11 @@ namespace Wyam.Core.Execution
         /// <summary>
         /// Executes the engine. This is the primary method that kicks off generation.
         /// </summary>
-        public void Execute(IServiceProvider serviceProvider)
+        public async Task ExecuteAsync(IServiceProvider serviceProvider)
         {
+            // Remove the synchronization context
+            await default(SynchronizationContextRemover);
+
             if (serviceProvider == null)
             {
                 throw new ArgumentNullException(nameof(serviceProvider));

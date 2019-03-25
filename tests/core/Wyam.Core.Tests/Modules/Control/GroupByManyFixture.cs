@@ -44,7 +44,7 @@ namespace Wyam.Core.Tests.Modules.Control
                 engine.Pipelines.Add(groupByMany, gatherData);
 
                 // When
-                engine.Execute(serviceProvider);
+                engine.ExecuteAsync(serviceProvider);
 
                 // Then
                 CollectionAssert.AreEquivalent(new[] { 0, 1, 2, 3 }, groupKey);
@@ -72,7 +72,7 @@ namespace Wyam.Core.Tests.Modules.Control
                 engine.Pipelines.Add(groupByMany, orderBy, gatherData);
 
                 // When
-                engine.Execute(serviceProvider);
+                engine.ExecuteAsync(serviceProvider);
 
                 // Then
                 Assert.AreEqual(4, content.Count);
@@ -104,7 +104,7 @@ namespace Wyam.Core.Tests.Modules.Control
                 engine.Pipelines.Add(groupByMany, gatherData);
 
                 // When
-                engine.Execute(serviceProvider);
+                engine.ExecuteAsync(serviceProvider);
 
                 // Then
                 CollectionAssert.AreEquivalent(new[] { 0, 1, 2, 3 }, groupKey);
@@ -137,7 +137,7 @@ namespace Wyam.Core.Tests.Modules.Control
                 engine.Pipelines.Add(groupByMany, gatherData);
 
                 // When
-                engine.Execute(serviceProvider);
+                engine.ExecuteAsync(serviceProvider);
 
                 // Then
                 CollectionAssert.AreEquivalent(new[] { 1, 2, 3 }, groupKey);
@@ -170,7 +170,7 @@ namespace Wyam.Core.Tests.Modules.Control
                 engine.Pipelines.Add(groupByMany, gatherData);
 
                 // When
-                engine.Execute(serviceProvider);
+                engine.ExecuteAsync(serviceProvider);
 
                 // Then
                 CollectionAssert.AreEquivalent(new object[] { "A", "B", "b", "C", "c", 1, "1" }, groupKey);
@@ -203,7 +203,7 @@ namespace Wyam.Core.Tests.Modules.Control
                 engine.Pipelines.Add(groupByMany, gatherData);
 
                 // When
-                engine.Execute(serviceProvider);
+                engine.ExecuteAsync(serviceProvider);
 
                 // Then
                 CollectionAssert.AreEquivalent(new object[] { "A", "b", "C", 1 }, groupKey);
@@ -231,7 +231,7 @@ namespace Wyam.Core.Tests.Modules.Control
                 engine.Pipelines.Add(groupByMany, gatherData);
 
                 // When
-                engine.Execute(serviceProvider);
+                engine.ExecuteAsync(serviceProvider);
 
                 // Then
                 CollectionAssert.AreEquivalent(new[] { 1, 2, 3 }, groupKey);

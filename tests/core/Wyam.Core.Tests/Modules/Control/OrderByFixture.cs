@@ -43,7 +43,7 @@ namespace Wyam.Core.Tests.Modules.Control
                 engine.Pipelines.Add(count, concat, orderBy, gatherData);
 
                 // When
-                engine.Execute(serviceProvider);
+                engine.ExecuteAsync(serviceProvider);
 
                 // Then
                 Assert.AreEqual(8, content.Count);
@@ -76,7 +76,7 @@ namespace Wyam.Core.Tests.Modules.Control
                 engine.Pipelines.Add(count, concat, orderBy, gatherData);
 
                 // When
-                engine.Execute(serviceProvider);
+                engine.ExecuteAsync(serviceProvider);
 
                 // Then
                 Assert.AreEqual(8, content.Count);
@@ -109,7 +109,7 @@ namespace Wyam.Core.Tests.Modules.Control
                 engine.Pipelines.Add(count, count2, orderBy, gatherData);
 
                 // When
-                engine.Execute(serviceProvider);
+                engine.ExecuteAsync(serviceProvider);
 
                 // Then
                 Assert.AreEqual(10, content.Count); // (4+1) * (21+1)
@@ -143,7 +143,7 @@ namespace Wyam.Core.Tests.Modules.Control
                 engine.Pipelines.Add(count, count2, orderBy, gatherData);
 
                 // When
-                engine.Execute(serviceProvider);
+                engine.ExecuteAsync(serviceProvider);
 
                 // Then
                 Assert.AreEqual(10, content.Count); // (4+1) * (21+1)
@@ -178,7 +178,7 @@ namespace Wyam.Core.Tests.Modules.Control
                 engine.Pipelines.Add(count, count2, orderBy, gatherData);
 
                 // When
-                engine.Execute(serviceProvider);
+                engine.ExecuteAsync(serviceProvider);
 
                 // Then
                 Assert.AreEqual(10, content.Count); // (4+1) * (21+1)
@@ -212,7 +212,7 @@ namespace Wyam.Core.Tests.Modules.Control
                 engine.Pipelines.Add(count, count2, orderBy, gatherData);
 
                 // When
-                engine.Execute(serviceProvider);
+                engine.ExecuteAsync(serviceProvider);
 
                 // Then
                 Assert.AreEqual(10, content.Count); // (4+1) * (21+1)

@@ -36,7 +36,7 @@ namespace Wyam.Core.Tests.Modules.Control
                 engine.Pipelines.Add(a, new If((x, y) => x.Content == "1", b), c);
 
                 // When
-                engine.Execute(serviceProvider);
+                engine.ExecuteAsync(serviceProvider);
 
                 // Then
                 Assert.AreEqual(1, a.ExecuteCount);
@@ -79,7 +79,7 @@ namespace Wyam.Core.Tests.Modules.Control
                     d);
 
                 // When
-                engine.Execute(serviceProvider);
+                engine.ExecuteAsync(serviceProvider);
 
                 // Then
                 Assert.AreEqual(1, a.ExecuteCount);
@@ -125,7 +125,7 @@ namespace Wyam.Core.Tests.Modules.Control
                     d);
 
                 // When
-                engine.Execute(serviceProvider);
+                engine.ExecuteAsync(serviceProvider);
 
                 // Then
                 Assert.AreEqual(1, a.ExecuteCount);
@@ -176,7 +176,7 @@ namespace Wyam.Core.Tests.Modules.Control
                     e);
 
                 // When
-                engine.Execute(serviceProvider);
+                engine.ExecuteAsync(serviceProvider);
 
                 // Then
                 Assert.AreEqual(1, a.ExecuteCount);
@@ -217,7 +217,7 @@ namespace Wyam.Core.Tests.Modules.Control
                 engine.Pipelines.Add(a, new If(x => true, b), c);
 
                 // When
-                engine.Execute(serviceProvider);
+                engine.ExecuteAsync(serviceProvider);
 
                 // Then
                 Assert.AreEqual(1, a.ExecuteCount);
@@ -252,7 +252,7 @@ namespace Wyam.Core.Tests.Modules.Control
                 engine.Pipelines.Add(a, new If(x => false, b), c);
 
                 // When
-                engine.Execute(serviceProvider);
+                engine.ExecuteAsync(serviceProvider);
 
                 // Then
                 Assert.AreEqual(1, a.ExecuteCount);
@@ -287,7 +287,7 @@ namespace Wyam.Core.Tests.Modules.Control
                 engine.Pipelines.Add(a, new If((doc, ctx) => false, b), c);
 
                 // When
-                engine.Execute(serviceProvider);
+                engine.ExecuteAsync(serviceProvider);
 
                 // Then
                 Assert.AreEqual(1, a.ExecuteCount);
@@ -322,7 +322,7 @@ namespace Wyam.Core.Tests.Modules.Control
                 engine.Pipelines.Add(a, new If((doc, ctx) => false, b).WithoutUnmatchedDocuments(), c);
 
                 // When
-                engine.Execute(serviceProvider);
+                engine.ExecuteAsync(serviceProvider);
 
                 // Then
                 Assert.AreEqual(1, a.ExecuteCount);

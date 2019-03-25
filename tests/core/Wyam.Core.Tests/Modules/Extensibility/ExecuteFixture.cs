@@ -31,7 +31,7 @@ namespace Wyam.Core.Tests.Modules.Extensibility
                 engine.Pipelines.Add(execute);
 
                 // When
-                engine.Execute(serviceProvider);
+                engine.ExecuteAsync(serviceProvider);
 
                 // Then
             }
@@ -46,7 +46,7 @@ namespace Wyam.Core.Tests.Modules.Extensibility
                 engine.Pipelines.Add(execute);
 
                 // When
-                engine.Execute(serviceProvider);
+                engine.ExecuteAsync(serviceProvider);
 
                 // Then
             }
@@ -61,7 +61,7 @@ namespace Wyam.Core.Tests.Modules.Extensibility
                 engine.Pipelines.Add(execute);
 
                 // When, Then
-                Assert.Throws<Exception>(() => engine.Execute(serviceProvider));
+                Assert.Throws<Exception>(() => engine.ExecuteAsync(serviceProvider));
             }
 
             [Test]
@@ -113,7 +113,7 @@ namespace Wyam.Core.Tests.Modules.Extensibility
                 engine.Pipelines.Add(execute);
 
                 // When
-                engine.Execute(serviceProvider);
+                engine.ExecuteAsync(serviceProvider);
 
                 // Then
             }
@@ -129,7 +129,7 @@ namespace Wyam.Core.Tests.Modules.Extensibility
                 engine.Pipelines.Add(execute);
 
                 // When
-                engine.Execute(serviceProvider);
+                engine.ExecuteAsync(serviceProvider);
 
                 // Then
             }
@@ -145,7 +145,7 @@ namespace Wyam.Core.Tests.Modules.Extensibility
                 engine.Pipelines.Add("Test", execute);
 
                 // When
-                engine.Execute(serviceProvider);
+                engine.ExecuteAsync(serviceProvider);
 
                 // Then
                 CollectionAssert.AreEquivalent(new[] { document }, engine.Documents["Test"]);
@@ -162,7 +162,7 @@ namespace Wyam.Core.Tests.Modules.Extensibility
                 engine.Pipelines.Add("Test", execute);
 
                 // When
-                engine.Execute(serviceProvider);
+                engine.ExecuteAsync(serviceProvider);
 
                 // Then
                 CollectionAssert.AreEquivalent(new[] { document }, engine.Documents["Test"]);

@@ -45,8 +45,8 @@ namespace Wyam.Core.Tests.Execution
                 engine.Pipelines.Add("Count", a, b, c).WithProcessDocumentsOnce();
 
                 // When
-                engine.Execute(serviceProvider);
-                engine.Execute(serviceProvider);
+                engine.ExecuteAsync(serviceProvider);
+                engine.ExecuteAsync(serviceProvider);
 
                 // Then
                 Assert.AreEqual(24, engine.Documents.FromPipeline("Count").Count());
@@ -83,9 +83,9 @@ namespace Wyam.Core.Tests.Execution
                 engine.Pipelines.Add("Count", a, b, c).WithProcessDocumentsOnce();
 
                 // When
-                engine.Execute(serviceProvider);
+                engine.ExecuteAsync(serviceProvider);
                 a.Value = 0; // Reset a.Value so output from a has same content
-                engine.Execute(serviceProvider);
+                engine.ExecuteAsync(serviceProvider);
 
                 // Then
                 Assert.AreEqual(24, engine.Documents.FromPipeline("Count").Count());
@@ -122,8 +122,8 @@ namespace Wyam.Core.Tests.Execution
                 engine.Pipelines.Add("Count", a, b, c).WithProcessDocumentsOnce();
 
                 // When
-                engine.Execute(serviceProvider);
-                engine.Execute(serviceProvider);
+                engine.ExecuteAsync(serviceProvider);
+                engine.ExecuteAsync(serviceProvider);
 
                 // Then
                 Assert.AreEqual(24, engine.Documents.FromPipeline("Count").Count());
@@ -155,7 +155,7 @@ namespace Wyam.Core.Tests.Execution
                 engine.Pipelines.Add("Count", a, b);
 
                 // When
-                engine.Execute(serviceProvider);
+                engine.ExecuteAsync(serviceProvider);
 
                 // Then
                 Assert.AreEqual(1, engine.Documents.FromPipeline("Count").Count());
@@ -185,7 +185,7 @@ namespace Wyam.Core.Tests.Execution
                 engine.Pipelines.Add("Count", a, new Concat(b, c));
 
                 // When, Then
-                Assert.Throws<Exception>(() => engine.Execute(serviceProvider));
+                Assert.Throws<Exception>(() => engine.ExecuteAsync(serviceProvider));
             }
 
             [Test]

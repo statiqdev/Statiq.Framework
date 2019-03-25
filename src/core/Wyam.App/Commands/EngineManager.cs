@@ -83,11 +83,11 @@ namespace Wyam.App.Commands
 
         public Engine Engine { get; }
 
-        public bool Execute(IServiceProvider serviceProvider)
+        public async Task<bool> ExecuteAsync(IServiceProvider serviceProvider)
         {
             try
             {
-                Engine.Execute(serviceProvider);
+                await Engine.ExecuteAsync(serviceProvider);
             }
             catch (Exception)
             {

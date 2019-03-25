@@ -14,7 +14,7 @@ namespace Wyam.Common.Tracing
     /// <summary>
     /// Provides access to tracing functionality. This class is thread safe.
     /// </summary>
-    public class Trace : ITrace
+    public sealed class Trace : ITrace
     {
         private static readonly TraceSource TraceSource = new TraceSource("Wyam", SourceLevels.Information);
         private static readonly object ListenersLock = new object();

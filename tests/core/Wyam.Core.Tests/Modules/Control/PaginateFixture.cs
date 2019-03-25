@@ -52,7 +52,7 @@ namespace Wyam.Core.Tests.Modules.Control
                 engine.Pipelines.Add(paginate, gatherData);
 
                 // When
-                engine.Execute(serviceProvider);
+                engine.ExecuteAsync(serviceProvider);
 
                 // Then
                 CollectionAssert.AreEqual(new[] { 1, 2, 3 }, currentPage);
@@ -83,7 +83,7 @@ namespace Wyam.Core.Tests.Modules.Control
                 engine.Pipelines.Add(paginate, gatherData);
 
                 // When
-                engine.Execute(serviceProvider);
+                engine.ExecuteAsync(serviceProvider);
 
                 // Then
                 Assert.AreEqual(3, content.Count);
@@ -115,7 +115,7 @@ namespace Wyam.Core.Tests.Modules.Control
                 engine.Pipelines.Add(paginate, gatherData);
 
                 // When
-                engine.Execute(serviceProvider);
+                engine.ExecuteAsync(serviceProvider);
 
                 // Then
                 Assert.AreEqual(3, previousPages.Count);
@@ -149,7 +149,7 @@ namespace Wyam.Core.Tests.Modules.Control
                 engine.Pipelines.Add(paginate, gatherData);
 
                 // When
-                engine.Execute(serviceProvider);
+                engine.ExecuteAsync(serviceProvider);
 
                 // Then
                 Assert.AreEqual(3, content.Count);

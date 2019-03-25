@@ -45,7 +45,7 @@ namespace Wyam.Hosting.Tests
             Server server = new Server(TestContext.CurrentContext.TestDirectory, port);
 
             // When, Then
-            Should.NotThrow(() => server.Start());
+            Should.NotThrow(() => server.StartAsync());
             server.Dispose();
         }
 
@@ -55,7 +55,7 @@ namespace Wyam.Hosting.Tests
             // Given
             int port = GetEphemeralPort();
             Server server = new Server(TestContext.CurrentContext.TestDirectory, port);
-            server.Start();
+            await server.StartAsync();
 
             HttpClient client = new HttpClient
             {
@@ -74,7 +74,7 @@ namespace Wyam.Hosting.Tests
             // Given
             int port = GetEphemeralPort();
             Server server = new Server(TestContext.CurrentContext.TestDirectory, port);
-            server.Start();
+            await server.StartAsync();
 
             HttpClient client = new HttpClient
             {

@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Threading.Tasks;
 using Spectre.Cli;
 using Wyam.App.Configuration;
 using Wyam.Common.Configuration;
@@ -13,6 +14,6 @@ namespace Wyam.App
         void SetDefaultCommand<TCommand>()
             where TCommand : class, ICommand;
 
-        int Run();
+        Task<int> RunAsync();
     }
 }

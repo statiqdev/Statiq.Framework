@@ -26,7 +26,7 @@ namespace Wyam.Core.Tests.Modules.Extensibility
                 engine.Pipelines.Add(new Trace(traceEventType.ToString()).EventType(traceEventType));
 
                 // When
-                TestDelegate test = () => engine.Execute(serviceProvider);
+                TestDelegate test = () => engine.ExecuteAsync(serviceProvider);
 
                 // Then
                 Assert.Throws<Exception>(test);

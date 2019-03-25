@@ -2,17 +2,19 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 using Spectre.Cli;
+using Wyam.App.Assemblies;
 using Wyam.App.Commands;
 using Wyam.App.Configuration;
 using Wyam.App.Tracing;
 using Wyam.Common.Configuration;
 using Wyam.Common.Execution;
-using Wyam.Core.Execution;
-using Wyam.Common.Shortcodes;
 using Wyam.Common.Modules;
-using Wyam.App.Assemblies;
+using Wyam.Common.Shortcodes;
+using Wyam.Core.Execution;
+using Wyam.Core.Util;
 
 namespace Wyam.App
 {
@@ -41,8 +43,11 @@ namespace Wyam.App
             _getCommandApp = x => new CommandApp<TCommand>(x);
         }
 
-        public int Run()
+        public async Task<int> RunAsync()
         {
+            // Remove the synchronization context
+            await default(SynchronizationContextRemover);
+
             // Output version info
             Common.Tracing.Trace.Information($"Wyam version {Engine.Version}");
 
@@ -63,14 +68,14 @@ namespace Wyam.App
             _configurators.Configure(serviceCollection);
 
             // Create the command line parser and run the command
-            ServiceTypeRegistrar registrar = new ServiceTypeRegistrar(serviceCollection, x => BuildServiceProvider(x));
+            ServiceTypeRegistrar registrar = new ServiceTypeRegistrar(serviceCollection, BuildServiceProvider);
             ICommandApp app = _getCommandApp(registrar);
             app.Configure(x =>
             {
                 x.ValidateExamples();
                 _configurators.Configure(x);
             });
-            return app.Run(Args);
+            return await app.RunAsync(Args);
         }
 
         protected virtual IServiceCollection CreateServiceCollection() => new ServiceCollection();
