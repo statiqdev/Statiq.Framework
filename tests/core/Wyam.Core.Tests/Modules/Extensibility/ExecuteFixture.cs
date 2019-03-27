@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using NUnit.Framework;
 using Shouldly;
 using Wyam.Common.Documents;
@@ -22,7 +23,7 @@ namespace Wyam.Core.Tests.Modules.Extensibility
         public class ExecuteTests : ExecuteFixture
         {
             [Test]
-            public void DoesNotThrowForNullResultWithDocumentConfig()
+            public async Task DoesNotThrowForNullResultWithDocumentConfig()
             {
                 // Given
                 IServiceProvider serviceProvider = new TestServiceProvider();
@@ -31,13 +32,13 @@ namespace Wyam.Core.Tests.Modules.Extensibility
                 engine.Pipelines.Add(execute);
 
                 // When
-                engine.ExecuteAsync(serviceProvider);
+                await engine.ExecuteAsync(serviceProvider);
 
                 // Then
             }
 
             [Test]
-            public void DoesNotThrowForNullResultWithContextConfig()
+            public async Task DoesNotThrowForNullResultWithContextConfig()
             {
                 // Given
                 IServiceProvider serviceProvider = new TestServiceProvider();
@@ -46,13 +47,13 @@ namespace Wyam.Core.Tests.Modules.Extensibility
                 engine.Pipelines.Add(execute);
 
                 // When
-                engine.ExecuteAsync(serviceProvider);
+                await engine.ExecuteAsync(serviceProvider);
 
                 // Then
             }
 
             [Test]
-            public void ThrowsForObjectResultWithContextConfig()
+            public async Task ThrowsForObjectResultWithContextConfig()
             {
                 // Given
                 IServiceProvider serviceProvider = new TestServiceProvider();
@@ -61,7 +62,7 @@ namespace Wyam.Core.Tests.Modules.Extensibility
                 engine.Pipelines.Add(execute);
 
                 // When, Then
-                Assert.Throws<Exception>(() => engine.ExecuteAsync(serviceProvider));
+                await Should.ThrowAsync<Exception>(async () => await engine.ExecuteAsync(serviceProvider));
             }
 
             [Test]
@@ -103,7 +104,7 @@ namespace Wyam.Core.Tests.Modules.Extensibility
             }
 
             [Test]
-            public void DoesNotRequireReturnValueForDocumentConfig()
+            public async Task DoesNotRequireReturnValueForDocumentConfig()
             {
                 // Given
                 IServiceProvider serviceProvider = new TestServiceProvider();
@@ -113,13 +114,13 @@ namespace Wyam.Core.Tests.Modules.Extensibility
                 engine.Pipelines.Add(execute);
 
                 // When
-                engine.ExecuteAsync(serviceProvider);
+                await engine.ExecuteAsync(serviceProvider);
 
                 // Then
             }
 
             [Test]
-            public void DoesNotRequireReturnValueForContextConfig()
+            public async Task DoesNotRequireReturnValueForContextConfig()
             {
                 // Given
                 IServiceProvider serviceProvider = new TestServiceProvider();
@@ -129,13 +130,13 @@ namespace Wyam.Core.Tests.Modules.Extensibility
                 engine.Pipelines.Add(execute);
 
                 // When
-                engine.ExecuteAsync(serviceProvider);
+                await engine.ExecuteAsync(serviceProvider);
 
                 // Then
             }
 
             [Test]
-            public void ReturnsDocumentForSingleResultDocumentFromContextConfig()
+            public async Task ReturnsDocumentForSingleResultDocumentFromContextConfig()
             {
                 // Given
                 IServiceProvider serviceProvider = new TestServiceProvider();
@@ -145,14 +146,14 @@ namespace Wyam.Core.Tests.Modules.Extensibility
                 engine.Pipelines.Add("Test", execute);
 
                 // When
-                engine.ExecuteAsync(serviceProvider);
+                await engine.ExecuteAsync(serviceProvider);
 
                 // Then
                 CollectionAssert.AreEquivalent(new[] { document }, engine.Documents["Test"]);
             }
 
             [Test]
-            public void ReturnsDocumentForSingleResultDocumentFromDocumentConfig()
+            public async Task ReturnsDocumentForSingleResultDocumentFromDocumentConfig()
             {
                 // Given
                 IServiceProvider serviceProvider = new TestServiceProvider();
@@ -162,7 +163,7 @@ namespace Wyam.Core.Tests.Modules.Extensibility
                 engine.Pipelines.Add("Test", execute);
 
                 // When
-                engine.ExecuteAsync(serviceProvider);
+                await engine.ExecuteAsync(serviceProvider);
 
                 // Then
                 CollectionAssert.AreEquivalent(new[] { document }, engine.Documents["Test"]);

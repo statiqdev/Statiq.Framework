@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using NUnit.Framework;
 using Wyam.Common.Documents;
 using Wyam.Common.Execution;
@@ -24,7 +25,7 @@ namespace Wyam.Core.Tests.Modules.Control
         public class ExecuteTests : GroupByFixture
         {
             [Test]
-            public void SetsCorrectMetadata()
+            public async Task SetsCorrectMetadata()
             {
                 // Given
                 List<int> groupKey = new List<int>();
@@ -44,14 +45,14 @@ namespace Wyam.Core.Tests.Modules.Control
                 engine.Pipelines.Add(groupBy, gatherData);
 
                 // When
-                engine.ExecuteAsync(serviceProvider);
+                await engine.ExecuteAsync(serviceProvider);
 
                 // Then
                 CollectionAssert.AreEquivalent(new[] { 0, 1, 2 }, groupKey);
             }
 
             [Test]
-            public void SetsDocumentsInMetadata()
+            public async Task SetsDocumentsInMetadata()
             {
                 // Given
                 List<IList<string>> content = new List<IList<string>>();
@@ -72,7 +73,7 @@ namespace Wyam.Core.Tests.Modules.Control
                 engine.Pipelines.Add(groupBy, orderBy, gatherData);
 
                 // When
-                engine.ExecuteAsync(serviceProvider);
+                await engine.ExecuteAsync(serviceProvider);
 
                 // Then
                 Assert.AreEqual(3, content.Count);
@@ -82,7 +83,7 @@ namespace Wyam.Core.Tests.Modules.Control
             }
 
             [Test]
-            public void GroupByMetadataKey()
+            public async Task GroupByMetadataKey()
             {
                 // Given
                 List<int> groupKey = new List<int>();
@@ -103,14 +104,14 @@ namespace Wyam.Core.Tests.Modules.Control
                 engine.Pipelines.Add(groupBy, gatherData);
 
                 // When
-                engine.ExecuteAsync(serviceProvider);
+                await engine.ExecuteAsync(serviceProvider);
 
                 // Then
                 CollectionAssert.AreEquivalent(new[] { 0, 1, 2 }, groupKey);
             }
 
             [Test]
-            public void GroupByMetadataKeyWithMissingMetadata()
+            public async Task GroupByMetadataKeyWithMissingMetadata()
             {
                 // Given
                 List<int> groupKey = new List<int>();
@@ -136,14 +137,14 @@ namespace Wyam.Core.Tests.Modules.Control
                 engine.Pipelines.Add(groupBy, gatherData);
 
                 // When
-                engine.ExecuteAsync(serviceProvider);
+                await engine.ExecuteAsync(serviceProvider);
 
                 // Then
                 CollectionAssert.AreEquivalent(new[] { 1, 2 }, groupKey);
             }
 
             [Test]
-            public void ExcludesDocumentsThatDontMatchPredicate()
+            public async Task ExcludesDocumentsThatDontMatchPredicate()
             {
                 // Given
                 List<int> groupKey = new List<int>();
@@ -164,7 +165,7 @@ namespace Wyam.Core.Tests.Modules.Control
                 engine.Pipelines.Add(groupBy, gatherData);
 
                 // When
-                engine.ExecuteAsync(serviceProvider);
+                await engine.ExecuteAsync(serviceProvider);
 
                 // Then
                 CollectionAssert.AreEquivalent(new[] { 1, 2 }, groupKey);

@@ -22,7 +22,7 @@ namespace Wyam.Hosting.Middleware
             _loggerFactory = loggerFactory;
         }
 
-        public async Task Invoke(HttpContext context)
+        public async Task InvokeAsync(HttpContext context)
         {
             await _next(context);
 

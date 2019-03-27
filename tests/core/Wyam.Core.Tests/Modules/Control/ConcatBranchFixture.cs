@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading.Tasks;
 using NUnit.Framework;
 using Wyam.Common.Execution;
 using Wyam.Common.Tracing;
@@ -17,7 +18,7 @@ namespace Wyam.Core.Tests.Modules.Control
         public class ExecuteTests : ConcatBranchFixture
         {
             [Test]
-            public void ResultsInCorrectCounts()
+            public async Task ResultsInCorrectCountsAsync()
             {
                 // Given
                 IServiceProvider serviceProvider = new TestServiceProvider();
@@ -37,7 +38,7 @@ namespace Wyam.Core.Tests.Modules.Control
                 engine.Pipelines.Add(a, new ConcatBranch(b), c);
 
                 // When
-                engine.ExecuteAsync(serviceProvider);
+                await engine.ExecuteAsync(serviceProvider);
 
                 // Then
                 Assert.AreEqual(1, a.ExecuteCount);
@@ -52,7 +53,7 @@ namespace Wyam.Core.Tests.Modules.Control
             }
 
             [Test]
-            public void ResultsInCorrectCountsWithPredicate()
+            public async Task ResultsInCorrectCountsWithPredicate()
             {
                 // Given
                 IServiceProvider serviceProvider = new TestServiceProvider();
@@ -72,7 +73,7 @@ namespace Wyam.Core.Tests.Modules.Control
                 engine.Pipelines.Add(a, new ConcatBranch(b).Where((x, y) => x.Content == "1"), c);
 
                 // When
-                engine.ExecuteAsync(serviceProvider);
+                await engine.ExecuteAsync(serviceProvider);
 
                 // Then
                 Assert.AreEqual(1, a.ExecuteCount);

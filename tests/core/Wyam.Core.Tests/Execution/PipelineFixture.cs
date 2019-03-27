@@ -12,6 +12,7 @@ using Wyam.Testing;
 using Wyam.Testing.Modules;
 using Wyam.Common.Execution;
 using Wyam.Testing.Execution;
+using Shouldly;
 
 namespace Wyam.Core.Tests.Execution
 {
@@ -22,7 +23,7 @@ namespace Wyam.Core.Tests.Execution
         public class ExecuteTests : PipelineFixture
         {
             [Test]
-            public void ReprocessesPreviousDocumentsWithDistinctSources()
+            public async Task ReprocessesPreviousDocumentsWithDistinctSources()
             {
                 // Given
                 IServiceProvider serviceProvider = new TestServiceProvider();
@@ -45,8 +46,8 @@ namespace Wyam.Core.Tests.Execution
                 engine.Pipelines.Add("Count", a, b, c).WithProcessDocumentsOnce();
 
                 // When
-                engine.ExecuteAsync(serviceProvider);
-                engine.ExecuteAsync(serviceProvider);
+                await engine.ExecuteAsync(serviceProvider);
+                await engine.ExecuteAsync(serviceProvider);
 
                 // Then
                 Assert.AreEqual(24, engine.Documents.FromPipeline("Count").Count());
@@ -62,7 +63,7 @@ namespace Wyam.Core.Tests.Execution
             }
 
             [Test]
-            public void DoesNotProcessPreviousDocumentsWhenSameSource()
+            public async Task DoesNotProcessPreviousDocumentsWhenSameSource()
             {
                 // Given
                 IServiceProvider serviceProvider = new TestServiceProvider();
@@ -83,9 +84,9 @@ namespace Wyam.Core.Tests.Execution
                 engine.Pipelines.Add("Count", a, b, c).WithProcessDocumentsOnce();
 
                 // When
-                engine.ExecuteAsync(serviceProvider);
+                await engine.ExecuteAsync(serviceProvider);
                 a.Value = 0; // Reset a.Value so output from a has same content
-                engine.ExecuteAsync(serviceProvider);
+                await engine.ExecuteAsync(serviceProvider);
 
                 // Then
                 Assert.AreEqual(24, engine.Documents.FromPipeline("Count").Count());
@@ -101,7 +102,7 @@ namespace Wyam.Core.Tests.Execution
             }
 
             [Test]
-            public void ReprocessPreviousDocumentsWithDifferentContent()
+            public async Task ReprocessPreviousDocumentsWithDifferentContent()
             {
                 // Given
                 IServiceProvider serviceProvider = new TestServiceProvider();
@@ -122,8 +123,8 @@ namespace Wyam.Core.Tests.Execution
                 engine.Pipelines.Add("Count", a, b, c).WithProcessDocumentsOnce();
 
                 // When
-                engine.ExecuteAsync(serviceProvider);
-                engine.ExecuteAsync(serviceProvider);
+                await engine.ExecuteAsync(serviceProvider);
+                await engine.ExecuteAsync(serviceProvider);
 
                 // Then
                 Assert.AreEqual(24, engine.Documents.FromPipeline("Count").Count());
@@ -139,7 +140,7 @@ namespace Wyam.Core.Tests.Execution
             }
 
             [Test]
-            public void SameSourceIsIgnoredIfAlreadySet()
+            public async Task SameSourceIsIgnoredIfAlreadySet()
             {
                 // Given
                 IServiceProvider serviceProvider = new TestServiceProvider();
@@ -155,7 +156,7 @@ namespace Wyam.Core.Tests.Execution
                 engine.Pipelines.Add("Count", a, b);
 
                 // When
-                engine.ExecuteAsync(serviceProvider);
+                await engine.ExecuteAsync(serviceProvider);
 
                 // Then
                 Assert.AreEqual(1, engine.Documents.FromPipeline("Count").Count());
@@ -168,7 +169,7 @@ namespace Wyam.Core.Tests.Execution
             }
 
             [Test]
-            public void SameSourceThrowsException()
+            public async Task SameSourceThrowsException()
             {
                 // Given
                 IServiceProvider serviceProvider = new TestServiceProvider();
@@ -185,7 +186,7 @@ namespace Wyam.Core.Tests.Execution
                 engine.Pipelines.Add("Count", a, new Concat(b, c));
 
                 // When, Then
-                Assert.Throws<Exception>(() => engine.ExecuteAsync(serviceProvider));
+                await Should.ThrowAsync<Exception>(async () => await engine.ExecuteAsync(serviceProvider));
             }
 
             [Test]

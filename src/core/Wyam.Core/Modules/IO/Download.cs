@@ -117,7 +117,7 @@ namespace Wyam.Core.Modules.IO
             List<DownloadResponse> responses = _cachedResponses;
             if (responses == null)
             {
-                List<Task<DownloadResponse>> tasks = _requests.Select(x => GetResponse(x, context)).ToList();
+                List<Task<DownloadResponse>> tasks = _requests.Select(x => GetResponseAsync(x, context)).ToList();
                 Task.WhenAll(tasks).Wait();
                 responses = tasks
                     .Where(x => !x.IsFaulted)
@@ -152,7 +152,7 @@ namespace Wyam.Core.Modules.IO
                 { HttpMethod.Put, (client, uri, content) => client.PutAsync(uri, content) }
             };
 
-        private async Task<DownloadResponse> GetResponse(DownloadRequest request, IExecutionContext context)
+        private async Task<DownloadResponse> GetResponseAsync(DownloadRequest request, IExecutionContext context)
         {
             // Get the HTTP client
             using (HttpClientHandler clientHandler = new HttpClientHandler())

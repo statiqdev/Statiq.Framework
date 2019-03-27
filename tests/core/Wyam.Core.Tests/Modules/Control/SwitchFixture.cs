@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading.Tasks;
 using NUnit.Framework;
 using Wyam.Common.Execution;
 using Wyam.Core.Execution;
@@ -16,7 +17,7 @@ namespace Wyam.Core.Tests.Modules.Control
         public class ExecuteTests : SwitchFixture
         {
             [Test]
-            public void SwitchResultsInCorrectCounts()
+            public async Task SwitchResultsInCorrectCounts()
             {
                 // Given
                 IServiceProvider serviceProvider = new TestServiceProvider();
@@ -29,7 +30,7 @@ namespace Wyam.Core.Tests.Modules.Control
                 engine.Pipelines.Add(a, new Switch((x, y) => x.Content).Case("1", b).Case("2", c).Default(d));
 
                 // When
-                engine.ExecuteAsync(serviceProvider);
+                await engine.ExecuteAsync(serviceProvider);
 
                 // Then
                 Assert.AreEqual(1, a.ExecuteCount);
@@ -39,7 +40,7 @@ namespace Wyam.Core.Tests.Modules.Control
             }
 
             [Test]
-            public void SwitchNoCasesResultsInCorrectCounts()
+            public async Task SwitchNoCasesResultsInCorrectCounts()
             {
                 // Given
                 IServiceProvider serviceProvider = new TestServiceProvider();
@@ -51,7 +52,7 @@ namespace Wyam.Core.Tests.Modules.Control
                 engine.Pipelines.Add(a, new Switch((x, y) => x.Content).Default(b), c);
 
                 // When
-                engine.ExecuteAsync(serviceProvider);
+                await engine.ExecuteAsync(serviceProvider);
 
                 // Then
                 Assert.AreEqual(1, a.ExecuteCount);
@@ -62,7 +63,7 @@ namespace Wyam.Core.Tests.Modules.Control
             }
 
             [Test]
-            public void MissingDefaultResultsInCorrectCounts()
+            public async Task MissingDefaultResultsInCorrectCounts()
             {
                 // Given
                 IServiceProvider serviceProvider = new TestServiceProvider();
@@ -74,7 +75,7 @@ namespace Wyam.Core.Tests.Modules.Control
                 engine.Pipelines.Add(a, new Switch((x, y) => x.Content).Case("1", b), c);
 
                 // When
-                engine.ExecuteAsync(serviceProvider);
+                await engine.ExecuteAsync(serviceProvider);
 
                 // Then
                 Assert.AreEqual(1, a.ExecuteCount);
@@ -85,7 +86,7 @@ namespace Wyam.Core.Tests.Modules.Control
             }
 
             [Test]
-            public void ArrayInCaseResultsInCorrectCounts()
+            public async Task ArrayInCaseResultsInCorrectCounts()
             {
                 // Given
                 IServiceProvider serviceProvider = new TestServiceProvider();
@@ -97,7 +98,7 @@ namespace Wyam.Core.Tests.Modules.Control
                 engine.Pipelines.Add(a, new Switch((x, y) => x.Content).Case(new string[] { "1", "2" }, b), c);
 
                 // When
-                engine.ExecuteAsync(serviceProvider);
+                await engine.ExecuteAsync(serviceProvider);
 
                 // Then
                 Assert.AreEqual(1, a.ExecuteCount);
@@ -108,7 +109,7 @@ namespace Wyam.Core.Tests.Modules.Control
             }
 
             [Test]
-            public void OmittingCasesAndDefaultResultsInCorrectCounts()
+            public async Task OmittingCasesAndDefaultResultsInCorrectCounts()
             {
                 // Given
                 IServiceProvider serviceProvider = new TestServiceProvider();
@@ -119,7 +120,7 @@ namespace Wyam.Core.Tests.Modules.Control
                 engine.Pipelines.Add(a, new Switch((x, y) => x.Content), b);
 
                 // When
-                engine.ExecuteAsync(serviceProvider);
+                await engine.ExecuteAsync(serviceProvider);
 
                 // Then
                 Assert.AreEqual(3, b.InputCount);

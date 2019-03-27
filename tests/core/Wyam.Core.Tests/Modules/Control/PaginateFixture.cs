@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using NUnit.Framework;
 using Wyam.Common.Documents;
 using Wyam.Common.Execution;
@@ -24,7 +25,7 @@ namespace Wyam.Core.Tests.Modules.Control
         public class ExecuteTests : PaginateFixture
         {
             [Test]
-            public void PaginateSetsCorrectMetadata()
+            public async Task PaginateSetsCorrectMetadata()
             {
                 // Given
                 List<int> currentPage = new List<int>();
@@ -52,7 +53,7 @@ namespace Wyam.Core.Tests.Modules.Control
                 engine.Pipelines.Add(paginate, gatherData);
 
                 // When
-                engine.ExecuteAsync(serviceProvider);
+                await engine.ExecuteAsync(serviceProvider);
 
                 // Then
                 CollectionAssert.AreEqual(new[] { 1, 2, 3 }, currentPage);
@@ -63,7 +64,7 @@ namespace Wyam.Core.Tests.Modules.Control
             }
 
             [Test]
-            public void PaginateSetsDocumentsInMetadata()
+            public async Task PaginateSetsDocumentsInMetadata()
             {
                 // Given
                 List<IList<string>> content = new List<IList<string>>();
@@ -83,7 +84,7 @@ namespace Wyam.Core.Tests.Modules.Control
                 engine.Pipelines.Add(paginate, gatherData);
 
                 // When
-                engine.ExecuteAsync(serviceProvider);
+                await engine.ExecuteAsync(serviceProvider);
 
                 // Then
                 Assert.AreEqual(3, content.Count);
@@ -93,7 +94,7 @@ namespace Wyam.Core.Tests.Modules.Control
             }
 
             [Test]
-            public void SetsPreviousAndNextDocuments()
+            public async Task SetsPreviousAndNextDocuments()
             {
                 // Given
                 List<IList<string>> previousPages = new List<IList<string>>();
@@ -115,7 +116,7 @@ namespace Wyam.Core.Tests.Modules.Control
                 engine.Pipelines.Add(paginate, gatherData);
 
                 // When
-                engine.ExecuteAsync(serviceProvider);
+                await engine.ExecuteAsync(serviceProvider);
 
                 // Then
                 Assert.AreEqual(3, previousPages.Count);
@@ -129,7 +130,7 @@ namespace Wyam.Core.Tests.Modules.Control
             }
 
             [Test]
-            public void ExcludesDocumentsThatFailPredicate()
+            public async Task ExcludesDocumentsThatFailPredicate()
             {
                 // Given
                 List<IList<string>> content = new List<IList<string>>();
@@ -149,7 +150,7 @@ namespace Wyam.Core.Tests.Modules.Control
                 engine.Pipelines.Add(paginate, gatherData);
 
                 // When
-                engine.ExecuteAsync(serviceProvider);
+                await engine.ExecuteAsync(serviceProvider);
 
                 // Then
                 Assert.AreEqual(3, content.Count);

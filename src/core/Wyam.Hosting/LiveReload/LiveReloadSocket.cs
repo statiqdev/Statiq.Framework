@@ -82,7 +82,7 @@ namespace Wyam.Hosting.LiveReload
                     break;
 
                 case "hello":
-                    await HandleHello(json);
+                    await HandleHelloAsync(json);
                     break;
 
                 default:
@@ -98,7 +98,7 @@ namespace Wyam.Hosting.LiveReload
             // noop
         }
 
-        private async Task HandleHello(string json)
+        private async Task HandleHelloAsync(string json)
         {
             HelloMessage hello = JsonConvert.DeserializeObject<HelloMessage>(json, DefaultJsonSerializerSettings);
 

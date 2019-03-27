@@ -26,7 +26,7 @@ namespace Wyam.Hosting.Middleware
             _virtualDirectory = NormalizeVirtualDirectory(virtualDirectory);
         }
 
-        public async Task Invoke(HttpContext context)
+        public async Task InvokeAsync(HttpContext context)
         {
             if (context.Request.Path.ToString().StartsWith(_virtualDirectory))
             {

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Threading.Tasks;
 using Wyam.App;
 using Wyam.Common.Execution;
@@ -14,6 +15,7 @@ namespace Splashdown
     {
         // Use with the YamlFrontMatter example from that folder
         // dotnet run --project ..\..\src\clients\Splashdown\Splashdown.csproj -- preview
+        [SuppressMessage("Roslynator.CSharp.Analyzers", "RCS1046", Justification = "Main does not accept async suffix")]
         public static async Task<int> Main(string[] args) =>
             await Bootstrapper
                 .CreateDefault(args)

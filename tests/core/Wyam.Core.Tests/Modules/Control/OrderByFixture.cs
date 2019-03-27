@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using NUnit.Framework;
 using Wyam.Common.Execution;
 using Wyam.Core.Execution;
@@ -18,7 +19,7 @@ namespace Wyam.Core.Tests.Modules.Control
         public class ExecuteTests : OrderByFixture
         {
             [Test]
-            public void OrderByOrdersInAscendingOrder()
+            public async Task OrderByOrdersInAscendingOrder()
             {
                 // Given
                 List<string> content = new List<string>();
@@ -43,7 +44,7 @@ namespace Wyam.Core.Tests.Modules.Control
                 engine.Pipelines.Add(count, concat, orderBy, gatherData);
 
                 // When
-                engine.ExecuteAsync(serviceProvider);
+                await engine.ExecuteAsync(serviceProvider);
 
                 // Then
                 Assert.AreEqual(8, content.Count);
@@ -51,7 +52,7 @@ namespace Wyam.Core.Tests.Modules.Control
             }
 
             [Test]
-            public void OrderByOrdersInDescendingOrder()
+            public async Task OrderByOrdersInDescendingOrder()
             {
                 // Given
                 List<string> content = new List<string>();
@@ -76,7 +77,7 @@ namespace Wyam.Core.Tests.Modules.Control
                 engine.Pipelines.Add(count, concat, orderBy, gatherData);
 
                 // When
-                engine.ExecuteAsync(serviceProvider);
+                await engine.ExecuteAsync(serviceProvider);
 
                 // Then
                 Assert.AreEqual(8, content.Count);
@@ -84,7 +85,7 @@ namespace Wyam.Core.Tests.Modules.Control
             }
 
             [Test]
-            public void OrderByOrdersThenByInAscendingOrder()
+            public async Task OrderByOrdersThenByInAscendingOrder()
             {
                 // Given
                 List<string> content = new List<string>();
@@ -109,7 +110,7 @@ namespace Wyam.Core.Tests.Modules.Control
                 engine.Pipelines.Add(count, count2, orderBy, gatherData);
 
                 // When
-                engine.ExecuteAsync(serviceProvider);
+                await engine.ExecuteAsync(serviceProvider);
 
                 // Then
                 Assert.AreEqual(10, content.Count); // (4+1) * (21+1)
@@ -117,7 +118,7 @@ namespace Wyam.Core.Tests.Modules.Control
             }
 
             [Test]
-            public void OrderByOrdersThenByInDescendingOrder()
+            public async Task OrderByOrdersThenByInDescendingOrder()
             {
                 // Given
                 List<string> content = new List<string>();
@@ -143,7 +144,7 @@ namespace Wyam.Core.Tests.Modules.Control
                 engine.Pipelines.Add(count, count2, orderBy, gatherData);
 
                 // When
-                engine.ExecuteAsync(serviceProvider);
+                await engine.ExecuteAsync(serviceProvider);
 
                 // Then
                 Assert.AreEqual(10, content.Count); // (4+1) * (21+1)
@@ -151,7 +152,7 @@ namespace Wyam.Core.Tests.Modules.Control
             }
 
             [Test]
-            public void OrderByOrdersDescendingThenByInDescendingOrder()
+            public async Task OrderByOrdersDescendingThenByInDescendingOrder()
             {
                 // Given
                 List<string> content = new List<string>();
@@ -178,7 +179,7 @@ namespace Wyam.Core.Tests.Modules.Control
                 engine.Pipelines.Add(count, count2, orderBy, gatherData);
 
                 // When
-                engine.ExecuteAsync(serviceProvider);
+                await engine.ExecuteAsync(serviceProvider);
 
                 // Then
                 Assert.AreEqual(10, content.Count); // (4+1) * (21+1)
@@ -186,7 +187,7 @@ namespace Wyam.Core.Tests.Modules.Control
             }
 
             [Test]
-            public void OrderByOrdersDescendingThenByInAscendingOrder()
+            public async Task OrderByOrdersDescendingThenByInAscendingOrder()
             {
                 // Given
                 List<string> content = new List<string>();
@@ -212,7 +213,7 @@ namespace Wyam.Core.Tests.Modules.Control
                 engine.Pipelines.Add(count, count2, orderBy, gatherData);
 
                 // When
-                engine.ExecuteAsync(serviceProvider);
+                await engine.ExecuteAsync(serviceProvider);
 
                 // Then
                 Assert.AreEqual(10, content.Count); // (4+1) * (21+1)

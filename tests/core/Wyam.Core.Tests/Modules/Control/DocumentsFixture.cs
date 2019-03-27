@@ -1,11 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using NUnit.Framework;
+using Wyam.Common.Execution;
 using Wyam.Core.Execution;
 using Wyam.Core.Modules.Extensibility;
 using Wyam.Testing;
-using Wyam.Common.Execution;
 using Wyam.Testing.Execution;
 
 namespace Wyam.Core.Tests.Modules.Control
@@ -17,7 +18,7 @@ namespace Wyam.Core.Tests.Modules.Control
         public class ExecuteTests : DocumentsFixture
         {
             [Test]
-            public void CountReturnsCorrectDocuments()
+            public async Task CountReturnsCorrectDocuments()
             {
                 // Given
                 IServiceProvider serviceProvider = new TestServiceProvider();
@@ -26,14 +27,14 @@ namespace Wyam.Core.Tests.Modules.Control
                 engine.Pipelines.Add(documents);
 
                 // When
-                engine.ExecuteAsync(serviceProvider);
+                await engine.ExecuteAsync(serviceProvider);
 
                 // Then
                 Assert.AreEqual(5, engine.Documents.Count());
             }
 
             [Test]
-            public void ContentReturnsCorrectDocuments()
+            public async Task ContentReturnsCorrectDocuments()
             {
                 // Given
                 List<string> content = new List<string>();
@@ -49,7 +50,7 @@ namespace Wyam.Core.Tests.Modules.Control
                 engine.Pipelines.Add(documents, gatherData);
 
                 // When
-                engine.ExecuteAsync(serviceProvider);
+                await engine.ExecuteAsync(serviceProvider);
 
                 // Then
                 Assert.AreEqual(4, content.Count);
@@ -57,7 +58,7 @@ namespace Wyam.Core.Tests.Modules.Control
             }
 
             [Test]
-            public void MetadataReturnsCorrectDocuments()
+            public async Task MetadataReturnsCorrectDocuments()
             {
                 // Given
                 List<object> values = new List<object>();
@@ -76,7 +77,7 @@ namespace Wyam.Core.Tests.Modules.Control
                 engine.Pipelines.Add(documents, gatherData);
 
                 // When
-                engine.ExecuteAsync(serviceProvider);
+                await engine.ExecuteAsync(serviceProvider);
 
                 // Then
                 Assert.AreEqual(3, values.Count);
@@ -84,7 +85,7 @@ namespace Wyam.Core.Tests.Modules.Control
             }
 
             [Test]
-            public void ContentAndMetadataReturnsCorrectDocuments()
+            public async Task ContentAndMetadataReturnsCorrectDocuments()
             {
                 // Given
                 List<string> content = new List<string>();
@@ -105,7 +106,7 @@ namespace Wyam.Core.Tests.Modules.Control
                 engine.Pipelines.Add(documents, gatherData);
 
                 // When
-                engine.ExecuteAsync(serviceProvider);
+                await engine.ExecuteAsync(serviceProvider);
 
                 // Then
                 Assert.AreEqual(3, content.Count);
@@ -115,7 +116,7 @@ namespace Wyam.Core.Tests.Modules.Control
             }
 
             [Test]
-            public void PipelineReturnsCorrectDocuments()
+            public async Task PipelineReturnsCorrectDocuments()
             {
                 // Given
                 List<string> content = new List<string>();
@@ -132,7 +133,7 @@ namespace Wyam.Core.Tests.Modules.Control
                 engine.Pipelines.Add(new Core.Modules.Control.Documents("Foo"), gatherData);
 
                 // When
-                engine.ExecuteAsync(serviceProvider);
+                await engine.ExecuteAsync(serviceProvider);
 
                 // Then
                 Assert.AreEqual(4, content.Count);
@@ -140,7 +141,7 @@ namespace Wyam.Core.Tests.Modules.Control
             }
 
             [Test]
-            public void EmptyConstructorReturnsAllDocuments()
+            public async Task EmptyConstructorReturnsAllDocuments()
             {
                 // Given
                 List<string> content = new List<string>();
@@ -157,7 +158,7 @@ namespace Wyam.Core.Tests.Modules.Control
                 engine.Pipelines.Add(new Core.Modules.Control.Documents(), gatherData);
 
                 // When
-                engine.ExecuteAsync(serviceProvider);
+                await engine.ExecuteAsync(serviceProvider);
 
                 // Then
                 Assert.AreEqual(6, content.Count);
@@ -165,7 +166,7 @@ namespace Wyam.Core.Tests.Modules.Control
             }
 
             [Test]
-            public void EmptyConstructorWithSpecifiedPipelinesReturnsCorrectDocuments()
+            public async Task EmptyConstructorWithSpecifiedPipelinesReturnsCorrectDocuments()
             {
                 // Given
                 List<string> content = new List<string>();
@@ -183,7 +184,7 @@ namespace Wyam.Core.Tests.Modules.Control
                 engine.Pipelines.Add(new Core.Modules.Control.Documents().FromPipelines("Foo", "Baz"), gatherData);
 
                 // When
-                engine.ExecuteAsync(serviceProvider);
+                await engine.ExecuteAsync(serviceProvider);
 
                 // Then
                 Assert.AreEqual(6, content.Count);
@@ -191,7 +192,7 @@ namespace Wyam.Core.Tests.Modules.Control
             }
 
             [Test]
-            public void SpecifiedPipelinesReturnsCorrectDocuments()
+            public async Task SpecifiedPipelinesReturnsCorrectDocuments()
             {
                 // Given
                 List<string> content = new List<string>();
@@ -209,7 +210,7 @@ namespace Wyam.Core.Tests.Modules.Control
                 engine.Pipelines.Add(new Core.Modules.Control.Documents("Foo").FromPipelines("Baz"), gatherData);
 
                 // When
-                engine.ExecuteAsync(serviceProvider);
+                await engine.ExecuteAsync(serviceProvider);
 
                 // Then
                 Assert.AreEqual(6, content.Count);
@@ -217,7 +218,7 @@ namespace Wyam.Core.Tests.Modules.Control
             }
 
             [Test]
-            public void SpecifiedPipelineDocumentsAreReturnedInCorrectOrder()
+            public async Task SpecifiedPipelineDocumentsAreReturnedInCorrectOrder()
             {
                 // Given
                 List<string> content = new List<string>();
@@ -235,7 +236,7 @@ namespace Wyam.Core.Tests.Modules.Control
                 engine.Pipelines.Add(new Core.Modules.Control.Documents("Baz").FromPipelines("Foo"), gatherData);
 
                 // When
-                engine.ExecuteAsync(serviceProvider);
+                await engine.ExecuteAsync(serviceProvider);
 
                 // Then
                 Assert.AreEqual(6, content.Count);

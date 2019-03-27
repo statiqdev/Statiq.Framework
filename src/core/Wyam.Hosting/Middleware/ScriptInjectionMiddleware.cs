@@ -29,7 +29,7 @@ namespace Wyam.Hosting.Middleware
         }
 
         /// <inheritdoc />
-        public async Task Invoke(HttpContext context)
+        public async Task InvokeAsync(HttpContext context)
         {
             // Intercept the original stream
             Stream originalBody = context.Response.Body;

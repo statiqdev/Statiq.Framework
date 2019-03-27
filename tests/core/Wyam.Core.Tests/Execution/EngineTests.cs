@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 using NUnit.Framework;
 using Wyam.Common.Execution;
 using Wyam.Common.Meta;
@@ -19,7 +20,7 @@ namespace Wyam.Core.Tests.Execution
     public class EngineTests : BaseFixture
     {
         [Test]
-        public void ExecuteResultsInCorrectCounts()
+        public async Task ExecuteResultsInCorrectCounts()
         {
             // Given
             IServiceProvider serviceProvider = new TestServiceProvider();
@@ -39,7 +40,7 @@ namespace Wyam.Core.Tests.Execution
             engine.Pipelines.Add(a, b, c);
 
             // When
-            engine.ExecuteAsync(serviceProvider);
+            await engine.ExecuteAsync(serviceProvider);
 
             // Then
             Assert.AreEqual(1, a.ExecuteCount);
@@ -54,7 +55,7 @@ namespace Wyam.Core.Tests.Execution
         }
 
         [Test]
-        public void CompletedMetadataIsPopulatedAfterRun()
+        public async Task CompletedMetadataIsPopulatedAfterRun()
         {
             // Given
             IServiceProvider serviceProvider = new TestServiceProvider();
@@ -75,7 +76,7 @@ namespace Wyam.Core.Tests.Execution
                     }, false));
 
             // When
-            engine.ExecuteAsync(serviceProvider);
+            await engine.ExecuteAsync(serviceProvider);
 
             // Then
             Assert.AreEqual(2, engine.Documents.FromPipeline("Pipeline").Count());
@@ -96,7 +97,7 @@ namespace Wyam.Core.Tests.Execution
         }
 
         [Test]
-        public void CompletedContentIsPopulatedAfterRun()
+        public async Task CompletedContentIsPopulatedAfterRun()
         {
             // Given
             IServiceProvider serviceProvider = new TestServiceProvider();
@@ -117,7 +118,7 @@ namespace Wyam.Core.Tests.Execution
                 new Core.Modules.Metadata.Meta("Content", (x, y) => x.Content));
 
             // When
-            engine.ExecuteAsync(serviceProvider);
+            await engine.ExecuteAsync(serviceProvider);
 
             // Then
             Assert.AreEqual(2, engine.Documents.FromPipeline("Pipeline 1").Count());

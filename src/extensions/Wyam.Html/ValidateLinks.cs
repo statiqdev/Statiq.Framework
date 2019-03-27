@@ -118,13 +118,13 @@ namespace Wyam.Html
                     }
 
                     // Relative
-                    if (!uri.IsAbsoluteUri && _validateRelativeLinks && !(await ValidateRelativeLink(uri, context).ConfigureAwait(false)))
+                    if (!uri.IsAbsoluteUri && _validateRelativeLinks && !(await ValidateRelativeLinkAsync(uri, context).ConfigureAwait(false)))
                     {
                         AddOrUpdateFailure(link.Value, failures);
                     }
 
                     // Absolute
-                    if (uri.IsAbsoluteUri && _validateAbsoluteLinks && !(await ValidateAbsoluteLink(uri, context).ConfigureAwait(false)))
+                    if (uri.IsAbsoluteUri && _validateAbsoluteLinks && !(await ValidateAbsoluteLinkAsync(uri, context).ConfigureAwait(false)))
                     {
                         AddOrUpdateFailure(link.Value, failures);
                     }
@@ -180,7 +180,7 @@ namespace Wyam.Html
         }
 
         // Internal for testing
-        internal static async Task<bool> ValidateRelativeLink(Uri uri, IExecutionContext context)
+        internal static async Task<bool> ValidateRelativeLinkAsync(Uri uri, IExecutionContext context)
         {
             List<FilePath> checkPaths = new List<FilePath>();
 
@@ -249,7 +249,7 @@ namespace Wyam.Html
             // Check the absolute URL just in case the user is using some sort of CNAME or something.
             if (Uri.TryCreate(context.GetLink() + uri, UriKind.Absolute, out Uri absoluteCheckUri))
             {
-                return await ValidateAbsoluteLink(absoluteCheckUri, context).ConfigureAwait(false);
+                return await ValidateAbsoluteLinkAsync(absoluteCheckUri, context).ConfigureAwait(false);
             }
 
             Trace.Verbose($"Validation failure for relative link {uri}: could not find output file at any of {string.Join(", ", checkPaths.Select(x => x.FullPath))}");
@@ -257,7 +257,7 @@ namespace Wyam.Html
         }
 
         // Internal for testing
-        internal static async Task<bool> ValidateAbsoluteLink(Uri uri, IExecutionContext context)
+        internal static async Task<bool> ValidateAbsoluteLinkAsync(Uri uri, IExecutionContext context)
         {
             // If this is a mailto: link, it's sufficient just that it passed the Uri validation.
             if (uri.Scheme == Uri.UriSchemeMailto)
@@ -266,7 +266,7 @@ namespace Wyam.Html
             }
 
             // Perform request as HEAD
-            bool result = await ValidateAbsoluteLink(uri, HttpMethod.Head, context).ConfigureAwait(false);
+            bool result = await ValidateAbsoluteLinkAsync(uri, HttpMethod.Head, context).ConfigureAwait(false);
 
             if (result)
             {
@@ -274,10 +274,10 @@ namespace Wyam.Html
             }
 
             // Try one more time as GET
-            return await ValidateAbsoluteLink(uri, HttpMethod.Get, context).ConfigureAwait(false);
+            return await ValidateAbsoluteLinkAsync(uri, HttpMethod.Get, context).ConfigureAwait(false);
         }
 
-        private static async Task<bool> ValidateAbsoluteLink(Uri uri, HttpMethod method, IExecutionContext context)
+        private static async Task<bool> ValidateAbsoluteLinkAsync(Uri uri, HttpMethod method, IExecutionContext context)
         {
             // Retry with exponential backoff links. This helps with websites like GitHub that will give us a 429 -- TooManyRequests.
             RetryPolicy<HttpResponseMessage> retryPolicy = Policy

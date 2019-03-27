@@ -23,7 +23,7 @@ namespace Wyam.Core.Tests.Modules.Control
         public class ExecuteTests : ModuleCollectionFixture
         {
             [Test]
-            public void ChildModulesAreExecuted()
+            public async Task ChildModulesAreExecuted()
             {
                 // Given
                 IServiceProvider serviceProvider = new TestServiceProvider();
@@ -43,7 +43,7 @@ namespace Wyam.Core.Tests.Modules.Control
                 engine.Pipelines.Add(a, new ModuleCollection(b, c));
 
                 // When
-                engine.ExecuteAsync(serviceProvider);
+                await engine.ExecuteAsync(serviceProvider);
 
                 // Then
                 Assert.AreEqual(1, a.ExecuteCount);

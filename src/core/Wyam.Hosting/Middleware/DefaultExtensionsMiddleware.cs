@@ -41,7 +41,7 @@ namespace Wyam.Hosting.Middleware
             _logger = loggerFactory.CreateLogger<DefaultExtensionsMiddleware>();
         }
 
-        public async Task Invoke(HttpContext context)
+        public async Task InvokeAsync(HttpContext context)
         {
             if (IsGetOrHeadMethod(context.Request.Method)
                 && !PathEndsInSlash(context.Request.Path))

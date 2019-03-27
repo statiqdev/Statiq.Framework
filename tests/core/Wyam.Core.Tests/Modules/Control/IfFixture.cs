@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading.Tasks;
 using NUnit.Framework;
 using Wyam.Common.Execution;
 using Wyam.Core.Execution;
@@ -16,7 +17,7 @@ namespace Wyam.Core.Tests.Modules.Control
         public class ExecuteTests : IfFixture
         {
             [Test]
-            public void IfResultsInCorrectCounts()
+            public async Task IfResultsInCorrectCounts()
             {
                 // Given
                 IServiceProvider serviceProvider = new TestServiceProvider();
@@ -36,7 +37,7 @@ namespace Wyam.Core.Tests.Modules.Control
                 engine.Pipelines.Add(a, new If((x, y) => x.Content == "1", b), c);
 
                 // When
-                engine.ExecuteAsync(serviceProvider);
+                await engine.ExecuteAsync(serviceProvider);
 
                 // Then
                 Assert.AreEqual(1, a.ExecuteCount);
@@ -51,7 +52,7 @@ namespace Wyam.Core.Tests.Modules.Control
             }
 
             [Test]
-            public void ElseIfResultsInCorrectCounts()
+            public async Task ElseIfResultsInCorrectCounts()
             {
                 // Given
                 IServiceProvider serviceProvider = new TestServiceProvider();
@@ -79,7 +80,7 @@ namespace Wyam.Core.Tests.Modules.Control
                     d);
 
                 // When
-                engine.ExecuteAsync(serviceProvider);
+                await engine.ExecuteAsync(serviceProvider);
 
                 // Then
                 Assert.AreEqual(1, a.ExecuteCount);
@@ -97,7 +98,7 @@ namespace Wyam.Core.Tests.Modules.Control
             }
 
             [Test]
-            public void ElseResultsInCorrectCounts()
+            public async Task ElseResultsInCorrectCounts()
             {
                 // Given
                 IServiceProvider serviceProvider = new TestServiceProvider();
@@ -125,7 +126,7 @@ namespace Wyam.Core.Tests.Modules.Control
                     d);
 
                 // When
-                engine.ExecuteAsync(serviceProvider);
+                await engine.ExecuteAsync(serviceProvider);
 
                 // Then
                 Assert.AreEqual(1, a.ExecuteCount);
@@ -143,7 +144,7 @@ namespace Wyam.Core.Tests.Modules.Control
             }
 
             [Test]
-            public void IfElseAndElseResultsInCorrectCounts()
+            public async Task IfElseAndElseResultsInCorrectCounts()
             {
                 // Given
                 IServiceProvider serviceProvider = new TestServiceProvider();
@@ -176,7 +177,7 @@ namespace Wyam.Core.Tests.Modules.Control
                     e);
 
                 // When
-                engine.ExecuteAsync(serviceProvider);
+                await engine.ExecuteAsync(serviceProvider);
 
                 // Then
                 Assert.AreEqual(1, a.ExecuteCount);
@@ -197,7 +198,7 @@ namespace Wyam.Core.Tests.Modules.Control
             }
 
             [Test]
-            public void IfWithContextResultsInCorrectCounts()
+            public async Task IfWithContextResultsInCorrectCounts()
             {
                 // Given
                 IServiceProvider serviceProvider = new TestServiceProvider();
@@ -217,7 +218,7 @@ namespace Wyam.Core.Tests.Modules.Control
                 engine.Pipelines.Add(a, new If(x => true, b), c);
 
                 // When
-                engine.ExecuteAsync(serviceProvider);
+                await engine.ExecuteAsync(serviceProvider);
 
                 // Then
                 Assert.AreEqual(1, a.ExecuteCount);
@@ -232,7 +233,7 @@ namespace Wyam.Core.Tests.Modules.Control
             }
 
             [Test]
-            public void FalseIfWithContextResultsInCorrectCounts()
+            public async Task FalseIfWithContextResultsInCorrectCounts()
             {
                 // Given
                 IServiceProvider serviceProvider = new TestServiceProvider();
@@ -252,7 +253,7 @@ namespace Wyam.Core.Tests.Modules.Control
                 engine.Pipelines.Add(a, new If(x => false, b), c);
 
                 // When
-                engine.ExecuteAsync(serviceProvider);
+                await engine.ExecuteAsync(serviceProvider);
 
                 // Then
                 Assert.AreEqual(1, a.ExecuteCount);
@@ -267,7 +268,7 @@ namespace Wyam.Core.Tests.Modules.Control
             }
 
             [Test]
-            public void UnmatchedDocumentsAreAddedToResults()
+            public async Task UnmatchedDocumentsAreAddedToResults()
             {
                 // Given
                 IServiceProvider serviceProvider = new TestServiceProvider();
@@ -287,7 +288,7 @@ namespace Wyam.Core.Tests.Modules.Control
                 engine.Pipelines.Add(a, new If((doc, ctx) => false, b), c);
 
                 // When
-                engine.ExecuteAsync(serviceProvider);
+                await engine.ExecuteAsync(serviceProvider);
 
                 // Then
                 Assert.AreEqual(1, a.ExecuteCount);
@@ -302,7 +303,7 @@ namespace Wyam.Core.Tests.Modules.Control
             }
 
             [Test]
-            public void UnmatchedDocumentsAreNotAddedToResults()
+            public async Task UnmatchedDocumentsAreNotAddedToResults()
             {
                 // Given
                 IServiceProvider serviceProvider = new TestServiceProvider();
@@ -322,7 +323,7 @@ namespace Wyam.Core.Tests.Modules.Control
                 engine.Pipelines.Add(a, new If((doc, ctx) => false, b).WithoutUnmatchedDocuments(), c);
 
                 // When
-                engine.ExecuteAsync(serviceProvider);
+                await engine.ExecuteAsync(serviceProvider);
 
                 // Then
                 Assert.AreEqual(1, a.ExecuteCount);
