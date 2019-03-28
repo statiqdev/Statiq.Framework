@@ -313,7 +313,7 @@ var searchModule = function() {{
                 IFile stopwordsFile = context.FileSystem.GetInputFile(_stopwordsPath);
                 if (stopwordsFile.Exists)
                 {
-                    stopwords = stopwordsFile.ReadAllText()
+                    stopwords = stopwordsFile.ReadAllTextAsync()
                         .Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries)
                         .Select(f => f.Trim().ToLowerInvariant())
                         .Where(f => f.Length > 1)

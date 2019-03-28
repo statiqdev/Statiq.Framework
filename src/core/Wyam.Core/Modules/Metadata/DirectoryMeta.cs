@@ -129,7 +129,7 @@ namespace Wyam.Core.Modules.Metadata
                 {
                     // First add the inherited metadata to the temp dictionary
                     List<DirectoryPath> sourcePaths = new List<DirectoryPath>();
-                    DirectoryPath inputPath = context.FileSystem.GetContainingInputPath(input.Source)?.Collapse();
+                    DirectoryPath inputPath = context.FileSystem.GetContainingInputPathAsync(input.Source).Result?.Collapse();
                     if (inputPath != null)
                     {
                         DirectoryPath dir = input.Source.Directory.Collapse();

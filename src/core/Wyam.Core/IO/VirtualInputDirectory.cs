@@ -5,13 +5,13 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Wyam.Common.IO;
+using Wyam.Common.Util;
 
 namespace Wyam.Core.IO
 {
     internal class VirtualInputDirectory : IDirectory
     {
         private readonly FileSystem _fileSystem;
-        private readonly DirectoryPath _path;
 
         public VirtualInputDirectory(FileSystem fileSystem, DirectoryPath path)
         {
@@ -25,47 +25,50 @@ namespace Wyam.Core.IO
             }
 
             _fileSystem = fileSystem ?? throw new ArgumentNullException(nameof(fileSystem));
-            _path = path;
+            Path = path;
         }
 
-        public DirectoryPath Path => _path;
+        /// <inheritdoc/>
+        public DirectoryPath Path { get; }
 
         NormalizedPath IFileSystemEntry.Path => Path;
 
-        public IDirectory Parent
+        /// <inheritdoc/>
+        public Task<IDirectory> GetParentAsync()
         {
-            get
+            DirectoryPath parentPath = Path.Parent;
+            if (parentPath == null)
             {
-                DirectoryPath parentPath = _path.Parent;
-                if (parentPath == null)
-                {
-                    return null;
-                }
-                return new VirtualInputDirectory(_fileSystem, parentPath);
+                return Task.FromResult<IDirectory>(null);
             }
+            return Task.FromResult<IDirectory>(new VirtualInputDirectory(_fileSystem, parentPath));
         }
 
-        public void Create()
+        /// <inheritdoc/>
+        public Task CreateAsync()
         {
             throw new NotSupportedException("Can not create a virtual input directory");
         }
 
-        public void Delete(bool recursive)
+        /// <inheritdoc/>
+        public Task DeleteAsync(bool recursive)
         {
             throw new NotSupportedException("Can not delete a virtual input directory");
         }
 
-        // For the root (".") virtual directory, this should just return the child name,
-        // but for all others it should include the child directory name
-        public IEnumerable<IDirectory> GetDirectories(SearchOption searchOption = SearchOption.TopDirectoryOnly)
+        /// <inheritdoc/>
+        public async Task<IEnumerable<IDirectory>> GetDirectoriesAsync(SearchOption searchOption = SearchOption.TopDirectoryOnly)
         {
+            // For the root (".") virtual directory, this should just return the child name,
+            // but for all others it should include the child directory name
+
             // Get all the relative child directories
             HashSet<DirectoryPath> directories = new HashSet<DirectoryPath>();
-            foreach (IDirectory directory in GetExistingDirectories())
+            foreach (IDirectory directory in await GetExistingDirectoriesAsync())
             {
-                foreach (IDirectory childDirectory in directory.GetDirectories(searchOption))
+                foreach (IDirectory childDirectory in await directory.GetDirectoriesAsync(searchOption))
                 {
-                    directories.Add(_path.Combine(directory.Path.GetRelativePath(childDirectory.Path)));
+                    directories.Add(Path.Combine(directory.Path.GetRelativePath(childDirectory.Path)));
                 }
             }
 
@@ -73,13 +76,14 @@ namespace Wyam.Core.IO
             return directories.Select(x => new VirtualInputDirectory(_fileSystem, x));
         }
 
-        public IEnumerable<IFile> GetFiles(SearchOption searchOption = SearchOption.TopDirectoryOnly)
+        /// <inheritdoc/>
+        public async Task<IEnumerable<IFile>> GetFilesAsync(SearchOption searchOption = SearchOption.TopDirectoryOnly)
         {
             // Get all the files for each input directory, replacing earlier ones with later ones
             Dictionary<FilePath, IFile> files = new Dictionary<FilePath, IFile>();
-            foreach (IDirectory directory in GetExistingDirectories())
+            foreach (IDirectory directory in await GetExistingDirectoriesAsync())
             {
-                foreach (IFile file in directory.GetFiles(searchOption))
+                foreach (IFile file in await directory.GetFilesAsync(searchOption))
                 {
                     files[directory.Path.GetRelativePath(file.Path)] = file;
                 }
@@ -87,7 +91,8 @@ namespace Wyam.Core.IO
             return files.Values;
         }
 
-        public IDirectory GetDirectory(DirectoryPath path)
+        /// <inheritdoc/>
+        public Task<IDirectory> GetDirectoryAsync(DirectoryPath path)
         {
             if (path == null)
             {
@@ -98,10 +103,11 @@ namespace Wyam.Core.IO
                 throw new ArgumentException("Path must be relative", nameof(path));
             }
 
-            return new VirtualInputDirectory(_fileSystem, _path.Combine(path));
+            return Task.FromResult<IDirectory>(new VirtualInputDirectory(_fileSystem, Path.Combine(path)));
         }
 
-        public IFile GetFile(FilePath path)
+        /// <inheritdoc/>
+        public async Task<IFile> GetFileAsync(FilePath path)
         {
             if (path == null)
             {
@@ -112,16 +118,16 @@ namespace Wyam.Core.IO
                 throw new ArgumentException("Path must be relative", nameof(path));
             }
 
-            return _fileSystem.GetInputFile(_path.CombineFile(path));
+            return await _fileSystem.GetInputFileAsync(Path.CombineFile(path));
         }
 
         /// <summary>
         /// Gets a value indicating whether any of the input paths contain this directory.
         /// </summary>
-        /// <value>
+        /// <returns>
         /// <c>true</c> if this directory exists at one of the input paths; otherwise, <c>false</c>.
-        /// </value>
-        public bool Exists => GetExistingDirectories().Any();
+        /// </returns>
+        public async Task<bool> GetExistsAsync() => (await GetExistingDirectoriesAsync()).Any();
 
         /// <summary>
         /// Returns <c>true</c> if any of the input paths are case sensitive.
@@ -135,11 +141,11 @@ namespace Wyam.Core.IO
         /// results when assuming if directories and files in that file system existed
         /// (for example, in the globber).
         /// </remarks>
-        public bool IsCaseSensitive => GetExistingDirectories().Any(x => x.IsCaseSensitive);
+        public bool IsCaseSensitive => GetExistingDirectoriesAsync().Result.Any(x => x.IsCaseSensitive);
 
-        private IEnumerable<IDirectory> GetExistingDirectories() =>
-            _fileSystem.InputPaths
-                .Select(x => _fileSystem.GetRootDirectory(x.Combine(_path)))
-                .Where(x => x.Exists);
+        private async Task<IEnumerable<IDirectory>> GetExistingDirectoriesAsync() =>
+            await _fileSystem.InputPaths
+                .SelectAsync(async x => await _fileSystem.GetRootDirectoryAsync(x.Combine(Path)))
+                .WhereAsync(async x => await x.GetExistsAsync());
     }
 }

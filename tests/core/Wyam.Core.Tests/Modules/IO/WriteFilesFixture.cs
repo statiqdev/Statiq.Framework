@@ -73,7 +73,7 @@ namespace Wyam.Core.Tests.Modules.IO
                 // Then
                 IFile outputFile = Engine.FileSystem.GetOutputFile("Subfolder/write-test.txt");
                 Assert.IsTrue(outputFile.Exists);
-                Assert.AreEqual("Test", outputFile.ReadAllText());
+                Assert.AreEqual("Test", outputFile.ReadAllTextAsync());
             }
 
             [Test]
@@ -90,7 +90,7 @@ namespace Wyam.Core.Tests.Modules.IO
                 // Then
                 IFile outputFile = Engine.FileSystem.GetOutputFile("Subfolder/write-test.txt");
                 Assert.IsTrue(outputFile.Exists);
-                Assert.AreEqual("Test", outputFile.ReadAllText());
+                Assert.AreEqual("Test", outputFile.ReadAllTextAsync());
             }
 
             [Test]
@@ -106,7 +106,7 @@ namespace Wyam.Core.Tests.Modules.IO
                 // Then
                 IFile outputFile = Engine.FileSystem.GetOutputFile(".dotfile");
                 Assert.IsTrue(outputFile.Exists);
-                Assert.AreEqual("Test", outputFile.ReadAllText());
+                Assert.AreEqual("Test", outputFile.ReadAllTextAsync());
             }
 
             [Test]
@@ -118,7 +118,7 @@ namespace Wyam.Core.Tests.Modules.IO
                 const string newContent = "Test";
 
                 IFile fileMock = Engine.FileSystem.GetOutputFile(fileName);
-                fileMock.WriteAllText(oldContent);
+                fileMock.WriteAllTextAsync(oldContent);
 
                 WriteFiles writeFiles = new WriteFiles((x, y) => fileName);
                 IDocument[] inputs = { Context.GetDocument(Context.GetContentStream(newContent)) };
@@ -128,7 +128,7 @@ namespace Wyam.Core.Tests.Modules.IO
 
                 // Then
                 IFile outputFile = Engine.FileSystem.GetOutputFile(fileName);
-                Assert.AreEqual(newContent, outputFile.ReadAllText());
+                Assert.AreEqual(newContent, outputFile.ReadAllTextAsync());
             }
 
             [Test]
@@ -196,7 +196,7 @@ namespace Wyam.Core.Tests.Modules.IO
                 // Then
                 IFile outputFile = Engine.FileSystem.GetOutputFile("output.txt");
                 Assert.IsTrue(outputFile.Exists);
-                Assert.AreEqual("E", outputFile.ReadAllText());
+                Assert.AreEqual("E", outputFile.ReadAllTextAsync());
             }
 
             [Test]
@@ -242,7 +242,7 @@ namespace Wyam.Core.Tests.Modules.IO
                 // Then
                 IFile outputFile = Engine.FileSystem.GetOutputFile("output.txt");
                 Assert.IsTrue(outputFile.Exists);
-                Assert.AreEqual("ABCDE", outputFile.ReadAllText());
+                Assert.AreEqual("ABCDE", outputFile.ReadAllTextAsync());
             }
 
             [TestCase(Keys.DestinationFileBase, "write-test")]

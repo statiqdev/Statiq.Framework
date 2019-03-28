@@ -38,24 +38,24 @@ namespace Wyam.Core.Shortcodes.IO
             IFile includedFile = null;
             if (includedPath.IsRelative && _sourcePath != null)
             {
-                includedFile = context.FileSystem.GetFile(_sourcePath.Directory.CombineFile(includedPath));
+                includedFile = context.FileSystem.GetFileAsync(_sourcePath.Directory.CombineFile(includedPath)).Result;
             }
 
             // If that didn't work, try relative to the input folder
-            if (includedFile?.Exists != true)
+            if (includedFile?.GetExistsAsync().Result != true)
             {
-                includedFile = context.FileSystem.GetInputFile(includedPath);
+                includedFile = context.FileSystem.GetInputFileAsync(includedPath).Result;
             }
 
             // Get the included file
-            if (!includedFile.Exists)
+            if (!includedFile.GetExistsAsync().Result)
             {
                 Trace.Warning($"Included file {includedPath.FullPath} does not exist");
                 return context.GetShortcodeResult((Stream)null);
             }
 
             // Set the currently included shortcode source so nested includes can use it
-            return context.GetShortcodeResult(includedFile.OpenRead(), new MetadataItems
+            return context.GetShortcodeResult(includedFile.OpenReadAsync().Result, new MetadataItems
             {
                 { "IncludeShortcodeSource", includedFile.Path.FullPath }
             });

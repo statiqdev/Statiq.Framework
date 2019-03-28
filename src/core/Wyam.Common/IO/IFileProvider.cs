@@ -17,13 +17,13 @@ namespace Wyam.Common.IO
         /// </summary>
         /// <param name="path">The path to the file.</param>
         /// <returns>The file.</returns>
-        IFile GetFile(FilePath path);
+        Task<IFile> GetFileAsync(FilePath path);
 
         /// <summary>
         /// Gets a directory from a specified path.
         /// </summary>
         /// <param name="path">The path to the directory.</param>
         /// <returns>The directory.</returns>
-        IDirectory GetDirectory(DirectoryPath path);
+        Task<IDirectory> GetDirectoryAsync(DirectoryPath path);
     }
 }

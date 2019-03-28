@@ -250,7 +250,7 @@ namespace Wyam.Blog
         public override void Scaffold(IFile configFile, IDirectory inputDirectory)
         {
             // Config file
-            configFile?.WriteAllText(@"#recipe Blog
+            configFile?.WriteAllTextAsync(@"#recipe Blog
 
 // Customize your settings and add new ones here
 Settings[Keys.Host] = ""host.com"";
@@ -260,13 +260,13 @@ Settings[BlogKeys.Description] = ""Welcome!"";
 // Add any pipeline customizations here");
 
             // Add info page
-            inputDirectory.GetFile("about.md").WriteAllText(
+            inputDirectory.GetFileAsync("about.md").WriteAllTextAsync(
 @"Title: About Me
 ---
 I'm awesome!");
 
             // Add post page
-            inputDirectory.GetFile("posts/first-post.md").WriteAllText(
+            inputDirectory.GetFileAsync("posts/first-post.md").WriteAllTextAsync(
 @"Title: First Post
 Published: 1/1/2016
 Tags: Introduction

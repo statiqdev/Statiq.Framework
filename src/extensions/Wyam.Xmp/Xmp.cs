@@ -136,7 +136,7 @@ namespace Wyam.Xmp
                          if (sidecarFile.Exists)
                          {
                              MemoryStream xmpBytes = new MemoryStream();
-                             using (Stream xmpStream = sidecarFile.OpenRead())
+                             using (Stream xmpStream = sidecarFile.OpenReadAsync())
                              {
                                  xmpStream.CopyTo(xmpBytes);
                              }

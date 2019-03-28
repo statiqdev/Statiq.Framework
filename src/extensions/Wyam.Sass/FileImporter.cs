@@ -124,7 +124,7 @@ namespace Wyam.Sass
                 {
                     _parentAbsolutePaths.AddOrUpdate(requestedFilePath, file.Path, (x, y) => file.Path);
                 }
-                scss = file.ReadAllText();
+                scss = file.ReadAllTextAsync();
                 return true;
             }
             return false;

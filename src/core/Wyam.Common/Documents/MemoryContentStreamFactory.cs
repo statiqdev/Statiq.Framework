@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Text;
+using System.Threading.Tasks;
 using Wyam.Common.Execution;
 
 namespace Wyam.Common.Documents
@@ -12,7 +13,7 @@ namespace Wyam.Common.Documents
     public class MemoryContentStreamFactory : IContentStreamFactory
     {
         /// <inheritdoc />
-        public Stream GetStream(IExecutionContext context, string content = null) =>
-            string.IsNullOrEmpty(content) ? new MemoryStream() : new MemoryStream(Encoding.UTF8.GetBytes(content));
+        public Task<Stream> GetStreamAsync(IExecutionContext context, string content = null) =>
+            Task.FromResult<Stream>(string.IsNullOrEmpty(content) ? new MemoryStream() : new MemoryStream(Encoding.UTF8.GetBytes(content)));
     }
 }

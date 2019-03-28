@@ -44,8 +44,8 @@ namespace Wyam.Razor
             }
             IDirectory directory = WyamFileSystem.GetInputDirectory(subpath);
             List<IFileInfo> fileInfos = new List<IFileInfo>();
-            fileInfos.AddRange(directory.GetDirectories().Select(x => new WyamDirectoryInfo(x)));
-            fileInfos.AddRange(directory.GetFiles().Select(x => new WyamFileInfo(x)));
+            fileInfos.AddRange(directory.GetDirectoriesAsync().Select(x => new WyamDirectoryInfo(x)));
+            fileInfos.AddRange(directory.GetFilesAsync().Select(x => new WyamFileInfo(x)));
             return new EnumerableDirectoryContents(fileInfos);
         }
 
@@ -102,7 +102,7 @@ namespace Wyam.Razor
 
             public bool IsDirectory => false;
 
-            public Stream CreateReadStream() => _file.OpenRead();
+            public Stream CreateReadStream() => _file.OpenReadAsync();
         }
 
         private class WyamDirectoryInfo : IFileInfo

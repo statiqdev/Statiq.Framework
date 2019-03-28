@@ -49,7 +49,7 @@ namespace Wyam.Core.Tests.IO.Globbing
             {
                 // Given
                 IFileProvider fileProvider = GetFileProvider();
-                IDirectory directory = fileProvider.GetDirectory(directoryPath);
+                IDirectory directory = fileProvider.GetDirectoryAsync(directoryPath);
 
                 // When
                 IEnumerable<IFile> matches = Globber.GetFiles(directory, patterns);
@@ -163,7 +163,7 @@ namespace Wyam.Core.Tests.IO.Globbing
             {
                 // Given
                 IFileProvider fileProvider = GetFileProvider();
-                IDirectory directory = fileProvider.GetDirectory("/a");
+                IDirectory directory = fileProvider.GetDirectoryAsync("/a");
 
                 // When, Then
                 Assert.Throws<ArgumentException>(() => Globber.GetFiles(directory, pattern));

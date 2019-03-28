@@ -49,7 +49,7 @@ namespace Wyam.Core.Tests.IO
                 VirtualInputDirectory directory = GetVirtualInputDirectory(virtualPath);
 
                 // When
-                IEnumerable<IDirectory> directories = directory.GetDirectories(searchOption);
+                IEnumerable<IDirectory> directories = directory.GetDirectoriesAsync(searchOption);
 
                 // Then
                 CollectionAssert.AreEquivalent(expectedPaths, directories.Select(x => x.Path.FullPath));
@@ -64,7 +64,7 @@ namespace Wyam.Core.Tests.IO
                 VirtualInputDirectory directory = GetVirtualInputDirectory(virtualPath);
 
                 // When
-                IEnumerable<IDirectory> directories = directory.GetDirectories(searchOption);
+                IEnumerable<IDirectory> directories = directory.GetDirectoriesAsync(searchOption);
 
                 // Then
                 CollectionAssert.AreEquivalent(expectedPaths, directories.Select(x => x.Path.FullPath));
@@ -84,7 +84,7 @@ namespace Wyam.Core.Tests.IO
                 VirtualInputDirectory directory = GetVirtualInputDirectory(virtualPath);
 
                 // When
-                IEnumerable<IFile> files = directory.GetFiles(searchOption);
+                IEnumerable<IFile> files = directory.GetFilesAsync(searchOption);
 
                 // Then
                 CollectionAssert.AreEquivalent(expectedPaths, files.Select(x => x.Path.FullPath));
@@ -108,7 +108,7 @@ namespace Wyam.Core.Tests.IO
                 VirtualInputDirectory directory = GetVirtualInputDirectory(virtualPath);
 
                 // When
-                IFile file = directory.GetFile(filePath);
+                IFile file = directory.GetFileAsync(filePath);
 
                 // Then
                 Assert.AreEqual(expectedPath, file.Path.FullPath);
@@ -128,7 +128,7 @@ namespace Wyam.Core.Tests.IO
                 VirtualInputDirectory directory = new VirtualInputDirectory(fileSystem, ".");
 
                 // When
-                IFile file = directory.GetFile("../c/foo.txt");
+                IFile file = directory.GetFileAsync("../c/foo.txt");
 
                 // Then
                 Assert.AreEqual("/a/b/c/foo.txt", file.Path.FullPath);
@@ -141,7 +141,7 @@ namespace Wyam.Core.Tests.IO
                 VirtualInputDirectory directory = GetVirtualInputDirectory(".");
 
                 // When, Then
-                Assert.Throws<ArgumentNullException>(() => directory.GetFile(null));
+                Assert.Throws<ArgumentNullException>(() => directory.GetFileAsync(null));
             }
 
             [Test]
@@ -152,7 +152,7 @@ namespace Wyam.Core.Tests.IO
                 FilePath filePath = "/a/test.txt";
 
                 // When, Then
-                Assert.Throws<ArgumentException>(() => directory.GetFile(filePath));
+                Assert.Throws<ArgumentException>(() => directory.GetFileAsync(filePath));
             }
         }
 
@@ -257,7 +257,7 @@ namespace Wyam.Core.Tests.IO
                 VirtualInputDirectory directory = new VirtualInputDirectory(fileSystem, ".");
 
                 // When, Then
-                Assert.Throws<NotSupportedException>(() => directory.Create());
+                Assert.Throws<NotSupportedException>(() => directory.CreateAsync());
             }
         }
 

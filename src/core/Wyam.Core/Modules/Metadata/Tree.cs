@@ -86,7 +86,7 @@ namespace Wyam.Core.Modules.Metadata
             {
                 FilePath source = new FilePath(string.Join("/", treePath.Concat(new[] { "index.html" })));
                 items.Add(new MetadataItem(Keys.RelativeFilePath, source));
-                return context.GetDocument(context.FileSystem.GetInputFile(source).Path.FullPath, items);
+                return context.GetDocument(context.FileSystem.GetInputFileAsync(source).Result.Path.FullPath, items);
             };
             _sort = (x, y) => Comparer.Default.Compare(
                 x.Get<object[]>(Keys.TreePath)?.LastOrDefault(),

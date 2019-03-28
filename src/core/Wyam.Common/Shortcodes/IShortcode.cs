@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
+using System.Threading.Tasks;
 using Wyam.Common.Documents;
 using Wyam.Common.Execution;
 using Wyam.Common.Meta;
@@ -39,6 +40,6 @@ namespace Wyam.Common.Shortcodes
         /// The result can be <c>null</c> in which case the shortcode declaration will be removed from the document
         /// but no replacement content will be added and the metadata will not change.
         /// </returns>
-        IShortcodeResult Execute(KeyValuePair<string, string>[] args, string content, IDocument document, IExecutionContext context);
+        Task<IShortcodeResult> ExecuteAsync(KeyValuePair<string, string>[] args, string content, IDocument document, IExecutionContext context);
     }
 }

@@ -117,13 +117,7 @@ namespace Wyam.Common.Modules
         {
             // If it's already what we want, then just return it
             IDictionary<string, object> dictionary = item as IDictionary<string, object>;
-            if (dictionary != null)
-            {
-                return dictionary;
-            }
-
-            // Any other object...
-            return item.GetType().GetProperties().ToDictionary(prop => prop.Name, prop => prop.GetValue(item));
+            return dictionary ?? item.GetType().GetProperties().ToDictionary(prop => prop.Name, prop => prop.GetValue(item));
         }
 
         /// <inheritdoc />
@@ -144,7 +138,7 @@ namespace Wyam.Common.Modules
                 IDictionary<string, object> dict = GetDictionary(item);
 
                 // If we have a whitelist, remove anything not whitelisted
-                if (_includedKeys.Any())
+                if (_includedKeys.Count > 0)
                 {
                     dict = dict.Where(kvp => _includedKeys.Contains(kvp.Key)).ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
                 }
@@ -167,7 +161,7 @@ namespace Wyam.Common.Modules
                     }
                 }
 
-                yield return context.GetDocument(context.GetContentStream(content), meta);
+                yield return context.GetDocument(context.GetContentStreamAsync(content).Result, meta);
             }
         }
     }

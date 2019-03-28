@@ -70,12 +70,12 @@ namespace Wyam.Core.Modules.IO
                     if (ShouldProcess(input, context))
                     {
                         FilePath outputPath = GetOutputPath(input, context);
-                        IFile output = outputPath != null ? context.FileSystem.GetOutputFile(outputPath) : null;
+                        IFile output = outputPath != null ? context.FileSystem.GetOutputFileAsync(outputPath).Result : null;
                         if (output != null)
                         {
-                            IDirectory outputDirectory = output.Directory;
-                            if ((outputDirectory.Path.FullPath != "." && outputDirectory.Exists && output.Exists)
-                                || (outputDirectory.Path.FullPath == "." && output.Exists))
+                            IDirectory outputDirectory = output.GetDirectoryAsync().Result;
+                            if ((outputDirectory.Path.FullPath != "." && outputDirectory.GetExistsAsync().Result && output.GetExistsAsync().Result)
+                                || (outputDirectory.Path.FullPath == "." && output.GetExistsAsync().Result))
                             {
                                 return null;
                             }

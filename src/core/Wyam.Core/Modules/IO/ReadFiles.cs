@@ -107,16 +107,16 @@ namespace Wyam.Core.Modules.IO
             if (patterns != null)
             {
                 return context.FileSystem
-                    .GetInputFiles(patterns)
+                    .GetInputFilesAsync(patterns).Result
                     .AsParallel()
                     .Where(file => _predicate == null || _predicate(file))
                     .Select(file =>
                     {
                         Trace.Verbose($"Read file {file.Path.FullPath}");
-                        DirectoryPath inputPath = context.FileSystem.GetContainingInputPath(file.Path);
+                        DirectoryPath inputPath = context.FileSystem.GetContainingInputPathAsync(file.Path).Result;
                         FilePath relativePath = inputPath?.GetRelativePath(file.Path) ?? file.Path.FileName;
                         FilePath fileNameWithoutExtension = file.Path.FileNameWithoutExtension;
-                        return context.GetDocument(input, file.Path, file.OpenRead(), new MetadataItems
+                        return context.GetDocument(input, file.Path, file.OpenReadAsync().Result, new MetadataItems
                         {
                             { Keys.SourceFileRoot, inputPath ?? file.Path.Directory },
                             { Keys.SourceFileBase, fileNameWithoutExtension },

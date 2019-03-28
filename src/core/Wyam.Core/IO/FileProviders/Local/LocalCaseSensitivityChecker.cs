@@ -32,7 +32,7 @@ namespace Wyam.Core.IO.FileProviders.Local
         private bool? IsDirectoryCaseSensitive(IDirectory directory)
         {
             string path = directory.Path.FullPath;
-            if (!directory.Exists || !path.Any(c => char.IsLetter(c)))
+            if (!directory.GetExistsAsync().Result || !path.Any(c => char.IsLetter(c)))
             {
                 return null;
             }

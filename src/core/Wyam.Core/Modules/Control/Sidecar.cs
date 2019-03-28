@@ -110,11 +110,11 @@ namespace Wyam.Core.Modules.Control
                 FilePath sidecarPath = _sidecarPath.Invoke<FilePath>(input, context);
                 if (sidecarPath != null)
                 {
-                    IFile sidecarFile = context.FileSystem.GetInputFile(sidecarPath.FullPath);
-                    if (sidecarFile.Exists)
+                    IFile sidecarFile = context.FileSystem.GetInputFileAsync(sidecarPath.FullPath).Result;
+                    if (sidecarFile.GetExistsAsync().Result)
                     {
-                        string sidecarContent = sidecarFile.ReadAllText();
-                        foreach (IDocument result in context.Execute(this, new[] { context.GetDocument(input, context.GetContentStream(sidecarContent)) }))
+                        string sidecarContent = sidecarFile.ReadAllTextAsync().Result;
+                        foreach (IDocument result in context.Execute(this, new[] { context.GetDocument(input, context.GetContentStreamAsync(sidecarContent).Result) }))
                         {
                             results.Add(context.GetDocument(input, result));
                         }

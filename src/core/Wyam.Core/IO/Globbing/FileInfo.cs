@@ -21,6 +21,6 @@ namespace Wyam.Core.IO.Globbing
 
         public override string FullName => _file.Path.Collapse().FullPath;
 
-        public override DirectoryInfoBase ParentDirectory => new DirectoryInfo(_file.Directory);
+        public override DirectoryInfoBase ParentDirectory => new DirectoryInfo(_file.GetDirectoryAsync().Result);
     }
 }

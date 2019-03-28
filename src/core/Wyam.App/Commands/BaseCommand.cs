@@ -23,8 +23,7 @@ namespace Wyam.App.Commands
     public abstract class BaseCommand<TSettings> : AsyncCommand<TSettings>
         where TSettings : BaseSettings
     {
-        [SuppressMessage("Roslynator.CSharp.Analyzers", "RCS1046", Justification = "No async suffix on overide")]
-        public sealed override async Task<int> Execute(CommandContext context, TSettings settings)
+        public sealed override async Task<int> ExecuteAsync(CommandContext context, TSettings settings)
         {
             // Set verbose tracing
             if (settings.Verbose)

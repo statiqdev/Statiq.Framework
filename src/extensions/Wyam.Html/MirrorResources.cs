@@ -169,7 +169,7 @@ namespace Wyam.Html
                 response.EnsureSuccessStatusCode();
 
                 // Copy the result to output
-                using (Stream outputStream = outputFile.OpenWrite())
+                using (Stream outputStream = outputFile.OpenWriteAsync())
                 {
                     response.Content.CopyToAsync(outputStream).Wait();
                 }

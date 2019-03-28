@@ -50,7 +50,7 @@ namespace Wyam.Core.Modules.IO
                 return new IDocument[0];
             }
 
-            return new[] { context.GetDocument(context.GetContentStream(context.ApplicationInput)) };
+            return new[] { context.GetDocument(context.GetContentStreamAsync(context.ApplicationInput).Result) };
         }
     }
 }

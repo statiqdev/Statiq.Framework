@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using Wyam.Common.Documents;
 using Wyam.Common.Execution;
 using Wyam.Common.IO;
@@ -44,12 +45,13 @@ namespace Wyam.Core.Modules.IO
         {
             return inputs.AsParallel().Select(context, input =>
             {
-                string content = input.Content;
-                return ProcessIncludes(ref content, input.Source, context) ? context.GetDocument(input, context.GetContentStream(content)) : input;
+                string content = ProcessIncludesAsync(input.Content, input.Source, context).Result;
+                return content == null ? input : context.GetDocument(input, context.GetContentStreamAsync(content).Result);
             });
         }
 
-        private bool ProcessIncludes(ref string content, FilePath source, IExecutionContext context)
+        // Returns null if the content wasn't modified
+        private async Task<string> ProcessIncludesAsync(string content, FilePath source, IExecutionContext context)
         {
             bool modified = false;
 
@@ -86,21 +88,25 @@ namespace Wyam.Core.Modules.IO
                             }
 
                             // Get and read the file content
-                            IFile includedFile = context.FileSystem.GetFile(includedPath);
+                            IFile includedFile = await context.FileSystem.GetFileAsync(includedPath);
                             string includedContent = string.Empty;
-                            if (!includedFile.Exists)
+                            if (!await includedFile.GetExistsAsync())
                             {
                                 Trace.Warning($"Included file {includedFile.Path.FullPath} does not exist");
                             }
                             else
                             {
-                                includedContent = includedFile.ReadAllText();
+                                includedContent = await includedFile.ReadAllTextAsync();
                             }
 
                             // Recursively process include statements
                             if (_recursion)
                             {
-                                ProcessIncludes(ref includedContent, includedPath, context);
+                                string nestedContent = await ProcessIncludesAsync(includedContent, includedPath, context);
+                                if (nestedContent != null)
+                                {
+                                    includedContent = nestedContent;
+                                }
                             }
 
                             // Do the replacement
@@ -111,7 +117,7 @@ namespace Wyam.Core.Modules.IO
                 }
             }
 
-            return modified;
+            return modified ? content : null;
         }
     }
 }

@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 using Wyam.Common.Configuration;
 using Wyam.Common.Documents;
 using Wyam.Common.Execution;
@@ -51,86 +52,86 @@ namespace Wyam.Core.Shortcodes
         public void Add(Type type) => Add(type?.Name, type);
 
         public void Add(string name, string result) =>
-            Add(name, (args, content, doc, ctx) => result != null ? ctx.GetShortcodeResult(ctx.GetContentStream(result)) : null);
+            Add(name, async (args, content, doc, ctx) => result != null ? ctx.GetShortcodeResult(await ctx.GetContentStreamAsync(result)) : null);
 
         public void Add(string name, ContextConfig contextConfig) =>
-            Add(name, (args, content, doc, ctx) =>
+            Add(name, async (args, content, doc, ctx) =>
             {
                 string result = contextConfig?.Invoke<string>(ctx);
-                return result != null ? ctx.GetShortcodeResult(ctx.GetContentStream(result)) : null;
+                return result != null ? ctx.GetShortcodeResult(await ctx.GetContentStreamAsync(result)) : null;
             });
 
         public void Add(string name, DocumentConfig documentConfig) =>
-            Add(name, (args, content, doc, ctx) =>
+            Add(name, async (args, content, doc, ctx) =>
             {
                 string result = documentConfig?.Invoke<string>(doc, ctx);
-                return result != null ? ctx.GetShortcodeResult(ctx.GetContentStream(result)) : null;
+                return result != null ? ctx.GetShortcodeResult(await ctx.GetContentStreamAsync(result)) : null;
             });
 
         public void Add(string name, Func<string, string> func) =>
-            Add(name, (args, content, doc, ctx) =>
+            Add(name, async (args, content, doc, ctx) =>
             {
                 string result = func?.Invoke(content);
-                return result != null ? ctx.GetShortcodeResult(ctx.GetContentStream(result)) : null;
+                return result != null ? ctx.GetShortcodeResult(await ctx.GetContentStreamAsync(result)) : null;
             });
 
         public void Add(string name, Func<KeyValuePair<string, string>[], string> func) =>
-            Add(name, (args, content, doc, ctx) =>
+            Add(name, async (args, content, doc, ctx) =>
             {
                 string result = func?.Invoke(args);
-                return result != null ? ctx.GetShortcodeResult(ctx.GetContentStream(result)) : null;
+                return result != null ? ctx.GetShortcodeResult(await ctx.GetContentStreamAsync(result)) : null;
             });
 
         public void Add(string name, Func<KeyValuePair<string, string>[], string, string> func) =>
-            Add(name, (args, content, doc, ctx) =>
+            Add(name, async (args, content, doc, ctx) =>
             {
                 string result = func?.Invoke(args, content);
-                return result != null ? ctx.GetShortcodeResult(ctx.GetContentStream(result)) : null;
+                return result != null ? ctx.GetShortcodeResult(await ctx.GetContentStreamAsync(result)) : null;
             });
 
         public void Add(string name, Func<KeyValuePair<string, string>[], string, IExecutionContext, string> func) =>
-            Add(name, (args, content, doc, ctx) =>
+            Add(name, async (args, content, doc, ctx) =>
             {
                 string result = func?.Invoke(args, content, ctx);
-                return result != null ? ctx.GetShortcodeResult(ctx.GetContentStream(result)) : null;
+                return result != null ? ctx.GetShortcodeResult(await ctx.GetContentStreamAsync(result)) : null;
             });
 
         public void Add(string name, Func<KeyValuePair<string, string>[], string, IDocument, IExecutionContext, string> func) =>
-            Add(name, (args, content, doc, ctx) =>
+            Add(name, async (args, content, doc, ctx) =>
             {
                 string result = func?.Invoke(args, content, doc, ctx);
-                return result != null ? ctx.GetShortcodeResult(ctx.GetContentStream(result)) : null;
+                return result != null ? ctx.GetShortcodeResult(await ctx.GetContentStreamAsync(result)) : null;
             });
 
         public void Add(string name, Func<KeyValuePair<string, string>[], IExecutionContext, string> func) =>
-            Add(name, (args, content, doc, ctx) =>
+            Add(name, async (args, content, doc, ctx) =>
             {
                 string result = func?.Invoke(args, ctx);
-                return result != null ? ctx.GetShortcodeResult(ctx.GetContentStream(result)) : null;
+                return result != null ? ctx.GetShortcodeResult(await ctx.GetContentStreamAsync(result)) : null;
             });
 
         public void Add(string name, Func<KeyValuePair<string, string>[], IDocument, IExecutionContext, string> func) =>
-            Add(name, (args, content, doc, ctx) =>
+            Add(name, async (args, content, doc, ctx) =>
             {
                 string result = func?.Invoke(args, doc, ctx);
-                return result != null ? ctx.GetShortcodeResult(ctx.GetContentStream(result)) : null;
+                return result != null ? ctx.GetShortcodeResult(await ctx.GetContentStreamAsync(result)) : null;
             });
 
         public void Add(string name, Func<string, IExecutionContext, string> func) =>
-            Add(name, (args, content, doc, ctx) =>
+            Add(name, async (args, content, doc, ctx) =>
             {
                 string result = func?.Invoke(content, ctx);
-                return result != null ? ctx.GetShortcodeResult(ctx.GetContentStream(result)) : null;
+                return result != null ? ctx.GetShortcodeResult(await ctx.GetContentStreamAsync(result)) : null;
             });
 
         public void Add(string name, Func<string, IDocument, IExecutionContext, string> func) =>
-            Add(name, (args, content, doc, ctx) =>
+            Add(name, async (args, content, doc, ctx) =>
             {
                 string result = func?.Invoke(content, doc, ctx);
-                return result != null ? ctx.GetShortcodeResult(ctx.GetContentStream(result)) : null;
+                return result != null ? ctx.GetShortcodeResult(await ctx.GetContentStreamAsync(result)) : null;
             });
 
-        public void Add(string name, Func<KeyValuePair<string, string>[], string, IDocument, IExecutionContext, IShortcodeResult> func)
+        public void Add(string name, Func<KeyValuePair<string, string>[], string, IDocument, IExecutionContext, Task<IShortcodeResult>> func)
         {
             if (string.IsNullOrWhiteSpace(name) || name.Any(c => char.IsWhiteSpace(c)))
             {

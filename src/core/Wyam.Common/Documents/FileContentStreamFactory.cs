@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Threading.Tasks;
 using Wyam.Common.Execution;
 using Wyam.Common.IO;
 
@@ -13,12 +14,12 @@ namespace Wyam.Common.Documents
     public class FileContentStreamFactory : IContentStreamFactory
     {
         /// <inheritdoc />
-        public Stream GetStream(IExecutionContext context, string content = null)
+        public async Task<Stream> GetStreamAsync(IExecutionContext context, string content = null)
         {
-            IFile tempFile = context.FileSystem.GetTempFile();
+            IFile tempFile = await context.FileSystem.GetTempFileAsync();
             if (!string.IsNullOrEmpty(content))
             {
-                tempFile.WriteAllText(content);
+                await tempFile.WriteAllTextAsync(content);
             }
             return new FileContentStream(tempFile);
         }

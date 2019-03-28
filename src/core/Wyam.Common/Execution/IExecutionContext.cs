@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Net.Http;
 using System.Reflection;
+using System.Threading.Tasks;
 using Wyam.Common.Caching;
 using Wyam.Common.Configuration;
 using Wyam.Common.Documents;
@@ -90,7 +91,7 @@ namespace Wyam.Common.Execution
         /// </summary>
         /// <param name="content">Content to initialize the stream with.</param>
         /// <returns>A stream for document content.</returns>
-        Stream GetContentStream(string content = null);
+        Task<Stream> GetContentStreamAsync(string content = null);
 
         /// <summary>
         /// Creates a <see cref="HttpClient"/> instance that should be used for all HTTP communication.
@@ -264,14 +265,14 @@ namespace Wyam.Common.Execution
         /// </param>
         /// <param name="metadata">New metadata to be added to the document as a result of executing the shortcode.</param>
         /// <returns>A shortcode result.</returns>
-        IShortcodeResult GetShortcodeResult(string content, IEnumerable<KeyValuePair<string, object>> metadata = null);
+        Task<IShortcodeResult> GetShortcodeResultAsync(string content, IEnumerable<KeyValuePair<string, object>> metadata = null);
 
         /// <summary>
         /// A factory method for use from inside an <see cref="IShortcode"/> to create an <see cref="IShortcodeResult"/>.
         /// </summary>
         /// <param name="content">
         /// The content of the shortcode. The passed in stream will be disposed when the shortcode has been rendered.
-        /// Use <see cref="GetContentStream(string)"/> if you need to create a content stream from a string.
+        /// Use <see cref="GetContentStreamAsync(string)"/> if you need to create a content stream from a string.
         /// If you don't want the shortcode to add new content, you can use <c>null</c> for the content stream.
         /// </param>
         /// <param name="metadata">New metadata to be added to the document as a result of executing the shortcode.</param>

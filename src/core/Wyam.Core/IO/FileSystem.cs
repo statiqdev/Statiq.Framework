@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Wyam.Common.IO;
+using Wyam.Common.Util;
 using Wyam.Core.IO.FileProviders.Local;
 using Wyam.Core.IO.Globbing;
 
@@ -15,7 +16,7 @@ namespace Wyam.Core.IO
     // Initially based on code from Cake (http://cakebuild.net/)
     internal class FileSystem : IFileSystem
     {
-        private DirectoryPath _rootPath = System.IO.Directory.GetCurrentDirectory();
+        private DirectoryPath _rootPath = Directory.GetCurrentDirectory();
         private DirectoryPath _outputPath = "output";
         private DirectoryPath _tempPath = "temp";
 
@@ -81,7 +82,7 @@ namespace Wyam.Core.IO
             }
         }
 
-        public IFile GetInputFile(FilePath path)
+        public async Task<IFile> GetInputFileAsync(FilePath path)
         {
             if (path == null)
             {
@@ -93,12 +94,12 @@ namespace Wyam.Core.IO
                 IFile notFound = null;
                 foreach (DirectoryPath inputPath in InputPaths.Reverse())
                 {
-                    IFile file = GetFile(RootPath.Combine(inputPath).CombineFile(path));
+                    IFile file = await GetFileAsync(RootPath.Combine(inputPath).CombineFile(path));
                     if (notFound == null)
                     {
                         notFound = file;
                     }
-                    if (file.Exists)
+                    if (await file.GetExistsAsync())
                     {
                         return file;
                     }
@@ -109,28 +110,24 @@ namespace Wyam.Core.IO
                 }
                 return notFound;
             }
-            return GetFile(path);
+            return await GetFileAsync(path);
         }
 
-        public IEnumerable<IFile> GetInputFiles(params string[] patterns)
-        {
-            return GetInputFiles((IEnumerable<string>)patterns);
-        }
+        public async Task<IEnumerable<IFile>> GetInputFilesAsync(params string[] patterns) =>
+            await GetInputFilesAsync((IEnumerable<string>)patterns);
 
-        public IEnumerable<IFile> GetInputFiles(IEnumerable<string> patterns)
-        {
-            return GetFiles(GetInputDirectory(), patterns);
-        }
+        public async Task<IEnumerable<IFile>> GetInputFilesAsync(IEnumerable<string> patterns) =>
+            await GetFilesAsync(await GetInputDirectoryAsync(), patterns);
 
-        public IDirectory GetInputDirectory(DirectoryPath path = null) =>
+        public async Task<IDirectory> GetInputDirectoryAsync(DirectoryPath path = null) =>
             path == null
                 ? new VirtualInputDirectory(this, ".")
-                : (path.IsRelative ? new VirtualInputDirectory(this, path) : GetDirectory(path));
+                : (path.IsRelative ? new VirtualInputDirectory(this, path) : await GetDirectoryAsync(path));
 
-        public IReadOnlyList<IDirectory> GetInputDirectories() =>
-            InputPaths.Select(GetRootDirectory).ToImmutableArray();
+        public async Task<IReadOnlyList<IDirectory>> GetInputDirectoriesAsync() =>
+            (await InputPaths.SelectAsync(async x => await GetRootDirectoryAsync(x))).ToImmutableArray();
 
-        public DirectoryPath GetContainingInputPath(NormalizedPath path)
+        public async Task<DirectoryPath> GetContainingInputPathAsync(NormalizedPath path)
         {
             if (path == null)
             {
@@ -144,21 +141,19 @@ namespace Wyam.Core.IO
                     .FirstOrDefault(x => x.FileProvider == path.FileProvider
                         && (path.FullPath == x.Collapse().FullPath || path.FullPath.StartsWith(x.Collapse().FullPath + "/")));
             }
-            FilePath filePath = path as FilePath;
-            if (filePath != null)
+            if (path is FilePath filePath)
             {
-                IFile file = GetInputFile(filePath);
-                return file.Exists ? GetContainingInputPath(file.Path) : null;
+                IFile file = await GetInputFileAsync(filePath);
+                return await file.GetExistsAsync() ? await GetContainingInputPathAsync(file.Path) : null;
             }
-            DirectoryPath directoryPath = path as DirectoryPath;
-            if (directoryPath != null)
+            if (path is DirectoryPath directoryPath)
             {
-                return InputPaths
+                return await InputPaths
                     .Reverse()
-                    .Select(x => new KeyValuePair<DirectoryPath, IDirectory>(x, GetRootDirectory(x.Combine(directoryPath))))
-                    .Where(x => x.Value.Exists)
-                    .Select(x => RootPath.Combine(x.Key))
-                    .FirstOrDefault();
+                    .SelectAsync(async x => (x, await GetRootDirectoryAsync(x.Combine(directoryPath))))
+                    .WhereAsync(async x => await x.Item2.GetExistsAsync())
+                    .SelectAsync(x => RootPath.Combine(x.Item1))
+                    .FirstOrDefaultAsync();
             }
             return null;
         }
@@ -178,11 +173,11 @@ namespace Wyam.Core.IO
                 ? RootPath.Combine(OutputPath)
                 : RootPath.Combine(OutputPath).Combine(path);
 
-        public IFile GetOutputFile(FilePath path) =>
-            GetFile(GetOutputPath(path));
+        public async Task<IFile> GetOutputFileAsync(FilePath path) =>
+            await GetFileAsync(GetOutputPath(path));
 
-        public IDirectory GetOutputDirectory(DirectoryPath path = null) =>
-            GetDirectory(GetOutputPath(path));
+        public async Task<IDirectory> GetOutputDirectoryAsync(DirectoryPath path = null) =>
+            await GetDirectoryAsync(GetOutputPath(path));
 
         public FilePath GetTempPath(FilePath path)
         {
@@ -199,82 +194,84 @@ namespace Wyam.Core.IO
                 ? RootPath.Combine(TempPath)
                 : RootPath.Combine(TempPath).Combine(path);
 
-        public IFile GetTempFile(FilePath path) =>
-            GetFile(GetTempPath(path));
+        public async Task<IFile> GetTempFileAsync(FilePath path) =>
+            await GetFileAsync(GetTempPath(path));
 
-        public IFile GetTempFile() => GetTempFile(System.IO.Path.ChangeExtension(System.IO.Path.GetRandomFileName(), "tmp"));
+        public async Task<IFile> GetTempFileAsync() =>
+            await GetTempFileAsync(Path.ChangeExtension(Path.GetRandomFileName(), "tmp"));
 
-        public IDirectory GetTempDirectory(DirectoryPath path = null) =>
-            GetDirectory(GetTempPath(path));
+        public async Task<IDirectory> GetTempDirectoryAsync(DirectoryPath path = null) =>
+            await GetDirectoryAsync(GetTempPath(path));
 
-        public IFile GetRootFile(FilePath path)
+        public async Task<IFile> GetRootFileAsync(FilePath path)
         {
             if (path == null)
             {
                 throw new ArgumentNullException(nameof(path));
             }
 
-            return GetFile(RootPath.CombineFile(path));
+            return await GetFileAsync(RootPath.CombineFile(path));
         }
 
-        public IDirectory GetRootDirectory(DirectoryPath path = null) =>
+        public async Task<IDirectory> GetRootDirectoryAsync(DirectoryPath path = null) =>
             path == null
-            ? GetDirectory(RootPath)
-            : GetDirectory(RootPath.Combine(path));
+            ? await GetDirectoryAsync(RootPath)
+            : await GetDirectoryAsync(RootPath.Combine(path));
 
-        public IFile GetFile(FilePath path)
+        public async Task<IFile> GetFileAsync(FilePath path)
         {
             if (path == null)
             {
                 throw new ArgumentNullException(nameof(path));
             }
 
-            return GetFileProvider(path).GetFile(path);
+            return await GetFileProvider(path).GetFileAsync(path);
         }
 
-        public IDirectory GetDirectory(DirectoryPath path)
+        public async Task<IDirectory> GetDirectoryAsync(DirectoryPath path)
         {
             if (path == null)
             {
                 throw new ArgumentNullException(nameof(path));
             }
 
-            return GetFileProvider(path).GetDirectory(path);
+            return await GetFileProvider(path).GetDirectoryAsync(path);
         }
 
-        public IEnumerable<IFile> GetFiles(params string[] patterns) =>
-            GetFiles(GetRootDirectory(), patterns);
+        public async Task<IEnumerable<IFile>> GetFilesAsync(params string[] patterns) =>
+            await GetFilesAsync(await GetRootDirectoryAsync(), patterns);
 
-        public IEnumerable<IFile> GetFiles(IEnumerable<string> patterns) =>
-            GetFiles(GetRootDirectory(), patterns);
+        public async Task<IEnumerable<IFile>> GetFilesAsync(IEnumerable<string> patterns) =>
+            await GetFilesAsync(await GetRootDirectoryAsync(), patterns);
 
-        public IEnumerable<IFile> GetFiles(IDirectory directory, params string[] patterns) =>
-            GetFiles(directory, (IEnumerable<string>)patterns);
+        public async Task<IEnumerable<IFile>> GetFilesAsync(IDirectory directory, params string[] patterns) =>
+            await GetFilesAsync(directory, (IEnumerable<string>)patterns);
 
-        public IEnumerable<IFile> GetFiles(IDirectory directory, IEnumerable<string> patterns)
+        public async Task<IEnumerable<IFile>> GetFilesAsync(IDirectory directory, IEnumerable<string> patterns)
         {
             if (directory == null)
             {
                 throw new ArgumentNullException(nameof(directory));
             }
 
-            return patterns
+            IEnumerable<Tuple<IDirectory, string>> directoryPatterns = await patterns
                 .Where(x => x != null)
-                .Select(x =>
+                .SelectAsync(async x =>
                 {
                     bool negated = x[0] == '!';
                     FilePath filePath = negated ? new FilePath(x.Substring(1)) : new FilePath(x);
                     if (filePath.IsAbsolute)
                     {
                         // The globber doesn't support absolute paths, so get the root directory of this path (including provider)
-                        IDirectory rootDirectory = GetDirectory(filePath.Root);
+                        IDirectory rootDirectory = await GetDirectoryAsync(filePath.Root);
                         FilePath relativeFilePath = filePath.RootRelative.Collapse();
                         return Tuple.Create(
                             rootDirectory,
                             negated ? ('!' + relativeFilePath.FullPath) : relativeFilePath.FullPath);
                     }
                     return Tuple.Create(directory, x);
-                })
+                });
+            return directoryPatterns
                 .GroupBy(x => x.Item1, x => x.Item2, new DirectoryEqualityComparer())
                 .SelectMany(x => Globber.GetFiles(x.Key, x));
         }
@@ -293,8 +290,7 @@ namespace Wyam.Core.IO
             {
                 throw new ArgumentException("The path has no provider");
             }
-            IFileProvider fileProvider;
-            if (!FileProviders.TryGet(path.FileProvider.Scheme, out fileProvider))
+            if (!FileProviders.TryGet(path.FileProvider.Scheme, out IFileProvider fileProvider))
             {
                 throw new KeyNotFoundException($"A provider for the scheme {path.FileProvider} could not be found");
             }

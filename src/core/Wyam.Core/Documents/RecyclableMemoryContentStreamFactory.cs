@@ -16,7 +16,7 @@ namespace Wyam.Core.Documents
         private readonly object _managerLock = new object();
         private RecyclableMemoryStreamManager _manager;
 
-        public Stream GetStream(IExecutionContext context, string content = null)
+        public Task<Stream> GetStreamAsync(IExecutionContext context, string content = null)
         {
             lock (_managerLock)
             {
@@ -34,10 +34,10 @@ namespace Wyam.Core.Documents
 
             if (string.IsNullOrEmpty(content))
             {
-                return _manager.GetStream();
+                return Task.FromResult<Stream>(_manager.GetStream());
             }
             byte[] contentBytes = Encoding.UTF8.GetBytes(content);
-            return _manager.GetStream(null, contentBytes, 0, contentBytes.Length);
+            return Task.FromResult<Stream>(_manager.GetStream(null, contentBytes, 0, contentBytes.Length));
         }
     }
 }

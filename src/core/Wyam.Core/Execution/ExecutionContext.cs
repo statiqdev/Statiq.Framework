@@ -110,7 +110,7 @@ namespace Wyam.Core.Execution
 
         public bool TryConvert<T>(object value, out T result) => TypeHelper.TryConvert(value, out result);
 
-        public Stream GetContentStream(string content = null) => Engine.ContentStreamFactory.GetStream(this, content);
+        public async Task<Stream> GetContentStreamAsync(string content = null) => await Engine.ContentStreamFactory.GetStreamAsync(this, content);
 
         public HttpClient CreateHttpClient() => CreateHttpClient(_httpMessageHandler);
 
@@ -226,8 +226,8 @@ namespace Wyam.Core.Execution
                 maxUsagesPerEngine,
                 engineTimeout ?? TimeSpan.FromSeconds(5));
 
-        public IShortcodeResult GetShortcodeResult(string content, IEnumerable<KeyValuePair<string, object>> metadata = null)
-            => GetShortcodeResult(content == null ? null : GetContentStream(content), metadata);
+        public async Task<IShortcodeResult> GetShortcodeResultAsync(string content, IEnumerable<KeyValuePair<string, object>> metadata = null)
+            => GetShortcodeResult(content == null ? null : await GetContentStreamAsync(content), metadata);
 
         public IShortcodeResult GetShortcodeResult(Stream content, IEnumerable<KeyValuePair<string, object>> metadata = null)
             => new ShortcodeResult(content, metadata);

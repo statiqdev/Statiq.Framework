@@ -54,7 +54,7 @@ namespace Wyam.Core.Modules.Contents
         /// <returns>A single document in a list</returns>
         public IEnumerable<IDocument> Execute(IReadOnlyList<IDocument> inputs, IExecutionContext context)
         {
-            Stream contentStream = context.GetContentStream();
+            Stream contentStream = context.GetContentStreamAsync().Result;
             if (inputs == null || inputs.Count < 1)
             {
                 return new[] { context.GetDocument() };

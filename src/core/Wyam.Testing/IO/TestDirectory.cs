@@ -38,11 +38,11 @@ namespace Wyam.Testing.IO
 
         public bool IsCaseSensitive => true;
 
-        public void Create() => _fileProvider.Directories.Add(_path.FullPath);
+        public void CreateAsync() => _fileProvider.Directories.Add(_path.FullPath);
 
         public void Delete(bool recursive) => _fileProvider.Directories.Remove(_path.FullPath);
 
-        public IEnumerable<IDirectory> GetDirectories(SearchOption searchOption = SearchOption.TopDirectoryOnly)
+        public IEnumerable<IDirectory> GetDirectoriesAsync(SearchOption searchOption = SearchOption.TopDirectoryOnly)
         {
             if (searchOption == SearchOption.TopDirectoryOnly)
             {
@@ -60,7 +60,7 @@ namespace Wyam.Testing.IO
                 .Select(x => new TestDirectory(_fileProvider, x));
         }
 
-        public IEnumerable<IFile> GetFiles(SearchOption searchOption = SearchOption.TopDirectoryOnly)
+        public IEnumerable<IFile> GetFilesAsync(SearchOption searchOption = SearchOption.TopDirectoryOnly)
         {
             if (searchOption == SearchOption.TopDirectoryOnly)
             {
@@ -91,7 +91,7 @@ namespace Wyam.Testing.IO
             return new TestDirectory(_fileProvider, _path.Combine(path));
         }
 
-        public IFile GetFile(FilePath path)
+        public IFile GetFileAsync(FilePath path)
         {
             if (path == null)
             {

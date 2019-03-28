@@ -21,13 +21,13 @@ namespace Wyam.Core.IO.Globbing
 
         public override IEnumerable<FileSystemInfoBase> EnumerateFileSystemInfos()
         {
-            if (_directory.Exists)
+            if (_directory.GetExistsAsync().Result)
             {
-                foreach (IDirectory childDirectory in _directory.GetDirectories())
+                foreach (IDirectory childDirectory in _directory.GetDirectoriesAsync().Result)
                 {
                     yield return new DirectoryInfo(childDirectory);
                 }
-                foreach (IFile childFile in _directory.GetFiles())
+                foreach (IFile childFile in _directory.GetFilesAsync().Result)
                 {
                     yield return new FileInfo(childFile);
                 }
@@ -38,15 +38,15 @@ namespace Wyam.Core.IO.Globbing
         {
             if (string.Equals(name, "..", StringComparison.Ordinal))
             {
-                return new DirectoryInfo(_directory.GetDirectory(".."), true);
+                return new DirectoryInfo(_directory.GetDirectoryAsync("..").Result, true);
             }
-            return _directory.GetDirectories()
+            return _directory.GetDirectoriesAsync().Result
                 .Where(x => x.Path.Collapse().Name == name)
                 .Select(x => new DirectoryInfo(x))
                 .FirstOrDefault();
         }
 
-        public override FileInfoBase GetFile(string path) => new FileInfo(_directory.GetFile(path));
+        public override FileInfoBase GetFile(string path) => new FileInfo(_directory.GetFileAsync(path).Result);
 
         public override string Name => _isParentPath ? ".." : _directory.Path.Collapse().Name;
 
@@ -56,8 +56,8 @@ namespace Wyam.Core.IO.Globbing
         {
             get
             {
-                IDirectory parent = _directory.Parent;
-                return parent == null ? null : new DirectoryInfo(_directory.Parent);
+                IDirectory parent = _directory.GetParentAsync().Result;
+                return parent == null ? null : new DirectoryInfo(_directory.GetParentAsync().Result);
             }
         }
     }

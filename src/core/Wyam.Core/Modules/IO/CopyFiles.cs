@@ -124,7 +124,7 @@ namespace Wyam.Core.Modules.IO
             if (patterns != null)
             {
                 return context.FileSystem
-                    .GetInputFiles(patterns)
+                    .GetInputFilesAsync(patterns).Result
                     .AsParallel()
                     .Where(x => _predicate == null || _predicate(x))
                     .Select(file =>
@@ -132,18 +132,18 @@ namespace Wyam.Core.Modules.IO
                         try
                         {
                             // Get the default destination file
-                            DirectoryPath inputPath = context.FileSystem.GetContainingInputPath(file.Path);
+                            DirectoryPath inputPath = context.FileSystem.GetContainingInputPathAsync(file.Path).Result;
                             FilePath relativePath = inputPath?.GetRelativePath(file.Path) ?? file.Path.FileName;
-                            IFile destination = context.FileSystem.GetOutputFile(relativePath);
+                            IFile destination = context.FileSystem.GetOutputFileAsync(relativePath).Result;
 
                             // Calculate an alternate destination if needed
                             if (_destinationPath != null)
                             {
-                                destination = context.FileSystem.GetOutputFile(_destinationPath(file, destination));
+                                destination = context.FileSystem.GetOutputFileAsync(_destinationPath(file, destination)).Result;
                             }
 
                             // Copy to the destination
-                            file.CopyTo(destination);
+                            file.CopyToAsync(destination);
                             Trace.Verbose("Copied file {0} to {1}", file.Path.FullPath, destination.Path.FullPath);
 
                             // Return the document

@@ -20,6 +20,6 @@ namespace Wyam.Common.Documents
         /// <param name="context">The current execution context.</param>
         /// <param name="content">Content to initialize the stream with.</param>
         /// <returns>A stream for document content.</returns>
-        Stream GetStream(IExecutionContext context, string content = null);
+        Task<Stream> GetStreamAsync(IExecutionContext context, string content = null);
     }
 }

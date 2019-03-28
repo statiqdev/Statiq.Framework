@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Threading.Tasks;
 using Wyam.Common.IO;
 
 namespace Wyam.Core.IO.FileProviders.Local
@@ -8,17 +9,10 @@ namespace Wyam.Core.IO.FileProviders.Local
     internal class LocalFile : IFile
     {
         private readonly FileInfo _file;
-        private readonly FilePath _path;
 
-        public FilePath Path => _path;
+        public FilePath Path { get; }
 
-        NormalizedPath IFileSystemEntry.Path => _path;
-
-        public IDirectory Directory => new LocalDirectory(_path.Directory);
-
-        public bool Exists => _file.Exists;
-
-        public long Length => _file.Length;
+        NormalizedPath IFileSystemEntry.Path => Path;
 
         public LocalFile(FilePath path)
         {
@@ -31,11 +25,17 @@ namespace Wyam.Core.IO.FileProviders.Local
                 throw new ArgumentException("Path must be absolute", nameof(path));
             }
 
-            _path = path.Collapse();
-            _file = new FileInfo(_path.FullPath);
+            Path = path.Collapse();
+            _file = new FileInfo(Path.FullPath);
         }
 
-        public void CopyTo(IFile destination, bool overwrite = true, bool createDirectory = true)
+        public Task<IDirectory> GetDirectoryAsync() => Task.FromResult<IDirectory>(new LocalDirectory(Path.Directory));
+
+        public Task<bool> GetExistsAsync() => Task.FromResult(_file.Exists);
+
+        public Task<long> GetLengthAsync() => Task.FromResult(_file.Length);
+
+        public async Task CopyToAsync(IFile destination, bool overwrite = true, bool createDirectory = true)
         {
             if (destination == null)
             {
@@ -45,28 +45,29 @@ namespace Wyam.Core.IO.FileProviders.Local
             // Create the directory
             if (createDirectory)
             {
-                destination.Directory.Create();
+                IDirectory directory = await destination.GetDirectoryAsync();
+                await directory.CreateAsync();
             }
 
             // Use the file system APIs if destination is also in the file system
             if (destination is LocalFile)
             {
-                RetryHelper.Retry(() => _file.CopyTo(destination.Path.FullPath, overwrite));
+                LocalFileProvider.RetryPolicy.Execute(() => _file.CopyTo(destination.Path.FullPath, overwrite));
             }
             else
             {
                 // Otherwise use streams to perform the copy
-                using (Stream sourceStream = OpenRead())
+                using (Stream sourceStream = await OpenReadAsync())
                 {
-                    using (Stream destinationStream = destination.OpenWrite())
+                    using (Stream destinationStream = await destination.OpenWriteAsync())
                     {
-                        sourceStream.CopyTo(destinationStream);
+                        await sourceStream.CopyToAsync(destinationStream);
                     }
                 }
             }
         }
 
-        public void MoveTo(IFile destination)
+        public async Task MoveToAsync(IFile destination)
         {
             if (destination == null)
             {
@@ -76,64 +77,75 @@ namespace Wyam.Core.IO.FileProviders.Local
             // Use the file system APIs if destination is also in the file system
             if (destination is LocalFile)
             {
-                RetryHelper.Retry(() => _file.MoveTo(destination.Path.FullPath));
+                LocalFileProvider.RetryPolicy.Execute(() => _file.MoveTo(destination.Path.FullPath));
             }
             else
             {
                 // Otherwise use streams to perform the move
-                using (Stream sourceStream = OpenRead())
+                using (Stream sourceStream = await OpenReadAsync())
                 {
-                    using (Stream destinationStream = destination.OpenWrite())
+                    using (Stream destinationStream = await destination.OpenWriteAsync())
                     {
-                        sourceStream.CopyTo(destinationStream);
+                        await sourceStream.CopyToAsync(destinationStream);
                     }
                 }
-                Delete();
+                await DeleteAsync();
             }
         }
 
-        public void Delete() => RetryHelper.Retry(() => _file.Delete());
-
-        public string ReadAllText() =>
-            RetryHelper.Retry(() => System.IO.File.ReadAllText(_file.FullName));
-
-        public void WriteAllText(string contents, bool createDirectory = true)
+        public Task DeleteAsync()
         {
-            if (createDirectory)
-            {
-                Directory.Create();
-            }
-            RetryHelper.Retry(() => System.IO.File.WriteAllText(_file.FullName, contents));
+            LocalFileProvider.RetryPolicy.Execute(() => _file.Delete());
+            return Task.CompletedTask;
         }
 
-        public Stream OpenRead() =>
-            RetryHelper.Retry(() => _file.Open(FileMode.Open, FileAccess.Read, FileShare.ReadWrite));
+        public async Task<string> ReadAllTextAsync() =>
+            await LocalFileProvider.AsyncRetryPolicy.ExecuteAsync(() => File.ReadAllTextAsync(_file.FullName));
 
-        public Stream OpenWrite(bool createDirectory = true)
+        public async Task WriteAllTextAsync(string contents, bool createDirectory = true)
         {
             if (createDirectory)
             {
-                Directory.Create();
+                await CreateDirectoryAsync();
             }
-            return RetryHelper.Retry(() => _file.Open(FileMode.OpenOrCreate, FileAccess.Write, FileShare.ReadWrite));
+
+            await LocalFileProvider.AsyncRetryPolicy.ExecuteAsync(() => File.WriteAllTextAsync(_file.FullName, contents));
         }
 
-        public Stream OpenAppend(bool createDirectory = true)
+        public Task<Stream> OpenReadAsync() =>
+            Task.FromResult<Stream>(LocalFileProvider.RetryPolicy.Execute(() => _file.Open(FileMode.Open, FileAccess.Read, FileShare.ReadWrite)));
+
+        public async Task<Stream> OpenWriteAsync(bool createDirectory = true)
         {
             if (createDirectory)
             {
-                Directory.Create();
+                await CreateDirectoryAsync();
             }
-            return RetryHelper.Retry(() => _file.Open(FileMode.Append, FileAccess.Write, FileShare.ReadWrite));
+            return LocalFileProvider.RetryPolicy.Execute(() => _file.Open(FileMode.OpenOrCreate, FileAccess.Write, FileShare.ReadWrite));
         }
 
-        public Stream Open(bool createDirectory = true)
+        public async Task<Stream> OpenAppendAsync(bool createDirectory = true)
         {
             if (createDirectory)
             {
-                Directory.Create();
+                await CreateDirectoryAsync();
             }
-            return RetryHelper.Retry(() => _file.Open(FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.ReadWrite));
+            return LocalFileProvider.RetryPolicy.Execute(() => _file.Open(FileMode.Append, FileAccess.Write, FileShare.ReadWrite));
+        }
+
+        public async Task<Stream> OpenAsync(bool createDirectory = true)
+        {
+            if (createDirectory)
+            {
+                await CreateDirectoryAsync();
+            }
+            return LocalFileProvider.RetryPolicy.Execute(() => _file.Open(FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.ReadWrite));
+        }
+
+        private async Task CreateDirectoryAsync()
+        {
+            IDirectory directory = await GetDirectoryAsync();
+            await directory.CreateAsync();
         }
     }
 }

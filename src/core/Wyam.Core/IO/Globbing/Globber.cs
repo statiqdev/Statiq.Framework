@@ -73,7 +73,7 @@ namespace Wyam.Core.IO.Globbing
 
             DirectoryInfoBase directoryInfo = new DirectoryInfo(directory);
             PatternMatchingResult result = matcher.Execute(directoryInfo);
-            return result.Files.Select(match => directory.GetFile(match.Path));
+            return result.Files.Select(match => directory.GetFileAsync(match.Path).Result);
         }
 
         /// <summary>Expands all brace ranges in a pattern, returning a sequence containing every possible combination.</summary>

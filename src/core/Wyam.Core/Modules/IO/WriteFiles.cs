@@ -272,14 +272,14 @@ namespace Wyam.Core.Modules.IO
                             {
                                 // Complete the previous write, then do the next one
                                 previousWrite();
-                                outputs.Add(Write(input, context, outputPath));
+                                outputs.Add(WriteAsync(input, context, outputPath).Result);
                             });
                     }
                     else
                     {
                         value = new Tuple<List<string>, Action>(
                             new List<string> { input.SourceString() },
-                            () => outputs.Add(Write(input, context, outputPath)));
+                            () => outputs.Add(WriteAsync(input, context, outputPath).Result));
                     }
                     writesBySource[outputPath] = value;
                 }
@@ -302,9 +302,9 @@ namespace Wyam.Core.Modules.IO
             return outputs;
         }
 
-        private IDocument Write(IDocument input, IExecutionContext context, FilePath outputPath)
+        private async Task<IDocument> WriteAsync(IDocument input, IExecutionContext context, FilePath outputPath)
         {
-            IFile output = context.FileSystem.GetOutputFile(outputPath);
+            IFile output = await context.FileSystem.GetOutputFileAsync(outputPath);
             if (output != null)
             {
                 using (Stream inputStream = input.GetStream())
@@ -315,7 +315,7 @@ namespace Wyam.Core.Modules.IO
                     }
                     if (!_onlyMetadata)
                     {
-                        using (Stream outputStream = _append ? output.OpenAppend() : output.OpenWrite())
+                        using (Stream outputStream = _append ? await output.OpenAppendAsync() : await output.OpenWriteAsync())
                         {
                             inputStream.CopyTo(outputStream);
                             if (!_append)
@@ -358,7 +358,7 @@ namespace Wyam.Core.Modules.IO
                 }
                 return _onlyMetadata
                     ? context.GetDocument(input, metadata)
-                    : context.GetDocument(input, output.OpenRead(), metadata);
+                    : context.GetDocument(input, await output.OpenReadAsync(), metadata);
             }
             return input;
         }

@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 using Buildalyzer;
 using Buildalyzer.Workspaces;
 using Microsoft.CodeAnalysis;
@@ -16,6 +17,7 @@ using Wyam.Common.IO;
 using Wyam.Common.Meta;
 using Wyam.Common.Modules;
 using Wyam.Common.Tracing;
+using Wyam.Common.Util;
 
 namespace Wyam.CodeAnalysis
 {
@@ -267,14 +269,8 @@ namespace Wyam.CodeAnalysis
         /// </summary>
         /// <param name="predicate">A predicate that returns <c>true</c> if the symbol should be included in the initial result set.</param>
         /// <returns>The current module instance.</returns>
-        public AnalyzeCSharp WithNamedTypes(Func<INamedTypeSymbol, bool> predicate = null)
-        {
-            return WhereSymbol(x =>
-            {
-                INamedTypeSymbol namedTypeSymbol = x as INamedTypeSymbol;
-                return namedTypeSymbol != null && (predicate?.Invoke(namedTypeSymbol) ?? true);
-            });
-        }
+        public AnalyzeCSharp WithNamedTypes(Func<INamedTypeSymbol, bool> predicate = null) =>
+            WhereSymbol(x => x is INamedTypeSymbol namedTypeSymbol && (predicate?.Invoke(namedTypeSymbol) ?? true));
 
         /// <summary>
         /// Limits symbols in the initial result set to those in the specified namespaces.
@@ -291,8 +287,7 @@ namespace Wyam.CodeAnalysis
                 {
                     return true;
                 }
-                INamespaceSymbol namespaceSymbol = x as INamespaceSymbol;
-                if (namespaceSymbol == null)
+                if (!(x is INamespaceSymbol namespaceSymbol))
                 {
                     return x.ContainingNamespace != null
                            && (namespaces.Length == 0 || namespaces.Any(y => x.ContainingNamespace.ToString().StartsWith(y)));
@@ -319,8 +314,7 @@ namespace Wyam.CodeAnalysis
                 {
                     return true;
                 }
-                INamespaceSymbol namespaceSymbol = x as INamespaceSymbol;
-                if (namespaceSymbol == null)
+                if (!(x is INamespaceSymbol namespaceSymbol))
                 {
                     return x.ContainingNamespace != null && predicate(x.ContainingNamespace.ToString());
                 }
@@ -417,18 +411,18 @@ namespace Wyam.CodeAnalysis
             IDocument namespaceDocument = metadata.Document(CodeAnalysisKeys.ContainingNamespace);
             FilePath writePath = null;
 
-            if (metadata.String(CodeAnalysisKeys.Kind) == SymbolKind.Assembly.ToString())
+            if (metadata.String(CodeAnalysisKeys.Kind) == nameof(SymbolKind.Assembly))
             {
                 // Assemblies output to the index page in a folder of their name
                 writePath = new FilePath($"{metadata[CodeAnalysisKeys.DisplayName]}/index.html");
             }
-            else if (metadata.String(CodeAnalysisKeys.Kind) == SymbolKind.Namespace.ToString())
+            else if (metadata.String(CodeAnalysisKeys.Kind) == nameof(SymbolKind.Namespace))
             {
                 // Namespaces output to the index page in a folder of their full name
                 // If this namespace does not have a containing namespace, it's the global namespace
                 writePath = new FilePath(namespaceDocument == null ? "global/index.html" : $"{metadata[CodeAnalysisKeys.DisplayName]}/index.html");
             }
-            else if (metadata.String(CodeAnalysisKeys.Kind) == SymbolKind.NamedType.ToString())
+            else if (metadata.String(CodeAnalysisKeys.Kind) == nameof(SymbolKind.NamedType))
             {
                 // Types output to the index page in a folder of their SymbolId under the folder for their namespace
                 writePath = new FilePath(namespaceDocument?[CodeAnalysisKeys.ContainingNamespace] == null
@@ -471,9 +465,9 @@ namespace Wyam.CodeAnalysis
             // Add the input source and references
             List<ISymbol> symbols = new List<ISymbol>();
             compilation = AddSourceFiles(inputs, context, compilation);
-            compilation = AddProjectReferences(context, symbols, compilation);
-            compilation = AddSolutionReferences(context, symbols, compilation);
-            compilation = AddAssemblyReferences(context, symbols, compilation);
+            compilation = AddProjectReferencesAsync(context, symbols, compilation).Result;
+            compilation = AddSolutionReferencesAsync(context, symbols, compilation).Result;
+            compilation = AddAssemblyReferencesAsync(context, symbols, compilation).Result;
 
             // Get and return the document tree
             symbols.Add(compilation.Assembly.GlobalNamespace);
@@ -514,15 +508,15 @@ namespace Wyam.CodeAnalysis
             return compilation;
         }
 
-        private Compilation AddAssemblyReferences(IExecutionContext context, List<ISymbol> symbols, Compilation compilation)
+        private async Task<Compilation> AddAssemblyReferencesAsync(IExecutionContext context, List<ISymbol> symbols, Compilation compilation)
         {
-            IEnumerable<IFile> assemblyFiles = context.FileSystem.GetInputFiles(_assemblyGlobs)
-                .Where(x => (x.Path.Extension == ".dll" || x.Path.Extension == ".exe") && x.Exists);
-            MetadataReference[] assemblyReferences = assemblyFiles.Select(assemblyFile =>
+            IEnumerable<IFile> assemblyFiles = await context.FileSystem.GetInputFilesAsync(_assemblyGlobs)
+                .WhereAsync(async x => (x.Path.Extension == ".dll" || x.Path.Extension == ".exe") && await x.GetExistsAsync());
+            MetadataReference[] assemblyReferences = await assemblyFiles.SelectAsync(async assemblyFile =>
             {
                 // Create the metadata reference for the compilation
-                IFile xmlFile = context.FileSystem.GetFile(assemblyFile.Path.ChangeExtension("xml"));
-                if (xmlFile.Exists)
+                IFile xmlFile = await context.FileSystem.GetFileAsync(assemblyFile.Path.ChangeExtension("xml"));
+                if (await xmlFile.GetExistsAsync())
                 {
                     Trace.Verbose($"Creating metadata reference for assembly {assemblyFile.Path.FullPath} with XML documentation file at {xmlFile.Path.FullPath}");
                     return MetadataReference.CreateFromFile(
@@ -531,7 +525,7 @@ namespace Wyam.CodeAnalysis
                 }
                 Trace.Verbose($"Creating metadata reference for assembly {assemblyFile.Path.FullPath} without XML documentation file");
                 return (MetadataReference)MetadataReference.CreateFromFile(assemblyFile.Path.FullPath);
-            }).ToArray();
+            }).ToArrayAsync();
             if (assemblyReferences.Length > 0)
             {
                 compilation = compilation.AddReferences(assemblyReferences);
@@ -542,7 +536,7 @@ namespace Wyam.CodeAnalysis
             return compilation;
         }
 
-        private Compilation AddProjectReferences(IExecutionContext context, List<ISymbol> symbols, Compilation compilation)
+        private async Task<Compilation> AddProjectReferencesAsync(IExecutionContext context, List<ISymbol> symbols, Compilation compilation)
         {
             // Generate a single Workspace and add all of the projects to it
             StringWriter log = new StringWriter();
@@ -551,8 +545,8 @@ namespace Wyam.CodeAnalysis
                 LogWriter = log
             });
             AdhocWorkspace workspace = new AdhocWorkspace();
-            IEnumerable<IFile> projectFiles = context.FileSystem.GetInputFiles(_projectGlobs)
-                .Where(x => x.Path.Extension == ".csproj" && x.Exists);
+            IEnumerable<IFile> projectFiles = await context.FileSystem.GetInputFilesAsync(_projectGlobs)
+                .WhereAsync(async x => x.Path.Extension == ".csproj" && await x.GetExistsAsync());
             List<Project> projects = new List<Project>();
             foreach (IFile projectFile in projectFiles)
             {
@@ -581,14 +575,13 @@ namespace Wyam.CodeAnalysis
                 }
                 projects.Add(project);
             }
-            compilation = AddProjectReferences(projects, symbols, compilation);
-            return compilation;
+            return AddProjectReferences(projects, symbols, compilation);
         }
 
-        private Compilation AddSolutionReferences(IExecutionContext context, List<ISymbol> symbols, Compilation compilation)
+        private async Task<Compilation> AddSolutionReferencesAsync(IExecutionContext context, List<ISymbol> symbols, Compilation compilation)
         {
-            IEnumerable<IFile> solutionFiles = context.FileSystem.GetInputFiles(_solutionGlobs)
-                .Where(x => x.Path.Extension == ".sln" && x.Exists);
+            IEnumerable<IFile> solutionFiles = await context.FileSystem.GetInputFilesAsync(_solutionGlobs)
+                .WhereAsync(async x => x.Path.Extension == ".sln" && await x.GetExistsAsync());
             foreach (IFile solutionFile in solutionFiles)
             {
                 Trace.Verbose($"Creating workspace solution for {solutionFile.Path.FullPath}");

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using Wyam.Common.Configuration;
 using Wyam.Common.Documents;
 using Wyam.Common.Execution;
@@ -17,7 +18,7 @@ namespace Wyam.Common.Shortcodes
             where TShortcode : IShortcode;
 
         /// <summary>
-        /// Adds a shortcode by type, infering the name from the type name.
+        /// Adds a shortcode by type, inferring the name from the type name.
         /// </summary>
         /// <typeparam name="TShortcode">The type of the shortcode to add.</typeparam>
         void Add<TShortcode>()
@@ -31,7 +32,7 @@ namespace Wyam.Common.Shortcodes
         void Add(string name, Type type);
 
         /// <summary>
-        /// Adds a shortcode by type, infering the name from the type name.
+        /// Adds a shortcode by type, inferring the name from the type name.
         /// </summary>
         /// <param name="type">The type of the shortcode to add (must implement <see cref="IShortcode"/>).</param>
         void Add(Type type);
@@ -155,6 +156,6 @@ namespace Wyam.Common.Shortcodes
         /// A function that has the declared arguments and content and the current document and execution context as inputs
         /// and a <see cref="IShortcodeResult"/> as an output which allows the shortcode to add metadata to the document.
         /// </param>
-        void Add(string name, Func<KeyValuePair<string, string>[], string, IDocument, IExecutionContext, IShortcodeResult> func);
+        void Add(string name, Func<KeyValuePair<string, string>[], string, IDocument, IExecutionContext, Task<IShortcodeResult>> func);
     }
 }

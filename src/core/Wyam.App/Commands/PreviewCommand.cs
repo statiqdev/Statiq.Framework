@@ -78,7 +78,7 @@ namespace Wyam.App.Commands
                     ? GetContentTypes(settings.ContentTypes)
                     : new Dictionary<string, string>();
                 Server previewServer = await StartPreviewServerAsync(
-                    engineManager.Engine.FileSystem.GetOutputDirectory().Path,
+                    (await engineManager.Engine.FileSystem.GetOutputDirectoryAsync()).Path,
                     settings.Port,
                     settings.ForceExt,
                     settings.VirtualDirectory,
@@ -88,8 +88,8 @@ namespace Wyam.App.Commands
                 // Start the watchers
                 Trace.Information("Watching paths(s) {0}", string.Join(", ", engineManager.Engine.FileSystem.InputPaths));
                 ActionFileSystemWatcher inputFolderWatcher = new ActionFileSystemWatcher(
-                    engineManager.Engine.FileSystem.GetOutputDirectory().Path,
-                    engineManager.Engine.FileSystem.GetInputDirectories().Select(x => x.Path),
+                    (await engineManager.Engine.FileSystem.GetOutputDirectoryAsync()).Path,
+                    (await engineManager.Engine.FileSystem.GetInputDirectoriesAsync()).Select(x => x.Path),
                     true,
                     "*.*",
                     path =>

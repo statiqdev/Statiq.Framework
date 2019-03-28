@@ -25,9 +25,9 @@ namespace Wyam.Common.Documents
             CheckDisposed();
             _disposed = true;
             _stream?.Dispose();
-            if (_file.Exists)
+            if (_file.GetExistsAsync().Result)
             {
-                _file.Delete();
+                _file.DeleteAsync().Wait();
             }
         }
 
@@ -39,7 +39,7 @@ namespace Wyam.Common.Documents
             }
         }
 
-        private Stream GetStream() => _stream ?? (_stream = _file.Open());
+        private Stream GetStream() => _stream ?? (_stream = _file.OpenAsync().Result);
 
         public override object InitializeLifetimeService()
         {
@@ -47,10 +47,10 @@ namespace Wyam.Common.Documents
             return GetStream().InitializeLifetimeService();
         }
 
-        public override Task CopyToAsync(Stream destination, int bufferSize, CancellationToken cancellationToken)
+        public override async Task CopyToAsync(Stream destination, int bufferSize, CancellationToken cancellationToken)
         {
             CheckDisposed();
-            return GetStream().CopyToAsync(destination, bufferSize, cancellationToken);
+            await GetStream().CopyToAsync(destination, bufferSize, cancellationToken);
         }
 
         public override void Close()
@@ -65,10 +65,10 @@ namespace Wyam.Common.Documents
             GetStream().Flush();
         }
 
-        public override Task FlushAsync(CancellationToken cancellationToken)
+        public override async Task FlushAsync(CancellationToken cancellationToken)
         {
             CheckDisposed();
-            return GetStream().FlushAsync(cancellationToken);
+            await GetStream().FlushAsync(cancellationToken);
         }
 
         public override IAsyncResult BeginRead(byte[] buffer, int offset, int count, AsyncCallback callback, object state)
@@ -83,10 +83,10 @@ namespace Wyam.Common.Documents
             return GetStream().EndRead(asyncResult);
         }
 
-        public override Task<int> ReadAsync(byte[] buffer, int offset, int count, CancellationToken cancellationToken)
+        public override async Task<int> ReadAsync(byte[] buffer, int offset, int count, CancellationToken cancellationToken)
         {
             CheckDisposed();
-            return GetStream().ReadAsync(buffer, offset, count, cancellationToken);
+            return await GetStream().ReadAsync(buffer, offset, count, cancellationToken);
         }
 
         public override IAsyncResult BeginWrite(byte[] buffer, int offset, int count, AsyncCallback callback, object state)
@@ -101,10 +101,10 @@ namespace Wyam.Common.Documents
             GetStream().EndWrite(asyncResult);
         }
 
-        public override Task WriteAsync(byte[] buffer, int offset, int count, CancellationToken cancellationToken)
+        public override async Task WriteAsync(byte[] buffer, int offset, int count, CancellationToken cancellationToken)
         {
             CheckDisposed();
-            return GetStream().WriteAsync(buffer, offset, count, cancellationToken);
+            await GetStream().WriteAsync(buffer, offset, count, cancellationToken);
         }
 
         public override long Seek(long offset, SeekOrigin origin)

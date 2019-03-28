@@ -210,7 +210,7 @@ namespace Wyam.Testing.IO
                 throw new ArgumentNullException(nameof(path));
             }
 
-            return GetFileProvider(path).GetFile(path);
+            return GetFileProvider(path).GetFileAsync(path);
         }
 
         /// <inheritdoc />
@@ -221,7 +221,7 @@ namespace Wyam.Testing.IO
                 throw new ArgumentNullException(nameof(path));
             }
 
-            return GetFileProvider(path).GetDirectory(path);
+            return GetFileProvider(path).GetDirectoryAsync(path);
         }
 
         /// <inheritdoc />

@@ -23,20 +23,8 @@ namespace Wyam.Core.Documents
             _settings = settings;
         }
 
-        public IDocument GetDocument(IExecutionContext context)
-        {
-            return new Document(_settings, null, null, null, true);
-        }
-
-        public IDocument GetDocument(
-            IExecutionContext context,
-            IDocument sourceDocument,
-            FilePath source,
-            string content,
-            IEnumerable<KeyValuePair<string, object>> items = null)
-        {
-            return GetDocument(context, sourceDocument, source, string.IsNullOrEmpty(content) ? null : context.GetContentStream(content), items);
-        }
+        public IDocument GetDocument(IExecutionContext context) =>
+            new Document(_settings, null, null, null, true);
 
         public IDocument GetDocument(
             IExecutionContext context,
@@ -49,15 +37,6 @@ namespace Wyam.Core.Documents
                 return new Document(_settings, source, null, items, true);
             }
             return new Document((Document)sourceDocument, source, items);
-        }
-
-        public IDocument GetDocument(
-            IExecutionContext context,
-            IDocument sourceDocument,
-            string content,
-            IEnumerable<KeyValuePair<string, object>> items = null)
-        {
-            return GetDocument(context, sourceDocument, string.IsNullOrEmpty(content) ? null : context.GetContentStream(content), items);
         }
 
         public IDocument GetDocument(

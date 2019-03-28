@@ -44,7 +44,7 @@ namespace Wyam.Testing.IO
             }
         }
 
-        public void CopyTo(IFile destination, bool overwrite = true, bool createDirectory = true)
+        public void CopyToAsync(IFile destination, bool overwrite = true, bool createDirectory = true)
         {
             CreateDirectory(createDirectory, destination);
 
@@ -58,7 +58,7 @@ namespace Wyam.Testing.IO
             }
         }
 
-        public void MoveTo(IFile destination)
+        public void MoveToAsync(IFile destination)
         {
             if (!_fileProvider.Files.ContainsKey(_path.FullPath))
             {
@@ -71,24 +71,24 @@ namespace Wyam.Testing.IO
             }
         }
 
-        public void Delete()
+        public void DeleteAsync()
         {
             StringBuilder builder;
             _fileProvider.Files.TryRemove(_path.FullPath, out builder);
         }
 
-        public string ReadAllText()
+        public string ReadAllTextAsync()
         {
             return _fileProvider.Files[_path.FullPath].ToString();
         }
 
-        public void WriteAllText(string contents, bool createDirectory = true)
+        public void WriteAllTextAsync(string contents, bool createDirectory = true)
         {
             CreateDirectory(createDirectory, this);
             _fileProvider.Files[_path.FullPath] = new StringBuilder(contents);
         }
 
-        public Stream OpenRead()
+        public Stream OpenReadAsync()
         {
             StringBuilder builder;
             if (!_fileProvider.Files.TryGetValue(_path.FullPath, out builder))
@@ -99,13 +99,13 @@ namespace Wyam.Testing.IO
             return new MemoryStream(bytes);
         }
 
-        public Stream OpenWrite(bool createDirectory = true)
+        public Stream OpenWriteAsync(bool createDirectory = true)
         {
             CreateDirectory(createDirectory, this);
             return new StringBuilderStream(_fileProvider.Files.AddOrUpdate(_path.FullPath, new StringBuilder(), (x, y) => y));
         }
 
-        public Stream OpenAppend(bool createDirectory = true)
+        public Stream OpenAppendAsync(bool createDirectory = true)
         {
             CreateDirectory(createDirectory, this);
             StringBuilderStream stream = new StringBuilderStream(_fileProvider.Files.AddOrUpdate(_path.FullPath, new StringBuilder(), (x, y) => y));
@@ -115,7 +115,7 @@ namespace Wyam.Testing.IO
             return stream;
         }
 
-        public Stream Open(bool createDirectory = true)
+        public Stream OpenAsync(bool createDirectory = true)
         {
             CreateDirectory(createDirectory, this);
             return new StringBuilderStream(_fileProvider.Files.AddOrUpdate(_path.FullPath, new StringBuilder(), (x, y) => y));

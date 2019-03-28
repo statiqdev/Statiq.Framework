@@ -72,10 +72,10 @@ namespace Wyam.Core.Modules.Templates
                         FilePath path = _xsltPath.Invoke<FilePath>(input, context);
                         if (path != null)
                         {
-                            IFile file = context.FileSystem.GetInputFile(path);
-                            if (file.Exists)
+                            IFile file = context.FileSystem.GetInputFileAsync(path).Result;
+                            if (file.GetExistsAsync().Result)
                             {
-                                using (Stream fileStream = file.OpenRead())
+                                using (Stream fileStream = file.OpenReadAsync().Result)
                                 {
                                     xslt.Load(XmlReader.Create(fileStream));
                                 }
@@ -97,7 +97,7 @@ namespace Wyam.Core.Modules.Templates
                         {
                             xslt.Transform(XmlReader.Create(stream), writer);
                         }
-                        return context.GetDocument(input, context.GetContentStream(str.ToString()));
+                        return context.GetDocument(input, context.GetContentStreamAsync(str.ToString()).Result);
                     }
                 }
                 catch (Exception e)

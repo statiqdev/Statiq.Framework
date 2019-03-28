@@ -380,7 +380,7 @@ namespace Wyam.Docs
         public override void Scaffold(IFile configFile, IDirectory inputDirectory)
         {
             // Config file
-            configFile?.WriteAllText(@"#recipe Docs
+            configFile?.WriteAllTextAsync(@"#recipe Docs
 
 // Customize your settings and add new ones here
 Settings[Keys.Host] = ""host.com"";
@@ -389,23 +389,23 @@ Settings[DocsKeys.Title] = ""My Docs"";
 // Add any pipeline customizations here");
 
             // Add info page
-            inputDirectory.GetFile("about.md").WriteAllText(
+            inputDirectory.GetFileAsync("about.md").WriteAllTextAsync(
 @"Title: About This Project
 ---
 This project is awesome!");
 
             // Add docs pages
-            inputDirectory.GetFile("docs/command-line.md").WriteAllText(
+            inputDirectory.GetFileAsync("docs/command-line.md").WriteAllTextAsync(
 @"Description: How to use the command line.
 ---
 Here are some instructions on how to use the command line.");
-            inputDirectory.GetFile("docs/usage.md").WriteAllText(
+            inputDirectory.GetFileAsync("docs/usage.md").WriteAllTextAsync(
 @"Description: Library usage instructions.
 ---
 To use this library, take these steps...");
 
             // Add post page
-            inputDirectory.GetFile("blog/new-release.md").WriteAllText(
+            inputDirectory.GetFileAsync("blog/new-release.md").WriteAllTextAsync(
 @"Title: New Release
 Published: 1/1/2016
 Category: Release

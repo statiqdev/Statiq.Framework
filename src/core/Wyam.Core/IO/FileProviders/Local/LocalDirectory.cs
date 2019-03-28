@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 using Wyam.Common.IO;
 
 namespace Wyam.Core.IO.FileProviders.Local
@@ -13,22 +14,10 @@ namespace Wyam.Core.IO.FileProviders.Local
             = new LocalCaseSensitivityChecker();
 
         private readonly DirectoryInfo _directory;
-        private readonly DirectoryPath _path;
 
-        public DirectoryPath Path => _path;
+        public DirectoryPath Path { get; }
 
-        NormalizedPath IFileSystemEntry.Path => _path;
-
-        public bool Exists => _directory.Exists;
-
-        public IDirectory Parent
-        {
-            get
-            {
-                DirectoryInfo parent = _directory.Parent;
-                return parent == null ? null : new LocalDirectory(new DirectoryPath(_path.FileProvider, parent.FullName));
-            }
-        }
+        NormalizedPath IFileSystemEntry.Path => Path;
 
         public LocalDirectory(DirectoryPath path)
         {
@@ -41,48 +30,66 @@ namespace Wyam.Core.IO.FileProviders.Local
                 throw new ArgumentException("Path must be absolute", nameof(path));
             }
 
-            _path = path.Collapse();
-            _directory = new DirectoryInfo(_path.FullPath);
-        }
-
-        public void Create() => RetryHelper.Retry(() => _directory.Create());
-
-        public void Delete(bool recursive) => RetryHelper.Retry(() => _directory.Delete(recursive));
-
-        public IEnumerable<IDirectory> GetDirectories(SearchOption searchOption = SearchOption.TopDirectoryOnly) =>
-            RetryHelper.Retry(() => _directory.GetDirectories("*", searchOption).Select(directory => new LocalDirectory(directory.FullName)));
-
-        public IEnumerable<IFile> GetFiles(SearchOption searchOption = SearchOption.TopDirectoryOnly) =>
-            RetryHelper.Retry(() => _directory.GetFiles("*", searchOption).Select(file => new LocalFile(file.FullName)));
-
-        public IDirectory GetDirectory(DirectoryPath path)
-        {
-            if (path == null)
-            {
-                throw new ArgumentNullException(nameof(path));
-            }
-            if (!path.IsRelative)
-            {
-                throw new ArgumentException("Path must be relative", nameof(path));
-            }
-
-            return new LocalDirectory(_path.Combine(path));
-        }
-
-        public IFile GetFile(FilePath path)
-        {
-            if (path == null)
-            {
-                throw new ArgumentNullException(nameof(path));
-            }
-            if (!path.IsRelative)
-            {
-                throw new ArgumentException("Path must be relative", nameof(path));
-            }
-
-            return new LocalFile(_path.CombineFile(path));
+            Path = path.Collapse();
+            _directory = new DirectoryInfo(Path.FullPath);
         }
 
         public bool IsCaseSensitive => _caseSensitivtyChecker.IsCaseSensitive(this);
+
+        public Task<bool> GetExistsAsync() => Task.FromResult(_directory.Exists);
+
+        public Task<IDirectory> GetParentAsync()
+        {
+            DirectoryInfo parent = _directory.Parent;
+            return Task.FromResult<IDirectory>(parent == null ? null : new LocalDirectory(new DirectoryPath(Path.FileProvider, parent.FullName)));
+        }
+
+        public Task CreateAsync()
+        {
+            LocalFileProvider.RetryPolicy.Execute(() => _directory.Create());
+            return Task.CompletedTask;
+        }
+
+        public Task DeleteAsync(bool recursive)
+        {
+            LocalFileProvider.RetryPolicy.Execute(() => _directory.Delete(recursive));
+            return Task.CompletedTask;
+        }
+
+        public Task<IEnumerable<IDirectory>> GetDirectoriesAsync(SearchOption searchOption = SearchOption.TopDirectoryOnly) =>
+            Task.FromResult(LocalFileProvider.RetryPolicy.Execute(() =>
+                _directory.GetDirectories("*", searchOption).Select(directory => (IDirectory)new LocalDirectory(directory.FullName))));
+
+        public Task<IEnumerable<IFile>> GetFilesAsync(SearchOption searchOption = SearchOption.TopDirectoryOnly) =>
+            Task.FromResult(LocalFileProvider.RetryPolicy.Execute(() =>
+                _directory.GetFiles("*", searchOption).Select(file => (IFile)new LocalFile(file.FullName))));
+
+        public Task<IDirectory> GetDirectoryAsync(DirectoryPath path)
+        {
+            if (path == null)
+            {
+                throw new ArgumentNullException(nameof(path));
+            }
+            if (!path.IsRelative)
+            {
+                throw new ArgumentException("Path must be relative", nameof(path));
+            }
+
+            return Task.FromResult<IDirectory>(new LocalDirectory(Path.Combine(path)));
+        }
+
+        public Task<IFile> GetFileAsync(FilePath path)
+        {
+            if (path == null)
+            {
+                throw new ArgumentNullException(nameof(path));
+            }
+            if (!path.IsRelative)
+            {
+                throw new ArgumentException("Path must be relative", nameof(path));
+            }
+
+            return Task.FromResult<IFile>(new LocalFile(Path.CombineFile(path)));
+        }
     }
 }

@@ -25,6 +25,6 @@ namespace Wyam.Common.IO
         /// <value>
         ///   <c>true</c> if the entry exists; otherwise, <c>false</c>.
         /// </value>
-        bool Exists { get; }
+        Task<bool> GetExistsAsync();
     }
 }

@@ -144,15 +144,15 @@ namespace Wyam.Core.Execution
         /// <summary>
         /// Deletes the output path and all files it contains.
         /// </summary>
-        public void CleanOutputPath()
+        public async Task CleanOutputPathAsync()
         {
             try
             {
                 Trace.Information("Cleaning output path: {0}", FileSystem.OutputPath);
-                IDirectory outputDirectory = FileSystem.GetOutputDirectory();
-                if (outputDirectory.Exists)
+                IDirectory outputDirectory = await FileSystem.GetOutputDirectoryAsync();
+                if (await outputDirectory.GetExistsAsync())
                 {
-                    outputDirectory.Delete(true);
+                    await outputDirectory.DeleteAsync(true);
                 }
                 Trace.Information("Cleaned output directory");
             }
@@ -165,15 +165,15 @@ namespace Wyam.Core.Execution
         /// <summary>
         /// Deletes the temp path and all files it contains.
         /// </summary>
-        public void CleanTempPath()
+        public async Task CleanTempPathAsync()
         {
             try
             {
                 Trace.Information("Cleaning temp path: {0}", FileSystem.TempPath);
-                IDirectory tempDirectory = FileSystem.GetTempDirectory();
-                if (tempDirectory.Exists)
+                IDirectory tempDirectory = await FileSystem.GetTempDirectoryAsync();
+                if (await tempDirectory.GetExistsAsync())
                 {
-                    tempDirectory.Delete(true);
+                    await tempDirectory.DeleteAsync(true);
                 }
                 Trace.Information("Cleaned temp directory");
             }
@@ -224,12 +224,12 @@ namespace Wyam.Core.Execution
                 Trace.Warning("The output path is also one of the input paths which can cause unexpected behavior and is usually not advised");
             }
 
-            CleanTempPath();
+            await CleanTempPathAsync();
 
             // Clean the output folder if requested
             if (Settings.Bool(Keys.CleanOutputPath))
             {
-                CleanOutputPath();
+                await CleanOutputPathAsync();
             }
 
             try
@@ -312,7 +312,7 @@ namespace Wyam.Core.Execution
                 pipeline.Dispose();
             }
             System.Diagnostics.Trace.Listeners.Remove(_diagnosticsTraceListener);
-            CleanTempPath();
+            CleanTempPathAsync().Wait();
             _disposed = true;
         }
 

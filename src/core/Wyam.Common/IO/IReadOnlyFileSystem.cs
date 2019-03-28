@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace Wyam.Common.IO
 {
@@ -67,7 +68,7 @@ namespace Wyam.Common.IO
         /// current input paths.
         /// </param>
         /// <returns>An input file.</returns>
-        IFile GetInputFile(FilePath path);
+        Task<IFile> GetInputFileAsync(FilePath path);
 
         /// <summary>
         /// Gets matching input files based on globbing patterns and/or absolute paths. If any absolute paths
@@ -75,7 +76,7 @@ namespace Wyam.Common.IO
         /// </summary>
         /// <param name="patterns">The globbing patterns and/or absolute paths.</param>
         /// <returns>All input files that match the globbing patterns and/or absolute paths.</returns>
-        IEnumerable<IFile> GetInputFiles(params string[] patterns);
+        Task<IEnumerable<IFile>> GetInputFilesAsync(params string[] patterns);
 
         /// <summary>
         /// Gets matching input files based on globbing patterns and/or absolute paths. If any absolute paths
@@ -83,7 +84,7 @@ namespace Wyam.Common.IO
         /// </summary>
         /// <param name="patterns">The globbing patterns and/or absolute paths.</param>
         /// <returns>All input files that match the globbing patterns and/or absolute paths.</returns>
-        IEnumerable<IFile> GetInputFiles(IEnumerable<string> patterns);
+        Task<IEnumerable<IFile>> GetInputFilesAsync(IEnumerable<string> patterns);
 
         /// <summary>
         /// Gets a directory representing an input.
@@ -97,13 +98,13 @@ namespace Wyam.Common.IO
         /// directory aggregating all input paths is returned.
         /// </param>
         /// <returns>An input directory.</returns>
-        IDirectory GetInputDirectory(DirectoryPath path = null);
+        Task<IDirectory> GetInputDirectoryAsync(DirectoryPath path = null);
 
         /// <summary>
         /// Gets all absolute input directories.
         /// </summary>
         /// <returns>The absolute input directories.</returns>
-        IReadOnlyList<IDirectory> GetInputDirectories();
+        Task<IReadOnlyList<IDirectory>> GetInputDirectoriesAsync();
 
         /// <summary>
         /// Gets the absolute input path that contains the specified file or directory. If the provided
@@ -116,7 +117,7 @@ namespace Wyam.Common.IO
         /// <param name="path">The file path.</param>
         /// <returns>The input path that contains the specified file,
         /// or <c>null</c> if no input path does.</returns>
-        DirectoryPath GetContainingInputPath(NormalizedPath path);
+        Task<DirectoryPath> GetContainingInputPathAsync(NormalizedPath path);
 
         /// <summary>
         /// Gets an output file path by combining it with the root path and output path.
@@ -143,7 +144,7 @@ namespace Wyam.Common.IO
         /// current output path.
         /// </param>
         /// <returns>An output file.</returns>
-        IFile GetOutputFile(FilePath path);
+        Task<IFile> GetOutputFileAsync(FilePath path);
 
         /// <summary>
         /// Gets a directory representing an output.
@@ -156,7 +157,7 @@ namespace Wyam.Common.IO
         /// output directory is returned.
         /// </param>
         /// <returns>An output directory.</returns>
-        IDirectory GetOutputDirectory(DirectoryPath path = null);
+        Task<IDirectory> GetOutputDirectoryAsync(DirectoryPath path = null);
 
         /// <summary>
         /// Gets a file representing a root file.
@@ -168,7 +169,7 @@ namespace Wyam.Common.IO
         /// current root path.
         /// </param>
         /// <returns>A root file.</returns>
-        IFile GetRootFile(FilePath path);
+        Task<IFile> GetRootFileAsync(FilePath path);
 
         /// <summary>
         /// Gets a directory representing a root directory.
@@ -181,7 +182,7 @@ namespace Wyam.Common.IO
         /// root directory is returned.
         /// </param>
         /// <returns>A root directory.</returns>
-        IDirectory GetRootDirectory(DirectoryPath path = null);
+        Task<IDirectory> GetRootDirectoryAsync(DirectoryPath path = null);
 
         /// <summary>
         /// Gets a temp file path by combining it with the root path and temp path.
@@ -208,13 +209,13 @@ namespace Wyam.Common.IO
         /// current temp path.
         /// </param>
         /// <returns>A temp file.</returns>
-        IFile GetTempFile(FilePath path);
+        Task<IFile> GetTempFileAsync(FilePath path);
 
         /// <summary>
         /// Gets a file representing a temp file with a random file name.
         /// </summary>
         /// <returns>A temp file.</returns>
-        IFile GetTempFile();
+        Task<IFile> GetTempFileAsync();
 
         /// <summary>
         /// Gets a directory representing temp files.
@@ -227,7 +228,7 @@ namespace Wyam.Common.IO
         /// temp directory is returned.
         /// </param>
         /// <returns>A temp directory.</returns>
-        IDirectory GetTempDirectory(DirectoryPath path = null);
+        Task<IDirectory> GetTempDirectoryAsync(DirectoryPath path = null);
 
         /// <summary>
         /// Gets an absolute file.
@@ -236,7 +237,7 @@ namespace Wyam.Common.IO
         /// The absolute path of the file.
         /// </param>
         /// <returns>A file.</returns>
-        IFile GetFile(FilePath path);
+        Task<IFile> GetFileAsync(FilePath path);
 
         /// <summary>
         /// Gets an absolute directory.
@@ -245,7 +246,7 @@ namespace Wyam.Common.IO
         /// The absolute path of the directory.
         /// </param>
         /// <returns>A directory.</returns>
-        IDirectory GetDirectory(DirectoryPath path);
+        Task<IDirectory> GetDirectoryAsync(DirectoryPath path);
 
         /// <summary>
         /// Gets matching files based on globbing patterns from the root path or absolute paths.
@@ -254,7 +255,7 @@ namespace Wyam.Common.IO
         /// <returns>
         /// All files in the specified directory that match the globbing patterns and/or absolute paths.
         /// </returns>
-        IEnumerable<IFile> GetFiles(string[] patterns);
+        Task<IEnumerable<IFile>> GetFilesAsync(string[] patterns);
 
         /// <summary>
         /// Gets matching files based on globbing patterns from the root path or absolute paths.
@@ -263,7 +264,7 @@ namespace Wyam.Common.IO
         /// <returns>
         /// All files in the specified directory that match the globbing patterns and/or absolute paths.
         /// </returns>
-        IEnumerable<IFile> GetFiles(IEnumerable<string> patterns);
+        Task<IEnumerable<IFile>> GetFilesAsync(IEnumerable<string> patterns);
 
         /// <summary>
         /// Gets matching files based on globbing patterns and/or absolute paths. If any absolute paths
@@ -274,7 +275,7 @@ namespace Wyam.Common.IO
         /// <returns>
         /// All files in the specified directory that match the globbing patterns and/or absolute paths.
         /// </returns>
-        IEnumerable<IFile> GetFiles(IDirectory directory, params string[] patterns);
+        Task<IEnumerable<IFile>> GetFilesAsync(IDirectory directory, params string[] patterns);
 
         /// <summary>
         /// Gets matching files based on globbing patterns and/or absolute paths. If any absolute paths
@@ -285,7 +286,7 @@ namespace Wyam.Common.IO
         /// <returns>
         /// All files in the specified directory that match the globbing patterns and/or absolute paths.
         /// </returns>
-        IEnumerable<IFile> GetFiles(IDirectory directory, IEnumerable<string> patterns);
+        Task<IEnumerable<IFile>> GetFilesAsync(IDirectory directory, IEnumerable<string> patterns);
 
         /// <summary>
         /// Gets the registered file provider for a specified path.

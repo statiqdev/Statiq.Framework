@@ -23,16 +23,16 @@ namespace Wyam.Common.IO
         /// <summary>
         /// Gets the directory of the file.
         /// </summary>
-        /// <value>
+        /// <returns>
         /// The directory of the file.
-        /// </value>
-        IDirectory Directory { get; }
+        /// </returns>
+        Task<IDirectory> GetDirectoryAsync();
 
         /// <summary>
         /// Gets the length of the file.
         /// </summary>
-        /// <value>The length of the file.</value>
-        long Length { get; }
+        /// <returns>The length of the file.</returns>
+        Task<long> GetLengthAsync();
 
         /// <summary>
         /// Copies the file to the specified destination file.
@@ -40,38 +40,38 @@ namespace Wyam.Common.IO
         /// <param name="destination">The destination file.</param>
         /// <param name="overwrite">Will overwrite existing destination file if set to <c>true</c>.</param>
         /// <param name="createDirectory">Will create any needed directories that don't already exist if set to <c>true</c>.</param>
-        void CopyTo(IFile destination, bool overwrite = true, bool createDirectory = true);
+        Task CopyToAsync(IFile destination, bool overwrite = true, bool createDirectory = true);
 
         /// <summary>
         /// Moves the file to the specified destination file.
         /// </summary>
         /// <param name="destination">The destination file.</param>
-        void MoveTo(IFile destination);
+        Task MoveToAsync(IFile destination);
 
         /// <summary>
         /// Deletes the file.
         /// </summary>
-        void Delete();
+        Task DeleteAsync();
 
         /// <summary>
         /// Reads all text from the file.
         /// </summary>
         /// <returns>All text in the file.</returns>
-        string ReadAllText();
+        Task<string> ReadAllTextAsync();
 
         /// <summary>
         /// Writes the specified text to a file.
         /// </summary>
         /// <param name="contents">The text to write.</param>
         /// <param name="createDirectory">Will create any needed directories that don't already exist if set to <c>true</c>.</param>
-        void WriteAllText(string contents, bool createDirectory = true);
+        Task WriteAllTextAsync(string contents, bool createDirectory = true);
 
         /// <summary>
         /// Opens the file for reading. If it does not exist, an exception
         /// will be thrown.
         /// </summary>
         /// <returns>The stream.</returns>
-        Stream OpenRead();
+        Task<Stream> OpenReadAsync();
 
         /// <summary>
         /// Opens the file for writing. This will either create the file
@@ -79,7 +79,7 @@ namespace Wyam.Common.IO
         /// </summary>
         /// <param name="createDirectory">Will create any needed directories that don't already exist if set to <c>true</c>.</param>
         /// <returns>The stream.</returns>
-        Stream OpenWrite(bool createDirectory = true);
+        Task<Stream> OpenWriteAsync(bool createDirectory = true);
 
         /// <summary>
         /// Opens the file for writing. This will either create the file
@@ -87,7 +87,7 @@ namespace Wyam.Common.IO
         /// </summary>
         /// <param name="createDirectory">Will create any needed directories that don't already exist if set to <c>true</c>.</param>
         /// <returns>The stream.</returns>
-        Stream OpenAppend(bool createDirectory = true);
+        Task<Stream> OpenAppendAsync(bool createDirectory = true);
 
         /// <summary>
         /// Opens the file for reading and writing. This will either create the file
@@ -95,6 +95,6 @@ namespace Wyam.Common.IO
         /// </summary>
         /// <param name="createDirectory">Will create any needed directories that don't already exist if set to <c>true</c>.</param>
         /// <returns>The stream.</returns>
-        Stream Open(bool createDirectory = true);
+        Task<Stream> OpenAsync(bool createDirectory = true);
     }
 }

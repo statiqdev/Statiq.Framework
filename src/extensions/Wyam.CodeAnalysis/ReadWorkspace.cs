@@ -136,7 +136,7 @@ namespace Wyam.CodeAnalysis
                                     Common.Tracing.Trace.Verbose($"Read file {file.Path.FullPath}");
                                     DirectoryPath inputPath = context.FileSystem.GetContainingInputPath(file.Path);
                                     FilePath relativePath = inputPath?.GetRelativePath(file.Path) ?? projectFile.Path.Directory.GetRelativePath(file.Path);
-                                    return context.GetDocument(file.Path, file.OpenRead(), new MetadataItems
+                                    return context.GetDocument(file.Path, file.OpenReadAsync(), new MetadataItems
                                     {
                                         { CodeAnalysisKeys.AssemblyName, assemblyName },
                                         { Keys.SourceFileRoot, inputPath ?? file.Path.Directory },

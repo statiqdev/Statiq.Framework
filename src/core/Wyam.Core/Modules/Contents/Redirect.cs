@@ -144,7 +144,7 @@ namespace Wyam.Core.Modules.Contents
                             {
                                 metaRefreshDocuments.Add(
                                     context.GetDocument(
-                                        context.GetContentStream($@"
+                                        context.GetContentStreamAsync($@"
 <!doctype html>
 <html>    
   <head>      
@@ -154,7 +154,7 @@ namespace Wyam.Core.Modules.Contents
   <body> 
     <p>This page has moved to a <a href=""{url}"">{url}</a></p> 
   </body>  
-</html>"),
+</html>").Result,
                                         new MetadataItems
                                         {
                                             { Keys.RelativeFilePath, outputPath },

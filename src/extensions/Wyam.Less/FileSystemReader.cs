@@ -16,7 +16,7 @@ namespace Wyam.Less
         public byte[] GetBinaryFileContents(string fileName)
         {
             IFile file = GetInputFile(fileName);
-            using (Stream stream = file.OpenRead())
+            using (Stream stream = file.OpenReadAsync())
             {
                 byte[] buffer = new byte[stream.Length];
                 stream.Read(buffer, 0, (int)stream.Length);
@@ -24,7 +24,7 @@ namespace Wyam.Less
             }
         }
 
-        public string GetFileContents(string fileName) => GetInputFile(fileName).ReadAllText();
+        public string GetFileContents(string fileName) => GetInputFile(fileName).ReadAllTextAsync();
 
         public bool DoesFileExist(string fileName) => GetInputFile(fileName).Exists;
 
