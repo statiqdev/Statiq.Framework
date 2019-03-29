@@ -6,6 +6,7 @@ using System.Net.Http;
 using System.Runtime.Serialization;
 using System.Runtime.Serialization.Json;
 using System.Text;
+using System.Threading.Tasks;
 using Wyam.Common.Documents;
 using Wyam.Common.Execution;
 using Wyam.Common.Meta;
@@ -32,7 +33,7 @@ namespace Wyam.Core.Shortcodes.Html
         private bool _omitScript;
 
         /// <inheritdoc />
-        public override IShortcodeResult Execute(KeyValuePair<string, string>[] args, string content, IDocument document, IExecutionContext context)
+        public override async Task<IShortcodeResult> ExecuteAsync(KeyValuePair<string, string>[] args, string content, IDocument document, IExecutionContext context)
         {
             ConvertingDictionary arguments = args.ToDictionary(
                 context,
@@ -65,7 +66,7 @@ namespace Wyam.Core.Shortcodes.Html
             // Omit the script on the next Twitter embed
             _omitScript = true;
 
-            return Execute("https://publish.twitter.com/oembed", $"https://twitter.com/username/status/{arguments.String("Id")}", query, context);
+            return await ExecuteAsync("https://publish.twitter.com/oembed", $"https://twitter.com/username/status/{arguments.String("Id")}", query, context);
         }
     }
 }

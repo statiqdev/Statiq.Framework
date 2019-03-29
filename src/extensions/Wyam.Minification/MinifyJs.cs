@@ -54,7 +54,7 @@ namespace Wyam.Minification
         {
             CrockfordJsMinifier minifier = new CrockfordJsMinifier();
 
-            return Minify(inputs, context, (x) => minifier.Minify(x, _isInlineCode), "JS");
+            return MinifyAsync(inputs, context, (x) => minifier.Minify(x, _isInlineCode), "JS").Result;
         }
     }
 }

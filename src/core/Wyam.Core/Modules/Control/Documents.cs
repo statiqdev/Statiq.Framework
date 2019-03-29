@@ -94,7 +94,7 @@ namespace Wyam.Core.Modules.Control
         /// <param name="content">The content for each output document.</param>
         public Documents(params string[] content)
         {
-            _contextDocuments = ctx => content.Select(x => ctx.GetDocument(ctx.GetContentStream(x)));
+            _contextDocuments = ctx => content.Select(x => ctx.GetDocumentAsync(x).Result);
         }
 
         /// <summary>
@@ -112,7 +112,7 @@ namespace Wyam.Core.Modules.Control
         /// <param name="contentAndMetadata">The content and metadata for each output document.</param>
         public Documents(params Tuple<string, IEnumerable<KeyValuePair<string, object>>>[] contentAndMetadata)
         {
-            _contextDocuments = ctx => contentAndMetadata.Select(x => ctx.GetDocument(ctx.GetContentStream(x.Item1), x.Item2));
+            _contextDocuments = ctx => contentAndMetadata.Select(x => ctx.GetDocumentAsync(x.Item1, x.Item2).Result);
         }
 
         /// <summary>

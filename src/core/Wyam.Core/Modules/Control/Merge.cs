@@ -67,13 +67,13 @@ namespace Wyam.Core.Modules.Control
                 {
                     return inputs.SelectMany(context, input =>
                         context.Execute(this, new[] { input })
-                            .Select(result => context.GetDocument(input, context.GetContentStream(result.Content), result.Metadata)));
+                            .Select(result => context.GetDocumentAsync(input, result.Content, result.Metadata).Result));
                 }
 
                 // Execute the modules once and apply to each input document
                 List<IDocument> results = context.Execute(this).ToList();
                 return inputs.SelectMany(context, input =>
-                    results.Select(result => context.GetDocument(input, context.GetContentStream(result.Content), result.Metadata)));
+                    results.Select(result => context.GetDocumentAsync(input, result.Content, result.Metadata).Result));
             }
 
             return inputs;

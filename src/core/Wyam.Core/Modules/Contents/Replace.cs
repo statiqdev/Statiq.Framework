@@ -134,16 +134,16 @@ namespace Wyam.Core.Modules.Contents
                     _regexOptions);
                 return new[]
                 {
-                    currentDocumentContent == newDocumentContent ? input : context.GetDocument(input, context.GetContentStream(newDocumentContent))
+                    currentDocumentContent == newDocumentContent ? input : context.GetDocumentAsync(input, newDocumentContent).Result
                 };
             }
             return new[]
             {
-                context.GetDocument(
+                context.GetDocumentAsync(
                     input,
-                    context.GetContentStream(_isRegex ?
+                    _isRegex ?
                         Regex.Replace(input.Content, _search, content.ToString(), _regexOptions) :
-                        input.Content.Replace(_search, content.ToString())))
+                        input.Content.Replace(_search, content.ToString())).Result
             };
         }
     }

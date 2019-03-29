@@ -87,7 +87,7 @@ namespace Wyam.Minification
         {
             XmlMinifier minifier = new XmlMinifier(_minificationSettings);
 
-            return Minify(inputs, context, minifier.Minify, "XML");
+            return MinifyAsync(inputs, context, minifier.Minify, "XML").Result;
         }
     }
 }

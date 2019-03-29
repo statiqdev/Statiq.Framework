@@ -104,7 +104,7 @@ namespace Wyam.Minification
         {
             XhtmlMinifier minifier = new XhtmlMinifier(_minificationSettings);
 
-            return Minify(inputs, context, minifier.Minify, "XHTML");
+            return MinifyAsync(inputs, context, minifier.Minify, "XHTML").Result;
         }
     }
 }

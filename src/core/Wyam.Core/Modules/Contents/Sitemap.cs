@@ -145,7 +145,7 @@ namespace Wyam.Core.Modules.Contents
 
             // Always output the sitemap document, even if it's empty
             sb.Append("</urlset>");
-            return new[] { context.GetDocument(context.GetContentStream(sb.ToString())) };
+            return new[] { context.GetDocumentAsync(sb.ToString()).Result };
         }
     }
 }

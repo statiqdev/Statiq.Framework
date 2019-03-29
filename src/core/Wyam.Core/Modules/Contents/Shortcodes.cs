@@ -3,10 +3,12 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 using Wyam.Common.Documents;
 using Wyam.Common.Execution;
 using Wyam.Common.Modules;
 using Wyam.Common.Shortcodes;
+using Wyam.Common.Util;
 using Wyam.Core.Meta;
 using Wyam.Core.Shortcodes;
 using Wyam.Core.Util;
@@ -61,7 +63,8 @@ namespace Wyam.Core.Modules.Contents
             return inputs.AsParallel().Select(context, input =>
             {
                 Stream stream = input.GetStream();
-                if (ProcessShortcodes(stream, input, context, out IDocument result))
+                IDocument result = ProcessShortcodesAsync(stream, input, context).Result;
+                if (result != null)
                 {
                     return result;
                 }
@@ -70,8 +73,8 @@ namespace Wyam.Core.Modules.Contents
             });
         }
 
-        // The inputStream will be disposed if this returns <c>true</c> but will not otherwise
-        private bool ProcessShortcodes(Stream inputStream, IDocument input, IExecutionContext context, out IDocument result)
+        // The inputStream will be disposed if this returns a result document but will not otherwise
+        private async Task<IDocument> ProcessShortcodesAsync(Stream inputStream, IDocument input, IExecutionContext context)
         {
             // Parse the input stream looking for shortcodes
             ShortcodeParser parser = new ShortcodeParser(_startDelimiter, _endDelimiter, context.Shortcodes);
@@ -87,8 +90,7 @@ namespace Wyam.Core.Modules.Contents
             // Return the original document if we didn't find any
             if (locations.Count == 0)
             {
-                result = null;
-                return false;
+                return null;
             }
 
             // Otherwise, create a shortcode instance for each named shortcode
@@ -99,11 +101,11 @@ namespace Wyam.Core.Modules.Contents
                     .ToDictionary(x => x, x => context.Shortcodes.CreateInstance(x), StringComparer.OrdinalIgnoreCase);
 
             // Execute each of the shortcodes in order
-            List<InsertingStreamLocation> insertingLocations = locations
-                .Select(x =>
+            InsertingStreamLocation[] insertingLocations = await locations
+                .SelectAsync(async x =>
                 {
                     // Execute the shortcode
-                    IShortcodeResult shortcodeResult = shortcodes[x.Name].Execute(x.Arguments, x.Content, input, context);
+                    IShortcodeResult shortcodeResult = await shortcodes[x.Name].ExecuteAsync(x.Arguments, x.Content, input, context);
 
                     // Merge output metadata with the current input document
                     // Creating a new document is the easiest way to ensure all the metadata from shortcodes gets accumulated correctly
@@ -123,7 +125,8 @@ namespace Wyam.Core.Modules.Contents
                             {
                                 shortcodeResultStream = new SeekableStream(shortcodeResultStream, true);
                             }
-                            if (ProcessShortcodes(shortcodeResultStream, input, context, out IDocument nestedResult))
+                            IDocument nestedResult = await ProcessShortcodesAsync(shortcodeResultStream, input, context);
+                            if (nestedResult != null)
                             {
                                 input = nestedResult;
                                 shortcodeResultStream = nestedResult.GetStream();  // Will get disposed in the replacement operation below
@@ -138,7 +141,7 @@ namespace Wyam.Core.Modules.Contents
 
                     return new InsertingStreamLocation(x.FirstIndex, x.LastIndex, null);
                 })
-                .ToList();
+                .ToArrayAsync();
 
             // Dispose any shortcodes that implement IDisposable
             foreach (IDisposable disposableShortcode
@@ -149,7 +152,7 @@ namespace Wyam.Core.Modules.Contents
 
             // Construct a new stream with the shortcode results inserted
             // We have to use all TextWriter/TextReaders over the streams to ensure consistent encoding
-            Stream resultStream = context.GetContentStream();
+            Stream resultStream = await context.GetContentStreamAsync();
             char[] buffer = new char[4096];
             using (TextWriter writer = new StreamWriter(resultStream, Encoding.UTF8, 4096, true))
             {
@@ -185,8 +188,7 @@ namespace Wyam.Core.Modules.Contents
                     Read(reader, writer, null, ref buffer);
                 }
             }
-            result = context.GetDocument(input, resultStream);
-            return true;
+            return context.GetDocument(input, resultStream);
         }
 
         // writer = null to just skip length in reader

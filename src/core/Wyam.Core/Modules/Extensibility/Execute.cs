@@ -163,7 +163,7 @@ namespace Wyam.Core.Modules.Extensibility
         }
 
         private IEnumerable<IDocument> ChangeContent(object result, IExecutionContext context, IDocument document) =>
-            new[] { context.GetDocument(document, context.GetContentStream(result.ToString())) };
+            new[] { context.GetDocumentAsync(document, result.ToString()).Result };
 
         private IEnumerable<IDocument> ThrowInvalidDelegateResult(object result)
         {

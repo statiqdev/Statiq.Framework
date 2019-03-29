@@ -177,13 +177,13 @@ namespace Wyam.Core.Modules.Contents
                     if (!string.IsNullOrEmpty(content))
                     {
                         outputs.Add(
-                            context.GetDocument(
-                                context.GetContentStream(content),
+                            context.GetDocumentAsync(
+                                content,
                                 new MetadataItems
                                 {
                                     { Keys.RelativeFilePath, additionalOutput.Key },
                                     { Keys.WritePath, additionalOutput.Key }
-                                }));
+                                }).Result);
                     }
                 }
             }

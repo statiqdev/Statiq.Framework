@@ -54,7 +54,7 @@ namespace Wyam.Minification
         {
             KristensenCssMinifier minifier = new KristensenCssMinifier();
 
-            return Minify(inputs, context, (x) => minifier.Minify(x, _isInlineCode), "CSS");
+            return MinifyAsync(inputs, context, (x) => minifier.Minify(x, _isInlineCode), "CSS").Result;
         }
     }
 }
