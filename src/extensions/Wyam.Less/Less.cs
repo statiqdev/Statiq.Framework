@@ -95,14 +95,14 @@ namespace Wyam.Less
 
                 // Process the result
                 FilePath cssPath = path.ChangeExtension("css");
-                return context.GetDocument(
+                return context.GetDocumentAsync(
                     input,
-                    context.GetContentStream(content),
+                    content,
                     new MetadataItems
                     {
                         { Keys.RelativeFilePath, cssPath },
                         { Keys.WritePath, cssPath }
-                    });
+                    }).Result;
             });
         }
     }

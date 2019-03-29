@@ -126,6 +126,15 @@ namespace Wyam.Common.Execution
         IDocument GetDocument(FilePath source, Stream stream, IEnumerable<KeyValuePair<string, object>> items = null, bool disposeStream = true);
 
         /// <summary>
+        /// Gets a new document with the specified source, content stream, and metadata (in addition to the default initial metadata).
+        /// </summary>
+        /// <param name="source">The source.</param>
+        /// <param name="content">The content.</param>
+        /// <param name="items">The metadata items.</param>
+        /// <returns>The new document.</returns>
+        Task<IDocument> GetDocumentAsync(FilePath source, string content, IEnumerable<KeyValuePair<string, object>> items = null);
+
+        /// <summary>
         /// Gets a new document with the specified source and metadata (in addition to the default initial metadata).
         /// </summary>
         /// <param name="source">The source.</param>
@@ -144,6 +153,14 @@ namespace Wyam.Common.Execution
         /// <param name="disposeStream">If set to <c>true</c> the provided <see cref="Stream"/> is disposed when the document is.</param>
         /// <returns>The new document.</returns>
         IDocument GetDocument(Stream stream, IEnumerable<KeyValuePair<string, object>> items = null, bool disposeStream = true);
+
+        /// <summary>
+        /// Gets a new document with the specified content stream and metadata (in addition to the default initial metadata).
+        /// </summary>
+        /// <param name="content">The content.</param>
+        /// <param name="items">The metadata items.</param>
+        /// <returns>The new document.</returns>
+        Task<IDocument> GetDocumentAsync(string content, IEnumerable<KeyValuePair<string, object>> items = null);
 
         /// <summary>
         /// Gets a new document with the specified metadata (in addition to the default initial metadata).
@@ -168,6 +185,17 @@ namespace Wyam.Common.Execution
         IDocument GetDocument(IDocument sourceDocument, FilePath source, Stream stream, IEnumerable<KeyValuePair<string, object>> items = null, bool disposeStream = true);
 
         /// <summary>
+        /// Clones the specified source document with a new source, new content stream, and additional metadata (all existing metadata is retained)
+        /// or gets a new document if the source document is null or <c>AsNewDocuments()</c> was called on the module.
+        /// </summary>
+        /// <param name="sourceDocument">The source document.</param>
+        /// <param name="source">The source (if the source document contains a source, then this is ignored and the source document's source is used instead).</param>
+        /// <param name="content">The content.</param>
+        /// <param name="items">The metadata items.</param>
+        /// <returns>The cloned or new document.</returns>
+        Task<IDocument> GetDocumentAsync(IDocument sourceDocument, FilePath source, string content, IEnumerable<KeyValuePair<string, object>> items = null);
+
+        /// <summary>
         /// Clones the specified source document with a new content stream, and additional metadata (all existing metadata is retained)
         /// or gets a new document if the source document is null or <c>AsNewDocuments()</c> was called on the module.
         /// If <paramref name="disposeStream"/> is true (which it is by default), the provided
@@ -180,6 +208,16 @@ namespace Wyam.Common.Execution
         /// <param name="disposeStream">If set to <c>true</c> the provided <see cref="Stream"/> is disposed when the document is.</param>
         /// <returns>The cloned or new document.</returns>
         IDocument GetDocument(IDocument sourceDocument, Stream stream, IEnumerable<KeyValuePair<string, object>> items = null, bool disposeStream = true);
+
+        /// <summary>
+        /// Clones the specified source document with a new content stream, and additional metadata (all existing metadata is retained)
+        /// or gets a new document if the source document is null or <c>AsNewDocuments()</c> was called on the module.
+        /// </summary>
+        /// <param name="sourceDocument">The source document.</param>
+        /// <param name="content">The content.</param>
+        /// <param name="items">The metadata items.</param>
+        /// <returns>The cloned or new document.</returns>
+        Task<IDocument> GetDocumentAsync(IDocument sourceDocument, string content, IEnumerable<KeyValuePair<string, object>> items = null);
 
         /// <summary>
         /// Clones the specified source document with a new source and additional metadata (all existing metadata is retained)
@@ -272,7 +310,6 @@ namespace Wyam.Common.Execution
         /// </summary>
         /// <param name="content">
         /// The content of the shortcode. The passed in stream will be disposed when the shortcode has been rendered.
-        /// Use <see cref="GetContentStreamAsync(string)"/> if you need to create a content stream from a string.
         /// If you don't want the shortcode to add new content, you can use <c>null</c> for the content stream.
         /// </param>
         /// <param name="metadata">New metadata to be added to the document as a result of executing the shortcode.</param>

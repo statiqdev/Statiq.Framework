@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Threading.Tasks;
 using Wyam.Common.Documents;
 using Wyam.Common.Execution;
 using Wyam.Common.Meta;
@@ -32,7 +33,7 @@ namespace Wyam.Core.Shortcodes.Html
     public class Gist : IShortcode
     {
         /// <inheritdoc />
-        public IShortcodeResult Execute(KeyValuePair<string, string>[] args, string content, IDocument document, IExecutionContext context)
+        public async Task<IShortcodeResult> ExecuteAsync(KeyValuePair<string, string>[] args, string content, IDocument document, IExecutionContext context)
         {
             ConvertingDictionary arguments = args.ToDictionary(
                 context,
@@ -40,7 +41,7 @@ namespace Wyam.Core.Shortcodes.Html
                 "Username",
                 "File");
             arguments.RequireKeys("Id");
-            return context.GetShortcodeResult(
+            return await context.GetShortcodeResultAsync(
                 $"<script src=\"//gist.github.com/{arguments.String("Username", x => x + "/")}{arguments.String("Id")}.js"
                 + $"{arguments.String("File", x => "?file=" + x)}\" type=\"text/javascript\"></script>");
         }

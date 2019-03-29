@@ -190,8 +190,8 @@ namespace Wyam.Testing.Execution
         public IServiceProvider ServiceProvider { get; set; } = new TestServiceProvider();
 
         /// <inheritdoc/>
-        public Stream GetContentStream(string content = null) =>
-            string.IsNullOrEmpty(content) ? new MemoryStream() : new MemoryStream(Encoding.UTF8.GetBytes(content));
+        public Task<Stream> GetContentStreamAsync(string content = null) =>
+            Task.FromResult<Stream>(string.IsNullOrEmpty(content) ? new MemoryStream() : new MemoryStream(Encoding.UTF8.GetBytes(content)));
 
         /// <inheritdoc/>
         public HttpClient CreateHttpClient() =>
@@ -262,8 +262,8 @@ namespace Wyam.Testing.Execution
             return inputs.ToList();
         }
 
-        public IShortcodeResult GetShortcodeResult(string content, IEnumerable<KeyValuePair<string, object>> metadata = null)
-            => GetShortcodeResult(content == null ? null : GetContentStream(content), metadata);
+        public Task<IShortcodeResult> GetShortcodeResultAsync(string content, IEnumerable<KeyValuePair<string, object>> metadata = null)
+            => Task.FromResult(GetShortcodeResult(content == null ? null : GetContentStreamAsync(content).Result, metadata));
 
         public IShortcodeResult GetShortcodeResult(Stream content, IEnumerable<KeyValuePair<string, object>> metadata = null)
             => new ShortcodeResult(content, metadata);

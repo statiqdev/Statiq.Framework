@@ -124,11 +124,17 @@ namespace Wyam.Core.Execution
         public IDocument GetDocument(FilePath source, Stream stream, IEnumerable<KeyValuePair<string, object>> items = null, bool disposeStream = true) =>
             GetDocument((IDocument)null, source, stream, items, disposeStream);
 
+        public async Task<IDocument> GetDocumentAsync(FilePath source, string content, IEnumerable<KeyValuePair<string, object>> items = null) =>
+            GetDocument((IDocument)null, source, await GetContentStreamAsync(content), items);
+
         public IDocument GetDocument(FilePath source, IEnumerable<KeyValuePair<string, object>> items = null) =>
             GetDocument((IDocument)null, source, (Stream)null, items);
 
         public IDocument GetDocument(Stream stream, IEnumerable<KeyValuePair<string, object>> items = null, bool disposeStream = true) =>
             GetDocument((IDocument)null, stream, items, disposeStream);
+
+        public async Task<IDocument> GetDocumentAsync(string content, IEnumerable<KeyValuePair<string, object>> items = null) =>
+            GetDocument((IDocument)null, await GetContentStreamAsync(content), items);
 
         public IDocument GetDocument(IEnumerable<KeyValuePair<string, object>> items) =>
             GetDocument((IDocument)null, items);
@@ -169,6 +175,9 @@ namespace Wyam.Core.Execution
             return document;
         }
 
+        public async Task<IDocument> GetDocumentAsync(IDocument sourceDocument, FilePath source, string content, IEnumerable<KeyValuePair<string, object>> items = null) =>
+            GetDocument(sourceDocument, source, await GetContentStreamAsync(content), items);
+
         public IDocument GetDocument(IDocument sourceDocument, Stream stream, IEnumerable<KeyValuePair<string, object>> items = null, bool disposeStream = true)
         {
             CheckDisposed();
@@ -176,6 +185,9 @@ namespace Wyam.Core.Execution
             _pipeline.AddClonedDocument(document);
             return document;
         }
+
+        public async Task<IDocument> GetDocumentAsync(IDocument sourceDocument, string content, IEnumerable<KeyValuePair<string, object>> items = null) =>
+            GetDocument(sourceDocument, await GetContentStreamAsync(content), items);
 
         public IDocument GetDocument(IDocument sourceDocument, IEnumerable<KeyValuePair<string, object>> items)
         {

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Threading.Tasks;
 using Wyam.Common.Documents;
 using Wyam.Common.Execution;
 using Wyam.Common.IO;
@@ -33,7 +34,7 @@ namespace Wyam.Core.Shortcodes.Html
     public class Link : IShortcode
     {
         /// <inheritdoc />
-        public IShortcodeResult Execute(KeyValuePair<string, string>[] args, string content, IDocument document, IExecutionContext context)
+        public async Task<IShortcodeResult> ExecuteAsync(KeyValuePair<string, string>[] args, string content, IDocument document, IExecutionContext context)
         {
             ConvertingDictionary arguments = args.ToDictionary(
                 context,
@@ -51,7 +52,7 @@ namespace Wyam.Core.Shortcodes.Html
             string path = arguments.String("Path");
             if (LinkGenerator.TryGetAbsoluteHttpUri(path, out string absoluteUri))
             {
-                return context.GetShortcodeResult(absoluteUri);
+                return await context.GetShortcodeResultAsync(absoluteUri);
             }
             FilePath filePath = new FilePath(path);
 
@@ -81,7 +82,7 @@ namespace Wyam.Core.Shortcodes.Html
                 ? arguments.Bool("Lowercase")
                 : context.Bool(Keys.LinkLowercase);
 
-            return context.GetShortcodeResult(LinkGenerator.GetLink(filePath, host, root, scheme, hidePages, hideExtensions, lowercase));
+            return await context.GetShortcodeResultAsync(LinkGenerator.GetLink(filePath, host, root, scheme, hidePages, hideExtensions, lowercase));
         }
     }
 }

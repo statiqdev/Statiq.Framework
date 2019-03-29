@@ -59,7 +59,7 @@ namespace Wyam.Core.Modules.Contents
         /// <inheritdoc />
         protected override IEnumerable<IDocument> Execute(object content, IDocument input, IExecutionContext context)
         {
-            return new[] { content == null ? input : context.GetDocument(input, context.GetContentStreamAsync(content.ToString()).Result) };
+            return new[] { content == null ? input : context.GetDocumentAsync(input, content.ToString()).Result };
         }
     }
 }

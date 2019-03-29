@@ -142,7 +142,7 @@ namespace Wyam.Json
                            string result = JsonConvert.SerializeObject(data, settings);
                            if (string.IsNullOrEmpty(_destinationKey))
                            {
-                               return context.GetDocument(input, context.GetContentStream(result));
+                               return context.GetDocumentAsync(input, result).Result;
                            }
                            return context.GetDocument(input, new MetadataItems
                            {

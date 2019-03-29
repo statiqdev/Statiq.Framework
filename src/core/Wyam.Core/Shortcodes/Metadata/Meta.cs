@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Threading.Tasks;
 using Wyam.Common.Documents;
 using Wyam.Common.Execution;
 using Wyam.Common.Meta;
@@ -21,7 +22,7 @@ namespace Wyam.Core.Shortcodes.Metadata
     public class Meta : IShortcode
     {
         /// <inheritdoc />
-        public IShortcodeResult Execute(KeyValuePair<string, string>[] args, string content, IDocument document, IExecutionContext context) =>
-            context.GetShortcodeResult(document.String(args.SingleValue()));
+        public async Task<IShortcodeResult> ExecuteAsync(KeyValuePair<string, string>[] args, string content, IDocument document, IExecutionContext context) =>
+            await context.GetShortcodeResultAsync(document.String(args.SingleValue()));
     }
 }

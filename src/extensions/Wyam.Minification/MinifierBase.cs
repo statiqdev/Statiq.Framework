@@ -1,18 +1,20 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using WebMarkupMin.Core;
 using Wyam.Common.Documents;
 using Wyam.Common.Execution;
 using Wyam.Common.Tracing;
+using Wyam.Common.Util;
 
 namespace Wyam.Minification
 {
     public abstract class MinifierBase
     {
-        public IEnumerable<IDocument> Minify(IReadOnlyList<IDocument> inputs, IExecutionContext context, Func<string, MinificationResultBase> minify, string minifierType)
+        public async Task<IEnumerable<IDocument>> MinifyAsync(IReadOnlyList<IDocument> inputs, IExecutionContext context, Func<string, MinificationResultBase> minify, string minifierType)
         {
-            return inputs.AsParallel().Select(input =>
+            return await inputs.SelectAsync(async input =>
             {
                 try
                 {
@@ -29,7 +31,7 @@ namespace Wyam.Minification
                         Trace.Warning("{0} warnings found while minifying {4} for {1}:{2}{3}", result.Warnings.Count, input.SourceString(), Environment.NewLine, string.Join(Environment.NewLine, result.Warnings.Select(MinificationErrorInfoToString)), minifierType);
                     }
 
-                    return context.GetDocument(input, context.GetContentStream(result.MinifiedContent));
+                    return await context.GetDocumentAsync(input, result.MinifiedContent);
                 }
                 catch (Exception ex)
                 {

@@ -251,7 +251,7 @@ namespace Wyam.Html
                         {
                             metadata.Add(_parentKey, new CachedDelegateMetadataValue(_ => parent?.Document));
                         }
-                        Stream contentStream = context.GetContentStream();
+                        Stream contentStream = context.GetContentStreamAsync().Result;
                         using (StreamWriter writer = contentStream.GetWriter())
                         {
                             heading.Element.ChildNodes.ToHtml(writer, ProcessingInstructionFormatter.Instance);

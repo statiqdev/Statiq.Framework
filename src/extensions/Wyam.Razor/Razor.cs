@@ -2,12 +2,13 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 using Wyam.Common.Configuration;
 using Wyam.Common.Documents;
-using Wyam.Common.Meta;
-using Wyam.Common.Modules;
 using Wyam.Common.Execution;
 using Wyam.Common.IO;
+using Wyam.Common.Meta;
+using Wyam.Common.Modules;
 using Trace = Wyam.Common.Tracing.Trace;
 
 namespace Wyam.Razor
@@ -193,7 +194,7 @@ namespace Wyam.Razor
             {
                 Trace.Verbose("Processing Razor for {0}", input.SourceString());
 
-                Stream contentStream = context.GetContentStream();
+                Stream contentStream = context.GetContentStreamAsync().Result;
                 using (Stream inputStream = input.GetStream())
                 {
                     FilePath viewStartLocationPath = _viewStartPath?.Invoke<FilePath>(input, context);
@@ -206,8 +207,8 @@ namespace Wyam.Razor
                         Context = context,
                         Document = input,
                         LayoutLocation = _layoutPath?.Invoke<FilePath>(input, context)?.FullPath,
-                        ViewStartLocation = viewStartLocationPath != null ? GetRelativePath(viewStartLocationPath, context) : null,
-                        RelativePath = GetRelativePath(input, context),
+                        ViewStartLocation = viewStartLocationPath != null ? GetRelativePathAsync(viewStartLocationPath, context).Result : null,
+                        RelativePath = GetRelativePathAsync(input, context).Result,
                         Model = _model == null ? input : _model.Invoke(input, context),
                     };
 
@@ -218,19 +219,19 @@ namespace Wyam.Razor
             });
         }
 
-        private string GetRelativePath(IDocument document, IExecutionContext context)
+        private async Task<string> GetRelativePathAsync(IDocument document, IExecutionContext context)
         {
             // Use the pre-calculated relative file path if available
             FilePath relativePath = document.FilePath(Keys.RelativeFilePath);
-            return relativePath != null ? $"/{relativePath.FullPath}" : GetRelativePath(document.Source, context);
+            return relativePath != null ? $"/{relativePath.FullPath}" : await GetRelativePathAsync(document.Source, context);
         }
 
-        private string GetRelativePath(FilePath path, IExecutionContext context)
+        private async Task<string> GetRelativePathAsync(FilePath path, IExecutionContext context)
         {
             // Calculate a relative path from the input path(s) (or root) to the provided path
             if (path != null)
             {
-                DirectoryPath inputPath = context.FileSystem.GetContainingInputPath(path) ?? new DirectoryPath("/");
+                DirectoryPath inputPath = await context.FileSystem.GetContainingInputPathAsync(path) ?? new DirectoryPath("/");
                 if (path.IsRelative)
                 {
                     // If the path is relative, combine it with the input path to make it absolute

@@ -219,7 +219,7 @@ namespace Wyam.Html
                                 // Clone the document and optionally change content to the HTML element
                                 if (_outerHtmlContent.HasValue)
                                 {
-                                    Stream contentStream = context.GetContentStream();
+                                    Stream contentStream = context.GetContentStreamAsync().Result;
                                     using (StreamWriter writer = contentStream.GetWriter())
                                     {
                                         if (_outerHtmlContent.Value)

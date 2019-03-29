@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Concurrent;
+using System.Threading.Tasks;
 using Wyam.Common.Execution;
 using Wyam.Common.IO;
 
@@ -21,11 +22,16 @@ namespace Wyam.Sass
             _importPathFunc = importPathFunc;
         }
 
+        // This is a TryImportDelegate which unfortunately isn't async
         public bool TryImport(string requestedFile, string parentPath, out string scss, out string map)
         {
-            scss = null;
+            scss = TryImportAsync(requestedFile, parentPath).Result;
             map = null;
+            return scss != null;
+        }
 
+        public async Task<string> TryImportAsync(string requestedFile, string parentPath)
+        {
             // Modify the requested file if we have an import path function
             string modifiedParentPath = null;
             if (_importPathFunc != null)
@@ -35,7 +41,7 @@ namespace Wyam.Sass
             }
             if (string.IsNullOrWhiteSpace(requestedFile))
             {
-                return false;
+                return null;
             }
 
             // Get the input relative path to the parent file
@@ -52,51 +58,56 @@ namespace Wyam.Sass
 
             // Try to get the relative path to the parent file from inside the input virtual file system
             // But if the parent file isn't under an input path, just use it directly
-            DirectoryPath containingInputPath = _fileSystem.GetContainingInputPath(parentFilePath);
+            DirectoryPath containingInputPath = await _fileSystem.GetContainingInputPathAsync(parentFilePath);
             FilePath parentRelativePath = containingInputPath != null
                 ? containingInputPath.GetRelativePath(parentFilePath)
                 : parentFilePath;
 
             // Find the requested file by first combining with the parent
             FilePath filePath = parentRelativePath.Directory.CombineFile(requestedFilePath);
-            if (GetFileVariations(filePath, requestedFilePath, out scss))
+            string scss = await GetFileVariationsAsync(filePath, requestedFilePath);
+            if (scss != null)
             {
-                return true;
+                return scss;
             }
 
             // That didn't work so try it again as a relative path from the input folder
-            if (!requestedFilePath.IsAbsolute && GetFileVariations(requestedFilePath, requestedFilePath, out scss))
+            scss = await GetFileVariationsAsync(requestedFilePath, requestedFilePath);
+            if (!requestedFilePath.IsAbsolute && scss != null)
             {
-                return true;
+                return scss;
             }
 
-            return false;
+            return null;
         }
 
-        private bool GetFileVariations(FilePath filePath, FilePath requestedFilePath, out string scss)
+        private async Task<string> GetFileVariationsAsync(FilePath filePath, FilePath requestedFilePath)
         {
             // ...as specified
-            if (GetFile(filePath, requestedFilePath, out scss))
+            string scss = await GetFileAsync(filePath, requestedFilePath);
+            if (scss != null)
             {
-                return true;
+                return scss;
             }
 
             // ...with extension (if not already)
             if (!filePath.HasExtension || filePath.Extension != ".scss")
             {
                 FilePath extensionPath = filePath.AppendExtension(".scss");
-                if (GetFile(extensionPath, requestedFilePath, out scss))
+                scss = await GetFileAsync(extensionPath, requestedFilePath);
+                if (scss != null)
                 {
-                    return true;
+                    return scss;
                 }
 
                 // ...and with underscore prefix (if not already)
                 if (!extensionPath.FileName.FullPath.StartsWith("_"))
                 {
                     extensionPath = extensionPath.Directory.CombineFile("_" + extensionPath.FileName.FullPath);
-                    if (GetFile(extensionPath, requestedFilePath, out scss))
+                    scss = await GetFileAsync(extensionPath, requestedFilePath);
+                    if (scss != null)
                     {
-                        return true;
+                        return scss;
                     }
                 }
             }
@@ -105,29 +116,29 @@ namespace Wyam.Sass
             if (!filePath.FileName.FullPath.StartsWith("_"))
             {
                 filePath = filePath.Directory.CombineFile("_" + filePath.FileName.FullPath);
-                if (GetFile(filePath, requestedFilePath, out scss))
+                scss = await GetFileAsync(filePath, requestedFilePath);
+                if (scss != null)
                 {
-                    return true;
+                    return scss;
                 }
             }
 
-            return false;
+            return null;
         }
 
-        private bool GetFile(FilePath filePath, FilePath requestedFilePath, out string scss)
+        private async Task<string> GetFileAsync(FilePath filePath, FilePath requestedFilePath)
         {
-            scss = null;
-            IFile file = _fileSystem.GetInputFile(filePath);
-            if (file.Exists)
+            string scss = null;
+            IFile file = await _fileSystem.GetInputFileAsync(filePath);
+            if (await file.GetExistsAsync())
             {
                 if (requestedFilePath.IsRelative)
                 {
                     _parentAbsolutePaths.AddOrUpdate(requestedFilePath, file.Path, (x, y) => file.Path);
                 }
-                scss = file.ReadAllTextAsync();
-                return true;
+                scss = await file.ReadAllTextAsync();
             }
-            return false;
+            return scss;
         }
     }
 }

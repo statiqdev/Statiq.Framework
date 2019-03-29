@@ -206,7 +206,7 @@ namespace Wyam.Html
                             replacement.Key.Replace(parser.ParseFragment(replacement.Value, replacement.Key.ParentElement).ToArray());
                         }
 
-                        Stream contentStream = context.GetContentStream();
+                        Stream contentStream = context.GetContentStreamAsync().Result;
                         using (StreamWriter writer = contentStream.GetWriter())
                         {
                             htmlDocument.ToHtml(writer, ProcessingInstructionFormatter.Instance);

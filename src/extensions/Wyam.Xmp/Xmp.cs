@@ -132,11 +132,11 @@ namespace Wyam.Xmp
                      FilePath sourceFilePath = input.FilePath(Keys.SourceFilePath);
                      if (sourceFilePath != null)
                      {
-                         IFile sidecarFile = context.FileSystem.GetInputFile(sourceFilePath.FullPath + ".xmp");
-                         if (sidecarFile.Exists)
+                         IFile sidecarFile = context.FileSystem.GetInputFileAsync(sourceFilePath.FullPath + ".xmp").Result;
+                         if (sidecarFile.GetExistsAsync().Result)
                          {
                              MemoryStream xmpBytes = new MemoryStream();
-                             using (Stream xmpStream = sidecarFile.OpenReadAsync())
+                             using (Stream xmpStream = sidecarFile.OpenReadAsync().Result)
                              {
                                  xmpStream.CopyTo(xmpBytes);
                              }

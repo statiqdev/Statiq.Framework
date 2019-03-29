@@ -126,7 +126,7 @@ namespace Wyam.Highlight
                                     }
                                 }
 
-                                Stream contentStream = context.GetContentStream();
+                                Stream contentStream = context.GetContentStreamAsync().Result;
                                 using (StreamWriter writer = contentStream.GetWriter())
                                 {
                                     htmlDocument.ToHtml(writer, HtmlMarkupFormatter.Instance);

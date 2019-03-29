@@ -389,29 +389,29 @@ Settings[DocsKeys.Title] = ""My Docs"";
 // Add any pipeline customizations here");
 
             // Add info page
-            inputDirectory.GetFileAsync("about.md").WriteAllTextAsync(
+            inputDirectory.GetFileAsync("about.md").Result.WriteAllTextAsync(
 @"Title: About This Project
 ---
-This project is awesome!");
+This project is awesome!").Wait();
 
             // Add docs pages
-            inputDirectory.GetFileAsync("docs/command-line.md").WriteAllTextAsync(
+            inputDirectory.GetFileAsync("docs/command-line.md").Result.WriteAllTextAsync(
 @"Description: How to use the command line.
 ---
-Here are some instructions on how to use the command line.");
-            inputDirectory.GetFileAsync("docs/usage.md").WriteAllTextAsync(
+Here are some instructions on how to use the command line.").Wait();
+            inputDirectory.GetFileAsync("docs/usage.md").Result.WriteAllTextAsync(
 @"Description: Library usage instructions.
 ---
-To use this library, take these steps...");
+To use this library, take these steps...").Wait();
 
             // Add post page
-            inputDirectory.GetFileAsync("blog/new-release.md").WriteAllTextAsync(
+            inputDirectory.GetFileAsync("blog/new-release.md").Result.WriteAllTextAsync(
 @"Title: New Release
 Published: 1/1/2016
 Category: Release
 Author: me
 ---
-There is a new release out, go get it now.");
+There is a new release out, go get it now.").Wait();
         }
 
         private static IDocument TreePlaceholderFactory(object[] path, MetadataItems items, IExecutionContext context)
@@ -419,7 +419,7 @@ There is a new release out, go get it now.");
             FilePath indexPath = new FilePath(string.Join("/", path.Concat(new[] { "index.html" })));
             items.Add(Keys.RelativeFilePath, indexPath);
             items.Add(Keys.Title, Title.GetTitle(indexPath));
-            return context.GetDocument(context.GetContentStream("@Html.Partial(\"_ChildPages\")"), items);
+            return context.GetDocument(context.GetContentStreamAsync("@Html.Partial(\"_ChildPages\")").Result, items);
         }
     }
 }

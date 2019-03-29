@@ -46,7 +46,7 @@ namespace Wyam.Core.Modules.IO
             return inputs.AsParallel().Select(context, input =>
             {
                 string content = ProcessIncludesAsync(input.Content, input.Source, context).Result;
-                return content == null ? input : context.GetDocument(input, context.GetContentStreamAsync(content).Result);
+                return content == null ? input : context.GetDocumentAsync(input, content).Result;
             });
         }
 

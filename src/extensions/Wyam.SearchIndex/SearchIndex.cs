@@ -195,7 +195,7 @@ namespace Wyam.SearchIndex
                 return Array.Empty<IDocument>();
             }
 
-            string[] stopwords = GetStopwords(context);
+            string[] stopwords = GetStopwordsAsync(context).Result;
             StringBuilder scriptBuilder = BuildScript(searchIndexItems, stopwords, context);
             string script = _script(scriptBuilder, context);
 
@@ -215,7 +215,7 @@ namespace Wyam.SearchIndex
                 };
             }
 
-            return new[] { context.GetDocument(context.GetContentStream(script), metadata) };
+            return new[] { context.GetDocumentAsync(script, metadata).Result };
         }
 
         private StringBuilder BuildScript(IList<ISearchIndexItem> searchIndexItems, string[] stopwords, IExecutionContext context)
@@ -299,21 +299,18 @@ var searchModule = function() {{
             return clean;
         }
 
-        private static string ToJsonString(string s)
-        {
-            return Newtonsoft.Json.JsonConvert.ToString(s);
-        }
+        private static string ToJsonString(string s) => Newtonsoft.Json.JsonConvert.ToString(s);
 
-        private string[] GetStopwords(IExecutionContext context)
+        private async Task<string[]> GetStopwordsAsync(IExecutionContext context)
         {
             string[] stopwords = new string[0];
 
             if (_stopwordsPath != null)
             {
-                IFile stopwordsFile = context.FileSystem.GetInputFile(_stopwordsPath);
-                if (stopwordsFile.Exists)
+                IFile stopwordsFile = await context.FileSystem.GetInputFileAsync(_stopwordsPath);
+                if (await stopwordsFile.GetExistsAsync())
                 {
-                    stopwords = stopwordsFile.ReadAllTextAsync()
+                    stopwords = (await stopwordsFile.ReadAllTextAsync())
                         .Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries)
                         .Select(f => f.Trim().ToLowerInvariant())
                         .Where(f => f.Length > 1)

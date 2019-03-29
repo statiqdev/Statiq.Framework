@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 using System.Xml.Linq;
 using Wyam.Common.Documents;
 using Wyam.Common.Execution;
@@ -73,7 +74,7 @@ namespace Wyam.Core.Shortcodes.Html
     public class Table : IShortcode
     {
         /// <inheritdoc />
-        public IShortcodeResult Execute(KeyValuePair<string, string>[] args, string content, IDocument document, IExecutionContext context)
+        public async Task<IShortcodeResult> ExecuteAsync(KeyValuePair<string, string>[] args, string content, IDocument document, IExecutionContext context)
         {
             ConvertingDictionary dictionary = args.ToDictionary(
                 context,
@@ -173,7 +174,7 @@ namespace Wyam.Core.Shortcodes.Html
                 }
             }
 
-            return context.GetShortcodeResult(table.ToString());
+            return await context.GetShortcodeResultAsync(table.ToString());
         }
     }
 }

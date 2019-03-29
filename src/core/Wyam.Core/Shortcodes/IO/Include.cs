@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
+using System.Threading.Tasks;
 using Wyam.Common.Documents;
 using Wyam.Common.Execution;
 using Wyam.Common.IO;
@@ -24,7 +25,7 @@ namespace Wyam.Core.Shortcodes.IO
         private FilePath _sourcePath;
 
         /// <inheritdoc />
-        public IShortcodeResult Execute(KeyValuePair<string, string>[] args, string content, IDocument document, IExecutionContext context)
+        public async Task<IShortcodeResult> ExecuteAsync(KeyValuePair<string, string>[] args, string content, IDocument document, IExecutionContext context)
         {
             // Get the included path relative to the document
             FilePath includedPath = new FilePath(args.SingleValue());
@@ -38,24 +39,24 @@ namespace Wyam.Core.Shortcodes.IO
             IFile includedFile = null;
             if (includedPath.IsRelative && _sourcePath != null)
             {
-                includedFile = context.FileSystem.GetFileAsync(_sourcePath.Directory.CombineFile(includedPath)).Result;
+                includedFile = await context.FileSystem.GetFileAsync(_sourcePath.Directory.CombineFile(includedPath));
             }
 
             // If that didn't work, try relative to the input folder
-            if (includedFile?.GetExistsAsync().Result != true)
+            if (!await includedFile?.GetExistsAsync())
             {
-                includedFile = context.FileSystem.GetInputFileAsync(includedPath).Result;
+                includedFile = await context.FileSystem.GetInputFileAsync(includedPath);
             }
 
             // Get the included file
             if (!includedFile.GetExistsAsync().Result)
             {
                 Trace.Warning($"Included file {includedPath.FullPath} does not exist");
-                return context.GetShortcodeResult((Stream)null);
+                return context.GetShortcodeResult(null);
             }
 
             // Set the currently included shortcode source so nested includes can use it
-            return context.GetShortcodeResult(includedFile.OpenReadAsync().Result, new MetadataItems
+            return context.GetShortcodeResult(await includedFile.OpenReadAsync(), new MetadataItems
             {
                 { "IncludeShortcodeSource", includedFile.Path.FullPath }
             });

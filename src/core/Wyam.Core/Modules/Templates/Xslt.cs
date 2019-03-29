@@ -97,7 +97,7 @@ namespace Wyam.Core.Modules.Templates
                         {
                             xslt.Transform(XmlReader.Create(stream), writer);
                         }
-                        return context.GetDocument(input, context.GetContentStreamAsync(str.ToString()).Result);
+                        return context.GetDocumentAsync(input, str.ToString()).Result;
                     }
                 }
                 catch (Exception e)

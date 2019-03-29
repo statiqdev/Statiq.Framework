@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 using NUnit.Framework;
 using Shouldly;
 using Wyam.Common.Documents;
@@ -216,31 +217,31 @@ namespace Wyam.Core.Tests.Modules.Contents
 
         public class TestShortcode : IShortcode
         {
-            public IShortcodeResult Execute(KeyValuePair<string, string>[] args, string content, IDocument document, IExecutionContext context) =>
-                context.GetShortcodeResult(context.GetContentStream("Foo"));
+            public async Task<IShortcodeResult> ExecuteAsync(KeyValuePair<string, string>[] args, string content, IDocument document, IExecutionContext context) =>
+                await context.GetShortcodeResultAsync("Foo");
         }
 
         public class NestedShortcode : IShortcode
         {
-            public IShortcodeResult Execute(KeyValuePair<string, string>[] args, string content, IDocument document, IExecutionContext context) =>
-                context.GetShortcodeResult(context.GetContentStream("ABC<?# Nested /?>XYZ"));
+            public async Task<IShortcodeResult> ExecuteAsync(KeyValuePair<string, string>[] args, string content, IDocument document, IExecutionContext context) =>
+                await context.GetShortcodeResultAsync("ABC<?# Nested /?>XYZ");
         }
 
         public class RawShortcode : IShortcode
         {
-            public IShortcodeResult Execute(KeyValuePair<string, string>[] args, string content, IDocument document, IExecutionContext context) =>
-                context.GetShortcodeResult(context.GetContentStream(content));
+            public async Task<IShortcodeResult> ExecuteAsync(KeyValuePair<string, string>[] args, string content, IDocument document, IExecutionContext context) =>
+                context.GetShortcodeResult(await context.GetContentStreamAsync(content));
         }
 
         public class NullStreamShortcode : IShortcode
         {
-            public IShortcodeResult Execute(KeyValuePair<string, string>[] args, string content, IDocument document, IExecutionContext context) =>
-                context.GetShortcodeResult((Stream)null);
+            public Task<IShortcodeResult> ExecuteAsync(KeyValuePair<string, string>[] args, string content, IDocument document, IExecutionContext context) =>
+                Task.FromResult(context.GetShortcodeResult((Stream)null));
         }
 
         public class NullResultShortcode : IShortcode
         {
-            public IShortcodeResult Execute(KeyValuePair<string, string>[] args, string content, IDocument document, IExecutionContext context) => null;
+            public Task<IShortcodeResult> ExecuteAsync(KeyValuePair<string, string>[] args, string content, IDocument document, IExecutionContext context) => Task.FromResult<IShortcodeResult>(null);
         }
 
         public class DisposableShortcode : IShortcode, IDisposable
@@ -253,8 +254,8 @@ namespace Wyam.Core.Tests.Modules.Contents
                 Disposed = false;
             }
 
-            public IShortcodeResult Execute(KeyValuePair<string, string>[] args, string content, IDocument document, IExecutionContext context) =>
-                context.GetShortcodeResult(context.GetContentStream("Foo"));
+            public async Task<IShortcodeResult> ExecuteAsync(KeyValuePair<string, string>[] args, string content, IDocument document, IExecutionContext context) =>
+                context.GetShortcodeResult(await context.GetContentStreamAsync("Foo"));
 
             public void Dispose() =>
                 Disposed = true;
@@ -262,42 +263,42 @@ namespace Wyam.Core.Tests.Modules.Contents
 
         public class AddsMetadataShortcode : IShortcode
         {
-            public IShortcodeResult Execute(KeyValuePair<string, string>[] args, string content, IDocument document, IExecutionContext context) =>
-                context.GetShortcodeResult((Stream)null, new MetadataItems
+            public Task<IShortcodeResult> ExecuteAsync(KeyValuePair<string, string>[] args, string content, IDocument document, IExecutionContext context) =>
+                Task.FromResult(context.GetShortcodeResult((Stream)null, new MetadataItems
                 {
                     { "A", "1" },
                     { "B", "2" }
-                });
+                }));
         }
 
         public class AddsMetadataShortcode2 : IShortcode
         {
-            public IShortcodeResult Execute(KeyValuePair<string, string>[] args, string content, IDocument document, IExecutionContext context) =>
-                context.GetShortcodeResult((Stream)null, new MetadataItems
+            public Task<IShortcodeResult> ExecuteAsync(KeyValuePair<string, string>[] args, string content, IDocument document, IExecutionContext context) =>
+                Task.FromResult(context.GetShortcodeResult((Stream)null, new MetadataItems
                 {
                     { "A", "3" },
                     { "C", "4" }
-                });
+                }));
         }
 
         public class ReadsMetadataShortcode : IShortcode
         {
-            public IShortcodeResult Execute(KeyValuePair<string, string>[] args, string content, IDocument document, IExecutionContext context) =>
-                context.GetShortcodeResult((Stream)null, new MetadataItems
+            public Task<IShortcodeResult> ExecuteAsync(KeyValuePair<string, string>[] args, string content, IDocument document, IExecutionContext context) =>
+                Task.FromResult(context.GetShortcodeResult((Stream)null, new MetadataItems
                 {
                     { $"Foo", document.Get<int>("Foo") + 1 }
-                });
+                }));
         }
 
         public class IncrementingShortcode : IShortcode
         {
             private int _value = 20;
 
-            public IShortcodeResult Execute(KeyValuePair<string, string>[] args, string content, IDocument document, IExecutionContext context) =>
-                context.GetShortcodeResult((Stream)null, new MetadataItems
+            public Task<IShortcodeResult> ExecuteAsync(KeyValuePair<string, string>[] args, string content, IDocument document, IExecutionContext context) =>
+                Task.FromResult(context.GetShortcodeResult((Stream)null, new MetadataItems
                 {
                     { $"Foo", _value++ }
-                });
+                }));
         }
     }
 }

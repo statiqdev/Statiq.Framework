@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 using AngleSharp.Parser.Html;
 using Wyam.Common.Documents;
 using Wyam.Common.Execution;
@@ -47,7 +48,7 @@ namespace Wyam.Highlight.Shortcodes
     public class Highlight : IShortcode
     {
         /// <inheritdoc />
-        public IShortcodeResult Execute(KeyValuePair<string, string>[] args, string content, IDocument document, IExecutionContext context)
+        public async Task<IShortcodeResult> ExecuteAsync(KeyValuePair<string, string>[] args, string content, IDocument document, IExecutionContext context)
         {
             ConvertingDictionary dictionary = args.ToDictionary(
                 context,
@@ -76,7 +77,7 @@ namespace Wyam.Highlight.Shortcodes
                     element.SetAttribute("class", $"language-{dictionary.String("Language")}");
                 }
                 Wyam.Highlight.Highlight.HighlightElement(enginePool, element);
-                return context.GetShortcodeResult(element.OuterHtml);
+                return await context.GetShortcodeResultAsync(element.OuterHtml);
             }
         }
     }

@@ -6,6 +6,7 @@ using System.Net.Http;
 using System.Runtime.Serialization;
 using System.Runtime.Serialization.Json;
 using System.Text;
+using System.Threading.Tasks;
 using Wyam.Common.Documents;
 using Wyam.Common.Execution;
 using Wyam.Common.Meta;
@@ -32,7 +33,7 @@ namespace Wyam.Core.Shortcodes.Html
     public class Embed : IShortcode
     {
         /// <inheritdoc />
-        public virtual IShortcodeResult Execute(KeyValuePair<string, string>[] args, string content, IDocument document, IExecutionContext context)
+        public virtual async Task<IShortcodeResult> ExecuteAsync(KeyValuePair<string, string>[] args, string content, IDocument document, IExecutionContext context)
         {
             ConvertingDictionary arguments = args.ToDictionary(
                 context,
@@ -40,7 +41,7 @@ namespace Wyam.Core.Shortcodes.Html
                 "Url",
                 "Format");
             arguments.RequireKeys("Endpoint", "Url");
-            return Execute(
+            return await ExecuteAsync(
                 arguments.String("Endpoint"),
                 arguments.String("Url"),
                 arguments.ContainsKey("Format")
@@ -49,10 +50,10 @@ namespace Wyam.Core.Shortcodes.Html
                 context);
         }
 
-        protected IShortcodeResult Execute(string endpoint, string url, IExecutionContext context) =>
-            Execute(endpoint, url, null, context);
+        protected async Task<IShortcodeResult> ExecuteAsync(string endpoint, string url, IExecutionContext context) =>
+            await ExecuteAsync(endpoint, url, null, context);
 
-        protected IShortcodeResult Execute(string endpoint, string url, IEnumerable<string> query, IExecutionContext context)
+        protected async Task<IShortcodeResult> ExecuteAsync(string endpoint, string url, IEnumerable<string> query, IExecutionContext context)
         {
             // Get the oEmbed response
             EmbedResponse embedResponse;
@@ -63,7 +64,7 @@ namespace Wyam.Core.Shortcodes.Html
                 {
                     request += "&" + string.Join("&", query);
                 }
-                HttpResponseMessage response = httpClient.GetAsync(request).Result;
+                HttpResponseMessage response = await httpClient.GetAsync(request);
                 if (response.StatusCode == HttpStatusCode.NotFound)
                 {
                     Trace.Error($"Received 404 not found for oEmbed at {request}");
@@ -73,7 +74,7 @@ namespace Wyam.Core.Shortcodes.Html
                     || response.Content.Headers.ContentType.MediaType == "text/html")
                 {
                     DataContractJsonSerializer serializer = new DataContractJsonSerializer(typeof(EmbedResponse));
-                    using (Stream stream = response.Content.ReadAsStreamAsync().Result)
+                    using (Stream stream = await response.Content.ReadAsStreamAsync())
                     {
                         embedResponse = (EmbedResponse)serializer.ReadObject(stream);
                     }
@@ -81,7 +82,7 @@ namespace Wyam.Core.Shortcodes.Html
                 else if (response.Content.Headers.ContentType.MediaType == "text/xml")
                 {
                     DataContractSerializer serializer = new DataContractSerializer(typeof(EmbedResponse));
-                    using (Stream stream = response.Content.ReadAsStreamAsync().Result)
+                    using (Stream stream = await response.Content.ReadAsStreamAsync())
                     {
                         embedResponse = (EmbedResponse)serializer.ReadObject(stream);
                     }
@@ -95,7 +96,7 @@ namespace Wyam.Core.Shortcodes.Html
             // Switch based on type
             if (!string.IsNullOrEmpty(embedResponse.Html))
             {
-                return context.GetShortcodeResult(embedResponse.Html);
+                return await context.GetShortcodeResultAsync(embedResponse.Html);
             }
             else if (embedResponse.Type == "photo")
             {
@@ -105,15 +106,15 @@ namespace Wyam.Core.Shortcodes.Html
                 {
                     throw new InvalidDataException("Did not receive required oEmbed values for image type");
                 }
-                return context.GetShortcodeResult($"<img src=\"{embedResponse.Url}\" width=\"{embedResponse.Width}\" height=\"{embedResponse.Height}\" />");
+                return await context.GetShortcodeResultAsync($"<img src=\"{embedResponse.Url}\" width=\"{embedResponse.Width}\" height=\"{embedResponse.Height}\" />");
             }
             else if (embedResponse.Type == "link")
             {
                 if (!string.IsNullOrEmpty(embedResponse.Title))
                 {
-                    return context.GetShortcodeResult($"<a href=\"{url}\">{embedResponse.Title}</a>");
+                    return await context.GetShortcodeResultAsync($"<a href=\"{url}\">{embedResponse.Title}</a>");
                 }
-                return context.GetShortcodeResult($"<a href=\"{url}\">{url}</a>");
+                return await context.GetShortcodeResultAsync($"<a href=\"{url}\">{url}</a>");
             }
 
             throw new InvalidDataException("Could not determine embedded content for oEmbed response");

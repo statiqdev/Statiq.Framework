@@ -118,7 +118,7 @@ namespace Wyam.CodeAnalysis
             {
                 if (projectPath != null)
                 {
-                    IFile projectFile = context.FileSystem.GetInputFile(projectPath);
+                    IFile projectFile = context.FileSystem.GetInputFileAsync(projectPath).Result;
                     return GetProjects(context, projectFile)
                         .AsParallel()
                         .Where(project => project != null && (_whereProject == null || _whereProject(project.Name)))
@@ -129,14 +129,14 @@ namespace Wyam.CodeAnalysis
                             return project.Documents
                                 .AsParallel()
                                 .Where(x => !string.IsNullOrWhiteSpace(x.FilePath))
-                                .Select(x => context.FileSystem.GetInputFile(x.FilePath))
-                                .Where(x => x.Exists && (_whereFile == null || _whereFile(x)) && (_extensions?.Contains(x.Path.Extension) != false))
+                                .Select(x => context.FileSystem.GetInputFileAsync(x.FilePath).Result)
+                                .Where(x => x.GetExistsAsync().Result && (_whereFile == null || _whereFile(x)) && (_extensions?.Contains(x.Path.Extension) != false))
                                 .Select(file =>
                                 {
                                     Common.Tracing.Trace.Verbose($"Read file {file.Path.FullPath}");
-                                    DirectoryPath inputPath = context.FileSystem.GetContainingInputPath(file.Path);
+                                    DirectoryPath inputPath = context.FileSystem.GetContainingInputPathAsync(file.Path).Result;
                                     FilePath relativePath = inputPath?.GetRelativePath(file.Path) ?? projectFile.Path.Directory.GetRelativePath(file.Path);
-                                    return context.GetDocument(file.Path, file.OpenReadAsync(), new MetadataItems
+                                    return context.GetDocument(file.Path, file.OpenReadAsync().Result, new MetadataItems
                                     {
                                         { CodeAnalysisKeys.AssemblyName, assemblyName },
                                         { Keys.SourceFileRoot, inputPath ?? file.Path.Directory },

@@ -260,18 +260,18 @@ Settings[BlogKeys.Description] = ""Welcome!"";
 // Add any pipeline customizations here");
 
             // Add info page
-            inputDirectory.GetFileAsync("about.md").WriteAllTextAsync(
+            inputDirectory.GetFileAsync("about.md").Result.WriteAllTextAsync(
 @"Title: About Me
 ---
-I'm awesome!");
+I'm awesome!").Wait();
 
             // Add post page
-            inputDirectory.GetFileAsync("posts/first-post.md").WriteAllTextAsync(
+            inputDirectory.GetFileAsync("posts/first-post.md").Result.WriteAllTextAsync(
 @"Title: First Post
 Published: 1/1/2016
 Tags: Introduction
 ---
-This is my first post!");
+This is my first post!").Wait();
         }
     }
 }

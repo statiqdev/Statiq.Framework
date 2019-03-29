@@ -115,7 +115,7 @@ namespace Wyam.Html
                                 element.Insert(_position, content);
                             }
 
-                            Stream contentStream = context.GetContentStream();
+                            Stream contentStream = context.GetContentStreamAsync().Result;
                             using (StreamWriter writer = contentStream.GetWriter())
                             {
                                 htmlDocument.ToHtml(writer, ProcessingInstructionFormatter.Instance);

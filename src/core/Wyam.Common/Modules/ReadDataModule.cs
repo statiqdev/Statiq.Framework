@@ -161,7 +161,7 @@ namespace Wyam.Common.Modules
                     }
                 }
 
-                yield return context.GetDocument(context.GetContentStreamAsync(content).Result, meta);
+                yield return context.GetDocumentAsync(content, meta).Result;
             }
         }
     }

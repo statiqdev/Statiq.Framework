@@ -168,7 +168,7 @@ namespace Wyam.Sass
                     FilePath inputPath = _inputPath.Invoke<FilePath>(input, context);
                     if (inputPath?.IsAbsolute != true)
                     {
-                        inputPath = context.FileSystem.GetInputFile(new FilePath(Path.GetRandomFileName())).Path;
+                        inputPath = context.FileSystem.GetInputFileAsync(new FilePath(Path.GetRandomFileName())).Result.Path;
                         Trace.Warning($"No input path found for document {input.SourceString()}, using {inputPath.FileName.FullPath}");
                     }
 
@@ -187,36 +187,36 @@ namespace Wyam.Sass
                     options.IncludePaths.AddRange(
                         _includePaths
                             .Where(x => x != null)
-                            .Select(x => x.IsAbsolute ? x.FullPath : context.FileSystem.GetContainingInputPath(x)?.Combine(x)?.FullPath)
+                            .Select(x => x.IsAbsolute ? x.FullPath : context.FileSystem.GetContainingInputPathAsync(x).Result?.Combine(x)?.FullPath)
                             .Where(x => x != null));
                     ScssResult result = Scss.ConvertToCss(content, options);
 
                     // Process the result
-                    DirectoryPath relativeDirectory = context.FileSystem.GetContainingInputPath(inputPath);
+                    DirectoryPath relativeDirectory = context.FileSystem.GetContainingInputPathAsync(inputPath).Result;
                     FilePath relativePath = relativeDirectory?.GetRelativePath(inputPath) ?? inputPath.FileName;
 
                     FilePath cssPath = relativePath.ChangeExtension("css");
-                    IDocument cssDocument = context.GetDocument(
+                    IDocument cssDocument = context.GetDocumentAsync(
                         input,
-                        context.GetContentStream(result.Css ?? string.Empty),
+                        result.Css ?? string.Empty,
                         new MetadataItems
                         {
                             { Keys.RelativeFilePath, cssPath },
                             { Keys.WritePath, cssPath }
-                        });
+                        }).Result;
 
                     IDocument sourceMapDocument = null;
                     if (_generateSourceMap && result.SourceMap != null)
                     {
                         FilePath sourceMapPath = relativePath.ChangeExtension("map");
-                        sourceMapDocument = context.GetDocument(
+                        sourceMapDocument = context.GetDocumentAsync(
                             input,
-                            context.GetContentStream(result.SourceMap),
+                            result.SourceMap,
                             new MetadataItems
                             {
                                 { Keys.RelativeFilePath, sourceMapPath },
                                 { Keys.WritePath, sourceMapPath }
-                            });
+                            }).Result;
                     }
 
                     return new[] { cssDocument, sourceMapDocument };
@@ -232,8 +232,8 @@ namespace Wyam.Sass
                 path = document.FilePath(Keys.RelativeFilePath);
                 if (path != null)
                 {
-                    IFile inputFile = context.FileSystem.GetInputFile(path);
-                    return inputFile.Exists ? inputFile.Path : null;
+                    IFile inputFile = context.FileSystem.GetInputFileAsync(path).Result;
+                    return inputFile.GetExistsAsync().Result ? inputFile.Path : null;
                 }
             }
             return path;

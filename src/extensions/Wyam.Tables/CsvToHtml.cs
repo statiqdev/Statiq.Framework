@@ -67,7 +67,7 @@ namespace Wyam.Tables
                         firstLine = false;
                     }
                     builder.Append("</table>");
-                    return context.GetDocument(input, context.GetContentStream(builder.ToString()));
+                    return context.GetDocumentAsync(input, builder.ToString()).Result;
                 }
                 catch (Exception e)
                 {

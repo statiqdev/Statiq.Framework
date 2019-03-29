@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 using Wyam.Common.IO;
 
 namespace Wyam.Testing.IO
@@ -9,75 +10,83 @@ namespace Wyam.Testing.IO
     public class TestDirectory : IDirectory
     {
         private readonly TestFileProvider _fileProvider;
-        private readonly DirectoryPath _path;
 
         public TestDirectory(TestFileProvider fileProvider, DirectoryPath path)
         {
             _fileProvider = fileProvider;
-            _path = path.Collapse();
+            Path = path.Collapse();
         }
 
-        public DirectoryPath Path => _path;
+        public DirectoryPath Path { get; }
 
         NormalizedPath IFileSystemEntry.Path => Path;
 
-        public bool Exists => _fileProvider.Directories.Contains(_path.FullPath);
+        public Task<bool> GetExistsAsync() => Task.FromResult(_fileProvider.Directories.Contains(Path.FullPath));
 
-        public IDirectory Parent
+        public Task<IDirectory> GetParentAsync()
         {
-            get
+            DirectoryPath parentPath = Path.Parent;
+            if (parentPath == null)
             {
-                DirectoryPath parentPath = _path.Parent;
-                if (parentPath == null)
-                {
-                    return null;
-                }
-                return new TestDirectory(_fileProvider, parentPath);
+                return Task.FromResult<IDirectory>(null);
             }
+            return Task.FromResult<IDirectory>(new TestDirectory(_fileProvider, parentPath));
         }
 
         public bool IsCaseSensitive => true;
 
-        public void CreateAsync() => _fileProvider.Directories.Add(_path.FullPath);
+        public Task CreateAsync()
+        {
+            _fileProvider.Directories.Add(Path.FullPath);
+            return Task.CompletedTask;
+        }
 
-        public void Delete(bool recursive) => _fileProvider.Directories.Remove(_path.FullPath);
+        public Task DeleteAsync(bool recursive)
+        {
+            _fileProvider.Directories.Remove(Path.FullPath);
+            return Task.CompletedTask;
+        }
 
-        public IEnumerable<IDirectory> GetDirectoriesAsync(SearchOption searchOption = SearchOption.TopDirectoryOnly)
+        public Task<IEnumerable<IDirectory>> GetDirectoriesAsync(SearchOption searchOption = SearchOption.TopDirectoryOnly)
         {
             if (searchOption == SearchOption.TopDirectoryOnly)
             {
-                string adjustedPath = _path.FullPath.EndsWith("/", StringComparison.Ordinal)
-                    ? _path.FullPath.Substring(0, _path.FullPath.Length - 1)
-                    : _path.FullPath;
-                return _fileProvider.Directories
+                string adjustedPath = Path.FullPath.EndsWith("/", StringComparison.Ordinal)
+                    ? Path.FullPath.Substring(0, Path.FullPath.Length - 1)
+                    : Path.FullPath;
+                return Task.FromResult(_fileProvider.Directories
                     .Where(x => x.StartsWith(adjustedPath + "/")
                         && adjustedPath.Count(c => c == '/') == x.Count(c => c == '/') - 1
-                        && _path.FullPath != x)
-                    .Select(x => new TestDirectory(_fileProvider, x));
+                        && Path.FullPath != x)
+                    .Select(x => new TestDirectory(_fileProvider, x))
+                    .Cast<IDirectory>());
             }
-            return _fileProvider.Directories
-                .Where(x => x.StartsWith(_path.FullPath + "/") && _path.FullPath != x)
-                .Select(x => new TestDirectory(_fileProvider, x));
+            return Task.FromResult(_fileProvider.Directories
+                .Where(x => x.StartsWith(Path.FullPath + "/") && Path.FullPath != x)
+                .Select(x => new TestDirectory(_fileProvider, x))
+                .Cast<IDirectory>());
         }
 
-        public IEnumerable<IFile> GetFilesAsync(SearchOption searchOption = SearchOption.TopDirectoryOnly)
+        public Task<IEnumerable<IFile>> GetFilesAsync(SearchOption searchOption = SearchOption.TopDirectoryOnly)
         {
             if (searchOption == SearchOption.TopDirectoryOnly)
             {
-                string adjustedPath = _path.FullPath.EndsWith("/", StringComparison.Ordinal)
-                    ? _path.FullPath.Substring(0, _path.FullPath.Length - 1)
-                    : _path.FullPath;
-                return _fileProvider.Files.Keys
+                string adjustedPath = Path.FullPath.EndsWith("/", StringComparison.Ordinal)
+                    ? Path.FullPath.Substring(0, Path.FullPath.Length - 1)
+                    : Path.FullPath;
+                return Task.FromResult(_fileProvider.Files.Keys
                     .Where(x => x.StartsWith(adjustedPath)
                         && adjustedPath.Count(c => c == '/') == x.Count(c => c == '/') - 1)
-                    .Select(x => new TestFile(_fileProvider, x));
+                    .Select(x => new TestFile(_fileProvider, x))
+                    .Cast<IFile>());
             }
-            return _fileProvider.Files.Keys
-                .Where(x => x.StartsWith(_path.FullPath))
-                .Select(x => new TestFile(_fileProvider, x));
+            return Task.FromResult(_fileProvider.Files.Keys
+                .Where(x => x.StartsWith(Path.FullPath))
+                .Select(x => new TestFile(_fileProvider, x))
+                .Cast<IFile>());
         }
 
-        public IDirectory GetDirectory(DirectoryPath path)
+        public Task<IDirectory> GetDirectoryAsync(DirectoryPath path)
         {
             if (path == null)
             {
@@ -88,10 +97,10 @@ namespace Wyam.Testing.IO
                 throw new ArgumentException("Path must be relative", nameof(path));
             }
 
-            return new TestDirectory(_fileProvider, _path.Combine(path));
+            return Task.FromResult<IDirectory>(new TestDirectory(_fileProvider, Path.Combine(path)));
         }
 
-        public IFile GetFileAsync(FilePath path)
+        public Task<IFile> GetFileAsync(FilePath path)
         {
             if (path == null)
             {
@@ -102,7 +111,7 @@ namespace Wyam.Testing.IO
                 throw new ArgumentException("Path must be relative", nameof(path));
             }
 
-            return new TestFile(_fileProvider, _path.CombineFile(path));
+            return Task.FromResult<IFile>(new TestFile(_fileProvider, Path.CombineFile(path)));
         }
     }
 }

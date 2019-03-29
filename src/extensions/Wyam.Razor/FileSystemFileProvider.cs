@@ -32,7 +32,7 @@ namespace Wyam.Razor
             {
                 return new NotFoundFileInfo(subpath);
             }
-            IFile file = WyamFileSystem.GetInputFile(subpath.TrimStart('/'));
+            IFile file = WyamFileSystem.GetInputFileAsync(subpath.TrimStart('/')).Result;
             return new WyamFileInfo(file);
         }
 
@@ -42,10 +42,10 @@ namespace Wyam.Razor
             {
                 return new NotFoundDirectoryContents();
             }
-            IDirectory directory = WyamFileSystem.GetInputDirectory(subpath);
+            IDirectory directory = WyamFileSystem.GetInputDirectoryAsync(subpath).Result;
             List<IFileInfo> fileInfos = new List<IFileInfo>();
-            fileInfos.AddRange(directory.GetDirectoriesAsync().Select(x => new WyamDirectoryInfo(x)));
-            fileInfos.AddRange(directory.GetFilesAsync().Select(x => new WyamFileInfo(x)));
+            fileInfos.AddRange(directory.GetDirectoriesAsync().Result.Select(x => new WyamDirectoryInfo(x)));
+            fileInfos.AddRange(directory.GetFilesAsync().Result.Select(x => new WyamFileInfo(x)));
             return new EnumerableDirectoryContents(fileInfos);
         }
 
@@ -90,9 +90,9 @@ namespace Wyam.Razor
                 _file = file;
             }
 
-            public bool Exists => _file.Exists;
+            public bool Exists => _file.GetExistsAsync().Result;
 
-            public long Length => _file.Length;
+            public long Length => _file.GetLengthAsync().Result;
 
             public string PhysicalPath => _file.Path.FullPath;
 
@@ -102,7 +102,7 @@ namespace Wyam.Razor
 
             public bool IsDirectory => false;
 
-            public Stream CreateReadStream() => _file.OpenReadAsync();
+            public Stream CreateReadStream() => _file.OpenReadAsync().Result;
         }
 
         private class WyamDirectoryInfo : IFileInfo
@@ -114,7 +114,7 @@ namespace Wyam.Razor
                 _directory = directory;
             }
 
-            public bool Exists => _directory.Exists;
+            public bool Exists => _directory.GetExistsAsync().Result;
 
             public long Length => -1L;
 

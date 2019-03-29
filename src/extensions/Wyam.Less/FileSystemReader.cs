@@ -1,4 +1,5 @@
 using System.IO;
+using System.Threading.Tasks;
 using dotless.Core.Input;
 using Wyam.Common.IO;
 
@@ -15,8 +16,8 @@ namespace Wyam.Less
 
         public byte[] GetBinaryFileContents(string fileName)
         {
-            IFile file = GetInputFile(fileName);
-            using (Stream stream = file.OpenReadAsync())
+            IFile file = GetInputFileAsync(fileName).Result;
+            using (Stream stream = file.OpenReadAsync().Result)
             {
                 byte[] buffer = new byte[stream.Length];
                 stream.Read(buffer, 0, (int)stream.Length);
@@ -24,18 +25,18 @@ namespace Wyam.Less
             }
         }
 
-        public string GetFileContents(string fileName) => GetInputFile(fileName).ReadAllTextAsync();
+        public string GetFileContents(string fileName) => GetInputFileAsync(fileName).Result.ReadAllTextAsync().Result;
 
-        public bool DoesFileExist(string fileName) => GetInputFile(fileName).Exists;
+        public bool DoesFileExist(string fileName) => GetInputFileAsync(fileName).Result.GetExistsAsync().Result;
 
         public bool UseCacheDependencies => true;
 
-        private IFile GetInputFile(FilePath filePath)
+        private async Task<IFile> GetInputFileAsync(FilePath filePath)
         {
             // Find the requested file
             // ...as specified
-            IFile file = _fileSystem.GetInputFile(filePath);
-            if (file.Exists)
+            IFile file = await _fileSystem.GetInputFileAsync(filePath);
+            if (await file.GetExistsAsync())
             {
                 return file;
             }
@@ -44,8 +45,8 @@ namespace Wyam.Less
             if (!filePath.HasExtension || filePath.Extension != ".less")
             {
                 FilePath extensionPath = filePath.AppendExtension(".less");
-                IFile extensionFile = _fileSystem.GetInputFile(extensionPath);
-                if (extensionFile.Exists)
+                IFile extensionFile = await _fileSystem.GetInputFileAsync(extensionPath);
+                if (await extensionFile.GetExistsAsync())
                 {
                     return extensionFile;
                 }
@@ -54,8 +55,8 @@ namespace Wyam.Less
                 if (!extensionPath.FileName.FullPath.StartsWith("_"))
                 {
                     extensionPath = extensionPath.Directory.CombineFile("_" + extensionPath.FileName.FullPath);
-                    extensionFile = _fileSystem.GetInputFile(extensionPath);
-                    if (extensionFile.Exists)
+                    extensionFile = await _fileSystem.GetInputFileAsync(extensionPath);
+                    if (await extensionFile.GetExistsAsync())
                     {
                         return extensionFile;
                     }
@@ -66,8 +67,8 @@ namespace Wyam.Less
             if (!filePath.FileName.FullPath.StartsWith("_"))
             {
                 filePath = filePath.Directory.CombineFile("_" + filePath.FileName.FullPath);
-                IFile underscoreFile = _fileSystem.GetInputFile(filePath);
-                if (underscoreFile.Exists)
+                IFile underscoreFile = await _fileSystem.GetInputFileAsync(filePath);
+                if (await underscoreFile.GetExistsAsync())
                 {
                     return underscoreFile;
                 }

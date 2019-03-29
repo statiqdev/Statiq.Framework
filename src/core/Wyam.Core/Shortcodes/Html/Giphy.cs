@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Threading.Tasks;
 using Wyam.Common.Documents;
 using Wyam.Common.Execution;
 using Wyam.Common.Shortcodes;
@@ -24,7 +25,7 @@ namespace Wyam.Core.Shortcodes.Html
     /// <parameter>The ID of the gif.</parameter>
     public class Giphy : Embed
     {
-        public override IShortcodeResult Execute(KeyValuePair<string, string>[] args, string content, IDocument document, IExecutionContext context) =>
-            Execute("https://giphy.com/services/oembed", $"https://giphy.com/gifs/{args.SingleValue()}", context);
+        public override async Task<IShortcodeResult> ExecuteAsync(KeyValuePair<string, string>[] args, string content, IDocument document, IExecutionContext context) =>
+            await ExecuteAsync("https://giphy.com/services/oembed", $"https://giphy.com/gifs/{args.SingleValue()}", context);
     }
 }

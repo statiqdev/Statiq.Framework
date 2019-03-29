@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Wyam.Common.Util
 {
-    public static class AsyncLinqExtensions
+    public static class AsyncExtensions
     {
         public static async Task<IEnumerable<TResult>> SelectAsync<TSource, TResult>(
             this IEnumerable<TSource> items,
@@ -53,5 +53,19 @@ namespace Wyam.Common.Util
         public static async Task<TSource[]> ToArrayAsync<TSource>(
             this Task<IEnumerable<TSource>> items) =>
             (await items).ToArray();
+
+        public static async Task<TItem> FindAsync<TItem>(
+            this List<TItem> list,
+            Func<TItem, Task<bool>> predicate)
+        {
+            foreach (TItem item in list)
+            {
+                if (await predicate(item))
+                {
+                    return item;
+                }
+            }
+            return default(TItem);
+        }
     }
 }

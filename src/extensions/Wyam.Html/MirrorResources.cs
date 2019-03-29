@@ -7,6 +7,7 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Text;
+using System.Threading.Tasks;
 using AngleSharp.Dom;
 using AngleSharp.Dom.Html;
 using AngleSharp.Html;
@@ -87,7 +88,7 @@ namespace Wyam.Html
                         .GetElementsByTagName("link")
                         .Where(x => x.HasAttribute("href") && !x.HasAttribute("data-no-mirror")))
                     {
-                        string replacement = DownloadAndReplace(element.GetAttribute("href"), element, mirrorCache, context);
+                        string replacement = DownloadAndReplaceAsync(element.GetAttribute("href"), element, mirrorCache, context).Result;
                         if (replacement != null)
                         {
                             element.Attributes["href"].Value = replacement;
@@ -99,7 +100,7 @@ namespace Wyam.Html
                     foreach (IHtmlScriptElement element in htmlDocument.Scripts
                         .Where(x => !string.IsNullOrEmpty(x.Source) && !x.HasAttribute("data-no-mirror")))
                     {
-                        string replacement = DownloadAndReplace(element.Source, element, mirrorCache, context);
+                        string replacement = DownloadAndReplaceAsync(element.Source, element, mirrorCache, context).Result;
                         if (replacement != null)
                         {
                             element.Source = replacement;
@@ -110,7 +111,7 @@ namespace Wyam.Html
                     // Return a new document with the replacements if we performed any
                     if (modifiedDocument)
                     {
-                        Stream contentStream = context.GetContentStream();
+                        Stream contentStream = context.GetContentStreamAsync().Result;
                         using (StreamWriter writer = contentStream.GetWriter())
                         {
                             htmlDocument.ToHtml(writer, ProcessingInstructionFormatter.Instance);
@@ -124,7 +125,7 @@ namespace Wyam.Html
             });
         }
 
-        private string DownloadAndReplace(string source, IElement element, Dictionary<string, string> mirrorCache, IExecutionContext context)
+        private async Task<string> DownloadAndReplaceAsync(string source, IElement element, Dictionary<string, string> mirrorCache, IExecutionContext context)
         {
             if (mirrorCache.TryGetValue(source, out string cachedValue))
             {
@@ -149,29 +150,29 @@ namespace Wyam.Html
             string link = context.GetLink(path);
 
             // Download the resource, but only if we haven't already written it to disk
-            IFile outputFile = context.FileSystem.GetOutputFile(path);
-            if (!outputFile.Exists)
+            IFile outputFile = await context.FileSystem.GetOutputFileAsync(path);
+            if (!await outputFile.GetExistsAsync())
             {
                 Common.Tracing.Trace.Verbose($"Downloading resource from {uri} to {path.FullPath}");
 
                 // Retry with exponential backoff links. This helps with websites like GitHub that will give us a 429 -- TooManyRequests.
-                RetryPolicy<HttpResponseMessage> retryPolicy = Policy
+                AsyncRetryPolicy<HttpResponseMessage> retryPolicy = Policy
                     .Handle<HttpRequestException>()
                     .OrResult<HttpResponseMessage>(r => r.StatusCode == TooManyRequests)
                     .WaitAndRetryAsync(MaxAbsoluteLinkRetry, attempt => TimeSpan.FromSeconds(0.1 * Math.Pow(2, attempt)));
-                HttpResponseMessage response = retryPolicy.ExecuteAsync(async () =>
+                HttpResponseMessage response = await retryPolicy.ExecuteAsync(async () =>
                 {
                     using (HttpClient httpClient = context.CreateHttpClient())
                     {
-                        return await httpClient.SendAsync(new HttpRequestMessage(HttpMethod.Get, uri)).ConfigureAwait(false);
+                        return await httpClient.SendAsync(new HttpRequestMessage(HttpMethod.Get, uri));
                     }
-                }).Result;
+                });
                 response.EnsureSuccessStatusCode();
 
                 // Copy the result to output
-                using (Stream outputStream = outputFile.OpenWriteAsync())
+                using (Stream outputStream = await outputFile.OpenWriteAsync())
                 {
-                    response.Content.CopyToAsync(outputStream).Wait();
+                    await response.Content.CopyToAsync(outputStream);
                 }
             }
 
