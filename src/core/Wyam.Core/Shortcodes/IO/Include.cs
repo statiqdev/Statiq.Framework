@@ -43,13 +43,13 @@ namespace Wyam.Core.Shortcodes.IO
             }
 
             // If that didn't work, try relative to the input folder
-            if (!await includedFile?.GetExistsAsync())
+            if (includedFile == null || !await includedFile.GetExistsAsync())
             {
                 includedFile = await context.FileSystem.GetInputFileAsync(includedPath);
             }
 
             // Get the included file
-            if (!includedFile.GetExistsAsync().Result)
+            if (!await includedFile.GetExistsAsync())
             {
                 Trace.Warning($"Included file {includedPath.FullPath} does not exist");
                 return context.GetShortcodeResult(null);

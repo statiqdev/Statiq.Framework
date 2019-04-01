@@ -45,11 +45,11 @@ namespace Wyam.Core.Tests.IO.Globbing
             [TestCase("/a/x", new[] { "../b/**/1/*.txt" }, new[] { "/a/b/c/1/2.txt" })]
             [TestCase("/a/b", new[] { "**/1/*.txt" }, new[] { "/a/b/c/1/2.txt" })]
             [TestCase("/a", new[] { "x/*.{txt,xml,doc}" }, new[] { "/a/x/bar.txt", "/a/x/foo.xml", "/a/x/foo.doc" })]
-            public void ShouldReturnMatchedFiles(string directoryPath, string[] patterns, string[] resultPaths)
+            public async Task ShouldReturnMatchedFiles(string directoryPath, string[] patterns, string[] resultPaths)
             {
                 // Given
                 IFileProvider fileProvider = GetFileProvider();
-                IDirectory directory = fileProvider.GetDirectoryAsync(directoryPath);
+                IDirectory directory = await fileProvider.GetDirectoryAsync(directoryPath);
 
                 // When
                 IEnumerable<IFile> matches = Globber.GetFiles(directory, patterns);
@@ -61,7 +61,7 @@ namespace Wyam.Core.Tests.IO.Globbing
             }
 
             [Test]
-            public void DoubleWildcardShouldMatchZeroOrMorePathSegments()
+            public async Task DoubleWildcardShouldMatchZeroOrMorePathSegments()
             {
                 // Given
                 TestFileProvider fileProvider = new TestFileProvider();
@@ -73,7 +73,7 @@ namespace Wyam.Core.Tests.IO.Globbing
                 fileProvider.AddFile("/root/a/x.txt");
                 fileProvider.AddFile("/root/a/b/x.txt");
                 fileProvider.AddFile("/root/d/x.txt");
-                IDirectory directory = fileProvider.GetDirectory("/");
+                IDirectory directory = await fileProvider.GetDirectoryAsync("/");
 
                 // When
                 IEnumerable<IFile> matches = Globber.GetFiles(directory, "root/{a,}/**/x.txt");
@@ -84,7 +84,7 @@ namespace Wyam.Core.Tests.IO.Globbing
             }
 
             [Test]
-            public void WildcardShouldMatchZeroOrMore()
+            public async Task WildcardShouldMatchZeroOrMore()
             {
                 // Given
                 TestFileProvider fileProvider = new TestFileProvider();
@@ -97,7 +97,7 @@ namespace Wyam.Core.Tests.IO.Globbing
                 fileProvider.AddFile("/root/a/b/x.txt");
                 fileProvider.AddFile("/root/a/b/.txt");
                 fileProvider.AddFile("/root/d/x.txt");
-                IDirectory directory = fileProvider.GetDirectory("/");
+                IDirectory directory = await fileProvider.GetDirectoryAsync("/");
 
                 // When
                 IEnumerable<IFile> matches = Globber.GetFiles(directory, "root/**/*.txt");
@@ -109,7 +109,7 @@ namespace Wyam.Core.Tests.IO.Globbing
 
             [TestCase("/a/x", new[] { "../b/c/**/1/2/*.txt" }, new[] { "/a/b/c/d/e/1/2/3.txt" })]
             [TestCase("/a/x", new[] { "../b/c/d/e/1/2/*.txt" }, new[] { "/a/b/c/d/e/1/2/3.txt" })]
-            public void RecursiveWildcardTests(string directoryPath, string[] patterns, string[] resultPaths)
+            public async Task RecursiveWildcardTests(string directoryPath, string[] patterns, string[] resultPaths)
             {
                 // Given
                 TestFileProvider fileProvider = new TestFileProvider();
@@ -121,7 +121,7 @@ namespace Wyam.Core.Tests.IO.Globbing
                 fileProvider.AddDirectory("/a/b/c/d/e/1");
                 fileProvider.AddDirectory("/a/b/c/d/e/1/2");
                 fileProvider.AddFile("/a/b/c/d/e/1/2/3.txt");
-                IDirectory directory = fileProvider.GetDirectory(directoryPath);
+                IDirectory directory = await fileProvider.GetDirectoryAsync(directoryPath);
 
                 // When
                 IEnumerable<IFile> matches = Globber.GetFiles(directory, patterns);
@@ -136,7 +136,7 @@ namespace Wyam.Core.Tests.IO.Globbing
             // due to an incorrect TestDirectory.GetDirectories() implementation
             // (it was returning non-existing "/a/b/foo/y.txt" as a match)
             [Test]
-            public void NestedFoldersWilcard()
+            public async Task NestedFoldersWilcard()
             {
                 // Given
                 TestFileProvider fileProvider = new TestFileProvider();
@@ -147,7 +147,7 @@ namespace Wyam.Core.Tests.IO.Globbing
                 fileProvider.AddDirectory("/a/bar/foo");
                 fileProvider.AddFile("/a/b/c/x.txt");
                 fileProvider.AddFile("/a/bar/foo/y.txt");
-                IDirectory directory = fileProvider.GetDirectory("/a");
+                IDirectory directory = await fileProvider.GetDirectoryAsync("/a");
 
                 // When
                 IEnumerable<IFile> matches = Globber.GetFiles(directory, "**/*.txt");
@@ -159,11 +159,11 @@ namespace Wyam.Core.Tests.IO.Globbing
             [TestCase("/a/b")]
             [TestCase("/**/a")]
             [WindowsTestCase("C:/a")]
-            public void ShouldThrowForRootPatterns(string pattern)
+            public async Task ShouldThrowForRootPatterns(string pattern)
             {
                 // Given
                 IFileProvider fileProvider = GetFileProvider();
-                IDirectory directory = fileProvider.GetDirectoryAsync("/a");
+                IDirectory directory = await fileProvider.GetDirectoryAsync("/a");
 
                 // When, Then
                 Assert.Throws<ArgumentException>(() => Globber.GetFiles(directory, pattern));

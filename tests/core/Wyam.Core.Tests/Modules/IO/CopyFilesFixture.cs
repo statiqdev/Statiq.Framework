@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading;
+using System.Threading.Tasks;
 using NUnit.Framework;
 using Wyam.Common.Configuration;
 using Wyam.Common.Documents;
@@ -82,7 +83,7 @@ namespace Wyam.Core.Tests.Modules.IO
         public class ExecuteTests : CopyFilesFixture
         {
             [Test]
-            public void RecursivePatternCopiesFiles()
+            public async Task RecursivePatternCopiesFiles()
             {
                 // Given
                 CopyFiles copyFiles = new CopyFiles("**/*.txt");
@@ -91,16 +92,16 @@ namespace Wyam.Core.Tests.Modules.IO
                 copyFiles.Execute(Inputs, Context).ToList();
 
                 // Then
-                Assert.IsTrue(Engine.FileSystem.GetOutputFile("test-a.txt").Exists);
-                Assert.IsTrue(Engine.FileSystem.GetOutputFile("test-b.txt").Exists);
-                Assert.IsTrue(Engine.FileSystem.GetOutputFile("Subfolder/test-c.txt").Exists);
-                Assert.IsTrue(Engine.FileSystem.GetOutputDirectory("Subfolder").Exists);
-                Assert.IsFalse(Engine.FileSystem.GetOutputFile("markdown-x.md").Exists);
-                Assert.IsFalse(Engine.FileSystem.GetOutputFile("Subfolder/markdown-y.md").Exists);
+                Assert.IsTrue(await (await Engine.FileSystem.GetOutputFileAsync("test-a.txt")).GetExistsAsync());
+                Assert.IsTrue(await (await Engine.FileSystem.GetOutputFileAsync("test-b.txt")).GetExistsAsync());
+                Assert.IsTrue(await (await Engine.FileSystem.GetOutputFileAsync("Subfolder/test-c.txt")).GetExistsAsync());
+                Assert.IsTrue(await (await Engine.FileSystem.GetOutputDirectoryAsync("Subfolder")).GetExistsAsync());
+                Assert.IsFalse(await (await Engine.FileSystem.GetOutputFileAsync("markdown-x.md")).GetExistsAsync());
+                Assert.IsFalse(await (await Engine.FileSystem.GetOutputFileAsync("Subfolder/markdown-y.md")).GetExistsAsync());
             }
 
             [Test]
-            public void CopyFilesInTopDirectoryOnly()
+            public async Task CopyFilesInTopDirectoryOnly()
             {
                 // Given
                 CopyFiles copyFiles = new CopyFiles("*.txt");
@@ -109,16 +110,16 @@ namespace Wyam.Core.Tests.Modules.IO
                 copyFiles.Execute(Inputs, Context).ToList();
 
                 // Then
-                Assert.IsTrue(Engine.FileSystem.GetOutputFile("test-a.txt").Exists);
-                Assert.IsTrue(Engine.FileSystem.GetOutputFile("test-b.txt").Exists);
-                Assert.IsFalse(Engine.FileSystem.GetOutputFile("Subfolder/test-c.txt").Exists);
-                Assert.IsFalse(Engine.FileSystem.GetOutputDirectory("Subfolder").Exists);
-                Assert.IsFalse(Engine.FileSystem.GetOutputFile("markdown-x.md").Exists);
-                Assert.IsFalse(Engine.FileSystem.GetOutputFile("Subfolder/markdown-y.md").Exists);
+                Assert.IsTrue(await (await Engine.FileSystem.GetOutputFileAsync("test-a.txt")).GetExistsAsync());
+                Assert.IsTrue(await (await Engine.FileSystem.GetOutputFileAsync("test-b.txt")).GetExistsAsync());
+                Assert.IsFalse(await (await Engine.FileSystem.GetOutputFileAsync("Subfolder/test-c.txt")).GetExistsAsync());
+                Assert.IsFalse(await (await Engine.FileSystem.GetOutputDirectoryAsync("Subfolder")).GetExistsAsync());
+                Assert.IsFalse(await (await Engine.FileSystem.GetOutputFileAsync("markdown-x.md")).GetExistsAsync());
+                Assert.IsFalse(await (await Engine.FileSystem.GetOutputFileAsync("Subfolder/markdown-y.md")).GetExistsAsync());
             }
 
             [Test]
-            public void CopyFilesInSubfolderOnly()
+            public async Task CopyFilesInSubfolderOnly()
             {
                 // Given
                 CopyFiles copyFiles = new CopyFiles("Subfolder/*.txt");
@@ -127,16 +128,16 @@ namespace Wyam.Core.Tests.Modules.IO
                 copyFiles.Execute(Inputs, Context).ToList();
 
                 // Then
-                Assert.IsFalse(Engine.FileSystem.GetOutputFile("test-a.txt").Exists);
-                Assert.IsFalse(Engine.FileSystem.GetOutputFile("test-b.txt").Exists);
-                Assert.IsTrue(Engine.FileSystem.GetOutputFile("Subfolder/test-c.txt").Exists);
-                Assert.IsTrue(Engine.FileSystem.GetOutputDirectory("Subfolder").Exists);
-                Assert.IsFalse(Engine.FileSystem.GetOutputFile("markdown-x.md").Exists);
-                Assert.IsFalse(Engine.FileSystem.GetOutputFile("Subfolder/markdown-y.md").Exists);
+                Assert.IsFalse(await (await Engine.FileSystem.GetOutputFileAsync("test-a.txt")).GetExistsAsync());
+                Assert.IsFalse(await (await Engine.FileSystem.GetOutputFileAsync("test-b.txt")).GetExistsAsync());
+                Assert.IsTrue(await (await Engine.FileSystem.GetOutputFileAsync("Subfolder/test-c.txt")).GetExistsAsync());
+                Assert.IsTrue(await (await Engine.FileSystem.GetOutputDirectoryAsync("Subfolder")).GetExistsAsync());
+                Assert.IsFalse(await (await Engine.FileSystem.GetOutputFileAsync("markdown-x.md")).GetExistsAsync());
+                Assert.IsFalse(await (await Engine.FileSystem.GetOutputFileAsync("Subfolder/markdown-y.md")).GetExistsAsync());
             }
 
             [Test]
-            public void CopyFilesAboveInputPath()
+            public async Task CopyFilesAboveInputPath()
             {
                 // Given
                 CopyFiles copyFiles = new CopyFiles("../*.txt");
@@ -145,17 +146,17 @@ namespace Wyam.Core.Tests.Modules.IO
                 copyFiles.Execute(Inputs, Context).ToList();
 
                 // Then
-                Assert.IsFalse(Engine.FileSystem.GetOutputFile("test-a.txt").Exists);
-                Assert.IsFalse(Engine.FileSystem.GetOutputFile("test-b.txt").Exists);
-                Assert.IsFalse(Engine.FileSystem.GetOutputFile("Subfolder/test-c.txt").Exists);
-                Assert.IsFalse(Engine.FileSystem.GetOutputDirectory("Subfolder").Exists);
-                Assert.IsFalse(Engine.FileSystem.GetOutputFile("markdown-x.md").Exists);
-                Assert.IsFalse(Engine.FileSystem.GetOutputFile("Subfolder/markdown-y.md").Exists);
-                Assert.IsTrue(Engine.FileSystem.GetOutputFile("test-above-input.txt").Exists);
+                Assert.IsFalse(await (await Engine.FileSystem.GetOutputFileAsync("test-a.txt")).GetExistsAsync());
+                Assert.IsFalse(await (await Engine.FileSystem.GetOutputFileAsync("test-b.txt")).GetExistsAsync());
+                Assert.IsFalse(await (await Engine.FileSystem.GetOutputFileAsync("Subfolder/test-c.txt")).GetExistsAsync());
+                Assert.IsFalse(await (await Engine.FileSystem.GetOutputDirectoryAsync("Subfolder")).GetExistsAsync());
+                Assert.IsFalse(await (await Engine.FileSystem.GetOutputFileAsync("markdown-x.md")).GetExistsAsync());
+                Assert.IsFalse(await (await Engine.FileSystem.GetOutputFileAsync("Subfolder/markdown-y.md")).GetExistsAsync());
+                Assert.IsTrue(await (await Engine.FileSystem.GetOutputFileAsync("test-above-input.txt")).GetExistsAsync());
             }
 
             [Test]
-            public void CopyFilesAboveInputPathWithOthers()
+            public async Task CopyFilesAboveInputPathWithOthers()
             {
                 // Given
                 CopyFiles copyFiles = new CopyFiles("../**/*.txt");
@@ -164,17 +165,17 @@ namespace Wyam.Core.Tests.Modules.IO
                 copyFiles.Execute(Inputs, Context).ToList();
 
                 // Then
-                Assert.IsTrue(Engine.FileSystem.GetOutputFile("test-a.txt").Exists);
-                Assert.IsTrue(Engine.FileSystem.GetOutputFile("test-b.txt").Exists);
-                Assert.IsTrue(Engine.FileSystem.GetOutputFile("Subfolder/test-c.txt").Exists);
-                Assert.IsTrue(Engine.FileSystem.GetOutputDirectory("Subfolder").Exists);
-                Assert.IsFalse(Engine.FileSystem.GetOutputFile("markdown-x.md").Exists);
-                Assert.IsFalse(Engine.FileSystem.GetOutputFile("Subfolder/markdown-y.md").Exists);
-                Assert.IsTrue(Engine.FileSystem.GetOutputFile("test-above-input.txt").Exists);
+                Assert.IsTrue(await (await Engine.FileSystem.GetOutputFileAsync("test-a.txt")).GetExistsAsync());
+                Assert.IsTrue(await (await Engine.FileSystem.GetOutputFileAsync("test-b.txt")).GetExistsAsync());
+                Assert.IsTrue(await (await Engine.FileSystem.GetOutputFileAsync("Subfolder/test-c.txt")).GetExistsAsync());
+                Assert.IsTrue(await (await Engine.FileSystem.GetOutputDirectoryAsync("Subfolder")).GetExistsAsync());
+                Assert.IsFalse(await (await Engine.FileSystem.GetOutputFileAsync("markdown-x.md")).GetExistsAsync());
+                Assert.IsFalse(await (await Engine.FileSystem.GetOutputFileAsync("Subfolder/markdown-y.md")).GetExistsAsync());
+                Assert.IsTrue(await (await Engine.FileSystem.GetOutputFileAsync("test-above-input.txt")).GetExistsAsync());
             }
 
             [Test]
-            public void CopyFolderFromAbsolutePath()
+            public async Task CopyFolderFromAbsolutePath()
             {
                 // Given
                 CopyFiles copyFiles = new CopyFiles("/TestFiles/Input/**/*.txt");
@@ -183,16 +184,16 @@ namespace Wyam.Core.Tests.Modules.IO
                 copyFiles.Execute(Inputs, Context).ToList();
 
                 // Then
-                Assert.IsTrue(Engine.FileSystem.GetOutputFile("test-a.txt").Exists);
-                Assert.IsTrue(Engine.FileSystem.GetOutputFile("test-b.txt").Exists);
-                Assert.IsTrue(Engine.FileSystem.GetOutputFile("Subfolder/test-c.txt").Exists);
-                Assert.IsTrue(Engine.FileSystem.GetOutputDirectory("Subfolder").Exists);
-                Assert.IsFalse(Engine.FileSystem.GetOutputFile("markdown-x.md").Exists);
-                Assert.IsFalse(Engine.FileSystem.GetOutputFile("Subfolder/markdown-y.md").Exists);
+                Assert.IsTrue(await (await Engine.FileSystem.GetOutputFileAsync("test-a.txt")).GetExistsAsync());
+                Assert.IsTrue(await (await Engine.FileSystem.GetOutputFileAsync("test-b.txt")).GetExistsAsync());
+                Assert.IsTrue(await (await Engine.FileSystem.GetOutputFileAsync("Subfolder/test-c.txt")).GetExistsAsync());
+                Assert.IsTrue(await (await Engine.FileSystem.GetOutputDirectoryAsync("Subfolder")).GetExistsAsync());
+                Assert.IsFalse(await (await Engine.FileSystem.GetOutputFileAsync("markdown-x.md")).GetExistsAsync());
+                Assert.IsFalse(await (await Engine.FileSystem.GetOutputFileAsync("Subfolder/markdown-y.md")).GetExistsAsync());
             }
 
             [Test]
-            public void CopyNonExistingFolder()
+            public async Task CopyNonExistingFolder()
             {
                 // Given
                 CopyFiles copyFiles = new CopyFiles("NonExisting/**/*.txt");
@@ -201,12 +202,12 @@ namespace Wyam.Core.Tests.Modules.IO
                 copyFiles.Execute(Inputs, Context).ToList();
 
                 // Then
-                Assert.IsFalse(Engine.FileSystem.GetOutputFile("test-a.txt").Exists);
-                Assert.IsFalse(Engine.FileSystem.GetOutputFile("test-b.txt").Exists);
-                Assert.IsFalse(Engine.FileSystem.GetOutputFile("Subfolder/test-c.txt").Exists);
-                Assert.IsFalse(Engine.FileSystem.GetOutputDirectory("Subfolder").Exists);
-                Assert.IsFalse(Engine.FileSystem.GetOutputFile("markdown-x.md").Exists);
-                Assert.IsFalse(Engine.FileSystem.GetOutputFile("Subfolder/markdown-y.md").Exists);
+                Assert.IsFalse(await (await Engine.FileSystem.GetOutputFileAsync("test-a.txt")).GetExistsAsync());
+                Assert.IsFalse(await (await Engine.FileSystem.GetOutputFileAsync("test-b.txt")).GetExistsAsync());
+                Assert.IsFalse(await (await Engine.FileSystem.GetOutputFileAsync("Subfolder/test-c.txt")).GetExistsAsync());
+                Assert.IsFalse(await (await Engine.FileSystem.GetOutputDirectoryAsync("Subfolder")).GetExistsAsync());
+                Assert.IsFalse(await (await Engine.FileSystem.GetOutputFileAsync("markdown-x.md")).GetExistsAsync());
+                Assert.IsFalse(await (await Engine.FileSystem.GetOutputFileAsync("Subfolder/markdown-y.md")).GetExistsAsync());
             }
 
             [Test]

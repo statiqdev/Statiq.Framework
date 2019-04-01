@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using NUnit.Framework;
+using Shouldly;
 using Wyam.Common.IO;
 using Wyam.Core.IO;
 using Wyam.Testing;
@@ -96,7 +98,7 @@ namespace Wyam.Core.Tests.IO
             [TestCase("baz.txt", "/a/y/baz.txt")]
             [TestCase("/a/b/c/foo.txt", "/a/b/c/foo.txt")]
             [TestCase("/z/baz.txt", "/z/baz.txt")]
-            public void ReturnsInputFile(string input, string expected)
+            public async Task ReturnsInputFile(string input, string expected)
             {
                 // Given
                 FileSystem fileSystem = new FileSystem();
@@ -108,14 +110,14 @@ namespace Wyam.Core.Tests.IO
                 fileSystem.FileProviders.Add(NormalizedPath.DefaultFileProvider.Scheme, GetFileProvider());
 
                 // When
-                IFile result = fileSystem.GetInputFile(input);
+                IFile result = await fileSystem.GetInputFileAsync(input);
 
                 // Then
                 Assert.AreEqual(expected, result.Path.FullPath);
             }
 
             [Test]
-            public void ReturnsInputFileAboveInputDirectory()
+            public async Task ReturnsInputFileAboveInputDirectory()
             {
                 // Given
                 FileSystem fileSystem = new FileSystem();
@@ -124,14 +126,14 @@ namespace Wyam.Core.Tests.IO
                 fileSystem.FileProviders.Add(NormalizedPath.DefaultFileProvider.Scheme, GetFileProvider());
 
                 // When
-                IFile result = fileSystem.GetInputFile("../bar.txt");
+                IFile result = await fileSystem.GetInputFileAsync("../bar.txt");
 
                 // Then
                 Assert.AreEqual("/a/x/bar.txt", result.Path.FullPath);
             }
 
             [Test]
-            public void ReturnsInputFileWhenInputDirectoryAboveRoot()
+            public async Task ReturnsInputFileWhenInputDirectoryAboveRoot()
             {
                 // Given
                 FileSystem fileSystem = new FileSystem();
@@ -140,14 +142,14 @@ namespace Wyam.Core.Tests.IO
                 fileSystem.FileProviders.Add(NormalizedPath.DefaultFileProvider.Scheme, GetFileProvider());
 
                 // When
-                IFile result = fileSystem.GetInputFile("bar.txt");
+                IFile result = await fileSystem.GetInputFileAsync("bar.txt");
 
                 // Then
                 Assert.AreEqual("/a/x/bar.txt", result.Path.FullPath);
             }
 
             [Test]
-            public void ReturnsInputFileWhenInputDirectoryAndFileAscend()
+            public async Task ReturnsInputFileWhenInputDirectoryAndFileAscend()
             {
                 // Given
                 FileSystem fileSystem = new FileSystem();
@@ -156,7 +158,7 @@ namespace Wyam.Core.Tests.IO
                 fileSystem.FileProviders.Add(NormalizedPath.DefaultFileProvider.Scheme, GetFileProvider());
 
                 // When
-                IFile result = fileSystem.GetInputFile("../bar.txt");
+                IFile result = await fileSystem.GetInputFileAsync("../bar.txt");
 
                 // Then
                 Assert.AreEqual("/a/x/bar.txt", result.Path.FullPath);
@@ -166,13 +168,13 @@ namespace Wyam.Core.Tests.IO
         public class GetInputDirectoryTests : FileSystemFixture
         {
             [Test]
-            public void ReturnsVirtualInputDirectoryForRelativePath()
+            public async Task ReturnsVirtualInputDirectoryForRelativePath()
             {
                 // Given
                 FileSystem fileSystem = new FileSystem();
 
                 // When
-                IDirectory result = fileSystem.GetInputDirectory("A/B/C");
+                IDirectory result = await fileSystem.GetInputDirectoryAsync("A/B/C");
 
                 // Then
                 Assert.IsInstanceOf<VirtualInputDirectory>(result);
@@ -180,13 +182,13 @@ namespace Wyam.Core.Tests.IO
             }
 
             [Test]
-            public void ReturnsVirtualInputDirectoryForAscendingPath()
+            public async Task ReturnsVirtualInputDirectoryForAscendingPath()
             {
                 // Given
                 FileSystem fileSystem = new FileSystem();
 
                 // When
-                IDirectory result = fileSystem.GetInputDirectory("../A/B/C");
+                IDirectory result = await fileSystem.GetInputDirectoryAsync("../A/B/C");
 
                 // Then
                 Assert.IsInstanceOf<VirtualInputDirectory>(result);
@@ -194,13 +196,13 @@ namespace Wyam.Core.Tests.IO
             }
 
             [Test]
-            public void ReturnsVirtualInputDirectoryForNullPath()
+            public async Task ReturnsVirtualInputDirectoryForNullPath()
             {
                 // Given
                 FileSystem fileSystem = new FileSystem();
 
                 // When
-                IDirectory result = fileSystem.GetInputDirectory();
+                IDirectory result = await fileSystem.GetInputDirectoryAsync();
 
                 // Then
                 Assert.IsInstanceOf<VirtualInputDirectory>(result);
@@ -208,13 +210,13 @@ namespace Wyam.Core.Tests.IO
             }
 
             [Test]
-            public void ReturnsDirectoryForAbsolutePath()
+            public async Task ReturnsDirectoryForAbsolutePath()
             {
                 // Given
                 FileSystem fileSystem = new FileSystem();
 
                 // When
-                IDirectory result = fileSystem.GetInputDirectory("/A/B/C");
+                IDirectory result = await fileSystem.GetInputDirectoryAsync("/A/B/C");
 
                 // Then
                 Assert.AreEqual("/A/B/C", result.Path.FullPath);
@@ -224,7 +226,7 @@ namespace Wyam.Core.Tests.IO
         public class GetInputDirectoriesTests : FileSystemFixture
         {
             [Test]
-            public void ReturnsCombinedInputDirectories()
+            public async Task ReturnsCombinedInputDirectories()
             {
                 // Given
                 FileSystem fileSystem = new FileSystem();
@@ -237,7 +239,7 @@ namespace Wyam.Core.Tests.IO
                 fileSystem.FileProviders.Add(NormalizedPath.DefaultFileProvider.Scheme, GetFileProvider());
 
                 // When
-                IEnumerable<IDirectory> result = fileSystem.GetInputDirectories();
+                IEnumerable<IDirectory> result = await fileSystem.GetInputDirectoriesAsync();
 
                 // Then
                 CollectionAssert.AreEquivalent(
@@ -257,13 +259,13 @@ namespace Wyam.Core.Tests.IO
         public class GetContainingInputPathTests : FileSystemFixture
         {
             [Test]
-            public void ThrowsForNullPath()
+            public async Task ThrowsForNullPath()
             {
                 // Given
                 FileSystem fileSystem = new FileSystem();
 
                 // When, Then
-                Assert.Throws<ArgumentNullException>(() => fileSystem.GetContainingInputPath(null));
+                await Should.ThrowAsync<ArgumentNullException>(async () => await fileSystem.GetContainingInputPathAsync(null));
             }
 
             [TestCase("/a/b/c/foo.txt", "/a/b")]
@@ -273,7 +275,7 @@ namespace Wyam.Core.Tests.IO
             [TestCase("/a/b/c/../e/foo.txt", "/a/b")]
             [TestCase("/a/b/c", "/a/b")]
             [TestCase("/a/x", "/a/x")]
-            public void ShouldReturnContainingPathForAbsolutePath(string path, string expected)
+            public async Task ShouldReturnContainingPathForAbsolutePath(string path, string expected)
             {
                 // Given
                 FileSystem fileSystem = new FileSystem();
@@ -283,8 +285,8 @@ namespace Wyam.Core.Tests.IO
                 fileSystem.FileProviders.Add(string.Empty, GetFileProvider());
 
                 // When
-                DirectoryPath inputPathFromFilePath = fileSystem.GetContainingInputPath(new FilePath(path));
-                DirectoryPath inputPathFromDirectoryPath = fileSystem.GetContainingInputPath(new DirectoryPath(path));
+                DirectoryPath inputPathFromFilePath = await fileSystem.GetContainingInputPathAsync(new FilePath(path));
+                DirectoryPath inputPathFromDirectoryPath = await fileSystem.GetContainingInputPathAsync(new DirectoryPath(path));
 
                 // Then
                 Assert.AreEqual(expected, inputPathFromFilePath?.FullPath);
@@ -296,7 +298,7 @@ namespace Wyam.Core.Tests.IO
             [TestCase("/a/x/baz.txt", "/a/y/../x")]
             [TestCase("/z/baz.txt", null)]
             [TestCase("/a/b/c/../e/foo.txt", "/a/y/../b")]
-            public void ShouldReturnContainingPathForInputPathAboveRootPath(string path, string expected)
+            public async Task ShouldReturnContainingPathForInputPathAboveRootPath(string path, string expected)
             {
                 // Given
                 FileSystem fileSystem = new FileSystem();
@@ -306,8 +308,8 @@ namespace Wyam.Core.Tests.IO
                 fileSystem.FileProviders.Add(string.Empty, GetFileProvider());
 
                 // When
-                DirectoryPath inputPathFromFilePath = fileSystem.GetContainingInputPath(new FilePath(path));
-                DirectoryPath inputPathFromDirectoryPath = fileSystem.GetContainingInputPath(new DirectoryPath(path));
+                DirectoryPath inputPathFromFilePath = await fileSystem.GetContainingInputPathAsync(new FilePath(path));
+                DirectoryPath inputPathFromDirectoryPath = await fileSystem.GetContainingInputPathAsync(new DirectoryPath(path));
 
                 // Then
                 Assert.AreEqual(expected, inputPathFromFilePath?.FullPath);
@@ -320,7 +322,7 @@ namespace Wyam.Core.Tests.IO
             [TestCase("z/baz.txt", null)]
             [TestCase("c/../e/foo.txt", null)]
             [TestCase("c/e/../foo.txt", "/a/b")]
-            public void ShouldReturnContainingPathForRelativeFilePath(string path, string expected)
+            public async Task ShouldReturnContainingPathForRelativeFilePath(string path, string expected)
             {
                 // Given
                 FileSystem fileSystem = new FileSystem();
@@ -330,7 +332,7 @@ namespace Wyam.Core.Tests.IO
                 fileSystem.FileProviders.Add(NormalizedPath.DefaultFileProvider.Scheme, GetFileProvider());
 
                 // When
-                DirectoryPath inputPath = fileSystem.GetContainingInputPath(new FilePath(path));
+                DirectoryPath inputPath = await fileSystem.GetContainingInputPathAsync(new FilePath(path));
 
                 // Then
                 Assert.AreEqual(expected, inputPath?.FullPath);
@@ -340,7 +342,7 @@ namespace Wyam.Core.Tests.IO
             [TestCase("z", "/a/y")]
             [TestCase("r", null)]
             [TestCase("c/e", null)]
-            public void ShouldReturnContainingPathForRelativeDirectoryPath(string path, string expected)
+            public async Task ShouldReturnContainingPathForRelativeDirectoryPath(string path, string expected)
             {
                 // Given
                 FileSystem fileSystem = new FileSystem();
@@ -350,14 +352,14 @@ namespace Wyam.Core.Tests.IO
                 fileSystem.FileProviders.Add(NormalizedPath.DefaultFileProvider.Scheme, GetFileProvider());
 
                 // When
-                DirectoryPath inputPath = fileSystem.GetContainingInputPath(new DirectoryPath(path));
+                DirectoryPath inputPath = await fileSystem.GetContainingInputPathAsync(new DirectoryPath(path));
 
                 // Then
                 Assert.AreEqual(expected, inputPath?.FullPath);
             }
 
             [Test]
-            public void ShouldReturnContainingPathWhenOtherInputPathStartsTheSame()
+            public async Task ShouldReturnContainingPathWhenOtherInputPathStartsTheSame()
             {
                 // Given
                 FileSystem fileSystem = new FileSystem();
@@ -371,7 +373,7 @@ namespace Wyam.Core.Tests.IO
                 fileSystem.FileProviders.Add(NormalizedPath.DefaultFileProvider.Scheme, fileProvider);
 
                 // When
-                DirectoryPath inputPath = fileSystem.GetContainingInputPath(new FilePath("baz.txt"));
+                DirectoryPath inputPath = await fileSystem.GetContainingInputPathAsync(new FilePath("baz.txt"));
 
                 // Then
                 Assert.AreEqual("/a/yz", inputPath?.FullPath);
@@ -510,38 +512,38 @@ namespace Wyam.Core.Tests.IO
         public class GetFilesTests : FileSystemFixture
         {
             [Test]
-            public void ShouldThrowForNullDirectory()
+            public async Task ShouldThrowForNullDirectory()
             {
                 // Given
                 FileSystem fileSystem = new FileSystem();
                 fileSystem.FileProviders.Add(NormalizedPath.DefaultFileProvider.Scheme, GetFileProvider());
 
                 // When, Then
-                Assert.Throws<ArgumentNullException>(() => fileSystem.GetFiles((IDirectory)null, "/"));
+                await Should.ThrowAsync<ArgumentNullException>(async () => await fileSystem.GetFilesAsync((IDirectory)null, "/"));
             }
 
             [Test]
-            public void ShouldThrowForNullPatterns()
+            public async Task ShouldThrowForNullPatterns()
             {
                 // Given
                 FileSystem fileSystem = new FileSystem();
                 fileSystem.FileProviders.Add(NormalizedPath.DefaultFileProvider.Scheme, GetFileProvider());
-                IDirectory dir = fileSystem.GetDirectory("/");
+                IDirectory dir = await fileSystem.GetDirectoryAsync("/");
 
                 // When, Then
-                Assert.Throws<ArgumentNullException>(() => fileSystem.GetFiles(dir, null));
+                await Should.ThrowAsync<ArgumentNullException>(async () => await fileSystem.GetFilesAsync(dir, null));
             }
 
             [Test]
-            public void ShouldNotThrowForNullPattern()
+            public async Task ShouldNotThrowForNullPattern()
             {
                 // Given
                 FileSystem fileSystem = new FileSystem();
                 fileSystem.FileProviders.Add(NormalizedPath.DefaultFileProvider.Scheme, GetFileProvider());
-                IDirectory dir = fileSystem.GetDirectory("/");
+                IDirectory dir = await fileSystem.GetDirectoryAsync("/");
 
                 // When
-                IEnumerable<IFile> results = fileSystem.GetFiles(dir, null, "**/foo.txt");
+                IEnumerable<IFile> results = await fileSystem.GetFilesAsync(dir, null, "**/foo.txt");
 
                 // Then
                 CollectionAssert.AreEquivalent(new[] { "/a/b/c/foo.txt" }, results.Select(x => x.Path.FullPath));
@@ -576,7 +578,7 @@ namespace Wyam.Core.Tests.IO
             [TestCase("/", new[] { "qwerty|/q/werty.txt" }, new[] { "/q/werty.txt" }, true)]
             [TestCase("/", new[] { "qwerty:///|/q/werty.txt" }, new[] { "/q/werty.txt" }, false)]
             [TestCase("/", new[] { "qwerty:///q/werty.txt" }, new[] { "/q/werty.txt" }, false)]
-            public void ShouldReturnExistingFiles(string directory, string[] patterns, string[] expected, bool reverseSlashes)
+            public async Task ShouldReturnExistingFiles(string directory, string[] patterns, string[] expected, bool reverseSlashes)
             {
                 // TestContext.Out.WriteLine($"Patterns: {string.Join(",", patterns)}");
 
@@ -588,10 +590,10 @@ namespace Wyam.Core.Tests.IO
                 alternateProvider.AddDirectory("/q");
                 alternateProvider.AddFile("/q/werty.txt");
                 fileSystem.FileProviders.Add("qwerty", alternateProvider);
-                IDirectory dir = fileSystem.GetDirectory(directory);
+                IDirectory dir = await fileSystem.GetDirectoryAsync(directory);
 
                 // When
-                IEnumerable<IFile> results = fileSystem.GetFiles(dir, patterns);
+                IEnumerable<IFile> results = await fileSystem.GetFilesAsync(dir, patterns);
 
                 // Then
                 CollectionAssert.AreEquivalent(expected, results.Select(x => x.Path.FullPath));
@@ -599,7 +601,7 @@ namespace Wyam.Core.Tests.IO
                 if (reverseSlashes)
                 {
                     // When
-                    results = fileSystem.GetFiles(dir, patterns.Select(x => x.Replace("/", "\\")));
+                    results = await fileSystem.GetFilesAsync(dir, patterns.Select(x => x.Replace("/", "\\")));
 
                     // Then
                     CollectionAssert.AreEquivalent(expected, results.Select(x => x.Path.FullPath));

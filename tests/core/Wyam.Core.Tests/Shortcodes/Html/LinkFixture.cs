@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
+using System.Threading.Tasks;
 using NUnit.Framework;
 using Shouldly;
 using Wyam.Common.IO;
@@ -24,7 +25,7 @@ namespace Wyam.Core.Tests.Shortcodes.Html
             [TestCase("foo/bar", "/foo/bar")]
             [TestCase("/foo/bar", "/foo/bar")]
             [TestCase("//foo/bar", "//foo/bar")]
-            public void RendersLink(string path, string expected)
+            public async Task RendersLink(string path, string expected)
             {
                 // Given
                 TestExecutionContext context = new TestExecutionContext();
@@ -38,7 +39,7 @@ namespace Wyam.Core.Tests.Shortcodes.Html
                 Link shortcode = new Link();
 
                 // When
-                IShortcodeResult result = shortcode.Execute(args, string.Empty, document, context);
+                IShortcodeResult result = await shortcode.ExecuteAsync(args, string.Empty, document, context);
 
                 // Then
                 using (TextReader reader = new StreamReader(result.Stream))
@@ -52,7 +53,7 @@ namespace Wyam.Core.Tests.Shortcodes.Html
             [TestCase("foo/bar", "http://domain.com/foo/bar")]
             [TestCase("/foo/bar", "http://domain.com/foo/bar")]
             [TestCase("//foo/bar", "http://domain.com//foo/bar")]
-            public void RendersLinkWithHost(string path, string expected)
+            public async Task RendersLinkWithHost(string path, string expected)
             {
                 // Given
                 TestExecutionContext context = new TestExecutionContext();
@@ -68,7 +69,7 @@ namespace Wyam.Core.Tests.Shortcodes.Html
                 Link shortcode = new Link();
 
                 // When
-                IShortcodeResult result = shortcode.Execute(args, string.Empty, document, context);
+                IShortcodeResult result = await shortcode.ExecuteAsync(args, string.Empty, document, context);
 
                 // Then
                 using (TextReader reader = new StreamReader(result.Stream))
@@ -82,7 +83,7 @@ namespace Wyam.Core.Tests.Shortcodes.Html
             [TestCase("foo/bar", "http://google.com/foo/bar")]
             [TestCase("/foo/bar", "http://google.com/foo/bar")]
             [TestCase("//foo/bar", "http://google.com//foo/bar")]
-            public void RendersLinkWithAlternateHost(string path, string expected)
+            public async Task RendersLinkWithAlternateHost(string path, string expected)
             {
                 // Given
                 TestExecutionContext context = new TestExecutionContext();
@@ -98,7 +99,7 @@ namespace Wyam.Core.Tests.Shortcodes.Html
                 Link shortcode = new Link();
 
                 // When
-                IShortcodeResult result = shortcode.Execute(args, string.Empty, document, context);
+                IShortcodeResult result = await shortcode.ExecuteAsync(args, string.Empty, document, context);
 
                 // Then
                 using (TextReader reader = new StreamReader(result.Stream))

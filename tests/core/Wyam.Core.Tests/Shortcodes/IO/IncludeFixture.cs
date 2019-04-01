@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
+using System.Threading.Tasks;
 using NUnit.Framework;
 using Shouldly;
 using Wyam.Common.IO;
@@ -21,7 +22,7 @@ namespace Wyam.Core.Tests.Shortcodes.IO
         public class ExecuteTests : IncludeFixture
         {
             [Test]
-            public void IncludesFile()
+            public async Task IncludesFile()
             {
                 // Given
                 TestFileProvider fileProvider = new TestFileProvider();
@@ -48,7 +49,7 @@ namespace Wyam.Core.Tests.Shortcodes.IO
                 Include shortcode = new Include();
 
                 // When
-                IShortcodeResult result = shortcode.Execute(args, string.Empty, document, context);
+                IShortcodeResult result = await shortcode.ExecuteAsync(args, string.Empty, document, context);
 
                 // Then
                 using (TextReader reader = new StreamReader(result.Stream))
@@ -58,7 +59,7 @@ namespace Wyam.Core.Tests.Shortcodes.IO
             }
 
             [Test]
-            public void NullResultIfFileDoesNotExist()
+            public async Task NullResultIfFileDoesNotExist()
             {
                 // Given
                 ThrowOnTraceEventType(System.Diagnostics.TraceEventType.Error);
@@ -86,14 +87,14 @@ namespace Wyam.Core.Tests.Shortcodes.IO
                 Include shortcode = new Include();
 
                 // When
-                IShortcodeResult result = shortcode.Execute(args, string.Empty, document, context);
+                IShortcodeResult result = await shortcode.ExecuteAsync(args, string.Empty, document, context);
 
                 // Then
                 result.Stream.ShouldBeNull();
             }
 
             [Test]
-            public void IncludesFileRelativeToSource()
+            public async Task IncludesFileRelativeToSource()
             {
                 // Given
                 TestFileProvider fileProvider = new TestFileProvider();
@@ -124,7 +125,7 @@ namespace Wyam.Core.Tests.Shortcodes.IO
                 Include shortcode = new Include();
 
                 // When
-                IShortcodeResult result = shortcode.Execute(args, string.Empty, document, context);
+                IShortcodeResult result = await shortcode.ExecuteAsync(args, string.Empty, document, context);
 
                 // Then
                 using (TextReader reader = new StreamReader(result.Stream))

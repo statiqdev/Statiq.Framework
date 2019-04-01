@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
+using System.Threading.Tasks;
 using NUnit.Framework;
 using Shouldly;
 using Wyam.Common.Meta;
@@ -19,7 +20,7 @@ namespace Wyam.Core.Tests.Shortcodes.Html
         public class ExecuteTests : FigureFixture
         {
             [Test]
-            public void RendersFigure()
+            public async Task RendersFigure()
             {
                 // Given
                 TestExecutionContext context = new TestExecutionContext();
@@ -38,7 +39,7 @@ namespace Wyam.Core.Tests.Shortcodes.Html
                 Figure shortcode = new Figure();
 
                 // When
-                IShortcodeResult result = shortcode.Execute(args, "foo bar", document, context);
+                IShortcodeResult result = await shortcode.ExecuteAsync(args, "foo bar", document, context);
 
                 // Then
                 using (TextReader reader = new StreamReader(result.Stream))
@@ -55,7 +56,7 @@ namespace Wyam.Core.Tests.Shortcodes.Html
             }
 
             [Test]
-            public void RendersFigureWithoutLink()
+            public async Task RendersFigureWithoutLink()
             {
                 // Given
                 TestExecutionContext context = new TestExecutionContext();
@@ -71,7 +72,7 @@ namespace Wyam.Core.Tests.Shortcodes.Html
                 Figure shortcode = new Figure();
 
                 // When
-                IShortcodeResult result = shortcode.Execute(args, "foo bar", document, context);
+                IShortcodeResult result = await shortcode.ExecuteAsync(args, "foo bar", document, context);
 
                 // Then
                 using (TextReader reader = new StreamReader(result.Stream))
@@ -86,7 +87,7 @@ namespace Wyam.Core.Tests.Shortcodes.Html
             }
 
             [Test]
-            public void DoesNotRenderLinkIfNoImage()
+            public async Task DoesNotRenderLinkIfNoImage()
             {
                 // Given
                 TestExecutionContext context = new TestExecutionContext();
@@ -104,7 +105,7 @@ namespace Wyam.Core.Tests.Shortcodes.Html
                 Figure shortcode = new Figure();
 
                 // When
-                IShortcodeResult result = shortcode.Execute(args, "foo bar", document, context);
+                IShortcodeResult result = await shortcode.ExecuteAsync(args, "foo bar", document, context);
 
                 // Then
                 using (TextReader reader = new StreamReader(result.Stream))

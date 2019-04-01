@@ -45,7 +45,7 @@ namespace Wyam.Testing.IO
         public DirectoryPath TempPath { get; set; } = "temp";
 
         /// <inheritdoc />
-        public IFile GetInputFile(FilePath path)
+        public Task<IFile> GetInputFileAsync(FilePath path)
         {
             if (path == null)
             {
@@ -57,49 +57,45 @@ namespace Wyam.Testing.IO
                 IFile notFound = null;
                 foreach (DirectoryPath inputPath in InputPaths.Reverse())
                 {
-                    IFile file = GetFile(RootPath.Combine(inputPath).CombineFile(path));
+                    IFile file = GetFileAsync(RootPath.Combine(inputPath).CombineFile(path)).Result;
                     if (notFound == null)
                     {
                         notFound = file;
                     }
-                    if (file.Exists)
+                    if (file.GetExistsAsync().Result)
                     {
-                        return file;
+                        return Task.FromResult(file);
                     }
                 }
                 if (notFound == null)
                 {
                     throw new InvalidOperationException("The input paths collection must have at least one path");
                 }
-                return notFound;
+                return Task.FromResult(notFound);
             }
-            return GetFile(path);
+            return GetFileAsync(path);
         }
 
         /// <inheritdoc />
-        public IEnumerable<IFile> GetInputFiles(params string[] patterns)
-        {
-            return GetInputFiles((IEnumerable<string>)patterns);
-        }
+        public Task<IEnumerable<IFile>> GetInputFilesAsync(params string[] patterns) =>
+            GetInputFilesAsync((IEnumerable<string>)patterns);
 
         /// <inheritdoc />
-        public IEnumerable<IFile> GetInputFiles(IEnumerable<string> patterns)
-        {
-            return GetFiles(GetInputDirectory(), patterns);
-        }
+        public Task<IEnumerable<IFile>> GetInputFilesAsync(IEnumerable<string> patterns) =>
+            GetFilesAsync(GetInputDirectoryAsync().Result, patterns);
 
         /// <inheritdoc />
-        public IDirectory GetInputDirectory(DirectoryPath path = null) =>
-            path == null
+        public Task<IDirectory> GetInputDirectoryAsync(DirectoryPath path = null) =>
+            Task.FromResult(path == null
                 ? new TestDirectory(FileProvider, ".")
-                : (path.IsRelative ? new TestDirectory(FileProvider, path) : GetDirectory(path));
+                : (path.IsRelative ? new TestDirectory(FileProvider, path) : GetDirectoryAsync(path).Result));
 
         /// <inheritdoc />
-        public IReadOnlyList<IDirectory> GetInputDirectories() =>
-            InputPaths.Select(GetRootDirectory).ToImmutableArray();
+        public Task<IReadOnlyList<IDirectory>> GetInputDirectoriesAsync() =>
+            Task.FromResult<IReadOnlyList<IDirectory>>(InputPaths.Select(x => GetRootDirectoryAsync(x).Result).ToImmutableArray());
 
         /// <inheritdoc />
-        public DirectoryPath GetContainingInputPath(NormalizedPath path)
+        public Task<DirectoryPath> GetContainingInputPathAsync(NormalizedPath path)
         {
             if (path == null)
             {
@@ -107,29 +103,28 @@ namespace Wyam.Testing.IO
             }
             if (path.IsAbsolute)
             {
-                return InputPaths
+                return Task.FromResult(InputPaths
                     .Reverse()
                     .Select(x => RootPath.Combine(x))
                     .FirstOrDefault(x => x.FileProvider == path.FileProvider
-                        && (path.FullPath == x.Collapse().FullPath || path.FullPath.StartsWith(x.Collapse().FullPath + "/")));
+                        && (path.FullPath == x.Collapse().FullPath || path.FullPath.StartsWith(x.Collapse().FullPath + "/"))));
             }
-            FilePath filePath = path as FilePath;
-            if (filePath != null)
+            if (path is FilePath filePath)
             {
-                IFile file = GetInputFile(filePath);
-                return file.Exists ? GetContainingInputPath(file.Path) : null;
+                IFile file = GetInputFileAsync(filePath).Result;
+                return Task.FromResult(file.GetExistsAsync().Result ? GetContainingInputPathAsync(file.Path).Result : null);
             }
             DirectoryPath directoryPath = path as DirectoryPath;
             if (directoryPath != null)
             {
-                return InputPaths
+                return Task.FromResult(InputPaths
                     .Reverse()
-                    .Select(x => new KeyValuePair<DirectoryPath, IDirectory>(x, GetRootDirectory(x.Combine(directoryPath))))
-                    .Where(x => x.Value.Exists)
+                    .Select(x => new KeyValuePair<DirectoryPath, IDirectory>(x, GetRootDirectoryAsync(x.Combine(directoryPath)).Result))
+                    .Where(x => x.Value.GetExistsAsync().Result)
                     .Select(x => RootPath.Combine(x.Key))
-                    .FirstOrDefault();
+                    .FirstOrDefault());
             }
-            return null;
+            return Task.FromResult<DirectoryPath>(null);
         }
 
         /// <inheritdoc />
@@ -150,12 +145,12 @@ namespace Wyam.Testing.IO
                 : RootPath.Combine(OutputPath).Combine(path);
 
         /// <inheritdoc />
-        public IFile GetOutputFile(FilePath path) =>
-            GetFile(GetOutputPath(path));
+        public Task<IFile> GetOutputFileAsync(FilePath path) =>
+            GetFileAsync(GetOutputPath(path));
 
         /// <inheritdoc />
-        public IDirectory GetOutputDirectory(DirectoryPath path = null) =>
-            GetDirectory(GetOutputPath(path));
+        public Task<IDirectory> GetOutputDirectoryAsync(DirectoryPath path = null) =>
+            GetDirectoryAsync(GetOutputPath(path));
 
         /// <inheritdoc />
         public FilePath GetTempPath(FilePath path)
@@ -175,35 +170,36 @@ namespace Wyam.Testing.IO
                 : RootPath.Combine(TempPath).Combine(path);
 
         /// <inheritdoc />
-        public IFile GetTempFile(FilePath path) =>
-            GetFile(GetTempPath(path));
+        public Task<IFile> GetTempFileAsync(FilePath path) =>
+            GetFileAsync(GetTempPath(path));
 
         /// <inheritdoc />
-        public IFile GetTempFile() => GetTempFile(System.IO.Path.ChangeExtension(System.IO.Path.GetRandomFileName(), "tmp"));
+        public Task<IFile> GetTempFileAsync() =>
+            GetTempFileAsync(System.IO.Path.ChangeExtension(System.IO.Path.GetRandomFileName(), "tmp"));
 
         /// <inheritdoc />
-        public IDirectory GetTempDirectory(DirectoryPath path = null) =>
-            GetDirectory(GetTempPath(path));
+        public Task<IDirectory> GetTempDirectoryAsync(DirectoryPath path = null) =>
+            GetDirectoryAsync(GetTempPath(path));
 
         /// <inheritdoc />
-        public IFile GetRootFile(FilePath path)
+        public Task<IFile> GetRootFileAsync(FilePath path)
         {
             if (path == null)
             {
                 throw new ArgumentNullException(nameof(path));
             }
 
-            return GetFile(RootPath.CombineFile(path));
+            return GetFileAsync(RootPath.CombineFile(path));
         }
 
         /// <inheritdoc />
-        public IDirectory GetRootDirectory(DirectoryPath path = null) =>
+        public Task<IDirectory> GetRootDirectoryAsync(DirectoryPath path = null) =>
             path == null
-            ? GetDirectory(RootPath)
-            : GetDirectory(RootPath.Combine(path));
+            ? GetDirectoryAsync(RootPath)
+            : GetDirectoryAsync(RootPath.Combine(path));
 
         /// <inheritdoc />
-        public IFile GetFile(FilePath path)
+        public Task<IFile> GetFileAsync(FilePath path)
         {
             if (path == null)
             {
@@ -214,7 +210,7 @@ namespace Wyam.Testing.IO
         }
 
         /// <inheritdoc />
-        public IDirectory GetDirectory(DirectoryPath path)
+        public Task<IDirectory> GetDirectoryAsync(DirectoryPath path)
         {
             if (path == null)
             {
@@ -225,19 +221,20 @@ namespace Wyam.Testing.IO
         }
 
         /// <inheritdoc />
-        public IEnumerable<IFile> GetFiles(params string[] patterns) =>
-            GetFiles(GetRootDirectory(), patterns);
+        public Task<IEnumerable<IFile>> GetFilesAsync(params string[] patterns) =>
+            GetFilesAsync(GetRootDirectoryAsync().Result, patterns);
 
         /// <inheritdoc />
-        public IEnumerable<IFile> GetFiles(IEnumerable<string> patterns) =>
-            GetFiles(GetRootDirectory(), patterns);
+        public Task<IEnumerable<IFile>> GetFilesAsync(IEnumerable<string> patterns) =>
+            GetFilesAsync(GetRootDirectoryAsync().Result, patterns);
 
         /// <inheritdoc />
-        public IEnumerable<IFile> GetFiles(IDirectory directory, params string[] patterns) =>
-            GetFiles(directory, (IEnumerable<string>)patterns);
+        public Task<IEnumerable<IFile>> GetFilesAsync(IDirectory directory, params string[] patterns) =>
+            GetFilesAsync(directory, (IEnumerable<string>)patterns);
 
         /// <inheritdoc />
-        public IEnumerable<IFile> GetFiles(IDirectory directory, IEnumerable<string> patterns) => Array.Empty<IFile>();
+        public Task<IEnumerable<IFile>> GetFilesAsync(IDirectory directory, IEnumerable<string> patterns) =>
+            Task.FromResult<IEnumerable<IFile>>(Array.Empty<IFile>());
 
         /// <inheritdoc />
         public IFileProvider GetFileProvider(NormalizedPath path) => FileProvider;

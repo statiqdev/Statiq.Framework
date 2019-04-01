@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
+using System.Threading.Tasks;
 using NUnit.Framework;
 using Shouldly;
 using Wyam.Common.Shortcodes;
@@ -18,7 +19,7 @@ namespace Wyam.Core.Tests.Shortcodes.Html
         public class ExecuteTests : GistFixture
         {
             [Test]
-            public void RendersGist()
+            public async Task RendersGist()
             {
                 TestExecutionContext context = new TestExecutionContext();
                 TestDocument document = new TestDocument();
@@ -31,7 +32,7 @@ namespace Wyam.Core.Tests.Shortcodes.Html
                 Gist shortcode = new Gist();
 
                 // When
-                IShortcodeResult result = shortcode.Execute(args, null, document, context);
+                IShortcodeResult result = await shortcode.ExecuteAsync(args, null, document, context);
 
                 // Then
                 using (TextReader reader = new StreamReader(result.Stream))
@@ -42,7 +43,7 @@ namespace Wyam.Core.Tests.Shortcodes.Html
             }
 
             [Test]
-            public void RendersGistWithoutUsername()
+            public async Task RendersGistWithoutUsername()
             {
                 TestExecutionContext context = new TestExecutionContext();
                 TestDocument document = new TestDocument();
@@ -54,7 +55,7 @@ namespace Wyam.Core.Tests.Shortcodes.Html
                 Gist shortcode = new Gist();
 
                 // When
-                IShortcodeResult result = shortcode.Execute(args, null, document, context);
+                IShortcodeResult result = await shortcode.ExecuteAsync(args, null, document, context);
 
                 // Then
                 using (TextReader reader = new StreamReader(result.Stream))
@@ -65,7 +66,7 @@ namespace Wyam.Core.Tests.Shortcodes.Html
             }
 
             [Test]
-            public void RendersGistWithoutFile()
+            public async Task RendersGistWithoutFile()
             {
                 TestExecutionContext context = new TestExecutionContext();
                 TestDocument document = new TestDocument();
@@ -77,7 +78,7 @@ namespace Wyam.Core.Tests.Shortcodes.Html
                 Gist shortcode = new Gist();
 
                 // When
-                IShortcodeResult result = shortcode.Execute(args, null, document, context);
+                IShortcodeResult result = await shortcode.ExecuteAsync(args, null, document, context);
 
                 // Then
                 using (TextReader reader = new StreamReader(result.Stream))

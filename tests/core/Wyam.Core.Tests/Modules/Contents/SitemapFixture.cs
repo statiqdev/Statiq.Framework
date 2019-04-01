@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading;
+using System.Threading.Tasks;
 using NUnit.Framework;
 using Wyam.Common.Documents;
 using Wyam.Common.Execution;
@@ -29,7 +30,7 @@ namespace Wyam.Core.Tests.Modules.Contents
             [TestCase("www.example.org", null, "http://www.example.org/sub/testfile")]
             [TestCase(null, "http://www.example.com", "http://www.example.com")]
             [TestCase("www.example.org", "http://www.example.com/{0}", "http://www.example.com/sub/testfile.html")]
-            public void SitemapGeneratedWithSitemapItem(string hostname, string formatterString, string expected)
+            public async Task SitemapGeneratedWithSitemapItem(string hostname, string formatterString, string expected)
             {
                 // Given
                 IServiceProvider serviceProvider = new TestServiceProvider();
@@ -41,7 +42,7 @@ namespace Wyam.Core.Tests.Modules.Contents
                 ExecutionPipeline contentPipeline = new ExecutionPipeline("Content", (IModuleList)null);
                 IExecutionContext context = new ExecutionContext(engine, Guid.Empty, contentPipeline, serviceProvider);
 
-                IDocument doc = context.GetDocument(context.GetContentStream("Test"), new[]
+                IDocument doc = await context.GetDocumentAsync("Test", new[]
                 {
                     new KeyValuePair<string, object>(Keys.RelativeFilePath, "sub/testfile.html")
                 });
@@ -76,7 +77,7 @@ namespace Wyam.Core.Tests.Modules.Contents
             [TestCase("www.example.org", null, "http://www.example.org/sub/testfile")]
             [TestCase(null, "http://www.example.com", "http://www.example.com")]
             [TestCase("www.example.org", "http://www.example.com/{0}", "http://www.example.com/sub/testfile.html")]
-            public void SitemapGeneratedWithSitemapItemAsString(string hostname, string formatterString, string expected)
+            public async Task SitemapGeneratedWithSitemapItemAsString(string hostname, string formatterString, string expected)
             {
                 // Given
                 IServiceProvider serviceProvider = new TestServiceProvider();
@@ -88,7 +89,7 @@ namespace Wyam.Core.Tests.Modules.Contents
                 ExecutionPipeline contentPipeline = new ExecutionPipeline("Content", (IModuleList)null);
                 IExecutionContext context = new ExecutionContext(engine, Guid.Empty, contentPipeline, serviceProvider);
 
-                IDocument doc = context.GetDocument(context.GetContentStream("Test"), new[]
+                IDocument doc = await context.GetDocumentAsync("Test", new[]
                 {
                     new KeyValuePair<string, object>(Keys.RelativeFilePath, "sub/testfile.html")
                 });
@@ -123,7 +124,7 @@ namespace Wyam.Core.Tests.Modules.Contents
             [TestCase("www.example.org", null, "http://www.example.org/sub/testfile")]
             [TestCase(null, "http://www.example.com", "http://www.example.com")]
             [TestCase("www.example.org", "http://www.example.com{0}", "http://www.example.com/sub/testfile")]
-            public void SitemapGeneratedWhenNoSitemapItem(string hostname, string formatterString, string expected)
+            public async Task SitemapGeneratedWhenNoSitemapItem(string hostname, string formatterString, string expected)
             {
                 // Given
                 IServiceProvider serviceProvider = new TestServiceProvider();
@@ -135,7 +136,7 @@ namespace Wyam.Core.Tests.Modules.Contents
                 ExecutionPipeline contentPipeline = new ExecutionPipeline("Content", (IModuleList)null);
                 IExecutionContext context = new ExecutionContext(engine, Guid.Empty, contentPipeline, serviceProvider);
 
-                IDocument doc = context.GetDocument(context.GetContentStream("Test"), new[]
+                IDocument doc = await context.GetDocumentAsync("Test", new[]
                 {
                     new KeyValuePair<string, object>(Keys.RelativeFilePath, "sub/testfile.html")
                 });

@@ -2,7 +2,9 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 using NUnit.Framework;
+using Shouldly;
 using Wyam.Common.IO;
 using Wyam.Core.IO;
 using Wyam.Testing;
@@ -40,31 +42,29 @@ namespace Wyam.Core.Tests.IO
 
         public class GetDirectoriesTests : VirtualInputDirectoryFixture
         {
-            [Test]
             [TestCase(".", SearchOption.AllDirectories, new[] { "c", "c/1", "d", "a", "a/b" })]
             [TestCase(".", SearchOption.TopDirectoryOnly, new[] { "c", "d", "a" })]
-            public void RootVirtualDirectoryDoesNotIncludeSelf(string virtualPath, SearchOption searchOption, string[] expectedPaths)
+            public async Task RootVirtualDirectoryDoesNotIncludeSelf(string virtualPath, SearchOption searchOption, string[] expectedPaths)
             {
                 // Given
                 VirtualInputDirectory directory = GetVirtualInputDirectory(virtualPath);
 
                 // When
-                IEnumerable<IDirectory> directories = directory.GetDirectoriesAsync(searchOption);
+                IEnumerable<IDirectory> directories = await directory.GetDirectoriesAsync(searchOption);
 
                 // Then
                 CollectionAssert.AreEquivalent(expectedPaths, directories.Select(x => x.Path.FullPath));
             }
 
-            [Test]
             [TestCase("a", SearchOption.AllDirectories, new[] { "a/b" })]
             [TestCase("a", SearchOption.TopDirectoryOnly, new[] { "a/b" })]
-            public void NonRootVirtualDirectoryIncludesSelf(string virtualPath, SearchOption searchOption, string[] expectedPaths)
+            public async Task NonRootVirtualDirectoryIncludesSelf(string virtualPath, SearchOption searchOption, string[] expectedPaths)
             {
                 // Given
                 VirtualInputDirectory directory = GetVirtualInputDirectory(virtualPath);
 
                 // When
-                IEnumerable<IDirectory> directories = directory.GetDirectoriesAsync(searchOption);
+                IEnumerable<IDirectory> directories = await directory.GetDirectoriesAsync(searchOption);
 
                 // Then
                 CollectionAssert.AreEquivalent(expectedPaths, directories.Select(x => x.Path.FullPath));
@@ -73,18 +73,17 @@ namespace Wyam.Core.Tests.IO
 
         public class GetFilesTests : VirtualInputDirectoryFixture
         {
-            [Test]
             [TestCase(".", SearchOption.AllDirectories, new[] { "/a/b/c/foo.txt", "/a/b/c/1/2.txt", "/a/b/d/baz.txt", "/foo/baz.txt", "/foo/c/baz.txt" })]
             [TestCase(".", SearchOption.TopDirectoryOnly, new[] { "/foo/baz.txt" })]
             [TestCase("c", SearchOption.AllDirectories, new[] { "/a/b/c/foo.txt", "/a/b/c/1/2.txt", "/foo/c/baz.txt" })]
             [TestCase("c", SearchOption.TopDirectoryOnly, new[] { "/a/b/c/foo.txt", "/foo/c/baz.txt" })]
-            public void GetsFiles(string virtualPath, SearchOption searchOption, string[] expectedPaths)
+            public async Task GetsFiles(string virtualPath, SearchOption searchOption, string[] expectedPaths)
             {
                 // Given
                 VirtualInputDirectory directory = GetVirtualInputDirectory(virtualPath);
 
                 // When
-                IEnumerable<IFile> files = directory.GetFilesAsync(searchOption);
+                IEnumerable<IFile> files = await directory.GetFilesAsync(searchOption);
 
                 // Then
                 CollectionAssert.AreEquivalent(expectedPaths, files.Select(x => x.Path.FullPath));
@@ -93,7 +92,6 @@ namespace Wyam.Core.Tests.IO
 
         public class GetFileTests : VirtualInputDirectoryFixture
         {
-            [Test]
             [TestCase(".", "c/foo.txt", "/a/b/c/foo.txt", true)]
             [TestCase(".", "baz.txt", "/foo/baz.txt", true)]
             [TestCase("c", "foo.txt", "/a/b/c/foo.txt", true)]
@@ -102,21 +100,21 @@ namespace Wyam.Core.Tests.IO
             [TestCase("c", "baz.txt", "/foo/c/baz.txt", true)]
             [TestCase("c", "bar.txt", "/foo/c/bar.txt", false)]
             [TestCase("x/y/z", "bar.txt", "/foo/x/y/z/bar.txt", false)]
-            public void GetsInputFile(string virtualPath, string filePath, string expectedPath, bool expectedExists)
+            public async Task GetsInputFile(string virtualPath, string filePath, string expectedPath, bool expectedExists)
             {
                 // Given
                 VirtualInputDirectory directory = GetVirtualInputDirectory(virtualPath);
 
                 // When
-                IFile file = directory.GetFileAsync(filePath);
+                IFile file = await directory.GetFileAsync(filePath);
 
                 // Then
                 Assert.AreEqual(expectedPath, file.Path.FullPath);
-                Assert.AreEqual(expectedExists, file.Exists);
+                Assert.AreEqual(expectedExists, await file.GetExistsAsync());
             }
 
             [Test]
-            public void GetsInputFileAboveInputDirectory()
+            public async Task GetsInputFileAboveInputDirectory()
             {
                 // Given
                 FileSystem fileSystem = new FileSystem();
@@ -128,31 +126,31 @@ namespace Wyam.Core.Tests.IO
                 VirtualInputDirectory directory = new VirtualInputDirectory(fileSystem, ".");
 
                 // When
-                IFile file = directory.GetFileAsync("../c/foo.txt");
+                IFile file = await directory.GetFileAsync("../c/foo.txt");
 
                 // Then
                 Assert.AreEqual("/a/b/c/foo.txt", file.Path.FullPath);
             }
 
             [Test]
-            public void ThrowsForNullPath()
+            public async Task ThrowsForNullPath()
             {
                 // Given
                 VirtualInputDirectory directory = GetVirtualInputDirectory(".");
 
                 // When, Then
-                Assert.Throws<ArgumentNullException>(() => directory.GetFileAsync(null));
+                await Should.ThrowAsync<ArgumentNullException>(async () => await directory.GetFileAsync(null));
             }
 
             [Test]
-            public void ThrowsForAbsolutePath()
+            public async Task ThrowsForAbsolutePath()
             {
                 // Given
                 VirtualInputDirectory directory = GetVirtualInputDirectory(".");
                 FilePath filePath = "/a/test.txt";
 
                 // When, Then
-                Assert.Throws<ArgumentException>(() => directory.GetFileAsync(filePath));
+                await Should.ThrowAsync<ArgumentException>(async () => await directory.GetFileAsync(filePath));
             }
         }
 
@@ -164,37 +162,37 @@ namespace Wyam.Core.Tests.IO
             [TestCase(".", "..", ".")]
             [TestCase("a", "..", "a")]
             [TestCase("a/b", "c", "a/b/c")]
-            public void ShouldReturnDirectory(string virtualPath, string path, string expected)
+            public async Task ShouldReturnDirectory(string virtualPath, string path, string expected)
             {
                 // Given
                 VirtualInputDirectory directory = GetVirtualInputDirectory(virtualPath);
 
                 // When
-                IDirectory result = directory.GetDirectory(path);
+                IDirectory result = await directory.GetDirectoryAsync(path);
 
                 // Then
                 Assert.AreEqual(expected, result.Path.Collapse().FullPath);
             }
 
             [Test]
-            public void ThrowsForNullPath()
+            public async Task ThrowsForNullPath()
             {
                 // Given
                 VirtualInputDirectory directory = GetVirtualInputDirectory(".");
 
                 // When, Then
-                Assert.Throws<ArgumentNullException>(() => directory.GetDirectory(null));
+                await Should.ThrowAsync<ArgumentNullException>(async () => await directory.GetDirectoryAsync(null));
             }
 
             [Test]
-            public void ThrowsForAbsolutePath()
+            public async Task ThrowsForAbsolutePath()
             {
                 // Given
                 VirtualInputDirectory directory = GetVirtualInputDirectory(".");
                 DirectoryPath directoryPath = "/a/b";
 
                 // When, Then
-                Assert.Throws<ArgumentException>(() => directory.GetDirectory(directoryPath));
+                await Should.ThrowAsync<ArgumentException>(async () => await directory.GetDirectoryAsync(directoryPath));
             }
         }
 
@@ -204,13 +202,13 @@ namespace Wyam.Core.Tests.IO
             [TestCase("a/b/", "a")]
             [TestCase(".", null)]
             [TestCase("a", null)]
-            public void ShouldReturnParentDirectory(string virtualPath, string expected)
+            public async Task ShouldReturnParentDirectory(string virtualPath, string expected)
             {
                 // Given
                 VirtualInputDirectory directory = GetVirtualInputDirectory(virtualPath);
 
                 // When
-                IDirectory result = directory.Parent;
+                IDirectory result = await directory.GetParentAsync();
 
                 // Then
                 Assert.AreEqual(expected, result?.Path.Collapse().FullPath);
@@ -223,13 +221,16 @@ namespace Wyam.Core.Tests.IO
             [TestCase("c")]
             [TestCase("c/1")]
             [TestCase("a/b")]
-            public void ShouldReturnTrueForExistingPaths(string virtualPath)
+            public async Task ShouldReturnTrueForExistingPaths(string virtualPath)
             {
                 // Given
                 VirtualInputDirectory directory = GetVirtualInputDirectory(virtualPath);
 
-                // When, Then
-                Assert.IsTrue(directory.Exists);
+                // When
+                bool exists = await directory.GetExistsAsync();
+
+                // Then
+                exists.ShouldBeTrue();
             }
 
             [TestCase("x")]
@@ -237,41 +238,44 @@ namespace Wyam.Core.Tests.IO
             [TestCase("baz")]
             [TestCase("a/b/c")]
             [TestCase("q/w/e")]
-            public void ShouldReturnFalseForNonExistingPaths(string virtualPath)
+            public async Task ShouldReturnFalseForNonExistingPaths(string virtualPath)
             {
                 // Given
                 VirtualInputDirectory directory = GetVirtualInputDirectory(virtualPath);
 
-                // When, Then
-                Assert.IsFalse(directory.Exists);
+                // When
+                bool exists = await directory.GetExistsAsync();
+
+                // Then
+                exists.ShouldBeFalse();
             }
         }
 
         public class CreateTests : VirtualInputDirectoryFixture
         {
             [Test]
-            public void ShouldThrow()
+            public async Task ShouldThrow()
             {
                 // Given
                 FileSystem fileSystem = new FileSystem();
                 VirtualInputDirectory directory = new VirtualInputDirectory(fileSystem, ".");
 
                 // When, Then
-                Assert.Throws<NotSupportedException>(() => directory.CreateAsync());
+                await Should.ThrowAsync<NotSupportedException>(async () => await directory.CreateAsync());
             }
         }
 
         public class DeleteTests : VirtualInputDirectoryFixture
         {
             [Test]
-            public void ShouldThrow()
+            public async Task ShouldThrow()
             {
                 // Given
                 FileSystem fileSystem = new FileSystem();
                 VirtualInputDirectory directory = new VirtualInputDirectory(fileSystem, ".");
 
                 // When, Then
-                Assert.Throws<NotSupportedException>(() => directory.Delete(false));
+                await Should.ThrowAsync<NotSupportedException>(async () => await directory.DeleteAsync(false));
             }
         }
 

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Threading.Tasks;
 using Wyam.Common.Configuration;
 using Wyam.Common.Documents;
 using Wyam.Common.Execution;
@@ -64,7 +65,7 @@ namespace Wyam.Testing.Shortcodes
         public void Add(string name, Func<string, IDocument, IExecutionContext, string> func) =>
             throw new NotImplementedException();
 
-        public void Add(string name, Func<KeyValuePair<string, string>[], string, IDocument, IExecutionContext, IShortcodeResult> func) =>
+        public void Add(string name, Func<KeyValuePair<string, string>[], string, IDocument, IExecutionContext, Task<IShortcodeResult>> func) =>
             throw new NotImplementedException();
 
         public bool Contains(string name) => ContainsKey(name);

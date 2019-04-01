@@ -59,12 +59,12 @@ namespace Wyam.Core.Tests.Modules.IO
         public class ExecuteTests : IncludeFixture
         {
             [Test]
-            public void ThrowForNoSourceWhenIncludingRelativePath()
+            public async Task ThrowForNoSourceWhenIncludingRelativePath()
             {
                 // Given
                 IDocument[] documents =
                 {
-                    Context.GetDocument(Context.GetContentStream("foo ^\"test-a.txt\" bar"))
+                    await Context.GetDocumentAsync("foo ^\"test-a.txt\" bar")
                 };
                 Include include = new Include();
 
@@ -73,12 +73,12 @@ namespace Wyam.Core.Tests.Modules.IO
             }
 
             [Test]
-            public void DoesNotThrowForNoSourceWhenIncludingAbsolutePath()
+            public async Task DoesNotThrowForNoSourceWhenIncludingAbsolutePath()
             {
                 // Given
                 IDocument[] documents =
                 {
-                    Context.GetDocument(Context.GetContentStream("foo ^\"/TestFiles/Input/test-a.txt\" bar"))
+                    await Context.GetDocumentAsync("foo ^\"/TestFiles/Input/test-a.txt\" bar")
                 };
                 Include include = new Include();
 
@@ -90,12 +90,12 @@ namespace Wyam.Core.Tests.Modules.IO
             }
 
             [Test]
-            public void IncludeOnFirstCharacter()
+            public async Task IncludeOnFirstCharacter()
             {
                 // Given
                 IDocument[] documents =
                 {
-                    Context.GetDocument(new FilePath("/TestFiles/Input/test.txt"), Context.GetContentStream("^\"test-a.txt\"foo"))
+                    await Context.GetDocumentAsync(new FilePath("/TestFiles/Input/test.txt"), "^\"test-a.txt\"foo")
                 };
                 Include include = new Include();
 
@@ -107,12 +107,12 @@ namespace Wyam.Core.Tests.Modules.IO
             }
 
             [Test]
-            public void DoesNotIncludeOnFirstCharacterIfEscaped()
+            public async Task DoesNotIncludeOnFirstCharacterIfEscaped()
             {
                 // Given
                 IDocument[] documents =
                 {
-                    Context.GetDocument(new FilePath("/TestFiles/Input/test.txt"), Context.GetContentStream("\\^\"test-a.txt\"foo"))
+                    await Context.GetDocumentAsync(new FilePath("/TestFiles/Input/test.txt"), "\\^\"test-a.txt\"foo")
                 };
                 Include include = new Include();
 
@@ -124,12 +124,12 @@ namespace Wyam.Core.Tests.Modules.IO
             }
 
             [Test]
-            public void MultipleEscapeCharacters()
+            public async Task MultipleEscapeCharacters()
             {
                 // Given
                 IDocument[] documents =
                 {
-                    Context.GetDocument(new FilePath("/TestFiles/Input/test.txt"), Context.GetContentStream("\\\\\\^\"test-a.txt\"foo"))
+                    await Context.GetDocumentAsync(new FilePath("/TestFiles/Input/test.txt"), "\\\\\\^\"test-a.txt\"foo")
                 };
                 Include include = new Include();
 
@@ -141,14 +141,14 @@ namespace Wyam.Core.Tests.Modules.IO
             }
 
             [Test]
-            public void MultipleIncludes()
+            public async Task MultipleIncludes()
             {
                 // Given
                 IDocument[] documents =
                 {
-                    Context.GetDocument(
+                    await Context.GetDocumentAsync(
                         new FilePath("/TestFiles/Input/test.txt"),
-                        Context.GetContentStream("x ^\"test-a.txt\" y ^\"test-b.txt\" z"))
+                        "x ^\"test-a.txt\" y ^\"test-b.txt\" z")
                 };
                 Include include = new Include();
 
@@ -160,14 +160,14 @@ namespace Wyam.Core.Tests.Modules.IO
             }
 
             [Test]
-            public void MultipleAdjacentIncludes()
+            public async Task MultipleAdjacentIncludes()
             {
                 // Given
                 IDocument[] documents =
                 {
-                    Context.GetDocument(
+                    await Context.GetDocumentAsync(
                         new FilePath("/TestFiles/Input/test.txt"),
-                        Context.GetContentStream("x ^\"test-a.txt\"^\"test-b.txt\" z"))
+                        "x ^\"test-a.txt\"^\"test-b.txt\" z")
                 };
                 Include include = new Include();
 
@@ -179,15 +179,15 @@ namespace Wyam.Core.Tests.Modules.IO
             }
 
             [Test]
-            public void FileNotFoundRemovesIncludeStatement()
+            public async Task FileNotFoundRemovesIncludeStatement()
             {
                 // Given
                 ThrowOnTraceEventType(System.Diagnostics.TraceEventType.Error);
                 IDocument[] documents =
                 {
-                    Context.GetDocument(
+                    await Context.GetDocumentAsync(
                         new FilePath("/TestFiles/Input/test.txt"),
-                        Context.GetContentStream("x ^\"test-c.txt\" y"))
+                        "x ^\"test-c.txt\" y")
                 };
                 Include include = new Include();
 
@@ -199,14 +199,14 @@ namespace Wyam.Core.Tests.Modules.IO
             }
 
             [Test]
-            public void IncludingRelativePath()
+            public async Task IncludingRelativePath()
             {
                 // Given
                 IDocument[] documents =
                 {
-                    Context.GetDocument(
+                    await Context.GetDocumentAsync(
                         new FilePath("/TestFiles/Input/test.txt"),
-                        Context.GetContentStream("x ^\"Subfolder/test-c.txt\" y"))
+                        "x ^\"Subfolder/test-c.txt\" y")
                 };
                 Include include = new Include();
 
@@ -218,14 +218,14 @@ namespace Wyam.Core.Tests.Modules.IO
             }
 
             [Test]
-            public void IncludingRelativePathOutsideInput()
+            public async Task IncludingRelativePathOutsideInput()
             {
                 // Given
                 IDocument[] documents =
                 {
-                    Context.GetDocument(
+                    await Context.GetDocumentAsync(
                         new FilePath("/TestFiles/Input/test.txt"),
-                        Context.GetContentStream("x ^\"../test-above-input.txt\" y"))
+                        "x ^\"../test-above-input.txt\" y")
                 };
                 Include include = new Include();
 
@@ -237,14 +237,14 @@ namespace Wyam.Core.Tests.Modules.IO
             }
 
             [Test]
-            public void IncludingAbsolutePath()
+            public async Task IncludingAbsolutePath()
             {
                 // Given
                 IDocument[] documents =
                 {
-                    Context.GetDocument(
+                    await Context.GetDocumentAsync(
                         new FilePath("/TestFiles/Input/test.txt"),
-                        Context.GetContentStream("x ^\"/TestFiles/test-above-input.txt\" y"))
+                        "x ^\"/TestFiles/test-above-input.txt\" y")
                 };
                 Include include = new Include();
 
@@ -256,7 +256,7 @@ namespace Wyam.Core.Tests.Modules.IO
             }
 
             [Test]
-            public void NestedInclude()
+            public async Task NestedInclude()
             {
                 // Given
                 FileProvider.AddFile(
@@ -264,9 +264,9 @@ namespace Wyam.Core.Tests.Modules.IO
                     "3 ^\"test-a.txt\" 4");
                 IDocument[] documents =
                 {
-                    Context.GetDocument(
+                    await Context.GetDocumentAsync(
                         new FilePath("/TestFiles/Input/test.txt"),
-                        Context.GetContentStream("1 ^\"test-outer.txt\" 2"))
+                        "1 ^\"test-outer.txt\" 2")
                 };
                 Include include = new Include();
 
@@ -278,7 +278,7 @@ namespace Wyam.Core.Tests.Modules.IO
             }
 
             [Test]
-            public void NestedIncludeWithoutRecursion()
+            public async Task NestedIncludeWithoutRecursion()
             {
                 // Given
                 FileProvider.AddFile(
@@ -286,9 +286,9 @@ namespace Wyam.Core.Tests.Modules.IO
                     "3 ^\"test-a.txt\" 4");
                 IDocument[] documents =
                 {
-                    Context.GetDocument(
+                    await Context.GetDocumentAsync(
                         new FilePath("/TestFiles/Input/test.txt"),
-                        Context.GetContentStream("1 ^\"test-outer.txt\" 2"))
+                        "1 ^\"test-outer.txt\" 2")
                 };
                 Include include = new Include().WithRecursion(false);
 
@@ -300,7 +300,7 @@ namespace Wyam.Core.Tests.Modules.IO
             }
 
             [Test]
-            public void NestedIncludeWithInnerEscape()
+            public async Task NestedIncludeWithInnerEscape()
             {
                 // Given
                 FileProvider.AddFile(
@@ -308,9 +308,9 @@ namespace Wyam.Core.Tests.Modules.IO
                     "3 \\^\"test-a.txt\" 4");
                 IDocument[] documents =
                 {
-                    Context.GetDocument(
+                    await Context.GetDocumentAsync(
                         new FilePath("/TestFiles/Input/test.txt"),
-                        Context.GetContentStream("1 ^\"test-outer.txt\" 2"))
+                        "1 ^\"test-outer.txt\" 2")
                 };
                 Include include = new Include().WithRecursion(false);
 
@@ -322,7 +322,7 @@ namespace Wyam.Core.Tests.Modules.IO
             }
 
             [Test]
-            public void MultipleNestedInclude()
+            public async Task MultipleNestedInclude()
             {
                 // Given
                 FileProvider.AddFile(
@@ -333,9 +333,9 @@ namespace Wyam.Core.Tests.Modules.IO
                     "5 ^\"test-a.txt\" 6");
                 IDocument[] documents =
                 {
-                    Context.GetDocument(
+                    await Context.GetDocumentAsync(
                         new FilePath("/TestFiles/Input/test.txt"),
-                        Context.GetContentStream("1 ^\"test-outer.txt\" 2"))
+                        "1 ^\"test-outer.txt\" 2")
                 };
                 Include include = new Include();
 

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
+using System.Threading.Tasks;
 using NUnit.Framework;
 using Shouldly;
 using Wyam.Common.Shortcodes;
@@ -18,7 +19,7 @@ namespace Wyam.Core.Tests.Shortcodes.Html
         public class ExecuteTests : TableFixture
         {
             [Test]
-            public void RendersTableWithoutSettings()
+            public async Task RendersTableWithoutSettings()
             {
                 // Given
                 TestExecutionContext context = new TestExecutionContext();
@@ -35,7 +36,7 @@ l=m nop
                 Table shortcode = new Table();
 
                 // When
-                IShortcodeResult result = shortcode.Execute(args, content, document, context);
+                IShortcodeResult result = await shortcode.ExecuteAsync(args, content, document, context);
 
                 // Then
                 using (TextReader reader = new StreamReader(result.Stream))
@@ -78,7 +79,7 @@ l=m nop
             }
 
             [Test]
-            public void RendersTableWithSettings()
+            public async Task RendersTableWithSettings()
             {
                 // Given
                 TestExecutionContext context = new TestExecutionContext();
@@ -105,7 +106,7 @@ l=m nop
                 Table shortcode = new Table();
 
                 // When
-                IShortcodeResult result = shortcode.Execute(args, content, document, context);
+                IShortcodeResult result = await shortcode.ExecuteAsync(args, content, document, context);
 
                 // Then
                 using (TextReader reader = new StreamReader(result.Stream))

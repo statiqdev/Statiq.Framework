@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
+using System.Threading.Tasks;
 using NUnit.Framework;
 using Shouldly;
 using Wyam.Common.Meta;
@@ -19,7 +20,7 @@ namespace Wyam.Core.Tests.Shortcodes.Metadata
         public class ExecuteTests : MetaFixture
         {
             [Test]
-            public void RendersMetadata()
+            public async Task RendersMetadata()
             {
                 // Given
                 TestExecutionContext context = new TestExecutionContext();
@@ -34,7 +35,7 @@ namespace Wyam.Core.Tests.Shortcodes.Metadata
                 Core.Shortcodes.Metadata.Meta shortcode = new Core.Shortcodes.Metadata.Meta();
 
                 // When
-                IShortcodeResult result = shortcode.Execute(args, string.Empty, document, context);
+                IShortcodeResult result = await shortcode.ExecuteAsync(args, string.Empty, document, context);
 
                 // Then
                 using (TextReader reader = new StreamReader(result.Stream))
@@ -44,7 +45,7 @@ namespace Wyam.Core.Tests.Shortcodes.Metadata
             }
 
             [Test]
-            public void NullStreamForMissingMetadata()
+            public async Task NullStreamForMissingMetadata()
             {
                 // Given
                 TestExecutionContext context = new TestExecutionContext();
@@ -59,7 +60,7 @@ namespace Wyam.Core.Tests.Shortcodes.Metadata
                 Core.Shortcodes.Metadata.Meta shortcode = new Core.Shortcodes.Metadata.Meta();
 
                 // When
-                IShortcodeResult result = shortcode.Execute(args, string.Empty, document, context);
+                IShortcodeResult result = await shortcode.ExecuteAsync(args, string.Empty, document, context);
 
                 // Then
                 result.Stream.ShouldBeNull();

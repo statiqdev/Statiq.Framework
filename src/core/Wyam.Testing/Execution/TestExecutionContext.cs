@@ -40,28 +40,20 @@ namespace Wyam.Testing.Execution
         public IDocument GetDocument() => new TestDocument();
 
         /// <inheritdoc/>
-        public IDocument GetDocument(FilePath source, string content, IEnumerable<KeyValuePair<string, object>> items = null)
-        {
-            throw new NotSupportedException("This method is obsolete, please use the stream version");
-        }
+        public Task<IDocument> GetDocumentAsync(FilePath source, string content, IEnumerable<KeyValuePair<string, object>> items = null) =>
+            Task.FromResult(GetDocument(source, GetContentStreamAsync(content).Result, items));
 
         /// <inheritdoc/>
-        public IDocument GetDocument(string content, IEnumerable<KeyValuePair<string, object>> items = null)
-        {
-            throw new NotSupportedException("This method is obsolete, please use the stream version");
-        }
+        public Task<IDocument> GetDocumentAsync(string content, IEnumerable<KeyValuePair<string, object>> items = null) =>
+            Task.FromResult(GetDocument(GetContentStreamAsync(content).Result, items));
 
         /// <inheritdoc/>
-        public IDocument GetDocument(IDocument sourceDocument, FilePath source, string content, IEnumerable<KeyValuePair<string, object>> items = null)
-        {
-            throw new NotSupportedException("This method is obsolete, please use the stream version");
-        }
+        public Task<IDocument> GetDocumentAsync(IDocument sourceDocument, FilePath source, string content, IEnumerable<KeyValuePair<string, object>> items = null) =>
+            Task.FromResult(GetDocument(sourceDocument, source, GetContentStreamAsync(content).Result, items));
 
         /// <inheritdoc/>
-        public IDocument GetDocument(IDocument sourceDocument, string content, IEnumerable<KeyValuePair<string, object>> items = null)
-        {
-            throw new NotSupportedException("This method is obsolete, please use the stream version");
-        }
+        public Task<IDocument> GetDocumentAsync(IDocument sourceDocument, string content, IEnumerable<KeyValuePair<string, object>> items = null) =>
+            Task.FromResult(GetDocument(sourceDocument, GetContentStreamAsync(content).Result, items));
 
         /// <inheritdoc/>
         public IDocument GetDocument(IEnumerable<KeyValuePair<string, object>> items) => new TestDocument(items);

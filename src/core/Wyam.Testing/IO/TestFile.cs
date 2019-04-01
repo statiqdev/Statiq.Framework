@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Threading.Tasks;
 using Wyam.Common.IO;
 
 namespace Wyam.Testing.IO
@@ -9,23 +10,22 @@ namespace Wyam.Testing.IO
     public class TestFile : IFile
     {
         private readonly TestFileProvider _fileProvider;
-        private readonly FilePath _path;
 
         public TestFile(TestFileProvider fileProvider, FilePath path)
         {
             _fileProvider = fileProvider;
-            _path = path.Collapse();
+            Path = path.Collapse();
         }
 
-        public FilePath Path => _path;
+        public FilePath Path { get; }
 
         NormalizedPath IFileSystemEntry.Path => Path;
 
-        public bool Exists => _fileProvider.Files.ContainsKey(_path.FullPath);
+        public Task<bool> GetExistsAsync() => Task.FromResult(_fileProvider.Files.ContainsKey(Path.FullPath));
 
-        public IDirectory Directory => new TestDirectory(_fileProvider, _path.Directory);
+        public Task<IDirectory> GetDirectoryAsync() => Task.FromResult<IDirectory>(new TestDirectory(_fileProvider, Path.Directory));
 
-        public long Length => _fileProvider.Files[_path.FullPath].Length;
+        public Task<long> GetLengthAsync() => Task.FromResult<long>(_fileProvider.Files[Path.FullPath].Length);
 
         private void CreateDirectory(bool createDirectory, IFile file)
         {
@@ -44,81 +44,82 @@ namespace Wyam.Testing.IO
             }
         }
 
-        public void CopyToAsync(IFile destination, bool overwrite = true, bool createDirectory = true)
+        public Task CopyToAsync(IFile destination, bool overwrite = true, bool createDirectory = true)
         {
             CreateDirectory(createDirectory, destination);
 
             if (overwrite)
             {
-                _fileProvider.Files[destination.Path.FullPath] = new StringBuilder(_fileProvider.Files[_path.FullPath].ToString());
+                _fileProvider.Files[destination.Path.FullPath] = new StringBuilder(_fileProvider.Files[Path.FullPath].ToString());
             }
             else
             {
-                _fileProvider.Files.TryAdd(destination.Path.FullPath, new StringBuilder(_fileProvider.Files[_path.FullPath].ToString()));
+                _fileProvider.Files.TryAdd(destination.Path.FullPath, new StringBuilder(_fileProvider.Files[Path.FullPath].ToString()));
             }
+
+            return Task.CompletedTask;
         }
 
-        public void MoveToAsync(IFile destination)
+        public Task MoveToAsync(IFile destination)
         {
-            if (!_fileProvider.Files.ContainsKey(_path.FullPath))
+            if (!_fileProvider.Files.ContainsKey(Path.FullPath))
             {
                 throw new FileNotFoundException();
             }
-            StringBuilder builder;
-            if (_fileProvider.Files.TryRemove(_path.FullPath, out builder))
+
+            if (_fileProvider.Files.TryRemove(Path.FullPath, out StringBuilder builder))
             {
                 _fileProvider.Files.TryAdd(destination.Path.FullPath, builder);
             }
+
+            return Task.CompletedTask;
         }
 
-        public void DeleteAsync()
+        public Task DeleteAsync()
         {
-            StringBuilder builder;
-            _fileProvider.Files.TryRemove(_path.FullPath, out builder);
+            _fileProvider.Files.TryRemove(Path.FullPath, out StringBuilder builder);
+            return Task.CompletedTask;
         }
 
-        public string ReadAllTextAsync()
-        {
-            return _fileProvider.Files[_path.FullPath].ToString();
-        }
+        public Task<string> ReadAllTextAsync() => Task.FromResult(_fileProvider.Files[Path.FullPath].ToString());
 
-        public void WriteAllTextAsync(string contents, bool createDirectory = true)
+        public Task WriteAllTextAsync(string contents, bool createDirectory = true)
         {
             CreateDirectory(createDirectory, this);
-            _fileProvider.Files[_path.FullPath] = new StringBuilder(contents);
+            _fileProvider.Files[Path.FullPath] = new StringBuilder(contents);
+            return Task.CompletedTask;
         }
 
-        public Stream OpenReadAsync()
+        public Task<Stream> OpenReadAsync()
         {
-            StringBuilder builder;
-            if (!_fileProvider.Files.TryGetValue(_path.FullPath, out builder))
+            if (!_fileProvider.Files.TryGetValue(Path.FullPath, out StringBuilder builder))
             {
                 throw new FileNotFoundException();
             }
             byte[] bytes = Encoding.UTF8.GetBytes(builder.ToString());
-            return new MemoryStream(bytes);
+            return Task.FromResult<Stream>(new MemoryStream(bytes));
         }
 
-        public Stream OpenWriteAsync(bool createDirectory = true)
+        public Task<Stream> OpenWriteAsync(bool createDirectory = true)
         {
             CreateDirectory(createDirectory, this);
-            return new StringBuilderStream(_fileProvider.Files.AddOrUpdate(_path.FullPath, new StringBuilder(), (x, y) => y));
+            return Task.FromResult<Stream>(new StringBuilderStream(_fileProvider.Files.AddOrUpdate(Path.FullPath, new StringBuilder(), (x, y) => y)));
         }
 
-        public Stream OpenAppendAsync(bool createDirectory = true)
+        public Task<Stream> OpenAppendAsync(bool createDirectory = true)
         {
             CreateDirectory(createDirectory, this);
-            StringBuilderStream stream = new StringBuilderStream(_fileProvider.Files.AddOrUpdate(_path.FullPath, new StringBuilder(), (x, y) => y));
+            StringBuilderStream stream = new StringBuilderStream(_fileProvider.Files.AddOrUpdate(Path.FullPath, new StringBuilder(), (x, y) => y));
 
             // Start appending at the end of the stream.
             stream.Position = stream.Length;
-            return stream;
+            return Task.FromResult<Stream>(stream);
         }
 
-        public Stream OpenAsync(bool createDirectory = true)
+        public Task<Stream> OpenAsync(bool createDirectory = true)
         {
             CreateDirectory(createDirectory, this);
-            return new StringBuilderStream(_fileProvider.Files.AddOrUpdate(_path.FullPath, new StringBuilder(), (x, y) => y));
+            return Task.FromResult<Stream>(new StringBuilderStream(_fileProvider.Files.AddOrUpdate(Path.FullPath, new StringBuilder(), (x, y) => y)));
         }
     }
 }
