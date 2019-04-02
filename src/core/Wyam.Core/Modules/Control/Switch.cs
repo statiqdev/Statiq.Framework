@@ -6,6 +6,7 @@ using Wyam.Common.Configuration;
 using Wyam.Common.Documents;
 using Wyam.Common.Modules;
 using Wyam.Common.Execution;
+using System.Threading.Tasks;
 
 namespace Wyam.Core.Modules.Control
 {
@@ -62,7 +63,7 @@ namespace Wyam.Core.Modules.Control
         }
 
         /// <inheritdoc />
-        public IEnumerable<IDocument> Execute(IReadOnlyList<IDocument> inputs, IExecutionContext context)
+        public async Task<IEnumerable<IDocument>> ExecuteAsync(IReadOnlyList<IDocument> inputs, IExecutionContext context)
         {
             List<IDocument> results = new List<IDocument>();
             IEnumerable<IDocument> documents = inputs;
@@ -88,13 +89,13 @@ namespace Wyam.Core.Modules.Control
                     }
                 }
 
-                results.AddRange(context.Execute(c.Item2, handled));
+                results.AddRange(await context.ExecuteAsync(c.Item2, handled));
                 documents = unhandled;
             }
 
             if (_defaultModules != null)
             {
-                results.AddRange(context.Execute(_defaultModules, documents));
+                results.AddRange(await context.ExecuteAsync(_defaultModules, documents));
             }
             else
             {

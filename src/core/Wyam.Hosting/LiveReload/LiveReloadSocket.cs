@@ -64,7 +64,7 @@ namespace Wyam.Hosting.LiveReload
                 {
                     ct.ThrowIfCancellationRequested();
                     result = await _webSocket.ReceiveAsync(buffer, ct);
-                    stream.Write(buffer.Array, buffer.Offset, result.Count);
+                    await stream.WriteAsync(buffer.Array, buffer.Offset, result.Count);
                 }
                 while (!result.EndOfMessage);
                 return stream.ToArray();

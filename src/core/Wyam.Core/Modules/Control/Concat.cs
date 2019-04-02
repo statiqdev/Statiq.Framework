@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using Wyam.Common.Documents;
 using Wyam.Common.Execution;
 using Wyam.Common.Modules;
@@ -51,9 +52,9 @@ namespace Wyam.Core.Modules.Control
         }
 
         /// <inheritdoc />
-        public override IEnumerable<IDocument> Execute(IReadOnlyList<IDocument> inputs, IExecutionContext context)
+        public override async Task<IEnumerable<IDocument>> ExecuteAsync(IReadOnlyList<IDocument> inputs, IExecutionContext context)
         {
-            IEnumerable<IDocument> docs = context.Execute(this);
+            IEnumerable<IDocument> docs = await context.ExecuteAsync(this);
             if (_predicate != null)
             {
                 docs = docs.Where(x => _predicate(context, x, inputs));

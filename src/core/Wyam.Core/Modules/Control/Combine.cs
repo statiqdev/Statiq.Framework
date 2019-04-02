@@ -24,14 +24,14 @@ namespace Wyam.Core.Modules.Control
     public class Combine : IModule
     {
         /// <inheritdoc />
-        public IEnumerable<IDocument> Execute(IReadOnlyList<IDocument> inputs, IExecutionContext context)
+        public async Task<IEnumerable<IDocument>> ExecuteAsync(IReadOnlyList<IDocument> inputs, IExecutionContext context)
         {
             IDocument result = null;
-            context.ForEach(inputs, input =>
+            await context.ForEachAsync(inputs, async input =>
             {
                 result = result == null
                     ? input
-                    : context.GetDocumentAsync(result, result.Content + input.Content, input).Result;
+                    : await context.GetDocumentAsync(result, result.Content + input.Content, input);
             });
             return new[] { result };
         }

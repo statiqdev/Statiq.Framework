@@ -253,7 +253,7 @@ namespace Wyam.Common.Execution
         /// <param name="modules">The modules to execute.</param>
         /// <param name="inputs">The input documents.</param>
         /// <returns>The result documents from the executed modules.</returns>
-        IReadOnlyList<IDocument> Execute(IEnumerable<IModule> modules, IEnumerable<IDocument> inputs);
+        Task<IReadOnlyList<IDocument>> ExecuteAsync(IEnumerable<IModule> modules, IEnumerable<IDocument> inputs);
 
         /// <summary>
         /// Executes the specified modules with an empty initial input document with optional additional metadata and returns the result documents.
@@ -261,7 +261,7 @@ namespace Wyam.Common.Execution
         /// <param name="modules">The modules to execute.</param>
         /// <param name="metadata">The metadata to use.</param>
         /// <returns>The result documents from the executed modules.</returns>
-        IReadOnlyList<IDocument> Execute(IEnumerable<IModule> modules, IEnumerable<KeyValuePair<string, object>> metadata = null);
+        Task<IReadOnlyList<IDocument>> ExecuteAsync(IEnumerable<IModule> modules, IEnumerable<KeyValuePair<string, object>> metadata = null);
 
         /// <summary>
         /// Executes the specified modules with an empty initial input document with optional additional metadata and returns the result documents.
@@ -269,7 +269,7 @@ namespace Wyam.Common.Execution
         /// <param name="modules">The modules to execute.</param>
         /// <param name="metadata">The metadata to use.</param>
         /// <returns>The result documents from the executed modules.</returns>
-        IReadOnlyList<IDocument> Execute(IEnumerable<IModule> modules, IEnumerable<MetadataItem> metadata);
+        Task<IReadOnlyList<IDocument>> ExecuteAsync(IEnumerable<IModule> modules, IEnumerable<MetadataItem> metadata);
 
         /// <summary>
         /// Gets a new <see cref="IJavaScriptEnginePool"/>. The returned engine pool should be disposed

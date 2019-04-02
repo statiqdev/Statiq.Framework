@@ -143,9 +143,11 @@ namespace Wyam.Core.IO
         /// </remarks>
         public bool IsCaseSensitive => GetExistingDirectoriesAsync().Result.Any(x => x.IsCaseSensitive);
 
-        private async Task<IEnumerable<IDirectory>> GetExistingDirectoriesAsync() =>
-            await _fileSystem.InputPaths
-                .SelectAsync(async x => await _fileSystem.GetRootDirectoryAsync(x.Combine(Path)))
-                .WhereAsync(async x => await x.GetExistsAsync());
+        private async Task<IEnumerable<IDirectory>> GetExistingDirectoriesAsync()
+        {
+            IEnumerable<IDirectory> directories = await _fileSystem.InputPaths
+                .SelectAsync(async x => await _fileSystem.GetRootDirectoryAsync(x.Combine(Path)));
+            return await directories.WhereAsync(async x => await x.GetExistsAsync());
+        }
     }
 }

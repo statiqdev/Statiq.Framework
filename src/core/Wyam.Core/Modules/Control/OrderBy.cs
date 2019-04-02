@@ -6,6 +6,7 @@ using Wyam.Common.Documents;
 using Wyam.Common.Modules;
 using Wyam.Common.Execution;
 using Wyam.Core.Util;
+using System.Threading.Tasks;
 
 namespace Wyam.Core.Modules.Control
 {
@@ -89,7 +90,7 @@ namespace Wyam.Core.Modules.Control
         }
 
         /// <inheritdoc />
-        public IEnumerable<IDocument> Execute(IReadOnlyList<IDocument> inputs, IExecutionContext context)
+        public Task<IEnumerable<IDocument>> ExecuteAsync(IReadOnlyList<IDocument> inputs, IExecutionContext context)
         {
             IOrderedEnumerable<IDocument> orderdList = null;
             foreach (Order order in _orders.Reverse())
@@ -108,7 +109,7 @@ namespace Wyam.Core.Modules.Control
                 }
             }
 
-            return orderdList;
+            return Task.FromResult<IEnumerable<IDocument>>(orderdList);
         }
 
         private class Order

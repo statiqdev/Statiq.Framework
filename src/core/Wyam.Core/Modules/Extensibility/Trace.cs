@@ -1,9 +1,10 @@
 ﻿using System.Collections.Generic;
 using System.Diagnostics;
+using System.Threading.Tasks;
 using Wyam.Common.Configuration;
 using Wyam.Common.Documents;
-using Wyam.Common.Modules;
 using Wyam.Common.Execution;
+using Wyam.Common.Modules;
 
 namespace Wyam.Core.Modules.Extensibility
 {
@@ -32,7 +33,7 @@ namespace Wyam.Core.Modules.Extensibility
         /// you to trace different content depending on the execution context.
         /// </summary>
         /// <param name="content">A delegate that returns the content to trace.</param>
-        public Trace(ContextConfig content)
+        public Trace(AsyncContextConfig content)
             : base(content)
         {
         }
@@ -42,7 +43,7 @@ namespace Wyam.Core.Modules.Extensibility
         /// you to trace different content for each document depending on the input document.
         /// </summary>
         /// <param name="content">A delegate that returns the content to trace.</param>
-        public Trace(DocumentConfig content)
+        public Trace(AsyncDocumentConfig content)
             : base(content)
         {
         }
@@ -69,10 +70,10 @@ namespace Wyam.Core.Modules.Extensibility
         }
 
         /// <inheritdoc />
-        protected override IEnumerable<IDocument> Execute(object content, IDocument input, IExecutionContext context)
+        protected override Task<IEnumerable<IDocument>> ExecuteAsync(object content, IDocument input, IExecutionContext context)
         {
             Common.Tracing.Trace.TraceEvent(_traceEventType, content.ToString());
-            return new[] { input };
+            return Task.FromResult<IEnumerable<IDocument>>(new[] { input });
         }
     }
 }

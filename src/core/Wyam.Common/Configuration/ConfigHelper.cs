@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading.Tasks;
 using Wyam.Common.Documents;
 using Wyam.Common.Execution;
 
@@ -13,8 +14,8 @@ namespace Wyam.Common.Configuration
     /// <typeparam name="T">The type of the value you want to eventually convert to.</typeparam>
     public class ConfigHelper<T>
     {
-        private readonly ContextConfig _contextConfig;
-        private readonly DocumentConfig _documentConfig;
+        private readonly AsyncContextConfig _contextConfig;
+        private readonly AsyncDocumentConfig _documentConfig;
         private readonly T _defaultValue;
         private T _value;
         private bool _gotValue;
@@ -25,7 +26,7 @@ namespace Wyam.Common.Configuration
         /// <param name="value">The value.</param>
         public ConfigHelper(T value)
         {
-            _contextConfig = c => value;
+            _contextConfig = _ => Task.FromResult<object>(value);
         }
 
         /// <summary>
@@ -33,7 +34,7 @@ namespace Wyam.Common.Configuration
         /// </summary>
         /// <param name="config">The delegate.</param>
         /// <param name="defaultValue">A default value to use if the delegate is null.</param>
-        public ConfigHelper(ContextConfig config, T defaultValue = default(T))
+        public ConfigHelper(AsyncContextConfig config, T defaultValue = default(T))
         {
             _contextConfig = config;
             _defaultValue = defaultValue;
@@ -44,7 +45,7 @@ namespace Wyam.Common.Configuration
         /// </summary>
         /// <param name="config">The delegate.</param>
         /// <param name="defaultValue">A default value to use if the delegate is null.</param>
-        public ConfigHelper(DocumentConfig config, T defaultValue = default(T))
+        public ConfigHelper(AsyncDocumentConfig config, T defaultValue = default(T))
         {
             _documentConfig = config;
             _defaultValue = defaultValue;
@@ -58,7 +59,7 @@ namespace Wyam.Common.Configuration
         /// <param name="context">The execution context.</param>
         /// <param name="postProcessing">An optional post-processing function.</param>
         /// <returns>The result value.</returns>
-        public T GetValue(IDocument document, IExecutionContext context, Func<T, T> postProcessing = null)
+        public async Task<T> GetValueAsync(IDocument document, IExecutionContext context, Func<T, T> postProcessing = null)
         {
             if (_documentConfig == null)
             {
@@ -66,7 +67,7 @@ namespace Wyam.Common.Configuration
                 {
                     return _value;
                 }
-                _value = _contextConfig == null ? _defaultValue : _contextConfig.Invoke<T>(context);
+                _value = _contextConfig == null ? _defaultValue : await _contextConfig.InvokeAsync<T>(context);
                 if (postProcessing != null)
                 {
                     _value = postProcessing(_value);
@@ -75,7 +76,7 @@ namespace Wyam.Common.Configuration
                 return _value;
             }
 
-            T value = _documentConfig.Invoke<T>(document, context);
+            T value = await _documentConfig.InvokeAsync<T>(document, context);
             if (postProcessing != null)
             {
                 value = postProcessing(value);

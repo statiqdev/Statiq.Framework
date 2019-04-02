@@ -11,6 +11,7 @@ using Wyam.Common.Util;
 using Wyam.Core.Documents;
 using Wyam.Core.Meta;
 using Wyam.Core.Util;
+using System.Threading.Tasks;
 
 namespace Wyam.Core.Modules.Control
 {
@@ -150,9 +151,9 @@ namespace Wyam.Core.Modules.Control
         }
 
         /// <inheritdoc />
-        public override IEnumerable<IDocument> Execute(IReadOnlyList<IDocument> inputs, IExecutionContext context)
+        public override async Task<IEnumerable<IDocument>> ExecuteAsync(IReadOnlyList<IDocument> inputs, IExecutionContext context)
         {
-            ImmutableArray<IGrouping<object, IDocument>> groupings = context.Execute(this, inputs)
+            ImmutableArray<IGrouping<object, IDocument>> groupings = (await context.ExecuteAsync(this, inputs))
                 .Where(context, x => _predicate?.Invoke(x, context) ?? true)
                 .GroupBy(x => _key(x, context), _comparer)
                 .ToImmutableArray();
@@ -166,8 +167,8 @@ namespace Wyam.Core.Modules.Control
                     input,
                     new MetadataItems
                     {
-                        { Common.Meta.Keys.GroupDocuments, x.ToImmutableArray() },
-                        { Common.Meta.Keys.GroupKey, x.Key }
+                        { Keys.GroupDocuments, x.ToImmutableArray() },
+                        { Keys.GroupKey, x.Key }
                     }));
             });
         }

@@ -108,13 +108,12 @@ namespace Wyam.Core.Modules.Contents
         }
 
         /// <inheritdoc />
-        public IEnumerable<IDocument> Execute(IReadOnlyList<IDocument> inputs, IExecutionContext context)
+        public async Task<IEnumerable<IDocument>> ExecuteAsync(IReadOnlyList<IDocument> inputs, IExecutionContext context)
         {
             // Iterate redirects and generate all of the per-redirect documents (I.e., meta refresh pages)
             ConcurrentDictionary<FilePath, string> redirects = new ConcurrentDictionary<FilePath, string>();
-            List<IDocument> outputs = inputs
-                .AsParallel()
-                .SelectMany(context, input =>
+            List<IDocument> outputs = (await inputs
+                .ParallelSelectManyAsync(context, async input =>
                 {
                     IReadOnlyList<FilePath> paths = _paths.Invoke<IReadOnlyList<FilePath>>(input, context, "while getting paths");
                     if (paths != null)
@@ -143,7 +142,7 @@ namespace Wyam.Core.Modules.Contents
                             if (_metaRefreshPages)
                             {
                                 metaRefreshDocuments.Add(
-                                    context.GetDocumentAsync(
+                                    await context.GetDocumentAsync(
                                         $@"
 <!doctype html>
 <html>    
@@ -159,13 +158,13 @@ namespace Wyam.Core.Modules.Contents
                                         {
                                             { Keys.RelativeFilePath, outputPath },
                                             { Keys.WritePath, outputPath }
-                                        }).Result);
+                                        }));
                             }
                         }
                         return (IEnumerable<IDocument>)metaRefreshDocuments;
                     }
-                    return new IDocument[] { };
-                })
+                    return Array.Empty<IDocument>();
+                }))
                 .ToList();  // Need to materialize the parallel operation before creating the additional outputs
 
             // Generate other output documents if requested
@@ -177,13 +176,13 @@ namespace Wyam.Core.Modules.Contents
                     if (!string.IsNullOrEmpty(content))
                     {
                         outputs.Add(
-                            context.GetDocumentAsync(
+                            await context.GetDocumentAsync(
                                 content,
                                 new MetadataItems
                                 {
                                     { Keys.RelativeFilePath, additionalOutput.Key },
                                     { Keys.WritePath, additionalOutput.Key }
-                                }).Result);
+                                }));
                     }
                 }
             }

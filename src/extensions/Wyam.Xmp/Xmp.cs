@@ -110,11 +110,11 @@ namespace Wyam.Xmp
         }
 
         /// <inheritdoc />
-        public IEnumerable<IDocument> Execute(IReadOnlyList<IDocument> inputs, IExecutionContext context)
+        public async Task<IEnumerable<IDocument>> ExecuteAsync(IReadOnlyList<IDocument> inputs, IExecutionContext context)
         {
-            return inputs.Select(context, input =>
-             {
-                 MetadataExtractor.Formats.Xmp.XmpDirectory xmpDirectory;
+            return (await inputs.SelectAsync(context, async input =>
+            {
+                 XmpDirectory xmpDirectory;
                  try
                  {
                      using (Stream stream = input.GetStream())
@@ -132,13 +132,13 @@ namespace Wyam.Xmp
                      FilePath sourceFilePath = input.FilePath(Keys.SourceFilePath);
                      if (sourceFilePath != null)
                      {
-                         IFile sidecarFile = context.FileSystem.GetInputFileAsync(sourceFilePath.FullPath + ".xmp").Result;
-                         if (sidecarFile.GetExistsAsync().Result)
+                         IFile sidecarFile = await context.FileSystem.GetInputFileAsync(sourceFilePath.FullPath + ".xmp");
+                         if (await sidecarFile.GetExistsAsync())
                          {
                              MemoryStream xmpBytes = new MemoryStream();
-                             using (Stream xmpStream = sidecarFile.OpenReadAsync().Result)
+                             using (Stream xmpStream = await sidecarFile.OpenReadAsync())
                              {
-                                 xmpStream.CopyTo(xmpBytes);
+                                 await xmpStream.CopyToAsync(xmpBytes);
                              }
                              xmpDirectory = new XmpReader().Extract(xmpBytes.ToArray());
                          }
@@ -199,7 +199,7 @@ namespace Wyam.Xmp
                      }
                  }
                  return newValues.Count > 0 ? context.GetDocument(input, newValues) : input;
-             }).Where(x => x != null);
+             })).Where(x => x != null);
         }
 
         [System.Diagnostics.DebuggerDisplay("{ElementName}: {ElementValue} [{ElementArrayIndex}] ({ElementNameSpace})")]

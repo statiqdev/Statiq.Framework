@@ -53,7 +53,7 @@ namespace Wyam.Hosting.Middleware
                 }
             }
             interceptedBody.Position = 0;
-            interceptedBody.CopyTo(originalBody);
+            await interceptedBody.CopyToAsync(originalBody);
             context.Response.Body = originalBody;
         }
     }

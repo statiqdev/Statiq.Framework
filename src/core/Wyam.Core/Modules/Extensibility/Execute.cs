@@ -1,10 +1,11 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using Wyam.Common.Configuration;
 using Wyam.Common.Documents;
-using Wyam.Common.Modules;
 using Wyam.Common.Execution;
+using Wyam.Common.Modules;
 using Wyam.Common.Util;
 using Wyam.Core.Modules.Contents;
 
@@ -22,7 +23,7 @@ namespace Wyam.Core.Modules.Extensibility
     /// <category>Extensibility</category>
     public class Execute : IModule
     {
-        private readonly Func<IReadOnlyList<IDocument>, IExecutionContext, IEnumerable<IDocument>> _execute;
+        private readonly Func<IReadOnlyList<IDocument>, IExecutionContext, Task<IEnumerable<IDocument>>> _execute;
 
         /// <summary>
         /// Specifies a delegate that should be invoked once for each input document. If the delegate
@@ -37,11 +38,11 @@ namespace Wyam.Core.Modules.Extensibility
         /// <see cref="IDocument"/>, <c>IEnumerable&lt;IModule&gt;</c>, <see cref="IModule"/>, object, or null.</param>
         /// <param name="parallel">The delegate is usually evaluated and each input document is processed in parallel.
         /// Setting this to <c>false</c> runs evaluates and processes each document in their original input order.</param>
-        public Execute(DocumentConfig execute, bool parallel = true)
+        public Execute(AsyncDocumentConfig execute, bool parallel = true)
         {
-            _execute = (inputs, context) =>
+            _execute = async (inputs, context) =>
             {
-                Func<IDocument, IEnumerable<IDocument>> selectMany = input =>
+                Func<IDocument, Task<IEnumerable<IDocument>>> selectMany = async input =>
                 {
                     object documentResult = execute(input, context);
                     if (documentResult == null)
@@ -49,12 +50,12 @@ namespace Wyam.Core.Modules.Extensibility
                         return new[] { input };
                     }
                     return GetDocuments(documentResult)
-                        ?? ExecuteModules(documentResult, context, new[] { input })
+                        ?? await ExecuteModulesAsync(documentResult, context, new[] { input })
                         ?? ChangeContent(documentResult, context, input);
                 };
                 return parallel
-                    ? inputs.AsParallel().SelectMany(context, selectMany)
-                    : inputs.SelectMany(context, selectMany);
+                    ? await inputs.ParallelSelectManyAsync(context, selectMany)
+                    : await inputs.SelectManyAsync(context, selectMany);
             };
         }
 
@@ -65,11 +66,11 @@ namespace Wyam.Core.Modules.Extensibility
         /// <param name="execute">An action to execute on each input document.</param>
         /// <param name="parallel">The delegate is usually evaluated and each input document is processed in parallel.
         /// Setting this to <c>false</c> runs evaluates and processes each document in their original input order.</param>
-        public Execute(Action<IDocument, IExecutionContext> execute, bool parallel = true)
+        public Execute(Func<IDocument, IExecutionContext, Task> execute, bool parallel = true)
             : this(
-                (doc, ctx) =>
+                async (doc, ctx) =>
                 {
-                    execute(doc, ctx);
+                    await execute(doc, ctx);
                     return null;
                 },
                 parallel)
@@ -86,17 +87,17 @@ namespace Wyam.Core.Modules.Extensibility
         /// </summary>
         /// <param name="execute">A delegate to invoke that should return a <c>IEnumerable&lt;IDocument&gt;</c>,
         /// <see cref="IDocument"/>, <c>IEnumerable&lt;IModule&gt;</c>, <see cref="IModule"/>, or null.</param>
-        public Execute(ContextConfig execute)
+        public Execute(AsyncContextConfig execute)
         {
-            _execute = (inputs, context) =>
+            _execute = async (inputs, context) =>
             {
-                object contextResult = execute(context);
+                object contextResult = await execute(context);
                 if (contextResult == null)
                 {
                     return inputs;
                 }
                 return GetDocuments(contextResult)
-                    ?? ExecuteModules(contextResult, context, inputs)
+                    ?? await ExecuteModulesAsync(contextResult, context, inputs)
                     ?? ThrowInvalidDelegateResult(contextResult);
             };
         }
@@ -106,11 +107,11 @@ namespace Wyam.Core.Modules.Extensibility
         /// The output from this module will be the input documents.
         /// </summary>
         /// <param name="execute">An action to execute.</param>
-        public Execute(Action<IExecutionContext> execute)
+        public Execute(Func<IExecutionContext, Task> execute)
             : this(
-                ctx =>
+                async ctx =>
                 {
-                    execute(ctx);
+                    await execute(ctx);
                     return null;
                 })
         {
@@ -120,33 +121,27 @@ namespace Wyam.Core.Modules.Extensibility
         /// Specifies a delegate that should be invoked for all input documents. If the delegate
         /// returns a <c>IEnumerable&lt;IDocument&gt;</c> or <see cref="IDocument"/>, the document(s) will be the
         /// output(s) of this module. If the delegate returns null or anything else, this module will just output the input documents.
-        /// The third parameter of the delegate is primarly to aid overload resolution between this and the other constructors.
-        /// The value <c>null</c> will be passed for now, though it might be used for something else in a future version.
         /// </summary>
         /// <param name="execute">A delegate to invoke that should return a <c>IEnumerable&lt;IDocument&gt;</c>, <see cref="IDocument"/>, or null.</param>
-        public Execute(Func<IReadOnlyList<IDocument>, IExecutionContext, object, object> execute)
+        public Execute(Func<IReadOnlyList<IDocument>, IExecutionContext, Task<object>> execute)
         {
-            _execute = (inputs, context) => GetDocuments(execute(inputs, context, null)) ?? inputs;
+            _execute = async (inputs, context) => GetDocuments(await execute(inputs, context)) ?? inputs;
         }
 
         /// <inheritdoc />
-        IEnumerable<IDocument> IModule.Execute(IReadOnlyList<IDocument> inputs, IExecutionContext context) => _execute(inputs, context);
+        Task<IEnumerable<IDocument>> IModule.ExecuteAsync(IReadOnlyList<IDocument> inputs, IExecutionContext context) => _execute(inputs, context);
 
         private IEnumerable<IDocument> GetDocuments(object result)
         {
             IEnumerable<IDocument> documents = result as IEnumerable<IDocument>;
-            if (documents == null)
+            if (documents == null && result is IDocument document)
             {
-                IDocument document = result as IDocument;
-                if (document != null)
-                {
-                    documents = new[] { document };
-                }
+                documents = new[] { document };
             }
             return documents;
         }
 
-        private IEnumerable<IDocument> ExecuteModules(object results, IExecutionContext context, IEnumerable<IDocument> inputs)
+        private async Task<IEnumerable<IDocument>> ExecuteModulesAsync(object results, IExecutionContext context, IEnumerable<IDocument> inputs)
         {
             // Check for a single IModule first since some modules also implement IEnumerable<IModule>
             IEnumerable<IModule> modules;
@@ -159,7 +154,7 @@ namespace Wyam.Core.Modules.Extensibility
             {
                 modules = results as IEnumerable<IModule>;
             }
-            return modules != null ? context.Execute(modules, inputs) : null;
+            return modules != null ? await context.ExecuteAsync(modules, inputs) : null;
         }
 
         private IEnumerable<IDocument> ChangeContent(object result, IExecutionContext context, IDocument document) =>

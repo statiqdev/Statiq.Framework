@@ -42,15 +42,15 @@ namespace Wyam.Core.Modules.IO
     public class ReadApplicationInput : IModule
     {
         /// <inheritdoc />
-        public IEnumerable<IDocument> Execute(IReadOnlyList<IDocument> inputs, IExecutionContext context)
+        public async Task<IEnumerable<IDocument>> ExecuteAsync(IReadOnlyList<IDocument> inputs, IExecutionContext context)
         {
             // If ApplicationInput is empty, return nothing
             if (string.IsNullOrWhiteSpace(context.ApplicationInput))
             {
-                return new IDocument[0];
+                return Array.Empty<IDocument>();
             }
 
-            return new[] { context.GetDocumentAsync(context.ApplicationInput).Result };
+            return new[] { await context.GetDocumentAsync(context.ApplicationInput) };
         }
     }
 }

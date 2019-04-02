@@ -1,4 +1,5 @@
-﻿using Wyam.Common.Documents;
+﻿using System.Threading.Tasks;
+using Wyam.Common.Documents;
 using Wyam.Common.Execution;
 
 namespace Wyam.Common.Configuration
@@ -9,5 +10,5 @@ namespace Wyam.Common.Configuration
     /// <param name="doc">The document.</param>
     /// <param name="ctx">The execution context.</param>
     /// <returns>A result object.</returns>
-    public delegate object DocumentConfig(IDocument doc, IExecutionContext ctx);
+    public delegate Task<object> AsyncDocumentConfig(IDocument doc, IExecutionContext ctx);
 }

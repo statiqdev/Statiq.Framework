@@ -3,6 +3,7 @@ using Wyam.Common.Configuration;
 using Wyam.Common.Documents;
 using Wyam.Common.Modules;
 using Wyam.Common.Execution;
+using System.Threading.Tasks;
 
 namespace Wyam.Core.Modules.Contents
 {
@@ -54,9 +55,9 @@ namespace Wyam.Core.Modules.Contents
         }
 
         /// <inheritdoc />
-        protected override IEnumerable<IDocument> Execute(object content, IDocument input, IExecutionContext context)
+        protected override async Task<IEnumerable<IDocument>> ExecuteAsync(object content, IDocument input, IExecutionContext context)
         {
-            return new[] { content == null ? input : context.GetDocumentAsync(input, input.Content + content).Result };
+            return new[] { content == null ? input : await context.GetDocumentAsync(input, input.Content + content) };
         }
     }
 }

@@ -8,6 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Wyam.Common.Documents;
 using Wyam.Common.Execution;
+using Wyam.Common.Util;
 
 namespace Wyam.Common.Modules
 {
@@ -121,15 +122,15 @@ namespace Wyam.Common.Modules
         }
 
         /// <inheritdoc />
-        public IEnumerable<IDocument> Execute(IReadOnlyList<IDocument> inputs, IExecutionContext context)
+        public async Task<IEnumerable<IDocument>> ExecuteAsync(IReadOnlyList<IDocument> inputs, IExecutionContext context)
         {
             IEnumerable<TItem> items = GetItems(inputs, context);
             if (items == null)
             {
-                yield break;
+                return Array.Empty<IDocument>();
             }
 
-            foreach (TItem item in items.Where(x => x != null).Take(_limit))
+            return await items.Where(x => x != null).Take(_limit).ParallelSelectAsync(async item =>
             {
                 string content = string.Empty;
                 List<KeyValuePair<string, object>> meta = new List<KeyValuePair<string, object>>();
@@ -161,8 +162,8 @@ namespace Wyam.Common.Modules
                     }
                 }
 
-                yield return context.GetDocumentAsync(content, meta).Result;
-            }
+                return await context.GetDocumentAsync(content, meta);
+            });
         }
     }
 }

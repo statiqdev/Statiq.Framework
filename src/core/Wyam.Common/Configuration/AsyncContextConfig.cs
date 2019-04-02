@@ -1,4 +1,5 @@
-﻿using Wyam.Common.Execution;
+﻿using System.Threading.Tasks;
+using Wyam.Common.Execution;
 
 namespace Wyam.Common.Configuration
 {
@@ -7,5 +8,5 @@ namespace Wyam.Common.Configuration
     /// </summary>
     /// <param name="ctx">The execution context.</param>
     /// <returns>A result object.</returns>
-    public delegate object ContextConfig(IExecutionContext ctx);
+    public delegate Task<object> AsyncContextConfig(IExecutionContext ctx);
 }

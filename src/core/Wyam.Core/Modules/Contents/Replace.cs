@@ -5,6 +5,7 @@ using Wyam.Common.Configuration;
 using Wyam.Common.Documents;
 using Wyam.Common.Modules;
 using Wyam.Common.Execution;
+using System.Threading.Tasks;
 
 namespace Wyam.Core.Modules.Contents
 {
@@ -114,7 +115,7 @@ namespace Wyam.Core.Modules.Contents
         }
 
         /// <inheritdoc />
-        protected override IEnumerable<IDocument> Execute(object content, IDocument input, IExecutionContext context)
+        protected override async Task<IEnumerable<IDocument>> ExecuteAsync(object content, IDocument input, IExecutionContext context)
         {
             if (content == null)
             {
@@ -134,16 +135,16 @@ namespace Wyam.Core.Modules.Contents
                     _regexOptions);
                 return new[]
                 {
-                    currentDocumentContent == newDocumentContent ? input : context.GetDocumentAsync(input, newDocumentContent).Result
+                    currentDocumentContent == newDocumentContent ? input : await context.GetDocumentAsync(input, newDocumentContent)
                 };
             }
             return new[]
             {
-                context.GetDocumentAsync(
+                await context.GetDocumentAsync(
                     input,
                     _isRegex ?
                         Regex.Replace(input.Content, _search, content.ToString(), _regexOptions) :
-                        input.Content.Replace(_search, content.ToString())).Result
+                        input.Content.Replace(_search, content.ToString()))
             };
         }
     }

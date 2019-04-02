@@ -148,12 +148,9 @@ namespace Wyam.Core.IO
             }
             if (path is DirectoryPath directoryPath)
             {
-                return await InputPaths
-                    .Reverse()
-                    .SelectAsync(async x => (x, await GetRootDirectoryAsync(x.Combine(directoryPath))))
-                    .WhereAsync(async x => await x.Item2.GetExistsAsync())
-                    .SelectAsync(x => RootPath.Combine(x.Item1))
-                    .FirstOrDefaultAsync();
+                IEnumerable<(DirectoryPath x, IDirectory)> rootDirectories = await InputPaths.Reverse().SelectAsync(async x => (x, await GetRootDirectoryAsync(x.Combine(directoryPath))));
+                IEnumerable<(DirectoryPath x, IDirectory)> existingRootDirectories = await rootDirectories.WhereAsync(async x => await x.Item2.GetExistsAsync());
+                return existingRootDirectories.Select(x => RootPath.Combine(x.Item1)).FirstOrDefault();
             }
             return null;
         }

@@ -1,9 +1,10 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using Wyam.Common.Configuration;
 using Wyam.Common.Documents;
-using Wyam.Common.Modules;
 using Wyam.Common.Execution;
+using Wyam.Common.Modules;
 
 namespace Wyam.Core.Modules.Control
 {
@@ -100,7 +101,7 @@ namespace Wyam.Core.Modules.Control
         }
 
         /// <inheritdoc />
-        public IEnumerable<IDocument> Execute(IReadOnlyList<IDocument> inputs, IExecutionContext context)
+        public async Task<IEnumerable<IDocument>> ExecuteAsync(IReadOnlyList<IDocument> inputs, IExecutionContext context)
         {
             List<IDocument> results = new List<IDocument>();
             IReadOnlyList<IDocument> documents = inputs;
@@ -142,7 +143,7 @@ namespace Wyam.Core.Modules.Control
                 // Run the modules on the documents that satisfy the predicate
                 if (matched.Count > 0)
                 {
-                    results.AddRange(context.Execute(condition, matched));
+                    results.AddRange(await context.ExecuteAsync(condition, matched));
                 }
 
                 // Continue with the documents that don't satisfy the predicate

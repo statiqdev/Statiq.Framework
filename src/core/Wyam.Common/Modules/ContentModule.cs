@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Threading.Tasks;
 using Wyam.Common.Configuration;
 using Wyam.Common.Documents;
 using Wyam.Common.Execution;
@@ -27,7 +28,7 @@ namespace Wyam.Common.Modules
         /// Creates a new content module with the specified content delegate.
         /// </summary>
         /// <param name="content">The content delegate.</param>
-        protected ContentModule(ContextConfig content)
+        protected ContentModule(AsyncContextConfig content)
         {
             _content = new ConfigHelper<object>(content);
         }
@@ -36,7 +37,7 @@ namespace Wyam.Common.Modules
         /// Creates a new content module with the specified content delegate.
         /// </summary>
         /// <param name="content">The content delegate.</param>
-        protected ContentModule(DocumentConfig content)
+        protected ContentModule(AsyncDocumentConfig content)
         {
             _content = new ConfigHelper<object>(content);
         }
@@ -58,17 +59,15 @@ namespace Wyam.Common.Modules
         }
 
         /// <inheritdoc />
-        public IEnumerable<IDocument> Execute(IReadOnlyList<IDocument> inputs, IExecutionContext context)
+        public async Task<IEnumerable<IDocument>> ExecuteAsync(IReadOnlyList<IDocument> inputs, IExecutionContext context)
         {
             if (_modules != null)
             {
-                return context
-                    .Execute(_modules, inputs.Count == 1 ? inputs : null)
-                    .SelectMany(
-                        context,
-                        x => inputs.SelectMany(context, y => Execute(x.Content, y, context)));
+                IReadOnlyList<IDocument> documents = await context.ExecuteAsync(_modules, inputs.Count == 1 ? inputs : null);
+                return await documents.SelectManyAsync(context, async x => await inputs.SelectManyAsync(context, async y => await ExecuteAsync(x.Content, y, context)));
             }
-            return inputs.SelectMany(context, x => Execute(_content.GetValue(x, context), x, context));
+
+            return await inputs.SelectManyAsync(context, async x => await ExecuteAsync(await _content.GetValueAsync(x, context), x, context));
         }
 
         /// <summary>
@@ -79,6 +78,6 @@ namespace Wyam.Common.Modules
         /// <param name="input">The input document.</param>
         /// <param name="context">The execution context.</param>
         /// <returns>Result documents.</returns>
-        protected abstract IEnumerable<IDocument> Execute(object content, IDocument input, IExecutionContext context);
+        protected abstract Task<IEnumerable<IDocument>> ExecuteAsync(object content, IDocument input, IExecutionContext context);
     }
 }

@@ -41,12 +41,12 @@ namespace Wyam.Core.Modules.IO
         }
 
         /// <inheritdoc />
-        public IEnumerable<IDocument> Execute(IReadOnlyList<IDocument> inputs, IExecutionContext context)
+        public async Task<IEnumerable<IDocument>> ExecuteAsync(IReadOnlyList<IDocument> inputs, IExecutionContext context)
         {
-            return inputs.AsParallel().Select(context, input =>
+            return await inputs.ParallelSelectAsync(context, async input =>
             {
-                string content = ProcessIncludesAsync(input.Content, input.Source, context).Result;
-                return content == null ? input : context.GetDocumentAsync(input, content).Result;
+                string content = await ProcessIncludesAsync(input.Content, input.Source, context);
+                return content == null ? input : await context.GetDocumentAsync(input, content);
             });
         }
 

@@ -4,6 +4,7 @@ using Wyam.Common.Documents;
 using Wyam.Common.Modules;
 using Wyam.Common.Execution;
 using Wyam.Common.Util;
+using System.Threading.Tasks;
 
 namespace Wyam.Core.Modules.Control
 {
@@ -63,9 +64,9 @@ namespace Wyam.Core.Modules.Control
         }
 
         /// <inheritdoc />
-        public override IEnumerable<IDocument> Execute(IReadOnlyList<IDocument> inputs, IExecutionContext context)
+        public override async Task<IEnumerable<IDocument>> ExecuteAsync(IReadOnlyList<IDocument> inputs, IExecutionContext context)
         {
-            return inputs.SelectMany(context, x => context.Execute(this, new[] { x }));
+            return await inputs.SelectManyAsync<IDocument>(context, async x => await context.ExecuteAsync(this, new[] { x }));
         }
     }
 }

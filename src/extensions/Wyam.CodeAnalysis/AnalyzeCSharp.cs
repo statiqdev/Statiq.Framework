@@ -451,7 +451,7 @@ namespace Wyam.CodeAnalysis
         }
 
         /// <inheritdoc />
-        public IEnumerable<IDocument> Execute(IReadOnlyList<IDocument> inputs, IExecutionContext context)
+        public async Task<IEnumerable<IDocument>> ExecuteAsync(IReadOnlyList<IDocument> inputs, IExecutionContext context)
         {
             // Create the compilation (have to supply an XmlReferenceResolver to handle include XML doc comments)
             MetadataReference mscorlib = MetadataReference.CreateFromFile(typeof(object).Assembly.Location);
@@ -465,9 +465,9 @@ namespace Wyam.CodeAnalysis
             // Add the input source and references
             List<ISymbol> symbols = new List<ISymbol>();
             compilation = AddSourceFiles(inputs, context, compilation);
-            compilation = AddProjectReferencesAsync(context, symbols, compilation).Result;
-            compilation = AddSolutionReferencesAsync(context, symbols, compilation).Result;
-            compilation = AddAssemblyReferencesAsync(context, symbols, compilation).Result;
+            compilation = await AddProjectReferencesAsync(context, symbols, compilation);
+            compilation = await AddSolutionReferencesAsync(context, symbols, compilation);
+            compilation = await AddAssemblyReferencesAsync(context, symbols, compilation);
 
             // Get and return the document tree
             symbols.Add(compilation.Assembly.GlobalNamespace);
@@ -510,9 +510,9 @@ namespace Wyam.CodeAnalysis
 
         private async Task<Compilation> AddAssemblyReferencesAsync(IExecutionContext context, List<ISymbol> symbols, Compilation compilation)
         {
-            IEnumerable<IFile> assemblyFiles = await context.FileSystem.GetInputFilesAsync(_assemblyGlobs)
-                .WhereAsync(async x => (x.Path.Extension == ".dll" || x.Path.Extension == ".exe") && await x.GetExistsAsync());
-            MetadataReference[] assemblyReferences = await assemblyFiles.SelectAsync(async assemblyFile =>
+            IEnumerable<IFile> assemblyFiles = await context.FileSystem.GetInputFilesAsync(_assemblyGlobs);
+            assemblyFiles = await assemblyFiles.WhereAsync(async x => (x.Path.Extension == ".dll" || x.Path.Extension == ".exe") && await x.GetExistsAsync());
+            MetadataReference[] assemblyReferences = (await assemblyFiles.SelectAsync(async assemblyFile =>
             {
                 // Create the metadata reference for the compilation
                 IFile xmlFile = await context.FileSystem.GetFileAsync(assemblyFile.Path.ChangeExtension("xml"));
@@ -525,7 +525,7 @@ namespace Wyam.CodeAnalysis
                 }
                 Trace.Verbose($"Creating metadata reference for assembly {assemblyFile.Path.FullPath} without XML documentation file");
                 return (MetadataReference)MetadataReference.CreateFromFile(assemblyFile.Path.FullPath);
-            }).ToArrayAsync();
+            })).ToArray();
             if (assemblyReferences.Length > 0)
             {
                 compilation = compilation.AddReferences(assemblyReferences);
@@ -545,8 +545,8 @@ namespace Wyam.CodeAnalysis
                 LogWriter = log
             });
             AdhocWorkspace workspace = new AdhocWorkspace();
-            IEnumerable<IFile> projectFiles = await context.FileSystem.GetInputFilesAsync(_projectGlobs)
-                .WhereAsync(async x => x.Path.Extension == ".csproj" && await x.GetExistsAsync());
+            IEnumerable<IFile> projectFiles = await context.FileSystem.GetInputFilesAsync(_projectGlobs);
+            projectFiles = await projectFiles.WhereAsync(async x => x.Path.Extension == ".csproj" && await x.GetExistsAsync());
             List<Project> projects = new List<Project>();
             foreach (IFile projectFile in projectFiles)
             {
@@ -575,13 +575,13 @@ namespace Wyam.CodeAnalysis
                 }
                 projects.Add(project);
             }
-            return AddProjectReferences(projects, symbols, compilation);
+            return await AddProjectReferencesAsync(projects, symbols, compilation);
         }
 
         private async Task<Compilation> AddSolutionReferencesAsync(IExecutionContext context, List<ISymbol> symbols, Compilation compilation)
         {
-            IEnumerable<IFile> solutionFiles = await context.FileSystem.GetInputFilesAsync(_solutionGlobs)
-                .WhereAsync(async x => x.Path.Extension == ".sln" && await x.GetExistsAsync());
+            IEnumerable<IFile> solutionFiles = await context.FileSystem.GetInputFilesAsync(_solutionGlobs);
+            solutionFiles = await solutionFiles.WhereAsync(async x => x.Path.Extension == ".sln" && await x.GetExistsAsync());
             foreach (IFile solutionFile in solutionFiles)
             {
                 Trace.Verbose($"Creating workspace solution for {solutionFile.Path.FullPath}");
@@ -611,22 +611,22 @@ namespace Wyam.CodeAnalysis
                     result.AddToWorkspace(workspace);
                 }
 
-                compilation = AddProjectReferences(workspace.CurrentSolution.Projects, symbols, compilation);
+                compilation = await AddProjectReferencesAsync(workspace.CurrentSolution.Projects, symbols, compilation);
             }
             return compilation;
         }
 
-        private Compilation AddProjectReferences(IEnumerable<Project> projects, List<ISymbol> symbols, Compilation compilation)
+        private async Task<Compilation> AddProjectReferencesAsync(IEnumerable<Project> projects, List<ISymbol> symbols, Compilation compilation)
         {
             // Add a references to the compilation for each project in the solution
-            MetadataReference[] compilationReferences = projects
+            MetadataReference[] compilationReferences = (await projects
                 .Where(x => x.SupportsCompilation)
-                .AsParallel()
-                .Select(x =>
+                .SelectAsync(async x =>
                 {
                     Trace.Verbose($"Creating compilation reference for project {x.Name}");
-                    return (MetadataReference)x.GetCompilationAsync().Result.ToMetadataReference(new[] { x.AssemblyName }.ToImmutableArray());
-                })
+                    Compilation projectCompilation = await x.GetCompilationAsync();
+                    return projectCompilation.ToMetadataReference(new[] { x.AssemblyName }.ToImmutableArray());
+                }))
                 .ToArray();
             if (compilationReferences.Length > 0)
             {

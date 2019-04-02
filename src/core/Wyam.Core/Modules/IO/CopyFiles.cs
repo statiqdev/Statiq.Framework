@@ -2,12 +2,13 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 using Wyam.Common.Configuration;
 using Wyam.Common.Documents;
+using Wyam.Common.Execution;
 using Wyam.Common.IO;
 using Wyam.Common.Meta;
 using Wyam.Common.Modules;
-using Wyam.Common.Execution;
 using Wyam.Common.Tracing;
 using Wyam.Common.Util;
 using Wyam.Core.Documents;
@@ -30,10 +31,10 @@ namespace Wyam.Core.Modules.IO
     /// <category>Input/Output</category>
     public class CopyFiles : IModule, IAsNewDocuments
     {
-        private readonly DocumentConfig _patternsDelegate;
+        private readonly AsyncDocumentConfig _patternsDelegate;
         private readonly string[] _patterns;
-        private Func<IFile, IFile, FilePath> _destinationPath;
-        private Func<IFile, bool> _predicate = null;
+        private Func<IFile, IFile, Task<FilePath>> _destinationPath;
+        private Func<IFile, Task<bool>> _predicate = null;
 
         /// <summary>
         /// Copies all files that match the specified globbing patterns and/or absolute paths. This allows you to specify different
@@ -43,7 +44,7 @@ namespace Wyam.Core.Modules.IO
         /// specify a function-based source path if there will be no overlap between the path returned from each input document.
         /// </summary>
         /// <param name="patterns">A delegate that returns one or more globbing patterns and/or absolute paths.</param>
-        public CopyFiles(DocumentConfig patterns)
+        public CopyFiles(AsyncDocumentConfig patterns)
         {
             _patternsDelegate = patterns ?? throw new ArgumentNullException(nameof(patterns));
         }
@@ -65,10 +66,10 @@ namespace Wyam.Core.Modules.IO
         /// </summary>
         /// <param name="predicate">A predicate that returns <c>true</c> if the file should be copied.</param>
         /// <returns>The current module instance.</returns>
-        public CopyFiles Where(Func<IFile, bool> predicate)
+        public CopyFiles Where(Func<IFile, Task<bool>> predicate)
         {
-            Func<IFile, bool> currentPredicate = _predicate;
-            _predicate = currentPredicate == null ? predicate : x => currentPredicate(x) && predicate(x);
+            Func<IFile, Task<bool>> currentPredicate = _predicate;
+            _predicate = currentPredicate == null ? predicate : async x => await currentPredicate(x) && await predicate(x);
             return this;
         }
 
@@ -81,14 +82,14 @@ namespace Wyam.Core.Modules.IO
         /// <param name="destinationPath">A delegate that specifies an alternate destination.
         /// The parameter contains the source <see cref="IFile"/>.</param>
         /// <returns>The current module instance.</returns>
-        public CopyFiles To(Func<IFile, FilePath> destinationPath)
+        public CopyFiles To(Func<IFile, Task<FilePath>> destinationPath)
         {
             if (destinationPath == null)
             {
                 throw new ArgumentNullException(nameof(destinationPath));
             }
 
-            _destinationPath = (source, destination) => destinationPath(source);
+            _destinationPath = async (source, destination) => await destinationPath(source);
             return this;
         }
 
@@ -104,62 +105,60 @@ namespace Wyam.Core.Modules.IO
         /// The first parameter contains the source <see cref="IFile"/> and the second contains
         /// an <see cref="IFile"/> representing the calculated destination.</param>
         /// <returns>The current module instance.</returns>
-        public CopyFiles To(Func<IFile, IFile, FilePath> destinationPath)
+        public CopyFiles To(Func<IFile, IFile, Task<FilePath>> destinationPath)
         {
             _destinationPath = destinationPath ?? throw new ArgumentNullException(nameof(destinationPath));
             return this;
         }
 
         /// <inheritdoc />
-        public IEnumerable<IDocument> Execute(IReadOnlyList<IDocument> inputs, IExecutionContext context)
+        public async Task<IEnumerable<IDocument>> ExecuteAsync(IReadOnlyList<IDocument> inputs, IExecutionContext context)
         {
             return _patterns != null
-                ? Execute(null, _patterns, context)
-                : inputs.AsParallel().SelectMany(context, input =>
-                    Execute(input, _patternsDelegate.Invoke<string[]>(input, context, "while getting patterns"), context));
+                ? await ExecuteAsync(null, _patterns, context)
+                : await inputs.ParallelSelectManyAsync(context, async input =>
+                    await ExecuteAsync(input, await _patternsDelegate.InvokeAsync<string[]>(input, context, "while getting patterns"), context));
         }
 
-        private IEnumerable<IDocument> Execute(IDocument input, string[] patterns, IExecutionContext context)
+        private async Task<IEnumerable<IDocument>> ExecuteAsync(IDocument input, string[] patterns, IExecutionContext context)
         {
             if (patterns != null)
             {
-                return context.FileSystem
-                    .GetInputFilesAsync(patterns).Result
-                    .AsParallel()
-                    .Where(x => _predicate == null || _predicate(x))
-                    .Select(file =>
+                IEnumerable<IFile> inputFiles = await context.FileSystem.GetInputFilesAsync(patterns);
+                inputFiles = await inputFiles.WhereAsync(async x => _predicate == null || await _predicate(x));
+                return (await inputFiles.SelectAsync(async file =>
+                {
+                    try
                     {
-                        try
+                        // Get the default destination file
+                        DirectoryPath inputPath = await context.FileSystem.GetContainingInputPathAsync(file.Path);
+                        FilePath relativePath = inputPath?.GetRelativePath(file.Path) ?? file.Path.FileName;
+                        IFile destination = await context.FileSystem.GetOutputFileAsync(relativePath);
+
+                        // Calculate an alternate destination if needed
+                        if (_destinationPath != null)
                         {
-                            // Get the default destination file
-                            DirectoryPath inputPath = context.FileSystem.GetContainingInputPathAsync(file.Path).Result;
-                            FilePath relativePath = inputPath?.GetRelativePath(file.Path) ?? file.Path.FileName;
-                            IFile destination = context.FileSystem.GetOutputFileAsync(relativePath).Result;
-
-                            // Calculate an alternate destination if needed
-                            if (_destinationPath != null)
-                            {
-                                destination = context.FileSystem.GetOutputFileAsync(_destinationPath(file, destination)).Result;
-                            }
-
-                            // Copy to the destination
-                            file.CopyToAsync(destination);
-                            Trace.Verbose("Copied file {0} to {1}", file.Path.FullPath, destination.Path.FullPath);
-
-                            // Return the document
-                            return context.GetDocument(input, file.Path, new MetadataItems
-                            {
-                                { Keys.SourceFilePath, file.Path },
-                                { Keys.DestinationFilePath, destination.Path }
-                            });
+                            destination = await context.FileSystem.GetOutputFileAsync(await _destinationPath(file, destination));
                         }
-                        catch (Exception ex)
+
+                        // Copy to the destination
+                        await file.CopyToAsync(destination);
+                        Trace.Verbose("Copied file {0} to {1}", file.Path.FullPath, destination.Path.FullPath);
+
+                        // Return the document
+                        return context.GetDocument(input, file.Path, new MetadataItems
                         {
-                            Trace.Error($"Error while copying file {file.Path.FullPath}: {ex.Message}");
-                            throw;
-                        }
-                    })
-                    .Where(x => x != null);
+                            { Keys.SourceFilePath, file.Path },
+                            { Keys.DestinationFilePath, destination.Path }
+                        });
+                    }
+                    catch (Exception ex)
+                    {
+                        Trace.Error($"Error while copying file {file.Path.FullPath}: {ex.Message}");
+                        throw;
+                    }
+                }))
+                .Where(x => x != null);
             }
             return Array.Empty<IDocument>();
         }

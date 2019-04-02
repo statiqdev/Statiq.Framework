@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using Wyam.Common.Documents;
 using Wyam.Common.Execution;
 using Wyam.Common.Modules;
@@ -30,11 +31,11 @@ namespace Wyam.Core.Modules.Control
         }
 
         /// <inheritdoc />
-        public IEnumerable<IDocument> Execute(IReadOnlyList<IDocument> inputs, IExecutionContext context)
+        public Task<IEnumerable<IDocument>> ExecuteAsync(IReadOnlyList<IDocument> inputs, IExecutionContext context)
         {
             IDocument[] inputArray = inputs.ToArray();
             Array.Sort(inputArray, _sort);
-            return inputArray;
+            return Task.FromResult<IEnumerable<IDocument>>(inputArray);
         }
     }
 }

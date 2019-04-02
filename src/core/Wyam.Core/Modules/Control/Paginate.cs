@@ -10,6 +10,7 @@ using Wyam.Common.Execution;
 using Wyam.Common.Util;
 using Wyam.Core.Documents;
 using Wyam.Core.Meta;
+using System.Threading.Tasks;
 
 namespace Wyam.Core.Modules.Control
 {
@@ -150,12 +151,12 @@ namespace Wyam.Core.Modules.Control
         }
 
         /// <inheritdoc />
-        public override IEnumerable<IDocument> Execute(IReadOnlyList<IDocument> inputs, IExecutionContext context)
+        public override async Task<IEnumerable<IDocument>> ExecuteAsync(IReadOnlyList<IDocument> inputs, IExecutionContext context)
         {
             // Partition the pages
             IDocument[][] partitions =
                 Partition(
-                    context.Execute(this, inputs)
+                    (await context.ExecuteAsync(this, inputs))
                         .Where(context, x => _predicate?.Invoke(x, context) ?? true)
                         .ToList(),
                     _pageSize)

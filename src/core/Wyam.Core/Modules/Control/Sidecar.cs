@@ -8,6 +8,7 @@ using Wyam.Common.Execution;
 using Wyam.Common.IO;
 using Wyam.Common.Meta;
 using Wyam.Common.Util;
+using System.Threading.Tasks;
 
 namespace Wyam.Core.Modules.Control
 {
@@ -102,19 +103,19 @@ namespace Wyam.Core.Modules.Control
         }
 
         /// <inheritdoc />
-        public override IEnumerable<IDocument> Execute(IReadOnlyList<IDocument> inputs, IExecutionContext context)
+        public override async Task<IEnumerable<IDocument>> ExecuteAsync(IReadOnlyList<IDocument> inputs, IExecutionContext context)
         {
             List<IDocument> results = new List<IDocument>();
-            context.ForEach(inputs, input =>
+            await context.ForEachAsync(inputs, async input =>
             {
                 FilePath sidecarPath = _sidecarPath.Invoke<FilePath>(input, context);
                 if (sidecarPath != null)
                 {
-                    IFile sidecarFile = context.FileSystem.GetInputFileAsync(sidecarPath.FullPath).Result;
-                    if (sidecarFile.GetExistsAsync().Result)
+                    IFile sidecarFile = await context.FileSystem.GetInputFileAsync(sidecarPath.FullPath);
+                    if (await sidecarFile.GetExistsAsync())
                     {
-                        string sidecarContent = sidecarFile.ReadAllTextAsync().Result;
-                        foreach (IDocument result in context.Execute(this, new[] { context.GetDocumentAsync(input, sidecarContent).Result }))
+                        string sidecarContent = await sidecarFile.ReadAllTextAsync();
+                        foreach (IDocument result in await context.ExecuteAsync(this, new[] { await context.GetDocumentAsync(input, sidecarContent) }))
                         {
                             results.Add(context.GetDocument(input, result));
                         }

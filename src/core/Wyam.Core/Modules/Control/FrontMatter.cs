@@ -5,6 +5,7 @@ using Wyam.Common.Documents;
 using Wyam.Common.Modules;
 using Wyam.Common.Execution;
 using Wyam.Common.Util;
+using System.Threading.Tasks;
 
 namespace Wyam.Core.Modules.Control
 {
@@ -104,10 +105,10 @@ namespace Wyam.Core.Modules.Control
         }
 
         /// <inheritdoc />
-        public override IEnumerable<IDocument> Execute(IReadOnlyList<IDocument> inputs, IExecutionContext context)
+        public override async Task<IEnumerable<IDocument>> ExecuteAsync(IReadOnlyList<IDocument> inputs, IExecutionContext context)
         {
             List<IDocument> results = new List<IDocument>();
-            context.ForEach(inputs, input =>
+            await context.ForEachAsync(inputs, async input =>
             {
                 List<string> inputLines = input.Content.Split(new[] { '\n' }, StringSplitOptions.None).ToList();
                 int delimiterLine = inputLines.FindIndex(x =>
@@ -130,9 +131,9 @@ namespace Wyam.Core.Modules.Control
                     string frontMatter = string.Join("\n", inputLines.Skip(startLine).Take(delimiterLine - startLine)) + "\n";
                     inputLines.RemoveRange(0, delimiterLine + 1);
                     string content = string.Join("\n", inputLines);
-                    foreach (IDocument result in context.Execute(this, new[] { context.GetDocumentAsync(input, frontMatter).Result }))
+                    foreach (IDocument result in await context.ExecuteAsync(this, new[] { await context.GetDocumentAsync(input, frontMatter) }))
                     {
-                        results.Add(context.GetDocumentAsync(result, content).Result);
+                        results.Add(await context.GetDocumentAsync(result, content));
                     }
                 }
                 else

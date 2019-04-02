@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading.Tasks;
 using Wyam.Common.Documents;
 using Wyam.Common.Execution;
 
@@ -16,10 +17,8 @@ namespace Wyam.Common.Configuration
         /// <param name="config">The delegate.</param>
         /// <param name="context">The execution context.</param>
         /// <returns>A typed result from invoking the delegate.</returns>
-        public static T Invoke<T>(this ContextConfig config, IExecutionContext context)
-        {
-            return Invoke<T>(config, context, null);
-        }
+        public static Task<T> InvokeAsync<T>(this AsyncContextConfig config, IExecutionContext context) =>
+            InvokeAsync<T>(config, context, null);
 
         /// <summary>
         /// Invokes the delegate with additional information in the exception message if the conversion fails.
@@ -29,11 +28,10 @@ namespace Wyam.Common.Configuration
         /// <param name="context">The execution context.</param>
         /// <param name="errorDetails">A string to add to the exception message should the conversion fail.</param>
         /// <returns>A typed result from invoking the delegate.</returns>
-        public static T Invoke<T>(this ContextConfig config, IExecutionContext context, string errorDetails)
+        public static async Task<T> InvokeAsync<T>(this AsyncContextConfig config, IExecutionContext context, string errorDetails)
         {
-            object value = config(context);
-            T result;
-            if (!context.TryConvert(value, out result))
+            object value = await config(context);
+            if (!context.TryConvert(value, out T result))
             {
                 errorDetails = GetErrorDetails(errorDetails);
                 throw new InvalidOperationException(
@@ -49,11 +47,10 @@ namespace Wyam.Common.Configuration
         /// <param name="config">The delegate.</param>
         /// <param name="context">The execution context.</param>
         /// <returns>A typed result from invoking the delegate, or the default value of <typeparamref name="T"/> if the conversion fails.</returns>
-        public static T TryInvoke<T>(this ContextConfig config, IExecutionContext context)
+        public static async Task<T> TryInvokeAsync<T>(this AsyncContextConfig config, IExecutionContext context)
         {
-            object value = config(context);
-            T result;
-            return context.TryConvert(value, out result) ? result : default(T);
+            object value = await config(context);
+            return context.TryConvert(value, out T result) ? result : default(T);
         }
 
         /// <summary>
@@ -64,10 +61,8 @@ namespace Wyam.Common.Configuration
         /// <param name="document">The document.</param>
         /// <param name="context">The execution context.</param>
         /// <returns>A typed result from invoking the delegate.</returns>
-        public static T Invoke<T>(this DocumentConfig config, IDocument document, IExecutionContext context)
-        {
-            return Invoke<T>(config, document, context, null);
-        }
+        public static Task<T> InvokeAsync<T>(this AsyncDocumentConfig config, IDocument document, IExecutionContext context) =>
+            InvokeAsync<T>(config, document, context, null);
 
         /// <summary>
         /// Invokes the delegate with additional information in the exception message if the conversion fails.
@@ -78,11 +73,10 @@ namespace Wyam.Common.Configuration
         /// <param name="context">The execution context.</param>
         /// <param name="errorDetails">A string to add to the exception message should the conversion fail.</param>
         /// <returns>A typed result from invoking the delegate.</returns>
-        public static T Invoke<T>(this DocumentConfig config, IDocument document, IExecutionContext context, string errorDetails)
+        public static async Task<T> InvokeAsync<T>(this AsyncDocumentConfig config, IDocument document, IExecutionContext context, string errorDetails)
         {
-            object value = config(document, context);
-            T result;
-            if (!context.TryConvert(value, out result))
+            object value = await config(document, context);
+            if (!context.TryConvert(value, out T result))
             {
                 errorDetails = GetErrorDetails(errorDetails);
                 throw new InvalidOperationException(
@@ -99,11 +93,10 @@ namespace Wyam.Common.Configuration
         /// <param name="document">The document.</param>
         /// <param name="context">The execution context.</param>
         /// <returns>A typed result from invoking the delegate, or the default value of <typeparamref name="T"/> if the conversion fails.</returns>
-        public static T TryInvoke<T>(this DocumentConfig config, IDocument document, IExecutionContext context)
+        public static async Task<T> TryInvokeAsync<T>(this AsyncDocumentConfig config, IDocument document, IExecutionContext context)
         {
-            object value = config(document, context);
-            T result;
-            return context.TryConvert(value, out result) ? result : default(T);
+            object value = await config(document, context);
+            return context.TryConvert(value, out T result) ? result : default(T);
         }
 
         private static string GetErrorDetails(string errorDetails)

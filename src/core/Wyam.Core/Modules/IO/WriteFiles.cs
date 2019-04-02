@@ -317,7 +317,7 @@ namespace Wyam.Core.Modules.IO
                     {
                         using (Stream outputStream = _append ? await output.OpenAppendAsync() : await output.OpenWriteAsync())
                         {
-                            inputStream.CopyTo(outputStream);
+                            await inputStream.CopyToAsync(outputStream);
                             if (!_append)
                             {
                                 outputStream.SetLength(inputStream.Length);

@@ -14,6 +14,7 @@ using Wyam.Common.Modules.Contents;
 using Wyam.Common.Util;
 using Wyam.Core.Documents;
 using Wyam.Core.Meta;
+using System.Threading.Tasks;
 
 namespace Wyam.Core.Modules.Contents
 {
@@ -84,7 +85,7 @@ namespace Wyam.Core.Modules.Contents
         }
 
         /// <inheritdoc />
-        public IEnumerable<IDocument> Execute(IReadOnlyList<IDocument> inputs, IExecutionContext context)
+        public async Task<IEnumerable<IDocument>> ExecuteAsync(IReadOnlyList<IDocument> inputs, IExecutionContext context)
         {
             StringBuilder sb = new StringBuilder();
             sb.Append("<?xml version=\"1.0\" encoding=\"UTF-8\"?><urlset xmlns=\"http://www.sitemaps.org/schemas/sitemap/0.9\">");
@@ -145,7 +146,7 @@ namespace Wyam.Core.Modules.Contents
 
             // Always output the sitemap document, even if it's empty
             sb.Append("</urlset>");
-            return new[] { context.GetDocumentAsync(sb.ToString()).Result };
+            return new[] { await context.GetDocumentAsync(sb.ToString()) };
         }
     }
 }

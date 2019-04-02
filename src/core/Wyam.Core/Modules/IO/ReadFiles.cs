@@ -13,6 +13,7 @@ using Wyam.Common.Util;
 using Wyam.Core.Documents;
 using Wyam.Core.Meta;
 using Wyam.Core.Modules.Control;
+using System.Threading.Tasks;
 
 namespace Wyam.Core.Modules.IO
 {
@@ -39,16 +40,16 @@ namespace Wyam.Core.Modules.IO
     /// <category>Input/Output</category>
     public class ReadFiles : IModule, IAsNewDocuments
     {
-        private readonly ContextConfig _contextPatterns;
-        private readonly DocumentConfig _documentPatterns;
-        private Func<IFile, bool> _predicate = null;
+        private readonly AsyncContextConfig _contextPatterns;
+        private readonly AsyncDocumentConfig _documentPatterns;
+        private Func<IFile, Task<bool>> _predicate = null;
 
         /// <summary>
         /// Reads all files that match the specified globbing patterns and/or absolute paths. This allows you to
         /// specify different patterns and/or paths depending on the context.
         /// </summary>
         /// <param name="patterns">A delegate that returns one or more globbing patterns and/or absolute paths.</param>
-        public ReadFiles(ContextConfig patterns)
+        public ReadFiles(AsyncContextConfig patterns)
         {
             _contextPatterns = patterns ?? throw new ArgumentNullException(nameof(patterns));
         }
@@ -58,7 +59,7 @@ namespace Wyam.Core.Modules.IO
         /// specify different patterns and/or paths depending on the input.
         /// </summary>
         /// <param name="patterns">A delegate that returns one or more globbing patterns and/or absolute paths.</param>
-        public ReadFiles(DocumentConfig patterns)
+        public ReadFiles(AsyncDocumentConfig patterns)
         {
             _documentPatterns = patterns ?? throw new ArgumentNullException(nameof(patterns));
         }
@@ -78,7 +79,7 @@ namespace Wyam.Core.Modules.IO
                 throw new ArgumentNullException(nameof(patterns));
             }
 
-            _contextPatterns = _ => patterns;
+            _contextPatterns = _ => Task.FromResult<object>(patterns);
         }
 
         /// <summary>
@@ -86,56 +87,54 @@ namespace Wyam.Core.Modules.IO
         /// </summary>
         /// <param name="predicate">A predicate that returns <c>true</c> if the file should be read.</param>
         /// <returns>The current module instance.</returns>
-        public ReadFiles Where(Func<IFile, bool> predicate)
+        public ReadFiles Where(Func<IFile, Task<bool>> predicate)
         {
-            Func<IFile, bool> currentPredicate = _predicate;
-            _predicate = currentPredicate == null ? predicate : x => currentPredicate(x) && predicate(x);
+            Func<IFile, Task<bool>> currentPredicate = _predicate;
+            _predicate = currentPredicate == null ? predicate : async x => await currentPredicate(x) && await predicate(x);
             return this;
         }
 
         /// <inheritdoc />
-        public IEnumerable<IDocument> Execute(IReadOnlyList<IDocument> inputs, IExecutionContext context)
+        public async Task<IEnumerable<IDocument>> ExecuteAsync(IReadOnlyList<IDocument> inputs, IExecutionContext context)
         {
             return _contextPatterns != null
-                ? Execute(null, _contextPatterns.Invoke<string[]>(context, "while getting patterns"), context)
-                : inputs.AsParallel().SelectMany(context, input =>
-                    Execute(input, _documentPatterns.Invoke<string[]>(input, context, "while getting patterns"), context));
+                ? await ExecuteAsync(null, await _contextPatterns.InvokeAsync<string[]>(context, "while getting patterns"), context)
+                : await inputs.ParallelSelectManyAsync(context, async input =>
+                    await ExecuteAsync(input, await _documentPatterns.InvokeAsync<string[]>(input, context, "while getting patterns"), context));
         }
 
-        private IEnumerable<IDocument> Execute(IDocument input, string[] patterns, IExecutionContext context)
+        private async Task<IEnumerable<IDocument>> ExecuteAsync(IDocument input, string[] patterns, IExecutionContext context)
         {
             if (patterns != null)
             {
-                return context.FileSystem
-                    .GetInputFilesAsync(patterns).Result
-                    .AsParallel()
-                    .Where(file => _predicate == null || _predicate(file))
-                    .Select(file =>
+                IEnumerable<IFile> files = await context.FileSystem.GetInputFilesAsync(patterns);
+                files = await files.ParallelWhereAsync(async file => _predicate == null || await _predicate(file));
+                return await files.ParallelSelectAsync(async file =>
+                {
+                    Trace.Verbose($"Read file {file.Path.FullPath}");
+                    DirectoryPath inputPath = await context.FileSystem.GetContainingInputPathAsync(file.Path);
+                    FilePath relativePath = inputPath?.GetRelativePath(file.Path) ?? file.Path.FileName;
+                    FilePath fileNameWithoutExtension = file.Path.FileNameWithoutExtension;
+                    return context.GetDocument(input, file.Path, await file.OpenReadAsync(), new MetadataItems
                     {
-                        Trace.Verbose($"Read file {file.Path.FullPath}");
-                        DirectoryPath inputPath = context.FileSystem.GetContainingInputPathAsync(file.Path).Result;
-                        FilePath relativePath = inputPath?.GetRelativePath(file.Path) ?? file.Path.FileName;
-                        FilePath fileNameWithoutExtension = file.Path.FileNameWithoutExtension;
-                        return context.GetDocument(input, file.Path, file.OpenReadAsync().Result, new MetadataItems
+                        { Keys.SourceFileRoot, inputPath ?? file.Path.Directory },
+                        { Keys.SourceFileBase, fileNameWithoutExtension },
+                        { Keys.SourceFileExt, file.Path.Extension },
+                        { Keys.SourceFileName, file.Path.FileName },
+                        { Keys.SourceFileDir, file.Path.Directory },
+                        { Keys.SourceFilePath, file.Path },
                         {
-                            { Keys.SourceFileRoot, inputPath ?? file.Path.Directory },
-                            { Keys.SourceFileBase, fileNameWithoutExtension },
-                            { Keys.SourceFileExt, file.Path.Extension },
-                            { Keys.SourceFileName, file.Path.FileName },
-                            { Keys.SourceFileDir, file.Path.Directory },
-                            { Keys.SourceFilePath, file.Path },
-                            {
-                                Keys.SourceFilePathBase, fileNameWithoutExtension == null
-                                    ? null : file.Path.Directory.CombineFile(file.Path.FileNameWithoutExtension)
-                            },
-                            { Keys.RelativeFilePath, relativePath },
-                            {
-                                Keys.RelativeFilePathBase, fileNameWithoutExtension == null
-                                    ? null : relativePath.Directory.CombineFile(file.Path.FileNameWithoutExtension)
-                            },
-                            { Keys.RelativeFileDir, relativePath.Directory }
-                        });
+                            Keys.SourceFilePathBase, fileNameWithoutExtension == null
+                                ? null : file.Path.Directory.CombineFile(file.Path.FileNameWithoutExtension)
+                        },
+                        { Keys.RelativeFilePath, relativePath },
+                        {
+                            Keys.RelativeFilePathBase, fileNameWithoutExtension == null
+                                ? null : relativePath.Directory.CombineFile(file.Path.FileNameWithoutExtension)
+                        },
+                        { Keys.RelativeFileDir, relativePath.Directory }
                     });
+                });
             }
             return Array.Empty<IDocument>();
         }

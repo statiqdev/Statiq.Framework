@@ -6,6 +6,7 @@ using Wyam.Common.Documents;
 using Wyam.Common.Modules;
 using Wyam.Common.Execution;
 using Wyam.Common.Util;
+using System.Threading.Tasks;
 
 namespace Wyam.Core.Modules.Control
 {
@@ -150,7 +151,7 @@ namespace Wyam.Core.Modules.Control
         }
 
         /// <inheritdoc />
-        public IEnumerable<IDocument> Execute(IReadOnlyList<IDocument> inputs, IExecutionContext context)
+        public Task<IEnumerable<IDocument>> ExecuteAsync(IReadOnlyList<IDocument> inputs, IExecutionContext context)
         {
             IEnumerable<IDocument> documents;
             if (_documentDocuments != null)
@@ -171,7 +172,7 @@ namespace Wyam.Core.Modules.Control
             {
                 documents = documents.Where(context, x => _predicate(x, context));
             }
-            return documents;
+            return Task.FromResult(documents);
         }
     }
 }

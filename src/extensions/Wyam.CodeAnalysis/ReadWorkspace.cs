@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 using Buildalyzer;
 using Microsoft.CodeAnalysis;
 using Wyam.Common.Configuration;
@@ -12,6 +13,7 @@ using Wyam.Common.IO;
 using Wyam.Common.Meta;
 using Wyam.Common.Modules;
 using Wyam.Common.Tracing;
+using Wyam.Common.Util;
 
 namespace Wyam.CodeAnalysis
 {
@@ -104,53 +106,55 @@ namespace Wyam.CodeAnalysis
         }
 
         /// <inheritdoc />
-        public IEnumerable<IDocument> Execute(IReadOnlyList<IDocument> inputs, IExecutionContext context)
+        public async Task<IEnumerable<IDocument>> ExecuteAsync(IReadOnlyList<IDocument> inputs, IExecutionContext context)
         {
-            return _path != null
-                ? Execute(null, _path, context)
-                : inputs.AsParallel().SelectMany(input =>
-                    Execute(input, _pathDelegate.Invoke<FilePath>(input, context), context));
+            if (_path != null)
+            {
+                return await ExecuteAsync(null, _path, context);
+            }
+
+            return await inputs.ParallelSelectManyAsync(async input =>
+                await ExecuteAsync(input, _pathDelegate.Invoke<FilePath>(input, context), context));
         }
 
-        private IEnumerable<IDocument> Execute(IDocument input, FilePath projectPath, IExecutionContext context)
+        private async Task<IEnumerable<IDocument>> ExecuteAsync(IDocument input, FilePath projectPath, IExecutionContext context)
         {
-            return context.TraceExceptions<IEnumerable<IDocument>>(input, i =>
+            return await context.TraceExceptionsAsync(input, async _ =>
             {
                 if (projectPath != null)
                 {
-                    IFile projectFile = context.FileSystem.GetInputFileAsync(projectPath).Result;
-                    return GetProjects(context, projectFile)
-                        .AsParallel()
+                    IFile projectFile = await context.FileSystem.GetInputFileAsync(projectPath);
+                    return await GetProjects(context, projectFile)
                         .Where(project => project != null && (_whereProject == null || _whereProject(project.Name)))
-                        .SelectMany(project =>
+                        .ParallelSelectManyAsync(async project =>
                         {
                             Common.Tracing.Trace.Verbose("Read project {0}", project.Name);
                             string assemblyName = project.AssemblyName;
-                            return project.Documents
-                                .AsParallel()
+                            IEnumerable<IFile> documentPaths = await project.Documents
                                 .Where(x => !string.IsNullOrWhiteSpace(x.FilePath))
-                                .Select(x => context.FileSystem.GetInputFileAsync(x.FilePath).Result)
-                                .Where(x => x.GetExistsAsync().Result && (_whereFile == null || _whereFile(x)) && (_extensions?.Contains(x.Path.Extension) != false))
-                                .Select(file =>
+                                .SelectAsync(async x => await context.FileSystem.GetInputFileAsync(x.FilePath));
+                            documentPaths = await documentPaths
+                                .WhereAsync(async x => await x.GetExistsAsync() && (_whereFile == null || _whereFile(x)) && (_extensions?.Contains(x.Path.Extension) != false));
+                            return await documentPaths.SelectAsync(async file =>
+                            {
+                                Common.Tracing.Trace.Verbose($"Read file {file.Path.FullPath}");
+                                DirectoryPath inputPath = await context.FileSystem.GetContainingInputPathAsync(file.Path);
+                                FilePath relativePath = inputPath?.GetRelativePath(file.Path) ?? projectFile.Path.Directory.GetRelativePath(file.Path);
+                                return context.GetDocument(file.Path, await file.OpenReadAsync(), new MetadataItems
                                 {
-                                    Common.Tracing.Trace.Verbose($"Read file {file.Path.FullPath}");
-                                    DirectoryPath inputPath = context.FileSystem.GetContainingInputPathAsync(file.Path).Result;
-                                    FilePath relativePath = inputPath?.GetRelativePath(file.Path) ?? projectFile.Path.Directory.GetRelativePath(file.Path);
-                                    return context.GetDocument(file.Path, file.OpenReadAsync().Result, new MetadataItems
-                                    {
-                                        { CodeAnalysisKeys.AssemblyName, assemblyName },
-                                        { Keys.SourceFileRoot, inputPath ?? file.Path.Directory },
-                                        { Keys.SourceFileBase, file.Path.FileNameWithoutExtension },
-                                        { Keys.SourceFileExt, file.Path.Extension },
-                                        { Keys.SourceFileName, file.Path.FileName },
-                                        { Keys.SourceFileDir, file.Path.Directory },
-                                        { Keys.SourceFilePath, file.Path },
-                                        { Keys.SourceFilePathBase, file.Path.Directory.CombineFile(file.Path.FileNameWithoutExtension) },
-                                        { Keys.RelativeFilePath, relativePath },
-                                        { Keys.RelativeFilePathBase, relativePath.Directory.CombineFile(file.Path.FileNameWithoutExtension) },
-                                        { Keys.RelativeFileDir, relativePath.Directory }
-                                    });
+                                    { CodeAnalysisKeys.AssemblyName, assemblyName },
+                                    { Keys.SourceFileRoot, inputPath ?? file.Path.Directory },
+                                    { Keys.SourceFileBase, file.Path.FileNameWithoutExtension },
+                                    { Keys.SourceFileExt, file.Path.Extension },
+                                    { Keys.SourceFileName, file.Path.FileName },
+                                    { Keys.SourceFileDir, file.Path.Directory },
+                                    { Keys.SourceFilePath, file.Path },
+                                    { Keys.SourceFilePathBase, file.Path.Directory.CombineFile(file.Path.FileNameWithoutExtension) },
+                                    { Keys.RelativeFilePath, relativePath },
+                                    { Keys.RelativeFilePathBase, relativePath.Directory.CombineFile(file.Path.FileNameWithoutExtension) },
+                                    { Keys.RelativeFileDir, relativePath.Directory }
                                 });
+                            });
                         });
                 }
                 return Array.Empty<IDocument>();

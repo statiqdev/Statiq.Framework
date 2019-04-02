@@ -58,22 +58,22 @@ namespace Wyam.Core.Modules.Control
         }
 
         /// <inheritdoc />
-        public override IEnumerable<IDocument> Execute(IReadOnlyList<IDocument> inputs, IExecutionContext context)
+        public override async Task<IEnumerable<IDocument>> ExecuteAsync(IReadOnlyList<IDocument> inputs, IExecutionContext context)
         {
-            if (((IModuleList)this).Count > 0)
+            if (Count > 0)
             {
                 // Execute the modules for each input document
                 if (_forEachDocument)
                 {
-                    return inputs.SelectMany(context, input =>
-                        context.Execute(this, new[] { input })
-                            .Select(result => context.GetDocumentAsync(input, result.Content, result.Metadata).Result));
+                    return await inputs.SelectManyAsync(context, async input =>
+                        await (await context.ExecuteAsync(this, new[] { input }))
+                            .SelectAsync(async result => await context.GetDocumentAsync(input, result.Content, result.Metadata)));
                 }
 
                 // Execute the modules once and apply to each input document
-                List<IDocument> results = context.Execute(this).ToList();
-                return inputs.SelectMany(context, input =>
-                    results.Select(result => context.GetDocumentAsync(input, result.Content, result.Metadata).Result));
+                List<IDocument> results = (await context.ExecuteAsync(this)).ToList();
+                return await inputs.SelectManyAsync(context, async input =>
+                    await results.SelectAsync(async result => await context.GetDocumentAsync(input, result.Content, result.Metadata)));
             }
 
             return inputs;

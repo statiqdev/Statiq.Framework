@@ -102,9 +102,9 @@ namespace Wyam.AmazonWebServices
         }
 
         /// <inheritdoc />
-        public IEnumerable<IDocument> Execute(IReadOnlyList<IDocument> inputs, IExecutionContext context)
+        public async Task<IEnumerable<IDocument>> ExecuteAsync(IReadOnlyList<IDocument> inputs, IExecutionContext context)
         {
-            Stream contentStream = context.GetContentStreamAsync().Result;
+            Stream contentStream = await context.GetContentStreamAsync();
             using (TextWriter textWriter = new StreamWriter(contentStream))
             {
                 using (JsonWriter writer = new JsonTextWriter(textWriter))

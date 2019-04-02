@@ -52,9 +52,9 @@ namespace Wyam.Core.Modules.Contents
         /// Returns a single document containing the concatenated content of all input documents with an optional delimiter and configurable metadata options
         /// </summary>
         /// <returns>A single document in a list</returns>
-        public IEnumerable<IDocument> Execute(IReadOnlyList<IDocument> inputs, IExecutionContext context)
+        public async Task<IEnumerable<IDocument>> ExecuteAsync(IReadOnlyList<IDocument> inputs, IExecutionContext context)
         {
-            Stream contentStream = context.GetContentStreamAsync().Result;
+            Stream contentStream = await context.GetContentStreamAsync();
             if (inputs == null || inputs.Count < 1)
             {
                 return new[] { context.GetDocument() };
@@ -75,12 +75,12 @@ namespace Wyam.Core.Modules.Contents
                 }
                 else
                 {
-                    contentStream.Write(delimeterBytes, 0, delimeterBytes.Length);
+                    await contentStream.WriteAsync(delimeterBytes, 0, delimeterBytes.Length);
                 }
 
                 using (Stream inputStream = document.GetStream())
                 {
-                    inputStream.CopyTo(contentStream);
+                    await inputStream.CopyToAsync(contentStream);
                 }
             }
 
@@ -103,14 +103,11 @@ namespace Wyam.Core.Modules.Contents
                     return inputs.Last().Metadata.ToList();
 
                 case JoinedMetadata.AllWithFirstDuplicates:
-                    {
-                        return inputs.SelectMany(a => a.Metadata).GroupBy(b => b.Key).ToDictionary(g => g.Key, g => g.First().Value).ToArray();
-                    }
+                    return inputs.SelectMany(a => a.Metadata).GroupBy(b => b.Key).ToDictionary(g => g.Key, g => g.First().Value).ToArray();
 
                 case JoinedMetadata.AllWithLastDuplicates:
-                    {
-                        return inputs.SelectMany(a => a.Metadata).GroupBy(b => b.Key).ToDictionary(g => g.Key, g => g.Last().Value).ToArray();
-                    }
+                    return inputs.SelectMany(a => a.Metadata).GroupBy(b => b.Key).ToDictionary(g => g.Key, g => g.Last().Value).ToArray();
+
                 case JoinedMetadata.DefaultOnly:
                     return new List<KeyValuePair<string, object>>();
 

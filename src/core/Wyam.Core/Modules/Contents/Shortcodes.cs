@@ -58,12 +58,12 @@ namespace Wyam.Core.Modules.Contents
         }
 
         /// <inheritdoc />
-        public IEnumerable<IDocument> Execute(IReadOnlyList<IDocument> inputs, IExecutionContext context)
+        public async Task<IEnumerable<IDocument>> ExecuteAsync(IReadOnlyList<IDocument> inputs, IExecutionContext context)
         {
-            return inputs.AsParallel().Select(context, input =>
+            return await inputs.ParallelSelectAsync(context, async input =>
             {
                 Stream stream = input.GetStream();
-                IDocument result = ProcessShortcodesAsync(stream, input, context).Result;
+                IDocument result = await ProcessShortcodesAsync(stream, input, context);
                 if (result != null)
                 {
                     return result;
@@ -101,7 +101,7 @@ namespace Wyam.Core.Modules.Contents
                     .ToDictionary(x => x, x => context.Shortcodes.CreateInstance(x), StringComparer.OrdinalIgnoreCase);
 
             // Execute each of the shortcodes in order
-            InsertingStreamLocation[] insertingLocations = await locations
+            InsertingStreamLocation[] insertingLocations = (await locations
                 .SelectAsync(async x =>
                 {
                     // Execute the shortcode
@@ -140,8 +140,8 @@ namespace Wyam.Core.Modules.Contents
                     }
 
                     return new InsertingStreamLocation(x.FirstIndex, x.LastIndex, null);
-                })
-                .ToArrayAsync();
+                }))
+                .ToArray();
 
             // Dispose any shortcodes that implement IDisposable
             foreach (IDisposable disposableShortcode

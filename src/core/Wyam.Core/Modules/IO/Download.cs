@@ -17,6 +17,7 @@ using Wyam.Common.Tracing;
 using Wyam.Core.Documents;
 using Wyam.Core.Meta;
 using Wyam.Core.Modules.Control;
+using Wyam.Common.Util;
 
 namespace Wyam.Core.Modules.IO
 {
@@ -112,16 +113,13 @@ namespace Wyam.Core.Modules.IO
         }
 
         /// <inheritdoc />
-        public IEnumerable<IDocument> Execute(IReadOnlyList<IDocument> inputs, IExecutionContext context)
+        public async Task<IEnumerable<IDocument>> ExecuteAsync(IReadOnlyList<IDocument> inputs, IExecutionContext context)
         {
             List<DownloadResponse> responses = _cachedResponses;
             if (responses == null)
             {
-                List<Task<DownloadResponse>> tasks = _requests.Select(x => GetResponseAsync(x, context)).ToList();
-                Task.WhenAll(tasks).Wait();
-                responses = tasks
-                    .Where(x => !x.IsFaulted)
-                    .Select(t => t.Result)
+                responses =
+                    (await _requests.ParallelSelectAsync(async x => await GetResponseAsync(x, context)))
                     .Where(x => x != null)
                     .ToList();
                 if (_cacheResponses)
@@ -129,7 +127,7 @@ namespace Wyam.Core.Modules.IO
                     _cachedResponses = responses;
                 }
             }
-            return responses.AsParallel().Select(r =>
+            return responses.Select(r =>
             {
                 string uri = r.Uri.ToString();
                 return context.GetDocument(
@@ -183,7 +181,7 @@ namespace Wyam.Core.Modules.IO
                         {
                             Stream result = await content.ReadAsStreamAsync().ConfigureAwait(false);
                             MemoryStream mem = new MemoryStream();
-                            result.CopyTo(mem);
+                            await result.CopyToAsync(mem);
                             Dictionary<string, string> headers = content.Headers.ToDictionary(
                                 x => CultureInfo.CurrentCulture.TextInfo.ToTitleCase(x.Key), x => string.Join(",", x.Value));
                             return new DownloadResponse(request.Uri, mem, headers);
