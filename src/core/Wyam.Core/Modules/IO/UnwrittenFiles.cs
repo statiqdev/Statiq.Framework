@@ -2,10 +2,11 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 using Wyam.Common.Configuration;
 using Wyam.Common.Documents;
-using Wyam.Common.IO;
 using Wyam.Common.Execution;
+using Wyam.Common.IO;
 using Wyam.Common.Util;
 
 namespace Wyam.Core.Modules.IO
@@ -35,7 +36,7 @@ namespace Wyam.Core.Modules.IO
         /// location (including file name) or a path relative to the output folder.
         /// </summary>
         /// <param name="path">A delegate that returns a <c>string</c> with the desired path.</param>
-        public UnwrittenFiles(DocumentConfig path)
+        public UnwrittenFiles(AsyncDocumentConfig path)
             : base(path)
         {
         }
@@ -61,28 +62,28 @@ namespace Wyam.Core.Modules.IO
         }
 
         /// <inheritdoc />
-        public override IEnumerable<IDocument> Execute(IReadOnlyList<IDocument> inputs, IExecutionContext context)
+        public override async Task<IEnumerable<IDocument>> ExecuteAsync(IReadOnlyList<IDocument> inputs, IExecutionContext context)
         {
-            return inputs
-                .AsParallel()
-                .Select(context, input =>
+            return (await inputs
+                .ParallelSelectAsync(context, async input =>
                 {
-                    if (ShouldProcess(input, context))
+                    if (await ShouldProcessAsync(input, context))
                     {
-                        FilePath outputPath = GetOutputPath(input, context);
-                        IFile output = outputPath != null ? context.FileSystem.GetOutputFileAsync(outputPath).Result : null;
+                        FilePath outputPath = await GetOutputPathAsync(input, context);
+                        IFile output = outputPath != null ? await context.FileSystem.GetOutputFileAsync(outputPath) : null;
                         if (output != null)
                         {
-                            IDirectory outputDirectory = output.GetDirectoryAsync().Result;
-                            if ((outputDirectory.Path.FullPath != "." && outputDirectory.GetExistsAsync().Result && output.GetExistsAsync().Result)
-                                || (outputDirectory.Path.FullPath == "." && output.GetExistsAsync().Result))
+                            IDirectory outputDirectory = await output.GetDirectoryAsync();
+                            bool outputExists = await output.GetExistsAsync();
+                            if ((outputDirectory.Path.FullPath != "." && await outputDirectory.GetExistsAsync() && outputExists)
+                                || (outputDirectory.Path.FullPath == "." && outputExists))
                             {
                                 return null;
                             }
                         }
                     }
                     return input;
-                })
+                }))
                 .Where(x => x != null);
         }
     }

@@ -58,12 +58,12 @@ namespace Wyam.Core.Modules.IO
     /// <category>Input/Output</category>
     public class WriteFiles : IModule
     {
-        private readonly DocumentConfig _path;
+        private readonly AsyncDocumentConfig _path;
         private readonly bool _warnOnWriteMetadata;
         private bool _useWriteMetadata = true;
         private bool _ignoreEmptyContent = true;
         private bool _append;
-        private Func<IDocument, IExecutionContext, bool> _predicate = null;
+        private Func<IDocument, IExecutionContext, Task<bool>> _predicate = null;
         private bool _onlyMetadata = false;
 
         /// <summary>
@@ -72,7 +72,7 @@ namespace Wyam.Core.Modules.IO
         /// location (including file name) or a path relative to the output folder.
         /// </summary>
         /// <param name="path">A delegate that returns a <see cref="FilePath"/> with the desired path.</param>
-        public WriteFiles(DocumentConfig path)
+        public WriteFiles(AsyncDocumentConfig path)
         {
             _path = path ?? throw new ArgumentNullException(nameof(path));
             _warnOnWriteMetadata = true;
@@ -94,7 +94,7 @@ namespace Wyam.Core.Modules.IO
             _path = (x, y) =>
             {
                 FilePath fileRelative = x.FilePath(Keys.RelativeFilePath);
-                return fileRelative?.ChangeExtension(extension);
+                return Task.FromResult<object>(fileRelative?.ChangeExtension(extension));
             };
             _warnOnWriteMetadata = true;
         }
@@ -106,7 +106,7 @@ namespace Wyam.Core.Modules.IO
         /// </summary>
         public WriteFiles()
         {
-            _path = (x, y) => x.FilePath(Keys.RelativeFilePath);
+            _path = (x, y) => Task.FromResult<object>(x.FilePath(Keys.RelativeFilePath));
         }
 
         /// <summary>
@@ -168,12 +168,17 @@ namespace Wyam.Core.Modules.IO
         /// </summary>
         /// <param name="predicate">A predicate that returns <c>true</c> if the file should be written.</param>
         /// <returns>The current module instance.</returns>
-        public WriteFiles Where(DocumentConfig predicate)
+        public WriteFiles Where(AsyncDocumentConfig predicate)
         {
-            Func<IDocument, IExecutionContext, bool> currentPredicate = _predicate;
-            _predicate = currentPredicate == null
-                ? (Func<IDocument, IExecutionContext, bool>)predicate.Invoke<bool>
-                : ((x, c) => currentPredicate(x, c) && predicate.Invoke<bool>(x, c));
+            Func<IDocument, IExecutionContext, Task<bool>> currentPredicate = _predicate;
+            if (currentPredicate == null)
+            {
+                _predicate = predicate.InvokeAsync<bool>;
+            }
+            else
+            {
+                _predicate = async (doc, ctx) => await currentPredicate(doc, ctx) && await predicate.InvokeAsync<bool>(doc, ctx);
+            }
             return this;
         }
 
@@ -183,10 +188,8 @@ namespace Wyam.Core.Modules.IO
         /// <param name="input">The input document to check/</param>
         /// <param name="context">The execution context.</param>
         /// <returns><c>true</c> if the input document should be processed, <c>false</c> otherwise.</returns>
-        protected bool ShouldProcess(IDocument input, IExecutionContext context)
-        {
-            return _predicate == null || _predicate(input, context);
-        }
+        protected async Task<bool> ShouldProcessAsync(IDocument input, IExecutionContext context) =>
+            _predicate == null || await _predicate(input, context);
 
         /// <summary>
         /// Gets the output path of the input document.
@@ -194,7 +197,7 @@ namespace Wyam.Core.Modules.IO
         /// <param name="input">The input document.</param>
         /// <param name="context">The execution context.</param>
         /// <returns>The outout path.</returns>
-        protected FilePath GetOutputPath(IDocument input, IExecutionContext context)
+        protected async Task<FilePath> GetOutputPathAsync(IDocument input, IExecutionContext context)
         {
             FilePath path = null;
 
@@ -240,19 +243,19 @@ namespace Wyam.Core.Modules.IO
             }
 
             // Fallback to the default behavior function
-            return path ?? _path.Invoke<FilePath>(input, context, "while getting path");
+            return path ?? await _path.InvokeAsync<FilePath>(input, context, "while getting path");
         }
 
         /// <inheritdoc />
-        public virtual IEnumerable<IDocument> Execute(IReadOnlyList<IDocument> inputs, IExecutionContext context)
+        public virtual async Task<IEnumerable<IDocument>> ExecuteAsync(IReadOnlyList<IDocument> inputs, IExecutionContext context)
         {
             // Get the output file path for each file in sequence and set up action chains
             // Value = input source string(s) (for reporting a warning if not appending), write action
             ConcurrentBag<IDocument> outputs = new ConcurrentBag<IDocument>();
-            Dictionary<FilePath, Tuple<List<string>, Action>> writesBySource = new Dictionary<FilePath, Tuple<List<string>, Action>>();
-            context.ForEach(inputs, input =>
+            Dictionary<FilePath, Tuple<List<string>, Func<Task>>> writesBySource = new Dictionary<FilePath, Tuple<List<string>, Func<Task>>>();
+            await context.ForEachAsync(inputs, async input =>
             {
-                FilePath outputPath = ShouldProcess(input, context) ? GetOutputPath(input, context) : null;
+                FilePath outputPath = await ShouldProcessAsync(input, context) ? await GetOutputPathAsync(input, context) : null;
                 if (outputPath == null)
                 {
                     // No output path or failed the predicate so just pass the input document through
@@ -260,26 +263,25 @@ namespace Wyam.Core.Modules.IO
                 }
                 else
                 {
-                    Tuple<List<string>, Action> value;
-                    if (writesBySource.TryGetValue(outputPath, out value))
+                    if (writesBySource.TryGetValue(outputPath, out Tuple<List<string>, Func<Task>> value))
                     {
                         // This output source was already seen so nest the previous write action in a new one
                         value.Item1.Add(input.SourceString());
-                        Action previousWrite = value.Item2;
-                        value = new Tuple<List<string>, Action>(
+                        Func<Task> previousWrite = value.Item2;
+                        value = new Tuple<List<string>, Func<Task>>(
                             value.Item1,
-                            () =>
+                            async () =>
                             {
                                 // Complete the previous write, then do the next one
-                                previousWrite();
-                                outputs.Add(WriteAsync(input, context, outputPath).Result);
+                                await previousWrite();
+                                outputs.Add(await WriteAsync(input, context, outputPath));
                             });
                     }
                     else
                     {
-                        value = new Tuple<List<string>, Action>(
+                        value = new Tuple<List<string>, Func<Task>>(
                             new List<string> { input.SourceString() },
-                            () => outputs.Add(WriteAsync(input, context, outputPath).Result));
+                            async () => outputs.Add(await WriteAsync(input, context, outputPath)));
                     }
                     writesBySource[outputPath] = value;
                 }
@@ -288,7 +290,7 @@ namespace Wyam.Core.Modules.IO
             // Display a warning for any duplicated outputs if not appending
             if (!_append)
             {
-                foreach (KeyValuePair<FilePath, Tuple<List<string>, Action>> kvp in writesBySource.Where(x => x.Value.Item1.Count > 1))
+                foreach (KeyValuePair<FilePath, Tuple<List<string>, Func<Task>>> kvp in writesBySource.Where(x => x.Value.Item1.Count > 1))
                 {
                     string inputSources = Environment.NewLine + "  " + string.Join(Environment.NewLine + "  ", kvp.Value.Item1);
                     Trace.Warning($"Multiple documents output to {kvp.Key} (this probably wasn't intended):{inputSources}");
@@ -296,7 +298,7 @@ namespace Wyam.Core.Modules.IO
             }
 
             // Run the write actions in parallel
-            Parallel.Invoke(writesBySource.Values.Select(x => x.Item2).ToArray());
+            await writesBySource.Values.ParallelForEachAsync(async x => await x.Item2());
 
             // Aggregate and return the results
             return outputs;
