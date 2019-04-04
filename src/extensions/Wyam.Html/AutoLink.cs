@@ -42,7 +42,7 @@ namespace Wyam.Html
     public class AutoLink : IModule
     {
         // Key = text to replace, Value = url
-        private readonly ConfigHelper<IDictionary<string, string>> _links;
+        private readonly DocumentConfig<IDictionary<string, string>> _links;
         private readonly IDictionary<string, string> _extraLinks = new Dictionary<string, string>();
         private string _querySelector = "p";
         private bool _matchOnlyWholeWord = false;
@@ -53,31 +53,8 @@ namespace Wyam.Html
         /// Creates the module without any initial mappings. Use <c>AddLink(...)</c> to add mappings with fluent methods.
         /// </summary>
         public AutoLink()
+            : this(new Dictionary<string, string>())
         {
-            _links = new ConfigHelper<IDictionary<string, string>>(new Dictionary<string, string>());
-        }
-
-        /// <summary>
-        /// Specifies a dictionary of link mappings. The keys specify strings to search for in the HTML content
-        /// and the values specify what should be placed in the <c>href</c> attribute. This uses the same
-        /// link mappings for all input documents.
-        /// </summary>
-        /// <param name="links">A dictionary of link mappings.</param>
-        public AutoLink(IDictionary<string, string> links)
-        {
-            _links = new ConfigHelper<IDictionary<string, string>>(links ?? new Dictionary<string, string>());
-        }
-
-        /// <summary>
-        /// Specifies a dictionary of link mappings given an <see cref="IExecutionContext"/>. The return value is expected
-        /// to be a <c>IDictionary&lt;string, string&gt;</c>. The keys specify strings to search for in the HTML content
-        /// and the values specify what should be placed in the <c>href</c> attribute. This uses the same
-        /// link mappings for all input documents.
-        /// </summary>
-        /// <param name="links">A delegate that returns a dictionary of link mappings.</param>
-        public AutoLink(ContextConfig links)
-        {
-            _links = new ConfigHelper<IDictionary<string, string>>(links, new Dictionary<string, string>());
         }
 
         /// <summary>
@@ -87,9 +64,9 @@ namespace Wyam.Html
         /// to specify a different mapping for each input document.
         /// </summary>
         /// <param name="links">A delegate that returns a dictionary of link mappings.</param>
-        public AutoLink(DocumentConfig links)
+        public AutoLink(DocumentConfig<IDictionary<string, string>> links)
         {
-            _links = new ConfigHelper<IDictionary<string, string>>(links, new Dictionary<string, string>());
+            _links = links;
         }
 
         /// <summary>
@@ -165,15 +142,17 @@ namespace Wyam.Html
         }
 
         /// <inheritdoc />
-        public IEnumerable<Common.Documents.IDocument> Execute(IReadOnlyList<Common.Documents.IDocument> inputs, IExecutionContext context)
+        public async Task<IEnumerable<Common.Documents.IDocument>> ExecuteAsync(IReadOnlyList<Common.Documents.IDocument> inputs, IExecutionContext context)
         {
             HtmlParser parser = new HtmlParser();
-            return inputs.AsParallel().Select(context, input =>
+            return await inputs.ParallelSelectAsync(context, PerformReplacementsAsync);
+
+            async Task<Common.Documents.IDocument> PerformReplacementsAsync(Common.Documents.IDocument input)
             {
                 try
                 {
                     // Get the links and HTML decode the keys (if they're encoded) since the text nodes are decoded
-                    IDictionary<string, string> links = _links.GetValue(input, context, v => _extraLinks
+                    IDictionary<string, string> links = await _links.GetValueAsync(input, context, v => _extraLinks
                         .Concat(v.Where(l => !_extraLinks.ContainsKey(l.Key)))
                         .Where(x => !string.IsNullOrWhiteSpace(x.Value))
                         .ToDictionary(z => WebUtility.HtmlDecode(z.Key), z => $"<a href=\"{z.Value}\">{z.Key}</a>"));
@@ -183,7 +162,7 @@ namespace Wyam.Html
                     IHtmlDocument htmlDocument;
                     using (Stream stream = input.GetStream())
                     {
-                        htmlDocument = parser.Parse(stream);
+                        htmlDocument = await parser.ParseAsync(stream);
                     }
                     foreach (IElement element in htmlDocument.QuerySelectorAll(_querySelector).Where(t => !t.Ancestors<IHtmlAnchorElement>().Any()))
                     {
@@ -206,7 +185,7 @@ namespace Wyam.Html
                             replacement.Key.Replace(parser.ParseFragment(replacement.Value, replacement.Key.ParentElement).ToArray());
                         }
 
-                        Stream contentStream = context.GetContentStreamAsync().Result;
+                        Stream contentStream = await context.GetContentStreamAsync();
                         using (StreamWriter writer = contentStream.GetWriter())
                         {
                             htmlDocument.ToHtml(writer, ProcessingInstructionFormatter.Instance);
@@ -214,14 +193,14 @@ namespace Wyam.Html
                             return context.GetDocument(input, contentStream);
                         }
                     }
-                    return input;
                 }
                 catch (Exception ex)
                 {
                     Trace.Warning("Exception while parsing HTML for {0}: {1}", input.SourceString(), ex.Message);
-                    return input;
                 }
-            });
+
+                return input;
+            }
         }
 
         private bool ReplaceStrings(IText textNode, IDictionary<string, string> map, out string newText)

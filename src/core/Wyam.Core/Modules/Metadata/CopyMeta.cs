@@ -1,9 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using Wyam.Common.Documents;
-using Wyam.Common.Modules;
 using Wyam.Common.Execution;
+using Wyam.Common.Modules;
 using Wyam.Common.Util;
 
 namespace Wyam.Core.Modules.Metadata
@@ -55,9 +56,12 @@ namespace Wyam.Core.Modules.Metadata
         }
 
         /// <inheritdoc />
-        public IEnumerable<IDocument> Execute(IReadOnlyList<IDocument> inputs, IExecutionContext context)
+        public Task<IEnumerable<IDocument>> ExecuteAsync(IReadOnlyList<IDocument> inputs, IExecutionContext context)
         {
-            return inputs.AsParallel().SelectMany(context, input =>
+            return Task.FromResult<IEnumerable<IDocument>>(
+                inputs.AsParallel().SelectMany(context, CopyMetaSelector));
+
+            IEnumerable<IDocument> CopyMetaSelector(IDocument input)
             {
                 if (input.TryGetValue(_fromKey, out object existingValue))
                 {
@@ -84,7 +88,7 @@ namespace Wyam.Core.Modules.Metadata
                 {
                     return new[] { input };
                 }
-            });
+            }
         }
     }
 }

@@ -409,7 +409,7 @@ namespace Wyam.CodeAnalysis
         private FilePath DefaultWritePath(IMetadata metadata, DirectoryPath prefix)
         {
             IDocument namespaceDocument = metadata.Document(CodeAnalysisKeys.ContainingNamespace);
-            FilePath writePath = null;
+            FilePath writePath;
 
             if (metadata.String(CodeAnalysisKeys.Kind) == nameof(SymbolKind.Assembly))
             {
@@ -489,30 +489,42 @@ namespace Wyam.CodeAnalysis
 
         private Compilation AddSourceFiles(IReadOnlyList<IDocument> inputs, IExecutionContext context, Compilation compilation)
         {
+            ConcurrentBag<SyntaxTree> syntaxTrees = new ConcurrentBag<SyntaxTree>();
             if (_inputDocuments)
             {
                 // Get syntax trees (supply path so that XML doc includes can be resolved)
-                ConcurrentBag<SyntaxTree> syntaxTrees = new ConcurrentBag<SyntaxTree>();
-                context.ParallelForEach(inputs, input =>
-                {
-                    using (Stream stream = input.GetStream())
-                    {
-                        SourceText sourceText = SourceText.From(stream);
-                        syntaxTrees.Add(CSharpSyntaxTree.ParseText(
-                            sourceText,
-                            path: input.String(Keys.SourceFilePath, string.Empty)));
-                    }
-                });
+                context.ParallelForEach(inputs, AddSyntaxTrees);
                 compilation = compilation.AddSyntaxTrees(syntaxTrees);
             }
             return compilation;
+
+            void AddSyntaxTrees(IDocument input)
+            {
+                using (Stream stream = input.GetStream())
+                {
+                    SourceText sourceText = SourceText.From(stream);
+                    syntaxTrees.Add(CSharpSyntaxTree.ParseText(
+                        sourceText,
+                        path: input.String(Keys.SourceFilePath, string.Empty)));
+                }
+            }
         }
 
         private async Task<Compilation> AddAssemblyReferencesAsync(IExecutionContext context, List<ISymbol> symbols, Compilation compilation)
         {
             IEnumerable<IFile> assemblyFiles = await context.FileSystem.GetInputFilesAsync(_assemblyGlobs);
             assemblyFiles = await assemblyFiles.WhereAsync(async x => (x.Path.Extension == ".dll" || x.Path.Extension == ".exe") && await x.GetExistsAsync());
-            MetadataReference[] assemblyReferences = (await assemblyFiles.SelectAsync(async assemblyFile =>
+            MetadataReference[] assemblyReferences = (await assemblyFiles.SelectAsync(CreateMetadataReferences)).ToArray();
+            if (assemblyReferences.Length > 0)
+            {
+                compilation = compilation.AddReferences(assemblyReferences);
+                symbols.AddRange(assemblyReferences
+                    .Select(x => (IAssemblySymbol)compilation.GetAssemblyOrModuleSymbol(x))
+                    .Select(x => _assemblySymbols ? x : (ISymbol)x.GlobalNamespace));
+            }
+            return compilation;
+
+            async Task<MetadataReference> CreateMetadataReferences(IFile assemblyFile)
             {
                 // Create the metadata reference for the compilation
                 IFile xmlFile = await context.FileSystem.GetFileAsync(assemblyFile.Path.ChangeExtension("xml"));
@@ -525,15 +537,7 @@ namespace Wyam.CodeAnalysis
                 }
                 Trace.Verbose($"Creating metadata reference for assembly {assemblyFile.Path.FullPath} without XML documentation file");
                 return (MetadataReference)MetadataReference.CreateFromFile(assemblyFile.Path.FullPath);
-            })).ToArray();
-            if (assemblyReferences.Length > 0)
-            {
-                compilation = compilation.AddReferences(assemblyReferences);
-                symbols.AddRange(assemblyReferences
-                    .Select(x => (IAssemblySymbol)compilation.GetAssemblyOrModuleSymbol(x))
-                    .Select(x => _assemblySymbols ? x : (ISymbol)x.GlobalNamespace));
             }
-            return compilation;
         }
 
         private async Task<Compilation> AddProjectReferencesAsync(IExecutionContext context, List<ISymbol> symbols, Compilation compilation)

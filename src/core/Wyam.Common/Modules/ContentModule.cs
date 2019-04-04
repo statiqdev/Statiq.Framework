@@ -12,35 +12,14 @@ namespace Wyam.Common.Modules
     /// </summary>
     public abstract class ContentModule : IModule
     {
-        private readonly ConfigHelper<object> _content;
+        private readonly DocumentConfig _content;
         private readonly IModule[] _modules;
 
         /// <summary>
-        /// Creates a new content module with the specified content.
-        /// </summary>
-        /// <param name="content">The content.</param>
-        protected ContentModule(object content)
-        {
-            _content = new ConfigHelper<object>(content);
-        }
-
-        /// <summary>
         /// Creates a new content module with the specified content delegate.
         /// </summary>
         /// <param name="content">The content delegate.</param>
-        protected ContentModule(AsyncContextConfig content)
-        {
-            _content = new ConfigHelper<object>(content);
-        }
-
-        /// <summary>
-        /// Creates a new content module with the specified content delegate.
-        /// </summary>
-        /// <param name="content">The content delegate.</param>
-        protected ContentModule(AsyncDocumentConfig content)
-        {
-            _content = new ConfigHelper<object>(content);
-        }
+        protected ContentModule(DocumentConfig content) => _content = content;
 
         /// <summary>
         /// Creates a new content module with the content determined by child modules.

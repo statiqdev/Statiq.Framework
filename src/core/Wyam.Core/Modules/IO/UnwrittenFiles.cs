@@ -64,27 +64,29 @@ namespace Wyam.Core.Modules.IO
         /// <inheritdoc />
         public override async Task<IEnumerable<IDocument>> ExecuteAsync(IReadOnlyList<IDocument> inputs, IExecutionContext context)
         {
-            return (await inputs
-                .ParallelSelectAsync(context, async input =>
+            return
+                (await inputs.ParallelSelectAsync(context, SelectUnwrittenFilesAsync))
+                .Where(x => x != null);
+
+            async Task<IDocument> SelectUnwrittenFilesAsync(IDocument input)
+            {
+                if (await ShouldProcessAsync(input, context))
                 {
-                    if (await ShouldProcessAsync(input, context))
+                    FilePath outputPath = await GetOutputPathAsync(input, context);
+                    IFile output = outputPath != null ? await context.FileSystem.GetOutputFileAsync(outputPath) : null;
+                    if (output != null)
                     {
-                        FilePath outputPath = await GetOutputPathAsync(input, context);
-                        IFile output = outputPath != null ? await context.FileSystem.GetOutputFileAsync(outputPath) : null;
-                        if (output != null)
+                        IDirectory outputDirectory = await output.GetDirectoryAsync();
+                        bool outputExists = await output.GetExistsAsync();
+                        if ((outputDirectory.Path.FullPath != "." && await outputDirectory.GetExistsAsync() && outputExists)
+                            || (outputDirectory.Path.FullPath == "." && outputExists))
                         {
-                            IDirectory outputDirectory = await output.GetDirectoryAsync();
-                            bool outputExists = await output.GetExistsAsync();
-                            if ((outputDirectory.Path.FullPath != "." && await outputDirectory.GetExistsAsync() && outputExists)
-                                || (outputDirectory.Path.FullPath == "." && outputExists))
-                            {
-                                return null;
-                            }
+                            return null;
                         }
                     }
-                    return input;
-                }))
-                .Where(x => x != null);
+                }
+                return input;
+            }
         }
     }
 }

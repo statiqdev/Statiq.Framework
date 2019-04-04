@@ -18,25 +18,6 @@ namespace Wyam.Core.Modules.Contents
     public class Content : ContentModule
     {
         /// <summary>
-        /// Uses the string value of the specified object as the new content for every input document.
-        /// </summary>
-        /// <param name="content">The new content to use.</param>
-        public Content(object content)
-            : base(content)
-        {
-        }
-
-        /// <summary>
-        /// Uses the string value of the returned object as the new content for each document.
-        /// This allows you to specify different content depending on the execution context.
-        /// </summary>
-        /// <param name="content">A delegate that gets the new content to use.</param>
-        public Content(ContextConfig content)
-            : base(content)
-        {
-        }
-
-        /// <summary>
         /// Uses the string value of the returned object as the new content for each document. This
         /// allows you to specify different content for each document depending on the input document.
         /// </summary>
