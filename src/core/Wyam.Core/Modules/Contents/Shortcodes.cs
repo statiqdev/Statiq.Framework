@@ -101,47 +101,7 @@ namespace Wyam.Core.Modules.Contents
                     .ToDictionary(x => x, x => context.Shortcodes.CreateInstance(x), StringComparer.OrdinalIgnoreCase);
 
             // Execute each of the shortcodes in order
-            InsertingStreamLocation[] insertingLocations = (await locations
-                .SelectAsync(async x =>
-                {
-                    // Execute the shortcode
-                    IShortcodeResult shortcodeResult = await shortcodes[x.Name].ExecuteAsync(x.Arguments, x.Content, input, context);
-
-                    // Merge output metadata with the current input document
-                    // Creating a new document is the easiest way to ensure all the metadata from shortcodes gets accumulated correctly
-                    if (shortcodeResult?.Metadata != null)
-                    {
-                        input = context.GetDocument(input, shortcodeResult.Metadata);
-                    }
-
-                    // Recursively parse shortcodes
-                    Stream shortcodeResultStream = shortcodeResult?.Stream;
-                    if (shortcodeResultStream != null)
-                    {
-                        // Don't process nested shortcodes if it's the raw shortcode
-                        if (!x.Name.Equals(nameof(Core.Shortcodes.Contents.Raw), StringComparison.OrdinalIgnoreCase))
-                        {
-                            if (!shortcodeResultStream.CanSeek)
-                            {
-                                shortcodeResultStream = new SeekableStream(shortcodeResultStream, true);
-                            }
-                            IDocument nestedResult = await ProcessShortcodesAsync(shortcodeResultStream, input, context);
-                            if (nestedResult != null)
-                            {
-                                input = nestedResult;
-                                shortcodeResultStream = nestedResult.GetStream();  // Will get disposed in the replacement operation below
-                            }
-                            else
-                            {
-                                shortcodeResultStream.Position = 0;
-                            }
-                        }
-                        return new InsertingStreamLocation(x.FirstIndex, x.LastIndex, shortcodeResultStream);
-                    }
-
-                    return new InsertingStreamLocation(x.FirstIndex, x.LastIndex, null);
-                }))
-                .ToArray();
+            InsertingStreamLocation[] insertingLocations = (await locations.SelectAsync(ExecuteShortcodesAsync)).ToArray();
 
             // Dispose any shortcodes that implement IDisposable
             foreach (IDisposable disposableShortcode
@@ -189,6 +149,46 @@ namespace Wyam.Core.Modules.Contents
                 }
             }
             return context.GetDocument(input, resultStream);
+
+            async Task<InsertingStreamLocation> ExecuteShortcodesAsync(ShortcodeLocation x)
+            {
+                // Execute the shortcode
+                IShortcodeResult shortcodeResult = await shortcodes[x.Name].ExecuteAsync(x.Arguments, x.Content, input, context);
+
+                // Merge output metadata with the current input document
+                // Creating a new document is the easiest way to ensure all the metadata from shortcodes gets accumulated correctly
+                if (shortcodeResult?.Metadata != null)
+                {
+                    input = context.GetDocument(input, shortcodeResult.Metadata);
+                }
+
+                // Recursively parse shortcodes
+                Stream shortcodeResultStream = shortcodeResult?.Stream;
+                if (shortcodeResultStream != null)
+                {
+                    // Don't process nested shortcodes if it's the raw shortcode
+                    if (!x.Name.Equals(nameof(Core.Shortcodes.Contents.Raw), StringComparison.OrdinalIgnoreCase))
+                    {
+                        if (!shortcodeResultStream.CanSeek)
+                        {
+                            shortcodeResultStream = new SeekableStream(shortcodeResultStream, true);
+                        }
+                        IDocument nestedResult = await ProcessShortcodesAsync(shortcodeResultStream, input, context);
+                        if (nestedResult != null)
+                        {
+                            input = nestedResult;
+                            shortcodeResultStream = nestedResult.GetStream();  // Will get disposed in the replacement operation below
+                        }
+                        else
+                        {
+                            shortcodeResultStream.Position = 0;
+                        }
+                    }
+                    return new InsertingStreamLocation(x.FirstIndex, x.LastIndex, shortcodeResultStream);
+                }
+
+                return new InsertingStreamLocation(x.FirstIndex, x.LastIndex, null);
+            }
         }
 
         // writer = null to just skip length in reader

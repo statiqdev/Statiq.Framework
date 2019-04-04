@@ -1,10 +1,10 @@
 ﻿using System.Collections.Generic;
 using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 using Wyam.Common.Configuration;
 using Wyam.Common.Documents;
 using Wyam.Common.Modules;
 using Wyam.Common.Execution;
-using System.Threading.Tasks;
 
 namespace Wyam.Core.Modules.Contents
 {
@@ -23,32 +23,6 @@ namespace Wyam.Core.Modules.Contents
         private RegexOptions _regexOptions = RegexOptions.None;
 
         /// <summary>
-        /// Replaces all occurrences of the search string in the string value of the
-        /// specified object with the content of each input document.
-        /// </summary>
-        /// <param name="search">The string to search for.</param>
-        /// <param name="content">The content within which to search for the search string.</param>
-        public ReplaceIn(string search, object content)
-            : base(content)
-        {
-            _search = search;
-        }
-
-        /// <summary>
-        /// Replaces all occurrences of the search string in the string value of the
-        /// returned object with the content of each input document. This allows you to
-        /// specify different content depending on the execution context.
-        /// </summary>
-        /// <param name="search">The string to search for.</param>
-        /// <param name="content">A delegate that returns the content within which
-        /// to search for the search string.</param>
-        public ReplaceIn(string search, ContextConfig content)
-            : base(content)
-        {
-            _search = search;
-        }
-
-        /// <summary>
         /// Replaces all occurrences of the search string in the string value of the returned
         /// object with the content of each input document. This allows you to specify different
         /// content for each document depending on the input document.
@@ -56,7 +30,7 @@ namespace Wyam.Core.Modules.Contents
         /// <param name="search">The string to search for.</param>
         /// <param name="content">A delegate that returns the content within which
         /// to search for the search string.</param>
-        public ReplaceIn(string search, DocumentConfig content)
+        public ReplaceIn(string search, DocumentConfig<string> content)
             : base(content)
         {
             _search = search;
@@ -90,7 +64,7 @@ namespace Wyam.Core.Modules.Contents
         }
 
         /// <inheritdoc />
-        protected override async Task<IEnumerable<IDocument>> ExecuteAsync(object content, IDocument input, IExecutionContext context)
+        protected override async Task<IDocument> ExecuteAsync(string content, IDocument input, IExecutionContext context)
         {
             if (content == null)
             {
@@ -98,16 +72,13 @@ namespace Wyam.Core.Modules.Contents
             }
             if (string.IsNullOrEmpty(_search))
             {
-                return new[] { await context.GetDocumentAsync(input, content.ToString()) };
+                return await context.GetDocumentAsync(input, content);
             }
-            return new[]
-            {
-                await context.GetDocumentAsync(
-                    input,
-                    _isRegex ?
-                        Regex.Replace(input.Content, _search, content.ToString(), _regexOptions) :
-                        content.ToString().Replace(_search, input.Content))
-            };
+            return await context.GetDocumentAsync(
+                input,
+                _isRegex ?
+                    Regex.Replace(input.Content, _search, content, _regexOptions) :
+                    content.Replace(_search, input.Content));
         }
     }
 }

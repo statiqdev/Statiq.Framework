@@ -37,19 +37,10 @@ namespace Wyam.CodeAnalysis
     public class ReadSolution : ReadWorkspace
     {
         /// <summary>
-        /// Reads the solution file at the specified path.
-        /// </summary>
-        /// <param name="path">The solution file path.</param>
-        public ReadSolution(FilePath path)
-            : base(path)
-        {
-        }
-
-        /// <summary>
         /// Reads the solution file at the specified path. This allows you to specify a different solution file depending on the input.
         /// </summary>
         /// <param name="path">A delegate that returns a <c>FilePath</c> with the solution file path.</param>
-        public ReadSolution(AsyncDocumentConfig<FilePath> path)
+        public ReadSolution(DocumentConfig<FilePath> path)
             : base(path)
         {
         }

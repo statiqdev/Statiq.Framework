@@ -8,9 +8,11 @@ using Wyam.Common.Execution;
 
 namespace Wyam.Common.Configuration
 {
-    public class DocumentConfig : DocumentConfig<object>
+    // Use the strongly typed version in most cases
+    // Only use the untyped configs when you might need to convert the result to different types
+    public class DocumentConfigNew : DocumentConfig<object>
     {
-        internal DocumentConfig(Func<IDocument, IExecutionContext, Task<object>> func)
+        internal DocumentConfigNew(Func<IDocument, IExecutionContext, Task<object>> func)
             : base(func)
         {
         }

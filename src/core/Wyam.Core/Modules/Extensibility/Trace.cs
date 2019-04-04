@@ -20,30 +20,11 @@ namespace Wyam.Core.Modules.Extensibility
         private TraceEventType _traceEventType = TraceEventType.Information;
 
         /// <summary>
-        /// Outputs the string value of the specified object to trace.
-        /// </summary>
-        /// <param name="content">The content to trace.</param>
-        public Trace(object content)
-            : base(content)
-        {
-        }
-
-        /// <summary>
-        /// Outputs the string value of the returned object to trace. This allows
-        /// you to trace different content depending on the execution context.
-        /// </summary>
-        /// <param name="content">A delegate that returns the content to trace.</param>
-        public Trace(AsyncContextConfig content)
-            : base(content)
-        {
-        }
-
-        /// <summary>
         /// Outputs the string value of the returned object to trace. This allows
         /// you to trace different content for each document depending on the input document.
         /// </summary>
         /// <param name="content">A delegate that returns the content to trace.</param>
-        public Trace(AsyncDocumentConfig content)
+        public Trace(DocumentConfig<string> content)
             : base(content)
         {
         }
@@ -70,10 +51,10 @@ namespace Wyam.Core.Modules.Extensibility
         }
 
         /// <inheritdoc />
-        protected override Task<IEnumerable<IDocument>> ExecuteAsync(object content, IDocument input, IExecutionContext context)
+        protected override Task<IDocument> ExecuteAsync(string content, IDocument input, IExecutionContext context)
         {
-            Common.Tracing.Trace.TraceEvent(_traceEventType, content.ToString());
-            return Task.FromResult<IEnumerable<IDocument>>(new[] { input });
+            Common.Tracing.Trace.TraceEvent(_traceEventType, content);
+            return Task.FromResult(input);
         }
     }
 }

@@ -1,9 +1,9 @@
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using Wyam.Common.Configuration;
 using Wyam.Common.Documents;
-using Wyam.Common.Modules;
 using Wyam.Common.Execution;
-using System.Threading.Tasks;
+using Wyam.Common.Modules;
 
 namespace Wyam.Core.Modules.Contents
 {
@@ -14,31 +14,12 @@ namespace Wyam.Core.Modules.Contents
     public class Append : ContentModule
     {
         /// <summary>
-        /// Appends the string value of the specified object to the content of every input document.
-        /// </summary>
-        /// <param name="content">The content to append.</param>
-        public Append(object content)
-            : base(content)
-        {
-        }
-
-        /// <summary>
-        /// Appends the string value of the returned object to to content of each document. This
-        /// allows you to specify different content to append depending on the execution context.
-        /// </summary>
-        /// <param name="content">A delegate that returns the content to append.</param>
-        public Append(ContextConfig content)
-            : base(content)
-        {
-        }
-
-        /// <summary>
         /// Appends the string value of the returned object to to content of each document.
         /// This allows you to specify different content to append for each document depending
         /// on the input document.
         /// </summary>
         /// <param name="content">A delegate that returns the content to append.</param>
-        public Append(DocumentConfig content)
+        public Append(DocumentConfig<string> content)
             : base(content)
         {
         }
@@ -55,9 +36,7 @@ namespace Wyam.Core.Modules.Contents
         }
 
         /// <inheritdoc />
-        protected override async Task<IEnumerable<IDocument>> ExecuteAsync(object content, IDocument input, IExecutionContext context)
-        {
-            return new[] { content == null ? input : await context.GetDocumentAsync(input, input.Content + content) };
-        }
+        protected override async Task<IDocument> ExecuteAsync(string content, IDocument input, IExecutionContext context) =>
+            content == null ? input : await context.GetDocumentAsync(input, input.Content + content);
     }
 }

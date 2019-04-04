@@ -43,7 +43,7 @@ namespace Wyam.Core.Modules.Contents
         private readonly Dictionary<FilePath, Func<IDictionary<FilePath, string>, string>> _additionalOutputs =
             new Dictionary<FilePath, Func<IDictionary<FilePath, string>, string>>();
 
-        private DocumentConfig _paths = (doc, ctx) => doc.List<FilePath>(Keys.RedirectFrom);
+        private DocumentConfig<IReadOnlyList<FilePath>> _paths = Config.FromDocument(doc => doc.List<FilePath>(Keys.RedirectFrom));
         private bool _metaRefreshPages = true;
         private bool _includeHost = false;
 
@@ -53,7 +53,7 @@ namespace Wyam.Core.Modules.Contents
         /// </summary>
         /// <param name="paths">A delegate that should return one or more <see cref="FilePath"/>.</param>
         /// <returns>The current module instance.</returns>
-        public Redirect WithPaths(DocumentConfig paths)
+        public Redirect WithPaths(DocumentConfig<IReadOnlyList<FilePath>> paths)
         {
             _paths = paths ?? throw new ArgumentNullException(nameof(paths));
             return this;
@@ -112,60 +112,9 @@ namespace Wyam.Core.Modules.Contents
         {
             // Iterate redirects and generate all of the per-redirect documents (I.e., meta refresh pages)
             ConcurrentDictionary<FilePath, string> redirects = new ConcurrentDictionary<FilePath, string>();
-            List<IDocument> outputs = (await inputs
-                .ParallelSelectManyAsync(context, async input =>
-                {
-                    IReadOnlyList<FilePath> paths = _paths.Invoke<IReadOnlyList<FilePath>>(input, context, "while getting paths");
-                    if (paths != null)
-                    {
-                        List<IDocument> metaRefreshDocuments = new List<IDocument>();
-                        foreach (FilePath fromPath in paths.Where(x => x != null))
-                        {
-                            // Make sure it's a relative path
-                            if (!fromPath.IsRelative)
-                            {
-                                Trace.Warning($"The redirect path must be relative for document {input.SourceString()}: {fromPath}");
-                                continue;
-                            }
 
-                            // Record the redirect for additional processing
-                            string url = context.GetLink(input, _includeHost);
-                            redirects.TryAdd(fromPath, url);
-
-                            // Meta refresh documents
-                            FilePath outputPath = fromPath;
-                            if (!string.Equals(outputPath.Extension, ".html", StringComparison.OrdinalIgnoreCase))
-                            {
-                                outputPath = outputPath.AppendExtension(".html");
-                            }
-
-                            if (_metaRefreshPages)
-                            {
-                                metaRefreshDocuments.Add(
-                                    await context.GetDocumentAsync(
-                                        $@"
-<!doctype html>
-<html>    
-  <head>      
-    <title>Redirected</title>      
-    <meta http-equiv=""refresh"" content=""0;url='{url}'"" />    
-  </head>    
-  <body> 
-    <p>This page has moved to a <a href=""{url}"">{url}</a></p> 
-  </body>  
-</html>",
-                                        new MetadataItems
-                                        {
-                                            { Keys.RelativeFilePath, outputPath },
-                                            { Keys.WritePath, outputPath }
-                                        }));
-                            }
-                        }
-                        return (IEnumerable<IDocument>)metaRefreshDocuments;
-                    }
-                    return Array.Empty<IDocument>();
-                }))
-                .ToList();  // Need to materialize the parallel operation before creating the additional outputs
+            // Need to materialize the parallel operation before creating the additional outputs
+            List<IDocument> outputs = (await inputs.ParallelSelectManyAsync(context, GetOutputsAsync)).ToList();
 
             // Generate other output documents if requested
             if (redirects.Count > 0)
@@ -188,6 +137,59 @@ namespace Wyam.Core.Modules.Contents
             }
 
             return outputs;
+
+            async Task<IEnumerable<IDocument>> GetOutputsAsync(IDocument input)
+            {
+                IReadOnlyList<FilePath> paths = await _paths.GetValueAsync(input, context);
+                if (paths != null)
+                {
+                    List<IDocument> metaRefreshDocuments = new List<IDocument>();
+                    foreach (FilePath fromPath in paths.Where(x => x != null))
+                    {
+                        // Make sure it's a relative path
+                        if (!fromPath.IsRelative)
+                        {
+                            Trace.Warning($"The redirect path must be relative for document {input.SourceString()}: {fromPath}");
+                            continue;
+                        }
+
+                        // Record the redirect for additional processing
+                        string url = context.GetLink(input, _includeHost);
+                        redirects.TryAdd(fromPath, url);
+
+                        // Meta refresh documents
+                        FilePath outputPath = fromPath;
+                        if (!string.Equals(outputPath.Extension, ".html", StringComparison.OrdinalIgnoreCase))
+                        {
+                            outputPath = outputPath.AppendExtension(".html");
+                        }
+
+                        if (_metaRefreshPages)
+                        {
+                            metaRefreshDocuments.Add(
+                                await context.GetDocumentAsync(
+                                    $@"
+<!doctype html>
+<html>    
+  <head>      
+    <title>Redirected</title>      
+    <meta http-equiv=""refresh"" content=""0;url='{url}'"" />    
+  </head>    
+  <body> 
+    <p>This page has moved to a <a href=""{url}"">{url}</a></p> 
+  </body>  
+</html>",
+                                    new MetadataItems
+                                    {
+                                            { Keys.RelativeFilePath, outputPath },
+                                            { Keys.WritePath, outputPath }
+                                    }));
+                        }
+                    }
+                    return metaRefreshDocuments;
+                }
+                return Array.Empty<IDocument>();
+            }
         }
     }
 }

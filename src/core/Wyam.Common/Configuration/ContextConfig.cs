@@ -8,12 +8,14 @@ using Wyam.Common.Execution;
 
 namespace Wyam.Common.Configuration
 {
-    public class ContextConfig : DocumentConfig
+    public class ContextConfigNew : DocumentConfigNew
     {
-        internal ContextConfig(Func<IExecutionContext, Task<object>> func)
+        internal ContextConfigNew(Func<IExecutionContext, Task<object>> func)
             : base((_, ctx) => func(ctx))
         {
         }
+
+        public Task<object> GetValueAsync(IExecutionContext context) => GetValueAsync(null, context);
 
         public async Task<T> GetValueAsync<T>(IExecutionContext context, string errorDetails = null)
         {

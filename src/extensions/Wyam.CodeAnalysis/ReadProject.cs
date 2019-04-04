@@ -37,19 +37,10 @@ namespace Wyam.CodeAnalysis
     public class ReadProject : ReadWorkspace
     {
         /// <summary>
-        /// Reads the project file at the specified path.
-        /// </summary>
-        /// <param name="path">The project file path.</param>
-        public ReadProject(FilePath path)
-            : base(path)
-        {
-        }
-
-        /// <summary>
         /// Reads the project file at the specified path. This allows you to specify a different project file depending on the input.
         /// </summary>
         /// <param name="path">A delegate that returns a <c>FilePath</c> with the project file path.</param>
-        public ReadProject(AsyncDocumentConfig<FilePath> path)
+        public ReadProject(DocumentConfig<FilePath> path)
             : base(path)
         {
         }

@@ -12,14 +12,14 @@ namespace Wyam.Common.Modules
     /// </summary>
     public abstract class ContentModule : IModule
     {
-        private readonly DocumentConfig _content;
+        private readonly DocumentConfig<string> _content;
         private readonly IModule[] _modules;
 
         /// <summary>
         /// Creates a new content module with the specified content delegate.
         /// </summary>
         /// <param name="content">The content delegate.</param>
-        protected ContentModule(DocumentConfig content) => _content = content;
+        protected ContentModule(DocumentConfig<string> content) => _content = content;
 
         /// <summary>
         /// Creates a new content module with the content determined by child modules.
@@ -43,10 +43,10 @@ namespace Wyam.Common.Modules
             if (_modules != null)
             {
                 IReadOnlyList<IDocument> documents = await context.ExecuteAsync(_modules, inputs.Count == 1 ? inputs : null);
-                return await documents.SelectManyAsync(context, async x => await inputs.SelectManyAsync(context, async y => await ExecuteAsync(x.Content, y, context)));
+                return await documents.SelectManyAsync(context, async x => await inputs.SelectAsync(context, async y => await ExecuteAsync(x.Content, y, context)));
             }
 
-            return await inputs.SelectManyAsync(context, async x => await ExecuteAsync(await _content.GetValueAsync(x, context), x, context));
+            return await inputs.SelectAsync(context, async x => await ExecuteAsync(await _content.GetValueAsync(x, context), x, context));
         }
 
         /// <summary>
@@ -57,6 +57,6 @@ namespace Wyam.Common.Modules
         /// <param name="input">The input document.</param>
         /// <param name="context">The execution context.</param>
         /// <returns>Result documents.</returns>
-        protected abstract Task<IEnumerable<IDocument>> ExecuteAsync(object content, IDocument input, IExecutionContext context);
+        protected abstract Task<IDocument> ExecuteAsync(string content, IDocument input, IExecutionContext context);
     }
 }

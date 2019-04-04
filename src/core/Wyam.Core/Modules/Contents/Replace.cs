@@ -1,11 +1,11 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Text.RegularExpressions;
-using System;
+using System.Threading.Tasks;
 using Wyam.Common.Configuration;
 using Wyam.Common.Documents;
-using Wyam.Common.Modules;
 using Wyam.Common.Execution;
-using System.Threading.Tasks;
+using Wyam.Common.Modules;
 
 namespace Wyam.Core.Modules.Contents
 {
@@ -16,34 +16,9 @@ namespace Wyam.Core.Modules.Contents
     public class Replace : ContentModule
     {
         private readonly string _search;
-        private readonly Func<Match, IDocument, object> _contentFinder;
+        private readonly Func<Match, IDocument, string> _contentFinder;
         private bool _isRegex;
         private RegexOptions _regexOptions = RegexOptions.None;
-
-        /// <summary>
-        /// Replaces all occurrences of the search string in every input document
-        /// with the string value of the specified object.
-        /// </summary>
-        /// <param name="search">The string to search for.</param>
-        /// <param name="content">The content to replace the search string with.</param>
-        public Replace(string search, object content)
-            : base(content)
-        {
-            _search = search;
-        }
-
-        /// <summary>
-        /// Replaces all occurrences of the search string in every input document with the
-        /// string value of the returned object. This allows you to specify different content
-        /// depending on the execution context.
-        /// </summary>
-        /// <param name="search">The string to search for.</param>
-        /// <param name="content">A delegate that returns the content to replace the search string with.</param>
-        public Replace(string search, ContextConfig content)
-            : base(content)
-        {
-            _search = search;
-        }
 
         /// <summary>
         /// Replaces all occurrences of the search string in every input document with the
@@ -52,7 +27,7 @@ namespace Wyam.Core.Modules.Contents
         /// </summary>
         /// <param name="search">The string to search for.</param>
         /// <param name="content">A delegate that returns the content to replace the search string with.</param>
-        public Replace(string search, DocumentConfig content)
+        public Replace(string search, DocumentConfig<string> content)
             : base(content)
         {
             _search = search;
@@ -78,11 +53,11 @@ namespace Wyam.Core.Modules.Contents
         /// </summary>
         /// <param name="search">The string to search for (interpreted as a regular expression).</param>
         /// <param name="contentFinder">A delegate that returns the content to replace the match.</param>
-        public Replace(string search, Func<Match, object> contentFinder)
-            : base(null as object)
+        public Replace(string search, Func<Match, string> contentFinder)
+            : base(null as string)
         {
             _search = search;
-            _contentFinder = (match, doc) => contentFinder(match);
+            _contentFinder = (match, _) => contentFinder(match);
             _isRegex = true;
         }
 
@@ -93,8 +68,8 @@ namespace Wyam.Core.Modules.Contents
         /// </summary>
         /// <param name="search">The string to search for (interpreted as a regular expression).</param>
         /// <param name="contentFinder">A delegate that returns the content to replace the match.</param>
-        public Replace(string search, Func<Match, IDocument, object> contentFinder)
-            : base(null as object)
+        public Replace(string search, Func<Match, IDocument, string> contentFinder)
+            : base(null as string)
         {
             _search = search;
             _contentFinder = contentFinder;
@@ -115,7 +90,7 @@ namespace Wyam.Core.Modules.Contents
         }
 
         /// <inheritdoc />
-        protected override async Task<IEnumerable<IDocument>> ExecuteAsync(object content, IDocument input, IExecutionContext context)
+        protected override async Task<IDocument> ExecuteAsync(string content, IDocument input, IExecutionContext context)
         {
             if (content == null)
             {
@@ -123,7 +98,7 @@ namespace Wyam.Core.Modules.Contents
             }
             if (string.IsNullOrEmpty(_search))
             {
-                return new[] { input };
+                return input;
             }
             if (_contentFinder != null)
             {
@@ -133,19 +108,13 @@ namespace Wyam.Core.Modules.Contents
                     _search,
                     match => _contentFinder(match, input)?.ToString() ?? string.Empty,
                     _regexOptions);
-                return new[]
-                {
-                    currentDocumentContent == newDocumentContent ? input : await context.GetDocumentAsync(input, newDocumentContent)
-                };
+                return currentDocumentContent == newDocumentContent ? input : await context.GetDocumentAsync(input, newDocumentContent);
             }
-            return new[]
-            {
-                await context.GetDocumentAsync(
-                    input,
-                    _isRegex ?
-                        Regex.Replace(input.Content, _search, content.ToString(), _regexOptions) :
-                        input.Content.Replace(_search, content.ToString()))
-            };
+            return await context.GetDocumentAsync(
+                input,
+                _isRegex
+                    ? Regex.Replace(input.Content, _search, content, _regexOptions)
+                    : input.Content.Replace(_search, content));
         }
     }
 }

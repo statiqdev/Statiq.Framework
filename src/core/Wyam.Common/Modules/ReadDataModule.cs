@@ -125,12 +125,11 @@ namespace Wyam.Common.Modules
         public async Task<IEnumerable<IDocument>> ExecuteAsync(IReadOnlyList<IDocument> inputs, IExecutionContext context)
         {
             IEnumerable<TItem> items = GetItems(inputs, context);
-            if (items == null)
-            {
-                return Array.Empty<IDocument>();
-            }
+            return items == null
+                ? Array.Empty<IDocument>()
+                : await items.Where(x => x != null).Take(_limit).ParallelSelectAsync(ReadDataAsync);
 
-            return await items.Where(x => x != null).Take(_limit).ParallelSelectAsync(async item =>
+            async Task<IDocument> ReadDataAsync(TItem item)
             {
                 string content = string.Empty;
                 List<KeyValuePair<string, object>> meta = new List<KeyValuePair<string, object>>();
@@ -163,7 +162,7 @@ namespace Wyam.Common.Modules
                 }
 
                 return await context.GetDocumentAsync(content, meta);
-            });
+            }
         }
     }
 }

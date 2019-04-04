@@ -4,17 +4,17 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 using Wyam.Common.Configuration;
 using Wyam.Common.Documents;
+using Wyam.Common.Execution;
 using Wyam.Common.IO;
 using Wyam.Common.Meta;
 using Wyam.Common.Modules;
-using Wyam.Common.Execution;
 using Wyam.Common.Modules.Contents;
 using Wyam.Common.Util;
 using Wyam.Core.Documents;
 using Wyam.Core.Meta;
-using System.Threading.Tasks;
 
 namespace Wyam.Core.Modules.Contents
 {
@@ -33,7 +33,7 @@ namespace Wyam.Core.Modules.Contents
     {
         private static readonly string[] ChangeFrequencies = { "always", "hourly", "daily", "weekly", "monthly", "yearly", "never" };
 
-        private readonly DocumentConfig _sitemapItemOrLocation;
+        private readonly DocumentConfigNew _sitemapItemOrLocation;
         private readonly Func<string, string> _locationFormatter;
 
         /// <summary>
@@ -45,7 +45,7 @@ namespace Wyam.Core.Modules.Contents
         /// <param name="locationFormatter">A location formatter that will be applied to the location of each input after
         /// getting the value of the <c>SitemapItem</c> metadata key.</param>
         public Sitemap(Func<string, string> locationFormatter = null)
-            : this((d, c) => d.Get(Keys.SitemapItem), locationFormatter)
+            : this(Config.FromDocument(doc => doc.Get(Keys.SitemapItem)), locationFormatter)
         {
         }
 
@@ -60,7 +60,7 @@ namespace Wyam.Core.Modules.Contents
         /// <param name="locationFormatter">A location formatter that will be applied to the location of each input after
         /// getting the value of the specified metadata key.</param>
         public Sitemap(string sitemapItemOrLocationMetadataKey, Func<string, string> locationFormatter = null)
-            : this((d, c) => d.String(sitemapItemOrLocationMetadataKey), locationFormatter)
+            : this(Config.FromDocument(doc => doc.Get(sitemapItemOrLocationMetadataKey)), locationFormatter)
         {
             if (string.IsNullOrEmpty(sitemapItemOrLocationMetadataKey))
             {
@@ -78,7 +78,7 @@ namespace Wyam.Core.Modules.Contents
         /// with the desired item location. If the delegate returns <c>null</c>, the input document is not added to the sitemap.</param>
         /// <param name="locationFormatter">A location formatter that will be applied to the location of each input after
         /// getting the value of the specified metadata key.</param>
-        public Sitemap(DocumentConfig sitemapItemOrLocation, Func<string, string> locationFormatter = null)
+        public Sitemap(DocumentConfigNew sitemapItemOrLocation, Func<string, string> locationFormatter = null)
         {
             _sitemapItemOrLocation = sitemapItemOrLocation ?? throw new ArgumentNullException(nameof(sitemapItemOrLocation));
             _locationFormatter = locationFormatter;
@@ -89,11 +89,16 @@ namespace Wyam.Core.Modules.Contents
         {
             StringBuilder sb = new StringBuilder();
             sb.Append("<?xml version=\"1.0\" encoding=\"UTF-8\"?><urlset xmlns=\"http://www.sitemaps.org/schemas/sitemap/0.9\">");
+            await context.ForEachAsync(inputs, AddToSiteMapAsync);
+            sb.Append("</urlset>");
 
-            context.ForEach(inputs, input =>
+            // Always output the sitemap document, even if it's empty
+            return new[] { await context.GetDocumentAsync(sb.ToString()) };
+
+            async Task AddToSiteMapAsync(IDocument input)
             {
                 // Try to get a SitemapItem
-                object delegateResult = _sitemapItemOrLocation(input, context);
+                object delegateResult = await _sitemapItemOrLocation.GetValueAsync(input, context);
                 SitemapItem sitemapItem = delegateResult as SitemapItem
                     ?? new SitemapItem((delegateResult as string) ?? context.GetLink(input));
 
@@ -142,11 +147,7 @@ namespace Wyam.Core.Modules.Contents
                         sb.Append("</url>");
                     }
                 }
-            });
-
-            // Always output the sitemap document, even if it's empty
-            sb.Append("</urlset>");
-            return new[] { await context.GetDocumentAsync(sb.ToString()) };
+            }
         }
     }
 }
