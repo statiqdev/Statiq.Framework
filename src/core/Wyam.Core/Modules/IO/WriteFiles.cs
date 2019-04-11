@@ -58,12 +58,12 @@ namespace Wyam.Core.Modules.IO
     /// <category>Input/Output</category>
     public class WriteFiles : IModule
     {
-        private readonly AsyncDocumentConfig<FilePath> _path;
+        private readonly DocumentConfig<FilePath> _path;
         private readonly bool _warnOnWriteMetadata;
         private bool _useWriteMetadata = true;
         private bool _ignoreEmptyContent = true;
         private bool _append;
-        private AsyncDocumentPredicate _predicate = null;
+        private DocumentPredicate _predicate = null;
         private bool _onlyMetadata = false;
 
         /// <summary>
@@ -72,7 +72,7 @@ namespace Wyam.Core.Modules.IO
         /// location (including file name) or a path relative to the output folder.
         /// </summary>
         /// <param name="path">A delegate that returns a <see cref="FilePath"/> with the desired path.</param>
-        public WriteFiles(AsyncDocumentConfig<FilePath> path)
+        public WriteFiles(DocumentConfig<FilePath> path)
         {
             _path = path ?? throw new ArgumentNullException(nameof(path));
             _warnOnWriteMetadata = true;
@@ -91,11 +91,11 @@ namespace Wyam.Core.Modules.IO
                 throw new ArgumentNullException(nameof(extension));
             }
 
-            _path = (x, y) =>
+            _path = Config.FromDocument((x, _) =>
             {
                 FilePath fileRelative = x.FilePath(Keys.RelativeFilePath);
-                return Task.FromResult(fileRelative?.ChangeExtension(extension));
-            };
+                return fileRelative?.ChangeExtension(extension);
+            });
             _warnOnWriteMetadata = true;
         }
 
@@ -106,7 +106,7 @@ namespace Wyam.Core.Modules.IO
         /// </summary>
         public WriteFiles()
         {
-            _path = (x, y) => Task.FromResult(x.FilePath(Keys.RelativeFilePath));
+            _path = Config.FromDocument((x, _) => x.FilePath(Keys.RelativeFilePath));
         }
 
         /// <summary>
@@ -168,7 +168,7 @@ namespace Wyam.Core.Modules.IO
         /// </summary>
         /// <param name="predicate">A predicate that returns <c>true</c> if the file should be written.</param>
         /// <returns>The current module instance.</returns>
-        public WriteFiles Where(AsyncDocumentPredicate predicate)
+        public WriteFiles Where(DocumentPredicate predicate)
         {
             _predicate = _predicate.CombineWith(predicate);
             return this;
@@ -180,7 +180,7 @@ namespace Wyam.Core.Modules.IO
         /// <param name="input">The input document to check/</param>
         /// <param name="context">The execution context.</param>
         /// <returns><c>true</c> if the input document should be processed, <c>false</c> otherwise.</returns>
-        protected Task<bool> ShouldProcessAsync(IDocument input, IExecutionContext context) => _predicate.InvokeAsync(input, context);
+        protected Task<bool> ShouldProcessAsync(IDocument input, IExecutionContext context) => _predicate.GetValueAsync(input, context);
 
         /// <summary>
         /// Gets the output path of the input document.
@@ -234,7 +234,7 @@ namespace Wyam.Core.Modules.IO
             }
 
             // Fallback to the default behavior function
-            return path ?? await _path.InvokeAsync(input, context);
+            return path ?? await _path.GetValueAsync(input, context);
         }
 
         /// <inheritdoc />

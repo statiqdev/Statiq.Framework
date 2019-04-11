@@ -3,16 +3,16 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
+using System.Threading.Tasks;
 using Wyam.Common.Configuration;
 using Wyam.Common.Documents;
+using Wyam.Common.Execution;
 using Wyam.Common.Meta;
 using Wyam.Common.Modules;
-using Wyam.Common.Execution;
 using Wyam.Common.Util;
 using Wyam.Core.Documents;
 using Wyam.Core.Meta;
 using Wyam.Core.Util;
-using System.Threading.Tasks;
 
 namespace Wyam.Core.Modules.Control
 {
@@ -36,8 +36,8 @@ namespace Wyam.Core.Modules.Control
     /// <category>Control</category>
     public class GroupByMany : ContainerModule
     {
-        private readonly DocumentConfig _key;
-        private Func<IDocument, IExecutionContext, bool> _predicate;
+        private readonly DocumentConfig<IEnumerable<object>> _key;
+        private DocumentPredicate _predicate;
         private IEqualityComparer<object> _comparer;
         private bool _emptyOutputIfNoGroups;
 
@@ -49,7 +49,7 @@ namespace Wyam.Core.Modules.Control
         /// </summary>
         /// <param name="key">A delegate that returns the group keys.</param>
         /// <param name="modules">Modules to execute on the input documents prior to grouping.</param>
-        public GroupByMany(DocumentConfig key, params IModule[] modules)
+        public GroupByMany(DocumentConfig<IEnumerable<object>> key, params IModule[] modules)
             : this(key, (IEnumerable<IModule>)modules)
         {
         }
@@ -62,7 +62,7 @@ namespace Wyam.Core.Modules.Control
         /// </summary>
         /// <param name="key">A delegate that returns the group keys.</param>
         /// <param name="modules">Modules to execute on the input documents prior to grouping.</param>
-        public GroupByMany(DocumentConfig key, IEnumerable<IModule> modules)
+        public GroupByMany(DocumentConfig<IEnumerable<object>> key, IEnumerable<IModule> modules)
             : base(modules)
         {
             _key = key ?? throw new ArgumentNullException(nameof(key));
@@ -99,8 +99,8 @@ namespace Wyam.Core.Modules.Control
                 throw new ArgumentNullException(nameof(keyMetadataKey));
             }
 
-            _key = (doc, ctx) => doc.Get(keyMetadataKey);
-            _predicate = (doc, ctx) => doc.ContainsKey(keyMetadataKey);
+            _key = Config.FromDocument((doc, _) => doc.Get<IEnumerable<object>>(keyMetadataKey));
+            _predicate = Config.IfDocument((doc, _) => doc.ContainsKey(keyMetadataKey));
         }
 
         /// <summary>
@@ -108,12 +108,9 @@ namespace Wyam.Core.Modules.Control
         /// </summary>
         /// <param name="predicate">A delegate that should return a <c>bool</c>.</param>
         /// <returns>The current module instance.</returns>
-        public GroupByMany Where(DocumentConfig predicate)
+        public GroupByMany Where(DocumentPredicate predicate)
         {
-            Func<IDocument, IExecutionContext, bool> currentPredicate = _predicate;
-            _predicate = currentPredicate == null
-                ? (Func<IDocument, IExecutionContext, bool>)predicate.Invoke<bool>
-                : ((x, c) => currentPredicate(x, c) && predicate.Invoke<bool>(x, c));
+            _predicate = _predicate.CombineWith(predicate);
             return this;
         }
 
@@ -159,9 +156,11 @@ namespace Wyam.Core.Modules.Control
         /// <inheritdoc />
         public override async Task<IEnumerable<IDocument>> ExecuteAsync(IReadOnlyList<IDocument> inputs, IExecutionContext context)
         {
-            ImmutableArray<IGrouping<object, IDocument>> groupings = (await context.ExecuteAsync(this, inputs))
-                .Where(context, x => _predicate?.Invoke(x, context) ?? true)
-                .GroupByMany(x => _key.Invoke<IEnumerable<object>>(x, context), _comparer)
+            IEnumerable<IDocument> docs = await (await context.ExecuteAsync(this, inputs))
+                .WhereAsync(context, async x => _predicate == null ? true : await _predicate.GetValueAsync(x, context));
+            IEnumerable<(IDocument x, IEnumerable<object>)> keys = await docs.SelectAsync(async x => (x, await _key.GetValueAsync(x, context)));
+            ImmutableArray<IGrouping<object, IDocument>> groupings = keys
+                .GroupByMany(x => x.Item2, x => x.Item1, _comparer)
                 .ToImmutableArray();
             if (groupings.Length == 0)
             {

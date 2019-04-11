@@ -1,12 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using Wyam.Common.Configuration;
 using Wyam.Common.Documents;
-using Wyam.Common.Modules;
 using Wyam.Common.Execution;
+using Wyam.Common.Modules;
 using Wyam.Common.Util;
-using System.Threading.Tasks;
 
 namespace Wyam.Core.Modules.Control
 {
@@ -18,7 +18,7 @@ namespace Wyam.Core.Modules.Control
     /// <category>Control</category>
     public class ConcatBranch : ContainerModule
     {
-        private Func<IDocument, IExecutionContext, bool> _predicate;
+        private DocumentPredicate _predicate;
 
         /// <summary>
         /// Evaluates the specified modules with each input document as the initial
@@ -49,12 +49,9 @@ namespace Wyam.Core.Modules.Control
         /// </summary>
         /// <param name="predicate">A delegate that should return a <c>bool</c>.</param>
         /// <returns>The current module instance.</returns>
-        public ConcatBranch Where(DocumentConfig predicate)
+        public ConcatBranch Where(DocumentPredicate predicate)
         {
-            Func<IDocument, IExecutionContext, bool> currentPredicate = _predicate;
-            _predicate = currentPredicate == null
-                ? (Func<IDocument, IExecutionContext, bool>)predicate.Invoke<bool>
-                : ((x, c) => currentPredicate(x, c) && predicate.Invoke<bool>(x, c));
+            _predicate = _predicate.CombineWith(predicate);
             return this;
         }
 
@@ -63,7 +60,7 @@ namespace Wyam.Core.Modules.Control
         {
             IEnumerable<IDocument> documents = _predicate == null
                 ? inputs
-                : inputs.Where(context, x => _predicate(x, context));
+                : await inputs.WhereAsync(context, async x => await _predicate.GetValueAsync(x, context));
             return inputs.Concat(await context.ExecuteAsync(this, documents));
         }
     }
