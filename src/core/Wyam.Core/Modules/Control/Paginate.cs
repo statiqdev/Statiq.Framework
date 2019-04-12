@@ -2,15 +2,15 @@
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
+using System.Threading.Tasks;
 using Wyam.Common.Configuration;
 using Wyam.Common.Documents;
+using Wyam.Common.Execution;
 using Wyam.Common.Meta;
 using Wyam.Common.Modules;
-using Wyam.Common.Execution;
 using Wyam.Common.Util;
 using Wyam.Core.Documents;
 using Wyam.Core.Meta;
-using System.Threading.Tasks;
 
 namespace Wyam.Core.Modules.Control
 {
@@ -60,8 +60,8 @@ namespace Wyam.Core.Modules.Control
     public class Paginate : ContainerModule
     {
         private readonly int _pageSize;
-        private readonly Dictionary<string, DocumentConfig> _pageMetadata = new Dictionary<string, DocumentConfig>();
-        private Func<IDocument, IExecutionContext, bool> _predicate;
+        private readonly Dictionary<string, DocumentConfigNew> _pageMetadata = new Dictionary<string, DocumentConfigNew>();
+        private DocumentPredicate _predicate;
         private int _takePages = int.MaxValue;
         private int _skipPages = 0;
 
@@ -98,12 +98,9 @@ namespace Wyam.Core.Modules.Control
         /// </summary>
         /// <param name="predicate">A delegate that should return a <c>bool</c>.</param>
         /// <returns>The current module instance.</returns>
-        public Paginate Where(DocumentConfig predicate)
+        public Paginate Where(DocumentPredicate predicate)
         {
-            Func<IDocument, IExecutionContext, bool> currentPredicate = _predicate;
-            _predicate = currentPredicate == null
-                ? (Func<IDocument, IExecutionContext, bool>)predicate.Invoke<bool>
-                : ((x, c) => currentPredicate(x, c) && predicate.Invoke<bool>(x, c));
+            _predicate = _predicate.CombineWith(predicate);
             return this;
         }
 
@@ -139,7 +136,7 @@ namespace Wyam.Core.Modules.Control
         /// <param name="key">The key of the metadata to add.</param>
         /// <param name="metadata">A delegate with the value for the metadata.</param>
         /// <returns>The current module instance.</returns>
-        public Paginate WithPageMetadata(string key, DocumentConfig metadata)
+        public Paginate WithPageMetadata(string key, DocumentConfigNew metadata)
         {
             if (key == null)
             {
@@ -154,27 +151,26 @@ namespace Wyam.Core.Modules.Control
         public override async Task<IEnumerable<IDocument>> ExecuteAsync(IReadOnlyList<IDocument> inputs, IExecutionContext context)
         {
             // Partition the pages
+            IReadOnlyList<IDocument> documents = (await (await context.ExecuteAsync(this, inputs)).FilterAsync(_predicate, context)).ToList();
             IDocument[][] partitions =
-                Partition(
-                    (await context.ExecuteAsync(this, inputs))
-                        .Where(context, x => _predicate?.Invoke(x, context) ?? true)
-                        .ToList(),
-                    _pageSize)
+                Partition(documents, _pageSize)
                 .ToArray();
             int totalItems = partitions.Sum(x => x.Length);
 
             // Create the documents
-            return inputs.SelectMany(context, input =>
+            return await inputs.SelectManyAsync(context, GetDocuments);
+
+            async Task<IEnumerable<IDocument>> GetDocuments(IDocument input)
             {
                 // Create the pages
                 Page[] pages = partitions
-                    .Skip(_skipPages)
-                    .Take(_takePages)
-                    .Select(x => new Page
-                    {
-                        PageDocuments = x
-                    })
-                    .ToArray();
+                        .Skip(_skipPages)
+                        .Take(_takePages)
+                        .Select(x => new Page
+                        {
+                            PageDocuments = x
+                        })
+                        .ToArray();
 
                 // Special case for no pages, create an empty one
                 if (pages.Length == 0)
@@ -194,9 +190,9 @@ namespace Wyam.Core.Modules.Control
                     // Get the current page document
                     int currentI = i;  // Avoid modified closure for previous/next matadata delegate
                     IDocument document = context.GetDocument(
-                        input,
-                        new Dictionary<string, object>
-                        {
+                            input,
+                            new Dictionary<string, object>
+                            {
                             { Keys.PageDocuments, pages[i].PageDocuments },
                             { Keys.CurrentPage, i + 1 },
                             { Keys.TotalPages, pages.Length },
@@ -205,21 +201,20 @@ namespace Wyam.Core.Modules.Control
                             { Keys.HasPreviousPage, i != 0 },
                             { Keys.NextPage, new CachedDelegateMetadataValue(_ => pages.Length > currentI + 1 ? pages[currentI + 1].Document : null) },
                             { Keys.PreviousPage, new CachedDelegateMetadataValue(_ => currentI != 0 ? pages[currentI - 1].Document : null) }
-                        });
+                            });
 
                     // Apply any page metadata
                     if (_pageMetadata.Count > 0)
                     {
-                        Dictionary<string, object> pageMetadata = _pageMetadata
-                            .Select(kvp => new KeyValuePair<string, object>(kvp.Key, kvp.Value.Invoke<object>(document, context)))
-                            .ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
+                        IEnumerable<KeyValuePair<string, object>> pageMetadata = await _pageMetadata
+                            .SelectAsync(async kvp => new KeyValuePair<string, object>(kvp.Key, await kvp.Value.GetValueAsync(document, context)));
                         document = context.GetDocument(document, pageMetadata);
                     }
 
                     pages[i].Document = document;
                 }
                 return pages.Select(x => x.Document);
-            });
+            }
         }
 
         // Interesting discussion of partitioning at

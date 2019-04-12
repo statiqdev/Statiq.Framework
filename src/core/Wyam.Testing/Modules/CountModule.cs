@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Threading.Tasks;
 using Wyam.Common.Documents;
 using Wyam.Common.Execution;
 using Wyam.Common.IO;
@@ -22,10 +23,11 @@ namespace Wyam.Testing.Modules
         }
 
         /// <inheritdoc />
-        public IEnumerable<IDocument> Execute(IReadOnlyList<IDocument> inputs, IExecutionContext context)
+        public async Task<IEnumerable<IDocument>> ExecuteAsync(IReadOnlyList<IDocument> inputs, IExecutionContext context)
         {
             int sourceCount = 0;
             ExecuteCount++;
+            List<IDocument> results = new List<IDocument>();
             foreach (IDocument input in inputs)
             {
                 InputCount++;
@@ -35,21 +37,22 @@ namespace Wyam.Testing.Modules
                     Value++;
                     if (CloneSource)
                     {
-                        yield return context.GetDocumentAsync(
+                        results.Add(await context.GetDocumentAsync(
                             input,
                             new FilePath(ValueKey + sourceCount++, PathKind.Absolute),
                             input.Content == null ? Value.ToString() : input.Content + Value,
-                            new Dictionary<string, object> { { ValueKey, Value } }).Result;
+                            new Dictionary<string, object> { { ValueKey, Value } }));
                     }
                     else
                     {
-                        yield return context.GetDocumentAsync(
+                        results.Add(await context.GetDocumentAsync(
                             input,
                             input.Content == null ? Value.ToString() : input.Content + Value,
-                            new Dictionary<string, object> { { ValueKey, Value } }).Result;
+                            new Dictionary<string, object> { { ValueKey, Value } }));
                     }
                 }
             }
+            return results;
         }
     }
 }

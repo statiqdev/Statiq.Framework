@@ -35,8 +35,8 @@ namespace Wyam.Core.Modules.IO
         /// The output of the function should be either a full path to the disk
         /// location (including file name) or a path relative to the output folder.
         /// </summary>
-        /// <param name="path">A delegate that returns a <c>string</c> with the desired path.</param>
-        public UnwrittenFiles(AsyncDocumentConfig path)
+        /// <param name="path">A delegate that returns the desired path.</param>
+        public UnwrittenFiles(DocumentConfig<FilePath> path)
             : base(path)
         {
         }

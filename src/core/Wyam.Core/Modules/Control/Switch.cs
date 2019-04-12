@@ -2,11 +2,11 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using Wyam.Common.Configuration;
 using Wyam.Common.Documents;
-using Wyam.Common.Modules;
 using Wyam.Common.Execution;
-using System.Threading.Tasks;
+using Wyam.Common.Modules;
 
 namespace Wyam.Core.Modules.Control
 {
@@ -24,17 +24,17 @@ namespace Wyam.Core.Modules.Control
     /// <category>Control</category>
     public class Switch : IModule
     {
-        private readonly List<Tuple<object, IModule[]>> _cases
-            = new List<Tuple<object, IModule[]>>();
+        private readonly List<Tuple<object, IEnumerable<IModule>>> _cases
+            = new List<Tuple<object, IEnumerable<IModule>>>();
 
-        private readonly DocumentConfig _value;
-        private IModule[] _defaultModules;
+        private readonly DocumentConfigNew _value;
+        private IEnumerable<IModule> _defaultModules;
 
         /// <summary>
         /// Defines the delegate that will be invoked against each input document to get the case comparison value.
         /// </summary>
         /// <param name="value">A delegate that returns an object to compare cases against.</param>
-        public Switch(DocumentConfig value)
+        public Switch(DocumentConfigNew value)
         {
             _value = value ?? throw new ArgumentNullException(nameof(value));
         }
@@ -45,9 +45,17 @@ namespace Wyam.Core.Modules.Control
         /// <param name="value">The value to compare to the one returned by the document delegate. Must be a primitive object or an array of primitive objects.</param>
         /// <param name="modules">The modules to execute if the case object (or any objects in the array) matches the document object.</param>
         /// <returns>The current module instance.</returns>
-        public Switch Case(object value, params IModule[] modules)
+        public Switch Case(object value, params IModule[] modules) => Case(value, (IEnumerable<IModule>)modules);
+
+        /// <summary>
+        /// Defines a case.
+        /// </summary>
+        /// <param name="value">The value to compare to the one returned by the document delegate. Must be a primitive object or an array of primitive objects.</param>
+        /// <param name="modules">The modules to execute if the case object (or any objects in the array) matches the document object.</param>
+        /// <returns>The current module instance.</returns>
+        public Switch Case(object value, IEnumerable<IModule> modules)
         {
-            _cases.Add(new Tuple<object, IModule[]>(value, modules));
+            _cases.Add(new Tuple<object, IEnumerable<IModule>>(value, modules));
             return this;
         }
 
@@ -56,7 +64,14 @@ namespace Wyam.Core.Modules.Control
         /// </summary>
         /// <param name="modules">The modules to execute against documents that don't match a case.</param>
         /// <returns>The current module instance.</returns>
-        public Switch Default(params IModule[] modules)
+        public Switch Default(params IModule[] modules) => Default((IEnumerable<IModule>)modules);
+
+        /// <summary>
+        /// Defines modules to execute against documents that don't match a case.
+        /// </summary>
+        /// <param name="modules">The modules to execute against documents that don't match a case.</param>
+        /// <returns>The current module instance.</returns>
+        public Switch Default(IEnumerable<IModule> modules)
         {
             _defaultModules = modules;
             return this;
@@ -67,14 +82,14 @@ namespace Wyam.Core.Modules.Control
         {
             List<IDocument> results = new List<IDocument>();
             IEnumerable<IDocument> documents = inputs;
-            foreach (Tuple<object, IModule[]> c in _cases)
+            foreach (Tuple<object, IEnumerable<IModule>> c in _cases)
             {
                 List<IDocument> handled = new List<IDocument>();
                 List<IDocument> unhandled = new List<IDocument>();
 
                 foreach (IDocument document in documents)
                 {
-                    object switchValue = _value.Invoke<object>(document, context);
+                    object switchValue = await _value.GetValueAsync(document, context);
                     object caseValue = c.Item1 ?? Array.Empty<object>();
                     IEnumerable caseValues = caseValue.GetType().IsArray ? (IEnumerable)caseValue : Enumerable.Repeat(caseValue, 1);
                     bool matches = caseValues.Cast<object>().Any(cv => object.Equals(switchValue, cv));

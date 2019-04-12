@@ -38,13 +38,17 @@ namespace Wyam.Core.Modules.Extensibility
         /// <see cref="IDocument"/>, <c>IEnumerable&lt;IModule&gt;</c>, <see cref="IModule"/>, object, or null.</param>
         /// <param name="parallel">The delegate is usually evaluated and each input document is processed in parallel.
         /// Setting this to <c>false</c> runs evaluates and processes each document in their original input order.</param>
-        public Execute(AsyncDocumentConfig execute, bool parallel = true)
+        public Execute(DocumentConfigNew execute, bool parallel = true)
         {
             _execute = async (inputs, context) =>
             {
-                Func<IDocument, Task<IEnumerable<IDocument>>> selectMany = async input =>
+                return parallel
+                    ? await inputs.ParallelSelectManyAsync(context, GetResults)
+                    : await inputs.SelectManyAsync(context, GetResults);
+
+                async Task<IEnumerable<IDocument>> GetResults(IDocument input)
                 {
-                    object documentResult = execute(input, context);
+                    object documentResult = await execute.GetValueAsync(input, context);
                     if (documentResult == null)
                     {
                         return new[] { input };
@@ -52,10 +56,7 @@ namespace Wyam.Core.Modules.Extensibility
                     return GetDocuments(documentResult)
                         ?? await ExecuteModulesAsync(documentResult, context, new[] { input })
                         ?? ChangeContent(documentResult, context, input);
-                };
-                return parallel
-                    ? await inputs.ParallelSelectManyAsync(context, selectMany)
-                    : await inputs.SelectManyAsync(context, selectMany);
+                }
             };
         }
 
@@ -68,11 +69,12 @@ namespace Wyam.Core.Modules.Extensibility
         /// Setting this to <c>false</c> runs evaluates and processes each document in their original input order.</param>
         public Execute(Func<IDocument, IExecutionContext, Task> execute, bool parallel = true)
             : this(
-                async (doc, ctx) =>
-                {
-                    await execute(doc, ctx);
-                    return null;
-                },
+                Config.AsyncFromDocument(
+                    async (doc, ctx) =>
+                    {
+                        await execute(doc, ctx);
+                        return null;
+                    }),
                 parallel)
         {
         }
@@ -87,11 +89,11 @@ namespace Wyam.Core.Modules.Extensibility
         /// </summary>
         /// <param name="execute">A delegate to invoke that should return a <c>IEnumerable&lt;IDocument&gt;</c>,
         /// <see cref="IDocument"/>, <c>IEnumerable&lt;IModule&gt;</c>, <see cref="IModule"/>, or null.</param>
-        public Execute(AsyncContextConfig execute)
+        public Execute(ContextConfigNew execute)
         {
             _execute = async (inputs, context) =>
             {
-                object contextResult = await execute(context);
+                object contextResult = await execute.GetValueAsync(context);
                 if (contextResult == null)
                 {
                     return inputs;
@@ -109,11 +111,12 @@ namespace Wyam.Core.Modules.Extensibility
         /// <param name="execute">An action to execute.</param>
         public Execute(Func<IExecutionContext, Task> execute)
             : this(
-                async ctx =>
-                {
-                    await execute(ctx);
-                    return null;
-                })
+                Config.AsyncFromContext(
+                    async ctx =>
+                    {
+                        await execute(ctx);
+                        return null;
+                    }))
         {
         }
 
@@ -145,8 +148,7 @@ namespace Wyam.Core.Modules.Extensibility
         {
             // Check for a single IModule first since some modules also implement IEnumerable<IModule>
             IEnumerable<IModule> modules;
-            IModule module = results as IModule;
-            if (module != null)
+            if (results is IModule module)
             {
                 modules = new[] { module };
             }

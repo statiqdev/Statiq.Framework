@@ -31,8 +31,7 @@ namespace Wyam.Core.Modules.IO
     /// <category>Input/Output</category>
     public class CopyFiles : IModule, IAsNewDocuments
     {
-        private readonly AsyncDocumentConfig _patternsDelegate;
-        private readonly string[] _patterns;
+        private readonly DocumentConfig<IEnumerable<string>> _patterns;
         private Func<IFile, IFile, Task<FilePath>> _destinationPath;
         private Func<IFile, Task<bool>> _predicate = null;
 
@@ -44,9 +43,9 @@ namespace Wyam.Core.Modules.IO
         /// specify a function-based source path if there will be no overlap between the path returned from each input document.
         /// </summary>
         /// <param name="patterns">A delegate that returns one or more globbing patterns and/or absolute paths.</param>
-        public CopyFiles(AsyncDocumentConfig patterns)
+        public CopyFiles(DocumentConfig<IEnumerable<string>> patterns)
         {
-            _patternsDelegate = patterns ?? throw new ArgumentNullException(nameof(patterns));
+            _patterns = patterns ?? throw new ArgumentNullException(nameof(patterns));
         }
 
         /// <summary>
@@ -57,8 +56,8 @@ namespace Wyam.Core.Modules.IO
         /// </summary>
         /// <param name="patterns">The globbing patterns and/or absolute paths to read.</param>
         public CopyFiles(params string[] patterns)
+            : this((DocumentConfig<IEnumerable<string>>)patterns)
         {
-            _patterns = patterns ?? throw new ArgumentNullException(nameof(patterns));
         }
 
         /// <summary>
@@ -89,7 +88,7 @@ namespace Wyam.Core.Modules.IO
                 throw new ArgumentNullException(nameof(destinationPath));
             }
 
-            _destinationPath = async (source, destination) => await destinationPath(source);
+            _destinationPath = async (source, _) => await destinationPath(source);
             return this;
         }
 
@@ -114,13 +113,13 @@ namespace Wyam.Core.Modules.IO
         /// <inheritdoc />
         public async Task<IEnumerable<IDocument>> ExecuteAsync(IReadOnlyList<IDocument> inputs, IExecutionContext context)
         {
-            return _patterns != null
-                ? await ExecuteAsync(null, _patterns, context)
-                : await inputs.ParallelSelectManyAsync(context, async input =>
-                    await ExecuteAsync(input, await _patternsDelegate.InvokeAsync<string[]>(input, context, "while getting patterns"), context));
+            return _patterns.IsDocumentConfig
+                ? await inputs.ParallelSelectManyAsync(context, async input =>
+                    await ExecuteAsync(input, await _patterns.GetValueAsync(input, context), context))
+                : await ExecuteAsync(null, await _patterns.GetValueAsync(null, context), context);
         }
 
-        private async Task<IEnumerable<IDocument>> ExecuteAsync(IDocument input, string[] patterns, IExecutionContext context)
+        private async Task<IEnumerable<IDocument>> ExecuteAsync(IDocument input, IEnumerable<string> patterns, IExecutionContext context)
         {
             if (patterns != null)
             {

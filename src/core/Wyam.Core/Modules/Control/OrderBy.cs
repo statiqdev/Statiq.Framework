@@ -1,12 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using Wyam.Common.Configuration;
 using Wyam.Common.Documents;
-using Wyam.Common.Modules;
 using Wyam.Common.Execution;
+using Wyam.Common.Modules;
 using Wyam.Core.Util;
-using System.Threading.Tasks;
 
 namespace Wyam.Core.Modules.Control
 {
@@ -25,12 +25,13 @@ namespace Wyam.Core.Modules.Control
         /// Orders the input documents using the specified delegate to get the ordering key.
         /// </summary>
         /// <param name="key">A delegate that should return the key to use for ordering.</param>
-        public OrderBy(DocumentConfig key)
+        public OrderBy(DocumentConfigNew key)
         {
             if (key == null)
             {
                 throw new ArgumentNullException(nameof(key));
             }
+
             _orders.Push(new Order(key));
         }
 
@@ -40,12 +41,13 @@ namespace Wyam.Core.Modules.Control
         /// </summary>
         /// <param name="key">A delegate that should return the key to use for ordering.</param>
         /// <returns>The current module instance.</returns>
-        public OrderBy ThenBy(DocumentConfig key)
+        public OrderBy ThenBy(DocumentConfigNew key)
         {
             if (key == null)
             {
                 throw new ArgumentNullException(nameof(key));
             }
+
             _orders.Push(new Order(key));
             return this;
         }
@@ -90,35 +92,37 @@ namespace Wyam.Core.Modules.Control
         }
 
         /// <inheritdoc />
-        public Task<IEnumerable<IDocument>> ExecuteAsync(IReadOnlyList<IDocument> inputs, IExecutionContext context)
+        public async Task<IEnumerable<IDocument>> ExecuteAsync(IReadOnlyList<IDocument> inputs, IExecutionContext context)
         {
-            IOrderedEnumerable<IDocument> orderdList = null;
+            IOrderedEnumerable<(IDocument Doc, object Key)> orderdList = null;
             foreach (Order order in _orders.Reverse())
             {
+                IEnumerable<(IDocument Doc, object Key)> inputsWithKey =
+                    await inputs.SelectAsync(context, async x => (x, await order.Key.GetValueAsync(x, context)));
                 if (orderdList == null)
                 {
                     orderdList = order.Descending
-                       ? inputs.OrderByDescending(x => order.Key(x, context), order.Comparer)
-                       : inputs.OrderBy(x => order.Key(x, context), order.Comparer);
+                        ? inputsWithKey.OrderByDescending(x => x.Key, order.Comparer)
+                        : inputsWithKey.OrderBy(x => x.Key, order.Comparer);
                 }
                 else
                 {
                     orderdList = order.Descending
-                        ? orderdList.ThenByDescending(x => order.Key(x, context), order.Comparer)
-                        : orderdList.ThenBy(x => order.Key(x, context), order.Comparer);
+                        ? orderdList.ThenByDescending(x => x.Key, order.Comparer)
+                        : orderdList.ThenBy(x => x.Key, order.Comparer);
                 }
             }
 
-            return Task.FromResult<IEnumerable<IDocument>>(orderdList);
+            return orderdList.Select(x => x.Doc);
         }
 
         private class Order
         {
-            public DocumentConfig Key { get; }
+            public DocumentConfigNew Key { get; }
             public bool Descending { get; set; }
             public IComparer<object> Comparer { get; set; }
 
-            public Order(DocumentConfig key)
+            public Order(DocumentConfigNew key)
             {
                 Key = key;
             }

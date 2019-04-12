@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Threading.Tasks;
 using Wyam.Common.Documents;
 using Wyam.Common.Execution;
 using Wyam.Common.Meta;
@@ -34,7 +35,7 @@ namespace Wyam.Core.Modules.Metadata
         }
 
         /// <inheritdoc />
-        public IEnumerable<IDocument> Execute(IReadOnlyList<IDocument> inputs, IExecutionContext context)
+        public Task<IEnumerable<IDocument>> ExecuteAsync(IReadOnlyList<IDocument> inputs, IExecutionContext context)
         {
             // Use a stack so we don't overflow the call stack with recursive calls for deep trees
             Stack<IDocument> stack = new Stack<IDocument>();
@@ -42,10 +43,11 @@ namespace Wyam.Core.Modules.Metadata
             {
                 stack.Push(root);
             }
+            List<IDocument> results = new List<IDocument>();
             while (stack.Count > 0)
             {
                 IDocument current = stack.Pop();
-                yield return current;
+                results.Add(current);
                 IEnumerable<IDocument> children = current.DocumentList(_childrenKey);
                 if (children != null)
                 {
@@ -55,6 +57,7 @@ namespace Wyam.Core.Modules.Metadata
                     }
                 }
             }
+            return Task.FromResult<IEnumerable<IDocument>>(results);
         }
     }
 }

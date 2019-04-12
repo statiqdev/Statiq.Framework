@@ -1,10 +1,11 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using Wyam.Common.Documents;
-using Wyam.Common.Modules;
 using Wyam.Common.Execution;
 using Wyam.Common.Meta;
+using Wyam.Common.Modules;
 using Wyam.Common.Util;
 
 namespace Wyam.Core.Modules.Metadata
@@ -91,9 +92,9 @@ namespace Wyam.Core.Modules.Metadata
         }
 
         /// <inheritdoc />
-        public IEnumerable<IDocument> Execute(IReadOnlyList<IDocument> inputs, IExecutionContext context)
+        public Task<IEnumerable<IDocument>> ExecuteAsync(IReadOnlyList<IDocument> inputs, IExecutionContext context)
         {
-            return inputs.AsParallel().Select(context, input =>
+            Parallel.ForEach(inputs, input =>
             {
                 // Check if the key exists
                 if (!input.Metadata.ContainsKey(_key))
@@ -101,7 +102,7 @@ namespace Wyam.Core.Modules.Metadata
                     if (_optional)
                     {
                         // It doesn't exist, but it wasn't required, so we're good.
-                        return input;
+                        return;
                     }
 
                     // This doesn't exist, and was required.
@@ -109,12 +110,10 @@ namespace Wyam.Core.Modules.Metadata
                 }
 
                 // Attempt to convert it to the desired type
-                T value;
-                if (!input.MetadataAs<T>().TryGetValue(_key, out value))
+                if (!input.MetadataAs<T>().TryGetValue(_key, out T value))
                 {
                     // Report the original string, as the value coming out of TryGetValue might not be the same as what went in.
-                    string originalStringValue = input.String(_key);
-                    throw GetException($"Value \"{originalStringValue}\" could not be converted to type \"{typeof(T).Name}\".");
+                    throw GetException($"Value \"{input.String(_key)}\" could not be converted to type \"{typeof(T).Name}\".");
                 }
 
                 // Check each assertion
@@ -125,9 +124,9 @@ namespace Wyam.Core.Modules.Metadata
                         throw GetException(assertion.Message);
                     }
                 }
-
-                return input;
             });
+
+            return Task.FromResult<IEnumerable<IDocument>>(inputs);
         }
 
         private Exception GetException(string message) => new Exception($"{message ?? "Assertion failed"}");

@@ -26,8 +26,7 @@ namespace Wyam.Core.Modules.Control
     public class Documents : IModule
     {
         private readonly List<string> _pipelines = new List<string>();
-        private readonly ContextConfig<IEnumerable<IDocument>> _contextDocuments;
-        private readonly DocumentConfig<IEnumerable<IDocument>> _documentDocuments;
+        private readonly DocumentConfig<IEnumerable<IDocument>> _documents;
         private DocumentPredicate _predicate;
 
         /// <summary>
@@ -47,19 +46,6 @@ namespace Wyam.Core.Modules.Control
         }
 
         /// <summary>
-        /// This will get documents based on the context so you can perform custom document
-        /// fetching behavior. The delegate will only be called once,
-        /// regardless of the number of input documents. The return value
-        /// is expected to be a <c>IEnumerable&lt;IDocument&gt;</c>.
-        /// </summary>
-        /// <param name="documents">A delegate that should return
-        /// a <c>IEnumerable&lt;IDocument&gt;</c> containing the documents to output.</param>
-        public Documents(ContextConfig<IEnumerable<IDocument>> documents)
-        {
-            _contextDocuments = documents ?? throw new ArgumentNullException(nameof(documents));
-        }
-
-        /// <summary>
         /// This will get documents based on each input document. The output will be the
         /// aggregate of all returned documents for each input document. The return value
         /// is expected to be a <c>IEnumerable&lt;IDocument&gt;</c>.
@@ -69,7 +55,7 @@ namespace Wyam.Core.Modules.Control
         /// output for each input document.</param>
         public Documents(DocumentConfig<IEnumerable<IDocument>> documents)
         {
-            _documentDocuments = documents ?? throw new ArgumentNullException(nameof(documents));
+            _documents = documents ?? throw new ArgumentNullException(nameof(documents));
         }
 
         /// <summary>
@@ -78,7 +64,7 @@ namespace Wyam.Core.Modules.Control
         /// <param name="count">The number of new documents to output.</param>
         public Documents(int count)
         {
-            _contextDocuments = Config.FromContext(ctx =>
+            _documents = Config.FromContext(ctx =>
             {
                 List<IDocument> documents = new List<IDocument>();
                 for (int c = 0; c < count; c++)
@@ -95,7 +81,7 @@ namespace Wyam.Core.Modules.Control
         /// <param name="content">The content for each output document.</param>
         public Documents(params string[] content)
         {
-            _contextDocuments = Config.AsyncFromContext(async ctx => await content.SelectAsync(async x => await ctx.GetDocumentAsync(x)));
+            _documents = Config.AsyncFromContext(async ctx => await content.SelectAsync(async x => await ctx.GetDocumentAsync(x)));
         }
 
         /// <summary>
@@ -104,7 +90,7 @@ namespace Wyam.Core.Modules.Control
         /// <param name="metadata">The metadata for each output document.</param>
         public Documents(params IEnumerable<KeyValuePair<string, object>>[] metadata)
         {
-            _contextDocuments = Config.FromContext(ctx => metadata.Select(ctx.GetDocument));
+            _documents = Config.FromContext(ctx => metadata.Select(ctx.GetDocument));
         }
 
         /// <summary>
@@ -113,7 +99,7 @@ namespace Wyam.Core.Modules.Control
         /// <param name="contentAndMetadata">The content and metadata for each output document.</param>
         public Documents(params Tuple<string, IEnumerable<KeyValuePair<string, object>>>[] contentAndMetadata)
         {
-            _contextDocuments = Config.AsyncFromContext(async ctx => await contentAndMetadata.SelectAsync(async x => await ctx.GetDocumentAsync(x.Item1, x.Item2)));
+            _documents = Config.AsyncFromContext(async ctx => await contentAndMetadata.SelectAsync(async x => await ctx.GetDocumentAsync(x.Item1, x.Item2)));
         }
 
         /// <summary>
@@ -139,7 +125,7 @@ namespace Wyam.Core.Modules.Control
         /// <returns>The current module instance.</returns>
         public Documents FromPipelines(params string[] pipelines)
         {
-            if (_contextDocuments != null || _documentDocuments != null)
+            if (_documents != null)
             {
                 throw new InvalidOperationException("Pipelines cannot be specified if the module is generating new documents using a delegate");
             }
@@ -152,13 +138,11 @@ namespace Wyam.Core.Modules.Control
         {
             IEnumerable<IDocument> documents;
 
-            if (_documentDocuments != null)
+            if (_documents != null)
             {
-                documents = await inputs.SelectManyAsync(context, async x => await _documentDocuments.GetValueAsync(x, context));
-            }
-            else if (_contextDocuments != null)
-            {
-                documents = await _contextDocuments.GetValueAsync(context);
+                documents = _documents.IsDocumentConfig
+                    ? await inputs.SelectManyAsync(context, x => _documents.GetValueAsync(x, context))
+                    : await _documents.GetValueAsync(null, context);
             }
             else
             {
@@ -167,12 +151,7 @@ namespace Wyam.Core.Modules.Control
                     : _pipelines.SelectMany(x => context.Documents.FromPipeline(x));
             }
 
-            if (_predicate != null)
-            {
-                documents = await documents.WhereAsync(context, async x => await _predicate.GetValueAsync(x, context));
-            }
-
-            return documents;
+            return await documents.FilterAsync(_predicate, context);
         }
     }
 }

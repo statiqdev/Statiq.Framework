@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Wyam.Common.Configuration;
@@ -15,22 +16,19 @@ namespace Wyam.Core.Modules.Control
     /// <category>Control</category>
     public class Where : IModule
     {
-        private readonly DocumentConfig _predicate;
+        private readonly DocumentPredicate _predicate;
 
         /// <summary>
         /// Specifies the predicate to use for filtering documents.
         /// Only input documents for which the predicate returns <c>true</c> will be output.
         /// </summary>
         /// <param name="predicate">A predicate delegate that should return a <c>bool</c>.</param>
-        public Where(DocumentConfig predicate)
+        public Where(DocumentPredicate predicate)
         {
-            _predicate = predicate;
+            _predicate = predicate ?? throw new ArgumentNullException(nameof(predicate));
         }
 
         /// <inheritdoc />
-        public Task<IEnumerable<IDocument>> ExecuteAsync(IReadOnlyList<IDocument> inputs, IExecutionContext context)
-        {
-            return Task.FromResult(inputs.Where(context, x => _predicate.Invoke<bool>(x, context)));
-        }
+        public Task<IEnumerable<IDocument>> ExecuteAsync(IReadOnlyList<IDocument> inputs, IExecutionContext context) => inputs.FilterAsync(_predicate, context);
     }
 }

@@ -1,14 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using Wyam.Common.Configuration;
 using Wyam.Common.Documents;
-using Wyam.Common.Modules;
 using Wyam.Common.Execution;
 using Wyam.Common.IO;
 using Wyam.Common.Meta;
+using Wyam.Common.Modules;
 using Wyam.Common.Util;
-using System.Threading.Tasks;
 
 namespace Wyam.Core.Modules.Control
 {
@@ -29,7 +29,7 @@ namespace Wyam.Core.Modules.Control
     /// <category>Control</category>
     public class Sidecar : ContainerModule
     {
-        private readonly DocumentConfig _sidecarPath;
+        private readonly DocumentConfig<FilePath> _sidecarPath;
 
         /// <summary>
         /// Searches for sidecar files at the same path as the input document SourceFilePath with the additional extension .meta.
@@ -76,7 +76,7 @@ namespace Wyam.Core.Modules.Control
                 throw new ArgumentException("Value cannot be null or empty.", nameof(extension));
             }
 
-            _sidecarPath = (d, c) => d.FilePath(Common.Meta.Keys.SourceFilePath)?.AppendExtension(extension);
+            _sidecarPath = Config.FromDocument((d, _) => d.FilePath(Keys.SourceFilePath)?.AppendExtension(extension));
         }
 
         /// <summary>
@@ -85,7 +85,7 @@ namespace Wyam.Core.Modules.Control
         /// </summary>
         /// <param name="sidecarPath">A delegate that returns a <see cref="FilePath"/> with the desired sidecar path.</param>
         /// <param name="modules">The modules to execute against the sidecar file.</param>
-        public Sidecar(DocumentConfig sidecarPath, params IModule[] modules)
+        public Sidecar(DocumentConfig<FilePath> sidecarPath, params IModule[] modules)
             : this(sidecarPath, (IEnumerable<IModule>)modules)
         {
         }
@@ -96,7 +96,7 @@ namespace Wyam.Core.Modules.Control
         /// </summary>
         /// <param name="sidecarPath">A delegate that returns a <see cref="FilePath"/> with the desired sidecar path.</param>
         /// <param name="modules">The modules to execute against the sidecar file.</param>
-        public Sidecar(DocumentConfig sidecarPath, IEnumerable<IModule> modules)
+        public Sidecar(DocumentConfig<FilePath> sidecarPath, IEnumerable<IModule> modules)
             : base(modules)
         {
             _sidecarPath = sidecarPath ?? throw new ArgumentNullException(nameof(sidecarPath));
@@ -108,7 +108,7 @@ namespace Wyam.Core.Modules.Control
             List<IDocument> results = new List<IDocument>();
             await context.ForEachAsync(inputs, async input =>
             {
-                FilePath sidecarPath = _sidecarPath.Invoke<FilePath>(input, context);
+                FilePath sidecarPath = await _sidecarPath.GetValueAsync(input, context);
                 if (sidecarPath != null)
                 {
                     IFile sidecarFile = await context.FileSystem.GetInputFileAsync(sidecarPath.FullPath);

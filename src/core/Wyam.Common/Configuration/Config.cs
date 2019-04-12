@@ -10,6 +10,14 @@ namespace Wyam.Common.Configuration
 {
     public static class Config
     {
+        /// <summary>
+        /// Creates a <see cref="ContextConfigNew"/> (and via casting, a <see cref="DocumentConfigNew"/>) from an object value.
+        /// </summary>
+        /// <remarks>
+        /// If you need to get a strongly typed configuration, you don't need a helper method as the value can be directly casted to a configuration item.
+        /// </remarks>
+        /// <param name="value">The value of the configuration.</param>
+        /// <returns>A configuration item with the given value.</returns>
         public static ContextConfigNew FromValue(object value) => new ContextConfigNew(_ => Task.FromResult(value));
 
         public static ContextConfigNew AsyncFromValue(Task<object> value) => new ContextConfigNew(_ => value);

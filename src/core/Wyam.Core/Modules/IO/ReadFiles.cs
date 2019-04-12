@@ -40,28 +40,17 @@ namespace Wyam.Core.Modules.IO
     /// <category>Input/Output</category>
     public class ReadFiles : IModule, IAsNewDocuments
     {
-        private readonly AsyncContextConfig _contextPatterns;
-        private readonly AsyncDocumentConfig _documentPatterns;
+        private readonly DocumentConfig<IEnumerable<string>> _patterns;
         private Func<IFile, Task<bool>> _predicate = null;
-
-        /// <summary>
-        /// Reads all files that match the specified globbing patterns and/or absolute paths. This allows you to
-        /// specify different patterns and/or paths depending on the context.
-        /// </summary>
-        /// <param name="patterns">A delegate that returns one or more globbing patterns and/or absolute paths.</param>
-        public ReadFiles(AsyncContextConfig patterns)
-        {
-            _contextPatterns = patterns ?? throw new ArgumentNullException(nameof(patterns));
-        }
 
         /// <summary>
         /// Reads all files that match the specified globbing patterns and/or absolute paths. This allows you to
         /// specify different patterns and/or paths depending on the input.
         /// </summary>
         /// <param name="patterns">A delegate that returns one or more globbing patterns and/or absolute paths.</param>
-        public ReadFiles(AsyncDocumentConfig patterns)
+        public ReadFiles(DocumentConfig<IEnumerable<string>> patterns)
         {
-            _documentPatterns = patterns ?? throw new ArgumentNullException(nameof(patterns));
+            _patterns = patterns ?? throw new ArgumentNullException(nameof(patterns));
         }
 
         /// <summary>
@@ -69,17 +58,8 @@ namespace Wyam.Core.Modules.IO
         /// </summary>
         /// <param name="patterns">The globbing patterns and/or absolute paths to read.</param>
         public ReadFiles(params string[] patterns)
+            : this((DocumentConfig<IEnumerable<string>>)patterns)
         {
-            if (patterns == null)
-            {
-                throw new ArgumentNullException(nameof(patterns));
-            }
-            if (patterns.Any(x => x == null))
-            {
-                throw new ArgumentNullException(nameof(patterns));
-            }
-
-            _contextPatterns = _ => Task.FromResult<object>(patterns);
         }
 
         /// <summary>
@@ -97,13 +77,13 @@ namespace Wyam.Core.Modules.IO
         /// <inheritdoc />
         public async Task<IEnumerable<IDocument>> ExecuteAsync(IReadOnlyList<IDocument> inputs, IExecutionContext context)
         {
-            return _contextPatterns != null
-                ? await ExecuteAsync(null, await _contextPatterns.InvokeAsync<string[]>(context, "while getting patterns"), context)
-                : await inputs.ParallelSelectManyAsync(context, async input =>
-                    await ExecuteAsync(input, await _documentPatterns.InvokeAsync<string[]>(input, context, "while getting patterns"), context));
+            return _patterns.IsDocumentConfig
+                ? await inputs.ParallelSelectManyAsync(context, async input =>
+                    await ExecuteAsync(input, await _patterns.GetValueAsync(input, context), context))
+                : await ExecuteAsync(null, await _patterns.GetValueAsync(null, context), context);
         }
 
-        private async Task<IEnumerable<IDocument>> ExecuteAsync(IDocument input, string[] patterns, IExecutionContext context)
+        private async Task<IEnumerable<IDocument>> ExecuteAsync(IDocument input, IEnumerable<string> patterns, IExecutionContext context)
         {
             if (patterns != null)
             {

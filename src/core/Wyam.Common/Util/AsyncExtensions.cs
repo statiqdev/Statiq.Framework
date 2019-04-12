@@ -50,6 +50,20 @@ namespace Wyam.Common.Util
             return tasks.Where(x => x.Item2.Result).Select(x => x.Item1);
         }
 
+        public static async Task<bool> AnyAsync<TSource>(
+            this IEnumerable<TSource> items,
+            Func<TSource, Task<bool>> asyncPredicate)
+        {
+            foreach (TSource item in items)
+            {
+                if (await asyncPredicate(item))
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+
         public static async Task<TItem> FindAsync<TItem>(
             this List<TItem> list,
             Func<TItem, Task<bool>> predicate)

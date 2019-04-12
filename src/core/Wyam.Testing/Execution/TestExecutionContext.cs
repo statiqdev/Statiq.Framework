@@ -225,7 +225,7 @@ namespace Wyam.Testing.Execution
                 return true;
             }
 
-            result = default(T);
+            result = default;
             return value == null;
         }
 

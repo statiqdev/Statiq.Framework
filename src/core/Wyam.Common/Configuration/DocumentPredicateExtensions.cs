@@ -22,5 +22,8 @@ namespace Wyam.Common.Configuration
             }
             return new DocumentPredicate(async (doc, ctx) => await first.GetValueAsync(doc, ctx) && await second.GetValueAsync(doc, ctx));
         }
+
+        public static Task<IEnumerable<IDocument>> FilterAsync(this IEnumerable<IDocument> documents, DocumentPredicate predicate, IExecutionContext context) =>
+            predicate == null ? Task.FromResult(documents) : documents.WhereAsync(context, x => predicate.GetValueAsync(x, context));
     }
 }

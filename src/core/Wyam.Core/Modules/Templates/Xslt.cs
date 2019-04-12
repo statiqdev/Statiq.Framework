@@ -2,13 +2,14 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Xml;
 using System.Xml.Xsl;
 using Wyam.Common.Configuration;
 using Wyam.Common.Documents;
+using Wyam.Common.Execution;
 using Wyam.Common.IO;
 using Wyam.Common.Modules;
-using Wyam.Common.Execution;
 using Wyam.Common.Tracing;
 using Wyam.Common.Util;
 
@@ -25,17 +26,8 @@ namespace Wyam.Core.Modules.Templates
     /// <category>Templates</category>
     public class Xslt : IModule
     {
-        private readonly DocumentConfig _xsltPath;
+        private readonly DocumentConfig<FilePath> _xsltPath;
         private readonly IModule[] _xsltGeneration;
-
-        /// <summary>
-        /// Transforms input documents using a specified XSLT file from the file system.
-        /// </summary>
-        /// <param name="xsltPath">The path of the XSLT file to use.</param>
-        public Xslt(FilePath xsltPath)
-        {
-            _xsltPath = (a, b) => xsltPath;
-        }
 
         /// <summary>
         /// Transforms input documents using a specified XSLT file from the file system
@@ -43,7 +35,7 @@ namespace Wyam.Core.Modules.Templates
         /// on the input document.
         /// </summary>
         /// <param name="xsltPath">A delegate that should return a <see cref="FilePath"/> with the XSLT file to use.</param>
-        public Xslt(DocumentConfig xsltPath)
+        public Xslt(DocumentConfig<FilePath> xsltPath)
         {
             _xsltPath = xsltPath;
         }
@@ -59,53 +51,45 @@ namespace Wyam.Core.Modules.Templates
         }
 
         /// <inheritdoc />
-        public IEnumerable<IDocument> Execute(IReadOnlyList<IDocument> inputs, IExecutionContext context)
+        public Task<IEnumerable<IDocument>> ExecuteAsync(IReadOnlyList<IDocument> inputs, IExecutionContext context)
         {
-            return inputs.AsParallel().Select(context, input =>
+            return inputs.ParallelSelectAsync(context, async input =>
             {
-                try
-                {
-                    XslCompiledTransform xslt = new XslCompiledTransform();
+                XslCompiledTransform xslt = new XslCompiledTransform();
 
-                    if (_xsltPath != null)
+                if (_xsltPath != null)
+                {
+                    FilePath path = await _xsltPath.GetValueAsync(input, context);
+                    if (path != null)
                     {
-                        FilePath path = _xsltPath.Invoke<FilePath>(input, context);
-                        if (path != null)
+                        IFile file = await context.FileSystem.GetInputFileAsync(path);
+                        if (await file.GetExistsAsync())
                         {
-                            IFile file = context.FileSystem.GetInputFileAsync(path).Result;
-                            if (file.GetExistsAsync().Result)
+                            using (Stream fileStream = await file.OpenReadAsync())
                             {
-                                using (Stream fileStream = file.OpenReadAsync().Result)
-                                {
-                                    xslt.Load(XmlReader.Create(fileStream));
-                                }
+                                xslt.Load(XmlReader.Create(fileStream));
                             }
                         }
                     }
-                    else if (_xsltGeneration != null)
-                    {
-                        IDocument xsltDocument = context.Execute(_xsltGeneration, new[] { input }).Single();
-                        using (Stream stream = xsltDocument.GetStream())
-                        {
-                            xslt.Load(XmlReader.Create(stream));
-                        }
-                    }
-                    using (Stream stream = input.GetStream())
-                    {
-                        StringWriter str = new StringWriter();
-                        using (XmlTextWriter writer = new XmlTextWriter(str))
-                        {
-                            xslt.Transform(XmlReader.Create(stream), writer);
-                        }
-                        return context.GetDocumentAsync(input, str.ToString()).Result;
-                    }
                 }
-                catch (Exception e)
+                else if (_xsltGeneration != null)
                 {
-                    Trace.Error($"An {e.GetType().Name} occurred: {e.Message}");
-                    return null;
+                    IDocument xsltDocument = (await context.ExecuteAsync(_xsltGeneration, new[] { input })).Single();
+                    using (Stream stream = xsltDocument.GetStream())
+                    {
+                        xslt.Load(XmlReader.Create(stream));
+                    }
                 }
-            }).Where(x => x != null);
+                using (Stream stream = input.GetStream())
+                {
+                    StringWriter str = new StringWriter();
+                    using (XmlTextWriter writer = new XmlTextWriter(str))
+                    {
+                        xslt.Transform(XmlReader.Create(stream), writer);
+                    }
+                    return await context.GetDocumentAsync(input, str.ToString());
+                }
+            });
         }
     }
 }

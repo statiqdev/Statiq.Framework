@@ -29,18 +29,7 @@ namespace Wyam.Core.Modules.Control
         /// </summary>
         /// <param name="predicate">A predicate delegate that should return a <c>bool</c>.</param>
         /// <param name="modules">The modules to execute on documents where the predicate is <c>true</c>.</param>
-        public If(DocumentConfig predicate, params IModule[] modules)
-        {
-            _conditions.Add(new IfCondition(predicate, modules));
-        }
-
-        /// <summary>
-        /// Specifies a predicate and a series of child modules to be evaluated if the predicate returns <c>true</c>.
-        /// The predicate will be evaluated once for all input documents.
-        /// </summary>
-        /// <param name="predicate">A predicate delegate that should return a <c>bool</c>.</param>
-        /// <param name="modules">The modules to execute on documents if the predicate is <c>true</c>.</param>
-        public If(ContextConfig predicate, params IModule[] modules)
+        public If(DocumentPredicate predicate, params IModule[] modules)
         {
             _conditions.Add(new IfCondition(predicate, modules));
         }
@@ -53,21 +42,7 @@ namespace Wyam.Core.Modules.Control
         /// <param name="predicate">A predicate delegate that should return a <c>bool</c>.</param>
         /// <param name="modules">The modules to execute on documents where the predicate is <c>true</c>.</param>
         /// <returns>The current module instance.</returns>
-        public If ElseIf(DocumentConfig predicate, params IModule[] modules)
-        {
-            _conditions.Add(new IfCondition(predicate, modules));
-            return this;
-        }
-
-        /// <summary>
-        /// Specifies an alternate condition to be tested on documents that did not satisfy
-        /// previous conditions. You can chain together as many <c>ElseIf</c> calls as needed.
-        /// The predicate will be evaluated once for all input documents.
-        /// </summary>
-        /// <param name="predicate">A predicate delegate that should return a <c>bool</c>.</param>
-        /// <param name="modules">The modules to execute on documents if the predicate is <c>true</c>.</param>
-        /// <returns>The current module instance.</returns>
-        public If ElseIf(ContextConfig predicate, params IModule[] modules)
+        public If ElseIf(DocumentPredicate predicate, params IModule[] modules)
         {
             _conditions.Add(new IfCondition(predicate, modules));
             return this;
@@ -110,26 +85,16 @@ namespace Wyam.Core.Modules.Control
                 // Split the documents into ones that satisfy the predicate and ones that don't
                 List<IDocument> matched = new List<IDocument>();
                 List<IDocument> unmatched = new List<IDocument>();
-                if (condition.IsFinalElse)
+                if (condition.Predicate == null)
                 {
+                    // This is the final else without a predicate
                     matched.AddRange(documents);
                 }
-                else if (condition.ContextConfig != null)
+                else if (condition.Predicate.IsDocumentConfig)
                 {
-                    if (condition.ContextConfig.Invoke<bool>(context, "while evaluating condition"))
+                    await context.ForEachAsync(documents, async document =>
                     {
-                        matched.AddRange(documents);
-                    }
-                    else
-                    {
-                        unmatched.AddRange(documents);
-                    }
-                }
-                else if (condition.DocumentConfig != null)
-                {
-                    context.ForEach(documents, document =>
-                    {
-                        if (condition.DocumentConfig.Invoke<bool>(document, context, "while evaluating condition"))
+                        if (await condition.Predicate.GetValueAsync(document, context))
                         {
                             matched.Add(document);
                         }
@@ -138,6 +103,17 @@ namespace Wyam.Core.Modules.Control
                             unmatched.Add(document);
                         }
                     });
+                }
+                else
+                {
+                    if (await condition.Predicate.GetValueAsync(null, context))
+                    {
+                        matched.AddRange(documents);
+                    }
+                    else
+                    {
+                        unmatched.AddRange(documents);
+                    }
                 }
 
                 // Run the modules on the documents that satisfy the predicate

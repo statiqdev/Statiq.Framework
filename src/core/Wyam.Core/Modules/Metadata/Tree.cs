@@ -45,9 +45,9 @@ namespace Wyam.Core.Modules.Metadata
     /// <category>Metadata</category>
     public class Tree : IModule
     {
-        private DocumentConfig _isRoot;
-        private DocumentConfig _treePath;
-        private Func<object[], MetadataItems, IExecutionContext, IDocument> _placeholderFactory;
+        private DocumentPredicate _isRoot;
+        private DocumentConfig<string[]> _treePath;
+        private Func<string[], MetadataItems, IExecutionContext, Task<IDocument>> _placeholderFactory;
         private Comparison<IDocument> _sort;
         private bool _collapseRoot = false;
         private bool _nesting = false;
@@ -65,8 +65,8 @@ namespace Wyam.Core.Modules.Metadata
         /// </summary>
         public Tree()
         {
-            _isRoot = (doc, ctx) => false;
-            _treePath = (doc, ctx) =>
+            _isRoot = false;
+            _treePath = Config.FromDocument((doc, _) =>
             {
                 // Attempt to get the segments first from RelativeFilePath and then from Source
                 List<string> segments = doc.FilePath(Keys.RelativeFilePath)?.Segments.ToList();
@@ -80,13 +80,13 @@ namespace Wyam.Core.Modules.Metadata
                 {
                     segments.RemoveAt(segments.Count - 1);
                 }
-                return segments.Cast<object>().ToArray();
-            };
-            _placeholderFactory = (treePath, items, context) =>
+                return segments.ToArray();
+            });
+            _placeholderFactory = async (treePath, items, context) =>
             {
                 FilePath source = new FilePath(string.Join("/", treePath.Concat(new[] { "index.html" })));
                 items.Add(new MetadataItem(Keys.RelativeFilePath, source));
-                return context.GetDocument(context.FileSystem.GetInputFileAsync(source).Result.Path.FullPath, items);
+                return context.GetDocument((await context.FileSystem.GetInputFileAsync(source)).Path.FullPath, items);
             };
             _sort = (x, y) => Comparer.Default.Compare(
                 x.Get<object[]>(Keys.TreePath)?.LastOrDefault(),
@@ -105,7 +105,7 @@ namespace Wyam.Core.Modules.Metadata
         /// </remarks>
         /// <param name="factory">The factory function.</param>
         /// <returns>The current module instance.</returns>
-        public Tree WithPlaceholderFactory(Func<object[], MetadataItems, IExecutionContext, IDocument> factory)
+        public Tree WithPlaceholderFactory(Func<string[], MetadataItems, IExecutionContext, Task<IDocument>> factory)
         {
             _placeholderFactory = factory ?? throw new ArgumentNullException(nameof(factory));
             return this;
@@ -130,7 +130,7 @@ namespace Wyam.Core.Modules.Metadata
         /// </summary>
         /// <param name="isRoot">A predicate (must return <c>bool</c>) that specifies if the current document is treated as the root of a new tree.</param>
         /// <returns>The current module instance.</returns>
-        public Tree WithRoots(DocumentConfig isRoot)
+        public Tree WithRoots(DocumentPredicate isRoot)
         {
             _isRoot = isRoot ?? throw new ArgumentNullException(nameof(isRoot));
             return this;
@@ -140,9 +140,9 @@ namespace Wyam.Core.Modules.Metadata
         /// Defines the structure of the tree. If the delegate returns <c>null</c> the document
         /// is excluded from the tree.
         /// </summary>
-        /// <param name="treePath">A delegate that must return a sequence of objects.</param>
+        /// <param name="treePath">A delegate that must return a sequence of strings.</param>
         /// <returns>The current module instance.</returns>
-        public Tree WithTreePath(DocumentConfig treePath)
+        public Tree WithTreePath(DocumentConfig<string[]> treePath)
         {
             _treePath = treePath ?? throw new ArgumentNullException(nameof(treePath));
             return this;
@@ -197,42 +197,42 @@ namespace Wyam.Core.Modules.Metadata
         }
 
         /// <inheritdoc />
-        public IEnumerable<IDocument> Execute(IReadOnlyList<IDocument> inputs, IExecutionContext context)
+        public async Task<IEnumerable<IDocument>> ExecuteAsync(IReadOnlyList<IDocument> inputs, IExecutionContext context)
         {
             // Create a dictionary of tree nodes
             TreeNodeEqualityComparer treeNodeEqualityComparer = new TreeNodeEqualityComparer();
-            Dictionary<object[], TreeNode> nodes = inputs
-                .Select(x => new TreeNode(this, x, context))
+            IEnumerable<TreeNode> nodes = await inputs.SelectAsync(async x => new TreeNode(await _treePath.GetValueAsync(x, context)));
+            nodes = nodes
                 .Where(x => x.TreePath != null)
-                .Distinct(treeNodeEqualityComparer)
+                .Distinct(treeNodeEqualityComparer);
+            Dictionary<string[], TreeNode> nodesDictionary = nodes
                 .ToDictionary(x => x.TreePath, new TreePathEqualityComparer());
 
             // Add links between parent and children (creating empty tree nodes as needed)
-            Queue<TreeNode> nodesToProcess = new Queue<TreeNode>(nodes.Values);
+            Queue<TreeNode> nodesToProcess = new Queue<TreeNode>(nodesDictionary.Values);
             while (nodesToProcess.Count > 0)
             {
                 TreeNode node = nodesToProcess.Dequeue();
 
                 // Skip root nodes
                 if (node.TreePath.Length == 0
-                    || (node.InputDocument != null && _isRoot.Invoke<bool>(node.InputDocument, context)))
+                    || (node.InputDocument != null && await _isRoot.GetValueAsync(node.InputDocument, context)))
                 {
                     continue;
                 }
 
                 // Skip the root node if not nesting or if collapsing the root
-                object[] parentTreePath = node.GetParentTreePath();
+                string[] parentTreePath = node.GetParentTreePath();
                 if (parentTreePath.Length == 0 && (!_nesting || _collapseRoot))
                 {
                     continue;
                 }
 
                 // Find (or create) the parent
-                TreeNode parent;
-                if (!nodes.TryGetValue(parentTreePath, out parent))
+                if (!nodesDictionary.TryGetValue(parentTreePath, out TreeNode parent))
                 {
                     parent = new TreeNode(parentTreePath);
-                    nodes.Add(parentTreePath, parent);
+                    nodesDictionary.Add(parentTreePath, parent);
                     nodesToProcess.Enqueue(parent);
                 }
 
@@ -242,46 +242,46 @@ namespace Wyam.Core.Modules.Metadata
             }
 
             // Recursively generate child output documents
-            foreach (TreeNode node in nodes.Values.Where(x => x.Parent == null))
+            foreach (TreeNode node in nodesDictionary.Values.Where(x => x.Parent == null))
             {
-                node.GenerateOutputDocuments(this, context);
+                await node.GenerateOutputDocumentsAsync(this, context);
             }
 
             // Return parent nodes or all nodes depending on nesting
-            return nodes.Values
+            return nodesDictionary.Values
                 .Where(x => (!_nesting || x.Parent == null) && x.OutputDocument != null)
                 .Select(x => x.OutputDocument);
         }
 
         private class TreeNode
         {
-            public object[] TreePath { get; }
+            public string[] TreePath { get; }
             public IDocument InputDocument { get; }
             public IDocument OutputDocument { get; private set; }
             public TreeNode Parent { get; set; }
             public List<TreeNode> Children { get; } = new List<TreeNode>();
 
             // New placeholder node
-            public TreeNode(object[] treePath)
+            public TreeNode(string[] treePath)
             {
                 TreePath = treePath ?? throw new ArgumentNullException(nameof(treePath));
             }
 
             // New node from an input document
-            public TreeNode(Tree tree, IDocument inputDocument, IExecutionContext context)
+            public TreeNode(string[] treePath, IDocument inputDocument)
+                : this(treePath)
             {
-                TreePath = tree._treePath.Invoke<object[]>(inputDocument, context);
                 InputDocument = inputDocument;
             }
 
             // We need to build the tree from the bottom up so that the children don't have to be lazy
             // This also sorts the children once they're created
-            public void GenerateOutputDocuments(Tree tree, IExecutionContext context)
+            public async Task GenerateOutputDocumentsAsync(Tree tree, IExecutionContext context)
             {
                 // Recursively build output documents for children
                 foreach (TreeNode child in Children)
                 {
-                    child.GenerateOutputDocuments(tree, context);
+                    await child.GenerateOutputDocumentsAsync(tree, context);
                 }
 
                 // We're done if we've already created the output document
@@ -327,7 +327,7 @@ namespace Wyam.Core.Modules.Metadata
                 {
                     // There's no input document for this node so we need to make a placeholder
                     metadata.Add(Keys.TreePlaceholder, true);
-                    OutputDocument = tree._placeholderFactory(TreePath, metadata, context) ?? context.GetDocument(metadata);
+                    OutputDocument = await tree._placeholderFactory(TreePath, metadata, context) ?? context.GetDocument(metadata);
                 }
                 else
                 {
@@ -335,7 +335,7 @@ namespace Wyam.Core.Modules.Metadata
                 }
             }
 
-            public object[] GetParentTreePath() => TreePath.Take(TreePath.Length - 1).ToArray();
+            public string[] GetParentTreePath() => TreePath.Take(TreePath.Length - 1).ToArray();
 
             private TreeNode GetPreviousSibling() =>
                 Parent?.Children.AsEnumerable().Reverse().SkipWhile(x => x != this).Skip(1).FirstOrDefault();
@@ -357,7 +357,7 @@ namespace Wyam.Core.Modules.Metadata
             {
                 if (Children.Count > 0)
                 {
-                    return Children.First();
+                    return Children.FirstOrDefault();
                 }
 
                 TreeNode nextSibling = GetNextSibling();
@@ -391,11 +391,11 @@ namespace Wyam.Core.Modules.Metadata
                 _comparer.GetHashCode(obj?.TreePath);
         }
 
-        private class TreePathEqualityComparer : IEqualityComparer<object[]>
+        private class TreePathEqualityComparer : IEqualityComparer<string[]>
         {
-            public bool Equals(object[] x, object[] y) => x.SequenceEqual(y);
+            public bool Equals(string[] x, string[] y) => x.SequenceEqual(y);
 
-            public int GetHashCode(object[] obj) =>
+            public int GetHashCode(string[] obj) =>
                 obj?.Aggregate(17, (index, x) => (index * 23) + (x?.GetHashCode() ?? 0)) ?? 0;
         }
     }

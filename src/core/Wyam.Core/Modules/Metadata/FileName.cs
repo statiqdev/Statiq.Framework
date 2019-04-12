@@ -3,12 +3,13 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 using Wyam.Common.Configuration;
 using Wyam.Common.Documents;
+using Wyam.Common.Execution;
 using Wyam.Common.IO;
 using Wyam.Common.Meta;
 using Wyam.Common.Modules;
-using Wyam.Common.Execution;
 using Wyam.Common.Util;
 using Wyam.Core.Documents;
 using Wyam.Core.Meta;
@@ -41,7 +42,7 @@ namespace Wyam.Core.Modules.Metadata
 
         private static readonly Regex FileNameRegex = new Regex("^([a-zA-Z0-9])+$");
 
-        private readonly DocumentConfig _fileName = (d, c) => d.String(Keys.SourceFileName);
+        private readonly DocumentConfig<string> _fileName = Config.FromDocument((d, _) => d.String(Keys.SourceFileName));
         private readonly string _outputKey = Keys.WriteFileName;
         private string _pathOutputKey = Keys.WritePath;  // null for no output path
 
@@ -68,7 +69,7 @@ namespace Wyam.Core.Modules.Metadata
             {
                 throw new ArgumentException(nameof(inputKey));
             }
-            _fileName = (d, c) => d.String(inputKey);
+            _fileName = Config.FromDocument((d, _) => d.String(inputKey));
         }
 
         /// <summary>
@@ -76,7 +77,7 @@ namespace Wyam.Core.Modules.Metadata
         /// Also sets the metadata key <c>WritePath</c> to <c>Path.Combine(RelativeFileDir, WriteFileName)</c>.
         /// </summary>
         /// <param name="fileName">A delegate that should return a <c>string</c> with the filename to optimize.</param>
-        public FileName(DocumentConfig fileName)
+        public FileName(DocumentConfig<string> fileName)
         {
             _fileName = fileName ?? throw new ArgumentNullException(nameof(fileName));
         }
@@ -105,7 +106,7 @@ namespace Wyam.Core.Modules.Metadata
             {
                 throw new ArgumentException(nameof(outputKey));
             }
-            _fileName = (d, c) => d.String(inputKey);
+            _fileName = Config.FromDocument((d, _) => d.String(inputKey));
             _outputKey = outputKey;
         }
 
@@ -115,7 +116,7 @@ namespace Wyam.Core.Modules.Metadata
         /// </summary>
         /// <param name="fileName">A delegate that should return a <c>string</c> with the filename to optimize.</param>
         /// <param name="outputKey">The metadata key to use for the optimized filename.</param>
-        public FileName(DocumentConfig fileName, string outputKey)
+        public FileName(DocumentConfig<string> fileName, string outputKey)
         {
             if (outputKey == null)
             {
@@ -174,11 +175,11 @@ namespace Wyam.Core.Modules.Metadata
         }
 
         /// <inheritdoc />
-        public IEnumerable<IDocument> Execute(IReadOnlyList<IDocument> inputs, IExecutionContext context)
+        public async Task<IEnumerable<IDocument>> ExecuteAsync(IReadOnlyList<IDocument> inputs, IExecutionContext context)
         {
-            return inputs.AsParallel().Select(context, input =>
+            return await inputs.ParallelSelectAsync(context, async input =>
             {
-                string fileName = _fileName.Invoke<string>(input, context);
+                string fileName = await _fileName.GetValueAsync(input, context);
 
                 if (!string.IsNullOrWhiteSpace(fileName))
                 {

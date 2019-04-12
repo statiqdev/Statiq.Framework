@@ -43,7 +43,7 @@ namespace Wyam.Common.Modules
             if (_modules != null)
             {
                 IReadOnlyList<IDocument> documents = await context.ExecuteAsync(_modules, inputs.Count == 1 ? inputs : null);
-                return await documents.SelectManyAsync(context, async x => await inputs.SelectAsync(context, async y => await ExecuteAsync(x.Content, y, context)));
+                return await documents.SelectManyAsync(context, x => inputs.SelectAsync(context, y => ExecuteAsync(x.Content, y, context)));
             }
 
             return await inputs.SelectAsync(context, async x => await ExecuteAsync(await _content.GetValueAsync(x, context), x, context));

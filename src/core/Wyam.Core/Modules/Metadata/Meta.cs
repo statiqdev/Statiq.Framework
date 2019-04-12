@@ -1,10 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using Wyam.Common.Configuration;
 using Wyam.Common.Documents;
-using Wyam.Common.Modules;
 using Wyam.Common.Execution;
+using Wyam.Common.Modules;
 using Wyam.Common.Util;
 
 namespace Wyam.Core.Modules.Metadata
@@ -16,34 +17,11 @@ namespace Wyam.Core.Modules.Metadata
     public class Meta : IModule
     {
         private readonly string _key;
-        private readonly ConfigHelper<object> _metadata;
+        private readonly DocumentConfigNew _metadata;
         private readonly IModule[] _modules;
         private bool _forEachDocument;
         private bool _ignoreNull;
         private bool _onlyIfNonExisting;
-
-        /// <summary>
-        /// The specified object is added as metadata for the specified key for every input document.
-        /// </summary>
-        /// <param name="key">The metadata key to set.</param>
-        /// <param name="metadata">The object to add as metadata.</param>
-        public Meta(string key, object metadata)
-        {
-            _key = key ?? throw new ArgumentNullException(nameof(key));
-            _metadata = new ConfigHelper<object>(metadata);
-        }
-
-        /// <summary>
-        /// Uses a function to determine an object to be added as metadata for each document.
-        /// This allows you to specify different metadata for each document depending on the context.
-        /// </summary>
-        /// <param name="key">The metadata key to set.</param>
-        /// <param name="metadata">A delegate that returns the object to add as metadata.</param>
-        public Meta(string key, ContextConfig metadata)
-        {
-            _key = key ?? throw new ArgumentNullException(nameof(key));
-            _metadata = new ConfigHelper<object>(metadata);
-        }
 
         /// <summary>
         /// Uses a function to determine an object to be added as metadata for each document.
@@ -51,10 +29,10 @@ namespace Wyam.Core.Modules.Metadata
         /// </summary>
         /// <param name="key">The metadata key to set.</param>
         /// <param name="metadata">A delegate that returns the object to add as metadata.</param>
-        public Meta(string key, DocumentConfig metadata)
+        public Meta(string key, DocumentConfigNew metadata)
         {
             _key = key ?? throw new ArgumentNullException(nameof(key));
-            _metadata = new ConfigHelper<object>(metadata);
+            _metadata = metadata ?? throw new ArgumentNullException(nameof(metadata));
         }
 
         /// <summary>
@@ -104,7 +82,7 @@ namespace Wyam.Core.Modules.Metadata
         }
 
         /// <inheritdoc />
-        public IEnumerable<IDocument> Execute(IReadOnlyList<IDocument> inputs, IExecutionContext context)
+        public async Task<IEnumerable<IDocument>> ExecuteAsync(IReadOnlyList<IDocument> inputs, IExecutionContext context)
         {
             if (_modules != null)
             {
@@ -113,9 +91,9 @@ namespace Wyam.Core.Modules.Metadata
                 // Execute the modules for each input document
                 if (_forEachDocument)
                 {
-                    return inputs.Select(context, input =>
+                    return await inputs.SelectAsync(context, async input =>
                     {
-                        foreach (IDocument result in context.Execute(_modules, new[] { input }))
+                        foreach (IDocument result in await context.ExecuteAsync(_modules, new[] { input }))
                         {
                             foreach (KeyValuePair<string, object> kvp in result)
                             {
@@ -132,7 +110,7 @@ namespace Wyam.Core.Modules.Metadata
                 }
 
                 // Execute the modules once and apply to each input document
-                foreach (IDocument result in context.Execute(_modules))
+                foreach (IDocument result in await context.ExecuteAsync(_modules))
                 {
                     foreach (KeyValuePair<string, object> kvp in result)
                     {
@@ -144,9 +122,9 @@ namespace Wyam.Core.Modules.Metadata
                     _onlyIfNonExisting ? metadata.Where(x => !input.ContainsKey(x.Key)) : metadata));
             }
 
-            return inputs.Select(context, x => _onlyIfNonExisting && x.ContainsKey(_key)
+            return await inputs.SelectAsync(context, async x => _onlyIfNonExisting && x.ContainsKey(_key)
                 ? x
-                : context.GetDocument(x, new[] { new KeyValuePair<string, object>(_key, _metadata.GetValue(x, context)) }));
+                : context.GetDocument(x, new[] { new KeyValuePair<string, object>(_key, await _metadata.GetValueAsync(x, context)) }));
         }
     }
 }

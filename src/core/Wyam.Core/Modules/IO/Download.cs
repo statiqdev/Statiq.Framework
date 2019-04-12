@@ -203,10 +203,9 @@ namespace Wyam.Core.Modules.IO
                 }
                 else
                 {
-                    query = query + "&";
+                    query += "&";
                 }
-                query = query
-                    + string.Join(
+                query += string.Join(
                         "&",
                         queryString.Select(x => string.IsNullOrEmpty(x.Value)
                             ? WebUtility.UrlEncode(x.Key)

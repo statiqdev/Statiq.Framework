@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Net;
+using System.Threading.Tasks;
 using Wyam.Common.Configuration;
 using Wyam.Common.Documents;
 using Wyam.Common.Execution;
@@ -24,7 +25,7 @@ namespace Wyam.Core.Modules.Metadata
     /// <category>Metadata</category>
     public class Title : IModule
     {
-        private readonly DocumentConfig _title = GetTitle;
+        private readonly DocumentConfig<string> _title = Config.FromDocument((doc, _) => GetTitle(doc));
         private string _key = Keys.Title;
         private bool _keepExisting = true;
 
@@ -38,33 +39,10 @@ namespace Wyam.Core.Modules.Metadata
         }
 
         /// <summary>
-        /// This sets the title of all input documents to the specified string.
-        /// </summary>
-        /// <param name="title">The title to set.</param>
-        public Title(string title)
-        {
-            _title = (doc, ctx) => title;
-        }
-
-        /// <summary>
         /// This sets the title of all input documents to a value from the delegate.
         /// </summary>
         /// <param name="title">A delegate that must return a string.</param>
-        public Title(ContextConfig title)
-        {
-            if (title == null)
-            {
-                throw new ArgumentNullException(nameof(title));
-            }
-
-            _title = (doc, ctx) => title(ctx);
-        }
-
-        /// <summary>
-        /// This sets the title of all input documents to a value from the delegate.
-        /// </summary>
-        /// <param name="title">A delegate that must return a string.</param>
-        public Title(DocumentConfig title)
+        public Title(DocumentConfig<string> title)
         {
             _title = title ?? throw new ArgumentNullException(nameof(title));
         }
@@ -105,11 +83,10 @@ namespace Wyam.Core.Modules.Metadata
         }
 
         /// <inheritdoc />
-        public IEnumerable<IDocument> Execute(IReadOnlyList<IDocument> inputs, IExecutionContext context)
+        public async Task<IEnumerable<IDocument>> ExecuteAsync(IReadOnlyList<IDocument> inputs, IExecutionContext context)
         {
-            return inputs
-                .AsParallel()
-                .Select(context, input =>
+            return await inputs
+                .ParallelSelectAsync(context, async input =>
                 {
                     // Check if there's already a title set
                     if (_keepExisting && input.WithoutSettings.ContainsKey(_key))
@@ -118,7 +95,7 @@ namespace Wyam.Core.Modules.Metadata
                     }
 
                     // Calculate the new title
-                    string title = _title.Invoke<string>(input, context);
+                    string title = await _title.GetValueAsync(input, context);
                     return title == null
                         ? input
                         : context
@@ -133,9 +110,8 @@ namespace Wyam.Core.Modules.Metadata
         /// Gets a normalized title given a document.
         /// </summary>
         /// <param name="doc">The document.</param>
-        /// <param name="context">The execution context.</param>
         /// <returns>A normalized title.</returns>
-        public static object GetTitle(IDocument doc, IExecutionContext context)
+        public static string GetTitle(IDocument doc)
         {
             FilePath path = doc.Source ?? doc.FilePath(Keys.RelativeFilePath);
             return path == null ? null : GetTitle(path);

@@ -126,7 +126,7 @@ namespace Wyam.CodeAnalysis
                         string assemblyName = project.AssemblyName;
                         IEnumerable<IFile> documentPaths = await project.Documents
                             .Where(x => !string.IsNullOrWhiteSpace(x.FilePath))
-                            .SelectAsync(async x => await context.FileSystem.GetInputFileAsync(x.FilePath));
+                            .SelectAsync(x => context.FileSystem.GetInputFileAsync(x.FilePath));
                         documentPaths = await documentPaths
                             .WhereAsync(async x => await x.GetExistsAsync() && (_whereFile == null || _whereFile(x)) && (_extensions?.Contains(x.Path.Extension) != false));
                         return await documentPaths.SelectAsync(GetProjectDocumentAsync);
