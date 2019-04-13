@@ -207,9 +207,11 @@ namespace Wyam.Html
         }
 
         /// <inheritdoc />
-        public IEnumerable<IDocument> Execute(IReadOnlyList<IDocument> inputs, IExecutionContext context)
+        public async Task<IEnumerable<IDocument>> ExecuteAsync(IReadOnlyList<IDocument> inputs, IExecutionContext context)
         {
-            return inputs.AsParallel().Select(context, input =>
+            return await inputs.ParallelSelectAsync(context, GetDocumentAsync);
+
+            async Task<IDocument> GetDocumentAsync(IDocument input)
             {
                 string oldContent = input.Content;
                 StringWriter outputString = new StringWriter();
@@ -247,8 +249,8 @@ namespace Wyam.Html
                         }
                     }
                 }
-                return escaped ? context.GetDocumentAsync(input, outputString.ToString()).Result : input;
-            });
+                return escaped ? await context.GetDocumentAsync(input, outputString.ToString()) : input;
+            }
         }
     }
 }

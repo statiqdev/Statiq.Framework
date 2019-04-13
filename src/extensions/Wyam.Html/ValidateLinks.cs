@@ -81,7 +81,7 @@ namespace Wyam.Html
         }
 
         /// <inheritdoc />
-        public IEnumerable<IDocument> Execute(IReadOnlyList<IDocument> inputs, IExecutionContext context)
+        public async Task<IEnumerable<IDocument>> ExecuteAsync(IReadOnlyList<IDocument> inputs, IExecutionContext context)
         {
 #pragma warning disable RCS1163 // Unused parameter.
             // Handle invalid HTTPS certificates and allow alternate security protocols (see http://stackoverflow.com/a/5670954/807064)
@@ -97,7 +97,7 @@ namespace Wyam.Html
 
             // Gather all links
             HtmlParser parser = new HtmlParser();
-            context.ParallelForEach(inputs, input => GatherLinks(input, parser, links));
+            await context.ParallelForEachAsync(inputs, async input => await GatherLinksAsync(input, parser, links));
 
             // This policy will limit the number of executing link validations.
             // Limit the amount of concurrent link checks to avoid overwhelming servers.
@@ -148,9 +148,9 @@ namespace Wyam.Html
         }
 
         // Internal for testing
-        internal static void GatherLinks(IDocument input, HtmlParser parser, ConcurrentDictionary<string, ConcurrentBag<(string source, string outerHtml)>> links)
+        internal static async Task GatherLinksAsync(IDocument input, HtmlParser parser, ConcurrentDictionary<string, ConcurrentBag<(string source, string outerHtml)>> links)
         {
-            IHtmlDocument htmlDocument = input.ParseHtml(parser);
+            IHtmlDocument htmlDocument = await input.ParseHtmlAsync(parser);
             if (htmlDocument != null)
             {
                 // Links

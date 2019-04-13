@@ -44,10 +44,10 @@ namespace Wyam.Html
         // Key = text to replace, Value = url
         private readonly DocumentConfig<IDictionary<string, string>> _links;
         private readonly IDictionary<string, string> _extraLinks = new Dictionary<string, string>();
+        private readonly List<char> _startWordSeparators = new List<char>();
+        private readonly List<char> _endWordSeparators = new List<char>();
         private string _querySelector = "p";
         private bool _matchOnlyWholeWord = false;
-        private List<char> _startWordSeparators = new List<char>();
-        private List<char> _endWordSeparators = new List<char>();
 
         /// <summary>
         /// Creates the module without any initial mappings. Use <c>AddLink(...)</c> to add mappings with fluent methods.

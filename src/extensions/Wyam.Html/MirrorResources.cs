@@ -64,7 +64,7 @@ namespace Wyam.Html
             _pathFunc = pathFunc ?? throw new ArgumentNullException(nameof(pathFunc));
         }
 
-        public IEnumerable<Common.Documents.IDocument> Execute(IReadOnlyList<Common.Documents.IDocument> inputs, IExecutionContext context)
+        public async Task<IEnumerable<Common.Documents.IDocument>> ExecuteAsync(IReadOnlyList<Common.Documents.IDocument> inputs, IExecutionContext context)
         {
 #pragma warning disable RCS1163 // Unused parameter.
             // Handle invalid HTTPS certificates and allow alternate security protocols (see http://stackoverflow.com/a/5670954/807064)
@@ -76,19 +76,21 @@ namespace Wyam.Html
 
             // Iterate the input documents synchronously so we don't download the same resource more than once
             HtmlParser parser = new HtmlParser();
-            return inputs.Select(context, input =>
+            return await inputs.SelectAsync(context, GetDocumentAsync);
+
+            async Task<Common.Documents.IDocument> GetDocumentAsync(Common.Documents.IDocument input)
             {
-                IHtmlDocument htmlDocument = input.ParseHtml(parser);
+                IHtmlDocument htmlDocument = await input.ParseHtmlAsync(parser);
                 if (htmlDocument != null)
                 {
                     bool modifiedDocument = false;
 
                     // Link element
                     foreach (IElement element in htmlDocument
-                        .GetElementsByTagName("link")
-                        .Where(x => x.HasAttribute("href") && !x.HasAttribute("data-no-mirror")))
+                            .GetElementsByTagName("link")
+                            .Where(x => x.HasAttribute("href") && !x.HasAttribute("data-no-mirror")))
                     {
-                        string replacement = DownloadAndReplaceAsync(element.GetAttribute("href"), element, mirrorCache, context).Result;
+                        string replacement = await DownloadAndReplaceAsync(element.GetAttribute("href"), element, mirrorCache, context);
                         if (replacement != null)
                         {
                             element.Attributes["href"].Value = replacement;
@@ -98,9 +100,9 @@ namespace Wyam.Html
 
                     // Scripts
                     foreach (IHtmlScriptElement element in htmlDocument.Scripts
-                        .Where(x => !string.IsNullOrEmpty(x.Source) && !x.HasAttribute("data-no-mirror")))
+                            .Where(x => !string.IsNullOrEmpty(x.Source) && !x.HasAttribute("data-no-mirror")))
                     {
-                        string replacement = DownloadAndReplaceAsync(element.Source, element, mirrorCache, context).Result;
+                        string replacement = await DownloadAndReplaceAsync(element.Source, element, mirrorCache, context);
                         if (replacement != null)
                         {
                             element.Source = replacement;
@@ -111,7 +113,7 @@ namespace Wyam.Html
                     // Return a new document with the replacements if we performed any
                     if (modifiedDocument)
                     {
-                        Stream contentStream = context.GetContentStreamAsync().Result;
+                        Stream contentStream = await context.GetContentStreamAsync();
                         using (StreamWriter writer = contentStream.GetWriter())
                         {
                             htmlDocument.ToHtml(writer, ProcessingInstructionFormatter.Instance);
@@ -122,7 +124,7 @@ namespace Wyam.Html
                 }
 
                 return input;
-            });
+            }
         }
 
         private async Task<string> DownloadAndReplaceAsync(string source, IElement element, Dictionary<string, string> mirrorCache, IExecutionContext context)

@@ -184,13 +184,15 @@ namespace Wyam.Html
         }
 
         /// <inheritdoc />
-        public IEnumerable<Common.Documents.IDocument> Execute(IReadOnlyList<Common.Documents.IDocument> inputs, IExecutionContext context)
+        public async Task<IEnumerable<Common.Documents.IDocument>> ExecuteAsync(IReadOnlyList<Common.Documents.IDocument> inputs, IExecutionContext context)
         {
             HtmlParser parser = new HtmlParser();
-            return inputs.AsParallel().SelectMany(context, input =>
+            return await inputs.ParallelSelectManyAsync(context, GetDocumentsAsync);
+
+            async Task<IEnumerable<Common.Documents.IDocument>> GetDocumentsAsync(Common.Documents.IDocument input)
             {
                 // Parse the HTML content
-                IHtmlDocument htmlDocument = input.ParseHtml(parser);
+                IHtmlDocument htmlDocument = await input.ParseHtmlAsync(parser);
                 if (htmlDocument == null)
                 {
                     return new[] { input };
@@ -219,7 +221,7 @@ namespace Wyam.Html
                                 // Clone the document and optionally change content to the HTML element
                                 if (_outerHtmlContent.HasValue)
                                 {
-                                    Stream contentStream = context.GetContentStreamAsync().Result;
+                                    Stream contentStream = await context.GetContentStreamAsync();
                                     using (StreamWriter writer = contentStream.GetWriter())
                                     {
                                         if (_outerHtmlContent.Value)
@@ -249,7 +251,7 @@ namespace Wyam.Html
                     Trace.Warning("Exception while processing HTML for {0}: {1}", input.SourceString(), ex.Message);
                     return new[] { input };
                 }
-            });
+            }
         }
     }
 }

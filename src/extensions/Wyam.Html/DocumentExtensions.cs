@@ -18,8 +18,8 @@ namespace Wyam.Html
         /// </summary>
         /// <param name="document">The document to parse.</param>
         /// <returns>The parsed HTML document.</returns>
-        public static IHtmlDocument ParseHtml(this IDocument document) =>
-            ParseHtml(document, new HtmlParser());
+        public static async Task<IHtmlDocument> ParseHtmlAsync(this IDocument document) =>
+            await ParseHtmlAsync(document, new HtmlParser());
 
         /// <summary>
         /// Gets an <see cref="IHtmlDocument"/> by parsing the content of an <see cref="IDocument"/>.
@@ -27,13 +27,13 @@ namespace Wyam.Html
         /// <param name="document">The document to parse.</param>
         /// <param name="parser">A parser instance.</param>
         /// <returns>The parsed HTML document.</returns>
-        public static IHtmlDocument ParseHtml(this IDocument document, HtmlParser parser)
+        public static async Task<IHtmlDocument> ParseHtmlAsync(this IDocument document, HtmlParser parser)
         {
             try
             {
                 using (Stream stream = document.GetStream())
                 {
-                    return parser.Parse(stream);
+                    return await parser.ParseAsync(stream);
                 }
             }
             catch (Exception ex)

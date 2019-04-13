@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 using AngleSharp.Dom;
 using AngleSharp.Dom.Html;
 using AngleSharp.Html;
@@ -166,7 +167,7 @@ namespace Wyam.Html
         }
 
         /// <inheritdoc />
-        public IEnumerable<Common.Documents.IDocument> Execute(IReadOnlyList<Common.Documents.IDocument> inputs, IExecutionContext context)
+        public async Task<IEnumerable<Common.Documents.IDocument>> ExecuteAsync(IReadOnlyList<Common.Documents.IDocument> inputs, IExecutionContext context)
         {
             if (string.IsNullOrWhiteSpace(_metadataKey))
             {
@@ -185,12 +186,13 @@ namespace Wyam.Html
                 query.Append(level);
             }
 
-            // Process documents
             HtmlParser parser = new HtmlParser();
-            return inputs.AsParallel().Select(context, input =>
+            return await inputs.ParallelSelectAsync(context, GetDocumentAsync);
+
+            async Task<Common.Documents.IDocument> GetDocumentAsync(Common.Documents.IDocument input)
             {
                 // Parse the HTML content
-                IHtmlDocument htmlDocument = input.ParseHtml(parser);
+                IHtmlDocument htmlDocument = await input.ParseHtmlAsync(parser);
                 if (htmlDocument == null)
                 {
                     return input;
@@ -251,7 +253,8 @@ namespace Wyam.Html
                         {
                             metadata.Add(_parentKey, new CachedDelegateMetadataValue(_ => parent?.Document));
                         }
-                        Stream contentStream = context.GetContentStreamAsync().Result;
+
+                        Stream contentStream = await context.GetContentStreamAsync();
                         using (StreamWriter writer = contentStream.GetWriter())
                         {
                             heading.Element.ChildNodes.ToHtml(writer, ProcessingInstructionFormatter.Instance);
@@ -280,7 +283,7 @@ namespace Wyam.Html
                                     .ToArray()
                         }
                     });
-            });
+            }
         }
 
         private class Heading

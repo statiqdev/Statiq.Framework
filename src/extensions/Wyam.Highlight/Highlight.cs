@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 using AngleSharp.Dom.Html;
 using AngleSharp.Extensions;
 using AngleSharp.Html;
@@ -78,10 +79,10 @@ namespace Wyam.Highlight
         }
 
         /// <inheritdoc />
-        public IEnumerable<IDocument> Execute(IReadOnlyList<IDocument> inputs, IExecutionContext context)
+        public async Task<IEnumerable<IDocument>> ExecuteAsync(IReadOnlyList<IDocument> inputs, IExecutionContext context)
         {
             HtmlParser parser = new HtmlParser();
-            using (IJavaScriptEnginePool enginePool = context.GetJavaScriptEnginePool(x =>
+            IJavaScriptEnginePool enginePool = context.GetJavaScriptEnginePool(x =>
             {
                 if (string.IsNullOrWhiteSpace(_highlightJsFile))
                 {
@@ -91,15 +92,16 @@ namespace Wyam.Highlight
                 {
                     x.ExecuteFile(_highlightJsFile);
                 }
-            }))
+            });
+            using (enginePool)
             {
-                return inputs.AsParallel().Select(context, input =>
+                IEnumerable<IDocument> results = await inputs.ParallelSelectAsync(context, async input =>
                 {
                     try
                     {
                         using (Stream stream = input.GetStream())
                         {
-                            using (IHtmlDocument htmlDocument = parser.Parse(stream))
+                            using (IHtmlDocument htmlDocument = await parser.ParseAsync(stream))
                             {
                                 foreach (AngleSharp.Dom.IElement element in htmlDocument.QuerySelectorAll(_codeQuerySelector))
                                 {
@@ -126,7 +128,7 @@ namespace Wyam.Highlight
                                     }
                                 }
 
-                                Stream contentStream = context.GetContentStreamAsync().Result;
+                                Stream contentStream = await context.GetContentStreamAsync();
                                 using (StreamWriter writer = contentStream.GetWriter())
                                 {
                                     htmlDocument.ToHtml(writer, HtmlMarkupFormatter.Instance);
@@ -141,7 +143,10 @@ namespace Wyam.Highlight
                         Trace.Warning("Exception while highlighting source code for {0}: {1}", input.SourceString(), ex.Message);
                         return input;
                     }
-                }).ToList();
+                });
+
+                // Materialize the results before disposing the JS engine
+                return results.ToList();
             }
         }
 

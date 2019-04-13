@@ -28,8 +28,8 @@ namespace Wyam.GitHub
     {
         private readonly Credentials _credentials;
 
-        private readonly Dictionary<string, Func<IDocument, IExecutionContext, GitHubClient, object>> _requests
-            = new Dictionary<string, Func<IDocument, IExecutionContext, GitHubClient, object>>();
+        private readonly Dictionary<string, Func<IDocument, IExecutionContext, GitHubClient, Task<object>>> _requests
+            = new Dictionary<string, Func<IDocument, IExecutionContext, GitHubClient, Task<object>>>();
 
         private Uri _url;
 
@@ -76,7 +76,7 @@ namespace Wyam.GitHub
         /// <param name="key">The metadata key in which to store the return value of the request function.</param>
         /// <param name="request">A function with the request to make.</param>
         /// <returns>The current module instance.</returns>
-        public GitHub WithRequest(string key, Func<GitHubClient, object> request)
+        public GitHub WithRequest(string key, Func<GitHubClient, Task<object>> request)
         {
             if (string.IsNullOrEmpty(key))
             {
@@ -97,7 +97,7 @@ namespace Wyam.GitHub
         /// <param name="key">The metadata key in which to store the return value of the request function.</param>
         /// <param name="request">A function with the request to make.</param>
         /// <returns>The current module instance.</returns>
-        public GitHub WithRequest(string key, Func<IExecutionContext, GitHubClient, object> request)
+        public GitHub WithRequest(string key, Func<IExecutionContext, GitHubClient, Task<object>> request)
         {
             if (string.IsNullOrEmpty(key))
             {
@@ -118,7 +118,7 @@ namespace Wyam.GitHub
         /// <param name="key">The metadata key in which to store the return value of the request function.</param>
         /// <param name="request">A function with the request to make.</param>
         /// <returns>The current module instance.</returns>
-        public GitHub WithRequest(string key, Func<IDocument, IExecutionContext, GitHubClient, object> request)
+        public GitHub WithRequest(string key, Func<IDocument, IExecutionContext, GitHubClient, Task<object>> request)
         {
             if (string.IsNullOrEmpty(key))
             {
@@ -130,28 +130,28 @@ namespace Wyam.GitHub
         }
 
         /// <inheritdoc />
-        public IEnumerable<IDocument> Execute(IReadOnlyList<IDocument> inputs, IExecutionContext context)
+        public async Task<IEnumerable<IDocument>> ExecuteAsync(IReadOnlyList<IDocument> inputs, IExecutionContext context)
         {
             GitHubClient github = new GitHubClient(new ProductHeaderValue("Wyam"), _url ?? GitHubClient.GitHubApiUrl);
             if (_credentials != null)
             {
                 github.Credentials = _credentials;
             }
-            return inputs.AsParallel().Select(context, input =>
+            return await inputs.ParallelSelectAsync(context, async input =>
             {
                 ConcurrentDictionary<string, object> results = new ConcurrentDictionary<string, object>();
-                foreach (KeyValuePair<string, Func<IDocument, IExecutionContext, GitHubClient, object>> request in _requests.AsParallel())
+                await _requests.ParallelForEachAsync(async request =>
                 {
                     Trace.Verbose("Submitting {0} GitHub request for {1}", request.Key, input.SourceString());
                     try
                     {
-                        results[request.Key] = request.Value(input, context, github);
+                        results[request.Key] = await request.Value(input, context, github);
                     }
                     catch (Exception ex)
                     {
                         Trace.Warning("Exception while submitting {0} GitHub request for {1}: {2}", request.Key, input.SourceString(), ex.ToString());
                     }
-                }
+                });
                 return context.GetDocument(input, results);
             });
         }

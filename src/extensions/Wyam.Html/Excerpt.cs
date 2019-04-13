@@ -116,7 +116,7 @@ namespace Wyam.Html
         }
 
         /// <inheritdoc />
-        public IEnumerable<Common.Documents.IDocument> Execute(IReadOnlyList<Common.Documents.IDocument> inputs, IExecutionContext context)
+        public async Task<IEnumerable<Common.Documents.IDocument>> ExecuteAsync(IReadOnlyList<Common.Documents.IDocument> inputs, IExecutionContext context)
         {
             if (string.IsNullOrWhiteSpace(_metadataKey))
             {
@@ -124,10 +124,12 @@ namespace Wyam.Html
             }
 
             HtmlParser parser = new HtmlParser();
-            return inputs.AsParallel().Select(context, input =>
+            return await inputs.ParallelSelectAsync(context, GetDocumentAsync);
+
+            async Task<Common.Documents.IDocument> GetDocumentAsync(Common.Documents.IDocument input)
             {
                 // Parse the HTML content
-                IHtmlDocument htmlDocument = input.ParseHtml(parser);
+                IHtmlDocument htmlDocument = await input.ParseHtmlAsync(parser);
                 if (htmlDocument == null)
                 {
                     return input;
@@ -149,7 +151,7 @@ namespace Wyam.Html
                     });
                 }
                 return input;
-            });
+            }
         }
 
         private string GetQueryExcerpt(IHtmlDocument htmlDocument)

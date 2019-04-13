@@ -32,7 +32,7 @@ namespace Wyam.Html
     public class HtmlInsert : IModule
     {
         private readonly string _querySelector;
-        private readonly DocumentConfig _content;
+        private readonly DocumentConfig<string> _content;
         private bool _first;
         private AdjacentPosition _position = AdjacentPosition.BeforeEnd;
 
@@ -40,19 +40,8 @@ namespace Wyam.Html
         /// Creates the module with the specified query selector.
         /// </summary>
         /// <param name="querySelector">The query selector to use.</param>
-        /// <param name="content">The content to insert.</param>
-        public HtmlInsert(string querySelector, string content)
-        {
-            _querySelector = querySelector;
-            _content = (doc, ctx) => content;
-        }
-
-        /// <summary>
-        /// Creates the module with the specified query selector.
-        /// </summary>
-        /// <param name="querySelector">The query selector to use.</param>
         /// <param name="content">The content to insert as a delegate that should return a <c>string</c>.</param>
-        public HtmlInsert(string querySelector, DocumentConfig content)
+        public HtmlInsert(string querySelector, DocumentConfig<string> content)
         {
             _querySelector = querySelector;
             _content = content;
@@ -81,20 +70,22 @@ namespace Wyam.Html
         }
 
         /// <inheritdoc />
-        public IEnumerable<Common.Documents.IDocument> Execute(IReadOnlyList<Common.Documents.IDocument> inputs, IExecutionContext context)
+        public async Task<IEnumerable<Common.Documents.IDocument>> ExecuteAsync(IReadOnlyList<Common.Documents.IDocument> inputs, IExecutionContext context)
         {
             HtmlParser parser = new HtmlParser();
-            return inputs.AsParallel().Select(context, input =>
+            return await inputs.ParallelSelectAsync(context, GetDocumentAsync);
+
+            async Task<Common.Documents.IDocument> GetDocumentAsync(Common.Documents.IDocument input)
             {
                 // Get the replacement content
-                string content = _content.Invoke<string>(input, context);
+                string content = await _content.GetValueAsync(input, context);
                 if (content == null)
                 {
                     return input;
                 }
 
                 // Parse the HTML content
-                IHtmlDocument htmlDocument = input.ParseHtml(parser);
+                IHtmlDocument htmlDocument = await input.ParseHtmlAsync(parser);
                 if (htmlDocument == null)
                 {
                     return input;
@@ -115,7 +106,7 @@ namespace Wyam.Html
                                 element.Insert(_position, content);
                             }
 
-                            Stream contentStream = context.GetContentStreamAsync().Result;
+                            Stream contentStream = await context.GetContentStreamAsync();
                             using (StreamWriter writer = contentStream.GetWriter())
                             {
                                 htmlDocument.ToHtml(writer, ProcessingInstructionFormatter.Instance);
@@ -131,7 +122,7 @@ namespace Wyam.Html
                     Trace.Warning("Exception while processing HTML for {0}: {1}", input.SourceString(), ex.Message);
                     return input;
                 }
-            });
+            }
         }
     }
 }
