@@ -99,8 +99,8 @@ namespace Wyam.Core.Modules.Control
                 throw new ArgumentNullException(nameof(keyMetadataKey));
             }
 
-            _key = Config.FromDocument((doc, _) => doc.Get<IEnumerable<object>>(keyMetadataKey));
-            _predicate = Config.IfDocument((doc, _) => doc.ContainsKey(keyMetadataKey));
+            _key = Config.FromDocument(doc => doc.Get<IEnumerable<object>>(keyMetadataKey));
+            _predicate = Config.IfDocument(doc => doc.ContainsKey(keyMetadataKey));
         }
 
         /// <summary>

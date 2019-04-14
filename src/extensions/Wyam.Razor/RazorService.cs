@@ -1,4 +1,5 @@
 ﻿using System.Collections.Concurrent;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -12,7 +13,7 @@ namespace Wyam.Razor
         private readonly ConcurrentDictionary<CompilationParameters, RazorCompiler> _compilers
             = new ConcurrentDictionary<CompilationParameters, RazorCompiler>();
 
-        public void Render(RenderRequest request)
+        public async Task RenderAsync(RenderRequest request)
         {
             CompilationParameters parameters = new CompilationParameters
             {
@@ -23,7 +24,7 @@ namespace Wyam.Razor
             };
 
             RazorCompiler compiler = _compilers.GetOrAdd(parameters, _ => new RazorCompiler(parameters));
-            compiler.RenderPage(request);
+            await compiler.RenderPageAsync(request);
         }
 
         public void ExpireChangeTokens()

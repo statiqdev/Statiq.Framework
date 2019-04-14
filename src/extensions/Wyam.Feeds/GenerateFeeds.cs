@@ -71,14 +71,14 @@ namespace Wyam.Feeds
         private ContextConfig<string> _feedCopyright = Config.FromContext(ctx => ctx.String(FeedKeys.Copyright) ?? DateTime.UtcNow.Year.ToString());
 
         private DocumentConfig<Uri> _itemId = Config.FromDocument((doc, ctx) => ctx.Convert<Uri>(ctx.GetLink(doc, true)));
-        private DocumentConfig<string> _itemTitle = Config.FromDocument((doc, _) => doc.String(FeedKeys.Title));
-        private DocumentConfig<string> _itemDescription = Config.FromDocument((doc, _) => doc.String(FeedKeys.Description) ?? doc.String(FeedKeys.Excerpt));
-        private DocumentConfig<string> _itemAuthor = Config.FromDocument((doc, _) => doc.String(FeedKeys.Author));
-        private DocumentConfig<DateTime?> _itemPublished = Config.FromDocument((doc, _) => doc.Get<DateTime?>(FeedKeys.Published));
-        private DocumentConfig<DateTime?> _itemUpdated = Config.FromDocument((doc, _) => doc.Get<DateTime?>(FeedKeys.Updated));
+        private DocumentConfig<string> _itemTitle = Config.FromDocument(doc => doc.String(FeedKeys.Title));
+        private DocumentConfig<string> _itemDescription = Config.FromDocument(doc => doc.String(FeedKeys.Description) ?? doc.String(FeedKeys.Excerpt));
+        private DocumentConfig<string> _itemAuthor = Config.FromDocument(doc => doc.String(FeedKeys.Author));
+        private DocumentConfig<DateTime?> _itemPublished = Config.FromDocument(doc => doc.Get<DateTime?>(FeedKeys.Published));
+        private DocumentConfig<DateTime?> _itemUpdated = Config.FromDocument(doc => doc.Get<DateTime?>(FeedKeys.Updated));
         private DocumentConfig<Uri> _itemLink = Config.FromDocument((doc, ctx) => ctx.Convert<Uri>(ctx.GetLink(doc, true)));
         private DocumentConfig<Uri> _itemImageLink = Config.FromDocument((doc, ctx) => ctx.Convert<Uri>(ctx.GetLink(doc, FeedKeys.Image, true)));
-        private DocumentConfig<string> _itemContent = Config.FromDocument((doc, _) => doc.String(FeedKeys.Content));
+        private DocumentConfig<string> _itemContent = Config.FromDocument(doc => doc.String(FeedKeys.Content));
         private DocumentConfig<Uri> _itemThreadLink = null;
         private DocumentConfig<int> _itemThreadCount = null;
         private DocumentConfig<DateTime?> _itemThreadUpdated = null;

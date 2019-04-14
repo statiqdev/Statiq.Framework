@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 using Markdig;
 using Markdig.Helpers;
 using Markdig.Parsers;
@@ -176,20 +177,19 @@ namespace Wyam.Markdown
         }
 
         /// <inheritdoc />
-        public IEnumerable<IDocument> Execute(IReadOnlyList<IDocument> inputs, IExecutionContext context)
+        public async Task<IEnumerable<IDocument>> ExecuteAsync(IReadOnlyList<IDocument> inputs, IExecutionContext context)
         {
-            return inputs.AsParallel().Select(context, input =>
+            return await inputs.ParallelSelectAsync(context, ProcessMarkdownAsync);
+
+            async Task<IDocument> ProcessMarkdownAsync(IDocument input)
             {
                 Trace.Verbose(
                     "Processing Markdown {0} for {1}",
                     string.IsNullOrEmpty(_sourceKey) ? string.Empty : ("in" + _sourceKey),
                     input.SourceString());
 
-                string result;
-
                 IExecutionCache executionCache = context.ExecutionCache;
-
-                if (!executionCache.TryGetValue<string>(input, _sourceKey, out result))
+                if (!executionCache.TryGetValue(input, _sourceKey, out string result))
                 {
                     string content;
                     if (string.IsNullOrEmpty(_sourceKey))
@@ -217,7 +217,7 @@ namespace Wyam.Markdown
                         {
                             htmlRenderer.LinkRewriter = (link) =>
                             {
-                                if (link == null || link.Length == 0)
+                                if (string.IsNullOrEmpty(link))
                                 {
                                     return link;
                                 }
@@ -249,12 +249,12 @@ namespace Wyam.Markdown
                 }
 
                 return string.IsNullOrEmpty(_sourceKey)
-                    ? context.GetDocumentAsync(input, result).Result
+                    ? await context.GetDocumentAsync(input, result)
                     : context.GetDocument(input, new MetadataItems
                     {
                         { string.IsNullOrEmpty(_destinationKey) ? _sourceKey : _destinationKey, result }
                     });
-            });
+            }
         }
 
         private MarkdownPipeline CreatePipeline()

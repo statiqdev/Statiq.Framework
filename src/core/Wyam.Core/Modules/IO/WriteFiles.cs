@@ -91,9 +91,9 @@ namespace Wyam.Core.Modules.IO
                 throw new ArgumentNullException(nameof(extension));
             }
 
-            _path = Config.FromDocument((x, _) =>
+            _path = Config.FromDocument(doc =>
             {
-                FilePath fileRelative = x.FilePath(Keys.RelativeFilePath);
+                FilePath fileRelative = doc.FilePath(Keys.RelativeFilePath);
                 return fileRelative?.ChangeExtension(extension);
             });
             _warnOnWriteMetadata = true;
@@ -106,7 +106,7 @@ namespace Wyam.Core.Modules.IO
         /// </summary>
         public WriteFiles()
         {
-            _path = Config.FromDocument((x, _) => x.FilePath(Keys.RelativeFilePath));
+            _path = Config.FromDocument(doc => doc.FilePath(Keys.RelativeFilePath));
         }
 
         /// <summary>

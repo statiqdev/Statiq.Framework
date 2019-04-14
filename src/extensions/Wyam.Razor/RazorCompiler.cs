@@ -10,6 +10,7 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Text.Encodings.Web;
 using System.Threading;
+using System.Threading.Tasks;
 using System.Xml.Linq;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.DataProtection.Repositories;
@@ -157,7 +158,7 @@ namespace Wyam.Razor
             }
         }
 
-        public void RenderPage(RenderRequest request)
+        public async Task RenderPageAsync(RenderRequest request)
         {
             using (IServiceScope scope = _serviceScopeFactory.CreateScope())
             {
@@ -168,7 +169,7 @@ namespace Wyam.Razor
                 using (StreamWriter writer = request.Output.GetWriter())
                 {
                     Microsoft.AspNetCore.Mvc.Rendering.ViewContext viewContext = GetViewContext(serviceProvider, request, view, writer);
-                    viewContext.View.RenderAsync(viewContext).GetAwaiter().GetResult();
+                    await viewContext.View.RenderAsync(viewContext);
                 }
             }
         }
@@ -189,7 +190,7 @@ namespace Wyam.Razor
 
             ITempDataDictionary tempData = new TempDataDictionary(actionContext.HttpContext, serviceProvider.GetRequiredService<ITempDataProvider>());
 
-            ViewContext viewContext = new ViewContext(
+            return new ViewContext(
                 actionContext,
                 view,
                 viewData,
@@ -198,8 +199,6 @@ namespace Wyam.Razor
                 new HtmlHelperOptions(),
                 request.Document,
                 request.Context);
-
-            return viewContext;
         }
 
         /// <summary>
@@ -260,9 +259,7 @@ namespace Wyam.Razor
 
             CompilationResult compilationResult = CompilePage(serviceProvider, request, hash, projectItem, projectFileSystem);
 
-            IRazorPage result = compilationResult.GetPage(request.RelativePath);
-
-            return result;
+            return compilationResult.GetPage(request.RelativePath);
         }
 
         private CompilationResult CompilePage(IServiceProvider serviceProvider, RenderRequest request, byte[] hash, RazorProjectItem projectItem, RazorProjectFileSystem projectFileSystem)

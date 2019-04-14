@@ -44,9 +44,9 @@ namespace Wyam.Razor
         private static Guid _executionId = Guid.Empty;
 
         private readonly Type _basePageType;
-        private DocumentConfig _viewStartPath;
-        private DocumentConfig _layoutPath;
-        private DocumentConfig _model;
+        private DocumentConfig<FilePath> _viewStartPath;
+        private DocumentConfig<FilePath> _layoutPath;
+        private DocumentConfigNew _model;
         private string _ignorePrefix = "_";
 
         /// <summary>
@@ -80,17 +80,6 @@ namespace Wyam.Razor
         }
 
         /// <summary>
-        /// Specifies an alternate ViewStart file to use for all Razor pages processed by this module.
-        /// </summary>
-        /// <param name="path">The path to the alternate ViewStart file.</param>
-        /// <returns>The current module instance.</returns>
-        public Razor WithViewStart(FilePath path)
-        {
-            _viewStartPath = (doc, ctx) => path;
-            return this;
-        }
-
-        /// <summary>
         /// Specifies an alternate ViewStart file to use for all Razor pages processed by this module. This
         /// lets you specify a different ViewStart file for each document. For example, you could return a
         /// ViewStart based on document location or document metadata. Returning <c>null</c> from the
@@ -99,20 +88,9 @@ namespace Wyam.Razor
         /// <param name="path">A delegate that should return the ViewStart path as a <c>FilePath</c>,
         /// or <c>null</c> for the default ViewStart search behavior.</param>
         /// <returns>The current module instance.</returns>
-        public Razor WithViewStart(DocumentConfig path)
+        public Razor WithViewStart(DocumentConfig<FilePath> path)
         {
             _viewStartPath = path;
-            return this;
-        }
-
-        /// <summary>
-        /// Specifies a layout file to use for all Razor pages processed by this module.
-        /// </summary>
-        /// <param name="path">The path to the layout file.</param>
-        /// <returns>The current module instance.</returns>
-        public Razor WithLayout(FilePath path)
-        {
-            _layoutPath = path == null ? (DocumentConfig)null : (doc, ctx) => path;
             return this;
         }
 
@@ -122,20 +100,9 @@ namespace Wyam.Razor
         /// </summary>
         /// <param name="path">A delegate that should return the layout path as a <c>FilePath</c>.</param>
         /// <returns>The current module instance.</returns>
-        public Razor WithLayout(DocumentConfig path)
+        public Razor WithLayout(DocumentConfig<FilePath> path)
         {
             _layoutPath = path;
-            return this;
-        }
-
-        /// <summary>
-        /// Specifies a model to use for each page.
-        /// </summary>
-        /// <param name="model">The model.</param>
-        /// <returns>The current module instance.</returns>
-        public Razor WithModel(object model)
-        {
-            _model = (doc, ctx) => model;
             return this;
         }
 
@@ -145,7 +112,7 @@ namespace Wyam.Razor
         /// </summary>
         /// <param name="model">A delegate that returns the model.</param>
         /// <returns>The current module instance.</returns>
-        public Razor WithModel(DocumentConfig model)
+        public Razor WithModel(DocumentConfigNew model)
         {
             _model = model;
             return this;
@@ -166,7 +133,7 @@ namespace Wyam.Razor
         }
 
         /// <inheritdoc />
-        public IEnumerable<IDocument> Execute(IReadOnlyList<IDocument> inputs, IExecutionContext context)
+        public async Task<IEnumerable<IDocument>> ExecuteAsync(IReadOnlyList<IDocument> inputs, IExecutionContext context)
         {
             // Expire the internal Razor cache if this is a new execution
             // This needs to be done so that layouts/partials can be re-rendered if they've changed,
@@ -190,14 +157,17 @@ namespace Wyam.Razor
             }
 
             // Compile and evaluate the pages in parallel
-            return validInputs.AsParallel().Select(context, input =>
+            return await validInputs.ParallelSelectAsync(context, RenderDocumentAsync);
+
+            async Task<IDocument> RenderDocumentAsync(IDocument input)
             {
                 Trace.Verbose("Processing Razor for {0}", input.SourceString());
 
-                Stream contentStream = context.GetContentStreamAsync().Result;
+                Stream contentStream = await context.GetContentStreamAsync();
                 using (Stream inputStream = input.GetStream())
                 {
-                    FilePath viewStartLocationPath = _viewStartPath?.Invoke<FilePath>(input, context);
+                    FilePath viewStartLocationPath = _viewStartPath == null ? null : await _viewStartPath.GetValueAsync(input, context);
+                    string layoutPath = _layoutPath == null ? null : (await _layoutPath.GetValueAsync(input, context))?.FullPath;
 
                     RenderRequest request = new RenderRequest
                     {
@@ -206,17 +176,17 @@ namespace Wyam.Razor
                         BaseType = _basePageType,
                         Context = context,
                         Document = input,
-                        LayoutLocation = _layoutPath?.Invoke<FilePath>(input, context)?.FullPath,
-                        ViewStartLocation = viewStartLocationPath != null ? GetRelativePathAsync(viewStartLocationPath, context).Result : null,
-                        RelativePath = GetRelativePathAsync(input, context).Result,
-                        Model = _model == null ? input : _model.Invoke(input, context),
+                        LayoutLocation = layoutPath,
+                        ViewStartLocation = viewStartLocationPath != null ? await GetRelativePathAsync(viewStartLocationPath, context) : null,
+                        RelativePath = await GetRelativePathAsync(input, context),
+                        Model = _model == null ? input : await _model.GetValueAsync(input, context)
                     };
 
-                    RazorService.Render(request);
+                    await RazorService.RenderAsync(request);
                 }
 
                 return context.GetDocument(input, contentStream);
-            });
+            }
         }
 
         private async Task<string> GetRelativePathAsync(IDocument document, IExecutionContext context)

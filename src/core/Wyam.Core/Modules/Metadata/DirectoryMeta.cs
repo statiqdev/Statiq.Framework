@@ -88,7 +88,7 @@ namespace Wyam.Core.Modules.Metadata
         /// <returns>The current module instance.</returns>
         public DirectoryMeta WithMetadataFile(FilePath metadataFileName, bool inherited = false, bool replace = false)
         {
-            return WithMetadataFile(Config.IfDocument((x, _) => x.Source?.FileName.Equals(metadataFileName) == true), inherited, replace);
+            return WithMetadataFile(Config.IfDocument(doc => doc.Source?.FileName.Equals(metadataFileName) == true), inherited, replace);
         }
 
         /// <inheritdoc />

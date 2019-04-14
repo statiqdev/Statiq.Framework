@@ -25,7 +25,7 @@ namespace Wyam.Core.Modules.Metadata
     /// <category>Metadata</category>
     public class Title : IModule
     {
-        private readonly DocumentConfig<string> _title = Config.FromDocument((doc, _) => GetTitle(doc));
+        private readonly DocumentConfig<string> _title = Config.FromDocument(GetTitle);
         private string _key = Keys.Title;
         private bool _keepExisting = true;
 

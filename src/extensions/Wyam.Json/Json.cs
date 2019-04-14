@@ -51,48 +51,48 @@ namespace Wyam.Json
         }
 
         /// <inheritdoc />
-        public IEnumerable<IDocument> Execute(IReadOnlyList<IDocument> inputs, IExecutionContext context)
+        public Task<IEnumerable<IDocument>> ExecuteAsync(IReadOnlyList<IDocument> inputs, IExecutionContext context)
         {
             // Don't use the built-in exception tracing so that we can return the original document on error
-            return inputs
-                .AsParallel()
-                .Select(input =>
+            ParallelQuery<IDocument> outputs = inputs.AsParallel().Select(ProcessJson).Where(x => x != null);
+            return Task.FromResult<IEnumerable<IDocument>>(outputs);
+
+            IDocument ProcessJson(IDocument input)
+            {
+                try
                 {
-                    try
+                    JsonSerializer serializer = new JsonSerializer();
+                    Dictionary<string, object> items = new Dictionary<string, object>();
+                    ExpandoObject json;
+                    using (TextReader contentReader = new StringReader(input.Content))
                     {
-                        JsonSerializer serializer = new JsonSerializer();
-                        Dictionary<string, object> items = new Dictionary<string, object>();
-                        ExpandoObject json;
-                        using (TextReader contentReader = new StringReader(input.Content))
+                        using (JsonReader jsonReader = new JsonTextReader(contentReader))
                         {
-                            using (JsonReader jsonReader = new JsonTextReader(contentReader))
-                            {
-                                json = serializer.Deserialize<ExpandoObject>(jsonReader);
-                            }
-                        }
-                        if (json != null)
-                        {
-                            if (!string.IsNullOrEmpty(_key))
-                            {
-                                items[_key] = json;
-                            }
-                            if (_flatten)
-                            {
-                                foreach (KeyValuePair<string, object> item in json)
-                                {
-                                    items[item.Key] = item.Value;
-                                }
-                            }
-                            return context.GetDocument(input, items);
+                            json = serializer.Deserialize<ExpandoObject>(jsonReader);
                         }
                     }
-                    catch (Exception ex)
+                    if (json != null)
                     {
-                        Trace.Error("Error processing JSON for {0}: {1}", input.SourceString(), ex.ToString());
+                        if (!string.IsNullOrEmpty(_key))
+                        {
+                            items[_key] = json;
+                        }
+                        if (_flatten)
+                        {
+                            foreach (KeyValuePair<string, object> item in json)
+                            {
+                                items[item.Key] = item.Value;
+                            }
+                        }
+                        return context.GetDocument(input, items);
                     }
-                    return input;
-                })
-                .Where(x => x != null);
+                }
+                catch (Exception ex)
+                {
+                    Trace.Error("Error processing JSON for {0}: {1}", input.SourceString(), ex.ToString());
+                }
+                return input;
+            }
         }
     }
 }

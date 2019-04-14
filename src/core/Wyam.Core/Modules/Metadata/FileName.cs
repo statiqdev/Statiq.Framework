@@ -42,7 +42,7 @@ namespace Wyam.Core.Modules.Metadata
 
         private static readonly Regex FileNameRegex = new Regex("^([a-zA-Z0-9])+$");
 
-        private readonly DocumentConfig<string> _fileName = Config.FromDocument((d, _) => d.String(Keys.SourceFileName));
+        private readonly DocumentConfig<string> _fileName = Config.FromDocument(doc => doc.String(Keys.SourceFileName));
         private readonly string _outputKey = Keys.WriteFileName;
         private string _pathOutputKey = Keys.WritePath;  // null for no output path
 
@@ -69,7 +69,7 @@ namespace Wyam.Core.Modules.Metadata
             {
                 throw new ArgumentException(nameof(inputKey));
             }
-            _fileName = Config.FromDocument((d, _) => d.String(inputKey));
+            _fileName = Config.FromDocument(doc => doc.String(inputKey));
         }
 
         /// <summary>
@@ -106,7 +106,7 @@ namespace Wyam.Core.Modules.Metadata
             {
                 throw new ArgumentException(nameof(outputKey));
             }
-            _fileName = Config.FromDocument((d, _) => d.String(inputKey));
+            _fileName = Config.FromDocument(doc => doc.String(inputKey));
             _outputKey = outputKey;
         }
 

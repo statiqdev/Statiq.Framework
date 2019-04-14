@@ -4,6 +4,7 @@ using WebMarkupMin.Core;
 using Wyam.Common.Documents;
 using Wyam.Common.Modules;
 using Wyam.Common.Execution;
+using System.Threading.Tasks;
 
 namespace Wyam.Minification
 {
@@ -120,11 +121,11 @@ namespace Wyam.Minification
         }
 
         /// <inheritdoc />
-        public IEnumerable<IDocument> Execute(IReadOnlyList<IDocument> inputs, IExecutionContext context)
+        public async Task<IEnumerable<IDocument>> ExecuteAsync(IReadOnlyList<IDocument> inputs, IExecutionContext context)
         {
             HtmlMinifier minifier = new HtmlMinifier(_minificationSettings);
 
-            return MinifyAsync(inputs, context, minifier.Minify, "HTML").Result;
+            return await MinifyAsync(inputs, context, minifier.Minify, "HTML");
         }
     }
 }

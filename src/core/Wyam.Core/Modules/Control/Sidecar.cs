@@ -76,7 +76,7 @@ namespace Wyam.Core.Modules.Control
                 throw new ArgumentException("Value cannot be null or empty.", nameof(extension));
             }
 
-            _sidecarPath = Config.FromDocument((d, _) => d.FilePath(Keys.SourceFilePath)?.AppendExtension(extension));
+            _sidecarPath = Config.FromDocument(doc => doc.FilePath(Keys.SourceFilePath)?.AppendExtension(extension));
         }
 
         /// <summary>

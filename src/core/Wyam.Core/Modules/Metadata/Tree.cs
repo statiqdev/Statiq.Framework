@@ -66,7 +66,7 @@ namespace Wyam.Core.Modules.Metadata
         public Tree()
         {
             _isRoot = false;
-            _treePath = Config.FromDocument((doc, _) =>
+            _treePath = Config.FromDocument(doc =>
             {
                 // Attempt to get the segments first from RelativeFilePath and then from Source
                 List<string> segments = doc.FilePath(Keys.RelativeFilePath)?.Segments.ToList();

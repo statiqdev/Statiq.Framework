@@ -46,7 +46,7 @@ namespace Wyam.Less
     /// <category>Templates</category>
     public class Less : IModule
     {
-        private DocumentConfig _inputPath = (doc, ctx) => doc.FilePath(Keys.RelativeFilePath);
+        private DocumentConfig<FilePath> _inputPath = Config.FromDocument(doc => doc.FilePath(Keys.RelativeFilePath));
 
         /// <summary>
         /// Specifies a delegate that should be used to get the input path for each
@@ -56,21 +56,22 @@ namespace Wyam.Less
         /// </summary>
         /// <param name="inputPath">A delegate that should return a <see cref="FilePath"/>.</param>
         /// <returns>The current instance.</returns>
-        public Less WithInputPath(DocumentConfig inputPath)
+        public Less WithInputPath(DocumentConfig<FilePath> inputPath)
         {
             _inputPath = inputPath ?? throw new ArgumentNullException(nameof(inputPath));
             return this;
         }
 
         /// <inheritdoc />
-        public IEnumerable<IDocument> Execute(IReadOnlyList<IDocument> inputs, IExecutionContext context)
+        public async Task<IEnumerable<IDocument>> ExecuteAsync(IReadOnlyList<IDocument> inputs, IExecutionContext context)
         {
             DotlessConfiguration config = DotlessConfiguration.GetDefault();
             config.Logger = typeof(LessLogger);
             EngineFactory engineFactory = new EngineFactory(config);
             FileSystemReader fileSystemReader = new FileSystemReader(context.FileSystem);
+            return await inputs.ParallelSelectAsync(context, ProcessLessAsync);
 
-            return inputs.AsParallel().Select(context, input =>
+            async Task<IDocument> ProcessLessAsync(IDocument input)
             {
                 Trace.Verbose("Processing Less for {0}", input.SourceString());
                 ILessEngine engine = engineFactory.GetEngine();
@@ -80,7 +81,7 @@ namespace Wyam.Less
                 engine.AsDynamic().Underlying.Underlying.Parser.Importer.FileReader = fileSystemReader;
 
                 // Less conversion
-                FilePath path = _inputPath.Invoke<FilePath>(input, context);
+                FilePath path = await _inputPath.GetValueAsync(input, context);
                 if (path != null)
                 {
                     engine.CurrentDirectory = path.Directory.FullPath;
@@ -95,15 +96,15 @@ namespace Wyam.Less
 
                 // Process the result
                 FilePath cssPath = path.ChangeExtension("css");
-                return context.GetDocumentAsync(
+                return await context.GetDocumentAsync(
                     input,
                     content,
                     new MetadataItems
                     {
                         { Keys.RelativeFilePath, cssPath },
                         { Keys.WritePath, cssPath }
-                    }).Result;
-            });
+                    });
+            }
         }
     }
 }

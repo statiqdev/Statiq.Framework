@@ -4,6 +4,7 @@ using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Formats;
 using SixLabors.ImageSharp.PixelFormats;
@@ -320,63 +321,65 @@ namespace Wyam.Images
         }
 
         /// <inheritdoc />
-        public IEnumerable<IDocument> Execute(IReadOnlyList<IDocument> inputs, IExecutionContext context)
+        public Task<IEnumerable<IDocument>> ExecuteAsync(IReadOnlyList<IDocument> inputs, IExecutionContext context)
         {
             ImageFormatManager formatManager = new ImageFormatManager();
-            return inputs.SelectMany(context, input =>
+            IEnumerable<IDocument> outputs = inputs.SelectMany(context, ProcessImages);
+            return Task.FromResult(outputs);
+
+            IEnumerable<IDocument> ProcessImages(IDocument input)
             {
                 FilePath relativePath = input.FilePath(Keys.RelativeFilePath);
-                return _operations
-                    .SelectMany(operations =>
+                return _operations.SelectMany(operations =>
+                {
+                    FilePath destinationPath = relativePath == null ? null : context.FileSystem.GetOutputPath(relativePath);
+
+                    // Get the image
+                    Image<Rgba32> image;
+                    IImageFormat imageFormat;
+                    using (Stream stream = input.GetStream())
                     {
-                        FilePath destinationPath = relativePath == null ? null : context.FileSystem.GetOutputPath(relativePath);
+                        image = SixLabors.ImageSharp.Image.Load(stream, out imageFormat);
+                    }
 
-                        // Get the image
-                        Image<Rgba32> image;
-                        IImageFormat imageFormat;
-                        using (Stream stream = input.GetStream())
+                    // Mutate the image with the specified operations, if there are any
+                    if (operations.Operations.Count > 0)
+                    {
+                        image.Mutate(imageContext =>
                         {
-                            image = SixLabors.ImageSharp.Image.Load(stream, out imageFormat);
-                        }
-
-                        // Mutate the image with the specified operations, if there are any
-                        if (operations.Operations.Count > 0)
-                        {
-                            image.Mutate(imageContext =>
+                            IImageProcessingContext<Rgba32> workingImageContext = imageContext;
+                            foreach (IImageOperation operation in operations.Operations)
                             {
-                                IImageProcessingContext<Rgba32> workingImageContext = imageContext;
-                                foreach (IImageOperation operation in operations.Operations)
+                                // Apply operation
+                                workingImageContext = operation.Apply(workingImageContext);
+
+                                // Modify the path
+                                if (destinationPath != null)
                                 {
-                                    // Apply operation
-                                    workingImageContext = operation.Apply(workingImageContext);
-
-                                    // Modify the path
-                                    if (destinationPath != null)
-                                    {
-                                        destinationPath = operation.GetPath(destinationPath) ?? destinationPath;
-                                    }
+                                    destinationPath = operation.GetPath(destinationPath) ?? destinationPath;
                                 }
-                            });
-                        }
+                            }
+                        });
+                    }
 
-                        // Invoke output actions
-                        IEnumerable<OutputAction> outputActions = operations.OutputActions.Count == 0
-                            ? (IEnumerable<OutputAction>)new[] { new OutputAction((i, s) => i.Save(s, imageFormat), null) }
-                            : operations.OutputActions;
-                        return outputActions.Select(action =>
+                    // Invoke output actions
+                    IEnumerable<OutputAction> outputActions = operations.OutputActions.Count == 0
+                        ? (IEnumerable<OutputAction>)new[] { new OutputAction((i, s) => i.Save(s, imageFormat), null) }
+                        : operations.OutputActions;
+                    return outputActions.Select(action =>
+                    {
+                        FilePath formatPath = action.GetPath(destinationPath) ?? destinationPath;
+                        Trace.Verbose($"{Keys.WritePath}: {formatPath}");
+                        MemoryStream outputStream = new MemoryStream();
+                        action.Invoke(image, outputStream);
+                        outputStream.Seek(0, SeekOrigin.Begin);
+                        return context.GetDocument(input, outputStream, new MetadataItems
                         {
-                            FilePath formatPath = action.GetPath(destinationPath) ?? destinationPath;
-                            Trace.Verbose($"{Keys.WritePath}: {formatPath}");
-                            MemoryStream outputStream = new MemoryStream();
-                            action.Invoke(image, outputStream);
-                            outputStream.Seek(0, SeekOrigin.Begin);
-                            return context.GetDocument(input, outputStream, new MetadataItems
-                            {
-                                { Keys.WritePath, formatPath }
-                            });
+                            { Keys.WritePath, formatPath }
                         });
                     });
-            });
+                });
+            }
         }
     }
 }

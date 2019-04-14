@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 using SharpScss;
 using Wyam.Common.Configuration;
 using Wyam.Common.Documents;
@@ -51,7 +52,7 @@ namespace Wyam.Sass
     public class Sass : IModule
     {
         private readonly List<DirectoryPath> _includePaths = new List<DirectoryPath>();
-        private DocumentConfig _inputPath = DefaultInputPath;
+        private DocumentConfig<FilePath> _inputPath = Config.AsyncFromDocument(DefaultInputPathAsync);
         private Func<string, string> _importPathFunc = null;
         private bool _includeSourceComments = false;
         private ScssOutputStyle _outputStyle = ScssOutputStyle.Compact;
@@ -65,7 +66,7 @@ namespace Wyam.Sass
         /// </summary>
         /// <param name="inputPath">A delegate that should return a <see cref="FilePath"/>.</param>
         /// <returns>The current instance.</returns>
-        public Sass WithInputPath(DocumentConfig inputPath)
+        public Sass WithInputPath(DocumentConfig<FilePath> inputPath)
         {
             _inputPath = inputPath ?? throw new ArgumentNullException(nameof(inputPath));
             return this;
@@ -157,74 +158,72 @@ namespace Wyam.Sass
         }
 
         /// <inheritdoc />
-        public IEnumerable<IDocument> Execute(IReadOnlyList<IDocument> inputs, IExecutionContext context)
+        public async Task<IEnumerable<IDocument>> ExecuteAsync(IReadOnlyList<IDocument> inputs, IExecutionContext context)
         {
-            return inputs
-                .AsParallel()
-                .SelectMany(context, input =>
+            return await inputs.ParallelSelectManyAsync(context, ProcessSassAsync);
+
+            async Task<IEnumerable<IDocument>> ProcessSassAsync(IDocument input)
+            {
+                Trace.Verbose($"Processing Sass for {input.SourceString()}");
+
+                FilePath inputPath = await _inputPath.GetValueAsync(input, context);
+                if (inputPath?.IsAbsolute != true)
                 {
-                    Trace.Verbose($"Processing Sass for {input.SourceString()}");
+                    inputPath = (await context.FileSystem.GetInputFileAsync(new FilePath(Path.GetRandomFileName()))).Path;
+                    Trace.Warning($"No input path found for document {input.SourceString()}, using {inputPath.FileName.FullPath}");
+                }
 
-                    FilePath inputPath = _inputPath.Invoke<FilePath>(input, context);
-                    if (inputPath?.IsAbsolute != true)
+                string content = input.Content;
+
+                // Sass conversion
+                FileImporter importer = new FileImporter(context.FileSystem, _importPathFunc);
+                ScssOptions options = new ScssOptions
+                {
+                    OutputStyle = _outputStyle,
+                    GenerateSourceMap = _generateSourceMap,
+                    SourceComments = _includeSourceComments,
+                    InputFile = inputPath.FullPath,
+                    TryImport = importer.TryImport
+                };
+                IEnumerable<string> includePaths = await _includePaths
+                    .Where(x => x != null)
+                    .SelectAsync(async x => x.IsAbsolute ? x.FullPath : (await context.FileSystem.GetContainingInputPathAsync(x))?.Combine(x)?.FullPath);
+                options.IncludePaths.AddRange(includePaths.Where(x => x != null));
+                ScssResult result = Scss.ConvertToCss(content, options);
+
+                // Process the result
+                DirectoryPath relativeDirectory = await context.FileSystem.GetContainingInputPathAsync(inputPath);
+                FilePath relativePath = relativeDirectory?.GetRelativePath(inputPath) ?? inputPath.FileName;
+
+                FilePath cssPath = relativePath.ChangeExtension("css");
+                IDocument cssDocument = await context.GetDocumentAsync(
+                    input,
+                    result.Css ?? string.Empty,
+                    new MetadataItems
                     {
-                        inputPath = context.FileSystem.GetInputFileAsync(new FilePath(Path.GetRandomFileName())).Result.Path;
-                        Trace.Warning($"No input path found for document {input.SourceString()}, using {inputPath.FileName.FullPath}");
-                    }
-
-                    string content = input.Content;
-
-                    // Sass conversion
-                    FileImporter importer = new FileImporter(context.FileSystem, _importPathFunc);
-                    ScssOptions options = new ScssOptions
-                    {
-                        OutputStyle = _outputStyle,
-                        GenerateSourceMap = _generateSourceMap,
-                        SourceComments = _includeSourceComments,
-                        InputFile = inputPath.FullPath,
-                        TryImport = importer.TryImport
-                    };
-                    options.IncludePaths.AddRange(
-                        _includePaths
-                            .Where(x => x != null)
-                            .Select(x => x.IsAbsolute ? x.FullPath : context.FileSystem.GetContainingInputPathAsync(x).Result?.Combine(x)?.FullPath)
-                            .Where(x => x != null));
-                    ScssResult result = Scss.ConvertToCss(content, options);
-
-                    // Process the result
-                    DirectoryPath relativeDirectory = context.FileSystem.GetContainingInputPathAsync(inputPath).Result;
-                    FilePath relativePath = relativeDirectory?.GetRelativePath(inputPath) ?? inputPath.FileName;
-
-                    FilePath cssPath = relativePath.ChangeExtension("css");
-                    IDocument cssDocument = context.GetDocumentAsync(
-                        input,
-                        result.Css ?? string.Empty,
-                        new MetadataItems
-                        {
                             { Keys.RelativeFilePath, cssPath },
                             { Keys.WritePath, cssPath }
-                        }).Result;
+                    });
 
-                    IDocument sourceMapDocument = null;
-                    if (_generateSourceMap && result.SourceMap != null)
-                    {
-                        FilePath sourceMapPath = relativePath.ChangeExtension("map");
-                        sourceMapDocument = context.GetDocumentAsync(
-                            input,
-                            result.SourceMap,
-                            new MetadataItems
-                            {
+                IDocument sourceMapDocument = null;
+                if (_generateSourceMap && result.SourceMap != null)
+                {
+                    FilePath sourceMapPath = relativePath.ChangeExtension("map");
+                    sourceMapDocument = await context.GetDocumentAsync(
+                        input,
+                        result.SourceMap,
+                        new MetadataItems
+                        {
                                 { Keys.RelativeFilePath, sourceMapPath },
                                 { Keys.WritePath, sourceMapPath }
-                            }).Result;
-                    }
+                        });
+                }
 
-                    return new[] { cssDocument, sourceMapDocument };
-                })
-                .Where(x => x != null);
+                return new[] { cssDocument, sourceMapDocument };
+            }
         }
 
-        private static object DefaultInputPath(IDocument document, IExecutionContext context)
+        private static async Task<FilePath> DefaultInputPathAsync(IDocument document, IExecutionContext context)
         {
             FilePath path = document.FilePath(Keys.SourceFilePath);
             if (path == null)
@@ -232,8 +231,8 @@ namespace Wyam.Sass
                 path = document.FilePath(Keys.RelativeFilePath);
                 if (path != null)
                 {
-                    IFile inputFile = context.FileSystem.GetInputFileAsync(path).Result;
-                    return inputFile.GetExistsAsync().Result ? inputFile.Path : null;
+                    IFile inputFile = await context.FileSystem.GetInputFileAsync(path);
+                    return await inputFile.GetExistsAsync() ? inputFile.Path : null;
                 }
             }
             return path;

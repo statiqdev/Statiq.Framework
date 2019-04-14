@@ -13,6 +13,7 @@ using Wyam.Common.Modules;
 using Wyam.Common.Execution;
 using Wyam.Common.Tracing;
 using Newtonsoft.Json.Serialization;
+using Wyam.Common.Util;
 
 namespace Wyam.Json
 {
@@ -26,7 +27,7 @@ namespace Wyam.Json
     /// <category>Content</category>
     public class GenerateJson : IModule
     {
-        private readonly DocumentConfig _data;
+        private readonly DocumentConfigNew _data;
         private readonly string _destinationKey;
         private bool _indenting = true;
         private bool _camelCase = false;
@@ -42,7 +43,7 @@ namespace Wyam.Json
         public GenerateJson(string sourceKey, string destinationKey = null)
         {
             _destinationKey = destinationKey;
-            _data = (doc, ctx) => doc.Get(sourceKey);
+            _data = Config.FromDocument(doc => doc.Get(sourceKey));
         }
 
         /// <summary>
@@ -52,23 +53,10 @@ namespace Wyam.Json
         /// <param name="data">A delegate that returns the object to convert to JSON.</param>
         /// <param name="destinationKey">The metadata key where the JSON should be stored (or <c>null</c>
         /// to replace the content of each input document).</param>
-        public GenerateJson(ContextConfig data, string destinationKey = null)
+        public GenerateJson(DocumentConfigNew data, string destinationKey = null)
         {
             _destinationKey = destinationKey;
-            _data = (doc, ctx) => data(ctx);
-        }
-
-        /// <summary>
-        /// The object returned by the specified delegate is converted to JSON, which then either
-        /// replaces the content of each input document or is stored in the specified metadata key.
-        /// </summary>
-        /// <param name="data">A delegate that returns the object to convert to JSON.</param>
-        /// <param name="destinationKey">The metadata key where the JSON should be stored (or <c>null</c>
-        /// to replace the content of each input document).</param>
-        public GenerateJson(DocumentConfig data, string destinationKey = null)
-        {
-            _destinationKey = destinationKey;
-            _data = data;
+            _data = data ?? throw new ArgumentNullException(nameof(data));
         }
 
         /// <summary>
@@ -80,7 +68,7 @@ namespace Wyam.Json
         public GenerateJson(IEnumerable<string> keys, string destinationKey = null)
         {
             _destinationKey = destinationKey;
-            _data = (doc, ctx) => keys.Where(k => doc.ContainsKey(k)).ToDictionary(k => k, k => doc[k]);
+            _data = Config.FromDocument(doc => (object)keys.Where(k => doc.ContainsKey(k)).ToDictionary(k => k, k => doc[k]));
         }
 
         /// <summary>
@@ -102,7 +90,7 @@ namespace Wyam.Json
         /// <returns>The current module instance.</returns>
         public GenerateJson WithCamelCase(bool camelCase = true)
         {
-            _camelCase = true;
+            _camelCase = camelCase;
             return this;
         }
 
@@ -118,45 +106,44 @@ namespace Wyam.Json
         }
 
         /// <inheritdoc />
-        public IEnumerable<IDocument> Execute(IReadOnlyList<IDocument> inputs, IExecutionContext context)
+        public async Task<IEnumerable<IDocument>> ExecuteAsync(IReadOnlyList<IDocument> inputs, IExecutionContext context)
         {
             // Don't use the built-in exception tracing so that we can return the original document on error
-            return inputs
-               .AsParallel()
-               .Select(input =>
-               {
-                   try
-                   {
-                       object data = _data(input, context);
-                       if (data != null)
-                       {
-                           JsonSerializerSettings settings = new JsonSerializerSettings()
-                           {
-                               Formatting = _indenting ? Formatting.Indented : Formatting.None
-                           };
-                           if (_camelCase)
-                           {
-                               settings.ContractResolver = new CamelCasePropertyNamesContractResolver();
-                           }
-                           _settings?.Invoke(settings);
-                           string result = JsonConvert.SerializeObject(data, settings);
-                           if (string.IsNullOrEmpty(_destinationKey))
-                           {
-                               return context.GetDocumentAsync(input, result).Result;
-                           }
-                           return context.GetDocument(input, new MetadataItems
-                           {
+            return await inputs.ParallelSelectAsync(GenerateJsonAsync);
+
+            async Task<IDocument> GenerateJsonAsync(IDocument input)
+            {
+                try
+                {
+                    object data = await _data.GetValueAsync(input, context);
+                    if (data != null)
+                    {
+                        JsonSerializerSettings settings = new JsonSerializerSettings()
+                        {
+                            Formatting = _indenting ? Formatting.Indented : Formatting.None
+                        };
+                        if (_camelCase)
+                        {
+                            settings.ContractResolver = new CamelCasePropertyNamesContractResolver();
+                        }
+                        _settings?.Invoke(settings);
+                        string result = JsonConvert.SerializeObject(data, settings);
+                        if (string.IsNullOrEmpty(_destinationKey))
+                        {
+                            return await context.GetDocumentAsync(input, result);
+                        }
+                        return context.GetDocument(input, new MetadataItems
+                               {
                                { _destinationKey, result }
-                           });
-                       }
-                   }
-                   catch (Exception ex)
-                   {
-                       Trace.Error("Error serializing JSON for {0}: {1}", input.SourceString(), ex.ToString());
-                   }
-                   return input;
-               })
-               .Where(x => x != null);
+                               });
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Trace.Error("Error serializing JSON for {0}: {1}", input.SourceString(), ex.ToString());
+                }
+                return input;
+            }
         }
     }
 }
