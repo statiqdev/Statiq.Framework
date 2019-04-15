@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 using Wyam.Common.Documents;
 using Wyam.Common.Execution;
 using Wyam.Common.Modules;
@@ -20,16 +21,16 @@ namespace Wyam.Tables
     public class ExcelToCsv : IModule
     {
         /// <inheritdoc />
-        public IEnumerable<IDocument> Execute(IReadOnlyList<IDocument> inputs, IExecutionContext context)
+        public Task<IEnumerable<IDocument>> ExecuteAsync(IReadOnlyList<IDocument> inputs, IExecutionContext context)
         {
-            return inputs.AsParallel().Select(context, input =>
+            ParallelQuery<IDocument> outputs = inputs.AsParallel().Select(context, input =>
             {
                 try
                 {
                     IEnumerable<IEnumerable<string>> records;
                     using (Stream stream = input.GetStream())
                     {
-                        records = ExcelFile.GetAllRecords(input.GetStream());
+                        records = ExcelFile.GetAllRecords(stream);
                     }
 
                     using (MemoryStream memoryStream = new MemoryStream())
@@ -40,10 +41,11 @@ namespace Wyam.Tables
                 }
                 catch (Exception e)
                 {
-                    Trace.Error($"An {e.ToString()} occurred ({input.SourceString()}): {e.Message}");
+                    Trace.Error($"An {e} occurred ({input.SourceString()}): {e.Message}");
                     return null;
                 }
-            }).Where(x => x != null);
+            });
+            return Task.FromResult<IEnumerable<IDocument>>(outputs);
         }
     }
 }

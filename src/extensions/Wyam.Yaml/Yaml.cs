@@ -52,9 +52,9 @@ namespace Wyam.Yaml
         }
 
         /// <inheritdoc />
-        public IEnumerable<IDocument> Execute(IReadOnlyList<IDocument> inputs, IExecutionContext context)
+        public Task<IEnumerable<IDocument>> ExecuteAsync(IReadOnlyList<IDocument> inputs, IExecutionContext context)
         {
-            return inputs
+            ParallelQuery<IDocument> outputs = inputs
                 .AsParallel()
                 .SelectMany(context, input =>
                 {
@@ -66,8 +66,7 @@ namespace Wyam.Yaml
                         foreach (YamlDocument document in yamlStream.Documents)
                         {
                             // If this is a sequence, get a document for each item
-                            YamlSequenceNode rootSequence = document.RootNode as YamlSequenceNode;
-                            if (rootSequence != null)
+                            if (document.RootNode is YamlSequenceNode rootSequence)
                             {
                                 documentMetadata.AddRange(rootSequence.Children.Select(x => GetDocumentMetadata(x, context)));
                             }
@@ -83,8 +82,8 @@ namespace Wyam.Yaml
                         return new[] { input };
                     }
                     return documentMetadata.Select(metadata => context.GetDocument(input, metadata));
-                })
-                .Where(x => x != null);
+                });
+            return Task.FromResult<IEnumerable<IDocument>>(outputs);
         }
 
         private Dictionary<string, object> GetDocumentMetadata(YamlNode node, IExecutionContext context)
@@ -100,8 +99,7 @@ namespace Wyam.Yaml
             // Also get the flat metadata if requested
             if (_flatten)
             {
-                YamlMappingNode mappingNode = node as YamlMappingNode;
-                if (mappingNode == null)
+                if (!(node is YamlMappingNode mappingNode))
                 {
                     throw new InvalidOperationException("Cannot flatten YAML content that doesn't have a mapping node at the root (or within a root sequence).");
                 }

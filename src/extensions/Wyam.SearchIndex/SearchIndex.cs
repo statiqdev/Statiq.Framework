@@ -68,10 +68,10 @@ namespace Wyam.SearchIndex
     public class SearchIndex : IModule
     {
         private static readonly Regex StripHtmlAndSpecialChars = new Regex(@"<[^>]+>|&[a-zA-Z]{2,};|&#\d+;|[^a-zA-Z-#]", RegexOptions.Compiled);
-        private readonly DocumentConfig _searchIndexItem;
+        private readonly DocumentConfig<ISearchIndexItem> _searchIndexItem;
         private FilePath _stopwordsPath;
         private bool _enableStemming;
-        private ContextConfig _path = _ => new FilePath("searchIndex.js");
+        private ContextConfig<FilePath> _path = new FilePath("searchIndex.js");
         private bool _includeHost = false;
         private Func<StringBuilder, IExecutionContext, string> _script = (builder, _) => builder.ToString();
 
@@ -82,7 +82,7 @@ namespace Wyam.SearchIndex
         /// <param name="stopwordsPath">A file to use that contains a set of stopwords.</param>
         /// <param name="enableStemming">If set to <c>true</c>, stemming is enabled.</param>
         public SearchIndex(FilePath stopwordsPath = null, bool enableStemming = false)
-            : this((doc, ctx) => doc.Get<SearchIndexItem>(SearchIndexKeys.SearchIndexItem), stopwordsPath, enableStemming)
+            : this(Config.FromDocument(doc => doc.Get<ISearchIndexItem>(SearchIndexKeys.SearchIndexItem)), stopwordsPath, enableStemming)
         {
         }
 
@@ -94,17 +94,17 @@ namespace Wyam.SearchIndex
         /// <param name="stopwordsPath">A file to use that contains a set of stopwords.</param>
         /// <param name="enableStemming">If set to <c>true</c>, stemming is enabled.</param>
         public SearchIndex(string searchIndexItemMetadataKey, FilePath stopwordsPath = null, bool enableStemming = false)
-            : this((doc, ctx) => doc.Get<SearchIndexItem>(searchIndexItemMetadataKey), stopwordsPath, enableStemming)
+            : this(Config.FromDocument(doc => doc.Get<ISearchIndexItem>(searchIndexItemMetadataKey)), stopwordsPath, enableStemming)
         {
         }
 
         /// <summary>
         /// Creates the search index by using a delegate that returns a <c>SearchIndexItem</c> instance for each input document.
         /// </summary>
-        /// <param name="searchIndexItem">A delegate that should return a <c>SearchIndexItem</c>.</param>
+        /// <param name="searchIndexItem">A delegate that should return a <c>ISearchIndexItem</c>.</param>
         /// <param name="stopwordsPath">A file to use that contains a set of stopwords.</param>
         /// <param name="enableStemming">If set to <c>true</c>, stemming is enabled.</param>
-        public SearchIndex(DocumentConfig searchIndexItem, FilePath stopwordsPath = null, bool enableStemming = false)
+        public SearchIndex(DocumentConfig<ISearchIndexItem> searchIndexItem, FilePath stopwordsPath = null, bool enableStemming = false)
         {
             _searchIndexItem = searchIndexItem ?? throw new ArgumentNullException(nameof(searchIndexItem));
             _stopwordsPath = stopwordsPath;
@@ -152,7 +152,7 @@ namespace Wyam.SearchIndex
         /// <returns>The current module instance.</returns>
         public SearchIndex WithPath(FilePath path)
         {
-            _path = _ => path;
+            _path = path;
             return this;
         }
 
@@ -162,7 +162,7 @@ namespace Wyam.SearchIndex
         /// </summary>
         /// <param name="path">A delegate that should return a <see cref="FilePath"/> to the output file.</param>
         /// <returns>The current module instance.</returns>
-        public SearchIndex WithPath(ContextConfig path)
+        public SearchIndex WithPath(ContextConfig<FilePath> path)
         {
             _path = path ?? throw new ArgumentNullException(nameof(path));
             return this;
@@ -182,10 +182,10 @@ namespace Wyam.SearchIndex
         }
 
         /// <inheritdoc />
-        public IEnumerable<IDocument> Execute(IReadOnlyList<IDocument> inputs, IExecutionContext context)
+        public async Task<IEnumerable<IDocument>> ExecuteAsync(IReadOnlyList<IDocument> inputs, IExecutionContext context)
         {
-            ISearchIndexItem[] searchIndexItems = inputs
-                .Select(context, x => _searchIndexItem.TryInvoke<ISearchIndexItem>(x, context))
+            ISearchIndexItem[] searchIndexItems =
+                (await inputs.SelectAsync(context, async x => await _searchIndexItem.GetValueAsync(x, context)))
                 .Where(x => !string.IsNullOrEmpty(x?.Title) && !string.IsNullOrEmpty(x.Content))
                 .ToArray();
 
@@ -195,13 +195,13 @@ namespace Wyam.SearchIndex
                 return Array.Empty<IDocument>();
             }
 
-            string[] stopwords = GetStopwordsAsync(context).Result;
+            string[] stopwords = await GetStopwordsAsync(context);
             StringBuilder scriptBuilder = BuildScript(searchIndexItems, stopwords, context);
             string script = _script(scriptBuilder, context);
 
             // Get the output path
             MetadataItems metadata = null;
-            FilePath outputPath = _path?.Invoke<FilePath>(context, "while getting output path");
+            FilePath outputPath = await _path?.GetValueAsync(context);
             if (outputPath != null)
             {
                 if (!outputPath.IsRelative)
@@ -215,7 +215,7 @@ namespace Wyam.SearchIndex
                 };
             }
 
-            return new[] { context.GetDocumentAsync(script, metadata).Result };
+            return new[] { await context.GetDocumentAsync(script, metadata) };
         }
 
         private StringBuilder BuildScript(IList<ISearchIndexItem> searchIndexItems, string[] stopwords, IExecutionContext context)

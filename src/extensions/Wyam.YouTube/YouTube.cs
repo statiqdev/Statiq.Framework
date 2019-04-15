@@ -86,9 +86,9 @@ namespace Wyam.YouTube
         }
 
         /// <inheritdoc />
-        public IEnumerable<IDocument> Execute(IReadOnlyList<IDocument> inputs, IExecutionContext context)
+        public Task<IEnumerable<IDocument>> ExecuteAsync(IReadOnlyList<IDocument> inputs, IExecutionContext context)
         {
-            return inputs.AsParallel().Select(context, input =>
+            ParallelQuery<IDocument> outputs = inputs.AsParallel().Select(context, input =>
             {
                 ConcurrentDictionary<string, object> results = new ConcurrentDictionary<string, object>();
                 foreach (KeyValuePair<string, Func<IDocument, IExecutionContext, YouTubeService, object>> request in _requests.AsParallel())
@@ -105,6 +105,7 @@ namespace Wyam.YouTube
                 }
                 return context.GetDocument(input, results);
             });
+            return Task.FromResult<IEnumerable<IDocument>>(outputs);
         }
     }
 }

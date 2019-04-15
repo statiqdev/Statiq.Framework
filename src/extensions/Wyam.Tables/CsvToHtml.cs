@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 using Wyam.Common.Documents;
 using Wyam.Common.Execution;
 using Wyam.Common.Modules;
@@ -34,9 +35,9 @@ namespace Wyam.Tables
         }
 
         /// <inheritdoc />
-        public IEnumerable<IDocument> Execute(IReadOnlyList<IDocument> inputs, IExecutionContext context)
+        public async Task<IEnumerable<IDocument>> ExecuteAsync(IReadOnlyList<IDocument> inputs, IExecutionContext context)
         {
-            return inputs.AsParallel().Select(context, input =>
+            return await inputs.ParallelSelectAsync(context, async input =>
             {
                 try
                 {
@@ -67,14 +68,14 @@ namespace Wyam.Tables
                         firstLine = false;
                     }
                     builder.Append("</table>");
-                    return context.GetDocumentAsync(input, builder.ToString()).Result;
+                    return await context.GetDocumentAsync(input, builder.ToString());
                 }
                 catch (Exception e)
                 {
-                    Trace.Error($"An {e.ToString()} occurred ({input.SourceString()}): {e.Message}");
+                    Trace.Error($"An {e} occurred ({input.SourceString()}): {e.Message}");
                     return null;
                 }
-            }).Where(x => x != null);
+            });
         }
     }
 }
