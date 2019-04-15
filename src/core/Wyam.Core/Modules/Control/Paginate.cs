@@ -60,7 +60,7 @@ namespace Wyam.Core.Modules.Control
     public class Paginate : ContainerModule
     {
         private readonly int _pageSize;
-        private readonly Dictionary<string, DocumentConfigNew> _pageMetadata = new Dictionary<string, DocumentConfigNew>();
+        private readonly Dictionary<string, DocumentConfig> _pageMetadata = new Dictionary<string, DocumentConfig>();
         private DocumentPredicate _predicate;
         private int _takePages = int.MaxValue;
         private int _skipPages = 0;
@@ -136,7 +136,7 @@ namespace Wyam.Core.Modules.Control
         /// <param name="key">The key of the metadata to add.</param>
         /// <param name="metadata">A delegate with the value for the metadata.</param>
         /// <returns>The current module instance.</returns>
-        public Paginate WithPageMetadata(string key, DocumentConfigNew metadata)
+        public Paginate WithPageMetadata(string key, DocumentConfig metadata)
         {
             if (key == null)
             {

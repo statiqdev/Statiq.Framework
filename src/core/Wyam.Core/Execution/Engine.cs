@@ -255,7 +255,7 @@ namespace Wyam.Core.Execution
                             {
                                 try
                                 {
-                                    ((ExecutionPipeline)pipeline).Execute(this, executionId, serviceScope.ServiceProvider);
+                                    await ((ExecutionPipeline)pipeline).ExecuteAsync(this, executionId, serviceScope.ServiceProvider);
                                     pipelineStopwatch.Stop();
                                     Trace.Information(
                                         "Executed pipeline \"{0}\" ({1}/{2}) in {3} ms resulting in {4} output document(s)",

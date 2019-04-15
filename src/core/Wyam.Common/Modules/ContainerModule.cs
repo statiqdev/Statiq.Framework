@@ -50,9 +50,6 @@ namespace Wyam.Common.Modules
         public bool Remove(IModule item) => _modules.Remove(item);
 
         /// <inheritdoc />
-        public bool Remove(string name) => _modules.Remove(name);
-
-        /// <inheritdoc />
         public int Count => _modules.Count;
 
         /// <inheritdoc />
@@ -60,9 +57,6 @@ namespace Wyam.Common.Modules
 
         /// <inheritdoc />
         public void Insert(int index, params IModule[] modules) => _modules.Insert(index, modules);
-
-        /// <inheritdoc />
-        public int IndexOf(string name) => _modules.IndexOf(name);
 
         /// <inheritdoc />
         public bool IsReadOnly => _modules.IsReadOnly;
@@ -82,23 +76,5 @@ namespace Wyam.Common.Modules
             get { return _modules[index]; }
             set { _modules[index] = value; }
         }
-
-        /// <inheritdoc />
-        public bool Contains(string name) => _modules.Contains(name);
-
-        /// <inheritdoc />
-        public bool TryGetValue(string name, out IModule value) => _modules.TryGetValue(name, out value);
-
-        /// <inheritdoc />
-        public IModule this[string name] => _modules[name];
-
-        /// <inheritdoc />
-        public void Add(string name, IModule module) => _modules.Add(name, module);
-
-        /// <inheritdoc />
-        public void Insert(int index, string name, IModule module) => _modules.Insert(index, name, module);
-
-        /// <inheritdoc />
-        public IEnumerable<KeyValuePair<string, IModule>> AsKeyValuePairs() => _modules.AsKeyValuePairs();
     }
 }

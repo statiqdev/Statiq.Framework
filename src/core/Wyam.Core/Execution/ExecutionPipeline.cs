@@ -68,7 +68,7 @@ namespace Wyam.Core.Execution
         }
 
         // This is the main execute method called by the engine
-        public void Execute(Engine engine, Guid executionId, IServiceProvider serviceProvider)
+        public async Task ExecuteAsync(Engine engine, Guid executionId, IServiceProvider serviceProvider)
         {
             if (_disposed)
             {
@@ -86,7 +86,7 @@ namespace Wyam.Core.Execution
             using (ExecutionContext context = new ExecutionContext(engine, executionId, this, serviceProvider))
             {
                 ImmutableArray<IDocument> inputs = new[] { engine.DocumentFactory.GetDocument(context) }.ToImmutableArray();
-                resultDocuments = Execute(context, _modules, inputs);
+                resultDocuments = await ExecuteAsync(context, _modules, inputs);
             }
 
             // Dispose documents that aren't part of the final collection for this pipeline,
@@ -125,7 +125,7 @@ namespace Wyam.Core.Execution
         }
 
         // This executes the specified modules with the specified input documents
-        public IReadOnlyList<IDocument> Execute(ExecutionContext context, IEnumerable<IModule> modules, ImmutableArray<IDocument> inputDocuments)
+        public async Task<IReadOnlyList<IDocument>> ExecuteAsync(ExecutionContext context, IEnumerable<IModule> modules, ImmutableArray<IDocument> inputDocuments)
         {
             if (_disposed)
             {
@@ -144,7 +144,8 @@ namespace Wyam.Core.Execution
                         // Execute the module
                         using (ExecutionContext moduleContext = context.Clone(module))
                         {
-                            resultDocuments = module.Execute(inputDocuments, moduleContext)?.Where(x => x != null).ToImmutableArray() ?? ImmutableArray<IDocument>.Empty;
+                            IEnumerable<IDocument> moduleResult = await module.ExecuteAsync(inputDocuments, moduleContext);
+                            resultDocuments = moduleResult?.Where(x => x != null).ToImmutableArray() ?? ImmutableArray<IDocument>.Empty;
                         }
 
                         // Remove any documents that were previously processed (checking will also mark the cache entry as hit)

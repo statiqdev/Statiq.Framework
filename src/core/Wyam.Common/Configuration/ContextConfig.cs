@@ -8,9 +8,9 @@ using Wyam.Common.Execution;
 
 namespace Wyam.Common.Configuration
 {
-    public class ContextConfigNew : DocumentConfigNew
+    public class ContextConfig : DocumentConfig
     {
-        internal ContextConfigNew(Func<IExecutionContext, Task<object>> func)
+        internal ContextConfig(Func<IExecutionContext, Task<object>> func)
             : base((_, ctx) => func(ctx))
         {
         }

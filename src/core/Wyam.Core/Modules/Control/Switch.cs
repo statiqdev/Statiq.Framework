@@ -27,14 +27,14 @@ namespace Wyam.Core.Modules.Control
         private readonly List<Tuple<object, IEnumerable<IModule>>> _cases
             = new List<Tuple<object, IEnumerable<IModule>>>();
 
-        private readonly DocumentConfigNew _value;
+        private readonly DocumentConfig _value;
         private IEnumerable<IModule> _defaultModules;
 
         /// <summary>
         /// Defines the delegate that will be invoked against each input document to get the case comparison value.
         /// </summary>
         /// <param name="value">A delegate that returns an object to compare cases against.</param>
-        public Switch(DocumentConfigNew value)
+        public Switch(DocumentConfig value)
         {
             _value = value ?? throw new ArgumentNullException(nameof(value));
         }

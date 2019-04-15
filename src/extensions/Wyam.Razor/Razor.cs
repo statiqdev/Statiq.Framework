@@ -46,7 +46,7 @@ namespace Wyam.Razor
         private readonly Type _basePageType;
         private DocumentConfig<FilePath> _viewStartPath;
         private DocumentConfig<FilePath> _layoutPath;
-        private DocumentConfigNew _model;
+        private DocumentConfig _model;
         private string _ignorePrefix = "_";
 
         /// <summary>
@@ -112,7 +112,7 @@ namespace Wyam.Razor
         /// </summary>
         /// <param name="model">A delegate that returns the model.</param>
         /// <returns>The current module instance.</returns>
-        public Razor WithModel(DocumentConfigNew model)
+        public Razor WithModel(DocumentConfig model)
         {
             _model = model;
             return this;

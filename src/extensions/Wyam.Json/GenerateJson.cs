@@ -27,7 +27,7 @@ namespace Wyam.Json
     /// <category>Content</category>
     public class GenerateJson : IModule
     {
-        private readonly DocumentConfigNew _data;
+        private readonly DocumentConfig _data;
         private readonly string _destinationKey;
         private bool _indenting = true;
         private bool _camelCase = false;
@@ -53,7 +53,7 @@ namespace Wyam.Json
         /// <param name="data">A delegate that returns the object to convert to JSON.</param>
         /// <param name="destinationKey">The metadata key where the JSON should be stored (or <c>null</c>
         /// to replace the content of each input document).</param>
-        public GenerateJson(DocumentConfigNew data, string destinationKey = null)
+        public GenerateJson(DocumentConfig data, string destinationKey = null)
         {
             _destinationKey = destinationKey;
             _data = data ?? throw new ArgumentNullException(nameof(data));

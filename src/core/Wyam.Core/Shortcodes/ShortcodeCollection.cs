@@ -54,17 +54,17 @@ namespace Wyam.Core.Shortcodes
         public void Add(string name, string result) =>
             Add(name, async (args, content, doc, ctx) => result != null ? await ctx.GetShortcodeResultAsync(result) : null);
 
-        public void Add(string name, ContextConfig contextConfig) =>
+        public void Add(string name, ContextConfig<string> contextConfig) =>
             Add(name, async (args, content, doc, ctx) =>
             {
-                string result = contextConfig?.Invoke<string>(ctx);
+                string result = contextConfig == null ? null : await contextConfig.GetValueAsync(ctx);
                 return result != null ? await ctx.GetShortcodeResultAsync(result) : null;
             });
 
-        public void Add(string name, DocumentConfig documentConfig) =>
+        public void Add(string name, DocumentConfig<string> documentConfig) =>
             Add(name, async (args, content, doc, ctx) =>
             {
-                string result = documentConfig?.Invoke<string>(doc, ctx);
+                string result = documentConfig == null ? null : await documentConfig.GetValueAsync(doc, ctx);
                 return result != null ? await ctx.GetShortcodeResultAsync(result) : null;
             });
 

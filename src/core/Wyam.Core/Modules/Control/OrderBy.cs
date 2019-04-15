@@ -25,7 +25,7 @@ namespace Wyam.Core.Modules.Control
         /// Orders the input documents using the specified delegate to get the ordering key.
         /// </summary>
         /// <param name="key">A delegate that should return the key to use for ordering.</param>
-        public OrderBy(DocumentConfigNew key)
+        public OrderBy(DocumentConfig key)
         {
             if (key == null)
             {
@@ -41,7 +41,7 @@ namespace Wyam.Core.Modules.Control
         /// </summary>
         /// <param name="key">A delegate that should return the key to use for ordering.</param>
         /// <returns>The current module instance.</returns>
-        public OrderBy ThenBy(DocumentConfigNew key)
+        public OrderBy ThenBy(DocumentConfig key)
         {
             if (key == null)
             {
@@ -118,11 +118,11 @@ namespace Wyam.Core.Modules.Control
 
         private class Order
         {
-            public DocumentConfigNew Key { get; }
+            public DocumentConfig Key { get; }
             public bool Descending { get; set; }
             public IComparer<object> Comparer { get; set; }
 
-            public Order(DocumentConfigNew key)
+            public Order(DocumentConfig key)
             {
                 Key = key;
             }

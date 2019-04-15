@@ -38,7 +38,7 @@ namespace Wyam.Core.Modules.Extensibility
         /// <see cref="IDocument"/>, <c>IEnumerable&lt;IModule&gt;</c>, <see cref="IModule"/>, object, or null.</param>
         /// <param name="parallel">The delegate is usually evaluated and each input document is processed in parallel.
         /// Setting this to <c>false</c> runs evaluates and processes each document in their original input order.</param>
-        public Execute(DocumentConfigNew execute, bool parallel = true)
+        public Execute(DocumentConfig execute, bool parallel = true)
         {
             _execute = async (inputs, context) =>
             {
@@ -89,7 +89,7 @@ namespace Wyam.Core.Modules.Extensibility
         /// </summary>
         /// <param name="execute">A delegate to invoke that should return a <c>IEnumerable&lt;IDocument&gt;</c>,
         /// <see cref="IDocument"/>, <c>IEnumerable&lt;IModule&gt;</c>, <see cref="IModule"/>, or null.</param>
-        public Execute(ContextConfigNew execute)
+        public Execute(ContextConfig execute)
         {
             _execute = async (inputs, context) =>
             {

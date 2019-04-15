@@ -17,7 +17,7 @@ namespace Wyam.Core.Modules.Metadata
     public class Meta : IModule
     {
         private readonly string _key;
-        private readonly DocumentConfigNew _metadata;
+        private readonly DocumentConfig _metadata;
         private readonly IModule[] _modules;
         private bool _forEachDocument;
         private bool _ignoreNull;
@@ -29,7 +29,7 @@ namespace Wyam.Core.Modules.Metadata
         /// </summary>
         /// <param name="key">The metadata key to set.</param>
         /// <param name="metadata">A delegate that returns the object to add as metadata.</param>
-        public Meta(string key, DocumentConfigNew metadata)
+        public Meta(string key, DocumentConfig metadata)
         {
             _key = key ?? throw new ArgumentNullException(nameof(key));
             _metadata = metadata ?? throw new ArgumentNullException(nameof(metadata));

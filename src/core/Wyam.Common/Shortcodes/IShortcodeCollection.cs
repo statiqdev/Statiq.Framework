@@ -45,20 +45,20 @@ namespace Wyam.Common.Shortcodes
         void Add(string name, string result);
 
         /// <summary>
-        /// Adds a shortcode and uses a <see cref="ContextConfig"/> to determine
+        /// Adds a shortcode and uses a <see cref="ContextConfig{String}"/> to determine
         /// the shortcode result.
         /// </summary>
         /// <param name="name">The name of the shortcode.</param>
         /// <param name="contextConfig">A delegate that should return a <see cref="string"/>.</param>
-        void Add(string name, ContextConfig contextConfig);
+        void Add(string name, ContextConfig<string> contextConfig);
 
         /// <summary>
-        /// Adds a shortcode and uses a <see cref="DocumentConfig"/> to determine
+        /// Adds a shortcode and uses a <see cref="DocumentConfig{String}"/> to determine
         /// the shortcode result.
         /// </summary>
         /// <param name="name">The name of the shortcode.</param>
         /// <param name="documentConfig">A delegate that should return a <see cref="string"/>.</param>
-        void Add(string name, DocumentConfig documentConfig);
+        void Add(string name, DocumentConfig<string> documentConfig);
 
         /// <summary>
         /// Adds a shortcode that determines the result content using the declared content.

@@ -10,7 +10,7 @@ namespace Wyam.Common.Modules
     /// </summary>
     public class ModuleList : IModuleList
     {
-        private readonly List<KeyValuePair<string, IModule>> _modules = new List<KeyValuePair<string, IModule>>();
+        private readonly List<IModule> _modules = new List<IModule>();
 
         /// <summary>
         /// Creates a new empty module list.
@@ -61,21 +61,7 @@ namespace Wyam.Common.Modules
             {
                 throw new ArgumentNullException(nameof(item));
             }
-            Add(ExpandNamedModule(item));
-        }
-
-        /// <inheritdoc />
-        public void Add(string name, IModule module) =>
-            Add(new KeyValuePair<string, IModule>(name, module));
-
-        private void Add(KeyValuePair<string, IModule> namedModule)
-        {
-            if (namedModule.Value == null)
-            {
-                throw new ArgumentException("Module cannot be null");
-            }
-            CheckName(namedModule.Key);
-            _modules.Add(namedModule);
+            _modules.Add(item);
         }
 
         /// <inheritdoc />
@@ -95,21 +81,7 @@ namespace Wyam.Common.Modules
             {
                 throw new ArgumentNullException(nameof(item));
             }
-            Insert(index, ExpandNamedModule(item));
-        }
-
-        /// <inheritdoc />
-        public void Insert(int index, string name, IModule module) =>
-            Insert(index, new KeyValuePair<string, IModule>(name, module));
-
-        private void Insert(int index, KeyValuePair<string, IModule> namedModule)
-        {
-            if (namedModule.Value == null)
-            {
-                throw new ArgumentException("Module cannot be null");
-            }
-            CheckName(namedModule.Key);
-            _modules.Insert(index, namedModule);
+            _modules.Insert(index, item);
         }
 
         /// <inheritdoc />
@@ -125,49 +97,13 @@ namespace Wyam.Common.Modules
         }
 
         /// <inheritdoc />
-        public bool Remove(string name)
-        {
-            int index = IndexOf(name);
-            if (index >= 0)
-            {
-                _modules.RemoveAt(index);
-                return true;
-            }
-            return false;
-        }
-
-        /// <inheritdoc />
         public void RemoveAt(int index) => _modules.RemoveAt(index);
 
         /// <inheritdoc />
         public IModule this[int index]
         {
-            get
-            {
-                return _modules[index].Value;
-            }
-            set
-            {
-                // Zero it out before setting so we don't throw for duplicate keys
-                _modules[index] = default(KeyValuePair<string, IModule>);
-                KeyValuePair<string, IModule> namedModule = ExpandNamedModule(value);
-                CheckName(namedModule.Key);
-                _modules[index] = namedModule;
-            }
-        }
-
-        /// <inheritdoc />
-        public IModule this[string name]
-        {
-            get
-            {
-                IModule module;
-                if (TryGetValue(name, out module))
-                {
-                    return module;
-                }
-                throw new KeyNotFoundException($"The key \"{name}\" was not present in the dictionary.");
-            }
+            get => _modules[index];
+            set => _modules[index] = value ?? throw new ArgumentNullException(nameof(value));
         }
 
         /// <inheritdoc />
@@ -177,60 +113,20 @@ namespace Wyam.Common.Modules
         public void Clear() => _modules.Clear();
 
         /// <inheritdoc />
-        public bool Contains(IModule item) => _modules.Any(x => x.Value.Equals(item));
+        public bool Contains(IModule item) => _modules.Any(x => x.Equals(item));
 
         /// <inheritdoc />
-        public bool Contains(string name) => _modules.Any(x => string.Equals(x.Key, name, StringComparison.OrdinalIgnoreCase));
-
-        /// <inheritdoc />
-        public void CopyTo(IModule[] array, int arrayIndex) => _modules.Select(x => x.Value).ToList().CopyTo(array);
+        public void CopyTo(IModule[] array, int arrayIndex) => _modules.CopyTo(array);
 
         /// <inheritdoc />
         public bool IsReadOnly => false;
 
         /// <inheritdoc />
-        public int IndexOf(IModule item) => _modules.FindIndex(x => x.Value.Equals(item));
-
-        /// <inheritdoc />
-        public bool TryGetValue(string name, out IModule value)
-        {
-            foreach (KeyValuePair<string, IModule> item in _modules)
-            {
-                if (string.Equals(item.Key, name, StringComparison.OrdinalIgnoreCase))
-                {
-                    value = item.Value;
-                    return true;
-                }
-            }
-            value = null;
-            return false;
-        }
-
-        /// <inheritdoc />
-        public int IndexOf(string name) => _modules.FindIndex(x => string.Equals(x.Key, name, StringComparison.OrdinalIgnoreCase));
-
-        /// <inheritdoc />
-        public IEnumerable<KeyValuePair<string, IModule>> AsKeyValuePairs() => _modules;
+        public int IndexOf(IModule item) => _modules.FindIndex(x => x.Equals(item));
 
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
         /// <inheritdoc />
-        public IEnumerator<IModule> GetEnumerator() => _modules.Select(x => x.Value).GetEnumerator();
-
-        private KeyValuePair<string, IModule> ExpandNamedModule(IModule module)
-        {
-            NamedModule namedModule = module as NamedModule;
-            return namedModule != null
-                ? new KeyValuePair<string, IModule>(namedModule.Name, namedModule.Module)
-                : new KeyValuePair<string, IModule>(null, module);
-        }
-
-        private void CheckName(string name)
-        {
-            if (name != null && _modules.Any(x => x.Key != null && string.Equals(x.Key, name, StringComparison.OrdinalIgnoreCase)))
-            {
-                throw new ArgumentException($"A module with the name {name} already exists");
-            }
-        }
+        public IEnumerator<IModule> GetEnumerator() => _modules.GetEnumerator();
     }
 }

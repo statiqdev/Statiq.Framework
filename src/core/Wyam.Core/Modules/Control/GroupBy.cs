@@ -30,7 +30,7 @@ namespace Wyam.Core.Modules.Control
     /// <category>Control</category>
     public class GroupBy : ContainerModule
     {
-        private readonly DocumentConfigNew _key;
+        private readonly DocumentConfig _key;
         private DocumentPredicate _predicate;
         private IEqualityComparer<object> _comparer;
         private bool _emptyOutputIfNoGroups;
@@ -43,7 +43,7 @@ namespace Wyam.Core.Modules.Control
         /// </summary>
         /// <param name="key">A delegate that returns the group key.</param>
         /// <param name="modules">Modules to execute on the input documents prior to grouping.</param>
-        public GroupBy(DocumentConfigNew key, params IModule[] modules)
+        public GroupBy(DocumentConfig key, params IModule[] modules)
             : this(key, (IEnumerable<IModule>)modules)
         {
         }
@@ -56,7 +56,7 @@ namespace Wyam.Core.Modules.Control
         /// </summary>
         /// <param name="key">A delegate that returns the group key.</param>
         /// <param name="modules">Modules to execute on the input documents prior to grouping.</param>
-        public GroupBy(DocumentConfigNew key, IEnumerable<IModule> modules)
+        public GroupBy(DocumentConfig key, IEnumerable<IModule> modules)
             : base(modules)
         {
             _key = key ?? throw new ArgumentNullException(nameof(key));
