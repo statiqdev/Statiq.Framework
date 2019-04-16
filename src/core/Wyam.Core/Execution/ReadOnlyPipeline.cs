@@ -27,16 +27,6 @@ namespace Wyam.Core.Execution
 
         public int Count => _pipeline.Count;
 
-        public bool Contains(string name) => _pipeline.Contains(name);
-
-        public bool TryGetValue(string name, out IModule value) => _pipeline.TryGetValue(name, out value);
-
-        public IModule this[string name] => _pipeline[name];
-
         public IModule this[int index] => _pipeline[index];
-
-        public int IndexOf(string name) => _pipeline.IndexOf(name);
-
-        public IEnumerable<KeyValuePair<string, IModule>> AsKeyValuePairs() => _pipeline.AsKeyValuePairs();
     }
 }

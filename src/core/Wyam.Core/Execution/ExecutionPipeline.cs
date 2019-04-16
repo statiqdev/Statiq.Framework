@@ -295,15 +295,11 @@ namespace Wyam.Core.Execution
 
         public bool Remove(IModule item) => _modules.Remove(item);
 
-        public bool Remove(string name) => _modules.Remove(name);
-
         public int Count => _modules.Count;
 
         public void Add(params IModule[] modules) => _modules.Add(modules);
 
         public void Insert(int index, params IModule[] modules) => _modules.Insert(index, modules);
-
-        public int IndexOf(string name) => _modules.IndexOf(name);
 
         public bool IsReadOnly => _modules.IsReadOnly;
 
@@ -318,17 +314,5 @@ namespace Wyam.Core.Execution
             get { return _modules[index]; }
             set { _modules[index] = value; }
         }
-
-        public bool Contains(string name) => _modules.Contains(name);
-
-        public bool TryGetValue(string name, out IModule value) => _modules.TryGetValue(name, out value);
-
-        public IModule this[string name] => _modules[name];
-
-        public void Add(string name, IModule module) => _modules.Add(name, module);
-
-        public void Insert(int index, string name, IModule module) => _modules.Insert(index, name, module);
-
-        public IEnumerable<KeyValuePair<string, IModule>> AsKeyValuePairs() => _modules.AsKeyValuePairs();
     }
 }

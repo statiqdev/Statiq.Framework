@@ -197,17 +197,17 @@ namespace Wyam.Core.Execution
             return document;
         }
 
-        public IReadOnlyList<IDocument> Execute(IEnumerable<IModule> modules, IEnumerable<IDocument> inputs) =>
-            Execute(modules, inputs, null);
+        public Task<IReadOnlyList<IDocument>> ExecuteAsync(IEnumerable<IModule> modules, IEnumerable<IDocument> inputs) =>
+            ExecuteAsync(modules, inputs, null);
 
         // Executes the module with an empty document containing the specified metadata items
-        public IReadOnlyList<IDocument> Execute(IEnumerable<IModule> modules, IEnumerable<KeyValuePair<string, object>> items = null) =>
-            Execute(modules, null, items);
+        public Task<IReadOnlyList<IDocument>> ExecuteAsync(IEnumerable<IModule> modules, IEnumerable<KeyValuePair<string, object>> items = null) =>
+            ExecuteAsync(modules, null, items);
 
-        public IReadOnlyList<IDocument> Execute(IEnumerable<IModule> modules, IEnumerable<MetadataItem> items) =>
-            Execute(modules, items?.Select(x => x.Pair));
+        public Task<IReadOnlyList<IDocument>> ExecuteAsync(IEnumerable<IModule> modules, IEnumerable<MetadataItem> items) =>
+            ExecuteAsync(modules, items?.Select(x => x.Pair));
 
-        private IReadOnlyList<IDocument> Execute(IEnumerable<IModule> modules, IEnumerable<IDocument> inputs, IEnumerable<KeyValuePair<string, object>> items)
+        private async Task<IReadOnlyList<IDocument>> ExecuteAsync(IEnumerable<IModule> modules, IEnumerable<IDocument> inputs, IEnumerable<KeyValuePair<string, object>> items)
         {
             CheckDisposed();
 
@@ -220,7 +220,7 @@ namespace Wyam.Core.Execution
             IReadOnlyList<IDocument> originalDocuments = Engine.DocumentCollection.Get(_pipeline.Name);
             ImmutableArray<IDocument> documents = inputs?.ToImmutableArray()
                 ?? new[] { GetDocument(items) }.ToImmutableArray();
-            IReadOnlyList<IDocument> results = _pipeline.Execute(this, modules, documents);
+            IReadOnlyList<IDocument> results = await _pipeline.ExecuteAsync(this, modules, documents);
             Engine.DocumentCollection.Set(_pipeline.Name, originalDocuments);
             return results;
         }
