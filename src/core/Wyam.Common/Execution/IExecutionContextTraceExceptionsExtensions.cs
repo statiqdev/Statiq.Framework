@@ -11,7 +11,7 @@ namespace Wyam.Common.Execution
     /// <summary>
     /// Extensions to send exception messages to trace output with relevant context such as currently executing module and document.
     /// </summary>
-    public static class TraceExceptionsExtensions
+    public static class IExecutionContextTraceExceptionsExtensions
     {
         /// <summary>
         /// If an exception is thrown within the action, an error messages will be sent to the trace output

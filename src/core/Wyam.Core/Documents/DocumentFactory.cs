@@ -23,22 +23,6 @@ namespace Wyam.Core.Documents
             _settings = settings;
         }
 
-        public IDocument GetDocument(IExecutionContext context) =>
-            new Document(_settings, null, null, null, true);
-
-        public IDocument GetDocument(
-            IExecutionContext context,
-            IDocument sourceDocument,
-            FilePath source,
-            IEnumerable<KeyValuePair<string, object>> items = null)
-        {
-            if (sourceDocument == null || ModuleExtensions.AsNewDocumentModules.Contains(context.Module))
-            {
-                return new Document(_settings, source, null, items, true);
-            }
-            return new Document((Document)sourceDocument, source, items);
-        }
-
         public IDocument GetDocument(
             IExecutionContext context,
             IDocument sourceDocument,
@@ -52,32 +36,6 @@ namespace Wyam.Core.Documents
                 return new Document(_settings, source, stream, items, disposeStream);
             }
             return new Document((Document)sourceDocument, source, stream, items, disposeStream);
-        }
-
-        public IDocument GetDocument(
-            IExecutionContext context,
-            IDocument sourceDocument,
-            Stream stream,
-            IEnumerable<KeyValuePair<string, object>> items = null,
-            bool disposeStream = true)
-        {
-            if (sourceDocument == null || ModuleExtensions.AsNewDocumentModules.Contains(context.Module))
-            {
-                return new Document(_settings, null, stream, items, disposeStream);
-            }
-            return new Document((Document)sourceDocument, stream, items, disposeStream);
-        }
-
-        public IDocument GetDocument(
-            IExecutionContext context,
-            IDocument sourceDocument,
-            IEnumerable<KeyValuePair<string, object>> items)
-        {
-            if (sourceDocument == null || ModuleExtensions.AsNewDocumentModules.Contains(context.Module))
-            {
-                return new Document(_settings, null, null, items, true);
-            }
-            return new Document((Document)sourceDocument, items);
         }
     }
 }

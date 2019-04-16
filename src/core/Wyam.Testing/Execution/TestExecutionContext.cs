@@ -37,39 +37,6 @@ namespace Wyam.Testing.Execution
         private readonly TestSettings _settings = new TestSettings();
 
         /// <inheritdoc/>
-        public IDocument GetDocument() => new TestDocument();
-
-        /// <inheritdoc/>
-        public Task<IDocument> GetDocumentAsync(FilePath source, string content, IEnumerable<KeyValuePair<string, object>> items = null) =>
-            Task.FromResult(GetDocument(source, GetContentStreamAsync(content).Result, items));
-
-        /// <inheritdoc/>
-        public Task<IDocument> GetDocumentAsync(string content, IEnumerable<KeyValuePair<string, object>> items = null) =>
-            Task.FromResult(GetDocument(GetContentStreamAsync(content).Result, items));
-
-        /// <inheritdoc/>
-        public Task<IDocument> GetDocumentAsync(IDocument sourceDocument, FilePath source, string content, IEnumerable<KeyValuePair<string, object>> items = null) =>
-            Task.FromResult(GetDocument(sourceDocument, source, GetContentStreamAsync(content).Result, items));
-
-        /// <inheritdoc/>
-        public Task<IDocument> GetDocumentAsync(IDocument sourceDocument, string content, IEnumerable<KeyValuePair<string, object>> items = null) =>
-            Task.FromResult(GetDocument(sourceDocument, GetContentStreamAsync(content).Result, items));
-
-        /// <inheritdoc/>
-        public IDocument GetDocument(IEnumerable<KeyValuePair<string, object>> items) => new TestDocument(items);
-
-        /// <inheritdoc/>
-        public IDocument GetDocument(IDocument sourceDocument, IEnumerable<KeyValuePair<string, object>> items)
-        {
-            return new TestDocument(items == null ? sourceDocument : sourceDocument.Concat(items))
-            {
-                Id = sourceDocument.Id,
-                Source = sourceDocument.Source,
-                Content = sourceDocument.Content
-            };
-        }
-
-        /// <inheritdoc/>
         public IDocument GetDocument(
             IDocument sourceDocument,
             FilePath source,
@@ -77,57 +44,16 @@ namespace Wyam.Testing.Execution
             IEnumerable<KeyValuePair<string, object>> items = null,
             bool disposeStream = true)
         {
-            return new TestDocument(items == null ? sourceDocument : sourceDocument.Concat(items))
+            TestDocument document = sourceDocument == null
+                ? new TestDocument(items)
+                : new TestDocument(items == null ? sourceDocument : sourceDocument.Concat(items));
+            if (sourceDocument != null)
             {
-                Id = sourceDocument.Id,
-                Source = source,
-                Content = GetContent(stream)
-            };
-        }
-
-        /// <inheritdoc/>
-        public IDocument GetDocument(FilePath source, Stream stream, IEnumerable<KeyValuePair<string, object>> items = null, bool disposeStream = true)
-        {
-            return new TestDocument(items)
-            {
-                Source = source,
-                Content = GetContent(stream)
-            };
-        }
-
-        /// <inheritdoc/>
-        public IDocument GetDocument(FilePath source, IEnumerable<KeyValuePair<string, object>> items = null)
-        {
-            return new TestDocument(items)
-            {
-                Source = source
-            };
-        }
-
-        /// <inheritdoc/>
-        public IDocument GetDocument(IDocument sourceDocument, Stream stream, IEnumerable<KeyValuePair<string, object>> items = null, bool disposeStream = true)
-        {
-            return new TestDocument(items == null ? sourceDocument : sourceDocument.Concat(items))
-            {
-                Id = sourceDocument.Id,
-                Source = sourceDocument.Source,
-                Content = GetContent(stream)
-            };
-        }
-
-        /// <inheritdoc/>
-        public IDocument GetDocument(Stream stream, IEnumerable<KeyValuePair<string, object>> items = null, bool disposeStream = true)
-        {
-            return new TestDocument(items)
-            {
-                Content = GetContent(stream)
-            };
-        }
-
-        /// <inheritdoc/>
-        public IDocument GetDocument(IDocument sourceDocument, FilePath source, IEnumerable<KeyValuePair<string, object>> items = null)
-        {
-            return GetDocument(sourceDocument, source, (Stream)null, items);
+                document.Id = sourceDocument.Id;
+            }
+            document.Source = source;
+            document.Content = GetContent(stream);
+            return document;
         }
 
         private string GetContent(Stream stream)
@@ -230,18 +156,7 @@ namespace Wyam.Testing.Execution
         }
 
         /// <inheritdoc/>
-        public IReadOnlyList<IDocument> Execute(IEnumerable<IModule> modules, IEnumerable<IDocument> inputs) =>
-            Execute(modules, inputs, null);
-
-        /// <inheritdoc/>
-        public IReadOnlyList<IDocument> Execute(IEnumerable<IModule> modules, IEnumerable<KeyValuePair<string, object>> items = null) =>
-            Execute(modules, null, items);
-
-        /// <inheritdoc/>
-        public IReadOnlyList<IDocument> Execute(IEnumerable<IModule> modules, IEnumerable<MetadataItem> items) =>
-            Execute(modules, items?.Select(x => x.Pair));
-
-        private IReadOnlyList<IDocument> Execute(IEnumerable<IModule> modules, IEnumerable<IDocument> inputs, IEnumerable<KeyValuePair<string, object>> items)
+        public async Task<IReadOnlyList<IDocument>> ExecuteAsync(IEnumerable<IModule> modules, IEnumerable<IDocument> inputs)
         {
             if (modules == null)
             {
@@ -249,7 +164,7 @@ namespace Wyam.Testing.Execution
             }
             foreach (IModule module in modules)
             {
-                inputs = module.Execute(inputs.ToList(), this);
+                inputs = await module.ExecuteAsync(inputs.ToList(), this);
             }
             return inputs.ToList();
         }

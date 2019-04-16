@@ -10,7 +10,7 @@ namespace Wyam.Common.Execution
     /// <summary>
     /// Extension methods for <see cref="IPipeline"/>.
     /// </summary>
-    public static class PipelineExtensions
+    public static class IPipelineExtensions
     {
         /// <summary>
         /// Specifies that a given pipeline doesn't use data from other pipelines and prevents reprocessing of documents after the first pass.

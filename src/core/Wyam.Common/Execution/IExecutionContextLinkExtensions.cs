@@ -9,7 +9,7 @@ namespace Wyam.Common.Execution
     /// <summary>
     /// Extensions to generate web links using global settings.
     /// </summary>
-    public static class LinkExtensions
+    public static class IExecutionContextLinkExtensions
     {
         /// <summary>
         /// Gets a link for the root of the site using the host and root path specified in the settings.

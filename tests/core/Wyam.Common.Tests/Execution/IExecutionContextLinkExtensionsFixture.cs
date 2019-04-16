@@ -13,9 +13,9 @@ using Wyam.Testing.Meta;
 namespace Wyam.Common.Tests.Execution
 {
     [TestFixture]
-    public class LinkExtensionsFixture : BaseFixture
+    public class IExecutionContextLinkExtensionsFixture : BaseFixture
     {
-        public class GetLinkTests : LinkExtensionsFixture
+        public class GetLinkTests : IExecutionContextLinkExtensionsFixture
         {
             [TestCase("http://foo.com/bar", false, "http://foo.com/bar")]
             [TestCase("http://foo.com/bar", true, "http://foo.com/bar")]

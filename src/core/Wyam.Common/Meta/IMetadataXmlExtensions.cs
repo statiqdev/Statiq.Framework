@@ -5,7 +5,7 @@ using System.Xml.Linq;
 
 namespace Wyam.Common.Meta
 {
-    public static class MetadataXmlExtensions
+    public static class IMetadataXmlExtensions
     {
         /// <summary>
         /// Gets an XML attribute for the given metadata key.

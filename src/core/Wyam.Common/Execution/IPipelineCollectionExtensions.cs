@@ -7,7 +7,7 @@ namespace Wyam.Common.Execution
     /// <summary>
     /// Extensions for working with pipeline collections.
     /// </summary>
-    public static class PipelineCollectionExtensions
+    public static class IPipelineCollectionExtensions
     {
         /// <summary>
         /// Adds a new unnamed pipeline to the collection.

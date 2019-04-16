@@ -9,7 +9,7 @@ namespace Wyam.Common.Modules
     /// <summary>
     /// Extensions for use with <see cref="ModuleList"/>.
     /// </summary>
-    public static class ModuleListExtensions
+    public static class IModuleListExtensions
     {
         /// <summary>
         /// Appends modules.

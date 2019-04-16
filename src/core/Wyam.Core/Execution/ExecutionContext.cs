@@ -119,49 +119,7 @@ namespace Wyam.Core.Execution
             Timeout = TimeSpan.FromSeconds(60)
         };
 
-        // GetDocument
-
-        public IDocument GetDocument(FilePath source, Stream stream, IEnumerable<KeyValuePair<string, object>> items = null, bool disposeStream = true) =>
-            GetDocument((IDocument)null, source, stream, items, disposeStream);
-
-        public async Task<IDocument> GetDocumentAsync(FilePath source, string content, IEnumerable<KeyValuePair<string, object>> items = null) =>
-            GetDocument((IDocument)null, source, await GetContentStreamAsync(content), items);
-
-        public IDocument GetDocument(FilePath source, IEnumerable<KeyValuePair<string, object>> items = null) =>
-            GetDocument((IDocument)null, source, (Stream)null, items);
-
-        public IDocument GetDocument(Stream stream, IEnumerable<KeyValuePair<string, object>> items = null, bool disposeStream = true) =>
-            GetDocument((IDocument)null, stream, items, disposeStream);
-
-        public async Task<IDocument> GetDocumentAsync(string content, IEnumerable<KeyValuePair<string, object>> items = null) =>
-            GetDocument((IDocument)null, await GetContentStreamAsync(content), items);
-
-        public IDocument GetDocument(IEnumerable<KeyValuePair<string, object>> items) =>
-            GetDocument((IDocument)null, items);
-
-        // IDocumentFactory
-
-        public IDocument GetDocument()
-        {
-            CheckDisposed();
-            IDocument document = Engine.DocumentFactory.GetDocument(this);
-            _pipeline.AddClonedDocument(document);
-            return document;
-        }
-
-        public IDocument GetDocument(IDocument sourceDocument, FilePath source, IEnumerable<KeyValuePair<string, object>> items = null)
-        {
-            CheckDisposed();
-            IDocument document = Engine.DocumentFactory.GetDocument(this, sourceDocument, source, items);
-            if (sourceDocument != null && sourceDocument.Source == null)
-            {
-                // Only add a new source if the source document didn't already contain one (otherwise the one it contains will be used)
-                _pipeline.AddDocumentSource(source);
-            }
-            _pipeline.AddClonedDocument(document);
-            return document;
-        }
-
+        /// <inheritdoc/>
         public IDocument GetDocument(IDocument sourceDocument, FilePath source, Stream stream, IEnumerable<KeyValuePair<string, object>> items = null, bool disposeStream = true)
         {
             CheckDisposed();
@@ -175,39 +133,7 @@ namespace Wyam.Core.Execution
             return document;
         }
 
-        public async Task<IDocument> GetDocumentAsync(IDocument sourceDocument, FilePath source, string content, IEnumerable<KeyValuePair<string, object>> items = null) =>
-            GetDocument(sourceDocument, source, await GetContentStreamAsync(content), items);
-
-        public IDocument GetDocument(IDocument sourceDocument, Stream stream, IEnumerable<KeyValuePair<string, object>> items = null, bool disposeStream = true)
-        {
-            CheckDisposed();
-            IDocument document = Engine.DocumentFactory.GetDocument(this, sourceDocument, stream, items, disposeStream);
-            _pipeline.AddClonedDocument(document);
-            return document;
-        }
-
-        public async Task<IDocument> GetDocumentAsync(IDocument sourceDocument, string content, IEnumerable<KeyValuePair<string, object>> items = null) =>
-            GetDocument(sourceDocument, await GetContentStreamAsync(content), items);
-
-        public IDocument GetDocument(IDocument sourceDocument, IEnumerable<KeyValuePair<string, object>> items)
-        {
-            CheckDisposed();
-            IDocument document = Engine.DocumentFactory.GetDocument(this, sourceDocument, items);
-            _pipeline.AddClonedDocument(document);
-            return document;
-        }
-
-        public Task<IReadOnlyList<IDocument>> ExecuteAsync(IEnumerable<IModule> modules, IEnumerable<IDocument> inputs) =>
-            ExecuteAsync(modules, inputs, null);
-
-        // Executes the module with an empty document containing the specified metadata items
-        public Task<IReadOnlyList<IDocument>> ExecuteAsync(IEnumerable<IModule> modules, IEnumerable<KeyValuePair<string, object>> items = null) =>
-            ExecuteAsync(modules, null, items);
-
-        public Task<IReadOnlyList<IDocument>> ExecuteAsync(IEnumerable<IModule> modules, IEnumerable<MetadataItem> items) =>
-            ExecuteAsync(modules, items?.Select(x => x.Pair));
-
-        private async Task<IReadOnlyList<IDocument>> ExecuteAsync(IEnumerable<IModule> modules, IEnumerable<IDocument> inputs, IEnumerable<KeyValuePair<string, object>> items)
+        public async Task<IReadOnlyList<IDocument>> ExecuteAsync(IEnumerable<IModule> modules, IEnumerable<IDocument> inputs)
         {
             CheckDisposed();
 
@@ -218,8 +144,7 @@ namespace Wyam.Core.Execution
 
             // Store the document list before executing the child modules and restore it afterwards
             IReadOnlyList<IDocument> originalDocuments = Engine.DocumentCollection.Get(_pipeline.Name);
-            ImmutableArray<IDocument> documents = inputs?.ToImmutableArray()
-                ?? new[] { GetDocument(items) }.ToImmutableArray();
+            ImmutableArray<IDocument> documents = (inputs ?? new[] { this.GetDocument() }).ToImmutableArray();
             IReadOnlyList<IDocument> results = await _pipeline.ExecuteAsync(this, modules, documents);
             Engine.DocumentCollection.Set(_pipeline.Name, originalDocuments);
             return results;

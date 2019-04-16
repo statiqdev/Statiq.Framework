@@ -1,10 +1,17 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
+using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
+using Wyam.Common.Documents;
+using Wyam.Common.IO;
+using Wyam.Common.Meta;
+using Wyam.Common.Modules;
 
 namespace Wyam.Common.Execution
 {
-    public static class ExecutionContextExtensions
+    public static class IExecutionContextExtensions
     {
         /// <summary>
         /// Provides access to the same enhanced type conversion used to convert metadata types.
@@ -27,5 +34,18 @@ namespace Wyam.Common.Execution
         /// <returns>The value converted to type T or the specified default value if the value cannot be converted to type T.</returns>
         public static T Convert<T>(this IExecutionContext context, object value, Func<T> defaultValueFactory) =>
             context.TryConvert<T>(value, out T result) ? result : (defaultValueFactory == null ? default : defaultValueFactory());
+
+        /// <summary>
+        /// Executes the specified modules with an empty initial input document with optional additional metadata and returns the result documents.
+        /// </summary>
+        /// <param name="context">The execution context.</param>
+        /// <param name="modules">The modules to execute.</param>
+        /// <param name="metadata">The metadata to use.</param>
+        /// <returns>The result documents from the executed modules.</returns>
+        public static Task<IReadOnlyList<IDocument>> ExecuteAsync(
+            this IExecutionContext context,
+            IEnumerable<IModule> modules,
+            IEnumerable<KeyValuePair<string, object>> metadata = null) =>
+            context.ExecuteAsync(modules, new[] { context.GetDocument(metadata) });
     }
 }
