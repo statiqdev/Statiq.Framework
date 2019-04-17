@@ -197,17 +197,11 @@ namespace Wyam.Core.Documents
 
         public IMetadata<T> MetadataAs<T>() => _metadata.MetadataAs<T>();
 
-        public object Get(string key, object defaultValue) => _metadata.Get(key, defaultValue);
-
         public object GetRaw(string key) => _metadata.GetRaw(key);
-
-        public T Get<T>(string key) => _metadata.Get<T>(key);
-
-        public T Get<T>(string key, T defaultValue) => _metadata.Get<T>(key, defaultValue);
 
         public bool TryGetValue<T>(string key, out T value) => _metadata.TryGetValue<T>(key, out value);
 
-        public bool TryGetValue(string key, out object value) => _metadata.TryGetValue(key, out value);
+        public bool TryGetValue(string key, out object value) => TryGetValue<object>(key, out value);
 
         public IMetadata GetMetadata(params string[] keys) => _metadata.GetMetadata(keys);
 

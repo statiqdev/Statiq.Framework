@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using Wyam.Common.Execution;
 
@@ -82,16 +83,6 @@ namespace Wyam.Common.Meta
             ((IDictionary<string, object>)_dictionary).CopyTo(array, arrayIndex);
 
         /// <inheritdoc />
-        public object Get(string key, object defaultValue = null) =>
-            TryGetValue(key, out object value) ? value : defaultValue;
-
-        /// <inheritdoc />
-        public T Get<T>(string key) => TryGetValue(key, out T value) ? value : default(T);
-
-        /// <inheritdoc />
-        public T Get<T>(string key, T defaultValue) => TryGetValue(key, out T value) ? value : defaultValue;
-
-        /// <inheritdoc />
         public IEnumerator<KeyValuePair<string, object>> GetEnumerator() => _dictionary.GetEnumerator();
 
         /// <inheritdoc />
@@ -106,24 +97,23 @@ namespace Wyam.Common.Meta
             ((IDictionary<string, object>)_dictionary).Remove(item);
 
         /// <inheritdoc />
-        public bool TryGetValue(string key, out object value) => TryGetValue<object>(key, out value);
-
-        /// <inheritdoc />
         public bool TryGetValue<T>(string key, out T value)
         {
-            value = default(T);
+            value = default;
             return _dictionary.TryGetValue(key, out object rawValue) && _context.TryConvert(rawValue, out value);
         }
+
+        /// <inheritdoc />
+        public bool TryGetValue(string key, out object value) => TryGetValue<object>(key, out value);
 
         /// <inheritdoc />
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
         /// <inheritdoc />
-        public IMetadata GetMetadata(params string[] keys) =>
-            throw new NotSupportedException();
+        public IMetadata<T> MetadataAs<T>() => new MetadataAs<T>(this, _context);
 
         /// <inheritdoc />
-        public IMetadata<T> MetadataAs<T>() =>
+        public IMetadata GetMetadata(params string[] keys) =>
             throw new NotSupportedException();
     }
 }

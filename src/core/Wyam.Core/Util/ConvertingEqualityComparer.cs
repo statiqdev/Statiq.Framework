@@ -22,21 +22,14 @@ namespace Wyam.Core.Util
             _comparer = comparer ?? throw new ArgumentNullException(nameof(comparer));
         }
 
-        bool IEqualityComparer<object>.Equals(object x, object y)
-        {
-            TValue xValue;
-            TValue yValue;
-            if (!TypeHelper.TryConvert(x, out xValue) || !TypeHelper.TryConvert(y, out yValue))
-            {
-                return false;
-            }
-            return _comparer.Equals(xValue, yValue);
-        }
+        bool IEqualityComparer<object>.Equals(object x, object y) =>
+            TypeHelper.Instance.TryConvert(x, out TValue xValue)
+                && TypeHelper.Instance.TryConvert(y, out TValue yValue)
+                && _comparer.Equals(xValue, yValue);
 
-        public int GetHashCode(object obj)
-        {
-            TValue value;
-            return TypeHelper.TryConvert(obj, out value) ? _comparer.GetHashCode(value) : 0;
-        }
+        public int GetHashCode(object obj) =>
+            TypeHelper.Instance.TryConvert(obj, out TValue value)
+                ? _comparer.GetHashCode(value)
+                : 0;
     }
 }

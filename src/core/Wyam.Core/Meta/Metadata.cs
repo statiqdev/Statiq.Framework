@@ -22,7 +22,7 @@ namespace Wyam.Core.Meta
             Stack = stack ?? throw new ArgumentNullException(nameof(stack));
         }
 
-        public IMetadata<T> MetadataAs<T>() => new MetadataAs<T>(this);
+        public IMetadata<T> MetadataAs<T>() => new MetadataAs<T>(this, TypeHelper.Instance);
 
         public bool ContainsKey(string key)
         {
@@ -32,9 +32,6 @@ namespace Wyam.Core.Meta
             }
             return Stack.Any(x => x.ContainsKey(key));
         }
-
-        public object Get(string key, object defaultValue = null) =>
-            TryGetValue(key, out object value) ? value : defaultValue;
 
         public object GetRaw(string key)
         {
@@ -50,24 +47,20 @@ namespace Wyam.Core.Meta
             return meta[key];
         }
 
-        public T Get<T>(string key) => MetadataAs<T>().Get(key);
-
-        public T Get<T>(string key, T defaultValue) => MetadataAs<T>().Get(key, defaultValue);
-
         public bool TryGetValue<T>(string key, out T value)
         {
             if (key == null)
             {
                 throw new ArgumentNullException(nameof(key));
             }
-            value = default(T);
+            value = default;
             IReadOnlyDictionary<string, object> meta = Stack.FirstOrDefault(x => x.ContainsKey(key));
             if (meta == null)
             {
                 return false;
             }
             object rawValue = GetValue(meta[key]);
-            return TypeHelper.TryConvert(rawValue, out value);
+            return TypeHelper.Instance.TryConvert(rawValue, out value);
         }
 
         public bool TryGetValue(string key, out object value) => TryGetValue<object>(key, out value);

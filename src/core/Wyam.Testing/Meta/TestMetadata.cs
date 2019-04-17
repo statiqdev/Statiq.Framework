@@ -46,45 +46,7 @@ namespace Wyam.Testing.Meta
         }
 
         /// <inhertdoc />
-        public object Get(string key, object defaultValue = null) =>
-            TryGetValue(key, out object value) ? value : defaultValue;
-
-        /// <inhertdoc />
         public object GetRaw(string key) => _dictionary[key];
-
-        /// <inhertdoc />
-        public T Get<T>(string key)
-        {
-            object value = Get(key);
-
-            // Check if there's a test-specific conversion
-            if (TypeConversions.TryGetValue((value?.GetType() ?? typeof(object), typeof(T)), out Func<object, object> typeConversion))
-            {
-                return (T)typeConversion(value);
-            }
-
-            // Default conversion is just to cast
-            return (T)value;
-        }
-
-        /// <inhertdoc />
-        public T Get<T>(string key, T defaultValue)
-        {
-            if (TryGetValue(key, out object value))
-            {
-                // Check if there's a test-specific conversion
-                if (TypeConversions.TryGetValue((value?.GetType() ?? typeof(object), typeof(T)), out Func<object, object> typeConversion))
-                {
-                    return (T)typeConversion(value);
-                }
-
-                // Default conversion is just to cast
-                return (T)value;
-            }
-
-            // Key not found, return the default value
-            return defaultValue;
-        }
 
         /// <inheritdoc />
         public bool TryGetValue<T>(string key, out T value)
@@ -114,7 +76,7 @@ namespace Wyam.Testing.Meta
             return true;
         }
 
-        /// <inhertdoc />
+        /// <inheritdoc />
         public bool TryGetValue(string key, out object value) => TryGetValue<object>(key, out value);
 
         public Dictionary<(Type Value, Type Result), Func<object, object>> TypeConversions { get; } = new Dictionary<(Type Value, Type Result), Func<object, object>>();
@@ -186,7 +148,7 @@ namespace Wyam.Testing.Meta
         public IMetadata<T> MetadataAs<T>() => new TestMetadataAs<T>(
             _dictionary
                 .Where(x => x.Value is T || TypeConversions.ContainsKey((x.Value?.GetType() ?? typeof(object), typeof(T))))
-                .ToDictionary(x => x.Key, x => Get<T>(x.Key)));
+                .ToDictionary(x => x.Key, x => this.Get<T>(x.Key)));
 
         /// <summary>
         /// This resolves the metadata value by recursively expanding IMetadataValue.

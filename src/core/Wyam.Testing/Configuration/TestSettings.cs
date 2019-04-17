@@ -78,22 +78,13 @@ namespace Wyam.Testing.Configuration
         public IMetadata<T> MetadataAs<T>() => _metadata.MetadataAs<T>();
 
         /// <inheritdoc />
-        public object Get(string key, object defaultValue = null) => _metadata.Get(key, defaultValue);
-
-        /// <inheritdoc />
         public object GetRaw(string key) => _metadata.GetRaw(key);
-
-        /// <inheritdoc />
-        public T Get<T>(string key) => _metadata.Get<T>(key);
-
-        /// <inheritdoc />
-        public T Get<T>(string key, T defaultValue) => _metadata.Get(key, defaultValue);
 
         /// <inheritdoc />
         public bool TryGetValue<T>(string key, out T value) => _metadata.TryGetValue<T>(key, out value);
 
         /// <inheritdoc />
-        public bool TryGetValue(string key, out object value) => _metadata.TryGetValue(key, out value);
+        public bool TryGetValue(string key, out object value) => TryGetValue<object>(key, out value);
 
         /// <inheritdoc />
         public IMetadata GetMetadata(params string[] keys) => _metadata.GetMetadata(keys);

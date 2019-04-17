@@ -4,24 +4,29 @@ using System.Collections.Generic;
 using System.Linq;
 using Wyam.Common.Meta;
 
-namespace Wyam.Core.Meta
+namespace Wyam.Common.Meta
 {
-    // This wraps the Metadata class and provides strongly-typed access
-    // See http://www.codeproject.com/Articles/248440/Universal-Type-Converter for conversion library
-    // Only values that can be converted to the requested type are considered part of the dictionary
-    internal class MetadataAs<T> : IMetadata<T>
+    /// <summary>
+    /// This wraps an <see cref="IMetadata"/> implementation and provides strongly-typed access with type conversion.
+    /// Only values that can be converted to the requested type are considered part of the dictionary.
+    /// </summary>
+    /// <remarks>This class is generally used as part of <see cref="IMetadata"/> implementations.</remarks>
+    /// <typeparam name="T">The type to convert metadata values to.</typeparam>
+    public class MetadataAs<T> : IMetadata<T>
     {
         private readonly IMetadata _metadata;
+        private readonly IMetadataTypeConverter _typeConverter;
 
-        public MetadataAs(IMetadata metadata)
+        public MetadataAs(IMetadata metadata, IMetadataTypeConverter typeConverter)
         {
             _metadata = metadata ?? throw new ArgumentNullException(nameof(metadata));
+            _typeConverter = typeConverter ?? throw new ArgumentNullException(nameof(typeConverter));
         }
 
         public IEnumerator<KeyValuePair<string, T>> GetEnumerator()
         {
             return _metadata
-                .Select(x => TypeHelper.TryConvert(x.Value, out T value)
+                .Select(x => _typeConverter.TryConvert(x.Value, out T value)
                     ? new KeyValuePair<string, T>?(new KeyValuePair<string, T>(x.Key, value))
                     : null)
                 .Where(x => x.HasValue)
@@ -29,12 +34,9 @@ namespace Wyam.Core.Meta
                 .GetEnumerator();
         }
 
-        IEnumerator IEnumerable.GetEnumerator()
-        {
-            return GetEnumerator();
-        }
+        IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
-        public int Count => _metadata.Count(x => TypeHelper.TryConvert(x.Value, out T value));
+        public int Count => _metadata.Count(x => _typeConverter.TryConvert(x.Value, out T value));
 
         public bool ContainsKey(string key) => TryGetValue(key, out _);
 

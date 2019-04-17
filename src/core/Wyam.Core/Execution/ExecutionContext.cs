@@ -108,7 +108,9 @@ namespace Wyam.Core.Execution
             return func();
         }
 
-        public bool TryConvert<T>(object value, out T result) => TypeHelper.TryConvert(value, out result);
+        public bool TryConvert<T>(object value, out T result) => TypeHelper.Instance.TryConvert(value, out result);
+
+        public bool TryGetValue(string key, out object value) => TryGetValue<object>(key, out value);
 
         public async Task<Stream> GetContentStreamAsync(string content = null) => await Engine.ContentStreamFactory.GetStreamAsync(this, content);
 
@@ -199,15 +201,7 @@ namespace Wyam.Core.Execution
 
         public IMetadata<T> MetadataAs<T>() => Settings.MetadataAs<T>();
 
-        public object Get(string key, object defaultValue = null) => Settings.Get(key, defaultValue);
-
         public object GetRaw(string key) => Settings.Get(key);
-
-        public T Get<T>(string key) => Settings.Get<T>(key);
-
-        public T Get<T>(string key, T defaultValue) => Settings.Get(key, defaultValue);
-
-        public bool TryGetValue(string key, out object value) => Settings.TryGetValue(key, out value);
 
         public bool TryGetValue<T>(string key, out T value) => Settings.TryGetValue<T>(key, out value);
 

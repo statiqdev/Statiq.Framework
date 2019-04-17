@@ -52,22 +52,13 @@ namespace Wyam.Core.Documents
         public IMetadata<T> MetadataAs<T>() => Document.MetadataAs<T>();
 
         /// <inheritdoc />
-        public object Get(string key, object defaultValue = null) => Document.Get(key, defaultValue);
-
-        /// <inheritdoc />
         public object GetRaw(string key) => Document.GetRaw(key);
 
         /// <inheritdoc />
-        public T Get<T>(string key) => Document.Get<T>(key);
-
-        /// <inheritdoc />
-        public T Get<T>(string key, T defaultValue) => Document.Get(key, defaultValue);
-
-        /// <inheritdoc />
-        public bool TryGetValue(string key, out object value) => Document.TryGetValue(key, out value);
-
-        /// <inheritdoc />
         public bool TryGetValue<T>(string key, out T value) => Document.TryGetValue<T>(key, out value);
+
+        /// <inheritdoc />
+        public bool TryGetValue(string key, out object value) => TryGetValue<object>(key, out value);
 
         /// <inheritdoc />
         public IMetadata GetMetadata(params string[] keys) => Document.GetMetadata(keys);

@@ -20,7 +20,7 @@ namespace Wyam.Common.Execution
     /// All of the information that represents a given build. Also implements
     /// <see cref="IMetadata"/> to expose the global metadata.
     /// </summary>
-    public interface IExecutionContext : IMetadata
+    public interface IExecutionContext : IMetadata, IMetadataTypeConverter
     {
         /// <summary>
         /// Uniquly identifies the current execution cycle. This can be used to initialize and/or
@@ -120,15 +120,6 @@ namespace Wyam.Common.Execution
         /// <param name="disposeStream">If set to <c>true</c> the provided <see cref="Stream"/> is disposed when the document is.</param>
         /// <returns>The cloned or new document.</returns>
         IDocument GetDocument(IDocument sourceDocument, FilePath source, Stream stream, IEnumerable<KeyValuePair<string, object>> items = null, bool disposeStream = true);
-
-        /// <summary>
-        /// Provides access to the same enhanced type conversion used to convert metadata types.
-        /// </summary>
-        /// <typeparam name="T">The destination type.</typeparam>
-        /// <param name="value">The value to convert.</param>
-        /// <param name="result">The result of the conversion.</param>
-        /// <returns><c>true</c> if the conversion could be completed, <c>false</c> otherwise.</returns>
-        bool TryConvert<T>(object value, out T result);
 
         /// <summary>
         /// Executes the specified modules with the specified input documents and returns the result documents.

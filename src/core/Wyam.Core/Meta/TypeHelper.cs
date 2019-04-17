@@ -2,17 +2,24 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using Wyam.Common.Meta;
 
 namespace Wyam.Core.Meta
 {
-    public static class TypeHelper
+    public sealed class TypeHelper : IMetadataTypeConverter
     {
-        public static bool TryConvert<T>(object value, out T result)
+        public static TypeHelper Instance { get; } = new TypeHelper();
+
+        private TypeHelper()
+        {
+        }
+
+        public bool TryConvert<T>(object value, out T result)
         {
             // Check for null
             if (value == null)
             {
-                result = default(T);
+                result = default;
                 return !typeof(T).IsValueType
                     || (typeof(T).IsGenericType && typeof(T).GetGenericTypeDefinition() == typeof(Nullable<>));
             }
