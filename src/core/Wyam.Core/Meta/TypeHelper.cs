@@ -6,15 +6,9 @@ using Wyam.Common.Meta;
 
 namespace Wyam.Core.Meta
 {
-    public sealed class TypeHelper : IMetadataTypeConverter
+    public static class TypeHelper
     {
-        public static TypeHelper Instance { get; } = new TypeHelper();
-
-        private TypeHelper()
-        {
-        }
-
-        public bool TryConvert<T>(object value, out T result)
+        public static bool TryConvert<T>(object value, out T result)
         {
             // Check for null
             if (value == null)

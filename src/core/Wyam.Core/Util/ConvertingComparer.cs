@@ -20,7 +20,7 @@ namespace Wyam.Core.Util
         }
 
         public int Compare(object x, object y) =>
-            TypeHelper.Instance.TryConvert(x, out TValue xValue) && TypeHelper.Instance.TryConvert(y, out TValue yValue)
+            TypeHelper.TryConvert(x, out TValue xValue) && TypeHelper.TryConvert(y, out TValue yValue)
                 ? _comparer.Compare(xValue, yValue)
                 : 0;
     }

@@ -6,7 +6,10 @@ using TB.ComponentModel;
 
 namespace Wyam.Core.Meta
 {
-    // These are used by MetadataAs for enumerable conversions, but must be declared outside for easier reflection instantiation
+    /// <summary>
+    /// These are used by <see cref="TypeHelper"/> for enumerable conversions,
+    /// but must be declared outside for easier reflection instantiation.
+    /// </summary>
     internal abstract class MetadataTypeConverter
     {
         public abstract IEnumerable ToReadOnlyList(IEnumerable enumerable);

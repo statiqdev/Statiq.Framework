@@ -144,12 +144,6 @@ namespace Wyam.Testing.Meta
 
         public bool IsReadOnly => ((IDictionary<string, object>)_dictionary).IsReadOnly;
 
-        /// <inhertdoc />
-        public IMetadata<T> MetadataAs<T>() => new TestMetadataAs<T>(
-            _dictionary
-                .Where(x => x.Value is T || TypeConversions.ContainsKey((x.Value?.GetType() ?? typeof(object), typeof(T))))
-                .ToDictionary(x => x.Key, x => this.Get<T>(x.Key)));
-
         /// <summary>
         /// This resolves the metadata value by recursively expanding IMetadataValue.
         /// </summary>

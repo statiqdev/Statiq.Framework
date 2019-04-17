@@ -71,9 +71,6 @@ namespace Wyam.Testing.Documents
         public bool ContainsKey(string key) => _metadata.ContainsKey(key);
 
         /// <inhertdoc />
-        public IMetadata<T> MetadataAs<T>() => _metadata.MetadataAs<T>();
-
-        /// <inhertdoc />
         public object GetRaw(string key) => _metadata[key];
 
         /// <inhertdoc />

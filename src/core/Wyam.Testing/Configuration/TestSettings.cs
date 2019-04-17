@@ -75,9 +75,6 @@ namespace Wyam.Testing.Configuration
         }
 
         /// <inheritdoc />
-        public IMetadata<T> MetadataAs<T>() => _metadata.MetadataAs<T>();
-
-        /// <inheritdoc />
         public object GetRaw(string key) => _metadata.GetRaw(key);
 
         /// <inheritdoc />

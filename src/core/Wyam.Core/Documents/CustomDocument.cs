@@ -49,9 +49,6 @@ namespace Wyam.Core.Documents
         public IEnumerable<object> Values => Document.Values;
 
         /// <inheritdoc />
-        public IMetadata<T> MetadataAs<T>() => Document.MetadataAs<T>();
-
-        /// <inheritdoc />
         public object GetRaw(string key) => Document.GetRaw(key);
 
         /// <inheritdoc />

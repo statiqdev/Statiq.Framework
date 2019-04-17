@@ -110,9 +110,6 @@ namespace Wyam.Common.Meta
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
         /// <inheritdoc />
-        public IMetadata<T> MetadataAs<T>() => new MetadataAs<T>(this, _context);
-
-        /// <inheritdoc />
         public IMetadata GetMetadata(params string[] keys) =>
             throw new NotSupportedException();
     }

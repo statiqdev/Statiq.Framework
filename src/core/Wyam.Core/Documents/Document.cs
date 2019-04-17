@@ -195,8 +195,6 @@ namespace Wyam.Core.Documents
 
         public IEnumerable<object> Values => _metadata.Values;
 
-        public IMetadata<T> MetadataAs<T>() => _metadata.MetadataAs<T>();
-
         public object GetRaw(string key) => _metadata.GetRaw(key);
 
         public bool TryGetValue<T>(string key, out T value) => _metadata.TryGetValue<T>(key, out value);

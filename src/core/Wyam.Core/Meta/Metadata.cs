@@ -22,8 +22,6 @@ namespace Wyam.Core.Meta
             Stack = stack ?? throw new ArgumentNullException(nameof(stack));
         }
 
-        public IMetadata<T> MetadataAs<T>() => new MetadataAs<T>(this, TypeHelper.Instance);
-
         public bool ContainsKey(string key)
         {
             if (key == null)
@@ -60,7 +58,7 @@ namespace Wyam.Core.Meta
                 return false;
             }
             object rawValue = GetValue(meta[key]);
-            return TypeHelper.Instance.TryConvert(rawValue, out value);
+            return TypeHelper.TryConvert(rawValue, out value);
         }
 
         public bool TryGetValue(string key, out object value) => TryGetValue<object>(key, out value);

@@ -23,12 +23,12 @@ namespace Wyam.Core.Util
         }
 
         bool IEqualityComparer<object>.Equals(object x, object y) =>
-            TypeHelper.Instance.TryConvert(x, out TValue xValue)
-                && TypeHelper.Instance.TryConvert(y, out TValue yValue)
+            TypeHelper.TryConvert(x, out TValue xValue)
+                && TypeHelper.TryConvert(y, out TValue yValue)
                 && _comparer.Equals(xValue, yValue);
 
         public int GetHashCode(object obj) =>
-            TypeHelper.Instance.TryConvert(obj, out TValue value)
+            TypeHelper.TryConvert(obj, out TValue value)
                 ? _comparer.GetHashCode(value)
                 : 0;
     }

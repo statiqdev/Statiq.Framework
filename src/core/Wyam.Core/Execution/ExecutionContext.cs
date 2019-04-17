@@ -108,7 +108,7 @@ namespace Wyam.Core.Execution
             return func();
         }
 
-        public bool TryConvert<T>(object value, out T result) => TypeHelper.Instance.TryConvert(value, out result);
+        public bool TryConvert<T>(object value, out T result) => TypeHelper.TryConvert(value, out result);
 
         public bool TryGetValue(string key, out object value) => TryGetValue<object>(key, out value);
 
@@ -198,8 +198,6 @@ namespace Wyam.Core.Execution
         public IEnumerable<string> Keys => Settings.Keys;
 
         public IEnumerable<object> Values => Settings.Values;
-
-        public IMetadata<T> MetadataAs<T>() => Settings.MetadataAs<T>();
 
         public object GetRaw(string key) => Settings.Get(key);
 

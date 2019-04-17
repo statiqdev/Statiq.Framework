@@ -275,9 +275,6 @@ namespace Wyam.Testing.Execution
         public IEnumerable<object> Values => _settings.Values;
 
         /// <inheritdoc/>
-        public IMetadata<T> MetadataAs<T>() => _settings.MetadataAs<T>();
-
-        /// <inheritdoc/>
         public object GetRaw(string key) => _settings.GetRaw(key);
 
         /// <inheritdoc/>

@@ -11,13 +11,6 @@ namespace Wyam.Common.Meta
     public interface IMetadata : IReadOnlyDictionary<string, object>
     {
         /// <summary>
-        /// Presents metadata values as a specific type (see <see cref="IMetadata"/>).
-        /// </summary>
-        /// <typeparam name="T">The type metadata values should be converted to.</typeparam>
-        /// <returns>A strongly-typed <see cref="IMetadata"/> object that returns values converted to type T.</returns>
-        IMetadata<T> MetadataAs<T>();
-
-        /// <summary>
         /// Gets the raw value for the specified key. This method will not materialize <see cref="IMetadataValue"/>
         /// values the way <see cref="TryGetValue{T}(string, out T)"/> and other get methods will. A <see cref="KeyNotFoundException"/> will be thrown
         /// for missing keys.
