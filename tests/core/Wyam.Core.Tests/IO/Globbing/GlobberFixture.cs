@@ -52,8 +52,8 @@ namespace Wyam.Core.Tests.IO.Globbing
                 IDirectory directory = await fileProvider.GetDirectoryAsync(directoryPath);
 
                 // When
-                IEnumerable<IFile> matches = Globber.GetFiles(directory, patterns);
-                IEnumerable<IFile> matchesReversedSlash = Globber.GetFiles(directory, patterns.Select(x => x.Replace("/", "\\")));
+                IEnumerable<IFile> matches = await Globber.GetFilesAsync(directory, patterns);
+                IEnumerable<IFile> matchesReversedSlash = await Globber.GetFilesAsync(directory, patterns.Select(x => x.Replace("/", "\\")));
 
                 // Then
                 CollectionAssert.AreEquivalent(resultPaths, matches.Select(x => x.Path.FullPath));
@@ -76,7 +76,7 @@ namespace Wyam.Core.Tests.IO.Globbing
                 IDirectory directory = await fileProvider.GetDirectoryAsync("/");
 
                 // When
-                IEnumerable<IFile> matches = Globber.GetFiles(directory, "root/{a,}/**/x.txt");
+                IEnumerable<IFile> matches = await Globber.GetFilesAsync(directory, "root/{a,}/**/x.txt");
 
                 // Then
                 matches.Select(x => x.Path.FullPath).ShouldBe(
@@ -100,7 +100,7 @@ namespace Wyam.Core.Tests.IO.Globbing
                 IDirectory directory = await fileProvider.GetDirectoryAsync("/");
 
                 // When
-                IEnumerable<IFile> matches = Globber.GetFiles(directory, "root/**/*.txt");
+                IEnumerable<IFile> matches = await Globber.GetFilesAsync(directory, "root/**/*.txt");
 
                 // Then
                 matches.Select(x => x.Path.FullPath).ShouldBe(
@@ -124,8 +124,8 @@ namespace Wyam.Core.Tests.IO.Globbing
                 IDirectory directory = await fileProvider.GetDirectoryAsync(directoryPath);
 
                 // When
-                IEnumerable<IFile> matches = Globber.GetFiles(directory, patterns);
-                IEnumerable<IFile> matchesReversedSlash = Globber.GetFiles(directory, patterns.Select(x => x.Replace("/", "\\")));
+                IEnumerable<IFile> matches = await Globber.GetFilesAsync(directory, patterns);
+                IEnumerable<IFile> matchesReversedSlash = await Globber.GetFilesAsync(directory, patterns.Select(x => x.Replace("/", "\\")));
 
                 // Then
                 CollectionAssert.AreEquivalent(resultPaths, matches.Select(x => x.Path.FullPath));
@@ -150,7 +150,7 @@ namespace Wyam.Core.Tests.IO.Globbing
                 IDirectory directory = await fileProvider.GetDirectoryAsync("/a");
 
                 // When
-                IEnumerable<IFile> matches = Globber.GetFiles(directory, "**/*.txt");
+                IEnumerable<IFile> matches = await Globber.GetFilesAsync(directory, "**/*.txt");
 
                 // Then
                 CollectionAssert.AreEquivalent(new[] { "/a/b/c/x.txt", "/a/bar/foo/y.txt" }, matches.Select(x => x.Path.FullPath));
@@ -166,7 +166,7 @@ namespace Wyam.Core.Tests.IO.Globbing
                 IDirectory directory = await fileProvider.GetDirectoryAsync("/a");
 
                 // When, Then
-                Assert.Throws<ArgumentException>(() => Globber.GetFiles(directory, pattern));
+                await Should.ThrowAsync<ArgumentException>(async () => await Globber.GetFilesAsync(directory, pattern));
             }
         }
 

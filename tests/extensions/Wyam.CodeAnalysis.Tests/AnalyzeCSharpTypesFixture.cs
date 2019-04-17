@@ -1,12 +1,14 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using Microsoft.CodeAnalysis;
 using NUnit.Framework;
 using Wyam.Common.Documents;
+using Wyam.Common.Execution;
 using Wyam.Common.IO;
 using Wyam.Common.Meta;
 using Wyam.Common.Modules;
-using Wyam.Common.Execution;
+using Wyam.Common.Util;
 
 namespace Wyam.CodeAnalysis.Tests
 {
@@ -17,7 +19,7 @@ namespace Wyam.CodeAnalysis.Tests
         public class ExecuteTests : AnalyzeCSharpTypesFixture
         {
             [Test]
-            public void ReturnsAllTypes()
+            public async Task ReturnsAllTypes()
             {
                 // Given
                 const string code = @"
@@ -48,14 +50,14 @@ namespace Wyam.CodeAnalysis.Tests
                 IModule module = new AnalyzeCSharp();
 
                 // When
-                List<IDocument> results = module.Execute(new[] { document }, context).ToList();  // Make sure to materialize the result list
+                List<IDocument> results = await module.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
 
                 // Then
                 CollectionAssert.AreEquivalent(new[] { string.Empty, "Foo", "Blue", "Green", "Red", "Yellow", "Orange" }, results.Select(x => x["Name"]));
             }
 
             [Test]
-            public void ReturnsExtensionMethods()
+            public async Task ReturnsExtensionMethods()
             {
                 // Given
                 const string code = @"
@@ -78,7 +80,7 @@ namespace Wyam.CodeAnalysis.Tests
                 IModule module = new AnalyzeCSharp();
 
                 // When
-                List<IDocument> results = module.Execute(new[] { document }, context).ToList();  // Make sure to materialize the result list
+                List<IDocument> results = await module.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
 
                 // Then
                 CollectionAssert.AreEquivalent(
@@ -87,7 +89,7 @@ namespace Wyam.CodeAnalysis.Tests
             }
 
             [Test]
-            public void ReturnsExtensionMethodsForBaseClass()
+            public async Task ReturnsExtensionMethodsForBaseClass()
             {
                 // Given
                 const string code = @"
@@ -114,7 +116,7 @@ namespace Wyam.CodeAnalysis.Tests
                 IModule module = new AnalyzeCSharp();
 
                 // When
-                List<IDocument> results = module.Execute(new[] { document }, context).ToList();  // Make sure to materialize the result list
+                List<IDocument> results = await module.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
 
                 // Then
                 CollectionAssert.AreEquivalent(
@@ -123,7 +125,7 @@ namespace Wyam.CodeAnalysis.Tests
             }
 
             [Test]
-            public void MemberTypesReturnsNestedTypes()
+            public async Task MemberTypesReturnsNestedTypes()
             {
                 // Given
                 const string code = @"
@@ -150,7 +152,7 @@ namespace Wyam.CodeAnalysis.Tests
                 IModule module = new AnalyzeCSharp();
 
                 // When
-                List<IDocument> results = module.Execute(new[] { document }, context).ToList();  // Make sure to materialize the result list
+                List<IDocument> results = await module.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
 
                 // Then
                 CollectionAssert.AreEquivalent(
@@ -159,7 +161,7 @@ namespace Wyam.CodeAnalysis.Tests
             }
 
             [Test]
-            public void FullNameContainsContainingType()
+            public async Task FullNameContainsContainingType()
             {
                 // Given
                 const string code = @"
@@ -189,14 +191,14 @@ namespace Wyam.CodeAnalysis.Tests
                 IModule module = new AnalyzeCSharp();
 
                 // When
-                List<IDocument> results = module.Execute(new[] { document }, context).ToList();  // Make sure to materialize the result list
+                List<IDocument> results = await module.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
 
                 // Then
                 CollectionAssert.AreEquivalent(new[] { string.Empty, "Foo", "Green", "Green.Blue", "Red", "Yellow", "Bar" }, results.Select(x => x["FullName"]));
             }
 
             [Test]
-            public void DisplayNameContainsContainingType()
+            public async Task DisplayNameContainsContainingType()
             {
                 // Given
                 const string code = @"
@@ -226,14 +228,14 @@ namespace Wyam.CodeAnalysis.Tests
                 IModule module = new AnalyzeCSharp();
 
                 // When
-                List<IDocument> results = module.Execute(new[] { document }, context).ToList();  // Make sure to materialize the result list
+                List<IDocument> results = await module.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
 
                 // Then
                 CollectionAssert.AreEquivalent(new[] { "global", "Foo", "Green", "Green.Blue", "Red", "Yellow", "Foo.Bar" }, results.Select(x => x["DisplayName"]));
             }
 
             [Test]
-            public void QualifiedNameContainsNamespaceAndContainingType()
+            public async Task QualifiedNameContainsNamespaceAndContainingType()
             {
                 // Given
                 const string code = @"
@@ -263,14 +265,14 @@ namespace Wyam.CodeAnalysis.Tests
                 IModule module = new AnalyzeCSharp();
 
                 // When
-                List<IDocument> results = module.Execute(new[] { document }, context).ToList();  // Make sure to materialize the result list
+                List<IDocument> results = await module.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
 
                 // Then
                 CollectionAssert.AreEquivalent(new[] { string.Empty, "Foo", "Foo.Green", "Foo.Green.Blue", "Foo.Red", "Foo.Bar.Yellow", "Foo.Bar" }, results.Select(x => x["QualifiedName"]));
             }
 
             [Test]
-            public void ContainingNamespaceIsCorrect()
+            public async Task ContainingNamespaceIsCorrect()
             {
                 // Given
                 const string code = @"
@@ -300,7 +302,7 @@ namespace Wyam.CodeAnalysis.Tests
                 IModule module = new AnalyzeCSharp();
 
                 // When
-                List<IDocument> results = module.Execute(new[] { document }, context).ToList();  // Make sure to materialize the result list
+                List<IDocument> results = await module.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
 
                 // Then
                 Assert.AreEqual("Foo", results.Single(x => x["Name"].Equals("Green")).Get<IDocument>("ContainingNamespace")["Name"]);
@@ -310,7 +312,7 @@ namespace Wyam.CodeAnalysis.Tests
             }
 
             [Test]
-            public void ContainingTypeIsCorrect()
+            public async Task ContainingTypeIsCorrect()
             {
                 // Given
                 const string code = @"
@@ -340,7 +342,7 @@ namespace Wyam.CodeAnalysis.Tests
                 IModule module = new AnalyzeCSharp();
 
                 // When
-                List<IDocument> results = module.Execute(new[] { document }, context).ToList();  // Make sure to materialize the result list
+                List<IDocument> results = await module.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
 
                 // Then
                 Assert.IsNull(results.Single(x => x["Name"].Equals("Green")).Get<IDocument>("ContainingType"));
@@ -350,7 +352,7 @@ namespace Wyam.CodeAnalysis.Tests
             }
 
             [Test]
-            public void KindIsCorrect()
+            public async Task KindIsCorrect()
             {
                 // Given
                 const string code = @"
@@ -380,7 +382,7 @@ namespace Wyam.CodeAnalysis.Tests
                 IModule module = new AnalyzeCSharp();
 
                 // When
-                List<IDocument> results = module.Execute(new[] { document }, context).ToList();  // Make sure to materialize the result list
+                List<IDocument> results = await module.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
 
                 // Then
                 Assert.AreEqual("NamedType", results.Single(x => x["Name"].Equals("Green"))["Kind"]);
@@ -390,7 +392,7 @@ namespace Wyam.CodeAnalysis.Tests
             }
 
             [Test]
-            public void SpecificKindIsCorrect()
+            public async Task SpecificKindIsCorrect()
             {
                 // Given
                 const string code = @"
@@ -420,7 +422,7 @@ namespace Wyam.CodeAnalysis.Tests
                 IModule module = new AnalyzeCSharp();
 
                 // When
-                List<IDocument> results = module.Execute(new[] { document }, context).ToList();  // Make sure to materialize the result list
+                List<IDocument> results = await module.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
 
                 // Then
                 Assert.AreEqual("Class", results.Single(x => x["Name"].Equals("Green"))["SpecificKind"]);
@@ -430,7 +432,7 @@ namespace Wyam.CodeAnalysis.Tests
             }
 
             [Test]
-            public void BaseTypeIsCorrect()
+            public async Task BaseTypeIsCorrect()
             {
                 // Given
                 const string code = @"
@@ -466,7 +468,7 @@ namespace Wyam.CodeAnalysis.Tests
                 IModule module = new AnalyzeCSharp();
 
                 // When
-                List<IDocument> results = module.Execute(new[] { document }, context).ToList();  // Make sure to materialize the result list
+                List<IDocument> results = await module.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
 
                 // Then
                 Assert.AreEqual("Object", results.Single(x => x["Name"].Equals("Red")).DocumentList("BaseTypes").First()["Name"]);
@@ -478,7 +480,7 @@ namespace Wyam.CodeAnalysis.Tests
             }
 
             [Test]
-            public void MembersReturnsAllMembersExceptConstructors()
+            public async Task MembersReturnsAllMembersExceptConstructors()
             {
                 // Given
                 const string code = @"
@@ -507,7 +509,7 @@ namespace Wyam.CodeAnalysis.Tests
                 IModule module = new AnalyzeCSharp();
 
                 // When
-                List<IDocument> results = module.Execute(new[] { document }, context).ToList();  // Make sure to materialize the result list
+                List<IDocument> results = await module.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
 
                 // Then
                 CollectionAssert.AreEquivalent(
@@ -516,7 +518,7 @@ namespace Wyam.CodeAnalysis.Tests
             }
 
             [Test]
-            public void ConstructorsIsPopulated()
+            public async Task ConstructorsIsPopulated()
             {
                 // Given
                 const string code = @"
@@ -549,14 +551,14 @@ namespace Wyam.CodeAnalysis.Tests
                 IModule module = new AnalyzeCSharp();
 
                 // When
-                List<IDocument> results = module.Execute(new[] { document }, context).ToList();  // Make sure to materialize the result list
+                List<IDocument> results = await module.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
 
                 // Then
                 Assert.AreEqual(2, GetResult(results, "Blue").Get<IReadOnlyList<IDocument>>("Constructors").Count);
             }
 
             [Test]
-            public void WritePathIsCorrect()
+            public async Task WritePathIsCorrect()
             {
                 // Given
                 const string code = @"
@@ -587,7 +589,7 @@ namespace Wyam.CodeAnalysis.Tests
                 IModule module = new AnalyzeCSharp();
 
                 // When
-                List<IDocument> results = module.Execute(new[] { document }, context).ToList();  // Make sure to materialize the result list
+                List<IDocument> results = await module.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
 
                 // Then
                 CollectionAssert.AreEquivalent(
@@ -596,7 +598,7 @@ namespace Wyam.CodeAnalysis.Tests
             }
 
             [Test]
-            public void GetDocumentForExternalBaseType()
+            public async Task GetDocumentForExternalBaseType()
             {
                 // Given
                 const string code = @"
@@ -612,14 +614,14 @@ namespace Wyam.CodeAnalysis.Tests
                 IModule module = new AnalyzeCSharp();
 
                 // When
-                List<IDocument> results = module.Execute(new[] { document }, context).ToList();  // Make sure to materialize the result list
+                List<IDocument> results = await module.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
 
                 // Then
                 Assert.AreEqual("Object", GetResult(results, "Red").DocumentList("BaseTypes").First()["Name"]);
             }
 
             [Test]
-            public void GetDocumentsForExternalInterfaces()
+            public async Task GetDocumentsForExternalInterfaces()
             {
                 // Given
                 const string code = @"
@@ -639,7 +641,7 @@ namespace Wyam.CodeAnalysis.Tests
                 IModule module = new AnalyzeCSharp();
 
                 // When
-                List<IDocument> results = module.Execute(new[] { document }, context).ToList();  // Make sure to materialize the result list
+                List<IDocument> results = await module.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
 
                 // Then
                 CollectionAssert.AreEquivalent(new[] { string.Empty, "Foo", "Red", "IBlue" }, results.Select(x => x["Name"]));
@@ -647,7 +649,7 @@ namespace Wyam.CodeAnalysis.Tests
             }
 
             [Test]
-            public void GetDerivedTypes()
+            public async Task GetDerivedTypes()
             {
                 // Given
                 const string code = @"
@@ -679,7 +681,7 @@ namespace Wyam.CodeAnalysis.Tests
                 IModule module = new AnalyzeCSharp();
 
                 // When
-                List<IDocument> results = module.Execute(new[] { document }, context).ToList();  // Make sure to materialize the result list
+                List<IDocument> results = await module.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
 
                 // Then
                 CollectionAssert.AreEquivalent(new[] { "Blue" }, GetResult(results, "Red").Get<IEnumerable<IDocument>>("DerivedTypes").Select(x => x["Name"]));
@@ -690,7 +692,7 @@ namespace Wyam.CodeAnalysis.Tests
             }
 
             [Test]
-            public void GetTypeParams()
+            public async Task GetTypeParams()
             {
                 // Given
                 const string code = @"
@@ -710,7 +712,7 @@ namespace Wyam.CodeAnalysis.Tests
                 IModule module = new AnalyzeCSharp();
 
                 // When
-                List<IDocument> results = module.Execute(new[] { document }, context).ToList();  // Make sure to materialize the result list
+                List<IDocument> results = await module.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
 
                 // Then
                 CollectionAssert.AreEqual(new[] { "T" }, GetResult(results, "Red").Get<IEnumerable<IDocument>>("TypeParameters").Select(x => x["Name"]));
@@ -718,7 +720,7 @@ namespace Wyam.CodeAnalysis.Tests
             }
 
             [Test]
-            public void TypeParamReferencesClass()
+            public async Task TypeParamReferencesClass()
             {
                 // Given
                 const string code = @"
@@ -734,14 +736,14 @@ namespace Wyam.CodeAnalysis.Tests
                 IModule module = new AnalyzeCSharp();
 
                 // When
-                List<IDocument> results = module.Execute(new[] { document }, context).ToList();  // Make sure to materialize the result list
+                List<IDocument> results = await module.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
 
                 // Then
                 Assert.AreEqual("Red", GetResult(results, "Red").Get<IEnumerable<IDocument>>("TypeParameters").First().Get<IDocument>("DeclaringType")["Name"]);
             }
 
             [Test]
-            public void TypesExcludedByPredicate()
+            public async Task TypesExcludedByPredicate()
             {
                 // Given
                 const string code = @"
@@ -772,14 +774,14 @@ namespace Wyam.CodeAnalysis.Tests
                 IModule module = new AnalyzeCSharp().WhereSymbol(x => x is INamedTypeSymbol && ((INamedTypeSymbol)x).TypeKind == TypeKind.Class);
 
                 // When
-                List<IDocument> results = module.Execute(new[] { document }, context).ToList();  // Make sure to materialize the result list
+                List<IDocument> results = await module.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
 
                 // Then
                 CollectionAssert.AreEquivalent(new[] { "Blue", "Green", "Red" }, results.Select(x => x["Name"]));
             }
 
             [Test]
-            public void RestrictedToNamedTypes()
+            public async Task RestrictedToNamedTypes()
             {
                 // Given
                 const string code = @"
@@ -802,14 +804,14 @@ namespace Wyam.CodeAnalysis.Tests
                 IModule module = new AnalyzeCSharp().WithNamedTypes();
 
                 // When
-                List<IDocument> results = module.Execute(new[] { document }, context).ToList();  // Make sure to materialize the result list
+                List<IDocument> results = await module.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
 
                 // Then
                 CollectionAssert.AreEquivalent(new[] { "Blue", "Red" }, results.Select(x => x["Name"]));
             }
 
             [Test]
-            public void RestrictedToNamedTypesWithPredicate()
+            public async Task RestrictedToNamedTypesWithPredicate()
             {
                 // Given
                 const string code = @"
@@ -832,7 +834,7 @@ namespace Wyam.CodeAnalysis.Tests
                 IModule module = new AnalyzeCSharp().WithNamedTypes(x => x.TypeKind == TypeKind.Class);
 
                 // When
-                List<IDocument> results = module.Execute(new[] { document }, context).ToList();  // Make sure to materialize the result list
+                List<IDocument> results = await module.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
 
                 // Then
                 CollectionAssert.AreEquivalent(new[] { "Blue" }, results.Select(x => x["Name"]));

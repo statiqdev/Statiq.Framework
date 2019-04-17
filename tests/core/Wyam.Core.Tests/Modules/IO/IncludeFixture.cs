@@ -4,10 +4,12 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using NUnit.Framework;
+using Shouldly;
 using Wyam.Common.Documents;
 using Wyam.Common.Execution;
 using Wyam.Common.IO;
 using Wyam.Common.Modules;
+using Wyam.Common.Util;
 using Wyam.Core.Execution;
 using Wyam.Core.Modules.IO;
 using Wyam.Testing;
@@ -69,7 +71,7 @@ namespace Wyam.Core.Tests.Modules.IO
                 Include include = new Include();
 
                 // When, Then
-                Assert.Throws<AggregateException>(() => include.Execute(documents, Context).ToList());
+                await Should.ThrowAsync<AggregateException>(async () => await include.ExecuteAsync(documents, Context).ToListAsync());
             }
 
             [Test]
@@ -83,7 +85,7 @@ namespace Wyam.Core.Tests.Modules.IO
                 Include include = new Include();
 
                 // When, Then
-                List<IDocument> results = include.Execute(documents, Context).ToList();
+                List<IDocument> results = await include.ExecuteAsync(documents, Context).ToListAsync();
 
                 // Then
                 Assert.AreEqual("foo aaa bar", results.Single().Content);
@@ -100,7 +102,7 @@ namespace Wyam.Core.Tests.Modules.IO
                 Include include = new Include();
 
                 // When
-                List<IDocument> results = include.Execute(documents, Context).ToList();
+                List<IDocument> results = await include.ExecuteAsync(documents, Context).ToListAsync();
 
                 // Then
                 Assert.AreEqual("aaafoo", results.Single().Content);
@@ -117,7 +119,7 @@ namespace Wyam.Core.Tests.Modules.IO
                 Include include = new Include();
 
                 // When
-                List<IDocument> results = include.Execute(documents, Context).ToList();
+                List<IDocument> results = await include.ExecuteAsync(documents, Context).ToListAsync();
 
                 // Then
                 Assert.AreEqual("^\"test-a.txt\"foo", results.Single().Content);
@@ -134,7 +136,7 @@ namespace Wyam.Core.Tests.Modules.IO
                 Include include = new Include();
 
                 // When
-                List<IDocument> results = include.Execute(documents, Context).ToList();
+                List<IDocument> results = await include.ExecuteAsync(documents, Context).ToListAsync();
 
                 // Then
                 Assert.AreEqual("\\\\^\"test-a.txt\"foo", results.Single().Content);
@@ -153,7 +155,7 @@ namespace Wyam.Core.Tests.Modules.IO
                 Include include = new Include();
 
                 // When
-                List<IDocument> results = include.Execute(documents, Context).ToList();
+                List<IDocument> results = await include.ExecuteAsync(documents, Context).ToListAsync();
 
                 // Then
                 Assert.AreEqual("x aaa y bbb z", results.Single().Content);
@@ -172,7 +174,7 @@ namespace Wyam.Core.Tests.Modules.IO
                 Include include = new Include();
 
                 // When
-                List<IDocument> results = include.Execute(documents, Context).ToList();
+                List<IDocument> results = await include.ExecuteAsync(documents, Context).ToListAsync();
 
                 // Then
                 Assert.AreEqual("x aaabbb z", results.Single().Content);
@@ -192,7 +194,7 @@ namespace Wyam.Core.Tests.Modules.IO
                 Include include = new Include();
 
                 // When
-                List<IDocument> results = include.Execute(documents, Context).ToList();
+                List<IDocument> results = await include.ExecuteAsync(documents, Context).ToListAsync();
 
                 // Then
                 Assert.AreEqual("x  y", results.Single().Content);
@@ -211,7 +213,7 @@ namespace Wyam.Core.Tests.Modules.IO
                 Include include = new Include();
 
                 // When
-                List<IDocument> results = include.Execute(documents, Context).ToList();
+                List<IDocument> results = await include.ExecuteAsync(documents, Context).ToListAsync();
 
                 // Then
                 Assert.AreEqual("x ccc y", results.Single().Content);
@@ -230,7 +232,7 @@ namespace Wyam.Core.Tests.Modules.IO
                 Include include = new Include();
 
                 // When
-                List<IDocument> results = include.Execute(documents, Context).ToList();
+                List<IDocument> results = await include.ExecuteAsync(documents, Context).ToListAsync();
 
                 // Then
                 Assert.AreEqual("x test y", results.Single().Content);
@@ -249,7 +251,7 @@ namespace Wyam.Core.Tests.Modules.IO
                 Include include = new Include();
 
                 // When
-                List<IDocument> results = include.Execute(documents, Context).ToList();
+                List<IDocument> results = await include.ExecuteAsync(documents, Context).ToListAsync();
 
                 // Then
                 Assert.AreEqual("x test y", results.Single().Content);
@@ -271,7 +273,7 @@ namespace Wyam.Core.Tests.Modules.IO
                 Include include = new Include();
 
                 // When
-                List<IDocument> results = include.Execute(documents, Context).ToList();
+                List<IDocument> results = await include.ExecuteAsync(documents, Context).ToListAsync();
 
                 // Then
                 Assert.AreEqual("1 3 aaa 4 2", results.Single().Content);
@@ -293,7 +295,7 @@ namespace Wyam.Core.Tests.Modules.IO
                 Include include = new Include().WithRecursion(false);
 
                 // When
-                List<IDocument> results = include.Execute(documents, Context).ToList();
+                List<IDocument> results = await include.ExecuteAsync(documents, Context).ToListAsync();
 
                 // Then
                 Assert.AreEqual("1 3 ^\"test-a.txt\" 4 2", results.Single().Content);
@@ -315,7 +317,7 @@ namespace Wyam.Core.Tests.Modules.IO
                 Include include = new Include().WithRecursion(false);
 
                 // When
-                List<IDocument> results = include.Execute(documents, Context).ToList();
+                List<IDocument> results = await include.ExecuteAsync(documents, Context).ToListAsync();
 
                 // Then
                 Assert.AreEqual("1 3 \\^\"test-a.txt\" 4 2", results.Single().Content);
@@ -340,7 +342,7 @@ namespace Wyam.Core.Tests.Modules.IO
                 Include include = new Include();
 
                 // When
-                List<IDocument> results = include.Execute(documents, Context).ToList();
+                List<IDocument> results = await include.ExecuteAsync(documents, Context).ToListAsync();
 
                 // Then
                 Assert.AreEqual("1 3 5 aaa 6 4 2", results.Single().Content);

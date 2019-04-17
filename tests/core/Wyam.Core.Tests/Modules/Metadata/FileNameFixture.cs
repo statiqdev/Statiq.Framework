@@ -1,16 +1,17 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using NUnit.Framework;
 using Wyam.Common.Documents;
+using Wyam.Common.Execution;
 using Wyam.Common.IO;
 using Wyam.Common.Meta;
-using Wyam.Common.Execution;
 using Wyam.Common.Modules;
 using Wyam.Common.Util;
 using Wyam.Core.Documents;
-using Wyam.Core.Modules.Metadata;
 using Wyam.Core.Execution;
+using Wyam.Core.Modules.Metadata;
 using Wyam.Testing;
 using Wyam.Testing.Execution;
 
@@ -35,7 +36,7 @@ namespace Wyam.Core.Tests.Modules.Metadata
             [TestCase(
                 "one-two-three--four--five and a six--seven--eight-nine------ten",
                 "onetwothreefourfive-and-a-sixseveneightnineten")]
-            public void FileNameIsConvertedCorrectly(string input, string output)
+            public async Task FileNameIsConvertedCorrectly(string input, string output)
             {
                 // Given
                 IServiceProvider serviceProvider = new TestServiceProvider();
@@ -52,14 +53,14 @@ namespace Wyam.Core.Tests.Modules.Metadata
                 FileName fileName = new FileName();
 
                 // When
-                IEnumerable<IDocument> documents = fileName.Execute(inputs, context);
+                IEnumerable<IDocument> documents = await fileName.ExecuteAsync(inputs, context).ToListAsync();
 
                 // Then
                 Assert.AreEqual(output, documents.First().FilePath(Keys.WriteFileName).FullPath);
             }
 
             [Test]
-            public void FileNameShouldBeLowercase()
+            public async Task FileNameShouldBeLowercase()
             {
                 // Given
                 const string input = "FileName With MiXeD CapS";
@@ -79,14 +80,14 @@ namespace Wyam.Core.Tests.Modules.Metadata
                 FileName fileName = new FileName();
 
                 // When
-                IEnumerable<IDocument> documents = fileName.Execute(inputs, context);
+                IEnumerable<IDocument> documents = await fileName.ExecuteAsync(inputs, context).ToListAsync();
 
                 // Then
                 Assert.AreEqual(output, documents.First().FilePath(Keys.WriteFileName).FullPath);
             }
 
             [Test]
-            public void WithAllowedCharactersDoesNotReplaceProvidedCharacters()
+            public async Task WithAllowedCharactersDoesNotReplaceProvidedCharacters()
             {
                 // Given
                 const string input = "this-is-a-.net-tag";
@@ -107,14 +108,14 @@ namespace Wyam.Core.Tests.Modules.Metadata
 
                 // When
                 fileName = fileName.WithAllowedCharacters(new string[] { "-" });
-                IEnumerable<IDocument> documents = fileName.Execute(inputs, context);
+                IEnumerable<IDocument> documents = await fileName.ExecuteAsync(inputs, context).ToListAsync();
 
                 // Then
                 Assert.AreEqual(output, documents.First().FilePath(Keys.WriteFileName).FullPath);
             }
 
             [Test]
-            public void WithAllowedCharactersDoesNotReplaceDotAtEnd()
+            public async Task WithAllowedCharactersDoesNotReplaceDotAtEnd()
             {
                 // Given
                 const string input = "this-is-a-.";
@@ -135,7 +136,7 @@ namespace Wyam.Core.Tests.Modules.Metadata
 
                 // When
                 fileName = fileName.WithAllowedCharacters(new string[] { "." });
-                IEnumerable<IDocument> documents = fileName.Execute(inputs, context);
+                IEnumerable<IDocument> documents = await fileName.ExecuteAsync(inputs, context).ToListAsync();
 
                 // Then
                 Assert.AreEqual(output, documents.First().FilePath(Keys.WriteFileName).FullPath);
@@ -145,7 +146,7 @@ namespace Wyam.Core.Tests.Modules.Metadata
 
             [Test]
             [TestCaseSource(nameof(ReservedChars))]
-            public void FileNameIsConvertedCorrectlyWithReservedChar(string character)
+            public async Task FileNameIsConvertedCorrectlyWithReservedChar(string character)
             {
                 // Given
                 IServiceProvider serviceProvider = new TestServiceProvider();
@@ -165,7 +166,7 @@ namespace Wyam.Core.Tests.Modules.Metadata
                 FileName fileName = new FileName();
 
                 // When
-                IEnumerable<IDocument> documents = fileName.Execute(inputs, context);
+                IEnumerable<IDocument> documents = await fileName.ExecuteAsync(inputs, context).ToListAsync();
 
                 // Then
                 Assert.AreEqual("testing-some-of-these-", documents.First().FilePath(Keys.WriteFileName).FullPath);
@@ -174,7 +175,7 @@ namespace Wyam.Core.Tests.Modules.Metadata
             [TestCase(null)]
             [TestCase("")]
             [TestCase(" ")]
-            public void IgnoresNullOrWhiteSpaceStrings(string input)
+            public async Task IgnoresNullOrWhiteSpaceStrings(string input)
             {
                 // Given
                 IServiceProvider serviceProvider = new TestServiceProvider();
@@ -191,14 +192,14 @@ namespace Wyam.Core.Tests.Modules.Metadata
                 FileName fileName = new FileName();
 
                 // When
-                IEnumerable<IDocument> documents = fileName.Execute(inputs, context);
+                IEnumerable<IDocument> documents = await fileName.ExecuteAsync(inputs, context).ToListAsync();
 
                 // Then
                 Assert.IsFalse(documents.First().ContainsKey(Keys.WriteFileName));
             }
 
             [Test]
-            public void PreservesExtension()
+            public async Task PreservesExtension()
             {
                 // Given
                 const string input = "myfile.html";
@@ -218,14 +219,14 @@ namespace Wyam.Core.Tests.Modules.Metadata
                 FileName fileName = new FileName("MyKey");
 
                 // When
-                IEnumerable<IDocument> documents = fileName.Execute(inputs, context);
+                IEnumerable<IDocument> documents = await fileName.ExecuteAsync(inputs, context).ToListAsync();
 
                 // Then
                 Assert.AreEqual(output, documents.First().FilePath(Keys.WriteFileName).FullPath);
             }
 
             [Test]
-            public void TrimWhitespace()
+            public async Task TrimWhitespace()
             {
                 // Given
                 const string input = "   myfile.html   ";
@@ -245,7 +246,7 @@ namespace Wyam.Core.Tests.Modules.Metadata
                 FileName fileName = new FileName("MyKey");
 
                 // When
-                IEnumerable<IDocument> documents = fileName.Execute(inputs, context);
+                IEnumerable<IDocument> documents = await fileName.ExecuteAsync(inputs, context).ToListAsync();
 
                 // Then
                 Assert.AreEqual(output, documents.First().FilePath(Keys.WriteFileName).FullPath);

@@ -268,9 +268,9 @@ namespace Wyam.Core.IO
                     }
                     return Tuple.Create(directory, x);
                 });
-            return directoryPatterns
-                .GroupBy(x => x.Item1, x => x.Item2, new DirectoryEqualityComparer())
-                .SelectMany(x => Globber.GetFiles(x.Key, x));
+            IEnumerable<IGrouping<IDirectory, string>> patternGroups = directoryPatterns
+                .GroupBy(x => x.Item1, x => x.Item2, new DirectoryEqualityComparer());
+            return await patternGroups.SelectManyAsync(async x => await Globber.GetFilesAsync(x.Key, x));
         }
 
         public IFileProvider GetFileProvider(NormalizedPath path)

@@ -11,6 +11,7 @@ using Wyam.Common.Execution;
 using Wyam.Common.IO;
 using Wyam.Common.Meta;
 using Wyam.Common.Modules;
+using Wyam.Common.Util;
 using Wyam.Core.Documents;
 using Wyam.Core.Execution;
 using Wyam.Core.Modules.IO;
@@ -69,7 +70,7 @@ namespace Wyam.Core.Tests.Modules.IO
             public void ThrowsOnNullPathFunction()
             {
                 // Given, When, Then
-                Assert.Throws<ArgumentNullException>(() => new CopyFiles((DocumentConfig)null));
+                Assert.Throws<ArgumentNullException>(() => new CopyFiles((DocumentConfig<IEnumerable<string>>)null));
             }
 
             [Test]
@@ -89,7 +90,7 @@ namespace Wyam.Core.Tests.Modules.IO
                 CopyFiles copyFiles = new CopyFiles("**/*.txt");
 
                 // When
-                copyFiles.Execute(Inputs, Context).ToList();
+                await copyFiles.ExecuteAsync(Inputs, Context).ToListAsync();
 
                 // Then
                 Assert.IsTrue(await (await Engine.FileSystem.GetOutputFileAsync("test-a.txt")).GetExistsAsync());
@@ -107,7 +108,7 @@ namespace Wyam.Core.Tests.Modules.IO
                 CopyFiles copyFiles = new CopyFiles("*.txt");
 
                 // When
-                copyFiles.Execute(Inputs, Context).ToList();
+                await copyFiles.ExecuteAsync(Inputs, Context).ToListAsync();
 
                 // Then
                 Assert.IsTrue(await (await Engine.FileSystem.GetOutputFileAsync("test-a.txt")).GetExistsAsync());
@@ -125,7 +126,7 @@ namespace Wyam.Core.Tests.Modules.IO
                 CopyFiles copyFiles = new CopyFiles("Subfolder/*.txt");
 
                 // When
-                copyFiles.Execute(Inputs, Context).ToList();
+                await copyFiles.ExecuteAsync(Inputs, Context).ToListAsync();
 
                 // Then
                 Assert.IsFalse(await (await Engine.FileSystem.GetOutputFileAsync("test-a.txt")).GetExistsAsync());
@@ -143,7 +144,7 @@ namespace Wyam.Core.Tests.Modules.IO
                 CopyFiles copyFiles = new CopyFiles("../*.txt");
 
                 // When
-                copyFiles.Execute(Inputs, Context).ToList();
+                await copyFiles.ExecuteAsync(Inputs, Context).ToListAsync();
 
                 // Then
                 Assert.IsFalse(await (await Engine.FileSystem.GetOutputFileAsync("test-a.txt")).GetExistsAsync());
@@ -162,7 +163,7 @@ namespace Wyam.Core.Tests.Modules.IO
                 CopyFiles copyFiles = new CopyFiles("../**/*.txt");
 
                 // When
-                copyFiles.Execute(Inputs, Context).ToList();
+                await copyFiles.ExecuteAsync(Inputs, Context).ToListAsync();
 
                 // Then
                 Assert.IsTrue(await (await Engine.FileSystem.GetOutputFileAsync("test-a.txt")).GetExistsAsync());
@@ -181,7 +182,7 @@ namespace Wyam.Core.Tests.Modules.IO
                 CopyFiles copyFiles = new CopyFiles("/TestFiles/Input/**/*.txt");
 
                 // When
-                copyFiles.Execute(Inputs, Context).ToList();
+                await copyFiles.ExecuteAsync(Inputs, Context).ToListAsync();
 
                 // Then
                 Assert.IsTrue(await (await Engine.FileSystem.GetOutputFileAsync("test-a.txt")).GetExistsAsync());
@@ -199,7 +200,7 @@ namespace Wyam.Core.Tests.Modules.IO
                 CopyFiles copyFiles = new CopyFiles("NonExisting/**/*.txt");
 
                 // When
-                copyFiles.Execute(Inputs, Context).ToList();
+                await copyFiles.ExecuteAsync(Inputs, Context).ToListAsync();
 
                 // Then
                 Assert.IsFalse(await (await Engine.FileSystem.GetOutputFileAsync("test-a.txt")).GetExistsAsync());
@@ -211,24 +212,24 @@ namespace Wyam.Core.Tests.Modules.IO
             }
 
             [Test]
-            public void ShouldSetMetadata()
+            public async Task ShouldSetMetadata()
             {
                 // Given
                 CopyFiles copyFiles = new CopyFiles("**/test-a.txt");
 
                 // When
-                copyFiles.Execute(Inputs, Context).ToList();
+                await copyFiles.ExecuteAsync(Inputs, Context).ToListAsync();
             }
 
             [TestCase(Keys.SourceFilePath, "/TestFiles/Input/test-a.txt")]
             [TestCase(Keys.DestinationFilePath, "/output/test-a.txt")]
-            public void ShouldSetFilePathMetadata(string key, string expected)
+            public async Task ShouldSetFilePathMetadata(string key, string expected)
             {
                 // Given
                 CopyFiles copyFiles = new CopyFiles("**/test-a.txt");
 
                 // When
-                IDocument output = copyFiles.Execute(Inputs, Context).ToList().First();
+                IDocument output = (await copyFiles.ExecuteAsync(Inputs, Context)).First();
 
                 // Then
                 object result = output[key];

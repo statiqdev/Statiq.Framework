@@ -1,9 +1,11 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using NUnit.Framework;
 using Shouldly;
 using Wyam.Common.Documents;
 using Wyam.Common.Execution;
+using Wyam.Common.Util;
 using Wyam.Testing;
 using Wyam.Testing.Documents;
 using Wyam.Testing.Execution;
@@ -17,7 +19,7 @@ namespace Wyam.Html.Tests
         public class ExecuteTests : AutoLinkFixture
         {
             [Test]
-            public void NoReplacementReturnsSameDocument()
+            public async Task NoReplacementReturnsSameDocument()
             {
                 // Given
                 const string input = @"<html>
@@ -37,14 +39,14 @@ namespace Wyam.Html.Tests
                 });
 
                 // When
-                IList<IDocument> results = autoLink.Execute(new[] { document }, context).ToList();  // Make sure to materialize the result list
+                IList<IDocument> results = await autoLink.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
 
                 // Then
                 results.Single().ShouldBeSameAs(document);
             }
 
             [Test]
-            public void AddsLink()
+            public async Task AddsLink()
             {
                 // Given
                 const string input = @"<html>
@@ -72,14 +74,14 @@ namespace Wyam.Html.Tests
                 });
 
                 // When
-                IList<IDocument> results = autoLink.Execute(new[] { document }, context).ToList();  // Make sure to materialize the result list
+                IList<IDocument> results = await autoLink.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
 
                 // Then
                 results.Single().Content.ShouldBe(output, StringCompareShould.IgnoreLineEndings);
             }
 
             [Test]
-            public void AddsLinkWithoutImpactingEscapes()
+            public async Task AddsLinkWithoutImpactingEscapes()
             {
                 // Given
                 const string input = @"<html>
@@ -107,14 +109,14 @@ namespace Wyam.Html.Tests
                 });
 
                 // When
-                IList<IDocument> results = autoLink.Execute(new[] { document }, context).ToList();  // Make sure to materialize the result list
+                IList<IDocument> results = await autoLink.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
 
                 // Then
                 results.Single().Content.ShouldBe(output, StringCompareShould.IgnoreLineEndings);
             }
 
             [Test]
-            public void AddsLinkWithAlternateQuerySelector()
+            public async Task AddsLinkWithAlternateQuerySelector()
             {
                 // Given
                 const string input = @"<html>
@@ -144,14 +146,14 @@ namespace Wyam.Html.Tests
                 }).WithQuerySelector("baz");
 
                 // When
-                IList<IDocument> results = autoLink.Execute(new[] { document }, context).ToList();  // Make sure to materialize the result list
+                IList<IDocument> results = await autoLink.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
 
                 // Then
                 results.Single().Content.ShouldBe(output, StringCompareShould.IgnoreLineEndings);
             }
 
             [Test]
-            public void AddsLinkWhenContainerHasChildElements()
+            public async Task AddsLinkWhenContainerHasChildElements()
             {
                 // Given
                 const string input = @"<html>
@@ -179,14 +181,14 @@ namespace Wyam.Html.Tests
                 });
 
                 // When
-                IList<IDocument> results = autoLink.Execute(new[] { document }, context).ToList();  // Make sure to materialize the result list
+                IList<IDocument> results = await autoLink.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
 
                 // Then
                 results.Single().Content.ShouldBe(output, StringCompareShould.IgnoreLineEndings);
             }
 
             [Test]
-            public void AddsLinkWhenInsideChildElement()
+            public async Task AddsLinkWhenInsideChildElement()
             {
                 // Given
                 const string input = @"<html>
@@ -214,14 +216,14 @@ namespace Wyam.Html.Tests
                 });
 
                 // When
-                IList<IDocument> results = autoLink.Execute(new[] { document }, context).ToList();  // Make sure to materialize the result list
+                IList<IDocument> results = await autoLink.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
 
                 // Then
                 results.Single().Content.ShouldBe(output, StringCompareShould.IgnoreLineEndings);
             }
 
             [Test]
-            public void DoesNotReplaceInAttributes()
+            public async Task DoesNotReplaceInAttributes()
             {
                 // Given
                 const string input = @"<html>
@@ -249,14 +251,14 @@ namespace Wyam.Html.Tests
                 });
 
                 // When
-                IList<IDocument> results = autoLink.Execute(new[] { document }, context).ToList();  // Make sure to materialize the result list
+                IList<IDocument> results = await autoLink.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
 
                 // Then
                 results.Single().Content.ShouldBe(output, StringCompareShould.IgnoreLineEndings);
             }
 
             [Test]
-            public void AddsMultipleLinksInSameElement()
+            public async Task AddsMultipleLinksInSameElement()
             {
                 // Given
                 const string input = @"<html>
@@ -285,14 +287,14 @@ namespace Wyam.Html.Tests
                 });
 
                 // When
-                IList<IDocument> results = autoLink.Execute(new[] { document }, context).ToList();  // Make sure to materialize the result list
+                IList<IDocument> results = await autoLink.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
 
                 // Then
                 results.Single().Content.ShouldBe(output, StringCompareShould.IgnoreLineEndings);
             }
 
             [Test]
-            public void AddsMultipleLinksInDifferentElements()
+            public async Task AddsMultipleLinksInDifferentElements()
             {
                 // Given
                 const string input = @"<html>
@@ -323,14 +325,14 @@ namespace Wyam.Html.Tests
                 });
 
                 // When
-                IList<IDocument> results = autoLink.Execute(new[] { document }, context).ToList();  // Make sure to materialize the result list
+                IList<IDocument> results = await autoLink.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
 
                 // Then
                 results.Single().Content.ShouldBe(output, StringCompareShould.IgnoreLineEndings);
             }
 
             [Test]
-            public void DoesNotAddLinksInExistingLinkElements()
+            public async Task DoesNotAddLinksInExistingLinkElements()
             {
                 // Given
                 const string input = @"<html>
@@ -359,14 +361,14 @@ namespace Wyam.Html.Tests
                 });
 
                 // When
-                IList<IDocument> results = autoLink.Execute(new[] { document }, context).ToList();  // Make sure to materialize the result list
+                IList<IDocument> results = await autoLink.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
 
                 // Then
                 results.Single().Content.ShouldBe(output, StringCompareShould.IgnoreLineEndings);
             }
 
             [Test]
-            public void AddsMultipleLinksWhenFirstIsSubstring()
+            public async Task AddsMultipleLinksWhenFirstIsSubstring()
             {
                 // Given
                 const string input = @"<html>
@@ -395,14 +397,14 @@ namespace Wyam.Html.Tests
                 });
 
                 // When
-                IList<IDocument> results = autoLink.Execute(new[] { document }, context).ToList();  // Make sure to materialize the result list
+                IList<IDocument> results = await autoLink.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
 
                 // Then
                 results.Single().Content.ShouldBe(output, StringCompareShould.IgnoreLineEndings);
             }
 
             [Test]
-            public void AddLinkMethodTakesPrecedence()
+            public async Task AddLinkMethodTakesPrecedence()
             {
                 // Given
                 const string input = @"<html>
@@ -431,14 +433,14 @@ namespace Wyam.Html.Tests
                 }).WithLink("Foobaz", "http://www.yahoo.com");
 
                 // When
-                IList<IDocument> results = autoLink.Execute(new[] { document }, context).ToList();  // Make sure to materialize the result list
+                IList<IDocument> results = await autoLink.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
 
                 // Then
                 results.Single().Content.ShouldBe(output, StringCompareShould.IgnoreLineEndings);
             }
 
             [Test]
-            public void IgnoreSubstringIfSearchingForWholeWords()
+            public async Task IgnoreSubstringIfSearchingForWholeWords()
             {
                 // Given
                 const string input = @"<html>
@@ -466,14 +468,14 @@ namespace Wyam.Html.Tests
                 }).WithMatchOnlyWholeWord();
 
                 // When
-                IList<IDocument> results = autoLink.Execute(new[] { document }, context).ToList();  // Make sure to materialize the result list
+                IList<IDocument> results = await autoLink.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
 
                 // Then
                 results.Single().Content.ShouldBe(output, StringCompareShould.IgnoreLineEndings);
             }
 
             [Test]
-            public void AdjacentWords()
+            public async Task AdjacentWords()
             {
                 // Given
                 const string input = @"<html>
@@ -502,14 +504,14 @@ namespace Wyam.Html.Tests
                 });
 
                 // When
-                IList<IDocument> results = autoLink.Execute(new[] { document }, context).ToList();  // Make sure to materialize the result list
+                IList<IDocument> results = await autoLink.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
 
                 // Then
                 results.Single().Content.ShouldBe(output, StringCompareShould.IgnoreLineEndings);
             }
 
             [Test]
-            public void WordAtTheEndAfterPreviousWord()
+            public async Task WordAtTheEndAfterPreviousWord()
             {
                 // Given
                 const string input = @"<html>
@@ -538,14 +540,14 @@ namespace Wyam.Html.Tests
                 }).WithMatchOnlyWholeWord();
 
                 // When
-                IList<IDocument> results = autoLink.Execute(new[] { document }, context).ToList();  // Make sure to materialize the result list
+                IList<IDocument> results = await autoLink.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
 
                 // Then
                 results.Single().Content.ShouldBe(output, StringCompareShould.IgnoreLineEndings);
             }
 
             [Test]
-            public void NonWholeWords()
+            public async Task NonWholeWords()
             {
                 // Given
                 const string input = @"<html>
@@ -566,7 +568,7 @@ namespace Wyam.Html.Tests
                 }).WithMatchOnlyWholeWord();
 
                 // When
-                IList<IDocument> results = autoLink.Execute(new[] { document }, context).ToList();  // Make sure to materialize the result list
+                IList<IDocument> results = await autoLink.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
 
                 // Then
                 results.Single().ShouldBeSameAs(document);
@@ -582,7 +584,7 @@ namespace Wyam.Html.Tests
             [TestCase("<li><code>IEnumerable&lt;Foo&lt;T&gt;&gt;</code></li>", @"<li><code>IEnumerable&lt;<a href=""http://www.fooOfT.com"">Foo&lt;T&gt;</a>&gt;</code></li>")]
             [TestCase("<li><code>IEnumerable&lt;IEnumerable&lt;Foo&gt;&gt;</code></li>", @"<li><code>IEnumerable&lt;IEnumerable&lt;<a href=""http://www.foo.com"">Foo</a>&gt;&gt;</code></li>")]
             [TestCase("<li><code>IEnumerable&lt;IEnumerable&lt;Foo&lt;T&gt;&gt;&gt;</code></li>", @"<li><code>IEnumerable&lt;IEnumerable&lt;<a href=""http://www.fooOfT.com"">Foo&lt;T&gt;</a>&gt;&gt;</code></li>")]
-            public void AddLinksToGenericWordsInsideAngleBrackets(string input, string expected)
+            public async Task AddLinksToGenericWordsInsideAngleBrackets(string input, string expected)
             {
                 // Given
                 string inputContent = $"<html><head></head><body><foo></foo><ul>{input}</ul></body></html>";
@@ -601,14 +603,14 @@ namespace Wyam.Html.Tests
                     .WithEndWordSeparators('>');
 
                 // When
-                IList<IDocument> results = autoLink.Execute(new[] { document }, context).ToList();  // Make sure to materialize the result list
+                IList<IDocument> results = await autoLink.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
 
                 // Then
                 results.Single().Content.ShouldBe(expectedContent);
             }
 
             [Test]
-            public void DoesNotRewriteOutsideQuerySelectorWhenNoReplacements()
+            public async Task DoesNotRewriteOutsideQuerySelectorWhenNoReplacements()
             {
                 // Given
                 string inputContent = $"<div>@x.Select(x => x) <code>Foo bar</code></div>";
@@ -623,14 +625,14 @@ namespace Wyam.Html.Tests
                     .WithEndWordSeparators('>');
 
                 // When
-                IList<IDocument> results = autoLink.Execute(new[] { document }, context).ToList();  // Make sure to materialize the result list
+                IList<IDocument> results = await autoLink.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
 
                 // Then
                 results.Single().Content.ShouldBe(expectedContent);
             }
 
             [Test]
-            public void NoReplacementWithQuerySelectorReturnsSameDocument()
+            public async Task NoReplacementWithQuerySelectorReturnsSameDocument()
             {
                 // Given
                 string inputContent = $"<div>@x.Select(x => x) <code>Foo bar</code></div>";
@@ -645,7 +647,7 @@ namespace Wyam.Html.Tests
                     .WithEndWordSeparators('>');
 
                 // When
-                IList<IDocument> results = autoLink.Execute(new[] { document }, context).ToList();  // Make sure to materialize the result list
+                IList<IDocument> results = await autoLink.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
 
                 // Then
                 results.Single().ShouldBeSameAs(document);

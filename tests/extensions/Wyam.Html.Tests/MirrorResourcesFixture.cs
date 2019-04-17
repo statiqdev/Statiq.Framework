@@ -5,11 +5,13 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Text;
+using System.Threading.Tasks;
 using NUnit.Framework;
 using Shouldly;
 using Wyam.Common.Documents;
 using Wyam.Common.IO;
 using Wyam.Common.Meta;
+using Wyam.Common.Util;
 using Wyam.Testing;
 using Wyam.Testing.Documents;
 using Wyam.Testing.Execution;
@@ -23,7 +25,7 @@ namespace Wyam.Html.Tests
         public class ExecuteTests : MirrorResourcesFixture
         {
             [Test]
-            public void ReplacesScriptResource()
+            public async Task ReplacesScriptResource()
             {
                 // Given
                 TestExecutionContext context = new TestExecutionContext();
@@ -38,7 +40,7 @@ namespace Wyam.Html.Tests
                 MirrorResources module = new MirrorResources();
 
                 // When
-                List<IDocument> result = module.Execute(new[] { document }, context).ToList();
+                List<IDocument> result = await module.ExecuteAsync(new[] { document }, context).ToListAsync();
 
                 // Then
                 result.Single().Content.ShouldBe(
@@ -51,7 +53,7 @@ namespace Wyam.Html.Tests
             }
 
             [Test]
-            public void ReplacesLinkResource()
+            public async Task ReplacesLinkResource()
             {
                 // Given
                 TestExecutionContext context = new TestExecutionContext();
@@ -66,7 +68,7 @@ namespace Wyam.Html.Tests
                 MirrorResources module = new MirrorResources();
 
                 // When
-                List<IDocument> result = module.Execute(new[] { document }, context).ToList();
+                List<IDocument> result = await module.ExecuteAsync(new[] { document }, context).ToListAsync();
 
                 // Then
                 result.Single().Content.ShouldBe(
@@ -79,7 +81,7 @@ namespace Wyam.Html.Tests
             }
 
             [Test]
-            public void DoesNotReplaceDataNoMirrorAttribute()
+            public async Task DoesNotReplaceDataNoMirrorAttribute()
             {
                 // Given
                 TestExecutionContext context = new TestExecutionContext();
@@ -95,7 +97,7 @@ namespace Wyam.Html.Tests
                 MirrorResources module = new MirrorResources();
 
                 // When
-                List<IDocument> result = module.Execute(new[] { document }, context).ToList();
+                List<IDocument> result = await module.ExecuteAsync(new[] { document }, context).ToListAsync();
 
                 // Then
                 result.Single().Content.ShouldBe(
@@ -110,7 +112,7 @@ namespace Wyam.Html.Tests
             }
 
             [Test]
-            public void UsesCustomMirrorPath()
+            public async Task UsesCustomMirrorPath()
             {
                 // Given
                 TestExecutionContext context = new TestExecutionContext();
@@ -125,7 +127,7 @@ namespace Wyam.Html.Tests
                 MirrorResources module = new MirrorResources(x => new FilePath("/foo/bar.js"));
 
                 // When
-                List<IDocument> result = module.Execute(new[] { document }, context).ToList();
+                List<IDocument> result = await module.ExecuteAsync(new[] { document }, context).ToListAsync();
 
                 // Then
                 result.Single().Content.ShouldBe(

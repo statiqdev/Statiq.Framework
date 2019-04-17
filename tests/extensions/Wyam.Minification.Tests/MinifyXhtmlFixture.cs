@@ -1,9 +1,11 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using NUnit.Framework;
 using Shouldly;
 using Wyam.Common.Documents;
 using Wyam.Common.Execution;
+using Wyam.Common.Util;
 using Wyam.Testing;
 using Wyam.Testing.Documents;
 using Wyam.Testing.Execution;
@@ -17,7 +19,7 @@ namespace Wyam.Minification.Tests
         public class ExecuteTests : MinifyXhtmlFixture
         {
             [Test]
-            public void Minify()
+            public async Task Minify()
             {
                 // Given
                 const string input = @"<html>
@@ -36,7 +38,7 @@ namespace Wyam.Minification.Tests
                 MinifyXhtml minifyXhtml = new MinifyXhtml();
 
                 // When
-                IList<IDocument> results = minifyXhtml.Execute(new[] { document }, context).ToList();  // Make sure to materialize the result list
+                IList<IDocument> results = await minifyXhtml.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
 
                 // Then
                 results.Single().Content.ShouldBe(output, StringCompareShould.IgnoreLineEndings);

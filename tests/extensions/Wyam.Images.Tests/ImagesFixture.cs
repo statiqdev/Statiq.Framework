@@ -3,11 +3,13 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 using NUnit.Framework;
 using Shouldly;
 using Wyam.Common.Documents;
 using Wyam.Common.IO;
 using Wyam.Common.Meta;
+using Wyam.Common.Util;
 using Wyam.Testing;
 using Wyam.Testing.Documents;
 using Wyam.Testing.Execution;
@@ -20,7 +22,7 @@ namespace Wyam.Images.Tests
         public class ExecuteTests : ImagesFixture
         {
             [Test]
-            public void OutputsTheSameAsInput()
+            public async Task OutputsTheSameAsInput()
             {
                 // Given
                 TestExecutionContext context = new TestExecutionContext();
@@ -32,7 +34,7 @@ namespace Wyam.Images.Tests
                 Image module = new Image();
 
                 // When
-                IList<IDocument> results = module.Execute(new[] { document }, context).ToList();  // Make sure to materialize the result list
+                IList<IDocument> results = await module.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
 
                 // Then
                 results.Count.ShouldBe(1);
@@ -40,7 +42,7 @@ namespace Wyam.Images.Tests
             }
 
             [Test]
-            public void ChangesPathWhenOutputFormatSpecified()
+            public async Task ChangesPathWhenOutputFormatSpecified()
             {
                 // Given
                 TestExecutionContext context = new TestExecutionContext();
@@ -52,7 +54,7 @@ namespace Wyam.Images.Tests
                 Image module = new Image().OutputAsGif();
 
                 // When
-                IList<IDocument> results = module.Execute(new[] { document }, context).ToList();  // Make sure to materialize the result list
+                IList<IDocument> results = await module.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
 
                 // Then
                 results.Count.ShouldBe(1);
@@ -60,7 +62,7 @@ namespace Wyam.Images.Tests
             }
 
             [Test]
-            public void ChangesPathWhenBrightnessSpecified()
+            public async Task ChangesPathWhenBrightnessSpecified()
             {
                 // Given
                 TestExecutionContext context = new TestExecutionContext();
@@ -72,7 +74,7 @@ namespace Wyam.Images.Tests
                 Image module = new Image().Brightness(123);
 
                 // When
-                IList<IDocument> results = module.Execute(new[] { document }, context).ToList();  // Make sure to materialize the result list
+                IList<IDocument> results = await module.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
 
                 // Then
                 results.Count.ShouldBe(1);

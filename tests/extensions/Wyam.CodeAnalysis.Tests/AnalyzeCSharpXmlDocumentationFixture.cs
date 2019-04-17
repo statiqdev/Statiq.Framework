@@ -1,11 +1,13 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using Microsoft.CodeAnalysis;
 using NUnit.Framework;
 using Wyam.Common.Documents;
+using Wyam.Common.Execution;
 using Wyam.Common.Meta;
 using Wyam.Common.Modules;
-using Wyam.Common.Execution;
+using Wyam.Common.Util;
 
 namespace Wyam.CodeAnalysis.Tests
 {
@@ -16,7 +18,7 @@ namespace Wyam.CodeAnalysis.Tests
         public class ExecuteTests : AnalyzeCSharpXmlDocumentationFixture
         {
             [Test]
-            public void SingleLineSummary()
+            public async Task SingleLineSummary()
             {
                 // Given
                 const string code = @"
@@ -38,7 +40,7 @@ namespace Wyam.CodeAnalysis.Tests
                 IModule module = new AnalyzeCSharp();
 
                 // When
-                List<IDocument> results = module.Execute(new[] { document }, context).ToList();  // Make sure to materialize the result list
+                List<IDocument> results = await module.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
 
                 // Then
                 Assert.AreEqual("This is a summary.", GetResult(results, "Green")["Summary"]);
@@ -46,7 +48,7 @@ namespace Wyam.CodeAnalysis.Tests
             }
 
             [Test]
-            public void MultiLineSummary()
+            public async Task MultiLineSummary()
             {
                 // Given
                 const string code = @"
@@ -73,7 +75,7 @@ namespace Wyam.CodeAnalysis.Tests
                 IModule module = new AnalyzeCSharp();
 
                 // When
-                List<IDocument> results = module.Execute(new[] { document }, context).ToList();  // Make sure to materialize the result list
+                List<IDocument> results = await module.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
 
                 // Then
                 Assert.AreEqual("\n    This is a summary.\n    ", GetResult(results, "Green")["Summary"]);
@@ -81,7 +83,7 @@ namespace Wyam.CodeAnalysis.Tests
             }
 
             [Test]
-            public void MultipleSummaryElements()
+            public async Task MultipleSummaryElements()
             {
                 // Given
                 const string code = @"
@@ -99,14 +101,14 @@ namespace Wyam.CodeAnalysis.Tests
                 IModule module = new AnalyzeCSharp();
 
                 // When
-                List<IDocument> results = module.Execute(new[] { document }, context).ToList();  // Make sure to materialize the result list
+                List<IDocument> results = await module.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
 
                 // Then
                 Assert.AreEqual("This is a summary.\nThis is another summary.", GetResult(results, "Green")["Summary"]);
             }
 
             [Test]
-            public void NoSummary()
+            public async Task NoSummary()
             {
                 // Given
                 const string code = @"
@@ -122,14 +124,14 @@ namespace Wyam.CodeAnalysis.Tests
                 IModule module = new AnalyzeCSharp();
 
                 // When
-                List<IDocument> results = module.Execute(new[] { document }, context).ToList();  // Make sure to materialize the result list
+                List<IDocument> results = await module.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
 
                 // Then
                 Assert.AreEqual(string.Empty, GetResult(results, "Green")["Summary"]);
             }
 
             [Test]
-            public void SummaryWithCElement()
+            public async Task SummaryWithCElement()
             {
                 // Given
                 const string code = @"
@@ -148,14 +150,14 @@ namespace Wyam.CodeAnalysis.Tests
                 IModule module = new AnalyzeCSharp();
 
                 // When
-                List<IDocument> results = module.Execute(new[] { document }, context).ToList();  // Make sure to materialize the result list
+                List<IDocument> results = await module.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
 
                 // Then
                 Assert.AreEqual("\n    This is <code>some code</code> in a summary.\n    ", GetResult(results, "Green")["Summary"]);
             }
 
             [Test]
-            public void SummaryWithCElementAndInlineCssClass()
+            public async Task SummaryWithCElementAndInlineCssClass()
             {
                 // Given
                 const string code = @"
@@ -174,14 +176,14 @@ namespace Wyam.CodeAnalysis.Tests
                 IModule module = new AnalyzeCSharp();
 
                 // When
-                List<IDocument> results = module.Execute(new[] { document }, context).ToList();  // Make sure to materialize the result list
+                List<IDocument> results = await module.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
 
                 // Then
                 Assert.AreEqual("\n    This is <code class=\"code\">some code</code> in a summary.\n    ", GetResult(results, "Green")["Summary"]);
             }
 
             [Test]
-            public void SummaryWithCElementAndDeclaredCssClass()
+            public async Task SummaryWithCElementAndDeclaredCssClass()
             {
                 // Given
                 const string code = @"
@@ -200,14 +202,14 @@ namespace Wyam.CodeAnalysis.Tests
                 IModule module = new AnalyzeCSharp().WithCssClasses("code", "code");
 
                 // When
-                List<IDocument> results = module.Execute(new[] { document }, context).ToList();  // Make sure to materialize the result list
+                List<IDocument> results = await module.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
 
                 // Then
                 Assert.AreEqual("\n    This is <code class=\"code\">some code</code> in a summary.\n    ", GetResult(results, "Green")["Summary"]);
             }
 
             [Test]
-            public void SummaryWithCElementAndInlineAndDeclaredCssClasses()
+            public async Task SummaryWithCElementAndInlineAndDeclaredCssClasses()
             {
                 // Given
                 const string code = @"
@@ -226,14 +228,14 @@ namespace Wyam.CodeAnalysis.Tests
                 IModule module = new AnalyzeCSharp().WithCssClasses("code", "more-code");
 
                 // When
-                List<IDocument> results = module.Execute(new[] { document }, context).ToList();  // Make sure to materialize the result list
+                List<IDocument> results = await module.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
 
                 // Then
                 Assert.AreEqual("\n    This is <code class=\"code more-code\">some code</code> in a summary.\n    ", GetResult(results, "Green")["Summary"]);
             }
 
             [Test]
-            public void SummaryWithMultipleCElements()
+            public async Task SummaryWithMultipleCElements()
             {
                 // Given
                 const string code = @"
@@ -252,14 +254,14 @@ namespace Wyam.CodeAnalysis.Tests
                 IModule module = new AnalyzeCSharp();
 
                 // When
-                List<IDocument> results = module.Execute(new[] { document }, context).ToList();  // Make sure to materialize the result list
+                List<IDocument> results = await module.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
 
                 // Then
                 Assert.AreEqual("\n    This is <code>some code</code> in <code>a</code> summary.\n    ", GetResult(results, "Green")["Summary"]);
             }
 
             [Test]
-            public void SummaryWithCodeElement()
+            public async Task SummaryWithCodeElement()
             {
                 // Given
                 const string code = @"
@@ -282,14 +284,14 @@ namespace Wyam.CodeAnalysis.Tests
                 IModule module = new AnalyzeCSharp();
 
                 // When
-                List<IDocument> results = module.Execute(new[] { document }, context).ToList();  // Make sure to materialize the result list
+                List<IDocument> results = await module.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
 
                 // Then
                 Assert.AreEqual("\n    This is\n    <pre><code>with some code</code></pre>\n    a summary\n    ", GetResult(results, "Green")["Summary"]);
             }
 
             [Test]
-            public void SummaryWithCodeElementAndCElement()
+            public async Task SummaryWithCodeElementAndCElement()
             {
                 // Given
                 const string code = @"
@@ -312,7 +314,7 @@ namespace Wyam.CodeAnalysis.Tests
                 IModule module = new AnalyzeCSharp();
 
                 // When
-                List<IDocument> results = module.Execute(new[] { document }, context).ToList();  // Make sure to materialize the result list
+                List<IDocument> results = await module.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
 
                 // Then
                 Assert.AreEqual(
@@ -321,7 +323,7 @@ namespace Wyam.CodeAnalysis.Tests
             }
 
             [Test]
-            public void SummaryWithMultipleCodeElements()
+            public async Task SummaryWithMultipleCodeElements()
             {
                 // Given
                 const string code = @"
@@ -347,14 +349,14 @@ namespace Wyam.CodeAnalysis.Tests
                 IModule module = new AnalyzeCSharp();
 
                 // When
-                List<IDocument> results = module.Execute(new[] { document }, context).ToList();  // Make sure to materialize the result list
+                List<IDocument> results = await module.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
 
                 // Then
                 Assert.AreEqual("\n    This is\n    <pre><code>with some code</code></pre>\n    a summary\n    <pre><code>more code</code></pre>\n    ", GetResult(results, "Green")["Summary"]);
             }
 
             [Test]
-            public void SummaryOnPartialClasses()
+            public async Task SummaryOnPartialClasses()
             {
                 // Given
                 const string code = @"
@@ -387,14 +389,14 @@ namespace Wyam.CodeAnalysis.Tests
                 IModule module = new AnalyzeCSharp();
 
                 // When
-                List<IDocument> results = module.Execute(new[] { document }, context).ToList();  // Make sure to materialize the result list
+                List<IDocument> results = await module.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
 
                 // Then
                 Assert.AreEqual("\n    This is a summary repeated for each partial class\n    ", GetResult(results, "Green")["Summary"]);
             }
 
             [Test]
-            public void MethodWithParam()
+            public async Task MethodWithParam()
             {
                 // Given
                 const string code = @"
@@ -414,7 +416,7 @@ namespace Wyam.CodeAnalysis.Tests
                 IModule module = new AnalyzeCSharp();
 
                 // When
-                List<IDocument> results = module.Execute(new[] { document }, context).ToList();  // Make sure to materialize the result list
+                List<IDocument> results = await module.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
 
                 // Then
                 Assert.AreEqual(
@@ -426,7 +428,7 @@ namespace Wyam.CodeAnalysis.Tests
             }
 
             [Test]
-            public void MethodWithMissingParam()
+            public async Task MethodWithMissingParam()
             {
                 // Given
                 const string code = @"
@@ -446,14 +448,14 @@ namespace Wyam.CodeAnalysis.Tests
                 IModule module = new AnalyzeCSharp();
 
                 // When
-                List<IDocument> results = module.Execute(new[] { document }, context).ToList();  // Make sure to materialize the result list
+                List<IDocument> results = await module.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
 
                 // Then
                 CollectionAssert.IsEmpty(GetMember(results, "Green", "Go").List<ReferenceComment>("Params"));
             }
 
             [Test]
-            public void MethodWithExceptionElement()
+            public async Task MethodWithExceptionElement()
             {
                 // Given
                 const string code = @"
@@ -477,7 +479,7 @@ namespace Wyam.CodeAnalysis.Tests
                 IModule module = new AnalyzeCSharp();
 
                 // When
-                List<IDocument> results = module.Execute(new[] { document }, context).ToList();  // Make sure to materialize the result list
+                List<IDocument> results = await module.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
 
                 // Then
                 Assert.AreEqual(
@@ -492,7 +494,7 @@ namespace Wyam.CodeAnalysis.Tests
             }
 
             [Test]
-            public void MethodWithUnknownExceptionElement()
+            public async Task MethodWithUnknownExceptionElement()
             {
                 // Given
                 const string code = @"
@@ -512,7 +514,7 @@ namespace Wyam.CodeAnalysis.Tests
                 IModule module = new AnalyzeCSharp();
 
                 // When
-                List<IDocument> results = module.Execute(new[] { document }, context).ToList();  // Make sure to materialize the result list
+                List<IDocument> results = await module.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
 
                 // Then
                 Assert.AreEqual(
@@ -527,7 +529,7 @@ namespace Wyam.CodeAnalysis.Tests
             }
 
             [Test]
-            public void ExceptionElementWithoutCref()
+            public async Task ExceptionElementWithoutCref()
             {
                 // Given
                 const string code = @"
@@ -547,7 +549,7 @@ namespace Wyam.CodeAnalysis.Tests
                 IModule module = new AnalyzeCSharp();
 
                 // When
-                List<IDocument> results = module.Execute(new[] { document }, context).ToList();  // Make sure to materialize the result list
+                List<IDocument> results = await module.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
 
                 // Then
                 Assert.AreEqual(
@@ -559,7 +561,7 @@ namespace Wyam.CodeAnalysis.Tests
             }
 
             [Test]
-            public void MultipleExceptionElements()
+            public async Task MultipleExceptionElements()
             {
                 // Given
                 const string code = @"
@@ -584,7 +586,7 @@ namespace Wyam.CodeAnalysis.Tests
                 IModule module = new AnalyzeCSharp();
 
                 // When
-                List<IDocument> results = module.Execute(new[] { document }, context).ToList();  // Make sure to materialize the result list
+                List<IDocument> results = await module.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
 
                 // Then
                 Assert.AreEqual(2, GetMember(results, "Green", "Go").List<ReferenceComment>("Exceptions").Count);
@@ -609,7 +611,7 @@ namespace Wyam.CodeAnalysis.Tests
             }
 
             [Test]
-            public void SummaryWithBulletListElement()
+            public async Task SummaryWithBulletListElement()
             {
                 // Given
                 const string code = @"
@@ -642,7 +644,7 @@ namespace Wyam.CodeAnalysis.Tests
                 IModule module = new AnalyzeCSharp();
 
                 // When
-                List<IDocument> results = module.Execute(new[] { document }, context).ToList();  // Make sure to materialize the result list
+                List<IDocument> results = await module.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
 
                 // Then
                 Assert.AreEqual(
@@ -667,7 +669,7 @@ namespace Wyam.CodeAnalysis.Tests
             }
 
             [Test]
-            public void SummaryWithNumberListElement()
+            public async Task SummaryWithNumberListElement()
             {
                 // Given
                 const string code = @"
@@ -700,7 +702,7 @@ namespace Wyam.CodeAnalysis.Tests
                 IModule module = new AnalyzeCSharp();
 
                 // When
-                List<IDocument> results = module.Execute(new[] { document }, context).ToList();  // Make sure to materialize the result list
+                List<IDocument> results = await module.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
 
                 // Then
                 Assert.AreEqual(
@@ -725,7 +727,7 @@ namespace Wyam.CodeAnalysis.Tests
             }
 
             [Test]
-            public void SummaryWithTableListElement()
+            public async Task SummaryWithTableListElement()
             {
                 // Given
                 const string code = @"
@@ -758,7 +760,7 @@ namespace Wyam.CodeAnalysis.Tests
                 IModule module = new AnalyzeCSharp();
 
                 // When
-                List<IDocument> results = module.Execute(new[] { document }, context).ToList();  // Make sure to materialize the result list
+                List<IDocument> results = await module.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
 
                 // Then
                 Assert.AreEqual(
@@ -783,7 +785,7 @@ namespace Wyam.CodeAnalysis.Tests
             }
 
             [Test]
-            public void SummaryWithParaElements()
+            public async Task SummaryWithParaElements()
             {
                 // Given
                 const string code = @"
@@ -803,14 +805,14 @@ namespace Wyam.CodeAnalysis.Tests
                 IModule module = new AnalyzeCSharp();
 
                 // When
-                List<IDocument> results = module.Execute(new[] { document }, context).ToList();  // Make sure to materialize the result list
+                List<IDocument> results = await module.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
 
                 // Then
                 Assert.AreEqual("\n    <p>ABC</p>\n    <p>XYZ</p>\n    ", GetResult(results, "Green")["Summary"]);
             }
 
             [Test]
-            public void SummaryWithParaElementsAndNestedCElement()
+            public async Task SummaryWithParaElementsAndNestedCElement()
             {
                 // Given
                 const string code = @"
@@ -830,14 +832,14 @@ namespace Wyam.CodeAnalysis.Tests
                 IModule module = new AnalyzeCSharp();
 
                 // When
-                List<IDocument> results = module.Execute(new[] { document }, context).ToList();  // Make sure to materialize the result list
+                List<IDocument> results = await module.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
 
                 // Then
                 Assert.AreEqual("\n    <p>ABC</p>\n    <p>X<code>Y</code>Z</p>\n    ", GetResult(results, "Green")["Summary"]);
             }
 
             [Test]
-            public void SummaryWithSeeElement()
+            public async Task SummaryWithSeeElement()
             {
                 // Given
                 const string code = @"
@@ -858,14 +860,14 @@ namespace Wyam.CodeAnalysis.Tests
                 IModule module = new AnalyzeCSharp();
 
                 // When
-                List<IDocument> results = module.Execute(new[] { document }, context).ToList();  // Make sure to materialize the result list
+                List<IDocument> results = await module.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
 
                 // Then
                 Assert.AreEqual("Check <code><a href=\"/Foo/Red/index.html\">Red</a></code> class", GetResult(results, "Green")["Summary"]);
             }
 
             [Test]
-            public void SummaryWithSeeElementWithNotFoundSymbol()
+            public async Task SummaryWithSeeElementWithNotFoundSymbol()
             {
                 // Given
                 const string code = @"
@@ -886,14 +888,14 @@ namespace Wyam.CodeAnalysis.Tests
                 IModule module = new AnalyzeCSharp();
 
                 // When
-                List<IDocument> results = module.Execute(new[] { document }, context).ToList();  // Make sure to materialize the result list
+                List<IDocument> results = await module.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
 
                 // Then
                 Assert.AreEqual("Check <code>Blue</code> class", GetResult(results, "Green")["Summary"]);
             }
 
             [Test]
-            public void SummaryWithSeeElementWithNonCompilationGenericSymbol()
+            public async Task SummaryWithSeeElementWithNonCompilationGenericSymbol()
             {
                 // Given
                 const string code = @"
@@ -914,14 +916,14 @@ namespace Wyam.CodeAnalysis.Tests
                 IModule module = new AnalyzeCSharp();
 
                 // When
-                List<IDocument> results = module.Execute(new[] { document }, context).ToList();  // Make sure to materialize the result list
+                List<IDocument> results = await module.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
 
                 // Then
                 Assert.AreEqual("Check <code>IEnumerable&lt;string&gt;</code> class", GetResult(results, "Green")["Summary"]);
             }
 
             [Test]
-            public void SummaryWithSeeElementToMethod()
+            public async Task SummaryWithSeeElementToMethod()
             {
                 // Given
                 const string code = @"
@@ -945,14 +947,14 @@ namespace Wyam.CodeAnalysis.Tests
                 IModule module = new AnalyzeCSharp();
 
                 // When
-                List<IDocument> results = module.Execute(new[] { document }, context).ToList();  // Make sure to materialize the result list
+                List<IDocument> results = await module.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
 
                 // Then
                 Assert.AreEqual("Check <code><a href=\"/Foo/Red/00F22A50.html\">Blue()</a></code> method", GetResult(results, "Green")["Summary"]);
             }
 
             [Test]
-            public void SummaryWithUnknownSeeElement()
+            public async Task SummaryWithUnknownSeeElement()
             {
                 // Given
                 const string code = @"
@@ -969,14 +971,14 @@ namespace Wyam.CodeAnalysis.Tests
                 IModule module = new AnalyzeCSharp();
 
                 // When
-                List<IDocument> results = module.Execute(new[] { document }, context).ToList();  // Make sure to materialize the result list
+                List<IDocument> results = await module.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
 
                 // Then
                 Assert.AreEqual("Check <code>Red</code> class", GetResult(results, "Green")["Summary"]);
             }
 
             [Test]
-            public void SummaryWithSeealsoElement()
+            public async Task SummaryWithSeealsoElement()
             {
                 // Given
                 const string code = @"
@@ -997,7 +999,7 @@ namespace Wyam.CodeAnalysis.Tests
                 IModule module = new AnalyzeCSharp();
 
                 // When
-                List<IDocument> results = module.Execute(new[] { document }, context).ToList();  // Make sure to materialize the result list
+                List<IDocument> results = await module.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
 
                 // Then
                 // <seealso> should be removed from the summary and instead placed in the SeeAlso metadata
@@ -1006,7 +1008,7 @@ namespace Wyam.CodeAnalysis.Tests
             }
 
             [Test]
-            public void RootSeealsoElement()
+            public async Task RootSeealsoElement()
             {
                 // Given
                 const string code = @"
@@ -1027,14 +1029,14 @@ namespace Wyam.CodeAnalysis.Tests
                 IModule module = new AnalyzeCSharp();
 
                 // When
-                List<IDocument> results = module.Execute(new[] { document }, context).ToList();  // Make sure to materialize the result list
+                List<IDocument> results = await module.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
 
                 // Then
                 Assert.AreEqual("<code><a href=\"/Foo/Red/index.html\">Red</a></code>", GetResult(results, "Green").Get<IReadOnlyList<string>>("SeeAlso")[0]);
             }
 
             [Test]
-            public void OtherCommentWithSeeElement()
+            public async Task OtherCommentWithSeeElement()
             {
                 // Given
                 const string code = @"
@@ -1055,7 +1057,7 @@ namespace Wyam.CodeAnalysis.Tests
                 IModule module = new AnalyzeCSharp();
 
                 // When
-                List<IDocument> results = module.Execute(new[] { document }, context).ToList();  // Make sure to materialize the result list
+                List<IDocument> results = await module.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
 
                 // Then
                 Assert.AreEqual(
@@ -1064,7 +1066,7 @@ namespace Wyam.CodeAnalysis.Tests
             }
 
             [Test]
-            public void MultipleOtherComments()
+            public async Task MultipleOtherComments()
             {
                 // Given
                 const string code = @"
@@ -1087,7 +1089,7 @@ namespace Wyam.CodeAnalysis.Tests
                 IModule module = new AnalyzeCSharp();
 
                 // When
-                List<IDocument> results = module.Execute(new[] { document }, context).ToList();  // Make sure to materialize the result list
+                List<IDocument> results = await module.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
 
                 // Then
                 Assert.AreEqual(
@@ -1105,7 +1107,7 @@ namespace Wyam.CodeAnalysis.Tests
             }
 
             [Test]
-            public void OtherCommentsWithAttributes()
+            public async Task OtherCommentsWithAttributes()
             {
                 // Given
                 const string code = @"
@@ -1127,7 +1129,7 @@ namespace Wyam.CodeAnalysis.Tests
                 IModule module = new AnalyzeCSharp();
 
                 // When
-                List<IDocument> results = module.Execute(new[] { document }, context).ToList();  // Make sure to materialize the result list
+                List<IDocument> results = await module.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
 
                 // Then
                 Assert.AreEqual(
@@ -1148,7 +1150,7 @@ namespace Wyam.CodeAnalysis.Tests
             }
 
             [Test]
-            public void NoDocsForImplicitSymbols()
+            public async Task NoDocsForImplicitSymbols()
             {
                 // Given
                 const string code = @"
@@ -1167,14 +1169,14 @@ namespace Wyam.CodeAnalysis.Tests
                     .WhereSymbol(x => x is INamedTypeSymbol);
 
                 // When
-                List<IDocument> results = module.Execute(new[] { document }, context).ToList();  // Make sure to materialize the result list
+                List<IDocument> results = await module.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
 
                 // Then
                 Assert.IsFalse(GetResult(results, "Green").Get<IReadOnlyList<IDocument>>("Constructors")[0].ContainsKey("Summary"));
             }
 
             [Test]
-            public void WithDocsForImplicitSymbols()
+            public async Task WithDocsForImplicitSymbols()
             {
                 // Given
                 const string code = @"
@@ -1194,14 +1196,14 @@ namespace Wyam.CodeAnalysis.Tests
                     .WithDocsForImplicitSymbols();
 
                 // When
-                List<IDocument> results = module.Execute(new[] { document }, context).ToList();  // Make sure to materialize the result list
+                List<IDocument> results = await module.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
 
                 // Then
                 Assert.AreEqual("This is a summary.", GetResult(results, "Green").Get<IReadOnlyList<IDocument>>("Constructors")[0]["Summary"]);
             }
 
             [Test]
-            public void ExternalInclude()
+            public async Task ExternalInclude()
             {
                 // Given
                 const string code = @"
@@ -1218,14 +1220,14 @@ namespace Wyam.CodeAnalysis.Tests
                 IModule module = new AnalyzeCSharp();
 
                 // When
-                List<IDocument> results = module.Execute(new[] { document }, context).ToList();  // Make sure to materialize the result list
+                List<IDocument> results = await module.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
 
                 // Then
                 Assert.AreEqual("This is a included summary.", GetResult(results, "Green")["Summary"]);
             }
 
             [Test]
-            public void NamespaceSummary()
+            public async Task NamespaceSummary()
             {
                 // Given
                 const string code = @"
@@ -1242,14 +1244,14 @@ namespace Wyam.CodeAnalysis.Tests
                 IModule module = new AnalyzeCSharp();
 
                 // When
-                List<IDocument> results = module.Execute(new[] { document }, context).ToList();  // Make sure to materialize the result list
+                List<IDocument> results = await module.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
 
                 // Then
                 Assert.AreEqual("This is a summary.", GetResult(results, "Foo")["Summary"]);
             }
 
             [Test]
-            public void NamespaceSummaryWithNamespaceDocClass()
+            public async Task NamespaceSummaryWithNamespaceDocClass()
             {
                 // Given
                 const string code = @"
@@ -1270,14 +1272,14 @@ namespace Wyam.CodeAnalysis.Tests
                 IModule module = new AnalyzeCSharp();
 
                 // When
-                List<IDocument> results = module.Execute(new[] { document }, context).ToList();  // Make sure to materialize the result list
+                List<IDocument> results = await module.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
 
                 // Then
                 Assert.AreEqual("This is a summary.", GetResult(results, "Foo")["Summary"]);
             }
 
             [Test]
-            public void InheritFromBaseClass()
+            public async Task InheritFromBaseClass()
             {
                 // Given
                 const string code = @"
@@ -1299,14 +1301,14 @@ namespace Wyam.CodeAnalysis.Tests
                 IModule module = new AnalyzeCSharp();
 
                 // When
-                List<IDocument> results = module.Execute(new[] { document }, context).ToList();  // Make sure to materialize the result list
+                List<IDocument> results = await module.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
 
                 // Then
                 Assert.AreEqual("This is a summary.", GetResult(results, "Blue")["Summary"]);
             }
 
             [Test]
-            public void ImplicitInheritFromBaseClass()
+            public async Task ImplicitInheritFromBaseClass()
             {
                 // Given
                 const string code = @"
@@ -1327,14 +1329,14 @@ namespace Wyam.CodeAnalysis.Tests
                 IModule module = new AnalyzeCSharp().WithImplicitInheritDoc();
 
                 // When
-                List<IDocument> results = module.Execute(new[] { document }, context).ToList();  // Make sure to materialize the result list
+                List<IDocument> results = await module.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
 
                 // Then
                 Assert.AreEqual("This is a summary.", GetResult(results, "Blue")["Summary"]);
             }
 
             [Test]
-            public void InheritFromCref()
+            public async Task InheritFromCref()
             {
                 // Given
                 const string code = @"
@@ -1356,14 +1358,14 @@ namespace Wyam.CodeAnalysis.Tests
                 IModule module = new AnalyzeCSharp();
 
                 // When
-                List<IDocument> results = module.Execute(new[] { document }, context).ToList();  // Make sure to materialize the result list
+                List<IDocument> results = await module.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
 
                 // Then
                 Assert.AreEqual("This is a summary.", GetResult(results, "Blue")["Summary"]);
             }
 
             [Test]
-            public void CircularInheritdoc()
+            public async Task CircularInheritdoc()
             {
                 // Given
                 const string code = @"
@@ -1386,14 +1388,14 @@ namespace Wyam.CodeAnalysis.Tests
                 IModule module = new AnalyzeCSharp();
 
                 // When
-                List<IDocument> results = module.Execute(new[] { document }, context).ToList();  // Make sure to materialize the result list
+                List<IDocument> results = await module.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
 
                 // Then
                 Assert.AreEqual("This is a summary.", GetResult(results, "Blue")["Summary"]);
             }
 
             [Test]
-            public void RecursiveInheritdoc()
+            public async Task RecursiveInheritdoc()
             {
                 // Given
                 const string code = @"
@@ -1420,14 +1422,14 @@ namespace Wyam.CodeAnalysis.Tests
                 IModule module = new AnalyzeCSharp();
 
                 // When
-                List<IDocument> results = module.Execute(new[] { document }, context).ToList();  // Make sure to materialize the result list
+                List<IDocument> results = await module.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
 
                 // Then
                 Assert.AreEqual("This is a summary.", GetResult(results, "Blue")["Summary"]);
             }
 
             [Test]
-            public void InheritDoesNotOverrideExistingSummary()
+            public async Task InheritDoesNotOverrideExistingSummary()
             {
                 // Given
                 const string code = @"
@@ -1450,14 +1452,14 @@ namespace Wyam.CodeAnalysis.Tests
                 IModule module = new AnalyzeCSharp();
 
                 // When
-                List<IDocument> results = module.Execute(new[] { document }, context).ToList();  // Make sure to materialize the result list
+                List<IDocument> results = await module.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
 
                 // Then
                 Assert.AreEqual("Blue summary.", GetResult(results, "Blue")["Summary"]);
             }
 
             [Test]
-            public void InheritFromOverriddenMethod()
+            public async Task InheritFromOverriddenMethod()
             {
                 // Given
                 const string code = @"
@@ -1483,14 +1485,14 @@ namespace Wyam.CodeAnalysis.Tests
                 IModule module = new AnalyzeCSharp();
 
                 // When
-                List<IDocument> results = module.Execute(new[] { document }, context).ToList();  // Make sure to materialize the result list
+                List<IDocument> results = await module.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
 
                 // Then
                 Assert.AreEqual("Base summary.", GetMember(results, "Blue", "Foo")["Summary"]);
             }
 
             [Test]
-            public void InheritFromOverriddenMethodWithParams()
+            public async Task InheritFromOverriddenMethodWithParams()
             {
                 // Given
                 const string code = @"
@@ -1518,7 +1520,7 @@ namespace Wyam.CodeAnalysis.Tests
                 IModule module = new AnalyzeCSharp();
 
                 // When
-                List<IDocument> results = module.Execute(new[] { document }, context).ToList();  // Make sure to materialize the result list
+                List<IDocument> results = await module.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
 
                 // Then
                 Assert.AreEqual(
@@ -1536,7 +1538,7 @@ namespace Wyam.CodeAnalysis.Tests
             }
 
             [Test]
-            public void InheritFromInterface()
+            public async Task InheritFromInterface()
             {
                 // Given
                 const string code = @"
@@ -1558,14 +1560,14 @@ namespace Wyam.CodeAnalysis.Tests
                 IModule module = new AnalyzeCSharp();
 
                 // When
-                List<IDocument> results = module.Execute(new[] { document }, context).ToList();  // Make sure to materialize the result list
+                List<IDocument> results = await module.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
 
                 // Then
                 Assert.AreEqual("Green summary.", GetResult(results, "Blue")["Summary"]);
             }
 
             [Test]
-            public void InheritFromMultipleInterfaces()
+            public async Task InheritFromMultipleInterfaces()
             {
                 // Given
                 const string code = @"
@@ -1591,14 +1593,14 @@ namespace Wyam.CodeAnalysis.Tests
                 IModule module = new AnalyzeCSharp();
 
                 // When
-                List<IDocument> results = module.Execute(new[] { document }, context).ToList();  // Make sure to materialize the result list
+                List<IDocument> results = await module.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
 
                 // Then
                 Assert.AreEqual("Red summary.", GetResult(results, "Blue")["Summary"]);
             }
 
             [Test]
-            public void InheritFromMultipleInterfacesWithMultipleMatches()
+            public async Task InheritFromMultipleInterfacesWithMultipleMatches()
             {
                 // Given
                 const string code = @"
@@ -1625,14 +1627,14 @@ namespace Wyam.CodeAnalysis.Tests
                 IModule module = new AnalyzeCSharp();
 
                 // When
-                List<IDocument> results = module.Execute(new[] { document }, context).ToList();  // Make sure to materialize the result list
+                List<IDocument> results = await module.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
 
                 // Then
                 Assert.AreEqual("Green summary.", GetResult(results, "Blue")["Summary"]);
             }
 
             [Test]
-            public void InheritFromImplementedMethod()
+            public async Task InheritFromImplementedMethod()
             {
                 // Given
                 const string code = @"
@@ -1658,14 +1660,14 @@ namespace Wyam.CodeAnalysis.Tests
                 IModule module = new AnalyzeCSharp();
 
                 // When
-                List<IDocument> results = module.Execute(new[] { document }, context).ToList();  // Make sure to materialize the result list
+                List<IDocument> results = await module.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
 
                 // Then
                 Assert.AreEqual("Interface summary.", GetMember(results, "Blue", "Foo")["Summary"]);
             }
 
             [Test]
-            public void InheritFromImplementedMethodIfOverride()
+            public async Task InheritFromImplementedMethodIfOverride()
             {
                 // Given
                 const string code = @"
@@ -1694,14 +1696,14 @@ namespace Wyam.CodeAnalysis.Tests
                 IModule module = new AnalyzeCSharp();
 
                 // When
-                List<IDocument> results = module.Execute(new[] { document }, context).ToList();  // Make sure to materialize the result list
+                List<IDocument> results = await module.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
 
                 // Then
                 Assert.AreEqual("Interface summary.", GetMember(results, "Blue", "Foo")["Summary"]);
             }
 
             [Test]
-            public void InheritFromBaseMethodIfOverrideAndInterface()
+            public async Task InheritFromBaseMethodIfOverrideAndInterface()
             {
                 // Given
                 const string code = @"
@@ -1731,14 +1733,14 @@ namespace Wyam.CodeAnalysis.Tests
                 IModule module = new AnalyzeCSharp();
 
                 // When
-                List<IDocument> results = module.Execute(new[] { document }, context).ToList();  // Make sure to materialize the result list
+                List<IDocument> results = await module.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
 
                 // Then
                 Assert.AreEqual("Base summary.", GetMember(results, "Blue", "Foo")["Summary"]);
             }
 
             [Test]
-            public void InheritFromImplementedMethodIfIndirectOverride()
+            public async Task InheritFromImplementedMethodIfIndirectOverride()
             {
                 // Given
                 const string code = @"
@@ -1771,14 +1773,14 @@ namespace Wyam.CodeAnalysis.Tests
                 IModule module = new AnalyzeCSharp();
 
                 // When
-                List<IDocument> results = module.Execute(new[] { document }, context).ToList();  // Make sure to materialize the result list
+                List<IDocument> results = await module.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
 
                 // Then
                 Assert.AreEqual("Interface summary.", GetMember(results, "Blue", "Foo")["Summary"]);
             }
 
             [Test]
-            public void SummaryWithCdata()
+            public async Task SummaryWithCdata()
             {
                 // Given
                 const string code = @"
@@ -1799,14 +1801,14 @@ namespace Wyam.CodeAnalysis.Tests
                 IModule module = new AnalyzeCSharp();
 
                 // When
-                List<IDocument> results = module.Execute(new[] { document }, context).ToList();  // Make sure to materialize the result list
+                List<IDocument> results = await module.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
 
                 // Then
                 Assert.AreEqual("\n    &lt;foo&gt;bar&lt;/foo&gt;\n    ", GetResult(results, "Green")["Summary"]);
             }
 
             [Test]
-            public void ExampleCodeWithCdata()
+            public async Task ExampleCodeWithCdata()
             {
                 // Given
                 const string code = @"
@@ -1829,7 +1831,7 @@ namespace Wyam.CodeAnalysis.Tests
                 IModule module = new AnalyzeCSharp();
 
                 // When
-                List<IDocument> results = module.Execute(new[] { document }, context).ToList();  // Make sure to materialize the result list
+                List<IDocument> results = await module.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
 
                 // Then
                 Assert.AreEqual("\n    <pre><code>&lt;foo&gt;bar&lt;/foo&gt;</code></pre>\n    ", GetResult(results, "Green")["Example"]);

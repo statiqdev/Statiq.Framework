@@ -5,11 +5,14 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using NUnit.Framework;
+using Shouldly;
+using Wyam.Common.Configuration;
 using Wyam.Common.Documents;
 using Wyam.Common.Execution;
 using Wyam.Common.IO;
 using Wyam.Common.Meta;
 using Wyam.Common.Modules;
+using Wyam.Common.Util;
 using Wyam.Core.Execution;
 using Wyam.Core.Modules.IO;
 using Wyam.Testing;
@@ -69,7 +72,7 @@ namespace Wyam.Core.Tests.Modules.IO
                 WriteFiles writeFiles = new WriteFiles(".txt");
 
                 // When
-                writeFiles.Execute(inputs, Context).ToList();
+                await writeFiles.ExecuteAsync(inputs, Context).ToListAsync();
 
                 // Then
                 IFile outputFile = await Engine.FileSystem.GetOutputFileAsync("Subfolder/write-test.txt");
@@ -86,7 +89,7 @@ namespace Wyam.Core.Tests.Modules.IO
                 WriteFiles writeFiles = new WriteFiles("txt");
 
                 // When
-                writeFiles.Execute(inputs, Context).ToList();
+                await writeFiles.ExecuteAsync(inputs, Context).ToListAsync();
 
                 // Then
                 IFile outputFile = await Engine.FileSystem.GetOutputFileAsync("Subfolder/write-test.txt");
@@ -99,10 +102,10 @@ namespace Wyam.Core.Tests.Modules.IO
             {
                 // Given
                 IDocument[] inputs = new[] { await Context.GetDocumentAsync("Test") };
-                WriteFiles writeFiles = new WriteFiles((x, y) => ".dotfile");
+                WriteFiles writeFiles = new WriteFiles((FilePath)".dotfile");
 
                 // When
-                writeFiles.Execute(inputs, Context).ToList();
+                await writeFiles.ExecuteAsync(inputs, Context).ToListAsync();
 
                 // Then
                 IFile outputFile = await Engine.FileSystem.GetOutputFileAsync(".dotfile");
@@ -121,11 +124,11 @@ namespace Wyam.Core.Tests.Modules.IO
                 IFile fileMock = await Engine.FileSystem.GetOutputFileAsync(fileName);
                 await fileMock.WriteAllTextAsync(oldContent);
 
-                WriteFiles writeFiles = new WriteFiles((x, y) => fileName);
+                WriteFiles writeFiles = new WriteFiles((FilePath)fileName);
                 IDocument[] inputs = { await Context.GetDocumentAsync(newContent) };
 
                 // When
-                writeFiles.Execute(inputs, Context).ToList();
+                await writeFiles.ExecuteAsync(inputs, Context).ToListAsync();
 
                 // Then
                 IFile outputFile = await Engine.FileSystem.GetOutputFileAsync(fileName);
@@ -137,10 +140,10 @@ namespace Wyam.Core.Tests.Modules.IO
             {
                 // Given
                 IDocument[] inputs = new[] { await Context.GetDocumentAsync("Test") };
-                WriteFiles writeFiles = new WriteFiles((x, y) => ".dotfile");
+                WriteFiles writeFiles = new WriteFiles((FilePath)".dotfile");
 
                 // When
-                IDocument document = writeFiles.Execute(inputs, Context).ToList().First();
+                IDocument document = (await writeFiles.ExecuteAsync(inputs, Context)).First();
 
                 // Then
                 Assert.IsNull(document[Keys.DestinationFileBase]);
@@ -153,10 +156,10 @@ namespace Wyam.Core.Tests.Modules.IO
             {
                 // Given
                 IDocument[] inputs = new[] { await Context.GetDocumentAsync("Test") };
-                WriteFiles writeFiles = new WriteFiles((x, y) => null);
+                WriteFiles writeFiles = new WriteFiles((FilePath)null);
 
                 // When
-                IDocument output = writeFiles.Execute(inputs, Context).ToList().First();
+                IDocument output = (await writeFiles.ExecuteAsync(inputs, Context)).First();
 
                 // Then
                 Assert.AreEqual("Test", output.Content);
@@ -167,10 +170,10 @@ namespace Wyam.Core.Tests.Modules.IO
             {
                 // Given
                 IDocument[] inputs = new[] { await Context.GetDocumentAsync("Test") };
-                WriteFiles writeFiles = new WriteFiles((x, y) => null).Where((x, y) => false);
+                WriteFiles writeFiles = new WriteFiles((FilePath)null).Where(false);
 
                 // When
-                IDocument output = writeFiles.Execute(inputs, Context).ToList().First();
+                IDocument output = (await writeFiles.ExecuteAsync(inputs, Context)).First();
 
                 // Then
                 Assert.AreEqual("Test", output.Content);
@@ -189,10 +192,10 @@ namespace Wyam.Core.Tests.Modules.IO
                     await Context.GetDocumentAsync("D"),
                     await Context.GetDocumentAsync("E"),
                 };
-                WriteFiles writeFiles = new WriteFiles((x, y) => "output.txt");
+                WriteFiles writeFiles = new WriteFiles((FilePath)"output.txt");
 
                 // When
-                writeFiles.Execute(inputs, Context).ToList();
+                await writeFiles.ExecuteAsync(inputs, Context).ToListAsync();
 
                 // Then
                 IFile outputFile = await Engine.FileSystem.GetOutputFileAsync("output.txt");
@@ -212,15 +215,10 @@ namespace Wyam.Core.Tests.Modules.IO
                     await Context.GetDocumentAsync(new FilePath("/d.txt"), "D"),
                     await Context.GetDocumentAsync(new FilePath("/e.txt"), "E"),
                 };
-                WriteFiles writeFiles = new WriteFiles((x, y) => "output.txt");
+                WriteFiles writeFiles = new WriteFiles((FilePath)"output.txt");
 
                 // When, Then
-                Assert.Throws<Exception>(() => writeFiles.Execute(inputs, Context).ToList(), @"Multiple documents output to output.txt (this probably wasn't intended):
-  /a.txt
-  /b.txt
-  /c.txt
-  /d.txt
-  /e.txt");
+                await Should.ThrowAsync<Exception>(async () => await writeFiles.ExecuteAsync(inputs, Context).ToListAsync());
             }
 
             [Test]
@@ -235,10 +233,10 @@ namespace Wyam.Core.Tests.Modules.IO
                     await Context.GetDocumentAsync("D"),
                     await Context.GetDocumentAsync("E"),
                 };
-                WriteFiles writeFiles = new WriteFiles((x, y) => "output.txt").Append();
+                WriteFiles writeFiles = new WriteFiles((FilePath)"output.txt").Append();
 
                 // When
-                writeFiles.Execute(inputs, Context).ToList();
+                await writeFiles.ExecuteAsync(inputs, Context).ToListAsync();
 
                 // Then
                 IFile outputFile = await Engine.FileSystem.GetOutputFileAsync("output.txt");
@@ -260,7 +258,7 @@ namespace Wyam.Core.Tests.Modules.IO
                 WriteFiles writeFiles = new WriteFiles(".txt");
 
                 // When
-                IDocument output = writeFiles.Execute(inputs, Context).ToList().First();
+                IDocument output = (await writeFiles.ExecuteAsync(inputs, Context)).First();
 
                 // Then
                 object result = output[key];
@@ -278,7 +276,7 @@ namespace Wyam.Core.Tests.Modules.IO
                 WriteFiles writeFiles = new WriteFiles(".txt");
 
                 // When
-                IDocument output = writeFiles.Execute(inputs, Context).ToList().First();
+                IDocument output = (await writeFiles.ExecuteAsync(inputs, Context)).First();
 
                 // Then
                 object result = output[key];
@@ -295,7 +293,7 @@ namespace Wyam.Core.Tests.Modules.IO
                 WriteFiles writeFiles = new WriteFiles(".txt");
 
                 // When
-                IDocument output = writeFiles.Execute(inputs, Context).ToList().First();
+                IDocument output = (await writeFiles.ExecuteAsync(inputs, Context)).First();
 
                 // Then
                 object result = output[key];
@@ -338,7 +336,7 @@ namespace Wyam.Core.Tests.Modules.IO
                 WriteFiles writeFiles = new WriteFiles();
 
                 // When
-                IEnumerable<IDocument> outputs = writeFiles.Execute(inputs, Context).ToList();
+                IEnumerable<IDocument> outputs = await writeFiles.ExecuteAsync(inputs, Context).ToListAsync();
 
                 // Then
                 Assert.AreEqual(4, outputs.Count());

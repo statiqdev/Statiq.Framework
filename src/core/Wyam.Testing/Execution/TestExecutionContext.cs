@@ -169,8 +169,8 @@ namespace Wyam.Testing.Execution
             return inputs.ToList();
         }
 
-        public Task<IShortcodeResult> GetShortcodeResultAsync(string content, IEnumerable<KeyValuePair<string, object>> metadata = null)
-            => Task.FromResult(GetShortcodeResult(content == null ? null : GetContentStreamAsync(content).Result, metadata));
+        public async Task<IShortcodeResult> GetShortcodeResultAsync(string content, IEnumerable<KeyValuePair<string, object>> metadata = null)
+            => GetShortcodeResult(content == null ? null : await GetContentStreamAsync(content), metadata);
 
         public IShortcodeResult GetShortcodeResult(Stream content, IEnumerable<KeyValuePair<string, object>> metadata = null)
             => new ShortcodeResult(content, metadata);

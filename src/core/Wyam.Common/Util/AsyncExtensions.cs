@@ -75,7 +75,11 @@ namespace Wyam.Common.Util
                     return item;
                 }
             }
-            return default(TItem);
+            return default;
         }
+
+        public static async Task<List<T>> ToListAsync<T>(this Task<IEnumerable<T>> task) => (await task).ToList();
+
+        public static async Task<T[]> ToArrayAsync<T>(this Task<IEnumerable<T>> task) => (await task).ToArray();
     }
 }

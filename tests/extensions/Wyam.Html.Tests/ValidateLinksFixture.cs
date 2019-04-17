@@ -27,7 +27,7 @@ namespace Wyam.Html.Tests
             [TestCase("<img src=\"http://foo/bar.png\"></img>", "http://foo/bar.png")]
             [TestCase("<script src=\"/foo/bar.js\"></script>", "/foo/bar.js")]
             [TestCase("<script src=\"http://foo.com/bar.js\"></script>", "http://foo.com/bar.js")]
-            public void FindsLinksInBody(string tag, string link)
+            public async Task FindsLinksInBody(string tag, string link)
             {
                 // Given
                 IDocument document = new TestDocument($"<html><head></head><body>{tag}</body></html>");
@@ -36,7 +36,7 @@ namespace Wyam.Html.Tests
                     new ConcurrentDictionary<string, ConcurrentBag<(string source, string outerHtml)>>();
 
                 // When
-                ValidateLinks.GatherLinks(document, parser, links);
+                await ValidateLinks.GatherLinksAsync(document, parser, links);
 
                 // Then
                 Assert.That(links.Count, Is.EqualTo(1));
@@ -48,7 +48,7 @@ namespace Wyam.Html.Tests
             [TestCase("<link rel=\"icon\" href=\"/foo/favicon.ico\" type=\"image/x-icon\">", "/foo/favicon.ico")]
             [TestCase("<script src=\"/foo/bar.js\"></script>", "/foo/bar.js")]
             [TestCase("<script src=\"http://foo.com/bar.js\"></script>", "http://foo.com/bar.js")]
-            public void FindsLinksInHead(string tag, string link)
+            public async Task FindsLinksInHead(string tag, string link)
             {
                 // Given
                 IDocument document = new TestDocument($"<html><head>{tag}</head><body></body></html>");
@@ -57,7 +57,7 @@ namespace Wyam.Html.Tests
                     new ConcurrentDictionary<string, ConcurrentBag<(string source, string outerHtml)>>();
 
                 // When
-                ValidateLinks.GatherLinks(document, parser, links);
+                await ValidateLinks.GatherLinksAsync(document, parser, links);
 
                 // Then
                 Assert.That(links.Count, Is.EqualTo(1));

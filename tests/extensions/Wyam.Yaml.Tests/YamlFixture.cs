@@ -1,13 +1,15 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using NUnit.Framework;
+using Shouldly;
 using Wyam.Common.Documents;
 using Wyam.Common.Execution;
+using Wyam.Common.Util;
 using Wyam.Testing;
-using Wyam.Yaml.Dynamic;
-using Wyam.Testing.Execution;
 using Wyam.Testing.Documents;
-using Shouldly;
+using Wyam.Testing.Execution;
+using Wyam.Yaml.Dynamic;
 
 namespace Wyam.Yaml.Tests
 {
@@ -18,7 +20,7 @@ namespace Wyam.Yaml.Tests
         public class ExecuteTests : YamlFixture
         {
             [Test]
-            public void SetsMetadataKey()
+            public async Task SetsMetadataKey()
             {
                 // Given
                 IExecutionContext context = new TestExecutionContext();
@@ -26,7 +28,7 @@ namespace Wyam.Yaml.Tests
                 Yaml yaml = new Yaml("MyYaml");
 
                 // When
-                IList<IDocument> documents = yaml.Execute(new[] { document }, context).ToList();  // Make sure to materialize the result list
+                IList<IDocument> documents = await yaml.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
 
                 // Then
                 documents.Count.ShouldBe(1);
@@ -34,7 +36,7 @@ namespace Wyam.Yaml.Tests
             }
 
             [Test]
-            public void GeneratesDynamicObject()
+            public async Task GeneratesDynamicObject()
             {
                 // Given
                 IExecutionContext context = new TestExecutionContext();
@@ -46,7 +48,7 @@ C: Yes
                 Yaml yaml = new Yaml("MyYaml");
 
                 // When
-                IList<IDocument> documents = yaml.Execute(new[] { document }, context).ToList();  // Make sure to materialize the result list
+                IList<IDocument> documents = await yaml.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
 
                 // Then
                 documents.Count.ShouldBe(1);
@@ -58,7 +60,7 @@ C: Yes
             }
 
             [Test]
-            public void FlattensTopLevelScalarNodes()
+            public async Task FlattensTopLevelScalarNodes()
             {
                 // Given
                 IExecutionContext context = new TestExecutionContext();
@@ -70,7 +72,7 @@ C: Yes
                 Yaml yaml = new Yaml();
 
                 // When
-                IList<IDocument> documents = yaml.Execute(new[] { document }, context).ToList();  // Make sure to materialize the result list
+                IList<IDocument> documents = await yaml.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
 
                 // Then
                 documents.Count.ShouldBe(1);
@@ -81,7 +83,7 @@ C: Yes
             }
 
             [Test]
-            public void GeneratesDynamicObjectAndFlattens()
+            public async Task GeneratesDynamicObjectAndFlattens()
             {
                 // Given
                 IExecutionContext context = new TestExecutionContext();
@@ -93,7 +95,7 @@ C: Yes
                 Yaml yaml = new Yaml("MyYaml", true);
 
                 // When
-                IList<IDocument> documents = yaml.Execute(new[] { document }, context).ToList();  // Make sure to materialize the result list
+                IList<IDocument> documents = await yaml.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
 
                 // Then
                 documents.Count.ShouldBe(1);
@@ -108,7 +110,7 @@ C: Yes
             }
 
             [Test]
-            public void ReturnsDocumentIfEmptyInputAndFlatten()
+            public async Task ReturnsDocumentIfEmptyInputAndFlatten()
             {
                 // Given
                 IExecutionContext context = new TestExecutionContext();
@@ -117,7 +119,7 @@ C: Yes
                 Yaml yaml = new Yaml();
 
                 // When
-                IList<IDocument> documents = yaml.Execute(new[] { document }, context).ToList();  // Make sure to materialize the result list
+                IList<IDocument> documents = await yaml.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
 
                 // Then
                 documents.Count.ShouldBe(1);
@@ -125,7 +127,7 @@ C: Yes
             }
 
             [Test]
-            public void EmptyReturnIfEmptyInputAndNotFlatten()
+            public async Task EmptyReturnIfEmptyInputAndNotFlatten()
             {
                 // Given
                 IExecutionContext context = new TestExecutionContext();
@@ -134,14 +136,14 @@ C: Yes
                 Yaml yaml = new Yaml("Foo");
 
                 // When
-                IList<IDocument> documents = yaml.Execute(new[] { document }, context).ToList();  // Make sure to materialize the result list
+                IList<IDocument> documents = await yaml.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
 
                 // Then
                 documents.Count.ShouldBe(0);
             }
 
             [Test]
-            public void UsesDocumentNestingForComplexChildren()
+            public async Task UsesDocumentNestingForComplexChildren()
             {
                 // Given
                 IExecutionContext context = new TestExecutionContext();
@@ -155,7 +157,7 @@ C:
                 Yaml yaml = new Yaml();
 
                 // When
-                IList<IDocument> documents = yaml.Execute(new[] { document }, context).ToList();  // Make sure to materialize the result list
+                IList<IDocument> documents = await yaml.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
 
                 // Then
                 documents.Count.ShouldBe(1);

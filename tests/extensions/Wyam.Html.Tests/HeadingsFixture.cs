@@ -1,9 +1,11 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using NUnit.Framework;
 using Wyam.Common.Documents;
 using Wyam.Common.Execution;
 using Wyam.Common.Meta;
+using Wyam.Common.Util;
 using Wyam.Testing;
 using Wyam.Testing.Documents;
 using Wyam.Testing.Execution;
@@ -17,7 +19,7 @@ namespace Wyam.Html.Tests
         public class ExecuteTests : HeadingsFixture
         {
             [Test]
-            public void SetsHeadingContent()
+            public async Task SetsHeadingContent()
             {
                 // Given
                 const string input = @"<html>
@@ -37,7 +39,7 @@ namespace Wyam.Html.Tests
                 Headings headings = new Headings();
 
                 // When
-                List<IDocument> results = headings.Execute(new[] { document }, context).ToList();  // Make sure to materialize the result list
+                List<IDocument> results = await headings.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
 
                 // Then
                 CollectionAssert.AreEqual(
@@ -46,7 +48,7 @@ namespace Wyam.Html.Tests
             }
 
             [Test]
-            public void SetsHeadingMetadata()
+            public async Task SetsHeadingMetadata()
             {
                 // Given
                 const string input = @"<html>
@@ -66,7 +68,7 @@ namespace Wyam.Html.Tests
                 Headings headings = new Headings().WithHeadingKey("HContent");
 
                 // When
-                List<IDocument> results = headings.Execute(new[] { document }, context).ToList();  // Make sure to materialize the result list
+                List<IDocument> results = await headings.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
 
                 // Then
                 CollectionAssert.AreEqual(
@@ -75,7 +77,7 @@ namespace Wyam.Html.Tests
             }
 
             [Test]
-            public void DoesNotSetHeadingMetadataIfNull()
+            public async Task DoesNotSetHeadingMetadataIfNull()
             {
                 // Given
                 const string input = @"<html>
@@ -95,7 +97,7 @@ namespace Wyam.Html.Tests
                 Headings headings = new Headings();
 
                 // When
-                List<IDocument> results = headings.Execute(new[] { document }, context).ToList();  // Make sure to materialize the result list
+                List<IDocument> results = await headings.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
 
                 // Then
 
@@ -105,7 +107,7 @@ namespace Wyam.Html.Tests
             }
 
             [Test]
-            public void OnlyGetsFirstLevelByDefault()
+            public async Task OnlyGetsFirstLevelByDefault()
             {
                 // Given
                 const string input = @"<html>
@@ -126,7 +128,7 @@ namespace Wyam.Html.Tests
                 Headings headings = new Headings();
 
                 // When
-                List<IDocument> results = headings.Execute(new[] { document }, context).ToList();  // Make sure to materialize the result list
+                List<IDocument> results = await headings.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
 
                 // Then
                 CollectionAssert.AreEqual(
@@ -135,7 +137,7 @@ namespace Wyam.Html.Tests
             }
 
             [Test]
-            public void GetsDeeperLevels()
+            public async Task GetsDeeperLevels()
             {
                 // Given
                 const string input = @"<html>
@@ -156,7 +158,7 @@ namespace Wyam.Html.Tests
                 Headings headings = new Headings(3);
 
                 // When
-                List<IDocument> results = headings.Execute(new[] { document }, context).ToList();  // Make sure to materialize the result list
+                List<IDocument> results = await headings.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
 
                 // Then
                 CollectionAssert.AreEqual(
@@ -165,7 +167,7 @@ namespace Wyam.Html.Tests
             }
 
             [Test]
-            public void Nesting()
+            public async Task Nesting()
             {
                 // Given
                 const string input = @"<html>
@@ -188,7 +190,7 @@ namespace Wyam.Html.Tests
                 Headings headings = new Headings(3).WithNesting();
 
                 // When
-                List<IDocument> results = headings.Execute(new[] { document }, context).ToList();  // Make sure to materialize the result list
+                List<IDocument> results = await headings.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
 
                 // Then
                 CollectionAssert.AreEqual(
@@ -203,7 +205,7 @@ namespace Wyam.Html.Tests
             }
 
             [Test]
-            public void SetsChildrenWhenNotNesting()
+            public async Task SetsChildrenWhenNotNesting()
             {
                 // Given
                 const string input = @"<html>
@@ -226,7 +228,7 @@ namespace Wyam.Html.Tests
                 Headings headings = new Headings(3);
 
                 // When
-                List<IDocument> results = headings.Execute(new[] { document }, context).ToList();  // Make sure to materialize the result list
+                List<IDocument> results = await headings.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
 
                 // Then
                 CollectionAssert.AreEqual(
@@ -241,7 +243,7 @@ namespace Wyam.Html.Tests
             }
 
             [Test]
-            public void SetsHeadingIdAttribute()
+            public async Task SetsHeadingIdAttribute()
             {
                 // Given
                 const string input = @"<html>
@@ -261,7 +263,7 @@ namespace Wyam.Html.Tests
                 Headings headings = new Headings();
 
                 // When
-                List<IDocument> results = headings.Execute(new[] { document }, context).ToList();  // Make sure to materialize the result list
+                List<IDocument> results = await headings.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
 
                 // Then
                 CollectionAssert.AreEqual(

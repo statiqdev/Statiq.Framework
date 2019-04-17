@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.FileSystemGlobbing;
 using Microsoft.Extensions.FileSystemGlobbing.Abstractions;
 using Wyam.Common.IO;
+using Wyam.Common.Util;
 
 namespace Wyam.Core.IO.Globbing
 {
@@ -25,8 +26,8 @@ namespace Wyam.Core.IO.Globbing
         /// <param name="directory">The directory to search.</param>
         /// <param name="patterns">The globbing pattern(s) to use.</param>
         /// <returns>Files that match the globbing pattern(s).</returns>
-        public static IEnumerable<IFile> GetFiles(IDirectory directory, params string[] patterns) =>
-            GetFiles(directory, (IEnumerable<string>)patterns);
+        public static Task<IEnumerable<IFile>> GetFilesAsync(IDirectory directory, params string[] patterns) =>
+            GetFilesAsync(directory, (IEnumerable<string>)patterns);
 
         /// <summary>
         /// Gets files from the specified directory using globbing patterns.
@@ -34,7 +35,7 @@ namespace Wyam.Core.IO.Globbing
         /// <param name="directory">The directory to search.</param>
         /// <param name="patterns">The globbing pattern(s) to use.</param>
         /// <returns>Files that match the globbing pattern(s).</returns>
-        public static IEnumerable<IFile> GetFiles(IDirectory directory, IEnumerable<string> patterns)
+        public static async Task<IEnumerable<IFile>> GetFilesAsync(IDirectory directory, IEnumerable<string> patterns)
         {
             // Initially based on code from Reliak.FileSystemGlobbingExtensions (https://github.com/reliak/Reliak.FileSystemGlobbingExtensions)
 
@@ -73,7 +74,7 @@ namespace Wyam.Core.IO.Globbing
 
             DirectoryInfoBase directoryInfo = new DirectoryInfo(directory);
             PatternMatchingResult result = matcher.Execute(directoryInfo);
-            return result.Files.Select(match => directory.GetFileAsync(match.Path).Result);
+            return await result.Files.SelectAsync(async match => await directory.GetFileAsync(match.Path));
         }
 
         /// <summary>Expands all brace ranges in a pattern, returning a sequence containing every possible combination.</summary>

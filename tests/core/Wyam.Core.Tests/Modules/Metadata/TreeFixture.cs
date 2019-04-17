@@ -1,16 +1,19 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using NUnit.Framework;
+using Shouldly;
+using Wyam.Common.Configuration;
 using Wyam.Common.Documents;
+using Wyam.Common.Execution;
 using Wyam.Common.IO;
 using Wyam.Common.Meta;
-using Wyam.Common.Execution;
 using Wyam.Common.Modules;
+using Wyam.Common.Util;
 using Wyam.Core.Execution;
 using Wyam.Core.Modules.Metadata;
 using Wyam.Testing;
-using Shouldly;
 using Wyam.Testing.Execution;
 
 namespace Wyam.Core.Tests.Modules.Metadata
@@ -22,7 +25,7 @@ namespace Wyam.Core.Tests.Modules.Metadata
         public class ExecuteTests : TreeFixture
         {
             [Test]
-            public void GetsTreeWithCommonRoot()
+            public async Task GetsTreeWithCommonRoot()
             {
                 // Given
                 IServiceProvider serviceProvider = new TestServiceProvider();
@@ -40,7 +43,7 @@ namespace Wyam.Core.Tests.Modules.Metadata
                 Tree tree = new Tree().WithNesting();
 
                 // When
-                List<IDocument> documents = tree.Execute(inputs, context).ToList();
+                List<IDocument> documents = await tree.ExecuteAsync(inputs, context).ToListAsync();
 
                 // Then
                 Assert.AreEqual(1, documents.Count);
@@ -62,7 +65,7 @@ namespace Wyam.Core.Tests.Modules.Metadata
             }
 
             [Test]
-            public void GetsTree()
+            public async Task GetsTree()
             {
                 // Given
                 IServiceProvider serviceProvider = new TestServiceProvider();
@@ -80,7 +83,7 @@ namespace Wyam.Core.Tests.Modules.Metadata
                 Tree tree = new Tree().WithNesting();
 
                 // When
-                List<IDocument> documents = tree.Execute(inputs, context).ToList();
+                List<IDocument> documents = await tree.ExecuteAsync(inputs, context).ToListAsync();
 
                 // Then
                 Assert.AreEqual(1, documents.Count);
@@ -101,7 +104,7 @@ namespace Wyam.Core.Tests.Modules.Metadata
             }
 
             [Test]
-            public void GetsPlaceholderWithSource()
+            public async Task GetsPlaceholderWithSource()
             {
                 // Given
                 IExecutionContext context = new TestExecutionContext();
@@ -112,7 +115,7 @@ namespace Wyam.Core.Tests.Modules.Metadata
                 Tree tree = new Tree().WithNesting();
 
                 // When
-                List<IDocument> documents = tree.Execute(inputs, context).ToList();
+                List<IDocument> documents = await tree.ExecuteAsync(inputs, context).ToListAsync();
 
                 // Then
                 Assert.AreEqual(1, documents.Count);
@@ -127,7 +130,7 @@ namespace Wyam.Core.Tests.Modules.Metadata
             }
 
             [Test]
-            public void CollapseRoot()
+            public async Task CollapseRoot()
             {
                 // Given
                 IServiceProvider serviceProvider = new TestServiceProvider();
@@ -145,7 +148,7 @@ namespace Wyam.Core.Tests.Modules.Metadata
                 Tree tree = new Tree().WithNesting(true, true);
 
                 // When
-                List<IDocument> documents = tree.Execute(inputs, context).ToList();
+                List<IDocument> documents = await tree.ExecuteAsync(inputs, context).ToListAsync();
 
                 // Then
                 Assert.AreEqual(4, documents.Count);
@@ -155,7 +158,7 @@ namespace Wyam.Core.Tests.Modules.Metadata
             }
 
             [Test]
-            public void GetsPreviousSibling()
+            public async Task GetsPreviousSibling()
             {
                 // Given
                 IServiceProvider serviceProvider = new TestServiceProvider();
@@ -170,7 +173,7 @@ namespace Wyam.Core.Tests.Modules.Metadata
                 Tree tree = new Tree().WithNesting();
 
                 // When
-                List<IDocument> documents = tree.Execute(inputs, context).ToList();
+                List<IDocument> documents = await tree.ExecuteAsync(inputs, context).ToListAsync();
 
                 // Then
                 IDocument document = FindTreeNode(documents[0], "root/a/2.txt");
@@ -180,7 +183,7 @@ namespace Wyam.Core.Tests.Modules.Metadata
             }
 
             [Test]
-            public void GetsNextSibling()
+            public async Task GetsNextSibling()
             {
                 // Given
                 IServiceProvider serviceProvider = new TestServiceProvider();
@@ -195,7 +198,7 @@ namespace Wyam.Core.Tests.Modules.Metadata
                 Tree tree = new Tree().WithNesting();
 
                 // When
-                List<IDocument> documents = tree.Execute(inputs, context).ToList();
+                List<IDocument> documents = await tree.ExecuteAsync(inputs, context).ToListAsync();
 
                 // Then
                 IDocument document = FindTreeNode(documents[0], "root/a/2.txt");
@@ -205,7 +208,7 @@ namespace Wyam.Core.Tests.Modules.Metadata
             }
 
             [Test]
-            public void GetsPrevious()
+            public async Task GetsPrevious()
             {
                 // Given
                 IServiceProvider serviceProvider = new TestServiceProvider();
@@ -220,7 +223,7 @@ namespace Wyam.Core.Tests.Modules.Metadata
                 Tree tree = new Tree().WithNesting();
 
                 // When
-                List<IDocument> documents = tree.Execute(inputs, context).ToList();
+                List<IDocument> documents = await tree.ExecuteAsync(inputs, context).ToListAsync();
 
                 // Then
                 IDocument document = FindTreeNode(documents[0], "root/a/2.txt");
@@ -230,7 +233,7 @@ namespace Wyam.Core.Tests.Modules.Metadata
             }
 
             [Test]
-            public void GetsPreviousUpTree()
+            public async Task GetsPreviousUpTree()
             {
                 // Given
                 IServiceProvider serviceProvider = new TestServiceProvider();
@@ -246,7 +249,7 @@ namespace Wyam.Core.Tests.Modules.Metadata
                 Tree tree = new Tree().WithNesting();
 
                 // When
-                List<IDocument> documents = tree.Execute(inputs, context).ToList();
+                List<IDocument> documents = await tree.ExecuteAsync(inputs, context).ToListAsync();
 
                 // Then
                 IDocument document = FindTreeNode(documents[0], "root/b/4.txt");
@@ -256,7 +259,7 @@ namespace Wyam.Core.Tests.Modules.Metadata
             }
 
             [Test]
-            public void SplitsTree()
+            public async Task SplitsTree()
             {
                 // Given
                 IServiceProvider serviceProvider = new TestServiceProvider();
@@ -271,10 +274,10 @@ namespace Wyam.Core.Tests.Modules.Metadata
                     "root/b/4.txt");
                 Tree tree = new Tree()
                     .WithNesting()
-                    .WithRoots((doc, ctx) => doc.FilePath(Keys.RelativeFilePath).FullPath.EndsWith("b/index.html"));
+                    .WithRoots(Config.IfDocument(doc => doc.FilePath(Keys.RelativeFilePath).FullPath.EndsWith("b/index.html")));
 
                 // When
-                List<IDocument> documents = tree.Execute(inputs, context).ToList();
+                List<IDocument> documents = await tree.ExecuteAsync(inputs, context).ToListAsync();
 
                 // Then
                 Assert.AreEqual(2, documents.Count);
@@ -292,7 +295,7 @@ namespace Wyam.Core.Tests.Modules.Metadata
             }
 
             [Test]
-            public void FlatTree()
+            public async Task FlatTree()
             {
                 // Given
                 IServiceProvider serviceProvider = new TestServiceProvider();
@@ -307,7 +310,7 @@ namespace Wyam.Core.Tests.Modules.Metadata
                 Tree tree = new Tree();
 
                 // When
-                List<IDocument> documents = tree.Execute(inputs, context).ToList();
+                List<IDocument> documents = await tree.ExecuteAsync(inputs, context).ToListAsync();
 
                 // Then
                 AssertTreeChildren(

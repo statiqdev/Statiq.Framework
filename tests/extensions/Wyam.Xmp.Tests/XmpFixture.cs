@@ -2,10 +2,12 @@
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 using NUnit.Framework;
 using Shouldly;
 using Wyam.Common.Documents;
 using Wyam.Common.Execution;
+using Wyam.Common.Util;
 using Wyam.Testing;
 using Wyam.Testing.Documents;
 using Wyam.Testing.Execution;
@@ -18,7 +20,7 @@ namespace Wyam.Xmp.Tests
         public class ExecuteTests : XmpFixture
         {
             [Test]
-            public void ReadMetadata()
+            public async Task ReadMetadata()
             {
                 // Given
                 System.Globalization.CultureInfo.CurrentCulture = System.Globalization.CultureInfo.GetCultureInfo("en");
@@ -28,7 +30,7 @@ namespace Wyam.Xmp.Tests
                     .WithMetadata("xmpRights:UsageTerms", "Copyright");
 
                 // When
-                List<IDocument> results = directoryMetadata.Execute(new List<IDocument>(documents), context).ToList();  // Make sure to materialize the result list
+                List<IDocument> results = await directoryMetadata.ExecuteAsync(new List<IDocument>(documents), context).ToListAsync();  // Make sure to materialize the result list
 
                 // Then
                 results.Single()["Copyright"].ToString()
@@ -36,7 +38,7 @@ namespace Wyam.Xmp.Tests
             }
 
             [Test]
-            public void SkipMissingMandatory()
+            public async Task SkipMissingMandatory()
             {
                 // Given
                 System.Globalization.CultureInfo.CurrentCulture = System.Globalization.CultureInfo.GetCultureInfo("en");
@@ -49,14 +51,14 @@ namespace Wyam.Xmp.Tests
                     .WithMetadata("xmpRights:UsageTerms", "Copyright", true);
 
                 // When
-                List<IDocument> results = directoryMetadata.Execute(new List<IDocument>(documents), context).ToList();  // Make sure to materialize the result list
+                List<IDocument> results = await directoryMetadata.ExecuteAsync(new List<IDocument>(documents), context).ToListAsync();  // Make sure to materialize the result list
 
                 // Then
                 results.Count.ShouldBe(1);
             }
 
             [Test]
-            public void DontSkipMissingMandatory()
+            public async Task DontSkipMissingMandatory()
             {
                 // Given
                 System.Globalization.CultureInfo.CurrentCulture = System.Globalization.CultureInfo.GetCultureInfo("en");
@@ -69,14 +71,14 @@ namespace Wyam.Xmp.Tests
                     .WithMetadata("xmpRights:UsageTerms", "Copyright", true);
 
                 // When
-                List<IDocument> results = directoryMetadata.Execute(new List<IDocument>(documents), context).ToList();  // Make sure to materialize the result list
+                List<IDocument> results = await directoryMetadata.ExecuteAsync(new List<IDocument>(documents), context).ToListAsync();  // Make sure to materialize the result list
 
                 // Then
                 results.Count.ShouldBe(2);
             }
 
             [Test]
-            public void UsingNonDefaultNamespace()
+            public async Task UsingNonDefaultNamespace()
             {
                 // Given
                 System.Globalization.CultureInfo.CurrentCulture = System.Globalization.CultureInfo.GetCultureInfo("en");
@@ -87,7 +89,7 @@ namespace Wyam.Xmp.Tests
                     .WithMetadata("bla:UsageTerms", "Copyright");
 
                 // When
-                List<IDocument> results = directoryMetadata.Execute(new List<IDocument>(documents), context).ToList();  // Make sure to materialize the result list
+                List<IDocument> results = (await directoryMetadata.ExecuteAsync(new List<IDocument>(documents), context)).ToList();  // Make sure to materialize the result list
 
                 // Then
                 results.Single()["Copyright"].ToString()

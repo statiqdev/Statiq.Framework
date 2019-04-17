@@ -1,9 +1,12 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using NUnit.Framework;
+using Wyam.Common.Configuration;
 using Wyam.Common.Documents;
-using Wyam.Common.Modules;
 using Wyam.Common.Execution;
+using Wyam.Common.Modules;
+using Wyam.Common.Util;
 using Wyam.Core.Modules.Extensibility;
 using Wyam.Core.Modules.Templates;
 using Wyam.Testing;
@@ -19,7 +22,7 @@ namespace Wyam.Core.Tests.Modules.Templates
         public class ExecuteTests : XsltFixture
         {
             [Test]
-            public void TestTransform()
+            public async Task TestTransform()
             {
                 // Given
                 string xsltInput = string.Empty
@@ -81,11 +84,11 @@ namespace Wyam.Core.Tests.Modules.Templates
                 TestExecutionContext context = new TestExecutionContext();
                 IDocument document = new TestDocument(input);
                 IDocument xsltDocument = new TestDocument(xsltInput);
-                IModule module = new Execute(_ => new[] { xsltDocument });
+                IModule module = new Execute((DocumentConfig)new[] { xsltDocument });
                 Xslt xslt = new Xslt(module);
 
                 // When
-                IList<IDocument> results = xslt.Execute(new[] { document }, context).ToList();  // Make sure to materialize the result list
+                IList<IDocument> results = await xslt.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
 
                 // Then
                 Assert.That(results.Select(x => x.Content), Is.EquivalentTo(new[] { output }));

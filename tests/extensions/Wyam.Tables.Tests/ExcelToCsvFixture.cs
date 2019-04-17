@@ -1,9 +1,11 @@
 ﻿using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 using NUnit.Framework;
 using Shouldly;
 using Wyam.Common.Documents;
+using Wyam.Common.Util;
 using Wyam.Testing;
 using Wyam.Testing.Documents;
 using Wyam.Testing.Execution;
@@ -16,7 +18,7 @@ namespace Wyam.Tables.Tests
         public class ExecuteTests : ExcelToCsvFixture
         {
             [Test]
-            public void TestXlsx()
+            public async Task TestXlsx()
             {
                 // Given
                 string output = string.Empty
@@ -53,7 +55,7 @@ namespace Wyam.Tables.Tests
                 ExcelToCsv module = new ExcelToCsv();
 
                 // When
-                IList<IDocument> results = module.Execute(new[] { document }, context).ToList();  // Make sure to materialize the result list
+                IList<IDocument> results = await module.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
 
                 // Then
                 results.Count.ShouldBe(1);

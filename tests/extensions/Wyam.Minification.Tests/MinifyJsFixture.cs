@@ -1,9 +1,11 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using NUnit.Framework;
 using Shouldly;
 using Wyam.Common.Documents;
 using Wyam.Common.Execution;
+using Wyam.Common.Util;
 using Wyam.Testing;
 using Wyam.Testing.Documents;
 using Wyam.Testing.Execution;
@@ -17,7 +19,7 @@ namespace Wyam.Minification.Tests
         public class ExecuteTests : MinifyJsFixture
         {
             [Test]
-            public void Minify()
+            public async Task Minify()
             {
                 // Given
                 // Example taken from https://raw.githubusercontent.com/douglascrockford/JSMin/master/README
@@ -52,7 +54,7 @@ if(is.ua.indexOf('gecko')>=0){is.ie=is.ns=false;is.gecko=true;}";
                 MinifyJs minifyJs = new MinifyJs();
 
                 // When
-                IList<IDocument> results = minifyJs.Execute(new[] { document }, context).ToList();  // Make sure to materialize the result list
+                IList<IDocument> results = await minifyJs.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
 
                 // Then
                 results.Single().Content.ShouldBe(output, StringCompareShould.IgnoreLineEndings);

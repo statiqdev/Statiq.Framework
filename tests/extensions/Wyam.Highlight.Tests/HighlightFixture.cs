@@ -1,10 +1,13 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using NUnit.Framework;
 using NUnit.Framework.Internal;
+using Shouldly;
 using Wyam.Common.Documents;
 using Wyam.Common.Execution;
+using Wyam.Common.Util;
 using Wyam.Testing;
 using Wyam.Testing.Documents;
 using Wyam.Testing.JavaScript;
@@ -19,7 +22,7 @@ namespace Wyam.Highlight.Tests
         public class ExecuteTests : HighlightFixture
         {
             [Test]
-            public void CanHighlightCSharp()
+            public async Task CanHighlightCSharp()
             {
                 // Given
                 const string input = @"
@@ -65,14 +68,14 @@ namespace Wyam.Highlight.Tests
                 Highlight highlight = new Highlight();
 
                 // When
-                List<IDocument> results = highlight.Execute(new[] { document }, context).ToList();
+                List<IDocument> results = await highlight.ExecuteAsync(new[] { document }, context).ToListAsync();
 
                 // Then
                 Assert.IsTrue(results[0].Content.Contains("language-csharp hljs"));
             }
 
             [Test]
-            public void CanHighlightHtml()
+            public async Task CanHighlightHtml()
             {
                 const string input = @"
 <html>
@@ -104,14 +107,14 @@ namespace Wyam.Highlight.Tests
                 Highlight highlight = new Highlight();
 
                 // When
-                List<IDocument> results = highlight.Execute(new[] { document }, context).ToList();
+                List<IDocument> results = await highlight.ExecuteAsync(new[] { document }, context).ToListAsync();
 
                 // Then
                 Assert.IsTrue(results[0].Content.Contains("language-html hljs"));
             }
 
             [Test]
-            public void CanHighlightAfterRazor()
+            public async Task CanHighlightAfterRazor()
             {
                 // Given
                 // if we execute razor before this, the code block will be escaped.
@@ -138,14 +141,14 @@ namespace Wyam.Highlight.Tests
                 Highlight highlight = new Highlight();
 
                 // When
-                List<IDocument> results = highlight.Execute(new[] { document }, context).ToList();
+                List<IDocument> results = await highlight.ExecuteAsync(new[] { document }, context).ToListAsync();
 
                 // Then
                 Assert.IsTrue(results[0].Content.Contains("language-html hljs"));
             }
 
             [Test]
-            public void CanHighlightAutoCodeBlocks()
+            public async Task CanHighlightAutoCodeBlocks()
             {
                 // Given
                 const string input = @"
@@ -174,14 +177,14 @@ namespace Wyam.Highlight.Tests
                 Highlight highlight = new Highlight();
 
                 // When
-                List<IDocument> results = highlight.Execute(new[] { document }, context).ToList();
+                List<IDocument> results = await highlight.ExecuteAsync(new[] { document }, context).ToListAsync();
 
                 // Then
                 Assert.IsTrue(results[0].Content.Contains("hljs"));
             }
 
             [Test]
-            public void HighlightFailsForMissingLanguage()
+            public async Task HighlightFailsForMissingLanguage()
             {
                 // Given
                 const string input = @"
@@ -214,15 +217,11 @@ namespace Wyam.Highlight.Tests
                 Highlight highlight = new Highlight();
 
                 // When, Then
-                Assert.Throws<AggregateException>(() =>
-                {
-                    List<IDocument> results = highlight.Execute(new[] { document }, context).ToList();
-                    Assert.IsNull(results, "Should never get here due to exception");
-                });
+                await Should.ThrowAsync<AggregateException>(async () => await highlight.ExecuteAsync(new[] { document }, context).ToListAsync());
             }
 
             [Test]
-            public void HighlightSucceedsForMissingLanguageWhenConfiguredNotToWarn()
+            public async Task HighlightSucceedsForMissingLanguageWhenConfiguredNotToWarn()
             {
                 // Given
                 const string input = @"
@@ -256,7 +255,7 @@ namespace Wyam.Highlight.Tests
                     .WithMissingLanguageWarning(false);
 
                 // When
-                List<IDocument> results = highlight.Execute(new[] { document }, context).ToList();
+                List<IDocument> results = await highlight.ExecuteAsync(new[] { document }, context).ToListAsync();
 
                 // Then
                 CollectionAssert.IsNotEmpty(results);

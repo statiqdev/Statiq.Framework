@@ -1,8 +1,10 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using NUnit.Framework;
 using Wyam.Common.Documents;
 using Wyam.Common.Execution;
+using Wyam.Common.Util;
 using Wyam.Testing;
 using Wyam.Testing.Documents;
 using Wyam.Testing.Execution;
@@ -16,7 +18,7 @@ namespace Wyam.Html.Tests
         public class ExecuteTests : HtmlEscapeFixture
         {
             [Test]
-            public void NoReplacementReturnsSameDocument()
+            public async Task NoReplacementReturnsSameDocument()
             {
                 // Given
                 const string input = @"<html>
@@ -33,14 +35,14 @@ namespace Wyam.Html.Tests
                 HtmlEscape htmlEscape = new HtmlEscape();
 
                 // When
-                IList<IDocument> results = htmlEscape.Execute(new[] { document }, context).ToList();  // Make sure to materialize the result list
+                IList<IDocument> results = await htmlEscape.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
 
                 // Then
                 Assert.That(results, Is.EquivalentTo(new[] { document }));
             }
 
             [Test]
-            public void EscapeWith()
+            public async Task EscapeWith()
             {
                 // Given
                 const string input = @"<html>
@@ -98,14 +100,14 @@ namespace Wyam.Html.Tests
                 HtmlEscape htmlEscape = new HtmlEscape().WithEscapedChar('ä', 'ö', 'ü', 'Ä', 'Ö', 'Ü', 'ß', '©');
 
                 // When
-                IList<IDocument> results = htmlEscape.Execute(new[] { document }, context).ToList();  // Make sure to materialize the result list
+                IList<IDocument> results = await htmlEscape.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
 
                 // Then
                 Assert.That(results.Select(x => x.Content), Is.EquivalentTo(new[] { output }));
             }
 
             [Test]
-            public void EscapeNonStandard()
+            public async Task EscapeNonStandard()
             {
                 // Given
                 const string input = @"<html>
@@ -131,7 +133,7 @@ namespace Wyam.Html.Tests
                 HtmlEscape htmlEscape = new HtmlEscape().EscapeAllNonstandard().WithDefaultStandard();
 
                 // When
-                IList<IDocument> results = htmlEscape.Execute(new[] { document }, context).ToList();  // Make sure to materialize the result list
+                IList<IDocument> results = await htmlEscape.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
 
                 // Then
                 Assert.That(results.Select(x => x.Content), Is.EquivalentTo(new[] { output }));

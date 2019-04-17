@@ -1,11 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using NUnit.Framework;
 using Shouldly;
 using Wyam.Common.Documents;
 using Wyam.Common.Execution;
 using Wyam.Common.Meta;
+using Wyam.Common.Util;
 using Wyam.Testing;
 using Wyam.Testing.Documents;
 using Wyam.Testing.Execution;
@@ -19,7 +21,7 @@ namespace Wyam.Html.Tests
         public class ExecuteTests : HtmlQueryFixture
         {
             [Test]
-            public void GetOuterHtml()
+            public async Task GetOuterHtml()
             {
                 // Given
                 const string input = @"<html>
@@ -38,7 +40,7 @@ namespace Wyam.Html.Tests
                     .GetOuterHtml("Key");
 
                 // When
-                IList<IDocument> results = query.Execute(new[] { document }, context).ToList();  // Make sure to materialize the result list
+                IList<IDocument> results = await query.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
 
                 // Then
                 results.Select(x => x["Key"].ToString()).ShouldBe(new[]
@@ -49,7 +51,7 @@ namespace Wyam.Html.Tests
             }
 
             [Test]
-            public void GetOuterHtmlWithAttributes()
+            public async Task GetOuterHtmlWithAttributes()
             {
                 // Given
                 const string input = @"<html>
@@ -68,7 +70,7 @@ namespace Wyam.Html.Tests
                     .GetOuterHtml("Key");
 
                 // When
-                IList<IDocument> results = query.Execute(new[] { document }, context).ToList();  // Make sure to materialize the result list
+                IList<IDocument> results = await query.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
 
                 // Then
                 results.Select(x => x["Key"].ToString()).ShouldBe(new[]
@@ -79,7 +81,7 @@ namespace Wyam.Html.Tests
             }
 
             [Test]
-            public void GetOuterHtmlForFirst()
+            public async Task GetOuterHtmlForFirst()
             {
                 // Given
                 const string input = @"<html>
@@ -99,7 +101,7 @@ namespace Wyam.Html.Tests
                     .First();
 
                 // When
-                IList<IDocument> results = query.Execute(new[] { document }, context).ToList();  // Make sure to materialize the result list
+                IList<IDocument> results = await query.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
 
                 // Then
                 results.Select(x => x["Key"].ToString()).ShouldBe(new[]
@@ -109,7 +111,7 @@ namespace Wyam.Html.Tests
             }
 
             [Test]
-            public void GetInnerHtml()
+            public async Task GetInnerHtml()
             {
                 // Given
                 const string input = @"<html>
@@ -128,7 +130,7 @@ namespace Wyam.Html.Tests
                     .GetInnerHtml("Key");
 
                 // When
-                IList<IDocument> results = query.Execute(new[] { document }, context).ToList();  // Make sure to materialize the result list
+                IList<IDocument> results = await query.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
 
                 // Then
                 results.Select(x => x["Key"].ToString()).ShouldBe(new[]
@@ -139,7 +141,7 @@ namespace Wyam.Html.Tests
             }
 
             [Test]
-            public void GetInnerHtmlAndOuterHtml()
+            public async Task GetInnerHtmlAndOuterHtml()
             {
                 // Given
                 const string input = @"<html>
@@ -159,7 +161,7 @@ namespace Wyam.Html.Tests
                     .GetOuterHtml("OuterHtmlKey");
 
                 // When
-                IList<IDocument> results = query.Execute(new[] { document }, context).ToList();  // Make sure to materialize the result list
+                IList<IDocument> results = await query.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
 
                 // Then
                 results.Select(x => x["InnerHtmlKey"].ToString()).ShouldBe(new[]
@@ -175,7 +177,7 @@ namespace Wyam.Html.Tests
             }
 
             [Test]
-            public void SetOuterHtmlContent()
+            public async Task SetOuterHtmlContent()
             {
                 // Given
                 const string input = @"<html>
@@ -194,7 +196,7 @@ namespace Wyam.Html.Tests
                     .SetContent();
 
                 // When
-                List<IDocument> results = query.Execute(new[] { document }, context).ToList();  // Make sure to materialize the result list
+                List<IDocument> results = await query.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
 
                 // Then
                 results.Select(x => x.Content).ShouldBe(new[]
@@ -205,7 +207,7 @@ namespace Wyam.Html.Tests
             }
 
             [Test]
-            public void SetInnerHtmlContent()
+            public async Task SetInnerHtmlContent()
             {
                 // Given
                 const string input = @"<html>
@@ -224,7 +226,7 @@ namespace Wyam.Html.Tests
                     .SetContent(false);
 
                 // When
-                List<IDocument> results = query.Execute(new[] { document }, context).ToList();  // Make sure to materialize the result list
+                List<IDocument> results = await query.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
 
                 // Then
                 results.Select(x => x.Content).ShouldBe(new[]
@@ -235,7 +237,7 @@ namespace Wyam.Html.Tests
             }
 
             [Test]
-            public void SetOuterHtmlContentWithMetadata()
+            public async Task SetOuterHtmlContentWithMetadata()
             {
                 // Given
                 const string input = @"<html>
@@ -256,7 +258,7 @@ namespace Wyam.Html.Tests
                     .GetOuterHtml("OuterHtmlKey");
 
                 // When
-                List<IDocument> results = query.Execute(new[] { document }, context).ToList();  // Make sure to materialize the result list
+                List<IDocument> results = await query.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
 
                 // Then
                 results.Select(x => x.Content).ShouldBe(new[]
@@ -277,7 +279,7 @@ namespace Wyam.Html.Tests
             }
 
             [Test]
-            public void GetTextContent()
+            public async Task GetTextContent()
             {
                 // Given
                 const string input = @"<html>
@@ -296,7 +298,7 @@ namespace Wyam.Html.Tests
                     .GetTextContent("TextContentKey");
 
                 // When
-                IList<IDocument> results = query.Execute(new[] { document }, context).ToList();  // Make sure to materialize the result list
+                IList<IDocument> results = await query.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
 
                 // Then
                 results.Select(x => x.String("TextContentKey")).ShouldBe(new[]
@@ -307,7 +309,7 @@ namespace Wyam.Html.Tests
             }
 
             [Test]
-            public void GetAttributeValue()
+            public async Task GetAttributeValue()
             {
                 // Given
                 const string input = @"<html>
@@ -326,7 +328,7 @@ namespace Wyam.Html.Tests
                     .GetAttributeValue("foo", "Foo");
 
                 // When
-                IList<IDocument> results = query.Execute(new[] { document }, context).ToList();  // Make sure to materialize the result list
+                IList<IDocument> results = await query.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
 
                 // Then
                 results.Select(x => x.String("Foo")).ShouldBe(new[]
@@ -337,7 +339,7 @@ namespace Wyam.Html.Tests
             }
 
             [Test]
-            public void GetAttributeValueWithImplicitKey()
+            public async Task GetAttributeValueWithImplicitKey()
             {
                 // Given
                 const string input = @"<html>
@@ -356,7 +358,7 @@ namespace Wyam.Html.Tests
                     .GetAttributeValue("foo");
 
                 // When
-                IList<IDocument> results = query.Execute(new[] { document }, context).ToList();  // Make sure to materialize the result list
+                IList<IDocument> results = await query.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
 
                 // Then
                 results.Select(x => x.String("foo")).ShouldBe(new[]
@@ -367,7 +369,7 @@ namespace Wyam.Html.Tests
             }
 
             [Test]
-            public void GetAttributeValueWithMoreThanOneMatch()
+            public async Task GetAttributeValueWithMoreThanOneMatch()
             {
                 // Given
                 const string input = @"<html>
@@ -386,7 +388,7 @@ namespace Wyam.Html.Tests
                     .GetAttributeValue("foo");
 
                 // When
-                IList<IDocument> results = query.Execute(new[] { document }, context).ToList();  // Make sure to materialize the result list
+                IList<IDocument> results = await query.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
 
                 // Then
                 results.Select(x => x.String("foo")).ShouldBe(new[]
@@ -397,7 +399,7 @@ namespace Wyam.Html.Tests
             }
 
             [Test]
-            public void GetAttributeValues()
+            public async Task GetAttributeValues()
             {
                 // Given
                 const string input = @"<html>
@@ -416,7 +418,7 @@ namespace Wyam.Html.Tests
                     .GetAttributeValues();
 
                 // When
-                IList<IDocument> results = query.Execute(new[] { document }, context).ToList();  // Make sure to materialize the result list
+                IList<IDocument> results = await query.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
 
                 // Then
                 results
@@ -439,7 +441,7 @@ namespace Wyam.Html.Tests
             }
 
             [Test]
-            public void GetAll()
+            public async Task GetAll()
             {
                 // Given
                 const string input = @"<html>
@@ -458,7 +460,7 @@ namespace Wyam.Html.Tests
                     .GetAll();
 
                 // When
-                IList<IDocument> results = query.Execute(new[] { document }, context).ToList();  // Make sure to materialize the result list
+                IList<IDocument> results = await query.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
 
                 // Then
                 results

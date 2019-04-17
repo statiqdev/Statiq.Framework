@@ -1,11 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using NUnit.Framework;
+using Shouldly;
 using Wyam.Common.Documents;
 using Wyam.Common.Execution;
 using Wyam.Common.IO;
 using Wyam.Common.Meta;
+using Wyam.Common.Util;
 using Wyam.Testing;
 using Wyam.Testing.Documents;
 using Wyam.Testing.Execution;
@@ -20,7 +23,7 @@ namespace Wyam.Sass.Tests
         public class ExecuteTests : SassFixture
         {
             [Test]
-            public void Convert()
+            public async Task Convert()
             {
                 // Given
                 const string input = @"
@@ -55,7 +58,7 @@ body {
                 Sass sass = new Sass().WithCompactOutputStyle();
 
                 // When
-                List<IDocument> results = sass.Execute(new[] { document }, context).ToList(); // Make sure to materialize the result list
+                List<IDocument> results = await sass.ExecuteAsync(new[] { document }, context).ToListAsync(); // Make sure to materialize the result list
 
                 // Then
                 Assert.That(results.Select(x => x.Content), Is.EqualTo(new[] { output }));
@@ -63,7 +66,7 @@ body {
             }
 
             [Test]
-            public void EmptyOutputForEmptyContent()
+            public async Task EmptyOutputForEmptyContent()
             {
                 // Given
                 string input = string.Empty;
@@ -89,7 +92,7 @@ body {
                 Sass sass = new Sass();
 
                 // When
-                List<IDocument> results = sass.Execute(new[] { document }, context).ToList(); // Make sure to materialize the result list
+                List<IDocument> results = await sass.ExecuteAsync(new[] { document }, context).ToListAsync(); // Make sure to materialize the result list
 
                 // Then
                 Assert.That(results.Select(x => x.Content), Is.EqualTo(new[] { string.Empty }));
@@ -97,7 +100,7 @@ body {
             }
 
             [Test]
-            public void ConvertingBadSassFails()
+            public async Task ConvertingBadSassFails()
             {
                 // Given
                 const string input = @"
@@ -129,14 +132,14 @@ body {
                 Sass sass = new Sass();
 
                 // When, Then
-                Assert.Catch<AggregateException>(() =>
+                await Should.ThrowAsync<AggregateException>(async () =>
                 {
-                    sass.Execute(new[] { document }, context).ToList(); // Make sure to materialize the result list
+                    await sass.ExecuteAsync(new[] { document }, context).ToListAsync(); // Make sure to materialize the result list
                 });
             }
 
             [Test]
-            public void NestedImports()
+            public async Task NestedImports()
             {
                 // Given
                 const string outerImport = @"
@@ -177,7 +180,7 @@ body {
                 Sass sass = new Sass().IncludeSourceComments(false).WithCompactOutputStyle();
 
                 // When
-                List<IDocument> results = sass.Execute(new[] { document }, context).ToList(); // Make sure to materialize the result list
+                List<IDocument> results = await sass.ExecuteAsync(new[] { document }, context).ToListAsync(); // Make sure to materialize the result list
 
                 // Then
                 Assert.That(results.Select(x => x.Content), Is.EqualTo(new[] { output }));
@@ -185,7 +188,7 @@ body {
             }
 
             [Test]
-            public void ImportWithoutExtension()
+            public async Task ImportWithoutExtension()
             {
                 // Given
                 const string import = @"
@@ -223,7 +226,7 @@ body {
                 Sass sass = new Sass().IncludeSourceComments(false).WithCompactOutputStyle();
 
                 // When
-                List<IDocument> results = sass.Execute(new[] { document }, context).ToList(); // Make sure to materialize the result list
+                List<IDocument> results = await sass.ExecuteAsync(new[] { document }, context).ToListAsync(); // Make sure to materialize the result list
 
                 // Then
                 Assert.That(results.Select(x => x.Content), Is.EqualTo(new[] { output }));
@@ -231,7 +234,7 @@ body {
             }
 
             [Test]
-            public void ImportWithoutPrefix()
+            public async Task ImportWithoutPrefix()
             {
                 // Given
                 const string import = @"
@@ -269,7 +272,7 @@ body {
                 Sass sass = new Sass().IncludeSourceComments(false).WithCompactOutputStyle();
 
                 // When
-                List<IDocument> results = sass.Execute(new[] { document }, context).ToList(); // Make sure to materialize the result list
+                List<IDocument> results = await sass.ExecuteAsync(new[] { document }, context).ToListAsync(); // Make sure to materialize the result list
 
                 // Then
                 Assert.That(results.Select(x => x.Content), Is.EqualTo(new[] { output }));
@@ -277,7 +280,7 @@ body {
             }
 
             [Test]
-            public void ImportWithoutPrefixOrExtension()
+            public async Task ImportWithoutPrefixOrExtension()
             {
                 // Given
                 const string import = @"
@@ -315,7 +318,7 @@ body {
                 Sass sass = new Sass().IncludeSourceComments(false).WithCompactOutputStyle();
 
                 // When
-                List<IDocument> results = sass.Execute(new[] { document }, context).ToList(); // Make sure to materialize the result list
+                List<IDocument> results = await sass.ExecuteAsync(new[] { document }, context).ToListAsync(); // Make sure to materialize the result list
 
                 // Then
                 Assert.That(results.Select(x => x.Content), Is.EqualTo(new[] { output }));

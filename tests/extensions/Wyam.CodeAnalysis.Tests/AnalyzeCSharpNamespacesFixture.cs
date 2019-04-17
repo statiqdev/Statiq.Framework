@@ -1,11 +1,13 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using NUnit.Framework;
 using Wyam.Common.Documents;
+using Wyam.Common.Execution;
 using Wyam.Common.IO;
 using Wyam.Common.Meta;
 using Wyam.Common.Modules;
-using Wyam.Common.Execution;
+using Wyam.Common.Util;
 
 namespace Wyam.CodeAnalysis.Tests
 {
@@ -16,7 +18,7 @@ namespace Wyam.CodeAnalysis.Tests
         public class ExecuteTests : AnalyzeCSharpNamespacesFixture
         {
             [Test]
-            public void GetsTopLevelNamespaces()
+            public async Task GetsTopLevelNamespaces()
             {
                 // Given
                 const string code = @"
@@ -33,14 +35,14 @@ namespace Wyam.CodeAnalysis.Tests
                 IModule module = new AnalyzeCSharp();
 
                 // When
-                List<IDocument> results = module.Execute(new[] { document }, context).ToList();  // Make sure to materialize the result list
+                List<IDocument> results = await module.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
 
                 // Then
                 CollectionAssert.AreEquivalent(new[] { string.Empty, "Foo", "Bar" }, results.Select(x => x["Name"]));
             }
 
             [Test]
-            public void TopLevelNamespaceContainsDirectlyNestedNamespaces()
+            public async Task TopLevelNamespaceContainsDirectlyNestedNamespaces()
             {
                 // Given
                 const string code = @"
@@ -61,7 +63,7 @@ namespace Wyam.CodeAnalysis.Tests
                 IModule module = new AnalyzeCSharp();
 
                 // When
-                List<IDocument> results = module.Execute(new[] { document }, context).ToList();  // Make sure to materialize the result list
+                List<IDocument> results = await module.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
 
                 // Then
                 CollectionAssert.AreEquivalent(new[] { string.Empty, "Foo", "Baz", "Bar" }, results.Select(x => x["Name"]));
@@ -71,7 +73,7 @@ namespace Wyam.CodeAnalysis.Tests
             }
 
             [Test]
-            public void NestedNamespaceContainsDirectlyNestedNamespaces()
+            public async Task NestedNamespaceContainsDirectlyNestedNamespaces()
             {
                 // Given
                 const string code = @"
@@ -92,7 +94,7 @@ namespace Wyam.CodeAnalysis.Tests
                 IModule module = new AnalyzeCSharp();
 
                 // When
-                List<IDocument> results = module.Execute(new[] { document }, context).ToList();  // Make sure to materialize the result list
+                List<IDocument> results = await module.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
 
                 // Then
                 CollectionAssert.AreEquivalent(new[] { string.Empty, "Foo", "Baz", "Bar" }, results.Select(x => x["Name"]));
@@ -102,7 +104,7 @@ namespace Wyam.CodeAnalysis.Tests
             }
 
             [Test]
-            public void FullNameDoesNotContainFullHierarchy()
+            public async Task FullNameDoesNotContainFullHierarchy()
             {
                 // Given
                 const string code = @"
@@ -119,14 +121,14 @@ namespace Wyam.CodeAnalysis.Tests
                 IModule module = new AnalyzeCSharp();
 
                 // When
-                List<IDocument> results = module.Execute(new[] { document }, context).ToList();  // Make sure to materialize the result list
+                List<IDocument> results = await module.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
 
                 // Then
                 CollectionAssert.AreEquivalent(new[] { string.Empty, "Foo", "Bar" }, results.Select(x => x["FullName"]));
             }
 
             [Test]
-            public void QualifiedNameContainsFullHierarchy()
+            public async Task QualifiedNameContainsFullHierarchy()
             {
                 // Given
                 const string code = @"
@@ -143,14 +145,14 @@ namespace Wyam.CodeAnalysis.Tests
                 IModule module = new AnalyzeCSharp();
 
                 // When
-                List<IDocument> results = module.Execute(new[] { document }, context).ToList();  // Make sure to materialize the result list
+                List<IDocument> results = await module.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
 
                 // Then
                 CollectionAssert.AreEquivalent(new[] { string.Empty, "Foo", "Foo.Bar" }, results.Select(x => x["QualifiedName"]));
             }
 
             [Test]
-            public void DisplayNameContainsFullHierarchy()
+            public async Task DisplayNameContainsFullHierarchy()
             {
                 // Given
                 const string code = @"
@@ -167,14 +169,14 @@ namespace Wyam.CodeAnalysis.Tests
                 IModule module = new AnalyzeCSharp();
 
                 // When
-                List<IDocument> results = module.Execute(new[] { document }, context).ToList();  // Make sure to materialize the result list
+                List<IDocument> results = await module.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
 
                 // Then
                 CollectionAssert.AreEquivalent(new[] { "global", "Foo", "Foo.Bar" }, results.Select(x => x["DisplayName"]));
             }
 
             [Test]
-            public void NamespaceKindIsNamespace()
+            public async Task NamespaceKindIsNamespace()
             {
                 // Given
                 const string code = @"
@@ -191,14 +193,14 @@ namespace Wyam.CodeAnalysis.Tests
                 IModule module = new AnalyzeCSharp();
 
                 // When
-                List<IDocument> results = module.Execute(new[] { document }, context).ToList();  // Make sure to materialize the result list
+                List<IDocument> results = await module.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
 
                 // Then
                 CollectionAssert.AreEquivalent(new[] { "Namespace", "Namespace", "Namespace" }, results.Select(x => x["Kind"]));
             }
 
             [Test]
-            public void NestedNamespacesReferenceParents()
+            public async Task NestedNamespacesReferenceParents()
             {
                 // Given
                 const string code = @"
@@ -215,7 +217,7 @@ namespace Wyam.CodeAnalysis.Tests
                 IModule module = new AnalyzeCSharp();
 
                 // When
-                List<IDocument> results = module.Execute(new[] { document }, context).ToList();  // Make sure to materialize the result list
+                List<IDocument> results = await module.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
 
                 // Then
                 Assert.AreEqual("Foo", results.Single(x => x["Name"].Equals("Bar")).Get<IDocument>("ContainingNamespace")["Name"]);
@@ -223,7 +225,7 @@ namespace Wyam.CodeAnalysis.Tests
             }
 
             [Test]
-            public void NamespacesContainTypes()
+            public async Task NamespacesContainTypes()
             {
                 // Given
                 const string code = @"
@@ -250,7 +252,7 @@ namespace Wyam.CodeAnalysis.Tests
                 IModule module = new AnalyzeCSharp();
 
                 // When
-                List<IDocument> results = module.Execute(new[] { document }, context).ToList();  // Make sure to materialize the result list
+                List<IDocument> results = await module.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
 
                 // Then
                 CollectionAssert.AreEquivalent(
@@ -262,7 +264,7 @@ namespace Wyam.CodeAnalysis.Tests
             }
 
             [Test]
-            public void NamespacesDoNotContainNestedTypes()
+            public async Task NamespacesDoNotContainNestedTypes()
             {
                 // Given
                 const string code = @"
@@ -281,7 +283,7 @@ namespace Wyam.CodeAnalysis.Tests
                 IModule module = new AnalyzeCSharp();
 
                 // When
-                List<IDocument> results = module.Execute(new[] { document }, context).ToList();  // Make sure to materialize the result list
+                List<IDocument> results = await module.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
 
                 // Then
                 CollectionAssert.AreEquivalent(
@@ -290,7 +292,7 @@ namespace Wyam.CodeAnalysis.Tests
             }
 
             [Test]
-            public void WritePathIsCorrect()
+            public async Task WritePathIsCorrect()
             {
                 // Given
                 const string code = @"
@@ -306,7 +308,7 @@ namespace Wyam.CodeAnalysis.Tests
                 IModule module = new AnalyzeCSharp();
 
                 // When
-                List<IDocument> results = module.Execute(new[] { document }, context).ToList();  // Make sure to materialize the result list
+                List<IDocument> results = await module.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
 
                 // Then
                 CollectionAssert.AreEquivalent(

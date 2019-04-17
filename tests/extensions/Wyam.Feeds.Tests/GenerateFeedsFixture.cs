@@ -2,11 +2,13 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 using NUnit.Framework;
 using Shouldly;
 using Wyam.Common.Documents;
 using Wyam.Common.IO;
 using Wyam.Common.Meta;
+using Wyam.Common.Util;
 using Wyam.Testing;
 using Wyam.Testing.Documents;
 using Wyam.Testing.Execution;
@@ -19,7 +21,7 @@ namespace Wyam.Feeds.Tests
         public class ExecuteTests : GenerateFeedsFixture
         {
             [Test]
-            public void DoesNotChangeImageDomain()
+            public async Task DoesNotChangeImageDomain()
             {
                 // Given
                 TestExecutionContext context = new TestExecutionContext();
@@ -35,7 +37,7 @@ namespace Wyam.Feeds.Tests
                 GenerateFeeds module = new GenerateFeeds();
 
                 // When
-                IList<IDocument> results = module.Execute(new[] { document }, context).ToList();  // Make sure to materialize the result list
+                IList<IDocument> results = await module.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
 
                 // Then
                 results.Select(x => x.FilePath(Keys.WritePath).FullPath).ShouldBe(new[] { "feed.rss", "feed.atom" }, true);

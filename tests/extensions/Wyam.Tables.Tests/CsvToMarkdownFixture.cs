@@ -1,8 +1,10 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using NUnit.Framework;
 using Shouldly;
 using Wyam.Common.Documents;
+using Wyam.Common.Util;
 using Wyam.Testing;
 using Wyam.Testing.Documents;
 using Wyam.Testing.Execution;
@@ -15,7 +17,7 @@ namespace Wyam.Tables.Tests
         public class ExecuteTests : CsvToMarkdownFixture
         {
             [Test]
-            public void TestWithoutHeader()
+            public async Task TestWithoutHeader()
             {
                 // Given
                 string input = string.Empty
@@ -108,7 +110,7 @@ namespace Wyam.Tables.Tests
                 CsvToMarkdown module = new CsvToMarkdown();
 
                 // When
-                IList<IDocument> results = module.Execute(new[] { document }, context).ToList();  // Make sure to materialize the result list
+                IList<IDocument> results = await module.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
 
                 // Then
                 results.Count.ShouldBe(1);
@@ -116,7 +118,7 @@ namespace Wyam.Tables.Tests
             }
 
             [Test]
-            public void TestHeader()
+            public async Task TestHeader()
             {
                 // Given
                 string input = string.Empty
@@ -209,7 +211,7 @@ namespace Wyam.Tables.Tests
                 CsvToMarkdown module = new CsvToMarkdown().WithHeader();
 
                 // When
-                IList<IDocument> results = module.Execute(new[] { document }, context).ToList();  // Make sure to materialize the result list
+                IList<IDocument> results = await module.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
 
                 // Then
                 results.Count.ShouldBe(1);

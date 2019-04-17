@@ -6,6 +6,7 @@ using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Reflection;
+using System.Threading.Tasks;
 using NUnit.Framework;
 using Shouldly;
 using Wyam.Common.Documents;
@@ -13,6 +14,7 @@ using Wyam.Common.Execution;
 using Wyam.Common.IO;
 using Wyam.Common.Meta;
 using Wyam.Common.Modules;
+using Wyam.Common.Util;
 using Wyam.Core.Documents;
 using Wyam.Core.Meta;
 using Wyam.Core.Modules.IO;
@@ -29,7 +31,7 @@ namespace Wyam.Core.Tests.Modules.IO
         public class ExecuteTests : DownloadFixture
         {
             [Test]
-            public void SingleHtmlDownloadGetStream()
+            public async Task SingleHtmlDownloadGetStream()
             {
                 // Given
                 IDocument document = new TestDocument();
@@ -49,7 +51,7 @@ namespace Wyam.Core.Tests.Modules.IO
                 IModule download = new Download().WithUris("https://wyam.io/");
 
                 // When
-                IList<IDocument> results = download.Execute(new[] { document }, context).ToList();  // Make sure to materialize the result list
+                IList<IDocument> results = await download.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
 
                 // Then
                 IDocument result = results.Single();
@@ -74,7 +76,7 @@ namespace Wyam.Core.Tests.Modules.IO
             }
 
             [Test]
-            public void MultipleHtmlDownload()
+            public async Task MultipleHtmlDownload()
             {
                 // Given
                 IDocument document = new TestDocument();
@@ -94,7 +96,7 @@ namespace Wyam.Core.Tests.Modules.IO
                 IModule download = new Download().WithUris("https://wyam.io/", "https://github.com/Wyamio/Wyam");
 
                 // When
-                IList<IDocument> results = download.Execute(new[] { document }, context).ToList();  // Make sure to materialize the result list
+                IList<IDocument> results = await download.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
 
                 // Then
                 foreach (IDocument result in results)
@@ -119,7 +121,7 @@ namespace Wyam.Core.Tests.Modules.IO
             }
 
             [Test]
-            public void SingleImageDownload()
+            public async Task SingleImageDownload()
             {
                 // Given
                 IDocument document = new TestDocument();
@@ -137,7 +139,7 @@ namespace Wyam.Core.Tests.Modules.IO
                 IModule download = new Download().WithUris("https://wyam.io/assets/img/logo.png");
 
                 // When
-                IList<IDocument> results = download.Execute(new[] { document }, context).ToList();  // Make sure to materialize the result list
+                IList<IDocument> results = await download.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
 
                 // Then
                 using (Stream stream = results.Single().GetStream())
@@ -147,7 +149,7 @@ namespace Wyam.Core.Tests.Modules.IO
             }
 
             [Test]
-            public void SingleImageDownloadWithRequestHeader()
+            public async Task SingleImageDownloadWithRequestHeader()
             {
                 // Given
                 IDocument document = new TestDocument();
@@ -167,7 +169,7 @@ namespace Wyam.Core.Tests.Modules.IO
                 IModule download = new Download().WithUri("https://wyam.io/assets/img/logo.png", header);
 
                 // When
-                IList<IDocument> results = download.Execute(new[] { document }, context).ToList();  // Make sure to materialize the result list
+                IList<IDocument> results = await download.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
 
                 // Then
                 using (Stream stream = results.Single().GetStream())

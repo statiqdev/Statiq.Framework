@@ -1,19 +1,22 @@
 ﻿using System.Collections.Generic;
 using System.IO;
-using System.Text;
 using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 using NUnit.Framework;
+using Wyam.Common.Configuration;
 using Wyam.Common.Documents;
 using Wyam.Common.Execution;
+using Wyam.Common.IO;
+using Wyam.Common.Meta;
+using Wyam.Common.Util;
+using Wyam.Core.Execution;
 using Wyam.Core.Modules.Control;
 using Wyam.Core.Modules.Extensibility;
-using Wyam.Core.Execution;
 using Wyam.Testing;
-using Wyam.Common.IO;
-using Wyam.Testing.IO;
-using Wyam.Common.Meta;
-using Wyam.Testing.Execution;
 using Wyam.Testing.Documents;
+using Wyam.Testing.Execution;
+using Wyam.Testing.IO;
 
 namespace Wyam.Core.Tests.Modules.Control
 {
@@ -24,7 +27,7 @@ namespace Wyam.Core.Tests.Modules.Control
         public class ExecuteTests : SidecarFixture
         {
             [Test]
-            public void LoadsSidecarFile()
+            public async Task LoadsSidecarFile()
             {
                 // Given
                 Engine engine = new Engine();
@@ -34,14 +37,14 @@ namespace Wyam.Core.Tests.Modules.Control
                     GetDocument("a/1.md", "File a1")
                 };
                 string lodedSidecarContent = null;
-                Sidecar sidecar = new Sidecar(new Execute((x, ctx) =>
+                Sidecar sidecar = new Sidecar(new ExecuteDocument(Config.FromDocument(x =>
                 {
                     lodedSidecarContent = x.Content;
-                    return new[] { x };
-                }));
+                    return (object)new[] { x };
+                })));
 
                 // When
-                IEnumerable<IDocument> documents = sidecar.Execute(inputs, context).ToArray();
+                IEnumerable<IDocument> documents = await sidecar.ExecuteAsync(inputs, context).ToArrayAsync();
 
                 // Then
                 Assert.AreEqual("data: a1", lodedSidecarContent);
@@ -49,7 +52,7 @@ namespace Wyam.Core.Tests.Modules.Control
             }
 
             [Test]
-            public void LoadsCustomSidecarFile()
+            public async Task LoadsCustomSidecarFile()
             {
                 // Given
                 Engine engine = new Engine();
@@ -59,14 +62,14 @@ namespace Wyam.Core.Tests.Modules.Control
                     GetDocument("a/1.md", "File a1")
                 };
                 string lodedSidecarContent = null;
-                Sidecar sidecar = new Sidecar(".other", new Execute((x, ctx) =>
-                 {
-                     lodedSidecarContent = x.Content;
-                     return new[] { x };
-                 }));
+                Sidecar sidecar = new Sidecar(".other", new ExecuteDocument(Config.FromDocument(x =>
+                {
+                    lodedSidecarContent = x.Content;
+                    return (object)new[] { x };
+                })));
 
                 // When
-                IEnumerable<IDocument> documents = sidecar.Execute(inputs, context).ToArray();
+                IEnumerable<IDocument> documents = await sidecar.ExecuteAsync(inputs, context).ToArrayAsync();
 
                 // Then
                 Assert.AreEqual("data: other", lodedSidecarContent);
@@ -74,7 +77,7 @@ namespace Wyam.Core.Tests.Modules.Control
             }
 
             [Test]
-            public void ReturnsOriginalDocumentForMissingSidecarFile()
+            public async Task ReturnsOriginalDocumentForMissingSidecarFile()
             {
                 // Given
                 Engine engine = new Engine();
@@ -84,14 +87,14 @@ namespace Wyam.Core.Tests.Modules.Control
                     GetDocument("a/1.md", "File a1")
                 };
                 bool executedSidecarModules = false;
-                Sidecar sidecar = new Sidecar(".foo", new Execute((x, ctx) =>
+                Sidecar sidecar = new Sidecar(".foo", new ExecuteDocument(Config.FromDocument(x =>
                 {
                     executedSidecarModules = true;
-                    return new[] { x };
-                }));
+                    return (object)new[] { x };
+                })));
 
                 // When
-                IEnumerable<IDocument> documents = sidecar.Execute(inputs, context).ToArray();
+                IEnumerable<IDocument> documents = await sidecar.ExecuteAsync(inputs, context).ToArrayAsync();
 
                 // Then
                 Assert.IsFalse(executedSidecarModules);

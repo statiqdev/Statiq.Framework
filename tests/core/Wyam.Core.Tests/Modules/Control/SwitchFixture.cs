@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
 using NUnit.Framework;
+using Wyam.Common.Configuration;
 using Wyam.Common.Execution;
 using Wyam.Core.Execution;
 using Wyam.Core.Modules.Control;
@@ -27,7 +28,7 @@ namespace Wyam.Core.Tests.Modules.Control
                 CountModule c = new CountModule("C");
                 CountModule d = new CountModule("D");
 
-                engine.Pipelines.Add(a, new Switch((x, y) => x.Content).Case("1", b).Case("2", c).Default(d));
+                engine.Pipelines.Add(a, new Switch(Config.FromDocument(x => (object)x.Content)).Case("1", b).Case("2", c).Default(d));
 
                 // When
                 await engine.ExecuteAsync(serviceProvider);
@@ -49,7 +50,7 @@ namespace Wyam.Core.Tests.Modules.Control
                 CountModule b = new CountModule("B");
                 CountModule c = new CountModule("C");
 
-                engine.Pipelines.Add(a, new Switch((x, y) => x.Content).Default(b), c);
+                engine.Pipelines.Add(a, new Switch(Config.FromDocument(x => (object)x.Content)).Default(b), c);
 
                 // When
                 await engine.ExecuteAsync(serviceProvider);
@@ -72,7 +73,7 @@ namespace Wyam.Core.Tests.Modules.Control
                 CountModule b = new CountModule("B");
                 CountModule c = new CountModule("C");
 
-                engine.Pipelines.Add(a, new Switch((x, y) => x.Content).Case("1", b), c);
+                engine.Pipelines.Add(a, new Switch(Config.FromDocument(x => (object)x.Content)).Case("1", b), c);
 
                 // When
                 await engine.ExecuteAsync(serviceProvider);
@@ -95,7 +96,7 @@ namespace Wyam.Core.Tests.Modules.Control
                 CountModule b = new CountModule("B");
                 CountModule c = new CountModule("C");
 
-                engine.Pipelines.Add(a, new Switch((x, y) => x.Content).Case(new string[] { "1", "2" }, b), c);
+                engine.Pipelines.Add(a, new Switch(Config.FromDocument(x => (object)x.Content)).Case(new string[] { "1", "2" }, b), c);
 
                 // When
                 await engine.ExecuteAsync(serviceProvider);
@@ -117,7 +118,7 @@ namespace Wyam.Core.Tests.Modules.Control
                 CountModule a = new CountModule("A") { AdditionalOutputs = 2 };
                 CountModule b = new CountModule("B");
 
-                engine.Pipelines.Add(a, new Switch((x, y) => x.Content), b);
+                engine.Pipelines.Add(a, new Switch(Config.FromDocument(x => (object)x.Content)), b);
 
                 // When
                 await engine.ExecuteAsync(serviceProvider);

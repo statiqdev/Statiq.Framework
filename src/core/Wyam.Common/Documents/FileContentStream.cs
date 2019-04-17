@@ -39,7 +39,9 @@ namespace Wyam.Common.Documents
             }
         }
 
-        private Stream GetStream() => _stream ?? (_stream = _file.OpenAsync().Result);
+        private async Task<Stream> GetStreamAsync() => _stream ?? (_stream = await _file.OpenAsync());
+
+        private Stream GetStream() => GetStreamAsync().Result;
 
         public override object InitializeLifetimeService()
         {
@@ -50,7 +52,8 @@ namespace Wyam.Common.Documents
         public override async Task CopyToAsync(Stream destination, int bufferSize, CancellationToken cancellationToken)
         {
             CheckDisposed();
-            await GetStream().CopyToAsync(destination, bufferSize, cancellationToken);
+            Stream stream = await GetStreamAsync();
+            await stream.CopyToAsync(destination, bufferSize, cancellationToken);
         }
 
         public override void Close()
@@ -68,7 +71,8 @@ namespace Wyam.Common.Documents
         public override async Task FlushAsync(CancellationToken cancellationToken)
         {
             CheckDisposed();
-            await GetStream().FlushAsync(cancellationToken);
+            Stream stream = await GetStreamAsync();
+            await stream.FlushAsync(cancellationToken);
         }
 
         public override IAsyncResult BeginRead(byte[] buffer, int offset, int count, AsyncCallback callback, object state)
@@ -86,7 +90,8 @@ namespace Wyam.Common.Documents
         public override async Task<int> ReadAsync(byte[] buffer, int offset, int count, CancellationToken cancellationToken)
         {
             CheckDisposed();
-            return await GetStream().ReadAsync(buffer, offset, count, cancellationToken);
+            Stream stream = await GetStreamAsync();
+            return await stream.ReadAsync(buffer, offset, count, cancellationToken);
         }
 
         public override IAsyncResult BeginWrite(byte[] buffer, int offset, int count, AsyncCallback callback, object state)
@@ -104,7 +109,8 @@ namespace Wyam.Common.Documents
         public override async Task WriteAsync(byte[] buffer, int offset, int count, CancellationToken cancellationToken)
         {
             CheckDisposed();
-            await GetStream().WriteAsync(buffer, offset, count, cancellationToken);
+            Stream stream = await GetStreamAsync();
+            await stream.WriteAsync(buffer, offset, count, cancellationToken);
         }
 
         public override long Seek(long offset, SeekOrigin origin)

@@ -10,6 +10,7 @@ using Shouldly;
 using Wyam.Common.Documents;
 using Wyam.Common.Execution;
 using Wyam.Common.Tracing;
+using Wyam.Common.Util;
 using Wyam.Testing;
 using Wyam.Testing.Documents;
 using Wyam.Testing.Execution;
@@ -33,7 +34,7 @@ namespace Wyam.Json.Tests
         public class ExecuteTests : JsonFixture
         {
             [Test]
-            public void GeneratesDynamicObject()
+            public async Task GeneratesDynamicObject()
             {
                 // Given
                 TestExecutionContext context = new TestExecutionContext();
@@ -41,7 +42,7 @@ namespace Wyam.Json.Tests
                 Json json = new Json("MyJson");
 
                 // When
-                IList<IDocument> results = json.Execute(new[] { document }, context).ToList();  // Make sure to materialize the result list
+                IList<IDocument> results = await json.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
 
                 // Then
                 IDocument result = results.Single();
@@ -54,7 +55,7 @@ namespace Wyam.Json.Tests
             }
 
             [Test]
-            public void FlattensTopLevel()
+            public async Task FlattensTopLevel()
             {
                 // Given
                 TestExecutionContext context = new TestExecutionContext();
@@ -62,7 +63,7 @@ namespace Wyam.Json.Tests
                 Json json = new Json();
 
                 // When
-                IList<IDocument> results = json.Execute(new[] { document }, context).ToList();  // Make sure to materialize the result list
+                IList<IDocument> results = await json.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
 
                 // Then
                 IDocument result = results.Single();
@@ -75,7 +76,7 @@ namespace Wyam.Json.Tests
 
             [Test]
             [Parallelizable(ParallelScope.None)]
-            public void ReturnsDocumentOnError()
+            public async Task ReturnsDocumentOnError()
             {
                 // Given
                 RemoveListener();
@@ -84,7 +85,7 @@ namespace Wyam.Json.Tests
                 Json json = new Json("MyJson");
 
                 // When
-                List<IDocument> results = json.Execute(new[] { document }, context).ToList();  // Make sure to materialize the result list
+                List<IDocument> results = await json.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
 
                 // Then
                 document.Count.ShouldBe(0);

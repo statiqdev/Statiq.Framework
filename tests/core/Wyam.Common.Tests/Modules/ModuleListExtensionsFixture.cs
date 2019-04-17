@@ -26,8 +26,8 @@ namespace Wyam.Common.Tests.Modules
                 // Given
                 IPipeline collection = new ExecutionPipeline("Test", new IModule[]
                 {
-                    new ReadFiles(ctx => "*.md"),
-                    new ReadFiles(ctx => "*.md"),
+                    new ReadFiles("*.md"),
+                    new ReadFiles("*.md"),
                     new WriteFiles()
                 });
 
@@ -50,8 +50,8 @@ namespace Wyam.Common.Tests.Modules
                 // Given
                 IPipeline collection = new ExecutionPipeline("Test", new IModule[]
                 {
-                    new ReadFiles(ctx => "*.md"),
-                    new ReadFiles(ctx => "*.md"),
+                    new ReadFiles("*.md"),
+                    new ReadFiles("*.md"),
                     new WriteFiles()
                 });
 
@@ -74,8 +74,8 @@ namespace Wyam.Common.Tests.Modules
                 // Given
                 IPipeline collection = new ExecutionPipeline("Test", new IModule[]
                 {
-                    new ReadFiles(ctx => "*.md"),
-                    new ReadFiles(ctx => "*.md"),
+                    new ReadFiles("*.md"),
+                    new ReadFiles("*.md"),
                     new WriteFiles()
                 });
 
@@ -98,8 +98,8 @@ namespace Wyam.Common.Tests.Modules
                 // Given
                 IPipeline collection = new ExecutionPipeline("Test", new IModule[]
                 {
-                    new ReadFiles(ctx => "*.md"),
-                    new ReadFiles(ctx => "*.md"),
+                    new ReadFiles("*.md"),
+                    new ReadFiles("*.md"),
                     new WriteFiles()
                 });
 
@@ -122,7 +122,7 @@ namespace Wyam.Common.Tests.Modules
                 // Given
                 IPipeline collection = new ExecutionPipeline("Test", new IModule[]
                 {
-                    new ReadFiles(ctx => "*.md"),
+                    new ReadFiles("*.md"),
                     new CountModule("mykey1"),
                     new CountModule("mykey2"),
                     new WriteFiles()
@@ -145,7 +145,7 @@ namespace Wyam.Common.Tests.Modules
                 // Given
                 IPipeline collection = new ExecutionPipeline("Test", new IModule[]
                 {
-                    new ReadFiles(ctx => "*.md"),
+                    new ReadFiles("*.md"),
                     new CountModule("mykey1"),
                     new CountModule("mykey2"),
                     new WriteFiles()
@@ -157,116 +157,6 @@ namespace Wyam.Common.Tests.Modules
                 // Then
                 Assert.AreEqual("mykey1", ((CountModule)collection[1]).ValueKey);
                 Assert.AreEqual("replacedKey", ((CountModule)collection[2]).ValueKey);
-            }
-        }
-
-        public class InsertMultipleTests : ModuleListExtensionsFixture
-        {
-            [Test]
-            public void InsertMultiple()
-            {
-                // Given
-                IPipeline collection = new ExecutionPipeline("Test", new[]
-                {
-                    new CountModule("mykey1").WithName("First"),
-                    new CountModule("mykey2").WithName("Second")
-                });
-
-                // When
-                collection.InsertBefore("Second", new CountModule("mykey3"), new CountModule("mykey4"));
-
-                // Then
-                Assert.AreEqual("mykey1", ((CountModule)collection[0]).ValueKey);
-                Assert.AreEqual("mykey3", ((CountModule)collection[1]).ValueKey);
-                Assert.AreEqual("mykey4", ((CountModule)collection[2]).ValueKey);
-                Assert.AreEqual("mykey2", ((CountModule)collection[3]).ValueKey);
-            }
-        }
-
-        public class InsertBeforeWithNameTests : ModuleListExtensionsFixture
-        {
-            [Test]
-            public void InsertBeforeWithName()
-            {
-                // Given
-                IPipeline collection = new ExecutionPipeline("Test", new[]
-                {
-                    new CountModule("mykey1").WithName("First"),
-                    new CountModule("mykey2").WithName("Second")
-                });
-
-                // When
-                collection.InsertBefore("Second", new CountModule("mykey3"));
-
-                // Then
-                Assert.AreEqual("mykey1", ((CountModule)collection[0]).ValueKey);
-                Assert.AreEqual("mykey3", ((CountModule)collection[1]).ValueKey);
-                Assert.AreEqual("mykey2", ((CountModule)collection[2]).ValueKey);
-            }
-        }
-
-        public class InsertAfterWithNameTests : ModuleListExtensionsFixture
-        {
-            [Test]
-            public void InsertAfterWithName()
-            {
-                // Given
-                IPipeline collection = new ExecutionPipeline("Test", new[]
-                {
-                    new CountModule("mykey1").WithName("First"),
-                    new CountModule("mykey2").WithName("Second")
-                });
-
-                // When
-                collection.InsertAfter("Second", new CountModule("mykey3"));
-
-                // Then
-                Assert.AreEqual("mykey1", ((CountModule)collection[0]).ValueKey);
-                Assert.AreEqual("mykey2", ((CountModule)collection[1]).ValueKey);
-                Assert.AreEqual("mykey3", ((CountModule)collection[2]).ValueKey);
-            }
-        }
-
-        public class ReplaceWithNameTests : ModuleListExtensionsFixture
-        {
-            [Test]
-            public void ReplaceWithName()
-            {
-                // Given
-                IPipeline collection = new ExecutionPipeline("Test", new[]
-                {
-                    new CountModule("mykey1").WithName("First"),
-                    new CountModule("mykey2").WithName("Second")
-                });
-
-                // When
-                collection.Replace("Second", new CountModule("mykey3"));
-
-                // Then
-                Assert.AreEqual("mykey1", ((CountModule)collection[0]).ValueKey);
-                Assert.AreEqual("mykey3", ((CountModule)collection[1]).ValueKey);
-            }
-
-            [Test]
-            public void AlsoWorksWithModules()
-            {
-                // Given
-                IPipeline collection = new ExecutionPipeline("Test", new[]
-                {
-                    new CountModule("mykey1")
-                        .WithName("First"),
-                    new CountModule("mykey2")
-                        .WithName("Second"),
-                    new Concat(new CountModule("mysubkey1").WithName("inner"))
-                        .WithName("Third")
-                });
-
-                // When
-                (collection["Third"] as IModuleList)
-                    .Replace("inner", new CountModule("newsubkey"));
-
-                // Then
-                Assert.AreEqual("newsubkey", ((CountModule)((IModuleList)collection["Third"])["inner"]).ValueKey);
             }
         }
     }

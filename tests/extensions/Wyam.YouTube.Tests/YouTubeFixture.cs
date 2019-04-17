@@ -1,8 +1,10 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using NUnit.Framework;
 using Wyam.Common.Documents;
 using Wyam.Common.Modules;
+using Wyam.Common.Util;
 using Wyam.Testing;
 using Wyam.Testing.Documents;
 using Wyam.Testing.Execution;
@@ -16,7 +18,7 @@ namespace Wyam.YouTube.Tests
         public class ExecuteTests : YouTubeFixture
         {
             [Test]
-            public void SetsMetadata()
+            public async Task SetsMetadata()
             {
                 // Given
                 TestExecutionContext context = new TestExecutionContext();
@@ -26,7 +28,7 @@ namespace Wyam.YouTube.Tests
                     .WithRequest("Bar", (doc, ctx, yt) => "baz");
 
                 // When
-                IList<IDocument> results = youtube.Execute(new[] { document }, context).ToList(); // Make sure to materialize the result list
+                IList<IDocument> results = await youtube.ExecuteAsync(new[] { document }, context).ToListAsync(); // Make sure to materialize the result list
 
                 // Then
                 Assert.That(results.Single()["Foo"], Is.EqualTo(1));

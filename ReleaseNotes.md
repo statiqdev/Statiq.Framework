@@ -5,6 +5,10 @@
 - Wyam.App added
 - Target for libraries changed from netstandard to netcoreapp
 - Wyam.Configuration removed
+- Module execution is now async, plumbing throughout
+- New config delegate types and Config static helpers
+- Removed named modules APIs
+- Split Execute module into Execute, ExecuteDocument, and ExecuteContext
 
 # 2.2.4
 

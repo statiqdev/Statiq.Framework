@@ -2,9 +2,11 @@
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 using NUnit.Framework;
 using Shouldly;
 using Wyam.Common.Documents;
+using Wyam.Common.Util;
 using Wyam.Testing;
 using Wyam.Testing.Documents;
 using Wyam.Testing.Execution;
@@ -18,7 +20,7 @@ namespace Wyam.Html.Tests
         public class ExecuteTests : ExcerptFixture
         {
             [Test]
-            public void ExcerptFirstParagraph()
+            public async Task ExcerptFirstParagraph()
             {
                 // Given
                 const string input = @"<html>
@@ -36,14 +38,14 @@ namespace Wyam.Html.Tests
                 Excerpt excerpt = new Excerpt();
 
                 // When
-                IEnumerable<IDocument> results = excerpt.Execute(new[] { document }, context).ToList();  // Make sure to materialize the result list
+                IEnumerable<IDocument> results = await excerpt.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
 
                 // Then
                 results.Single()["Excerpt"].ShouldBe("<p>This is some Foobar text</p>");
             }
 
             [Test]
-            public void ExcerptAlternateQuerySelector()
+            public async Task ExcerptAlternateQuerySelector()
             {
                 // Given
                 const string input = @"<html>
@@ -61,14 +63,14 @@ namespace Wyam.Html.Tests
                 Excerpt excerpt = new Excerpt("div");
 
                 // When
-                IEnumerable<IDocument> results = excerpt.Execute(new[] { document }, context).ToList();  // Make sure to materialize the result list
+                IEnumerable<IDocument> results = await excerpt.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
 
                 // Then
                 results.Single()["Excerpt"].ShouldBe("<div>This is some other text</div>");
             }
 
             [Test]
-            public void ExcerptAlternateMetadataKey()
+            public async Task ExcerptAlternateMetadataKey()
             {
                 // Given
                 const string input = @"<html>
@@ -86,14 +88,14 @@ namespace Wyam.Html.Tests
                 Excerpt excerpt = new Excerpt().WithMetadataKey("Baz");
 
                 // When
-                IEnumerable<IDocument> results = excerpt.Execute(new[] { document }, context).ToList();  // Make sure to materialize the result list
+                IEnumerable<IDocument> results = await excerpt.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
 
                 // Then
                 results.Single()["Baz"].ShouldBe("<p>This is some Foobar text</p>");
             }
 
             [Test]
-            public void ExcerptInnerHtml()
+            public async Task ExcerptInnerHtml()
             {
                 // Given
                 const string input = @"<html>
@@ -111,14 +113,14 @@ namespace Wyam.Html.Tests
                 Excerpt excerpt = new Excerpt().WithOuterHtml(false);
 
                 // When
-                IEnumerable<IDocument> results = excerpt.Execute(new[] { document }, context).ToList();  // Make sure to materialize the result list
+                IEnumerable<IDocument> results = await excerpt.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
 
                 // Then
                 results.Single()["Excerpt"].ShouldBe("This is some Foobar text");
             }
 
             [Test]
-            public void NoExcerptReturnsSameDocument()
+            public async Task NoExcerptReturnsSameDocument()
             {
                 // Given
                 const string input = @"<html>
@@ -135,14 +137,14 @@ namespace Wyam.Html.Tests
                 Excerpt excerpt = new Excerpt("p");
 
                 // When
-                IEnumerable<IDocument> results = excerpt.Execute(new[] { document }, null).ToList();  // Make sure to materialize the result list
+                IEnumerable<IDocument> results = await excerpt.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
 
                 // Then
                 results.Single().ShouldBe(document);
             }
 
             [Test]
-            public void SeparatorInsideParagraph()
+            public async Task SeparatorInsideParagraph()
             {
                 // Given
                 const string input = @"<html>
@@ -160,14 +162,14 @@ namespace Wyam.Html.Tests
                 Excerpt excerpt = new Excerpt();
 
                 // When
-                IEnumerable<IDocument> results = excerpt.Execute(new[] { document }, context).ToList();  // Make sure to materialize the result list
+                IEnumerable<IDocument> results = await excerpt.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
 
                 // Then
                 results.Single()["Excerpt"].ShouldBe("<p>This is some </p>");
             }
 
             [Test]
-            public void SeparatorBetweenParagraphs()
+            public async Task SeparatorBetweenParagraphs()
             {
                 // Given
                 const string input = @"<html>
@@ -187,7 +189,7 @@ namespace Wyam.Html.Tests
                 Excerpt excerpt = new Excerpt();
 
                 // When
-                IEnumerable<IDocument> results = excerpt.Execute(new[] { document }, context).ToList();  // Make sure to materialize the result list
+                IEnumerable<IDocument> results = await excerpt.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
 
                 // Then
                 results.Single()["Excerpt"].ToString().ShouldBe(
@@ -197,7 +199,7 @@ namespace Wyam.Html.Tests
             }
 
             [Test]
-            public void SeparatorInsideParagraphWithSiblings()
+            public async Task SeparatorInsideParagraphWithSiblings()
             {
                 // Given
                 const string input = @"<html>
@@ -215,7 +217,7 @@ namespace Wyam.Html.Tests
                 Excerpt excerpt = new Excerpt();
 
                 // When
-                IEnumerable<IDocument> results = excerpt.Execute(new[] { document }, context).ToList();  // Make sure to materialize the result list
+                IEnumerable<IDocument> results = await excerpt.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
 
                 // Then
                 results.Single()["Excerpt"].ToString().ShouldBe(
@@ -225,7 +227,7 @@ namespace Wyam.Html.Tests
             }
 
             [Test]
-            public void AlternateSeparatorComment()
+            public async Task AlternateSeparatorComment()
             {
                 // Given
                 const string input = @"<html>
@@ -243,14 +245,14 @@ namespace Wyam.Html.Tests
                 Excerpt excerpt = new Excerpt().WithSeparators(new[] { "foo" });
 
                 // When
-                IEnumerable<IDocument> results = excerpt.Execute(new[] { document }, context).ToList();  // Make sure to materialize the result list
+                IEnumerable<IDocument> results = await excerpt.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
 
                 // Then
                 results.Single()["Excerpt"].ShouldBe("<p>This is some </p>");
             }
 
             [Test]
-            public void MultipleSeparatorComments()
+            public async Task MultipleSeparatorComments()
             {
                 // Given
                 const string input = @"<html>
@@ -268,7 +270,7 @@ namespace Wyam.Html.Tests
                 Excerpt excerpt = new Excerpt();
 
                 // When
-                IEnumerable<IDocument> results = excerpt.Execute(new[] { document }, context).ToList();  // Make sure to materialize the result list
+                IEnumerable<IDocument> results = await excerpt.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
 
                 // Then
                 results.Single()["Excerpt"].ShouldBe("<p>This is some </p>");

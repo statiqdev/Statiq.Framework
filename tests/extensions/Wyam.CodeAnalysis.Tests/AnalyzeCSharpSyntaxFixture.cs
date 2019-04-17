@@ -1,10 +1,12 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using NUnit.Framework;
 using Shouldly;
 using Wyam.Common.Documents;
-using Wyam.Common.Modules;
 using Wyam.Common.Execution;
+using Wyam.Common.Modules;
+using Wyam.Common.Util;
 
 namespace Wyam.CodeAnalysis.Tests
 {
@@ -15,7 +17,7 @@ namespace Wyam.CodeAnalysis.Tests
         public class ExecuteTests : AnalyzeCSharpSyntaxFixture
         {
             [Test]
-            public void ImplicitClassAccessibility()
+            public async Task ImplicitClassAccessibility()
             {
                 // Given
                 const string code = @"
@@ -31,14 +33,14 @@ namespace Wyam.CodeAnalysis.Tests
                 IModule module = new AnalyzeCSharp();
 
                 // When
-                List<IDocument> results = module.Execute(new[] { document }, context).ToList();  // Make sure to materialize the result list
+                List<IDocument> results = await module.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
 
                 // Then
                 GetResult(results, "Green")["Syntax"].ShouldBe("internal class Green");
             }
 
             [Test]
-            public void ImplicitMemberAccessibility()
+            public async Task ImplicitMemberAccessibility()
             {
                 // Given
                 const string code = @"
@@ -57,14 +59,14 @@ namespace Wyam.CodeAnalysis.Tests
                 IModule module = new AnalyzeCSharp();
 
                 // When
-                List<IDocument> results = module.Execute(new[] { document }, context).ToList();  // Make sure to materialize the result list
+                List<IDocument> results = await module.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
 
                 // Then
                 GetMember(results, "Green", "Blue")["Syntax"].ShouldBe("private void Blue()");
             }
 
             [Test]
-            public void ExplicitClassAccessibility()
+            public async Task ExplicitClassAccessibility()
             {
                 // Given
                 const string code = @"
@@ -80,14 +82,14 @@ namespace Wyam.CodeAnalysis.Tests
                 IModule module = new AnalyzeCSharp();
 
                 // When
-                List<IDocument> results = module.Execute(new[] { document }, context).ToList();  // Make sure to materialize the result list
+                List<IDocument> results = await module.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
 
                 // Then
                 GetResult(results, "Green")["Syntax"].ShouldBe("public class Green");
             }
 
             [Test]
-            public void ExplicitMemberAccessibility()
+            public async Task ExplicitMemberAccessibility()
             {
                 // Given
                 const string code = @"
@@ -106,14 +108,14 @@ namespace Wyam.CodeAnalysis.Tests
                 IModule module = new AnalyzeCSharp();
 
                 // When
-                List<IDocument> results = module.Execute(new[] { document }, context).ToList();  // Make sure to materialize the result list
+                List<IDocument> results = await module.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
 
                 // Then
                 GetMember(results, "Green", "Blue")["Syntax"].ShouldBe("internal void Blue()");
             }
 
             [Test]
-            public void ClassAttributes()
+            public async Task ClassAttributes()
             {
                 // Given
                 const string code = @"
@@ -131,7 +133,7 @@ namespace Wyam.CodeAnalysis.Tests
                 IModule module = new AnalyzeCSharp();
 
                 // When
-                List<IDocument> results = module.Execute(new[] { document }, context).ToList();  // Make sure to materialize the result list
+                List<IDocument> results = await module.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
 
                 // Then
                 GetResult(results, "Green")["Syntax"].ToString().ShouldBe(
@@ -142,7 +144,7 @@ internal class Green",
             }
 
             [Test]
-            public void MethodAttributes()
+            public async Task MethodAttributes()
             {
                 // Given
                 const string code = @"
@@ -163,7 +165,7 @@ internal class Green",
                 IModule module = new AnalyzeCSharp();
 
                 // When
-                List<IDocument> results = module.Execute(new[] { document }, context).ToList();  // Make sure to materialize the result list
+                List<IDocument> results = await module.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
 
                 // Then
                 GetMember(results, "Green", "Blue")["Syntax"].ToString().ShouldBe(
@@ -174,7 +176,7 @@ private int Blue()",
             }
 
             [Test]
-            public void ClassComments()
+            public async Task ClassComments()
             {
                 // Given
                 const string code = @"
@@ -200,7 +202,7 @@ private int Blue()",
                 IModule module = new AnalyzeCSharp();
 
                 // When
-                List<IDocument> results = module.Execute(new[] { document }, context).ToList();  // Make sure to materialize the result list
+                List<IDocument> results = await module.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
 
                 // Then
                 GetResult(results, "Green")["Syntax"].ToString().ShouldBe(
@@ -211,7 +213,7 @@ internal class Green : Blue",
             }
 
             [Test]
-            public void AbstractClass()
+            public async Task AbstractClass()
             {
                 // Given
                 const string code = @"
@@ -227,14 +229,14 @@ internal class Green : Blue",
                 IModule module = new AnalyzeCSharp();
 
                 // When
-                List<IDocument> results = module.Execute(new[] { document }, context).ToList();  // Make sure to materialize the result list
+                List<IDocument> results = await module.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
 
                 // Then
                 GetResult(results, "Green")["Syntax"].ShouldBe("internal abstract class Green");
             }
 
             [Test]
-            public void SealedClass()
+            public async Task SealedClass()
             {
                 // Given
                 const string code = @"
@@ -250,14 +252,14 @@ internal class Green : Blue",
                 IModule module = new AnalyzeCSharp();
 
                 // When
-                List<IDocument> results = module.Execute(new[] { document }, context).ToList();  // Make sure to materialize the result list
+                List<IDocument> results = await module.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
 
                 // Then
                 GetResult(results, "Green")["Syntax"].ShouldBe("internal sealed class Green");
             }
 
             [Test]
-            public void StaticClass()
+            public async Task StaticClass()
             {
                 // Given
                 const string code = @"
@@ -273,14 +275,14 @@ internal class Green : Blue",
                 IModule module = new AnalyzeCSharp();
 
                 // When
-                List<IDocument> results = module.Execute(new[] { document }, context).ToList();  // Make sure to materialize the result list
+                List<IDocument> results = await module.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
 
                 // Then
                 GetResult(results, "Green")["Syntax"].ShouldBe("internal static class Green");
             }
 
             [Test]
-            public void StaticMethod()
+            public async Task StaticMethod()
             {
                 // Given
                 const string code = @"
@@ -299,14 +301,14 @@ internal class Green : Blue",
                 IModule module = new AnalyzeCSharp();
 
                 // When
-                List<IDocument> results = module.Execute(new[] { document }, context).ToList();  // Make sure to materialize the result list
+                List<IDocument> results = await module.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
 
                 // Then
                 GetMember(results, "Green", "Blue")["Syntax"].ShouldBe("private static void Blue()");
             }
 
             [Test]
-            public void ClassWithGenericTypeParameters()
+            public async Task ClassWithGenericTypeParameters()
             {
                 // Given
                 const string code = @"
@@ -322,14 +324,14 @@ internal class Green : Blue",
                 IModule module = new AnalyzeCSharp();
 
                 // When
-                List<IDocument> results = module.Execute(new[] { document }, context).ToList();  // Make sure to materialize the result list
+                List<IDocument> results = await module.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
 
                 // Then
                 GetResult(results, "Green")["Syntax"].ShouldBe("internal class Green<out TKey, TValue>");
             }
 
             [Test]
-            public void ClassWithGenericTypeParametersAndConstraints()
+            public async Task ClassWithGenericTypeParametersAndConstraints()
             {
                 // Given
                 const string code = @"
@@ -345,14 +347,14 @@ internal class Green : Blue",
                 IModule module = new AnalyzeCSharp();
 
                 // When
-                List<IDocument> results = module.Execute(new[] { document }, context).ToList();  // Make sure to materialize the result list
+                List<IDocument> results = await module.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
 
                 // Then
                 GetResult(results, "Green")["Syntax"].ShouldBe("internal class Green<out TKey, TValue> where TValue : class");
             }
 
             [Test]
-            public void ClassWithGenericTypeParametersAndBaseAndConstraints()
+            public async Task ClassWithGenericTypeParametersAndBaseAndConstraints()
             {
                 // Given
                 const string code = @"
@@ -377,14 +379,14 @@ internal class Green : Blue",
                 IModule module = new AnalyzeCSharp();
 
                 // When
-                List<IDocument> results = module.Execute(new[] { document }, context).ToList();  // Make sure to materialize the result list
+                List<IDocument> results = await module.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
 
                 // Then
                 GetResult(results, "Green")["Syntax"].ShouldBe("internal class Green<out TKey, TValue> : Blue, IFoo where TValue : class");
             }
 
             [Test]
-            public void MethodWithGenericParameters()
+            public async Task MethodWithGenericParameters()
             {
                 // Given
                 const string code = @"
@@ -404,14 +406,14 @@ internal class Green : Blue",
                 IModule module = new AnalyzeCSharp();
 
                 // When
-                List<IDocument> results = module.Execute(new[] { document }, context).ToList();  // Make sure to materialize the result list
+                List<IDocument> results = await module.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
 
                 // Then
                 GetMember(results, "Green", "Blue")["Syntax"].ShouldBe("public TValue Blue<TKey, TValue>(TKey key, TValue value, bool flag)");
             }
 
             [Test]
-            public void MethodWithGenericParametersAndConstraints()
+            public async Task MethodWithGenericParametersAndConstraints()
             {
                 // Given
                 const string code = @"
@@ -431,14 +433,14 @@ internal class Green : Blue",
                 IModule module = new AnalyzeCSharp();
 
                 // When
-                List<IDocument> results = module.Execute(new[] { document }, context).ToList();  // Make sure to materialize the result list
+                List<IDocument> results = await module.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
 
                 // Then
                 GetMember(results, "Green", "Blue")["Syntax"].ShouldBe("public TValue Blue<TKey, TValue>(TKey key, TValue value, bool flag) where TKey : class");
             }
 
             [Test]
-            public void Enum()
+            public async Task Enum()
             {
                 // Given
                 const string code = @"
@@ -456,14 +458,14 @@ internal class Green : Blue",
                 IModule module = new AnalyzeCSharp();
 
                 // When
-                List<IDocument> results = module.Execute(new[] { document }, context).ToList();  // Make sure to materialize the result list
+                List<IDocument> results = await module.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
 
                 // Then
                 GetResult(results, "Green")["Syntax"].ShouldBe("internal enum Green");
             }
 
             [Test]
-            public void EnumWithBase()
+            public async Task EnumWithBase()
             {
                 // Given
                 const string code = @"
@@ -481,14 +483,14 @@ internal class Green : Blue",
                 IModule module = new AnalyzeCSharp();
 
                 // When
-                List<IDocument> results = module.Execute(new[] { document }, context).ToList();  // Make sure to materialize the result list
+                List<IDocument> results = await module.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
 
                 // Then
                 GetResult(results, "Green")["Syntax"].ShouldBe("internal enum Green");
             }
 
             [Test]
-            public void ExplicitProperty()
+            public async Task ExplicitProperty()
             {
                 // Given
                 const string code = @"
@@ -508,14 +510,14 @@ internal class Green : Blue",
                 IModule module = new AnalyzeCSharp();
 
                 // When
-                List<IDocument> results = module.Execute(new[] { document }, context).ToList();  // Make sure to materialize the result list
+                List<IDocument> results = await module.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
 
                 // Then
                 GetMember(results, "Green", "Blue")["Syntax"].ShouldBe("public int Blue { get; }");
             }
 
             [Test]
-            public void AutoProperty()
+            public async Task AutoProperty()
             {
                 // Given
                 const string code = @"
@@ -532,14 +534,14 @@ internal class Green : Blue",
                 IModule module = new AnalyzeCSharp();
 
                 // When
-                List<IDocument> results = module.Execute(new[] { document }, context).ToList();  // Make sure to materialize the result list
+                List<IDocument> results = await module.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
 
                 // Then
                 GetMember(results, "Green", "Blue")["Syntax"].ShouldBe("public int Blue { get; set; }");
             }
 
             [Test]
-            public void WrapsForLongMethodSignature()
+            public async Task WrapsForLongMethodSignature()
             {
                 // Given
                 const string code = @"
@@ -559,7 +561,7 @@ internal class Green : Blue",
                 IModule module = new AnalyzeCSharp();
 
                 // When
-                List<IDocument> results = module.Execute(new[] { document }, context).ToList();  // Make sure to materialize the result list
+                List<IDocument> results = await module.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
 
                 // Then
                 GetMember(results, "Green", "Blue")["Syntax"].ToString().ShouldBe(
@@ -569,7 +571,7 @@ internal class Green : Blue",
             }
 
             [Test]
-            public void WrapsForLongClassSignature()
+            public async Task WrapsForLongClassSignature()
             {
                 // Given
                 const string code = @"
@@ -585,7 +587,7 @@ internal class Green : Blue",
                 IModule module = new AnalyzeCSharp();
 
                 // When
-                List<IDocument> results = module.Execute(new[] { document }, context).ToList();  // Make sure to materialize the result list
+                List<IDocument> results = await module.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
 
                 // Then
                 GetResult(results, "Green")["Syntax"].ToString().ShouldBe(
@@ -596,7 +598,7 @@ internal class Green : Blue",
             }
 
             [Test]
-            public void ClassWithInterfaces()
+            public async Task ClassWithInterfaces()
             {
                 // Given
                 const string code = @"
@@ -612,7 +614,7 @@ internal class Green : Blue",
                 IModule module = new AnalyzeCSharp();
 
                 // When
-                List<IDocument> results = module.Execute(new[] { document }, context).ToList();  // Make sure to materialize the result list
+                List<IDocument> results = await module.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
 
                 // Then
                 GetResult(results, "Green")["Syntax"].ShouldBe("internal class Green : IFoo, IBar, IFooBar");

@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using NUnit.Framework;
+using Shouldly;
 using Wyam.Common.Modules;
 using Wyam.Testing;
 using Wyam.Testing.Modules;
@@ -17,7 +18,7 @@ namespace Wyam.Common.Tests.Modules
         public class AddTests : ModuleListFixture
         {
             [Test]
-            public void AddModuleWithoutName()
+            public void AddModule()
             {
                 // Given
                 ModuleList list = new ModuleList();
@@ -27,47 +28,7 @@ namespace Wyam.Common.Tests.Modules
                 list.Add(count);
 
                 // Then
-                Assert.That(list.AsKeyValuePairs(), Is.EqualTo(new[] { new KeyValuePair<string, IModule>(null, count) }));
-            }
-
-            [Test]
-            public void AddModuleWithName()
-            {
-                // Given
-                ModuleList list = new ModuleList();
-                CountModule count = new CountModule("A");
-
-                // When
-                list.Add("Foo", count);
-
-                // Then
-                Assert.That(list.AsKeyValuePairs(), Is.EqualTo(new[] { new KeyValuePair<string, IModule>("Foo", count) }));
-            }
-
-            [Test]
-            public void AddNamedModule()
-            {
-                // Given
-                ModuleList list = new ModuleList();
-                CountModule count = new CountModule("A");
-
-                // When
-                list.Add(new NamedModule("Foo", count));
-
-                // Then
-                Assert.That(list.AsKeyValuePairs(), Is.EqualTo(new[] { new KeyValuePair<string, IModule>("Foo", count) }));
-            }
-
-            [Test]
-            public void ThrowsWhenAddingDuplicateNamedModule()
-            {
-                // Given
-                CountModule count = new CountModule("A");
-                CountModule count2 = new CountModule("B");
-                ModuleList list = new ModuleList(new NamedModule("A", count));
-
-                // When, Then
-                Assert.That(() => list.Add(new NamedModule("A", count2)), Throws.Exception);
+                list.ShouldBe(new[] { count });
             }
         }
 
@@ -136,41 +97,6 @@ namespace Wyam.Common.Tests.Modules
                 Assert.That(result, Is.False);
                 Assert.That(list, Is.EqualTo(new[] { count2 }));
             }
-
-            [Test]
-            public void RemovesModuleByName()
-            {
-                // Given
-                CountModule count = new CountModule("A");
-                CountModule count2 = new CountModule("B");
-                ModuleList list = new ModuleList(
-                    new NamedModule("A", count),
-                    new NamedModule("B", count2));
-
-                // When
-                bool result = list.Remove("A");
-
-                // Then
-                Assert.That(result, Is.True);
-                Assert.That(list, Is.EqualTo(new[] { count2 }));
-            }
-
-            [Test]
-            public void ReturnsFalseWhenNotRemovedByName()
-            {
-                // Given
-                CountModule count = new CountModule("A");
-                CountModule count2 = new CountModule("B");
-                ModuleList list = new ModuleList(
-                    new NamedModule("B", count2));
-
-                // When
-                bool result = list.Remove("A");
-
-                // Then
-                Assert.That(result, Is.False);
-                Assert.That(list, Is.EqualTo(new[] { count2 }));
-            }
         }
 
         public class IndexOfTests : ModuleListFixture
@@ -204,39 +130,6 @@ namespace Wyam.Common.Tests.Modules
                 // Then
                 Assert.That(index, Is.LessThan(0));
             }
-
-            [Test]
-            public void ReturnsIndexByName()
-            {
-                // Given
-                CountModule count = new CountModule("A");
-                CountModule count2 = new CountModule("B");
-                ModuleList list = new ModuleList(
-                    new NamedModule("A", count),
-                    new NamedModule("B", count2));
-
-                // When
-                int index = list.IndexOf("B");
-
-                // Then
-                Assert.That(index, Is.EqualTo(1));
-            }
-
-            [Test]
-            public void ReturnsNegativeIndexWhenNotFoundByName()
-            {
-                // Given
-                CountModule count = new CountModule("A");
-                CountModule count2 = new CountModule("B");
-                ModuleList list = new ModuleList(
-                    new NamedModule("B", count2));
-
-                // When
-                int index = list.IndexOf("A");
-
-                // Then
-                Assert.That(index, Is.LessThan(0));
-            }
         }
 
         public class InsertTests : ModuleListFixture
@@ -251,54 +144,6 @@ namespace Wyam.Common.Tests.Modules
 
                 // When
                 list.Insert(0, count);
-
-                // Then
-                Assert.That(list, Is.EqualTo(new[] { count, count2 }));
-            }
-
-            [Test]
-            public void ThrowsWhenInsertingDuplicateNamedModule()
-            {
-                // Given
-                CountModule count = new CountModule("A");
-                CountModule count2 = new CountModule("B");
-                ModuleList list = new ModuleList(
-                    new NamedModule("A", count),
-                    new NamedModule("B", count2));
-
-                // When, Then
-                Assert.That(() => list.Insert(1, new NamedModule("A", count2)), Throws.Exception);
-            }
-        }
-
-        public class IndexerTests : ModuleListFixture
-        {
-            [Test]
-            public void ThrowsWhenSettingDuplicateNamedModule()
-            {
-                // Given
-                CountModule count = new CountModule("A");
-                CountModule count2 = new CountModule("B");
-                ModuleList list = new ModuleList(
-                    new NamedModule("A", count),
-                    new NamedModule("B", count2));
-
-                // When, Then
-                Assert.That(() => { list[1] = new NamedModule("A", count2); }, Throws.Exception);
-            }
-
-            [Test]
-            public void DoesNotThrowWhenSettingDuplicateNamedModuleAtSameIndex()
-            {
-                // Given
-                CountModule count = new CountModule("A");
-                CountModule count2 = new CountModule("B");
-                ModuleList list = new ModuleList(
-                    new NamedModule("A", count),
-                    new NamedModule("B", count2));
-
-                // When
-                list[1] = new NamedModule("B", count2);
 
                 // Then
                 Assert.That(list, Is.EqualTo(new[] { count, count2 }));
