@@ -2,7 +2,9 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Threading.Tasks;
 using Wyam.App;
+using Wyam.Common.Configuration;
 using Wyam.Common.Execution;
+using Wyam.Common.Meta;
 using Wyam.Core.Modules.Contents;
 using Wyam.Core.Modules.Control;
 using Wyam.Core.Modules.IO;
@@ -24,8 +26,8 @@ namespace Splashdown
                     new FrontMatter(new Yaml()),
                     new Markdown(),
                     new ReplaceIn("{{CONTENT}}", new ReadFiles("template.html")),
-                    new Replace("{{TITLE}}", (doc, _) => doc.Get("Title", "Default Title")),
-                    new Replace("{{DESC}}", (doc, _) => doc.Get("Description", "Default Description")),
+                    new Replace("{{TITLE}}", Config.FromDocument(doc => doc.Get("Title", "Default Title"))),
+                    new Replace("{{DESC}}", Config.FromDocument(doc => doc.Get("Description", "Default Description"))),
                     new WriteFiles(".html"))
                 .RunAsync();
     }

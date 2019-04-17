@@ -1,9 +1,9 @@
 ﻿using System.Collections.Generic;
+using System.Threading.Tasks;
 using WebMarkupMin.Core;
 using Wyam.Common.Documents;
-using Wyam.Common.Modules;
 using Wyam.Common.Execution;
-using System.Threading.Tasks;
+using Wyam.Common.Modules;
 
 namespace Wyam.Minification
 {
