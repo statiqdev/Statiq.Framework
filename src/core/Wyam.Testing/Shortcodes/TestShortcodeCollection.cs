@@ -9,64 +9,14 @@ using Wyam.Common.Shortcodes;
 
 namespace Wyam.Testing.Shortcodes
 {
-    public class TestShortcodeCollection : Dictionary<string, Type>, IShortcodeCollection
+    public class TestShortcodeCollection : Dictionary<string, Func<IShortcode>>, IShortcodeCollection
     {
         public TestShortcodeCollection()
             : base(StringComparer.OrdinalIgnoreCase)
         {
         }
 
-        public IShortcode CreateInstance(string name) => (IShortcode)Activator.CreateInstance(this[name]);
-
-        public void Add<TShortcode>(string name)
-            where TShortcode : IShortcode =>
-            this[name] = typeof(TShortcode);
-
-        public void Add<TShortcode>()
-            where TShortcode : IShortcode =>
-            Add<TShortcode>(typeof(TShortcode).Name);
-
-        public void Add(Type type) =>
-            this[type.Name] = type;
-
-        public void Add(string name, string result) =>
-            throw new NotImplementedException();
-
-        public void Add(string name, ContextConfig contextConfig) =>
-            throw new NotImplementedException();
-
-        public void Add(string name, DocumentConfig documentConfig) =>
-            throw new NotImplementedException();
-
-        public void Add(string name, Func<string, string> func) =>
-            throw new NotImplementedException();
-
-        public void Add(string name, Func<KeyValuePair<string, string>[], string> func) =>
-            throw new NotImplementedException();
-
-        public void Add(string name, Func<KeyValuePair<string, string>[], string, string> func) =>
-            throw new NotImplementedException();
-
-        public void Add(string name, Func<KeyValuePair<string, string>[], string, IExecutionContext, string> func) =>
-            throw new NotImplementedException();
-
-        public void Add(string name, Func<KeyValuePair<string, string>[], string, IDocument, IExecutionContext, string> func) =>
-            throw new NotImplementedException();
-
-        public void Add(string name, Func<KeyValuePair<string, string>[], IExecutionContext, string> func) =>
-            throw new NotImplementedException();
-
-        public void Add(string name, Func<KeyValuePair<string, string>[], IDocument, IExecutionContext, string> func) =>
-            throw new NotImplementedException();
-
-        public void Add(string name, Func<string, IExecutionContext, string> func) =>
-            throw new NotImplementedException();
-
-        public void Add(string name, Func<string, IDocument, IExecutionContext, string> func) =>
-            throw new NotImplementedException();
-
-        public void Add(string name, Func<KeyValuePair<string, string>[], string, IDocument, IExecutionContext, Task<IShortcodeResult>> func) =>
-            throw new NotImplementedException();
+        public IShortcode CreateInstance(string name) => this[name]();
 
         public bool Contains(string name) => ContainsKey(name);
 
