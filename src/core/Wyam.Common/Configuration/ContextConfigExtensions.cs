@@ -8,18 +8,11 @@ using Wyam.Common.Execution;
 
 namespace Wyam.Common.Configuration
 {
-    public class ContextConfig : DocumentConfig
+    public static class ContextConfigExtensions
     {
-        internal ContextConfig(Func<IExecutionContext, Task<object>> func)
-            : base((_, ctx) => func(ctx))
+        public static async Task<T> GetValueAsync<T>(this ContextConfig<object> config, IExecutionContext context, string errorDetails = null)
         {
-        }
-
-        public Task<object> GetValueAsync(IExecutionContext context) => GetValueAsync(null, context);
-
-        public async Task<T> GetValueAsync<T>(IExecutionContext context, string errorDetails = null)
-        {
-            object value = await GetValueAsync(null, context);
+            object value = await config.GetValueAsync(null, context);
             if (!context.TryConvert(value, out T result))
             {
                 throw new InvalidOperationException(
@@ -28,12 +21,10 @@ namespace Wyam.Common.Configuration
             return result;
         }
 
-        public async Task<T> TryGetValueAsync<T>(IExecutionContext context)
+        public static async Task<T> TryGetValueAsync<T>(this ContextConfig<object> config, IExecutionContext context)
         {
-            object value = await GetValueAsync(null, context);
+            object value = await config.GetValueAsync(null, context);
             return context.TryConvert(value, out T result) ? result : default;
         }
-
-        public override bool IsDocumentConfig => false;
     }
 }

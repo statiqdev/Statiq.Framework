@@ -33,7 +33,7 @@ namespace Wyam.Core.Modules.Extensibility
         /// </summary>
         /// <param name="execute">A delegate to invoke that should return a <c>IEnumerable&lt;IDocument&gt;</c>,
         /// <see cref="IDocument"/>, <c>IEnumerable&lt;IModule&gt;</c>, <see cref="IModule"/>, or null.</param>
-        public ExecuteContext(ContextConfig execute)
+        public ExecuteContext(ContextConfig<object> execute)
             : base(async (inputs, context) =>
             {
                 object contextResult = await execute.GetValueAsync(context);
@@ -59,7 +59,7 @@ namespace Wyam.Core.Modules.Extensibility
                     async ctx =>
                     {
                         await execute(ctx);
-                        return null;
+                        return (object)null;
                     }))
         {
         }
@@ -75,7 +75,7 @@ namespace Wyam.Core.Modules.Extensibility
                     ctx =>
                     {
                         execute(ctx);
-                        return null;
+                        return (object)null;
                     }))
         {
         }

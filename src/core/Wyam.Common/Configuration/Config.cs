@@ -11,36 +11,24 @@ namespace Wyam.Common.Configuration
     public static class Config
     {
         /// <summary>
-        /// Creates a <see cref="ContextConfig"/> (and via casting, a <see cref="DocumentConfig"/>) from an object value.
+        /// Creates a <see cref="ContextConfig{T}"/> (and via casting, a <see cref="DocumentConfig{T}"/>) from an object value.
         /// </summary>
         /// <remarks>
         /// If you need to get a strongly typed configuration, you don't need a helper method as the value can be directly casted to a configuration item.
         /// </remarks>
         /// <param name="value">The value of the configuration.</param>
         /// <returns>A configuration item with the given value.</returns>
-        public static ContextConfig FromValue(object value) => new ContextConfig(_ => Task.FromResult(value));
+        public static ContextConfig<T> FromValue<T>(T value) => new ContextConfig<T>(_ => Task.FromResult(value));
 
-        public static ContextConfig AsyncFromValue(Task<object> value) => new ContextConfig(_ => value);
-
-        public static ContextConfig FromContext(Func<IExecutionContext, object> func) => new ContextConfig(ctx => Task.FromResult(func(ctx)));
-
-        public static ContextConfig AsyncFromContext(Func<IExecutionContext, Task<object>> func) => new ContextConfig(func);
+        public static ContextConfig<T> AsyncFromValue<T>(Task<T> value) => new ContextConfig<T>(_ => value);
 
         public static ContextConfig<T> FromContext<T>(Func<IExecutionContext, T> func) => new ContextConfig<T>(ctx => Task.FromResult(func(ctx)));
 
         public static ContextConfig<T> AsyncFromContext<T>(Func<IExecutionContext, Task<T>> func) => new ContextConfig<T>(func);
 
-        public static DocumentConfig FromDocument(Func<IDocument, IExecutionContext, object> func) => new DocumentConfig((doc, ctx) => Task.FromResult(func(doc, ctx)));
-
-        public static DocumentConfig AsyncFromDocument(Func<IDocument, IExecutionContext, Task<object>> func) => new DocumentConfig(func);
-
         public static DocumentConfig<T> FromDocument<T>(Func<IDocument, IExecutionContext, T> func) => new DocumentConfig<T>((doc, ctx) => Task.FromResult(func(doc, ctx)));
 
         public static DocumentConfig<T> AsyncFromDocument<T>(Func<IDocument, IExecutionContext, Task<T>> func) => new DocumentConfig<T>(func);
-
-        public static DocumentConfig FromDocument(Func<IDocument, object> func) => new DocumentConfig((doc, _) => Task.FromResult(func(doc)));
-
-        public static DocumentConfig AsyncFromDocument(Func<IDocument, Task<object>> func) => new DocumentConfig((doc, _) => func(doc));
 
         public static DocumentConfig<T> FromDocument<T>(Func<IDocument, T> func) => new DocumentConfig<T>((doc, _) => Task.FromResult(func(doc)));
 

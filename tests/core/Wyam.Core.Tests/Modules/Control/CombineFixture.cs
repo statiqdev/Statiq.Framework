@@ -1,9 +1,11 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using NUnit.Framework;
 using Wyam.Common.Documents;
 using Wyam.Common.Execution;
+using Wyam.Common.Util;
 using Wyam.Core.Modules.Control;
 using Wyam.Testing;
 using Wyam.Testing.Documents;
@@ -18,7 +20,7 @@ namespace Wyam.Core.Tests.Modules.Control
         public class ExecuteTests : CombineFixture
         {
             [Test]
-            public void AppendsContent()
+            public async Task AppendsContent()
             {
                 // Given
                 TestExecutionContext context = new TestExecutionContext();
@@ -27,14 +29,14 @@ namespace Wyam.Core.Tests.Modules.Control
                 Combine combine = new Combine();
 
                 // When
-                List<IDocument> results = combine.Execute(new[] { a, b }, context).ToList();  // Make sure to materialize the result list
+                List<IDocument> results = await combine.ExecuteAsync(new[] { a, b }, context).ToListAsync();  // Make sure to materialize the result list
 
                 // Then
                 CollectionAssert.AreEqual(new[] { "ab" }, results.Select(x => x.Content));
             }
 
             [Test]
-            public void MergesMetadata()
+            public async Task MergesMetadata()
             {
                 // Given
                 TestExecutionContext context = new TestExecutionContext();
@@ -51,7 +53,7 @@ namespace Wyam.Core.Tests.Modules.Control
                 Combine combine = new Combine();
 
                 // When
-                List<IDocument> results = combine.Execute(new[] { a, b }, context).ToList();  // Make sure to materialize the result list
+                List<IDocument> results = await combine.ExecuteAsync(new[] { a, b }, context).ToListAsync();  // Make sure to materialize the result list
 
                 // Then
                 CollectionAssert.AreEquivalent(

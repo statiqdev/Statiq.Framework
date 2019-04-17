@@ -110,7 +110,7 @@ namespace Wyam.Core.Modules.Metadata
                 }
 
                 // Attempt to convert it to the desired type
-                if (!input.MetadataAs<T>().TryGetValue(_key, out T value))
+                if (!input.TryGetValue(_key, out T value))
                 {
                     // Report the original string, as the value coming out of TryGetValue might not be the same as what went in.
                     throw GetException($"Value \"{input.String(_key)}\" could not be converted to type \"{typeof(T).Name}\".");

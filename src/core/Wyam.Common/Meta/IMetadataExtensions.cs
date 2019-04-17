@@ -30,7 +30,7 @@ namespace Wyam.Common.Meta
         /// <param name="key">The key of the value to get.</param>
         /// <returns>The value for the specified key converted to type T or default(T) if the key is not found or cannot be converted to type T.</returns>
         public static T Get<T>(this IMetadata metadata, string key) =>
-            metadata.MetadataAs<T>().Get(key);
+            metadata.TryGetValue(key, out T value) ? value : default;
 
         /// <summary>
         /// Gets the value for the specified key. This method never throws an exception. It will return the specified
@@ -42,6 +42,6 @@ namespace Wyam.Common.Meta
         /// <param name="defaultValue">The default value to use if the key is not found or cannot be converted to type T.</param>
         /// <returns>The value for the specified key converted to type T or the specified default value.</returns>
         public static T Get<T>(this IMetadata metadata, string key, T defaultValue) =>
-            metadata.MetadataAs<T>().Get(key, defaultValue);
+            metadata.TryGetValue(key, out T value) ? value : defaultValue;
     }
 }

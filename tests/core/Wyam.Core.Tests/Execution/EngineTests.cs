@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using NUnit.Framework;
+using Wyam.Common.Configuration;
 using Wyam.Common.Execution;
 using Wyam.Common.Meta;
 using Wyam.Common.Util;
@@ -63,17 +64,17 @@ namespace Wyam.Core.Tests.Execution
             int c = 0;
             engine.Pipelines.Add(
                 "Pipeline",
-                new Execute(
-                    (x, ctx) => new[]
+                new ExecuteDocument(
+                    Config.FromDocument((x, ctx) => (object)new[]
                     {
                         ctx.GetDocument(x, (Stream)null, new Dictionary<string, object> { { c.ToString(), c++ } }),
                         ctx.GetDocument(x, (Stream)null, new Dictionary<string, object> { { c.ToString(), c++ } })
-                    }, false),
-                new Execute(
-                    (x, ctx) => new[]
+                    }), false),
+                new ExecuteDocument(
+                    Config.FromDocument((x, ctx) => (object)new[]
                     {
                         ctx.GetDocument(x, (Stream)null, new Dictionary<string, object> { { c.ToString(), c++ } })
-                    }, false));
+                    }), false));
 
             // When
             await engine.ExecuteAsync(serviceProvider);
@@ -104,18 +105,18 @@ namespace Wyam.Core.Tests.Execution
             Engine engine = new Engine();
             int c = 0;
             engine.Pipelines.Add(
-                new Execute(
-                    (x, ctx) => new[]
+                new ExecuteDocument(
+                    Config.FromDocument((x, ctx) => new[]
                     {
                         ctx.GetDocument(x, ctx.GetContentStreamAsync(c++.ToString()).Result),
                         ctx.GetDocument(x, ctx.GetContentStreamAsync(c++.ToString()).Result)
-                    }, false),
-                new Execute(
-                    (x, ctx) => new[]
+                    }), false),
+                new ExecuteDocument(
+                    Config.FromDocument((x, ctx) => new[]
                     {
                         ctx.GetDocument(x, ctx.GetContentStreamAsync(c++.ToString()).Result)
-                    }, false),
-                new Core.Modules.Metadata.Meta("Content", (x, y) => x.Content));
+                    }), false),
+                new Core.Modules.Metadata.Meta("Content", Config.FromDocument(x => x.Content)));
 
             // When
             await engine.ExecuteAsync(serviceProvider);
