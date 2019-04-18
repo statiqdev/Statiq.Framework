@@ -205,11 +205,11 @@ namespace Wyam.Sass
                             { Keys.WritePath, cssPath }
                     });
 
-                IDocument sourceMapDocument = null;
+                // Generate a source map if requested
                 if (_generateSourceMap && result.SourceMap != null)
                 {
                     FilePath sourceMapPath = relativePath.ChangeExtension("map");
-                    sourceMapDocument = await context.GetDocumentAsync(
+                    IDocument sourceMapDocument = await context.GetDocumentAsync(
                         input,
                         result.SourceMap,
                         new MetadataItems
@@ -217,9 +217,10 @@ namespace Wyam.Sass
                                 { Keys.RelativeFilePath, sourceMapPath },
                                 { Keys.WritePath, sourceMapPath }
                         });
+                    return new[] { cssDocument, sourceMapDocument };
                 }
 
-                return new[] { cssDocument, sourceMapDocument };
+                return new[] { cssDocument };
             }
         }
 

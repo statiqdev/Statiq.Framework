@@ -15,10 +15,8 @@ namespace Wyam.Common.Configuration
         {
         }
 
-        public static implicit operator ContextPredicate(bool value) => new ContextPredicate(_ => Task.FromResult(value));
-
-        public Task<bool> GetValueAsync(IExecutionContext context) => GetValueAsync(null, context);
-
         public override bool IsDocumentConfig => false;
+
+        public static implicit operator ContextPredicate(bool value) => new ContextPredicate(_ => Task.FromResult(value));
     }
 }

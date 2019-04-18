@@ -37,7 +37,9 @@ namespace Wyam.Common.Configuration
 
         public virtual bool IsDocumentConfig => true;
 
-        public async Task<T> GetValueAsync(IDocument document, IExecutionContext context, Func<T, T> transform = null)
+        // This should only be accessed via the extension method(s) that guard against null so that null coalescing operators can be used
+        // See the discussion at https://github.com/dotnet/roslyn/issues/7171
+        internal async Task<T> GetAndCacheValueAsync(IDocument document, IExecutionContext context, Func<T, T> transform = null)
         {
             // We can potentially cache the value if this was called with a null document
             // or is not a document config (in which case the document isn't used in the delegate)

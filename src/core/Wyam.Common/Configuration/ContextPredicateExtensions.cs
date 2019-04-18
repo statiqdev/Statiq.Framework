@@ -10,6 +10,11 @@ namespace Wyam.Common.Configuration
 {
     public static class ContextPredicateExtensions
     {
+        public static Task<bool> GetValueAsync(
+            this ContextPredicate predicate,
+            IExecutionContext context) =>
+            predicate?.GetAndCacheValueAsync(null, context) ?? Task.FromResult(default(bool));
+
         public static ContextPredicate CombineWith(this ContextPredicate first, ContextPredicate second)
         {
             if (first == null)

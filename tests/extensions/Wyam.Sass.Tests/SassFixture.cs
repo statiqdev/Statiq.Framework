@@ -132,7 +132,7 @@ body {
                 Sass sass = new Sass();
 
                 // When, Then
-                await Should.ThrowAsync<AggregateException>(async () =>
+                await Should.ThrowAsync<Exception>(async () =>
                 {
                     await sass.ExecuteAsync(new[] { document }, context).ToListAsync(); // Make sure to materialize the result list
                 });

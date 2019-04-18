@@ -201,7 +201,7 @@ namespace Wyam.SearchIndex
 
             // Get the output path
             MetadataItems metadata = null;
-            FilePath outputPath = await _path?.GetValueAsync(context);
+            FilePath outputPath = await _path.GetValueAsync(context);
             if (outputPath != null)
             {
                 if (!outputPath.IsRelative)

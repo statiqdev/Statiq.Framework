@@ -407,15 +407,15 @@ namespace Wyam.Feeds
             // Get the feed
             Feed feed = new Feed
             {
-                ID = await _feedId?.GetValueAsync(context),
-                Title = await _feedTitle?.GetValueAsync(context),
-                Description = await _feedDescription?.GetValueAsync(context),
-                Author = await _feedAuthor?.GetValueAsync(context),
-                Published = await _feedPublished?.GetValueAsync(context),
-                Updated = await _feedUpdated?.GetValueAsync(context),
-                Link = await _feedLink?.GetValueAsync(context),
-                ImageLink = await _feedImageLink?.GetValueAsync(context),
-                Copyright = await _feedCopyright?.GetValueAsync(context)
+                ID = await _feedId.GetValueAsync(context),
+                Title = await _feedTitle.GetValueAsync(context),
+                Description = await _feedDescription.GetValueAsync(context),
+                Author = await _feedAuthor.GetValueAsync(context),
+                Published = await _feedPublished.GetValueAsync(context),
+                Updated = await _feedUpdated.GetValueAsync(context),
+                Link = await _feedLink.GetValueAsync(context),
+                ImageLink = await _feedImageLink.GetValueAsync(context),
+                Copyright = await _feedCopyright.GetValueAsync(context)
             };
 
             // Add items
@@ -423,18 +423,18 @@ namespace Wyam.Feeds
             {
                 feed.Items.Add(new FeedItem
                 {
-                    ID = await _itemId?.GetValueAsync(input, context),
-                    Title = await _itemTitle?.GetValueAsync(input, context),
-                    Description = await _itemDescription?.GetValueAsync(input, context),
-                    Author = await _itemAuthor?.GetValueAsync(input, context),
-                    Published = await _itemPublished?.GetValueAsync(input, context),
-                    Updated = await _itemUpdated?.GetValueAsync(input, context),
-                    Link = await _itemLink?.GetValueAsync(input, context),
-                    ImageLink = await _itemImageLink?.GetValueAsync(input, context),
-                    Content = await _itemContent?.GetValueAsync(input, context),
-                    ThreadLink = await _itemThreadLink?.GetValueAsync(input, context),
-                    ThreadCount = await _itemThreadCount?.GetValueAsync(input, context),
-                    ThreadUpdated = await _itemThreadUpdated?.GetValueAsync(input, context)
+                    ID = await _itemId.GetValueAsync(input, context),
+                    Title = await _itemTitle.GetValueAsync(input, context),
+                    Description = await _itemDescription.GetValueAsync(input, context),
+                    Author = await _itemAuthor.GetValueAsync(input, context),
+                    Published = await _itemPublished.GetValueAsync(input, context),
+                    Updated = await _itemUpdated.GetValueAsync(input, context),
+                    Link = await _itemLink.GetValueAsync(input, context),
+                    ImageLink = await _itemImageLink.GetValueAsync(input, context),
+                    Content = await _itemContent.GetValueAsync(input, context),
+                    ThreadLink = await _itemThreadLink.GetValueAsync(input, context),
+                    ThreadCount = await _itemThreadCount.GetValueAsync(input, context),
+                    ThreadUpdated = await _itemThreadUpdated.GetValueAsync(input, context)
                 });
             });
 
@@ -450,7 +450,7 @@ namespace Wyam.Feeds
         private async Task<IDocument> GenerateFeedAsync(FeedType feedType, Feed feed, ContextConfig<FilePath> path, IExecutionContext context)
         {
             // Get the output path
-            FilePath outputPath = await path?.GetValueAsync(context);
+            FilePath outputPath = await path.GetValueAsync(context);
             if (outputPath == null)
             {
                 return null;

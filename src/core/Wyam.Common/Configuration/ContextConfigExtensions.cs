@@ -10,9 +10,20 @@ namespace Wyam.Common.Configuration
 {
     public static class ContextConfigExtensions
     {
+        public static Task<T> GetValueAsync<T>(
+            this ContextConfig<T> config,
+            IExecutionContext context,
+            Func<T, T> transform = null) =>
+            config?.GetAndCacheValueAsync(null, context, transform) ?? Task.FromResult(default(T));
+
         public static async Task<T> GetValueAsync<T>(this ContextConfig<object> config, IExecutionContext context, string errorDetails = null)
         {
-            object value = await config.GetValueAsync(null, context);
+            if (config == null)
+            {
+                return default;
+            }
+
+            object value = await config.GetAndCacheValueAsync(null, context);
             if (!context.TryConvert(value, out T result))
             {
                 throw new InvalidOperationException(
@@ -23,7 +34,12 @@ namespace Wyam.Common.Configuration
 
         public static async Task<T> TryGetValueAsync<T>(this ContextConfig<object> config, IExecutionContext context)
         {
-            object value = await config.GetValueAsync(null, context);
+            if (config == null)
+            {
+                return default;
+            }
+
+            object value = await config.GetAndCacheValueAsync(null, context);
             return context.TryConvert(value, out T result) ? result : default;
         }
     }

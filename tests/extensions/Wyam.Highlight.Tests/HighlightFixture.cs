@@ -217,7 +217,7 @@ namespace Wyam.Highlight.Tests
                 Highlight highlight = new Highlight();
 
                 // When, Then
-                await Should.ThrowAsync<AggregateException>(async () => await highlight.ExecuteAsync(new[] { document }, context).ToListAsync());
+                await Should.ThrowAsync<Exception>(async () => await highlight.ExecuteAsync(new[] { document }, context).ToListAsync());
             }
 
             [Test]

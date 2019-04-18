@@ -34,8 +34,6 @@ namespace Wyam.Common.Configuration
 
         public override bool IsDocumentConfig => false;
 
-        public Task<T> GetValueAsync(IExecutionContext context) => GetValueAsync(null, context);
-
         public static implicit operator ContextConfig<T>(T value) => new ContextConfig<T>(_ => Task.FromResult(value));
 
         // These special casting operators for object variants ensure we don't accidentally "wrap" an existing ContextConfig/DocumentConfig
