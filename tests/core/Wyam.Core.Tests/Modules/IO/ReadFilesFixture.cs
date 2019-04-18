@@ -70,7 +70,7 @@ namespace Wyam.Core.Tests.Modules.IO
             public void ThrowsOnNullPathFunction()
             {
                 // Given, When, Then
-                Assert.Throws<ArgumentNullException>(() => new ReadFiles(Config.FromDocument<IEnumerable<string>>(_ => null)));
+                Assert.Throws<ArgumentNullException>(() => new ReadFiles((DocumentConfig<IEnumerable<string>>)null));
             }
 
             [Test]

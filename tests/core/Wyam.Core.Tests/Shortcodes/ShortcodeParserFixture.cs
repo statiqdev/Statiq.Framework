@@ -47,7 +47,7 @@ namespace Wyam.Core.Tests.Shortcodes
                     ShortcodeParser.DefaultPostRenderEndDelimiter,
                     new TestShortcodeCollection
                     {
-                        { "name", (Type)null }
+                        { "name", typeof(TestShortcode) }
                     });
 
                 // When
@@ -91,7 +91,7 @@ namespace Wyam.Core.Tests.Shortcodes
                     ShortcodeParser.DefaultPostRenderEndDelimiter,
                     new TestShortcodeCollection
                     {
-                        { "name", (Type)null }
+                        { "name", typeof(TestShortcode) }
                     });
 
                 // When
@@ -117,8 +117,8 @@ namespace Wyam.Core.Tests.Shortcodes
                     ShortcodeParser.DefaultPostRenderEndDelimiter,
                     new TestShortcodeCollection
                     {
-                        { "foo", (Type)null },
-                        { "bar", (Type)null }
+                        { "foo", typeof(TestShortcode) },
+                        { "bar", typeof(TestShortcode) }
                     });
 
                 // When, Then
@@ -160,7 +160,7 @@ namespace Wyam.Core.Tests.Shortcodes
                     endDelimiter,
                     new TestShortcodeCollection
                     {
-                        { "name", (Type)null }
+                        { "name", typeof(TestShortcode) }
                     });
 
                 // When
@@ -194,7 +194,7 @@ namespace Wyam.Core.Tests.Shortcodes
                     ShortcodeParser.DefaultPostRenderEndDelimiter,
                     new TestShortcodeCollection
                     {
-                        { "name", (Type)null }
+                        { "name", typeof(TestShortcode) }
                     });
 
                 // When
@@ -221,7 +221,7 @@ namespace Wyam.Core.Tests.Shortcodes
                     ShortcodeParser.DefaultPostRenderEndDelimiter,
                     new TestShortcodeCollection
                     {
-                        { "name", (Type)null }
+                        { "name", typeof(TestShortcode) }
                     });
 
                 // When
@@ -241,7 +241,7 @@ namespace Wyam.Core.Tests.Shortcodes
                     ShortcodeParser.DefaultPostRenderEndDelimiter,
                     new TestShortcodeCollection
                     {
-                        { "bar", (Type)null }
+                        { "bar", typeof(TestShortcode) }
                     });
 
                 // When, Then
@@ -258,7 +258,7 @@ namespace Wyam.Core.Tests.Shortcodes
                     ShortcodeParser.DefaultPostRenderEndDelimiter,
                     new TestShortcodeCollection
                     {
-                        { "bar", (Type)null }
+                        { "bar", typeof(TestShortcode) }
                     });
 
                 // When, Then
@@ -275,7 +275,7 @@ namespace Wyam.Core.Tests.Shortcodes
                     ShortcodeParser.DefaultPostRenderEndDelimiter,
                     new TestShortcodeCollection
                     {
-                        { "foo", (Type)null }
+                        { "foo", typeof(TestShortcode) }
                     });
 
                 // When, Then

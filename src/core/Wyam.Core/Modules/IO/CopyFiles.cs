@@ -56,7 +56,7 @@ namespace Wyam.Core.Modules.IO
         /// </summary>
         /// <param name="patterns">The globbing patterns and/or absolute paths to read.</param>
         public CopyFiles(params string[] patterns)
-            : this((DocumentConfig<IEnumerable<string>>)patterns)
+            : this((DocumentConfig<IEnumerable<string>>)(patterns ?? throw new ArgumentNullException(nameof(patterns))))
         {
         }
 

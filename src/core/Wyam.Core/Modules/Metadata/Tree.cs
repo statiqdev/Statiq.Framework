@@ -201,7 +201,7 @@ namespace Wyam.Core.Modules.Metadata
         {
             // Create a dictionary of tree nodes
             TreeNodeEqualityComparer treeNodeEqualityComparer = new TreeNodeEqualityComparer();
-            IEnumerable<TreeNode> nodes = await inputs.SelectAsync(async x => new TreeNode(await _treePath.GetValueAsync(x, context)));
+            IEnumerable<TreeNode> nodes = await inputs.SelectAsync(async x => new TreeNode(await _treePath.GetValueAsync(x, context), x));
             nodes = nodes
                 .Where(x => x.TreePath != null)
                 .Distinct(treeNodeEqualityComparer);

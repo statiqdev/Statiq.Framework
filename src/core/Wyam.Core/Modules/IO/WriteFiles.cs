@@ -63,7 +63,7 @@ namespace Wyam.Core.Modules.IO
         private bool _useWriteMetadata = true;
         private bool _ignoreEmptyContent = true;
         private bool _append;
-        private DocumentPredicate _predicate = null;
+        private DocumentPredicate _predicate = true;
         private bool _onlyMetadata = false;
 
         /// <summary>

@@ -71,7 +71,7 @@ namespace Wyam.Core.Tests.Modules.IO
                 Include include = new Include();
 
                 // When, Then
-                await Should.ThrowAsync<AggregateException>(async () => await include.ExecuteAsync(documents, Context).ToListAsync());
+                await Should.ThrowAsync<Exception>(async () => await include.ExecuteAsync(documents, Context).ToListAsync());
             }
 
             [Test]

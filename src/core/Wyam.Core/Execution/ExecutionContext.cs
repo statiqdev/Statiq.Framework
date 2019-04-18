@@ -126,7 +126,7 @@ namespace Wyam.Core.Execution
         {
             CheckDisposed();
             IDocument document = Engine.DocumentFactory.GetDocument(this, sourceDocument, source, stream, items, disposeStream);
-            if (sourceDocument != null && sourceDocument.Source == null)
+            if (sourceDocument != null && sourceDocument.Source == null && source != null)
             {
                 // Only add a new source if the source document didn't already contain one (otherwise the one it contains will be used)
                 _pipeline.AddDocumentSource(source);

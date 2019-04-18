@@ -78,13 +78,5 @@ namespace Wyam.Core.Tests.Shortcodes
                 Should.Throw<ArgumentException>(() => shortcodes.Add<TestShortcode>("  xyz  "));
             }
         }
-
-        private class TestShortcode : IShortcode
-        {
-            public Task<IShortcodeResult> ExecuteAsync(KeyValuePair<string, string>[] args, string content, IDocument document, IExecutionContext context)
-            {
-                throw new NotImplementedException();
-            }
-        }
     }
 }
