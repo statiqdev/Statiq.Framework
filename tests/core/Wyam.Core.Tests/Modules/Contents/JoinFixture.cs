@@ -103,7 +103,7 @@ namespace Wyam.Core.Tests.Modules.Contents
             List<IDocument> results = await join.ExecuteAsync(null, context).ToListAsync();
 
             // Then
-            Assert.AreEqual(null, results.Single().Content);
+            Assert.AreEqual(string.Empty, results.Single().Content);
         }
 
         [Test]
@@ -245,7 +245,7 @@ namespace Wyam.Core.Tests.Modules.Contents
             List<IDocument> results = await join.ExecuteAsync(new IDocument[0], context).ToListAsync();
 
             // Then
-            Assert.AreEqual(null, results.Single().Content);
+            Assert.AreEqual(string.Empty, results.Single().Content);
         }
 
         [Test]
@@ -259,7 +259,7 @@ namespace Wyam.Core.Tests.Modules.Contents
             List<IDocument> results = await join.ExecuteAsync(new IDocument[0], context).ToListAsync();
 
             // Then
-            Assert.AreEqual(null, results.Single().Content);
+            Assert.AreEqual(string.Empty, results.Single().Content);
         }
     }
 }

@@ -70,7 +70,7 @@ namespace Wyam.Core.Modules.Extensibility
                 Config.AsyncFromDocument(
                     async (doc, ctx) =>
                     {
-                        await execute(doc, ctx);
+                        await (execute(doc, ctx) ?? Task.CompletedTask);
                         return (object)null;
                     }),
                 parallel)

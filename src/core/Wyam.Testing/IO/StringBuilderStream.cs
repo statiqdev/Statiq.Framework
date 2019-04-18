@@ -14,17 +14,21 @@ namespace Wyam.Testing.IO
     {
         private readonly Random _random = new Random();
         private readonly MemoryStream _buffer;
+        private readonly MemoryStream _content;
         private readonly StreamReader _bufferReader;
         private readonly StringBuilder _resultBuilder;
 
         public StringBuilderStream(StringBuilder resultBuilder)
         {
             _buffer = new MemoryStream();
+            _content = new MemoryStream();
 
             // Copy the old result into the current buffer.
-            StreamWriter writer = new StreamWriter(_buffer);
-            writer.Write(resultBuilder.ToString());
-            writer.Flush();
+            using (StreamWriter writer = new StreamWriter(_buffer, Encoding.Default, 2048, true))
+            {
+                writer.Write(resultBuilder.ToString());
+                writer.Flush();
+            }
             _buffer.Position = 0;
 
             _bufferReader = new StreamReader(_buffer, true);
@@ -50,7 +54,6 @@ namespace Wyam.Testing.IO
             _buffer.Position = 0;
             _resultBuilder.Clear();
             _resultBuilder.Append(_bufferReader.ReadToEnd());
-            _buffer.SetLength(0);
         }
 
         public override long Seek(long offset, SeekOrigin origin)

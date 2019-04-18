@@ -52,7 +52,7 @@ namespace Wyam.Testing.Execution
                 document.Id = sourceDocument.Id;
             }
             document.Source = source;
-            document.Content = GetContent(stream);
+            document.Content = stream == null && sourceDocument != null ? sourceDocument.Content : GetContent(stream);
             return document;
         }
 

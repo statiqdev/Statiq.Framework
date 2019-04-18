@@ -40,7 +40,7 @@ namespace Wyam.Core.Tests.Modules.Control
                 Sidecar sidecar = new Sidecar(new ExecuteDocument(Config.FromDocument(x =>
                 {
                     lodedSidecarContent = x.Content;
-                    return (object)new[] { x };
+                    return new[] { x };
                 })));
 
                 // When
@@ -65,7 +65,7 @@ namespace Wyam.Core.Tests.Modules.Control
                 Sidecar sidecar = new Sidecar(".other", new ExecuteDocument(Config.FromDocument(x =>
                 {
                     lodedSidecarContent = x.Content;
-                    return (object)new[] { x };
+                    return new[] { x };
                 })));
 
                 // When
@@ -103,7 +103,7 @@ namespace Wyam.Core.Tests.Modules.Control
 
             private IDocument GetDocument(string source, string content)
             {
-                IDocument document = new TestDocument(
+                return new TestDocument(
                     content,
                     new Dictionary<string, object>
                     {
@@ -114,7 +114,6 @@ namespace Wyam.Core.Tests.Modules.Control
                     {
                         Source = new FilePath("/" + source)
                     };
-                return document;
             }
 
             private IExecutionContext GetExecutionContext(Engine engine)

@@ -58,7 +58,7 @@ namespace Wyam.Core.Modules.Extensibility
                 Config.AsyncFromContext(
                     async ctx =>
                     {
-                        await execute(ctx);
+                        await (execute(ctx) ?? Task.CompletedTask);
                         return (object)null;
                     }))
         {

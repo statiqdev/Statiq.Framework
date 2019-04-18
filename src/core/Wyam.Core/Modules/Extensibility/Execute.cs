@@ -46,7 +46,7 @@ namespace Wyam.Core.Modules.Extensibility
         {
             _execute = async (inputs, context) =>
             {
-                await execute(inputs, context);
+                await (execute(inputs, context) ?? Task.CompletedTask);
                 return inputs;
             };
         }

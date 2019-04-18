@@ -44,9 +44,12 @@ namespace Wyam.Testing.Documents
         public TestDocument(IEnumerable<KeyValuePair<string, object>> metadata)
             : this()
         {
-            foreach (KeyValuePair<string, object> item in metadata)
+            if (metadata != null)
             {
-                _metadata[item.Key] = item.Value;
+                foreach (KeyValuePair<string, object> item in metadata)
+                {
+                    _metadata[item.Key] = item.Value;
+                }
             }
         }
 

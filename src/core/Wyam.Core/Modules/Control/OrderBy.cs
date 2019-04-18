@@ -92,28 +92,26 @@ namespace Wyam.Core.Modules.Control
         }
 
         /// <inheritdoc />
-        public async Task<IEnumerable<IDocument>> ExecuteAsync(IReadOnlyList<IDocument> inputs, IExecutionContext context)
+        public Task<IEnumerable<IDocument>> ExecuteAsync(IReadOnlyList<IDocument> inputs, IExecutionContext context)
         {
-            IOrderedEnumerable<(IDocument Doc, object Key)> orderdList = null;
+            IOrderedEnumerable<IDocument> orderdList = null;
             foreach (Order order in _orders.Reverse())
             {
-                IEnumerable<(IDocument Doc, object Key)> inputsWithKey =
-                    await inputs.SelectAsync(context, async x => (x, await order.Key.GetValueAsync(x, context)));
                 if (orderdList == null)
                 {
                     orderdList = order.Descending
-                        ? inputsWithKey.OrderByDescending(x => x.Key, order.Comparer)
-                        : inputsWithKey.OrderBy(x => x.Key, order.Comparer);
+                        ? inputs.OrderByDescending(x => order.Key.GetValueAsync(x, context).Result, order.Comparer)
+                        : inputs.OrderBy(x => order.Key.GetValueAsync(x, context).Result, order.Comparer);
                 }
                 else
                 {
                     orderdList = order.Descending
-                        ? orderdList.ThenByDescending(x => x.Key, order.Comparer)
-                        : orderdList.ThenBy(x => x.Key, order.Comparer);
+                        ? orderdList.ThenByDescending(x => order.Key.GetValueAsync(x, context).Result, order.Comparer)
+                        : orderdList.ThenBy(x => order.Key.GetValueAsync(x, context).Result, order.Comparer);
                 }
             }
 
-            return orderdList.Select(x => x.Doc);
+            return Task.FromResult<IEnumerable<IDocument>>(orderdList);
         }
 
         private class Order

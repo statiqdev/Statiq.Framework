@@ -17,7 +17,7 @@ namespace Wyam.Core.Documents
     // Document source must be unique within the pipeline
     internal class Document : IDocument
     {
-        private readonly object _streamLock;
+        private readonly SemaphoreSlim _streamMutex;
         private readonly MetadataStack _metadata;
         private readonly Stream _stream;
         private bool _disposeStream;
@@ -33,7 +33,7 @@ namespace Wyam.Core.Documents
         {
         }
 
-        private Document(string id, MetadataStack metadata, FilePath source, Stream stream, object streamLock, IEnumerable<KeyValuePair<string, object>> items, bool disposeStream)
+        private Document(string id, MetadataStack metadata, FilePath source, Stream stream, SemaphoreSlim streamMutex, IEnumerable<KeyValuePair<string, object>> items, bool disposeStream)
         {
             if (source?.IsAbsolute == false)
             {
@@ -66,7 +66,7 @@ namespace Wyam.Core.Documents
                     _disposeStream = disposeStream;
                 }
             }
-            _streamLock = streamLock ?? new object();
+            _streamMutex = streamMutex ?? new SemaphoreSlim(1);
         }
 
         internal Document(Document sourceDocument, FilePath source, IEnumerable<KeyValuePair<string, object>> items = null)
@@ -75,7 +75,7 @@ namespace Wyam.Core.Documents
                 sourceDocument._metadata,
                 sourceDocument.Source ?? source,
                 sourceDocument._stream,
-                sourceDocument._streamLock,
+                sourceDocument._streamMutex,
                 items,
                 sourceDocument._disposeStream)
         {
@@ -85,14 +85,37 @@ namespace Wyam.Core.Documents
             sourceDocument._disposeStream = false;
         }
 
-        internal Document(Document sourceDocument, FilePath source, Stream stream, IEnumerable<KeyValuePair<string, object>> items = null, bool disposeStream = true)
-            : this(sourceDocument.Id, sourceDocument._metadata, sourceDocument.Source ?? source, stream, null, items, disposeStream)
+        internal Document(
+            Document sourceDocument,
+            FilePath source,
+            Stream stream,
+            IEnumerable<KeyValuePair<string, object>> items = null,
+            bool disposeStream = true)
+            : this(
+                sourceDocument.Id,
+                sourceDocument._metadata,
+                sourceDocument.Source ?? source,
+                stream ?? sourceDocument._stream,
+                stream == null ? sourceDocument._streamMutex : null,
+                items,
+                disposeStream)
         {
             sourceDocument.CheckDisposed();
         }
 
-        internal Document(Document sourceDocument, Stream stream, IEnumerable<KeyValuePair<string, object>> items = null, bool disposeStream = true)
-            : this(sourceDocument.Id, sourceDocument._metadata, sourceDocument.Source, stream, null, items, disposeStream)
+        internal Document(
+            Document sourceDocument,
+            Stream stream,
+            IEnumerable<KeyValuePair<string, object>> items = null,
+            bool disposeStream = true)
+            : this(
+                sourceDocument.Id,
+                sourceDocument._metadata,
+                sourceDocument.Source,
+                stream ?? sourceDocument._stream,
+                stream == null ? sourceDocument._streamMutex : null,
+                items,
+                disposeStream)
         {
             sourceDocument.CheckDisposed();
         }
@@ -103,7 +126,7 @@ namespace Wyam.Core.Documents
                 sourceDocument._metadata,
                 sourceDocument.Source,
                 sourceDocument._stream,
-                sourceDocument._streamLock,
+                sourceDocument._streamMutex,
                 items,
                 sourceDocument._disposeStream)
         {
@@ -126,7 +149,7 @@ namespace Wyam.Core.Documents
             get
             {
                 CheckDisposed();
-                Monitor.Enter(_streamLock);
+                _streamMutex.Wait();
                 try
                 {
                     _stream.Position = 0;
@@ -137,7 +160,7 @@ namespace Wyam.Core.Documents
                 }
                 finally
                 {
-                    Monitor.Exit(_streamLock);
+                    _streamMutex.Release();
                 }
             }
         }
@@ -145,12 +168,12 @@ namespace Wyam.Core.Documents
         public Stream GetStream()
         {
             CheckDisposed();
-            Monitor.Enter(_streamLock);
+            _streamMutex.Wait();
             _stream.Position = 0;
             return new BlockingStream(_stream, this);
         }
 
-        internal void ReleaseStream() => Monitor.Exit(_streamLock);
+        internal void ReleaseStream() => _streamMutex.Release();
 
         public override string ToString() => _disposed ? string.Empty : Content;
 
