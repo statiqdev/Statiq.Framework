@@ -84,7 +84,7 @@ namespace Wyam.Core.Tests.Modules.Templates
                 TestExecutionContext context = new TestExecutionContext();
                 IDocument document = new TestDocument(input);
                 IDocument xsltDocument = new TestDocument(xsltInput);
-                IModule module = new Execute((DocumentConfig)new[] { xsltDocument });
+                IModule module = new ExecuteDocument(new[] { xsltDocument });
                 Xslt xslt = new Xslt(module);
 
                 // When

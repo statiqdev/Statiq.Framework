@@ -9,6 +9,14 @@ using Wyam.Common.Util;
 
 namespace Wyam.Common.Configuration
 {
+    /// <summary>
+    /// A union configuration value that can be either a delegate
+    /// that uses a document and context or a simple value. Use the factory methods
+    /// in the <see cref="Config"/> class to create one. Instances can also be created
+    /// through implicit casting from the value type. Note that due to overload ambiguity,
+    /// if a value type of object is used, then all overloads should also be <see cref="DocumentConfig{T}"/>.
+    /// </summary>
+    /// <typeparam name="T">The value type for this config data.</typeparam>
     public class DocumentConfig<T> : IDocumentConfig
     {
         private readonly Func<IDocument, IExecutionContext, Task<object>> _delegate;

@@ -10,6 +10,7 @@ using Wyam.Testing;
 using Wyam.Testing.Modules;
 using Wyam.Common.Execution;
 using Wyam.Testing.Execution;
+using Wyam.Common.Configuration;
 
 namespace Wyam.Core.Tests.Modules.Control
 {
@@ -20,7 +21,7 @@ namespace Wyam.Core.Tests.Modules.Control
         public class ExecuteTests : MergeFixture
         {
             [Test]
-            public void ReplacesContent()
+            public async Task ReplacesContent()
             {
                 // Given
                 IServiceProvider serviceProvider = new TestServiceProvider();
@@ -37,17 +38,17 @@ namespace Wyam.Core.Tests.Modules.Control
                     "Test",
                     a,
                     new Merge(b),
-                    new Core.Modules.Metadata.Meta("Content", (doc, ctx) => doc.Content));
+                    new Core.Modules.Metadata.Meta("Content", Config.FromDocument(doc => doc.Content)));
 
                 // When
-                engine.ExecuteAsync(serviceProvider);
+                await engine.ExecuteAsync(serviceProvider);
 
                 // Then
                 CollectionAssert.AreEqual(new[] { "21" }, engine.Documents["Test"].Select(x => x["Content"]));
             }
 
             [Test]
-            public void CombinesMetadata()
+            public async Task CombinesMetadata()
             {
                 // Given
                 IServiceProvider serviceProvider = new TestServiceProvider();
@@ -63,7 +64,7 @@ namespace Wyam.Core.Tests.Modules.Control
                 engine.Pipelines.Add("Test", a, new Merge(b));
 
                 // When
-                engine.ExecuteAsync(serviceProvider);
+                await engine.ExecuteAsync(serviceProvider);
 
                 // Then
                 CollectionAssert.AreEqual(new[] { 11 }, engine.Documents["Test"].Select(x => x["A"]));
@@ -71,7 +72,7 @@ namespace Wyam.Core.Tests.Modules.Control
             }
 
             [Test]
-            public void CombinesAndOverwritesMetadata()
+            public async Task CombinesAndOverwritesMetadata()
             {
                 // Given
                 IServiceProvider serviceProvider = new TestServiceProvider();
@@ -87,14 +88,14 @@ namespace Wyam.Core.Tests.Modules.Control
                 engine.Pipelines.Add("Test", a, new Merge(b));
 
                 // When
-                engine.ExecuteAsync(serviceProvider);
+                await engine.ExecuteAsync(serviceProvider);
 
                 // Then
                 CollectionAssert.AreEqual(new[] { 21 }, engine.Documents["Test"].Select(x => x["A"]));
             }
 
             [Test]
-            public void SingleInputSingleResult()
+            public async Task SingleInputSingleResult()
             {
                 // Given
                 IServiceProvider serviceProvider = new TestServiceProvider();
@@ -110,7 +111,7 @@ namespace Wyam.Core.Tests.Modules.Control
                 engine.Pipelines.Add("Test", a, new Merge(b));
 
                 // When
-                engine.ExecuteAsync(serviceProvider);
+                await engine.ExecuteAsync(serviceProvider);
 
                 // Then
                 Assert.AreEqual(1, a.OutputCount);
@@ -120,7 +121,7 @@ namespace Wyam.Core.Tests.Modules.Control
             }
 
             [Test]
-            public void SingleInputMultipleResults()
+            public async Task SingleInputMultipleResults()
             {
                 // Given
                 IServiceProvider serviceProvider = new TestServiceProvider();
@@ -137,7 +138,7 @@ namespace Wyam.Core.Tests.Modules.Control
                 engine.Pipelines.Add("Test", a, new Merge(b));
 
                 // When
-                engine.ExecuteAsync(serviceProvider);
+                await engine.ExecuteAsync(serviceProvider);
 
                 // Then
                 Assert.AreEqual(1, a.OutputCount);
@@ -147,7 +148,7 @@ namespace Wyam.Core.Tests.Modules.Control
             }
 
             [Test]
-            public void MultipleInputsSingleResult()
+            public async Task MultipleInputsSingleResult()
             {
                 // Given
                 IServiceProvider serviceProvider = new TestServiceProvider();
@@ -164,7 +165,7 @@ namespace Wyam.Core.Tests.Modules.Control
                 engine.Pipelines.Add("Test", a, new Merge(b));
 
                 // When
-                engine.ExecuteAsync(serviceProvider);
+                await engine.ExecuteAsync(serviceProvider);
 
                 // Then
                 Assert.AreEqual(2, a.OutputCount);
@@ -174,7 +175,7 @@ namespace Wyam.Core.Tests.Modules.Control
             }
 
             [Test]
-            public void MultipleInputsMultipleResults()
+            public async Task MultipleInputsMultipleResults()
             {
                 // Given
                 IServiceProvider serviceProvider = new TestServiceProvider();
@@ -192,7 +193,7 @@ namespace Wyam.Core.Tests.Modules.Control
                 engine.Pipelines.Add("Test", a, new Merge(b));
 
                 // When
-                engine.ExecuteAsync(serviceProvider);
+                await engine.ExecuteAsync(serviceProvider);
 
                 // Then
                 Assert.AreEqual(2, a.OutputCount);
@@ -202,7 +203,7 @@ namespace Wyam.Core.Tests.Modules.Control
             }
 
             [Test]
-            public void SingleInputSingleResultForEachDocument()
+            public async Task SingleInputSingleResultForEachDocument()
             {
                 // Given
                 IServiceProvider serviceProvider = new TestServiceProvider();
@@ -219,10 +220,10 @@ namespace Wyam.Core.Tests.Modules.Control
                     "Test",
                     a,
                     new Merge(b).ForEachDocument(),
-                    new Core.Modules.Metadata.Meta("Content", (doc, ctx) => doc.Content));
+                    new Core.Modules.Metadata.Meta("Content", Config.FromDocument(doc => doc.Content)));
 
                 // When
-                engine.ExecuteAsync(serviceProvider);
+                await engine.ExecuteAsync(serviceProvider);
 
                 // Then
                 Assert.AreEqual(1, a.OutputCount);
@@ -231,7 +232,7 @@ namespace Wyam.Core.Tests.Modules.Control
             }
 
             [Test]
-            public void SingleInputMultipleResultsForEachDocument()
+            public async Task SingleInputMultipleResultsForEachDocument()
             {
                 // Given
                 IServiceProvider serviceProvider = new TestServiceProvider();
@@ -249,10 +250,10 @@ namespace Wyam.Core.Tests.Modules.Control
                     "Test",
                     a,
                     new Merge(b).ForEachDocument(),
-                    new Core.Modules.Metadata.Meta("Content", (doc, ctx) => doc.Content));
+                    new Core.Modules.Metadata.Meta("Content", Config.FromDocument(doc => doc.Content)));
 
                 // When
-                engine.ExecuteAsync(serviceProvider);
+                await engine.ExecuteAsync(serviceProvider);
 
                 // Then
                 Assert.AreEqual(1, a.OutputCount);
@@ -261,7 +262,7 @@ namespace Wyam.Core.Tests.Modules.Control
             }
 
             [Test]
-            public void MultipleInputsSingleResultForEachDocument()
+            public async Task MultipleInputsSingleResultForEachDocument()
             {
                 // Given
                 IServiceProvider serviceProvider = new TestServiceProvider();
@@ -279,10 +280,10 @@ namespace Wyam.Core.Tests.Modules.Control
                     "Test",
                     a,
                     new Merge(b).ForEachDocument(),
-                    new Core.Modules.Metadata.Meta("Content", (doc, ctx) => doc.Content));
+                    new Core.Modules.Metadata.Meta("Content", Config.FromDocument(doc => doc.Content)));
 
                 // When
-                engine.ExecuteAsync(serviceProvider);
+                await engine.ExecuteAsync(serviceProvider);
 
                 // Then
                 Assert.AreEqual(2, a.OutputCount);
@@ -291,7 +292,7 @@ namespace Wyam.Core.Tests.Modules.Control
             }
 
             [Test]
-            public void MultipleInputsMultipleResultsForEachDocument()
+            public async Task MultipleInputsMultipleResultsForEachDocument()
             {
                 // Given
                 IServiceProvider serviceProvider = new TestServiceProvider();
@@ -310,10 +311,10 @@ namespace Wyam.Core.Tests.Modules.Control
                     "Test",
                     a,
                     new Merge(b).ForEachDocument(),
-                    new Core.Modules.Metadata.Meta("Content", (doc, ctx) => doc.Content));
+                    new Core.Modules.Metadata.Meta("Content", Config.FromDocument(doc => doc.Content)));
 
                 // When
-                engine.ExecuteAsync(serviceProvider);
+                await engine.ExecuteAsync(serviceProvider);
 
                 // Then
                 Assert.AreEqual(2, a.OutputCount);

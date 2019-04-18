@@ -40,10 +40,14 @@ namespace Wyam.Json
         /// <param name="sourceKey">The metadata key of the object to convert to JSON.</param>
         /// <param name="destinationKey">The metadata key where the JSON should be stored (or <c>null</c>
         /// to replace the content of each input document).</param>
-        public GenerateJson(string sourceKey, string destinationKey = null)
+        public GenerateJson(DocumentConfig<string> sourceKey, string destinationKey = null)
         {
+            if (sourceKey == null)
+            {
+                throw new ArgumentNullException(nameof(sourceKey));
+            }
             _destinationKey = destinationKey;
-            _data = Config.FromDocument(doc => doc.Get(sourceKey));
+            _data = Config.AsyncFromDocument(async (doc, ctx) => doc.Get(await sourceKey.GetValueAsync(doc, ctx)));
         }
 
         /// <summary>
@@ -65,11 +69,14 @@ namespace Wyam.Json
         /// <param name="keys">The metadata keys to serialize as properties.</param>
         /// <param name="destinationKey">The metadata key where the JSON should be stored (or <c>null</c>
         /// to replace the content of each input document).</param>
-        public GenerateJson(IEnumerable<string> keys, string destinationKey = null)
+        public GenerateJson(DocumentConfig<IEnumerable<string>> keys, string destinationKey = null)
         {
+            if (keys == null)
+            {
+                throw new ArgumentNullException(nameof(keys));
+            }
             _destinationKey = destinationKey;
-            DocumentConfig<object> test = Config.FromDocument(doc => keys.Where(k => doc.ContainsKey(k)).ToDictionary(k => k, k => doc[k]));
-            _data = Config.FromDocument(doc => (object)keys.Where(k => doc.ContainsKey(k)).ToDictionary(k => k, k => doc[k]));
+            _data = Config.AsyncFromDocument(async (doc, ctx) => (await keys.GetValueAsync(doc, ctx)).Where(k => doc.ContainsKey(k)).ToDictionary(k => k, k => doc[k]));
         }
 
         /// <summary>
@@ -134,9 +141,9 @@ namespace Wyam.Json
                             return await context.GetDocumentAsync(input, result);
                         }
                         return context.GetDocument(input, new MetadataItems
-                               {
-                               { _destinationKey, result }
-                               });
+                        {
+                            { _destinationKey, result }
+                        });
                     }
                 }
                 catch (Exception ex)

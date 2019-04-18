@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using NUnit.Framework;
+using Wyam.Common.Configuration;
 using Wyam.Common.Documents;
 using Wyam.Common.Execution;
 using Wyam.Common.Meta;
@@ -40,7 +41,7 @@ namespace Wyam.Core.Tests.Modules.Control
                     AdditionalOutputs = 7
                 };
                 Paginate paginate = new Paginate(3, count);
-                Execute gatherData = new Execute(
+                Execute gatherData = new ExecuteDocument(
                     (d, c) =>
                 {
                     currentPage.Add(d.Get<int>(Keys.CurrentPage));
@@ -75,7 +76,7 @@ namespace Wyam.Core.Tests.Modules.Control
                     AdditionalOutputs = 7
                 };
                 Paginate paginate = new Paginate(3, count);
-                Execute gatherData = new Execute(
+                Execute gatherData = new ExecuteDocument(
                     (d, c) =>
                 {
                     content.Add(d.Get<IList<IDocument>>(Keys.PageDocuments).Select(x => x.Content).ToList());
@@ -106,7 +107,7 @@ namespace Wyam.Core.Tests.Modules.Control
                     AdditionalOutputs = 7
                 };
                 Paginate paginate = new Paginate(3, count);
-                Execute gatherData = new Execute(
+                Execute gatherData = new ExecuteDocument(
                     (d, c) =>
                     {
                         previousPages.Add(d.Document(Keys.PreviousPage)?.Get<IList<IDocument>>(Keys.PageDocuments).Select(x => x.Content).ToList());
@@ -140,13 +141,13 @@ namespace Wyam.Core.Tests.Modules.Control
                 {
                     AdditionalOutputs = 7
                 };
-                Paginate paginate = new Paginate(3, count).Where((doc, ctx) => doc.Content != "5");
-                Execute gatherData = new Execute(
+                Paginate paginate = new Paginate(3, count).Where(Config.IfDocument(doc => doc.Content != "5"));
+                Execute gatherData = new ExecuteDocument(
                     (d, c) =>
-                {
-                    content.Add(d.Get<IList<IDocument>>(Keys.PageDocuments).Select(x => x.Content).ToList());
-                    return null;
-                }, false);
+                    {
+                        content.Add(d.Get<IList<IDocument>>(Keys.PageDocuments).Select(x => x.Content).ToList());
+                        return null;
+                    }, false);
                 engine.Pipelines.Add(paginate, gatherData);
 
                 // When

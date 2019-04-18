@@ -2,7 +2,10 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using NUnit.Framework;
+using Wyam.Common.Configuration;
+using Wyam.Common.Documents;
 using Wyam.Common.Execution;
+using Wyam.Common.Meta;
 using Wyam.Core.Execution;
 using Wyam.Core.Modules.Control;
 using Wyam.Core.Modules.Extensibility;
@@ -34,13 +37,13 @@ namespace Wyam.Core.Tests.Modules.Control
                     AdditionalOutputs = 2
                 };
                 Concat concat = new Concat(count2);
-                OrderBy orderBy = new OrderBy((d, c) => d.Get<int>("A"));
-                Execute gatherData = new Execute(
-                    (d, c) =>
-                {
-                    content.Add(d.Content);
-                    return null;
-                }, false);
+                OrderBy orderBy = new OrderBy(Config.FromDocument(d => d.Get<int>("A")));
+                Execute gatherData = new ExecuteDocument(
+                    Config.FromDocument(d =>
+                    {
+                        content.Add(d.Content);
+                        return (IDocument)null;
+                    }), false);
                 engine.Pipelines.Add(count, concat, orderBy, gatherData);
 
                 // When
@@ -67,13 +70,13 @@ namespace Wyam.Core.Tests.Modules.Control
                     AdditionalOutputs = 2
                 };
                 Concat concat = new Concat(count2);
-                OrderBy orderBy = new OrderBy((d, c) => d.Get<int>("A")).Descending();
-                Execute gatherData = new Execute(
-                    (d, c) =>
-                {
-                    content.Add(d.Content);
-                    return null;
-                }, false);
+                OrderBy orderBy = new OrderBy(Config.FromDocument(d => d.Get<int>("A"))).Descending();
+                Execute gatherData = new ExecuteDocument(
+                    Config.FromDocument(d =>
+                    {
+                        content.Add(d.Content);
+                        return (IDocument)null;
+                    }), false);
                 engine.Pipelines.Add(count, concat, orderBy, gatherData);
 
                 // When
@@ -99,14 +102,14 @@ namespace Wyam.Core.Tests.Modules.Control
                 {
                     AdditionalOutputs = 1
                 };
-                OrderBy orderBy = new OrderBy((d, c) => d.Get<int>("A"))
-                    .ThenBy((d, c) => d.Get<int>("B"));
-                Execute gatherData = new Execute(
-                    (d, c) =>
-                {
-                    content.Add(d.Content);
-                    return null;
-                }, false);
+                OrderBy orderBy = new OrderBy(Config.FromDocument(d => d.Get<int>("A")))
+                    .ThenBy(Config.FromDocument(d => d.Get<int>("B")));
+                Execute gatherData = new ExecuteDocument(
+                    Config.FromDocument(d =>
+                    {
+                        content.Add(d.Content);
+                        return (IDocument)null;
+                    }), false);
                 engine.Pipelines.Add(count, count2, orderBy, gatherData);
 
                 // When
@@ -132,15 +135,15 @@ namespace Wyam.Core.Tests.Modules.Control
                 {
                     AdditionalOutputs = 1
                 };
-                OrderBy orderBy = new OrderBy((d, c) => d.Get<int>("A"))
-                    .ThenBy((d, c) => d.Get<int>("B"))
+                OrderBy orderBy = new OrderBy(Config.FromDocument(d => d.Get<int>("A")))
+                    .ThenBy(Config.FromDocument(d => d.Get<int>("B")))
                     .Descending();
-                Execute gatherData = new Execute(
-                    (d, c) =>
-                {
-                    content.Add(d.Content);
-                    return null;
-                }, false);
+                Execute gatherData = new ExecuteDocument(
+                    Config.FromDocument(d =>
+                    {
+                        content.Add(d.Content);
+                        return (IDocument)null;
+                    }), false);
                 engine.Pipelines.Add(count, count2, orderBy, gatherData);
 
                 // When
@@ -166,16 +169,16 @@ namespace Wyam.Core.Tests.Modules.Control
                 {
                     AdditionalOutputs = 1
                 };
-                OrderBy orderBy = new OrderBy((d, c) => d.Get<int>("A"))
+                OrderBy orderBy = new OrderBy(Config.FromDocument(d => d.Get<int>("A")))
                     .Descending()
-                    .ThenBy((d, c) => d.Get<int>("B"))
+                    .ThenBy(Config.FromDocument(d => d.Get<int>("B")))
                     .Descending();
-                Execute gatherData = new Execute(
-                    (d, c) =>
-                {
-                    content.Add(d.Content);
-                    return null;
-                }, false);
+                Execute gatherData = new ExecuteDocument(
+                    Config.FromDocument(d =>
+                    {
+                        content.Add(d.Content);
+                        return (IDocument)null;
+                    }), false);
                 engine.Pipelines.Add(count, count2, orderBy, gatherData);
 
                 // When
@@ -201,15 +204,15 @@ namespace Wyam.Core.Tests.Modules.Control
                 {
                     AdditionalOutputs = 1
                 };
-                OrderBy orderBy = new OrderBy((d, c) => d.Get<int>("A"))
+                OrderBy orderBy = new OrderBy(Config.FromDocument(d => d.Get<int>("A")))
                     .Descending()
-                    .ThenBy((d, c) => d.Get<int>("B"));
-                Execute gatherData = new Execute(
-                    (d, c) =>
-                {
-                    content.Add(d.Content);
-                    return null;
-                }, false);
+                    .ThenBy(Config.FromDocument(d => d.Get<int>("B")));
+                Execute gatherData = new ExecuteDocument(
+                    Config.FromDocument(d =>
+                    {
+                        content.Add(d.Content);
+                        return (IDocument)null;
+                    }), false);
                 engine.Pipelines.Add(count, count2, orderBy, gatherData);
 
                 // When

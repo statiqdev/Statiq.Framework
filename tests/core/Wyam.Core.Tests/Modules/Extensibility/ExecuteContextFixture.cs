@@ -45,7 +45,7 @@ namespace Wyam.Core.Tests.Modules.Extensibility
                 // Given
                 IServiceProvider serviceProvider = new TestServiceProvider();
                 Engine engine = new Engine();
-                Execute execute = new ExecuteContext((ContextConfig)1);
+                Execute execute = new ExecuteContext(1);
                 engine.Pipelines.Add(execute);
 
                 // When, Then
@@ -62,7 +62,7 @@ namespace Wyam.Core.Tests.Modules.Extensibility
                     new TestDocument(),
                     new TestDocument()
                 };
-                Execute execute = new ExecuteContext((ContextConfig)null);
+                Execute execute = new ExecuteContext((object)null);
 
                 // When
                 IEnumerable<IDocument> outputs = await ((IModule)execute).ExecuteAsync(inputs, context).ToListAsync();
@@ -93,8 +93,8 @@ namespace Wyam.Core.Tests.Modules.Extensibility
                 // Given
                 IServiceProvider serviceProvider = new TestServiceProvider();
                 Engine engine = new Engine();
-                IDocument document = new TestDocument();
-                Execute execute = new ExecuteContext((ContextConfig)document);
+                TestDocument document = new TestDocument();
+                Execute execute = new ExecuteContext(document);
                 engine.Pipelines.Add("Test", execute);
 
                 // When
@@ -118,7 +118,7 @@ namespace Wyam.Core.Tests.Modules.Extensibility
                 Execute execute = new ExecuteContext(Config.FromContext(c =>
                 {
                     count++;
-                    return null;
+                    return (object)null;
                 }));
 
                 // When
