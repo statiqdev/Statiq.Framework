@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using NUnit.Framework;
+using Wyam.Common.Configuration;
 using Wyam.Common.Execution;
 using Wyam.Core.Execution;
 using Wyam.Core.Modules.Extensibility;
@@ -41,12 +42,12 @@ namespace Wyam.Core.Tests.Modules.Control
                 IServiceProvider serviceProvider = new TestServiceProvider();
                 Engine engine = new Engine();
                 Core.Modules.Control.Documents documents = new Core.Modules.Control.Documents("A", "B", "C", "D");
-                Execute gatherData = new Execute(
-                    (d, c) =>
+                Execute gatherData = new ExecuteDocument(
+                    Config.FromDocument(d =>
                 {
                     content.Add(d.Content);
-                    return null;
-                }, false);
+                    return (object)null;
+                }), false);
                 engine.Pipelines.Add(documents, gatherData);
 
                 // When
@@ -68,12 +69,12 @@ namespace Wyam.Core.Tests.Modules.Control
                     new Dictionary<string, object> { { "Foo", "a" } },
                     new Dictionary<string, object> { { "Foo", "b" } },
                     new Dictionary<string, object> { { "Foo", "c" } });
-                Execute gatherData = new Execute(
-                    (d, c) =>
+                Execute gatherData = new ExecuteDocument(
+                    Config.FromDocument(d =>
                 {
                     values.Add(d["Foo"]);
-                    return null;
-                }, false);
+                    return (object)null;
+                }), false);
                 engine.Pipelines.Add(documents, gatherData);
 
                 // When
@@ -96,13 +97,13 @@ namespace Wyam.Core.Tests.Modules.Control
                     Tuple.Create("A", new Dictionary<string, object> { { "Foo", "a" } }.AsEnumerable()),
                     Tuple.Create("B", new Dictionary<string, object> { { "Foo", "b" } }.AsEnumerable()),
                     Tuple.Create("C", new Dictionary<string, object> { { "Foo", "c" } }.AsEnumerable()));
-                Execute gatherData = new Execute(
-                    (d, c) =>
+                Execute gatherData = new ExecuteDocument(
+                    Config.FromDocument(d =>
                 {
                     content.Add(d.Content);
                     values.Add(d["Foo"]);
-                    return null;
-                }, false);
+                    return (object)null;
+                }), false);
                 engine.Pipelines.Add(documents, gatherData);
 
                 // When
@@ -122,12 +123,12 @@ namespace Wyam.Core.Tests.Modules.Control
                 List<string> content = new List<string>();
                 IServiceProvider serviceProvider = new TestServiceProvider();
                 Engine engine = new Engine();
-                Execute gatherData = new Execute(
-                    (d, c) =>
+                Execute gatherData = new ExecuteDocument(
+                    Config.FromDocument(d =>
                     {
                         content.Add(d.Content);
-                        return null;
-                    }, false);
+                        return (object)null;
+                    }), false);
                 engine.Pipelines.Add("Foo", new Core.Modules.Control.Documents("A", "B", "C", "D"));
                 engine.Pipelines.Add("Bar", new Core.Modules.Control.Documents("E", "F"));
                 engine.Pipelines.Add(new Core.Modules.Control.Documents("Foo"), gatherData);
@@ -147,12 +148,12 @@ namespace Wyam.Core.Tests.Modules.Control
                 List<string> content = new List<string>();
                 IServiceProvider serviceProvider = new TestServiceProvider();
                 Engine engine = new Engine();
-                Execute gatherData = new Execute(
-                    (d, c) =>
+                Execute gatherData = new ExecuteDocument(
+                    Config.FromDocument(d =>
                     {
                         content.Add(d.Content);
-                        return null;
-                    }, false);
+                        return (object)null;
+                    }), false);
                 engine.Pipelines.Add("Foo", new Core.Modules.Control.Documents("A", "B", "C", "D"));
                 engine.Pipelines.Add("Bar", new Core.Modules.Control.Documents("E", "F"));
                 engine.Pipelines.Add(new Core.Modules.Control.Documents(), gatherData);
@@ -172,12 +173,12 @@ namespace Wyam.Core.Tests.Modules.Control
                 List<string> content = new List<string>();
                 IServiceProvider serviceProvider = new TestServiceProvider();
                 Engine engine = new Engine();
-                Execute gatherData = new Execute(
-                    (d, c) =>
+                Execute gatherData = new ExecuteDocument(
+                    Config.FromDocument(d =>
                     {
                         content.Add(d.Content);
-                        return null;
-                    }, false);
+                        return (object)null;
+                    }), false);
                 engine.Pipelines.Add("Foo", new Core.Modules.Control.Documents("A", "B", "C", "D"));
                 engine.Pipelines.Add("Bar", new Core.Modules.Control.Documents("E", "F"));
                 engine.Pipelines.Add("Baz", new Core.Modules.Control.Documents("G", "H"));
@@ -198,12 +199,12 @@ namespace Wyam.Core.Tests.Modules.Control
                 List<string> content = new List<string>();
                 IServiceProvider serviceProvider = new TestServiceProvider();
                 Engine engine = new Engine();
-                Execute gatherData = new Execute(
-                    (d, c) =>
+                Execute gatherData = new ExecuteDocument(
+                    Config.FromDocument(d =>
                     {
                         content.Add(d.Content);
-                        return null;
-                    }, false);
+                        return (object)null;
+                    }), false);
                 engine.Pipelines.Add("Foo", new Core.Modules.Control.Documents("A", "B", "C", "D"));
                 engine.Pipelines.Add("Bar", new Core.Modules.Control.Documents("E", "F"));
                 engine.Pipelines.Add("Baz", new Core.Modules.Control.Documents("G", "H"));
@@ -224,12 +225,12 @@ namespace Wyam.Core.Tests.Modules.Control
                 List<string> content = new List<string>();
                 IServiceProvider serviceProvider = new TestServiceProvider();
                 Engine engine = new Engine();
-                Execute gatherData = new Execute(
-                    (d, c) =>
+                Execute gatherData = new ExecuteDocument(
+                    Config.FromDocument(d =>
                     {
                         content.Add(d.Content);
-                        return null;
-                    }, false);
+                        return (object)null;
+                    }), false);
                 engine.Pipelines.Add("Foo", new Core.Modules.Control.Documents("A", "B", "C", "D"));
                 engine.Pipelines.Add("Bar", new Core.Modules.Control.Documents("E", "F"));
                 engine.Pipelines.Add("Baz", new Core.Modules.Control.Documents("G", "H"));

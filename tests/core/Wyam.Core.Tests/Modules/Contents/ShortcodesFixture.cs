@@ -10,6 +10,7 @@ using Wyam.Common.Documents;
 using Wyam.Common.Execution;
 using Wyam.Common.Meta;
 using Wyam.Common.Shortcodes;
+using Wyam.Common.Util;
 using Wyam.Core.Modules.Contents;
 using Wyam.Testing;
 using Wyam.Testing.Documents;
@@ -24,7 +25,7 @@ namespace Wyam.Core.Tests.Modules.Contents
         public class ExecuteTests : ShortcodesFixture
         {
             [Test]
-            public void ProcessesShortcode()
+            public async Task ProcessesShortcode()
             {
                 // Given
                 TestExecutionContext context = new TestExecutionContext();
@@ -33,14 +34,14 @@ namespace Wyam.Core.Tests.Modules.Contents
                 Core.Modules.Contents.Shortcodes module = new Core.Modules.Contents.Shortcodes();
 
                 // When
-                List<IDocument> results = module.Execute(new[] { document }, context).ToList();
+                List<IDocument> results = await module.ExecuteAsync(new[] { document }, context).ToListAsync();
 
                 // Then
                 results.Single().Content.ShouldBe("123Foo456");
             }
 
             [Test]
-            public void ProcessesNestedShortcodeInResult()
+            public async Task ProcessesNestedShortcodeInResult()
             {
                 // Given
                 TestExecutionContext context = new TestExecutionContext();
@@ -50,14 +51,14 @@ namespace Wyam.Core.Tests.Modules.Contents
                 Core.Modules.Contents.Shortcodes module = new Core.Modules.Contents.Shortcodes();
 
                 // When
-                List<IDocument> results = module.Execute(new[] { document }, context).ToList();
+                List<IDocument> results = await module.ExecuteAsync(new[] { document }, context).ToListAsync();
 
                 // Then
                 results.Single().Content.ShouldBe("123ABCFooXYZ456");
             }
 
             [Test]
-            public void ProcessesNestedShortcode()
+            public async Task ProcessesNestedShortcode()
             {
                 // Given
                 TestExecutionContext context = new TestExecutionContext();
@@ -67,14 +68,14 @@ namespace Wyam.Core.Tests.Modules.Contents
                 Core.Modules.Contents.Shortcodes module = new Core.Modules.Contents.Shortcodes();
 
                 // When
-                List<IDocument> results = module.Execute(new[] { document }, context).ToList();
+                List<IDocument> results = await module.ExecuteAsync(new[] { document }, context).ToListAsync();
 
                 // Then
                 results.Single().Content.ShouldBe("123ABCFooXYZ456");
             }
 
             [Test]
-            public void DoesNotProcessNestedRawShortcode()
+            public async Task DoesNotProcessNestedRawShortcode()
             {
                 // Given
                 TestExecutionContext context = new TestExecutionContext();
@@ -84,14 +85,14 @@ namespace Wyam.Core.Tests.Modules.Contents
                 Core.Modules.Contents.Shortcodes module = new Core.Modules.Contents.Shortcodes();
 
                 // When
-                List<IDocument> results = module.Execute(new[] { document }, context).ToList();
+                List<IDocument> results = await module.ExecuteAsync(new[] { document }, context).ToListAsync();
 
                 // Then
                 results.Single().Content.ShouldBe("123ABC<?# Bar /?>XYZ456");
             }
 
             [Test]
-            public void DoesNotProcessDirectlyNestedRawShortcode()
+            public async Task DoesNotProcessDirectlyNestedRawShortcode()
             {
                 // Given
                 TestExecutionContext context = new TestExecutionContext();
@@ -101,14 +102,14 @@ namespace Wyam.Core.Tests.Modules.Contents
                 Core.Modules.Contents.Shortcodes module = new Core.Modules.Contents.Shortcodes();
 
                 // When
-                List<IDocument> results = module.Execute(new[] { document }, context).ToList();
+                List<IDocument> results = await module.ExecuteAsync(new[] { document }, context).ToListAsync();
 
                 // Then
                 results.Single().Content.ShouldBe("123<?# Bar /?>456");
             }
 
             [Test]
-            public void ShortcodeSupportsNullStreamResult()
+            public async Task ShortcodeSupportsNullStreamResult()
             {
                 // Given
                 TestExecutionContext context = new TestExecutionContext();
@@ -117,14 +118,14 @@ namespace Wyam.Core.Tests.Modules.Contents
                 Core.Modules.Contents.Shortcodes module = new Core.Modules.Contents.Shortcodes();
 
                 // When
-                List<IDocument> results = module.Execute(new[] { document }, context).ToList();
+                List<IDocument> results = await module.ExecuteAsync(new[] { document }, context).ToListAsync();
 
                 // Then
                 results.Single().Content.ShouldBe("123456");
             }
 
             [Test]
-            public void ShortcodeSupportsNullResult()
+            public async Task ShortcodeSupportsNullResult()
             {
                 // Given
                 TestExecutionContext context = new TestExecutionContext();
@@ -134,14 +135,14 @@ namespace Wyam.Core.Tests.Modules.Contents
                 Core.Modules.Contents.Shortcodes module = new Core.Modules.Contents.Shortcodes();
 
                 // When
-                List<IDocument> results = module.Execute(new[] { document }, context).ToList();
+                List<IDocument> results = await module.ExecuteAsync(new[] { document }, context).ToListAsync();
 
                 // Then
                 results.Single().Content.ShouldBe("123Foo456789Foo");
             }
 
             [Test]
-            public void DisposesShortcode()
+            public async Task DisposesShortcode()
             {
                 // Given
                 TestExecutionContext context = new TestExecutionContext();
@@ -150,14 +151,14 @@ namespace Wyam.Core.Tests.Modules.Contents
                 Core.Modules.Contents.Shortcodes module = new Core.Modules.Contents.Shortcodes();
 
                 // When
-                List<IDocument> results = module.Execute(new[] { document }, context).ToList();
+                List<IDocument> results = await module.ExecuteAsync(new[] { document }, context).ToListAsync();
 
                 // Then
                 DisposableShortcode.Disposed.ShouldBeTrue();
             }
 
             [Test]
-            public void ShortcodesCanAddMetadata()
+            public async Task ShortcodesCanAddMetadata()
             {
                 // Given
                 TestExecutionContext context = new TestExecutionContext();
@@ -167,7 +168,7 @@ namespace Wyam.Core.Tests.Modules.Contents
                 Core.Modules.Contents.Shortcodes module = new Core.Modules.Contents.Shortcodes();
 
                 // When
-                List<IDocument> results = module.Execute(new[] { document }, context).ToList();
+                List<IDocument> results = await module.ExecuteAsync(new[] { document }, context).ToListAsync();
 
                 // Then
                 results.Single().Content.ShouldBe("123456789");
@@ -177,7 +178,7 @@ namespace Wyam.Core.Tests.Modules.Contents
             }
 
             [Test]
-            public void ShortcodesCanReadMetadata()
+            public async Task ShortcodesCanReadMetadata()
             {
                 // Given
                 TestExecutionContext context = new TestExecutionContext();
@@ -190,7 +191,7 @@ namespace Wyam.Core.Tests.Modules.Contents
                 Core.Modules.Contents.Shortcodes module = new Core.Modules.Contents.Shortcodes();
 
                 // When
-                List<IDocument> results = module.Execute(new[] { document }, context).ToList();
+                List<IDocument> results = await module.ExecuteAsync(new[] { document }, context).ToListAsync();
 
                 // Then
                 results.Single().Content.ShouldBe("123456789");
@@ -198,7 +199,7 @@ namespace Wyam.Core.Tests.Modules.Contents
             }
 
             [Test]
-            public void ShortcodesPersistState()
+            public async Task ShortcodesPersistState()
             {
                 // Given
                 TestExecutionContext context = new TestExecutionContext();
@@ -207,7 +208,7 @@ namespace Wyam.Core.Tests.Modules.Contents
                 Core.Modules.Contents.Shortcodes module = new Core.Modules.Contents.Shortcodes();
 
                 // When
-                List<IDocument> results = module.Execute(new[] { document }, context).ToList();
+                List<IDocument> results = await module.ExecuteAsync(new[] { document }, context).ToListAsync();
 
                 // Then
                 results.Single().Content.ShouldBe("123456789");

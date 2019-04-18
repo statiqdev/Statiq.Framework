@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using NUnit.Framework;
+using Wyam.Common.Configuration;
 using Wyam.Common.Documents;
 using Wyam.Common.Execution;
 using Wyam.Common.Meta;
@@ -35,13 +36,13 @@ namespace Wyam.Core.Tests.Modules.Control
                 {
                     AdditionalOutputs = 7
                 };
-                GroupBy groupBy = new GroupBy((d, c) => d.Get<int>("A") % 3, count);
-                Execute gatherData = new Execute(
-                    (d, c) =>
-                {
-                    groupKey.Add(d.Get<int>(Keys.GroupKey));
-                    return null;
-                }, false);
+                GroupBy groupBy = new GroupBy(Config.FromDocument(d => d.Get<int>("A") % 3), count);
+                Execute gatherData = new ExecuteDocument(
+                    Config.FromDocument(d =>
+                    {
+                        groupKey.Add(d.Get<int>(Keys.GroupKey));
+                        return (object)null;
+                    }), false);
                 engine.Pipelines.Add(groupBy, gatherData);
 
                 // When
@@ -62,14 +63,14 @@ namespace Wyam.Core.Tests.Modules.Control
                 {
                     AdditionalOutputs = 7
                 };
-                GroupBy groupBy = new GroupBy((d, c) => d.Get<int>("A") % 3, count);
-                OrderBy orderBy = new OrderBy((d, c) => d.Get<int>(Keys.GroupKey));
-                Execute gatherData = new Execute(
-                    (d, c) =>
-                {
-                    content.Add(d.Get<IList<IDocument>>(Keys.GroupDocuments).Select(x => x.Content).ToList());
-                    return null;
-                }, false);
+                GroupBy groupBy = new GroupBy(Config.FromDocument(d => d.Get<int>("A") % 3), count);
+                OrderBy orderBy = new OrderBy(Config.FromDocument(d => d.Get<int>(Keys.GroupKey)));
+                Execute gatherData = new ExecuteDocument(
+                    Config.FromDocument(d =>
+                    {
+                        content.Add(d.Get<IList<IDocument>>(Keys.GroupDocuments).Select(x => x.Content).ToList());
+                        return (object)null;
+                    }), false);
                 engine.Pipelines.Add(groupBy, orderBy, gatherData);
 
                 // When
@@ -93,14 +94,14 @@ namespace Wyam.Core.Tests.Modules.Control
                 {
                     AdditionalOutputs = 7
                 };
-                Core.Modules.Metadata.Meta meta = new Core.Modules.Metadata.Meta("GroupMetadata", (d, c) => d.Get<int>("A") % 3);
+                Core.Modules.Metadata.Meta meta = new Core.Modules.Metadata.Meta("GroupMetadata", Config.FromDocument(d => d.Get<int>("A") % 3));
                 GroupBy groupBy = new GroupBy("GroupMetadata", count, meta);
-                Execute gatherData = new Execute(
-                    (d, c) =>
-                {
-                    groupKey.Add(d.Get<int>(Keys.GroupKey));
-                    return null;
-                }, false);
+                Execute gatherData = new ExecuteDocument(
+                    Config.FromDocument(d =>
+                    {
+                        groupKey.Add(d.Get<int>(Keys.GroupKey));
+                        return (object)null;
+                    }), false);
                 engine.Pipelines.Add(groupBy, gatherData);
 
                 // When
@@ -121,19 +122,19 @@ namespace Wyam.Core.Tests.Modules.Control
                 {
                     AdditionalOutputs = 7
                 };
-                Execute meta = new Execute(
-                    (d, c) =>
-                {
-                    int groupMetadata = d.Get<int>("A") % 3;
-                    return groupMetadata == 0 ? d : c.GetDocument(d, new MetadataItems { { "GroupMetadata", groupMetadata } });
-                }, false);
+                Execute meta = new ExecuteDocument(
+                    Config.FromDocument((d, c) =>
+                    {
+                        int groupMetadata = d.Get<int>("A") % 3;
+                        return groupMetadata == 0 ? d : c.GetDocument(d, new MetadataItems { { "GroupMetadata", groupMetadata } });
+                    }), false);
                 GroupBy groupBy = new GroupBy("GroupMetadata", count, meta);
-                Execute gatherData = new Execute(
-                    (d, c) =>
-                {
-                    groupKey.Add(d.Get<int>(Keys.GroupKey));
-                    return null;
-                }, false);
+                Execute gatherData = new ExecuteDocument(
+                    Config.FromDocument(d =>
+                    {
+                        groupKey.Add(d.Get<int>(Keys.GroupKey));
+                        return (object)null;
+                    }), false);
                 engine.Pipelines.Add(groupBy, gatherData);
 
                 // When
@@ -154,14 +155,14 @@ namespace Wyam.Core.Tests.Modules.Control
                 {
                     AdditionalOutputs = 7
                 };
-                GroupBy groupBy = new GroupBy((d, c) => d.Get<int>("A") % 3, count)
-                    .Where((d, c) => d.Get<int>("A") % 3 != 0);
-                Execute gatherData = new Execute(
-                    (d, c) =>
-                {
-                    groupKey.Add(d.Get<int>(Keys.GroupKey));
-                    return null;
-                }, false);
+                GroupBy groupBy = new GroupBy(Config.FromDocument(d => d.Get<int>("A") % 3), count)
+                    .Where(Config.IfDocument(d => d.Get<int>("A") % 3 != 0));
+                Execute gatherData = new ExecuteDocument(
+                    Config.FromDocument(d =>
+                    {
+                        groupKey.Add(d.Get<int>(Keys.GroupKey));
+                        return (object)null;
+                    }), false);
                 engine.Pipelines.Add(groupBy, gatherData);
 
                 // When

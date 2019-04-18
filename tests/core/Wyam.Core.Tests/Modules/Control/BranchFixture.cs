@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
 using NUnit.Framework;
+using Wyam.Common.Configuration;
 using Wyam.Common.Execution;
 using Wyam.Common.Tracing;
 using Wyam.Core.Execution;
@@ -70,7 +71,7 @@ namespace Wyam.Core.Tests.Modules.Control
                 {
                     AdditionalOutputs = 3
                 };
-                engine.Pipelines.Add(a, new Branch(b).Where((x, y) => x.Content == "1"), c);
+                engine.Pipelines.Add(a, new Branch(b).Where(Config.IfDocument(x => x.Content == "1")), c);
 
                 // When
                 await engine.ExecuteAsync(serviceProvider);

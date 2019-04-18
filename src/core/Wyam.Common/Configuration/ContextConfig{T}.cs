@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -16,7 +18,7 @@ namespace Wyam.Common.Configuration
     /// if a value type of object is used, then all overloads should also be <see cref="ContextConfig{T}"/>.
     /// </summary>
     /// <typeparam name="T">The value type for this config data.</typeparam>
-    public class ContextConfig<T> : DocumentConfig<T>, IContextConfig
+    public class ContextConfig<T> : DocumentConfig<T>
     {
         // Only created by the Config factory methods to ensure matching value types
         internal ContextConfig(Func<IExecutionContext, Task<T>> func)
@@ -30,27 +32,34 @@ namespace Wyam.Common.Configuration
         {
         }
 
-        // This forces a cast to DocumentConfig<T> to ensure nested DocumentConfig<T> objects get unwrapped
-        // then casts to the desired ContextConfig<T>
-        public static implicit operator ContextConfig<T>(T value)
-        {
-            if (value is IContextConfig contextConfig)
-            {
-                if (!typeof(T).IsAssignableFrom(contextConfig.ValueType))
-                {
-                    throw new InvalidCastException("Could not cast value type of configuration delegate");
-                }
-                return new ContextConfig<T>(contextConfig.Delegate);
-            }
-            if (value is IDocumentConfig)
-            {
-                throw new InvalidCastException("Can not cast a document config to a context config");
-            }
-            return new ContextConfig<T>(_ => Task.FromResult(value));
-        }
+        public override bool IsDocumentConfig => false;
 
         public Task<T> GetValueAsync(IExecutionContext context) => GetValueAsync(null, context);
 
-        public override bool IsDocumentConfig => false;
+        public static implicit operator ContextConfig<T>(T value) => new ContextConfig<T>(_ => Task.FromResult(value));
+
+        // These special casting operators for object variants ensure we don't accidentally "wrap" an existing ContextConfig/DocumentConfig
+
+        public static implicit operator ContextConfig<IEnumerable<object>>(ContextConfig<T> contextConfig)
+        {
+            if (typeof(IEnumerable).IsAssignableFrom(typeof(T)))
+            {
+                return new ContextConfig<IEnumerable<object>>(async (doc, ctx) => ((IEnumerable)await contextConfig.Delegate(doc, ctx)).Cast<object>());
+            }
+            return new ContextConfig<IEnumerable<object>>(async (doc, ctx) => new object[] { await contextConfig.Delegate(doc, ctx) });
+        }
+
+        public static implicit operator DocumentConfig<IEnumerable<object>>(ContextConfig<T> contextConfig)
+        {
+            if (typeof(IEnumerable).IsAssignableFrom(typeof(T)))
+            {
+                return new ContextConfig<IEnumerable<object>>(async (doc, ctx) => ((IEnumerable)await contextConfig.Delegate(doc, ctx)).Cast<object>());
+            }
+            return new ContextConfig<IEnumerable<object>>(async (doc, ctx) => new object[] { await contextConfig.Delegate(doc, ctx) });
+        }
+
+        public static implicit operator ContextConfig<object>(ContextConfig<T> contextConfig) => new ContextConfig<object>(contextConfig.Delegate);
+
+        public static implicit operator DocumentConfig<object>(ContextConfig<T> contextConfig) => new ContextConfig<object>(contextConfig.Delegate);
     }
 }

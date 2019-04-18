@@ -5,12 +5,14 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using NUnit.Framework;
+using Wyam.Common.Configuration;
 using Wyam.Common.Documents;
 using Wyam.Common.Execution;
 using Wyam.Common.Meta;
 using Wyam.Common.Modules;
 using Wyam.Common.Modules.Contents;
 using Wyam.Common.Tracing;
+using Wyam.Common.Util;
 using Wyam.Core.Documents;
 using Wyam.Core.Execution;
 using Wyam.Core.Modules.Contents;
@@ -50,8 +52,8 @@ namespace Wyam.Core.Tests.Modules.Contents
 
                 Core.Modules.Metadata.Meta m = new Core.Modules.Metadata.Meta(
                     Keys.SitemapItem,
-                    (d, c) => new SitemapItem(d[Keys.RelativeFilePath].ToString()));
-                IEnumerable<IDocument> outputs = m.Execute(inputs, context);
+                    Config.FromDocument(d => new SitemapItem(d[Keys.RelativeFilePath].ToString())));
+                IEnumerable<IDocument> outputs = await m.ExecuteAsync(inputs, context);
 
                 Func<string, string> formatter = null;
 
@@ -62,7 +64,7 @@ namespace Wyam.Core.Tests.Modules.Contents
 
                 // When
                 Sitemap sitemap = new Sitemap(formatter);
-                List<IDocument> results = sitemap.Execute(outputs.ToList(), context).ToList();
+                List<IDocument> results = await sitemap.ExecuteAsync(outputs.ToList(), context).ToListAsync();
 
                 foreach (IDocument document in inputs.Concat(outputs.ToList()))
                 {
@@ -97,8 +99,8 @@ namespace Wyam.Core.Tests.Modules.Contents
 
                 Core.Modules.Metadata.Meta m = new Core.Modules.Metadata.Meta(
                     Keys.SitemapItem,
-                    (d, c) => d[Keys.RelativeFilePath].ToString());
-                IEnumerable<IDocument> outputs = m.Execute(inputs, context);
+                    Config.FromDocument(d => d[Keys.RelativeFilePath].ToString()));
+                IEnumerable<IDocument> outputs = await m.ExecuteAsync(inputs, context);
 
                 Func<string, string> formatter = null;
 
@@ -109,7 +111,7 @@ namespace Wyam.Core.Tests.Modules.Contents
 
                 // When
                 Sitemap sitemap = new Sitemap(formatter);
-                List<IDocument> results = sitemap.Execute(outputs.ToList(), context).ToList();
+                List<IDocument> results = await sitemap.ExecuteAsync(outputs.ToList(), context).ToListAsync();
 
                 foreach (IDocument document in inputs.Concat(outputs.ToList()))
                 {
@@ -151,7 +153,7 @@ namespace Wyam.Core.Tests.Modules.Contents
 
                 // When
                 Sitemap sitemap = new Sitemap(formatter);
-                List<IDocument> results = sitemap.Execute(inputs.ToList(), context).ToList();
+                List<IDocument> results = await sitemap.ExecuteAsync(inputs.ToList(), context).ToListAsync();
 
                 foreach (IDocument document in inputs)
                 {

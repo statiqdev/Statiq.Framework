@@ -1,13 +1,15 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using NUnit.Framework;
+using Wyam.Common.Configuration;
 using Wyam.Common.Documents;
 using Wyam.Common.Execution;
 using Wyam.Common.Modules;
 using Wyam.Core.Documents;
+using Wyam.Core.Execution;
 using Wyam.Core.Modules.Control;
 using Wyam.Core.Modules.Extensibility;
-using Wyam.Core.Execution;
 using Wyam.Testing;
 using Wyam.Testing.Documents;
 using Wyam.Testing.Execution;
@@ -21,7 +23,7 @@ namespace Wyam.Core.Tests.Modules.Control
         public class ExecuteTests : FrontMatterFixture
         {
             [Test]
-            public void DefaultCtorSplitsAtDashes()
+            public async Task DefaultCtorSplitsAtDashes()
             {
                 // Given
                 IExecutionContext context = new TestExecutionContext();
@@ -34,14 +36,14 @@ Content1
 Content2")
                 };
                 string frontMatterContent = null;
-                FrontMatter frontMatter = new FrontMatter(new Execute((x, ctx) =>
+                FrontMatter frontMatter = new FrontMatter(new ExecuteDocument(Config.FromDocument(x =>
                 {
                     frontMatterContent = x.Content;
                     return new[] { x };
-                }));
+                })));
 
                 // When
-                IEnumerable<IDocument> documents = frontMatter.Execute(inputs, context);
+                IEnumerable<IDocument> documents = await frontMatter.ExecuteAsync(inputs, context);
 
                 // Then
                 Assert.AreEqual(1, documents.Count());
@@ -55,7 +57,7 @@ Content2", documents.First().Content);
             }
 
             [Test]
-            public void EmptyFirstLineWithDelimiterTreatsAsFrontMatter()
+            public async Task EmptyFirstLineWithDelimiterTreatsAsFrontMatter()
             {
                 // Given
                 IExecutionContext context = new TestExecutionContext();
@@ -70,14 +72,14 @@ Content1
 Content2")
                 };
                 string frontMatterContent = null;
-                FrontMatter frontMatter = new FrontMatter(new Execute((x, ctx) =>
+                FrontMatter frontMatter = new FrontMatter(new ExecuteDocument(Config.FromDocument(x =>
                 {
                     frontMatterContent = x.Content;
                     return new[] { x };
-                }));
+                })));
 
                 // When
-                IEnumerable<IDocument> documents = frontMatter.Execute(inputs, context);
+                IEnumerable<IDocument> documents = await frontMatter.ExecuteAsync(inputs, context);
 
                 // Then
                 Assert.AreEqual(1, documents.Count());
@@ -93,7 +95,7 @@ Content2", documents.First().Content);
             }
 
             [Test]
-            public void EmptyFirstLineWithoutDelimiterTreatsAsFrontMatter()
+            public async Task EmptyFirstLineWithoutDelimiterTreatsAsFrontMatter()
             {
                 // Given
                 IExecutionContext context = new TestExecutionContext();
@@ -107,14 +109,14 @@ Content1
 Content2")
                 };
                 string frontMatterContent = null;
-                FrontMatter frontMatter = new FrontMatter(new Execute((x, ctx) =>
+                FrontMatter frontMatter = new FrontMatter(new ExecuteDocument(Config.FromDocument(x =>
                 {
                     frontMatterContent = x.Content;
                     return new[] { x };
-                }));
+                })));
 
                 // When
-                IEnumerable<IDocument> documents = frontMatter.Execute(inputs, context);
+                IEnumerable<IDocument> documents = await frontMatter.ExecuteAsync(inputs, context);
 
                 // Then
                 Assert.AreEqual(1, documents.Count());
@@ -129,7 +131,7 @@ Content2", documents.First().Content);
             }
 
             [Test]
-            public void DashStringDoesNotSplitAtNonmatchingDashes()
+            public async Task DashStringDoesNotSplitAtNonmatchingDashes()
             {
                 // Given
                 IExecutionContext context = new TestExecutionContext();
@@ -142,14 +144,14 @@ Content1
 Content2")
                 };
                 bool executed = false;
-                FrontMatter frontMatter = new FrontMatter("-", new Execute((x, ctx) =>
+                FrontMatter frontMatter = new FrontMatter("-", new ExecuteDocument(Config.FromDocument(x =>
                 {
                     executed = true;
                     return new[] { x };
-                }));
+                })));
 
                 // When
-                IEnumerable<IDocument> documents = frontMatter.Execute(inputs, context);
+                IEnumerable<IDocument> documents = await frontMatter.ExecuteAsync(inputs, context);
 
                 // Then
                 Assert.AreEqual(1, documents.Count());
@@ -163,7 +165,7 @@ Content2", documents.First().Content);
             }
 
             [Test]
-            public void MatchingStringSplitsAtCorrectLocation()
+            public async Task MatchingStringSplitsAtCorrectLocation()
             {
                 // Given
                 IExecutionContext context = new TestExecutionContext();
@@ -176,14 +178,14 @@ Content1
 Content2")
                 };
                 string frontMatterContent = null;
-                FrontMatter frontMatter = new FrontMatter("ABC", new Execute((x, ctx) =>
+                FrontMatter frontMatter = new FrontMatter("ABC", new ExecuteDocument(Config.FromDocument(x =>
                 {
                     frontMatterContent = x.Content;
                     return new[] { x };
-                }));
+                })));
 
                 // When
-                IEnumerable<IDocument> documents = frontMatter.Execute(inputs, context);
+                IEnumerable<IDocument> documents = await frontMatter.ExecuteAsync(inputs, context);
 
                 // Then
                 Assert.AreEqual(1, documents.Count());
@@ -197,7 +199,7 @@ Content2", documents.First().Content);
             }
 
             [Test]
-            public void SingleCharWithRepeatedDelimiterSplitsAtCorrectLocation()
+            public async Task SingleCharWithRepeatedDelimiterSplitsAtCorrectLocation()
             {
                 // Given
                 IExecutionContext context = new TestExecutionContext();
@@ -210,14 +212,14 @@ Content1
 Content2")
                 };
                 string frontMatterContent = null;
-                FrontMatter frontMatter = new FrontMatter('!', new Execute((x, ctx) =>
+                FrontMatter frontMatter = new FrontMatter('!', new ExecuteDocument(Config.FromDocument(x =>
                 {
                     frontMatterContent = x.Content;
                     return new[] { x };
-                }));
+                })));
 
                 // When
-                IEnumerable<IDocument> documents = frontMatter.Execute(inputs, context);
+                IEnumerable<IDocument> documents = await frontMatter.ExecuteAsync(inputs, context);
 
                 // Then
                 Assert.AreEqual(1, documents.Count());
@@ -231,7 +233,7 @@ Content2", documents.First().Content);
             }
 
             [Test]
-            public void SingleCharWithRepeatedDelimiterWithTrailingSpacesSplitsAtCorrectLocation()
+            public async Task SingleCharWithRepeatedDelimiterWithTrailingSpacesSplitsAtCorrectLocation()
             {
                 // Given
                 IExecutionContext context = new TestExecutionContext();
@@ -244,14 +246,14 @@ Content1
 Content2")
                 };
                 string frontMatterContent = null;
-                FrontMatter frontMatter = new FrontMatter('!', new Execute((x, ctx) =>
+                FrontMatter frontMatter = new FrontMatter('!', new ExecuteDocument(Config.FromDocument(x =>
                 {
                     frontMatterContent = x.Content;
                     return new[] { x };
-                }));
+                })));
 
                 // When
-                IEnumerable<IDocument> documents = frontMatter.Execute(inputs, context);
+                IEnumerable<IDocument> documents = await frontMatter.ExecuteAsync(inputs, context);
 
                 // Then
                 Assert.AreEqual(1, documents.Count());
@@ -265,7 +267,7 @@ Content2", documents.First().Content);
             }
 
             [Test]
-            public void SingleCharWithRepeatedDelimiterWithLeadingSpacesDoesNotSplit()
+            public async Task SingleCharWithRepeatedDelimiterWithLeadingSpacesDoesNotSplit()
             {
                 // Given
                 IExecutionContext context = new TestExecutionContext();
@@ -278,14 +280,14 @@ Content1
 Content2")
                 };
                 bool executed = false;
-                FrontMatter frontMatter = new FrontMatter('!', new Execute((x, ctx) =>
+                FrontMatter frontMatter = new FrontMatter('!', new ExecuteDocument(Config.FromDocument(x =>
                 {
                     executed = true;
                     return new[] { x };
-                }));
+                })));
 
                 // When
-                IEnumerable<IDocument> documents = frontMatter.Execute(inputs, context);
+                IEnumerable<IDocument> documents = await frontMatter.ExecuteAsync(inputs, context);
 
                 // Then
                 Assert.AreEqual(1, documents.Count());
@@ -299,7 +301,7 @@ Content2", documents.First().Content);
             }
 
             [Test]
-            public void SingleCharWithRepeatedDelimiterWithExtraLinesSplitsAtCorrectLocation()
+            public async Task SingleCharWithRepeatedDelimiterWithExtraLinesSplitsAtCorrectLocation()
             {
                 // Given
                 IExecutionContext context = new TestExecutionContext();
@@ -314,14 +316,14 @@ Content1
 Content2")
                 };
                 string frontMatterContent = null;
-                FrontMatter frontMatter = new FrontMatter('!', new Execute((x, ctx) =>
+                FrontMatter frontMatter = new FrontMatter('!', new ExecuteDocument(Config.FromDocument(x =>
                 {
                     frontMatterContent = x.Content;
                     return new[] { x };
-                }));
+                })));
 
                 // When
-                IEnumerable<IDocument> documents = frontMatter.Execute(inputs, context);
+                IEnumerable<IDocument> documents = await frontMatter.ExecuteAsync(inputs, context);
 
                 // Then
                 Assert.AreEqual(1, documents.Count());
@@ -337,7 +339,7 @@ Content2", documents.First().Content);
             }
 
             [Test]
-            public void SingleCharWithSingleDelimiterSplitsAtCorrectLocation()
+            public async Task SingleCharWithSingleDelimiterSplitsAtCorrectLocation()
             {
                 // Given
                 IExecutionContext context = new TestExecutionContext();
@@ -350,14 +352,14 @@ Content1
 Content2")
                 };
                 string frontMatterContent = null;
-                FrontMatter frontMatter = new FrontMatter('!', new Execute((x, ctx) =>
+                FrontMatter frontMatter = new FrontMatter('!', new ExecuteDocument(Config.FromDocument(x =>
                 {
                     frontMatterContent = x.Content;
                     return new[] { x };
-                }));
+                })));
 
                 // When
-                IEnumerable<IDocument> documents = frontMatter.Execute(inputs, context);
+                IEnumerable<IDocument> documents = await frontMatter.ExecuteAsync(inputs, context);
 
                 // Then
                 Assert.AreEqual(1, documents.Count());
@@ -371,7 +373,7 @@ Content2", documents.First().Content);
             }
 
             [Test]
-            public void MultipleInputDocumentsResultsInMultipleOutputs()
+            public async Task MultipleInputDocumentsResultsInMultipleOutputs()
             {
                 // Given
                 IExecutionContext context = new TestExecutionContext();
@@ -385,14 +387,14 @@ XX"),
 YY")
                 };
                 string frontMatterContent = string.Empty;
-                FrontMatter frontMatter = new FrontMatter(new Execute((x, ctx) =>
+                FrontMatter frontMatter = new FrontMatter(new ExecuteDocument(Config.FromDocument(x =>
                 {
                     frontMatterContent += x.Content;
                     return new[] { x };
-                }));
+                })));
 
                 // When
-                IEnumerable<IDocument> documents = frontMatter.Execute(inputs, context);
+                IEnumerable<IDocument> documents = await frontMatter.ExecuteAsync(inputs, context);
 
                 // Then
                 Assert.AreEqual(2, documents.Count());
@@ -405,7 +407,7 @@ BB
             }
 
             [Test]
-            public void DefaultCtorIgnoresDelimiterOnFirstLine()
+            public async Task DefaultCtorIgnoresDelimiterOnFirstLine()
             {
                 // Given
                 IExecutionContext context = new TestExecutionContext();
@@ -419,14 +421,14 @@ Content1
 Content2")
                 };
                 string frontMatterContent = null;
-                FrontMatter frontMatter = new FrontMatter(new Execute((x, ctx) =>
+                FrontMatter frontMatter = new FrontMatter(new ExecuteDocument(Config.FromDocument(x =>
                 {
                     frontMatterContent = x.Content;
                     return new[] { x };
-                }));
+                })));
 
                 // When
-                IEnumerable<IDocument> documents = frontMatter.Execute(inputs, context);
+                IEnumerable<IDocument> documents = await frontMatter.ExecuteAsync(inputs, context);
 
                 // Then
                 Assert.AreEqual(1, documents.Count());
@@ -440,7 +442,7 @@ Content2", documents.First().Content);
             }
 
             [Test]
-            public void NoIgnoreDelimiterOnFirstLine()
+            public async Task NoIgnoreDelimiterOnFirstLine()
             {
                 // Given
                 IExecutionContext context = new TestExecutionContext();
@@ -454,14 +456,14 @@ Content1
 Content2")
                 };
                 string frontMatterContent = null;
-                FrontMatter frontMatter = new FrontMatter(new Execute((x, ctx) =>
+                FrontMatter frontMatter = new FrontMatter(new ExecuteDocument(Config.FromDocument(x =>
                 {
                     frontMatterContent = x.Content;
                     return new[] { x };
-                })).IgnoreDelimiterOnFirstLine(false);
+                }))).IgnoreDelimiterOnFirstLine(false);
 
                 // When
-                IEnumerable<IDocument> documents = frontMatter.Execute(inputs, context);
+                IEnumerable<IDocument> documents = await frontMatter.ExecuteAsync(inputs, context);
 
                 // Then
                 Assert.AreEqual(1, documents.Count());
