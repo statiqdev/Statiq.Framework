@@ -20,7 +20,7 @@ using Wyam.Common.Util;
 
 namespace Wyam.CodeAnalysis.Analysis
 {
-    // If types aren't matching (I.e., not linking in the docs recipe due to mismatched documents), may need to use ISymbol.OriginalDefinition when
+    // If types aren't matching (I.e., not linking due to mismatched documents), may need to use ISymbol.OriginalDefinition when
     // creating the document for a symbol (or document metadata) to counteract new symbols due to type substitution for generics
     internal class AnalyzeSymbolVisitor : SymbolVisitor
     {

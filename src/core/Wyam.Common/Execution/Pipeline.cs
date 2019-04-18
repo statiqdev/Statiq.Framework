@@ -11,10 +11,7 @@ namespace Wyam.Common.Execution
     /// A utility class for specifying pipelines. Note that this is not required
     /// for pipeline creation and is typically only used when a pipeline needs to
     /// be specified outside the context of a configuration file (such as a recipe,
-    /// though it's not even required for those). Instances of this class
-    /// are typically assigned to read-only properties in a <see cref="Recipe"/> class and by
-    /// convention the class name should match the property name (an exception will be thrown during
-    /// recipe application if not). This class also implements string conversions and operators
+    /// though it's not even required for those). This class also implements string conversions and operators
     /// that return the pipeline name (so it can be used as a key for the pipeline it defines).
     /// Note that once this pipeline is added to an <see cref="IPipelineCollection"/>, the actual
     /// instance probably won't be what's stored by the collection and should not be used for comparisons.
