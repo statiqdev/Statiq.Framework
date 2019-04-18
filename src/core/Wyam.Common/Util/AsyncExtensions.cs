@@ -81,5 +81,30 @@ namespace Wyam.Common.Util
         public static async Task<List<T>> ToListAsync<T>(this Task<IEnumerable<T>> task) => (await task).ToList();
 
         public static async Task<T[]> ToArrayAsync<T>(this Task<IEnumerable<T>> task) => (await task).ToArray();
+
+        // See https://stackoverflow.com/a/15530170
+        public static Task<TBase> FromDerived<TBase, TDerived>(this Task<TDerived> task)
+            where TDerived : TBase
+        {
+            TaskCompletionSource<TBase> tcs = new TaskCompletionSource<TBase>();
+            task.ContinueWith(
+                t =>
+                {
+                    if (t.IsFaulted)
+                    {
+                        tcs.TrySetException(t.Exception.InnerExceptions);
+                    }
+                    else if (t.IsCanceled)
+                    {
+                        tcs.TrySetCanceled();
+                    }
+                    else
+                    {
+                        tcs.TrySetResult(t.Result);
+                    }
+                },
+                TaskContinuationOptions.ExecuteSynchronously);
+            return tcs.Task;
+        }
     }
 }

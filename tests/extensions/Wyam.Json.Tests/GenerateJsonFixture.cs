@@ -85,7 +85,7 @@ namespace Wyam.Json.Tests
                 // Given
                 TestExecutionContext context = new TestExecutionContext();
                 TestDocument document = new TestDocument();
-                GenerateJson generateJson = new GenerateJson((DocumentConfig)_jsonObject);
+                GenerateJson generateJson = new GenerateJson(_jsonObject);
 
                 // When
                 IList<IDocument> results = await generateJson.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list

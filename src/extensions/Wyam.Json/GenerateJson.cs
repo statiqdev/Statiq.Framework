@@ -68,6 +68,7 @@ namespace Wyam.Json
         public GenerateJson(IEnumerable<string> keys, string destinationKey = null)
         {
             _destinationKey = destinationKey;
+            DocumentConfig<object> test = Config.FromDocument(doc => keys.Where(k => doc.ContainsKey(k)).ToDictionary(k => k, k => doc[k]));
             _data = Config.FromDocument(doc => (object)keys.Where(k => doc.ContainsKey(k)).ToDictionary(k => k, k => doc[k]));
         }
 

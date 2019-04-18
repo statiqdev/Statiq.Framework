@@ -5,6 +5,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Wyam.Common.Documents;
 using Wyam.Common.Execution;
+using Wyam.Common.Util;
 
 namespace Wyam.Common.Configuration
 {
@@ -47,6 +48,7 @@ namespace Wyam.Common.Configuration
         public static DocumentPredicate AsyncIfDocument(Func<IDocument, Task<bool>> func) => new DocumentPredicate((doc, _) => func(doc));
 
         // This just adds a space to the front of error details so it'll format nicely
+        // Used by the extensions that convert values from a DocumentConfig<object> or ContextConfig<object>
         internal static string GetErrorDetails(string errorDetails)
         {
             if (errorDetails?.StartsWith(" ") == false)

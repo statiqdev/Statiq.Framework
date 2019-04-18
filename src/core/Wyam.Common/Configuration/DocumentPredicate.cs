@@ -5,13 +5,14 @@ using System.Threading;
 using System.Threading.Tasks;
 using Wyam.Common.Documents;
 using Wyam.Common.Execution;
+using Wyam.Common.Util;
 
 namespace Wyam.Common.Configuration
 {
     public class DocumentPredicate : DocumentConfig<bool>
     {
         internal DocumentPredicate(Func<IDocument, IExecutionContext, Task<bool>> func)
-            : base(func)
+            : base((doc, ctx) => func(doc, ctx).FromDerived<object, bool>())
         {
         }
 
