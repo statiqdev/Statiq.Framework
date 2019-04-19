@@ -16,9 +16,9 @@ namespace Wyam.Common.Tests.Modules
 {
     [TestFixture]
     [Parallelizable(ParallelScope.Self | ParallelScope.Children)]
-    public class ModuleListExtensionsFixture : BaseFixture
+    public class IModuleListExtensionsFixture : BaseFixture
     {
-        public class InsertAfterFirstTests : ModuleListExtensionsFixture
+        public class InsertAfterFirstTests : IModuleListExtensionsFixture
         {
             [Test]
             public void InsertAfterFirst()
@@ -42,7 +42,7 @@ namespace Wyam.Common.Tests.Modules
             }
         }
 
-        public class InsertBeforeFirstTests : ModuleListExtensionsFixture
+        public class InsertBeforeFirstTests : IModuleListExtensionsFixture
         {
             [Test]
             public void InsertBeforeFirst()
@@ -66,7 +66,7 @@ namespace Wyam.Common.Tests.Modules
             }
         }
 
-        public class InsertAfterLastTests : ModuleListExtensionsFixture
+        public class InsertAfterLastTests : IModuleListExtensionsFixture
         {
             [Test]
             public void InsertAfterLast()
@@ -90,7 +90,7 @@ namespace Wyam.Common.Tests.Modules
             }
         }
 
-        public class InsertBeforeLastTests : ModuleListExtensionsFixture
+        public class InsertBeforeLastTests : IModuleListExtensionsFixture
         {
             [Test]
             public void InsertBeforeLast()
@@ -114,7 +114,7 @@ namespace Wyam.Common.Tests.Modules
             }
         }
 
-        public class ReplaceFirstTests : ModuleListExtensionsFixture
+        public class ReplaceFirstTests : IModuleListExtensionsFixture
         {
             [Test]
             public void ReplaceFirst()
@@ -137,7 +137,7 @@ namespace Wyam.Common.Tests.Modules
             }
         }
 
-        public class ReplaceLastTests : ModuleListExtensionsFixture
+        public class ReplaceLastTests : IModuleListExtensionsFixture
         {
             [Test]
             public void ReplaceLast()
