@@ -121,12 +121,12 @@ namespace Wyam.CodeAnalysis
         private readonly List<string> _projectGlobs = new List<string>();
         private readonly List<string> _solutionGlobs = new List<string>();
 
-        private Func<ISymbol, bool> _symbolPredicate;
+        private ContextConfig<Func<ISymbol, bool>> _symbolPredicate;
         private Func<IMetadata, FilePath> _writePath;
         private DirectoryPath _writePathPrefix = null;
-        private bool _docsForImplicitSymbols = false;
-        private bool _inputDocuments = true;
-        private bool _assemblySymbols = false;
+        private ContextConfig<bool> _docsForImplicitSymbols = false;
+        private ContextConfig<bool> _inputDocuments = true;
+        private ContextConfig<bool> _assemblySymbols = false;
         private ContextConfig<bool> _implicitInheritDoc = false;
 
         /// <summary>
@@ -148,9 +148,9 @@ namespace Wyam.CodeAnalysis
         /// </summary>
         /// <param name="docsForImplicitSymbols">If set to <c>true</c>, documentation metadata is generated for XML comments on all symbols.</param>
         /// <returns>The current module instance.</returns>
-        public AnalyzeCSharp WithDocsForImplicitSymbols(bool docsForImplicitSymbols = true)
+        public AnalyzeCSharp WithDocsForImplicitSymbols(ContextConfig<bool> docsForImplicitSymbols = null)
         {
-            _docsForImplicitSymbols = docsForImplicitSymbols;
+            _docsForImplicitSymbols = docsForImplicitSymbols ?? true;
             return this;
         }
 
@@ -159,9 +159,9 @@ namespace Wyam.CodeAnalysis
         /// </summary>
         /// <param name="inputDocuments"><c>true</c> to analyze the content of input documents.</param>
         /// <returns>The current module instance.</returns>
-        public AnalyzeCSharp WithInputDocuments(bool inputDocuments = true)
+        public AnalyzeCSharp WithInputDocuments(ContextConfig<bool> inputDocuments = null)
         {
-            _inputDocuments = inputDocuments;
+            _inputDocuments = inputDocuments ?? true;
             return this;
         }
 
@@ -254,13 +254,9 @@ namespace Wyam.CodeAnalysis
         /// </summary>
         /// <param name="predicate">A predicate that returns <c>true</c> if the symbol should be included in the initial result set.</param>
         /// <returns>The current module instance.</returns>
-        public AnalyzeCSharp WhereSymbol(Func<ISymbol, bool> predicate)
+        public AnalyzeCSharp WhereSymbol(ContextConfig<Func<ISymbol, bool>> predicate)
         {
-            if (predicate != null)
-            {
-                Func<ISymbol, bool> currentPredicate = _symbolPredicate;
-                _symbolPredicate = currentPredicate == null ? predicate : x => currentPredicate(x) && predicate(x);
-            }
+            _symbolPredicate = _symbolPredicate.CombineWith(predicate);
             return this;
         }
 
@@ -270,8 +266,14 @@ namespace Wyam.CodeAnalysis
         /// </summary>
         /// <param name="predicate">A predicate that returns <c>true</c> if the symbol should be included in the initial result set.</param>
         /// <returns>The current module instance.</returns>
-        public AnalyzeCSharp WithNamedTypes(Func<INamedTypeSymbol, bool> predicate = null) =>
-            WhereSymbol(x => x is INamedTypeSymbol namedTypeSymbol && (predicate?.Invoke(namedTypeSymbol) ?? true));
+        public AnalyzeCSharp WithNamedTypes(ContextConfig<Func<INamedTypeSymbol, bool>> predicate = null)
+        {
+            return WhereSymbol(Config.FromContext<Func<ISymbol, bool>>(async ctx =>
+            {
+                Func<INamedTypeSymbol, bool> nameTypePredicate = await predicate.GetValueAsync(ctx);
+                return x => x is INamedTypeSymbol namedTypeSymbol && (nameTypePredicate?.Invoke(namedTypeSymbol) ?? true);
+            }));
+        }
 
         /// <summary>
         /// Limits symbols in the initial result set to those in the specified namespaces.
@@ -280,26 +282,31 @@ namespace Wyam.CodeAnalysis
         /// <param name="namespaces">The namespaces to include symbols from (if <c>namespaces</c> is <c>null</c>, symbols from all
         /// namespaces are included).</param>
         /// <returns>The current module instance.</returns>
-        public AnalyzeCSharp WhereNamespaces(bool includeGlobal, params string[] namespaces)
+        public AnalyzeCSharp WhereNamespaces(ContextConfig<bool> includeGlobal, ContextConfig<IEnumerable<string>> namespaces)
         {
-            return WhereSymbol(x =>
+            return WhereSymbol(Config.FromContext<Func<ISymbol, bool>>(async ctx =>
             {
-                if (x is IAssemblySymbol)
+                bool includeGlobalValue = await includeGlobal.GetValueAsync(ctx);
+                string[] namespacesValue = (await namespaces.GetValueAsync(ctx)).ToArray();
+                return x =>
                 {
-                    return true;
-                }
-                if (!(x is INamespaceSymbol namespaceSymbol))
-                {
-                    return x.ContainingNamespace != null
-                           && (namespaces.Length == 0 || namespaces.Any(y => x.ContainingNamespace.ToString().StartsWith(y)));
-                }
-                if (namespaces.Length == 0)
-                {
-                    return includeGlobal || !namespaceSymbol.IsGlobalNamespace;
-                }
-                return (includeGlobal && ((INamespaceSymbol)x).IsGlobalNamespace)
-                       || namespaces.Any(y => x.ToString().StartsWith(y));
-            });
+                    if (x is IAssemblySymbol)
+                    {
+                        return true;
+                    }
+                    if (!(x is INamespaceSymbol namespaceSymbol))
+                    {
+                        return x.ContainingNamespace != null
+                               && (namespacesValue.Length == 0 || namespacesValue.Any(y => x.ContainingNamespace.ToString().StartsWith(y)));
+                    }
+                    if (namespacesValue.Length == 0)
+                    {
+                        return includeGlobalValue || !namespaceSymbol.IsGlobalNamespace;
+                    }
+                    return (includeGlobalValue && ((INamespaceSymbol)x).IsGlobalNamespace)
+                           || namespacesValue.Any(y => x.ToString().StartsWith(y));
+                };
+            }));
         }
 
         /// <summary>
@@ -307,20 +314,28 @@ namespace Wyam.CodeAnalysis
         /// </summary>
         /// <param name="predicate">A predicate that returns true if symbols in the namespace should be included.</param>
         /// <returns>The current module instance.</returns>
-        public AnalyzeCSharp WhereNamespaces(Func<string, bool> predicate)
+        public AnalyzeCSharp WhereNamespaces(ContextConfig<Func<string, bool>> predicate)
         {
-            return WhereSymbol(x =>
+            return WhereSymbol(Config.FromContext<Func<ISymbol, bool>>(async ctx =>
             {
-                if (x is IAssemblySymbol)
+                Func<string, bool> predicateValue = await predicate.GetValueAsync(ctx);
+                if (predicateValue == null)
                 {
-                    return true;
+                    return null;
                 }
-                if (!(x is INamespaceSymbol namespaceSymbol))
+                return x =>
                 {
-                    return x.ContainingNamespace != null && predicate(x.ContainingNamespace.ToString());
-                }
-                return predicate(namespaceSymbol.ToString());
-            });
+                    if (x is IAssemblySymbol)
+                    {
+                        return true;
+                    }
+                    if (!(x is INamespaceSymbol namespaceSymbol))
+                    {
+                        return x.ContainingNamespace != null && predicateValue(x.ContainingNamespace.ToString());
+                    }
+                    return predicateValue(namespaceSymbol.ToString());
+                };
+            }));
         }
 
         /// <summary>
@@ -328,18 +343,23 @@ namespace Wyam.CodeAnalysis
         /// </summary>
         /// <param name="includeProtected">If set to <c>true</c>, protected symbols are also included.</param>
         /// <returns>The current module instance.</returns>
-        public AnalyzeCSharp WherePublic(bool includeProtected = true)
+        public AnalyzeCSharp WherePublic(ContextConfig<bool> includeProtected = null)
         {
-            return WhereSymbol(x =>
+            includeProtected = includeProtected ?? true;
+            return WhereSymbol(Config.FromContext<Func<ISymbol, bool>>(async ctx =>
             {
-                if (x is IAssemblySymbol)
+                bool includeProtectedValue = await includeProtected.GetValueAsync(ctx);
+                return x =>
                 {
-                    return true;
-                }
-                return x.DeclaredAccessibility == Accessibility.Public
-                    || (includeProtected && x.DeclaredAccessibility == Accessibility.Protected)
-                    || x.DeclaredAccessibility == Accessibility.NotApplicable;
-            });
+                    if (x is IAssemblySymbol)
+                    {
+                        return true;
+                    }
+                    return x.DeclaredAccessibility == Accessibility.Public
+                        || (includeProtectedValue && x.DeclaredAccessibility == Accessibility.Protected)
+                        || x.DeclaredAccessibility == Accessibility.NotApplicable;
+                };
+            }));
         }
 
         /// <summary>
@@ -372,10 +392,14 @@ namespace Wyam.CodeAnalysis
         /// </summary>
         /// <param name="assemblySymbols"><c>true</c> to output assembly symbol documents.</param>
         /// <returns>The current module instance.</returns>
-        public AnalyzeCSharp WithAssemblySymbols(bool assemblySymbols = true)
+        public AnalyzeCSharp WithAssemblySymbols(ContextConfig<bool> assemblySymbols = null)
         {
-            _assemblySymbols = assemblySymbols;
-            return WhereSymbol(x => !(x is IAssemblySymbol) || (_assemblySymbols && x.Name != CompilationAssemblyName));
+            _assemblySymbols = assemblySymbols ?? true;
+            return WhereSymbol(Config.FromContext<Func<ISymbol, bool>>(async ctx =>
+            {
+                bool assemblySymbolsValue = await _assemblySymbols.GetValueAsync(ctx);
+                return x => !(x is IAssemblySymbol) || (assemblySymbolsValue && x.Name != CompilationAssemblyName);
+            }));
         }
 
         /// <summary>
@@ -465,7 +489,7 @@ namespace Wyam.CodeAnalysis
 
             // Add the input source and references
             List<ISymbol> symbols = new List<ISymbol>();
-            compilation = AddSourceFiles(inputs, context, compilation);
+            compilation = await AddSourceFilesAsync(inputs, context, compilation);
             compilation = await AddProjectReferencesAsync(context, symbols, compilation);
             compilation = await AddSolutionReferencesAsync(context, symbols, compilation);
             compilation = await AddAssemblyReferencesAsync(context, symbols, compilation);
@@ -475,11 +499,11 @@ namespace Wyam.CodeAnalysis
             AnalyzeSymbolVisitor visitor = new AnalyzeSymbolVisitor(
                 compilation,
                 context,
-                _symbolPredicate,
+                await _symbolPredicate.GetValueAsync(context),
                 _writePath ?? (x => DefaultWritePath(x, _writePathPrefix)),
                 _cssClasses,
-                _docsForImplicitSymbols,
-                _assemblySymbols,
+                await _docsForImplicitSymbols.GetValueAsync(context),
+                await _assemblySymbols.GetValueAsync(context),
                 await _implicitInheritDoc.GetValueAsync(context));
             foreach (ISymbol symbol in symbols)
             {
@@ -488,10 +512,10 @@ namespace Wyam.CodeAnalysis
             return visitor.Finish();
         }
 
-        private Compilation AddSourceFiles(IReadOnlyList<IDocument> inputs, IExecutionContext context, Compilation compilation)
+        private async Task<Compilation> AddSourceFilesAsync(IReadOnlyList<IDocument> inputs, IExecutionContext context, Compilation compilation)
         {
             ConcurrentBag<SyntaxTree> syntaxTrees = new ConcurrentBag<SyntaxTree>();
-            if (_inputDocuments)
+            if (await _inputDocuments.GetValueAsync(context))
             {
                 // Get syntax trees (supply path so that XML doc includes can be resolved)
                 context.ParallelForEach(inputs, AddSyntaxTrees);
@@ -519,9 +543,9 @@ namespace Wyam.CodeAnalysis
             if (assemblyReferences.Length > 0)
             {
                 compilation = compilation.AddReferences(assemblyReferences);
-                symbols.AddRange(assemblyReferences
+                symbols.AddRange(await assemblyReferences
                     .Select(x => (IAssemblySymbol)compilation.GetAssemblyOrModuleSymbol(x))
-                    .Select(x => _assemblySymbols ? x : (ISymbol)x.GlobalNamespace));
+                    .SelectAsync(async x => await _assemblySymbols.GetValueAsync(context) ? x : (ISymbol)x.GlobalNamespace));
             }
             return compilation;
 
@@ -580,7 +604,7 @@ namespace Wyam.CodeAnalysis
                 }
                 projects.Add(project);
             }
-            return await AddProjectReferencesAsync(projects, symbols, compilation);
+            return await AddProjectReferencesAsync(context, projects, symbols, compilation);
         }
 
         private async Task<Compilation> AddSolutionReferencesAsync(IExecutionContext context, List<ISymbol> symbols, Compilation compilation)
@@ -616,12 +640,12 @@ namespace Wyam.CodeAnalysis
                     result.AddToWorkspace(workspace);
                 }
 
-                compilation = await AddProjectReferencesAsync(workspace.CurrentSolution.Projects, symbols, compilation);
+                compilation = await AddProjectReferencesAsync(context, workspace.CurrentSolution.Projects, symbols, compilation);
             }
             return compilation;
         }
 
-        private async Task<Compilation> AddProjectReferencesAsync(IEnumerable<Project> projects, List<ISymbol> symbols, Compilation compilation)
+        private async Task<Compilation> AddProjectReferencesAsync(IExecutionContext context, IEnumerable<Project> projects, List<ISymbol> symbols, Compilation compilation)
         {
             // Add a references to the compilation for each project in the solution
             MetadataReference[] compilationReferences = (await projects
@@ -636,9 +660,9 @@ namespace Wyam.CodeAnalysis
             if (compilationReferences.Length > 0)
             {
                 compilation = compilation.AddReferences(compilationReferences);
-                symbols.AddRange(compilationReferences
+                symbols.AddRange(await compilationReferences
                     .Select(x => (IAssemblySymbol)compilation.GetAssemblyOrModuleSymbol(x))
-                    .Select(x => _assemblySymbols ? x : (ISymbol)x.GlobalNamespace));
+                    .SelectAsync(async x => await _assemblySymbols.GetValueAsync(context) ? x : (ISymbol)x.GlobalNamespace));
             }
             return compilation;
         }

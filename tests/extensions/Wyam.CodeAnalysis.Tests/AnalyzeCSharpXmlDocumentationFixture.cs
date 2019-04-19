@@ -1,8 +1,10 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.CodeAnalysis;
 using NUnit.Framework;
+using Wyam.Common.Configuration;
 using Wyam.Common.Documents;
 using Wyam.Common.Execution;
 using Wyam.Common.Meta;
@@ -1166,7 +1168,7 @@ namespace Wyam.CodeAnalysis.Tests
                 IDocument document = GetDocument(code);
                 IExecutionContext context = GetContext();
                 IModule module = new AnalyzeCSharp()
-                    .WhereSymbol(x => x is INamedTypeSymbol);
+                    .WhereSymbol(Config.FromValue<Func<ISymbol, bool>>(x => x is INamedTypeSymbol));
 
                 // When
                 List<IDocument> results = await module.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
@@ -1192,7 +1194,7 @@ namespace Wyam.CodeAnalysis.Tests
                 IDocument document = GetDocument(code);
                 IExecutionContext context = GetContext();
                 IModule module = new AnalyzeCSharp()
-                    .WhereSymbol(x => x is INamedTypeSymbol)
+                    .WhereSymbol((Func<ISymbol, bool>)(x => x is INamedTypeSymbol))
                     .WithDocsForImplicitSymbols();
 
                 // When

@@ -55,5 +55,33 @@ namespace Wyam.Common.Configuration
             }
             return new ContextConfig<bool>(async ctx => await first.GetValueAsync(ctx) && await second.GetValueAsync(ctx));
         }
+
+        public static ContextConfig<Func<T, bool>> CombineWith<T>(
+            this ContextConfig<Func<T, bool>> first,
+            ContextConfig<Func<T, bool>> second)
+        {
+            if (first == null)
+            {
+                return second;
+            }
+            if (second == null)
+            {
+                return first;
+            }
+            return new ContextConfig<Func<T, bool>>(async ctx =>
+            {
+                Func<T, bool> innerFirst = await first.GetValueAsync(ctx);
+                Func<T, bool> innerSecond = await second.GetValueAsync(ctx);
+                if (innerFirst == null)
+                {
+                    return innerSecond;
+                }
+                if (innerSecond == null)
+                {
+                    return innerFirst;
+                }
+                return x => innerFirst(x) && innerSecond(x);
+            });
+        }
     }
 }

@@ -67,7 +67,7 @@ namespace Wyam.Core.Modules.Extensibility
         /// Setting this to <c>false</c> runs evaluates and processes each document in their original input order.</param>
         public ExecuteDocument(Func<IDocument, IExecutionContext, Task> execute, bool parallel = true)
             : this(
-                Config.AsyncFromDocument(
+                Config.FromDocument(
                     async (doc, ctx) =>
                     {
                         await (execute(doc, ctx) ?? Task.CompletedTask);

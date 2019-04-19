@@ -52,7 +52,7 @@ namespace Wyam.Sass
     public class Sass : IModule
     {
         private readonly List<DirectoryPath> _includePaths = new List<DirectoryPath>();
-        private DocumentConfig<FilePath> _inputPath = Config.AsyncFromDocument(DefaultInputPathAsync);
+        private DocumentConfig<FilePath> _inputPath = Config.FromDocument(DefaultInputPathAsync);
         private Func<string, string> _importPathFunc = null;
         private bool _includeSourceComments = false;
         private ScssOutputStyle _outputStyle = ScssOutputStyle.Compact;

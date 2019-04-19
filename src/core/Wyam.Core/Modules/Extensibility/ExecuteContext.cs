@@ -55,7 +55,7 @@ namespace Wyam.Core.Modules.Extensibility
         /// <param name="execute">An action to execute.</param>
         public ExecuteContext(Func<IExecutionContext, Task> execute)
             : this(
-                Config.AsyncFromContext(
+                Config.FromContext(
                     async ctx =>
                     {
                         await (execute(ctx) ?? Task.CompletedTask);

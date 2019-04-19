@@ -47,7 +47,7 @@ namespace Wyam.Json
                 throw new ArgumentNullException(nameof(sourceKey));
             }
             _destinationKey = destinationKey;
-            _data = Config.AsyncFromDocument(async (doc, ctx) => doc.Get(await sourceKey.GetValueAsync(doc, ctx)));
+            _data = Config.FromDocument(async (doc, ctx) => doc.Get(await sourceKey.GetValueAsync(doc, ctx)));
         }
 
         /// <summary>
@@ -76,7 +76,7 @@ namespace Wyam.Json
                 throw new ArgumentNullException(nameof(keys));
             }
             _destinationKey = destinationKey;
-            _data = Config.AsyncFromDocument(async (doc, ctx) => (await keys.GetValueAsync(doc, ctx)).Where(k => doc.ContainsKey(k)).ToDictionary(k => k, k => doc[k]));
+            _data = Config.FromDocument(async (doc, ctx) => (await keys.GetValueAsync(doc, ctx)).Where(k => doc.ContainsKey(k)).ToDictionary(k => k, k => doc[k]));
         }
 
         /// <summary>

@@ -64,6 +64,34 @@ namespace Wyam.Common.Configuration
             return new DocumentConfig<bool>(async (doc, ctx) => await first.GetValueAsync(doc, ctx) && await second.GetValueAsync(doc, ctx));
         }
 
+        public static DocumentConfig<Func<T, bool>> CombineWith<T>(
+            this DocumentConfig<Func<T, bool>> first,
+            DocumentConfig<Func<T, bool>> second)
+        {
+            if (first == null)
+            {
+                return second;
+            }
+            if (second == null)
+            {
+                return first;
+            }
+            return new DocumentConfig<Func<T, bool>>(async (doc, ctx) =>
+            {
+                Func<T, bool> innerFirst = await first.GetValueAsync(doc, ctx);
+                Func<T, bool> innerSecond = await second.GetValueAsync(doc, ctx);
+                if (innerFirst == null)
+                {
+                    return innerSecond;
+                }
+                if (innerSecond == null)
+                {
+                    return innerFirst;
+                }
+                return x => innerFirst(x) && innerSecond(x);
+            });
+        }
+
         public static Task<IEnumerable<IDocument>> FilterAsync(this IEnumerable<IDocument> documents, DocumentConfig<bool> predicate, IExecutionContext context) =>
             predicate == null ? Task.FromResult(documents) : documents.WhereAsync(context, x => predicate.GetValueAsync(x, context));
     }
