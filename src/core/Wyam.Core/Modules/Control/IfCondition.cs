@@ -9,9 +9,9 @@ namespace Wyam.Core.Modules.Control
 {
     public class IfCondition : ModuleList
     {
-        public DocumentPredicate Predicate { get; set; }
+        public DocumentConfig<bool> Predicate { get; set; }
 
-        internal IfCondition(DocumentPredicate predicate, IModule[] modules)
+        internal IfCondition(DocumentConfig<bool> predicate, IModule[] modules)
             : base(modules)
         {
             Predicate = predicate;

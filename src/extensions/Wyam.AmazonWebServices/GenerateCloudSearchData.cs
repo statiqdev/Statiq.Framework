@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
+using Wyam.Common.Configuration;
 using Wyam.Common.Documents;
 using Wyam.Common.Execution;
 using Wyam.Common.Meta;
@@ -38,8 +39,8 @@ namespace Wyam.AmazonWebServices
     /// <category>Content</category>
     public class GenerateCloudSearchData : IModule
     {
-        private readonly string _idMetaKey;
-        private readonly string _bodyField;
+        private readonly ContextConfig<string> _idMetaKey;
+        private readonly ContextConfig<string> _bodyField;
         private readonly List<MetaFieldMapping> _metaFields;
         private readonly List<Field> _fields;
 
@@ -48,7 +49,7 @@ namespace Wyam.AmazonWebServices
         /// </summary>
         /// <param name="idMetaKey">The meta key representing the unique ID for this document.  If NULL, the Document.Id will be used.</param>
         /// <param name="bodyField">The field name for the document contents.  If NULL, the document contents will not be written to the data.</param>
-        public GenerateCloudSearchData(string idMetaKey, string bodyField)
+        public GenerateCloudSearchData(ContextConfig<string> idMetaKey, ContextConfig<string> bodyField)
         {
             _idMetaKey = idMetaKey;
             _bodyField = bodyField;
@@ -61,9 +62,9 @@ namespace Wyam.AmazonWebServices
         /// </summary>
         /// <param name="fieldName">The CloudSearch field name.</param>
         /// <param name="metaKey">The meta key. If the meta key does not exist, the field will not be written.</param>
-        /// <param name="transformer">An optional function that takes a string and returns an object. If specified, it will be invoked on the meta value prior to serialization. If the function returns NULL, the field will not be written.</param>
+        /// <param name="transformer">If specified, it will be invoked on the meta value prior to serialization. If the function returns NULL, the field will not be written.</param>
         /// <returns>The current module.</returns>
-        public GenerateCloudSearchData MapMetaField(string fieldName, string metaKey, Func<object, object> transformer = null)
+        public GenerateCloudSearchData MapMetaField(DocumentConfig<string> fieldName, DocumentConfig<string> metaKey, Func<object, object> transformer = null)
         {
             if (fieldName == null)
             {
@@ -78,32 +79,23 @@ namespace Wyam.AmazonWebServices
         }
 
         /// <summary>
-        /// Adds a literal field value.
+        /// Adds a field value.
         /// </summary>
         /// <param name="fieldName">The CloudSearch field name.</param>
         /// <param name="fieldValue">The value.</param>
         /// <returns>The current module.</returns>
-        public GenerateCloudSearchData AddField(string fieldName, object fieldValue)
+        public GenerateCloudSearchData AddField(DocumentConfig<string> fieldName, DocumentConfig<object> fieldValue)
         {
             _fields.Add(new Field(fieldName, fieldValue));
-            return this;
-        }
-
-        /// <summary>
-        /// Adds a function-based field value. The function will take in a document and return an object, which will be the field value.
-        /// </summary>
-        /// <param name="fieldName">The CloudSearch field name.</param>
-        /// <param name="execute">A function of signature Func&lt;IDocument, object&gt;. If the function returns NULL, the field will not be written.</param>
-        /// <returns>The current module.</returns>
-        public GenerateCloudSearchData AddField(string fieldName, Func<IDocument, object> execute)
-        {
-            _fields.Add(new Field(fieldName, execute));
             return this;
         }
 
         /// <inheritdoc />
         public async Task<IEnumerable<IDocument>> ExecuteAsync(IReadOnlyList<IDocument> inputs, IExecutionContext context)
         {
+            string idMetaKey = await _idMetaKey.GetValueAsync(context);
+            string bodyField = await _bodyField.GetValueAsync(context);
+
             Stream contentStream = await context.GetContentStreamAsync();
             using (TextWriter textWriter = new StreamWriter(contentStream))
             {
@@ -111,7 +103,7 @@ namespace Wyam.AmazonWebServices
                 {
                     writer.WriteStartArray();
 
-                    context.ForEach(inputs, doc =>
+                    await context.ForEachAsync(inputs, async doc =>
                     {
                         writer.WriteStartObject();
 
@@ -119,52 +111,59 @@ namespace Wyam.AmazonWebServices
                         writer.WriteValue("add");
 
                         writer.WritePropertyName("id");
-                        writer.WriteValue(_idMetaKey != null ? doc.String(_idMetaKey) : doc.Id);
+                        writer.WriteValue(idMetaKey != null ? doc.String(idMetaKey) : doc.Id);
 
                         writer.WritePropertyName("fields");
                         writer.WriteStartObject();
 
-                        if (_bodyField != null)
+                        if (bodyField != null)
                         {
-                            writer.WritePropertyName(_bodyField);
+                            writer.WritePropertyName(bodyField);
                             writer.WriteValue(doc.Content);
                         }
 
                         foreach (Field field in _fields)
                         {
-                            object value = field.GetValue(doc);
-                            if (value == null)
+                            string name = await field.FieldName.GetValueAsync(doc, context);
+                            object value = await field.FieldValue.GetValueAsync(doc, context);
+                            if (name == null || value == null)
                             {
                                 // Null fields are not written
                                 continue;
                             }
 
-                            writer.WritePropertyName(field.FieldName);
+                            writer.WritePropertyName(name);
                             writer.WriteRawValue(JsonConvert.SerializeObject(value));
                         }
 
                         foreach (MetaFieldMapping field in _metaFields)
                         {
-                            if (!doc.ContainsKey(field.MetaKey))
+                            string metaKey = await field.MetaKey.GetValueAsync(doc, context);
+                            string fieldName = await field.FieldName.GetValueAsync(doc, context);
+
+                            if (!doc.ContainsKey(metaKey))
                             {
                                 continue;
                             }
 
-                            object value = doc.Get(field.MetaKey);
-                            if (value == null)
+                            object value = doc.Get(metaKey);
+                            if (value == null || fieldName == null)
                             {
                                 // Null fields are not written
                                 continue;
                             }
 
-                            value = field.Transformer.Invoke(value.ToString());
+                            if (field.Transformer != null)
+                            {
+                                value = field.Transformer.Invoke(value);
+                            }
                             if (value == null)
                             {
                                 // If the transformer function returns null, we'll not writing this either
                                 continue;
                             }
 
-                            writer.WritePropertyName(field.FieldName);
+                            writer.WritePropertyName(fieldName);
                             writer.WriteRawValue(JsonConvert.SerializeObject(value));
                         }
 

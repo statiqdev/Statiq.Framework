@@ -16,14 +16,14 @@ namespace Wyam.Core.Modules.Control
     /// <category>Control</category>
     public class Where : IModule
     {
-        private readonly DocumentPredicate _predicate;
+        private readonly DocumentConfig<bool> _predicate;
 
         /// <summary>
         /// Specifies the predicate to use for filtering documents.
         /// Only input documents for which the predicate returns <c>true</c> will be output.
         /// </summary>
         /// <param name="predicate">A predicate delegate that should return a <c>bool</c>.</param>
-        public Where(DocumentPredicate predicate)
+        public Where(DocumentConfig<bool> predicate)
         {
             _predicate = predicate ?? throw new ArgumentNullException(nameof(predicate));
         }

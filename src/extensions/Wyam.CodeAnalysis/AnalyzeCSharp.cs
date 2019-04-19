@@ -11,6 +11,7 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.Text;
 using Wyam.CodeAnalysis.Analysis;
+using Wyam.Common.Configuration;
 using Wyam.Common.Documents;
 using Wyam.Common.Execution;
 using Wyam.Common.IO;
@@ -126,7 +127,7 @@ namespace Wyam.CodeAnalysis
         private bool _docsForImplicitSymbols = false;
         private bool _inputDocuments = true;
         private bool _assemblySymbols = false;
-        private bool _implicitInheritDoc = false;
+        private ContextConfig<bool> _implicitInheritDoc = false;
 
         /// <summary>
         /// This will assume <c>inheritdoc</c> if a symbol has no other code comments.
@@ -134,9 +135,9 @@ namespace Wyam.CodeAnalysis
         /// <param name="implicitInheritDoc">If set to <c>true</c>, the symbol will inherit documentation comments
         /// if no other comments are provided.</param>
         /// <returns>The current module instance.</returns>
-        public AnalyzeCSharp WithImplicitInheritDoc(bool implicitInheritDoc = true)
+        public AnalyzeCSharp WithImplicitInheritDoc(ContextConfig<bool> implicitInheritDoc = null)
         {
-            _implicitInheritDoc = implicitInheritDoc;
+            _implicitInheritDoc = implicitInheritDoc ?? true;
             return this;
         }
 
@@ -479,7 +480,7 @@ namespace Wyam.CodeAnalysis
                 _cssClasses,
                 _docsForImplicitSymbols,
                 _assemblySymbols,
-                _implicitInheritDoc);
+                await _implicitInheritDoc.GetValueAsync(context));
             foreach (ISymbol symbol in symbols)
             {
                 visitor.Visit(symbol);

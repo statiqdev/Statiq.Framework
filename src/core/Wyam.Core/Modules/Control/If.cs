@@ -29,7 +29,7 @@ namespace Wyam.Core.Modules.Control
         /// </summary>
         /// <param name="predicate">A predicate delegate that should return a <c>bool</c>.</param>
         /// <param name="modules">The modules to execute on documents where the predicate is <c>true</c>.</param>
-        public If(DocumentPredicate predicate, params IModule[] modules)
+        public If(DocumentConfig<bool> predicate, params IModule[] modules)
         {
             _conditions.Add(new IfCondition(predicate, modules));
         }
@@ -42,7 +42,7 @@ namespace Wyam.Core.Modules.Control
         /// <param name="predicate">A predicate delegate that should return a <c>bool</c>.</param>
         /// <param name="modules">The modules to execute on documents where the predicate is <c>true</c>.</param>
         /// <returns>The current module instance.</returns>
-        public If ElseIf(DocumentPredicate predicate, params IModule[] modules)
+        public If ElseIf(DocumentConfig<bool> predicate, params IModule[] modules)
         {
             _conditions.Add(new IfCondition(predicate, modules));
             return this;

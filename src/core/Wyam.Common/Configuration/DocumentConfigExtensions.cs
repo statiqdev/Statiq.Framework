@@ -50,5 +50,21 @@ namespace Wyam.Common.Configuration
             object value = await config.GetAndCacheValueAsync(document, context);
             return context.TryConvert(value, out T result) ? result : default;
         }
+
+        public static DocumentConfig<bool> CombineWith(this DocumentConfig<bool> first, DocumentConfig<bool> second)
+        {
+            if (first == null)
+            {
+                return second;
+            }
+            if (second == null)
+            {
+                return first;
+            }
+            return new DocumentConfig<bool>(async (doc, ctx) => await first.GetValueAsync(doc, ctx) && await second.GetValueAsync(doc, ctx));
+        }
+
+        public static Task<IEnumerable<IDocument>> FilterAsync(this IEnumerable<IDocument> documents, DocumentConfig<bool> predicate, IExecutionContext context) =>
+            predicate == null ? Task.FromResult(documents) : documents.WhereAsync(context, x => predicate.GetValueAsync(x, context));
     }
 }

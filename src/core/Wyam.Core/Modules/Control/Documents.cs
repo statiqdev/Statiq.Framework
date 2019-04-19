@@ -27,7 +27,7 @@ namespace Wyam.Core.Modules.Control
     {
         private readonly List<string> _pipelines = new List<string>();
         private readonly DocumentConfig<IEnumerable<IDocument>> _documents;
-        private DocumentPredicate _predicate;
+        private DocumentConfig<bool> _predicate;
 
         /// <summary>
         /// This outputs all existing documents from all pipelines (except the current one).
@@ -107,7 +107,7 @@ namespace Wyam.Core.Modules.Control
         /// </summary>
         /// <param name="predicate">A delegate that should return a <c>bool</c>.</param>
         /// <returns>The current module instance.</returns>
-        public Documents Where(DocumentPredicate predicate)
+        public Documents Where(DocumentConfig<bool> predicate)
         {
             _predicate = _predicate.CombineWith(predicate);
             return this;

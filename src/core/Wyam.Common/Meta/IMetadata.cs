@@ -23,7 +23,7 @@ namespace Wyam.Common.Meta
         /// Tries to get the value for the specified key.
         /// </summary>
         /// <typeparam name="T">The desired return type.</typeparam>
-        /// <param name="key">The key of the value to get.</param>
+        /// <param name="key">The key of the value to get. If the key is <c>null</c>, this will return the default value.</param>
         /// <param name="value">The value of the key if it was found and could be converted to the desired return type.</param>
         /// <returns><c>true</c> if the key was found and the value could be converted to the desired return type, <c>false</c> otherwise.</returns>
         bool TryGetValue<T>(string key, out T value);

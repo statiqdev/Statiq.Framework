@@ -45,7 +45,7 @@ namespace Wyam.Core.Modules.Metadata
     /// <category>Metadata</category>
     public class Tree : IModule
     {
-        private DocumentPredicate _isRoot;
+        private DocumentConfig<bool> _isRoot;
         private DocumentConfig<string[]> _treePath;
         private Func<string[], MetadataItems, IExecutionContext, Task<IDocument>> _placeholderFactory;
         private Comparison<IDocument> _sort;
@@ -130,7 +130,7 @@ namespace Wyam.Core.Modules.Metadata
         /// </summary>
         /// <param name="isRoot">A predicate (must return <c>bool</c>) that specifies if the current document is treated as the root of a new tree.</param>
         /// <returns>The current module instance.</returns>
-        public Tree WithRoots(DocumentPredicate isRoot)
+        public Tree WithRoots(DocumentConfig<bool> isRoot)
         {
             _isRoot = isRoot ?? throw new ArgumentNullException(nameof(isRoot));
             return this;

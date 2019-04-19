@@ -42,5 +42,18 @@ namespace Wyam.Common.Configuration
             object value = await config.GetAndCacheValueAsync(null, context);
             return context.TryConvert(value, out T result) ? result : default;
         }
+
+        public static ContextConfig<bool> CombineWith(this ContextConfig<bool> first, ContextConfig<bool> second)
+        {
+            if (first == null)
+            {
+                return second;
+            }
+            if (second == null)
+            {
+                return first;
+            }
+            return new ContextConfig<bool>(async ctx => await first.GetValueAsync(ctx) && await second.GetValueAsync(ctx));
+        }
     }
 }

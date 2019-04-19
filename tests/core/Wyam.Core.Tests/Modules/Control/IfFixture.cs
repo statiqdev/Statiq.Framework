@@ -35,7 +35,7 @@ namespace Wyam.Core.Tests.Modules.Control
                 {
                     AdditionalOutputs = 3
                 };
-                engine.Pipelines.Add(a, new If(Config.IfDocument((x, y) => x.Content == "1"), b), c);
+                engine.Pipelines.Add(a, new If(Config.FromDocument((x, y) => x.Content == "1"), b), c);
 
                 // When
                 await engine.ExecuteAsync(serviceProvider);
@@ -76,8 +76,8 @@ namespace Wyam.Core.Tests.Modules.Control
                 };
                 engine.Pipelines.Add(
                     a,
-                    new If(Config.IfDocument((x, y) => x.Content == "1"), b)
-                        .ElseIf(Config.IfDocument((x, y) => x.Content == "2"), c),
+                    new If(Config.FromDocument((x, y) => x.Content == "1"), b)
+                        .ElseIf(Config.FromDocument((x, y) => x.Content == "2"), c),
                     d);
 
                 // When
@@ -122,7 +122,7 @@ namespace Wyam.Core.Tests.Modules.Control
                 };
                 engine.Pipelines.Add(
                     a,
-                    new If(Config.IfDocument((x, y) => x.Content == "1"), b)
+                    new If(Config.FromDocument((x, y) => x.Content == "1"), b)
                         .Else(c),
                     d);
 
@@ -172,8 +172,8 @@ namespace Wyam.Core.Tests.Modules.Control
                 };
                 engine.Pipelines.Add(
                     a,
-                    new If(Config.IfDocument((x, y) => x.Content == "1"), b)
-                        .ElseIf(Config.IfDocument((x, y) => x.Content == "3"), c)
+                    new If(Config.FromDocument((x, y) => x.Content == "1"), b)
+                        .ElseIf(Config.FromDocument((x, y) => x.Content == "3"), c)
                         .Else(d),
                     e);
 
@@ -216,7 +216,7 @@ namespace Wyam.Core.Tests.Modules.Control
                 {
                     AdditionalOutputs = 3
                 };
-                engine.Pipelines.Add(a, new If(Config.IfContext(x => true), b), c);
+                engine.Pipelines.Add(a, new If(Config.FromContext(x => true), b), c);
 
                 // When
                 await engine.ExecuteAsync(serviceProvider);
@@ -251,7 +251,7 @@ namespace Wyam.Core.Tests.Modules.Control
                 {
                     AdditionalOutputs = 3
                 };
-                engine.Pipelines.Add(a, new If(Config.IfContext(x => false), b), c);
+                engine.Pipelines.Add(a, new If(Config.FromContext(x => false), b), c);
 
                 // When
                 await engine.ExecuteAsync(serviceProvider);
@@ -286,7 +286,7 @@ namespace Wyam.Core.Tests.Modules.Control
                 {
                     AdditionalOutputs = 3
                 };
-                engine.Pipelines.Add(a, new If(Config.IfDocument((doc, ctx) => false), b), c);
+                engine.Pipelines.Add(a, new If(Config.FromDocument((doc, ctx) => false), b), c);
 
                 // When
                 await engine.ExecuteAsync(serviceProvider);
@@ -321,7 +321,7 @@ namespace Wyam.Core.Tests.Modules.Control
                 {
                     AdditionalOutputs = 3
                 };
-                engine.Pipelines.Add(a, new If(Config.IfDocument((doc, ctx) => false), b).WithoutUnmatchedDocuments(), c);
+                engine.Pipelines.Add(a, new If(Config.FromDocument((doc, ctx) => false), b).WithoutUnmatchedDocuments(), c);
 
                 // When
                 await engine.ExecuteAsync(serviceProvider);

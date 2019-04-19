@@ -223,7 +223,7 @@ namespace Wyam.Core.Tests.Modules.Control
                     AdditionalOutputs = 7
                 };
                 GroupByMany groupByMany = new GroupByMany(Config.FromDocument(d => new[] { d.Get<int>("A") % 3, 3 }), count)
-                    .Where(Config.IfDocument(d => d.Get<int>("A") % 3 != 0));
+                    .Where(Config.FromDocument(d => d.Get<int>("A") % 3 != 0));
                 Execute gatherData = new ExecuteDocument(
                     Config.FromDocument(d =>
                     {

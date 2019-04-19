@@ -47,11 +47,11 @@ namespace Wyam.Core.Meta
 
         public bool TryGetValue<T>(string key, out T value)
         {
+            value = default;
             if (key == null)
             {
-                throw new ArgumentNullException(nameof(key));
+                return false;
             }
-            value = default;
             IReadOnlyDictionary<string, object> meta = Stack.FirstOrDefault(x => x.ContainsKey(key));
             if (meta == null)
             {

@@ -71,7 +71,7 @@ namespace Wyam.Core.Tests.Modules.Control
                 {
                     AdditionalOutputs = 3
                 };
-                engine.Pipelines.Add(a, new ConcatBranch(b).Where(Config.IfDocument(x => x.Content == "1")), c);
+                engine.Pipelines.Add(a, new ConcatBranch(b).Where(Config.FromDocument(x => x.Content == "1")), c);
 
                 // When
                 await engine.ExecuteAsync(serviceProvider);

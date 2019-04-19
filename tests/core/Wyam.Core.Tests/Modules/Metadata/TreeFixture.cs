@@ -274,7 +274,7 @@ namespace Wyam.Core.Tests.Modules.Metadata
                     "root/b/4.txt");
                 Tree tree = new Tree()
                     .WithNesting()
-                    .WithRoots(Config.IfDocument(doc => doc.FilePath(Keys.RelativeFilePath).FullPath.EndsWith("b/index.html")));
+                    .WithRoots(Config.FromDocument(doc => doc.FilePath(Keys.RelativeFilePath).FullPath.EndsWith("b/index.html")));
 
                 // When
                 List<IDocument> documents = await tree.ExecuteAsync(inputs, context).ToListAsync();

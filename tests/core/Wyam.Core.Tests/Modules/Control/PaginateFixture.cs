@@ -141,7 +141,7 @@ namespace Wyam.Core.Tests.Modules.Control
                 {
                     AdditionalOutputs = 7
                 };
-                Paginate paginate = new Paginate(3, count).Where(Config.IfDocument(doc => doc.Content != "5"));
+                Paginate paginate = new Paginate(3, count).Where(Config.FromDocument(doc => doc.Content != "5"));
                 Execute gatherData = new ExecuteDocument(
                     (d, c) =>
                     {

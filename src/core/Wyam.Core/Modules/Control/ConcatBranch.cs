@@ -18,7 +18,7 @@ namespace Wyam.Core.Modules.Control
     /// <category>Control</category>
     public class ConcatBranch : ContainerModule
     {
-        private DocumentPredicate _predicate;
+        private DocumentConfig<bool> _predicate;
 
         /// <summary>
         /// Evaluates the specified modules with each input document as the initial
@@ -49,7 +49,7 @@ namespace Wyam.Core.Modules.Control
         /// </summary>
         /// <param name="predicate">A delegate that should return a <c>bool</c>.</param>
         /// <returns>The current module instance.</returns>
-        public ConcatBranch Where(DocumentPredicate predicate)
+        public ConcatBranch Where(DocumentConfig<bool> predicate)
         {
             _predicate = _predicate.CombineWith(predicate);
             return this;

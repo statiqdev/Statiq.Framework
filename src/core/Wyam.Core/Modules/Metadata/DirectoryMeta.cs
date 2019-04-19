@@ -73,7 +73,7 @@ namespace Wyam.Core.Modules.Metadata
         /// <param name="inherited">If set to <c>true</c>, metadata from documents with this file name will be inherited by documents in nested directories.</param>
         /// <param name="replace">If set to <c>true</c>, metadata from this document will replace any existing metadata on the target document.</param>
         /// <returns>The current module instance.</returns>
-        public DirectoryMeta WithMetadataFile(DocumentPredicate metadataFileName, bool inherited = false, bool replace = false)
+        public DirectoryMeta WithMetadataFile(DocumentConfig<bool> metadataFileName, bool inherited = false, bool replace = false)
         {
             _metadataFiles.Add(new MetaFileEntry(metadataFileName, inherited, replace));
             return this;
@@ -88,7 +88,7 @@ namespace Wyam.Core.Modules.Metadata
         /// <returns>The current module instance.</returns>
         public DirectoryMeta WithMetadataFile(FilePath metadataFileName, bool inherited = false, bool replace = false)
         {
-            return WithMetadataFile(Config.IfDocument(doc => doc.Source?.FileName.Equals(metadataFileName) == true), inherited, replace);
+            return WithMetadataFile(Config.FromDocument(doc => doc.Source?.FileName.Equals(metadataFileName) == true), inherited, replace);
         }
 
         /// <inheritdoc />
@@ -196,10 +196,10 @@ namespace Wyam.Core.Modules.Metadata
         private class MetaFileEntry
         {
             public bool Inherited { get; }
-            public DocumentPredicate MetadataFileName { get; }
+            public DocumentConfig<bool> MetadataFileName { get; }
             public bool Replace { get; }
 
-            public MetaFileEntry(DocumentPredicate metadataFileName, bool inherited, bool replace)
+            public MetaFileEntry(DocumentConfig<bool> metadataFileName, bool inherited, bool replace)
             {
                 MetadataFileName = metadataFileName;
                 Inherited = inherited;

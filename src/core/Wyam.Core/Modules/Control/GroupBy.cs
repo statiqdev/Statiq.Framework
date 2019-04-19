@@ -31,7 +31,7 @@ namespace Wyam.Core.Modules.Control
     public class GroupBy : ContainerModule
     {
         private readonly DocumentConfig<object> _key;
-        private DocumentPredicate _predicate;
+        private DocumentConfig<bool> _predicate;
         private IEqualityComparer<object> _comparer;
         private bool _emptyOutputIfNoGroups;
 
@@ -94,7 +94,7 @@ namespace Wyam.Core.Modules.Control
             }
 
             _key = Config.FromDocument(doc => doc.Get(keyMetadataKey));
-            _predicate = Config.IfDocument(doc => doc.ContainsKey(keyMetadataKey));
+            _predicate = Config.FromDocument(doc => doc.ContainsKey(keyMetadataKey));
         }
 
         /// <summary>
@@ -102,7 +102,7 @@ namespace Wyam.Core.Modules.Control
         /// </summary>
         /// <param name="predicate">A delegate that should return a <c>bool</c>.</param>
         /// <returns>The current module instance.</returns>
-        public GroupBy Where(DocumentPredicate predicate)
+        public GroupBy Where(DocumentConfig<bool> predicate)
         {
             _predicate = _predicate.CombineWith(predicate);
             return this;

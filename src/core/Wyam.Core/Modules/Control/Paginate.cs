@@ -61,7 +61,7 @@ namespace Wyam.Core.Modules.Control
     {
         private readonly int _pageSize;
         private readonly Dictionary<string, DocumentConfig<object>> _pageMetadata = new Dictionary<string, DocumentConfig<object>>();
-        private DocumentPredicate _predicate;
+        private DocumentConfig<bool> _predicate;
         private int _takePages = int.MaxValue;
         private int _skipPages = 0;
 
@@ -98,7 +98,7 @@ namespace Wyam.Core.Modules.Control
         /// </summary>
         /// <param name="predicate">A delegate that should return a <c>bool</c>.</param>
         /// <returns>The current module instance.</returns>
-        public Paginate Where(DocumentPredicate predicate)
+        public Paginate Where(DocumentConfig<bool> predicate)
         {
             _predicate = _predicate.CombineWith(predicate);
             return this;

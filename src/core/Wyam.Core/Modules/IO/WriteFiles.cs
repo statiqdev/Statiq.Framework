@@ -63,7 +63,7 @@ namespace Wyam.Core.Modules.IO
         private bool _useWriteMetadata = true;
         private bool _ignoreEmptyContent = true;
         private bool _append;
-        private DocumentPredicate _predicate = true;
+        private DocumentConfig<bool> _predicate = true;
         private bool _onlyMetadata = false;
 
         /// <summary>
@@ -168,7 +168,7 @@ namespace Wyam.Core.Modules.IO
         /// </summary>
         /// <param name="predicate">A predicate that returns <c>true</c> if the file should be written.</param>
         /// <returns>The current module instance.</returns>
-        public WriteFiles Where(DocumentPredicate predicate)
+        public WriteFiles Where(DocumentConfig<bool> predicate)
         {
             _predicate = _predicate.CombineWith(predicate);
             return this;

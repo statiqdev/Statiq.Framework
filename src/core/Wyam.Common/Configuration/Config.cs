@@ -23,6 +23,8 @@ namespace Wyam.Common.Configuration
 
         public static ContextConfig<T> AsyncFromValue<T>(Task<T> value) => new ContextConfig<T>(_ => value);
 
+        public static ContextConfig<IEnumerable<T>> FromValues<T>(params T[] values) => new ContextConfig<IEnumerable<T>>(_ => Task.FromResult<IEnumerable<T>>(values));
+
         public static ContextConfig<T> FromContext<T>(Func<IExecutionContext, T> func) => new ContextConfig<T>(ctx => Task.FromResult(func(ctx)));
 
         public static ContextConfig<T> AsyncFromContext<T>(Func<IExecutionContext, Task<T>> func) => new ContextConfig<T>(func);
@@ -34,18 +36,6 @@ namespace Wyam.Common.Configuration
         public static DocumentConfig<T> FromDocument<T>(Func<IDocument, T> func) => new DocumentConfig<T>((doc, _) => Task.FromResult(func(doc)));
 
         public static DocumentConfig<T> AsyncFromDocument<T>(Func<IDocument, Task<T>> func) => new DocumentConfig<T>((doc, _) => func(doc));
-
-        public static ContextPredicate IfContext(Func<IExecutionContext, bool> func) => new ContextPredicate(ctx => Task.FromResult(func(ctx)));
-
-        public static ContextPredicate AsyncIfContext(Func<IExecutionContext, Task<bool>> func) => new ContextPredicate(func);
-
-        public static DocumentPredicate IfDocument(Func<IDocument, IExecutionContext, bool> func) => new DocumentPredicate((doc, ctx) => Task.FromResult(func(doc, ctx)));
-
-        public static DocumentPredicate AsyncIfDocument(Func<IDocument, IExecutionContext, Task<bool>> func) => new DocumentPredicate(func);
-
-        public static DocumentPredicate IfDocument(Func<IDocument, bool> func) => new DocumentPredicate((doc, _) => Task.FromResult(func(doc)));
-
-        public static DocumentPredicate AsyncIfDocument(Func<IDocument, Task<bool>> func) => new DocumentPredicate((doc, _) => func(doc));
 
         // This just adds a space to the front of error details so it'll format nicely
         // Used by the extensions that convert values from a DocumentConfig<object> or ContextConfig<object>
