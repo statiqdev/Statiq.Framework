@@ -95,6 +95,66 @@ namespace Wyam.Common.Tests.Configuration
                 // Then
                 (await config.GetAndCacheValueAsync(null, null)).ShouldBe(new object[] { 8, 9, 10 });
             }
+
+            [Test]
+            public async Task CastingFromArgToArgAndObjectDocumentConfig()
+            {
+                // Given, When
+                DocumentConfig<int, object> config = Config.FromContext<int, int>((ctx, arg) => 10);
+
+                // Then
+                (await config.GetAndCacheValueAsync(null, null, 100)).ShouldBe(10);
+            }
+
+            [Test]
+            public async Task CastingFromArgToArgAndObjectContextConfig()
+            {
+                // Given, When
+                ContextConfig<int, object> config = Config.FromContext<int, int>((ctx, arg) => 10);
+
+                // Then
+                (await config.GetAndCacheValueAsync(null, null, 100)).ShouldBe(10);
+            }
+
+            [Test]
+            public void CastingFromArgToObjectDocumentConfigShouldThrow()
+            {
+                // Given, When
+                DocumentConfig<object> config;
+
+                // Then
+                Should.Throw<InvalidCastException>(() => config = Config.FromContext<int, int>((ctx, arg) => 10));
+            }
+
+            [Test]
+            public void CastingFromArgToObjectContextConfigShouldThrow()
+            {
+                // Given, When
+                ContextConfig<object> config;
+
+                // Then
+                Should.Throw<InvalidCastException>(() => config = Config.FromContext<int, int>((ctx, arg) => 10));
+            }
+
+            [Test]
+            public async Task CastingFromArgToDocumentConfig()
+            {
+                // Given, When
+                DocumentConfig<int, int> config = Config.FromContext<int, int>((ctx, arg) => 10);
+
+                // Then
+                (await config.GetAndCacheValueAsync(null, null, 100)).ShouldBe(10);
+            }
+
+            [Test]
+            public async Task CastingFromArgToContextConfig()
+            {
+                // Given, When
+                ContextConfig<int, int> config = Config.FromContext<int, int>((ctx, arg) => 10);
+
+                // Then
+                (await config.GetAndCacheValueAsync(null, null, 100)).ShouldBe(10);
+            }
         }
     }
 }

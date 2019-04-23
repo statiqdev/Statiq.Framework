@@ -10,14 +10,16 @@ namespace Wyam.Common.Configuration
 {
     public static class DocumentConfigExtensions
     {
-        public static Task<T> GetValueAsync<T>(
-            this DocumentConfig<T> config,
+        // No arguments
+
+        public static Task<TValue> GetValueAsync<TValue>(
+            this DocumentConfig<TValue> config,
             IDocument document,
             IExecutionContext context,
-            Func<T, T> transform = null) =>
-            config?.GetAndCacheValueAsync(document, context, transform) ?? Task.FromResult(default(T));
+            Func<TValue, TValue> transform = null) =>
+            config?.GetAndCacheValueAsync(document, context, transform) ?? Task.FromResult(default(TValue));
 
-        public static async Task<T> GetValueAsync<T>(
+        public static async Task<TValue> GetValueAsync<TValue>(
             this DocumentConfig<object> config,
             IDocument document,
             IExecutionContext context,
@@ -29,15 +31,15 @@ namespace Wyam.Common.Configuration
             }
 
             object value = await config.GetAndCacheValueAsync(document, context);
-            if (!context.TryConvert(value, out T result))
+            if (!context.TryConvert(value, out TValue result))
             {
                 throw new InvalidOperationException(
-                    $"Could not convert from type {value?.GetType().Name ?? "null"} to type {typeof(T).Name}{Config.GetErrorDetails(errorDetails)}");
+                    $"Could not convert from type {value?.GetType().Name ?? "null"} to type {typeof(TValue).Name}{Config.GetErrorDetails(errorDetails)}");
             }
             return result;
         }
 
-        public static async Task<T> TryGetValueAsync<T>(
+        public static async Task<TValue> TryGetValueAsync<TValue>(
             this DocumentConfig<object> config,
             IDocument document,
             IExecutionContext context)
@@ -48,7 +50,7 @@ namespace Wyam.Common.Configuration
             }
 
             object value = await config.GetAndCacheValueAsync(document, context);
-            return context.TryConvert(value, out T result) ? result : default;
+            return context.TryConvert(value, out TValue result) ? result : default;
         }
 
         public static DocumentConfig<bool> CombineWith(this DocumentConfig<bool> first, DocumentConfig<bool> second)
@@ -64,9 +66,56 @@ namespace Wyam.Common.Configuration
             return new DocumentConfig<bool>(async (doc, ctx) => await first.GetValueAsync(doc, ctx) && await second.GetValueAsync(doc, ctx));
         }
 
-        public static DocumentConfig<Func<T, bool>> CombineWith<T>(
-            this DocumentConfig<Func<T, bool>> first,
-            DocumentConfig<Func<T, bool>> second)
+        public static Task<IEnumerable<IDocument>> FilterAsync(this IEnumerable<IDocument> documents, DocumentConfig<bool> predicate, IExecutionContext context) =>
+            predicate == null ? Task.FromResult(documents) : documents.WhereAsync(context, x => predicate.GetValueAsync(x, context));
+
+        // 1 argument
+
+        public static Task<TValue> GetValueAsync<TArg, TValue>(
+            this DocumentConfig<TArg, TValue> config,
+            IDocument document,
+            IExecutionContext context,
+            TArg arg,
+            Func<TValue, TValue> transform = null) =>
+            config?.GetAndCacheValueAsync(document, context, arg, transform) ?? Task.FromResult(default(TValue));
+
+        public static async Task<TValue> GetValueAsync<TArg, TValue>(
+            this DocumentConfig<TArg, object> config,
+            IDocument document,
+            IExecutionContext context,
+            TArg arg,
+            string errorDetails = null)
+        {
+            if (config == null)
+            {
+                return default;
+            }
+
+            object value = await config.GetAndCacheValueAsync(document, context, arg);
+            if (!context.TryConvert(value, out TValue result))
+            {
+                throw new InvalidOperationException(
+                    $"Could not convert from type {value?.GetType().Name ?? "null"} to type {typeof(TValue).Name}{Config.GetErrorDetails(errorDetails)}");
+            }
+            return result;
+        }
+
+        public static async Task<TValue> TryGetValueAsync<TArg, TValue>(
+            this DocumentConfig<TArg, object> config,
+            IDocument document,
+            IExecutionContext context,
+            TArg arg)
+        {
+            if (config == null)
+            {
+                return default;
+            }
+
+            object value = await config.GetAndCacheValueAsync(document, context, arg);
+            return context.TryConvert(value, out TValue result) ? result : default;
+        }
+
+        public static DocumentConfig<TArg, bool> CombineWith<TArg>(this DocumentConfig<TArg, bool> first, DocumentConfig<TArg, bool> second)
         {
             if (first == null)
             {
@@ -76,23 +125,10 @@ namespace Wyam.Common.Configuration
             {
                 return first;
             }
-            return new DocumentConfig<Func<T, bool>>(async (doc, ctx) =>
-            {
-                Func<T, bool> innerFirst = await first.GetValueAsync(doc, ctx);
-                Func<T, bool> innerSecond = await second.GetValueAsync(doc, ctx);
-                if (innerFirst == null)
-                {
-                    return innerSecond;
-                }
-                if (innerSecond == null)
-                {
-                    return innerFirst;
-                }
-                return x => innerFirst(x) && innerSecond(x);
-            });
+            return new DocumentConfig<TArg, bool>(async (doc, ctx, arg) => await first.GetValueAsync(doc, ctx, arg) && await second.GetValueAsync(doc, ctx, arg));
         }
 
-        public static Task<IEnumerable<IDocument>> FilterAsync(this IEnumerable<IDocument> documents, DocumentConfig<bool> predicate, IExecutionContext context) =>
-            predicate == null ? Task.FromResult(documents) : documents.WhereAsync(context, x => predicate.GetValueAsync(x, context));
+        public static Task<IEnumerable<IDocument>> FilterAsync<TArg>(this IEnumerable<IDocument> documents, DocumentConfig<TArg, bool> predicate, IExecutionContext context, TArg arg) =>
+            predicate == null ? Task.FromResult(documents) : documents.WhereAsync(context, x => predicate.GetValueAsync(x, context, arg));
     }
 }

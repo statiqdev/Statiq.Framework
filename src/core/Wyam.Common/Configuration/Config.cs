@@ -19,23 +19,39 @@ namespace Wyam.Common.Configuration
         /// </remarks>
         /// <param name="value">The value of the configuration.</param>
         /// <returns>A configuration item with the given value.</returns>
-        public static ContextConfig<T> FromValue<T>(T value) => new ContextConfig<T>(_ => Task.FromResult(value));
+        public static ContextConfig<TValue> FromValue<TValue>(TValue value) => new ContextConfig<TValue>(_ => Task.FromResult(value));
 
-        public static ContextConfig<T> FromValue<T>(Task<T> value) => new ContextConfig<T>(_ => value);
+        public static ContextConfig<TValue> FromValue<TValue>(Task<TValue> value) => new ContextConfig<TValue>(_ => value);
 
-        public static ContextConfig<IEnumerable<T>> FromValues<T>(params T[] values) => new ContextConfig<IEnumerable<T>>(_ => Task.FromResult<IEnumerable<T>>(values));
+        public static ContextConfig<IEnumerable<TValue>> FromValues<TValue>(params TValue[] values) => new ContextConfig<IEnumerable<TValue>>(_ => Task.FromResult<IEnumerable<TValue>>(values));
 
-        public static ContextConfig<T> FromContext<T>(Func<IExecutionContext, T> func) => new ContextConfig<T>(ctx => Task.FromResult(func(ctx)));
+        // No arguments
 
-        public static ContextConfig<T> FromContext<T>(Func<IExecutionContext, Task<T>> func) => new ContextConfig<T>(func);
+        public static ContextConfig<TValue> FromContext<TValue>(Func<IExecutionContext, TValue> func) => new ContextConfig<TValue>(ctx => Task.FromResult(func(ctx)));
 
-        public static DocumentConfig<T> FromDocument<T>(Func<IDocument, IExecutionContext, T> func) => new DocumentConfig<T>((doc, ctx) => Task.FromResult(func(doc, ctx)));
+        public static ContextConfig<TValue> FromContext<TValue>(Func<IExecutionContext, Task<TValue>> func) => new ContextConfig<TValue>(func);
 
-        public static DocumentConfig<T> FromDocument<T>(Func<IDocument, IExecutionContext, Task<T>> func) => new DocumentConfig<T>(func);
+        public static DocumentConfig<TValue> FromDocument<TValue>(Func<IDocument, TValue> func) => new DocumentConfig<TValue>((doc, _) => Task.FromResult(func(doc)));
 
-        public static DocumentConfig<T> FromDocument<T>(Func<IDocument, T> func) => new DocumentConfig<T>((doc, _) => Task.FromResult(func(doc)));
+        public static DocumentConfig<TValue> FromDocument<TValue>(Func<IDocument, Task<TValue>> func) => new DocumentConfig<TValue>((doc, _) => func(doc));
 
-        public static DocumentConfig<T> FromDocument<T>(Func<IDocument, Task<T>> func) => new DocumentConfig<T>((doc, _) => func(doc));
+        public static DocumentConfig<TValue> FromDocument<TValue>(Func<IDocument, IExecutionContext, TValue> func) => new DocumentConfig<TValue>((doc, ctx) => Task.FromResult(func(doc, ctx)));
+
+        public static DocumentConfig<TValue> FromDocument<TValue>(Func<IDocument, IExecutionContext, Task<TValue>> func) => new DocumentConfig<TValue>(func);
+
+        // 1 argument
+
+        public static ContextConfig<TArg, TValue> FromContext<TArg, TValue>(Func<IExecutionContext, TArg, TValue> func) => new ContextConfig<TArg, TValue>((ctx, arg) => Task.FromResult(func(ctx, arg)));
+
+        public static ContextConfig<TArg, TValue> FromContext<TArg, TValue>(Func<IExecutionContext, TArg, Task<TValue>> func) => new ContextConfig<TArg, TValue>(func);
+
+        public static DocumentConfig<TArg, TValue> FromDocument<TArg, TValue>(Func<IDocument, IExecutionContext, TArg, TValue> func) => new DocumentConfig<TArg, TValue>((doc, ctx, arg) => Task.FromResult(func(doc, ctx, arg)));
+
+        public static DocumentConfig<TArg, TValue> FromDocument<TArg, TValue>(Func<IDocument, IExecutionContext, TArg, Task<TValue>> func) => new DocumentConfig<TArg, TValue>(func);
+
+        public static ContextConfig<TArg, TValue> FromArgument<TArg, TValue>(Func<TArg, TValue> func) => new ContextConfig<TArg, TValue>((_, arg) => Task.FromResult(func(arg)));
+
+        public static ContextConfig<TArg, TValue> FromArgument<TArg, TValue>(Func<TArg, Task<TValue>> func) => new ContextConfig<TArg, TValue>((_, arg) => func(arg));
 
         // This just adds a space to the front of error details so it'll format nicely
         // Used by the extensions that convert values from a DocumentConfig<object> or ContextConfig<object>
