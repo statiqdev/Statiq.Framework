@@ -1168,7 +1168,7 @@ namespace Wyam.CodeAnalysis.Tests
                 IDocument document = GetDocument(code);
                 IExecutionContext context = GetContext();
                 IModule module = new AnalyzeCSharp()
-                    .WhereSymbol(Config.FromArgument((ISymbol x) => x is INamedTypeSymbol));
+                    .WhereSymbol(Config.FromValue<Func<ISymbol, bool>>(x => x is INamedTypeSymbol));
 
                 // When
                 List<IDocument> results = await module.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
@@ -1194,7 +1194,7 @@ namespace Wyam.CodeAnalysis.Tests
                 IDocument document = GetDocument(code);
                 IExecutionContext context = GetContext();
                 IModule module = new AnalyzeCSharp()
-                    .WhereSymbol(Config.FromArgument((ISymbol x) => x is INamedTypeSymbol))
+                    .WhereSymbol((Func<ISymbol, bool>)(x => x is INamedTypeSymbol))
                     .WithDocsForImplicitSymbols();
 
                 // When

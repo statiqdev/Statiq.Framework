@@ -5,7 +5,6 @@ using System.Reflection;
 using System.Threading.Tasks;
 using Microsoft.CodeAnalysis;
 using NUnit.Framework;
-using Wyam.Common.Configuration;
 using Wyam.Common.Documents;
 using Wyam.Common.Execution;
 using Wyam.Common.IO;
@@ -279,7 +278,7 @@ namespace Wyam.CodeAnalysis.Tests
                 ";
                 IDocument document = GetDocument(code);
                 IExecutionContext context = GetContext();
-                IModule module = new AnalyzeCSharp().WhereSymbol(Config.FromArgument((ISymbol x) => x.Name != "Green"));
+                IModule module = new AnalyzeCSharp().WhereSymbol((Func<ISymbol, bool>)(x => x.Name != "Green"));
 
                 // When
                 List<IDocument> results = await module.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
