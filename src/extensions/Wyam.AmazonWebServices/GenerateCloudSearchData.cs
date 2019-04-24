@@ -39,8 +39,8 @@ namespace Wyam.AmazonWebServices
     /// <category>Content</category>
     public class GenerateCloudSearchData : IModule
     {
-        private readonly ContextConfig<string> _idMetaKey;
-        private readonly ContextConfig<string> _bodyField;
+        private readonly string _idMetaKey;
+        private readonly string _bodyField;
         private readonly List<MetaFieldMapping> _metaFields;
         private readonly List<Field> _fields;
 
@@ -49,7 +49,7 @@ namespace Wyam.AmazonWebServices
         /// </summary>
         /// <param name="idMetaKey">The meta key representing the unique ID for this document.  If NULL, the Document.Id will be used.</param>
         /// <param name="bodyField">The field name for the document contents.  If NULL, the document contents will not be written to the data.</param>
-        public GenerateCloudSearchData(ContextConfig<string> idMetaKey, ContextConfig<string> bodyField)
+        public GenerateCloudSearchData(string idMetaKey, string bodyField)
         {
             _idMetaKey = idMetaKey;
             _bodyField = bodyField;
@@ -93,9 +93,6 @@ namespace Wyam.AmazonWebServices
         /// <inheritdoc />
         public async Task<IEnumerable<IDocument>> ExecuteAsync(IReadOnlyList<IDocument> inputs, IExecutionContext context)
         {
-            string idMetaKey = await _idMetaKey.GetValueAsync(context);
-            string bodyField = await _bodyField.GetValueAsync(context);
-
             Stream contentStream = await context.GetContentStreamAsync();
             using (TextWriter textWriter = new StreamWriter(contentStream))
             {
@@ -111,14 +108,14 @@ namespace Wyam.AmazonWebServices
                         writer.WriteValue("add");
 
                         writer.WritePropertyName("id");
-                        writer.WriteValue(idMetaKey != null ? doc.String(idMetaKey) : doc.Id);
+                        writer.WriteValue(_idMetaKey != null ? doc.String(_idMetaKey) : doc.Id);
 
                         writer.WritePropertyName("fields");
                         writer.WriteStartObject();
 
-                        if (bodyField != null)
+                        if (_bodyField != null)
                         {
-                            writer.WritePropertyName(bodyField);
+                            writer.WritePropertyName(_bodyField);
                             writer.WriteValue(doc.Content);
                         }
 

@@ -72,7 +72,7 @@ namespace Wyam.Common.Shortcodes
             DocumentConfig<string> documentConfig) =>
             collection.Add(name, async (args, content, doc, ctx) =>
             {
-                string result = documentConfig == null ? null : await documentConfig.GetValueAsync(doc, ctx);
+                string result = documentConfig == null ? null : await documentConfig.GetAndTransformValueAsync(doc, ctx);
                 return result != null ? await ctx.GetShortcodeResultAsync(result) : null;
             });
 

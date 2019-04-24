@@ -90,7 +90,7 @@ namespace Wyam.Core.Modules.Control
                     // This is the final else without a predicate
                     matched.AddRange(documents);
                 }
-                else if (condition.Predicate.IsDocumentConfig)
+                else if (condition.Predicate.RequiresDocument)
                 {
                     await context.ForEachAsync(documents, async document =>
                     {

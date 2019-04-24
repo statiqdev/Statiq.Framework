@@ -19,23 +19,27 @@ namespace Wyam.Common.Configuration
     /// if a value type of object is used, then all overloads should also be <see cref="DocumentConfig{T}"/>.
     /// </summary>
     /// <typeparam name="TValue">The value type for this config data.</typeparam>
-    public class DocumentConfig<TValue> : DocumentConfig
+    public class DocumentConfig<TValue>
     {
-        internal Func<IDocument, IExecutionContext, Task<object>> Delegate { get; }
+        private readonly Func<IDocument, IExecutionContext, Task<TValue>> _delegate;
 
-        internal DocumentConfig(Func<IDocument, IExecutionContext, Task<TValue>> func)
-            : this((doc, ctx) => func(doc, ctx).FromDerived<object, TValue>())
+        internal DocumentConfig(Func<IDocument, IExecutionContext, Task<TValue>> func, bool requiresDocument = true)
         {
+            _delegate = func;
+            RequiresDocument = requiresDocument;
         }
 
-        internal DocumentConfig(Func<IDocument, IExecutionContext, Task<object>> func) => Delegate = func;
+        public bool RequiresDocument { get; }
 
         // This should only be accessed via the extension method(s) that guard against null so that null coalescing operators can be used
         // See the discussion at https://github.com/dotnet/roslyn/issues/7171
-        internal async Task<TValue> GetAndCacheValueAsync(IDocument document, IExecutionContext context, Func<TValue, TValue> transform = null) =>
-            await GetAndCacheValueAsync(Delegate(document, context), document, context, transform);
+        internal async Task<TValue> GetAndTransformValueAsync(IDocument document, IExecutionContext context, Func<TValue, TValue> transform = null)
+        {
+            TValue value = await _delegate(document, context);
+            return transform == null ? value : transform(value);
+        }
 
-        public static implicit operator DocumentConfig<TValue>(TValue value) => new ContextConfig<TValue>(_ => Task.FromResult(value));
+        public static implicit operator DocumentConfig<TValue>(TValue value) => new DocumentConfig<TValue>((_, __) => Task.FromResult(value), false);
 
         // These special casting operators for object variants ensure we don't accidentally "wrap" an existing ContextConfig/DocumentConfig
 
@@ -43,11 +47,12 @@ namespace Wyam.Common.Configuration
         {
             if (typeof(IEnumerable).IsAssignableFrom(typeof(TValue)))
             {
-                return new DocumentConfig<IEnumerable<object>>(async (doc, ctx) => ((IEnumerable)await documentConfig.Delegate(doc, ctx)).Cast<object>());
+                return new DocumentConfig<IEnumerable<object>>(async (doc, ctx) => ((IEnumerable)await documentConfig._delegate(doc, ctx)).Cast<object>(), documentConfig.RequiresDocument);
             }
-            return new DocumentConfig<IEnumerable<object>>(async (doc, ctx) => new object[] { await documentConfig.Delegate(doc, ctx) });
+            return new DocumentConfig<IEnumerable<object>>(async (doc, ctx) => new object[] { await documentConfig._delegate(doc, ctx) }, documentConfig.RequiresDocument);
         }
 
-        public static implicit operator DocumentConfig<object>(DocumentConfig<TValue> documentConfig) => new DocumentConfig<object>(documentConfig.Delegate);
+        public static implicit operator DocumentConfig<object>(DocumentConfig<TValue> documentConfig) =>
+            new DocumentConfig<object>(async (doc, ctx) => await documentConfig._delegate(doc, ctx), documentConfig.RequiresDocument);
     }
 }

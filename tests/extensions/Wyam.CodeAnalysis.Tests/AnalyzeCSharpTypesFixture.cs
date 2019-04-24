@@ -772,7 +772,7 @@ namespace Wyam.CodeAnalysis.Tests
                 ";
                 IDocument document = GetDocument(code);
                 IExecutionContext context = GetContext();
-                IModule module = new AnalyzeCSharp().WhereSymbol((Func<ISymbol, bool>)(x => x is INamedTypeSymbol && ((INamedTypeSymbol)x).TypeKind == TypeKind.Class));
+                IModule module = new AnalyzeCSharp().WhereSymbol(x => x is INamedTypeSymbol && ((INamedTypeSymbol)x).TypeKind == TypeKind.Class);
 
                 // When
                 List<IDocument> results = await module.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
@@ -832,7 +832,7 @@ namespace Wyam.CodeAnalysis.Tests
                 ";
                 IDocument document = GetDocument(code);
                 IExecutionContext context = GetContext();
-                IModule module = new AnalyzeCSharp().WithNamedTypes((Func<INamedTypeSymbol, bool>)(x => x.TypeKind == TypeKind.Class));
+                IModule module = new AnalyzeCSharp().WithNamedTypes(x => x.TypeKind == TypeKind.Class);
 
                 // When
                 List<IDocument> results = await module.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list

@@ -71,7 +71,7 @@ namespace Wyam.SearchIndex
         private readonly DocumentConfig<ISearchIndexItem> _searchIndexItem;
         private FilePath _stopwordsPath;
         private bool _enableStemming;
-        private ContextConfig<FilePath> _path = new FilePath("searchIndex.js");
+        private FilePath _path = new FilePath("searchIndex.js");
         private bool _includeHost = false;
         private Func<StringBuilder, IExecutionContext, string> _script = (builder, _) => builder.ToString();
 
@@ -157,18 +157,6 @@ namespace Wyam.SearchIndex
         }
 
         /// <summary>
-        /// Controls the output path of the result document. If this is specified, the resulting <see cref="FilePath"/>
-        /// will be used to set a <c>WritePath</c> metadata value.
-        /// </summary>
-        /// <param name="path">A delegate that should return a <see cref="FilePath"/> to the output file.</param>
-        /// <returns>The current module instance.</returns>
-        public SearchIndex WithPath(ContextConfig<FilePath> path)
-        {
-            _path = path ?? throw new ArgumentNullException(nameof(path));
-            return this;
-        }
-
-        /// <summary>
         /// This allows you to customize the Lunr.js JavaScript that this module creates.
         /// </summary>
         /// <param name="script">A script transformation function. The <see cref="StringBuilder"/> contains
@@ -201,17 +189,16 @@ namespace Wyam.SearchIndex
 
             // Get the output path
             MetadataItems metadata = null;
-            FilePath outputPath = await _path.GetValueAsync(context);
-            if (outputPath != null)
+            if (_path != null)
             {
-                if (!outputPath.IsRelative)
+                if (!_path.IsRelative)
                 {
                     throw new ArgumentException("The output path must be relative");
                 }
                 metadata = new MetadataItems
                 {
-                    { Keys.RelativeFilePath, outputPath },
-                    { Keys.WritePath, outputPath }
+                    { Keys.RelativeFilePath, _path },
+                    { Keys.WritePath, _path }
                 };
             }
 

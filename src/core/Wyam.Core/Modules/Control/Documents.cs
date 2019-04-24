@@ -140,7 +140,7 @@ namespace Wyam.Core.Modules.Control
 
             if (_documents != null)
             {
-                documents = _documents.IsDocumentConfig
+                documents = _documents.RequiresDocument
                     ? await inputs.SelectManyAsync(context, x => _documents.GetValueAsync(x, context))
                     : await _documents.GetValueAsync(null, context);
             }

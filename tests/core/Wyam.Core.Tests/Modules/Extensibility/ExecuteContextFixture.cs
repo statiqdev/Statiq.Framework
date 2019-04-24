@@ -30,7 +30,7 @@ namespace Wyam.Core.Tests.Modules.Extensibility
                 // Given
                 IServiceProvider serviceProvider = new TestServiceProvider();
                 Engine engine = new Engine();
-                Execute execute = new ExecuteContext(_ => null);
+                Execute execute = new ExecuteContext(_ => (object)null);
                 engine.Pipelines.Add(execute);
 
                 // When
@@ -45,7 +45,7 @@ namespace Wyam.Core.Tests.Modules.Extensibility
                 // Given
                 IServiceProvider serviceProvider = new TestServiceProvider();
                 Engine engine = new Engine();
-                Execute execute = new ExecuteContext(1);
+                Execute execute = new ExecuteContext(_ => 1);
                 engine.Pipelines.Add(execute);
 
                 // When, Then
@@ -62,7 +62,7 @@ namespace Wyam.Core.Tests.Modules.Extensibility
                     new TestDocument(),
                     new TestDocument()
                 };
-                Execute execute = new ExecuteContext((object)null);
+                Execute execute = new ExecuteContext(_ => (object)null);
 
                 // When
                 IEnumerable<IDocument> outputs = await ((IModule)execute).ExecuteAsync(inputs, context).ToListAsync();
@@ -94,7 +94,7 @@ namespace Wyam.Core.Tests.Modules.Extensibility
                 IServiceProvider serviceProvider = new TestServiceProvider();
                 Engine engine = new Engine();
                 TestDocument document = new TestDocument();
-                Execute execute = new ExecuteContext(document);
+                Execute execute = new ExecuteContext(_ => document);
                 engine.Pipelines.Add("Test", execute);
 
                 // When
@@ -115,11 +115,11 @@ namespace Wyam.Core.Tests.Modules.Extensibility
                     new TestDocument()
                 };
                 int count = 0;
-                Execute execute = new ExecuteContext(Config.FromContext(c =>
+                Execute execute = new ExecuteContext(c =>
                 {
                     count++;
                     return (object)null;
-                }));
+                });
 
                 // When
                 await ((IModule)execute).ExecuteAsync(inputs, context).ToListAsync();

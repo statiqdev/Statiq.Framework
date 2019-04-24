@@ -24,7 +24,7 @@ namespace Wyam.Common.Tests.Configuration
                 DocumentConfig<int> config = 10;
 
                 // Then
-                (await config.GetAndCacheValueAsync(null, null)).ShouldBe(10);
+                (await config.GetAndTransformValueAsync(null, null)).ShouldBe(10);
             }
 
             [Test]
@@ -34,7 +34,7 @@ namespace Wyam.Common.Tests.Configuration
                 DocumentConfig<object> config = 10;
 
                 // Then
-                (await config.GetAndCacheValueAsync(null, null)).ShouldBe(10);
+                (await config.GetAndTransformValueAsync(null, null)).ShouldBe(10);
             }
 
             [Test]
@@ -44,7 +44,7 @@ namespace Wyam.Common.Tests.Configuration
                 DocumentConfig<object> config = new DocumentConfig<int>((_, __) => Task.FromResult(10));
 
                 // Then
-                (await config.GetAndCacheValueAsync(null, null)).ShouldBe(10);
+                (await config.GetAndTransformValueAsync(null, null)).ShouldBe(10);
             }
 
             [Test]
@@ -54,7 +54,7 @@ namespace Wyam.Common.Tests.Configuration
                 DocumentConfig<IEnumerable<object>> config = new DocumentConfig<int>((_, __) => Task.FromResult(10));
 
                 // Then
-                (await config.GetAndCacheValueAsync(null, null)).ShouldBe(new object[] { 10 });
+                (await config.GetAndTransformValueAsync(null, null)).ShouldBe(new object[] { 10 });
             }
 
             [Test]
@@ -65,180 +65,7 @@ namespace Wyam.Common.Tests.Configuration
                     new DocumentConfig<IEnumerable<int>>((_, __) => Task.FromResult((IEnumerable<int>)new[] { 8, 9, 10 }));
 
                 // Then
-                (await config.GetAndCacheValueAsync(null, null)).ShouldBe(new object[] { 8, 9, 10 });
-            }
-
-            [Test]
-            public async Task CastingFromArgToArgAndObjectDocumentConfig()
-            {
-                // Given, When
-                DocumentConfig<int, object> config = Config.FromDocument<int, int>((doc, ctx, arg) => 10);
-
-                // Then
-                (await config.GetAndCacheValueAsync(null, null, 100)).ShouldBe(10);
-            }
-
-            [Test]
-            public async Task CastingFromArgToArgAndObjectContextConfig()
-            {
-                // Given, When
-                ContextConfig<int, object> config = Config.FromDocument<int, int>((doc, ctx, arg) => 10);
-
-                // Then
-                (await config.GetAndCacheValueAsync(null, null, 100)).ShouldBe(10);
-            }
-
-            [Test]
-            public void CastingFromArgToObjectDocumentConfig()
-            {
-                // Given, When
-                DocumentConfig<object> config;
-
-                // Then
-                Should.Throw<InvalidCastException>(() => config = Config.FromDocument<int, int>((doc, ctx, arg) => 10));
-            }
-
-            [Test]
-            public void CastingFromArgToObjectContextConfig()
-            {
-                // Given, When
-                ContextConfig<object> config;
-
-                // Then
-                Should.Throw<InvalidCastException>(() => config = Config.FromDocument<int, int>((doc, ctx, arg) => 10));
-            }
-        }
-
-        public class GetCacheAndValueAsyncTests : DocumentConfigFixture
-        {
-            [Test]
-            public async Task CachesForSameContext()
-            {
-                // Given
-                TestExecutionContext context = new TestExecutionContext();
-                int count = 1;
-                DocumentConfig<int> config = new DocumentConfig<int>(async (_, __) =>
-                {
-                    await Task.CompletedTask;
-                    return count++;
-                });
-
-                // When
-                int result1 = await config.GetAndCacheValueAsync(null, context);
-                int result2 = await config.GetAndCacheValueAsync(null, context);
-
-                // Then
-                result1.ShouldBe(1);
-                result2.ShouldBe(1);
-            }
-
-            [Test]
-            public async Task DoesNotCacheForDifferentContexts()
-            {
-                // Given
-                TestExecutionContext context1 = new TestExecutionContext();
-                TestExecutionContext context2 = new TestExecutionContext();
-                int count = 1;
-                DocumentConfig<int> config = new DocumentConfig<int>(async (_, __) =>
-                {
-                    await Task.CompletedTask;
-                    return count++;
-                });
-
-                // When
-                int result1 = await config.GetAndCacheValueAsync(null, context1);
-                int result2 = await config.GetAndCacheValueAsync(null, context2);
-
-                // Then
-                result1.ShouldBe(1);
-                result2.ShouldBe(2);
-            }
-
-            [Test]
-            public async Task DoesNotCacheIfDocument()
-            {
-                // Given
-                TestExecutionContext context = new TestExecutionContext();
-                TestDocument document = new TestDocument();
-                int count = 1;
-                DocumentConfig<int> config = new DocumentConfig<int>(async (_, __) =>
-                {
-                    await Task.CompletedTask;
-                    return count++;
-                });
-
-                // When
-                int result1 = await config.GetAndCacheValueAsync(document, context);
-                int result2 = await config.GetAndCacheValueAsync(document, context);
-
-                // Then
-                result1.ShouldBe(1);
-                result2.ShouldBe(2);
-            }
-
-            [Test]
-            public async Task CachesForContextConfigIfDocument()
-            {
-                // Given
-                TestExecutionContext context = new TestExecutionContext();
-                TestDocument document = new TestDocument();
-                int count = 1;
-                DocumentConfig<int> config = new ContextConfig<int>(async _ =>
-                {
-                    await Task.CompletedTask;
-                    return count++;
-                });
-
-                // When
-                int result1 = await config.GetAndCacheValueAsync(document, context);
-                int result2 = await config.GetAndCacheValueAsync(document, context);
-
-                // Then
-                result1.ShouldBe(1);
-                result2.ShouldBe(1);
-            }
-
-            [Test]
-            public async Task DoesNotCacheForSameContextWithArgument()
-            {
-                // Given
-                TestExecutionContext context = new TestExecutionContext();
-                int count = 1;
-                DocumentConfig<int, int> config = new DocumentConfig<int, int>(async (_, __, arg) =>
-                {
-                    await Task.CompletedTask;
-                    return count++;
-                });
-
-                // When
-                int result1 = await config.GetAndCacheValueAsync(null, context, 100);
-                int result2 = await config.GetAndCacheValueAsync(null, context, 100);
-
-                // Then
-                result1.ShouldBe(1);
-                result2.ShouldBe(2);
-            }
-
-            [Test]
-            public async Task DoesNotCacheForContextConfigIfDocumentWithArgument()
-            {
-                // Given
-                TestExecutionContext context = new TestExecutionContext();
-                TestDocument document = new TestDocument();
-                int count = 1;
-                DocumentConfig<int, int> config = new ContextConfig<int, int>(async (_, __) =>
-                {
-                    await Task.CompletedTask;
-                    return count++;
-                });
-
-                // When
-                int result1 = await config.GetAndCacheValueAsync(document, context, 100);
-                int result2 = await config.GetAndCacheValueAsync(document, context, 100);
-
-                // Then
-                result1.ShouldBe(1);
-                result2.ShouldBe(2);
+                (await config.GetAndTransformValueAsync(null, null)).ShouldBe(new object[] { 8, 9, 10 });
             }
         }
     }

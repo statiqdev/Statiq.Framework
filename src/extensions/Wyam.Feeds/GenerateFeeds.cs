@@ -56,19 +56,19 @@ namespace Wyam.Feeds
         public static readonly FilePath DefaultRdfPath = null;
 
         private int _maximumItems = 20;
-        private ContextConfig<FilePath> _rssPath = DefaultRssPath;
-        private ContextConfig<FilePath> _atomPath = DefaultAtomPath;
-        private ContextConfig<FilePath> _rdfPath = DefaultRdfPath;
+        private FilePath _rssPath = DefaultRssPath;
+        private FilePath _atomPath = DefaultAtomPath;
+        private FilePath _rdfPath = DefaultRdfPath;
 
-        private ContextConfig<Uri> _feedId = Config.FromContext(ctx => ctx.Convert<Uri>(ctx.GetLink()));
-        private ContextConfig<string> _feedTitle = Config.FromContext(ctx => ctx.String(FeedKeys.Title));
-        private ContextConfig<string> _feedDescription = Config.FromContext(ctx => ctx.String(FeedKeys.Description));
-        private ContextConfig<string> _feedAuthor = Config.FromContext(ctx => ctx.String(FeedKeys.Author));
-        private ContextConfig<DateTime?> _feedPublished = DateTime.UtcNow;
-        private ContextConfig<DateTime?> _feedUpdated = DateTime.UtcNow;
-        private ContextConfig<Uri> _feedLink = Config.FromContext(ctx => ctx.Convert<Uri>(ctx.GetLink()));
-        private ContextConfig<Uri> _feedImageLink = Config.FromContext(ctx => ctx.Convert<Uri>(ctx.GetLink(ctx, FeedKeys.Image, true)));
-        private ContextConfig<string> _feedCopyright = Config.FromContext(ctx => ctx.String(FeedKeys.Copyright) ?? DateTime.UtcNow.Year.ToString());
+        private Uri _feedId;
+        private string _feedTitle;
+        private string _feedDescription;
+        private string _feedAuthor;
+        private DateTime? _feedPublished;
+        private DateTime? _feedUpdated;
+        private Uri _feedLink;
+        private Uri _feedImageLink;
+        private string _feedCopyright;
 
         private DocumentConfig<Uri> _itemId = Config.FromDocument((doc, ctx) => ctx.Convert<Uri>(ctx.GetLink(doc, true)));
         private DocumentConfig<string> _itemTitle = Config.FromDocument(doc => doc.String(FeedKeys.Title));
@@ -104,7 +104,7 @@ namespace Wyam.Feeds
         /// <param name="rssPath">A delegate that should return a <see cref="FilePath"/> for the RSS path.
         /// If the delegate is <c>null</c> or returns <c>null</c>, no RSS file will be generated.</param>
         /// <returns>The current module instance.</returns>
-        public GenerateFeeds WithRssPath(ContextConfig<FilePath> rssPath)
+        public GenerateFeeds WithRssPath(FilePath rssPath)
         {
             _rssPath = rssPath;
             return this;
@@ -117,7 +117,7 @@ namespace Wyam.Feeds
         /// <param name="atomPath">A delegate that should return a <see cref="FilePath"/> for the Atom path.
         /// If the delegate is <c>null</c> or returns <c>null</c>, no Atom file will be generated.</param>
         /// <returns>The current module instance.</returns>
-        public GenerateFeeds WithAtomPath(ContextConfig<FilePath> atomPath)
+        public GenerateFeeds WithAtomPath(FilePath atomPath)
         {
             _atomPath = atomPath;
             return this;
@@ -129,7 +129,7 @@ namespace Wyam.Feeds
         /// <param name="rdfPath">A delegate that should return a <see cref="FilePath"/> for the RDF path.
         /// If the delegate is <c>null</c> or returns <c>null</c>, no RDF file will be generated.</param>
         /// <returns>The current module instance.</returns>
-        public GenerateFeeds WithRdfPath(ContextConfig<FilePath> rdfPath)
+        public GenerateFeeds WithRdfPath(FilePath rdfPath)
         {
             _rdfPath = rdfPath;
             return this;
@@ -141,7 +141,7 @@ namespace Wyam.Feeds
         /// <param name="feedId">A delegate that should return a <c>Uri</c> with
         /// the feed identifier.</param>
         /// <returns>The current module instance.</returns>
-        public GenerateFeeds WithFeedId(ContextConfig<Uri> feedId)
+        public GenerateFeeds WithFeedId(Uri feedId)
         {
             _feedId = feedId;
             return this;
@@ -154,7 +154,7 @@ namespace Wyam.Feeds
         /// <param name="feedTitle">A delegate that should return a <c>string</c> with
         /// the feed title.</param>
         /// <returns>The current module instance.</returns>
-        public GenerateFeeds WithFeedTitle(ContextConfig<string> feedTitle)
+        public GenerateFeeds WithFeedTitle(string feedTitle)
         {
             _feedTitle = feedTitle;
             return this;
@@ -167,7 +167,7 @@ namespace Wyam.Feeds
         /// <param name="feedDescription">A delegate that should return a <c>string</c> with
         /// the feed description.</param>
         /// <returns>The current module instance.</returns>
-        public GenerateFeeds WithFeedDescription(ContextConfig<string> feedDescription)
+        public GenerateFeeds WithFeedDescription(string feedDescription)
         {
             _feedDescription = feedDescription;
             return this;
@@ -180,7 +180,7 @@ namespace Wyam.Feeds
         /// <param name="feedAuthor">A delegate that should return a <c>string</c> with
         /// the feed author.</param>
         /// <returns>The current module instance.</returns>
-        public GenerateFeeds WithFeedAuthor(ContextConfig<string> feedAuthor)
+        public GenerateFeeds WithFeedAuthor(string feedAuthor)
         {
             _feedAuthor = feedAuthor;
             return this;
@@ -192,7 +192,7 @@ namespace Wyam.Feeds
         /// <param name="feedPublished">A delegate that should return a <c>DateTime</c> with
         /// the feed published time.</param>
         /// <returns>The current module instance.</returns>
-        public GenerateFeeds WithFeedPublished(ContextConfig<DateTime?> feedPublished)
+        public GenerateFeeds WithFeedPublished(DateTime feedPublished)
         {
             _feedPublished = feedPublished;
             return this;
@@ -204,7 +204,7 @@ namespace Wyam.Feeds
         /// <param name="feedUpdated">A delegate that should return a <c>DateTime</c> with
         /// the feed updated time.</param>
         /// <returns>The current module instance.</returns>
-        public GenerateFeeds WithFeedUpdated(ContextConfig<DateTime?> feedUpdated)
+        public GenerateFeeds WithFeedUpdated(DateTime feedUpdated)
         {
             _feedUpdated = feedUpdated;
             return this;
@@ -216,7 +216,7 @@ namespace Wyam.Feeds
         /// <param name="feedLink">A delegate that should return a <c>Uri</c> with
         /// the feed link.</param>
         /// <returns>The current module instance.</returns>
-        public GenerateFeeds WithFeedLink(ContextConfig<Uri> feedLink)
+        public GenerateFeeds WithFeedLink(Uri feedLink)
         {
             _feedLink = feedLink;
             return this;
@@ -229,7 +229,7 @@ namespace Wyam.Feeds
         /// <param name="feedImageLink">A delegate that should return a <c>Uri</c> with
         /// the feed image link.</param>
         /// <returns>The current module instance.</returns>
-        public GenerateFeeds WithFeedImageLink(ContextConfig<Uri> feedImageLink)
+        public GenerateFeeds WithFeedImageLink(Uri feedImageLink)
         {
             _feedImageLink = feedImageLink;
             return this;
@@ -242,7 +242,7 @@ namespace Wyam.Feeds
         /// <param name="feedCopyright">A delegate that should return a <c>string</c> with
         /// the feed copyright.</param>
         /// <returns>The current module instance.</returns>
-        public GenerateFeeds WithFeedCopyright(ContextConfig<string> feedCopyright)
+        public GenerateFeeds WithFeedCopyright(string feedCopyright)
         {
             _feedCopyright = feedCopyright;
             return this;
@@ -407,15 +407,15 @@ namespace Wyam.Feeds
             // Get the feed
             Feed feed = new Feed
             {
-                ID = await _feedId.GetValueAsync(context),
-                Title = await _feedTitle.GetValueAsync(context),
-                Description = await _feedDescription.GetValueAsync(context),
-                Author = await _feedAuthor.GetValueAsync(context),
-                Published = await _feedPublished.GetValueAsync(context),
-                Updated = await _feedUpdated.GetValueAsync(context),
-                Link = await _feedLink.GetValueAsync(context),
-                ImageLink = await _feedImageLink.GetValueAsync(context),
-                Copyright = await _feedCopyright.GetValueAsync(context)
+                ID = _feedId ?? context.Convert<Uri>(context.GetLink()),
+                Title = _feedTitle ?? context.String(FeedKeys.Title),
+                Description = _feedDescription ?? context.String(FeedKeys.Description),
+                Author = _feedAuthor ?? context.String(FeedKeys.Author),
+                Published = _feedPublished ?? DateTime.UtcNow,
+                Updated = _feedUpdated ?? DateTime.UtcNow,
+                Link = _feedLink ?? context.Convert<Uri>(context.GetLink()),
+                ImageLink = _feedImageLink ?? context.Convert<Uri>(context.GetLink(context, FeedKeys.Image, true)),
+                Copyright = _feedCopyright ?? context.String(FeedKeys.Copyright) ?? DateTime.UtcNow.Year.ToString()
             };
 
             // Add items
@@ -441,21 +441,20 @@ namespace Wyam.Feeds
             // Generate the feeds
             return new[]
             {
-                await GenerateFeedAsync(FeedType.Rss, feed, _rssPath, context),
-                await GenerateFeedAsync(FeedType.Atom, feed, _atomPath, context),
-                await GenerateFeedAsync(FeedType.Rdf, feed, _rdfPath, context)
+                GenerateFeed(FeedType.Rss, feed, _rssPath, context),
+                GenerateFeed(FeedType.Atom, feed, _atomPath, context),
+                GenerateFeed(FeedType.Rdf, feed, _rdfPath, context)
             }.Where(x => x != null);
         }
 
-        private async Task<IDocument> GenerateFeedAsync(FeedType feedType, Feed feed, ContextConfig<FilePath> path, IExecutionContext context)
+        private IDocument GenerateFeed(FeedType feedType, Feed feed, FilePath path, IExecutionContext context)
         {
             // Get the output path
-            FilePath outputPath = await path.GetValueAsync(context);
-            if (outputPath == null)
+            if (path == null)
             {
                 return null;
             }
-            if (!outputPath.IsRelative)
+            if (!path.IsRelative)
             {
                 throw new ArgumentException("The feed output path must be relative");
             }
@@ -466,8 +465,8 @@ namespace Wyam.Feeds
             stream.Position = 0;
             return context.GetDocument(stream, new MetadataItems
             {
-                new MetadataItem(Keys.RelativeFilePath, outputPath),
-                new MetadataItem(Keys.WritePath, outputPath)
+                new MetadataItem(Keys.RelativeFilePath, path),
+                new MetadataItem(Keys.WritePath, path)
             });
         }
     }

@@ -46,7 +46,7 @@ namespace Wyam.Common.Modules
                 return await documents.SelectManyAsync(context, x => inputs.SelectAsync(context, y => ExecuteAsync(x.Content, y, context)));
             }
 
-            return await inputs.SelectAsync(context, async x => await ExecuteAsync(await _content.GetValueAsync(x, context), x, context));
+            return await inputs.SelectAsync(context, async x => await ExecuteAsync(await _content.GetAndTransformValueAsync(x, context), x, context));
         }
 
         /// <summary>

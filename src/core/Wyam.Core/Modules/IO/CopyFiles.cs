@@ -113,7 +113,7 @@ namespace Wyam.Core.Modules.IO
         /// <inheritdoc />
         public async Task<IEnumerable<IDocument>> ExecuteAsync(IReadOnlyList<IDocument> inputs, IExecutionContext context)
         {
-            return _patterns.IsDocumentConfig
+            return _patterns.RequiresDocument
                 ? await inputs.ParallelSelectManyAsync(context, async input =>
                     await ExecuteAsync(input, await _patterns.GetValueAsync(input, context), context))
                 : await ExecuteAsync(null, await _patterns.GetValueAsync(null, context), context);
