@@ -2,6 +2,7 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -12,6 +13,7 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.Text;
 using Wyam.Common.Caching;
+using Wyam.Common.Configuration;
 using Wyam.Common.Documents;
 using Wyam.Common.Execution;
 using Wyam.Common.IO;
@@ -22,7 +24,7 @@ namespace Wyam.CodeAnalysis.Analysis
 {
     // If types aren't matching (I.e., not linking due to mismatched documents), may need to use ISymbol.OriginalDefinition when
     // creating the document for a symbol (or document metadata) to counteract new symbols due to type substitution for generics
-    internal class AnalyzeSymbolVisitor : SymbolVisitor
+    internal class AnalyzeSymbolVisitor : SymbolVisitor<Task>
     {
         private static readonly object XmlDocLock = new object();
 
@@ -33,7 +35,7 @@ namespace Wyam.CodeAnalysis.Analysis
 
         private readonly Compilation _compilation;
         private readonly IExecutionContext _context;
-        private readonly Func<ISymbol, bool> _symbolPredicate;
+        private readonly ContextConfig<ISymbol, bool> _symbolPredicate;
         private readonly Func<IMetadata, FilePath> _writePath;
         private readonly ConcurrentDictionary<string, string> _cssClasses;
         private readonly bool _docsForImplicitSymbols;
@@ -51,7 +53,7 @@ namespace Wyam.CodeAnalysis.Analysis
         public AnalyzeSymbolVisitor(
             Compilation compilation,
             IExecutionContext context,
-            Func<ISymbol, bool> symbolPredicate,
+            ContextConfig<ISymbol, bool> symbolPredicate,
             Func<IMetadata, FilePath> writePath,
             ConcurrentDictionary<string, string> cssClasses,
             bool docsForImplicitSymbols,
@@ -93,19 +95,21 @@ namespace Wyam.CodeAnalysis.Analysis
             return _symbolToDocument.Select(x => x.Value);
         }
 
-        public override void DefaultVisit(ISymbol symbol)
+        [SuppressMessage("Naming", "RCS1046", Justification = "Cannot add Async suffix to overridden methods")]
+        public override async Task DefaultVisit(ISymbol symbol)
         {
-            if (ShouldIncludeSymbol(symbol))
+            if (await ShouldIncludeSymbolAsync(symbol))
             {
                 AddDocument(symbol, false, new MetadataItems());
             }
 
-            base.DefaultVisit(symbol);
+            await base.DefaultVisit(symbol);
         }
 
-        public override void VisitAssembly(IAssemblySymbol symbol)
+        [SuppressMessage("Naming", "RCS1046", Justification = "Cannot add Async suffix to overridden methods")]
+        public override async Task VisitAssembly(IAssemblySymbol symbol)
         {
-            if (ShouldIncludeSymbol(symbol))
+            if (await ShouldIncludeSymbolAsync(symbol))
             {
                 AddDocument(symbol, true, new MetadataItems
                 {
@@ -117,11 +121,12 @@ namespace Wyam.CodeAnalysis.Analysis
             // Descend if not finished, regardless if this namespace was included
             if (!_finished)
             {
-                symbol.GlobalNamespace.Accept(this);
+                await symbol.GlobalNamespace.Accept(this);
             }
         }
 
-        public override void VisitNamespace(INamespaceSymbol symbol)
+        [SuppressMessage("Naming", "RCS1046", Justification = "Cannot add Async suffix to overridden methods")]
+        public override async Task VisitNamespace(INamespaceSymbol symbol)
         {
             // Add to the namespace symbol cache
             string displayName = GetDisplayName(symbol);
@@ -129,7 +134,20 @@ namespace Wyam.CodeAnalysis.Analysis
             symbols.Add(symbol);
 
             // Create the document (but not if none of the members would be included)
-            if (ShouldIncludeSymbol(symbol, x => _symbolPredicate == null || x.GetMembers().Any(m => _symbolPredicate(m))))
+            bool memberIncluded = true;
+            if (_symbolPredicate != null)
+            {
+                memberIncluded = false;
+                foreach (ISymbol member in symbol.GetMembers())
+                {
+                    if (await _symbolPredicate.GetValueAsync(_context, member))
+                    {
+                        memberIncluded = true;
+                        break;
+                    }
+                }
+            }
+            if (memberIncluded && await ShouldIncludeSymbolAsync(symbol))
             {
                 _namespaceDisplayNameToDocument.AddOrUpdate(
                     displayName,
@@ -145,21 +163,22 @@ namespace Wyam.CodeAnalysis.Analysis
             // Descend if not finished, regardless if this namespace was included
             if (!_finished)
             {
-                Parallel.ForEach(symbol.GetMembers(), s => s.Accept(this));
+                await symbol.GetMembers().ParallelForEachAsync(async s => await s.Accept(this));
             }
         }
 
-        public override void VisitNamedType(INamedTypeSymbol symbol)
+        [SuppressMessage("Naming", "RCS1046", Justification = "Cannot add Async suffix to overridden methods")]
+        public override async Task VisitNamedType(INamedTypeSymbol symbol)
         {
             // Only visit the original definition until we're finished
             INamedTypeSymbol originalDefinition = GetOriginalSymbolDefinition(symbol);
             if (!_finished && originalDefinition != symbol)
             {
-                VisitNamedType(originalDefinition);
+                await VisitNamedType(originalDefinition);
                 return;
             }
 
-            if (ShouldIncludeSymbol(symbol))
+            if (await ShouldIncludeSymbolAsync(symbol))
             {
                 MetadataItems metadata = new MetadataItems
                 {
@@ -190,18 +209,18 @@ namespace Wyam.CodeAnalysis.Analysis
                 // Descend if not finished, and only if this type was included
                 if (!_finished)
                 {
-                    Parallel.ForEach(
-                        symbol.GetMembers()
+                    await symbol.GetMembers()
                         .Where(MemberPredicate)
-                        .Concat(symbol.Constructors.Where(x => !x.IsImplicitlyDeclared)),
-                        s => s.Accept(this));
+                        .Concat(symbol.Constructors.Where(x => !x.IsImplicitlyDeclared))
+                        .ParallelForEachAsync(async s => await s.Accept(this));
                 }
             }
         }
 
-        public override void VisitTypeParameter(ITypeParameterSymbol symbol)
+        [SuppressMessage("Naming", "RCS1046", Justification = "Cannot add Async suffix to overridden methods")]
+        public override async Task VisitTypeParameter(ITypeParameterSymbol symbol)
         {
-            if (ShouldIncludeSymbol(symbol))
+            if (await ShouldIncludeSymbolAsync(symbol))
             {
                 AddMemberDocument(symbol, false, new MetadataItems
                 {
@@ -212,9 +231,10 @@ namespace Wyam.CodeAnalysis.Analysis
             }
         }
 
-        public override void VisitParameter(IParameterSymbol symbol)
+        [SuppressMessage("Naming", "RCS1046", Justification = "Cannot add Async suffix to overridden methods")]
+        public override async Task VisitParameter(IParameterSymbol symbol)
         {
-            if (ShouldIncludeSymbol(symbol))
+            if (await ShouldIncludeSymbolAsync(symbol))
             {
                 AddMemberDocument(symbol, false, new MetadataItems
                 {
@@ -225,7 +245,8 @@ namespace Wyam.CodeAnalysis.Analysis
             }
         }
 
-        public override void VisitMethod(IMethodSymbol symbol)
+        [SuppressMessage("Naming", "RCS1046", Justification = "Cannot add Async suffix to overridden methods")]
+        public override async Task VisitMethod(IMethodSymbol symbol)
         {
             // If this is an extension method, record it
             if (!_finished && symbol.IsExtensionMethod)
@@ -233,7 +254,7 @@ namespace Wyam.CodeAnalysis.Analysis
                 _extensionMethods.Add(symbol);
             }
 
-            if (ShouldIncludeSymbol(symbol))
+            if (await ShouldIncludeSymbolAsync(symbol))
             {
                 AddMemberDocument(symbol, true, new MetadataItems
                 {
@@ -249,9 +270,10 @@ namespace Wyam.CodeAnalysis.Analysis
             }
         }
 
-        public override void VisitField(IFieldSymbol symbol)
+        [SuppressMessage("Naming", "RCS1046", Justification = "Cannot add Async suffix to overridden methods")]
+        public override async Task VisitField(IFieldSymbol symbol)
         {
-            if (ShouldIncludeSymbol(symbol))
+            if (await ShouldIncludeSymbolAsync(symbol))
             {
                 AddMemberDocument(symbol, true, new MetadataItems
                 {
@@ -265,9 +287,10 @@ namespace Wyam.CodeAnalysis.Analysis
             }
         }
 
-        public override void VisitEvent(IEventSymbol symbol)
+        [SuppressMessage("Naming", "RCS1046", Justification = "Cannot add Async suffix to overridden methods")]
+        public override async Task VisitEvent(IEventSymbol symbol)
         {
-            if (ShouldIncludeSymbol(symbol))
+            if (await ShouldIncludeSymbolAsync(symbol))
             {
                 AddMemberDocument(symbol, true, new MetadataItems
                 {
@@ -279,9 +302,10 @@ namespace Wyam.CodeAnalysis.Analysis
             }
         }
 
-        public override void VisitProperty(IPropertySymbol symbol)
+        [SuppressMessage("Naming", "RCS1046", Justification = "Cannot add Async suffix to overridden methods")]
+        public override async Task VisitProperty(IPropertySymbol symbol)
         {
-            if (ShouldIncludeSymbol(symbol))
+            if (await ShouldIncludeSymbolAsync(symbol))
             {
                 AddMemberDocument(symbol, true, new MetadataItems
                 {
@@ -297,7 +321,7 @@ namespace Wyam.CodeAnalysis.Analysis
 
         // Helpers below...
 
-        private bool ShouldIncludeSymbol<TSymbol>(TSymbol symbol, Func<TSymbol, bool> additionalCondition = null)
+        private async Task<bool> ShouldIncludeSymbolAsync<TSymbol>(TSymbol symbol)
             where TSymbol : ISymbol
         {
             // Exclude the global auto-generated F# namespace (need to use .ToString() instead of .Name because it can have dots which act as nested namespaces)
@@ -305,7 +329,7 @@ namespace Wyam.CodeAnalysis.Analysis
             {
                 return false;
             }
-            return _finished || ((_symbolPredicate == null || _symbolPredicate(symbol)) && (additionalCondition == null || additionalCondition(symbol)));
+            return _finished || _symbolPredicate == null || await _symbolPredicate.GetValueAsync(_context, symbol);
         }
 
         // This was helpful: http://stackoverflow.com/a/30445814/807064
