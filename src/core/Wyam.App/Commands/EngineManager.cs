@@ -67,7 +67,7 @@ namespace Wyam.App.Commands
                 }
             }
 
-            // Run configurators after command line has been applied
+            // Run engine configurators after command line, settings, etc. have been applied
             bootstrapper.Configurators.Configure<IEngine>(Engine);
 
             // Trace the full environment

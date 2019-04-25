@@ -24,8 +24,6 @@ namespace Wyam.Core.Execution
         private readonly ConcurrentHashSet<FilePath> _documentSources = new ConcurrentHashSet<FilePath>();
         private readonly IModuleList _modules;
         private ConcurrentBag<IDocument> _clonedDocuments = new ConcurrentBag<IDocument>();
-        private Cache<List<IDocument>> _previouslyProcessedCache;
-        private Dictionary<FilePath, List<IDocument>> _processedSources;
         private bool _disposed;
 
         public string Name { get; }
@@ -45,28 +43,6 @@ namespace Wyam.Core.Execution
             _modules = modules ?? new ModuleList();
         }
 
-        public bool ProcessDocumentsOnce
-        {
-            get
-            {
-                return _previouslyProcessedCache != null;
-            }
-
-            set
-            {
-                if (!value)
-                {
-                    _previouslyProcessedCache = null;
-                    _processedSources = null;
-                }
-                else if (_previouslyProcessedCache == null)
-                {
-                    _previouslyProcessedCache = new Cache<List<IDocument>>();
-                    _processedSources = new Dictionary<FilePath, List<IDocument>>();
-                }
-            }
-        }
-
         // This is the main execute method called by the engine
         public async Task ExecuteAsync(Engine engine, Guid executionId, IServiceProvider serviceProvider)
         {
@@ -78,8 +54,6 @@ namespace Wyam.Core.Execution
             // Setup for pipeline execution
             _documentSources.Clear();
             ResetClonedDocuments();
-            _previouslyProcessedCache?.ResetEntryHits();
-            _processedSources?.Clear();
 
             // Execute all modules in the pipeline
             IReadOnlyList<IDocument> resultDocuments;
@@ -95,33 +69,6 @@ namespace Wyam.Core.Execution
             FlattenResultDocuments(resultDocuments, flattenedResultDocuments);
             Parallel.ForEach(_clonedDocuments.Where(x => !flattenedResultDocuments.Contains(x)), x => x.Dispose());
             _clonedDocuments = new ConcurrentBag<IDocument>(flattenedResultDocuments);
-
-            // Check the previously processed cache for any previously processed documents that need to be added
-            if (_previouslyProcessedCache != null && _processedSources != null)
-            {
-                // Dispose the previously processed documents that we didn't get this time around
-                Parallel.ForEach(_previouslyProcessedCache.ClearUnhitEntries().SelectMany(x => x), x => x.Dispose());
-
-                // Trace the number of previously processed documents
-                Trace.Verbose("{0} previously processed document(s) were not reprocessed", _previouslyProcessedCache.GetValues().Sum(x => x.Count));
-
-                // Add new result documents to the cache
-                foreach (IDocument resultDocument in _clonedDocuments)
-                {
-                    if (_processedSources.TryGetValue(resultDocument.Source, out List<IDocument> processedResultDocuments))
-                    {
-                        processedResultDocuments.Add(resultDocument);
-                    }
-                    else
-                    {
-                        Trace.Warning("Could not find processed document cache for source {0}, please report this warning to the developers", resultDocument.SourceString());
-                    }
-                }
-
-                // Reset cloned documents (since we're tracking them in the previously processed cache now) and set new aggregate results
-                _clonedDocuments = new ConcurrentBag<IDocument>();
-                engine.DocumentCollection.Set(Name, _previouslyProcessedCache.GetValues().SelectMany(x => x).ToList().AsReadOnly());
-            }
         }
 
         // This executes the specified modules with the specified input documents
@@ -146,38 +93,6 @@ namespace Wyam.Core.Execution
                         {
                             IEnumerable<IDocument> moduleResult = await module.ExecuteAsync(inputDocuments, moduleContext);
                             resultDocuments = moduleResult?.Where(x => x != null).ToImmutableArray() ?? ImmutableArray<IDocument>.Empty;
-                        }
-
-                        // Remove any documents that were previously processed (checking will also mark the cache entry as hit)
-                        if (_previouslyProcessedCache != null && _processedSources != null)
-                        {
-                            ImmutableArray<IDocument>.Builder newDocuments = ImmutableArray.CreateBuilder<IDocument>();
-                            foreach (IDocument resultDocument in resultDocuments)
-                            {
-                                if (_processedSources.ContainsKey(resultDocument.Source))
-                                {
-                                    // We've seen this source before and already added it to the processed cache
-                                    newDocuments.Add(resultDocument);
-                                }
-                                else
-                                {
-                                    if (!_previouslyProcessedCache.TryGetValue(resultDocument, out List<IDocument> processedDocuments))
-                                    {
-                                        // This document was not previously processed, so add it to the current result and set up a list to track final results
-                                        newDocuments.Add(resultDocument);
-                                        processedDocuments = new List<IDocument>();
-                                        _previouslyProcessedCache.Set(resultDocument, processedDocuments);
-                                        _processedSources.Add(resultDocument.Source, processedDocuments);
-                                    }
-
-                                    // Otherwise, this document was previously processed so don't add it to the results
-                                }
-                            }
-                            if (newDocuments.Count != resultDocuments.Length)
-                            {
-                                Trace.Verbose("Removed {0} previously processed document(s)", resultDocuments.Length - newDocuments.Count);
-                            }
-                            resultDocuments = newDocuments.ToImmutable();
                         }
 
                         // Set results in engine and trace
@@ -259,10 +174,6 @@ namespace Wyam.Core.Execution
 
             // Clean up the documents
             ResetClonedDocuments();
-            if (_previouslyProcessedCache != null)
-            {
-                Parallel.ForEach(_previouslyProcessedCache.GetValues().SelectMany(x => x), x => x.Dispose());
-            }
 
             // Clean up the modules
             DisposeModules(_modules);

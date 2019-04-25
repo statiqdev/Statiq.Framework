@@ -12,10 +12,5 @@ namespace Wyam.Common.Execution
         /// The name of the pipeline.
         /// </summary>
         string Name { get; }
-
-        /// <summary>
-        /// Indicates whether this pipeline only processes documents once.
-        /// </summary>
-        bool ProcessDocumentsOnce { get; }
     }
 }

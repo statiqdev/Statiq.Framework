@@ -5,6 +5,7 @@ using Wyam.App;
 using Wyam.Common.Configuration;
 using Wyam.Common.Execution;
 using Wyam.Common.Meta;
+using Wyam.Common.Modules;
 using Wyam.Core.Modules.Contents;
 using Wyam.Core.Modules.Control;
 using Wyam.Core.Modules.IO;
@@ -29,6 +30,11 @@ namespace Splashdown
                     new Replace("{{TITLE}}", Config.FromDocument(doc => doc.Get("Title", "Default Title"))),
                     new Replace("{{DESC}}", Config.FromDocument(doc => doc.Get("Description", "Default Description"))),
                     new WriteFiles(".html"))
+                .AddPipeline("AsAction", (p, s) =>
+                {
+                    p.Add(new ReadFiles("*.md"));
+                    p.Add(new FrontMatter(new Yaml()));
+                })
                 .RunAsync();
     }
 }

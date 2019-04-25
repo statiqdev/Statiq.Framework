@@ -23,7 +23,6 @@ namespace Wyam.Core.Execution
         public IPipeline Add(IPipeline pipeline)
         {
             ExecutionPipeline executionPipeline = CreatePipeline(pipeline.Name, pipeline);
-            executionPipeline.ProcessDocumentsOnce = pipeline.ProcessDocumentsOnce;
             _pipelines.Add(executionPipeline);
             return executionPipeline;
         }
@@ -38,7 +37,6 @@ namespace Wyam.Core.Execution
         public IPipeline Insert(int index, IPipeline pipeline)
         {
             ExecutionPipeline executionPipeline = CreatePipeline(pipeline.Name, pipeline);
-            executionPipeline.ProcessDocumentsOnce = pipeline.ProcessDocumentsOnce;
             _pipelines.Insert(index, executionPipeline);
             return executionPipeline;
         }
