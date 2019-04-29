@@ -14,7 +14,7 @@ namespace Wyam.Common.Execution
     /// <summary>
     /// The engine is the primary entry point for the generation process.
     /// </summary>
-    public interface IEngine
+    public interface IEngine : IConfigurable
     {
         /// <summary>
         /// Gets the file system.

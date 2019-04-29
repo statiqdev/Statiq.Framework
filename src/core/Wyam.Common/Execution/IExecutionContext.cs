@@ -79,6 +79,8 @@ namespace Wyam.Common.Execution
         /// </summary>
         IDocumentCollection Documents { get; }
 
+        IServiceProvider Services { get; }
+
         /// <summary>
         /// Gets any input that was passed to the application (for example, on stdin via piping).
         /// </summary>
@@ -187,15 +189,5 @@ namespace Wyam.Common.Execution
         /// <param name="metadata">New metadata to be added to the document as a result of executing the shortcode.</param>
         /// <returns>A shortcode result.</returns>
         IShortcodeResult GetShortcodeResult(Stream content, IEnumerable<KeyValuePair<string, object>> metadata = null);
-
-        object GetRequiredService(Type serviceType);
-
-        T GetRequiredService<T>();
-
-        T GetService<T>();
-
-        IEnumerable<T> GetServices<T>();
-
-        IEnumerable<object> GetServices(Type serviceType);
     }
 }

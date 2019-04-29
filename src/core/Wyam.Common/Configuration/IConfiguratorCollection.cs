@@ -5,20 +5,20 @@ namespace Wyam.Common.Configuration
 {
     public interface IConfiguratorCollection
     {
-        void Add<T, TConfigurator>()
-            where T : class
-            where TConfigurator : class, IConfigurator<T>;
+        void Add<TConfigurable, TConfigurator>()
+            where TConfigurable : IConfigurable
+            where TConfigurator : IConfigurator<TConfigurable>;
 
-        void Add<T>(Action<T> action)
-            where T : class;
+        void Add<TConfigurable>(Action<TConfigurable> action)
+            where TConfigurable : IConfigurable;
 
-        void Add<T>(IConfigurator<T> configurator)
-            where T : class;
+        void Add<TConfigurable>(IConfigurator<TConfigurable> configurator)
+            where TConfigurable : IConfigurable;
 
-        IList<IConfigurator<T>> Get<T>()
-            where T : class;
+        IList<IConfigurator<TConfigurable>> Get<TConfigurable>()
+            where TConfigurable : IConfigurable;
 
-        bool TryGet<T>(out IList<IConfigurator<T>> configurators)
-            where T : class;
+        bool TryGet<TConfigurable>(out IList<IConfigurator<TConfigurable>> configurators)
+            where TConfigurable : IConfigurable;
     }
 }

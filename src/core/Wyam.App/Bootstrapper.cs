@@ -62,18 +62,20 @@ namespace Wyam.App
             _configurators.Configure<IBootstrapper>(this);
 
             // Configure the service collection
-            IServiceCollection serviceCollection = CreateServiceCollection();
-            serviceCollection.AddSingleton<IConfigurableBootstrapper>(this);
-            serviceCollection.AddSingleton<IBootstrapper>(this);
-            _configurators.Configure(serviceCollection);
+            IServiceCollection services = CreateServiceCollection();
+            services.AddSingleton<IConfigurableBootstrapper>(this);
+            services.AddSingleton<IBootstrapper>(this);
+            ConfigurableServices configurableServices = new ConfigurableServices(services);
+            _configurators.Configure(configurableServices);
 
             // Create the command line parser and run the command
-            ServiceTypeRegistrar registrar = new ServiceTypeRegistrar(serviceCollection, BuildServiceProvider);
+            ServiceTypeRegistrar registrar = new ServiceTypeRegistrar(services, BuildServiceProvider);
             ICommandApp app = _getCommandApp(registrar);
             app.Configure(x =>
             {
                 x.ValidateExamples();
-                _configurators.Configure(x);
+                ConfigurableCommands configurableCommands = new ConfigurableCommands(x);
+                _configurators.Configure(configurableCommands);
             });
             return await app.RunAsync(Args);
         }

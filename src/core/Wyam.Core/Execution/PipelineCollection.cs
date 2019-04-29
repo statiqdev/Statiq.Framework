@@ -21,7 +21,7 @@ namespace Wyam.Core.Execution
         }
 
         // This has to be defined in PipelineCollection so that it can track the previous sequential pipeline added
-        public IPipeline AddSeqential(string name, IEnumerable<IModule> processModules)
+        public IPipeline AddSequential(string name, IEnumerable<IModule> processModules)
         {
             IPipeline pipeline = new Pipeline();
             Add(name, pipeline);

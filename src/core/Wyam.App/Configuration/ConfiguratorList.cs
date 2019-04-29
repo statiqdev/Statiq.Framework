@@ -7,7 +7,7 @@ using Wyam.Common.Configuration;
 namespace Wyam.App.Configuration
 {
     internal class ConfiguratorList<TConfigurable> : IList<IConfigurator<TConfigurable>>
-        where TConfigurable : class
+        where TConfigurable : IConfigurable
     {
         private readonly List<object> _list;
 

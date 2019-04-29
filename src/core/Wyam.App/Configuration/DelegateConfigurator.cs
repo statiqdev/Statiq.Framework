@@ -8,16 +8,16 @@ using Wyam.Common.Execution;
 
 namespace Wyam.App.Configuration
 {
-    public class DelegateConfigurator<T> : IConfigurator<T>
-        where T : class
+    public class DelegateConfigurator<TConfigurable> : IConfigurator<TConfigurable>
+        where TConfigurable : IConfigurable
     {
-        private readonly Action<T> _action;
+        private readonly Action<TConfigurable> _action;
 
-        public DelegateConfigurator(Action<T> action)
+        public DelegateConfigurator(Action<TConfigurable> action)
         {
             _action = action;
         }
 
-        public void Configure(T configurable) => _action?.Invoke(configurable);
+        public void Configure(TConfigurable configurable) => _action?.Invoke(configurable);
     }
 }

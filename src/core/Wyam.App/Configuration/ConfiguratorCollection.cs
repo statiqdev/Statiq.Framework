@@ -9,20 +9,20 @@ namespace Wyam.App.Configuration
         private readonly Dictionary<Type, List<object>> _configurators = new Dictionary<Type, List<object>>();
 
         public void Add<TConfigurable, TConfigurator>()
-            where TConfigurable : class
-            where TConfigurator : class, IConfigurator<TConfigurable> =>
+            where TConfigurable : IConfigurable
+            where TConfigurator : IConfigurator<TConfigurable> =>
             Get<TConfigurable>().Add(Activator.CreateInstance<TConfigurator>());
 
         public void Add<TConfigurable>(Action<TConfigurable> action)
-            where TConfigurable : class =>
+            where TConfigurable : IConfigurable =>
             Add(new DelegateConfigurator<TConfigurable>(action));
 
         public void Add<TConfigurable>(IConfigurator<TConfigurable> configurator)
-            where TConfigurable : class =>
+            where TConfigurable : IConfigurable =>
             Get<TConfigurable>().Add(configurator);
 
         public IList<IConfigurator<TConfigurable>> Get<TConfigurable>()
-            where TConfigurable : class
+            where TConfigurable : IConfigurable
         {
             if (!_configurators.TryGetValue(typeof(TConfigurable), out List<object> list))
             {
@@ -33,7 +33,7 @@ namespace Wyam.App.Configuration
         }
 
         public bool TryGet<TConfigurable>(out IList<IConfigurator<TConfigurable>> configurators)
-            where TConfigurable : class
+            where TConfigurable : IConfigurable
         {
             if (_configurators.TryGetValue(typeof(TConfigurable), out List<object> list))
             {

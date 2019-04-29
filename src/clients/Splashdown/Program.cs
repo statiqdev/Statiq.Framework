@@ -23,6 +23,7 @@ namespace Splashdown
             await Bootstrapper
                 .CreateDefault(args)
                 .AddPipeline(
+                    "Sample",
                     new ReadFiles("*.md"),
                     new FrontMatter(new Yaml()),
                     new Markdown(),
@@ -32,8 +33,8 @@ namespace Splashdown
                     new WriteFiles(".html"))
                 .AddPipeline("AsAction", (p, s) =>
                 {
-                    p.Add(new ReadFiles("*.md"));
-                    p.Add(new FrontMatter(new Yaml()));
+                    p.Process.Add(new ReadFiles("*.md"));
+                    p.Process.Add(new FrontMatter(new Yaml()));
                 })
                 .RunAsync();
     }

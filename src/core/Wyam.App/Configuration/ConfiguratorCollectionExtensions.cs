@@ -8,7 +8,7 @@ namespace Wyam.App.Configuration
     public static class ConfiguratorCollectionExtensions
     {
         public static void Configure<TConfigurable>(this IConfiguratorCollection configuratorCollection, TConfigurable configurable)
-            where TConfigurable : class
+            where TConfigurable : IConfigurable
         {
             if (configuratorCollection.TryGet(out IList<IConfigurator<TConfigurable>> configurators))
             {

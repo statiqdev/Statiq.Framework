@@ -37,8 +37,6 @@ namespace Wyam.Core.Execution
 
         private readonly PipelinePhase _pipelinePhase;
 
-        private readonly IServiceProvider _serviceProvider;
-
         private bool _disposed;
 
         public Engine Engine { get; }
@@ -65,14 +63,16 @@ namespace Wyam.Core.Execution
 
         public IExecutionCache ExecutionCache => Engine.ExecutionCacheManager.Get(Module, Settings);
 
+        public IServiceProvider Services { get; }
+
         public string ApplicationInput => Engine.ApplicationInput;
 
-        public ExecutionContext(Engine engine, Guid executionId, PipelinePhase pipelinePhase, IServiceProvider serviceProvider)
+        public ExecutionContext(Engine engine, Guid executionId, PipelinePhase pipelinePhase, IServiceProvider services)
         {
             Engine = engine ?? throw new ArgumentNullException(nameof(engine));
             ExecutionId = executionId;
             _pipelinePhase = pipelinePhase ?? throw new ArgumentNullException(nameof(pipelinePhase));
-            _serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
+            Services = services ?? throw new ArgumentNullException(nameof(services));
         }
 
         private ExecutionContext(ExecutionContext original, IModule module)
@@ -80,7 +80,7 @@ namespace Wyam.Core.Execution
             Engine = original.Engine;
             ExecutionId = original.ExecutionId;
             _pipelinePhase = original._pipelinePhase;
-            _serviceProvider = original._serviceProvider;
+            Services = original.Services;
             Module = module;
         }
 
@@ -172,18 +172,6 @@ namespace Wyam.Core.Execution
 
         public IShortcodeResult GetShortcodeResult(Stream content, IEnumerable<KeyValuePair<string, object>> metadata = null)
             => new ShortcodeResult(content, metadata);
-
-        // Service Provider
-
-        public object GetRequiredService(Type serviceType) => CheckDisposed(() => _serviceProvider.GetRequiredService(serviceType));
-
-        public T GetRequiredService<T>() => CheckDisposed(() => _serviceProvider.GetRequiredService<T>());
-
-        public T GetService<T>() => CheckDisposed(() => _serviceProvider.GetService<T>());
-
-        public IEnumerable<T> GetServices<T>() => CheckDisposed(() => _serviceProvider.GetServices<T>());
-
-        public IEnumerable<object> GetServices(Type serviceType) => CheckDisposed(() => _serviceProvider.GetServices(serviceType));
 
         // IMetadata
 

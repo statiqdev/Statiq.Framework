@@ -119,5 +119,9 @@ namespace Wyam.App
         // These have to be extensions to IBootstrapper in Wyam.App and not general IPipelineCollection extensions because Wyam.Common doesn't reference Wyam.Core where modules are defined
 
         // AddIsolatedPipeline()
+
+        // Dependencies
+
+        // Builder model?
     }
 }

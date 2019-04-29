@@ -141,13 +141,6 @@ namespace Wyam.Core.Execution
             }
         }
 
-        public IPipeline Add(string name)
-        {
-            IPipeline pipeline = new Pipeline();
-            Add(name, pipeline);
-            return pipeline;
-        }
-
         /// <summary>
         /// Deletes the output path and all files it contains.
         /// </summary>
