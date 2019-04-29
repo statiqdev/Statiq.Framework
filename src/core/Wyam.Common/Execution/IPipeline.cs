@@ -7,11 +7,20 @@ namespace Wyam.Common.Execution
     /// <summary>
     /// Represents a named collection of modules that should be executed by the engine.
     /// </summary>
-    public interface IPipeline : IModuleList
+    public interface IPipeline
     {
-        /// <summary>
-        /// The name of the pipeline.
-        /// </summary>
-        string Name { get; }
+        IModuleList Read { get; }
+
+        IModuleList Process { get; }
+
+        IModuleList Render { get; }
+
+        IModuleList Write { get; }
+
+        List<IPipeline> Dependencies { get; }
+
+        bool Isolated { get; set; }
+
+        bool AlwaysProcess { get; set; }
     }
 }

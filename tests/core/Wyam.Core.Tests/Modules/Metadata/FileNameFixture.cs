@@ -41,7 +41,7 @@ namespace Wyam.Core.Tests.Modules.Metadata
                 // Given
                 IServiceProvider serviceProvider = new TestServiceProvider();
                 Engine engine = new Engine();
-                ExecutionPipeline pipeline = new ExecutionPipeline("Pipeline", (IModuleList)null);
+                Pipeline pipeline = new Pipeline("Pipeline", (IModuleList)null);
                 IExecutionContext context = new ExecutionContext(engine, Guid.Empty, pipeline, serviceProvider);
                 IDocument[] inputs =
                 {
@@ -68,7 +68,7 @@ namespace Wyam.Core.Tests.Modules.Metadata
 
                 IServiceProvider serviceProvider = new TestServiceProvider();
                 Engine engine = new Engine();
-                ExecutionPipeline pipeline = new ExecutionPipeline("Pipeline", (IModuleList)null);
+                Pipeline pipeline = new Pipeline("Pipeline", (IModuleList)null);
                 IExecutionContext context = new ExecutionContext(engine, Guid.Empty, pipeline, serviceProvider);
                 IDocument[] inputs =
                 {
@@ -95,7 +95,7 @@ namespace Wyam.Core.Tests.Modules.Metadata
 
                 IServiceProvider serviceProvider = new TestServiceProvider();
                 Engine engine = new Engine();
-                ExecutionPipeline pipeline = new ExecutionPipeline("Pipeline", (IModuleList)null);
+                Pipeline pipeline = new Pipeline("Pipeline", (IModuleList)null);
                 IExecutionContext context = new ExecutionContext(engine, Guid.Empty, pipeline, serviceProvider);
                 IDocument[] inputs =
                 {
@@ -123,7 +123,7 @@ namespace Wyam.Core.Tests.Modules.Metadata
 
                 IServiceProvider serviceProvider = new TestServiceProvider();
                 Engine engine = new Engine();
-                ExecutionPipeline pipeline = new ExecutionPipeline("Pipeline", (IModuleList)null);
+                Pipeline pipeline = new Pipeline("Pipeline", (IModuleList)null);
                 IExecutionContext context = new ExecutionContext(engine, Guid.Empty, pipeline, serviceProvider);
                 IDocument[] inputs =
                 {
@@ -151,7 +151,7 @@ namespace Wyam.Core.Tests.Modules.Metadata
                 // Given
                 IServiceProvider serviceProvider = new TestServiceProvider();
                 Engine engine = new Engine();
-                ExecutionPipeline pipeline = new ExecutionPipeline("Pipeline", (IModuleList)null);
+                Pipeline pipeline = new Pipeline("Pipeline", (IModuleList)null);
                 IExecutionContext context = new ExecutionContext(engine, Guid.Empty, pipeline, serviceProvider);
                 string manyCharactersWow = new string(character[0], 10);
                 IDocument[] inputs =
@@ -180,7 +180,7 @@ namespace Wyam.Core.Tests.Modules.Metadata
                 // Given
                 IServiceProvider serviceProvider = new TestServiceProvider();
                 Engine engine = new Engine();
-                ExecutionPipeline pipeline = new ExecutionPipeline("Pipeline", (IModuleList)null);
+                Pipeline pipeline = new Pipeline("Pipeline", (IModuleList)null);
                 IExecutionContext context = new ExecutionContext(engine, Guid.Empty, pipeline, serviceProvider);
                 IDocument[] inputs =
                 {
@@ -207,7 +207,7 @@ namespace Wyam.Core.Tests.Modules.Metadata
 
                 IServiceProvider serviceProvider = new TestServiceProvider();
                 Engine engine = new Engine();
-                ExecutionPipeline pipeline = new ExecutionPipeline("Pipeline", (IModuleList)null);
+                Pipeline pipeline = new Pipeline("Pipeline", (IModuleList)null);
                 IExecutionContext context = new ExecutionContext(engine, Guid.Empty, pipeline, serviceProvider);
                 IDocument[] inputs =
                 {
@@ -234,7 +234,7 @@ namespace Wyam.Core.Tests.Modules.Metadata
 
                 IServiceProvider serviceProvider = new TestServiceProvider();
                 Engine engine = new Engine();
-                ExecutionPipeline pipeline = new ExecutionPipeline("Pipeline", (IModuleList)null);
+                Pipeline pipeline = new Pipeline("Pipeline", (IModuleList)null);
                 IExecutionContext context = new ExecutionContext(engine, Guid.Empty, pipeline, serviceProvider);
                 IDocument[] inputs =
                 {

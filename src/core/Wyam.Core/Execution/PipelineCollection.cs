@@ -5,110 +5,33 @@ using System.Linq;
 using Wyam.Common;
 using Wyam.Common.Modules;
 using Wyam.Common.Execution;
+using Wyam.Common.Util;
 
 namespace Wyam.Core.Execution
 {
-    internal class PipelineCollection : IPipelineCollection
+    internal class PipelineCollection : Dictionary<string, IPipeline>, IPipelineCollection
     {
-        private readonly List<IPipeline> _pipelines = new List<IPipeline>();
-        private int _nameCounter = 0;
+        private IPipeline _previousPipeline;
 
-        public IPipeline Add(string name, IModuleList modules)
+        public IPipeline Add(string name)
         {
-            ExecutionPipeline executionPipeline = CreatePipeline(name, modules);
-            _pipelines.Add(executionPipeline);
-            return executionPipeline;
+            IPipeline pipeline = new Pipeline();
+            Add(name, pipeline);
+            return pipeline;
         }
 
-        public IPipeline Add(IPipeline pipeline)
+        // This has to be defined in PipelineCollection so that it can track the previous sequential pipeline added
+        public IPipeline AddSeqential(string name, IEnumerable<IModule> processModules)
         {
-            ExecutionPipeline executionPipeline = CreatePipeline(pipeline.Name, pipeline);
-            _pipelines.Add(executionPipeline);
-            return executionPipeline;
-        }
-
-        public IPipeline Insert(int index, string name, IModuleList modules)
-        {
-            ExecutionPipeline executionPipeline = CreatePipeline(name, modules);
-            _pipelines.Insert(index, executionPipeline);
-            return executionPipeline;
-        }
-
-        public IPipeline Insert(int index, IPipeline pipeline)
-        {
-            ExecutionPipeline executionPipeline = CreatePipeline(pipeline.Name, pipeline);
-            _pipelines.Insert(index, executionPipeline);
-            return executionPipeline;
-        }
-
-        private ExecutionPipeline CreatePipeline(string name, IModuleList modules)
-        {
-            _nameCounter++;
-            if (string.IsNullOrWhiteSpace(name))
+            IPipeline pipeline = new Pipeline();
+            Add(name, pipeline);
+            pipeline.Process.AddRange(processModules);
+            if (_previousPipeline != null)
             {
-                name = "Pipeline " + _nameCounter;
+                pipeline.Dependencies.Add(_previousPipeline);
             }
-            if (ContainsKey(name))
-            {
-                throw new ArgumentException("Pipelines must have a unique name.");
-            }
-            return new ExecutionPipeline(name, modules);
+            _previousPipeline = pipeline;
+            return pipeline;
         }
-
-        public bool Remove(string name)
-        {
-            int index = IndexOf(name);
-            if (index >= 0)
-            {
-                RemoveAt(index);
-                return true;
-            }
-            return false;
-        }
-
-        public void RemoveAt(int index) => _pipelines.RemoveAt(index);
-
-        public int IndexOf(string name) => _pipelines.FindIndex(x => string.Equals(x.Name, name, StringComparison.OrdinalIgnoreCase));
-
-        public IEnumerable<IPipeline> Pipelines => _pipelines;
-
-        public int Count => _pipelines.Count;
-
-        public bool ContainsKey(string key) =>
-            _pipelines.Any(x => string.Equals(key, x.Name, StringComparison.OrdinalIgnoreCase));
-
-        public bool TryGetValue(string key, out IPipeline value)
-        {
-            value = _pipelines.FirstOrDefault(x => string.Equals(key, x.Name, StringComparison.OrdinalIgnoreCase));
-            return value != null;
-        }
-
-        public IPipeline this[string key]
-        {
-            get
-            {
-                IPipeline pipeline;
-                if (!TryGetValue(key, out pipeline))
-                {
-                    throw new KeyNotFoundException($"The pipeline {key} was not found.");
-                }
-                return pipeline;
-            }
-        }
-
-        public IEnumerable<string> Keys => _pipelines.Select(x => x.Name);
-
-        public IEnumerable<IPipeline> Values => _pipelines;
-
-        public IEnumerator<KeyValuePair<string, IPipeline>> GetEnumerator() =>
-            _pipelines.Select(x => new KeyValuePair<string, IPipeline>(x.Name, x)).GetEnumerator();
-
-        IEnumerator<IPipeline> IEnumerable<IPipeline>.GetEnumerator() => _pipelines.GetEnumerator();
-
-        IEnumerator<IPipeline> IPipelineCollection.GetEnumerator() => _pipelines.GetEnumerator();
-
-        IEnumerator IEnumerable.GetEnumerator() => _pipelines.GetEnumerator();
-
-        IPipeline IReadOnlyList<IPipeline>.this[int index] => _pipelines[index];
     }
 }

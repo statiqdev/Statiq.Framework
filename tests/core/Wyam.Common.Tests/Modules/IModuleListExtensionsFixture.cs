@@ -24,7 +24,7 @@ namespace Wyam.Common.Tests.Modules
             public void InsertAfterFirst()
             {
                 // Given
-                IPipeline collection = new ExecutionPipeline("Test", new IModule[]
+                IPipeline collection = new Pipeline("Test", new IModule[]
                 {
                     new ReadFiles("*.md"),
                     new ReadFiles("*.md"),
@@ -48,7 +48,7 @@ namespace Wyam.Common.Tests.Modules
             public void InsertBeforeFirst()
             {
                 // Given
-                IPipeline collection = new ExecutionPipeline("Test", new IModule[]
+                IPipeline collection = new Pipeline("Test", new IModule[]
                 {
                     new ReadFiles("*.md"),
                     new ReadFiles("*.md"),
@@ -72,7 +72,7 @@ namespace Wyam.Common.Tests.Modules
             public void InsertAfterLast()
             {
                 // Given
-                IPipeline collection = new ExecutionPipeline("Test", new IModule[]
+                IPipeline collection = new Pipeline("Test", new IModule[]
                 {
                     new ReadFiles("*.md"),
                     new ReadFiles("*.md"),
@@ -96,7 +96,7 @@ namespace Wyam.Common.Tests.Modules
             public void InsertBeforeLast()
             {
                 // Given
-                IPipeline collection = new ExecutionPipeline("Test", new IModule[]
+                IPipeline collection = new Pipeline("Test", new IModule[]
                 {
                     new ReadFiles("*.md"),
                     new ReadFiles("*.md"),
@@ -120,7 +120,7 @@ namespace Wyam.Common.Tests.Modules
             public void ReplaceFirst()
             {
                 // Given
-                IPipeline collection = new ExecutionPipeline("Test", new IModule[]
+                IPipeline collection = new Pipeline("Test", new IModule[]
                 {
                     new ReadFiles("*.md"),
                     new CountModule("mykey1"),
@@ -143,7 +143,7 @@ namespace Wyam.Common.Tests.Modules
             public void ReplaceLast()
             {
                 // Given
-                IPipeline collection = new ExecutionPipeline("Test", new IModule[]
+                IPipeline collection = new Pipeline("Test", new IModule[]
                 {
                     new ReadFiles("*.md"),
                     new CountModule("mykey1"),

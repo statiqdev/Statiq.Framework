@@ -35,7 +35,7 @@ namespace Wyam.Core.Execution
         // Cache the HttpMessageHandler (the HttpClient is really just a thin wrapper around this)
         private static readonly HttpMessageHandler _httpMessageHandler = new HttpClientHandler();
 
-        private readonly ExecutionPipeline _pipeline;
+        private readonly PipelinePhase _pipelinePhase;
 
         private readonly IServiceProvider _serviceProvider;
 
@@ -49,7 +49,9 @@ namespace Wyam.Core.Execution
 
         public IReadOnlyCollection<string> Namespaces => Engine.Namespaces;
 
-        public IReadOnlyPipeline Pipeline => new ReadOnlyPipeline(_pipeline);
+        public string PipelineName => _pipelinePhase.PipelineName;
+
+        public string PhaseName => _pipelinePhase.PhaseName;
 
         public IModule Module { get; }
 
@@ -65,11 +67,11 @@ namespace Wyam.Core.Execution
 
         public string ApplicationInput => Engine.ApplicationInput;
 
-        public ExecutionContext(Engine engine, Guid executionId, ExecutionPipeline pipeline, IServiceProvider serviceProvider)
+        public ExecutionContext(Engine engine, Guid executionId, PipelinePhase pipelinePhase, IServiceProvider serviceProvider)
         {
             Engine = engine ?? throw new ArgumentNullException(nameof(engine));
             ExecutionId = executionId;
-            _pipeline = pipeline ?? throw new ArgumentNullException(nameof(pipeline));
+            _pipelinePhase = pipelinePhase ?? throw new ArgumentNullException(nameof(pipelinePhase));
             _serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
         }
 
@@ -77,7 +79,7 @@ namespace Wyam.Core.Execution
         {
             Engine = original.Engine;
             ExecutionId = original.ExecutionId;
-            _pipeline = original._pipeline;
+            _pipelinePhase = original._pipelinePhase;
             _serviceProvider = original._serviceProvider;
             Module = module;
         }
@@ -129,9 +131,9 @@ namespace Wyam.Core.Execution
             if (sourceDocument != null && sourceDocument.Source == null && source != null)
             {
                 // Only add a new source if the source document didn't already contain one (otherwise the one it contains will be used)
-                _pipeline.AddDocumentSource(source);
+                _pipelinePhase.AddDocumentSource(source);
             }
-            _pipeline.AddClonedDocument(document);
+            _pipelinePhase.AddClonedDocument(document);
             return document;
         }
 
@@ -145,10 +147,10 @@ namespace Wyam.Core.Execution
             }
 
             // Store the document list before executing the child modules and restore it afterwards
-            IReadOnlyList<IDocument> originalDocuments = Engine.DocumentCollection.Get(_pipeline.Name);
-            ImmutableArray<IDocument> documents = (inputs ?? new[] { this.GetDocument() }).ToImmutableArray();
-            IReadOnlyList<IDocument> results = await _pipeline.ExecuteAsync(this, modules, documents);
-            Engine.DocumentCollection.Set(_pipeline.Name, originalDocuments);
+            IReadOnlyList<IDocument> originalDocuments = Engine.DocumentCollection.Get(_pipelinePhase.PipelineName);
+            ImmutableArray<IDocument> inputDocuments = (inputs ?? new[] { this.GetDocument() }).ToImmutableArray();
+            IReadOnlyList<IDocument> results = await _pipelinePhase.ExecuteAsync(this, modules, inputDocuments);
+            Engine.DocumentCollection.Set(_pipelinePhase.PipelineName, originalDocuments);
             return results;
         }
 

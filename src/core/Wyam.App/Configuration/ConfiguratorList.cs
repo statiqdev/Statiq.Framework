@@ -6,8 +6,8 @@ using Wyam.Common.Configuration;
 
 namespace Wyam.App.Configuration
 {
-    internal class ConfiguratorList<T> : IList<IConfigurator<T>>
-        where T : class
+    internal class ConfiguratorList<TConfigurable> : IList<IConfigurator<TConfigurable>>
+        where TConfigurable : class
     {
         private readonly List<object> _list;
 
@@ -16,9 +16,9 @@ namespace Wyam.App.Configuration
             _list = list ?? throw new ArgumentNullException(nameof(list));
         }
 
-        public IConfigurator<T> this[int index]
+        public IConfigurator<TConfigurable> this[int index]
         {
-            get => (IConfigurator<T>)_list[index];
+            get => (IConfigurator<TConfigurable>)_list[index];
             set
             {
                 if (value != null)
@@ -32,7 +32,7 @@ namespace Wyam.App.Configuration
 
         public bool IsReadOnly => false;
 
-        public void Add(IConfigurator<T> item)
+        public void Add(IConfigurator<TConfigurable> item)
         {
             if (item != null)
             {
@@ -42,17 +42,17 @@ namespace Wyam.App.Configuration
 
         public void Clear() => _list.Clear();
 
-        public bool Contains(IConfigurator<T> item) => _list.Contains(item);
+        public bool Contains(IConfigurator<TConfigurable> item) => _list.Contains(item);
 
-        public void CopyTo(IConfigurator<T>[] array, int arrayIndex) =>
-            _list.Cast<IConfigurator<T>>().ToList().CopyTo(array, arrayIndex);
+        public void CopyTo(IConfigurator<TConfigurable>[] array, int arrayIndex) =>
+            _list.Cast<IConfigurator<TConfigurable>>().ToList().CopyTo(array, arrayIndex);
 
-        public IEnumerator<IConfigurator<T>> GetEnumerator() =>
-            _list.Cast<IConfigurator<T>>().GetEnumerator();
+        public IEnumerator<IConfigurator<TConfigurable>> GetEnumerator() =>
+            _list.Cast<IConfigurator<TConfigurable>>().GetEnumerator();
 
-        public int IndexOf(IConfigurator<T> item) => _list.IndexOf(item);
+        public int IndexOf(IConfigurator<TConfigurable> item) => _list.IndexOf(item);
 
-        public void Insert(int index, IConfigurator<T> item)
+        public void Insert(int index, IConfigurator<TConfigurable> item)
         {
             if (item != null)
             {
@@ -60,7 +60,7 @@ namespace Wyam.App.Configuration
             }
         }
 
-        public bool Remove(IConfigurator<T> item) => _list.Remove(item);
+        public bool Remove(IConfigurator<TConfigurable> item) => _list.Remove(item);
 
         public void RemoveAt(int index) => _list.RemoveAt(index);
 

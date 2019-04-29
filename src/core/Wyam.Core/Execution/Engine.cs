@@ -141,6 +141,13 @@ namespace Wyam.Core.Execution
             }
         }
 
+        public IPipeline Add(string name)
+        {
+            IPipeline pipeline = new Pipeline();
+            Add(name, pipeline);
+            return pipeline;
+        }
+
         /// <summary>
         /// Deletes the output path and all files it contains.
         /// </summary>
@@ -255,7 +262,7 @@ namespace Wyam.Core.Execution
                             {
                                 try
                                 {
-                                    await ((ExecutionPipeline)pipeline).ExecuteAsync(this, executionId, serviceScope.ServiceProvider);
+                                    await ((Pipeline)pipeline).ExecuteAsync(this, executionId, serviceScope.ServiceProvider);
                                     pipelineStopwatch.Stop();
                                     Trace.Information(
                                         "Executed pipeline \"{0}\" ({1}/{2}) in {3} ms resulting in {4} output document(s)",
@@ -281,7 +288,7 @@ namespace Wyam.Core.Execution
                     ExecutionCacheManager.ClearUnhitEntries();
                     foreach (IPipeline pipeline in _pipelines.Pipelines)
                     {
-                        ((ExecutionPipeline)pipeline).ResetClonedDocuments();
+                        ((Pipeline)pipeline).ResetClonedDocuments();
                     }
 
                     engineStopwatch.Stop();
@@ -307,7 +314,7 @@ namespace Wyam.Core.Execution
                 return;
             }
 
-            foreach (ExecutionPipeline pipeline in _pipelines.Pipelines)
+            foreach (Pipeline pipeline in _pipelines.Pipelines)
             {
                 pipeline.Dispose();
             }

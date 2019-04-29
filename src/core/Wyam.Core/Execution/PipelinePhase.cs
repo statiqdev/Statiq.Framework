@@ -19,36 +19,38 @@ using Wyam.Core.Meta;
 
 namespace Wyam.Core.Execution
 {
-    internal class ExecutionPipeline : IPipeline, IDisposable
+    /// <summary>
+    /// This contains the pipeline execution context and other data
+    /// needed to execute a pipeline and cache it's results.
+    /// </summary>
+    internal class PipelinePhase : IDisposable
     {
-        private readonly ConcurrentHashSet<FilePath> _documentSources = new ConcurrentHashSet<FilePath>();
         private readonly IModuleList _modules;
+        private readonly ConcurrentHashSet<FilePath> _documentSources = new ConcurrentHashSet<FilePath>();
         private ConcurrentBag<IDocument> _clonedDocuments = new ConcurrentBag<IDocument>();
         private bool _disposed;
 
-        public string Name { get; }
-
-        public ExecutionPipeline(string name, params IModule[] modules)
-            : this(name, new ModuleList(modules))
+        public PipelinePhase(string pipelineName, string phaseName, IModuleList modules)
         {
+            PipelineName = pipelineName;
+            PhaseName = phaseName;
+            _modules = modules;
         }
 
-        public ExecutionPipeline(string name, IModuleList modules)
-        {
-            if (string.IsNullOrWhiteSpace(name))
-            {
-                throw new ArgumentException(nameof(name));
-            }
-            Name = name;
-            _modules = modules ?? new ModuleList();
-        }
+        // TODO: Add properties for task and dependencies
+        // Goal is to be able to kick-off pipeline phases from a collection and then after each one completes, check to see
+        // if the full dependency set of any other non-completed ones are completed and then kick off all of those in parallel
+
+        public string PipelineName { get; }
+
+        public string PhaseName { get; }
 
         // This is the main execute method called by the engine
         public async Task ExecuteAsync(Engine engine, Guid executionId, IServiceProvider serviceProvider)
         {
             if (_disposed)
             {
-                throw new ObjectDisposedException(nameof(ExecutionPipeline));
+                throw new ObjectDisposedException(nameof(Pipeline));
             }
 
             // Setup for pipeline execution
@@ -76,7 +78,7 @@ namespace Wyam.Core.Execution
         {
             if (_disposed)
             {
-                throw new ObjectDisposedException(nameof(ExecutionPipeline));
+                throw new ObjectDisposedException(nameof(Pipeline));
             }
 
             ImmutableArray<IDocument> resultDocuments = ImmutableArray<IDocument>.Empty;
@@ -96,7 +98,7 @@ namespace Wyam.Core.Execution
                         }
 
                         // Set results in engine and trace
-                        context.Engine.DocumentCollection.Set(Name, resultDocuments);
+                        context.Engine.DocumentCollection.Set(PipelineName, resultDocuments);
                         stopwatch.Stop();
                         Trace.Verbose(
                             "Executed module {0} in {1} ms resulting in {2} output document(s)",
@@ -109,14 +111,14 @@ namespace Wyam.Core.Execution
                     {
                         Trace.Error("Error while executing module {0}", moduleName);
                         resultDocuments = ImmutableArray<IDocument>.Empty;
-                        context.Engine.DocumentCollection.Set(Name, resultDocuments);
+                        context.Engine.DocumentCollection.Set(PipelineName, resultDocuments);
                         throw;
                     }
                 }
             }
 
             // Set the document collection result one more time just to be sure it matches the result documents
-            context.Engine.DocumentCollection.Set(Name, resultDocuments);
+            context.Engine.DocumentCollection.Set(PipelineName, resultDocuments);
             return resultDocuments;
         }
 
@@ -168,7 +170,7 @@ namespace Wyam.Core.Execution
         {
             if (_disposed)
             {
-                throw new ObjectDisposedException(nameof(ExecutionPipeline));
+                throw new ObjectDisposedException(nameof(Pipeline));
             }
             _disposed = true;
 
@@ -190,40 +192,6 @@ namespace Wyam.Core.Execution
                     DisposeModules(childModules);
                 }
             }
-        }
-
-        IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
-
-        public IEnumerator<IModule> GetEnumerator() => _modules.GetEnumerator();
-
-        public void Add(IModule item) => _modules.Add(item);
-
-        public void Clear() => _modules.Clear();
-
-        public bool Contains(IModule item) => _modules.Contains(item);
-
-        public void CopyTo(IModule[] array, int arrayIndex) => _modules.CopyTo(array, arrayIndex);
-
-        public bool Remove(IModule item) => _modules.Remove(item);
-
-        public int Count => _modules.Count;
-
-        public void Add(params IModule[] modules) => _modules.Add(modules);
-
-        public void Insert(int index, params IModule[] modules) => _modules.Insert(index, modules);
-
-        public bool IsReadOnly => _modules.IsReadOnly;
-
-        public int IndexOf(IModule item) => _modules.IndexOf(item);
-
-        public void Insert(int index, IModule item) => _modules.Insert(index, item);
-
-        public void RemoveAt(int index) => _modules.RemoveAt(index);
-
-        public IModule this[int index]
-        {
-            get { return _modules[index]; }
-            set { _modules[index] = value; }
         }
     }
 }

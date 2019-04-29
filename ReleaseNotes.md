@@ -6,8 +6,9 @@
 - Target for libraries changed from netstandard to netcoreapp
 - Wyam.Configuration removed
 - Module execution is now async, plumbing throughout
-- New config delegate types and Config static helpers
+- New config delegate types for document configs, removal of context config (use normal types, get context when adding modules)
 - Removed named modules APIs
+- Removed IPipeline.ProcessDocumentsOnce and related plumbing
 - Split Execute module into Execute, ExecuteDocument, and ExecuteContext
 
 # 2.2.4

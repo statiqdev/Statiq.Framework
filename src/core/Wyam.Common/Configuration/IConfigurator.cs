@@ -1,8 +1,8 @@
 ﻿namespace Wyam.Common.Configuration
 {
-    public interface IConfigurator<T>
-        where T : class
+    public interface IConfigurator<TConfigurable>
+        where TConfigurable : class
     {
-        void Configure(T configurable);
+        void Configure(TConfigurable configurable);
     }
 }

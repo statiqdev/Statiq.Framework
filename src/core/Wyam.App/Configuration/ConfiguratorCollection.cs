@@ -1,7 +1,5 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
 using Wyam.Common.Configuration;
 
 namespace Wyam.App.Configuration
@@ -10,36 +8,36 @@ namespace Wyam.App.Configuration
     {
         private readonly Dictionary<Type, List<object>> _configurators = new Dictionary<Type, List<object>>();
 
-        public void Add<T, TConfigurator>()
-            where T : class
-            where TConfigurator : class, IConfigurator<T> =>
-            Get<T>().Add(Activator.CreateInstance<TConfigurator>());
+        public void Add<TConfigurable, TConfigurator>()
+            where TConfigurable : class
+            where TConfigurator : class, IConfigurator<TConfigurable> =>
+            Get<TConfigurable>().Add(Activator.CreateInstance<TConfigurator>());
 
-        public void Add<T>(Action<T> action)
-            where T : class =>
-            Add(new DelegateConfigurator<T>(action));
+        public void Add<TConfigurable>(Action<TConfigurable> action)
+            where TConfigurable : class =>
+            Add(new DelegateConfigurator<TConfigurable>(action));
 
-        public void Add<T>(IConfigurator<T> configurator)
-            where T : class =>
-            Get<T>().Add(configurator);
+        public void Add<TConfigurable>(IConfigurator<TConfigurable> configurator)
+            where TConfigurable : class =>
+            Get<TConfigurable>().Add(configurator);
 
-        public IList<IConfigurator<T>> Get<T>()
-            where T : class
+        public IList<IConfigurator<TConfigurable>> Get<TConfigurable>()
+            where TConfigurable : class
         {
-            if (!_configurators.TryGetValue(typeof(T), out List<object> list))
+            if (!_configurators.TryGetValue(typeof(TConfigurable), out List<object> list))
             {
                 list = new List<object>();
-                _configurators.Add(typeof(T), list);
+                _configurators.Add(typeof(TConfigurable), list);
             }
-            return new ConfiguratorList<T>(list);
+            return new ConfiguratorList<TConfigurable>(list);
         }
 
-        public bool TryGet<T>(out IList<IConfigurator<T>> configurators)
-            where T : class
+        public bool TryGet<TConfigurable>(out IList<IConfigurator<TConfigurable>> configurators)
+            where TConfigurable : class
         {
-            if (_configurators.TryGetValue(typeof(T), out List<object> list))
+            if (_configurators.TryGetValue(typeof(TConfigurable), out List<object> list))
             {
-                configurators = new ConfiguratorList<T>(list);
+                configurators = new ConfiguratorList<TConfigurable>(list);
                 return true;
             }
             configurators = null;

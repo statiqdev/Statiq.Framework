@@ -121,77 +121,28 @@ namespace Wyam.App
             return bootstrapper;
         }
 
-        public static IBootstrapper Configure<T>(this IBootstrapper bootstrapper, Action<T> action)
-            where T : class
+        public static IBootstrapper Configure<TConfigurable>(this IBootstrapper bootstrapper, Action<TConfigurable> action)
+            where TConfigurable : class
         {
             bootstrapper.Configurators.Add(action);
             return bootstrapper;
         }
 
-        public static IBootstrapper AddConfigurator<T, TConfigurator>(this IBootstrapper bootstrapper)
-            where T : class
-            where TConfigurator : class, Common.Configuration.IConfigurator<T>
+        public static IBootstrapper AddConfigurator<TConfigurable, TConfigurator>(this IBootstrapper bootstrapper)
+            where TConfigurable : class
+            where TConfigurator : class, Common.Configuration.IConfigurator<TConfigurable>
         {
-            bootstrapper.Configurators.Add<T, TConfigurator>();
+            bootstrapper.Configurators.Add<TConfigurable, TConfigurator>();
             return bootstrapper;
         }
 
-        public static IBootstrapper AddConfigurator<T>(
+        public static IBootstrapper AddConfigurator<TConfigurable>(
             this IBootstrapper bootstrapper,
-            Common.Configuration.IConfigurator<T> configurator)
-            where T : class
+            Common.Configuration.IConfigurator<TConfigurable> configurator)
+            where TConfigurable : class
         {
             bootstrapper.Configurators.Add(configurator);
             return bootstrapper;
         }
-
-        public static IBootstrapper AddPipeline(
-            this IBootstrapper bootstrapper,
-            IModuleList modules) =>
-            bootstrapper.Configure<IEngine>(x => x.Pipelines.Add(modules));
-
-        public static IBootstrapper AddPipeline(
-            this IBootstrapper bootstrapper,
-            string name,
-            IModuleList modules) =>
-            bootstrapper.Configure<IEngine>(x => x.Pipelines.Add(name, modules));
-
-        public static IBootstrapper AddPipeline(
-            this IBootstrapper bootstrapper,
-            params IModule[] modules) =>
-            bootstrapper.Configure<IEngine>(x => x.Pipelines.Add(modules));
-
-        public static IBootstrapper AddPipeline(
-            this IBootstrapper bootstrapper,
-            string name,
-            params IModule[] modules) =>
-            bootstrapper.Configure<IEngine>(x => x.Pipelines.Add(name, modules));
-
-        public static IBootstrapper AddPipeline(
-            this IBootstrapper bootstrapper,
-            IPipeline pipeline) =>
-            bootstrapper.Configure<IEngine>(x => x.Pipelines.Add(pipeline));
-
-        public static IBootstrapper AddPipeline<TPipeline>(
-            this IBootstrapper bootstrapper)
-            where TPipeline : IPipeline =>
-            bootstrapper.Configure<IEngine>(x => x.Pipelines.Add<TPipeline>());
-
-        public static IBootstrapper AddPipeline(
-            this IBootstrapper bootstrapper,
-            Action<IPipeline, IReadOnlySettings> action) =>
-            bootstrapper.Configure<IEngine>(x => action(x.Pipelines.Add(), x.Settings));
-
-        public static IBootstrapper AddPipeline(
-            this IBootstrapper bootstrapper,
-            string name,
-            Action<IPipeline, IReadOnlySettings> action) =>
-            bootstrapper.Configure<IEngine>(x => action(x.Pipelines.Add(name), x.Settings));
-
-        public static IBootstrapper AddPipeline<TPipeline>(
-            this IBootstrapper bootstrapper,
-            Action<IPipeline, IReadOnlySettings> action)
-            where TPipeline : IPipeline =>
-            bootstrapper.Configure<IEngine>(x => action(x.Pipelines.Add<TPipeline>(), x.Settings));
     }
 }

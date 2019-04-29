@@ -40,9 +40,14 @@ namespace Wyam.Common.Execution
         IReadOnlyCollection<string> Namespaces { get; }
 
         /// <summary>
-        /// Gets the currently executing pipeline.
+        /// Gets the name of the currently executing pipeline.
         /// </summary>
-        IReadOnlyPipeline Pipeline { get; }
+        string PipelineName { get; }
+
+        /// <summary>
+        /// Gets the name of the currently executing pipeline phase.
+        /// </summary>
+        string PhaseName { get; }
 
         /// <summary>
         /// Gets the currently executing module.
