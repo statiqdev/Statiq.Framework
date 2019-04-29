@@ -56,7 +56,13 @@ namespace Wyam.Common.Modules
         public void Add(params IModule[] modules) => _modules.Add(modules);
 
         /// <inheritdoc />
+        public void Add(IEnumerable<IModule> modules) => _modules.Add(modules);
+
+        /// <inheritdoc />
         public void Insert(int index, params IModule[] modules) => _modules.Insert(index, modules);
+
+        /// <inheritdoc />
+        public void Insert(int index, IEnumerable<IModule> modules) => _modules.Insert(index, modules);
 
         /// <inheritdoc />
         public bool IsReadOnly => _modules.IsReadOnly;

@@ -10,9 +10,5 @@ namespace Wyam.Common.Execution
     {
         // Adds a new pipeline and returns it for editing
         IPipeline Add(string name);
-
-        // Adds a new pipeline with the specified modules in the process phase
-        // and creates a dependency to the previously added pipeline
-        IPipeline AddSequential(string name, IEnumerable<IModule> processModules);
     }
 }

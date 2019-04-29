@@ -19,7 +19,7 @@ using Wyam.Core.Meta;
 
 namespace Wyam.Core.Execution
 {
-    internal class Pipeline : IPipeline
+    public class Pipeline : IPipeline
     {
         public IModuleList Read { get; } = new ModuleList();
 
@@ -29,7 +29,7 @@ namespace Wyam.Core.Execution
 
         public IModuleList Write { get; } = new ModuleList();
 
-        public List<IPipeline> Dependencies { get; } = new List<IPipeline>();
+        public HashSet<IPipeline> Dependencies { get; } = new HashSet<IPipeline>();
 
         public bool Isolated { get; set; }
 

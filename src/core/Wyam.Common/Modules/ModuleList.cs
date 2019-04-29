@@ -46,7 +46,11 @@ namespace Wyam.Common.Modules
         }
 
         /// <inheritdoc />
-        public void Add(params IModule[] modules)
+        public void Add(params IModule[] modules) =>
+            Add((IEnumerable<IModule>)modules);
+
+        /// <inheritdoc />
+        public void Add(IEnumerable<IModule> modules)
         {
             foreach (IModule module in modules.Where(x => x != null))
             {
@@ -65,12 +69,16 @@ namespace Wyam.Common.Modules
         }
 
         /// <inheritdoc />
-        public void Insert(int index, params IModule[] modules)
+        public void Insert(int index, params IModule[] modules) =>
+            Insert(index, (IEnumerable<IModule>)modules);
+
+        /// <inheritdoc />
+        public void Insert(int index, IEnumerable<IModule> modules)
         {
-            modules = modules.Where(x => x != null).ToArray();
-            for (int i = index; i < index + modules.Length; i++)
+            IModule[] moduleArray = modules.Where(x => x != null).ToArray();
+            for (int i = index; i < index + moduleArray.Length; i++)
             {
-                Insert(i, modules[i - index]);
+                Insert(i, moduleArray[i - index]);
             }
         }
 

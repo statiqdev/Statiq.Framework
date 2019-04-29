@@ -17,7 +17,7 @@ namespace Wyam.Common.Execution
 
         IModuleList Write { get; }
 
-        List<IPipeline> Dependencies { get; }
+        HashSet<IPipeline> Dependencies { get; }
 
         bool Isolated { get; set; }
 

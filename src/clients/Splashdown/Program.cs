@@ -22,20 +22,17 @@ namespace Splashdown
         public static async Task<int> Main(string[] args) =>
             await Bootstrapper
                 .CreateDefault(args)
-                .AddPipeline(
-                    "Sample",
-                    new ReadFiles("*.md"),
-                    new FrontMatter(new Yaml()),
-                    new Markdown(),
-                    new ReplaceIn("{{CONTENT}}", new ReadFiles("template.html")),
-                    new Replace("{{TITLE}}", Config.FromDocument(doc => doc.Get("Title", "Default Title"))),
-                    new Replace("{{DESC}}", Config.FromDocument(doc => doc.Get("Description", "Default Description"))),
-                    new WriteFiles(".html"))
-                .AddPipeline("AsAction", (p, s) =>
-                {
-                    p.Process.Add(new ReadFiles("*.md"));
-                    p.Process.Add(new FrontMatter(new Yaml()));
-                })
+                .AddPipeline("Sample", builder =>
+                    builder
+                        .AddProcess(
+                            new ReadFiles("*.md"),
+                            new FrontMatter(new Yaml()),
+                            new Markdown(),
+                            new ReplaceIn("{{CONTENT}}", new ReadFiles("template.html")),
+                            new Replace("{{TITLE}}", Config.FromDocument(doc => doc.Get("Title", "Default Title"))),
+                            new Replace("{{DESC}}", Config.FromDocument(doc => doc.Get("Description", "Default Description"))),
+                            new WriteFiles(".html"))
+                        .Build())
                 .RunAsync();
     }
 }
