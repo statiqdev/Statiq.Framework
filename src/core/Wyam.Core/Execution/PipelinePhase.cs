@@ -16,6 +16,7 @@ using Wyam.Common.Util;
 using Wyam.Core.Caching;
 using Wyam.Core.Documents;
 using Wyam.Core.Meta;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Wyam.Core.Execution
 {
@@ -25,101 +26,89 @@ namespace Wyam.Core.Execution
     /// </summary>
     internal class PipelinePhase : IDisposable
     {
-        private readonly IModuleList _modules;
+        private readonly IList<IModule> _modules;
         private readonly ConcurrentHashSet<FilePath> _documentSources = new ConcurrentHashSet<FilePath>();
         private ConcurrentBag<IDocument> _clonedDocuments = new ConcurrentBag<IDocument>();
         private bool _disposed;
 
-        public PipelinePhase(string pipelineName, string phaseName, IModuleList modules)
+        public PipelinePhase(string pipelineName, string phaseName, IList<IModule> modules, params PipelinePhase[] dependencies)
         {
             PipelineName = pipelineName;
             PhaseName = phaseName;
-            _modules = modules;
+            _modules = modules ?? new List<IModule>();
+            Dependencies = dependencies ?? Array.Empty<PipelinePhase>();
         }
-
-        // TODO: Add properties for task and dependencies
-        // Goal is to be able to kick-off pipeline phases from a collection and then after each one completes, check to see
-        // if the full dependency set of any other non-completed ones are completed and then kick off all of those in parallel
 
         public string PipelineName { get; }
 
         public string PhaseName { get; }
 
+        /// <summary>
+        /// The first dependency should contain the input documents for this phase.
+        /// </summary>
+        public PipelinePhase[] Dependencies { get; set; }
+
+        /// <summary>
+        /// Holds the output documents from the previous execution of this phase.
+        /// </summary>
+        public ImmutableArray<IDocument> OutputDocuments { get; private set; } = ImmutableArray<IDocument>.Empty;
+
         // This is the main execute method called by the engine
-        public async Task ExecuteAsync(Engine engine, Guid executionId, IServiceProvider serviceProvider)
+        public async Task ExecuteAsync(
+            Engine engine,
+            Guid executionId,
+            IServiceProvider serviceProvider,
+            ImmutableArray<IDocument> inputDocuments)
         {
             if (_disposed)
             {
-                throw new ObjectDisposedException(nameof(Pipeline));
+                throw new ObjectDisposedException(nameof(PipelinePhase));
+            }
+
+            if (_modules.Count == 0)
+            {
+                Trace.Information($"{PipelineName}/{PhaseName} contains no modules, skipping");
+                OutputDocuments = inputDocuments;
+                return;
             }
 
             // Setup for pipeline execution
             _documentSources.Clear();
             ResetClonedDocuments();
 
-            // Execute all modules in the pipeline
-            IReadOnlyList<IDocument> resultDocuments;
-            using (ExecutionContext context = new ExecutionContext(engine, executionId, this, serviceProvider))
+            System.Diagnostics.Stopwatch pipelineStopwatch = System.Diagnostics.Stopwatch.StartNew();
+            using (Trace.WithIndent().Information($"Executing {PipelineName}/{PhaseName} with {_modules.Count} module(s)"))
             {
-                ImmutableArray<IDocument> inputs = new[] { engine.DocumentFactory.GetDocument(context) }.ToImmutableArray();
-                resultDocuments = await ExecuteAsync(context, _modules, inputs);
+                try
+                {
+                    // Execute all modules in the pipeline with a new DI scope per phase
+                    IServiceScopeFactory serviceScopeFactory = serviceProvider.GetRequiredService<IServiceScopeFactory>();
+                    using (IServiceScope serviceScope = serviceScopeFactory.CreateScope())
+                    {
+                        using (ExecutionContext context = new ExecutionContext(engine, executionId, this, serviceScope.ServiceProvider))
+                        {
+                            OutputDocuments = await Engine.ExecuteAsync(context, _modules, inputDocuments);
+                            pipelineStopwatch.Stop();
+                            Trace.Information($"Executed {PipelineName}/{PhaseName} in {pipelineStopwatch.ElapsedMilliseconds} ms resulting in {OutputDocuments.Length} output document(s)");
+                        }
+                    }
+                }
+                catch (Exception)
+                {
+                    Trace.Error($"Error while executing {PipelineName}/{PhaseName}");
+                    throw;
+                }
             }
+
+            // TODO: Set context.Engine.DocumentCollection.Set(PipelineName, resultDocuments)
+            // But only if this is the Process phase
 
             // Dispose documents that aren't part of the final collection for this pipeline,
             // but don't dispose any documents that are referenced directly or indirectly from the final ones
             HashSet<IDocument> flattenedResultDocuments = new HashSet<IDocument>();
-            FlattenResultDocuments(resultDocuments, flattenedResultDocuments);
+            FlattenResultDocuments(OutputDocuments, flattenedResultDocuments);
             Parallel.ForEach(_clonedDocuments.Where(x => !flattenedResultDocuments.Contains(x)), x => x.Dispose());
             _clonedDocuments = new ConcurrentBag<IDocument>(flattenedResultDocuments);
-        }
-
-        // This executes the specified modules with the specified input documents
-        public async Task<IReadOnlyList<IDocument>> ExecuteAsync(ExecutionContext context, IEnumerable<IModule> modules, ImmutableArray<IDocument> inputDocuments)
-        {
-            if (_disposed)
-            {
-                throw new ObjectDisposedException(nameof(Pipeline));
-            }
-
-            ImmutableArray<IDocument> resultDocuments = ImmutableArray<IDocument>.Empty;
-            foreach (IModule module in modules.Where(x => x != null))
-            {
-                string moduleName = module.GetType().Name;
-                System.Diagnostics.Stopwatch stopwatch = System.Diagnostics.Stopwatch.StartNew();
-                using (Trace.WithIndent().Verbose("Executing module {0} with {1} input document(s)", moduleName, inputDocuments.Length))
-                {
-                    try
-                    {
-                        // Execute the module
-                        using (ExecutionContext moduleContext = context.Clone(module))
-                        {
-                            IEnumerable<IDocument> moduleResult = await module.ExecuteAsync(inputDocuments, moduleContext);
-                            resultDocuments = moduleResult?.Where(x => x != null).ToImmutableArray() ?? ImmutableArray<IDocument>.Empty;
-                        }
-
-                        // Set results in engine and trace
-                        context.Engine.DocumentCollection.Set(PipelineName, resultDocuments);
-                        stopwatch.Stop();
-                        Trace.Verbose(
-                            "Executed module {0} in {1} ms resulting in {2} output document(s)",
-                            moduleName,
-                            stopwatch.ElapsedMilliseconds,
-                            resultDocuments.Length);
-                        inputDocuments = resultDocuments;
-                    }
-                    catch (Exception)
-                    {
-                        Trace.Error("Error while executing module {0}", moduleName);
-                        resultDocuments = ImmutableArray<IDocument>.Empty;
-                        context.Engine.DocumentCollection.Set(PipelineName, resultDocuments);
-                        throw;
-                    }
-                }
-            }
-
-            // Set the document collection result one more time just to be sure it matches the result documents
-            context.Engine.DocumentCollection.Set(PipelineName, resultDocuments);
-            return resultDocuments;
         }
 
         private void FlattenResultDocuments(IEnumerable<IDocument> documents, HashSet<IDocument> flattenedResultDocuments)
@@ -181,13 +170,12 @@ namespace Wyam.Core.Execution
             DisposeModules(_modules);
         }
 
-        private void DisposeModules(IEnumerable<IModule> modules)
+        private static void DisposeModules(IEnumerable<IModule> modules)
         {
             foreach (IModule module in modules)
             {
                 (module as IDisposable)?.Dispose();
-                IEnumerable<IModule> childModules = module as IEnumerable<IModule>;
-                if (childModules != null)
+                if (module is IEnumerable<IModule> childModules)
                 {
                     DisposeModules(childModules);
                 }

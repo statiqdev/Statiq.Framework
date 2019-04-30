@@ -82,33 +82,21 @@ namespace Wyam.App
             return this;
         }
 
-        public PipelineBuilder AddDependencies(params IPipeline[] dependencies)
-        {
-            _actions.Add(x => x.Dependencies.AddRange(dependencies));
-            return this;
-        }
-
-        public PipelineBuilder AddDependencies(IEnumerable<IPipeline> dependencies)
-        {
-            _actions.Add(x => x.Dependencies.AddRange(dependencies));
-            return this;
-        }
-
         public PipelineBuilder AddDependencies(params string[] dependencies)
         {
-            _actions.Add(x => x.Dependencies.AddRange(dependencies.Select(d => _collection[d])));
+            _actions.Add(x => x.Dependencies.AddRange(dependencies));
             return this;
         }
 
         public PipelineBuilder AddDependencies(IEnumerable<string> dependencies)
         {
-            _actions.Add(x => x.Dependencies.AddRange(dependencies.Select(d => _collection[d])));
+            _actions.Add(x => x.Dependencies.AddRange(dependencies));
             return this;
         }
 
         public PipelineBuilder AsSerial()
         {
-            _actions.Add(x => x.Dependencies.AddRange(_collection.Values));
+            _actions.Add(x => x.Dependencies.AddRange(_collection.Keys));
             return this;
         }
 

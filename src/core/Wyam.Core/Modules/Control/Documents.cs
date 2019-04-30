@@ -147,7 +147,7 @@ namespace Wyam.Core.Modules.Control
             else
             {
                 documents = _pipelines.Count == 0
-                    ? context.Documents.ExceptPipeline(context.Pipeline.Name)
+                    ? context.Documents.ExceptPipeline(context.PipelineName)
                     : _pipelines.SelectMany(x => context.Documents.FromPipeline(x));
             }
 

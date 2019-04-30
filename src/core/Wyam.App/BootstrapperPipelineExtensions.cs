@@ -102,7 +102,7 @@ namespace Wyam.App
                 {
                     pipeline.Write.AddRange(writeModules);
                 }
-                pipeline.Dependencies.AddRange(x.Pipelines.Values);
+                pipeline.Dependencies.AddRange(x.Pipelines.Keys);
             });
     }
 }

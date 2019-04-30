@@ -76,7 +76,7 @@ namespace Wyam.Core.Modules.Extensibility
         {
             // Check for a single IModule first since some modules also implement IEnumerable<IModule>
             IEnumerable<IModule> modules = results is IModule module ? new[] { module } : results as IEnumerable<IModule>;
-            return modules != null ? await context.ExecuteAsync(modules, inputs) : null;
+            return modules != null ? await context.ExecuteAsync(modules, inputs) : (IEnumerable<IDocument>)null;
         }
 
         protected static async Task<IEnumerable<IDocument>> ChangeContentAsync(object result, IExecutionContext context, IDocument document) =>

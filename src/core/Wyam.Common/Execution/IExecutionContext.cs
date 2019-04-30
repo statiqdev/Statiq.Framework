@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.IO;
 using System.Net.Http;
 using System.Reflection;
@@ -143,7 +144,7 @@ namespace Wyam.Common.Execution
         /// <param name="modules">The modules to execute.</param>
         /// <param name="inputs">The input documents.</param>
         /// <returns>The result documents from the executed modules.</returns>
-        Task<IReadOnlyList<IDocument>> ExecuteAsync(IEnumerable<IModule> modules, IEnumerable<IDocument> inputs);
+        Task<ImmutableArray<IDocument>> ExecuteAsync(IEnumerable<IModule> modules, IEnumerable<IDocument> inputs);
 
         /// <summary>
         /// Gets a new <see cref="IJavaScriptEnginePool"/>. The returned engine pool should be disposed

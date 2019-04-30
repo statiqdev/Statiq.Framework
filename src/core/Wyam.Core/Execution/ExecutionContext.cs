@@ -104,12 +104,6 @@ namespace Wyam.Core.Execution
             }
         }
 
-        private TResult CheckDisposed<TResult>(Func<TResult> func)
-        {
-            CheckDisposed();
-            return func();
-        }
-
         public bool TryConvert<T>(object value, out T result) => TypeHelper.TryConvert(value, out result);
 
         public bool TryGetValue(string key, out object value) => TryGetValue<object>(key, out value);
@@ -137,21 +131,10 @@ namespace Wyam.Core.Execution
             return document;
         }
 
-        public async Task<IReadOnlyList<IDocument>> ExecuteAsync(IEnumerable<IModule> modules, IEnumerable<IDocument> inputs)
+        public async Task<ImmutableArray<IDocument>> ExecuteAsync(IEnumerable<IModule> modules, IEnumerable<IDocument> inputs)
         {
             CheckDisposed();
-
-            if (modules == null)
-            {
-                return ImmutableArray<IDocument>.Empty;
-            }
-
-            // Store the document list before executing the child modules and restore it afterwards
-            IReadOnlyList<IDocument> originalDocuments = Engine.DocumentCollection.Get(_pipelinePhase.PipelineName);
-            ImmutableArray<IDocument> inputDocuments = (inputs ?? new[] { this.GetDocument() }).ToImmutableArray();
-            IReadOnlyList<IDocument> results = await _pipelinePhase.ExecuteAsync(this, modules, inputDocuments);
-            Engine.DocumentCollection.Set(_pipelinePhase.PipelineName, originalDocuments);
-            return results;
+            return await Engine.ExecuteAsync(this, modules, inputs?.ToImmutableArray() ?? ImmutableArray<IDocument>.Empty);
         }
 
         public IJavaScriptEnginePool GetJavaScriptEnginePool(

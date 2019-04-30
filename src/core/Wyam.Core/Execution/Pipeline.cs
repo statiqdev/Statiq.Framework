@@ -29,7 +29,7 @@ namespace Wyam.Core.Execution
 
         public IModuleList Write { get; } = new ModuleList();
 
-        public HashSet<IPipeline> Dependencies { get; } = new HashSet<IPipeline>();
+        public HashSet<string> Dependencies { get; } = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
         public bool Isolated { get; set; }
 

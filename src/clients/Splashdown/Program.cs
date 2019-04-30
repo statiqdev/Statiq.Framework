@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using Wyam.App;
 using Wyam.Common.Configuration;
 using Wyam.Common.Execution;
+using Wyam.Common.IO;
 using Wyam.Common.Meta;
 using Wyam.Common.Modules;
 using Wyam.Core.Modules.Contents;
@@ -22,16 +23,27 @@ namespace Splashdown
         public static async Task<int> Main(string[] args) =>
             await Bootstrapper
                 .CreateDefault(args)
-                .AddPipeline("Sample", builder =>
+                .AddPipeline("First", builder =>
                     builder
+                        .AddRead(new ReadFiles("*.md"))
                         .AddProcess(
-                            new ReadFiles("*.md"),
                             new FrontMatter(new Yaml()),
                             new Markdown(),
                             new ReplaceIn("{{CONTENT}}", new ReadFiles("template.html")),
                             new Replace("{{TITLE}}", Config.FromDocument(doc => doc.Get("Title", "Default Title"))),
-                            new Replace("{{DESC}}", Config.FromDocument(doc => doc.Get("Description", "Default Description"))),
-                            new WriteFiles(".html"))
+                            new Replace("{{DESC}}", Config.FromDocument(doc => doc.Get("Description", "Default Description"))))
+                        .AddWrite(new WriteFiles(".html"))
+                        .Build())
+                .AddPipeline("Second", builder =>
+                    builder
+                        .AddRead(new ReadFiles("*.md"))
+                        .AddProcess(
+                            new FrontMatter(new Yaml()),
+                            new Markdown(),
+                            new ReplaceIn("{{CONTENT}}", new ReadFiles("template.html")),
+                            new Replace("{{TITLE}}", Config.FromDocument(doc => doc.Get("Title", "Default Title"))),
+                            new Replace("{{DESC}}", Config.FromDocument(doc => doc.Get("Description", "Default Description"))))
+                        .AddWrite(new WriteFiles(Config.FromDocument(doc => (FilePath)$"{doc.Source.FileName}2.html")))
                         .Build())
                 .RunAsync();
     }

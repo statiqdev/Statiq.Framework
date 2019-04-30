@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
@@ -10,6 +11,7 @@ using Wyam.Common.Documents;
 using Wyam.Common.Execution;
 using Wyam.Common.IO;
 using Wyam.Common.Meta;
+using Wyam.Common.Modules;
 using Wyam.Common.Shortcodes;
 using Wyam.Common.Tracing;
 using Wyam.Common.Util;
@@ -52,6 +54,9 @@ namespace Wyam.Core.Execution
 
         private IContentStreamFactory _contentStreamFactory = new RecyclableMemoryContentStreamFactory();
         private IDocumentFactory _documentFactory;
+
+        // Gets initialized on first execute
+        private PipelinePhase[] _phases;
 
         private bool _disposed;
 
@@ -232,6 +237,12 @@ namespace Wyam.Core.Execution
                 await CleanOutputPathAsync();
             }
 
+            // Create the pipeline phases
+            if (_phases == null)
+            {
+                _phases = GetPipelinePhases(_pipelines);
+            }
+
             try
             {
                 System.Diagnostics.Stopwatch engineStopwatch = System.Diagnostics.Stopwatch.StartNew();
@@ -241,55 +252,23 @@ namespace Wyam.Core.Execution
                     DocumentCollection.Clear();
                     ExecutionCacheManager.ResetEntryHits();
 
-                    // Enumerate pipelines and execute each in order
+                    // Get and execute all phases
                     Guid executionId = Guid.NewGuid();
-                    int c = 1;
-                    foreach (IPipeline pipeline in _pipelines.Pipelines)
-                    {
-                        string pipelineName = pipeline.Name;
-                        System.Diagnostics.Stopwatch pipelineStopwatch = System.Diagnostics.Stopwatch.StartNew();
-                        using (Trace.WithIndent().Information("Executing pipeline \"{0}\" ({1}/{2}) with {3} child module(s)", pipelineName, c, _pipelines.Count, pipeline.Count))
-                        {
-                            IServiceScopeFactory serviceScopeFactory = serviceProvider.GetRequiredService<IServiceScopeFactory>();
-                            using (IServiceScope serviceScope = serviceScopeFactory.CreateScope())
-                            {
-                                try
-                                {
-                                    await ((Pipeline)pipeline).ExecuteAsync(this, executionId, serviceScope.ServiceProvider);
-                                    pipelineStopwatch.Stop();
-                                    Trace.Information(
-                                        "Executed pipeline \"{0}\" ({1}/{2}) in {3} ms resulting in {4} output document(s)",
-                                        pipelineName,
-                                        c++,
-                                        _pipelines.Count,
-                                        pipelineStopwatch.ElapsedMilliseconds,
-                                        DocumentCollection.FromPipeline(pipelineName).Count());
-                                }
-                                catch (Exception)
-                                {
-                                    Trace.Error("Error while executing pipeline {0}", pipelineName);
-                                    throw;
-                                }
-                            }
-                        }
-                    }
+                    Task[] phaseTasks = GetPhaseTasks(executionId, serviceProvider);
+                    await Task.WhenAll(phaseTasks);
 
                     // Clean up (clear unhit cache entries, dispose documents)
                     // Note that disposing the documents immediately after engine execution will ensure write streams get flushed and released
                     // but will also mean that callers (and tests) can't access documents and document content after the engine finishes
                     // Easiest way to access content after engine execution is to add a final Meta module and copy content to metadata
                     ExecutionCacheManager.ClearUnhitEntries();
-                    foreach (IPipeline pipeline in _pipelines.Pipelines)
+                    foreach (PipelinePhase phase in _phases)
                     {
-                        ((Pipeline)pipeline).ResetClonedDocuments();
+                        phase.ResetClonedDocuments();
                     }
 
                     engineStopwatch.Stop();
-                    Trace.Information(
-                        "Executed {0}/{1} pipelines in {2} ms",
-                        c - 1,
-                        _pipelines.Count,
-                        engineStopwatch.ElapsedMilliseconds);
+                    Trace.Information($"Finished execution in {engineStopwatch.ElapsedMilliseconds} ms");
                 }
             }
             catch (Exception ex)
@@ -297,6 +276,155 @@ namespace Wyam.Core.Execution
                 Trace.Critical("Exception during execution: {0}", ex.ToString());
                 throw;
             }
+        }
+
+        // The result array is sorted based on dependencies
+        private static PipelinePhase[] GetPipelinePhases(PipelineCollection pipelines)
+        {
+            // Perform a topological sort to create phases down the dependency tree
+            Dictionary<string, PipelinePhases> phases = new Dictionary<string, PipelinePhases>(StringComparer.OrdinalIgnoreCase);
+            List<PipelinePhases> sortedPhases = new List<PipelinePhases>();
+            HashSet<string> visited = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            foreach (KeyValuePair<string, IPipeline> pipelineEntry in pipelines)
+            {
+                Visit(pipelineEntry.Key, pipelineEntry.Value);
+            }
+
+            // Make a pass through non-isolated render phases to set dependencies to all non-isolated process phases
+            foreach (PipelinePhases pipelinePhases in phases.Values.Where(x => !x.Isolated))
+            {
+                pipelinePhases.Render.Dependencies =
+                    pipelinePhases.Render.Dependencies
+                        .Concat(phases.Values.Where(x => x != pipelinePhases && !x.Isolated).Select(x => x.Process))
+                        .ToArray();
+            }
+
+            return sortedPhases
+                .Select(x => x.Read)
+                .Concat(sortedPhases.Select(x => x.Process))
+                .Concat(sortedPhases.Select(x => x.Render))
+                .Concat(sortedPhases.Select(x => x.Write))
+                .ToArray();
+
+            // Returns the process phases (if not isolated)
+            PipelinePhases Visit(string name, IPipeline pipeline)
+            {
+                PipelinePhases pipelinePhases;
+
+                if (pipeline.Isolated)
+                {
+                    // This is an isolated pipeline so just add the phases in a chain
+                    pipelinePhases = new PipelinePhases(true);
+                    pipelinePhases.Read = new PipelinePhase(name, nameof(IPipeline.Read), pipeline.Read);
+                    pipelinePhases.Process = new PipelinePhase(name, nameof(IPipeline.Process), pipeline.Process,  pipelinePhases.Read);
+                    pipelinePhases.Render = new PipelinePhase(name, nameof(IPipeline.Render), pipeline.Render, pipelinePhases.Process);
+                    pipelinePhases.Write = new PipelinePhase(name, nameof(IPipeline.Write), pipeline.Write, pipelinePhases.Render);
+                    phases.Add(name, pipelinePhases);
+                    sortedPhases.Add(pipelinePhases);
+                    return pipelinePhases;
+                }
+
+                if (visited.Add(name))
+                {
+                    // Visit dependencies if this isn't an isolated pipeline
+                    List<PipelinePhase> processDependencies = new List<PipelinePhase>();
+                    foreach (string dependencyName in pipeline.Dependencies)
+                    {
+                        if (!pipelines.TryGetValue(dependencyName, out IPipeline dependency))
+                        {
+                            throw new Exception($"Could not find pipeline dependency {dependencyName} of {name}");
+                        }
+                        if (dependency.Isolated)
+                        {
+                            throw new Exception($"Pipeline {name} has dependency on isolated pipeline {dependencyName}");
+                        }
+                        processDependencies.Add(Visit(dependencyName, dependency).Process);
+                    }
+
+                    // Add the phases (by this time all dependencies should have been added)
+                    pipelinePhases = new PipelinePhases(false);
+                    pipelinePhases.Read = new PipelinePhase(name, nameof(IPipeline.Read), pipeline.Read);
+                    processDependencies.Insert(0, pipelinePhases.Read);  // Makes sure the process phase is also dependent on it's read phase
+                    pipelinePhases.Process = new PipelinePhase(name, nameof(IPipeline.Process), pipeline.Process, processDependencies.ToArray());
+                    pipelinePhases.Render = new PipelinePhase(name, nameof(IPipeline.Render), pipeline.Render, pipelinePhases.Process);  // Render dependencies will be added after all pipelines have been processed
+                    pipelinePhases.Write = new PipelinePhase(name, nameof(IPipeline.Write), pipeline.Write, pipelinePhases.Render);
+                    phases.Add(name, pipelinePhases);
+                    sortedPhases.Add(pipelinePhases);
+                }
+                else if (!phases.TryGetValue(name, out pipelinePhases))
+                {
+                    throw new Exception($"Pipeline cyclical dependency detected involving {name}");
+                }
+
+                return pipelinePhases;
+            }
+        }
+
+        private Task[] GetPhaseTasks(Guid executionId, IServiceProvider serviceProvider)
+        {
+            Dictionary<PipelinePhase, Task> phaseTasks = new Dictionary<PipelinePhase, Task>();
+            foreach (PipelinePhase phase in _phases)
+            {
+                phaseTasks.Add(phase, GetTask(phase));
+            }
+            return phaseTasks.Values.ToArray();
+
+            Task GetTask(PipelinePhase taskPhase)
+            {
+                if (taskPhase.Dependencies.Length == 0)
+                {
+                    // This will immediatly queue the read phase while we continue figuring out tasks, but that's okay
+                    return Task.Run(() => taskPhase.ExecuteAsync(this, executionId, serviceProvider, ImmutableArray<IDocument>.Empty));
+                }
+
+                // We have to explicitly wait the execution task in the continuation function
+                // (the continuation task doesn't wait for the tasks it continues)
+                return Task.Factory.ContinueWhenAll(
+                    taskPhase.Dependencies.Select(x => phaseTasks[x]).ToArray(),
+                    _ => Task.WaitAll(taskPhase.ExecuteAsync(this, executionId, serviceProvider, taskPhase.Dependencies[0].OutputDocuments)));
+            }
+        }
+
+        // This executes the specified modules with the specified input documents
+        internal static async Task<ImmutableArray<IDocument>> ExecuteAsync(ExecutionContext context, IEnumerable<IModule> modules, ImmutableArray<IDocument> inputDocuments)
+        {
+            ImmutableArray<IDocument> resultDocuments = ImmutableArray<IDocument>.Empty;
+            if (modules != null)
+            {
+                foreach (IModule module in modules.Where(x => x != null))
+                {
+                    string moduleName = module.GetType().Name;
+                    System.Diagnostics.Stopwatch stopwatch = System.Diagnostics.Stopwatch.StartNew();
+                    using (Trace.WithIndent().Verbose("Executing module {0} with {1} input document(s)", moduleName, inputDocuments.Length))
+                    {
+                        try
+                        {
+                            // Execute the module
+                            using (ExecutionContext moduleContext = context.Clone(module))
+                            {
+                                IEnumerable<IDocument> moduleResult = await module.ExecuteAsync(inputDocuments, moduleContext);
+                                resultDocuments = moduleResult?.Where(x => x != null).ToImmutableArray() ?? ImmutableArray<IDocument>.Empty;
+                            }
+
+                            // Trace results
+                            stopwatch.Stop();
+                            Trace.Verbose(
+                                "Executed module {0} in {1} ms resulting in {2} output document(s)",
+                                moduleName,
+                                stopwatch.ElapsedMilliseconds,
+                                resultDocuments.Length);
+                            inputDocuments = resultDocuments;
+                        }
+                        catch (Exception)
+                        {
+                            Trace.Error("Error while executing module {0}", moduleName);
+                            resultDocuments = ImmutableArray<IDocument>.Empty;
+                            throw;
+                        }
+                    }
+                }
+            }
+            return resultDocuments;
         }
 
         /// <inheritdoc />
@@ -307,10 +435,22 @@ namespace Wyam.Core.Execution
                 return;
             }
 
-            foreach (Pipeline pipeline in _pipelines.Pipelines)
+            if (_phases != null)
             {
-                pipeline.Dispose();
+                foreach (PipelinePhase phase in _phases)
+                {
+                    phase.Dispose();
+                }
             }
+
+            foreach (IPipeline pipeline in _pipelines.Values)
+            {
+                if (pipeline is IDisposable disposablePipeline)
+                {
+                    disposablePipeline.Dispose();
+                }
+            }
+
             System.Diagnostics.Trace.Listeners.Remove(_diagnosticsTraceListener);
             CleanTempPathAsync().Wait();
             _disposed = true;
@@ -322,6 +462,20 @@ namespace Wyam.Core.Execution
             {
                 throw new ObjectDisposedException(nameof(Engine));
             }
+        }
+
+        private class PipelinePhases
+        {
+            public PipelinePhases(bool isolated)
+            {
+                Isolated = isolated;
+            }
+
+            public bool Isolated { get; }
+            public PipelinePhase Read { get; set; }
+            public PipelinePhase Process { get; set; }
+            public PipelinePhase Render { get; set; }
+            public PipelinePhase Write { get; set; }
         }
     }
 }
