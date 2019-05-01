@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
@@ -89,12 +90,8 @@ namespace Wyam.Core.Execution
         /// </summary>
         public IPipelineCollection Pipelines => _pipelines;
 
-        /// <summary>
-        /// Gets the documents.
-        /// </summary>
-        public IDocumentCollection Documents => DocumentCollection;
-
-        internal DocumentCollection DocumentCollection { get; } = new DocumentCollection();
+        internal ConcurrentDictionary<string, ImmutableArray<IDocument>> Documents { get; }
+            = new ConcurrentDictionary<string, ImmutableArray<IDocument>>(StringComparer.OrdinalIgnoreCase);
 
         /// <summary>
         /// Gets the namespaces that should be brought in scope by modules that support dynamic compilation.
@@ -249,7 +246,7 @@ namespace Wyam.Core.Execution
                 using (Trace.WithIndent().Information("Executing {0} pipelines", _pipelines.Count))
                 {
                     // Setup (clear the document collection and reset cache counters)
-                    DocumentCollection.Clear();
+                    Documents.Clear();
                     ExecutionCacheManager.ResetEntryHits();
 
                     // Get and execute all phases
@@ -315,10 +312,10 @@ namespace Wyam.Core.Execution
                 {
                     // This is an isolated pipeline so just add the phases in a chain
                     pipelinePhases = new PipelinePhases(true);
-                    pipelinePhases.Read = new PipelinePhase(name, nameof(IPipeline.Read), pipeline.Read);
-                    pipelinePhases.Process = new PipelinePhase(name, nameof(IPipeline.Process), pipeline.Process,  pipelinePhases.Read);
-                    pipelinePhases.Render = new PipelinePhase(name, nameof(IPipeline.Render), pipeline.Render, pipelinePhases.Process);
-                    pipelinePhases.Write = new PipelinePhase(name, nameof(IPipeline.Write), pipeline.Write, pipelinePhases.Render);
+                    pipelinePhases.Read = new PipelinePhase(pipeline, name, nameof(IPipeline.Read), pipeline.Read);
+                    pipelinePhases.Process = new PipelinePhase(pipeline, name, nameof(IPipeline.Process), pipeline.Process,  pipelinePhases.Read);
+                    pipelinePhases.Render = new PipelinePhase(pipeline, name, nameof(IPipeline.Render), pipeline.Render, pipelinePhases.Process);
+                    pipelinePhases.Write = new PipelinePhase(pipeline, name, nameof(IPipeline.Write), pipeline.Write, pipelinePhases.Render);
                     phases.Add(name, pipelinePhases);
                     sortedPhases.Add(pipelinePhases);
                     return pipelinePhases;
@@ -343,11 +340,11 @@ namespace Wyam.Core.Execution
 
                     // Add the phases (by this time all dependencies should have been added)
                     pipelinePhases = new PipelinePhases(false);
-                    pipelinePhases.Read = new PipelinePhase(name, nameof(IPipeline.Read), pipeline.Read);
+                    pipelinePhases.Read = new PipelinePhase(pipeline, name, nameof(IPipeline.Read), pipeline.Read);
                     processDependencies.Insert(0, pipelinePhases.Read);  // Makes sure the process phase is also dependent on it's read phase
-                    pipelinePhases.Process = new PipelinePhase(name, nameof(IPipeline.Process), pipeline.Process, processDependencies.ToArray());
-                    pipelinePhases.Render = new PipelinePhase(name, nameof(IPipeline.Render), pipeline.Render, pipelinePhases.Process);  // Render dependencies will be added after all pipelines have been processed
-                    pipelinePhases.Write = new PipelinePhase(name, nameof(IPipeline.Write), pipeline.Write, pipelinePhases.Render);
+                    pipelinePhases.Process = new PipelinePhase(pipeline, name, nameof(IPipeline.Process), pipeline.Process, processDependencies.ToArray());
+                    pipelinePhases.Render = new PipelinePhase(pipeline, name, nameof(IPipeline.Render), pipeline.Render, pipelinePhases.Process);  // Render dependencies will be added after all pipelines have been processed
+                    pipelinePhases.Write = new PipelinePhase(pipeline, name, nameof(IPipeline.Write), pipeline.Write, pipelinePhases.Render);
                     phases.Add(name, pipelinePhases);
                     sortedPhases.Add(pipelinePhases);
                 }

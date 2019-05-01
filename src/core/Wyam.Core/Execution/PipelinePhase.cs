@@ -31,13 +31,16 @@ namespace Wyam.Core.Execution
         private ConcurrentBag<IDocument> _clonedDocuments = new ConcurrentBag<IDocument>();
         private bool _disposed;
 
-        public PipelinePhase(string pipelineName, string phaseName, IList<IModule> modules, params PipelinePhase[] dependencies)
+        public PipelinePhase(IPipeline pipeline, string pipelineName, string phaseName, IList<IModule> modules, params PipelinePhase[] dependencies)
         {
+            Pipeline = pipeline;
             PipelineName = pipelineName;
             PhaseName = phaseName;
             _modules = modules ?? new List<IModule>();
             Dependencies = dependencies ?? Array.Empty<PipelinePhase>();
         }
+
+        public IPipeline Pipeline { get; }
 
         public string PipelineName { get; }
 
@@ -100,8 +103,14 @@ namespace Wyam.Core.Execution
                 }
             }
 
-            // TODO: Set context.Engine.DocumentCollection.Set(PipelineName, resultDocuments)
-            // But only if this is the Process phase
+            // Store the result documents, but only if this is the Process phase of a non-isolated pipeline
+            if (!Pipeline.Isolated && PhaseName.Equals(nameof(IPipeline.Process), StringComparison.OrdinalIgnoreCase))
+            {
+                engine.Documents.AddOrUpdate(
+                    PipelineName,
+                    OutputDocuments,
+                    (_, __) => OutputDocuments);
+            }
 
             // Dispose documents that aren't part of the final collection for this pipeline,
             // but don't dispose any documents that are referenced directly or indirectly from the final ones

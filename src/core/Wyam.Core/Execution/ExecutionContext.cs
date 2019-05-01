@@ -53,7 +53,7 @@ namespace Wyam.Core.Execution
 
         public IModule Module { get; }
 
-        public IDocumentCollection Documents => Engine.Documents;
+        public IDocumentCollection Documents { get; }
 
         public IReadOnlyFileSystem FileSystem => Engine.FileSystem;
 
@@ -73,6 +73,7 @@ namespace Wyam.Core.Execution
             ExecutionId = executionId;
             _pipelinePhase = pipelinePhase ?? throw new ArgumentNullException(nameof(pipelinePhase));
             Services = services ?? throw new ArgumentNullException(nameof(services));
+            Documents = new DocumentCollection(pipelinePhase, engine);
         }
 
         private ExecutionContext(ExecutionContext original, IModule module)

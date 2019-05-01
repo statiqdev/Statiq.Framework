@@ -3,11 +3,8 @@
 namespace Wyam.Common.Documents
 {
     /// <summary>
-    /// Contains a collection of documents output by each pipeline.
-    /// The documents are populated for each pipeline as it is
-    /// executed and will contain the most recent set of document
-    /// outputs for the most recently executed module, even if the
-    /// pipeline is not complete.
+    /// Contains a collection of documents output by the process
+    /// phase of each pipeline (except isolated ones).
     /// </summary>
     public interface IDocumentCollection : IEnumerable<IDocument>
     {

@@ -1,59 +1,94 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using Wyam.Common;
 using Wyam.Common.Documents;
+using Wyam.Common.Execution;
+using Wyam.Core.Execution;
 
 namespace Wyam.Core.Documents
 {
     internal class DocumentCollection : IDocumentCollection
     {
-        private readonly Dictionary<string, IReadOnlyList<IDocument>> _documents
-            = new Dictionary<string, IReadOnlyList<IDocument>>();
+        private readonly PipelinePhase _pipelinePhase;
+        private readonly Engine _engine;
 
-        public void Clear()
+        public DocumentCollection(PipelinePhase pipelinePhase, Engine engine)
         {
-            _documents.Clear();
+            _pipelinePhase = pipelinePhase;
+            _engine = engine;
         }
-
-        public void Set(string pipeline, IReadOnlyList<IDocument> documents)
-        {
-            _documents[pipeline] = documents;
-        }
-
-        public IReadOnlyList<IDocument> Get(string pipeline)
-        {
-            IReadOnlyList<IDocument> documents;
-            return _documents.TryGetValue(pipeline, out documents) ? documents : null;
-        }
-
-        // IDocumentCollection
 
         public IEnumerator<IDocument> GetEnumerator()
         {
-            return _documents.SelectMany(x => x.Value).Distinct().GetEnumerator();
+            Check();
+            return GetDependencies().SelectMany(x => x.Value).Distinct().GetEnumerator();
         }
 
-        IEnumerator IEnumerable.GetEnumerator()
-        {
-            return GetEnumerator();
-        }
+        IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
         public IReadOnlyDictionary<string, IEnumerable<IDocument>> ByPipeline()
         {
-            return _documents.ToDictionary(x => x.Key, x => x.Value.Distinct());
+            Check();
+            return GetDependencies().ToDictionary(x => x.Key, x => x.Value.Distinct());
         }
 
         public IEnumerable<IDocument> FromPipeline(string pipeline)
         {
-            return _documents[pipeline].Distinct();
+            Check(pipeline);
+            return _engine.Documents[pipeline].Distinct();
         }
 
         public IEnumerable<IDocument> ExceptPipeline(string pipeline)
         {
-            return _documents.Where(x => x.Key != pipeline).SelectMany(x => x.Value).Distinct();
+            Check(pipeline);
+            return GetDependencies().Where(x => x.Key != pipeline).SelectMany(x => x.Value).Distinct();
         }
 
         public IEnumerable<IDocument> this[string pipline] => FromPipeline(pipline);
+
+        // If in the process phase only get documents for dependencies
+        private IEnumerable<KeyValuePair<string, ImmutableArray<IDocument>>> GetDependencies() =>
+            _engine.Documents
+                .Where(x =>
+                    _pipelinePhase.PhaseName == nameof(IPipeline.Render)
+                    || _pipelinePhase.Dependencies.Any(d => d.PipelineName.Equals(x.Key, StringComparison.OrdinalIgnoreCase)));
+
+        private void Check(string pipeline)
+        {
+            Check();
+            if (string.IsNullOrEmpty(pipeline))
+            {
+                throw new ArgumentException(nameof(pipeline));
+            }
+            if (!_engine.Pipelines.ContainsKey(pipeline))
+            {
+                throw new KeyNotFoundException($"The pipeline {pipeline} could not be found");
+            }
+            if (_engine.Pipelines[pipeline].Isolated)
+            {
+                throw new InvalidOperationException($"Cannot access documents in isolated pipeline {pipeline}");
+            }
+            if (_pipelinePhase.PhaseName == nameof(IPipeline.Process)
+                && !_pipelinePhase.Dependencies.Any(d => d.PipelineName.Equals(pipeline, StringComparison.OrdinalIgnoreCase)))
+            {
+                throw new InvalidOperationException($"Cannot access documents from pipeline {pipeline} without a dependency while in the {nameof(IPipeline.Process)} phase");
+            }
+        }
+
+        private void Check()
+        {
+            if (_engine.Pipelines[_pipelinePhase.PipelineName].Isolated)
+            {
+                throw new InvalidOperationException($"Cannot access documents from inside isolated pipeline {_pipelinePhase.PipelineName}");
+            }
+            if (_pipelinePhase.PhaseName != nameof(IPipeline.Process) && _pipelinePhase.PhaseName != nameof(IPipeline.Render))
+            {
+                throw new InvalidOperationException($"Cannot access the document collection during the {_pipelinePhase.PhaseName} phase");
+            }
+        }
     }
 }

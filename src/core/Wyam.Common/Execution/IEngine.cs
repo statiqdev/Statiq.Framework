@@ -37,11 +37,6 @@ namespace Wyam.Common.Execution
         IShortcodeCollection Shortcodes { get; }
 
         /// <summary>
-        /// Gets the documents.
-        /// </summary>
-        IDocumentCollection Documents { get; }
-
-        /// <summary>
         /// Gets the namespaces that should be brought in scope by modules that support dynamic compilation.
         /// </summary>
         INamespacesCollection Namespaces { get; }
