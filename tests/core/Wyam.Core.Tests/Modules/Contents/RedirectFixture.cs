@@ -116,12 +116,10 @@ namespace Wyam.Core.Tests.Modules.Contents
                 { Keys.RedirectFrom, new List<FilePath> { new FilePath("foo.html") } },
                 { Keys.RelativeFilePath, new FilePath("foo2.html") }
             });
-            redirected1.AddTypeConversion<FilePath, string>(x => x.FullPath);
             TestDocument redirected2 = new TestDocument(new MetadataItems
             {
                 { Keys.RedirectFrom, new List<FilePath> { new FilePath("bar/baz.html") } }
             });
-            redirected2.AddTypeConversion<FilePath, string>(x => x.FullPath);
             IExecutionContext context = new TestExecutionContext();
             Redirect redirect = new Redirect().WithAdditionalOutput(new FilePath("a/b"), x => string.Join("|", x.Select(y => $"{y.Key} {y.Value}")));
 
@@ -142,12 +140,10 @@ namespace Wyam.Core.Tests.Modules.Contents
                 { Keys.RedirectFrom, new List<FilePath> { new FilePath("foo.html") } },
                 { Keys.RelativeFilePath, new FilePath("foo2.html") }
             });
-            redirected1.AddTypeConversion<FilePath, string>(x => x.FullPath);
             TestDocument redirected2 = new TestDocument(new MetadataItems
             {
                 { Keys.RedirectFrom, new List<FilePath> { new FilePath("bar/baz.html") } }
             });
-            redirected2.AddTypeConversion<FilePath, string>(x => x.FullPath);
             IExecutionContext context = new TestExecutionContext();
             Redirect redirect = new Redirect()
                 .WithAdditionalOutput(new FilePath("a/b"), x => string.Join("|", x.Select(y => $"{y.Key} {y.Value}")))

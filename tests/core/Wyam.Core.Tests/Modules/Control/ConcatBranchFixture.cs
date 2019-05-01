@@ -1,7 +1,9 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using NUnit.Framework;
 using Wyam.Common.Configuration;
+using Wyam.Common.Documents;
 using Wyam.Common.Execution;
 using Wyam.Common.Tracing;
 using Wyam.Core.Execution;
@@ -22,8 +24,6 @@ namespace Wyam.Core.Tests.Modules.Control
             public async Task ResultsInCorrectCountsAsync()
             {
                 // Given
-                IServiceProvider serviceProvider = new TestServiceProvider();
-                Engine engine = new Engine();
                 CountModule a = new CountModule("A")
                 {
                     AdditionalOutputs = 1
@@ -36,10 +36,9 @@ namespace Wyam.Core.Tests.Modules.Control
                 {
                     AdditionalOutputs = 3
                 };
-                engine.Pipelines.Add(a, new ConcatBranch(b), c);
 
                 // When
-                await engine.ExecuteAsync(serviceProvider);
+                IReadOnlyList<IDocument> results = await ExecuteAsync(a, new ConcatBranch(b), c);
 
                 // Then
                 Assert.AreEqual(1, a.ExecuteCount);
@@ -57,8 +56,6 @@ namespace Wyam.Core.Tests.Modules.Control
             public async Task ResultsInCorrectCountsWithPredicate()
             {
                 // Given
-                IServiceProvider serviceProvider = new TestServiceProvider();
-                Engine engine = new Engine();
                 CountModule a = new CountModule("A")
                 {
                     AdditionalOutputs = 1
@@ -71,10 +68,9 @@ namespace Wyam.Core.Tests.Modules.Control
                 {
                     AdditionalOutputs = 3
                 };
-                engine.Pipelines.Add(a, new ConcatBranch(b).Where(Config.FromDocument(x => x.Content == "1")), c);
 
                 // When
-                await engine.ExecuteAsync(serviceProvider);
+                IReadOnlyList<IDocument> results = await ExecuteAsync(a, new ConcatBranch(b).Where(Config.FromDocument(x => x.Content == "1")), c);
 
                 // Then
                 Assert.AreEqual(1, a.ExecuteCount);

@@ -34,84 +34,84 @@ namespace Wyam.App
             return pipeline;
         }
 
-        public PipelineBuilder AddRead(IEnumerable<IModule> modules)
-        {
-            _actions.Add(x => x.Read.Add(modules));
-            return this;
-        }
-
-        public PipelineBuilder AddRead(params IModule[] modules)
-        {
-            _actions.Add(x => x.Read.Add(modules));
-            return this;
-        }
-
-        public PipelineBuilder AddProcess(IEnumerable<IModule> modules)
-        {
-            _actions.Add(x => x.Process.Add(modules));
-            return this;
-        }
-
-        public PipelineBuilder AddProcess(params IModule[] modules)
-        {
-            _actions.Add(x => x.Process.Add(modules));
-            return this;
-        }
-
-        public PipelineBuilder AddRender(IEnumerable<IModule> modules)
-        {
-            _actions.Add(x => x.Render.Add(modules));
-            return this;
-        }
-
-        public PipelineBuilder AddRender(params IModule[] modules)
-        {
-            _actions.Add(x => x.Render.Add(modules));
-            return this;
-        }
-
-        public PipelineBuilder AddWrite(IEnumerable<IModule> modules)
-        {
-            _actions.Add(x => x.Write.Add(modules));
-            return this;
-        }
-
-        public PipelineBuilder AddWrite(params IModule[] modules)
-        {
-            _actions.Add(x => x.Write.Add(modules));
-            return this;
-        }
-
-        public PipelineBuilder AddDependencies(params string[] dependencies)
-        {
-            _actions.Add(x => x.Dependencies.AddRange(dependencies));
-            return this;
-        }
-
-        public PipelineBuilder AddDependencies(IEnumerable<string> dependencies)
-        {
-            _actions.Add(x => x.Dependencies.AddRange(dependencies));
-            return this;
-        }
-
         public PipelineBuilder AsSerial()
         {
             _actions.Add(x => x.Dependencies.AddRange(_collection.Keys));
             return this;
         }
 
+        // TODO: AddRead(string), AddWrite(string) to create ReadFiles/WriteFiles modules
+
+        public PipelineBuilder WithReadModules(IEnumerable<IModule> modules)
+        {
+            _actions.Add(x => x.WithReadModules(modules));
+            return this;
+        }
+
+        public PipelineBuilder WithReadModules(params IModule[] modules)
+        {
+            _actions.Add(x => x.WithReadModules(modules));
+            return this;
+        }
+
+        public PipelineBuilder WithProcessModules(IEnumerable<IModule> modules)
+        {
+            _actions.Add(x => x.WithProcessModules(modules));
+            return this;
+        }
+
+        public PipelineBuilder WithProcessModules(params IModule[] modules)
+        {
+            _actions.Add(x => x.WithProcessModules(modules));
+            return this;
+        }
+
+        public PipelineBuilder WithRenderModules(IEnumerable<IModule> modules)
+        {
+            _actions.Add(x => x.WithRenderModules(modules));
+            return this;
+        }
+
+        public PipelineBuilder WithRenderModules(params IModule[] modules)
+        {
+            _actions.Add(x => x.WithRenderModules(modules));
+            return this;
+        }
+
+        public PipelineBuilder WithWriteModules(IEnumerable<IModule> modules)
+        {
+            _actions.Add(x => x.WithWriteModules(modules));
+            return this;
+        }
+
+        public PipelineBuilder WithWriteModules(params IModule[] modules)
+        {
+            _actions.Add(x => x.WithWriteModules(modules));
+            return this;
+        }
+
+        public PipelineBuilder WithDependencies(params string[] dependencies)
+        {
+            _actions.Add(x => x.WithDependencies(dependencies));
+            return this;
+        }
+
+        public PipelineBuilder WithDependencies(IEnumerable<string> dependencies)
+        {
+            _actions.Add(x => x.WithDependencies(dependencies));
+            return this;
+        }
+
         public PipelineBuilder AsIsolated(bool isolated = true)
         {
-            _actions.Add(x => x.Isolated = isolated);
+            _actions.Add(x => x.AsIsolated(isolated));
             return this;
         }
 
         public PipelineBuilder AlwaysProcess(bool alwaysProcess = true)
         {
-            _actions.Add(x => x.AlwaysProcess = alwaysProcess);
+            _actions.Add(x => x.AlwaysProcess(alwaysProcess));
             return this;
         }
-
-        // TODO: AddRead(string), AddWrite(string)
     }
 }

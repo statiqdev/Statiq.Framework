@@ -13,13 +13,15 @@ namespace Wyam.Core.Documents
 {
     internal class DocumentCollection : IDocumentCollection
     {
+        private readonly ConcurrentDictionary<string, ImmutableArray<IDocument>> _documents;
         private readonly PipelinePhase _pipelinePhase;
-        private readonly Engine _engine;
+        private readonly IPipelineCollection _pipelines;
 
-        public DocumentCollection(PipelinePhase pipelinePhase, Engine engine)
+        public DocumentCollection(ConcurrentDictionary<string, ImmutableArray<IDocument>> documents, PipelinePhase pipelinePhase, IPipelineCollection pipelines)
         {
+            _documents = documents;
             _pipelinePhase = pipelinePhase;
-            _engine = engine;
+            _pipelines = pipelines;
         }
 
         public IEnumerator<IDocument> GetEnumerator()
@@ -39,7 +41,7 @@ namespace Wyam.Core.Documents
         public IEnumerable<IDocument> FromPipeline(string pipeline)
         {
             Check(pipeline);
-            return _engine.Documents[pipeline].Distinct();
+            return _documents[pipeline].Distinct();
         }
 
         public IEnumerable<IDocument> ExceptPipeline(string pipeline)
@@ -52,10 +54,10 @@ namespace Wyam.Core.Documents
 
         // If in the process phase only get documents for dependencies
         private IEnumerable<KeyValuePair<string, ImmutableArray<IDocument>>> GetDependencies() =>
-            _engine.Documents
+            _documents
                 .Where(x =>
-                    _pipelinePhase.PhaseName == nameof(IPipeline.Render)
-                    || _pipelinePhase.Dependencies.Any(d => d.PipelineName.Equals(x.Key, StringComparison.OrdinalIgnoreCase)));
+                    _pipelinePhase.Phase == Phase.Render
+                    || _pipelinePhase.Dependencies.Any(d => d.Name.Equals(x.Key, StringComparison.OrdinalIgnoreCase)));
 
         private void Check(string pipeline)
         {
@@ -64,30 +66,30 @@ namespace Wyam.Core.Documents
             {
                 throw new ArgumentException(nameof(pipeline));
             }
-            if (!_engine.Pipelines.ContainsKey(pipeline))
+            if (!_pipelines.ContainsKey(pipeline))
             {
                 throw new KeyNotFoundException($"The pipeline {pipeline} could not be found");
             }
-            if (_engine.Pipelines[pipeline].Isolated)
+            if (_pipelines[pipeline].Isolated)
             {
                 throw new InvalidOperationException($"Cannot access documents in isolated pipeline {pipeline}");
             }
-            if (_pipelinePhase.PhaseName == nameof(IPipeline.Process)
-                && !_pipelinePhase.Dependencies.Any(d => d.PipelineName.Equals(pipeline, StringComparison.OrdinalIgnoreCase)))
+            if (_pipelinePhase.Phase == Phase.Process
+                && !_pipelinePhase.Dependencies.Any(d => d.Name.Equals(pipeline, StringComparison.OrdinalIgnoreCase)))
             {
-                throw new InvalidOperationException($"Cannot access documents from pipeline {pipeline} without a dependency while in the {nameof(IPipeline.Process)} phase");
+                throw new InvalidOperationException($"Cannot access documents from pipeline {pipeline} without a dependency while in the {nameof(IPipeline.ProcessModules)} phase");
             }
         }
 
         private void Check()
         {
-            if (_engine.Pipelines[_pipelinePhase.PipelineName].Isolated)
+            if (_pipelines[_pipelinePhase.Name].Isolated)
             {
-                throw new InvalidOperationException($"Cannot access documents from inside isolated pipeline {_pipelinePhase.PipelineName}");
+                throw new InvalidOperationException($"Cannot access documents from inside isolated pipeline {_pipelinePhase.Name}");
             }
-            if (_pipelinePhase.PhaseName != nameof(IPipeline.Process) && _pipelinePhase.PhaseName != nameof(IPipeline.Render))
+            if (_pipelinePhase.Phase != Phase.Process && _pipelinePhase.Phase != Phase.Render)
             {
-                throw new InvalidOperationException($"Cannot access the document collection during the {_pipelinePhase.PhaseName} phase");
+                throw new InvalidOperationException($"Cannot access the document collection during the {_pipelinePhase.Phase} phase");
             }
         }
     }

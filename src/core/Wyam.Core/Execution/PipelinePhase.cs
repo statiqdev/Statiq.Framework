@@ -31,20 +31,20 @@ namespace Wyam.Core.Execution
         private ConcurrentBag<IDocument> _clonedDocuments = new ConcurrentBag<IDocument>();
         private bool _disposed;
 
-        public PipelinePhase(IPipeline pipeline, string pipelineName, string phaseName, IList<IModule> modules, params PipelinePhase[] dependencies)
+        public PipelinePhase(IPipeline pipeline, string name, Phase phase, IList<IModule> modules, params PipelinePhase[] dependencies)
         {
             Pipeline = pipeline;
-            PipelineName = pipelineName;
-            PhaseName = phaseName;
+            Name = name;
+            Phase = phase;
             _modules = modules ?? new List<IModule>();
             Dependencies = dependencies ?? Array.Empty<PipelinePhase>();
         }
 
         public IPipeline Pipeline { get; }
 
-        public string PipelineName { get; }
+        public string Name { get; }
 
-        public string PhaseName { get; }
+        public Phase Phase { get; }
 
         /// <summary>
         /// The first dependency should contain the input documents for this phase.
@@ -70,7 +70,7 @@ namespace Wyam.Core.Execution
 
             if (_modules.Count == 0)
             {
-                Trace.Information($"{PipelineName}/{PhaseName} contains no modules, skipping");
+                Trace.Information($"{Name}/{Phase} contains no modules, skipping");
                 OutputDocuments = inputDocuments;
                 return;
             }
@@ -80,7 +80,7 @@ namespace Wyam.Core.Execution
             ResetClonedDocuments();
 
             System.Diagnostics.Stopwatch pipelineStopwatch = System.Diagnostics.Stopwatch.StartNew();
-            using (Trace.WithIndent().Information($"Executing {PipelineName}/{PhaseName} with {_modules.Count} module(s)"))
+            using (Trace.WithIndent().Information($"Executing {Name}/{Phase} with {_modules.Count} module(s)"))
             {
                 try
                 {
@@ -92,22 +92,22 @@ namespace Wyam.Core.Execution
                         {
                             OutputDocuments = await Engine.ExecuteAsync(context, _modules, inputDocuments);
                             pipelineStopwatch.Stop();
-                            Trace.Information($"Executed {PipelineName}/{PhaseName} in {pipelineStopwatch.ElapsedMilliseconds} ms resulting in {OutputDocuments.Length} output document(s)");
+                            Trace.Information($"Executed {Name}/{Phase} in {pipelineStopwatch.ElapsedMilliseconds} ms resulting in {OutputDocuments.Length} output document(s)");
                         }
                     }
                 }
                 catch (Exception)
                 {
-                    Trace.Error($"Error while executing {PipelineName}/{PhaseName}");
+                    Trace.Error($"Error while executing {Name}/{Phase}");
                     throw;
                 }
             }
 
             // Store the result documents, but only if this is the Process phase of a non-isolated pipeline
-            if (!Pipeline.Isolated && PhaseName.Equals(nameof(IPipeline.Process), StringComparison.OrdinalIgnoreCase))
+            if (!Pipeline.Isolated && Phase == Phase.Process)
             {
                 engine.Documents.AddOrUpdate(
-                    PipelineName,
+                    Name,
                     OutputDocuments,
                     (_, __) => OutputDocuments);
             }

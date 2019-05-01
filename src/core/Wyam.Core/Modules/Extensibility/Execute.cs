@@ -67,7 +67,7 @@ namespace Wyam.Core.Modules.Extensibility
         }
 
         /// <inheritdoc />
-        Task<IEnumerable<IDocument>> IModule.ExecuteAsync(IReadOnlyList<IDocument> inputs, IExecutionContext context) => _execute(inputs, context);
+        public Task<IEnumerable<IDocument>> ExecuteAsync(IReadOnlyList<IDocument> inputs, IExecutionContext context) => _execute(inputs, context);
 
         protected static IEnumerable<IDocument> GetDocuments(object result) =>
             result is IDocument document ? new[] { document } : result as IEnumerable<IDocument>;

@@ -11,6 +11,7 @@ using Wyam.Testing.Modules;
 using Wyam.Common.Execution;
 using Wyam.Testing.Execution;
 using Wyam.Common.Configuration;
+using Wyam.Common.Documents;
 
 namespace Wyam.Core.Tests.Modules.Control
 {
@@ -24,8 +25,6 @@ namespace Wyam.Core.Tests.Modules.Control
             public async Task ReplacesContent()
             {
                 // Given
-                IServiceProvider serviceProvider = new TestServiceProvider();
-                Engine engine = new Engine();
                 CountModule a = new CountModule("A")
                 {
                     Value = 10
@@ -34,25 +33,21 @@ namespace Wyam.Core.Tests.Modules.Control
                 {
                     Value = 20
                 };
-                engine.Pipelines.Add(
-                    "Test",
+
+                // When
+                IReadOnlyList<IDocument> results = await ExecuteAsync(
                     a,
                     new Merge(b),
                     new Core.Modules.Metadata.Meta("Content", Config.FromDocument(doc => doc.Content)));
 
-                // When
-                await engine.ExecuteAsync(serviceProvider);
-
                 // Then
-                CollectionAssert.AreEqual(new[] { "21" }, engine.Documents["Test"].Select(x => x["Content"]));
+                CollectionAssert.AreEqual(new[] { "21" }, results.Select(x => x["Content"]));
             }
 
             [Test]
             public async Task CombinesMetadata()
             {
                 // Given
-                IServiceProvider serviceProvider = new TestServiceProvider();
-                Engine engine = new Engine();
                 CountModule a = new CountModule("A")
                 {
                     Value = 10
@@ -61,22 +56,19 @@ namespace Wyam.Core.Tests.Modules.Control
                 {
                     Value = 20
                 };
-                engine.Pipelines.Add("Test", a, new Merge(b));
 
                 // When
-                await engine.ExecuteAsync(serviceProvider);
+                IReadOnlyList<IDocument> results = await ExecuteAsync(a, new Merge(b));
 
                 // Then
-                CollectionAssert.AreEqual(new[] { 11 }, engine.Documents["Test"].Select(x => x["A"]));
-                CollectionAssert.AreEqual(new[] { 21 }, engine.Documents["Test"].Select(x => x["B"]));
+                CollectionAssert.AreEqual(new[] { 11 }, results.Select(x => x["A"]));
+                CollectionAssert.AreEqual(new[] { 21 }, results.Select(x => x["B"]));
             }
 
             [Test]
             public async Task CombinesAndOverwritesMetadata()
             {
                 // Given
-                IServiceProvider serviceProvider = new TestServiceProvider();
-                Engine engine = new Engine();
                 CountModule a = new CountModule("A")
                 {
                     Value = 10
@@ -85,21 +77,18 @@ namespace Wyam.Core.Tests.Modules.Control
                 {
                     Value = 20
                 };
-                engine.Pipelines.Add("Test", a, new Merge(b));
 
                 // When
-                await engine.ExecuteAsync(serviceProvider);
+                IReadOnlyList<IDocument> results = await ExecuteAsync(a, new Merge(b));
 
                 // Then
-                CollectionAssert.AreEqual(new[] { 21 }, engine.Documents["Test"].Select(x => x["A"]));
+                CollectionAssert.AreEqual(new[] { 21 }, results.Select(x => x["A"]));
             }
 
             [Test]
             public async Task SingleInputSingleResult()
             {
                 // Given
-                IServiceProvider serviceProvider = new TestServiceProvider();
-                Engine engine = new Engine();
                 CountModule a = new CountModule("A")
                 {
                     Value = 10
@@ -108,24 +97,21 @@ namespace Wyam.Core.Tests.Modules.Control
                 {
                     Value = 20
                 };
-                engine.Pipelines.Add("Test", a, new Merge(b));
 
                 // When
-                await engine.ExecuteAsync(serviceProvider);
+                IReadOnlyList<IDocument> results = await ExecuteAsync(a, new Merge(b));
 
                 // Then
                 Assert.AreEqual(1, a.OutputCount);
                 Assert.AreEqual(1, b.OutputCount);
-                CollectionAssert.AreEqual(new[] { 11 }, engine.Documents["Test"].Select(x => x["A"]));
-                CollectionAssert.AreEqual(new[] { 21 }, engine.Documents["Test"].Select(x => x["B"]));
+                CollectionAssert.AreEqual(new[] { 11 }, results.Select(x => x["A"]));
+                CollectionAssert.AreEqual(new[] { 21 }, results.Select(x => x["B"]));
             }
 
             [Test]
             public async Task SingleInputMultipleResults()
             {
                 // Given
-                IServiceProvider serviceProvider = new TestServiceProvider();
-                Engine engine = new Engine();
                 CountModule a = new CountModule("A")
                 {
                     Value = 10
@@ -135,24 +121,21 @@ namespace Wyam.Core.Tests.Modules.Control
                     Value = 20,
                     AdditionalOutputs = 1
                 };
-                engine.Pipelines.Add("Test", a, new Merge(b));
 
                 // When
-                await engine.ExecuteAsync(serviceProvider);
+                IReadOnlyList<IDocument> results = await ExecuteAsync(a, new Merge(b));
 
                 // Then
                 Assert.AreEqual(1, a.OutputCount);
                 Assert.AreEqual(2, b.OutputCount);
-                CollectionAssert.AreEqual(new[] { 11, 11 }, engine.Documents["Test"].Select(x => x["A"]));
-                CollectionAssert.AreEqual(new[] { 21, 22 }, engine.Documents["Test"].Select(x => x["B"]));
+                CollectionAssert.AreEqual(new[] { 11, 11 }, results.Select(x => x["A"]));
+                CollectionAssert.AreEqual(new[] { 21, 22 }, results.Select(x => x["B"]));
             }
 
             [Test]
             public async Task MultipleInputsSingleResult()
             {
                 // Given
-                IServiceProvider serviceProvider = new TestServiceProvider();
-                Engine engine = new Engine();
                 CountModule a = new CountModule("A")
                 {
                     Value = 10,
@@ -162,24 +145,21 @@ namespace Wyam.Core.Tests.Modules.Control
                 {
                     Value = 20
                 };
-                engine.Pipelines.Add("Test", a, new Merge(b));
 
                 // When
-                await engine.ExecuteAsync(serviceProvider);
+                IReadOnlyList<IDocument> results = await ExecuteAsync(a, new Merge(b));
 
                 // Then
                 Assert.AreEqual(2, a.OutputCount);
                 Assert.AreEqual(1, b.OutputCount);
-                CollectionAssert.AreEqual(new[] { 11, 12 }, engine.Documents["Test"].Select(x => x["A"]));
-                CollectionAssert.AreEqual(new[] { 21, 21 }, engine.Documents["Test"].Select(x => x["B"]));
+                CollectionAssert.AreEqual(new[] { 11, 12 }, results.Select(x => x["A"]));
+                CollectionAssert.AreEqual(new[] { 21, 21 }, results.Select(x => x["B"]));
             }
 
             [Test]
             public async Task MultipleInputsMultipleResults()
             {
                 // Given
-                IServiceProvider serviceProvider = new TestServiceProvider();
-                Engine engine = new Engine();
                 CountModule a = new CountModule("A")
                 {
                     Value = 10,
@@ -190,24 +170,21 @@ namespace Wyam.Core.Tests.Modules.Control
                     Value = 20,
                     AdditionalOutputs = 1
                 };
-                engine.Pipelines.Add("Test", a, new Merge(b));
 
                 // When
-                await engine.ExecuteAsync(serviceProvider);
+                IReadOnlyList<IDocument> results = await ExecuteAsync(a, new Merge(b));
 
                 // Then
                 Assert.AreEqual(2, a.OutputCount);
                 Assert.AreEqual(2, b.OutputCount);
-                CollectionAssert.AreEqual(new[] { 11, 11, 12, 12 }, engine.Documents["Test"].Select(x => x["A"]));
-                CollectionAssert.AreEqual(new[] { 21, 22, 21, 22 }, engine.Documents["Test"].Select(x => x["B"]));
+                CollectionAssert.AreEqual(new[] { 11, 11, 12, 12 }, results.Select(x => x["A"]));
+                CollectionAssert.AreEqual(new[] { 21, 22, 21, 22 }, results.Select(x => x["B"]));
             }
 
             [Test]
             public async Task SingleInputSingleResultForEachDocument()
             {
                 // Given
-                IServiceProvider serviceProvider = new TestServiceProvider();
-                Engine engine = new Engine();
                 CountModule a = new CountModule("A")
                 {
                     Value = 10
@@ -216,27 +193,23 @@ namespace Wyam.Core.Tests.Modules.Control
                 {
                     Value = 20
                 };
-                engine.Pipelines.Add(
-                    "Test",
+
+                // When
+                IReadOnlyList<IDocument> results = await ExecuteAsync(
                     a,
                     new Merge(b).ForEachDocument(),
                     new Core.Modules.Metadata.Meta("Content", Config.FromDocument(doc => doc.Content)));
 
-                // When
-                await engine.ExecuteAsync(serviceProvider);
-
                 // Then
                 Assert.AreEqual(1, a.OutputCount);
                 Assert.AreEqual(1, b.OutputCount);
-                CollectionAssert.AreEqual(new[] { "1121" }, engine.Documents["Test"].Select(x => x["Content"]));
+                CollectionAssert.AreEqual(new[] { "1121" }, results.Select(x => x["Content"]));
             }
 
             [Test]
             public async Task SingleInputMultipleResultsForEachDocument()
             {
                 // Given
-                IServiceProvider serviceProvider = new TestServiceProvider();
-                Engine engine = new Engine();
                 CountModule a = new CountModule("A")
                 {
                     Value = 10
@@ -246,27 +219,23 @@ namespace Wyam.Core.Tests.Modules.Control
                     Value = 20,
                     AdditionalOutputs = 1
                 };
-                engine.Pipelines.Add(
-                    "Test",
+
+                // When
+                IReadOnlyList<IDocument> results = await ExecuteAsync(
                     a,
                     new Merge(b).ForEachDocument(),
                     new Core.Modules.Metadata.Meta("Content", Config.FromDocument(doc => doc.Content)));
 
-                // When
-                await engine.ExecuteAsync(serviceProvider);
-
                 // Then
                 Assert.AreEqual(1, a.OutputCount);
                 Assert.AreEqual(2, b.OutputCount);
-                CollectionAssert.AreEqual(new[] { "1121", "1122" }, engine.Documents["Test"].Select(x => x["Content"]));
+                CollectionAssert.AreEqual(new[] { "1121", "1122" }, results.Select(x => x["Content"]));
             }
 
             [Test]
             public async Task MultipleInputsSingleResultForEachDocument()
             {
                 // Given
-                IServiceProvider serviceProvider = new TestServiceProvider();
-                Engine engine = new Engine();
                 CountModule a = new CountModule("A")
                 {
                     Value = 10,
@@ -276,27 +245,23 @@ namespace Wyam.Core.Tests.Modules.Control
                 {
                     Value = 20
                 };
-                engine.Pipelines.Add(
-                    "Test",
+
+                // When
+                IReadOnlyList<IDocument> results = await ExecuteAsync(
                     a,
                     new Merge(b).ForEachDocument(),
                     new Core.Modules.Metadata.Meta("Content", Config.FromDocument(doc => doc.Content)));
 
-                // When
-                await engine.ExecuteAsync(serviceProvider);
-
                 // Then
                 Assert.AreEqual(2, a.OutputCount);
                 Assert.AreEqual(2, b.OutputCount);
-                CollectionAssert.AreEqual(new[] { "1121", "1222" }, engine.Documents["Test"].Select(x => x["Content"]));
+                CollectionAssert.AreEqual(new[] { "1121", "1222" }, results.Select(x => x["Content"]));
             }
 
             [Test]
             public async Task MultipleInputsMultipleResultsForEachDocument()
             {
                 // Given
-                IServiceProvider serviceProvider = new TestServiceProvider();
-                Engine engine = new Engine();
                 CountModule a = new CountModule("A")
                 {
                     Value = 10,
@@ -307,19 +272,17 @@ namespace Wyam.Core.Tests.Modules.Control
                     Value = 20,
                     AdditionalOutputs = 1
                 };
-                engine.Pipelines.Add(
-                    "Test",
+
+                // When
+                IReadOnlyList<IDocument> results = await ExecuteAsync(
                     a,
                     new Merge(b).ForEachDocument(),
                     new Core.Modules.Metadata.Meta("Content", Config.FromDocument(doc => doc.Content)));
 
-                // When
-                await engine.ExecuteAsync(serviceProvider);
-
                 // Then
                 Assert.AreEqual(2, a.OutputCount);
                 Assert.AreEqual(4, b.OutputCount);
-                CollectionAssert.AreEqual(new[] { "1121", "1122", "1223", "1224" }, engine.Documents["Test"].Select(x => x["Content"]));
+                CollectionAssert.AreEqual(new[] { "1121", "1122", "1223", "1224" }, results.Select(x => x["Content"]));
             }
         }
     }

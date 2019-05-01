@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using Wyam.Common.Meta;
+using Wyam.Testing.Execution;
 
 namespace Wyam.Testing.Meta
 {
@@ -79,7 +80,8 @@ namespace Wyam.Testing.Meta
         /// <inheritdoc />
         public bool TryGetValue(string key, out object value) => TryGetValue<object>(key, out value);
 
-        public Dictionary<(Type Value, Type Result), Func<object, object>> TypeConversions { get; } = new Dictionary<(Type Value, Type Result), Func<object, object>>();
+        public Dictionary<(Type Value, Type Result), Func<object, object>> TypeConversions { get; } =
+            new Dictionary<(Type Value, Type Result), Func<object, object>>(TestExecutionContext.DefaultTypeConversions);
 
         public void AddTypeConversion<T, TResult>(Func<T, TResult> typeConversion) => TypeConversions.Add((typeof(T), typeof(TResult)), x => typeConversion((T)x));
 

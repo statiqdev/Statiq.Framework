@@ -10,12 +10,12 @@ using Microsoft.Extensions.FileSystemGlobbing.Abstractions;
 using Wyam.Common.IO;
 using Wyam.Common.Util;
 
-namespace Wyam.Core.IO.Globbing
+namespace Wyam.Common.IO.Globbing
 {
     /// <summary>
     /// Helper methods to work with globbing patterns.
     /// </summary>
-    public static class Globber
+    internal static class Globber
     {
         private static readonly Regex HasBraces = new Regex(@"\{.*\}");
         private static readonly Regex NumericSet = new Regex(@"^\{(-?[0-9]+)\.\.(-?[0-9]+)\}");
@@ -26,19 +26,9 @@ namespace Wyam.Core.IO.Globbing
         /// <param name="directory">The directory to search.</param>
         /// <param name="patterns">The globbing pattern(s) to use.</param>
         /// <returns>Files that match the globbing pattern(s).</returns>
-        public static Task<IEnumerable<IFile>> GetFilesAsync(IDirectory directory, params string[] patterns) =>
-            GetFilesAsync(directory, (IEnumerable<string>)patterns);
-
-        /// <summary>
-        /// Gets files from the specified directory using globbing patterns.
-        /// </summary>
-        /// <param name="directory">The directory to search.</param>
-        /// <param name="patterns">The globbing pattern(s) to use.</param>
-        /// <returns>Files that match the globbing pattern(s).</returns>
+        /// <remarks>Initially based on code from Reliak.FileSystemGlobbingExtensions (https://github.com/reliak/Reliak.FileSystemGlobbingExtensions).</remarks>
         public static async Task<IEnumerable<IFile>> GetFilesAsync(IDirectory directory, IEnumerable<string> patterns)
         {
-            // Initially based on code from Reliak.FileSystemGlobbingExtensions (https://github.com/reliak/Reliak.FileSystemGlobbingExtensions)
-
             Matcher matcher = new Matcher(directory.IsCaseSensitive ? StringComparison.Ordinal : StringComparison.OrdinalIgnoreCase);
 
             // Expand braces

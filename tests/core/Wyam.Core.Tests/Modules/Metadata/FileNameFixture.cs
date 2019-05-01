@@ -39,16 +39,13 @@ namespace Wyam.Core.Tests.Modules.Metadata
             public async Task FileNameIsConvertedCorrectly(string input, string output)
             {
                 // Given
-                IServiceProvider serviceProvider = new TestServiceProvider();
-                Engine engine = new Engine();
-                Pipeline pipeline = new Pipeline("Pipeline", (IModuleList)null);
-                IExecutionContext context = new ExecutionContext(engine, Guid.Empty, pipeline, serviceProvider);
+                TestExecutionContext context = new TestExecutionContext();
                 IDocument[] inputs =
                 {
                     context.GetDocument(new MetadataItems
-                {
-                    new MetadataItem(Keys.SourceFileName, input)
-                })
+                    {
+                        new MetadataItem(Keys.SourceFileName, input)
+                    })
                 };
                 FileName fileName = new FileName();
 
@@ -66,16 +63,13 @@ namespace Wyam.Core.Tests.Modules.Metadata
                 const string input = "FileName With MiXeD CapS";
                 const string output = "filename-with-mixed-caps";
 
-                IServiceProvider serviceProvider = new TestServiceProvider();
-                Engine engine = new Engine();
-                Pipeline pipeline = new Pipeline("Pipeline", (IModuleList)null);
-                IExecutionContext context = new ExecutionContext(engine, Guid.Empty, pipeline, serviceProvider);
+                TestExecutionContext context = new TestExecutionContext();
                 IDocument[] inputs =
                 {
                     context.GetDocument(new MetadataItems
-                {
-                    new MetadataItem(Keys.SourceFileName, new FilePath(input))
-                })
+                    {
+                        new MetadataItem(Keys.SourceFileName, new FilePath(input))
+                    })
                 };
                 FileName fileName = new FileName();
 
@@ -93,16 +87,13 @@ namespace Wyam.Core.Tests.Modules.Metadata
                 const string input = "this-is-a-.net-tag";
                 const string output = "this-is-a-.net-tag";
 
-                IServiceProvider serviceProvider = new TestServiceProvider();
-                Engine engine = new Engine();
-                Pipeline pipeline = new Pipeline("Pipeline", (IModuleList)null);
-                IExecutionContext context = new ExecutionContext(engine, Guid.Empty, pipeline, serviceProvider);
+                TestExecutionContext context = new TestExecutionContext();
                 IDocument[] inputs =
                 {
                     context.GetDocument(new MetadataItems
-                {
-                    new MetadataItem(Keys.SourceFileName, new FilePath(input))
-                })
+                    {
+                        new MetadataItem(Keys.SourceFileName, new FilePath(input))
+                    })
                 };
                 FileName fileName = new FileName();
 
@@ -121,16 +112,13 @@ namespace Wyam.Core.Tests.Modules.Metadata
                 const string input = "this-is-a-.";
                 const string output = "thisisa.";
 
-                IServiceProvider serviceProvider = new TestServiceProvider();
-                Engine engine = new Engine();
-                Pipeline pipeline = new Pipeline("Pipeline", (IModuleList)null);
-                IExecutionContext context = new ExecutionContext(engine, Guid.Empty, pipeline, serviceProvider);
+                TestExecutionContext context = new TestExecutionContext();
                 IDocument[] inputs =
                 {
                     context.GetDocument(new MetadataItems
-                {
-                    new MetadataItem(Keys.SourceFileName, new FilePath(input))
-                })
+                    {
+                        new MetadataItem(Keys.SourceFileName, new FilePath(input))
+                    })
                 };
                 FileName fileName = new FileName();
 
@@ -149,19 +137,16 @@ namespace Wyam.Core.Tests.Modules.Metadata
             public async Task FileNameIsConvertedCorrectlyWithReservedChar(string character)
             {
                 // Given
-                IServiceProvider serviceProvider = new TestServiceProvider();
-                Engine engine = new Engine();
-                Pipeline pipeline = new Pipeline("Pipeline", (IModuleList)null);
-                IExecutionContext context = new ExecutionContext(engine, Guid.Empty, pipeline, serviceProvider);
+                TestExecutionContext context = new TestExecutionContext();
                 string manyCharactersWow = new string(character[0], 10);
                 IDocument[] inputs =
                 {
                     context.GetDocument(new MetadataItems
-                {
-                    new MetadataItem(
-                        Keys.SourceFileName,
-                        string.Format("testing {0} some of {0} these {0}", manyCharactersWow))
-                })
+                    {
+                        new MetadataItem(
+                            Keys.SourceFileName,
+                            string.Format("testing {0} some of {0} these {0}", manyCharactersWow))
+                    })
                 };
                 FileName fileName = new FileName();
 
@@ -178,16 +163,13 @@ namespace Wyam.Core.Tests.Modules.Metadata
             public async Task IgnoresNullOrWhiteSpaceStrings(string input)
             {
                 // Given
-                IServiceProvider serviceProvider = new TestServiceProvider();
-                Engine engine = new Engine();
-                Pipeline pipeline = new Pipeline("Pipeline", (IModuleList)null);
-                IExecutionContext context = new ExecutionContext(engine, Guid.Empty, pipeline, serviceProvider);
+                TestExecutionContext context = new TestExecutionContext();
                 IDocument[] inputs =
                 {
                     context.GetDocument(new MetadataItems
-                {
-                    new MetadataItem(Keys.SourceFileName, input)
-                })
+                    {
+                        new MetadataItem(Keys.SourceFileName, input)
+                    })
                 };
                 FileName fileName = new FileName();
 
@@ -205,10 +187,7 @@ namespace Wyam.Core.Tests.Modules.Metadata
                 const string input = "myfile.html";
                 const string output = "myfile.html";
 
-                IServiceProvider serviceProvider = new TestServiceProvider();
-                Engine engine = new Engine();
-                Pipeline pipeline = new Pipeline("Pipeline", (IModuleList)null);
-                IExecutionContext context = new ExecutionContext(engine, Guid.Empty, pipeline, serviceProvider);
+                TestExecutionContext context = new TestExecutionContext();
                 IDocument[] inputs =
                 {
                     context.GetDocument(new MetadataItems
@@ -232,10 +211,7 @@ namespace Wyam.Core.Tests.Modules.Metadata
                 const string input = "   myfile.html   ";
                 const string output = "myfile.html";
 
-                IServiceProvider serviceProvider = new TestServiceProvider();
-                Engine engine = new Engine();
-                Pipeline pipeline = new Pipeline("Pipeline", (IModuleList)null);
-                IExecutionContext context = new ExecutionContext(engine, Guid.Empty, pipeline, serviceProvider);
+                TestExecutionContext context = new TestExecutionContext();
                 IDocument[] inputs =
                 {
                     context.GetDocument(new MetadataItems

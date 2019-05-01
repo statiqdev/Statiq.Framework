@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.FileSystemGlobbing.Abstractions;
 using Wyam.Common.IO;
 
-namespace Wyam.Core.IO.Globbing
+namespace Wyam.Common.IO.Globbing
 {
     internal class FileInfo : FileInfoBase
     {

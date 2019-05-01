@@ -28,10 +28,7 @@ namespace Wyam.Core.Tests.Modules.Metadata
             public async Task GetsTreeWithCommonRoot()
             {
                 // Given
-                IServiceProvider serviceProvider = new TestServiceProvider();
-                Engine engine = new Engine();
-                Pipeline pipeline = new Pipeline("Pipeline", (IModuleList)null);
-                IExecutionContext context = new ExecutionContext(engine, Guid.Empty, pipeline, serviceProvider);
+                TestExecutionContext context = new TestExecutionContext();
                 IDocument[] inputs = GetDocuments(
                     context,
                     "root/a/2.txt",
@@ -68,10 +65,7 @@ namespace Wyam.Core.Tests.Modules.Metadata
             public async Task GetsTree()
             {
                 // Given
-                IServiceProvider serviceProvider = new TestServiceProvider();
-                Engine engine = new Engine();
-                Pipeline pipeline = new Pipeline("Pipeline", (IModuleList)null);
-                IExecutionContext context = new ExecutionContext(engine, Guid.Empty, pipeline, serviceProvider);
+                TestExecutionContext context = new TestExecutionContext();
                 IDocument[] inputs = GetDocuments(
                     context,
                     "a/2.txt",
@@ -107,7 +101,7 @@ namespace Wyam.Core.Tests.Modules.Metadata
             public async Task GetsPlaceholderWithSource()
             {
                 // Given
-                IExecutionContext context = new TestExecutionContext();
+                TestExecutionContext context = new TestExecutionContext();
                 IDocument[] inputs = GetDocuments(
                     context,
                     "a/2.txt",
@@ -133,10 +127,7 @@ namespace Wyam.Core.Tests.Modules.Metadata
             public async Task CollapseRoot()
             {
                 // Given
-                IServiceProvider serviceProvider = new TestServiceProvider();
-                Engine engine = new Engine();
-                Pipeline pipeline = new Pipeline("Pipeline", (IModuleList)null);
-                IExecutionContext context = new ExecutionContext(engine, Guid.Empty, pipeline, serviceProvider);
+                TestExecutionContext context = new TestExecutionContext();
                 IDocument[] inputs = GetDocuments(
                     context,
                     "a/2.txt",
@@ -161,10 +152,7 @@ namespace Wyam.Core.Tests.Modules.Metadata
             public async Task GetsPreviousSibling()
             {
                 // Given
-                IServiceProvider serviceProvider = new TestServiceProvider();
-                Engine engine = new Engine();
-                Pipeline pipeline = new Pipeline("Pipeline", (IModuleList)null);
-                IExecutionContext context = new ExecutionContext(engine, Guid.Empty, pipeline, serviceProvider);
+                TestExecutionContext context = new TestExecutionContext();
                 IDocument[] inputs = GetDocuments(
                     context,
                     "root/a/2.txt",
@@ -186,10 +174,7 @@ namespace Wyam.Core.Tests.Modules.Metadata
             public async Task GetsNextSibling()
             {
                 // Given
-                IServiceProvider serviceProvider = new TestServiceProvider();
-                Engine engine = new Engine();
-                Pipeline pipeline = new Pipeline("Pipeline", (IModuleList)null);
-                IExecutionContext context = new ExecutionContext(engine, Guid.Empty, pipeline, serviceProvider);
+                TestExecutionContext context = new TestExecutionContext();
                 IDocument[] inputs = GetDocuments(
                     context,
                     "root/a/2.txt",
@@ -211,10 +196,7 @@ namespace Wyam.Core.Tests.Modules.Metadata
             public async Task GetsPrevious()
             {
                 // Given
-                IServiceProvider serviceProvider = new TestServiceProvider();
-                Engine engine = new Engine();
-                Pipeline pipeline = new Pipeline("Pipeline", (IModuleList)null);
-                IExecutionContext context = new ExecutionContext(engine, Guid.Empty, pipeline, serviceProvider);
+                TestExecutionContext context = new TestExecutionContext();
                 IDocument[] inputs = GetDocuments(
                     context,
                     "root/a/2.txt",
@@ -236,10 +218,7 @@ namespace Wyam.Core.Tests.Modules.Metadata
             public async Task GetsPreviousUpTree()
             {
                 // Given
-                IServiceProvider serviceProvider = new TestServiceProvider();
-                Engine engine = new Engine();
-                Pipeline pipeline = new Pipeline("Pipeline", (IModuleList)null);
-                IExecutionContext context = new ExecutionContext(engine, Guid.Empty, pipeline, serviceProvider);
+                TestExecutionContext context = new TestExecutionContext();
                 IDocument[] inputs = GetDocuments(
                     context,
                     "root/a/2.txt",
@@ -262,10 +241,7 @@ namespace Wyam.Core.Tests.Modules.Metadata
             public async Task SplitsTree()
             {
                 // Given
-                IServiceProvider serviceProvider = new TestServiceProvider();
-                Engine engine = new Engine();
-                Pipeline pipeline = new Pipeline("Pipeline", (IModuleList)null);
-                IExecutionContext context = new ExecutionContext(engine, Guid.Empty, pipeline, serviceProvider);
+                TestExecutionContext context = new TestExecutionContext();
                 IDocument[] inputs = GetDocuments(
                     context,
                     "root/a/2.txt",
@@ -298,10 +274,7 @@ namespace Wyam.Core.Tests.Modules.Metadata
             public async Task FlatTree()
             {
                 // Given
-                IServiceProvider serviceProvider = new TestServiceProvider();
-                Engine engine = new Engine();
-                Pipeline pipeline = new Pipeline("Pipeline", (IModuleList)null);
-                IExecutionContext context = new ExecutionContext(engine, Guid.Empty, pipeline, serviceProvider);
+                TestExecutionContext context = new TestExecutionContext();
                 IDocument[] inputs = GetDocuments(
                     context,
                     "root/a/b/2.txt",

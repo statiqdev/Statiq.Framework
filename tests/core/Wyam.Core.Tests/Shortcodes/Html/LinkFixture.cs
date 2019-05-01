@@ -29,8 +29,6 @@ namespace Wyam.Core.Tests.Shortcodes.Html
             {
                 // Given
                 TestExecutionContext context = new TestExecutionContext();
-                context.AddTypeConversion<string, FilePath>(x => new FilePath(x));
-                context.AddTypeConversion<string, bool>(x => bool.Parse(x));
                 TestDocument document = new TestDocument();
                 KeyValuePair<string, string>[] args = new KeyValuePair<string, string>[]
                 {
@@ -57,8 +55,6 @@ namespace Wyam.Core.Tests.Shortcodes.Html
             {
                 // Given
                 TestExecutionContext context = new TestExecutionContext();
-                context.AddTypeConversion<string, FilePath>(x => new FilePath(x));
-                context.AddTypeConversion<string, bool>(x => bool.Parse(x));
                 context.Settings[Keys.Host] = "domain.com";
                 TestDocument document = new TestDocument();
                 KeyValuePair<string, string>[] args = new KeyValuePair<string, string>[]
@@ -87,8 +83,6 @@ namespace Wyam.Core.Tests.Shortcodes.Html
             {
                 // Given
                 TestExecutionContext context = new TestExecutionContext();
-                context.AddTypeConversion<string, FilePath>(x => new FilePath(x));
-                context.AddTypeConversion<string, bool>(x => bool.Parse(x));
                 context.Settings[Keys.Host] = "domain.com";
                 TestDocument document = new TestDocument();
                 KeyValuePair<string, string>[] args = new KeyValuePair<string, string>[]

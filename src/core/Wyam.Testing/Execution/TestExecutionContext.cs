@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -79,7 +80,10 @@ namespace Wyam.Testing.Execution
         public IReadOnlyCollection<string> Namespaces { get; set; } = new List<string>();
 
         /// <inheritdoc/>
-        public IReadOnlyPipeline Pipeline { get; set; }
+        public string PipelineName { get; set; }
+
+        /// <inheritdoc/>
+        public Phase Phase { get; set; } = Phase.Process;
 
         /// <inheritdoc/>
         public IModule Module { get; set; }
@@ -94,6 +98,9 @@ namespace Wyam.Testing.Execution
         public IDocumentCollection Documents { get; set; }
 
         /// <inheritdoc/>
+        public IServiceProvider Services { get; set; } = new TestServiceProvider();
+
+        /// <inheritdoc/>
         public string ApplicationInput { get; set; }
 
         /// <inheritdoc/>
@@ -104,8 +111,6 @@ namespace Wyam.Testing.Execution
         public IShortcodeCollection Shortcodes { get; set; } = new TestShortcodeCollection();
 
         IReadOnlyShortcodeCollection IExecutionContext.Shortcodes => Shortcodes;
-
-        public IServiceProvider ServiceProvider { get; set; } = new TestServiceProvider();
 
         /// <inheritdoc/>
         public Task<Stream> GetContentStreamAsync(string content = null) =>
@@ -130,7 +135,20 @@ namespace Wyam.Testing.Execution
                 Content = new StringContent(string.Empty)
             };
 
-        public Dictionary<(Type Value, Type Result), Func<object, object>> TypeConversions { get; } = new Dictionary<(Type Value, Type Result), Func<object, object>>();
+        // Includes some initial common conversions
+        public Dictionary<(Type Value, Type Result), Func<object, object>> TypeConversions { get; } = new Dictionary<(Type Value, Type Result), Func<object, object>>(DefaultTypeConversions);
+
+        public static Dictionary<(Type Value, Type Result), Func<object, object>> DefaultTypeConversions { get; } =
+            new Dictionary<(Type Value, Type Result), Func<object, object>>
+            {
+                { (typeof(string), typeof(bool)), x => bool.Parse((string)x) },
+                { (typeof(string), typeof(FilePath)), x => new FilePath((string)x) },
+                { (typeof(FilePath), typeof(string)), x => ((FilePath)x).FullPath },
+                { (typeof(string), typeof(DirectoryPath)), x => new DirectoryPath((string)x) },
+                { (typeof(DirectoryPath), typeof(string)), x => ((DirectoryPath)x).FullPath },
+                { (typeof(string), typeof(Uri)), x => new Uri((string)x) },
+                { (typeof(Uri), typeof(string)), x => ((Uri)x).ToString() }
+            };
 
         public void AddTypeConversion<T, TResult>(Func<T, TResult> typeConversion) => TypeConversions.Add((typeof(T), typeof(TResult)), x => typeConversion((T)x));
 
@@ -156,17 +174,17 @@ namespace Wyam.Testing.Execution
         }
 
         /// <inheritdoc/>
-        public async Task<IReadOnlyList<IDocument>> ExecuteAsync(IEnumerable<IModule> modules, IEnumerable<IDocument> inputs)
+        public async Task<ImmutableArray<IDocument>> ExecuteAsync(IEnumerable<IModule> modules, IEnumerable<IDocument> inputs)
         {
             if (modules == null)
             {
-                return Array.Empty<IDocument>();
+                return ImmutableArray<IDocument>.Empty;
             }
             foreach (IModule module in modules)
             {
                 inputs = await module.ExecuteAsync(inputs.ToList(), this);
             }
-            return inputs.ToList();
+            return inputs.ToImmutableArray();
         }
 
         public async Task<IShortcodeResult> GetShortcodeResultAsync(string content, IEnumerable<KeyValuePair<string, object>> metadata = null)
@@ -232,18 +250,6 @@ namespace Wyam.Testing.Execution
                 throw new NotImplementedException();
             }
         }
-
-        // Service Provider
-
-        public object GetRequiredService(Type serviceType) => ServiceProvider.GetRequiredService(serviceType);
-
-        public T GetRequiredService<T>() => ServiceProvider.GetRequiredService<T>();
-
-        public T GetService<T>() => ServiceProvider.GetService<T>();
-
-        public IEnumerable<T> GetServices<T>() => ServiceProvider.GetServices<T>();
-
-        public IEnumerable<object> GetServices(Type serviceType) => ServiceProvider.GetServices(serviceType);
 
         // IMetadata
 

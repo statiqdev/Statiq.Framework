@@ -9,13 +9,13 @@ namespace Wyam.Common.Execution
     /// </summary>
     public interface IPipeline
     {
-        IModuleList Read { get; }
+        IModuleList ReadModules { get; }
 
-        IModuleList Process { get; }
+        IModuleList ProcessModules { get; }
 
-        IModuleList Render { get; }
+        IModuleList RenderModules { get; }
 
-        IModuleList Write { get; }
+        IModuleList WriteModules { get; }
 
         HashSet<string> Dependencies { get; }
 

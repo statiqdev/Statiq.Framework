@@ -25,25 +25,25 @@ namespace Splashdown
                 .CreateDefault(args)
                 .AddPipeline("First", builder =>
                     builder
-                        .AddRead(new ReadFiles("*.md"))
-                        .AddProcess(
+                        .WithReadModules(new ReadFiles("*.md"))
+                        .WithProcessModules(
                             new FrontMatter(new Yaml()),
                             new Markdown(),
                             new ReplaceIn("{{CONTENT}}", new ReadFiles("template.html")),
                             new Replace("{{TITLE}}", Config.FromDocument(doc => doc.Get("Title", "Default Title"))),
                             new Replace("{{DESC}}", Config.FromDocument(doc => doc.Get("Description", "Default Description"))))
-                        .AddWrite(new WriteFiles(".html"))
+                        .WithWriteModules(new WriteFiles(".html"))
                         .Build())
                 .AddPipeline("Second", builder =>
                     builder
-                        .AddRead(new ReadFiles("*.md"))
-                        .AddProcess(
+                        .WithReadModules(new ReadFiles("*.md"))
+                        .WithProcessModules(
                             new FrontMatter(new Yaml()),
                             new Markdown(),
                             new ReplaceIn("{{CONTENT}}", new ReadFiles("template.html")),
                             new Replace("{{TITLE}}", Config.FromDocument(doc => doc.Get("Title", "Default Title"))),
                             new Replace("{{DESC}}", Config.FromDocument(doc => doc.Get("Description", "Default Description"))))
-                        .AddWrite(new WriteFiles(Config.FromDocument(doc => (FilePath)$"{doc.Source.FileName}2.html")))
+                        .WithWriteModules(new WriteFiles(Config.FromDocument(doc => (FilePath)$"{doc.Source.FileName}2.html")))
                         .Build())
                 .RunAsync();
     }

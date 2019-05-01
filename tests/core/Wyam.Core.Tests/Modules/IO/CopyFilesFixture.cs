@@ -26,44 +26,6 @@ namespace Wyam.Core.Tests.Modules.IO
     [NonParallelizable]
     public class CopyFilesFixture : BaseFixture
     {
-        private Engine Engine { get; set; }
-        private Pipeline Pipeline { get; set; }
-        private IExecutionContext Context { get; set; }
-        private IDocument[] Inputs { get; set; }
-
-        [SetUp]
-        public void SetUp()
-        {
-            IServiceProvider serviceProvider = new TestServiceProvider();
-            Engine = new Engine();
-            Engine.FileSystem.FileProviders.Add(NormalizedPath.DefaultFileProvider.Scheme, GetFileProvider());
-            Engine.FileSystem.RootPath = "/";
-            Engine.FileSystem.InputPaths.Clear();
-            Engine.FileSystem.InputPaths.Add("/TestFiles/Input");
-            Pipeline = new Pipeline("Pipeline", (IModuleList)null);
-            Context = new ExecutionContext(Engine, Guid.Empty, Pipeline, serviceProvider);
-            Inputs = new[] { Context.GetDocument() };
-        }
-
-        private IFileProvider GetFileProvider()
-        {
-            TestFileProvider fileProvider = new TestFileProvider();
-
-            fileProvider.AddDirectory("/");
-            fileProvider.AddDirectory("/TestFiles");
-            fileProvider.AddDirectory("/TestFiles/Input");
-            fileProvider.AddDirectory("/TestFiles/Input/Subfolder");
-
-            fileProvider.AddFile("/TestFiles/test-above-input.txt", "test");
-            fileProvider.AddFile("/TestFiles/Input/markdown-x.md", "xxx");
-            fileProvider.AddFile("/TestFiles/Input/test-a.txt", "aaa");
-            fileProvider.AddFile("/TestFiles/Input/test-b.txt", "bbb");
-            fileProvider.AddFile("/TestFiles/Input/Subfolder/markdown-y.md", "yyy");
-            fileProvider.AddFile("/TestFiles/Input/Subfolder/test-c.txt", "ccc");
-
-            return fileProvider;
-        }
-
         public class ConstructorTests : CopyFilesFixture
         {
             [Test]
@@ -87,138 +49,146 @@ namespace Wyam.Core.Tests.Modules.IO
             public async Task RecursivePatternCopiesFiles()
             {
                 // Given
+                TestExecutionContext context = GetExecutionContext();
                 CopyFiles copyFiles = new CopyFiles("**/*.txt");
 
                 // When
-                await copyFiles.ExecuteAsync(Inputs, Context).ToListAsync();
+                await ExecuteAsync(context, copyFiles);
 
                 // Then
-                Assert.IsTrue(await (await Engine.FileSystem.GetOutputFileAsync("test-a.txt")).GetExistsAsync());
-                Assert.IsTrue(await (await Engine.FileSystem.GetOutputFileAsync("test-b.txt")).GetExistsAsync());
-                Assert.IsTrue(await (await Engine.FileSystem.GetOutputFileAsync("Subfolder/test-c.txt")).GetExistsAsync());
-                Assert.IsTrue(await (await Engine.FileSystem.GetOutputDirectoryAsync("Subfolder")).GetExistsAsync());
-                Assert.IsFalse(await (await Engine.FileSystem.GetOutputFileAsync("markdown-x.md")).GetExistsAsync());
-                Assert.IsFalse(await (await Engine.FileSystem.GetOutputFileAsync("Subfolder/markdown-y.md")).GetExistsAsync());
+                Assert.IsTrue(await (await context.FileSystem.GetOutputFileAsync("test-a.txt")).GetExistsAsync());
+                Assert.IsTrue(await (await context.FileSystem.GetOutputFileAsync("test-b.txt")).GetExistsAsync());
+                Assert.IsTrue(await (await context.FileSystem.GetOutputFileAsync("Subfolder/test-c.txt")).GetExistsAsync());
+                Assert.IsTrue(await (await context.FileSystem.GetOutputDirectoryAsync("Subfolder")).GetExistsAsync());
+                Assert.IsFalse(await (await context.FileSystem.GetOutputFileAsync("markdown-x.md")).GetExistsAsync());
+                Assert.IsFalse(await (await context.FileSystem.GetOutputFileAsync("Subfolder/markdown-y.md")).GetExistsAsync());
             }
 
             [Test]
             public async Task CopyFilesInTopDirectoryOnly()
             {
                 // Given
+                TestExecutionContext context = GetExecutionContext();
                 CopyFiles copyFiles = new CopyFiles("*.txt");
 
                 // When
-                await copyFiles.ExecuteAsync(Inputs, Context).ToListAsync();
+                await ExecuteAsync(context, copyFiles);
 
                 // Then
-                Assert.IsTrue(await (await Engine.FileSystem.GetOutputFileAsync("test-a.txt")).GetExistsAsync());
-                Assert.IsTrue(await (await Engine.FileSystem.GetOutputFileAsync("test-b.txt")).GetExistsAsync());
-                Assert.IsFalse(await (await Engine.FileSystem.GetOutputFileAsync("Subfolder/test-c.txt")).GetExistsAsync());
-                Assert.IsFalse(await (await Engine.FileSystem.GetOutputDirectoryAsync("Subfolder")).GetExistsAsync());
-                Assert.IsFalse(await (await Engine.FileSystem.GetOutputFileAsync("markdown-x.md")).GetExistsAsync());
-                Assert.IsFalse(await (await Engine.FileSystem.GetOutputFileAsync("Subfolder/markdown-y.md")).GetExistsAsync());
+                Assert.IsTrue(await (await context.FileSystem.GetOutputFileAsync("test-a.txt")).GetExistsAsync());
+                Assert.IsTrue(await (await context.FileSystem.GetOutputFileAsync("test-b.txt")).GetExistsAsync());
+                Assert.IsFalse(await (await context.FileSystem.GetOutputFileAsync("Subfolder/test-c.txt")).GetExistsAsync());
+                Assert.IsFalse(await (await context.FileSystem.GetOutputDirectoryAsync("Subfolder")).GetExistsAsync());
+                Assert.IsFalse(await (await context.FileSystem.GetOutputFileAsync("markdown-x.md")).GetExistsAsync());
+                Assert.IsFalse(await (await context.FileSystem.GetOutputFileAsync("Subfolder/markdown-y.md")).GetExistsAsync());
             }
 
             [Test]
             public async Task CopyFilesInSubfolderOnly()
             {
                 // Given
+                TestExecutionContext context = GetExecutionContext();
                 CopyFiles copyFiles = new CopyFiles("Subfolder/*.txt");
 
                 // When
-                await copyFiles.ExecuteAsync(Inputs, Context).ToListAsync();
+                await ExecuteAsync(context, copyFiles);
 
                 // Then
-                Assert.IsFalse(await (await Engine.FileSystem.GetOutputFileAsync("test-a.txt")).GetExistsAsync());
-                Assert.IsFalse(await (await Engine.FileSystem.GetOutputFileAsync("test-b.txt")).GetExistsAsync());
-                Assert.IsTrue(await (await Engine.FileSystem.GetOutputFileAsync("Subfolder/test-c.txt")).GetExistsAsync());
-                Assert.IsTrue(await (await Engine.FileSystem.GetOutputDirectoryAsync("Subfolder")).GetExistsAsync());
-                Assert.IsFalse(await (await Engine.FileSystem.GetOutputFileAsync("markdown-x.md")).GetExistsAsync());
-                Assert.IsFalse(await (await Engine.FileSystem.GetOutputFileAsync("Subfolder/markdown-y.md")).GetExistsAsync());
+                Assert.IsFalse(await (await context.FileSystem.GetOutputFileAsync("test-a.txt")).GetExistsAsync());
+                Assert.IsFalse(await (await context.FileSystem.GetOutputFileAsync("test-b.txt")).GetExistsAsync());
+                Assert.IsTrue(await (await context.FileSystem.GetOutputFileAsync("Subfolder/test-c.txt")).GetExistsAsync());
+                Assert.IsTrue(await (await context.FileSystem.GetOutputDirectoryAsync("Subfolder")).GetExistsAsync());
+                Assert.IsFalse(await (await context.FileSystem.GetOutputFileAsync("markdown-x.md")).GetExistsAsync());
+                Assert.IsFalse(await (await context.FileSystem.GetOutputFileAsync("Subfolder/markdown-y.md")).GetExistsAsync());
             }
 
             [Test]
             public async Task CopyFilesAboveInputPath()
             {
                 // Given
+                TestExecutionContext context = GetExecutionContext();
                 CopyFiles copyFiles = new CopyFiles("../*.txt");
 
                 // When
-                await copyFiles.ExecuteAsync(Inputs, Context).ToListAsync();
+                await ExecuteAsync(context, copyFiles);
 
                 // Then
-                Assert.IsFalse(await (await Engine.FileSystem.GetOutputFileAsync("test-a.txt")).GetExistsAsync());
-                Assert.IsFalse(await (await Engine.FileSystem.GetOutputFileAsync("test-b.txt")).GetExistsAsync());
-                Assert.IsFalse(await (await Engine.FileSystem.GetOutputFileAsync("Subfolder/test-c.txt")).GetExistsAsync());
-                Assert.IsFalse(await (await Engine.FileSystem.GetOutputDirectoryAsync("Subfolder")).GetExistsAsync());
-                Assert.IsFalse(await (await Engine.FileSystem.GetOutputFileAsync("markdown-x.md")).GetExistsAsync());
-                Assert.IsFalse(await (await Engine.FileSystem.GetOutputFileAsync("Subfolder/markdown-y.md")).GetExistsAsync());
-                Assert.IsTrue(await (await Engine.FileSystem.GetOutputFileAsync("test-above-input.txt")).GetExistsAsync());
+                Assert.IsFalse(await (await context.FileSystem.GetOutputFileAsync("test-a.txt")).GetExistsAsync());
+                Assert.IsFalse(await (await context.FileSystem.GetOutputFileAsync("test-b.txt")).GetExistsAsync());
+                Assert.IsFalse(await (await context.FileSystem.GetOutputFileAsync("Subfolder/test-c.txt")).GetExistsAsync());
+                Assert.IsFalse(await (await context.FileSystem.GetOutputDirectoryAsync("Subfolder")).GetExistsAsync());
+                Assert.IsFalse(await (await context.FileSystem.GetOutputFileAsync("markdown-x.md")).GetExistsAsync());
+                Assert.IsFalse(await (await context.FileSystem.GetOutputFileAsync("Subfolder/markdown-y.md")).GetExistsAsync());
+                Assert.IsTrue(await (await context.FileSystem.GetOutputFileAsync("test-above-input.txt")).GetExistsAsync());
             }
 
             [Test]
             public async Task CopyFilesAboveInputPathWithOthers()
             {
                 // Given
+                TestExecutionContext context = GetExecutionContext();
                 CopyFiles copyFiles = new CopyFiles("../**/*.txt");
 
                 // When
-                await copyFiles.ExecuteAsync(Inputs, Context).ToListAsync();
+                await ExecuteAsync(context, copyFiles);
 
                 // Then
-                Assert.IsTrue(await (await Engine.FileSystem.GetOutputFileAsync("test-a.txt")).GetExistsAsync());
-                Assert.IsTrue(await (await Engine.FileSystem.GetOutputFileAsync("test-b.txt")).GetExistsAsync());
-                Assert.IsTrue(await (await Engine.FileSystem.GetOutputFileAsync("Subfolder/test-c.txt")).GetExistsAsync());
-                Assert.IsTrue(await (await Engine.FileSystem.GetOutputDirectoryAsync("Subfolder")).GetExistsAsync());
-                Assert.IsFalse(await (await Engine.FileSystem.GetOutputFileAsync("markdown-x.md")).GetExistsAsync());
-                Assert.IsFalse(await (await Engine.FileSystem.GetOutputFileAsync("Subfolder/markdown-y.md")).GetExistsAsync());
-                Assert.IsTrue(await (await Engine.FileSystem.GetOutputFileAsync("test-above-input.txt")).GetExistsAsync());
+                Assert.IsTrue(await (await context.FileSystem.GetOutputFileAsync("test-a.txt")).GetExistsAsync());
+                Assert.IsTrue(await (await context.FileSystem.GetOutputFileAsync("test-b.txt")).GetExistsAsync());
+                Assert.IsTrue(await (await context.FileSystem.GetOutputFileAsync("Subfolder/test-c.txt")).GetExistsAsync());
+                Assert.IsTrue(await (await context.FileSystem.GetOutputDirectoryAsync("Subfolder")).GetExistsAsync());
+                Assert.IsFalse(await (await context.FileSystem.GetOutputFileAsync("markdown-x.md")).GetExistsAsync());
+                Assert.IsFalse(await (await context.FileSystem.GetOutputFileAsync("Subfolder/markdown-y.md")).GetExistsAsync());
+                Assert.IsTrue(await (await context.FileSystem.GetOutputFileAsync("test-above-input.txt")).GetExistsAsync());
             }
 
             [Test]
             public async Task CopyFolderFromAbsolutePath()
             {
                 // Given
+                TestExecutionContext context = GetExecutionContext();
                 CopyFiles copyFiles = new CopyFiles("/TestFiles/Input/**/*.txt");
 
                 // When
-                await copyFiles.ExecuteAsync(Inputs, Context).ToListAsync();
+                await ExecuteAsync(context, copyFiles);
 
                 // Then
-                Assert.IsTrue(await (await Engine.FileSystem.GetOutputFileAsync("test-a.txt")).GetExistsAsync());
-                Assert.IsTrue(await (await Engine.FileSystem.GetOutputFileAsync("test-b.txt")).GetExistsAsync());
-                Assert.IsTrue(await (await Engine.FileSystem.GetOutputFileAsync("Subfolder/test-c.txt")).GetExistsAsync());
-                Assert.IsTrue(await (await Engine.FileSystem.GetOutputDirectoryAsync("Subfolder")).GetExistsAsync());
-                Assert.IsFalse(await (await Engine.FileSystem.GetOutputFileAsync("markdown-x.md")).GetExistsAsync());
-                Assert.IsFalse(await (await Engine.FileSystem.GetOutputFileAsync("Subfolder/markdown-y.md")).GetExistsAsync());
+                Assert.IsTrue(await (await context.FileSystem.GetOutputFileAsync("test-a.txt")).GetExistsAsync());
+                Assert.IsTrue(await (await context.FileSystem.GetOutputFileAsync("test-b.txt")).GetExistsAsync());
+                Assert.IsTrue(await (await context.FileSystem.GetOutputFileAsync("Subfolder/test-c.txt")).GetExistsAsync());
+                Assert.IsTrue(await (await context.FileSystem.GetOutputDirectoryAsync("Subfolder")).GetExistsAsync());
+                Assert.IsFalse(await (await context.FileSystem.GetOutputFileAsync("markdown-x.md")).GetExistsAsync());
+                Assert.IsFalse(await (await context.FileSystem.GetOutputFileAsync("Subfolder/markdown-y.md")).GetExistsAsync());
             }
 
             [Test]
             public async Task CopyNonExistingFolder()
             {
                 // Given
+                TestExecutionContext context = GetExecutionContext();
                 CopyFiles copyFiles = new CopyFiles("NonExisting/**/*.txt");
 
                 // When
-                await copyFiles.ExecuteAsync(Inputs, Context).ToListAsync();
+                await ExecuteAsync(context, copyFiles);
 
                 // Then
-                Assert.IsFalse(await (await Engine.FileSystem.GetOutputFileAsync("test-a.txt")).GetExistsAsync());
-                Assert.IsFalse(await (await Engine.FileSystem.GetOutputFileAsync("test-b.txt")).GetExistsAsync());
-                Assert.IsFalse(await (await Engine.FileSystem.GetOutputFileAsync("Subfolder/test-c.txt")).GetExistsAsync());
-                Assert.IsFalse(await (await Engine.FileSystem.GetOutputDirectoryAsync("Subfolder")).GetExistsAsync());
-                Assert.IsFalse(await (await Engine.FileSystem.GetOutputFileAsync("markdown-x.md")).GetExistsAsync());
-                Assert.IsFalse(await (await Engine.FileSystem.GetOutputFileAsync("Subfolder/markdown-y.md")).GetExistsAsync());
+                Assert.IsFalse(await (await context.FileSystem.GetOutputFileAsync("test-a.txt")).GetExistsAsync());
+                Assert.IsFalse(await (await context.FileSystem.GetOutputFileAsync("test-b.txt")).GetExistsAsync());
+                Assert.IsFalse(await (await context.FileSystem.GetOutputFileAsync("Subfolder/test-c.txt")).GetExistsAsync());
+                Assert.IsFalse(await (await context.FileSystem.GetOutputDirectoryAsync("Subfolder")).GetExistsAsync());
+                Assert.IsFalse(await (await context.FileSystem.GetOutputFileAsync("markdown-x.md")).GetExistsAsync());
+                Assert.IsFalse(await (await context.FileSystem.GetOutputFileAsync("Subfolder/markdown-y.md")).GetExistsAsync());
             }
 
             [Test]
             public async Task ShouldSetMetadata()
             {
                 // Given
+                TestExecutionContext context = GetExecutionContext();
                 CopyFiles copyFiles = new CopyFiles("**/test-a.txt");
 
                 // When
-                await copyFiles.ExecuteAsync(Inputs, Context).ToListAsync();
+                await ExecuteAsync(context, copyFiles);
             }
 
             [TestCase(Keys.SourceFilePath, "/TestFiles/Input/test-a.txt")]
@@ -226,16 +196,47 @@ namespace Wyam.Core.Tests.Modules.IO
             public async Task ShouldSetFilePathMetadata(string key, string expected)
             {
                 // Given
+                TestExecutionContext context = GetExecutionContext();
                 CopyFiles copyFiles = new CopyFiles("**/test-a.txt");
 
                 // When
-                IDocument output = (await copyFiles.ExecuteAsync(Inputs, Context)).First();
+                IDocument output = (await ExecuteAsync(context, copyFiles)).First();
 
                 // Then
                 object result = output[key];
                 Assert.IsInstanceOf<FilePath>(result);
                 Assert.AreEqual(expected, ((FilePath)result).FullPath);
             }
+        }
+
+        protected static TestExecutionContext GetExecutionContext()
+        {
+            TestFileProvider fileProvider = new TestFileProvider();
+
+            fileProvider.AddDirectory("/");
+            fileProvider.AddDirectory("/TestFiles");
+            fileProvider.AddDirectory("/TestFiles/Input");
+            fileProvider.AddDirectory("/TestFiles/Input/Subfolder");
+
+            fileProvider.AddFile("/TestFiles/test-above-input.txt", "test");
+            fileProvider.AddFile("/TestFiles/Input/markdown-x.md", "xxx");
+            fileProvider.AddFile("/TestFiles/Input/test-a.txt", "aaa");
+            fileProvider.AddFile("/TestFiles/Input/test-b.txt", "bbb");
+            fileProvider.AddFile("/TestFiles/Input/Subfolder/markdown-y.md", "yyy");
+            fileProvider.AddFile("/TestFiles/Input/Subfolder/test-c.txt", "ccc");
+
+            TestFileSystem fileSystem = new TestFileSystem
+            {
+                FileProvider = fileProvider,
+                RootPath = "/"
+            };
+            fileSystem.InputPaths.Clear();
+            fileSystem.InputPaths.Add("/TestFiles/Input");
+
+            return new TestExecutionContext
+            {
+                FileSystem = fileSystem
+            };
         }
     }
 }

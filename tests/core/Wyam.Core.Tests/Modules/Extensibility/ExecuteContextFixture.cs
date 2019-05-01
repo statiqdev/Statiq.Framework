@@ -28,13 +28,11 @@ namespace Wyam.Core.Tests.Modules.Extensibility
             public async Task DoesNotThrowForNullResult()
             {
                 // Given
-                IServiceProvider serviceProvider = new TestServiceProvider();
-                Engine engine = new Engine();
-                Execute execute = new ExecuteContext(_ => (object)null);
-                engine.Pipelines.Add(execute);
+                TestExecutionContext context = new TestExecutionContext();
+                ExecuteContext execute = new ExecuteContext(_ => (object)null);
 
                 // When
-                await engine.ExecuteAsync(serviceProvider);
+                await execute.ExecuteAsync(Array.Empty<IDocument>(), context);
 
                 // Then
             }
@@ -43,29 +41,27 @@ namespace Wyam.Core.Tests.Modules.Extensibility
             public async Task ThrowsForObjectResult()
             {
                 // Given
-                IServiceProvider serviceProvider = new TestServiceProvider();
-                Engine engine = new Engine();
-                Execute execute = new ExecuteContext(_ => 1);
-                engine.Pipelines.Add(execute);
+                TestExecutionContext context = new TestExecutionContext();
+                ExecuteContext execute = new ExecuteContext(_ => 1);
 
                 // When, Then
-                await Should.ThrowAsync<Exception>(async () => await engine.ExecuteAsync(serviceProvider));
+                await Should.ThrowAsync<Exception>(async () => await execute.ExecuteAsync(Array.Empty<IDocument>(), context));
             }
 
             [Test]
             public async Task ReturnsInputsForNullResult()
             {
                 // Given
-                IExecutionContext context = new TestExecutionContext();
+                TestExecutionContext context = new TestExecutionContext();
                 IDocument[] inputs =
                 {
                     new TestDocument(),
                     new TestDocument()
                 };
-                Execute execute = new ExecuteContext(_ => (object)null);
+                ExecuteContext execute = new ExecuteContext(_ => (object)null);
 
                 // When
-                IEnumerable<IDocument> outputs = await ((IModule)execute).ExecuteAsync(inputs, context).ToListAsync();
+                IEnumerable<IDocument> outputs = await execute.ExecuteAsync(inputs, context).ToListAsync();
 
                 // Then
                 CollectionAssert.AreEqual(inputs, outputs);
@@ -75,14 +71,12 @@ namespace Wyam.Core.Tests.Modules.Extensibility
             public async Task DoesNotRequireReturnValue()
             {
                 // Given
-                IServiceProvider serviceProvider = new TestServiceProvider();
+                TestExecutionContext context = new TestExecutionContext();
                 int a = 0;
-                Engine engine = new Engine();
-                Execute execute = new ExecuteContext(c => { a = a + 1; });
-                engine.Pipelines.Add(execute);
+                ExecuteContext execute = new ExecuteContext(c => { a = a + 1; });
 
                 // When
-                await engine.ExecuteAsync(serviceProvider);
+                await execute.ExecuteAsync(Array.Empty<IDocument>(), context);
 
                 // Then
             }
@@ -91,17 +85,15 @@ namespace Wyam.Core.Tests.Modules.Extensibility
             public async Task ReturnsDocumentForSingleResultDocument()
             {
                 // Given
-                IServiceProvider serviceProvider = new TestServiceProvider();
-                Engine engine = new Engine();
+                TestExecutionContext context = new TestExecutionContext();
                 TestDocument document = new TestDocument();
-                Execute execute = new ExecuteContext(_ => document);
-                engine.Pipelines.Add("Test", execute);
+                ExecuteContext execute = new ExecuteContext(_ => document);
 
                 // When
-                await engine.ExecuteAsync(serviceProvider);
+                IEnumerable<IDocument> result = await execute.ExecuteAsync(Array.Empty<IDocument>(), context);
 
                 // Then
-                CollectionAssert.AreEquivalent(new[] { document }, engine.Documents["Test"]);
+                CollectionAssert.AreEquivalent(new[] { document }, result.Single());
             }
 
             [Test]
@@ -115,14 +107,14 @@ namespace Wyam.Core.Tests.Modules.Extensibility
                     new TestDocument()
                 };
                 int count = 0;
-                Execute execute = new ExecuteContext(c =>
+                ExecuteContext execute = new ExecuteContext(c =>
                 {
                     count++;
                     return (object)null;
                 });
 
                 // When
-                await ((IModule)execute).ExecuteAsync(inputs, context).ToListAsync();
+                await execute.ExecuteAsync(inputs, context).ToListAsync();
 
                 // Then
                 count.ShouldBe(1);

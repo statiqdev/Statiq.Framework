@@ -16,21 +16,6 @@ namespace Wyam.Core.Tests.Execution
     {
         public class AddTests : PipelineCollectionFixture
         {
-            [TestCase(null)]
-            [TestCase("")]
-            public void AutoGeneratesNameForNullOrEmpty(string name)
-            {
-                // Given
-                PipelineCollection pipelines = new PipelineCollection();
-                pipelines.Add("First");
-
-                // When
-                pipelines.Add(name);
-
-                // Then
-                Assert.AreEqual("Pipeline 2", pipelines.Values.Skip(1).First().Name);
-            }
-
             [Test]
             public void ThrowsForDuplicateName()
             {

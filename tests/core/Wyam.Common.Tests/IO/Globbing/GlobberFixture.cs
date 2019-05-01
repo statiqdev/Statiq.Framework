@@ -7,12 +7,12 @@ using System.Threading.Tasks;
 using NUnit.Framework;
 using Shouldly;
 using Wyam.Common.IO;
-using Wyam.Core.IO.Globbing;
+using Wyam.Common.IO.Globbing;
 using Wyam.Testing;
 using Wyam.Testing.Attributes;
 using Wyam.Testing.IO;
 
-namespace Wyam.Core.Tests.IO.Globbing
+namespace Wyam.Common.Tests.IO.Globbing
 {
     [TestFixture]
     [Parallelizable(ParallelScope.Self | ParallelScope.Children)]
@@ -76,7 +76,7 @@ namespace Wyam.Core.Tests.IO.Globbing
                 IDirectory directory = await fileProvider.GetDirectoryAsync("/");
 
                 // When
-                IEnumerable<IFile> matches = await Globber.GetFilesAsync(directory, "root/{a,}/**/x.txt");
+                IEnumerable<IFile> matches = await Globber.GetFilesAsync(directory, new[] { "root/{a,}/**/x.txt" });
 
                 // Then
                 matches.Select(x => x.Path.FullPath).ShouldBe(
@@ -100,7 +100,7 @@ namespace Wyam.Core.Tests.IO.Globbing
                 IDirectory directory = await fileProvider.GetDirectoryAsync("/");
 
                 // When
-                IEnumerable<IFile> matches = await Globber.GetFilesAsync(directory, "root/**/*.txt");
+                IEnumerable<IFile> matches = await Globber.GetFilesAsync(directory, new[] { "root/**/*.txt" });
 
                 // Then
                 matches.Select(x => x.Path.FullPath).ShouldBe(
@@ -150,7 +150,7 @@ namespace Wyam.Core.Tests.IO.Globbing
                 IDirectory directory = await fileProvider.GetDirectoryAsync("/a");
 
                 // When
-                IEnumerable<IFile> matches = await Globber.GetFilesAsync(directory, "**/*.txt");
+                IEnumerable<IFile> matches = await Globber.GetFilesAsync(directory, new[] { "**/*.txt" });
 
                 // Then
                 CollectionAssert.AreEquivalent(new[] { "/a/b/c/x.txt", "/a/bar/foo/y.txt" }, matches.Select(x => x.Path.FullPath));
@@ -166,7 +166,7 @@ namespace Wyam.Core.Tests.IO.Globbing
                 IDirectory directory = await fileProvider.GetDirectoryAsync("/a");
 
                 // When, Then
-                await Should.ThrowAsync<ArgumentException>(async () => await Globber.GetFilesAsync(directory, pattern));
+                await Should.ThrowAsync<ArgumentException>(async () => await Globber.GetFilesAsync(directory, new[] { pattern }));
             }
         }
 

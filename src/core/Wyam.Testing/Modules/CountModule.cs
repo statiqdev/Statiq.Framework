@@ -28,6 +28,13 @@ namespace Wyam.Testing.Modules
             int sourceCount = 0;
             ExecuteCount++;
             List<IDocument> results = new List<IDocument>();
+
+            // Add an initial document if there isn't already one (to support legacy tests designed before empty initial input sets were used)
+            if (inputs.Count == 0)
+            {
+                inputs = new[] { context.GetDocument() };
+            }
+
             foreach (IDocument input in inputs)
             {
                 InputCount++;

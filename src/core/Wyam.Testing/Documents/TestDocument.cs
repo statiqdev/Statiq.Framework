@@ -67,6 +67,10 @@ namespace Wyam.Testing.Documents
             Stream = stream;
         }
 
+        public void Add(KeyValuePair<string, object> item) => _metadata.Add(item);
+
+        public void Add(string key, object value) => _metadata.Add(key, value);
+
         /// <inhertdoc />
         public IMetadata WithoutSettings => this;
 

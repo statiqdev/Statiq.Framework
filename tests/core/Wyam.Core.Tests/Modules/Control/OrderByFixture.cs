@@ -26,8 +26,6 @@ namespace Wyam.Core.Tests.Modules.Control
             {
                 // Given
                 List<string> content = new List<string>();
-                IServiceProvider serviceProvider = new TestServiceProvider();
-                Engine engine = new Engine();
                 CountModule count = new CountModule("A")
                 {
                     AdditionalOutputs = 4
@@ -44,10 +42,9 @@ namespace Wyam.Core.Tests.Modules.Control
                         content.Add(d.Content);
                         return (IDocument)null;
                     }), false);
-                engine.Pipelines.Add(count, concat, orderBy, gatherData);
 
                 // When
-                await engine.ExecuteAsync(serviceProvider);
+                await ExecuteAsync(count, concat, orderBy, gatherData);
 
                 // Then
                 Assert.AreEqual(8, content.Count);
@@ -59,8 +56,6 @@ namespace Wyam.Core.Tests.Modules.Control
             {
                 // Given
                 List<string> content = new List<string>();
-                IServiceProvider serviceProvider = new TestServiceProvider();
-                Engine engine = new Engine();
                 CountModule count = new CountModule("A")
                 {
                     AdditionalOutputs = 4
@@ -77,10 +72,9 @@ namespace Wyam.Core.Tests.Modules.Control
                         content.Add(d.Content);
                         return (IDocument)null;
                     }), false);
-                engine.Pipelines.Add(count, concat, orderBy, gatherData);
 
                 // When
-                await engine.ExecuteAsync(serviceProvider);
+                await ExecuteAsync(count, concat, orderBy, gatherData);
 
                 // Then
                 Assert.AreEqual(8, content.Count);
@@ -92,8 +86,6 @@ namespace Wyam.Core.Tests.Modules.Control
             {
                 // Given
                 List<string> content = new List<string>();
-                IServiceProvider serviceProvider = new TestServiceProvider();
-                Engine engine = new Engine();
                 CountModule count = new CountModule("A")
                 {
                     AdditionalOutputs = 4
@@ -110,10 +102,9 @@ namespace Wyam.Core.Tests.Modules.Control
                         content.Add(d.Content);
                         return (IDocument)null;
                     }), false);
-                engine.Pipelines.Add(count, count2, orderBy, gatherData);
 
                 // When
-                await engine.ExecuteAsync(serviceProvider);
+                await ExecuteAsync(count, count2, orderBy, gatherData);
 
                 // Then
                 Assert.AreEqual(10, content.Count); // (4+1) * (21+1)
@@ -125,8 +116,6 @@ namespace Wyam.Core.Tests.Modules.Control
             {
                 // Given
                 List<string> content = new List<string>();
-                IServiceProvider serviceProvider = new TestServiceProvider();
-                Engine engine = new Engine();
                 CountModule count = new CountModule("A")
                 {
                     AdditionalOutputs = 4
@@ -144,10 +133,9 @@ namespace Wyam.Core.Tests.Modules.Control
                         content.Add(d.Content);
                         return (IDocument)null;
                     }), false);
-                engine.Pipelines.Add(count, count2, orderBy, gatherData);
 
                 // When
-                await engine.ExecuteAsync(serviceProvider);
+                await ExecuteAsync(count, count2, orderBy, gatherData);
 
                 // Then
                 Assert.AreEqual(10, content.Count); // (4+1) * (21+1)
@@ -159,8 +147,6 @@ namespace Wyam.Core.Tests.Modules.Control
             {
                 // Given
                 List<string> content = new List<string>();
-                IServiceProvider serviceProvider = new TestServiceProvider();
-                Engine engine = new Engine();
                 CountModule count = new CountModule("A")
                 {
                     AdditionalOutputs = 4
@@ -179,10 +165,9 @@ namespace Wyam.Core.Tests.Modules.Control
                         content.Add(d.Content);
                         return (IDocument)null;
                     }), false);
-                engine.Pipelines.Add(count, count2, orderBy, gatherData);
 
                 // When
-                await engine.ExecuteAsync(serviceProvider);
+                await ExecuteAsync(count, count2, orderBy, gatherData);
 
                 // Then
                 Assert.AreEqual(10, content.Count); // (4+1) * (21+1)
@@ -194,8 +179,6 @@ namespace Wyam.Core.Tests.Modules.Control
             {
                 // Given
                 List<string> content = new List<string>();
-                IServiceProvider serviceProvider = new TestServiceProvider();
-                Engine engine = new Engine();
                 CountModule count = new CountModule("A")
                 {
                     AdditionalOutputs = 4
@@ -213,10 +196,9 @@ namespace Wyam.Core.Tests.Modules.Control
                         content.Add(d.Content);
                         return (IDocument)null;
                     }), false);
-                engine.Pipelines.Add(count, count2, orderBy, gatherData);
 
                 // When
-                await engine.ExecuteAsync(serviceProvider);
+                await ExecuteAsync(count, count2, orderBy, gatherData);
 
                 // Then
                 Assert.AreEqual(10, content.Count); // (4+1) * (21+1)

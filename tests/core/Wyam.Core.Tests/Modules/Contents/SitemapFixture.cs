@@ -8,6 +8,7 @@ using NUnit.Framework;
 using Wyam.Common.Configuration;
 using Wyam.Common.Documents;
 using Wyam.Common.Execution;
+using Wyam.Common.IO;
 using Wyam.Common.Meta;
 using Wyam.Common.Modules;
 using Wyam.Common.Modules.Contents;
@@ -18,6 +19,7 @@ using Wyam.Core.Execution;
 using Wyam.Core.Modules.Contents;
 using Wyam.Core.Modules.Metadata;
 using Wyam.Testing;
+using Wyam.Testing.Documents;
 using Wyam.Testing.Execution;
 using ExecutionContext = Wyam.Core.Execution.ExecutionContext;
 
@@ -35,25 +37,21 @@ namespace Wyam.Core.Tests.Modules.Contents
             public async Task SitemapGeneratedWithSitemapItem(string hostname, string formatterString, string expected)
             {
                 // Given
-                IServiceProvider serviceProvider = new TestServiceProvider();
-                Engine engine = new Engine();
+                TestExecutionContext context = new TestExecutionContext();
                 if (!string.IsNullOrWhiteSpace(hostname))
                 {
-                    engine.Settings[Keys.Host] = hostname;
+                    context.Settings[Keys.Host] = hostname;
                 }
-                Pipeline contentPipeline = new Pipeline("Content", (IModuleList)null);
-                IExecutionContext context = new ExecutionContext(engine, Guid.Empty, contentPipeline, serviceProvider);
 
-                IDocument doc = await context.GetDocumentAsync("Test", new[]
+                TestDocument doc = new TestDocument("Test")
                 {
-                    new KeyValuePair<string, object>(Keys.RelativeFilePath, "sub/testfile.html")
-                });
+                    { Keys.RelativeFilePath, "sub/testfile.html" }
+                };
                 IDocument[] inputs = { doc };
 
                 Core.Modules.Metadata.Meta m = new Core.Modules.Metadata.Meta(
                     Keys.SitemapItem,
                     Config.FromDocument(d => new SitemapItem(d[Keys.RelativeFilePath].ToString())));
-                IEnumerable<IDocument> outputs = await m.ExecuteAsync(inputs, context);
 
                 Func<string, string> formatter = null;
 
@@ -62,14 +60,10 @@ namespace Wyam.Core.Tests.Modules.Contents
                     formatter = f => string.Format(formatterString, f);
                 }
 
-                // When
                 Sitemap sitemap = new Sitemap(formatter);
-                List<IDocument> results = await sitemap.ExecuteAsync(outputs.ToList(), context).ToListAsync();
 
-                foreach (IDocument document in inputs.Concat(outputs.ToList()))
-                {
-                    ((IDisposable)document).Dispose();
-                }
+                // When
+                IReadOnlyList<IDocument> results = await ExecuteAsync(inputs, context, m, sitemap);
 
                 // Then
                 Assert.AreEqual(1, results.Count);
@@ -82,25 +76,21 @@ namespace Wyam.Core.Tests.Modules.Contents
             public async Task SitemapGeneratedWithSitemapItemAsString(string hostname, string formatterString, string expected)
             {
                 // Given
-                IServiceProvider serviceProvider = new TestServiceProvider();
-                Engine engine = new Engine();
+                TestExecutionContext context = new TestExecutionContext();
                 if (!string.IsNullOrWhiteSpace(hostname))
                 {
-                    engine.Settings[Keys.Host] = hostname;
+                    context.Settings[Keys.Host] = hostname;
                 }
-                Pipeline contentPipeline = new Pipeline("Content", (IModuleList)null);
-                IExecutionContext context = new ExecutionContext(engine, Guid.Empty, contentPipeline, serviceProvider);
 
-                IDocument doc = await context.GetDocumentAsync("Test", new[]
+                TestDocument doc = new TestDocument("Test")
                 {
-                    new KeyValuePair<string, object>(Keys.RelativeFilePath, "sub/testfile.html")
-                });
+                    { Keys.RelativeFilePath, "sub/testfile.html" }
+                };
                 IDocument[] inputs = { doc };
 
                 Core.Modules.Metadata.Meta m = new Core.Modules.Metadata.Meta(
                     Keys.SitemapItem,
                     Config.FromDocument(d => d[Keys.RelativeFilePath].ToString()));
-                IEnumerable<IDocument> outputs = await m.ExecuteAsync(inputs, context);
 
                 Func<string, string> formatter = null;
 
@@ -109,14 +99,10 @@ namespace Wyam.Core.Tests.Modules.Contents
                     formatter = f => string.Format(formatterString, f);
                 }
 
-                // When
                 Sitemap sitemap = new Sitemap(formatter);
-                List<IDocument> results = await sitemap.ExecuteAsync(outputs.ToList(), context).ToListAsync();
 
-                foreach (IDocument document in inputs.Concat(outputs.ToList()))
-                {
-                    ((IDisposable)document).Dispose();
-                }
+                // When
+                IReadOnlyList<IDocument> results = await ExecuteAsync(inputs, context, m, sitemap);
 
                 // Then
                 Assert.AreEqual(1, results.Count);
@@ -129,19 +115,16 @@ namespace Wyam.Core.Tests.Modules.Contents
             public async Task SitemapGeneratedWhenNoSitemapItem(string hostname, string formatterString, string expected)
             {
                 // Given
-                IServiceProvider serviceProvider = new TestServiceProvider();
-                Engine engine = new Engine();
+                TestExecutionContext context = new TestExecutionContext();
                 if (!string.IsNullOrWhiteSpace(hostname))
                 {
-                    engine.Settings[Keys.Host] = hostname;
+                    context.Settings[Keys.Host] = hostname;
                 }
-                Pipeline contentPipeline = new Pipeline("Content", (IModuleList)null);
-                IExecutionContext context = new ExecutionContext(engine, Guid.Empty, contentPipeline, serviceProvider);
 
-                IDocument doc = await context.GetDocumentAsync("Test", new[]
+                TestDocument doc = new TestDocument("Test")
                 {
-                    new KeyValuePair<string, object>(Keys.RelativeFilePath, "sub/testfile.html")
-                });
+                    { Keys.RelativeFilePath, "sub/testfile.html" }
+                };
                 IDocument[] inputs = { doc };
 
                 Func<string, string> formatter = null;
@@ -151,14 +134,10 @@ namespace Wyam.Core.Tests.Modules.Contents
                     formatter = f => string.Format(formatterString, f);
                 }
 
-                // When
                 Sitemap sitemap = new Sitemap(formatter);
-                List<IDocument> results = await sitemap.ExecuteAsync(inputs.ToList(), context).ToListAsync();
 
-                foreach (IDocument document in inputs)
-                {
-                    document.Dispose();
-                }
+                // When
+                IReadOnlyList<IDocument> results = await ExecuteAsync(inputs, context, sitemap);
 
                 // Then
                 Assert.AreEqual(1, results.Count);

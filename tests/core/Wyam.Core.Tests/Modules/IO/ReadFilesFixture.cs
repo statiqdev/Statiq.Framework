@@ -25,45 +25,6 @@ namespace Wyam.Core.Tests.Modules.IO
     [NonParallelizable]
     public class ReadFilesFixture : BaseFixture
     {
-        private Engine Engine { get; set; }
-        private Pipeline Pipeline { get; set; }
-        private IExecutionContext Context { get; set; }
-        private IDocument[] Inputs { get; set; }
-
-        [SetUp]
-        public void SetUp()
-        {
-            IServiceProvider serviceProvider = new TestServiceProvider();
-            Engine = new Engine();
-            Engine.FileSystem.FileProviders.Add(NormalizedPath.DefaultFileProvider.Scheme, GetFileProvider());
-            Engine.FileSystem.RootPath = "/";
-            Engine.FileSystem.InputPaths.Clear();
-            Engine.FileSystem.InputPaths.Add("/TestFiles/Input");
-            Pipeline = new Pipeline("Pipeline", (IModuleList)null);
-            Context = new ExecutionContext(Engine, Guid.Empty, Pipeline, serviceProvider);
-            Inputs = new[] { Context.GetDocument() };
-        }
-
-        private IFileProvider GetFileProvider()
-        {
-            TestFileProvider fileProvider = new TestFileProvider();
-
-            fileProvider.AddDirectory("/");
-            fileProvider.AddDirectory("/TestFiles");
-            fileProvider.AddDirectory("/TestFiles/Input");
-            fileProvider.AddDirectory("/TestFiles/Input/Subfolder");
-
-            fileProvider.AddFile("/TestFiles/test-above-input.txt", "test");
-            fileProvider.AddFile("/TestFiles/Input/markdown-x.md", "xxx");
-            fileProvider.AddFile("/TestFiles/Input/test-a.txt", "aaa");
-            fileProvider.AddFile("/TestFiles/Input/test-b.txt", "bbb");
-            fileProvider.AddFile("/TestFiles/Input/Subfolder/markdown-y.md", "yyy");
-            fileProvider.AddFile("/TestFiles/Input/Subfolder/test-c.txt", "ccc");
-            fileProvider.AddFile("/TestFiles/Input/.dotfile", "dotfile");
-
-            return fileProvider;
-        }
-
         public class ConstructorTests : ReadFilesFixture
         {
             [Test]
@@ -77,7 +38,7 @@ namespace Wyam.Core.Tests.Modules.IO
             public void ThrowsOnNullPatterns()
             {
                 // Given, When, Then
-                Assert.Throws<ArgumentNullException>(() => new ReadFiles((string[])null));
+                Assert.Throws<ArgumentNullException>(() => new ReadFiles(null));
             }
         }
 
@@ -94,23 +55,25 @@ namespace Wyam.Core.Tests.Modules.IO
             public async Task PatternFindsCorrectFiles(string pattern, int expectedCount)
             {
                 // Given
+                TestExecutionContext context = GetExecutionContext();
                 ReadFiles readFiles = new ReadFiles(pattern);
 
                 // When
-                IEnumerable<IDocument> documents = await readFiles.ExecuteAsync(Inputs, Context).ToListAsync();
+                IReadOnlyList<IDocument> documents = await ExecuteAsync(context, readFiles);
 
                 // Then
-                Assert.AreEqual(expectedCount, documents.Count());
+                Assert.AreEqual(expectedCount, documents.Count);
             }
 
             [Test]
             public async Task PatternWorksWithSubpath()
             {
                 // Given
+                TestExecutionContext context = GetExecutionContext();
                 ReadFiles readFiles = new ReadFiles("Subfolder/*.txt");
 
                 // When
-                IEnumerable<IDocument> documents = await readFiles.ExecuteAsync(Inputs, Context).ToListAsync();
+                IReadOnlyList<IDocument> documents = await ExecuteAsync(context, readFiles);
 
                 // Then
                 Assert.AreEqual(1, documents.Count());
@@ -120,10 +83,11 @@ namespace Wyam.Core.Tests.Modules.IO
             public async Task PatternWorksWithSingleFile()
             {
                 // Given
+                TestExecutionContext context = GetExecutionContext();
                 ReadFiles readFiles = new ReadFiles("test-a.txt");
 
                 // When
-                IEnumerable<IDocument> documents = await readFiles.ExecuteAsync(Inputs, Context).ToListAsync();
+                IReadOnlyList<IDocument> documents = await ExecuteAsync(context, readFiles);
 
                 // Then
                 Assert.AreEqual(1, documents.Count());
@@ -133,10 +97,11 @@ namespace Wyam.Core.Tests.Modules.IO
             public async Task ShouldReturnNullBasePathsForDotFiles()
             {
                 // Given
+                TestExecutionContext context = GetExecutionContext();
                 ReadFiles readFiles = new ReadFiles(".dotfile");
 
                 // When
-                IDocument document = (await readFiles.ExecuteAsync(Inputs, Context)).First();
+                IDocument document = (await ExecuteAsync(context, readFiles))[0];
 
                 // Then
                 Assert.IsNull(document[Keys.SourceFileBase]);
@@ -148,10 +113,11 @@ namespace Wyam.Core.Tests.Modules.IO
             public async Task GetsCorrectContent()
             {
                 // Given
+                TestExecutionContext context = GetExecutionContext();
                 ReadFiles readFiles = new ReadFiles("test-a.txt");
 
                 // When
-                IDocument document = (await readFiles.ExecuteAsync(Inputs, Context)).First();
+                IDocument document = (await ExecuteAsync(context, readFiles))[0];
 
                 // Then
                 Assert.AreEqual("aaa", document.Content);
@@ -166,10 +132,11 @@ namespace Wyam.Core.Tests.Modules.IO
             public async Task ShouldSetFilePathMetadata(string key, string expected)
             {
                 // Given
+                TestExecutionContext context = GetExecutionContext();
                 ReadFiles readFiles = new ReadFiles("**/test-c.txt");
 
                 // When
-                IDocument output = (await readFiles.ExecuteAsync(Inputs, Context)).First();
+                IDocument output = (await ExecuteAsync(context, readFiles))[0];
 
                 // Then
                 object result = output[key];
@@ -183,10 +150,11 @@ namespace Wyam.Core.Tests.Modules.IO
             public async Task ShouldSetDirectoryPathMetadata(string key, string expected)
             {
                 // Given
+                TestExecutionContext context = GetExecutionContext();
                 ReadFiles readFiles = new ReadFiles("**/test-c.txt");
 
                 // When
-                IDocument output = (await readFiles.ExecuteAsync(Inputs, Context)).First();
+                IDocument output = (await ExecuteAsync(context, readFiles))[0];
 
                 // Then
                 object result = output[key];
@@ -198,10 +166,11 @@ namespace Wyam.Core.Tests.Modules.IO
             public async Task ShouldSetStringMetadata(string key, string expected)
             {
                 // Given
+                TestExecutionContext context = GetExecutionContext();
                 ReadFiles readFiles = new ReadFiles("**/test-c.txt");
 
                 // When
-                IDocument output = (await readFiles.ExecuteAsync(Inputs, Context)).First();
+                IDocument output = (await ExecuteAsync(context, readFiles))[0];
 
                 // Then
                 object result = output[key];
@@ -213,27 +182,60 @@ namespace Wyam.Core.Tests.Modules.IO
             public async Task WorksWithMultipleExtensions()
             {
                 // Given
+                TestExecutionContext context = GetExecutionContext();
                 ReadFiles readFiles = new ReadFiles("**/*.{txt,md}");
 
                 // When
-                IEnumerable<IDocument> documents = await readFiles.ExecuteAsync(Inputs, Context).ToListAsync();
+                IReadOnlyList<IDocument> documents = await ExecuteAsync(context, readFiles);
 
                 // Then
-                Assert.AreEqual(5, documents.Count());
+                Assert.AreEqual(5, documents.Count);
             }
 
             [Test]
             public async Task PredicateShouldReturnMatchingFiles()
             {
                 // Given
+                TestExecutionContext context = GetExecutionContext();
                 ReadFiles readFiles = new ReadFiles("**/*").Where(x => Task.FromResult(x.Path.FullPath.Contains("test")));
 
                 // When
-                IEnumerable<IDocument> documents = await readFiles.ExecuteAsync(Inputs, Context).ToListAsync();
+                IReadOnlyList<IDocument> documents = await ExecuteAsync(context, readFiles);
 
                 // Then
-                Assert.AreEqual(3, documents.Count());
+                Assert.AreEqual(3, documents.Count);
             }
+        }
+
+        protected static TestExecutionContext GetExecutionContext()
+        {
+            TestFileProvider fileProvider = new TestFileProvider();
+
+            fileProvider.AddDirectory("/");
+            fileProvider.AddDirectory("/TestFiles");
+            fileProvider.AddDirectory("/TestFiles/Input");
+            fileProvider.AddDirectory("/TestFiles/Input/Subfolder");
+
+            fileProvider.AddFile("/TestFiles/test-above-input.txt", "test");
+            fileProvider.AddFile("/TestFiles/Input/markdown-x.md", "xxx");
+            fileProvider.AddFile("/TestFiles/Input/test-a.txt", "aaa");
+            fileProvider.AddFile("/TestFiles/Input/test-b.txt", "bbb");
+            fileProvider.AddFile("/TestFiles/Input/Subfolder/markdown-y.md", "yyy");
+            fileProvider.AddFile("/TestFiles/Input/Subfolder/test-c.txt", "ccc");
+            fileProvider.AddFile("/TestFiles/Input/.dotfile", "dotfile");
+
+            TestFileSystem fileSystem = new TestFileSystem
+            {
+                FileProvider = fileProvider,
+                RootPath = "/"
+            };
+            fileSystem.InputPaths.Clear();
+            fileSystem.InputPaths.Add("/TestFiles/Input");
+
+            return new TestExecutionContext
+            {
+                FileSystem = fileSystem
+            };
         }
     }
 }

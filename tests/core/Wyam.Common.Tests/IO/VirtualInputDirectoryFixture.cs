@@ -6,11 +6,10 @@ using System.Threading.Tasks;
 using NUnit.Framework;
 using Shouldly;
 using Wyam.Common.IO;
-using Wyam.Core.IO;
 using Wyam.Testing;
 using Wyam.Testing.IO;
 
-namespace Wyam.Core.Tests.IO
+namespace Wyam.Common.Tests.IO
 {
     [TestFixture]
     [Parallelizable(ParallelScope.Self | ParallelScope.Children)]
@@ -29,14 +28,14 @@ namespace Wyam.Core.Tests.IO
             public void ThrowsForNullDirectoryPath()
             {
                 // Given, When, Then
-                Assert.Throws<ArgumentNullException>(() => new VirtualInputDirectory(new FileSystem(), null));
+                Assert.Throws<ArgumentNullException>(() => new VirtualInputDirectory(new TestFileSystem(), null));
             }
 
             [Test]
             public void ThrowsForNonRelativePath()
             {
                 // Given, When, Then
-                Assert.Throws<ArgumentException>(() => new VirtualInputDirectory(new FileSystem(), new DirectoryPath("/A")));
+                Assert.Throws<ArgumentException>(() => new VirtualInputDirectory(new TestFileSystem(), new DirectoryPath("/A")));
             }
         }
 
@@ -117,7 +116,7 @@ namespace Wyam.Core.Tests.IO
             public async Task GetsInputFileAboveInputDirectory()
             {
                 // Given
-                FileSystem fileSystem = new FileSystem();
+                TestFileSystem fileSystem = new TestFileSystem();
                 fileSystem.RootPath = "/a";
                 fileSystem.InputPaths.Add("b/d");
                 fileSystem.InputPaths.Add("alt:///foo");
@@ -257,7 +256,7 @@ namespace Wyam.Core.Tests.IO
             public async Task ShouldThrow()
             {
                 // Given
-                FileSystem fileSystem = new FileSystem();
+                TestFileSystem fileSystem = new TestFileSystem();
                 VirtualInputDirectory directory = new VirtualInputDirectory(fileSystem, ".");
 
                 // When, Then
@@ -271,7 +270,7 @@ namespace Wyam.Core.Tests.IO
             public async Task ShouldThrow()
             {
                 // Given
-                FileSystem fileSystem = new FileSystem();
+                TestFileSystem fileSystem = new TestFileSystem();
                 VirtualInputDirectory directory = new VirtualInputDirectory(fileSystem, ".");
 
                 // When, Then
@@ -281,7 +280,7 @@ namespace Wyam.Core.Tests.IO
 
         private VirtualInputDirectory GetVirtualInputDirectory(string path)
         {
-            FileSystem fileSystem = new FileSystem();
+            TestFileSystem fileSystem = new TestFileSystem();
             fileSystem.RootPath = "/a";
             fileSystem.InputPaths.Add("b");
             fileSystem.InputPaths.Add("alt:///foo");

@@ -4,11 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using NUnit.Framework;
+using Wyam.Common.Documents;
 using Wyam.Common.Execution;
 using Wyam.Common.Modules;
-using Wyam.Core.Execution;
-using Wyam.Core.Modules.Control;
-using Wyam.Core.Modules.IO;
 using Wyam.Testing;
 using Wyam.Testing.Modules;
 
@@ -24,21 +22,19 @@ namespace Wyam.Common.Tests.Modules
             public void InsertAfterFirst()
             {
                 // Given
-                IPipeline collection = new Pipeline("Test", new IModule[]
-                {
-                    new ReadFiles("*.md"),
-                    new ReadFiles("*.md"),
-                    new WriteFiles()
-                });
+                IModuleList collection = new ModuleList(
+                    new RedModule(),
+                    new RedModule(),
+                    new GreenModule());
 
                 // When
-                collection.InsertAfterFirst<ReadFiles>(new CountModule("foo"));
+                collection.InsertAfterFirst<RedModule>(new CountModule("foo"));
 
                 // Then
-                Assert.AreEqual(collection[0].GetType(), typeof(ReadFiles));
+                Assert.AreEqual(collection[0].GetType(), typeof(RedModule));
                 Assert.AreEqual(collection[1].GetType(), typeof(CountModule));
-                Assert.AreEqual(collection[2].GetType(), typeof(ReadFiles));
-                Assert.AreEqual(collection[3].GetType(), typeof(WriteFiles));
+                Assert.AreEqual(collection[2].GetType(), typeof(RedModule));
+                Assert.AreEqual(collection[3].GetType(), typeof(GreenModule));
             }
         }
 
@@ -48,21 +44,19 @@ namespace Wyam.Common.Tests.Modules
             public void InsertBeforeFirst()
             {
                 // Given
-                IPipeline collection = new Pipeline("Test", new IModule[]
-                {
-                    new ReadFiles("*.md"),
-                    new ReadFiles("*.md"),
-                    new WriteFiles()
-                });
+                IModuleList collection = new ModuleList(
+                    new RedModule(),
+                    new RedModule(),
+                    new GreenModule());
 
                 // When
-                collection.InsertBeforeFirst<ReadFiles>(new CountModule("foo"));
+                collection.InsertBeforeFirst<RedModule>(new CountModule("foo"));
 
                 // Then
                 Assert.AreEqual(collection[0].GetType(), typeof(CountModule));
-                Assert.AreEqual(collection[1].GetType(), typeof(ReadFiles));
-                Assert.AreEqual(collection[2].GetType(), typeof(ReadFiles));
-                Assert.AreEqual(collection[3].GetType(), typeof(WriteFiles));
+                Assert.AreEqual(collection[1].GetType(), typeof(RedModule));
+                Assert.AreEqual(collection[2].GetType(), typeof(RedModule));
+                Assert.AreEqual(collection[3].GetType(), typeof(GreenModule));
             }
         }
 
@@ -72,21 +66,19 @@ namespace Wyam.Common.Tests.Modules
             public void InsertAfterLast()
             {
                 // Given
-                IPipeline collection = new Pipeline("Test", new IModule[]
-                {
-                    new ReadFiles("*.md"),
-                    new ReadFiles("*.md"),
-                    new WriteFiles()
-                });
+                IModuleList collection = new ModuleList(
+                    new RedModule(),
+                    new RedModule(),
+                    new GreenModule());
 
                 // When
-                collection.InsertAfterLast<ReadFiles>(new CountModule("foo"));
+                collection.InsertAfterLast<RedModule>(new CountModule("foo"));
 
                 // Then
-                Assert.AreEqual(collection[0].GetType(), typeof(ReadFiles));
-                Assert.AreEqual(collection[1].GetType(), typeof(ReadFiles));
+                Assert.AreEqual(collection[0].GetType(), typeof(RedModule));
+                Assert.AreEqual(collection[1].GetType(), typeof(RedModule));
                 Assert.AreEqual(collection[2].GetType(), typeof(CountModule));
-                Assert.AreEqual(collection[3].GetType(), typeof(WriteFiles));
+                Assert.AreEqual(collection[3].GetType(), typeof(GreenModule));
             }
         }
 
@@ -96,21 +88,19 @@ namespace Wyam.Common.Tests.Modules
             public void InsertBeforeLast()
             {
                 // Given
-                IPipeline collection = new Pipeline("Test", new IModule[]
-                {
-                    new ReadFiles("*.md"),
-                    new ReadFiles("*.md"),
-                    new WriteFiles()
-                });
+                IModuleList collection = new ModuleList(
+                    new RedModule(),
+                    new RedModule(),
+                    new GreenModule());
 
                 // When
-                collection.InsertBeforeLast<ReadFiles>(new CountModule("foo"));
+                collection.InsertBeforeLast<RedModule>(new CountModule("foo"));
 
                 // Then
-                Assert.AreEqual(collection[0].GetType(), typeof(ReadFiles));
+                Assert.AreEqual(collection[0].GetType(), typeof(RedModule));
                 Assert.AreEqual(collection[1].GetType(), typeof(CountModule));
-                Assert.AreEqual(collection[2].GetType(), typeof(ReadFiles));
-                Assert.AreEqual(collection[3].GetType(), typeof(WriteFiles));
+                Assert.AreEqual(collection[2].GetType(), typeof(RedModule));
+                Assert.AreEqual(collection[3].GetType(), typeof(GreenModule));
             }
         }
 
@@ -120,13 +110,11 @@ namespace Wyam.Common.Tests.Modules
             public void ReplaceFirst()
             {
                 // Given
-                IPipeline collection = new Pipeline("Test", new IModule[]
-                {
-                    new ReadFiles("*.md"),
+                IModuleList collection = new ModuleList(
+                    new RedModule(),
                     new CountModule("mykey1"),
                     new CountModule("mykey2"),
-                    new WriteFiles()
-                });
+                    new GreenModule());
 
                 // When
                 collection.ReplaceFirst<CountModule>(new CountModule("replacedKey"));
@@ -143,13 +131,11 @@ namespace Wyam.Common.Tests.Modules
             public void ReplaceLast()
             {
                 // Given
-                IPipeline collection = new Pipeline("Test", new IModule[]
-                {
-                    new ReadFiles("*.md"),
+                IModuleList collection = new ModuleList(
+                    new RedModule(),
                     new CountModule("mykey1"),
                     new CountModule("mykey2"),
-                    new WriteFiles()
-                });
+                    new GreenModule());
 
                 // When
                 collection.ReplaceLast<CountModule>(new CountModule("replacedKey"));
@@ -158,6 +144,16 @@ namespace Wyam.Common.Tests.Modules
                 Assert.AreEqual("mykey1", ((CountModule)collection[1]).ValueKey);
                 Assert.AreEqual("replacedKey", ((CountModule)collection[2]).ValueKey);
             }
+        }
+
+        private class RedModule : IModule
+        {
+            public Task<IEnumerable<IDocument>> ExecuteAsync(IReadOnlyList<IDocument> inputs, IExecutionContext context) => throw new NotImplementedException();
+        }
+
+        private class GreenModule : IModule
+        {
+            public Task<IEnumerable<IDocument>> ExecuteAsync(IReadOnlyList<IDocument> inputs, IExecutionContext context) => throw new NotImplementedException();
         }
     }
 }

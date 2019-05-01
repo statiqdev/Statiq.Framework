@@ -1,7 +1,9 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using NUnit.Framework;
 using Wyam.Common.Configuration;
+using Wyam.Common.Documents;
 using Wyam.Common.Execution;
 using Wyam.Core.Execution;
 using Wyam.Core.Modules.Control;
@@ -21,8 +23,6 @@ namespace Wyam.Core.Tests.Modules.Control
             public async Task IfResultsInCorrectCounts()
             {
                 // Given
-                IServiceProvider serviceProvider = new TestServiceProvider();
-                Engine engine = new Engine();
                 CountModule a = new CountModule("A")
                 {
                     AdditionalOutputs = 2
@@ -35,10 +35,9 @@ namespace Wyam.Core.Tests.Modules.Control
                 {
                     AdditionalOutputs = 3
                 };
-                engine.Pipelines.Add(a, new If(Config.FromDocument((x, y) => x.Content == "1"), b), c);
 
                 // When
-                await engine.ExecuteAsync(serviceProvider);
+                await ExecuteAsync(a, new If(Config.FromDocument((x, y) => x.Content == "1"), b), c);
 
                 // Then
                 Assert.AreEqual(1, a.ExecuteCount);
@@ -56,8 +55,6 @@ namespace Wyam.Core.Tests.Modules.Control
             public async Task ElseIfResultsInCorrectCounts()
             {
                 // Given
-                IServiceProvider serviceProvider = new TestServiceProvider();
-                Engine engine = new Engine();
                 CountModule a = new CountModule("A")
                 {
                     AdditionalOutputs = 2
@@ -74,14 +71,13 @@ namespace Wyam.Core.Tests.Modules.Control
                 {
                     AdditionalOutputs = 2
                 };
-                engine.Pipelines.Add(
+
+                // When
+                await ExecuteAsync(
                     a,
                     new If(Config.FromDocument((x, y) => x.Content == "1"), b)
                         .ElseIf(Config.FromDocument((x, y) => x.Content == "2"), c),
                     d);
-
-                // When
-                await engine.ExecuteAsync(serviceProvider);
 
                 // Then
                 Assert.AreEqual(1, a.ExecuteCount);
@@ -102,8 +98,6 @@ namespace Wyam.Core.Tests.Modules.Control
             public async Task ElseResultsInCorrectCounts()
             {
                 // Given
-                IServiceProvider serviceProvider = new TestServiceProvider();
-                Engine engine = new Engine();
                 CountModule a = new CountModule("A")
                 {
                     AdditionalOutputs = 2
@@ -120,14 +114,13 @@ namespace Wyam.Core.Tests.Modules.Control
                 {
                     AdditionalOutputs = 2
                 };
-                engine.Pipelines.Add(
+
+                // When
+                await ExecuteAsync(
                     a,
                     new If(Config.FromDocument((x, y) => x.Content == "1"), b)
                         .Else(c),
                     d);
-
-                // When
-                await engine.ExecuteAsync(serviceProvider);
 
                 // Then
                 Assert.AreEqual(1, a.ExecuteCount);
@@ -148,8 +141,6 @@ namespace Wyam.Core.Tests.Modules.Control
             public async Task IfElseAndElseResultsInCorrectCounts()
             {
                 // Given
-                IServiceProvider serviceProvider = new TestServiceProvider();
-                Engine engine = new Engine();
                 CountModule a = new CountModule("A")
                 {
                     AdditionalOutputs = 3
@@ -170,15 +161,14 @@ namespace Wyam.Core.Tests.Modules.Control
                 {
                     AdditionalOutputs = 3
                 };
-                engine.Pipelines.Add(
+
+                // When
+                await ExecuteAsync(
                     a,
                     new If(Config.FromDocument((x, y) => x.Content == "1"), b)
                         .ElseIf(Config.FromDocument((x, y) => x.Content == "3"), c)
                         .Else(d),
                     e);
-
-                // When
-                await engine.ExecuteAsync(serviceProvider);
 
                 // Then
                 Assert.AreEqual(1, a.ExecuteCount);
@@ -202,8 +192,6 @@ namespace Wyam.Core.Tests.Modules.Control
             public async Task IfWithContextResultsInCorrectCounts()
             {
                 // Given
-                IServiceProvider serviceProvider = new TestServiceProvider();
-                Engine engine = new Engine();
                 CountModule a = new CountModule("A")
                 {
                     AdditionalOutputs = 2
@@ -216,10 +204,9 @@ namespace Wyam.Core.Tests.Modules.Control
                 {
                     AdditionalOutputs = 3
                 };
-                engine.Pipelines.Add(a, new If(Config.FromContext(x => true), b), c);
 
                 // When
-                await engine.ExecuteAsync(serviceProvider);
+                await ExecuteAsync(a, new If(Config.FromContext(x => true), b), c);
 
                 // Then
                 Assert.AreEqual(1, a.ExecuteCount);
@@ -237,8 +224,6 @@ namespace Wyam.Core.Tests.Modules.Control
             public async Task FalseIfWithContextResultsInCorrectCounts()
             {
                 // Given
-                IServiceProvider serviceProvider = new TestServiceProvider();
-                Engine engine = new Engine();
                 CountModule a = new CountModule("A")
                 {
                     AdditionalOutputs = 2
@@ -251,10 +236,9 @@ namespace Wyam.Core.Tests.Modules.Control
                 {
                     AdditionalOutputs = 3
                 };
-                engine.Pipelines.Add(a, new If(Config.FromContext(x => false), b), c);
 
                 // When
-                await engine.ExecuteAsync(serviceProvider);
+                await ExecuteAsync(a, new If(Config.FromContext(x => false), b), c);
 
                 // Then
                 Assert.AreEqual(1, a.ExecuteCount);
@@ -272,8 +256,6 @@ namespace Wyam.Core.Tests.Modules.Control
             public async Task UnmatchedDocumentsAreAddedToResults()
             {
                 // Given
-                IServiceProvider serviceProvider = new TestServiceProvider();
-                Engine engine = new Engine();
                 CountModule a = new CountModule("A")
                 {
                     AdditionalOutputs = 2
@@ -286,10 +268,9 @@ namespace Wyam.Core.Tests.Modules.Control
                 {
                     AdditionalOutputs = 3
                 };
-                engine.Pipelines.Add(a, new If(Config.FromDocument((doc, ctx) => false), b), c);
 
                 // When
-                await engine.ExecuteAsync(serviceProvider);
+                await ExecuteAsync(a, new If(Config.FromDocument((doc, ctx) => false), b), c);
 
                 // Then
                 Assert.AreEqual(1, a.ExecuteCount);
@@ -307,8 +288,6 @@ namespace Wyam.Core.Tests.Modules.Control
             public async Task UnmatchedDocumentsAreNotAddedToResults()
             {
                 // Given
-                IServiceProvider serviceProvider = new TestServiceProvider();
-                Engine engine = new Engine();
                 CountModule a = new CountModule("A")
                 {
                     AdditionalOutputs = 2
@@ -321,10 +300,9 @@ namespace Wyam.Core.Tests.Modules.Control
                 {
                     AdditionalOutputs = 3
                 };
-                engine.Pipelines.Add(a, new If(Config.FromDocument((doc, ctx) => false), b).WithoutUnmatchedDocuments(), c);
 
                 // When
-                await engine.ExecuteAsync(serviceProvider);
+                await ExecuteAsync(a, new If(Config.FromDocument((doc, ctx) => false), b).WithoutUnmatchedDocuments(), c);
 
                 // Then
                 Assert.AreEqual(1, a.ExecuteCount);

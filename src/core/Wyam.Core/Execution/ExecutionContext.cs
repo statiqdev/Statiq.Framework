@@ -47,9 +47,9 @@ namespace Wyam.Core.Execution
 
         public IReadOnlyCollection<string> Namespaces => Engine.Namespaces;
 
-        public string PipelineName => _pipelinePhase.PipelineName;
+        public string PipelineName => _pipelinePhase.Name;
 
-        public string PhaseName => _pipelinePhase.PhaseName;
+        public Phase Phase => _pipelinePhase.Phase;
 
         public IModule Module { get; }
 
@@ -73,7 +73,7 @@ namespace Wyam.Core.Execution
             ExecutionId = executionId;
             _pipelinePhase = pipelinePhase ?? throw new ArgumentNullException(nameof(pipelinePhase));
             Services = services ?? throw new ArgumentNullException(nameof(services));
-            Documents = new DocumentCollection(pipelinePhase, engine);
+            Documents = new DocumentCollection(engine.Documents, pipelinePhase, engine.Pipelines);
         }
 
         private ExecutionContext(ExecutionContext original, IModule module)
@@ -82,6 +82,7 @@ namespace Wyam.Core.Execution
             ExecutionId = original.ExecutionId;
             _pipelinePhase = original._pipelinePhase;
             Services = original.Services;
+            Documents = original.Documents;
             Module = module;
         }
 

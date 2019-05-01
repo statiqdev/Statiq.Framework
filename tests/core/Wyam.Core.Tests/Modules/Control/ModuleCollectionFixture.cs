@@ -26,8 +26,6 @@ namespace Wyam.Core.Tests.Modules.Control
             public async Task ChildModulesAreExecuted()
             {
                 // Given
-                IServiceProvider serviceProvider = new TestServiceProvider();
-                Engine engine = new Engine();
                 CountModule a = new CountModule("A")
                 {
                     AdditionalOutputs = 1
@@ -40,10 +38,9 @@ namespace Wyam.Core.Tests.Modules.Control
                 {
                     AdditionalOutputs = 3
                 };
-                engine.Pipelines.Add(a, new ModuleCollection(b, c));
 
                 // When
-                await engine.ExecuteAsync(serviceProvider);
+                await ExecuteAsync(a, new ModuleCollection(b, c));
 
                 // Then
                 Assert.AreEqual(1, a.ExecuteCount);

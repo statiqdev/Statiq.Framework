@@ -312,10 +312,10 @@ namespace Wyam.Core.Execution
                 {
                     // This is an isolated pipeline so just add the phases in a chain
                     pipelinePhases = new PipelinePhases(true);
-                    pipelinePhases.Read = new PipelinePhase(pipeline, name, nameof(IPipeline.Read), pipeline.Read);
-                    pipelinePhases.Process = new PipelinePhase(pipeline, name, nameof(IPipeline.Process), pipeline.Process,  pipelinePhases.Read);
-                    pipelinePhases.Render = new PipelinePhase(pipeline, name, nameof(IPipeline.Render), pipeline.Render, pipelinePhases.Process);
-                    pipelinePhases.Write = new PipelinePhase(pipeline, name, nameof(IPipeline.Write), pipeline.Write, pipelinePhases.Render);
+                    pipelinePhases.Read = new PipelinePhase(pipeline, name, Phase.Read, pipeline.ReadModules);
+                    pipelinePhases.Process = new PipelinePhase(pipeline, name, Phase.Process, pipeline.ProcessModules,  pipelinePhases.Read);
+                    pipelinePhases.Render = new PipelinePhase(pipeline, name, Phase.Render, pipeline.RenderModules, pipelinePhases.Process);
+                    pipelinePhases.Write = new PipelinePhase(pipeline, name, Phase.Write, pipeline.WriteModules, pipelinePhases.Render);
                     phases.Add(name, pipelinePhases);
                     sortedPhases.Add(pipelinePhases);
                     return pipelinePhases;
@@ -340,11 +340,11 @@ namespace Wyam.Core.Execution
 
                     // Add the phases (by this time all dependencies should have been added)
                     pipelinePhases = new PipelinePhases(false);
-                    pipelinePhases.Read = new PipelinePhase(pipeline, name, nameof(IPipeline.Read), pipeline.Read);
+                    pipelinePhases.Read = new PipelinePhase(pipeline, name, Phase.Read, pipeline.ReadModules);
                     processDependencies.Insert(0, pipelinePhases.Read);  // Makes sure the process phase is also dependent on it's read phase
-                    pipelinePhases.Process = new PipelinePhase(pipeline, name, nameof(IPipeline.Process), pipeline.Process, processDependencies.ToArray());
-                    pipelinePhases.Render = new PipelinePhase(pipeline, name, nameof(IPipeline.Render), pipeline.Render, pipelinePhases.Process);  // Render dependencies will be added after all pipelines have been processed
-                    pipelinePhases.Write = new PipelinePhase(pipeline, name, nameof(IPipeline.Write), pipeline.Write, pipelinePhases.Render);
+                    pipelinePhases.Process = new PipelinePhase(pipeline, name, Phase.Process, pipeline.ProcessModules, processDependencies.ToArray());
+                    pipelinePhases.Render = new PipelinePhase(pipeline, name, Phase.Render, pipeline.RenderModules, pipelinePhases.Process);  // Render dependencies will be added after all pipelines have been processed
+                    pipelinePhases.Write = new PipelinePhase(pipeline, name, Phase.Write, pipeline.WriteModules, pipelinePhases.Render);
                     phases.Add(name, pipelinePhases);
                     sortedPhases.Add(pipelinePhases);
                 }

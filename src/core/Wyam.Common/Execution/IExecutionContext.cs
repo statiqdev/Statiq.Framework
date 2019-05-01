@@ -48,7 +48,7 @@ namespace Wyam.Common.Execution
         /// <summary>
         /// Gets the name of the currently executing pipeline phase.
         /// </summary>
-        string PhaseName { get; }
+        Phase Phase { get; }
 
         /// <summary>
         /// Gets the currently executing module.
@@ -80,6 +80,10 @@ namespace Wyam.Common.Execution
         /// </summary>
         IDocumentCollection Documents { get; }
 
+        /// <summary>
+        /// Gets the dependency injection service provider. A new scope is
+        /// created for each pipeline phase.
+        /// </summary>
         IServiceProvider Services { get; }
 
         /// <summary>

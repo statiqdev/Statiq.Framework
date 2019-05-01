@@ -4,9 +4,8 @@ using System.Linq;
 using System.Text;
 using NUnit.Framework;
 using Wyam.Common.Documents;
-using Wyam.Core.Documents;
-using Wyam.Core.Meta;
 using Wyam.Testing;
+using Wyam.Testing.Documents;
 
 namespace Wyam.Common.Tests.Documents
 {
@@ -20,18 +19,18 @@ namespace Wyam.Common.Tests.Documents
             public void ReturnsCorrectLookupOfInt()
             {
                 // Given
-                IDocument a = new Document(
-                    new MetadataDictionary { { "Numbers", new[] { 1, 2, 3 } } },
-                    new MemoryStream(Encoding.UTF8.GetBytes("a")));
-                IDocument b = new Document(
-                    new MetadataDictionary { { "Numbers", new[] { 2, 3, 4 } } },
-                    new MemoryStream(Encoding.UTF8.GetBytes("b")));
-                IDocument c = new Document(
-                    new MetadataDictionary { { "Numbers", 3 } },
-                    new MemoryStream(Encoding.UTF8.GetBytes("c")));
-                IDocument d = new Document(
-                    new MetadataDictionary { { "Numbers", "4" } },
-                    new MemoryStream(Encoding.UTF8.GetBytes("d")));
+                IDocument a = new TestDocument(
+                    new MemoryStream(Encoding.UTF8.GetBytes("a")),
+                    new Dictionary<string, object> { { "Numbers", new[] { 1, 2, 3 } } });
+                IDocument b = new TestDocument(
+                    new MemoryStream(Encoding.UTF8.GetBytes("b")),
+                    new Dictionary<string, object> { { "Numbers", new[] { 2, 3, 4 } } });
+                IDocument c = new TestDocument(
+                    new MemoryStream(Encoding.UTF8.GetBytes("c")),
+                    new Dictionary<string, object> { { "Numbers", 3 } });
+                IDocument d = new TestDocument(
+                    new MemoryStream(Encoding.UTF8.GetBytes("d")),
+                    new Dictionary<string, object> { { "Numbers", "4" } });
                 List<IDocument> documents = new List<IDocument>() { a, b, c, d };
 
                 // When
@@ -49,18 +48,18 @@ namespace Wyam.Common.Tests.Documents
             public void ReturnsCorrectLookupOfString()
             {
                 // Given
-                IDocument a = new Document(
-                    new MetadataDictionary { { "Numbers", new[] { 1, 2, 3 } } },
-                    new MemoryStream(Encoding.UTF8.GetBytes("a")));
-                IDocument b = new Document(
-                    new MetadataDictionary { { "Numbers", new[] { 2, 3, 4 } } },
-                    new MemoryStream(Encoding.UTF8.GetBytes("b")));
-                IDocument c = new Document(
-                    new MetadataDictionary { { "Numbers", 3 } },
-                    new MemoryStream(Encoding.UTF8.GetBytes("c")));
-                IDocument d = new Document(
-                    new MetadataDictionary { { "Numbers", "4" } },
-                    new MemoryStream(Encoding.UTF8.GetBytes("d")));
+                IDocument a = new TestDocument(
+                    new MemoryStream(Encoding.UTF8.GetBytes("a")),
+                    new Dictionary<string, object> { { "Numbers", new[] { 1, 2, 3 } } });
+                IDocument b = new TestDocument(
+                    new MemoryStream(Encoding.UTF8.GetBytes("b")),
+                    new Dictionary<string, object> { { "Numbers", new[] { 2, 3, 4 } } });
+                IDocument c = new TestDocument(
+                    new MemoryStream(Encoding.UTF8.GetBytes("c")),
+                    new Dictionary<string, object> { { "Numbers", 3 } });
+                IDocument d = new TestDocument(
+                    new MemoryStream(Encoding.UTF8.GetBytes("d")),
+                    new Dictionary<string, object> { { "Numbers", "4" } });
                 List<IDocument> documents = new List<IDocument>() { a, b, c, d };
 
                 // When
@@ -78,34 +77,34 @@ namespace Wyam.Common.Tests.Documents
             public void ReturnsCorrectLookupWithValues()
             {
                 // Given
-                IDocument a = new Document(
-                    new MetadataDictionary
+                IDocument a = new TestDocument(
+                    new MemoryStream(Encoding.UTF8.GetBytes("a")),
+                    new Dictionary<string, object>
                     {
                         { "Numbers", new[] { 1, 2, 3 } },
                         { "Colors", "Red" }
-                    },
-                    new MemoryStream(Encoding.UTF8.GetBytes("a")));
-                IDocument b = new Document(
-                    new MetadataDictionary
+                    });
+                IDocument b = new TestDocument(
+                    new MemoryStream(Encoding.UTF8.GetBytes("b")),
+                    new Dictionary<string, object>
                     {
                         { "Numbers", new[] { 2, 3, 4 } },
                         { "Colors", new[] { "Red", "Blue" } }
-                    },
-                    new MemoryStream(Encoding.UTF8.GetBytes("b")));
-                IDocument c = new Document(
-                    new MetadataDictionary
+                    });
+                IDocument c = new TestDocument(
+                    new MemoryStream(Encoding.UTF8.GetBytes("c")),
+                    new Dictionary<string, object>
                     {
                         { "Numbers", 3 },
                         { "Colors", "Green" }
-                    },
-                    new MemoryStream(Encoding.UTF8.GetBytes("c")));
-                IDocument d = new Document(
-                    new MetadataDictionary
+                    });
+                IDocument d = new TestDocument(
+                    new MemoryStream(Encoding.UTF8.GetBytes("d")),
+                    new Dictionary<string, object>
                     {
                         { "Numbers", "4" },
                         { "Colors", new[] { "Green", "Blue" } }
-                    },
-                    new MemoryStream(Encoding.UTF8.GetBytes("d")));
+                    });
                 List<IDocument> documents = new List<IDocument>() { a, b, c, d };
 
                 // When
@@ -126,34 +125,34 @@ namespace Wyam.Common.Tests.Documents
             public void ReturnsCorrectLookupWithValues()
             {
                 // Given
-                IDocument a = new Document(
-                    new MetadataDictionary
+                IDocument a = new TestDocument(
+                    new MemoryStream(Encoding.UTF8.GetBytes("a")),
+                    new Dictionary<string, object>
                     {
                         { "Numbers", new[] { 1, 2, 3 } },
                         { "Colors", "Red" }
-                    },
-                    new MemoryStream(Encoding.UTF8.GetBytes("a")));
-                IDocument b = new Document(
-                    new MetadataDictionary
+                    });
+                IDocument b = new TestDocument(
+                    new MemoryStream(Encoding.UTF8.GetBytes("b")),
+                    new Dictionary<string, object>
                     {
                         { "Numbers", new[] { 2, 3, 4 } },
                         { "Colors", new[] { "Red", "Blue" } }
-                    },
-                    new MemoryStream(Encoding.UTF8.GetBytes("b")));
-                IDocument c = new Document(
-                    new MetadataDictionary
+                    });
+                IDocument c = new TestDocument(
+                    new MemoryStream(Encoding.UTF8.GetBytes("c")),
+                    new Dictionary<string, object>
                     {
                         { "Numbers", 3 },
                         { "Colors", "Green" }
-                    },
-                    new MemoryStream(Encoding.UTF8.GetBytes("c")));
-                IDocument d = new Document(
-                    new MetadataDictionary
+                    });
+                IDocument d = new TestDocument(
+                    new MemoryStream(Encoding.UTF8.GetBytes("d")),
+                    new Dictionary<string, object>
                     {
                         { "Numbers", "4" },
                         { "Colors", new[] { "Green", "Blue" } }
-                    },
-                    new MemoryStream(Encoding.UTF8.GetBytes("d")));
+                    });
                 List<IDocument> documents = new List<IDocument>() { a, b, c, d };
 
                 // When

@@ -7,13 +7,13 @@ using System.Threading.Tasks;
 using Wyam.Common.IO;
 using Wyam.Common.Util;
 
-namespace Wyam.Core.IO
+namespace Wyam.Common.IO
 {
     internal class VirtualInputDirectory : IDirectory
     {
-        private readonly FileSystem _fileSystem;
+        private readonly IReadOnlyFileSystem _fileSystem;
 
-        public VirtualInputDirectory(FileSystem fileSystem, DirectoryPath path)
+        public VirtualInputDirectory(IReadOnlyFileSystem fileSystem, DirectoryPath path)
         {
             if (path == null)
             {

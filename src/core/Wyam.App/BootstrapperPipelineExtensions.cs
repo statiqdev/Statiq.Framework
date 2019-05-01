@@ -88,19 +88,19 @@ namespace Wyam.App
                 IPipeline pipeline = x.Pipelines.Add(name);
                 if (readModules != null)
                 {
-                    pipeline.Read.AddRange(readModules);
+                    pipeline.ReadModules.AddRange(readModules);
                 }
                 if (processModules != null)
                 {
-                    pipeline.Process.AddRange(processModules);
+                    pipeline.ProcessModules.AddRange(processModules);
                 }
                 if (renderModules != null)
                 {
-                    pipeline.Render.AddRange(renderModules);
+                    pipeline.RenderModules.AddRange(renderModules);
                 }
                 if (writeModules != null)
                 {
-                    pipeline.Write.AddRange(writeModules);
+                    pipeline.WriteModules.AddRange(writeModules);
                 }
                 pipeline.Dependencies.AddRange(x.Pipelines.Keys);
             });

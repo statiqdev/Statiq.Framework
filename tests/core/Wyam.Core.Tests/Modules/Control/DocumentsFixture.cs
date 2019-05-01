@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using NUnit.Framework;
 using Wyam.Common.Configuration;
+using Wyam.Common.Documents;
 using Wyam.Common.Execution;
 using Wyam.Core.Execution;
 using Wyam.Core.Modules.Extensibility;
@@ -22,16 +23,13 @@ namespace Wyam.Core.Tests.Modules.Control
             public async Task CountReturnsCorrectDocuments()
             {
                 // Given
-                IServiceProvider serviceProvider = new TestServiceProvider();
-                Engine engine = new Engine();
                 Core.Modules.Control.Documents documents = new Core.Modules.Control.Documents(5);
-                engine.Pipelines.Add(documents);
 
                 // When
-                await engine.ExecuteAsync(serviceProvider);
+                IReadOnlyList<IDocument> results = await ExecuteAsync(documents);
 
                 // Then
-                Assert.AreEqual(5, engine.Documents.Count());
+                Assert.AreEqual(5, results.Count);
             }
 
             [Test]
@@ -39,8 +37,6 @@ namespace Wyam.Core.Tests.Modules.Control
             {
                 // Given
                 List<string> content = new List<string>();
-                IServiceProvider serviceProvider = new TestServiceProvider();
-                Engine engine = new Engine();
                 Core.Modules.Control.Documents documents = new Core.Modules.Control.Documents("A", "B", "C", "D");
                 Execute gatherData = new ExecuteDocument(
                     Config.FromDocument(d =>
@@ -48,10 +44,9 @@ namespace Wyam.Core.Tests.Modules.Control
                     content.Add(d.Content);
                     return (object)null;
                 }), false);
-                engine.Pipelines.Add(documents, gatherData);
 
                 // When
-                await engine.ExecuteAsync(serviceProvider);
+                IReadOnlyList<IDocument> results = await ExecuteAsync(documents, gatherData);
 
                 // Then
                 Assert.AreEqual(4, content.Count);
@@ -63,8 +58,6 @@ namespace Wyam.Core.Tests.Modules.Control
             {
                 // Given
                 List<object> values = new List<object>();
-                IServiceProvider serviceProvider = new TestServiceProvider();
-                Engine engine = new Engine();
                 Core.Modules.Control.Documents documents = new Core.Modules.Control.Documents(
                     new Dictionary<string, object> { { "Foo", "a" } },
                     new Dictionary<string, object> { { "Foo", "b" } },
@@ -75,10 +68,9 @@ namespace Wyam.Core.Tests.Modules.Control
                     values.Add(d["Foo"]);
                     return (object)null;
                 }), false);
-                engine.Pipelines.Add(documents, gatherData);
 
                 // When
-                await engine.ExecuteAsync(serviceProvider);
+                IReadOnlyList<IDocument> results = await ExecuteAsync(documents, gatherData);
 
                 // Then
                 Assert.AreEqual(3, values.Count);
@@ -91,8 +83,6 @@ namespace Wyam.Core.Tests.Modules.Control
                 // Given
                 List<string> content = new List<string>();
                 List<object> values = new List<object>();
-                IServiceProvider serviceProvider = new TestServiceProvider();
-                Engine engine = new Engine();
                 Core.Modules.Control.Documents documents = new Core.Modules.Control.Documents(
                     Tuple.Create("A", new Dictionary<string, object> { { "Foo", "a" } }.AsEnumerable()),
                     Tuple.Create("B", new Dictionary<string, object> { { "Foo", "b" } }.AsEnumerable()),
@@ -104,10 +94,9 @@ namespace Wyam.Core.Tests.Modules.Control
                     values.Add(d["Foo"]);
                     return (object)null;
                 }), false);
-                engine.Pipelines.Add(documents, gatherData);
 
                 // When
-                await engine.ExecuteAsync(serviceProvider);
+                IReadOnlyList<IDocument> results = await ExecuteAsync(documents, gatherData);
 
                 // Then
                 Assert.AreEqual(3, content.Count);
@@ -129,9 +118,9 @@ namespace Wyam.Core.Tests.Modules.Control
                         content.Add(d.Content);
                         return (object)null;
                     }), false);
-                engine.Pipelines.Add("Foo", new Core.Modules.Control.Documents("A", "B", "C", "D"));
-                engine.Pipelines.Add("Bar", new Core.Modules.Control.Documents("E", "F"));
-                engine.Pipelines.Add(new Core.Modules.Control.Documents("Foo"), gatherData);
+                engine.Pipelines.Add("Foo", new TestPipeline(new Core.Modules.Control.Documents("A", "B", "C", "D")));
+                engine.Pipelines.Add("Bar", new TestPipeline(new Core.Modules.Control.Documents("E", "F")));
+                engine.Pipelines.Add(new TestPipeline(new Core.Modules.Control.Documents("Foo"), gatherData).WithDependencies("Foo", "Bar"));
 
                 // When
                 await engine.ExecuteAsync(serviceProvider);
@@ -154,9 +143,9 @@ namespace Wyam.Core.Tests.Modules.Control
                         content.Add(d.Content);
                         return (object)null;
                     }), false);
-                engine.Pipelines.Add("Foo", new Core.Modules.Control.Documents("A", "B", "C", "D"));
-                engine.Pipelines.Add("Bar", new Core.Modules.Control.Documents("E", "F"));
-                engine.Pipelines.Add(new Core.Modules.Control.Documents(), gatherData);
+                engine.Pipelines.Add("Foo", new TestPipeline(new Core.Modules.Control.Documents("A", "B", "C", "D")));
+                engine.Pipelines.Add("Bar", new TestPipeline(new Core.Modules.Control.Documents("E", "F")));
+                engine.Pipelines.Add(new TestPipeline(new Core.Modules.Control.Documents(), gatherData).WithDependencies("Foo", "Bar"));
 
                 // When
                 await engine.ExecuteAsync(serviceProvider);
@@ -179,10 +168,12 @@ namespace Wyam.Core.Tests.Modules.Control
                         content.Add(d.Content);
                         return (object)null;
                     }), false);
-                engine.Pipelines.Add("Foo", new Core.Modules.Control.Documents("A", "B", "C", "D"));
-                engine.Pipelines.Add("Bar", new Core.Modules.Control.Documents("E", "F"));
-                engine.Pipelines.Add("Baz", new Core.Modules.Control.Documents("G", "H"));
-                engine.Pipelines.Add(new Core.Modules.Control.Documents().FromPipelines("Foo", "Baz"), gatherData);
+                engine.Pipelines.Add("Foo", new TestPipeline(new Core.Modules.Control.Documents("A", "B", "C", "D")));
+                engine.Pipelines.Add("Bar", new TestPipeline(new Core.Modules.Control.Documents("E", "F")));
+                engine.Pipelines.Add("Baz", new TestPipeline(new Core.Modules.Control.Documents("G", "H")));
+                engine.Pipelines.Add(
+                    new TestPipeline(new Core.Modules.Control.Documents().FromPipelines("Foo", "Baz"), gatherData)
+                        .WithDependencies("Foo", "Bar", "Baz"));
 
                 // When
                 await engine.ExecuteAsync(serviceProvider);
@@ -205,10 +196,12 @@ namespace Wyam.Core.Tests.Modules.Control
                         content.Add(d.Content);
                         return (object)null;
                     }), false);
-                engine.Pipelines.Add("Foo", new Core.Modules.Control.Documents("A", "B", "C", "D"));
-                engine.Pipelines.Add("Bar", new Core.Modules.Control.Documents("E", "F"));
-                engine.Pipelines.Add("Baz", new Core.Modules.Control.Documents("G", "H"));
-                engine.Pipelines.Add(new Core.Modules.Control.Documents("Foo").FromPipelines("Baz"), gatherData);
+                engine.Pipelines.Add("Foo", new TestPipeline(new Core.Modules.Control.Documents("A", "B", "C", "D")));
+                engine.Pipelines.Add("Bar", new TestPipeline(new Core.Modules.Control.Documents("E", "F")));
+                engine.Pipelines.Add("Baz", new TestPipeline(new Core.Modules.Control.Documents("G", "H")));
+                engine.Pipelines.Add(
+                    new TestPipeline(new Core.Modules.Control.Documents("Foo").FromPipelines("Baz"), gatherData)
+                        .WithDependencies("Foo", "Bar", "Baz"));
 
                 // When
                 await engine.ExecuteAsync(serviceProvider);
@@ -231,10 +224,12 @@ namespace Wyam.Core.Tests.Modules.Control
                         content.Add(d.Content);
                         return (object)null;
                     }), false);
-                engine.Pipelines.Add("Foo", new Core.Modules.Control.Documents("A", "B", "C", "D"));
-                engine.Pipelines.Add("Bar", new Core.Modules.Control.Documents("E", "F"));
-                engine.Pipelines.Add("Baz", new Core.Modules.Control.Documents("G", "H"));
-                engine.Pipelines.Add(new Core.Modules.Control.Documents("Baz").FromPipelines("Foo"), gatherData);
+                engine.Pipelines.Add("Foo", new TestPipeline(new Core.Modules.Control.Documents("A", "B", "C", "D")));
+                engine.Pipelines.Add("Bar", new TestPipeline(new Core.Modules.Control.Documents("E", "F")));
+                engine.Pipelines.Add("Baz", new TestPipeline(new Core.Modules.Control.Documents("G", "H")));
+                engine.Pipelines.Add(
+                    new TestPipeline(new Core.Modules.Control.Documents("Baz").FromPipelines("Foo"), gatherData)
+                        .WithDependencies("Foo", "Bar", "Baz"));
 
                 // When
                 await engine.ExecuteAsync(serviceProvider);
