@@ -36,7 +36,8 @@ namespace Wyam.Core.Tests.Modules.Control
                 List<bool> hasPreviousPage = new List<bool>();
                 CountModule count = new CountModule("A")
                 {
-                    AdditionalOutputs = 7
+                    AdditionalOutputs = 7,
+                    EnsureInputDocument = true
                 };
                 Paginate paginate = new Paginate(3, count);
                 Execute gatherData = new ExecuteDocument(
@@ -68,7 +69,8 @@ namespace Wyam.Core.Tests.Modules.Control
                 List<IList<string>> content = new List<IList<string>>();
                 CountModule count = new CountModule("A")
                 {
-                    AdditionalOutputs = 7
+                    AdditionalOutputs = 7,
+                    EnsureInputDocument = true
                 };
                 Paginate paginate = new Paginate(3, count);
                 Execute gatherData = new ExecuteDocument(
@@ -96,7 +98,8 @@ namespace Wyam.Core.Tests.Modules.Control
                 List<IList<string>> nextPages = new List<IList<string>>();
                 CountModule count = new CountModule("A")
                 {
-                    AdditionalOutputs = 7
+                    AdditionalOutputs = 7,
+                    EnsureInputDocument = true
                 };
                 Paginate paginate = new Paginate(3, count);
                 Execute gatherData = new ExecuteDocument(
@@ -128,7 +131,8 @@ namespace Wyam.Core.Tests.Modules.Control
                 List<IList<string>> content = new List<IList<string>>();
                 CountModule count = new CountModule("A")
                 {
-                    AdditionalOutputs = 7
+                    AdditionalOutputs = 7,
+                    EnsureInputDocument = true
                 };
                 Paginate paginate = new Paginate(3, count).Where(Config.FromDocument(doc => doc.Content != "5"));
                 Execute gatherData = new ExecuteDocument(

@@ -41,13 +41,17 @@ namespace Wyam.Core.Tests.Modules.Control
             public async Task SwitchNoCasesResultsInCorrectCounts()
             {
                 // Given
-                CountModule a = new CountModule("A") { AdditionalOutputs = 2 };
+                CountModule a = new CountModule("A")
+                {
+                    AdditionalOutputs = 2,
+                    EnsureInputDocument = true
+                };
                 CountModule b = new CountModule("B");
                 CountModule c = new CountModule("C");
                 Switch switchModule = new Switch(Config.FromDocument(x => (object)x.Content)).Default(b);
 
                 // When
-                await ExecuteAsync(a, switchModule, b);
+                await ExecuteAsync(a, switchModule, c);
 
                 // Then
                 Assert.AreEqual(1, a.ExecuteCount);
@@ -61,7 +65,11 @@ namespace Wyam.Core.Tests.Modules.Control
             public async Task MissingDefaultResultsInCorrectCounts()
             {
                 // Given
-                CountModule a = new CountModule("A") { AdditionalOutputs = 2 };
+                CountModule a = new CountModule("A")
+                {
+                    AdditionalOutputs = 2,
+                    EnsureInputDocument = true
+                };
                 CountModule b = new CountModule("B");
                 CountModule c = new CountModule("C");
                 Switch switchModule = new Switch(Config.FromDocument(x => (object)x.Content)).Case("1", b);
@@ -81,7 +89,11 @@ namespace Wyam.Core.Tests.Modules.Control
             public async Task ArrayInCaseResultsInCorrectCounts()
             {
                 // Given
-                CountModule a = new CountModule("A") { AdditionalOutputs = 2 };
+                CountModule a = new CountModule("A")
+                {
+                    AdditionalOutputs = 2,
+                    EnsureInputDocument = true
+                };
                 CountModule b = new CountModule("B");
                 CountModule c = new CountModule("C");
                 Switch switchModule = new Switch(Config.FromDocument(x => (object)x.Content)).Case(new string[] { "1", "2" }, b);
@@ -101,7 +113,11 @@ namespace Wyam.Core.Tests.Modules.Control
             public async Task OmittingCasesAndDefaultResultsInCorrectCounts()
             {
                 // Given
-                CountModule a = new CountModule("A") { AdditionalOutputs = 2 };
+                CountModule a = new CountModule("A")
+                {
+                    AdditionalOutputs = 2,
+                    EnsureInputDocument = true
+                };
                 CountModule b = new CountModule("B");
                 Switch switchModule = new Switch(Config.FromDocument(x => (object)x.Content));
 

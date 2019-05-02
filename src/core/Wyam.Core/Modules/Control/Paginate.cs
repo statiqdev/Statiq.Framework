@@ -158,7 +158,11 @@ namespace Wyam.Core.Modules.Control
             int totalItems = partitions.Sum(x => x.Length);
 
             // Create the documents
-            return await inputs.SelectManyAsync(context, GetDocuments);
+            if (inputs.Count > 0)
+            {
+                return await inputs.SelectManyAsync(context, GetDocuments);
+            }
+            return await GetDocuments(null);
 
             async Task<IEnumerable<IDocument>> GetDocuments(IDocument input)
             {

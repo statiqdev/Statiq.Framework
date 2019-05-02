@@ -32,7 +32,8 @@ namespace Wyam.Core.Tests.Modules.Control
                 List<int> groupKey = new List<int>();
                 CountModule count = new CountModule("A")
                 {
-                    AdditionalOutputs = 7
+                    AdditionalOutputs = 7,
+                    EnsureInputDocument = true
                 };
                 GroupByMany groupByMany = new GroupByMany(Config.FromDocument(d => new[] { d.Get<int>("A") % 3, 3 }), count);
                 Execute gatherData = new ExecuteDocument(
@@ -56,7 +57,8 @@ namespace Wyam.Core.Tests.Modules.Control
                 List<IList<string>> content = new List<IList<string>>();
                 CountModule count = new CountModule("A")
                 {
-                    AdditionalOutputs = 7
+                    AdditionalOutputs = 7,
+                    EnsureInputDocument = true
                 };
                 GroupByMany groupByMany = new GroupByMany(Config.FromDocument(d => new[] { d.Get<int>("A") % 3, 3 }), count);
                 OrderBy orderBy = new OrderBy(Config.FromDocument(d => d.Get<int>(Keys.GroupKey)));
@@ -85,9 +87,10 @@ namespace Wyam.Core.Tests.Modules.Control
                 List<int> groupKey = new List<int>();
                 CountModule count = new CountModule("A")
                 {
-                    AdditionalOutputs = 7
+                    AdditionalOutputs = 7,
+                    EnsureInputDocument = true
                 };
-                Core.Modules.Metadata.Meta meta = new Core.Modules.Metadata.Meta("GroupMetadata", Config.FromDocument(d => new[] { d.Get<int>("A") % 3, 3 }));
+                Core.Modules.Metadata.Meta meta = new Core.Modules.Metadata.Meta("GroupMetadata", Config.FromDocument(d => new object[] { d.Get<int>("A") % 3, 3 }));
                 GroupByMany groupByMany = new GroupByMany("GroupMetadata", count, meta);
                 Execute gatherData = new ExecuteDocument(
                     Config.FromDocument(d =>
@@ -110,13 +113,14 @@ namespace Wyam.Core.Tests.Modules.Control
                 List<int> groupKey = new List<int>();
                 CountModule count = new CountModule("A")
                 {
-                    AdditionalOutputs = 7
+                    AdditionalOutputs = 7,
+                    EnsureInputDocument = true
                 };
                 Execute meta = new ExecuteDocument(
                     Config.FromDocument((d, c) =>
                     {
                         int groupMetadata = d.Get<int>("A") % 3;
-                        return groupMetadata == 0 ? d : c.GetDocument(d, new MetadataItems { { "GroupMetadata", new[] { groupMetadata, 3 } } });
+                        return groupMetadata == 0 ? d : c.GetDocument(d, new MetadataItems { { "GroupMetadata", new object[] { groupMetadata, 3 } } });
                     }), false);
                 GroupByMany groupByMany = new GroupByMany("GroupMetadata", count, meta);
                 Execute gatherData = new ExecuteDocument(
@@ -138,16 +142,16 @@ namespace Wyam.Core.Tests.Modules.Control
             {
                 // Given
                 List<object> groupKey = new List<object>();
-                Execute meta = new ExecuteDocument(
-                    Config.FromDocument((d, c) => new IDocument[]
+                Execute meta = new ExecuteContext(
+                    c => new IDocument[]
                     {
-                        c.GetDocument(d, new MetadataItems { { "Tag", new[] { "A", "b" } } }),
-                        c.GetDocument(d, new MetadataItems { { "Tag", new[] { "B" } } }),
-                        c.GetDocument(d, new MetadataItems { { "Tag", "C" } }),
-                        c.GetDocument(d, new MetadataItems { { "Tag", new[] { "c" } } }),
-                        c.GetDocument(d, new MetadataItems { { "Tag", new[] { 1 } } }),
-                        c.GetDocument(d, new MetadataItems { { "Tag", "1" } })
-                    }), false);
+                        c.GetDocument(new MetadataItems { { "Tag", new object[] { "A", "b" } } }),
+                        c.GetDocument(new MetadataItems { { "Tag", new object[] { "B" } } }),
+                        c.GetDocument(new MetadataItems { { "Tag", new object[] { "C" } } }),
+                        c.GetDocument(new MetadataItems { { "Tag", new object[] { "c" } } }),
+                        c.GetDocument(new MetadataItems { { "Tag", new object[] { 1 } } }),
+                        c.GetDocument(new MetadataItems { { "Tag", new object[] { "1" } } })
+                    });
                 GroupByMany groupByMany = new GroupByMany("Tag", meta);
                 Execute gatherData = new ExecuteDocument(
                     Config.FromDocument(d =>
@@ -168,16 +172,16 @@ namespace Wyam.Core.Tests.Modules.Control
             {
                 // Given
                 List<object> groupKey = new List<object>();
-                Execute meta = new ExecuteDocument(
-                    Config.FromDocument((d, c) => new IDocument[]
+                Execute meta = new ExecuteContext(
+                    c => new IDocument[]
                     {
-                        c.GetDocument(d, new MetadataItems { { "Tag", new[] { "A", "b" } } }),
-                        c.GetDocument(d, new MetadataItems { { "Tag", new[] { "B" } } }),
-                        c.GetDocument(d, new MetadataItems { { "Tag", "C" } }),
-                        c.GetDocument(d, new MetadataItems { { "Tag", new[] { "c" } } }),
-                        c.GetDocument(d, new MetadataItems { { "Tag", new[] { 1 } } }),
-                        c.GetDocument(d, new MetadataItems { { "Tag", "1" } })
-                    }), false);
+                        c.GetDocument(new MetadataItems { { "Tag", new object[] { "A", "b" } } }),
+                        c.GetDocument(new MetadataItems { { "Tag", new object[] { "B" } } }),
+                        c.GetDocument(new MetadataItems { { "Tag", new object[] { "C" } } }),
+                        c.GetDocument(new MetadataItems { { "Tag", new object[] { "c" } } }),
+                        c.GetDocument(new MetadataItems { { "Tag", new object[] { 1 } } }),
+                        c.GetDocument(new MetadataItems { { "Tag", new object[] { "1" } } })
+                    });
                 GroupByMany groupByMany = new GroupByMany("Tag", meta).WithComparer(StringComparer.OrdinalIgnoreCase);
                 Execute gatherData = new ExecuteDocument(
                     Config.FromDocument(d =>
@@ -200,7 +204,8 @@ namespace Wyam.Core.Tests.Modules.Control
                 List<int> groupKey = new List<int>();
                 CountModule count = new CountModule("A")
                 {
-                    AdditionalOutputs = 7
+                    AdditionalOutputs = 7,
+                    EnsureInputDocument = true
                 };
                 GroupByMany groupByMany = new GroupByMany(Config.FromDocument(d => new[] { d.Get<int>("A") % 3, 3 }), count)
                     .Where(Config.FromDocument(d => d.Get<int>("A") % 3 != 0));

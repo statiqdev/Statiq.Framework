@@ -27,7 +27,8 @@ namespace Wyam.Core.Tests.Modules.Control
                 // Given
                 CountModule a = new CountModule("A")
                 {
-                    Value = 10
+                    Value = 10,
+                    EnsureInputDocument = true
                 };
                 CountModule b = new CountModule("B")
                 {
@@ -50,7 +51,8 @@ namespace Wyam.Core.Tests.Modules.Control
                 // Given
                 CountModule a = new CountModule("A")
                 {
-                    Value = 10
+                    Value = 10,
+                    EnsureInputDocument = true
                 };
                 CountModule b = new CountModule("B")
                 {
@@ -71,7 +73,8 @@ namespace Wyam.Core.Tests.Modules.Control
                 // Given
                 CountModule a = new CountModule("A")
                 {
-                    Value = 10
+                    Value = 10,
+                    EnsureInputDocument = true
                 };
                 CountModule b = new CountModule("A")
                 {
@@ -91,7 +94,8 @@ namespace Wyam.Core.Tests.Modules.Control
                 // Given
                 CountModule a = new CountModule("A")
                 {
-                    Value = 10
+                    Value = 10,
+                    EnsureInputDocument = true
                 };
                 CountModule b = new CountModule("B")
                 {
@@ -114,7 +118,8 @@ namespace Wyam.Core.Tests.Modules.Control
                 // Given
                 CountModule a = new CountModule("A")
                 {
-                    Value = 10
+                    Value = 10,
+                    EnsureInputDocument = true
                 };
                 CountModule b = new CountModule("B")
                 {
@@ -139,7 +144,8 @@ namespace Wyam.Core.Tests.Modules.Control
                 CountModule a = new CountModule("A")
                 {
                     Value = 10,
-                    AdditionalOutputs = 1
+                    AdditionalOutputs = 1,
+                    EnsureInputDocument = true
                 };
                 CountModule b = new CountModule("B")
                 {
@@ -163,7 +169,8 @@ namespace Wyam.Core.Tests.Modules.Control
                 CountModule a = new CountModule("A")
                 {
                     Value = 10,
-                    AdditionalOutputs = 1
+                    AdditionalOutputs = 1,
+                    EnsureInputDocument = true
                 };
                 CountModule b = new CountModule("B")
                 {
@@ -187,7 +194,8 @@ namespace Wyam.Core.Tests.Modules.Control
                 // Given
                 CountModule a = new CountModule("A")
                 {
-                    Value = 10
+                    Value = 10,
+                    EnsureInputDocument = true
                 };
                 CountModule b = new CountModule("B")
                 {
@@ -212,7 +220,8 @@ namespace Wyam.Core.Tests.Modules.Control
                 // Given
                 CountModule a = new CountModule("A")
                 {
-                    Value = 10
+                    Value = 10,
+                    EnsureInputDocument = true
                 };
                 CountModule b = new CountModule("B")
                 {
@@ -239,7 +248,8 @@ namespace Wyam.Core.Tests.Modules.Control
                 CountModule a = new CountModule("A")
                 {
                     Value = 10,
-                    AdditionalOutputs = 1
+                    AdditionalOutputs = 1,
+                    EnsureInputDocument = true
                 };
                 CountModule b = new CountModule("B")
                 {
@@ -265,7 +275,8 @@ namespace Wyam.Core.Tests.Modules.Control
                 CountModule a = new CountModule("A")
                 {
                     Value = 10,
-                    AdditionalOutputs = 1
+                    AdditionalOutputs = 1,
+                    EnsureInputDocument = true
                 };
                 CountModule b = new CountModule("B")
                 {

@@ -72,13 +72,17 @@ namespace Wyam.Core.Tests.Modules.Extensibility
             {
                 // Given
                 TestDocument document = new TestDocument();
+                CountModule count = new CountModule("A")
+                {
+                    EnsureInputDocument = true
+                };
                 ExecuteDocument execute = new ExecuteDocument(document);
 
                 // When
-                IEnumerable<IDocument> result = await ExecuteAsync(execute);
+                IEnumerable<IDocument> result = await ExecuteAsync(count, execute);
 
                 // Then
-                CollectionAssert.AreEquivalent(new[] { document }, result.Single());
+                CollectionAssert.AreEquivalent(document, result.Single());
             }
 
             [Test]

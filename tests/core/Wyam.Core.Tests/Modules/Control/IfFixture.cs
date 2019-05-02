@@ -25,7 +25,8 @@ namespace Wyam.Core.Tests.Modules.Control
                 // Given
                 CountModule a = new CountModule("A")
                 {
-                    AdditionalOutputs = 2
+                    AdditionalOutputs = 2,
+                    EnsureInputDocument = true
                 };
                 CountModule b = new CountModule("B")
                 {
@@ -57,7 +58,8 @@ namespace Wyam.Core.Tests.Modules.Control
                 // Given
                 CountModule a = new CountModule("A")
                 {
-                    AdditionalOutputs = 2
+                    AdditionalOutputs = 2,
+                    EnsureInputDocument = true
                 };
                 CountModule b = new CountModule("B")
                 {
@@ -100,7 +102,8 @@ namespace Wyam.Core.Tests.Modules.Control
                 // Given
                 CountModule a = new CountModule("A")
                 {
-                    AdditionalOutputs = 2
+                    AdditionalOutputs = 2,
+                    EnsureInputDocument = true
                 };
                 CountModule b = new CountModule("B")
                 {
@@ -143,7 +146,8 @@ namespace Wyam.Core.Tests.Modules.Control
                 // Given
                 CountModule a = new CountModule("A")
                 {
-                    AdditionalOutputs = 3
+                    AdditionalOutputs = 3,
+                    EnsureInputDocument = true
                 };
                 CountModule b = new CountModule("B")
                 {
@@ -194,7 +198,8 @@ namespace Wyam.Core.Tests.Modules.Control
                 // Given
                 CountModule a = new CountModule("A")
                 {
-                    AdditionalOutputs = 2
+                    AdditionalOutputs = 2,
+                    EnsureInputDocument = true
                 };
                 CountModule b = new CountModule("B")
                 {
@@ -226,7 +231,8 @@ namespace Wyam.Core.Tests.Modules.Control
                 // Given
                 CountModule a = new CountModule("A")
                 {
-                    AdditionalOutputs = 2
+                    AdditionalOutputs = 2,
+                    EnsureInputDocument = true
                 };
                 CountModule b = new CountModule("B")
                 {
@@ -258,7 +264,8 @@ namespace Wyam.Core.Tests.Modules.Control
                 // Given
                 CountModule a = new CountModule("A")
                 {
-                    AdditionalOutputs = 2
+                    AdditionalOutputs = 2,
+                    EnsureInputDocument = true
                 };
                 CountModule b = new CountModule("B")
                 {
@@ -290,7 +297,8 @@ namespace Wyam.Core.Tests.Modules.Control
                 // Given
                 CountModule a = new CountModule("A")
                 {
-                    AdditionalOutputs = 2
+                    AdditionalOutputs = 2,
+                    EnsureInputDocument = true
                 };
                 CountModule b = new CountModule("B")
                 {
@@ -302,7 +310,7 @@ namespace Wyam.Core.Tests.Modules.Control
                 };
 
                 // When
-                await ExecuteAsync(a, new If(Config.FromDocument((doc, ctx) => false), b).WithoutUnmatchedDocuments(), c);
+                await ExecuteAsync(a, new If(false, b).WithoutUnmatchedDocuments(), c);
 
                 // Then
                 Assert.AreEqual(1, a.ExecuteCount);

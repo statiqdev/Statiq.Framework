@@ -47,7 +47,7 @@ namespace Wyam.Core.Execution
 
         public IReadOnlyCollection<string> Namespaces => Engine.Namespaces;
 
-        public string PipelineName => _pipelinePhase.Name;
+        public string PipelineName => _pipelinePhase.PipelineName;
 
         public Phase Phase => _pipelinePhase.Phase;
 

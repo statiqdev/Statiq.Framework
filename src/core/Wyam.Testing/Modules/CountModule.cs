@@ -16,6 +16,7 @@ namespace Wyam.Testing.Modules
         public int InputCount { get; set; }
         public int OutputCount { get; set; }
         public bool CloneSource { get; set; } // Indicates whether the clone call should output a source
+        public bool EnsureInputDocument { get; set; }
 
         public CountModule(string valueKey)
         {
@@ -29,8 +30,8 @@ namespace Wyam.Testing.Modules
             ExecuteCount++;
             List<IDocument> results = new List<IDocument>();
 
-            // Add an initial document if there isn't already one (to support legacy tests designed before empty initial input sets were used)
-            if (inputs.Count == 0)
+            // Add an initial document if there isn't already one
+            if (inputs.Count == 0 && EnsureInputDocument)
             {
                 inputs = new[] { context.GetDocument() };
             }

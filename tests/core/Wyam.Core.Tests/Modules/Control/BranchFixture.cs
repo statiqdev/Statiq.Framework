@@ -26,7 +26,8 @@ namespace Wyam.Core.Tests.Modules.Control
                 // Given
                 CountModule a = new CountModule("A")
                 {
-                    AdditionalOutputs = 1
+                    AdditionalOutputs = 1,
+                    EnsureInputDocument = true
                 };
                 CountModule b = new CountModule("B")
                 {
@@ -58,7 +59,8 @@ namespace Wyam.Core.Tests.Modules.Control
                 // Given
                 CountModule a = new CountModule("A")
                 {
-                    AdditionalOutputs = 1
+                    AdditionalOutputs = 1,
+                    EnsureInputDocument = true
                 };
                 CountModule b = new CountModule("B")
                 {

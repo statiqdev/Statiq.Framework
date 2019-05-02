@@ -39,7 +39,13 @@ namespace Wyam.Core.Modules.Contents
         }
 
         /// <inheritdoc />
-        protected override async Task<IDocument> ExecuteAsync(string content, IDocument input, IExecutionContext context) =>
-            content == null ? input : await context.GetDocumentAsync(input, content);
+        protected override async Task<IDocument> ExecuteAsync(string content, IDocument input, IExecutionContext context)
+        {
+            if (input == null)
+            {
+                return await context.GetDocumentAsync(content);
+            }
+            return content == null ? input : await context.GetDocumentAsync(input, content);
+        }
     }
 }

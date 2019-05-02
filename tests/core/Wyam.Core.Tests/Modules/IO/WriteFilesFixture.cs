@@ -32,8 +32,15 @@ namespace Wyam.Core.Tests.Modules.IO
             {
                 // Given
                 TestExecutionContext context = GetExecutionContext();
-                context.Settings[Keys.RelativeFilePath] = new FilePath("Subfolder/write-test.abc");
-                IDocument[] inputs = new[] { await context.GetDocumentAsync("Test") };
+                IDocument[] inputs = new[]
+                {
+                    await context.GetDocumentAsync(
+                        "Test",
+                        new Dictionary<string, object>
+                        {
+                            { Keys.RelativeFilePath, new FilePath("Subfolder/write-test.abc") }
+                        })
+                };
                 WriteFiles writeFiles = new WriteFiles(".txt");
 
                 // When
@@ -50,8 +57,15 @@ namespace Wyam.Core.Tests.Modules.IO
             {
                 // Given
                 TestExecutionContext context = GetExecutionContext();
-                context.Settings[Keys.RelativeFilePath] = new FilePath("Subfolder/write-test.abc");
-                IDocument[] inputs = new[] { await context.GetDocumentAsync("Test") };
+                IDocument[] inputs = new[]
+                {
+                    await context.GetDocumentAsync(
+                        "Test",
+                        new Dictionary<string, object>
+                        {
+                            { Keys.RelativeFilePath, new FilePath("Subfolder/write-test.abc") }
+                        })
+                };
                 WriteFiles writeFiles = new WriteFiles("txt");
 
                 // When
@@ -228,8 +242,15 @@ namespace Wyam.Core.Tests.Modules.IO
             {
                 // Given
                 TestExecutionContext context = GetExecutionContext();
-                context.Settings[Keys.RelativeFilePath] = new FilePath("Subfolder/write-test.abc");
-                IDocument[] inputs = new[] { await context.GetDocumentAsync("Test") };
+                IDocument[] inputs = new[]
+                {
+                    await context.GetDocumentAsync(
+                        "Test",
+                        new Dictionary<string, object>
+                        {
+                            { Keys.RelativeFilePath, new FilePath("Subfolder/write-test.abc") }
+                        })
+                };
                 WriteFiles writeFiles = new WriteFiles(".txt");
 
                 // When
@@ -247,8 +268,15 @@ namespace Wyam.Core.Tests.Modules.IO
             {
                 // Given
                 TestExecutionContext context = GetExecutionContext();
-                context.Settings[Keys.RelativeFilePath] = new FilePath("Subfolder/write-test.abc");
-                IDocument[] inputs = new[] { await context.GetDocumentAsync("Test") };
+                IDocument[] inputs = new[]
+                {
+                    await context.GetDocumentAsync(
+                        "Test",
+                        new Dictionary<string, object>
+                        {
+                            { Keys.RelativeFilePath, new FilePath("Subfolder/write-test.abc") }
+                        })
+                };
                 WriteFiles writeFiles = new WriteFiles(".txt");
 
                 // When
@@ -265,8 +293,15 @@ namespace Wyam.Core.Tests.Modules.IO
             {
                 // Given
                 TestExecutionContext context = GetExecutionContext();
-                context.Settings[Keys.RelativeFilePath] = new FilePath("Subfolder/write-test.abc");
-                IDocument[] inputs = new[] { await context.GetDocumentAsync("Test") };
+                IDocument[] inputs = new[]
+                {
+                    await context.GetDocumentAsync(
+                        "Test",
+                        new Dictionary<string, object>
+                        {
+                            { Keys.RelativeFilePath, new FilePath("Subfolder/write-test.abc") }
+                        })
+                };
                 WriteFiles writeFiles = new WriteFiles(".txt");
 
                 // When

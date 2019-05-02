@@ -93,7 +93,7 @@ namespace Wyam.Core.Tests.Modules.Extensibility
                 IEnumerable<IDocument> result = await execute.ExecuteAsync(Array.Empty<IDocument>(), context);
 
                 // Then
-                CollectionAssert.AreEquivalent(new[] { document }, result.Single());
+                CollectionAssert.AreEquivalent(document, result.Single());
             }
 
             [Test]

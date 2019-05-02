@@ -165,16 +165,26 @@ namespace Wyam.Core.Modules.Control
             {
                 return _emptyOutputIfNoGroups ? Array.Empty<IDocument>() : inputs;
             }
-            return inputs.SelectMany(context, input =>
+
+            if (inputs.Count > 0)
             {
-                return groupings.Select(x => context.GetDocument(
-                    input,
-                    new MetadataItems
-                    {
-                        { Keys.GroupDocuments, x.ToImmutableArray() },
-                        { Keys.GroupKey, x.Key }
-                    }));
-            });
+                return inputs.SelectMany(context, input =>
+                {
+                    return groupings.Select(x => context.GetDocument(
+                        input,
+                        new MetadataItems
+                        {
+                            { Keys.GroupDocuments, x.ToImmutableArray() },
+                            { Keys.GroupKey, x.Key }
+                        }));
+                });
+            }
+            return groupings.Select(x => context.GetDocument(
+                new MetadataItems
+                {
+                    { Keys.GroupDocuments, x.ToImmutableArray() },
+                    { Keys.GroupKey, x.Key }
+                }));
         }
     }
 }

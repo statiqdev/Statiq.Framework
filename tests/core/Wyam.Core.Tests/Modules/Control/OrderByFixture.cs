@@ -28,7 +28,8 @@ namespace Wyam.Core.Tests.Modules.Control
                 List<string> content = new List<string>();
                 CountModule count = new CountModule("A")
                 {
-                    AdditionalOutputs = 4
+                    AdditionalOutputs = 4,
+                    EnsureInputDocument = true
                 };
                 CountModule count2 = new CountModule("A")
                 {
@@ -58,7 +59,8 @@ namespace Wyam.Core.Tests.Modules.Control
                 List<string> content = new List<string>();
                 CountModule count = new CountModule("A")
                 {
-                    AdditionalOutputs = 4
+                    AdditionalOutputs = 4,
+                    EnsureInputDocument = true
                 };
                 CountModule count2 = new CountModule("A")
                 {
@@ -88,7 +90,8 @@ namespace Wyam.Core.Tests.Modules.Control
                 List<string> content = new List<string>();
                 CountModule count = new CountModule("A")
                 {
-                    AdditionalOutputs = 4
+                    AdditionalOutputs = 4,
+                    EnsureInputDocument = true
                 };
                 CountModule count2 = new CountModule("B")
                 {
@@ -118,7 +121,8 @@ namespace Wyam.Core.Tests.Modules.Control
                 List<string> content = new List<string>();
                 CountModule count = new CountModule("A")
                 {
-                    AdditionalOutputs = 4
+                    AdditionalOutputs = 4,
+                    EnsureInputDocument = true
                 };
                 CountModule count2 = new CountModule("B")
                 {
@@ -149,7 +153,8 @@ namespace Wyam.Core.Tests.Modules.Control
                 List<string> content = new List<string>();
                 CountModule count = new CountModule("A")
                 {
-                    AdditionalOutputs = 4
+                    AdditionalOutputs = 4,
+                    EnsureInputDocument = true
                 };
                 CountModule count2 = new CountModule("B")
                 {
@@ -181,7 +186,8 @@ namespace Wyam.Core.Tests.Modules.Control
                 List<string> content = new List<string>();
                 CountModule count = new CountModule("A")
                 {
-                    AdditionalOutputs = 4
+                    AdditionalOutputs = 4,
+                    EnsureInputDocument = true
                 };
                 CountModule count2 = new CountModule("B")
                 {

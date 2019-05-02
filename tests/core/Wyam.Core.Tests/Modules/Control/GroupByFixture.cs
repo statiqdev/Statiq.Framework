@@ -32,7 +32,8 @@ namespace Wyam.Core.Tests.Modules.Control
                 List<int> groupKey = new List<int>();
                 CountModule count = new CountModule("A")
                 {
-                    AdditionalOutputs = 7
+                    AdditionalOutputs = 7,
+                    EnsureInputDocument = true
                 };
                 GroupBy groupBy = new GroupBy(Config.FromDocument(d => d.Get<int>("A") % 3), count);
                 Execute gatherData = new ExecuteDocument(
@@ -56,7 +57,8 @@ namespace Wyam.Core.Tests.Modules.Control
                 List<IList<string>> content = new List<IList<string>>();
                 CountModule count = new CountModule("A")
                 {
-                    AdditionalOutputs = 7
+                    AdditionalOutputs = 7,
+                    EnsureInputDocument = true
                 };
                 GroupBy groupBy = new GroupBy(Config.FromDocument(d => d.Get<int>("A") % 3), count);
                 OrderBy orderBy = new OrderBy(Config.FromDocument(d => d.Get<int>(Keys.GroupKey)));
@@ -84,7 +86,8 @@ namespace Wyam.Core.Tests.Modules.Control
                 List<int> groupKey = new List<int>();
                 CountModule count = new CountModule("A")
                 {
-                    AdditionalOutputs = 7
+                    AdditionalOutputs = 7,
+                    EnsureInputDocument = true
                 };
                 Core.Modules.Metadata.Meta meta = new Core.Modules.Metadata.Meta("GroupMetadata", Config.FromDocument(d => d.Get<int>("A") % 3));
                 GroupBy groupBy = new GroupBy("GroupMetadata", count, meta);
@@ -109,7 +112,8 @@ namespace Wyam.Core.Tests.Modules.Control
                 List<int> groupKey = new List<int>();
                 CountModule count = new CountModule("A")
                 {
-                    AdditionalOutputs = 7
+                    AdditionalOutputs = 7,
+                    EnsureInputDocument = true
                 };
                 Execute meta = new ExecuteDocument(
                     Config.FromDocument((d, c) =>
@@ -139,7 +143,8 @@ namespace Wyam.Core.Tests.Modules.Control
                 List<int> groupKey = new List<int>();
                 CountModule count = new CountModule("A")
                 {
-                    AdditionalOutputs = 7
+                    AdditionalOutputs = 7,
+                    EnsureInputDocument = true
                 };
                 GroupBy groupBy = new GroupBy(Config.FromDocument(d => d.Get<int>("A") % 3), count)
                     .Where(Config.FromDocument(d => d.Get<int>("A") % 3 != 0));

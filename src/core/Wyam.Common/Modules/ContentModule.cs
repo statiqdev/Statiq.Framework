@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Wyam.Common.Configuration;
 using Wyam.Common.Documents;
@@ -17,6 +18,7 @@ namespace Wyam.Common.Modules
 
         /// <summary>
         /// Creates a new content module with the specified content delegate.
+        /// If there are no input documents and the content delegate doesn't require a document, it will be still be evaluated without an initial document.
         /// </summary>
         /// <param name="content">The content delegate.</param>
         protected ContentModule(DocumentConfig<string> content) => _content = content;
@@ -26,7 +28,7 @@ namespace Wyam.Common.Modules
         /// </summary>
         /// <remarks>
         /// If only one input document is available, it will be used as the initial document for the specified modules.
-        /// If more than one document is available, an empty initial document will be used.
+        /// If more than one document is available, an empty collection of initial documents will be used.
         /// To force usage of each input document in a set (I.e., A, B, and C input documents specify a unique "template" metadata value and you want to append
         /// some result of operating on that template value to each), make the content module a child of the ForEach module.
         /// Each input will be applied against each result from the specified modules (I.e., if 2 inputs and the module chain results in 2 outputs, there will be 4 total outputs).
@@ -46,12 +48,22 @@ namespace Wyam.Common.Modules
                 return await documents.SelectManyAsync(context, x => inputs.SelectAsync(context, y => ExecuteAsync(x.Content, y, context)));
             }
 
+            if (inputs.Count == 0)
+            {
+                if (_content.RequiresDocument)
+                {
+                    return Array.Empty<IDocument>();
+                }
+                return new[] { await ExecuteAsync(await _content.GetValueAsync(null, context), null, context) };
+            }
             return await inputs.SelectAsync(context, async x => await ExecuteAsync(await _content.GetAndTransformValueAsync(x, context), x, context));
         }
 
         /// <summary>
         /// Executes the module with the specified content against a single document.
         /// Note that content can be passed in as null, implementers should guard against that.
+        /// Also the input document can be null if the module was executed against an empty
+        /// set of input documents and the content delegate does not require a document.
         /// </summary>
         /// <param name="content">The content.</param>
         /// <param name="input">The input document.</param>

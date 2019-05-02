@@ -66,6 +66,10 @@ namespace Wyam.Core.Modules.Contents
         /// <inheritdoc />
         protected override async Task<IDocument> ExecuteAsync(string content, IDocument input, IExecutionContext context)
         {
+            if (input == null)
+            {
+                return null;
+            }
             if (content == null)
             {
                 content = string.Empty;

@@ -7,6 +7,7 @@ using System.Linq;
 using Wyam.Common;
 using Wyam.Common.Documents;
 using Wyam.Common.Execution;
+using Wyam.Common.Util;
 using Wyam.Core.Execution;
 
 namespace Wyam.Core.Documents
@@ -27,7 +28,7 @@ namespace Wyam.Core.Documents
         public IEnumerator<IDocument> GetEnumerator()
         {
             Check();
-            return GetDependencies().SelectMany(x => x.Value).Distinct().GetEnumerator();
+            return GetDocumentsFromDependencies().SelectMany(x => x.Value).Distinct().GetEnumerator();
         }
 
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
@@ -35,7 +36,7 @@ namespace Wyam.Core.Documents
         public IReadOnlyDictionary<string, IEnumerable<IDocument>> ByPipeline()
         {
             Check();
-            return GetDependencies().ToDictionary(x => x.Key, x => x.Value.Distinct());
+            return GetDocumentsFromDependencies().ToDictionary(x => x.Key, x => x.Value.Distinct());
         }
 
         public IEnumerable<IDocument> FromPipeline(string pipeline)
@@ -46,20 +47,39 @@ namespace Wyam.Core.Documents
 
         public IEnumerable<IDocument> ExceptPipeline(string pipeline)
         {
-            Check(pipeline);
-            return GetDependencies().Where(x => x.Key != pipeline).SelectMany(x => x.Value).Distinct();
+            Check(pipeline, false);
+            return GetDocumentsFromDependencies().Where(x => x.Key != pipeline).SelectMany(x => x.Value).Distinct();
         }
 
         public IEnumerable<IDocument> this[string pipline] => FromPipeline(pipline);
 
-        // If in the process phase only get documents for dependencies
-        private IEnumerable<KeyValuePair<string, ImmutableArray<IDocument>>> GetDependencies() =>
-            _documents
-                .Where(x =>
-                    _pipelinePhase.Phase == Phase.Render
-                    || _pipelinePhase.Dependencies.Any(d => d.Name.Equals(x.Key, StringComparison.OrdinalIgnoreCase)));
+        // If in the process phase only get documents from dependencies (including transient ones)
+        private IEnumerable<KeyValuePair<string, ImmutableArray<IDocument>>> GetDocumentsFromDependencies()
+        {
+            if (_pipelinePhase.Phase == Phase.Render)
+            {
+                return _documents;
+            }
 
-        private void Check(string pipeline)
+            HashSet<string> transientDependencies = GatherProcessPhaseDependencies(_pipelinePhase);
+            return _documents.Where(x => transientDependencies.Contains(x.Key));
+        }
+
+        private HashSet<string> GatherProcessPhaseDependencies(PipelinePhase phase, HashSet<string> transientDependencies = null)
+        {
+            if (transientDependencies == null)
+            {
+                transientDependencies = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            }
+            foreach (PipelinePhase dependency in phase.Dependencies.Where(x => x.Phase == Phase.Process))
+            {
+                transientDependencies.Add(dependency.PipelineName);
+                GatherProcessPhaseDependencies(dependency, transientDependencies);
+            }
+            return transientDependencies;
+        }
+
+        private void Check(string pipeline, bool phaseChecks = true)
         {
             Check();
             if (string.IsNullOrEmpty(pipeline))
@@ -74,18 +94,24 @@ namespace Wyam.Core.Documents
             {
                 throw new InvalidOperationException($"Cannot access documents in isolated pipeline {pipeline}");
             }
-            if (_pipelinePhase.Phase == Phase.Process
-                && !_pipelinePhase.Dependencies.Any(d => d.Name.Equals(pipeline, StringComparison.OrdinalIgnoreCase)))
+            if (phaseChecks && _pipelinePhase.Phase == Phase.Process)
             {
-                throw new InvalidOperationException($"Cannot access documents from pipeline {pipeline} without a dependency while in the {nameof(IPipeline.ProcessModules)} phase");
+                if (pipeline.Equals(_pipelinePhase.PipelineName, StringComparison.OrdinalIgnoreCase))
+                {
+                    throw new InvalidOperationException($"Cannot access documents from currently executing pipeline {pipeline} while in the {nameof(Phase.Process)} phase");
+                }
+                if (!GatherProcessPhaseDependencies(_pipelinePhase).Contains(pipeline))
+                {
+                    throw new InvalidOperationException($"Cannot access documents from pipeline {pipeline} without a dependency while in the {nameof(Phase.Process)} phase");
+                }
             }
         }
 
         private void Check()
         {
-            if (_pipelines[_pipelinePhase.Name].Isolated)
+            if (_pipelines[_pipelinePhase.PipelineName].Isolated)
             {
-                throw new InvalidOperationException($"Cannot access documents from inside isolated pipeline {_pipelinePhase.Name}");
+                throw new InvalidOperationException($"Cannot access documents from inside isolated pipeline {_pipelinePhase.PipelineName}");
             }
             if (_pipelinePhase.Phase != Phase.Process && _pipelinePhase.Phase != Phase.Render)
             {

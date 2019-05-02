@@ -127,7 +127,7 @@ namespace Wyam.Core.Tests.Modules.Control
 
                 // Then
                 Assert.AreEqual(4, content.Count);
-                CollectionAssert.AreEqual(new[] { "A", "B", "C", "D" }, content);
+                CollectionAssert.AreEquivalent(new[] { "A", "B", "C", "D" }, content);
             }
 
             [Test]
@@ -152,7 +152,7 @@ namespace Wyam.Core.Tests.Modules.Control
 
                 // Then
                 Assert.AreEqual(6, content.Count);
-                CollectionAssert.AreEqual(new[] { "A", "B", "C", "D", "E", "F" }, content);
+                CollectionAssert.AreEquivalent(new[] { "A", "B", "C", "D", "E", "F" }, content);
             }
 
             [Test]
@@ -180,7 +180,7 @@ namespace Wyam.Core.Tests.Modules.Control
 
                 // Then
                 Assert.AreEqual(6, content.Count);
-                CollectionAssert.AreEqual(new[] { "A", "B", "C", "D", "G", "H" }, content);
+                CollectionAssert.AreEquivalent(new[] { "A", "B", "C", "D", "G", "H" }, content);
             }
 
             [Test]
@@ -208,7 +208,7 @@ namespace Wyam.Core.Tests.Modules.Control
 
                 // Then
                 Assert.AreEqual(6, content.Count);
-                CollectionAssert.AreEqual(new[] { "A", "B", "C", "D", "G", "H" }, content);
+                CollectionAssert.AreEquivalent(new[] { "A", "B", "C", "D", "G", "H" }, content);
             }
 
             [Test]
@@ -236,7 +236,7 @@ namespace Wyam.Core.Tests.Modules.Control
 
                 // Then
                 Assert.AreEqual(6, content.Count);
-                CollectionAssert.AreEqual(new[] { "G", "H", "A", "B", "C", "D" }, content);
+                CollectionAssert.AreEquivalent(new[] { "G", "H", "A", "B", "C", "D" }, content);
             }
         }
     }

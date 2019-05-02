@@ -412,9 +412,9 @@ namespace Wyam.Core.Execution
                                 resultDocuments.Length);
                             inputDocuments = resultDocuments;
                         }
-                        catch (Exception)
+                        catch (Exception ex)
                         {
-                            Trace.Error("Error while executing module {0}", moduleName);
+                            Trace.Error($"Error while executing module {moduleName}: {ex.Message}");
                             resultDocuments = ImmutableArray<IDocument>.Empty;
                             throw;
                         }
