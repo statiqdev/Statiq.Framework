@@ -10,9 +10,8 @@ using Wyam.Testing;
 
 namespace Wyam.Common.Tests.IO
 {
-    // Resharper NUnit runner having issues with this test fixture
-    // [TestFixture(typeof(DirectoryPath))]
-    // [TestFixture(typeof(FilePath))]
+    [TestFixture(typeof(DirectoryPath))]
+    [TestFixture(typeof(FilePath))]
     [Parallelizable(ParallelScope.Self | ParallelScope.Children)]
     public class PathCollectionFixture<TPath> : BaseFixture
         where TPath : NormalizedPath
@@ -50,19 +49,6 @@ namespace Wyam.Common.Tests.IO
             }
         }
 
-        public class ConstructorTests : PathCollectionFixture<TPath>
-        {
-            [Test]
-            public void ShouldThrowIfComparerIsNull()
-            {
-                // Given, When
-                TestDelegate test = () => new PathCollection<TPath>(Enumerable.Empty<TPath>());
-
-                // Then
-                Assert.Throws<ArgumentNullException>(test);
-            }
-        }
-
         public class CountTests : PathCollectionFixture<TPath>
         {
             [Test]
@@ -91,22 +77,6 @@ namespace Wyam.Common.Tests.IO
                 // Then
                 Assert.AreEqual(2, collection.Count);
             }
-
-            [Test]
-            [TestCase(true, 2)]
-            [TestCase(false, 1)]
-            public void ShouldRespectFileSystemCaseSensitivityWhenAddingPath(bool caseSensitive, int expectedCount)
-            {
-                // Given
-                PathCollection<TPath> collection = new PathCollection<TPath>();
-                collection.Add(_upperCaseA);
-
-                // When
-                collection.Add(_lowerCaseA);
-
-                // Then
-                Assert.AreEqual(expectedCount, collection.Count);
-            }
         }
 
         public class AddRangeTests : PathCollectionFixture<TPath>
@@ -123,60 +93,6 @@ namespace Wyam.Common.Tests.IO
 
                 // Then
                 Assert.AreEqual(3, collection.Count);
-            }
-
-            [Test]
-            [TestCase(true, 5)]
-            [TestCase(false, 3)]
-            public void ShouldRespectFileSystemCaseSensitivityWhenAddingPaths(bool caseSensitive, int expectedCount)
-            {
-                // Given
-                PathCollection<TPath> collection = new PathCollection<TPath>(
-                    new[] { _upperCaseA, _upperCaseB });
-
-                // When
-                collection.AddRange(new[] { _lowerCaseA, _lowerCaseB, _lowerCaseC });
-
-                // Then
-                Assert.AreEqual(expectedCount, collection.Count);
-            }
-        }
-
-        public class RemoveTests : PathCollectionFixture<TPath>
-        {
-            [Test]
-            [TestCase(true, 1)]
-            [TestCase(false, 0)]
-            public void ShouldRespectFileSystemCaseSensitivityWhenRemovingPath(bool caseSensitive, int expectedCount)
-            {
-                // Given
-                PathCollection<TPath> collection = new PathCollection<TPath>();
-                collection.Add(_upperCaseA);
-
-                // When
-                collection.Remove(_lowerCaseA);
-
-                // Then
-                Assert.AreEqual(expectedCount, collection.Count);
-            }
-        }
-
-        public class RemoveRangeTests : PathCollectionFixture<TPath>
-        {
-            [Test]
-            [TestCase(true, 2)]
-            [TestCase(false, 0)]
-            public void ShouldRespectFileSystemCaseSensitivityWhenRemovingPaths(bool caseSensitive, int expectedCount)
-            {
-                // Given
-                PathCollection<TPath> collection = new PathCollection<TPath>(
-                    new[] { _upperCaseA, _upperCaseB });
-
-                // When
-                collection.RemoveRange(new[] { _lowerCaseA, _lowerCaseB, _lowerCaseC });
-
-                // Then
-                Assert.AreEqual(expectedCount, collection.Count);
             }
         }
     }

@@ -36,7 +36,6 @@ namespace Wyam.Common.Tests.Execution
                 {
                     { "Path", value }
                 };
-                metadata.AddTypeConversion<string, FilePath>(x => new FilePath(x));
 
                 // When
                 string result = context.GetLink(metadata, "Path", includeHost);

@@ -12,13 +12,15 @@ namespace Wyam.Common.IO
     public class PathCollection<TPath> : IReadOnlyList<TPath>
         where TPath : NormalizedPath
     {
-        private readonly List<TPath> _paths;
+        private static readonly PathEqualityComparer _comparer = new PathEqualityComparer();
+
+        private readonly object _pathsLock = new object();
+        private readonly List<TPath> _paths = new List<TPath>();
 
         /// <summary>
         /// Initializes a new path collection.
         /// </summary>
         public PathCollection()
-            : this(Enumerable.Empty<TPath>())
         {
         }
 
@@ -28,7 +30,7 @@ namespace Wyam.Common.IO
         /// <param name="paths">The paths.</param>
         public PathCollection(IEnumerable<TPath> paths)
         {
-            _paths = new List<TPath>(paths.Distinct<TPath>(new PathEqualityComparer()));
+            AddRange(paths);
         }
 
         /// <summary>
@@ -39,7 +41,11 @@ namespace Wyam.Common.IO
         /// </returns>
         public IEnumerator<TPath> GetEnumerator()
         {
-            return _paths.GetEnumerator();
+            lock (_pathsLock)
+            {
+                // Copy to a new list for consumers so as not to lock during enumeration
+                return _paths.ToList().GetEnumerator();
+            }
         }
 
         IEnumerator IEnumerable.GetEnumerator()
@@ -51,7 +57,16 @@ namespace Wyam.Common.IO
         /// Gets the number of directories in the collection.
         /// </summary>
         /// <value>The number of directories in the collection.</value>
-        public int Count => _paths.Count;
+        public int Count
+        {
+            get
+            {
+                lock (_pathsLock)
+                {
+                    return _paths.Count;
+                }
+            }
+        }
 
         /// <summary>
         /// Gets or sets the <see cref="Wyam.Common.IO.DirectoryPath" /> at the specified index.
@@ -63,8 +78,25 @@ namespace Wyam.Common.IO
         /// <returns>The path at the specified index.</returns>
         public TPath this[int index]
         {
-            get { return _paths[index]; }
-            set { _paths[index] = value; }
+            get
+            {
+                lock (_pathsLock)
+                {
+                    return _paths[index];
+                }
+            }
+            set
+            {
+                if (value == null)
+                {
+                    throw new ArgumentNullException(nameof(value));
+                }
+
+                lock (_pathsLock)
+                {
+                    _paths[index] = value;
+                }
+            }
         }
 
         /// <summary>
@@ -76,12 +108,20 @@ namespace Wyam.Common.IO
         /// </returns>
         public bool Add(TPath path)
         {
-            if (_paths.Contains(path, new PathEqualityComparer()))
+            if (path == null)
             {
-                return false;
+                throw new ArgumentNullException(nameof(path));
             }
-            _paths.Add(path);
-            return true;
+
+            lock (_pathsLock)
+            {
+                if (_paths.Contains(path, new PathEqualityComparer()))
+                {
+                    return false;
+                }
+                _paths.Add(path);
+                return true;
+            }
         }
 
         /// <summary>
@@ -94,9 +134,16 @@ namespace Wyam.Common.IO
             {
                 throw new ArgumentNullException(nameof(paths));
             }
-            foreach (TPath path in paths)
+
+            lock (_pathsLock)
             {
-                _paths.Add(path);
+                foreach (TPath path in paths)
+                {
+                    if (!_paths.Contains(path, _comparer))
+                    {
+                        _paths.Add(path);
+                    }
+                }
             }
         }
 
@@ -105,7 +152,10 @@ namespace Wyam.Common.IO
         /// </summary>
         public void Clear()
         {
-            _paths.Clear();
+            lock (_pathsLock)
+            {
+                _paths.Clear();
+            }
         }
 
         /// <summary>
@@ -115,7 +165,10 @@ namespace Wyam.Common.IO
         /// <returns><c>true</c> if the collection contains the path, otherwise <c>false</c>.</returns>
         public bool Contains(TPath path)
         {
-            return _paths.Contains(path, new PathEqualityComparer());
+            lock (_pathsLock)
+            {
+                return _paths.Contains(path, _comparer);
+            }
         }
 
         /// <summary>
@@ -125,13 +178,21 @@ namespace Wyam.Common.IO
         /// <returns><c>true</c> if the collection contained the path, otherwise <c>false</c>.</returns>
         public bool Remove(TPath path)
         {
-            int index = IndexOf(path);
-            if (index == -1)
+            if (path == null)
             {
-                return false;
+                throw new ArgumentNullException(nameof(path));
             }
-            _paths.RemoveAt(index);
-            return true;
+
+            lock (_pathsLock)
+            {
+                int index = _paths.FindIndex(x => x.Equals(path));
+                if (index == -1)
+                {
+                    return false;
+                }
+                _paths.RemoveAt(index);
+                return true;
+            }
         }
 
         /// <summary>
@@ -144,9 +205,17 @@ namespace Wyam.Common.IO
             {
                 throw new ArgumentNullException(nameof(paths));
             }
-            foreach (TPath path in paths)
+
+            lock (_pathsLock)
             {
-                _paths.Remove(path);
+                foreach (TPath path in paths)
+                {
+                    int index = _paths.FindIndex(x => x.Equals(path));
+                    if (index != -1)
+                    {
+                        _paths.RemoveAt(index);
+                    }
+                }
             }
         }
 
@@ -157,7 +226,15 @@ namespace Wyam.Common.IO
         /// <returns>The index of the specified path, or -1 if not found.</returns>
         public int IndexOf(TPath path)
         {
-            return _paths.FindIndex(x => x.Equals(path));
+            if (path == null)
+            {
+                throw new ArgumentNullException(nameof(path));
+            }
+
+            lock (_pathsLock)
+            {
+                return _paths.FindIndex(x => x.Equals(path));
+            }
         }
 
         /// <summary>
@@ -168,12 +245,20 @@ namespace Wyam.Common.IO
         /// <returns><c>true</c> if the collection did not contain the path and it was inserted, otherwise <c>false</c></returns>
         public bool Insert(int index, TPath path)
         {
-            if (_paths.Contains(path, new PathEqualityComparer()))
+            if (path == null)
             {
-                return false;
+                throw new ArgumentNullException(nameof(path));
             }
-            _paths.Insert(index, path);
-            return true;
+
+            lock (_pathsLock)
+            {
+                if (_paths.Contains(path, _comparer))
+                {
+                    return false;
+                }
+                _paths.Insert(index, path);
+                return true;
+            }
         }
 
         /// <summary>
@@ -182,7 +267,10 @@ namespace Wyam.Common.IO
         /// <param name="index">The index where the path should be removed.</param>
         public void RemoveAt(int index)
         {
-            _paths.RemoveAt(index);
+            lock (_pathsLock)
+            {
+                _paths.RemoveAt(index);
+            }
         }
     }
 }

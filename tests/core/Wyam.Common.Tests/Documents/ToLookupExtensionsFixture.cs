@@ -27,10 +27,10 @@ namespace Wyam.Common.Tests.Documents
                     new Dictionary<string, object> { { "Numbers", new[] { 2, 3, 4 } } });
                 IDocument c = new TestDocument(
                     new MemoryStream(Encoding.UTF8.GetBytes("c")),
-                    new Dictionary<string, object> { { "Numbers", 3 } });
+                    new Dictionary<string, object> { { "Numbers", new[] { 3 } } });
                 IDocument d = new TestDocument(
                     new MemoryStream(Encoding.UTF8.GetBytes("d")),
-                    new Dictionary<string, object> { { "Numbers", "4" } });
+                    new Dictionary<string, object> { { "Numbers", new[] { 4 } } });
                 List<IDocument> documents = new List<IDocument>() { a, b, c, d };
 
                 // When
@@ -50,16 +50,16 @@ namespace Wyam.Common.Tests.Documents
                 // Given
                 IDocument a = new TestDocument(
                     new MemoryStream(Encoding.UTF8.GetBytes("a")),
-                    new Dictionary<string, object> { { "Numbers", new[] { 1, 2, 3 } } });
+                    new Dictionary<string, object> { { "Numbers", new[] { "1", "2", "3" } } });
                 IDocument b = new TestDocument(
                     new MemoryStream(Encoding.UTF8.GetBytes("b")),
-                    new Dictionary<string, object> { { "Numbers", new[] { 2, 3, 4 } } });
+                    new Dictionary<string, object> { { "Numbers", new[] { "2", "3", "4" } } });
                 IDocument c = new TestDocument(
                     new MemoryStream(Encoding.UTF8.GetBytes("c")),
-                    new Dictionary<string, object> { { "Numbers", 3 } });
+                    new Dictionary<string, object> { { "Numbers", new[] { "3" } } });
                 IDocument d = new TestDocument(
                     new MemoryStream(Encoding.UTF8.GetBytes("d")),
-                    new Dictionary<string, object> { { "Numbers", "4" } });
+                    new Dictionary<string, object> { { "Numbers", new[] { "4" } } });
                 List<IDocument> documents = new List<IDocument>() { a, b, c, d };
 
                 // When
@@ -89,21 +89,21 @@ namespace Wyam.Common.Tests.Documents
                     new Dictionary<string, object>
                     {
                         { "Numbers", new[] { 2, 3, 4 } },
-                        { "Colors", new[] { "Red", "Blue" } }
+                        { "Colors", "Red" }
                     });
                 IDocument c = new TestDocument(
                     new MemoryStream(Encoding.UTF8.GetBytes("c")),
                     new Dictionary<string, object>
                     {
-                        { "Numbers", 3 },
+                        { "Numbers", new[] { 3 } },
                         { "Colors", "Green" }
                     });
                 IDocument d = new TestDocument(
                     new MemoryStream(Encoding.UTF8.GetBytes("d")),
                     new Dictionary<string, object>
                     {
-                        { "Numbers", "4" },
-                        { "Colors", new[] { "Green", "Blue" } }
+                        { "Numbers", new[] { 4 } },
+                        { "Colors", "Green" }
                     });
                 List<IDocument> documents = new List<IDocument>() { a, b, c, d };
 
@@ -130,7 +130,7 @@ namespace Wyam.Common.Tests.Documents
                     new Dictionary<string, object>
                     {
                         { "Numbers", new[] { 1, 2, 3 } },
-                        { "Colors", "Red" }
+                        { "Colors", new[] { "Red" } }
                     });
                 IDocument b = new TestDocument(
                     new MemoryStream(Encoding.UTF8.GetBytes("b")),
@@ -143,14 +143,14 @@ namespace Wyam.Common.Tests.Documents
                     new MemoryStream(Encoding.UTF8.GetBytes("c")),
                     new Dictionary<string, object>
                     {
-                        { "Numbers", 3 },
-                        { "Colors", "Green" }
+                        { "Numbers", new[] { 3 } },
+                        { "Colors", new[] { "Green" } }
                     });
                 IDocument d = new TestDocument(
                     new MemoryStream(Encoding.UTF8.GetBytes("d")),
                     new Dictionary<string, object>
                     {
-                        { "Numbers", "4" },
+                        { "Numbers", new[] { 4 } },
                         { "Colors", new[] { "Green", "Blue" } }
                     });
                 List<IDocument> documents = new List<IDocument>() { a, b, c, d };

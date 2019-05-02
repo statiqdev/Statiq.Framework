@@ -38,6 +38,7 @@ namespace Wyam.Core.Tests.Modules.Contents
             {
                 // Given
                 TestExecutionContext context = new TestExecutionContext();
+                context.Settings[Keys.LinkHideExtensions] = true;
                 if (!string.IsNullOrWhiteSpace(hostname))
                 {
                     context.Settings[Keys.Host] = hostname;
@@ -77,6 +78,7 @@ namespace Wyam.Core.Tests.Modules.Contents
             {
                 // Given
                 TestExecutionContext context = new TestExecutionContext();
+                context.Settings[Keys.LinkHideExtensions] = true;
                 if (!string.IsNullOrWhiteSpace(hostname))
                 {
                     context.Settings[Keys.Host] = hostname;
@@ -116,6 +118,7 @@ namespace Wyam.Core.Tests.Modules.Contents
             {
                 // Given
                 TestExecutionContext context = new TestExecutionContext();
+                context.Settings[Keys.LinkHideExtensions] = true;
                 if (!string.IsNullOrWhiteSpace(hostname))
                 {
                     context.Settings[Keys.Host] = hostname;

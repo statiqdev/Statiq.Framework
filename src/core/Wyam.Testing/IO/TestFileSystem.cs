@@ -17,14 +17,17 @@ namespace Wyam.Testing.IO
         /// <summary>
         /// The file provider to use for this file system.
         /// </summary>
-        public TestFileProvider FileProvider { get; set; } = new TestFileProvider();
-
-        /// <inheritdoc />
-        public IFileProviderCollection FileProviders
+        public IFileProvider FileProvider
         {
-            get { throw new NotImplementedException(); }
+            get => FileProviders.Get(NormalizedPath.DefaultFileProvider.Scheme);
+            set => FileProviders.Add(NormalizedPath.DefaultFileProvider.Scheme, value);
         }
 
+        /// <inheritdoc />
+        public IFileProviderCollection FileProviders { get; } =
+            new TestFileProviderCollection(new TestFileProvider());
+
+        /// <inheritdoc />
         IReadOnlyFileProviderCollection IReadOnlyFileSystem.FileProviders => FileProviders;
 
         /// <inheritdoc />
@@ -46,6 +49,25 @@ namespace Wyam.Testing.IO
         public DirectoryPath TempPath { get; set; } = "temp";
 
         /// <inheritdoc />
-        public IFileProvider GetFileProvider(NormalizedPath path) => FileProvider;
+        public IFileProvider GetFileProvider(NormalizedPath path)
+        {
+            if (path == null)
+            {
+                throw new ArgumentNullException(nameof(path));
+            }
+            if (path.IsRelative)
+            {
+                throw new ArgumentException("The path must be absolute");
+            }
+            if (path.FileProvider == null)
+            {
+                throw new ArgumentException("The path has no provider");
+            }
+            if (!FileProviders.TryGet(path.FileProvider.Scheme, out IFileProvider fileProvider))
+            {
+                throw new KeyNotFoundException($"A provider for the scheme {path.FileProvider} could not be found");
+            }
+            return fileProvider;
+        }
     }
 }
