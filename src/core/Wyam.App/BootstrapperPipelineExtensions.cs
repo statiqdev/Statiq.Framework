@@ -451,10 +451,13 @@ namespace Wyam.App
             {
                 builder
                     .WithDependencies(dependencies, isolated)
-                    .WithReadFiles(readPattern)
                     .WithProcessModules(processModules)
                     .WithRenderModules(renderModules)
                     .WithWriteModules(writeModules);
+                if (readPattern != null)
+                {
+                    builder.WithReadFiles(readPattern);
+                }
             });
 
         private static IBootstrapper AddPipeline(
@@ -470,9 +473,12 @@ namespace Wyam.App
             {
                 builder
                     .WithDependencies(dependencies, isolated)
-                    .WithReadFiles(readPattern)
                     .WithProcessModules(processModules)
                     .WithRenderModules(renderModules);
+                if (readPattern != null)
+                {
+                    builder.WithReadFiles(readPattern);
+                }
                 if (writeFiles)
                 {
                     builder.WithWriteModules();
@@ -492,10 +498,13 @@ namespace Wyam.App
             {
                 builder
                     .WithDependencies(dependencies, isolated)
-                    .WithReadFiles(readPattern)
                     .WithProcessModules(processModules)
                     .WithRenderModules(renderModules)
                     .WithWriteFiles(writeExtension);
+                if (readPattern != null)
+                {
+                    builder.WithReadFiles(readPattern);
+                }
             });
 
         private static IBootstrapper AddPipeline(
@@ -511,10 +520,13 @@ namespace Wyam.App
             {
                 builder
                     .WithDependencies(dependencies, isolated)
-                    .WithReadFiles(readPattern)
                     .WithProcessModules(processModules)
                     .WithRenderModules(renderModules)
                     .WithWriteFiles(writePath);
+                if (readPattern != null)
+                {
+                    builder.WithReadFiles(readPattern);
+                }
             });
 
         private static PipelineBuilder WithDependencies(this PipelineBuilder builder, IEnumerable<string> dependencies, bool isolated)
