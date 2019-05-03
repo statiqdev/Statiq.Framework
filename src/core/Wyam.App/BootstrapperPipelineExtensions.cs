@@ -481,7 +481,7 @@ namespace Wyam.App
                 }
                 if (writeFiles)
                 {
-                    builder.WithWriteModules();
+                    builder.WithWriteFiles();
                 }
             });
 

@@ -18,15 +18,11 @@ using Wyam.Hosting;
 
 namespace Wyam.App.Commands
 {
-    [Description("Builds the site and serves it, optionally watching for changes and rebuilding.")]
+    [Description("Builds the site and serves it, optionally watching for changes and rebuilding by default.")]
     public class PreviewCommand : BaseCommand<PreviewCommand.Settings>
     {
         public class Settings : BuildCommand.Settings
         {
-            [CommandOption("-w|--watch")]
-            [Description("Watches the input folder(s) for changes and rebuilds the site.")]
-            public bool Watch { get; set; }
-
             [CommandOption("-p|--port")]
             [Description("Start the preview web server on the specified port (default is 5080).")]
             public int Port { get; set; } = 5080;
@@ -42,6 +38,10 @@ namespace Wyam.App.Commands
             [CommandOption("--content-type")]
             [Description("Specifies additional supported content types for the preview server as extension=contenttype.")]
             public string[] ContentTypes { get; set; }
+
+            [CommandOption("--no-watch")]
+            [Description("Turns off watching the input folder(s) for changes and rebuilding.")]
+            public bool NoWatch { get; set; }
 
             [CommandOption("--no-reload")]
             [Description("urns off LiveReload support in the preview server.")]
@@ -86,17 +86,21 @@ namespace Wyam.App.Commands
                     contentTypes);
 
                 // Start the watchers
-                Trace.Information("Watching paths(s) {0}", string.Join(", ", engineManager.Engine.FileSystem.InputPaths));
-                ActionFileSystemWatcher inputFolderWatcher = new ActionFileSystemWatcher(
-                    (await engineManager.Engine.FileSystem.GetOutputDirectoryAsync()).Path,
-                    (await engineManager.Engine.FileSystem.GetInputDirectoriesAsync()).Select(x => x.Path),
-                    true,
-                    "*.*",
-                    path =>
-                    {
-                        _changedFiles.Enqueue(path);
-                        _messageEvent.Set();
-                    });
+                ActionFileSystemWatcher inputFolderWatcher = null;
+                if (!settings.NoWatch)
+                {
+                    Trace.Information("Watching paths(s) {0}", string.Join(", ", engineManager.Engine.FileSystem.InputPaths));
+                    inputFolderWatcher = new ActionFileSystemWatcher(
+                        (await engineManager.Engine.FileSystem.GetOutputDirectoryAsync()).Path,
+                        (await engineManager.Engine.FileSystem.GetInputDirectoriesAsync()).Select(x => x.Path),
+                        true,
+                        "*.*",
+                        path =>
+                        {
+                            _changedFiles.Enqueue(path);
+                            _messageEvent.Set();
+                        });
+                }
 
                 // Start the message pump
 
@@ -165,7 +169,7 @@ namespace Wyam.App.Commands
 
                 // Shutdown
                 Trace.Information("Shutting down");
-                inputFolderWatcher.Dispose();
+                inputFolderWatcher?.Dispose();
                 previewServer.Dispose();
             }
 

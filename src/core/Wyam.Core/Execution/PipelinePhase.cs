@@ -71,7 +71,7 @@ namespace Wyam.Core.Execution
 
             if (_modules.Count == 0)
             {
-                Trace.Information($"{PipelineName}/{Phase} contains no modules, skipping");
+                Trace.Verbose($"{PipelineName}/{Phase} contains no modules, skipping");
                 OutputDocuments = inputDocuments;
                 return;
             }
@@ -81,7 +81,7 @@ namespace Wyam.Core.Execution
             ResetClonedDocuments();
 
             System.Diagnostics.Stopwatch pipelineStopwatch = System.Diagnostics.Stopwatch.StartNew();
-            Trace.Information($"Executing {PipelineName}/{Phase} with {_modules.Count} module(s)");
+            Trace.Verbose($"Executing {PipelineName}/{Phase} with {_modules.Count} module(s)");
             try
             {
                 // Execute all modules in the pipeline with a new DI scope per phase
@@ -113,6 +113,7 @@ namespace Wyam.Core.Execution
 
             // Dispose documents that aren't part of the final collection for this pipeline,
             // but don't dispose any documents that are referenced directly or indirectly from the final ones
+            // TODO: Figure out why this isn't working quite right - we're disposing documents and then trying to access them in later phases
             // HashSet<IDocument> flattenedResultDocuments = new HashSet<IDocument>();
             // FlattenResultDocuments(OutputDocuments, flattenedResultDocuments);
             // Parallel.ForEach(_clonedDocuments.Where(x => !flattenedResultDocuments.Contains(x)), x => x.Dispose());
