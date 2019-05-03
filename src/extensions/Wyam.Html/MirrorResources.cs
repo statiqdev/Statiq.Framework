@@ -90,7 +90,7 @@ namespace Wyam.Html
                             .GetElementsByTagName("link")
                             .Where(x => x.HasAttribute("href") && !x.HasAttribute("data-no-mirror")))
                     {
-                        string replacement = await DownloadAndReplaceAsync(element.GetAttribute("href"), element, mirrorCache, context);
+                        string replacement = await DownloadAndReplaceAsync(element.GetAttribute("href"), mirrorCache, context);
                         if (replacement != null)
                         {
                             element.Attributes["href"].Value = replacement;
@@ -102,7 +102,7 @@ namespace Wyam.Html
                     foreach (IHtmlScriptElement element in htmlDocument.Scripts
                             .Where(x => !string.IsNullOrEmpty(x.Source) && !x.HasAttribute("data-no-mirror")))
                     {
-                        string replacement = await DownloadAndReplaceAsync(element.Source, element, mirrorCache, context);
+                        string replacement = await DownloadAndReplaceAsync(element.Source, mirrorCache, context);
                         if (replacement != null)
                         {
                             element.Source = replacement;
@@ -127,7 +127,7 @@ namespace Wyam.Html
             }
         }
 
-        private async Task<string> DownloadAndReplaceAsync(string source, IElement element, Dictionary<string, string> mirrorCache, IExecutionContext context)
+        private async Task<string> DownloadAndReplaceAsync(string source, Dictionary<string, string> mirrorCache, IExecutionContext context)
         {
             if (mirrorCache.TryGetValue(source, out string cachedValue))
             {

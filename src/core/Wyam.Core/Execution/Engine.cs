@@ -243,30 +243,29 @@ namespace Wyam.Core.Execution
             try
             {
                 System.Diagnostics.Stopwatch engineStopwatch = System.Diagnostics.Stopwatch.StartNew();
-                using (Trace.WithIndent().Information("Executing {0} pipelines", _pipelines.Count))
+                Trace.Information("Executing {0} pipelines", _pipelines.Count);
+
+                // Setup (clear the document collection and reset cache counters)
+                Documents.Clear();
+                ExecutionCacheManager.ResetEntryHits();
+
+                // Get and execute all phases
+                Guid executionId = Guid.NewGuid();
+                Task[] phaseTasks = GetPhaseTasks(executionId, serviceProvider);
+                await Task.WhenAll(phaseTasks);
+
+                // Clean up (clear unhit cache entries, dispose documents)
+                // Note that disposing the documents immediately after engine execution will ensure write streams get flushed and released
+                // but will also mean that callers (and tests) can't access documents and document content after the engine finishes
+                // Easiest way to access content after engine execution is to add a final Meta module and copy content to metadata
+                ExecutionCacheManager.ClearUnhitEntries();
+                foreach (PipelinePhase phase in _phases)
                 {
-                    // Setup (clear the document collection and reset cache counters)
-                    Documents.Clear();
-                    ExecutionCacheManager.ResetEntryHits();
-
-                    // Get and execute all phases
-                    Guid executionId = Guid.NewGuid();
-                    Task[] phaseTasks = GetPhaseTasks(executionId, serviceProvider);
-                    await Task.WhenAll(phaseTasks);
-
-                    // Clean up (clear unhit cache entries, dispose documents)
-                    // Note that disposing the documents immediately after engine execution will ensure write streams get flushed and released
-                    // but will also mean that callers (and tests) can't access documents and document content after the engine finishes
-                    // Easiest way to access content after engine execution is to add a final Meta module and copy content to metadata
-                    ExecutionCacheManager.ClearUnhitEntries();
-                    foreach (PipelinePhase phase in _phases)
-                    {
-                        phase.ResetClonedDocuments();
-                    }
-
-                    engineStopwatch.Stop();
-                    Trace.Information($"Finished execution in {engineStopwatch.ElapsedMilliseconds} ms");
+                    phase.ResetClonedDocuments();
                 }
+
+                engineStopwatch.Stop();
+                Trace.Information($"Finished execution in {engineStopwatch.ElapsedMilliseconds} ms");
             }
             catch (Exception ex)
             {
@@ -392,32 +391,31 @@ namespace Wyam.Core.Execution
                 {
                     string moduleName = module.GetType().Name;
                     System.Diagnostics.Stopwatch stopwatch = System.Diagnostics.Stopwatch.StartNew();
-                    using (Trace.WithIndent().Verbose("Executing module {0} with {1} input document(s)", moduleName, inputDocuments.Length))
-                    {
-                        try
-                        {
-                            // Execute the module
-                            using (ExecutionContext moduleContext = context.Clone(module))
-                            {
-                                IEnumerable<IDocument> moduleResult = await module.ExecuteAsync(inputDocuments, moduleContext);
-                                resultDocuments = moduleResult?.Where(x => x != null).ToImmutableArray() ?? ImmutableArray<IDocument>.Empty;
-                            }
+                    Trace.Verbose("Executing module {0} with {1} input document(s)", moduleName, inputDocuments.Length);
 
-                            // Trace results
-                            stopwatch.Stop();
-                            Trace.Verbose(
-                                "Executed module {0} in {1} ms resulting in {2} output document(s)",
-                                moduleName,
-                                stopwatch.ElapsedMilliseconds,
-                                resultDocuments.Length);
-                            inputDocuments = resultDocuments;
-                        }
-                        catch (Exception ex)
+                    try
+                    {
+                        // Execute the module
+                        using (ExecutionContext moduleContext = context.Clone(module))
                         {
-                            Trace.Error($"Error while executing module {moduleName}: {ex.Message}");
-                            resultDocuments = ImmutableArray<IDocument>.Empty;
-                            throw;
+                            IEnumerable<IDocument> moduleResult = await module.ExecuteAsync(inputDocuments, moduleContext);
+                            resultDocuments = moduleResult?.Where(x => x != null).ToImmutableArray() ?? ImmutableArray<IDocument>.Empty;
                         }
+
+                        // Trace results
+                        stopwatch.Stop();
+                        Trace.Verbose(
+                            "Executed module {0} in {1} ms resulting in {2} output document(s)",
+                            moduleName,
+                            stopwatch.ElapsedMilliseconds,
+                            resultDocuments.Length);
+                        inputDocuments = resultDocuments;
+                    }
+                    catch (Exception ex)
+                    {
+                        Trace.Error($"Error while executing module {moduleName}: {ex.Message}");
+                        resultDocuments = ImmutableArray<IDocument>.Empty;
+                        throw;
                     }
                 }
             }

@@ -33,21 +33,42 @@ namespace Wyam.Common.Util
 
         public static async Task<IEnumerable<TResult>> SelectAsync<TSource, TResult>(
             this IEnumerable<TSource> items,
-            Func<TSource, Task<TResult>> asyncSelector) =>
-            await Task.WhenAll(items.Select(asyncSelector));
+            Func<TSource, Task<TResult>> asyncSelector)
+        {
+            // We need to iterate the items one-by-one and wait on each task as it's provided
+            // Otherwise the tasks will all be created AND STARTED during the iteration, potentially in parallel
+            // In other words, creating/getting a bunch of tasks and then calling Task.WhenAll() to wait on them _may_ run them in parallel
+            List<TResult> results = new List<TResult>();
+            foreach (TSource item in items)
+            {
+                Task<TResult> task = asyncSelector(item);  // Task may already be started by the time we get it
+                if (task != null)
+                {
+                    results.Add(await task);
+                }
+            }
+            return results;
+        }
 
         public static async Task<IEnumerable<TResult>> SelectManyAsync<TSource, TResult>(
             this IEnumerable<TSource> items,
             Func<TSource, Task<IEnumerable<TResult>>> asyncSelector) =>
-            (await Task.WhenAll(items.Select(asyncSelector))).SelectMany(x => x);
+            (await items.SelectAsync(asyncSelector)).SelectMany(x => x);
 
         public static async Task<IEnumerable<TSource>> WhereAsync<TSource>(
             this IEnumerable<TSource> items,
             Func<TSource, Task<bool>> asyncPredicate)
         {
-            IEnumerable<(TSource x, Task<bool>)> tasks = items.Select(x => (x, asyncPredicate(x)));
-            await Task.WhenAll(tasks.Select(x => x.Item2));
-            return tasks.Where(x => x.Item2.Result).Select(x => x.Item1);
+            List<TSource> results = new List<TSource>();
+            foreach (TSource item in items)
+            {
+                Task<bool> task = asyncPredicate(item);  // Task may already be started by the time we get it
+                if (await task)
+                {
+                    results.Add(item);
+                }
+            }
+            return results;
         }
 
         public static async Task<bool> AnyAsync<TSource>(

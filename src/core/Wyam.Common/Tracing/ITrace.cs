@@ -72,22 +72,5 @@ namespace Wyam.Common.Tracing
         /// <param name="messageOrFormat">The formatted message to write.</param>
         /// <param name="args">The arguments for the formatted message.</param>
         void TraceEvent(TraceEventType eventType, string messageOrFormat, params object[] args);
-
-        /// <summary>
-        /// Indents all future trace messages.
-        /// </summary>
-        /// <returns>The new indent level.</returns>
-        int Indent();
-
-        /// <summary>
-        /// The current indent level.
-        /// </summary>
-        int IndentLevel { get; set; }
-
-        /// <summary>
-        /// Returns a <see cref="IIndentedTraceEvent"/> that can be used to trace a message and indent following messages.
-        /// </summary>
-        /// <returns>A <see cref="IIndentedTraceEvent"/> that should be used to trace an indented message and indent following messages.</returns>
-        IIndentedTraceEvent WithIndent();
     }
 }

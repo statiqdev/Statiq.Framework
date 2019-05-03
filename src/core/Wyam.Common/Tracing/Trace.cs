@@ -89,37 +89,6 @@ namespace Wyam.Common.Tracing
             }
         }
 
-        public static int Indent() => IndentLevel++;
-
-        public static int IndentLevel
-        {
-            get
-            {
-                return _indent;
-            }
-            set
-            {
-                if (value >= 0)
-                {
-                    Interlocked.Exchange(ref _indent, value);
-
-                    lock (ListenersLock)
-                    {
-                        foreach (TraceListener listener in TraceSource.Listeners)
-                        {
-                            listener.IndentLevel = value;
-                        }
-                    }
-                }
-            }
-        }
-
-        /// <summary>
-        /// Indents all trace messages until the returned <see cref="IIndentedTraceEvent"/> is disposed.
-        /// </summary>
-        /// <returns>A <see cref="IIndentedTraceEvent"/> that should be disposed when indenting is complete.</returns>
-        public static IIndentedTraceEvent WithIndent() => new IndentedTraceEvent();
-
         SourceLevels ITrace.Level
         {
             get { return Level; }
@@ -149,15 +118,5 @@ namespace Wyam.Common.Tracing
 
         void ITrace.TraceEvent(TraceEventType eventType, string messageOrFormat, params object[] args) =>
             TraceEvent(eventType, messageOrFormat, args);
-
-        int ITrace.Indent() => Indent();
-
-        int ITrace.IndentLevel
-        {
-            get { return IndentLevel; }
-            set { IndentLevel = value; }
-        }
-
-        IIndentedTraceEvent ITrace.WithIndent() => WithIndent();
     }
 }

@@ -113,10 +113,10 @@ namespace Wyam.Core.Execution
 
             // Dispose documents that aren't part of the final collection for this pipeline,
             // but don't dispose any documents that are referenced directly or indirectly from the final ones
-            HashSet<IDocument> flattenedResultDocuments = new HashSet<IDocument>();
-            FlattenResultDocuments(OutputDocuments, flattenedResultDocuments);
-            Parallel.ForEach(_clonedDocuments.Where(x => !flattenedResultDocuments.Contains(x)), x => x.Dispose());
-            _clonedDocuments = new ConcurrentBag<IDocument>(flattenedResultDocuments);
+            // HashSet<IDocument> flattenedResultDocuments = new HashSet<IDocument>();
+            // FlattenResultDocuments(OutputDocuments, flattenedResultDocuments);
+            // Parallel.ForEach(_clonedDocuments.Where(x => !flattenedResultDocuments.Contains(x)), x => x.Dispose());
+            // _clonedDocuments = new ConcurrentBag<IDocument>(flattenedResultDocuments);
         }
 
         private void FlattenResultDocuments(IEnumerable<IDocument> documents, HashSet<IDocument> flattenedResultDocuments)
