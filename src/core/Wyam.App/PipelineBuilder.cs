@@ -76,7 +76,8 @@ namespace Wyam.App
 
         public PipelineBuilder AsSerial()
         {
-            _actions.Add(x => x.Dependencies.AddRange(_collection.Keys));
+            // Make sure not to add isolated pipelines as dependencies
+            _actions.Add(x => x.Dependencies.AddRange(_collection.Where(p => !p.Value.Isolated).Select(p => p.Key)));
             return this;
         }
 
