@@ -15,7 +15,7 @@ using Wyam.Common.Shortcodes;
 
 namespace Wyam.App
 {
-    public static class BootstrapperExtensions
+    public static class BootstrapperConfiguratorExtensions
     {
         public static IBootstrapper AddCommand<TCommand>(this IBootstrapper bootstrapper, string name)
             where TCommand : class, ICommand

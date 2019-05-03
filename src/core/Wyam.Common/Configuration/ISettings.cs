@@ -19,7 +19,7 @@ namespace Wyam.Common.Configuration
     /// <metadata cref="Keys.CleanOutputPath" usage="Setting" />
     /// <metadata cref="Keys.DateTimeInputCulture" usage="Setting" />
     /// <metadata cref="Keys.DateTimeDisplayCulture" usage="Setting" />
-    public interface ISettings : IMetadataDictionary, IReadOnlySettings
+    public interface ISettings : IMetadataDictionary, IReadOnlySettings, IConfigurable
     {
     }
 }
