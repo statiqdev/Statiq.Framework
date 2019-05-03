@@ -81,27 +81,25 @@ namespace Wyam.Core.Execution
             ResetClonedDocuments();
 
             System.Diagnostics.Stopwatch pipelineStopwatch = System.Diagnostics.Stopwatch.StartNew();
-            using (Trace.WithIndent().Information($"Executing {PipelineName}/{Phase} with {_modules.Count} module(s)"))
+            Trace.Information($"Executing {PipelineName}/{Phase} with {_modules.Count} module(s)");
+            try
             {
-                try
+                // Execute all modules in the pipeline with a new DI scope per phase
+                IServiceScopeFactory serviceScopeFactory = serviceProvider.GetRequiredService<IServiceScopeFactory>();
+                using (IServiceScope serviceScope = serviceScopeFactory.CreateScope())
                 {
-                    // Execute all modules in the pipeline with a new DI scope per phase
-                    IServiceScopeFactory serviceScopeFactory = serviceProvider.GetRequiredService<IServiceScopeFactory>();
-                    using (IServiceScope serviceScope = serviceScopeFactory.CreateScope())
+                    using (ExecutionContext context = new ExecutionContext(engine, executionId, this, serviceScope.ServiceProvider))
                     {
-                        using (ExecutionContext context = new ExecutionContext(engine, executionId, this, serviceScope.ServiceProvider))
-                        {
-                            OutputDocuments = await Engine.ExecuteAsync(context, _modules, inputDocuments);
-                            pipelineStopwatch.Stop();
-                            Trace.Information($"Executed {PipelineName}/{Phase} in {pipelineStopwatch.ElapsedMilliseconds} ms resulting in {OutputDocuments.Length} output document(s)");
-                        }
+                        OutputDocuments = await Engine.ExecuteAsync(context, _modules, inputDocuments);
+                        pipelineStopwatch.Stop();
+                        Trace.Information($"Executed {PipelineName}/{Phase} in {pipelineStopwatch.ElapsedMilliseconds} ms resulting in {OutputDocuments.Length} output document(s)");
                     }
                 }
-                catch (Exception)
-                {
-                    Trace.Error($"Error while executing {PipelineName}/{Phase}");
-                    throw;
-                }
+            }
+            catch (Exception)
+            {
+                Trace.Error($"Error while executing {PipelineName}/{Phase}");
+                throw;
             }
 
             // Store the result documents, but only if this is the Process phase of a non-isolated pipeline
