@@ -23,7 +23,7 @@ namespace Splashdown
         public static async Task<int> Main(string[] args) =>
             await Bootstrapper
                 .CreateDefault(args)
-                .AddPipeline("First", builder =>
+                .BuildPipeline("First", builder =>
                     builder
                         .WithReadModules(new ReadFiles("*.md"))
                         .WithProcessModules(
@@ -32,19 +32,16 @@ namespace Splashdown
                             new ReplaceIn("{{CONTENT}}", new ReadFiles("template.html")),
                             new Replace("{{TITLE}}", Config.FromDocument(doc => doc.Get("Title", "Default Title"))),
                             new Replace("{{DESC}}", Config.FromDocument(doc => doc.Get("Description", "Default Description"))))
-                        .WithWriteModules(new WriteFiles(".html"))
-                        .Build())
-                .AddPipeline("Second", builder =>
-                    builder
-                        .WithReadModules(new ReadFiles("*.md"))
-                        .WithProcessModules(
-                            new FrontMatter(new Yaml()),
-                            new Markdown(),
-                            new ReplaceIn("{{CONTENT}}", new ReadFiles("template.html")),
-                            new Replace("{{TITLE}}", Config.FromDocument(doc => doc.Get("Title", "Default Title"))),
-                            new Replace("{{DESC}}", Config.FromDocument(doc => doc.Get("Description", "Default Description"))))
-                        .WithWriteModules(new WriteFiles(Config.FromDocument(doc => (FilePath)$"{doc.Source.FileName}2.html")))
-                        .Build())
+                        .WithWriteModules(new WriteFiles(".html")))
+                .AddIsolatedPipeline(
+                    "Second",
+                    "*.md",
+                    Config.FromDocument(doc => (FilePath)$"{doc.Source.FileName}2.html"),
+                    new FrontMatter(new Yaml()),
+                    new Markdown(),
+                    new ReplaceIn("{{CONTENT}}", new ReadFiles("template.html")),
+                    new Replace("{{TITLE}}", Config.FromDocument(doc => doc.Get("Title", "Default Title"))),
+                    new Replace("{{DESC}}", Config.FromDocument(doc => doc.Get("Description", "Default Description"))))
                 .RunAsync();
     }
 }
