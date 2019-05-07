@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Threading.Tasks;
 using Wyam.Common.IO;
 using Wyam.Common.Meta;
 
@@ -40,7 +41,7 @@ namespace Wyam.Common.Documents
 
         /// <summary>Gets the content associated with this document as a string. This will result in reading the entire content stream.</summary>
         /// <value>The content associated with this document.</value>
-        string Content { get; }
+        Task<string> GetContentAsStringAsync();
 
         /// <summary>
         /// Gets the content associated with this document as a <see cref="Stream"/>.
@@ -49,7 +50,7 @@ namespace Wyam.Common.Documents
         /// Other threads will block on this call until the previously returned stream is disposed.
         /// </summary>
         /// <returns>A <see cref="Stream"/> of the content associated with this document.</returns>
-        Stream GetStream();
+        Task<Stream> GetContentAsync();
 
         /// <summary>
         /// Gets the metadata for this document without any global settings included.

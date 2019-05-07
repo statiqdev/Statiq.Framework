@@ -2,151 +2,127 @@
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
-using Wyam.Common.IO;
+using Wyam.Common.Execution;
 
-namespace Wyam.Common.Documents
+namespace Wyam.Common.Documents.Content
 {
-    /// <summary>
-    /// This creates a file stream that deletes the underlying file on dispose.
-    /// </summary>
-    internal class FileContentStream : Stream
+    internal class ContentStream : Stream
     {
-        private readonly IFile _file;
-        private Stream _stream;
+        private readonly Stream _stream;
+        private readonly SemaphoreSlim _mutex;
         private bool _disposed;
 
-        public FileContentStream(IFile file)
+        public ContentStream(Stream stream, SemaphoreSlim mutex)
         {
-            _file = file ?? throw new ArgumentNullException(nameof(file));
+            _stream = stream;
+            _mutex = mutex;
         }
 
         protected override void Dispose(bool disposing)
         {
             CheckDisposed();
             _disposed = true;
-            _stream?.Dispose();
-            if (_file.GetExistsAsync().Result)
-            {
-                _file.DeleteAsync().Wait();
-            }
+            _mutex?.Release();
         }
 
         private void CheckDisposed()
         {
             if (_disposed)
             {
-                throw new ObjectDisposedException(nameof(FileContentStream));
+                throw new ObjectDisposedException(nameof(ContentStream));
             }
         }
 
-        private async Task<Stream> GetStreamAsync() => _stream ?? (_stream = await _file.OpenAsync());
-
-        private Stream GetStream() => GetStreamAsync().Result;
-
-        public override object InitializeLifetimeService()
-        {
-            CheckDisposed();
-            return GetStream().InitializeLifetimeService();
-        }
+        // Delegating members
 
         public override async Task CopyToAsync(Stream destination, int bufferSize, CancellationToken cancellationToken)
         {
             CheckDisposed();
-            Stream stream = await GetStreamAsync();
-            await stream.CopyToAsync(destination, bufferSize, cancellationToken);
-        }
-
-        public override void Close()
-        {
-            CheckDisposed();
-            GetStream().Close();
+            await _stream.CopyToAsync(destination, bufferSize, cancellationToken);
         }
 
         public override void Flush()
         {
             CheckDisposed();
-            GetStream().Flush();
+            _stream.Flush();
         }
 
         public override async Task FlushAsync(CancellationToken cancellationToken)
         {
             CheckDisposed();
-            Stream stream = await GetStreamAsync();
-            await stream.FlushAsync(cancellationToken);
+            await _stream.FlushAsync(cancellationToken);
         }
 
         public override IAsyncResult BeginRead(byte[] buffer, int offset, int count, AsyncCallback callback, object state)
         {
             CheckDisposed();
-            return GetStream().BeginRead(buffer, offset, count, callback, state);
+            return _stream.BeginRead(buffer, offset, count, callback, state);
         }
 
         public override int EndRead(IAsyncResult asyncResult)
         {
             CheckDisposed();
-            return GetStream().EndRead(asyncResult);
+            return _stream.EndRead(asyncResult);
         }
 
         public override async Task<int> ReadAsync(byte[] buffer, int offset, int count, CancellationToken cancellationToken)
         {
             CheckDisposed();
-            Stream stream = await GetStreamAsync();
-            return await stream.ReadAsync(buffer, offset, count, cancellationToken);
+            return await _stream.ReadAsync(buffer, offset, count, cancellationToken);
         }
 
         public override IAsyncResult BeginWrite(byte[] buffer, int offset, int count, AsyncCallback callback, object state)
         {
             CheckDisposed();
-            return GetStream().BeginWrite(buffer, offset, count, callback, state);
+            return _stream.BeginWrite(buffer, offset, count, callback, state);
         }
 
         public override void EndWrite(IAsyncResult asyncResult)
         {
             CheckDisposed();
-            GetStream().EndWrite(asyncResult);
+            _stream.EndWrite(asyncResult);
         }
 
         public override async Task WriteAsync(byte[] buffer, int offset, int count, CancellationToken cancellationToken)
         {
             CheckDisposed();
-            Stream stream = await GetStreamAsync();
-            await stream.WriteAsync(buffer, offset, count, cancellationToken);
+            await _stream.WriteAsync(buffer, offset, count, cancellationToken);
         }
 
         public override long Seek(long offset, SeekOrigin origin)
         {
             CheckDisposed();
-            return GetStream().Seek(offset, origin);
+            return _stream.Seek(offset, origin);
         }
 
         public override void SetLength(long value)
         {
             CheckDisposed();
-            GetStream().SetLength(value);
+            _stream.SetLength(value);
         }
 
         public override int Read(byte[] buffer, int offset, int count)
         {
             CheckDisposed();
-            return GetStream().Read(buffer, offset, count);
+            return _stream.Read(buffer, offset, count);
         }
 
         public override int ReadByte()
         {
             CheckDisposed();
-            return GetStream().ReadByte();
+            return _stream.ReadByte();
         }
 
         public override void Write(byte[] buffer, int offset, int count)
         {
             CheckDisposed();
-            GetStream().Write(buffer, offset, count);
+            _stream.Write(buffer, offset, count);
         }
 
         public override void WriteByte(byte value)
         {
             CheckDisposed();
-            GetStream().WriteByte(value);
+            _stream.WriteByte(value);
         }
 
         public override bool CanRead
@@ -154,7 +130,7 @@ namespace Wyam.Common.Documents
             get
             {
                 CheckDisposed();
-                return GetStream().CanRead;
+                return _stream.CanRead;
             }
         }
 
@@ -163,7 +139,7 @@ namespace Wyam.Common.Documents
             get
             {
                 CheckDisposed();
-                return GetStream().CanSeek;
+                return _stream.CanSeek;
             }
         }
 
@@ -172,7 +148,7 @@ namespace Wyam.Common.Documents
             get
             {
                 CheckDisposed();
-                return GetStream().CanTimeout;
+                return _stream.CanTimeout;
             }
         }
 
@@ -181,7 +157,7 @@ namespace Wyam.Common.Documents
             get
             {
                 CheckDisposed();
-                return GetStream().CanWrite;
+                return _stream.CanWrite;
             }
         }
 
@@ -190,7 +166,7 @@ namespace Wyam.Common.Documents
             get
             {
                 CheckDisposed();
-                return GetStream().Length;
+                return _stream.Length;
             }
         }
 
@@ -199,12 +175,12 @@ namespace Wyam.Common.Documents
             get
             {
                 CheckDisposed();
-                return GetStream().Position;
+                return _stream.Position;
             }
             set
             {
                 CheckDisposed();
-                GetStream().Position = value;
+                _stream.Position = value;
             }
         }
 
@@ -213,12 +189,12 @@ namespace Wyam.Common.Documents
             get
             {
                 CheckDisposed();
-                return GetStream().ReadTimeout;
+                return _stream.ReadTimeout;
             }
             set
             {
                 CheckDisposed();
-                GetStream().ReadTimeout = value;
+                _stream.ReadTimeout = value;
             }
         }
 
@@ -227,12 +203,12 @@ namespace Wyam.Common.Documents
             get
             {
                 CheckDisposed();
-                return GetStream().WriteTimeout;
+                return _stream.WriteTimeout;
             }
             set
             {
                 CheckDisposed();
-                GetStream().WriteTimeout = value;
+                _stream.WriteTimeout = value;
             }
         }
     }

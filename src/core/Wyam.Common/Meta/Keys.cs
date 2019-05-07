@@ -56,6 +56,12 @@ namespace Wyam.Common.Meta
         public const string LinkLowercase = nameof(LinkLowercase);
 
         /// <summary>
+        /// This will cause temporary backing files to be created for string document content
+        /// instead of storing that content in memory. 
+        /// </summary>
+        public const string UseStringContentFiles = nameof(UseStringContentFiles);
+
+        /// <summary>
         /// Indicates whether caching should be used.
         /// </summary>
         /// <type><see cref="bool"/></type>

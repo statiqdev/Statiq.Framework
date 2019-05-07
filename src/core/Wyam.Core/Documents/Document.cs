@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Collections;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading;
+using System.Threading.Tasks;
 using Wyam.Common.Documents;
 using Wyam.Common.IO;
 using Wyam.Common.Meta;
@@ -17,105 +19,68 @@ namespace Wyam.Core.Documents
     // Document source must be unique within the pipeline
     internal class Document : IDocument
     {
-        private readonly SemaphoreSlim _streamMutex;
+        private static readonly Dictionary<IContentProvider, int> _contentProviderReferenceCount = new Dictionary<IContentProvider, int>();
+        private static readonly object _contentProviderReferenceCountLock = new object();
+
         private readonly MetadataStack _metadata;
-        private readonly Stream _stream;
-        private bool _disposeStream;
+        private readonly IContentProvider _contentProvider;
         private bool _disposed;
 
-        internal Document(MetadataDictionary initialMetadata, Stream stream = null)
-            : this(initialMetadata, null, stream, null, true)
+        internal Document(
+            MetadataDictionary initialMetadata,
+            IContentProvider contentProvider = null)
+            : this(initialMetadata, null, contentProvider, null)
         {
         }
 
-        internal Document(MetadataDictionary initialMetadata, FilePath source, Stream stream, IEnumerable<KeyValuePair<string, object>> items, bool disposeStream)
-            : this(Guid.NewGuid().ToString(), new MetadataStack(initialMetadata), source, stream, null, items, disposeStream)
+        internal Document(
+            MetadataDictionary initialMetadata,
+            FilePath source,
+            IContentProvider contentProvider,
+            IEnumerable<KeyValuePair<string, object>> items)
+            : this(Guid.NewGuid().ToString(), new MetadataStack(initialMetadata), source, contentProvider, items)
         {
-        }
-
-        private Document(string id, MetadataStack metadata, FilePath source, Stream stream, SemaphoreSlim streamMutex, IEnumerable<KeyValuePair<string, object>> items, bool disposeStream)
-        {
-            if (source?.IsAbsolute == false)
-            {
-                throw new ArgumentException("Document sources must be absolute", nameof(source));
-            }
-
-            Id = id ?? throw new ArgumentNullException(nameof(id));
-            Source = source;
-            _metadata = items == null ? metadata : metadata.Clone(items);
-
-            if (stream == null)
-            {
-                _stream = Stream.Null;
-            }
-            else
-            {
-                if (!stream.CanRead)
-                {
-                    throw new ArgumentException("Document stream must support reading.", nameof(stream));
-                }
-
-                if (!stream.CanSeek)
-                {
-                    _stream = new SeekableStream(stream, disposeStream);
-                    _disposeStream = true;
-                }
-                else
-                {
-                    _stream = stream;
-                    _disposeStream = disposeStream;
-                }
-            }
-            _streamMutex = streamMutex ?? new SemaphoreSlim(1);
-        }
-
-        internal Document(Document sourceDocument, FilePath source, IEnumerable<KeyValuePair<string, object>> items = null)
-            : this(
-                sourceDocument.Id,
-                sourceDocument._metadata,
-                sourceDocument.Source ?? source,
-                sourceDocument._stream,
-                sourceDocument._streamMutex,
-                items,
-                sourceDocument._disposeStream)
-        {
-            sourceDocument.CheckDisposed();
-
-            // Don't dispose the stream since the cloned document might be final and get passed to another pipeline, it'll take care of final disposal
-            sourceDocument._disposeStream = false;
         }
 
         internal Document(
             Document sourceDocument,
             FilePath source,
-            Stream stream,
-            IEnumerable<KeyValuePair<string, object>> items = null,
-            bool disposeStream = true)
+            IEnumerable<KeyValuePair<string, object>> items = null)
             : this(
                 sourceDocument.Id,
                 sourceDocument._metadata,
                 sourceDocument.Source ?? source,
-                stream ?? sourceDocument._stream,
-                stream == null ? sourceDocument._streamMutex : null,
-                items,
-                disposeStream)
+                sourceDocument._contentProvider,
+                items)
         {
             sourceDocument.CheckDisposed();
         }
 
         internal Document(
             Document sourceDocument,
-            Stream stream,
-            IEnumerable<KeyValuePair<string, object>> items = null,
-            bool disposeStream = true)
+            FilePath source,
+            IContentProvider contentProvider,
+            IEnumerable<KeyValuePair<string, object>> items = null)
+            : this(
+                sourceDocument.Id,
+                sourceDocument._metadata,
+                sourceDocument.Source ?? source,
+                contentProvider ?? sourceDocument._contentProvider,
+                items)
+        {
+            sourceDocument.CheckDisposed();
+        }
+
+        internal Document(
+            Document sourceDocument,
+            IContentProvider contentProvider,
+            IEnumerable<KeyValuePair<string, object>> items = null)
             : this(
                 sourceDocument.Id,
                 sourceDocument._metadata,
                 sourceDocument.Source,
-                stream ?? sourceDocument._stream,
-                stream == null ? sourceDocument._streamMutex : null,
-                items,
-                disposeStream)
+                contentProvider ?? sourceDocument._contentProvider,
+                items)
         {
             sourceDocument.CheckDisposed();
         }
@@ -125,15 +90,43 @@ namespace Wyam.Core.Documents
                 sourceDocument.Id,
                 sourceDocument._metadata,
                 sourceDocument.Source,
-                sourceDocument._stream,
-                sourceDocument._streamMutex,
-                items,
-                sourceDocument._disposeStream)
+                sourceDocument._contentProvider,
+                items)
         {
             sourceDocument.CheckDisposed();
+        }
 
-            // Don't dispose the stream since the cloned document might be final and get passed to another pipeline, it'll take care of final disposal
-            sourceDocument._disposeStream = false;
+        private Document(
+            string id,
+            MetadataStack metadata,
+            FilePath source,
+            IContentProvider contentProvider,
+            IEnumerable<KeyValuePair<string, object>> items)
+        {
+            if (source?.IsAbsolute == false)
+            {
+                throw new ArgumentException("Document sources must be absolute", nameof(source));
+            }
+
+            Id = id ?? throw new ArgumentNullException(nameof(id));
+            Source = source;
+            _metadata = items == null ? metadata : metadata.Clone(items);
+            _contentProvider = contentProvider;
+
+            if (_contentProvider != null)
+            {
+                lock (_contentProviderReferenceCountLock)
+                {
+                    if (_contentProviderReferenceCount.TryGetValue(_contentProvider, out int count))
+                    {
+                        _contentProviderReferenceCount[_contentProvider] = count + 1;
+                    }
+                    else
+                    {
+                        _contentProviderReferenceCount.Add(contentProvider, 1);
+                    }
+                }
+            }
         }
 
         public FilePath Source { get; }
@@ -144,38 +137,26 @@ namespace Wyam.Core.Documents
 
         public IMetadata Metadata => _metadata;
 
-        public string Content
+        public async Task<string> GetContentAsStringAsync()
         {
-            get
+            CheckDisposed();
+            using (StreamReader reader = new StreamReader(await GetContentAsync()))
             {
-                CheckDisposed();
-                _streamMutex.Wait();
-                try
-                {
-                    _stream.Position = 0;
-                    using (StreamReader reader = new StreamReader(_stream, Encoding.UTF8, true, 4096, true))
-                    {
-                        return reader.ReadToEnd();
-                    }
-                }
-                finally
-                {
-                    _streamMutex.Release();
-                }
+                return await reader.ReadToEndAsync();
             }
         }
 
-        public Stream GetStream()
+        public async Task<Stream> GetContentAsync()
         {
             CheckDisposed();
-            _streamMutex.Wait();
-            _stream.Position = 0;
-            return new BlockingStream(_stream, this);
+            if (_contentProvider == null)
+            {
+                return Stream.Null;
+            }
+            return await _contentProvider.GetStreamAsync();
         }
 
-        internal void ReleaseStream() => _streamMutex.Release();
-
-        public override string ToString() => _disposed ? string.Empty : Content;
+        public override string ToString() => _disposed ? string.Empty : Source?.FullPath ?? string.Empty;
 
         public void Dispose()
         {
@@ -184,9 +165,31 @@ namespace Wyam.Core.Documents
                 return;
             }
 
-            if (_disposeStream)
+            if (_contentProvider != null)
             {
-                _stream.Dispose();
+                int count;
+                lock (_contentProviderReferenceCountLock)
+                {
+                    if (!_contentProviderReferenceCount.TryGetValue(_contentProvider, out count))
+                    {
+                        throw new InvalidOperationException("Unexepected document content provider reference count missing");
+                    }
+                    count--;
+                    if (count == 0)
+                    {
+                        _contentProviderReferenceCount.Remove(_contentProvider);
+                    }
+                    else
+                    {
+                        _contentProviderReferenceCount[_contentProvider] = count;
+                    }
+                }
+
+                // Dispose the content provider outside the lock
+                if (count == 0)
+                {
+                    _contentProvider.Dispose();
+                }
             }
 
             _disposed = true;

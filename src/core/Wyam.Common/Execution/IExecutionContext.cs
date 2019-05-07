@@ -41,6 +41,11 @@ namespace Wyam.Common.Execution
         IReadOnlyCollection<string> Namespaces { get; }
 
         /// <summary>
+        /// Provides pooled memory streams (via the RecyclableMemoryStream library).
+        /// </summary>
+        IMemoryStreamManager MemoryStreamManager { get; }
+
+        /// <summary>
         /// Gets the name of the currently executing pipeline.
         /// </summary>
         string PipelineName { get; }
@@ -95,17 +100,6 @@ namespace Wyam.Common.Execution
         string ApplicationInput { get; }
 
         /// <summary>
-        /// Gets a <see cref="Stream"/> that can be used for document content. If <paramref name="content"/>
-        /// is not null, the stream is initialized with the specified content. It is prefered to use
-        /// this method to obtain a stream over creating your own if the source of the content does
-        /// not already provide one. The returned streams are optimized for memory usage and performance.
-        /// <remarks>The position is set to the beginning of the stream when returned.</remarks>
-        /// </summary>
-        /// <param name="content">Content to initialize the stream with.</param>
-        /// <returns>A stream for document content.</returns>
-        Task<Stream> GetContentStreamAsync(string content = null);
-
-        /// <summary>
         /// Creates a <see cref="HttpClient"/> instance that should be used for all HTTP communication.
         /// </summary>
         /// <returns>A new <see cref="HttpClient"/> instance.</returns>
@@ -119,19 +113,15 @@ namespace Wyam.Common.Execution
         HttpClient CreateHttpClient(HttpMessageHandler handler);
 
         /// <summary>
-        /// Clones the specified source document with a new source, new content stream, and additional metadata (all existing metadata is retained)
+        /// Clones the specified source document with a new source, new content provider, and additional metadata (all existing metadata is retained)
         /// or gets a new document if the source document is null or <c>AsNewDocuments()</c> was called on the module.
-        /// If <paramref name="disposeStream"/> is true (which it is by default), the provided
-        /// <see cref="Stream"/> will automatically be disposed when the document is disposed (I.e., the
-        /// document takes ownership of the <see cref="Stream"/>).
         /// </summary>
         /// <param name="sourceDocument">The source document.</param>
         /// <param name="source">The source (if the source document contains a source, then this is ignored and the source document's source is used instead).</param>
-        /// <param name="stream">The content stream.</param>
+        /// <param name="contentProvider">The content provider.</param>
         /// <param name="items">The metadata items.</param>
-        /// <param name="disposeStream">If set to <c>true</c> the provided <see cref="Stream"/> is disposed when the document is.</param>
         /// <returns>The cloned or new document.</returns>
-        IDocument GetDocument(IDocument sourceDocument, FilePath source, Stream stream, IEnumerable<KeyValuePair<string, object>> items = null, bool disposeStream = true);
+        IDocument GetDocument(IDocument sourceDocument, FilePath source, IContentProvider contentProvider, IEnumerable<KeyValuePair<string, object>> items = null);
 
         /// <summary>
         /// Provides access to the same enhanced type conversion used to convert metadata types.

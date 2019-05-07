@@ -106,6 +106,9 @@ namespace Wyam.Core.Execution
 
         internal ExecutionCacheManager ExecutionCacheManager { get; } = new ExecutionCacheManager();
 
+        /// <inheritdoc />
+        public IMemoryStreamManager MemoryStreamManager { get; } = new MemoryStreamManager();
+
         /// <summary>
         /// Gets or sets the application input.
         /// </summary>

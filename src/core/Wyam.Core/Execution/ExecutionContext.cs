@@ -67,6 +67,8 @@ namespace Wyam.Core.Execution
 
         public string ApplicationInput => Engine.ApplicationInput;
 
+        public IMemoryStreamManager MemoryStreamManager => Engine.MemoryStreamManager;
+
         public ExecutionContext(Engine engine, Guid executionId, PipelinePhase pipelinePhase, IServiceProvider services)
         {
             Engine = engine ?? throw new ArgumentNullException(nameof(engine));

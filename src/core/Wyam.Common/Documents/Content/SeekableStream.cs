@@ -2,24 +2,25 @@
 using System.IO;
 using System.Diagnostics;
 
-namespace Wyam.Core.Util
+namespace Wyam.Common.Documents.Content
 {
     internal class SeekableStream : Stream
     {
         private readonly Stream _stream;
         private readonly bool _disposeStream;
-        private readonly MemoryStream _memoryStream = new MemoryStream();
+        private readonly MemoryStream _bufferStream;
         private bool _endOfStream = false;
         private bool _disposed = false;
 
-        public SeekableStream(Stream stream, bool disposeStream)
+        public SeekableStream(Stream stream, bool disposeStream, MemoryStream bufferStream)
         {
-            if (!stream.CanRead)
+            if (!stream?.CanRead ?? throw new ArgumentNullException(nameof(stream)))
             {
                 throw new ArgumentException("Wrapped stream must be readable.");
             }
             _stream = stream;
             _disposeStream = disposeStream;
+            _bufferStream = bufferStream ?? throw new ArgumentNullException(nameof(bufferStream));
         }
 
         public override bool CanRead => true;
@@ -40,7 +41,7 @@ namespace Wyam.Core.Util
                 {
                     Fill();
                 }
-                return _memoryStream.Length;
+                return _bufferStream.Length;
             }
         }
 
@@ -49,7 +50,7 @@ namespace Wyam.Core.Util
             get
             {
                 CheckDisposed();
-                return _memoryStream.Position;
+                return _bufferStream.Position;
             }
             set
             {
@@ -61,9 +62,8 @@ namespace Wyam.Core.Util
         public override int Read(byte[] buffer, int offset, int count)
         {
             CheckDisposed();
-            int memoryBytes = 0;
             int streamBytes = 0;
-            memoryBytes = _memoryStream.Read(buffer, offset, count);
+            int memoryBytes = _bufferStream.Read(buffer, offset, count);
             if ((count > memoryBytes) && (!_endOfStream))
             {
                 int read = _stream.Read(buffer, offset + memoryBytes + streamBytes, count - memoryBytes - streamBytes);
@@ -72,7 +72,7 @@ namespace Wyam.Core.Util
                 {
                     _endOfStream = true;
                 }
-                _memoryStream.Write(buffer, offset + memoryBytes, streamBytes);
+                _bufferStream.Write(buffer, offset + memoryBytes, streamBytes);
             }
             return memoryBytes + streamBytes;
         }
@@ -80,31 +80,31 @@ namespace Wyam.Core.Util
         public override long Seek(long offset, SeekOrigin origin)
         {
             CheckDisposed();
-            long newPosition = 0L;
+            long newPosition;
             switch (origin)
             {
                 case SeekOrigin.Begin:
                     newPosition = offset;
                     break;
                 case SeekOrigin.Current:
-                    newPosition = _memoryStream.Position + offset;
+                    newPosition = _bufferStream.Position + offset;
                     break;
                 case SeekOrigin.End:
                     if (!_endOfStream)
                     {
                         Fill();
                     }
-                    newPosition = _memoryStream.Length + offset;
+                    newPosition = _bufferStream.Length + offset;
                     break;
                 default:
                     throw new ArgumentOutOfRangeException(nameof(origin));
             }
 
             // Read additional bytes from the underlying stream if seeking past the end of the buffer
-            if ((newPosition > _memoryStream.Length) && (!_endOfStream))
+            if ((newPosition > _bufferStream.Length) && (!_endOfStream))
             {
-                _memoryStream.Position = _memoryStream.Length;
-                int bytesToRead = (int)(newPosition - _memoryStream.Length);
+                _bufferStream.Position = _bufferStream.Length;
+                int bytesToRead = (int)(newPosition - _bufferStream.Length);
                 byte[] buffer = new byte[1024];
                 do
                 {
@@ -112,7 +112,7 @@ namespace Wyam.Core.Util
                 }
                 while ((bytesToRead > 0) && (!_endOfStream));
             }
-            _memoryStream.Position = (newPosition <= _memoryStream.Length) ? newPosition : _memoryStream.Length;
+            _bufferStream.Position = (newPosition <= _bufferStream.Length) ? newPosition : _bufferStream.Length;
             return 0;
         }
 
@@ -133,13 +133,13 @@ namespace Wyam.Core.Util
                 return;
             }
 
-            _memoryStream.Position = _memoryStream.Length;
-            int bytesRead = 0;
+            _bufferStream.Position = _bufferStream.Length;
             byte[] buffer = new byte[1024];
+            int bytesRead;
             do
             {
                 bytesRead = _stream.Read(buffer, 0, buffer.Length);
-                _memoryStream.Write(buffer, 0, bytesRead);
+                _bufferStream.Write(buffer, 0, bytesRead);
             }
             while (bytesRead != 0);
             _endOfStream = true;
@@ -153,7 +153,7 @@ namespace Wyam.Core.Util
                 return;
             }
 
-            _memoryStream?.Dispose();
+            _bufferStream.Dispose();
             if (_disposeStream)
             {
                 _stream.Dispose();

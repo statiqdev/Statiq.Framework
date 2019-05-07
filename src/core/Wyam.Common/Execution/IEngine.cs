@@ -48,6 +48,11 @@ namespace Wyam.Common.Execution
         IRawAssemblyCollection DynamicAssemblies { get; }
 
         /// <summary>
+        /// Provides pooled memory streams (via the RecyclableMemoryStream library).
+        /// </summary>
+        IMemoryStreamManager MemoryStreamManager { get; }
+
+        /// <summary>
         /// Gets or sets the application input.
         /// </summary>
         string ApplicationInput { get; set; }
