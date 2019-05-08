@@ -22,6 +22,6 @@ namespace Wyam.Core.Shortcodes.Contents
     {
         /// <inheritdoc />
         public async Task<IDocument> ExecuteAsync(KeyValuePair<string, string>[] args, string content, IDocument document, IExecutionContext context) =>
-            await context.NewGetDocumentAsync(content: content);
+            context.GetDocument(await context.GetContentProviderAsync(content));
     }
 }

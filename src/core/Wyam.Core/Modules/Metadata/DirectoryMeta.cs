@@ -180,7 +180,7 @@ namespace Wyam.Core.Modules.Metadata
                     firstLevel = false;
                 }
 
-                return newMetadata.Count > 0 ? await context.NewGetDocumentAsync(input, metadata: newMetadata) : input;
+                return newMetadata.Count > 0 ? context.GetDocument(input, newMetadata) : input;
             }
         }
 

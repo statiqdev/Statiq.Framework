@@ -103,9 +103,9 @@ namespace Wyam.Core.Modules.Metadata
                                 }
                             }
                         }
-                        return await context.NewGetDocumentAsync(
+                        return context.GetDocument(
                             input,
-                            metadata: _onlyIfNonExisting ? metadata.Where(x => !input.ContainsKey(x.Key)) : metadata);
+                            _onlyIfNonExisting ? metadata.Where(x => !input.ContainsKey(x.Key)) : metadata);
                     });
                 }
 
@@ -117,16 +117,16 @@ namespace Wyam.Core.Modules.Metadata
                         metadata[kvp.Key] = kvp.Value;
                     }
                 }
-                return await inputs.SelectAsync(context, async input => await context.NewGetDocumentAsync(
+                return inputs.Select(context, input => context.GetDocument(
                     input,
-                    metadata: _onlyIfNonExisting ? metadata.Where(x => !input.ContainsKey(x.Key)) : metadata));
+                    _onlyIfNonExisting ? metadata.Where(x => !input.ContainsKey(x.Key)) : metadata));
             }
 
             return await inputs.SelectAsync(context, async doc => _onlyIfNonExisting && doc.ContainsKey(_key)
                 ? doc
-                : await context.NewGetDocumentAsync(
+                : context.GetDocument(
                     doc,
-                    metadata: new[]
+                    new[]
                     {
                         new KeyValuePair<string, object>(_key, await _metadata.GetValueAsync(doc, context))
                     }));

@@ -200,7 +200,7 @@ namespace Wyam.SearchIndex
                 };
             }
 
-            return new[] { await context.GetDocumentAsync(metadata: metadata, content: script) };
+            return new[] { context.GetDocument(metadata, await context.GetContentProviderAsync(script)) };
         }
 
         private StringBuilder BuildScript(IList<ISearchIndexItem> searchIndexItems, string[] stopwords, IExecutionContext context)

@@ -56,7 +56,7 @@ namespace Wyam.Core.Modules.Contents
         {
             if (inputs == null || inputs.Count < 1)
             {
-                return new[] { await context.NewGetDocumentAsync() };
+                return new[] { context.GetDocument() };
             }
 
             Stream contentStream = await context.GetContentStreamAsync();
@@ -84,7 +84,7 @@ namespace Wyam.Core.Modules.Contents
                 }
             }
 
-            return new[] { await context.NewGetDocumentAsync(metadata: MetadataForOutputDocument(inputs), content: contentStream) };
+            return new[] { context.GetDocument(MetadataForOutputDocument(inputs), await context.GetContentProviderAsync(contentStream)) };
         }
 
         /// <summary>

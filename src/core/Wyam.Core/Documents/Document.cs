@@ -26,27 +26,36 @@ namespace Wyam.Core.Documents
         internal Document(
             MetadataDictionary initialMetadata,
             IContentProvider contentProvider = null)
-            : this(initialMetadata, null, contentProvider, null)
+            : this(initialMetadata, null, null, contentProvider, null)
         {
         }
 
         internal Document(
             MetadataDictionary initialMetadata,
             FilePath source,
+            FilePath destination,
             IContentProvider contentProvider,
             IEnumerable<KeyValuePair<string, object>> items)
-            : this(Guid.NewGuid().ToString(), new MetadataStack(initialMetadata), source, contentProvider, items)
+            : this(
+                  Guid.NewGuid().ToString(),
+                  new MetadataStack(initialMetadata),
+                  source,
+                  destination,
+                  contentProvider,
+                  items)
         {
         }
 
         internal Document(
             Document sourceDocument,
             FilePath source,
+            FilePath destination,
             IEnumerable<KeyValuePair<string, object>> items = null)
             : this(
                 sourceDocument.Id,
                 sourceDocument._metadata,
                 sourceDocument.Source ?? source,
+                destination ?? sourceDocument.Destination,
                 sourceDocument._contentProvider,
                 items)
         {
@@ -56,12 +65,14 @@ namespace Wyam.Core.Documents
         internal Document(
             Document sourceDocument,
             FilePath source,
+            FilePath destination,
             IContentProvider contentProvider,
             IEnumerable<KeyValuePair<string, object>> items = null)
             : this(
                 sourceDocument.Id,
                 sourceDocument._metadata,
                 sourceDocument.Source ?? source,
+                destination ?? sourceDocument.Destination,
                 contentProvider ?? sourceDocument._contentProvider,
                 items)
         {
@@ -76,6 +87,7 @@ namespace Wyam.Core.Documents
                 sourceDocument.Id,
                 sourceDocument._metadata,
                 sourceDocument.Source,
+                sourceDocument.Destination,
                 contentProvider ?? sourceDocument._contentProvider,
                 items)
         {
@@ -87,6 +99,7 @@ namespace Wyam.Core.Documents
                 sourceDocument.Id,
                 sourceDocument._metadata,
                 sourceDocument.Source,
+                sourceDocument.Destination,
                 sourceDocument._contentProvider,
                 items)
         {
@@ -97,6 +110,7 @@ namespace Wyam.Core.Documents
             string id,
             MetadataStack metadata,
             FilePath source,
+            FilePath destination,
             IContentProvider contentProvider,
             IEnumerable<KeyValuePair<string, object>> items)
         {
@@ -107,6 +121,7 @@ namespace Wyam.Core.Documents
 
             Id = id ?? throw new ArgumentNullException(nameof(id));
             Source = source;
+            Destination = destination;
             _metadata = items == null ? metadata : metadata.Clone(items);
             _contentProvider = contentProvider;
 
@@ -128,6 +143,8 @@ namespace Wyam.Core.Documents
 
         public FilePath Source { get; }
 
+        public FilePath Destination { get; }
+
         public string SourceString() => Source?.ToString() ?? "[unknown source]";
 
         public string Id { get; }
@@ -137,11 +154,12 @@ namespace Wyam.Core.Documents
         public async Task<string> GetStringAsync()
         {
             CheckDisposed();
-            if (_contentProvider == null)
+            Stream stream = await GetStreamAsync();
+            if (stream == null || stream == Stream.Null)
             {
                 return string.Empty;
             }
-            using (StreamReader reader = new StreamReader(await GetStreamAsync()))
+            using (StreamReader reader = new StreamReader(stream))
             {
                 return await reader.ReadToEndAsync();
             }
@@ -150,11 +168,7 @@ namespace Wyam.Core.Documents
         public async Task<Stream> GetStreamAsync()
         {
             CheckDisposed();
-            if (_contentProvider == null)
-            {
-                return Stream.Null;
-            }
-            return await _contentProvider.GetStreamAsync();
+            return _contentProvider == null ? Stream.Null : await _contentProvider.GetStreamAsync();
         }
 
         internal IContentProvider ContentProvider

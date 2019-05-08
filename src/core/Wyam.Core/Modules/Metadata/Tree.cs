@@ -85,7 +85,7 @@ namespace Wyam.Core.Modules.Metadata
             {
                 FilePath source = new FilePath(string.Join("/", treePath.Concat(new[] { "index.html" })));
                 items.Add(new MetadataItem(Keys.RelativeFilePath, source));
-                return await context.NewGetDocumentAsync(source: (await context.FileSystem.GetInputFileAsync(source)).Path.FullPath, metadata: items);
+                return context.GetDocument((await context.FileSystem.GetInputFileAsync(source)).Path.FullPath, null, items);
             };
             _sort = (x, y) => Comparer.Default.Compare(
                 x.Get<object[]>(Keys.TreePath)?.LastOrDefault(),
@@ -326,11 +326,11 @@ namespace Wyam.Core.Modules.Metadata
                 {
                     // There's no input document for this node so we need to make a placeholder
                     metadata.Add(Keys.TreePlaceholder, true);
-                    OutputDocument = await tree._placeholderFactory(TreePath, metadata, context) ?? await context.NewGetDocumentAsync(metadata: metadata);
+                    OutputDocument = await tree._placeholderFactory(TreePath, metadata, context) ?? context.GetDocument(metadata);
                 }
                 else
                 {
-                    OutputDocument = await context.NewGetDocumentAsync(InputDocument, metadata: metadata);
+                    OutputDocument = context.GetDocument(InputDocument, metadata);
                 }
             }
 

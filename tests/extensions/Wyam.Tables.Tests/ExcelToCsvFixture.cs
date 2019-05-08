@@ -49,7 +49,7 @@ namespace Wyam.Tables.Tests
 + "\"26\",\"26\",\"52\",\"78\",\"104\",\"130\",\"156\",\"182\"\r\n";
 
                 TestExecutionContext context = new TestExecutionContext();
-                TestDocument document = new TestDocument(GetTestFileStream("test.xlsx"));
+                TestDocument document = new TestDocument(content: GetTestFileStream("test.xlsx"));
                 ExcelToCsv module = new ExcelToCsv();
 
                 // When
@@ -57,7 +57,7 @@ namespace Wyam.Tables.Tests
 
                 // Then
                 results.Count.ShouldBe(1);
-                results[0].Content.ShouldBe(output, StringCompareShould.IgnoreLineEndings);
+                (await results[0].GetStringAsync()).ShouldBe(output, StringCompareShould.IgnoreLineEndings);
             }
         }
     }

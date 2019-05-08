@@ -173,7 +173,7 @@ namespace Wyam.Core.Shortcodes.Html
                 }
             }
 
-            return await context.NewGetDocumentAsync(content: table);
+            return context.GetDocument(await context.GetContentProviderAsync(table));
         }
     }
 }

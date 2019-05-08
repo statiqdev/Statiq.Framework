@@ -85,7 +85,7 @@ namespace Wyam.Core.Modules.Templates
                     {
                         xslt.Transform(XmlReader.Create(stream), writer);
                     }
-                    return await context.NewGetDocumentAsync(input, content: str);
+                    return context.GetDocument(input, await context.GetContentProviderAsync(str));
                 }
             });
         }

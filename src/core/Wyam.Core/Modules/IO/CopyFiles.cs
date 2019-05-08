@@ -142,15 +142,16 @@ namespace Wyam.Core.Modules.IO
                         Trace.Verbose("Copied file {0} to {1}", file.Path.FullPath, destination.Path.FullPath);
 
                         // Return the document
-                        return await context.NewGetDocumentAsync(
+                        return context.GetDocument(
                             input,
                             file.Path,
+                            relativePath,
                             new MetadataItems
                             {
                                 { Keys.SourceFilePath, file.Path },
                                 { Keys.DestinationFilePath, destination.Path }
                             },
-                            file);
+                            await context.GetContentProviderAsync(file));
                     }
                     catch (Exception ex)
                     {

@@ -21,22 +21,22 @@ namespace Wyam.Tables
     public class ExcelToCsv : IModule
     {
         /// <inheritdoc />
-        public Task<IEnumerable<IDocument>> ExecuteAsync(IReadOnlyList<IDocument> inputs, IExecutionContext context)
+        public async Task<IEnumerable<IDocument>> ExecuteAsync(IReadOnlyList<IDocument> inputs, IExecutionContext context)
         {
-            ParallelQuery<IDocument> outputs = inputs.AsParallel().Select(context, input =>
+            return await inputs.ParallelSelectAsync(context, async input =>
             {
                 try
                 {
                     IEnumerable<IEnumerable<string>> records;
-                    using (Stream stream = input.GetStream())
+                    using (Stream stream = await input.GetStreamAsync())
                     {
                         records = ExcelFile.GetAllRecords(stream);
                     }
 
-                    using (MemoryStream memoryStream = new MemoryStream())
+                    using (Stream contentStream = await context.GetContentStreamAsync())
                     {
-                        CsvFile.WriteAllRecords(records, memoryStream);
-                        return context.GetDocument(input, memoryStream);
+                        CsvFile.WriteAllRecords(records, contentStream);
+                        return context.GetDocument(input, await context.GetContentProviderAsync(contentStream));
                     }
                 }
                 catch (Exception e)
@@ -45,7 +45,6 @@ namespace Wyam.Tables
                     return null;
                 }
             });
-            return Task.FromResult<IEnumerable<IDocument>>(outputs);
         }
     }
 }

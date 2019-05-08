@@ -24,10 +24,12 @@ namespace Wyam.Images.Tests
                 // Given
                 TestExecutionContext context = new TestExecutionContext();
                 MemoryStream fileStream = GetTestFileStream("logo-square.png");
-                TestDocument document = new TestDocument(fileStream, new MetadataItems
-                {
-                    { Keys.RelativeFilePath, new FilePath("a/b/test.png") }
-                });
+                TestDocument document = new TestDocument(
+                    new MetadataItems
+                    {
+                        { Keys.RelativeFilePath, new FilePath("a/b/test.png") }
+                    },
+                    fileStream);
                 Image module = new Image();
 
                 // When
@@ -44,10 +46,12 @@ namespace Wyam.Images.Tests
                 // Given
                 TestExecutionContext context = new TestExecutionContext();
                 MemoryStream fileStream = GetTestFileStream("logo-square.png");
-                TestDocument document = new TestDocument(fileStream, new MetadataItems
-                {
-                    { Keys.RelativeFilePath, new FilePath("a/b/test.png") }
-                });
+                TestDocument document = new TestDocument(
+                    new MetadataItems
+                    {
+                        { Keys.RelativeFilePath, new FilePath("a/b/test.png") }
+                    },
+                    fileStream);
                 Image module = new Image().OutputAsGif();
 
                 // When
@@ -64,10 +68,12 @@ namespace Wyam.Images.Tests
                 // Given
                 TestExecutionContext context = new TestExecutionContext();
                 MemoryStream fileStream = GetTestFileStream("logo-square.png");
-                TestDocument document = new TestDocument(fileStream, new MetadataItems
-                {
-                    { Keys.RelativeFilePath, new FilePath("a/b/test.png") }
-                });
+                TestDocument document = new TestDocument(
+                    new MetadataItems
+                    {
+                        { Keys.RelativeFilePath, new FilePath("a/b/test.png") }
+                    },
+                    fileStream);
                 Image module = new Image().Brightness(123);
 
                 // When

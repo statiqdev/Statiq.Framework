@@ -20,11 +20,11 @@ namespace Wyam.Common.Content
         /// <see cref="Stream"/> will automatically be disposed when the document is disposed (I.e., the
         /// document takes ownership of the <see cref="Stream"/>).
         /// </summary>
-        /// <param name="context">The current execution context.</param>
+        /// <param name="memoryStreamFactory">A memory stream factory for use if the content stream can't seek and a buffer needs to be created.</param>
         /// <param name="stream">The stream that contains content.</param>
         /// <param name="disposeStream">If <c>true</c>, the provided <see cref="Stream"/> is disposed when no longer used by documents.</param>
         /// <param name="synchronized">If <c>true</c>, access to the provided stream will be synchronized so that only one caller can access it at a time.</param>
-        public StreamContent(IExecutionContext context, Stream stream, bool disposeStream = true, bool synchronized = true)
+        public StreamContent(IMemoryStreamFactory memoryStreamFactory, Stream stream, bool disposeStream = true, bool synchronized = true)
         {
             if (!stream?.CanRead ?? throw new ArgumentNullException(nameof(stream)))
             {
@@ -39,7 +39,7 @@ namespace Wyam.Common.Content
             else
             {
                 // If the stream can't seek, wrap it in a buffered stream that can
-                MemoryStream bufferStream = context.MemoryStreamManager.GetStream();
+                MemoryStream bufferStream = memoryStreamFactory.GetStream();
                 _stream = new SeekableStream(stream, disposeStream, bufferStream);
                 _disposeStream = true;
             }

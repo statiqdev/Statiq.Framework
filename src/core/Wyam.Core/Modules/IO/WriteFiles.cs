@@ -350,8 +350,8 @@ namespace Wyam.Core.Modules.IO
                     });
                 }
                 return _onlyMetadata
-                    ? await context.NewGetDocumentAsync(input, metadata: metadata)
-                    : await context.NewGetDocumentAsync(input, metadata: metadata, content: outputFile);
+                    ? context.GetDocument(input, metadata)
+                    : context.GetDocument(input, metadata, await context.GetContentProviderAsync(outputFile));
             }
             return input;
         }

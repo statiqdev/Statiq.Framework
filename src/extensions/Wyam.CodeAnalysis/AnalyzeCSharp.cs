@@ -464,7 +464,7 @@ namespace Wyam.CodeAnalysis
 
             // Add the input source and references
             List<ISymbol> symbols = new List<ISymbol>();
-            compilation = AddSourceFiles(inputs, context, compilation);
+            compilation = await AddSourceFilesAsync(inputs, context, compilation);
             compilation = await AddProjectReferencesAsync(context, symbols, compilation);
             compilation = await AddSolutionReferencesAsync(context, symbols, compilation);
             compilation = await AddAssemblyReferencesAsync(context, symbols, compilation);
@@ -484,20 +484,20 @@ namespace Wyam.CodeAnalysis
             return visitor.Finish();
         }
 
-        private Compilation AddSourceFiles(IReadOnlyList<IDocument> inputs, IExecutionContext context, Compilation compilation)
+        private async Task<Compilation> AddSourceFilesAsync(IReadOnlyList<IDocument> inputs, IExecutionContext context, Compilation compilation)
         {
             ConcurrentBag<SyntaxTree> syntaxTrees = new ConcurrentBag<SyntaxTree>();
             if (_inputDocuments)
             {
                 // Get syntax trees (supply path so that XML doc includes can be resolved)
-                context.ParallelForEach(inputs, AddSyntaxTrees);
+                await context.ParallelForEachAsync(inputs, async x => await AddSyntaxTreesAsync(x));
                 compilation = compilation.AddSyntaxTrees(syntaxTrees);
             }
             return compilation;
 
-            void AddSyntaxTrees(IDocument input)
+            async Task AddSyntaxTreesAsync(IDocument input)
             {
-                using (Stream stream = input.GetStream())
+                using (Stream stream = await input.GetStreamAsync())
                 {
                     SourceText sourceText = SourceText.From(stream);
                     syntaxTrees.Add(CSharpSyntaxTree.ParseText(

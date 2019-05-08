@@ -440,13 +440,13 @@ namespace Wyam.Feeds
             // Generate the feeds
             return new[]
             {
-                GenerateFeed(FeedType.Rss, feed, _rssPath, context),
-                GenerateFeed(FeedType.Atom, feed, _atomPath, context),
-                GenerateFeed(FeedType.Rdf, feed, _rdfPath, context)
+                await GenerateFeedAsync(FeedType.Rss, feed, _rssPath, context),
+                await GenerateFeedAsync(FeedType.Atom, feed, _atomPath, context),
+                await GenerateFeedAsync(FeedType.Rdf, feed, _rdfPath, context)
             }.Where(x => x != null);
         }
 
-        private IDocument GenerateFeed(FeedType feedType, Feed feed, FilePath path, IExecutionContext context)
+        private async Task<IDocument> GenerateFeedAsync(FeedType feedType, Feed feed, FilePath path, IExecutionContext context)
         {
             // Get the output path
             if (path == null)
@@ -459,14 +459,15 @@ namespace Wyam.Feeds
             }
 
             // Generate the feed and document
-            MemoryStream stream = new MemoryStream();
-            FeedSerializer.SerializeXml(feedType, feed, stream);
-            stream.Position = 0;
-            return context.GetDocument(stream, new MetadataItems
-            {
-                new MetadataItem(Keys.RelativeFilePath, path),
-                new MetadataItem(Keys.WritePath, path)
-            });
+            Stream contentStream = await context.GetContentStreamAsync();
+            FeedSerializer.SerializeXml(feedType, feed, contentStream);
+            return context.GetDocument(
+                new MetadataItems
+                {
+                    new MetadataItem(Keys.RelativeFilePath, path),
+                    new MetadataItem(Keys.WritePath, path)
+                },
+                await context.GetContentProviderAsync(contentStream));
         }
     }
 }

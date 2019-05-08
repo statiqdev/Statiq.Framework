@@ -102,14 +102,14 @@ namespace Wyam.Core.Tests.Modules.Control
             private IDocument GetDocument(string source, string content)
             {
                 return new TestDocument(
-                    content,
                     new Dictionary<string, object>
                     {
                         { Keys.RelativeFilePath, source },
                         { Keys.SourceFilePath, new FilePath("/" + source) },
                         { Keys.SourceFileName, new FilePath(source).FileName }
-                    })
-                    {
+                    },
+                    content)
+                {
                         Source = new FilePath("/" + source)
                     };
             }

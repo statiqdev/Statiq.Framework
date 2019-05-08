@@ -33,9 +33,9 @@ Content1
 Content2")
                 };
                 string frontMatterContent = null;
-                FrontMatter frontMatter = new FrontMatter(new ExecuteDocument(Config.FromDocument(x =>
+                FrontMatter frontMatter = new FrontMatter(new ExecuteDocument(Config.FromDocument(async x =>
                 {
-                    frontMatterContent = x.Content;
+                    frontMatterContent = await x.GetStringAsync();
                     return new[] { x };
                 })));
 
@@ -50,7 +50,7 @@ FM2
 ", frontMatterContent);
                 Assert.AreEqual(
                     @"Content1
-Content2", documents.First().Content);
+Content2", await documents.First().GetStringAsync());
             }
 
             [Test]
@@ -69,9 +69,9 @@ Content1
 Content2")
                 };
                 string frontMatterContent = null;
-                FrontMatter frontMatter = new FrontMatter(new ExecuteDocument(Config.FromDocument(x =>
+                FrontMatter frontMatter = new FrontMatter(new ExecuteDocument(Config.FromDocument(async x =>
                 {
-                    frontMatterContent = x.Content;
+                    frontMatterContent = await x.GetStringAsync();
                     return new[] { x };
                 })));
 
@@ -88,7 +88,7 @@ Content2")
 FM2
 ---
 Content1
-Content2", documents.First().Content);
+Content2", await documents.First().GetStringAsync());
             }
 
             [Test]
@@ -106,9 +106,9 @@ Content1
 Content2")
                 };
                 string frontMatterContent = null;
-                FrontMatter frontMatter = new FrontMatter(new ExecuteDocument(Config.FromDocument(x =>
+                FrontMatter frontMatter = new FrontMatter(new ExecuteDocument(Config.FromDocument(async x =>
                 {
-                    frontMatterContent = x.Content;
+                    frontMatterContent = await x.GetStringAsync();
                     return new[] { x };
                 })));
 
@@ -124,7 +124,7 @@ FM2
 ", frontMatterContent);
                 Assert.AreEqual(
                     @"Content1
-Content2", documents.First().Content);
+Content2", await documents.First().GetStringAsync());
             }
 
             [Test]
@@ -158,7 +158,7 @@ Content2")
 FM2
 ---
 Content1
-Content2", documents.First().Content);
+Content2", await documents.First().GetStringAsync());
             }
 
             [Test]
@@ -175,9 +175,9 @@ Content1
 Content2")
                 };
                 string frontMatterContent = null;
-                FrontMatter frontMatter = new FrontMatter("ABC", new ExecuteDocument(Config.FromDocument(x =>
+                FrontMatter frontMatter = new FrontMatter("ABC", new ExecuteDocument(Config.FromDocument(async x =>
                 {
-                    frontMatterContent = x.Content;
+                    frontMatterContent = await x.GetStringAsync();
                     return new[] { x };
                 })));
 
@@ -192,7 +192,7 @@ FM2
 ", frontMatterContent);
                 Assert.AreEqual(
                     @"Content1
-Content2", documents.First().Content);
+Content2", await documents.First().GetStringAsync());
             }
 
             [Test]
@@ -209,9 +209,9 @@ Content1
 Content2")
                 };
                 string frontMatterContent = null;
-                FrontMatter frontMatter = new FrontMatter('!', new ExecuteDocument(Config.FromDocument(x =>
+                FrontMatter frontMatter = new FrontMatter('!', new ExecuteDocument(Config.FromDocument(async x =>
                 {
-                    frontMatterContent = x.Content;
+                    frontMatterContent = await x.GetStringAsync();
                     return new[] { x };
                 })));
 
@@ -226,7 +226,7 @@ FM2
 ", frontMatterContent);
                 Assert.AreEqual(
                     @"Content1
-Content2", documents.First().Content);
+Content2", await documents.First().GetStringAsync());
             }
 
             [Test]
@@ -243,9 +243,9 @@ Content1
 Content2")
                 };
                 string frontMatterContent = null;
-                FrontMatter frontMatter = new FrontMatter('!', new ExecuteDocument(Config.FromDocument(x =>
+                FrontMatter frontMatter = new FrontMatter('!', new ExecuteDocument(Config.FromDocument(async x =>
                 {
-                    frontMatterContent = x.Content;
+                    frontMatterContent = await x.GetStringAsync();
                     return new[] { x };
                 })));
 
@@ -260,7 +260,7 @@ FM2
 ", frontMatterContent);
                 Assert.AreEqual(
                     @"Content1
-Content2", documents.First().Content);
+Content2", await documents.First().GetStringAsync());
             }
 
             [Test]
@@ -294,7 +294,7 @@ Content2")
 FM2
   !!!!
 Content1
-Content2", documents.First().Content);
+Content2", await documents.First().GetStringAsync());
             }
 
             [Test]
@@ -313,9 +313,9 @@ Content1
 Content2")
                 };
                 string frontMatterContent = null;
-                FrontMatter frontMatter = new FrontMatter('!', new ExecuteDocument(Config.FromDocument(x =>
+                FrontMatter frontMatter = new FrontMatter('!', new ExecuteDocument(Config.FromDocument(async x =>
                 {
-                    frontMatterContent = x.Content;
+                    frontMatterContent = await x.GetStringAsync();
                     return new[] { x };
                 })));
 
@@ -332,7 +332,7 @@ FM2
                 Assert.AreEqual(
                     @"
 Content1
-Content2", documents.First().Content);
+Content2", await documents.First().GetStringAsync());
             }
 
             [Test]
@@ -349,9 +349,9 @@ Content1
 Content2")
                 };
                 string frontMatterContent = null;
-                FrontMatter frontMatter = new FrontMatter('!', new ExecuteDocument(Config.FromDocument(x =>
+                FrontMatter frontMatter = new FrontMatter('!', new ExecuteDocument(Config.FromDocument(async x =>
                 {
-                    frontMatterContent = x.Content;
+                    frontMatterContent = await x.GetStringAsync();
                     return new[] { x };
                 })));
 
@@ -366,7 +366,7 @@ FM2
 ", frontMatterContent);
                 Assert.AreEqual(
                     @"Content1
-Content2", documents.First().Content);
+Content2", await documents.First().GetStringAsync());
             }
 
             [Test]
@@ -384,9 +384,9 @@ XX"),
 YY")
                 };
                 string frontMatterContent = string.Empty;
-                FrontMatter frontMatter = new FrontMatter(new ExecuteDocument(Config.FromDocument(x =>
+                FrontMatter frontMatter = new FrontMatter(new ExecuteDocument(Config.FromDocument(async x =>
                 {
-                    frontMatterContent += x.Content;
+                    frontMatterContent += await x.GetStringAsync();
                     return new[] { x };
                 })));
 
@@ -399,8 +399,8 @@ YY")
                     @"AA
 BB
 ", frontMatterContent);
-                Assert.AreEqual("XX", documents.First().Content);
-                Assert.AreEqual("YY", documents.Skip(1).First().Content);
+                Assert.AreEqual("XX", await documents.First().GetStringAsync());
+                Assert.AreEqual("YY", await documents.Skip(1).First().GetStringAsync());
             }
 
             [Test]
@@ -418,9 +418,9 @@ Content1
 Content2")
                 };
                 string frontMatterContent = null;
-                FrontMatter frontMatter = new FrontMatter(new ExecuteDocument(Config.FromDocument(x =>
+                FrontMatter frontMatter = new FrontMatter(new ExecuteDocument(Config.FromDocument(async x =>
                 {
-                    frontMatterContent = x.Content;
+                    frontMatterContent = await x.GetStringAsync();
                     return new[] { x };
                 })));
 
@@ -435,7 +435,7 @@ FM2
 ", frontMatterContent);
                 Assert.AreEqual(
                     @"Content1
-Content2", documents.First().Content);
+Content2", await documents.First().GetStringAsync());
             }
 
             [Test]
@@ -453,9 +453,9 @@ Content1
 Content2")
                 };
                 string frontMatterContent = null;
-                FrontMatter frontMatter = new FrontMatter(new ExecuteDocument(Config.FromDocument(x =>
+                FrontMatter frontMatter = new FrontMatter(new ExecuteDocument(Config.FromDocument(async x =>
                 {
-                    frontMatterContent = x.Content;
+                    frontMatterContent = await x.GetStringAsync();
                     return new[] { x };
                 }))).IgnoreDelimiterOnFirstLine(false);
 
@@ -470,7 +470,7 @@ Content2")
 FM2
 ---
 Content1
-Content2", documents.First().Content);
+Content2", await documents.First().GetStringAsync());
             }
         }
     }

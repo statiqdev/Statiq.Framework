@@ -48,7 +48,7 @@ namespace Wyam.Core.Modules.IO
                 return Array.Empty<IDocument>();
             }
 
-            return new[] { await context.NewGetDocumentAsync(content: context.ApplicationInput) };
+            return new[] { context.GetDocument(await context.GetContentProviderAsync(context.ApplicationInput)) };
         }
     }
 }

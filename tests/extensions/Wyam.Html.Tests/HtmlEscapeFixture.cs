@@ -103,7 +103,7 @@ namespace Wyam.Html.Tests
                 IList<IDocument> results = await htmlEscape.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
 
                 // Then
-                Assert.That(results.Select(x => x.Content), Is.EquivalentTo(new[] { output }));
+                Assert.That(await results.SelectAsync(async x => await x.GetStringAsync()), Is.EquivalentTo(new[] { output }));
             }
 
             [Test]
@@ -136,7 +136,7 @@ namespace Wyam.Html.Tests
                 IList<IDocument> results = await htmlEscape.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
 
                 // Then
-                Assert.That(results.Select(x => x.Content), Is.EquivalentTo(new[] { output }));
+                Assert.That(await results.SelectAsync(async x => await x.GetStringAsync()), Is.EquivalentTo(new[] { output }));
             }
         }
     }

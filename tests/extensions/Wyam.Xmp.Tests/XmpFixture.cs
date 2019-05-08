@@ -97,7 +97,7 @@ namespace Wyam.Xmp.Tests
             }
 
             private IEnumerable<IDocument> GetDocuments(params string[] pathArray) =>
-                pathArray.Select(x => new TestDocument(File.OpenRead(x))
+                pathArray.Select(x => new TestDocument(content: File.OpenRead(x))
                 {
                     Source = x
                 });

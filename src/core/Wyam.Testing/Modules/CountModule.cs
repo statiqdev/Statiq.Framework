@@ -38,6 +38,7 @@ namespace Wyam.Testing.Modules
 
             foreach (IDocument input in inputs)
             {
+                string inputContent = await input.GetStringAsync();
                 InputCount++;
                 for (int c = 0; c < AdditionalOutputs + 1; c++)
                 {
@@ -45,18 +46,19 @@ namespace Wyam.Testing.Modules
                     Value++;
                     if (CloneSource)
                     {
-                        results.Add(await context.GetDocumentAsync(
+                        results.Add(context.GetDocument(
                             input,
                             new FilePath(ValueKey + sourceCount++, PathKind.Absolute),
+                            null,
                             new Dictionary<string, object> { { ValueKey, Value } },
-                            input.Content == null ? Value.ToString() : input.Content + Value));
+                            await context.GetContentProviderAsync(inputContent == null ? Value.ToString() : inputContent + Value)));
                     }
                     else
                     {
-                        results.Add(await context.GetDocumentAsync(
+                        results.Add(context.GetDocument(
                             input,
-                            source: input.Content == null ? Value.ToString() : input.Content + Value,
-                            content: new Dictionary<string, object> { { ValueKey, Value } }));
+                            new Dictionary<string, object> { { ValueKey, Value } },
+                            await context.GetContentProviderAsync(inputContent == null ? Value.ToString() : inputContent + Value)));
                     }
                 }
             }

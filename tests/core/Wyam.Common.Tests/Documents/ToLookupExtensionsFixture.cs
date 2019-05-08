@@ -20,17 +20,17 @@ namespace Wyam.Common.Tests.Documents
             {
                 // Given
                 IDocument a = new TestDocument(
-                    new MemoryStream(Encoding.UTF8.GetBytes("a")),
-                    new Dictionary<string, object> { { "Numbers", new[] { 1, 2, 3 } } });
+                    new Dictionary<string, object> { { "Numbers", new[] { 1, 2, 3 } } },
+                    "a");
                 IDocument b = new TestDocument(
-                    new MemoryStream(Encoding.UTF8.GetBytes("b")),
-                    new Dictionary<string, object> { { "Numbers", new[] { 2, 3, 4 } } });
+                    new Dictionary<string, object> { { "Numbers", new[] { 2, 3, 4 } } },
+                    "b");
                 IDocument c = new TestDocument(
-                    new MemoryStream(Encoding.UTF8.GetBytes("c")),
-                    new Dictionary<string, object> { { "Numbers", new[] { 3 } } });
+                    new Dictionary<string, object> { { "Numbers", new[] { 3 } } },
+                    "c");
                 IDocument d = new TestDocument(
-                    new MemoryStream(Encoding.UTF8.GetBytes("d")),
-                    new Dictionary<string, object> { { "Numbers", new[] { 4 } } });
+                    new Dictionary<string, object> { { "Numbers", new[] { 4 } } },
+                    "d");
                 List<IDocument> documents = new List<IDocument>() { a, b, c, d };
 
                 // When
@@ -49,17 +49,17 @@ namespace Wyam.Common.Tests.Documents
             {
                 // Given
                 IDocument a = new TestDocument(
-                    new MemoryStream(Encoding.UTF8.GetBytes("a")),
-                    new Dictionary<string, object> { { "Numbers", new[] { "1", "2", "3" } } });
+                    new Dictionary<string, object> { { "Numbers", new[] { "1", "2", "3" } } },
+                    "a");
                 IDocument b = new TestDocument(
-                    new MemoryStream(Encoding.UTF8.GetBytes("b")),
-                    new Dictionary<string, object> { { "Numbers", new[] { "2", "3", "4" } } });
+                    new Dictionary<string, object> { { "Numbers", new[] { "2", "3", "4" } } },
+                    "b");
                 IDocument c = new TestDocument(
-                    new MemoryStream(Encoding.UTF8.GetBytes("c")),
-                    new Dictionary<string, object> { { "Numbers", new[] { "3" } } });
+                    new Dictionary<string, object> { { "Numbers", new[] { "3" } } },
+                    "c");
                 IDocument d = new TestDocument(
-                    new MemoryStream(Encoding.UTF8.GetBytes("d")),
-                    new Dictionary<string, object> { { "Numbers", new[] { "4" } } });
+                    new Dictionary<string, object> { { "Numbers", new[] { "4" } } },
+                    "d");
                 List<IDocument> documents = new List<IDocument>() { a, b, c, d };
 
                 // When
@@ -78,33 +78,33 @@ namespace Wyam.Common.Tests.Documents
             {
                 // Given
                 IDocument a = new TestDocument(
-                    new MemoryStream(Encoding.UTF8.GetBytes("a")),
                     new Dictionary<string, object>
                     {
                         { "Numbers", new[] { 1, 2, 3 } },
                         { "Colors", "Red" }
-                    });
+                    },
+                    "a");
                 IDocument b = new TestDocument(
-                    new MemoryStream(Encoding.UTF8.GetBytes("b")),
                     new Dictionary<string, object>
                     {
                         { "Numbers", new[] { 2, 3, 4 } },
                         { "Colors", "Red" }
-                    });
+                    },
+                    "b");
                 IDocument c = new TestDocument(
-                    new MemoryStream(Encoding.UTF8.GetBytes("c")),
                     new Dictionary<string, object>
                     {
                         { "Numbers", new[] { 3 } },
                         { "Colors", "Green" }
-                    });
+                    },
+                    "c");
                 IDocument d = new TestDocument(
-                    new MemoryStream(Encoding.UTF8.GetBytes("d")),
                     new Dictionary<string, object>
                     {
                         { "Numbers", new[] { 4 } },
                         { "Colors", "Green" }
-                    });
+                    },
+                    "d");
                 List<IDocument> documents = new List<IDocument>() { a, b, c, d };
 
                 // When
@@ -126,33 +126,33 @@ namespace Wyam.Common.Tests.Documents
             {
                 // Given
                 IDocument a = new TestDocument(
-                    new MemoryStream(Encoding.UTF8.GetBytes("a")),
                     new Dictionary<string, object>
                     {
                         { "Numbers", new[] { 1, 2, 3 } },
                         { "Colors", new[] { "Red" } }
-                    });
+                    },
+                    "a");
                 IDocument b = new TestDocument(
-                    new MemoryStream(Encoding.UTF8.GetBytes("b")),
                     new Dictionary<string, object>
                     {
                         { "Numbers", new[] { 2, 3, 4 } },
                         { "Colors", new[] { "Red", "Blue" } }
-                    });
+                    },
+                    "b");
                 IDocument c = new TestDocument(
-                    new MemoryStream(Encoding.UTF8.GetBytes("c")),
                     new Dictionary<string, object>
                     {
                         { "Numbers", new[] { 3 } },
                         { "Colors", new[] { "Green" } }
-                    });
+                    },
+                    "c");
                 IDocument d = new TestDocument(
-                    new MemoryStream(Encoding.UTF8.GetBytes("d")),
                     new Dictionary<string, object>
                     {
                         { "Numbers", new[] { 4 } },
                         { "Colors", new[] { "Green", "Blue" } }
-                    });
+                    },
+                    "d");
                 List<IDocument> documents = new List<IDocument>() { a, b, c, d };
 
                 // When

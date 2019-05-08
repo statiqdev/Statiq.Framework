@@ -258,7 +258,7 @@ namespace Wyam.Html
                         {
                             heading.Element.ChildNodes.ToHtml(writer, ProcessingInstructionFormatter.Instance);
                             writer.Flush();
-                            heading.Document = context.GetDocument(contentStream, metadata);
+                            heading.Document = context.GetDocument(metadata, await context.GetContentProviderAsync(contentStream));
                         }
 
                         // Add to parent

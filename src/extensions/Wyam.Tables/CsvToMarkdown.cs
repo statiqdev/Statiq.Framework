@@ -48,7 +48,7 @@ namespace Wyam.Tables
                 try
                 {
                     IEnumerable<IEnumerable<string>> records;
-                    using (Stream stream = input.GetStream())
+                    using (Stream stream = await input.GetStreamAsync())
                     {
                         records = CsvFile.GetAllRecords(stream);
                     }
@@ -85,7 +85,7 @@ namespace Wyam.Tables
                         firstLine = false;
                     }
 
-                    return await context.GetDocumentAsync(input, source: builder.ToString());
+                    return context.GetDocument(input, await context.GetContentProviderAsync(builder));
                 }
                 catch (Exception e)
                 {

@@ -3,9 +3,12 @@ using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
+using System.Threading.Tasks;
+using Wyam.Common.Content;
 using Wyam.Common.Documents;
 using Wyam.Common.IO;
 using Wyam.Common.Meta;
+using Wyam.Testing.Execution;
 using Wyam.Testing.Meta;
 
 namespace Wyam.Testing.Documents
@@ -18,27 +21,45 @@ namespace Wyam.Testing.Documents
     {
         private readonly TestMetadata _metadata = new TestMetadata();
 
-        /// <inhertdoc />
         public TestDocument()
         {
             Id = Guid.NewGuid().ToString();
         }
 
-        /// <inhertdoc />
         public TestDocument(string content)
             : this()
         {
-            Content = content;
+            TestMemoryStreamFactory memoryStreamFactory = new TestMemoryStreamFactory();
+            ContentProvider = new StreamContent(memoryStreamFactory, memoryStreamFactory.GetStream(content));
         }
 
-        /// <inhertdoc />
-        public TestDocument(Stream stream)
+        public TestDocument(Stream content)
             : this()
         {
-            Stream = stream;
+            TestMemoryStreamFactory memoryStreamFactory = new TestMemoryStreamFactory();
+            ContentProvider = new StreamContent(memoryStreamFactory, content);
         }
 
-        /// <inhertdoc />
+        public TestDocument(IEnumerable<KeyValuePair<string, object>> metadata, string content)
+            : this(metadata)
+        {
+            TestMemoryStreamFactory memoryStreamFactory = new TestMemoryStreamFactory();
+            ContentProvider = new StreamContent(memoryStreamFactory, memoryStreamFactory.GetStream(content));
+        }
+
+        public TestDocument(IEnumerable<KeyValuePair<string, object>> metadata, Stream content)
+            : this(metadata)
+        {
+            TestMemoryStreamFactory memoryStreamFactory = new TestMemoryStreamFactory();
+            ContentProvider = new StreamContent(memoryStreamFactory, content);
+        }
+
+        public TestDocument(IContentProvider contentProvider)
+            : this()
+        {
+            ContentProvider = contentProvider;
+        }
+
         public TestDocument(IEnumerable<KeyValuePair<string, object>> metadata)
             : this()
         {
@@ -52,17 +73,10 @@ namespace Wyam.Testing.Documents
         }
 
         /// <inhertdoc />
-        public TestDocument(string content, IEnumerable<KeyValuePair<string, object>> metadata)
+        public TestDocument(IEnumerable<KeyValuePair<string, object>> metadata, IContentProvider contentProvider)
             : this(metadata)
         {
-            Content = content;
-        }
-
-        /// <inhertdoc />
-        public TestDocument(Stream stream, IEnumerable<KeyValuePair<string, object>> metadata)
-            : this(metadata)
-        {
-            Stream = stream;
+            ContentProvider = contentProvider;
         }
 
         public void Add(KeyValuePair<string, object> item) => _metadata.Add(item);
@@ -103,23 +117,33 @@ namespace Wyam.Testing.Documents
         public FilePath Source { get; set; }
 
         /// <inhertdoc />
+        public FilePath Destination { get; set; }
+
+        /// <inhertdoc />
         public string SourceString() => Source?.FullPath;
 
         /// <inhertdoc />
-        public string Content { get; set; }
-
-        /// <summary>
-        /// Lets you set the document stream directly
-        /// </summary>
-        public Stream Stream { get; set; }
+        public IContentProvider ContentProvider { get; set; }
 
         /// <inhertdoc />
-        public Stream GetStream()
+        public bool HasContent => ContentProvider != null;
+
+        /// <inhertdoc />
+        public async Task<string> GetStringAsync()
         {
-            return Stream ?? (string.IsNullOrEmpty(Content)
-                ? new MemoryStream()
-                : new MemoryStream(Encoding.UTF8.GetBytes(Content)));
+            Stream stream = await GetStreamAsync();
+            if (stream == null || stream == Stream.Null)
+            {
+                return string.Empty;
+            }
+            using (StreamReader reader = new StreamReader(stream))
+            {
+                return await reader.ReadToEndAsync();
+            }
         }
+
+        public async Task<Stream> GetStreamAsync() =>
+            ContentProvider == null ? Stream.Null : await ContentProvider.GetStreamAsync();
 
         /// <inhertdoc />
         public IMetadata Metadata => this;

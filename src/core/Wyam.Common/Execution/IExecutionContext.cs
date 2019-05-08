@@ -5,6 +5,7 @@ using System.IO;
 using System.Net.Http;
 using System.Threading.Tasks;
 using Wyam.Common.Configuration;
+using Wyam.Common.Content;
 using Wyam.Common.Documents;
 using Wyam.Common.IO;
 using Wyam.Common.JavaScript;
@@ -40,7 +41,7 @@ namespace Wyam.Common.Execution
         /// <summary>
         /// Provides pooled memory streams (via the RecyclableMemoryStream library).
         /// </summary>
-        IMemoryStreamManager MemoryStreamManager { get; }
+        IMemoryStreamFactory MemoryStreamFactory { get; }
 
         /// <summary>
         /// Gets the name of the currently executing pipeline.
@@ -116,23 +117,28 @@ namespace Wyam.Common.Execution
         Task<Stream> GetContentStreamAsync(string content = null);
 
         /// <summary>
-        /// Clones the specified source document with a new source, new content, and additional metadata (all existing metadata is retained)
-        /// or gets a new document if the source document is null or <c>AsNewDocuments()</c> was called on the module.
+        /// Gets a content provider that can be used for document content.
         /// </summary>
-        /// <remarks>
-        /// Given the possibility for incorrect overload resolution, no overloads of this method are provided.
-        /// It is recommended that named parameters be used when only a subset need to be provided.
-        /// </remarks>
-        /// <param name="sourceDocument">The source document.</param>
-        /// <param name="source">The source (if the source document contains a source, then this is ignored and the source document's source is used instead).</param>
+        /// <param name="content">The content to create a provider for.</param>
+        /// <returns>A content provider for use when creating documents.</returns>
+        Task<IContentProvider> GetContentProviderAsync(object content);
+
+        /// <summary>
+        /// Clones the original document with a new source and destination, new content, and additional metadata (all existing metadata is retained)
+        /// or gets a new document if the original document is null or <c>AsNewDocuments()</c> was called on the module.
+        /// </summary>
+        /// <param name="originalDocument">The original document.</param>
+        /// <param name="source">The source (if the original document contains a source, then this is ignored and the original document's source is used instead).</param>
+        /// <param name="destination">The destination.</param>
         /// <param name="metadata">The metadata items.</param>
-        /// <param name="content">The content.</param>
+        /// <param name="contentProvider">The content provider.</param>
         /// <returns>The cloned or new document.</returns>
-        Task<IDocument> NewGetDocumentAsync(
-            IDocument sourceDocument = null,
-            FilePath source = null,
+        IDocument GetDocument(
+            IDocument originalDocument,
+            FilePath source,
+            FilePath destination,
             IEnumerable<KeyValuePair<string, object>> metadata = null,
-            object content = null);
+            IContentProvider contentProvider = null);
 
         /// <summary>
         /// Provides access to the same enhanced type conversion used to convert metadata types.

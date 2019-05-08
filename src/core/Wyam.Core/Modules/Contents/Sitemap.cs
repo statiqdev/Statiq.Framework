@@ -88,7 +88,7 @@ namespace Wyam.Core.Modules.Contents
             sb.Append("</urlset>");
 
             // Always output the sitemap document, even if it's empty
-            return new[] { await context.NewGetDocumentAsync(content: sb) };
+            return new[] { context.GetDocument(await context.GetContentProviderAsync(sb)) };
 
             async Task AddToSiteMapAsync(IDocument input)
             {

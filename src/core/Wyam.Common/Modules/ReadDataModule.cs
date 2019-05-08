@@ -157,7 +157,7 @@ namespace Wyam.Common.Modules
                     }
                 }
 
-                return await context.NewGetDocumentAsync(metadata: meta, content: content);
+                return context.GetDocument(meta, await context.GetContentProviderAsync(content));
             }
         }
     }

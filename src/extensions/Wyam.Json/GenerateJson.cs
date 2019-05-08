@@ -135,7 +135,7 @@ namespace Wyam.Json
                         string result = JsonConvert.SerializeObject(data, settings);
                         if (string.IsNullOrEmpty(_destinationKey))
                         {
-                            return await context.GetDocumentAsync(input, source: result);
+                            return context.GetDocument(input, await context.GetContentProviderAsync(result));
                         }
                         return context.GetDocument(input, new MetadataItems
                         {

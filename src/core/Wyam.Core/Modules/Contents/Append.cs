@@ -39,9 +39,9 @@ namespace Wyam.Core.Modules.Contents
         {
             if (input == null)
             {
-                return await context.NewGetDocumentAsync(content: content);
+                return context.GetDocument(await context.GetContentProviderAsync(content));
             }
-            return content == null ? input : await context.NewGetDocumentAsync(input, content: await input.GetStringAsync() + content);
+            return content == null ? input : context.GetDocument(input, await context.GetContentProviderAsync(await input.GetStringAsync() + content));
         }
     }
 }

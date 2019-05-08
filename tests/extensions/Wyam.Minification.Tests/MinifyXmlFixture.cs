@@ -45,7 +45,7 @@ namespace Wyam.Minification.Tests
                 IList<IDocument> results = await minifyXml.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
 
                 // Then
-                results.Single().Content.ShouldBe(output, StringCompareShould.IgnoreLineEndings);
+                (await results.Single().GetStringAsync()).ShouldBe(output, StringCompareShould.IgnoreLineEndings);
             }
         }
     }

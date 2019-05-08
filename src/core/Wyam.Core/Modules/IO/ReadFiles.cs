@@ -91,9 +91,10 @@ namespace Wyam.Core.Modules.IO
                     DirectoryPath inputPath = await context.FileSystem.GetContainingInputPathAsync(file.Path);
                     FilePath relativePath = inputPath?.GetRelativePath(file.Path) ?? file.Path.FileName;
                     FilePath fileNameWithoutExtension = file.Path.FileNameWithoutExtension;
-                    return await context.NewGetDocumentAsync(
+                    return context.GetDocument(
                         input,
                         file.Path,
+                        relativePath,
                         new MetadataItems
                         {
                             { Keys.SourceFileRoot, inputPath ?? file.Path.Directory },
@@ -113,7 +114,7 @@ namespace Wyam.Core.Modules.IO
                             },
                             { Keys.RelativeFileDir, relativePath.Directory }
                         },
-                        file);
+                        await context.GetContentProviderAsync(file));
                 });
             }
             return Array.Empty<IDocument>();

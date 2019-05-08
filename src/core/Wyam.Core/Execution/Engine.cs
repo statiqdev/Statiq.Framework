@@ -100,7 +100,7 @@ namespace Wyam.Core.Execution
         public IRawAssemblyCollection DynamicAssemblies { get; } = new RawAssemblyCollection();
 
         /// <inheritdoc />
-        public IMemoryStreamManager MemoryStreamManager { get; } = new MemoryStreamManager();
+        public IMemoryStreamFactory MemoryStreamManager { get; } = new MemoryStreamFactory();
 
         /// <summary>
         /// Gets or sets the application input.

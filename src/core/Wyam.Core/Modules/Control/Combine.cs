@@ -27,7 +27,10 @@ namespace Wyam.Core.Modules.Control
             {
                 result = result == null
                     ? input
-                    : await context.NewGetDocumentAsync(result, metadata: input, content: await result.GetStringAsync() + await input.GetStringAsync());
+                    : context.GetDocument(
+                        result,
+                        input,
+                        await context.GetContentProviderAsync(await result.GetStringAsync() + await input.GetStringAsync()));
             });
             return new[] { result };
         }

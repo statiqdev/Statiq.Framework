@@ -49,16 +49,16 @@ namespace Wyam.Core.Shortcodes.IO
             if (!await includedFile.GetExistsAsync())
             {
                 Trace.Warning($"Included file {includedPath.FullPath} does not exist");
-                return await context.NewGetDocumentAsync();
+                return context.GetDocument();
             }
 
             // Set the currently included shortcode source so nested includes can use it
-            return await context.NewGetDocumentAsync(
+            return context.GetDocument(
                 metadata: new MetadataItems
                 {
                     { "IncludeShortcodeSource", includedFile.Path.FullPath }
                 },
-                content: includedFile);
+                await context.GetContentProviderAsync(includedFile));
         }
     }
 }

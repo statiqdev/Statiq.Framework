@@ -116,7 +116,7 @@ namespace Wyam.Xmp
                  XmpDirectory xmpDirectory;
                  try
                  {
-                     using (Stream stream = input.GetStream())
+                     using (Stream stream = await input.GetStreamAsync())
                      {
                          xmpDirectory = ImageMetadataReader.ReadMetadata(stream).OfType<XmpDirectory>().FirstOrDefault();
                      }

@@ -16,6 +16,7 @@ using Wyam.Common.IO;
 using Wyam.Common.Meta;
 using Wyam.Common.Modules;
 using Wyam.Common.Tracing;
+using Wyam.Common.Util;
 using Wyam.Images.Operations;
 
 namespace Wyam.Images
@@ -319,23 +320,22 @@ namespace Wyam.Images
         }
 
         /// <inheritdoc />
-        public Task<IEnumerable<IDocument>> ExecuteAsync(IReadOnlyList<IDocument> inputs, IExecutionContext context)
+        public async Task<IEnumerable<IDocument>> ExecuteAsync(IReadOnlyList<IDocument> inputs, IExecutionContext context)
         {
             ImageFormatManager formatManager = new ImageFormatManager();
-            IEnumerable<IDocument> outputs = inputs.SelectMany(context, ProcessImages);
-            return Task.FromResult(outputs);
+            return await inputs.SelectManyAsync(context, ProcessImagesAsync);
 
-            IEnumerable<IDocument> ProcessImages(IDocument input)
+            async Task<IEnumerable<IDocument>> ProcessImagesAsync(IDocument input)
             {
                 FilePath relativePath = input.FilePath(Keys.RelativeFilePath);
-                return _operations.SelectMany(operations =>
+                return await _operations.SelectManyAsync(async operations =>
                 {
                     FilePath destinationPath = relativePath == null ? null : context.FileSystem.GetOutputPath(relativePath);
 
                     // Get the image
                     Image<Rgba32> image;
                     IImageFormat imageFormat;
-                    using (Stream stream = input.GetStream())
+                    using (Stream stream = await input.GetStreamAsync())
                     {
                         image = SixLabors.ImageSharp.Image.Load(stream, out imageFormat);
                     }
@@ -364,17 +364,20 @@ namespace Wyam.Images
                     IEnumerable<OutputAction> outputActions = operations.OutputActions.Count == 0
                         ? (IEnumerable<OutputAction>)new[] { new OutputAction((i, s) => i.Save(s, imageFormat), null) }
                         : operations.OutputActions;
-                    return outputActions.Select(action =>
+                    return await outputActions.SelectAsync(async action =>
                     {
                         FilePath formatPath = action.GetPath(destinationPath) ?? destinationPath;
                         Trace.Verbose($"{Keys.WritePath}: {formatPath}");
                         MemoryStream outputStream = new MemoryStream();
                         action.Invoke(image, outputStream);
                         outputStream.Seek(0, SeekOrigin.Begin);
-                        return context.GetDocument(input, outputStream, new MetadataItems
-                        {
-                            { Keys.WritePath, formatPath }
-                        });
+                        return context.GetDocument(
+                            input,
+                            new MetadataItems
+                            {
+                                { Keys.WritePath, formatPath }
+                            },
+                            await context.GetContentProviderAsync(outputStream));
                     });
                 });
             }

@@ -38,7 +38,7 @@ namespace Wyam.Markdown.Tests
                 IList<IDocument> results = await markdown.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
 
                 // Then
-                results.Single().Content.ShouldBe(output, StringCompareShould.IgnoreLineEndings);
+                (await results.Single().GetStringAsync()).ShouldBe(output, StringCompareShould.IgnoreLineEndings);
             }
 
             [Test]
@@ -70,7 +70,7 @@ namespace Wyam.Markdown.Tests
                 IList<IDocument> results = await markdown.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
 
                 // Then
-                results.Single().Content.ShouldBe(output, StringCompareShould.IgnoreLineEndings);
+                (await results.Single().GetStringAsync()).ShouldBe(output, StringCompareShould.IgnoreLineEndings);
             }
 
             [Test]
@@ -94,7 +94,7 @@ namespace Wyam.Markdown.Tests
                 IList<IDocument> results = await markdown.ExecuteAsync(new[] { document }, context).ToListAsync();
 
                 // Then
-                results.Single().Content.ShouldBe(output, StringCompareShould.IgnoreLineEndings);
+                (await results.Single().GetStringAsync()).ShouldBe(output, StringCompareShould.IgnoreLineEndings);
             }
 
             [Test]
@@ -112,7 +112,7 @@ namespace Wyam.Markdown.Tests
                 IList<IDocument> results = await markdown.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
 
                 // Then
-                results.Single().Content.ShouldBe(output, StringCompareShould.IgnoreLineEndings);
+                (await results.Single().GetStringAsync()).ShouldBe(output, StringCompareShould.IgnoreLineEndings);
             }
 
             [Test]
@@ -130,7 +130,7 @@ namespace Wyam.Markdown.Tests
                 IList<IDocument> results = await markdown.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
 
                 // Then
-                results.Single().Content.ShouldBe(output, StringCompareShould.IgnoreLineEndings);
+                (await results.Single().GetStringAsync()).ShouldBe(output, StringCompareShould.IgnoreLineEndings);
             }
 
             [Test]
@@ -152,7 +152,7 @@ the family Rosaceae.</p>
                 IList<IDocument> results = await markdown.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
 
                 // Then
-                results.Single().Content.ShouldBe(output, StringCompareShould.IgnoreLineEndings);
+                (await results.Single().GetStringAsync()).ShouldBe(output, StringCompareShould.IgnoreLineEndings);
             }
 
             [Test]
@@ -176,7 +176,7 @@ the family Rosaceae.</dd>
                 IList<IDocument> results = await markdown.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
 
                 // Then
-                results.Single().Content.ShouldBe(output, StringCompareShould.IgnoreLineEndings);
+                (await results.Single().GetStringAsync()).ShouldBe(output, StringCompareShould.IgnoreLineEndings);
             }
 
             [Test]
@@ -194,7 +194,7 @@ the family Rosaceae.</dd>
                 IList<IDocument> results = await markdown.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
 
                 // Then
-                results.Single().Content.ShouldBe(output, StringCompareShould.IgnoreLineEndings);
+                (await results.Single().GetStringAsync()).ShouldBe(output, StringCompareShould.IgnoreLineEndings);
             }
 
             [Test]
@@ -212,7 +212,7 @@ the family Rosaceae.</dd>
                 IList<IDocument> results = await markdown.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
 
                 // Then
-                results.Single().Content.ShouldBe(output, StringCompareShould.IgnoreLineEndings);
+                (await results.Single().GetStringAsync()).ShouldBe(output, StringCompareShould.IgnoreLineEndings);
             }
 
             [Test]
@@ -230,7 +230,7 @@ the family Rosaceae.</dd>
                 IList<IDocument> results = await markdown.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
 
                 // Then
-                results.Single().Content.ShouldBe(output, StringCompareShould.IgnoreLineEndings);
+                (await results.Single().GetStringAsync()).ShouldBe(output, StringCompareShould.IgnoreLineEndings);
             }
 
             [Test]
@@ -313,7 +313,7 @@ the family Rosaceae.</dd>
                 IList<IDocument> results = await markdown.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
 
                 // Then
-                results.Single().Content.ShouldBe(output, StringCompareShould.IgnoreLineEndings);
+                (await results.Single().GetStringAsync()).ShouldBe(output, StringCompareShould.IgnoreLineEndings);
             }
         }
     }

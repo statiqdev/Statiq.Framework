@@ -124,13 +124,13 @@ namespace Wyam.Core.Modules.Contents
                     if (!string.IsNullOrEmpty(content))
                     {
                         outputs.Add(
-                            await context.NewGetDocumentAsync(
-                                metadata: new MetadataItems
+                            context.GetDocument(
+                                new MetadataItems
                                 {
                                     { Keys.RelativeFilePath, additionalOutput.Key },
                                     { Keys.WritePath, additionalOutput.Key }
                                 },
-                                content: content));
+                                await context.GetContentProviderAsync(content)));
                     }
                 }
             }
@@ -166,13 +166,13 @@ namespace Wyam.Core.Modules.Contents
                         if (_metaRefreshPages)
                         {
                             metaRefreshDocuments.Add(
-                                await context.NewGetDocumentAsync(
+                                context.GetDocument(
                                     metadata: new MetadataItems
                                     {
                                             { Keys.RelativeFilePath, outputPath },
                                             { Keys.WritePath, outputPath }
                                     },
-                                    content: $@"
+                                    await context.GetContentProviderAsync($@"
 <!doctype html>
 <html>    
   <head>      
@@ -182,7 +182,7 @@ namespace Wyam.Core.Modules.Contents
   <body> 
     <p>This page has moved to a <a href=""{url}"">{url}</a></p> 
   </body>  
-</html>"));
+</html>")));
                         }
                     }
                     return metaRefreshDocuments;

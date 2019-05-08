@@ -113,9 +113,9 @@ namespace Wyam.Core.Modules.Control
                     if (await sidecarFile.GetExistsAsync())
                     {
                         string sidecarContent = await sidecarFile.ReadAllTextAsync();
-                        foreach (IDocument result in await context.ExecuteAsync(this, new[] { await context.NewGetDocumentAsync(input, content: sidecarContent) }))
+                        foreach (IDocument result in await context.ExecuteAsync(this, new[] { context.GetDocument(input, await context.GetContentProviderAsync(sidecarContent)) }))
                         {
-                            results.Add(await context.NewGetDocumentAsync(input, metadata: result));
+                            results.Add(context.GetDocument(input, result));
                         }
                     }
                     else

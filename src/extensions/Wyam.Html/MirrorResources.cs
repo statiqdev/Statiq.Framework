@@ -113,7 +113,7 @@ namespace Wyam.Html
                         {
                             htmlDocument.ToHtml(writer, ProcessingInstructionFormatter.Instance);
                             writer.Flush();
-                            return context.GetDocument(input, contentStream);
+                            return context.GetDocument(input, await context.GetContentProviderAsync(contentStream));
                         }
                     }
                 }

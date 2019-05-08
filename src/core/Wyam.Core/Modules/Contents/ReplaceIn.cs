@@ -75,14 +75,13 @@ namespace Wyam.Core.Modules.Contents
             }
             if (string.IsNullOrEmpty(_search))
             {
-                return await context.NewGetDocumentAsync(input, content: content);
+                return context.GetDocument(input, await context.GetContentProviderAsync(content));
             }
             string inputContent = await input.GetStringAsync();
-            return await context.NewGetDocumentAsync(
-                input,
-                content: _isRegex
-                    ? Regex.Replace(inputContent, _search, content, _regexOptions)
-                    : content.Replace(_search, inputContent));
+            string replaced = _isRegex
+                ? Regex.Replace(inputContent, _search, content, _regexOptions)
+                : content.Replace(_search, inputContent);
+            return context.GetDocument(input, await context.GetContentProviderAsync(replaced));
         }
     }
 }

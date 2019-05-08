@@ -113,7 +113,7 @@ namespace Wyam.AmazonWebServices
                         if (_bodyField != null)
                         {
                             writer.WritePropertyName(_bodyField);
-                            writer.WriteValue(doc.Content);
+                            writer.WriteValue(await doc.GetStringAsync());
                         }
 
                         foreach (Field field in _fields)
@@ -169,7 +169,7 @@ namespace Wyam.AmazonWebServices
                     writer.WriteEndArray();
                     textWriter.Flush();
 
-                    return new[] { context.GetDocument(contentStream) };
+                    return new[] { context.GetDocument(await context.GetContentProviderAsync(contentStream)) };
                 }
             }
         }

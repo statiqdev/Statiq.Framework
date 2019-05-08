@@ -209,7 +209,7 @@ namespace Wyam.Html
 
             async Task<IDocument> GetDocumentAsync(IDocument input)
             {
-                string oldContent = input.Content;
+                string oldContent = await input.GetStringAsync();
                 StringWriter outputString = new StringWriter();
                 bool escaped = false;
 
@@ -245,7 +245,7 @@ namespace Wyam.Html
                         }
                     }
                 }
-                return escaped ? await context.GetDocumentAsync(input, source: outputString.ToString()) : input;
+                return escaped ? context.GetDocument(input, await context.GetContentProviderAsync(outputString)) : input;
             }
         }
     }

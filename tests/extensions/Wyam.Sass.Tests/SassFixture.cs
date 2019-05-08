@@ -50,10 +50,12 @@ body {
                 {
                     FileSystem = fileSystem
                 };
-                IDocument document = new TestDocument(input, new MetadataItems
-                {
-                    { Keys.RelativeFilePath, new FilePath("assets/test.scss") }
-                });
+                IDocument document = new TestDocument(
+                    new MetadataItems
+                    {
+                        { Keys.RelativeFilePath, new FilePath("assets/test.scss") }
+                    },
+                    input);
 
                 Sass sass = new Sass().WithCompactOutputStyle();
 
@@ -61,7 +63,7 @@ body {
                 List<IDocument> results = await sass.ExecuteAsync(new[] { document }, context).ToListAsync(); // Make sure to materialize the result list
 
                 // Then
-                Assert.That(results.Select(x => x.Content), Is.EqualTo(new[] { output }));
+                Assert.That(await results.SelectAsync(async x => await x.GetStringAsync()), Is.EqualTo(new[] { output }));
                 Assert.That(results.Select(x => x.FilePath(Keys.RelativeFilePath).FullPath), Is.EqualTo(new[] { "assets/test.css" }));
             }
 
@@ -84,10 +86,12 @@ body {
                 {
                     FileSystem = fileSystem
                 };
-                IDocument document = new TestDocument(input, new MetadataItems
-                {
-                    { Keys.RelativeFilePath, new FilePath("assets/test.scss") }
-                });
+                IDocument document = new TestDocument(
+                    new MetadataItems
+                    {
+                        { Keys.RelativeFilePath, new FilePath("assets/test.scss") }
+                    },
+                    input);
 
                 Sass sass = new Sass();
 
@@ -95,7 +99,7 @@ body {
                 List<IDocument> results = await sass.ExecuteAsync(new[] { document }, context).ToListAsync(); // Make sure to materialize the result list
 
                 // Then
-                Assert.That(results.Select(x => x.Content), Is.EqualTo(new[] { string.Empty }));
+                Assert.That(await results.SelectAsync(async x => await x.GetStringAsync()), Is.EqualTo(new[] { string.Empty }));
                 Assert.That(results.Select(x => x.FilePath(Keys.RelativeFilePath).FullPath), Is.EqualTo(new[] { "assets/test.css" }));
             }
 
@@ -124,10 +128,12 @@ body {
                 {
                     FileSystem = fileSystem
                 };
-                IDocument document = new TestDocument(input, new MetadataItems
-                {
-                    { Keys.RelativeFilePath, new FilePath("assets/test.scss") }
-                });
+                IDocument document = new TestDocument(
+                    new MetadataItems
+                    {
+                        { Keys.RelativeFilePath, new FilePath("assets/test.scss") }
+                    },
+                    input);
 
                 Sass sass = new Sass();
 
@@ -172,10 +178,12 @@ body {
                 {
                     FileSystem = fileSystem
                 };
-                IDocument document = new TestDocument(input, new MetadataItems
-                {
-                    { Keys.RelativeFilePath, new FilePath("assets/test.scss") }
-                });
+                IDocument document = new TestDocument(
+                    new MetadataItems
+                    {
+                        { Keys.RelativeFilePath, new FilePath("assets/test.scss") }
+                    },
+                    input);
 
                 Sass sass = new Sass().IncludeSourceComments(false).WithCompactOutputStyle();
 
@@ -183,7 +191,7 @@ body {
                 List<IDocument> results = await sass.ExecuteAsync(new[] { document }, context).ToListAsync(); // Make sure to materialize the result list
 
                 // Then
-                Assert.That(results.Select(x => x.Content), Is.EqualTo(new[] { output }));
+                Assert.That(await results.SelectAsync(async x => await x.GetStringAsync()), Is.EqualTo(new[] { output }));
                 Assert.That(results.Select(x => x.FilePath(Keys.RelativeFilePath).FullPath), Is.EqualTo(new[] { "assets/test.css" }));
             }
 
@@ -218,10 +226,12 @@ body {
                 {
                     FileSystem = fileSystem
                 };
-                IDocument document = new TestDocument(input, new MetadataItems
-                {
-                    { Keys.RelativeFilePath, new FilePath("assets/test.scss") }
-                });
+                IDocument document = new TestDocument(
+                    new MetadataItems
+                    {
+                        { Keys.RelativeFilePath, new FilePath("assets/test.scss") }
+                    },
+                    input);
 
                 Sass sass = new Sass().IncludeSourceComments(false).WithCompactOutputStyle();
 
@@ -229,7 +239,7 @@ body {
                 List<IDocument> results = await sass.ExecuteAsync(new[] { document }, context).ToListAsync(); // Make sure to materialize the result list
 
                 // Then
-                Assert.That(results.Select(x => x.Content), Is.EqualTo(new[] { output }));
+                Assert.That(await results.SelectAsync(async x => await x.GetStringAsync()), Is.EqualTo(new[] { output }));
                 Assert.That(results.Select(x => x.FilePath(Keys.RelativeFilePath).FullPath), Is.EqualTo(new[] { "assets/test.css" }));
             }
 
@@ -264,10 +274,12 @@ body {
                 {
                     FileSystem = fileSystem
                 };
-                IDocument document = new TestDocument(input, new MetadataItems
-                {
-                    { Keys.RelativeFilePath, new FilePath("assets/test.scss") }
-                });
+                IDocument document = new TestDocument(
+                    new MetadataItems
+                    {
+                        { Keys.RelativeFilePath, new FilePath("assets/test.scss") }
+                    },
+                    input);
 
                 Sass sass = new Sass().IncludeSourceComments(false).WithCompactOutputStyle();
 
@@ -275,7 +287,7 @@ body {
                 List<IDocument> results = await sass.ExecuteAsync(new[] { document }, context).ToListAsync(); // Make sure to materialize the result list
 
                 // Then
-                Assert.That(results.Select(x => x.Content), Is.EqualTo(new[] { output }));
+                Assert.That(await results.SelectAsync(async x => await x.GetStringAsync()), Is.EqualTo(new[] { output }));
                 Assert.That(results.Select(x => x.FilePath(Keys.RelativeFilePath).FullPath), Is.EqualTo(new[] { "assets/test.css" }));
             }
 
@@ -310,10 +322,12 @@ body {
                 {
                     FileSystem = fileSystem
                 };
-                IDocument document = new TestDocument(input, new MetadataItems
-                {
-                    { Keys.RelativeFilePath, new FilePath("assets/test.scss") }
-                });
+                IDocument document = new TestDocument(
+                    new MetadataItems
+                    {
+                        { Keys.RelativeFilePath, new FilePath("assets/test.scss") }
+                    },
+                    input);
 
                 Sass sass = new Sass().IncludeSourceComments(false).WithCompactOutputStyle();
 
@@ -321,7 +335,7 @@ body {
                 List<IDocument> results = await sass.ExecuteAsync(new[] { document }, context).ToListAsync(); // Make sure to materialize the result list
 
                 // Then
-                Assert.That(results.Select(x => x.Content), Is.EqualTo(new[] { output }));
+                Assert.That(await results.SelectAsync(async x => await x.GetStringAsync()), Is.EqualTo(new[] { output }));
                 Assert.That(results.Select(x => x.FilePath(Keys.RelativeFilePath).FullPath), Is.EqualTo(new[] { "assets/test.css" }));
             }
 

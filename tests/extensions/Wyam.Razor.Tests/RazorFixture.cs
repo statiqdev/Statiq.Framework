@@ -37,7 +37,7 @@ namespace Wyam.Razor.Tests
                 List<IDocument> results = await razor.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
 
                 // Then
-                results.Single().Content.ShouldBe(" <p>0</p>  <p>1</p>  <p>2</p>  <p>3</p>  <p>4</p> ");
+                (await results.Single().GetStringAsync()).ShouldBe(" <p>0</p>  <p>1</p>  <p>2</p>  <p>3</p>  <p>4</p> ");
             }
 
             [Test]
@@ -86,17 +86,19 @@ namespace Wyam.Razor.Tests
                 // Given
                 Engine engine = new Engine();
                 IExecutionContext context = GetExecutionContext(engine);
-                IDocument document = new TestDocument(@"<p>@Metadata[""MyKey""]</p>", new MetadataItems
-                {
-                    { "MyKey", "MyValue" }
-                });
+                IDocument document = new TestDocument(
+                    new MetadataItems
+                    {
+                        { "MyKey", "MyValue" }
+                    },
+                    @"<p>@Metadata[""MyKey""]</p>");
                 Razor razor = new Razor();
 
                 // When
                 List<IDocument> results = await razor.ExecuteAsync(new[] { document }, context).ToListAsync();
 
                 // Then
-                results.Single().Content.ShouldBe("<p>MyValue</p>");
+                (await results.Single().GetStringAsync()).ShouldBe("<p>MyValue</p>");
             }
 
             [Test]
@@ -115,7 +117,7 @@ namespace Wyam.Razor.Tests
                 List<IDocument> results = await razor.ExecuteAsync(new[] { document }, context).ToListAsync();
 
                 // Then
-                results.Single().Content.ShouldBe("<p>file:///Temp/temp.txt</p>");
+                (await results.Single().GetStringAsync()).ShouldBe("<p>file:///Temp/temp.txt</p>");
             }
 
             [Test]
@@ -131,7 +133,7 @@ namespace Wyam.Razor.Tests
                 List<IDocument> results = await razor.ExecuteAsync(new[] { document }, context).ToListAsync();
 
                 // Then
-                results.Single().Content.ShouldBe("<p>file:///Temp/temp.txt</p>");
+                (await results.Single().GetStringAsync()).ShouldBe("<p>file:///Temp/temp.txt</p>");
             }
 
             [Test]
@@ -149,7 +151,7 @@ namespace Wyam.Razor.Tests
                 List<IDocument> results = await razor.ExecuteAsync(new[] { document }, context).ToListAsync();
 
                 // Then
-                results.Single().Content.ShouldBe("<p>3</p>");
+                (await results.Single().GetStringAsync()).ShouldBe("<p>3</p>");
             }
 
             [Test]
@@ -170,7 +172,7 @@ namespace Wyam.Razor.Tests
                 List<IDocument> results = await razor.ExecuteAsync(new[] { document }, context).ToListAsync();
 
                 // Then
-                results.Single().Content.ShouldBe(
+                (await results.Single().GetStringAsync()).ShouldBe(
                     @"LAYOUT
 <p>This is a test</p>",
                     StringCompareShould.IgnoreLineEndings);
@@ -191,7 +193,7 @@ namespace Wyam.Razor.Tests
                 List<IDocument> results = await razor.ExecuteAsync(new[] { document }, context).ToListAsync();
 
                 // Then
-                results.Single().Content.ShouldBe(
+                (await results.Single().GetStringAsync()).ShouldBe(
                     @"LAYOUT
 <p>This is a test</p>",
                     StringCompareShould.IgnoreLineEndings);
@@ -212,7 +214,7 @@ namespace Wyam.Razor.Tests
                 List<IDocument> results = await razor.ExecuteAsync(new[] { document }, context).ToListAsync();
 
                 // Then
-                results.Single().Content.ShouldBe(
+                (await results.Single().GetStringAsync()).ShouldBe(
                     @"LAYOUT2
 <p>This is a test</p>",
                     StringCompareShould.IgnoreLineEndings);
@@ -233,7 +235,7 @@ namespace Wyam.Razor.Tests
                 List<IDocument> results = await razor.ExecuteAsync(new[] { document }, context).ToListAsync();
 
                 // Then
-                results.Single().Content.ShouldBe(
+                (await results.Single().GetStringAsync()).ShouldBe(
                     @"LAYOUT3
 <p>This is a test</p>",
                     StringCompareShould.IgnoreLineEndings);
@@ -254,7 +256,7 @@ namespace Wyam.Razor.Tests
                 List<IDocument> results = await razor.ExecuteAsync(new[] { document }, context).ToListAsync();
 
                 // Then
-                results.Single().Content.ShouldBe(
+                (await results.Single().GetStringAsync()).ShouldBe(
                     @"LAYOUT3
 <p>This is a test</p>",
                     StringCompareShould.IgnoreLineEndings);
@@ -275,7 +277,7 @@ namespace Wyam.Razor.Tests
                 List<IDocument> results = await razor.ExecuteAsync(new[] { document }, context).ToListAsync();
 
                 // Then
-                results.Single().Content.ShouldBe(
+                (await results.Single().GetStringAsync()).ShouldBe(
                     @"LAYOUT3
 <p>This is a test</p>",
                     StringCompareShould.IgnoreLineEndings);
@@ -303,7 +305,7 @@ namespace Wyam.Razor.Tests
                 List<IDocument> results = await razor.ExecuteAsync(new[] { document1, document2 }, context).ToListAsync();
 
                 // Then
-                results.Single().Content.ShouldBe(
+                (await results.Single().GetStringAsync()).ShouldBe(
                     @"LAYOUT4
 <p>This is a test</p>",
                     StringCompareShould.IgnoreLineEndings);
@@ -327,7 +329,7 @@ namespace Wyam.Razor.Tests
                 List<IDocument> results = await razor.ExecuteAsync(new[] { document1, document2 }, context).ToListAsync();
 
                 // Then
-                results.Single().Content.ShouldBe("<p>This is a test</p>");
+                (await results.Single().GetStringAsync()).ShouldBe("<p>This is a test</p>");
             }
 
             [Test]
@@ -351,7 +353,7 @@ namespace Wyam.Razor.Tests
                 List<IDocument> results = await razor.ExecuteAsync(new[] { document }, context).ToListAsync();
 
                 // Then
-                results.Single().Content.ShouldBe(
+                (await results.Single().GetStringAsync()).ShouldBe(
                     @"LAYOUT5
 
 <p>Section Content</p>
@@ -382,7 +384,7 @@ namespace Wyam.Razor.Tests
                 List<IDocument> results2 = await razor.ExecuteAsync(new[] { document }, context).ToListAsync();
 
                 // Then
-                results1.Single().Content.ShouldBe(
+                (await results1.Single().GetStringAsync()).ShouldBe(
                     @"LAYOUT5
 
 <p>Section Content</p>
@@ -390,7 +392,7 @@ namespace Wyam.Razor.Tests
 <p>This is a test</p>",
                     StringCompareShould.IgnoreLineEndings);
 
-                results2.Single().Content.ShouldBe(
+                (await results2.Single().GetStringAsync()).ShouldBe(
                     @"LAYOUT5
 
 <p>Section Content</p>
@@ -401,11 +403,13 @@ namespace Wyam.Razor.Tests
 
             private IDocument GetDocument(string source, string content)
             {
-                TestDocument document = new TestDocument(content, new[]
-                {
-                    new KeyValuePair<string, object>(Keys.RelativeFilePath, new FilePath(source)),
-                    new KeyValuePair<string, object>(Keys.SourceFileName, new FilePath(source).FileName)
-                });
+                TestDocument document = new TestDocument(
+                    new[]
+                    {
+                        new KeyValuePair<string, object>(Keys.RelativeFilePath, new FilePath(source)),
+                        new KeyValuePair<string, object>(Keys.SourceFileName, new FilePath(source).FileName)
+                    },
+                    content);
                 document.Source = new FilePath(source);
                 return document;
             }

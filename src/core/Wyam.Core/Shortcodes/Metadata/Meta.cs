@@ -21,6 +21,6 @@ namespace Wyam.Core.Shortcodes.Metadata
     {
         /// <inheritdoc />
         public async Task<IDocument> ExecuteAsync(KeyValuePair<string, string>[] args, string content, IDocument document, IExecutionContext context) =>
-            await context.NewGetDocumentAsync(content: document.String(args.SingleValue()));
+            context.GetDocument(await context.GetContentProviderAsync(document.String(args.SingleValue())));
     }
 }

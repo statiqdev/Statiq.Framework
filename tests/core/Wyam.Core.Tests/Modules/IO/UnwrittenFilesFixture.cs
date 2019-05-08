@@ -67,10 +67,10 @@ namespace Wyam.Core.Tests.Modules.IO
             TestExecutionContext context = GetContext();
             IDocument[] inputs =
             {
-                new TestDocument("Test", new MetadataItems
+                new TestDocument(new MetadataItems
                 {
                     { Keys.RelativeFilePath, new FilePath("foo.txt") }
-                })
+                }, "Test")
             };
             UnwrittenFiles unwrittenFiles = new UnwrittenFiles();
 
@@ -89,10 +89,10 @@ namespace Wyam.Core.Tests.Modules.IO
             TestExecutionContext context = GetContext();
             IDocument[] inputs =
             {
-                new TestDocument("Test", new MetadataItems
+                new TestDocument(new MetadataItems
                 {
                     { Keys.RelativeFilePath, new FilePath("test.md") }
-                })
+                }, "Test")
             };
             UnwrittenFiles unwrittenFiles = new UnwrittenFiles(".txt");
 

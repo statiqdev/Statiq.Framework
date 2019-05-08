@@ -5,7 +5,7 @@ namespace Wyam.Common.Execution
     /// <summary>
     /// Provides pooled memory streams (via the RecyclableMemoryStream library).
     /// </summary>
-    public interface IMemoryStreamManager
+    public interface IMemoryStreamFactory
     {
         /// <summary>
         /// Retrieve a new <see cref="MemoryStream"/> object with a default initial capacity.

@@ -126,15 +126,15 @@ namespace Wyam.Core.Modules.IO
             return await responses.SelectAsync(async r =>
             {
                 string uri = r.Uri.ToString();
-                return await context.NewGetDocumentAsync(
-                    null,
+                return context.GetDocument(
                     new FilePath((Uri)null, uri, PathKind.Absolute),
+                    null,
                     new MetadataItems
                     {
                         { Keys.SourceUri, uri },
                         { Keys.SourceHeaders, r.Headers }
                     },
-                    r.Stream);
+                    await context.GetContentProviderAsync(r.Stream));
             });
         }
 

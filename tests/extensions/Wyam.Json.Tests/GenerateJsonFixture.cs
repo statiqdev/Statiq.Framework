@@ -76,7 +76,7 @@ namespace Wyam.Json.Tests
                 IList<IDocument> results = await generateJson.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
 
                 // Then
-                results.Select(x => x.Content).Single().ShouldBe(_jsonContent, StringCompareShould.IgnoreLineEndings);
+                (await results.SelectAsync(async x => await x.GetStringAsync())).Single().ShouldBe(_jsonContent, StringCompareShould.IgnoreLineEndings);
             }
 
             [Test]
@@ -91,7 +91,7 @@ namespace Wyam.Json.Tests
                 IList<IDocument> results = await generateJson.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
 
                 // Then
-                results.Select(x => x.Content).Single().ShouldBe(_jsonContent, StringCompareShould.IgnoreLineEndings);
+                (await results.SelectAsync(async x => await x.GetStringAsync())).Single().ShouldBe(_jsonContent, StringCompareShould.IgnoreLineEndings);
             }
 
             [Test]
@@ -109,7 +109,7 @@ namespace Wyam.Json.Tests
                 IList<IDocument> results = await generateJson.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
 
                 // Then
-                results.Select(x => x.Content).Single().ShouldBe(_jsonContent, StringCompareShould.IgnoreLineEndings);
+                (await results.SelectAsync(async x => await x.GetStringAsync())).Single().ShouldBe(_jsonContent, StringCompareShould.IgnoreLineEndings);
             }
 
             [Test]
@@ -150,7 +150,7 @@ namespace Wyam.Json.Tests
                 IList<IDocument> results = await generateJson.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
 
                 // Then
-                results.Select(x => x.Content).Single().ShouldBe(nonIndentedJsonContent, StringCompareShould.IgnoreLineEndings);
+                (await results.SelectAsync(async x => await x.GetStringAsync())).Single().ShouldBe(nonIndentedJsonContent, StringCompareShould.IgnoreLineEndings);
             }
 
             [Test]
@@ -168,7 +168,7 @@ namespace Wyam.Json.Tests
                 IList<IDocument> results = await generateJson.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
 
                 // Then
-                results.Select(x => x.Content).Single().ShouldBe(_camelCaseJsonContent, StringCompareShould.IgnoreLineEndings);
+                (await results.SelectAsync(async x => await x.GetStringAsync())).Single().ShouldBe(_camelCaseJsonContent, StringCompareShould.IgnoreLineEndings);
             }
 
             [Test]
@@ -187,7 +187,7 @@ namespace Wyam.Json.Tests
                 IList<IDocument> results = await generateJson.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
 
                 // Then
-                results.Select(x => x.Content).Single().ShouldBe(
+                (await results.SelectAsync(async x => await x.GetStringAsync())).Single().ShouldBe(
                     @"{
   ""Bar"": ""baz""
 }",
@@ -210,7 +210,7 @@ namespace Wyam.Json.Tests
                 IList<IDocument> results = await generateJson.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
 
                 // Then
-                results.Select(x => x.Content).Single().ShouldBe(
+                (await results.SelectAsync(async x => await x.GetStringAsync())).Single().ShouldBe(
                     @"{
   ""bar"": ""baz""
 }",
@@ -233,7 +233,7 @@ namespace Wyam.Json.Tests
                 IList<IDocument> results = await generateJson.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
 
             // Then
-                results.Select(x => x.Content).Single().ShouldBe(
+                (await results.SelectAsync(async x => await x.GetStringAsync())).Single().ShouldBe(
                 @"{
   ""Bar"": ""baz""
 }",
@@ -256,7 +256,7 @@ namespace Wyam.Json.Tests
                 IList<IDocument> results = await generateJson.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
 
                 // Then
-                results.Select(x => x.Content).Single().ShouldBe(
+                (await results.SelectAsync(async x => await x.GetStringAsync())).Single().ShouldBe(
                     @"{
   ""bar"": ""baz""
 }",

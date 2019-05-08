@@ -164,7 +164,7 @@ namespace Wyam.Razor
                 Trace.Verbose("Processing Razor for {0}", input.SourceString());
 
                 Stream contentStream = await context.GetContentStreamAsync();
-                using (Stream inputStream = input.GetStream())
+                using (Stream inputStream = await input.GetStreamAsync())
                 {
                     FilePath viewStartLocationPath = _viewStartPath == null ? null : await _viewStartPath.GetValueAsync(input, context);
                     string layoutPath = _layoutPath == null ? null : (await _layoutPath.GetValueAsync(input, context))?.FullPath;
@@ -185,7 +185,7 @@ namespace Wyam.Razor
                     await RazorService.RenderAsync(request);
                 }
 
-                return context.GetDocument(input, contentStream);
+                return context.GetDocument(input, await context.GetContentProviderAsync(contentStream));
             }
         }
 

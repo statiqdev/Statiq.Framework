@@ -17,16 +17,7 @@ namespace Wyam.Core.Modules.Metadata
     public class Index : IModule
     {
         /// <inheritdoc />
-        public async Task<IEnumerable<IDocument>> ExecuteAsync(IReadOnlyList<IDocument> inputs, IExecutionContext context)
-        {
-            List<IDocument> outputs = new List<IDocument>();
-            int i = 0;
-            foreach (IDocument input in inputs)
-            {
-                outputs.Add(await context.NewGetDocumentAsync(input, metadata: new MetadataItems { { Keys.Index, i + 1 } }));
-                i++;
-            }
-            return outputs;
-        }
+        public Task<IEnumerable<IDocument>> ExecuteAsync(IReadOnlyList<IDocument> inputs, IExecutionContext context) =>
+            Task.FromResult(inputs.Select((x, i) => context.GetDocument(x, new MetadataItems { { Keys.Index, i + 1 } })));
     }
 }

@@ -165,19 +165,19 @@ namespace Wyam.Core.Modules.Control
 
             if (inputs.Count > 0)
             {
-                return await inputs.SelectManyAsync(context, async input =>
+                return inputs.SelectMany(context, input =>
                 {
-                    return await groupings.SelectAsync(async x => await context.NewGetDocumentAsync(
+                    return groupings.Select(x => context.GetDocument(
                         input,
-                        metadata: new MetadataItems
+                        new MetadataItems
                         {
                             { Keys.GroupDocuments, x.ToImmutableArray() },
                             { Keys.GroupKey, x.Key }
                         }));
                 });
             }
-            return await groupings.SelectAsync(async x => await context.NewGetDocumentAsync(
-                metadata: new MetadataItems
+            return groupings.Select(x => context.GetDocument(
+                new MetadataItems
                 {
                     { Keys.GroupDocuments, x.ToImmutableArray() },
                     { Keys.GroupKey, x.Key }

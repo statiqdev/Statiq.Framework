@@ -84,18 +84,18 @@ namespace Wyam.Less
                     path = new FilePath(Path.GetRandomFileName());
                     Trace.Warning($"No input path found for document {input.SourceString()}, using {path.FileName.FullPath}");
                 }
-                string content = engine.TransformToCss(input.Content, path.FileName.FullPath);
+                string content = engine.TransformToCss(await input.GetStringAsync(), path.FileName.FullPath);
 
                 // Process the result
                 FilePath cssPath = path.ChangeExtension("css");
-                return await context.GetDocumentAsync(
+                return context.GetDocument(
                     input,
-                    source: content,
-                    content: new MetadataItems
+                    new MetadataItems
                     {
                         { Keys.RelativeFilePath, cssPath },
                         { Keys.WritePath, cssPath }
-                    });
+                    },
+                    await context.GetContentProviderAsync(content));
             }
         }
     }

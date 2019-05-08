@@ -66,10 +66,10 @@ namespace Wyam.Core.Tests.Modules.Contents
                         </body>
                     </html>";
             TestExecutionContext context = new TestExecutionContext();
-            TestDocument document = new TestDocument(input, new MetadataItems
+            TestDocument document = new TestDocument(new MetadataItems
             {
                 { "Fizz", "Buzz" }
-            });
+            }, input);
             Replace replace = new Replace(@"(<span>.*<\/span>)", (_, doc) => $"<div>{doc["Fizz"]}</div>");
 
             // When

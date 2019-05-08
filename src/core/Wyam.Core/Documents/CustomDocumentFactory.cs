@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using Wyam.Common.Documents;
 using Wyam.Common.IO;
 using Wyam.Common.Execution;
+using Wyam.Common.Content;
 
 namespace Wyam.Core.Documents
 {
@@ -17,15 +18,16 @@ namespace Wyam.Core.Documents
             _documentFactory = documentFactory;
         }
 
-        public async Task<IDocument> GetDocumentAsync(
+        public IDocument GetDocument(
             IExecutionContext context,
-            IDocument sourceDocument,
+            IDocument originalDocument,
             FilePath source,
+            FilePath destination,
             IEnumerable<KeyValuePair<string, object>> metadata,
-            object content)
+            IContentProvider contentProvider)
         {
-            CustomDocument customDocument = (CustomDocument)sourceDocument;
-            IDocument document = await _documentFactory.GetDocumentAsync(context, customDocument?.Document, source, metadata, content);
+            CustomDocument customDocument = (CustomDocument)originalDocument;
+            IDocument document = _documentFactory.GetDocument(context, customDocument?.Document, source, destination, metadata, contentProvider);
 
             CustomDocument newCustomDocument = customDocument == null
                 ? Activator.CreateInstance<T>()

@@ -9,6 +9,7 @@ using Wyam.Common.Documents;
 using Wyam.Common.Modules;
 using Wyam.Common.Execution;
 using Wyam.Common.Tracing;
+using Wyam.Common.Util;
 
 namespace Wyam.Json
 {
@@ -53,17 +54,16 @@ namespace Wyam.Json
         public Task<IEnumerable<IDocument>> ExecuteAsync(IReadOnlyList<IDocument> inputs, IExecutionContext context)
         {
             // Don't use the built-in exception tracing so that we can return the original document on error
-            ParallelQuery<IDocument> outputs = inputs.AsParallel().Select(ProcessJson).Where(x => x != null);
-            return Task.FromResult<IEnumerable<IDocument>>(outputs);
+            return inputs.ParallelSelectAsync(ProcessJsonAsync);
 
-            IDocument ProcessJson(IDocument input)
+            async Task<IDocument> ProcessJsonAsync(IDocument input)
             {
                 try
                 {
                     JsonSerializer serializer = new JsonSerializer();
                     Dictionary<string, object> items = new Dictionary<string, object>();
                     ExpandoObject json;
-                    using (TextReader contentReader = new StringReader(input.Content))
+                    using (TextReader contentReader = new StreamReader(await input.GetStreamAsync()))
                     {
                         using (JsonReader jsonReader = new JsonTextReader(contentReader))
                         {

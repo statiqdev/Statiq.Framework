@@ -99,7 +99,7 @@ namespace Wyam.Highlight
                 {
                     try
                     {
-                        using (Stream stream = input.GetStream())
+                        using (Stream stream = await input.GetStreamAsync())
                         {
                             using (IHtmlDocument htmlDocument = await parser.ParseAsync(stream))
                             {
@@ -133,7 +133,7 @@ namespace Wyam.Highlight
                                 {
                                     htmlDocument.ToHtml(writer, HtmlMarkupFormatter.Instance);
                                     writer.Flush();
-                                    return context.GetDocument(input, contentStream);
+                                    return context.GetDocument(input, await context.GetContentProviderAsync(contentStream));
                                 }
                             }
                         }

@@ -28,7 +28,7 @@ namespace Wyam.Html
         {
             try
             {
-                using (Stream stream = document.GetStream())
+                using (Stream stream = await document.GetStreamAsync())
                 {
                     return await parser.ParseAsync(stream);
                 }

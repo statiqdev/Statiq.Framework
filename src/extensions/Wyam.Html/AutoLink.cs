@@ -155,7 +155,7 @@ namespace Wyam.Html
                     // Enumerate all elements that match the query selector not already in a link element
                     List<KeyValuePair<IText, string>> replacements = new List<KeyValuePair<IText, string>>();
                     IHtmlDocument htmlDocument;
-                    using (Stream stream = input.GetStream())
+                    using (Stream stream = await input.GetStreamAsync())
                     {
                         htmlDocument = await parser.ParseAsync(stream);
                     }
@@ -185,7 +185,7 @@ namespace Wyam.Html
                         {
                             htmlDocument.ToHtml(writer, ProcessingInstructionFormatter.Instance);
                             writer.Flush();
-                            return context.GetDocument(input, contentStream);
+                            return context.GetDocument(input, await context.GetContentProviderAsync(contentStream));
                         }
                     }
                 }

@@ -200,7 +200,7 @@ namespace Wyam.Core.Tests.Shortcodes
                 List<ShortcodeLocation> result = parser.Parse(stream);
 
                 // Then
-                result.Single().Content.ShouldBe(content);
+                (await result.Single().GetStringAsync()).ShouldBe(content);
             }
 
             [TestCase("<?# name ?><?*abc?><?#/ name ?>", "abc")]
@@ -227,7 +227,7 @@ namespace Wyam.Core.Tests.Shortcodes
                 List<ShortcodeLocation> result = parser.Parse(stream);
 
                 // Then
-                result.Single().Content.ShouldBe(content);
+                (await result.Single().GetStringAsync()).ShouldBe(content);
             }
 
             [Test]

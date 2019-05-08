@@ -187,17 +187,17 @@ namespace Wyam.Core.Modules.Metadata
                         DirectoryPath relativeFileDir = input.DirectoryPath(Keys.RelativeFileDir);
                         if (!string.IsNullOrWhiteSpace(_pathOutputKey) && relativeFileDir != null)
                         {
-                            return await context.NewGetDocumentAsync(
+                            return context.GetDocument(
                                 input,
-                                metadata: new MetadataItems
+                                new MetadataItems
                                 {
                                     { _outputKey, filePath },
                                     { _pathOutputKey, relativeFileDir.CombineFile(filePath) }
                                 });
                         }
-                        return await context.NewGetDocumentAsync(
+                        return context.GetDocument(
                             input,
-                            metadata: new MetadataItems
+                            new MetadataItems
                             {
                                 { _outputKey, filePath }
                             });

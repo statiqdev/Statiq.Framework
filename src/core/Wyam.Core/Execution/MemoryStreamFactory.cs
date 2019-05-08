@@ -9,7 +9,7 @@ namespace Wyam.Core.Execution
     /// Forwards calls to an underlying <see cref="RecyclableMemoryStreamManager"/>
     /// so that Wyam.Common doesn't have to maintain a reference to it.
     /// </summary>
-    internal class MemoryStreamManager : IMemoryStreamManager
+    internal class MemoryStreamFactory : IMemoryStreamFactory
     {
         private const int BlockSize = 16384;
 

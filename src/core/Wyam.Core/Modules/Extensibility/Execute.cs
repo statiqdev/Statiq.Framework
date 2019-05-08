@@ -77,7 +77,7 @@ namespace Wyam.Core.Modules.Extensibility
         }
 
         protected static async Task<IEnumerable<IDocument>> ChangeContentAsync(object result, IExecutionContext context, IDocument document) =>
-            new[] { await context.NewGetDocumentAsync(document, content: result) };
+            new[] { context.GetDocument(document, await context.GetContentProviderAsync(result)) };
 
         protected static IEnumerable<IDocument> ThrowInvalidDelegateResult(object result)
         {

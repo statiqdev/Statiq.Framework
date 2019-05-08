@@ -56,7 +56,7 @@ namespace Wyam.Core.Execution
 
         public string ApplicationInput => Engine.ApplicationInput;
 
-        public IMemoryStreamManager MemoryStreamManager => Engine.MemoryStreamManager;
+        public IMemoryStreamFactory MemoryStreamFactory => Engine.MemoryStreamManager;
 
         public ExecutionContext(Engine engine, Guid executionId, PipelinePhase pipelinePhase, IServiceProvider services)
         {
@@ -123,20 +123,63 @@ namespace Wyam.Core.Execution
             }
 
             // Otherwise get a memory stream from the pool and use that
-            Stream memoryStream = MemoryStreamManager.GetStream(content);
-            return new ContentStream(new Common.Content.StreamContent(this, memoryStream), memoryStream, false);
+            Stream memoryStream = MemoryStreamFactory.GetStream(content);
+            return new ContentStream(new Common.Content.StreamContent(MemoryStreamFactory, memoryStream), memoryStream, false);
         }
 
         /// <inheritdoc/>
-        public async Task<IDocument> NewGetDocumentAsync(
-            IDocument sourceDocument = null,
-            FilePath source = null,
+        public async Task<IContentProvider> GetContentProviderAsync(object content)
+        {
+            switch (content)
+            {
+                case null:
+                    return null;
+                case IContentProvider contentProvider:
+                    return contentProvider;
+                case ContentStream contentStream:
+                    return contentStream.GetContentProvider();  // This will also dispose the writable stream
+                case Stream stream:
+                    return new Common.Content.StreamContent(MemoryStreamFactory, stream);
+                case IFile file:
+                    return new FileContent(file);
+                case Document document:
+                    return document.ContentProvider;
+            }
+
+            // This wasn't one of the known content types, so treat it as a string
+            string contentString = content as string ?? content.ToString();
+
+            if (string.IsNullOrEmpty(contentString))
+            {
+                return null;
+            }
+
+            if (this.Bool(Common.Meta.Keys.UseStringContentFiles))
+            {
+                // Use a temp file for strings
+                IFile tempFile = await FileSystem.GetTempFileAsync();
+                if (!string.IsNullOrEmpty(contentString))
+                {
+                    await tempFile.WriteAllTextAsync(contentString);
+                }
+                return new TempFileContent(tempFile);
+            }
+
+            // Otherwise get a memory stream from the pool and use that
+            return new Common.Content.StreamContent(MemoryStreamFactory, MemoryStreamFactory.GetStream(contentString));
+        }
+
+        /// <inheritdoc/>
+        public IDocument GetDocument(
+            IDocument originalDocument,
+            FilePath source,
+            FilePath destination,
             IEnumerable<KeyValuePair<string, object>> metadata = null,
-            object content = null)
+            IContentProvider contentProvider = null)
         {
             CheckDisposed();
-            IDocument document = await Engine.DocumentFactory.GetDocumentAsync(this, sourceDocument, source, metadata, content);
-            if (sourceDocument != null && sourceDocument.Source == null && source != null)
+            IDocument document = Engine.DocumentFactory.GetDocument(this, originalDocument, source, destination, metadata, contentProvider);
+            if (originalDocument != null && originalDocument.Source == null && source != null)
             {
                 // Only add a new source if the source document didn't already contain one (otherwise the one it contains will be used)
                 _pipelinePhase.AddDocumentSource(source);

@@ -35,7 +35,7 @@ namespace Wyam.Core.Tests.Modules.Contents
                 List<IDocument> results = await module.ExecuteAsync(new[] { document }, context).ToListAsync();
 
                 // Then
-                results.Single().Content.ShouldBe("123Foo456");
+                (await results.Single().GetStringAsync()).ShouldBe("123Foo456");
             }
 
             [Test]
@@ -52,7 +52,7 @@ namespace Wyam.Core.Tests.Modules.Contents
                 List<IDocument> results = await module.ExecuteAsync(new[] { document }, context).ToListAsync();
 
                 // Then
-                results.Single().Content.ShouldBe("123ABCFooXYZ456");
+                (await results.Single().GetStringAsync()).ShouldBe("123ABCFooXYZ456");
             }
 
             [Test]
@@ -69,7 +69,7 @@ namespace Wyam.Core.Tests.Modules.Contents
                 List<IDocument> results = await module.ExecuteAsync(new[] { document }, context).ToListAsync();
 
                 // Then
-                results.Single().Content.ShouldBe("123ABCFooXYZ456");
+                (await results.Single().GetStringAsync()).ShouldBe("123ABCFooXYZ456");
             }
 
             [Test]
@@ -86,7 +86,7 @@ namespace Wyam.Core.Tests.Modules.Contents
                 List<IDocument> results = await module.ExecuteAsync(new[] { document }, context).ToListAsync();
 
                 // Then
-                results.Single().Content.ShouldBe("123ABC<?# Bar /?>XYZ456");
+                (await results.Single().GetStringAsync()).ShouldBe("123ABC<?# Bar /?>XYZ456");
             }
 
             [Test]
@@ -103,23 +103,7 @@ namespace Wyam.Core.Tests.Modules.Contents
                 List<IDocument> results = await module.ExecuteAsync(new[] { document }, context).ToListAsync();
 
                 // Then
-                results.Single().Content.ShouldBe("123<?# Bar /?>456");
-            }
-
-            [Test]
-            public async Task ShortcodeSupportsNullStreamResult()
-            {
-                // Given
-                TestExecutionContext context = new TestExecutionContext();
-                context.Shortcodes.Add<NullStreamShortcode>("Bar");
-                IDocument document = new TestDocument("123<?# Bar /?>456");
-                Core.Modules.Contents.Shortcodes module = new Core.Modules.Contents.Shortcodes();
-
-                // When
-                List<IDocument> results = await module.ExecuteAsync(new[] { document }, context).ToListAsync();
-
-                // Then
-                results.Single().Content.ShouldBe("123456");
+                (await results.Single().GetStringAsync()).ShouldBe("123<?# Bar /?>456");
             }
 
             [Test]
@@ -136,7 +120,7 @@ namespace Wyam.Core.Tests.Modules.Contents
                 List<IDocument> results = await module.ExecuteAsync(new[] { document }, context).ToListAsync();
 
                 // Then
-                results.Single().Content.ShouldBe("123Foo456789Foo");
+                (await results.Single().GetStringAsync()).ShouldBe("123Foo456789Foo");
             }
 
             [Test]
@@ -169,7 +153,7 @@ namespace Wyam.Core.Tests.Modules.Contents
                 List<IDocument> results = await module.ExecuteAsync(new[] { document }, context).ToListAsync();
 
                 // Then
-                results.Single().Content.ShouldBe("123456789");
+                (await results.Single().GetStringAsync()).ShouldBe("123456789");
                 results.Single()["A"].ShouldBe("3");
                 results.Single()["B"].ShouldBe("2");
                 results.Single()["C"].ShouldBe("4");
@@ -182,17 +166,19 @@ namespace Wyam.Core.Tests.Modules.Contents
                 TestExecutionContext context = new TestExecutionContext();
                 context.Shortcodes.Add<ReadsMetadataShortcode>("S1");
                 context.Shortcodes.Add<ReadsMetadataShortcode>("S2");
-                IDocument document = new TestDocument("123<?# S1 /?>456<?# S2 /?>789<?# S1 /?>", new MetadataItems
-                {
-                    { "Foo", 10 }
-                });
+                IDocument document = new TestDocument(
+                    new MetadataItems
+                    {
+                        { "Foo", 10 }
+                    },
+                    "123<?# S1 /?>456<?# S2 /?>789<?# S1 /?>");
                 Core.Modules.Contents.Shortcodes module = new Core.Modules.Contents.Shortcodes();
 
                 // When
                 List<IDocument> results = await module.ExecuteAsync(new[] { document }, context).ToListAsync();
 
                 // Then
-                results.Single().Content.ShouldBe("123456789");
+                (await results.Single().GetStringAsync()).ShouldBe("123456789");
                 results.Single()["Foo"].ShouldBe(13);
             }
 
@@ -209,38 +195,32 @@ namespace Wyam.Core.Tests.Modules.Contents
                 List<IDocument> results = await module.ExecuteAsync(new[] { document }, context).ToListAsync();
 
                 // Then
-                results.Single().Content.ShouldBe("123456789");
+                (await results.Single().GetStringAsync()).ShouldBe("123456789");
                 results.Single()["Foo"].ShouldBe(22);
             }
         }
 
         public class TestShortcode : IShortcode
         {
-            public async Task<IShortcodeResult> ExecuteAsync(KeyValuePair<string, string>[] args, string content, IDocument document, IExecutionContext context) =>
-                await context.GetShortcodeResultAsync("Foo");
+            public Task<IDocument> ExecuteAsync(KeyValuePair<string, string>[] args, string content, IDocument document, IExecutionContext context) =>
+                Task.FromResult<IDocument>(new TestDocument("Foo"));
         }
 
         public class NestedShortcode : IShortcode
         {
-            public async Task<IShortcodeResult> ExecuteAsync(KeyValuePair<string, string>[] args, string content, IDocument document, IExecutionContext context) =>
-                await context.GetShortcodeResultAsync("ABC<?# Nested /?>XYZ");
+            public Task<IDocument> ExecuteAsync(KeyValuePair<string, string>[] args, string content, IDocument document, IExecutionContext context) =>
+                Task.FromResult<IDocument>(new TestDocument("ABC<?# Nested /?>XYZ"));
         }
 
         public class RawShortcode : IShortcode
         {
-            public async Task<IShortcodeResult> ExecuteAsync(KeyValuePair<string, string>[] args, string content, IDocument document, IExecutionContext context) =>
-                context.GetShortcodeResult(await context.GetContentStreamAsync(content));
-        }
-
-        public class NullStreamShortcode : IShortcode
-        {
-            public Task<IShortcodeResult> ExecuteAsync(KeyValuePair<string, string>[] args, string content, IDocument document, IExecutionContext context) =>
-                Task.FromResult(context.GetShortcodeResult((Stream)null));
+            public async Task<IDocument> ExecuteAsync(KeyValuePair<string, string>[] args, string content, IDocument document, IExecutionContext context) =>
+                new TestDocument(await context.GetContentStreamAsync(content));
         }
 
         public class NullResultShortcode : IShortcode
         {
-            public Task<IShortcodeResult> ExecuteAsync(KeyValuePair<string, string>[] args, string content, IDocument document, IExecutionContext context) => Task.FromResult<IShortcodeResult>(null);
+            public Task<IDocument> ExecuteAsync(KeyValuePair<string, string>[] args, string content, IDocument document, IExecutionContext context) => Task.FromResult<IDocument>(null);
         }
 
         public class DisposableShortcode : IShortcode, IDisposable
@@ -253,8 +233,8 @@ namespace Wyam.Core.Tests.Modules.Contents
                 Disposed = false;
             }
 
-            public async Task<IShortcodeResult> ExecuteAsync(KeyValuePair<string, string>[] args, string content, IDocument document, IExecutionContext context) =>
-                context.GetShortcodeResult(await context.GetContentStreamAsync("Foo"));
+            public async Task<IDocument> ExecuteAsync(KeyValuePair<string, string>[] args, string content, IDocument document, IExecutionContext context) =>
+                new TestDocument(await context.GetContentStreamAsync("Foo"));
 
             public void Dispose() =>
                 Disposed = true;
@@ -262,8 +242,8 @@ namespace Wyam.Core.Tests.Modules.Contents
 
         public class AddsMetadataShortcode : IShortcode
         {
-            public Task<IShortcodeResult> ExecuteAsync(KeyValuePair<string, string>[] args, string content, IDocument document, IExecutionContext context) =>
-                Task.FromResult(context.GetShortcodeResult((Stream)null, new MetadataItems
+            public Task<IDocument> ExecuteAsync(KeyValuePair<string, string>[] args, string content, IDocument document, IExecutionContext context) =>
+                Task.FromResult<IDocument>(new TestDocument(new MetadataItems
                 {
                     { "A", "1" },
                     { "B", "2" }
@@ -272,8 +252,8 @@ namespace Wyam.Core.Tests.Modules.Contents
 
         public class AddsMetadataShortcode2 : IShortcode
         {
-            public Task<IShortcodeResult> ExecuteAsync(KeyValuePair<string, string>[] args, string content, IDocument document, IExecutionContext context) =>
-                Task.FromResult(context.GetShortcodeResult((Stream)null, new MetadataItems
+            public Task<IDocument> ExecuteAsync(KeyValuePair<string, string>[] args, string content, IDocument document, IExecutionContext context) =>
+                Task.FromResult<IDocument>(new TestDocument(new MetadataItems
                 {
                     { "A", "3" },
                     { "C", "4" }
@@ -282,8 +262,8 @@ namespace Wyam.Core.Tests.Modules.Contents
 
         public class ReadsMetadataShortcode : IShortcode
         {
-            public Task<IShortcodeResult> ExecuteAsync(KeyValuePair<string, string>[] args, string content, IDocument document, IExecutionContext context) =>
-                Task.FromResult(context.GetShortcodeResult((Stream)null, new MetadataItems
+            public Task<IDocument> ExecuteAsync(KeyValuePair<string, string>[] args, string content, IDocument document, IExecutionContext context) =>
+                Task.FromResult<IDocument>(new TestDocument(new MetadataItems
                 {
                     { $"Foo", document.Get<int>("Foo") + 1 }
                 }));
@@ -293,8 +273,8 @@ namespace Wyam.Core.Tests.Modules.Contents
         {
             private int _value = 20;
 
-            public Task<IShortcodeResult> ExecuteAsync(KeyValuePair<string, string>[] args, string content, IDocument document, IExecutionContext context) =>
-                Task.FromResult(context.GetShortcodeResult((Stream)null, new MetadataItems
+            public Task<IDocument> ExecuteAsync(KeyValuePair<string, string>[] args, string content, IDocument document, IExecutionContext context) =>
+                Task.FromResult<IDocument>(new TestDocument(new MetadataItems
                 {
                     { $"Foo", _value++ }
                 }));

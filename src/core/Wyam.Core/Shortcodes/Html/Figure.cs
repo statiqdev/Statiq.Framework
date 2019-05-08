@@ -93,7 +93,7 @@ namespace Wyam.Core.Shortcodes.Html
                 figure.Add(new XElement("figcaption", content));
             }
 
-            return await context.NewGetDocumentAsync(content: figure);
+            return context.GetDocument(await context.GetContentProviderAsync(figure));
         }
     }
 }

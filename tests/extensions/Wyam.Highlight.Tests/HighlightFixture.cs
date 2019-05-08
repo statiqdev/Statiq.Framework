@@ -71,7 +71,7 @@ namespace Wyam.Highlight.Tests
                 List<IDocument> results = await highlight.ExecuteAsync(new[] { document }, context).ToListAsync();
 
                 // Then
-                Assert.IsTrue(results[0].Content.Contains("language-csharp hljs"));
+                Assert.IsTrue((await results[0].GetStringAsync()).Contains("language-csharp hljs"));
             }
 
             [Test]
@@ -110,7 +110,7 @@ namespace Wyam.Highlight.Tests
                 List<IDocument> results = await highlight.ExecuteAsync(new[] { document }, context).ToListAsync();
 
                 // Then
-                Assert.IsTrue(results[0].Content.Contains("language-html hljs"));
+                Assert.IsTrue((await results[0].GetStringAsync()).Contains("language-html hljs"));
             }
 
             [Test]
@@ -144,7 +144,7 @@ namespace Wyam.Highlight.Tests
                 List<IDocument> results = await highlight.ExecuteAsync(new[] { document }, context).ToListAsync();
 
                 // Then
-                Assert.IsTrue(results[0].Content.Contains("language-html hljs"));
+                Assert.IsTrue((await results[0].GetStringAsync()).Contains("language-html hljs"));
             }
 
             [Test]
@@ -180,7 +180,7 @@ namespace Wyam.Highlight.Tests
                 List<IDocument> results = await highlight.ExecuteAsync(new[] { document }, context).ToListAsync();
 
                 // Then
-                Assert.IsTrue(results[0].Content.Contains("hljs"));
+                Assert.IsTrue((await results[0].GetStringAsync()).Contains("hljs"));
             }
 
             [Test]

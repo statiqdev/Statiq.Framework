@@ -37,7 +37,7 @@ namespace Wyam.Html.Tests
                 List<IDocument> result = await module.ExecuteAsync(new[] { document }, context).ToListAsync();
 
                 // Then
-                result.Single().Content.ShouldBe(
+                (await result.Single().GetStringAsync()).ShouldBe(
                     @"<html><head>
                         <script src=""/mirror/cdn.jsdelivr.net/npm/es6-promise/dist/es6-promise.auto.min.js""></script>
                       </head>
@@ -65,7 +65,7 @@ namespace Wyam.Html.Tests
                 List<IDocument> result = await module.ExecuteAsync(new[] { document }, context).ToListAsync();
 
                 // Then
-                result.Single().Content.ShouldBe(
+                (await result.Single().GetStringAsync()).ShouldBe(
                     @"<html><head>
                         <link rel=""stylesheet"" href=""/mirror/cdn.jsdelivr.net/npm/@@progress/kendo-theme-bootstrap@3.2.0/dist/all.min.css"">
                       </head>
@@ -94,7 +94,7 @@ namespace Wyam.Html.Tests
                 List<IDocument> result = await module.ExecuteAsync(new[] { document }, context).ToListAsync();
 
                 // Then
-                result.Single().Content.ShouldBe(
+                (await result.Single().GetStringAsync()).ShouldBe(
                     @"<html>
                       <head>
                         <script src=""https://cdn.jsdelivr.net/npm/es6-promise/dist/es6-promise.auto.min.js"" data-no-mirror></script>
@@ -124,7 +124,7 @@ namespace Wyam.Html.Tests
                 List<IDocument> result = await module.ExecuteAsync(new[] { document }, context).ToListAsync();
 
                 // Then
-                result.Single().Content.ShouldBe(
+                (await result.Single().GetStringAsync()).ShouldBe(
                     @"<html><head>
                         <script src=""/foo/bar.js""></script>
                       </head>

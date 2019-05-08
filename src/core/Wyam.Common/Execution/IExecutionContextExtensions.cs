@@ -42,6 +42,6 @@ namespace Wyam.Common.Execution
             this IExecutionContext context,
             IEnumerable<IModule> modules,
             IEnumerable<KeyValuePair<string, object>> metadata = null) =>
-            await context.ExecuteAsync(modules, new[] { await context.NewGetDocumentAsync(metadata: metadata) });
+            await context.ExecuteAsync(modules, new[] { context.GetDocument(metadata) });
     }
 }

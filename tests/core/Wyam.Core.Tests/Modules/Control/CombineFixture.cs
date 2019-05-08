@@ -32,7 +32,7 @@ namespace Wyam.Core.Tests.Modules.Control
                 List<IDocument> results = await combine.ExecuteAsync(new[] { a, b }, context).ToListAsync();  // Make sure to materialize the result list
 
                 // Then
-                CollectionAssert.AreEqual(new[] { "ab" }, results.Select(x => x.Content));
+                CollectionAssert.AreEqual(new[] { "ab" }, await results.SelectAsync(async x => await x.GetStringAsync()));
             }
 
             [Test]

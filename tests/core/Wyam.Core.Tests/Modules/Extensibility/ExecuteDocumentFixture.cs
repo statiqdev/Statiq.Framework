@@ -119,7 +119,7 @@ namespace Wyam.Core.Tests.Modules.Extensibility
                 IReadOnlyList<IDocument> results = await ExecuteAsync(inputs, execute);
 
                 // Then
-                CollectionAssert.AreEquivalent(results.Select(x => x.Content), new[] { "0", "1" });
+                CollectionAssert.AreEquivalent(await results.SelectAsync(async x => await x.GetStringAsync()), new[] { "0", "1" });
             }
         }
     }

@@ -95,7 +95,7 @@ namespace Wyam.Core.Modules.Contents
 
             // Construct a new stream with the shortcode results inserted
             // We have to use all TextWriter/TextReaders over the streams to ensure consistent encoding
-            Stream resultStream = context.MemoryStreamManager.GetStream();
+            Stream resultStream = context.MemoryStreamFactory.GetStream();
             char[] buffer = new char[4096];
             using (TextWriter writer = new StreamWriter(resultStream, Encoding.UTF8, 4096, true))
             {
@@ -131,7 +131,7 @@ namespace Wyam.Core.Modules.Contents
                     Read(reader, writer, null, ref buffer);
                 }
             }
-            return await context.NewGetDocumentAsync(input, content: resultStream);
+            return context.GetDocument(input, await context.GetContentProviderAsync(resultStream));
 
             async Task<InsertingStreamLocation> ExecuteShortcodesAsync(ShortcodeLocation x)
             {
@@ -140,7 +140,7 @@ namespace Wyam.Core.Modules.Contents
 
                 // Merge output metadata with the current input document
                 // Creating a new document is the easiest way to ensure all the metadata from shortcodes gets accumulated correctly
-                input = await context.NewGetDocumentAsync(input, metadata: shortcodeResult, content: shortcodeResult);
+                input = context.GetDocument(input, shortcodeResult, await context.GetContentProviderAsync(shortcodeResult));
 
                 // Recursively parse shortcodes
                 if (shortcodeResult.HasContent)

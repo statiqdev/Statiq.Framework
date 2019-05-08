@@ -111,13 +111,14 @@ namespace Wyam.Core.Modules.Contents
                     _search,
                     match => _contentFinder(match, input)?.ToString() ?? string.Empty,
                     _regexOptions);
-                return currentDocumentContent == newDocumentContent ? input : await context.NewGetDocumentAsync(input, content: newDocumentContent);
+                return currentDocumentContent == newDocumentContent ? input : context.GetDocument(input, await context.GetContentProviderAsync(newDocumentContent));
             }
-            return await context.NewGetDocumentAsync(
+            string replaced = _isRegex
+                ? Regex.Replace(currentDocumentContent, _search, content, _regexOptions)
+                : currentDocumentContent.Replace(_search, content);
+            return context.GetDocument(
                 input,
-                content: _isRegex
-                    ? Regex.Replace(currentDocumentContent, _search, content, _regexOptions)
-                    : currentDocumentContent.Replace(_search, content));
+                await context.GetContentProviderAsync(replaced));
         }
     }
 }

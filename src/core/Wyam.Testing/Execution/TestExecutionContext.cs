@@ -9,6 +9,7 @@ using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
 using Wyam.Common.Configuration;
+using Wyam.Common.Content;
 using Wyam.Common.Documents;
 using Wyam.Common.Execution;
 using Wyam.Common.IO;
@@ -16,7 +17,6 @@ using Wyam.Common.JavaScript;
 using Wyam.Common.Meta;
 using Wyam.Common.Modules;
 using Wyam.Common.Shortcodes;
-using Wyam.Testing.Caching;
 using Wyam.Testing.Configuration;
 using Wyam.Testing.Documents;
 using Wyam.Testing.IO;
@@ -31,39 +31,6 @@ namespace Wyam.Testing.Execution
     public class TestExecutionContext : IExecutionContext, ITypeConversions
     {
         private readonly TestSettings _settings = new TestSettings();
-
-        /// <inheritdoc/>
-        public IDocument GetDocument(
-            IDocument sourceDocument,
-            FilePath source,
-            Stream stream,
-            IEnumerable<KeyValuePair<string, object>> items = null,
-            bool disposeStream = true)
-        {
-            TestDocument document = sourceDocument == null
-                ? new TestDocument(items)
-                : new TestDocument(items == null ? sourceDocument : sourceDocument.Concat(items));
-            if (sourceDocument != null)
-            {
-                document.Id = sourceDocument.Id;
-            }
-            document.Source = source;
-            document.Content = stream == null && sourceDocument != null ? sourceDocument.Content : GetContent(stream);
-            return document;
-        }
-
-        private string GetContent(Stream stream)
-        {
-            if (stream == null)
-            {
-                return string.Empty;
-            }
-            stream.Position = 0;
-            using (StreamReader reader = new StreamReader(stream, Encoding.UTF8, true, 4096, true))
-            {
-                return reader.ReadToEnd();
-            }
-        }
 
         /// <inheritdoc/>
         public Guid ExecutionId { get; set; } = Guid.NewGuid();
@@ -82,9 +49,6 @@ namespace Wyam.Testing.Execution
 
         /// <inheritdoc/>
         public IModule Module { get; set; }
-
-        /// <inheritdoc/>
-        public IExecutionCache ExecutionCache { get; set; } = new TestExecutionCache();
 
         /// <inheritdoc/>
         public IReadOnlyFileSystem FileSystem { get; set; } = new TestFileSystem();
@@ -107,9 +71,56 @@ namespace Wyam.Testing.Execution
 
         IReadOnlyShortcodeCollection IExecutionContext.Shortcodes => Shortcodes;
 
+        public IMemoryStreamFactory MemoryStreamFactory { get; set; } = new TestMemoryStreamFactory();
+
         /// <inheritdoc/>
         public Task<Stream> GetContentStreamAsync(string content = null) =>
             Task.FromResult<Stream>(string.IsNullOrEmpty(content) ? new MemoryStream() : new MemoryStream(Encoding.UTF8.GetBytes(content)));
+
+        /// <inheritdoc/>
+        public async Task<IContentProvider> GetContentProviderAsync(object content)
+        {
+            await Task.CompletedTask;
+
+            switch (content)
+            {
+                case null:
+                    return null;
+                case IContentProvider contentProvider:
+                    return contentProvider;
+                case Stream stream:
+                    return new Common.Content.StreamContent(MemoryStreamFactory, stream);
+                case IFile file:
+                    return new FileContent(file);
+                case TestDocument document:
+                    return document.ContentProvider;
+            }
+
+            string contentString = content as string ?? content.ToString();
+            return string.IsNullOrEmpty(contentString)
+                ? null
+                : new Common.Content.StreamContent(MemoryStreamFactory, MemoryStreamFactory.GetStream(contentString));
+        }
+
+        /// <inheritdoc/>
+        public IDocument GetDocument(
+            IDocument originalDocument,
+            FilePath source,
+            FilePath destination,
+            IEnumerable<KeyValuePair<string, object>> metadata = null,
+            IContentProvider contentProvider = null)
+        {
+            TestDocument document = originalDocument == null
+                ? new TestDocument(metadata, contentProvider)
+                : new TestDocument(
+                    metadata == null ? originalDocument : originalDocument.Concat(metadata),
+                    contentProvider == null ? ((TestDocument)originalDocument).ContentProvider : contentProvider);
+            if (originalDocument != null)
+            {
+                document.Id = originalDocument.Id;
+            }
+            return document;
+        }
 
         /// <inheritdoc/>
         public HttpClient CreateHttpClient() =>
@@ -180,25 +191,6 @@ namespace Wyam.Testing.Execution
                 inputs = await module.ExecuteAsync(inputs.ToList(), this);
             }
             return inputs.ToImmutableArray();
-        }
-
-        public async Task<IShortcodeResult> GetShortcodeResultAsync(string content, IEnumerable<KeyValuePair<string, object>> metadata = null)
-            => GetShortcodeResult(content == null ? null : await GetContentStreamAsync(content), metadata);
-
-        public IShortcodeResult GetShortcodeResult(Stream content, IEnumerable<KeyValuePair<string, object>> metadata = null)
-            => new ShortcodeResult(content, metadata);
-
-        private class ShortcodeResult : IShortcodeResult
-        {
-            public Stream Stream { get; }
-
-            public IEnumerable<KeyValuePair<string, object>> Metadata { get; }
-
-            public ShortcodeResult(Stream stream, IEnumerable<KeyValuePair<string, object>> metadata)
-            {
-                Stream = stream;
-                Metadata = metadata;
-            }
         }
 
         public Func<IJavaScriptEngine> JsEngineFunc { get; set; } = () =>

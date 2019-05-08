@@ -8,6 +8,7 @@ using Wyam.Common.Modules;
 using Wyam.Common.Execution;
 using YamlDotNet.RepresentationModel;
 using Wyam.Yaml.Dynamic;
+using Wyam.Common.Util;
 
 namespace Wyam.Yaml
 {
@@ -50,38 +51,35 @@ namespace Wyam.Yaml
         }
 
         /// <inheritdoc />
-        public Task<IEnumerable<IDocument>> ExecuteAsync(IReadOnlyList<IDocument> inputs, IExecutionContext context)
+        public async Task<IEnumerable<IDocument>> ExecuteAsync(IReadOnlyList<IDocument> inputs, IExecutionContext context)
         {
-            ParallelQuery<IDocument> outputs = inputs
-                .AsParallel()
-                .SelectMany(context, input =>
+            return await inputs.ParallelSelectManyAsync(async input =>
+            {
+                List<Dictionary<string, object>> documentMetadata = new List<Dictionary<string, object>>();
+                using (TextReader contentReader = new StreamReader(await input.GetStreamAsync()))
                 {
-                    List<Dictionary<string, object>> documentMetadata = new List<Dictionary<string, object>>();
-                    using (TextReader contentReader = new StringReader(input.Content))
+                    YamlStream yamlStream = new YamlStream();
+                    yamlStream.Load(contentReader);
+                    foreach (YamlDocument document in yamlStream.Documents)
                     {
-                        YamlStream yamlStream = new YamlStream();
-                        yamlStream.Load(contentReader);
-                        foreach (YamlDocument document in yamlStream.Documents)
+                        // If this is a sequence, get a document for each item
+                        if (document.RootNode is YamlSequenceNode rootSequence)
                         {
-                            // If this is a sequence, get a document for each item
-                            if (document.RootNode is YamlSequenceNode rootSequence)
-                            {
-                                documentMetadata.AddRange(rootSequence.Children.Select(x => GetDocumentMetadata(x, context)));
-                            }
-                            else
-                            {
-                                // Otherwise, just get a single set of metadata
-                                documentMetadata.Add(GetDocumentMetadata(document.RootNode, context));
-                            }
+                            documentMetadata.AddRange(rootSequence.Children.Select(x => GetDocumentMetadata(x, context)));
+                        }
+                        else
+                        {
+                            // Otherwise, just get a single set of metadata
+                            documentMetadata.Add(GetDocumentMetadata(document.RootNode, context));
                         }
                     }
-                    if (documentMetadata.Count == 0 && _flatten)
-                    {
-                        return new[] { input };
-                    }
-                    return documentMetadata.Select(metadata => context.GetDocument(input, metadata));
-                });
-            return Task.FromResult<IEnumerable<IDocument>>(outputs);
+                }
+                if (documentMetadata.Count == 0 && _flatten)
+                {
+                    return new[] { input };
+                }
+                return documentMetadata.Select(metadata => context.GetDocument(input, metadata));
+            });
         }
 
         private Dictionary<string, object> GetDocumentMetadata(YamlNode node, IExecutionContext context)

@@ -135,20 +135,24 @@ namespace Wyam.CodeAnalysis
                             Common.Tracing.Trace.Verbose($"Read file {file.Path.FullPath}");
                             DirectoryPath inputPath = await context.FileSystem.GetContainingInputPathAsync(file.Path);
                             FilePath relativePath = inputPath?.GetRelativePath(file.Path) ?? projectFile.Path.Directory.GetRelativePath(file.Path);
-                            return context.GetDocument(file.Path, await file.OpenReadAsync(), new MetadataItems
-                            {
-                                { CodeAnalysisKeys.AssemblyName, assemblyName },
-                                { Keys.SourceFileRoot, inputPath ?? file.Path.Directory },
-                                { Keys.SourceFileBase, file.Path.FileNameWithoutExtension },
-                                { Keys.SourceFileExt, file.Path.Extension },
-                                { Keys.SourceFileName, file.Path.FileName },
-                                { Keys.SourceFileDir, file.Path.Directory },
-                                { Keys.SourceFilePath, file.Path },
-                                { Keys.SourceFilePathBase, file.Path.Directory.CombineFile(file.Path.FileNameWithoutExtension) },
-                                { Keys.RelativeFilePath, relativePath },
-                                { Keys.RelativeFilePathBase, relativePath.Directory.CombineFile(file.Path.FileNameWithoutExtension) },
-                                { Keys.RelativeFileDir, relativePath.Directory }
-                            });
+                            return context.GetDocument(
+                                file.Path,
+                                null,
+                                new MetadataItems
+                                {
+                                    { CodeAnalysisKeys.AssemblyName, assemblyName },
+                                    { Keys.SourceFileRoot, inputPath ?? file.Path.Directory },
+                                    { Keys.SourceFileBase, file.Path.FileNameWithoutExtension },
+                                    { Keys.SourceFileExt, file.Path.Extension },
+                                    { Keys.SourceFileName, file.Path.FileName },
+                                    { Keys.SourceFileDir, file.Path.Directory },
+                                    { Keys.SourceFilePath, file.Path },
+                                    { Keys.SourceFilePathBase, file.Path.Directory.CombineFile(file.Path.FileNameWithoutExtension) },
+                                    { Keys.RelativeFilePath, relativePath },
+                                    { Keys.RelativeFilePathBase, relativePath.Directory.CombineFile(file.Path.FileNameWithoutExtension) },
+                                    { Keys.RelativeFileDir, relativePath.Directory }
+                                },
+                                await context.GetContentProviderAsync(file));
                         }
                     }
                 }

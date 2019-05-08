@@ -72,7 +72,7 @@ namespace Wyam.Common.Shortcodes
             collection.Add(name, async (args, content, doc, ctx) =>
             {
                 string result = documentConfig == null ? null : await documentConfig.GetAndTransformValueAsync(doc, ctx);
-                return result != null ? await ctx.NewGetDocumentAsync(content: result) : null;
+                return result != null ? ctx.GetDocument(await ctx.GetContentProviderAsync(result)) : null;
             });
 
         /// <summary>
@@ -88,7 +88,7 @@ namespace Wyam.Common.Shortcodes
             collection.Add(name, async (args, content, doc, ctx) =>
             {
                 string result = func?.Invoke(content);
-                return result != null ? await ctx.NewGetDocumentAsync(content: result) : null;
+                return result != null ? ctx.GetDocument(await ctx.GetContentProviderAsync(result)) : null;
             });
 
         /// <summary>
@@ -104,7 +104,7 @@ namespace Wyam.Common.Shortcodes
             collection.Add(name, async (args, content, doc, ctx) =>
             {
                 string result = func?.Invoke(args);
-                return result != null ? await ctx.NewGetDocumentAsync(content: result) : null;
+                return result != null ? ctx.GetDocument(await ctx.GetContentProviderAsync(result)) : null;
             });
 
         /// <summary>
@@ -120,7 +120,7 @@ namespace Wyam.Common.Shortcodes
             collection.Add(name, async (args, content, doc, ctx) =>
             {
                 string result = func?.Invoke(args, content);
-                return result != null ? await ctx.NewGetDocumentAsync(content: result) : null;
+                return result != null ? ctx.GetDocument(await ctx.GetContentProviderAsync(result)) : null;
             });
 
         /// <summary>
@@ -140,7 +140,7 @@ namespace Wyam.Common.Shortcodes
             collection.Add(name, async (args, content, doc, ctx) =>
             {
                 string result = func?.Invoke(args, content, ctx);
-                return result != null ? await ctx.NewGetDocumentAsync(content: result) : null;
+                return result != null ? ctx.GetDocument(await ctx.GetContentProviderAsync(result)) : null;
             });
 
         /// <summary>
@@ -160,7 +160,7 @@ namespace Wyam.Common.Shortcodes
             collection.Add(name, async (args, content, doc, ctx) =>
             {
                 string result = func?.Invoke(args, content, doc, ctx);
-                return result != null ? await ctx.NewGetDocumentAsync(content: result) : null;
+                return result != null ? ctx.GetDocument(await ctx.GetContentProviderAsync(result)) : null;
             });
 
         /// <summary>
@@ -180,7 +180,7 @@ namespace Wyam.Common.Shortcodes
             collection.Add(name, async (args, content, doc, ctx) =>
             {
                 string result = func?.Invoke(args, ctx);
-                return result != null ? await ctx.NewGetDocumentAsync(content: result) : null;
+                return result != null ? ctx.GetDocument(await ctx.GetContentProviderAsync(result)) : null;
             });
 
         /// <summary>
@@ -200,7 +200,7 @@ namespace Wyam.Common.Shortcodes
             collection.Add(name, async (args, content, doc, ctx) =>
             {
                 string result = func?.Invoke(args, doc, ctx);
-                return result != null ? await ctx.NewGetDocumentAsync(content: result) : null;
+                return result != null ? ctx.GetDocument(await ctx.GetContentProviderAsync(result)) : null;
             });
 
         /// <summary>
@@ -220,7 +220,7 @@ namespace Wyam.Common.Shortcodes
             collection.Add(name, async (args, content, doc, ctx) =>
             {
                 string result = func?.Invoke(content, ctx);
-                return result != null ? await ctx.NewGetDocumentAsync(content: result) : null;
+                return result != null ? ctx.GetDocument(await ctx.GetContentProviderAsync(result)) : null;
             });
 
         /// <summary>
@@ -240,7 +240,7 @@ namespace Wyam.Common.Shortcodes
             collection.Add(name, async (args, content, doc, ctx) =>
             {
                 string result = func?.Invoke(content, doc, ctx);
-                return result != null ? await ctx.NewGetDocumentAsync(content: result) : null;
+                return result != null ? ctx.GetDocument(await ctx.GetContentProviderAsync(result)) : null;
             });
 
         /// <summary>

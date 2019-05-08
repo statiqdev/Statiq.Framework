@@ -45,7 +45,7 @@ namespace Wyam.Highlight.Shortcodes
     public class Highlight : IShortcode
     {
         /// <inheritdoc />
-        public async Task<IShortcodeResult> ExecuteAsync(KeyValuePair<string, string>[] args, string content, IDocument document, IExecutionContext context)
+        public async Task<IDocument> ExecuteAsync(KeyValuePair<string, string>[] args, string content, IDocument document, IExecutionContext context)
         {
             ConvertingDictionary dictionary = args.ToDictionary(
                 context,
@@ -74,7 +74,7 @@ namespace Wyam.Highlight.Shortcodes
                     element.SetAttribute("class", $"language-{dictionary.String("Language")}");
                 }
                 Wyam.Highlight.Highlight.HighlightElement(enginePool, element);
-                return await context.GetShortcodeResultAsync(element.OuterHtml);
+                return context.GetDocument(await context.GetContentProviderAsync(element.OuterHtml));
             }
         }
     }

@@ -31,7 +31,7 @@ namespace Wyam.Core.Tests.Modules.Contents
             List<IDocument> results = await join.ExecuteAsync(new[] { first, second }, context).ToListAsync();
 
             // Then
-            Assert.AreEqual("TestTest2", results.Single().Content);
+            Assert.AreEqual("TestTest2", await results.Single().GetStringAsync());
         }
 
         [Test]
@@ -49,7 +49,7 @@ namespace Wyam.Core.Tests.Modules.Contents
             List<IDocument> results = await join.ExecuteAsync(new[] { first, second, third }, context).ToListAsync();
 
             // Then
-            Assert.AreEqual("TestTest2Test3", results.Single().Content);
+            Assert.AreEqual("TestTest2Test3", await results.Single().GetStringAsync());
         }
 
         [Test]
@@ -67,7 +67,7 @@ namespace Wyam.Core.Tests.Modules.Contents
             List<IDocument> results = await join.ExecuteAsync(new[] { first, second, third }, context).ToListAsync();
 
             // Then
-            Assert.AreEqual("Test2Test3", results.Single().Content);
+            Assert.AreEqual("Test2Test3", await results.Single().GetStringAsync());
         }
 
         [Test]
@@ -85,7 +85,7 @@ namespace Wyam.Core.Tests.Modules.Contents
             List<IDocument> results = await join.ExecuteAsync(new[] { first, second, third }, context).ToListAsync();
 
             // Then
-            Assert.AreEqual("TestTest3", results.Single().Content);
+            Assert.AreEqual("TestTest3", await results.Single().GetStringAsync());
         }
 
         [Test]
@@ -99,7 +99,7 @@ namespace Wyam.Core.Tests.Modules.Contents
             List<IDocument> results = await join.ExecuteAsync(null, context).ToListAsync();
 
             // Then
-            Assert.AreEqual(string.Empty, results.Single().Content);
+            Assert.AreEqual(string.Empty, await results.Single().GetStringAsync());
         }
 
         [Test]
@@ -116,7 +116,7 @@ namespace Wyam.Core.Tests.Modules.Contents
             List<IDocument> results = await join.ExecuteAsync(new[] { first, second }, context).ToListAsync();
 
             // Then
-            Assert.AreEqual("Test,Test2", results.Single().Content);
+            Assert.AreEqual("Test,Test2", await results.Single().GetStringAsync());
         }
 
         [Test]
@@ -133,15 +133,15 @@ namespace Wyam.Core.Tests.Modules.Contents
             List<IDocument> results = await join.ExecuteAsync(new[] { first, second }, context).ToListAsync();
 
             // Then
-            Assert.AreEqual("TestTestTest2", results.Single().Content);
+            Assert.AreEqual("TestTestTest2", await results.Single().GetStringAsync());
         }
 
         [Test]
         public async Task JoinTwoDocumentsWithKeepFirstMetaDataReturnKeepsFirstMetaData()
         {
             // Given
-            IDocument first = new TestDocument("Test", new List<KeyValuePair<string, object>>() { new KeyValuePair<string, object>("one", "two") });
-            IDocument second = new TestDocument("Test2", new List<KeyValuePair<string, object>>() { new KeyValuePair<string, object>("three", "four") });
+            IDocument first = new TestDocument(new List<KeyValuePair<string, object>>() { new KeyValuePair<string, object>("one", "two") }, "Test");
+            IDocument second = new TestDocument(new List<KeyValuePair<string, object>>() { new KeyValuePair<string, object>("three", "four") }, "Test2");
 
             IExecutionContext context = new TestExecutionContext();
             Join join = new Join(JoinedMetadata.FirstDocument);
@@ -158,8 +158,8 @@ namespace Wyam.Core.Tests.Modules.Contents
         public async Task JoinTwoDocumentsWithMetaDataReturnDefaultMetaData()
         {
             // Given
-            IDocument first = new TestDocument("Test", new List<KeyValuePair<string, object>>() { new KeyValuePair<string, object>("one", "two") });
-            IDocument second = new TestDocument("Test2", new List<KeyValuePair<string, object>>() { new KeyValuePair<string, object>("three", "four") });
+            IDocument first = new TestDocument(new List<KeyValuePair<string, object>>() { new KeyValuePair<string, object>("one", "two") }, "Test");
+            IDocument second = new TestDocument(new List<KeyValuePair<string, object>>() { new KeyValuePair<string, object>("three", "four") }, "Test2");
 
             IExecutionContext context = new TestExecutionContext();
             Join join = new Join();
@@ -176,8 +176,8 @@ namespace Wyam.Core.Tests.Modules.Contents
         public async Task JoinTwoDocumentsWithKeepLastMetaDataReturnKeepsLastMetaData()
         {
             // Given
-            IDocument first = new TestDocument("Test", new List<KeyValuePair<string, object>>() { new KeyValuePair<string, object>("one", "two") });
-            IDocument second = new TestDocument("Test2", new List<KeyValuePair<string, object>>() { new KeyValuePair<string, object>("three", "four") });
+            IDocument first = new TestDocument(new List<KeyValuePair<string, object>>() { new KeyValuePair<string, object>("one", "two") }, "Test");
+            IDocument second = new TestDocument(new List<KeyValuePair<string, object>>() { new KeyValuePair<string, object>("three", "four") }, "Test2");
 
             IExecutionContext context = new TestExecutionContext();
             Join join = new Join(JoinedMetadata.LastDocument);
@@ -194,8 +194,8 @@ namespace Wyam.Core.Tests.Modules.Contents
         public async Task JoinTwoDocumentsWithAllKeepFirstMetaData()
         {
             // Given
-            IDocument first = new TestDocument("Test", new List<KeyValuePair<string, object>>() { new KeyValuePair<string, object>("one", "two") });
-            IDocument second = new TestDocument("Test2", new List<KeyValuePair<string, object>>() { new KeyValuePair<string, object>("one", "seven"),  new KeyValuePair<string, object>("three", "four") });
+            IDocument first = new TestDocument(new List<KeyValuePair<string, object>>() { new KeyValuePair<string, object>("one", "two") }, "Test");
+            IDocument second = new TestDocument(new List<KeyValuePair<string, object>>() { new KeyValuePair<string, object>("one", "seven"), new KeyValuePair<string, object>("three", "four") }, "Test2");
 
             IExecutionContext context = new TestExecutionContext();
             Join join = new Join(JoinedMetadata.AllWithFirstDuplicates);
@@ -214,8 +214,8 @@ namespace Wyam.Core.Tests.Modules.Contents
         public async Task JoinTwoDocumentsWithAllKeepLastMetaData()
         {
             // Given
-            IDocument first = new TestDocument("Test", new List<KeyValuePair<string, object>>() { new KeyValuePair<string, object>("one", "two") });
-            IDocument second = new TestDocument("Test2", new List<KeyValuePair<string, object>>() { new KeyValuePair<string, object>("one", "seven"), new KeyValuePair<string, object>("three", "four") });
+            IDocument first = new TestDocument(new List<KeyValuePair<string, object>>() { new KeyValuePair<string, object>("one", "two") }, "Test");
+            IDocument second = new TestDocument(new List<KeyValuePair<string, object>>() { new KeyValuePair<string, object>("one", "seven"), new KeyValuePair<string, object>("three", "four") }, "Test2");
 
             IExecutionContext context = new TestExecutionContext();
             Join join = new Join(JoinedMetadata.AllWithLastDuplicates);
@@ -241,7 +241,7 @@ namespace Wyam.Core.Tests.Modules.Contents
             List<IDocument> results = await join.ExecuteAsync(new IDocument[0], context).ToListAsync();
 
             // Then
-            Assert.AreEqual(string.Empty, results.Single().Content);
+            Assert.AreEqual(string.Empty, await results.Single().GetStringAsync());
         }
 
         [Test]
@@ -255,7 +255,7 @@ namespace Wyam.Core.Tests.Modules.Contents
             List<IDocument> results = await join.ExecuteAsync(new IDocument[0], context).ToListAsync();
 
             // Then
-            Assert.AreEqual(string.Empty, results.Single().Content);
+            Assert.AreEqual(string.Empty, await results.Single().GetStringAsync());
         }
     }
 }

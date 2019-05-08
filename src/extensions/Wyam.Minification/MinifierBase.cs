@@ -18,7 +18,7 @@ namespace Wyam.Minification
             {
                 try
                 {
-                    MinificationResultBase result = minify(input.Content);
+                    MinificationResultBase result = minify(await input.GetStringAsync());
 
                     if (result.Errors.Count > 0)
                     {
@@ -31,7 +31,7 @@ namespace Wyam.Minification
                         Trace.Warning("{0} warnings found while minifying {4} for {1}:{2}{3}", result.Warnings.Count, input.SourceString(), Environment.NewLine, string.Join(Environment.NewLine, result.Warnings.Select(MinificationErrorInfoToString)), minifierType);
                     }
 
-                    return await context.GetDocumentAsync(input, source: result.MinifiedContent);
+                    return context.GetDocument(input, await context.GetContentProviderAsync(result.MinifiedContent));
                 }
                 catch (Exception ex)
                 {

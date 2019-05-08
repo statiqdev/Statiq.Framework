@@ -39,9 +39,10 @@ namespace Wyam.Core.Shortcodes.Html
                 "Username",
                 "File");
             arguments.RequireKeys("Id");
-            return await context.NewGetDocumentAsync(
-                content: $"<script src=\"//gist.github.com/{arguments.String("Username", x => x + "/")}{arguments.String("Id")}.js"
-                + $"{arguments.String("File", x => "?file=" + x)}\" type=\"text/javascript\"></script>");
+            return context.GetDocument(
+                await context.GetContentProviderAsync(
+                    $"<script src=\"//gist.github.com/{arguments.String("Username", x => x + "/")}{arguments.String("Id")}.js"
+                    + $"{arguments.String("File", x => "?file=" + x)}\" type=\"text/javascript\"></script>"));
         }
     }
 }

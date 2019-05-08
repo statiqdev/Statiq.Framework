@@ -31,10 +31,7 @@ namespace Wyam.Html.Tests
                             <h1>Bar</h1>
                         </body>
                     </html>";
-                IDocument document = new TestDocument
-                {
-                    Content = input
-                };
+                IDocument document = new TestDocument(input);
                 IExecutionContext context = new TestExecutionContext();
                 Headings headings = new Headings();
 
@@ -44,7 +41,7 @@ namespace Wyam.Html.Tests
                 // Then
                 CollectionAssert.AreEqual(
                     new[] { "Foo", "Bar" },
-                    results[0].DocumentList(HtmlKeys.Headings).Select(x => x.Content).ToArray());
+                    await results[0].DocumentList(HtmlKeys.Headings).SelectAsync(async x => await x.GetStringAsync()));
             }
 
             [Test]
@@ -60,10 +57,7 @@ namespace Wyam.Html.Tests
                             <h1>Bar</h1>
                         </body>
                     </html>";
-                IDocument document = new TestDocument
-                {
-                    Content = input
-                };
+                IDocument document = new TestDocument(input);
                 IExecutionContext context = new TestExecutionContext();
                 Headings headings = new Headings().WithHeadingKey("HContent");
 
@@ -89,10 +83,7 @@ namespace Wyam.Html.Tests
                             <h1>Bar</h1>
                         </body>
                     </html>";
-                IDocument document = new TestDocument
-                {
-                    Content = input
-                };
+                IDocument document = new TestDocument(input);
                 IExecutionContext context = new TestExecutionContext();
                 Headings headings = new Headings();
 
@@ -120,10 +111,7 @@ namespace Wyam.Html.Tests
                             <h1>Bar</h1>
                         </body>
                     </html>";
-                IDocument document = new TestDocument
-                {
-                    Content = input
-                };
+                IDocument document = new TestDocument(input);
                 IExecutionContext context = new TestExecutionContext();
                 Headings headings = new Headings();
 
@@ -133,7 +121,7 @@ namespace Wyam.Html.Tests
                 // Then
                 CollectionAssert.AreEqual(
                     new[] { "Foo", "Bar" },
-                    results[0].DocumentList(HtmlKeys.Headings).Select(x => x.Content).ToArray());
+                    await results[0].DocumentList(HtmlKeys.Headings).SelectAsync(async x => await x.GetStringAsync()));
             }
 
             [Test]
@@ -150,10 +138,7 @@ namespace Wyam.Html.Tests
                             <h1>Bar</h1>
                         </body>
                     </html>";
-                IDocument document = new TestDocument
-                {
-                    Content = input
-                };
+                IDocument document = new TestDocument(input);
                 IExecutionContext context = new TestExecutionContext();
                 Headings headings = new Headings(3);
 
@@ -163,7 +148,7 @@ namespace Wyam.Html.Tests
                 // Then
                 CollectionAssert.AreEqual(
                     new[] { "Foo", "Baz", "Bar" },
-                    results[0].DocumentList(HtmlKeys.Headings).Select(x => x.Content).ToArray());
+                    await results[0].DocumentList(HtmlKeys.Headings).SelectAsync(async x => await x.GetStringAsync()));
             }
 
             [Test]
@@ -182,10 +167,7 @@ namespace Wyam.Html.Tests
                             <h2>Boo</h2>
                         </body>
                     </html>";
-                IDocument document = new TestDocument
-                {
-                    Content = input
-                };
+                IDocument document = new TestDocument(input);
                 IExecutionContext context = new TestExecutionContext();
                 Headings headings = new Headings(3).WithNesting();
 
@@ -195,13 +177,13 @@ namespace Wyam.Html.Tests
                 // Then
                 CollectionAssert.AreEqual(
                     new[] { "Foo", "Bar" },
-                    results[0].DocumentList(HtmlKeys.Headings).Select(x => x.Content).ToArray());
+                    await results[0].DocumentList(HtmlKeys.Headings).SelectAsync(async x => await x.GetStringAsync()));
                 CollectionAssert.AreEqual(
                     new[] { "Baz", "Boz" },
-                    results[0].DocumentList(HtmlKeys.Headings)[0].DocumentList(Keys.Children).Select(x => x.Content).ToArray());
+                    await results[0].DocumentList(HtmlKeys.Headings)[0].DocumentList(Keys.Children).SelectAsync(async x => await x.GetStringAsync()));
                 CollectionAssert.AreEqual(
                     new[] { "Boo" },
-                    results[0].DocumentList(HtmlKeys.Headings)[1].DocumentList(Keys.Children).Select(x => x.Content).ToArray());
+                    await results[0].DocumentList(HtmlKeys.Headings)[1].DocumentList(Keys.Children).SelectAsync(async x => await x.GetStringAsync()));
             }
 
             [Test]
@@ -220,10 +202,7 @@ namespace Wyam.Html.Tests
                             <h2>Boo</h2>
                         </body>
                     </html>";
-                IDocument document = new TestDocument
-                {
-                    Content = input
-                };
+                IDocument document = new TestDocument(input);
                 IExecutionContext context = new TestExecutionContext();
                 Headings headings = new Headings(3);
 
@@ -233,13 +212,13 @@ namespace Wyam.Html.Tests
                 // Then
                 CollectionAssert.AreEqual(
                     new[] { "Foo", "Baz", "Boz", "Bar", "Boo" },
-                    results[0].DocumentList(HtmlKeys.Headings).Select(x => x.Content).ToArray());
+                    await results[0].DocumentList(HtmlKeys.Headings).SelectAsync(async x => await x.GetStringAsync()));
                 CollectionAssert.AreEqual(
                     new[] { "Baz", "Boz" },
-                    results[0].DocumentList(HtmlKeys.Headings)[0].DocumentList(Keys.Children).Select(x => x.Content).ToArray());
+                    await results[0].DocumentList(HtmlKeys.Headings)[0].DocumentList(Keys.Children).SelectAsync(async x => await x.GetStringAsync()));
                 CollectionAssert.AreEqual(
                     new[] { "Boo" },
-                    results[0].DocumentList(HtmlKeys.Headings)[3].DocumentList(Keys.Children).Select(x => x.Content).ToArray());
+                    await results[0].DocumentList(HtmlKeys.Headings)[3].DocumentList(Keys.Children).SelectAsync(async x => await x.GetStringAsync()));
             }
 
             [Test]
@@ -255,10 +234,7 @@ namespace Wyam.Html.Tests
                             <h1 id=""bar"">Bar</h1>
                         </body>
                     </html>";
-                IDocument document = new TestDocument
-                {
-                    Content = input
-                };
+                IDocument document = new TestDocument(input);
                 IExecutionContext context = new TestExecutionContext();
                 Headings headings = new Headings();
 

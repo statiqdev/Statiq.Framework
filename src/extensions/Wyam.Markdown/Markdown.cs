@@ -190,7 +190,7 @@ namespace Wyam.Markdown
                 string content;
                 if (string.IsNullOrEmpty(_sourceKey))
                 {
-                    content = input.Content;
+                    content = await input.GetStringAsync();
                 }
                 else if (input.ContainsKey(_sourceKey))
                 {
@@ -243,7 +243,7 @@ namespace Wyam.Markdown
                 }
 
                 return string.IsNullOrEmpty(_sourceKey)
-                    ? await context.GetDocumentAsync(input, source: result)
+                    ? context.GetDocument(input, await context.GetContentProviderAsync(result))
                     : context.GetDocument(input, new MetadataItems
                     {
                         { string.IsNullOrEmpty(_destinationKey) ? _sourceKey : _destinationKey, result }

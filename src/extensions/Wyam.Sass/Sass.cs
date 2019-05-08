@@ -173,7 +173,7 @@ namespace Wyam.Sass
                     Trace.Warning($"No input path found for document {input.SourceString()}, using {inputPath.FileName.FullPath}");
                 }
 
-                string content = input.Content;
+                string content = await input.GetStringAsync();
 
                 // Sass conversion
                 FileImporter importer = new FileImporter(context.FileSystem, _importPathFunc);
@@ -196,27 +196,27 @@ namespace Wyam.Sass
                 FilePath relativePath = relativeDirectory?.GetRelativePath(inputPath) ?? inputPath.FileName;
 
                 FilePath cssPath = relativePath.ChangeExtension("css");
-                IDocument cssDocument = await context.GetDocumentAsync(
+                IDocument cssDocument = context.GetDocument(
                     input,
-                    source: result.Css ?? string.Empty,
-                    content: new MetadataItems
+                    new MetadataItems
                     {
                             { Keys.RelativeFilePath, cssPath },
                             { Keys.WritePath, cssPath }
-                    });
+                    },
+                    await context.GetContentProviderAsync(result.Css ?? string.Empty));
 
                 // Generate a source map if requested
                 if (_generateSourceMap && result.SourceMap != null)
                 {
                     FilePath sourceMapPath = relativePath.ChangeExtension("map");
-                    IDocument sourceMapDocument = await context.GetDocumentAsync(
+                    IDocument sourceMapDocument = context.GetDocument(
                         input,
-                        source: result.SourceMap,
-                        content: new MetadataItems
+                        new MetadataItems
                         {
                                 { Keys.RelativeFilePath, sourceMapPath },
                                 { Keys.WritePath, sourceMapPath }
-                        });
+                        },
+                        await context.GetContentProviderAsync(result.SourceMap));
                     return new[] { cssDocument, sourceMapDocument };
                 }
 

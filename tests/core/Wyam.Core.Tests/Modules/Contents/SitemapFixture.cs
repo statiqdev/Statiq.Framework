@@ -56,7 +56,7 @@ namespace Wyam.Core.Tests.Modules.Contents
 
                 // Then
                 Assert.AreEqual(1, results.Count);
-                Assert.That(results[0].Content, Does.Contain($"<loc>{expected}</loc>"));
+                Assert.That((await results[0].GetStringAsync()), Does.Contain($"<loc>{expected}</loc>"));
             }
 
             [TestCase("www.example.org", null, "http://www.example.org/sub/testfile")]
@@ -96,7 +96,7 @@ namespace Wyam.Core.Tests.Modules.Contents
 
                 // Then
                 Assert.AreEqual(1, results.Count);
-                Assert.That(results[0].Content, Does.Contain($"<loc>{expected}</loc>"));
+                Assert.That((await results[0].GetStringAsync()), Does.Contain($"<loc>{expected}</loc>"));
             }
 
             [TestCase("www.example.org", null, "http://www.example.org/sub/testfile")]
@@ -132,7 +132,7 @@ namespace Wyam.Core.Tests.Modules.Contents
 
                 // Then
                 Assert.AreEqual(1, results.Count);
-                Assert.That(results[0].Content, Does.Contain($"<loc>{expected}</loc>"));
+                Assert.That((await results[0].GetStringAsync()), Does.Contain($"<loc>{expected}</loc>"));
             }
         }
     }

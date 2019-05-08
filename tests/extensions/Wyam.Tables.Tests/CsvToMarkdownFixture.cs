@@ -113,7 +113,7 @@ namespace Wyam.Tables.Tests
 
                 // Then
                 results.Count.ShouldBe(1);
-                results[0].Content.ShouldBe(output, StringCompareShould.IgnoreLineEndings);
+                (await results[0].GetStringAsync()).ShouldBe(output, StringCompareShould.IgnoreLineEndings);
             }
 
             [Test]
@@ -214,7 +214,7 @@ namespace Wyam.Tables.Tests
 
                 // Then
                 results.Count.ShouldBe(1);
-                results[0].Content.ShouldBe(output, StringCompareShould.IgnoreLineEndings);
+                (await results[0].GetStringAsync()).ShouldBe(output, StringCompareShould.IgnoreLineEndings);
             }
         }
     }

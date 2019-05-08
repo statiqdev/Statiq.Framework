@@ -230,7 +230,11 @@ namespace Wyam.Html
                                             element.ChildNodes.ToHtml(writer, ProcessingInstructionFormatter.Instance);
                                         }
                                         writer.Flush();
-                                        documents.Add(context.GetDocument(input, contentStream, metadata.Count == 0 ? null : metadata));
+                                        documents.Add(
+                                            context.GetDocument(
+                                                input,
+                                                metadata.Count == 0 ? null : metadata,
+                                                await context.GetContentProviderAsync(contentStream)));
                                     }
                                 }
                                 else

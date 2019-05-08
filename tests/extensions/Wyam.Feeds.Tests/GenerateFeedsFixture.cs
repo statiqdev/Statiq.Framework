@@ -37,7 +37,7 @@ namespace Wyam.Feeds.Tests
 
                 // Then
                 results.Select(x => x.FilePath(Keys.WritePath).FullPath).ShouldBe(new[] { "feed.rss", "feed.atom" }, true);
-                results[0].Content.ShouldContain("http://foo.com/bar/baz.png");
+                (await results[0].GetStringAsync()).ShouldContain("http://foo.com/bar/baz.png");
             }
         }
     }

@@ -94,7 +94,7 @@ namespace Wyam.Core.Shortcodes.Html
             // Switch based on type
             if (!string.IsNullOrEmpty(embedResponse.Html))
             {
-                return await context.NewGetDocumentAsync(content: embedResponse.Html);
+                return context.GetDocument(await context.GetContentProviderAsync(embedResponse.Html));
             }
             else if (embedResponse.Type == "photo")
             {
@@ -104,15 +104,15 @@ namespace Wyam.Core.Shortcodes.Html
                 {
                     throw new InvalidDataException("Did not receive required oEmbed values for image type");
                 }
-                return await context.NewGetDocumentAsync(content: $"<img src=\"{embedResponse.Url}\" width=\"{embedResponse.Width}\" height=\"{embedResponse.Height}\" />");
+                return context.GetDocument(await context.GetContentProviderAsync($"<img src=\"{embedResponse.Url}\" width=\"{embedResponse.Width}\" height=\"{embedResponse.Height}\" />"));
             }
             else if (embedResponse.Type == "link")
             {
                 if (!string.IsNullOrEmpty(embedResponse.Title))
                 {
-                    return await context.NewGetDocumentAsync(content: $"<a href=\"{url}\">{embedResponse.Title}</a>");
+                    return context.GetDocument(await context.GetContentProviderAsync($"<a href=\"{url}\">{embedResponse.Title}</a>"));
                 }
-                return await context.NewGetDocumentAsync(content: $"<a href=\"{url}\">{url}</a>");
+                return context.GetDocument(await context.GetContentProviderAsync($"<a href=\"{url}\">{url}</a>"));
             }
 
             throw new InvalidDataException("Could not determine embedded content for oEmbed response");

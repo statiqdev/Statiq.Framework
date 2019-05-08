@@ -190,9 +190,9 @@ namespace Wyam.Core.Modules.Control
                 {
                     // Get the current page document
                     int currentI = i;  // Avoid modified closure for previous/next matadata delegate
-                    IDocument document = await context.NewGetDocumentAsync(
+                    IDocument document = context.GetDocument(
                         input,
-                        metadata: new Dictionary<string, object>
+                        new Dictionary<string, object>
                         {
                             { Keys.PageDocuments, pages[i].PageDocuments },
                             { Keys.CurrentPage, i + 1 },
@@ -209,7 +209,7 @@ namespace Wyam.Core.Modules.Control
                     {
                         IEnumerable<KeyValuePair<string, object>> pageMetadata = await _pageMetadata
                             .SelectAsync(async kvp => new KeyValuePair<string, object>(kvp.Key, await kvp.Value.GetValueAsync(document, context)));
-                        document = await context.NewGetDocumentAsync(document, metadata: pageMetadata);
+                        document = context.GetDocument(document, pageMetadata);
                     }
 
                     pages[i].Document = document;

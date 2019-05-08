@@ -199,7 +199,7 @@ namespace Wyam.Html.Tests
                 List<IDocument> results = await query.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
 
                 // Then
-                results.Select(x => x.Content).ShouldBe(new[]
+                (await results.SelectAsync(async x => await x.GetStringAsync())).ShouldBe(new[]
                 {
                     "<p>This is some Foobar text</p>",
                     "<p>This is some other text</p>"
@@ -229,7 +229,7 @@ namespace Wyam.Html.Tests
                 List<IDocument> results = await query.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
 
                 // Then
-                results.Select(x => x.Content).ShouldBe(new[]
+                (await results.SelectAsync(async x => await x.GetStringAsync())).ShouldBe(new[]
                 {
                     "This is some Foobar text",
                     "This is some other text"
@@ -261,7 +261,7 @@ namespace Wyam.Html.Tests
                 List<IDocument> results = await query.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
 
                 // Then
-                results.Select(x => x.Content).ShouldBe(new[]
+                (await results.SelectAsync(async x => await x.GetStringAsync())).ShouldBe(new[]
                 {
                     "<p>This is some Foobar text</p>",
                     "<p>This is some other text</p>"

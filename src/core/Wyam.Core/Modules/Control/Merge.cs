@@ -65,13 +65,13 @@ namespace Wyam.Core.Modules.Control
                 {
                     return await inputs.SelectManyAsync(context, async input =>
                         await (await context.ExecuteAsync(this, new[] { input }))
-                            .SelectAsync(result => context.NewGetDocumentAsync(input, metadata: result, content: result)));
+                            .SelectAsync(async result => context.GetDocument(input, result, await context.GetContentProviderAsync(result))));
                 }
 
                 // Execute the modules once and apply to each input document
                 List<IDocument> results = (await context.ExecuteAsync(this)).ToList();
                 return await inputs.SelectManyAsync(context, async input =>
-                    await results.SelectAsync(result => context.NewGetDocumentAsync(input, metadata: result, content: result)));
+                    await results.SelectAsync(async result => context.GetDocument(input, result, await context.GetContentProviderAsync(result))));
             }
 
             return inputs;

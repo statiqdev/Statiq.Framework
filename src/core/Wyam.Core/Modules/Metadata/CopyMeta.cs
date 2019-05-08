@@ -55,11 +55,12 @@ namespace Wyam.Core.Modules.Metadata
         }
 
         /// <inheritdoc />
-        public async Task<IEnumerable<IDocument>> ExecuteAsync(IReadOnlyList<IDocument> inputs, IExecutionContext context)
+        public Task<IEnumerable<IDocument>> ExecuteAsync(IReadOnlyList<IDocument> inputs, IExecutionContext context)
         {
-            return await inputs.ParallelSelectAsync(context, async x => await CopyMetaSelectorAsync(x));
+            return Task.FromResult<IEnumerable<IDocument>>(
+                inputs.AsParallel().SelectMany(context, CopyMetaSelector));
 
-            async Task<IDocument> CopyMetaSelectorAsync(IDocument input)
+            IEnumerable<IDocument> CopyMetaSelector(IDocument input)
             {
                 if (input.TryGetValue(_fromKey, out object existingValue))
                 {
@@ -80,11 +81,11 @@ namespace Wyam.Core.Modules.Metadata
                         existingValue = _execute.Invoke(existingValue.ToString());
                     }
 
-                    return await context.NewGetDocumentAsync(input, metadata: new[] { new KeyValuePair<string, object>(_toKey, existingValue) });
+                    return new[] { context.GetDocument(input, new[] { new KeyValuePair<string, object>(_toKey, existingValue) }) };
                 }
                 else
                 {
-                    return input;
+                    return new[] { input };
                 }
             }
         }

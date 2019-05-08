@@ -21,60 +21,19 @@ namespace Wyam.Core.Documents
             _settings = settings;
         }
 
-        public async Task<IDocument> GetDocumentAsync(
+        public IDocument GetDocument(
             IExecutionContext context,
-            IDocument sourceDocument,
+            IDocument originalDocument,
             FilePath source,
+            FilePath destination,
             IEnumerable<KeyValuePair<string, object>> metadata,
-            object content)
+            IContentProvider contentProvider)
         {
-            IContentProvider contentProvider = await GetContentProviderAsync(context, content);
-            if (sourceDocument == null || ModuleExtensions.AsNewDocumentModules.Contains(context.Module))
+            if (originalDocument == null || ModuleExtensions.AsNewDocumentModules.Contains(context.Module))
             {
-                return new Document(_settings, source, contentProvider, metadata);
+                return new Document(_settings, source, destination, contentProvider, metadata);
             }
-            return new Document((Document)sourceDocument, source, contentProvider, metadata);
-        }
-
-        private static async Task<IContentProvider> GetContentProviderAsync(IExecutionContext context, object content)
-        {
-            switch (content)
-            {
-                case null:
-                    return null;
-                case IContentProvider contentProvider:
-                    return contentProvider;
-                case ContentStream contentStream:
-                    return contentStream.GetContentProvider();  // This will also dispose the writable stream
-                case Stream stream:
-                    return new StreamContent(context, stream);
-                case IFile file:
-                    return new FileContent(file);
-                case Document document:
-                    return document.ContentProvider;
-            }
-
-            // This wasn't one of the known content types, so treat it as a string
-            string contentString = content as string ?? content.ToString();
-
-            if (string.IsNullOrEmpty(contentString))
-            {
-                return null;
-            }
-
-            if (context.Bool(Keys.UseStringContentFiles))
-            {
-                // Use a temp file for strings
-                IFile tempFile = await context.FileSystem.GetTempFileAsync();
-                if (!string.IsNullOrEmpty(contentString))
-                {
-                    await tempFile.WriteAllTextAsync(contentString);
-                }
-                return new TempFileContent(tempFile);
-            }
-
-            // Otherwise get a memory stream from the pool and use that
-            return new StreamContent(context, context.MemoryStreamManager.GetStream(contentString));
+            return new Document((Document)originalDocument, source, destination, contentProvider, metadata);
         }
     }
 }
