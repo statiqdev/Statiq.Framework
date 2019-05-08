@@ -1,21 +1,15 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using System.Threading.Tasks;
 using ConcurrentCollections;
-using Wyam.Common;
 using Wyam.Common.Documents;
 using Wyam.Common.IO;
 using Wyam.Common.Modules;
 using Wyam.Common.Execution;
 using Wyam.Common.Tracing;
-using Wyam.Common.Util;
-using Wyam.Core.Caching;
-using Wyam.Core.Documents;
-using Wyam.Core.Meta;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Wyam.Core.Execution
@@ -113,11 +107,10 @@ namespace Wyam.Core.Execution
 
             // Dispose documents that aren't part of the final collection for this pipeline,
             // but don't dispose any documents that are referenced directly or indirectly from the final ones
-            // TODO: Figure out why this isn't working quite right - we're disposing documents and then trying to access them in later phases
-            // HashSet<IDocument> flattenedResultDocuments = new HashSet<IDocument>();
-            // FlattenResultDocuments(OutputDocuments, flattenedResultDocuments);
-            // Parallel.ForEach(_clonedDocuments.Where(x => !flattenedResultDocuments.Contains(x)), x => x.Dispose());
-            // _clonedDocuments = new ConcurrentBag<IDocument>(flattenedResultDocuments);
+            HashSet<IDocument> flattenedResultDocuments = new HashSet<IDocument>();
+            FlattenResultDocuments(OutputDocuments, flattenedResultDocuments);
+            Parallel.ForEach(_clonedDocuments.Where(x => !flattenedResultDocuments.Contains(x)), x => x.Dispose());
+            _clonedDocuments = new ConcurrentBag<IDocument>(flattenedResultDocuments);
         }
 
         private void FlattenResultDocuments(IEnumerable<IDocument> documents, HashSet<IDocument> flattenedResultDocuments)

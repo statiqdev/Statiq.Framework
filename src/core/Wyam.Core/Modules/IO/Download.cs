@@ -5,8 +5,6 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
-using System.Net.Http.Headers;
-using System.Text;
 using System.Threading.Tasks;
 using Wyam.Common.Documents;
 using Wyam.Common.IO;
@@ -14,8 +12,6 @@ using Wyam.Common.Meta;
 using Wyam.Common.Modules;
 using Wyam.Common.Execution;
 using Wyam.Common.Tracing;
-using Wyam.Core.Documents;
-using Wyam.Core.Meta;
 using Wyam.Core.Modules.Control;
 using Wyam.Common.Util;
 
@@ -127,17 +123,18 @@ namespace Wyam.Core.Modules.IO
                     _cachedResponses = responses;
                 }
             }
-            return responses.Select(r =>
+            return await responses.SelectAsync(async r =>
             {
                 string uri = r.Uri.ToString();
-                return context.GetDocument(
+                return await context.NewGetDocumentAsync(
+                    null,
                     new FilePath((Uri)null, uri, PathKind.Absolute),
-                    r.Stream,
                     new MetadataItems
                     {
                         { Keys.SourceUri, uri },
                         { Keys.SourceHeaders, r.Headers }
-                    });
+                    },
+                    r.Stream);
             });
         }
 

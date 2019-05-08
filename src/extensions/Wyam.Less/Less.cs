@@ -1,17 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using dotless.Core;
 using dotless.Core.configuration;
-using dotless.Core.Cache;
-using dotless.Core.Parser.Infrastructure.Nodes;
-using dotless.Core.Parser.Tree;
-using dotless.Core.Plugins;
 using ReflectionMagic;
-using Wyam.Common;
 using Wyam.Common.Configuration;
 using Wyam.Common.Documents;
 using Wyam.Common.Meta;
@@ -77,7 +70,6 @@ namespace Wyam.Less
                 ILessEngine engine = engineFactory.GetEngine();
 
                 // TODO: Get rid of RefelectionMagic and this ugly hack as soon as dotless gets better external DI support
-                engine.AsDynamic().Underlying.Cache = new LessCache(context.ExecutionCache);
                 engine.AsDynamic().Underlying.Underlying.Parser.Importer.FileReader = fileSystemReader;
 
                 // Less conversion
@@ -98,8 +90,8 @@ namespace Wyam.Less
                 FilePath cssPath = path.ChangeExtension("css");
                 return await context.GetDocumentAsync(
                     input,
-                    content,
-                    new MetadataItems
+                    source: content,
+                    content: new MetadataItems
                     {
                         { Keys.RelativeFilePath, cssPath },
                         { Keys.WritePath, cssPath }

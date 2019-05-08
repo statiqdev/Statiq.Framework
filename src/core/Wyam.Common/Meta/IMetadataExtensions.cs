@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace Wyam.Common.Meta
+﻿namespace Wyam.Common.Meta
 {
     public static class IMetadataExtensions
     {

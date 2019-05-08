@@ -1,9 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Wyam.Common.Documents;
 using Wyam.Common.Modules;
@@ -249,7 +245,7 @@ namespace Wyam.Html
                         }
                     }
                 }
-                return escaped ? await context.GetDocumentAsync(input, outputString.ToString()) : input;
+                return escaped ? await context.GetDocumentAsync(input, source: outputString.ToString()) : input;
             }
         }
     }

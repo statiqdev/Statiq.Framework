@@ -6,14 +6,11 @@ using System.Linq;
 using System.Threading.Tasks;
 using NUnit.Framework;
 using Shouldly;
-using Wyam.Common.Configuration;
 using Wyam.Common.Documents;
 using Wyam.Common.Execution;
 using Wyam.Common.IO;
 using Wyam.Common.Meta;
-using Wyam.Common.Modules;
 using Wyam.Common.Util;
-using Wyam.Core.Execution;
 using Wyam.Core.Modules.IO;
 using Wyam.Testing;
 using Wyam.Testing.Execution;
@@ -35,11 +32,11 @@ namespace Wyam.Core.Tests.Modules.IO
                 IDocument[] inputs = new[]
                 {
                     await context.GetDocumentAsync(
-                        "Test",
-                        new Dictionary<string, object>
+                        metadata: new Dictionary<string, object>
                         {
                             { Keys.RelativeFilePath, new FilePath("Subfolder/write-test.abc") }
-                        })
+                        },
+                        content: "Test")
                 };
                 WriteFiles writeFiles = new WriteFiles(".txt");
 
@@ -60,11 +57,11 @@ namespace Wyam.Core.Tests.Modules.IO
                 IDocument[] inputs = new[]
                 {
                     await context.GetDocumentAsync(
-                        "Test",
-                        new Dictionary<string, object>
+                        metadata: new Dictionary<string, object>
                         {
                             { Keys.RelativeFilePath, new FilePath("Subfolder/write-test.abc") }
-                        })
+                        },
+                        content: "Test")
                 };
                 WriteFiles writeFiles = new WriteFiles("txt");
 
@@ -82,7 +79,7 @@ namespace Wyam.Core.Tests.Modules.IO
             {
                 // Given
                 TestExecutionContext context = GetExecutionContext();
-                IDocument[] inputs = new[] { await context.GetDocumentAsync("Test") };
+                IDocument[] inputs = new[] { await context.GetDocumentAsync(content: "Test") };
                 WriteFiles writeFiles = new WriteFiles((FilePath)".dotfile");
 
                 // When
@@ -107,7 +104,7 @@ namespace Wyam.Core.Tests.Modules.IO
                 await fileMock.WriteAllTextAsync(oldContent);
 
                 WriteFiles writeFiles = new WriteFiles((FilePath)fileName);
-                IDocument[] inputs = { await context.GetDocumentAsync(newContent) };
+                IDocument[] inputs = { await context.GetDocumentAsync(content: newContent) };
 
                 // When
                 await writeFiles.ExecuteAsync(inputs, context).ToListAsync();
@@ -122,7 +119,7 @@ namespace Wyam.Core.Tests.Modules.IO
             {
                 // Given
                 TestExecutionContext context = GetExecutionContext();
-                IDocument[] inputs = new[] { await context.GetDocumentAsync("Test") };
+                IDocument[] inputs = new[] { await context.GetDocumentAsync(content: "Test") };
                 WriteFiles writeFiles = new WriteFiles((FilePath)".dotfile");
 
                 // When
@@ -139,7 +136,7 @@ namespace Wyam.Core.Tests.Modules.IO
             {
                 // Given
                 TestExecutionContext context = GetExecutionContext();
-                IDocument[] inputs = new[] { await context.GetDocumentAsync("Test") };
+                IDocument[] inputs = new[] { await context.GetDocumentAsync(content: "Test") };
                 WriteFiles writeFiles = new WriteFiles((FilePath)null);
 
                 // When
@@ -154,7 +151,7 @@ namespace Wyam.Core.Tests.Modules.IO
             {
                 // Given
                 TestExecutionContext context = GetExecutionContext();
-                IDocument[] inputs = new[] { await context.GetDocumentAsync("Test") };
+                IDocument[] inputs = new[] { await context.GetDocumentAsync(content: "Test") };
                 WriteFiles writeFiles = new WriteFiles((FilePath)null).Where(false);
 
                 // When
@@ -172,11 +169,11 @@ namespace Wyam.Core.Tests.Modules.IO
                 ThrowOnTraceEventType(TraceEventType.Error);
                 IDocument[] inputs = new[]
                 {
-                    await context.GetDocumentAsync("A"),
-                    await context.GetDocumentAsync("B"),
-                    await context.GetDocumentAsync("C"),
-                    await context.GetDocumentAsync("D"),
-                    await context.GetDocumentAsync("E"),
+                    await context.GetDocumentAsync(content: "A"),
+                    await context.GetDocumentAsync(content: "B"),
+                    await context.GetDocumentAsync(content: "C"),
+                    await context.GetDocumentAsync(content: "D"),
+                    await context.GetDocumentAsync(content: "E"),
                 };
                 WriteFiles writeFiles = new WriteFiles((FilePath)"output.txt");
 
@@ -196,11 +193,11 @@ namespace Wyam.Core.Tests.Modules.IO
                 TestExecutionContext context = GetExecutionContext();
                 IDocument[] inputs = new[]
                 {
-                    await context.GetDocumentAsync(new FilePath("/a.txt"), "A"),
-                    await context.GetDocumentAsync(new FilePath("/b.txt"), "B"),
-                    await context.GetDocumentAsync(new FilePath("/c.txt"), "C"),
-                    await context.GetDocumentAsync(new FilePath("/d.txt"), "D"),
-                    await context.GetDocumentAsync(new FilePath("/e.txt"), "E"),
+                    await context.GetDocumentAsync(source: new FilePath("/a.txt"), content: "A"),
+                    await context.GetDocumentAsync(source: new FilePath("/b.txt"), content: "B"),
+                    await context.GetDocumentAsync(source: new FilePath("/c.txt"), content: "C"),
+                    await context.GetDocumentAsync(source: new FilePath("/d.txt"), content: "D"),
+                    await context.GetDocumentAsync(source: new FilePath("/e.txt"), content: "E"),
                 };
                 WriteFiles writeFiles = new WriteFiles((FilePath)"output.txt");
 
@@ -215,11 +212,11 @@ namespace Wyam.Core.Tests.Modules.IO
                 TestExecutionContext context = GetExecutionContext();
                 IDocument[] inputs = new[]
                 {
-                    await context.GetDocumentAsync("A"),
-                    await context.GetDocumentAsync("B"),
-                    await context.GetDocumentAsync("C"),
-                    await context.GetDocumentAsync("D"),
-                    await context.GetDocumentAsync("E"),
+                    await context.GetDocumentAsync(content: "A"),
+                    await context.GetDocumentAsync(content: "B"),
+                    await context.GetDocumentAsync(content: "C"),
+                    await context.GetDocumentAsync(content: "D"),
+                    await context.GetDocumentAsync(content: "E"),
                 };
                 WriteFiles writeFiles = new WriteFiles((FilePath)"output.txt").Append();
 
@@ -245,11 +242,11 @@ namespace Wyam.Core.Tests.Modules.IO
                 IDocument[] inputs = new[]
                 {
                     await context.GetDocumentAsync(
-                        "Test",
-                        new Dictionary<string, object>
+                        metadata: new Dictionary<string, object>
                         {
                             { Keys.RelativeFilePath, new FilePath("Subfolder/write-test.abc") }
-                        })
+                        },
+                        content: "Test")
                 };
                 WriteFiles writeFiles = new WriteFiles(".txt");
 
@@ -271,11 +268,11 @@ namespace Wyam.Core.Tests.Modules.IO
                 IDocument[] inputs = new[]
                 {
                     await context.GetDocumentAsync(
-                        "Test",
-                        new Dictionary<string, object>
+                        metadata: new Dictionary<string, object>
                         {
                             { Keys.RelativeFilePath, new FilePath("Subfolder/write-test.abc") }
-                        })
+                        },
+                        content: "Test")
                 };
                 WriteFiles writeFiles = new WriteFiles(".txt");
 
@@ -296,11 +293,11 @@ namespace Wyam.Core.Tests.Modules.IO
                 IDocument[] inputs = new[]
                 {
                     await context.GetDocumentAsync(
-                        "Test",
-                        new Dictionary<string, object>
+                        metadata: new Dictionary<string, object>
                         {
                             { Keys.RelativeFilePath, new FilePath("Subfolder/write-test.abc") }
-                        })
+                        },
+                        content: "Test")
                 };
                 WriteFiles writeFiles = new WriteFiles(".txt");
 
@@ -322,17 +319,17 @@ namespace Wyam.Core.Tests.Modules.IO
                 IDocument[] inputs =
                 {
                     await context.GetDocumentAsync(
-                        "Test",
-                        new MetadataItems
+                        metadata: new MetadataItems
                         {
                             new MetadataItem(Keys.RelativeFilePath, new FilePath("Subfolder/write-test"))
-                        }),
+                        },
+                        content: "Test"),
                     await context.GetDocumentAsync(
-                        string.Empty,
-                        new MetadataItems
+                        metadata: new MetadataItems
                         {
                             new MetadataItem(Keys.RelativeFilePath, new FilePath("Subfolder/empty-test")),
-                        }),
+                        },
+                        content: string.Empty),
                     context.GetDocument(
                         (Stream)null,
                         new MetadataItems

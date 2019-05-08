@@ -1,6 +1,4 @@
-﻿using Wyam.Common.Tracing;
-
-namespace Wyam.Razor
+﻿namespace Wyam.Razor
 {
     internal class SilentDiagnosticSource : System.Diagnostics.DiagnosticSource
     {

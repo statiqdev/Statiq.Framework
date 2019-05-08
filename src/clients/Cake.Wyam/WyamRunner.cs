@@ -2,7 +2,6 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Text;
-using Cake.Common.Tools.DotNetCore;
 using Cake.Core;
 using Cake.Core.IO;
 using Cake.Core.Tooling;

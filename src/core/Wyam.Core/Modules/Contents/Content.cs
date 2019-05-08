@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using Wyam.Common.Configuration;
 using Wyam.Common.Documents;
 using Wyam.Common.Execution;
@@ -43,9 +42,9 @@ namespace Wyam.Core.Modules.Contents
         {
             if (input == null)
             {
-                return await context.GetDocumentAsync(content);
+                return await context.NewGetDocumentAsync(content: content);
             }
-            return content == null ? input : await context.GetDocumentAsync(input, content);
+            return content == null ? input : await context.NewGetDocumentAsync(input, content: content);
         }
     }
 }

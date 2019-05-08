@@ -3,14 +3,13 @@ using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 using Wyam.Common.Execution;
-using Wyam.Common.Util;
 
-namespace Wyam.Common.Documents.Content
+namespace Wyam.Common.Content
 {
     /// <summary>
     /// A content provider for streams.
     /// </summary>
-    internal class StreamContent : IContentProvider
+    public class StreamContent : IContentProvider
     {
         private readonly Stream _stream;
         private readonly bool _disposeStream;
@@ -67,7 +66,7 @@ namespace Wyam.Common.Documents.Content
 
             // Even if we don't need to synchronize, return a wrapping stream to ensure the underlying
             // stream isn't disposed after every use
-            return new ContentStream(_stream, _mutex);
+            return new SynchronizedStream(_stream, _mutex);
         }
     }
 }

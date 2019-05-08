@@ -1,7 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using Wyam.Common.Documents;
 using Wyam.Common.Modules;
@@ -67,13 +65,13 @@ namespace Wyam.Core.Modules.Control
                 {
                     return await inputs.SelectManyAsync(context, async input =>
                         await (await context.ExecuteAsync(this, new[] { input }))
-                            .SelectAsync(result => context.GetDocumentAsync(input, result.Content, result.Metadata)));
+                            .SelectAsync(result => context.NewGetDocumentAsync(input, metadata: result, content: result)));
                 }
 
                 // Execute the modules once and apply to each input document
                 List<IDocument> results = (await context.ExecuteAsync(this)).ToList();
                 return await inputs.SelectManyAsync(context, async input =>
-                    await results.SelectAsync(result => context.GetDocumentAsync(input, result.Content, result.Metadata)));
+                    await results.SelectAsync(result => context.NewGetDocumentAsync(input, metadata: result, content: result)));
             }
 
             return inputs;

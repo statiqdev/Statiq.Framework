@@ -1,17 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using NUnit.Framework;
-using Wyam.Common.Execution;
-using Wyam.Common.Modules;
-using Wyam.Core.Execution;
-using Wyam.Core.Modules.Control;
 using Wyam.Core.Modules.Extensibility;
-using Wyam.Core.Modules.IO;
 using Wyam.Testing;
-using Wyam.Testing.Execution;
 using Wyam.Testing.Modules;
 
 namespace Wyam.Core.Tests.Modules.Control

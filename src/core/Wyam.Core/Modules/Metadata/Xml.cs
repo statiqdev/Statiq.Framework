@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Xml;
 using Wyam.Common.Documents;
 using Wyam.Common.Execution;
@@ -86,15 +87,15 @@ namespace Wyam.Core.Modules.Metadata
         }
 
         /// <inheritdoc />
-        protected override IEnumerable<Dictionary<string, object>> GetItems(IReadOnlyList<IDocument> inputs, IExecutionContext context)
+        protected override async Task<IEnumerable<Dictionary<string, object>>> GetItemsAsync(IReadOnlyList<IDocument> inputs, IExecutionContext context)
         {
             // Get XML from the input documents?
             if (_data == null)
             {
-                return inputs.AsParallel().SelectMany(input =>
+                return await inputs.ParallelSelectManyAsync(context, async input =>
                 {
                     XmlDocument inputDoc = new XmlDocument();
-                    using (Stream stream = input.GetStream())
+                    using (Stream stream = await input.GetStreamAsync())
                     {
                         inputDoc.Load(stream);
                     }

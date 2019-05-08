@@ -2,7 +2,6 @@
 using System.Linq;
 using System.Threading.Tasks;
 using NUnit.Framework;
-using Wyam.Common.Configuration;
 using Wyam.Common.Documents;
 using Wyam.Common.Execution;
 using Wyam.Common.Modules;

@@ -98,11 +98,13 @@ namespace Wyam.Core.Modules.Metadata
                     string title = await _title.GetValueAsync(input, context);
                     return title == null
                         ? input
-                        : context
-                            .GetDocument(input, new MetadataItems
-                            {
-                                { _key, title }
-                            });
+                        : await context
+                            .NewGetDocumentAsync(
+                                input,
+                                metadata: new MetadataItems
+                                {
+                                    { _key, title }
+                                });
                 });
         }
 

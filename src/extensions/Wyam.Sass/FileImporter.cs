@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Threading.Tasks;
-using Wyam.Common.Execution;
 using Wyam.Common.IO;
 
 namespace Wyam.Sass

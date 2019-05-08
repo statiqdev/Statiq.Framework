@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 using Wyam.Common.Documents;
 using Wyam.Common.Execution;
@@ -23,7 +21,7 @@ namespace Wyam.Core.Shortcodes.Contents
     public class Raw : IShortcode
     {
         /// <inheritdoc />
-        public async Task<IShortcodeResult> ExecuteAsync(KeyValuePair<string, string>[] args, string content, IDocument document, IExecutionContext context) =>
-            await context.GetShortcodeResultAsync(content);
+        public async Task<IDocument> ExecuteAsync(KeyValuePair<string, string>[] args, string content, IDocument document, IExecutionContext context) =>
+            await context.NewGetDocumentAsync(content: content);
     }
 }

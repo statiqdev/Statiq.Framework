@@ -64,12 +64,12 @@ namespace Wyam.Core.Modules.Control
         /// <param name="count">The number of new documents to output.</param>
         public Documents(int count)
         {
-            _documents = Config.FromContext(ctx =>
+            _documents = Config.FromContext(async ctx =>
             {
                 List<IDocument> documents = new List<IDocument>();
                 for (int c = 0; c < count; c++)
                 {
-                    documents.Add(ctx.GetDocument());
+                    documents.Add(await ctx.NewGetDocumentAsync());
                 }
                 return (IEnumerable<IDocument>)documents;
             });
@@ -81,7 +81,7 @@ namespace Wyam.Core.Modules.Control
         /// <param name="content">The content for each output document.</param>
         public Documents(params string[] content)
         {
-            _documents = Config.FromContext(async ctx => await content.SelectAsync(async x => await ctx.GetDocumentAsync(x)));
+            _documents = Config.FromContext(async ctx => await content.SelectAsync(async x => await ctx.NewGetDocumentAsync(content: x)));
         }
 
         /// <summary>
@@ -90,7 +90,7 @@ namespace Wyam.Core.Modules.Control
         /// <param name="metadata">The metadata for each output document.</param>
         public Documents(params IEnumerable<KeyValuePair<string, object>>[] metadata)
         {
-            _documents = Config.FromContext(ctx => metadata.Select(ctx.GetDocument));
+            _documents = Config.FromContext(async ctx => await metadata.SelectAsync(async x => await ctx.NewGetDocumentAsync(content: x)));
         }
 
         /// <summary>
@@ -99,7 +99,7 @@ namespace Wyam.Core.Modules.Control
         /// <param name="contentAndMetadata">The content and metadata for each output document.</param>
         public Documents(params Tuple<string, IEnumerable<KeyValuePair<string, object>>>[] contentAndMetadata)
         {
-            _documents = Config.FromContext(async ctx => await contentAndMetadata.SelectAsync(async x => await ctx.GetDocumentAsync(x.Item1, x.Item2)));
+            _documents = Config.FromContext(async ctx => await contentAndMetadata.SelectAsync(async x => await ctx.NewGetDocumentAsync(metadata: x.Item2, content: x.Item1)));
         }
 
         /// <summary>

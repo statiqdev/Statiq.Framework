@@ -1,12 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
-using Wyam.Common.Configuration;
 using Wyam.Common.Documents;
 using Wyam.Common.Execution;
 using Wyam.Common.Modules;
-using Wyam.Common.Util;
 using Wyam.Core.Modules.Contents;
 
 namespace Wyam.Core.Modules.Extensibility

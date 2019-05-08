@@ -1,8 +1,7 @@
 ﻿using System;
 using System.IO;
-using System.Diagnostics;
 
-namespace Wyam.Common.Documents.Content
+namespace Wyam.Common.Content
 {
     internal class SeekableStream : Stream
     {

@@ -12,8 +12,6 @@ using Wyam.Common.Modules;
 using Wyam.Common.Execution;
 using Wyam.Common.Tracing;
 using Wyam.Common.Util;
-using Wyam.Core.Documents;
-using Wyam.Core.Meta;
 
 namespace Wyam.Core.Modules.IO
 {
@@ -299,10 +297,10 @@ namespace Wyam.Core.Modules.IO
 
         private async Task<IDocument> WriteAsync(IDocument input, IExecutionContext context, FilePath outputPath)
         {
-            IFile output = await context.FileSystem.GetOutputFileAsync(outputPath);
-            if (output != null)
+            IFile outputFile = await context.FileSystem.GetOutputFileAsync(outputPath);
+            if (outputFile != null)
             {
-                using (Stream inputStream = input.GetStream())
+                using (Stream inputStream = await input.GetStreamAsync())
                 {
                     if (_ignoreEmptyContent && inputStream.Length == 0)
                     {
@@ -310,7 +308,7 @@ namespace Wyam.Core.Modules.IO
                     }
                     if (!_onlyMetadata)
                     {
-                        using (Stream outputStream = _append ? await output.OpenAppendAsync() : await output.OpenWriteAsync())
+                        using (Stream outputStream = _append ? await outputFile.OpenAppendAsync() : await outputFile.OpenWriteAsync())
                         {
                             await inputStream.CopyToAsync(outputStream);
                             if (!_append)
@@ -320,15 +318,15 @@ namespace Wyam.Core.Modules.IO
                         }
                     }
                 }
-                Trace.Verbose($"{(_onlyMetadata ? "Set metadata for" : "Wrote")} file {output.Path.FullPath} from {input.SourceString()}");
-                FilePath relativePath = context.FileSystem.GetOutputPath().GetRelativePath(output.Path) ?? output.Path.FileName;
-                FilePath fileNameWithoutExtension = output.Path.FileNameWithoutExtension;
+                Trace.Verbose($"{(_onlyMetadata ? "Set metadata for" : "Wrote")} file {outputFile.Path.FullPath} from {input.SourceString()}");
+                FilePath relativePath = context.FileSystem.GetOutputPath().GetRelativePath(outputFile.Path) ?? outputFile.Path.FileName;
+                FilePath fileNameWithoutExtension = outputFile.Path.FileNameWithoutExtension;
                 MetadataItems metadata = new MetadataItems
                 {
                     { Keys.RelativeFilePath, relativePath },
                     {
                         Keys.RelativeFilePathBase, fileNameWithoutExtension == null
-                            ? null : relativePath.Directory.CombineFile(output.Path.FileNameWithoutExtension)
+                            ? null : relativePath.Directory.CombineFile(outputFile.Path.FileNameWithoutExtension)
                     },
                     { Keys.RelativeFileDir, relativePath.Directory }
                 };
@@ -341,19 +339,19 @@ namespace Wyam.Core.Modules.IO
                     metadata.AddRange(new MetadataItems
                     {
                         { Keys.DestinationFileBase, fileNameWithoutExtension },
-                        { Keys.DestinationFileExt, output.Path.Extension },
-                        { Keys.DestinationFileName, output.Path.FileName },
-                        { Keys.DestinationFileDir, output.Path.Directory },
-                        { Keys.DestinationFilePath, output.Path },
+                        { Keys.DestinationFileExt, outputFile.Path.Extension },
+                        { Keys.DestinationFileName, outputFile.Path.FileName },
+                        { Keys.DestinationFileDir, outputFile.Path.Directory },
+                        { Keys.DestinationFilePath, outputFile.Path },
                         {
                             Keys.DestinationFilePathBase, fileNameWithoutExtension == null
-                                ? null : output.Path.Directory.CombineFile(output.Path.FileNameWithoutExtension)
+                                ? null : outputFile.Path.Directory.CombineFile(outputFile.Path.FileNameWithoutExtension)
                         },
                     });
                 }
                 return _onlyMetadata
-                    ? context.GetDocument(input, metadata)
-                    : context.GetDocument(input, await output.OpenReadAsync(), metadata);
+                    ? await context.NewGetDocumentAsync(input, metadata: metadata)
+                    : await context.NewGetDocumentAsync(input, metadata: metadata, content: outputFile);
             }
             return input;
         }

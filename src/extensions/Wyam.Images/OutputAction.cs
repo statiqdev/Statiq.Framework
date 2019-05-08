@@ -2,7 +2,6 @@
 using System.IO;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
-using SixLabors.ImageSharp.Processing;
 using Wyam.Common.IO;
 
 namespace Wyam.Images.Operations

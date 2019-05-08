@@ -54,12 +54,12 @@ namespace Wyam.Core.Modules.Contents
         /// <returns>A single document in a list</returns>
         public async Task<IEnumerable<IDocument>> ExecuteAsync(IReadOnlyList<IDocument> inputs, IExecutionContext context)
         {
-            Stream contentStream = await context.GetContentStreamAsync();
             if (inputs == null || inputs.Count < 1)
             {
-                return new[] { context.GetDocument() };
+                return new[] { await context.NewGetDocumentAsync() };
             }
 
+            Stream contentStream = await context.GetContentStreamAsync();
             bool first = true;
             byte[] delimeterBytes = Encoding.UTF8.GetBytes(_delimiter);
             foreach (IDocument document in inputs)
@@ -78,13 +78,13 @@ namespace Wyam.Core.Modules.Contents
                     await contentStream.WriteAsync(delimeterBytes, 0, delimeterBytes.Length);
                 }
 
-                using (Stream inputStream = document.GetStream())
+                using (Stream inputStream = await document.GetStreamAsync())
                 {
                     await inputStream.CopyToAsync(contentStream);
                 }
             }
 
-            return new[] { context.GetDocument(contentStream, MetadataForOutputDocument(inputs)) };
+            return new[] { await context.NewGetDocumentAsync(metadata: MetadataForOutputDocument(inputs), content: contentStream) };
         }
 
         /// <summary>

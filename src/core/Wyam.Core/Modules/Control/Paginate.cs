@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.Immutable;
 using System.Linq;
 using System.Threading.Tasks;
 using Wyam.Common.Configuration;
@@ -9,8 +8,6 @@ using Wyam.Common.Execution;
 using Wyam.Common.Meta;
 using Wyam.Common.Modules;
 using Wyam.Common.Util;
-using Wyam.Core.Documents;
-using Wyam.Core.Meta;
 
 namespace Wyam.Core.Modules.Control
 {
@@ -193,10 +190,10 @@ namespace Wyam.Core.Modules.Control
                 {
                     // Get the current page document
                     int currentI = i;  // Avoid modified closure for previous/next matadata delegate
-                    IDocument document = context.GetDocument(
-                            input,
-                            new Dictionary<string, object>
-                            {
+                    IDocument document = await context.NewGetDocumentAsync(
+                        input,
+                        metadata: new Dictionary<string, object>
+                        {
                             { Keys.PageDocuments, pages[i].PageDocuments },
                             { Keys.CurrentPage, i + 1 },
                             { Keys.TotalPages, pages.Length },
@@ -205,14 +202,14 @@ namespace Wyam.Core.Modules.Control
                             { Keys.HasPreviousPage, i != 0 },
                             { Keys.NextPage, new CachedDelegateMetadataValue(_ => pages.Length > currentI + 1 ? pages[currentI + 1].Document : null) },
                             { Keys.PreviousPage, new CachedDelegateMetadataValue(_ => currentI != 0 ? pages[currentI - 1].Document : null) }
-                            });
+                        });
 
                     // Apply any page metadata
                     if (_pageMetadata.Count > 0)
                     {
                         IEnumerable<KeyValuePair<string, object>> pageMetadata = await _pageMetadata
                             .SelectAsync(async kvp => new KeyValuePair<string, object>(kvp.Key, await kvp.Value.GetValueAsync(document, context)));
-                        document = context.GetDocument(document, pageMetadata);
+                        document = await context.NewGetDocumentAsync(document, metadata: pageMetadata);
                     }
 
                     pages[i].Document = document;

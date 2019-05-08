@@ -1,12 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Text;
 using System.Threading.Tasks;
-using Wyam.Common.Execution;
-using Wyam.Common.IO;
 
-namespace Wyam.Common.Documents
+namespace Wyam.Common.Content
 {
     /// <summary>
     /// Contains the content for a document. Instances will
@@ -16,8 +12,7 @@ namespace Wyam.Common.Documents
     public interface IContentProvider : IDisposable
     {
         /// <summary>
-        /// Gets the content stream. The returned stream will be disposed
-        /// after use.
+        /// Gets the content stream. The returned stream should be disposed after use.
         /// </summary>
         /// <returns>The content stream for a document.</returns>
         Task<Stream> GetStreamAsync();

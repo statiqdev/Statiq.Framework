@@ -2,9 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
-using Wyam.Common.IO;
 using Wyam.Common.Util;
 
 namespace Wyam.Common.IO

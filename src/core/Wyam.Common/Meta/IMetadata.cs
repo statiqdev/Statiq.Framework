@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using Wyam.Common.Documents;
-using Wyam.Common.IO;
+﻿using System.Collections.Generic;
 
 namespace Wyam.Common.Meta
 {

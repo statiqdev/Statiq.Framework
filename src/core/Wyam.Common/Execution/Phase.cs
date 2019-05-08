@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace Wyam.Common.Execution
+﻿namespace Wyam.Common.Execution
 {
     public enum Phase
     {

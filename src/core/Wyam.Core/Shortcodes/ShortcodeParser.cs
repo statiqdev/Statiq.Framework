@@ -4,7 +4,6 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using Wyam.Common.Shortcodes;
-using Wyam.Core.Util;
 
 namespace Wyam.Core.Shortcodes
 {

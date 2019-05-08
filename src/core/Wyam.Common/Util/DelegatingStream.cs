@@ -1,128 +1,124 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using Wyam.Common.Execution;
 
-namespace Wyam.Common.Documents.Content
+namespace Wyam.Common.Util
 {
-    internal class ContentStream : Stream
+    public abstract class DelegatingStream : Stream
     {
-        private readonly Stream _stream;
-        private readonly SemaphoreSlim _mutex;
-        private bool _disposed;
+        protected Stream Stream { get; }
 
-        public ContentStream(Stream stream, SemaphoreSlim mutex)
+        protected bool Disposed { get; private set; }
+
+        protected DelegatingStream(Stream stream)
         {
-            _stream = stream;
-            _mutex = mutex;
+            Stream = stream ?? throw new ArgumentNullException(nameof(stream));
         }
 
         protected override void Dispose(bool disposing)
         {
-            CheckDisposed();
-            _disposed = true;
-            _mutex?.Release();
+            Disposed = true;
         }
 
-        private void CheckDisposed()
+        protected virtual void CheckDisposed()
         {
-            if (_disposed)
+            if (Disposed)
             {
-                throw new ObjectDisposedException(nameof(ContentStream));
+                throw new ObjectDisposedException(GetType().Name);
             }
         }
-
-        // Delegating members
 
         public override async Task CopyToAsync(Stream destination, int bufferSize, CancellationToken cancellationToken)
         {
             CheckDisposed();
-            await _stream.CopyToAsync(destination, bufferSize, cancellationToken);
+            await Stream.CopyToAsync(destination, bufferSize, cancellationToken);
         }
 
         public override void Flush()
         {
             CheckDisposed();
-            _stream.Flush();
+            Stream.Flush();
         }
 
         public override async Task FlushAsync(CancellationToken cancellationToken)
         {
             CheckDisposed();
-            await _stream.FlushAsync(cancellationToken);
+            await Stream.FlushAsync(cancellationToken);
         }
 
         public override IAsyncResult BeginRead(byte[] buffer, int offset, int count, AsyncCallback callback, object state)
         {
             CheckDisposed();
-            return _stream.BeginRead(buffer, offset, count, callback, state);
+            return Stream.BeginRead(buffer, offset, count, callback, state);
         }
 
         public override int EndRead(IAsyncResult asyncResult)
         {
             CheckDisposed();
-            return _stream.EndRead(asyncResult);
+            return Stream.EndRead(asyncResult);
         }
 
         public override async Task<int> ReadAsync(byte[] buffer, int offset, int count, CancellationToken cancellationToken)
         {
             CheckDisposed();
-            return await _stream.ReadAsync(buffer, offset, count, cancellationToken);
+            return await Stream.ReadAsync(buffer, offset, count, cancellationToken);
         }
 
         public override IAsyncResult BeginWrite(byte[] buffer, int offset, int count, AsyncCallback callback, object state)
         {
             CheckDisposed();
-            return _stream.BeginWrite(buffer, offset, count, callback, state);
+            return Stream.BeginWrite(buffer, offset, count, callback, state);
         }
 
         public override void EndWrite(IAsyncResult asyncResult)
         {
             CheckDisposed();
-            _stream.EndWrite(asyncResult);
+            Stream.EndWrite(asyncResult);
         }
 
         public override async Task WriteAsync(byte[] buffer, int offset, int count, CancellationToken cancellationToken)
         {
             CheckDisposed();
-            await _stream.WriteAsync(buffer, offset, count, cancellationToken);
+            await Stream.WriteAsync(buffer, offset, count, cancellationToken);
         }
 
         public override long Seek(long offset, SeekOrigin origin)
         {
             CheckDisposed();
-            return _stream.Seek(offset, origin);
+            return Stream.Seek(offset, origin);
         }
 
         public override void SetLength(long value)
         {
             CheckDisposed();
-            _stream.SetLength(value);
+            Stream.SetLength(value);
         }
 
         public override int Read(byte[] buffer, int offset, int count)
         {
             CheckDisposed();
-            return _stream.Read(buffer, offset, count);
+            return Stream.Read(buffer, offset, count);
         }
 
         public override int ReadByte()
         {
             CheckDisposed();
-            return _stream.ReadByte();
+            return Stream.ReadByte();
         }
 
         public override void Write(byte[] buffer, int offset, int count)
         {
             CheckDisposed();
-            _stream.Write(buffer, offset, count);
+            Stream.Write(buffer, offset, count);
         }
 
         public override void WriteByte(byte value)
         {
             CheckDisposed();
-            _stream.WriteByte(value);
+            Stream.WriteByte(value);
         }
 
         public override bool CanRead
@@ -130,7 +126,7 @@ namespace Wyam.Common.Documents.Content
             get
             {
                 CheckDisposed();
-                return _stream.CanRead;
+                return Stream.CanRead;
             }
         }
 
@@ -139,7 +135,7 @@ namespace Wyam.Common.Documents.Content
             get
             {
                 CheckDisposed();
-                return _stream.CanSeek;
+                return Stream.CanSeek;
             }
         }
 
@@ -148,7 +144,7 @@ namespace Wyam.Common.Documents.Content
             get
             {
                 CheckDisposed();
-                return _stream.CanTimeout;
+                return Stream.CanTimeout;
             }
         }
 
@@ -157,7 +153,7 @@ namespace Wyam.Common.Documents.Content
             get
             {
                 CheckDisposed();
-                return _stream.CanWrite;
+                return Stream.CanWrite;
             }
         }
 
@@ -166,7 +162,7 @@ namespace Wyam.Common.Documents.Content
             get
             {
                 CheckDisposed();
-                return _stream.Length;
+                return Stream.Length;
             }
         }
 
@@ -175,12 +171,12 @@ namespace Wyam.Common.Documents.Content
             get
             {
                 CheckDisposed();
-                return _stream.Position;
+                return Stream.Position;
             }
             set
             {
                 CheckDisposed();
-                _stream.Position = value;
+                Stream.Position = value;
             }
         }
 
@@ -189,12 +185,12 @@ namespace Wyam.Common.Documents.Content
             get
             {
                 CheckDisposed();
-                return _stream.ReadTimeout;
+                return Stream.ReadTimeout;
             }
             set
             {
                 CheckDisposed();
-                _stream.ReadTimeout = value;
+                Stream.ReadTimeout = value;
             }
         }
 
@@ -203,12 +199,12 @@ namespace Wyam.Common.Documents.Content
             get
             {
                 CheckDisposed();
-                return _stream.WriteTimeout;
+                return Stream.WriteTimeout;
             }
             set
             {
                 CheckDisposed();
-                _stream.WriteTimeout = value;
+                Stream.WriteTimeout = value;
             }
         }
     }

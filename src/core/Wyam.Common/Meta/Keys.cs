@@ -1,9 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Globalization;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Wyam.Common.Documents;
 using Wyam.Common.IO;
 
@@ -57,7 +54,7 @@ namespace Wyam.Common.Meta
 
         /// <summary>
         /// This will cause temporary backing files to be created for string document content
-        /// instead of storing that content in memory. 
+        /// instead of storing that content in memory.
         /// </summary>
         public const string UseStringContentFiles = nameof(UseStringContentFiles);
 

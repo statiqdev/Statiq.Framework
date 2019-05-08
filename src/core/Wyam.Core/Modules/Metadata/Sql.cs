@@ -2,9 +2,7 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
-using System.Diagnostics;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using Wyam.Common.Documents;
 using Wyam.Common.Execution;
@@ -44,7 +42,7 @@ namespace Wyam.Core.Modules.Metadata
         }
 
         /// <inheritdoc />
-        protected override IEnumerable<DataRow> GetItems(IReadOnlyList<IDocument> inputs, IExecutionContext context)
+        protected override Task<IEnumerable<DataRow>> GetItemsAsync(IReadOnlyList<IDocument> inputs, IExecutionContext context)
         {
             using (SqlConnection conn = new SqlConnection(_connectionString))
             {
@@ -53,7 +51,7 @@ namespace Wyam.Core.Modules.Metadata
                 {
                     DataTable dataTable = new DataTable();
                     adapter.Fill(dataTable);
-                    return dataTable.Rows.Cast<DataRow>();
+                    return Task.FromResult(dataTable.Rows.Cast<DataRow>());
                 }
             }
         }

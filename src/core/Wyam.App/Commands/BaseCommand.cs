@@ -1,21 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
 using System.Diagnostics;
-using System.Diagnostics.CodeAnalysis;
 using System.IO;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Spectre.Cli;
-using Wyam.App.Configuration;
 using Wyam.App.Tracing;
-using Wyam.Common.Configuration;
-using Wyam.Common.Execution;
-using Wyam.Common.IO;
-using Wyam.Common.Meta;
-using Wyam.Common.Tracing;
-using Wyam.Core.Execution;
 using Trace = Wyam.Common.Tracing.Trace;
 
 namespace Wyam.App.Commands

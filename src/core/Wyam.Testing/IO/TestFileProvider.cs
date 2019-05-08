@@ -1,11 +1,9 @@
-﻿using System;
-using System.Collections.Concurrent;
+﻿using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
 using ConcurrentCollections;
 using Wyam.Common.IO;
-using Wyam.Common.Util;
 
 namespace Wyam.Testing.IO
 {

@@ -85,7 +85,7 @@ namespace Wyam.Tables
                         firstLine = false;
                     }
 
-                    return await context.GetDocumentAsync(input, builder.ToString());
+                    return await context.GetDocumentAsync(input, source: builder.ToString());
                 }
                 catch (Exception e)
                 {

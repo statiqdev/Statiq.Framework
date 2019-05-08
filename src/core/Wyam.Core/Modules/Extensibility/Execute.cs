@@ -1,12 +1,9 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
-using Wyam.Common.Configuration;
 using Wyam.Common.Documents;
 using Wyam.Common.Execution;
 using Wyam.Common.Modules;
-using Wyam.Common.Util;
 using Wyam.Core.Modules.Contents;
 
 namespace Wyam.Core.Modules.Extensibility
@@ -80,7 +77,7 @@ namespace Wyam.Core.Modules.Extensibility
         }
 
         protected static async Task<IEnumerable<IDocument>> ChangeContentAsync(object result, IExecutionContext context, IDocument document) =>
-            new[] { await context.GetDocumentAsync(document, result.ToString()) };
+            new[] { await context.NewGetDocumentAsync(document, content: result) };
 
         protected static IEnumerable<IDocument> ThrowInvalidDelegateResult(object result)
         {

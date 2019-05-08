@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
@@ -11,8 +10,6 @@ using Wyam.Common.IO;
 using Wyam.Common.Meta;
 using Wyam.Common.Modules;
 using Wyam.Common.Util;
-using Wyam.Core.Documents;
-using Wyam.Core.Meta;
 
 namespace Wyam.Core.Modules.Metadata
 {
@@ -190,16 +187,20 @@ namespace Wyam.Core.Modules.Metadata
                         DirectoryPath relativeFileDir = input.DirectoryPath(Keys.RelativeFileDir);
                         if (!string.IsNullOrWhiteSpace(_pathOutputKey) && relativeFileDir != null)
                         {
-                            return context.GetDocument(input, new MetadataItems
-                            {
-                                { _outputKey, filePath },
-                                { _pathOutputKey, relativeFileDir.CombineFile(filePath) }
-                            });
+                            return await context.NewGetDocumentAsync(
+                                input,
+                                metadata: new MetadataItems
+                                {
+                                    { _outputKey, filePath },
+                                    { _pathOutputKey, relativeFileDir.CombineFile(filePath) }
+                                });
                         }
-                        return context.GetDocument(input, new MetadataItems
-                        {
-                            { _outputKey, filePath }
-                        });
+                        return await context.NewGetDocumentAsync(
+                            input,
+                            metadata: new MetadataItems
+                            {
+                                { _outputKey, filePath }
+                            });
                     }
                 }
                 return input;

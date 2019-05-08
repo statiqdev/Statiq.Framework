@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using Wyam.Common.Documents;
 using Wyam.Common.Modules;
 
 namespace Wyam.Common.Execution

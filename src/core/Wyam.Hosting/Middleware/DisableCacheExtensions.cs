@@ -1,8 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 using Microsoft.AspNetCore.Builder;
-using Wyam.Hosting.Middleware;
 
 namespace Wyam.Hosting.Middleware
 {

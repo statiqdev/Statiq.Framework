@@ -1,10 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using NUnit.Framework;
+﻿using NUnit.Framework;
 using Shouldly;
 using Wyam.Common.Execution;
-using Wyam.Common.IO;
 using Wyam.Common.Meta;
 using Wyam.Testing;
 using Wyam.Testing.Execution;

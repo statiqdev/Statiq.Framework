@@ -1,6 +1,6 @@
 ﻿using System.IO;
 
-namespace Wyam.Common.Caching
+namespace Wyam.Common.Util
 {
     /// <summary>
     /// A helper class to quickly calculate CRC32 codes.

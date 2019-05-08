@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Wyam.Common.Configuration;
@@ -104,21 +103,21 @@ namespace Wyam.Core.Modules.Contents
             {
                 return input;
             }
+            string currentDocumentContent = await input.GetStringAsync();
             if (_contentFinder != null)
             {
-                string currentDocumentContent = input.Content;
                 string newDocumentContent = Regex.Replace(
-                    input.Content,
+                    currentDocumentContent,
                     _search,
                     match => _contentFinder(match, input)?.ToString() ?? string.Empty,
                     _regexOptions);
-                return currentDocumentContent == newDocumentContent ? input : await context.GetDocumentAsync(input, newDocumentContent);
+                return currentDocumentContent == newDocumentContent ? input : await context.NewGetDocumentAsync(input, content: newDocumentContent);
             }
-            return await context.GetDocumentAsync(
+            return await context.NewGetDocumentAsync(
                 input,
-                _isRegex
-                    ? Regex.Replace(input.Content, _search, content, _regexOptions)
-                    : input.Content.Replace(_search, content));
+                content: _isRegex
+                    ? Regex.Replace(currentDocumentContent, _search, content, _regexOptions)
+                    : currentDocumentContent.Replace(_search, content));
         }
     }
 }

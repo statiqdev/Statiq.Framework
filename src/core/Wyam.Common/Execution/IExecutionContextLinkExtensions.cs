@@ -1,5 +1,4 @@
-﻿using System;
-using Wyam.Common.Configuration;
+﻿using Wyam.Common.Configuration;
 using Wyam.Common.IO;
 using Wyam.Common.Meta;
 using Wyam.Common.Util;

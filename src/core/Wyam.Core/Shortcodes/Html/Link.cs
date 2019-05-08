@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 using Wyam.Common.Documents;
 using Wyam.Common.Execution;
@@ -34,7 +32,7 @@ namespace Wyam.Core.Shortcodes.Html
     public class Link : IShortcode
     {
         /// <inheritdoc />
-        public async Task<IShortcodeResult> ExecuteAsync(KeyValuePair<string, string>[] args, string content, IDocument document, IExecutionContext context)
+        public async Task<IDocument> ExecuteAsync(KeyValuePair<string, string>[] args, string content, IDocument document, IExecutionContext context)
         {
             ConvertingDictionary arguments = args.ToDictionary(
                 context,
@@ -52,7 +50,7 @@ namespace Wyam.Core.Shortcodes.Html
             string path = arguments.String("Path");
             if (LinkGenerator.TryGetAbsoluteHttpUri(path, out string absoluteUri))
             {
-                return await context.GetShortcodeResultAsync(absoluteUri);
+                return await context.NewGetDocumentAsync(content: absoluteUri);
             }
             FilePath filePath = new FilePath(path);
 
@@ -82,7 +80,7 @@ namespace Wyam.Core.Shortcodes.Html
                 ? arguments.Bool("Lowercase")
                 : context.Bool(Keys.LinkLowercase);
 
-            return await context.GetShortcodeResultAsync(LinkGenerator.GetLink(filePath, host, root, scheme, hidePages, hideExtensions, lowercase));
+            return await context.NewGetDocumentAsync(content: LinkGenerator.GetLink(filePath, host, root, scheme, hidePages, hideExtensions, lowercase));
         }
     }
 }

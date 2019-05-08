@@ -1,7 +1,5 @@
 ﻿using System.Collections.Concurrent;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.Extensions.DependencyInjection;
 
 namespace Wyam.Razor
 {

@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
 using System.Threading.Tasks;
 using Wyam.Common.Configuration;
 using Wyam.Common.Documents;
@@ -73,7 +72,7 @@ namespace Wyam.Common.Shortcodes
             collection.Add(name, async (args, content, doc, ctx) =>
             {
                 string result = documentConfig == null ? null : await documentConfig.GetAndTransformValueAsync(doc, ctx);
-                return result != null ? await ctx.GetShortcodeResultAsync(result) : null;
+                return result != null ? await ctx.NewGetDocumentAsync(content: result) : null;
             });
 
         /// <summary>
@@ -89,7 +88,7 @@ namespace Wyam.Common.Shortcodes
             collection.Add(name, async (args, content, doc, ctx) =>
             {
                 string result = func?.Invoke(content);
-                return result != null ? await ctx.GetShortcodeResultAsync(result) : null;
+                return result != null ? await ctx.NewGetDocumentAsync(content: result) : null;
             });
 
         /// <summary>
@@ -105,7 +104,7 @@ namespace Wyam.Common.Shortcodes
             collection.Add(name, async (args, content, doc, ctx) =>
             {
                 string result = func?.Invoke(args);
-                return result != null ? await ctx.GetShortcodeResultAsync(result) : null;
+                return result != null ? await ctx.NewGetDocumentAsync(content: result) : null;
             });
 
         /// <summary>
@@ -121,7 +120,7 @@ namespace Wyam.Common.Shortcodes
             collection.Add(name, async (args, content, doc, ctx) =>
             {
                 string result = func?.Invoke(args, content);
-                return result != null ? await ctx.GetShortcodeResultAsync(result) : null;
+                return result != null ? await ctx.NewGetDocumentAsync(content: result) : null;
             });
 
         /// <summary>
@@ -141,7 +140,7 @@ namespace Wyam.Common.Shortcodes
             collection.Add(name, async (args, content, doc, ctx) =>
             {
                 string result = func?.Invoke(args, content, ctx);
-                return result != null ? await ctx.GetShortcodeResultAsync(result) : null;
+                return result != null ? await ctx.NewGetDocumentAsync(content: result) : null;
             });
 
         /// <summary>
@@ -161,7 +160,7 @@ namespace Wyam.Common.Shortcodes
             collection.Add(name, async (args, content, doc, ctx) =>
             {
                 string result = func?.Invoke(args, content, doc, ctx);
-                return result != null ? await ctx.GetShortcodeResultAsync(result) : null;
+                return result != null ? await ctx.NewGetDocumentAsync(content: result) : null;
             });
 
         /// <summary>
@@ -181,7 +180,7 @@ namespace Wyam.Common.Shortcodes
             collection.Add(name, async (args, content, doc, ctx) =>
             {
                 string result = func?.Invoke(args, ctx);
-                return result != null ? await ctx.GetShortcodeResultAsync(result) : null;
+                return result != null ? await ctx.NewGetDocumentAsync(content: result) : null;
             });
 
         /// <summary>
@@ -201,7 +200,7 @@ namespace Wyam.Common.Shortcodes
             collection.Add(name, async (args, content, doc, ctx) =>
             {
                 string result = func?.Invoke(args, doc, ctx);
-                return result != null ? await ctx.GetShortcodeResultAsync(result) : null;
+                return result != null ? await ctx.NewGetDocumentAsync(content: result) : null;
             });
 
         /// <summary>
@@ -221,7 +220,7 @@ namespace Wyam.Common.Shortcodes
             collection.Add(name, async (args, content, doc, ctx) =>
             {
                 string result = func?.Invoke(content, ctx);
-                return result != null ? await ctx.GetShortcodeResultAsync(result) : null;
+                return result != null ? await ctx.NewGetDocumentAsync(content: result) : null;
             });
 
         /// <summary>
@@ -241,7 +240,7 @@ namespace Wyam.Common.Shortcodes
             collection.Add(name, async (args, content, doc, ctx) =>
             {
                 string result = func?.Invoke(content, doc, ctx);
-                return result != null ? await ctx.GetShortcodeResultAsync(result) : null;
+                return result != null ? await ctx.NewGetDocumentAsync(content: result) : null;
             });
 
         /// <summary>
@@ -252,12 +251,12 @@ namespace Wyam.Common.Shortcodes
         /// <param name="name">The name of the shortcode.</param>
         /// <param name="func">
         /// A function that has the declared arguments and content and the current document and execution context as inputs
-        /// and a <see cref="IShortcodeResult"/> as an output which allows the shortcode to add metadata to the document.
+        /// and a <see cref="IDocument"/> as an output which allows the shortcode to add metadata to the document.
         /// </param>
         public static void Add(
             this IShortcodeCollection collection,
             string name,
-            Func<KeyValuePair<string, string>[], string, IDocument, IExecutionContext, Task<IShortcodeResult>> func) =>
+            Func<KeyValuePair<string, string>[], string, IDocument, IExecutionContext, Task<IDocument>> func) =>
             collection.Add(name, () => new FuncShortcode(func));
     }
 }

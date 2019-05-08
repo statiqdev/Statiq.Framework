@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -10,7 +9,6 @@ using Wyam.Common.Documents;
 using Wyam.Common.Execution;
 using Wyam.Common.IO;
 using Wyam.Common.Modules;
-using Wyam.Common.Tracing;
 using Wyam.Common.Util;
 
 namespace Wyam.Core.Modules.Templates
@@ -75,19 +73,19 @@ namespace Wyam.Core.Modules.Templates
                 else if (_xsltGeneration != null)
                 {
                     IDocument xsltDocument = (await context.ExecuteAsync(_xsltGeneration, new[] { input })).Single();
-                    using (Stream stream = xsltDocument.GetStream())
+                    using (Stream stream = await xsltDocument.GetStreamAsync())
                     {
                         xslt.Load(XmlReader.Create(stream));
                     }
                 }
-                using (Stream stream = input.GetStream())
+                using (Stream stream = await input.GetStreamAsync())
                 {
                     StringWriter str = new StringWriter();
                     using (XmlTextWriter writer = new XmlTextWriter(str))
                     {
                         xslt.Transform(XmlReader.Create(stream), writer);
                     }
-                    return await context.GetDocumentAsync(input, str.ToString());
+                    return await context.NewGetDocumentAsync(input, content: str);
                 }
             });
         }

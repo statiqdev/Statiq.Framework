@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Wyam.Common.Documents;
@@ -68,7 +67,7 @@ namespace Wyam.Tables
                         firstLine = false;
                     }
                     builder.Append("</table>");
-                    return await context.GetDocumentAsync(input, builder.ToString());
+                    return await context.GetDocumentAsync(input, source: builder.ToString());
                 }
                 catch (Exception e)
                 {

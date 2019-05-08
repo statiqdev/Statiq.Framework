@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Text;
+﻿using System.IO;
 
 namespace Wyam.Common.Execution
 {
@@ -11,20 +8,20 @@ namespace Wyam.Common.Execution
     public interface IMemoryStreamManager
     {
         /// <summary>
-        /// Retrieve a new <see cref="MemoryStream"/> object with no tag and a default initial capacity.
+        /// Retrieve a new <see cref="MemoryStream"/> object with a default initial capacity.
         /// </summary>
         /// <returns>A <see cref="MemoryStream"/>.</returns>
         MemoryStream GetStream();
 
         /// <summary>
-        /// Retrieve a new <see cref="MemoryStream"/> object with the given tag and at least the given capacity.
+        /// Retrieve a new <see cref="MemoryStream"/> object with at least the given capacity.
         /// </summary>
         /// <param name="requiredSize">The minimum desired capacity for the stream.</param>
         /// <returns>A <see cref="MemoryStream"/>.</returns>
         MemoryStream GetStream(int requiredSize);
 
         /// <summary>
-        /// Retrieve a new <see cref="MemoryStream"/> object with the given tag and at least the given capacity, possibly using
+        /// Retrieve a new <see cref="MemoryStream"/> object with at least the given capacity, possibly using
         /// a single continugous underlying buffer.
         /// </summary>
         /// <remarks>Retrieving a MemoryStream which provides a single contiguous buffer can be useful in situations
@@ -37,7 +34,7 @@ namespace Wyam.Common.Execution
         MemoryStream GetStream(int requiredSize, bool asContiguousBuffer);
 
         /// <summary>
-        /// Retrieve a new <see cref="MemoryStream"/> object with the given tag and with contents copied from the provided
+        /// Retrieve a new <see cref="MemoryStream"/> object with contents copied from the provided
         /// buffer. The provided buffer is not wrapped or used after construction.
         /// </summary>
         /// <remarks>The new stream's position is set to the beginning of the stream when returned.</remarks>
@@ -46,5 +43,12 @@ namespace Wyam.Common.Execution
         /// <param name="count">The number of bytes to copy from the buffer.</param>
         /// <returns>A <see cref="MemoryStream"/>.</returns>
         MemoryStream GetStream(byte[] buffer, int offset, int count);
+
+        /// <summary>
+        /// Retrieve a new <see cref="MemoryStream"/> object with the provided string encoded as UTF8.
+        /// </summary>
+        /// <param name="content">The string to encode and store in the memory stream.</param>
+        /// <returns>A <see cref="MemoryStream"/>.</returns>
+        MemoryStream GetStream(string content);
     }
 }

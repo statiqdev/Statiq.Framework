@@ -2,11 +2,6 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Wyam.Common.Configuration;
-using Wyam.Common.Documents;
-using Wyam.Common.Execution;
 using Wyam.Common.Shortcodes;
 
 namespace Wyam.Core.Shortcodes

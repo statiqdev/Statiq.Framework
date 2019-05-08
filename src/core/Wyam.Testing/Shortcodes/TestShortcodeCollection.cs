@@ -1,10 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
-using System.Threading.Tasks;
-using Wyam.Common.Configuration;
-using Wyam.Common.Documents;
-using Wyam.Common.Execution;
 using Wyam.Common.Shortcodes;
 
 namespace Wyam.Testing.Shortcodes

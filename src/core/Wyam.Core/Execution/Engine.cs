@@ -6,7 +6,6 @@ using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
 using JavaScriptEngineSwitcher.Core;
-using Microsoft.Extensions.DependencyInjection;
 using Wyam.Common.Configuration;
 using Wyam.Common.Documents;
 using Wyam.Common.Execution;
@@ -15,12 +14,9 @@ using Wyam.Common.Meta;
 using Wyam.Common.Modules;
 using Wyam.Common.Shortcodes;
 using Wyam.Common.Tracing;
-using Wyam.Common.Util;
-using Wyam.Core.Caching;
 using Wyam.Core.Configuration;
 using Wyam.Core.Documents;
 using Wyam.Core.IO;
-using Wyam.Core.Meta;
 using Wyam.Core.Shortcodes;
 using Wyam.Core.Tracing;
 using Wyam.Core.Util;
@@ -53,7 +49,6 @@ namespace Wyam.Core.Execution
         private readonly PipelineCollection _pipelines = new PipelineCollection();
         private readonly DiagnosticsTraceListener _diagnosticsTraceListener = new DiagnosticsTraceListener();
 
-        private IContentStreamFactory _contentStreamFactory = new RecyclableMemoryContentStreamFactory();
         private IDocumentFactory _documentFactory;
 
         // Gets initialized on first execute
@@ -104,8 +99,6 @@ namespace Wyam.Core.Execution
         /// </summary>
         public IRawAssemblyCollection DynamicAssemblies { get; } = new RawAssemblyCollection();
 
-        internal ExecutionCacheManager ExecutionCacheManager { get; } = new ExecutionCacheManager();
-
         /// <inheritdoc />
         public IMemoryStreamManager MemoryStreamManager { get; } = new MemoryStreamManager();
 
@@ -127,22 +120,6 @@ namespace Wyam.Core.Execution
             set
             {
                 _documentFactory = value ?? throw new ArgumentNullException(nameof(DocumentFactory));
-            }
-        }
-
-        /// <summary>
-        /// The factory that should provide content streams for documents.
-        /// </summary>
-        public IContentStreamFactory ContentStreamFactory
-        {
-            get
-            {
-                return _contentStreamFactory;
-            }
-
-            set
-            {
-                _contentStreamFactory = value ?? throw new ArgumentNullException(nameof(ContentStreamFactory));
             }
         }
 
@@ -248,20 +225,18 @@ namespace Wyam.Core.Execution
                 System.Diagnostics.Stopwatch engineStopwatch = System.Diagnostics.Stopwatch.StartNew();
                 Trace.Information("Executing {0} pipelines", _pipelines.Count);
 
-                // Setup (clear the document collection and reset cache counters)
+                // Setup (clear the document collection)
                 Documents.Clear();
-                ExecutionCacheManager.ResetEntryHits();
 
                 // Get and execute all phases
                 Guid executionId = Guid.NewGuid();
                 Task[] phaseTasks = GetPhaseTasks(executionId, serviceProvider);
                 await Task.WhenAll(phaseTasks);
 
-                // Clean up (clear unhit cache entries, dispose documents)
+                // Clean up (dispose documents)
                 // Note that disposing the documents immediately after engine execution will ensure write streams get flushed and released
                 // but will also mean that callers (and tests) can't access documents and document content after the engine finishes
                 // Easiest way to access content after engine execution is to add a final Meta module and copy content to metadata
-                ExecutionCacheManager.ClearUnhitEntries();
                 foreach (PipelinePhase phase in _phases)
                 {
                     phase.ResetClonedDocuments();

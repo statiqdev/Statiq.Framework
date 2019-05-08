@@ -1,10 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Threading.Tasks;
 using NUnit.Framework;
 using Shouldly;
-using Wyam.Common.Documents;
 using Wyam.Common.Execution;
 using Wyam.Common.Shortcodes;
 using Wyam.Core.Shortcodes;

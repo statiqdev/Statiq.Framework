@@ -1,8 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using Cake.Common.Tools.DotNetCore;
 using Cake.Core.IO;
-using Cake.Core.Tooling;
 
 namespace Cake.Wyam
 {

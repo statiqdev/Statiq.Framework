@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using Microsoft.Extensions.DependencyInjection;
-using Wyam.Common.Configuration;
+﻿using Wyam.Common.Configuration;
 
 namespace Wyam.App.Configuration
 {

@@ -1,14 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 using NUnit.Framework;
 using Shouldly;
 using Wyam.Common.Configuration;
-using Wyam.Common.Documents;
 using Wyam.Testing;
-using Wyam.Testing.Documents;
-using Wyam.Testing.Execution;
 
 namespace Wyam.Common.Tests.Configuration
 {

@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using Wyam.Common.Documents;
 using Wyam.Common.Execution;
@@ -45,8 +44,8 @@ namespace Wyam.Core.Modules.IO
         {
             return await inputs.ParallelSelectAsync(context, async input =>
             {
-                string content = await ProcessIncludesAsync(input.Content, input.Source, context);
-                return content == null ? input : await context.GetDocumentAsync(input, content);
+                string content = await ProcessIncludesAsync(await input.GetStringAsync(), input.Source, context);
+                return content == null ? input : await context.NewGetDocumentAsync(input, content: content);
             });
         }
 

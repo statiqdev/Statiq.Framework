@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Xml.Serialization;
 
 namespace Wyam.Feeds.Syndication.Rss

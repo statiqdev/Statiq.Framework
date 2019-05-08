@@ -3,17 +3,10 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.IO;
-using System.Linq;
 using System.Net.Http;
-using System.Reflection;
-using System.Text;
 using System.Threading.Tasks;
-using JavaScriptEngineSwitcher.Core;
-using JavaScriptEngineSwitcher.Jint;
-using JSPool;
-using Microsoft.Extensions.DependencyInjection;
-using Wyam.Common.Caching;
 using Wyam.Common.Configuration;
+using Wyam.Common.Content;
 using Wyam.Common.Documents;
 using Wyam.Common.Execution;
 using Wyam.Common.IO;
@@ -21,12 +14,10 @@ using Wyam.Common.JavaScript;
 using Wyam.Common.Meta;
 using Wyam.Common.Modules;
 using Wyam.Common.Shortcodes;
-using Wyam.Common.Tracing;
-using Wyam.Common.Util;
+using Wyam.Core.Content;
 using Wyam.Core.Documents;
 using Wyam.Core.JavaScript;
 using Wyam.Core.Meta;
-using Wyam.Core.Shortcodes;
 
 namespace Wyam.Core.Execution
 {
@@ -60,8 +51,6 @@ namespace Wyam.Core.Execution
         public IReadOnlySettings Settings => Engine.Settings;
 
         public IReadOnlyShortcodeCollection Shortcodes => Engine.Shortcodes;
-
-        public IExecutionCache ExecutionCache => Engine.ExecutionCacheManager.Get(Module, Settings);
 
         public IServiceProvider Services { get; }
 
@@ -112,8 +101,6 @@ namespace Wyam.Core.Execution
 
         public bool TryGetValue(string key, out object value) => TryGetValue<object>(key, out value);
 
-        public async Task<Stream> GetContentStreamAsync(string content = null) => await Engine.ContentStreamFactory.GetStreamAsync(this, content);
-
         public HttpClient CreateHttpClient() => CreateHttpClient(_httpMessageHandler);
 
         public HttpClient CreateHttpClient(HttpMessageHandler handler) => new HttpClient(handler, false)
@@ -122,10 +109,33 @@ namespace Wyam.Core.Execution
         };
 
         /// <inheritdoc/>
-        public IDocument GetDocument(IDocument sourceDocument, FilePath source, Stream stream, IEnumerable<KeyValuePair<string, object>> items = null, bool disposeStream = true)
+        public async Task<Stream> GetContentStreamAsync(string content = null)
+        {
+            if (this.Bool(Common.Meta.Keys.UseStringContentFiles))
+            {
+                // Use a temp file for strings
+                IFile tempFile = await FileSystem.GetTempFileAsync();
+                if (!string.IsNullOrEmpty(content))
+                {
+                    await tempFile.WriteAllTextAsync(content);
+                }
+                return new ContentStream(new TempFileContent(tempFile), await tempFile.OpenAsync(), true);
+            }
+
+            // Otherwise get a memory stream from the pool and use that
+            Stream memoryStream = MemoryStreamManager.GetStream(content);
+            return new ContentStream(new Common.Content.StreamContent(this, memoryStream), memoryStream, false);
+        }
+
+        /// <inheritdoc/>
+        public async Task<IDocument> NewGetDocumentAsync(
+            IDocument sourceDocument = null,
+            FilePath source = null,
+            IEnumerable<KeyValuePair<string, object>> metadata = null,
+            object content = null)
         {
             CheckDisposed();
-            IDocument document = Engine.DocumentFactory.GetDocument(this, sourceDocument, source, stream, items, disposeStream);
+            IDocument document = await Engine.DocumentFactory.GetDocumentAsync(this, sourceDocument, source, metadata, content);
             if (sourceDocument != null && sourceDocument.Source == null && source != null)
             {
                 // Only add a new source if the source document didn't already contain one (otherwise the one it contains will be used)
@@ -153,12 +163,6 @@ namespace Wyam.Core.Execution
                 maxEngines,
                 maxUsagesPerEngine,
                 engineTimeout ?? TimeSpan.FromSeconds(5));
-
-        public async Task<IShortcodeResult> GetShortcodeResultAsync(string content, IEnumerable<KeyValuePair<string, object>> metadata = null)
-            => GetShortcodeResult(content == null ? null : await GetContentStreamAsync(content), metadata);
-
-        public IShortcodeResult GetShortcodeResult(Stream content, IEnumerable<KeyValuePair<string, object>> metadata = null)
-            => new ShortcodeResult(content, metadata);
 
         // IMetadata
 

@@ -2,7 +2,6 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using Wyam.Common.Configuration;
 using Wyam.Common.Documents;
@@ -125,13 +124,13 @@ namespace Wyam.Core.Modules.Contents
                     if (!string.IsNullOrEmpty(content))
                     {
                         outputs.Add(
-                            await context.GetDocumentAsync(
-                                content,
-                                new MetadataItems
+                            await context.NewGetDocumentAsync(
+                                metadata: new MetadataItems
                                 {
                                     { Keys.RelativeFilePath, additionalOutput.Key },
                                     { Keys.WritePath, additionalOutput.Key }
-                                }));
+                                },
+                                content: content));
                     }
                 }
             }
@@ -167,8 +166,13 @@ namespace Wyam.Core.Modules.Contents
                         if (_metaRefreshPages)
                         {
                             metaRefreshDocuments.Add(
-                                await context.GetDocumentAsync(
-                                    $@"
+                                await context.NewGetDocumentAsync(
+                                    metadata: new MetadataItems
+                                    {
+                                            { Keys.RelativeFilePath, outputPath },
+                                            { Keys.WritePath, outputPath }
+                                    },
+                                    content: $@"
 <!doctype html>
 <html>    
   <head>      
@@ -178,12 +182,7 @@ namespace Wyam.Core.Modules.Contents
   <body> 
     <p>This page has moved to a <a href=""{url}"">{url}</a></p> 
   </body>  
-</html>",
-                                    new MetadataItems
-                                    {
-                                            { Keys.RelativeFilePath, outputPath },
-                                            { Keys.WritePath, outputPath }
-                                    }));
+</html>"));
                         }
                     }
                     return metaRefreshDocuments;

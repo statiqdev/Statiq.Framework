@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Wyam.Common.IO
+﻿namespace Wyam.Common.IO
 {
     /// <summary>
     /// A collection of file providers mapped to schemes.

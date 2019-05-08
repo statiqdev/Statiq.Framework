@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Text;
+﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 using Wyam.Common.Documents;
 using Wyam.Common.Execution;
@@ -25,7 +22,7 @@ namespace Wyam.Core.Shortcodes.IO
         private FilePath _sourcePath;
 
         /// <inheritdoc />
-        public async Task<IShortcodeResult> ExecuteAsync(KeyValuePair<string, string>[] args, string content, IDocument document, IExecutionContext context)
+        public async Task<IDocument> ExecuteAsync(KeyValuePair<string, string>[] args, string content, IDocument document, IExecutionContext context)
         {
             // Get the included path relative to the document
             FilePath includedPath = new FilePath(args.SingleValue());
@@ -52,14 +49,16 @@ namespace Wyam.Core.Shortcodes.IO
             if (!await includedFile.GetExistsAsync())
             {
                 Trace.Warning($"Included file {includedPath.FullPath} does not exist");
-                return context.GetShortcodeResult(null);
+                return await context.NewGetDocumentAsync();
             }
 
             // Set the currently included shortcode source so nested includes can use it
-            return context.GetShortcodeResult(await includedFile.OpenReadAsync(), new MetadataItems
-            {
-                { "IncludeShortcodeSource", includedFile.Path.FullPath }
-            });
+            return await context.NewGetDocumentAsync(
+                metadata: new MetadataItems
+                {
+                    { "IncludeShortcodeSource", includedFile.Path.FullPath }
+                },
+                content: includedFile);
         }
     }
 }

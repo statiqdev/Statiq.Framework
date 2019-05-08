@@ -1,10 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Microsoft.Extensions.FileSystemGlobbing.Abstractions;
-using Wyam.Common.IO;
 
 namespace Wyam.Common.IO.Globbing
 {

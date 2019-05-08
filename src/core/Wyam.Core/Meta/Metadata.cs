@@ -2,8 +2,6 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using Wyam.Common.Documents;
-using Wyam.Common.IO;
 using Wyam.Common.Meta;
 
 namespace Wyam.Core.Meta

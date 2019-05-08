@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using Wyam.Common.Documents;
 using Wyam.Common.Execution;
 using Wyam.Common.Modules;
@@ -28,6 +29,6 @@ namespace Wyam.Core.Modules.Metadata
         }
 
         /// <inheritdoc />
-        protected override IEnumerable<object> GetItems(IReadOnlyList<IDocument> inputs, IExecutionContext context) => _objects;
+        protected override Task<IEnumerable<object>> GetItemsAsync(IReadOnlyList<IDocument> inputs, IExecutionContext context) => Task.FromResult(_objects);
     }
 }

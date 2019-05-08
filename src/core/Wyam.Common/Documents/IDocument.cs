@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
 using Wyam.Common.IO;
@@ -14,8 +13,8 @@ namespace Wyam.Common.Documents
     /// Documents are immutable so you must call one of the <c>GetDocument</c> methods of <see cref="IDocumentFactory"/>
     /// to create a new document. Implements <see cref="IMetadata"/> and all metadata calls are passed through
     /// to the document's internal <see cref="IMetadata"/> instance (exposed via the <see cref="Metadata"/>
-    /// property). Note that both the <see cref="Content"/> property and the result of the <see cref="GetStream"/>
-    /// method are guaranteed not to be null. When a document is created, either a string or a <see cref="Stream"/>
+    /// property). Note that the result of both the <see cref="GetStringAsync"/> and the <see cref="GetStreamAsync"/>
+    /// methods are guaranteed not to be null. When a document is created, either a string or a <see cref="Stream"/>
     /// is provided. Whenever the other of the two is requested, the system will convert the current representation
     /// for you.
     /// </remarks>
@@ -39,18 +38,27 @@ namespace Wyam.Common.Documents
         /// <value>The metadata associated with this document.</value>
         IMetadata Metadata { get; }
 
-        /// <summary>Gets the content associated with this document as a string. This will result in reading the entire content stream.</summary>
+        /// <summary>
+        /// Gets the content associated with this document as a string.
+        /// This will result in reading the entire content stream.
+        /// It's prefered to read directly as a stream using <see cref="GetStreamAsync"/> if possible.
+        /// </summary>
         /// <value>The content associated with this document.</value>
-        Task<string> GetContentAsStringAsync();
+        Task<string> GetStringAsync();
 
         /// <summary>
         /// Gets the content associated with this document as a <see cref="Stream"/>.
         /// The underlying stream will be reset to position 0 each time this method is called.
         /// The stream you get from this call must be disposed as soon as reading is complete.
-        /// Other threads will block on this call until the previously returned stream is disposed.
         /// </summary>
         /// <returns>A <see cref="Stream"/> of the content associated with this document.</returns>
-        Task<Stream> GetContentAsync();
+        Task<Stream> GetStreamAsync();
+
+        /// <summary>
+        /// Indicates if this document has content (if not, <see cref="GetStreamAsync()"/> will
+        /// return <see cref="Stream.Null"/> and <see cref="GetStringAsync()"/> will return <see cref="string.Empty"/>.
+        /// </summary>
+        bool HasContent { get; }
 
         /// <summary>
         /// Gets the metadata for this document without any global settings included.

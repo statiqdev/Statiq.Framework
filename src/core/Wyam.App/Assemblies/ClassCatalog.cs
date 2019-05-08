@@ -3,15 +3,10 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyModel;
 using Wyam.Common.Configuration;
-using Wyam.Common.IO;
-using Wyam.Common.Modules;
 using Wyam.Common.Tracing;
-using Wyam.Common.Util;
-using Wyam.Core.Configuration;
 
 namespace Wyam.App.Assemblies
 {

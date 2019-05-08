@@ -1,17 +1,14 @@
 ﻿using System;
 using System.Collections;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading;
 using System.Threading.Tasks;
+using Wyam.Common.Content;
 using Wyam.Common.Documents;
 using Wyam.Common.IO;
 using Wyam.Common.Meta;
 using Wyam.Core.Meta;
-using Wyam.Core.Util;
 
 namespace Wyam.Core.Documents
 {
@@ -137,16 +134,20 @@ namespace Wyam.Core.Documents
 
         public IMetadata Metadata => _metadata;
 
-        public async Task<string> GetContentAsStringAsync()
+        public async Task<string> GetStringAsync()
         {
             CheckDisposed();
-            using (StreamReader reader = new StreamReader(await GetContentAsync()))
+            if (_contentProvider == null)
+            {
+                return string.Empty;
+            }
+            using (StreamReader reader = new StreamReader(await GetStreamAsync()))
             {
                 return await reader.ReadToEndAsync();
             }
         }
 
-        public async Task<Stream> GetContentAsync()
+        public async Task<Stream> GetStreamAsync()
         {
             CheckDisposed();
             if (_contentProvider == null)
@@ -154,6 +155,24 @@ namespace Wyam.Core.Documents
                 return Stream.Null;
             }
             return await _contentProvider.GetStreamAsync();
+        }
+
+        internal IContentProvider ContentProvider
+        {
+            get
+            {
+                CheckDisposed();
+                return _contentProvider;
+            }
+        }
+
+        public bool HasContent
+        {
+            get
+            {
+                CheckDisposed();
+                return _contentProvider != null;
+            }
         }
 
         public override string ToString() => _disposed ? string.Empty : Source?.FullPath ?? string.Empty;

@@ -1,11 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
 using Wyam.Common.Configuration;
 using Wyam.Common.Execution;
 using Wyam.Common.IO;
 using Wyam.Common.Modules;
-using Wyam.Common.Util;
 
 namespace Wyam.App
 {

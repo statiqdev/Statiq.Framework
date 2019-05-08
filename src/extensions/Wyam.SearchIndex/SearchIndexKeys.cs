@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Wyam.SearchIndex
+﻿namespace Wyam.SearchIndex
 {
     /// <summary>
     /// Metadata keys for use by the <see cref="SearchIndex"/> module.

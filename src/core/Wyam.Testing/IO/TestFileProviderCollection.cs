@@ -2,7 +2,6 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.Immutable;
-using System.Text;
 using Wyam.Common.IO;
 
 namespace Wyam.Testing.IO

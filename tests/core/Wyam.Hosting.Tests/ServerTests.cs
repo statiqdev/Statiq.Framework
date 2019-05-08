@@ -1,14 +1,10 @@
 ﻿using System;
-using System.Collections.Concurrent;
-using System.Collections.Generic;
 using System.Net;
 using System.Net.Http;
 using System.Net.Sockets;
 using System.Threading.Tasks;
 using NUnit.Framework;
 using Shouldly;
-using Wyam.Hosting.LiveReload;
-using Wyam.Testing;
 
 namespace Wyam.Hosting.Tests
 {

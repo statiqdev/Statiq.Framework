@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Xml.Linq;
 using Wyam.Common.Documents;
@@ -46,7 +44,7 @@ namespace Wyam.Core.Shortcodes.Html
     public class Figure : IShortcode
     {
         /// <inheritdoc />
-        public async Task<IShortcodeResult> ExecuteAsync(KeyValuePair<string, string>[] args, string content, IDocument document, IExecutionContext context)
+        public async Task<IDocument> ExecuteAsync(KeyValuePair<string, string>[] args, string content, IDocument document, IExecutionContext context)
         {
             ConvertingDictionary arguments = args.ToDictionary(
                 context,
@@ -95,7 +93,7 @@ namespace Wyam.Core.Shortcodes.Html
                 figure.Add(new XElement("figcaption", content));
             }
 
-            return await context.GetShortcodeResultAsync(figure.ToString());
+            return await context.NewGetDocumentAsync(content: figure);
         }
     }
 }

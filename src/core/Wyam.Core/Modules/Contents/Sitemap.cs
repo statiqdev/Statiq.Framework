@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Globalization;
-using System.IO;
-using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Wyam.Common.Configuration;
@@ -12,9 +10,6 @@ using Wyam.Common.IO;
 using Wyam.Common.Meta;
 using Wyam.Common.Modules;
 using Wyam.Common.Modules.Contents;
-using Wyam.Common.Util;
-using Wyam.Core.Documents;
-using Wyam.Core.Meta;
 
 namespace Wyam.Core.Modules.Contents
 {
@@ -93,7 +88,7 @@ namespace Wyam.Core.Modules.Contents
             sb.Append("</urlset>");
 
             // Always output the sitemap document, even if it's empty
-            return new[] { await context.GetDocumentAsync(sb.ToString()) };
+            return new[] { await context.NewGetDocumentAsync(content: sb) };
 
             async Task AddToSiteMapAsync(IDocument input)
             {

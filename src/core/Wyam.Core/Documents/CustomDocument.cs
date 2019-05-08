@@ -1,9 +1,6 @@
-﻿using System;
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using Wyam.Common.Documents;
 using Wyam.Common.IO;
@@ -26,6 +23,9 @@ namespace Wyam.Core.Documents
         /// </summary>
         /// <returns>A new custom document instance with the same values as the current instance.</returns>
         protected internal virtual CustomDocument Clone() => (CustomDocument)MemberwiseClone();
+
+        /// <inheritdoc />
+        public bool HasContent => Document.HasContent;
 
         /// <inheritdoc />
         public IMetadata WithoutSettings => Document.WithoutSettings;
@@ -76,10 +76,10 @@ namespace Wyam.Core.Documents
         public IMetadata Metadata => Document.Metadata;
 
         /// <inheritdoc />
-        public string Content => Document.Content;
+        public Task<string> GetStringAsync() => Document.GetStringAsync();
 
         /// <inheritdoc />
-        public Stream GetStream() => Document.GetStream();
+        public Task<Stream> GetStreamAsync() => Document.GetStreamAsync();
 
         /// <inheritdoc />
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();

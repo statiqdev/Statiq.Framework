@@ -4,7 +4,6 @@ using Wyam.Common.Documents;
 using Wyam.Common.Execution;
 using Wyam.Common.Meta;
 using Wyam.Common.Modules;
-using Wyam.Common.Util;
 
 namespace Wyam.Core.Modules.Metadata
 {

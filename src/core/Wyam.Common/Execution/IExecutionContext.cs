@@ -3,9 +3,7 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.IO;
 using System.Net.Http;
-using System.Reflection;
 using System.Threading.Tasks;
-using Wyam.Common.Caching;
 using Wyam.Common.Configuration;
 using Wyam.Common.Documents;
 using Wyam.Common.IO;
@@ -13,7 +11,6 @@ using Wyam.Common.JavaScript;
 using Wyam.Common.Meta;
 using Wyam.Common.Modules;
 using Wyam.Common.Shortcodes;
-using Wyam.Common.Tracing;
 
 namespace Wyam.Common.Execution
 {
@@ -59,11 +56,6 @@ namespace Wyam.Common.Execution
         /// Gets the currently executing module.
         /// </summary>
         IModule Module { get; }
-
-        /// <summary>
-        /// Gets the current execution cache. Modules can use the cache to store data between executions.
-        /// </summary>
-        IExecutionCache ExecutionCache { get; }
 
         /// <summary>
         /// Gets the current file system.
@@ -113,15 +105,34 @@ namespace Wyam.Common.Execution
         HttpClient CreateHttpClient(HttpMessageHandler handler);
 
         /// <summary>
-        /// Clones the specified source document with a new source, new content provider, and additional metadata (all existing metadata is retained)
+        /// Gets a <see cref="Stream"/> that can be used for document content. If <paramref name="content"/>
+        /// is not null, the stream is initialized with the specified content. It is prefered to use
+        /// this method to obtain a stream over creating your own if the source of the content does
+        /// not already provide one. The returned streams are optimized for memory usage and performance.
+        /// <remarks>The position is set to the beginning of the stream when returned.</remarks>
+        /// </summary>
+        /// <param name="content">Content to initialize the stream with.</param>
+        /// <returns>A stream for document content.</returns>
+        Task<Stream> GetContentStreamAsync(string content = null);
+
+        /// <summary>
+        /// Clones the specified source document with a new source, new content, and additional metadata (all existing metadata is retained)
         /// or gets a new document if the source document is null or <c>AsNewDocuments()</c> was called on the module.
         /// </summary>
+        /// <remarks>
+        /// Given the possibility for incorrect overload resolution, no overloads of this method are provided.
+        /// It is recommended that named parameters be used when only a subset need to be provided.
+        /// </remarks>
         /// <param name="sourceDocument">The source document.</param>
         /// <param name="source">The source (if the source document contains a source, then this is ignored and the source document's source is used instead).</param>
-        /// <param name="contentProvider">The content provider.</param>
-        /// <param name="items">The metadata items.</param>
+        /// <param name="metadata">The metadata items.</param>
+        /// <param name="content">The content.</param>
         /// <returns>The cloned or new document.</returns>
-        IDocument GetDocument(IDocument sourceDocument, FilePath source, IContentProvider contentProvider, IEnumerable<KeyValuePair<string, object>> items = null);
+        Task<IDocument> NewGetDocumentAsync(
+            IDocument sourceDocument = null,
+            FilePath source = null,
+            IEnumerable<KeyValuePair<string, object>> metadata = null,
+            object content = null);
 
         /// <summary>
         /// Provides access to the same enhanced type conversion used to convert metadata types.
@@ -162,27 +173,5 @@ namespace Wyam.Common.Execution
             int maxEngines = 25,
             int maxUsagesPerEngine = 100,
             TimeSpan? engineTimeout = null);
-
-        /// <summary>
-        /// A factory method for use from inside an <see cref="IShortcode"/> to create an <see cref="IShortcodeResult"/>.
-        /// </summary>
-        /// <param name="content">
-        /// The content of the shortcode.
-        /// If you don't want the shortcode to add new content, you can use <c>null</c> for the content.
-        /// </param>
-        /// <param name="metadata">New metadata to be added to the document as a result of executing the shortcode.</param>
-        /// <returns>A shortcode result.</returns>
-        Task<IShortcodeResult> GetShortcodeResultAsync(string content, IEnumerable<KeyValuePair<string, object>> metadata = null);
-
-        /// <summary>
-        /// A factory method for use from inside an <see cref="IShortcode"/> to create an <see cref="IShortcodeResult"/>.
-        /// </summary>
-        /// <param name="content">
-        /// The content of the shortcode. The passed in stream will be disposed when the shortcode has been rendered.
-        /// If you don't want the shortcode to add new content, you can use <c>null</c> for the content stream.
-        /// </param>
-        /// <param name="metadata">New metadata to be added to the document as a result of executing the shortcode.</param>
-        /// <returns>A shortcode result.</returns>
-        IShortcodeResult GetShortcodeResult(Stream content, IEnumerable<KeyValuePair<string, object>> metadata = null);
     }
 }

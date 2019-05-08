@@ -3,7 +3,6 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using Wyam.Common.Configuration;
 using Wyam.Common.Documents;
@@ -86,7 +85,7 @@ namespace Wyam.Core.Modules.Metadata
             {
                 FilePath source = new FilePath(string.Join("/", treePath.Concat(new[] { "index.html" })));
                 items.Add(new MetadataItem(Keys.RelativeFilePath, source));
-                return context.GetDocument((await context.FileSystem.GetInputFileAsync(source)).Path.FullPath, items);
+                return await context.NewGetDocumentAsync(source: (await context.FileSystem.GetInputFileAsync(source)).Path.FullPath, metadata: items);
             };
             _sort = (x, y) => Comparer.Default.Compare(
                 x.Get<object[]>(Keys.TreePath)?.LastOrDefault(),
@@ -327,11 +326,11 @@ namespace Wyam.Core.Modules.Metadata
                 {
                     // There's no input document for this node so we need to make a placeholder
                     metadata.Add(Keys.TreePlaceholder, true);
-                    OutputDocument = await tree._placeholderFactory(TreePath, metadata, context) ?? context.GetDocument(metadata);
+                    OutputDocument = await tree._placeholderFactory(TreePath, metadata, context) ?? await context.NewGetDocumentAsync(metadata: metadata);
                 }
                 else
                 {
-                    OutputDocument = context.GetDocument(InputDocument, metadata);
+                    OutputDocument = await context.NewGetDocumentAsync(InputDocument, metadata: metadata);
                 }
             }
 

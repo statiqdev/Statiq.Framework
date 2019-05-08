@@ -1,12 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 using Wyam.Common.Documents;
 using Wyam.Common.Modules;
 using Wyam.Common.Execution;
-using Wyam.Common.Util;
 
 namespace Wyam.Core.Modules.Control
 {
@@ -31,7 +27,7 @@ namespace Wyam.Core.Modules.Control
             {
                 result = result == null
                     ? input
-                    : await context.GetDocumentAsync(result, result.Content + input.Content, input);
+                    : await context.NewGetDocumentAsync(result, metadata: input, content: await result.GetStringAsync() + await input.GetStringAsync());
             });
             return new[] { result };
         }

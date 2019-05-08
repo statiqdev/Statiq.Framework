@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Wyam.Common.Configuration;
@@ -11,8 +10,6 @@ using Wyam.Common.Meta;
 using Wyam.Common.Modules;
 using Wyam.Common.Tracing;
 using Wyam.Common.Util;
-using Wyam.Core.Documents;
-using Wyam.Core.Meta;
 
 namespace Wyam.Core.Modules.IO
 {
@@ -145,11 +142,15 @@ namespace Wyam.Core.Modules.IO
                         Trace.Verbose("Copied file {0} to {1}", file.Path.FullPath, destination.Path.FullPath);
 
                         // Return the document
-                        return context.GetDocument(input, file.Path, new MetadataItems
-                        {
-                            { Keys.SourceFilePath, file.Path },
-                            { Keys.DestinationFilePath, destination.Path }
-                        });
+                        return await context.NewGetDocumentAsync(
+                            input,
+                            file.Path,
+                            new MetadataItems
+                            {
+                                { Keys.SourceFilePath, file.Path },
+                                { Keys.DestinationFilePath, destination.Path }
+                            },
+                            file);
                     }
                     catch (Exception ex)
                     {

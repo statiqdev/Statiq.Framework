@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using Wyam.Common.Configuration;
 using Wyam.Common.Documents;
@@ -8,7 +7,6 @@ using Wyam.Common.Execution;
 using Wyam.Common.IO;
 using Wyam.Common.Meta;
 using Wyam.Common.Modules;
-using Wyam.Common.Util;
 
 namespace Wyam.Core.Modules.Control
 {
@@ -115,9 +113,9 @@ namespace Wyam.Core.Modules.Control
                     if (await sidecarFile.GetExistsAsync())
                     {
                         string sidecarContent = await sidecarFile.ReadAllTextAsync();
-                        foreach (IDocument result in await context.ExecuteAsync(this, new[] { await context.GetDocumentAsync(input, sidecarContent) }))
+                        foreach (IDocument result in await context.ExecuteAsync(this, new[] { await context.NewGetDocumentAsync(input, content: sidecarContent) }))
                         {
-                            results.Add(context.GetDocument(input, result));
+                            results.Add(await context.NewGetDocumentAsync(input, metadata: result));
                         }
                     }
                     else

@@ -1,15 +1,5 @@
-﻿using System;
-using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.IO;
-using System.Linq;
-using System.Runtime.InteropServices;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Runtime.InteropServices;
 using NUnit.Framework;
-using Wyam.Testing.Tracing;
-using Trace = Wyam.Common.Tracing.Trace;
 
 namespace Wyam.Testing.Attributes
 {

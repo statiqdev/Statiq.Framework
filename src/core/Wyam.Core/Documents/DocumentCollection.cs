@@ -4,10 +4,8 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
-using Wyam.Common;
 using Wyam.Common.Documents;
 using Wyam.Common.Execution;
-using Wyam.Common.Util;
 using Wyam.Core.Execution;
 
 namespace Wyam.Core.Documents

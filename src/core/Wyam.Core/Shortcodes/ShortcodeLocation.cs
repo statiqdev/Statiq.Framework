@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using Wyam.Common.Shortcodes;
-using Wyam.Core.Util;
+﻿using System.Collections.Generic;
 
 namespace Wyam.Core.Shortcodes
 {

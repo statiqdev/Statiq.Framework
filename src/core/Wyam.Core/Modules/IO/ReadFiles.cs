@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
-using System.Linq;
 using System.Threading.Tasks;
 using Wyam.Common.Configuration;
 using Wyam.Common.Documents;
@@ -11,8 +9,6 @@ using Wyam.Common.Meta;
 using Wyam.Common.Modules;
 using Wyam.Common.Tracing;
 using Wyam.Common.Util;
-using Wyam.Core.Documents;
-using Wyam.Core.Meta;
 using Wyam.Core.Modules.Control;
 
 namespace Wyam.Core.Modules.IO
@@ -95,25 +91,29 @@ namespace Wyam.Core.Modules.IO
                     DirectoryPath inputPath = await context.FileSystem.GetContainingInputPathAsync(file.Path);
                     FilePath relativePath = inputPath?.GetRelativePath(file.Path) ?? file.Path.FileName;
                     FilePath fileNameWithoutExtension = file.Path.FileNameWithoutExtension;
-                    return context.GetDocument(input, file.Path, await file.OpenReadAsync(), new MetadataItems
-                    {
-                        { Keys.SourceFileRoot, inputPath ?? file.Path.Directory },
-                        { Keys.SourceFileBase, fileNameWithoutExtension },
-                        { Keys.SourceFileExt, file.Path.Extension },
-                        { Keys.SourceFileName, file.Path.FileName },
-                        { Keys.SourceFileDir, file.Path.Directory },
-                        { Keys.SourceFilePath, file.Path },
+                    return await context.NewGetDocumentAsync(
+                        input,
+                        file.Path,
+                        new MetadataItems
                         {
-                            Keys.SourceFilePathBase, fileNameWithoutExtension == null
-                                ? null : file.Path.Directory.CombineFile(file.Path.FileNameWithoutExtension)
+                            { Keys.SourceFileRoot, inputPath ?? file.Path.Directory },
+                            { Keys.SourceFileBase, fileNameWithoutExtension },
+                            { Keys.SourceFileExt, file.Path.Extension },
+                            { Keys.SourceFileName, file.Path.FileName },
+                            { Keys.SourceFileDir, file.Path.Directory },
+                            { Keys.SourceFilePath, file.Path },
+                            {
+                                Keys.SourceFilePathBase, fileNameWithoutExtension == null
+                                    ? null : file.Path.Directory.CombineFile(file.Path.FileNameWithoutExtension)
+                            },
+                            { Keys.RelativeFilePath, relativePath },
+                            {
+                                Keys.RelativeFilePathBase, fileNameWithoutExtension == null
+                                    ? null : relativePath.Directory.CombineFile(file.Path.FileNameWithoutExtension)
+                            },
+                            { Keys.RelativeFileDir, relativePath.Directory }
                         },
-                        { Keys.RelativeFilePath, relativePath },
-                        {
-                            Keys.RelativeFilePathBase, fileNameWithoutExtension == null
-                                ? null : relativePath.Directory.CombineFile(file.Path.FileNameWithoutExtension)
-                        },
-                        { Keys.RelativeFileDir, relativePath.Directory }
-                    });
+                        file);
                 });
             }
             return Array.Empty<IDocument>();

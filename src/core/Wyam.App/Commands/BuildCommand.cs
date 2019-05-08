@@ -1,18 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.ComponentModel;
-using System.IO;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using Spectre.Cli;
-using Wyam.App.Configuration;
 using Wyam.Common.Configuration;
-using Wyam.Common.Execution;
-using Wyam.Common.IO;
-using Wyam.Common.Meta;
-using Wyam.Common.Tracing;
-using Wyam.Core.Execution;
 
 namespace Wyam.App.Commands
 {

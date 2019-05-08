@@ -1,11 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Security.Cryptography.X509Certificates;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Wyam.Common.IO
+﻿namespace Wyam.Common.IO
 {
     /// <summary>
     /// A file system that can be configured.

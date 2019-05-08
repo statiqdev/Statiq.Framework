@@ -1,11 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
-using Microsoft.Extensions.DependencyInjection;
-using Spectre.Cli;
 using Wyam.App.Commands;
-using Wyam.App.Configuration;
 using Wyam.App.Tracing;
 using Wyam.Common.Configuration;
 using Wyam.Common.Execution;

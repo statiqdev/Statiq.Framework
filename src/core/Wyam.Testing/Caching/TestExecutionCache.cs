@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Wyam.Common.Caching;
-using Wyam.Common.Documents;
+﻿using Wyam.Common.Documents;
 
 namespace Wyam.Testing.Caching
 {

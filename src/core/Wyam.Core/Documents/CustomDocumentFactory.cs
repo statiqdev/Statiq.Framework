@@ -1,8 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using Wyam.Common.Documents;
 using Wyam.Common.IO;
@@ -20,16 +17,15 @@ namespace Wyam.Core.Documents
             _documentFactory = documentFactory;
         }
 
-        public IDocument GetDocument(
+        public async Task<IDocument> GetDocumentAsync(
             IExecutionContext context,
             IDocument sourceDocument,
             FilePath source,
-            Stream stream,
-            IEnumerable<KeyValuePair<string, object>> items = null,
-            bool disposeStream = true)
+            IEnumerable<KeyValuePair<string, object>> metadata,
+            object content)
         {
             CustomDocument customDocument = (CustomDocument)sourceDocument;
-            IDocument document = _documentFactory.GetDocument(context, customDocument?.Document, source, stream, items, disposeStream);
+            IDocument document = await _documentFactory.GetDocumentAsync(context, customDocument?.Document, source, metadata, content);
 
             CustomDocument newCustomDocument = customDocument == null
                 ? Activator.CreateInstance<T>()

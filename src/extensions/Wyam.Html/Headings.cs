@@ -6,7 +6,6 @@ using System.Text;
 using System.Threading.Tasks;
 using AngleSharp.Dom;
 using AngleSharp.Dom.Html;
-using AngleSharp.Html;
 using AngleSharp.Parser.Html;
 using Wyam.Common.Execution;
 using Wyam.Common.Meta;

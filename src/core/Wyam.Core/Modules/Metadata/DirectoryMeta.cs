@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Wyam.Common.Configuration;
@@ -181,7 +180,7 @@ namespace Wyam.Core.Modules.Metadata
                     firstLevel = false;
                 }
 
-                return newMetadata.Count > 0 ? context.GetDocument(input, newMetadata) : input;
+                return newMetadata.Count > 0 ? await context.NewGetDocumentAsync(input, metadata: newMetadata) : input;
             }
         }
 

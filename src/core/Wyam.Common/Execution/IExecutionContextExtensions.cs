@@ -1,13 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
-using System.IO;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using Wyam.Common.Documents;
-using Wyam.Common.IO;
-using Wyam.Common.Meta;
 using Wyam.Common.Modules;
 
 namespace Wyam.Common.Execution
@@ -43,10 +38,10 @@ namespace Wyam.Common.Execution
         /// <param name="modules">The modules to execute.</param>
         /// <param name="metadata">The metadata to use.</param>
         /// <returns>The result documents from the executed modules.</returns>
-        public static Task<ImmutableArray<IDocument>> ExecuteAsync(
+        public static async Task<ImmutableArray<IDocument>> ExecuteAsync(
             this IExecutionContext context,
             IEnumerable<IModule> modules,
             IEnumerable<KeyValuePair<string, object>> metadata = null) =>
-            context.ExecuteAsync(modules, new[] { context.GetDocument(metadata) });
+            await context.ExecuteAsync(modules, new[] { await context.NewGetDocumentAsync(metadata: metadata) });
     }
 }

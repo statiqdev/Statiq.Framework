@@ -1,7 +1,5 @@
 ﻿using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -202,7 +200,7 @@ namespace Wyam.SearchIndex
                 };
             }
 
-            return new[] { await context.GetDocumentAsync(script, metadata) };
+            return new[] { await context.GetDocumentAsync(metadata: metadata, content: script) };
         }
 
         private StringBuilder BuildScript(IList<ISearchIndexItem> searchIndexItems, string[] stopwords, IExecutionContext context)

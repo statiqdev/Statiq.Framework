@@ -1,16 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using NUnit.Framework;
 using Shouldly;
 using Wyam.Common.Documents;
 using Wyam.Common.Execution;
 using Wyam.Common.IO;
-using Wyam.Common.Modules;
-using Wyam.Common.Util;
-using Wyam.Core.Execution;
 using Wyam.Core.Modules.IO;
 using Wyam.Testing;
 using Wyam.Testing.Execution;
@@ -31,7 +27,7 @@ namespace Wyam.Core.Tests.Modules.IO
                 TestExecutionContext context = GetExecutionContext();
                 IDocument[] documents =
                 {
-                    await context.GetDocumentAsync("foo ^\"test-a.txt\" bar")
+                    await context.GetDocumentAsync(content: "foo ^\"test-a.txt\" bar")
                 };
                 Include include = new Include();
 
@@ -46,7 +42,7 @@ namespace Wyam.Core.Tests.Modules.IO
                 TestExecutionContext context = GetExecutionContext();
                 IDocument[] documents =
                 {
-                    await context.GetDocumentAsync("foo ^\"/TestFiles/Input/test-a.txt\" bar")
+                    await context.GetDocumentAsync(content: "foo ^\"/TestFiles/Input/test-a.txt\" bar")
                 };
                 Include include = new Include();
 
@@ -64,7 +60,7 @@ namespace Wyam.Core.Tests.Modules.IO
                 TestExecutionContext context = GetExecutionContext();
                 IDocument[] documents =
                 {
-                    await context.GetDocumentAsync(new FilePath("/TestFiles/Input/test.txt"), "^\"test-a.txt\"foo")
+                    await context.GetDocumentAsync(source: new FilePath("/TestFiles/Input/test.txt"), content: "^\"test-a.txt\"foo")
                 };
                 Include include = new Include();
 
@@ -82,7 +78,7 @@ namespace Wyam.Core.Tests.Modules.IO
                 TestExecutionContext context = GetExecutionContext();
                 IDocument[] documents =
                 {
-                    await context.GetDocumentAsync(new FilePath("/TestFiles/Input/test.txt"), "\\^\"test-a.txt\"foo")
+                    await context.GetDocumentAsync(source: new FilePath("/TestFiles/Input/test.txt"), content: "\\^\"test-a.txt\"foo")
                 };
                 Include include = new Include();
 
@@ -100,7 +96,7 @@ namespace Wyam.Core.Tests.Modules.IO
                 TestExecutionContext context = GetExecutionContext();
                 IDocument[] documents =
                 {
-                    await context.GetDocumentAsync(new FilePath("/TestFiles/Input/test.txt"), "\\\\\\^\"test-a.txt\"foo")
+                    await context.GetDocumentAsync(source: new FilePath("/TestFiles/Input/test.txt"), content: "\\\\\\^\"test-a.txt\"foo")
                 };
                 Include include = new Include();
 
@@ -119,8 +115,8 @@ namespace Wyam.Core.Tests.Modules.IO
                 IDocument[] documents =
                 {
                     await context.GetDocumentAsync(
-                        new FilePath("/TestFiles/Input/test.txt"),
-                        "x ^\"test-a.txt\" y ^\"test-b.txt\" z")
+                        source: new FilePath("/TestFiles/Input/test.txt"),
+                        content: "x ^\"test-a.txt\" y ^\"test-b.txt\" z")
                 };
                 Include include = new Include();
 
@@ -139,8 +135,8 @@ namespace Wyam.Core.Tests.Modules.IO
                 IDocument[] documents =
                 {
                     await context.GetDocumentAsync(
-                        new FilePath("/TestFiles/Input/test.txt"),
-                        "x ^\"test-a.txt\"^\"test-b.txt\" z")
+                        source: new FilePath("/TestFiles/Input/test.txt"),
+                        content: "x ^\"test-a.txt\"^\"test-b.txt\" z")
                 };
                 Include include = new Include();
 
@@ -160,8 +156,8 @@ namespace Wyam.Core.Tests.Modules.IO
                 IDocument[] documents =
                 {
                     await context.GetDocumentAsync(
-                        new FilePath("/TestFiles/Input/test.txt"),
-                        "x ^\"test-c.txt\" y")
+                        source: new FilePath("/TestFiles/Input/test.txt"),
+                        content: "x ^\"test-c.txt\" y")
                 };
                 Include include = new Include();
 
@@ -180,8 +176,8 @@ namespace Wyam.Core.Tests.Modules.IO
                 IDocument[] documents =
                 {
                     await context.GetDocumentAsync(
-                        new FilePath("/TestFiles/Input/test.txt"),
-                        "x ^\"Subfolder/test-c.txt\" y")
+                        source: new FilePath("/TestFiles/Input/test.txt"),
+                        content: "x ^\"Subfolder/test-c.txt\" y")
                 };
                 Include include = new Include();
 
@@ -200,8 +196,8 @@ namespace Wyam.Core.Tests.Modules.IO
                 IDocument[] documents =
                 {
                     await context.GetDocumentAsync(
-                        new FilePath("/TestFiles/Input/test.txt"),
-                        "x ^\"../test-above-input.txt\" y")
+                        source: new FilePath("/TestFiles/Input/test.txt"),
+                        content: "x ^\"../test-above-input.txt\" y")
                 };
                 Include include = new Include();
 
@@ -220,8 +216,8 @@ namespace Wyam.Core.Tests.Modules.IO
                 IDocument[] documents =
                 {
                     await context.GetDocumentAsync(
-                        new FilePath("/TestFiles/Input/test.txt"),
-                        "x ^\"/TestFiles/test-above-input.txt\" y")
+                        source: new FilePath("/TestFiles/Input/test.txt"),
+                        content: "x ^\"/TestFiles/test-above-input.txt\" y")
                 };
                 Include include = new Include();
 
@@ -243,8 +239,8 @@ namespace Wyam.Core.Tests.Modules.IO
                 IDocument[] documents =
                 {
                     await context.GetDocumentAsync(
-                        new FilePath("/TestFiles/Input/test.txt"),
-                        "1 ^\"test-outer.txt\" 2")
+                        source: new FilePath("/TestFiles/Input/test.txt"),
+                        content: "1 ^\"test-outer.txt\" 2")
                 };
                 Include include = new Include();
 
@@ -266,8 +262,8 @@ namespace Wyam.Core.Tests.Modules.IO
                 IDocument[] documents =
                 {
                     await context.GetDocumentAsync(
-                        new FilePath("/TestFiles/Input/test.txt"),
-                        "1 ^\"test-outer.txt\" 2")
+                        source: new FilePath("/TestFiles/Input/test.txt"),
+                        content: "1 ^\"test-outer.txt\" 2")
                 };
                 Include include = new Include().WithRecursion(false);
 
@@ -289,8 +285,8 @@ namespace Wyam.Core.Tests.Modules.IO
                 IDocument[] documents =
                 {
                     await context.GetDocumentAsync(
-                        new FilePath("/TestFiles/Input/test.txt"),
-                        "1 ^\"test-outer.txt\" 2")
+                        source: new FilePath("/TestFiles/Input/test.txt"),
+                        content: "1 ^\"test-outer.txt\" 2")
                 };
                 Include include = new Include().WithRecursion(false);
 
@@ -315,8 +311,8 @@ namespace Wyam.Core.Tests.Modules.IO
                 IDocument[] documents =
                 {
                     await context.GetDocumentAsync(
-                        new FilePath("/TestFiles/Input/test.txt"),
-                        "1 ^\"test-outer.txt\" 2")
+                        source: new FilePath("/TestFiles/Input/test.txt"),
+                        content: "1 ^\"test-outer.txt\" 2")
                 };
                 Include include = new Include();
 

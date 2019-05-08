@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using Wyam.Common.Documents;
 using Wyam.Common.Modules;
@@ -50,7 +48,7 @@ namespace Wyam.Core.Modules.IO
                 return Array.Empty<IDocument>();
             }
 
-            return new[] { await context.GetDocumentAsync(context.ApplicationInput) };
+            return new[] { await context.NewGetDocumentAsync(content: context.ApplicationInput) };
         }
     }
 }

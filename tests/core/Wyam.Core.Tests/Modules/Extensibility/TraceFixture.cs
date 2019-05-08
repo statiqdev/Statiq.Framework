@@ -3,12 +3,7 @@ using System.Diagnostics;
 using System.Threading.Tasks;
 using NUnit.Framework;
 using Shouldly;
-using Wyam.Common.Documents;
-using Wyam.Common.Execution;
-using Wyam.Core.Execution;
 using Wyam.Testing;
-using Wyam.Testing.Execution;
-using Wyam.Testing.Modules;
 using Trace = Wyam.Core.Modules.Extensibility.Trace;
 
 namespace Wyam.Core.Tests.Modules.Extensibility

@@ -1,5 +1,4 @@
 ﻿using System;
-using Wyam.Common.Documents;
 
 namespace Wyam.Common.Meta
 {

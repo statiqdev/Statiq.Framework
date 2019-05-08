@@ -10,7 +10,6 @@ using Markdig.Helpers;
 using Markdig.Parsers;
 using Markdig.Renderers;
 using Markdig.Syntax;
-using Wyam.Common.Caching;
 using Wyam.Common.Documents;
 using Wyam.Common.Execution;
 using Wyam.Common.Meta;
@@ -188,68 +187,63 @@ namespace Wyam.Markdown
                     string.IsNullOrEmpty(_sourceKey) ? string.Empty : ("in" + _sourceKey),
                     input.SourceString());
 
-                IExecutionCache executionCache = context.ExecutionCache;
-                if (!executionCache.TryGetValue(input, _sourceKey, out string result))
+                string content;
+                if (string.IsNullOrEmpty(_sourceKey))
                 {
-                    string content;
-                    if (string.IsNullOrEmpty(_sourceKey))
-                    {
-                        content = input.Content;
-                    }
-                    else if (input.ContainsKey(_sourceKey))
-                    {
-                        content = input.String(_sourceKey) ?? string.Empty;
-                    }
-                    else
-                    {
-                        // Don't do anything if the key doesn't exist
-                        return input;
-                    }
+                    content = input.Content;
+                }
+                else if (input.ContainsKey(_sourceKey))
+                {
+                    content = input.String(_sourceKey) ?? string.Empty;
+                }
+                else
+                {
+                    // Don't do anything if the key doesn't exist
+                    return input;
+                }
 
-                    MarkdownPipeline pipeline = CreatePipeline();
+                MarkdownPipeline pipeline = CreatePipeline();
 
-                    using (StringWriter writer = new StringWriter())
+                string result;
+                using (StringWriter writer = new StringWriter())
+                {
+                    HtmlRenderer htmlRenderer = new HtmlRenderer(writer);
+                    pipeline.Setup(htmlRenderer);
+
+                    if (_prependLinkRoot && context.Settings.ContainsKey(Keys.LinkRoot))
                     {
-                        HtmlRenderer htmlRenderer = new HtmlRenderer(writer);
-                        pipeline.Setup(htmlRenderer);
-
-                        if (_prependLinkRoot && context.Settings.ContainsKey(Keys.LinkRoot))
+                        htmlRenderer.LinkRewriter = (link) =>
                         {
-                            htmlRenderer.LinkRewriter = (link) =>
+                            if (string.IsNullOrEmpty(link))
                             {
-                                if (string.IsNullOrEmpty(link))
-                                {
-                                    return link;
-                                }
-
-                                if (link[0] == '/')
-                                {
-                                    // root-based url, must be rewritten by prepending the LinkRoot setting value
-                                    // ex: '/virtual/directory' + '/relative/abs/link.html' => '/virtual/directory/relative/abs/link.html'
-                                    link = context.Settings[Keys.LinkRoot] + link;
-                                }
-
                                 return link;
-                            };
-                        }
+                            }
 
-                        MarkdownDocument document = MarkdownParser.Parse(content, pipeline);
-                        htmlRenderer.Render(document);
-                        writer.Flush();
-                        result = writer.ToString();
+                            if (link[0] == '/')
+                            {
+                                // root-based url, must be rewritten by prepending the LinkRoot setting value
+                                // ex: '/virtual/directory' + '/relative/abs/link.html' => '/virtual/directory/relative/abs/link.html'
+                                link = context.Settings[Keys.LinkRoot] + link;
+                            }
+
+                            return link;
+                        };
                     }
 
-                    if (_escapeAt)
-                    {
-                        result = EscapeAtRegex.Replace(result, "&#64;");
-                        result = result.Replace("\\@", "@");
-                    }
+                    MarkdownDocument document = MarkdownParser.Parse(content, pipeline);
+                    htmlRenderer.Render(document);
+                    writer.Flush();
+                    result = writer.ToString();
+                }
 
-                    executionCache.Set(input, _sourceKey, result);
+                if (_escapeAt)
+                {
+                    result = EscapeAtRegex.Replace(result, "&#64;");
+                    result = result.Replace("\\@", "@");
                 }
 
                 return string.IsNullOrEmpty(_sourceKey)
-                    ? await context.GetDocumentAsync(input, result)
+                    ? await context.GetDocumentAsync(input, source: result)
                     : context.GetDocument(input, new MetadataItems
                     {
                         { string.IsNullOrEmpty(_destinationKey) ? _sourceKey : _destinationKey, result }

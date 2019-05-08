@@ -1,7 +1,4 @@
-﻿using System.Reflection;
-using Microsoft.AspNetCore.Hosting;
-using Wyam.Common.Execution;
-using Wyam.Common.IO;
+﻿using Microsoft.AspNetCore.Hosting;
 using IFileProvider = Microsoft.Extensions.FileProviders.IFileProvider;
 
 namespace Wyam.Razor

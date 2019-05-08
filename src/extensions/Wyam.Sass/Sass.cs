@@ -198,8 +198,8 @@ namespace Wyam.Sass
                 FilePath cssPath = relativePath.ChangeExtension("css");
                 IDocument cssDocument = await context.GetDocumentAsync(
                     input,
-                    result.Css ?? string.Empty,
-                    new MetadataItems
+                    source: result.Css ?? string.Empty,
+                    content: new MetadataItems
                     {
                             { Keys.RelativeFilePath, cssPath },
                             { Keys.WritePath, cssPath }
@@ -211,8 +211,8 @@ namespace Wyam.Sass
                     FilePath sourceMapPath = relativePath.ChangeExtension("map");
                     IDocument sourceMapDocument = await context.GetDocumentAsync(
                         input,
-                        result.SourceMap,
-                        new MetadataItems
+                        source: result.SourceMap,
+                        content: new MetadataItems
                         {
                                 { Keys.RelativeFilePath, sourceMapPath },
                                 { Keys.WritePath, sourceMapPath }

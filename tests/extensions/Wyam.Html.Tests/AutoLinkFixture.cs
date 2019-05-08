@@ -4,7 +4,6 @@ using System.Threading.Tasks;
 using NUnit.Framework;
 using Shouldly;
 using Wyam.Common.Documents;
-using Wyam.Common.Execution;
 using Wyam.Common.Util;
 using Wyam.Testing;
 using Wyam.Testing.Documents;

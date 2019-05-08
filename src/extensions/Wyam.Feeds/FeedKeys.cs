@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Wyam.Feeds
+﻿namespace Wyam.Feeds
 {
     /// <summary>
     /// Keys for use with the <see cref="GenerateFeeds"/> module.

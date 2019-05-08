@@ -1,13 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.Immutable;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
 using Wyam.Common.IO;
-using Wyam.Common.Util;
 using Wyam.Core.IO.FileProviders.Local;
 
 namespace Wyam.Core.IO

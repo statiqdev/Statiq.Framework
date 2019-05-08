@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
+﻿using System.IO;
 using System.Text;
 using Microsoft.IO;
 using Wyam.Common.Execution;
@@ -33,5 +31,15 @@ namespace Wyam.Core.Execution
 
         public MemoryStream GetStream(byte[] buffer, int offset, int count) =>
             _manager.GetStream(null, buffer, offset, count);
+
+        public MemoryStream GetStream(string content)
+        {
+            if (string.IsNullOrEmpty(content))
+            {
+                return GetStream();
+            }
+            byte[] contentBytes = Encoding.UTF8.GetBytes(content);
+            return GetStream(contentBytes, 0, contentBytes.Length);
+        }
     }
 }

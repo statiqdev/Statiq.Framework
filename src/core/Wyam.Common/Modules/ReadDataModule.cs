@@ -1,10 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
-using System.IO;
 using System.Linq;
-using System.Net;
-using System.Text;
 using System.Threading.Tasks;
 using Wyam.Common.Documents;
 using Wyam.Common.Execution;
@@ -103,10 +99,10 @@ namespace Wyam.Common.Modules
         /// <param name="inputs">The input documents.</param>
         /// <param name="context">The current execution context.</param>
         /// <returns>The objects to create documents from.</returns>
-        protected abstract IEnumerable<TItem> GetItems(IReadOnlyList<IDocument> inputs, IExecutionContext context);
+        protected abstract Task<IEnumerable<TItem>> GetItemsAsync(IReadOnlyList<IDocument> inputs, IExecutionContext context);
 
         /// <summary>
-        /// Used to convert each object from <see cref="GetItems(IReadOnlyList{IDocument}, IExecutionContext)"/> into a IDictionary&lt;string, object&gt;.
+        /// Used to convert each object from <see cref="GetItemsAsync(IReadOnlyList{IDocument}, IExecutionContext)"/> into a IDictionary&lt;string, object&gt;.
         /// The base implementation checks if the object implements IDictionary&lt;string, object&gt; and just
         /// performs a cast is if it does. If not, reflection is used to construct a IDictionary&lt;string, object&gt;
         /// from all of the object's properties. Override this method to provide an alternate way of getting
@@ -124,7 +120,7 @@ namespace Wyam.Common.Modules
         /// <inheritdoc />
         public async Task<IEnumerable<IDocument>> ExecuteAsync(IReadOnlyList<IDocument> inputs, IExecutionContext context)
         {
-            IEnumerable<TItem> items = GetItems(inputs, context);
+            IEnumerable<TItem> items = await GetItemsAsync(inputs, context);
             return items == null
                 ? Array.Empty<IDocument>()
                 : await items.Where(x => x != null).Take(_limit).ParallelSelectAsync(ReadDataAsync);
@@ -161,7 +157,7 @@ namespace Wyam.Common.Modules
                     }
                 }
 
-                return await context.GetDocumentAsync(content, meta);
+                return await context.NewGetDocumentAsync(metadata: meta, content: content);
             }
         }
     }

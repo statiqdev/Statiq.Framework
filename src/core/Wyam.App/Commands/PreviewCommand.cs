@@ -3,17 +3,14 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Spectre.Cli;
-using Wyam.App.Configuration;
 using Wyam.App.Tracing;
 using Wyam.Common.Configuration;
 using Wyam.Common.Execution;
 using Wyam.Common.IO;
 using Wyam.Common.Tracing;
-using Wyam.Core.Execution;
 using Wyam.Hosting;
 
 namespace Wyam.App.Commands

@@ -1,6 +1,4 @@
-﻿using Cake.Common.Tools.DotNetCore;
-using Cake.Core.Diagnostics;
-using Cake.Testing.Fixtures;
+﻿using Cake.Testing.Fixtures;
 
 namespace Cake.Wyam.Tests
 {

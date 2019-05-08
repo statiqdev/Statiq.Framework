@@ -1,8 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
-using Wyam.Common.IO;
+using System.Threading.Tasks;
 using Wyam.Common.Execution;
+using Wyam.Common.IO;
 
 namespace Wyam.Common.Documents
 {
@@ -12,19 +12,25 @@ namespace Wyam.Common.Documents
     public interface IDocumentFactory
     {
         /// <summary>
-        /// Clones the specified source document with a new source, new content stream, and additional metadata (all existing metadata is retained)
+        /// Clones the specified source document with a new source, new content, and additional metadata (all existing metadata is retained)
         /// or gets a new document if the source document is null or <c>AsNewDocuments()</c> was called on the module.
-        /// If <paramref name="disposeStream"/> is true (which it is by default), the provided
-        /// <see cref="Stream"/> will automatically be disposed when the document is disposed (I.e., the
-        /// document takes ownership of the <see cref="Stream"/>).
         /// </summary>
         /// <param name="context">The current execution context.</param>
         /// <param name="sourceDocument">The source document.</param>
         /// <param name="source">The source (if the source document contains a source, then this is ignored and the source document's source is used instead).</param>
-        /// <param name="stream">The content stream.</param>
-        /// <param name="items">The metadata items.</param>
-        /// <param name="disposeStream">If set to <c>true</c> the provided <see cref="Stream"/> is disposed when the document is.</param>
+        /// <param name="metadata">The metadata items.</param>
+        /// <param name="content">
+        /// The content, which should be dynamically infered based on type. Implementations should support creating content from
+        /// <see cref="Stream"/>, <see cref="string"/>, or <see cref="IFile"/>.
+        /// They should also support directly supplying an <see cref="IDocument"/> (in which case the existing content should be passed to the new document).
+        /// Any other content types should result in using the <see cref="object.ToString()"/> value as document content.
+        /// </param>
         /// <returns>The cloned or new document.</returns>
-        IDocument GetDocument(IExecutionContext context, IDocument sourceDocument, FilePath source, Stream stream, IEnumerable<KeyValuePair<string, object>> items = null, bool disposeStream = true);
+        Task<IDocument> GetDocumentAsync(
+            IExecutionContext context,
+            IDocument sourceDocument,
+            FilePath source,
+            IEnumerable<KeyValuePair<string, object>> metadata,
+            object content);
     }
 }

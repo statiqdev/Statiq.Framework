@@ -1,13 +1,9 @@
-﻿using System;
-using System.Collections.Concurrent;
-using System.Collections.Generic;
+﻿using System.Collections.Concurrent;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using AngleSharp.Parser.Html;
 using NUnit.Framework;
 using Wyam.Common.Documents;
-using Wyam.Common.IO;
 using Wyam.Testing;
 using Wyam.Testing.Documents;
 

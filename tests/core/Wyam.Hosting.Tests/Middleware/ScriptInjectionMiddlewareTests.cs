@@ -1,6 +1,4 @@
-﻿using System.IO;
-using System.Net.Http;
-using System.Reflection;
+﻿using System.Net.Http;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -10,7 +8,6 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.FileProviders;
 using NUnit.Framework;
 using Shouldly;
-using Wyam.Hosting.Tests;
 using Wyam.Hosting.Middleware;
 
 namespace Wyam.Hosting.Tests.Middleware

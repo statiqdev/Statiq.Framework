@@ -5,7 +5,6 @@ using System.Threading.Tasks;
 using Wyam.Common.Documents;
 using Wyam.Common.Execution;
 using Wyam.Common.Modules;
-using Wyam.Common.Util;
 
 namespace Wyam.Core.Modules.Control
 {
@@ -110,7 +109,8 @@ namespace Wyam.Core.Modules.Control
             List<IDocument> results = new List<IDocument>();
             await context.ForEachAsync(inputs, async input =>
             {
-                List<string> inputLines = input.Content.Split(new[] { '\n' }, StringSplitOptions.None).ToList();
+                string inputContent = await input.GetStringAsync();
+                List<string> inputLines = inputContent.Split(new[] { '\n' }, StringSplitOptions.None).ToList();
                 int delimiterLine = inputLines.FindIndex(x =>
                 {
                     string trimmed = x.TrimEnd();
@@ -131,9 +131,9 @@ namespace Wyam.Core.Modules.Control
                     string frontMatter = string.Join("\n", inputLines.Skip(startLine).Take(delimiterLine - startLine)) + "\n";
                     inputLines.RemoveRange(0, delimiterLine + 1);
                     string content = string.Join("\n", inputLines);
-                    foreach (IDocument result in await context.ExecuteAsync(this, new[] { await context.GetDocumentAsync(input, frontMatter) }))
+                    foreach (IDocument result in await context.ExecuteAsync(this, new[] { await context.NewGetDocumentAsync(input, content: frontMatter) }))
                     {
-                        results.Add(await context.GetDocumentAsync(result, content));
+                        results.Add(await context.NewGetDocumentAsync(result, content: content));
                     }
                 }
                 else

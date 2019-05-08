@@ -48,15 +48,15 @@ namespace Wyam.Testing.Modules
                         results.Add(await context.GetDocumentAsync(
                             input,
                             new FilePath(ValueKey + sourceCount++, PathKind.Absolute),
-                            input.Content == null ? Value.ToString() : input.Content + Value,
-                            new Dictionary<string, object> { { ValueKey, Value } }));
+                            new Dictionary<string, object> { { ValueKey, Value } },
+                            input.Content == null ? Value.ToString() : input.Content + Value));
                     }
                     else
                     {
                         results.Add(await context.GetDocumentAsync(
                             input,
-                            input.Content == null ? Value.ToString() : input.Content + Value,
-                            new Dictionary<string, object> { { ValueKey, Value } }));
+                            source: input.Content == null ? Value.ToString() : input.Content + Value,
+                            content: new Dictionary<string, object> { { ValueKey, Value } }));
                     }
                 }
             }

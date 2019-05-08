@@ -1,11 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
-using System.Text;
 using System.Threading.Tasks;
 using Wyam.Common.Documents;
 using Wyam.Common.Execution;
-using Wyam.Common.Meta;
 
 namespace Wyam.Common.Shortcodes
 {
@@ -22,7 +19,7 @@ namespace Wyam.Common.Shortcodes
     public interface IShortcode
     {
         /// <summary>
-        /// Executes the shortcode and returns an <see cref="IShortcodeResult"/>.
+        /// Executes the shortcode and returns an <see cref="IDocument"/> with the shortcode result content and metadata.
         /// </summary>
         /// <param name="args">
         /// The arguments declared with the shortcode. This contains a list of key-value pairs in the order
@@ -31,15 +28,12 @@ namespace Wyam.Common.Shortcodes
         /// </param>
         /// <param name="content">The content of the shortcode.</param>
         /// <param name="document">The current document (including metadata from previous shortcodes in the same document).</param>
-        /// <param name="context">
-        /// The current execution context. This can be used to obtain the <see cref="IShortcodeResult"/> instance
-        /// by calling <see cref="IExecutionContext.GetShortcodeResult(Stream, IEnumerable{KeyValuePair{string, object}})"/>.
-        /// </param>
+        /// <param name="context">The current execution context.</param>
         /// <returns>
         /// A shortcode result that contains a stream and new metadata as a result of executing this shortcode.
         /// The result can be <c>null</c> in which case the shortcode declaration will be removed from the document
         /// but no replacement content will be added and the metadata will not change.
         /// </returns>
-        Task<IShortcodeResult> ExecuteAsync(KeyValuePair<string, string>[] args, string content, IDocument document, IExecutionContext context);
+        Task<IDocument> ExecuteAsync(KeyValuePair<string, string>[] args, string content, IDocument document, IExecutionContext context);
     }
 }

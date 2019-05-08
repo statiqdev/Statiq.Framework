@@ -1,9 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Dynamic;
-using System.IO;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
 using Wyam.Common.Configuration;
@@ -138,7 +135,7 @@ namespace Wyam.Json
                         string result = JsonConvert.SerializeObject(data, settings);
                         if (string.IsNullOrEmpty(_destinationKey))
                         {
-                            return await context.GetDocumentAsync(input, result);
+                            return await context.GetDocumentAsync(input, source: result);
                         }
                         return context.GetDocument(input, new MetadataItems
                         {

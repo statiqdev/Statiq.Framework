@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
@@ -10,8 +9,6 @@ using Wyam.Common.Execution;
 using Wyam.Common.Meta;
 using Wyam.Common.Modules;
 using Wyam.Common.Util;
-using Wyam.Core.Documents;
-using Wyam.Core.Meta;
 using Wyam.Core.Util;
 
 namespace Wyam.Core.Modules.Control
@@ -168,19 +165,19 @@ namespace Wyam.Core.Modules.Control
 
             if (inputs.Count > 0)
             {
-                return inputs.SelectMany(context, input =>
+                return await inputs.SelectManyAsync(context, async input =>
                 {
-                    return groupings.Select(x => context.GetDocument(
+                    return await groupings.SelectAsync(async x => await context.NewGetDocumentAsync(
                         input,
-                        new MetadataItems
+                        metadata: new MetadataItems
                         {
                             { Keys.GroupDocuments, x.ToImmutableArray() },
                             { Keys.GroupKey, x.Key }
                         }));
                 });
             }
-            return groupings.Select(x => context.GetDocument(
-                new MetadataItems
+            return await groupings.SelectAsync(async x => await context.NewGetDocumentAsync(
+                metadata: new MetadataItems
                 {
                     { Keys.GroupDocuments, x.ToImmutableArray() },
                     { Keys.GroupKey, x.Key }
