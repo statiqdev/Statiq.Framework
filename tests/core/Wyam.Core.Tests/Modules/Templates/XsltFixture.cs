@@ -1,11 +1,11 @@
 ﻿using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using NUnit.Framework;
+using Shouldly;
+using Wyam.Common;
 using Wyam.Common.Documents;
 using Wyam.Common.Execution;
 using Wyam.Common.Modules;
-using Wyam.Common.Util;
 using Wyam.Core.Modules.Extensibility;
 using Wyam.Core.Modules.Templates;
 using Wyam.Testing;
@@ -80,17 +80,16 @@ namespace Wyam.Core.Tests.Modules.Templates
 
                 const string output = "<HTML><BODY><TABLE BORDER=\"2\"><TR><TD>ISBN</TD><TD>Title</TD><TD>Price</TD></TR><TR><TD>1-861003-11-0</TD><TD>The Autobiography of Benjamin Franklin</TD><TD>8.99</TD></TR><TR><TD>0-201-63361-2</TD><TD>The Confidence Man</TD><TD>11.99</TD></TR><TR><TD>1-861001-57-6</TD><TD>The Gorgias</TD><TD>9.99</TD></TR></TABLE></BODY></HTML>";
 
-                TestExecutionContext context = new TestExecutionContext();
-                IDocument document = new TestDocument(input);
+                TestDocument document = new TestDocument(input);
                 IDocument xsltDocument = new TestDocument(xsltInput);
                 IModule module = new ExecuteDocument(new[] { xsltDocument });
                 Xslt xslt = new Xslt(module);
 
                 // When
-                IList<IDocument> results = await xslt.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
+                TestDocument result = await ExecuteAsync(document, xslt).SingleAsync();
 
                 // Then
-                Assert.That(await results.SelectAsync(async x => await x.GetStringAsync()), Is.EquivalentTo(new[] { output }));
+                result.Content.ShouldBe(output);
             }
         }
     }

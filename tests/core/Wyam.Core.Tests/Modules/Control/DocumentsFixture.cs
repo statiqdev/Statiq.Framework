@@ -39,9 +39,9 @@ namespace Wyam.Core.Tests.Modules.Control
                 List<string> content = new List<string>();
                 Core.Modules.Control.Documents documents = new Core.Modules.Control.Documents("A", "B", "C", "D");
                 Execute gatherData = new ExecuteDocument(
-                    Config.FromDocument(d =>
+                    Config.FromDocument(async d =>
                 {
-                    content.Add(d.Content);
+                    content.Add(await d.GetStringAsync());
                     return (object)null;
                 }), false);
 
@@ -88,9 +88,9 @@ namespace Wyam.Core.Tests.Modules.Control
                     Tuple.Create("B", new Dictionary<string, object> { { "Foo", "b" } }.AsEnumerable()),
                     Tuple.Create("C", new Dictionary<string, object> { { "Foo", "c" } }.AsEnumerable()));
                 Execute gatherData = new ExecuteDocument(
-                    Config.FromDocument(d =>
+                    Config.FromDocument(async d =>
                 {
-                    content.Add(d.Content);
+                    content.Add(await d.GetStringAsync());
                     values.Add(d["Foo"]);
                     return (object)null;
                 }), false);
@@ -113,9 +113,9 @@ namespace Wyam.Core.Tests.Modules.Control
                 IServiceProvider serviceProvider = new TestServiceProvider();
                 Engine engine = new Engine();
                 Execute gatherData = new ExecuteDocument(
-                    Config.FromDocument(d =>
+                    Config.FromDocument(async d =>
                     {
-                        content.Add(d.Content);
+                        content.Add(await d.GetStringAsync());
                         return (object)null;
                     }), false);
                 engine.Pipelines.Add("Foo", new TestPipeline(new Core.Modules.Control.Documents("A", "B", "C", "D")));
@@ -138,9 +138,9 @@ namespace Wyam.Core.Tests.Modules.Control
                 IServiceProvider serviceProvider = new TestServiceProvider();
                 Engine engine = new Engine();
                 Execute gatherData = new ExecuteDocument(
-                    Config.FromDocument(d =>
+                    Config.FromDocument(async d =>
                     {
-                        content.Add(d.Content);
+                        content.Add(await d.GetStringAsync());
                         return (object)null;
                     }), false);
                 engine.Pipelines.Add("Foo", new TestPipeline(new Core.Modules.Control.Documents("A", "B", "C", "D")));
@@ -163,9 +163,9 @@ namespace Wyam.Core.Tests.Modules.Control
                 IServiceProvider serviceProvider = new TestServiceProvider();
                 Engine engine = new Engine();
                 Execute gatherData = new ExecuteDocument(
-                    Config.FromDocument(d =>
+                    Config.FromDocument(async d =>
                     {
-                        content.Add(d.Content);
+                        content.Add(await d.GetStringAsync());
                         return (object)null;
                     }), false);
                 engine.Pipelines.Add("Foo", new TestPipeline(new Core.Modules.Control.Documents("A", "B", "C", "D")));
@@ -191,9 +191,9 @@ namespace Wyam.Core.Tests.Modules.Control
                 IServiceProvider serviceProvider = new TestServiceProvider();
                 Engine engine = new Engine();
                 Execute gatherData = new ExecuteDocument(
-                    Config.FromDocument(d =>
+                    Config.FromDocument(async d =>
                     {
-                        content.Add(d.Content);
+                        content.Add(await d.GetStringAsync());
                         return (object)null;
                     }), false);
                 engine.Pipelines.Add("Foo", new TestPipeline(new Core.Modules.Control.Documents("A", "B", "C", "D")));
@@ -219,9 +219,9 @@ namespace Wyam.Core.Tests.Modules.Control
                 IServiceProvider serviceProvider = new TestServiceProvider();
                 Engine engine = new Engine();
                 Execute gatherData = new ExecuteDocument(
-                    Config.FromDocument(d =>
+                    Config.FromDocument(async d =>
                     {
-                        content.Add(d.Content);
+                        content.Add(await d.GetStringAsync());
                         return (object)null;
                     }), false);
                 engine.Pipelines.Add("Foo", new TestPipeline(new Core.Modules.Control.Documents("A", "B", "C", "D")));

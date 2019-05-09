@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using Wyam.Common.Modules;
-using Wyam.Common.Util;
 
 namespace Wyam.Common.Execution
 {

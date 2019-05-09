@@ -2,8 +2,8 @@
 using System.Threading.Tasks;
 using NUnit.Framework;
 using Shouldly;
+using Wyam.Common;
 using Wyam.Common.Documents;
-using Wyam.Common.Util;
 using Wyam.Testing;
 using Wyam.Testing.Documents;
 using Wyam.Testing.Execution;
@@ -104,16 +104,14 @@ namespace Wyam.Tables.Tests
 | 26 | 26 | 52 | 78 | 104 | 130 | 156 | 182 |
 +----+----+----+----+-----+-----+-----+-----+
 ";
-                TestExecutionContext context = new TestExecutionContext();
                 TestDocument document = new TestDocument(input);
                 CsvToMarkdown module = new CsvToMarkdown();
 
                 // When
-                IList<IDocument> results = await module.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
+                TestDocument result = await ExecuteAsync(document, module).SingleAsync();
 
                 // Then
-                results.Count.ShouldBe(1);
-                (await results[0].GetStringAsync()).ShouldBe(output, StringCompareShould.IgnoreLineEndings);
+                result.Content.ShouldBe(output, StringCompareShould.IgnoreLineEndings);
             }
 
             [Test]
@@ -205,16 +203,14 @@ namespace Wyam.Tables.Tests
 | 26 | 26 | 52 | 78 | 104 | 130 | 156 | 182 |
 +----+----+----+----+-----+-----+-----+-----+
 ";
-                TestExecutionContext context = new TestExecutionContext();
                 TestDocument document = new TestDocument(input);
                 CsvToMarkdown module = new CsvToMarkdown().WithHeader();
 
                 // When
-                IList<IDocument> results = await module.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
+                TestDocument result = await ExecuteAsync(document, module).SingleAsync();
 
                 // Then
-                results.Count.ShouldBe(1);
-                (await results[0].GetStringAsync()).ShouldBe(output, StringCompareShould.IgnoreLineEndings);
+                result.Content.ShouldBe(output, StringCompareShould.IgnoreLineEndings);
             }
         }
     }

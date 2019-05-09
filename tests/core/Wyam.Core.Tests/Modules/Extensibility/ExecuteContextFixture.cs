@@ -4,9 +4,9 @@ using System.Linq;
 using System.Threading.Tasks;
 using NUnit.Framework;
 using Shouldly;
+using Wyam.Common;
 using Wyam.Common.Documents;
 using Wyam.Common.Execution;
-using Wyam.Common.Util;
 using Wyam.Core.Modules.Extensibility;
 using Wyam.Testing;
 using Wyam.Testing.Documents;
@@ -21,35 +21,30 @@ namespace Wyam.Core.Tests.Modules.Extensibility
         public class ExecuteTests : ExecuteContextFixture
         {
             [Test]
-            public async Task DoesNotThrowForNullResult()
+            public void DoesNotThrowForNullResult()
             {
                 // Given
-                TestExecutionContext context = new TestExecutionContext();
                 ExecuteContext execute = new ExecuteContext(_ => (object)null);
 
-                // When
-                await execute.ExecuteAsync(Array.Empty<IDocument>(), context);
-
-                // Then
+                // When, Then
+                Should.NotThrow(() => ExecuteAsync(Array.Empty<TestDocument>(), execute).Result);
             }
 
             [Test]
             public async Task ThrowsForObjectResult()
             {
                 // Given
-                TestExecutionContext context = new TestExecutionContext();
                 ExecuteContext execute = new ExecuteContext(_ => 1);
 
                 // When, Then
-                await Should.ThrowAsync<Exception>(async () => await execute.ExecuteAsync(Array.Empty<IDocument>(), context));
+                await Should.ThrowAsync<Exception>(async () => await ExecuteAsync(Array.Empty<TestDocument>(), execute));
             }
 
             [Test]
             public async Task ReturnsInputsForNullResult()
             {
                 // Given
-                TestExecutionContext context = new TestExecutionContext();
-                IDocument[] inputs =
+                TestDocument[] inputs =
                 {
                     new TestDocument(),
                     new TestDocument()
@@ -57,47 +52,42 @@ namespace Wyam.Core.Tests.Modules.Extensibility
                 ExecuteContext execute = new ExecuteContext(_ => (object)null);
 
                 // When
-                IEnumerable<IDocument> outputs = await execute.ExecuteAsync(inputs, context).ToListAsync();
+                IReadOnlyList<TestDocument> outputs = await ExecuteAsync(inputs, execute);
 
                 // Then
                 CollectionAssert.AreEqual(inputs, outputs);
             }
 
             [Test]
-            public async Task DoesNotRequireReturnValue()
+            public void DoesNotRequireReturnValue()
             {
                 // Given
-                TestExecutionContext context = new TestExecutionContext();
                 int a = 0;
                 ExecuteContext execute = new ExecuteContext(c => { a = a + 1; });
 
-                // When
-                await execute.ExecuteAsync(Array.Empty<IDocument>(), context);
-
-                // Then
+                // When, Then
+                Should.NotThrow(() => ExecuteAsync(Array.Empty<TestDocument>(), execute).Result);
             }
 
             [Test]
             public async Task ReturnsDocumentForSingleResultDocument()
             {
                 // Given
-                TestExecutionContext context = new TestExecutionContext();
                 TestDocument document = new TestDocument();
                 ExecuteContext execute = new ExecuteContext(_ => document);
 
                 // When
-                IEnumerable<IDocument> result = await execute.ExecuteAsync(Array.Empty<IDocument>(), context);
+                TestDocument result = await ExecuteAsync(Array.Empty<TestDocument>(), execute).SingleAsync();
 
                 // Then
-                CollectionAssert.AreEquivalent(document, result.Single());
+                result.ShouldBe(document);
             }
 
             [Test]
             public async Task RunsModuleAgainstInputDocuments()
             {
                 // Given
-                IExecutionContext context = new TestExecutionContext();
-                IDocument[] inputs =
+                TestDocument[] inputs =
                 {
                     new TestDocument(),
                     new TestDocument()
@@ -110,7 +100,7 @@ namespace Wyam.Core.Tests.Modules.Extensibility
                 });
 
                 // When
-                await execute.ExecuteAsync(inputs, context).ToListAsync();
+                await ExecuteAsync(inputs, execute);
 
                 // Then
                 count.ShouldBe(1);

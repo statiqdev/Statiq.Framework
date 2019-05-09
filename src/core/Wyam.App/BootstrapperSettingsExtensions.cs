@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using Wyam.Common;
 using Wyam.Common.Configuration;
-using Wyam.Common.Util;
 
 namespace Wyam.App
 {

@@ -6,10 +6,10 @@ using System.Net.Http;
 using System.Threading.Tasks;
 using NUnit.Framework;
 using Shouldly;
+using Wyam.Common;
 using Wyam.Common.Documents;
 using Wyam.Common.Meta;
 using Wyam.Common.Modules;
-using Wyam.Common.Util;
 using Wyam.Core.Modules.IO;
 using Wyam.Testing;
 using Wyam.Testing.Documents;
@@ -27,7 +27,7 @@ namespace Wyam.Core.Tests.Modules.IO
             public async Task SingleHtmlDownloadGetStream()
             {
                 // Given
-                IDocument document = new TestDocument();
+                TestDocument document = new TestDocument();
                 TestExecutionContext context = new TestExecutionContext
                 {
                     HttpResponseFunc = (_, __) =>
@@ -44,10 +44,9 @@ namespace Wyam.Core.Tests.Modules.IO
                 IModule download = new Download().WithUris("https://wyam.io/");
 
                 // When
-                IList<IDocument> results = await download.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
+                TestDocument result = await ExecuteAsync(document, context, download).SingleAsync();
 
                 // Then
-                IDocument result = results.Single();
                 Assert.IsNotNull(result.Source, "Source cannot be empty");
 
                 Dictionary<string, string> headers = result[Keys.SourceHeaders] as Dictionary<string, string>;
@@ -61,18 +60,14 @@ namespace Wyam.Core.Tests.Modules.IO
                     Assert.IsNotEmpty(h.Value, "Header value cannot be empty");
                 }
 
-                using (Stream stream = result.GetStream())
-                {
-                    string content = new StreamReader(stream).ReadToEnd();
-                    Assert.IsNotEmpty(content, "Download cannot be empty");
-                }
+                result.Content.ShouldNotBeEmpty();
             }
 
             [Test]
             public async Task MultipleHtmlDownload()
             {
                 // Given
-                IDocument document = new TestDocument();
+                TestDocument document = new TestDocument();
                 TestExecutionContext context = new TestExecutionContext
                 {
                     HttpResponseFunc = (_, __) =>
@@ -89,10 +84,10 @@ namespace Wyam.Core.Tests.Modules.IO
                 IModule download = new Download().WithUris("https://wyam.io/", "https://github.com/Wyamio/Wyam");
 
                 // When
-                IList<IDocument> results = await download.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
+                IReadOnlyList<TestDocument> results = await ExecuteAsync(document, context, download);
 
                 // Then
-                foreach (IDocument result in results)
+                foreach (TestDocument result in results)
                 {
                     Dictionary<string, string> headers = result[Keys.SourceHeaders] as Dictionary<string, string>;
 
@@ -105,11 +100,7 @@ namespace Wyam.Core.Tests.Modules.IO
                         Assert.IsNotEmpty(h.Value, "Header value cannot be empty");
                     }
 
-                    using (Stream stream = result.GetStream())
-                    {
-                        string content = new StreamReader(stream).ReadToEnd();
-                        Assert.IsNotEmpty(content, "Download cannot be empty");
-                    }
+                    result.Content.ShouldNotBeEmpty();
                 }
             }
 
@@ -117,7 +108,7 @@ namespace Wyam.Core.Tests.Modules.IO
             public async Task SingleImageDownload()
             {
                 // Given
-                IDocument document = new TestDocument();
+                TestDocument document = new TestDocument();
                 TestExecutionContext context = new TestExecutionContext
                 {
                     HttpResponseFunc = (_, __) =>
@@ -132,10 +123,10 @@ namespace Wyam.Core.Tests.Modules.IO
                 IModule download = new Download().WithUris("https://wyam.io/assets/img/logo.png");
 
                 // When
-                IList<IDocument> results = await download.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
+                TestDocument result = await ExecuteAsync(document, context, download).SingleAsync();
 
                 // Then
-                using (Stream stream = results.Single().GetStream())
+                using (Stream stream = await result.GetStreamAsync())
                 {
                     stream.ReadByte().ShouldNotBe(-1);
                 }
@@ -145,7 +136,7 @@ namespace Wyam.Core.Tests.Modules.IO
             public async Task SingleImageDownloadWithRequestHeader()
             {
                 // Given
-                IDocument document = new TestDocument();
+                TestDocument document = new TestDocument();
                 TestExecutionContext context = new TestExecutionContext
                 {
                     HttpResponseFunc = (_, __) =>
@@ -162,10 +153,10 @@ namespace Wyam.Core.Tests.Modules.IO
                 IModule download = new Download().WithUri("https://wyam.io/assets/img/logo.png", header);
 
                 // When
-                IList<IDocument> results = await download.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
+                TestDocument result = await ExecuteAsync(document, context, download).SingleAsync();
 
                 // Then
-                using (Stream stream = results.Single().GetStream())
+                using (Stream stream = await result.GetStreamAsync())
                 {
                     stream.ReadByte().ShouldNotBe(-1);
                 }

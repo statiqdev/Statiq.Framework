@@ -2,10 +2,11 @@
 using System.Linq;
 using System.Threading.Tasks;
 using NUnit.Framework;
+using Shouldly;
+using Wyam.Common;
 using Wyam.Common.Documents;
 using Wyam.Common.Execution;
 using Wyam.Common.Meta;
-using Wyam.Common.Util;
 using Wyam.Testing;
 using Wyam.Testing.Documents;
 using Wyam.Testing.Execution;
@@ -31,17 +32,14 @@ namespace Wyam.Html.Tests
                             <h1>Bar</h1>
                         </body>
                     </html>";
-                IDocument document = new TestDocument(input);
-                IExecutionContext context = new TestExecutionContext();
+                TestDocument document = new TestDocument(input);
                 Headings headings = new Headings();
 
                 // When
-                List<IDocument> results = await headings.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
+                TestDocument result = await ExecuteAsync(document, headings).SingleAsync();
 
                 // Then
-                CollectionAssert.AreEqual(
-                    new[] { "Foo", "Bar" },
-                    await results[0].DocumentList(HtmlKeys.Headings).SelectAsync(async x => await x.GetStringAsync()));
+                result.DocumentList(HtmlKeys.Headings).Cast<TestDocument>().Select(x => x.Content).ShouldBe(new[] { "Foo", "Bar" });
             }
 
             [Test]
@@ -57,17 +55,14 @@ namespace Wyam.Html.Tests
                             <h1>Bar</h1>
                         </body>
                     </html>";
-                IDocument document = new TestDocument(input);
-                IExecutionContext context = new TestExecutionContext();
+                TestDocument document = new TestDocument(input);
                 Headings headings = new Headings().WithHeadingKey("HContent");
 
                 // When
-                List<IDocument> results = await headings.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
+                TestDocument result = await ExecuteAsync(document, headings).SingleAsync();
 
                 // Then
-                CollectionAssert.AreEqual(
-                    new[] { "Foo", "Bar" },
-                    results[0].DocumentList(HtmlKeys.Headings).Select(x => x.String("HContent")).ToArray());
+                result.DocumentList(HtmlKeys.Headings).Select(x => x.String("HContent")).ShouldBe(new[] { "Foo", "Bar" });
             }
 
             [Test]
@@ -83,18 +78,14 @@ namespace Wyam.Html.Tests
                             <h1>Bar</h1>
                         </body>
                     </html>";
-                IDocument document = new TestDocument(input);
-                IExecutionContext context = new TestExecutionContext();
+                TestDocument document = new TestDocument(input);
                 Headings headings = new Headings();
 
                 // When
-                List<IDocument> results = await headings.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
+                TestDocument result = await ExecuteAsync(document, headings).SingleAsync();
 
                 // Then
-
-                CollectionAssert.AreEqual(
-                    new string[] { null, null },
-                    results[0].DocumentList(HtmlKeys.Headings).Select(x => x.String("HContent")).ToArray());
+                result.DocumentList(HtmlKeys.Headings).Select(x => x.String("HContent")).ShouldBe(new string[] { null, null });
             }
 
             [Test]
@@ -111,17 +102,14 @@ namespace Wyam.Html.Tests
                             <h1>Bar</h1>
                         </body>
                     </html>";
-                IDocument document = new TestDocument(input);
-                IExecutionContext context = new TestExecutionContext();
+                TestDocument document = new TestDocument(input);
                 Headings headings = new Headings();
 
                 // When
-                List<IDocument> results = await headings.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
+                TestDocument result = await ExecuteAsync(document, headings).SingleAsync();
 
                 // Then
-                CollectionAssert.AreEqual(
-                    new[] { "Foo", "Bar" },
-                    await results[0].DocumentList(HtmlKeys.Headings).SelectAsync(async x => await x.GetStringAsync()));
+                result.DocumentList(HtmlKeys.Headings).Cast<TestDocument>().Select(x => x.Content).ShouldBe(new[] { "Foo", "Bar" });
             }
 
             [Test]
@@ -138,17 +126,14 @@ namespace Wyam.Html.Tests
                             <h1>Bar</h1>
                         </body>
                     </html>";
-                IDocument document = new TestDocument(input);
-                IExecutionContext context = new TestExecutionContext();
+                TestDocument document = new TestDocument(input);
                 Headings headings = new Headings(3);
 
                 // When
-                List<IDocument> results = await headings.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
+                TestDocument result = await ExecuteAsync(document, headings).SingleAsync();
 
                 // Then
-                CollectionAssert.AreEqual(
-                    new[] { "Foo", "Baz", "Bar" },
-                    await results[0].DocumentList(HtmlKeys.Headings).SelectAsync(async x => await x.GetStringAsync()));
+                result.DocumentList(HtmlKeys.Headings).Cast<TestDocument>().Select(x => x.Content).ShouldBe(new[] { "Foo", "Baz", "Bar" });
             }
 
             [Test]
@@ -167,23 +152,16 @@ namespace Wyam.Html.Tests
                             <h2>Boo</h2>
                         </body>
                     </html>";
-                IDocument document = new TestDocument(input);
-                IExecutionContext context = new TestExecutionContext();
+                TestDocument document = new TestDocument(input);
                 Headings headings = new Headings(3).WithNesting();
 
                 // When
-                List<IDocument> results = await headings.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
+                TestDocument result = await ExecuteAsync(document, headings).SingleAsync();
 
                 // Then
-                CollectionAssert.AreEqual(
-                    new[] { "Foo", "Bar" },
-                    await results[0].DocumentList(HtmlKeys.Headings).SelectAsync(async x => await x.GetStringAsync()));
-                CollectionAssert.AreEqual(
-                    new[] { "Baz", "Boz" },
-                    await results[0].DocumentList(HtmlKeys.Headings)[0].DocumentList(Keys.Children).SelectAsync(async x => await x.GetStringAsync()));
-                CollectionAssert.AreEqual(
-                    new[] { "Boo" },
-                    await results[0].DocumentList(HtmlKeys.Headings)[1].DocumentList(Keys.Children).SelectAsync(async x => await x.GetStringAsync()));
+                result.DocumentList(HtmlKeys.Headings).Cast<TestDocument>().Select(x => x.Content).ShouldBe(new[] { "Foo", "Bar" });
+                result.DocumentList(HtmlKeys.Headings)[0].DocumentList(Keys.Children).Cast<TestDocument>().Select(x => x.Content).ShouldBe(new[] { "Baz", "Boz" });
+                result.DocumentList(HtmlKeys.Headings)[1].DocumentList(Keys.Children).Cast<TestDocument>().Select(x => x.Content).ShouldBe(new[] { "Boo" });
             }
 
             [Test]
@@ -202,23 +180,16 @@ namespace Wyam.Html.Tests
                             <h2>Boo</h2>
                         </body>
                     </html>";
-                IDocument document = new TestDocument(input);
-                IExecutionContext context = new TestExecutionContext();
+                TestDocument document = new TestDocument(input);
                 Headings headings = new Headings(3);
 
                 // When
-                List<IDocument> results = await headings.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
+                TestDocument result = await ExecuteAsync(document, headings).SingleAsync();
 
                 // Then
-                CollectionAssert.AreEqual(
-                    new[] { "Foo", "Baz", "Boz", "Bar", "Boo" },
-                    await results[0].DocumentList(HtmlKeys.Headings).SelectAsync(async x => await x.GetStringAsync()));
-                CollectionAssert.AreEqual(
-                    new[] { "Baz", "Boz" },
-                    await results[0].DocumentList(HtmlKeys.Headings)[0].DocumentList(Keys.Children).SelectAsync(async x => await x.GetStringAsync()));
-                CollectionAssert.AreEqual(
-                    new[] { "Boo" },
-                    await results[0].DocumentList(HtmlKeys.Headings)[3].DocumentList(Keys.Children).SelectAsync(async x => await x.GetStringAsync()));
+                result.DocumentList(HtmlKeys.Headings).Cast<TestDocument>().Select(x => x.Content).ShouldBe(new[] { "Foo", "Baz", "Boz", "Bar", "Boo" });
+                result.DocumentList(HtmlKeys.Headings)[0].DocumentList(Keys.Children).Cast<TestDocument>().Select(x => x.Content).ShouldBe(new[] { "Baz", "Boz" });
+                result.DocumentList(HtmlKeys.Headings)[3].DocumentList(Keys.Children).Cast<TestDocument>().Select(x => x.Content).ShouldBe(new[] { "Boo" });
             }
 
             [Test]
@@ -234,17 +205,14 @@ namespace Wyam.Html.Tests
                             <h1 id=""bar"">Bar</h1>
                         </body>
                     </html>";
-                IDocument document = new TestDocument(input);
-                IExecutionContext context = new TestExecutionContext();
+                TestDocument document = new TestDocument(input);
                 Headings headings = new Headings();
 
                 // When
-                List<IDocument> results = await headings.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
+                TestDocument result = await ExecuteAsync(document, headings).SingleAsync();
 
                 // Then
-                CollectionAssert.AreEqual(
-                    new[] { null, "bar" },
-                    results[0].DocumentList(HtmlKeys.Headings).Select(x => x.String(HtmlKeys.Id)).ToArray());
+                result.DocumentList(HtmlKeys.Headings).Select(x => x.String(HtmlKeys.Id)).ShouldBe(new[] { null, "bar" });
             }
         }
     }

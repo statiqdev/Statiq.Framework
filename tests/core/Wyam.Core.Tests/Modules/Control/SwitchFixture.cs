@@ -21,7 +21,7 @@ namespace Wyam.Core.Tests.Modules.Control
                 CountModule b = new CountModule("B");
                 CountModule c = new CountModule("C");
                 CountModule d = new CountModule("D");
-                Switch switchModule = new Switch(Config.FromDocument(x => (object)x.Content)).Case("1", b).Case("2", c).Default(d);
+                Switch switchModule = new Switch(Config.FromDocument(async x => (object)await x.GetStringAsync())).Case("1", b).Case("2", c).Default(d);
 
                 // When
                 await ExecuteAsync(a, switchModule);
@@ -44,7 +44,7 @@ namespace Wyam.Core.Tests.Modules.Control
                 };
                 CountModule b = new CountModule("B");
                 CountModule c = new CountModule("C");
-                Switch switchModule = new Switch(Config.FromDocument(x => (object)x.Content)).Default(b);
+                Switch switchModule = new Switch(Config.FromDocument(async x => (object)await x.GetStringAsync())).Default(b);
 
                 // When
                 await ExecuteAsync(a, switchModule, c);
@@ -68,7 +68,7 @@ namespace Wyam.Core.Tests.Modules.Control
                 };
                 CountModule b = new CountModule("B");
                 CountModule c = new CountModule("C");
-                Switch switchModule = new Switch(Config.FromDocument(x => (object)x.Content)).Case("1", b);
+                Switch switchModule = new Switch(Config.FromDocument(async x => (object)await x.GetStringAsync())).Case("1", b);
 
                 // When
                 await ExecuteAsync(a, switchModule, c);
@@ -92,7 +92,7 @@ namespace Wyam.Core.Tests.Modules.Control
                 };
                 CountModule b = new CountModule("B");
                 CountModule c = new CountModule("C");
-                Switch switchModule = new Switch(Config.FromDocument(x => (object)x.Content)).Case(new string[] { "1", "2" }, b);
+                Switch switchModule = new Switch(Config.FromDocument(async x => (object)await x.GetStringAsync())).Case(new string[] { "1", "2" }, b);
 
                 // When
                 await ExecuteAsync(a, switchModule, c);
@@ -115,7 +115,7 @@ namespace Wyam.Core.Tests.Modules.Control
                     EnsureInputDocument = true
                 };
                 CountModule b = new CountModule("B");
-                Switch switchModule = new Switch(Config.FromDocument(x => (object)x.Content));
+                Switch switchModule = new Switch(Config.FromDocument(async x => (object)await x.GetStringAsync()));
 
                 // When
                 await ExecuteAsync(a, switchModule, b);

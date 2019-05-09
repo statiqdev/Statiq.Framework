@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Wyam.Common.Util
+namespace Wyam.Common
 {
     public static class ToLookupExtensions
     {

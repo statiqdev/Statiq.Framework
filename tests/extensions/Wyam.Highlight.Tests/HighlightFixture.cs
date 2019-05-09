@@ -1,13 +1,12 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using NUnit.Framework;
 using NUnit.Framework.Internal;
 using Shouldly;
+using Wyam.Common;
 using Wyam.Common.Documents;
 using Wyam.Common.Execution;
-using Wyam.Common.Util;
 using Wyam.Testing;
 using Wyam.Testing.Documents;
 using Wyam.Testing.JavaScript;
@@ -59,8 +58,8 @@ namespace Wyam.Highlight.Tests
 </body>
 </html>";
 
-                IDocument document = new TestDocument(input);
-                IExecutionContext context = new TestExecutionContext()
+                TestDocument document = new TestDocument(input);
+                TestExecutionContext context = new TestExecutionContext()
                 {
                     JsEngineFunc = () => new TestJsEngine()
                 };
@@ -68,10 +67,10 @@ namespace Wyam.Highlight.Tests
                 Highlight highlight = new Highlight();
 
                 // When
-                List<IDocument> results = await highlight.ExecuteAsync(new[] { document }, context).ToListAsync();
+                TestDocument result = await ExecuteAsync(document, context, highlight).SingleAsync();
 
                 // Then
-                Assert.IsTrue((await results[0].GetStringAsync()).Contains("language-csharp hljs"));
+                result.Content.ShouldContain("language-csharp hljs");
             }
 
             [Test]
@@ -98,8 +97,8 @@ namespace Wyam.Highlight.Tests
 </body>
 </html>";
 
-                IDocument document = new TestDocument(input);
-                IExecutionContext context = new TestExecutionContext()
+                TestDocument document = new TestDocument(input);
+                TestExecutionContext context = new TestExecutionContext()
                 {
                     JsEngineFunc = () => new TestJsEngine()
                 };
@@ -107,10 +106,10 @@ namespace Wyam.Highlight.Tests
                 Highlight highlight = new Highlight();
 
                 // When
-                List<IDocument> results = await highlight.ExecuteAsync(new[] { document }, context).ToListAsync();
+                TestDocument result = await ExecuteAsync(document, context, highlight).SingleAsync();
 
                 // Then
-                Assert.IsTrue((await results[0].GetStringAsync()).Contains("language-html hljs"));
+                result.Content.ShouldContain("language-html hljs");
             }
 
             [Test]
@@ -132,8 +131,8 @@ namespace Wyam.Highlight.Tests
 </body>
 </html>";
 
-                IDocument document = new TestDocument(input);
-                IExecutionContext context = new TestExecutionContext()
+                TestDocument document = new TestDocument(input);
+                TestExecutionContext context = new TestExecutionContext()
                 {
                     JsEngineFunc = () => new TestJsEngine()
                 };
@@ -141,10 +140,10 @@ namespace Wyam.Highlight.Tests
                 Highlight highlight = new Highlight();
 
                 // When
-                List<IDocument> results = await highlight.ExecuteAsync(new[] { document }, context).ToListAsync();
+                TestDocument result = await ExecuteAsync(document, context, highlight).SingleAsync();
 
                 // Then
-                Assert.IsTrue((await results[0].GetStringAsync()).Contains("language-html hljs"));
+                result.Content.ShouldContain("language-html hljs");
             }
 
             [Test]
@@ -168,8 +167,8 @@ namespace Wyam.Highlight.Tests
 </body>
 </html>";
 
-                IDocument document = new TestDocument(input);
-                IExecutionContext context = new TestExecutionContext()
+                TestDocument document = new TestDocument(input);
+                TestExecutionContext context = new TestExecutionContext()
                 {
                     JsEngineFunc = () => new TestJsEngine()
                 };
@@ -177,10 +176,10 @@ namespace Wyam.Highlight.Tests
                 Highlight highlight = new Highlight();
 
                 // When
-                List<IDocument> results = await highlight.ExecuteAsync(new[] { document }, context).ToListAsync();
+                TestDocument result = await ExecuteAsync(document, context, highlight).SingleAsync();
 
                 // Then
-                Assert.IsTrue((await results[0].GetStringAsync()).Contains("hljs"));
+                result.Content.ShouldContain("hljs");
             }
 
             [Test]
@@ -208,8 +207,8 @@ namespace Wyam.Highlight.Tests
 </body>
 </html>";
 
-                IDocument document = new TestDocument(input);
-                IExecutionContext context = new TestExecutionContext()
+                TestDocument document = new TestDocument(input);
+                TestExecutionContext context = new TestExecutionContext()
                 {
                     JsEngineFunc = () => new TestJsEngine()
                 };
@@ -217,7 +216,7 @@ namespace Wyam.Highlight.Tests
                 Highlight highlight = new Highlight();
 
                 // When, Then
-                await Should.ThrowAsync<Exception>(async () => await highlight.ExecuteAsync(new[] { document }, context).ToListAsync());
+                await Should.ThrowAsync<Exception>(async () => await ExecuteAsync(document, context, highlight));
             }
 
             [Test]
@@ -245,8 +244,8 @@ namespace Wyam.Highlight.Tests
 </body>
 </html>";
 
-                IDocument document = new TestDocument(input);
-                IExecutionContext context = new TestExecutionContext()
+                TestDocument document = new TestDocument(input);
+                TestExecutionContext context = new TestExecutionContext()
                 {
                     JsEngineFunc = () => new TestJsEngine()
                 };
@@ -255,10 +254,10 @@ namespace Wyam.Highlight.Tests
                     .WithMissingLanguageWarning(false);
 
                 // When
-                List<IDocument> results = await highlight.ExecuteAsync(new[] { document }, context).ToListAsync();
+                IReadOnlyList<TestDocument> results = await ExecuteAsync(document, context, highlight);
 
                 // Then
-                CollectionAssert.IsNotEmpty(results);
+                results.ShouldNotBeEmpty();
             }
         }
     }

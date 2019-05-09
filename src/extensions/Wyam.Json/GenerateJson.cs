@@ -10,7 +10,7 @@ using Wyam.Common.Modules;
 using Wyam.Common.Execution;
 using Wyam.Common.Tracing;
 using Newtonsoft.Json.Serialization;
-using Wyam.Common.Util;
+using Wyam.Common;
 
 namespace Wyam.Json
 {

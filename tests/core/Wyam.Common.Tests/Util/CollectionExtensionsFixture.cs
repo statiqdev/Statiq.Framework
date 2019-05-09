@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using NUnit.Framework;
 using Shouldly;
 using Wyam.Testing;
-using Wyam.Common.Util;
 
 namespace Wyam.Common.Tests.Util
 {

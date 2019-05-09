@@ -7,7 +7,6 @@ using Wyam.Common.Documents;
 using Wyam.Common.Execution;
 using Wyam.Common.IO;
 using Wyam.Common.Meta;
-using Wyam.Common.Util;
 using Wyam.Core.Execution;
 using Wyam.Core.Modules.Control;
 using Wyam.Core.Modules.Extensibility;
@@ -29,20 +28,20 @@ namespace Wyam.Core.Tests.Modules.Control
             {
                 // Given
                 Engine engine = new Engine();
-                IExecutionContext context = GetExecutionContext(engine);
-                IDocument[] inputs =
+                TestExecutionContext context = GetExecutionContext(engine);
+                TestDocument[] inputs =
                 {
                     GetDocument("a/1.md", "File a1")
                 };
                 string lodedSidecarContent = null;
-                Sidecar sidecar = new Sidecar(new ExecuteDocument(Config.FromDocument(x =>
+                Sidecar sidecar = new Sidecar(new ExecuteDocument(Config.FromDocument(async x =>
                 {
-                    lodedSidecarContent = x.Content;
+                    lodedSidecarContent = await x.GetStringAsync();
                     return new[] { x };
                 })));
 
                 // When
-                IEnumerable<IDocument> documents = await sidecar.ExecuteAsync(inputs, context).ToArrayAsync();
+                IReadOnlyList<TestDocument> documents = await ExecuteAsync(inputs, context, sidecar);
 
                 // Then
                 Assert.AreEqual("data: a1", lodedSidecarContent);
@@ -54,20 +53,20 @@ namespace Wyam.Core.Tests.Modules.Control
             {
                 // Given
                 Engine engine = new Engine();
-                IExecutionContext context = GetExecutionContext(engine);
-                IDocument[] inputs =
+                TestExecutionContext context = GetExecutionContext(engine);
+                TestDocument[] inputs =
                 {
                     GetDocument("a/1.md", "File a1")
                 };
                 string lodedSidecarContent = null;
-                Sidecar sidecar = new Sidecar(".other", new ExecuteDocument(Config.FromDocument(x =>
+                Sidecar sidecar = new Sidecar(".other", new ExecuteDocument(Config.FromDocument(async x =>
                 {
-                    lodedSidecarContent = x.Content;
+                    lodedSidecarContent = await x.GetStringAsync();
                     return new[] { x };
                 })));
 
                 // When
-                IEnumerable<IDocument> documents = await sidecar.ExecuteAsync(inputs, context).ToArrayAsync();
+                IReadOnlyList<TestDocument> documents = await ExecuteAsync(inputs, context, sidecar);
 
                 // Then
                 Assert.AreEqual("data: other", lodedSidecarContent);
@@ -79,8 +78,8 @@ namespace Wyam.Core.Tests.Modules.Control
             {
                 // Given
                 Engine engine = new Engine();
-                IExecutionContext context = GetExecutionContext(engine);
-                IDocument[] inputs =
+                TestExecutionContext context = GetExecutionContext(engine);
+                TestDocument[] inputs =
                 {
                     GetDocument("a/1.md", "File a1")
                 };
@@ -92,51 +91,41 @@ namespace Wyam.Core.Tests.Modules.Control
                 })));
 
                 // When
-                IEnumerable<IDocument> documents = await sidecar.ExecuteAsync(inputs, context).ToArrayAsync();
+                IReadOnlyList<TestDocument> documents = await ExecuteAsync(inputs, context, sidecar);
 
                 // Then
                 Assert.IsFalse(executedSidecarModules);
                 Assert.AreEqual(inputs.First(), documents.First());
             }
 
-            private IDocument GetDocument(string source, string content)
-            {
-                return new TestDocument(
+            private TestDocument GetDocument(string source, string content) =>
+                new TestDocument(
+                    new FilePath("/" + source),
+                    null,
                     new Dictionary<string, object>
                     {
                         { Keys.RelativeFilePath, source },
                         { Keys.SourceFilePath, new FilePath("/" + source) },
                         { Keys.SourceFileName, new FilePath(source).FileName }
                     },
-                    content)
-                {
-                        Source = new FilePath("/" + source)
-                    };
-            }
+                    content);
 
-            private IExecutionContext GetExecutionContext(Engine engine)
-            {
-                TestExecutionContext context = new TestExecutionContext
+            private TestExecutionContext GetExecutionContext(Engine engine) =>
+                new TestExecutionContext
                 {
                     Namespaces = engine.Namespaces,
                     FileSystem = GetFileSystem()
                 };
-                return context;
-            }
 
-            private IReadOnlyFileSystem GetFileSystem()
-            {
-                TestFileProvider fileProvider = GetFileProvider();
-                TestFileSystem fileSystem = new TestFileSystem
+            private TestFileSystem GetFileSystem() =>
+                new TestFileSystem
                 {
                     InputPaths = new PathCollection<DirectoryPath>(new[]
                     {
                         new DirectoryPath("/")
                     }),
-                    FileProvider = fileProvider
+                    FileProvider = GetFileProvider()
                 };
-                return fileSystem;
-            }
 
             private TestFileProvider GetFileProvider()
             {

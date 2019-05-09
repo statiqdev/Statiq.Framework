@@ -32,7 +32,7 @@ namespace Wyam.Core.Tests.Modules.Control
                 };
 
                 // When
-                await ExecuteAsync(a, new If(Config.FromDocument((x, y) => x.Content == "1"), b), c);
+                await ExecuteAsync(a, new If(Config.FromDocument(async doc => await doc.GetStringAsync() == "1"), b), c);
 
                 // Then
                 Assert.AreEqual(1, a.ExecuteCount);
@@ -71,8 +71,8 @@ namespace Wyam.Core.Tests.Modules.Control
                 // When
                 await ExecuteAsync(
                     a,
-                    new If(Config.FromDocument((x, y) => x.Content == "1"), b)
-                        .ElseIf(Config.FromDocument((x, y) => x.Content == "2"), c),
+                    new If(Config.FromDocument(async doc => await doc.GetStringAsync() == "1"), b)
+                        .ElseIf(Config.FromDocument(async doc => await doc.GetStringAsync() == "2"), c),
                     d);
 
                 // Then
@@ -115,7 +115,7 @@ namespace Wyam.Core.Tests.Modules.Control
                 // When
                 await ExecuteAsync(
                     a,
-                    new If(Config.FromDocument((x, y) => x.Content == "1"), b)
+                    new If(Config.FromDocument(async doc => await doc.GetStringAsync() == "1"), b)
                         .Else(c),
                     d);
 
@@ -163,8 +163,8 @@ namespace Wyam.Core.Tests.Modules.Control
                 // When
                 await ExecuteAsync(
                     a,
-                    new If(Config.FromDocument((x, y) => x.Content == "1"), b)
-                        .ElseIf(Config.FromDocument((x, y) => x.Content == "3"), c)
+                    new If(Config.FromDocument(async doc => await doc.GetStringAsync() == "1"), b)
+                        .ElseIf(Config.FromDocument(async doc => await doc.GetStringAsync() == "3"), c)
                         .Else(d),
                     e);
 

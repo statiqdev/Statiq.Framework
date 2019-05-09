@@ -4,7 +4,6 @@ using System.Linq;
 using System.Threading.Tasks;
 using Wyam.Common.Documents;
 using Wyam.Common.Tracing;
-using Wyam.Common.Util;
 
 namespace Wyam.Common.Execution
 {

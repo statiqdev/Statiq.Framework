@@ -35,20 +35,17 @@ namespace Wyam.Core.Tests.Shortcodes.Html
                 Figure shortcode = new Figure();
 
                 // When
-                IShortcodeResult result = await shortcode.ExecuteAsync(args, "foo bar", document, context);
+                TestDocument result = (TestDocument)await shortcode.ExecuteAsync(args, "foo bar", document, context);
 
                 // Then
-                using (TextReader reader = new StreamReader(result.Stream))
-                {
-                    reader.ReadToEnd().ShouldBe(
-                        @"<figure class=""jkl"">
+                result.Content.ShouldBe(
+                    @"<figure class=""jkl"">
   <a href=""/c/d"" target=""abc"" rel=""def"">
     <img src=""/a/b"" alt=""ghi"" height=""100px"" width=""200px"" />
   </a>
   <figcaption>foo bar</figcaption>
 </figure>",
-                        StringCompareShould.IgnoreLineEndings);
-                }
+                    StringCompareShould.IgnoreLineEndings);
             }
 
             [Test]
@@ -68,18 +65,15 @@ namespace Wyam.Core.Tests.Shortcodes.Html
                 Figure shortcode = new Figure();
 
                 // When
-                IShortcodeResult result = await shortcode.ExecuteAsync(args, "foo bar", document, context);
+                TestDocument result = (TestDocument)await shortcode.ExecuteAsync(args, "foo bar", document, context);
 
                 // Then
-                using (TextReader reader = new StreamReader(result.Stream))
-                {
-                    reader.ReadToEnd().ShouldBe(
-                        @"<figure class=""jkl"">
+                result.Content.ShouldBe(
+                    @"<figure class=""jkl"">
   <img src=""/a/b"" alt=""ghi"" height=""100px"" width=""200px"" />
   <figcaption>foo bar</figcaption>
 </figure>",
-                        StringCompareShould.IgnoreLineEndings);
-                }
+                    StringCompareShould.IgnoreLineEndings);
             }
 
             [Test]
@@ -101,17 +95,14 @@ namespace Wyam.Core.Tests.Shortcodes.Html
                 Figure shortcode = new Figure();
 
                 // When
-                IShortcodeResult result = await shortcode.ExecuteAsync(args, "foo bar", document, context);
+                TestDocument result = (TestDocument)await shortcode.ExecuteAsync(args, "foo bar", document, context);
 
                 // Then
-                using (TextReader reader = new StreamReader(result.Stream))
-                {
-                    reader.ReadToEnd().ShouldBe(
-                        @"<figure class=""jkl"">
+                result.Content.ShouldBe(
+                    @"<figure class=""jkl"">
   <figcaption>foo bar</figcaption>
 </figure>",
-                        StringCompareShould.IgnoreLineEndings);
-                }
+                    StringCompareShould.IgnoreLineEndings);
             }
         }
     }

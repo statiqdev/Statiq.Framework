@@ -7,7 +7,6 @@ using Shouldly;
 using Wyam.Common.Documents;
 using Wyam.Common.IO;
 using Wyam.Common.Meta;
-using Wyam.Common.Util;
 using Wyam.Testing;
 using Wyam.Testing.Documents;
 using Wyam.Testing.Execution;
@@ -33,11 +32,11 @@ namespace Wyam.Feeds.Tests
                 GenerateFeeds module = new GenerateFeeds();
 
                 // When
-                IList<IDocument> results = await module.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
+                IReadOnlyList<TestDocument> results = await ExecuteAsync(document, context, module);
 
                 // Then
                 results.Select(x => x.FilePath(Keys.WritePath).FullPath).ShouldBe(new[] { "feed.rss", "feed.atom" }, true);
-                (await results[0].GetStringAsync()).ShouldContain("http://foo.com/bar/baz.png");
+                results[0].Content.ShouldContain("http://foo.com/bar/baz.png");
             }
         }
     }

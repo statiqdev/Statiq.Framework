@@ -14,9 +14,9 @@ namespace Wyam.CodeAnalysis.Tests
 {
     public abstract class AnalyzeCSharpBaseFixture : BaseFixture
     {
-        protected IDocument GetDocument(string content) => new TestDocument(content);
+        protected TestDocument GetDocument(string content) => new TestDocument(content);
 
-        protected IExecutionContext GetContext() => new TestExecutionContext
+        protected TestExecutionContext GetContext() => new TestExecutionContext
         {
             FileSystem = new TestFileSystem
             {
@@ -24,24 +24,27 @@ namespace Wyam.CodeAnalysis.Tests
             }
         };
 
-        protected IDocument GetResult(List<IDocument> results, string name)
+        protected TestDocument GetResult(IReadOnlyList<TestDocument> results, string name)
         {
             return results.Single(x => x["Name"].Equals(name));
         }
 
-        protected IDocument GetMember(List<IDocument> results, string className, string memberName)
+        protected TestDocument GetMember(IReadOnlyList<TestDocument> results, string className, string memberName)
         {
             return GetResult(results, className)
                 .Get<IEnumerable<IDocument>>("Members")
+                .Cast<TestDocument>()
                 .Single(x => x["Name"].Equals(memberName));
         }
 
-        protected IDocument GetParameter(List<IDocument> results, string className, string methodName, string parameterName)
+        protected TestDocument GetParameter(IReadOnlyList<TestDocument> results, string className, string methodName, string parameterName)
         {
             return GetResult(results, className)
                 .Get<IEnumerable<IDocument>>("Members")
+                .Cast<TestDocument>()
                 .Single(x => x["Name"].Equals(methodName))
                 .Get<IEnumerable<IDocument>>("Parameters")
+                .Cast<TestDocument>()
                 .Single(x => x["Name"].Equals(parameterName));
         }
     }

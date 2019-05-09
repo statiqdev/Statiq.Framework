@@ -33,13 +33,11 @@ l=m nop
                 Table shortcode = new Table();
 
                 // When
-                IShortcodeResult result = await shortcode.ExecuteAsync(args, content, document, context);
+                TestDocument result = (TestDocument)await shortcode.ExecuteAsync(args, content, document, context);
 
                 // Then
-                using (TextReader reader = new StreamReader(result.Stream))
-                {
-                    reader.ReadToEnd().ShouldBe(
-                        @"<table>
+                result.Content.ShouldBe(
+                    @"<table>
   <tbody>
     <tr>
       <td>1</td>
@@ -71,8 +69,7 @@ l=m nop
     </tr>
   </tbody>
 </table>",
-                        StringCompareShould.IgnoreLineEndings);
-                }
+                    StringCompareShould.IgnoreLineEndings);
             }
 
             [Test]
@@ -103,13 +100,11 @@ l=m nop
                 Table shortcode = new Table();
 
                 // When
-                IShortcodeResult result = await shortcode.ExecuteAsync(args, content, document, context);
+                TestDocument result = (TestDocument)await shortcode.ExecuteAsync(args, content, document, context);
 
                 // Then
-                using (TextReader reader = new StreamReader(result.Stream))
-                {
-                    reader.ReadToEnd().ShouldBe(
-                        @"<table class=""tclass"">
+                result.Content.ShouldBe(
+                    @"<table class=""tclass"">
   <thead class=""hclass"">
     <tr>
       <th>1</th>
@@ -145,8 +140,7 @@ l=m nop
     </tr>
   </tfoot>
 </table>",
-                        StringCompareShould.IgnoreLineEndings);
-                }
+                    StringCompareShould.IgnoreLineEndings);
             }
         }
     }

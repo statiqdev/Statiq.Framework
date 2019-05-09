@@ -1,15 +1,14 @@
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using NUnit.Framework;
 using Shouldly;
+using Wyam.Common;
 using Wyam.Common.Documents;
 using Wyam.Common.Execution;
 using Wyam.Common.Meta;
 using Wyam.Common.Shortcodes;
-using Wyam.Common.Util;
 using Wyam.Testing;
 using Wyam.Testing.Documents;
 using Wyam.Testing.Execution;
@@ -28,14 +27,14 @@ namespace Wyam.Core.Tests.Modules.Contents
                 // Given
                 TestExecutionContext context = new TestExecutionContext();
                 context.Shortcodes.Add<TestShortcode>("Bar");
-                IDocument document = new TestDocument("123<?# Bar /?>456");
+                TestDocument document = new TestDocument("123<?# Bar /?>456");
                 Core.Modules.Contents.Shortcodes module = new Core.Modules.Contents.Shortcodes();
 
                 // When
-                List<IDocument> results = await module.ExecuteAsync(new[] { document }, context).ToListAsync();
+                TestDocument result = await ExecuteAsync(document, context, module).SingleAsync();
 
                 // Then
-                (await results.Single().GetStringAsync()).ShouldBe("123Foo456");
+                result.Content.ShouldBe("123Foo456");
             }
 
             [Test]
@@ -45,14 +44,14 @@ namespace Wyam.Core.Tests.Modules.Contents
                 TestExecutionContext context = new TestExecutionContext();
                 context.Shortcodes.Add<TestShortcode>("Nested");
                 context.Shortcodes.Add<NestedShortcode>("Bar");
-                IDocument document = new TestDocument("123<?# Bar /?>456");
+                TestDocument document = new TestDocument("123<?# Bar /?>456");
                 Core.Modules.Contents.Shortcodes module = new Core.Modules.Contents.Shortcodes();
 
                 // When
-                List<IDocument> results = await module.ExecuteAsync(new[] { document }, context).ToListAsync();
+                TestDocument result = await ExecuteAsync(document, context, module).SingleAsync();
 
                 // Then
-                (await results.Single().GetStringAsync()).ShouldBe("123ABCFooXYZ456");
+                result.Content.ShouldBe("123ABCFooXYZ456");
             }
 
             [Test]
@@ -62,14 +61,14 @@ namespace Wyam.Core.Tests.Modules.Contents
                 TestExecutionContext context = new TestExecutionContext();
                 context.Shortcodes.Add<RawShortcode>("Foo");
                 context.Shortcodes.Add<TestShortcode>("Bar");
-                IDocument document = new TestDocument("123<?# Foo ?>ABC<?# Bar /?>XYZ<?#/ Foo ?>456");
+                TestDocument document = new TestDocument("123<?# Foo ?>ABC<?# Bar /?>XYZ<?#/ Foo ?>456");
                 Core.Modules.Contents.Shortcodes module = new Core.Modules.Contents.Shortcodes();
 
                 // When
-                List<IDocument> results = await module.ExecuteAsync(new[] { document }, context).ToListAsync();
+                TestDocument result = await ExecuteAsync(document, context, module).SingleAsync();
 
                 // Then
-                (await results.Single().GetStringAsync()).ShouldBe("123ABCFooXYZ456");
+                result.Content.ShouldBe("123ABCFooXYZ456");
             }
 
             [Test]
@@ -79,14 +78,14 @@ namespace Wyam.Core.Tests.Modules.Contents
                 TestExecutionContext context = new TestExecutionContext();
                 context.Shortcodes.Add<RawShortcode>("Raw");
                 context.Shortcodes.Add<TestShortcode>("Bar");
-                IDocument document = new TestDocument("123<?# Raw ?>ABC<?# Bar /?>XYZ<?#/ Raw ?>456");
+                TestDocument document = new TestDocument("123<?# Raw ?>ABC<?# Bar /?>XYZ<?#/ Raw ?>456");
                 Core.Modules.Contents.Shortcodes module = new Core.Modules.Contents.Shortcodes();
 
                 // When
-                List<IDocument> results = await module.ExecuteAsync(new[] { document }, context).ToListAsync();
+                TestDocument result = await ExecuteAsync(document, context, module).SingleAsync();
 
                 // Then
-                (await results.Single().GetStringAsync()).ShouldBe("123ABC<?# Bar /?>XYZ456");
+                result.Content.ShouldBe("123ABC<?# Bar /?>XYZ456");
             }
 
             [Test]
@@ -96,14 +95,14 @@ namespace Wyam.Core.Tests.Modules.Contents
                 TestExecutionContext context = new TestExecutionContext();
                 context.Shortcodes.Add<RawShortcode>("Raw");
                 context.Shortcodes.Add<TestShortcode>("Bar");
-                IDocument document = new TestDocument("123<?# Raw ?><?# Bar /?><?#/ Raw ?>456");
+                TestDocument document = new TestDocument("123<?# Raw ?><?# Bar /?><?#/ Raw ?>456");
                 Core.Modules.Contents.Shortcodes module = new Core.Modules.Contents.Shortcodes();
 
                 // When
-                List<IDocument> results = await module.ExecuteAsync(new[] { document }, context).ToListAsync();
+                TestDocument result = await ExecuteAsync(document, context, module).SingleAsync();
 
                 // Then
-                (await results.Single().GetStringAsync()).ShouldBe("123<?# Bar /?>456");
+                result.Content.ShouldBe("123<?# Bar /?>456");
             }
 
             [Test]
@@ -113,14 +112,14 @@ namespace Wyam.Core.Tests.Modules.Contents
                 TestExecutionContext context = new TestExecutionContext();
                 context.Shortcodes.Add<TestShortcode>("S1");
                 context.Shortcodes.Add<NullResultShortcode>("S2");
-                IDocument document = new TestDocument("123<?# S1 /?>456<?# S2 /?>789<?# S1 /?>");
+                TestDocument document = new TestDocument("123<?# S1 /?>456<?# S2 /?>789<?# S1 /?>");
                 Core.Modules.Contents.Shortcodes module = new Core.Modules.Contents.Shortcodes();
 
                 // When
-                List<IDocument> results = await module.ExecuteAsync(new[] { document }, context).ToListAsync();
+                TestDocument result = await ExecuteAsync(document, context, module).SingleAsync();
 
                 // Then
-                (await results.Single().GetStringAsync()).ShouldBe("123Foo456789Foo");
+                result.Content.ShouldBe("123Foo456789Foo");
             }
 
             [Test]
@@ -129,11 +128,11 @@ namespace Wyam.Core.Tests.Modules.Contents
                 // Given
                 TestExecutionContext context = new TestExecutionContext();
                 context.Shortcodes.Add<DisposableShortcode>("Bar");
-                IDocument document = new TestDocument("123<?# Bar /?>456");
+                TestDocument document = new TestDocument("123<?# Bar /?>456");
                 Core.Modules.Contents.Shortcodes module = new Core.Modules.Contents.Shortcodes();
 
                 // When
-                List<IDocument> results = await module.ExecuteAsync(new[] { document }, context).ToListAsync();
+                await ExecuteAsync(document, context, module).SingleAsync();
 
                 // Then
                 DisposableShortcode.Disposed.ShouldBeTrue();
@@ -146,17 +145,17 @@ namespace Wyam.Core.Tests.Modules.Contents
                 TestExecutionContext context = new TestExecutionContext();
                 context.Shortcodes.Add<AddsMetadataShortcode>("S1");
                 context.Shortcodes.Add<AddsMetadataShortcode2>("S2");
-                IDocument document = new TestDocument("123<?# S1 /?>456<?# S2 /?>789");
+                TestDocument document = new TestDocument("123<?# S1 /?>456<?# S2 /?>789");
                 Core.Modules.Contents.Shortcodes module = new Core.Modules.Contents.Shortcodes();
 
                 // When
-                List<IDocument> results = await module.ExecuteAsync(new[] { document }, context).ToListAsync();
+                TestDocument result = await ExecuteAsync(document, context, module).SingleAsync();
 
                 // Then
-                (await results.Single().GetStringAsync()).ShouldBe("123456789");
-                results.Single()["A"].ShouldBe("3");
-                results.Single()["B"].ShouldBe("2");
-                results.Single()["C"].ShouldBe("4");
+                result.Content.ShouldBe("123456789");
+                result["A"].ShouldBe("3");
+                result["B"].ShouldBe("2");
+                result["C"].ShouldBe("4");
             }
 
             [Test]
@@ -166,7 +165,7 @@ namespace Wyam.Core.Tests.Modules.Contents
                 TestExecutionContext context = new TestExecutionContext();
                 context.Shortcodes.Add<ReadsMetadataShortcode>("S1");
                 context.Shortcodes.Add<ReadsMetadataShortcode>("S2");
-                IDocument document = new TestDocument(
+                TestDocument document = new TestDocument(
                     new MetadataItems
                     {
                         { "Foo", 10 }
@@ -175,11 +174,11 @@ namespace Wyam.Core.Tests.Modules.Contents
                 Core.Modules.Contents.Shortcodes module = new Core.Modules.Contents.Shortcodes();
 
                 // When
-                List<IDocument> results = await module.ExecuteAsync(new[] { document }, context).ToListAsync();
+                TestDocument result = await ExecuteAsync(document, context, module).SingleAsync();
 
                 // Then
-                (await results.Single().GetStringAsync()).ShouldBe("123456789");
-                results.Single()["Foo"].ShouldBe(13);
+                result.Content.ShouldBe("123456789");
+                result["Foo"].ShouldBe(13);
             }
 
             [Test]
@@ -188,15 +187,15 @@ namespace Wyam.Core.Tests.Modules.Contents
                 // Given
                 TestExecutionContext context = new TestExecutionContext();
                 context.Shortcodes.Add<IncrementingShortcode>("S");
-                IDocument document = new TestDocument("123<?# S /?>456<?# S /?>789<?# S /?>");
+                TestDocument document = new TestDocument("123<?# S /?>456<?# S /?>789<?# S /?>");
                 Core.Modules.Contents.Shortcodes module = new Core.Modules.Contents.Shortcodes();
 
                 // When
-                List<IDocument> results = await module.ExecuteAsync(new[] { document }, context).ToListAsync();
+                TestDocument result = await ExecuteAsync(document, context, module).SingleAsync();
 
                 // Then
-                (await results.Single().GetStringAsync()).ShouldBe("123456789");
-                results.Single()["Foo"].ShouldBe(22);
+                result.Content.ShouldBe("123456789");
+                result["Foo"].ShouldBe(22);
             }
         }
 

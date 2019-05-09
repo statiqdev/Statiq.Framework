@@ -2,10 +2,11 @@
 using System.Linq;
 using System.Threading.Tasks;
 using NUnit.Framework;
+using Shouldly;
+using Wyam.Common;
 using Wyam.Common.Documents;
 using Wyam.Common.IO;
 using Wyam.Common.Meta;
-using Wyam.Common.Util;
 using Wyam.Core.Modules.IO;
 using Wyam.Testing;
 using Wyam.Testing.Documents;
@@ -23,20 +24,18 @@ namespace Wyam.Core.Tests.Modules.IO
         {
             // Given
             TestExecutionContext context = GetContext();
-            IDocument[] inputs =
-            {
-                new TestDocument(new MetadataItems
+            TestDocument input = new TestDocument(
+                new MetadataItems
                 {
                     { Keys.RelativeFilePath, new FilePath("test.md") }
-                })
-            };
+                });
             UnwrittenFiles unwrittenFiles = new UnwrittenFiles();
 
             // When
-            IEnumerable<IDocument> outputs = await unwrittenFiles.ExecuteAsync(inputs, context).ToListAsync();
+            IReadOnlyList<TestDocument> results = await ExecuteAsync(input, context, unwrittenFiles);
 
             // Then
-            Assert.AreEqual(0, outputs.Count());
+            results.ShouldBeEmpty();
         }
 
         [Test]
@@ -44,20 +43,18 @@ namespace Wyam.Core.Tests.Modules.IO
         {
             // Given
             TestExecutionContext context = GetContext();
-            IDocument[] inputs =
-            {
-                new TestDocument(new MetadataItems
+            TestDocument input = new TestDocument(
+                new MetadataItems
                 {
                     { Keys.RelativeFilePath, new FilePath("test.txt") }
-                })
-            };
+                });
             UnwrittenFiles unwrittenFiles = new UnwrittenFiles(".md");
 
             // When
-            IEnumerable<IDocument> outputs = await unwrittenFiles.ExecuteAsync(inputs, context).ToListAsync();
+            IReadOnlyList<TestDocument> results = await ExecuteAsync(input, context, unwrittenFiles);
 
             // Then
-            Assert.AreEqual(0, outputs.Count());
+            results.ShouldBeEmpty();
         }
 
         [Test]
@@ -65,21 +62,19 @@ namespace Wyam.Core.Tests.Modules.IO
         {
             // Given
             TestExecutionContext context = GetContext();
-            IDocument[] inputs =
-            {
-                new TestDocument(new MetadataItems
+            TestDocument input = new TestDocument(
+                new MetadataItems
                 {
                     { Keys.RelativeFilePath, new FilePath("foo.txt") }
-                }, "Test")
-            };
+                },
+                "Test");
             UnwrittenFiles unwrittenFiles = new UnwrittenFiles();
 
             // When
-            IEnumerable<IDocument> outputs = await unwrittenFiles.ExecuteAsync(inputs, context).ToListAsync();
+            TestDocument result = await ExecuteAsync(input, context, unwrittenFiles).SingleAsync();
 
             // Then
-            Assert.AreEqual(1, outputs.Count());
-            Assert.AreEqual("Test", outputs.First().Content);
+            result.Content.ShouldBe("Test");
         }
 
         [Test]
@@ -87,21 +82,19 @@ namespace Wyam.Core.Tests.Modules.IO
         {
             // Given
             TestExecutionContext context = GetContext();
-            IDocument[] inputs =
-            {
-                new TestDocument(new MetadataItems
+            TestDocument input = new TestDocument(
+                new MetadataItems
                 {
                     { Keys.RelativeFilePath, new FilePath("test.md") }
-                }, "Test")
-            };
+                },
+                "Test");
             UnwrittenFiles unwrittenFiles = new UnwrittenFiles(".txt");
 
             // When
-            IEnumerable<IDocument> outputs = await unwrittenFiles.ExecuteAsync(inputs, context).ToListAsync();
+            TestDocument result = await ExecuteAsync(input, context, unwrittenFiles).SingleAsync();
 
             // Then
-            Assert.AreEqual(1, outputs.Count());
-            Assert.AreEqual("Test", outputs.First().Content);
+            result.Content.ShouldBe("Test");
         }
 
         private TestExecutionContext GetContext() => new TestExecutionContext

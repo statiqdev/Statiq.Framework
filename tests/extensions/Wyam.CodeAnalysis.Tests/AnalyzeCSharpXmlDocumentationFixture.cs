@@ -6,7 +6,8 @@ using Wyam.Common.Documents;
 using Wyam.Common.Execution;
 using Wyam.Common.Meta;
 using Wyam.Common.Modules;
-using Wyam.Common.Util;
+using Wyam.Testing.Documents;
+using Wyam.Testing.Execution;
 
 namespace Wyam.CodeAnalysis.Tests
 {
@@ -34,12 +35,12 @@ namespace Wyam.CodeAnalysis.Tests
                         }
                     }
                 ";
-                IDocument document = GetDocument(code);
-                IExecutionContext context = GetContext();
+                TestDocument document = GetDocument(code);
+                TestExecutionContext context = GetContext();
                 IModule module = new AnalyzeCSharp();
 
                 // When
-                List<IDocument> results = await module.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
+                IReadOnlyList<TestDocument> results = await ExecuteAsync(document, context, module);
 
                 // Then
                 Assert.AreEqual("This is a summary.", GetResult(results, "Green")["Summary"]);
@@ -69,12 +70,12 @@ namespace Wyam.CodeAnalysis.Tests
                         }
                     }
                 ";
-                IDocument document = GetDocument(code);
-                IExecutionContext context = GetContext();
+                TestDocument document = GetDocument(code);
+                TestExecutionContext context = GetContext();
                 IModule module = new AnalyzeCSharp();
 
                 // When
-                List<IDocument> results = await module.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
+                IReadOnlyList<TestDocument> results = await ExecuteAsync(document, context, module);
 
                 // Then
                 Assert.AreEqual("\n    This is a summary.\n    ", GetResult(results, "Green")["Summary"]);
@@ -95,12 +96,12 @@ namespace Wyam.CodeAnalysis.Tests
                         }
                     }
                 ";
-                IDocument document = GetDocument(code);
-                IExecutionContext context = GetContext();
+                TestDocument document = GetDocument(code);
+                TestExecutionContext context = GetContext();
                 IModule module = new AnalyzeCSharp();
 
                 // When
-                List<IDocument> results = await module.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
+                IReadOnlyList<TestDocument> results = await ExecuteAsync(document, context, module);
 
                 // Then
                 Assert.AreEqual("This is a summary.\nThis is another summary.", GetResult(results, "Green")["Summary"]);
@@ -118,12 +119,12 @@ namespace Wyam.CodeAnalysis.Tests
                         }
                     }
                 ";
-                IDocument document = GetDocument(code);
-                IExecutionContext context = GetContext();
+                TestDocument document = GetDocument(code);
+                TestExecutionContext context = GetContext();
                 IModule module = new AnalyzeCSharp();
 
                 // When
-                List<IDocument> results = await module.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
+                IReadOnlyList<TestDocument> results = await ExecuteAsync(document, context, module);
 
                 // Then
                 Assert.AreEqual(string.Empty, GetResult(results, "Green")["Summary"]);
@@ -144,12 +145,12 @@ namespace Wyam.CodeAnalysis.Tests
                         }
                     }
                 ";
-                IDocument document = GetDocument(code);
-                IExecutionContext context = GetContext();
+                TestDocument document = GetDocument(code);
+                TestExecutionContext context = GetContext();
                 IModule module = new AnalyzeCSharp();
 
                 // When
-                List<IDocument> results = await module.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
+                IReadOnlyList<TestDocument> results = await ExecuteAsync(document, context, module);
 
                 // Then
                 Assert.AreEqual("\n    This is <code>some code</code> in a summary.\n    ", GetResult(results, "Green")["Summary"]);
@@ -170,12 +171,12 @@ namespace Wyam.CodeAnalysis.Tests
                         }
                     }
                 ";
-                IDocument document = GetDocument(code);
-                IExecutionContext context = GetContext();
+                TestDocument document = GetDocument(code);
+                TestExecutionContext context = GetContext();
                 IModule module = new AnalyzeCSharp();
 
                 // When
-                List<IDocument> results = await module.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
+                IReadOnlyList<TestDocument> results = await ExecuteAsync(document, context, module);
 
                 // Then
                 Assert.AreEqual("\n    This is <code class=\"code\">some code</code> in a summary.\n    ", GetResult(results, "Green")["Summary"]);
@@ -196,12 +197,12 @@ namespace Wyam.CodeAnalysis.Tests
                         }
                     }
                 ";
-                IDocument document = GetDocument(code);
-                IExecutionContext context = GetContext();
+                TestDocument document = GetDocument(code);
+                TestExecutionContext context = GetContext();
                 IModule module = new AnalyzeCSharp().WithCssClasses("code", "code");
 
                 // When
-                List<IDocument> results = await module.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
+                IReadOnlyList<TestDocument> results = await ExecuteAsync(document, context, module);
 
                 // Then
                 Assert.AreEqual("\n    This is <code class=\"code\">some code</code> in a summary.\n    ", GetResult(results, "Green")["Summary"]);
@@ -222,12 +223,12 @@ namespace Wyam.CodeAnalysis.Tests
                         }
                     }
                 ";
-                IDocument document = GetDocument(code);
-                IExecutionContext context = GetContext();
+                TestDocument document = GetDocument(code);
+                TestExecutionContext context = GetContext();
                 IModule module = new AnalyzeCSharp().WithCssClasses("code", "more-code");
 
                 // When
-                List<IDocument> results = await module.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
+                IReadOnlyList<TestDocument> results = await ExecuteAsync(document, context, module);
 
                 // Then
                 Assert.AreEqual("\n    This is <code class=\"code more-code\">some code</code> in a summary.\n    ", GetResult(results, "Green")["Summary"]);
@@ -248,12 +249,12 @@ namespace Wyam.CodeAnalysis.Tests
                         }
                     }
                 ";
-                IDocument document = GetDocument(code);
-                IExecutionContext context = GetContext();
+                TestDocument document = GetDocument(code);
+                TestExecutionContext context = GetContext();
                 IModule module = new AnalyzeCSharp();
 
                 // When
-                List<IDocument> results = await module.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
+                IReadOnlyList<TestDocument> results = await ExecuteAsync(document, context, module);
 
                 // Then
                 Assert.AreEqual("\n    This is <code>some code</code> in <code>a</code> summary.\n    ", GetResult(results, "Green")["Summary"]);
@@ -278,12 +279,12 @@ namespace Wyam.CodeAnalysis.Tests
                         }
                     }
                 ";
-                IDocument document = GetDocument(code);
-                IExecutionContext context = GetContext();
+                TestDocument document = GetDocument(code);
+                TestExecutionContext context = GetContext();
                 IModule module = new AnalyzeCSharp();
 
                 // When
-                List<IDocument> results = await module.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
+                IReadOnlyList<TestDocument> results = await ExecuteAsync(document, context, module);
 
                 // Then
                 Assert.AreEqual("\n    This is\n    <pre><code>with some code</code></pre>\n    a summary\n    ", GetResult(results, "Green")["Summary"]);
@@ -308,12 +309,12 @@ namespace Wyam.CodeAnalysis.Tests
                         }
                     }
                 ";
-                IDocument document = GetDocument(code);
-                IExecutionContext context = GetContext();
+                TestDocument document = GetDocument(code);
+                TestExecutionContext context = GetContext();
                 IModule module = new AnalyzeCSharp();
 
                 // When
-                List<IDocument> results = await module.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
+                IReadOnlyList<TestDocument> results = await ExecuteAsync(document, context, module);
 
                 // Then
                 Assert.AreEqual(
@@ -343,12 +344,12 @@ namespace Wyam.CodeAnalysis.Tests
                         }
                     }
                 ";
-                IDocument document = GetDocument(code);
-                IExecutionContext context = GetContext();
+                TestDocument document = GetDocument(code);
+                TestExecutionContext context = GetContext();
                 IModule module = new AnalyzeCSharp();
 
                 // When
-                List<IDocument> results = await module.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
+                IReadOnlyList<TestDocument> results = await ExecuteAsync(document, context, module);
 
                 // Then
                 Assert.AreEqual("\n    This is\n    <pre><code>with some code</code></pre>\n    a summary\n    <pre><code>more code</code></pre>\n    ", GetResult(results, "Green")["Summary"]);
@@ -383,12 +384,12 @@ namespace Wyam.CodeAnalysis.Tests
                         }
                     }
                 ";
-                IDocument document = GetDocument(code);
-                IExecutionContext context = GetContext();
+                TestDocument document = GetDocument(code);
+                TestExecutionContext context = GetContext();
                 IModule module = new AnalyzeCSharp();
 
                 // When
-                List<IDocument> results = await module.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
+                IReadOnlyList<TestDocument> results = await ExecuteAsync(document, context, module);
 
                 // Then
                 Assert.AreEqual("\n    This is a summary repeated for each partial class\n    ", GetResult(results, "Green")["Summary"]);
@@ -410,12 +411,12 @@ namespace Wyam.CodeAnalysis.Tests
                         }
                     }
                 ";
-                IDocument document = GetDocument(code);
-                IExecutionContext context = GetContext();
+                TestDocument document = GetDocument(code);
+                TestExecutionContext context = GetContext();
                 IModule module = new AnalyzeCSharp();
 
                 // When
-                List<IDocument> results = await module.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
+                IReadOnlyList<TestDocument> results = await ExecuteAsync(document, context, module);
 
                 // Then
                 Assert.AreEqual(
@@ -442,12 +443,12 @@ namespace Wyam.CodeAnalysis.Tests
                         }
                     }
                 ";
-                IDocument document = GetDocument(code);
-                IExecutionContext context = GetContext();
+                TestDocument document = GetDocument(code);
+                TestExecutionContext context = GetContext();
                 IModule module = new AnalyzeCSharp();
 
                 // When
-                List<IDocument> results = await module.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
+                IReadOnlyList<TestDocument> results = await ExecuteAsync(document, context, module);
 
                 // Then
                 CollectionAssert.IsEmpty(GetMember(results, "Green", "Go").List<ReferenceComment>("Params"));
@@ -473,12 +474,12 @@ namespace Wyam.CodeAnalysis.Tests
                         }
                     }
                 ";
-                IDocument document = GetDocument(code);
-                IExecutionContext context = GetContext();
+                TestDocument document = GetDocument(code);
+                TestExecutionContext context = GetContext();
                 IModule module = new AnalyzeCSharp();
 
                 // When
-                List<IDocument> results = await module.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
+                IReadOnlyList<TestDocument> results = await ExecuteAsync(document, context, module);
 
                 // Then
                 Assert.AreEqual(
@@ -508,12 +509,12 @@ namespace Wyam.CodeAnalysis.Tests
                         }
                     }
                 ";
-                IDocument document = GetDocument(code);
-                IExecutionContext context = GetContext();
+                TestDocument document = GetDocument(code);
+                TestExecutionContext context = GetContext();
                 IModule module = new AnalyzeCSharp();
 
                 // When
-                List<IDocument> results = await module.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
+                IReadOnlyList<TestDocument> results = await ExecuteAsync(document, context, module);
 
                 // Then
                 Assert.AreEqual(
@@ -543,12 +544,12 @@ namespace Wyam.CodeAnalysis.Tests
                         }
                     }
                 ";
-                IDocument document = GetDocument(code);
-                IExecutionContext context = GetContext();
+                TestDocument document = GetDocument(code);
+                TestExecutionContext context = GetContext();
                 IModule module = new AnalyzeCSharp();
 
                 // When
-                List<IDocument> results = await module.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
+                IReadOnlyList<TestDocument> results = await ExecuteAsync(document, context, module);
 
                 // Then
                 Assert.AreEqual(
@@ -580,12 +581,12 @@ namespace Wyam.CodeAnalysis.Tests
                         }
                     }
                 ";
-                IDocument document = GetDocument(code);
-                IExecutionContext context = GetContext();
+                TestDocument document = GetDocument(code);
+                TestExecutionContext context = GetContext();
                 IModule module = new AnalyzeCSharp();
 
                 // When
-                List<IDocument> results = await module.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
+                IReadOnlyList<TestDocument> results = await ExecuteAsync(document, context, module);
 
                 // Then
                 Assert.AreEqual(2, GetMember(results, "Green", "Go").List<ReferenceComment>("Exceptions").Count);
@@ -638,12 +639,12 @@ namespace Wyam.CodeAnalysis.Tests
                         }
                     }
                 ";
-                IDocument document = GetDocument(code);
-                IExecutionContext context = GetContext();
+                TestDocument document = GetDocument(code);
+                TestExecutionContext context = GetContext();
                 IModule module = new AnalyzeCSharp();
 
                 // When
-                List<IDocument> results = await module.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
+                IReadOnlyList<TestDocument> results = await ExecuteAsync(document, context, module);
 
                 // Then
                 Assert.AreEqual(
@@ -696,12 +697,12 @@ namespace Wyam.CodeAnalysis.Tests
                         }
                     }
                 ";
-                IDocument document = GetDocument(code);
-                IExecutionContext context = GetContext();
+                TestDocument document = GetDocument(code);
+                TestExecutionContext context = GetContext();
                 IModule module = new AnalyzeCSharp();
 
                 // When
-                List<IDocument> results = await module.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
+                IReadOnlyList<TestDocument> results = await ExecuteAsync(document, context, module);
 
                 // Then
                 Assert.AreEqual(
@@ -754,12 +755,12 @@ namespace Wyam.CodeAnalysis.Tests
                         }
                     }
                 ";
-                IDocument document = GetDocument(code);
-                IExecutionContext context = GetContext();
+                TestDocument document = GetDocument(code);
+                TestExecutionContext context = GetContext();
                 IModule module = new AnalyzeCSharp();
 
                 // When
-                List<IDocument> results = await module.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
+                IReadOnlyList<TestDocument> results = await ExecuteAsync(document, context, module);
 
                 // Then
                 Assert.AreEqual(
@@ -799,12 +800,12 @@ namespace Wyam.CodeAnalysis.Tests
                         }
                     }
                 ";
-                IDocument document = GetDocument(code);
-                IExecutionContext context = GetContext();
+                TestDocument document = GetDocument(code);
+                TestExecutionContext context = GetContext();
                 IModule module = new AnalyzeCSharp();
 
                 // When
-                List<IDocument> results = await module.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
+                IReadOnlyList<TestDocument> results = await ExecuteAsync(document, context, module);
 
                 // Then
                 Assert.AreEqual("\n    <p>ABC</p>\n    <p>XYZ</p>\n    ", GetResult(results, "Green")["Summary"]);
@@ -826,12 +827,12 @@ namespace Wyam.CodeAnalysis.Tests
                         }
                     }
                 ";
-                IDocument document = GetDocument(code);
-                IExecutionContext context = GetContext();
+                TestDocument document = GetDocument(code);
+                TestExecutionContext context = GetContext();
                 IModule module = new AnalyzeCSharp();
 
                 // When
-                List<IDocument> results = await module.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
+                IReadOnlyList<TestDocument> results = await ExecuteAsync(document, context, module);
 
                 // Then
                 Assert.AreEqual("\n    <p>ABC</p>\n    <p>X<code>Y</code>Z</p>\n    ", GetResult(results, "Green")["Summary"]);
@@ -854,12 +855,12 @@ namespace Wyam.CodeAnalysis.Tests
                         }
                     }
                 ";
-                IDocument document = GetDocument(code);
-                IExecutionContext context = GetContext();
+                TestDocument document = GetDocument(code);
+                TestExecutionContext context = GetContext();
                 IModule module = new AnalyzeCSharp();
 
                 // When
-                List<IDocument> results = await module.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
+                IReadOnlyList<TestDocument> results = await ExecuteAsync(document, context, module);
 
                 // Then
                 Assert.AreEqual("Check <code><a href=\"/Foo/Red/index.html\">Red</a></code> class", GetResult(results, "Green")["Summary"]);
@@ -882,12 +883,12 @@ namespace Wyam.CodeAnalysis.Tests
                         }
                     }
                 ";
-                IDocument document = GetDocument(code);
-                IExecutionContext context = GetContext();
+                TestDocument document = GetDocument(code);
+                TestExecutionContext context = GetContext();
                 IModule module = new AnalyzeCSharp();
 
                 // When
-                List<IDocument> results = await module.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
+                IReadOnlyList<TestDocument> results = await ExecuteAsync(document, context, module);
 
                 // Then
                 Assert.AreEqual("Check <code>Blue</code> class", GetResult(results, "Green")["Summary"]);
@@ -910,12 +911,12 @@ namespace Wyam.CodeAnalysis.Tests
                         }
                     }
                 ";
-                IDocument document = GetDocument(code);
-                IExecutionContext context = GetContext();
+                TestDocument document = GetDocument(code);
+                TestExecutionContext context = GetContext();
                 IModule module = new AnalyzeCSharp();
 
                 // When
-                List<IDocument> results = await module.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
+                IReadOnlyList<TestDocument> results = await ExecuteAsync(document, context, module);
 
                 // Then
                 Assert.AreEqual("Check <code>IEnumerable&lt;string&gt;</code> class", GetResult(results, "Green")["Summary"]);
@@ -941,12 +942,12 @@ namespace Wyam.CodeAnalysis.Tests
                         }
                     }
                 ";
-                IDocument document = GetDocument(code);
-                IExecutionContext context = GetContext();
+                TestDocument document = GetDocument(code);
+                TestExecutionContext context = GetContext();
                 IModule module = new AnalyzeCSharp();
 
                 // When
-                List<IDocument> results = await module.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
+                IReadOnlyList<TestDocument> results = await ExecuteAsync(document, context, module);
 
                 // Then
                 Assert.AreEqual("Check <code><a href=\"/Foo/Red/00F22A50.html\">Blue()</a></code> method", GetResult(results, "Green")["Summary"]);
@@ -965,12 +966,12 @@ namespace Wyam.CodeAnalysis.Tests
                         }
                     }
                 ";
-                IDocument document = GetDocument(code);
-                IExecutionContext context = GetContext();
+                TestDocument document = GetDocument(code);
+                TestExecutionContext context = GetContext();
                 IModule module = new AnalyzeCSharp();
 
                 // When
-                List<IDocument> results = await module.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
+                IReadOnlyList<TestDocument> results = await ExecuteAsync(document, context, module);
 
                 // Then
                 Assert.AreEqual("Check <code>Red</code> class", GetResult(results, "Green")["Summary"]);
@@ -993,12 +994,12 @@ namespace Wyam.CodeAnalysis.Tests
                         }
                     }
                 ";
-                IDocument document = GetDocument(code);
-                IExecutionContext context = GetContext();
+                TestDocument document = GetDocument(code);
+                TestExecutionContext context = GetContext();
                 IModule module = new AnalyzeCSharp();
 
                 // When
-                List<IDocument> results = await module.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
+                IReadOnlyList<TestDocument> results = await ExecuteAsync(document, context, module);
 
                 // Then
                 // <seealso> should be removed from the summary and instead placed in the SeeAlso metadata
@@ -1023,12 +1024,12 @@ namespace Wyam.CodeAnalysis.Tests
                         }
                     }
                 ";
-                IDocument document = GetDocument(code);
-                IExecutionContext context = GetContext();
+                TestDocument document = GetDocument(code);
+                TestExecutionContext context = GetContext();
                 IModule module = new AnalyzeCSharp();
 
                 // When
-                List<IDocument> results = await module.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
+                IReadOnlyList<TestDocument> results = await ExecuteAsync(document, context, module);
 
                 // Then
                 Assert.AreEqual("<code><a href=\"/Foo/Red/index.html\">Red</a></code>", GetResult(results, "Green").Get<IReadOnlyList<string>>("SeeAlso")[0]);
@@ -1051,12 +1052,12 @@ namespace Wyam.CodeAnalysis.Tests
                         }
                     }
                 ";
-                IDocument document = GetDocument(code);
-                IExecutionContext context = GetContext();
+                TestDocument document = GetDocument(code);
+                TestExecutionContext context = GetContext();
                 IModule module = new AnalyzeCSharp();
 
                 // When
-                List<IDocument> results = await module.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
+                IReadOnlyList<TestDocument> results = await ExecuteAsync(document, context, module);
 
                 // Then
                 Assert.AreEqual(
@@ -1083,12 +1084,12 @@ namespace Wyam.CodeAnalysis.Tests
                         }
                     }
                 ";
-                IDocument document = GetDocument(code);
-                IExecutionContext context = GetContext();
+                TestDocument document = GetDocument(code);
+                TestExecutionContext context = GetContext();
                 IModule module = new AnalyzeCSharp();
 
                 // When
-                List<IDocument> results = await module.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
+                IReadOnlyList<TestDocument> results = await ExecuteAsync(document, context, module);
 
                 // Then
                 Assert.AreEqual(
@@ -1123,12 +1124,12 @@ namespace Wyam.CodeAnalysis.Tests
                         }
                     }
                 ";
-                IDocument document = GetDocument(code);
-                IExecutionContext context = GetContext();
+                TestDocument document = GetDocument(code);
+                TestExecutionContext context = GetContext();
                 IModule module = new AnalyzeCSharp();
 
                 // When
-                List<IDocument> results = await module.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
+                IReadOnlyList<TestDocument> results = await ExecuteAsync(document, context, module);
 
                 // Then
                 Assert.AreEqual(
@@ -1162,13 +1163,13 @@ namespace Wyam.CodeAnalysis.Tests
                         }
                     }
                 ";
-                IDocument document = GetDocument(code);
-                IExecutionContext context = GetContext();
+                TestDocument document = GetDocument(code);
+                TestExecutionContext context = GetContext();
                 IModule module = new AnalyzeCSharp()
                     .WhereSymbol(x => x is INamedTypeSymbol);
 
                 // When
-                List<IDocument> results = await module.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
+                IReadOnlyList<TestDocument> results = await ExecuteAsync(document, context, module);
 
                 // Then
                 Assert.IsFalse(GetResult(results, "Green").Get<IReadOnlyList<IDocument>>("Constructors")[0].ContainsKey("Summary"));
@@ -1188,14 +1189,14 @@ namespace Wyam.CodeAnalysis.Tests
                         }
                     }
                 ";
-                IDocument document = GetDocument(code);
-                IExecutionContext context = GetContext();
+                TestDocument document = GetDocument(code);
+                TestExecutionContext context = GetContext();
                 IModule module = new AnalyzeCSharp()
                     .WhereSymbol(x => x is INamedTypeSymbol)
                     .WithDocsForImplicitSymbols();
 
                 // When
-                List<IDocument> results = await module.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
+                IReadOnlyList<TestDocument> results = await ExecuteAsync(document, context, module);
 
                 // Then
                 Assert.AreEqual("This is a summary.", GetResult(results, "Green").Get<IReadOnlyList<IDocument>>("Constructors")[0]["Summary"]);
@@ -1214,12 +1215,12 @@ namespace Wyam.CodeAnalysis.Tests
                         }
                     }
                 ";
-                IDocument document = GetDocument(code);
-                IExecutionContext context = GetContext();
+                TestDocument document = GetDocument(code);
+                TestExecutionContext context = GetContext();
                 IModule module = new AnalyzeCSharp();
 
                 // When
-                List<IDocument> results = await module.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
+                IReadOnlyList<TestDocument> results = await ExecuteAsync(document, context, module);
 
                 // Then
                 Assert.AreEqual("This is a included summary.", GetResult(results, "Green")["Summary"]);
@@ -1238,12 +1239,12 @@ namespace Wyam.CodeAnalysis.Tests
                         }
                     }
                 ";
-                IDocument document = GetDocument(code);
-                IExecutionContext context = GetContext();
+                TestDocument document = GetDocument(code);
+                TestExecutionContext context = GetContext();
                 IModule module = new AnalyzeCSharp();
 
                 // When
-                List<IDocument> results = await module.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
+                IReadOnlyList<TestDocument> results = await ExecuteAsync(document, context, module);
 
                 // Then
                 Assert.AreEqual("This is a summary.", GetResult(results, "Foo")["Summary"]);
@@ -1266,12 +1267,12 @@ namespace Wyam.CodeAnalysis.Tests
                         }
                     }
                 ";
-                IDocument document = GetDocument(code);
-                IExecutionContext context = GetContext();
+                TestDocument document = GetDocument(code);
+                TestExecutionContext context = GetContext();
                 IModule module = new AnalyzeCSharp();
 
                 // When
-                List<IDocument> results = await module.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
+                IReadOnlyList<TestDocument> results = await ExecuteAsync(document, context, module);
 
                 // Then
                 Assert.AreEqual("This is a summary.", GetResult(results, "Foo")["Summary"]);
@@ -1295,12 +1296,12 @@ namespace Wyam.CodeAnalysis.Tests
                         }
                     }
                 ";
-                IDocument document = GetDocument(code);
-                IExecutionContext context = GetContext();
+                TestDocument document = GetDocument(code);
+                TestExecutionContext context = GetContext();
                 IModule module = new AnalyzeCSharp();
 
                 // When
-                List<IDocument> results = await module.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
+                IReadOnlyList<TestDocument> results = await ExecuteAsync(document, context, module);
 
                 // Then
                 Assert.AreEqual("This is a summary.", GetResult(results, "Blue")["Summary"]);
@@ -1323,12 +1324,12 @@ namespace Wyam.CodeAnalysis.Tests
                         }
                     }
                 ";
-                IDocument document = GetDocument(code);
-                IExecutionContext context = GetContext();
+                TestDocument document = GetDocument(code);
+                TestExecutionContext context = GetContext();
                 IModule module = new AnalyzeCSharp().WithImplicitInheritDoc();
 
                 // When
-                List<IDocument> results = await module.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
+                IReadOnlyList<TestDocument> results = await ExecuteAsync(document, context, module);
 
                 // Then
                 Assert.AreEqual("This is a summary.", GetResult(results, "Blue")["Summary"]);
@@ -1352,12 +1353,12 @@ namespace Wyam.CodeAnalysis.Tests
                         }
                     }
                 ";
-                IDocument document = GetDocument(code);
-                IExecutionContext context = GetContext();
+                TestDocument document = GetDocument(code);
+                TestExecutionContext context = GetContext();
                 IModule module = new AnalyzeCSharp();
 
                 // When
-                List<IDocument> results = await module.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
+                IReadOnlyList<TestDocument> results = await ExecuteAsync(document, context, module);
 
                 // Then
                 Assert.AreEqual("This is a summary.", GetResult(results, "Blue")["Summary"]);
@@ -1382,12 +1383,12 @@ namespace Wyam.CodeAnalysis.Tests
                         }
                     }
                 ";
-                IDocument document = GetDocument(code);
-                IExecutionContext context = GetContext();
+                TestDocument document = GetDocument(code);
+                TestExecutionContext context = GetContext();
                 IModule module = new AnalyzeCSharp();
 
                 // When
-                List<IDocument> results = await module.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
+                IReadOnlyList<TestDocument> results = await ExecuteAsync(document, context, module);
 
                 // Then
                 Assert.AreEqual("This is a summary.", GetResult(results, "Blue")["Summary"]);
@@ -1416,12 +1417,12 @@ namespace Wyam.CodeAnalysis.Tests
                         }
                     }
                 ";
-                IDocument document = GetDocument(code);
-                IExecutionContext context = GetContext();
+                TestDocument document = GetDocument(code);
+                TestExecutionContext context = GetContext();
                 IModule module = new AnalyzeCSharp();
 
                 // When
-                List<IDocument> results = await module.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
+                IReadOnlyList<TestDocument> results = await ExecuteAsync(document, context, module);
 
                 // Then
                 Assert.AreEqual("This is a summary.", GetResult(results, "Blue")["Summary"]);
@@ -1446,12 +1447,12 @@ namespace Wyam.CodeAnalysis.Tests
                         }
                     }
                 ";
-                IDocument document = GetDocument(code);
-                IExecutionContext context = GetContext();
+                TestDocument document = GetDocument(code);
+                TestExecutionContext context = GetContext();
                 IModule module = new AnalyzeCSharp();
 
                 // When
-                List<IDocument> results = await module.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
+                IReadOnlyList<TestDocument> results = await ExecuteAsync(document, context, module);
 
                 // Then
                 Assert.AreEqual("Blue summary.", GetResult(results, "Blue")["Summary"]);
@@ -1479,12 +1480,12 @@ namespace Wyam.CodeAnalysis.Tests
                         }
                     }
                 ";
-                IDocument document = GetDocument(code);
-                IExecutionContext context = GetContext();
+                TestDocument document = GetDocument(code);
+                TestExecutionContext context = GetContext();
                 IModule module = new AnalyzeCSharp();
 
                 // When
-                List<IDocument> results = await module.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
+                IReadOnlyList<TestDocument> results = await ExecuteAsync(document, context, module);
 
                 // Then
                 Assert.AreEqual("Base summary.", GetMember(results, "Blue", "Foo")["Summary"]);
@@ -1514,12 +1515,12 @@ namespace Wyam.CodeAnalysis.Tests
                         }
                     }
                 ";
-                IDocument document = GetDocument(code);
-                IExecutionContext context = GetContext();
+                TestDocument document = GetDocument(code);
+                TestExecutionContext context = GetContext();
                 IModule module = new AnalyzeCSharp();
 
                 // When
-                List<IDocument> results = await module.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
+                IReadOnlyList<TestDocument> results = await ExecuteAsync(document, context, module);
 
                 // Then
                 Assert.AreEqual(
@@ -1554,12 +1555,12 @@ namespace Wyam.CodeAnalysis.Tests
                         }
                     }
                 ";
-                IDocument document = GetDocument(code);
-                IExecutionContext context = GetContext();
+                TestDocument document = GetDocument(code);
+                TestExecutionContext context = GetContext();
                 IModule module = new AnalyzeCSharp();
 
                 // When
-                List<IDocument> results = await module.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
+                IReadOnlyList<TestDocument> results = await ExecuteAsync(document, context, module);
 
                 // Then
                 Assert.AreEqual("Green summary.", GetResult(results, "Blue")["Summary"]);
@@ -1587,12 +1588,12 @@ namespace Wyam.CodeAnalysis.Tests
                         }
                     }
                 ";
-                IDocument document = GetDocument(code);
-                IExecutionContext context = GetContext();
+                TestDocument document = GetDocument(code);
+                TestExecutionContext context = GetContext();
                 IModule module = new AnalyzeCSharp();
 
                 // When
-                List<IDocument> results = await module.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
+                IReadOnlyList<TestDocument> results = await ExecuteAsync(document, context, module);
 
                 // Then
                 Assert.AreEqual("Red summary.", GetResult(results, "Blue")["Summary"]);
@@ -1621,12 +1622,12 @@ namespace Wyam.CodeAnalysis.Tests
                         }
                     }
                 ";
-                IDocument document = GetDocument(code);
-                IExecutionContext context = GetContext();
+                TestDocument document = GetDocument(code);
+                TestExecutionContext context = GetContext();
                 IModule module = new AnalyzeCSharp();
 
                 // When
-                List<IDocument> results = await module.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
+                IReadOnlyList<TestDocument> results = await ExecuteAsync(document, context, module);
 
                 // Then
                 Assert.AreEqual("Green summary.", GetResult(results, "Blue")["Summary"]);
@@ -1654,12 +1655,12 @@ namespace Wyam.CodeAnalysis.Tests
                         }
                     }
                 ";
-                IDocument document = GetDocument(code);
-                IExecutionContext context = GetContext();
+                TestDocument document = GetDocument(code);
+                TestExecutionContext context = GetContext();
                 IModule module = new AnalyzeCSharp();
 
                 // When
-                List<IDocument> results = await module.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
+                IReadOnlyList<TestDocument> results = await ExecuteAsync(document, context, module);
 
                 // Then
                 Assert.AreEqual("Interface summary.", GetMember(results, "Blue", "Foo")["Summary"]);
@@ -1690,12 +1691,12 @@ namespace Wyam.CodeAnalysis.Tests
                         }
                     }
                 ";
-                IDocument document = GetDocument(code);
-                IExecutionContext context = GetContext();
+                TestDocument document = GetDocument(code);
+                TestExecutionContext context = GetContext();
                 IModule module = new AnalyzeCSharp();
 
                 // When
-                List<IDocument> results = await module.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
+                IReadOnlyList<TestDocument> results = await ExecuteAsync(document, context, module);
 
                 // Then
                 Assert.AreEqual("Interface summary.", GetMember(results, "Blue", "Foo")["Summary"]);
@@ -1727,12 +1728,12 @@ namespace Wyam.CodeAnalysis.Tests
                         }
                     }
                 ";
-                IDocument document = GetDocument(code);
-                IExecutionContext context = GetContext();
+                TestDocument document = GetDocument(code);
+                TestExecutionContext context = GetContext();
                 IModule module = new AnalyzeCSharp();
 
                 // When
-                List<IDocument> results = await module.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
+                IReadOnlyList<TestDocument> results = await ExecuteAsync(document, context, module);
 
                 // Then
                 Assert.AreEqual("Base summary.", GetMember(results, "Blue", "Foo")["Summary"]);
@@ -1767,12 +1768,12 @@ namespace Wyam.CodeAnalysis.Tests
                         }
                     }
                 ";
-                IDocument document = GetDocument(code);
-                IExecutionContext context = GetContext();
+                TestDocument document = GetDocument(code);
+                TestExecutionContext context = GetContext();
                 IModule module = new AnalyzeCSharp();
 
                 // When
-                List<IDocument> results = await module.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
+                IReadOnlyList<TestDocument> results = await ExecuteAsync(document, context, module);
 
                 // Then
                 Assert.AreEqual("Interface summary.", GetMember(results, "Blue", "Foo")["Summary"]);
@@ -1795,12 +1796,12 @@ namespace Wyam.CodeAnalysis.Tests
                         }
                     }
                 ";
-                IDocument document = GetDocument(code);
-                IExecutionContext context = GetContext();
+                TestDocument document = GetDocument(code);
+                TestExecutionContext context = GetContext();
                 IModule module = new AnalyzeCSharp();
 
                 // When
-                List<IDocument> results = await module.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
+                IReadOnlyList<TestDocument> results = await ExecuteAsync(document, context, module);
 
                 // Then
                 Assert.AreEqual("\n    &lt;foo&gt;bar&lt;/foo&gt;\n    ", GetResult(results, "Green")["Summary"]);
@@ -1825,12 +1826,12 @@ namespace Wyam.CodeAnalysis.Tests
                         }
                     }
                 ";
-                IDocument document = GetDocument(code);
-                IExecutionContext context = GetContext();
+                TestDocument document = GetDocument(code);
+                TestExecutionContext context = GetContext();
                 IModule module = new AnalyzeCSharp();
 
                 // When
-                List<IDocument> results = await module.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
+                IReadOnlyList<TestDocument> results = await ExecuteAsync(document, context, module);
 
                 // Then
                 Assert.AreEqual("\n    <pre><code>&lt;foo&gt;bar&lt;/foo&gt;</code></pre>\n    ", GetResult(results, "Green")["Example"]);

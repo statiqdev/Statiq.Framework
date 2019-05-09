@@ -8,7 +8,7 @@ using Wyam.Common.Modules;
 using Wyam.Common.Execution;
 using YamlDotNet.RepresentationModel;
 using Wyam.Yaml.Dynamic;
-using Wyam.Common.Util;
+using Wyam.Common;
 
 namespace Wyam.Yaml
 {

@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using System.IO;
-using System.Threading.Tasks;
 using Wyam.Common.Content;
 using Wyam.Common.Execution;
 using Wyam.Common.IO;

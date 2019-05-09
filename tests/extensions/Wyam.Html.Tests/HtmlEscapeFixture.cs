@@ -1,10 +1,10 @@
 ﻿using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using NUnit.Framework;
+using Shouldly;
+using Wyam.Common;
 using Wyam.Common.Documents;
 using Wyam.Common.Execution;
-using Wyam.Common.Util;
 using Wyam.Testing;
 using Wyam.Testing.Documents;
 using Wyam.Testing.Execution;
@@ -30,15 +30,14 @@ namespace Wyam.Html.Tests
                             <p>This is some Foobar text</p>
                         </body>
                     </html>";
-                TestExecutionContext context = new TestExecutionContext();
                 TestDocument document = new TestDocument(input);
                 HtmlEscape htmlEscape = new HtmlEscape();
 
                 // When
-                IList<IDocument> results = await htmlEscape.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
+                TestDocument result = await ExecuteAsync(document, htmlEscape).SingleAsync();
 
                 // Then
-                Assert.That(results, Is.EquivalentTo(new[] { document }));
+                result.ShouldBe(document);
             }
 
             [Test]
@@ -95,15 +94,14 @@ namespace Wyam.Html.Tests
                             </p>
                         </body>
                     </html>";
-                TestExecutionContext context = new TestExecutionContext();
                 TestDocument document = new TestDocument(input);
                 HtmlEscape htmlEscape = new HtmlEscape().WithEscapedChar('ä', 'ö', 'ü', 'Ä', 'Ö', 'Ü', 'ß', '©');
 
                 // When
-                IList<IDocument> results = await htmlEscape.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
+                TestDocument result = await ExecuteAsync(document, htmlEscape).SingleAsync();
 
                 // Then
-                Assert.That(await results.SelectAsync(async x => await x.GetStringAsync()), Is.EquivalentTo(new[] { output }));
+                result.Content.ShouldBe(output);
             }
 
             [Test]
@@ -128,15 +126,14 @@ namespace Wyam.Html.Tests
                             &lt;p&gt;This is some Foobar text&lt;&#47;p&gt;
                         &lt;&#47;body&gt;
                     &lt;&#47;html&gt;";
-                TestExecutionContext context = new TestExecutionContext();
                 TestDocument document = new TestDocument(input);
                 HtmlEscape htmlEscape = new HtmlEscape().EscapeAllNonstandard().WithDefaultStandard();
 
                 // When
-                IList<IDocument> results = await htmlEscape.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
+                TestDocument result = await ExecuteAsync(document, htmlEscape).SingleAsync();
 
                 // Then
-                Assert.That(await results.SelectAsync(async x => await x.GetStringAsync()), Is.EquivalentTo(new[] { output }));
+                result.Content.ShouldBe(output);
             }
         }
     }

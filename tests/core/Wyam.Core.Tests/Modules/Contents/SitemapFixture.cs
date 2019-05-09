@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using NUnit.Framework;
+using Shouldly;
+using Wyam.Common;
 using Wyam.Common.Configuration;
 using Wyam.Common.Documents;
 using Wyam.Common.Meta;
@@ -52,11 +54,10 @@ namespace Wyam.Core.Tests.Modules.Contents
                 Sitemap sitemap = new Sitemap(formatter);
 
                 // When
-                IReadOnlyList<IDocument> results = await ExecuteAsync(inputs, context, m, sitemap);
+                TestDocument result = await ExecuteAsync(doc, context, m, sitemap).SingleAsync();
 
                 // Then
-                Assert.AreEqual(1, results.Count);
-                Assert.That((await results[0].GetStringAsync()), Does.Contain($"<loc>{expected}</loc>"));
+                result.Content.ShouldContain($"<loc>{expected}</loc>");
             }
 
             [TestCase("www.example.org", null, "http://www.example.org/sub/testfile")]
@@ -92,11 +93,10 @@ namespace Wyam.Core.Tests.Modules.Contents
                 Sitemap sitemap = new Sitemap(formatter);
 
                 // When
-                IReadOnlyList<IDocument> results = await ExecuteAsync(inputs, context, m, sitemap);
+                TestDocument result = await ExecuteAsync(doc, context, m, sitemap).SingleAsync();
 
                 // Then
-                Assert.AreEqual(1, results.Count);
-                Assert.That((await results[0].GetStringAsync()), Does.Contain($"<loc>{expected}</loc>"));
+                result.Content.ShouldContain($"<loc>{expected}</loc>");
             }
 
             [TestCase("www.example.org", null, "http://www.example.org/sub/testfile")]
@@ -116,7 +116,6 @@ namespace Wyam.Core.Tests.Modules.Contents
                 {
                     { Keys.RelativeFilePath, "sub/testfile.html" }
                 };
-                IDocument[] inputs = { doc };
 
                 Func<string, string> formatter = null;
 
@@ -128,11 +127,10 @@ namespace Wyam.Core.Tests.Modules.Contents
                 Sitemap sitemap = new Sitemap(formatter);
 
                 // When
-                IReadOnlyList<IDocument> results = await ExecuteAsync(inputs, context, sitemap);
+                TestDocument result = await ExecuteAsync(doc, context, sitemap).SingleAsync();
 
                 // Then
-                Assert.AreEqual(1, results.Count);
-                Assert.That((await results[0].GetStringAsync()), Does.Contain($"<loc>{expected}</loc>"));
+                result.Content.ShouldContain($"<loc>{expected}</loc>");
             }
         }
     }

@@ -3,8 +3,8 @@ using System.Linq;
 using System.Threading.Tasks;
 using NUnit.Framework;
 using Shouldly;
+using Wyam.Common;
 using Wyam.Common.Documents;
-using Wyam.Common.Util;
 using Wyam.Testing;
 using Wyam.Testing.Documents;
 using Wyam.Testing.Execution;
@@ -32,14 +32,13 @@ namespace Wyam.Html.Tests
                         </body>
                     </html>";
                 TestDocument document = new TestDocument(input);
-                TestExecutionContext context = new TestExecutionContext();
                 Excerpt excerpt = new Excerpt();
 
                 // When
-                IEnumerable<IDocument> results = await excerpt.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
+                TestDocument result = await ExecuteAsync(document, excerpt).SingleAsync();
 
                 // Then
-                results.Single()["Excerpt"].ShouldBe("<p>This is some Foobar text</p>");
+                result["Excerpt"].ShouldBe("<p>This is some Foobar text</p>");
             }
 
             [Test]
@@ -57,14 +56,13 @@ namespace Wyam.Html.Tests
                         </body>
                     </html>";
                 TestDocument document = new TestDocument(input);
-                TestExecutionContext context = new TestExecutionContext();
                 Excerpt excerpt = new Excerpt("div");
 
                 // When
-                IEnumerable<IDocument> results = await excerpt.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
+                TestDocument result = await ExecuteAsync(document, excerpt).SingleAsync();
 
                 // Then
-                results.Single()["Excerpt"].ShouldBe("<div>This is some other text</div>");
+                result["Excerpt"].ShouldBe("<div>This is some other text</div>");
             }
 
             [Test]
@@ -82,14 +80,13 @@ namespace Wyam.Html.Tests
                         </body>
                     </html>";
                 TestDocument document = new TestDocument(input);
-                TestExecutionContext context = new TestExecutionContext();
                 Excerpt excerpt = new Excerpt().WithMetadataKey("Baz");
 
                 // When
-                IEnumerable<IDocument> results = await excerpt.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
+                TestDocument result = await ExecuteAsync(document, excerpt).SingleAsync();
 
                 // Then
-                results.Single()["Baz"].ShouldBe("<p>This is some Foobar text</p>");
+                result["Baz"].ShouldBe("<p>This is some Foobar text</p>");
             }
 
             [Test]
@@ -107,14 +104,13 @@ namespace Wyam.Html.Tests
                         </body>
                     </html>";
                 TestDocument document = new TestDocument(input);
-                TestExecutionContext context = new TestExecutionContext();
                 Excerpt excerpt = new Excerpt().WithOuterHtml(false);
 
                 // When
-                IEnumerable<IDocument> results = await excerpt.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
+                TestDocument result = await ExecuteAsync(document, excerpt).SingleAsync();
 
                 // Then
-                results.Single()["Excerpt"].ShouldBe("This is some Foobar text");
+                result["Excerpt"].ShouldBe("This is some Foobar text");
             }
 
             [Test]
@@ -131,14 +127,13 @@ namespace Wyam.Html.Tests
                         </body>
                     </html>";
                 TestDocument document = new TestDocument(input);
-                TestExecutionContext context = new TestExecutionContext();
                 Excerpt excerpt = new Excerpt("p");
 
                 // When
-                IEnumerable<IDocument> results = await excerpt.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
+                TestDocument result = await ExecuteAsync(document, excerpt).SingleAsync();
 
                 // Then
-                results.Single().ShouldBe(document);
+                result.ShouldBe(document);
             }
 
             [Test]
@@ -156,14 +151,13 @@ namespace Wyam.Html.Tests
                         </body>
                     </html>";
                 TestDocument document = new TestDocument(input);
-                TestExecutionContext context = new TestExecutionContext();
                 Excerpt excerpt = new Excerpt();
 
                 // When
-                IEnumerable<IDocument> results = await excerpt.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
+                TestDocument result = await ExecuteAsync(document, excerpt).SingleAsync();
 
                 // Then
-                results.Single()["Excerpt"].ShouldBe("<p>This is some </p>");
+                result["Excerpt"].ShouldBe("<p>This is some </p>");
             }
 
             [Test]
@@ -183,14 +177,13 @@ namespace Wyam.Html.Tests
                         </body>
                     </html>";
                 TestDocument document = new TestDocument(input);
-                TestExecutionContext context = new TestExecutionContext();
                 Excerpt excerpt = new Excerpt();
 
                 // When
-                IEnumerable<IDocument> results = await excerpt.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
+                TestDocument result = await ExecuteAsync(document, excerpt).SingleAsync();
 
                 // Then
-                results.Single()["Excerpt"].ToString().ShouldBe(
+                result["Excerpt"].ToString().ShouldBe(
                     @"<p>This is some Foobar text</p>
                             <p>This is some other text</p>",
                     StringCompareShould.IgnoreLineEndings);
@@ -211,14 +204,13 @@ namespace Wyam.Html.Tests
                         </body>
                     </html>";
                 TestDocument document = new TestDocument(input);
-                TestExecutionContext context = new TestExecutionContext();
                 Excerpt excerpt = new Excerpt();
 
                 // When
-                IEnumerable<IDocument> results = await excerpt.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
+                TestDocument result = await ExecuteAsync(document, excerpt).SingleAsync();
 
                 // Then
-                results.Single()["Excerpt"].ToString().ShouldBe(
+                result["Excerpt"].ToString().ShouldBe(
                     @"<p>This is some Foobar text</p>
                             <p>This <b>is</b> some </p>",
                     StringCompareShould.IgnoreLineEndings);
@@ -239,14 +231,13 @@ namespace Wyam.Html.Tests
                         </body>
                     </html>";
                 TestDocument document = new TestDocument(input);
-                TestExecutionContext context = new TestExecutionContext();
                 Excerpt excerpt = new Excerpt().WithSeparators(new[] { "foo" });
 
                 // When
-                IEnumerable<IDocument> results = await excerpt.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
+                TestDocument result = await ExecuteAsync(document, excerpt).SingleAsync();
 
                 // Then
-                results.Single()["Excerpt"].ShouldBe("<p>This is some </p>");
+                result["Excerpt"].ShouldBe("<p>This is some </p>");
             }
 
             [Test]
@@ -264,14 +255,13 @@ namespace Wyam.Html.Tests
                         </body>
                     </html>";
                 TestDocument document = new TestDocument(input);
-                TestExecutionContext context = new TestExecutionContext();
                 Excerpt excerpt = new Excerpt();
 
                 // When
-                IEnumerable<IDocument> results = await excerpt.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
+                TestDocument result = await ExecuteAsync(document, excerpt).SingleAsync();
 
                 // Then
-                results.Single()["Excerpt"].ShouldBe("<p>This is some </p>");
+                result["Excerpt"].ShouldBe("<p>This is some </p>");
             }
         }
     }

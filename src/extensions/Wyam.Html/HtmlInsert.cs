@@ -6,11 +6,11 @@ using System.Threading.Tasks;
 using AngleSharp.Dom;
 using AngleSharp.Dom.Html;
 using AngleSharp.Parser.Html;
+using Wyam.Common;
 using Wyam.Common.Configuration;
 using Wyam.Common.Execution;
 using Wyam.Common.Modules;
 using Wyam.Common.Tracing;
-using Wyam.Common.Util;
 
 namespace Wyam.Html
 {

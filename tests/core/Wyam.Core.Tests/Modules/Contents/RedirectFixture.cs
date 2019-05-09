@@ -8,7 +8,6 @@ using Wyam.Common.Documents;
 using Wyam.Common.Execution;
 using Wyam.Common.IO;
 using Wyam.Common.Meta;
-using Wyam.Common.Util;
 using Wyam.Core.Modules.Contents;
 using Wyam.Testing;
 using Wyam.Testing.Documents;
@@ -24,16 +23,15 @@ namespace Wyam.Core.Tests.Modules.Contents
         public async Task SingleRedirect()
         {
             // Given
-            IDocument redirected = new TestDocument(new MetadataItems
+            TestDocument redirected = new TestDocument(new MetadataItems
             {
                 { Keys.RedirectFrom, new List<FilePath> { new FilePath("foo.html") } }
             });
-            IDocument notRedirected = new TestDocument();
-            IExecutionContext context = new TestExecutionContext();
+            TestDocument notRedirected = new TestDocument();
             Redirect redirect = new Redirect();
 
             // When
-            List<IDocument> results = await redirect.ExecuteAsync(new[] { redirected, notRedirected }, context).ToListAsync();  // Make sure to materialize the result list
+            IReadOnlyList<TestDocument> results = await ExecuteAsync(new[] { redirected, notRedirected }, redirect);
 
             // Then
             CollectionAssert.AreEqual(new[] { "foo.html" }, results.Select(x => x.Get<FilePath>(Keys.WritePath).FullPath));
@@ -45,16 +43,15 @@ namespace Wyam.Core.Tests.Modules.Contents
         public async Task AddsExtension(string input, string expected)
         {
             // Given
-            IDocument redirected = new TestDocument(new MetadataItems
+            TestDocument redirected = new TestDocument(new MetadataItems
             {
                 { Keys.RedirectFrom, new List<FilePath> { new FilePath(input) } }
             });
-            IDocument notRedirected = new TestDocument();
-            IExecutionContext context = new TestExecutionContext();
+            TestDocument notRedirected = new TestDocument();
             Redirect redirect = new Redirect();
 
             // When
-            List<IDocument> results = await redirect.ExecuteAsync(new[] { redirected, notRedirected }, context).ToListAsync();  // Make sure to materialize the result list
+            IReadOnlyList<TestDocument> results = await ExecuteAsync(new[] { redirected, notRedirected }, redirect);
 
             // Then
             CollectionAssert.AreEqual(new[] { expected }, results.Select(x => x.Get<FilePath>(Keys.WritePath).FullPath));
@@ -64,20 +61,19 @@ namespace Wyam.Core.Tests.Modules.Contents
         public async Task WarnsForAbsoluteRedirectFromPath()
         {
             // Given
-            IDocument redirected = new TestDocument(new MetadataItems
+            TestDocument redirected = new TestDocument(new MetadataItems
             {
                 { Keys.RedirectFrom, new List<FilePath> { new FilePath("/foo/bar") } }
             })
             {
                 Source = new FilePath("/")
             };
-            IDocument notRedirected = new TestDocument();
-            IExecutionContext context = new TestExecutionContext();
+            TestDocument notRedirected = new TestDocument();
             Redirect redirect = new Redirect();
             ThrowOnTraceEventType(null);
 
             // When
-            List<IDocument> results = await redirect.ExecuteAsync(new[] { redirected, notRedirected }, context).ToListAsync();  // Make sure to materialize the result list
+            IReadOnlyList<TestDocument> results = await ExecuteAsync(new[] { redirected, notRedirected }, redirect);
 
             // Then
             Assert.IsTrue(Listener.Messages.ToList().Single(x => x.Key == TraceEventType.Warning).Value.StartsWith("The redirect path must be relative"));
@@ -88,19 +84,18 @@ namespace Wyam.Core.Tests.Modules.Contents
         public async Task MultipleRedirects()
         {
             // Given
-            IDocument redirected1 = new TestDocument(new MetadataItems
+            TestDocument redirected1 = new TestDocument(new MetadataItems
             {
                 { Keys.RedirectFrom, new List<FilePath> { new FilePath("foo.html") } }
             });
-            IDocument redirected2 = new TestDocument(new MetadataItems
+            TestDocument redirected2 = new TestDocument(new MetadataItems
             {
                 { Keys.RedirectFrom, new List<FilePath> { new FilePath("bar/baz.html") } }
             });
-            IExecutionContext context = new TestExecutionContext();
             Redirect redirect = new Redirect();
 
             // When
-            List<IDocument> results = await redirect.ExecuteAsync(new[] { redirected1, redirected2 }, context).ToListAsync();  // Make sure to materialize the result list
+            IReadOnlyList<TestDocument> results = await ExecuteAsync(new[] { redirected1, redirected2 }, redirect);
 
             // Then
             CollectionAssert.AreEquivalent(new[] { "foo.html", "bar/baz.html" }, results.Select(x => x.Get<FilePath>(Keys.WritePath).FullPath));
@@ -119,11 +114,10 @@ namespace Wyam.Core.Tests.Modules.Contents
             {
                 { Keys.RedirectFrom, new List<FilePath> { new FilePath("bar/baz.html") } }
             });
-            IExecutionContext context = new TestExecutionContext();
             Redirect redirect = new Redirect().WithAdditionalOutput(new FilePath("a/b"), x => string.Join("|", x.Select(y => $"{y.Key} {y.Value}")));
 
             // When
-            List<IDocument> results = await redirect.ExecuteAsync(new[] { redirected1, redirected2 }, context).ToListAsync();  // Make sure to materialize the result list
+            IReadOnlyList<TestDocument> results = await ExecuteAsync(new[] { redirected1, redirected2 }, redirect);
 
             // Then
             CollectionAssert.AreEquivalent(new[] { "foo.html", "bar/baz.html", "a/b" }, results.Select(x => x.Get<FilePath>(Keys.WritePath).FullPath));
@@ -143,13 +137,12 @@ namespace Wyam.Core.Tests.Modules.Contents
             {
                 { Keys.RedirectFrom, new List<FilePath> { new FilePath("bar/baz.html") } }
             });
-            IExecutionContext context = new TestExecutionContext();
             Redirect redirect = new Redirect()
                 .WithAdditionalOutput(new FilePath("a/b"), x => string.Join("|", x.Select(y => $"{y.Key} {y.Value}")))
                 .WithMetaRefreshPages(false);
 
             // When
-            List<IDocument> results = await redirect.ExecuteAsync(new[] { redirected1, redirected2 }, context).ToListAsync();  // Make sure to materialize the result list
+            IReadOnlyList<TestDocument> results = await ExecuteAsync(new[] { redirected1, redirected2 }, redirect);
 
             // Then
             CollectionAssert.AreEquivalent(new[] { "a/b" }, results.Select(x => x.Get<FilePath>(Keys.WritePath).FullPath));

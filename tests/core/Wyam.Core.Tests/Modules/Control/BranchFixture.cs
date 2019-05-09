@@ -68,7 +68,7 @@ namespace Wyam.Core.Tests.Modules.Control
                 };
 
                 // When
-                IReadOnlyList<IDocument> results = await ExecuteAsync(a, new Branch(b).Where(Config.FromDocument(x => x.Content == "1")), c);
+                IReadOnlyList<IDocument> results = await ExecuteAsync(a, new Branch(b).Where(Config.FromDocument(async x => await x.GetStringAsync() == "1")), c);
 
                 // Then
                 Assert.AreEqual(1, a.ExecuteCount);

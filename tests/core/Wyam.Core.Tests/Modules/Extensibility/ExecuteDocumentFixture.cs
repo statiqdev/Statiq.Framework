@@ -35,7 +35,7 @@ namespace Wyam.Core.Tests.Modules.Extensibility
             public async Task ReturnsInputsForNullResult()
             {
                 // Given
-                IDocument[] inputs =
+                TestDocument[] inputs =
                 {
                     new TestDocument(),
                     new TestDocument()
@@ -43,7 +43,7 @@ namespace Wyam.Core.Tests.Modules.Extensibility
                 ExecuteDocument execute = new ExecuteDocument((object)null);
 
                 // When
-                IEnumerable<IDocument> outputs = await ExecuteAsync(inputs, execute);
+                IReadOnlyList<TestDocument> outputs = await ExecuteAsync(inputs, execute);
 
                 // Then
                 CollectionAssert.AreEqual(inputs, outputs);
@@ -74,7 +74,7 @@ namespace Wyam.Core.Tests.Modules.Extensibility
                 ExecuteDocument execute = new ExecuteDocument(document);
 
                 // When
-                IEnumerable<IDocument> result = await ExecuteAsync(count, execute);
+                IReadOnlyList<TestDocument> result = await ExecuteAsync(count, execute);
 
                 // Then
                 CollectionAssert.AreEquivalent(document, result.Single());
@@ -84,7 +84,7 @@ namespace Wyam.Core.Tests.Modules.Extensibility
             public async Task RunsModuleAgainstEach()
             {
                 // Given
-                IDocument[] inputs =
+                TestDocument[] inputs =
                 {
                     new TestDocument(),
                     new TestDocument()
@@ -107,7 +107,7 @@ namespace Wyam.Core.Tests.Modules.Extensibility
             public async Task SetsNewContent()
             {
                 // Given
-                IDocument[] inputs =
+                TestDocument[] inputs =
                 {
                     new TestDocument(),
                     new TestDocument()
@@ -116,10 +116,10 @@ namespace Wyam.Core.Tests.Modules.Extensibility
                 ExecuteDocument execute = new ExecuteDocument(Config.FromDocument((d, c) => (object)count++));
 
                 // When
-                IReadOnlyList<IDocument> results = await ExecuteAsync(inputs, execute);
+                IReadOnlyList<TestDocument> results = await ExecuteAsync(inputs, execute);
 
                 // Then
-                CollectionAssert.AreEquivalent(await results.SelectAsync(async x => await x.GetStringAsync()), new[] { "0", "1" });
+                results.Select(x => x.Content).ShouldBe(new[] { "0", "1" });
             }
         }
     }

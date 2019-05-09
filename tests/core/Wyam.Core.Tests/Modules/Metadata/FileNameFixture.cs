@@ -2,12 +2,14 @@
 using System.Linq;
 using System.Threading.Tasks;
 using NUnit.Framework;
+using Shouldly;
+using Wyam.Common;
 using Wyam.Common.Documents;
 using Wyam.Common.IO;
 using Wyam.Common.Meta;
-using Wyam.Common.Util;
 using Wyam.Core.Modules.Metadata;
 using Wyam.Testing;
+using Wyam.Testing.Documents;
 using Wyam.Testing.Execution;
 
 namespace Wyam.Core.Tests.Modules.Metadata
@@ -34,21 +36,17 @@ namespace Wyam.Core.Tests.Modules.Metadata
             public async Task FileNameIsConvertedCorrectly(string input, string output)
             {
                 // Given
-                TestExecutionContext context = new TestExecutionContext();
-                IDocument[] inputs =
+                TestDocument document = new TestDocument(new MetadataItems
                 {
-                    context.GetDocument(new MetadataItems
-                    {
-                        new MetadataItem(Keys.SourceFileName, input)
-                    })
-                };
+                    new MetadataItem(Keys.SourceFileName, input)
+                });
                 FileName fileName = new FileName();
 
                 // When
-                IEnumerable<IDocument> documents = await fileName.ExecuteAsync(inputs, context).ToListAsync();
+                TestDocument result = await ExecuteAsync(document, fileName).SingleAsync();
 
                 // Then
-                Assert.AreEqual(output, documents.First().FilePath(Keys.WriteFileName).FullPath);
+                result.FilePath(Keys.WriteFileName).FullPath.ShouldBe(output);
             }
 
             [Test]
@@ -57,22 +55,17 @@ namespace Wyam.Core.Tests.Modules.Metadata
                 // Given
                 const string input = "FileName With MiXeD CapS";
                 const string output = "filename-with-mixed-caps";
-
-                TestExecutionContext context = new TestExecutionContext();
-                IDocument[] inputs =
+                TestDocument document = new TestDocument(new MetadataItems
                 {
-                    context.GetDocument(new MetadataItems
-                    {
-                        new MetadataItem(Keys.SourceFileName, new FilePath(input))
-                    })
-                };
+                    new MetadataItem(Keys.SourceFileName, new FilePath(input))
+                });
                 FileName fileName = new FileName();
 
                 // When
-                IEnumerable<IDocument> documents = await fileName.ExecuteAsync(inputs, context).ToListAsync();
+                TestDocument result = await ExecuteAsync(document, fileName).SingleAsync();
 
                 // Then
-                Assert.AreEqual(output, documents.First().FilePath(Keys.WriteFileName).FullPath);
+                result.FilePath(Keys.WriteFileName).FullPath.ShouldBe(output);
             }
 
             [Test]
@@ -81,23 +74,18 @@ namespace Wyam.Core.Tests.Modules.Metadata
                 // Given
                 const string input = "this-is-a-.net-tag";
                 const string output = "this-is-a-.net-tag";
-
-                TestExecutionContext context = new TestExecutionContext();
-                IDocument[] inputs =
+                TestDocument document = new TestDocument(new MetadataItems
                 {
-                    context.GetDocument(new MetadataItems
-                    {
-                        new MetadataItem(Keys.SourceFileName, new FilePath(input))
-                    })
-                };
+                    new MetadataItem(Keys.SourceFileName, new FilePath(input))
+                });
                 FileName fileName = new FileName();
 
                 // When
                 fileName = fileName.WithAllowedCharacters(new string[] { "-" });
-                IEnumerable<IDocument> documents = await fileName.ExecuteAsync(inputs, context).ToListAsync();
+                TestDocument result = await ExecuteAsync(document, fileName).SingleAsync();
 
                 // Then
-                Assert.AreEqual(output, documents.First().FilePath(Keys.WriteFileName).FullPath);
+                result.FilePath(Keys.WriteFileName).FullPath.ShouldBe(output);
             }
 
             [Test]
@@ -106,23 +94,18 @@ namespace Wyam.Core.Tests.Modules.Metadata
                 // Given
                 const string input = "this-is-a-.";
                 const string output = "thisisa.";
-
-                TestExecutionContext context = new TestExecutionContext();
-                IDocument[] inputs =
+                TestDocument document = new TestDocument(new MetadataItems
                 {
-                    context.GetDocument(new MetadataItems
-                    {
-                        new MetadataItem(Keys.SourceFileName, new FilePath(input))
-                    })
-                };
+                    new MetadataItem(Keys.SourceFileName, new FilePath(input))
+                });
                 FileName fileName = new FileName();
 
                 // When
                 fileName = fileName.WithAllowedCharacters(new string[] { "." });
-                IEnumerable<IDocument> documents = await fileName.ExecuteAsync(inputs, context).ToListAsync();
+                TestDocument result = await ExecuteAsync(document, fileName).SingleAsync();
 
                 // Then
-                Assert.AreEqual(output, documents.First().FilePath(Keys.WriteFileName).FullPath);
+                result.FilePath(Keys.WriteFileName).FullPath.ShouldBe(output);
             }
 
             public static string[] ReservedChars => FileName.ReservedChars;
@@ -132,24 +115,20 @@ namespace Wyam.Core.Tests.Modules.Metadata
             public async Task FileNameIsConvertedCorrectlyWithReservedChar(string character)
             {
                 // Given
-                TestExecutionContext context = new TestExecutionContext();
                 string manyCharactersWow = new string(character[0], 10);
-                IDocument[] inputs =
+                TestDocument document = new TestDocument(new MetadataItems
                 {
-                    context.GetDocument(new MetadataItems
-                    {
-                        new MetadataItem(
-                            Keys.SourceFileName,
-                            string.Format("testing {0} some of {0} these {0}", manyCharactersWow))
-                    })
-                };
+                    new MetadataItem(
+                        Keys.SourceFileName,
+                        string.Format("testing {0} some of {0} these {0}", manyCharactersWow))
+                });
                 FileName fileName = new FileName();
 
                 // When
-                IEnumerable<IDocument> documents = await fileName.ExecuteAsync(inputs, context).ToListAsync();
+                TestDocument result = await ExecuteAsync(document, fileName).SingleAsync();
 
                 // Then
-                Assert.AreEqual("testing-some-of-these-", documents.First().FilePath(Keys.WriteFileName).FullPath);
+                result.FilePath(Keys.WriteFileName).FullPath.ShouldBe("testing-some-of-these-");
             }
 
             [TestCase(null)]
@@ -158,21 +137,17 @@ namespace Wyam.Core.Tests.Modules.Metadata
             public async Task IgnoresNullOrWhiteSpaceStrings(string input)
             {
                 // Given
-                TestExecutionContext context = new TestExecutionContext();
-                IDocument[] inputs =
+                TestDocument document = new TestDocument(new MetadataItems
                 {
-                    context.GetDocument(new MetadataItems
-                    {
-                        new MetadataItem(Keys.SourceFileName, input)
-                    })
-                };
+                    new MetadataItem(Keys.SourceFileName, input)
+                });
                 FileName fileName = new FileName();
 
                 // When
-                IEnumerable<IDocument> documents = await fileName.ExecuteAsync(inputs, context).ToListAsync();
+                TestDocument result = await ExecuteAsync(document, fileName).SingleAsync();
 
                 // Then
-                Assert.IsFalse(documents.First().ContainsKey(Keys.WriteFileName));
+                result.Keys.ShouldContain(Keys.WriteFileName);
             }
 
             [Test]
@@ -182,21 +157,17 @@ namespace Wyam.Core.Tests.Modules.Metadata
                 const string input = "myfile.html";
                 const string output = "myfile.html";
 
-                TestExecutionContext context = new TestExecutionContext();
-                IDocument[] inputs =
+                TestDocument document = new TestDocument(new MetadataItems
                 {
-                    context.GetDocument(new MetadataItems
-                    {
-                        new MetadataItem("MyKey", input)
-                    })
-                };
+                    new MetadataItem("MyKey", input)
+                });
                 FileName fileName = new FileName("MyKey");
 
                 // When
-                IEnumerable<IDocument> documents = await fileName.ExecuteAsync(inputs, context).ToListAsync();
+                TestDocument result = await ExecuteAsync(document, fileName).SingleAsync();
 
                 // Then
-                Assert.AreEqual(output, documents.First().FilePath(Keys.WriteFileName).FullPath);
+                result.FilePath(Keys.WriteFileName).FullPath.ShouldBe(output);
             }
 
             [Test]
@@ -205,22 +176,17 @@ namespace Wyam.Core.Tests.Modules.Metadata
                 // Given
                 const string input = "   myfile.html   ";
                 const string output = "myfile.html";
-
-                TestExecutionContext context = new TestExecutionContext();
-                IDocument[] inputs =
+                TestDocument document = new TestDocument(new MetadataItems
                 {
-                    context.GetDocument(new MetadataItems
-                    {
-                        new MetadataItem("MyKey", input)
-                    })
-                };
+                    new MetadataItem("MyKey", input)
+                });
                 FileName fileName = new FileName("MyKey");
 
                 // When
-                IEnumerable<IDocument> documents = await fileName.ExecuteAsync(inputs, context).ToListAsync();
+                TestDocument result = await ExecuteAsync(document, fileName).SingleAsync();
 
                 // Then
-                Assert.AreEqual(output, documents.First().FilePath(Keys.WriteFileName).FullPath);
+                result.FilePath(Keys.WriteFileName).FullPath.ShouldBe(output);
             }
         }
     }

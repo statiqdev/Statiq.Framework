@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using Wyam.Common;
 using Wyam.Common.Execution;
 using Wyam.Common.Modules;
-using Wyam.Common.Util;
 
 namespace Wyam.Testing.Execution
 {

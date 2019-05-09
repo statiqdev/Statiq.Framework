@@ -2,17 +2,19 @@
 using System.Linq;
 using System.Threading.Tasks;
 using NUnit.Framework;
+using Shouldly;
+using Wyam.Common;
 using Wyam.Common.Documents;
 using Wyam.Common.Meta;
-using Wyam.Common.Util;
 using Wyam.Core.Modules.Contents;
+using Wyam.Testing;
 using Wyam.Testing.Documents;
 using Wyam.Testing.Execution;
 
 namespace Wyam.Core.Tests.Modules.Contents
 {
     [TestFixture]
-    public class ReplaceFixture
+    public class ReplaceFixture : BaseFixture
     {
         [Test]
         public async Task RecursiveReplaceWithContentFinder()
@@ -34,15 +36,14 @@ namespace Wyam.Core.Tests.Modules.Contents
                             <span>baz</span>
                         </body>
                     </html>";
-            TestExecutionContext context = new TestExecutionContext();
             TestDocument document = new TestDocument(input);
             Replace replace = new Replace(@"(<span>.*<\/span>)", _ => "<span>baz</span>");
 
             // When
-            IList<IDocument> results = await replace.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
+            TestDocument result = await ExecuteAsync(document, replace).SingleAsync();
 
             // Then
-            Assert.That(results.First().Content, Is.EquivalentTo(expected));
+            result.Content.ShouldBe(expected);
         }
 
         [Test]
@@ -65,18 +66,19 @@ namespace Wyam.Core.Tests.Modules.Contents
                             <div>Buzz</div>
                         </body>
                     </html>";
-            TestExecutionContext context = new TestExecutionContext();
-            TestDocument document = new TestDocument(new MetadataItems
-            {
-                { "Fizz", "Buzz" }
-            }, input);
+            TestDocument document = new TestDocument(
+                new MetadataItems
+                {
+                    { "Fizz", "Buzz" }
+                },
+                input);
             Replace replace = new Replace(@"(<span>.*<\/span>)", (_, doc) => $"<div>{doc["Fizz"]}</div>");
 
             // When
-            IList<IDocument> results = await replace.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
+            TestDocument result = await ExecuteAsync(document, replace).SingleAsync();
 
             // Then
-            Assert.That(results.First().Content, Is.EquivalentTo(expected));
+            result.Content.ShouldBe(expected);
         }
     }
 }

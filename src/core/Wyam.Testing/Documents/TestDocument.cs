@@ -2,7 +2,6 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
-using System.Text;
 using System.Threading.Tasks;
 using Wyam.Common.Content;
 using Wyam.Common.Documents;
@@ -72,10 +71,61 @@ namespace Wyam.Testing.Documents
             }
         }
 
-        /// <inhertdoc />
         public TestDocument(IEnumerable<KeyValuePair<string, object>> metadata, IContentProvider contentProvider)
             : this(metadata)
         {
+            ContentProvider = contentProvider;
+        }
+
+        public TestDocument(FilePath source, FilePath destination, IEnumerable<KeyValuePair<string, object>> metadata, string content)
+            : this(metadata)
+        {
+            Source = source;
+            Destination = destination;
+            TestMemoryStreamFactory memoryStreamFactory = new TestMemoryStreamFactory();
+            ContentProvider = new StreamContent(memoryStreamFactory, memoryStreamFactory.GetStream(content));
+        }
+
+        public TestDocument(FilePath source, FilePath destination, IEnumerable<KeyValuePair<string, object>> metadata, Stream content)
+            : this(metadata)
+        {
+            Source = source;
+            Destination = destination;
+            TestMemoryStreamFactory memoryStreamFactory = new TestMemoryStreamFactory();
+            ContentProvider = new StreamContent(memoryStreamFactory, content);
+        }
+
+        public TestDocument(FilePath source, FilePath destination, IEnumerable<KeyValuePair<string, object>> metadata, IContentProvider contentProvider)
+            : this(metadata)
+        {
+            Source = source;
+            Destination = destination;
+            ContentProvider = contentProvider;
+        }
+
+        public TestDocument(FilePath source, FilePath destination, string content)
+            : this()
+        {
+            Source = source;
+            Destination = destination;
+            TestMemoryStreamFactory memoryStreamFactory = new TestMemoryStreamFactory();
+            ContentProvider = new StreamContent(memoryStreamFactory, memoryStreamFactory.GetStream(content));
+        }
+
+        public TestDocument(FilePath source, FilePath destination, Stream content)
+            : this()
+        {
+            Source = source;
+            Destination = destination;
+            TestMemoryStreamFactory memoryStreamFactory = new TestMemoryStreamFactory();
+            ContentProvider = new StreamContent(memoryStreamFactory, content);
+        }
+
+        public TestDocument(FilePath source, FilePath destination, IContentProvider contentProvider)
+            : this()
+        {
+            Source = source;
+            Destination = destination;
             ContentProvider = contentProvider;
         }
 
@@ -144,6 +194,8 @@ namespace Wyam.Testing.Documents
 
         public async Task<Stream> GetStreamAsync() =>
             ContentProvider == null ? Stream.Null : await ContentProvider.GetStreamAsync();
+
+        public string Content => GetStringAsync().Result;
 
         /// <inhertdoc />
         public IMetadata Metadata => this;

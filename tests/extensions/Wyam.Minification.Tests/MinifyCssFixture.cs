@@ -3,8 +3,8 @@ using System.Linq;
 using System.Threading.Tasks;
 using NUnit.Framework;
 using Shouldly;
+using Wyam.Common;
 using Wyam.Common.Documents;
-using Wyam.Common.Util;
 using Wyam.Testing;
 using Wyam.Testing.Documents;
 using Wyam.Testing.Execution;
@@ -32,15 +32,14 @@ namespace Wyam.Minification.Tests
     font-weight: normal;
 }";
                 const string output = ".classname{font-weight:normal}";
-                TestExecutionContext context = new TestExecutionContext();
                 TestDocument document = new TestDocument(input);
                 MinifyCss minifyCss = new MinifyCss();
 
                 // When
-                IList<IDocument> results = await minifyCss.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
+                TestDocument result = await ExecuteAsync(document, minifyCss).SingleAsync();
 
                 // Then
-                (await results.Single().GetStringAsync()).ShouldBe(output, StringCompareShould.IgnoreLineEndings);
+                result.Content.ShouldBe(output, StringCompareShould.IgnoreLineEndings);
             }
         }
     }

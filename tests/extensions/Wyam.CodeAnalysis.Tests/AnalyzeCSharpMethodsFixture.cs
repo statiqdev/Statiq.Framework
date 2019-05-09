@@ -9,7 +9,8 @@ using Wyam.Common.Execution;
 using Wyam.Common.IO;
 using Wyam.Common.Meta;
 using Wyam.Common.Modules;
-using Wyam.Common.Util;
+using Wyam.Testing.Documents;
+using Wyam.Testing.Execution;
 
 namespace Wyam.CodeAnalysis.Tests
 {
@@ -40,12 +41,12 @@ namespace Wyam.CodeAnalysis.Tests
                             }
                         }
                     ";
-                    IDocument document = GetDocument(code);
-                    IExecutionContext context = GetContext();
+                    TestDocument document = GetDocument(code);
+                    TestExecutionContext context = GetContext();
                     IModule module = new AnalyzeCSharp();
 
                     // When
-                    List<IDocument> results = await module.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
+                    IReadOnlyList<TestDocument> results = await ExecuteAsync(document, context, module);
 
                     // Then
                     CollectionAssert.AreEquivalent(
@@ -79,12 +80,12 @@ namespace Wyam.CodeAnalysis.Tests
                         }
                     }
                 ";
-                IDocument document = GetDocument(code);
-                IExecutionContext context = GetContext();
+                TestDocument document = GetDocument(code);
+                TestExecutionContext context = GetContext();
                 IModule module = new AnalyzeCSharp();
 
                 // When
-                List<IDocument> results = await module.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
+                IReadOnlyList<TestDocument> results = await ExecuteAsync(document, context, module);
 
                 // Then
                 CollectionAssert.AreEquivalent(
@@ -107,12 +108,12 @@ namespace Wyam.CodeAnalysis.Tests
                         }
                     }
                 ";
-                IDocument document = GetDocument(code);
-                IExecutionContext context = GetContext();
+                TestDocument document = GetDocument(code);
+                TestExecutionContext context = GetContext();
                 IModule module = new AnalyzeCSharp();
 
                 // When
-                List<IDocument> results = await module.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
+                IReadOnlyList<TestDocument> results = await ExecuteAsync(document, context, module);
 
                 // Then
                 Assert.AreEqual("Blue", GetMember(results, "Blue", "Green").Get<IDocument>("ContainingType")["Name"]);
@@ -140,12 +141,12 @@ namespace Wyam.CodeAnalysis.Tests
                         }
                     }
                 ";
-                IDocument document = GetDocument(code);
-                IExecutionContext context = GetContext();
+                TestDocument document = GetDocument(code);
+                TestExecutionContext context = GetContext();
                 IModule module = new AnalyzeCSharp();
 
                 // When
-                List<IDocument> results = await module.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
+                IReadOnlyList<TestDocument> results = await ExecuteAsync(document, context, module);
 
                 // Then
                 CollectionAssert.AreEquivalent(
@@ -173,12 +174,12 @@ namespace Wyam.CodeAnalysis.Tests
                         }
                     }
                 ";
-                IDocument document = GetDocument(code);
-                IExecutionContext context = GetContext();
+                TestDocument document = GetDocument(code);
+                TestExecutionContext context = GetContext();
                 IModule module = new AnalyzeCSharp();
 
                 // When
-                List<IDocument> results = await module.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
+                IReadOnlyList<TestDocument> results = await ExecuteAsync(document, context, module);
 
                 // Then
                 Assert.AreEqual("X()", GetMember(results, "Yellow", "X")["DisplayName"]);
@@ -216,12 +217,12 @@ namespace Wyam.CodeAnalysis.Tests
                         }
                     }
                 ";
-                IDocument document = GetDocument(code);
-                IExecutionContext context = GetContext();
+                TestDocument document = GetDocument(code);
+                TestExecutionContext context = GetContext();
                 IModule module = new AnalyzeCSharp();
 
                 // When
-                List<IDocument> results = await module.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
+                IReadOnlyList<TestDocument> results = await ExecuteAsync(document, context, module);
 
                 // Then
                 Assert.AreEqual("int", GetMember(results, "Blue", "Green").Get<IDocument>("ReturnType")["DisplayName"]);
@@ -245,12 +246,12 @@ namespace Wyam.CodeAnalysis.Tests
                         }
                     }
                 ";
-                IDocument document = GetDocument(code);
-                IExecutionContext context = GetContext();
+                TestDocument document = GetDocument(code);
+                TestExecutionContext context = GetContext();
                 IModule module = new AnalyzeCSharp();
 
                 // When
-                List<IDocument> results = await module.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
+                IReadOnlyList<TestDocument> results = await ExecuteAsync(document, context, module);
 
                 // Then
                 Assert.AreEqual("Red", GetMember(results, "Red", "Blue").Get<IDocument>("ReturnType").Get<IDocument>("DeclaringType")["Name"]);
@@ -275,12 +276,12 @@ namespace Wyam.CodeAnalysis.Tests
                         }
                     }
                 ";
-                IDocument document = GetDocument(code);
-                IExecutionContext context = GetContext();
+                TestDocument document = GetDocument(code);
+                TestExecutionContext context = GetContext();
                 IModule module = new AnalyzeCSharp().WhereSymbol(x => x.Name != "Green");
 
                 // When
-                List<IDocument> results = await module.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
+                IReadOnlyList<TestDocument> results = await ExecuteAsync(document, context, module);
 
                 // Then
                 CollectionAssert.AreEquivalent(new[] { string.Empty, "Foo", "Blue", "Red" }, results.Select(x => x["Name"]));
@@ -304,12 +305,12 @@ namespace Wyam.CodeAnalysis.Tests
                         }
                     }
                 ";
-                IDocument document = GetDocument(code);
-                IExecutionContext context = GetContext();
+                TestDocument document = GetDocument(code);
+                TestExecutionContext context = GetContext();
                 IModule module = new AnalyzeCSharp();
 
                 // When
-                List<IDocument> results = await module.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
+                IReadOnlyList<TestDocument> results = await ExecuteAsync(document, context, module);
 
                 // Then
                 Assert.AreEqual("Int32", ((IDocument)GetParameter(results, "Yellow", "X", "z")["Type"])["Name"]);
@@ -327,12 +328,12 @@ namespace Wyam.CodeAnalysis.Tests
                         }
                     }
                 ";
-                IDocument document = GetDocument(code);
-                IExecutionContext context = GetContext();
+                TestDocument document = GetDocument(code);
+                TestExecutionContext context = GetContext();
                 IModule module = new AnalyzeCSharp();
 
                 // When
-                List<IDocument> results = await module.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
+                IReadOnlyList<TestDocument> results = await ExecuteAsync(document, context, module);
 
                 // Then
                 IDocument x = GetParameter(results, "Yellow", "X", "z");

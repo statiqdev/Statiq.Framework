@@ -26,7 +26,7 @@ using Microsoft.CodeAnalysis.Razor;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.ObjectPool;
-using Wyam.Common.Util;
+using Wyam.Common;
 
 namespace Wyam.Razor
 {

@@ -10,10 +10,10 @@ using AngleSharp.Dom.Html;
 using AngleSharp.Parser.Html;
 using Polly;
 using Polly.Retry;
+using Wyam.Common;
 using Wyam.Common.Execution;
 using Wyam.Common.IO;
 using Wyam.Common.Modules;
-using Wyam.Common.Util;
 
 namespace Wyam.Html
 {

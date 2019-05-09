@@ -31,17 +31,14 @@ namespace Wyam.Core.Tests.Shortcodes.Metadata
                 Core.Shortcodes.Metadata.Meta shortcode = new Core.Shortcodes.Metadata.Meta();
 
                 // When
-                IShortcodeResult result = await shortcode.ExecuteAsync(args, string.Empty, document, context);
+                TestDocument result = (TestDocument)await shortcode.ExecuteAsync(args, string.Empty, document, context);
 
                 // Then
-                using (TextReader reader = new StreamReader(result.Stream))
-                {
-                    reader.ReadToEnd().ShouldBe("Bar");
-                }
+                result.Content.ShouldBe("Bar");
             }
 
             [Test]
-            public async Task NullStreamForMissingMetadata()
+            public async Task EmptyForMissingMetadata()
             {
                 // Given
                 TestExecutionContext context = new TestExecutionContext();
@@ -56,10 +53,10 @@ namespace Wyam.Core.Tests.Shortcodes.Metadata
                 Core.Shortcodes.Metadata.Meta shortcode = new Core.Shortcodes.Metadata.Meta();
 
                 // When
-                IShortcodeResult result = await shortcode.ExecuteAsync(args, string.Empty, document, context);
+                TestDocument result = (TestDocument)await shortcode.ExecuteAsync(args, string.Empty, document, context);
 
                 // Then
-                result.Stream.ShouldBeNull();
+                result.Content.ShouldBeEmpty();
             }
         }
     }

@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using NUnit.Framework;
+using Wyam.Common;
 using Wyam.Common.Documents;
 using Wyam.Common.Execution;
-using Wyam.Common.Util;
 using Wyam.Core.Modules.Control;
 using Wyam.Testing;
 using Wyam.Testing.Documents;
@@ -23,13 +23,12 @@ namespace Wyam.Core.Tests.Modules.Control
             public async Task AppendsContent()
             {
                 // Given
-                TestExecutionContext context = new TestExecutionContext();
-                IDocument a = new TestDocument("a");
-                IDocument b = new TestDocument("b");
+                TestDocument a = new TestDocument("a");
+                TestDocument b = new TestDocument("b");
                 Combine combine = new Combine();
 
                 // When
-                List<IDocument> results = await combine.ExecuteAsync(new[] { a, b }, context).ToListAsync();  // Make sure to materialize the result list
+                IReadOnlyList<TestDocument> results = await ExecuteAsync(new[] { a, b }, combine);
 
                 // Then
                 CollectionAssert.AreEqual(new[] { "ab" }, await results.SelectAsync(async x => await x.GetStringAsync()));
@@ -39,13 +38,12 @@ namespace Wyam.Core.Tests.Modules.Control
             public async Task MergesMetadata()
             {
                 // Given
-                TestExecutionContext context = new TestExecutionContext();
-                IDocument a = new TestDocument(new Dictionary<string, object>
+                TestDocument a = new TestDocument(new Dictionary<string, object>
                 {
                     { "a", 1 },
                     { "b", 2 }
                 });
-                IDocument b = new TestDocument(new Dictionary<string, object>
+                TestDocument b = new TestDocument(new Dictionary<string, object>
                 {
                     { "b", 3 },
                     { "c", 4 }
@@ -53,7 +51,7 @@ namespace Wyam.Core.Tests.Modules.Control
                 Combine combine = new Combine();
 
                 // When
-                List<IDocument> results = await combine.ExecuteAsync(new[] { a, b }, context).ToListAsync();  // Make sure to materialize the result list
+                IReadOnlyList<TestDocument> results = await ExecuteAsync(new[] { a, b }, combine);
 
                 // Then
                 CollectionAssert.AreEquivalent(

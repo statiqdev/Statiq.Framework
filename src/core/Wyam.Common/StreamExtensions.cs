@@ -1,7 +1,7 @@
 ﻿using System.IO;
 using System.Text;
 
-namespace Wyam.Common.Util
+namespace Wyam.Common
 {
     /// <summary>
     /// Extension methods for use with <see cref="Stream"/>.

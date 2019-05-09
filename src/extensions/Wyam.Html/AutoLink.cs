@@ -12,7 +12,7 @@ using Wyam.Common.Configuration;
 using Wyam.Common.Modules;
 using Wyam.Common.Execution;
 using Wyam.Common.Tracing;
-using Wyam.Common.Util;
+using Wyam.Common;
 
 namespace Wyam.Html
 {

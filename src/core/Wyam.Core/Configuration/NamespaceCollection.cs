@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using System.Linq;
 using ConcurrentCollections;
+using Wyam.Common;
 using Wyam.Common.Configuration;
 using Wyam.Common.Execution;
-using Wyam.Common.Util;
 
 namespace Wyam.Core.Configuration
 {

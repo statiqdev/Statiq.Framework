@@ -26,7 +26,7 @@ namespace Wyam.Html.Tests
             public async Task FindsLinksInBody(string tag, string link)
             {
                 // Given
-                IDocument document = new TestDocument($"<html><head></head><body>{tag}</body></html>");
+                TestDocument document = new TestDocument($"<html><head></head><body>{tag}</body></html>");
                 HtmlParser parser = new HtmlParser();
                 ConcurrentDictionary<string, ConcurrentBag<(string source, string outerHtml)>> links =
                     new ConcurrentDictionary<string, ConcurrentBag<(string source, string outerHtml)>>();
@@ -47,7 +47,7 @@ namespace Wyam.Html.Tests
             public async Task FindsLinksInHead(string tag, string link)
             {
                 // Given
-                IDocument document = new TestDocument($"<html><head>{tag}</head><body></body></html>");
+                TestDocument document = new TestDocument($"<html><head>{tag}</head><body></body></html>");
                 HtmlParser parser = new HtmlParser();
                 ConcurrentDictionary<string, ConcurrentBag<(string source, string outerHtml)>> links =
                     new ConcurrentDictionary<string, ConcurrentBag<(string source, string outerHtml)>>();

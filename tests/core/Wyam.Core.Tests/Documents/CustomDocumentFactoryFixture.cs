@@ -26,7 +26,7 @@ namespace Wyam.Core.Tests.Documents
                 TestExecutionContext context = new TestExecutionContext();
 
                 // When
-                IDocument resultDocument = customDocumentFactory.GetDocument(context);
+                IDocument resultDocument = customDocumentFactory.GetDocument(context, null, null, null, null, null);
 
                 // Then
                 Assert.IsInstanceOf<TestDocument>(resultDocument);
@@ -48,7 +48,7 @@ namespace Wyam.Core.Tests.Documents
                 CloneReturnsNullDocument document = new CloneReturnsNullDocument();
 
                 // When, Then
-                Assert.Throws<Exception>(() => customDocumentFactory.GetDocument(context, document, new Dictionary<string, object>()));
+                Assert.Throws<Exception>(() => customDocumentFactory.GetDocument(context, document, null, null, new Dictionary<string, object>(), null));
             }
 
             [Test]
@@ -62,7 +62,7 @@ namespace Wyam.Core.Tests.Documents
                 CloneReturnsSameDocument document = new CloneReturnsSameDocument();
 
                 // When, Then
-                Assert.Throws<Exception>(() => customDocumentFactory.GetDocument(context, document, new Dictionary<string, object>()));
+                Assert.Throws<Exception>(() => customDocumentFactory.GetDocument(context, document, null, null, new Dictionary<string, object>(), null));
             }
 
             [Test]
@@ -74,16 +74,19 @@ namespace Wyam.Core.Tests.Documents
                 DocumentFactory documentFactory = new DocumentFactory(initialMetadata);
                 CustomDocumentFactory<TestDocument> customDocumentFactory = new CustomDocumentFactory<TestDocument>(documentFactory);
                 TestExecutionContext context = new TestExecutionContext();
-                CustomDocument sourceDocument = (CustomDocument)customDocumentFactory.GetDocument(context);
+                CustomDocument sourceDocument = (CustomDocument)customDocumentFactory.GetDocument(context, null, null, null, null, null);
 
                 // When
                 IDocument resultDocument = customDocumentFactory.GetDocument(
                     context,
                     sourceDocument,
+                    null,
+                    null,
                     new Dictionary<string, object>
                     {
                         { "Baz", "Bat" }
-                    });
+                    },
+                    null);
 
                 // Then
                 CollectionAssert.AreEquivalent(

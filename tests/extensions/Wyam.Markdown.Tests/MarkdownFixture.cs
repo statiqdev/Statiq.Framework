@@ -4,9 +4,9 @@ using System.Linq;
 using System.Threading.Tasks;
 using NUnit.Framework;
 using Shouldly;
+using Wyam.Common;
 using Wyam.Common.Documents;
 using Wyam.Common.Meta;
-using Wyam.Common.Util;
 using Wyam.Testing;
 using Wyam.Testing.Documents;
 using Wyam.Testing.Execution;
@@ -30,25 +30,25 @@ namespace Wyam.Markdown.Tests
 <em>Line 2</em></p>
 <h1>Line 3</h1>
 ";
-                TestExecutionContext context = new TestExecutionContext();
                 TestDocument document = new TestDocument(input);
                 Markdown markdown = new Markdown();
 
                 // When
-                IList<IDocument> results = await markdown.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
+                TestDocument result = await ExecuteAsync(document, markdown).SingleAsync();
 
                 // Then
-                (await results.Single().GetStringAsync()).ShouldBe(output, StringCompareShould.IgnoreLineEndings);
+                result.Content.ShouldBe(output, StringCompareShould.IgnoreLineEndings);
             }
 
             [Test]
             public async Task CanUseExternalExtensionDirectly()
             {
+                TestDocument document = new TestDocument();
                 TestMarkdownExtension extension = new TestMarkdownExtension();
                 Markdown markdown = new Markdown().UseExtension(extension);
 
                 // When
-                await markdown.ExecuteAsync(new[] { new TestDocument(string.Empty) }, new TestExecutionContext()).ToListAsync();  // Make sure to materialize the result list
+                await ExecuteAsync(document, markdown);
 
                 // Then
                 extension.ReceivedSetup.ShouldBeTrue();
@@ -60,17 +60,16 @@ namespace Wyam.Markdown.Tests
                 const string input = "![Alt text](/path/to/img.jpg)";
                 const string output = @"<p><img src=""/path/to/img.jpg"" class=""ui spaced image"" alt=""Alt text"" /></p>
 ";
-                TestExecutionContext context = new TestExecutionContext();
                 TestDocument document = new TestDocument(input);
                 Type[] o = { typeof(TestMarkdownExtension) };
                 IEnumerable<Type> cast = o as IEnumerable<Type>;
                 Markdown markdown = new Markdown().UseExtensions(cast);
 
                 // When
-                IList<IDocument> results = await markdown.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
+                TestDocument result = await ExecuteAsync(document, markdown).SingleAsync();
 
                 // Then
-                (await results.Single().GetStringAsync()).ShouldBe(output, StringCompareShould.IgnoreLineEndings);
+                result.Content.ShouldBe(output, StringCompareShould.IgnoreLineEndings);
             }
 
             [Test]
@@ -79,8 +78,6 @@ namespace Wyam.Markdown.Tests
                 const string input = "![Alt text](/path/to/img.jpg)";
                 const string output = @"<p><img src=""/path/to/img.jpg"" class=""ui spaced image second"" alt=""Alt text"" /></p>
 ";
-
-                TestExecutionContext context = new TestExecutionContext();
                 TestDocument document = new TestDocument(input);
                 Type[] o =
                 {
@@ -91,10 +88,10 @@ namespace Wyam.Markdown.Tests
                 Markdown markdown = new Markdown().UseExtensions(cast);
 
                 // When
-                IList<IDocument> results = await markdown.ExecuteAsync(new[] { document }, context).ToListAsync();
+                TestDocument result = await ExecuteAsync(document, markdown).SingleAsync();
 
                 // Then
-                (await results.Single().GetStringAsync()).ShouldBe(output, StringCompareShould.IgnoreLineEndings);
+                result.Content.ShouldBe(output, StringCompareShould.IgnoreLineEndings);
             }
 
             [Test]
@@ -104,15 +101,14 @@ namespace Wyam.Markdown.Tests
                 const string input = "[link](url){#id .class}";
                 const string output = @"<p><a href=""url"">link</a>{#id .class}</p>
 ";
-                TestExecutionContext context = new TestExecutionContext();
                 TestDocument document = new TestDocument(input);
                 Markdown markdown = new Markdown();
 
                 // When
-                IList<IDocument> results = await markdown.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
+                TestDocument result = await ExecuteAsync(document, markdown).SingleAsync();
 
                 // Then
-                (await results.Single().GetStringAsync()).ShouldBe(output, StringCompareShould.IgnoreLineEndings);
+                result.Content.ShouldBe(output, StringCompareShould.IgnoreLineEndings);
             }
 
             [Test]
@@ -122,15 +118,14 @@ namespace Wyam.Markdown.Tests
                 const string input = "[link](url){#id .class}";
                 const string output = @"<p><a href=""url"" id=""id"" class=""class"">link</a></p>
 ";
-                TestExecutionContext context = new TestExecutionContext();
                 TestDocument document = new TestDocument(input);
                 Markdown markdown = new Markdown().UseExtensions();
 
                 // When
-                IList<IDocument> results = await markdown.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
+                TestDocument result = await ExecuteAsync(document, markdown).SingleAsync();
 
                 // Then
-                (await results.Single().GetStringAsync()).ShouldBe(output, StringCompareShould.IgnoreLineEndings);
+                result.Content.ShouldBe(output, StringCompareShould.IgnoreLineEndings);
             }
 
             [Test]
@@ -144,15 +139,14 @@ namespace Wyam.Markdown.Tests
 :   Pomaceous fruit of plants of the genus Malus in
 the family Rosaceae.</p>
 ";
-                TestExecutionContext context = new TestExecutionContext();
                 TestDocument document = new TestDocument(input);
                 Markdown markdown = new Markdown();
 
                 // When
-                IList<IDocument> results = await markdown.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
+                TestDocument result = await ExecuteAsync(document, markdown).SingleAsync();
 
                 // Then
-                (await results.Single().GetStringAsync()).ShouldBe(output, StringCompareShould.IgnoreLineEndings);
+                result.Content.ShouldBe(output, StringCompareShould.IgnoreLineEndings);
             }
 
             [Test]
@@ -168,15 +162,14 @@ the family Rosaceae.</p>
 the family Rosaceae.</dd>
 </dl>
 ";
-                TestExecutionContext context = new TestExecutionContext();
                 TestDocument document = new TestDocument(input);
                 Markdown markdown = new Markdown().UseConfiguration("definitionlists");
 
                 // When
-                IList<IDocument> results = await markdown.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
+                TestDocument result = await ExecuteAsync(document, markdown).SingleAsync();
 
                 // Then
-                (await results.Single().GetStringAsync()).ShouldBe(output, StringCompareShould.IgnoreLineEndings);
+                result.Content.ShouldBe(output, StringCompareShould.IgnoreLineEndings);
             }
 
             [Test]
@@ -186,15 +179,14 @@ the family Rosaceae.</dd>
                 const string input = "Looking @Good, Man!";
                 const string output = @"<p>Looking &#64;Good, Man!</p>
 ";
-                TestExecutionContext context = new TestExecutionContext();
                 TestDocument document = new TestDocument(input);
                 Markdown markdown = new Markdown();
 
                 // When
-                IList<IDocument> results = await markdown.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
+                TestDocument result = await ExecuteAsync(document, markdown).SingleAsync();
 
                 // Then
-                (await results.Single().GetStringAsync()).ShouldBe(output, StringCompareShould.IgnoreLineEndings);
+                result.Content.ShouldBe(output, StringCompareShould.IgnoreLineEndings);
             }
 
             [Test]
@@ -204,15 +196,14 @@ the family Rosaceae.</dd>
                 const string input = @"Looking @Good, \\@Man!";
                 const string output = @"<p>Looking &#64;Good, @Man!</p>
 ";
-                TestExecutionContext context = new TestExecutionContext();
                 TestDocument document = new TestDocument(input);
                 Markdown markdown = new Markdown();
 
                 // When
-                IList<IDocument> results = await markdown.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
+                TestDocument result = await ExecuteAsync(document, markdown).SingleAsync();
 
                 // Then
-                (await results.Single().GetStringAsync()).ShouldBe(output, StringCompareShould.IgnoreLineEndings);
+                result.Content.ShouldBe(output, StringCompareShould.IgnoreLineEndings);
             }
 
             [Test]
@@ -222,15 +213,14 @@ the family Rosaceae.</dd>
                 const string input = "Looking @Good, Man!";
                 const string output = @"<p>Looking @Good, Man!</p>
 ";
-                TestExecutionContext context = new TestExecutionContext();
                 TestDocument document = new TestDocument(input);
                 Markdown markdown = new Markdown().EscapeAt(false);
 
                 // When
-                IList<IDocument> results = await markdown.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
+                TestDocument result = await ExecuteAsync(document, markdown).SingleAsync();
 
                 // Then
-                (await results.Single().GetStringAsync()).ShouldBe(output, StringCompareShould.IgnoreLineEndings);
+                result.Content.ShouldBe(output, StringCompareShould.IgnoreLineEndings);
             }
 
             [Test]
@@ -244,7 +234,6 @@ the family Rosaceae.</dd>
 <em>Line 2</em></p>
 <h1>Line 3</h1>
 ";
-                TestExecutionContext context = new TestExecutionContext();
                 TestDocument document = new TestDocument(new MetadataItems
                 {
                     { "meta", input }
@@ -252,10 +241,10 @@ the family Rosaceae.</dd>
                 Markdown markdown = new Markdown("meta");
 
                 // When
-                IList<IDocument> results = await markdown.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
+                TestDocument result = await ExecuteAsync(document, markdown).SingleAsync();
 
                 // Then
-                results.Single().String("meta").ShouldBe(output, StringCompareShould.IgnoreLineEndings);
+                result.String("meta").ShouldBe(output, StringCompareShould.IgnoreLineEndings);
             }
 
             [Test]
@@ -269,7 +258,6 @@ the family Rosaceae.</dd>
 <em>Line 2</em></p>
 <h1>Line 3</h1>
 ";
-                TestExecutionContext context = new TestExecutionContext();
                 TestDocument document = new TestDocument(new MetadataItems
                 {
                     { "meta", input }
@@ -277,25 +265,24 @@ the family Rosaceae.</dd>
                 Markdown markdown = new Markdown("meta", "meta2");
 
                 // When
-                IList<IDocument> results = await markdown.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
+                TestDocument result = await ExecuteAsync(document, markdown).SingleAsync();
 
                 // Then
-                results.Single().String("meta2").ShouldBe(output, StringCompareShould.IgnoreLineEndings);
+                result.String("meta2").ShouldBe(output, StringCompareShould.IgnoreLineEndings);
             }
 
             [Test]
             public async Task DoesNothingIfMetadataKeyDoesNotExist()
             {
                 // Given
-                TestExecutionContext context = new TestExecutionContext();
                 TestDocument document = new TestDocument();
                 Markdown markdown = new Markdown("meta");
 
                 // When
-                IList<IDocument> results = await markdown.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
+                TestDocument result = await ExecuteAsync(document, markdown).SingleAsync();
 
                 // Then
-                results.ShouldBe(new[] { document });
+                result.ShouldBe(document);
             }
 
             [Test]
@@ -310,10 +297,10 @@ the family Rosaceae.</dd>
                 Markdown markdown = new Markdown().PrependLinkRoot(true);
 
                 // When
-                IList<IDocument> results = await markdown.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
+                TestDocument result = await ExecuteAsync(document, context, markdown).SingleAsync();
 
                 // Then
-                (await results.Single().GetStringAsync()).ShouldBe(output, StringCompareShould.IgnoreLineEndings);
+                result.Content.ShouldBe(output, StringCompareShould.IgnoreLineEndings);
             }
         }
     }

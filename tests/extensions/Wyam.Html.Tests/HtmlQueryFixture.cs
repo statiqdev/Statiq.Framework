@@ -7,7 +7,6 @@ using Shouldly;
 using Wyam.Common.Documents;
 using Wyam.Common.Execution;
 using Wyam.Common.Meta;
-using Wyam.Common.Util;
 using Wyam.Testing;
 using Wyam.Testing.Documents;
 using Wyam.Testing.Execution;
@@ -35,12 +34,11 @@ namespace Wyam.Html.Tests
                         </body>
                     </html>";
                 TestDocument document = new TestDocument(input);
-                TestExecutionContext context = new TestExecutionContext();
                 HtmlQuery query = new HtmlQuery("p")
                     .GetOuterHtml("Key");
 
                 // When
-                IList<IDocument> results = await query.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
+                IReadOnlyList<TestDocument> results = await ExecuteAsync(document, query);
 
                 // Then
                 results.Select(x => x["Key"].ToString()).ShouldBe(new[]
@@ -65,12 +63,11 @@ namespace Wyam.Html.Tests
                         </body>
                     </html>";
                 TestDocument document = new TestDocument(input);
-                TestExecutionContext context = new TestExecutionContext();
                 HtmlQuery query = new HtmlQuery("p")
                     .GetOuterHtml("Key");
 
                 // When
-                IList<IDocument> results = await query.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
+                IReadOnlyList<TestDocument> results = await ExecuteAsync(document, query);
 
                 // Then
                 results.Select(x => x["Key"].ToString()).ShouldBe(new[]
@@ -95,13 +92,12 @@ namespace Wyam.Html.Tests
                         </body>
                     </html>";
                 TestDocument document = new TestDocument(input);
-                TestExecutionContext context = new TestExecutionContext();
                 HtmlQuery query = new HtmlQuery("p")
                     .GetOuterHtml("Key")
                     .First();
 
                 // When
-                IList<IDocument> results = await query.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
+                IReadOnlyList<TestDocument> results = await ExecuteAsync(document, query);
 
                 // Then
                 results.Select(x => x["Key"].ToString()).ShouldBe(new[]
@@ -125,12 +121,11 @@ namespace Wyam.Html.Tests
                         </body>
                     </html>";
                 TestDocument document = new TestDocument(input);
-                TestExecutionContext context = new TestExecutionContext();
                 HtmlQuery query = new HtmlQuery("p")
                     .GetInnerHtml("Key");
 
                 // When
-                IList<IDocument> results = await query.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
+                IReadOnlyList<TestDocument> results = await ExecuteAsync(document, query);
 
                 // Then
                 results.Select(x => x["Key"].ToString()).ShouldBe(new[]
@@ -155,13 +150,12 @@ namespace Wyam.Html.Tests
                         </body>
                     </html>";
                 TestDocument document = new TestDocument(input);
-                TestExecutionContext context = new TestExecutionContext();
                 HtmlQuery query = new HtmlQuery("p")
                     .GetInnerHtml("InnerHtmlKey")
                     .GetOuterHtml("OuterHtmlKey");
 
                 // When
-                IList<IDocument> results = await query.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
+                IReadOnlyList<TestDocument> results = await ExecuteAsync(document, query);
 
                 // Then
                 results.Select(x => x["InnerHtmlKey"].ToString()).ShouldBe(new[]
@@ -191,15 +185,14 @@ namespace Wyam.Html.Tests
                         </body>
                     </html>";
                 TestDocument document = new TestDocument(input);
-                TestExecutionContext context = new TestExecutionContext();
                 HtmlQuery query = new HtmlQuery("p")
                     .SetContent();
 
                 // When
-                List<IDocument> results = await query.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
+                IReadOnlyList<TestDocument> results = await ExecuteAsync(document, query);
 
                 // Then
-                (await results.SelectAsync(async x => await x.GetStringAsync())).ShouldBe(new[]
+                results.Select(x => x.Content).ShouldBe(new[]
                 {
                     "<p>This is some Foobar text</p>",
                     "<p>This is some other text</p>"
@@ -221,15 +214,14 @@ namespace Wyam.Html.Tests
                         </body>
                     </html>";
                 TestDocument document = new TestDocument(input);
-                TestExecutionContext context = new TestExecutionContext();
                 HtmlQuery query = new HtmlQuery("p")
                     .SetContent(false);
 
                 // When
-                List<IDocument> results = await query.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
+                IReadOnlyList<TestDocument> results = await ExecuteAsync(document, query);
 
                 // Then
-                (await results.SelectAsync(async x => await x.GetStringAsync())).ShouldBe(new[]
+                results.Select(x => x.Content).ShouldBe(new[]
                 {
                     "This is some Foobar text",
                     "This is some other text"
@@ -251,17 +243,16 @@ namespace Wyam.Html.Tests
                         </body>
                     </html>";
                 TestDocument document = new TestDocument(input);
-                TestExecutionContext context = new TestExecutionContext();
                 HtmlQuery query = new HtmlQuery("p")
                     .SetContent()
                     .GetInnerHtml("InnerHtmlKey")
                     .GetOuterHtml("OuterHtmlKey");
 
                 // When
-                List<IDocument> results = await query.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
+                IReadOnlyList<TestDocument> results = await ExecuteAsync(document, query);
 
                 // Then
-                (await results.SelectAsync(async x => await x.GetStringAsync())).ShouldBe(new[]
+                results.Select(x => x.Content).ShouldBe(new[]
                 {
                     "<p>This is some Foobar text</p>",
                     "<p>This is some other text</p>"
@@ -293,12 +284,11 @@ namespace Wyam.Html.Tests
                         </body>
                     </html>";
                 TestDocument document = new TestDocument(input);
-                TestExecutionContext context = new TestExecutionContext();
                 HtmlQuery query = new HtmlQuery("p")
                     .GetTextContent("TextContentKey");
 
                 // When
-                IList<IDocument> results = await query.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
+                IReadOnlyList<TestDocument> results = await ExecuteAsync(document, query);
 
                 // Then
                 results.Select(x => x.String("TextContentKey")).ShouldBe(new[]
@@ -323,12 +313,11 @@ namespace Wyam.Html.Tests
                         </body>
                     </html>";
                 TestDocument document = new TestDocument(input);
-                TestExecutionContext context = new TestExecutionContext();
                 HtmlQuery query = new HtmlQuery("p")
                     .GetAttributeValue("foo", "Foo");
 
                 // When
-                IList<IDocument> results = await query.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
+                IReadOnlyList<TestDocument> results = await ExecuteAsync(document, query);
 
                 // Then
                 results.Select(x => x.String("Foo")).ShouldBe(new[]
@@ -353,12 +342,11 @@ namespace Wyam.Html.Tests
                         </body>
                     </html>";
                 TestDocument document = new TestDocument(input);
-                TestExecutionContext context = new TestExecutionContext();
                 HtmlQuery query = new HtmlQuery("p")
                     .GetAttributeValue("foo");
 
                 // When
-                IList<IDocument> results = await query.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
+                IReadOnlyList<TestDocument> results = await ExecuteAsync(document, query);
 
                 // Then
                 results.Select(x => x.String("foo")).ShouldBe(new[]
@@ -383,12 +371,11 @@ namespace Wyam.Html.Tests
                         </body>
                     </html>";
                 TestDocument document = new TestDocument(input);
-                TestExecutionContext context = new TestExecutionContext();
                 HtmlQuery query = new HtmlQuery("p")
                     .GetAttributeValue("foo");
 
                 // When
-                IList<IDocument> results = await query.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
+                IReadOnlyList<TestDocument> results = await ExecuteAsync(document, query);
 
                 // Then
                 results.Select(x => x.String("foo")).ShouldBe(new[]
@@ -413,12 +400,11 @@ namespace Wyam.Html.Tests
                         </body>
                     </html>";
                 TestDocument document = new TestDocument(input);
-                TestExecutionContext context = new TestExecutionContext();
                 HtmlQuery query = new HtmlQuery("p")
                     .GetAttributeValues();
 
                 // When
-                IList<IDocument> results = await query.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
+                IReadOnlyList<TestDocument> results = await ExecuteAsync(document, query);
 
                 // Then
                 results
@@ -455,12 +441,11 @@ namespace Wyam.Html.Tests
                         </body>
                     </html>";
                 TestDocument document = new TestDocument(input);
-                TestExecutionContext context = new TestExecutionContext();
                 HtmlQuery query = new HtmlQuery("p")
                     .GetAll();
 
                 // When
-                IList<IDocument> results = await query.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
+                IReadOnlyList<TestDocument> results = await ExecuteAsync(document, query);
 
                 // Then
                 results

@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 using Wyam.Common.Documents;
 using Wyam.Common.Modules;
 using Wyam.Common.Execution;
-using Wyam.Common.Util;
+using Wyam.Common;
 
 namespace Wyam.Core.Modules.Control
 {

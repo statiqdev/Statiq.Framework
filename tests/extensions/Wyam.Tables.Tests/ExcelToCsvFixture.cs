@@ -2,8 +2,8 @@
 using System.Threading.Tasks;
 using NUnit.Framework;
 using Shouldly;
+using Wyam.Common;
 using Wyam.Common.Documents;
-using Wyam.Common.Util;
 using Wyam.Testing;
 using Wyam.Testing.Documents;
 using Wyam.Testing.Execution;
@@ -47,17 +47,14 @@ namespace Wyam.Tables.Tests
 + "\"24\",\"24\",\"48\",\"72\",\"96\",\"120\",\"144\",\"168\"\r\n"
 + "\"25\",\"25\",\"50\",\"75\",\"100\",\"125\",\"150\",\"175\"\r\n"
 + "\"26\",\"26\",\"52\",\"78\",\"104\",\"130\",\"156\",\"182\"\r\n";
-
-                TestExecutionContext context = new TestExecutionContext();
                 TestDocument document = new TestDocument(content: GetTestFileStream("test.xlsx"));
                 ExcelToCsv module = new ExcelToCsv();
 
                 // When
-                IList<IDocument> results = await module.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
+                TestDocument result = await ExecuteAsync(document, module).SingleAsync();
 
                 // Then
-                results.Count.ShouldBe(1);
-                (await results[0].GetStringAsync()).ShouldBe(output, StringCompareShould.IgnoreLineEndings);
+                result.Content.ShouldBe(output, StringCompareShould.IgnoreLineEndings);
             }
         }
     }

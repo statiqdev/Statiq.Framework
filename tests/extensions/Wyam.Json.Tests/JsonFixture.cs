@@ -6,8 +6,8 @@ using System.Linq;
 using System.Threading.Tasks;
 using NUnit.Framework;
 using Shouldly;
+using Wyam.Common;
 using Wyam.Common.Documents;
-using Wyam.Common.Util;
 using Wyam.Testing;
 using Wyam.Testing.Documents;
 using Wyam.Testing.Execution;
@@ -34,15 +34,13 @@ namespace Wyam.Json.Tests
             public async Task GeneratesDynamicObject()
             {
                 // Given
-                TestExecutionContext context = new TestExecutionContext();
                 TestDocument document = new TestDocument(_jsonContent);
                 Json json = new Json("MyJson");
 
                 // When
-                IList<IDocument> results = await json.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
+                TestDocument result = await ExecuteAsync(document, json).SingleAsync();
 
                 // Then
-                IDocument result = results.Single();
                 result.Count.ShouldBe(1);
                 result["MyJson"].ShouldBeOfType<ExpandoObject>();
                 ((string)((dynamic)result["MyJson"]).Email).ShouldBe("james@example.com");
@@ -55,15 +53,13 @@ namespace Wyam.Json.Tests
             public async Task FlattensTopLevel()
             {
                 // Given
-                TestExecutionContext context = new TestExecutionContext();
                 TestDocument document = new TestDocument(_jsonContent);
                 Json json = new Json();
 
                 // When
-                IList<IDocument> results = await json.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
+                TestDocument result = await ExecuteAsync(document, json).SingleAsync();
 
                 // Then
-                IDocument result = results.Single();
                 result.Count.ShouldBe(4);
                 ((string)result["Email"]).ShouldBe("james@example.com");
                 ((bool)result["Active"]).ShouldBeTrue();
@@ -77,15 +73,14 @@ namespace Wyam.Json.Tests
             {
                 // Given
                 RemoveListener();
-                TestExecutionContext context = new TestExecutionContext();
                 TestDocument document = new TestDocument("asdf");
                 Json json = new Json("MyJson");
 
                 // When
-                List<IDocument> results = await json.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
+                TestDocument result = await ExecuteAsync(document, json).SingleAsync();
 
                 // Then
-                document.Count.ShouldBe(0);
+                result.ShouldBe(document);
             }
         }
     }

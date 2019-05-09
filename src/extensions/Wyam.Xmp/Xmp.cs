@@ -13,7 +13,6 @@ using Wyam.Common.IO;
 using Wyam.Common.Meta;
 using Wyam.Common.Modules;
 using Wyam.Common.Tracing;
-using Wyam.Common.Util;
 using XmpCore;
 
 namespace Wyam.Xmp

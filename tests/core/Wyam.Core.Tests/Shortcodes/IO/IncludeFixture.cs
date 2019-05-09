@@ -45,17 +45,14 @@ namespace Wyam.Core.Tests.Shortcodes.IO
                 Include shortcode = new Include();
 
                 // When
-                IShortcodeResult result = await shortcode.ExecuteAsync(args, string.Empty, document, context);
+                TestDocument result = (TestDocument)await shortcode.ExecuteAsync(args, string.Empty, document, context);
 
                 // Then
-                using (TextReader reader = new StreamReader(result.Stream))
-                {
-                    reader.ReadToEnd().ShouldBe("foo");
-                }
+                result.Content.ShouldBe("foo");
             }
 
             [Test]
-            public async Task NullResultIfFileDoesNotExist()
+            public async Task EmptyResultIfFileDoesNotExist()
             {
                 // Given
                 ThrowOnTraceEventType(System.Diagnostics.TraceEventType.Error);
@@ -83,10 +80,10 @@ namespace Wyam.Core.Tests.Shortcodes.IO
                 Include shortcode = new Include();
 
                 // When
-                IShortcodeResult result = await shortcode.ExecuteAsync(args, string.Empty, document, context);
+                TestDocument result = (TestDocument)await shortcode.ExecuteAsync(args, string.Empty, document, context);
 
                 // Then
-                result.Stream.ShouldBeNull();
+                result.Content.ShouldBeEmpty();
             }
 
             [Test]
@@ -121,13 +118,10 @@ namespace Wyam.Core.Tests.Shortcodes.IO
                 Include shortcode = new Include();
 
                 // When
-                IShortcodeResult result = await shortcode.ExecuteAsync(args, string.Empty, document, context);
+                TestDocument result = (TestDocument)await shortcode.ExecuteAsync(args, string.Empty, document, context);
 
                 // Then
-                using (TextReader reader = new StreamReader(result.Stream))
-                {
-                    reader.ReadToEnd().ShouldBe("foo");
-                }
+                result.Content.ShouldBe("foo");
             }
         }
     }

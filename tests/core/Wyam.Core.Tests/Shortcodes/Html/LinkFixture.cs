@@ -33,13 +33,10 @@ namespace Wyam.Core.Tests.Shortcodes.Html
                 Link shortcode = new Link();
 
                 // When
-                IShortcodeResult result = await shortcode.ExecuteAsync(args, string.Empty, document, context);
+                TestDocument result = (TestDocument)await shortcode.ExecuteAsync(args, string.Empty, document, context);
 
                 // Then
-                using (TextReader reader = new StreamReader(result.Stream))
-                {
-                    reader.ReadToEnd().ShouldBe(expected);
-                }
+                result.Content.ShouldBe(expected);
             }
 
             [TestCase("http://foo.com/bar", "http://foo.com/bar")]
@@ -61,13 +58,10 @@ namespace Wyam.Core.Tests.Shortcodes.Html
                 Link shortcode = new Link();
 
                 // When
-                IShortcodeResult result = await shortcode.ExecuteAsync(args, string.Empty, document, context);
+                TestDocument result = (TestDocument)await shortcode.ExecuteAsync(args, string.Empty, document, context);
 
                 // Then
-                using (TextReader reader = new StreamReader(result.Stream))
-                {
-                    reader.ReadToEnd().ShouldBe(expected);
-                }
+                result.Content.ShouldBe(expected);
             }
 
             [TestCase("http://foo.com/bar", "http://foo.com/bar")]
@@ -89,13 +83,10 @@ namespace Wyam.Core.Tests.Shortcodes.Html
                 Link shortcode = new Link();
 
                 // When
-                IShortcodeResult result = await shortcode.ExecuteAsync(args, string.Empty, document, context);
+                TestDocument result = (TestDocument)await shortcode.ExecuteAsync(args, string.Empty, document, context);
 
                 // Then
-                using (TextReader reader = new StreamReader(result.Stream))
-                {
-                    reader.ReadToEnd().ShouldBe(expected);
-                }
+                result.Content.ShouldBe(expected);
             }
         }
     }

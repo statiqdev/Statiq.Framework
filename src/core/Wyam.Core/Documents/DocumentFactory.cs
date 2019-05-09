@@ -1,12 +1,8 @@
 ﻿using System.Collections.Generic;
-using System.IO;
-using System.Threading.Tasks;
 using Wyam.Common.Content;
 using Wyam.Common.Documents;
 using Wyam.Common.IO;
-using Wyam.Common.Meta;
 using Wyam.Common.Execution;
-using Wyam.Core.Content;
 using Wyam.Core.Modules;
 using Wyam.Core.Meta;
 

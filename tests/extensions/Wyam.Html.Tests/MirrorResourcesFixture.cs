@@ -3,9 +3,9 @@ using System.Linq;
 using System.Threading.Tasks;
 using NUnit.Framework;
 using Shouldly;
+using Wyam.Common;
 using Wyam.Common.Documents;
 using Wyam.Common.IO;
-using Wyam.Common.Util;
 using Wyam.Testing;
 using Wyam.Testing.Documents;
 using Wyam.Testing.Execution;
@@ -22,8 +22,7 @@ namespace Wyam.Html.Tests
             public async Task ReplacesScriptResource()
             {
                 // Given
-                TestExecutionContext context = new TestExecutionContext();
-                IDocument document = new TestDocument(
+                TestDocument document = new TestDocument(
                     @"<html>
                       <head>
                         <script src=""https://cdn.jsdelivr.net/npm/es6-promise/dist/es6-promise.auto.min.js""></script>
@@ -34,10 +33,10 @@ namespace Wyam.Html.Tests
                 MirrorResources module = new MirrorResources();
 
                 // When
-                List<IDocument> result = await module.ExecuteAsync(new[] { document }, context).ToListAsync();
+                TestDocument result = await ExecuteAsync(document, module).SingleAsync();
 
                 // Then
-                (await result.Single().GetStringAsync()).ShouldBe(
+                result.Content.ShouldBe(
                     @"<html><head>
                         <script src=""/mirror/cdn.jsdelivr.net/npm/es6-promise/dist/es6-promise.auto.min.js""></script>
                       </head>
@@ -50,8 +49,7 @@ namespace Wyam.Html.Tests
             public async Task ReplacesLinkResource()
             {
                 // Given
-                TestExecutionContext context = new TestExecutionContext();
-                IDocument document = new TestDocument(
+                TestDocument document = new TestDocument(
                     @"<html>
                       <head>
                         <link rel=""stylesheet"" href=""https://cdn.jsdelivr.net/npm/@@progress/kendo-theme-bootstrap@3.2.0/dist/all.min.css"" />
@@ -62,10 +60,10 @@ namespace Wyam.Html.Tests
                 MirrorResources module = new MirrorResources();
 
                 // When
-                List<IDocument> result = await module.ExecuteAsync(new[] { document }, context).ToListAsync();
+                TestDocument result = await ExecuteAsync(document, module).SingleAsync();
 
                 // Then
-                (await result.Single().GetStringAsync()).ShouldBe(
+                result.Content.ShouldBe(
                     @"<html><head>
                         <link rel=""stylesheet"" href=""/mirror/cdn.jsdelivr.net/npm/@@progress/kendo-theme-bootstrap@3.2.0/dist/all.min.css"">
                       </head>
@@ -78,8 +76,7 @@ namespace Wyam.Html.Tests
             public async Task DoesNotReplaceDataNoMirrorAttribute()
             {
                 // Given
-                TestExecutionContext context = new TestExecutionContext();
-                IDocument document = new TestDocument(
+                TestDocument document = new TestDocument(
                     @"<html>
                       <head>
                         <script src=""https://cdn.jsdelivr.net/npm/es6-promise/dist/es6-promise.auto.min.js"" data-no-mirror></script>
@@ -91,10 +88,10 @@ namespace Wyam.Html.Tests
                 MirrorResources module = new MirrorResources();
 
                 // When
-                List<IDocument> result = await module.ExecuteAsync(new[] { document }, context).ToListAsync();
+                TestDocument result = await ExecuteAsync(document, module).SingleAsync();
 
                 // Then
-                (await result.Single().GetStringAsync()).ShouldBe(
+                result.Content.ShouldBe(
                     @"<html>
                       <head>
                         <script src=""https://cdn.jsdelivr.net/npm/es6-promise/dist/es6-promise.auto.min.js"" data-no-mirror></script>
@@ -109,8 +106,7 @@ namespace Wyam.Html.Tests
             public async Task UsesCustomMirrorPath()
             {
                 // Given
-                TestExecutionContext context = new TestExecutionContext();
-                IDocument document = new TestDocument(
+                TestDocument document = new TestDocument(
                     @"<html>
                       <head>
                         <script src=""https://cdn.jsdelivr.net/npm/es6-promise/dist/es6-promise.auto.min.js""></script>
@@ -121,10 +117,10 @@ namespace Wyam.Html.Tests
                 MirrorResources module = new MirrorResources(x => new FilePath("/foo/bar.js"));
 
                 // When
-                List<IDocument> result = await module.ExecuteAsync(new[] { document }, context).ToListAsync();
+                TestDocument result = await ExecuteAsync(document, module).SingleAsync();
 
                 // Then
-                (await result.Single().GetStringAsync()).ShouldBe(
+                result.Content.ShouldBe(
                     @"<html><head>
                         <script src=""/foo/bar.js""></script>
                       </head>

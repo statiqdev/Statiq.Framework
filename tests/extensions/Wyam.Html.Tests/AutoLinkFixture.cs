@@ -3,8 +3,8 @@ using System.Linq;
 using System.Threading.Tasks;
 using NUnit.Framework;
 using Shouldly;
+using Wyam.Common;
 using Wyam.Common.Documents;
-using Wyam.Common.Util;
 using Wyam.Testing;
 using Wyam.Testing.Documents;
 using Wyam.Testing.Execution;
@@ -30,7 +30,6 @@ namespace Wyam.Html.Tests
                             <p>This is some Foobar text</p>
                         </body>
                     </html>";
-                TestExecutionContext context = new TestExecutionContext();
                 TestDocument document = new TestDocument(input);
                 AutoLink autoLink = new AutoLink(new Dictionary<string, string>()
                 {
@@ -38,10 +37,10 @@ namespace Wyam.Html.Tests
                 });
 
                 // When
-                IList<IDocument> results = await autoLink.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
+                TestDocument result = await ExecuteAsync(document, autoLink).SingleAsync();
 
                 // Then
-                results.Single().ShouldBeSameAs(document);
+                result.ShouldBeSameAs(document);
             }
 
             [Test]
@@ -65,7 +64,6 @@ namespace Wyam.Html.Tests
                             <p>This is some <a href=""http://www.google.com"">Foobar</a> text</p>
                         
                     </body></html>";
-                TestExecutionContext context = new TestExecutionContext();
                 TestDocument document = new TestDocument(input);
                 AutoLink autoLink = new AutoLink(new Dictionary<string, string>()
                 {
@@ -73,10 +71,10 @@ namespace Wyam.Html.Tests
                 });
 
                 // When
-                IList<IDocument> results = await autoLink.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
+                TestDocument result = await ExecuteAsync(document, autoLink).SingleAsync();
 
                 // Then
-                (await results.Single().GetStringAsync()).ShouldBe(output, StringCompareShould.IgnoreLineEndings);
+                result.Content.ShouldBe(output, StringCompareShould.IgnoreLineEndings);
             }
 
             [Test]
@@ -100,7 +98,6 @@ namespace Wyam.Html.Tests
                             <p>This A&lt;string, List&lt;B&gt;&gt; is some <a href=""http://www.google.com"">Foobar</a> text</p>
                         
                     </body></html>";
-                TestExecutionContext context = new TestExecutionContext();
                 TestDocument document = new TestDocument(input);
                 AutoLink autoLink = new AutoLink(new Dictionary<string, string>()
                 {
@@ -108,10 +105,10 @@ namespace Wyam.Html.Tests
                 });
 
                 // When
-                IList<IDocument> results = await autoLink.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
+                TestDocument result = await ExecuteAsync(document, autoLink).SingleAsync();
 
                 // Then
-                (await results.Single().GetStringAsync()).ShouldBe(output, StringCompareShould.IgnoreLineEndings);
+                result.Content.ShouldBe(output, StringCompareShould.IgnoreLineEndings);
             }
 
             [Test]
@@ -137,7 +134,6 @@ namespace Wyam.Html.Tests
                             <p>This is some Foobar text</p>
                         
                     </body></html>";
-                TestExecutionContext context = new TestExecutionContext();
                 TestDocument document = new TestDocument(input);
                 AutoLink autoLink = new AutoLink(new Dictionary<string, string>()
                 {
@@ -145,10 +141,10 @@ namespace Wyam.Html.Tests
                 }).WithQuerySelector("baz");
 
                 // When
-                IList<IDocument> results = await autoLink.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
+                TestDocument result = await ExecuteAsync(document, autoLink).SingleAsync();
 
                 // Then
-                (await results.Single().GetStringAsync()).ShouldBe(output, StringCompareShould.IgnoreLineEndings);
+                result.Content.ShouldBe(output, StringCompareShould.IgnoreLineEndings);
             }
 
             [Test]
@@ -172,7 +168,6 @@ namespace Wyam.Html.Tests
                             <p>This <i>is</i> some <a href=""http://www.google.com"">Foobar</a> <b>text</b></p>
                         
                     </body></html>";
-                TestExecutionContext context = new TestExecutionContext();
                 TestDocument document = new TestDocument(input);
                 AutoLink autoLink = new AutoLink(new Dictionary<string, string>()
                 {
@@ -180,10 +175,10 @@ namespace Wyam.Html.Tests
                 });
 
                 // When
-                IList<IDocument> results = await autoLink.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
+                TestDocument result = await ExecuteAsync(document, autoLink).SingleAsync();
 
                 // Then
-                (await results.Single().GetStringAsync()).ShouldBe(output, StringCompareShould.IgnoreLineEndings);
+                result.Content.ShouldBe(output, StringCompareShould.IgnoreLineEndings);
             }
 
             [Test]
@@ -207,7 +202,6 @@ namespace Wyam.Html.Tests
                             <p>This <i>is</i> some <i><a href=""http://www.google.com"">Foobar</a></i> <b>text</b></p>
                         
                     </body></html>";
-                TestExecutionContext context = new TestExecutionContext();
                 TestDocument document = new TestDocument(input);
                 AutoLink autoLink = new AutoLink(new Dictionary<string, string>()
                 {
@@ -215,10 +209,10 @@ namespace Wyam.Html.Tests
                 });
 
                 // When
-                IList<IDocument> results = await autoLink.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
+                TestDocument result = await ExecuteAsync(document, autoLink).SingleAsync();
 
                 // Then
-                (await results.Single().GetStringAsync()).ShouldBe(output, StringCompareShould.IgnoreLineEndings);
+                result.Content.ShouldBe(output, StringCompareShould.IgnoreLineEndings);
             }
 
             [Test]
@@ -242,7 +236,6 @@ namespace Wyam.Html.Tests
                             <p attr=""Foobar"">This is some <a href=""http://www.google.com"">Foobar</a> <b ref=""Foobar"">text</b></p>
                         
                     </body></html>";
-                TestExecutionContext context = new TestExecutionContext();
                 TestDocument document = new TestDocument(input);
                 AutoLink autoLink = new AutoLink(new Dictionary<string, string>()
                 {
@@ -250,10 +243,10 @@ namespace Wyam.Html.Tests
                 });
 
                 // When
-                IList<IDocument> results = await autoLink.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
+                TestDocument result = await ExecuteAsync(document, autoLink).SingleAsync();
 
                 // Then
-                (await results.Single().GetStringAsync()).ShouldBe(output, StringCompareShould.IgnoreLineEndings);
+                result.Content.ShouldBe(output, StringCompareShould.IgnoreLineEndings);
             }
 
             [Test]
@@ -277,7 +270,6 @@ namespace Wyam.Html.Tests
                             <p>This is some <i><a href=""http://www.google.com"">Foobar</a></i> text <a href=""http://www.bing.com"">Foobaz</a></p>
                         
                     </body></html>";
-                TestExecutionContext context = new TestExecutionContext();
                 TestDocument document = new TestDocument(input);
                 AutoLink autoLink = new AutoLink(new Dictionary<string, string>()
                 {
@@ -286,10 +278,10 @@ namespace Wyam.Html.Tests
                 });
 
                 // When
-                IList<IDocument> results = await autoLink.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
+                TestDocument result = await ExecuteAsync(document, autoLink).SingleAsync();
 
                 // Then
-                (await results.Single().GetStringAsync()).ShouldBe(output, StringCompareShould.IgnoreLineEndings);
+                result.Content.ShouldBe(output, StringCompareShould.IgnoreLineEndings);
             }
 
             [Test]
@@ -315,7 +307,6 @@ namespace Wyam.Html.Tests
                             <p>Another <a href=""http://www.bing.com"">Foobaz</a> paragraph</p>
                         
                     </body></html>";
-                TestExecutionContext context = new TestExecutionContext();
                 TestDocument document = new TestDocument(input);
                 AutoLink autoLink = new AutoLink(new Dictionary<string, string>()
                 {
@@ -324,10 +315,10 @@ namespace Wyam.Html.Tests
                 });
 
                 // When
-                IList<IDocument> results = await autoLink.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
+                TestDocument result = await ExecuteAsync(document, autoLink).SingleAsync();
 
                 // Then
-                (await results.Single().GetStringAsync()).ShouldBe(output, StringCompareShould.IgnoreLineEndings);
+                result.Content.ShouldBe(output, StringCompareShould.IgnoreLineEndings);
             }
 
             [Test]
@@ -351,7 +342,6 @@ namespace Wyam.Html.Tests
                             <p>This is some <a href=""http://www.yahoo.com"">Foobar</a> text <a href=""http://www.bing.com"">Foobaz</a></p>
                         
                     </body></html>";
-                TestExecutionContext context = new TestExecutionContext();
                 TestDocument document = new TestDocument(input);
                 AutoLink autoLink = new AutoLink(new Dictionary<string, string>()
                 {
@@ -360,10 +350,10 @@ namespace Wyam.Html.Tests
                 });
 
                 // When
-                IList<IDocument> results = await autoLink.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
+                TestDocument result = await ExecuteAsync(document, autoLink).SingleAsync();
 
                 // Then
-                (await results.Single().GetStringAsync()).ShouldBe(output, StringCompareShould.IgnoreLineEndings);
+                result.Content.ShouldBe(output, StringCompareShould.IgnoreLineEndings);
             }
 
             [Test]
@@ -387,7 +377,6 @@ namespace Wyam.Html.Tests
                             <p>This is some <i><a href=""http://www.google.com"">Foo</a>bar</i> text <a href=""http://www.bing.com"">Foobaz</a></p>
                         
                     </body></html>";
-                TestExecutionContext context = new TestExecutionContext();
                 TestDocument document = new TestDocument(input);
                 AutoLink autoLink = new AutoLink(new Dictionary<string, string>()
                 {
@@ -396,10 +385,10 @@ namespace Wyam.Html.Tests
                 });
 
                 // When
-                IList<IDocument> results = await autoLink.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
+                TestDocument result = await ExecuteAsync(document, autoLink).SingleAsync();
 
                 // Then
-                (await results.Single().GetStringAsync()).ShouldBe(output, StringCompareShould.IgnoreLineEndings);
+                result.Content.ShouldBe(output, StringCompareShould.IgnoreLineEndings);
             }
 
             [Test]
@@ -423,7 +412,6 @@ namespace Wyam.Html.Tests
                             <p>This is some <i><a href=""http://www.google.com"">Foobar</a></i> text <a href=""http://www.yahoo.com"">Foobaz</a></p>
                         
                     </body></html>";
-                TestExecutionContext context = new TestExecutionContext();
                 TestDocument document = new TestDocument(input);
                 AutoLink autoLink = new AutoLink(new Dictionary<string, string>()
                 {
@@ -432,10 +420,10 @@ namespace Wyam.Html.Tests
                 }).WithLink("Foobaz", "http://www.yahoo.com");
 
                 // When
-                IList<IDocument> results = await autoLink.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
+                TestDocument result = await ExecuteAsync(document, autoLink).SingleAsync();
 
                 // Then
-                (await results.Single().GetStringAsync()).ShouldBe(output, StringCompareShould.IgnoreLineEndings);
+                result.Content.ShouldBe(output, StringCompareShould.IgnoreLineEndings);
             }
 
             [Test]
@@ -459,7 +447,6 @@ namespace Wyam.Html.Tests
                             <p>This is some <i><a href=""http://www.google.com"">Foo</a></i> text Foobaz</p>
                         
                     </body></html>";
-                TestExecutionContext context = new TestExecutionContext();
                 TestDocument document = new TestDocument(input);
                 AutoLink autoLink = new AutoLink(new Dictionary<string, string>()
                 {
@@ -467,10 +454,10 @@ namespace Wyam.Html.Tests
                 }).WithMatchOnlyWholeWord();
 
                 // When
-                IList<IDocument> results = await autoLink.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
+                TestDocument result = await ExecuteAsync(document, autoLink).SingleAsync();
 
                 // Then
-                (await results.Single().GetStringAsync()).ShouldBe(output, StringCompareShould.IgnoreLineEndings);
+                result.Content.ShouldBe(output, StringCompareShould.IgnoreLineEndings);
             }
 
             [Test]
@@ -494,7 +481,6 @@ namespace Wyam.Html.Tests
                             <p>abc <a href=""http://www.google.com"">Foo</a>(<a href=""http://www.yahoo.com"">baz</a>) xyz</p>
                         
                     </body></html>";
-                TestExecutionContext context = new TestExecutionContext();
                 TestDocument document = new TestDocument(input);
                 AutoLink autoLink = new AutoLink(new Dictionary<string, string>()
                 {
@@ -503,10 +489,10 @@ namespace Wyam.Html.Tests
                 });
 
                 // When
-                IList<IDocument> results = await autoLink.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
+                TestDocument result = await ExecuteAsync(document, autoLink).SingleAsync();
 
                 // Then
-                (await results.Single().GetStringAsync()).ShouldBe(output, StringCompareShould.IgnoreLineEndings);
+                result.Content.ShouldBe(output, StringCompareShould.IgnoreLineEndings);
             }
 
             [Test]
@@ -530,7 +516,6 @@ namespace Wyam.Html.Tests
                             <p>sdfg asdf aasdf asf asdf asdf asdf aabc <a href=""http://www.google.com"">Fuzz</a> bazz def efg <a href=""http://www.yahoo.com"">baz</a> x</p>
                         
                     </body></html>";
-                TestExecutionContext context = new TestExecutionContext();
                 TestDocument document = new TestDocument(input);
                 AutoLink autoLink = new AutoLink(new Dictionary<string, string>()
                 {
@@ -539,10 +524,10 @@ namespace Wyam.Html.Tests
                 }).WithMatchOnlyWholeWord();
 
                 // When
-                IList<IDocument> results = await autoLink.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
+                TestDocument result = await ExecuteAsync(document, autoLink).SingleAsync();
 
                 // Then
-                (await results.Single().GetStringAsync()).ShouldBe(output, StringCompareShould.IgnoreLineEndings);
+                result.Content.ShouldBe(output, StringCompareShould.IgnoreLineEndings);
             }
 
             [Test]
@@ -558,7 +543,6 @@ namespace Wyam.Html.Tests
                             <p>abc Foo(baz) xyz</p>
                         </body>
                     </html>";
-                TestExecutionContext context = new TestExecutionContext();
                 TestDocument document = new TestDocument(input);
                 AutoLink autoLink = new AutoLink(new Dictionary<string, string>()
                 {
@@ -567,10 +551,10 @@ namespace Wyam.Html.Tests
                 }).WithMatchOnlyWholeWord();
 
                 // When
-                IList<IDocument> results = await autoLink.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
+                TestDocument result = await ExecuteAsync(document, autoLink).SingleAsync();
 
                 // Then
-                results.Single().ShouldBeSameAs(document);
+                result.ShouldBeSameAs(document);
             }
 
             [TestCase("<li>Foo</li>", "<li>Foo</li>")]
@@ -588,7 +572,6 @@ namespace Wyam.Html.Tests
                 // Given
                 string inputContent = $"<html><head></head><body><foo></foo><ul>{input}</ul></body></html>";
                 string expectedContent = $"<html><head></head><body><foo></foo><ul>{expected}</ul></body></html>";
-                TestExecutionContext context = new TestExecutionContext();
                 TestDocument document = new TestDocument(inputContent);
                 Dictionary<string, string> links = new Dictionary<string, string>()
                 {
@@ -602,10 +585,10 @@ namespace Wyam.Html.Tests
                     .WithEndWordSeparators('>');
 
                 // When
-                IList<IDocument> results = await autoLink.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
+                TestDocument result = await ExecuteAsync(document, autoLink).SingleAsync();
 
                 // Then
-                (await results.Single().GetStringAsync()).ShouldBe(expectedContent);
+                result.Content.ShouldBe(expectedContent);
             }
 
             [Test]
@@ -614,7 +597,6 @@ namespace Wyam.Html.Tests
                 // Given
                 string inputContent = $"<div>@x.Select(x => x) <code>Foo bar</code></div>";
                 string expectedContent = $"<div>@x.Select(x => x) <code>Foo bar</code></div>";
-                TestExecutionContext context = new TestExecutionContext();
                 TestDocument document = new TestDocument(inputContent);
                 Dictionary<string, string> links = new Dictionary<string, string>();
                 AutoLink autoLink = new AutoLink(links)
@@ -624,10 +606,10 @@ namespace Wyam.Html.Tests
                     .WithEndWordSeparators('>');
 
                 // When
-                IList<IDocument> results = await autoLink.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
+                TestDocument result = await ExecuteAsync(document, autoLink).SingleAsync();
 
                 // Then
-                (await results.Single().GetStringAsync()).ShouldBe(expectedContent);
+                result.Content.ShouldBe(expectedContent);
             }
 
             [Test]
@@ -635,8 +617,6 @@ namespace Wyam.Html.Tests
             {
                 // Given
                 string inputContent = $"<div>@x.Select(x => x) <code>Foo bar</code></div>";
-                string expectedContent = $"<div>@x.Select(x => x) <code>Foo bar</code></div>";
-                TestExecutionContext context = new TestExecutionContext();
                 TestDocument document = new TestDocument(inputContent);
                 Dictionary<string, string> links = new Dictionary<string, string>();
                 AutoLink autoLink = new AutoLink(links)
@@ -646,10 +626,10 @@ namespace Wyam.Html.Tests
                     .WithEndWordSeparators('>');
 
                 // When
-                IList<IDocument> results = await autoLink.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
+                TestDocument result = await ExecuteAsync(document, autoLink).SingleAsync();
 
                 // Then
-                results.Single().ShouldBeSameAs(document);
+                result.ShouldBeSameAs(document);
             }
         }
     }

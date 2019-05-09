@@ -5,7 +5,8 @@ using Shouldly;
 using Wyam.Common.Documents;
 using Wyam.Common.Execution;
 using Wyam.Common.Modules;
-using Wyam.Common.Util;
+using Wyam.Testing.Documents;
+using Wyam.Testing.Execution;
 
 namespace Wyam.CodeAnalysis.Tests
 {
@@ -27,12 +28,12 @@ namespace Wyam.CodeAnalysis.Tests
                         }
                     }
                 ";
-                IDocument document = GetDocument(code);
-                IExecutionContext context = GetContext();
+                TestDocument document = GetDocument(code);
+                TestExecutionContext context = GetContext();
                 IModule module = new AnalyzeCSharp();
 
                 // When
-                List<IDocument> results = await module.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
+                IReadOnlyList<TestDocument> results = await ExecuteAsync(document, context, module);
 
                 // Then
                 GetResult(results, "Green")["Syntax"].ShouldBe("internal class Green");
@@ -53,12 +54,12 @@ namespace Wyam.CodeAnalysis.Tests
                         }
                     }
                 ";
-                IDocument document = GetDocument(code);
-                IExecutionContext context = GetContext();
+                TestDocument document = GetDocument(code);
+                TestExecutionContext context = GetContext();
                 IModule module = new AnalyzeCSharp();
 
                 // When
-                List<IDocument> results = await module.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
+                IReadOnlyList<TestDocument> results = await ExecuteAsync(document, context, module);
 
                 // Then
                 GetMember(results, "Green", "Blue")["Syntax"].ShouldBe("private void Blue()");
@@ -76,12 +77,12 @@ namespace Wyam.CodeAnalysis.Tests
                         }
                     }
                 ";
-                IDocument document = GetDocument(code);
-                IExecutionContext context = GetContext();
+                TestDocument document = GetDocument(code);
+                TestExecutionContext context = GetContext();
                 IModule module = new AnalyzeCSharp();
 
                 // When
-                List<IDocument> results = await module.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
+                IReadOnlyList<TestDocument> results = await ExecuteAsync(document, context, module);
 
                 // Then
                 GetResult(results, "Green")["Syntax"].ShouldBe("public class Green");
@@ -102,12 +103,12 @@ namespace Wyam.CodeAnalysis.Tests
                         }
                     }
                 ";
-                IDocument document = GetDocument(code);
-                IExecutionContext context = GetContext();
+                TestDocument document = GetDocument(code);
+                TestExecutionContext context = GetContext();
                 IModule module = new AnalyzeCSharp();
 
                 // When
-                List<IDocument> results = await module.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
+                IReadOnlyList<TestDocument> results = await ExecuteAsync(document, context, module);
 
                 // Then
                 GetMember(results, "Green", "Blue")["Syntax"].ShouldBe("internal void Blue()");
@@ -127,12 +128,12 @@ namespace Wyam.CodeAnalysis.Tests
                         }
                     }
                 ";
-                IDocument document = GetDocument(code);
-                IExecutionContext context = GetContext();
+                TestDocument document = GetDocument(code);
+                TestExecutionContext context = GetContext();
                 IModule module = new AnalyzeCSharp();
 
                 // When
-                List<IDocument> results = await module.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
+                IReadOnlyList<TestDocument> results = await ExecuteAsync(document, context, module);
 
                 // Then
                 GetResult(results, "Green")["Syntax"].ToString().ShouldBe(
@@ -159,12 +160,12 @@ internal class Green",
                         }
                     }
                 ";
-                IDocument document = GetDocument(code);
-                IExecutionContext context = GetContext();
+                TestDocument document = GetDocument(code);
+                TestExecutionContext context = GetContext();
                 IModule module = new AnalyzeCSharp();
 
                 // When
-                List<IDocument> results = await module.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
+                IReadOnlyList<TestDocument> results = await ExecuteAsync(document, context, module);
 
                 // Then
                 GetMember(results, "Green", "Blue")["Syntax"].ToString().ShouldBe(
@@ -196,12 +197,12 @@ private int Blue()",
                         }
                     }
                 ";
-                IDocument document = GetDocument(code);
-                IExecutionContext context = GetContext();
+                TestDocument document = GetDocument(code);
+                TestExecutionContext context = GetContext();
                 IModule module = new AnalyzeCSharp();
 
                 // When
-                List<IDocument> results = await module.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
+                IReadOnlyList<TestDocument> results = await ExecuteAsync(document, context, module);
 
                 // Then
                 GetResult(results, "Green")["Syntax"].ToString().ShouldBe(
@@ -223,12 +224,12 @@ internal class Green : Blue",
                         }
                     }
                 ";
-                IDocument document = GetDocument(code);
-                IExecutionContext context = GetContext();
+                TestDocument document = GetDocument(code);
+                TestExecutionContext context = GetContext();
                 IModule module = new AnalyzeCSharp();
 
                 // When
-                List<IDocument> results = await module.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
+                IReadOnlyList<TestDocument> results = await ExecuteAsync(document, context, module);
 
                 // Then
                 GetResult(results, "Green")["Syntax"].ShouldBe("internal abstract class Green");
@@ -246,12 +247,12 @@ internal class Green : Blue",
                         }
                     }
                 ";
-                IDocument document = GetDocument(code);
-                IExecutionContext context = GetContext();
+                TestDocument document = GetDocument(code);
+                TestExecutionContext context = GetContext();
                 IModule module = new AnalyzeCSharp();
 
                 // When
-                List<IDocument> results = await module.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
+                IReadOnlyList<TestDocument> results = await ExecuteAsync(document, context, module);
 
                 // Then
                 GetResult(results, "Green")["Syntax"].ShouldBe("internal sealed class Green");
@@ -269,12 +270,12 @@ internal class Green : Blue",
                         }
                     }
                 ";
-                IDocument document = GetDocument(code);
-                IExecutionContext context = GetContext();
+                TestDocument document = GetDocument(code);
+                TestExecutionContext context = GetContext();
                 IModule module = new AnalyzeCSharp();
 
                 // When
-                List<IDocument> results = await module.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
+                IReadOnlyList<TestDocument> results = await ExecuteAsync(document, context, module);
 
                 // Then
                 GetResult(results, "Green")["Syntax"].ShouldBe("internal static class Green");
@@ -295,12 +296,12 @@ internal class Green : Blue",
                         }
                     }
                 ";
-                IDocument document = GetDocument(code);
-                IExecutionContext context = GetContext();
+                TestDocument document = GetDocument(code);
+                TestExecutionContext context = GetContext();
                 IModule module = new AnalyzeCSharp();
 
                 // When
-                List<IDocument> results = await module.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
+                IReadOnlyList<TestDocument> results = await ExecuteAsync(document, context, module);
 
                 // Then
                 GetMember(results, "Green", "Blue")["Syntax"].ShouldBe("private static void Blue()");
@@ -318,12 +319,12 @@ internal class Green : Blue",
                         }
                     }
                 ";
-                IDocument document = GetDocument(code);
-                IExecutionContext context = GetContext();
+                TestDocument document = GetDocument(code);
+                TestExecutionContext context = GetContext();
                 IModule module = new AnalyzeCSharp();
 
                 // When
-                List<IDocument> results = await module.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
+                IReadOnlyList<TestDocument> results = await ExecuteAsync(document, context, module);
 
                 // Then
                 GetResult(results, "Green")["Syntax"].ShouldBe("internal class Green<out TKey, TValue>");
@@ -341,12 +342,12 @@ internal class Green : Blue",
                         }
                     }
                 ";
-                IDocument document = GetDocument(code);
-                IExecutionContext context = GetContext();
+                TestDocument document = GetDocument(code);
+                TestExecutionContext context = GetContext();
                 IModule module = new AnalyzeCSharp();
 
                 // When
-                List<IDocument> results = await module.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
+                IReadOnlyList<TestDocument> results = await ExecuteAsync(document, context, module);
 
                 // Then
                 GetResult(results, "Green")["Syntax"].ShouldBe("internal class Green<out TKey, TValue> where TValue : class");
@@ -373,12 +374,12 @@ internal class Green : Blue",
                         }
                     }
                 ";
-                IDocument document = GetDocument(code);
-                IExecutionContext context = GetContext();
+                TestDocument document = GetDocument(code);
+                TestExecutionContext context = GetContext();
                 IModule module = new AnalyzeCSharp();
 
                 // When
-                List<IDocument> results = await module.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
+                IReadOnlyList<TestDocument> results = await ExecuteAsync(document, context, module);
 
                 // Then
                 GetResult(results, "Green")["Syntax"].ShouldBe("internal class Green<out TKey, TValue> : Blue, IFoo where TValue : class");
@@ -400,12 +401,12 @@ internal class Green : Blue",
                         }
                     }
                 ";
-                IDocument document = GetDocument(code);
-                IExecutionContext context = GetContext();
+                TestDocument document = GetDocument(code);
+                TestExecutionContext context = GetContext();
                 IModule module = new AnalyzeCSharp();
 
                 // When
-                List<IDocument> results = await module.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
+                IReadOnlyList<TestDocument> results = await ExecuteAsync(document, context, module);
 
                 // Then
                 GetMember(results, "Green", "Blue")["Syntax"].ShouldBe("public TValue Blue<TKey, TValue>(TKey key, TValue value, bool flag)");
@@ -427,12 +428,12 @@ internal class Green : Blue",
                         }
                     }
                 ";
-                IDocument document = GetDocument(code);
-                IExecutionContext context = GetContext();
+                TestDocument document = GetDocument(code);
+                TestExecutionContext context = GetContext();
                 IModule module = new AnalyzeCSharp();
 
                 // When
-                List<IDocument> results = await module.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
+                IReadOnlyList<TestDocument> results = await ExecuteAsync(document, context, module);
 
                 // Then
                 GetMember(results, "Green", "Blue")["Syntax"].ShouldBe("public TValue Blue<TKey, TValue>(TKey key, TValue value, bool flag) where TKey : class");
@@ -452,12 +453,12 @@ internal class Green : Blue",
                         }
                     }
                 ";
-                IDocument document = GetDocument(code);
-                IExecutionContext context = GetContext();
+                TestDocument document = GetDocument(code);
+                TestExecutionContext context = GetContext();
                 IModule module = new AnalyzeCSharp();
 
                 // When
-                List<IDocument> results = await module.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
+                IReadOnlyList<TestDocument> results = await ExecuteAsync(document, context, module);
 
                 // Then
                 GetResult(results, "Green")["Syntax"].ShouldBe("internal enum Green");
@@ -477,12 +478,12 @@ internal class Green : Blue",
                         }
                     }
                 ";
-                IDocument document = GetDocument(code);
-                IExecutionContext context = GetContext();
+                TestDocument document = GetDocument(code);
+                TestExecutionContext context = GetContext();
                 IModule module = new AnalyzeCSharp();
 
                 // When
-                List<IDocument> results = await module.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
+                IReadOnlyList<TestDocument> results = await ExecuteAsync(document, context, module);
 
                 // Then
                 GetResult(results, "Green")["Syntax"].ShouldBe("internal enum Green");
@@ -504,12 +505,12 @@ internal class Green : Blue",
                         }
                     }
                 ";
-                IDocument document = GetDocument(code);
-                IExecutionContext context = GetContext();
+                TestDocument document = GetDocument(code);
+                TestExecutionContext context = GetContext();
                 IModule module = new AnalyzeCSharp();
 
                 // When
-                List<IDocument> results = await module.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
+                IReadOnlyList<TestDocument> results = await ExecuteAsync(document, context, module);
 
                 // Then
                 GetMember(results, "Green", "Blue")["Syntax"].ShouldBe("public int Blue { get; }");
@@ -528,12 +529,12 @@ internal class Green : Blue",
                         }
                     }
                 ";
-                IDocument document = GetDocument(code);
-                IExecutionContext context = GetContext();
+                TestDocument document = GetDocument(code);
+                TestExecutionContext context = GetContext();
                 IModule module = new AnalyzeCSharp();
 
                 // When
-                List<IDocument> results = await module.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
+                IReadOnlyList<TestDocument> results = await ExecuteAsync(document, context, module);
 
                 // Then
                 GetMember(results, "Green", "Blue")["Syntax"].ShouldBe("public int Blue { get; set; }");
@@ -555,12 +556,12 @@ internal class Green : Blue",
                         }
                     }
                 ";
-                IDocument document = GetDocument(code);
-                IExecutionContext context = GetContext();
+                TestDocument document = GetDocument(code);
+                TestExecutionContext context = GetContext();
                 IModule module = new AnalyzeCSharp();
 
                 // When
-                List<IDocument> results = await module.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
+                IReadOnlyList<TestDocument> results = await ExecuteAsync(document, context, module);
 
                 // Then
                 GetMember(results, "Green", "Blue")["Syntax"].ToString().ShouldBe(
@@ -581,12 +582,12 @@ internal class Green : Blue",
                         }
                     }
                 ";
-                IDocument document = GetDocument(code);
-                IExecutionContext context = GetContext();
+                TestDocument document = GetDocument(code);
+                TestExecutionContext context = GetContext();
                 IModule module = new AnalyzeCSharp();
 
                 // When
-                List<IDocument> results = await module.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
+                IReadOnlyList<TestDocument> results = await ExecuteAsync(document, context, module);
 
                 // Then
                 GetResult(results, "Green")["Syntax"].ToString().ShouldBe(
@@ -608,12 +609,12 @@ internal class Green : Blue",
                         }
                     }
                 ";
-                IDocument document = GetDocument(code);
-                IExecutionContext context = GetContext();
+                TestDocument document = GetDocument(code);
+                TestExecutionContext context = GetContext();
                 IModule module = new AnalyzeCSharp();
 
                 // When
-                List<IDocument> results = await module.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
+                IReadOnlyList<TestDocument> results = await ExecuteAsync(document, context, module);
 
                 // Then
                 GetResult(results, "Green")["Syntax"].ShouldBe("internal class Green : IFoo, IBar, IFooBar");

@@ -29,14 +29,10 @@ namespace Wyam.Core.Tests.Shortcodes.Html
                 Gist shortcode = new Gist();
 
                 // When
-                IShortcodeResult result = await shortcode.ExecuteAsync(args, null, document, context);
+                TestDocument result = (TestDocument)await shortcode.ExecuteAsync(args, null, document, context);
 
                 // Then
-                using (TextReader reader = new StreamReader(result.Stream))
-                {
-                    reader.ReadToEnd().ShouldBe(
-                        "<script src=\"//gist.github.com/def/abc.js?file=ghi\" type=\"text/javascript\"></script>");
-                }
+                result.Content.ShouldBe("<script src=\"//gist.github.com/def/abc.js?file=ghi\" type=\"text/javascript\"></script>");
             }
 
             [Test]
@@ -52,14 +48,10 @@ namespace Wyam.Core.Tests.Shortcodes.Html
                 Gist shortcode = new Gist();
 
                 // When
-                IShortcodeResult result = await shortcode.ExecuteAsync(args, null, document, context);
+                TestDocument result = (TestDocument)await shortcode.ExecuteAsync(args, null, document, context);
 
                 // Then
-                using (TextReader reader = new StreamReader(result.Stream))
-                {
-                    reader.ReadToEnd().ShouldBe(
-                        "<script src=\"//gist.github.com/abc.js?file=ghi\" type=\"text/javascript\"></script>");
-                }
+                result.Content.ShouldBe("<script src=\"//gist.github.com/abc.js?file=ghi\" type=\"text/javascript\"></script>");
             }
 
             [Test]
@@ -75,14 +67,10 @@ namespace Wyam.Core.Tests.Shortcodes.Html
                 Gist shortcode = new Gist();
 
                 // When
-                IShortcodeResult result = await shortcode.ExecuteAsync(args, null, document, context);
+                TestDocument result = (TestDocument)await shortcode.ExecuteAsync(args, null, document, context);
 
                 // Then
-                using (TextReader reader = new StreamReader(result.Stream))
-                {
-                    reader.ReadToEnd().ShouldBe(
-                        "<script src=\"//gist.github.com/def/abc.js\" type=\"text/javascript\"></script>");
-                }
+                result.Content.ShouldBe("<script src=\"//gist.github.com/def/abc.js\" type=\"text/javascript\"></script>");
             }
         }
     }

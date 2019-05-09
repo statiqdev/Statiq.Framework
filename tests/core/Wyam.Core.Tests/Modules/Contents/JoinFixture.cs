@@ -3,9 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using NUnit.Framework;
+using Shouldly;
+using Wyam.Common;
 using Wyam.Common.Documents;
 using Wyam.Common.Execution;
-using Wyam.Common.Util;
 using Wyam.Core.Modules.Contents;
 using Wyam.Testing;
 using Wyam.Testing.Documents;
@@ -21,241 +22,214 @@ namespace Wyam.Core.Tests.Modules.Contents
         public async Task JoinTwoDocumentsJoinWithNoDelimiter()
         {
             // Given
-            IDocument first = new TestDocument("Test");
-            IDocument second = new TestDocument("Test2");
-
-            IExecutionContext context = new TestExecutionContext();
+            TestDocument first = new TestDocument("Test");
+            TestDocument second = new TestDocument("Test2");
             Join join = new Join();
 
             // When
-            List<IDocument> results = await join.ExecuteAsync(new[] { first, second }, context).ToListAsync();
+            TestDocument result = await ExecuteAsync(new[] { first, second }, join).SingleAsync();
 
             // Then
-            Assert.AreEqual("TestTest2", await results.Single().GetStringAsync());
+            result.Content.ShouldBe("TestTest2");
         }
 
         [Test]
         public async Task JoinThreeDocumentsJoinWithNoDelimiter()
         {
             // Given
-            IDocument first = new TestDocument("Test");
-            IDocument second = new TestDocument("Test2");
-            IDocument third = new TestDocument("Test3");
-
-            IExecutionContext context = new TestExecutionContext();
+            TestDocument first = new TestDocument("Test");
+            TestDocument second = new TestDocument("Test2");
+            TestDocument third = new TestDocument("Test3");
             Join join = new Join();
 
             // When
-            List<IDocument> results = await join.ExecuteAsync(new[] { first, second, third }, context).ToListAsync();
+            TestDocument result = await ExecuteAsync(new[] { first, second, third }, join).SingleAsync();
 
             // Then
-            Assert.AreEqual("TestTest2Test3", await results.Single().GetStringAsync());
+            result.Content.ShouldBe("TestTest2Test3");
         }
 
         [Test]
         public async Task JoinThreeDocumentsJoinWithNoDelimiter_firstnull()
         {
             // Given
-            IDocument first = null;
-            IDocument second = new TestDocument("Test2");
-            IDocument third = new TestDocument("Test3");
-
-            IExecutionContext context = new TestExecutionContext();
+            TestDocument first = null;
+            TestDocument second = new TestDocument("Test2");
+            TestDocument third = new TestDocument("Test3");
             Join join = new Join();
 
             // When
-            List<IDocument> results = await join.ExecuteAsync(new[] { first, second, third }, context).ToListAsync();
+            TestDocument result = await ExecuteAsync(new[] { first, second, third }, join).SingleAsync();
 
             // Then
-            Assert.AreEqual("Test2Test3", await results.Single().GetStringAsync());
+            result.Content.ShouldBe("Test2Test3");
         }
 
         [Test]
         public async Task JoinThreeDocumentsJoinWithNoDelimiter_secondnull()
         {
             // Given
-            IDocument first = new TestDocument("Test");
-            IDocument second = null;
-            IDocument third = new TestDocument("Test3");
-
-            IExecutionContext context = new TestExecutionContext();
+            TestDocument first = new TestDocument("Test");
+            TestDocument second = null;
+            TestDocument third = new TestDocument("Test3");
             Join join = new Join();
 
             // When
-            List<IDocument> results = await join.ExecuteAsync(new[] { first, second, third }, context).ToListAsync();
+            TestDocument result = await ExecuteAsync(new[] { first, second, third }, join).SingleAsync();
 
             // Then
-            Assert.AreEqual("TestTest3", await results.Single().GetStringAsync());
+            result.Content.ShouldBe("TestTest3");
         }
 
         [Test]
         public async Task JoinnullPassedInAsDocumentList()
         {
             // Given
-            IExecutionContext context = new TestExecutionContext();
             Join join = new Join();
 
             // When
-            List<IDocument> results = await join.ExecuteAsync(null, context).ToListAsync();
+            TestDocument result = await ExecuteAsync(join).SingleAsync();
 
             // Then
-            Assert.AreEqual(string.Empty, await results.Single().GetStringAsync());
+            result.Content.ShouldBeEmpty();
         }
 
         [Test]
         public async Task JoinTwoDocumentsJoinWithCommaDelimiter()
         {
             // Given
-            IDocument first = new TestDocument("Test");
-            IDocument second = new TestDocument("Test2");
-
-            IExecutionContext context = new TestExecutionContext();
+            TestDocument first = new TestDocument("Test");
+            TestDocument second = new TestDocument("Test2");
             Join join = new Join(",");
 
             // When
-            List<IDocument> results = await join.ExecuteAsync(new[] { first, second }, context).ToListAsync();
+            TestDocument result = await ExecuteAsync(new[] { first, second }, join).SingleAsync();
 
             // Then
-            Assert.AreEqual("Test,Test2", await results.Single().GetStringAsync());
+            result.Content.ShouldBe("Test,Test2");
         }
 
         [Test]
         public async Task JoinTwoDocumentsJoinWithDelimiterInText()
         {
             // Given
-            IDocument first = new TestDocument("Test");
-            IDocument second = new TestDocument("Test2");
-
-            IExecutionContext context = new TestExecutionContext();
+            TestDocument first = new TestDocument("Test");
+            TestDocument second = new TestDocument("Test2");
             Join join = new Join("Test");
 
             // When
-            List<IDocument> results = await join.ExecuteAsync(new[] { first, second }, context).ToListAsync();
+            TestDocument result = await ExecuteAsync(new[] { first, second }, join).SingleAsync();
 
             // Then
-            Assert.AreEqual("TestTestTest2", await results.Single().GetStringAsync());
+            result.Content.ShouldBe("TestTestTest2");
         }
 
         [Test]
         public async Task JoinTwoDocumentsWithKeepFirstMetaDataReturnKeepsFirstMetaData()
         {
             // Given
-            IDocument first = new TestDocument(new List<KeyValuePair<string, object>>() { new KeyValuePair<string, object>("one", "two") }, "Test");
-            IDocument second = new TestDocument(new List<KeyValuePair<string, object>>() { new KeyValuePair<string, object>("three", "four") }, "Test2");
-
-            IExecutionContext context = new TestExecutionContext();
+            TestDocument first = new TestDocument(new List<KeyValuePair<string, object>>() { new KeyValuePair<string, object>("one", "two") }, "Test");
+            TestDocument second = new TestDocument(new List<KeyValuePair<string, object>>() { new KeyValuePair<string, object>("three", "four") }, "Test2");
             Join join = new Join(JoinedMetadata.FirstDocument);
 
             // When
-            List<IDocument> results = await join.ExecuteAsync(new[] { first, second }, context).ToListAsync();
+            TestDocument result = await ExecuteAsync(new[] { first, second }, join).SingleAsync();
 
             // Then
-            Assert.True(results.Single().Keys.Contains("one"));
-            Assert.False(results.Single().Keys.Contains("three"));
+            result.Keys.ShouldContain("one");
+            result.Keys.ShouldNotContain("three");
         }
 
         [Test]
         public async Task JoinTwoDocumentsWithMetaDataReturnDefaultMetaData()
         {
             // Given
-            IDocument first = new TestDocument(new List<KeyValuePair<string, object>>() { new KeyValuePair<string, object>("one", "two") }, "Test");
-            IDocument second = new TestDocument(new List<KeyValuePair<string, object>>() { new KeyValuePair<string, object>("three", "four") }, "Test2");
-
-            IExecutionContext context = new TestExecutionContext();
+            TestDocument first = new TestDocument(new List<KeyValuePair<string, object>>() { new KeyValuePair<string, object>("one", "two") }, "Test");
+            TestDocument second = new TestDocument(new List<KeyValuePair<string, object>>() { new KeyValuePair<string, object>("three", "four") }, "Test2");
             Join join = new Join();
 
             // When
-            List<IDocument> results = await join.ExecuteAsync(new[] { first, second }, context).ToListAsync();
+            TestDocument result = await ExecuteAsync(new[] { first, second }, join).SingleAsync();
 
             // Then
-            Assert.False(results.Single().Keys.Contains("one"));
-            Assert.False(results.Single().Keys.Contains("three"));
+            result.Keys.ShouldNotContain("one");
+            result.Keys.ShouldNotContain("three");
         }
 
         [Test]
         public async Task JoinTwoDocumentsWithKeepLastMetaDataReturnKeepsLastMetaData()
         {
             // Given
-            IDocument first = new TestDocument(new List<KeyValuePair<string, object>>() { new KeyValuePair<string, object>("one", "two") }, "Test");
-            IDocument second = new TestDocument(new List<KeyValuePair<string, object>>() { new KeyValuePair<string, object>("three", "four") }, "Test2");
-
-            IExecutionContext context = new TestExecutionContext();
+            TestDocument first = new TestDocument(new List<KeyValuePair<string, object>>() { new KeyValuePair<string, object>("one", "two") }, "Test");
+            TestDocument second = new TestDocument(new List<KeyValuePair<string, object>>() { new KeyValuePair<string, object>("three", "four") }, "Test2");
             Join join = new Join(JoinedMetadata.LastDocument);
 
             // When
-            List<IDocument> results = await join.ExecuteAsync(new[] { first, second }, context).ToListAsync();
+            TestDocument result = await ExecuteAsync(new[] { first, second }, join).SingleAsync();
 
             // Then
-            Assert.True(results.Single().Keys.Contains("three"));
-            Assert.False(results.Single().Keys.Contains("one"));
+            result.Keys.ShouldNotContain("one");
+            result.Keys.ShouldContain("three");
         }
 
         [Test]
         public async Task JoinTwoDocumentsWithAllKeepFirstMetaData()
         {
             // Given
-            IDocument first = new TestDocument(new List<KeyValuePair<string, object>>() { new KeyValuePair<string, object>("one", "two") }, "Test");
-            IDocument second = new TestDocument(new List<KeyValuePair<string, object>>() { new KeyValuePair<string, object>("one", "seven"), new KeyValuePair<string, object>("three", "four") }, "Test2");
-
-            IExecutionContext context = new TestExecutionContext();
+            TestDocument first = new TestDocument(new List<KeyValuePair<string, object>>() { new KeyValuePair<string, object>("one", "two") }, "Test");
+            TestDocument second = new TestDocument(new List<KeyValuePair<string, object>>() { new KeyValuePair<string, object>("one", "seven"), new KeyValuePair<string, object>("three", "four") }, "Test2");
             Join join = new Join(JoinedMetadata.AllWithFirstDuplicates);
 
             // When
-            List<IDocument> results = await join.ExecuteAsync(new[] { first, second }, context).ToListAsync();
+            TestDocument result = await ExecuteAsync(new[] { first, second }, join).SingleAsync();
 
             // Then
-            Assert.True(results.Single().Values.Contains("two"));
-            Assert.False(results.Single().Values.Contains("seven"));
-
-            Assert.True(results.Single().Keys.Contains("three"));
+            result.Values.ShouldContain("two");
+            result.Values.ShouldNotContain("seven");
+            result.Values.ShouldContain("three");
         }
 
         [Test]
         public async Task JoinTwoDocumentsWithAllKeepLastMetaData()
         {
             // Given
-            IDocument first = new TestDocument(new List<KeyValuePair<string, object>>() { new KeyValuePair<string, object>("one", "two") }, "Test");
-            IDocument second = new TestDocument(new List<KeyValuePair<string, object>>() { new KeyValuePair<string, object>("one", "seven"), new KeyValuePair<string, object>("three", "four") }, "Test2");
-
-            IExecutionContext context = new TestExecutionContext();
+            TestDocument first = new TestDocument(new List<KeyValuePair<string, object>>() { new KeyValuePair<string, object>("one", "two") }, "Test");
+            TestDocument second = new TestDocument(new List<KeyValuePair<string, object>>() { new KeyValuePair<string, object>("one", "seven"), new KeyValuePair<string, object>("three", "four") }, "Test2");
             Join join = new Join(JoinedMetadata.AllWithLastDuplicates);
 
             // When
-            List<IDocument> results = await join.ExecuteAsync(new[] { first, second }, context).ToListAsync();
+            TestDocument result = await ExecuteAsync(new[] { first, second }, join).SingleAsync();
 
             // Then
-            Assert.False(results.Single().Values.Contains("two"));
-            Assert.True(results.Single().Values.Contains("seven"));
-
-            Assert.True(results.Single().Keys.Contains("three"));
+            result.Values.ShouldNotContain("two");
+            result.Values.ShouldContain("seven");
+            result.Values.ShouldContain("three");
         }
 
         [Test]
         public async Task EmptyListDoesNotError()
         {
             // Given
-            IExecutionContext context = new TestExecutionContext();
             Join join = new Join();
 
             // When
-            List<IDocument> results = await join.ExecuteAsync(new IDocument[0], context).ToListAsync();
+            TestDocument result = await ExecuteAsync(join).SingleAsync();
 
             // Then
-            Assert.AreEqual(string.Empty, await results.Single().GetStringAsync());
+            result.Content.ShouldBeEmpty();
         }
 
         [Test]
         public async Task EmptyListWithDelimitorDoesNotError()
         {
             // Given
-            IExecutionContext context = new TestExecutionContext();
             Join join = new Join(",");
 
             // When
-            List<IDocument> results = await join.ExecuteAsync(new IDocument[0], context).ToListAsync();
+            TestDocument result = await ExecuteAsync(join).SingleAsync();
 
             // Then
-            Assert.AreEqual(string.Empty, await results.Single().GetStringAsync());
+            result.Content.ShouldBeEmpty();
         }
     }
 }

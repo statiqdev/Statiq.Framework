@@ -3,10 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using WebMarkupMin.Core;
+using Wyam.Common;
 using Wyam.Common.Documents;
 using Wyam.Common.Execution;
 using Wyam.Common.Tracing;
-using Wyam.Common.Util;
 
 namespace Wyam.Minification
 {

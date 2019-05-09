@@ -4,11 +4,11 @@ using System.Linq;
 using System.Threading.Tasks;
 using NUnit.Framework;
 using Shouldly;
+using Wyam.Common;
 using Wyam.Common.Documents;
 using Wyam.Common.Execution;
 using Wyam.Common.IO;
 using Wyam.Common.Meta;
-using Wyam.Common.Util;
 using Wyam.Testing;
 using Wyam.Testing.Documents;
 using Wyam.Testing.Execution;
@@ -46,11 +46,11 @@ body {
                 {
                     FileProvider = fileProvider
                 };
-                IExecutionContext context = new TestExecutionContext
+                TestExecutionContext context = new TestExecutionContext
                 {
                     FileSystem = fileSystem
                 };
-                IDocument document = new TestDocument(
+                TestDocument document = new TestDocument(
                     new MetadataItems
                     {
                         { Keys.RelativeFilePath, new FilePath("assets/test.scss") }
@@ -60,11 +60,11 @@ body {
                 Sass sass = new Sass().WithCompactOutputStyle();
 
                 // When
-                List<IDocument> results = await sass.ExecuteAsync(new[] { document }, context).ToListAsync(); // Make sure to materialize the result list
+                TestDocument result = await ExecuteAsync(document, context, sass).SingleAsync();
 
                 // Then
-                Assert.That(await results.SelectAsync(async x => await x.GetStringAsync()), Is.EqualTo(new[] { output }));
-                Assert.That(results.Select(x => x.FilePath(Keys.RelativeFilePath).FullPath), Is.EqualTo(new[] { "assets/test.css" }));
+                result.Content.ShouldBe(output);
+                result.FilePath(Keys.RelativeFilePath).FullPath.ShouldBe("assets/test.css");
             }
 
             [Test]
@@ -82,11 +82,11 @@ body {
                 {
                     FileProvider = fileProvider
                 };
-                IExecutionContext context = new TestExecutionContext
+                TestExecutionContext context = new TestExecutionContext
                 {
                     FileSystem = fileSystem
                 };
-                IDocument document = new TestDocument(
+                TestDocument document = new TestDocument(
                     new MetadataItems
                     {
                         { Keys.RelativeFilePath, new FilePath("assets/test.scss") }
@@ -96,11 +96,11 @@ body {
                 Sass sass = new Sass();
 
                 // When
-                List<IDocument> results = await sass.ExecuteAsync(new[] { document }, context).ToListAsync(); // Make sure to materialize the result list
+                TestDocument result = await ExecuteAsync(document, context, sass).SingleAsync();
 
                 // Then
-                Assert.That(await results.SelectAsync(async x => await x.GetStringAsync()), Is.EqualTo(new[] { string.Empty }));
-                Assert.That(results.Select(x => x.FilePath(Keys.RelativeFilePath).FullPath), Is.EqualTo(new[] { "assets/test.css" }));
+                result.Content.ShouldBeEmpty();
+                result.FilePath(Keys.RelativeFilePath).FullPath.ShouldBe("assets/test.css");
             }
 
             [Test]
@@ -124,11 +124,11 @@ body {
                 {
                     FileProvider = fileProvider
                 };
-                IExecutionContext context = new TestExecutionContext
+                TestExecutionContext context = new TestExecutionContext
                 {
                     FileSystem = fileSystem
                 };
-                IDocument document = new TestDocument(
+                TestDocument document = new TestDocument(
                     new MetadataItems
                     {
                         { Keys.RelativeFilePath, new FilePath("assets/test.scss") }
@@ -138,10 +138,7 @@ body {
                 Sass sass = new Sass();
 
                 // When, Then
-                await Should.ThrowAsync<Exception>(async () =>
-                {
-                    await sass.ExecuteAsync(new[] { document }, context).ToListAsync(); // Make sure to materialize the result list
-                });
+                await Should.ThrowAsync<Exception>(async () => await ExecuteAsync(document, context, sass));
             }
 
             [Test]
@@ -174,11 +171,11 @@ body {
                 {
                     FileProvider = fileProvider
                 };
-                IExecutionContext context = new TestExecutionContext
+                TestExecutionContext context = new TestExecutionContext
                 {
                     FileSystem = fileSystem
                 };
-                IDocument document = new TestDocument(
+                TestDocument document = new TestDocument(
                     new MetadataItems
                     {
                         { Keys.RelativeFilePath, new FilePath("assets/test.scss") }
@@ -188,11 +185,11 @@ body {
                 Sass sass = new Sass().IncludeSourceComments(false).WithCompactOutputStyle();
 
                 // When
-                List<IDocument> results = await sass.ExecuteAsync(new[] { document }, context).ToListAsync(); // Make sure to materialize the result list
+                TestDocument result = await ExecuteAsync(document, context, sass).SingleAsync();
 
                 // Then
-                Assert.That(await results.SelectAsync(async x => await x.GetStringAsync()), Is.EqualTo(new[] { output }));
-                Assert.That(results.Select(x => x.FilePath(Keys.RelativeFilePath).FullPath), Is.EqualTo(new[] { "assets/test.css" }));
+                result.Content.ShouldBe(output);
+                result.FilePath(Keys.RelativeFilePath).FullPath.ShouldBe("assets/test.css");
             }
 
             [Test]
@@ -222,11 +219,11 @@ body {
                 {
                     FileProvider = fileProvider
                 };
-                IExecutionContext context = new TestExecutionContext
+                TestExecutionContext context = new TestExecutionContext
                 {
                     FileSystem = fileSystem
                 };
-                IDocument document = new TestDocument(
+                TestDocument document = new TestDocument(
                     new MetadataItems
                     {
                         { Keys.RelativeFilePath, new FilePath("assets/test.scss") }
@@ -236,11 +233,11 @@ body {
                 Sass sass = new Sass().IncludeSourceComments(false).WithCompactOutputStyle();
 
                 // When
-                List<IDocument> results = await sass.ExecuteAsync(new[] { document }, context).ToListAsync(); // Make sure to materialize the result list
+                TestDocument result = await ExecuteAsync(document, context, sass).SingleAsync();
 
                 // Then
-                Assert.That(await results.SelectAsync(async x => await x.GetStringAsync()), Is.EqualTo(new[] { output }));
-                Assert.That(results.Select(x => x.FilePath(Keys.RelativeFilePath).FullPath), Is.EqualTo(new[] { "assets/test.css" }));
+                result.Content.ShouldBe(output);
+                result.FilePath(Keys.RelativeFilePath).FullPath.ShouldBe("assets/test.css");
             }
 
             [Test]
@@ -270,11 +267,11 @@ body {
                 {
                     FileProvider = fileProvider
                 };
-                IExecutionContext context = new TestExecutionContext
+                TestExecutionContext context = new TestExecutionContext
                 {
                     FileSystem = fileSystem
                 };
-                IDocument document = new TestDocument(
+                TestDocument document = new TestDocument(
                     new MetadataItems
                     {
                         { Keys.RelativeFilePath, new FilePath("assets/test.scss") }
@@ -284,11 +281,11 @@ body {
                 Sass sass = new Sass().IncludeSourceComments(false).WithCompactOutputStyle();
 
                 // When
-                List<IDocument> results = await sass.ExecuteAsync(new[] { document }, context).ToListAsync(); // Make sure to materialize the result list
+                TestDocument result = await ExecuteAsync(document, context, sass).SingleAsync();
 
                 // Then
-                Assert.That(await results.SelectAsync(async x => await x.GetStringAsync()), Is.EqualTo(new[] { output }));
-                Assert.That(results.Select(x => x.FilePath(Keys.RelativeFilePath).FullPath), Is.EqualTo(new[] { "assets/test.css" }));
+                result.Content.ShouldBe(output);
+                result.FilePath(Keys.RelativeFilePath).FullPath.ShouldBe("assets/test.css");
             }
 
             [Test]
@@ -318,11 +315,11 @@ body {
                 {
                     FileProvider = fileProvider
                 };
-                IExecutionContext context = new TestExecutionContext
+                TestExecutionContext context = new TestExecutionContext
                 {
                     FileSystem = fileSystem
                 };
-                IDocument document = new TestDocument(
+                TestDocument document = new TestDocument(
                     new MetadataItems
                     {
                         { Keys.RelativeFilePath, new FilePath("assets/test.scss") }
@@ -332,11 +329,11 @@ body {
                 Sass sass = new Sass().IncludeSourceComments(false).WithCompactOutputStyle();
 
                 // When
-                List<IDocument> results = await sass.ExecuteAsync(new[] { document }, context).ToListAsync(); // Make sure to materialize the result list
+                TestDocument result = await ExecuteAsync(document, context, sass).SingleAsync();
 
                 // Then
-                Assert.That(await results.SelectAsync(async x => await x.GetStringAsync()), Is.EqualTo(new[] { output }));
-                Assert.That(results.Select(x => x.FilePath(Keys.RelativeFilePath).FullPath), Is.EqualTo(new[] { "assets/test.css" }));
+                result.Content.ShouldBe(output);
+                result.FilePath(Keys.RelativeFilePath).FullPath.ShouldBe("assets/test.css");
             }
 
             // TODO: Change above test to just use exact file name

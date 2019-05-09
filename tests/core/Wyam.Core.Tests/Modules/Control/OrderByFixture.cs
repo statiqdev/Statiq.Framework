@@ -35,9 +35,9 @@ namespace Wyam.Core.Tests.Modules.Control
                 Concat concat = new Concat(count2);
                 OrderBy orderBy = new OrderBy(Config.FromDocument(d => d.Get<int>("A")));
                 Execute gatherData = new ExecuteDocument(
-                    Config.FromDocument(d =>
+                    Config.FromDocument(async d =>
                     {
-                        content.Add(d.Content);
+                        content.Add(await d.GetStringAsync());
                         return (IDocument)null;
                     }), false);
 
@@ -66,9 +66,9 @@ namespace Wyam.Core.Tests.Modules.Control
                 Concat concat = new Concat(count2);
                 OrderBy orderBy = new OrderBy(Config.FromDocument(d => d.Get<int>("A"))).Descending();
                 Execute gatherData = new ExecuteDocument(
-                    Config.FromDocument(d =>
+                    Config.FromDocument(async d =>
                     {
-                        content.Add(d.Content);
+                        content.Add(await d.GetStringAsync());
                         return (IDocument)null;
                     }), false);
 
@@ -97,9 +97,9 @@ namespace Wyam.Core.Tests.Modules.Control
                 OrderBy orderBy = new OrderBy(Config.FromDocument(d => d.Get<int>("A")))
                     .ThenBy(Config.FromDocument(d => d.Get<int>("B")));
                 Execute gatherData = new ExecuteDocument(
-                    Config.FromDocument(d =>
+                    Config.FromDocument(async d =>
                     {
-                        content.Add(d.Content);
+                        content.Add(await d.GetStringAsync());
                         return (IDocument)null;
                     }), false);
 
@@ -129,9 +129,9 @@ namespace Wyam.Core.Tests.Modules.Control
                     .ThenBy(Config.FromDocument(d => d.Get<int>("B")))
                     .Descending();
                 Execute gatherData = new ExecuteDocument(
-                    Config.FromDocument(d =>
+                    Config.FromDocument(async d =>
                     {
-                        content.Add(d.Content);
+                        content.Add(await d.GetStringAsync());
                         return (IDocument)null;
                     }), false);
 
@@ -162,9 +162,9 @@ namespace Wyam.Core.Tests.Modules.Control
                     .ThenBy(Config.FromDocument(d => d.Get<int>("B")))
                     .Descending();
                 Execute gatherData = new ExecuteDocument(
-                    Config.FromDocument(d =>
+                    Config.FromDocument(async d =>
                     {
-                        content.Add(d.Content);
+                        content.Add(await d.GetStringAsync());
                         return (IDocument)null;
                     }), false);
 
@@ -194,9 +194,9 @@ namespace Wyam.Core.Tests.Modules.Control
                     .Descending()
                     .ThenBy(Config.FromDocument(d => d.Get<int>("B")));
                 Execute gatherData = new ExecuteDocument(
-                    Config.FromDocument(d =>
+                    Config.FromDocument(async d =>
                     {
-                        content.Add(d.Content);
+                        content.Add(await d.GetStringAsync());
                         return (IDocument)null;
                     }), false);
 

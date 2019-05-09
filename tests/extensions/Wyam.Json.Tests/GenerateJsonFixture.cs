@@ -4,11 +4,11 @@ using System.Linq;
 using System.Threading.Tasks;
 using NUnit.Framework;
 using Shouldly;
+using Wyam.Common;
 using Wyam.Common.Configuration;
 using Wyam.Common.Documents;
 using Wyam.Common.Execution;
 using Wyam.Common.Meta;
-using Wyam.Common.Util;
 using Wyam.Testing;
 using Wyam.Testing.Documents;
 using Wyam.Testing.Execution;
@@ -65,7 +65,6 @@ namespace Wyam.Json.Tests
             public async Task GetsObjectFromMetadata()
             {
                 // Given
-                TestExecutionContext context = new TestExecutionContext();
                 TestDocument document = new TestDocument(new MetadataItems
                 {
                     { "JsonObject", _jsonObject }
@@ -73,32 +72,30 @@ namespace Wyam.Json.Tests
                 GenerateJson generateJson = new GenerateJson("JsonObject");
 
                 // When
-                IList<IDocument> results = await generateJson.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
+                TestDocument result = await ExecuteAsync(document, generateJson).SingleAsync();
 
                 // Then
-                (await results.SelectAsync(async x => await x.GetStringAsync())).Single().ShouldBe(_jsonContent, StringCompareShould.IgnoreLineEndings);
+                result.Content.ShouldBe(_jsonContent, StringCompareShould.IgnoreLineEndings);
             }
 
             [Test]
             public async Task GetsObjectFromContextDelegate()
             {
                 // Given
-                TestExecutionContext context = new TestExecutionContext();
                 TestDocument document = new TestDocument();
                 GenerateJson generateJson = new GenerateJson(_jsonObject);
 
                 // When
-                IList<IDocument> results = await generateJson.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
+                TestDocument result = await ExecuteAsync(document, generateJson).SingleAsync();
 
                 // Then
-                (await results.SelectAsync(async x => await x.GetStringAsync())).Single().ShouldBe(_jsonContent, StringCompareShould.IgnoreLineEndings);
+                result.Content.ShouldBe(_jsonContent, StringCompareShould.IgnoreLineEndings);
             }
 
             [Test]
             public async Task GetsObjectFromDocumentDelegate()
             {
                 // Given
-                TestExecutionContext context = new TestExecutionContext();
                 TestDocument document = new TestDocument(new MetadataItems
                 {
                     { "JsonObject", _jsonObject }
@@ -106,17 +103,16 @@ namespace Wyam.Json.Tests
                 GenerateJson generateJson = new GenerateJson(Config.FromDocument(doc => doc.Get("JsonObject")));
 
                 // When
-                IList<IDocument> results = await generateJson.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
+                TestDocument result = await ExecuteAsync(document, generateJson).SingleAsync();
 
                 // Then
-                (await results.SelectAsync(async x => await x.GetStringAsync())).Single().ShouldBe(_jsonContent, StringCompareShould.IgnoreLineEndings);
+                result.Content.ShouldBe(_jsonContent, StringCompareShould.IgnoreLineEndings);
             }
 
             [Test]
             public async Task SetsMetadataKey()
             {
                 // Given
-                TestExecutionContext context = new TestExecutionContext();
                 TestDocument document = new TestDocument(new MetadataItems
                 {
                     { "JsonObject", _jsonObject }
@@ -124,18 +120,16 @@ namespace Wyam.Json.Tests
                 GenerateJson generateJson = new GenerateJson("JsonObject", "OutputKey");
 
                 // When
-                IList<IDocument> results = await generateJson.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
+                TestDocument result = await ExecuteAsync(document, generateJson).SingleAsync();
 
                 // Then
-                results.Select(x => x.First(y => y.Key == "OutputKey").Value).Single().ToString()
-                    .ShouldBe(_jsonContent, StringCompareShould.IgnoreLineEndings);
+                result.Content.ShouldBe(_jsonContent, StringCompareShould.IgnoreLineEndings);
             }
 
             [Test]
             public async Task DoesNotIndent()
             {
                 // Given
-                TestExecutionContext context = new TestExecutionContext();
                 TestDocument document = new TestDocument(new MetadataItems
                 {
                     { "JsonObject", _jsonObject }
@@ -147,17 +141,16 @@ namespace Wyam.Json.Tests
                     .Replace("\n", string.Empty);
 
                 // When
-                IList<IDocument> results = await generateJson.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
+                TestDocument result = await ExecuteAsync(document, generateJson).SingleAsync();
 
                 // Then
-                (await results.SelectAsync(async x => await x.GetStringAsync())).Single().ShouldBe(nonIndentedJsonContent, StringCompareShould.IgnoreLineEndings);
+                result.Content.ShouldBe(nonIndentedJsonContent, StringCompareShould.IgnoreLineEndings);
             }
 
             [Test]
             public async Task GeneratesCamelCasePropertyNames()
             {
                 // Given
-                TestExecutionContext context = new TestExecutionContext();
                 TestDocument document = new TestDocument(new MetadataItems
                 {
                     { "JsonObject", _jsonObject }
@@ -165,17 +158,16 @@ namespace Wyam.Json.Tests
                 GenerateJson generateJson = new GenerateJson("JsonObject").WithCamelCase();
 
                 // When
-                IList<IDocument> results = await generateJson.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
+                TestDocument result = await ExecuteAsync(document, generateJson).SingleAsync();
 
                 // Then
-                (await results.SelectAsync(async x => await x.GetStringAsync())).Single().ShouldBe(_camelCaseJsonContent, StringCompareShould.IgnoreLineEndings);
+                result.Content.ShouldBe(_camelCaseJsonContent, StringCompareShould.IgnoreLineEndings);
             }
 
             [Test]
             public async Task SerializesMetadataKeys()
             {
                 // Given
-                TestExecutionContext context = new TestExecutionContext();
                 TestDocument document = new TestDocument(new MetadataItems
                 {
                     { "Foo", "fuz" },
@@ -184,10 +176,10 @@ namespace Wyam.Json.Tests
                 GenerateJson generateJson = new GenerateJson(new[] { "Bar" });
 
                 // When
-                IList<IDocument> results = await generateJson.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
+                TestDocument result = await ExecuteAsync(document, generateJson).SingleAsync();
 
                 // Then
-                (await results.SelectAsync(async x => await x.GetStringAsync())).Single().ShouldBe(
+                result.Content.ShouldBe(
                     @"{
   ""Bar"": ""baz""
 }",
@@ -198,7 +190,6 @@ namespace Wyam.Json.Tests
             public async Task SerializesMetadataKeysWithCamelCase()
             {
                 // Given
-                TestExecutionContext context = new TestExecutionContext();
                 TestDocument document = new TestDocument(new MetadataItems
                 {
                     { "Foo", "fuz" },
@@ -207,10 +198,10 @@ namespace Wyam.Json.Tests
                 GenerateJson generateJson = new GenerateJson(new[] { "Bar" }).WithCamelCase();
 
                 // When
-                IList<IDocument> results = await generateJson.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
+                TestDocument result = await ExecuteAsync(document, generateJson).SingleAsync();
 
                 // Then
-                (await results.SelectAsync(async x => await x.GetStringAsync())).Single().ShouldBe(
+                result.Content.ShouldBe(
                     @"{
   ""bar"": ""baz""
 }",
@@ -221,7 +212,6 @@ namespace Wyam.Json.Tests
             public async Task SerializesMetadataObject()
             {
                 // Given
-                TestExecutionContext context = new TestExecutionContext();
                 TestDocument document = new TestDocument(new MetadataItems
                 {
                     { "Foo", "fuz" },
@@ -230,10 +220,10 @@ namespace Wyam.Json.Tests
                 GenerateJson generateJson = new GenerateJson(Config.FromDocument(doc => (object)doc.GetMetadata("Bar")));
 
                 // When
-                IList<IDocument> results = await generateJson.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
+                TestDocument result = await ExecuteAsync(document, generateJson).SingleAsync();
 
             // Then
-                (await results.SelectAsync(async x => await x.GetStringAsync())).Single().ShouldBe(
+                result.Content.ShouldBe(
                 @"{
   ""Bar"": ""baz""
 }",
@@ -244,7 +234,6 @@ namespace Wyam.Json.Tests
             public async Task SerializesMetadataObjectWithCamelCase()
             {
                 // Given
-                TestExecutionContext context = new TestExecutionContext();
                 TestDocument document = new TestDocument(new MetadataItems
                 {
                     { "Foo", "fuz" },
@@ -253,10 +242,10 @@ namespace Wyam.Json.Tests
                 GenerateJson generateJson = new GenerateJson(Config.FromDocument(doc => (object)doc.GetMetadata("Bar"))).WithCamelCase();
 
                 // When
-                IList<IDocument> results = await generateJson.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
+                TestDocument result = await ExecuteAsync(document, generateJson).SingleAsync();
 
                 // Then
-                (await results.SelectAsync(async x => await x.GetStringAsync())).Single().ShouldBe(
+                result.Content.ShouldBe(
                     @"{
   ""bar"": ""baz""
 }",

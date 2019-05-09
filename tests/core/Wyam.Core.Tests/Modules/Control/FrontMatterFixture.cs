@@ -23,7 +23,7 @@ namespace Wyam.Core.Tests.Modules.Control
             public async Task DefaultCtorSplitsAtDashes()
             {
                 // Given
-                IExecutionContext context = new TestExecutionContext();
+                TestExecutionContext context = new TestExecutionContext();
                 IDocument[] inputs =
                 {
                     new TestDocument(@"FM1
@@ -57,7 +57,7 @@ Content2", await documents.First().GetStringAsync());
             public async Task EmptyFirstLineWithDelimiterTreatsAsFrontMatter()
             {
                 // Given
-                IExecutionContext context = new TestExecutionContext();
+                TestExecutionContext context = new TestExecutionContext();
                 IDocument[] inputs =
                 {
                     new TestDocument(@"
@@ -95,7 +95,7 @@ Content2", await documents.First().GetStringAsync());
             public async Task EmptyFirstLineWithoutDelimiterTreatsAsFrontMatter()
             {
                 // Given
-                IExecutionContext context = new TestExecutionContext();
+                TestExecutionContext context = new TestExecutionContext();
                 IDocument[] inputs =
                 {
                     new TestDocument(@"
@@ -131,7 +131,7 @@ Content2", await documents.First().GetStringAsync());
             public async Task DashStringDoesNotSplitAtNonmatchingDashes()
             {
                 // Given
-                IExecutionContext context = new TestExecutionContext();
+                TestExecutionContext context = new TestExecutionContext();
                 IDocument[] inputs =
                 {
                     new TestDocument(@"FM1
@@ -165,7 +165,7 @@ Content2", await documents.First().GetStringAsync());
             public async Task MatchingStringSplitsAtCorrectLocation()
             {
                 // Given
-                IExecutionContext context = new TestExecutionContext();
+                TestExecutionContext context = new TestExecutionContext();
                 IDocument[] inputs =
                 {
                     new TestDocument(@"FM1
@@ -199,7 +199,7 @@ Content2", await documents.First().GetStringAsync());
             public async Task SingleCharWithRepeatedDelimiterSplitsAtCorrectLocation()
             {
                 // Given
-                IExecutionContext context = new TestExecutionContext();
+                TestExecutionContext context = new TestExecutionContext();
                 IDocument[] inputs =
                 {
                     new TestDocument(@"FM1
@@ -233,7 +233,7 @@ Content2", await documents.First().GetStringAsync());
             public async Task SingleCharWithRepeatedDelimiterWithTrailingSpacesSplitsAtCorrectLocation()
             {
                 // Given
-                IExecutionContext context = new TestExecutionContext();
+                TestExecutionContext context = new TestExecutionContext();
                 IDocument[] inputs =
                 {
                     new TestDocument(@"FM1
@@ -267,7 +267,7 @@ Content2", await documents.First().GetStringAsync());
             public async Task SingleCharWithRepeatedDelimiterWithLeadingSpacesDoesNotSplit()
             {
                 // Given
-                IExecutionContext context = new TestExecutionContext();
+                TestExecutionContext context = new TestExecutionContext();
                 IDocument[] inputs =
                 {
                     new TestDocument(@"FM1
@@ -301,7 +301,7 @@ Content2", await documents.First().GetStringAsync());
             public async Task SingleCharWithRepeatedDelimiterWithExtraLinesSplitsAtCorrectLocation()
             {
                 // Given
-                IExecutionContext context = new TestExecutionContext();
+                TestExecutionContext context = new TestExecutionContext();
                 IDocument[] inputs =
                 {
                      new TestDocument(@"FM1
@@ -339,7 +339,7 @@ Content2", await documents.First().GetStringAsync());
             public async Task SingleCharWithSingleDelimiterSplitsAtCorrectLocation()
             {
                 // Given
-                IExecutionContext context = new TestExecutionContext();
+                TestExecutionContext context = new TestExecutionContext();
                 IDocument[] inputs =
                 {
                     new TestDocument(@"FM1
@@ -373,7 +373,7 @@ Content2", await documents.First().GetStringAsync());
             public async Task MultipleInputDocumentsResultsInMultipleOutputs()
             {
                 // Given
-                IExecutionContext context = new TestExecutionContext();
+                TestExecutionContext context = new TestExecutionContext();
                 IDocument[] inputs =
                 {
                     new TestDocument(@"AA
@@ -407,7 +407,7 @@ BB
             public async Task DefaultCtorIgnoresDelimiterOnFirstLine()
             {
                 // Given
-                IExecutionContext context = new TestExecutionContext();
+                TestExecutionContext context = new TestExecutionContext();
                 IDocument[] inputs =
                 {
                     new TestDocument(@"---
@@ -442,7 +442,7 @@ Content2", await documents.First().GetStringAsync());
             public async Task NoIgnoreDelimiterOnFirstLine()
             {
                 // Given
-                IExecutionContext context = new TestExecutionContext();
+                TestExecutionContext context = new TestExecutionContext();
                 IDocument[] inputs =
                 {
                     new TestDocument(@"---

@@ -4,7 +4,6 @@ using System.Threading.Tasks;
 using Wyam.Common.Documents;
 using Wyam.Common.Modules;
 using Wyam.Common.Execution;
-using Wyam.Common.Util;
 
 namespace Wyam.Html
 {

@@ -35,7 +35,7 @@ namespace Wyam.Core.Tests.Modules.Control
                 IReadOnlyList<IDocument> results = await ExecuteAsync(
                     a,
                     new Merge(b),
-                    new Core.Modules.Metadata.Meta("Content", Config.FromDocument(doc => doc.Content)));
+                    new Core.Modules.Metadata.Meta("Content", Config.FromDocument(async doc => await doc.GetStringAsync())));
 
                 // Then
                 CollectionAssert.AreEqual(new[] { "21" }, results.Select(x => x["Content"]));
@@ -202,7 +202,7 @@ namespace Wyam.Core.Tests.Modules.Control
                 IReadOnlyList<IDocument> results = await ExecuteAsync(
                     a,
                     new Merge(b).ForEachDocument(),
-                    new Core.Modules.Metadata.Meta("Content", Config.FromDocument(doc => doc.Content)));
+                    new Core.Modules.Metadata.Meta("Content", Config.FromDocument(async doc => await doc.GetStringAsync())));
 
                 // Then
                 Assert.AreEqual(1, a.OutputCount);
@@ -229,7 +229,7 @@ namespace Wyam.Core.Tests.Modules.Control
                 IReadOnlyList<IDocument> results = await ExecuteAsync(
                     a,
                     new Merge(b).ForEachDocument(),
-                    new Core.Modules.Metadata.Meta("Content", Config.FromDocument(doc => doc.Content)));
+                    new Core.Modules.Metadata.Meta("Content", Config.FromDocument(async doc => await doc.GetStringAsync())));
 
                 // Then
                 Assert.AreEqual(1, a.OutputCount);
@@ -256,7 +256,7 @@ namespace Wyam.Core.Tests.Modules.Control
                 IReadOnlyList<IDocument> results = await ExecuteAsync(
                     a,
                     new Merge(b).ForEachDocument(),
-                    new Core.Modules.Metadata.Meta("Content", Config.FromDocument(doc => doc.Content)));
+                    new Core.Modules.Metadata.Meta("Content", Config.FromDocument(async doc => await doc.GetStringAsync())));
 
                 // Then
                 Assert.AreEqual(2, a.OutputCount);
@@ -284,7 +284,7 @@ namespace Wyam.Core.Tests.Modules.Control
                 IReadOnlyList<IDocument> results = await ExecuteAsync(
                     a,
                     new Merge(b).ForEachDocument(),
-                    new Core.Modules.Metadata.Meta("Content", Config.FromDocument(doc => doc.Content)));
+                    new Core.Modules.Metadata.Meta("Content", Config.FromDocument(async doc => await doc.GetStringAsync())));
 
                 // Then
                 Assert.AreEqual(2, a.OutputCount);

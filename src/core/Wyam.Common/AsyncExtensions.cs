@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace Wyam.Common.Util
+namespace Wyam.Common
 {
     public static class AsyncExtensions
     {
@@ -101,6 +101,10 @@ namespace Wyam.Common.Util
         public static async Task<List<T>> ToListAsync<T>(this Task<IEnumerable<T>> task) => (await task).ToList();
 
         public static async Task<T[]> ToArrayAsync<T>(this Task<IEnumerable<T>> task) => (await task).ToArray();
+
+        public static async Task<T> SingleAsync<T>(this Task<IEnumerable<T>> task) => (await task).Single();
+
+        public static async Task<T> SingleAsync<T>(this Task<IReadOnlyList<T>> task) => (await task).Single();
 
         // See https://stackoverflow.com/a/15530170
         public static Task<TBase> FromDerived<TBase, TDerived>(this Task<TDerived> task)

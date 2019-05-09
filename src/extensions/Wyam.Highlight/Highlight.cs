@@ -7,11 +7,11 @@ using AngleSharp.Dom.Html;
 using AngleSharp.Extensions;
 using AngleSharp.Html;
 using AngleSharp.Parser.Html;
+using Wyam.Common;
 using Wyam.Common.Documents;
 using Wyam.Common.Execution;
 using Wyam.Common.JavaScript;
 using Wyam.Common.Modules;
-using Wyam.Common.Util;
 using Trace = Wyam.Common.Tracing.Trace;
 
 namespace Wyam.Highlight

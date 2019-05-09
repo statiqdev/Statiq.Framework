@@ -3,14 +3,15 @@ using System.Linq;
 using System.Threading.Tasks;
 using NUnit.Framework;
 using Shouldly;
+using Wyam.Common;
 using Wyam.Common.Configuration;
 using Wyam.Common.Documents;
 using Wyam.Common.Execution;
 using Wyam.Common.IO;
 using Wyam.Common.Meta;
-using Wyam.Common.Util;
 using Wyam.Core.Modules.Metadata;
 using Wyam.Testing;
+using Wyam.Testing.Documents;
 using Wyam.Testing.Execution;
 
 namespace Wyam.Core.Tests.Modules.Metadata
@@ -25,9 +26,7 @@ namespace Wyam.Core.Tests.Modules.Metadata
             public async Task GetsTreeWithCommonRoot()
             {
                 // Given
-                TestExecutionContext context = new TestExecutionContext();
-                IDocument[] inputs = GetDocuments(
-                    context,
+                TestDocument[] inputs = GetDocumentsFromRelativePaths(
                     "root/a/2.txt",
                     "root/b/3.txt",
                     "root/a/1.txt",
@@ -37,12 +36,11 @@ namespace Wyam.Core.Tests.Modules.Metadata
                 Tree tree = new Tree().WithNesting();
 
                 // When
-                List<IDocument> documents = await tree.ExecuteAsync(inputs, context).ToListAsync();
+                TestDocument result = await ExecuteAsync(inputs, tree).SingleAsync();
 
                 // Then
-                Assert.AreEqual(1, documents.Count);
-                AssertTree(
-                    documents[0],
+                VerifyTree(
+                    result,
                     "index.html",
                     "root/index.html",
                     "root/6.txt",
@@ -62,9 +60,7 @@ namespace Wyam.Core.Tests.Modules.Metadata
             public async Task GetsTree()
             {
                 // Given
-                TestExecutionContext context = new TestExecutionContext();
-                IDocument[] inputs = GetDocuments(
-                    context,
+                TestDocument[] inputs = GetDocumentsFromRelativePaths(
                     "a/2.txt",
                     "b/3.txt",
                     "a/1.txt",
@@ -74,12 +70,11 @@ namespace Wyam.Core.Tests.Modules.Metadata
                 Tree tree = new Tree().WithNesting();
 
                 // When
-                List<IDocument> documents = await tree.ExecuteAsync(inputs, context).ToListAsync();
+                TestDocument result = await ExecuteAsync(inputs, tree).SingleAsync();
 
                 // Then
-                Assert.AreEqual(1, documents.Count);
-                AssertTree(
-                    documents[0],
+                VerifyTree(
+                    result,
                     "index.html",
                     "6.txt",
                     "a/index.html",
@@ -98,35 +93,30 @@ namespace Wyam.Core.Tests.Modules.Metadata
             public async Task GetsPlaceholderWithSource()
             {
                 // Given
-                TestExecutionContext context = new TestExecutionContext();
-                IDocument[] inputs = GetDocuments(
-                    context,
+                TestDocument[] inputs = GetDocumentsFromRelativePaths(
                     "a/2.txt",
                     "a/1.txt");
                 Tree tree = new Tree().WithNesting();
 
                 // When
-                List<IDocument> documents = await tree.ExecuteAsync(inputs, context).ToListAsync();
+                TestDocument result = await ExecuteAsync(inputs, tree).SingleAsync();
 
                 // Then
-                Assert.AreEqual(1, documents.Count);
-                AssertTree(
-                    documents[0],
+                VerifyTree(
+                    result,
                     "index.html",
                     "a/index.html",
                     "a/1.txt",
                     "a/2.txt");
-                documents[0].Source.ShouldBe("/input/index.html");
-                documents[0].Document(Keys.Next).Source.ShouldBe("/input/a/index.html");
+                result.Source.ShouldBe("/input/index.html");
+                result.Document(Keys.Next).Source.ShouldBe("/input/a/index.html");
             }
 
             [Test]
             public async Task CollapseRoot()
             {
                 // Given
-                TestExecutionContext context = new TestExecutionContext();
-                IDocument[] inputs = GetDocuments(
-                    context,
+                TestDocument[] inputs = GetDocumentsFromRelativePaths(
                     "a/2.txt",
                     "b/3.txt",
                     "a/1.txt",
@@ -136,88 +126,73 @@ namespace Wyam.Core.Tests.Modules.Metadata
                 Tree tree = new Tree().WithNesting(true, true);
 
                 // When
-                List<IDocument> documents = await tree.ExecuteAsync(inputs, context).ToListAsync();
+                IReadOnlyList<TestDocument> results = await ExecuteAsync(inputs, tree);
 
                 // Then
-                Assert.AreEqual(4, documents.Count);
-                CollectionAssert.AreEquivalent(
-                    new[] { "a/index.html", "b/index.html", "c/index.html", "6.txt" },
-                    documents.Select(x => x.FilePath(Keys.RelativeFilePath).FullPath));
+                results.Count.ShouldBe(4);
+                results.Select(x => x.FilePath(Keys.RelativeFilePath).FullPath)
+                    .ShouldBe(new[] { "a/index.html", "b/index.html", "c/index.html", "6.txt" }, true);
             }
 
             [Test]
             public async Task GetsPreviousSibling()
             {
                 // Given
-                TestExecutionContext context = new TestExecutionContext();
-                IDocument[] inputs = GetDocuments(
-                    context,
+                TestDocument[] inputs = GetDocumentsFromRelativePaths(
                     "root/a/2.txt",
                     "root/a/3.txt",
                     "root/a/1.txt");
                 Tree tree = new Tree().WithNesting();
 
                 // When
-                List<IDocument> documents = await tree.ExecuteAsync(inputs, context).ToListAsync();
+                IReadOnlyList<TestDocument> results = await ExecuteAsync(inputs, tree);
 
                 // Then
-                IDocument document = FindTreeNode(documents[0], "root/a/2.txt");
-                Assert.AreEqual(
-                    "root/a/1.txt",
-                    document.Document(Keys.PreviousSibling).FilePath(Keys.RelativeFilePath).FullPath);
+                IDocument document = FindTreeNode(results[0], "root/a/2.txt");
+                document.Document(Keys.PreviousSibling).FilePath(Keys.RelativeFilePath).FullPath.ShouldBe("root/a/1.txt");
             }
 
             [Test]
             public async Task GetsNextSibling()
             {
                 // Given
-                TestExecutionContext context = new TestExecutionContext();
-                IDocument[] inputs = GetDocuments(
-                    context,
+                TestDocument[] inputs = GetDocumentsFromRelativePaths(
                     "root/a/2.txt",
                     "root/a/3.txt",
                     "root/a/1.txt");
                 Tree tree = new Tree().WithNesting();
 
                 // When
-                List<IDocument> documents = await tree.ExecuteAsync(inputs, context).ToListAsync();
+                IReadOnlyList<TestDocument> results = await ExecuteAsync(inputs, tree);
 
                 // Then
-                IDocument document = FindTreeNode(documents[0], "root/a/2.txt");
-                Assert.AreEqual(
-                    "root/a/3.txt",
-                    document.Document(Keys.NextSibling).FilePath(Keys.RelativeFilePath).FullPath);
+                TestDocument document = FindTreeNode(results[0], "root/a/2.txt");
+                document.Document(Keys.NextSibling).FilePath(Keys.RelativeFilePath).FullPath.ShouldBe("root/a/3.txt");
             }
 
             [Test]
             public async Task GetsPrevious()
             {
                 // Given
-                TestExecutionContext context = new TestExecutionContext();
-                IDocument[] inputs = GetDocuments(
-                    context,
+                TestDocument[] inputs = GetDocumentsFromRelativePaths(
                     "root/a/2.txt",
                     "root/a/3.txt",
                     "root/a/1.txt");
                 Tree tree = new Tree().WithNesting();
 
                 // When
-                List<IDocument> documents = await tree.ExecuteAsync(inputs, context).ToListAsync();
+                IReadOnlyList<TestDocument> results = await ExecuteAsync(inputs, tree);
 
                 // Then
-                IDocument document = FindTreeNode(documents[0], "root/a/2.txt");
-                Assert.AreEqual(
-                    "root/a/1.txt",
-                    document.Document(Keys.Previous).FilePath(Keys.RelativeFilePath).FullPath);
+                TestDocument document = FindTreeNode(results[0], "root/a/2.txt");
+                document.Document(Keys.Previous).FilePath(Keys.RelativeFilePath).FullPath.ShouldBe("root/a/1.txt");
             }
 
             [Test]
             public async Task GetsPreviousUpTree()
             {
                 // Given
-                TestExecutionContext context = new TestExecutionContext();
-                IDocument[] inputs = GetDocuments(
-                    context,
+                TestDocument[] inputs = GetDocumentsFromRelativePaths(
                     "root/a/2.txt",
                     "root/a/3.txt",
                     "root/a/1.txt",
@@ -225,22 +200,18 @@ namespace Wyam.Core.Tests.Modules.Metadata
                 Tree tree = new Tree().WithNesting();
 
                 // When
-                List<IDocument> documents = await tree.ExecuteAsync(inputs, context).ToListAsync();
+                IReadOnlyList<TestDocument> results = await ExecuteAsync(inputs, tree);
 
                 // Then
-                IDocument document = FindTreeNode(documents[0], "root/b/4.txt");
-                Assert.AreEqual(
-                    "root/b/index.html",
-                    document.Document(Keys.Previous).FilePath(Keys.RelativeFilePath).FullPath);
+                TestDocument document = FindTreeNode(results[0], "root/b/4.txt");
+                document.Document(Keys.Previous).FilePath(Keys.RelativeFilePath).FullPath.ShouldBe("root/b/index.html");
             }
 
             [Test]
             public async Task SplitsTree()
             {
                 // Given
-                TestExecutionContext context = new TestExecutionContext();
-                IDocument[] inputs = GetDocuments(
-                    context,
+                TestDocument[] inputs = GetDocumentsFromRelativePaths(
                     "root/a/2.txt",
                     "root/b/index.html",
                     "root/a/1.txt",
@@ -250,16 +221,16 @@ namespace Wyam.Core.Tests.Modules.Metadata
                     .WithRoots(Config.FromDocument(doc => doc.FilePath(Keys.RelativeFilePath).FullPath.EndsWith("b/index.html")));
 
                 // When
-                List<IDocument> documents = await tree.ExecuteAsync(inputs, context).ToListAsync();
+                IReadOnlyList<TestDocument> results = await ExecuteAsync(inputs, tree);
 
                 // Then
-                Assert.AreEqual(2, documents.Count);
-                AssertTree(
-                    documents[0],
+                results.Count.ShouldBe(2);
+                VerifyTree(
+                    results[0],
                     "root/b/index.html",
                     "root/b/4.txt");
-                AssertTree(
-                    documents[1],
+                VerifyTree(
+                    results[1],
                     "index.html",
                     "root/index.html",
                     "root/a/index.html",
@@ -271,72 +242,70 @@ namespace Wyam.Core.Tests.Modules.Metadata
             public async Task FlatTree()
             {
                 // Given
-                TestExecutionContext context = new TestExecutionContext();
-                IDocument[] inputs = GetDocuments(
-                    context,
+                TestDocument[] inputs = GetDocumentsFromRelativePaths(
                     "root/a/b/2.txt",
                     "root/a/3.txt",
                     "root/a/1.txt");
                 Tree tree = new Tree();
 
                 // When
-                List<IDocument> documents = await tree.ExecuteAsync(inputs, context).ToListAsync();
+                IReadOnlyList<TestDocument> results = await ExecuteAsync(inputs, tree);
 
                 // Then
-                AssertTreeChildren(
-                    documents[0],
+                VerifyTreeChildren(
+                    results[0],
                     "root/a/b/2.txt");
-                AssertTreeChildren(
-                    documents[1],
+                VerifyTreeChildren(
+                    results[1],
                     "root/a/3.txt");
-                AssertTreeChildren(
-                    documents[2],
+                VerifyTreeChildren(
+                    results[2],
                     "root/a/1.txt");
-                AssertTreeChildren(
-                    documents[3],
+                VerifyTreeChildren(
+                    results[3],
                     "root/a/b/index.html",
                     "root/a/b/2.txt");
-                AssertTreeChildren(
-                    documents[4],
+                VerifyTreeChildren(
+                    results[4],
                     "root/a/index.html",
                     "root/a/1.txt",
                     "root/a/3.txt",
                     "root/a/b/index.html");
-                AssertTreeChildren(
-                    documents[5],
+                VerifyTreeChildren(
+                    results[5],
                     "root/index.html",
                     "root/a/index.html");
             }
 
-            private IDocument FindTreeNode(IDocument first, string relativeFilePath)
+            private TestDocument FindTreeNode(TestDocument first, string relativeFilePath)
             {
                 while (first != null && first.FilePath(Keys.RelativeFilePath).FullPath != relativeFilePath)
                 {
-                    first = first.Document(Keys.Next);
+                    first = (TestDocument)first.Document(Keys.Next);
                 }
                 return first;
             }
 
-            private void AssertTree(IDocument first, params string[] relativeFilePaths)
+            private void VerifyTree(TestDocument document, params string[] relativeFilePaths)
             {
                 foreach (string relativeFilePath in relativeFilePaths)
                 {
-                    Assert.IsNotNull(first);
-                    Assert.AreEqual(relativeFilePath, first.FilePath(Keys.RelativeFilePath).FullPath);
-                    first = first.Document(Keys.Next);
+                    document.ShouldNotBeNull();
+                    document.FilePath(Keys.RelativeFilePath).FullPath.ShouldBe(relativeFilePath);
+                    document = (TestDocument)document.Document(Keys.Next);
                 }
             }
 
-            private void AssertTreeChildren(IDocument parent, string parentPath, params string[] childFilePaths)
+            private void VerifyTreeChildren(TestDocument parent, string parentPath, params string[] childFilePaths)
             {
-                Assert.IsNotNull(parent);
-                Assert.AreEqual(parentPath, parent.FilePath(Keys.RelativeFilePath).FullPath);
+                parent.ShouldNotBeNull();
+                parent.FilePath(Keys.RelativeFilePath).FullPath.ShouldBe(parentPath);
                 IReadOnlyList<IDocument> children = parent.DocumentList(Keys.Children);
-                CollectionAssert.AreEqual(childFilePaths, children.Select(x => x.FilePath(Keys.RelativeFilePath).FullPath).ToArray());
+                children.Select(x => x.FilePath(Keys.RelativeFilePath).FullPath).ShouldBe(childFilePaths);
             }
 
-            private IDocument[] GetDocuments(IExecutionContext context, params string[] relativeFilePaths) =>
-                relativeFilePaths.Select(x => context.GetDocument(new MetadataItems
+            private TestDocument[] GetDocumentsFromRelativePaths(params string[] relativeFilePaths) =>
+                relativeFilePaths.Select(x => new TestDocument(new MetadataItems
                 {
                     new MetadataItem(Keys.RelativeFilePath, new FilePath(x))
                 })).ToArray();

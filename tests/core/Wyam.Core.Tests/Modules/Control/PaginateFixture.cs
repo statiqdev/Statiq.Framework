@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Threading.Tasks;
 using NUnit.Framework;
+using Wyam.Common;
 using Wyam.Common.Configuration;
 using Wyam.Common.Documents;
 using Wyam.Common.Execution;
@@ -68,11 +69,12 @@ namespace Wyam.Core.Tests.Modules.Control
                 };
                 Paginate paginate = new Paginate(3, count);
                 Execute gatherData = new ExecuteDocument(
-                    (d, c) =>
+                    Config.FromDocument<object>(async (d, c) =>
                     {
-                        content.Add(d.Get<IList<IDocument>>(Keys.PageDocuments).Select(x => x.Content).ToList());
+                        IEnumerable<string> pageContent = await d.Get<IList<IDocument>>(Keys.PageDocuments).SelectAsync(async x => await x.GetStringAsync());
+                        content.Add(pageContent.ToList());
                         return null;
-                    }, false);
+                    }), false);
 
                 // When
                 await ExecuteAsync(paginate, gatherData);
@@ -97,12 +99,14 @@ namespace Wyam.Core.Tests.Modules.Control
                 };
                 Paginate paginate = new Paginate(3, count);
                 Execute gatherData = new ExecuteDocument(
-                    (d, c) =>
+                    Config.FromDocument<object>(async (d, c) =>
                     {
-                        previousPages.Add(d.Document(Keys.PreviousPage)?.Get<IList<IDocument>>(Keys.PageDocuments).Select(x => x.Content).ToList());
-                        nextPages.Add(d.Document(Keys.NextPage)?.Get<IList<IDocument>>(Keys.PageDocuments).Select(x => x.Content).ToList());
+                        IEnumerable<string> previousPageContent = await d.Document(Keys.PreviousPage)?.Get<IList<IDocument>>(Keys.PageDocuments).SelectAsync(async x => await x.GetStringAsync());
+                        previousPages.Add(previousPageContent.ToList());
+                        IEnumerable<string> nextPageContent = await d.Document(Keys.NextPage)?.Get<IList<IDocument>>(Keys.PageDocuments).SelectAsync(async x => await x.GetStringAsync());
+                        nextPages.Add(nextPageContent.ToList());
                         return null;
-                    }, false);
+                    }), false);
 
                 // When
                 await ExecuteAsync(paginate, gatherData);
@@ -128,13 +132,14 @@ namespace Wyam.Core.Tests.Modules.Control
                     AdditionalOutputs = 7,
                     EnsureInputDocument = true
                 };
-                Paginate paginate = new Paginate(3, count).Where(Config.FromDocument(doc => doc.Content != "5"));
+                Paginate paginate = new Paginate(3, count).Where(Config.FromDocument(async doc => await doc.GetStringAsync() != "5"));
                 Execute gatherData = new ExecuteDocument(
-                    (d, c) =>
+                    Config.FromDocument<object>(async (d, c) =>
                     {
-                        content.Add(d.Get<IList<IDocument>>(Keys.PageDocuments).Select(x => x.Content).ToList());
+                        IEnumerable<string> pageContent = await d.Get<IList<IDocument>>(Keys.PageDocuments).SelectAsync(async x => await x.GetStringAsync());
+                        content.Add(pageContent.ToList());
                         return null;
-                    }, false);
+                    }), false);
 
                 // When
                 await ExecuteAsync(paginate, gatherData);

@@ -3,12 +3,15 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using NUnit.Framework;
+using Shouldly;
+using Wyam.Common;
 using Wyam.Common.Configuration;
 using Wyam.Common.Documents;
 using Wyam.Common.IO;
 using Wyam.Common.Meta;
 using Wyam.Core.Modules.IO;
 using Wyam.Testing;
+using Wyam.Testing.Documents;
 using Wyam.Testing.Execution;
 using Wyam.Testing.IO;
 
@@ -24,14 +27,14 @@ namespace Wyam.Core.Tests.Modules.IO
             public void ThrowsOnNullPathFunction()
             {
                 // Given, When, Then
-                Assert.Throws<ArgumentNullException>(() => new ReadFiles((DocumentConfig<IEnumerable<string>>)null));
+                Should.Throw<ArgumentNullException>(() => new ReadFiles((DocumentConfig<IEnumerable<string>>)null));
             }
 
             [Test]
             public void ThrowsOnNullPatterns()
             {
                 // Given, When, Then
-                Assert.Throws<ArgumentNullException>(() => new ReadFiles(null));
+                Should.Throw<ArgumentNullException>(() => new ReadFiles(null));
             }
         }
 
@@ -52,10 +55,10 @@ namespace Wyam.Core.Tests.Modules.IO
                 ReadFiles readFiles = new ReadFiles(pattern);
 
                 // When
-                IReadOnlyList<IDocument> documents = await ExecuteAsync(context, readFiles);
+                IReadOnlyList<TestDocument> results = await ExecuteAsync(context, readFiles);
 
                 // Then
-                Assert.AreEqual(expectedCount, documents.Count);
+                results.Count.ShouldBe(expectedCount);
             }
 
             [Test]
@@ -66,10 +69,10 @@ namespace Wyam.Core.Tests.Modules.IO
                 ReadFiles readFiles = new ReadFiles("Subfolder/*.txt");
 
                 // When
-                IReadOnlyList<IDocument> documents = await ExecuteAsync(context, readFiles);
+                IReadOnlyList<TestDocument> results = await ExecuteAsync(context, readFiles);
 
                 // Then
-                Assert.AreEqual(1, documents.Count());
+                results.Count.ShouldBe(1);
             }
 
             [Test]
@@ -80,10 +83,10 @@ namespace Wyam.Core.Tests.Modules.IO
                 ReadFiles readFiles = new ReadFiles("test-a.txt");
 
                 // When
-                IReadOnlyList<IDocument> documents = await ExecuteAsync(context, readFiles);
+                IReadOnlyList<TestDocument> results = await ExecuteAsync(context, readFiles);
 
                 // Then
-                Assert.AreEqual(1, documents.Count());
+                results.Count.ShouldBe(1);
             }
 
             [Test]
@@ -94,12 +97,12 @@ namespace Wyam.Core.Tests.Modules.IO
                 ReadFiles readFiles = new ReadFiles(".dotfile");
 
                 // When
-                IDocument document = (await ExecuteAsync(context, readFiles))[0];
+                TestDocument result = await ExecuteAsync(context, readFiles).SingleAsync();
 
                 // Then
-                Assert.IsNull(document[Keys.SourceFileBase]);
-                Assert.IsNull(document[Keys.SourceFilePathBase]);
-                Assert.IsNull(document[Keys.RelativeFilePathBase]);
+                result[Keys.SourceFileBase].ShouldBeNull();
+                result[Keys.SourceFilePathBase].ShouldBeNull();
+                result[Keys.RelativeFilePathBase].ShouldBeNull();
             }
 
             [Test]
@@ -110,10 +113,10 @@ namespace Wyam.Core.Tests.Modules.IO
                 ReadFiles readFiles = new ReadFiles("test-a.txt");
 
                 // When
-                IDocument document = (await ExecuteAsync(context, readFiles))[0];
+                TestDocument result = await ExecuteAsync(context, readFiles).SingleAsync();
 
                 // Then
-                Assert.AreEqual("aaa", document.Content);
+                result.Content.ShouldBe("aaa");
             }
 
             [TestCase(Keys.SourceFileBase, "test-c")]
@@ -129,12 +132,12 @@ namespace Wyam.Core.Tests.Modules.IO
                 ReadFiles readFiles = new ReadFiles("**/test-c.txt");
 
                 // When
-                IDocument output = (await ExecuteAsync(context, readFiles))[0];
+                TestDocument result = await ExecuteAsync(context, readFiles).SingleAsync();
 
                 // Then
-                object result = output[key];
-                Assert.IsInstanceOf<FilePath>(result);
-                Assert.AreEqual(expected, ((FilePath)result).FullPath);
+                object value = result[key];
+                value.ShouldBeOfType<FilePath>();
+                ((FilePath)value).FullPath.ShouldBe(expected);
             }
 
             [TestCase(Keys.SourceFileRoot, "/TestFiles/Input")]
@@ -147,12 +150,12 @@ namespace Wyam.Core.Tests.Modules.IO
                 ReadFiles readFiles = new ReadFiles("**/test-c.txt");
 
                 // When
-                IDocument output = (await ExecuteAsync(context, readFiles))[0];
+                TestDocument result = await ExecuteAsync(context, readFiles).SingleAsync();
 
                 // Then
-                object result = output[key];
-                Assert.IsInstanceOf<DirectoryPath>(result);
-                Assert.AreEqual(expected, ((DirectoryPath)result).FullPath);
+                object value = result[key];
+                value.ShouldBeOfType<DirectoryPath>();
+                ((DirectoryPath)value).FullPath.ShouldBe(expected);
             }
 
             [TestCase(Keys.SourceFileExt, ".txt")]
@@ -163,12 +166,12 @@ namespace Wyam.Core.Tests.Modules.IO
                 ReadFiles readFiles = new ReadFiles("**/test-c.txt");
 
                 // When
-                IDocument output = (await ExecuteAsync(context, readFiles))[0];
+                TestDocument result = await ExecuteAsync(context, readFiles).SingleAsync();
 
                 // Then
-                object result = output[key];
-                Assert.IsInstanceOf<string>(result);
-                Assert.AreEqual(expected, result);
+                object value = result[key];
+                value.ShouldBeOfType<string>();
+                ((string)value).ShouldBe(expected);
             }
 
             [Test]
@@ -179,10 +182,10 @@ namespace Wyam.Core.Tests.Modules.IO
                 ReadFiles readFiles = new ReadFiles("**/*.{txt,md}");
 
                 // When
-                IReadOnlyList<IDocument> documents = await ExecuteAsync(context, readFiles);
+                IReadOnlyList<TestDocument> documents = await ExecuteAsync(context, readFiles);
 
                 // Then
-                Assert.AreEqual(5, documents.Count);
+                documents.Count.ShouldBe(5);
             }
 
             [Test]
@@ -193,10 +196,10 @@ namespace Wyam.Core.Tests.Modules.IO
                 ReadFiles readFiles = new ReadFiles("**/*").Where(x => Task.FromResult(x.Path.FullPath.Contains("test")));
 
                 // When
-                IReadOnlyList<IDocument> documents = await ExecuteAsync(context, readFiles);
+                IReadOnlyList<TestDocument> documents = await ExecuteAsync(context, readFiles);
 
                 // Then
-                Assert.AreEqual(3, documents.Count);
+                documents.Count.ShouldBe(3);
             }
         }
 

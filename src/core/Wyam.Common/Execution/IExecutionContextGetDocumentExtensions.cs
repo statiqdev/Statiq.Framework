@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using System.Collections.Generic;
 using Wyam.Common.Content;
 using Wyam.Common.Documents;
 using Wyam.Common.IO;

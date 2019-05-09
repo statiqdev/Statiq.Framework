@@ -3,8 +3,8 @@ using System.Linq;
 using System.Threading.Tasks;
 using NUnit.Framework;
 using Shouldly;
+using Wyam.Common;
 using Wyam.Common.Documents;
-using Wyam.Common.Util;
 using Wyam.Testing;
 using Wyam.Testing.Documents;
 using Wyam.Testing.Execution;
@@ -32,15 +32,14 @@ namespace Wyam.Minification.Tests
                         </body>
                     </html>";
                 const string output = "<html><head><title>Title</title><body><h1>Title</h1><p>This is<br>some text";
-                TestExecutionContext context = new TestExecutionContext();
                 TestDocument document = new TestDocument(input);
                 MinifyHtml minifyHtml = new MinifyHtml();
 
                 // When
-                IList<IDocument> results = await minifyHtml.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
+                TestDocument result = await ExecuteAsync(document, minifyHtml).SingleAsync();
 
                 // Then
-                (await results.Single().GetStringAsync()).ShouldBe(output, StringCompareShould.IgnoreLineEndings);
+                result.Content.ShouldBe(output, StringCompareShould.IgnoreLineEndings);
             }
 
             [Test]
@@ -58,7 +57,6 @@ namespace Wyam.Minification.Tests
                         </body>
                     </html>";
                 const string output = "<html><head><title>Title</title></head><body><!-- FOO --><h1>Title</h1><p>This is<br>some text</p></body></html>";
-                TestExecutionContext context = new TestExecutionContext();
                 TestDocument document = new TestDocument(input);
                 MinifyHtml minifyHtml = new MinifyHtml()
                     .WithSettings(settings =>
@@ -68,10 +66,10 @@ namespace Wyam.Minification.Tests
                     });
 
                 // When
-                IList<IDocument> results = await minifyHtml.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
+                TestDocument result = await ExecuteAsync(document, minifyHtml).SingleAsync();
 
                 // Then
-                (await results.Single().GetStringAsync()).ShouldBe(output, StringCompareShould.IgnoreLineEndings);
+                result.Content.ShouldBe(output, StringCompareShould.IgnoreLineEndings);
             }
         }
     }

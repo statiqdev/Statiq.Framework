@@ -4,11 +4,12 @@ using System.Linq;
 using System.Threading.Tasks;
 using NUnit.Framework;
 using Shouldly;
+using Wyam.Common;
 using Wyam.Common.Documents;
-using Wyam.Common.Execution;
 using Wyam.Common.IO;
 using Wyam.Core.Modules.IO;
 using Wyam.Testing;
+using Wyam.Testing.Documents;
 using Wyam.Testing.Execution;
 using Wyam.Testing.IO;
 
@@ -25,14 +26,11 @@ namespace Wyam.Core.Tests.Modules.IO
             {
                 // Given
                 TestExecutionContext context = GetExecutionContext();
-                IDocument[] documents =
-                {
-                    await context.GetDocumentAsync(content: "foo ^\"test-a.txt\" bar")
-                };
+                TestDocument document = new TestDocument("foo ^\"test-a.txt\" bar");
                 Include include = new Include();
 
                 // When, Then
-                await Should.ThrowAsync<Exception>(async () => await ExecuteAsync(documents, context, include));
+                await Should.ThrowAsync<Exception>(async () => await ExecuteAsync(document, context, include));
             }
 
             [Test]
@@ -40,17 +38,14 @@ namespace Wyam.Core.Tests.Modules.IO
             {
                 // Given
                 TestExecutionContext context = GetExecutionContext();
-                IDocument[] documents =
-                {
-                    await context.GetDocumentAsync(content: "foo ^\"/TestFiles/Input/test-a.txt\" bar")
-                };
+                TestDocument document = new TestDocument("foo ^\"/TestFiles/Input/test-a.txt\" bar");
                 Include include = new Include();
 
                 // When, Then
-                IReadOnlyList<IDocument> results = await ExecuteAsync(documents, context, include);
+                TestDocument result = await ExecuteAsync(document, context, include).SingleAsync();
 
                 // Then
-                Assert.AreEqual("foo aaa bar", results.Single().Content);
+                result.Content.ShouldBe("foo aaa bar");
             }
 
             [Test]
@@ -58,17 +53,14 @@ namespace Wyam.Core.Tests.Modules.IO
             {
                 // Given
                 TestExecutionContext context = GetExecutionContext();
-                IDocument[] documents =
-                {
-                    await context.GetDocumentAsync(source: new FilePath("/TestFiles/Input/test.txt"), content: "^\"test-a.txt\"foo")
-                };
+                TestDocument document = new TestDocument(new FilePath("/TestFiles/Input/test.txt"), null, "^\"test-a.txt\"foo");
                 Include include = new Include();
 
                 // When
-                IReadOnlyList<IDocument> results = await ExecuteAsync(documents, context, include);
+                TestDocument result = await ExecuteAsync(document, context, include).SingleAsync();
 
                 // Then
-                Assert.AreEqual("aaafoo", results.Single().Content);
+                result.Content.ShouldBe("aaafoo");
             }
 
             [Test]
@@ -76,17 +68,14 @@ namespace Wyam.Core.Tests.Modules.IO
             {
                 // Given
                 TestExecutionContext context = GetExecutionContext();
-                IDocument[] documents =
-                {
-                    await context.GetDocumentAsync(source: new FilePath("/TestFiles/Input/test.txt"), content: "\\^\"test-a.txt\"foo")
-                };
+                TestDocument document = new TestDocument(new FilePath("/TestFiles/Input/test.txt"), null, "\\^\"test-a.txt\"foo");
                 Include include = new Include();
 
                 // When
-                IReadOnlyList<IDocument> results = await ExecuteAsync(documents, context, include);
+                TestDocument result = await ExecuteAsync(document, context, include).SingleAsync();
 
                 // Then
-                Assert.AreEqual("^\"test-a.txt\"foo", results.Single().Content);
+                result.Content.ShouldBe("^\"test-a.txt\"foo");
             }
 
             [Test]
@@ -94,17 +83,14 @@ namespace Wyam.Core.Tests.Modules.IO
             {
                 // Given
                 TestExecutionContext context = GetExecutionContext();
-                IDocument[] documents =
-                {
-                    await context.GetDocumentAsync(source: new FilePath("/TestFiles/Input/test.txt"), content: "\\\\\\^\"test-a.txt\"foo")
-                };
+                TestDocument document = new TestDocument(new FilePath("/TestFiles/Input/test.txt"), null, content: "\\\\\\^\"test-a.txt\"foo");
                 Include include = new Include();
 
                 // When
-                IReadOnlyList<IDocument> results = await ExecuteAsync(documents, context, include);
+                TestDocument result = await ExecuteAsync(document, context, include).SingleAsync();
 
                 // Then
-                Assert.AreEqual("\\\\^\"test-a.txt\"foo", results.Single().Content);
+                result.Content.ShouldBe("\\\\^\"test-a.txt\"foo");
             }
 
             [Test]
@@ -112,19 +98,14 @@ namespace Wyam.Core.Tests.Modules.IO
             {
                 // Given
                 TestExecutionContext context = GetExecutionContext();
-                IDocument[] documents =
-                {
-                    await context.GetDocumentAsync(
-                        source: new FilePath("/TestFiles/Input/test.txt"),
-                        content: "x ^\"test-a.txt\" y ^\"test-b.txt\" z")
-                };
+                TestDocument document = new TestDocument(new FilePath("/TestFiles/Input/test.txt"), null, "x ^\"test-a.txt\" y ^\"test-b.txt\" z");
                 Include include = new Include();
 
                 // When
-                IReadOnlyList<IDocument> results = await ExecuteAsync(documents, context, include);
+                TestDocument result = await ExecuteAsync(document, context, include).SingleAsync();
 
                 // Then
-                Assert.AreEqual("x aaa y bbb z", results.Single().Content);
+                result.Content.ShouldBe("x aaa y bbb z");
             }
 
             [Test]
@@ -132,19 +113,14 @@ namespace Wyam.Core.Tests.Modules.IO
             {
                 // Given
                 TestExecutionContext context = GetExecutionContext();
-                IDocument[] documents =
-                {
-                    await context.GetDocumentAsync(
-                        source: new FilePath("/TestFiles/Input/test.txt"),
-                        content: "x ^\"test-a.txt\"^\"test-b.txt\" z")
-                };
+                TestDocument document = new TestDocument(new FilePath("/TestFiles/Input/test.txt"), null, "x ^\"test-a.txt\"^\"test-b.txt\" z");
                 Include include = new Include();
 
                 // When
-                IReadOnlyList<IDocument> results = await ExecuteAsync(documents, context, include);
+                TestDocument result = await ExecuteAsync(document, context, include).SingleAsync();
 
                 // Then
-                Assert.AreEqual("x aaabbb z", results.Single().Content);
+                result.Content.ShouldBe("x aaabbb z");
             }
 
             [Test]
@@ -153,19 +129,14 @@ namespace Wyam.Core.Tests.Modules.IO
                 // Given
                 TestExecutionContext context = GetExecutionContext();
                 ThrowOnTraceEventType(System.Diagnostics.TraceEventType.Error);
-                IDocument[] documents =
-                {
-                    await context.GetDocumentAsync(
-                        source: new FilePath("/TestFiles/Input/test.txt"),
-                        content: "x ^\"test-c.txt\" y")
-                };
+                TestDocument document = new TestDocument(new FilePath("/TestFiles/Input/test.txt"), null, "x ^\"test-c.txt\" y");
                 Include include = new Include();
 
                 // When
-                IReadOnlyList<IDocument> results = await ExecuteAsync(documents, context, include);
+                TestDocument result = await ExecuteAsync(document, context, include).SingleAsync();
 
                 // Then
-                Assert.AreEqual("x  y", results.Single().Content);
+                result.Content.ShouldBe("x  y");
             }
 
             [Test]
@@ -173,19 +144,14 @@ namespace Wyam.Core.Tests.Modules.IO
             {
                 // Given
                 TestExecutionContext context = GetExecutionContext();
-                IDocument[] documents =
-                {
-                    await context.GetDocumentAsync(
-                        source: new FilePath("/TestFiles/Input/test.txt"),
-                        content: "x ^\"Subfolder/test-c.txt\" y")
-                };
+                TestDocument document = new TestDocument(new FilePath("/TestFiles/Input/test.txt"), null, "x ^\"Subfolder/test-c.txt\" y");
                 Include include = new Include();
 
                 // When
-                IReadOnlyList<IDocument> results = await ExecuteAsync(documents, context, include);
+                TestDocument result = await ExecuteAsync(document, context, include).SingleAsync();
 
                 // Then
-                Assert.AreEqual("x ccc y", results.Single().Content);
+                result.Content.ShouldBe("x ccc y");
             }
 
             [Test]
@@ -193,19 +159,14 @@ namespace Wyam.Core.Tests.Modules.IO
             {
                 // Given
                 TestExecutionContext context = GetExecutionContext();
-                IDocument[] documents =
-                {
-                    await context.GetDocumentAsync(
-                        source: new FilePath("/TestFiles/Input/test.txt"),
-                        content: "x ^\"../test-above-input.txt\" y")
-                };
+                TestDocument document = new TestDocument(new FilePath("/TestFiles/Input/test.txt"), null, "x ^\"../test-above-input.txt\" y");
                 Include include = new Include();
 
                 // When
-                IReadOnlyList<IDocument> results = await ExecuteAsync(documents, context, include);
+                TestDocument result = await ExecuteAsync(document, context, include).SingleAsync();
 
                 // Then
-                Assert.AreEqual("x test y", results.Single().Content);
+                result.Content.ShouldBe("x test y");
             }
 
             [Test]
@@ -213,19 +174,14 @@ namespace Wyam.Core.Tests.Modules.IO
             {
                 // Given
                 TestExecutionContext context = GetExecutionContext();
-                IDocument[] documents =
-                {
-                    await context.GetDocumentAsync(
-                        source: new FilePath("/TestFiles/Input/test.txt"),
-                        content: "x ^\"/TestFiles/test-above-input.txt\" y")
-                };
+                TestDocument document = new TestDocument(new FilePath("/TestFiles/Input/test.txt"), null, "x ^\"/TestFiles/test-above-input.txt\" y");
                 Include include = new Include();
 
                 // When
-                IReadOnlyList<IDocument> results = await ExecuteAsync(documents, context, include);
+                TestDocument result = await ExecuteAsync(document, context, include).SingleAsync();
 
                 // Then
-                Assert.AreEqual("x test y", results.Single().Content);
+                result.Content.ShouldBe("x test y");
             }
 
             [Test]
@@ -236,19 +192,14 @@ namespace Wyam.Core.Tests.Modules.IO
                 fileProvider.AddFile(
                     "/TestFiles/Input/test-outer.txt",
                     "3 ^\"test-a.txt\" 4");
-                IDocument[] documents =
-                {
-                    await context.GetDocumentAsync(
-                        source: new FilePath("/TestFiles/Input/test.txt"),
-                        content: "1 ^\"test-outer.txt\" 2")
-                };
+                TestDocument document = new TestDocument(new FilePath("/TestFiles/Input/test.txt"), null, "1 ^\"test-outer.txt\" 2");
                 Include include = new Include();
 
                 // When
-                IReadOnlyList<IDocument> results = await ExecuteAsync(documents, context, include);
+                TestDocument result = await ExecuteAsync(document, context, include).SingleAsync();
 
                 // Then
-                Assert.AreEqual("1 3 aaa 4 2", results.Single().Content);
+                result.Content.ShouldBe("1 3 aaa 4 2");
             }
 
             [Test]
@@ -259,19 +210,14 @@ namespace Wyam.Core.Tests.Modules.IO
                 fileProvider.AddFile(
                     "/TestFiles/Input/test-outer.txt",
                     "3 ^\"test-a.txt\" 4");
-                IDocument[] documents =
-                {
-                    await context.GetDocumentAsync(
-                        source: new FilePath("/TestFiles/Input/test.txt"),
-                        content: "1 ^\"test-outer.txt\" 2")
-                };
+                TestDocument document = new TestDocument(new FilePath("/TestFiles/Input/test.txt"), null, "1 ^\"test-outer.txt\" 2");
                 Include include = new Include().WithRecursion(false);
 
                 // When
-                IReadOnlyList<IDocument> results = await ExecuteAsync(documents, context, include);
+                TestDocument result = await ExecuteAsync(document, context, include).SingleAsync();
 
                 // Then
-                Assert.AreEqual("1 3 ^\"test-a.txt\" 4 2", results.Single().Content);
+                result.Content.ShouldBe("1 3 ^\"test-a.txt\" 4 2");
             }
 
             [Test]
@@ -282,19 +228,14 @@ namespace Wyam.Core.Tests.Modules.IO
                 fileProvider.AddFile(
                     "/TestFiles/Input/test-outer.txt",
                     "3 \\^\"test-a.txt\" 4");
-                IDocument[] documents =
-                {
-                    await context.GetDocumentAsync(
-                        source: new FilePath("/TestFiles/Input/test.txt"),
-                        content: "1 ^\"test-outer.txt\" 2")
-                };
+                TestDocument document = new TestDocument(new FilePath("/TestFiles/Input/test.txt"), null, "1 ^\"test-outer.txt\" 2");
                 Include include = new Include().WithRecursion(false);
 
                 // When
-                IReadOnlyList<IDocument> results = await ExecuteAsync(documents, context, include);
+                TestDocument result = await ExecuteAsync(document, context, include).SingleAsync();
 
                 // Then
-                Assert.AreEqual("1 3 \\^\"test-a.txt\" 4 2", results.Single().Content);
+                result.Content.ShouldBe("1 3 \\^\"test-a.txt\" 4 2");
             }
 
             [Test]
@@ -308,19 +249,14 @@ namespace Wyam.Core.Tests.Modules.IO
                 fileProvider.AddFile(
                     "/TestFiles/Input/test-inner.txt",
                     "5 ^\"test-a.txt\" 6");
-                IDocument[] documents =
-                {
-                    await context.GetDocumentAsync(
-                        source: new FilePath("/TestFiles/Input/test.txt"),
-                        content: "1 ^\"test-outer.txt\" 2")
-                };
+                TestDocument document = new TestDocument(new FilePath("/TestFiles/Input/test.txt"), null, "1 ^\"test-outer.txt\" 2");
                 Include include = new Include();
 
                 // When
-                IReadOnlyList<IDocument> results = await ExecuteAsync(documents, context, include);
+                TestDocument result = await ExecuteAsync(document, context, include).SingleAsync();
 
                 // Then
-                Assert.AreEqual("1 3 5 aaa 6 4 2", results.Single().Content);
+                result.Content.ShouldBe("1 3 5 aaa 6 4 2");
             }
         }
 

@@ -3,13 +3,13 @@ using System.Linq;
 using System.Threading.Tasks;
 using NUnit.Framework;
 using Shouldly;
+using Wyam.Common;
 using Wyam.Common.Configuration;
 using Wyam.Common.Documents;
 using Wyam.Common.Execution;
 using Wyam.Common.IO;
 using Wyam.Common.Meta;
 using Wyam.Common.Tracing;
-using Wyam.Common.Util;
 using Wyam.Core.Execution;
 using Wyam.Testing;
 using Wyam.Testing.Documents;
@@ -29,15 +29,15 @@ namespace Wyam.Razor.Tests
             {
                 // Given
                 Engine engine = new Engine();
-                IExecutionContext context = GetExecutionContext(engine);
-                IDocument document = new TestDocument("@for(int c = 0 ; c < 5 ; c++) { <p>@c</p> }");
+                TestExecutionContext context = GetExecutionContext(engine);
+                TestDocument document = new TestDocument("@for(int c = 0 ; c < 5 ; c++) { <p>@c</p> }");
                 Razor razor = new Razor();
 
                 // When
-                List<IDocument> results = await razor.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
+                TestDocument result = await ExecuteAsync(document, context, razor).SingleAsync();
 
                 // Then
-                (await results.Single().GetStringAsync()).ShouldBe(" <p>0</p>  <p>1</p>  <p>2</p>  <p>3</p>  <p>4</p> ");
+                result.Content.ShouldBe(" <p>0</p>  <p>1</p>  <p>2</p>  <p>3</p>  <p>4</p> ");
             }
 
             [Test]
@@ -46,14 +46,14 @@ namespace Wyam.Razor.Tests
             {
                 // Given
                 Engine engine = new Engine();
-                IExecutionContext context = GetExecutionContext(engine);
-                IDocument document = new TestDocument(@"@{ Trace.Information(""Test""); }");
+                TestExecutionContext context = GetExecutionContext(engine);
+                TestDocument document = new TestDocument(@"@{ Trace.Information(""Test""); }");
                 TraceListener traceListener = new TraceListener();
                 Trace.AddListener(traceListener);
                 Razor razor = new Razor();
 
                 // When
-                List<IDocument> results = await razor.ExecuteAsync(new[] { document }, context).ToListAsync();  // Make sure to materialize the result list
+                await ExecuteAsync(document, context, razor).SingleAsync();
 
                 // Then
                 Trace.RemoveListener(traceListener);
@@ -85,8 +85,8 @@ namespace Wyam.Razor.Tests
             {
                 // Given
                 Engine engine = new Engine();
-                IExecutionContext context = GetExecutionContext(engine);
-                IDocument document = new TestDocument(
+                TestExecutionContext context = GetExecutionContext(engine);
+                TestDocument document = new TestDocument(
                     new MetadataItems
                     {
                         { "MyKey", "MyValue" }
@@ -95,10 +95,10 @@ namespace Wyam.Razor.Tests
                 Razor razor = new Razor();
 
                 // When
-                List<IDocument> results = await razor.ExecuteAsync(new[] { document }, context).ToListAsync();
+                TestDocument result = await ExecuteAsync(document, context, razor).SingleAsync();
 
                 // Then
-                (await results.Single().GetStringAsync()).ShouldBe("<p>MyValue</p>");
+                result.Content.ShouldBe("<p>MyValue</p>");
             }
 
             [Test]
@@ -106,18 +106,18 @@ namespace Wyam.Razor.Tests
             {
                 // Given
                 Engine engine = new Engine();
-                IExecutionContext context = GetExecutionContext(engine);
-                IDocument document = new TestDocument("<p>@Document.Source</p>")
+                TestExecutionContext context = GetExecutionContext(engine);
+                TestDocument document = new TestDocument("<p>@Document.Source</p>")
                 {
                     Source = new FilePath("/Temp/temp.txt")
                 };
                 Razor razor = new Razor();
 
                 // When
-                List<IDocument> results = await razor.ExecuteAsync(new[] { document }, context).ToListAsync();
+                TestDocument result = await ExecuteAsync(document, context, razor).SingleAsync();
 
                 // Then
-                (await results.Single().GetStringAsync()).ShouldBe("<p>file:///Temp/temp.txt</p>");
+                result.Content.ShouldBe("<p>file:///Temp/temp.txt</p>");
             }
 
             [Test]
@@ -125,15 +125,15 @@ namespace Wyam.Razor.Tests
             {
                 // Given
                 Engine engine = new Engine();
-                IExecutionContext context = GetExecutionContext(engine);
-                IDocument document = GetDocument("/Temp/temp.txt", "<p>@Model.Source</p>");
+                TestExecutionContext context = GetExecutionContext(engine);
+                TestDocument document = GetDocument("/Temp/temp.txt", "<p>@Model.Source</p>");
                 Razor razor = new Razor();
 
                 // When
-                List<IDocument> results = await razor.ExecuteAsync(new[] { document }, context).ToListAsync();
+                TestDocument result = await ExecuteAsync(document, context, razor).SingleAsync();
 
                 // Then
-                (await results.Single().GetStringAsync()).ShouldBe("<p>file:///Temp/temp.txt</p>");
+                result.Content.ShouldBe("<p>file:///Temp/temp.txt</p>");
             }
 
             [Test]
@@ -141,17 +141,17 @@ namespace Wyam.Razor.Tests
             {
                 // Given
                 Engine engine = new Engine();
-                IExecutionContext context = GetExecutionContext(engine);
-                IDocument document = GetDocument("C:/Temp/temp.txt", @"@model IList<int>
+                TestExecutionContext context = GetExecutionContext(engine);
+                TestDocument document = GetDocument("C:/Temp/temp.txt", @"@model IList<int>
 <p>@Model.Count</p>");
                 IList<int> model = new[] { 1, 2, 3 };
                 Razor razor = new Razor().WithModel(Config.FromValue(model));
 
                 // When
-                List<IDocument> results = await razor.ExecuteAsync(new[] { document }, context).ToListAsync();
+                TestDocument result = await ExecuteAsync(document, context, razor).SingleAsync();
 
                 // Then
-                (await results.Single().GetStringAsync()).ShouldBe("<p>3</p>");
+                result.Content.ShouldBe("<p>3</p>");
             }
 
             [Test]
@@ -159,8 +159,8 @@ namespace Wyam.Razor.Tests
             {
                 // Given
                 Engine engine = new Engine();
-                IExecutionContext context = GetExecutionContext(engine);
-                IDocument document = GetDocument(
+                TestExecutionContext context = GetExecutionContext(engine);
+                TestDocument document = GetDocument(
                     "/Layout/Test.cshtml",
                     @"@{
 	Layout = ""_Layout.cshtml"";
@@ -169,10 +169,10 @@ namespace Wyam.Razor.Tests
                 Razor razor = new Razor();
 
                 // When
-                List<IDocument> results = await razor.ExecuteAsync(new[] { document }, context).ToListAsync();
+                TestDocument result = await ExecuteAsync(document, context, razor).SingleAsync();
 
                 // Then
-                (await results.Single().GetStringAsync()).ShouldBe(
+                result.Content.ShouldBe(
                     @"LAYOUT
 <p>This is a test</p>",
                     StringCompareShould.IgnoreLineEndings);
@@ -183,17 +183,17 @@ namespace Wyam.Razor.Tests
             {
                 // Given
                 Engine engine = new Engine();
-                IExecutionContext context = GetExecutionContext(engine);
-                IDocument document = GetDocument(
+                TestExecutionContext context = GetExecutionContext(engine);
+                TestDocument document = GetDocument(
                     "/Layout/Test.cshtml",
                     "<p>This is a test</p>");
                 Razor razor = new Razor().WithLayout((FilePath)"_Layout.cshtml");
 
                 // When
-                List<IDocument> results = await razor.ExecuteAsync(new[] { document }, context).ToListAsync();
+                TestDocument result = await ExecuteAsync(document, context, razor).SingleAsync();
 
                 // Then
-                (await results.Single().GetStringAsync()).ShouldBe(
+                result.Content.ShouldBe(
                     @"LAYOUT
 <p>This is a test</p>",
                     StringCompareShould.IgnoreLineEndings);
@@ -204,17 +204,17 @@ namespace Wyam.Razor.Tests
             {
                 // Given
                 Engine engine = new Engine();
-                IExecutionContext context = GetExecutionContext(engine);
-                IDocument document = GetDocument(
+                TestExecutionContext context = GetExecutionContext(engine);
+                TestDocument document = GetDocument(
                     "/ViewStartAndLayout/Test.cshtml",
                     "<p>This is a test</p>");
                 Razor razor = new Razor();
 
                 // When
-                List<IDocument> results = await razor.ExecuteAsync(new[] { document }, context).ToListAsync();
+                TestDocument result = await ExecuteAsync(document, context, razor).SingleAsync();
 
                 // Then
-                (await results.Single().GetStringAsync()).ShouldBe(
+                result.Content.ShouldBe(
                     @"LAYOUT2
 <p>This is a test</p>",
                     StringCompareShould.IgnoreLineEndings);
@@ -225,17 +225,17 @@ namespace Wyam.Razor.Tests
             {
                 // Given
                 Engine engine = new Engine();
-                IExecutionContext context = GetExecutionContext(engine);
-                IDocument document = GetDocument(
+                TestExecutionContext context = GetExecutionContext(engine);
+                TestDocument document = GetDocument(
                     "/AlternateViewStartPath/Test.cshtml",
                     "<p>This is a test</p>");
                 Razor razor = new Razor().WithViewStart((FilePath)"/AlternateViewStart/_ViewStart.cshtml");
 
                 // When
-                List<IDocument> results = await razor.ExecuteAsync(new[] { document }, context).ToListAsync();
+                TestDocument result = await ExecuteAsync(document, context, razor).SingleAsync();
 
                 // Then
-                (await results.Single().GetStringAsync()).ShouldBe(
+                result.Content.ShouldBe(
                     @"LAYOUT3
 <p>This is a test</p>",
                     StringCompareShould.IgnoreLineEndings);
@@ -246,17 +246,17 @@ namespace Wyam.Razor.Tests
             {
                 // Given
                 Engine engine = new Engine();
-                IExecutionContext context = GetExecutionContext(engine);
-                IDocument document = GetDocument(
+                TestExecutionContext context = GetExecutionContext(engine);
+                TestDocument document = GetDocument(
                     "/AlternateViewStartPath/Test.cshtml",
                     "<p>This is a test</p>");
                 Razor razor = new Razor().WithViewStart((FilePath)"/AlternateViewStart/_ViewStartRelativeLayout.cshtml");
 
                 // When
-                List<IDocument> results = await razor.ExecuteAsync(new[] { document }, context).ToListAsync();
+                TestDocument result = await ExecuteAsync(document, context, razor).SingleAsync();
 
                 // Then
-                (await results.Single().GetStringAsync()).ShouldBe(
+                result.Content.ShouldBe(
                     @"LAYOUT3
 <p>This is a test</p>",
                     StringCompareShould.IgnoreLineEndings);
@@ -267,17 +267,17 @@ namespace Wyam.Razor.Tests
             {
                 // Given
                 Engine engine = new Engine();
-                IExecutionContext context = GetExecutionContext(engine);
-                IDocument document = GetDocument(
+                TestExecutionContext context = GetExecutionContext(engine);
+                TestDocument document = GetDocument(
                     "/AlternateViewStartPath/Test.cshtml",
                     "<p>This is a test</p>");
                 Razor razor = new Razor().WithViewStart((FilePath)"AlternateViewStart/_ViewStartRelativeLayout.cshtml");
 
                 // When
-                List<IDocument> results = await razor.ExecuteAsync(new[] { document }, context).ToListAsync();
+                TestDocument result = await ExecuteAsync(document, context, razor).SingleAsync();
 
                 // Then
-                (await results.Single().GetStringAsync()).ShouldBe(
+                result.Content.ShouldBe(
                     @"LAYOUT3
 <p>This is a test</p>",
                     StringCompareShould.IgnoreLineEndings);
@@ -288,24 +288,24 @@ namespace Wyam.Razor.Tests
             {
                 // Given
                 Engine engine = new Engine();
-                IExecutionContext context = GetExecutionContext(engine);
-                IDocument document1 = GetDocument(
+                TestExecutionContext context = GetExecutionContext(engine);
+                TestDocument document1 = GetDocument(
                     "/IgnoreUnderscores/Test.cshtml",
                     @"@{
 	Layout = ""_Layout.cshtml"";
 }
 <p>This is a test</p>");
-                IDocument document2 = GetDocument(
+                TestDocument document2 = GetDocument(
                     "/IgnoreUnderscores/_Layout.cshtml",
                     @"LAYOUT4
 @RenderBody()");
                 Razor razor = new Razor();
 
                 // When
-                List<IDocument> results = await razor.ExecuteAsync(new[] { document1, document2 }, context).ToListAsync();
+                TestDocument result = await ExecuteAsync(new[] { document1, document2 }, context, razor).SingleAsync();
 
                 // Then
-                (await results.Single().GetStringAsync()).ShouldBe(
+                result.Content.ShouldBe(
                     @"LAYOUT4
 <p>This is a test</p>",
                     StringCompareShould.IgnoreLineEndings);
@@ -316,20 +316,20 @@ namespace Wyam.Razor.Tests
             {
                 // Given
                 Engine engine = new Engine();
-                IExecutionContext context = GetExecutionContext(engine);
-                IDocument document1 = GetDocument(
+                TestExecutionContext context = GetExecutionContext(engine);
+                TestDocument document1 = GetDocument(
                     "/AlternateIgnorePrefix/Test.cshtml",
                     "<p>This is a test</p>");
-                IDocument document2 = GetDocument(
+                TestDocument document2 = GetDocument(
                     "/AlternateIgnorePrefix/IgnoreMe.cshtml",
                     "<p>Ignore me</p>");
                 Razor razor = new Razor().IgnorePrefix("Ignore");
 
                 // When
-                List<IDocument> results = await razor.ExecuteAsync(new[] { document1, document2 }, context).ToListAsync();
+                TestDocument result = await ExecuteAsync(new[] { document1, document2 }, context, razor).SingleAsync();
 
                 // Then
-                (await results.Single().GetStringAsync()).ShouldBe("<p>This is a test</p>");
+                result.Content.ShouldBe("<p>This is a test</p>");
             }
 
             [Test]
@@ -337,8 +337,8 @@ namespace Wyam.Razor.Tests
             {
                 // Given
                 Engine engine = new Engine();
-                IExecutionContext context = GetExecutionContext(engine);
-                IDocument document = GetDocument(
+                TestExecutionContext context = GetExecutionContext(engine);
+                TestDocument document = GetDocument(
                     "/LayoutWithSection/Test.cshtml",
                     @"@{
 	Layout = ""_Layout.cshtml"";
@@ -350,10 +350,10 @@ namespace Wyam.Razor.Tests
                 Razor razor = new Razor();
 
                 // When
-                List<IDocument> results = await razor.ExecuteAsync(new[] { document }, context).ToListAsync();
+                TestDocument result = await ExecuteAsync(document, context, razor).SingleAsync();
 
                 // Then
-                (await results.Single().GetStringAsync()).ShouldBe(
+                result.Content.ShouldBe(
                     @"LAYOUT5
 
 <p>Section Content</p>
@@ -367,8 +367,8 @@ namespace Wyam.Razor.Tests
             {
                 // Given
                 Engine engine = new Engine();
-                IExecutionContext context = GetExecutionContext(engine);
-                IDocument document = GetDocument(
+                TestExecutionContext context = GetExecutionContext(engine);
+                TestDocument document = GetDocument(
                     "/LayoutWithSection/Test.cshtml",
                     @"@{
 	Layout = ""_Layout.cshtml"";
@@ -401,7 +401,7 @@ namespace Wyam.Razor.Tests
                     StringCompareShould.IgnoreLineEndings);
             }
 
-            private IDocument GetDocument(string source, string content)
+            private TestDocument GetDocument(string source, string content)
             {
                 TestDocument document = new TestDocument(
                     new[]
@@ -414,18 +414,19 @@ namespace Wyam.Razor.Tests
                 return document;
             }
 
-            private IExecutionContext GetExecutionContext(Engine engine)
+            private TestExecutionContext GetExecutionContext(Engine engine)
             {
-                TestExecutionContext context = new TestExecutionContext();
-                context.Namespaces = engine.Namespaces;
-                context.FileSystem = GetFileSystem();
-                return context;
+                return new TestExecutionContext
+                {
+                    Namespaces = engine.Namespaces,
+                    FileSystem = GetFileSystem()
+                };
             }
 
-            private IReadOnlyFileSystem GetFileSystem()
+            private TestFileSystem GetFileSystem()
             {
                 TestFileProvider fileProvider = GetFileProvider();
-                TestFileSystem fileSystem = new TestFileSystem()
+                return new TestFileSystem()
                 {
                     RootPath = new DirectoryPath("/"),
                     InputPaths = new PathCollection<DirectoryPath>()
@@ -434,7 +435,6 @@ namespace Wyam.Razor.Tests
                     },
                     FileProvider = fileProvider
                 };
-                return fileSystem;
             }
 
             private TestFileProvider GetFileProvider()
