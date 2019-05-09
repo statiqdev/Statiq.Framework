@@ -186,7 +186,7 @@ namespace Wyam.Core.Tests.Modules.Contents
             // Then
             result.Values.ShouldContain("two");
             result.Values.ShouldNotContain("seven");
-            result.Values.ShouldContain("three");
+            result.Keys.ShouldContain("three");
         }
 
         [Test]
@@ -203,7 +203,7 @@ namespace Wyam.Core.Tests.Modules.Contents
             // Then
             result.Values.ShouldNotContain("two");
             result.Values.ShouldContain("seven");
-            result.Values.ShouldContain("three");
+            result.Keys.ShouldContain("three");
         }
 
         [Test]

@@ -101,10 +101,12 @@ namespace Wyam.Core.Tests.Modules.Control
                 Execute gatherData = new ExecuteDocument(
                     Config.FromDocument<object>(async (d, c) =>
                     {
-                        IEnumerable<string> previousPageContent = await d.Document(Keys.PreviousPage)?.Get<IList<IDocument>>(Keys.PageDocuments).SelectAsync(async x => await x.GetStringAsync());
-                        previousPages.Add(previousPageContent.ToList());
-                        IEnumerable<string> nextPageContent = await d.Document(Keys.NextPage)?.Get<IList<IDocument>>(Keys.PageDocuments).SelectAsync(async x => await x.GetStringAsync());
-                        nextPages.Add(nextPageContent.ToList());
+                        IList<IDocument> previousPageDocuments = d.Document(Keys.PreviousPage)?.Get<IList<IDocument>>(Keys.PageDocuments);
+                        IEnumerable<string> previousPageContent = previousPageDocuments == null ? null : await previousPageDocuments.SelectAsync(async x => await x.GetStringAsync());
+                        previousPages.Add(previousPageContent?.ToList());
+                        IList<IDocument> nextPageDocuments = d.Document(Keys.NextPage)?.Get<IList<IDocument>>(Keys.PageDocuments);
+                        IEnumerable<string> nextPageContent = nextPageDocuments == null ? null : await nextPageDocuments.SelectAsync(async x => await x.GetStringAsync());
+                        nextPages.Add(nextPageContent?.ToList());
                         return null;
                     }), false);
 

@@ -20,7 +20,7 @@ namespace Wyam.Common.Content
         protected override void Dispose(bool disposing)
         {
             base.Dispose(disposing);
-            _mutex?.Release();
+            _mutex.Release();
         }
     }
 }

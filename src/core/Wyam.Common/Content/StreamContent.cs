@@ -11,9 +11,9 @@ namespace Wyam.Common.Content
     /// </summary>
     public class StreamContent : IContentProvider
     {
+        private readonly SemaphoreSlim _mutex = new SemaphoreSlim(1);
         private readonly Stream _stream;
         private readonly bool _disposeStream;
-        private readonly SemaphoreSlim _mutex;
 
         /// <summary>
         /// If <paramref name="disposeStream"/> is true (which it is by default), the provided
@@ -23,8 +23,7 @@ namespace Wyam.Common.Content
         /// <param name="memoryStreamFactory">A memory stream factory for use if the content stream can't seek and a buffer needs to be created.</param>
         /// <param name="stream">The stream that contains content.</param>
         /// <param name="disposeStream">If <c>true</c>, the provided <see cref="Stream"/> is disposed when no longer used by documents.</param>
-        /// <param name="synchronized">If <c>true</c>, access to the provided stream will be synchronized so that only one caller can access it at a time.</param>
-        public StreamContent(IMemoryStreamFactory memoryStreamFactory, Stream stream, bool disposeStream = true, bool synchronized = true)
+        public StreamContent(IMemoryStreamFactory memoryStreamFactory, Stream stream, bool disposeStream = true)
         {
             if (!stream?.CanRead ?? throw new ArgumentNullException(nameof(stream)))
             {
@@ -43,8 +42,6 @@ namespace Wyam.Common.Content
                 _stream = new SeekableStream(stream, disposeStream, bufferStream);
                 _disposeStream = true;
             }
-
-            _mutex = synchronized ? new SemaphoreSlim(1) : null;
         }
 
         public void Dispose()
@@ -57,10 +54,7 @@ namespace Wyam.Common.Content
 
         public async Task<Stream> GetStreamAsync()
         {
-            if (_mutex != null)
-            {
-                await _mutex.WaitAsync();
-            }
+            await _mutex.WaitAsync();
 
             _stream.Position = 0;
 

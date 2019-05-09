@@ -147,7 +147,7 @@ namespace Wyam.Core.Tests.Modules.Metadata
                 TestDocument result = await ExecuteAsync(document, fileName).SingleAsync();
 
                 // Then
-                result.Keys.ShouldContain(Keys.WriteFileName);
+                result.Keys.ShouldNotContain(Keys.WriteFileName);
             }
 
             [Test]

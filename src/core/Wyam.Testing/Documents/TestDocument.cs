@@ -29,34 +29,34 @@ namespace Wyam.Testing.Documents
             : this()
         {
             TestMemoryStreamFactory memoryStreamFactory = new TestMemoryStreamFactory();
-            ContentProvider = new StreamContent(memoryStreamFactory, memoryStreamFactory.GetStream(content));
+            ContentProvider = content == null ? null : new StreamContent(memoryStreamFactory, memoryStreamFactory.GetStream(content));
         }
 
         public TestDocument(Stream content)
             : this()
         {
             TestMemoryStreamFactory memoryStreamFactory = new TestMemoryStreamFactory();
-            ContentProvider = new StreamContent(memoryStreamFactory, content);
+            ContentProvider = content == null ? null : new StreamContent(memoryStreamFactory, content);
         }
 
         public TestDocument(IEnumerable<KeyValuePair<string, object>> metadata, string content)
             : this(metadata)
         {
             TestMemoryStreamFactory memoryStreamFactory = new TestMemoryStreamFactory();
-            ContentProvider = new StreamContent(memoryStreamFactory, memoryStreamFactory.GetStream(content));
+            ContentProvider = content == null ? null : new StreamContent(memoryStreamFactory, memoryStreamFactory.GetStream(content));
         }
 
         public TestDocument(IEnumerable<KeyValuePair<string, object>> metadata, Stream content)
             : this(metadata)
         {
             TestMemoryStreamFactory memoryStreamFactory = new TestMemoryStreamFactory();
-            ContentProvider = new StreamContent(memoryStreamFactory, content);
+            ContentProvider = content == null ? null : new StreamContent(memoryStreamFactory, content);
         }
 
         public TestDocument(IContentProvider contentProvider)
             : this()
         {
-            ContentProvider = contentProvider;
+            ContentProvider = contentProvider is NullContent ? null : contentProvider;
         }
 
         public TestDocument(IEnumerable<KeyValuePair<string, object>> metadata)
@@ -74,7 +74,7 @@ namespace Wyam.Testing.Documents
         public TestDocument(IEnumerable<KeyValuePair<string, object>> metadata, IContentProvider contentProvider)
             : this(metadata)
         {
-            ContentProvider = contentProvider;
+            ContentProvider = contentProvider is NullContent ? null : contentProvider;
         }
 
         public TestDocument(FilePath source, FilePath destination, IEnumerable<KeyValuePair<string, object>> metadata, string content)
@@ -83,7 +83,7 @@ namespace Wyam.Testing.Documents
             Source = source;
             Destination = destination;
             TestMemoryStreamFactory memoryStreamFactory = new TestMemoryStreamFactory();
-            ContentProvider = new StreamContent(memoryStreamFactory, memoryStreamFactory.GetStream(content));
+            ContentProvider = content == null ? null : new StreamContent(memoryStreamFactory, memoryStreamFactory.GetStream(content));
         }
 
         public TestDocument(FilePath source, FilePath destination, IEnumerable<KeyValuePair<string, object>> metadata, Stream content)
@@ -92,7 +92,7 @@ namespace Wyam.Testing.Documents
             Source = source;
             Destination = destination;
             TestMemoryStreamFactory memoryStreamFactory = new TestMemoryStreamFactory();
-            ContentProvider = new StreamContent(memoryStreamFactory, content);
+            ContentProvider = content == null ? null : new StreamContent(memoryStreamFactory, content);
         }
 
         public TestDocument(FilePath source, FilePath destination, IEnumerable<KeyValuePair<string, object>> metadata, IContentProvider contentProvider)
@@ -100,7 +100,7 @@ namespace Wyam.Testing.Documents
         {
             Source = source;
             Destination = destination;
-            ContentProvider = contentProvider;
+            ContentProvider = contentProvider is NullContent ? null : contentProvider;
         }
 
         public TestDocument(FilePath source, FilePath destination, string content)
@@ -126,7 +126,7 @@ namespace Wyam.Testing.Documents
         {
             Source = source;
             Destination = destination;
-            ContentProvider = contentProvider;
+            ContentProvider = contentProvider is NullContent ? null : contentProvider;
         }
 
         public void Add(KeyValuePair<string, object> item) => _metadata.Add(item);

@@ -47,7 +47,7 @@ namespace Wyam.Tables.Tests
 + "\"24\",\"24\",\"48\",\"72\",\"96\",\"120\",\"144\",\"168\"\r\n"
 + "\"25\",\"25\",\"50\",\"75\",\"100\",\"125\",\"150\",\"175\"\r\n"
 + "\"26\",\"26\",\"52\",\"78\",\"104\",\"130\",\"156\",\"182\"\r\n";
-                TestDocument document = new TestDocument(content: GetTestFileStream("test.xlsx"));
+                TestDocument document = new TestDocument(GetTestFileStream("test.xlsx"));
                 ExcelToCsv module = new ExcelToCsv();
 
                 // When

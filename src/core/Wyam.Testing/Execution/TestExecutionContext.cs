@@ -17,6 +17,7 @@ using Wyam.Common.JavaScript;
 using Wyam.Common.Meta;
 using Wyam.Common.Modules;
 using Wyam.Common.Shortcodes;
+using Wyam.Common.Util;
 using Wyam.Testing.Configuration;
 using Wyam.Testing.Documents;
 using Wyam.Testing.IO;
@@ -74,8 +75,20 @@ namespace Wyam.Testing.Execution
         public IMemoryStreamFactory MemoryStreamFactory { get; set; } = new TestMemoryStreamFactory();
 
         /// <inheritdoc/>
-        public Task<Stream> GetContentStreamAsync(string content = null) =>
-            Task.FromResult<Stream>(string.IsNullOrEmpty(content) ? new MemoryStream() : new MemoryStream(Encoding.UTF8.GetBytes(content)));
+        public Task<Stream> GetContentStreamAsync(string content = null) => Task.FromResult<Stream>(new ContentStream(content));
+
+        private class ContentStream : DelegatingStream
+        {
+            public ContentStream(string content)
+                : base(string.IsNullOrEmpty(content) ? new MemoryStream() : new MemoryStream(Encoding.UTF8.GetBytes(content)))
+            {
+            }
+
+            // Don't mark the stream as disposed
+            protected override void Dispose(bool disposing)
+            {
+            }
+        }
 
         /// <inheritdoc/>
         public async Task<IContentProvider> GetContentProviderAsync(object content)
@@ -88,6 +101,8 @@ namespace Wyam.Testing.Execution
                     return null;
                 case IContentProvider contentProvider:
                     return contentProvider;
+                case ContentStream contentStream:
+                    return new Common.Content.StreamContent(MemoryStreamFactory, contentStream, false);
                 case Stream stream:
                     return new Common.Content.StreamContent(MemoryStreamFactory, stream);
                 case IFile file:
@@ -111,8 +126,14 @@ namespace Wyam.Testing.Execution
             IContentProvider contentProvider = null)
         {
             TestDocument document = originalDocument == null
-                ? new TestDocument(metadata, contentProvider)
+                ? new TestDocument(
+                    source,
+                    destination,
+                    metadata,
+                    contentProvider)
                 : new TestDocument(
+                    source,
+                    destination,
                     metadata == null ? originalDocument : originalDocument.Concat(metadata),
                     contentProvider == null ? ((TestDocument)originalDocument).ContentProvider : contentProvider);
             if (originalDocument != null)

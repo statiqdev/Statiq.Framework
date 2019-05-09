@@ -1,10 +1,12 @@
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Wyam.Common;
+using Wyam.Common.Content;
 using Wyam.Common.Documents;
 using Wyam.Common.Execution;
 using Wyam.Common.Modules;
@@ -77,14 +79,25 @@ namespace Wyam.Core.Modules.Contents
             }
 
             // Otherwise, create a shortcode instance for each named shortcode
-            Dictionary<string, IShortcode> shortcodes =
+            ImmutableDictionary<string, IShortcode> shortcodes =
                 locations
                     .Select(x => x.Name)
                     .Distinct(StringComparer.OrdinalIgnoreCase)
-                    .ToDictionary(x => x, x => context.Shortcodes.CreateInstance(x), StringComparer.OrdinalIgnoreCase);
+                    .ToImmutableDictionary(x => x, x => context.Shortcodes.CreateInstance(x), StringComparer.OrdinalIgnoreCase);
 
             // Execute each of the shortcodes in order
-            InsertingStreamLocation[] insertingLocations = (await locations.SelectAsync(ExecuteShortcodesAsync)).ToArray();
+            List<InsertingStreamLocation> insertingLocations = new List<InsertingStreamLocation>();
+            foreach (ShortcodeLocation location in locations)
+            {
+                InsertingStreamLocation insertingLocation = await ExecuteShortcodesAsync(input, context, location, shortcodes);
+                insertingLocations.Add(insertingLocation);
+
+                // Accumulate metadata for the following shortcodes
+                if (insertingLocation.Document != null)
+                {
+                    input = context.GetDocument(input, insertingLocation.Document);
+                }
+            }
 
             // Dispose any shortcodes that implement IDisposable
             foreach (IDisposable disposableShortcode
@@ -119,6 +132,9 @@ namespace Wyam.Core.Modules.Contents
                             {
                                 Read(insertingReader, writer, null, ref buffer);
                             }
+
+                            // Merge shortcode metadata with the current document
+                            input = context.GetDocument(input, insertingLocation.Document);
                         }
 
                         // Skip the shortcode text
@@ -132,33 +148,46 @@ namespace Wyam.Core.Modules.Contents
                 }
             }
             return context.GetDocument(input, await context.GetContentProviderAsync(resultStream));
+        }
 
-            async Task<InsertingStreamLocation> ExecuteShortcodesAsync(ShortcodeLocation x)
+        private async Task<InsertingStreamLocation> ExecuteShortcodesAsync(
+            IDocument input,
+            IExecutionContext context,
+            ShortcodeLocation location,
+            ImmutableDictionary<string, IShortcode> shortcodes)
+        {
+            // Execute the shortcode
+            IDocument shortcodeResult = await shortcodes[location.Name].ExecuteAsync(location.Arguments, location.Content, input, context);
+            IDocument mergedResult = null;
+
+            if (shortcodeResult != null)
             {
-                // Execute the shortcode
-                IDocument shortcodeResult = await shortcodes[x.Name].ExecuteAsync(x.Arguments, x.Content, input, context);
-
-                // Merge output metadata with the current input document
-                // Creating a new document is the easiest way to ensure all the metadata from shortcodes gets accumulated correctly
-                input = context.GetDocument(input, shortcodeResult, await context.GetContentProviderAsync(shortcodeResult));
-
-                // Recursively parse shortcodes
                 if (shortcodeResult.HasContent)
                 {
+                    // Merge output metadata with the current input document
+                    // Creating a new document is the easiest way to ensure all the metadata from shortcodes gets accumulated correctly
+                    mergedResult = context.GetDocument(input, shortcodeResult, await context.GetContentProviderAsync(shortcodeResult));
+
                     // Don't process nested shortcodes if it's the raw shortcode
-                    if (!x.Name.Equals(nameof(Core.Shortcodes.Contents.Raw), StringComparison.OrdinalIgnoreCase))
+                    if (!location.Name.Equals(nameof(Core.Shortcodes.Contents.Raw), StringComparison.OrdinalIgnoreCase))
                     {
-                        IDocument nestedResult = await ProcessShortcodesAsync(input, context);
+                        // Recursively parse shortcodes
+                        IDocument nestedResult = await ProcessShortcodesAsync(mergedResult, context);
                         if (nestedResult != null)
                         {
-                            input = nestedResult;
+                            mergedResult = nestedResult;
                         }
                     }
-                    return new InsertingStreamLocation(x.FirstIndex, x.LastIndex, input);
+                    return new InsertingStreamLocation(location.FirstIndex, location.LastIndex, mergedResult);
                 }
-
-                return new InsertingStreamLocation(x.FirstIndex, x.LastIndex, null);
+                else
+                {
+                    // Don't copy the content provider from the input document if the shortcode doesn't have content
+                    mergedResult = context.GetDocument(input, shortcodeResult, NullContent.Provider);
+                }
             }
+
+            return new InsertingStreamLocation(location.FirstIndex, location.LastIndex, mergedResult);
         }
 
         // writer = null to just skip length in reader

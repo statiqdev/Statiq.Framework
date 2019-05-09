@@ -90,7 +90,7 @@ namespace Wyam.Core.Modules.Control
         /// <param name="metadata">The metadata for each output document.</param>
         public Documents(params IEnumerable<KeyValuePair<string, object>>[] metadata)
         {
-            _documents = Config.FromContext(async ctx => await metadata.SelectAsync(async x => ctx.GetDocument(await ctx.GetContentProviderAsync(x))));
+            _documents = Config.FromContext(ctx => metadata.Select(x => ctx.GetDocument(x)));
         }
 
         /// <summary>

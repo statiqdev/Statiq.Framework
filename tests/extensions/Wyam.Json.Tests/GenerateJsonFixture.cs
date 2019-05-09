@@ -123,7 +123,7 @@ namespace Wyam.Json.Tests
                 TestDocument result = await ExecuteAsync(document, generateJson).SingleAsync();
 
                 // Then
-                result.Content.ShouldBe(_jsonContent, StringCompareShould.IgnoreLineEndings);
+                result["OutputKey"].ToString().ShouldBe(_jsonContent, StringCompareShould.IgnoreLineEndings);
             }
 
             [Test]

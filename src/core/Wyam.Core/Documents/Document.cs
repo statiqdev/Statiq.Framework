@@ -123,7 +123,9 @@ namespace Wyam.Core.Documents
             Source = source;
             Destination = destination;
             _metadata = items == null ? metadata : metadata.Clone(items);
-            _contentProvider = contentProvider;
+
+            // Special case to set the content provider to null when cloning
+            _contentProvider = contentProvider is NullContent ? null : contentProvider;
 
             if (_contentProvider != null)
             {
