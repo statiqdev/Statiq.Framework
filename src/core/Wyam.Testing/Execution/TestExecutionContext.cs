@@ -83,11 +83,6 @@ namespace Wyam.Testing.Execution
                 : base(string.IsNullOrEmpty(content) ? new MemoryStream() : new MemoryStream(Encoding.UTF8.GetBytes(content)))
             {
             }
-
-            // Don't mark the stream as disposed
-            protected override void Dispose(bool disposing)
-            {
-            }
         }
 
         /// <inheritdoc/>

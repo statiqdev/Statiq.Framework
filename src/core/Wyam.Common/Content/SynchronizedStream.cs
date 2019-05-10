@@ -5,7 +5,8 @@ using Wyam.Common.Util;
 namespace Wyam.Common.Content
 {
     /// <summary>
-    /// Wraps another stream and releases a mutex when it's disposed.
+    /// Wraps another stream and releases a mutex when it's disposed,
+    /// but doesn't dispose the underlying stream.
     /// </summary>
     internal class SynchronizedStream : DelegatingStream
     {
@@ -19,7 +20,6 @@ namespace Wyam.Common.Content
 
         protected override void Dispose(bool disposing)
         {
-            base.Dispose(disposing);
             _mutex.Release();
         }
     }

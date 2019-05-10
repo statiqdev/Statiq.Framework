@@ -24,11 +24,10 @@ namespace Wyam.Core.Content
 
         protected override void Dispose(bool disposing)
         {
-            if (!Disposed && _disposeStream)
+            if (_disposeStream)
             {
                 Stream.Dispose();
             }
-            base.Dispose(disposing);
         }
 
         /// <summary>
