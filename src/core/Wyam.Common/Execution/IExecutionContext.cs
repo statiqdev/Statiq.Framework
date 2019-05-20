@@ -141,6 +141,16 @@ namespace Wyam.Common.Execution
             IContentProvider contentProvider = null);
 
         /// <summary>
+        /// Removes a document from disposal tracking, making it the responsibility of the caller to dispose the document.
+        /// This method should only be used when you want the module to take over document lifetime (such as caching between executions).
+        /// Note that a prior module might have otherwise removed the document from tracking in which case this method will return
+        /// <c>false</c> and the caller should not attempt to dispose the document.
+        /// </summary>
+        /// <param name="document">The document to stop tracking.</param>
+        /// <returns><c>true</c> if the document was being tracked and the caller should now be responsible for it, <c>false</c> otherwise.</returns>
+        bool Untrack(IDocument document);
+
+        /// <summary>
         /// Provides access to the same enhanced type conversion used to convert metadata types.
         /// </summary>
         /// <typeparam name="T">The destination type.</typeparam>

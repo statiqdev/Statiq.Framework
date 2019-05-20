@@ -11,6 +11,8 @@
 - Removed IPipeline.ProcessDocumentsOnce and related plumbing
 - Split Execute module into Execute, ExecuteDocument, and ExecuteContext
 - Pipelines no longer start with an empty initial document (this was important before the execution context provided access to settings but it no longer needed)
+- New `Cache` module to handle caching between executions
+- New content provider API for document content
 
 # 2.2.4
 

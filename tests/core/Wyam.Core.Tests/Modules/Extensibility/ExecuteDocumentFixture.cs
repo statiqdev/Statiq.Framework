@@ -119,7 +119,7 @@ namespace Wyam.Core.Tests.Modules.Extensibility
                 IReadOnlyList<TestDocument> results = await ExecuteAsync(inputs, execute);
 
                 // Then
-                results.Select(x => x.Content).ShouldBe(new[] { "0", "1" });
+                results.Select(x => x.Content).ShouldBe(new[] { "0", "1" }, true);
             }
         }
     }

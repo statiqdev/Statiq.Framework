@@ -338,10 +338,10 @@ namespace Wyam.Common.IO
         /// <inheritdoc />
         public override int GetHashCode()
         {
-            int hash = 17;
-            hash = (hash * 31) + (FileProvider?.GetHashCode() ?? 0);
-            hash = (hash * 31) + FullPath.GetHashCode();
-            return hash;
+            HashCode hash = default;
+            hash.Add(FileProvider?.GetHashCode() ?? 0);
+            hash.Add(FullPath.GetHashCode());
+            return hash.ToHashCode();
         }
 
         /// <inheritdoc />

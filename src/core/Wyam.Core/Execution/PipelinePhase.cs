@@ -22,7 +22,7 @@ namespace Wyam.Core.Execution
     {
         private readonly IList<IModule> _modules;
         private readonly ConcurrentHashSet<FilePath> _documentSources = new ConcurrentHashSet<FilePath>();
-        private ConcurrentBag<IDocument> _clonedDocuments = new ConcurrentBag<IDocument>();
+        private ConcurrentHashSet<IDocument> _clonedDocuments = new ConcurrentHashSet<IDocument>();
         private bool _disposed;
 
         public PipelinePhase(IPipeline pipeline, string pipelineName, Phase phase, IList<IModule> modules, params PipelinePhase[] dependencies)
@@ -110,7 +110,9 @@ namespace Wyam.Core.Execution
             HashSet<IDocument> flattenedResultDocuments = new HashSet<IDocument>();
             FlattenResultDocuments(OutputDocuments, flattenedResultDocuments);
             Parallel.ForEach(_clonedDocuments.Where(x => !flattenedResultDocuments.Contains(x)), x => x.Dispose());
-            _clonedDocuments = new ConcurrentBag<IDocument>(flattenedResultDocuments);
+
+            // Track remaining outputs *tracked by this phase* to dispose them after overall execution is done
+            _clonedDocuments = new ConcurrentHashSet<IDocument>(flattenedResultDocuments.Where(x => _clonedDocuments.Contains(x)));
         }
 
         private void FlattenResultDocuments(IEnumerable<IDocument> documents, HashSet<IDocument> flattenedResultDocuments)
@@ -151,10 +153,24 @@ namespace Wyam.Core.Execution
             }
         }
 
+        /// <summary>
+        /// Removes a document from disposal tracking, making it the responsibility of the caller to dispose the document.
+        /// This method should only be used when you want the module to take over document lifetime (such as caching between executions).
+        /// Note that a prior module might have otherwise removed the document from tracking in which case this method will return
+        /// <c>false</c> and the caller should not attempt to dispose the document.
+        /// </summary>
+        /// <param name="document">The document to stop tracking.</param>
+        /// <returns><c>true</c> if the document was being tracked and the caller should now be responsible for it, <c>false</c> otherwise.</returns>
+        public bool Untrack(IDocument document) => _clonedDocuments.TryRemove(document);
+
+        /// <summary>
+        /// Disposes all remaining cloned documents from this phase.
+        /// Called at the end of execution after all pipelines have run.
+        /// </summary>
         public void ResetClonedDocuments()
         {
             Parallel.ForEach(_clonedDocuments, x => x.Dispose());
-            _clonedDocuments = new ConcurrentBag<IDocument>();
+            _clonedDocuments = new ConcurrentHashSet<IDocument>();
         }
 
         public void Dispose()

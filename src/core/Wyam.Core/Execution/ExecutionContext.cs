@@ -188,6 +188,9 @@ namespace Wyam.Core.Execution
             return document;
         }
 
+        /// <inheritdoc/>
+        public bool Untrack(IDocument document) => _pipelinePhase.Untrack(document);
+
         public async Task<ImmutableArray<IDocument>> ExecuteAsync(IEnumerable<IModule> modules, IEnumerable<IDocument> inputs)
         {
             CheckDisposed();

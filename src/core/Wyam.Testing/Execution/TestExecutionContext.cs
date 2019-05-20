@@ -139,6 +139,9 @@ namespace Wyam.Testing.Execution
         }
 
         /// <inheritdoc/>
+        public bool Untrack(IDocument document) => false;
+
+        /// <inheritdoc/>
         public HttpClient CreateHttpClient() =>
             new HttpClient(new TestHttpMessageHandler(HttpResponseFunc, null));
 

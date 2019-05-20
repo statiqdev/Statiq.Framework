@@ -1,4 +1,5 @@
 ﻿using System.IO;
+using System.Threading.Tasks;
 
 namespace Wyam.Common.Util
 {
@@ -73,13 +74,13 @@ namespace Wyam.Common.Util
         /// </summary>
         /// <param name="stream">The stream.</param>
         /// <returns>A CRC32.</returns>
-        public static uint Calculate(Stream stream)
+        public static async Task<uint> CalculateAsync(Stream stream)
         {
             byte[] buffer = new byte[BufferSize];
             uint crc32 = 0xffffffffU;
             while (true)
             {
-                int read = stream.Read(buffer, 0, BufferSize);
+                int read = await stream.ReadAsync(buffer, 0, BufferSize);
                 if (read == 0)
                 {
                     break;
