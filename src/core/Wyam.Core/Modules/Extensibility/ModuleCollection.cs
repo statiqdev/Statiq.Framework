@@ -57,6 +57,6 @@ namespace Wyam.Core.Modules.Extensibility
         }
 
         /// <inheritdoc />
-        public override async Task<IEnumerable<IDocument>> ExecuteAsync(IReadOnlyList<IDocument> inputs, IExecutionContext context) => await context.ExecuteAsync(this, inputs);
+        public override async Task<IEnumerable<IDocument>> ExecuteAsync(IReadOnlyList<IDocument> inputs, IExecutionContext context) => await context.ExecuteAsync(Children, inputs);
     }
 }

@@ -44,9 +44,9 @@ namespace Wyam.Core.Modules.Control
         }
 
         /// <summary>
-        /// Specifies that the whole sequence of modules should be executed for every input document
+        /// Specifies that the whole sequence of child modules should be executed for every input document
         /// (as opposed to the default behavior of the sequence of modules only being executed once
-        /// with an empty initial document). This method has no effect if no modules are specified.
+        /// with all input documents). This method has no effect if no modules are specified.
         /// </summary>
         /// <returns>The current module instance.</returns>
         public Merge ForEachDocument()
@@ -58,18 +58,18 @@ namespace Wyam.Core.Modules.Control
         /// <inheritdoc />
         public override async Task<IEnumerable<IDocument>> ExecuteAsync(IReadOnlyList<IDocument> inputs, IExecutionContext context)
         {
-            if (Count > 0)
+            if (Children.Count > 0)
             {
                 // Execute the modules for each input document
                 if (_forEachDocument)
                 {
                     return await inputs.SelectManyAsync(context, async input =>
-                        await (await context.ExecuteAsync(this, new[] { input }))
+                        await (await context.ExecuteAsync(Children, new[] { input }))
                             .SelectAsync(async result => context.GetDocument(input, result, await context.GetContentProviderAsync(result))));
                 }
 
                 // Execute the modules once and apply to each input document
-                List<IDocument> results = (await context.ExecuteAsync(this)).ToList();
+                List<IDocument> results = (await context.ExecuteAsync(Children)).ToList();
                 return await inputs.SelectManyAsync(context, async input =>
                     await results.SelectAsync(async result => context.GetDocument(input, result, await context.GetContentProviderAsync(result))));
             }

@@ -83,7 +83,7 @@ namespace Wyam.Core.Modules.Control
         public override async Task<IEnumerable<IDocument>> ExecuteAsync(IReadOnlyList<IDocument> inputs, IExecutionContext context)
         {
             IEnumerable<IDocument> documents = await inputs.FilterAsync(_predicate, context);
-            await context.ExecuteAsync(this, documents);
+            await context.ExecuteAsync(Children, documents);
             return inputs;
         }
     }

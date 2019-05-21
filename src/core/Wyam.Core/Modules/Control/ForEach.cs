@@ -64,7 +64,7 @@ namespace Wyam.Core.Modules.Control
         /// <inheritdoc />
         public override async Task<IEnumerable<IDocument>> ExecuteAsync(IReadOnlyList<IDocument> inputs, IExecutionContext context)
         {
-            return await inputs.SelectManyAsync<IDocument>(context, async x => await context.ExecuteAsync(this, new[] { x }));
+            return await inputs.SelectManyAsync<IDocument>(context, async x => await context.ExecuteAsync(Children, new[] { x }));
         }
     }
 }

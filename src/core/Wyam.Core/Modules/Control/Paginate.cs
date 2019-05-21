@@ -148,7 +148,7 @@ namespace Wyam.Core.Modules.Control
         public override async Task<IEnumerable<IDocument>> ExecuteAsync(IReadOnlyList<IDocument> inputs, IExecutionContext context)
         {
             // Partition the pages
-            IReadOnlyList<IDocument> documents = (await (await context.ExecuteAsync(this, inputs)).FilterAsync(_predicate, context)).ToList();
+            IReadOnlyList<IDocument> documents = (await (await context.ExecuteAsync(Children, inputs)).FilterAsync(_predicate, context)).ToList();
             IDocument[][] partitions =
                 Partition(documents, _pageSize)
                 .ToArray();

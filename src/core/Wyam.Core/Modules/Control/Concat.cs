@@ -54,7 +54,7 @@ namespace Wyam.Core.Modules.Control
         /// <inheritdoc />
         public override async Task<IEnumerable<IDocument>> ExecuteAsync(IReadOnlyList<IDocument> inputs, IExecutionContext context)
         {
-            IEnumerable<IDocument> docs = await context.ExecuteAsync(this);
+            IEnumerable<IDocument> docs = await context.ExecuteAsync(Children);
             if (_predicate != null)
             {
                 docs = docs.Where(x => _predicate(context, x, inputs));

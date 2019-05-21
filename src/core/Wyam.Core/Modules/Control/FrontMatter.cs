@@ -131,7 +131,7 @@ namespace Wyam.Core.Modules.Control
                     string frontMatter = string.Join("\n", inputLines.Skip(startLine).Take(delimiterLine - startLine)) + "\n";
                     inputLines.RemoveRange(0, delimiterLine + 1);
                     string content = string.Join("\n", inputLines);
-                    foreach (IDocument result in await context.ExecuteAsync(this, new[] { context.GetDocument(input, await context.GetContentProviderAsync(frontMatter)) }))
+                    foreach (IDocument result in await context.ExecuteAsync(Children, new[] { context.GetDocument(input, await context.GetContentProviderAsync(frontMatter)) }))
                     {
                         results.Add(context.GetDocument(result, await context.GetContentProviderAsync(content)));
                     }

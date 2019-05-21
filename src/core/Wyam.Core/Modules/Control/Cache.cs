@@ -14,6 +14,7 @@ namespace Wyam.Core.Modules.Control
     public class Cache : ContainerModule, IDisposable
     {
         private Dictionary<FilePath, CacheItem> _cache = null;
+        private bool _forEachDocument;
 
         public Cache(params IModule[] modules)
             : this((IEnumerable<IModule>)modules)
@@ -23,6 +24,18 @@ namespace Wyam.Core.Modules.Control
         public Cache(IEnumerable<IModule> modules)
             : base(modules)
         {
+        }
+
+        /// <summary>
+        /// Specifies that the whole sequence of child modules should be executed for every unhit input document
+        /// (as opposed to the default behavior of the sequence of modules only being executed once
+        /// with all unhit input documents).
+        /// </summary>
+        /// <returns>The current module instance.</returns>
+        public Cache ForEachDocument()
+        {
+            _forEachDocument = true;
+            return this;
         }
 
         public void Dispose()
@@ -113,9 +126,21 @@ namespace Wyam.Core.Modules.Control
             }
 
             // Execute misses
-            ImmutableArray<IDocument> results = misses.Count > 0
-                ? await context.ExecuteAsync(this, misses)
-                : ImmutableArray<IDocument>.Empty;
+            ImmutableArray<IDocument> results;
+            if (misses.Count == 0)
+            {
+                results = ImmutableArray<IDocument>.Empty;
+            }
+            else if (_forEachDocument)
+            {
+                results = (await misses.SelectManyAsync(context, async miss =>
+                    (IEnumerable<IDocument>)await context.ExecuteAsync(Children, new IDocument[] { miss })))
+                    .ToImmutableArray();
+            }
+            else
+            {
+                results = await context.ExecuteAsync(Children, misses);
+            }
             outputs.AddRange(results);
 
             // Cache results by matching sources with inputs

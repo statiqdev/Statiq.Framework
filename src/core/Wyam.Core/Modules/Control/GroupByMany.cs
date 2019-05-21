@@ -153,7 +153,7 @@ namespace Wyam.Core.Modules.Control
         /// <inheritdoc />
         public override async Task<IEnumerable<IDocument>> ExecuteAsync(IReadOnlyList<IDocument> inputs, IExecutionContext context)
         {
-            IEnumerable<IDocument> docs = await (await context.ExecuteAsync(this, inputs)).FilterAsync(_predicate, context);
+            IEnumerable<IDocument> docs = await (await context.ExecuteAsync(Children, inputs)).FilterAsync(_predicate, context);
             IEnumerable<(IDocument x, IEnumerable<object>)> keys = await docs.SelectAsync(async x => (x, await _key.GetValueAsync(x, context)));
             ImmutableArray<IGrouping<object, IDocument>> groupings = keys
                 .GroupByMany(x => x.Item2, x => x.Item1, _comparer)
