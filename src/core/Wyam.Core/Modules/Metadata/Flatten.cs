@@ -36,25 +36,10 @@ namespace Wyam.Core.Modules.Metadata
         /// <inheritdoc />
         public Task<IEnumerable<IDocument>> ExecuteAsync(IReadOnlyList<IDocument> inputs, IExecutionContext context)
         {
-            // Use a stack so we don't overflow the call stack with recursive calls for deep trees
-            Stack<IDocument> stack = new Stack<IDocument>();
-            foreach (IDocument root in inputs)
+            HashSet<IDocument> results = new HashSet<IDocument>();
+            foreach (IDocument input in inputs)
             {
-                stack.Push(root);
-            }
-            List<IDocument> results = new List<IDocument>();
-            while (stack.Count > 0)
-            {
-                IDocument current = stack.Pop();
-                results.Add(current);
-                IEnumerable<IDocument> children = current.DocumentList(_childrenKey);
-                if (children != null)
-                {
-                    foreach (IDocument child in children)
-                    {
-                        stack.Push(child);
-                    }
-                }
+                input.Flatten(results, _childrenKey);
             }
             return Task.FromResult<IEnumerable<IDocument>>(results);
         }

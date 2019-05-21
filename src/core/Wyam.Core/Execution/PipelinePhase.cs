@@ -11,6 +11,7 @@ using Wyam.Common.Modules;
 using Wyam.Common.Execution;
 using Wyam.Common.Tracing;
 using Microsoft.Extensions.DependencyInjection;
+using Wyam.Core.Modules.Control;
 
 namespace Wyam.Core.Execution
 {
@@ -108,35 +109,14 @@ namespace Wyam.Core.Execution
             // Dispose documents that aren't part of the final collection for this pipeline,
             // but don't dispose any documents that are referenced directly or indirectly from the final ones
             HashSet<IDocument> flattenedResultDocuments = new HashSet<IDocument>();
-            FlattenResultDocuments(OutputDocuments, flattenedResultDocuments);
+            foreach (IDocument outputDocument in OutputDocuments)
+            {
+                outputDocument.Flatten(flattenedResultDocuments);
+            }
             Parallel.ForEach(_clonedDocuments.Where(x => !flattenedResultDocuments.Contains(x)), x => x.Dispose());
 
             // Track remaining outputs *tracked by this phase* to dispose them after overall execution is done
             _clonedDocuments = new ConcurrentHashSet<IDocument>(flattenedResultDocuments.Where(x => _clonedDocuments.Contains(x)));
-        }
-
-        private void FlattenResultDocuments(IEnumerable<IDocument> documents, HashSet<IDocument> flattenedResultDocuments)
-        {
-            foreach (IDocument document in documents)
-            {
-                if (document == null || !flattenedResultDocuments.Add(document))
-                {
-                    continue;
-                }
-
-                FlattenResultDocuments(
-                    document.Keys.SelectMany(x =>
-                    {
-                        object value = document.GetRaw(x);
-                        IEnumerable<IDocument> children = value as IEnumerable<IDocument>;
-                        if (children == null && value is IDocument)
-                        {
-                            children = new[] { (IDocument)value };
-                        }
-                        return children ?? Enumerable.Empty<IDocument>();
-                    }),
-                    flattenedResultDocuments);
-            }
         }
 
         public void AddClonedDocument(IDocument document) => _clonedDocuments.Add(document);

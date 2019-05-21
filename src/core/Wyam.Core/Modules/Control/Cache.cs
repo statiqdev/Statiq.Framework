@@ -11,10 +11,10 @@ using Wyam.Common.Modules;
 
 namespace Wyam.Core.Modules.Control
 {
+    // Should not contain modules that aggregate documents like Tree - put those after the cacheable operation
     public class Cache : ContainerModule, IDisposable
     {
         private Dictionary<FilePath, CacheItem> _cache = null;
-        private bool _forEachDocument;
 
         public Cache(params IModule[] modules)
             : this((IEnumerable<IModule>)modules)
@@ -24,18 +24,6 @@ namespace Wyam.Core.Modules.Control
         public Cache(IEnumerable<IModule> modules)
             : base(modules)
         {
-        }
-
-        /// <summary>
-        /// Specifies that the whole sequence of child modules should be executed for every unhit input document
-        /// (as opposed to the default behavior of the sequence of modules only being executed once
-        /// with all unhit input documents).
-        /// </summary>
-        /// <returns>The current module instance.</returns>
-        public Cache ForEachDocument()
-        {
-            _forEachDocument = true;
-            return this;
         }
 
         public void Dispose()
@@ -58,7 +46,7 @@ namespace Wyam.Core.Modules.Control
             List<IDocument> outputs = new List<IDocument>();
 
             // Need to track misses by their source so we can calculate the input document hashes that resulted in outputs
-            Dictionary<FilePath, IGrouping<FilePath, IDocument>> missesBySource;
+            List<IGrouping<FilePath, IDocument>> missesBySource;
 
             // Creating a new cache and swapping is the easiest way to expire old entries
             Dictionary<FilePath, CacheItem> currentCache = _cache;
@@ -72,13 +60,13 @@ namespace Wyam.Core.Modules.Control
                 missesBySource = inputs
                     .Where(x => x.Source != null)
                     .GroupBy(x => x.Source)
-                    .ToDictionary(x => x.Key, x => x);
+                    .ToList();
             }
             else
             {
                 // Note that due to cloning we could have multiple inputs and outputs with the same source
                 // so we need to check all inputs with a given source and only consider a hit when they all match
-                missesBySource = new Dictionary<FilePath, IGrouping<FilePath, IDocument>>();
+                missesBySource = new List<IGrouping<FilePath, IDocument>>();
                 foreach (IGrouping<FilePath, IDocument> inputsBySource in inputs.GroupBy(x => x.Source))
                 {
                     // Documents with a null source are never cached
@@ -117,7 +105,7 @@ namespace Wyam.Core.Modules.Control
                         }
 
                         // Miss with non-null source: track source and input documents so we can cache for next pass
-                        missesBySource.Add(inputsBySource.Key, inputsBySource);
+                        missesBySource.Add(inputsBySource);
                     }
 
                     // Miss: add inputs to execute
@@ -126,59 +114,65 @@ namespace Wyam.Core.Modules.Control
             }
 
             // Execute misses
-            ImmutableArray<IDocument> results;
-            if (misses.Count == 0)
-            {
-                results = ImmutableArray<IDocument>.Empty;
-            }
-            else if (_forEachDocument)
-            {
-                results = (await misses.SelectManyAsync(context, async miss =>
-                    (IEnumerable<IDocument>)await context.ExecuteAsync(Children, new IDocument[] { miss })))
-                    .ToImmutableArray();
-            }
-            else
-            {
-                results = await context.ExecuteAsync(Children, misses);
-            }
+            ImmutableArray<IDocument> results = misses.Count == 0
+                ? ImmutableArray<IDocument>.Empty
+                : await context.ExecuteAsync(Children, misses);
+            Dictionary<FilePath, IGrouping<FilePath, IDocument>> resultsBySource =
+                results.GroupBy(x => x.Source).ToDictionary(x => x.Key, x => x);
             outputs.AddRange(results);
 
-            // Cache results by matching sources with inputs
-            foreach (IGrouping<FilePath, IDocument> resultsBySource in results.GroupBy(x => x.Source))
+            // Cache all miss sources, even if they resulted in an empty result document set
+            foreach (IGrouping<FilePath, IDocument> inputGroup in missesBySource)
             {
-                // Only cache if there were actually inputs with this source
-                if (missesBySource.TryGetValue(resultsBySource.Key, out IGrouping<FilePath, IDocument> inputGroup))
+                // These are the hashes of every input document with the same source as these output documents
+                int[] inputHashes = await inputGroup.SelectAsync(x => x.GetHashAsync()).ToArrayAsync();
+
+                // Did we get any results from this input source?
+                if (resultsBySource.TryGetValue(inputGroup.Key, out IGrouping<FilePath, IDocument> sourceResults))
                 {
-                    _cache.Add(resultsBySource.Key, new CacheItem(
-                        await inputGroup.SelectAsync(x => x.GetHashAsync()).ToArrayAsync(),
-                        resultsBySource.Select(x => (x, context.Untrack(x))).ToArray()));
+                    // Note whether the result document was being tracked (and is now tracked/disposed by the cache)
+                    (IDocument Document, bool Tracking)[] resultDocuments = sourceResults.Select(x => (x, context.Untrack(x))).ToArray();
+
+                    // We also need to track any child documents in the metadata of results so they don't get disposed by the context
+                    HashSet<IDocument> flattenedDocuments = new HashSet<IDocument>();
+                    foreach (IDocument resultDocument in sourceResults)
+                    {
+                        resultDocument.Flatten(flattenedDocuments);
+                    }
+                    IDocument[] childDocuments = flattenedDocuments.Where(x => !sourceResults.Contains(x) && context.Untrack(x)).ToArray();
+
+                    _cache.Add(inputGroup.Key, new CacheItem(inputHashes, resultDocuments, childDocuments));
+                }
+                else
+                {
+                    // No results for this source
+                    _cache.Add(inputGroup.Key, new CacheItem(inputHashes, Array.Empty<(IDocument, bool)>(), Array.Empty<IDocument>()));
                 }
             }
 
             return outputs;
         }
 
-        private class CacheItem : IDisposable
+        public class CacheItem : IDisposable
         {
             private readonly (IDocument Document, bool Tracking)[] _resultDocuments;
+            private readonly IDocument[] _childDocuments;
 
-            public CacheItem(int[] inputHashes, (IDocument, bool)[] resultDocuments)
+            public CacheItem(int[] inputHashes, (IDocument, bool)[] resultDocuments, IDocument[] childDocuments)
             {
                 InputHashes = inputHashes;
                 _resultDocuments = resultDocuments;
+                _childDocuments = childDocuments;
             }
 
             public int[] InputHashes { get; }
 
             public IEnumerable<IDocument> ResultDocuments => _resultDocuments.Select(x => x.Document);
 
-            public void Dispose()
-            {
-                foreach (IDocument resultDocument in _resultDocuments.Where(x => x.Tracking).Select(x => x.Document))
-                {
-                    resultDocument.Dispose();
-                }
-            }
+            public void Dispose() =>
+                Parallel.ForEach(
+                    _resultDocuments.Where(x => x.Tracking).Select(x => x.Document).Concat(_childDocuments),
+                    document => document.Dispose());
         }
     }
 }
