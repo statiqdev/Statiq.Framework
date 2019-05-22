@@ -339,24 +339,24 @@ namespace Wyam.Core.Execution
             Dictionary<PipelinePhase, Task> phaseTasks = new Dictionary<PipelinePhase, Task>();
             foreach (PipelinePhase phase in _phases)
             {
-                phaseTasks.Add(phase, GetTask(phase));
+                phaseTasks.Add(phase, GetPhaseTask(executionId, serviceProvider, phaseTasks, phase));
             }
             return phaseTasks.Values.ToArray();
+        }
 
-            Task GetTask(PipelinePhase taskPhase)
+        private Task GetPhaseTask(Guid executionId, IServiceProvider serviceProvider, Dictionary<PipelinePhase, Task> phaseTasks, PipelinePhase phase)
+        {
+            if (phase.Dependencies.Length == 0)
             {
-                if (taskPhase.Dependencies.Length == 0)
-                {
-                    // This will immediatly queue the read phase while we continue figuring out tasks, but that's okay
-                    return Task.Run(() => taskPhase.ExecuteAsync(this, executionId, serviceProvider, ImmutableArray<IDocument>.Empty));
-                }
-
-                // We have to explicitly wait the execution task in the continuation function
-                // (the continuation task doesn't wait for the tasks it continues)
-                return Task.Factory.ContinueWhenAll(
-                    taskPhase.Dependencies.Select(x => phaseTasks[x]).ToArray(),
-                    _ => Task.WaitAll(taskPhase.ExecuteAsync(this, executionId, serviceProvider, taskPhase.Dependencies[0].OutputDocuments)));
+                // This will immediatly queue the read phase while we continue figuring out tasks, but that's okay
+                return Task.Run(() => phase.ExecuteAsync(this, executionId, serviceProvider));
             }
+
+            // We have to explicitly wait the execution task in the continuation function
+            // (the continuation task doesn't wait for the tasks it continues)
+            return Task.Factory.ContinueWhenAll(
+                phase.Dependencies.Select(x => phaseTasks[x]).ToArray(),
+                _ => Task.WaitAll(phase.ExecuteAsync(this, executionId, serviceProvider)));
         }
 
         // This executes the specified modules with the specified input documents

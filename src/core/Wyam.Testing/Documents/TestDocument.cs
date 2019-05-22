@@ -136,6 +136,11 @@ namespace Wyam.Testing.Documents
         /// <inhertdoc />
         public IMetadata WithoutSettings => this;
 
+        public int CacheHashCode { get; set; }
+
+        /// <inhertdoc />
+        public Task<int> GetCacheHashCodeAsync() => Task.FromResult(CacheHashCode);
+
         /// <inhertdoc />
         public bool ContainsKey(string key) => _metadata.ContainsKey(key);
 
@@ -162,6 +167,9 @@ namespace Wyam.Testing.Documents
 
         /// <inhertdoc />
         public string Id { get; set; }
+
+        /// <inhertdoc />
+        public int Version { get; set; }
 
         /// <inhertdoc />
         public FilePath Source { get; set; }

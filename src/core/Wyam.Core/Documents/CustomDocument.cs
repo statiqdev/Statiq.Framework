@@ -31,6 +31,9 @@ namespace Wyam.Core.Documents
         public IMetadata WithoutSettings => Document.WithoutSettings;
 
         /// <inheritdoc />
+        public virtual Task<int> GetCacheHashCodeAsync() => Document.GetCacheHashCodeAsync();
+
+        /// <inheritdoc />
         public IEnumerator<KeyValuePair<string, object>> GetEnumerator() => Document.GetEnumerator();
 
         /// <inheritdoc />
@@ -71,6 +74,9 @@ namespace Wyam.Core.Documents
 
         /// <inheritdoc />
         public string Id => Document.Id;
+
+        /// <inheritdoc />
+        public int Version => Document.Version;
 
         /// <inheritdoc />
         public IMetadata Metadata => Document.Metadata;

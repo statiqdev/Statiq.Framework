@@ -12,32 +12,6 @@ namespace Wyam.Common.Documents
     public static class IDocumentExtensions
     {
         /// <summary>
-        /// Gets a hash of the provided document content and metadata.
-        /// </summary>
-        /// <param name="document">The document to hash.</param>
-        /// <returns>A hash that represents the document content and it's metadata.</returns>
-        public static async Task<int> GetHashAsync(this IDocument document)
-        {
-            if (document == null)
-            {
-                return 0;
-            }
-
-            HashCode hash = default;
-            using (Stream stream = await document.GetStreamAsync())
-            {
-                hash.Add(await Crc32.CalculateAsync(stream));
-            }
-            foreach (KeyValuePair<string, object> item in document.WithoutSettings)
-            {
-                hash.Add(item.Key);
-                hash.Add(item.Value);
-            }
-
-            return hash.ToHashCode();
-        }
-
-        /// <summary>
         /// Recursivly flattens metadata that contains a document or documents.
         /// </summary>
         /// <param name="document">The parent document to flatten.</param>

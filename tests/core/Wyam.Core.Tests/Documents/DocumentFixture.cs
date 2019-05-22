@@ -24,8 +24,8 @@ namespace Wyam.Core.Tests.Documents
                 MetadataDictionary initialMetadata = new MetadataDictionary();
 
                 // When
-                Document a = new Document(initialMetadata);
-                Document b = new Document(initialMetadata);
+                Document a = new Document(initialMetadata, null, null, null, null);
+                Document b = new Document(initialMetadata, null, null, null, null);
 
                 // Then
                 Assert.AreNotEqual(a.Id, b.Id);
@@ -39,10 +39,16 @@ namespace Wyam.Core.Tests.Documents
             {
                 // Given
                 MetadataDictionary initialMetadata = new MetadataDictionary();
-                Document document = new Document(initialMetadata);
+                Document document = new Document(initialMetadata, null, null, null, null);
 
                 // When
-                IDocument cloned = new Document(document, new MetadataItems());
+                IDocument cloned = new Document(
+                    document,
+                    document.Version + 1,
+                    null,
+                    null,
+                    null,
+                    new MetadataItems());
 
                 // Then
                 Assert.AreEqual(document.Id, cloned.Id);
@@ -57,8 +63,14 @@ namespace Wyam.Core.Tests.Documents
                 // Given
                 MetadataDictionary initialMetadata = new MetadataDictionary();
                 initialMetadata.Add("A", "a");
-                Document document = new Document(initialMetadata);
-                Document cloned = new Document(document, new MetadataItems { { "B", "b" } });
+                Document document = new Document(initialMetadata, null, null, null, null);
+                Document cloned = new Document(
+                    document,
+                    document.Version + 1,
+                    null,
+                    null,
+                    null,
+                    new MetadataItems { { "B", "b" } });
 
                 // When
                 string initialA = document.String("A");

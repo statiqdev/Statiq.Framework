@@ -8,6 +8,8 @@ using Wyam.Common.Content;
 using Wyam.Common.Documents;
 using Wyam.Common.IO;
 using Wyam.Common.Meta;
+using Wyam.Common.Tracing;
+using Wyam.Common.Util;
 using Wyam.Core.Meta;
 
 namespace Wyam.Core.Documents
@@ -25,19 +27,13 @@ namespace Wyam.Core.Documents
 
         internal Document(
             MetadataDictionary initialMetadata,
-            IContentProvider contentProvider = null)
-            : this(initialMetadata, null, null, contentProvider, null)
-        {
-        }
-
-        internal Document(
-            MetadataDictionary initialMetadata,
             FilePath source,
             FilePath destination,
             IContentProvider contentProvider,
             IEnumerable<KeyValuePair<string, object>> items)
             : this(
                   Guid.NewGuid().ToString(),
+                  0,
                   new MetadataStack(initialMetadata),
                   source,
                   destination,
@@ -48,59 +44,18 @@ namespace Wyam.Core.Documents
 
         internal Document(
             Document sourceDocument,
-            FilePath source,
-            FilePath destination,
-            IEnumerable<KeyValuePair<string, object>> items = null)
-            : this(
-                sourceDocument.Id,
-                sourceDocument._metadata,
-                sourceDocument.Source ?? source,
-                destination ?? sourceDocument.Destination,
-                sourceDocument._contentProvider,
-                items)
-        {
-            sourceDocument.CheckDisposed();
-        }
-
-        internal Document(
-            Document sourceDocument,
+            int version,
             FilePath source,
             FilePath destination,
             IContentProvider contentProvider,
             IEnumerable<KeyValuePair<string, object>> items = null)
             : this(
                 sourceDocument.Id,
+                version,
                 sourceDocument._metadata,
                 sourceDocument.Source ?? source,
                 destination ?? sourceDocument.Destination,
                 contentProvider ?? sourceDocument._contentProvider,
-                items)
-        {
-            sourceDocument.CheckDisposed();
-        }
-
-        internal Document(
-            Document sourceDocument,
-            IContentProvider contentProvider,
-            IEnumerable<KeyValuePair<string, object>> items = null)
-            : this(
-                sourceDocument.Id,
-                sourceDocument._metadata,
-                sourceDocument.Source,
-                sourceDocument.Destination,
-                contentProvider ?? sourceDocument._contentProvider,
-                items)
-        {
-            sourceDocument.CheckDisposed();
-        }
-
-        internal Document(Document sourceDocument, IEnumerable<KeyValuePair<string, object>> items)
-            : this(
-                sourceDocument.Id,
-                sourceDocument._metadata,
-                sourceDocument.Source,
-                sourceDocument.Destination,
-                sourceDocument._contentProvider,
                 items)
         {
             sourceDocument.CheckDisposed();
@@ -108,6 +63,7 @@ namespace Wyam.Core.Documents
 
         private Document(
             string id,
+            int version,
             MetadataStack metadata,
             FilePath source,
             FilePath destination,
@@ -120,6 +76,7 @@ namespace Wyam.Core.Documents
             }
 
             Id = id ?? throw new ArgumentNullException(nameof(id));
+            Version = version;
             Source = source;
             Destination = destination;
             _metadata = items == null ? metadata : metadata.Clone(items);
@@ -150,6 +107,8 @@ namespace Wyam.Core.Documents
         public string SourceString() => Source?.ToString() ?? "[unknown source]";
 
         public string Id { get; }
+
+        public int Version { get; }
 
         public IMetadata Metadata => _metadata;
 
@@ -195,10 +154,9 @@ namespace Wyam.Core.Documents
 
         public void Dispose()
         {
-            if (_disposed)
-            {
-                return;
-            }
+            CheckDisposed();
+
+            Trace.Verbose($"Disposing document with ID {Id}.{Version} and source {SourceString()}");
 
             if (_contentProvider != null)
             {
@@ -236,11 +194,27 @@ namespace Wyam.Core.Documents
             {
                 throw new ObjectDisposedException(
                     nameof(Document),
-                    $"Attempted to access disposed document with ID {Id} and source {SourceString()}");
+                    $"Attempted to access disposed document with ID {Id}.{Version} and source {SourceString()}");
             }
         }
 
         public IMetadata WithoutSettings => new MetadataStack(_metadata.Stack.Reverse().Skip(1));
+
+        public async Task<int> GetCacheHashCodeAsync()
+        {
+            HashCode hash = default;
+            using (Stream stream = await GetStreamAsync())
+            {
+                hash.Add(await Crc32.CalculateAsync(stream));
+            }
+            foreach (KeyValuePair<string, object> item in WithoutSettings)
+            {
+                hash.Add(item.Key);
+                hash.Add(item.Value);
+            }
+
+            return hash.ToHashCode();
+        }
 
         // IMetadata
 

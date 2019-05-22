@@ -31,11 +31,14 @@ namespace Wyam.Common.Documents
         string SourceString();
 
         /// <summary>An identifier that is generated when the document is created and stays the same after cloning.</summary>
-        /// <value>The identifier.</value>
         string Id { get; }
 
+        /// <summary>
+        /// A document version that gets incremented on every clone operation. Starts at 0.
+        /// </summary>
+        int Version { get; }
+
         /// <summary>Gets the metadata associated with this document.</summary>
-        /// <value>The metadata associated with this document.</value>
         IMetadata Metadata { get; }
 
         /// <summary>
@@ -65,5 +68,13 @@ namespace Wyam.Common.Documents
         /// </summary>
         /// <returns>The document metadata without global settings.</returns>
         IMetadata WithoutSettings { get; }
+
+        /// <summary>
+        /// Gets a hash of the provided document content and metadata appropriate for caching.
+        /// Custom <see cref="IDocument"/> implementations may also contribute additional state
+        /// data to the resulting hash code.
+        /// </summary>
+        /// <returns>A hash appropriate for caching.</returns>
+        Task<int> GetCacheHashCodeAsync();
     }
 }

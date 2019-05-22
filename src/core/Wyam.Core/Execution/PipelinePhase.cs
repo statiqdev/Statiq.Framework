@@ -52,12 +52,17 @@ namespace Wyam.Core.Execution
         /// </summary>
         public ImmutableArray<IDocument> OutputDocuments { get; private set; } = ImmutableArray<IDocument>.Empty;
 
+        /// <summary>
+        /// The first dependency always holds the input documents for this phase.
+        /// </summary>
+        /// <returns>The input documents for this phase.</returns>
+        private ImmutableArray<IDocument> GetInputDocuments() => Dependencies.Length == 0 ? ImmutableArray<IDocument>.Empty : Dependencies[0].OutputDocuments;
+
         // This is the main execute method called by the engine
         public async Task ExecuteAsync(
             Engine engine,
             Guid executionId,
-            IServiceProvider serviceProvider,
-            ImmutableArray<IDocument> inputDocuments)
+            IServiceProvider serviceProvider)
         {
             if (_disposed)
             {
@@ -66,8 +71,8 @@ namespace Wyam.Core.Execution
 
             if (_modules.Count == 0)
             {
-                Trace.Verbose($"{PipelineName}/{Phase} contains no modules, skipping");
-                OutputDocuments = inputDocuments;
+                Trace.Verbose($"Pipeline {PipelineName}/{Phase} contains no modules, skipping");
+                OutputDocuments = GetInputDocuments();
                 return;
             }
 
@@ -76,7 +81,7 @@ namespace Wyam.Core.Execution
             ResetClonedDocuments();
 
             System.Diagnostics.Stopwatch pipelineStopwatch = System.Diagnostics.Stopwatch.StartNew();
-            Trace.Verbose($"Executing {PipelineName}/{Phase} with {_modules.Count} module(s)");
+            Trace.Verbose($"Executing pipeline {PipelineName}/{Phase} with {_modules.Count} module(s)");
             try
             {
                 // Execute all modules in the pipeline with a new DI scope per phase
@@ -85,15 +90,15 @@ namespace Wyam.Core.Execution
                 {
                     using (ExecutionContext context = new ExecutionContext(engine, executionId, this, serviceScope.ServiceProvider))
                     {
-                        OutputDocuments = await Engine.ExecuteAsync(context, _modules, inputDocuments);
+                        OutputDocuments = await Engine.ExecuteAsync(context, _modules, GetInputDocuments());
                         pipelineStopwatch.Stop();
-                        Trace.Information($"Executed {PipelineName}/{Phase} in {pipelineStopwatch.ElapsedMilliseconds} ms resulting in {OutputDocuments.Length} output document(s)");
+                        Trace.Information($"Executed pipeline {PipelineName}/{Phase} in {pipelineStopwatch.ElapsedMilliseconds} ms resulting in {OutputDocuments.Length} output document(s)");
                     }
                 }
             }
             catch (Exception)
             {
-                Trace.Error($"Error while executing {PipelineName}/{Phase}");
+                Trace.Error($"Error while executing pipeline {PipelineName}/{Phase}");
                 throw;
             }
 
