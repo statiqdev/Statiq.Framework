@@ -149,9 +149,14 @@ namespace Wyam.App.Commands
                     if (changedFiles.Count > 0)
                     {
                         Trace.Information("{0} files have changed, re-executing", changedFiles.Count);
+
+                        // If there was an execution error due to reload, keep previewing but clear the cache
                         exitCode = await engineManager.ExecuteAsync(_serviceProvider)
                             ? ExitCode.Normal
                             : ExitCode.ExecutionError;
+
+                        // TODO: Clear the cache when an error occurs during preview
+
                         await previewServer.TriggerReloadAsync();
                     }
 

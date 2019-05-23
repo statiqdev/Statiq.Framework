@@ -356,7 +356,21 @@ namespace Wyam.Core.Execution
             // (the continuation task doesn't wait for the tasks it continues)
             return Task.Factory.ContinueWhenAll(
                 phase.Dependencies.Select(x => phaseTasks[x]).ToArray(),
-                _ => Task.WaitAll(phase.ExecuteAsync(this, executionId, serviceProvider)));
+                dependencies =>
+                {
+                    // Only run the dependent task if all the dependencies successfully completed
+                    if (dependencies.All(x => x.IsCompletedSuccessfully))
+                    {
+                        Task.WaitAll(phase.ExecuteAsync(this, executionId, serviceProvider));
+                    }
+                    else
+                    {
+                        // Otherwise, throw an exception so that this dependency is also skipped by it's dependents
+                        string error = $"Skipping pipeline {phase.PipelineName}/{phase.Phase} due to dependency error";
+                        Trace.Error(error);
+                        throw new Exception(error);
+                    }
+                });
         }
 
         // This executes the specified modules with the specified input documents

@@ -99,6 +99,7 @@ namespace Wyam.Core.Execution
             catch (Exception)
             {
                 Trace.Error($"Error while executing pipeline {PipelineName}/{Phase}");
+                OutputDocuments = ImmutableArray<IDocument>.Empty;
                 throw;
             }
 

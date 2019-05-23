@@ -150,7 +150,7 @@ namespace Wyam.Core.Modules.Control
             // Dispose invalidated cache entries
             foreach (CacheEntry invalidatedEntry in invalidated)
             {
-                foreach (IDocument disposingDocument in invalidatedEntry.Documents.Where(x => x.Tracked))
+                foreach (IDocument disposingDocument in invalidatedEntry.Documents.Where(x => x.Tracked).Select(x => x.Document))
                 {
                     // Try to find another existing cached document
                     CachedDocument cachedDocument = null;

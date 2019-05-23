@@ -45,8 +45,9 @@ namespace Wyam.App.Commands
             {
                 await Engine.ExecuteAsync(serviceProvider);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                Trace.Critical(ex.Message);
                 return false;
             }
             return true;
