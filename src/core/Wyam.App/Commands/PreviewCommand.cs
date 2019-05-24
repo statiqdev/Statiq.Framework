@@ -10,6 +10,7 @@ using Wyam.App.Tracing;
 using Wyam.Common.Configuration;
 using Wyam.Common.Execution;
 using Wyam.Common.IO;
+using Wyam.Common.Meta;
 using Wyam.Common.Tracing;
 using Wyam.Hosting;
 
@@ -150,12 +151,32 @@ namespace Wyam.App.Commands
                     {
                         Trace.Information("{0} files have changed, re-executing", changedFiles.Count);
 
+                        // Reset caches when an error occurs during the previous preview
+                        object existingResetCacheSetting = null;
+                        bool setResetCacheSetting = false;
+                        if (exitCode == ExitCode.ExecutionError)
+                        {
+                            existingResetCacheSetting = engineManager.Engine.Settings.GetValueOrDefault(Keys.ResetCache);
+                            setResetCacheSetting = true;
+                            engineManager.Engine.Settings[Keys.ResetCache] = true;
+                        }
+
                         // If there was an execution error due to reload, keep previewing but clear the cache
                         exitCode = await engineManager.ExecuteAsync(_serviceProvider)
                             ? ExitCode.Normal
                             : ExitCode.ExecutionError;
 
-                        // TODO: Clear the cache when an error occurs during preview
+                        // Reset the reset cache setting after removing it
+                        if (setResetCacheSetting)
+                        {
+                            if (existingResetCacheSetting == null)
+                            {
+                                engineManager.Engine.Settings.Remove(Keys.ResetCache);
+                            }
+                            {
+                                engineManager.Engine.Settings[Keys.ResetCache] = existingResetCacheSetting;
+                            }
+                        }
 
                         await previewServer.TriggerReloadAsync();
                     }

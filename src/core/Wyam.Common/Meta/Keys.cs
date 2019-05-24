@@ -369,5 +369,26 @@ namespace Wyam.Common.Meta
         /// </summary>
         /// <type><see cref="FilePath"/></type>
         public const string RedirectFrom = nameof(RedirectFrom);
+
+        /// <summary>
+        /// Entirely disables cache modules, both during runtime and the persistent cache.
+        /// </summary>
+        public const string DisableCache = nameof(DisableCache);
+
+        /// <summary>
+        /// Resets the cache when set (you generally won't set this as an initial setting, otherwise
+        /// the cache will always be reinitialized.
+        /// </summary>
+        public const string ResetCache = nameof(ResetCache);
+
+        /// <summary>
+        /// Disables cache persistence and won't read from or write to it.
+        /// </summary>
+        public const string DisablePersistentCache = nameof(DisablePersistentCache);
+
+        /// <summary>
+        /// Won't read from the persistent cache at startup but will write to it on shutdown.
+        /// </summary>
+        public const string ResetPersistentCache = nameof(ResetPersistentCache);
     }
 }

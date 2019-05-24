@@ -7,6 +7,7 @@ using Wyam.Common;
 using Wyam.Common.Documents;
 using Wyam.Common.Execution;
 using Wyam.Common.IO;
+using Wyam.Common.Meta;
 using Wyam.Common.Modules;
 using Wyam.Common.Tracing;
 
@@ -29,6 +30,11 @@ namespace Wyam.Core.Modules.Control
 
         public void Dispose()
         {
+            ResetCache();
+        }
+
+        private void ResetCache()
+        {
             // Dipose any documents we've been holding on to
             if (_cache != null)
             {
@@ -43,6 +49,19 @@ namespace Wyam.Core.Modules.Control
         /// <inheritdoc />
         public override async Task<IEnumerable<IDocument>> ExecuteAsync(IReadOnlyList<IDocument> inputs, IExecutionContext context)
         {
+            // If we're disabling the cache, clear any existing entries and just execute children
+            if (context.Settings.Bool(Keys.DisableCache))
+            {
+                ResetCache();
+                return await context.ExecuteAsync(Children, inputs);
+            }
+
+            // If we're reseting the cache, reset it but then continue
+            if (context.Settings.Bool(Keys.ResetCache))
+            {
+                ResetCache();
+            }
+
             List<IDocument> misses = new List<IDocument>();
             List<IDocument> outputs = new List<IDocument>();
 
