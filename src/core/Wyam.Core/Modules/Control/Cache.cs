@@ -10,10 +10,27 @@ using Wyam.Common.IO;
 using Wyam.Common.Meta;
 using Wyam.Common.Modules;
 using Wyam.Common.Tracing;
+using Wyam.Core.Modules.Metadata;
 
 namespace Wyam.Core.Modules.Control
 {
-    // Should not contain modules that aggregate documents like Tree - put those after the cacheable operation
+    /// <summary>
+    /// Caches documents between executions.
+    /// </summary>
+    /// <remarks>
+    /// This module will execute child modules and cache the output documents. On following
+    /// executions, the cached documents will be output if the input documents (as well as
+    /// any other specified documents) match the original inputs (as defined by a hash of
+    /// the document content and metadata). Using this module can greatly improve performance
+    /// on re-execution after making changes in preview mode. In general, caching works best
+    /// when there is a one-to-one relationship between input and output documents. Modules
+    /// that aggregate documents into groups such as <see cref="Tree"/> should not be used as
+    /// child modules of the cache module. Instead they should appear after the cache module
+    /// and operate on the cached outputs.
+    /// </remarks>
+    /// <metadata cref="Keys.DisableCache" usage="Input" />
+    /// <metadata cref="Keys.ResetCache" usage="Input" />
+    /// <category>Control</category>
     public class Cache : ContainerModule, IDisposable
     {
         private Dictionary<FilePath, CacheEntry> _cache = null;

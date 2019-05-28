@@ -63,7 +63,7 @@ namespace Wyam.Sass
                 : parentFilePath;
 
             // Find the requested file by first combining with the parent
-            FilePath filePath = parentRelativePath.Directory.CombineFile(requestedFilePath);
+            FilePath filePath = parentRelativePath.ChangeFileName(requestedFilePath);
             string scss = await GetFileVariationsAsync(filePath, requestedFilePath);
             if (scss != null)
             {
@@ -102,7 +102,7 @@ namespace Wyam.Sass
                 // ...and with underscore prefix (if not already)
                 if (!extensionPath.FileName.FullPath.StartsWith("_"))
                 {
-                    extensionPath = extensionPath.Directory.CombineFile("_" + extensionPath.FileName.FullPath);
+                    extensionPath = extensionPath.ChangeFileName("_" + extensionPath.FileName.FullPath);
                     scss = await GetFileAsync(extensionPath, requestedFilePath);
                     if (scss != null)
                     {
@@ -114,7 +114,7 @@ namespace Wyam.Sass
             // ...with underscore prefix (if not already)
             if (!filePath.FileName.FullPath.StartsWith("_"))
             {
-                filePath = filePath.Directory.CombineFile("_" + filePath.FileName.FullPath);
+                filePath = filePath.ChangeFileName("_" + filePath.FileName.FullPath);
                 scss = await GetFileAsync(filePath, requestedFilePath);
                 if (scss != null)
                 {

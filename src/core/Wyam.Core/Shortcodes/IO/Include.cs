@@ -36,7 +36,7 @@ namespace Wyam.Core.Shortcodes.IO
             IFile includedFile = null;
             if (includedPath.IsRelative && _sourcePath != null)
             {
-                includedFile = await context.FileSystem.GetFileAsync(_sourcePath.Directory.CombineFile(includedPath));
+                includedFile = await context.FileSystem.GetFileAsync(_sourcePath.ChangeFileName(includedPath));
             }
 
             // If that didn't work, try relative to the input folder

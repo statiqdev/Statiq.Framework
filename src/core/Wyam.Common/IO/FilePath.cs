@@ -175,6 +175,13 @@ namespace Wyam.Common.IO
             new FilePath(FileProvider, System.IO.Path.ChangeExtension(FullPath, extension));
 
         /// <summary>
+        /// Changes the file name of the path by combining the specified path with the <see cref="Directory"/>.
+        /// </summary>
+        /// <param name="filePath">The path to combine with the <see cref="Directory"/>.</param>
+        /// <returns>A new path with the specified path replacing the current file name.</returns>
+        public FilePath ChangeFileName(FilePath filePath) => Directory.CombineFile(filePath);
+
+        /// <summary>
         /// Appends a file extension to the path.
         /// </summary>
         /// <param name="extension">The extension.</param>

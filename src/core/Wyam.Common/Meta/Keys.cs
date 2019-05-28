@@ -82,129 +82,28 @@ namespace Wyam.Common.Meta
         /// <type><see cref="string"/> or <see cref="CultureInfo"/></type>
         public const string DateTimeDisplayCulture = nameof(DateTimeDisplayCulture);
 
-        // ReadFile/WriteFiles/CopyFiles
+        // Destination
 
         /// <summary>
-        /// The absolute root search path without any nested directories
-        /// (I.e., the path that was searched, and possibly descended, for the given pattern).
-        /// </summary>
-        /// <type><see cref="DirectoryPath"/></type>
-        public const string SourceFileRoot = nameof(SourceFileRoot);
-
-        /// <summary>
-        /// The name of the original file without extension.
-        /// </summary>
-        /// <type><see cref="FilePath"/></type>
-        public const string SourceFileBase = nameof(SourceFileBase);
-
-        /// <summary>
-        /// The extension of the original file (including the ".").
+        /// The extension to use when setting the destination of a document.
         /// </summary>
         /// <type><see cref="string"/></type>
-        public const string SourceFileExt = nameof(SourceFileExt);
+        public const string DestinationExtension = nameof(DestinationExtension);
 
         /// <summary>
-        /// The file name of the original file with extension.
-        /// </summary>
-        /// <type><see cref="FilePath"/></type>
-        public const string SourceFileName = nameof(SourceFileName);
-
-        /// <summary>
-        /// The absolute path to the folder of the original file.
-        /// </summary>
-        /// <type><see cref="DirectoryPath"/></type>
-        public const string SourceFileDir = nameof(SourceFileDir);
-
-        /// <summary>
-        /// The absolute path to the original file.
-        /// </summary>
-        /// <type><see cref="FilePath"/></type>
-        public const string SourceFilePath = nameof(SourceFilePath);
-
-        /// <summary>
-        /// The absolute path to the original file without the file extension.
-        /// </summary>
-        /// <type><see cref="FilePath"/></type>
-        public const string SourceFilePathBase = nameof(SourceFilePathBase);
-
-        /// <summary>
-        /// The path to the file relative to the input folder. This metadata
-        /// value is used when generating links to the document.
-        /// </summary>
-        /// <type><see cref="FilePath"/></type>
-        public const string RelativeFilePath = nameof(RelativeFilePath);
-
-        /// <summary>
-        /// The path to the file relative to the input folder without extension.
-        /// </summary>
-        /// <type><see cref="FilePath"/></type>
-        public const string RelativeFilePathBase = nameof(RelativeFilePathBase);
-
-        /// <summary>
-        /// The path to the folder containing the file relative to the input folder.
-        /// </summary>
-        /// <type><see cref="DirectoryPath"/></type>
-        public const string RelativeFileDir = nameof(RelativeFileDir);
-
-        /// <summary>
-        /// The file name without any extension. Equivalent
-        /// to <c>Path.GetFileNameWithoutExtension(DestinationFilePath)</c>.
-        /// </summary>
-        /// <type><see cref="FilePath"/></type>
-        public const string DestinationFileBase = nameof(DestinationFileBase);
-
-        /// <summary>
-        /// The extension of the file. Equivalent
-        /// to <c>Path.GetExtension(DestinationFilePath)</c>.
-        /// </summary>
-        /// <type><see cref="string"/></type>
-        public const string DestinationFileExt = nameof(DestinationFileExt);
-
-        /// <summary>
-        /// The full file name. Equivalent
-        /// to <c>Path.GetFileName(DestinationFilePath)</c>.
+        /// The file name to use when setting the destination of a document.
+        /// The destination will be set to the given file name at the same
+        /// relative path.
         /// </summary>
         /// <type><see cref="FilePath"/></type>
         public const string DestinationFileName = nameof(DestinationFileName);
 
         /// <summary>
-        /// The full absolute directory of the file.
-        /// Equivalent to <c>Path.GetDirectoryName(DestinationFilePath)</c>.
-        /// </summary>
-        /// <type><see cref="DirectoryPath"/></type>
-        public const string DestinationFileDir = nameof(DestinationFileDir);
-
-        /// <summary>
-        /// The full absolute path (including file name)
-        /// of the destination file.
+        /// The path to use when setting the destination of a document.
+        /// The specified path can be either relative to the output path or absolute.
         /// </summary>
         /// <type><see cref="FilePath"/></type>
-        public const string DestinationFilePath = nameof(DestinationFilePath);
-
-        /// <summary>
-        /// The full absolute path (including file name)
-        /// of the destination file without the file extension.
-        /// </summary>
-        /// <type><see cref="FilePath"/></type>
-        public const string DestinationFilePathBase = nameof(DestinationFilePathBase);
-
-        /// <summary>
-        /// The extension to use when writing the file.
-        /// </summary>
-        /// <type><see cref="string"/></type>
-        public const string WriteExtension = nameof(WriteExtension);
-
-        /// <summary>
-        /// The file name to use when writing the file.
-        /// </summary>
-        /// <type><see cref="FilePath"/></type>
-        public const string WriteFileName = nameof(WriteFileName);
-
-        /// <summary>
-        /// The path to use when writing the file.
-        /// </summary>
-        /// <type><see cref="FilePath"/></type>
-        public const string WritePath = nameof(WritePath);
+        public const string DestinationPath = nameof(DestinationPath);
 
         // Paginate
 
@@ -380,15 +279,5 @@ namespace Wyam.Common.Meta
         /// the cache will always be reinitialized.
         /// </summary>
         public const string ResetCache = nameof(ResetCache);
-
-        /// <summary>
-        /// Disables cache persistence and won't read from or write to it.
-        /// </summary>
-        public const string DisablePersistentCache = nameof(DisablePersistentCache);
-
-        /// <summary>
-        /// Won't read from the persistent cache at startup but will write to it on shutdown.
-        /// </summary>
-        public const string ResetPersistentCache = nameof(ResetPersistentCache);
     }
 }

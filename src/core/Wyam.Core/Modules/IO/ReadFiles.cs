@@ -17,22 +17,13 @@ namespace Wyam.Core.Modules.IO
     /// Reads the content of files from the file system into the content of new documents.
     /// </summary>
     /// <remarks>
-    /// For each output document, several metadata values are set with information about the file. This module will
-    /// be executed once and input documents will be ignored if search patterns are specified. Otherwise, if a delegate
+    /// This module will be executed once and input documents will be ignored if search patterns are specified. Otherwise, if a delegate
     /// is specified, the module will be executed once per input document and the resulting output documents will be
     /// aggregated. In either case, the input documents will not be returned as output of this module. If you want to add
     /// additional files to a current pipeline, you should enclose your ReadFiles modules with <see cref="Concat"/>.
+    /// The document destination will be set to the relative path of the file (so that <see cref="WriteFiles"/> will write it
+    /// to the same relative path in the output folder).
     /// </remarks>
-    /// <metadata cref="Keys.SourceFileRoot" usage="Output" />
-    /// <metadata cref="Keys.SourceFileBase" usage="Output" />
-    /// <metadata cref="Keys.SourceFileExt" usage="Output" />
-    /// <metadata cref="Keys.SourceFileName" usage="Output" />
-    /// <metadata cref="Keys.SourceFileDir" usage="Output" />
-    /// <metadata cref="Keys.SourceFilePath" usage="Output" />
-    /// <metadata cref="Keys.SourceFilePathBase" usage="Output" />
-    /// <metadata cref="Keys.RelativeFilePath" usage="Output" />
-    /// <metadata cref="Keys.RelativeFilePathBase" usage="Output" />
-    /// <metadata cref="Keys.RelativeFileDir" usage="Output" />
     /// <category>Input/Output</category>
     public class ReadFiles : IModule, IAsNewDocuments
     {
@@ -95,25 +86,7 @@ namespace Wyam.Core.Modules.IO
                         input,
                         file.Path,
                         relativePath,
-                        new MetadataItems
-                        {
-                            { Keys.SourceFileRoot, inputPath ?? file.Path.Directory },
-                            { Keys.SourceFileBase, fileNameWithoutExtension },
-                            { Keys.SourceFileExt, file.Path.Extension },
-                            { Keys.SourceFileName, file.Path.FileName },
-                            { Keys.SourceFileDir, file.Path.Directory },
-                            { Keys.SourceFilePath, file.Path },
-                            {
-                                Keys.SourceFilePathBase, fileNameWithoutExtension == null
-                                    ? null : file.Path.Directory.CombineFile(file.Path.FileNameWithoutExtension)
-                            },
-                            { Keys.RelativeFilePath, relativePath },
-                            {
-                                Keys.RelativeFilePathBase, fileNameWithoutExtension == null
-                                    ? null : relativePath.Directory.CombineFile(file.Path.FileNameWithoutExtension)
-                            },
-                            { Keys.RelativeFileDir, relativePath.Directory }
-                        },
+                        null,
                         await context.GetContentProviderAsync(file));
                 });
             }

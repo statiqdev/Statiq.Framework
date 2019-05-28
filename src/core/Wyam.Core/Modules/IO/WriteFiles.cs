@@ -19,125 +19,18 @@ namespace Wyam.Core.Modules.IO
     /// Writes the content of each input document to the file system.
     /// </summary>
     /// <remarks>
-    /// If the metadata keys <c>WriteFileName</c> (which requires <c>RelativeFileDir</c> to be
-    /// set, usually by the ReadFiles module), <c>WriteExtension</c> (which
-    /// requires <c>RelativeFilePath</c> to be set, usually by the <see cref="ReadFiles"/> module)
-    /// or <c>WritePath</c> are set on an input document, that value will be used instead
-    /// of what's specified in the module. For example, if you have a bunch
-    /// of Razor .cshtml files that need to be rendered to .html files but one of them
-    /// should be output as a .xml file instead, define the <c>WriteExtension</c> metadata value
-    /// in the front matter of the page.
+    /// Writes files to the location specified by <see cref="IDocument.Destination"/>.
+    /// If the destination path is relative, the document will be written to the output
+    /// folder at the relative location. If the destination path is absolute, the document
+    /// will be written to the absolute location. Use the <see cref="Destination"/> module
+    /// to set the document destination prior to using this module.
     /// </remarks>
-    /// <metadata cref="Keys.RelativeFilePath" usage="Input">
-    /// Used in combination with <see cref="Keys.WriteExtension"/> to determine an
-    /// alternate location to write the file.
-    /// </metadata>
-    /// <metadata cref="Keys.RelativeFileDir" usage="Input">
-    /// Used in combination with <see cref="Keys.WriteFileName"/> to determine an
-    /// alternate location to write the file.
-    /// </metadata>
-    /// <metadata cref="Keys.WriteExtension" usage="Input" />
-    /// <metadata cref="Keys.WriteFileName" usage="Input" />
-    /// <metadata cref="Keys.WritePath" usage="Input" />
-    /// <metadata cref="Keys.WritePath" usage="Output">
-    /// The write path is output if the module is in metadata-only mode so that following
-    /// executions of the <see cref="WriteFiles"/> module will write the document to the
-    /// calculated output path.
-    /// </metadata>
-    /// <metadata cref="Keys.RelativeFilePath" usage="Output" />
-    /// <metadata cref="Keys.RelativeFilePathBase" usage="Output" />
-    /// <metadata cref="Keys.RelativeFileDir" usage="Output" />
-    /// <metadata cref="Keys.DestinationFileBase" usage="Output" />
-    /// <metadata cref="Keys.DestinationFileExt" usage="Output" />
-    /// <metadata cref="Keys.DestinationFileName" usage="Output" />
-    /// <metadata cref="Keys.DestinationFileDir" usage="Output" />
-    /// <metadata cref="Keys.DestinationFilePath" usage="Output" />
-    /// <metadata cref="Keys.DestinationFilePathBase" usage="Output" />
     /// <category>Input/Output</category>
     public class WriteFiles : IModule
     {
-        private readonly DocumentConfig<FilePath> _path;
-        private readonly bool _warnOnWriteMetadata;
-        private bool _useWriteMetadata = true;
         private bool _ignoreEmptyContent = true;
         private bool _append;
         private DocumentConfig<bool> _predicate = true;
-        private bool _onlyMetadata = false;
-
-        /// <summary>
-        /// Uses a delegate to describe where to write the content of each document.
-        /// The output of the function should be either a full path to the disk
-        /// location (including file name) or a path relative to the output folder.
-        /// </summary>
-        /// <param name="path">A delegate that returns a <see cref="FilePath"/> with the desired path.</param>
-        public WriteFiles(DocumentConfig<FilePath> path)
-        {
-            _path = path ?? throw new ArgumentNullException(nameof(path));
-            _warnOnWriteMetadata = true;
-        }
-
-        /// <summary>
-        /// Writes the document content to disk with the specified extension with the same
-        /// base file name and relative path as the input file. This requires metadata
-        /// for <c>RelativeFilePath</c> to be set (which is done by default by the <see cref="ReadFiles"/> module).
-        /// </summary>
-        /// <param name="extension">The extension to use for writing the file.</param>
-        public WriteFiles(string extension)
-        {
-            if (extension == null)
-            {
-                throw new ArgumentNullException(nameof(extension));
-            }
-
-            _path = Config.FromDocument(doc =>
-            {
-                FilePath fileRelative = doc.FilePath(Keys.RelativeFilePath);
-                return fileRelative?.ChangeExtension(extension);
-            });
-            _warnOnWriteMetadata = true;
-        }
-
-        /// <summary>
-        /// Writes the document content to disk with the same file name and relative path
-        /// as the input file. This requires metadata for <c>RelativeFilePath</c> to be set,
-        /// which is done by the <see cref="ReadFiles"/> module or can be set manually.
-        /// </summary>
-        public WriteFiles()
-        {
-            _path = Config.FromDocument(doc => doc.FilePath(Keys.RelativeFilePath));
-        }
-
-        /// <summary>
-        /// Indicates that only metadata should be added to the document and a file should not
-        /// actually be written to the file system. This is useful for preprocessing documents
-        /// so they appear in a pipeline with the correct write metadata, while actually
-        /// writing them later with a second <see cref="WriteFiles"/> module invocation.
-        /// Only the following metadata values are written when this flag is turned on:
-        /// <c>WritePath</c>, <c>RelativeFilePath</c>, <c>RelativeFilePathBase</c>,
-        /// and <c>RelativeFileDir</c>. The <c>Destination...</c> metadata values are
-        /// not added to the document when only setting metadata..
-        /// </summary>
-        /// <param name="onlyMetadata">If set to <c>true</c>, metadata will be added
-        /// to the input document(s) without actually writing them to the file system.</param>
-        /// <returns>The current module instance.</returns>
-        public WriteFiles OnlyMetadata(bool onlyMetadata = true)
-        {
-            _onlyMetadata = onlyMetadata;
-            return this;
-        }
-
-        /// <summary>
-        /// By default the metadata values for <c>WritePath</c>, <c>WriteFileName</c>, and <c>WriteExtension</c>
-        /// are checked and used first, even if a delegate is specified in the constructor. This method can be used
-        /// to turn off the default behavior and always rely on the delegate for obtaining the write location.
-        /// </summary>
-        /// <param name="useWriteMetadata">If set to <c>false</c>, metadata of the input document will not be used.</param>
-        /// <returns>The current module instance.</returns>
-        public WriteFiles UseWriteMetadata(bool useWriteMetadata = true)
-        {
-            _useWriteMetadata = useWriteMetadata;
-            return this;
-        }
 
         /// <summary>
         /// Ignores documents with empty content, which is the default behavior.
@@ -180,67 +73,11 @@ namespace Wyam.Core.Modules.IO
         /// <returns><c>true</c> if the input document should be processed, <c>false</c> otherwise.</returns>
         protected Task<bool> ShouldProcessAsync(IDocument input, IExecutionContext context) => _predicate.GetValueAsync(input, context);
 
-        /// <summary>
-        /// Gets the output path of the input document.
-        /// </summary>
-        /// <param name="input">The input document.</param>
-        /// <param name="context">The execution context.</param>
-        /// <returns>The outout path.</returns>
-        protected async Task<FilePath> GetOutputPathAsync(IDocument input, IExecutionContext context)
-        {
-            FilePath path = null;
-
-            if (_useWriteMetadata)
-            {
-                string metadataKey = null;
-
-                // WritePath
-                path = input.FilePath(Keys.WritePath);
-                if (path != null)
-                {
-                    metadataKey = Keys.WritePath;
-                }
-
-                // WriteFileName
-                DirectoryPath relativeFileDir = input.DirectoryPath(Keys.RelativeFileDir);
-                FilePath writeFileName = input.FilePath(Keys.WriteFileName);
-                if (path == null
-                    && relativeFileDir != null
-                    && writeFileName != null)
-                {
-                    metadataKey = Keys.WriteFileName;
-                    path = relativeFileDir.CombineFile(writeFileName);
-                }
-
-                // WriteExtension
-                FilePath relativeFilePath = input.FilePath(Keys.RelativeFilePath);
-                string writeExtension = input.String(Keys.WriteExtension);
-                if (path == null
-                    && relativeFilePath != null
-                    && !string.IsNullOrWhiteSpace(writeExtension))
-                {
-                    metadataKey = Keys.WriteExtension;
-                    path = relativeFilePath.ChangeExtension(writeExtension);
-                }
-
-                // Warn if needed
-                if (metadataKey != null && _warnOnWriteMetadata)
-                {
-                    Trace.Warning($"An extension or delegate was specified for the WriteFiles module, but the metadata key {metadataKey} took precedence for the document with source {input.SourceString()}"
-                        + $" resulting in an output path of {path}. Call UseWriteMetadata(false) to prevent the special write metadata keys from overriding WriteFiles constructor values.");
-                }
-            }
-
-            // Fallback to the default behavior function
-            return path ?? await _path.GetValueAsync(input, context);
-        }
-
         /// <inheritdoc />
         public virtual async Task<IEnumerable<IDocument>> ExecuteAsync(IReadOnlyList<IDocument> inputs, IExecutionContext context)
         {
             // Get the output file path for each file in sequence and set up action chains
             // Value = input source string(s) (for reporting a warning if not appending), write action
-            ConcurrentBag<IDocument> outputs = new ConcurrentBag<IDocument>();
             Dictionary<FilePath, Tuple<List<string>, Func<Task>>> writesBySource = new Dictionary<FilePath, Tuple<List<string>, Func<Task>>>();
             await context.ForEachAsync(inputs, WriteFilesAsync);
 
@@ -257,20 +94,14 @@ namespace Wyam.Core.Modules.IO
             // Run the write actions in parallel
             await writesBySource.Values.ParallelForEachAsync(async x => await x.Item2());
 
-            // Aggregate and return the results
-            return outputs;
+            // Return the input documents
+            return inputs;
 
             async Task WriteFilesAsync(IDocument input)
             {
-                FilePath outputPath = await ShouldProcessAsync(input, context) ? await GetOutputPathAsync(input, context) : null;
-                if (outputPath == null)
+                if (await ShouldProcessAsync(input, context) && input.Destination != null)
                 {
-                    // No output path or failed the predicate so just pass the input document through
-                    outputs.Add(input);
-                }
-                else
-                {
-                    if (writesBySource.TryGetValue(outputPath, out Tuple<List<string>, Func<Task>> value))
+                    if (writesBySource.TryGetValue(input.Destination, out Tuple<List<string>, Func<Task>> value))
                     {
                         // This output source was already seen so nest the previous write action in a new one
                         value.Item1.Add(input.SourceString());
@@ -281,21 +112,21 @@ namespace Wyam.Core.Modules.IO
                             {
                                 // Complete the previous write, then do the next one
                                 await previousWrite();
-                                outputs.Add(await WriteAsync(input, context, outputPath));
+                                await WriteAsync(input, context, input.Destination);
                             });
                     }
                     else
                     {
                         value = new Tuple<List<string>, Func<Task>>(
                             new List<string> { input.SourceString() },
-                            async () => outputs.Add(await WriteAsync(input, context, outputPath)));
+                            async () => await WriteAsync(input, context, input.Destination));
                     }
-                    writesBySource[outputPath] = value;
+                    writesBySource[input.Destination] = value;
                 }
             }
         }
 
-        private async Task<IDocument> WriteAsync(IDocument input, IExecutionContext context, FilePath outputPath)
+        private async Task WriteAsync(IDocument input, IExecutionContext context, FilePath outputPath)
         {
             IFile outputFile = await context.FileSystem.GetOutputFileAsync(outputPath);
             if (outputFile != null)
@@ -304,56 +135,20 @@ namespace Wyam.Core.Modules.IO
                 {
                     if (_ignoreEmptyContent && inputStream.Length == 0)
                     {
-                        return input;
+                        return;
                     }
-                    if (!_onlyMetadata)
+
+                    using (Stream outputStream = _append ? await outputFile.OpenAppendAsync() : await outputFile.OpenWriteAsync())
                     {
-                        using (Stream outputStream = _append ? await outputFile.OpenAppendAsync() : await outputFile.OpenWriteAsync())
+                        await inputStream.CopyToAsync(outputStream);
+                        if (!_append)
                         {
-                            await inputStream.CopyToAsync(outputStream);
-                            if (!_append)
-                            {
-                                outputStream.SetLength(inputStream.Length);
-                            }
+                            outputStream.SetLength(inputStream.Length);
                         }
                     }
                 }
-                Trace.Verbose($"{(_onlyMetadata ? "Set metadata for" : "Wrote")} file {outputFile.Path.FullPath} from {input.SourceString()}");
-                FilePath relativePath = context.FileSystem.GetOutputPath().GetRelativePath(outputFile.Path) ?? outputFile.Path.FileName;
-                FilePath fileNameWithoutExtension = outputFile.Path.FileNameWithoutExtension;
-                MetadataItems metadata = new MetadataItems
-                {
-                    { Keys.RelativeFilePath, relativePath },
-                    {
-                        Keys.RelativeFilePathBase, fileNameWithoutExtension == null
-                            ? null : relativePath.Directory.CombineFile(outputFile.Path.FileNameWithoutExtension)
-                    },
-                    { Keys.RelativeFileDir, relativePath.Directory }
-                };
-                if (_onlyMetadata)
-                {
-                    metadata.Add(Keys.WritePath, outputPath);
-                }
-                else
-                {
-                    metadata.AddRange(new MetadataItems
-                    {
-                        { Keys.DestinationFileBase, fileNameWithoutExtension },
-                        { Keys.DestinationFileExt, outputFile.Path.Extension },
-                        { Keys.DestinationFileName, outputFile.Path.FileName },
-                        { Keys.DestinationFileDir, outputFile.Path.Directory },
-                        { Keys.DestinationFilePath, outputFile.Path },
-                        {
-                            Keys.DestinationFilePathBase, fileNameWithoutExtension == null
-                                ? null : outputFile.Path.Directory.CombineFile(outputFile.Path.FileNameWithoutExtension)
-                        },
-                    });
-                }
-                return _onlyMetadata
-                    ? context.GetDocument(input, metadata)
-                    : context.GetDocument(input, metadata, await context.GetContentProviderAsync(outputFile));
+                Trace.Verbose($"Wrote file {outputFile.Path.FullPath} from {input.SourceString()}");
             }
-            return input;
         }
     }
 }

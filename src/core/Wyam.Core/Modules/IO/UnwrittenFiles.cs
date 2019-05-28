@@ -27,37 +27,6 @@ namespace Wyam.Core.Modules.IO
     /// <category>Input/Output</category>
     public class UnwrittenFiles : WriteFiles
     {
-        /// <summary>
-        /// Uses a delegate to describe where to write the content of each document.
-        /// The output of the function should be either a full path to the disk
-        /// location (including file name) or a path relative to the output folder.
-        /// </summary>
-        /// <param name="path">A delegate that returns the desired path.</param>
-        public UnwrittenFiles(DocumentConfig<FilePath> path)
-            : base(path)
-        {
-        }
-
-        /// <summary>
-        /// Writes the document content to disk with the specified extension with the same
-        /// base file name and relative path as the input file. This requires metadata
-        /// for <c>RelativeFilePath</c> to be set (which is done by default by the <see cref="ReadFiles"/> module).
-        /// </summary>
-        /// <param name="extension">The extension to use for writing the file.</param>
-        public UnwrittenFiles(string extension)
-            : base(extension)
-        {
-        }
-
-        /// <summary>
-        /// Writes the document content to disk with the same file name and relative path
-        /// as the input file. This requires metadata for <c>RelativeFilePath</c> to be set
-        /// (which is done by default by the <see cref="ReadFiles"/> module).
-        /// </summary>
-        public UnwrittenFiles()
-        {
-        }
-
         /// <inheritdoc />
         public override async Task<IEnumerable<IDocument>> ExecuteAsync(IReadOnlyList<IDocument> inputs, IExecutionContext context)
         {
@@ -67,10 +36,9 @@ namespace Wyam.Core.Modules.IO
 
             async Task<IDocument> SelectUnwrittenFilesAsync(IDocument input)
             {
-                if (await ShouldProcessAsync(input, context))
+                if (await ShouldProcessAsync(input, context) && input.Destination != null)
                 {
-                    FilePath outputPath = await GetOutputPathAsync(input, context);
-                    IFile output = outputPath != null ? await context.FileSystem.GetOutputFileAsync(outputPath) : null;
+                    IFile output = await context.FileSystem.GetOutputFileAsync(input.Destination);
                     if (output != null)
                     {
                         IDirectory outputDirectory = await output.GetDirectoryAsync();

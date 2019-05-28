@@ -54,7 +54,7 @@ namespace Wyam.Less
                 // ...and with underscore prefix (if not already)
                 if (!extensionPath.FileName.FullPath.StartsWith("_"))
                 {
-                    extensionPath = extensionPath.Directory.CombineFile("_" + extensionPath.FileName.FullPath);
+                    extensionPath = extensionPath.ChangeFileName("_" + extensionPath.FileName.FullPath);
                     extensionFile = await _fileSystem.GetInputFileAsync(extensionPath);
                     if (await extensionFile.GetExistsAsync())
                     {
@@ -66,7 +66,7 @@ namespace Wyam.Less
             // ...with underscore prefix (if not already)
             if (!filePath.FileName.FullPath.StartsWith("_"))
             {
-                filePath = filePath.Directory.CombineFile("_" + filePath.FileName.FullPath);
+                filePath = filePath.ChangeFileName("_" + filePath.FileName.FullPath);
                 IFile underscoreFile = await _fileSystem.GetInputFileAsync(filePath);
                 if (await underscoreFile.GetExistsAsync())
                 {
