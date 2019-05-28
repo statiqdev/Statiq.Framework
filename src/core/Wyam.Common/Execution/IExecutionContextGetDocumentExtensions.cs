@@ -20,11 +20,31 @@ namespace Wyam.Common.Execution
             this IExecutionContext context,
             FilePath source,
             FilePath destination,
-            IEnumerable<KeyValuePair<string, object>> metadata = null,
+            IEnumerable<KeyValuePair<string, object>> metadata,
             IContentProvider contentProvider = null) =>
             context.GetDocument(
                 null,
                 source,
+                destination,
+                metadata,
+                contentProvider);
+
+        /// <summary>
+        /// Gets a new document with the specified source and destination, content, and metadata.
+        /// </summary>
+        /// <param name="context">The current execution context.</param>
+        /// <param name="destination">The destination.</param>
+        /// <param name="metadata">The metadata items.</param>
+        /// <param name="contentProvider">The content provider.</param>
+        /// <returns>The new document.</returns>
+        public static IDocument GetDocument(
+            this IExecutionContext context,
+            FilePath destination,
+            IEnumerable<KeyValuePair<string, object>> metadata,
+            IContentProvider contentProvider = null) =>
+            context.GetDocument(
+                null,
+                null,
                 destination,
                 metadata,
                 contentProvider);
@@ -45,6 +65,24 @@ namespace Wyam.Common.Execution
             context.GetDocument(
                 null,
                 source,
+                destination,
+                null,
+                contentProvider);
+
+        /// <summary>
+        /// Gets a new document with the specified source and destination, content, and metadata.
+        /// </summary>
+        /// <param name="context">The current execution context.</param>
+        /// <param name="destination">The destination.</param>
+        /// <param name="contentProvider">The content provider.</param>
+        /// <returns>The new document.</returns>
+        public static IDocument GetDocument(
+            this IExecutionContext context,
+            FilePath destination,
+            IContentProvider contentProvider = null) =>
+            context.GetDocument(
+                null,
+                null,
                 destination,
                 null,
                 contentProvider);
@@ -97,13 +135,57 @@ namespace Wyam.Common.Execution
             this IExecutionContext context,
             IDocument originalDocument,
             FilePath destination,
-            IEnumerable<KeyValuePair<string, object>> metadata = null,
+            IEnumerable<KeyValuePair<string, object>> metadata,
             IContentProvider contentProvider = null) =>
             context.GetDocument(
                 originalDocument,
                 null,
                 destination,
                 metadata,
+                contentProvider);
+
+        /// <summary>
+        /// Clones the original document with a new destination, new content, and additional metadata (all existing metadata is retained)
+        /// or gets a new document if the original document is null or <c>AsNewDocuments()</c> was called on the module.
+        /// </summary>
+        /// <param name="context">The current execution context.</param>
+        /// <param name="originalDocument">The original document.</param>
+        /// <param name="source">The source (if the original document contains a source, then this is ignored and the original document's source is used instead).</param>
+        /// <param name="destination">The destination.</param>
+        /// <param name="contentProvider">The content provider.</param>
+        /// <returns>The cloned or new document.</returns>
+        public static IDocument GetDocument(
+            this IExecutionContext context,
+            IDocument originalDocument,
+            FilePath source,
+            FilePath destination,
+            IContentProvider contentProvider = null) =>
+            context.GetDocument(
+                originalDocument,
+                source,
+                destination,
+                null,
+                contentProvider);
+
+        /// <summary>
+        /// Clones the original document with a new destination, new content, and additional metadata (all existing metadata is retained)
+        /// or gets a new document if the original document is null or <c>AsNewDocuments()</c> was called on the module.
+        /// </summary>
+        /// <param name="context">The current execution context.</param>
+        /// <param name="originalDocument">The original document.</param>
+        /// <param name="destination">The destination.</param>
+        /// <param name="contentProvider">The content provider.</param>
+        /// <returns>The cloned or new document.</returns>
+        public static IDocument GetDocument(
+            this IExecutionContext context,
+            IDocument originalDocument,
+            FilePath destination,
+            IContentProvider contentProvider = null) =>
+            context.GetDocument(
+                originalDocument,
+                null,
+                destination,
+                null,
                 contentProvider);
 
         /// <summary>

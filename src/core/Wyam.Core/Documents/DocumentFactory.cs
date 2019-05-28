@@ -44,7 +44,7 @@ namespace Wyam.Core.Documents
 
             newDocument = newDocument ?? new Document((Document)originalDocument, version, source, destination, contentProvider, metadata);
 
-            Trace.Verbose($"Created document with ID {newDocument.Id}.{newDocument.Version}{(originalDocument == null ? string.Empty : " from version " + originalDocument.Version)} and source {newDocument.SourceString()}");
+            Trace.Verbose($"Created document with ID {newDocument.Id}.{newDocument.Version}{(originalDocument == null ? string.Empty : " from version " + originalDocument.Version)} and source {newDocument.Source.ToDisplayString()}");
 
             return newDocument;
         }

@@ -33,8 +33,6 @@ namespace Wyam.Core.Modules.Contents
     /// you specify. It does not output the original input files.</para>
     /// </remarks>
     /// <metadata cref="Keys.RedirectFrom" usage="Input" />
-    /// <metadata cref="Keys.RelativeFilePath" usage="Output" />
-    /// <metadata cref="Keys.WritePath" usage="Output" />
     /// <category>Content</category>
     public class Redirect : IModule
     {
@@ -124,11 +122,7 @@ namespace Wyam.Core.Modules.Contents
                     {
                         outputs.Add(
                             context.GetDocument(
-                                new MetadataItems
-                                {
-                                    { Keys.RelativeFilePath, additionalOutput.Key },
-                                    { Keys.WritePath, additionalOutput.Key }
-                                },
+                                additionalOutput.Key,
                                 await context.GetContentProviderAsync(content)));
                     }
                 }
@@ -147,7 +141,7 @@ namespace Wyam.Core.Modules.Contents
                         // Make sure it's a relative path
                         if (!fromPath.IsRelative)
                         {
-                            Trace.Warning($"The redirect path must be relative for document {input.SourceString()}: {fromPath}");
+                            Trace.Warning($"The redirect path must be relative for document {input.Source.ToDisplayString()}: {fromPath}");
                             continue;
                         }
 
@@ -166,11 +160,7 @@ namespace Wyam.Core.Modules.Contents
                         {
                             metaRefreshDocuments.Add(
                                 context.GetDocument(
-                                    metadata: new MetadataItems
-                                    {
-                                            { Keys.RelativeFilePath, outputPath },
-                                            { Keys.WritePath, outputPath }
-                                    },
+                                    outputPath,
                                     await context.GetContentProviderAsync($@"
 <!doctype html>
 <html>    

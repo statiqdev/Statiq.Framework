@@ -127,10 +127,9 @@ namespace Wyam.Xmp
                  if (xmpDirectory == null)
                  {
                      // Try to read sidecarfile
-                     FilePath sourceFilePath = input.FilePath(Keys.SourceFilePath);
-                     if (sourceFilePath != null)
+                     if (input.Source != null)
                      {
-                         IFile sidecarFile = await context.FileSystem.GetInputFileAsync(sourceFilePath.FullPath + ".xmp");
+                         IFile sidecarFile = await context.FileSystem.GetInputFileAsync(input.Source.AppendExtension(".xmp"));
                          if (await sidecarFile.GetExistsAsync())
                          {
                              MemoryStream xmpBytes = new MemoryStream();
@@ -146,7 +145,7 @@ namespace Wyam.Xmp
                  {
                      if (_toSearch.Any(y => y.IsMandatory))
                      {
-                         Trace.Warning($"File doe not contain Metadata or sidecar file ({input.SourceString()})");
+                         Trace.Warning($"File doe not contain Metadata or sidecar file ({input.Source.ToDisplayString()})");
                          if (_skipElementOnMissingData)
                          {
                              return null;
@@ -169,7 +168,7 @@ namespace Wyam.Xmp
                          {
                              if (search.IsMandatory)
                              {
-                                 Trace.Error($"Metadata does not Contain {search.XmpPath} ({input.SourceString()})");
+                                 Trace.Error($"Metadata does not Contain {search.XmpPath} ({input.Source.ToDisplayString()})");
                                  if (_skipElementOnMissingData)
                                  {
                                      return null;
@@ -180,7 +179,7 @@ namespace Wyam.Xmp
                          object value = GetObjectFromMetadata(metadata, hierarchicalDirectory);
                          if (newValues.ContainsKey(search.MetadataKey) && _errorOnDoubleKeys)
                          {
-                             Trace.Error($"This Module tries to write same Key multiple times {search.MetadataKey} ({input.SourceString()})");
+                             Trace.Error($"This Module tries to write same Key multiple times {search.MetadataKey} ({input.Source.ToDisplayString()})");
                          }
                          else
                          {

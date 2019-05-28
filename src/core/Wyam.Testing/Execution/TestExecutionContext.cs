@@ -117,7 +117,7 @@ namespace Wyam.Testing.Execution
             IDocument originalDocument,
             FilePath source,
             FilePath destination,
-            IEnumerable<KeyValuePair<string, object>> metadata = null,
+            IEnumerable<KeyValuePair<string, object>> metadata,
             IContentProvider contentProvider = null)
         {
             TestDocument document = originalDocument == null

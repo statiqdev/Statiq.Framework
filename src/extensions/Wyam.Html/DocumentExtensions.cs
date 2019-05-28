@@ -35,7 +35,7 @@ namespace Wyam.Html
             }
             catch (Exception ex)
             {
-                Trace.Warning("Exception while parsing HTML for {0}: {1}", document.SourceString(), ex.Message);
+                Trace.Warning("Exception while parsing HTML for {0}: {1}", document.Source.ToDisplayString(), ex.Message);
             }
             return null;
         }

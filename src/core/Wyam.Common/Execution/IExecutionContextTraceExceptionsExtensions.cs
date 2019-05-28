@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Wyam.Common.Documents;
 using Wyam.Common.Tracing;
+using Wyam.Common.IO;
 
 namespace Wyam.Common.Execution
 {
@@ -28,7 +29,7 @@ namespace Wyam.Common.Execution
             }
             catch (Exception ex)
             {
-                Trace.Error($"Exception while processing document {document?.SourceString() ?? "unknown"} in module {context?.Module?.GetType().Name ?? "unknown"}: {ex.Message}");
+                Trace.Error($"Exception while processing document {document?.Source.ToDisplayString() ?? "unknown"} in module {context?.Module?.GetType().Name ?? "unknown"}: {ex.Message}");
                 throw;
             }
         }
@@ -49,7 +50,7 @@ namespace Wyam.Common.Execution
             }
             catch (Exception ex)
             {
-                Trace.Error($"Exception while processing document {document?.SourceString() ?? "unknown"} in module {context?.Module?.GetType().Name ?? "unknown"}: {ex.Message}");
+                Trace.Error($"Exception while processing document {document?.Source.ToDisplayString() ?? "unknown"} in module {context?.Module?.GetType().Name ?? "unknown"}: {ex.Message}");
                 throw;
             }
         }
@@ -72,7 +73,7 @@ namespace Wyam.Common.Execution
             }
             catch (Exception ex)
             {
-                Trace.Error($"Exception while processing document {document?.SourceString() ?? "unknown"} in module {context?.Module?.GetType().Name ?? "unknown"}: {ex.Message}");
+                Trace.Error($"Exception while processing document {document?.Source.ToDisplayString() ?? "unknown"} in module {context?.Module?.GetType().Name ?? "unknown"}: {ex.Message}");
                 throw;
             }
         }
@@ -95,7 +96,7 @@ namespace Wyam.Common.Execution
             }
             catch (Exception ex)
             {
-                Trace.Error($"Exception while processing document {document?.SourceString() ?? "unknown"} in module {context?.Module?.GetType().Name ?? "unknown"}: {ex.Message}");
+                Trace.Error($"Exception while processing document {document?.Source.ToDisplayString() ?? "unknown"} in module {context?.Module?.GetType().Name ?? "unknown"}: {ex.Message}");
                 throw;
             }
         }

@@ -140,7 +140,7 @@ namespace Wyam.Highlight
                     }
                     catch (Exception ex)
                     {
-                        Trace.Warning("Exception while highlighting source code for {0}: {1}", input.SourceString(), ex.Message);
+                        Trace.Warning("Exception while highlighting source code for {0}: {1}", input.Source.ToDisplayString(), ex.Message);
                         return input;
                     }
                 });

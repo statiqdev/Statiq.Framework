@@ -161,7 +161,7 @@ namespace Wyam.Razor
 
             async Task<IDocument> RenderDocumentAsync(IDocument input)
             {
-                Trace.Verbose("Processing Razor for {0}", input.SourceString());
+                Trace.Verbose("Processing Razor for {0}", input.Source.ToDisplayString());
 
                 Stream contentStream = await context.GetContentStreamAsync();
                 using (Stream inputStream = await input.GetStreamAsync())
@@ -192,7 +192,7 @@ namespace Wyam.Razor
         private async Task<string> GetRelativePathAsync(IDocument document, IExecutionContext context)
         {
             // Use the pre-calculated relative file path if available
-            FilePath relativePath = document.FilePath(Keys.RelativeFilePath);
+            FilePath relativePath = document.Source?.GetRelativePath(context);
             return relativePath != null ? $"/{relativePath.FullPath}" : await GetRelativePathAsync(document.Source, context);
         }
 

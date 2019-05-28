@@ -36,15 +36,6 @@ namespace Wyam.Core.Modules.IO
     /// <metadata cref="Keys.DestinationFileName" usage="Input" />
     /// <metadata cref="Keys.DestinationExtension" usage="Input" />
     /// <category>Input/Output</category>
-    // TODO: test absolute DestinationPath with empty constructor (existing and null destination)
-    // TODO: test relative DestinationPath with empty constructor (existing and null destination)
-    // TODO: test DestinationFileName with empty constructor and existing relative destination
-    // TODO: test DestinationFileName with empty constructor and existing absolute destination
-    // TODO: test DestinationFileName with empty constructor and existing null destination
-    // TODO: test DestinationExtension with empty constructor and existing destination
-    // TODO: test DestinationExtension with empty constructor and null destination (should still be null after)
-    // TODO: tests for extension constructor
-    // TODO: test FilePath.ChangeFileName() (and audit for other uses)
     public class Destination : IModule
     {
         private readonly DocumentConfig<FilePath> _destination;

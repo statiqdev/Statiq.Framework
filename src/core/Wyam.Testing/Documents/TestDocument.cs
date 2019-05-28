@@ -178,9 +178,6 @@ namespace Wyam.Testing.Documents
         public FilePath Destination { get; set; }
 
         /// <inhertdoc />
-        public string SourceString() => Source?.FullPath;
-
-        /// <inhertdoc />
         public IContentProvider ContentProvider { get; set; }
 
         /// <inhertdoc />

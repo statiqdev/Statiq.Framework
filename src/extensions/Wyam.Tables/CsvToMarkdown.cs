@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Wyam.Common.Documents;
 using Wyam.Common.Execution;
+using Wyam.Common.IO;
 using Wyam.Common.Modules;
 using Wyam.Common.Tracing;
 
@@ -89,7 +90,7 @@ namespace Wyam.Tables
                 }
                 catch (Exception e)
                 {
-                    Trace.Error($"An {e} occurred ({input.SourceString()}): {e.Message}");
+                    Trace.Error($"An {e} occurred ({input.Source.ToDisplayString()}): {e.Message}");
                     return null;
                 }
             });

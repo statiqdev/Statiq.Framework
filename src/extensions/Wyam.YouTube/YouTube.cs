@@ -7,6 +7,7 @@ using Google.Apis.Services;
 using Google.Apis.YouTube.v3;
 using Wyam.Common.Documents;
 using Wyam.Common.Execution;
+using Wyam.Common.IO;
 using Wyam.Common.Modules;
 using Wyam.Common.Tracing;
 
@@ -92,14 +93,14 @@ namespace Wyam.YouTube
                 ConcurrentDictionary<string, object> results = new ConcurrentDictionary<string, object>();
                 foreach (KeyValuePair<string, Func<IDocument, IExecutionContext, YouTubeService, object>> request in _requests.AsParallel())
                 {
-                    Trace.Verbose("Submitting {0} YouTube request for {1}", request.Key, input.SourceString());
+                    Trace.Verbose("Submitting {0} YouTube request for {1}", request.Key, input.Source.ToDisplayString());
                     try
                     {
                         results[request.Key] = request.Value(input, context, _youtube);
                     }
                     catch (Exception ex)
                     {
-                        Trace.Warning("Exception while submitting {0} YouTube request for {1}: {2}", request.Key, input.SourceString(), ex.ToString());
+                        Trace.Warning("Exception while submitting {0} YouTube request for {1}: {2}", request.Key, input.Source.ToDisplayString(), ex.ToString());
                     }
                 }
                 return context.GetDocument(input, results);

@@ -3,6 +3,7 @@ using Shouldly;
 using Wyam.Common.Execution;
 using Wyam.Common.Meta;
 using Wyam.Testing;
+using Wyam.Testing.Documents;
 using Wyam.Testing.Execution;
 using Wyam.Testing.Meta;
 
@@ -28,13 +29,13 @@ namespace Wyam.Common.Tests.Execution
                 // Given
                 TestExecutionContext context = new TestExecutionContext();
                 context.Settings[Keys.Host] = "domain.com";
-                TestMetadata metadata = new TestMetadata
+                TestDocument document = new TestDocument
                 {
                     { "Path", value }
                 };
 
                 // When
-                string result = context.GetLink(metadata, "Path", includeHost);
+                string result = context.GetLink(document, "Path", includeHost);
 
                 // Then
                 result.ShouldBe(expected);

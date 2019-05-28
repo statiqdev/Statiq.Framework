@@ -21,9 +21,6 @@ namespace Wyam.Core.Modules.Control
     /// in more than one output document, multiple clones of the input document will be made for each one.
     /// The output document content is set to the original input document content.
     /// </remarks>
-    /// <metadata cref="Keys.SourceFilePath" usage="Input">
-    /// Used as the default location at which to search for sidecar files for a given document.
-    /// </metadata>
     /// <category>Control</category>
     public class Sidecar : ContainerModule
     {
@@ -74,7 +71,7 @@ namespace Wyam.Core.Modules.Control
                 throw new ArgumentException("Value cannot be null or empty.", nameof(extension));
             }
 
-            _sidecarPath = Config.FromDocument(doc => doc.FilePath(Keys.SourceFilePath)?.AppendExtension(extension));
+            _sidecarPath = Config.FromDocument(doc => doc.Source?.AppendExtension(extension));
         }
 
         /// <summary>
@@ -109,7 +106,7 @@ namespace Wyam.Core.Modules.Control
                 FilePath sidecarPath = await _sidecarPath.GetValueAsync(input, context);
                 if (sidecarPath != null)
                 {
-                    IFile sidecarFile = await context.FileSystem.GetInputFileAsync(sidecarPath.FullPath);
+                    IFile sidecarFile = await context.FileSystem.GetInputFileAsync(sidecarPath);
                     if (await sidecarFile.GetExistsAsync())
                     {
                         string sidecarContent = await sidecarFile.ReadAllTextAsync();

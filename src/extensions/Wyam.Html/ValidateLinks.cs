@@ -154,25 +154,25 @@ namespace Wyam.Html
                 // Links
                 foreach (IElement element in htmlDocument.Links)
                 {
-                    AddOrUpdateLink(element.GetAttribute("href"), element, input.SourceString(), links);
+                    AddOrUpdateLink(element.GetAttribute("href"), element, input.Source.ToDisplayString(), links);
                 }
 
                 // Link element
                 foreach (IElement element in htmlDocument.GetElementsByTagName("link").Where(x => x.HasAttribute("href")))
                 {
-                    AddOrUpdateLink(element.GetAttribute("href"), element, input.SourceString(), links);
+                    AddOrUpdateLink(element.GetAttribute("href"), element, input.Source.ToDisplayString(), links);
                 }
 
                 // Images
                 foreach (IHtmlImageElement element in htmlDocument.Images)
                 {
-                    AddOrUpdateLink(element.GetAttribute("src"), element, input.SourceString(), links);
+                    AddOrUpdateLink(element.GetAttribute("src"), element, input.Source.ToDisplayString(), links);
                 }
 
                 // Scripts
                 foreach (IHtmlScriptElement element in htmlDocument.Scripts)
                 {
-                    AddOrUpdateLink(element.Source, element, input.SourceString(), links);
+                    AddOrUpdateLink(element.Source, element, input.Source.ToDisplayString(), links);
                 }
             }
         }

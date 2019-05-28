@@ -32,19 +32,16 @@ namespace Wyam.Less
     /// );
     /// </code>
     /// </example>
-    /// <metadata cref="Keys.RelativeFilePath" usage="Input" />
-    /// <metadata cref="Keys.RelativeFilePath" usage="Output">Relative path to the output CSS (or map) file.</metadata>
-    /// <metadata cref="Keys.WritePath" usage="Output" />
     /// <category>Templates</category>
     public class Less : IModule
     {
-        private DocumentConfig<FilePath> _inputPath = Config.FromDocument(doc => doc.FilePath(Keys.RelativeFilePath));
+        private DocumentConfig<FilePath> _inputPath = Config.FromDocument(doc => doc.Source);
 
         /// <summary>
         /// Specifies a delegate that should be used to get the input path for each
         /// input document. This allows the Sass processor to search the right
-        /// file system and paths for include files. By default, the <see cref="Keys.RelativeFilePath"/>
-        /// metadata value is used for the input document path.
+        /// file system and paths for include files. By default, the value of
+        /// <see cref="IDocument.Source"/> is used for the input document path.
         /// </summary>
         /// <param name="inputPath">A delegate that should return a <see cref="FilePath"/>.</param>
         /// <returns>The current instance.</returns>
@@ -65,7 +62,7 @@ namespace Wyam.Less
 
             async Task<IDocument> ProcessLessAsync(IDocument input)
             {
-                Trace.Verbose("Processing Less for {0}", input.SourceString());
+                Trace.Verbose("Processing Less for {0}", input.Source.ToDisplayString());
                 ILessEngine engine = engineFactory.GetEngine();
 
                 // TODO: Get rid of RefelectionMagic and this ugly hack as soon as dotless gets better external DI support
@@ -81,19 +78,15 @@ namespace Wyam.Less
                 {
                     engine.CurrentDirectory = string.Empty;
                     path = new FilePath(Path.GetRandomFileName());
-                    Trace.Warning($"No input path found for document {input.SourceString()}, using {path.FileName.FullPath}");
+                    Trace.Warning($"No input path found for document {input.Source.ToDisplayString()}, using {path.FileName.FullPath}");
                 }
                 string content = engine.TransformToCss(await input.GetStringAsync(), path.FileName.FullPath);
 
                 // Process the result
-                FilePath cssPath = path.ChangeExtension("css");
+                FilePath cssPath = path.GetRelativePath(context).ChangeExtension("css");
                 return context.GetDocument(
                     input,
-                    new MetadataItems
-                    {
-                        { Keys.RelativeFilePath, cssPath },
-                        { Keys.WritePath, cssPath }
-                    },
+                    cssPath,
                     await context.GetContentProviderAsync(content));
             }
         }

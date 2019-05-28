@@ -23,10 +23,8 @@ namespace Wyam.Common.IO
         /// <returns>An input file.</returns>
         public static async Task<IFile> GetInputFileAsync(this IReadOnlyFileSystem fileSystem, FilePath path)
         {
-            if (path == null)
-            {
-                throw new ArgumentNullException(nameof(path));
-            }
+            _ = fileSystem ?? throw new ArgumentNullException(nameof(fileSystem));
+            _ = path ?? throw new ArgumentNullException(nameof(path));
 
             if (path.IsRelative)
             {
@@ -93,18 +91,14 @@ namespace Wyam.Common.IO
         /// or <c>null</c> if no input path does.</returns>
         public static async Task<DirectoryPath> GetContainingInputPathAsync(this IReadOnlyFileSystem fileSystem, NormalizedPath path)
         {
-            if (path == null)
-            {
-                throw new ArgumentNullException(nameof(path));
-            }
+            _ = fileSystem ?? throw new ArgumentNullException(nameof(fileSystem));
+            _ = path ?? throw new ArgumentNullException(nameof(path));
+
             if (path.IsAbsolute)
             {
-                return fileSystem.InputPaths
-                    .Reverse()
-                    .Select(x => fileSystem.RootPath.Combine(x))
-                    .FirstOrDefault(x => x.FileProvider == path.FileProvider
-                        && (path.FullPath == x.Collapse().FullPath || path.FullPath.StartsWith(x.Collapse().FullPath + "/")));
+                return fileSystem.GetContainingInputPathForAbsolutePath(path);
             }
+
             if (path is FilePath filePath)
             {
                 IFile file = await fileSystem.GetInputFileAsync(filePath);
@@ -121,7 +115,25 @@ namespace Wyam.Common.IO
                         .WhereAsync(async x => await x.Item2.GetExistsAsync());
                 return existingRootDirectories.Select(x => fileSystem.RootPath.Combine(x.Item1)).FirstOrDefault();
             }
+
             return null;
+        }
+
+        internal static DirectoryPath GetContainingInputPathForAbsolutePath(this IReadOnlyFileSystem fileSystem, NormalizedPath path)
+        {
+            _ = fileSystem ?? throw new ArgumentNullException(nameof(fileSystem));
+            _ = path ?? throw new ArgumentNullException(nameof(path));
+
+            if (!path.IsAbsolute)
+            {
+                throw new ArgumentException("Path must be absolute");
+            }
+
+            return fileSystem.InputPaths
+                .Reverse()
+                .Select(x => fileSystem.RootPath.Combine(x))
+                .FirstOrDefault(x => x.FileProvider == path.FileProvider
+                    && (path.FullPath == x.Collapse().FullPath || path.FullPath.StartsWith(x.Collapse().FullPath + "/")));
         }
 
         /// <summary>
@@ -132,10 +144,8 @@ namespace Wyam.Common.IO
         /// <returns>The output file path.</returns>
         public static FilePath GetOutputPath(this IReadOnlyFileSystem fileSystem, FilePath path)
         {
-            if (path == null)
-            {
-                throw new ArgumentNullException(nameof(path));
-            }
+            _ = fileSystem ?? throw new ArgumentNullException(nameof(fileSystem));
+            _ = path ?? throw new ArgumentNullException(nameof(path));
 
             return fileSystem.RootPath.Combine(fileSystem.OutputPath).CombineFile(path);
         }
@@ -189,10 +199,8 @@ namespace Wyam.Common.IO
         /// <returns>The temp file path.</returns>
         public static FilePath GetTempPath(this IReadOnlyFileSystem fileSystem, FilePath path)
         {
-            if (path == null)
-            {
-                throw new ArgumentNullException(nameof(path));
-            }
+            _ = fileSystem ?? throw new ArgumentNullException(nameof(fileSystem));
+            _ = path ?? throw new ArgumentNullException(nameof(path));
 
             return fileSystem.RootPath.Combine(fileSystem.TempPath).CombineFile(path);
         }
@@ -259,10 +267,8 @@ namespace Wyam.Common.IO
         /// <returns>A root file.</returns>
         public static async Task<IFile> GetRootFileAsync(this IReadOnlyFileSystem fileSystem, FilePath path)
         {
-            if (path == null)
-            {
-                throw new ArgumentNullException(nameof(path));
-            }
+            _ = fileSystem ?? throw new ArgumentNullException(nameof(fileSystem));
+            _ = path ?? throw new ArgumentNullException(nameof(path));
 
             return await fileSystem.GetFileAsync(fileSystem.RootPath.CombineFile(path));
         }
@@ -294,10 +300,8 @@ namespace Wyam.Common.IO
         /// <returns>A file.</returns>
         public static async Task<IFile> GetFileAsync(this IReadOnlyFileSystem fileSystem, FilePath path)
         {
-            if (path == null)
-            {
-                throw new ArgumentNullException(nameof(path));
-            }
+            _ = fileSystem ?? throw new ArgumentNullException(nameof(fileSystem));
+            _ = path ?? throw new ArgumentNullException(nameof(path));
 
             return await fileSystem.GetFileProvider(path).GetFileAsync(path);
         }
@@ -312,10 +316,8 @@ namespace Wyam.Common.IO
         /// <returns>A directory.</returns>
         public static async Task<IDirectory> GetDirectoryAsync(this IReadOnlyFileSystem fileSystem, DirectoryPath path)
         {
-            if (path == null)
-            {
-                throw new ArgumentNullException(nameof(path));
-            }
+            _ = fileSystem ?? throw new ArgumentNullException(nameof(fileSystem));
+            _ = path ?? throw new ArgumentNullException(nameof(path));
 
             return await fileSystem.GetFileProvider(path).GetDirectoryAsync(path);
         }
@@ -385,10 +387,8 @@ namespace Wyam.Common.IO
         /// </returns>
         public static async Task<IEnumerable<IFile>> GetFilesAsync(this IReadOnlyFileSystem fileSystem, IDirectory directory, IEnumerable<string> patterns)
         {
-            if (directory == null)
-            {
-                throw new ArgumentNullException(nameof(directory));
-            }
+            _ = fileSystem ?? throw new ArgumentNullException(nameof(fileSystem));
+            _ = directory ?? throw new ArgumentNullException(nameof(directory));
 
             IEnumerable<Tuple<IDirectory, string>> directoryPatterns = await patterns
                 .Where(x => x != null)

@@ -22,7 +22,7 @@ namespace Wyam.Common.Documents
     {
         /// <summary>
         /// An identifier for the document meant to reflect the source of the data. These should be unique (such as a file name).
-        /// This property is always an absolute path.
+        /// This property is always an absolute path. If you want to get a relative path, use <see cref="FilePath.GetRelativePath(Execution.IExecutionContext)"/>.
         /// </summary>
         /// <value>
         /// The source of the document, or <c>null</c> if the document doesn't have a source.
@@ -33,12 +33,6 @@ namespace Wyam.Common.Documents
         /// The destination of the document. Can be either relative or absolute.
         /// </summary>
         FilePath Destination { get; }
-
-        /// <summary>
-        /// Gets a string representation of the source that's guaranteed non-null, used primarily for trace messages.
-        /// </summary>
-        /// <returns>A string representation of the source.</returns>
-        string SourceString();
 
         /// <summary>An identifier that is generated when the document is created and stays the same after cloning.</summary>
         string Id { get; }

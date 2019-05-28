@@ -8,6 +8,7 @@ using Wyam.Common.Modules;
 using Wyam.Common.Execution;
 using Wyam.Common.Tracing;
 using Wyam.Common;
+using Wyam.Common.IO;
 
 namespace Wyam.GitHub
 {
@@ -140,14 +141,14 @@ namespace Wyam.GitHub
                 ConcurrentDictionary<string, object> results = new ConcurrentDictionary<string, object>();
                 await _requests.ParallelForEachAsync(async request =>
                 {
-                    Trace.Verbose("Submitting {0} GitHub request for {1}", request.Key, input.SourceString());
+                    Trace.Verbose("Submitting {0} GitHub request for {1}", request.Key, input.Source.ToDisplayString());
                     try
                     {
                         results[request.Key] = await request.Value(input, context, github);
                     }
                     catch (Exception ex)
                     {
-                        Trace.Warning("Exception while submitting {0} GitHub request for {1}: {2}", request.Key, input.SourceString(), ex.ToString());
+                        Trace.Warning("Exception while submitting {0} GitHub request for {1}: {2}", request.Key, input.Source.ToDisplayString(), ex.ToString());
                     }
                 });
                 return context.GetDocument(input, results);

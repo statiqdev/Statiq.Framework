@@ -1,4 +1,5 @@
 ﻿using Wyam.Common.Configuration;
+using Wyam.Common.Documents;
 using Wyam.Common.IO;
 using Wyam.Common.Meta;
 using Wyam.Common.Util;
@@ -26,54 +27,61 @@ namespace Wyam.Common.Execution
                 false);
 
         /// <summary>
-        /// Gets a link for the specified metadata (typically a document) using the
-        /// "RelativeFilePath" metadata value and the default settings from the
-        /// <see cref="IReadOnlySettings" />. This version should be used inside modules to ensure
+        /// Gets a link for the specified document using the document destination.
+        /// This version should be used inside modules to ensure
         /// consistent link generation. Note that you can optionally include the host or not depending
         /// on if you want to generate host-specific links. By default, the host is not included so that
         /// sites work the same on any server including the preview server.
         /// </summary>
         /// <param name="context">The execution context.</param>
-        /// <param name="metadata">The metadata or document to generate a link for.</param>
+        /// <param name="document">The document to generate a link for.</param>
         /// <param name="includeHost">If set to <c>true</c> the host configured in the output settings will
         /// be included in the link, otherwise the host will be omitted and only the root path will be included (default).</param>
         /// <returns>
         /// A string representation of the path suitable for a web link.
         /// </returns>
-        public static string GetLink(this IExecutionContext context, IMetadata metadata, bool includeHost = false) =>
-            GetLink(context, metadata, Keys.RelativeFilePath, includeHost);
+        public static string GetLink(this IExecutionContext context, IDocument document, bool includeHost = false) =>
+            GetLink(context, document, null, includeHost);
 
         /// <summary>
-        /// Gets a link for the specified metadata (typically a document) using the
-        /// specified metadata value (by default, "RelativeFilePath") and the default settings from the
+        /// Gets a link for the specified document using the document destination
+        /// or the specified metadata value and the default settings from the
         /// <see cref="IReadOnlySettings" />. This version should be used inside modules to ensure
         /// consistent link generation. Note that you can optionally include the host or not depending
         /// on if you want to generate host-specific links. By default, the host is not included so that
         /// sites work the same on any server including the preview server.
         /// </summary>
         /// <param name="context">The execution context.</param>
-        /// <param name="metadata">The metadata or document to generate a link for.</param>
-        /// <param name="key">The key at which a <see cref="FilePath"/> can be found for generating the link.</param>
+        /// <param name="document">The document to generate a link for.</param>
+        /// <param name="key">
+        /// The key at which a <see cref="FilePath"/> can be found for generating the link.
+        /// If <c>null</c>, <see cref="IDocument.Destination"/> will be used.
+        /// </param>
         /// <param name="includeHost">If set to <c>true</c> the host configured in the output settings will
         /// be included in the link, otherwise the host will be omitted and only the root path will be included (default).</param>
         /// <returns>
         /// A string representation of the path suitable for a web link.
         /// </returns>
-        public static string GetLink(this IExecutionContext context, IMetadata metadata, string key, bool includeHost = false)
+        public static string GetLink(this IExecutionContext context, IDocument document, string key, bool includeHost = false)
         {
-            if (metadata?.ContainsKey(key) == true)
+            FilePath filePath = null;
+            if (key == null)
+            {
+                filePath = document.Destination;
+            }
+            else if (document?.ContainsKey(key) == true)
             {
                 // Return the actual URI if it's absolute
-                if (LinkGenerator.TryGetAbsoluteHttpUri(metadata.String(key), out string absoluteUri))
+                if (LinkGenerator.TryGetAbsoluteHttpUri(document.String(key), out string absoluteUri))
                 {
                     return absoluteUri;
                 }
 
                 // Otherwise try to process the value as a file path
-                FilePath filePath = metadata.FilePath(key);
-                return filePath != null ? GetLink(context, filePath, includeHost) : null;
+                filePath = document.FilePath(key);
             }
-            return null;
+
+            return filePath != null ? GetLink(context, filePath, includeHost) : null;
         }
 
         /// <summary>

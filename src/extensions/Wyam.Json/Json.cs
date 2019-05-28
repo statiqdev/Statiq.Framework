@@ -87,7 +87,7 @@ namespace Wyam.Json
                 }
                 catch (Exception ex)
                 {
-                    Trace.Error("Error processing JSON for {0}: {1}", input.SourceString(), ex.ToString());
+                    Trace.Error("Error processing JSON for {0}: {1}", input.Source.ToDisplayString(), ex.ToString());
                 }
                 return input;
             }

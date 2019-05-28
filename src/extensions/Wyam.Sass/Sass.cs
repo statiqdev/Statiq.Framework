@@ -44,10 +44,6 @@ namespace Wyam.Sass
     /// );
     /// </code>
     /// </example>
-    /// <metadata cref="Keys.SourceFilePath" usage="Input">The default key to use for determining the input document path.</metadata>
-    /// <metadata cref="Keys.RelativeFilePath" usage="Input">If <see cref="Keys.SourceFilePath"/> is unavailable, this is used to guess at the source file path.</metadata>
-    /// <metadata cref="Keys.RelativeFilePath" usage="Output">Relative path to the output CSS (or map) file.</metadata>
-    /// <metadata cref="Keys.WritePath" usage="Output" />
     /// <category>Templates</category>
     public class Sass : IModule
     {
@@ -61,8 +57,8 @@ namespace Wyam.Sass
         /// <summary>
         /// Specifies a delegate that should be used to get the input path for each
         /// input document. This allows the Sass processor to search the right
-        /// file system and paths for include files. By default, the <see cref="Keys.RelativeFilePath"/>
-        /// metadata value is used for the input document path.
+        /// file system and paths for include files. By default, the <see cref="IDocument.Source"/>
+        /// value is used for the input document path.
         /// </summary>
         /// <param name="inputPath">A delegate that should return a <see cref="FilePath"/>.</param>
         /// <returns>The current instance.</returns>
@@ -164,13 +160,13 @@ namespace Wyam.Sass
 
             async Task<IEnumerable<IDocument>> ProcessSassAsync(IDocument input)
             {
-                Trace.Verbose($"Processing Sass for {input.SourceString()}");
+                Trace.Verbose($"Processing Sass for {input.Source.ToDisplayString()}");
 
                 FilePath inputPath = await _inputPath.GetValueAsync(input, context);
                 if (inputPath?.IsAbsolute != true)
                 {
                     inputPath = (await context.FileSystem.GetInputFileAsync(new FilePath(Path.GetRandomFileName()))).Path;
-                    Trace.Warning($"No input path found for document {input.SourceString()}, using {inputPath.FileName.FullPath}");
+                    Trace.Warning($"No input path found for document {input.Source.ToDisplayString()}, using {inputPath.FileName.FullPath}");
                 }
 
                 string content = await input.GetStringAsync();
@@ -198,11 +194,7 @@ namespace Wyam.Sass
                 FilePath cssPath = relativePath.ChangeExtension("css");
                 IDocument cssDocument = context.GetDocument(
                     input,
-                    new MetadataItems
-                    {
-                            { Keys.RelativeFilePath, cssPath },
-                            { Keys.WritePath, cssPath }
-                    },
+                    cssPath,
                     await context.GetContentProviderAsync(result.Css ?? string.Empty));
 
                 // Generate a source map if requested
@@ -211,11 +203,7 @@ namespace Wyam.Sass
                     FilePath sourceMapPath = relativePath.ChangeExtension("map");
                     IDocument sourceMapDocument = context.GetDocument(
                         input,
-                        new MetadataItems
-                        {
-                                { Keys.RelativeFilePath, sourceMapPath },
-                                { Keys.WritePath, sourceMapPath }
-                        },
+                        sourceMapPath,
                         await context.GetContentProviderAsync(result.SourceMap));
                     return new[] { cssDocument, sourceMapDocument };
                 }
@@ -226,17 +214,12 @@ namespace Wyam.Sass
 
         private static async Task<FilePath> DefaultInputPathAsync(IDocument document, IExecutionContext context)
         {
-            FilePath path = document.FilePath(Keys.SourceFilePath);
-            if (path == null)
+            if (document.Source != null)
             {
-                path = document.FilePath(Keys.RelativeFilePath);
-                if (path != null)
-                {
-                    IFile inputFile = await context.FileSystem.GetInputFileAsync(path);
-                    return await inputFile.GetExistsAsync() ? inputFile.Path : null;
-                }
+                IFile inputFile = await context.FileSystem.GetInputFileAsync(document.Source);
+                return await inputFile.GetExistsAsync() ? inputFile.Path : null;
             }
-            return path;
+            return null;
         }
     }
 }

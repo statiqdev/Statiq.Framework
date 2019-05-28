@@ -137,7 +137,7 @@ namespace Wyam.Common.Execution
             IDocument originalDocument,
             FilePath source,
             FilePath destination,
-            IEnumerable<KeyValuePair<string, object>> metadata = null,
+            IEnumerable<KeyValuePair<string, object>> metadata,
             IContentProvider contentProvider = null);
 
         /// <summary>

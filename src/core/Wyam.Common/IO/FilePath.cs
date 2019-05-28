@@ -1,4 +1,7 @@
 ﻿using System;
+using System.Linq;
+using System.Threading.Tasks;
+using Wyam.Common.Execution;
 
 namespace Wyam.Common.IO
 {
@@ -188,10 +191,8 @@ namespace Wyam.Common.IO
         /// <returns>A new <see cref="FilePath"/> with an appended extension.</returns>
         public FilePath AppendExtension(string extension)
         {
-            if (extension == null)
-            {
-                throw new ArgumentNullException(nameof(extension));
-            }
+            _ = extension ?? throw new ArgumentNullException(nameof(extension));
+
             if (!extension.StartsWith(".", StringComparison.OrdinalIgnoreCase))
             {
                 extension = string.Concat(".", extension);
@@ -206,17 +207,12 @@ namespace Wyam.Common.IO
         /// <returns>A new <see cref="FilePath"/> with the specified suffix.</returns>
         public FilePath InsertSuffix(string suffix)
         {
-            if (suffix == null)
-            {
-                throw new ArgumentNullException(nameof(suffix));
-            }
+            _ = suffix ?? throw new ArgumentNullException(nameof(suffix));
 
             int extensionIndex = FullPath.LastIndexOf(".");
-            if (extensionIndex == -1)
-            {
-                return new FilePath(FileProvider, string.Concat(FullPath, suffix));
-            }
-            return new FilePath(FileProvider, string.Concat(FullPath.Substring(0, extensionIndex), suffix, FullPath.Substring(extensionIndex)));
+            return extensionIndex == -1
+                ? new FilePath(FileProvider, string.Concat(FullPath, suffix))
+                : new FilePath(FileProvider, string.Concat(FullPath.Substring(0, extensionIndex), suffix, FullPath.Substring(extensionIndex)));
         }
 
         /// <summary>
@@ -226,10 +222,7 @@ namespace Wyam.Common.IO
         /// <returns>A new <see cref="FilePath"/> with the specified prefix.</returns>
         public FilePath InsertPrefix(string prefix)
         {
-            if (prefix == null)
-            {
-                throw new ArgumentNullException(nameof(prefix));
-            }
+            _ = prefix ?? throw new ArgumentNullException(nameof(prefix));
 
             int nameIndex = FullPath.LastIndexOf("/");
             if (nameIndex == -1)
@@ -246,14 +239,27 @@ namespace Wyam.Common.IO
         public FilePath Collapse() => new FilePath(FileProvider, Collapse(this));
 
         /// <summary>
+        /// Gets path to this file relative to it's containing input directory in the current file system.
+        /// If no input directories contain this file, then the file name is returned.
+        /// </summary>
+        /// <param name="context">The current execution context.</param>
+        /// <returns>A path to this file relative to it's containing input directory in the current file system.</returns>
+        public FilePath GetRelativePath(IExecutionContext context)
+        {
+            if (IsRelative)
+            {
+                return this;
+            }
+
+            return context.FileSystem.GetContainingInputPathForAbsolutePath(this)?.GetRelativePath(this) ?? FileName;
+        }
+
+        /// <summary>
         /// Performs an implicit conversion from <see cref="string"/> to <see cref="FilePath"/>.
         /// </summary>
         /// <param name="path">The path.</param>
         /// <returns>A <see cref="FilePath"/>.</returns>
-        public static implicit operator FilePath(string path)
-        {
-            return FromString(path);
-        }
+        public static implicit operator FilePath(string path) => FromString(path);
 
         /// <summary>
         /// Performs a conversion from <see cref="string"/> to <see cref="FilePath"/>.

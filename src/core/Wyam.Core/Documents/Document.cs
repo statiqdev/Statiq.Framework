@@ -104,8 +104,6 @@ namespace Wyam.Core.Documents
 
         public FilePath Destination { get; }
 
-        public string SourceString() => Source?.ToString() ?? "[unknown source]";
-
         public string Id { get; }
 
         public int Version { get; }
@@ -156,7 +154,7 @@ namespace Wyam.Core.Documents
         {
             CheckDisposed();
 
-            Trace.Verbose($"Disposing document with ID {Id}.{Version} and source {SourceString()}");
+            Trace.Verbose($"Disposing document with ID {Id}.{Version} and source {Source.ToDisplayString()}");
 
             if (_contentProvider != null)
             {
@@ -194,7 +192,7 @@ namespace Wyam.Core.Documents
             {
                 throw new ObjectDisposedException(
                     nameof(Document),
-                    $"Attempted to access disposed document with ID {Id}.{Version} and source {SourceString()}");
+                    $"Attempted to access disposed document with ID {Id}.{Version} and source {Source.ToDisplayString()}");
             }
         }
 

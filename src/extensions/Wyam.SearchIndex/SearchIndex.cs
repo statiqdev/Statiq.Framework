@@ -59,8 +59,6 @@ namespace Wyam.SearchIndex
     /// </code>
     /// </example>
     /// <metadata cref="SearchIndexKeys.SearchIndexItem" usage="Input" />
-    /// <metadata cref="Keys.RelativeFilePath" usage="Output">Relative path to the output search index file.</metadata>
-    /// <metadata cref="Keys.WritePath" usage="Output" />
     /// <category>Content</category>
     public class SearchIndex : IModule
     {
@@ -68,7 +66,7 @@ namespace Wyam.SearchIndex
         private readonly DocumentConfig<ISearchIndexItem> _searchIndexItem;
         private FilePath _stopwordsPath;
         private bool _enableStemming;
-        private FilePath _path = new FilePath("searchIndex.js");
+        private FilePath _destination = new FilePath("searchIndex.js");
         private bool _includeHost = false;
         private Func<StringBuilder, IExecutionContext, string> _script = (builder, _) => builder.ToString();
 
@@ -142,14 +140,14 @@ namespace Wyam.SearchIndex
         }
 
         /// <summary>
-        /// Controls the output path of the result document. If this is specified, the resulting <see cref="FilePath"/>
-        /// will be used to set a <c>WritePath</c> metadata value.
+        /// Controls the output path of the result document (by default the
+        /// destination of the result document is "searchIndex.js").
         /// </summary>
-        /// <param name="path">The path to the output file.</param>
+        /// <param name="destination">The destination path.</param>
         /// <returns>The current module instance.</returns>
-        public SearchIndex WithPath(FilePath path)
+        public SearchIndex WithDestination(FilePath destination)
         {
-            _path = path;
+            _destination = destination;
             return this;
         }
 
@@ -184,22 +182,7 @@ namespace Wyam.SearchIndex
             StringBuilder scriptBuilder = BuildScript(searchIndexItems, stopwords, context);
             string script = _script(scriptBuilder, context);
 
-            // Get the output path
-            MetadataItems metadata = null;
-            if (_path != null)
-            {
-                if (!_path.IsRelative)
-                {
-                    throw new ArgumentException("The output path must be relative");
-                }
-                metadata = new MetadataItems
-                {
-                    { Keys.RelativeFilePath, _path },
-                    { Keys.WritePath, _path }
-                };
-            }
-
-            return new[] { context.GetDocument(metadata, await context.GetContentProviderAsync(script)) };
+            return new[] { context.GetDocument(_destination, await context.GetContentProviderAsync(script)) };
         }
 
         private StringBuilder BuildScript(IList<ISearchIndexItem> searchIndexItems, string[] stopwords, IExecutionContext context)

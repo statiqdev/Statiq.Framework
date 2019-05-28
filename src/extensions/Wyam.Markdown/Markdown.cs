@@ -185,7 +185,7 @@ namespace Wyam.Markdown
                 Trace.Verbose(
                     "Processing Markdown {0} for {1}",
                     string.IsNullOrEmpty(_sourceKey) ? string.Empty : ("in" + _sourceKey),
-                    input.SourceString());
+                    input.Source.ToDisplayString());
 
                 string content;
                 if (string.IsNullOrEmpty(_sourceKey))

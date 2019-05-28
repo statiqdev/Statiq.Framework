@@ -70,7 +70,7 @@ namespace Wyam.Core.Documents
         public FilePath Source => Document.Source;
 
         /// <inheritdoc />
-        public string SourceString() => Document.SourceString();
+        public FilePath Destination => Document.Destination;
 
         /// <inheritdoc />
         public string Id => Document.Id;
