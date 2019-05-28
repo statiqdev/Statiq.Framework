@@ -19,7 +19,6 @@ namespace Wyam.Core.Modules.Metadata
     /// <remarks>
     /// This will split the title at special characters, capitalize first letters, remove extensions, etc.
     /// </remarks>
-    /// <metadata cref="Keys.RelativeFilePath" usage="Input" />
     /// <metadata cref="Keys.Title" usage="Output" />
     /// <category>Metadata</category>
     public class Title : IModule
@@ -106,11 +105,7 @@ namespace Wyam.Core.Modules.Metadata
         /// </summary>
         /// <param name="doc">The document.</param>
         /// <returns>A normalized title.</returns>
-        public static string GetTitle(IDocument doc)
-        {
-            FilePath path = doc.Source ?? doc.FilePath(Keys.RelativeFilePath);
-            return path == null ? null : GetTitle(path);
-        }
+        public static string GetTitle(IDocument doc) => doc.Source == null ? null : GetTitle(doc.Source);
 
         /// <summary>
         /// Gets a normalized title given a file path.
@@ -146,9 +141,7 @@ namespace Wyam.Core.Modules.Metadata
             }
 
             // Capitalize
-            title = CultureInfo.CurrentCulture.TextInfo.ToTitleCase(title);
-
-            return title;
+            return CultureInfo.CurrentCulture.TextInfo.ToTitleCase(title);
         }
     }
 }

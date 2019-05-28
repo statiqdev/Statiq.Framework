@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using Wyam.Common.Execution;
 
 namespace Wyam.Common.Meta
@@ -15,20 +16,29 @@ namespace Wyam.Common.Meta
     /// </remarks>
     public class ConvertingDictionary : IMetadataDictionary
     {
-        private readonly Dictionary<string, object> _dictionary;
-
         private readonly IExecutionContext _context;
+
+        private readonly Dictionary<string, object> _dictionary;
 
         public ConvertingDictionary(IExecutionContext context)
         {
-            _dictionary = new Dictionary<string, object>(StringComparer.OrdinalIgnoreCase);
             _context = context ?? throw new ArgumentNullException(nameof(context));
+            _dictionary = new Dictionary<string, object>(StringComparer.OrdinalIgnoreCase);
         }
 
         public ConvertingDictionary(IExecutionContext context, IDictionary<string, object> dictionary)
         {
-            _dictionary = new Dictionary<string, object>(dictionary, StringComparer.OrdinalIgnoreCase);
             _context = context ?? throw new ArgumentNullException(nameof(context));
+            _dictionary = new Dictionary<string, object>(dictionary, StringComparer.OrdinalIgnoreCase);
+        }
+
+        public ConvertingDictionary(IExecutionContext context, IEnumerable<KeyValuePair<string, object>> items)
+            : this(context)
+        {
+            foreach (KeyValuePair<string, object> item in items)
+            {
+                _dictionary[item.Key] = item.Value;
+            }
         }
 
         /// <inheritdoc />

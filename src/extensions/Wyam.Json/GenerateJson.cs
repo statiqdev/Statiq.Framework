@@ -11,6 +11,7 @@ using Wyam.Common.Execution;
 using Wyam.Common.Tracing;
 using Newtonsoft.Json.Serialization;
 using Wyam.Common;
+using Wyam.Common.IO;
 
 namespace Wyam.Json
 {

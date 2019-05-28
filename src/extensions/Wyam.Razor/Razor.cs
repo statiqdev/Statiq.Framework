@@ -7,7 +7,6 @@ using Wyam.Common.Configuration;
 using Wyam.Common.Documents;
 using Wyam.Common.Execution;
 using Wyam.Common.IO;
-using Wyam.Common.Meta;
 using Wyam.Common.Modules;
 using Trace = Wyam.Common.Tracing.Trace;
 
@@ -33,8 +32,6 @@ namespace Wyam.Razor
     /// That said, a lot of functionality does function the same as it does in ASP.NET MVC.
     /// </para>
     /// </remarks>
-    /// <metadata cref="Keys.SourceFileName" usage="Input">
-    /// <metadata cref="Keys.RelativeFilePath" usage="Input" />
     /// Used to determine if the source file name contains the ignore prefix.
     /// </metadata>
     /// <category>Templates</category>
@@ -146,9 +143,7 @@ namespace Wyam.Razor
 
             // Eliminate input documents that we shouldn't process
             List<IDocument> validInputs = inputs
-                .Where(context, x => _ignorePrefix == null
-                    || !x.ContainsKey(Keys.SourceFileName)
-                    || !x.FilePath(Keys.SourceFileName).FullPath.StartsWith(_ignorePrefix))
+                .Where(context, x => _ignorePrefix == null || x.Source?.FileName.FullPath.StartsWith(_ignorePrefix) != true)
                 .ToList();
 
             if (validInputs.Count < inputs.Count)

@@ -17,14 +17,10 @@ namespace Wyam.Core.Modules.IO
     /// Copies the content of files from one path on to another path.
     /// </summary>
     /// <remarks>
-    /// For each output document, several metadata values are set with information about the file.
     /// By default, files are copied from the input folder (or a subfolder) to the same relative
     /// location in the output folder, but this doesn't have to be the case. The output of this module are documents
-    /// with metadata representing the files copied by the module. Note that the input documents are not output by this
-    /// module.
+    /// representing the files copied by the module. Note that the input documents are not output by this module.
     /// </remarks>
-    /// <metadata cref="Keys.SourceFilePath" usage="Output">The full path (including file name) of the source file.</metadata>
-    /// <metadata cref="Keys.DestinationFilePath" usage="Output">The full path (including file name) of the destination file.</metadata>
     /// <category>Input/Output</category>
     public class CopyFiles : IModule, IAsNewDocuments
     {
@@ -127,8 +123,7 @@ namespace Wyam.Core.Modules.IO
                     try
                     {
                         // Get the default destination file
-                        DirectoryPath inputPath = await context.FileSystem.GetContainingInputPathAsync(file.Path);
-                        FilePath relativePath = inputPath?.GetRelativePath(file.Path) ?? file.Path.FileName;
+                        FilePath relativePath = file.Path.GetRelativePath(context);
                         IFile destination = await context.FileSystem.GetOutputFileAsync(relativePath);
 
                         // Calculate an alternate destination if needed
@@ -146,11 +141,6 @@ namespace Wyam.Core.Modules.IO
                             input,
                             file.Path,
                             relativePath,
-                            new MetadataItems
-                            {
-                                { Keys.SourceFilePath, file.Path },
-                                { Keys.DestinationFilePath, destination.Path }
-                            },
                             await context.GetContentProviderAsync(file));
                     }
                     catch (Exception ex)

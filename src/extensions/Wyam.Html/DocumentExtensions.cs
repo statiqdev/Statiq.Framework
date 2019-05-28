@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using AngleSharp.Dom.Html;
 using AngleSharp.Parser.Html;
 using Wyam.Common.Documents;
+using Wyam.Common.IO;
 using Wyam.Common.Tracing;
 
 namespace Wyam.Html

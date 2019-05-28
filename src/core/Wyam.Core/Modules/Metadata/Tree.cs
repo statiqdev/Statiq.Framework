@@ -31,9 +31,6 @@ namespace Wyam.Core.Modules.Metadata
     /// by rerunning this module on all the newly created documents again.
     /// </para>
     /// </remarks>
-    /// <metadata cref="Keys.RelativeFilePath" usage="Input">
-    /// Used to calculate the segments of the document in the tree.
-    /// </metadata>
     /// <metadata cref="Keys.Parent" usage="Output"/>
     /// <metadata cref="Keys.Children" usage="Output"/>
     /// <metadata cref="Keys.PreviousSibling" usage="Output"/>
@@ -65,10 +62,12 @@ namespace Wyam.Core.Modules.Metadata
         public Tree()
         {
             _isRoot = false;
-            _treePath = Config.FromDocument(doc =>
+            _treePath = Config.FromDocument((doc, ctx) =>
             {
-                // Attempt to get the segments first from RelativeFilePath and then from Source
-                List<string> segments = doc.FilePath(Keys.RelativeFilePath)?.Segments.ToList();
+                // Attempt to get the segments from the source path and then the destination path
+                List<string> segments =
+                    doc.Source?.GetRelativePath(ctx)?.Segments.ToList()
+                        ?? doc.Destination?.GetRelativePath(ctx)?.Segments.ToList();
                 if (segments == null)
                 {
                     return null;
@@ -84,8 +83,7 @@ namespace Wyam.Core.Modules.Metadata
             _placeholderFactory = async (treePath, items, context) =>
             {
                 FilePath source = new FilePath(string.Join("/", treePath.Concat(new[] { "index.html" })));
-                items.Add(new MetadataItem(Keys.RelativeFilePath, source));
-                return context.GetDocument((await context.FileSystem.GetInputFileAsync(source)).Path.FullPath, null, items);
+                return context.GetDocument((await context.FileSystem.GetInputFileAsync(source)).Path.FullPath, source, items);
             };
             _sort = (x, y) => Comparer.Default.Compare(
                 x.Get<object[]>(Keys.TreePath)?.LastOrDefault(),

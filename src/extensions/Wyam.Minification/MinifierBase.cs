@@ -6,6 +6,7 @@ using WebMarkupMin.Core;
 using Wyam.Common;
 using Wyam.Common.Documents;
 using Wyam.Common.Execution;
+using Wyam.Common.IO;
 using Wyam.Common.Tracing;
 
 namespace Wyam.Minification

@@ -61,8 +61,6 @@ namespace Wyam.Images
     /// with a "-medium" suffix.
     /// </para>
     /// </remarks>
-    /// <metadata cref="Keys.RelativeFilePath" usage="Input" />
-    /// <metadata cref="Keys.WritePath" usage="Output" />
     /// <category>Content</category>
     public class Image : IModule
     {
@@ -327,7 +325,7 @@ namespace Wyam.Images
 
             async Task<IEnumerable<IDocument>> ProcessImagesAsync(IDocument input)
             {
-                FilePath relativePath = input.FilePath(Keys.RelativeFilePath);
+                FilePath relativePath = input.Source.GetRelativePath(context);
                 return await _operations.SelectManyAsync(async operations =>
                 {
                     FilePath destinationPath = relativePath == null ? null : context.FileSystem.GetOutputPath(relativePath);
@@ -367,16 +365,12 @@ namespace Wyam.Images
                     return await outputActions.SelectAsync(async action =>
                     {
                         FilePath formatPath = action.GetPath(destinationPath) ?? destinationPath;
-                        Trace.Verbose($"{Keys.WritePath}: {formatPath}");
                         MemoryStream outputStream = new MemoryStream();
                         action.Invoke(image, outputStream);
                         outputStream.Seek(0, SeekOrigin.Begin);
                         return context.GetDocument(
                             input,
-                            new MetadataItems
-                            {
-                                { Keys.WritePath, formatPath }
-                            },
+                            formatPath,
                             await context.GetContentProviderAsync(outputStream));
                     });
                 });

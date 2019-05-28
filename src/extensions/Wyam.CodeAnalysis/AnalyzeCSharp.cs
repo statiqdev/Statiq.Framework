@@ -83,25 +83,6 @@ namespace Wyam.CodeAnalysis
     /// <metadata cref="CodeAnalysisKeys.TypeParams" usage="Output"/>
     /// <metadata cref="CodeAnalysisKeys.SeeAlso" usage="Output"/>
     /// <metadata cref="CodeAnalysisKeys.Syntax" usage="Output"/>
-    /// <metadata cref="Keys.RelativeFilePath" usage="Output">
-    /// The same as <see cref="Keys.WritePath"/>.
-    /// This metadata key is available for compatibility with other modules.
-    /// </metadata>
-    /// <metadata cref="Keys.RelativeFilePathBase" usage="Output">
-    /// The same as <see cref="Keys.WritePath"/> without the file extension.
-    /// This metadata key is available for compatibility with other modules.
-    /// </metadata>
-    /// <metadata cref="Keys.RelativeFileDir" usage="Output">
-    /// The same as the directory of <see cref="Keys.WritePath"/>.
-    /// This metadata key is available for compatibility with other modules.
-    /// </metadata>
-    /// <metadata cref="Keys.WritePath" usage="Output">
-    /// A write path is generated for each symbol during code analysis and serves several purposes.First, it's
-    /// used to automatically create hyperlinks for references in XML documentation comments.It can also be used
-    /// for generating inbound links from other modules or pipelines to a given symbol. Because the WriteFiles module
-    /// will check for any WritePath metadata values when outputting documents, this metadata also makes writing
-    /// symbol documents to disk easier (presumably after they've been sent through a templating module).
-    /// </metadata>
     /// <metadata cref="CodeAnalysisKeys.OutputBuildLog" usage="Setting"/>
     /// <category>Metadata</category>
     public class AnalyzeCSharp : IModule
@@ -433,7 +414,7 @@ namespace Wyam.CodeAnalysis
             {
                 // Members output to a page equal to their SymbolId under the folder for their type
                 IDocument containingTypeDocument = metadata.Document(CodeAnalysisKeys.ContainingType);
-                string containingPath = containingTypeDocument.FilePath(Keys.WritePath).FullPath;
+                string containingPath = containingTypeDocument.Destination.FullPath;
                 if (prefix != null && containingPath.StartsWith(prefix.FullPath + "/"))
                 {
                     containingPath = containingPath.Substring(prefix.FullPath.Length + 1);
@@ -502,7 +483,7 @@ namespace Wyam.CodeAnalysis
                     SourceText sourceText = SourceText.From(stream);
                     syntaxTrees.Add(CSharpSyntaxTree.ParseText(
                         sourceText,
-                        path: input.String(Keys.SourceFilePath, string.Empty)));
+                        path: input.Source.FullPath ?? string.Empty));
                 }
             }
         }

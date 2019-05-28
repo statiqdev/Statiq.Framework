@@ -21,8 +21,6 @@ namespace Wyam.CodeAnalysis
     /// This module will be executed once and input documents will be ignored if a search path is
     /// specified. Otherwise, if a delegate is specified the module will be executed once per input
     /// document and the resulting output documents will be aggregated.
-    /// Note that this requires the MSBuild tools to be installed (included with Visual Studio).
-    /// See https://github.com/dotnet/roslyn/issues/212 and https://roslyn.codeplex.com/workitem/218.
     /// </summary>
     public abstract class ReadWorkspace : IModule, IAsNewDocuments
     {
@@ -133,24 +131,12 @@ namespace Wyam.CodeAnalysis
                         async Task<IDocument> GetProjectDocumentAsync(IFile file)
                         {
                             Common.Tracing.Trace.Verbose($"Read file {file.Path.FullPath}");
-                            DirectoryPath inputPath = await context.FileSystem.GetContainingInputPathAsync(file.Path);
-                            FilePath relativePath = inputPath?.GetRelativePath(file.Path) ?? projectFile.Path.Directory.GetRelativePath(file.Path);
                             return context.GetDocument(
                                 file.Path,
                                 null,
                                 new MetadataItems
                                 {
-                                    { CodeAnalysisKeys.AssemblyName, assemblyName },
-                                    { Keys.SourceFileRoot, inputPath ?? file.Path.Directory },
-                                    { Keys.SourceFileBase, file.Path.FileNameWithoutExtension },
-                                    { Keys.SourceFileExt, file.Path.Extension },
-                                    { Keys.SourceFileName, file.Path.FileName },
-                                    { Keys.SourceFileDir, file.Path.Directory },
-                                    { Keys.SourceFilePath, file.Path },
-                                    { Keys.SourceFilePathBase, file.Path.Directory.CombineFile(file.Path.FileNameWithoutExtension) },
-                                    { Keys.RelativeFilePath, relativePath },
-                                    { Keys.RelativeFilePathBase, relativePath.Directory.CombineFile(file.Path.FileNameWithoutExtension) },
-                                    { Keys.RelativeFileDir, relativePath.Directory }
+                                    { CodeAnalysisKeys.AssemblyName, assemblyName }
                                 },
                                 await context.GetContentProviderAsync(file));
                         }

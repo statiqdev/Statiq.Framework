@@ -34,8 +34,6 @@ namespace Wyam.Feeds
     /// <metadata cref="FeedKeys.Published" usage="Input"/>
     /// <metadata cref="FeedKeys.Updated" usage="Input"/>
     /// <metadata cref="FeedKeys.Content" usage="Input"/>
-    /// <metadata cref="Keys.RelativeFilePath" usage="Output">Relative path to the output feed file.</metadata>
-    /// <metadata cref="Keys.WritePath" usage="Output" />
     /// <category>Content</category>
     public class GenerateFeeds : IModule
     {
@@ -462,11 +460,7 @@ namespace Wyam.Feeds
             Stream contentStream = await context.GetContentStreamAsync();
             FeedSerializer.SerializeXml(feedType, feed, contentStream);
             return context.GetDocument(
-                new MetadataItems
-                {
-                    new MetadataItem(Keys.RelativeFilePath, path),
-                    new MetadataItem(Keys.WritePath, path)
-                },
+                path,
                 await context.GetContentProviderAsync(contentStream));
         }
     }

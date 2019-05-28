@@ -9,6 +9,7 @@ using AngleSharp.Parser.Html;
 using Wyam.Common;
 using Wyam.Common.Configuration;
 using Wyam.Common.Execution;
+using Wyam.Common.IO;
 using Wyam.Common.Modules;
 using Wyam.Common.Tracing;
 

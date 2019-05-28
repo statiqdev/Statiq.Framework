@@ -9,6 +9,7 @@ using Wyam.Common.Modules;
 using Wyam.Common.Execution;
 using Wyam.Common.Tracing;
 using Wyam.Common;
+using Wyam.Common.IO;
 
 namespace Wyam.Json
 {

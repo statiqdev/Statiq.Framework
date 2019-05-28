@@ -410,34 +410,20 @@ namespace Wyam.CodeAnalysis.Analysis
                 new MetadataItem(CodeAnalysisKeys.OriginalDefinition, DocumentFor(GetOriginalSymbolDefinition(symbol)))
             });
 
-            // Add metadata that's specific to initially-processed symbols
-            if (!_finished)
-            {
-                items.AddRange(new[]
-                {
-                    new MetadataItem(Keys.WritePath, x => _writePath(x), true),
-                    new MetadataItem(Keys.RelativeFilePath, x => x.FilePath(Keys.WritePath)),
-                    new MetadataItem(Keys.RelativeFilePathBase, x =>
-                    {
-                        FilePath writePath = x.FilePath(Keys.WritePath);
-                        return writePath.Directory.CombineFile(writePath.FileNameWithoutExtension);
-                    }),
-                    new MetadataItem(Keys.RelativeFileDir, x => x.FilePath(Keys.WritePath).Directory)
-                });
-            }
-
             // XML Documentation
             if (xmlDocumentation && (!_finished || _docsForImplicitSymbols))
             {
                 AddXmlDocumentation(symbol, items);
             }
 
-            // Create the document and add it to caches
-            IDocument document = _symbolToDocument.GetOrAdd(
-                symbol,
-                _ => _context.GetDocument(new FilePath((Uri)null, symbol.ToDisplayString(), PathKind.Absolute), null, items));
+            // Add a destination for initially-processed symbols
+            // Create a converting dictionary from the metadata items for use by the write path delegate to deal with metadata delegates
+            FilePath destination = _finished ? null : _writePath(new ConvertingDictionary(_context, items));
 
-            return document;
+            // Create the document and add it to caches
+            return _symbolToDocument.GetOrAdd(
+                symbol,
+                _ => _context.GetDocument(new FilePath((Uri)null, symbol.ToDisplayString(), PathKind.Absolute), destination, items));
         }
 
         private void AddXmlDocumentation(ISymbol symbol, MetadataItems metadata)

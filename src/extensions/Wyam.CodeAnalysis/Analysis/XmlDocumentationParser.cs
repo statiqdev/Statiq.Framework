@@ -495,12 +495,11 @@ namespace Wyam.CodeAnalysis.Analysis
             string cref = element.Attribute("cref")?.Value;
             if (cref != null)
             {
-                IDocument crefDoc;
                 ISymbol crefSymbol = DocumentationCommentId.GetFirstSymbolForDeclarationId(cref, _compilation);
-                if (crefSymbol != null && _symbolToDocument.TryGetValue(crefSymbol, out crefDoc))
+                if (crefSymbol != null && _symbolToDocument.TryGetValue(crefSymbol, out IDocument crefDoc))
                 {
                     string name = crefDoc.String(CodeAnalysisKeys.DisplayName);
-                    link = $"<code><a href=\"{_context.GetLink(crefDoc.FilePath(Keys.WritePath))}\">{WebUtility.HtmlEncode(name)}</a></code>";
+                    link = $"<code><a href=\"{_context.GetLink(crefDoc)}\">{WebUtility.HtmlEncode(name)}</a></code>";
                     return name;
                 }
             }

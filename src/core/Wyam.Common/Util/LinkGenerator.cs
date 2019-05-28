@@ -33,8 +33,7 @@ namespace Wyam.Common.Util
         public static string GetLink(NormalizedPath path, string host, DirectoryPath root, string scheme, string[] hidePages, string[] hideExtensions, bool lowercase)
         {
             // Remove index pages and extensions if a file path
-            FilePath filePath = path as FilePath;
-            if (filePath != null)
+            if (path is FilePath filePath)
             {
                 if (hidePages != null && filePath.FullPath != "/"
                     && hidePages.Where(x => x != null).Select(x => x.EndsWith(".") ? x : x + ".").Any(x => filePath.FileName.FullPath.StartsWith(x)))

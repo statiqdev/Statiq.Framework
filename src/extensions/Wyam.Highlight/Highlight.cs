@@ -10,6 +10,7 @@ using AngleSharp.Parser.Html;
 using Wyam.Common;
 using Wyam.Common.Documents;
 using Wyam.Common.Execution;
+using Wyam.Common.IO;
 using Wyam.Common.JavaScript;
 using Wyam.Common.Modules;
 using Trace = Wyam.Common.Tracing.Trace;
