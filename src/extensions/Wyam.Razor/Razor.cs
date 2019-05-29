@@ -33,7 +33,6 @@ namespace Wyam.Razor
     /// </para>
     /// </remarks>
     /// Used to determine if the source file name contains the ignore prefix.
-    /// </metadata>
     /// <category>Templates</category>
     public class Razor : IModule
     {

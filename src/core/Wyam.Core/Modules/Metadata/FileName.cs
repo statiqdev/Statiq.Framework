@@ -13,17 +13,12 @@ using Wyam.Common.Modules;
 namespace Wyam.Core.Modules.Metadata
 {
     /// <summary>
-    /// Optimizes a specified metadata key as a filename.
+    /// Optimizes a file name.
     /// </summary>
     /// <remarks>
-    /// This module takes the value of the specified metadata key and optimizes it
-    /// for use as a filename by removing reserved characters, white-listing characters,
-    /// etc.
+    /// This module takes the destination file name (or the value of a specified
+    /// metadata key) and optimizes it by removing reserved characters, white-listing characters, etc.
     /// </remarks>
-    /// <metadata cref="Keys.SourceFileName" usage="Input" />
-    /// <metadata cref="Keys.RelativeFileDir" usage="Input" />
-    /// <metadata cref="Keys.WriteFileName" usage="Output" />
-    /// <metadata cref="Keys.WritePath" usage="Output" />
     /// <category>Metadata</category>
     public class FileName : IModule
     {
@@ -38,125 +33,52 @@ namespace Wyam.Core.Modules.Metadata
 
         private static readonly Regex FileNameRegex = new Regex("^([a-zA-Z0-9])+$");
 
-        private readonly DocumentConfig<string> _fileName = Config.FromDocument(doc => doc.String(Keys.SourceFileName));
-        private readonly string _outputKey = Keys.WriteFileName;
-        private string _pathOutputKey = Keys.WritePath;  // null for no output path
+        private readonly DocumentConfig<FilePath> _path = Config.FromDocument(doc => doc.Destination);
+        private readonly string _outputKey = null;
 
         /// <summary>
-        /// Sets the metadata key <c>WriteFileName</c> to an optimized version of <c>SourceFileName</c>.
-        /// Also sets the metadata key <c>WritePath</c> to <c>Path.Combine(RelativeFileDir, WriteFileName)</c>.
+        /// Optimizes the destination file name of each input document.
         /// </summary>
         public FileName()
         {
         }
 
         /// <summary>
-        /// Sets the metadata key <c>WriteFileName</c> to an optimized version of the specified input metadata key.
-        /// Also sets the metadata key <c>WritePath</c> to <c>Path.Combine(RelativeFileDir, WriteFileName)</c>.
+        /// Optimizes the file name stored in the given metadata key and stores it back in the same key.
         /// </summary>
-        /// <param name="inputKey">The metadata key to use for the input filename.</param>
-        public FileName(string inputKey)
+        /// <param name="key">The key containing the path to optimize.</param>
+        public FileName(string key)
         {
-            if (inputKey == null)
-            {
-                throw new ArgumentNullException(nameof(inputKey));
-            }
-            if (string.IsNullOrWhiteSpace(inputKey))
-            {
-                throw new ArgumentException(nameof(inputKey));
-            }
-            _fileName = Config.FromDocument(doc => doc.String(inputKey));
+            _ = key ?? throw new ArgumentNullException(nameof(key));
+            _path = Config.FromDocument(doc => doc.FilePath(key));
+            _outputKey = key;
         }
 
         /// <summary>
-        /// Sets the metadata key <c>WriteFileName</c> to an optimized version of the return value of the delegate.
-        /// Also sets the metadata key <c>WritePath</c> to <c>Path.Combine(RelativeFileDir, WriteFileName)</c>.
-        /// </summary>
-        /// <param name="fileName">A delegate that should return a <c>string</c> with the filename to optimize.</param>
-        public FileName(DocumentConfig<string> fileName)
-        {
-            _fileName = fileName ?? throw new ArgumentNullException(nameof(fileName));
-        }
-
-        /// <summary>
-        /// Sets the specified metadata key to an optimized version of the specified input metadata key.
-        /// Does not automatically set the <c>WritePath</c> metadata key.
+        /// Optimizes the file name stored in the given metadata key and stores it at the provided key.
         /// </summary>
         /// <param name="inputKey">The metadata key to use for the input filename.</param>
         /// <param name="outputKey">The metadata key to use for the optimized filename.</param>
         public FileName(string inputKey, string outputKey)
         {
-            if (inputKey == null)
-            {
-                throw new ArgumentNullException(nameof(inputKey));
-            }
-            if (string.IsNullOrWhiteSpace(inputKey))
-            {
-                throw new ArgumentException(nameof(inputKey));
-            }
-            if (outputKey == null)
-            {
-                throw new ArgumentNullException(nameof(outputKey));
-            }
-            if (string.IsNullOrWhiteSpace(outputKey))
-            {
-                throw new ArgumentException(nameof(outputKey));
-            }
-            _fileName = Config.FromDocument(doc => doc.String(inputKey));
+            _ = inputKey ?? throw new ArgumentNullException(nameof(inputKey));
+            _ = outputKey ?? throw new ArgumentNullException(nameof(outputKey));
+
+            _path = Config.FromDocument(doc => doc.FilePath(inputKey));
             _outputKey = outputKey;
         }
 
         /// <summary>
-        /// Sets the specified metadata key to an optimized version of the return value of the delegate.
-        /// Does not automatically set the <c>WritePath</c> metadata key.
+        /// Optimizes the file name in the resulting path and sets the specified metadata key.
         /// </summary>
-        /// <param name="fileName">A delegate that should return a <c>string</c> with the filename to optimize.</param>
+        /// <param name="path">A delegate that should return a <see cref="FilePath"/> to optimize.</param>
         /// <param name="outputKey">The metadata key to use for the optimized filename.</param>
-        public FileName(DocumentConfig<string> fileName, string outputKey)
+        public FileName(DocumentConfig<FilePath> path, string outputKey)
         {
-            if (outputKey == null)
-            {
-                throw new ArgumentNullException(nameof(outputKey));
-            }
-            if (string.IsNullOrWhiteSpace(outputKey))
-            {
-                throw new ArgumentException(nameof(outputKey));
-            }
-            _fileName = fileName ?? throw new ArgumentNullException(nameof(fileName));
+            _ = outputKey ?? throw new ArgumentNullException(outputKey);
+
+            _path = path ?? throw new ArgumentNullException(nameof(path));
             _outputKey = outputKey;
-        }
-
-        /// <summary>
-        /// Indicates whether to set the metadata key <c>WritePath</c> to <c>Path.Combine(RelativeFileDir, WriteFileName)</c>.
-        /// </summary>
-        /// <param name="preservePath">If set to <c>true</c>, the <c>WritePath</c> metadata key is set.</param>
-        /// <returns>The current module instance.</returns>
-        public FileName PreservePath(bool preservePath)
-        {
-            if (!preservePath)
-            {
-                _pathOutputKey = null;
-            }
-            return this;
-        }
-
-        /// <summary>
-        /// Indicates whether to set the specified metadata key to <c>Path.Combine(RelativeFileDir, WriteFileName)</c>.
-        /// </summary>
-        /// <param name="outputKey">The metadata key to set.</param>
-        /// <returns>The current module instance.</returns>
-        public FileName PreservePath(string outputKey)
-        {
-            if (outputKey == null)
-            {
-                throw new ArgumentNullException(nameof(outputKey));
-            }
-            if (string.IsNullOrWhiteSpace(outputKey))
-            {
-                throw new ArgumentException(nameof(outputKey));
-            }
-            _pathOutputKey = outputKey;
-            return this;
         }
 
         /// <summary>
@@ -175,31 +97,29 @@ namespace Wyam.Core.Modules.Metadata
         {
             return await inputs.ParallelSelectAsync(context, async input =>
             {
-                string fileName = await _fileName.GetValueAsync(input, context);
+                FilePath path = await _path.GetValueAsync(input, context);
 
-                if (!string.IsNullOrWhiteSpace(fileName))
+                if (path != null)
                 {
-                    fileName = GetFileName(fileName);
+                    string fileName = GetFileName(path.FileName.FullPath);
                     if (!string.IsNullOrWhiteSpace(fileName))
                     {
-                        FilePath filePath = new FilePath(fileName);
-                        DirectoryPath relativeFileDir = input.DirectoryPath(Keys.RelativeFileDir);
-                        if (!string.IsNullOrWhiteSpace(_pathOutputKey) && relativeFileDir != null)
+                        path = path.ChangeFileName(fileName);
+                        if (string.IsNullOrWhiteSpace(_outputKey))
                         {
+                            // No output key so set the destination
+                            return context.GetDocument(input, path);
+                        }
+                        else
+                        {
+                            // Set the specified output key
                             return context.GetDocument(
                                 input,
                                 new MetadataItems
                                 {
-                                    { _outputKey, filePath },
-                                    { _pathOutputKey, relativeFileDir.CombineFile(filePath) }
+                                    { _outputKey, path }
                                 });
                         }
-                        return context.GetDocument(
-                            input,
-                            new MetadataItems
-                            {
-                                { _outputKey, filePath }
-                            });
                     }
                 }
                 return input;

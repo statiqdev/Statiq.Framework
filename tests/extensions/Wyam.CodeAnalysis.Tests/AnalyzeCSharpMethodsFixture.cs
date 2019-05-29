@@ -151,7 +151,7 @@ namespace Wyam.CodeAnalysis.Tests
                 // Then
                 CollectionAssert.AreEquivalent(
                     new[] { "global/Yellow/66F23CDD.html", "Foo/Red/A94FD382.html" },
-                    results.Where(x => x["Kind"].Equals("Method")).Select(x => ((FilePath)x[Keys.WritePath]).FullPath));
+                    results.Where(x => x["Kind"].Equals("Method")).Select(x => x.Destination.FullPath));
             }
 
             [Test]

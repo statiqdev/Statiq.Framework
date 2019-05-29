@@ -63,13 +63,17 @@ namespace Wyam.App
 
         public PipelineBuilder WithWriteFiles(string extension)
         {
-            _actions.Add(x => x.WriteModules.Add(new WriteFiles(extension)));
+            _actions.Add(x => x.WriteModules.Add(
+                new Destination(extension),
+                new WriteFiles()));
             return this;
         }
 
         public PipelineBuilder WithWriteFiles(DocumentConfig<FilePath> path)
         {
-            _actions.Add(x => x.WriteModules.Add(new WriteFiles(path)));
+            _actions.Add(x => x.WriteModules.Add(
+                new Destination(path),
+                new WriteFiles()));
             return this;
         }
 

@@ -51,10 +51,8 @@ body {
                     FileSystem = fileSystem
                 };
                 TestDocument document = new TestDocument(
-                    new MetadataItems
-                    {
-                        { Keys.RelativeFilePath, new FilePath("assets/test.scss") }
-                    },
+                    new FilePath("/input/assets/test.scss"),
+                    new FilePath("assets/test.scss"),
                     input);
 
                 Sass sass = new Sass().WithCompactOutputStyle();
@@ -64,7 +62,7 @@ body {
 
                 // Then
                 result.Content.ShouldBe(output);
-                result.FilePath(Keys.RelativeFilePath).FullPath.ShouldBe("assets/test.css");
+                result.Destination.FullPath.ShouldBe("assets/test.css");
             }
 
             [Test]
@@ -87,10 +85,8 @@ body {
                     FileSystem = fileSystem
                 };
                 TestDocument document = new TestDocument(
-                    new MetadataItems
-                    {
-                        { Keys.RelativeFilePath, new FilePath("assets/test.scss") }
-                    },
+                    new FilePath("/input/assets/test.scss"),
+                    new FilePath("assets/test.scss"),
                     input);
 
                 Sass sass = new Sass();
@@ -100,7 +96,7 @@ body {
 
                 // Then
                 result.Content.ShouldBeEmpty();
-                result.FilePath(Keys.RelativeFilePath).FullPath.ShouldBe("assets/test.css");
+                result.Destination.FullPath.ShouldBe("assets/test.css");
             }
 
             [Test]
@@ -129,10 +125,8 @@ body {
                     FileSystem = fileSystem
                 };
                 TestDocument document = new TestDocument(
-                    new MetadataItems
-                    {
-                        { Keys.RelativeFilePath, new FilePath("assets/test.scss") }
-                    },
+                    new FilePath("/input/assets/test.scss"),
+                    new FilePath("assets/test.scss"),
                     input);
 
                 Sass sass = new Sass();
@@ -176,10 +170,8 @@ body {
                     FileSystem = fileSystem
                 };
                 TestDocument document = new TestDocument(
-                    new MetadataItems
-                    {
-                        { Keys.RelativeFilePath, new FilePath("assets/test.scss") }
-                    },
+                    new FilePath("/input/assets/test.scss"),
+                    new FilePath("assets/test.scss"),
                     input);
 
                 Sass sass = new Sass().IncludeSourceComments(false).WithCompactOutputStyle();
@@ -189,7 +181,7 @@ body {
 
                 // Then
                 result.Content.ShouldBe(output);
-                result.FilePath(Keys.RelativeFilePath).FullPath.ShouldBe("assets/test.css");
+                result.Destination.FullPath.ShouldBe("assets/test.css");
             }
 
             [Test]
@@ -224,10 +216,8 @@ body {
                     FileSystem = fileSystem
                 };
                 TestDocument document = new TestDocument(
-                    new MetadataItems
-                    {
-                        { Keys.RelativeFilePath, new FilePath("assets/test.scss") }
-                    },
+                    new FilePath("/input/assets/test.scss"),
+                    new FilePath("assets/test.scss"),
                     input);
 
                 Sass sass = new Sass().IncludeSourceComments(false).WithCompactOutputStyle();
@@ -237,7 +227,7 @@ body {
 
                 // Then
                 result.Content.ShouldBe(output);
-                result.FilePath(Keys.RelativeFilePath).FullPath.ShouldBe("assets/test.css");
+                result.Destination.FullPath.ShouldBe("assets/test.css");
             }
 
             [Test]
@@ -272,10 +262,8 @@ body {
                     FileSystem = fileSystem
                 };
                 TestDocument document = new TestDocument(
-                    new MetadataItems
-                    {
-                        { Keys.RelativeFilePath, new FilePath("assets/test.scss") }
-                    },
+                    new FilePath("/input/assets/test.scss"),
+                    new FilePath("assets/test.scss"),
                     input);
 
                 Sass sass = new Sass().IncludeSourceComments(false).WithCompactOutputStyle();
@@ -285,7 +273,7 @@ body {
 
                 // Then
                 result.Content.ShouldBe(output);
-                result.FilePath(Keys.RelativeFilePath).FullPath.ShouldBe("assets/test.css");
+                result.Destination.FullPath.ShouldBe("assets/test.css");
             }
 
             [Test]
@@ -320,10 +308,8 @@ body {
                     FileSystem = fileSystem
                 };
                 TestDocument document = new TestDocument(
-                    new MetadataItems
-                    {
-                        { Keys.RelativeFilePath, new FilePath("assets/test.scss") }
-                    },
+                    new FilePath("/input/assets/test.scss"),
+                    new FilePath("assets/test.scss"),
                     input);
 
                 Sass sass = new Sass().IncludeSourceComments(false).WithCompactOutputStyle();
@@ -333,7 +319,7 @@ body {
 
                 // Then
                 result.Content.ShouldBe(output);
-                result.FilePath(Keys.RelativeFilePath).FullPath.ShouldBe("assets/test.css");
+                result.Destination.FullPath.ShouldBe("assets/test.css");
             }
 
             // TODO: Change above test to just use exact file name

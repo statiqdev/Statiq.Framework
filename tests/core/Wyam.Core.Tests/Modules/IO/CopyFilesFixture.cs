@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using NUnit.Framework;
+using Shouldly;
 using Wyam.Common.Configuration;
 using Wyam.Common.Documents;
 using Wyam.Common.IO;
@@ -172,32 +173,18 @@ namespace Wyam.Core.Tests.Modules.IO
                 Assert.IsFalse(await (await context.FileSystem.GetOutputFileAsync("Subfolder/markdown-y.md")).GetExistsAsync());
             }
 
-            [Test]
-            public async Task ShouldSetMetadata()
+            public async Task ShouldSetSourceAndDestination()
             {
                 // Given
                 TestExecutionContext context = GetExecutionContext();
                 CopyFiles copyFiles = new CopyFiles("**/test-a.txt");
 
                 // When
-                await ExecuteAsync(context, copyFiles);
-            }
-
-            [TestCase(Keys.SourceFilePath, "/TestFiles/Input/test-a.txt")]
-            [TestCase(Keys.DestinationFilePath, "/output/test-a.txt")]
-            public async Task ShouldSetFilePathMetadata(string key, string expected)
-            {
-                // Given
-                TestExecutionContext context = GetExecutionContext();
-                CopyFiles copyFiles = new CopyFiles("**/test-a.txt");
-
-                // When
-                IDocument output = (await ExecuteAsync(context, copyFiles)).First();
+                IDocument output = (await ExecuteAsync(context, copyFiles))[0];
 
                 // Then
-                object result = output[key];
-                Assert.IsInstanceOf<FilePath>(result);
-                Assert.AreEqual(expected, ((FilePath)result).FullPath);
+                output.Source.FullPath.ShouldBe("/TestFiles/Input/test-a.txt");
+                output.Destination.FullPath.ShouldBe("test-a.txt");
             }
         }
 

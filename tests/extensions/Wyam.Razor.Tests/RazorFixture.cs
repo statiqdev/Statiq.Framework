@@ -404,11 +404,8 @@ namespace Wyam.Razor.Tests
             private TestDocument GetDocument(string source, string content)
             {
                 TestDocument document = new TestDocument(
-                    new[]
-                    {
-                        new KeyValuePair<string, object>(Keys.RelativeFilePath, new FilePath(source)),
-                        new KeyValuePair<string, object>(Keys.SourceFileName, new FilePath(source).FileName)
-                    },
+                    new FilePath(source),
+                    null,
                     content);
                 document.Source = new FilePath(source);
                 return document;

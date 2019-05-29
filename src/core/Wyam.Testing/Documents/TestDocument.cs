@@ -77,6 +77,13 @@ namespace Wyam.Testing.Documents
             ContentProvider = contentProvider is NullContent ? null : contentProvider;
         }
 
+        public TestDocument(FilePath source, FilePath destination, IEnumerable<KeyValuePair<string, object>> metadata)
+            : this(metadata)
+        {
+            Source = source;
+            Destination = destination;
+        }
+
         public TestDocument(FilePath source, FilePath destination, IEnumerable<KeyValuePair<string, object>> metadata, string content)
             : this(metadata)
         {

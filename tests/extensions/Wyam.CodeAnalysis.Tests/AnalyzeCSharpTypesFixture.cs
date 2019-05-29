@@ -595,7 +595,7 @@ namespace Wyam.CodeAnalysis.Tests
                 // Then
                 CollectionAssert.AreEquivalent(
                     new[] { "Foo/Green/index.html", "Foo.Bar/Blue/index.html", "global/Yellow/index.html", "Foo/Red/index.html" },
-                    results.Where(x => x["Kind"].Equals("NamedType")).Select(x => ((FilePath)x[Keys.WritePath]).FullPath));
+                    results.Where(x => x["Kind"].Equals("NamedType")).Select(x => x.Destination.FullPath));
             }
 
             [Test]

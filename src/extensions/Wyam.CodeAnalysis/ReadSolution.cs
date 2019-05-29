@@ -22,16 +22,6 @@ namespace Wyam.CodeAnalysis
     /// The output of this module is similar to executing the ReadFiles module on all source files in the solution.
     /// </remarks>
     /// <metadata cref="CodeAnalysisKeys.AssemblyName" usage="Output" />
-    /// <metadata cref="Keys.SourceFileRoot" usage="Output" />
-    /// <metadata cref="Keys.SourceFileBase" usage="Output" />
-    /// <metadata cref="Keys.SourceFileExt" usage="Output" />
-    /// <metadata cref="Keys.SourceFileName" usage="Output" />
-    /// <metadata cref="Keys.SourceFileDir" usage="Output" />
-    /// <metadata cref="Keys.SourceFilePath" usage="Output" />
-    /// <metadata cref="Keys.SourceFilePathBase" usage="Output" />
-    /// <metadata cref="Keys.RelativeFilePath" usage="Output" />
-    /// <metadata cref="Keys.RelativeFilePathBase" usage="Output" />
-    /// <metadata cref="Keys.RelativeFileDir" usage="Output" />
     /// <metadata cref="CodeAnalysisKeys.OutputBuildLog" usage="Setting"/>
     /// <category>Input/Output</category>
     public class ReadSolution : ReadWorkspace

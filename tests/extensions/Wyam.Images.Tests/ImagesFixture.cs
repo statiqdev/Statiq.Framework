@@ -24,10 +24,8 @@ namespace Wyam.Images.Tests
                 // Given
                 MemoryStream fileStream = GetTestFileStream("logo-square.png");
                 TestDocument document = new TestDocument(
-                    new MetadataItems
-                    {
-                        { Keys.RelativeFilePath, new FilePath("a/b/test.png") }
-                    },
+                    new FilePath("/input/a/b/test.png"),
+                    null,
                     fileStream);
                 Image module = new Image();
 
@@ -35,7 +33,7 @@ namespace Wyam.Images.Tests
                 TestDocument result = await ExecuteAsync(document, module).SingleAsync();
 
                 // Then
-                result.Get<FilePath>(Keys.WritePath).FullPath.ShouldBe("/output/a/b/test.png");
+                result.Destination.FullPath.ShouldBe("a/b/test.png");
             }
 
             [Test]
@@ -44,10 +42,8 @@ namespace Wyam.Images.Tests
                 // Given
                 MemoryStream fileStream = GetTestFileStream("logo-square.png");
                 TestDocument document = new TestDocument(
-                    new MetadataItems
-                    {
-                        { Keys.RelativeFilePath, new FilePath("a/b/test.png") }
-                    },
+                    new FilePath("/input/a/b/test.png"),
+                    null,
                     fileStream);
                 Image module = new Image().OutputAsGif();
 
@@ -55,7 +51,7 @@ namespace Wyam.Images.Tests
                 TestDocument result = await ExecuteAsync(document, module).SingleAsync();
 
                 // Then
-                result.Get<FilePath>(Keys.WritePath).FullPath.ShouldBe("/output/a/b/test.gif");
+                result.Destination.FullPath.ShouldBe("a/b/test.gif");
             }
 
             [Test]
@@ -64,10 +60,8 @@ namespace Wyam.Images.Tests
                 // Given
                 MemoryStream fileStream = GetTestFileStream("logo-square.png");
                 TestDocument document = new TestDocument(
-                    new MetadataItems
-                    {
-                        { Keys.RelativeFilePath, new FilePath("a/b/test.png") }
-                    },
+                    new FilePath("/input/a/b/test.png"),
+                    null,
                     fileStream);
                 Image module = new Image().Brightness(123);
 
@@ -75,7 +69,7 @@ namespace Wyam.Images.Tests
                 TestDocument result = await ExecuteAsync(document, module).SingleAsync();
 
                 // Then
-                result.Get<FilePath>(Keys.WritePath).FullPath.ShouldBe("/output/a/b/test-b123.png");
+                result.Destination.FullPath.ShouldBe("a/b/test-b123.png");
             }
         }
     }

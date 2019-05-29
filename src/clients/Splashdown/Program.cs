@@ -28,8 +28,9 @@ namespace Splashdown
                             new Markdown(),
                             new ReplaceIn("{{CONTENT}}", new ReadFiles("template.html")),
                             new Replace("{{TITLE}}", Config.FromDocument(doc => doc.Get("Title", "Default Title"))),
-                            new Replace("{{DESC}}", Config.FromDocument(doc => doc.Get("Description", "Default Description"))))
-                        .WithWriteModules(new WriteFiles(".html")))
+                            new Replace("{{DESC}}", Config.FromDocument(doc => doc.Get("Description", "Default Description"))),
+                            new Destination(".html"))
+                        .WithWriteModules(new WriteFiles()))
                 .AddIsolatedPipeline(
                     "Second",
                     "*.md",

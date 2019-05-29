@@ -9,6 +9,16 @@ namespace Wyam.Testing.IO
     /// </summary>
     public class TestFileSystem : IFileSystem
     {
+        public TestFileSystem()
+            : this(new TestFileProvider("input"))
+        {
+        }
+
+        public TestFileSystem(IFileProvider defaultFileProvider)
+        {
+            FileProviders = new TestFileProviderCollection(defaultFileProvider);
+        }
+
         /// <summary>
         /// The file provider to use for this file system.
         /// </summary>
@@ -19,8 +29,7 @@ namespace Wyam.Testing.IO
         }
 
         /// <inheritdoc />
-        public IFileProviderCollection FileProviders { get; } =
-            new TestFileProviderCollection(new TestFileProvider());
+        public IFileProviderCollection FileProviders { get; }
 
         /// <inheritdoc />
         IReadOnlyFileProviderCollection IReadOnlyFileSystem.FileProviders => FileProviders;

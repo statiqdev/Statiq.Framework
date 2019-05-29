@@ -3,12 +3,22 @@ using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
 using ConcurrentCollections;
+using Wyam.Common;
 using Wyam.Common.IO;
 
 namespace Wyam.Testing.IO
 {
     public class TestFileProvider : IFileProvider
     {
+        public TestFileProvider()
+        {
+        }
+
+        public TestFileProvider(params string[] directories)
+        {
+            Directories.AddRange(directories);
+        }
+
         public ICollection<string> Directories { get; } = new ConcurrentHashSet<string>();
         public ConcurrentDictionary<string, StringBuilder> Files { get; } = new ConcurrentDictionary<string, StringBuilder>();
 

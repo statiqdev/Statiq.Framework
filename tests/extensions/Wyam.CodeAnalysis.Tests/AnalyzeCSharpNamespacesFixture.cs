@@ -314,7 +314,7 @@ namespace Wyam.CodeAnalysis.Tests
                 // Then
                 CollectionAssert.AreEquivalent(
                     new[] { "global/index.html", "Foo/index.html", "Foo.Bar/index.html" },
-                    results.Where(x => x["Kind"].Equals("Namespace")).Select(x => ((FilePath)x[Keys.WritePath]).FullPath));
+                    results.Where(x => x["Kind"].Equals("Namespace")).Select(x => x.Destination.FullPath));
             }
         }
     }
