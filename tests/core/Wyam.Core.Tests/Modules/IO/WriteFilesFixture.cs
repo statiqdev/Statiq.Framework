@@ -25,28 +25,7 @@ namespace Wyam.Core.Tests.Modules.IO
     {
         public class ExecuteTests : WriteFilesFixture
         {
-            [Test]
-            public async Task ExtensionWithDotWritesFiles()
-            {
-                // Given
-                TestExecutionContext context = GetExecutionContext();
-                TestDocument input = new TestDocument(
-                    new Dictionary<string, object>
-                    {
-                        { Keys.RelativeFilePath, new FilePath("Subfolder/write-test.abc") }
-                    },
-                    "Test");
-                WriteFiles writeFiles = new WriteFiles(".txt");
-
-                // When
-                await ExecuteAsync(input, context, writeFiles);
-
-                // Then
-                IFile outputFile = await context.FileSystem.GetOutputFileAsync("Subfolder/write-test.txt");
-                (await outputFile.GetExistsAsync()).ShouldBeTrue();
-                (await outputFile.ReadAllTextAsync()).ShouldBe("Test");
-            }
-
+            /*
             [Test]
             public async Task ExtensionWithoutDotWritesFiles()
             {
@@ -327,6 +306,7 @@ namespace Wyam.Core.Tests.Modules.IO
                 (await (await context.FileSystem.GetOutputFileAsync("output/Subfolder/null-test")).GetExistsAsync()).ShouldBeFalse();
                 (await (await context.FileSystem.GetOutputFileAsync("output/Subfolder/stream-test")).GetExistsAsync()).ShouldBeFalse();
             }
+            */
         }
 
         protected static TestExecutionContext GetExecutionContext()

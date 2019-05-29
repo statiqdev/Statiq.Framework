@@ -130,7 +130,7 @@ namespace Wyam.Core.Tests.Modules.Metadata
 
                 // Then
                 results.Count.ShouldBe(4);
-                results.Select(x => x.FilePath(Keys.RelativeFilePath).FullPath)
+                results.Select(x => x.Destination.FullPath)
                     .ShouldBe(new[] { "a/index.html", "b/index.html", "c/index.html", "6.txt" }, true);
             }
 
@@ -145,11 +145,11 @@ namespace Wyam.Core.Tests.Modules.Metadata
                 Tree tree = new Tree().WithNesting();
 
                 // When
-                IReadOnlyList<TestDocument> results = await ExecuteAsync(inputs, tree);
+                TestDocument result = await ExecuteAsync(inputs, tree).SingleAsync();
 
                 // Then
-                IDocument document = FindTreeNode(results[0], "root/a/2.txt");
-                document.Document(Keys.PreviousSibling).FilePath(Keys.RelativeFilePath).FullPath.ShouldBe("root/a/1.txt");
+                IDocument document = FindTreeNode(result, "root/a/2.txt");
+                document.Document(Keys.PreviousSibling).Destination.FullPath.ShouldBe("root/a/1.txt");
             }
 
             [Test]
@@ -163,11 +163,11 @@ namespace Wyam.Core.Tests.Modules.Metadata
                 Tree tree = new Tree().WithNesting();
 
                 // When
-                IReadOnlyList<TestDocument> results = await ExecuteAsync(inputs, tree);
+                TestDocument result = await ExecuteAsync(inputs, tree).SingleAsync();
 
                 // Then
-                TestDocument document = FindTreeNode(results[0], "root/a/2.txt");
-                document.Document(Keys.NextSibling).FilePath(Keys.RelativeFilePath).FullPath.ShouldBe("root/a/3.txt");
+                TestDocument document = FindTreeNode(result, "root/a/2.txt");
+                document.Document(Keys.NextSibling).Destination.FullPath.ShouldBe("root/a/3.txt");
             }
 
             [Test]
@@ -181,11 +181,11 @@ namespace Wyam.Core.Tests.Modules.Metadata
                 Tree tree = new Tree().WithNesting();
 
                 // When
-                IReadOnlyList<TestDocument> results = await ExecuteAsync(inputs, tree);
+                TestDocument result = await ExecuteAsync(inputs, tree).SingleAsync();
 
                 // Then
-                TestDocument document = FindTreeNode(results[0], "root/a/2.txt");
-                document.Document(Keys.Previous).FilePath(Keys.RelativeFilePath).FullPath.ShouldBe("root/a/1.txt");
+                TestDocument document = FindTreeNode(result, "root/a/2.txt");
+                document.Document(Keys.Previous).Destination.FullPath.ShouldBe("root/a/1.txt");
             }
 
             [Test]
@@ -200,11 +200,11 @@ namespace Wyam.Core.Tests.Modules.Metadata
                 Tree tree = new Tree().WithNesting();
 
                 // When
-                IReadOnlyList<TestDocument> results = await ExecuteAsync(inputs, tree);
+                TestDocument result = await ExecuteAsync(inputs, tree).SingleAsync();
 
                 // Then
-                TestDocument document = FindTreeNode(results[0], "root/b/4.txt");
-                document.Document(Keys.Previous).FilePath(Keys.RelativeFilePath).FullPath.ShouldBe("root/b/index.html");
+                TestDocument document = FindTreeNode(result, "root/b/4.txt");
+                document.Document(Keys.Previous).Destination.FullPath.ShouldBe("root/b/index.html");
             }
 
             [Test]
@@ -218,7 +218,7 @@ namespace Wyam.Core.Tests.Modules.Metadata
                     "root/b/4.txt");
                 Tree tree = new Tree()
                     .WithNesting()
-                    .WithRoots(Config.FromDocument(doc => doc.FilePath(Keys.RelativeFilePath).FullPath.EndsWith("b/index.html")));
+                    .WithRoots(Config.FromDocument(doc => doc.Destination.FullPath.EndsWith("b/index.html")));
 
                 // When
                 IReadOnlyList<TestDocument> results = await ExecuteAsync(inputs, tree);
@@ -279,7 +279,7 @@ namespace Wyam.Core.Tests.Modules.Metadata
 
             private TestDocument FindTreeNode(TestDocument first, string relativeFilePath)
             {
-                while (first != null && first.FilePath(Keys.RelativeFilePath).FullPath != relativeFilePath)
+                while (first != null && first.Destination.FullPath != relativeFilePath)
                 {
                     first = (TestDocument)first.Document(Keys.Next);
                 }
@@ -291,7 +291,7 @@ namespace Wyam.Core.Tests.Modules.Metadata
                 foreach (string relativeFilePath in relativeFilePaths)
                 {
                     document.ShouldNotBeNull();
-                    document.FilePath(Keys.RelativeFilePath).FullPath.ShouldBe(relativeFilePath);
+                    document.Destination.FullPath.ShouldBe(relativeFilePath);
                     document = (TestDocument)document.Document(Keys.Next);
                 }
             }
@@ -299,16 +299,13 @@ namespace Wyam.Core.Tests.Modules.Metadata
             private void VerifyTreeChildren(TestDocument parent, string parentPath, params string[] childFilePaths)
             {
                 parent.ShouldNotBeNull();
-                parent.FilePath(Keys.RelativeFilePath).FullPath.ShouldBe(parentPath);
+                parent.Destination.FullPath.ShouldBe(parentPath);
                 IReadOnlyList<IDocument> children = parent.DocumentList(Keys.Children);
-                children.Select(x => x.FilePath(Keys.RelativeFilePath).FullPath).ShouldBe(childFilePaths);
+                children.Select(x => x.Destination.FullPath).ShouldBe(childFilePaths);
             }
 
             private TestDocument[] GetDocumentsFromRelativePaths(params string[] relativeFilePaths) =>
-                relativeFilePaths.Select(x => new TestDocument(new MetadataItems
-                {
-                    new MetadataItem(Keys.RelativeFilePath, new FilePath(x))
-                })).ToArray();
+                relativeFilePaths.Select(x => new TestDocument(new FilePath(x))).ToArray();
         }
     }
 }

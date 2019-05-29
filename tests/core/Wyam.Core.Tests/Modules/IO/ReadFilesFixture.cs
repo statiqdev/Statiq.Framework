@@ -90,22 +90,6 @@ namespace Wyam.Core.Tests.Modules.IO
             }
 
             [Test]
-            public async Task ShouldReturnNullBasePathsForDotFiles()
-            {
-                // Given
-                TestExecutionContext context = GetExecutionContext();
-                ReadFiles readFiles = new ReadFiles(".dotfile");
-
-                // When
-                TestDocument result = await ExecuteAsync(context, readFiles).SingleAsync();
-
-                // Then
-                result[Keys.SourceFileBase].ShouldBeNull();
-                result[Keys.SourceFilePathBase].ShouldBeNull();
-                result[Keys.RelativeFilePathBase].ShouldBeNull();
-            }
-
-            [Test]
             public async Task GetsCorrectContent()
             {
                 // Given
@@ -119,13 +103,7 @@ namespace Wyam.Core.Tests.Modules.IO
                 result.Content.ShouldBe("aaa");
             }
 
-            [TestCase(Keys.SourceFileBase, "test-c")]
-            [TestCase(Keys.SourceFileName, "test-c.txt")]
-            [TestCase(Keys.SourceFilePath, "/TestFiles/Input/Subfolder/test-c.txt")]
-            [TestCase(Keys.SourceFilePathBase, "/TestFiles/Input/Subfolder/test-c")]
-            [TestCase(Keys.RelativeFilePath, "Subfolder/test-c.txt")]
-            [TestCase(Keys.RelativeFilePathBase, "Subfolder/test-c")]
-            public async Task ShouldSetFilePathMetadata(string key, string expected)
+            public async Task ShouldSetSource(string key, string expected)
             {
                 // Given
                 TestExecutionContext context = GetExecutionContext();
@@ -135,15 +113,10 @@ namespace Wyam.Core.Tests.Modules.IO
                 TestDocument result = await ExecuteAsync(context, readFiles).SingleAsync();
 
                 // Then
-                object value = result[key];
-                value.ShouldBeOfType<FilePath>();
-                ((FilePath)value).FullPath.ShouldBe(expected);
+                result.Source.FullPath.ShouldBe("/TestFiles/Input/Subfolder/test-c.txt");
             }
 
-            [TestCase(Keys.SourceFileRoot, "/TestFiles/Input")]
-            [TestCase(Keys.SourceFileDir, "/TestFiles/Input/Subfolder")]
-            [TestCase(Keys.RelativeFileDir, "Subfolder")]
-            public async Task ShouldSetDirectoryPathMetadata(string key, string expected)
+            public async Task ShouldSetDestination(string key, string expected)
             {
                 // Given
                 TestExecutionContext context = GetExecutionContext();
@@ -153,25 +126,7 @@ namespace Wyam.Core.Tests.Modules.IO
                 TestDocument result = await ExecuteAsync(context, readFiles).SingleAsync();
 
                 // Then
-                object value = result[key];
-                value.ShouldBeOfType<DirectoryPath>();
-                ((DirectoryPath)value).FullPath.ShouldBe(expected);
-            }
-
-            [TestCase(Keys.SourceFileExt, ".txt")]
-            public async Task ShouldSetStringMetadata(string key, string expected)
-            {
-                // Given
-                TestExecutionContext context = GetExecutionContext();
-                ReadFiles readFiles = new ReadFiles("**/test-c.txt");
-
-                // When
-                TestDocument result = await ExecuteAsync(context, readFiles).SingleAsync();
-
-                // Then
-                object value = result[key];
-                value.ShouldBeOfType<string>();
-                ((string)value).ShouldBe(expected);
+                result.Destination.FullPath.ShouldBe("Subfolder/test-c.txt");
             }
 
             [Test]

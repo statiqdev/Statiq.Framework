@@ -17,18 +17,22 @@ namespace Wyam.Common.Tests.Documents
             public void ReturnsCorrectLookupOfInt()
             {
                 // Given
-                IDocument a = new TestDocument(
-                    new Dictionary<string, object> { { "Numbers", new[] { 1, 2, 3 } } },
-                    "a");
-                IDocument b = new TestDocument(
-                    new Dictionary<string, object> { { "Numbers", new[] { 2, 3, 4 } } },
-                    "b");
-                IDocument c = new TestDocument(
-                    new Dictionary<string, object> { { "Numbers", new[] { 3 } } },
-                    "c");
-                IDocument d = new TestDocument(
-                    new Dictionary<string, object> { { "Numbers", new[] { 4 } } },
-                    "d");
+                IDocument a = new TestDocument("a")
+                {
+                    { "Numbers", new[] { 1, 2, 3 } }
+                };
+                IDocument b = new TestDocument("b")
+                {
+                    { "Numbers", new[] { 2, 3, 4 } }
+                };
+                IDocument c = new TestDocument("c")
+                {
+                    { "Numbers", new[] { 3 } }
+                };
+                IDocument d = new TestDocument("d")
+                {
+                    { "Numbers", new[] { 4 } }
+                };
                 List<IDocument> documents = new List<IDocument>() { a, b, c, d };
 
                 // When
@@ -46,18 +50,22 @@ namespace Wyam.Common.Tests.Documents
             public void ReturnsCorrectLookupOfString()
             {
                 // Given
-                IDocument a = new TestDocument(
-                    new Dictionary<string, object> { { "Numbers", new[] { "1", "2", "3" } } },
-                    "a");
-                IDocument b = new TestDocument(
-                    new Dictionary<string, object> { { "Numbers", new[] { "2", "3", "4" } } },
-                    "b");
-                IDocument c = new TestDocument(
-                    new Dictionary<string, object> { { "Numbers", new[] { "3" } } },
-                    "c");
-                IDocument d = new TestDocument(
-                    new Dictionary<string, object> { { "Numbers", new[] { "4" } } },
-                    "d");
+                IDocument a = new TestDocument("a")
+                {
+                    { "Numbers", new[] { "1", "2", "3" } }
+                };
+                IDocument b = new TestDocument("b")
+                {
+                    { "Numbers", new[] { "2", "3", "4" } }
+                };
+                IDocument c = new TestDocument("c")
+                {
+                    { "Numbers", new[] { "3" } }
+                };
+                IDocument d = new TestDocument("d")
+                {
+                    { "Numbers", new[] { "4" } }
+                };
                 List<IDocument> documents = new List<IDocument>() { a, b, c, d };
 
                 // When
@@ -75,34 +83,26 @@ namespace Wyam.Common.Tests.Documents
             public void ReturnsCorrectLookupWithValues()
             {
                 // Given
-                IDocument a = new TestDocument(
-                    new Dictionary<string, object>
-                    {
-                        { "Numbers", new[] { 1, 2, 3 } },
-                        { "Colors", "Red" }
-                    },
-                    "a");
-                IDocument b = new TestDocument(
-                    new Dictionary<string, object>
-                    {
-                        { "Numbers", new[] { 2, 3, 4 } },
-                        { "Colors", "Red" }
-                    },
-                    "b");
-                IDocument c = new TestDocument(
-                    new Dictionary<string, object>
-                    {
-                        { "Numbers", new[] { 3 } },
-                        { "Colors", "Green" }
-                    },
-                    "c");
-                IDocument d = new TestDocument(
-                    new Dictionary<string, object>
-                    {
-                        { "Numbers", new[] { 4 } },
-                        { "Colors", "Green" }
-                    },
-                    "d");
+                IDocument a = new TestDocument("a")
+                {
+                    { "Numbers", new[] { 1, 2, 3 } },
+                    { "Colors", "Red" }
+                };
+                IDocument b = new TestDocument("b")
+                {
+                    { "Numbers", new[] { 2, 3, 4 } },
+                    { "Colors", "Red" }
+                };
+                IDocument c = new TestDocument("c")
+                {
+                    { "Numbers", new[] { 3 } },
+                    { "Colors", "Green" }
+                };
+                IDocument d = new TestDocument("d")
+                {
+                    { "Numbers", new[] { 4 } },
+                    { "Colors", "Green" }
+                };
                 List<IDocument> documents = new List<IDocument>() { a, b, c, d };
 
                 // When
@@ -123,34 +123,26 @@ namespace Wyam.Common.Tests.Documents
             public void ReturnsCorrectLookupWithValues()
             {
                 // Given
-                IDocument a = new TestDocument(
-                    new Dictionary<string, object>
-                    {
-                        { "Numbers", new[] { 1, 2, 3 } },
-                        { "Colors", new[] { "Red" } }
-                    },
-                    "a");
-                IDocument b = new TestDocument(
-                    new Dictionary<string, object>
-                    {
-                        { "Numbers", new[] { 2, 3, 4 } },
-                        { "Colors", new[] { "Red", "Blue" } }
-                    },
-                    "b");
-                IDocument c = new TestDocument(
-                    new Dictionary<string, object>
-                    {
-                        { "Numbers", new[] { 3 } },
-                        { "Colors", new[] { "Green" } }
-                    },
-                    "c");
-                IDocument d = new TestDocument(
-                    new Dictionary<string, object>
-                    {
-                        { "Numbers", new[] { 4 } },
-                        { "Colors", new[] { "Green", "Blue" } }
-                    },
-                    "d");
+                IDocument a = new TestDocument("a")
+                {
+                    { "Numbers", new[] { 1, 2, 3 } },
+                    { "Colors", new[] { "Red" } }
+                };
+                IDocument b = new TestDocument("b")
+                {
+                    { "Numbers", new[] { 2, 3, 4 } },
+                    { "Colors", new[] { "Red", "Blue" } }
+                };
+                IDocument c = new TestDocument("c")
+                {
+                    { "Numbers", new[] { 3 } },
+                    { "Colors", new[] { "Green" } }
+                };
+                IDocument d = new TestDocument("d")
+                {
+                    { "Numbers", new[] { 4 } },
+                    { "Colors", new[] { "Green", "Blue" } }
+                };
                 List<IDocument> documents = new List<IDocument>() { a, b, c, d };
 
                 // When

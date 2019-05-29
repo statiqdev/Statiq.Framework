@@ -66,8 +66,8 @@ namespace Wyam.Core.Modules.Metadata
             {
                 // Attempt to get the segments from the source path and then the destination path
                 List<string> segments =
-                    doc.Source?.GetRelativePath(ctx)?.Segments.ToList()
-                        ?? doc.Destination?.GetRelativePath(ctx)?.Segments.ToList();
+                    doc.Source?.GetRelativeInputPath(ctx)?.Segments.ToList()
+                        ?? doc.Destination?.GetRelativeInputPath(ctx)?.Segments.ToList();
                 if (segments == null)
                 {
                     return null;

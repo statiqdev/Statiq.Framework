@@ -25,7 +25,6 @@ namespace Wyam.Images.Tests
                 MemoryStream fileStream = GetTestFileStream("logo-square.png");
                 TestDocument document = new TestDocument(
                     new FilePath("/input/a/b/test.png"),
-                    null,
                     fileStream);
                 Image module = new Image();
 
@@ -43,7 +42,6 @@ namespace Wyam.Images.Tests
                 MemoryStream fileStream = GetTestFileStream("logo-square.png");
                 TestDocument document = new TestDocument(
                     new FilePath("/input/a/b/test.png"),
-                    null,
                     fileStream);
                 Image module = new Image().OutputAsGif();
 
@@ -61,7 +59,6 @@ namespace Wyam.Images.Tests
                 MemoryStream fileStream = GetTestFileStream("logo-square.png");
                 TestDocument document = new TestDocument(
                     new FilePath("/input/a/b/test.png"),
-                    null,
                     fileStream);
                 Image module = new Image().Brightness(123);
 

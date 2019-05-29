@@ -34,7 +34,7 @@ namespace Wyam.Core.Tests.Modules.Contents
             IReadOnlyList<TestDocument> results = await ExecuteAsync(new[] { redirected, notRedirected }, redirect);
 
             // Then
-            CollectionAssert.AreEqual(new[] { "foo.html" }, results.Select(x => x.Get<FilePath>(Keys.WritePath).FullPath));
+            CollectionAssert.AreEqual(new[] { "foo.html" }, results.Select(x => x.Destination.FullPath));
         }
 
         [TestCase("foo/bar", "foo/bar.html")]
@@ -54,7 +54,7 @@ namespace Wyam.Core.Tests.Modules.Contents
             IReadOnlyList<TestDocument> results = await ExecuteAsync(new[] { redirected, notRedirected }, redirect);
 
             // Then
-            CollectionAssert.AreEqual(new[] { expected }, results.Select(x => x.Get<FilePath>(Keys.WritePath).FullPath));
+            CollectionAssert.AreEqual(new[] { expected }, results.Select(x => x.Destination.FullPath));
         }
 
         [Test]
@@ -98,18 +98,19 @@ namespace Wyam.Core.Tests.Modules.Contents
             IReadOnlyList<TestDocument> results = await ExecuteAsync(new[] { redirected1, redirected2 }, redirect);
 
             // Then
-            CollectionAssert.AreEquivalent(new[] { "foo.html", "bar/baz.html" }, results.Select(x => x.Get<FilePath>(Keys.WritePath).FullPath));
+            CollectionAssert.AreEquivalent(new[] { "foo.html", "bar/baz.html" }, results.Select(x => x.Destination.FullPath));
         }
 
         [Test]
         public async Task WithAdditionalOutput()
         {
             // Given
-            TestDocument redirected1 = new TestDocument(new MetadataItems
-            {
-                { Keys.RedirectFrom, new List<FilePath> { new FilePath("foo.html") } },
-                { Keys.RelativeFilePath, new FilePath("foo2.html") }
-            });
+            TestDocument redirected1 = new TestDocument(
+                new FilePath("foo2.html"),
+                new MetadataItems
+                {
+                    { Keys.RedirectFrom, new List<FilePath> { new FilePath("foo.html") } }
+                });
             TestDocument redirected2 = new TestDocument(new MetadataItems
             {
                 { Keys.RedirectFrom, new List<FilePath> { new FilePath("bar/baz.html") } }
@@ -120,19 +121,20 @@ namespace Wyam.Core.Tests.Modules.Contents
             IReadOnlyList<TestDocument> results = await ExecuteAsync(new[] { redirected1, redirected2 }, redirect);
 
             // Then
-            CollectionAssert.AreEquivalent(new[] { "foo.html", "bar/baz.html", "a/b" }, results.Select(x => x.Get<FilePath>(Keys.WritePath).FullPath));
-            Assert.IsTrue(results.Single(x => x.Get<FilePath>(Keys.WritePath).FullPath == "a/b").Content.Contains("foo.html /foo2.html"));
+            CollectionAssert.AreEquivalent(new[] { "foo.html", "bar/baz.html", "a/b" }, results.Select(x => x.Destination.FullPath));
+            Assert.IsTrue(results.Single(x => x.Destination.FullPath == "a/b").Content.Contains("foo.html /foo2.html"));
         }
 
         [Test]
         public async Task WithAdditionalOutputWithoutMetaRefresh()
         {
             // Given
-            TestDocument redirected1 = new TestDocument(new MetadataItems
-            {
-                { Keys.RedirectFrom, new List<FilePath> { new FilePath("foo.html") } },
-                { Keys.RelativeFilePath, new FilePath("foo2.html") }
-            });
+            TestDocument redirected1 = new TestDocument(
+                new FilePath("foo2.html"),
+                new MetadataItems
+                {
+                    { Keys.RedirectFrom, new List<FilePath> { new FilePath("foo.html") } }
+                });
             TestDocument redirected2 = new TestDocument(new MetadataItems
             {
                 { Keys.RedirectFrom, new List<FilePath> { new FilePath("bar/baz.html") } }
@@ -145,7 +147,7 @@ namespace Wyam.Core.Tests.Modules.Contents
             IReadOnlyList<TestDocument> results = await ExecuteAsync(new[] { redirected1, redirected2 }, redirect);
 
             // Then
-            CollectionAssert.AreEquivalent(new[] { "a/b" }, results.Select(x => x.Get<FilePath>(Keys.WritePath).FullPath));
+            CollectionAssert.AreEquivalent(new[] { "a/b" }, results.Select(x => x.Destination.FullPath));
         }
     }
 }

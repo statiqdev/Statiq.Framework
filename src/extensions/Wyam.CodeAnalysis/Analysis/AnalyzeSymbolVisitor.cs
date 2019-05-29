@@ -33,7 +33,7 @@ namespace Wyam.CodeAnalysis.Analysis
         private readonly Compilation _compilation;
         private readonly IExecutionContext _context;
         private readonly Func<ISymbol, bool> _symbolPredicate;
-        private readonly Func<IMetadata, FilePath> _writePath;
+        private readonly Func<ISymbol, FilePath> _destination;
         private readonly ConcurrentDictionary<string, string> _cssClasses;
         private readonly bool _docsForImplicitSymbols;
         private readonly bool _assemblySymbols;
@@ -51,7 +51,7 @@ namespace Wyam.CodeAnalysis.Analysis
             Compilation compilation,
             IExecutionContext context,
             Func<ISymbol, bool> symbolPredicate,
-            Func<IMetadata, FilePath> writePath,
+            Func<ISymbol, FilePath> destination,
             ConcurrentDictionary<string, string> cssClasses,
             bool docsForImplicitSymbols,
             bool assemblySymbols,
@@ -60,7 +60,7 @@ namespace Wyam.CodeAnalysis.Analysis
             _compilation = compilation;
             _context = context;
             _symbolPredicate = symbolPredicate;
-            _writePath = writePath;
+            _destination = destination;
             _cssClasses = cssClasses;
             _docsForImplicitSymbols = docsForImplicitSymbols;
             _assemblySymbols = assemblySymbols;
@@ -123,7 +123,7 @@ namespace Wyam.CodeAnalysis.Analysis
         public override void VisitNamespace(INamespaceSymbol symbol)
         {
             // Add to the namespace symbol cache
-            string displayName = GetDisplayName(symbol);
+            string displayName = symbol.GetDisplayName();
             ConcurrentHashSet<INamespaceSymbol> symbols = _namespaceDisplayNameToSymbols.GetOrAdd(displayName, _ => new ConcurrentHashSet<INamespaceSymbol>());
             symbols.Add(symbol);
 
@@ -356,7 +356,7 @@ namespace Wyam.CodeAnalysis.Analysis
 
         private IDocument AddNamespaceDocument(INamespaceSymbol symbol, bool xmlDocumentation)
         {
-            string displayName = GetDisplayName(symbol);
+            string displayName = symbol.GetDisplayName();
             MetadataItems items = new MetadataItems
             {
                 { CodeAnalysisKeys.Symbol, _ => _namespaceDisplayNameToSymbols[displayName].ToImmutableList() },
@@ -394,12 +394,12 @@ namespace Wyam.CodeAnalysis.Analysis
             {
                 // In general, cache the values that need calculation and don't cache the ones that are just properties of ISymbol
                 new MetadataItem(CodeAnalysisKeys.IsResult, !_finished),
-                new MetadataItem(CodeAnalysisKeys.SymbolId, _ => GetId(symbol), true),
+                new MetadataItem(CodeAnalysisKeys.SymbolId, _ => symbol.GetId(), true),
                 new MetadataItem(CodeAnalysisKeys.CommentId, commentId),
                 new MetadataItem(CodeAnalysisKeys.Name, metadata => string.IsNullOrEmpty(symbol.Name) ? metadata.String(CodeAnalysisKeys.FullName) : symbol.Name),
-                new MetadataItem(CodeAnalysisKeys.FullName, _ => GetFullName(symbol), true),
-                new MetadataItem(CodeAnalysisKeys.DisplayName, _ => GetDisplayName(symbol), true),
-                new MetadataItem(CodeAnalysisKeys.QualifiedName, _ => GetQualifiedName(symbol), true),
+                new MetadataItem(CodeAnalysisKeys.FullName, _ => symbol.GetFullName(), true),
+                new MetadataItem(CodeAnalysisKeys.DisplayName, _ => symbol.GetDisplayName(), true),
+                new MetadataItem(CodeAnalysisKeys.QualifiedName, _ => symbol.GetQualifiedName(), true),
                 new MetadataItem(CodeAnalysisKeys.Kind, _ => symbol.Kind.ToString()),
                 new MetadataItem(CodeAnalysisKeys.ContainingNamespace, DocumentFor(symbol.ContainingNamespace)),
                 new MetadataItem(CodeAnalysisKeys.Syntax, _ => GetSyntax(symbol), true),
@@ -417,8 +417,7 @@ namespace Wyam.CodeAnalysis.Analysis
             }
 
             // Add a destination for initially-processed symbols
-            // Create a converting dictionary from the metadata items for use by the write path delegate to deal with metadata delegates
-            FilePath destination = _finished ? null : _writePath(new ConvertingDictionary(_context, items));
+            FilePath destination = _finished ? null : _destination(symbol);
 
             // Create the document and add it to caches
             return _symbolToDocument.GetOrAdd(
@@ -529,62 +528,6 @@ namespace Wyam.CodeAnalysis.Analysis
             return str.ToUpper();
         }
 
-        // Note that the symbol ID is not fully-qualified and is therefore only unique within a namespace
-        private static string GetId(ISymbol symbol)
-        {
-            if (symbol is IAssemblySymbol)
-            {
-                return symbol.Name + ".dll";
-            }
-            if (symbol is INamespaceOrTypeSymbol)
-            {
-                char[] id = symbol.MetadataName.ToCharArray();
-                for (int c = 0; c < id.Length; c++)
-                {
-                    if (!char.IsLetterOrDigit(id[c]) && id[c] != '-' && id[c] != '.')
-                    {
-                        id[c] = '_';
-                    }
-                }
-                return new string(id);
-            }
-
-            // Get a hash for anything other than namespaces or types
-            return BitConverter.ToString(BitConverter.GetBytes(Crc32.Calculate(symbol.GetDocumentationCommentId() ?? GetFullName(symbol)))).Replace("-", string.Empty);
-        }
-
-        internal static string GetFullName(ISymbol symbol)
-        {
-            return symbol.ToDisplayString(new SymbolDisplayFormat(
-                typeQualificationStyle: SymbolDisplayTypeQualificationStyle.NameAndContainingTypes,
-                genericsOptions: SymbolDisplayGenericsOptions.IncludeTypeParameters,
-                parameterOptions: SymbolDisplayParameterOptions.IncludeType,
-                memberOptions: SymbolDisplayMemberOptions.IncludeParameters,
-                miscellaneousOptions: SymbolDisplayMiscellaneousOptions.UseSpecialTypes));
-        }
-
-        private static string GetQualifiedName(ISymbol symbol)
-        {
-            return symbol.ToDisplayString(new SymbolDisplayFormat(
-                typeQualificationStyle: SymbolDisplayTypeQualificationStyle.NameAndContainingTypesAndNamespaces,
-                genericsOptions: SymbolDisplayGenericsOptions.IncludeTypeParameters));
-        }
-
-        private static string GetDisplayName(ISymbol symbol)
-        {
-            if (symbol is IAssemblySymbol)
-            {
-                // Add .dll to assembly names
-                return symbol.Name + ".dll";
-            }
-            if (symbol.Kind == SymbolKind.Namespace)
-            {
-                // Use "global" for the global namespace display name since it's a reserved keyword and it's used to refer to the global namespace in code
-                return symbol.ContainingNamespace == null ? "global" : GetQualifiedName(symbol);
-            }
-            return GetFullName(symbol);
-        }
-
         private IReadOnlyList<IDocument> GetDerivedTypes(INamedTypeSymbol symbol) =>
             _namedTypes
                 .Where(x => x.Key.BaseType != null && GetOriginalSymbolDefinition(x.Key.BaseType).Equals(GetOriginalSymbolDefinition(symbol)))
@@ -613,8 +556,14 @@ namespace Wyam.CodeAnalysis.Analysis
         private SymbolDocumentValues DocumentsFor(IEnumerable<ISymbol> symbols) =>
             new SymbolDocumentValues(symbols, this);
 
-        public bool TryGetDocument(ISymbol symbol, out IDocument document) =>
-            _symbolToDocument.TryGetValue(symbol, out document);
+        public bool TryGetDocument(ISymbol symbol, out IDocument document)
+        {
+            if (!_finished)
+            {
+                throw new InvalidOperationException("Cannot access code analysis document references inside symbol visitor");
+            }
+            return _symbolToDocument.TryGetValue(symbol, out document);
+        }
 
         // We need this because in many cases we don't really care about concrete generic types, only their definition
         // This converts all concrete generics into their original defintion

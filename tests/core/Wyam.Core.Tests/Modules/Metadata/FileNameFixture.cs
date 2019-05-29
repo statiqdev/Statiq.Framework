@@ -36,17 +36,14 @@ namespace Wyam.Core.Tests.Modules.Metadata
             public async Task FileNameIsConvertedCorrectly(string input, string output)
             {
                 // Given
-                TestDocument document = new TestDocument(new MetadataItems
-                {
-                    new MetadataItem(Keys.SourceFileName, input)
-                });
+                TestDocument document = new TestDocument(new FilePath(input));
                 FileName fileName = new FileName();
 
                 // When
                 TestDocument result = await ExecuteAsync(document, fileName).SingleAsync();
 
                 // Then
-                result.FilePath(Keys.WriteFileName).FullPath.ShouldBe(output);
+                result.Destination.FullPath.ShouldBe(output);
             }
 
             [Test]
@@ -55,17 +52,14 @@ namespace Wyam.Core.Tests.Modules.Metadata
                 // Given
                 const string input = "FileName With MiXeD CapS";
                 const string output = "filename-with-mixed-caps";
-                TestDocument document = new TestDocument(new MetadataItems
-                {
-                    new MetadataItem(Keys.SourceFileName, new FilePath(input))
-                });
+                TestDocument document = new TestDocument(new FilePath(input));
                 FileName fileName = new FileName();
 
                 // When
                 TestDocument result = await ExecuteAsync(document, fileName).SingleAsync();
 
                 // Then
-                result.FilePath(Keys.WriteFileName).FullPath.ShouldBe(output);
+                result.Destination.FullPath.ShouldBe(output);
             }
 
             [Test]
@@ -74,10 +68,7 @@ namespace Wyam.Core.Tests.Modules.Metadata
                 // Given
                 const string input = "this-is-a-.net-tag";
                 const string output = "this-is-a-.net-tag";
-                TestDocument document = new TestDocument(new MetadataItems
-                {
-                    new MetadataItem(Keys.SourceFileName, new FilePath(input))
-                });
+                TestDocument document = new TestDocument(new FilePath(input));
                 FileName fileName = new FileName();
 
                 // When
@@ -85,7 +76,7 @@ namespace Wyam.Core.Tests.Modules.Metadata
                 TestDocument result = await ExecuteAsync(document, fileName).SingleAsync();
 
                 // Then
-                result.FilePath(Keys.WriteFileName).FullPath.ShouldBe(output);
+                result.Destination.FullPath.ShouldBe(output);
             }
 
             [Test]
@@ -94,10 +85,7 @@ namespace Wyam.Core.Tests.Modules.Metadata
                 // Given
                 const string input = "this-is-a-.";
                 const string output = "thisisa.";
-                TestDocument document = new TestDocument(new MetadataItems
-                {
-                    new MetadataItem(Keys.SourceFileName, new FilePath(input))
-                });
+                TestDocument document = new TestDocument(new FilePath(input));
                 FileName fileName = new FileName();
 
                 // When
@@ -105,7 +93,7 @@ namespace Wyam.Core.Tests.Modules.Metadata
                 TestDocument result = await ExecuteAsync(document, fileName).SingleAsync();
 
                 // Then
-                result.FilePath(Keys.WriteFileName).FullPath.ShouldBe(output);
+                result.Destination.FullPath.ShouldBe(output);
             }
 
             public static string[] ReservedChars => FileName.ReservedChars;
@@ -116,19 +104,15 @@ namespace Wyam.Core.Tests.Modules.Metadata
             {
                 // Given
                 string manyCharactersWow = new string(character[0], 10);
-                TestDocument document = new TestDocument(new MetadataItems
-                {
-                    new MetadataItem(
-                        Keys.SourceFileName,
-                        string.Format("testing {0} some of {0} these {0}", manyCharactersWow))
-                });
+                string path = string.Format("testing {0} some of {0} these {0}", manyCharactersWow);
+                TestDocument document = new TestDocument(new FilePath(path));
                 FileName fileName = new FileName();
 
                 // When
                 TestDocument result = await ExecuteAsync(document, fileName).SingleAsync();
 
                 // Then
-                result.FilePath(Keys.WriteFileName).FullPath.ShouldBe("testing-some-of-these-");
+                result.Destination.FullPath.ShouldBe("testing-some-of-these-");
             }
 
             [TestCase(null)]
@@ -137,17 +121,17 @@ namespace Wyam.Core.Tests.Modules.Metadata
             public async Task IgnoresNullOrWhiteSpaceStrings(string input)
             {
                 // Given
-                TestDocument document = new TestDocument(new MetadataItems
+                TestDocument document = new TestDocument
                 {
-                    new MetadataItem(Keys.SourceFileName, input)
-                });
-                FileName fileName = new FileName();
+                    new MetadataItem("MyKey", input)
+                };
+                FileName fileName = new FileName("MyKey");
 
                 // When
                 TestDocument result = await ExecuteAsync(document, fileName).SingleAsync();
 
                 // Then
-                result.Keys.ShouldNotContain(Keys.WriteFileName);
+                result.String("MyKey").ShouldBe(input);
             }
 
             [Test]
@@ -157,17 +141,17 @@ namespace Wyam.Core.Tests.Modules.Metadata
                 const string input = "myfile.html";
                 const string output = "myfile.html";
 
-                TestDocument document = new TestDocument(new MetadataItems
+                TestDocument document = new TestDocument
                 {
                     new MetadataItem("MyKey", input)
-                });
+                };
                 FileName fileName = new FileName("MyKey");
 
                 // When
                 TestDocument result = await ExecuteAsync(document, fileName).SingleAsync();
 
                 // Then
-                result.FilePath(Keys.WriteFileName).FullPath.ShouldBe(output);
+                result.FilePath("MyKey").FullPath.ShouldBe(output);
             }
 
             [Test]
@@ -176,17 +160,17 @@ namespace Wyam.Core.Tests.Modules.Metadata
                 // Given
                 const string input = "   myfile.html   ";
                 const string output = "myfile.html";
-                TestDocument document = new TestDocument(new MetadataItems
+                TestDocument document = new TestDocument
                 {
                     new MetadataItem("MyKey", input)
-                });
+                };
                 FileName fileName = new FileName("MyKey");
 
                 // When
                 TestDocument result = await ExecuteAsync(document, fileName).SingleAsync();
 
                 // Then
-                result.FilePath(Keys.WriteFileName).FullPath.ShouldBe(output);
+                result.FilePath("MyKey").FullPath.ShouldBe(output);
             }
         }
     }

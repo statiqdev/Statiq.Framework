@@ -235,13 +235,13 @@ namespace Wyam.CodeAnalysis.Analysis
                         else if (currentMethodSymbol != null && currentMethodSymbol.Name == currentMethodSymbol.ContainingType.Name)
                         {
                             // Constructor, check base type constructors for the same signature
-                            string signature = AnalyzeSymbolVisitor.GetFullName(currentMethodSymbol);
+                            string signature = currentMethodSymbol.GetFullName();
                             signature = signature.Substring(signature.IndexOf('('));
                             foreach (INamedTypeSymbol baseTypeSymbol in AnalyzeSymbolVisitor.GetBaseTypes(currentMethodSymbol.ContainingType))
                             {
                                 foreach (IMethodSymbol constructorSymbol in baseTypeSymbol.Constructors.Where(x => !x.IsImplicitlyDeclared))
                                 {
-                                    string constructorSignature = AnalyzeSymbolVisitor.GetFullName(constructorSymbol);
+                                    string constructorSignature = constructorSymbol.GetFullName();
                                     constructorSignature = constructorSignature.Substring(constructorSignature.IndexOf('('));
                                     if (signature == constructorSignature
                                         && inheritedSymbolCommentIds.Add(constructorSymbol.GetDocumentationCommentId()))

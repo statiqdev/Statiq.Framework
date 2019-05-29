@@ -56,5 +56,32 @@ namespace Wyam.Common
                 throw new ArgumentException("Dictionary does not contain all required keys");
             }
         }
+
+        /// <summary>
+        /// Determines whether the items starts with the specified values.
+        /// </summary>
+        /// <typeparam name="T">The type of item.</typeparam>
+        /// <param name="items">The items.</param>
+        /// <param name="values">The values.</param>
+        /// <returns><c>true</c> if the items starts with all the specified values, <c>false</c> otherwise.</returns>
+        public static bool StartsWith<T>(this IEnumerable<T> items, IEnumerable<T> values)
+        {
+            _ = items ?? throw new ArgumentNullException(nameof(items));
+            _ = values ?? throw new ArgumentNullException(nameof(values));
+
+            IEnumerator<T> valuesEnumerator = values.GetEnumerator();
+            foreach (T item in items)
+            {
+                if (!valuesEnumerator.MoveNext())
+                {
+                    break;
+                }
+                if (!item.Equals(valuesEnumerator.Current))
+                {
+                    return false;
+                }
+            }
+            return !valuesEnumerator.MoveNext();
+        }
     }
 }

@@ -120,7 +120,7 @@ namespace Wyam.CodeAnalysis.Tests
             }
 
             [Test]
-            public async Task WritePathIsCorrect()
+            public async Task DestinationPathIsCorrect()
             {
                 // Given
                 const string code = @"

@@ -29,7 +29,7 @@ namespace Splashdown
                             new ReplaceIn("{{CONTENT}}", new ReadFiles("template.html")),
                             new Replace("{{TITLE}}", Config.FromDocument(doc => doc.Get("Title", "Default Title"))),
                             new Replace("{{DESC}}", Config.FromDocument(doc => doc.Get("Description", "Default Description"))),
-                            new Destination(".html"))
+                            new SetDestination(".html"))
                         .WithWriteModules(new WriteFiles()))
                 .AddIsolatedPipeline(
                     "Second",

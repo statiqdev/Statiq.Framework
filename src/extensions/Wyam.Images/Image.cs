@@ -325,10 +325,10 @@ namespace Wyam.Images
 
             async Task<IEnumerable<IDocument>> ProcessImagesAsync(IDocument input)
             {
-                FilePath relativePath = input.Source.GetRelativePath(context);
+                FilePath relativePath = input.Source.GetRelativeInputPath(context);
                 return await _operations.SelectManyAsync(async operations =>
                 {
-                    FilePath destinationPath = relativePath == null ? null : context.FileSystem.GetOutputPath(relativePath);
+                    FilePath destinationPath = relativePath;
 
                     // Get the image
                     Image<Rgba32> image;
@@ -350,10 +350,7 @@ namespace Wyam.Images
                                 workingImageContext = operation.Apply(workingImageContext);
 
                                 // Modify the path
-                                if (destinationPath != null)
-                                {
-                                    destinationPath = operation.GetPath(destinationPath) ?? destinationPath;
-                                }
+                                destinationPath = operation.GetPath(destinationPath) ?? destinationPath;
                             }
                         });
                     }

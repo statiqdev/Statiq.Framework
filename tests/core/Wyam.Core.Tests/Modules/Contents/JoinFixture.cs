@@ -128,8 +128,14 @@ namespace Wyam.Core.Tests.Modules.Contents
         public async Task JoinTwoDocumentsWithKeepFirstMetaDataReturnKeepsFirstMetaData()
         {
             // Given
-            TestDocument first = new TestDocument(new List<KeyValuePair<string, object>>() { new KeyValuePair<string, object>("one", "two") }, "Test");
-            TestDocument second = new TestDocument(new List<KeyValuePair<string, object>>() { new KeyValuePair<string, object>("three", "four") }, "Test2");
+            TestDocument first = new TestDocument("Test")
+            {
+                { "one", "two" }
+            };
+            TestDocument second = new TestDocument("Test2")
+            {
+                { "three", "four" }
+            };
             Join join = new Join(JoinedMetadata.FirstDocument);
 
             // When
@@ -144,8 +150,14 @@ namespace Wyam.Core.Tests.Modules.Contents
         public async Task JoinTwoDocumentsWithMetaDataReturnDefaultMetaData()
         {
             // Given
-            TestDocument first = new TestDocument(new List<KeyValuePair<string, object>>() { new KeyValuePair<string, object>("one", "two") }, "Test");
-            TestDocument second = new TestDocument(new List<KeyValuePair<string, object>>() { new KeyValuePair<string, object>("three", "four") }, "Test2");
+            TestDocument first = new TestDocument("Test")
+            {
+                { "one", "two" }
+            };
+            TestDocument second = new TestDocument("Test2")
+            {
+                { "three", "four" }
+            };
             Join join = new Join();
 
             // When
@@ -160,8 +172,14 @@ namespace Wyam.Core.Tests.Modules.Contents
         public async Task JoinTwoDocumentsWithKeepLastMetaDataReturnKeepsLastMetaData()
         {
             // Given
-            TestDocument first = new TestDocument(new List<KeyValuePair<string, object>>() { new KeyValuePair<string, object>("one", "two") }, "Test");
-            TestDocument second = new TestDocument(new List<KeyValuePair<string, object>>() { new KeyValuePair<string, object>("three", "four") }, "Test2");
+            TestDocument first = new TestDocument("Test")
+            {
+                { "one", "two" }
+            };
+            TestDocument second = new TestDocument("Test2")
+            {
+                { "three", "four" }
+            };
             Join join = new Join(JoinedMetadata.LastDocument);
 
             // When
@@ -176,8 +194,15 @@ namespace Wyam.Core.Tests.Modules.Contents
         public async Task JoinTwoDocumentsWithAllKeepFirstMetaData()
         {
             // Given
-            TestDocument first = new TestDocument(new List<KeyValuePair<string, object>>() { new KeyValuePair<string, object>("one", "two") }, "Test");
-            TestDocument second = new TestDocument(new List<KeyValuePair<string, object>>() { new KeyValuePair<string, object>("one", "seven"), new KeyValuePair<string, object>("three", "four") }, "Test2");
+            TestDocument first = new TestDocument("Test")
+            {
+                { "one", "two" }
+            };
+            TestDocument second = new TestDocument("Test2")
+            {
+                { "one", "seven" },
+                { "three", "four" }
+            };
             Join join = new Join(JoinedMetadata.AllWithFirstDuplicates);
 
             // When
@@ -193,8 +218,15 @@ namespace Wyam.Core.Tests.Modules.Contents
         public async Task JoinTwoDocumentsWithAllKeepLastMetaData()
         {
             // Given
-            TestDocument first = new TestDocument(new List<KeyValuePair<string, object>>() { new KeyValuePair<string, object>("one", "two") }, "Test");
-            TestDocument second = new TestDocument(new List<KeyValuePair<string, object>>() { new KeyValuePair<string, object>("one", "seven"), new KeyValuePair<string, object>("three", "four") }, "Test2");
+            TestDocument first = new TestDocument("Test")
+            {
+                { "one", "two" }
+            };
+            TestDocument second = new TestDocument("Test2")
+            {
+                { "one", "seven" },
+                { "three", "four" }
+            };
             Join join = new Join(JoinedMetadata.AllWithLastDuplicates);
 
             // When

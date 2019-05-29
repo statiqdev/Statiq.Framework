@@ -83,7 +83,7 @@ namespace Wyam.Less
                 string content = engine.TransformToCss(await input.GetStringAsync(), path.FileName.FullPath);
 
                 // Process the result
-                FilePath cssPath = path.GetRelativePath(context).ChangeExtension("css");
+                FilePath cssPath = path.GetRelativeInputPath(context).ChangeExtension("css");
                 return context.GetDocument(
                     input,
                     cssPath,

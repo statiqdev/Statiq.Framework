@@ -1,5 +1,6 @@
 ﻿using System.Collections.Concurrent;
 using System.Collections.Generic;
+using Wyam.Common;
 using Wyam.Common.Content;
 using Wyam.Common.Documents;
 using Wyam.Common.Execution;
@@ -30,6 +31,10 @@ namespace Wyam.Core.Documents
             IEnumerable<KeyValuePair<string, object>> metadata,
             IContentProvider contentProvider)
         {
+            // If a destination was provided and it's under the output path, make it relative to match convention
+            destination = GetRelativeDestination(destination, context.FileSystem.OutputPath);
+
+            // Create a new document if requested via the AsNewDocument module
             Document newDocument = null;
             if (originalDocument == null || ModuleExtensions.AsNewDocumentModules.Contains(context.Module))
             {
@@ -47,6 +52,18 @@ namespace Wyam.Core.Documents
             Trace.Verbose($"Created document with ID {newDocument.Id}.{newDocument.Version}{(originalDocument == null ? string.Empty : " from version " + originalDocument.Version)} and source {newDocument.Source.ToDisplayString()}");
 
             return newDocument;
+        }
+
+        // Internal for testing
+        internal static FilePath GetRelativeDestination(FilePath destination, DirectoryPath outputPath)
+        {
+            if (destination?.IsAbsolute == true
+                && destination.FileProvider == outputPath.FileProvider
+                && destination.Directory.Segments.StartsWith(outputPath.Segments))
+            {
+                return outputPath.GetRelativePath(destination);
+            }
+            return destination;
         }
     }
 }

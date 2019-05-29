@@ -77,6 +77,12 @@ namespace Wyam.Testing.Documents
             ContentProvider = contentProvider is NullContent ? null : contentProvider;
         }
 
+        public TestDocument(FilePath source, FilePath destination)
+        {
+            Source = source;
+            Destination = destination;
+        }
+
         public TestDocument(FilePath source, FilePath destination, IEnumerable<KeyValuePair<string, object>> metadata)
             : this(metadata)
         {
@@ -133,6 +139,140 @@ namespace Wyam.Testing.Documents
         {
             Source = source;
             Destination = destination;
+            ContentProvider = contentProvider is NullContent ? null : contentProvider;
+        }
+
+        public TestDocument(FilePath path)
+        {
+            if (path.IsAbsolute)
+            {
+                Source = path;
+                Destination = path.FullPath.StartsWith("/input") ? new FilePath(path.FullPath.Substring(6)) : null;
+            }
+            else
+            {
+                Source = new DirectoryPath("/input").CombineFile(path);
+                Destination = path;
+            }
+        }
+
+        public TestDocument(FilePath path, IEnumerable<KeyValuePair<string, object>> metadata)
+            : this(metadata)
+        {
+            if (path.IsAbsolute)
+            {
+                Source = path;
+                Destination = path.FullPath.StartsWith("/input") ? new FilePath(path.FullPath.Substring(6)) : null;
+            }
+            else
+            {
+                Source = new DirectoryPath("/input").CombineFile(path);
+                Destination = path;
+            }
+        }
+
+        public TestDocument(FilePath path, IEnumerable<KeyValuePair<string, object>> metadata, string content)
+            : this(metadata)
+        {
+            if (path.IsAbsolute)
+            {
+                Source = path;
+                Destination = path.FullPath.StartsWith("/input") ? new FilePath(path.FullPath.Substring(6)) : null;
+            }
+            else
+            {
+                Source = new DirectoryPath("/input").CombineFile(path);
+                Destination = path;
+            }
+
+            TestMemoryStreamFactory memoryStreamFactory = new TestMemoryStreamFactory();
+            ContentProvider = content == null ? null : new StreamContent(memoryStreamFactory, memoryStreamFactory.GetStream(content));
+        }
+
+        public TestDocument(FilePath path, IEnumerable<KeyValuePair<string, object>> metadata, Stream content)
+            : this(metadata)
+        {
+            if (path.IsAbsolute)
+            {
+                Source = path;
+                Destination = path.FullPath.StartsWith("/input") ? new FilePath(path.FullPath.Substring(6)) : null;
+            }
+            else
+            {
+                Source = new DirectoryPath("/input").CombineFile(path);
+                Destination = path;
+            }
+
+            TestMemoryStreamFactory memoryStreamFactory = new TestMemoryStreamFactory();
+            ContentProvider = content == null ? null : new StreamContent(memoryStreamFactory, content);
+        }
+
+        public TestDocument(FilePath path, IEnumerable<KeyValuePair<string, object>> metadata, IContentProvider contentProvider)
+            : this(metadata)
+        {
+            if (path.IsAbsolute)
+            {
+                Source = path;
+                Destination = path.FullPath.StartsWith("/input") ? new FilePath(path.FullPath.Substring(6)) : null;
+            }
+            else
+            {
+                Source = new DirectoryPath("/input").CombineFile(path);
+                Destination = path;
+            }
+
+            ContentProvider = contentProvider is NullContent ? null : contentProvider;
+        }
+
+        public TestDocument(FilePath path, string content)
+            : this()
+        {
+            if (path.IsAbsolute)
+            {
+                Source = path;
+                Destination = path.FullPath.StartsWith("/input") ? new FilePath(path.FullPath.Substring(6)) : null;
+            }
+            else
+            {
+                Source = new DirectoryPath("/input").CombineFile(path);
+                Destination = path;
+            }
+
+            TestMemoryStreamFactory memoryStreamFactory = new TestMemoryStreamFactory();
+            ContentProvider = new StreamContent(memoryStreamFactory, memoryStreamFactory.GetStream(content));
+        }
+
+        public TestDocument(FilePath path, Stream content)
+            : this()
+        {
+            if (path.IsAbsolute)
+            {
+                Source = path;
+                Destination = path.FullPath.StartsWith("/input") ? new FilePath(path.FullPath.Substring(6)) : null;
+            }
+            else
+            {
+                Source = new DirectoryPath("/input").CombineFile(path);
+                Destination = path;
+            }
+
+            TestMemoryStreamFactory memoryStreamFactory = new TestMemoryStreamFactory();
+            ContentProvider = new StreamContent(memoryStreamFactory, content);
+        }
+
+        public TestDocument(FilePath path, IContentProvider contentProvider)
+            : this()
+        {
+            if (path.IsAbsolute)
+            {
+                Source = path;
+            }
+            else
+            {
+                Source = new DirectoryPath("/input").CombineFile(path);
+                Destination = path;
+            }
+
             ContentProvider = contentProvider is NullContent ? null : contentProvider;
         }
 

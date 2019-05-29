@@ -22,7 +22,7 @@ namespace Wyam.Core.Modules.IO
     /// Writes files to the location specified by <see cref="IDocument.Destination"/>.
     /// If the destination path is relative, the document will be written to the output
     /// folder at the relative location. If the destination path is absolute, the document
-    /// will be written to the absolute location. Use the <see cref="Destination"/> module
+    /// will be written to the absolute location. Use the <see cref="SetDestination"/> module
     /// to set the document destination prior to using this module.
     /// </remarks>
     /// <category>Input/Output</category>

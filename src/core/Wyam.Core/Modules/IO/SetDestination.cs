@@ -36,7 +36,7 @@ namespace Wyam.Core.Modules.IO
     /// <metadata cref="Keys.DestinationFileName" usage="Input" />
     /// <metadata cref="Keys.DestinationExtension" usage="Input" />
     /// <category>Input/Output</category>
-    public class Destination : IModule
+    public class SetDestination : IModule
     {
         private readonly DocumentConfig<FilePath> _destination;
 
@@ -46,7 +46,7 @@ namespace Wyam.Core.Modules.IO
         /// (in that order of precedence). If none of those metadata values are set, the
         /// destination will remain unchanged.
         /// </summary>
-        public Destination()
+        public SetDestination()
         {
             _destination = Config.FromDocument(GetPathFromMetadata);
         }
@@ -57,7 +57,7 @@ namespace Wyam.Core.Modules.IO
         /// metadata values are set, those will take precedence.
         /// </summary>
         /// <param name="extension">The extension to set the destination to.</param>
-        public Destination(string extension)
+        public SetDestination(string extension)
         {
             if (extension == null)
             {
@@ -71,7 +71,7 @@ namespace Wyam.Core.Modules.IO
         /// Changes the destination of input documents to that of the delegate.
         /// </summary>
         /// <param name="destination">A delegate that returns a <see cref="FilePath"/> with the desired destination path.</param>
-        public Destination(DocumentConfig<FilePath> destination)
+        public SetDestination(DocumentConfig<FilePath> destination)
         {
             _destination = destination ?? throw new ArgumentNullException(nameof(destination));
         }

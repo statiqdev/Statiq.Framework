@@ -19,20 +19,6 @@ namespace Wyam.AmazonWebServices
     /// Note that this just creates the document. Once that document is written to the file system, you will still need to upload the document
     /// to a correctly configured CloudSearch instance using the API or Amazon CLI.
     /// </remarks>
-    /// <example>
-    /// <code>
-    /// Pipelines.Add("CloudSearchData",
-    ///     Documents("NameOfAPriorPipeline"),
-    ///     GenerateCloudSearchData("Id", "Body")
-    ///        .AddField("type", "post")
-    ///        .AddField("length", d => d.Content.Count())
-    ///        .MapMetaField("title", "Title")
-    ///        .MapMetaField("tags", "Tags", o => o.Split(",".ToCharArray())),
-    ///     Meta("WritePath", "cloudsearch_data.json"),
-    ///     WriteFiles()
-    /// );
-    /// </code>
-    /// </example>
     /// <category>Content</category>
     public class GenerateCloudSearchData : IModule
     {

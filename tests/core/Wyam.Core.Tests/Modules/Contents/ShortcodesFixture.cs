@@ -165,12 +165,10 @@ namespace Wyam.Core.Tests.Modules.Contents
                 TestExecutionContext context = new TestExecutionContext();
                 context.Shortcodes.Add<ReadsMetadataShortcode>("S1");
                 context.Shortcodes.Add<ReadsMetadataShortcode>("S2");
-                TestDocument document = new TestDocument(
-                    new MetadataItems
-                    {
-                        { "Foo", 10 }
-                    },
-                    "123<?# S1 /?>456<?# S2 /?>789<?# S1 /?>");
+                TestDocument document = new TestDocument("123<?# S1 /?>456<?# S2 /?>789<?# S1 /?>")
+                {
+                    { "Foo", 10 }
+                };
                 Core.Modules.Contents.Shortcodes module = new Core.Modules.Contents.Shortcodes();
 
                 // When

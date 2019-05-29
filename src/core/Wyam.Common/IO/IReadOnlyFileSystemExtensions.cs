@@ -131,9 +131,10 @@ namespace Wyam.Common.IO
 
             return fileSystem.InputPaths
                 .Reverse()
-                .Select(x => fileSystem.RootPath.Combine(x))
-                .FirstOrDefault(x => x.FileProvider == path.FileProvider
-                    && (path.FullPath == x.Collapse().FullPath || path.FullPath.StartsWith(x.Collapse().FullPath + "/")));
+                .Select(x => fileSystem.RootPath.Combine(x).Collapse())
+                .FirstOrDefault(x =>
+                    x.FileProvider == path.FileProvider
+                    && path.Segments.StartsWith(x.Segments));
         }
 
         /// <summary>

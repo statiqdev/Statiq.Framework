@@ -6,6 +6,7 @@ using Shouldly;
 using Wyam.Common;
 using Wyam.Common.Configuration;
 using Wyam.Common.Documents;
+using Wyam.Common.IO;
 using Wyam.Common.Meta;
 using Wyam.Common.Modules.Contents;
 using Wyam.Core.Modules.Contents;
@@ -34,15 +35,12 @@ namespace Wyam.Core.Tests.Modules.Contents
                     context.Settings[Keys.Host] = hostname;
                 }
 
-                TestDocument doc = new TestDocument("Test")
-                {
-                    { Keys.RelativeFilePath, "sub/testfile.html" }
-                };
+                TestDocument doc = new TestDocument(new FilePath("sub/testfile.html"), "Test");
                 IDocument[] inputs = { doc };
 
                 Core.Modules.Metadata.Meta m = new Core.Modules.Metadata.Meta(
                     Keys.SitemapItem,
-                    Config.FromDocument(d => new SitemapItem(d[Keys.RelativeFilePath].ToString())));
+                    Config.FromDocument(d => new SitemapItem(d.Destination.FullPath)));
 
                 Func<string, string> formatter = null;
 
@@ -73,15 +71,12 @@ namespace Wyam.Core.Tests.Modules.Contents
                     context.Settings[Keys.Host] = hostname;
                 }
 
-                TestDocument doc = new TestDocument("Test")
-                {
-                    { Keys.RelativeFilePath, "sub/testfile.html" }
-                };
+                TestDocument doc = new TestDocument(new FilePath("sub/testfile.html"), "Test");
                 IDocument[] inputs = { doc };
 
                 Core.Modules.Metadata.Meta m = new Core.Modules.Metadata.Meta(
                     Keys.SitemapItem,
-                    Config.FromDocument(d => d[Keys.RelativeFilePath].ToString()));
+                    Config.FromDocument(d => d.Destination.FullPath));
 
                 Func<string, string> formatter = null;
 
@@ -112,10 +107,7 @@ namespace Wyam.Core.Tests.Modules.Contents
                     context.Settings[Keys.Host] = hostname;
                 }
 
-                TestDocument doc = new TestDocument("Test")
-                {
-                    { Keys.RelativeFilePath, "sub/testfile.html" }
-                };
+                TestDocument doc = new TestDocument(new FilePath("sub/testfile.html"), "Test");
 
                 Func<string, string> formatter = null;
 

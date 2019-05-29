@@ -31,16 +31,16 @@ namespace Wyam.Core.Modules.Control
     /// <metadata cref="Keys.DisableCache" usage="Input" />
     /// <metadata cref="Keys.ResetCache" usage="Input" />
     /// <category>Control</category>
-    public class Cache : ContainerModule, IDisposable
+    public class CacheDocuments : ContainerModule, IDisposable
     {
         private Dictionary<FilePath, CacheEntry> _cache = null;
 
-        public Cache(params IModule[] modules)
+        public CacheDocuments(params IModule[] modules)
             : this((IEnumerable<IModule>)modules)
         {
         }
 
-        public Cache(IEnumerable<IModule> modules)
+        public CacheDocuments(IEnumerable<IModule> modules)
             : base(modules)
         {
         }

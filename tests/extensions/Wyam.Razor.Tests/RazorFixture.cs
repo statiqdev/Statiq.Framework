@@ -86,12 +86,10 @@ namespace Wyam.Razor.Tests
                 // Given
                 Engine engine = new Engine();
                 TestExecutionContext context = GetExecutionContext(engine);
-                TestDocument document = new TestDocument(
-                    new MetadataItems
-                    {
-                        { "MyKey", "MyValue" }
-                    },
-                    @"<p>@Metadata[""MyKey""]</p>");
+                TestDocument document = new TestDocument(@"<p>@Metadata[""MyKey""]</p>")
+                {
+                    { "MyKey", "MyValue" }
+                };
                 Razor razor = new Razor();
 
                 // When
@@ -401,15 +399,7 @@ namespace Wyam.Razor.Tests
                     StringCompareShould.IgnoreLineEndings);
             }
 
-            private TestDocument GetDocument(string source, string content)
-            {
-                TestDocument document = new TestDocument(
-                    new FilePath(source),
-                    null,
-                    content);
-                document.Source = new FilePath(source);
-                return document;
-            }
+            private TestDocument GetDocument(string source, string content) => new TestDocument(new FilePath(source), content);
 
             private TestExecutionContext GetExecutionContext(Engine engine)
             {

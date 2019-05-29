@@ -102,8 +102,8 @@ namespace Wyam.CodeAnalysis
         private readonly List<string> _solutionGlobs = new List<string>();
 
         private Func<ISymbol, bool> _symbolPredicate;
-        private Func<IMetadata, FilePath> _writePath;
-        private DirectoryPath _writePathPrefix = null;
+        private Func<ISymbol, FilePath> _destination;
+        private DirectoryPath _destinationPrefix = null;
         private bool _docsForImplicitSymbols = false;
         private bool _inputDocuments = true;
         private bool _assemblySymbols = false;
@@ -359,76 +359,71 @@ namespace Wyam.CodeAnalysis
         }
 
         /// <summary>
-        /// This changes the default behavior for the generated <c>WritePath</c> metadata value, which is to place files in a path
+        /// This changes the default behavior for the generated destination paths, which is to place files in a path
         /// with the same name as their containing namespace. Namespace documents will be named "index.html" while other type documents
         /// will get a name equal to their SymbolId. Member documents will get the same name as their containing type plus an
-        /// anchor to their SymbolId. Note that the default scheme makes the assumption that members will not have their own files,
-        /// if that's not the case a new WritePath function will have to be supplied using this method.
+        /// anchor to their SymbolId.
         /// </summary>
-        /// <param name="writePath">A function that takes the metadata for a given symbol and returns a <c>FilePath</c> to
-        /// use for the <c>WritePath</c> metadata value.</param>
+        /// <param name="destination">
+        /// A function that takes the metadata for a given symbol and returns a <c>FilePath</c> to use for the destination.
+        /// </param>
         /// <returns>The current module instance.</returns>
-        public AnalyzeCSharp WithWritePath(Func<IMetadata, FilePath> writePath)
+        public AnalyzeCSharp WithDestination(Func<ISymbol, FilePath> destination)
         {
-            _writePath = writePath;
+            _destination = destination;
             return this;
         }
 
         /// <summary>
-        /// This lets you add a prefix to the default <c>WritePath</c> behavior (such as nesting symbol documents inside
-        /// a folder like "api/"). Whatever you supply will be combined with the <c>WritePath</c>. This method has no
-        /// effect if you've supplied a custom <c>WritePath</c> behavior.
+        /// This lets you add a prefix to the default destination behavior (such as nesting symbol documents inside
+        /// a folder like "api/"). Whatever you supply will be combined with the destination. This method has no
+        /// effect if you've supplied a custom destination behavior.
         /// </summary>
-        /// <param name="prefix">The prefix to use for each generated <c>WritePath</c>.</param>
+        /// <param name="destinationPreview">The prefix to use for each generated destination.</param>
         /// <returns>The current module instance.</returns>
-        public AnalyzeCSharp WithWritePathPrefix(DirectoryPath prefix)
+        public AnalyzeCSharp WithDestinationPrefix(DirectoryPath destinationPreview)
         {
-            _writePathPrefix = prefix;
+            _destinationPrefix = destinationPreview;
             return this;
         }
 
-        private FilePath DefaultWritePath(IMetadata metadata, DirectoryPath prefix)
+        private FilePath DefaultDestination(ISymbol symbol, DirectoryPath prefix)
         {
-            IDocument namespaceDocument = metadata.Document(CodeAnalysisKeys.ContainingNamespace);
-            FilePath writePath;
+            INamespaceSymbol containingNamespace = symbol.ContainingNamespace;
+            FilePath destinationPath;
 
-            if (metadata.String(CodeAnalysisKeys.Kind) == nameof(SymbolKind.Assembly))
+            if (symbol.Kind == SymbolKind.Assembly)
             {
                 // Assemblies output to the index page in a folder of their name
-                writePath = new FilePath($"{metadata[CodeAnalysisKeys.DisplayName]}/index.html");
+                destinationPath = new FilePath($"{symbol.GetDisplayName()}/index.html");
             }
-            else if (metadata.String(CodeAnalysisKeys.Kind) == nameof(SymbolKind.Namespace))
+            else if (symbol.Kind == SymbolKind.Namespace)
             {
                 // Namespaces output to the index page in a folder of their full name
                 // If this namespace does not have a containing namespace, it's the global namespace
-                writePath = new FilePath(namespaceDocument == null ? "global/index.html" : $"{metadata[CodeAnalysisKeys.DisplayName]}/index.html");
+                destinationPath = new FilePath(containingNamespace == null ? "global/index.html" : $"{symbol.GetDisplayName()}/index.html");
             }
-            else if (metadata.String(CodeAnalysisKeys.Kind) == nameof(SymbolKind.NamedType))
+            else if (symbol.Kind == SymbolKind.NamedType)
             {
                 // Types output to the index page in a folder of their SymbolId under the folder for their namespace
-                writePath = new FilePath(namespaceDocument?[CodeAnalysisKeys.ContainingNamespace] == null
-                    ? $"global/{metadata[CodeAnalysisKeys.SymbolId]}/index.html"
-                    : $"{namespaceDocument[CodeAnalysisKeys.DisplayName]}/{metadata[CodeAnalysisKeys.SymbolId]}/index.html");
+                destinationPath = new FilePath(containingNamespace.ContainingNamespace == null
+                    ? $"global/{symbol.GetId()}/index.html"
+                    : $"{containingNamespace.GetDisplayName()}/{symbol.GetId()}/index.html");
             }
             else
             {
                 // Members output to a page equal to their SymbolId under the folder for their type
-                IDocument containingTypeDocument = metadata.Document(CodeAnalysisKeys.ContainingType);
-                string containingPath = containingTypeDocument.Destination.FullPath;
-                if (prefix != null && containingPath.StartsWith(prefix.FullPath + "/"))
-                {
-                    containingPath = containingPath.Substring(prefix.FullPath.Length + 1);
-                }
-                writePath = new FilePath(containingPath.Replace("index.html", metadata.String(CodeAnalysisKeys.SymbolId) + ".html"));
+                FilePath containingPath = DefaultDestination(symbol.ContainingType, null);
+                destinationPath = containingPath.ChangeFileName($"{symbol.GetId()}.html");
             }
 
             // Add the prefix
             if (prefix != null)
             {
-                writePath = prefix.CombineFile(writePath);
+                destinationPath = prefix.CombineFile(destinationPath);
             }
 
-            return writePath;
+            return destinationPath;
         }
 
         /// <inheritdoc />
@@ -456,7 +451,7 @@ namespace Wyam.CodeAnalysis
                 compilation,
                 context,
                 _symbolPredicate,
-                _writePath ?? (x => DefaultWritePath(x, _writePathPrefix)),
+                _destination ?? (x => DefaultDestination(x, _destinationPrefix)),
                 _cssClasses,
                 _docsForImplicitSymbols,
                 _assemblySymbols,
@@ -483,7 +478,7 @@ namespace Wyam.CodeAnalysis
                     SourceText sourceText = SourceText.From(stream);
                     syntaxTrees.Add(CSharpSyntaxTree.ParseText(
                         sourceText,
-                        path: input.Source.FullPath ?? string.Empty));
+                        path: input.Source?.FullPath ?? string.Empty));
                 }
             }
         }

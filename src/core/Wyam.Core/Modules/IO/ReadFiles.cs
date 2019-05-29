@@ -22,7 +22,7 @@ namespace Wyam.Core.Modules.IO
     /// aggregated. In either case, the input documents will not be returned as output of this module. If you want to add
     /// additional files to a current pipeline, you should enclose your ReadFiles modules with <see cref="Concat"/>.
     /// <see cref="IDocument.Source"/> will be set to the absolute path of the file
-    /// (use <see cref="FilePath.GetRelativePath(IExecutionContext)"/> to get a source path relative to the input folders).
+    /// (use <see cref="FilePath.GetRelativeInputPath(IExecutionContext)"/> to get a source path relative to the input folders).
     /// <see cref="IDocument.Destination"/> will be set to the relative path of the file (so that <see cref="WriteFiles"/> will write it
     /// to the same relative path in the output folder).
     /// </remarks>
@@ -84,7 +84,7 @@ namespace Wyam.Core.Modules.IO
                     return context.GetDocument(
                         input,
                         file.Path,
-                        file.Path.GetRelativePath(context),
+                        file.Path.GetRelativeInputPath(context),
                         await context.GetContentProviderAsync(file));
                 });
             }

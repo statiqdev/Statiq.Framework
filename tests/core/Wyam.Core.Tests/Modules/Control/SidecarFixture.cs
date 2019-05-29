@@ -101,13 +101,7 @@ namespace Wyam.Core.Tests.Modules.Control
             private TestDocument GetDocument(string source, string content) =>
                 new TestDocument(
                     new FilePath("/" + source),
-                    null,
-                    new Dictionary<string, object>
-                    {
-                        { Keys.RelativeFilePath, source },
-                        { Keys.SourceFilePath, new FilePath("/" + source) },
-                        { Keys.SourceFileName, new FilePath(source).FileName }
-                    },
+                    new FilePath(source),
                     content);
 
             private TestExecutionContext GetExecutionContext(Engine engine) =>

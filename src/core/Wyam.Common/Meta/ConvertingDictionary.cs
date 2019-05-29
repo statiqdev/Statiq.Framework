@@ -44,7 +44,19 @@ namespace Wyam.Common.Meta
         /// <inheritdoc />
         public object this[string key]
         {
-            get => _dictionary[key];
+            get
+            {
+                if (key == null)
+                {
+                    throw new ArgumentNullException(nameof(key));
+                }
+                if (!TryGetValue(key, out object value))
+                {
+                    throw new KeyNotFoundException("The key " + key + " was not found in metadata, use Get() to provide a default value.");
+                }
+                return value;
+            }
+
             set => _dictionary[key] = value;
         }
 
@@ -58,7 +70,7 @@ namespace Wyam.Common.Meta
         public ICollection<string> Keys => _dictionary.Keys;
 
         /// <inheritdoc />
-        public ICollection<object> Values => _dictionary.Values;
+        public ICollection<object> Values => _dictionary.Values.Select(GetValue).ToArray();
 
         /// <inheritdoc />
         public bool IsReadOnly => false;
@@ -81,17 +93,17 @@ namespace Wyam.Common.Meta
 
         /// <inheritdoc />
         public bool Contains(KeyValuePair<string, object> item) =>
-            ((IDictionary<string, object>)_dictionary).Contains(item);
+            _dictionary.Select(GetItem).Contains(item);
 
         /// <inheritdoc />
         public bool ContainsKey(string key) => _dictionary.ContainsKey(key);
 
         /// <inheritdoc />
         public void CopyTo(KeyValuePair<string, object>[] array, int arrayIndex) =>
-            ((IDictionary<string, object>)_dictionary).CopyTo(array, arrayIndex);
+            _dictionary.Select(GetItem).ToArray().CopyTo(array, arrayIndex);
 
         /// <inheritdoc />
-        public IEnumerator<KeyValuePair<string, object>> GetEnumerator() => _dictionary.GetEnumerator();
+        public IEnumerator<KeyValuePair<string, object>> GetEnumerator() => _dictionary.Select(GetItem).GetEnumerator();
 
         /// <inheritdoc />
         public object GetRaw(string key) =>
@@ -108,7 +120,12 @@ namespace Wyam.Common.Meta
         public bool TryGetValue<T>(string key, out T value)
         {
             value = default;
-            return _dictionary.TryGetValue(key, out object rawValue) && _context.TryConvert(rawValue, out value);
+            if (!_dictionary.TryGetValue(key, out object rawValue))
+            {
+                return false;
+            }
+            rawValue = GetValue(rawValue);
+            return _context.TryConvert(rawValue, out value);
         }
 
         /// <inheritdoc />
@@ -120,5 +137,19 @@ namespace Wyam.Common.Meta
         /// <inheritdoc />
         public IMetadata GetMetadata(params string[] keys) =>
             throw new NotSupportedException();
+
+        /// <summary>
+        /// This resolves the metadata value by recursively expanding IMetadataValue.
+        /// </summary>
+        private object GetValue(object originalValue) =>
+            originalValue is IMetadataValue metadataValue ? GetValue(metadataValue.Get(this)) : originalValue;
+
+        /// <summary>
+        /// This resolves the metadata value by expanding IMetadataValue.
+        /// </summary>
+        private KeyValuePair<string, object> GetItem(KeyValuePair<string, object> item) =>
+            item.Value is IMetadataValue metadataValue
+                ? new KeyValuePair<string, object>(item.Key, GetValue(metadataValue.Get(this)))
+                : item;
     }
 }

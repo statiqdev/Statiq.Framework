@@ -4,12 +4,14 @@ using System.Linq;
 using System.Threading.Tasks;
 using NUnit.Framework;
 using Shouldly;
+using Wyam.Common;
 using Wyam.Common.Configuration;
 using Wyam.Common.Documents;
 using Wyam.Common.IO;
 using Wyam.Common.Meta;
 using Wyam.Core.Modules.IO;
 using Wyam.Testing;
+using Wyam.Testing.Documents;
 using Wyam.Testing.Execution;
 using Wyam.Testing.IO;
 
@@ -180,7 +182,7 @@ namespace Wyam.Core.Tests.Modules.IO
                 CopyFiles copyFiles = new CopyFiles("**/test-a.txt");
 
                 // When
-                IDocument output = (await ExecuteAsync(context, copyFiles))[0];
+                TestDocument output = await ExecuteAsync(context, copyFiles).SingleAsync();
 
                 // Then
                 output.Source.FullPath.ShouldBe("/TestFiles/Input/test-a.txt");

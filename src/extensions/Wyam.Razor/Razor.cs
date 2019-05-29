@@ -186,7 +186,7 @@ namespace Wyam.Razor
         private async Task<string> GetRelativePathAsync(IDocument document, IExecutionContext context)
         {
             // Use the pre-calculated relative file path if available
-            FilePath relativePath = document.Source?.GetRelativePath(context);
+            FilePath relativePath = document.Source?.GetRelativeInputPath(context);
             return relativePath != null ? $"/{relativePath.FullPath}" : await GetRelativePathAsync(document.Source, context);
         }
 

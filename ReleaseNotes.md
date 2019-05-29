@@ -11,8 +11,12 @@
 - Removed IPipeline.ProcessDocumentsOnce and related plumbing
 - Split Execute module into Execute, ExecuteDocument, and ExecuteContext
 - Pipelines no longer start with an empty initial document (this was important before the execution context provided access to settings but it no longer needed)
-- New `Cache` module to handle caching between executions
+- New `CacheDocuments` module to handle caching between executions
 - New content provider API for document content
+- Removed file metadata keys and replaced with uses of `IDocument.Source` and `IDocument.Destination` (which gets set to the relative path initially) - Keys.SourceFilePath = IDocument.Source, Keys.RelativeFilePath = IDocument.Destination
+- New `SetDestination` module to set `IDocument.Destination` and removed path tweaking from `WriteFiles` module (use `SetDestination` before `WriteFiles` to change destination path)
+- Container modules no longer implement `IModuleList` directly, instead they have a `Children` property (removes ambiguity when an `IModuleList` is expected)
+- Added `IDocument.Version` to indicate how many times a given document has been cloned (each clone incremented the version) - useful for debugging
 
 # 2.2.4
 

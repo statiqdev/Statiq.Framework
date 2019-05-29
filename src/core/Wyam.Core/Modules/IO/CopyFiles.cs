@@ -123,7 +123,7 @@ namespace Wyam.Core.Modules.IO
                     try
                     {
                         // Get the default destination file
-                        FilePath relativePath = file.Path.GetRelativePath(context);
+                        FilePath relativePath = file.Path.GetRelativeInputPath(context);
                         IFile destination = await context.FileSystem.GetOutputFileAsync(relativePath);
 
                         // Calculate an alternate destination if needed

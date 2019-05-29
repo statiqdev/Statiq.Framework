@@ -1,12 +1,9 @@
 ﻿using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using NUnit.Framework;
 using Shouldly;
 using Wyam.Common;
-using Wyam.Common.Documents;
 using Wyam.Common.IO;
-using Wyam.Common.Meta;
 using Wyam.Core.Modules.IO;
 using Wyam.Testing;
 using Wyam.Testing.Documents;
@@ -24,11 +21,7 @@ namespace Wyam.Core.Tests.Modules.IO
         {
             // Given
             TestExecutionContext context = GetContext();
-            TestDocument input = new TestDocument(
-                new MetadataItems
-                {
-                    { Keys.RelativeFilePath, new FilePath("test.md") }
-                });
+            TestDocument input = new TestDocument(new FilePath("test.md"));
             UnwrittenFiles unwrittenFiles = new UnwrittenFiles();
 
             // When
@@ -44,11 +37,9 @@ namespace Wyam.Core.Tests.Modules.IO
             // Given
             TestExecutionContext context = GetContext();
             TestDocument input = new TestDocument(
-                new MetadataItems
-                {
-                    { Keys.RelativeFilePath, new FilePath("test.txt") }
-                });
-            UnwrittenFiles unwrittenFiles = new UnwrittenFiles(".md");
+                new FilePath("/input/test.txt"),
+                new FilePath("test.md"));
+            UnwrittenFiles unwrittenFiles = new UnwrittenFiles();
 
             // When
             IReadOnlyList<TestDocument> results = await ExecuteAsync(input, context, unwrittenFiles);
@@ -63,10 +54,7 @@ namespace Wyam.Core.Tests.Modules.IO
             // Given
             TestExecutionContext context = GetContext();
             TestDocument input = new TestDocument(
-                new MetadataItems
-                {
-                    { Keys.RelativeFilePath, new FilePath("foo.txt") }
-                },
+                new FilePath("foo.txt"),
                 "Test");
             UnwrittenFiles unwrittenFiles = new UnwrittenFiles();
 
@@ -83,12 +71,9 @@ namespace Wyam.Core.Tests.Modules.IO
             // Given
             TestExecutionContext context = GetContext();
             TestDocument input = new TestDocument(
-                new MetadataItems
-                {
-                    { Keys.RelativeFilePath, new FilePath("test.md") }
-                },
-                "Test");
-            UnwrittenFiles unwrittenFiles = new UnwrittenFiles(".txt");
+                new FilePath("/input/test.md"),
+                new FilePath("test.txt"));
+            UnwrittenFiles unwrittenFiles = new UnwrittenFiles();
 
             // When
             TestDocument result = await ExecuteAsync(input, context, unwrittenFiles).SingleAsync();

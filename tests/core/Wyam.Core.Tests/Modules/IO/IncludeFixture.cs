@@ -53,7 +53,7 @@ namespace Wyam.Core.Tests.Modules.IO
             {
                 // Given
                 TestExecutionContext context = GetExecutionContext();
-                TestDocument document = new TestDocument(new FilePath("/TestFiles/Input/test.txt"), null, "^\"test-a.txt\"foo");
+                TestDocument document = new TestDocument(new FilePath("/TestFiles/Input/test.txt"), "^\"test-a.txt\"foo");
                 Include include = new Include();
 
                 // When
@@ -68,7 +68,7 @@ namespace Wyam.Core.Tests.Modules.IO
             {
                 // Given
                 TestExecutionContext context = GetExecutionContext();
-                TestDocument document = new TestDocument(new FilePath("/TestFiles/Input/test.txt"), null, "\\^\"test-a.txt\"foo");
+                TestDocument document = new TestDocument(new FilePath("/TestFiles/Input/test.txt"), "\\^\"test-a.txt\"foo");
                 Include include = new Include();
 
                 // When
@@ -83,7 +83,7 @@ namespace Wyam.Core.Tests.Modules.IO
             {
                 // Given
                 TestExecutionContext context = GetExecutionContext();
-                TestDocument document = new TestDocument(new FilePath("/TestFiles/Input/test.txt"), null, content: "\\\\\\^\"test-a.txt\"foo");
+                TestDocument document = new TestDocument(new FilePath("/TestFiles/Input/test.txt"), "\\\\\\^\"test-a.txt\"foo");
                 Include include = new Include();
 
                 // When
@@ -98,7 +98,7 @@ namespace Wyam.Core.Tests.Modules.IO
             {
                 // Given
                 TestExecutionContext context = GetExecutionContext();
-                TestDocument document = new TestDocument(new FilePath("/TestFiles/Input/test.txt"), null, "x ^\"test-a.txt\" y ^\"test-b.txt\" z");
+                TestDocument document = new TestDocument(new FilePath("/TestFiles/Input/test.txt"), "x ^\"test-a.txt\" y ^\"test-b.txt\" z");
                 Include include = new Include();
 
                 // When
@@ -113,7 +113,7 @@ namespace Wyam.Core.Tests.Modules.IO
             {
                 // Given
                 TestExecutionContext context = GetExecutionContext();
-                TestDocument document = new TestDocument(new FilePath("/TestFiles/Input/test.txt"), null, "x ^\"test-a.txt\"^\"test-b.txt\" z");
+                TestDocument document = new TestDocument(new FilePath("/TestFiles/Input/test.txt"), "x ^\"test-a.txt\"^\"test-b.txt\" z");
                 Include include = new Include();
 
                 // When
@@ -129,7 +129,7 @@ namespace Wyam.Core.Tests.Modules.IO
                 // Given
                 TestExecutionContext context = GetExecutionContext();
                 ThrowOnTraceEventType(System.Diagnostics.TraceEventType.Error);
-                TestDocument document = new TestDocument(new FilePath("/TestFiles/Input/test.txt"), null, "x ^\"test-c.txt\" y");
+                TestDocument document = new TestDocument(new FilePath("/TestFiles/Input/test.txt"), "x ^\"test-c.txt\" y");
                 Include include = new Include();
 
                 // When
@@ -144,7 +144,7 @@ namespace Wyam.Core.Tests.Modules.IO
             {
                 // Given
                 TestExecutionContext context = GetExecutionContext();
-                TestDocument document = new TestDocument(new FilePath("/TestFiles/Input/test.txt"), null, "x ^\"Subfolder/test-c.txt\" y");
+                TestDocument document = new TestDocument(new FilePath("/TestFiles/Input/test.txt"), "x ^\"Subfolder/test-c.txt\" y");
                 Include include = new Include();
 
                 // When
@@ -159,7 +159,7 @@ namespace Wyam.Core.Tests.Modules.IO
             {
                 // Given
                 TestExecutionContext context = GetExecutionContext();
-                TestDocument document = new TestDocument(new FilePath("/TestFiles/Input/test.txt"), null, "x ^\"../test-above-input.txt\" y");
+                TestDocument document = new TestDocument(new FilePath("/TestFiles/Input/test.txt"), "x ^\"../test-above-input.txt\" y");
                 Include include = new Include();
 
                 // When
@@ -174,7 +174,7 @@ namespace Wyam.Core.Tests.Modules.IO
             {
                 // Given
                 TestExecutionContext context = GetExecutionContext();
-                TestDocument document = new TestDocument(new FilePath("/TestFiles/Input/test.txt"), null, "x ^\"/TestFiles/test-above-input.txt\" y");
+                TestDocument document = new TestDocument(new FilePath("/TestFiles/Input/test.txt"), "x ^\"/TestFiles/test-above-input.txt\" y");
                 Include include = new Include();
 
                 // When
@@ -192,7 +192,7 @@ namespace Wyam.Core.Tests.Modules.IO
                 fileProvider.AddFile(
                     "/TestFiles/Input/test-outer.txt",
                     "3 ^\"test-a.txt\" 4");
-                TestDocument document = new TestDocument(new FilePath("/TestFiles/Input/test.txt"), null, "1 ^\"test-outer.txt\" 2");
+                TestDocument document = new TestDocument(new FilePath("/TestFiles/Input/test.txt"), "1 ^\"test-outer.txt\" 2");
                 Include include = new Include();
 
                 // When
@@ -210,7 +210,7 @@ namespace Wyam.Core.Tests.Modules.IO
                 fileProvider.AddFile(
                     "/TestFiles/Input/test-outer.txt",
                     "3 ^\"test-a.txt\" 4");
-                TestDocument document = new TestDocument(new FilePath("/TestFiles/Input/test.txt"), null, "1 ^\"test-outer.txt\" 2");
+                TestDocument document = new TestDocument(new FilePath("/TestFiles/Input/test.txt"), "1 ^\"test-outer.txt\" 2");
                 Include include = new Include().WithRecursion(false);
 
                 // When
@@ -228,7 +228,7 @@ namespace Wyam.Core.Tests.Modules.IO
                 fileProvider.AddFile(
                     "/TestFiles/Input/test-outer.txt",
                     "3 \\^\"test-a.txt\" 4");
-                TestDocument document = new TestDocument(new FilePath("/TestFiles/Input/test.txt"), null, "1 ^\"test-outer.txt\" 2");
+                TestDocument document = new TestDocument(new FilePath("/TestFiles/Input/test.txt"), "1 ^\"test-outer.txt\" 2");
                 Include include = new Include().WithRecursion(false);
 
                 // When
@@ -249,7 +249,7 @@ namespace Wyam.Core.Tests.Modules.IO
                 fileProvider.AddFile(
                     "/TestFiles/Input/test-inner.txt",
                     "5 ^\"test-a.txt\" 6");
-                TestDocument document = new TestDocument(new FilePath("/TestFiles/Input/test.txt"), null, "1 ^\"test-outer.txt\" 2");
+                TestDocument document = new TestDocument(new FilePath("/TestFiles/Input/test.txt"), "1 ^\"test-outer.txt\" 2");
                 Include include = new Include();
 
                 // When

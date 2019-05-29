@@ -244,7 +244,7 @@ namespace Wyam.Common.IO
         /// </summary>
         /// <param name="context">The current execution context.</param>
         /// <returns>A path to this file relative to it's containing input directory in the current file system.</returns>
-        public FilePath GetRelativePath(IExecutionContext context)
+        public FilePath GetRelativeInputPath(IExecutionContext context)
         {
             if (IsRelative)
             {
