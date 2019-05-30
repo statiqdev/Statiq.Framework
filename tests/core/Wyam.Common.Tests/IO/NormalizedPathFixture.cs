@@ -1,6 +1,8 @@
 ﻿using System;
 using NUnit.Framework;
+using Shouldly;
 using Wyam.Common.IO;
+using Wyam.Common.Util;
 using Wyam.Testing;
 using Wyam.Testing.Attributes;
 
@@ -360,7 +362,39 @@ namespace Wyam.Common.Tests.IO
                 TestPath path = new TestPath(expected);
 
                 // Then
-                Assert.AreEqual(expected, path.FullPath);
+                path.FullPath.ShouldBe(expected);
+            }
+
+            [Test]
+            public void ShouldReturnFullPathForInferedAbsolutePath()
+            {
+                // Given, When
+                const string expected = "/shaders/basic";
+                TestPath path = new TestPath(expected);
+
+                // Then
+                path.FullPath.ShouldBe(expected);
+            }
+
+            [Test]
+            public void ShouldReturnFullPathForExplicitAbsolutePath()
+            {
+                // Given, When
+                const string expected = "shaders/basic";
+                TestPath path = new TestPath(expected, PathKind.Absolute);
+
+                // Then
+                path.FullPath.ShouldBe(expected);
+            }
+
+            [WindowsTest]
+            public void ShouldNotPrependSlashForRootedPath()
+            {
+                // Given, When
+                TestPath path = new TestPath("C:/shaders/basic");
+
+                // Then
+                path.FullPath.ShouldBe("C:\\shaders/basic");
             }
         }
 
@@ -456,62 +490,47 @@ namespace Wyam.Common.Tests.IO
             }
         }
 
-        public class CollapseTests : NormalizedPathFixture
+        public class GetSegementsTests : NormalizedPathFixture
         {
-            [Test]
-            public void ShouldThrowIfPathIsNull()
-            {
-                // Given, When
-                TestDelegate test = () => NormalizedPath.Collapse(null);
-
-                // Then
-                Assert.Throws<ArgumentNullException>(test);
-            }
-
             [TestCase("hello/temp/test/../world", "hello/temp/world")]
             [TestCase("../hello/temp/test/../world", "../hello/temp/world")]
             [TestCase("../hello/world", "../hello/world")]
             [TestCase("hello/temp/test/../../world", "hello/world")]
             [TestCase("hello/temp/../temp2/../world", "hello/world")]
             [TestCase("/hello/temp/test/../../world", "/hello/world")]
-            [TestCase("/hello/../../../../../../temp", "/temp")] // Stop collapsing when root is reached
+            [TestCase("/hello/../../../../../../temp", "/../../../../../temp")]
+            [TestCase("/hello/../../foo/../../../../temp", "/../../../../temp")]
             [TestCase(".", ".")]
-            [TestCase("/.", ".")]
-            [TestCase("./a", "a")]
-            [TestCase("./..", ".")]
+            [TestCase("..", "..")]
+            [TestCase("/..", "/..")]
+            [TestCase("/.", "/")]
+            [TestCase("/", "/")]
+            [TestCase("./.././foo", "./../foo")]
+            [TestCase("./a", "./a")]
+            [TestCase("./..", "./..")]
             [TestCase("a/./b", "a/b")]
             [TestCase("/a/./b", "/a/b")]
             [TestCase("a/b/.", "a/b")]
             [TestCase("/a/b/.", "/a/b")]
             [TestCase("/./a/b", "/a/b")]
-            [WindowsTestCase("c:/hello/temp/test/../../world", "c:/hello/world")]
-            [WindowsTestCase("c:/../../../../../../temp", "c:/temp")]
-            public void ShouldCollapseDirectoryPath(string fullPath, string expected)
-            {
-                // Given
-                DirectoryPath directoryPath = new DirectoryPath(fullPath);
-
-                // When
-                string path = NormalizedPath.Collapse(directoryPath);
-
-                // Then
-                Assert.AreEqual(expected, path);
-            }
-
+            [TestCase("/././a/b", "/a/b")]
+            [TestCase("c:/hello/temp/test/../../world", "c:/hello/world")]
+            [TestCase("c:/../../../../../../temp", "c:/../../../../../../temp")]
+            [TestCase("c:/../../foo/../../../../temp", "c:/../../../../../temp")]
             [TestCase("/a/b/c/../d/baz.txt", "/a/b/d/baz.txt")]
             [TestCase("../d/baz.txt", "../d/baz.txt")]
             [TestCase("../a/b/c/../d/baz.txt", "../a/b/d/baz.txt")]
-            [WindowsTestCase("c:/a/b/c/../d/baz.txt", "c:/a/b/d/baz.txt")]
-            public void ShouldCollapseFilePath(string fullPath, string expected)
+            [TestCase("c:/a/b/c/../d/baz.txt", "c:/a/b/d/baz.txt")]
+            public void ShouldCollapsePath(string fullPath, string expected)
             {
                 // Given
-                FilePath filePath = new FilePath(fullPath);
+                StringPool pool = new StringPool();
 
                 // When
-                string path = NormalizedPath.Collapse(filePath);
+                string[] segments = NormalizedPath.GetSegments(fullPath, pool);
 
                 // Then
-                Assert.AreEqual(expected, path);
+                string.Join('/', segments).ShouldBe(expected);
             }
         }
 

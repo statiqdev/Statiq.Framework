@@ -1,7 +1,9 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
+using Wyam.Common.Util;
 
 namespace Wyam.Common.IO
 {
@@ -13,6 +15,8 @@ namespace Wyam.Common.IO
         // Initially based on code from Cake (http://cakebuild.net/)
 
         private const string FileProviderDelimiter = "|";
+
+        private static readonly StringPool Pool = new StringPool();
 
         /// <summary>
         /// The default file provider.
@@ -73,40 +77,41 @@ namespace Wyam.Common.IO
         /// <param name="pathKind">Specifies whether the path is relative, absolute, or indeterminate.</param>
         private NormalizedPath(Tuple<Uri, string> providerAndPath, bool fullySpecified, PathKind pathKind)
         {
-            if (providerAndPath.Item2 == null)
-            {
-                throw new ArgumentNullException();
-            }
+            _ = providerAndPath ?? throw new ArgumentNullException(nameof(providerAndPath));
+            _ = providerAndPath.Item2 ?? throw new ArgumentNullException(nameof(providerAndPath.Item2));
+
             if (string.IsNullOrWhiteSpace(providerAndPath.Item2))
             {
                 throw new ArgumentException("Path cannot be empty");
             }
 
             // Leave spaces since they're valid path chars
-            FullPath = providerAndPath.Item2.Replace('\\', '/').Trim('\r', '\n', '\t');
+            string fullPath = providerAndPath.Item2.Replace('\\', '/').Trim('\r', '\n', '\t');
 
             // Remove relative part of a path, but only if it's not the only part
-            if (FullPath.StartsWith("./", StringComparison.Ordinal) && FullPath.Length > 2)
+            if (fullPath.StartsWith("./", StringComparison.Ordinal) && fullPath.Length > 2)
             {
-                FullPath = FullPath.Substring(2);
+                fullPath = fullPath.Substring(2);
             }
 
             // Remove trailing slashes (as long as this isn't just a slash)
-            if (FullPath.Length > 1)
+            if (fullPath.Length > 1)
             {
-                FullPath = FullPath.TrimEnd('/');
+                fullPath = fullPath.TrimEnd('/');
             }
 
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows) && FullPath.EndsWith(":", StringComparison.OrdinalIgnoreCase))
+            // Add a backslash if this is a windows root (I.e., ends with :)
+            // The one time a backslash is allowed
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows) && fullPath.EndsWith(":", StringComparison.OrdinalIgnoreCase))
             {
-                FullPath = string.Concat(FullPath, "/");
+                fullPath = string.Concat(fullPath, "\\");
             }
 
             // Absolute path?
             switch (pathKind)
             {
                 case PathKind.RelativeOrAbsolute:
-                    IsAbsolute = System.IO.Path.IsPathRooted(FullPath);
+                    IsAbsolute = System.IO.Path.IsPathRooted(fullPath);
                     break;
                 case PathKind.Absolute:
                     IsAbsolute = true;
@@ -134,8 +139,66 @@ namespace Wyam.Common.IO
                 FileProvider = providerAndPath.Item1;
             }
 
-            // Extract path segments.
-            Segments = FullPath.Split(new[] { '/' }, StringSplitOptions.RemoveEmptyEntries);
+            // Extract path segments, pool them, and collapse
+            Segments = GetSegments(fullPath, Pool);
+        }
+
+        // Internal for testing
+        // Splits the path on /, collapses it, and then pools the segements
+        internal static string[] GetSegments(string path, StringPool pool)
+        {
+            // Some special cases
+            if (path.Length == 0)
+            {
+                return new string[] { pool.GetOrAdd(".") };
+            }
+            if (path.Length == 1)
+            {
+                return new string[] { pool.GetOrAdd(path) };
+            }
+
+            // Collapse the path
+            Stack<string> stack = new Stack<string>();
+            string[] segments = path.Split('/', StringSplitOptions.RemoveEmptyEntries);
+            for (int c = 0; c < segments.Length; c++)
+            {
+                // Crawl up, but only if we have a segment to pop, otherwise preserve the backtrack
+                // Also don't pop a .. or a . (which would only appear in the first segment)
+                // We'll only hit this after at least the first segment
+                if (
+                    segments[c] == ".."
+                    && stack.Count > 0
+                    && stack.Peek() != ".."
+                    && (c > 1 || stack.Peek() != ".")
+                    && (stack.Count > 1 || !System.IO.Path.IsPathRooted(stack.Peek())))
+                {
+                    stack.Pop();
+                    continue;
+                }
+
+                // If this is a ., skip it unless it's the first segment
+                if (segments[c] == "." && (c != 0 || path[0] == '/'))
+                {
+                    continue;
+                }
+
+                // Push this segment
+                stack.Push(segments[c]);
+            }
+
+            // If there's nothing in the stack, figure out if we started with a slash
+            if (stack.Count == 0)
+            {
+                return path.Length > 0 && path[0] == '/'
+                    ? new string[] { pool.GetOrAdd("/") }
+                    : new string[] { pool.GetOrAdd(".") };
+            }
+
+            // Pool the segements
+            return stack
+                .Reverse()
+                .Select((s, i) => pool.GetOrAdd(i == 0 && path[0] == '/' ? "/" + s : s))
+                .ToArray();
         }
 
         // Internal for testing
@@ -231,7 +294,7 @@ namespace Wyam.Common.IO
         /// Gets the full path.
         /// </summary>
         /// <value>The full path.</value>
-        public string FullPath { get; }
+        public string FullPath => string.Join('/', Segments);
 
         /// <summary>
         /// Gets a value indicating whether this path is relative.
@@ -286,31 +349,6 @@ namespace Wyam.Common.IO
             }
         }
 
-        internal static string Collapse(NormalizedPath path)
-        {
-            _ = path ?? throw new ArgumentNullException(nameof(path));
-
-            Stack<string> stack = new Stack<string>();
-            foreach (string segment in path.FullPath.Split('/', '\\'))
-            {
-                if (segment == ".")
-                {
-                    continue;
-                }
-                if (segment == "..")
-                {
-                    if (stack.Count > 1)
-                    {
-                        stack.Pop();
-                    }
-                    continue;
-                }
-                stack.Push(segment);
-            }
-            string collapsed = string.Join("/", stack.Reverse());
-            return collapsed?.Length == 0 ? "." : collapsed;
-        }
-
         /// <summary>
         /// Returns a <see cref="string" /> that represents this path.
         /// </summary>
@@ -319,17 +357,18 @@ namespace Wyam.Common.IO
         /// </returns>
         public override string ToString()
         {
+            string fullPath = FullPath;
             if (IsRelative || FileProvider == null)
             {
-                return FullPath;
+                return fullPath;
             }
             string rightPart = GetRightPart(FileProvider);
             if (string.IsNullOrEmpty(rightPart) || rightPart == "/")
             {
                 // Remove the proceeding slash from FullPath if the provider already has one
-                return FileProvider + (rightPart == "/" && FullPath.StartsWith("/") ? FullPath.Substring(1) : FullPath);
+                return FileProvider + (rightPart == "/" && fullPath.StartsWith("/") ? fullPath.Substring(1) : fullPath);
             }
-            return FileProvider + FileProviderDelimiter + FullPath;
+            return FileProvider + FileProviderDelimiter + fullPath;
         }
 
         /// <inheritdoc />
@@ -337,7 +376,10 @@ namespace Wyam.Common.IO
         {
             HashCode hash = default;
             hash.Add(FileProvider?.GetHashCode() ?? 0);
-            hash.Add(FullPath.GetHashCode());
+            foreach (string segment in Segments)
+            {
+                hash.Add(segment);
+            }
             return hash.ToHashCode();
         }
 
@@ -366,14 +408,10 @@ namespace Wyam.Common.IO
         bool IEquatable<NormalizedPath>.Equals(NormalizedPath other) =>
             other != null
             && FileProvider?.ToString() == other.FileProvider?.ToString()
-            && FullPath == other.FullPath;
+            && Segments.SequenceEqual(other.Segments);
 
         /// <inheritdoc />
-        public int CompareTo(object obj)
-        {
-            NormalizedPath path = obj as NormalizedPath;
-            return path == null ? 1 : CompareTo(path);
-        }
+        public int CompareTo(object obj) => !(obj is NormalizedPath path) ? 1 : CompareTo(path);
 
         /// <inheritdoc />
         public int CompareTo(NormalizedPath other)

@@ -236,7 +236,7 @@ namespace Wyam.Common.IO
         /// Collapses a <see cref="FilePath"/> containing ellipses.
         /// </summary>
         /// <returns>A collapsed <see cref="FilePath"/>.</returns>
-        public FilePath Collapse() => new FilePath(FileProvider, Collapse(this));
+        public FilePath Collapse() => throw new NotSupportedException();
 
         /// <summary>
         /// Gets path to this file relative to it's containing input directory in the current file system.
