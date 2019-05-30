@@ -288,13 +288,10 @@ namespace Wyam.Common.IO
 
         internal static string Collapse(NormalizedPath path)
         {
-            if (path == null)
-            {
-                throw new ArgumentNullException(nameof(path));
-            }
+            _ = path ?? throw new ArgumentNullException(nameof(path));
+
             Stack<string> stack = new Stack<string>();
-            string[] segments = path.FullPath.Split('/', '\\');
-            foreach (string segment in segments)
+            foreach (string segment in path.FullPath.Split('/', '\\'))
             {
                 if (segment == ".")
                 {

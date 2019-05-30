@@ -33,7 +33,7 @@ namespace Wyam.Core.Modules.Metadata
 
         private static readonly Regex FileNameRegex = new Regex("^([a-zA-Z0-9])+$");
 
-        private readonly DocumentConfig<FilePath> _path = Config.FromDocument(doc => doc.Destination);
+        private readonly DocumentConfig<string> _fileName = null;
         private readonly string _outputKey = null;
 
         /// <summary>
@@ -46,43 +46,43 @@ namespace Wyam.Core.Modules.Metadata
         /// <summary>
         /// Optimizes the file name stored in the given metadata key and stores it back in the same key.
         /// </summary>
-        /// <param name="key">The key containing the path to optimize.</param>
+        /// <param name="key">The key containing the file name to optimize.</param>
         public FileName(string key)
         {
             _ = key ?? throw new ArgumentNullException(nameof(key));
-            _path = Config.FromDocument(doc => doc.FilePath(key));
+            _fileName = Config.FromDocument(doc => doc.String(key));
             _outputKey = key;
         }
 
         /// <summary>
         /// Optimizes the file name stored in the given metadata key and stores it at the provided key.
         /// </summary>
-        /// <param name="inputKey">The metadata key to use for the input filename.</param>
-        /// <param name="outputKey">The metadata key to use for the optimized filename.</param>
+        /// <param name="inputKey">The metadata key to use for the input file name.</param>
+        /// <param name="outputKey">The metadata key to use for the optimized file name.</param>
         public FileName(string inputKey, string outputKey)
         {
             _ = inputKey ?? throw new ArgumentNullException(nameof(inputKey));
             _ = outputKey ?? throw new ArgumentNullException(nameof(outputKey));
 
-            _path = Config.FromDocument(doc => doc.FilePath(inputKey));
+            _fileName = Config.FromDocument(doc => doc.String(inputKey));
             _outputKey = outputKey;
         }
 
         /// <summary>
         /// Optimizes the file name in the resulting path and sets the specified metadata key.
         /// </summary>
-        /// <param name="path">A delegate that should return a <see cref="FilePath"/> to optimize.</param>
-        /// <param name="outputKey">The metadata key to use for the optimized filename.</param>
-        public FileName(DocumentConfig<FilePath> path, string outputKey)
+        /// <param name="fileName">A delegate that should return a <see cref="string"/> file name to optimize.</param>
+        /// <param name="outputKey">The metadata key to use for the optimized file name.</param>
+        public FileName(DocumentConfig<string> fileName, string outputKey)
         {
             _ = outputKey ?? throw new ArgumentNullException(outputKey);
 
-            _path = path ?? throw new ArgumentNullException(nameof(path));
+            _fileName = fileName ?? throw new ArgumentNullException(nameof(fileName));
             _outputKey = outputKey;
         }
 
         /// <summary>
-        /// Specifies the characters to allow in the filename.
+        /// Specifies the characters to allow in the file name.
         /// </summary>
         /// <param name="allowedCharacters">The allowed characters.</param>
         /// <returns>The current module instance.</returns>
@@ -97,17 +97,19 @@ namespace Wyam.Core.Modules.Metadata
         {
             return await inputs.ParallelSelectAsync(context, async input =>
             {
-                FilePath path = await _path.GetValueAsync(input, context);
+                string fileName = _fileName == null
+                    ? input.Destination.FileName.FullPath
+                    : await _fileName.GetValueAsync(input, context);
 
-                if (path != null)
+                if (!string.IsNullOrWhiteSpace(fileName))
                 {
-                    string fileName = GetFileName(path.FileName.FullPath);
+                    fileName = GetFileName(fileName);
                     if (!string.IsNullOrWhiteSpace(fileName))
                     {
-                        path = path.ChangeFileName(fileName);
-                        if (string.IsNullOrWhiteSpace(_outputKey))
+                        if (_fileName == null || string.IsNullOrWhiteSpace(_outputKey))
                         {
                             // No output key so set the destination
+                            FilePath path = input.Destination.ChangeFileName(fileName);
                             return context.GetDocument(input, path);
                         }
                         else
@@ -117,7 +119,7 @@ namespace Wyam.Core.Modules.Metadata
                                 input,
                                 new MetadataItems
                                 {
-                                    { _outputKey, path }
+                                    { _outputKey, fileName }
                                 });
                         }
                     }

@@ -87,10 +87,7 @@ namespace Wyam.Common.IO
             }
             set
             {
-                if (value == null)
-                {
-                    throw new ArgumentNullException(nameof(value));
-                }
+                _ = value ?? throw new ArgumentNullException(nameof(value));
 
                 lock (_pathsLock)
                 {

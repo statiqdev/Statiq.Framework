@@ -33,14 +33,13 @@ namespace Wyam.Core.IO
 
             set
             {
-                if (value == null)
-                {
-                    throw new ArgumentNullException(nameof(RootPath));
-                }
+                _ = value ?? throw new ArgumentNullException(nameof(RootPath));
+
                 if (value.IsRelative)
                 {
                     throw new ArgumentException("The root path must not be relative");
                 }
+
                 _rootPath = value;
             }
         }
@@ -51,28 +50,14 @@ namespace Wyam.Core.IO
 
         public DirectoryPath OutputPath
         {
-            get
-            {
-                return _outputPath;
-            }
-
-            set
-            {
-                _outputPath = value ?? throw new ArgumentNullException(nameof(OutputPath));
-            }
+            get => _outputPath;
+            set => _outputPath = value ?? throw new ArgumentNullException(nameof(OutputPath));
         }
 
         public DirectoryPath TempPath
         {
-            get
-            {
-                return _tempPath;
-            }
-
-            set
-            {
-                _tempPath = value ?? throw new ArgumentNullException(nameof(TempPath));
-            }
+            get => _tempPath;
+            set => _tempPath = value ?? throw new ArgumentNullException(nameof(TempPath));
         }
 
         public IFileProvider GetFileProvider(NormalizedPath path)

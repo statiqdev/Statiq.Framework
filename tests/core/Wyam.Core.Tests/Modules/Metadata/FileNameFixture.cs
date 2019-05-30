@@ -21,15 +21,15 @@ namespace Wyam.Core.Tests.Modules.Metadata
         public class ExecuteTests : FileNameFixture
         {
             [TestCase(
-                "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~:/?#[]@!$&'()*+,;=",
+                "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~:?#[]@!$&'()*+,;=",
                 "abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyz0123456789")]
             [TestCase("Děku.jemeविकीвики-движка", "děku.jemeविकीвикидвижка")]
             [TestCase(
                 "this is my title - and some \t\t\t\t\n   clever; (piece) of text here: [ok].",
                 "this-is-my-title-and-some-clever-piece-of-text-here-ok")]
             [TestCase(
-                "this is my title?!! /r/science/ and #firstworldproblems :* :sadface=true",
-                "this-is-my-title-rscience-and-firstworldproblems-sadfacetrue")]
+                "this is my title?!! science and #firstworldproblems :* :sadface=true",
+                "this-is-my-title-science-and-firstworldproblems-sadfacetrue")]
             [TestCase(
                 "one-two-three--four--five and a six--seven--eight-nine------ten",
                 "onetwothreefourfive-and-a-sixseveneightnineten")]
@@ -105,14 +105,17 @@ namespace Wyam.Core.Tests.Modules.Metadata
                 // Given
                 string manyCharactersWow = new string(character[0], 10);
                 string path = string.Format("testing {0} some of {0} these {0}", manyCharactersWow);
-                TestDocument document = new TestDocument(new FilePath(path));
-                FileName fileName = new FileName();
+                TestDocument document = new TestDocument()
+                {
+                    new MetadataItem("MyKey", path)
+                };
+                FileName fileName = new FileName("MyKey");
 
                 // When
                 TestDocument result = await ExecuteAsync(document, fileName).SingleAsync();
 
                 // Then
-                result.Destination.FullPath.ShouldBe("testing-some-of-these-");
+                result.String("MyKey").ShouldBe("testing-some-of-these-");
             }
 
             [TestCase(null)]

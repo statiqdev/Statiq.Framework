@@ -72,7 +72,8 @@ namespace Wyam.Core.Tests.Modules.IO
             TestExecutionContext context = GetContext();
             TestDocument input = new TestDocument(
                 new FilePath("/input/test.md"),
-                new FilePath("test.txt"));
+                new FilePath("test.txt"),
+                "Test");
             UnwrittenFiles unwrittenFiles = new UnwrittenFiles();
 
             // When

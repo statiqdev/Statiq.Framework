@@ -216,11 +216,11 @@ namespace Wyam.Common.Tests.IO
                 Assert.AreEqual(expected, inputPathFromDirectoryPath?.FullPath);
             }
 
-            [TestCase("/a/b/c/foo.txt", "/a/y/../b")]
-            [TestCase("/a/x/bar.txt", "/a/y/../x")]
-            [TestCase("/a/x/baz.txt", "/a/y/../x")]
+            [TestCase("/a/b/c/foo.txt", "/a/b")]
+            [TestCase("/a/x/bar.txt", "/a/x")]
+            [TestCase("/a/x/baz.txt", "/a/x")]
             [TestCase("/z/baz.txt", null)]
-            [TestCase("/a/b/c/../e/foo.txt", "/a/y/../b")]
+            [TestCase("/a/b/c/../e/foo.txt", "/a/b")]
             public async Task ShouldReturnContainingPathForInputPathAboveRootPath(string path, string expected)
             {
                 // Given

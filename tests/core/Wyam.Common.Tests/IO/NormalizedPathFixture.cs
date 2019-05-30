@@ -468,6 +468,9 @@ namespace Wyam.Common.Tests.IO
                 Assert.Throws<ArgumentNullException>(test);
             }
 
+            [TestCase("hello/temp/test/../world", "hello/temp/world")]
+            [TestCase("../hello/temp/test/../world", "../hello/temp/world")]
+            [TestCase("../hello/world", "../hello/world")]
             [TestCase("hello/temp/test/../../world", "hello/world")]
             [TestCase("hello/temp/../temp2/../world", "hello/world")]
             [TestCase("/hello/temp/test/../../world", "/hello/world")]
@@ -496,6 +499,8 @@ namespace Wyam.Common.Tests.IO
             }
 
             [TestCase("/a/b/c/../d/baz.txt", "/a/b/d/baz.txt")]
+            [TestCase("../d/baz.txt", "../d/baz.txt")]
+            [TestCase("../a/b/c/../d/baz.txt", "../a/b/d/baz.txt")]
             [WindowsTestCase("c:/a/b/c/../d/baz.txt", "c:/a/b/d/baz.txt")]
             public void ShouldCollapseFilePath(string fullPath, string expected)
             {
