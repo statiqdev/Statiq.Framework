@@ -107,59 +107,84 @@ namespace Wyam.Common.IO
                 fullPath = string.Concat(fullPath, "\\");
             }
 
-            // Absolute path?
-            switch (pathKind)
-            {
-                case PathKind.RelativeOrAbsolute:
-                    IsAbsolute = System.IO.Path.IsPathRooted(fullPath);
-                    break;
-                case PathKind.Absolute:
-                    IsAbsolute = true;
-                    break;
-                case PathKind.Relative:
-                    IsAbsolute = false;
-                    break;
-            }
-
-            // Set provider (but only if absolute)
-            if (IsRelative && providerAndPath.Item1 != null)
-            {
-                throw new ArgumentException("Can not specify provider for relative paths");
-            }
-            if (providerAndPath.Item1 == null && IsAbsolute && !fullySpecified)
-            {
-                FileProvider = DefaultFileProvider;
-            }
-            else if (providerAndPath.Item1?.IsAbsoluteUri == false)
-            {
-                throw new ArgumentException("The provider URI must always be absolute");
-            }
-            else
-            {
-                FileProvider = providerAndPath.Item1;
-            }
-
-            // Extract path segments, pool them, and collapse
+            IsAbsolute = GetIsAbsolute(pathKind, fullPath);
+            FileProvider = GetFileProvider(providerAndPath.Item1, IsAbsolute, fullySpecified);
             Segments = GetSegments(fullPath, Pool);
         }
 
-        // Internal for testing
-        // Splits the path on /, collapses it, and then pools the segements
-        internal static string[] GetSegments(string path, StringPool pool)
+        // Called when creating a path from another path and we already have segments
+        protected internal NormalizedPath(Uri fileProvider, string[] segments, PathKind pathKind)
         {
-            // Some special cases
-            if (path.Length == 0)
+            IsAbsolute = GetIsAbsolute(pathKind, segments[0]);
+            FileProvider = GetFileProvider(fileProvider, IsAbsolute, true);
+            Segments = GetSegments(segments, Pool);
+        }
+
+        private static bool GetIsAbsolute(PathKind pathKind, string path)
+        {
+            switch (pathKind)
             {
-                return new string[] { pool.GetOrAdd(".") };
+                case PathKind.RelativeOrAbsolute:
+                    return System.IO.Path.IsPathRooted(path);
+                case PathKind.Absolute:
+                    return true;
+                case PathKind.Relative:
+                    return false;
             }
-            if (path.Length == 1)
+            return false;
+        }
+
+        private static Uri GetFileProvider(Uri fileProvider, bool isAbsolute, bool fullySpecified)
+        {
+            if (!isAbsolute && fileProvider != null)
             {
-                return new string[] { pool.GetOrAdd(path) };
+                throw new ArgumentException("Can not specify provider for relative paths");
+            }
+            if (fileProvider == null && isAbsolute && !fullySpecified)
+            {
+                return DefaultFileProvider;
+            }
+            else if (fileProvider?.IsAbsoluteUri == false)
+            {
+                throw new ArgumentException("The provider URI must always be absolute");
+            }
+
+            return fileProvider;
+        }
+
+        // Internal for testing
+        // Splits the path on /
+        internal static string[] GetSegments(string path, StringPool pool) =>
+            GetSegments(
+                path?.Split('/', StringSplitOptions.RemoveEmptyEntries),
+                path?.Length > 0 && path[0] == '/',
+                pool);
+
+        // Called when constructing a path from another path and the first segment might have a slash
+        // Remove the first slash and then note if it had one
+        private static string[] GetSegments(string[] segments, StringPool pool)
+        {
+            if (segments?.Length > 0 && segments[0][0] == '/')
+            {
+                segments[0] = segments[0].Substring(1);
+                return GetSegments(segments, true, pool);
+            }
+            return GetSegments(segments, false, pool);
+        }
+
+        // Collapses the path and then pools the segements
+        private static string[] GetSegments(string[] segments, bool pathStartsWithSlash, StringPool pool)
+        {
+            // Special case for null and empty segments
+            if (segments == null || segments.Length == 0 || segments[0].Length == 0)
+            {
+                return pathStartsWithSlash
+                    ? new string[] { pool.GetOrAdd("/") }
+                    : new string[] { pool.GetOrAdd(".") };
             }
 
             // Collapse the path
             Stack<string> stack = new Stack<string>();
-            string[] segments = path.Split('/', StringSplitOptions.RemoveEmptyEntries);
             for (int c = 0; c < segments.Length; c++)
             {
                 // Crawl up, but only if we have a segment to pop, otherwise preserve the backtrack
@@ -177,7 +202,7 @@ namespace Wyam.Common.IO
                 }
 
                 // If this is a ., skip it unless it's the first segment
-                if (segments[c] == "." && (c != 0 || path[0] == '/'))
+                if (segments[c] == "." && (c != 0 || pathStartsWithSlash))
                 {
                     continue;
                 }
@@ -189,7 +214,7 @@ namespace Wyam.Common.IO
             // If there's nothing in the stack, figure out if we started with a slash
             if (stack.Count == 0)
             {
-                return path.Length > 0 && path[0] == '/'
+                return pathStartsWithSlash
                     ? new string[] { pool.GetOrAdd("/") }
                     : new string[] { pool.GetOrAdd(".") };
             }
@@ -197,7 +222,7 @@ namespace Wyam.Common.IO
             // Pool the segements
             return stack
                 .Reverse()
-                .Select((s, i) => pool.GetOrAdd(i == 0 && path[0] == '/' ? "/" + s : s))
+                .Select((s, i) => pool.GetOrAdd(i == 0 && pathStartsWithSlash ? "/" + s : s))
                 .ToArray();
         }
 
@@ -210,8 +235,7 @@ namespace Wyam.Common.IO
             }
 
             // The use of IsWellFormedOriginalString() weeds out cases where a file system path was implicitly converted to a URI
-            Uri uri;
-            if (!Uri.TryCreate(provider, UriKind.Absolute, out uri) || !uri.IsWellFormedOriginalString())
+            if (!Uri.TryCreate(provider, UriKind.Absolute, out Uri uri) || !uri.IsWellFormedOriginalString())
             {
                 // Couldn't create the provider as a URI, try it as just a scheme
                 if (Uri.CheckSchemeName(provider))
@@ -294,7 +318,7 @@ namespace Wyam.Common.IO
         /// Gets the full path.
         /// </summary>
         /// <value>The full path.</value>
-        public string FullPath => string.Join('/', Segments);
+        //public string FullPath => string.Join('/', Segments);
 
         /// <summary>
         /// Gets a value indicating whether this path is relative.
