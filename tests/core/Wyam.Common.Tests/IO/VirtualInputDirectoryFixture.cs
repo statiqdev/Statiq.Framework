@@ -170,7 +170,7 @@ namespace Wyam.Common.Tests.IO
                 IDirectory result = await directory.GetDirectoryAsync(path);
 
                 // Then
-                Assert.AreEqual(expected, result.Path.Collapse().FullPath);
+                Assert.AreEqual(expected, result.Path.FullPath);
             }
 
             [Test]
@@ -210,7 +210,7 @@ namespace Wyam.Common.Tests.IO
                 IDirectory result = await directory.GetParentAsync();
 
                 // Then
-                Assert.AreEqual(expected, result?.Path.Collapse().FullPath);
+                Assert.AreEqual(expected, result?.Path.FullPath);
             }
         }
 

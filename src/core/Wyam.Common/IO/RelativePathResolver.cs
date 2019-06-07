@@ -36,10 +36,6 @@ namespace Wyam.Common.IO
                 throw new ArgumentException("Paths must both be relative or both be absolute");
             }
 
-            // Collapse the paths
-            source = source.Collapse();
-            target = target.Collapse();
-
             // Check if they share the same provider
             if (source.FileProvider != target.FileProvider)
             {
@@ -59,7 +55,7 @@ namespace Wyam.Common.IO
             }
 
             // Check if they share the same root
-            if (target.Segments.Length == 0 || string.CompareOrdinal(source.Segments[0], target.Segments[0]) != 0)
+            if (target.Segments.Length == 0 || !source.Segments[0].SequenceEqual(target.Segments[0]))
             {
                 return target;
             }
@@ -71,7 +67,7 @@ namespace Wyam.Common.IO
             // Find common root
             for (int x = 0; x < minimumSegmentsLength; x++)
             {
-                if (string.CompareOrdinal(source.Segments[x], target.Segments[x]) != 0)
+                if (!source.Segments[x].SequenceEqual(target.Segments[x]))
                 {
                     break;
                 }
@@ -85,12 +81,12 @@ namespace Wyam.Common.IO
             }
 
             // Add relative folders in from path
-            List<string> relativeSegments = new List<string>();
+            List<ReadOnlyMemory<char>> relativeSegments = new List<ReadOnlyMemory<char>>();
             for (int x = lastCommonRoot + 1; x < source.Segments.Length; x++)
             {
                 if (source.Segments[x].Length > 0)
                 {
-                    relativeSegments.Add("..");
+                    relativeSegments.Add(NormalizedPath.DotDot.AsMemory());
                 }
             }
 

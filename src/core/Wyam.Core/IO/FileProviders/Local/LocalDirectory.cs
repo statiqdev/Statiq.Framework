@@ -30,7 +30,7 @@ namespace Wyam.Core.IO.FileProviders.Local
                 throw new ArgumentException("Path must be absolute", nameof(path));
             }
 
-            Path = path.Collapse();
+            Path = path;
             _directory = new DirectoryInfo(Path.FullPath);
         }
 

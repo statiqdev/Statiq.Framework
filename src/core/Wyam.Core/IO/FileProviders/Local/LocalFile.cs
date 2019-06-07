@@ -16,16 +16,13 @@ namespace Wyam.Core.IO.FileProviders.Local
 
         public LocalFile(FilePath path)
         {
-            if (path == null)
-            {
-                throw new ArgumentNullException(nameof(path));
-            }
+            _ = path ?? throw new ArgumentNullException(nameof(path));
             if (path.IsRelative)
             {
                 throw new ArgumentException("Path must be absolute", nameof(path));
             }
 
-            Path = path.Collapse();
+            Path = path;
             _file = new FileInfo(Path.FullPath);
         }
 
@@ -37,10 +34,7 @@ namespace Wyam.Core.IO.FileProviders.Local
 
         public async Task CopyToAsync(IFile destination, bool overwrite = true, bool createDirectory = true)
         {
-            if (destination == null)
-            {
-                throw new ArgumentNullException(nameof(destination));
-            }
+            _ = destination ?? throw new ArgumentNullException(nameof(destination));
 
             // Create the directory
             if (createDirectory)
@@ -69,10 +63,7 @@ namespace Wyam.Core.IO.FileProviders.Local
 
         public async Task MoveToAsync(IFile destination)
         {
-            if (destination == null)
-            {
-                throw new ArgumentNullException(nameof(destination));
-            }
+            _ = destination ?? throw new ArgumentNullException(nameof(destination));
 
             // Use the file system APIs if destination is also in the file system
             if (destination is LocalFile)

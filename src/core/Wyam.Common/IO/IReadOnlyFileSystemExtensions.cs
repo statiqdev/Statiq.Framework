@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Wyam.Common.IO.Globbing;
+using Wyam.Common.Util;
 
 namespace Wyam.Common.IO
 {
@@ -131,7 +132,7 @@ namespace Wyam.Common.IO
 
             return fileSystem.InputPaths
                 .Reverse()
-                .Select(x => fileSystem.RootPath.Combine(x).Collapse())
+                .Select(x => fileSystem.RootPath.Combine(x))
                 .FirstOrDefault(x =>
                     x.FileProvider == path.FileProvider
                     && path.Segments.StartsWith(x.Segments));
@@ -401,7 +402,7 @@ namespace Wyam.Common.IO
                     {
                         // The globber doesn't support absolute paths, so get the root directory of this path (including provider)
                         IDirectory rootDirectory = await fileSystem.GetDirectoryAsync(filePath.Root);
-                        FilePath relativeFilePath = filePath.RootRelative.Collapse();
+                        FilePath relativeFilePath = filePath.RootRelative;
                         return Tuple.Create(
                             rootDirectory,
                             negated ? ('!' + relativeFilePath.FullPath) : relativeFilePath.FullPath);

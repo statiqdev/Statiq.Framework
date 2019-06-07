@@ -319,36 +319,5 @@ namespace Wyam.Common.Tests.IO
                 Assert.IsNull(result);
             }
         }
-
-        public class CollapseTests : FilePathFixture
-        {
-            [TestCase("/a/b/c/../d/baz.txt", "/a/b/d/baz.txt")]
-            [WindowsTestCase("c:/a/b/c/../d/baz.txt", "c:/a/b/d/baz.txt")]
-            public void ShouldCollapse(string fullPath, string expected)
-            {
-                // Given
-                FilePath filePath = new FilePath(fullPath);
-
-                // When
-                FilePath path = filePath.Collapse();
-
-                // Then
-                Assert.AreEqual(expected, path.FullPath);
-            }
-
-            [Test]
-            public void CollapseRetainsProvider()
-            {
-                // Given
-                FilePath filePath = new FilePath(new Uri("foo:///"), "/a/b/../c/bar.txt");
-
-                // When
-                FilePath path = filePath.Collapse();
-
-                // Then
-                Assert.AreEqual("/a/c/bar.txt", path.FullPath);
-                Assert.AreEqual(new Uri("foo:///"), path.FileProvider);
-            }
-        }
     }
 }

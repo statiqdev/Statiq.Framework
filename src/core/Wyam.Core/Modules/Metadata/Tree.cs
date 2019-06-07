@@ -41,6 +41,8 @@ namespace Wyam.Core.Modules.Metadata
     /// <category>Metadata</category>
     public class Tree : IModule
     {
+        private static readonly ReadOnlyMemory<char> IndexFileName = "index.".AsMemory();
+
         private DocumentConfig<bool> _isRoot;
         private DocumentConfig<string[]> _treePath;
         private Func<string[], MetadataItems, IExecutionContext, Task<IDocument>> _placeholderFactory;
@@ -65,20 +67,20 @@ namespace Wyam.Core.Modules.Metadata
             _treePath = Config.FromDocument((doc, ctx) =>
             {
                 // Attempt to get the segments from the source path and then the destination path
-                List<string> segments =
-                    doc.Source?.GetRelativeInputPath(ctx)?.Segments.ToList()
-                        ?? doc.Destination?.GetRelativeInputPath(ctx)?.Segments.ToList();
+                ReadOnlyMemory<char>[] segments =
+                    doc.Source?.GetRelativeInputPath(ctx)?.Segments
+                        ?? doc.Destination?.GetRelativeInputPath(ctx)?.Segments;
                 if (segments == null)
                 {
                     return null;
                 }
 
                 // Promote "index." pages up a level
-                if (segments.Count > 0 && segments[segments.Count - 1].StartsWith("index.", StringComparison.OrdinalIgnoreCase))
+                if (segments.Length > 0 && segments[segments.Length - 1].StartsWith(IndexFileName))
                 {
-                    segments.RemoveAt(segments.Count - 1);
+                    return segments.Take(segments.Length - 1).Select(x => x.ToString()).ToArray();
                 }
-                return segments.ToArray();
+                return segments.Select(x => x.ToString()).ToArray();
             });
             _placeholderFactory = async (treePath, items, context) =>
             {

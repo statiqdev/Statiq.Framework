@@ -14,7 +14,7 @@ namespace Wyam.Testing.IO
         public TestDirectory(TestFileProvider fileProvider, DirectoryPath path)
         {
             _fileProvider = fileProvider;
-            Path = path.Collapse();
+            Path = path;
         }
 
         public DirectoryPath Path { get; }

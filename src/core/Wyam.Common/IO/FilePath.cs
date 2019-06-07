@@ -112,7 +112,7 @@ namespace Wyam.Common.IO
                 string directory = System.IO.Path.GetDirectoryName(FullPath);
                 if (string.IsNullOrWhiteSpace(directory))
                 {
-                    directory = ".";
+                    directory = Dot;
                 }
                 return new DirectoryPath(FileProvider, directory);
             }
@@ -130,7 +130,7 @@ namespace Wyam.Common.IO
                     return this;
                 }
                 DirectoryPath root = Root;
-                return root.FullPath == "."
+                return root.FullPath == Dot
                     ? this
                     : new FilePath(FullPath.Substring(root.FullPath.Length), PathKind.Relative);
             }
@@ -193,9 +193,9 @@ namespace Wyam.Common.IO
         {
             _ = extension ?? throw new ArgumentNullException(nameof(extension));
 
-            if (!extension.StartsWith(".", StringComparison.OrdinalIgnoreCase))
+            if (!extension.StartsWith(Dot, StringComparison.OrdinalIgnoreCase))
             {
-                extension = string.Concat(".", extension);
+                extension = string.Concat(Dot, extension);
             }
             return new FilePath(FileProvider, string.Concat(FullPath, extension));
         }
@@ -209,7 +209,7 @@ namespace Wyam.Common.IO
         {
             _ = suffix ?? throw new ArgumentNullException(nameof(suffix));
 
-            int extensionIndex = FullPath.LastIndexOf(".");
+            int extensionIndex = FullPath.LastIndexOf(Dot);
             return extensionIndex == -1
                 ? new FilePath(FileProvider, string.Concat(FullPath, suffix))
                 : new FilePath(FileProvider, string.Concat(FullPath.Substring(0, extensionIndex), suffix, FullPath.Substring(extensionIndex)));
@@ -224,19 +224,13 @@ namespace Wyam.Common.IO
         {
             _ = prefix ?? throw new ArgumentNullException(nameof(prefix));
 
-            int nameIndex = FullPath.LastIndexOf("/");
+            int nameIndex = FullPath.LastIndexOf(Slash);
             if (nameIndex == -1)
             {
                 return new FilePath(FileProvider, string.Concat(prefix, FullPath));
             }
             return new FilePath(FileProvider, string.Concat(FullPath.Substring(0, nameIndex + 1), prefix, FullPath.Substring(nameIndex + 1)));
         }
-
-        /// <summary>
-        /// Collapses a <see cref="FilePath"/> containing ellipses.
-        /// </summary>
-        /// <returns>A collapsed <see cref="FilePath"/>.</returns>
-        public FilePath Collapse() => throw new NotSupportedException();
 
         /// <summary>
         /// Gets path to this file relative to it's containing input directory in the current file system.

@@ -118,7 +118,7 @@ namespace Wyam.Core.Modules.Metadata
                         return new MetaInfo
                         {
                             Priority = c,
-                            Path = input.Source.Directory.Collapse(),
+                            Path = input.Source.Directory,
                             MetadataFileEntry = _metadataFiles[c],
                             Metadata = input.Metadata
                         };
@@ -131,10 +131,10 @@ namespace Wyam.Core.Modules.Metadata
             {
                 // First add the inherited metadata to the temp dictionary
                 List<DirectoryPath> sourcePaths = new List<DirectoryPath>();
-                DirectoryPath inputPath = (await context.FileSystem.GetContainingInputPathAsync(input.Source))?.Collapse();
+                DirectoryPath inputPath = await context.FileSystem.GetContainingInputPathAsync(input.Source);
                 if (inputPath != null)
                 {
-                    DirectoryPath dir = input.Source.Directory.Collapse();
+                    DirectoryPath dir = input.Source.Directory;
                     while (dir?.FullPath.StartsWith(inputPath.FullPath) == true)
                     {
                         sourcePaths.Add(dir);

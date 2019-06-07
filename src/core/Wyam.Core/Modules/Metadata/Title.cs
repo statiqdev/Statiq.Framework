@@ -4,6 +4,7 @@ using System.Globalization;
 using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
+using Wyam.Common;
 using Wyam.Common.Configuration;
 using Wyam.Common.Documents;
 using Wyam.Common.Execution;
@@ -23,6 +24,8 @@ namespace Wyam.Core.Modules.Metadata
     /// <category>Metadata</category>
     public class Title : IModule
     {
+        private static readonly ReadOnlyMemory<char> IndexFileName = "index.".AsMemory();
+
         private readonly DocumentConfig<string> _title = Config.FromDocument(GetTitle);
         private string _key = Keys.Title;
         private bool _keepExisting = true;
@@ -115,21 +118,21 @@ namespace Wyam.Core.Modules.Metadata
         public static string GetTitle(FilePath path)
         {
             // Get the filename, unless an index file, then get containing directory
-            string title = path.Segments.Last();
-            if (title.StartsWith("index.") && path.Segments.Length > 1)
+            ReadOnlyMemory<char> titleMemory = path.Segments[path.Segments.Length - 1];
+            if (titleMemory.StartsWith(IndexFileName) && path.Segments.Length > 1)
             {
-                title = path.Segments[path.Segments.Length - 2];
+                titleMemory = path.Segments[path.Segments.Length - 2];
             }
 
             // Strip the extension(s)
-            int extensionIndex = title.IndexOf('.');
+            int extensionIndex = titleMemory.Span.IndexOf('.');
             if (extensionIndex > 0)
             {
-                title = title.Substring(0, extensionIndex);
+                titleMemory = titleMemory.Slice(0, extensionIndex);
             }
 
             // Decode URL escapes
-            title = WebUtility.UrlDecode(title);
+            string title = WebUtility.UrlDecode(titleMemory.ToString());
 
             // Replace special characters with spaces
             title = title.Replace('-', ' ').Replace('_', ' ');

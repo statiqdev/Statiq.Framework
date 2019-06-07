@@ -38,16 +38,16 @@ namespace Wyam.Common.IO.Globbing
                 return new DirectoryInfo(_directory.GetDirectoryAsync("..").Result, true);
             }
             return _directory.GetDirectoriesAsync().Result
-                .Where(x => x.Path.Collapse().Name == name)
+                .Where(x => x.Path.Name == name)
                 .Select(x => new DirectoryInfo(x))
                 .FirstOrDefault();
         }
 
         public override FileInfoBase GetFile(string path) => new FileInfo(_directory.GetFileAsync(path).Result);
 
-        public override string Name => _isParentPath ? ".." : _directory.Path.Collapse().Name;
+        public override string Name => _isParentPath ? ".." : _directory.Path.Name;
 
-        public override string FullName => _directory.Path.Collapse().FullPath;
+        public override string FullName => _directory.Path.FullPath;
 
         public override DirectoryInfoBase ParentDirectory
         {

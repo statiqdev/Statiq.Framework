@@ -12,9 +12,9 @@ namespace Wyam.Common.IO.Globbing
             _file = file ?? throw new ArgumentNullException(nameof(file));
         }
 
-        public override string Name => _file.Path.Collapse().FileName.FullPath;
+        public override string Name => _file.Path.FileName.FullPath;
 
-        public override string FullName => _file.Path.Collapse().FullPath;
+        public override string FullName => _file.Path.FullPath;
 
         public override DirectoryInfoBase ParentDirectory => new DirectoryInfo(_file.GetDirectoryAsync().Result);
     }

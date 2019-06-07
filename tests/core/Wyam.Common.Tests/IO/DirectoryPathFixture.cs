@@ -12,15 +12,14 @@ namespace Wyam.Common.Tests.IO
     {
         public class NameTests : DirectoryPathFixture
         {
-            [Test]
             [TestCase("/a/b", "b")]
             [TestCase("/a/b/", "b")]
             [TestCase("/a/b/../c", "c")]
-            [TestCase("/a/b/..", "..")]
+            [TestCase("/a/b/..", "a")]
             [TestCase("/a", "a")]
             [TestCase("/", "/")]
-            [WindowsTestCase("C:/", "C:")]
-            [WindowsTestCase("C:", "C:")]
+            [WindowsTestCase("C:/", "C:/")]
+            [WindowsTestCase("C:", "C:/")]
             [WindowsTestCase("C:/Data", "Data")]
             [WindowsTestCase("C:/Data/Work", "Work")]
             [WindowsTestCase("C:/Data/Work/file.txt", "file.txt")]
@@ -39,10 +38,9 @@ namespace Wyam.Common.Tests.IO
 
         public class ParentTests : FilePathFixture
         {
-            [Test]
             [TestCase("/a/b", "/a")]
             [TestCase("/a/b/", "/a")]
-            [TestCase("/a/b/../c", "/a/b/..")]
+            [TestCase("/a/b/../c", "/a")]
             [TestCase("/a", "/")]
             [WindowsTestCase("C:/a/b", "C:/a")]
             [WindowsTestCase("C:/a", "C:/")]
@@ -310,37 +308,6 @@ namespace Wyam.Common.Tests.IO
 
                 // Then
                 Assert.Throws<ArgumentNullException>(test);
-            }
-        }
-
-        public class CollapseTests : FilePathFixture
-        {
-            [TestCase("/a/b/c/../d", "/a/b/d")]
-            [WindowsTestCase("c:/a/b/c/../d", "c:/a/b/d")]
-            public void ShouldCollapse(string fullPath, string expected)
-            {
-                // Given
-                DirectoryPath directoryPath = new DirectoryPath(fullPath);
-
-                // When
-                DirectoryPath path = directoryPath.Collapse();
-
-                // Then
-                Assert.AreEqual(expected, path.FullPath);
-            }
-
-            [Test]
-            public void CollapseRetainsProvider()
-            {
-                // Given
-                DirectoryPath directoryPath = new DirectoryPath(new Uri("foo:///"), "/a/b/../c");
-
-                // When
-                DirectoryPath path = directoryPath.Collapse();
-
-                // Then
-                Assert.AreEqual("/a/c", path.FullPath);
-                Assert.AreEqual(new Uri("foo:///"), path.FileProvider);
             }
         }
     }

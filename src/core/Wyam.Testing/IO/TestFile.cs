@@ -12,7 +12,7 @@ namespace Wyam.Testing.IO
         public TestFile(TestFileProvider fileProvider, FilePath path)
         {
             _fileProvider = fileProvider;
-            Path = path.Collapse();
+            Path = path;
         }
 
         public FilePath Path { get; }
@@ -27,13 +27,13 @@ namespace Wyam.Testing.IO
 
         private void CreateDirectory(bool createDirectory, IFile file)
         {
-            if (!createDirectory && !_fileProvider.Directories.Contains(file.Path.Directory.Collapse().FullPath))
+            if (!createDirectory && !_fileProvider.Directories.Contains(file.Path.Directory.FullPath))
             {
                 throw new IOException($"Directory {file.Path.Directory.FullPath} does not exist");
             }
             if (createDirectory)
             {
-                DirectoryPath parent = file.Path.Directory.Collapse();
+                DirectoryPath parent = file.Path.Directory;
                 while (parent != null)
                 {
                     _fileProvider.Directories.Add(parent.FullPath);

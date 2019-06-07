@@ -347,8 +347,8 @@ namespace Wyam.Common.Tests.IO
 
                 // Then
                 Assert.AreEqual(2, path.Segments.Length);
-                Assert.AreEqual("Hello", path.Segments[0]);
-                Assert.AreEqual("World", path.Segments[1]);
+                Assert.AreEqual("Hello", path.Segments[0].ToString());
+                Assert.AreEqual("World", path.Segments[1].ToString());
             }
         }
 
@@ -490,7 +490,7 @@ namespace Wyam.Common.Tests.IO
             }
         }
 
-        public class GetSegementsTests : NormalizedPathFixture
+        public class GetFullPathAndSegmentsTests : NormalizedPathFixture
         {
             [TestCase("hello/temp/test/../world", "hello/temp/world")]
             [TestCase("../hello/temp/test/../world", "../hello/temp/world")]
@@ -521,16 +521,16 @@ namespace Wyam.Common.Tests.IO
             [TestCase("../d/baz.txt", "../d/baz.txt")]
             [TestCase("../a/b/c/../d/baz.txt", "../a/b/d/baz.txt")]
             [TestCase("c:/a/b/c/../d/baz.txt", "c:/a/b/d/baz.txt")]
+            [TestCase("/a/b/c/../d", "/a/b/d")]
+            [TestCase("c:/a/b/c/../d", "c:/a/b/d")]
             public void ShouldCollapsePath(string fullPath, string expected)
             {
-                // Given
-                StringPool pool = new StringPool();
-
-                // When
-                string[] segments = NormalizedPath.GetSegments(fullPath, pool);
+                // Given, When
+                (string, ReadOnlyMemory<char>[]) fullPathAndSegments = NormalizedPath.GetFullPathAndSegments(fullPath.AsSpan());
 
                 // Then
-                string.Join('/', segments).ShouldBe(expected);
+                fullPathAndSegments.Item1.ShouldBe(expected);
+                string.Join('/', fullPathAndSegments.Item2).ShouldBe(expected);
             }
         }
 

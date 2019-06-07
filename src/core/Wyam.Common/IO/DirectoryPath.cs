@@ -101,7 +101,7 @@ namespace Wyam.Common.IO
         /// If we wanted to return the *actual* directory name, we'd need to pull in IFileSystem,
         /// and do various checks to make sure things exists.
         /// </remarks>
-        public string Name => Segments.Length == 0 ? FullPath : Segments.Last();
+        public string Name => Segments.Length == 0 ? FullPath : Segments.Last().ToString();
 
         /// <summary>
         /// Gets the parent path or <c>null</c> if this is a root path.
@@ -138,7 +138,7 @@ namespace Wyam.Common.IO
                     return this;
                 }
                 DirectoryPath root = Root;
-                return root.FullPath == "."
+                return root.FullPath == Dot
                     ? this
                     : new DirectoryPath(FullPath.Substring(root.FullPath.Length), PathKind.Relative);
             }
@@ -212,12 +212,6 @@ namespace Wyam.Common.IO
             }
             return !path.IsRelative ? path : new DirectoryPath(FileProvider, System.IO.Path.Combine(FullPath, path.FullPath));
         }
-
-        /// <summary>
-        /// Collapses a <see cref="DirectoryPath"/> containing ellipses.
-        /// </summary>
-        /// <returns>A collapsed <see cref="DirectoryPath"/>.</returns>
-        public DirectoryPath Collapse() => throw new NotSupportedException();
 
         /// <summary>
         /// Performs an implicit conversion from <see cref="string"/> to <see cref="DirectoryPath"/>.

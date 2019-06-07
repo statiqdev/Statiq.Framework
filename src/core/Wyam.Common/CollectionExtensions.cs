@@ -64,10 +64,22 @@ namespace Wyam.Common
         /// <param name="items">The items.</param>
         /// <param name="values">The values.</param>
         /// <returns><c>true</c> if the items starts with all the specified values, <c>false</c> otherwise.</returns>
-        public static bool StartsWith<T>(this IEnumerable<T> items, IEnumerable<T> values)
+        public static bool StartsWith<T>(this IEnumerable<T> items, IEnumerable<T> values) =>
+            StartsWith(items, values, EqualityComparer<T>.Default);
+
+        /// <summary>
+        /// Determines whether the items starts with the specified values.
+        /// </summary>
+        /// <typeparam name="T">The type of item.</typeparam>
+        /// <param name="items">The items.</param>
+        /// <param name="values">The values.</param>
+        /// <param name="comparer">The comparer to use.</param>
+        /// <returns><c>true</c> if the items starts with all the specified values, <c>false</c> otherwise.</returns>
+        public static bool StartsWith<T>(this IEnumerable<T> items, IEnumerable<T> values, IEqualityComparer<T> comparer)
         {
             _ = items ?? throw new ArgumentNullException(nameof(items));
             _ = values ?? throw new ArgumentNullException(nameof(values));
+            _ = comparer ?? throw new ArgumentNullException(nameof(comparer));
 
             IEnumerator<T> valuesEnumerator = values.GetEnumerator();
             foreach (T item in items)
@@ -76,7 +88,7 @@ namespace Wyam.Common
                 {
                     break;
                 }
-                if (!item.Equals(valuesEnumerator.Current))
+                if (!comparer.Equals(item, valuesEnumerator.Current))
                 {
                     return false;
                 }

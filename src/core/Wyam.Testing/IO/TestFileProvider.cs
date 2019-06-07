@@ -23,10 +23,10 @@ namespace Wyam.Testing.IO
         public ConcurrentDictionary<string, StringBuilder> Files { get; } = new ConcurrentDictionary<string, StringBuilder>();
 
         public Task<IDirectory> GetDirectoryAsync(DirectoryPath path) =>
-            Task.FromResult<IDirectory>(new TestDirectory(this, path.Collapse().FullPath));
+            Task.FromResult<IDirectory>(new TestDirectory(this, path.FullPath));
 
         public Task<IFile> GetFileAsync(FilePath path) =>
-            Task.FromResult<IFile>(new TestFile(this, path.Collapse().FullPath));
+            Task.FromResult<IFile>(new TestFile(this, path.FullPath));
 
         public void AddDirectory(string path) => Directories.Add(path);
 

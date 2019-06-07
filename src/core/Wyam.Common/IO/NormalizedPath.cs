@@ -14,9 +14,12 @@ namespace Wyam.Common.IO
     {
         // Initially based on code from Cake (http://cakebuild.net/)
 
-        private const string FileProviderDelimiter = "|";
+        public const string FileProviderDelimiter = "|";
+        public const string Dot = ".";
+        public const string DotDot = "..";
+        public const string Slash = "/";
 
-        private static readonly StringPool Pool = new StringPool();
+        private const string WhitespaceChars = "\r\n\t";
 
         /// <summary>
         /// The default file provider.
@@ -80,18 +83,30 @@ namespace Wyam.Common.IO
             _ = providerAndPath ?? throw new ArgumentNullException(nameof(providerAndPath));
             _ = providerAndPath.Item2 ?? throw new ArgumentNullException(nameof(providerAndPath.Item2));
 
-            if (string.IsNullOrWhiteSpace(providerAndPath.Item2))
+            ReadOnlySpan<char> fullPath = GetFullPath(providerAndPath.Item2);
+            IsAbsolute = GetIsAbsolute(pathKind, fullPath);
+            FileProvider = GetFileProvider(providerAndPath.Item1, IsAbsolute, fullySpecified);
+            (FullPath, Segments) = GetFullPathAndSegments(fullPath);
+        }
+
+        private static ReadOnlySpan<char> GetFullPath(string path)
+        {
+            if (string.IsNullOrWhiteSpace(path))
             {
                 throw new ArgumentException("Path cannot be empty");
             }
 
+            // Normalize slashes and trim whitespace
             // Leave spaces since they're valid path chars
-            string fullPath = providerAndPath.Item2.Replace('\\', '/').Trim('\r', '\n', '\t');
+            ReadOnlySpan<char> fullPath = path
+                .Replace('\\', '/')
+                .AsSpan()
+                .Trim(WhitespaceChars.AsSpan());
 
             // Remove relative part of a path, but only if it's not the only part
-            if (fullPath.StartsWith("./", StringComparison.Ordinal) && fullPath.Length > 2)
+            if (fullPath.Length > 2 && fullPath[0] == '.' && fullPath[1] == '/')
             {
-                fullPath = fullPath.Substring(2);
+                fullPath = fullPath.Slice(2);
             }
 
             // Remove trailing slashes (as long as this isn't just a slash)
@@ -101,26 +116,20 @@ namespace Wyam.Common.IO
             }
 
             // Add a backslash if this is a windows root (I.e., ends with :)
-            // The one time a backslash is allowed
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows) && fullPath.EndsWith(":", StringComparison.OrdinalIgnoreCase))
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows)
+                && fullPath.Length > 1
+                && fullPath[fullPath.Length - 1] == ':')
             {
-                fullPath = string.Concat(fullPath, "\\");
+                Span<char> pathSpan = new char[fullPath.Length + 1];
+                fullPath.CopyTo(pathSpan);
+                pathSpan[pathSpan.Length - 1] = '/';
+                fullPath = pathSpan;
             }
 
-            IsAbsolute = GetIsAbsolute(pathKind, fullPath);
-            FileProvider = GetFileProvider(providerAndPath.Item1, IsAbsolute, fullySpecified);
-            Segments = GetSegments(fullPath, Pool);
+            return fullPath;
         }
 
-        // Called when creating a path from another path and we already have segments
-        protected internal NormalizedPath(Uri fileProvider, string[] segments, PathKind pathKind)
-        {
-            IsAbsolute = GetIsAbsolute(pathKind, segments[0]);
-            FileProvider = GetFileProvider(fileProvider, IsAbsolute, true);
-            Segments = GetSegments(segments, Pool);
-        }
-
-        private static bool GetIsAbsolute(PathKind pathKind, string path)
+        private static bool GetIsAbsolute(PathKind pathKind, ReadOnlySpan<char> path)
         {
             switch (pathKind)
             {
@@ -153,77 +162,142 @@ namespace Wyam.Common.IO
         }
 
         // Internal for testing
-        // Splits the path on /
-        internal static string[] GetSegments(string path, StringPool pool) =>
-            GetSegments(
-                path?.Split('/', StringSplitOptions.RemoveEmptyEntries),
-                path?.Length > 0 && path[0] == '/',
-                pool);
-
-        // Called when constructing a path from another path and the first segment might have a slash
-        // Remove the first slash and then note if it had one
-        private static string[] GetSegments(string[] segments, StringPool pool)
+        // Splits the path on /, collapses it, and then pools the segements
+        internal static (string, ReadOnlyMemory<char>[]) GetFullPathAndSegments(ReadOnlySpan<char> path)
         {
-            if (segments?.Length > 0 && segments[0][0] == '/')
+            // Return the current path (.) if the path is null or empty
+            if (path == default || path.IsEmpty)
             {
-                segments[0] = segments[0].Substring(1);
-                return GetSegments(segments, true, pool);
-            }
-            return GetSegments(segments, false, pool);
-        }
-
-        // Collapses the path and then pools the segements
-        private static string[] GetSegments(string[] segments, bool pathStartsWithSlash, StringPool pool)
-        {
-            // Special case for null and empty segments
-            if (segments == null || segments.Length == 0 || segments[0].Length == 0)
-            {
-                return pathStartsWithSlash
-                    ? new string[] { pool.GetOrAdd("/") }
-                    : new string[] { pool.GetOrAdd(".") };
+                return (Dot, new ReadOnlyMemory<char>[] { Dot.AsMemory() });
             }
 
-            // Collapse the path
-            Stack<string> stack = new Stack<string>();
-            for (int c = 0; c < segments.Length; c++)
+            // If the path is only one character, we don't need to do anything
+            if (path.Length == 1)
             {
-                // Crawl up, but only if we have a segment to pop, otherwise preserve the backtrack
-                // Also don't pop a .. or a . (which would only appear in the first segment)
-                // We'll only hit this after at least the first segment
-                if (
-                    segments[c] == ".."
-                    && stack.Count > 0
-                    && stack.Peek() != ".."
-                    && (c > 1 || stack.Peek() != ".")
-                    && (stack.Count > 1 || !System.IO.Path.IsPathRooted(stack.Peek())))
+                switch (path[0])
                 {
-                    stack.Pop();
+                    case '.':
+                        return (Dot, new ReadOnlyMemory<char>[] { Dot.AsMemory() });
+                    case '/':
+                        return (Slash, new ReadOnlyMemory<char>[] { Slash.AsMemory() });
+                }
+
+                string pathString = path.ToString();
+                return (pathString, new ReadOnlyMemory<char>[] { pathString.AsMemory() });
+            }
+
+            // Special case if path is just a windows drive
+            // (it will always have a trailing slash because that got added earlier)
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows)
+                && path.Length > 2
+                && (path[path.Length - 1] == '/' && path[path.Length - 2] == ':'))
+            {
+                string pathString = path.ToString();
+                return (pathString, new ReadOnlyMemory<char>[] { pathString.AsMemory() });
+            }
+
+            // Note if the path starts with a slash because we'll add it back in
+            bool pathStartsWithSlash = path[0] == '/';
+
+            // Split the path
+            List<(int, int)> splits = new List<(int, int)>();
+            int length = 0;
+            for (int c = 0; c < path.Length; c++)
+            {
+                if (path[c] == '/')
+                {
+                    if (length == 0)
+                    {
+                        continue;
+                    }
+
+                    splits.Add((c - length, length));
+                    length = 0;
                     continue;
                 }
 
-                // If this is a ., skip it unless it's the first segment
-                if (segments[c] == "." && (c != 0 || pathStartsWithSlash))
+                length++;
+            }
+            if (length > 0)
+            {
+                splits.Add((path.Length - length, length));
+            }
+
+            // Collapse the path
+            length = pathStartsWithSlash ? 1 : 0;
+            List<(int, int)> segments = new List<(int, int)>();
+            for (int c = 0; c < splits.Count; c++)
+            {
+                ReadOnlySpan<char> segment = path.Slice(splits[c].Item1, splits[c].Item2);
+
+                // Crawl up, but only if we have a segment to pop, otherwise preserve the ".."
+                // Also don't pop a ".." or a "." (which would only appear in the first segment)
+                if (segments.Count > 0)
+                {
+                    ReadOnlySpan<char> last = path.Slice(segments[segments.Count - 1].Item1, segments[segments.Count - 1].Item2);
+
+                    if (
+                        segment.Equals(DotDot.AsSpan(), StringComparison.OrdinalIgnoreCase)
+                        && !last.Equals(DotDot.AsSpan(), StringComparison.OrdinalIgnoreCase)
+                        && (c > 1 || !last.Equals(Dot.AsSpan(), StringComparison.OrdinalIgnoreCase))
+                        && (segments.Count > 1 || !System.IO.Path.IsPathRooted(last)))
+                    {
+                        length -= segments[segments.Count - 1].Item2;
+                        segments.RemoveAt(segments.Count - 1);
+                        continue;
+                    }
+                }
+
+                // If this is a ".", skip it unless it's the first segment
+                if (segment.Equals(Dot.AsSpan(), StringComparison.OrdinalIgnoreCase)
+                    && (c != 0 || pathStartsWithSlash))
                 {
                     continue;
                 }
 
                 // Push this segment
-                stack.Push(segments[c]);
+                length += splits[c].Item2;
+                segments.Add(splits[c]);
             }
 
             // If there's nothing in the stack, figure out if we started with a slash
-            if (stack.Count == 0)
+            if (segments.Count == 0)
             {
                 return pathStartsWithSlash
-                    ? new string[] { pool.GetOrAdd("/") }
-                    : new string[] { pool.GetOrAdd(".") };
+                    ? (Slash, new ReadOnlyMemory<char>[] { Slash.AsMemory() })
+                    : (Dot, new ReadOnlyMemory<char>[] { Dot.AsMemory() });
             }
 
-            // Pool the segements
-            return stack
-                .Reverse()
-                .Select((s, i) => pool.GetOrAdd(i == 0 && pathStartsWithSlash ? "/" + s : s))
+            // Combine the segments back into a string
+            string fullPath = string.Create(length + (segments.Count - 1), path.ToArray(), (chars, pathChars) =>
+            {
+                int i = 0;
+                for (int c = 0; c < segments.Count; c++)
+                {
+                    // Add a slash prefix if the path started with one
+                    if (c != 0 || pathStartsWithSlash)
+                    {
+                        chars[i++] = '/';
+                    }
+
+                    // Copy character over to the path string
+                    int offset = 0;
+                    for (; offset < segments[c].Item2; offset++, i++)
+                    {
+                        chars[i] = pathChars[segments[c].Item1 + offset];
+                    }
+
+                    // Record the new start location and length so we can generate new slices for the final segments
+                    segments[c] = (i - offset, segments[c].Item2);
+                }
+            });
+
+            // Get memory slices and return
+            ReadOnlyMemory<char> fullPathMemory = fullPath.AsMemory();
+            ReadOnlyMemory<char>[] fullPathSegments = segments
+                .Select(x => fullPathMemory.Slice(x.Item1, x.Item2))
                 .ToArray();
+            return (fullPath, fullPathSegments);
         }
 
         // Internal for testing
@@ -271,15 +345,7 @@ namespace Wyam.Common.IO
             }
 
             // Did we get a delimiter?
-            string path = stringPath;
-            if (uriPath != null)
-            {
-                path = uriPath.ToString();
-            }
-            if (path == null)
-            {
-                throw new ArgumentNullException(nameof(path));
-            }
+            string path = uriPath?.ToString() ?? stringPath ?? throw new ArgumentNullException(nameof(path));
             int delimiterIndex = path.IndexOf(FileProviderDelimiter, StringComparison.Ordinal);
             if (delimiterIndex != -1)
             {
@@ -318,7 +384,7 @@ namespace Wyam.Common.IO
         /// Gets the full path.
         /// </summary>
         /// <value>The full path.</value>
-        //public string FullPath => string.Join('/', Segments);
+        public string FullPath { get; }
 
         /// <summary>
         /// Gets a value indicating whether this path is relative.
@@ -337,10 +403,22 @@ namespace Wyam.Common.IO
         public bool IsAbsolute { get; }
 
         /// <summary>
-        /// Gets the segments making up the path.
+        /// Gets the segments making up the path. These are slices of the
+        /// <see cref="FullPath"/> and can be converted to either
+        /// <see cref="ReadOnlySpan{T}"/> or <see cref="string"/> as needed.
+        /// This does not include directory seperator characters
+        /// or the leading slash if there is one.
         /// </summary>
+        /// <remarks>
+        /// Be careful when comparing segments or sequences of segments.
+        /// The default equality comparison behavior for
+        /// <see cref="ReadOnlyMemory{T}"/> is to compare the reference
+        /// equality of the underlying array, not the value equality
+        /// of the items in the memory. If you want to compare two
+        /// segments, use <see cref="MemoryExtensions.SequenceEqual(ReadOnlyMemory{char}, ReadOnlyMemory{char})"/>.
+        /// </remarks>
         /// <value>The segments making up the path.</value>
-        public string[] Segments { get; }
+        public ReadOnlyMemory<char>[] Segments { get; }
 
         /// <summary>
         /// Gets the file provider for this path. If this is a relative path,
@@ -364,10 +442,10 @@ namespace Wyam.Common.IO
         {
             get
             {
-                string directory = IsAbsolute ? System.IO.Path.GetPathRoot(FullPath) : ".";
+                string directory = IsAbsolute ? System.IO.Path.GetPathRoot(FullPath) : Dot;
                 if (string.IsNullOrWhiteSpace(directory))
                 {
-                    directory = ".";
+                    directory = Dot;
                 }
                 return new DirectoryPath(FileProvider, directory);
             }
@@ -381,18 +459,17 @@ namespace Wyam.Common.IO
         /// </returns>
         public override string ToString()
         {
-            string fullPath = FullPath;
             if (IsRelative || FileProvider == null)
             {
-                return fullPath;
+                return FullPath;
             }
             string rightPart = GetRightPart(FileProvider);
             if (string.IsNullOrEmpty(rightPart) || rightPart == "/")
             {
                 // Remove the proceeding slash from FullPath if the provider already has one
-                return FileProvider + (rightPart == "/" && fullPath.StartsWith("/") ? fullPath.Substring(1) : fullPath);
+                return FileProvider + (rightPart == "/" && FullPath.StartsWith("/") ? FullPath.Substring(1) : FullPath);
             }
-            return FileProvider + FileProviderDelimiter + fullPath;
+            return FileProvider + FileProviderDelimiter + FullPath;
         }
 
         /// <inheritdoc />
@@ -400,10 +477,7 @@ namespace Wyam.Common.IO
         {
             HashCode hash = default;
             hash.Add(FileProvider?.GetHashCode() ?? 0);
-            foreach (string segment in Segments)
-            {
-                hash.Add(segment);
-            }
+            hash.Add(FullPath);
             return hash.ToHashCode();
         }
 
@@ -432,7 +506,7 @@ namespace Wyam.Common.IO
         bool IEquatable<NormalizedPath>.Equals(NormalizedPath other) =>
             other != null
             && FileProvider?.ToString() == other.FileProvider?.ToString()
-            && Segments.SequenceEqual(other.Segments);
+            && FullPath.Equals(other.FullPath, StringComparison.Ordinal);
 
         /// <inheritdoc />
         public int CompareTo(object obj) => !(obj is NormalizedPath path) ? 1 : CompareTo(path);
