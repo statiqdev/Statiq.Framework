@@ -112,8 +112,6 @@ namespace Wyam.Common.Tests.IO
             [TestCase("file.txt\\", "file.txt")]
             [TestCase("Temp/file.txt/", "Temp/file.txt")]
             [TestCase("Temp\\file.txt\\", "Temp/file.txt")]
-            [TestCase("http://www.foo.bar/", "http://www.foo.bar")]
-            [TestCase("http://www.foo.bar/test/page.html/", "http://www.foo.bar/test/page.html")]
             public void ShouldRemoveTrailingSlashes(string value, string expected)
             {
                 // Given, When
@@ -172,11 +170,11 @@ namespace Wyam.Common.Tests.IO
             public void ShouldSetNullProviderForFirstCharDelimiter()
             {
                 // Given, When
-                TestPath path = new TestPath("|foo://a/b/c");
+                TestPath path = new TestPath("|a/b/c");
 
                 // Then
                 Assert.AreEqual(null, path.FileProvider);
-                Assert.AreEqual("foo://a/b/c", path.FullPath);
+                Assert.AreEqual("a/b/c", path.FullPath);
             }
 
             [Test]
@@ -503,7 +501,7 @@ namespace Wyam.Common.Tests.IO
             [TestCase(".", ".")]
             [TestCase("..", "..")]
             [TestCase("/..", "/..")]
-            [TestCase("/.", "/")]
+            [TestCase("/.", "/", "/")]
             [TestCase("/", "/")]
             [TestCase("./.././foo", "./../foo")]
             [TestCase("./a", "./a")]
@@ -523,14 +521,25 @@ namespace Wyam.Common.Tests.IO
             [TestCase("c:/a/b/c/../d/baz.txt", "c:/a/b/d/baz.txt")]
             [TestCase("/a/b/c/../d", "/a/b/d")]
             [TestCase("c:/a/b/c/../d", "c:/a/b/d")]
-            public void ShouldCollapsePath(string fullPath, string expected)
+            public void ShouldCollapsePath(string fullPath, string expectedFullPath, string expectedSegments = null)
             {
                 // Given, When
                 (string, ReadOnlyMemory<char>[]) fullPathAndSegments = NormalizedPath.GetFullPathAndSegments(fullPath.AsSpan());
 
                 // Then
-                fullPathAndSegments.Item1.ShouldBe(expected);
-                string.Join('/', fullPathAndSegments.Item2).ShouldBe(expected);
+                fullPathAndSegments.Item1.ShouldBe(expectedFullPath);
+                string.Join('/', fullPathAndSegments.Item2).ShouldBe(expectedSegments ?? expectedFullPath.TrimStart('/'));  // segments doesn't contain a leading slash
+            }
+
+            [Test]
+            public void SegmentsShouldBeEmptyForRoot()
+            {
+                // Given, When
+                (string, ReadOnlyMemory<char>[]) fullPathAndSegments = NormalizedPath.GetFullPathAndSegments("/".AsSpan());
+
+                // Then
+                fullPathAndSegments.Item1.ShouldBe("/");
+                fullPathAndSegments.Item2.ShouldBeEmpty();
             }
         }
 

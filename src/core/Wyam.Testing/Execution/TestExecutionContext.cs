@@ -127,8 +127,8 @@ namespace Wyam.Testing.Execution
                     metadata,
                     contentProvider)
                 : new TestDocument(
-                    source,
-                    destination,
+                    originalDocument.Source ?? source,
+                    destination ?? originalDocument.Destination,
                     metadata == null ? originalDocument : originalDocument.Concat(metadata),
                     contentProvider == null ? ((TestDocument)originalDocument).ContentProvider : contentProvider);
             if (originalDocument != null)

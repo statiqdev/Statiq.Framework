@@ -49,6 +49,7 @@ namespace Wyam.Common.Tests.IO
             [TestCase("C/A/B/C", "D/A/B/C", "D/A/B/C")]
             [TestCase("C/A/B", "D/E/", "D/E")]
             [TestCase("C/", "B/", "B")]
+
             public void ShouldReturnRelativePathWithDirectoryPath(string source, string target, string expected)
             {
                 // Given

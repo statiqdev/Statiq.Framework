@@ -20,7 +20,7 @@ namespace Wyam.Core.Tests.Shortcodes.Html
             [TestCase("https://foo.com/bar", "https://foo.com/bar")]
             [TestCase("foo/bar", "/foo/bar")]
             [TestCase("/foo/bar", "/foo/bar")]
-            [TestCase("//foo/bar", "//foo/bar")]
+            [TestCase("//foo/bar", "/foo/bar")]
             public async Task RendersLink(string path, string expected)
             {
                 // Given
@@ -43,7 +43,7 @@ namespace Wyam.Core.Tests.Shortcodes.Html
             [TestCase("https://foo.com/bar", "https://foo.com/bar")]
             [TestCase("foo/bar", "http://domain.com/foo/bar")]
             [TestCase("/foo/bar", "http://domain.com/foo/bar")]
-            [TestCase("//foo/bar", "http://domain.com//foo/bar")]
+            [TestCase("//foo/bar", "http://domain.com/foo/bar")]
             public async Task RendersLinkWithHost(string path, string expected)
             {
                 // Given
@@ -68,7 +68,7 @@ namespace Wyam.Core.Tests.Shortcodes.Html
             [TestCase("https://foo.com/bar", "https://foo.com/bar")]
             [TestCase("foo/bar", "http://google.com/foo/bar")]
             [TestCase("/foo/bar", "http://google.com/foo/bar")]
-            [TestCase("//foo/bar", "http://google.com//foo/bar")]
+            [TestCase("//foo/bar", "http://google.com/foo/bar")]
             public async Task RendersLinkWithAlternateHost(string path, string expected)
             {
                 // Given

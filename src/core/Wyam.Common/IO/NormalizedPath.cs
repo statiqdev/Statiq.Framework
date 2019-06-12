@@ -151,6 +151,7 @@ namespace Wyam.Common.IO
             }
             if (fileProvider == null && isAbsolute && !fullySpecified)
             {
+                // If a file provider wasn't given and this is an absolute path, we need one so use the default
                 return DefaultFileProvider;
             }
             else if (fileProvider?.IsAbsoluteUri == false)
@@ -179,7 +180,7 @@ namespace Wyam.Common.IO
                     case '.':
                         return (Dot, new ReadOnlyMemory<char>[] { Dot.AsMemory() });
                     case '/':
-                        return (Slash, new ReadOnlyMemory<char>[] { Slash.AsMemory() });
+                        return (Slash, new ReadOnlyMemory<char>[] { });  // segments should be empty if the path is just a slash
                 }
 
                 string pathString = path.ToString();
@@ -188,12 +189,13 @@ namespace Wyam.Common.IO
 
             // Special case if path is just a windows drive
             // (it will always have a trailing slash because that got added earlier)
+            // The segment should not have the trailing slash
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows)
                 && path.Length > 2
                 && (path[path.Length - 1] == '/' && path[path.Length - 2] == ':'))
             {
                 string pathString = path.ToString();
-                return (pathString, new ReadOnlyMemory<char>[] { pathString.AsMemory() });
+                return (pathString, new ReadOnlyMemory<char>[] { pathString.AsMemory().Slice(0, path.Length - 1) });
             }
 
             // Note if the path starts with a slash because we'll add it back in

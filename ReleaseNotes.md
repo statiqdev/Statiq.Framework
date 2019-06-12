@@ -17,6 +17,8 @@
 - New `SetDestination` module to set `IDocument.Destination` and removed path tweaking from `WriteFiles` module (use `SetDestination` before `WriteFiles` to change destination path)
 - Container modules no longer implement `IModuleList` directly, instead they have a `Children` property (removes ambiguity when an `IModuleList` is expected)
 - Added `IDocument.Version` to indicate how many times a given document has been cloned (each clone incremented the version) - useful for debugging
+- Paths now collapse by default
+- Path segments now use `ReadOnlyMemory<char>` and are slices of the full path for reduced string allocations and memory consumption
 
 # 2.2.4
 

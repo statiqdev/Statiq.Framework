@@ -158,8 +158,8 @@ namespace Wyam.Common.Tests.IO
             [TestCase("a/b", "..", "a")]
             [TestCase("a/b/", "..", "a")]
             [TestCase("a/b/../c", "..", "a")]
-            [TestCase(".", "..", ".")]
-            [TestCase("a", "..", "a")]
+            [TestCase(".", "..", "..")]
+            [TestCase("a", "..", ".")]
             [TestCase("a/b", "c", "a/b/c")]
             public async Task ShouldReturnDirectory(string virtualPath, string path, string expected)
             {
