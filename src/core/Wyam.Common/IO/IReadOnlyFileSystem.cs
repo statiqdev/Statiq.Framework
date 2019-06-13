@@ -10,12 +10,12 @@ namespace Wyam.Common.IO
         // Initially based on code from Cake (http://cakebuild.net/)
 
         /// <summary>
-        /// Gets the file providers.
+        /// Gets the file provider.
         /// </summary>
         /// <value>
-        /// The file providers.
+        /// The file provider.
         /// </value>
-        IReadOnlyFileProviderCollection FileProviders { get; }
+        IFileProvider FileProvider { get; }
 
         /// <summary>
         /// Gets the root path.
@@ -56,13 +56,5 @@ namespace Wyam.Common.IO
         /// The temporary file path.
         /// </value>
         DirectoryPath TempPath { get; }
-
-        /// <summary>
-        /// Gets the registered file provider for a specified path.
-        /// </summary>
-        /// <param name="path">The path to get the file provider for.</param>
-        /// <returns>The file provider for the specified path.</returns>
-        // This has to stay in the interface because the test file system only supports a single file provider
-        IFileProvider GetFileProvider(NormalizedPath path);
     }
 }

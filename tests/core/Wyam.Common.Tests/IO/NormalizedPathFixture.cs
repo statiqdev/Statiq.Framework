@@ -18,21 +18,6 @@ namespace Wyam.Common.Tests.IO
                 : base(path, pathKind)
             {
             }
-
-            public TestPath(string fileProvider, string path, PathKind pathKind = PathKind.RelativeOrAbsolute)
-                : base(fileProvider, path, pathKind)
-            {
-            }
-
-            public TestPath(Uri fileProvider, string path, PathKind pathKind = PathKind.RelativeOrAbsolute)
-                : base(fileProvider, path, pathKind)
-            {
-            }
-
-            public TestPath(Uri path)
-                : base(path)
-            {
-            }
         }
 
         public class ConstructorTests : NormalizedPathFixture
@@ -42,20 +27,6 @@ namespace Wyam.Common.Tests.IO
             {
                 // Given, When, Then
                 Assert.Throws<ArgumentNullException>(() => new TestPath(null));
-            }
-
-            [Test]
-            public void ShouldThrowIfStringProviderIsSpecifiedForRelativePath()
-            {
-                // Given, When, Then
-                Assert.Throws<ArgumentException>(() => new TestPath("foo:///", "Hello/World"));
-            }
-
-            [Test]
-            public void ShouldThrowIfUriProviderIsSpecifiedForRelativePath()
-            {
-                // Given, When, Then
-                Assert.Throws<ArgumentException>(() => new TestPath(new Uri("foo:///"), "Hello/World"));
             }
 
             [TestCase("")]
@@ -115,7 +86,7 @@ namespace Wyam.Common.Tests.IO
             public void ShouldRemoveTrailingSlashes(string value, string expected)
             {
                 // Given, When
-                TestPath path = new TestPath((Uri)null, value);
+                TestPath path = new TestPath(value);
 
                 // Then
                 Assert.AreEqual(expected, path.FullPath);
@@ -154,181 +125,6 @@ namespace Wyam.Common.Tests.IO
 
                 // Then
                 Assert.AreEqual("/", path.FullPath);
-            }
-
-            [Test]
-            public void ShouldSetProviderIfGivenOnlyScheme()
-            {
-                // Given, When
-                TestPath path = new TestPath("foo", "/a/b");
-
-                // Then
-                Assert.AreEqual(new Uri("foo:"), path.FileProvider);
-            }
-
-            [Test]
-            public void ShouldSetNullProviderForFirstCharDelimiter()
-            {
-                // Given, When
-                TestPath path = new TestPath("|a/b/c");
-
-                // Then
-                Assert.AreEqual(null, path.FileProvider);
-                Assert.AreEqual("a/b/c", path.FullPath);
-            }
-
-            [Test]
-            public void ShouldSplitUriPathWithDelimiter()
-            {
-                // Given, When
-                TestPath path = new TestPath(new Uri("foo:///a/b|c/d/e"));
-
-                // Then
-                Assert.AreEqual(new Uri("foo:///a/b"), path.FileProvider);
-                Assert.AreEqual("c/d/e", path.FullPath);
-                Assert.IsTrue(path.IsAbsolute);
-            }
-
-            [TestCase("a/b/c")]
-            [TestCase("/a/b/c")]
-            public void ShouldSetUriAsRelativePathIfNoLeftPart(string path)
-            {
-                // Given, When
-                TestPath testPath = new TestPath(new Uri(path, UriKind.Relative));
-
-                // Then
-                Assert.AreEqual(null, testPath.FileProvider);
-                Assert.AreEqual(path, testPath.FullPath);
-                Assert.IsTrue(testPath.IsRelative);
-            }
-
-            [Test]
-            public void ExplicitNullProviderShouldStayNull()
-            {
-                // Given, When
-                TestPath testPath = new TestPath((Uri)null, "/a/b/c", PathKind.Absolute);
-
-                // Then
-                Assert.IsNull(testPath.FileProvider);
-            }
-
-            [Test]
-            public void UnspecifiedProviderShouldUseDefault()
-            {
-                // Given, When
-                TestPath testPath = new TestPath("/a/b/c", PathKind.Absolute);
-
-                // Then
-                Assert.AreEqual(new Uri("file:///"), testPath.FileProvider);
-            }
-
-            [TestCase("foo:///")]
-            [TestCase("foo://")]
-            public void ShouldSetRootPathIfOnlyRootInString(string path)
-            {
-                // Given, When
-                TestPath testPath = new TestPath(path);
-
-                // Then
-                Assert.AreEqual(new Uri(path), testPath.FileProvider);
-                Assert.AreEqual("/", testPath.FullPath);
-            }
-
-            [TestCase("foo:///")]
-            [TestCase("foo://")]
-            public void ShouldSetRootPathIfOnlyRootInUri(string path)
-            {
-                // Given, When
-                TestPath testPath = new TestPath(new Uri(path));
-
-                // Then
-                Assert.AreEqual(new Uri(path), testPath.FileProvider);
-                Assert.AreEqual("/", testPath.FullPath);
-            }
-
-            [Test]
-            [WindowsTest]
-            public void ShouldUsePathAsFullPathIfNoPathInString()
-            {
-                // Given, When
-                TestPath testPath = new TestPath("foo:");
-
-                // Then
-                Assert.AreEqual(null, testPath.FileProvider);
-                Assert.AreEqual("foo:/", testPath.FullPath); // The slash is appended w/ assumption this is a file path
-            }
-
-            [Test]
-            public void ShouldThrowIfPathInUri()
-            {
-                // Given, When, Then
-                Assert.Throws<ArgumentNullException>(() => new TestPath(new Uri("foo:")));
-            }
-        }
-
-        public class GetFileProviderUriTests : NormalizedPathFixture
-        {
-            [TestCase(null)]
-            [TestCase("")]
-            public void ShouldReturnNullForNullOrEmptyPath(string provider)
-            {
-                // Given, When
-                Uri uri = NormalizedPath.GetFileProviderUri(provider);
-
-                // Then
-                Assert.IsNull(uri);
-            }
-
-            [Test]
-            public void ShouldReturnUriWithSchemeForScheme()
-            {
-                // Given, When
-                Uri uri = NormalizedPath.GetFileProviderUri("foo");
-
-                // Then
-                Assert.AreEqual(new Uri("foo:"), uri);
-            }
-
-            [TestCase("foo:")]
-            [TestCase("foo:///")]
-            [TestCase("foo:///a/b/c")]
-            [TestCase("foo:///a/b/c?x#y")]
-            public void ShouldReturnUriGivenUri(string provider)
-            {
-                // Given, When
-                Uri uri = NormalizedPath.GetFileProviderUri(provider);
-
-                // Then
-                Assert.AreEqual(new Uri(provider), uri);
-            }
-
-            [TestCase("a/b/c")]
-            [TestCase("c:/a/b/c")]
-            [TestCase(@"c:\a\b\c")]
-            [TestCase(":")]
-            public void ThrowsExceptionForInvalidUri(string provider)
-            {
-                // Given, When, Then
-                Assert.Throws<ArgumentException>(() => NormalizedPath.GetFileProviderUri(provider));
-            }
-        }
-
-        public class FileProviderTests : NormalizedPathFixture
-        {
-            [TestCase("foo", "/Hello/World", "foo:")]
-            [TestCase("foo:///", "/Hello/World", "foo:///")]
-            [TestCase("foo://x/y", "/Hello/World", "foo://x/y")]
-            [TestCase("", "/Hello/World", null)]
-            [TestCase(null, "/Hello/World", null)]
-            [TestCase(null, "Hello/World", null)]
-            [TestCase("", "Hello/World", null)]
-            public void ShouldReturnProvider(string provider, string pathName, string expectedProvider)
-            {
-                // Given, W
-                TestPath path = new TestPath(provider, pathName);
-
-                // Then
-                Assert.AreEqual(expectedProvider == null ? null : new Uri(expectedProvider), path.FileProvider);
             }
         }
 
@@ -470,18 +266,13 @@ namespace Wyam.Common.Tests.IO
 
         public class ToStringTests : NormalizedPathFixture
         {
-            [TestCase(null, "temp/hello", "temp/hello")]
-            [TestCase("foo://a/b/c", "/temp/hello", "foo://a/b/c|/temp/hello")]
-            [TestCase("foo:///", "/temp/hello", "foo:///temp/hello")]
-            [WindowsTestCase("foo:///", "c:/temp/hello", "foo:///c:/temp/hello")]
-            [TestCase("foo:", "/temp/hello", "foo:/temp/hello")]
-            [WindowsTestCase("foo:", "c:/temp/hello", "foo:c:/temp/hello")]
-            [TestCase(null, "/temp/hello", "/temp/hello")]
-            [WindowsTestCase(null, "c:/temp/hello", "c:/temp/hello")]
-            public void ShouldReturnStringRepresentation(string provider, string path, string expected)
+            [TestCase("temp/hello", "temp/hello")]
+            [TestCase("/temp/hello", "/temp/hello")]
+            [WindowsTestCase("c:/temp/hello", "c:/temp/hello")]
+            public void ShouldReturnStringRepresentation(string path, string expected)
             {
                 // Given, When
-                TestPath testPath = new TestPath(provider == null ? null : new Uri(provider), path);
+                TestPath testPath = new TestPath(path);
 
                 // Then
                 Assert.AreEqual(expected, testPath.ToString());
@@ -501,7 +292,7 @@ namespace Wyam.Common.Tests.IO
             [TestCase(".", ".")]
             [TestCase("..", "..")]
             [TestCase("/..", "/..")]
-            [TestCase("/.", "/", "/")]
+            [TestCase("/.", "/", new[] { "/" })]
             [TestCase("/", "/")]
             [TestCase("./.././foo", "./../foo")]
             [TestCase("./a", "./a")]
@@ -521,14 +312,14 @@ namespace Wyam.Common.Tests.IO
             [TestCase("c:/a/b/c/../d/baz.txt", "c:/a/b/d/baz.txt")]
             [TestCase("/a/b/c/../d", "/a/b/d")]
             [TestCase("c:/a/b/c/../d", "c:/a/b/d")]
-            public void ShouldCollapsePath(string fullPath, string expectedFullPath, string expectedSegments = null)
+            public void ShouldCollapsePath(string fullPath, string expectedFullPath, string[] expectedSegments = null)
             {
                 // Given, When
                 (string, ReadOnlyMemory<char>[]) fullPathAndSegments = NormalizedPath.GetFullPathAndSegments(fullPath.AsSpan());
 
                 // Then
                 fullPathAndSegments.Item1.ShouldBe(expectedFullPath);
-                string.Join('/', fullPathAndSegments.Item2).ShouldBe(expectedSegments ?? expectedFullPath.TrimStart('/'));  // segments doesn't contain a leading slash
+                fullPathAndSegments.Item2.ToStrings().ShouldBe(expectedSegments ?? expectedFullPath.Split('/', StringSplitOptions.RemoveEmptyEntries));
             }
 
             [Test]
@@ -540,30 +331,6 @@ namespace Wyam.Common.Tests.IO
                 // Then
                 fullPathAndSegments.Item1.ShouldBe("/");
                 fullPathAndSegments.Item2.ShouldBeEmpty();
-            }
-        }
-
-        public class GetFileProviderAndPathTests : NormalizedPathFixture
-        {
-            [TestCase("C:/a/b", null, "C:/a/b")]
-            [TestCase(@"C:\a\b", null, @"C:\a\b")]
-            [TestCase(@"|C|\a\b", null, @"C|\a\b")]
-            [TestCase(@"provider|C|\a\b", "provider:", @"C|\a\b")]
-            [TestCase(@"provider:///|C|\a\b", "provider:///", @"C|\a\b")]
-            [TestCase("/a/b", null, "/a/b")]
-            [TestCase("provider|/a/b", "provider:", "/a/b")]
-            [TestCase("provider:///|/a/b", "provider:///", "/a/b")]
-            [TestCase("provider://x/y/z|/a/b", "provider://x/y/z", "/a/b")]
-            [TestCase("|provider://x/y/z|/a/b", null, "provider://x/y/z|/a/b")]
-            [TestCase("foo::/A/B?x#c", "foo:", ":/A/B?x#c")]
-            public void ShouldParseProviderFromString(string fullPath, string provider, string path)
-            {
-                // Given, When
-                Tuple<Uri, string> result = NormalizedPath.GetFileProviderAndPath(null, fullPath);
-
-                // Then
-                Assert.AreEqual(provider == null ? null : new Uri(provider), result.Item1);
-                Assert.AreEqual(path, result.Item2);
             }
         }
 
@@ -622,18 +389,6 @@ namespace Wyam.Common.Tests.IO
                 // Given, When
                 FilePath first = new FilePath("shaders/basic.vert");
                 FilePath second = new FilePath("SHADERS/BASIC.VERT");
-
-                // Then
-                Assert.False(first.Equals(second));
-                Assert.False(second.Equals(first));
-            }
-
-            [Test]
-            public void SamePathsWithDifferentProvidersAreNotConsideredEqual()
-            {
-                // Given, When
-                FilePath first = new FilePath(new Uri("foo:///"), "/shaders/basic.vert");
-                FilePath second = new FilePath(new Uri("bar:///"), "/shaders/basic.vert");
 
                 // Then
                 Assert.False(first.Equals(second));

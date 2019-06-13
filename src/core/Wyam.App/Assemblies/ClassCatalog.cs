@@ -43,7 +43,7 @@ namespace Wyam.App.Assemblies
             Type type = GetAssignableFrom<T>().FirstOrDefault(x => x.Name.Equals(
                 typeName,
                 ignoreCase ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal));
-            return type == null ? default(T) : (T)Activator.CreateInstance(type);
+            return type == null ? default : (T)Activator.CreateInstance(type);
         }
 
         public void Populate()

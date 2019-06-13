@@ -1,9 +1,7 @@
 ﻿using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
-using Wyam.Common.Util;
 
 namespace Wyam.Common.IO
 {
@@ -14,7 +12,6 @@ namespace Wyam.Common.IO
     {
         // Initially based on code from Cake (http://cakebuild.net/)
 
-        public const string FileProviderDelimiter = "|";
         public const string Dot = ".";
         public const string DotDot = "..";
         public const string Slash = "/";
@@ -22,70 +19,16 @@ namespace Wyam.Common.IO
         private const string WhitespaceChars = "\r\n\t";
 
         /// <summary>
-        /// The default file provider.
-        /// </summary>
-        public static readonly Uri DefaultFileProvider = new Uri("file:///", UriKind.Absolute);
-
-        /// <summary>
         /// Initializes a new instance of the <see cref="NormalizedPath" /> class.
         /// </summary>
         /// <param name="path">The path.</param>
         /// <param name="pathKind">Specifies whether the path is relative, absolute, or indeterminate.</param>
         protected NormalizedPath(string path, PathKind pathKind)
-            : this(GetFileProviderAndPath(null, path), false, pathKind)
         {
-        }
+            _ = path ?? throw new ArgumentNullException(nameof(path));
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="NormalizedPath" /> class
-        /// with the given provider.
-        /// </summary>
-        /// <param name="fileProvider">The provider for this path.</param>
-        /// <param name="path">The path.</param>
-        /// <param name="pathKind">Specifies whether the path is relative, absolute, or indeterminate.</param>
-        protected NormalizedPath(string fileProvider, string path, PathKind pathKind)
-            : this(GetFileProviderUri(fileProvider), path, pathKind)
-        {
-        }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="NormalizedPath" /> class
-        /// with the given provider.
-        /// </summary>
-        /// <param name="fileProvider">The provider for this path.</param>
-        /// <param name="path">The path.</param>
-        /// <param name="pathKind">Specifies whether the path is relative, absolute, or indeterminate.</param>
-        protected NormalizedPath(Uri fileProvider, string path, PathKind pathKind)
-            : this(Tuple.Create(fileProvider, path), true, pathKind)
-        {
-        }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="NormalizedPath" /> class. The new path
-        /// will be absolute if the specified URI is absolute, otherwise it will be relative.
-        /// </summary>
-        /// <param name="path">The path as a URI.</param>
-        protected NormalizedPath(Uri path)
-            : this(GetFileProviderAndPath(path, null), false, path.IsAbsoluteUri ? PathKind.Absolute : PathKind.Relative)
-        {
-        }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="NormalizedPath" /> class.
-        /// </summary>
-        /// <param name="providerAndPath">The provider and path as a Tuple so it can
-        /// be passed from both of the other constructors.</param>
-        /// <param name="fullySpecified">If set to <c>true</c> indicates that this constructor was
-        /// called from one where the provider and path were fully specified (as opposed to being inferred).</param>
-        /// <param name="pathKind">Specifies whether the path is relative, absolute, or indeterminate.</param>
-        private NormalizedPath(Tuple<Uri, string> providerAndPath, bool fullySpecified, PathKind pathKind)
-        {
-            _ = providerAndPath ?? throw new ArgumentNullException(nameof(providerAndPath));
-            _ = providerAndPath.Item2 ?? throw new ArgumentNullException(nameof(providerAndPath.Item2));
-
-            ReadOnlySpan<char> fullPath = GetFullPath(providerAndPath.Item2);
+            ReadOnlySpan<char> fullPath = GetFullPath(path);
             IsAbsolute = GetIsAbsolute(pathKind, fullPath);
-            FileProvider = GetFileProvider(providerAndPath.Item1, IsAbsolute, fullySpecified);
             (FullPath, Segments) = GetFullPathAndSegments(fullPath);
         }
 
@@ -141,25 +84,6 @@ namespace Wyam.Common.IO
                     return false;
             }
             return false;
-        }
-
-        private static Uri GetFileProvider(Uri fileProvider, bool isAbsolute, bool fullySpecified)
-        {
-            if (!isAbsolute && fileProvider != null)
-            {
-                throw new ArgumentException("Can not specify provider for relative paths");
-            }
-            if (fileProvider == null && isAbsolute && !fullySpecified)
-            {
-                // If a file provider wasn't given and this is an absolute path, we need one so use the default
-                return DefaultFileProvider;
-            }
-            else if (fileProvider?.IsAbsoluteUri == false)
-            {
-                throw new ArgumentException("The provider URI must always be absolute");
-            }
-
-            return fileProvider;
         }
 
         // Internal for testing
@@ -302,86 +226,6 @@ namespace Wyam.Common.IO
             return (fullPath, fullPathSegments);
         }
 
-        // Internal for testing
-        internal static Uri GetFileProviderUri(string provider)
-        {
-            if (string.IsNullOrEmpty(provider))
-            {
-                return null;
-            }
-
-            // The use of IsWellFormedOriginalString() weeds out cases where a file system path was implicitly converted to a URI
-            if (!Uri.TryCreate(provider, UriKind.Absolute, out Uri uri) || !uri.IsWellFormedOriginalString())
-            {
-                // Couldn't create the provider as a URI, try it as just a scheme
-                if (Uri.CheckSchemeName(provider))
-                {
-                    uri = new Uri($"{provider}:", UriKind.Absolute);
-                }
-                else
-                {
-                    throw new ArgumentException("The provider URI is not valid");
-                }
-            }
-            return uri;
-        }
-
-        /// <summary>
-        /// Gets the provider and path from a path string. Implemented as a static
-        /// so it can be used in a constructor chain. Internal for testing.
-        /// </summary>
-        /// <param name="uriPath">The URI-based path.</param>
-        /// <param name="stringPath">The string-based path.</param>
-        /// <returns>The provider (item 1) and path (item 2).</returns>
-        internal static Tuple<Uri, string> GetFileProviderAndPath(Uri uriPath, string stringPath)
-        {
-            if (uriPath != null && stringPath != null)
-            {
-                throw new ArgumentException($"{nameof(uriPath)} and {nameof(stringPath)} can not both have values");
-            }
-
-            // If we got a relative URI, then just use that as the path
-            if (uriPath?.IsAbsoluteUri == false)
-            {
-                return new Tuple<Uri, string>(null, uriPath.ToString());
-            }
-
-            // Did we get a delimiter?
-            string path = uriPath?.ToString() ?? stringPath ?? throw new ArgumentNullException(nameof(path));
-            int delimiterIndex = path.IndexOf(FileProviderDelimiter, StringComparison.Ordinal);
-            if (delimiterIndex != -1)
-            {
-                // Path contains a provider delimiter, try to parse the provider
-                return Tuple.Create(
-                    GetFileProviderUri(path.Substring(0, delimiterIndex)),
-                    path.Length == delimiterIndex + 1 ? string.Empty : path.Substring(delimiterIndex + 1));
-            }
-
-            // See if the path is a URI and attempt to split it into left (provider) and right (path) parts
-            // The use of IsWellFormedOriginalString() weeds out cases where a file system path was implicitly converted to a URI
-            Uri fileProvider = uriPath;
-            if (fileProvider != null || (Uri.TryCreate(stringPath, UriKind.Absolute, out fileProvider) && fileProvider.IsWellFormedOriginalString()))
-            {
-                // No delimiter, but the path itself is a URI
-                // However, if there is no "right part" go back to treating the whole thing as a path
-                string rightPart = GetRightPart(fileProvider);
-                if (!string.IsNullOrEmpty(rightPart))
-                {
-                    return Tuple.Create(
-                        new Uri(GetLeftPart(fileProvider), UriKind.Absolute),
-                        rightPart);
-                }
-            }
-
-            return Tuple.Create(uriPath, stringPath);
-        }
-
-        private static string GetLeftPart(Uri uri) =>
-            uri.GetComponents(UriComponents.AbsoluteUri & ~UriComponents.PathAndQuery & ~UriComponents.Fragment, UriFormat.Unescaped);
-
-        private static string GetRightPart(Uri uri) =>
-            uri.GetComponents(UriComponents.PathAndQuery | UriComponents.Fragment, UriFormat.Unescaped);
-
         /// <summary>
         /// Gets the full path.
         /// </summary>
@@ -423,17 +267,6 @@ namespace Wyam.Common.IO
         public ReadOnlyMemory<char>[] Segments { get; }
 
         /// <summary>
-        /// Gets the file provider for this path. If this is a relative path,
-        /// the file provider will always be <c>null</c>. If this is an absolute
-        /// path and the file provider is <c>null</c> it indicates the path
-        /// is not intended for use with an actual file provider.
-        /// </summary>
-        /// <value>
-        /// The file provider for this path.
-        /// </value>
-        public Uri FileProvider { get; }
-
-        /// <summary>
         /// Gets the root of this path or "." if this is a relative path
         /// or there is no root.
         /// </summary>
@@ -449,7 +282,7 @@ namespace Wyam.Common.IO
                 {
                     directory = Dot;
                 }
-                return new DirectoryPath(FileProvider, directory);
+                return new DirectoryPath(directory);
             }
         }
 
@@ -459,26 +292,13 @@ namespace Wyam.Common.IO
         /// <returns>
         /// A <see cref="string" /> that represents this instance.
         /// </returns>
-        public override string ToString()
-        {
-            if (IsRelative || FileProvider == null)
-            {
-                return FullPath;
-            }
-            string rightPart = GetRightPart(FileProvider);
-            if (string.IsNullOrEmpty(rightPart) || rightPart == "/")
-            {
-                // Remove the proceeding slash from FullPath if the provider already has one
-                return FileProvider + (rightPart == "/" && FullPath.StartsWith("/") ? FullPath.Substring(1) : FullPath);
-            }
-            return FileProvider + FileProviderDelimiter + FullPath;
-        }
+        public override string ToString() => FullPath;
 
         /// <inheritdoc />
         public override int GetHashCode()
         {
             HashCode hash = default;
-            hash.Add(FileProvider?.GetHashCode() ?? 0);
+            hash.Add(IsAbsolute);
             hash.Add(FullPath);
             return hash.ToHashCode();
         }
@@ -489,8 +309,7 @@ namespace Wyam.Common.IO
             NormalizedPath other = obj as NormalizedPath;
 
             // Special case for string, attempt to create like-typed path from the value
-            string path = obj as string;
-            if (other == null && path != null)
+            if (other == null && obj is string path)
             {
                 if (this is FilePath)
                 {
@@ -507,7 +326,7 @@ namespace Wyam.Common.IO
 
         bool IEquatable<NormalizedPath>.Equals(NormalizedPath other) =>
             other != null
-            && FileProvider?.ToString() == other.FileProvider?.ToString()
+            && IsAbsolute == other.IsAbsolute
             && FullPath.Equals(other.FullPath, StringComparison.Ordinal);
 
         /// <inheritdoc />
@@ -526,10 +345,10 @@ namespace Wyam.Common.IO
                 throw new ArgumentException("Paths are not the same type");
             }
 
-            int providerCompare = string.Compare(FileProvider?.ToString(), other.FileProvider?.ToString(), StringComparison.Ordinal);
-            return providerCompare == 0
+            int absoluteCompare = IsAbsolute.CompareTo(other.IsAbsolute);
+            return absoluteCompare == 0
                 ? string.Compare(FullPath, other.FullPath, StringComparison.Ordinal)
-                : providerCompare;
+                : absoluteCompare;
         }
     }
 }

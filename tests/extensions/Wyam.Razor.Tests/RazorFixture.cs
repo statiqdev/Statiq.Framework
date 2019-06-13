@@ -115,7 +115,7 @@ namespace Wyam.Razor.Tests
                 TestDocument result = await ExecuteAsync(document, context, razor).SingleAsync();
 
                 // Then
-                result.Content.ShouldBe("<p>file:///Temp/temp.txt</p>");
+                result.Content.ShouldBe("<p>/Temp/temp.txt</p>");
             }
 
             [Test]
@@ -131,7 +131,7 @@ namespace Wyam.Razor.Tests
                 TestDocument result = await ExecuteAsync(document, context, razor).SingleAsync();
 
                 // Then
-                result.Content.ShouldBe("<p>file:///Temp/temp.txt</p>");
+                result.Content.ShouldBe("<p>/Temp/temp.txt</p>");
             }
 
             [Test]

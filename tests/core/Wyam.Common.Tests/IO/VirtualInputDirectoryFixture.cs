@@ -116,12 +116,10 @@ namespace Wyam.Common.Tests.IO
             public async Task GetsInputFileAboveInputDirectory()
             {
                 // Given
-                TestFileSystem fileSystem = new TestFileSystem();
+                TestFileSystem fileSystem = new TestFileSystem(GetFileProvider());
                 fileSystem.RootPath = "/a";
                 fileSystem.InputPaths.Add("b/d");
-                fileSystem.InputPaths.Add("alt:///foo");
-                fileSystem.FileProviders.Add(NormalizedPath.DefaultFileProvider.Scheme, GetFileProviderA());
-                fileSystem.FileProviders.Add("alt", GetFileProviderB());
+                fileSystem.InputPaths.Add("/foo");
                 VirtualInputDirectory directory = new VirtualInputDirectory(fileSystem, ".");
 
                 // When
@@ -280,16 +278,14 @@ namespace Wyam.Common.Tests.IO
 
         private VirtualInputDirectory GetVirtualInputDirectory(string path)
         {
-            TestFileSystem fileSystem = new TestFileSystem();
+            TestFileSystem fileSystem = new TestFileSystem(GetFileProvider());
             fileSystem.RootPath = "/a";
             fileSystem.InputPaths.Add("b");
-            fileSystem.InputPaths.Add("alt:///foo");
-            fileSystem.FileProviders.Add(NormalizedPath.DefaultFileProvider.Scheme, GetFileProviderA());
-            fileSystem.FileProviders.Add("alt", GetFileProviderB());
+            fileSystem.InputPaths.Add("/foo");
             return new VirtualInputDirectory(fileSystem, path);
         }
 
-        private IFileProvider GetFileProviderA()
+        private IFileProvider GetFileProvider()
         {
             TestFileProvider fileProvider = new TestFileProvider();
 
@@ -301,26 +297,17 @@ namespace Wyam.Common.Tests.IO
             fileProvider.AddDirectory("/a/x");
             fileProvider.AddDirectory("/a/y");
             fileProvider.AddDirectory("/a/y/z");
-
-            fileProvider.AddFile("/a/b/c/foo.txt");
-            fileProvider.AddFile("/a/b/c/baz.txt");
-            fileProvider.AddFile("/a/b/c/1/2.txt");
-            fileProvider.AddFile("/a/b/d/baz.txt");
-            fileProvider.AddFile("/a/x/bar.txt");
-
-            return fileProvider;
-        }
-
-        private IFileProvider GetFileProviderB()
-        {
-            TestFileProvider fileProvider = new TestFileProvider();
-
             fileProvider.AddDirectory("/foo");
             fileProvider.AddDirectory("/foo/a");
             fileProvider.AddDirectory("/foo/a/b");
             fileProvider.AddDirectory("/foo/c");
             fileProvider.AddDirectory("/bar");
 
+            fileProvider.AddFile("/a/b/c/foo.txt");
+            fileProvider.AddFile("/a/b/c/baz.txt");
+            fileProvider.AddFile("/a/b/c/1/2.txt");
+            fileProvider.AddFile("/a/b/d/baz.txt");
+            fileProvider.AddFile("/a/x/bar.txt");
             fileProvider.AddFile("/foo/baz.txt");
             fileProvider.AddFile("/foo/c/baz.txt");
             fileProvider.AddFile("/bar/baz.txt");

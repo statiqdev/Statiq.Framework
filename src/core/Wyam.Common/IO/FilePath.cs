@@ -34,66 +34,6 @@ namespace Wyam.Common.IO
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="FilePath" /> class
-        /// with the specified file provider.
-        /// The path will be considered absolute if the underlying OS file system
-        /// considers it absolute.
-        /// </summary>
-        /// <param name="fileProvider">The file provider.</param>
-        /// <param name="path">The path.</param>
-        public FilePath(string fileProvider, string path)
-            : base(fileProvider, path, PathKind.RelativeOrAbsolute)
-        {
-        }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="FilePath" /> class
-        /// with the specified file provider.
-        /// </summary>
-        /// <param name="fileProvider">The file provider.</param>
-        /// <param name="path">The path.</param>
-        /// <param name="pathKind">Specifies whether the path is relative, absolute, or indeterminate.</param>
-        public FilePath(string fileProvider, string path, PathKind pathKind)
-            : base(fileProvider, path, pathKind)
-        {
-        }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="FilePath" /> class
-        /// with the specified file provider.
-        /// The path will be considered absolute if the underlying OS file system
-        /// considers it absolute.
-        /// </summary>
-        /// <param name="fileProvider">The file provider.</param>
-        /// <param name="path">The path.</param>
-        public FilePath(Uri fileProvider, string path)
-            : base(fileProvider, path, PathKind.RelativeOrAbsolute)
-        {
-        }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="FilePath" /> class
-        /// with the specified file provider.
-        /// </summary>
-        /// <param name="fileProvider">The file provider.</param>
-        /// <param name="path">The path.</param>
-        /// <param name="pathKind">Specifies whether the path is relative, absolute, or indeterminate.</param>
-        public FilePath(Uri fileProvider, string path, PathKind pathKind)
-            : base(fileProvider, path, pathKind)
-        {
-        }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="FilePath" /> class
-        /// with the specified file provider and/or path.
-        /// </summary>
-        /// <param name="path">The path (and file provider if this is an absolute URI).</param>
-        public FilePath(Uri path)
-            : base(path)
-        {
-        }
-
-        /// <summary>
         /// Gets a value indicating whether this path has a file extension.
         /// </summary>
         /// <value>
@@ -114,7 +54,7 @@ namespace Wyam.Common.IO
                 {
                     directory = Dot;
                 }
-                return new DirectoryPath(FileProvider, directory);
+                return new DirectoryPath(directory);
             }
         }
 
@@ -175,7 +115,7 @@ namespace Wyam.Common.IO
         /// <param name="extension">The new extension.</param>
         /// <returns>A new <see cref="FilePath"/> with a new extension.</returns>
         public FilePath ChangeExtension(string extension) =>
-            new FilePath(FileProvider, System.IO.Path.ChangeExtension(FullPath, extension));
+            new FilePath(System.IO.Path.ChangeExtension(FullPath, extension));
 
         /// <summary>
         /// Changes the file name of the path by combining the specified path with the <see cref="Directory"/>.
@@ -197,7 +137,7 @@ namespace Wyam.Common.IO
             {
                 extension = string.Concat(Dot, extension);
             }
-            return new FilePath(FileProvider, string.Concat(FullPath, extension));
+            return new FilePath(string.Concat(FullPath, extension));
         }
 
         /// <summary>
@@ -211,8 +151,8 @@ namespace Wyam.Common.IO
 
             int extensionIndex = FullPath.LastIndexOf(Dot);
             return extensionIndex == -1
-                ? new FilePath(FileProvider, string.Concat(FullPath, suffix))
-                : new FilePath(FileProvider, string.Concat(FullPath.Substring(0, extensionIndex), suffix, FullPath.Substring(extensionIndex)));
+                ? new FilePath(string.Concat(FullPath, suffix))
+                : new FilePath(string.Concat(FullPath.Substring(0, extensionIndex), suffix, FullPath.Substring(extensionIndex)));
         }
 
         /// <summary>
@@ -227,9 +167,9 @@ namespace Wyam.Common.IO
             int nameIndex = FullPath.LastIndexOf(Slash);
             if (nameIndex == -1)
             {
-                return new FilePath(FileProvider, string.Concat(prefix, FullPath));
+                return new FilePath(string.Concat(prefix, FullPath));
             }
-            return new FilePath(FileProvider, string.Concat(FullPath.Substring(0, nameIndex + 1), prefix, FullPath.Substring(nameIndex + 1)));
+            return new FilePath(string.Concat(FullPath.Substring(0, nameIndex + 1), prefix, FullPath.Substring(nameIndex + 1)));
         }
 
         /// <summary>
@@ -253,29 +193,6 @@ namespace Wyam.Common.IO
         /// </summary>
         /// <param name="path">The path.</param>
         /// <returns>A <see cref="FilePath"/>.</returns>
-        public static implicit operator FilePath(string path) => FromString(path);
-
-        /// <summary>
-        /// Performs a conversion from <see cref="string"/> to <see cref="FilePath"/>.
-        /// </summary>
-        /// <param name="path">The path.</param>
-        /// <returns>A <see cref="FilePath"/>.</returns>
-        public static FilePath FromString(string path) =>
-            path == null ? null : new FilePath(path);
-
-        /// <summary>
-        /// Performs an implicit conversion from <see cref="Uri"/> to <see cref="FilePath"/>.
-        /// </summary>
-        /// <param name="path">The path.</param>
-        /// <returns>A <see cref="FilePath"/>.</returns>
-        public static implicit operator FilePath(Uri path) => FromUri(path);
-
-        /// <summary>
-        /// Performs a conversion from <see cref="Uri"/> to <see cref="FilePath"/>.
-        /// </summary>
-        /// <param name="path">The path.</param>
-        /// <returns>A <see cref="FilePath"/>.</returns>
-        public static FilePath FromUri(Uri path) =>
-            path == null ? null : new FilePath(path);
+        public static implicit operator FilePath(string path) => path == null ? null : new FilePath(path);
     }
 }

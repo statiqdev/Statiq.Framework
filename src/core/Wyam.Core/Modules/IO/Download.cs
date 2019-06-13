@@ -123,19 +123,14 @@ namespace Wyam.Core.Modules.IO
                     _cachedResponses = responses;
                 }
             }
-            return await responses.SelectAsync(async r =>
-            {
-                string uri = r.Uri.ToString();
-                return context.GetDocument(
-                    new FilePath((Uri)null, uri, PathKind.Absolute),
-                    null,
+            return await responses.SelectAsync(async response =>
+                context.GetDocument(
                     new MetadataItems
                     {
-                        { Keys.SourceUri, uri },
-                        { Keys.SourceHeaders, r.Headers }
+                        { Keys.SourceUri, response.Uri },
+                        { Keys.SourceHeaders, response.Headers }
                     },
-                    await context.GetContentProviderAsync(r.Stream));
-            });
+                    await context.GetContentProviderAsync(response.Stream)));
         }
 
         private static readonly Dictionary<HttpMethod, Func<HttpClient, Uri, HttpContent, Task<HttpResponseMessage>>> MethodMapping =

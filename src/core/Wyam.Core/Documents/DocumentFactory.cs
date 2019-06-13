@@ -58,7 +58,6 @@ namespace Wyam.Core.Documents
         internal static FilePath GetRelativeDestination(FilePath destination, DirectoryPath outputPath)
         {
             if (destination?.IsAbsolute == true
-                && destination.FileProvider == outputPath.FileProvider
                 && destination.Directory.Segments.StartsWith(outputPath.Segments))
             {
                 return outputPath.GetRelativePath(destination);

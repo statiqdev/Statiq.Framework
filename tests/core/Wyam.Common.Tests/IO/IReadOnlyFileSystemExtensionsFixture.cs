@@ -24,13 +24,12 @@ namespace Wyam.Common.Tests.IO
             public async Task ReturnsInputFile(string input, string expected)
             {
                 // Given
-                TestFileSystem fileSystem = new TestFileSystem();
+                TestFileSystem fileSystem = new TestFileSystem(GetFileProvider());
                 fileSystem.RootPath = "/a";
                 fileSystem.InputPaths.Add("b/c");
                 fileSystem.InputPaths.Add("b/d");
                 fileSystem.InputPaths.Add("x");
                 fileSystem.InputPaths.Add("y");
-                fileSystem.FileProviders.Add(NormalizedPath.DefaultFileProvider.Scheme, GetFileProvider());
 
                 // When
                 IFile result = await fileSystem.GetInputFileAsync(input);
@@ -43,10 +42,9 @@ namespace Wyam.Common.Tests.IO
             public async Task ReturnsInputFileAboveInputDirectory()
             {
                 // Given
-                TestFileSystem fileSystem = new TestFileSystem();
+                TestFileSystem fileSystem = new TestFileSystem(GetFileProvider());
                 fileSystem.RootPath = "/a";
                 fileSystem.InputPaths.Add("x/t");
-                fileSystem.FileProviders.Add(NormalizedPath.DefaultFileProvider.Scheme, GetFileProvider());
 
                 // When
                 IFile result = await fileSystem.GetInputFileAsync("../bar.txt");
@@ -59,10 +57,9 @@ namespace Wyam.Common.Tests.IO
             public async Task ReturnsInputFileWhenInputDirectoryAboveRoot()
             {
                 // Given
-                TestFileSystem fileSystem = new TestFileSystem();
+                TestFileSystem fileSystem = new TestFileSystem(GetFileProvider());
                 fileSystem.RootPath = "/a/b";
                 fileSystem.InputPaths.Add("../x");
-                fileSystem.FileProviders.Add(NormalizedPath.DefaultFileProvider.Scheme, GetFileProvider());
 
                 // When
                 IFile result = await fileSystem.GetInputFileAsync("bar.txt");
@@ -75,10 +72,9 @@ namespace Wyam.Common.Tests.IO
             public async Task ReturnsInputFileWhenInputDirectoryAndFileAscend()
             {
                 // Given
-                TestFileSystem fileSystem = new TestFileSystem();
+                TestFileSystem fileSystem = new TestFileSystem(GetFileProvider());
                 fileSystem.RootPath = "/a/b";
                 fileSystem.InputPaths.Add("../x/y");
-                fileSystem.FileProviders.Add(NormalizedPath.DefaultFileProvider.Scheme, GetFileProvider());
 
                 // When
                 IFile result = await fileSystem.GetInputFileAsync("../bar.txt");
@@ -152,14 +148,13 @@ namespace Wyam.Common.Tests.IO
             public async Task ReturnsCombinedInputDirectories()
             {
                 // Given
-                TestFileSystem fileSystem = new TestFileSystem();
+                TestFileSystem fileSystem = new TestFileSystem(GetFileProvider());
                 fileSystem.RootPath = "/a";
                 fileSystem.InputPaths.Add("b/c");
                 fileSystem.InputPaths.Add("b/d");
                 fileSystem.InputPaths.Add("x");
                 fileSystem.InputPaths.Add("y");
                 fileSystem.InputPaths.Add("../z");
-                fileSystem.FileProviders.Add(NormalizedPath.DefaultFileProvider.Scheme, GetFileProvider());
 
                 // When
                 IEnumerable<IDirectory> result = await fileSystem.GetInputDirectoriesAsync();
@@ -201,11 +196,10 @@ namespace Wyam.Common.Tests.IO
             public async Task ShouldReturnContainingPathForAbsolutePath(string path, string expected)
             {
                 // Given
-                TestFileSystem fileSystem = new TestFileSystem();
+                TestFileSystem fileSystem = new TestFileSystem(GetFileProvider());
                 fileSystem.RootPath = "/a";
                 fileSystem.InputPaths.Add("b");
                 fileSystem.InputPaths.Add("x");
-                fileSystem.FileProviders.Add(string.Empty, GetFileProvider());
 
                 // When
                 DirectoryPath inputPathFromFilePath = await fileSystem.GetContainingInputPathAsync(new FilePath(path));
@@ -224,11 +218,10 @@ namespace Wyam.Common.Tests.IO
             public async Task ShouldReturnContainingPathForInputPathAboveRootPath(string path, string expected)
             {
                 // Given
-                TestFileSystem fileSystem = new TestFileSystem();
+                TestFileSystem fileSystem = new TestFileSystem(GetFileProvider());
                 fileSystem.RootPath = "/a/y";
                 fileSystem.InputPaths.Add("../b");
                 fileSystem.InputPaths.Add("../x");
-                fileSystem.FileProviders.Add(string.Empty, GetFileProvider());
 
                 // When
                 DirectoryPath inputPathFromFilePath = await fileSystem.GetContainingInputPathAsync(new FilePath(path));
@@ -248,11 +241,10 @@ namespace Wyam.Common.Tests.IO
             public async Task ShouldReturnContainingPathForRelativeFilePath(string path, string expected)
             {
                 // Given
-                TestFileSystem fileSystem = new TestFileSystem();
+                TestFileSystem fileSystem = new TestFileSystem(GetFileProvider());
                 fileSystem.RootPath = "/a";
                 fileSystem.InputPaths.Add("b");
                 fileSystem.InputPaths.Add("x");
-                fileSystem.FileProviders.Add(NormalizedPath.DefaultFileProvider.Scheme, GetFileProvider());
 
                 // When
                 DirectoryPath inputPath = await fileSystem.GetContainingInputPathAsync(new FilePath(path));
@@ -268,11 +260,10 @@ namespace Wyam.Common.Tests.IO
             public async Task ShouldReturnContainingPathForRelativeDirectoryPath(string path, string expected)
             {
                 // Given
-                TestFileSystem fileSystem = new TestFileSystem();
+                TestFileSystem fileSystem = new TestFileSystem(GetFileProvider());
                 fileSystem.RootPath = "/a";
                 fileSystem.InputPaths.Add("b");
                 fileSystem.InputPaths.Add("y");
-                fileSystem.FileProviders.Add(NormalizedPath.DefaultFileProvider.Scheme, GetFileProvider());
 
                 // When
                 DirectoryPath inputPath = await fileSystem.GetContainingInputPathAsync(new DirectoryPath(path));
@@ -285,15 +276,14 @@ namespace Wyam.Common.Tests.IO
             public async Task ShouldReturnContainingPathWhenOtherInputPathStartsTheSame()
             {
                 // Given
-                TestFileSystem fileSystem = new TestFileSystem();
-                fileSystem.RootPath = "/a";
-                fileSystem.InputPaths.Add("yz");
-                fileSystem.InputPaths.Add("y");
-                TestFileProvider fileProvider = (TestFileProvider)GetFileProvider();
+                TestFileProvider fileProvider = GetFileProvider();
                 fileProvider.AddDirectory("yz");
                 fileProvider.AddDirectory("y");
                 fileProvider.AddFile("/a/yz/baz.txt");
-                fileSystem.FileProviders.Add(NormalizedPath.DefaultFileProvider.Scheme, fileProvider);
+                TestFileSystem fileSystem = new TestFileSystem(fileProvider);
+                fileSystem.RootPath = "/a";
+                fileSystem.InputPaths.Add("yz");
+                fileSystem.InputPaths.Add("y");
 
                 // When
                 DirectoryPath inputPath = await fileSystem.GetContainingInputPathAsync(new FilePath("baz.txt"));
@@ -309,8 +299,7 @@ namespace Wyam.Common.Tests.IO
             public async Task ShouldThrowForNullDirectory()
             {
                 // Given
-                TestFileSystem fileSystem = new TestFileSystem();
-                fileSystem.FileProviders.Add(NormalizedPath.DefaultFileProvider.Scheme, GetFileProvider());
+                TestFileSystem fileSystem = new TestFileSystem(GetFileProvider());
 
                 // When, Then
                 await Should.ThrowAsync<ArgumentNullException>(async () => await fileSystem.GetFilesAsync((IDirectory)null, "/"));
@@ -320,8 +309,7 @@ namespace Wyam.Common.Tests.IO
             public async Task ShouldThrowForNullPatterns()
             {
                 // Given
-                TestFileSystem fileSystem = new TestFileSystem();
-                fileSystem.FileProviders.Add(NormalizedPath.DefaultFileProvider.Scheme, GetFileProvider());
+                TestFileSystem fileSystem = new TestFileSystem(GetFileProvider());
                 IDirectory dir = await fileSystem.GetDirectoryAsync("/");
 
                 // When, Then
@@ -332,8 +320,7 @@ namespace Wyam.Common.Tests.IO
             public async Task ShouldNotThrowForNullPattern()
             {
                 // Given
-                TestFileSystem fileSystem = new TestFileSystem();
-                fileSystem.FileProviders.Add(NormalizedPath.DefaultFileProvider.Scheme, GetFileProvider());
+                TestFileSystem fileSystem = new TestFileSystem(GetFileProvider());
                 IDirectory dir = await fileSystem.GetDirectoryAsync("/");
 
                 // When
@@ -362,28 +349,20 @@ namespace Wyam.Common.Tests.IO
             [TestCase("/", new[] { "/**/foo.txt" }, new[] { "/a/b/c/foo.txt" }, true)]
             [TestCase("/", new[] { "/a/b/c/d/../foo.txt" }, new[] { "/a/b/c/foo.txt" }, true)]
             [TestCase("/a", new[] { "a/b/c/foo.txt", "!/a/b/c/d/../foo.txt" }, new string[] { }, true)]
-            [TestCase("/", new[] { "qwerty:///**/*.txt" }, new[] { "/q/werty.txt" }, false)]
-            [TestCase("/", new[] { "qwerty|/**/*.txt" }, new[] { "/q/werty.txt" }, true)]
-            [TestCase("/", new[] { "qwerty:///|/**/*.txt" }, new[] { "/q/werty.txt" }, false)]
-            [TestCase("/", new[] { "/q/werty.txt" }, new string[] { }, true)]
-            [TestCase("qwerty|/", new[] { "/q/werty.txt" }, new string[] { }, true)]
-            [TestCase("qwerty:///|/", new[] { "/q/werty.txt" }, new string[] { }, true)]
-            [TestCase("qwerty:///", new[] { "/q/werty.txt" }, new string[] { }, true)]
-            [TestCase("/", new[] { "qwerty|/q/werty.txt" }, new[] { "/q/werty.txt" }, true)]
-            [TestCase("/", new[] { "qwerty:///|/q/werty.txt" }, new[] { "/q/werty.txt" }, false)]
-            [TestCase("/", new[] { "qwerty:///q/werty.txt" }, new[] { "/q/werty.txt" }, false)]
+            [TestCase("/", new[] { "/**/*.txt" }, new[] { "/a/x/bar.txt", "/a/b/c/foo.txt", "/q/werty.txt" }, true)]
+            [TestCase("/", new[] { "/**/*.txt" }, new[] { "/a/x/bar.txt", "/a/b/c/foo.txt", "/q/werty.txt" }, false)]
+            [TestCase("/", new[] { "/q/werty.txt" }, new[] { "/q/werty.txt" }, true)]
+            [TestCase("/", new[] { "/q/werty.txt" }, new[] { "/q/werty.txt" }, false)]
             public async Task ShouldReturnExistingFiles(string directory, string[] patterns, string[] expected, bool reverseSlashes)
             {
                 // TestContext.Out.WriteLine($"Patterns: {string.Join(",", patterns)}");
 
                 // Given
-                TestFileSystem fileSystem = new TestFileSystem();
-                fileSystem.FileProviders.Add(NormalizedPath.DefaultFileProvider.Scheme, GetFileProvider());
-                TestFileProvider alternateProvider = new TestFileProvider();
-                alternateProvider.AddDirectory("/");
-                alternateProvider.AddDirectory("/q");
-                alternateProvider.AddFile("/q/werty.txt");
-                fileSystem.FileProviders.Add("qwerty", alternateProvider);
+                TestFileProvider fileProvider = GetFileProvider();
+                fileProvider.AddDirectory("/");
+                fileProvider.AddDirectory("/q");
+                fileProvider.AddFile("/q/werty.txt");
+                TestFileSystem fileSystem = new TestFileSystem(fileProvider);
                 IDirectory dir = await fileSystem.GetDirectoryAsync(directory);
 
                 // When
@@ -403,7 +382,7 @@ namespace Wyam.Common.Tests.IO
             }
         }
 
-        private IFileProvider GetFileProvider()
+        private TestFileProvider GetFileProvider()
         {
             TestFileProvider fileProvider = new TestFileProvider();
 

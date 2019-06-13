@@ -4,7 +4,7 @@ using System.IO;
 using System.Linq;
 using Wyam.Common.IO;
 
-namespace Wyam.Core.IO.FileProviders.Local
+namespace Wyam.Core.IO
 {
     internal class LocalCaseSensitivityChecker
     {

@@ -3,7 +3,7 @@ using System.Threading.Tasks;
 using Polly;
 using Wyam.Common.IO;
 
-namespace Wyam.Core.IO.FileProviders.Local
+namespace Wyam.Core.IO
 {
     public class LocalFileProvider : IFileProvider
     {

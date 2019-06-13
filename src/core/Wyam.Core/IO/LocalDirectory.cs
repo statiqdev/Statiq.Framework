@@ -5,7 +5,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Wyam.Common.IO;
 
-namespace Wyam.Core.IO.FileProviders.Local
+namespace Wyam.Core.IO
 {
     // Initially based on code from Cake (http://cakebuild.net/)
     internal class LocalDirectory : IDirectory
@@ -41,7 +41,7 @@ namespace Wyam.Core.IO.FileProviders.Local
         public Task<IDirectory> GetParentAsync()
         {
             DirectoryInfo parent = _directory.Parent;
-            return Task.FromResult<IDirectory>(parent == null ? null : new LocalDirectory(new DirectoryPath(Path.FileProvider, parent.FullName)));
+            return Task.FromResult<IDirectory>(parent == null ? null : new LocalDirectory(new DirectoryPath(parent.FullName)));
         }
 
         public Task CreateAsync()

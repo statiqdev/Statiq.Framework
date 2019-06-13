@@ -458,9 +458,8 @@ namespace Wyam.Core.Tests.Meta
 
         public class StringTests : MetadataStackFixture
         {
-            [TestCase("/a/b/c.txt", "file:///a/b/c.txt")]
+            [TestCase("/a/b/c.txt", "/a/b/c.txt")]
             [TestCase("a/b/c.txt", "a/b/c.txt")]
-            [TestCase("foo:///a/b/c.txt", "foo:///a/b/c.txt")]
             public void ReturnsCorrectStringForFilePath(string path, string expected)
             {
                 // Given
@@ -476,9 +475,8 @@ namespace Wyam.Core.Tests.Meta
                 Assert.AreEqual(expected, result);
             }
 
-            [TestCase("/a/b/c", "file:///a/b/c")]
+            [TestCase("/a/b/c", "/a/b/c")]
             [TestCase("a/b/c", "a/b/c")]
-            [TestCase("foo:///a/b/c", "foo:///a/b/c")]
             public void ReturnsCorrectStringForDirectoryPath(string path, string expected)
             {
                 // Given
@@ -499,7 +497,6 @@ namespace Wyam.Core.Tests.Meta
         {
             [TestCase("/a/b/c.txt", "/a/b/c.txt")]
             [TestCase("a/b/c.txt", "a/b/c.txt")]
-            [TestCase("foo:///a/b/c.txt", "/a/b/c.txt")]
             public void ReturnsCorrectFilePathForFilePath(string path, string expected)
             {
                 // Given
@@ -517,8 +514,6 @@ namespace Wyam.Core.Tests.Meta
 
             [TestCase("/a/b/c.txt", "/a/b/c.txt")]
             [TestCase("a/b/c.txt", "a/b/c.txt")]
-            [TestCase("foo:///a/b/c.txt", "/a/b/c.txt")]
-            [TestCase("foo:a/b/c.txt", null)]
             [TestCase(null, null)]
             public void ReturnsCorrectFilePathForString(string path, string expected)
             {
@@ -547,7 +542,6 @@ namespace Wyam.Core.Tests.Meta
         {
             [TestCase("/a/b/c", "/a/b/c")]
             [TestCase("a/b/c", "a/b/c")]
-            [TestCase("foo:///a/b/c", "/a/b/c")]
             public void ReturnsCorrectDirectoryPathForDirectoryPath(string path, string expected)
             {
                 // Given
@@ -565,8 +559,6 @@ namespace Wyam.Core.Tests.Meta
 
             [TestCase("/a/b/c", "/a/b/c")]
             [TestCase("a/b/c", "a/b/c")]
-            [TestCase("foo:///a/b/c", "/a/b/c")]
-            [TestCase("foo:a/b/c", null)]
             [TestCase(null, null)]
             public void ReturnsCorrectDirectoryPathForString(string path, string expected)
             {

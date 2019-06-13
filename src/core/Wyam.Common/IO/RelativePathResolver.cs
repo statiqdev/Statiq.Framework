@@ -21,25 +21,13 @@ namespace Wyam.Common.IO
 
         public static DirectoryPath Resolve(DirectoryPath source, DirectoryPath target)
         {
-            if (source == null)
-            {
-                throw new ArgumentNullException(nameof(source));
-            }
-            if (target == null)
-            {
-                throw new ArgumentNullException(nameof(target));
-            }
+            _ = source ?? throw new ArgumentNullException(nameof(source));
+            _ = target ?? throw new ArgumentNullException(nameof(target));
 
             // Make sure they're both either relative or absolute
             if (source.IsAbsolute != target.IsAbsolute)
             {
                 throw new ArgumentException("Paths must both be relative or both be absolute");
-            }
-
-            // Check if they share the same provider
-            if (source.FileProvider != target.FileProvider)
-            {
-                return target;
             }
 
             // Check if they're the same path

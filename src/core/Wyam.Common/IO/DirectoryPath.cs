@@ -32,66 +32,6 @@ namespace Wyam.Common.IO
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="DirectoryPath" /> class
-        /// with the specified file provider.
-        /// The path will be considered absolute if the underlying OS file system
-        /// considers it absolute.
-        /// </summary>
-        /// <param name="fileProvider">The file provider.</param>
-        /// <param name="path">The path.</param>
-        public DirectoryPath(string fileProvider, string path)
-            : base(fileProvider, path, PathKind.RelativeOrAbsolute)
-        {
-        }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="DirectoryPath" /> class
-        /// with the specified file provider.
-        /// </summary>
-        /// <param name="fileProvider">The file provider.</param>
-        /// <param name="path">The path.</param>
-        /// <param name="pathKind">Specifies whether the path is relative, absolute, or indeterminate.</param>
-        public DirectoryPath(string fileProvider, string path, PathKind pathKind)
-            : base(fileProvider, path, pathKind)
-        {
-        }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="DirectoryPath" /> class
-        /// with the specified file provider.
-        /// The path will be considered absolute if the underlying OS file system
-        /// considers it absolute.
-        /// </summary>
-        /// <param name="fileProvider">The file provider.</param>
-        /// <param name="path">The path.</param>
-        public DirectoryPath(Uri fileProvider, string path)
-            : base(fileProvider, path, PathKind.RelativeOrAbsolute)
-        {
-        }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="DirectoryPath" /> class
-        /// with the specified file provider.
-        /// </summary>
-        /// <param name="fileProvider">The file provider.</param>
-        /// <param name="path">The path.</param>
-        /// <param name="pathKind">Specifies whether the path is relative, absolute, or indeterminate.</param>
-        public DirectoryPath(Uri fileProvider, string path, PathKind pathKind)
-            : base(fileProvider, path, pathKind)
-        {
-        }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="DirectoryPath" /> class
-        /// with the specified file provider and/or path.
-        /// </summary>
-        /// <param name="path">The path (and file provider if this is an absolute URI).</param>
-        public DirectoryPath(Uri path)
-            : base(path)
-        {
-        }
-
-        /// <summary>
         /// Gets the name of the directory.
         /// </summary>
         /// <value>The directory name.</value>
@@ -118,7 +58,7 @@ namespace Wyam.Common.IO
                 {
                     return null;
                 }
-                return new DirectoryPath(FileProvider, directory);
+                return new DirectoryPath(directory);
             }
         }
 
@@ -145,8 +85,7 @@ namespace Wyam.Common.IO
         }
 
         /// <summary>
-        /// Combines the current path with the file name of a <see cref="FilePath"/>. The current file provider
-        /// is maintained.
+        /// Combines the current path with the file name of a <see cref="FilePath"/>.
         /// </summary>
         /// <param name="path">The path.</param>
         /// <returns>A combination of the current path and the file name of the provided <see cref="FilePath"/>.</returns>
@@ -156,7 +95,7 @@ namespace Wyam.Common.IO
             {
                 throw new ArgumentNullException(nameof(path));
             }
-            return new FilePath(FileProvider, System.IO.Path.Combine(FullPath, path.FileName.FullPath));
+            return new FilePath(System.IO.Path.Combine(FullPath, path.FileName.FullPath));
         }
 
         /// <summary>
@@ -194,7 +133,7 @@ namespace Wyam.Common.IO
             {
                 throw new ArgumentNullException(nameof(path));
             }
-            return !path.IsRelative ? path : new FilePath(FileProvider, System.IO.Path.Combine(FullPath, path.FullPath));
+            return !path.IsRelative ? path : new FilePath(System.IO.Path.Combine(FullPath, path.FullPath));
         }
 
         /// <summary>
@@ -210,7 +149,7 @@ namespace Wyam.Common.IO
             {
                 throw new ArgumentNullException(nameof(path));
             }
-            return !path.IsRelative ? path : new DirectoryPath(FileProvider, System.IO.Path.Combine(FullPath, path.FullPath));
+            return !path.IsRelative ? path : new DirectoryPath(System.IO.Path.Combine(FullPath, path.FullPath));
         }
 
         /// <summary>
@@ -218,29 +157,6 @@ namespace Wyam.Common.IO
         /// </summary>
         /// <param name="path">The path.</param>
         /// <returns>A <see cref="DirectoryPath"/>.</returns>
-        public static implicit operator DirectoryPath(string path) => FromString(path);
-
-        /// <summary>
-        /// Performs a conversion from <see cref="string"/> to <see cref="DirectoryPath"/>.
-        /// </summary>
-        /// <param name="path">The path.</param>
-        /// <returns>A <see cref="DirectoryPath"/>.</returns>
-        public static DirectoryPath FromString(string path) =>
-            path == null ? null : new DirectoryPath(path);
-
-        /// <summary>
-        /// Performs an implicit conversion from <see cref="Uri"/> to <see cref="DirectoryPath"/>.
-        /// </summary>
-        /// <param name="path">The path.</param>
-        /// <returns>A <see cref="DirectoryPath"/>.</returns>
-        public static implicit operator DirectoryPath(Uri path) => FromUri(path);
-
-        /// <summary>
-        /// Performs a conversion from <see cref="Uri"/> to <see cref="DirectoryPath"/>.
-        /// </summary>
-        /// <param name="path">The path.</param>
-        /// <returns>A <see cref="DirectoryPath"/>.</returns>
-        public static DirectoryPath FromUri(Uri path) =>
-            path == null ? null : new DirectoryPath(path);
+        public static implicit operator DirectoryPath(string path) => path == null ? null : new DirectoryPath(path);
     }
 }

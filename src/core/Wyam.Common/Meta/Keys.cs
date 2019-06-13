@@ -190,7 +190,7 @@ namespace Wyam.Common.Meta
         /// <summary>
         /// The URI where the document was downloaded from.
         /// </summary>
-        /// <type><see cref="string"/></type>
+        /// <type><see cref="Uri"/></type>
         public const string SourceUri = nameof(SourceUri);
 
         /// <summary>

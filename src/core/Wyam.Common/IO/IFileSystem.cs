@@ -6,12 +6,12 @@
     public interface IFileSystem : IReadOnlyFileSystem
     {
         /// <summary>
-        /// Gets the file providers.
+        /// Gets the file provider.
         /// </summary>
         /// <value>
-        /// The file providers.
+        /// The file provider.
         /// </value>
-        new IFileProviderCollection FileProviders { get; }
+        new IFileProvider FileProvider { get; set; }
 
         /// <summary>
         /// Gets or sets the root path.

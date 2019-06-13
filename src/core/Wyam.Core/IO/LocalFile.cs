@@ -3,7 +3,7 @@ using System.IO;
 using System.Threading.Tasks;
 using Wyam.Common.IO;
 
-namespace Wyam.Core.IO.FileProviders.Local
+namespace Wyam.Core.IO
 {
     // Initially based on code from Cake (http://cakebuild.net/)
     internal class LocalFile : IFile

@@ -14,25 +14,15 @@ namespace Wyam.Testing.IO
         {
         }
 
-        public TestFileSystem(IFileProvider defaultFileProvider)
+        public TestFileSystem(IFileProvider fileProvider)
         {
-            FileProviders = new TestFileProviderCollection(defaultFileProvider);
+            FileProvider = fileProvider;
         }
 
         /// <summary>
         /// The file provider to use for this file system.
         /// </summary>
-        public IFileProvider FileProvider
-        {
-            get => FileProviders.Get(NormalizedPath.DefaultFileProvider.Scheme);
-            set => FileProviders.Add(NormalizedPath.DefaultFileProvider.Scheme, value);
-        }
-
-        /// <inheritdoc />
-        public IFileProviderCollection FileProviders { get; }
-
-        /// <inheritdoc />
-        IReadOnlyFileProviderCollection IReadOnlyFileSystem.FileProviders => FileProviders;
+        public IFileProvider FileProvider { get; set; }
 
         /// <inheritdoc />
         public DirectoryPath RootPath { get; set; } = new DirectoryPath("/");
@@ -51,27 +41,5 @@ namespace Wyam.Testing.IO
 
         /// <inheritdoc />
         public DirectoryPath TempPath { get; set; } = "temp";
-
-        /// <inheritdoc />
-        public IFileProvider GetFileProvider(NormalizedPath path)
-        {
-            if (path == null)
-            {
-                throw new ArgumentNullException(nameof(path));
-            }
-            if (path.IsRelative)
-            {
-                throw new ArgumentException("The path must be absolute");
-            }
-            if (path.FileProvider == null)
-            {
-                throw new ArgumentException("The path has no provider");
-            }
-            if (!FileProviders.TryGet(path.FileProvider.Scheme, out IFileProvider fileProvider))
-            {
-                throw new KeyNotFoundException($"A provider for the scheme {path.FileProvider} could not be found");
-            }
-            return fileProvider;
-        }
     }
 }

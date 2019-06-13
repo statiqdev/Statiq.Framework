@@ -1,5 +1,6 @@
 ﻿using System;
 using NUnit.Framework;
+using Shouldly;
 using Wyam.Common.IO;
 using Wyam.Testing;
 using Wyam.Testing.Attributes;
@@ -114,24 +115,6 @@ namespace Wyam.Common.Tests.IO
                 // Then
                 Assert.AreEqual(expected, result.FullPath);
             }
-
-            [WindowsTestCase("first:///", "c:/assets/shaders/", null, "simple.frag")]
-            [WindowsTestCase("first:///", "c:/", "second:///", "c:/simple.frag")]
-            [TestCase(null, "assets/shaders", null, "simple.frag")]
-            [TestCase("first:///", "/assets/shaders/", null, "simple.frag")]
-            [TestCase(null, "assets/shaders", "second:///", "/simple.frag")]
-            [TestCase("first:///", "/assets/shaders/", "second:///", "/simple.frag")]
-            public void FileProviderFromDirectoryPathIsUsed(string firstProvider, string firstPath, string secondProvider, string secondPath)
-            {
-                // Given
-                DirectoryPath path = new DirectoryPath(firstProvider == null ? null : new Uri(firstProvider), firstPath);
-
-                // When
-                FilePath result = path.GetFilePath(new FilePath(secondProvider == null ? null : new Uri(secondProvider), secondPath));
-
-                // Then
-                Assert.AreEqual(firstProvider == null ? null : new Uri(firstProvider), result.FileProvider);
-            }
         }
 
         public class RootRelativeTests : FilePathFixture
@@ -218,34 +201,6 @@ namespace Wyam.Common.Tests.IO
                 // Then
                 Assert.AreEqual(expected, result.FullPath);
             }
-
-            [WindowsTestCase("c:/assets/shaders/", "simple.frag")]
-            [TestCase("/assets/shaders/", "simple.frag")]
-            public void CombiningWithRelativePathKeepsFirstProvider(string first, string second)
-            {
-                // Given
-                DirectoryPath path = new DirectoryPath(new Uri("foo:///"), first);
-
-                // When
-                FilePath result = path.CombineFile(new FilePath(second));
-
-                // Then
-                Assert.AreEqual(new Uri("foo:///"), result.FileProvider);
-            }
-
-            [WindowsTestCase("c:/assets/shaders/", "c:/simple.frag")]
-            [TestCase("/assets/shaders/", "/simple.frag")]
-            public void CombiningWithAbsolutePathKeepsSecondProvider(string first, string second)
-            {
-                // Given
-                DirectoryPath path = new DirectoryPath(new Uri("first:///"), first);
-
-                // When
-                FilePath result = path.CombineFile(new FilePath(new Uri("second:///"), second));
-
-                // Then
-                Assert.AreEqual(new Uri("second:///"), result.FileProvider);
-            }
         }
 
         public class CombineTests : DirectoryPathFixture
@@ -267,34 +222,6 @@ namespace Wyam.Common.Tests.IO
 
                 // Then
                 Assert.AreEqual(expected, result.FullPath);
-            }
-
-            [WindowsTestCase("c:/assets/shaders/", "simple")]
-            [TestCase("/assets/shaders/", "simple")]
-            public void CombiningWithRelativePathKeepsFirstProvider(string first, string second)
-            {
-                // Given
-                DirectoryPath path = new DirectoryPath(new Uri("foo:///"), first);
-
-                // When
-                DirectoryPath result = path.Combine(new DirectoryPath(second));
-
-                // Then
-                Assert.AreEqual(new Uri("foo:///"), result.FileProvider);
-            }
-
-            [WindowsTestCase("c:/assets/shaders/", "c:/simple")]
-            [TestCase("/assets/shaders/", "/simpl")]
-            public void CombiningWithAbsolutePathKeepsSecondProvider(string first, string second)
-            {
-                // Given
-                DirectoryPath path = new DirectoryPath(new Uri("first:///"), first);
-
-                // When
-                DirectoryPath result = path.Combine(new DirectoryPath(new Uri("second:///"), second));
-
-                // Then
-                Assert.AreEqual(new Uri("second:///"), result.FileProvider);
             }
 
             [Test]

@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.IO;
 using Wyam.Common.IO;
-using Wyam.Core.IO.FileProviders.Local;
 
 namespace Wyam.Core.IO
 {
@@ -15,7 +14,7 @@ namespace Wyam.Core.IO
 
         public FileSystem()
         {
-            FileProviders = new FileProviderCollection(new LocalFileProvider());
+            FileProvider = new LocalFileProvider();
             InputPaths = new PathCollection<DirectoryPath>(new[]
             {
                 new DirectoryPath("theme"),
@@ -23,9 +22,7 @@ namespace Wyam.Core.IO
             });
         }
 
-        public IFileProviderCollection FileProviders { get; }
-
-        IReadOnlyFileProviderCollection IReadOnlyFileSystem.FileProviders => FileProviders;
+        public IFileProvider FileProvider { get; set; }
 
         public DirectoryPath RootPath
         {
@@ -58,27 +55,6 @@ namespace Wyam.Core.IO
         {
             get => _tempPath;
             set => _tempPath = value ?? throw new ArgumentNullException(nameof(TempPath));
-        }
-
-        public IFileProvider GetFileProvider(NormalizedPath path)
-        {
-            if (path == null)
-            {
-                throw new ArgumentNullException(nameof(path));
-            }
-            if (path.IsRelative)
-            {
-                throw new ArgumentException("The path must be absolute");
-            }
-            if (path.FileProvider == null)
-            {
-                throw new ArgumentException("The path has no provider");
-            }
-            if (!FileProviders.TryGet(path.FileProvider.Scheme, out IFileProvider fileProvider))
-            {
-                throw new KeyNotFoundException($"A provider for the scheme {path.FileProvider} could not be found");
-            }
-            return fileProvider;
         }
     }
 }

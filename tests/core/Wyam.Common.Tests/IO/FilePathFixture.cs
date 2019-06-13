@@ -1,5 +1,6 @@
 ﻿using System;
 using NUnit.Framework;
+using Shouldly;
 using Wyam.Common.IO;
 using Wyam.Testing;
 using Wyam.Testing.Attributes;
@@ -259,19 +260,6 @@ namespace Wyam.Common.Tests.IO
                 // Then
                 Assert.AreEqual("test.txt", result.FullPath);
             }
-
-            [Test]
-            public void NullProviderSetForReturnPath()
-            {
-                // Given
-                FilePath path = new FilePath("foo", "/input/test.txt");
-
-                // When
-                FilePath result = path.FileName;
-
-                // Then
-                Assert.AreEqual(null, result.FileProvider);
-            }
         }
 
         public class FileNameWithoutExtensionTests : FilePathFixture
@@ -290,19 +278,6 @@ namespace Wyam.Common.Tests.IO
 
                 // Then
                 Assert.AreEqual(expected, result.FullPath);
-            }
-
-            [Test]
-            public void NullProviderSetForReturnPath()
-            {
-                // Given
-                FilePath path = new FilePath("foo", "/input/test.txt");
-
-                // When
-                FilePath result = path.FileNameWithoutExtension;
-
-                // Then
-                Assert.AreEqual(null, result.FileProvider);
             }
 
             [TestCase("/input/.test")]

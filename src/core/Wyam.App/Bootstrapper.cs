@@ -98,7 +98,6 @@ namespace Wyam.App
                 .AddDefaultCommands()
                 .AddDefaultShortcodes()
                 .AddDefaultNamespaces()
-                .AddDefaultFileProviders()
                 .AddConfigurator(configurator);
 
         private static void OutputLogo()

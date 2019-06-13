@@ -133,9 +133,7 @@ namespace Wyam.Common.IO
             return fileSystem.InputPaths
                 .Reverse()
                 .Select(x => fileSystem.RootPath.Combine(x))
-                .FirstOrDefault(x =>
-                    x.FileProvider == path.FileProvider
-                    && path.Segments.StartsWith(x.Segments));
+                .FirstOrDefault(x => path.Segments.StartsWith(x.Segments));
         }
 
         /// <summary>
@@ -305,7 +303,7 @@ namespace Wyam.Common.IO
             _ = fileSystem ?? throw new ArgumentNullException(nameof(fileSystem));
             _ = path ?? throw new ArgumentNullException(nameof(path));
 
-            return await fileSystem.GetFileProvider(path).GetFileAsync(path);
+            return await fileSystem.FileProvider.GetFileAsync(path);
         }
 
         /// <summary>
@@ -321,7 +319,7 @@ namespace Wyam.Common.IO
             _ = fileSystem ?? throw new ArgumentNullException(nameof(fileSystem));
             _ = path ?? throw new ArgumentNullException(nameof(path));
 
-            return await fileSystem.GetFileProvider(path).GetDirectoryAsync(path);
+            return await fileSystem.FileProvider.GetDirectoryAsync(path);
         }
 
         /// <summary>

@@ -47,8 +47,6 @@ namespace Wyam.Core.Tests.Modules.IO
                 TestDocument result = await ExecuteAsync(document, context, download).SingleAsync();
 
                 // Then
-                Assert.IsNotNull(result.Source, "Source cannot be empty");
-
                 Dictionary<string, string> headers = result[Keys.SourceHeaders] as Dictionary<string, string>;
 
                 Assert.IsNotNull(headers, "Header cannot be null");

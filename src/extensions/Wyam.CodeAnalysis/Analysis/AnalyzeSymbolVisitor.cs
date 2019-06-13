@@ -422,7 +422,7 @@ namespace Wyam.CodeAnalysis.Analysis
             // Create the document and add it to caches
             return _symbolToDocument.GetOrAdd(
                 symbol,
-                _ => _context.GetDocument(new FilePath((Uri)null, symbol.ToDisplayString(), PathKind.Absolute), destination, items));
+                _ => _context.GetDocument(new FilePath(symbol.ToDisplayString(), PathKind.Absolute), destination, items));
         }
 
         private void AddXmlDocumentation(ISymbol symbol, MetadataItems metadata)

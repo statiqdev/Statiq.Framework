@@ -19,6 +19,7 @@
 - Added `IDocument.Version` to indicate how many times a given document has been cloned (each clone incremented the version) - useful for debugging
 - Paths now collapse by default
 - Path segments now use `ReadOnlyMemory<char>` and are slices of the full path for reduced string allocations and memory consumption
+- Removed support for multiple file providers from paths, each path now refers specifically to a location on disk
 
 # 2.2.4
 

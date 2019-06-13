@@ -42,27 +42,6 @@ namespace Wyam.App
                 }
             });
 
-        public static IBootstrapper AddDefaultFileProviders(this IBootstrapper bootstrapper) =>
-            bootstrapper.Configure<IEngine>(engine =>
-            {
-                foreach (IFileProvider fileProvider in bootstrapper.ClassCatalog.GetInstances<IFileProvider>())
-                {
-                    string scheme = fileProvider.GetType().Name.ToLowerInvariant();
-                    if (scheme.EndsWith("fileprovider"))
-                    {
-                        scheme = scheme.Substring(0, scheme.Length - 12);
-                    }
-                    if (scheme.EndsWith("provider"))
-                    {
-                        scheme = scheme.Substring(0, 8);
-                    }
-                    if (!string.IsNullOrEmpty(scheme))
-                    {
-                        engine.FileSystem.FileProviders.Add(scheme, fileProvider);
-                    }
-                }
-            });
-
         public static IBootstrapper AddDefaultNamespaces(this IBootstrapper bootstrapper) =>
             bootstrapper.Configure<IEngine>(engine =>
             {
