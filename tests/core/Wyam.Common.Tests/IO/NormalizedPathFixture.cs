@@ -303,15 +303,15 @@ namespace Wyam.Common.Tests.IO
             [TestCase("/a/b/.", "/a/b")]
             [TestCase("/./a/b", "/a/b")]
             [TestCase("/././a/b", "/a/b")]
-            [TestCase("c:/hello/temp/test/../../world", "c:/hello/world")]
-            [TestCase("c:/../../../../../../temp", "c:/../../../../../../temp")]
-            [TestCase("c:/../../foo/../../../../temp", "c:/../../../../../temp")]
             [TestCase("/a/b/c/../d/baz.txt", "/a/b/d/baz.txt")]
             [TestCase("../d/baz.txt", "../d/baz.txt")]
             [TestCase("../a/b/c/../d/baz.txt", "../a/b/d/baz.txt")]
-            [TestCase("c:/a/b/c/../d/baz.txt", "c:/a/b/d/baz.txt")]
             [TestCase("/a/b/c/../d", "/a/b/d")]
-            [TestCase("c:/a/b/c/../d", "c:/a/b/d")]
+            [WindowsTestCase("c:/hello/temp/test/../../world", "c:/hello/world")]
+            [WindowsTestCase("c:/../../../../../../temp", "c:/../../../../../../temp")]
+            [WindowsTestCase("c:/../../foo/../../../../temp", "c:/../../../../../temp")]
+            [WindowsTestCase("c:/a/b/c/../d/baz.txt", "c:/a/b/d/baz.txt")]
+            [WindowsTestCase("c:/a/b/c/../d", "c:/a/b/d")]
             public void ShouldCollapsePath(string fullPath, string expectedFullPath, string[] expectedSegments = null)
             {
                 // Given, When
