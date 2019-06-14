@@ -22,7 +22,7 @@ namespace Splashdown
                 .CreateDefault(args)
                 .BuildPipeline("First", builder =>
                     builder
-                        .WithReadModules(new ReadFiles("*.md"))
+                        .WithInputModules(new ReadFiles("*.md"))
                         .WithProcessModules(
                             new FrontMatter(new Yaml()),
                             new Markdown(),
@@ -30,7 +30,7 @@ namespace Splashdown
                             new Replace("{{TITLE}}", Config.FromDocument(doc => doc.Get("Title", "Default Title"))),
                             new Replace("{{DESC}}", Config.FromDocument(doc => doc.Get("Description", "Default Description"))),
                             new SetDestination(".html"))
-                        .WithWriteModules(new WriteFiles()))
+                        .WithOutputModules(new WriteFiles()))
                 .AddIsolatedPipeline(
                     "Second",
                     "*.md",
