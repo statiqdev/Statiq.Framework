@@ -54,7 +54,7 @@ namespace Wyam.Core.Documents
         // If in the process phase only get documents from dependencies (including transient ones)
         private IEnumerable<KeyValuePair<string, ImmutableArray<IDocument>>> GetDocumentsFromDependencies()
         {
-            if (_pipelinePhase.Phase == Phase.Render)
+            if (_pipelinePhase.Phase == Phase.Transform)
             {
                 return _documents;
             }
@@ -111,7 +111,7 @@ namespace Wyam.Core.Documents
             {
                 throw new InvalidOperationException($"Cannot access documents from inside isolated pipeline {_pipelinePhase.PipelineName}");
             }
-            if (_pipelinePhase.Phase != Phase.Process && _pipelinePhase.Phase != Phase.Render)
+            if (_pipelinePhase.Phase != Phase.Process && _pipelinePhase.Phase != Phase.Transform)
             {
                 throw new InvalidOperationException($"Cannot access the document collection during the {_pipelinePhase.Phase} phase");
             }

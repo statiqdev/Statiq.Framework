@@ -20,6 +20,7 @@
 - Paths now collapse by default
 - Path segments now use `ReadOnlyMemory<char>` and are slices of the full path for reduced string allocations and memory consumption
 - Removed support for multiple file providers from paths, each path now refers specifically to a location on disk
+- Pipelines execute in four phase: input, process, transform, output
 
 # 2.2.4
 

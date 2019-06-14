@@ -264,20 +264,20 @@ namespace Wyam.Core.Execution
                 Visit(pipelineEntry.Key, pipelineEntry.Value);
             }
 
-            // Make a pass through non-isolated render phases to set dependencies to all non-isolated process phases
+            // Make a pass through non-isolated transform phases to set dependencies to all non-isolated process phases
             foreach (PipelinePhases pipelinePhases in phases.Values.Where(x => !x.Isolated))
             {
-                pipelinePhases.Render.Dependencies =
-                    pipelinePhases.Render.Dependencies
+                pipelinePhases.Transform.Dependencies =
+                    pipelinePhases.Transform.Dependencies
                         .Concat(phases.Values.Where(x => x != pipelinePhases && !x.Isolated).Select(x => x.Process))
                         .ToArray();
             }
 
             return sortedPhases
-                .Select(x => x.Read)
+                .Select(x => x.Input)
                 .Concat(sortedPhases.Select(x => x.Process))
-                .Concat(sortedPhases.Select(x => x.Render))
-                .Concat(sortedPhases.Select(x => x.Write))
+                .Concat(sortedPhases.Select(x => x.Transform))
+                .Concat(sortedPhases.Select(x => x.Output))
                 .ToArray();
 
             // Returns the process phases (if not isolated)
@@ -289,10 +289,10 @@ namespace Wyam.Core.Execution
                 {
                     // This is an isolated pipeline so just add the phases in a chain
                     pipelinePhases = new PipelinePhases(true);
-                    pipelinePhases.Read = new PipelinePhase(pipeline, name, Phase.Read, pipeline.ReadModules);
-                    pipelinePhases.Process = new PipelinePhase(pipeline, name, Phase.Process, pipeline.ProcessModules,  pipelinePhases.Read);
-                    pipelinePhases.Render = new PipelinePhase(pipeline, name, Phase.Render, pipeline.RenderModules, pipelinePhases.Process);
-                    pipelinePhases.Write = new PipelinePhase(pipeline, name, Phase.Write, pipeline.WriteModules, pipelinePhases.Render);
+                    pipelinePhases.Input = new PipelinePhase(pipeline, name, Phase.Input, pipeline.InputModules);
+                    pipelinePhases.Process = new PipelinePhase(pipeline, name, Phase.Process, pipeline.ProcessModules,  pipelinePhases.Input);
+                    pipelinePhases.Transform = new PipelinePhase(pipeline, name, Phase.Transform, pipeline.TransformModules, pipelinePhases.Process);
+                    pipelinePhases.Output = new PipelinePhase(pipeline, name, Phase.Output, pipeline.OutputModules, pipelinePhases.Transform);
                     phases.Add(name, pipelinePhases);
                     sortedPhases.Add(pipelinePhases);
                     return pipelinePhases;
@@ -317,11 +317,11 @@ namespace Wyam.Core.Execution
 
                     // Add the phases (by this time all dependencies should have been added)
                     pipelinePhases = new PipelinePhases(false);
-                    pipelinePhases.Read = new PipelinePhase(pipeline, name, Phase.Read, pipeline.ReadModules);
-                    processDependencies.Insert(0, pipelinePhases.Read);  // Makes sure the process phase is also dependent on it's read phase
+                    pipelinePhases.Input = new PipelinePhase(pipeline, name, Phase.Input, pipeline.InputModules);
+                    processDependencies.Insert(0, pipelinePhases.Input);  // Makes sure the process phase is also dependent on it's input phase
                     pipelinePhases.Process = new PipelinePhase(pipeline, name, Phase.Process, pipeline.ProcessModules, processDependencies.ToArray());
-                    pipelinePhases.Render = new PipelinePhase(pipeline, name, Phase.Render, pipeline.RenderModules, pipelinePhases.Process);  // Render dependencies will be added after all pipelines have been processed
-                    pipelinePhases.Write = new PipelinePhase(pipeline, name, Phase.Write, pipeline.WriteModules, pipelinePhases.Render);
+                    pipelinePhases.Transform = new PipelinePhase(pipeline, name, Phase.Transform, pipeline.TransformModules, pipelinePhases.Process);  // Transform dependencies will be added after all pipelines have been processed
+                    pipelinePhases.Output = new PipelinePhase(pipeline, name, Phase.Output, pipeline.OutputModules, pipelinePhases.Transform);
                     phases.Add(name, pipelinePhases);
                     sortedPhases.Add(pipelinePhases);
                 }
@@ -348,7 +348,7 @@ namespace Wyam.Core.Execution
         {
             if (phase.Dependencies.Length == 0)
             {
-                // This will immediatly queue the read phase while we continue figuring out tasks, but that's okay
+                // This will immediatly queue the input phase while we continue figuring out tasks, but that's okay
                 return Task.Run(() => phase.ExecuteAsync(this, executionId, serviceProvider));
             }
 
@@ -459,10 +459,10 @@ namespace Wyam.Core.Execution
             }
 
             public bool Isolated { get; }
-            public PipelinePhase Read { get; set; }
+            public PipelinePhase Input { get; set; }
             public PipelinePhase Process { get; set; }
-            public PipelinePhase Render { get; set; }
-            public PipelinePhase Write { get; set; }
+            public PipelinePhase Transform { get; set; }
+            public PipelinePhase Output { get; set; }
         }
     }
 }

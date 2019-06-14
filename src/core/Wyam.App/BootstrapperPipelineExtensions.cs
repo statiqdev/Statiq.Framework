@@ -84,47 +84,47 @@ namespace Wyam.App
         public static IBootstrapper AddPipeline(
             this IBootstrapper bootstrapper,
             string name,
-            IEnumerable<IModule> readModules = null,
+            IEnumerable<IModule> inputModules = null,
             IEnumerable<IModule> processModules = null,
-            IEnumerable<IModule> renderModules = null,
-            IEnumerable<IModule> writeModules = null) =>
-            AddPipeline(bootstrapper, Array.Empty<string>(), true, name, readModules, processModules, renderModules, writeModules);
+            IEnumerable<IModule> transformModules = null,
+            IEnumerable<IModule> outputModules = null) =>
+            AddPipeline(bootstrapper, Array.Empty<string>(), true, name, inputModules, processModules, transformModules, outputModules);
 
         public static IBootstrapper AddPipeline(
             this IBootstrapper bootstrapper,
             string name,
-            string readPattern,
+            string readFilesPattern,
             IEnumerable<IModule> processModules = null,
-            IEnumerable<IModule> renderModules = null,
-            IEnumerable<IModule> writeModules = null) =>
-            AddPipeline(bootstrapper, Array.Empty<string>(), true, name, readPattern, processModules, renderModules, writeModules);
+            IEnumerable<IModule> transformModules = null,
+            IEnumerable<IModule> outputModules = null) =>
+            AddPipeline(bootstrapper, Array.Empty<string>(), true, name, readFilesPattern, processModules, transformModules, outputModules);
 
         public static IBootstrapper AddPipeline(
             this IBootstrapper bootstrapper,
             string name,
-            string readPattern,
+            string readFilesPattern,
             bool writeFiles,
             IEnumerable<IModule> processModules = null,
-            IEnumerable<IModule> renderModules = null) =>
-            AddPipeline(bootstrapper, Array.Empty<string>(), true, name, readPattern, writeFiles, processModules, renderModules);
+            IEnumerable<IModule> transformModules = null) =>
+            AddPipeline(bootstrapper, Array.Empty<string>(), true, name, readFilesPattern, writeFiles, processModules, transformModules);
 
         public static IBootstrapper AddPipeline(
             this IBootstrapper bootstrapper,
             string name,
-            string readPattern,
+            string readFilesPattern,
             string destinationExtension,
             IEnumerable<IModule> processModules = null,
-            IEnumerable<IModule> renderModules = null) =>
-            AddPipeline(bootstrapper, Array.Empty<string>(), true, name, readPattern, destinationExtension, processModules, renderModules);
+            IEnumerable<IModule> transformModules = null) =>
+            AddPipeline(bootstrapper, Array.Empty<string>(), true, name, readFilesPattern, destinationExtension, processModules, transformModules);
 
         public static IBootstrapper AddPipeline(
             this IBootstrapper bootstrapper,
             string name,
-            string readPattern,
+            string readFilesPattern,
             DocumentConfig<FilePath> destinationPath,
             IEnumerable<IModule> processModules = null,
-            IEnumerable<IModule> renderModules = null) =>
-            AddPipeline(bootstrapper, Array.Empty<string>(), true, name, readPattern, destinationPath, processModules, renderModules);
+            IEnumerable<IModule> transformModules = null) =>
+            AddPipeline(bootstrapper, Array.Empty<string>(), true, name, readFilesPattern, destinationPath, processModules, transformModules);
 
         public static IBootstrapper AddPipeline(
             this IBootstrapper bootstrapper,
@@ -135,26 +135,26 @@ namespace Wyam.App
         public static IBootstrapper AddPipeline(
             this IBootstrapper bootstrapper,
             string name,
-            string readPattern,
+            string readFilesPattern,
             bool writeFiles,
             params IModule[] processModules) =>
-            AddPipeline(bootstrapper, Array.Empty<string>(), false, name, readPattern, writeFiles, processModules, null);
+            AddPipeline(bootstrapper, Array.Empty<string>(), false, name, readFilesPattern, writeFiles, processModules, null);
 
         public static IBootstrapper AddPipeline(
             this IBootstrapper bootstrapper,
             string name,
-            string readPattern,
+            string readFilesPattern,
             string destinationExtension,
             params IModule[] processModules) =>
-            AddPipeline(bootstrapper, Array.Empty<string>(), false, name, readPattern, destinationExtension, processModules, null);
+            AddPipeline(bootstrapper, Array.Empty<string>(), false, name, readFilesPattern, destinationExtension, processModules, null);
 
         public static IBootstrapper AddPipeline(
             this IBootstrapper bootstrapper,
             string name,
-            string readPattern,
+            string readFilesPattern,
             DocumentConfig<FilePath> destinationPath,
             params IModule[] processModules) =>
-            AddPipeline(bootstrapper, Array.Empty<string>(), false, name, readPattern, destinationPath, processModules, null);
+            AddPipeline(bootstrapper, Array.Empty<string>(), false, name, readFilesPattern, destinationPath, processModules, null);
 
         // With dependencies
 
@@ -169,51 +169,51 @@ namespace Wyam.App
             this IBootstrapper bootstrapper,
             string name,
             IEnumerable<string> dependencies,
-            IEnumerable<IModule> readModules = null,
+            IEnumerable<IModule> inputModules = null,
             IEnumerable<IModule> processModules = null,
-            IEnumerable<IModule> renderModules = null,
-            IEnumerable<IModule> writeModules = null) =>
-            AddPipeline(bootstrapper, dependencies, true, name, readModules, processModules, renderModules, writeModules);
+            IEnumerable<IModule> transformModules = null,
+            IEnumerable<IModule> outputModules = null) =>
+            AddPipeline(bootstrapper, dependencies, true, name, inputModules, processModules, transformModules, outputModules);
 
         public static IBootstrapper AddPipeline(
             this IBootstrapper bootstrapper,
             string name,
             IEnumerable<string> dependencies,
-            string readPattern,
+            string readFilesPattern,
             IEnumerable<IModule> processModules = null,
-            IEnumerable<IModule> renderModules = null,
-            IEnumerable<IModule> writeModules = null) =>
-            AddPipeline(bootstrapper, dependencies, true, name, readPattern, processModules, renderModules, writeModules);
+            IEnumerable<IModule> transformModules = null,
+            IEnumerable<IModule> outputModules = null) =>
+            AddPipeline(bootstrapper, dependencies, true, name, readFilesPattern, processModules, transformModules, outputModules);
 
         public static IBootstrapper AddPipeline(
             this IBootstrapper bootstrapper,
             string name,
             IEnumerable<string> dependencies,
-            string readPattern,
+            string readFilesPattern,
             bool writeFiles,
             IEnumerable<IModule> processModules = null,
-            IEnumerable<IModule> renderModules = null) =>
-            AddPipeline(bootstrapper, dependencies, true, name, readPattern, writeFiles, processModules, renderModules);
+            IEnumerable<IModule> transformModules = null) =>
+            AddPipeline(bootstrapper, dependencies, true, name, readFilesPattern, writeFiles, processModules, transformModules);
 
         public static IBootstrapper AddPipeline(
             this IBootstrapper bootstrapper,
             string name,
             IEnumerable<string> dependencies,
-            string readPattern,
+            string readFilesPattern,
             string destinationExtension,
             IEnumerable<IModule> processModules = null,
-            IEnumerable<IModule> renderModules = null) =>
-            AddPipeline(bootstrapper, dependencies, true, name, readPattern, destinationExtension, processModules, renderModules);
+            IEnumerable<IModule> transformModules = null) =>
+            AddPipeline(bootstrapper, dependencies, true, name, readFilesPattern, destinationExtension, processModules, transformModules);
 
         public static IBootstrapper AddPipeline(
             this IBootstrapper bootstrapper,
             string name,
             IEnumerable<string> dependencies,
-            string readPattern,
+            string readFilesPattern,
             DocumentConfig<FilePath> destinationPath,
             IEnumerable<IModule> processModules = null,
-            IEnumerable<IModule> renderModules = null) =>
-            AddPipeline(bootstrapper, dependencies, true, name, readPattern, destinationPath, processModules, renderModules);
+            IEnumerable<IModule> transformModules = null) =>
+            AddPipeline(bootstrapper, dependencies, true, name, readFilesPattern, destinationPath, processModules, transformModules);
 
         public static IBootstrapper AddPipeline(
             this IBootstrapper bootstrapper,
@@ -226,28 +226,28 @@ namespace Wyam.App
             this IBootstrapper bootstrapper,
             string name,
             IEnumerable<string> dependencies,
-            string readPattern,
+            string readFilesPattern,
             bool writeFiles,
             params IModule[] processModules) =>
-            AddPipeline(bootstrapper, dependencies, false, name, readPattern, writeFiles, processModules, null);
+            AddPipeline(bootstrapper, dependencies, false, name, readFilesPattern, writeFiles, processModules, null);
 
         public static IBootstrapper AddPipeline(
             this IBootstrapper bootstrapper,
             string name,
             IEnumerable<string> dependencies,
-            string readPattern,
+            string readFilesPattern,
             string destinationExtension,
             params IModule[] processModules) =>
-            AddPipeline(bootstrapper, dependencies, false, name, readPattern, destinationExtension, processModules, null);
+            AddPipeline(bootstrapper, dependencies, false, name, readFilesPattern, destinationExtension, processModules, null);
 
         public static IBootstrapper AddPipeline(
             this IBootstrapper bootstrapper,
             string name,
             IEnumerable<string> dependencies,
-            string readPattern,
+            string readFilesPattern,
             DocumentConfig<FilePath> destinationPath,
             params IModule[] processModules) =>
-            AddPipeline(bootstrapper, dependencies, false, name, readPattern, destinationPath, processModules, null);
+            AddPipeline(bootstrapper, dependencies, false, name, readFilesPattern, destinationPath, processModules, null);
 
         // Serial
 
@@ -260,47 +260,47 @@ namespace Wyam.App
         public static IBootstrapper AddSerialPipeline(
             this IBootstrapper bootstrapper,
             string name,
-            IEnumerable<IModule> readModules = null,
+            IEnumerable<IModule> inputModules = null,
             IEnumerable<IModule> processModules = null,
-            IEnumerable<IModule> renderModules = null,
-            IEnumerable<IModule> writeModules = null) =>
-            AddPipeline(bootstrapper, null, false, name, readModules, processModules, renderModules, writeModules);
+            IEnumerable<IModule> transformModules = null,
+            IEnumerable<IModule> outputModules = null) =>
+            AddPipeline(bootstrapper, null, false, name, inputModules, processModules, transformModules, outputModules);
 
         public static IBootstrapper AddSerialPipeline(
             this IBootstrapper bootstrapper,
             string name,
-            string readPattern,
+            string readFilesPattern,
             IEnumerable<IModule> processModules = null,
-            IEnumerable<IModule> renderModules = null,
-            IEnumerable<IModule> writeModules = null) =>
-            AddPipeline(bootstrapper, null, false, name, readPattern, processModules, renderModules, writeModules);
+            IEnumerable<IModule> transformModules = null,
+            IEnumerable<IModule> outputModules = null) =>
+            AddPipeline(bootstrapper, null, false, name, readFilesPattern, processModules, transformModules, outputModules);
 
         public static IBootstrapper AddSerialPipeline(
             this IBootstrapper bootstrapper,
             string name,
-            string readPattern,
+            string readFilesPattern,
             bool writeFiles,
             IEnumerable<IModule> processModules = null,
-            IEnumerable<IModule> renderModules = null) =>
-            AddPipeline(bootstrapper, null, false, name, readPattern, writeFiles, processModules, renderModules);
+            IEnumerable<IModule> transformModules = null) =>
+            AddPipeline(bootstrapper, null, false, name, readFilesPattern, writeFiles, processModules, transformModules);
 
         public static IBootstrapper AddSerialPipeline(
             this IBootstrapper bootstrapper,
             string name,
-            string readPattern,
+            string readFilesPattern,
             string destinationExtension,
             IEnumerable<IModule> processModules = null,
-            IEnumerable<IModule> renderModules = null) =>
-            AddPipeline(bootstrapper, null, false, name, readPattern, destinationExtension, processModules, renderModules);
+            IEnumerable<IModule> transformModules = null) =>
+            AddPipeline(bootstrapper, null, false, name, readFilesPattern, destinationExtension, processModules, transformModules);
 
         public static IBootstrapper AddSerialPipeline(
             this IBootstrapper bootstrapper,
             string name,
-            string readPattern,
+            string readFilesPattern,
             DocumentConfig<FilePath> destinationPath,
             IEnumerable<IModule> processModules = null,
-            IEnumerable<IModule> renderModules = null) =>
-            AddPipeline(bootstrapper, null, false, name, readPattern, destinationPath, processModules, renderModules);
+            IEnumerable<IModule> transformModules = null) =>
+            AddPipeline(bootstrapper, null, false, name, readFilesPattern, destinationPath, processModules, transformModules);
 
         public static IBootstrapper AddSerialPipeline(
             this IBootstrapper bootstrapper,
@@ -311,26 +311,26 @@ namespace Wyam.App
         public static IBootstrapper AddSerialPipeline(
             this IBootstrapper bootstrapper,
             string name,
-            string readPattern,
+            string readFilesPattern,
             bool writeFiles,
             params IModule[] processModules) =>
-            AddPipeline(bootstrapper, null, false, name, readPattern, writeFiles, processModules, null);
+            AddPipeline(bootstrapper, null, false, name, readFilesPattern, writeFiles, processModules, null);
 
         public static IBootstrapper AddSerialPipeline(
             this IBootstrapper bootstrapper,
             string name,
-            string readPattern,
+            string readFilesPattern,
             string destinationExtension,
             params IModule[] processModules) =>
-            AddPipeline(bootstrapper, null, false, name, readPattern, destinationExtension, processModules, null);
+            AddPipeline(bootstrapper, null, false, name, readFilesPattern, destinationExtension, processModules, null);
 
         public static IBootstrapper AddSerialPipeline(
             this IBootstrapper bootstrapper,
             string name,
-            string readPattern,
+            string readFilesPattern,
             DocumentConfig<FilePath> destinationPath,
             params IModule[] processModules) =>
-            AddPipeline(bootstrapper, null, false, name, readPattern, destinationPath, processModules, null);
+            AddPipeline(bootstrapper, null, false, name, readFilesPattern, destinationPath, processModules, null);
 
         // Isolated
 
@@ -343,47 +343,47 @@ namespace Wyam.App
         public static IBootstrapper AddIsolatedPipeline(
             this IBootstrapper bootstrapper,
             string name,
-            IEnumerable<IModule> readModules = null,
+            IEnumerable<IModule> inputModules = null,
             IEnumerable<IModule> processModules = null,
-            IEnumerable<IModule> renderModules = null,
-            IEnumerable<IModule> writeModules = null) =>
-            AddPipeline(bootstrapper, null, true, name, readModules, processModules, renderModules, writeModules);
+            IEnumerable<IModule> transformModules = null,
+            IEnumerable<IModule> outputModules = null) =>
+            AddPipeline(bootstrapper, null, true, name, inputModules, processModules, transformModules, outputModules);
 
         public static IBootstrapper AddIsolatedPipeline(
             this IBootstrapper bootstrapper,
             string name,
-            string readPattern,
+            string readFilesPattern,
             IEnumerable<IModule> processModules = null,
-            IEnumerable<IModule> renderModules = null,
-            IEnumerable<IModule> writeModules = null) =>
-            AddPipeline(bootstrapper, null, true, name, readPattern, processModules, renderModules, writeModules);
+            IEnumerable<IModule> transformModules = null,
+            IEnumerable<IModule> outputModules = null) =>
+            AddPipeline(bootstrapper, null, true, name, readFilesPattern, processModules, transformModules, outputModules);
 
         public static IBootstrapper AddIsolatedPipeline(
             this IBootstrapper bootstrapper,
             string name,
-            string readPattern,
+            string readFilesPattern,
             bool writeFiles,
             IEnumerable<IModule> processModules = null,
-            IEnumerable<IModule> renderModules = null) =>
-            AddPipeline(bootstrapper, null, true, name, readPattern, writeFiles, processModules, renderModules);
+            IEnumerable<IModule> transformModules = null) =>
+            AddPipeline(bootstrapper, null, true, name, readFilesPattern, writeFiles, processModules, transformModules);
 
         public static IBootstrapper AddIsolatedPipeline(
             this IBootstrapper bootstrapper,
             string name,
-            string readPattern,
+            string readFilesPattern,
             string destinationExtension,
             IEnumerable<IModule> processModules = null,
-            IEnumerable<IModule> renderModules = null) =>
-            AddPipeline(bootstrapper, null, true, name, readPattern, destinationExtension, processModules, renderModules);
+            IEnumerable<IModule> transformModules = null) =>
+            AddPipeline(bootstrapper, null, true, name, readFilesPattern, destinationExtension, processModules, transformModules);
 
         public static IBootstrapper AddIsolatedPipeline(
             this IBootstrapper bootstrapper,
             string name,
-            string readPattern,
+            string readFilesPattern,
             DocumentConfig<FilePath> destinationPath,
             IEnumerable<IModule> processModules = null,
-            IEnumerable<IModule> renderModules = null) =>
-            AddPipeline(bootstrapper, null, true, name, readPattern, destinationPath, processModules, renderModules);
+            IEnumerable<IModule> transformModules = null) =>
+            AddPipeline(bootstrapper, null, true, name, readFilesPattern, destinationPath, processModules, transformModules);
 
         public static IBootstrapper AddIsolatedPipeline(
             this IBootstrapper bootstrapper,
@@ -394,26 +394,26 @@ namespace Wyam.App
         public static IBootstrapper AddIsolatedPipeline(
             this IBootstrapper bootstrapper,
             string name,
-            string readPattern,
+            string readFilesPattern,
             bool writeFiles,
             params IModule[] processModules) =>
-            AddPipeline(bootstrapper, null, true, name, readPattern, writeFiles, processModules, null);
+            AddPipeline(bootstrapper, null, true, name, readFilesPattern, writeFiles, processModules, null);
 
         public static IBootstrapper AddIsolatedPipeline(
             this IBootstrapper bootstrapper,
             string name,
-            string readPattern,
+            string readFilesPattern,
             string destinationExtension,
             params IModule[] processModules) =>
-            AddPipeline(bootstrapper, null, true, name, readPattern, destinationExtension, processModules, null);
+            AddPipeline(bootstrapper, null, true, name, readFilesPattern, destinationExtension, processModules, null);
 
         public static IBootstrapper AddIsolatedPipeline(
             this IBootstrapper bootstrapper,
             string name,
-            string readPattern,
+            string readFilesPattern,
             DocumentConfig<FilePath> destinationPath,
             params IModule[] processModules) =>
-            AddPipeline(bootstrapper, null, true, name, readPattern, destinationPath, processModules, null);
+            AddPipeline(bootstrapper, null, true, name, readFilesPattern, destinationPath, processModules, null);
 
         // Helpers for adding pipelines from modules
 
@@ -422,18 +422,18 @@ namespace Wyam.App
             IEnumerable<string> dependencies,
             bool isolated,
             string name,
-            IEnumerable<IModule> readModules,
+            IEnumerable<IModule> inputModules,
             IEnumerable<IModule> processModules,
-            IEnumerable<IModule> renderModules,
-            IEnumerable<IModule> writeModules) =>
+            IEnumerable<IModule> transformModules,
+            IEnumerable<IModule> outputModules) =>
             bootstrapper.BuildPipeline(name, builder =>
             {
                 builder
                     .WithDependencies(dependencies, isolated)
-                    .WithReadModules(readModules)
+                    .WithInputModules(inputModules)
                     .WithProcessModules(processModules)
-                    .WithRenderModules(renderModules)
-                    .WithWriteModules(writeModules);
+                    .WithTransformModules(transformModules)
+                    .WithOutputModules(outputModules);
             });
 
         private static IBootstrapper AddPipeline(
@@ -441,20 +441,20 @@ namespace Wyam.App
             IEnumerable<string> dependencies,
             bool isolated,
             string name,
-            string readPattern,
+            string readFilesPattern,
             IEnumerable<IModule> processModules,
-            IEnumerable<IModule> renderModules,
-            IEnumerable<IModule> writeModules) =>
+            IEnumerable<IModule> transformModules,
+            IEnumerable<IModule> outputModules) =>
             bootstrapper.BuildPipeline(name, builder =>
             {
                 builder
                     .WithDependencies(dependencies, isolated)
                     .WithProcessModules(processModules)
-                    .WithRenderModules(renderModules)
-                    .WithWriteModules(writeModules);
-                if (readPattern != null)
+                    .WithTransformModules(transformModules)
+                    .WithOutputModules(outputModules);
+                if (readFilesPattern != null)
                 {
-                    builder.WithReadFiles(readPattern);
+                    builder.WithInputReadFiles(readFilesPattern);
                 }
             });
 
@@ -463,23 +463,23 @@ namespace Wyam.App
             IEnumerable<string> dependencies,
             bool isolated,
             string name,
-            string readPattern,
+            string readFilesPattern,
             bool writeFiles,
             IEnumerable<IModule> processModules,
-            IEnumerable<IModule> renderModules) =>
+            IEnumerable<IModule> transformModules) =>
             bootstrapper.BuildPipeline(name, builder =>
             {
                 builder
                     .WithDependencies(dependencies, isolated)
                     .WithProcessModules(processModules)
-                    .WithRenderModules(renderModules);
-                if (readPattern != null)
+                    .WithTransformModules(transformModules);
+                if (readFilesPattern != null)
                 {
-                    builder.WithReadFiles(readPattern);
+                    builder.WithInputReadFiles(readFilesPattern);
                 }
                 if (writeFiles)
                 {
-                    builder.WithWriteFiles();
+                    builder.WithOutputWriteFiles();
                 }
             });
 
@@ -488,20 +488,20 @@ namespace Wyam.App
             IEnumerable<string> dependencies,
             bool isolated,
             string name,
-            string readPattern,
+            string readFilesPattern,
             string destinationExtension,
             IEnumerable<IModule> processModules,
-            IEnumerable<IModule> renderModules) =>
+            IEnumerable<IModule> transformModules) =>
             bootstrapper.BuildPipeline(name, builder =>
             {
                 builder
                     .WithDependencies(dependencies, isolated)
                     .WithProcessModules(processModules)
-                    .WithRenderModules(renderModules)
-                    .WithWriteFiles(destinationExtension);
-                if (readPattern != null)
+                    .WithTransformModules(transformModules)
+                    .WithOutputWriteFiles(destinationExtension);
+                if (readFilesPattern != null)
                 {
-                    builder.WithReadFiles(readPattern);
+                    builder.WithInputReadFiles(readFilesPattern);
                 }
             });
 
@@ -510,20 +510,20 @@ namespace Wyam.App
             IEnumerable<string> dependencies,
             bool isolated,
             string name,
-            string readPattern,
+            string readFilesPattern,
             DocumentConfig<FilePath> destinationPath,
             IEnumerable<IModule> processModules,
-            IEnumerable<IModule> renderModules) =>
+            IEnumerable<IModule> transformModules) =>
             bootstrapper.BuildPipeline(name, builder =>
             {
                 builder
                     .WithDependencies(dependencies, isolated)
                     .WithProcessModules(processModules)
-                    .WithRenderModules(renderModules)
-                    .WithWriteFiles(destinationPath);
-                if (readPattern != null)
+                    .WithTransformModules(transformModules)
+                    .WithOutputWriteFiles(destinationPath);
+                if (readFilesPattern != null)
                 {
-                    builder.WithReadFiles(readPattern);
+                    builder.WithInputReadFiles(readFilesPattern);
                 }
             });
 

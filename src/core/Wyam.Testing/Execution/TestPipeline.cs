@@ -11,13 +11,13 @@ namespace Wyam.Testing.Execution
     /// </summary>
     public class TestPipeline : IPipeline
     {
-        public IModuleList ReadModules { get; } = new ModuleList();
+        public IModuleList InputModules { get; } = new ModuleList();
 
         public IModuleList ProcessModules { get; } = new ModuleList();
 
-        public IModuleList RenderModules { get; } = new ModuleList();
+        public IModuleList TransformModules { get; } = new ModuleList();
 
-        public IModuleList WriteModules { get; } = new ModuleList();
+        public IModuleList OutputModules { get; } = new ModuleList();
 
         public HashSet<string> Dependencies { get; } = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 

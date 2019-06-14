@@ -2,9 +2,9 @@
 {
     public enum Phase
     {
-        Read,
+        Input,
         Process,
-        Render,
-        Write
+        Transform,
+        Output
     }
 }

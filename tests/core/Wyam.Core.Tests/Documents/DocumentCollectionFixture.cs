@@ -52,7 +52,7 @@ namespace Wyam.Core.Tests.Documents
             }
 
             [Test]
-            public void RenderPhaseGetsAllDocuments()
+            public void TransformPhaseGetsAllDocuments()
             {
                 // Given
                 TestDocument a1 = new TestDocument("a1");
@@ -65,13 +65,13 @@ namespace Wyam.Core.Tests.Documents
                     new ConcurrentDictionary<string, ImmutableArray<IDocument>>(StringComparer.OrdinalIgnoreCase);
                 IPipelineCollection pipelines = new PipelineCollection();
                 PipelinePhase phaseA =
-                    GetPipelineAndPhase("A", Phase.Render, pipelines, documents, new[] { a1 });
+                    GetPipelineAndPhase("A", Phase.Transform, pipelines, documents, new[] { a1 });
                 PipelinePhase phaseB =
-                    GetPipelineAndPhase("B", Phase.Render, pipelines, documents, new[] { b1, b2 }, phaseA);
+                    GetPipelineAndPhase("B", Phase.Transform, pipelines, documents, new[] { b1, b2 }, phaseA);
                 PipelinePhase phaseC =
-                    GetPipelineAndPhase("C", Phase.Render, pipelines, documents, new[] { c1 }, phaseB);
+                    GetPipelineAndPhase("C", Phase.Transform, pipelines, documents, new[] { c1 }, phaseB);
                 PipelinePhase phaseD =
-                    GetPipelineAndPhase("D", Phase.Render, pipelines, documents, new[] { d1, d2 });
+                    GetPipelineAndPhase("D", Phase.Transform, pipelines, documents, new[] { d1, d2 });
                 DocumentCollection documentCollection = new DocumentCollection(documents, phaseC, pipelines);
 
                 // When
@@ -95,13 +95,13 @@ namespace Wyam.Core.Tests.Documents
                     new ConcurrentDictionary<string, ImmutableArray<IDocument>>(StringComparer.OrdinalIgnoreCase);
                 IPipelineCollection pipelines = new PipelineCollection();
                 PipelinePhase phaseA =
-                    GetPipelineAndPhase("A", Phase.Render, pipelines, documents, new[] { a1 });
+                    GetPipelineAndPhase("A", Phase.Transform, pipelines, documents, new[] { a1 });
                 PipelinePhase phaseB =
-                    GetPipelineAndPhase("B", Phase.Render, pipelines, documents, new[] { b1, b2, a1 }, phaseA);
+                    GetPipelineAndPhase("B", Phase.Transform, pipelines, documents, new[] { b1, b2, a1 }, phaseA);
                 PipelinePhase phaseC =
-                    GetPipelineAndPhase("C", Phase.Render, pipelines, documents, new[] { c1 }, phaseB);
+                    GetPipelineAndPhase("C", Phase.Transform, pipelines, documents, new[] { c1 }, phaseB);
                 PipelinePhase phaseD =
-                    GetPipelineAndPhase("D", Phase.Render, pipelines, documents, new[] { d1, d2 });
+                    GetPipelineAndPhase("D", Phase.Transform, pipelines, documents, new[] { d1, d2 });
                 DocumentCollection documentCollection = new DocumentCollection(documents, phaseC, pipelines);
 
                 // When
@@ -127,13 +127,13 @@ namespace Wyam.Core.Tests.Documents
             }
 
             [Test]
-            public void ThrowsIfReadPhase()
+            public void ThrowsIfInputPhase()
             {
                 // Given
                 ConcurrentDictionary<string, ImmutableArray<IDocument>> documents =
                     new ConcurrentDictionary<string, ImmutableArray<IDocument>>(StringComparer.OrdinalIgnoreCase);
                 IPipelineCollection pipelines = new PipelineCollection();
-                PipelinePhase phase = GetPipelineAndPhase("A", Phase.Read, pipelines, documents, Array.Empty<IDocument>());
+                PipelinePhase phase = GetPipelineAndPhase("A", Phase.Input, pipelines, documents, Array.Empty<IDocument>());
                 phase.Pipeline.Isolated = true;
                 DocumentCollection documentCollection = new DocumentCollection(documents, phase, pipelines);
 
@@ -142,13 +142,13 @@ namespace Wyam.Core.Tests.Documents
             }
 
             [Test]
-            public void ThrowsIfWritePhase()
+            public void ThrowsIfOutputPhase()
             {
                 // Given
                 ConcurrentDictionary<string, ImmutableArray<IDocument>> documents =
                     new ConcurrentDictionary<string, ImmutableArray<IDocument>>(StringComparer.OrdinalIgnoreCase);
                 IPipelineCollection pipelines = new PipelineCollection();
-                PipelinePhase phase = GetPipelineAndPhase("A", Phase.Write, pipelines, documents, Array.Empty<IDocument>());
+                PipelinePhase phase = GetPipelineAndPhase("A", Phase.Output, pipelines, documents, Array.Empty<IDocument>());
                 phase.Pipeline.Isolated = true;
                 DocumentCollection documentCollection = new DocumentCollection(documents, phase, pipelines);
 
@@ -190,7 +190,7 @@ namespace Wyam.Core.Tests.Documents
             }
 
             [Test]
-            public void ExcludeCurrentPipelineDuringRender()
+            public void ExcludeCurrentPipelineDuringTransform()
             {
                 // Given
                 TestDocument a1 = new TestDocument("a1");
@@ -203,13 +203,13 @@ namespace Wyam.Core.Tests.Documents
                     new ConcurrentDictionary<string, ImmutableArray<IDocument>>(StringComparer.OrdinalIgnoreCase);
                 IPipelineCollection pipelines = new PipelineCollection();
                 PipelinePhase phaseA =
-                    GetPipelineAndPhase("A", Phase.Render, pipelines, documents, new[] { a1 });
+                    GetPipelineAndPhase("A", Phase.Transform, pipelines, documents, new[] { a1 });
                 PipelinePhase phaseB =
-                    GetPipelineAndPhase("B", Phase.Render, pipelines, documents, new[] { b1, b2 }, phaseA);
+                    GetPipelineAndPhase("B", Phase.Transform, pipelines, documents, new[] { b1, b2 }, phaseA);
                 PipelinePhase phaseC =
-                    GetPipelineAndPhase("C", Phase.Render, pipelines, documents, new[] { c1 }, phaseB);
+                    GetPipelineAndPhase("C", Phase.Transform, pipelines, documents, new[] { c1 }, phaseB);
                 PipelinePhase phaseD =
-                    GetPipelineAndPhase("D", Phase.Render, pipelines, documents, new[] { d1, d2 });
+                    GetPipelineAndPhase("D", Phase.Transform, pipelines, documents, new[] { d1, d2 });
                 DocumentCollection documentCollection = new DocumentCollection(documents, phaseC, pipelines);
 
                 // When
@@ -229,7 +229,7 @@ namespace Wyam.Core.Tests.Documents
                 ConcurrentDictionary<string, ImmutableArray<IDocument>> documents =
                     new ConcurrentDictionary<string, ImmutableArray<IDocument>>(StringComparer.OrdinalIgnoreCase);
                 IPipelineCollection pipelines = new PipelineCollection();
-                PipelinePhase phase = GetPipelineAndPhase("A", Phase.Render, pipelines, documents, Array.Empty<IDocument>());
+                PipelinePhase phase = GetPipelineAndPhase("A", Phase.Transform, pipelines, documents, Array.Empty<IDocument>());
                 DocumentCollection documentCollection = new DocumentCollection(documents, phase, pipelines);
 
                 // When, Then
@@ -243,7 +243,7 @@ namespace Wyam.Core.Tests.Documents
                 ConcurrentDictionary<string, ImmutableArray<IDocument>> documents =
                     new ConcurrentDictionary<string, ImmutableArray<IDocument>>(StringComparer.OrdinalIgnoreCase);
                 IPipelineCollection pipelines = new PipelineCollection();
-                PipelinePhase phase = GetPipelineAndPhase("A", Phase.Render, pipelines, documents, Array.Empty<IDocument>());
+                PipelinePhase phase = GetPipelineAndPhase("A", Phase.Transform, pipelines, documents, Array.Empty<IDocument>());
                 DocumentCollection documentCollection = new DocumentCollection(documents, phase, pipelines);
 
                 // When, Then
@@ -265,13 +265,13 @@ namespace Wyam.Core.Tests.Documents
             }
 
             [Test]
-            public void DoesNotThrowForCurrentPipelineDuringRender()
+            public void DoesNotThrowForCurrentPipelineDuringTransform()
             {
                 // Given
                 ConcurrentDictionary<string, ImmutableArray<IDocument>> documents =
                     new ConcurrentDictionary<string, ImmutableArray<IDocument>>(StringComparer.OrdinalIgnoreCase);
                 IPipelineCollection pipelines = new PipelineCollection();
-                PipelinePhase phase = GetPipelineAndPhase("A", Phase.Render, pipelines, documents, Array.Empty<IDocument>());
+                PipelinePhase phase = GetPipelineAndPhase("A", Phase.Transform, pipelines, documents, Array.Empty<IDocument>());
                 DocumentCollection documentCollection = new DocumentCollection(documents, phase, pipelines);
 
                 // When, Then
@@ -306,7 +306,7 @@ namespace Wyam.Core.Tests.Documents
             }
 
             [Test]
-            public void GetsDocumentsDuringRenderPhase()
+            public void GetsDocumentsDuringTransformPhase()
             {
                 // Given
                 TestDocument a1 = new TestDocument("a1");
@@ -319,13 +319,13 @@ namespace Wyam.Core.Tests.Documents
                     new ConcurrentDictionary<string, ImmutableArray<IDocument>>(StringComparer.OrdinalIgnoreCase);
                 IPipelineCollection pipelines = new PipelineCollection();
                 PipelinePhase phaseA =
-                    GetPipelineAndPhase("A", Phase.Render, pipelines, documents, new[] { a1 });
+                    GetPipelineAndPhase("A", Phase.Transform, pipelines, documents, new[] { a1 });
                 PipelinePhase phaseB =
-                    GetPipelineAndPhase("B", Phase.Render, pipelines, documents, new[] { b1, b2 }, phaseA);
+                    GetPipelineAndPhase("B", Phase.Transform, pipelines, documents, new[] { b1, b2 }, phaseA);
                 PipelinePhase phaseC =
-                    GetPipelineAndPhase("C", Phase.Render, pipelines, documents, new[] { c1 }, phaseB);
+                    GetPipelineAndPhase("C", Phase.Transform, pipelines, documents, new[] { c1 }, phaseB);
                 PipelinePhase phaseD =
-                    GetPipelineAndPhase("D", Phase.Render, pipelines, documents, new[] { d1, d2 });
+                    GetPipelineAndPhase("D", Phase.Transform, pipelines, documents, new[] { d1, d2 });
                 DocumentCollection documentCollection = new DocumentCollection(documents, phaseC, pipelines);
 
                 // When
@@ -349,13 +349,13 @@ namespace Wyam.Core.Tests.Documents
                     new ConcurrentDictionary<string, ImmutableArray<IDocument>>(StringComparer.OrdinalIgnoreCase);
                 IPipelineCollection pipelines = new PipelineCollection();
                 PipelinePhase phaseA =
-                    GetPipelineAndPhase("A", Phase.Render, pipelines, documents, new[] { a1 });
+                    GetPipelineAndPhase("A", Phase.Transform, pipelines, documents, new[] { a1 });
                 PipelinePhase phaseB =
-                    GetPipelineAndPhase("B", Phase.Render, pipelines, documents, new[] { b1, b2 }, phaseA);
+                    GetPipelineAndPhase("B", Phase.Transform, pipelines, documents, new[] { b1, b2 }, phaseA);
                 PipelinePhase phaseC =
-                    GetPipelineAndPhase("C", Phase.Render, pipelines, documents, new[] { c1 }, phaseB);
+                    GetPipelineAndPhase("C", Phase.Transform, pipelines, documents, new[] { c1 }, phaseB);
                 PipelinePhase phaseD =
-                    GetPipelineAndPhase("D", Phase.Render, pipelines, documents, new[] { d1, d2 });
+                    GetPipelineAndPhase("D", Phase.Transform, pipelines, documents, new[] { d1, d2 });
                 DocumentCollection documentCollection = new DocumentCollection(documents, phaseC, pipelines);
 
                 // When

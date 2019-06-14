@@ -5,17 +5,17 @@ namespace Wyam.Common.Execution
 {
     public static class IPipelineExtensions
     {
-        public static TPipeline WithReadModules<TPipeline>(this TPipeline pipeline, IEnumerable<IModule> modules)
+        public static TPipeline WithInputModules<TPipeline>(this TPipeline pipeline, IEnumerable<IModule> modules)
             where TPipeline : IPipeline
         {
-            pipeline.ReadModules.Add(modules);
+            pipeline.InputModules.Add(modules);
             return pipeline;
         }
 
-        public static TPipeline WithReadModules<TPipeline>(this TPipeline pipeline, params IModule[] modules)
+        public static TPipeline WithInputModules<TPipeline>(this TPipeline pipeline, params IModule[] modules)
             where TPipeline : IPipeline
         {
-            pipeline.ReadModules.Add(modules);
+            pipeline.InputModules.Add(modules);
             return pipeline;
         }
 
@@ -33,31 +33,31 @@ namespace Wyam.Common.Execution
             return pipeline;
         }
 
-        public static TPipeline WithRenderModules<TPipeline>(this TPipeline pipeline, IEnumerable<IModule> modules)
+        public static TPipeline WithTransformModules<TPipeline>(this TPipeline pipeline, IEnumerable<IModule> modules)
             where TPipeline : IPipeline
         {
-            pipeline.RenderModules.Add(modules);
+            pipeline.TransformModules.Add(modules);
             return pipeline;
         }
 
-        public static TPipeline WithRenderModules<TPipeline>(this TPipeline pipeline, params IModule[] modules)
+        public static TPipeline WithTransformModules<TPipeline>(this TPipeline pipeline, params IModule[] modules)
             where TPipeline : IPipeline
         {
-            pipeline.RenderModules.Add(modules);
+            pipeline.TransformModules.Add(modules);
             return pipeline;
         }
 
-        public static TPipeline WithWriteModules<TPipeline>(this TPipeline pipeline, IEnumerable<IModule> modules)
+        public static TPipeline WithOutputModules<TPipeline>(this TPipeline pipeline, IEnumerable<IModule> modules)
             where TPipeline : IPipeline
         {
-            pipeline.WriteModules.Add(modules);
+            pipeline.OutputModules.Add(modules);
             return pipeline;
         }
 
-        public static TPipeline WithWriteModules<TPipeline>(this TPipeline pipeline, params IModule[] modules)
+        public static TPipeline WithOutputModules<TPipeline>(this TPipeline pipeline, params IModule[] modules)
             where TPipeline : IPipeline
         {
-            pipeline.WriteModules.Add(modules);
+            pipeline.OutputModules.Add(modules);
             return pipeline;
         }
 

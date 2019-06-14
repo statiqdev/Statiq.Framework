@@ -40,38 +40,38 @@ namespace Wyam.App
             return pipeline;
         }
 
-        public PipelineBuilder WithReadFiles(params string[] patterns)
+        public PipelineBuilder WithInputReadFiles(params string[] patterns)
         {
-            _actions.Add(x => x.ReadModules.Add(new ReadFiles((DocumentConfig<IEnumerable<string>>)patterns)));
+            _actions.Add(x => x.InputModules.Add(new ReadFiles((DocumentConfig<IEnumerable<string>>)patterns)));
             return this;
         }
 
-        public PipelineBuilder WithReadFiles(IEnumerable<string> patterns)
+        public PipelineBuilder WithInputReadFiles(IEnumerable<string> patterns)
         {
             if (patterns != null)
             {
-                _actions.Add(x => x.ReadModules.Add(new ReadFiles((DocumentConfig<IEnumerable<string>>)patterns)));
+                _actions.Add(x => x.InputModules.Add(new ReadFiles((DocumentConfig<IEnumerable<string>>)patterns)));
             }
             return this;
         }
 
-        public PipelineBuilder WithWriteFiles()
+        public PipelineBuilder WithOutputWriteFiles()
         {
-            _actions.Add(x => x.WriteModules.Add(new WriteFiles()));
+            _actions.Add(x => x.OutputModules.Add(new WriteFiles()));
             return this;
         }
 
-        public PipelineBuilder WithWriteFiles(string extension)
+        public PipelineBuilder WithOutputWriteFiles(string extension)
         {
-            _actions.Add(x => x.WriteModules.Add(
+            _actions.Add(x => x.OutputModules.Add(
                 new SetDestination(extension),
                 new WriteFiles()));
             return this;
         }
 
-        public PipelineBuilder WithWriteFiles(DocumentConfig<FilePath> path)
+        public PipelineBuilder WithOutputWriteFiles(DocumentConfig<FilePath> path)
         {
-            _actions.Add(x => x.WriteModules.Add(
+            _actions.Add(x => x.OutputModules.Add(
                 new SetDestination(path),
                 new WriteFiles()));
             return this;
@@ -84,18 +84,18 @@ namespace Wyam.App
             return this;
         }
 
-        public PipelineBuilder WithReadModules(IEnumerable<IModule> modules)
+        public PipelineBuilder WithInputModules(IEnumerable<IModule> modules)
         {
             if (modules != null)
             {
-                _actions.Add(x => x.WithReadModules(modules));
+                _actions.Add(x => x.WithInputModules(modules));
             }
             return this;
         }
 
-        public PipelineBuilder WithReadModules(params IModule[] modules)
+        public PipelineBuilder WithInputModules(params IModule[] modules)
         {
-            _actions.Add(x => x.WithReadModules(modules));
+            _actions.Add(x => x.WithInputModules(modules));
             return this;
         }
 
@@ -114,33 +114,33 @@ namespace Wyam.App
             return this;
         }
 
-        public PipelineBuilder WithRenderModules(IEnumerable<IModule> modules)
+        public PipelineBuilder WithTransformModules(IEnumerable<IModule> modules)
         {
             if (modules != null)
             {
-                _actions.Add(x => x.WithRenderModules(modules));
+                _actions.Add(x => x.WithTransformModules(modules));
             }
             return this;
         }
 
-        public PipelineBuilder WithRenderModules(params IModule[] modules)
+        public PipelineBuilder WithTransformModules(params IModule[] modules)
         {
-            _actions.Add(x => x.WithRenderModules(modules));
+            _actions.Add(x => x.WithTransformModules(modules));
             return this;
         }
 
-        public PipelineBuilder WithWriteModules(IEnumerable<IModule> modules)
+        public PipelineBuilder WithOutputModules(IEnumerable<IModule> modules)
         {
             if (modules != null)
             {
-                _actions.Add(x => x.WithWriteModules(modules));
+                _actions.Add(x => x.WithOutputModules(modules));
             }
             return this;
         }
 
-        public PipelineBuilder WithWriteModules(params IModule[] modules)
+        public PipelineBuilder WithOutputModules(params IModule[] modules)
         {
-            _actions.Add(x => x.WithWriteModules(modules));
+            _actions.Add(x => x.WithOutputModules(modules));
             return this;
         }
 
