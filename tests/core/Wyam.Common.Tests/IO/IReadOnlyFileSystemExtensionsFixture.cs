@@ -174,6 +174,65 @@ namespace Wyam.Common.Tests.IO
             }
         }
 
+        public class GetContainingInputPathForAbsolutePathTests : IReadOnlyFileSystemExtensionsFixture
+        {
+            [Test]
+            public void ThrowsForNullPath()
+            {
+                // Given
+                TestFileSystem fileSystem = new TestFileSystem();
+
+                // When, Then
+                Should.Throw<ArgumentNullException>(() => fileSystem.GetContainingInputPathForAbsolutePath(null));
+            }
+
+            [TestCase("/a/b/c/foo.txt", "/a/b")]
+            [TestCase("/a/x/bar.txt", "/a/x")]
+            [TestCase("/a/x/baz.txt", "/a/x")]
+            [TestCase("/z/baz.txt", null)]
+            [TestCase("/a/b/c/../e/foo.txt", "/a/b")]
+            [TestCase("/a/b/c", "/a/b")]
+            [TestCase("/a/x", "/a/x")]
+            public void ShouldReturnContainingPathForAbsolutePath(string path, string expected)
+            {
+                // Given
+                TestFileSystem fileSystem = new TestFileSystem(GetFileProvider());
+                fileSystem.RootPath = "/a";
+                fileSystem.InputPaths.Add("b");
+                fileSystem.InputPaths.Add("x");
+
+                // When
+                DirectoryPath inputPathFromFilePath = fileSystem.GetContainingInputPathForAbsolutePath(new FilePath(path));
+                DirectoryPath inputPathFromDirectoryPath = fileSystem.GetContainingInputPathForAbsolutePath(new DirectoryPath(path));
+
+                // Then
+                Assert.AreEqual(expected, inputPathFromFilePath?.FullPath);
+                Assert.AreEqual(expected, inputPathFromDirectoryPath?.FullPath);
+            }
+
+            [TestCase("/a/b/c/foo.txt", "/a/b")]
+            [TestCase("/a/x/bar.txt", "/a/x")]
+            [TestCase("/a/x/baz.txt", "/a/x")]
+            [TestCase("/z/baz.txt", null)]
+            [TestCase("/a/b/c/../e/foo.txt", "/a/b")]
+            public void ShouldReturnContainingPathForInputPathAboveRootPath(string path, string expected)
+            {
+                // Given
+                TestFileSystem fileSystem = new TestFileSystem(GetFileProvider());
+                fileSystem.RootPath = "/a/y";
+                fileSystem.InputPaths.Add("../b");
+                fileSystem.InputPaths.Add("../x");
+
+                // When
+                DirectoryPath inputPathFromFilePath = fileSystem.GetContainingInputPathForAbsolutePath(new FilePath(path));
+                DirectoryPath inputPathFromDirectoryPath = fileSystem.GetContainingInputPathForAbsolutePath(new DirectoryPath(path));
+
+                // Then
+                Assert.AreEqual(expected, inputPathFromFilePath?.FullPath);
+                Assert.AreEqual(expected, inputPathFromDirectoryPath?.FullPath);
+            }
+        }
+
         public class GetContainingInputPathTests : IReadOnlyFileSystemExtensionsFixture
         {
             [Test]

@@ -43,7 +43,7 @@ namespace Wyam.Common.Execution
         /// A string representation of the path suitable for a web link.
         /// </returns>
         public static string GetLink(this IExecutionContext context, IDocument document, bool includeHost = false) =>
-            document.Source == null ? null : GetLink(context, document.Destination, includeHost);
+            document.Destination == null ? null : GetLink(context, document.Destination, includeHost);
 
         /// <summary>
         /// Gets a link for the specified metadata using the specified metadata value and the default settings from the

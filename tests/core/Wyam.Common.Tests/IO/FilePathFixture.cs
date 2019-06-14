@@ -294,5 +294,36 @@ namespace Wyam.Common.Tests.IO
                 Assert.IsNull(result);
             }
         }
+
+        public class ChangeFileNameTests : FilePathFixture
+        {
+            [TestCase("/input/test.txt", "foo.bar", "/input/foo.bar")]
+            [TestCase("/input/test", "foo.bar", "/input/foo.bar")]
+            [TestCase("input/test.txt", "foo.bar", "input/foo.bar")]
+            [TestCase("input/test", "foo.bar", "input/foo.bar")]
+            [TestCase("/test.txt", "foo.bar", "/foo.bar")]
+            [TestCase("/test", "foo.bar", "/foo.bar")]
+            [TestCase("test.txt", "foo.bar", "foo.bar")]
+            [TestCase("test", "foo.bar", "foo.bar")]
+            [TestCase("/input/test.txt", "foo", "/input/foo")]
+            [TestCase("/input/test", "foo", "/input/foo")]
+            [TestCase("input/test.txt", "foo", "input/foo")]
+            [TestCase("input/test", "foo", "input/foo")]
+            [TestCase("/test.txt", "foo", "/foo")]
+            [TestCase("/test", "foo", "/foo")]
+            [TestCase("test.txt", "foo", "foo")]
+            [TestCase("test", "foo", "foo")]
+            public void ShouldChangeFileName(string fullPath, string fileName, string expected)
+            {
+                // Given
+                FilePath path = new FilePath(fullPath);
+
+                // When
+                FilePath result = path.ChangeFileName(fileName);
+
+                // Then
+                result.FullPath.ShouldBe(expected);
+            }
+        }
     }
 }

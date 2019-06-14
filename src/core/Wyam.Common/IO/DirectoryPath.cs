@@ -104,10 +104,7 @@ namespace Wyam.Common.IO
         /// </summary>
         /// <param name="target">The target directory path.</param>
         /// <returns>A <see cref="DirectoryPath"/>.</returns>
-        public DirectoryPath GetRelativePath(DirectoryPath target)
-        {
-            return RelativePathResolver.Resolve(this, target);
-        }
+        public DirectoryPath GetRelativePath(DirectoryPath target) => RelativePathResolver.Resolve(this, target);
 
         /// <summary>
         /// Get the relative path to another file. If this path and the target path
@@ -115,10 +112,7 @@ namespace Wyam.Common.IO
         /// </summary>
         /// <param name="target">The target file path.</param>
         /// <returns>A <see cref="FilePath"/>.</returns>
-        public FilePath GetRelativePath(FilePath target)
-        {
-            return RelativePathResolver.Resolve(this, target);
-        }
+        public FilePath GetRelativePath(FilePath target) => RelativePathResolver.Resolve(this, target);
 
         /// <summary>
         /// Combines the current path with a <see cref="FilePath"/>.

@@ -48,6 +48,46 @@ namespace Wyam.Core.Tests.Modules.IO
 
             [TestCase(Keys.DestinationPath, "OtherFolder/foo.bar", "OtherFolder/foo.bar")]
             [TestCase(Keys.DestinationPath, "/OtherFolder/foo.bar", "/OtherFolder/foo.bar")]
+            [TestCase(Keys.DestinationFileName, "foo.bar", "foo.bar")]
+            [TestCase(Keys.DestinationFileName, "fizz/foo.bar", "fizz/foo.bar")]
+            [TestCase(Keys.DestinationFileName, "../fizz/foo.bar", "../fizz/foo.bar")]
+            [TestCase(Keys.DestinationFileName, "/foo.bar", "/foo.bar")]
+            [TestCase(Keys.DestinationFileName, "/fizz/foo.bar", "/fizz/foo.bar")]
+            [TestCase(Keys.DestinationExtension, "foo", null)]
+            [TestCase(Keys.DestinationExtension, ".foo", null)]
+            public async Task SetsDestinationFromMetadataWhenNullDestination(string key, string value, string expected)
+            {
+                // Given
+                TestDocument input = new TestDocument()
+                {
+                    { key, value }
+                };
+                SetDestination setDestination = new SetDestination();
+
+                // When
+                TestDocument result = await ExecuteAsync(input, setDestination).SingleAsync();
+
+                // Then
+                result.Destination.ShouldBe(expected);
+            }
+
+            [TestCase("foo", "Subfolder/write-test.foo")]
+            [TestCase(".foo", "Subfolder/write-test.foo")]
+            public async Task SetsDestinationUsingExtension(string extension, string expected)
+            {
+                // Given
+                TestDocument input = new TestDocument(new FilePath("Subfolder/write-test.abc"));
+                SetDestination setDestination = new SetDestination(extension);
+
+                // When
+                TestDocument result = await ExecuteAsync(input, setDestination).SingleAsync();
+
+                // Then
+                result.Destination.ShouldBe(expected);
+            }
+
+            [TestCase(Keys.DestinationPath, "OtherFolder/foo.bar", "OtherFolder/foo.bar")]
+            [TestCase(Keys.DestinationPath, "/OtherFolder/foo.bar", "/OtherFolder/foo.bar")]
             [TestCase(Keys.DestinationFileName, "foo.bar", "Subfolder/foo.bar")]
             [TestCase(Keys.DestinationFileName, "fizz/foo.bar", "Subfolder/fizz/foo.bar")]
             [TestCase(Keys.DestinationFileName, "../fizz/foo.bar", "fizz/foo.bar")]

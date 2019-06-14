@@ -1,8 +1,10 @@
 ﻿using NUnit.Framework;
 using Shouldly;
 using Wyam.Common.Execution;
+using Wyam.Common.IO;
 using Wyam.Common.Meta;
 using Wyam.Testing;
+using Wyam.Testing.Attributes;
 using Wyam.Testing.Documents;
 using Wyam.Testing.Execution;
 using Wyam.Testing.Meta;
@@ -36,6 +38,28 @@ namespace Wyam.Common.Tests.Execution
 
                 // When
                 string result = context.GetLink(document, "Path", includeHost);
+
+                // Then
+                result.ShouldBe(expected);
+            }
+
+            [TestCase("foo/bar.txt", false, "/foo/bar.txt")]
+            [TestCase("foo/bar.txt", true, "http://domain.com/foo/bar.txt")]
+            [TestCase("/foo/bar.txt", false, "/foo/bar.txt")]
+            [TestCase("/foo/bar.txt", true, "http://domain.com/foo/bar.txt")]
+            [TestCase("//foo/bar.txt", false, "/foo/bar.txt")]
+            [TestCase("//foo/bar.txt", true, "http://domain.com/foo/bar.txt")]
+            [WindowsTestCase("C:/foo/bar.txt", false, "/C:/foo/bar.txt")]
+            [WindowsTestCase("C:/foo/bar.txt", true, "http://domain.com/C:/foo/bar.txt")]
+            public void GetsLinkFromDestination(string destination, bool includeHost, string expected)
+            {
+                // Given
+                TestExecutionContext context = new TestExecutionContext();
+                context.Settings[Keys.Host] = "domain.com";
+                TestDocument document = new TestDocument(null, new FilePath(destination));
+
+                // When
+                string result = context.GetLink(document, includeHost);
 
                 // Then
                 result.ShouldBe(expected);
