@@ -1,6 +1,6 @@
 <Project>
   <Import Project="../Directory.Build.props" />
   <PropertyGroup>
-    <CodeAnalysisRuleSet>..\..\..\wyam.ruleset</CodeAnalysisRuleSet>
+    <CodeAnalysisRuleSet>..\..\..\statiq.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
 </Project>

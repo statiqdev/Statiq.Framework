@@ -12,10 +12,10 @@
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <Authors>Dave Glick, Other Awesome Contributors</Authors>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
-    <PackageIconUrl>https://wyam.io/Content/images/logo-square-64.png</PackageIconUrl>
-    <PackageProjectUrl>https://wyam.io</PackageProjectUrl>
+    <PackageIconUrl>https://statiq.dev/logo-square-64.png</PackageIconUrl>
+    <PackageProjectUrl>https://statiq.dev</PackageProjectUrl>
     <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
-    <Copyright>Copyright © Wyam Contributors</Copyright>
+    <Copyright>Copyright © Statiq Contributors</Copyright>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <CodeAnalysisTreatWarningsAsErrors>true</CodeAnalysisTreatWarningsAsErrors>
     <LangVersion>latest</LangVersion>

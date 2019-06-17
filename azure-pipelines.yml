@@ -7,8 +7,6 @@ jobs:
     env:
       SYSTEM_ACCESSTOKEN: $(System.AccessToken)
       MYGET_API_KEY: $(MYGET_API_KEY)
-      WYAM_CERTPASS: $(WYAM_CERTPASS)
-      SIGNTOOL: C:/Program Files (x86)/Microsoft SDKs/Windows/v7.1A/Bin/SignTool.exe
 - job: Linux
   pool:
     vmImage: 'ubuntu 16.04'
