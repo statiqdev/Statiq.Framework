@@ -6,19 +6,16 @@ namespace Statiq.Common.Content
     internal class SeekableStream : Stream
     {
         private readonly Stream _stream;
-        private readonly bool _disposeStream;
         private readonly MemoryStream _bufferStream;
         private bool _endOfStream = false;
-        private bool _disposed = false;
 
-        public SeekableStream(Stream stream, bool disposeStream, MemoryStream bufferStream)
+        public SeekableStream(Stream stream, MemoryStream bufferStream)
         {
             if (!stream?.CanRead ?? throw new ArgumentNullException(nameof(stream)))
             {
                 throw new ArgumentException("Wrapped stream must be readable.");
             }
             _stream = stream;
-            _disposeStream = disposeStream;
             _bufferStream = bufferStream ?? throw new ArgumentNullException(nameof(bufferStream));
         }
 
@@ -35,7 +32,6 @@ namespace Statiq.Common.Content
         {
             get
             {
-                CheckDisposed();
                 if (!_endOfStream)
                 {
                     Fill();
@@ -46,21 +42,12 @@ namespace Statiq.Common.Content
 
         public override long Position
         {
-            get
-            {
-                CheckDisposed();
-                return _bufferStream.Position;
-            }
-            set
-            {
-                CheckDisposed();
-                Seek(value, SeekOrigin.Begin);
-            }
+            get => _bufferStream.Position;
+            set => Seek(value, SeekOrigin.Begin);
         }
 
         public override int Read(byte[] buffer, int offset, int count)
         {
-            CheckDisposed();
             int streamBytes = 0;
             int memoryBytes = _bufferStream.Read(buffer, offset, count);
             if ((count > memoryBytes) && (!_endOfStream))
@@ -78,7 +65,6 @@ namespace Statiq.Common.Content
 
         public override long Seek(long offset, SeekOrigin origin)
         {
-            CheckDisposed();
             long newPosition;
             switch (origin)
             {
@@ -142,30 +128,6 @@ namespace Statiq.Common.Content
             }
             while (bytesRead != 0);
             _endOfStream = true;
-        }
-
-        protected override void Dispose(bool disposing)
-        {
-            base.Dispose(disposing);
-            if (_disposed || !disposing)
-            {
-                return;
-            }
-
-            _bufferStream.Dispose();
-            if (_disposeStream)
-            {
-                _stream.Dispose();
-            }
-            _disposed = true;
-        }
-
-        private void CheckDisposed()
-        {
-            if (_disposed)
-            {
-                throw new ObjectDisposedException(nameof(SeekableStream));
-            }
         }
     }
 }

@@ -129,12 +129,14 @@ namespace Statiq.Highlight
                                     }
                                 }
 
-                                Stream contentStream = await context.GetContentStreamAsync();
-                                using (StreamWriter writer = contentStream.GetWriter())
+                                using (Stream contentStream = await context.GetContentStreamAsync())
                                 {
-                                    htmlDocument.ToHtml(writer, HtmlMarkupFormatter.Instance);
-                                    writer.Flush();
-                                    return context.GetDocument(input, await context.GetContentProviderAsync(contentStream));
+                                    using (StreamWriter writer = contentStream.GetWriter())
+                                    {
+                                        htmlDocument.ToHtml(writer, HtmlMarkupFormatter.Instance);
+                                        writer.Flush();
+                                        return context.GetDocument(input, context.GetContentProvider(contentStream));
+                                    }
                                 }
                             }
                         }

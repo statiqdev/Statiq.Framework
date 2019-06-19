@@ -84,7 +84,7 @@ namespace Statiq.Core.Modules.Templates
                     {
                         xslt.Transform(XmlReader.Create(stream), writer);
                     }
-                    return context.GetDocument(input, await context.GetContentProviderAsync(str));
+                    return context.GetDocument(input, await context.GetContentProviderAsync(str.ToString()));
                 }
             });
         }

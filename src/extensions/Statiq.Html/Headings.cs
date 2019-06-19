@@ -253,12 +253,14 @@ namespace Statiq.Html
                             metadata.Add(_parentKey, new CachedDelegateMetadataValue(_ => parent?.Document));
                         }
 
-                        Stream contentStream = await context.GetContentStreamAsync();
-                        using (StreamWriter writer = contentStream.GetWriter())
+                        using (Stream contentStream = await context.GetContentStreamAsync())
                         {
-                            heading.Element.ChildNodes.ToHtml(writer, ProcessingInstructionFormatter.Instance);
-                            writer.Flush();
-                            heading.Document = context.GetDocument(metadata, await context.GetContentProviderAsync(contentStream));
+                            using (StreamWriter writer = contentStream.GetWriter())
+                            {
+                                heading.Element.ChildNodes.ToHtml(writer, ProcessingInstructionFormatter.Instance);
+                                writer.Flush();
+                                heading.Document = context.GetDocument(metadata, context.GetContentProvider(contentStream));
+                            }
                         }
 
                         // Add to parent

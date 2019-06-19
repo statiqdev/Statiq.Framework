@@ -110,18 +110,12 @@ namespace Statiq.Common.Execution
         /// is not null, the stream is initialized with the specified content. It is prefered to use
         /// this method to obtain a stream over creating your own if the source of the content does
         /// not already provide one. The returned streams are optimized for memory usage and performance.
-        /// <remarks>The position is set to the beginning of the stream when returned.</remarks>
+        /// Instances of the returned stream should be disposed when writing is complete.
         /// </summary>
+        /// <remarks>The position is set to the beginning of the stream when returned.</remarks>
         /// <param name="content">Content to initialize the stream with.</param>
         /// <returns>A stream for document content.</returns>
         Task<Stream> GetContentStreamAsync(string content = null);
-
-        /// <summary>
-        /// Gets a content provider that can be used for document content.
-        /// </summary>
-        /// <param name="content">The content to create a provider for.</param>
-        /// <returns>A content provider for use when creating documents.</returns>
-        Task<IContentProvider> GetContentProviderAsync(object content);
 
         /// <summary>
         /// Clones the original document with a new source and destination, new content, and additional metadata (all existing metadata is retained)

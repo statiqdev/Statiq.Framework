@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
+using Statiq.Common.Content;
 using Statiq.Common.Documents;
 using Statiq.Common.IO;
 using Statiq.Common.Meta;
@@ -80,6 +81,8 @@ namespace Statiq.Core.Documents
 
         /// <inheritdoc />
         public IMetadata Metadata => Document.Metadata;
+
+        public IContentProvider ContentProvider => Document.ContentProvider;
 
         /// <inheritdoc />
         public Task<string> GetStringAsync() => Document.GetStringAsync();

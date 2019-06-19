@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Threading.Tasks;
+using Statiq.Common.Content;
 
 namespace Statiq.Common.IO
 {
@@ -9,7 +10,7 @@ namespace Statiq.Common.IO
     /// available methods and may throw <see cref="NotSupportedException"/>.
     /// </summary>
     // Initially based on code from Cake (http://cakebuild.net/)
-    public interface IFile : IFileSystemEntry
+    public interface IFile : IFileSystemEntry, IContentProviderFactory
     {
         /// <summary>
         /// Gets the path to the file.

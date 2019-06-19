@@ -86,7 +86,7 @@ namespace Statiq.Tables
                         firstLine = false;
                     }
 
-                    return context.GetDocument(input, await context.GetContentProviderAsync(builder));
+                    return context.GetDocument(input, await context.GetContentProviderAsync(builder.ToString()));
                 }
                 catch (Exception e)
                 {

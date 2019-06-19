@@ -18,9 +18,6 @@ namespace Statiq.Core.Documents
     // Document source must be unique within the pipeline
     internal class Document : IDocument
     {
-        private static readonly Dictionary<IContentProvider, int> _contentProviderReferenceCount = new Dictionary<IContentProvider, int>();
-        private static readonly object _contentProviderReferenceCountLock = new object();
-
         private readonly MetadataStack _metadata;
         private readonly IContentProvider _contentProvider;
         private bool _disposed;
@@ -83,21 +80,6 @@ namespace Statiq.Core.Documents
 
             // Special case to set the content provider to null when cloning
             _contentProvider = contentProvider is NullContent ? null : contentProvider;
-
-            if (_contentProvider != null)
-            {
-                lock (_contentProviderReferenceCountLock)
-                {
-                    if (_contentProviderReferenceCount.TryGetValue(_contentProvider, out int count))
-                    {
-                        _contentProviderReferenceCount[_contentProvider] = count + 1;
-                    }
-                    else
-                    {
-                        _contentProviderReferenceCount.Add(contentProvider, 1);
-                    }
-                }
-            }
         }
 
         public FilePath Source { get; }
@@ -130,7 +112,7 @@ namespace Statiq.Core.Documents
             return _contentProvider == null ? Stream.Null : await _contentProvider.GetStreamAsync();
         }
 
-        internal IContentProvider ContentProvider
+        public IContentProvider ContentProvider
         {
             get
             {
@@ -155,33 +137,6 @@ namespace Statiq.Core.Documents
             CheckDisposed();
 
             Trace.Verbose($"Disposing document with ID {Id}.{Version} and source {Source.ToDisplayString()}");
-
-            if (_contentProvider != null)
-            {
-                int count;
-                lock (_contentProviderReferenceCountLock)
-                {
-                    if (!_contentProviderReferenceCount.TryGetValue(_contentProvider, out count))
-                    {
-                        throw new InvalidOperationException("Unexepected document content provider reference count missing");
-                    }
-                    count--;
-                    if (count == 0)
-                    {
-                        _contentProviderReferenceCount.Remove(_contentProvider);
-                    }
-                    else
-                    {
-                        _contentProviderReferenceCount[_contentProvider] = count;
-                    }
-                }
-
-                // Dispose the content provider outside the lock
-                if (count == 0)
-                {
-                    _contentProvider.Dispose();
-                }
-            }
 
             _disposed = true;
         }

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Statiq.Common;
 using Statiq.Common.Configuration;
@@ -78,14 +79,14 @@ namespace Statiq.Core.Modules.IO
             {
                 IEnumerable<IFile> files = await context.FileSystem.GetInputFilesAsync(patterns);
                 files = await files.ParallelWhereAsync(async file => _predicate == null || await _predicate(file));
-                return await files.ParallelSelectAsync(async file =>
+                return files.AsParallel().Select(file =>
                 {
                     Trace.Verbose($"Read file {file.Path.FullPath}");
                     return context.GetDocument(
                         input,
                         file.Path,
                         file.Path.GetRelativeInputPath(context),
-                        await context.GetContentProviderAsync(file));
+                        context.GetContentProvider(file));
                 });
             }
             return Array.Empty<IDocument>();

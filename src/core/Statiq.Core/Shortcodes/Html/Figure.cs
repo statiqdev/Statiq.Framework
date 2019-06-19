@@ -93,7 +93,7 @@ namespace Statiq.Core.Shortcodes.Html
                 figure.Add(new XElement("figcaption", content));
             }
 
-            return context.GetDocument(await context.GetContentProviderAsync(figure));
+            return context.GetDocument(await context.GetContentProviderAsync(figure.ToString()));
         }
     }
 }

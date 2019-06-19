@@ -36,7 +36,7 @@ namespace Statiq.Tables
                     using (Stream contentStream = await context.GetContentStreamAsync())
                     {
                         CsvFile.WriteAllRecords(records, contentStream);
-                        return context.GetDocument(input, await context.GetContentProviderAsync(contentStream));
+                        return context.GetDocument(input, context.GetContentProvider(contentStream));
                     }
                 }
                 catch (Exception e)

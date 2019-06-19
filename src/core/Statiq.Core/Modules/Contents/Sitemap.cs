@@ -88,7 +88,7 @@ namespace Statiq.Core.Modules.Contents
             sb.Append("</urlset>");
 
             // Always output the sitemap document, even if it's empty
-            return new[] { context.GetDocument(await context.GetContentProviderAsync(sb)) };
+            return new[] { context.GetDocument(await context.GetContentProviderAsync(sb.ToString())) };
 
             async Task AddToSiteMapAsync(IDocument input)
             {

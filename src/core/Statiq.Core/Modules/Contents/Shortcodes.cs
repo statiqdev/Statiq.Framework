@@ -147,7 +147,7 @@ namespace Statiq.Core.Modules.Contents
                     Read(reader, writer, null, ref buffer);
                 }
             }
-            return context.GetDocument(input, await context.GetContentProviderAsync(resultStream));
+            return context.GetDocument(input, context.GetContentProvider(resultStream));
         }
 
         private async Task<InsertingStreamLocation> ExecuteShortcodesAsync(
@@ -166,7 +166,7 @@ namespace Statiq.Core.Modules.Contents
                 {
                     // Merge output metadata with the current input document
                     // Creating a new document is the easiest way to ensure all the metadata from shortcodes gets accumulated correctly
-                    mergedResult = context.GetDocument(input, shortcodeResult, await context.GetContentProviderAsync(shortcodeResult));
+                    mergedResult = context.GetDocument(input, shortcodeResult, shortcodeResult.ContentProvider);
 
                     // Don't process nested shortcodes if it's the raw shortcode
                     if (!location.Name.Equals(nameof(Core.Shortcodes.Contents.Raw), StringComparison.OrdinalIgnoreCase))

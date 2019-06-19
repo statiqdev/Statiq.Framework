@@ -64,14 +64,13 @@ namespace Statiq.Core.Modules.Control
                 if (_forEachDocument)
                 {
                     return await inputs.SelectManyAsync(context, async input =>
-                        await (await context.ExecuteAsync(Children, new[] { input }))
-                            .SelectAsync(async result => context.GetDocument(input, result, await context.GetContentProviderAsync(result))));
+                        (await context.ExecuteAsync(Children, new[] { input }))
+                            .Select(result => context.GetDocument(input, result, result.ContentProvider)));
                 }
 
                 // Execute the modules once and apply to each input document
                 List<IDocument> results = (await context.ExecuteAsync(Children)).ToList();
-                return await inputs.SelectManyAsync(context, async input =>
-                    await results.SelectAsync(async result => context.GetDocument(input, result, await context.GetContentProviderAsync(result))));
+                return inputs.SelectMany(context, input => results.Select(result => context.GetDocument(input, result, result.ContentProvider)));
             }
 
             return inputs;

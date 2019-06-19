@@ -359,16 +359,13 @@ namespace Statiq.Images
                     IEnumerable<OutputAction> outputActions = operations.OutputActions.Count == 0
                         ? (IEnumerable<OutputAction>)new[] { new OutputAction((i, s) => i.Save(s, imageFormat), null) }
                         : operations.OutputActions;
-                    return await outputActions.SelectAsync(async action =>
+                    return outputActions.Select(action =>
                     {
                         FilePath formatPath = action.GetPath(destinationPath) ?? destinationPath;
                         MemoryStream outputStream = new MemoryStream();
                         action.Invoke(image, outputStream);
                         outputStream.Seek(0, SeekOrigin.Begin);
-                        return context.GetDocument(
-                            input,
-                            formatPath,
-                            await context.GetContentProviderAsync(outputStream));
+                        return context.GetDocument(input, formatPath, context.GetContentProvider(outputStream));
                     });
                 });
             }

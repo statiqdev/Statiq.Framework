@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Threading.Tasks;
+using Statiq.Common.Content;
 using Statiq.Common.Documents;
 using Statiq.Common.Execution;
 using Statiq.Common.Modules;
@@ -77,7 +79,25 @@ namespace Statiq.Core.Modules.Extensibility
         }
 
         protected static async Task<IEnumerable<IDocument>> ChangeContentAsync(object result, IExecutionContext context, IDocument document) =>
-            new[] { context.GetDocument(document, await context.GetContentProviderAsync(result)) };
+            new[] { context.GetDocument(document, await GetContentProviderAsync(result, context)) };
+
+        private static async Task<IContentProvider> GetContentProviderAsync(object content, IExecutionContext context)
+        {
+            switch (content)
+            {
+                case null:
+                    return null;
+                case IContentProvider contentProvider:
+                    return contentProvider;
+                case IContentProviderFactory factory:
+                    return context.GetContentProvider(factory);
+                case Stream stream:
+                    return context.GetContentProvider(stream);
+                case string str:
+                    return await context.GetContentProviderAsync(str);
+            }
+            return await context.GetContentProviderAsync(content.ToString());
+        }
 
         protected static IEnumerable<IDocument> ThrowInvalidDelegateResult(object result)
         {

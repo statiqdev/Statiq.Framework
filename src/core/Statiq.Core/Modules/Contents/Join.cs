@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Statiq.Common.Content;
 using Statiq.Common.Documents;
 using Statiq.Common.Execution;
 using Statiq.Common.Modules;
@@ -59,32 +60,34 @@ namespace Statiq.Core.Modules.Contents
                 return new[] { context.GetDocument() };
             }
 
-            Stream contentStream = await context.GetContentStreamAsync();
-            bool first = true;
-            byte[] delimeterBytes = Encoding.UTF8.GetBytes(_delimiter);
-            foreach (IDocument document in inputs)
+            using (Stream contentStream = await context.GetContentStreamAsync())
             {
-                if (document == null)
+                bool first = true;
+                byte[] delimeterBytes = Encoding.UTF8.GetBytes(_delimiter);
+                foreach (IDocument document in inputs)
                 {
-                    continue;
+                    if (document == null)
+                    {
+                        continue;
+                    }
+
+                    if (first)
+                    {
+                        first = false;
+                    }
+                    else
+                    {
+                        await contentStream.WriteAsync(delimeterBytes, 0, delimeterBytes.Length);
+                    }
+
+                    using (Stream inputStream = await document.GetStreamAsync())
+                    {
+                        await inputStream.CopyToAsync(contentStream);
+                    }
                 }
 
-                if (first)
-                {
-                    first = false;
-                }
-                else
-                {
-                    await contentStream.WriteAsync(delimeterBytes, 0, delimeterBytes.Length);
-                }
-
-                using (Stream inputStream = await document.GetStreamAsync())
-                {
-                    await inputStream.CopyToAsync(contentStream);
-                }
+                return new[] { context.GetDocument(MetadataForOutputDocument(inputs), context.GetContentProvider(contentStream)) };
             }
-
-            return new[] { context.GetDocument(MetadataForOutputDocument(inputs), await context.GetContentProviderAsync(contentStream)) };
         }
 
         /// <summary>

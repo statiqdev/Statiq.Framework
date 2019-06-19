@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Threading.Tasks;
+using Statiq.Common.Content;
 using Statiq.Common.IO;
 
 namespace Statiq.Core.IO
@@ -138,5 +139,7 @@ namespace Statiq.Core.IO
             IDirectory directory = await GetDirectoryAsync();
             await directory.CreateAsync();
         }
+
+        public IContentProvider GetContentProvider() => new FileContent(this);
     }
 }

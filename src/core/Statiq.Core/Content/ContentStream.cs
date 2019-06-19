@@ -1,5 +1,6 @@
 ﻿using System.IO;
 using Statiq.Common.Content;
+using Statiq.Common.Execution;
 using Statiq.Common.Util;
 using Statiq.Core.Documents;
 
@@ -7,13 +8,13 @@ namespace Statiq.Core.Content
 {
     /// <summary>
     /// A special writable <see cref="Stream"/> that can be used when creating new content
-    /// that provides an appropriate <see cref="IContentProvider"/> to the
-    /// <see cref="DocumentFactory"/>.
+    /// that provides an appropriate <see cref="IContentProvider"/>.
+    /// Instances of this stream should be disposed when writing is complete.
     /// </summary>
-    internal class ContentStream : DelegatingStream
+    internal class ContentStream : DelegatingStream, IContentProviderFactory
     {
         private readonly IContentProvider _contentProvider;
-        private readonly bool _disposeStream;
+        private bool _disposeStream;
 
         public ContentStream(IContentProvider contentProvider, Stream stream, bool disposeStream)
             : base(stream)
@@ -27,6 +28,7 @@ namespace Statiq.Core.Content
             if (_disposeStream)
             {
                 Stream.Dispose();
+                _disposeStream = false;
             }
         }
 

@@ -141,7 +141,7 @@ namespace Statiq.Core.Modules.IO
                             input,
                             file.Path,
                             relativePath,
-                            await context.GetContentProviderAsync(file));
+                            context.GetContentProvider(file));
                     }
                     catch (Exception ex)
                     {

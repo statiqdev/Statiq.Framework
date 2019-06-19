@@ -1,6 +1,7 @@
 using System.IO;
 using System.Text;
 using System.Threading.Tasks;
+using Statiq.Common.Content;
 using Statiq.Common.IO;
 
 namespace Statiq.Testing.IO
@@ -119,5 +120,7 @@ namespace Statiq.Testing.IO
             CreateDirectory(createDirectory, this);
             return Task.FromResult<Stream>(new StringBuilderStream(_fileProvider.Files.AddOrUpdate(Path.FullPath, new StringBuilder(), (x, y) => y)));
         }
+
+        public IContentProvider GetContentProvider() => new FileContent(this);
     }
 }

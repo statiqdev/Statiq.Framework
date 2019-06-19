@@ -126,9 +126,9 @@ namespace Statiq.CodeAnalysis
                             .SelectAsync(x => context.FileSystem.GetInputFileAsync(x.FilePath));
                         documentPaths = await documentPaths
                             .WhereAsync(async x => await x.GetExistsAsync() && (_whereFile == null || _whereFile(x)) && (_extensions?.Contains(x.Path.Extension) != false));
-                        return await documentPaths.SelectAsync(GetProjectDocumentAsync);
+                        return documentPaths.Select(GetProjectDocument);
 
-                        async Task<IDocument> GetProjectDocumentAsync(IFile file)
+                        IDocument GetProjectDocument(IFile file)
                         {
                             Common.Tracing.Trace.Verbose($"Read file {file.Path.FullPath}");
                             return context.GetDocument(
@@ -138,7 +138,7 @@ namespace Statiq.CodeAnalysis
                                 {
                                     { CodeAnalysisKeys.AssemblyName, assemblyName }
                                 },
-                                await context.GetContentProviderAsync(file));
+                                context.GetContentProvider(file));
                         }
                     }
                 }

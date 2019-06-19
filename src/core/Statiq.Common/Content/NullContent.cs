@@ -19,7 +19,6 @@ namespace Statiq.Common.Content
         {
         }
 
-        public void Dispose() => throw new NotSupportedException();
         public Task<Stream> GetStreamAsync() => throw new NotSupportedException();
     }
 }

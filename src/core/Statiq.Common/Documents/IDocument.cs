@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using System.Threading.Tasks;
+using Statiq.Common.Content;
 using Statiq.Common.IO;
 using Statiq.Common.Meta;
 
@@ -66,6 +67,11 @@ namespace Statiq.Common.Documents
         /// return <see cref="Stream.Null"/> and <see cref="GetStringAsync()"/> will return <see cref="string.Empty"/>.
         /// </summary>
         bool HasContent { get; }
+
+        /// <summary>
+        /// The content provider responsible for creating content streams for the document.
+        /// </summary>
+        IContentProvider ContentProvider { get; }
 
         /// <summary>
         /// Gets the metadata for this document without any global settings included.

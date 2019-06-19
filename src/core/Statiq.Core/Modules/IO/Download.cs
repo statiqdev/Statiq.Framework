@@ -123,14 +123,14 @@ namespace Statiq.Core.Modules.IO
                     _cachedResponses = responses;
                 }
             }
-            return await responses.SelectAsync(async response =>
+            return responses.Select(response =>
                 context.GetDocument(
                     new MetadataItems
                     {
                         { Keys.SourceUri, response.Uri },
                         { Keys.SourceHeaders, response.Headers }
                     },
-                    await context.GetContentProviderAsync(response.Stream)));
+                    context.GetContentProvider(response.Stream)));
         }
 
         private static readonly Dictionary<HttpMethod, Func<HttpClient, Uri, HttpContent, Task<HttpResponseMessage>>> MethodMapping =

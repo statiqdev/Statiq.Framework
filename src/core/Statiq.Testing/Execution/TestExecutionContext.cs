@@ -75,41 +75,19 @@ namespace Statiq.Testing.Execution
         public IMemoryStreamFactory MemoryStreamFactory { get; set; } = new TestMemoryStreamFactory();
 
         /// <inheritdoc/>
-        public Task<Stream> GetContentStreamAsync(string content = null) => Task.FromResult<Stream>(new ContentStream(content));
+        public Task<Stream> GetContentStreamAsync(string content = null) => Task.FromResult<Stream>(new TestContentStream(this, content));
 
-        private class ContentStream : DelegatingStream
+        private class TestContentStream : DelegatingStream, IContentProviderFactory
         {
-            public ContentStream(string content)
+            private readonly TestExecutionContext _context;
+
+            public TestContentStream(TestExecutionContext context, string content)
                 : base(string.IsNullOrEmpty(content) ? new MemoryStream() : new MemoryStream(Encoding.UTF8.GetBytes(content)))
             {
-            }
-        }
-
-        /// <inheritdoc/>
-        public async Task<IContentProvider> GetContentProviderAsync(object content)
-        {
-            await Task.CompletedTask;
-
-            switch (content)
-            {
-                case null:
-                    return null;
-                case IContentProvider contentProvider:
-                    return contentProvider;
-                case ContentStream contentStream:
-                    return new Common.Content.StreamContent(MemoryStreamFactory, contentStream, false);
-                case Stream stream:
-                    return new Common.Content.StreamContent(MemoryStreamFactory, stream);
-                case IFile file:
-                    return new FileContent(file);
-                case TestDocument document:
-                    return document.ContentProvider;
+                _context = context;
             }
 
-            string contentString = content as string ?? content.ToString();
-            return string.IsNullOrEmpty(contentString)
-                ? null
-                : new Common.Content.StreamContent(MemoryStreamFactory, MemoryStreamFactory.GetStream(contentString));
+            public IContentProvider GetContentProvider() => new Common.Content.StreamContent(_context.MemoryStreamFactory, this);
         }
 
         /// <inheritdoc/>

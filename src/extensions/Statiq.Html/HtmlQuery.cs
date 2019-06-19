@@ -219,23 +219,25 @@ namespace Statiq.Html
                                 // Clone the document and optionally change content to the HTML element
                                 if (_outerHtmlContent.HasValue)
                                 {
-                                    Stream contentStream = await context.GetContentStreamAsync();
-                                    using (StreamWriter writer = contentStream.GetWriter())
+                                    using (Stream contentStream = await context.GetContentStreamAsync())
                                     {
-                                        if (_outerHtmlContent.Value)
+                                        using (StreamWriter writer = contentStream.GetWriter())
                                         {
-                                            element.ToHtml(writer, ProcessingInstructionFormatter.Instance);
+                                            if (_outerHtmlContent.Value)
+                                            {
+                                                element.ToHtml(writer, ProcessingInstructionFormatter.Instance);
+                                            }
+                                            else
+                                            {
+                                                element.ChildNodes.ToHtml(writer, ProcessingInstructionFormatter.Instance);
+                                            }
+                                            writer.Flush();
+                                            documents.Add(
+                                                context.GetDocument(
+                                                    input,
+                                                    metadata.Count == 0 ? null : metadata,
+                                                    context.GetContentProvider(contentStream)));
                                         }
-                                        else
-                                        {
-                                            element.ChildNodes.ToHtml(writer, ProcessingInstructionFormatter.Instance);
-                                        }
-                                        writer.Flush();
-                                        documents.Add(
-                                            context.GetDocument(
-                                                input,
-                                                metadata.Count == 0 ? null : metadata,
-                                                await context.GetContentProviderAsync(contentStream)));
                                     }
                                 }
                                 else

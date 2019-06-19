@@ -68,7 +68,7 @@ namespace Statiq.Tables
                         firstLine = false;
                     }
                     builder.Append("</table>");
-                    return context.GetDocument(input, await context.GetContentProviderAsync(builder));
+                    return context.GetDocument(input, await context.GetContentProviderAsync(builder.ToString()));
                 }
                 catch (Exception e)
                 {

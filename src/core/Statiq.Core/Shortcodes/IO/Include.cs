@@ -58,7 +58,7 @@ namespace Statiq.Core.Shortcodes.IO
                 {
                     { "IncludeShortcodeSource", includedFile.Path.FullPath }
                 },
-                await context.GetContentProviderAsync(includedFile));
+                context.GetContentProvider(includedFile));
         }
     }
 }

@@ -7,12 +7,14 @@
     <RepositoryType>git</RepositoryType>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Remove="Content\**" />
+    <EmbeddedResource Remove="Content\**" />
+    <None Remove="Content\**" />
+  </ItemGroup>
+  <ItemGroup>
     <PackageReference Include="ConcurrentHashSet" Version="1.0.2" />
     <PackageReference Include="NUnit" Version="3.11.0" />
     <PackageReference Include="System.Collections.Immutable" Version="1.3.1" />
-  </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Content\" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Statiq.Common\Statiq.Common.csproj" />

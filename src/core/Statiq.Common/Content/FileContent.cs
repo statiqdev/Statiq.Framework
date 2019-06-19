@@ -17,11 +17,6 @@ namespace Statiq.Common.Content
             _file = file ?? throw new ArgumentException();
         }
 
-        public void Dispose()
-        {
-            // Nothing to do
-        }
-
         public Task<Stream> GetStreamAsync() => _file.OpenReadAsync();
     }
 }

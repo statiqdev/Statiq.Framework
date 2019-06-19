@@ -157,29 +157,31 @@ namespace Statiq.Razor
             {
                 Trace.Verbose("Processing Razor for {0}", input.Source.ToDisplayString());
 
-                Stream contentStream = await context.GetContentStreamAsync();
-                using (Stream inputStream = await input.GetStreamAsync())
+                using (Stream contentStream = await context.GetContentStreamAsync())
                 {
-                    FilePath viewStartLocationPath = _viewStartPath == null ? null : await _viewStartPath.GetValueAsync(input, context);
-                    string layoutPath = _layoutPath == null ? null : (await _layoutPath.GetValueAsync(input, context))?.FullPath;
-
-                    RenderRequest request = new RenderRequest
+                    using (Stream inputStream = await input.GetStreamAsync())
                     {
-                        Input = inputStream,
-                        Output = contentStream,
-                        BaseType = _basePageType,
-                        Context = context,
-                        Document = input,
-                        LayoutLocation = layoutPath,
-                        ViewStartLocation = viewStartLocationPath != null ? await GetRelativePathAsync(viewStartLocationPath, context) : null,
-                        RelativePath = await GetRelativePathAsync(input, context),
-                        Model = _model == null ? input : await _model.GetValueAsync(input, context)
-                    };
+                        FilePath viewStartLocationPath = _viewStartPath == null ? null : await _viewStartPath.GetValueAsync(input, context);
+                        string layoutPath = _layoutPath == null ? null : (await _layoutPath.GetValueAsync(input, context))?.FullPath;
 
-                    await RazorService.RenderAsync(request);
+                        RenderRequest request = new RenderRequest
+                        {
+                            Input = inputStream,
+                            Output = contentStream,
+                            BaseType = _basePageType,
+                            Context = context,
+                            Document = input,
+                            LayoutLocation = layoutPath,
+                            ViewStartLocation = viewStartLocationPath != null ? await GetRelativePathAsync(viewStartLocationPath, context) : null,
+                            RelativePath = await GetRelativePathAsync(input, context),
+                            Model = _model == null ? input : await _model.GetValueAsync(input, context)
+                        };
+
+                        await RazorService.RenderAsync(request);
+                    }
+
+                    return context.GetDocument(input, context.GetContentProvider(contentStream));
                 }
-
-                return context.GetDocument(input, await context.GetContentProviderAsync(contentStream));
             }
         }
 
