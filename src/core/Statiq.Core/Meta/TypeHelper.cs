@@ -2,11 +2,22 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using Statiq.Common.Execution;
 
 namespace Statiq.Core.Meta
 {
     public static class TypeHelper
     {
+        private class DefaultTypeConverter : ITypeConverter
+        {
+            public bool TryConvert<T>(object value, out T result) => TypeHelper.TryConvert(value, out result);
+        }
+
+        /// <summary>
+        /// Provides a singleton default <see cref="ITypeConverter"/>.
+        /// </summary>
+        public static ITypeConverter TypeConverter { get; } = new DefaultTypeConverter();
+
         public static bool TryConvert<T>(object value, out T result)
         {
             // Check for null

@@ -95,7 +95,7 @@ namespace Statiq.Core.Modules.Contents
                 // Accumulate metadata for the following shortcodes
                 if (insertingLocation.Document != null)
                 {
-                    input = context.GetDocument(input, insertingLocation.Document);
+                    input = input.Clone(insertingLocation.Document);
                 }
             }
 
@@ -134,7 +134,7 @@ namespace Statiq.Core.Modules.Contents
                             }
 
                             // Merge shortcode metadata with the current document
-                            input = context.GetDocument(input, insertingLocation.Document);
+                            input = input.Clone(insertingLocation.Document);
                         }
 
                         // Skip the shortcode text
@@ -147,7 +147,7 @@ namespace Statiq.Core.Modules.Contents
                     Read(reader, writer, null, ref buffer);
                 }
             }
-            return context.GetDocument(input, context.GetContentProvider(resultStream));
+            return input.Clone(context.GetContentProvider(resultStream));
         }
 
         private async Task<InsertingStreamLocation> ExecuteShortcodesAsync(
@@ -166,7 +166,7 @@ namespace Statiq.Core.Modules.Contents
                 {
                     // Merge output metadata with the current input document
                     // Creating a new document is the easiest way to ensure all the metadata from shortcodes gets accumulated correctly
-                    mergedResult = context.GetDocument(input, shortcodeResult, shortcodeResult.ContentProvider);
+                    mergedResult = input.Clone(shortcodeResult, shortcodeResult.ContentProvider);
 
                     // Don't process nested shortcodes if it's the raw shortcode
                     if (!location.Name.Equals(nameof(Core.Shortcodes.Contents.Raw), StringComparison.OrdinalIgnoreCase))
@@ -183,7 +183,7 @@ namespace Statiq.Core.Modules.Contents
                 else
                 {
                     // Don't copy the content provider from the input document if the shortcode doesn't have content
-                    mergedResult = context.GetDocument(input, shortcodeResult, NullContent.Provider);
+                    mergedResult = input.Clone(shortcodeResult, NullContent.Provider);
                 }
             }
 

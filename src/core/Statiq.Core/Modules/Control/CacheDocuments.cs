@@ -45,23 +45,9 @@ namespace Statiq.Core.Modules.Control
         {
         }
 
-        public void Dispose()
-        {
-            ResetCache();
-        }
+        public void Dispose() => ResetCache();
 
-        private void ResetCache()
-        {
-            // Dipose any documents we've been holding on to
-            if (_cache != null)
-            {
-                foreach (IDocument document in _cache.Values.SelectMany(x => x.Documents.Where(doc => doc.Tracked).Select(doc => doc.Document)))
-                {
-                    document.Dispose();
-                }
-                _cache = null;
-            }
-        }
+        private void ResetCache() => _cache = null;
 
         /// <inheritdoc />
         public override async Task<IEnumerable<IDocument>> ExecuteAsync(IReadOnlyList<IDocument> inputs, IExecutionContext context)
@@ -90,10 +76,6 @@ namespace Statiq.Core.Modules.Control
             // Creating a new cache and swapping is the easiest way to expire old entries
             Dictionary<FilePath, CacheEntry> currentCache = _cache;
             _cache = new Dictionary<FilePath, CacheEntry>();
-
-            // Keep track of invalidated cache items but don't dispose their documents until we're done
-            // in case some of the documents get used in other cache items
-            List<CacheEntry> invalidated = new List<CacheEntry>();
 
             // Check for hits and misses
             if (currentCache == null)
@@ -130,13 +112,12 @@ namespace Statiq.Core.Modules.Control
                             {
                                 Trace.Verbose($"Cache hit for {inputsBySource.Key}, using cached results");
                                 _cache.Add(inputsBySource.Key, entry);
-                                outputs.AddRange(entry.Documents.Where(x => x.IsResult).Select(x => x.Document));
+                                outputs.AddRange(entry.Documents);
                                 continue;  // Go to the next source group since misses are dealt with below
                             }
 
                             // If a miss and we previously cached results, dispose cached results if we took over tracking
                             message = $"Cache miss for {inputsBySource.Key}, one or more documents have changed";
-                            invalidated.Add(entry);
                         }
 
                         // Miss with non-null source: track source and input documents so we can cache for next pass
@@ -162,54 +143,14 @@ namespace Statiq.Core.Modules.Control
             foreach (KeyValuePair<FilePath, int> inputGroup in missesBySource)
             {
                 // Did we get any results from this input source?
-                CachedDocument[] cacheDocuments = null;
+                IDocument[] cacheDocuments = null;
                 if (resultsBySource.TryGetValue(inputGroup.Key, out IGrouping<FilePath, IDocument> sourceResults))
                 {
-                    // Note whether the result document was being tracked (and is now tracked/disposed by the cache)
-                    IEnumerable<CachedDocument> resultDocuments = sourceResults.Select(x => new CachedDocument(x, context.Untrack(x), true)).ToArray();
-
-                    // We also need to track any child documents in the metadata of results so they don't get disposed by the context
-                    HashSet<IDocument> flattenedDocuments = new HashSet<IDocument>();
-                    foreach (IDocument resultDocument in sourceResults)
-                    {
-                        resultDocument.Flatten(flattenedDocuments);
-                    }
-                    cacheDocuments = resultDocuments
-                        .Concat(flattenedDocuments.Where(x => !sourceResults.Contains(x)).Select(x => new CachedDocument(x, context.Untrack(x), false)))
-                        .ToArray();
+                    cacheDocuments = sourceResults.ToArray();
                 }
 
                 // Add a cache entry
                 _cache.Add(inputGroup.Key, new CacheEntry(inputGroup.Value, cacheDocuments));
-            }
-
-            // Dispose invalidated cache entries
-            foreach (CacheEntry invalidatedEntry in invalidated)
-            {
-                foreach (IDocument disposingDocument in invalidatedEntry.Documents.Where(x => x.Tracked).Select(x => x.Document))
-                {
-                    // Try to find another existing cached document
-                    CachedDocument cachedDocument = null;
-                    foreach (CacheEntry cacheEntry in _cache.Values)
-                    {
-                        cachedDocument = Array.Find(cacheEntry.Documents, x => x.Document.Equals(disposingDocument));
-                        if (cachedDocument != null)
-                        {
-                            break;
-                        }
-                    }
-
-                    // If we found this document still in use, pass on tracking responsibility
-                    // Otherwise dispose the document
-                    if (cachedDocument != null)
-                    {
-                        cachedDocument.Tracked = true;
-                    }
-                    else
-                    {
-                        disposingDocument.Dispose();
-                    }
-                }
             }
 
             return outputs;
@@ -227,33 +168,15 @@ namespace Statiq.Core.Modules.Control
 
         private class CacheEntry
         {
-            public CacheEntry(int inputHash, CachedDocument[] documents)
+            public CacheEntry(int inputHash, IDocument[] documents)
             {
                 InputHash = inputHash;
-                Documents = documents ?? Array.Empty<CachedDocument>();
+                Documents = documents ?? Array.Empty<IDocument>();
             }
 
             public int InputHash { get; }
 
-            public CachedDocument[] Documents { get; }
-        }
-
-        private class CachedDocument
-        {
-            public CachedDocument(IDocument document, bool tracked, bool isResult)
-            {
-                Document = document;
-                Tracked = tracked;
-                IsResult = isResult;
-            }
-
-            public IDocument Document { get; }
-
-            // Could get switched on if the tracking cache entry disposes but it's still in use in an active cache entry
-            public bool Tracked { get; set; }
-
-            // If false, this is a child document of the result
-            public bool IsResult { get; }
+            public IDocument[] Documents { get; }
         }
     }
 }

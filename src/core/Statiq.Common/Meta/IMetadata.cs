@@ -8,13 +8,14 @@ namespace Statiq.Common.Meta
     public interface IMetadata : IReadOnlyDictionary<string, object>
     {
         /// <summary>
-        /// Gets the raw value for the specified key. This method will not materialize <see cref="IMetadataValue"/>
+        /// Tries to get the raw value for the specified key. This method will not materialize <see cref="IMetadataValue"/>
         /// values the way <see cref="TryGetValue{T}(string, out T)"/> and other get methods will. A <see cref="KeyNotFoundException"/> will be thrown
         /// for missing keys.
         /// </summary>
         /// <param name="key">The key of the value to get.</param>
-        /// <returns>The raw value for the specified ke.y</returns>
-        object GetRaw(string key);
+        /// <param name="value">The value of the key if it was found.</param>
+        /// <returns><c>true</c> if the key was found, <c>false</c> otherwise.</returns>
+        bool TryGetRaw(string key, out object value);
 
         /// <summary>
         /// Tries to get the value for the specified key.

@@ -192,8 +192,7 @@ namespace Statiq.Sass
                 FilePath relativePath = relativeDirectory?.GetRelativePath(inputPath) ?? inputPath.FileName;
 
                 FilePath cssPath = relativePath.ChangeExtension("css");
-                IDocument cssDocument = context.GetDocument(
-                    input,
+                IDocument cssDocument = input.Clone(
                     cssPath,
                     await context.GetContentProviderAsync(result.Css ?? string.Empty));
 
@@ -201,8 +200,7 @@ namespace Statiq.Sass
                 if (_generateSourceMap && result.SourceMap != null)
                 {
                     FilePath sourceMapPath = relativePath.ChangeExtension("map");
-                    IDocument sourceMapDocument = context.GetDocument(
-                        input,
+                    IDocument sourceMapDocument = input.Clone(
                         sourceMapPath,
                         await context.GetContentProviderAsync(result.SourceMap));
                     return new[] { cssDocument, sourceMapDocument };

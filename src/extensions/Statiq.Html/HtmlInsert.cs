@@ -8,6 +8,7 @@ using AngleSharp.Dom.Html;
 using AngleSharp.Parser.Html;
 using Statiq.Common;
 using Statiq.Common.Configuration;
+using Statiq.Common.Documents;
 using Statiq.Common.Execution;
 using Statiq.Common.IO;
 using Statiq.Common.Modules;
@@ -110,7 +111,7 @@ namespace Statiq.Html
                                 {
                                     htmlDocument.ToHtml(writer, ProcessingInstructionFormatter.Instance);
                                     writer.Flush();
-                                    return context.GetDocument(input, context.GetContentProvider(contentStream));
+                                    return input.Clone(context.GetContentProvider(contentStream));
                                 }
                             }
                         }

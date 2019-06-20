@@ -11,42 +11,19 @@ namespace Statiq.Common.Execution
         /// Gets a new document with the specified source and destination, content, and metadata.
         /// </summary>
         /// <param name="context">The current execution context.</param>
-        /// <param name="source">The source.</param>
         /// <param name="destination">The destination.</param>
-        /// <param name="metadata">The metadata items.</param>
-        /// <param name="contentProvider">The content provider.</param>
-        /// <returns>The new document.</returns>
-        public static IDocument GetDocument(
-            this IExecutionContext context,
-            FilePath source,
-            FilePath destination,
-            IEnumerable<KeyValuePair<string, object>> metadata,
-            IContentProvider contentProvider = null) =>
-            context.GetDocument(
-                null,
-                source,
-                destination,
-                metadata,
-                contentProvider);
-
-        /// <summary>
-        /// Gets a new document with the specified source and destination, content, and metadata.
-        /// </summary>
-        /// <param name="context">The current execution context.</param>
-        /// <param name="destination">The destination.</param>
-        /// <param name="metadata">The metadata items.</param>
+        /// <param name="items">The metadata items.</param>
         /// <param name="contentProvider">The content provider.</param>
         /// <returns>The new document.</returns>
         public static IDocument GetDocument(
             this IExecutionContext context,
             FilePath destination,
-            IEnumerable<KeyValuePair<string, object>> metadata,
+            IEnumerable<KeyValuePair<string, object>> items,
             IContentProvider contentProvider = null) =>
             context.GetDocument(
                 null,
-                null,
                 destination,
-                metadata,
+                items,
                 contentProvider);
 
         /// <summary>
@@ -63,7 +40,6 @@ namespace Statiq.Common.Execution
             FilePath destination,
             IContentProvider contentProvider = null) =>
             context.GetDocument(
-                null,
                 source,
                 destination,
                 null,
@@ -81,7 +57,6 @@ namespace Statiq.Common.Execution
             FilePath destination,
             IContentProvider contentProvider = null) =>
             context.GetDocument(
-                null,
                 null,
                 destination,
                 null,
@@ -91,18 +66,17 @@ namespace Statiq.Common.Execution
         /// Gets a new document with the specified content and metadata.
         /// </summary>
         /// <param name="context">The current execution context.</param>
-        /// <param name="metadata">The metadata items.</param>
+        /// <param name="items">The metadata items.</param>
         /// <param name="contentProvider">The content provider.</param>
         /// <returns>The new document.</returns>
         public static IDocument GetDocument(
             this IExecutionContext context,
-            IEnumerable<KeyValuePair<string, object>> metadata,
+            IEnumerable<KeyValuePair<string, object>> items,
             IContentProvider contentProvider = null) =>
             context.GetDocument(
                 null,
                 null,
-                null,
-                metadata,
+                items,
                 contentProvider);
 
         /// <summary>
@@ -115,114 +89,6 @@ namespace Statiq.Common.Execution
             this IExecutionContext context,
             IContentProvider contentProvider = null) =>
             context.GetDocument(
-                null,
-                null,
-                null,
-                null,
-                contentProvider);
-
-        /// <summary>
-        /// Clones the original document with a new destination, new content, and additional metadata (all existing metadata is retained)
-        /// or gets a new document if the original document is null or <c>AsNewDocuments()</c> was called on the module.
-        /// </summary>
-        /// <param name="context">The current execution context.</param>
-        /// <param name="originalDocument">The original document.</param>
-        /// <param name="destination">The destination.</param>
-        /// <param name="metadata">The metadata items.</param>
-        /// <param name="contentProvider">The content provider.</param>
-        /// <returns>The cloned or new document.</returns>
-        public static IDocument GetDocument(
-            this IExecutionContext context,
-            IDocument originalDocument,
-            FilePath destination,
-            IEnumerable<KeyValuePair<string, object>> metadata,
-            IContentProvider contentProvider = null) =>
-            context.GetDocument(
-                originalDocument,
-                null,
-                destination,
-                metadata,
-                contentProvider);
-
-        /// <summary>
-        /// Clones the original document with a new destination, new content, and additional metadata (all existing metadata is retained)
-        /// or gets a new document if the original document is null or <c>AsNewDocuments()</c> was called on the module.
-        /// </summary>
-        /// <param name="context">The current execution context.</param>
-        /// <param name="originalDocument">The original document.</param>
-        /// <param name="source">The source (if the original document contains a source, then this is ignored and the original document's source is used instead).</param>
-        /// <param name="destination">The destination.</param>
-        /// <param name="contentProvider">The content provider.</param>
-        /// <returns>The cloned or new document.</returns>
-        public static IDocument GetDocument(
-            this IExecutionContext context,
-            IDocument originalDocument,
-            FilePath source,
-            FilePath destination,
-            IContentProvider contentProvider = null) =>
-            context.GetDocument(
-                originalDocument,
-                source,
-                destination,
-                null,
-                contentProvider);
-
-        /// <summary>
-        /// Clones the original document with a new destination, new content, and additional metadata (all existing metadata is retained)
-        /// or gets a new document if the original document is null or <c>AsNewDocuments()</c> was called on the module.
-        /// </summary>
-        /// <param name="context">The current execution context.</param>
-        /// <param name="originalDocument">The original document.</param>
-        /// <param name="destination">The destination.</param>
-        /// <param name="contentProvider">The content provider.</param>
-        /// <returns>The cloned or new document.</returns>
-        public static IDocument GetDocument(
-            this IExecutionContext context,
-            IDocument originalDocument,
-            FilePath destination,
-            IContentProvider contentProvider = null) =>
-            context.GetDocument(
-                originalDocument,
-                null,
-                destination,
-                null,
-                contentProvider);
-
-        /// <summary>
-        /// Clones the original document with new content and additional metadata (all existing metadata is retained)
-        /// or gets a new document if the original document is null or <c>AsNewDocuments()</c> was called on the module.
-        /// </summary>
-        /// <param name="context">The current execution context.</param>
-        /// <param name="originalDocument">The original document.</param>
-        /// <param name="metadata">The metadata items.</param>
-        /// <param name="contentProvider">The content provider.</param>
-        /// <returns>The cloned or new document.</returns>
-        public static IDocument GetDocument(
-            this IExecutionContext context,
-            IDocument originalDocument,
-            IEnumerable<KeyValuePair<string, object>> metadata,
-            IContentProvider contentProvider = null) =>
-            context.GetDocument(
-                originalDocument,
-                null,
-                null,
-                metadata,
-                contentProvider);
-
-        /// <summary>
-        /// Clones the original document with new content
-        /// or gets a new document if the original document is null or <c>AsNewDocuments()</c> was called on the module.
-        /// </summary>
-        /// <param name="context">The current execution context.</param>
-        /// <param name="originalDocument">The original document.</param>
-        /// <param name="contentProvider">The content provider.</param>
-        /// <returns>The cloned or new document.</returns>
-        public static IDocument GetDocument(
-            this IExecutionContext context,
-            IDocument originalDocument,
-            IContentProvider contentProvider = null) =>
-            context.GetDocument(
-                originalDocument,
                 null,
                 null,
                 null,

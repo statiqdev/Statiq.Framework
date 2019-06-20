@@ -180,7 +180,7 @@ namespace Statiq.Razor
                         await RazorService.RenderAsync(request);
                     }
 
-                    return context.GetDocument(input, context.GetContentProvider(contentStream));
+                    return input.Clone(context.GetContentProvider(contentStream));
                 }
             }
         }

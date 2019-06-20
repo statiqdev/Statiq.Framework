@@ -136,12 +136,13 @@ namespace Statiq.Json
                         string result = JsonConvert.SerializeObject(data, settings);
                         if (string.IsNullOrEmpty(_destinationKey))
                         {
-                            return context.GetDocument(input, await context.GetContentProviderAsync(result));
+                            return input.Clone(await context.GetContentProviderAsync(result));
                         }
-                        return context.GetDocument(input, new MetadataItems
-                        {
-                            { _destinationKey, result }
-                        });
+                        return input.Clone(
+                            new MetadataItems
+                            {
+                                { _destinationKey, result }
+                            });
                     }
                 }
                 catch (Exception ex)

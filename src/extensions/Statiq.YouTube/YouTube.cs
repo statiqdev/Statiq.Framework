@@ -24,7 +24,7 @@ namespace Statiq.YouTube
     /// will be sent for each input document.
     /// </remarks>
     /// <category>Metadata</category>
-    public class YouTube : IModule, IAsNewDocuments, IDisposable
+    public class YouTube : IModule, IDisposable
     {
         private readonly YouTubeService _youtube;
 
@@ -103,7 +103,7 @@ namespace Statiq.YouTube
                         Trace.Warning("Exception while submitting {0} YouTube request for {1}: {2}", request.Key, input.Source.ToDisplayString(), ex.ToString());
                     }
                 }
-                return context.GetDocument(input, results);
+                return input.Clone(results);
             });
             return Task.FromResult<IEnumerable<IDocument>>(outputs);
         }

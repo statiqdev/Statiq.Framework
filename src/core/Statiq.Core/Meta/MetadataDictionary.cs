@@ -7,39 +7,33 @@ namespace Statiq.Core.Meta
 {
     internal class MetadataDictionary : Metadata, IMetadataDictionary
     {
-        public MetadataDictionary()
+        // Ensure items is not null when calling the base ctor so the dictionary gets instantiated
+        public MetadataDictionary(IEnumerable<KeyValuePair<string, object>> items = null)
+            : base(TypeHelper.TypeConverter, items ?? Array.Empty<KeyValuePair<string, object>>())
         {
-            Stack.Push(new Dictionary<string, object>(StringComparer.OrdinalIgnoreCase));
         }
 
-        public MetadataDictionary(IDictionary<string, object> initialValues)
-        {
-            Stack.Push(new Dictionary<string, object>(initialValues, StringComparer.OrdinalIgnoreCase));
-        }
+        public void Add(KeyValuePair<string, object> item) => Dictionary.Add(item);
 
-        private IDictionary<string, object> GetDictionary() => (IDictionary<string, object>)Stack.Peek();
+        public void Clear() => Dictionary.Clear();
 
-        public void Add(KeyValuePair<string, object> item) => GetDictionary().Add(item);
-
-        public void Clear() => GetDictionary().Clear();
-
-        public bool Contains(KeyValuePair<string, object> item) => Stack.Peek().Contains(item);
+        public bool Contains(KeyValuePair<string, object> item) => Dictionary.Contains(item);
 
         public void CopyTo(KeyValuePair<string, object>[] array, int arrayIndex)
-            => GetDictionary().CopyTo(array, arrayIndex);
+            => Dictionary.CopyTo(array, arrayIndex);
 
-        public bool Remove(KeyValuePair<string, object> item) => GetDictionary().Remove(item);
+        public bool Remove(KeyValuePair<string, object> item) => Dictionary.Remove(item);
 
         public bool IsReadOnly { get; } = false;
 
-        public void Add(string key, object value) => GetDictionary().Add(key, value);
+        public void Add(string key, object value) => Dictionary.Add(key, value);
 
-        public bool Remove(string key) => GetDictionary().Remove(key);
+        public bool Remove(string key) => Dictionary.Remove(key);
 
         object IDictionary<string, object>.this[string key]
         {
-            get { return Stack.Peek()[key]; }
-            set { GetDictionary()[key] = value; }
+            get { return Dictionary[key]; }
+            set { Dictionary[key] = value; }
         }
 
         public new object this[string key]
@@ -48,9 +42,9 @@ namespace Statiq.Core.Meta
             set { ((IDictionary<string, object>)this)[key] = value; }
         }
 
-        ICollection<string> IDictionary<string, object>.Keys => GetDictionary().Keys;
+        ICollection<string> IDictionary<string, object>.Keys => Dictionary.Keys;
 
-        ICollection<object> IDictionary<string, object>.Values => GetDictionary().Values;
+        ICollection<object> IDictionary<string, object>.Values => Dictionary.Values;
 
         ICollection<string> IMetadataDictionary.Keys => ((IDictionary<string, object>)this).Keys;
 

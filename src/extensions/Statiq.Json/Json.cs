@@ -83,7 +83,7 @@ namespace Statiq.Json
                                 items[item.Key] = item.Value;
                             }
                         }
-                        return context.GetDocument(input, items);
+                        return input.Clone(items);
                     }
                 }
                 catch (Exception ex)

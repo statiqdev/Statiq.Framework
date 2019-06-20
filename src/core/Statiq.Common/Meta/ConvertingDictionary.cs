@@ -106,8 +106,7 @@ namespace Statiq.Common.Meta
         public IEnumerator<KeyValuePair<string, object>> GetEnumerator() => _dictionary.Select(GetItem).GetEnumerator();
 
         /// <inheritdoc />
-        public object GetRaw(string key) =>
-            _dictionary[key ?? throw new ArgumentNullException(nameof(key))];
+        public bool TryGetRaw(string key, out object value) => _dictionary.TryGetValue(key, out value);
 
         /// <inheritdoc />
         public bool Remove(string key) => _dictionary.Remove(key);

@@ -65,12 +65,12 @@ namespace Statiq.Core.Modules.Control
                 {
                     return await inputs.SelectManyAsync(context, async input =>
                         (await context.ExecuteAsync(Children, new[] { input }))
-                            .Select(result => context.GetDocument(input, result, result.ContentProvider)));
+                            .Select(result => input.Clone(result, result.ContentProvider)));
                 }
 
                 // Execute the modules once and apply to each input document
                 List<IDocument> results = (await context.ExecuteAsync(Children)).ToList();
-                return inputs.SelectMany(context, input => results.Select(result => context.GetDocument(input, result, result.ContentProvider)));
+                return inputs.SelectMany(context, input => results.Select(result => input.Clone(result, result.ContentProvider)));
             }
 
             return inputs;

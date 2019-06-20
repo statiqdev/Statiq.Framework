@@ -1,4 +1,6 @@
-﻿namespace Statiq.Common.Meta
+﻿using System.Collections.Generic;
+
+namespace Statiq.Common.Meta
 {
     public static class IMetadataExtensions
     {
@@ -39,5 +41,16 @@
         /// <returns>The value for the specified key converted to type T or the specified default value.</returns>
         public static T Get<T>(this IMetadata metadata, string key, T defaultValue) =>
             metadata.TryGetValue(key, out T value) ? value : defaultValue;
+
+        /// <summary>
+        /// Gets the raw value for the specified key. This method will not materialize <see cref="IMetadataValue"/>
+        /// values the way other get methods will. A <see cref="KeyNotFoundException"/> will be thrown
+        /// for missing keys.
+        /// </summary>
+        /// <param name="metadata">The metadata.</param>
+        /// <param name="key">The key of the value to get.</param>
+        /// <returns>The raw value for the specified key.</returns>
+        public static object GetRaw(this IMetadata metadata, string key) =>
+            metadata.TryGetRaw(key, out object value) ? value : throw new KeyNotFoundException(nameof(key));
     }
 }

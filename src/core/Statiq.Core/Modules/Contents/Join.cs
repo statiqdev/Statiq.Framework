@@ -100,16 +100,16 @@ namespace Statiq.Core.Modules.Contents
             switch (_metaDataMode)
             {
                 case JoinedMetadata.FirstDocument:
-                    return inputs.First().Metadata.ToList();
+                    return inputs.First().ToList();
 
                 case JoinedMetadata.LastDocument:
-                    return inputs.Last().Metadata.ToList();
+                    return inputs.Last().ToList();
 
                 case JoinedMetadata.AllWithFirstDuplicates:
-                    return inputs.SelectMany(a => a.Metadata).GroupBy(b => b.Key).ToDictionary(g => g.Key, g => g.First().Value).ToArray();
+                    return inputs.SelectMany(a => a).GroupBy(b => b.Key).ToDictionary(g => g.Key, g => g.First().Value).ToArray();
 
                 case JoinedMetadata.AllWithLastDuplicates:
-                    return inputs.SelectMany(a => a.Metadata).GroupBy(b => b.Key).ToDictionary(g => g.Key, g => g.Last().Value).ToArray();
+                    return inputs.SelectMany(a => a).GroupBy(b => b.Key).ToDictionary(g => g.Key, g => g.Last().Value).ToArray();
 
                 case JoinedMetadata.DefaultOnly:
                     return new List<KeyValuePair<string, object>>();

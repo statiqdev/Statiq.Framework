@@ -101,7 +101,7 @@ namespace Statiq.Core.Modules.IO
             await inputs.ParallelSelectAsync(async input =>
             {
                 FilePath destination = await _destination.GetValueAsync(input, context);
-                return destination == null ? input : context.GetDocument(input, destination);
+                return destination == null ? input : input.Clone(destination);
             });
     }
 }

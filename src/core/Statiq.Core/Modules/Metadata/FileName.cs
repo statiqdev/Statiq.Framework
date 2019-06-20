@@ -110,13 +110,12 @@ namespace Statiq.Core.Modules.Metadata
                         {
                             // No output key so set the destination
                             FilePath path = input.Destination.ChangeFileName(fileName);
-                            return context.GetDocument(input, path);
+                            return input.Clone(path);
                         }
                         else
                         {
                             // Set the specified output key
-                            return context.GetDocument(
-                                input,
+                            return input.Clone(
                                 new MetadataItems
                                 {
                                     { _outputKey, fileName }

@@ -71,7 +71,7 @@ namespace Statiq.Testing.Configuration
         }
 
         /// <inheritdoc />
-        public object GetRaw(string key) => _metadata.GetRaw(key);
+        public bool TryGetRaw(string key, out object value) => _metadata.TryGetRaw(key, out value);
 
         /// <inheritdoc />
         public bool TryGetValue<T>(string key, out T value) => _metadata.TryGetValue<T>(key, out value);

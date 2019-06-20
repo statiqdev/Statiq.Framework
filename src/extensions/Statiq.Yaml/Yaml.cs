@@ -78,7 +78,7 @@ namespace Statiq.Yaml
                 {
                     return new[] { input };
                 }
-                return documentMetadata.Select(metadata => context.GetDocument(input, metadata));
+                return documentMetadata.Select(metadata => input.Clone(metadata));
             });
         }
 

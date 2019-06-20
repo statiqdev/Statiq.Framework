@@ -55,7 +55,7 @@ namespace Statiq.Core.Tests.Documents
             }
         }
 
-        public class WitoutSettingsTests : DocumentFixture
+        public class MetadataTests : DocumentFixture
         {
             [Test]
             public void ReturnsMetadataWithoutSettings()
@@ -77,8 +77,8 @@ namespace Statiq.Core.Tests.Documents
                 string initialB = document.String("B");
                 string clonedA = cloned.String("A");
                 string clonedB = cloned.String("B");
-                string withoutA = cloned.WithoutSettings.String("A");
-                string withoutB = cloned.WithoutSettings.String("B");
+                string withoutA = cloned.Metadata.String("A");
+                string withoutB = cloned.Metadata.String("B");
 
                 // Then
                 Assert.AreEqual("a", initialA);

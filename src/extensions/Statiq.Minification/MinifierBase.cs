@@ -32,7 +32,7 @@ namespace Statiq.Minification
                         Trace.Warning("{0} warnings found while minifying {4} for {1}:{2}{3}", result.Warnings.Count, input.Source.ToDisplayString(), Environment.NewLine, string.Join(Environment.NewLine, result.Warnings.Select(MinificationErrorInfoToString)), minifierType);
                     }
 
-                    return context.GetDocument(input, await context.GetContentProviderAsync(result.MinifiedContent));
+                    return input.Clone(await context.GetContentProviderAsync(result.MinifiedContent));
                 }
                 catch (Exception ex)
                 {

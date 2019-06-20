@@ -244,7 +244,7 @@ namespace Statiq.Html
                         }
                     }
                 }
-                return escaped ? context.GetDocument(input, await context.GetContentProviderAsync(outputString.ToString())) : input;
+                return escaped ? input.Clone(await context.GetContentProviderAsync(outputString.ToString())) : input;
             }
         }
     }

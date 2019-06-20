@@ -120,7 +120,7 @@ namespace Statiq.Core.Modules.Metadata
                             Priority = c,
                             Path = input.Source.Directory,
                             MetadataFileEntry = _metadataFiles[c],
-                            Metadata = input.Metadata
+                            Metadata = input
                         };
                     }
                 }
@@ -164,7 +164,7 @@ namespace Statiq.Core.Modules.Metadata
                                     continue; // The value was already written.
                                 }
 
-                                if (input.Metadata.ContainsKey(keyValuePair.Key)
+                                if (input.ContainsKey(keyValuePair.Key)
                                     && !metadataEntry.MetadataFileEntry.Replace)
                                 {
                                     continue; // The value already exists and this MetadataFile has no override
@@ -180,7 +180,7 @@ namespace Statiq.Core.Modules.Metadata
                     firstLevel = false;
                 }
 
-                return newMetadata.Count > 0 ? context.GetDocument(input, newMetadata) : input;
+                return newMetadata.Count > 0 ? input.Clone(newMetadata) : input;
             }
         }
 

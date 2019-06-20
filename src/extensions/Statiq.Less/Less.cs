@@ -84,8 +84,7 @@ namespace Statiq.Less
 
                 // Process the result
                 FilePath cssPath = path.GetRelativeInputPath(context).ChangeExtension("css");
-                return context.GetDocument(
-                    input,
+                return input.Clone(
                     cssPath,
                     await context.GetContentProviderAsync(content));
             }

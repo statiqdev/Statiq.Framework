@@ -110,9 +110,9 @@ namespace Statiq.Core.Modules.Control
                     if (await sidecarFile.GetExistsAsync())
                     {
                         string sidecarContent = await sidecarFile.ReadAllTextAsync();
-                        foreach (IDocument result in await context.ExecuteAsync(Children, new[] { context.GetDocument(input, await context.GetContentProviderAsync(sidecarContent)) }))
+                        foreach (IDocument result in await context.ExecuteAsync(Children, new[] { input.Clone(await context.GetContentProviderAsync(sidecarContent)) }))
                         {
-                            results.Add(context.GetDocument(input, result));
+                            results.Add(input.Clone(result));
                         }
                     }
                     else

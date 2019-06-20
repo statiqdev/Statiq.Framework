@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
 using Statiq.Common.Content;
@@ -15,12 +16,23 @@ namespace Statiq.Common.Documents
     /// to create a new document. Implements <see cref="IMetadata"/> and all metadata calls are passed through
     /// to the document's internal <see cref="IMetadata"/> instance (exposed via the <see cref="Metadata"/>
     /// property). Note that the result of both the <see cref="GetStringAsync"/> and the <see cref="GetStreamAsync"/>
-    /// methods are guaranteed not to be null. When a document is created, either a string or a <see cref="Stream"/>
-    /// is provided. Whenever the other of the two is requested, the system will convert the current representation
-    /// for you.
+    /// methods are guaranteed not to be null.
     /// </remarks>
-    public interface IDocument : IMetadata, IDisposable
+    public interface IDocument : IMetadata
     {
+        /// <summary>
+        /// An identifier that is generated when the document is created and stays the same after cloning.
+        /// </summary>
+        string Id { get; }
+
+        /// <summary>
+        /// A document version that gets incremented on every clone operation. Starts at 0.
+        /// </summary>
+        int Version { get; }
+
+        /// <summary>Gets the metadata associated with this document without any global settings or properties.</summary>
+        IMetadata Metadata { get; }
+
         /// <summary>
         /// An identifier for the document meant to reflect the source of the data. These should be unique (such as a file name).
         /// This property is always an absolute path. If you want to get a relative path, use <see cref="FilePath.GetRelativeInputPath(Execution.IExecutionContext)"/>.
@@ -34,17 +46,6 @@ namespace Statiq.Common.Documents
         /// The destination of the document. Can be either relative or absolute.
         /// </summary>
         FilePath Destination { get; }
-
-        /// <summary>An identifier that is generated when the document is created and stays the same after cloning.</summary>
-        string Id { get; }
-
-        /// <summary>
-        /// A document version that gets incremented on every clone operation. Starts at 0.
-        /// </summary>
-        int Version { get; }
-
-        /// <summary>Gets the metadata associated with this document.</summary>
-        IMetadata Metadata { get; }
 
         /// <summary>
         /// Gets the content associated with this document as a string.
@@ -74,17 +75,25 @@ namespace Statiq.Common.Documents
         IContentProvider ContentProvider { get; }
 
         /// <summary>
-        /// Gets the metadata for this document without any global settings included.
-        /// </summary>
-        /// <returns>The document metadata without global settings.</returns>
-        IMetadata WithoutSettings { get; }
-
-        /// <summary>
         /// Gets a hash of the provided document content and metadata appropriate for caching.
         /// Custom <see cref="IDocument"/> implementations may also contribute additional state
         /// data to the resulting hash code.
         /// </summary>
         /// <returns>A hash appropriate for caching.</returns>
         Task<int> GetCacheHashCodeAsync();
+
+        /// <summary>
+        /// Clones this document.
+        /// </summary>
+        /// <param name="source">The new source. If this document already contains a source, then it's used and this is ignored.</param>
+        /// <param name="destination">The new destination or <c>null</c> to keep the existing destination.</param>
+        /// <param name="items">New metadata items or <c>null</c> not to add any new metadata.</param>
+        /// <param name="contentProvider">The new content provider or <c>null</c> to keep the existing content provider.</param>
+        /// <returns>A new document of the same type as this document.</returns>
+        IDocument Clone(
+            FilePath source,
+            FilePath destination,
+            IEnumerable<KeyValuePair<string, object>> items,
+            IContentProvider contentProvider = null);
     }
 }

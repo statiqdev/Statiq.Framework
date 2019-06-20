@@ -9,6 +9,7 @@ using AngleSharp.Parser.Html;
 using Statiq.Common.Modules;
 using Statiq.Common.Execution;
 using Statiq.Common.Meta;
+using Statiq.Common.Documents;
 
 namespace Statiq.Html
 {
@@ -141,7 +142,7 @@ namespace Statiq.Html
                 string excerpt = separatorExcerpt ?? queryExcerpt;
                 if (excerpt != null)
                 {
-                    return context.GetDocument(input, new MetadataItems
+                    return input.Clone(new MetadataItems
                     {
                         { _metadataKey,  excerpt.Trim() }
                     });

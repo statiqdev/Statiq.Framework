@@ -47,7 +47,7 @@ namespace Statiq.Testing.Meta
         }
 
         /// <inhertdoc />
-        public object GetRaw(string key) => _dictionary[key];
+        public bool TryGetRaw(string key, out object value) => _dictionary.TryGetValue(key, out value);
 
         /// <inheritdoc />
         public bool TryGetValue<T>(string key, out T value)

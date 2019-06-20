@@ -102,9 +102,7 @@ namespace Statiq.Core.Modules.Metadata
                                 }
                             }
                         }
-                        return context.GetDocument(
-                            input,
-                            _onlyIfNonExisting ? metadata.Where(x => !input.ContainsKey(x.Key)) : metadata);
+                        return input.Clone(_onlyIfNonExisting ? metadata.Where(x => !input.ContainsKey(x.Key)) : metadata);
                     });
                 }
 
@@ -116,15 +114,12 @@ namespace Statiq.Core.Modules.Metadata
                         metadata[kvp.Key] = kvp.Value;
                     }
                 }
-                return inputs.Select(context, input => context.GetDocument(
-                    input,
-                    _onlyIfNonExisting ? metadata.Where(x => !input.ContainsKey(x.Key)) : metadata));
+                return inputs.Select(context, input => input.Clone(_onlyIfNonExisting ? metadata.Where(x => !input.ContainsKey(x.Key)) : metadata));
             }
 
             return await inputs.SelectAsync(context, async doc => _onlyIfNonExisting && doc.ContainsKey(_key)
                 ? doc
-                : context.GetDocument(
-                    doc,
+                : doc.Clone(
                     new[]
                     {
                         new KeyValuePair<string, object>(_key, await _metadata.GetValueAsync(doc, context))

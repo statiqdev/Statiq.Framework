@@ -19,7 +19,7 @@ namespace Statiq.Common.Execution
     /// All of the information that represents a given build. Also implements
     /// <see cref="IMetadata"/> to expose the global metadata.
     /// </summary>
-    public interface IExecutionContext : IMetadata
+    public interface IExecutionContext : IMetadata, ITypeConverter
     {
         /// <summary>
         /// Uniquly identifies the current execution cycle. This can be used to initialize and/or
@@ -118,40 +118,19 @@ namespace Statiq.Common.Execution
         Task<Stream> GetContentStreamAsync(string content = null);
 
         /// <summary>
-        /// Clones the original document with a new source and destination, new content, and additional metadata (all existing metadata is retained)
-        /// or gets a new document if the original document is null or <c>AsNewDocuments()</c> was called on the module.
+        /// Gets a new document. Modules should use this method of obtaining documents during execution instead of instantiating them directly when possible so that the
+        /// default document type can be replaced by swapping out the document factory.
         /// </summary>
-        /// <param name="originalDocument">The original document.</param>
         /// <param name="source">The source (if the original document contains a source, then this is ignored and the original document's source is used instead).</param>
         /// <param name="destination">The destination.</param>
-        /// <param name="metadata">The metadata items.</param>
+        /// <param name="items">The metadata items.</param>
         /// <param name="contentProvider">The content provider.</param>
         /// <returns>The cloned or new document.</returns>
         IDocument GetDocument(
-            IDocument originalDocument,
             FilePath source,
             FilePath destination,
-            IEnumerable<KeyValuePair<string, object>> metadata,
+            IEnumerable<KeyValuePair<string, object>> items,
             IContentProvider contentProvider = null);
-
-        /// <summary>
-        /// Removes a document from disposal tracking, making it the responsibility of the caller to dispose the document.
-        /// This method should only be used when you want the module to take over document lifetime (such as caching between executions).
-        /// Note that a prior module might have otherwise removed the document from tracking in which case this method will return
-        /// <c>false</c> and the caller should not attempt to dispose the document.
-        /// </summary>
-        /// <param name="document">The document to stop tracking.</param>
-        /// <returns><c>true</c> if the document was being tracked and the caller should now be responsible for it, <c>false</c> otherwise.</returns>
-        bool Untrack(IDocument document);
-
-        /// <summary>
-        /// Provides access to the same enhanced type conversion used to convert metadata types.
-        /// </summary>
-        /// <typeparam name="T">The destination type.</typeparam>
-        /// <param name="value">The value to convert.</param>
-        /// <param name="result">The result of the conversion.</param>
-        /// <returns><c>true</c> if the conversion could be completed, <c>false</c> otherwise.</returns>
-        bool TryConvert<T>(object value, out T result);
 
         /// <summary>
         /// Executes the specified modules with the specified input documents and returns the result documents.

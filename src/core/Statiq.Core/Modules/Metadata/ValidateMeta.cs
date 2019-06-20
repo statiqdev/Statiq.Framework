@@ -95,7 +95,7 @@ namespace Statiq.Core.Modules.Metadata
             Parallel.ForEach(inputs, input =>
             {
                 // Check if the key exists
-                if (!input.Metadata.ContainsKey(_key))
+                if (!input.ContainsKey(_key))
                 {
                     if (_optional)
                     {

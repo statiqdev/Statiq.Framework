@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 using Statiq.Common.Content;
 using Statiq.Common.Documents;
@@ -276,6 +277,16 @@ namespace Statiq.Testing.Documents
             ContentProvider = contentProvider is NullContent ? null : contentProvider;
         }
 
+        public IDocument Clone(FilePath source, FilePath destination, IEnumerable<KeyValuePair<string, object>> items, IContentProvider contentProvider = null) =>
+            new TestDocument(
+                Source ?? source,
+                destination ?? Destination,
+                items == null ? this : this.Concat(items),
+                contentProvider ?? ContentProvider)
+                {
+                    Id = Id
+                };
+
         public void Add(KeyValuePair<string, object> item) => _metadata.Add(item);
 
         public void Add(string key, object value) => _metadata.Add(key, value);
@@ -292,7 +303,7 @@ namespace Statiq.Testing.Documents
         public bool ContainsKey(string key) => _metadata.ContainsKey(key);
 
         /// <inhertdoc />
-        public object GetRaw(string key) => _metadata[key];
+        public bool TryGetRaw(string key, out object value) => _metadata.TryGetRaw(key, out value);
 
         /// <inhertdoc />
         public bool TryGetValue<T>(string key, out T value) => _metadata.TryGetValue<T>(key, out value);

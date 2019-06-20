@@ -22,7 +22,7 @@ namespace Statiq.CodeAnalysis
     /// specified. Otherwise, if a delegate is specified the module will be executed once per input
     /// document and the resulting output documents will be aggregated.
     /// </summary>
-    public abstract class ReadWorkspace : IModule, IAsNewDocuments
+    public abstract class ReadWorkspace : IModule
     {
         private readonly DocumentConfig<FilePath> _path;
         private Func<string, bool> _whereProject;

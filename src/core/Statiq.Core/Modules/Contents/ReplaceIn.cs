@@ -75,13 +75,13 @@ namespace Statiq.Core.Modules.Contents
             }
             if (string.IsNullOrEmpty(_search))
             {
-                return context.GetDocument(input, await context.GetContentProviderAsync(content));
+                return input.Clone(await context.GetContentProviderAsync(content));
             }
             string inputContent = await input.GetStringAsync();
             string replaced = _isRegex
                 ? Regex.Replace(inputContent, _search, content, _regexOptions)
                 : content.Replace(_search, inputContent);
-            return context.GetDocument(input, await context.GetContentProviderAsync(replaced));
+            return input.Clone(await context.GetContentProviderAsync(replaced));
         }
     }
 }

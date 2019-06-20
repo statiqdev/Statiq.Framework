@@ -22,8 +22,6 @@ namespace Statiq.Core.Execution
     internal class PipelinePhase : IDisposable
     {
         private readonly IList<IModule> _modules;
-        private readonly ConcurrentHashSet<FilePath> _documentSources = new ConcurrentHashSet<FilePath>();
-        private ConcurrentHashSet<IDocument> _clonedDocuments = new ConcurrentHashSet<IDocument>();
         private bool _disposed;
 
         public PipelinePhase(IPipeline pipeline, string pipelineName, Phase phase, IList<IModule> modules, params PipelinePhase[] dependencies)
@@ -76,10 +74,6 @@ namespace Statiq.Core.Execution
                 return;
             }
 
-            // Setup for pipeline execution
-            _documentSources.Clear();
-            ResetClonedDocuments();
-
             System.Diagnostics.Stopwatch pipelineStopwatch = System.Diagnostics.Stopwatch.StartNew();
             Trace.Verbose($"Executing pipeline {PipelineName}/{Phase} with {_modules.Count} module(s)");
             try
@@ -88,12 +82,10 @@ namespace Statiq.Core.Execution
                 IServiceScopeFactory serviceScopeFactory = serviceProvider.GetRequiredService<IServiceScopeFactory>();
                 using (IServiceScope serviceScope = serviceScopeFactory.CreateScope())
                 {
-                    using (ExecutionContext context = new ExecutionContext(engine, executionId, this, serviceScope.ServiceProvider))
-                    {
-                        OutputDocuments = await Engine.ExecuteAsync(context, _modules, GetInputDocuments());
-                        pipelineStopwatch.Stop();
-                        Trace.Information($"Executed pipeline {PipelineName}/{Phase} in {pipelineStopwatch.ElapsedMilliseconds} ms resulting in {OutputDocuments.Length} output document(s)");
-                    }
+                    ExecutionContext context = new ExecutionContext(engine, executionId, this, serviceScope.ServiceProvider);
+                    OutputDocuments = await Engine.ExecuteAsync(context, _modules, GetInputDocuments());
+                    pipelineStopwatch.Stop();
+                    Trace.Information($"Executed pipeline {PipelineName}/{Phase} in {pipelineStopwatch.ElapsedMilliseconds} ms resulting in {OutputDocuments.Length} output document(s)");
                 }
             }
             catch (Exception)
@@ -111,52 +103,6 @@ namespace Statiq.Core.Execution
                     OutputDocuments,
                     (_, __) => OutputDocuments);
             }
-
-            // Dispose documents that aren't part of the final collection for this pipeline,
-            // but don't dispose any documents that are referenced directly or indirectly from the final ones
-            HashSet<IDocument> flattenedResultDocuments = new HashSet<IDocument>();
-            foreach (IDocument outputDocument in OutputDocuments)
-            {
-                outputDocument.Flatten(flattenedResultDocuments);
-            }
-            Parallel.ForEach(_clonedDocuments.Where(x => !flattenedResultDocuments.Contains(x)), x => x.Dispose());
-
-            // Track remaining outputs *tracked by this phase* to dispose them after overall execution is done
-            _clonedDocuments = new ConcurrentHashSet<IDocument>(flattenedResultDocuments.Where(x => _clonedDocuments.Contains(x)));
-        }
-
-        public void AddClonedDocument(IDocument document) => _clonedDocuments.Add(document);
-
-        public void AddDocumentSource(FilePath source)
-        {
-            if (source == null)
-            {
-                throw new ArgumentNullException(nameof(source));
-            }
-            if (!_documentSources.Add(source))
-            {
-                throw new ArgumentException("Document source must be unique within the pipeline: " + source);
-            }
-        }
-
-        /// <summary>
-        /// Removes a document from disposal tracking, making it the responsibility of the caller to dispose the document.
-        /// This method should only be used when you want the module to take over document lifetime (such as caching between executions).
-        /// Note that a prior module might have otherwise removed the document from tracking in which case this method will return
-        /// <c>false</c> and the caller should not attempt to dispose the document.
-        /// </summary>
-        /// <param name="document">The document to stop tracking.</param>
-        /// <returns><c>true</c> if the document was being tracked and the caller should now be responsible for it, <c>false</c> otherwise.</returns>
-        public bool Untrack(IDocument document) => _clonedDocuments.TryRemove(document);
-
-        /// <summary>
-        /// Disposes all remaining cloned documents from this phase.
-        /// Called at the end of execution after all pipelines have run.
-        /// </summary>
-        public void ResetClonedDocuments()
-        {
-            Parallel.ForEach(_clonedDocuments, x => x.Dispose());
-            _clonedDocuments = new ConcurrentHashSet<IDocument>();
         }
 
         public void Dispose()
@@ -167,10 +113,6 @@ namespace Statiq.Core.Execution
             }
             _disposed = true;
 
-            // Clean up the documents
-            ResetClonedDocuments();
-
-            // Clean up the modules
             DisposeModules(_modules);
         }
 

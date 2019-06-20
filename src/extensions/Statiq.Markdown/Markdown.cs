@@ -244,11 +244,12 @@ namespace Statiq.Markdown
                 }
 
                 return string.IsNullOrEmpty(_sourceKey)
-                    ? context.GetDocument(input, await context.GetContentProviderAsync(result))
-                    : context.GetDocument(input, new MetadataItems
-                    {
-                        { string.IsNullOrEmpty(_destinationKey) ? _sourceKey : _destinationKey, result }
-                    });
+                    ? input.Clone(await context.GetContentProviderAsync(result))
+                    : input.Clone(
+                        new MetadataItems
+                        {
+                            { string.IsNullOrEmpty(_destinationKey) ? _sourceKey : _destinationKey, result }
+                        });
             }
         }
 

@@ -14,6 +14,7 @@ using Statiq.Common.Execution;
 using Statiq.Common.Tracing;
 using Statiq.Common;
 using Statiq.Common.IO;
+using Statiq.Common.Documents;
 
 namespace Statiq.Html
 {
@@ -54,7 +55,7 @@ namespace Statiq.Html
         }
 
         /// <summary>
-        /// Specifies a dictionary of link mappings given an <see cref="IDocument"/> and <see cref="IExecutionContext"/>. The return
+        /// Specifies a dictionary of link mappings given an <see cref="Statiq.Common.Documents.IDocument"/> and <see cref="IExecutionContext"/>. The return
         /// value is expected to be a <c>IDictionary&lt;string, string&gt;</c>. The keys specify strings to search for in the
         /// HTML content and the values specify what should be placed in the <c>href</c> attribute. This allows you
         /// to specify a different mapping for each input document.
@@ -187,7 +188,7 @@ namespace Statiq.Html
                             {
                                 htmlDocument.ToHtml(writer, ProcessingInstructionFormatter.Instance);
                                 writer.Flush();
-                                return context.GetDocument(input, context.GetContentProvider(contentStream));
+                                return input.Clone(context.GetContentProvider(contentStream));
                             }
                         }
                     }

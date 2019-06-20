@@ -23,7 +23,7 @@ namespace Statiq.GitHub
     /// document.
     /// </remarks>
     /// <category>Metadata</category>
-    public class GitHub : IModule, IAsNewDocuments
+    public class GitHub : IModule
     {
         private readonly Credentials _credentials;
 
@@ -151,7 +151,7 @@ namespace Statiq.GitHub
                         Trace.Warning("Exception while submitting {0} GitHub request for {1}: {2}", request.Key, input.Source.ToDisplayString(), ex.ToString());
                     }
                 });
-                return context.GetDocument(input, results);
+                return input.Clone(results);
             });
         }
     }

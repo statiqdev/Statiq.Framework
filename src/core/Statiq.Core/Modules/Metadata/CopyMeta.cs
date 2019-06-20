@@ -81,7 +81,7 @@ namespace Statiq.Core.Modules.Metadata
                         existingValue = _execute.Invoke(existingValue.ToString());
                     }
 
-                    return new[] { context.GetDocument(input, new[] { new KeyValuePair<string, object>(_toKey, existingValue) }) };
+                    return new[] { input.Clone(new[] { new KeyValuePair<string, object>(_toKey, existingValue) }) };
                 }
                 else
                 {

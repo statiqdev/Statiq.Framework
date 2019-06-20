@@ -44,7 +44,7 @@ namespace Statiq.Core.Modules.IO
             return await inputs.ParallelSelectAsync(context, async input =>
             {
                 string content = await ProcessIncludesAsync(await input.GetStringAsync(), input.Source, context);
-                return content == null ? input : context.GetDocument(input, await context.GetContentProviderAsync(content));
+                return content == null ? input : input.Clone(await context.GetContentProviderAsync(content));
             });
         }
 

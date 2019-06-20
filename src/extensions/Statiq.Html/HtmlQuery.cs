@@ -11,6 +11,7 @@ using Statiq.Common.Execution;
 using Statiq.Common.Tracing;
 using Statiq.Common;
 using Statiq.Common.IO;
+using Statiq.Common.Documents;
 
 namespace Statiq.Html
 {
@@ -233,8 +234,7 @@ namespace Statiq.Html
                                             }
                                             writer.Flush();
                                             documents.Add(
-                                                context.GetDocument(
-                                                    input,
+                                                input.Clone(
                                                     metadata.Count == 0 ? null : metadata,
                                                     context.GetContentProvider(contentStream)));
                                         }
@@ -242,10 +242,10 @@ namespace Statiq.Html
                                 }
                                 else
                                 {
-                                    documents.Add(context.GetDocument(input, metadata));
+                                    documents.Add(input.Clone(metadata));
                                 }
                             }
-                            return (IEnumerable<Common.Documents.IDocument>)documents;
+                            return documents;
                         }
                     }
                     return new[] { input };

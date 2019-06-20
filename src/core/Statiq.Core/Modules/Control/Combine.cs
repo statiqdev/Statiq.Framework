@@ -27,8 +27,7 @@ namespace Statiq.Core.Modules.Control
             {
                 result = result == null
                     ? input
-                    : context.GetDocument(
-                        result,
+                    : result.Clone(
                         input,
                         await context.GetContentProviderAsync(await result.GetStringAsync() + await input.GetStringAsync()));
             });

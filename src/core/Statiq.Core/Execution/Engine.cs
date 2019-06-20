@@ -17,6 +17,7 @@ using Statiq.Common.Tracing;
 using Statiq.Core.Configuration;
 using Statiq.Core.Documents;
 using Statiq.Core.IO;
+using Statiq.Core.Meta;
 using Statiq.Core.Shortcodes;
 using Statiq.Core.Tracing;
 using Statiq.Core.Util;
@@ -62,65 +63,41 @@ namespace Statiq.Core.Execution
         public Engine()
         {
             System.Diagnostics.Trace.Listeners.Add(_diagnosticsTraceListener);
-            _documentFactory = new DocumentFactory(_settings);
+            _documentFactory = new DocumentFactory(this);
         }
 
-        /// <summary>
-        /// Gets the file system.
-        /// </summary>
+        /// <inheritdoc />
         public IFileSystem FileSystem => _fileSystem;
 
-        /// <summary>
-        /// Gets the settings.
-        /// </summary>
+        /// <inheritdoc />
         public ISettings Settings => _settings;
 
-        /// <summary>
-        /// Gets the shortcodes.
-        /// </summary>
+        /// <inheritdoc />
         public IShortcodeCollection Shortcodes => _shortcodes;
 
-        /// <summary>
-        /// Gets the pipelines.
-        /// </summary>
+        /// <inheritdoc />
         public IPipelineCollection Pipelines => _pipelines;
 
         internal ConcurrentDictionary<string, ImmutableArray<IDocument>> Documents { get; }
             = new ConcurrentDictionary<string, ImmutableArray<IDocument>>(StringComparer.OrdinalIgnoreCase);
 
-        /// <summary>
-        /// Gets the namespaces that should be brought in scope by modules that support dynamic compilation.
-        /// </summary>
+        /// <inheritdoc />
         public INamespacesCollection Namespaces { get; } = new NamespaceCollection();
 
-        /// <summary>
-        /// Gets a collection of all the raw assemblies that should be referenced by modules
-        /// that support dynamic compilation (such as configuration assemblies).
-        /// </summary>
+        /// <inheritdoc />
         public IRawAssemblyCollection DynamicAssemblies { get; } = new RawAssemblyCollection();
 
         /// <inheritdoc />
         public IMemoryStreamFactory MemoryStreamManager { get; } = new MemoryStreamFactory();
 
-        /// <summary>
-        /// Gets or sets the application input.
-        /// </summary>
+        /// <inheritdoc />
         public string ApplicationInput { get; set; }
 
-        /// <summary>
-        /// Gets or sets the document factory.
-        /// </summary>
+        /// <inheritdoc />
         public IDocumentFactory DocumentFactory
         {
-            get
-            {
-                return _documentFactory;
-            }
-
-            set
-            {
-                _documentFactory = value ?? throw new ArgumentNullException(nameof(DocumentFactory));
-            }
+            get => _documentFactory;
+            set => _documentFactory = value ?? throw new ArgumentNullException(nameof(DocumentFactory));
         }
 
         /// <summary>
@@ -175,6 +152,8 @@ namespace Statiq.Core.Execution
             JsEngineSwitcher.Current.EngineFactories.Clear();
             JsEngineSwitcher.Current.DefaultEngineName = string.Empty;
         }
+
+        public bool TryConvert<T>(object value, out T result) => TypeHelper.TryConvert(value, out result);
 
         /// <summary>
         /// Executes the engine. This is the primary method that kicks off generation.
@@ -232,15 +211,6 @@ namespace Statiq.Core.Execution
                 Guid executionId = Guid.NewGuid();
                 Task[] phaseTasks = GetPhaseTasks(executionId, serviceProvider);
                 await Task.WhenAll(phaseTasks);
-
-                // Clean up (dispose documents)
-                // Note that disposing the documents immediately after engine execution will ensure write streams get flushed and released
-                // but will also mean that callers (and tests) can't access documents and document content after the engine finishes
-                // Easiest way to access content after engine execution is to add a final Meta module and copy content to metadata
-                foreach (PipelinePhase phase in _phases)
-                {
-                    phase.ResetClonedDocuments();
-                }
 
                 engineStopwatch.Stop();
                 Trace.Information($"Finished execution in {engineStopwatch.ElapsedMilliseconds} ms");
@@ -388,11 +358,9 @@ namespace Statiq.Core.Execution
                     try
                     {
                         // Execute the module
-                        using (ExecutionContext moduleContext = context.Clone(module))
-                        {
-                            IEnumerable<IDocument> moduleResult = await module.ExecuteAsync(inputDocuments, moduleContext);
-                            resultDocuments = moduleResult?.Where(x => x != null).ToImmutableArray() ?? ImmutableArray<IDocument>.Empty;
-                        }
+                        ExecutionContext moduleContext = context.Clone(module);
+                        IEnumerable<IDocument> moduleResult = await module.ExecuteAsync(inputDocuments, moduleContext);
+                        resultDocuments = moduleResult?.Where(x => x != null).ToImmutableArray() ?? ImmutableArray<IDocument>.Empty;
 
                         // Trace results
                         stopwatch.Stop();

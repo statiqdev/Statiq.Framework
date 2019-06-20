@@ -8,6 +8,7 @@ using AngleSharp.Dom;
 using AngleSharp.Dom.Html;
 using AngleSharp.Parser.Html;
 using Statiq.Common;
+using Statiq.Common.Documents;
 using Statiq.Common.Execution;
 using Statiq.Common.Meta;
 using Statiq.Common.Modules;
@@ -268,8 +269,7 @@ namespace Statiq.Html
                     }
                 }
 
-                return context.GetDocument(
-                    input,
+                return input.Clone(
                     new MetadataItems
                     {
                         {

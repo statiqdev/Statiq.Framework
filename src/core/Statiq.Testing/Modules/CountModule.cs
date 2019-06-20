@@ -46,19 +46,19 @@ namespace Statiq.Testing.Modules
                     Value++;
                     if (CloneSource)
                     {
-                        results.Add(context.GetDocument(
-                            input,
-                            new FilePath(ValueKey + sourceCount++, PathKind.Absolute),
-                            null,
-                            new Dictionary<string, object> { { ValueKey, Value } },
-                            await context.GetContentProviderAsync(inputContent == null ? Value.ToString() : inputContent + Value)));
+                        results.Add(
+                            input.Clone(
+                                new FilePath(ValueKey + sourceCount++, PathKind.Absolute),
+                                null,
+                                new Dictionary<string, object> { { ValueKey, Value } },
+                                await context.GetContentProviderAsync(inputContent == null ? Value.ToString() : inputContent + Value)));
                     }
                     else
                     {
-                        results.Add(context.GetDocument(
-                            input,
-                            new Dictionary<string, object> { { ValueKey, Value } },
-                            await context.GetContentProviderAsync(inputContent == null ? Value.ToString() : inputContent + Value)));
+                        results.Add(
+                            input.Clone(
+                                new Dictionary<string, object> { { ValueKey, Value } },
+                                await context.GetContentProviderAsync(inputContent == null ? Value.ToString() : inputContent + Value)));
                     }
                 }
             }

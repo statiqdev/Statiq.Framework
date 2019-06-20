@@ -11,6 +11,7 @@ using AngleSharp.Parser.Html;
 using Polly;
 using Polly.Retry;
 using Statiq.Common;
+using Statiq.Common.Documents;
 using Statiq.Common.Execution;
 using Statiq.Common.IO;
 using Statiq.Common.Modules;
@@ -114,7 +115,7 @@ namespace Statiq.Html
                             {
                                 htmlDocument.ToHtml(writer, ProcessingInstructionFormatter.Instance);
                                 writer.Flush();
-                                return context.GetDocument(input, context.GetContentProvider(contentStream));
+                                return input.Clone(context.GetContentProvider(contentStream));
                             }
                         }
                     }

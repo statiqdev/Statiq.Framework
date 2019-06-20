@@ -44,7 +44,7 @@ namespace Statiq.Core.Modules.Contents
             {
                 return context.GetDocument(await context.GetContentProviderAsync(content));
             }
-            return content == null ? input : context.GetDocument(input, await context.GetContentProviderAsync(content));
+            return content == null ? input : input.Clone(await context.GetContentProviderAsync(content));
         }
     }
 }

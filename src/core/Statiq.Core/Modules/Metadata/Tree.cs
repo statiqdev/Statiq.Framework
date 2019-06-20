@@ -330,7 +330,7 @@ namespace Statiq.Core.Modules.Metadata
                 }
                 else
                 {
-                    OutputDocument = context.GetDocument(InputDocument, metadata);
+                    OutputDocument = InputDocument.Clone(metadata);
                 }
             }
 

@@ -28,7 +28,7 @@ namespace Statiq.Core.Modules.IO
     /// to the same relative path in the output folder).
     /// </remarks>
     /// <category>Input/Output</category>
-    public class ReadFiles : IModule, IAsNewDocuments
+    public class ReadFiles : IModule
     {
         private readonly DocumentConfig<IEnumerable<string>> _patterns;
         private Func<IFile, Task<bool>> _predicate = null;
@@ -82,8 +82,7 @@ namespace Statiq.Core.Modules.IO
                 return files.AsParallel().Select(file =>
                 {
                     Trace.Verbose($"Read file {file.Path.FullPath}");
-                    return context.GetDocument(
-                        input,
+                    return input.Clone(
                         file.Path,
                         file.Path.GetRelativeInputPath(context),
                         context.GetContentProvider(file));

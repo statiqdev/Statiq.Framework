@@ -1,0 +1,131 @@
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
+using Statiq.Common.Execution;
+using Statiq.Common.Meta;
+
+namespace Statiq.Common.Meta
+{
+    /// <summary>
+    /// A linked list of metadata items.
+    /// </summary>
+    public class Metadata : IMetadata
+    {
+        private readonly ITypeConverter _typeConverter;
+        private readonly IMetadata _previous;
+
+        protected IDictionary<string, object> Dictionary { get; }
+
+        public Metadata(ITypeConverter typeConverter, IMetadata previous, IEnumerable<KeyValuePair<string, object>> items = null)
+            : this(typeConverter, items)
+        {
+            _previous = previous;
+        }
+
+        // null items will mean a Dictionary doesn't get created, pass in an empty items array to ensure a Dictionary
+        public Metadata(ITypeConverter typeConverter, IEnumerable<KeyValuePair<string, object>> items = null)
+        {
+            _typeConverter = typeConverter ?? throw new ArgumentNullException(nameof(typeConverter));
+
+            if (items != null)
+            {
+                Dictionary = new Dictionary<string, object>(StringComparer.OrdinalIgnoreCase);
+                foreach (KeyValuePair<string, object> item in items)
+                {
+                    Dictionary[item.Key] = item.Value;
+                }
+            }
+        }
+
+        public bool ContainsKey(string key)
+        {
+            _ = key ?? throw new ArgumentNullException(nameof(key));
+            return (Dictionary?.ContainsKey(key) ?? false) || (_previous?.ContainsKey(key) ?? false);
+        }
+
+        public bool TryGetRaw(string key, out object value)
+        {
+            _ = key ?? throw new ArgumentNullException(nameof(key));
+            value = default;
+            return (Dictionary?.TryGetValue(key, out value) ?? false) || (_previous?.TryGetRaw(key, out value) ?? false);
+        }
+
+        public bool TryGetValue<T>(string key, out T value)
+        {
+            value = default;
+            if (key != null && TryGetRaw(key, out object raw))
+            {
+                object expanded = GetValue(raw);
+                return _typeConverter.TryConvert(expanded, out value);
+            }
+            return false;
+        }
+
+        public bool TryGetValue(string key, out object value) => TryGetValue<object>(key, out value);
+
+        public object this[string key]
+        {
+            get
+            {
+                if (key == null)
+                {
+                    throw new ArgumentNullException(nameof(key));
+                }
+                if (!TryGetValue(key, out object value))
+                {
+                    throw new KeyNotFoundException("The key " + key + " was not found in metadata, use Get() to provide a default value.");
+                }
+                return value;
+            }
+        }
+
+        public IEnumerable<string> Keys => this.Select(x => x.Key);
+
+        public IEnumerable<object> Values => this.Select(x => x.Value);
+
+#pragma warning disable RCS1077 // We want to count the enumerable items, not recursivly call this property
+        public int Count => this.Count();
+#pragma warning restore RCS1077
+
+        public IEnumerator<KeyValuePair<string, object>> GetEnumerator()
+        {
+            if (Dictionary != null)
+            {
+                foreach (KeyValuePair<string, object> item in Dictionary)
+                {
+                    yield return GetItem(item);
+                }
+            }
+            if (_previous != null)
+            {
+                foreach (KeyValuePair<string, object> previousItem in _previous)
+                {
+                    if (!Dictionary.ContainsKey(previousItem.Key))
+                    {
+                        yield return previousItem;
+                    }
+                }
+            }
+        }
+
+        IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
+
+        public IMetadata GetMetadata(params string[] keys) =>
+            new Metadata(_typeConverter, this.Where(x => keys.Contains(x.Key, StringComparer.OrdinalIgnoreCase)));
+
+        /// <summary>
+        /// This resolves the metadata value by recursively expanding IMetadataValue.
+        /// </summary>
+        private object GetValue(object originalValue) =>
+            originalValue is IMetadataValue metadataValue ? GetValue(metadataValue.Get(this)) : originalValue;
+
+        /// <summary>
+        /// This resolves the metadata value by expanding IMetadataValue.
+        /// </summary>
+        private KeyValuePair<string, object> GetItem(KeyValuePair<string, object> item) =>
+            item.Value is IMetadataValue metadataValue
+                ? new KeyValuePair<string, object>(item.Key, GetValue(metadataValue.Get(this)))
+                : item;
+    }
+}

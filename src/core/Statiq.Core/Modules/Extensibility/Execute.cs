@@ -79,7 +79,7 @@ namespace Statiq.Core.Modules.Extensibility
         }
 
         protected static async Task<IEnumerable<IDocument>> ChangeContentAsync(object result, IExecutionContext context, IDocument document) =>
-            new[] { context.GetDocument(document, await GetContentProviderAsync(result, context)) };
+            new[] { document.Clone(await GetContentProviderAsync(result, context)) };
 
         private static async Task<IContentProvider> GetContentProviderAsync(object content, IExecutionContext context)
         {

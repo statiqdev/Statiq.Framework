@@ -92,32 +92,15 @@ namespace Statiq.Testing.Execution
 
         /// <inheritdoc/>
         public IDocument GetDocument(
-            IDocument originalDocument,
             FilePath source,
             FilePath destination,
-            IEnumerable<KeyValuePair<string, object>> metadata,
-            IContentProvider contentProvider = null)
-        {
-            TestDocument document = originalDocument == null
-                ? new TestDocument(
-                    source,
-                    destination,
-                    metadata,
-                    contentProvider)
-                : new TestDocument(
-                    originalDocument.Source ?? source,
-                    destination ?? originalDocument.Destination,
-                    metadata == null ? originalDocument : originalDocument.Concat(metadata),
-                    contentProvider == null ? ((TestDocument)originalDocument).ContentProvider : contentProvider);
-            if (originalDocument != null)
-            {
-                document.Id = originalDocument.Id;
-            }
-            return document;
-        }
-
-        /// <inheritdoc/>
-        public bool Untrack(IDocument document) => false;
+            IEnumerable<KeyValuePair<string, object>> items,
+            IContentProvider contentProvider = null) =>
+            new TestDocument(
+                source,
+                destination,
+                items,
+                contentProvider);
 
         /// <inheritdoc/>
         public HttpClient CreateHttpClient() =>
@@ -265,7 +248,7 @@ namespace Statiq.Testing.Execution
         public IEnumerable<object> Values => _settings.Values;
 
         /// <inheritdoc/>
-        public object GetRaw(string key) => _settings.GetRaw(key);
+        public bool TryGetRaw(string key, out object value) => _settings.TryGetRaw(key, out value);
 
         /// <inheritdoc/>
         public bool TryGetValue<T>(string key, out T value) => _settings.TryGetValue<T>(key, out value);

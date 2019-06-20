@@ -111,14 +111,12 @@ namespace Statiq.Core.Modules.Contents
                     _search,
                     match => _contentFinder(match, input)?.ToString() ?? string.Empty,
                     _regexOptions);
-                return currentDocumentContent == newDocumentContent ? input : context.GetDocument(input, await context.GetContentProviderAsync(newDocumentContent));
+                return currentDocumentContent == newDocumentContent ? input : input.Clone(await context.GetContentProviderAsync(newDocumentContent));
             }
             string replaced = _isRegex
                 ? Regex.Replace(currentDocumentContent, _search, content, _regexOptions)
                 : currentDocumentContent.Replace(_search, content);
-            return context.GetDocument(
-                input,
-                await context.GetContentProviderAsync(replaced));
+            return input.Clone(await context.GetContentProviderAsync(replaced));
         }
     }
 }

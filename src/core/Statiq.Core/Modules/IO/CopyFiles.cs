@@ -22,7 +22,7 @@ namespace Statiq.Core.Modules.IO
     /// representing the files copied by the module. Note that the input documents are not output by this module.
     /// </remarks>
     /// <category>Input/Output</category>
-    public class CopyFiles : IModule, IAsNewDocuments
+    public class CopyFiles : IModule
     {
         private readonly DocumentConfig<IEnumerable<string>> _patterns;
         private Func<IFile, IFile, Task<FilePath>> _destinationPath;
@@ -137,8 +137,7 @@ namespace Statiq.Core.Modules.IO
                         Trace.Verbose("Copied file {0} to {1}", file.Path.FullPath, destination.Path.FullPath);
 
                         // Return the document
-                        return context.GetDocument(
-                            input,
+                        return input.Clone(
                             file.Path,
                             relativePath,
                             context.GetContentProvider(file));

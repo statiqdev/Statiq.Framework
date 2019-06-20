@@ -195,7 +195,7 @@ namespace Statiq.Xmp
                          }
                      }
                  }
-                 return newValues.Count > 0 ? context.GetDocument(input, newValues) : input;
+                 return newValues.Count > 0 ? input.Clone(newValues) : input;
              })).Where(x => x != null);
         }
 

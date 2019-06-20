@@ -8,7 +8,7 @@ namespace Statiq.Common.Execution
     /// <summary>
     /// The engine is the primary entry point for the generation process.
     /// </summary>
-    public interface IEngine : IConfigurable
+    public interface IEngine : IConfigurable, ITypeConverter
     {
         /// <summary>
         /// Gets the file system.
@@ -52,7 +52,8 @@ namespace Statiq.Common.Execution
         string ApplicationInput { get; set; }
 
         /// <summary>
-        /// Gets or sets the document factory.
+        /// Gets or sets the document factory that creates default document instances.
+        /// Replace this to create documents of a different default document type.
         /// </summary>
         IDocumentFactory DocumentFactory { get; set; }
     }

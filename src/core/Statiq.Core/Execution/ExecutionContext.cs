@@ -21,41 +21,53 @@ using Statiq.Core.Meta;
 
 namespace Statiq.Core.Execution
 {
-    internal class ExecutionContext : IExecutionContext, IDisposable
+    internal class ExecutionContext : IExecutionContext
     {
         // Cache the HttpMessageHandler (the HttpClient is really just a thin wrapper around this)
         private static readonly HttpMessageHandler _httpMessageHandler = new HttpClientHandler();
 
         private readonly PipelinePhase _pipelinePhase;
 
-        private bool _disposed;
-
+        /// <inheritdoc/>
         public Engine Engine { get; }
 
+        /// <inheritdoc/>
         public Guid ExecutionId { get; }
 
+        /// <inheritdoc/>
         public IReadOnlyCollection<byte[]> DynamicAssemblies => Engine.DynamicAssemblies;
 
+        /// <inheritdoc/>
         public IReadOnlyCollection<string> Namespaces => Engine.Namespaces;
 
+        /// <inheritdoc/>
         public string PipelineName => _pipelinePhase.PipelineName;
 
+        /// <inheritdoc/>
         public Phase Phase => _pipelinePhase.Phase;
 
+        /// <inheritdoc/>
         public IModule Module { get; }
 
+        /// <inheritdoc/>
         public IDocumentCollection Documents { get; }
 
+        /// <inheritdoc/>
         public IReadOnlyFileSystem FileSystem => Engine.FileSystem;
 
+        /// <inheritdoc/>
         public IReadOnlySettings Settings => Engine.Settings;
 
+        /// <inheritdoc/>
         public IReadOnlyShortcodeCollection Shortcodes => Engine.Shortcodes;
 
+        /// <inheritdoc/>
         public IServiceProvider Services { get; }
 
+        /// <inheritdoc/>
         public string ApplicationInput => Engine.ApplicationInput;
 
+        /// <inheritdoc/>
         public IMemoryStreamFactory MemoryStreamFactory => Engine.MemoryStreamManager;
 
         public ExecutionContext(Engine engine, Guid executionId, PipelinePhase pipelinePhase, IServiceProvider services)
@@ -79,30 +91,13 @@ namespace Statiq.Core.Execution
 
         internal ExecutionContext Clone(IModule module) => new ExecutionContext(this, module);
 
-        /// <summary>
-        /// The context is disposed after use by each module to ensure modules aren't accessing stale data
-        /// if they continue to create documents or perform other operations after the module is done
-        /// executing. A disposed context can no longer be used.
-        /// </summary>
-        public void Dispose()
-        {
-            _disposed = true;
-        }
+        /// <inheritdoc/>
+        public bool TryConvert<T>(object value, out T result) => Engine.TryConvert(value, out result);
 
-        private void CheckDisposed()
-        {
-            if (_disposed)
-            {
-                throw new ObjectDisposedException(nameof(ExecutionContext));
-            }
-        }
-
-        public bool TryConvert<T>(object value, out T result) => TypeHelper.TryConvert(value, out result);
-
-        public bool TryGetValue(string key, out object value) => TryGetValue<object>(key, out value);
-
+        /// <inheritdoc/>
         public HttpClient CreateHttpClient() => CreateHttpClient(_httpMessageHandler);
 
+        /// <inheritdoc/>
         public HttpClient CreateHttpClient(HttpMessageHandler handler) => new HttpClient(handler, false)
         {
             Timeout = TimeSpan.FromSeconds(60)
@@ -129,32 +124,17 @@ namespace Statiq.Core.Execution
 
         /// <inheritdoc/>
         public IDocument GetDocument(
-            IDocument originalDocument,
             FilePath source,
             FilePath destination,
-            IEnumerable<KeyValuePair<string, object>> metadata,
-            IContentProvider contentProvider = null)
-        {
-            CheckDisposed();
-            IDocument document = Engine.DocumentFactory.GetDocument(this, originalDocument, source, destination, metadata, contentProvider);
-            if (originalDocument != null && originalDocument.Source == null && source != null)
-            {
-                // Only add a new source if the source document didn't already contain one (otherwise the one it contains will be used)
-                _pipelinePhase.AddDocumentSource(source);
-            }
-            _pipelinePhase.AddClonedDocument(document);
-            return document;
-        }
+            IEnumerable<KeyValuePair<string, object>> items,
+            IContentProvider contentProvider = null) =>
+            Engine.DocumentFactory.GetDocument(this, source, destination, items, contentProvider);
 
         /// <inheritdoc/>
-        public bool Untrack(IDocument document) => _pipelinePhase.Untrack(document);
+        public async Task<ImmutableArray<IDocument>> ExecuteAsync(IEnumerable<IModule> modules, IEnumerable<IDocument> inputs) =>
+            await Engine.ExecuteAsync(this, modules, inputs?.ToImmutableArray() ?? ImmutableArray<IDocument>.Empty);
 
-        public async Task<ImmutableArray<IDocument>> ExecuteAsync(IEnumerable<IModule> modules, IEnumerable<IDocument> inputs)
-        {
-            CheckDisposed();
-            return await Engine.ExecuteAsync(this, modules, inputs?.ToImmutableArray() ?? ImmutableArray<IDocument>.Empty);
-        }
-
+        /// <inheritdoc/>
         public IJavaScriptEnginePool GetJavaScriptEnginePool(
             Action<IJavaScriptEngine> initializer = null,
             int startEngines = 10,
@@ -170,24 +150,37 @@ namespace Statiq.Core.Execution
 
         // IMetadata
 
+        /// <inheritdoc/>
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
+        /// <inheritdoc/>
         public IEnumerator<KeyValuePair<string, object>> GetEnumerator() => Settings.GetEnumerator();
 
+        /// <inheritdoc/>
         public int Count => Settings.Count;
 
+        /// <inheritdoc/>
         public bool ContainsKey(string key) => Settings.ContainsKey(key);
 
+        /// <inheritdoc/>
         public object this[string key] => Settings[key];
 
+        /// <inheritdoc/>
         public IEnumerable<string> Keys => Settings.Keys;
 
+        /// <inheritdoc/>
         public IEnumerable<object> Values => Settings.Values;
 
-        public object GetRaw(string key) => Settings.Get(key);
+        /// <inheritdoc/>
+        public bool TryGetRaw(string key, out object value) => Settings.TryGetRaw(key, out value);
 
+        /// <inheritdoc/>
+        public bool TryGetValue(string key, out object value) => TryGetValue<object>(key, out value);
+
+        /// <inheritdoc/>
         public bool TryGetValue<T>(string key, out T value) => Settings.TryGetValue<T>(key, out value);
 
+        /// <inheritdoc/>
         public IMetadata GetMetadata(params string[] keys) => Settings.GetMetadata(keys);
     }
 }

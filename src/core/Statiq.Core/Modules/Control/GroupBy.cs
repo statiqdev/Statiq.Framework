@@ -162,13 +162,13 @@ namespace Statiq.Core.Modules.Control
             {
                 return inputs.SelectMany(context, input =>
                 {
-                    return groupings.Select(x => context.GetDocument(
-                        input,
-                        new MetadataItems
-                        {
-                            { Keys.GroupDocuments, x.ToImmutableArray() },
-                            { Keys.GroupKey, x.Key }
-                        }));
+                    return groupings.Select(x =>
+                        input.Clone(
+                            new MetadataItems
+                            {
+                                { Keys.GroupDocuments, x.ToImmutableArray() },
+                                { Keys.GroupKey, x.Key }
+                            }));
                 });
             }
             return groupings.Select(x => context.GetDocument(

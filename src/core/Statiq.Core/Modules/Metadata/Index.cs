@@ -17,6 +17,6 @@ namespace Statiq.Core.Modules.Metadata
     {
         /// <inheritdoc />
         public Task<IEnumerable<IDocument>> ExecuteAsync(IReadOnlyList<IDocument> inputs, IExecutionContext context) =>
-            Task.FromResult(inputs.Select((x, i) => context.GetDocument(x, new MetadataItems { { Keys.Index, i + 1 } })));
+            Task.FromResult(inputs.Select((x, i) => x.Clone(new MetadataItems { { Keys.Index, i + 1 } })));
     }
 }

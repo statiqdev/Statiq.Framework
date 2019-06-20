@@ -54,7 +54,7 @@ namespace Statiq.Core.Shortcodes.IO
 
             // Set the currently included shortcode source so nested includes can use it
             return context.GetDocument(
-                metadata: new MetadataItems
+                new MetadataItems
                 {
                     { "IncludeShortcodeSource", includedFile.Path.FullPath }
                 },

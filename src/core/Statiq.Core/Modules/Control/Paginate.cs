@@ -190,8 +190,7 @@ namespace Statiq.Core.Modules.Control
                 {
                     // Get the current page document
                     int currentI = i;  // Avoid modified closure for previous/next matadata delegate
-                    IDocument document = context.GetDocument(
-                        input,
+                    IDocument document = input.Clone(
                         new Dictionary<string, object>
                         {
                             { Keys.PageDocuments, pages[i].PageDocuments },
@@ -209,7 +208,7 @@ namespace Statiq.Core.Modules.Control
                     {
                         IEnumerable<KeyValuePair<string, object>> pageMetadata = await _pageMetadata
                             .SelectAsync(async kvp => new KeyValuePair<string, object>(kvp.Key, await kvp.Value.GetValueAsync(document, context)));
-                        document = context.GetDocument(document, pageMetadata);
+                        document = document.Clone(pageMetadata);
                     }
 
                     pages[i].Document = document;

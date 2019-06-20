@@ -90,7 +90,7 @@ namespace Statiq.Core.Modules.Metadata
                 .ParallelSelectAsync(context, async input =>
                 {
                     // Check if there's already a title set
-                    if (_keepExisting && input.WithoutSettings.ContainsKey(_key))
+                    if (_keepExisting && input.Metadata.ContainsKey(_key))
                     {
                         return input;
                     }
@@ -99,7 +99,7 @@ namespace Statiq.Core.Modules.Metadata
                     string title = await _title.GetValueAsync(input, context);
                     return title == null
                         ? input
-                        : context.GetDocument(input, new MetadataItems { { _key, title } });
+                        : input.Clone(new MetadataItems { { _key, title } });
                 });
         }
 

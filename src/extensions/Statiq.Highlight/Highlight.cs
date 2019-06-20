@@ -135,7 +135,7 @@ namespace Statiq.Highlight
                                     {
                                         htmlDocument.ToHtml(writer, HtmlMarkupFormatter.Instance);
                                         writer.Flush();
-                                        return context.GetDocument(input, context.GetContentProvider(contentStream));
+                                        return input.Clone(context.GetContentProvider(contentStream));
                                     }
                                 }
                             }
