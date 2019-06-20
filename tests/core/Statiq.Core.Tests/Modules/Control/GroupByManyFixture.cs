@@ -114,10 +114,10 @@ namespace Statiq.Core.Tests.Modules.Control
                     EnsureInputDocument = true
                 };
                 Execute meta = new ExecuteDocument(
-                    Config.FromDocument((d, c) =>
+                    Config.FromDocument(d =>
                     {
                         int groupMetadata = d.Get<int>("A") % 3;
-                        return groupMetadata == 0 ? d : c.GetDocument(d, new MetadataItems { { "GroupMetadata", new object[] { groupMetadata, 3 } } });
+                        return groupMetadata == 0 ? d : d.Clone(new MetadataItems { { "GroupMetadata", new object[] { groupMetadata, 3 } } });
                     }), false);
                 GroupByMany groupByMany = new GroupByMany("GroupMetadata", count, meta);
                 Execute gatherData = new ExecuteDocument(

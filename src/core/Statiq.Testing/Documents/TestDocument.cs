@@ -17,7 +17,7 @@ namespace Statiq.Testing.Documents
     /// A simple document that stores metadata in a <c>Dictionary</c> without any built-in type conversion.
     /// Also no support for content at this time.
     /// </summary>
-    public class TestDocument : IDocument, ITypeConversions
+    public class TestDocument : IDocument
     {
         private readonly TestMetadata _metadata = new TestMetadata();
 
@@ -382,8 +382,6 @@ namespace Statiq.Testing.Documents
         /// <inhertdoc />
         public int Count => _metadata.Count;
 
-        public Dictionary<(Type Value, Type Result), Func<object, object>> TypeConversions => _metadata.TypeConversions;
-
-        public void AddTypeConversion<T, TResult>(Func<T, TResult> typeConversion) => _metadata.AddTypeConversion(typeConversion);
+        public TestTypeConverter TypeConverter => _metadata.TypeConverter;
     }
 }

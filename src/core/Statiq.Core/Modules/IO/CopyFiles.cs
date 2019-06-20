@@ -137,10 +137,9 @@ namespace Statiq.Core.Modules.IO
                         Trace.Verbose("Copied file {0} to {1}", file.Path.FullPath, destination.Path.FullPath);
 
                         // Return the document
-                        return input.Clone(
-                            file.Path,
-                            relativePath,
-                            context.GetContentProvider(file));
+                        return input == null
+                            ? context.GetDocument(file.Path, relativePath, context.GetContentProvider(file))
+                            : input.Clone(file.Path, relativePath, context.GetContentProvider(file));
                     }
                     catch (Exception ex)
                     {

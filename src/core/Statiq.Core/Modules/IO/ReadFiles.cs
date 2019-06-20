@@ -82,10 +82,9 @@ namespace Statiq.Core.Modules.IO
                 return files.AsParallel().Select(file =>
                 {
                     Trace.Verbose($"Read file {file.Path.FullPath}");
-                    return input.Clone(
-                        file.Path,
-                        file.Path.GetRelativeInputPath(context),
-                        context.GetContentProvider(file));
+                    return input == null
+                        ? context.GetDocument(file.Path, file.Path.GetRelativeInputPath(context), context.GetContentProvider(file))
+                        : input.Clone(file.Path, file.Path.GetRelativeInputPath(context), context.GetContentProvider(file));
                 });
             }
             return Array.Empty<IDocument>();

@@ -10,7 +10,7 @@ namespace Statiq.Testing.Meta
     /// <summary>
     /// A test implementation of <see cref="IMetadata"/>.
     /// </summary>
-    public class TestMetadata : IMetadata, IDictionary<string, object>, ITypeConversions
+    public class TestMetadata : IMetadata, IDictionary<string, object>
     {
         private readonly Dictionary<string, object> _dictionary;
 
@@ -64,7 +64,7 @@ namespace Statiq.Testing.Meta
             rawValue = GetValue(rawValue);
 
             // Check if there's a test-specific conversion
-            if (TypeConversions.TryGetValue((rawValue?.GetType() ?? typeof(object), typeof(T)), out Func<object, object> typeConversion))
+            if (TypeConverter.TypeConversions.TryGetValue((rawValue?.GetType() ?? typeof(object), typeof(T)), out Func<object, object> typeConversion))
             {
                 value = (T)typeConversion(rawValue);
             }
@@ -80,10 +80,7 @@ namespace Statiq.Testing.Meta
         /// <inheritdoc />
         public bool TryGetValue(string key, out object value) => TryGetValue<object>(key, out value);
 
-        public Dictionary<(Type Value, Type Result), Func<object, object>> TypeConversions { get; } =
-            new Dictionary<(Type Value, Type Result), Func<object, object>>(TestExecutionContext.DefaultTypeConversions);
-
-        public void AddTypeConversion<T, TResult>(Func<T, TResult> typeConversion) => TypeConversions.Add((typeof(T), typeof(TResult)), x => typeConversion((T)x));
+        public TestTypeConverter TypeConverter { get; } = new TestTypeConverter();
 
         /// <inhertdoc />
         public IMetadata GetMetadata(params string[] keys) => new TestMetadata(keys.Where(ContainsKey).ToDictionary(x => x, x => this[x]));

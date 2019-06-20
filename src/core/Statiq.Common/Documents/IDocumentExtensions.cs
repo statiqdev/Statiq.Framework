@@ -25,8 +25,11 @@ namespace Statiq.Common.Documents
             this IDocument document,
             FilePath destination,
             IEnumerable<KeyValuePair<string, object>> items,
-            IContentProvider contentProvider = null) =>
-            document.Clone(null, destination, items, contentProvider);
+            IContentProvider contentProvider = null)
+        {
+            _ = document ?? throw new ArgumentNullException(nameof(document), "Attempted to clone a null document");
+            return document.Clone(null, destination, items, contentProvider);
+        }
 
         /// <summary>
         /// Clones this document.
@@ -40,8 +43,11 @@ namespace Statiq.Common.Documents
             this IDocument document,
             FilePath source,
             FilePath destination,
-            IContentProvider contentProvider = null) =>
-            document.Clone(source, destination, null, contentProvider);
+            IContentProvider contentProvider = null)
+        {
+            _ = document ?? throw new ArgumentNullException(nameof(document), "Attempted to clone a null document");
+            return document.Clone(source, destination, null, contentProvider);
+        }
 
         /// <summary>
         /// Clones this document.
@@ -53,8 +59,11 @@ namespace Statiq.Common.Documents
         public static IDocument Clone(
             this IDocument document,
             FilePath destination,
-            IContentProvider contentProvider = null) =>
-            document.Clone(null, destination, null, contentProvider);
+            IContentProvider contentProvider = null)
+        {
+            _ = document ?? throw new ArgumentNullException(nameof(document), "Attempted to clone a null document");
+            return document.Clone(null, destination, null, contentProvider);
+        }
 
         /// <summary>
         /// Clones this document.
@@ -66,8 +75,11 @@ namespace Statiq.Common.Documents
         public static IDocument Clone(
             this IDocument document,
             IEnumerable<KeyValuePair<string, object>> items,
-            IContentProvider contentProvider = null) =>
-            document.Clone(null, null, items, contentProvider);
+            IContentProvider contentProvider = null)
+        {
+            _ = document ?? throw new ArgumentNullException(nameof(document), "Attempted to clone a null document");
+            return document.Clone(null, null, items, contentProvider);
+        }
 
         /// <summary>
         /// Clones this document.
@@ -77,8 +89,11 @@ namespace Statiq.Common.Documents
         /// <returns>A new document of the same type as this document.</returns>
         public static IDocument Clone(
             this IDocument document,
-            IContentProvider contentProvider) =>
-            document.Clone(null, null, null, contentProvider);
+            IContentProvider contentProvider)
+        {
+            _ = document ?? throw new ArgumentNullException(nameof(document), "Attempted to clone a null document");
+            return document.Clone(null, null, null, contentProvider);
+        }
 
         /// <summary>
         /// Recursivly flattens metadata that contains a document or documents.
@@ -88,6 +103,7 @@ namespace Statiq.Common.Documents
         /// <param name="key">If <c>null</c> aggregates children from all metadata keys, otherwise only gathers children from the specified key.</param>
         public static HashSet<IDocument> Flatten(this IDocument document, string key = null)
         {
+            _ = document ?? throw new ArgumentNullException(nameof(document));
             HashSet<IDocument> results = new HashSet<IDocument>();
             document.Flatten(results, key);
             return results;
@@ -101,6 +117,8 @@ namespace Statiq.Common.Documents
         /// <param name="key">If <c>null</c> aggregates children from all metadata keys, otherwise only gathers children from the specified key.</param>
         public static void Flatten(this IDocument document, HashSet<IDocument> results, string key = null)
         {
+            _ = document ?? throw new ArgumentNullException(nameof(document));
+
             if (results == null)
             {
                 throw new ArgumentNullException(nameof(results));

@@ -209,7 +209,11 @@ namespace Statiq.Common.Documents
             // This ensures actual properties will get added first and take precedince over any attributes that define colliding names
             List<(DocumentMetadataAttribute, MethodInfo)> attributeProperties =
                 new List<(DocumentMetadataAttribute Property, MethodInfo Getter)>();
-            foreach ((PropertyInfo property, MethodInfo getter) in typeof(TDocument).GetProperties().Select(x => (x, x.GetGetMethod())).Where(x => x.Item2 != null))
+            foreach ((PropertyInfo property, MethodInfo getter) in
+                typeof(TDocument)
+                    .GetProperties()
+                    .Select(x => (x, x.GetGetMethod()))
+                    .Where(x => x.Item2 != null && x.Item2.GetParameters().Length == 0))
             {
                 // If there's an attribute, do this in a second pass
                 DocumentMetadataAttribute attribute = property.GetCustomAttribute<DocumentMetadataAttribute>();
@@ -247,7 +251,7 @@ namespace Statiq.Common.Documents
         {
             Type delegateType = typeof(Func<,>).MakeGenericType(typeof(TDocument), getter.ReturnType);
             Delegate getterDelegate = getter.CreateDelegate(delegateType);
-            Type adapterType = typeof(PropertyCallAdapter<>).MakeGenericType(getter.ReturnType);
+            Type adapterType = typeof(PropertyCallAdapter<>).MakeGenericType(typeof(TDocument), getter.ReturnType);
             return Activator.CreateInstance(adapterType, getterDelegate) as IPropertyCallAdapter;
         }
 

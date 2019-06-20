@@ -88,7 +88,7 @@ namespace Statiq.Core.Execution
         public IRawAssemblyCollection DynamicAssemblies { get; } = new RawAssemblyCollection();
 
         /// <inheritdoc />
-        public IMemoryStreamFactory MemoryStreamManager { get; } = new MemoryStreamFactory();
+        public IMemoryStreamFactory MemoryStreamFactory { get; } = new MemoryStreamFactory();
 
         /// <inheritdoc />
         public string ApplicationInput { get; set; }

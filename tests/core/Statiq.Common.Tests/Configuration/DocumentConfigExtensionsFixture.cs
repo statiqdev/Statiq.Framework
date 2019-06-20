@@ -38,7 +38,7 @@ namespace Statiq.Common.Tests.Configuration
             {
                 // Given
                 TestExecutionContext context = new TestExecutionContext();
-                context.AddTypeConversion<string, int>(x => int.Parse(x));
+                context.TypeConverter.AddTypeConversion<string, int>(x => int.Parse(x));
                 DocumentConfig<object> config = "10";
 
                 // When
@@ -67,7 +67,7 @@ namespace Statiq.Common.Tests.Configuration
             {
                 // Given
                 TestExecutionContext context = new TestExecutionContext();
-                context.AddTypeConversion<string, int>(x => int.Parse(x));
+                context.TypeConverter.AddTypeConversion<string, int>(x => int.Parse(x));
                 DocumentConfig<object> config = "10";
 
                 // When

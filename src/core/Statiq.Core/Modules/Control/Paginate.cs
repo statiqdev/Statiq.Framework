@@ -190,18 +190,18 @@ namespace Statiq.Core.Modules.Control
                 {
                     // Get the current page document
                     int currentI = i;  // Avoid modified closure for previous/next matadata delegate
-                    IDocument document = input.Clone(
-                        new Dictionary<string, object>
-                        {
-                            { Keys.PageDocuments, pages[i].PageDocuments },
-                            { Keys.CurrentPage, i + 1 },
-                            { Keys.TotalPages, pages.Length },
-                            { Keys.TotalItems, totalItems },
-                            { Keys.HasNextPage, pages.Length > i + 1 },
-                            { Keys.HasPreviousPage, i != 0 },
-                            { Keys.NextPage, new CachedDelegateMetadataValue(_ => pages.Length > currentI + 1 ? pages[currentI + 1].Document : null) },
-                            { Keys.PreviousPage, new CachedDelegateMetadataValue(_ => currentI != 0 ? pages[currentI - 1].Document : null) }
-                        });
+                    Dictionary<string, object> metadata = new Dictionary<string, object>
+                    {
+                        { Keys.PageDocuments, pages[i].PageDocuments },
+                        { Keys.CurrentPage, i + 1 },
+                        { Keys.TotalPages, pages.Length },
+                        { Keys.TotalItems, totalItems },
+                        { Keys.HasNextPage, pages.Length > i + 1 },
+                        { Keys.HasPreviousPage, i != 0 },
+                        { Keys.NextPage, new CachedDelegateMetadataValue(_ => pages.Length > currentI + 1 ? pages[currentI + 1].Document : null) },
+                        { Keys.PreviousPage, new CachedDelegateMetadataValue(_ => currentI != 0 ? pages[currentI - 1].Document : null) }
+                    };
+                    IDocument document = input?.Clone(metadata) ?? context.GetDocument(metadata);
 
                     // Apply any page metadata
                     if (_pageMetadata.Count > 0)

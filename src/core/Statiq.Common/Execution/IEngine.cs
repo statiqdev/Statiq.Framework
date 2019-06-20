@@ -44,7 +44,7 @@ namespace Statiq.Common.Execution
         /// <summary>
         /// Provides pooled memory streams (via the RecyclableMemoryStream library).
         /// </summary>
-        IMemoryStreamFactory MemoryStreamManager { get; }
+        IMemoryStreamFactory MemoryStreamFactory { get; }
 
         /// <summary>
         /// Gets or sets the application input.

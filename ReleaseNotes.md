@@ -21,6 +21,9 @@
 - Path segments now use `ReadOnlyMemory<char>` and are slices of the full path for reduced string allocations and memory consumption
 - Removed support for multiple file providers from paths, each path now refers specifically to a location on disk
 - Pipelines execute in four phase: input, process, transform, output
+- Documents are not longer tracked by the execution context and calling `IExecutionContext.GetDocument()` is no longer required (though it's still prefered in order to get default document types)
+- Cloning a document is now performed with `IDocument.Clone()` overloads
+- Documents now provide the value of their public properties when no metadata exists for the given key (making custom document types much more useful)
 
 # 2.2.4
 

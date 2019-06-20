@@ -29,7 +29,7 @@ namespace Statiq.Testing.Execution
     /// <summary>
     /// An <see cref="IExecutionContext"/> that can be used for testing.
     /// </summary>
-    public class TestExecutionContext : IExecutionContext, ITypeConversions
+    public class TestExecutionContext : IExecutionContext
     {
         private readonly TestSettings _settings = new TestSettings();
 
@@ -121,43 +121,9 @@ namespace Statiq.Testing.Execution
                 Content = new StringContent(string.Empty)
             };
 
-        // Includes some initial common conversions
-        public Dictionary<(Type Value, Type Result), Func<object, object>> TypeConversions { get; } = new Dictionary<(Type Value, Type Result), Func<object, object>>(DefaultTypeConversions);
+        public TestTypeConverter TypeConverter { get; } = new TestTypeConverter();
 
-        public static Dictionary<(Type Value, Type Result), Func<object, object>> DefaultTypeConversions { get; } =
-            new Dictionary<(Type Value, Type Result), Func<object, object>>
-            {
-                { (typeof(string), typeof(bool)), x => bool.Parse((string)x) },
-                { (typeof(string), typeof(FilePath)), x => new FilePath((string)x) },
-                { (typeof(FilePath), typeof(string)), x => ((FilePath)x).FullPath },
-                { (typeof(string), typeof(DirectoryPath)), x => new DirectoryPath((string)x) },
-                { (typeof(DirectoryPath), typeof(string)), x => ((DirectoryPath)x).FullPath },
-                { (typeof(string), typeof(Uri)), x => new Uri((string)x) },
-                { (typeof(Uri), typeof(string)), x => ((Uri)x).ToString() }
-            };
-
-        public void AddTypeConversion<T, TResult>(Func<T, TResult> typeConversion) => TypeConversions.Add((typeof(T), typeof(TResult)), x => typeConversion((T)x));
-
-        /// <inheritdoc/>
-        public bool TryConvert<T>(object value, out T result)
-        {
-            // Check if there's a test-specific conversion
-            if (TypeConversions.TryGetValue((value?.GetType() ?? typeof(object), typeof(T)), out Func<object, object> typeConversion))
-            {
-                result = (T)typeConversion(value);
-                return true;
-            }
-
-            // Default conversion is just to cast
-            if (value is T)
-            {
-                result = (T)value;
-                return true;
-            }
-
-            result = default;
-            return value == null;
-        }
+        public bool TryConvert<T>(object value, out T result) => TypeConverter.TryConvert(value, out result);
 
         /// <inheritdoc/>
         public async Task<ImmutableArray<IDocument>> ExecuteAsync(IEnumerable<IModule> modules, IEnumerable<IDocument> inputs)

@@ -68,7 +68,7 @@ namespace Statiq.Core.Execution
         public string ApplicationInput => Engine.ApplicationInput;
 
         /// <inheritdoc/>
-        public IMemoryStreamFactory MemoryStreamFactory => Engine.MemoryStreamManager;
+        public IMemoryStreamFactory MemoryStreamFactory => Engine.MemoryStreamFactory;
 
         public ExecutionContext(Engine engine, Guid executionId, PipelinePhase pipelinePhase, IServiceProvider services)
         {
