@@ -9,7 +9,7 @@ namespace Statiq.Core.Meta
     {
         // Ensure items is not null when calling the base ctor so the dictionary gets instantiated
         public MetadataDictionary(IEnumerable<KeyValuePair<string, object>> items = null)
-            : base(TypeHelper.TypeConverter, items ?? Array.Empty<KeyValuePair<string, object>>())
+            : base(items ?? Array.Empty<KeyValuePair<string, object>>())
         {
         }
 

@@ -34,7 +34,6 @@ namespace Statiq.Core.Shortcodes.Html
         public virtual async Task<IDocument> ExecuteAsync(KeyValuePair<string, string>[] args, string content, IDocument document, IExecutionContext context)
         {
             ConvertingDictionary arguments = args.ToDictionary(
-                context,
                 "Endpoint",
                 "Url",
                 "Format");

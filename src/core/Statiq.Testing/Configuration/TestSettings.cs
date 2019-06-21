@@ -74,7 +74,7 @@ namespace Statiq.Testing.Configuration
         public bool TryGetRaw(string key, out object value) => _metadata.TryGetRaw(key, out value);
 
         /// <inheritdoc />
-        public bool TryGetValue<T>(string key, out T value) => _metadata.TryGetValue<T>(key, out value);
+        public bool TryGetValue<TValue>(string key, out TValue value) => _metadata.TryGetValue<TValue>(key, out value);
 
         /// <inheritdoc />
         public bool TryGetValue(string key, out object value) => TryGetValue<object>(key, out value);

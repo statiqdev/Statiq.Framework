@@ -17,7 +17,6 @@ namespace Statiq.Common.Tests.Shortcodes
             public void MatchesInCorrectOrder()
             {
                 // Given
-                TestExecutionContext context = new TestExecutionContext();
                 KeyValuePair<string, string>[] args = new KeyValuePair<string, string>[]
                 {
                     new KeyValuePair<string, string>(null, "1"),
@@ -26,7 +25,7 @@ namespace Statiq.Common.Tests.Shortcodes
                 };
 
                 // When
-                ConvertingDictionary dictionary = args.ToDictionary(context, "A", "B", "C");
+                ConvertingDictionary dictionary = args.ToDictionary("A", "B", "C");
 
                 // Then
                 dictionary.ShouldBe(
@@ -43,7 +42,6 @@ namespace Statiq.Common.Tests.Shortcodes
             public void MatchesNamedArguments()
             {
                 // Given
-                TestExecutionContext context = new TestExecutionContext();
                 KeyValuePair<string, string>[] args = new KeyValuePair<string, string>[]
                 {
                     new KeyValuePair<string, string>("B", "2"),
@@ -52,7 +50,7 @@ namespace Statiq.Common.Tests.Shortcodes
                 };
 
                 // When
-                ConvertingDictionary dictionary = args.ToDictionary(context, "A", "B", "C");
+                ConvertingDictionary dictionary = args.ToDictionary("A", "B", "C");
 
                 // Then
                 dictionary.ShouldBe(
@@ -69,7 +67,6 @@ namespace Statiq.Common.Tests.Shortcodes
             public void MatchesPositionalAndNamedArguments()
             {
                 // Given
-                TestExecutionContext context = new TestExecutionContext();
                 KeyValuePair<string, string>[] args = new KeyValuePair<string, string>[]
                 {
                     new KeyValuePair<string, string>(null, "1"),
@@ -78,7 +75,7 @@ namespace Statiq.Common.Tests.Shortcodes
                 };
 
                 // When
-                ConvertingDictionary dictionary = args.ToDictionary(context, "A", "B", "C");
+                ConvertingDictionary dictionary = args.ToDictionary("A", "B", "C");
 
                 // Then
                 dictionary.ShouldBe(
@@ -95,7 +92,6 @@ namespace Statiq.Common.Tests.Shortcodes
             public void ThrowsForPositionalAfterNamedArguments()
             {
                 // Given
-                TestExecutionContext context = new TestExecutionContext();
                 KeyValuePair<string, string>[] args = new KeyValuePair<string, string>[]
                 {
                     new KeyValuePair<string, string>(null, "1"),
@@ -104,14 +100,13 @@ namespace Statiq.Common.Tests.Shortcodes
                 };
 
                 // When, Then
-                Should.Throw<ShortcodeArgumentException>(() => args.ToDictionary(context, "A", "B", "C"));
+                Should.Throw<ShortcodeArgumentException>(() => args.ToDictionary("A", "B", "C"));
             }
 
             [Test]
             public void ThrowsForDuplicateNamedArguments()
             {
                 // Given
-                TestExecutionContext context = new TestExecutionContext();
                 KeyValuePair<string, string>[] args = new KeyValuePair<string, string>[]
                 {
                     new KeyValuePair<string, string>(null, "1"),
@@ -120,7 +115,7 @@ namespace Statiq.Common.Tests.Shortcodes
                 };
 
                 // When, Then
-                Should.Throw<ShortcodeArgumentException>(() => args.ToDictionary(context, "A", "B", "C"));
+                Should.Throw<ShortcodeArgumentException>(() => args.ToDictionary("A", "B", "C"));
             }
         }
     }

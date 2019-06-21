@@ -67,14 +67,14 @@ namespace Statiq.Feeds
         private Uri _feedImageLink;
         private string _feedCopyright;
 
-        private DocumentConfig<Uri> _itemId = Config.FromDocument((doc, ctx) => ctx.Convert<Uri>(ctx.GetLink(doc, true)));
+        private DocumentConfig<Uri> _itemId = Config.FromDocument((doc, ctx) => TypeHelper.Convert<Uri>(ctx.GetLink(doc, true)));
         private DocumentConfig<string> _itemTitle = Config.FromDocument(doc => doc.String(FeedKeys.Title));
         private DocumentConfig<string> _itemDescription = Config.FromDocument(doc => doc.String(FeedKeys.Description) ?? doc.String(FeedKeys.Excerpt));
         private DocumentConfig<string> _itemAuthor = Config.FromDocument(doc => doc.String(FeedKeys.Author));
         private DocumentConfig<DateTime?> _itemPublished = Config.FromDocument(doc => doc.Get<DateTime?>(FeedKeys.Published));
         private DocumentConfig<DateTime?> _itemUpdated = Config.FromDocument(doc => doc.Get<DateTime?>(FeedKeys.Updated));
-        private DocumentConfig<Uri> _itemLink = Config.FromDocument((doc, ctx) => ctx.Convert<Uri>(ctx.GetLink(doc, true)));
-        private DocumentConfig<Uri> _itemImageLink = Config.FromDocument((doc, ctx) => ctx.Convert<Uri>(ctx.GetLink(doc, FeedKeys.Image, true)));
+        private DocumentConfig<Uri> _itemLink = Config.FromDocument((doc, ctx) => TypeHelper.Convert<Uri>(ctx.GetLink(doc, true)));
+        private DocumentConfig<Uri> _itemImageLink = Config.FromDocument((doc, ctx) => TypeHelper.Convert<Uri>(ctx.GetLink(doc, FeedKeys.Image, true)));
         private DocumentConfig<string> _itemContent = Config.FromDocument(doc => doc.String(FeedKeys.Content));
         private DocumentConfig<Uri> _itemThreadLink = null;
         private DocumentConfig<int> _itemThreadCount = null;
@@ -404,14 +404,14 @@ namespace Statiq.Feeds
             // Get the feed
             Feed feed = new Feed
             {
-                ID = _feedId ?? context.Convert<Uri>(context.GetLink()),
+                ID = _feedId ?? TypeHelper.Convert<Uri>(context.GetLink()),
                 Title = _feedTitle ?? context.String(FeedKeys.Title),
                 Description = _feedDescription ?? context.String(FeedKeys.Description),
                 Author = _feedAuthor ?? context.String(FeedKeys.Author),
                 Published = _feedPublished ?? DateTime.UtcNow,
                 Updated = _feedUpdated ?? DateTime.UtcNow,
-                Link = _feedLink ?? context.Convert<Uri>(context.GetLink()),
-                ImageLink = _feedImageLink ?? context.Convert<Uri>(context.GetLink(context, FeedKeys.Image, true)),
+                Link = _feedLink ?? TypeHelper.Convert<Uri>(context.GetLink()),
+                ImageLink = _feedImageLink ?? TypeHelper.Convert<Uri>(context.GetLink(context, FeedKeys.Image, true)),
                 Copyright = _feedCopyright ?? context.String(FeedKeys.Copyright) ?? DateTime.UtcNow.Year.ToString()
             };
 

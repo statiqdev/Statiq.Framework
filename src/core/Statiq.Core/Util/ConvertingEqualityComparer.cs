@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using Statiq.Common.Meta;
 using Statiq.Core.Meta;
 
 namespace Statiq.Core.Util

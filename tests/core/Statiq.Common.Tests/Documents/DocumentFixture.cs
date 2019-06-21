@@ -22,12 +22,9 @@ namespace Statiq.Common.Tests.Documents
             [Test]
             public void IdIsNotTheSameForDifferentDocuments()
             {
-                // Given
-                TestEngine engine = new TestEngine();
-
-                // When
-                Document a = new Document(engine, null, null, null, null);
-                Document b = new Document(engine, null, null, null, null);
+                // Given, When
+                Document a = new Document();
+                Document b = new Document();
 
                 // Then
                 Assert.AreNotEqual(a.Id, b.Id);
@@ -40,14 +37,42 @@ namespace Statiq.Common.Tests.Documents
             public void IdIsTheSameAfterClone()
             {
                 // Given
-                TestEngine engine = new TestEngine();
-                Document document = new Document(engine, null, null, null, null);
+                Document document = new Document();
 
                 // When
-                IDocument cloned = document.Clone(null, null, null, null);
+                IDocument cloned = document.Clone(null);
 
                 // Then
                 Assert.AreEqual(document.Id, cloned.Id);
+            }
+
+            [Test]
+            public void DocumentTypeTheSameAfterClone()
+            {
+                // Given
+                CustomDocument document = new CustomDocument();
+
+                // When
+                IDocument cloned = document.Clone(null);
+
+                // Then
+                cloned.ShouldBeOfType<CustomDocument>();
+            }
+
+            [Test]
+            public void MembersAreCloned()
+            {
+                // Given
+                CustomDocument document = new CustomDocument
+                {
+                    Foo = "abc"
+                };
+
+                // When
+                IDocument cloned = document.Clone(null);
+
+                // Then
+                ((CustomDocument)cloned).Foo.ShouldBe("abc");
             }
         }
 
@@ -57,14 +82,13 @@ namespace Statiq.Common.Tests.Documents
             public void ReturnsMetadataWithoutSettings()
             {
                 // Given
-                TestEngine engine = new TestEngine();
-                engine.Settings.Add("A", "a");
-                Document document = new Document(engine, null, null, null, null);
-                Document cloned = document.Clone(
-                    null,
-                    null,
-                    new MetadataItems { { "B", "b" } },
-                    null);
+                MetadataItems settings = new MetadataItems
+                {
+                    { "A", "a" }
+                };
+                Document document = new Document(new Metadata(settings), null, null, null, null);
+                IDocument cloned = document.Clone(
+                    new MetadataItems { { "B", "b" } });
 
                 // When
                 string initialA = document.String("A");
@@ -87,14 +111,12 @@ namespace Statiq.Common.Tests.Documents
             public void MetadataOverwritesSettings()
             {
                 // Given
-                TestEngine engine = new TestEngine();
-                engine.Settings.Add("A", "a");
-                Document document = new Document(engine, null, null, null, null);
-                Document cloned = document.Clone(
-                    null,
-                    null,
-                    new MetadataItems { { "A", "b" } },
-                    null);
+                MetadataItems settings = new MetadataItems
+                {
+                    { "A", "a" }
+                };
+                Document document = new Document(new Metadata(settings), null, null, null, null);
+                IDocument cloned = document.Clone(new MetadataItems { { "A", "b" } });
 
                 // When
                 string initialValue = document.String("A");
@@ -111,12 +133,11 @@ namespace Statiq.Common.Tests.Documents
             public void GetsPropertyMetadata()
             {
                 // Given
-                TestEngine engine = new TestEngine();
-                PropertyDocument document = new PropertyDocument(engine, null, null, null, null)
+                CustomDocument document = new CustomDocument
                 {
                     Foo = "abc"
                 };
-                PropertyDocument cloned = document.Clone(null, null, new MetadataItems { { "Foo", "xyz" } }, null);
+                IDocument cloned = document.Clone(new MetadataItems { { "Foo", "xyz" } });
 
                 // When
                 string initialValue = document.String("Foo");
@@ -125,45 +146,16 @@ namespace Statiq.Common.Tests.Documents
                 string onlyMetadataValue = cloned.Metadata.String("Foo");
 
                 // Then
-                initialValue.ShouldBe("abc");  // Hey look ma, it's coming from a document property!
+                initialValue.ShouldBe("abc");
                 initialOnlyMetadataValue.ShouldBeNull();
                 clonedValue.ShouldBe("xyz");
                 onlyMetadataValue.ShouldBe("xyz");
             }
+        }
 
-            private class PropertyDocument : Document<PropertyDocument>
-            {
-                public string Foo { get; set; }
-
-                // Required constructors and overrides
-
-                public PropertyDocument(
-                   IEngine engine,
-                   FilePath source,
-                   FilePath destination,
-                   IEnumerable<KeyValuePair<string, object>> items,
-                   IContentProvider contentProvider = null)
-                   : base(engine, source, destination, items, contentProvider)
-                {
-                }
-
-                private PropertyDocument(
-                    PropertyDocument sourceDocument,
-                    FilePath source,
-                    FilePath destination,
-                    IEnumerable<KeyValuePair<string, object>> items,
-                    IContentProvider contentProvider = null)
-                    : base(sourceDocument, source, destination, items, contentProvider)
-                {
-                }
-
-                public override PropertyDocument Clone(
-                    FilePath source,
-                    FilePath destination,
-                    IEnumerable<KeyValuePair<string, object>> items,
-                    IContentProvider contentProvider = null) =>
-                    new PropertyDocument(this, source, destination, items, contentProvider);
-            }
+        private class CustomDocument : Document<CustomDocument>
+        {
+            public string Foo { get; set; }
         }
     }
 }

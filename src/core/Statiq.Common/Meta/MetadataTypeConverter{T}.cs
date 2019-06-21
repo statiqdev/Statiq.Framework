@@ -4,7 +4,7 @@ using System.Collections.Immutable;
 using System.Linq;
 using TB.ComponentModel;
 
-namespace Statiq.Core.Meta
+namespace Statiq.Common.Meta
 {
     internal class MetadataTypeConverter<T> : MetadataTypeConverter
     {
@@ -20,7 +20,7 @@ namespace Statiq.Core.Meta
         public override IEnumerable ToEnumerable(IEnumerable enumerable) =>
             ConvertEnumerable(enumerable);
 
-        // This is where the magic happens, see http://www.codeproject.com/Articles/248440/Universal-Type-Converter for conversion library
+        // This is where the magic happens via https://github.com/t-bruning/UniversalTypeConverter
         public static bool TryConvert(object value, out T result) =>
             UniversalTypeConverter.TryConvertTo(value, out result);
 

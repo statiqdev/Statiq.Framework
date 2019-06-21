@@ -21,9 +21,8 @@ namespace Statiq.Common.Tests.Meta
             public void MissingKeyThrowsKeyNotFoundException()
             {
                 // Given
-                TestEngine engine = new TestEngine();
                 MetadataItems initialMetadata = new MetadataItems();
-                Metadata metadata = new Metadata(engine, initialMetadata);
+                Metadata metadata = new Metadata(initialMetadata);
 
                 // When
                 TestDelegate test = () =>
@@ -39,9 +38,8 @@ namespace Statiq.Common.Tests.Meta
             public void NullKeyThrowsKeyNotFoundException()
             {
                 // Given
-                TestEngine engine = new TestEngine();
                 MetadataItems initialMetadata = new MetadataItems();
-                Metadata metadata = new Metadata(engine, initialMetadata);
+                Metadata metadata = new Metadata(initialMetadata);
 
                 // When
                 TestDelegate test = () =>
@@ -57,12 +55,11 @@ namespace Statiq.Common.Tests.Meta
             public void ReturnsCorrectResultWithMetadataValue()
             {
                 // Given
-                TestEngine engine = new TestEngine();
                 MetadataItems initialMetadata = new MetadataItems
                 {
                     { "A", new SimpleMetadataValue { Value = "a" } }
                 };
-                Metadata metadata = new Metadata(engine, initialMetadata);
+                Metadata metadata = new Metadata(initialMetadata);
 
                 // When
                 object value = metadata["A"];
@@ -75,12 +72,11 @@ namespace Statiq.Common.Tests.Meta
             public void ReturnsCorrectResultForKeysWithDifferentCase()
             {
                 // Given
-                TestEngine engine = new TestEngine();
                 MetadataItems initialMetadata = new MetadataItems
                 {
                     { "A", new SimpleMetadataValue { Value = "a" } }
                 };
-                Metadata metadata = new Metadata(engine, initialMetadata);
+                Metadata metadata = new Metadata(initialMetadata);
 
                 // When
                 object value = metadata["a"];
@@ -96,9 +92,8 @@ namespace Statiq.Common.Tests.Meta
             public void ReturnsTrueForValidValue()
             {
                 // Given
-                TestEngine engine = new TestEngine();
                 MetadataItems initialMetadata = new MetadataItems { { "A", "a" } };
-                Metadata metadata = new Metadata(engine, initialMetadata);
+                Metadata metadata = new Metadata(initialMetadata);
 
                 // When
                 bool contains = metadata.ContainsKey("A");
@@ -111,9 +106,8 @@ namespace Statiq.Common.Tests.Meta
             public void ReturnsFalseForInvalidValue()
             {
                 // Given
-                TestEngine engine = new TestEngine();
                 MetadataItems initialMetadata = new MetadataItems { { "A", "a" } };
-                Metadata metadata = new Metadata(engine, initialMetadata);
+                Metadata metadata = new Metadata(initialMetadata);
 
                 // When
                 bool contains = metadata.ContainsKey("B");
@@ -126,9 +120,8 @@ namespace Statiq.Common.Tests.Meta
             public void ReturnsTrueForSameKeysWithDifferentCase()
             {
                 // Given
-                TestEngine engine = new TestEngine();
                 MetadataItems initialMetadata = new MetadataItems { { "A", "a" } };
-                Metadata metadata = new Metadata(engine, initialMetadata);
+                Metadata metadata = new Metadata(initialMetadata);
 
                 // When
                 bool contains = metadata.ContainsKey("a");
@@ -144,9 +137,8 @@ namespace Statiq.Common.Tests.Meta
             public void ReturnsTrueForValidValue()
             {
                 // Given
-                TestEngine engine = new TestEngine();
                 MetadataItems initialMetadata = new MetadataItems { { "A", "a" } };
-                Metadata metadata = new Metadata(engine, initialMetadata);
+                Metadata metadata = new Metadata(initialMetadata);
 
                 // When
                 object value;
@@ -161,9 +153,8 @@ namespace Statiq.Common.Tests.Meta
             public void ReturnsFalseForInvalidValue()
             {
                 // Given
-                TestEngine engine = new TestEngine();
                 MetadataItems initialMetadata = new MetadataItems { { "A", "a" } };
-                Metadata metadata = new Metadata(engine, initialMetadata);
+                Metadata metadata = new Metadata(initialMetadata);
 
                 // When
                 object value;
@@ -178,12 +169,11 @@ namespace Statiq.Common.Tests.Meta
             public void ReturnsCorrectResultWithMetadataValue()
             {
                 // Given
-                TestEngine engine = new TestEngine();
                 MetadataItems initialMetadata = new MetadataItems
                 {
                     { "A", new SimpleMetadataValue { Value = "a" } }
                 };
-                Metadata metadata = new Metadata(engine, initialMetadata);
+                Metadata metadata = new Metadata(initialMetadata);
 
                 // When
                 object value;
@@ -201,12 +191,11 @@ namespace Statiq.Common.Tests.Meta
             public void CanCloneWithNewValues()
             {
                 // Given
-                TestEngine engine = new TestEngine();
                 MetadataItems initialMetadata = new MetadataItems();
-                Metadata metadata = new Metadata(engine, initialMetadata);
+                Metadata metadata = new Metadata(initialMetadata);
 
                 // When
-                metadata = new Metadata(engine, metadata, new[] { new KeyValuePair<string, object>("A", "a") });
+                metadata = new Metadata(metadata, new[] { new KeyValuePair<string, object>("A", "a") });
 
                 // Then
                 Assert.AreEqual("a", metadata["A"]);
@@ -216,12 +205,11 @@ namespace Statiq.Common.Tests.Meta
             public void ContainsPreviousValues()
             {
                 // Given
-                TestEngine engine = new TestEngine();
                 MetadataItems initialMetadata = new MetadataItems { { "A", "a" } };
-                Metadata metadata = new Metadata(engine, initialMetadata);
+                Metadata metadata = new Metadata(initialMetadata);
 
                 // When
-                Metadata clone = new Metadata(engine, metadata, new Dictionary<string, object> { { "B", "b" } });
+                Metadata clone = new Metadata(metadata, new Dictionary<string, object> { { "B", "b" } });
 
                 // Then
                 Assert.AreEqual("a", clone["A"]);
@@ -231,12 +219,11 @@ namespace Statiq.Common.Tests.Meta
             public void ClonedMetadataDoesNotContainNewValues()
             {
                 // Given
-                TestEngine engine = new TestEngine();
                 MetadataItems initialMetadata = new MetadataItems { { "A", "a" } };
-                Metadata metadata = new Metadata(engine, initialMetadata);
+                Metadata metadata = new Metadata(initialMetadata);
 
                 // When
-                Metadata clone = new Metadata(engine, metadata, new Dictionary<string, object> { { "B", "b" } });
+                Metadata clone = new Metadata(metadata, new Dictionary<string, object> { { "B", "b" } });
 
                 // Then
                 Assert.IsFalse(metadata.ContainsKey("B"));
@@ -246,12 +233,11 @@ namespace Statiq.Common.Tests.Meta
             public void ContainsNewValues()
             {
                 // Given
-                TestEngine engine = new TestEngine();
                 MetadataItems initialMetadata = new MetadataItems { { "A", "a" } };
-                Metadata metadata = new Metadata(engine, initialMetadata);
+                Metadata metadata = new Metadata(initialMetadata);
 
                 // When
-                Metadata clone = new Metadata(engine, metadata, new Dictionary<string, object> { { "B", "b" } });
+                Metadata clone = new Metadata(metadata, new Dictionary<string, object> { { "B", "b" } });
 
                 // Then
                 Assert.AreEqual("b", clone["B"]);
@@ -261,12 +247,11 @@ namespace Statiq.Common.Tests.Meta
             public void ReplacesValue()
             {
                 // Given
-                TestEngine engine = new TestEngine();
                 MetadataItems initialMetadata = new MetadataItems { { "A", "a" } };
-                Metadata metadata = new Metadata(engine, initialMetadata);
+                Metadata metadata = new Metadata(initialMetadata);
 
                 // When
-                Metadata clone = new Metadata(engine, metadata, new Dictionary<string, object> { { "A", "b" } });
+                Metadata clone = new Metadata(metadata, new Dictionary<string, object> { { "A", "b" } });
 
                 // Then
                 Assert.AreEqual("a", metadata["A"]);
@@ -280,9 +265,8 @@ namespace Statiq.Common.Tests.Meta
             public void GetWithMetadataValueReturnsCorrectResult()
             {
                 // Given
-                TestEngine engine = new TestEngine();
                 MetadataItems initialMetadata = new MetadataItems { { "A", "a" } };
-                Metadata metadata = new Metadata(engine, initialMetadata);
+                Metadata metadata = new Metadata(initialMetadata);
 
                 // When
                 object value = metadata.Get("A");
@@ -295,13 +279,12 @@ namespace Statiq.Common.Tests.Meta
             public void ReturnsCorrectResultWithDerivedMetadataValue()
             {
                 // Given
-                TestEngine engine = new TestEngine();
                 MetadataItems initialMetadata = new MetadataItems
                 {
                     { "A", new DerivedMetadataValue { Key = "X" } },
                     { "X", "x" }
                 };
-                Metadata metadata = new Metadata(engine, initialMetadata);
+                Metadata metadata = new Metadata(initialMetadata);
 
                 // When
                 object value = metadata.Get("A");
@@ -314,10 +297,9 @@ namespace Statiq.Common.Tests.Meta
             public void MetadataValueCalledForEachRequest()
             {
                 // Given
-                TestEngine engine = new TestEngine();
                 SimpleMetadataValue metadataValue = new SimpleMetadataValue { Value = "a" };
                 MetadataItems initialMetadata = new MetadataItems { { "A", metadataValue } };
-                Metadata metadata = new Metadata(engine, initialMetadata);
+                Metadata metadata = new Metadata(initialMetadata);
 
                 // When
                 object value = metadata.Get("A");
@@ -336,9 +318,8 @@ namespace Statiq.Common.Tests.Meta
             public void ReturnsCorrectResultForList()
             {
                 // Given
-                TestEngine engine = new TestEngine();
                 MetadataItems initialMetadata = new MetadataItems { { "A", new List<int> { 1, 2, 3 } } };
-                Metadata metadata = new Metadata(engine, initialMetadata);
+                Metadata metadata = new Metadata(initialMetadata);
 
                 // When
                 IReadOnlyList<int> result = metadata.List<int>("A");
@@ -349,12 +330,41 @@ namespace Statiq.Common.Tests.Meta
             }
 
             [Test]
+            public void ReturnsCorrectResultForConvertedStringList()
+            {
+                // Given
+                MetadataItems initialMetadata = new MetadataItems { { "A", new List<string> { "1", "2", "3" } } };
+                Metadata metadata = new Metadata(initialMetadata);
+
+                // When
+                IReadOnlyList<int> result = metadata.List<int>("A");
+
+                // Then
+                Assert.IsNotNull(result);
+                CollectionAssert.AreEqual(result, new[] { 1, 2, 3 });
+            }
+
+            [Test]
+            public void ReturnsCorrectResultForConvertedIntList()
+            {
+                // Given
+                MetadataItems initialMetadata = new MetadataItems { { "A", new List<int> { 1, 2, 3 } } };
+                Metadata metadata = new Metadata(initialMetadata);
+
+                // When
+                IReadOnlyList<string> result = metadata.List<string>("A");
+
+                // Then
+                Assert.IsNotNull(result);
+                CollectionAssert.AreEqual(result, new[] { "1", "2", "3" });
+            }
+
+            [Test]
             public void ReturnsCorrectResultForArray()
             {
                 // Given
-                TestEngine engine = new TestEngine();
                 MetadataItems initialMetadata = new MetadataItems { { "A", new[] { 1, 2, 3 } } };
-                Metadata metadata = new Metadata(engine, initialMetadata);
+                Metadata metadata = new Metadata(initialMetadata);
 
                 // When
                 IReadOnlyList<int> result = metadata.List<int>("A");
@@ -371,9 +381,8 @@ namespace Statiq.Common.Tests.Meta
             public void ReturnsNullWhenKeyNotFound()
             {
                 // Given
-                TestEngine engine = new TestEngine();
                 MetadataItems initialMetadata = new MetadataItems();
-                Metadata metadata = new Metadata(engine, initialMetadata);
+                Metadata metadata = new Metadata(initialMetadata);
 
                 // When
                 IReadOnlyList<IDocument> result = metadata.DocumentList("A");
@@ -386,12 +395,11 @@ namespace Statiq.Common.Tests.Meta
             public void ReturnsListForList()
             {
                 // Given
-                TestEngine engine = new TestEngine();
                 IDocument a = new TestDocument();
                 IDocument b = new TestDocument();
                 IDocument c = new TestDocument();
                 MetadataItems initialMetadata = new MetadataItems { { "A", new List<IDocument> { a, b, c } } };
-                Metadata metadata = new Metadata(engine, initialMetadata);
+                Metadata metadata = new Metadata(initialMetadata);
 
                 // When
                 IReadOnlyList<IDocument> result = metadata.DocumentList("A");
@@ -399,6 +407,36 @@ namespace Statiq.Common.Tests.Meta
                 // Then
                 Assert.IsNotNull(result);
                 CollectionAssert.AreEqual(new[] { a, b, c }, result);
+            }
+
+            [Test]
+            public void ReturnsEmptyListForListOfInt()
+            {
+                // Given
+                MetadataItems initialMetadata = new MetadataItems { { "A", new List<int> { 1, 2, 3 } } };
+                Metadata metadata = new Metadata(initialMetadata);
+
+                // When
+                IReadOnlyList<IDocument> result = metadata.DocumentList("A");
+
+                // Then
+                Assert.IsNotNull(result);
+                CollectionAssert.IsEmpty(result);
+            }
+
+            [Test]
+            public void ReturnsEmptyListForSingleInt()
+            {
+                // Given
+                MetadataItems initialMetadata = new MetadataItems { { "A", 1 } };
+                Metadata metadata = new Metadata(initialMetadata);
+
+                // When
+                IReadOnlyList<IDocument> result = metadata.DocumentList("A");
+
+                // Then
+                Assert.IsNotNull(result);
+                CollectionAssert.IsEmpty(result);
             }
         }
 
@@ -409,12 +447,11 @@ namespace Statiq.Common.Tests.Meta
             public void ReturnsCorrectStringForFilePath(string path, string expected)
             {
                 // Given
-                TestEngine engine = new TestEngine();
                 MetadataItems initialMetadata = new MetadataItems();
-                Metadata metadata = new Metadata(engine, initialMetadata);
+                Metadata metadata = new Metadata(initialMetadata);
 
                 // When
-                metadata = new Metadata(engine, metadata, new[] { new KeyValuePair<string, object>("A", new FilePath(path)) });
+                metadata = new Metadata(metadata, new[] { new KeyValuePair<string, object>("A", new FilePath(path)) });
                 object result = metadata.String("A");
 
                 // Then
@@ -427,12 +464,11 @@ namespace Statiq.Common.Tests.Meta
             public void ReturnsCorrectStringForDirectoryPath(string path, string expected)
             {
                 // Given
-                TestEngine engine = new TestEngine();
                 MetadataItems initialMetadata = new MetadataItems();
-                Metadata metadata = new Metadata(engine, initialMetadata);
+                Metadata metadata = new Metadata(initialMetadata);
 
                 // When
-                metadata = new Metadata(engine, metadata, new[] { new KeyValuePair<string, object>("A", new DirectoryPath(path)) });
+                metadata = new Metadata(metadata, new[] { new KeyValuePair<string, object>("A", new DirectoryPath(path)) });
                 object result = metadata.String("A");
 
                 // Then
@@ -448,12 +484,11 @@ namespace Statiq.Common.Tests.Meta
             public void ReturnsCorrectFilePathForFilePath(string path, string expected)
             {
                 // Given
-                TestEngine engine = new TestEngine();
                 MetadataItems initialMetadata = new MetadataItems();
-                Metadata metadata = new Metadata(engine, initialMetadata);
+                Metadata metadata = new Metadata(initialMetadata);
 
                 // When
-                metadata = new Metadata(engine, metadata, new[] { new KeyValuePair<string, object>("A", new FilePath(path)) });
+                metadata = new Metadata(metadata, new[] { new KeyValuePair<string, object>("A", new FilePath(path)) });
                 object result = metadata.FilePath("A");
 
                 // Then
@@ -467,12 +502,11 @@ namespace Statiq.Common.Tests.Meta
             public void ReturnsCorrectFilePathForString(string path, string expected)
             {
                 // Given
-                TestEngine engine = new TestEngine();
                 MetadataItems initialMetadata = new MetadataItems();
-                Metadata metadata = new Metadata(engine, initialMetadata);
+                Metadata metadata = new Metadata(initialMetadata);
 
                 // When
-                metadata = new Metadata(engine, metadata, new[] { new KeyValuePair<string, object>("A", path) });
+                metadata = new Metadata(metadata, new[] { new KeyValuePair<string, object>("A", path) });
                 object result = metadata.FilePath("A");
 
                 // Then
@@ -495,12 +529,11 @@ namespace Statiq.Common.Tests.Meta
             public void ReturnsCorrectDirectoryPathForDirectoryPath(string path, string expected)
             {
                 // Given
-                TestEngine engine = new TestEngine();
                 MetadataItems initialMetadata = new MetadataItems();
-                Metadata metadata = new Metadata(engine, initialMetadata);
+                Metadata metadata = new Metadata(initialMetadata);
 
                 // When
-                metadata = new Metadata(engine, metadata, new[] { new KeyValuePair<string, object>("A", new DirectoryPath(path)) });
+                metadata = new Metadata(metadata, new[] { new KeyValuePair<string, object>("A", new DirectoryPath(path)) });
                 object result = metadata.DirectoryPath("A");
 
                 // Then
@@ -514,12 +547,11 @@ namespace Statiq.Common.Tests.Meta
             public void ReturnsCorrectDirectoryPathForString(string path, string expected)
             {
                 // Given
-                TestEngine engine = new TestEngine();
                 MetadataItems initialMetadata = new MetadataItems();
-                Metadata metadata = new Metadata(engine, initialMetadata);
+                Metadata metadata = new Metadata(initialMetadata);
 
                 // When
-                metadata = new Metadata(engine, metadata, new[] { new KeyValuePair<string, object>("A", path) });
+                metadata = new Metadata(metadata, new[] { new KeyValuePair<string, object>("A", path) });
                 object result = metadata.DirectoryPath("A");
 
                 // Then
@@ -541,14 +573,13 @@ namespace Statiq.Common.Tests.Meta
             public void EnumeratingMetadataValuesReturnsCorrectResults()
             {
                 // Given
-                TestEngine engine = new TestEngine();
                 MetadataItems initialMetadata = new MetadataItems
                 {
                     { "A", new SimpleMetadataValue { Value = "a" } },
                     { "B", new SimpleMetadataValue { Value = "b" } },
                     { "C", new SimpleMetadataValue { Value = "c" } }
                 };
-                Metadata metadata = new Metadata(engine, initialMetadata);
+                Metadata metadata = new Metadata(initialMetadata);
 
                 // When
                 object[] values = metadata.Select(x => x.Value).ToArray();

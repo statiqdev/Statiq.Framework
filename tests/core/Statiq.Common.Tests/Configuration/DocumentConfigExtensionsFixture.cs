@@ -38,7 +38,6 @@ namespace Statiq.Common.Tests.Configuration
             {
                 // Given
                 TestExecutionContext context = new TestExecutionContext();
-                context.TypeConverter.AddTypeConversion<string, int>(x => int.Parse(x));
                 DocumentConfig<object> config = "10";
 
                 // When
@@ -53,7 +52,7 @@ namespace Statiq.Common.Tests.Configuration
             {
                 // Given
                 TestExecutionContext context = new TestExecutionContext();
-                DocumentConfig<object> config = "10";
+                DocumentConfig<object> config = "abc";
 
                 // When, Then
                 await Should.ThrowAsync<InvalidOperationException>(async () => await config.GetValueAsync<int>(null, context));
@@ -67,7 +66,6 @@ namespace Statiq.Common.Tests.Configuration
             {
                 // Given
                 TestExecutionContext context = new TestExecutionContext();
-                context.TypeConverter.AddTypeConversion<string, int>(x => int.Parse(x));
                 DocumentConfig<object> config = "10";
 
                 // When
@@ -82,7 +80,7 @@ namespace Statiq.Common.Tests.Configuration
             {
                 // Given
                 TestExecutionContext context = new TestExecutionContext();
-                DocumentConfig<object> config = "10";
+                DocumentConfig<object> config = "abc";
 
                 // When
                 int result = await config.TryGetValueAsync<int>(null, context);

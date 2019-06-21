@@ -19,7 +19,7 @@ namespace Statiq.Common.Execution
     /// All of the information that represents a given build. Also implements
     /// <see cref="IMetadata"/> to expose the global metadata.
     /// </summary>
-    public interface IExecutionContext : IMetadata, ITypeConverter
+    public interface IExecutionContext : IMetadata, IDocumentFactoryProvider
     {
         /// <summary>
         /// Uniquly identifies the current execution cycle. This can be used to initialize and/or
@@ -116,21 +116,6 @@ namespace Statiq.Common.Execution
         /// <param name="content">Content to initialize the stream with.</param>
         /// <returns>A stream for document content.</returns>
         Task<Stream> GetContentStreamAsync(string content = null);
-
-        /// <summary>
-        /// Gets a new document. Modules should use this method of obtaining documents during execution instead of instantiating them directly when possible so that the
-        /// default document type can be replaced by swapping out the document factory.
-        /// </summary>
-        /// <param name="source">The source (if the original document contains a source, then this is ignored and the original document's source is used instead).</param>
-        /// <param name="destination">The destination.</param>
-        /// <param name="items">The metadata items.</param>
-        /// <param name="contentProvider">The content provider.</param>
-        /// <returns>The cloned or new document.</returns>
-        IDocument GetDocument(
-            FilePath source,
-            FilePath destination,
-            IEnumerable<KeyValuePair<string, object>> items,
-            IContentProvider contentProvider = null);
 
         /// <summary>
         /// Executes the specified modules with the specified input documents and returns the result documents.

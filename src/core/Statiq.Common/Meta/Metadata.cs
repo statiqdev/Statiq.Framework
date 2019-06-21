@@ -12,22 +12,19 @@ namespace Statiq.Common.Meta
     /// </summary>
     public class Metadata : IMetadata
     {
-        private readonly ITypeConverter _typeConverter;
         private readonly IMetadata _previous;
 
         protected IDictionary<string, object> Dictionary { get; }
 
-        public Metadata(ITypeConverter typeConverter, IMetadata previous, IEnumerable<KeyValuePair<string, object>> items = null)
-            : this(typeConverter, items)
+        public Metadata(IMetadata previous, IEnumerable<KeyValuePair<string, object>> items = null)
+            : this(items)
         {
             _previous = previous;
         }
 
         // null items will mean a Dictionary doesn't get created, pass in an empty items array to ensure a Dictionary
-        public Metadata(ITypeConverter typeConverter, IEnumerable<KeyValuePair<string, object>> items = null)
+        public Metadata(IEnumerable<KeyValuePair<string, object>> items = null)
         {
-            _typeConverter = typeConverter ?? throw new ArgumentNullException(nameof(typeConverter));
-
             if (items != null)
             {
                 Dictionary = new Dictionary<string, object>(StringComparer.OrdinalIgnoreCase);
@@ -51,13 +48,13 @@ namespace Statiq.Common.Meta
             return (Dictionary?.TryGetValue(key, out value) ?? false) || (_previous?.TryGetRaw(key, out value) ?? false);
         }
 
-        public bool TryGetValue<T>(string key, out T value)
+        public bool TryGetValue<TValue>(string key, out TValue value)
         {
             value = default;
             if (key != null && TryGetRaw(key, out object raw))
             {
                 object expanded = GetValue(raw);
-                return _typeConverter.TryConvert(expanded, out value);
+                return TypeHelper.TryConvert(expanded, out value);
             }
             return false;
         }
@@ -112,7 +109,7 @@ namespace Statiq.Common.Meta
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
         public IMetadata GetMetadata(params string[] keys) =>
-            new Metadata(_typeConverter, this.Where(x => keys.Contains(x.Key, StringComparer.OrdinalIgnoreCase)));
+            new Metadata(this.Where(x => keys.Contains(x.Key, StringComparer.OrdinalIgnoreCase)));
 
         /// <summary>
         /// This resolves the metadata value by recursively expanding IMetadataValue.

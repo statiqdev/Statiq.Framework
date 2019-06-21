@@ -20,11 +20,11 @@ namespace Statiq.Common.Meta
         /// <summary>
         /// Tries to get the value for the specified key.
         /// </summary>
-        /// <typeparam name="T">The desired return type.</typeparam>
+        /// <typeparam name="TValue">The desired return type.</typeparam>
         /// <param name="key">The key of the value to get. If the key is <c>null</c>, this will return the default value.</param>
         /// <param name="value">The value of the key if it was found and could be converted to the desired return type.</param>
         /// <returns><c>true</c> if the key was found and the value could be converted to the desired return type, <c>false</c> otherwise.</returns>
-        bool TryGetValue<T>(string key, out T value);
+        bool TryGetValue<TValue>(string key, out TValue value);
 
         /// <summary>
         /// Gets a new <see cref="IMetadata"/> containing only the specified keys and their values. If a key is not present in the current

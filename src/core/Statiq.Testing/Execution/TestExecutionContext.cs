@@ -31,6 +31,11 @@ namespace Statiq.Testing.Execution
     /// </summary>
     public class TestExecutionContext : IExecutionContext
     {
+        public TestExecutionContext()
+        {
+            DocumentFactory = new DocumentFactory(_settings);
+        }
+
         private readonly TestSettings _settings = new TestSettings();
 
         /// <inheritdoc/>
@@ -121,10 +126,6 @@ namespace Statiq.Testing.Execution
                 Content = new StringContent(string.Empty)
             };
 
-        public TestTypeConverter TypeConverter { get; } = new TestTypeConverter();
-
-        public bool TryConvert<T>(object value, out T result) => TypeConverter.TryConvert(value, out result);
-
         /// <inheritdoc/>
         public async Task<ImmutableArray<IDocument>> ExecuteAsync(IEnumerable<IModule> modules, IEnumerable<IDocument> inputs)
         {
@@ -184,6 +185,8 @@ namespace Statiq.Testing.Execution
             }
         }
 
+        public DocumentFactory DocumentFactory { get; }
+
         // IMetadata
 
         /// <inheritdoc/>
@@ -217,7 +220,7 @@ namespace Statiq.Testing.Execution
         public bool TryGetRaw(string key, out object value) => _settings.TryGetRaw(key, out value);
 
         /// <inheritdoc/>
-        public bool TryGetValue<T>(string key, out T value) => _settings.TryGetValue<T>(key, out value);
+        public bool TryGetValue<TValue>(string key, out TValue value) => _settings.TryGetValue<TValue>(key, out value);
 
         /// <inheritdoc />
         public bool TryGetValue(string key, out object value) => TryGetValue<object>(key, out value);

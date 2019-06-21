@@ -50,37 +50,23 @@ namespace Statiq.Testing.Meta
         public bool TryGetRaw(string key, out object value) => _dictionary.TryGetValue(key, out value);
 
         /// <inheritdoc />
-        public bool TryGetValue<T>(string key, out T value)
+        public bool TryGetValue<TValue>(string key, out TValue value)
         {
             if (key == null)
             {
                 throw new ArgumentNullException(nameof(key));
             }
-            value = default(T);
+            value = default;
             if (!_dictionary.TryGetValue(key, out object rawValue))
             {
                 return false;
             }
             rawValue = GetValue(rawValue);
-
-            // Check if there's a test-specific conversion
-            if (TypeConverter.TypeConversions.TryGetValue((rawValue?.GetType() ?? typeof(object), typeof(T)), out Func<object, object> typeConversion))
-            {
-                value = (T)typeConversion(rawValue);
-            }
-            else
-            {
-                // Default conversion is just to cast
-                value = (T)rawValue;
-            }
-
-            return true;
+            return TypeHelper.TryConvert(rawValue, out value);
         }
 
         /// <inheritdoc />
         public bool TryGetValue(string key, out object value) => TryGetValue<object>(key, out value);
-
-        public TestTypeConverter TypeConverter { get; } = new TestTypeConverter();
 
         /// <inhertdoc />
         public IMetadata GetMetadata(params string[] keys) => new TestMetadata(keys.Where(ContainsKey).ToDictionary(x => x, x => this[x]));

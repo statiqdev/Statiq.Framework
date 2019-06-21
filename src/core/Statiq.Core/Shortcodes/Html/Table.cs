@@ -76,7 +76,6 @@ namespace Statiq.Core.Shortcodes.Html
         public async Task<IDocument> ExecuteAsync(KeyValuePair<string, string>[] args, string content, IDocument document, IExecutionContext context)
         {
             ConvertingDictionary dictionary = args.ToDictionary(
-                context,
                 "Class",
                 "HeaderRows",
                 "FooterRows",

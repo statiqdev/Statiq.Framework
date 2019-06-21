@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Statiq.Common.Documents;
 using Statiq.Common.Execution;
+using Statiq.Common.Meta;
 
 namespace Statiq.Common.Configuration
 {
@@ -27,7 +28,7 @@ namespace Statiq.Common.Configuration
             }
 
             object value = await config.GetAndTransformValueAsync(document, context);
-            if (!context.TryConvert(value, out TValue result))
+            if (!TypeHelper.TryConvert(value, out TValue result))
             {
                 throw new InvalidOperationException(
                     $"Could not convert from type {value?.GetType().Name ?? "null"} to type {typeof(TValue).Name}{Config.GetErrorDetails(errorDetails)}");
@@ -46,7 +47,7 @@ namespace Statiq.Common.Configuration
             }
 
             object value = await config.GetAndTransformValueAsync(document, context);
-            return context.TryConvert(value, out TValue result) ? result : default;
+            return TypeHelper.TryConvert(value, out TValue result) ? result : default;
         }
 
         public static DocumentConfig<bool> CombineWith(this DocumentConfig<bool> first, DocumentConfig<bool> second)

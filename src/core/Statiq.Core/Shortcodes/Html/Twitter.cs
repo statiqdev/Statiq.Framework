@@ -29,7 +29,6 @@ namespace Statiq.Core.Shortcodes.Html
         public override async Task<IDocument> ExecuteAsync(KeyValuePair<string, string>[] args, string content, IDocument document, IExecutionContext context)
         {
             ConvertingDictionary arguments = args.ToDictionary(
-                context,
                 "Id",
                 "HideMedia",
                 "HideThread",

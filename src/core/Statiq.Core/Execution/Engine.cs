@@ -50,8 +50,6 @@ namespace Statiq.Core.Execution
         private readonly PipelineCollection _pipelines = new PipelineCollection();
         private readonly DiagnosticsTraceListener _diagnosticsTraceListener = new DiagnosticsTraceListener();
 
-        private IDocumentFactory _documentFactory;
-
         // Gets initialized on first execute
         private PipelinePhase[] _phases;
 
@@ -63,7 +61,7 @@ namespace Statiq.Core.Execution
         public Engine()
         {
             System.Diagnostics.Trace.Listeners.Add(_diagnosticsTraceListener);
-            _documentFactory = new DocumentFactory(this);
+            DocumentFactory = new DocumentFactory(_settings);
         }
 
         /// <inheritdoc />
@@ -94,11 +92,7 @@ namespace Statiq.Core.Execution
         public string ApplicationInput { get; set; }
 
         /// <inheritdoc />
-        public IDocumentFactory DocumentFactory
-        {
-            get => _documentFactory;
-            set => _documentFactory = value ?? throw new ArgumentNullException(nameof(DocumentFactory));
-        }
+        public DocumentFactory DocumentFactory { get; }
 
         /// <summary>
         /// Deletes the output path and all files it contains.
@@ -152,8 +146,6 @@ namespace Statiq.Core.Execution
             JsEngineSwitcher.Current.EngineFactories.Clear();
             JsEngineSwitcher.Current.DefaultEngineName = string.Empty;
         }
-
-        public bool TryConvert<T>(object value, out T result) => TypeHelper.TryConvert(value, out result);
 
         /// <summary>
         /// Executes the engine. This is the primary method that kicks off generation.

@@ -16,25 +16,23 @@ namespace Statiq.Common.Meta
     /// </remarks>
     public class ConvertingDictionary : IMetadataDictionary
     {
-        private readonly IExecutionContext _context;
-
         private readonly Dictionary<string, object> _dictionary;
 
-        public ConvertingDictionary(IExecutionContext context)
+        public ConvertingDictionary()
         {
-            _context = context ?? throw new ArgumentNullException(nameof(context));
             _dictionary = new Dictionary<string, object>(StringComparer.OrdinalIgnoreCase);
         }
 
-        public ConvertingDictionary(IExecutionContext context, IDictionary<string, object> dictionary)
+        public ConvertingDictionary(IDictionary<string, object> dictionary)
         {
-            _context = context ?? throw new ArgumentNullException(nameof(context));
             _dictionary = new Dictionary<string, object>(dictionary, StringComparer.OrdinalIgnoreCase);
         }
 
-        public ConvertingDictionary(IExecutionContext context, IEnumerable<KeyValuePair<string, object>> items)
-            : this(context)
+        public ConvertingDictionary(IEnumerable<KeyValuePair<string, object>> items)
         {
+            _dictionary = new Dictionary<string, object>(StringComparer.OrdinalIgnoreCase);
+
+            // Copy over in case there are duplicate keys
             foreach (KeyValuePair<string, object> item in items)
             {
                 _dictionary[item.Key] = item.Value;
@@ -116,7 +114,7 @@ namespace Statiq.Common.Meta
             ((IDictionary<string, object>)_dictionary).Remove(item);
 
         /// <inheritdoc />
-        public bool TryGetValue<T>(string key, out T value)
+        public bool TryGetValue<TValue>(string key, out TValue value)
         {
             value = default;
             if (!_dictionary.TryGetValue(key, out object rawValue))
@@ -124,7 +122,7 @@ namespace Statiq.Common.Meta
                 return false;
             }
             rawValue = GetValue(rawValue);
-            return _context.TryConvert(rawValue, out value);
+            return TypeHelper.TryConvert(rawValue, out value);
         }
 
         /// <inheritdoc />

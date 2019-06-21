@@ -77,7 +77,6 @@ l=m nop
             {
                 // Given
                 TestExecutionContext context = new TestExecutionContext();
-                context.TypeConverter.AddTypeConversion<string, int>(x => int.Parse(x));
                 TestDocument document = new TestDocument();
                 string content = @"
 1 2 ""3 4""

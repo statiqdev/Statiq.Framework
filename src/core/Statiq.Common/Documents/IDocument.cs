@@ -11,24 +11,12 @@ namespace Statiq.Common.Documents
     /// <summary>
     /// Contains content and metadata for each item as it propagates through the pipeline.
     /// </summary>
-    /// <remarks>
-    /// Documents are immutable so you must call one of the <c>GetDocument</c> methods of <see cref="IDocumentFactory"/>
-    /// to create a new document. Implements <see cref="IMetadata"/> and all metadata calls are passed through
-    /// to the document's internal <see cref="IMetadata"/> instance (exposed via the <see cref="Metadata"/>
-    /// property). Note that the result of both the <see cref="GetStringAsync"/> and the <see cref="GetStreamAsync"/>
-    /// methods are guaranteed not to be null.
-    /// </remarks>
     public interface IDocument : IMetadata
     {
         /// <summary>
         /// An identifier that is generated when the document is created and stays the same after cloning.
         /// </summary>
         string Id { get; }
-
-        /// <summary>
-        /// A document version that gets incremented on every clone operation. Starts at 0.
-        /// </summary>
-        int Version { get; }
 
         /// <summary>Gets the metadata associated with this document without any global settings or properties.</summary>
         IMetadata Metadata { get; }

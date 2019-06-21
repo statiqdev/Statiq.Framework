@@ -68,6 +68,9 @@ namespace Statiq.Core.Execution
         public string ApplicationInput => Engine.ApplicationInput;
 
         /// <inheritdoc/>
+        public DocumentFactory DocumentFactory => Engine.DocumentFactory;
+
+        /// <inheritdoc/>
         public IMemoryStreamFactory MemoryStreamFactory => Engine.MemoryStreamFactory;
 
         public ExecutionContext(Engine engine, Guid executionId, PipelinePhase pipelinePhase, IServiceProvider services)
@@ -90,9 +93,6 @@ namespace Statiq.Core.Execution
         }
 
         internal ExecutionContext Clone(IModule module) => new ExecutionContext(this, module);
-
-        /// <inheritdoc/>
-        public bool TryConvert<T>(object value, out T result) => Engine.TryConvert(value, out result);
 
         /// <inheritdoc/>
         public HttpClient CreateHttpClient() => CreateHttpClient(_httpMessageHandler);
@@ -121,14 +121,6 @@ namespace Statiq.Core.Execution
             Stream memoryStream = MemoryStreamFactory.GetStream(content);
             return new ContentStream(new Common.Content.StreamContent(MemoryStreamFactory, memoryStream), memoryStream, false);
         }
-
-        /// <inheritdoc/>
-        public IDocument GetDocument(
-            FilePath source,
-            FilePath destination,
-            IEnumerable<KeyValuePair<string, object>> items,
-            IContentProvider contentProvider = null) =>
-            Engine.DocumentFactory.GetDocument(this, source, destination, items, contentProvider);
 
         /// <inheritdoc/>
         public async Task<ImmutableArray<IDocument>> ExecuteAsync(IEnumerable<IModule> modules, IEnumerable<IDocument> inputs) =>
@@ -178,7 +170,7 @@ namespace Statiq.Core.Execution
         public bool TryGetValue(string key, out object value) => TryGetValue<object>(key, out value);
 
         /// <inheritdoc/>
-        public bool TryGetValue<T>(string key, out T value) => Settings.TryGetValue<T>(key, out value);
+        public bool TryGetValue<TValue>(string key, out TValue value) => Settings.TryGetValue(key, out value);
 
         /// <inheritdoc/>
         public IMetadata GetMetadata(params string[] keys) => Settings.GetMetadata(keys);

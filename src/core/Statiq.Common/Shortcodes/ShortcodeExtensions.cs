@@ -64,12 +64,11 @@ namespace Statiq.Common.Shortcodes
         /// parameter follows named parameters and exception will be thrown.
         /// </summary>
         /// <param name="args">The original shortcode arguments.</param>
-        /// <param name="context">The current execution context.</param>
         /// <param name="keys">The parameter names in expected order.</param>
         /// <returns>A dictionary containing the parameters and their values.</returns>
-        public static ConvertingDictionary ToDictionary(this KeyValuePair<string, string>[] args, IExecutionContext context, params string[] keys)
+        public static ConvertingDictionary ToDictionary(this KeyValuePair<string, string>[] args, params string[] keys)
         {
-            ConvertingDictionary dictionary = new ConvertingDictionary(context);
+            ConvertingDictionary dictionary = new ConvertingDictionary();
 
             bool nullKeyAllowed = true;
             for (int c = 0; c < args.Length; c++)

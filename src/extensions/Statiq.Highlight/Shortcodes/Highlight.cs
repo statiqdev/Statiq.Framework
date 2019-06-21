@@ -48,7 +48,6 @@ namespace Statiq.Highlight.Shortcodes
         public async Task<IDocument> ExecuteAsync(KeyValuePair<string, string>[] args, string content, IDocument document, IExecutionContext context)
         {
             ConvertingDictionary dictionary = args.ToDictionary(
-                context,
                 "Language",
                 "Element",
                 "HighlightJsFile");

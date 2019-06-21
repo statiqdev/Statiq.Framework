@@ -1,122 +1,116 @@
 ﻿using System;
 using System.Collections;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
-using Statiq.Common.Configuration;
 using Statiq.Common.Content;
-using Statiq.Common.Execution;
 using Statiq.Common.IO;
 using Statiq.Common.Meta;
-using Statiq.Common.Tracing;
 using Statiq.Common.Util;
 
 namespace Statiq.Common.Documents
 {
     /// <summary>
-    /// A base class for custom document types.
+    /// A special type of <see cref="IDocument"/> that wraps an underlying
+    /// object, providing the object properties as metadata.
     /// </summary>
     /// <remarks>
-    /// Document implementations will consolidate metadata
-    /// from explicit metadata, implementation properties,
-    /// and finally default metadata (usually the engine
-    /// settings).
+    /// Note that unlike <see cref="Document"/> and other <see cref="Document{TDocument}"/>
+    /// derived documents, settings are not "bubbled up" through the document metadata.
     /// </remarks>
-    /// <typeparam name="TDocument">
-    /// The type of this document class (for example, declare
-    /// the base class of your custom document type as
-    /// <c>public class MyDoc : Document&lt;MyDoc&gt;</c>.
-    /// </typeparam>
-    public abstract class Document<TDocument> : FactoryDocument, IDocument
-        where TDocument : Document<TDocument>, new()
+    /// <typeparam name="T">The type of underlying object.</typeparam>
+    public class ObjectDocument<T> : IDocument
     {
-        private IMetadata _baseMetadata;
+        /// <inheritdoc />
+        public string Id { get; }
+
+        /// <summary>
+        /// The underlying object.
+        /// </summary>
+        public T Object { get; }
 
         /// <inheritdoc />
-        public string Id { get; private set; } = Guid.NewGuid().ToString();
+        public FilePath Source { get; }
 
         /// <inheritdoc />
-        public FilePath Source { get; private set; }
+        public FilePath Destination { get; }
 
         /// <inheritdoc />
-        public FilePath Destination { get; private set; }
+        public IMetadata Metadata { get; }
 
         /// <inheritdoc />
-        public IMetadata Metadata { get; private set; }
+        public IContentProvider ContentProvider { get; }
 
-        /// <inheritdoc />
-        public IContentProvider ContentProvider { get; private set; }
-
-        protected Document()
-            : this(null, null, null, null, null)
+        public ObjectDocument(T obj)
+            : this(obj, null, null, null, null)
         {
         }
 
-        protected Document(
+        public ObjectDocument(
+            T obj,
             FilePath destination,
             IEnumerable<KeyValuePair<string, object>> items,
             IContentProvider contentProvider = null)
-            : this(null, null, destination, items, contentProvider)
+            : this(obj, null, destination, items, contentProvider)
         {
         }
 
-        protected Document(
+        public ObjectDocument(
+            T obj,
             FilePath source,
             FilePath destination,
             IContentProvider contentProvider = null)
-            : this(null, source, destination, null, contentProvider)
+            : this(obj, source, destination, null, contentProvider)
         {
         }
 
-        protected Document(
+        public ObjectDocument(
+            T obj,
             FilePath destination,
             IContentProvider contentProvider = null)
-            : this(null, null, destination, null, contentProvider)
+            : this(obj, null, destination, null, contentProvider)
         {
         }
 
-        protected Document(
+        public ObjectDocument(
+            T obj,
             IEnumerable<KeyValuePair<string, object>> items,
             IContentProvider contentProvider = null)
-            : this(null, null, null, items, contentProvider)
+            : this(obj, null, null, items, contentProvider)
         {
         }
 
-        protected Document(IContentProvider contentProvider)
-            : this(null, null, null, null, contentProvider)
+        public ObjectDocument(
+            T obj,
+            IContentProvider contentProvider)
+            : this(obj, null, null, null, contentProvider)
         {
         }
 
-        protected Document(
-            FilePath source,
-            FilePath destination,
-            IEnumerable<KeyValuePair<string, object>> items,
-            IContentProvider contentProvider = null)
-            : this(null, source, destination, items, contentProvider)
-        {
-        }
-
-        protected Document(
-            IMetadata baseMetadata,
+        public ObjectDocument(
+            T obj,
             FilePath source,
             FilePath destination,
             IEnumerable<KeyValuePair<string, object>> items,
             IContentProvider contentProvider = null)
+            : this(Guid.NewGuid().ToString(), obj, source, destination, items, contentProvider)
         {
-            Initialize(baseMetadata, source, destination, new Metadata(items), contentProvider);
         }
 
-        internal override IDocument Initialize(
-            IMetadata baseMetadata,
+        private ObjectDocument(
+            string id,
+            T obj,
             FilePath source,
             FilePath destination,
-            IMetadata metadata,
+            IEnumerable<KeyValuePair<string, object>> items,
             IContentProvider contentProvider)
         {
+            if (obj == null)
+            {
+                throw new ArgumentNullException(nameof(obj));
+            }
             if (source?.IsAbsolute == false)
             {
                 throw new ArgumentException("Document sources must be absolute", nameof(source));
@@ -126,35 +120,28 @@ namespace Statiq.Common.Documents
                 throw new ArgumentException("Document destinations must be relative to the output path", nameof(source));
             }
 
-            _baseMetadata = baseMetadata;
+            Id = id;
+            Object = obj;
             Source = source;
             Destination = destination;
-            Metadata = metadata;
+            Metadata = new Metadata(items);
 
             // Special case to set the content provider to null when cloning
             ContentProvider = contentProvider is NullContent ? null : contentProvider;
-
-            return this;
         }
 
-        /// <inheritdoc />
         public IDocument Clone(
             FilePath source,
             FilePath destination,
             IEnumerable<KeyValuePair<string, object>> items,
-            IContentProvider contentProvider)
-        {
-            TDocument document = Clone();
-            document.Id = Id;  // Make sure it's got the same ID in case implementation overrode Clone()
-            return document.Initialize(
-                _baseMetadata,
+            IContentProvider contentProvider) =>
+            new ObjectDocument<T>(
+                Id,
+                Object,
                 Source ?? source,
                 destination ?? Destination,
                 items == null ? Metadata : new Metadata(Metadata, items),
                 contentProvider ?? ContentProvider);
-        }
-
-        protected virtual TDocument Clone() => (TDocument)MemberwiseClone();
 
         /// <inheritdoc />
         public async Task<string> GetStringAsync()
@@ -201,9 +188,7 @@ namespace Statiq.Common.Documents
         // IMetadata
 
         public bool ContainsKey(string key) =>
-            Metadata.ContainsKey(key)
-            || PropertyMetadata<TDocument>.For((TDocument)this).ContainsKey(key)
-            || (_baseMetadata?.ContainsKey(key) ?? false);
+            Metadata.ContainsKey(key) || PropertyMetadata<T>.For(Object).ContainsKey(key);
 
         public object this[string key]
         {
@@ -222,14 +207,10 @@ namespace Statiq.Common.Documents
         public IEnumerable<object> Values => this.Select(x => x.Value);
 
         public bool TryGetRaw(string key, out object value) =>
-            Metadata.TryGetRaw(key, out value)
-            || PropertyMetadata<TDocument>.For((TDocument)this).TryGetRaw(key, out value)
-            || (_baseMetadata?.TryGetRaw(key, out value) ?? false);
+            Metadata.TryGetRaw(key, out value) || PropertyMetadata<T>.For(Object).TryGetRaw(key, out value);
 
         public bool TryGetValue<TValue>(string key, out TValue value) =>
-            Metadata.TryGetValue(key, out value)
-            || PropertyMetadata<TDocument>.For((TDocument)this).TryGetValue(key, out value)
-            || (_baseMetadata?.TryGetValue(key, out value) ?? false);
+            Metadata.TryGetValue(key, out value) || PropertyMetadata<T>.For(Object).TryGetValue(key, out value);
 
         public bool TryGetValue(string key, out object value) => TryGetValue<object>(key, out value);
 
@@ -243,9 +224,7 @@ namespace Statiq.Common.Documents
         public IEnumerator<KeyValuePair<string, object>> GetEnumerator()
         {
             HashSet<string> keys = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-            foreach (KeyValuePair<string, object> item in Metadata
-                .Concat(PropertyMetadata<TDocument>.For((TDocument)this))
-                .Concat((IEnumerable<KeyValuePair<string, object>>)_baseMetadata ?? Array.Empty<KeyValuePair<string, object>>()))
+            foreach (KeyValuePair<string, object> item in Metadata.Concat(PropertyMetadata<T>.For(Object)))
             {
                 if (keys.Add(item.Key))
                 {

@@ -3,14 +3,9 @@ using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
-using System.Text;
-using System.Threading.Tasks;
-using Statiq.Common.Configuration;
 using Statiq.Common.Content;
-using Statiq.Common.Execution;
 using Statiq.Common.IO;
 using Statiq.Common.Meta;
-using Statiq.Common.Util;
 
 namespace Statiq.Common.Documents
 {
@@ -23,31 +18,62 @@ namespace Statiq.Common.Documents
     /// </remarks>
     public sealed class Document : Document<Document>
     {
+        public Document()
+        {
+        }
+
         public Document(
-            IEngine engine,
+            FilePath destination,
+            IEnumerable<KeyValuePair<string, object>> items,
+            IContentProvider contentProvider = null)
+            : base(destination, items, contentProvider)
+        {
+        }
+
+        public Document(
+            FilePath source,
+            FilePath destination,
+            IContentProvider contentProvider = null)
+            : base(source, destination, contentProvider)
+        {
+        }
+
+        public Document(
+            FilePath destination,
+            IContentProvider contentProvider = null)
+            : base(destination, contentProvider)
+        {
+        }
+
+        public Document(
+            IEnumerable<KeyValuePair<string, object>> items,
+            IContentProvider contentProvider = null)
+            : base(items, contentProvider)
+        {
+        }
+
+        public Document(IContentProvider contentProvider)
+            : base(contentProvider)
+        {
+        }
+
+        public Document(
             FilePath source,
             FilePath destination,
             IEnumerable<KeyValuePair<string, object>> items,
             IContentProvider contentProvider = null)
-            : base(engine, source, destination, items, contentProvider)
+            : base(source, destination, items, contentProvider)
         {
         }
 
-        private Document(
-            Document sourceDocument,
+        public Document(
+            IMetadata baseMetadata,
             FilePath source,
             FilePath destination,
             IEnumerable<KeyValuePair<string, object>> items,
             IContentProvider contentProvider = null)
-            : base(sourceDocument, source, destination, items, contentProvider)
+            : base(baseMetadata, source, destination, items, contentProvider)
         {
         }
-
-        public override Document Clone(
-            FilePath source,
-            FilePath destination,
-            IEnumerable<KeyValuePair<string, object>> items,
-            IContentProvider contentProvider = null) =>
-            new Document(this, source, destination, items, contentProvider);
     }
 }

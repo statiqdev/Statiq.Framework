@@ -14,6 +14,11 @@ namespace Statiq.Testing.Execution
 {
     public class TestEngine : IEngine
     {
+        public TestEngine()
+        {
+            DocumentFactory = new DocumentFactory(_settings);
+        }
+
         private readonly TestSettings _settings = new TestSettings();
 
         public ISettings Settings => _settings;
@@ -32,10 +37,6 @@ namespace Statiq.Testing.Execution
 
         public IRawAssemblyCollection DynamicAssemblies => throw new NotImplementedException();
 
-        public IDocumentFactory DocumentFactory { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
-
-        public TestTypeConverter TypeConverter { get; } = new TestTypeConverter();
-
-        public bool TryConvert<T>(object value, out T result) => TypeConverter.TryConvert(value, out result);
+        public DocumentFactory DocumentFactory { get; }
     }
 }

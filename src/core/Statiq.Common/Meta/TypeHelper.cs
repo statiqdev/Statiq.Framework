@@ -4,19 +4,29 @@ using System.Collections.Generic;
 using System.Linq;
 using Statiq.Common.Execution;
 
-namespace Statiq.Core.Meta
+namespace Statiq.Common.Meta
 {
     public static class TypeHelper
     {
-        private class DefaultTypeConverter : ITypeConverter
-        {
-            public bool TryConvert<T>(object value, out T result) => TypeHelper.TryConvert(value, out result);
-        }
+        /// <summary>
+        /// Converts the provided value to the specified type. This method never throws an exception.
+        /// It will return default(T) if the value cannot be converted to T.
+        /// </summary>
+        /// <typeparam name="T">The desired return type.</typeparam>
+        /// <param name="value">The value to convert.</param>
+        /// <returns>The value converted to type T or default(T) if the value cannot be converted to type T.</returns>
+        public static T Convert<T>(object value) => Convert<T>(value, null);
 
         /// <summary>
-        /// Provides a singleton default <see cref="ITypeConverter"/>.
+        /// Converts the provided value to the specified type. This method never throws an exception.
+        /// It will return the specified default value if the value cannot be converted to T.
         /// </summary>
-        public static ITypeConverter TypeConverter { get; } = new DefaultTypeConverter();
+        /// <typeparam name="T">The desired return type.</typeparam>
+        /// <param name="value">The value to convert.</param>
+        /// <param name="defaultValueFactory">A factory to get a default value if the value cannot be converted to type T.</param>
+        /// <returns>The value converted to type T or the specified default value if the value cannot be converted to type T.</returns>
+        public static T Convert<T>(object value, Func<T> defaultValueFactory) =>
+            TryConvert(value, out T result) ? result : (defaultValueFactory == null ? default : defaultValueFactory());
 
         public static bool TryConvert<T>(object value, out T result)
         {

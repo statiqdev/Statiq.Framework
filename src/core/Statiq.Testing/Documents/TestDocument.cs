@@ -306,7 +306,7 @@ namespace Statiq.Testing.Documents
         public bool TryGetRaw(string key, out object value) => _metadata.TryGetRaw(key, out value);
 
         /// <inhertdoc />
-        public bool TryGetValue<T>(string key, out T value) => _metadata.TryGetValue<T>(key, out value);
+        public bool TryGetValue<TValue>(string key, out TValue value) => _metadata.TryGetValue<TValue>(key, out value);
 
         /// <inheritdoc />
         public bool TryGetValue(string key, out object value) => TryGetValue<object>(key, out value);
@@ -381,7 +381,5 @@ namespace Statiq.Testing.Documents
 
         /// <inhertdoc />
         public int Count => _metadata.Count;
-
-        public TestTypeConverter TypeConverter => _metadata.TypeConverter;
     }
 }

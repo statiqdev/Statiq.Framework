@@ -2,10 +2,10 @@
 using System.Collections;
 using System.Collections.Generic;
 using NUnit.Framework;
-using Statiq.Core.Meta;
+using Statiq.Common.Meta;
 using Statiq.Testing;
 
-namespace Statiq.Core.Tests.Meta
+namespace Statiq.Common.Tests.Meta
 {
     [TestFixture]
     [Parallelizable(ParallelScope.Self | ParallelScope.Children)]
