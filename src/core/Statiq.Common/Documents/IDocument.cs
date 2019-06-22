@@ -16,10 +16,7 @@ namespace Statiq.Common.Documents
         /// <summary>
         /// An identifier that is generated when the document is created and stays the same after cloning.
         /// </summary>
-        string Id { get; }
-
-        /// <summary>Gets the metadata associated with this document without any global settings or properties.</summary>
-        IMetadata Metadata { get; }
+        Guid Id { get; }
 
         /// <summary>
         /// An identifier for the document meant to reflect the source of the data. These should be unique (such as a file name).

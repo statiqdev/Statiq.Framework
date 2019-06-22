@@ -16,8 +16,8 @@ namespace Statiq.Testing.Documents
     public class TestDocument : Document<TestDocument>
     {
         public TestDocument()
-            : this(null, null, null, null, null)
         {
+            Metadata = new TestMetadata();
         }
 
         public TestDocument(IContentProvider contentProvider)
@@ -41,12 +41,12 @@ namespace Statiq.Testing.Documents
         }
 
         public TestDocument(IMetadata baseMetadata, FilePath source, FilePath destination, IEnumerable<KeyValuePair<string, object>> items, IContentProvider contentProvider = null)
-            : this(baseMetadata, source, destination, new TestMetadata(items), contentProvider)
+            : this(baseMetadata, source, destination, items == null ? null : new TestMetadata(items), contentProvider)
         {
         }
 
         public TestDocument(IMetadata baseMetadata, FilePath source, FilePath destination, IMetadata metadata, IContentProvider contentProvider = null)
-            : base(baseMetadata, source, destination, new TestMetadata(metadata), contentProvider)
+            : base(baseMetadata, source, destination, metadata is TestMetadata ? metadata : new TestMetadata(metadata), contentProvider)
         {
             // All constructors lead here
         }
@@ -150,13 +150,22 @@ namespace Statiq.Testing.Documents
         private static FilePath GetSourcePath(FilePath path) =>
             path == null ? null : path.IsAbsolute ? path : new DirectoryPath("/input").CombineFile(path);
 
-        private static FilePath GetDestinationPath(FilePath path) =>
-            path == null ? null : path.IsAbsolute ? path.FullPath.StartsWith("/input") ? new FilePath(path.FullPath.Substring(6)) : null : path;
+        private static FilePath GetDestinationPath(FilePath path)
+        {
+            if (path?.IsRelative != false)
+            {
+                return path;
+            }
+            path = new DirectoryPath("/input").GetRelativePath(path);
+            return path.IsRelative ? path : null;
+        }
 
         // Test helpers
 
+        [PropertyMetadata(null)]
         public string Content => GetStringAsync().Result;
 
+        [PropertyMetadata(null)]
         public TestMetadata TestMetadata => (TestMetadata)Metadata;
 
         public void Add(KeyValuePair<string, object> item) => TestMetadata.Add(item);

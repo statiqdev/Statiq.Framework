@@ -27,7 +27,7 @@ namespace Statiq.Html
     /// </remarks>
     /// <metadata cref="HtmlKeys.Headings" usage="Output"/>
     /// <metadata cref="HtmlKeys.Level" usage="Output"/>
-    /// <metadata cref="HtmlKeys.Id" usage="Output"/>
+    /// <metadata cref="HtmlKeys.HeadingId" usage="Output"/>
     /// <metadata cref="Keys.Children" usage="Output">
     /// The child heading documents of the current heading document.
     /// </metadata>
@@ -41,7 +41,7 @@ namespace Statiq.Html
         private bool _nesting;
         private string _metadataKey = HtmlKeys.Headings;
         private string _levelKey = HtmlKeys.Level;
-        private string _idKey = HtmlKeys.Id;
+        private string _idKey = HtmlKeys.HeadingId;
         private string _childrenKey = Keys.Children;
         private string _parentKey = Keys.Parent;
         private string _headingKey;

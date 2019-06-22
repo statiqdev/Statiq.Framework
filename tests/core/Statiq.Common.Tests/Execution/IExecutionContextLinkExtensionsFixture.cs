@@ -45,12 +45,6 @@ namespace Statiq.Common.Tests.Execution
 
             [TestCase("foo/bar.txt", false, "/foo/bar.txt")]
             [TestCase("foo/bar.txt", true, "http://domain.com/foo/bar.txt")]
-            [TestCase("/foo/bar.txt", false, "/foo/bar.txt")]
-            [TestCase("/foo/bar.txt", true, "http://domain.com/foo/bar.txt")]
-            [TestCase("//foo/bar.txt", false, "/foo/bar.txt")]
-            [TestCase("//foo/bar.txt", true, "http://domain.com/foo/bar.txt")]
-            [WindowsTestCase("C:/foo/bar.txt", false, "/C:/foo/bar.txt")]
-            [WindowsTestCase("C:/foo/bar.txt", true, "http://domain.com/C:/foo/bar.txt")]
             public void GetsLinkFromDestination(string destination, bool includeHost, string expected)
             {
                 // Given

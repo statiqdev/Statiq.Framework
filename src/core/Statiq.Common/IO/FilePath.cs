@@ -189,6 +189,24 @@ namespace Statiq.Common.IO
         }
 
         /// <summary>
+        /// Gets path to this file relative to the output directory in the current file system.
+        /// If this path is not relative to the output directory, then the file name is returned.
+        /// </summary>
+        /// <param name="context">The current execution context.</param>
+        /// <returns>A path to this file relative to it's containing input directory in the current file system.</returns>
+        public FilePath GetRelativeOutputPath(IExecutionContext context)
+        {
+            if (IsRelative)
+            {
+                return this;
+            }
+
+            return Directory.Segments.StartsWith(context.FileSystem.OutputPath.Segments)
+                ? context.FileSystem.OutputPath.GetRelativePath(this)
+                : FileName;
+        }
+
+        /// <summary>
         /// Performs an implicit conversion from <see cref="string"/> to <see cref="FilePath"/>.
         /// </summary>
         /// <param name="path">The path.</param>

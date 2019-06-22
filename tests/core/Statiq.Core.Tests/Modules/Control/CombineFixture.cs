@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using NUnit.Framework;
+using Shouldly;
 using Statiq.Common;
 using Statiq.Common.Documents;
 using Statiq.Common.Execution;
@@ -54,13 +55,12 @@ namespace Statiq.Core.Tests.Modules.Control
                 IReadOnlyList<TestDocument> results = await ExecuteAsync(new[] { a, b }, combine);
 
                 // Then
-                CollectionAssert.AreEquivalent(
-                    new Dictionary<string, object>
+                new Dictionary<string, object>
                 {
                     { "a", 1 },
                     { "b", 3 },
                     { "c", 4 }
-                }, Iterate(results.First().GetEnumerator()));
+                }.ShouldBeSubsetOf(results[0]);
             }
         }
 

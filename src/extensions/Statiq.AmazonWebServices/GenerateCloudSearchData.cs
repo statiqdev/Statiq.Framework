@@ -91,7 +91,7 @@ namespace Statiq.AmazonWebServices
                         writer.WriteValue("add");
 
                         writer.WritePropertyName("id");
-                        writer.WriteValue(_idMetaKey != null ? doc.String(_idMetaKey) : doc.Id);
+                        writer.WriteValue(_idMetaKey != null ? doc.String(_idMetaKey) : doc.Id.ToString());
 
                         writer.WritePropertyName("fields");
                         writer.WriteStartObject();

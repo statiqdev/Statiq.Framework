@@ -404,26 +404,23 @@ namespace Statiq.Html.Tests
                     .GetAttributeValues();
 
                 // When
-                IReadOnlyList<TestDocument> results = await ExecuteAsync(document, query);
+                List<IOrderedEnumerable<KeyValuePair<string, object>>> results = (await ExecuteAsync(document, query))
+                    .Select(x => x.OrderBy(y => y.Key, StringComparer.OrdinalIgnoreCase))
+                    .ToList();
 
                 // Then
-                results
-                    .Select(x => x.OrderBy(y => y.Key, StringComparer.OrdinalIgnoreCase))
-                    .Cast<IEnumerable<KeyValuePair<string, object>>>()
-                    .ShouldBe(new[]
-                    {
-                        new List<KeyValuePair<string, object>>
-                        {
-                            new KeyValuePair<string, object>("a", "A"),
-                            new KeyValuePair<string, object>("b", "B"),
-                            new KeyValuePair<string, object>("foo", "bar")
-                        },
-                        new List<KeyValuePair<string, object>>
-                        {
-                            new KeyValuePair<string, object>("foo", "baz"),
-                            new KeyValuePair<string, object>("x", "X")
-                        }
-                    });
+                results.Count.ShouldBe(2);
+                new[]
+                {
+                    new KeyValuePair<string, object>("a", "A"),
+                    new KeyValuePair<string, object>("b", "B"),
+                    new KeyValuePair<string, object>("foo", "bar")
+                }.ShouldBeSubsetOf(results[0]);
+                new[]
+                {
+                    new KeyValuePair<string, object>("foo", "baz"),
+                    new KeyValuePair<string, object>("x", "X")
+                }.ShouldBeSubsetOf(results[1]);
             }
 
             [Test]
@@ -445,32 +442,29 @@ namespace Statiq.Html.Tests
                     .GetAll();
 
                 // When
-                IReadOnlyList<TestDocument> results = await ExecuteAsync(document, query);
+                List<IOrderedEnumerable<KeyValuePair<string, object>>> results = (await ExecuteAsync(document, query))
+                    .Select(x => x.OrderBy(y => y.Key, StringComparer.OrdinalIgnoreCase))
+                    .ToList();
 
                 // Then
-                results
-                    .Select(x => x.OrderBy(y => y.Key, StringComparer.OrdinalIgnoreCase))
-                    .Cast<IEnumerable<KeyValuePair<string, object>>>()
-                    .ShouldBe(new[]
-                    {
-                        new List<KeyValuePair<string, object>>
-                        {
-                            new KeyValuePair<string, object>("a", "A"),
-                            new KeyValuePair<string, object>("b", "B"),
-                            new KeyValuePair<string, object>("foo", "bar"),
-                            new KeyValuePair<string, object>("InnerHtml", "This is some <b>Foobar</b> text"),
-                            new KeyValuePair<string, object>("OuterHtml", @"<p foo=""bar"" a=""A"" b=""B"">This is some <b>Foobar</b> text</p>"),
-                            new KeyValuePair<string, object>("TextContent", "This is some Foobar text")
-                        },
-                        new List<KeyValuePair<string, object>>
-                        {
-                            new KeyValuePair<string, object>("foo", "baz"),
-                            new KeyValuePair<string, object>("InnerHtml", "This is some other text"),
-                            new KeyValuePair<string, object>("OuterHtml", @"<p foo=""baz"" x=""X"">This is some other text</p>"),
-                            new KeyValuePair<string, object>("TextContent", "This is some other text"),
-                            new KeyValuePair<string, object>("x", "X")
-                        }
-                    });
+                results.Count.ShouldBe(2);
+                new[]
+                {
+                    new KeyValuePair<string, object>("a", "A"),
+                    new KeyValuePair<string, object>("b", "B"),
+                    new KeyValuePair<string, object>("foo", "bar"),
+                    new KeyValuePair<string, object>("InnerHtml", "This is some <b>Foobar</b> text"),
+                    new KeyValuePair<string, object>("OuterHtml", @"<p foo=""bar"" a=""A"" b=""B"">This is some <b>Foobar</b> text</p>"),
+                    new KeyValuePair<string, object>("TextContent", "This is some Foobar text")
+                }.ShouldBeSubsetOf(results[0]);
+                new[]
+                {
+                    new KeyValuePair<string, object>("foo", "baz"),
+                    new KeyValuePair<string, object>("InnerHtml", "This is some other text"),
+                    new KeyValuePair<string, object>("OuterHtml", @"<p foo=""baz"" x=""X"">This is some other text</p>"),
+                    new KeyValuePair<string, object>("TextContent", "This is some other text"),
+                    new KeyValuePair<string, object>("x", "X")
+                }.ShouldBeSubsetOf(results[1]);
             }
         }
     }

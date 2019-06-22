@@ -29,7 +29,7 @@ namespace Statiq.Yaml.Tests
                 TestDocument result = await ExecuteAsync(document, yaml).SingleAsync();
 
                 // Then
-                result.Keys.ShouldBe(new[] { "MyYaml" }, true);
+                result.Keys.ShouldBe(new[] { "MyYaml", "Id", "Source", "Destination", "ContentProvider", "HasContent" }, true);
             }
 
             [Test]
@@ -47,7 +47,7 @@ C: Yes
                 TestDocument result = await ExecuteAsync(document, yaml).SingleAsync();
 
                 // Then
-                result.Keys.ShouldBe(new[] { "MyYaml" }, true);
+                result.Keys.ShouldBe(new[] { "MyYaml", "Id", "Source", "Destination", "ContentProvider", "HasContent" }, true);
                 result["MyYaml"].ShouldBeOfType<DynamicYaml>();
                 ((int)((dynamic)result["MyYaml"]).A).ShouldBe(1);
                 ((bool)((dynamic)result["MyYaml"]).B).ShouldBe(true);
@@ -69,7 +69,7 @@ C: Yes
                 TestDocument result = await ExecuteAsync(document, yaml).SingleAsync();
 
                 // Then
-                result.Keys.ShouldBe(new[] { "A", "B", "C" }, true);
+                result.Keys.ShouldBe(new[] { "A", "B", "C", "Id", "Source", "Destination", "ContentProvider", "HasContent" }, true);
                 result["A"].ShouldBe("1");
                 result["B"].ShouldBe("true");
                 result["C"].ShouldBe("Yes");
@@ -90,7 +90,7 @@ C: Yes
                 TestDocument result = await ExecuteAsync(document, yaml).SingleAsync();
 
                 // Then
-                result.Keys.ShouldBe(new[] { "MyYaml", "A", "B", "C" }, true);
+                result.Keys.ShouldBe(new[] { "MyYaml", "A", "B", "C", "Id", "Source", "Destination", "ContentProvider", "HasContent" }, true);
                 result["MyYaml"].ShouldBeOfType<DynamicYaml>();
                 ((int)((dynamic)result["MyYaml"]).A).ShouldBe(1);
                 ((bool)((dynamic)result["MyYaml"]).B).ShouldBe(true);
@@ -112,7 +112,7 @@ C: Yes
                 TestDocument result = await ExecuteAsync(document, yaml).SingleAsync();
 
                 // Then
-                result.Keys.ShouldBeEmpty();
+                result.Keys.ShouldBe(new[] { "Id", "Source", "Destination", "ContentProvider", "HasContent" }, true);
             }
 
             [Test]
@@ -147,14 +147,14 @@ C:
                 TestDocument result = await ExecuteAsync(document, yaml).SingleAsync();
 
                 // Then
-                result.Keys.ShouldBe(new[] { "C" }, true);
+                result.Keys.ShouldBe(new[] { "C", "Id", "Source", "Destination", "ContentProvider", "HasContent" }, true);
                 result["C"].ShouldBeOfType<IDocument[]>();
                 IDocument[] subDocuments = (IDocument[])result["C"];
                 subDocuments.Length.ShouldBe(2);
-                subDocuments[0].Keys.ShouldBe(new[] { "X", "Y" }, true);
+                subDocuments[0].Keys.ShouldBe(new[] { "X", "Y", "Id", "Source", "Destination", "ContentProvider", "HasContent" }, true);
                 subDocuments[0]["X"].ShouldBe("1");
                 subDocuments[0]["Y"].ShouldBe("2");
-                subDocuments[1].Keys.ShouldBe(new[] { "X", "Z" }, true);
+                subDocuments[1].Keys.ShouldBe(new[] { "X", "Z", "Id", "Source", "Destination", "ContentProvider", "HasContent" }, true);
                 subDocuments[1]["X"].ShouldBe("4");
                 subDocuments[1]["Z"].ShouldBe("5");
             }

@@ -41,7 +41,7 @@
         /// if the heading contains one.
         /// </summary>
         /// <type><see cref="string"/></type>
-        public const string Id = nameof(Id);
+        public const string HeadingId = nameof(HeadingId);
 
         /// <summary>
         /// The level of the heading of the current heading document.

@@ -396,7 +396,7 @@ namespace Statiq.Razor.Tests
                     StringCompareShould.IgnoreLineEndings);
             }
 
-            private TestDocument GetDocument(string source, string content) => new TestDocument(new FilePath(source), content);
+            private TestDocument GetDocument(string source, string content) => new TestDocument(new FilePath(source), (FilePath)null, content);
 
             private TestExecutionContext GetExecutionContext(Engine engine)
             {

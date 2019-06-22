@@ -144,7 +144,7 @@ namespace Statiq.Core.Tests.Modules.Metadata
                 const string input = "myfile.html";
                 const string output = "myfile.html";
 
-                TestDocument document = new TestDocument
+                TestDocument document = new TestDocument()
                 {
                     new MetadataItem("MyKey", input)
                 };

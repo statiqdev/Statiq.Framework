@@ -22,12 +22,9 @@ namespace Statiq.Core.Tests.Modules.IO
         public class ExecuteTests : SetDestinationFixture
         {
             [TestCase(Keys.DestinationPath, "OtherFolder/foo.bar", "OtherFolder/foo.bar")]
-            [TestCase(Keys.DestinationPath, "/OtherFolder/foo.bar", "/OtherFolder/foo.bar")]
             [TestCase(Keys.DestinationFileName, "foo.bar", "Subfolder/foo.bar")]
             [TestCase(Keys.DestinationFileName, "fizz/foo.bar", "Subfolder/fizz/foo.bar")]
             [TestCase(Keys.DestinationFileName, "../fizz/foo.bar", "fizz/foo.bar")]
-            [TestCase(Keys.DestinationFileName, "/foo.bar", "/foo.bar")]
-            [TestCase(Keys.DestinationFileName, "/fizz/foo.bar", "/fizz/foo.bar")]
             [TestCase(Keys.DestinationExtension, "foo", "Subfolder/write-test.foo")]
             [TestCase(Keys.DestinationExtension, ".foo", "Subfolder/write-test.foo")]
             public async Task SetsDestinationFromMetadata(string key, string value, string expected)
@@ -47,12 +44,9 @@ namespace Statiq.Core.Tests.Modules.IO
             }
 
             [TestCase(Keys.DestinationPath, "OtherFolder/foo.bar", "OtherFolder/foo.bar")]
-            [TestCase(Keys.DestinationPath, "/OtherFolder/foo.bar", "/OtherFolder/foo.bar")]
             [TestCase(Keys.DestinationFileName, "foo.bar", "foo.bar")]
             [TestCase(Keys.DestinationFileName, "fizz/foo.bar", "fizz/foo.bar")]
             [TestCase(Keys.DestinationFileName, "../fizz/foo.bar", "../fizz/foo.bar")]
-            [TestCase(Keys.DestinationFileName, "/foo.bar", "/foo.bar")]
-            [TestCase(Keys.DestinationFileName, "/fizz/foo.bar", "/fizz/foo.bar")]
             [TestCase(Keys.DestinationExtension, "foo", null)]
             [TestCase(Keys.DestinationExtension, ".foo", null)]
             public async Task SetsDestinationFromMetadataWhenNullDestination(string key, string value, string expected)
@@ -87,12 +81,9 @@ namespace Statiq.Core.Tests.Modules.IO
             }
 
             [TestCase(Keys.DestinationPath, "OtherFolder/foo.bar", "OtherFolder/foo.bar")]
-            [TestCase(Keys.DestinationPath, "/OtherFolder/foo.bar", "/OtherFolder/foo.bar")]
             [TestCase(Keys.DestinationFileName, "foo.bar", "Subfolder/foo.bar")]
             [TestCase(Keys.DestinationFileName, "fizz/foo.bar", "Subfolder/fizz/foo.bar")]
             [TestCase(Keys.DestinationFileName, "../fizz/foo.bar", "fizz/foo.bar")]
-            [TestCase(Keys.DestinationFileName, "/foo.bar", "/foo.bar")]
-            [TestCase(Keys.DestinationFileName, "/fizz/foo.bar", "/fizz/foo.bar")]
             [TestCase(Keys.DestinationExtension, "foo", "Subfolder/write-test.foo")]
             [TestCase(Keys.DestinationExtension, ".foo", "Subfolder/write-test.foo")]
             public async Task SetsDestinationFromMetadataOverridesExtension(string key, string value, string expected)

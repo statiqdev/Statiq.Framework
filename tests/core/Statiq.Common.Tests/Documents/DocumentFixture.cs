@@ -79,35 +79,6 @@ namespace Statiq.Common.Tests.Documents
         public class MetadataTests : DocumentFixture
         {
             [Test]
-            public void ReturnsMetadataWithoutSettings()
-            {
-                // Given
-                MetadataItems settings = new MetadataItems
-                {
-                    { "A", "a" }
-                };
-                Document document = new Document(new Metadata(settings), null, null, null, null);
-                IDocument cloned = document.Clone(
-                    new MetadataItems { { "B", "b" } });
-
-                // When
-                string initialA = document.String("A");
-                string initialB = document.String("B");
-                string clonedA = cloned.String("A");
-                string clonedB = cloned.String("B");
-                string onlyMetadataA = cloned.Metadata.String("A");
-                string onlyMetadataB = cloned.Metadata.String("B");
-
-                // Then
-                Assert.AreEqual("a", initialA);
-                Assert.IsNull(initialB);
-                Assert.AreEqual("a", clonedA);
-                Assert.AreEqual("b", clonedB);
-                Assert.IsNull(onlyMetadataA);
-                Assert.AreEqual("b", onlyMetadataB);
-            }
-
-            [Test]
             public void MetadataOverwritesSettings()
             {
                 // Given
@@ -121,12 +92,10 @@ namespace Statiq.Common.Tests.Documents
                 // When
                 string initialValue = document.String("A");
                 string clonedValue = cloned.String("A");
-                string onlyMetadataValue = cloned.Metadata.String("A");
 
                 // Then
                 initialValue.ShouldBe("a");
                 clonedValue.ShouldBe("b");
-                onlyMetadataValue.ShouldBe("b");
             }
 
             [Test]
@@ -141,15 +110,21 @@ namespace Statiq.Common.Tests.Documents
 
                 // When
                 string initialValue = document.String("Foo");
-                string initialOnlyMetadataValue = document.Metadata.String("Foo");
                 string clonedValue = cloned.String("Foo");
-                string onlyMetadataValue = cloned.Metadata.String("Foo");
 
                 // Then
                 initialValue.ShouldBe("abc");
-                initialOnlyMetadataValue.ShouldBeNull();
                 clonedValue.ShouldBe("xyz");
-                onlyMetadataValue.ShouldBe("xyz");
+            }
+
+            [Test]
+            public void IncludesBaseDocumentProperties()
+            {
+                // Given, When
+                Document document = new Document();
+
+                // Then
+                document.Keys.ShouldBe(new[] { "Id", "Source", "Destination", "ContentProvider", "HasContent" }, true);
             }
         }
 

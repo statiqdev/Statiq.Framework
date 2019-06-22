@@ -90,7 +90,7 @@ namespace Statiq.Core.Modules.Metadata
                 .ParallelSelectAsync(context, async input =>
                 {
                     // Check if there's already a title set
-                    if (_keepExisting && input.Metadata.ContainsKey(_key))
+                    if (_keepExisting && input.ContainsKey(_key))
                     {
                         return input;
                     }

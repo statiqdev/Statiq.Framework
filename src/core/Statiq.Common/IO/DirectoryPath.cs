@@ -107,8 +107,7 @@ namespace Statiq.Common.IO
         public DirectoryPath GetRelativePath(DirectoryPath target) => RelativePathResolver.Resolve(this, target);
 
         /// <summary>
-        /// Get the relative path to another file. If this path and the target path
-        /// do not share the same file provider, the target path is returned.
+        /// Get the relative path to another file.
         /// </summary>
         /// <param name="target">The target file path.</param>
         /// <returns>A <see cref="FilePath"/>.</returns>

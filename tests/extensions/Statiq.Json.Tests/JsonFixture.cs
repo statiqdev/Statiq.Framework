@@ -41,7 +41,7 @@ namespace Statiq.Json.Tests
                 TestDocument result = await ExecuteAsync(document, json).SingleAsync();
 
                 // Then
-                result.Count.ShouldBe(1);
+                result.Count.ShouldBe(6); // Includes property metadata
                 result["MyJson"].ShouldBeOfType<ExpandoObject>();
                 ((string)((dynamic)result["MyJson"]).Email).ShouldBe("james@example.com");
                 ((bool)((dynamic)result["MyJson"]).Active).ShouldBeTrue();
@@ -60,7 +60,7 @@ namespace Statiq.Json.Tests
                 TestDocument result = await ExecuteAsync(document, json).SingleAsync();
 
                 // Then
-                result.Count.ShouldBe(4);
+                result.Count.ShouldBe(9); // Includes property metadata
                 ((string)result["Email"]).ShouldBe("james@example.com");
                 ((bool)result["Active"]).ShouldBeTrue();
                 ((DateTime)result["CreatedDate"]).ShouldBe(new DateTime(2013, 1, 20, 0, 0, 0, DateTimeKind.Utc));

@@ -23,8 +23,10 @@ namespace Statiq.Common.Documents
     /// <typeparam name="T">The type of underlying object.</typeparam>
     public class ObjectDocument<T> : IDocument
     {
+        private readonly IMetadata _metadata;
+
         /// <inheritdoc />
-        public string Id { get; }
+        public Guid Id { get; }
 
         /// <summary>
         /// The underlying object.
@@ -36,9 +38,6 @@ namespace Statiq.Common.Documents
 
         /// <inheritdoc />
         public FilePath Destination { get; }
-
-        /// <inheritdoc />
-        public IMetadata Metadata { get; }
 
         /// <inheritdoc />
         public IContentProvider ContentProvider { get; }
@@ -95,7 +94,7 @@ namespace Statiq.Common.Documents
             FilePath destination,
             IEnumerable<KeyValuePair<string, object>> items,
             IContentProvider contentProvider = null)
-            : this(Guid.NewGuid().ToString(), obj, source, destination, new Metadata(items), contentProvider)
+            : this(Guid.NewGuid(), obj, source, destination, new Metadata(items), contentProvider)
         {
         }
 
@@ -105,12 +104,12 @@ namespace Statiq.Common.Documents
             FilePath destination,
             IMetadata metadata,
             IContentProvider contentProvider = null)
-            : this(Guid.NewGuid().ToString(), obj, source, destination, metadata, contentProvider)
+            : this(Guid.NewGuid(), obj, source, destination, metadata, contentProvider)
         {
         }
 
         private ObjectDocument(
-            string id,
+            Guid id,
             T obj,
             FilePath source,
             FilePath destination,
@@ -134,7 +133,7 @@ namespace Statiq.Common.Documents
             Object = obj;
             Source = source;
             Destination = destination;
-            Metadata = metadata ?? new Metadata();
+            _metadata = metadata ?? new Metadata();
 
             // Special case to set the content provider to null when cloning
             ContentProvider = contentProvider is NullContent ? null : contentProvider;
@@ -150,7 +149,7 @@ namespace Statiq.Common.Documents
                 Object,
                 Source ?? source,
                 destination ?? Destination,
-                items == null ? Metadata : new Metadata(Metadata, items),
+                items == null ? _metadata : new Metadata(_metadata, items),
                 contentProvider ?? ContentProvider);
 
         /// <inheritdoc />
@@ -198,7 +197,7 @@ namespace Statiq.Common.Documents
         // IMetadata
 
         public bool ContainsKey(string key) =>
-            Metadata.ContainsKey(key) || PropertyMetadata<T>.For(Object).ContainsKey(key);
+            _metadata.ContainsKey(key) || PropertyMetadata<T>.For(Object).ContainsKey(key);
 
         public object this[string key]
         {
@@ -217,10 +216,10 @@ namespace Statiq.Common.Documents
         public IEnumerable<object> Values => this.Select(x => x.Value);
 
         public bool TryGetRaw(string key, out object value) =>
-            Metadata.TryGetRaw(key, out value) || PropertyMetadata<T>.For(Object).TryGetRaw(key, out value);
+            _metadata.TryGetRaw(key, out value) || PropertyMetadata<T>.For(Object).TryGetRaw(key, out value);
 
         public bool TryGetValue<TValue>(string key, out TValue value) =>
-            Metadata.TryGetValue(key, out value) || PropertyMetadata<T>.For(Object).TryGetValue(key, out value);
+            _metadata.TryGetValue(key, out value) || PropertyMetadata<T>.For(Object).TryGetValue(key, out value);
 
         public bool TryGetValue(string key, out object value) => TryGetValue<object>(key, out value);
 
@@ -234,7 +233,7 @@ namespace Statiq.Common.Documents
         public IEnumerator<KeyValuePair<string, object>> GetEnumerator()
         {
             HashSet<string> keys = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-            foreach (KeyValuePair<string, object> item in Metadata.Concat(PropertyMetadata<T>.For(Object)))
+            foreach (KeyValuePair<string, object> item in _metadata.Concat(PropertyMetadata<T>.For(Object)))
             {
                 if (keys.Add(item.Key))
                 {

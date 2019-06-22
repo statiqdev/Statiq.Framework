@@ -212,7 +212,7 @@ namespace Statiq.Html.Tests
                 TestDocument result = await ExecuteAsync(document, headings).SingleAsync();
 
                 // Then
-                result.DocumentList(HtmlKeys.Headings).Select(x => x.String(HtmlKeys.Id)).ShouldBe(new[] { null, "bar" });
+                result.DocumentList(HtmlKeys.Headings).Select(x => x.String(HtmlKeys.HeadingId)).ShouldBe(new[] { null, "bar" });
             }
         }
     }
