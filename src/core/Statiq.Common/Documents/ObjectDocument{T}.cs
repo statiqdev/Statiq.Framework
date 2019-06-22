@@ -95,7 +95,17 @@ namespace Statiq.Common.Documents
             FilePath destination,
             IEnumerable<KeyValuePair<string, object>> items,
             IContentProvider contentProvider = null)
-            : this(Guid.NewGuid().ToString(), obj, source, destination, items, contentProvider)
+            : this(Guid.NewGuid().ToString(), obj, source, destination, new Metadata(items), contentProvider)
+        {
+        }
+
+        public ObjectDocument(
+            T obj,
+            FilePath source,
+            FilePath destination,
+            IMetadata metadata,
+            IContentProvider contentProvider = null)
+            : this(Guid.NewGuid().ToString(), obj, source, destination, metadata, contentProvider)
         {
         }
 
@@ -104,7 +114,7 @@ namespace Statiq.Common.Documents
             T obj,
             FilePath source,
             FilePath destination,
-            IEnumerable<KeyValuePair<string, object>> items,
+            IMetadata metadata,
             IContentProvider contentProvider)
         {
             if (obj == null)
@@ -124,7 +134,7 @@ namespace Statiq.Common.Documents
             Object = obj;
             Source = source;
             Destination = destination;
-            Metadata = new Metadata(items);
+            Metadata = metadata ?? new Metadata();
 
             // Special case to set the content provider to null when cloning
             ContentProvider = contentProvider is NullContent ? null : contentProvider;

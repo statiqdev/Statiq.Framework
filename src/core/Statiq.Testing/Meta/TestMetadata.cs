@@ -19,6 +19,18 @@ namespace Statiq.Testing.Meta
             _dictionary = new Dictionary<string, object>(StringComparer.OrdinalIgnoreCase);
         }
 
+        public TestMetadata(IEnumerable<KeyValuePair<string, object>> items)
+        {
+            _dictionary = new Dictionary<string, object>(StringComparer.OrdinalIgnoreCase);
+            if (items != null)
+            {
+                foreach (KeyValuePair<string, object> item in items)
+                {
+                    _dictionary[item.Key] = item.Value;
+                }
+            }
+        }
+
         public TestMetadata(IDictionary<string, object> initialMetadata)
         {
             _dictionary = new Dictionary<string, object>(initialMetadata, StringComparer.OrdinalIgnoreCase);

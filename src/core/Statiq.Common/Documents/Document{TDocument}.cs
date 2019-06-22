@@ -106,8 +106,18 @@ namespace Statiq.Common.Documents
             FilePath destination,
             IEnumerable<KeyValuePair<string, object>> items,
             IContentProvider contentProvider = null)
+            : this(baseMetadata, source, destination, new Metadata(items), contentProvider)
         {
-            Initialize(baseMetadata, source, destination, new Metadata(items), contentProvider);
+        }
+
+        protected Document(
+            IMetadata baseMetadata,
+            FilePath source,
+            FilePath destination,
+            IMetadata metadata,
+            IContentProvider contentProvider = null)
+        {
+            Initialize(baseMetadata, source, destination, metadata, contentProvider);
         }
 
         internal override IDocument Initialize(
@@ -129,7 +139,7 @@ namespace Statiq.Common.Documents
             _baseMetadata = baseMetadata;
             Source = source;
             Destination = destination;
-            Metadata = metadata;
+            Metadata = metadata ?? new Metadata();
 
             // Special case to set the content provider to null when cloning
             ContentProvider = contentProvider is NullContent ? null : contentProvider;

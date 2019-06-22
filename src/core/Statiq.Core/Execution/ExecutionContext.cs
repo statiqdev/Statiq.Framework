@@ -17,7 +17,6 @@ using Statiq.Common.Shortcodes;
 using Statiq.Core.Content;
 using Statiq.Core.Documents;
 using Statiq.Core.JavaScript;
-using Statiq.Core.Meta;
 
 namespace Statiq.Core.Execution
 {

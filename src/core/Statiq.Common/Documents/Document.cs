@@ -75,5 +75,15 @@ namespace Statiq.Common.Documents
             : base(baseMetadata, source, destination, items, contentProvider)
         {
         }
+
+        public Document(
+            IMetadata baseMetadata,
+            FilePath source,
+            FilePath destination,
+            IMetadata metadata,
+            IContentProvider contentProvider = null)
+            : base(baseMetadata, source, destination, metadata, contentProvider)
+        {
+        }
     }
 }

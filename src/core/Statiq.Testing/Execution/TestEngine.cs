@@ -7,6 +7,7 @@ using Statiq.Common.Execution;
 using Statiq.Common.IO;
 using Statiq.Common.Shortcodes;
 using Statiq.Testing.Configuration;
+using Statiq.Testing.Documents;
 using Statiq.Testing.IO;
 using Statiq.Testing.Meta;
 
@@ -17,6 +18,7 @@ namespace Statiq.Testing.Execution
         public TestEngine()
         {
             DocumentFactory = new DocumentFactory(_settings);
+            DocumentFactory.SetDefaultDocumentType<TestDocument>();
         }
 
         private readonly TestSettings _settings = new TestSettings();

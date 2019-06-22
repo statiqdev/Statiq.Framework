@@ -7,6 +7,7 @@ using NUnit.Framework;
 using Shouldly;
 using Statiq.Common.Documents;
 using Statiq.Common.Execution;
+using Statiq.Common.IO;
 using Statiq.Testing;
 using Statiq.Testing.Documents;
 using Statiq.Testing.Execution;
@@ -92,12 +93,7 @@ namespace Statiq.Xmp.Tests
             }
 
             private IReadOnlyList<TestDocument> GetDocumentsFromSources(params string[] pathArray) =>
-                pathArray
-                    .Select(x => new TestDocument(File.OpenRead(x))
-                    {
-                        Source = x
-                    })
-                    .ToList();
+                pathArray.Select(x => new TestDocument(x, (FilePath)null, File.OpenRead(x))).ToList();
         }
     }
 }

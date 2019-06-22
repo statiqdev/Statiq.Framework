@@ -1,5 +1,5 @@
 ﻿using Statiq.Common.Configuration;
-using Statiq.Core.Meta;
+using Statiq.Common.Meta;
 
 namespace Statiq.Core.Configuration
 {

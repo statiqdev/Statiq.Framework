@@ -61,13 +61,10 @@ namespace Statiq.Core.Tests.Modules.Contents
         public async Task WarnsForAbsoluteRedirectFromPath()
         {
             // Given
-            TestDocument redirected = new TestDocument(new MetadataItems
+            TestDocument redirected = new TestDocument(new FilePath("/"), null, new MetadataItems
             {
                 { Keys.RedirectFrom, new List<FilePath> { new FilePath("/foo/bar") } }
-            })
-            {
-                Source = new FilePath("/")
-            };
+            });
             TestDocument notRedirected = new TestDocument();
             Redirect redirect = new Redirect();
             ThrowOnTraceEventType(null);

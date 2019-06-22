@@ -34,6 +34,7 @@ namespace Statiq.Testing.Execution
         public TestExecutionContext()
         {
             DocumentFactory = new DocumentFactory(_settings);
+            DocumentFactory.SetDefaultDocumentType<TestDocument>();
         }
 
         private readonly TestSettings _settings = new TestSettings();

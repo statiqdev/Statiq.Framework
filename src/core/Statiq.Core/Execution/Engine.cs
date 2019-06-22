@@ -17,7 +17,6 @@ using Statiq.Common.Tracing;
 using Statiq.Core.Configuration;
 using Statiq.Core.Documents;
 using Statiq.Core.IO;
-using Statiq.Core.Meta;
 using Statiq.Core.Shortcodes;
 using Statiq.Core.Tracing;
 using Statiq.Core.Util;

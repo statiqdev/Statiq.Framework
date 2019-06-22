@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using Statiq.Common.Meta;
 
-namespace Statiq.Core.Meta
+namespace Statiq.Common.Meta
 {
-    internal class MetadataDictionary : Metadata, IMetadataDictionary
+    public class MetadataDictionary : Metadata, IMetadataDictionary
     {
         // Ensure items is not null when calling the base ctor so the dictionary gets instantiated
         public MetadataDictionary(IEnumerable<KeyValuePair<string, object>> items = null)

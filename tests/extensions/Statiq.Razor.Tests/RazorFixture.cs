@@ -105,10 +105,7 @@ namespace Statiq.Razor.Tests
                 // Given
                 Engine engine = new Engine();
                 TestExecutionContext context = GetExecutionContext(engine);
-                TestDocument document = new TestDocument("<p>@Document.Source</p>")
-                {
-                    Source = new FilePath("/Temp/temp.txt")
-                };
+                TestDocument document = new TestDocument(new FilePath("/Temp/temp.txt"), (FilePath)null, "<p>@Document.Source</p>");
                 Razor razor = new Razor();
 
                 // When
