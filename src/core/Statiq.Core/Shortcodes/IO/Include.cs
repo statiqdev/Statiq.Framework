@@ -16,6 +16,22 @@ namespace Statiq.Core.Shortcodes.IO
     /// The raw content of the file will be rendered where the shortcode appears.
     /// If the file does not exist nothing will be rendered.
     /// </remarks>
+    /// <example>
+    /// <para>Example usage to show the contents of test-include.html in the output</para>
+    /// <para>
+    /// <code>
+    /// &lt;?# Include "test-include.html" /?&gt;
+    /// </code>
+    /// </para>
+    /// <para>
+    /// If the included file contains Markdown syntax, you can even include it before the Markdown engine runs with a slight syntax change:
+    /// </para>
+    /// <para>
+    /// <code>
+    /// &lt;?! Include "test-include.md" /?&gt;?
+    /// </code>
+    /// </para>
+    /// </example>
     /// <parameter>The path to the file to include.</parameter>
     public class Include : IShortcode
     {

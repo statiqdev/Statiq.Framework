@@ -97,10 +97,15 @@ namespace Statiq.Core.Execution
         public HttpClient CreateHttpClient() => CreateHttpClient(_httpMessageHandler);
 
         /// <inheritdoc/>
-        public HttpClient CreateHttpClient(HttpMessageHandler handler) => new HttpClient(handler, false)
+        public HttpClient CreateHttpClient(HttpMessageHandler handler)
         {
-            Timeout = TimeSpan.FromSeconds(60)
-        };
+            HttpClient client = new HttpClient(handler, false)
+            {
+                Timeout = TimeSpan.FromSeconds(60)
+            };
+            client.DefaultRequestHeaders.Add("User-Agent", "Statiq");
+            return client;
+        }
 
         /// <inheritdoc/>
         public async Task<Stream> GetContentStreamAsync(string content = null)
