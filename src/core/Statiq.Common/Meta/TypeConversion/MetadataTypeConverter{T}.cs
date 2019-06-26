@@ -2,9 +2,8 @@
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
-using TB.ComponentModel;
 
-namespace Statiq.Common.Meta
+namespace Statiq.Common.Meta.TypeConversion
 {
     internal class MetadataTypeConverter<T> : MetadataTypeConverter
     {
