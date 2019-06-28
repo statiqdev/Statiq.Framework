@@ -1,12 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using Statiq.Common;
 using Statiq.Common.Configuration;
+using Statiq.Common.Documents;
 using Statiq.Common.Execution;
 using Statiq.Common.IO;
 using Statiq.Common.Modules;
 using Statiq.Core.Execution;
+using Statiq.Core.Modules.Extensibility;
 using Statiq.Core.Modules.IO;
 
 namespace Statiq.App
@@ -168,6 +171,78 @@ namespace Statiq.App
         public PipelineBuilder AlwaysProcess(bool alwaysProcess = true)
         {
             _actions.Add(x => x.AlwaysProcess(alwaysProcess));
+            return this;
+        }
+
+        public PipelineBuilder WithInputDelegate(Action<IReadOnlyList<IDocument>, IExecutionContext> action)
+        {
+            _actions.Add(x => x.WithInputDelegate(action));
+            return this;
+        }
+
+        public PipelineBuilder WithInputDelegate(Func<IReadOnlyList<IDocument>, IExecutionContext, Task> func)
+        {
+            _actions.Add(x => x.WithInputDelegate(func));
+            return this;
+        }
+
+        public PipelineBuilder WithInputDelegate(Func<IReadOnlyList<IDocument>, IExecutionContext, Task<object>> func)
+        {
+            _actions.Add(x => x.WithInputDelegate(func));
+            return this;
+        }
+
+        public PipelineBuilder WithProcessDelegate(Action<IReadOnlyList<IDocument>, IExecutionContext> action)
+        {
+            _actions.Add(x => x.WithProcessDelegate(action));
+            return this;
+        }
+
+        public PipelineBuilder WithProcessDelegate(Func<IReadOnlyList<IDocument>, IExecutionContext, Task> func)
+        {
+            _actions.Add(x => x.WithProcessDelegate(func));
+            return this;
+        }
+
+        public PipelineBuilder WithProcessDelegate(Func<IReadOnlyList<IDocument>, IExecutionContext, Task<object>> func)
+        {
+            _actions.Add(x => x.WithProcessDelegate(func));
+            return this;
+        }
+
+        public PipelineBuilder WithTransformDelegate(Action<IReadOnlyList<IDocument>, IExecutionContext> action)
+        {
+            _actions.Add(x => x.WithTransformDelegate(action));
+            return this;
+        }
+
+        public PipelineBuilder WithTransformDelegate(Func<IReadOnlyList<IDocument>, IExecutionContext, Task> func)
+        {
+            _actions.Add(x => x.WithTransformDelegate(func));
+            return this;
+        }
+
+        public PipelineBuilder WithTransformDelegate(Func<IReadOnlyList<IDocument>, IExecutionContext, Task<object>> func)
+        {
+            _actions.Add(x => x.WithTransformDelegate(func));
+            return this;
+        }
+
+        public PipelineBuilder WithOutputDelegate(Action<IReadOnlyList<IDocument>, IExecutionContext> action)
+        {
+            _actions.Add(x => x.WithOutputDelegate(action));
+            return this;
+        }
+
+        public PipelineBuilder WithOutputDelegate(Func<IReadOnlyList<IDocument>, IExecutionContext, Task> func)
+        {
+            _actions.Add(x => x.WithOutputDelegate(func));
+            return this;
+        }
+
+        public PipelineBuilder WithOutputDelegate(Func<IReadOnlyList<IDocument>, IExecutionContext, Task<object>> func)
+        {
+            _actions.Add(x => x.WithOutputDelegate(func));
             return this;
         }
     }
