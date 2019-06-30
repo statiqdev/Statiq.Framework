@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using NUnit.Framework;
 using Statiq.Common.Configuration;
@@ -112,6 +113,7 @@ namespace Statiq.Core.Tests.Modules.Control
                 List<string> content = new List<string>();
                 IServiceProvider serviceProvider = new TestServiceProvider();
                 Engine engine = new Engine();
+                CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
                 Execute gatherData = new ExecuteDocument(
                     Config.FromDocument(async d =>
                     {
@@ -123,7 +125,7 @@ namespace Statiq.Core.Tests.Modules.Control
                 engine.Pipelines.Add(new TestPipeline(new Core.Modules.Control.Documents("Foo"), gatherData).WithDependencies("Foo", "Bar"));
 
                 // When
-                await engine.ExecuteAsync(serviceProvider);
+                await engine.ExecuteAsync(serviceProvider, cancellationTokenSource);
 
                 // Then
                 Assert.AreEqual(4, content.Count);
@@ -137,6 +139,7 @@ namespace Statiq.Core.Tests.Modules.Control
                 List<string> content = new List<string>();
                 IServiceProvider serviceProvider = new TestServiceProvider();
                 Engine engine = new Engine();
+                CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
                 Execute gatherData = new ExecuteDocument(
                     Config.FromDocument(async d =>
                     {
@@ -148,7 +151,7 @@ namespace Statiq.Core.Tests.Modules.Control
                 engine.Pipelines.Add(new TestPipeline(new Core.Modules.Control.Documents(), gatherData).WithDependencies("Foo", "Bar"));
 
                 // When
-                await engine.ExecuteAsync(serviceProvider);
+                await engine.ExecuteAsync(serviceProvider, cancellationTokenSource);
 
                 // Then
                 Assert.AreEqual(6, content.Count);
@@ -162,6 +165,7 @@ namespace Statiq.Core.Tests.Modules.Control
                 List<string> content = new List<string>();
                 IServiceProvider serviceProvider = new TestServiceProvider();
                 Engine engine = new Engine();
+                CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
                 Execute gatherData = new ExecuteDocument(
                     Config.FromDocument(async d =>
                     {
@@ -176,7 +180,7 @@ namespace Statiq.Core.Tests.Modules.Control
                         .WithDependencies("Foo", "Bar", "Baz"));
 
                 // When
-                await engine.ExecuteAsync(serviceProvider);
+                await engine.ExecuteAsync(serviceProvider, cancellationTokenSource);
 
                 // Then
                 Assert.AreEqual(6, content.Count);
@@ -190,6 +194,7 @@ namespace Statiq.Core.Tests.Modules.Control
                 List<string> content = new List<string>();
                 IServiceProvider serviceProvider = new TestServiceProvider();
                 Engine engine = new Engine();
+                CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
                 Execute gatherData = new ExecuteDocument(
                     Config.FromDocument(async d =>
                     {
@@ -204,7 +209,7 @@ namespace Statiq.Core.Tests.Modules.Control
                         .WithDependencies("Foo", "Bar", "Baz"));
 
                 // When
-                await engine.ExecuteAsync(serviceProvider);
+                await engine.ExecuteAsync(serviceProvider, cancellationTokenSource);
 
                 // Then
                 Assert.AreEqual(6, content.Count);
@@ -218,6 +223,7 @@ namespace Statiq.Core.Tests.Modules.Control
                 List<string> content = new List<string>();
                 IServiceProvider serviceProvider = new TestServiceProvider();
                 Engine engine = new Engine();
+                CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
                 Execute gatherData = new ExecuteDocument(
                     Config.FromDocument(async d =>
                     {
@@ -232,7 +238,7 @@ namespace Statiq.Core.Tests.Modules.Control
                         .WithDependencies("Foo", "Bar", "Baz"));
 
                 // When
-                await engine.ExecuteAsync(serviceProvider);
+                await engine.ExecuteAsync(serviceProvider, cancellationTokenSource);
 
                 // Then
                 Assert.AreEqual(6, content.Count);

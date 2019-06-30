@@ -7,6 +7,7 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using Statiq.Common.Configuration;
 using Statiq.Common.Content;
@@ -79,6 +80,8 @@ namespace Statiq.Testing.Execution
         IReadOnlyShortcodeCollection IExecutionContext.Shortcodes => Shortcodes;
 
         public IMemoryStreamFactory MemoryStreamFactory { get; set; } = new TestMemoryStreamFactory();
+
+        public CancellationToken CancellationToken { get; set; } = CancellationToken.None;
 
         /// <inheritdoc/>
         public Task<Stream> GetContentStreamAsync(string content = null) => Task.FromResult<Stream>(new TestContentStream(this, content));

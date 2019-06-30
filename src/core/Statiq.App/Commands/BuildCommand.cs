@@ -1,5 +1,6 @@
 ﻿using System;
 using System.ComponentModel;
+using System.Threading;
 using System.Threading.Tasks;
 using Spectre.Cli;
 using Statiq.Common.Configuration;
@@ -51,9 +52,10 @@ namespace Statiq.App.Commands
 
         public override async Task<int> ExecuteCommandAsync(CommandContext context, Settings settings)
         {
+            CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
             using (EngineManager engineManager = new EngineManager(_bootstrapper, settings))
             {
-                return await engineManager.ExecuteAsync(_serviceProvider)
+                return await engineManager.ExecuteAsync(_serviceProvider, cancellationTokenSource)
                     ? (int)ExitCode.Normal
                     : (int)ExitCode.ExecutionError;
             }

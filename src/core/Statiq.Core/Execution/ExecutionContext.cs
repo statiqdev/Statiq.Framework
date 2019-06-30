@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.IO;
 using System.Net.Http;
+using System.Threading;
 using System.Threading.Tasks;
 using Statiq.Common.Configuration;
 using Statiq.Common.Content;
@@ -72,13 +73,17 @@ namespace Statiq.Core.Execution
         /// <inheritdoc/>
         public IMemoryStreamFactory MemoryStreamFactory => Engine.MemoryStreamFactory;
 
-        public ExecutionContext(Engine engine, Guid executionId, PipelinePhase pipelinePhase, IServiceProvider services)
+        /// <inheritdoc/>
+        public CancellationToken CancellationToken { get; }
+
+        public ExecutionContext(Engine engine, Guid executionId, PipelinePhase pipelinePhase, IServiceProvider services, CancellationToken cancellationToken)
         {
             Engine = engine ?? throw new ArgumentNullException(nameof(engine));
             ExecutionId = executionId;
             _pipelinePhase = pipelinePhase ?? throw new ArgumentNullException(nameof(pipelinePhase));
             Services = services ?? throw new ArgumentNullException(nameof(services));
             Documents = new DocumentCollection(engine.Documents, pipelinePhase, engine.Pipelines);
+            CancellationToken = cancellationToken;
         }
 
         private ExecutionContext(ExecutionContext original, IModule module)
@@ -89,6 +94,7 @@ namespace Statiq.Core.Execution
             Services = original.Services;
             Documents = original.Documents;
             Module = module;
+            CancellationToken = original.CancellationToken;
         }
 
         internal ExecutionContext Clone(IModule module) => new ExecutionContext(this, module);

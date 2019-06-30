@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.IO;
 using System.Net.Http;
+using System.Threading;
 using System.Threading.Tasks;
 using Statiq.Common.Configuration;
 using Statiq.Common.Content;
@@ -91,6 +92,12 @@ namespace Statiq.Common.Execution
         /// The application input.
         /// </value>
         string ApplicationInput { get; }
+
+        /// <summary>
+        /// Gets a cancellation token that will be cancelled when processing should stop.
+        /// Modules should check this token and pass it on whenever possible.
+        /// </summary>
+        CancellationToken CancellationToken { get; }
 
         /// <summary>
         /// Creates a <see cref="HttpClient"/> instance that should be used for all HTTP communication.

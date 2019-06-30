@@ -48,7 +48,7 @@ namespace Statiq.Core.Tests.Documents
                 IDocument[] result = documentCollection.ToArray();
 
                 // Then
-                result.ShouldBe(new[] { a1, b1, b2 });
+                result.ShouldBe(new[] { a1, b1, b2 }, true);
             }
 
             [Test]
@@ -186,7 +186,7 @@ namespace Statiq.Core.Tests.Documents
                 IDocument[] result = documentCollection.ExceptPipeline("C").ToArray();
 
                 // Then
-                result.ShouldBe(new[] { a1, b1, b2 });
+                result.ShouldBe(new[] { a1, b1, b2 }, true);
             }
 
             [Test]

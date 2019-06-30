@@ -66,7 +66,8 @@ namespace Statiq.App.Commands
             using (EngineManager engineManager = new EngineManager(_bootstrapper, settings))
             {
                 // Execute the engine for the first time
-                if (!await engineManager.ExecuteAsync(_serviceProvider))
+                CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
+                if (!await engineManager.ExecuteAsync(_serviceProvider, cancellationTokenSource))
                 {
                     return (int)ExitCode.ExecutionError;
                 }
@@ -162,7 +163,8 @@ namespace Statiq.App.Commands
                         }
 
                         // If there was an execution error due to reload, keep previewing but clear the cache
-                        exitCode = await engineManager.ExecuteAsync(_serviceProvider)
+                        cancellationTokenSource = new CancellationTokenSource();
+                        exitCode = await engineManager.ExecuteAsync(_serviceProvider, cancellationTokenSource)
                             ? ExitCode.Normal
                             : ExitCode.ExecutionError;
 

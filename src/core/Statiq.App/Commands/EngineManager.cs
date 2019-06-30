@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Statiq.App.Configuration;
 using Statiq.Common.Configuration;
@@ -39,11 +40,11 @@ namespace Statiq.App.Commands
 
         public Engine Engine { get; }
 
-        public async Task<bool> ExecuteAsync(IServiceProvider serviceProvider)
+        public async Task<bool> ExecuteAsync(IServiceProvider serviceProvider, CancellationTokenSource cancellationTokenSource)
         {
             try
             {
-                await Engine.ExecuteAsync(serviceProvider);
+                await Engine.ExecuteAsync(serviceProvider, cancellationTokenSource);
             }
             catch (Exception ex)
             {
