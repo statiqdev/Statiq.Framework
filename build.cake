@@ -2,24 +2,19 @@
 // SIGNTOOL (to sign the executable)
 
 // The following environment variables need to be set for Publish target:
-// WYAM_NUGET_API_KEY
-// WYAM_GITHUB_TOKEN
-
-// The following environment variables need to be set for Publish-MyGet target:
-// MYGET_API_KEY
+// STATIQ_NUGET_API_KEY
+// STATIQ_GITHUB_TOKEN
 
 // Publishing workflow:
 // - Update ReleaseNotes.md and RELEASE in develop branch
 // - Run a normal build with Cake to set SolutionInfo.cs in the repo and run through unit tests (`build.cmd`)
 // - Push to develop and fast-forward merge to master
 // - Switch to master
-// - Wait for CI to complete build and publish to MyGet
-// - Run a local prerelease build of Wyam.Web to verify release (`build -Script "prerelease.cake"` from Wyam.Web folder)
+// - Wait for CI to complete build and publish to GitHub Package Repository
 // - Run a Publish build with Cake (`build -target Publish`)
 // - No need to add a version tag to the repo - added by GitHub on publish
 // - Switch back to develop branch
-// - Add a blog post to Wyam.Web about the release
-// - Run a build on Wyam.Web from CI to verify final release (first make sure NuGet Gallery has updated packages by searching for "wyam")
+// - Add a blog post about the release
 
 #addin "Cake.FileHelpers"
 #addin "Octokit"
@@ -69,7 +64,7 @@ var binDir = buildResultDir + Directory("bin");
 
 Setup(context =>
 {
-    Information("Building version {0} of Wyam.", semVersion);
+    Information("Building version {0} of Statiq.", semVersion);
 });
 
 //////////////////////////////////////////////////////////////////////
@@ -88,8 +83,8 @@ Task("Patch-Assembly-Info")
     {
         var file = "./SolutionInfo.cs";
         CreateAssemblyInfo(file, new AssemblyInfoSettings {
-            Product = "Wyam",
-            Copyright = "Copyright \xa9 Wyam Contributors",
+            Product = "Statiq",
+            Copyright = "Copyright \xa9 Statiq Contributors",
             Version = version,
             FileVersion = version,
             InformationalVersion = semVersion
@@ -100,7 +95,7 @@ Task("Restore-Packages")
     .IsDependentOn("Patch-Assembly-Info")
     .Does(() =>
     {
-        DotNetCoreRestore("./Wyam.sln", new DotNetCoreRestoreSettings
+        DotNetCoreRestore("./StatiqFramework.sln", new DotNetCoreRestoreSettings
         {
             MSBuildSettings = msBuildSettings
         });
@@ -110,7 +105,7 @@ Task("Build")
     .IsDependentOn("Restore-Packages")
     .Does(() =>
     {
-        DotNetCoreBuild("./Wyam.sln", new DotNetCoreBuildSettings
+        DotNetCoreBuild("./StatiqFramework.sln", new DotNetCoreBuildSettings
         {
             Configuration = configuration,
             NoRestore = true,
@@ -162,28 +157,48 @@ Task("Create-Packages")
                 });
         }
     });
+
+Task("EnsureNuGetSource")
+    .WithCriteria(() => isRunningOnBuildServer)
+    .Does(() =>
+    {
+        var githubToken = EnvironmentVariable("STATIQ_GITHUB_TOKEN");
+        if (string.IsNullOrEmpty(githubToken))
+        {
+            throw new InvalidOperationException("Could not resolve GitHub token.");
+        }
+
+        // Add the authenticated feed source (remove any existing ones first to reset the access token)
+        if(NuGetHasSource("https://nuget.pkg.github.com/statiqdev/index.json"))
+        {
+            NuGetRemoveSource(
+                "GitHubStatiq",
+                "https://nuget.pkg.github.com/statiqdev/index.json");
+        }
+        NuGetAddSource(
+            "GitHubStatiq",
+            "https://nuget.pkg.github.com/statiqdev/index.json",
+            new NuGetSourcesSettings
+            {
+                UserName = "daveaglick",
+                Password = githubToken
+            });
+    });
     
-Task("Publish-MyGet")
+Task("Publish-GitHubPackageRepo")
     .IsDependentOn("Create-Packages")
+    .IsDependentOn("EnsureNuGetSource")
     .WithCriteria(() => !isLocal)
     .WithCriteria(() => !isPullRequest)
     .WithCriteria(() => isRunningOnWindows)
-    .WithCriteria(() => branch == "develop" || branch == "vnext")
+    .WithCriteria(() => branch == "develop")
     .Does(() =>
     {
-        // Resolve the API key.
-        var apiKey = EnvironmentVariable("MYGET_API_KEY");
-        if (string.IsNullOrEmpty(apiKey))
-        {
-            throw new InvalidOperationException("Could not resolve MyGet API key.");
-        }
-
         foreach (var nupkg in GetFiles(nugetRoot.Path.FullPath + "/*.nupkg"))
         {
             NuGetPush(nupkg, new NuGetPushSettings 
             {
-                Source = "https://www.myget.org/F/wyam/api/v2/package",
-                ApiKey = apiKey,
+                Source = "https://nuget.pkg.github.com/statiqdev/index.json",
                 Timeout = TimeSpan.FromSeconds(600)
             });
         }
@@ -196,7 +211,7 @@ Task("Publish-Packages")
     // TODO: Add criteria that makes sure this is the master branch
     .Does(() =>
     {
-        var apiKey = EnvironmentVariable("WYAM_NUGET_API_KEY");
+        var apiKey = EnvironmentVariable("STATIQ_NUGET_API_KEY");
         if (string.IsNullOrEmpty(apiKey))
         {
             throw new InvalidOperationException("Could not resolve NuGet API key.");
@@ -219,21 +234,20 @@ Task("Publish-Release")
     // TODO: Add criteria that makes sure this is the master branch
     .Does(() =>
     {
-        var githubToken = EnvironmentVariable("WYAM_GITHUB_TOKEN");
+        var githubToken = EnvironmentVariable("STATIQ_GITHUB_TOKEN");
         if (string.IsNullOrEmpty(githubToken))
         {
-            throw new InvalidOperationException("Could not resolve Wyam GitHub token.");
+            throw new InvalidOperationException("Could not resolve GitHub token.");
         }
         
-        var github = new GitHubClient(new ProductHeaderValue("WyamCakeBuild"))
+        var github = new GitHubClient(new ProductHeaderValue("Cake"))
         {
             Credentials = new Credentials(githubToken)
         };
-        var release = github.Repository.Release.Create("Wyamio", "Wyam", new NewRelease("v" + semVersion) 
+        var release = github.Repository.Release.Create("statiqdev", "Framework", new NewRelease("v" + semVersion) 
         {
             Name = semVersion,
-            Body = string.Join(Environment.NewLine, releaseNotes.Notes) + Environment.NewLine + Environment.NewLine
-                + @"### Please see https://wyam.io/docs/usage/obtaining for important notes about downloading and installing.",
+            Body = string.Join(Environment.NewLine, releaseNotes.Notes),
             TargetCommitish = "master"
         }).Result;
     });
@@ -255,7 +269,7 @@ Task("Publish")
     
 Task("BuildServer")
     .IsDependentOn("Run-Unit-Tests")
-    .IsDependentOn("Publish-MyGet");
+    .IsDependentOn("Publish-GitHubPackageRepo");
 
 //////////////////////////////////////////////////////////////////////
 // EXECUTION
