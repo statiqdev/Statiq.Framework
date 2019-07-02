@@ -53,10 +53,9 @@ var msBuildSettings = new DotNetCoreMSBuildSettings()
     .WithProperty("AssemblyVersion", version)
     .WithProperty("FileVersion", version);
 
-var buildDir = Directory("./src/clients/Wyam/bin") + Directory(configuration);
-var buildResultDir = Directory("./build");
-var nugetRoot = buildResultDir + Directory("nuget");
-var binDir = buildResultDir + Directory("bin");
+var buildDir = Directory("./build");
+var nugetRoot = buildDir + Directory("nuget");
+var binDir = buildDir + Directory("bin");
 
 ///////////////////////////////////////////////////////////////////////////////
 // SETUP / TEARDOWN
@@ -74,7 +73,7 @@ Setup(context =>
 Task("Clean")
     .Does(() =>
     {
-        CleanDirectories(new DirectoryPath[] { buildDir, buildResultDir, binDir, nugetRoot });
+        CleanDirectories(new DirectoryPath[] { buildDir, binDir, nugetRoot });
     });
 
 Task("Patch-Assembly-Info")
@@ -158,7 +157,7 @@ Task("Create-Packages")
         }
     });
 
-Task("EnsureNuGetSource")
+Task("Ensure-NuGet-Source")
     .WithCriteria(() => isRunningOnBuildServer)
     .Does(() =>
     {
@@ -185,21 +184,27 @@ Task("EnsureNuGetSource")
             });
     });
     
-Task("Publish-GitHubPackageRepo")
+Task("Publish-GitHub-Packages")
     .IsDependentOn("Create-Packages")
-    .IsDependentOn("EnsureNuGetSource")
+    .IsDependentOn("Ensure-NuGet-Source")
     .WithCriteria(() => !isLocal)
     .WithCriteria(() => !isPullRequest)
     .WithCriteria(() => isRunningOnWindows)
     .WithCriteria(() => branch == "develop")
     .Does(() =>
     {
+        var githubToken = EnvironmentVariable("STATIQ_GITHUB_TOKEN");
+        if (string.IsNullOrEmpty(githubToken))
+        {
+            throw new InvalidOperationException("Could not resolve GitHub token.");
+        }
+
         foreach (var nupkg in GetFiles(nugetRoot.Path.FullPath + "/*.nupkg"))
         {
             NuGetPush(nupkg, new NuGetPushSettings 
             {
-                Source = "https://nuget.pkg.github.com/statiqdev/index.json",
-                Timeout = TimeSpan.FromSeconds(600)
+                ApiKey = githubToken,
+                Source = "https://nuget.pkg.github.com/statiqdev/index.json"
             });
         }
     });
@@ -269,7 +274,7 @@ Task("Publish")
     
 Task("BuildServer")
     .IsDependentOn("Run-Unit-Tests")
-    .IsDependentOn("Publish-GitHubPackageRepo");
+    .IsDependentOn("Publish-GitHub-Packages");
 
 //////////////////////////////////////////////////////////////////////
 // EXECUTION

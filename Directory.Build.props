@@ -13,7 +13,7 @@
     <Authors>Dave Glick, Other Awesome Contributors</Authors>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageIconUrl>https://statiq.dev/logo-square-64.png</PackageIconUrl>
-    <PackageProjectUrl>https://statiq.dev</PackageProjectUrl>
+    <PackageProjectUrl>https://github.com/statiqdev/Framework</PackageProjectUrl>
     <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
     <Copyright>Copyright © Statiq Contributors</Copyright>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
