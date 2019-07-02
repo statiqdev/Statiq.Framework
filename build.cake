@@ -204,8 +204,7 @@ Task("Publish-GitHub-Packages")
             NuGetPush(nupkg, new NuGetPushSettings 
             {
                 ApiKey = githubToken,
-                Source = "https://nuget.pkg.github.com/statiqdev/index.json",
-                Verbosity = NuGetVerbosity.Detailed
+                Source = "https://nuget.pkg.github.com/statiqdev/index.json"
             });
         }
     });

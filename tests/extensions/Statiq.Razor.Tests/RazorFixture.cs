@@ -137,7 +137,7 @@ namespace Statiq.Razor.Tests
                 // Given
                 Engine engine = new Engine();
                 TestExecutionContext context = GetExecutionContext(engine);
-                TestDocument document = GetDocument("C:/Temp/temp.txt", @"@model IList<int>
+                TestDocument document = GetDocument("/Temp/temp.txt", @"@model IList<int>
 <p>@Model.Count</p>");
                 IList<int> model = new[] { 1, 2, 3 };
                 Razor razor = new Razor().WithModel(Config.FromValue(model));
