@@ -159,6 +159,7 @@ Task("Create-Packages")
 
 Task("Ensure-NuGet-Source")
     .WithCriteria(() => isRunningOnBuildServer)
+    .WithCriteria(() => isRunningOnWindows)
     .Does(() =>
     {
         var githubToken = EnvironmentVariable("STATIQ_GITHUB_TOKEN");
