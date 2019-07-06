@@ -34,7 +34,7 @@ namespace Statiq.Core.Modules.Contents
     /// </remarks>
     /// <metadata cref="Keys.RedirectFrom" usage="Input" />
     /// <category>Content</category>
-    public class Redirect : IModule
+    public class GenerateRedirects : IModule
     {
         private readonly Dictionary<FilePath, Func<IDictionary<FilePath, string>, string>> _additionalOutputs =
             new Dictionary<FilePath, Func<IDictionary<FilePath, string>, string>>();
@@ -49,7 +49,7 @@ namespace Statiq.Core.Modules.Contents
         /// </summary>
         /// <param name="paths">A delegate that should return one or more <see cref="FilePath"/>.</param>
         /// <returns>The current module instance.</returns>
-        public Redirect WithPaths(DocumentConfig<IReadOnlyList<FilePath>> paths)
+        public GenerateRedirects WithPaths(DocumentConfig<IReadOnlyList<FilePath>> paths)
         {
             _paths = paths ?? throw new ArgumentNullException(nameof(paths));
             return this;
@@ -60,7 +60,7 @@ namespace Statiq.Core.Modules.Contents
         /// </summary>
         /// <param name="metaRefreshPages">If <c>true</c>, meta refresh pages are generated.</param>
         /// <returns>The current module instance.</returns>
-        public Redirect WithMetaRefreshPages(bool metaRefreshPages = true)
+        public GenerateRedirects WithMetaRefreshPages(bool metaRefreshPages = true)
         {
             _metaRefreshPages = metaRefreshPages;
             return this;
@@ -71,7 +71,7 @@ namespace Statiq.Core.Modules.Contents
         /// </summary>
         /// <param name="includeHost"><c>true</c> to include the host.</param>
         /// <returns>The current module instance.</returns>
-        public Redirect IncludeHost(bool includeHost = true)
+        public GenerateRedirects IncludeHost(bool includeHost = true)
         {
             _includeHost = includeHost;
             return this;
@@ -85,7 +85,7 @@ namespace Statiq.Core.Modules.Contents
         /// <param name="content">A delegate that takes a dictionary with keys equal to each redirected file
         /// and values equal to the destination URL. The delegate should return the content of the output file.</param>
         /// <returns>The current module instance.</returns>
-        public Redirect WithAdditionalOutput(FilePath path, Func<IDictionary<FilePath, string>, string> content)
+        public GenerateRedirects WithAdditionalOutput(FilePath path, Func<IDictionary<FilePath, string>, string> content)
         {
             if (path == null)
             {

@@ -15,7 +15,7 @@ namespace Statiq.Core.Modules.Contents
     /// template substitution.
     /// </remarks>
     /// <category>Content</category>
-    public class ReplaceIn : ContentModule
+    public class ReplaceWithContent : ContentModule
     {
         private readonly string _search;
         private bool _isRegex;
@@ -29,7 +29,7 @@ namespace Statiq.Core.Modules.Contents
         /// <param name="search">The string to search for.</param>
         /// <param name="content">A delegate that returns the content within which
         /// to search for the search string.</param>
-        public ReplaceIn(string search, DocumentConfig<string> content)
+        public ReplaceWithContent(string search, DocumentConfig<string> content)
             : base(content)
         {
             _search = search;
@@ -43,7 +43,7 @@ namespace Statiq.Core.Modules.Contents
         /// <param name="search">The string to search for.</param>
         /// <param name="modules">Modules that output the content within which
         /// to search for the search string.</param>
-        public ReplaceIn(string search, params IModule[] modules)
+        public ReplaceWithContent(string search, params IModule[] modules)
             : base(modules)
         {
             _search = search;
@@ -55,7 +55,7 @@ namespace Statiq.Core.Modules.Contents
         /// </summary>
         /// <param name="regexOptions">The options to use (if any).</param>
         /// <returns>The current module instance.</returns>
-        public ReplaceIn IsRegex(RegexOptions regexOptions = RegexOptions.None)
+        public ReplaceWithContent IsRegex(RegexOptions regexOptions = RegexOptions.None)
         {
             _isRegex = true;
             _regexOptions = regexOptions;

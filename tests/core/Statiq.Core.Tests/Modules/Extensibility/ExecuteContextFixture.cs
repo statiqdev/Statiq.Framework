@@ -15,7 +15,6 @@ using Statiq.Testing.Execution;
 namespace Statiq.Core.Tests.Modules.Extensibility
 {
     [TestFixture]
-    [NonParallelizable]
     public class ExecuteContextFixture : BaseFixture
     {
         public class ExecuteTests : ExecuteContextFixture

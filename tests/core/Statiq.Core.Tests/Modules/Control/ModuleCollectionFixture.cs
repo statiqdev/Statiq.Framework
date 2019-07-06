@@ -7,7 +7,6 @@ using Statiq.Testing.Modules;
 namespace Statiq.Core.Tests.Modules.Control
 {
     [TestFixture]
-    [NonParallelizable]
     public class ModuleCollectionFixture : BaseFixture
     {
         public class ExecuteTests : ModuleCollectionFixture

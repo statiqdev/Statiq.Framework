@@ -12,7 +12,6 @@ using Statiq.Common.Documents;
 namespace Statiq.Core.Tests.Modules.Control
 {
     [TestFixture]
-    [NonParallelizable]
     public class MergeFixture : BaseFixture
     {
         public class ExecuteTests : MergeFixture

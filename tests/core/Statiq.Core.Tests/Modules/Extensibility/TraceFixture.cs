@@ -9,7 +9,6 @@ using Trace = Statiq.Core.Modules.Extensibility.Trace;
 namespace Statiq.Core.Tests.Modules.Extensibility
 {
     [TestFixture]
-    [NonParallelizable]
     public class TraceFixture : BaseFixture
     {
         public class ExecuteTests : TraceFixture

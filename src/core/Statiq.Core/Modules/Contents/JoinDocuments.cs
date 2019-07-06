@@ -15,7 +15,7 @@ namespace Statiq.Core.Modules.Contents
     /// Joins documents together with an optional delimiter to form one document.
     /// </summary>
     /// <category>Content</category>
-    public class Join : IModule
+    public class JoinDocuments : IModule
     {
         private readonly string _delimiter;
         private readonly JoinedMetadata _metaDataMode;
@@ -23,7 +23,7 @@ namespace Statiq.Core.Modules.Contents
         /// <summary>
         /// Concatenates multiple documents together to form a single document without a delimiter and with the default metadata only
         /// </summary>
-        public Join()
+        public JoinDocuments()
             : this(string.Empty)
         {
         }
@@ -32,7 +32,7 @@ namespace Statiq.Core.Modules.Contents
         /// Concatenates multiple documents together to form a single document without a delimiter using the specified meta data mode
         /// </summary>
         /// <param name="metaDataMode">The specified metadata mode</param>
-        public Join(JoinedMetadata metaDataMode)
+        public JoinDocuments(JoinedMetadata metaDataMode)
             : this(string.Empty, metaDataMode)
         {
         }
@@ -42,7 +42,7 @@ namespace Statiq.Core.Modules.Contents
         /// </summary>
         /// <param name="delimiter">The string to use as a separator between documents</param>
         /// <param name="metaDataMode">The specified metadata mode</param>
-        public Join(string delimiter, JoinedMetadata metaDataMode = JoinedMetadata.DefaultOnly)
+        public JoinDocuments(string delimiter, JoinedMetadata metaDataMode = JoinedMetadata.DefaultOnly)
         {
             _delimiter = delimiter;
             _metaDataMode = metaDataMode;

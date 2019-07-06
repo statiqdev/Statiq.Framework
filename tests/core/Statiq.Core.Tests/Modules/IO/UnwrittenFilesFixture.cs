@@ -13,7 +13,6 @@ using Statiq.Testing.IO;
 namespace Statiq.Core.Tests.Modules.IO
 {
     [TestFixture]
-    [NonParallelizable]
     public class UnwrittenFilesFixture : BaseFixture
     {
         [Test]

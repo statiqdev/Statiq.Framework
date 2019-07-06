@@ -15,7 +15,6 @@ using Statiq.Testing.Execution;
 namespace Statiq.Core.Tests.Modules.Templates
 {
     [TestFixture]
-    [NonParallelizable]
     public class XsltFixture : BaseFixture
     {
         public class ExecuteTests : XsltFixture

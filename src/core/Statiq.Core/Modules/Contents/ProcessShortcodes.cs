@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.IO;
@@ -19,7 +19,7 @@ namespace Statiq.Core.Modules.Contents
     /// Renders shortcodes in the input documents.
     /// </summary>
     /// <category>Content</category>
-    public class Shortcodes : IModule
+    public class ProcessShortcodes : IModule
     {
         private readonly string _startDelimiter;
         private readonly string _endDelimiter;
@@ -32,7 +32,7 @@ namespace Statiq.Core.Modules.Contents
         /// or post-template-rendering (<c>false</c>). The default delimiters are different
         /// depending on when the module is executed.
         /// </param>
-        public Shortcodes(bool preRender = false)
+        public ProcessShortcodes(bool preRender = false)
         {
             if (preRender)
             {
@@ -51,7 +51,7 @@ namespace Statiq.Core.Modules.Contents
         /// </summary>
         /// <param name="startDelimiter">The shortcode start delimiter.</param>
         /// <param name="endDelimiter">The shortcode end delimiter.</param>
-        public Shortcodes(string startDelimiter, string endDelimiter)
+        public ProcessShortcodes(string startDelimiter, string endDelimiter)
         {
             _startDelimiter = startDelimiter;
             _endDelimiter = endDelimiter;

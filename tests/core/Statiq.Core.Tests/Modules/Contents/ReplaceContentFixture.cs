@@ -14,7 +14,7 @@ using Statiq.Testing.Execution;
 namespace Statiq.Core.Tests.Modules.Contents
 {
     [TestFixture]
-    public class ReplaceFixture : BaseFixture
+    public class ReplaceContentFixture : BaseFixture
     {
         [Test]
         public async Task RecursiveReplaceWithContentFinder()
@@ -37,7 +37,7 @@ namespace Statiq.Core.Tests.Modules.Contents
                         </body>
                     </html>";
             TestDocument document = new TestDocument(input);
-            Replace replace = new Replace(@"(<span>.*<\/span>)", _ => "<span>baz</span>");
+            ReplaceContent replace = new ReplaceContent(@"(<span>.*<\/span>)", _ => "<span>baz</span>");
 
             // When
             TestDocument result = await ExecuteAsync(document, replace).SingleAsync();
@@ -70,7 +70,7 @@ namespace Statiq.Core.Tests.Modules.Contents
             {
                 { "Fizz", "Buzz" }
             };
-            Replace replace = new Replace(@"(<span>.*<\/span>)", (_, doc) => $"<div>{doc["Fizz"]}</div>");
+            ReplaceContent replace = new ReplaceContent(@"(<span>.*<\/span>)", (_, doc) => $"<div>{doc["Fizz"]}</div>");
 
             // When
             TestDocument result = await ExecuteAsync(document, replace).SingleAsync();

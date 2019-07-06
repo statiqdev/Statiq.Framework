@@ -10,14 +10,14 @@ namespace Statiq.Core.Modules.Contents
     /// Prepends the specified content to the existing content of each document.
     /// </summary>
     /// <category>Content</category>
-    public class Prepend : ContentModule
+    public class PrependContent : ContentModule
     {
         /// <summary>
         /// Prepends the string value of the returned object to to content of each document. This
         /// allows you to specify different content to prepend for each document depending on the input document.
         /// </summary>
         /// <param name="content">A delegate that returns the content to prepend.</param>
-        public Prepend(DocumentConfig<string> content)
+        public PrependContent(DocumentConfig<string> content)
             : base(content)
         {
         }
@@ -28,7 +28,7 @@ namespace Statiq.Core.Modules.Contents
         /// document for each input document).
         /// </summary>
         /// <param name="modules">The modules to execute.</param>
-        public Prepend(params IModule[] modules)
+        public PrependContent(params IModule[] modules)
             : base(modules)
         {
         }

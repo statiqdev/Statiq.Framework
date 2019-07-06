@@ -15,8 +15,7 @@ using Statiq.Testing.Execution;
 namespace Statiq.Core.Tests.Modules.Contents
 {
     [TestFixture]
-    [NonParallelizable]
-    public class JoinFixture : BaseFixture
+    public class JoinDocumentsFixture : BaseFixture
     {
         [Test]
         public async Task JoinTwoDocumentsJoinWithNoDelimiter()
@@ -24,7 +23,7 @@ namespace Statiq.Core.Tests.Modules.Contents
             // Given
             TestDocument first = new TestDocument("Test");
             TestDocument second = new TestDocument("Test2");
-            Join join = new Join();
+            JoinDocuments join = new JoinDocuments();
 
             // When
             TestDocument result = await ExecuteAsync(new[] { first, second }, join).SingleAsync();
@@ -40,7 +39,7 @@ namespace Statiq.Core.Tests.Modules.Contents
             TestDocument first = new TestDocument("Test");
             TestDocument second = new TestDocument("Test2");
             TestDocument third = new TestDocument("Test3");
-            Join join = new Join();
+            JoinDocuments join = new JoinDocuments();
 
             // When
             TestDocument result = await ExecuteAsync(new[] { first, second, third }, join).SingleAsync();
@@ -56,7 +55,7 @@ namespace Statiq.Core.Tests.Modules.Contents
             TestDocument first = null;
             TestDocument second = new TestDocument("Test2");
             TestDocument third = new TestDocument("Test3");
-            Join join = new Join();
+            JoinDocuments join = new JoinDocuments();
 
             // When
             TestDocument result = await ExecuteAsync(new[] { first, second, third }, join).SingleAsync();
@@ -72,7 +71,7 @@ namespace Statiq.Core.Tests.Modules.Contents
             TestDocument first = new TestDocument("Test");
             TestDocument second = null;
             TestDocument third = new TestDocument("Test3");
-            Join join = new Join();
+            JoinDocuments join = new JoinDocuments();
 
             // When
             TestDocument result = await ExecuteAsync(new[] { first, second, third }, join).SingleAsync();
@@ -85,7 +84,7 @@ namespace Statiq.Core.Tests.Modules.Contents
         public async Task JoinnullPassedInAsDocumentList()
         {
             // Given
-            Join join = new Join();
+            JoinDocuments join = new JoinDocuments();
 
             // When
             TestDocument result = await ExecuteAsync(join).SingleAsync();
@@ -100,7 +99,7 @@ namespace Statiq.Core.Tests.Modules.Contents
             // Given
             TestDocument first = new TestDocument("Test");
             TestDocument second = new TestDocument("Test2");
-            Join join = new Join(",");
+            JoinDocuments join = new JoinDocuments(",");
 
             // When
             TestDocument result = await ExecuteAsync(new[] { first, second }, join).SingleAsync();
@@ -115,7 +114,7 @@ namespace Statiq.Core.Tests.Modules.Contents
             // Given
             TestDocument first = new TestDocument("Test");
             TestDocument second = new TestDocument("Test2");
-            Join join = new Join("Test");
+            JoinDocuments join = new JoinDocuments("Test");
 
             // When
             TestDocument result = await ExecuteAsync(new[] { first, second }, join).SingleAsync();
@@ -136,7 +135,7 @@ namespace Statiq.Core.Tests.Modules.Contents
             {
                 { "three", "four" }
             };
-            Join join = new Join(JoinedMetadata.FirstDocument);
+            JoinDocuments join = new JoinDocuments(JoinedMetadata.FirstDocument);
 
             // When
             TestDocument result = await ExecuteAsync(new[] { first, second }, join).SingleAsync();
@@ -158,7 +157,7 @@ namespace Statiq.Core.Tests.Modules.Contents
             {
                 { "three", "four" }
             };
-            Join join = new Join();
+            JoinDocuments join = new JoinDocuments();
 
             // When
             TestDocument result = await ExecuteAsync(new[] { first, second }, join).SingleAsync();
@@ -180,7 +179,7 @@ namespace Statiq.Core.Tests.Modules.Contents
             {
                 { "three", "four" }
             };
-            Join join = new Join(JoinedMetadata.LastDocument);
+            JoinDocuments join = new JoinDocuments(JoinedMetadata.LastDocument);
 
             // When
             TestDocument result = await ExecuteAsync(new[] { first, second }, join).SingleAsync();
@@ -203,7 +202,7 @@ namespace Statiq.Core.Tests.Modules.Contents
                 { "one", "seven" },
                 { "three", "four" }
             };
-            Join join = new Join(JoinedMetadata.AllWithFirstDuplicates);
+            JoinDocuments join = new JoinDocuments(JoinedMetadata.AllWithFirstDuplicates);
 
             // When
             TestDocument result = await ExecuteAsync(new[] { first, second }, join).SingleAsync();
@@ -227,7 +226,7 @@ namespace Statiq.Core.Tests.Modules.Contents
                 { "one", "seven" },
                 { "three", "four" }
             };
-            Join join = new Join(JoinedMetadata.AllWithLastDuplicates);
+            JoinDocuments join = new JoinDocuments(JoinedMetadata.AllWithLastDuplicates);
 
             // When
             TestDocument result = await ExecuteAsync(new[] { first, second }, join).SingleAsync();
@@ -242,7 +241,7 @@ namespace Statiq.Core.Tests.Modules.Contents
         public async Task EmptyListDoesNotError()
         {
             // Given
-            Join join = new Join();
+            JoinDocuments join = new JoinDocuments();
 
             // When
             TestDocument result = await ExecuteAsync(join).SingleAsync();
@@ -255,7 +254,7 @@ namespace Statiq.Core.Tests.Modules.Contents
         public async Task EmptyListWithDelimitorDoesNotError()
         {
             // Given
-            Join join = new Join(",");
+            JoinDocuments join = new JoinDocuments(",");
 
             // When
             TestDocument result = await ExecuteAsync(join).SingleAsync();

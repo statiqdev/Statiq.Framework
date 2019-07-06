@@ -11,7 +11,6 @@ using Statiq.Testing.Modules;
 namespace Statiq.Core.Tests.Modules.Control
 {
     [TestFixture]
-    [NonParallelizable]
     public class ConcatBranchFixture : BaseFixture
     {
         public class ExecuteTests : ConcatBranchFixture

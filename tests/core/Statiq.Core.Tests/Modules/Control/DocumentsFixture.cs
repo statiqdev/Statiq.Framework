@@ -15,7 +15,6 @@ using Statiq.Testing.Execution;
 namespace Statiq.Core.Tests.Modules.Control
 {
     [TestFixture]
-    [NonParallelizable]
     public class DocumentsFixture : BaseFixture
     {
         public class ExecuteTests : DocumentsFixture

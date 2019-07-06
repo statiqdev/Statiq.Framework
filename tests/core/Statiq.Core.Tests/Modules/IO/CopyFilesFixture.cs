@@ -18,7 +18,6 @@ using Statiq.Testing.IO;
 namespace Statiq.Core.Tests.Modules.IO
 {
     [TestFixture]
-    [NonParallelizable]
     public class CopyFilesFixture : BaseFixture
     {
         public class ConstructorTests : CopyFilesFixture

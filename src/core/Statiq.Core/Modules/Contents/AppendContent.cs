@@ -1,4 +1,4 @@
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using Statiq.Common.Configuration;
 using Statiq.Common.Documents;
 using Statiq.Common.Execution;
@@ -10,7 +10,7 @@ namespace Statiq.Core.Modules.Contents
     /// Appends the specified content to the existing content of each document.
     /// </summary>
     /// <category>Content</category>
-    public class Append : ContentModule
+    public class AppendContent : ContentModule
     {
         /// <summary>
         /// Appends the string value of the returned object to to content of each document.
@@ -18,7 +18,7 @@ namespace Statiq.Core.Modules.Contents
         /// on the input document.
         /// </summary>
         /// <param name="content">A delegate that returns the content to append.</param>
-        public Append(DocumentConfig<string> content)
+        public AppendContent(DocumentConfig<string> content)
             : base(content)
         {
         }
@@ -29,7 +29,7 @@ namespace Statiq.Core.Modules.Contents
         /// than one output document for each input document).
         /// </summary>
         /// <param name="modules">The modules to execute.</param>
-        public Append(params IModule[] modules)
+        public AppendContent(params IModule[] modules)
             : base(modules)
         {
         }

@@ -14,7 +14,6 @@ using Statiq.Testing.Execution;
 namespace Statiq.Core.Tests.Modules.Metadata
 {
     [TestFixture]
-    [NonParallelizable]
     public class ValidateMetaFixture : BaseFixture
     {
         public class ExecuteTests : ValidateMetaFixture

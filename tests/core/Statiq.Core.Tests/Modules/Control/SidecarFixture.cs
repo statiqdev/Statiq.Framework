@@ -18,7 +18,6 @@ using Statiq.Testing.IO;
 namespace Statiq.Core.Tests.Modules.Control
 {
     [TestFixture]
-    [NonParallelizable]
     public class SidecarFixture : BaseFixture
     {
         public class ExecuteTests : SidecarFixture

@@ -18,7 +18,6 @@ using Statiq.Testing.Execution;
 namespace Statiq.Core.Tests.Modules.IO
 {
     [TestFixture]
-    [NonParallelizable]
     public class DownloadFixture : BaseFixture
     {
         public class ExecuteTests : DownloadFixture

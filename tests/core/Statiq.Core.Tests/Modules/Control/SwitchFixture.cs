@@ -8,7 +8,6 @@ using Statiq.Testing.Modules;
 namespace Statiq.Core.Tests.Modules.Control
 {
     [TestFixture]
-    [NonParallelizable]
     public class SwitchFixture : BaseFixture
     {
         public class ExecuteTests : SwitchFixture

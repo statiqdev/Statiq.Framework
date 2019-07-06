@@ -16,8 +16,7 @@ using Statiq.Testing.Execution;
 namespace Statiq.Core.Tests.Modules.Contents
 {
     [TestFixture]
-    [NonParallelizable]
-    public class RedirectFixture : BaseFixture
+    public class GenerateRedirectsFixture : BaseFixture
     {
         [Test]
         public async Task SingleRedirect()
@@ -28,7 +27,7 @@ namespace Statiq.Core.Tests.Modules.Contents
                 { Keys.RedirectFrom, new List<FilePath> { new FilePath("foo.html") } }
             });
             TestDocument notRedirected = new TestDocument();
-            Redirect redirect = new Redirect();
+            GenerateRedirects redirect = new GenerateRedirects();
 
             // When
             IReadOnlyList<TestDocument> results = await ExecuteAsync(new[] { redirected, notRedirected }, redirect);
@@ -48,7 +47,7 @@ namespace Statiq.Core.Tests.Modules.Contents
                 { Keys.RedirectFrom, new List<FilePath> { new FilePath(input) } }
             });
             TestDocument notRedirected = new TestDocument();
-            Redirect redirect = new Redirect();
+            GenerateRedirects redirect = new GenerateRedirects();
 
             // When
             IReadOnlyList<TestDocument> results = await ExecuteAsync(new[] { redirected, notRedirected }, redirect);
@@ -66,7 +65,7 @@ namespace Statiq.Core.Tests.Modules.Contents
                 { Keys.RedirectFrom, new List<FilePath> { new FilePath("/foo/bar") } }
             });
             TestDocument notRedirected = new TestDocument();
-            Redirect redirect = new Redirect();
+            GenerateRedirects redirect = new GenerateRedirects();
             ThrowOnTraceEventType(null);
 
             // When
@@ -89,7 +88,7 @@ namespace Statiq.Core.Tests.Modules.Contents
             {
                 { Keys.RedirectFrom, new List<FilePath> { new FilePath("bar/baz.html") } }
             });
-            Redirect redirect = new Redirect();
+            GenerateRedirects redirect = new GenerateRedirects();
 
             // When
             IReadOnlyList<TestDocument> results = await ExecuteAsync(new[] { redirected1, redirected2 }, redirect);
@@ -112,7 +111,7 @@ namespace Statiq.Core.Tests.Modules.Contents
             {
                 { Keys.RedirectFrom, new List<FilePath> { new FilePath("bar/baz.html") } }
             });
-            Redirect redirect = new Redirect().WithAdditionalOutput(new FilePath("a/b"), x => string.Join("|", x.Select(y => $"{y.Key} {y.Value}")));
+            GenerateRedirects redirect = new GenerateRedirects().WithAdditionalOutput(new FilePath("a/b"), x => string.Join("|", x.Select(y => $"{y.Key} {y.Value}")));
 
             // When
             IReadOnlyList<TestDocument> results = await ExecuteAsync(new[] { redirected1, redirected2 }, redirect);
@@ -136,7 +135,7 @@ namespace Statiq.Core.Tests.Modules.Contents
             {
                 { Keys.RedirectFrom, new List<FilePath> { new FilePath("bar/baz.html") } }
             });
-            Redirect redirect = new Redirect()
+            GenerateRedirects redirect = new GenerateRedirects()
                 .WithAdditionalOutput(new FilePath("a/b"), x => string.Join("|", x.Select(y => $"{y.Key} {y.Value}")))
                 .WithMetaRefreshPages(false);
 

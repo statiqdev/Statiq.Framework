@@ -16,7 +16,6 @@ using Statiq.Testing.IO;
 namespace Statiq.Core.Tests.Modules.IO
 {
     [TestFixture]
-    [NonParallelizable]
     public class IncludeFixture : BaseFixture
     {
         public class ExecuteTests : IncludeFixture

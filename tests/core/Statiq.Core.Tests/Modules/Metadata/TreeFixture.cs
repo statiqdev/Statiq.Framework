@@ -17,7 +17,6 @@ using Statiq.Testing.Execution;
 namespace Statiq.Core.Tests.Modules.Metadata
 {
     [TestFixture]
-    [NonParallelizable]
     public class TreeFixture : BaseFixture
     {
         public class ExecuteTests : TreeFixture

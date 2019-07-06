@@ -17,10 +17,9 @@ using Statiq.Testing.Execution;
 namespace Statiq.Core.Tests.Modules.Contents
 {
     [TestFixture]
-    [NonParallelizable]
-    public class SitemapFixture : BaseFixture
+    public class GenerateSitemapFixture : BaseFixture
     {
-        public class ExecuteTests : SitemapFixture
+        public class ExecuteTests : GenerateSitemapFixture
         {
             [TestCase("www.example.org", null, "http://www.example.org/sub/testfile")]
             [TestCase(null, "http://www.example.com", "http://www.example.com")]
@@ -49,7 +48,7 @@ namespace Statiq.Core.Tests.Modules.Contents
                     formatter = f => string.Format(formatterString, f);
                 }
 
-                Sitemap sitemap = new Sitemap(formatter);
+                GenerateSitemap sitemap = new GenerateSitemap(formatter);
 
                 // When
                 TestDocument result = await ExecuteAsync(doc, context, m, sitemap).SingleAsync();
@@ -85,7 +84,7 @@ namespace Statiq.Core.Tests.Modules.Contents
                     formatter = f => string.Format(formatterString, f);
                 }
 
-                Sitemap sitemap = new Sitemap(formatter);
+                GenerateSitemap sitemap = new GenerateSitemap(formatter);
 
                 // When
                 TestDocument result = await ExecuteAsync(doc, context, m, sitemap).SingleAsync();
@@ -116,7 +115,7 @@ namespace Statiq.Core.Tests.Modules.Contents
                     formatter = f => string.Format(formatterString, f);
                 }
 
-                Sitemap sitemap = new Sitemap(formatter);
+                GenerateSitemap sitemap = new GenerateSitemap(formatter);
 
                 // When
                 TestDocument result = await ExecuteAsync(doc, context, sitemap).SingleAsync();
