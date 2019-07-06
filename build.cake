@@ -156,12 +156,35 @@ Task("Create-Packages")
                 });
         }
     });
-
-Task("Ensure-NuGet-Source")
-    .WithCriteria(() => isRunningOnBuildServer)
+    
+Task("Publish-Prerelease-Packages")
+    .IsDependentOn("Create-Packages")
+    .WithCriteria(() => !isLocal)
+    .WithCriteria(() => !isPullRequest)
     .WithCriteria(() => isRunningOnWindows)
+    .WithCriteria(() => branch == "develop")
     .Does(() =>
     {
+        // Publish to the Wyam MyGet feed for now...
+        var apiKey = EnvironmentVariable("MYGET_API_KEY");
+        if (string.IsNullOrEmpty(apiKey))
+        {
+            throw new InvalidOperationException("Could not resolve MyGet API key.");
+        }
+
+        foreach (var nupkg in GetFiles(nugetRoot.Path.FullPath + "/*.nupkg"))
+        {
+            NuGetPush(nupkg, new NuGetPushSettings 
+            {
+                Source = "https://www.myget.org/F/wyam/api/v2/package",
+                ApiKey = apiKey,
+                Timeout = TimeSpan.FromSeconds(600)
+            });
+        }
+
+        return;
+
+        // Eventually publish to GitHub Package Registry
         var githubToken = EnvironmentVariable("STATIQ_GITHUB_TOKEN");
         if (string.IsNullOrEmpty(githubToken))
         {
@@ -183,22 +206,6 @@ Task("Ensure-NuGet-Source")
                 UserName = "daveaglick",
                 Password = githubToken
             });
-    });
-    
-Task("Publish-GitHub-Packages")
-    .IsDependentOn("Create-Packages")
-    .IsDependentOn("Ensure-NuGet-Source")
-    .WithCriteria(() => !isLocal)
-    .WithCriteria(() => !isPullRequest)
-    .WithCriteria(() => isRunningOnWindows)
-    .WithCriteria(() => branch == "develop")
-    .Does(() =>
-    {
-        var githubToken = EnvironmentVariable("STATIQ_GITHUB_TOKEN");
-        if (string.IsNullOrEmpty(githubToken))
-        {
-            throw new InvalidOperationException("Could not resolve GitHub token.");
-        }
 
         foreach (var nupkg in GetFiles(nugetRoot.Path.FullPath + "/*.nupkg"))
         {
@@ -275,7 +282,7 @@ Task("Publish")
     
 Task("BuildServer")
     .IsDependentOn("Run-Unit-Tests")
-    .IsDependentOn("Publish-GitHub-Packages");
+    .IsDependentOn("Publish-Prerelease-Packages");
 
 //////////////////////////////////////////////////////////////////////
 // EXECUTION
