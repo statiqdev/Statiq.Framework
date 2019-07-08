@@ -17,7 +17,7 @@ namespace Statiq.Core.Modules.Control
     /// the combined content and metadata is output.
     /// </remarks>
     /// <category>Control</category>
-    public class Combine : IModule
+    public class CombineDocuments : IModule
     {
         /// <inheritdoc />
         public async Task<IEnumerable<IDocument>> ExecuteAsync(IReadOnlyList<IDocument> inputs, IExecutionContext context)

@@ -54,7 +54,7 @@ namespace Statiq.Core.Modules.Control
     /// <metadata cref="Keys.NextPage" usage="Output" />
     /// <metadata cref="Keys.PreviousPage" usage="Output" />
     /// <category>Control</category>
-    public class Paginate : ContainerModule
+    public class PaginateDocuments : ContainerModule
     {
         private readonly int _pageSize;
         private readonly Dictionary<string, DocumentConfig<object>> _pageMetadata = new Dictionary<string, DocumentConfig<object>>();
@@ -68,7 +68,7 @@ namespace Statiq.Core.Modules.Control
         /// </summary>
         /// <param name="pageSize">The number of documents on each page.</param>
         /// <param name="modules">The modules to execute to get the documents to page.</param>
-        public Paginate(int pageSize, params IModule[] modules)
+        public PaginateDocuments(int pageSize, params IModule[] modules)
             : this(pageSize, (IEnumerable<IModule>)modules)
         {
         }
@@ -79,7 +79,7 @@ namespace Statiq.Core.Modules.Control
         /// </summary>
         /// <param name="pageSize">The number of documents on each page.</param>
         /// <param name="modules">The modules to execute to get the documents to page.</param>
-        public Paginate(int pageSize, IEnumerable<IModule> modules)
+        public PaginateDocuments(int pageSize, IEnumerable<IModule> modules)
             : base(modules)
         {
             if (pageSize <= 0)
@@ -95,7 +95,7 @@ namespace Statiq.Core.Modules.Control
         /// </summary>
         /// <param name="predicate">A delegate that should return a <c>bool</c>.</param>
         /// <returns>The current module instance.</returns>
-        public Paginate Where(DocumentConfig<bool> predicate)
+        public PaginateDocuments Where(DocumentConfig<bool> predicate)
         {
             _predicate = _predicate.CombineWith(predicate);
             return this;
@@ -106,7 +106,7 @@ namespace Statiq.Core.Modules.Control
         /// </summary>
         /// <param name="count">The number of pages to output.</param>
         /// <returns>The current module instance.</returns>
-        public Paginate TakePages(int count)
+        public PaginateDocuments TakePages(int count)
         {
             _takePages = count;
             return this;
@@ -117,7 +117,7 @@ namespace Statiq.Core.Modules.Control
         /// </summary>
         /// <param name="count">The number of pages to skip.</param>
         /// <returns>The current module instance.</returns>
-        public Paginate SkipPages(int count)
+        public PaginateDocuments SkipPages(int count)
         {
             _skipPages = count;
             return this;
@@ -133,7 +133,7 @@ namespace Statiq.Core.Modules.Control
         /// <param name="key">The key of the metadata to add.</param>
         /// <param name="metadata">A delegate with the value for the metadata.</param>
         /// <returns>The current module instance.</returns>
-        public Paginate WithPageMetadata(string key, DocumentConfig<object> metadata)
+        public PaginateDocuments WithPageMetadata(string key, DocumentConfig<object> metadata)
         {
             if (key == null)
             {

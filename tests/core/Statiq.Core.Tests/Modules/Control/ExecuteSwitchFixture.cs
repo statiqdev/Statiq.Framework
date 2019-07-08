@@ -8,9 +8,9 @@ using Statiq.Testing.Modules;
 namespace Statiq.Core.Tests.Modules.Control
 {
     [TestFixture]
-    public class SwitchFixture : BaseFixture
+    public class ExecuteSwitchFixture : BaseFixture
     {
-        public class ExecuteTests : SwitchFixture
+        public class ExecuteTests : ExecuteSwitchFixture
         {
             [Test]
             public async Task SwitchResultsInCorrectCounts()
@@ -20,7 +20,7 @@ namespace Statiq.Core.Tests.Modules.Control
                 CountModule b = new CountModule("B");
                 CountModule c = new CountModule("C");
                 CountModule d = new CountModule("D");
-                Switch switchModule = new Switch(Config.FromDocument(async x => (object)await x.GetStringAsync())).Case("1", b).Case("2", c).Default(d);
+                ExecuteSwitch switchModule = new ExecuteSwitch(Config.FromDocument(async x => (object)await x.GetStringAsync())).Case("1", b).Case("2", c).Default(d);
 
                 // When
                 await ExecuteAsync(a, switchModule);
@@ -43,7 +43,7 @@ namespace Statiq.Core.Tests.Modules.Control
                 };
                 CountModule b = new CountModule("B");
                 CountModule c = new CountModule("C");
-                Switch switchModule = new Switch(Config.FromDocument(async x => (object)await x.GetStringAsync())).Default(b);
+                ExecuteSwitch switchModule = new ExecuteSwitch(Config.FromDocument(async x => (object)await x.GetStringAsync())).Default(b);
 
                 // When
                 await ExecuteAsync(a, switchModule, c);
@@ -67,7 +67,7 @@ namespace Statiq.Core.Tests.Modules.Control
                 };
                 CountModule b = new CountModule("B");
                 CountModule c = new CountModule("C");
-                Switch switchModule = new Switch(Config.FromDocument(async x => (object)await x.GetStringAsync())).Case("1", b);
+                ExecuteSwitch switchModule = new ExecuteSwitch(Config.FromDocument(async x => (object)await x.GetStringAsync())).Case("1", b);
 
                 // When
                 await ExecuteAsync(a, switchModule, c);
@@ -91,7 +91,7 @@ namespace Statiq.Core.Tests.Modules.Control
                 };
                 CountModule b = new CountModule("B");
                 CountModule c = new CountModule("C");
-                Switch switchModule = new Switch(Config.FromDocument(async x => (object)await x.GetStringAsync())).Case(new string[] { "1", "2" }, b);
+                ExecuteSwitch switchModule = new ExecuteSwitch(Config.FromDocument(async x => (object)await x.GetStringAsync())).Case(new string[] { "1", "2" }, b);
 
                 // When
                 await ExecuteAsync(a, switchModule, c);
@@ -114,7 +114,7 @@ namespace Statiq.Core.Tests.Modules.Control
                     EnsureInputDocument = true
                 };
                 CountModule b = new CountModule("B");
-                Switch switchModule = new Switch(Config.FromDocument(async x => (object)await x.GetStringAsync()));
+                ExecuteSwitch switchModule = new ExecuteSwitch(Config.FromDocument(async x => (object)await x.GetStringAsync()));
 
                 // When
                 await ExecuteAsync(a, switchModule, b);

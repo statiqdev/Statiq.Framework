@@ -1,0 +1,56 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
+using Statiq.Common.Configuration;
+using Statiq.Common.Documents;
+using Statiq.Common.Execution;
+using Statiq.Common.Modules;
+
+namespace Statiq.Core.Modules.Control
+{
+    /// <summary>
+    /// Filters the current sequence of documents using a predicate.
+    /// </summary>
+    /// <remarks>
+    /// This module filters documents using "or" logic. If you want to also apply
+    /// "and" conditions, place additional <see cref="FilterDocuments"/> modules
+    /// after this one.
+    /// </remarks>
+    /// <category>Control</category>
+    public class FilterDocuments : IModule
+    {
+        private readonly List<DocumentConfig<bool>> _predicates = new List<DocumentConfig<bool>>();
+
+        /// <summary>
+        /// Creates a module to filter documents but applies no default filtering.
+        /// </summary>
+        public FilterDocuments()
+        {
+        }
+
+        /// <summary>
+        /// Specifies the predicate to use for filtering documents.
+        /// Only input documents for which the predicate returns <c>true</c> will be output.
+        /// </summary>
+        /// <param name="predicate">A predicate delegate that should return a <c>bool</c>.</param>
+        public FilterDocuments(DocumentConfig<bool> predicate)
+        {
+            _predicates.Add(predicate ?? throw new ArgumentNullException(nameof(predicate)));
+        }
+
+        /// <summary>
+        /// Applies an additional predicate to the filtering operation as an "or" condition.
+        /// </summary>
+        /// <param name="predicate">A predicate delegate that should return a <c>bool</c>.</param>
+        /// <returns>The current module instance.</returns>
+        public FilterDocuments Or(DocumentConfig<bool> predicate)
+        {
+            _predicates.Add(predicate ?? throw new ArgumentNullException(nameof(predicate)));
+            return this;
+        }
+
+        /// <inheritdoc />
+        public Task<IEnumerable<IDocument>> ExecuteAsync(IReadOnlyList<IDocument> inputs, IExecutionContext context) =>
+            inputs.FilterAsync(_predicates, context);
+    }
+}

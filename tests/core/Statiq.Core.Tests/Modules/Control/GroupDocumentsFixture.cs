@@ -16,9 +16,9 @@ using Statiq.Testing.Modules;
 namespace Statiq.Core.Tests.Modules.Control
 {
     [TestFixture]
-    public class GroupByManyFixture : BaseFixture
+    public class GroupDocumentsFixture : BaseFixture
     {
-        public class ExecuteTests : GroupByManyFixture
+        public class ExecuteTests : GroupDocumentsFixture
         {
             [Test]
             public async Task SetsCorrectMetadata()
@@ -30,7 +30,7 @@ namespace Statiq.Core.Tests.Modules.Control
                     AdditionalOutputs = 7,
                     EnsureInputDocument = true
                 };
-                GroupByMany groupByMany = new GroupByMany(Config.FromDocument(d => new[] { d.Get<int>("A") % 3, 3 }), count);
+                GroupDocuments groupByMany = new GroupDocuments(Config.FromDocument(d => new[] { d.Get<int>("A") % 3, 3 }), count);
                 Execute gatherData = new ExecuteDocument(
                     Config.FromDocument(d =>
                     {
@@ -55,8 +55,8 @@ namespace Statiq.Core.Tests.Modules.Control
                     AdditionalOutputs = 7,
                     EnsureInputDocument = true
                 };
-                GroupByMany groupByMany = new GroupByMany(Config.FromDocument(d => new[] { d.Get<int>("A") % 3, 3 }), count);
-                OrderBy orderBy = new OrderBy(Config.FromDocument(d => d.Get<int>(Keys.GroupKey)));
+                GroupDocuments groupByMany = new GroupDocuments(Config.FromDocument(d => new[] { d.Get<int>("A") % 3, 3 }), count);
+                OrderDocuments orderBy = new OrderDocuments(Config.FromDocument(d => d.Get<int>(Keys.GroupKey)));
                 Execute gatherData = new ExecuteDocument(
                     Config.FromDocument(async d =>
                     {
@@ -87,7 +87,7 @@ namespace Statiq.Core.Tests.Modules.Control
                     EnsureInputDocument = true
                 };
                 Core.Modules.Metadata.Meta meta = new Core.Modules.Metadata.Meta("GroupMetadata", Config.FromDocument(d => new object[] { d.Get<int>("A") % 3, 3 }));
-                GroupByMany groupByMany = new GroupByMany("GroupMetadata", count, meta);
+                GroupDocuments groupByMany = new GroupDocuments("GroupMetadata", count, meta);
                 Execute gatherData = new ExecuteDocument(
                     Config.FromDocument(d =>
                     {
@@ -118,7 +118,7 @@ namespace Statiq.Core.Tests.Modules.Control
                         int groupMetadata = d.Get<int>("A") % 3;
                         return groupMetadata == 0 ? d : d.Clone(new MetadataItems { { "GroupMetadata", new object[] { groupMetadata, 3 } } });
                     }), false);
-                GroupByMany groupByMany = new GroupByMany("GroupMetadata", count, meta);
+                GroupDocuments groupByMany = new GroupDocuments("GroupMetadata", count, meta);
                 Execute gatherData = new ExecuteDocument(
                     Config.FromDocument(d =>
                     {
@@ -148,7 +148,7 @@ namespace Statiq.Core.Tests.Modules.Control
                         c.GetDocument(new MetadataItems { { "Tag", new object[] { 1 } } }),
                         c.GetDocument(new MetadataItems { { "Tag", new object[] { "1" } } })
                     });
-                GroupByMany groupByMany = new GroupByMany("Tag", meta);
+                GroupDocuments groupByMany = new GroupDocuments("Tag", meta);
                 Execute gatherData = new ExecuteDocument(
                     Config.FromDocument(d =>
                     {
@@ -178,7 +178,7 @@ namespace Statiq.Core.Tests.Modules.Control
                         c.GetDocument(new MetadataItems { { "Tag", new object[] { 1 } } }),
                         c.GetDocument(new MetadataItems { { "Tag", new object[] { "1" } } })
                     });
-                GroupByMany groupByMany = new GroupByMany("Tag", meta).WithComparer(StringComparer.OrdinalIgnoreCase);
+                GroupDocuments groupByMany = new GroupDocuments("Tag", meta).WithComparer(StringComparer.OrdinalIgnoreCase);
                 Execute gatherData = new ExecuteDocument(
                     Config.FromDocument(d =>
                     {
@@ -203,7 +203,7 @@ namespace Statiq.Core.Tests.Modules.Control
                     AdditionalOutputs = 7,
                     EnsureInputDocument = true
                 };
-                GroupByMany groupByMany = new GroupByMany(Config.FromDocument(d => new[] { d.Get<int>("A") % 3, 3 }), count)
+                GroupDocuments groupByMany = new GroupDocuments(Config.FromDocument(d => new[] { d.Get<int>("A") % 3, 3 }), count)
                     .Where(Config.FromDocument(d => d.Get<int>("A") % 3 != 0));
                 Execute gatherData = new ExecuteDocument(
                     Config.FromDocument(d =>

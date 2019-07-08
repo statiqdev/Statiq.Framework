@@ -21,7 +21,7 @@ namespace Statiq.Core.Modules.Control
     /// The output document content is set to the original content without the front matter.
     /// </remarks>
     /// <category>Control</category>
-    public class FrontMatter : ContainerModule
+    public class ExtractFrontMatter : ContainerModule
     {
         private readonly string _delimiter;
         private readonly bool _repeated;
@@ -31,7 +31,7 @@ namespace Statiq.Core.Modules.Control
         /// Uses the default delimiter character and passes any front matter to the specified child modules for processing.
         /// </summary>
         /// <param name="modules">The modules to execute against the front matter.</param>
-        public FrontMatter(params IModule[] modules)
+        public ExtractFrontMatter(params IModule[] modules)
             : this((IEnumerable<IModule>)modules)
         {
         }
@@ -40,7 +40,7 @@ namespace Statiq.Core.Modules.Control
         /// Uses the default delimiter character and passes any front matter to the specified child modules for processing.
         /// </summary>
         /// <param name="modules">The modules to execute against the front matter.</param>
-        public FrontMatter(IEnumerable<IModule> modules)
+        public ExtractFrontMatter(IEnumerable<IModule> modules)
             : base(modules)
         {
             _delimiter = "-";
@@ -52,7 +52,7 @@ namespace Statiq.Core.Modules.Control
         /// </summary>
         /// <param name="delimiter">The delimiter to use.</param>
         /// <param name="modules">The modules to execute against the front matter.</param>
-        public FrontMatter(string delimiter, params IModule[] modules)
+        public ExtractFrontMatter(string delimiter, params IModule[] modules)
             : this(delimiter, (IEnumerable<IModule>)modules)
         {
         }
@@ -62,7 +62,7 @@ namespace Statiq.Core.Modules.Control
         /// </summary>
         /// <param name="delimiter">The delimiter to use.</param>
         /// <param name="modules">The modules to execute against the front matter.</param>
-        public FrontMatter(string delimiter, IEnumerable<IModule> modules)
+        public ExtractFrontMatter(string delimiter, IEnumerable<IModule> modules)
             : base(modules)
         {
             _delimiter = delimiter;
@@ -74,7 +74,7 @@ namespace Statiq.Core.Modules.Control
         /// </summary>
         /// <param name="delimiter">The delimiter to use.</param>
         /// <param name="modules">The modules to execute against the front matter.</param>
-        public FrontMatter(char delimiter, params IModule[] modules)
+        public ExtractFrontMatter(char delimiter, params IModule[] modules)
             : this(delimiter, (IEnumerable<IModule>)modules)
         {
         }
@@ -84,7 +84,7 @@ namespace Statiq.Core.Modules.Control
         /// </summary>
         /// <param name="delimiter">The delimiter to use.</param>
         /// <param name="modules">The modules to execute against the front matter.</param>
-        public FrontMatter(char delimiter, IEnumerable<IModule> modules)
+        public ExtractFrontMatter(char delimiter, IEnumerable<IModule> modules)
             : base(modules)
         {
             _delimiter = new string(delimiter, 1);
@@ -97,7 +97,7 @@ namespace Statiq.Core.Modules.Control
         /// </summary>
         /// <param name="ignore">If set to <c>true</c>, ignore the delimiter if it appears on the first line.</param>
         /// <returns>The current module instance.</returns>
-        public FrontMatter IgnoreDelimiterOnFirstLine(bool ignore = true)
+        public ExtractFrontMatter IgnoreDelimiterOnFirstLine(bool ignore = true)
         {
             _ignoreDelimiterOnFirstLine = ignore;
             return this;

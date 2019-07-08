@@ -22,7 +22,7 @@ namespace Statiq.Core.Modules.Control
     /// The output document content is set to the original input document content.
     /// </remarks>
     /// <category>Control</category>
-    public class Sidecar : ContainerModule
+    public class ProcessSidecarFile : ContainerModule
     {
         private readonly DocumentConfig<FilePath> _sidecarPath;
 
@@ -31,7 +31,7 @@ namespace Statiq.Core.Modules.Control
         /// If a sidecar file is found, it's content is passed to the specified child modules for processing.
         /// </summary>
         /// <param name="modules">The modules to execute against the sidecar file.</param>
-        public Sidecar(params IModule[] modules)
+        public ProcessSidecarFile(params IModule[] modules)
             : this(".meta", (IEnumerable<IModule>)modules)
         {
         }
@@ -41,7 +41,7 @@ namespace Statiq.Core.Modules.Control
         /// If a sidecar file is found, it's content is passed to the specified child modules for processing.
         /// </summary>
         /// <param name="modules">The modules to execute against the sidecar file.</param>
-        public Sidecar(IEnumerable<IModule> modules)
+        public ProcessSidecarFile(IEnumerable<IModule> modules)
             : this(".meta", modules)
         {
         }
@@ -52,7 +52,7 @@ namespace Statiq.Core.Modules.Control
         /// </summary>
         /// <param name="extension">The extension to search.</param>
         /// <param name="modules">The modules to execute against the sidecar file.</param>
-        public Sidecar(string extension, params IModule[] modules)
+        public ProcessSidecarFile(string extension, params IModule[] modules)
             : this(extension, (IEnumerable<IModule>)modules)
         {
         }
@@ -63,7 +63,7 @@ namespace Statiq.Core.Modules.Control
         /// </summary>
         /// <param name="extension">The extension to search.</param>
         /// <param name="modules">The modules to execute against the sidecar file.</param>
-        public Sidecar(string extension, IEnumerable<IModule> modules)
+        public ProcessSidecarFile(string extension, IEnumerable<IModule> modules)
             : base(modules)
         {
             if (string.IsNullOrEmpty(extension))
@@ -80,7 +80,7 @@ namespace Statiq.Core.Modules.Control
         /// </summary>
         /// <param name="sidecarPath">A delegate that returns a <see cref="FilePath"/> with the desired sidecar path.</param>
         /// <param name="modules">The modules to execute against the sidecar file.</param>
-        public Sidecar(DocumentConfig<FilePath> sidecarPath, params IModule[] modules)
+        public ProcessSidecarFile(DocumentConfig<FilePath> sidecarPath, params IModule[] modules)
             : this(sidecarPath, (IEnumerable<IModule>)modules)
         {
         }
@@ -91,7 +91,7 @@ namespace Statiq.Core.Modules.Control
         /// </summary>
         /// <param name="sidecarPath">A delegate that returns a <see cref="FilePath"/> with the desired sidecar path.</param>
         /// <param name="modules">The modules to execute against the sidecar file.</param>
-        public Sidecar(DocumentConfig<FilePath> sidecarPath, IEnumerable<IModule> modules)
+        public ProcessSidecarFile(DocumentConfig<FilePath> sidecarPath, IEnumerable<IModule> modules)
             : base(modules)
         {
             _sidecarPath = sidecarPath ?? throw new ArgumentNullException(nameof(sidecarPath));

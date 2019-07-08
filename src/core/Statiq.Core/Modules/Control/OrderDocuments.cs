@@ -17,7 +17,7 @@ namespace Statiq.Core.Modules.Control
     /// The ordered documents are output as the result of this module.
     /// </remarks>
     /// <category>Control</category>
-    public class OrderBy : IModule
+    public class OrderDocuments : IModule
     {
         private readonly Stack<Order> _orders = new Stack<Order>();
 
@@ -25,7 +25,7 @@ namespace Statiq.Core.Modules.Control
         /// Orders the input documents using the specified delegate to get the ordering key.
         /// </summary>
         /// <param name="key">A delegate that should return the key to use for ordering.</param>
-        public OrderBy(DocumentConfig<object> key)
+        public OrderDocuments(DocumentConfig<object> key)
         {
             if (key == null)
             {
@@ -41,7 +41,7 @@ namespace Statiq.Core.Modules.Control
         /// </summary>
         /// <param name="key">A delegate that should return the key to use for ordering.</param>
         /// <returns>The current module instance.</returns>
-        public OrderBy ThenBy(DocumentConfig<object> key)
+        public OrderDocuments ThenBy(DocumentConfig<object> key)
         {
             if (key == null)
             {
@@ -58,7 +58,7 @@ namespace Statiq.Core.Modules.Control
         /// </summary>
         /// <param name="descending">If set to <c>true</c>, the documents are output in descending order.</param>
         /// <returns>The current module instance.</returns>
-        public OrderBy Descending(bool descending = true)
+        public OrderDocuments Descending(bool descending = true)
         {
             _orders.Peek().Descending = descending;
             return this;
@@ -69,7 +69,7 @@ namespace Statiq.Core.Modules.Control
         /// </summary>
         /// <param name="comparer">The comparer to use.</param>
         /// <returns>The current module instance.</returns>
-        public OrderBy WithComparer(IComparer<object> comparer)
+        public OrderDocuments WithComparer(IComparer<object> comparer)
         {
             _orders.Peek().Comparer = comparer;
             return this;
@@ -85,7 +85,7 @@ namespace Statiq.Core.Modules.Control
         /// </summary>
         /// <param name="comparer">The typed comparer to use.</param>
         /// <returns>The current module instance.</returns>
-        public OrderBy WithComparer<TValue>(IComparer<TValue> comparer)
+        public OrderDocuments WithComparer<TValue>(IComparer<TValue> comparer)
         {
             _orders.Peek().Comparer = comparer == null ? null : new ConvertingComparer<TValue>(comparer);
             return this;

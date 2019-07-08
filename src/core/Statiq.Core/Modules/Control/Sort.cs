@@ -13,7 +13,7 @@ namespace Statiq.Core.Modules.Control
     /// </summary>
     /// <remarks>
     /// The sorted documents are output as the result of this module. This is similar
-    /// to the <see cref="OrderBy"/> module but gives greater control over the sorting
+    /// to the <see cref="OrderDocuments"/> module but gives greater control over the sorting
     /// process.
     /// </remarks>
     /// <category>Control</category>

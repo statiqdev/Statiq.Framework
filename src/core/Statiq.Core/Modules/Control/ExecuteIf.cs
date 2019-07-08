@@ -17,7 +17,7 @@ namespace Statiq.Core.Modules.Control
     /// outputs without modification.
     /// </remarks>
     /// <category>Control</category>
-    public class If : IModule, IList<IfCondition>
+    public class ExecuteIf : IModule, IList<IfCondition>
     {
         private readonly List<IfCondition> _conditions = new List<IfCondition>();
 
@@ -29,7 +29,7 @@ namespace Statiq.Core.Modules.Control
         /// </summary>
         /// <param name="predicate">A predicate delegate that should return a <c>bool</c>.</param>
         /// <param name="modules">The modules to execute on documents where the predicate is <c>true</c>.</param>
-        public If(DocumentConfig<bool> predicate, params IModule[] modules)
+        public ExecuteIf(DocumentConfig<bool> predicate, params IModule[] modules)
         {
             _conditions.Add(new IfCondition(predicate, modules));
         }
@@ -42,7 +42,7 @@ namespace Statiq.Core.Modules.Control
         /// <param name="predicate">A predicate delegate that should return a <c>bool</c>.</param>
         /// <param name="modules">The modules to execute on documents where the predicate is <c>true</c>.</param>
         /// <returns>The current module instance.</returns>
-        public If ElseIf(DocumentConfig<bool> predicate, params IModule[] modules)
+        public ExecuteIf ElseIf(DocumentConfig<bool> predicate, params IModule[] modules)
         {
             _conditions.Add(new IfCondition(predicate, modules));
             return this;
@@ -69,7 +69,7 @@ namespace Statiq.Core.Modules.Control
         /// </summary>
         /// <param name="withoutUnmatchedDocuments">Set to <c>true</c> to prevent unmatched documents from being added to the resut set.</param>
         /// <returns>The current module.</returns>
-        public If WithoutUnmatchedDocuments(bool withoutUnmatchedDocuments = true)
+        public ExecuteIf WithoutUnmatchedDocuments(bool withoutUnmatchedDocuments = true)
         {
             _withoutUnmatchedDocuments = withoutUnmatchedDocuments;
             return this;

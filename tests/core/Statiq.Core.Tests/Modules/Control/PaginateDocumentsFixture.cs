@@ -15,9 +15,9 @@ using Statiq.Testing.Modules;
 namespace Statiq.Core.Tests.Modules.Control
 {
     [TestFixture]
-    public class PaginateFixture : BaseFixture
+    public class PaginateDocumentsFixture : BaseFixture
     {
-        public class ExecuteTests : PaginateFixture
+        public class ExecuteTests : PaginateDocumentsFixture
         {
             [Test]
             public async Task PaginateSetsCorrectMetadata()
@@ -33,7 +33,7 @@ namespace Statiq.Core.Tests.Modules.Control
                     AdditionalOutputs = 7,
                     EnsureInputDocument = true
                 };
-                Paginate paginate = new Paginate(3, count);
+                PaginateDocuments paginate = new PaginateDocuments(3, count);
                 Execute gatherData = new ExecuteDocument(
                     (d, c) =>
                     {
@@ -66,7 +66,7 @@ namespace Statiq.Core.Tests.Modules.Control
                     AdditionalOutputs = 7,
                     EnsureInputDocument = true
                 };
-                Paginate paginate = new Paginate(3, count);
+                PaginateDocuments paginate = new PaginateDocuments(3, count);
                 Execute gatherData = new ExecuteDocument(
                     Config.FromDocument<object>(async (d, c) =>
                     {
@@ -96,7 +96,7 @@ namespace Statiq.Core.Tests.Modules.Control
                     AdditionalOutputs = 7,
                     EnsureInputDocument = true
                 };
-                Paginate paginate = new Paginate(3, count);
+                PaginateDocuments paginate = new PaginateDocuments(3, count);
                 Execute gatherData = new ExecuteDocument(
                     Config.FromDocument<object>(async (d, c) =>
                     {
@@ -133,7 +133,7 @@ namespace Statiq.Core.Tests.Modules.Control
                     AdditionalOutputs = 7,
                     EnsureInputDocument = true
                 };
-                Paginate paginate = new Paginate(3, count).Where(Config.FromDocument(async doc => await doc.GetStringAsync() != "5"));
+                PaginateDocuments paginate = new PaginateDocuments(3, count).Where(Config.FromDocument(async doc => await doc.GetStringAsync() != "5"));
                 Execute gatherData = new ExecuteDocument(
                     Config.FromDocument<object>(async (d, c) =>
                     {

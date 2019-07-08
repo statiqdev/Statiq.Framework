@@ -13,9 +13,9 @@ using Statiq.Testing.Modules;
 namespace Statiq.Core.Tests.Modules.Control
 {
     [TestFixture]
-    public class OrderByFixture : BaseFixture
+    public class OrderDocumentsFixture : BaseFixture
     {
-        public class ExecuteTests : OrderByFixture
+        public class ExecuteTests : OrderDocumentsFixture
         {
             [Test]
             public async Task OrderByOrdersInAscendingOrder()
@@ -32,7 +32,7 @@ namespace Statiq.Core.Tests.Modules.Control
                     AdditionalOutputs = 2
                 };
                 Concat concat = new Concat(count2);
-                OrderBy orderBy = new OrderBy(Config.FromDocument(d => d.Get<int>("A")));
+                OrderDocuments orderBy = new OrderDocuments(Config.FromDocument(d => d.Get<int>("A")));
                 Execute gatherData = new ExecuteDocument(
                     Config.FromDocument(async d =>
                     {
@@ -63,7 +63,7 @@ namespace Statiq.Core.Tests.Modules.Control
                     AdditionalOutputs = 2
                 };
                 Concat concat = new Concat(count2);
-                OrderBy orderBy = new OrderBy(Config.FromDocument(d => d.Get<int>("A"))).Descending();
+                OrderDocuments orderBy = new OrderDocuments(Config.FromDocument(d => d.Get<int>("A"))).Descending();
                 Execute gatherData = new ExecuteDocument(
                     Config.FromDocument(async d =>
                     {
@@ -93,7 +93,7 @@ namespace Statiq.Core.Tests.Modules.Control
                 {
                     AdditionalOutputs = 1
                 };
-                OrderBy orderBy = new OrderBy(Config.FromDocument(d => d.Get<int>("A")))
+                OrderDocuments orderBy = new OrderDocuments(Config.FromDocument(d => d.Get<int>("A")))
                     .ThenBy(Config.FromDocument(d => d.Get<int>("B")));
                 Execute gatherData = new ExecuteDocument(
                     Config.FromDocument(async d =>
@@ -124,7 +124,7 @@ namespace Statiq.Core.Tests.Modules.Control
                 {
                     AdditionalOutputs = 1
                 };
-                OrderBy orderBy = new OrderBy(Config.FromDocument(d => d.Get<int>("A")))
+                OrderDocuments orderBy = new OrderDocuments(Config.FromDocument(d => d.Get<int>("A")))
                     .ThenBy(Config.FromDocument(d => d.Get<int>("B")))
                     .Descending();
                 Execute gatherData = new ExecuteDocument(
@@ -156,7 +156,7 @@ namespace Statiq.Core.Tests.Modules.Control
                 {
                     AdditionalOutputs = 1
                 };
-                OrderBy orderBy = new OrderBy(Config.FromDocument(d => d.Get<int>("A")))
+                OrderDocuments orderBy = new OrderDocuments(Config.FromDocument(d => d.Get<int>("A")))
                     .Descending()
                     .ThenBy(Config.FromDocument(d => d.Get<int>("B")))
                     .Descending();
@@ -189,7 +189,7 @@ namespace Statiq.Core.Tests.Modules.Control
                 {
                     AdditionalOutputs = 1
                 };
-                OrderBy orderBy = new OrderBy(Config.FromDocument(d => d.Get<int>("A")))
+                OrderDocuments orderBy = new OrderDocuments(Config.FromDocument(d => d.Get<int>("A")))
                     .Descending()
                     .ThenBy(Config.FromDocument(d => d.Get<int>("B")));
                 Execute gatherData = new ExecuteDocument(

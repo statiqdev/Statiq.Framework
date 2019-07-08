@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Statiq.Common.Documents;
@@ -11,7 +11,7 @@ namespace Statiq.Core.Modules.Control
     /// Takes the first X documents from the current pipeline and discards the rest.
     /// </summary>
     /// <category>Control</category>
-    public class Take : IModule
+    public class TakeDocuments : IModule
     {
         private readonly int _x;
 
@@ -19,7 +19,7 @@ namespace Statiq.Core.Modules.Control
         /// Takes the first X documents from the current pipeline and discards the rest.
         /// </summary>
         /// <param name="x">An integer representing the number of documents to preserve from the current pipeline.</param>
-        public Take(int x)
+        public TakeDocuments(int x)
         {
             _x = x;
         }

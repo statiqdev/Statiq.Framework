@@ -8,9 +8,9 @@ using Statiq.Testing.Modules;
 namespace Statiq.Core.Tests.Modules.Control
 {
     [TestFixture]
-    public class IfFixture : BaseFixture
+    public class ExecuteIfFixture : BaseFixture
     {
-        public class ExecuteTests : IfFixture
+        public class ExecuteTests : ExecuteIfFixture
         {
             [Test]
             public async Task IfResultsInCorrectCounts()
@@ -31,7 +31,7 @@ namespace Statiq.Core.Tests.Modules.Control
                 };
 
                 // When
-                await ExecuteAsync(a, new If(Config.FromDocument(async doc => await doc.GetStringAsync() == "1"), b), c);
+                await ExecuteAsync(a, new ExecuteIf(Config.FromDocument(async doc => await doc.GetStringAsync() == "1"), b), c);
 
                 // Then
                 Assert.AreEqual(1, a.ExecuteCount);
@@ -70,7 +70,7 @@ namespace Statiq.Core.Tests.Modules.Control
                 // When
                 await ExecuteAsync(
                     a,
-                    new If(Config.FromDocument(async doc => await doc.GetStringAsync() == "1"), b)
+                    new ExecuteIf(Config.FromDocument(async doc => await doc.GetStringAsync() == "1"), b)
                         .ElseIf(Config.FromDocument(async doc => await doc.GetStringAsync() == "2"), c),
                     d);
 
@@ -114,7 +114,7 @@ namespace Statiq.Core.Tests.Modules.Control
                 // When
                 await ExecuteAsync(
                     a,
-                    new If(Config.FromDocument(async doc => await doc.GetStringAsync() == "1"), b)
+                    new ExecuteIf(Config.FromDocument(async doc => await doc.GetStringAsync() == "1"), b)
                         .Else(c),
                     d);
 
@@ -162,7 +162,7 @@ namespace Statiq.Core.Tests.Modules.Control
                 // When
                 await ExecuteAsync(
                     a,
-                    new If(Config.FromDocument(async doc => await doc.GetStringAsync() == "1"), b)
+                    new ExecuteIf(Config.FromDocument(async doc => await doc.GetStringAsync() == "1"), b)
                         .ElseIf(Config.FromDocument(async doc => await doc.GetStringAsync() == "3"), c)
                         .Else(d),
                     e);
@@ -204,7 +204,7 @@ namespace Statiq.Core.Tests.Modules.Control
                 };
 
                 // When
-                await ExecuteAsync(a, new If(Config.FromContext(x => true), b), c);
+                await ExecuteAsync(a, new ExecuteIf(Config.FromContext(x => true), b), c);
 
                 // Then
                 Assert.AreEqual(1, a.ExecuteCount);
@@ -237,7 +237,7 @@ namespace Statiq.Core.Tests.Modules.Control
                 };
 
                 // When
-                await ExecuteAsync(a, new If(Config.FromContext(x => false), b), c);
+                await ExecuteAsync(a, new ExecuteIf(Config.FromContext(x => false), b), c);
 
                 // Then
                 Assert.AreEqual(1, a.ExecuteCount);
@@ -270,7 +270,7 @@ namespace Statiq.Core.Tests.Modules.Control
                 };
 
                 // When
-                await ExecuteAsync(a, new If(Config.FromDocument((doc, ctx) => false), b), c);
+                await ExecuteAsync(a, new ExecuteIf(Config.FromDocument((doc, ctx) => false), b), c);
 
                 // Then
                 Assert.AreEqual(1, a.ExecuteCount);
@@ -303,7 +303,7 @@ namespace Statiq.Core.Tests.Modules.Control
                 };
 
                 // When
-                await ExecuteAsync(a, new If(false, b).WithoutUnmatchedDocuments(), c);
+                await ExecuteAsync(a, new ExecuteIf(false, b).WithoutUnmatchedDocuments(), c);
 
                 // Then
                 Assert.AreEqual(1, a.ExecuteCount);

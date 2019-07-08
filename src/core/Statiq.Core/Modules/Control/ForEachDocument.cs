@@ -41,13 +41,13 @@ namespace Statiq.Core.Modules.Control
     /// </code>
     /// </example>
     /// <category>Control</category>
-    public class ForEach : ContainerModule
+    public class ForEachDocument : ContainerModule
     {
         /// <summary>
         /// Specifies the modules to execute against the input document one at a time.
         /// </summary>
         /// <param name="modules">The modules to execute.</param>
-        public ForEach(params IModule[] modules)
+        public ForEachDocument(params IModule[] modules)
             : this((IEnumerable<IModule>)modules)
         {
         }
@@ -56,7 +56,7 @@ namespace Statiq.Core.Modules.Control
         /// Specifies the modules to execute against the input document one at a time.
         /// </summary>
         /// <param name="modules">The modules to execute.</param>
-        public ForEach(IEnumerable<IModule> modules)
+        public ForEachDocument(IEnumerable<IModule> modules)
             : base(modules)
         {
         }

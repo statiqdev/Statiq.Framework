@@ -18,9 +18,9 @@ using Statiq.Testing.IO;
 namespace Statiq.Core.Tests.Modules.Control
 {
     [TestFixture]
-    public class SidecarFixture : BaseFixture
+    public class ProcessSidecarFileFixture : BaseFixture
     {
-        public class ExecuteTests : SidecarFixture
+        public class ExecuteTests : ProcessSidecarFileFixture
         {
             [Test]
             public async Task LoadsSidecarFile()
@@ -33,7 +33,7 @@ namespace Statiq.Core.Tests.Modules.Control
                     GetDocument("a/1.md", "File a1")
                 };
                 string lodedSidecarContent = null;
-                Sidecar sidecar = new Sidecar(new ExecuteDocument(Config.FromDocument(async x =>
+                ProcessSidecarFile sidecar = new ProcessSidecarFile(new ExecuteDocument(Config.FromDocument(async x =>
                 {
                     lodedSidecarContent = await x.GetStringAsync();
                     return new[] { x };
@@ -58,7 +58,7 @@ namespace Statiq.Core.Tests.Modules.Control
                     GetDocument("a/1.md", "File a1")
                 };
                 string lodedSidecarContent = null;
-                Sidecar sidecar = new Sidecar(".other", new ExecuteDocument(Config.FromDocument(async x =>
+                ProcessSidecarFile sidecar = new ProcessSidecarFile(".other", new ExecuteDocument(Config.FromDocument(async x =>
                 {
                     lodedSidecarContent = await x.GetStringAsync();
                     return new[] { x };
@@ -83,7 +83,7 @@ namespace Statiq.Core.Tests.Modules.Control
                     GetDocument("a/1.md", "File a1")
                 };
                 bool executedSidecarModules = false;
-                Sidecar sidecar = new Sidecar(".foo", new ExecuteDocument(Config.FromDocument(x =>
+                ProcessSidecarFile sidecar = new ProcessSidecarFile(".foo", new ExecuteDocument(Config.FromDocument(x =>
                 {
                     executedSidecarModules = true;
                     return (object)new[] { x };

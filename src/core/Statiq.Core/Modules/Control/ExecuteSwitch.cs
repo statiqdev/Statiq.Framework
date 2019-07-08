@@ -22,7 +22,7 @@ namespace Statiq.Core.Modules.Control
     /// or output without modification (if no default is defined).
     /// </remarks>
     /// <category>Control</category>
-    public class Switch : IModule
+    public class ExecuteSwitch : IModule
     {
         private readonly List<Tuple<object, IEnumerable<IModule>>> _cases
             = new List<Tuple<object, IEnumerable<IModule>>>();
@@ -34,7 +34,7 @@ namespace Statiq.Core.Modules.Control
         /// Defines the delegate that will be invoked against each input document to get the case comparison value.
         /// </summary>
         /// <param name="value">A delegate that returns an object to compare cases against.</param>
-        public Switch(DocumentConfig<object> value)
+        public ExecuteSwitch(DocumentConfig<object> value)
         {
             _value = value ?? throw new ArgumentNullException(nameof(value));
         }
@@ -45,7 +45,7 @@ namespace Statiq.Core.Modules.Control
         /// <param name="value">The value to compare to the one returned by the document delegate. Must be a primitive object or an array of primitive objects.</param>
         /// <param name="modules">The modules to execute if the case object (or any objects in the array) matches the document object.</param>
         /// <returns>The current module instance.</returns>
-        public Switch Case(object value, params IModule[] modules) => Case(value, (IEnumerable<IModule>)modules);
+        public ExecuteSwitch Case(object value, params IModule[] modules) => Case(value, (IEnumerable<IModule>)modules);
 
         /// <summary>
         /// Defines a case.
@@ -53,7 +53,7 @@ namespace Statiq.Core.Modules.Control
         /// <param name="value">The value to compare to the one returned by the document delegate. Must be a primitive object or an array of primitive objects.</param>
         /// <param name="modules">The modules to execute if the case object (or any objects in the array) matches the document object.</param>
         /// <returns>The current module instance.</returns>
-        public Switch Case(object value, IEnumerable<IModule> modules)
+        public ExecuteSwitch Case(object value, IEnumerable<IModule> modules)
         {
             _cases.Add(new Tuple<object, IEnumerable<IModule>>(value, modules));
             return this;
@@ -64,14 +64,14 @@ namespace Statiq.Core.Modules.Control
         /// </summary>
         /// <param name="modules">The modules to execute against documents that don't match a case.</param>
         /// <returns>The current module instance.</returns>
-        public Switch Default(params IModule[] modules) => Default((IEnumerable<IModule>)modules);
+        public ExecuteSwitch Default(params IModule[] modules) => Default((IEnumerable<IModule>)modules);
 
         /// <summary>
         /// Defines modules to execute against documents that don't match a case.
         /// </summary>
         /// <param name="modules">The modules to execute against documents that don't match a case.</param>
         /// <returns>The current module instance.</returns>
-        public Switch Default(IEnumerable<IModule> modules)
+        public ExecuteSwitch Default(IEnumerable<IModule> modules)
         {
             _defaultModules = modules;
             return this;

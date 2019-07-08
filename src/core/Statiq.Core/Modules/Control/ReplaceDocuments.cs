@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -23,7 +23,7 @@ namespace Statiq.Core.Modules.Control
     /// documents, wrap it with the <see cref="Concat"/> module.
     /// </remarks>
     /// <category>Control</category>
-    public class Documents : IModule
+    public class ReplaceDocuments : IModule
     {
         private readonly List<string> _pipelines = new List<string>();
         private readonly DocumentConfig<IEnumerable<IDocument>> _documents;
@@ -32,7 +32,7 @@ namespace Statiq.Core.Modules.Control
         /// <summary>
         /// This outputs all existing documents from all pipelines (except the current one).
         /// </summary>
-        public Documents()
+        public ReplaceDocuments()
         {
         }
 
@@ -40,7 +40,7 @@ namespace Statiq.Core.Modules.Control
         /// This outputs the documents from the specified pipeline.
         /// </summary>
         /// <param name="pipeline">The pipeline to output documents from.</param>
-        public Documents(string pipeline)
+        public ReplaceDocuments(string pipeline)
         {
             _pipelines.Add(pipeline);
         }
@@ -53,7 +53,7 @@ namespace Statiq.Core.Modules.Control
         /// <param name="documents">A delegate that should return
         /// a <c>IEnumerable&lt;IDocument&gt;</c> containing the documents to
         /// output for each input document.</param>
-        public Documents(DocumentConfig<IEnumerable<IDocument>> documents)
+        public ReplaceDocuments(DocumentConfig<IEnumerable<IDocument>> documents)
         {
             _documents = documents ?? throw new ArgumentNullException(nameof(documents));
         }
@@ -62,7 +62,7 @@ namespace Statiq.Core.Modules.Control
         /// Generates a specified number of new empty documents.
         /// </summary>
         /// <param name="count">The number of new documents to output.</param>
-        public Documents(int count)
+        public ReplaceDocuments(int count)
         {
             _documents = Config.FromContext(ctx =>
             {
@@ -79,7 +79,7 @@ namespace Statiq.Core.Modules.Control
         /// Generates new documents with the specified content.
         /// </summary>
         /// <param name="content">The content for each output document.</param>
-        public Documents(params string[] content)
+        public ReplaceDocuments(params string[] content)
         {
             _documents = Config.FromContext(async ctx => await content.SelectAsync(async x => ctx.GetDocument(await ctx.GetContentProviderAsync(x))));
         }
@@ -88,7 +88,7 @@ namespace Statiq.Core.Modules.Control
         /// Generates new documents with the specified metadata.
         /// </summary>
         /// <param name="metadata">The metadata for each output document.</param>
-        public Documents(params IEnumerable<KeyValuePair<string, object>>[] metadata)
+        public ReplaceDocuments(params IEnumerable<KeyValuePair<string, object>>[] metadata)
         {
             _documents = Config.FromContext(ctx => metadata.Select(x => ctx.GetDocument(x)));
         }
@@ -97,7 +97,7 @@ namespace Statiq.Core.Modules.Control
         /// Generates new documents with the specified content and metadata.
         /// </summary>
         /// <param name="contentAndMetadata">The content and metadata for each output document.</param>
-        public Documents(params Tuple<string, IEnumerable<KeyValuePair<string, object>>>[] contentAndMetadata)
+        public ReplaceDocuments(params Tuple<string, IEnumerable<KeyValuePair<string, object>>>[] contentAndMetadata)
         {
             _documents = Config.FromContext(async ctx => await contentAndMetadata.SelectAsync(async x => ctx.GetDocument(x.Item2, await ctx.GetContentProviderAsync(x.Item1))));
         }
@@ -107,7 +107,7 @@ namespace Statiq.Core.Modules.Control
         /// </summary>
         /// <param name="predicate">A delegate that should return a <c>bool</c>.</param>
         /// <returns>The current module instance.</returns>
-        public Documents Where(DocumentConfig<bool> predicate)
+        public ReplaceDocuments Where(DocumentConfig<bool> predicate)
         {
             _predicate = _predicate.CombineWith(predicate);
             return this;
@@ -123,7 +123,7 @@ namespace Statiq.Core.Modules.Control
         /// </summary>
         /// <param name="pipelines">The additional pipelines to get documents from.</param>
         /// <returns>The current module instance.</returns>
-        public Documents FromPipelines(params string[] pipelines)
+        public ReplaceDocuments FromPipelines(params string[] pipelines)
         {
             if (_documents != null)
             {

@@ -15,9 +15,9 @@ using Statiq.Testing.Execution;
 namespace Statiq.Core.Tests.Modules.Control
 {
     [TestFixture]
-    public class CombineFixture : BaseFixture
+    public class CombineDocumentsFixture : BaseFixture
     {
-        public class ExecuteTests : CombineFixture
+        public class ExecuteTests : CombineDocumentsFixture
         {
             [Test]
             public async Task AppendsContent()
@@ -25,7 +25,7 @@ namespace Statiq.Core.Tests.Modules.Control
                 // Given
                 TestDocument a = new TestDocument("a");
                 TestDocument b = new TestDocument("b");
-                Combine combine = new Combine();
+                CombineDocuments combine = new CombineDocuments();
 
                 // When
                 IReadOnlyList<TestDocument> results = await ExecuteAsync(new[] { a, b }, combine);
@@ -48,7 +48,7 @@ namespace Statiq.Core.Tests.Modules.Control
                     { "b", 3 },
                     { "c", 4 }
                 });
-                Combine combine = new Combine();
+                CombineDocuments combine = new CombineDocuments();
 
                 // When
                 IReadOnlyList<TestDocument> results = await ExecuteAsync(new[] { a, b }, combine);

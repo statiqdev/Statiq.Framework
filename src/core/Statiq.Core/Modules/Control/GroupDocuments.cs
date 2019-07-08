@@ -31,7 +31,7 @@ namespace Statiq.Core.Modules.Control
     /// <metadata cref="Keys.GroupDocuments" usage="Output" />
     /// <metadata cref="Keys.GroupKey" usage="Output" />
     /// <category>Control</category>
-    public class GroupByMany : ContainerModule
+    public class GroupDocuments : ContainerModule
     {
         private readonly DocumentConfig<IEnumerable<object>> _key;
         private DocumentConfig<bool> _predicate;
@@ -46,7 +46,7 @@ namespace Statiq.Core.Modules.Control
         /// </summary>
         /// <param name="key">A delegate that returns the group keys.</param>
         /// <param name="modules">Modules to execute on the input documents prior to grouping.</param>
-        public GroupByMany(DocumentConfig<IEnumerable<object>> key, params IModule[] modules)
+        public GroupDocuments(DocumentConfig<IEnumerable<object>> key, params IModule[] modules)
             : this(key, (IEnumerable<IModule>)modules)
         {
         }
@@ -59,7 +59,7 @@ namespace Statiq.Core.Modules.Control
         /// </summary>
         /// <param name="key">A delegate that returns the group keys.</param>
         /// <param name="modules">Modules to execute on the input documents prior to grouping.</param>
-        public GroupByMany(DocumentConfig<IEnumerable<object>> key, IEnumerable<IModule> modules)
+        public GroupDocuments(DocumentConfig<IEnumerable<object>> key, IEnumerable<IModule> modules)
             : base(modules)
         {
             _key = key ?? throw new ArgumentNullException(nameof(key));
@@ -74,7 +74,7 @@ namespace Statiq.Core.Modules.Control
         /// </summary>
         /// <param name="keyMetadataKey">The key metadata key.</param>
         /// <param name="modules">Modules to execute on the input documents prior to grouping.</param>
-        public GroupByMany(string keyMetadataKey, params IModule[] modules)
+        public GroupDocuments(string keyMetadataKey, params IModule[] modules)
             : this(keyMetadataKey, (IEnumerable<IModule>)modules)
         {
         }
@@ -88,7 +88,7 @@ namespace Statiq.Core.Modules.Control
         /// </summary>
         /// <param name="keyMetadataKey">The key metadata key.</param>
         /// <param name="modules">Modules to execute on the input documents prior to grouping.</param>
-        public GroupByMany(string keyMetadataKey, IEnumerable<IModule> modules)
+        public GroupDocuments(string keyMetadataKey, IEnumerable<IModule> modules)
             : base(modules)
         {
             if (keyMetadataKey == null)
@@ -105,7 +105,7 @@ namespace Statiq.Core.Modules.Control
         /// </summary>
         /// <param name="predicate">A delegate that should return a <c>bool</c>.</param>
         /// <returns>The current module instance.</returns>
-        public GroupByMany Where(DocumentConfig<bool> predicate)
+        public GroupDocuments Where(DocumentConfig<bool> predicate)
         {
             _predicate = _predicate.CombineWith(predicate);
             return this;
@@ -116,7 +116,7 @@ namespace Statiq.Core.Modules.Control
         /// </summary>
         /// <param name="comparer">The equality comparer to use.</param>
         /// <returns>The current module instance.</returns>
-        public GroupByMany WithComparer(IEqualityComparer<object> comparer)
+        public GroupDocuments WithComparer(IEqualityComparer<object> comparer)
         {
             _comparer = comparer;
             return this;
@@ -132,7 +132,7 @@ namespace Statiq.Core.Modules.Control
         /// </summary>
         /// <param name="comparer">The typed equality comparer to use.</param>
         /// <returns>The current module instance.</returns>
-        public GroupByMany WithComparer<TValue>(IEqualityComparer<TValue> comparer)
+        public GroupDocuments WithComparer<TValue>(IEqualityComparer<TValue> comparer)
         {
             _comparer = comparer == null ? null : new ConvertingEqualityComparer<TValue>(comparer);
             return this;
@@ -144,7 +144,7 @@ namespace Statiq.Core.Modules.Control
         /// </summary>
         /// <param name="emptyOutput"><c>true</c> to not output documents when no groups are found.</param>
         /// <returns>The current module instance.</returns>
-        public GroupByMany WithEmptyOutputIfNoGroups(bool emptyOutput = true)
+        public GroupDocuments WithEmptyOutputIfNoGroups(bool emptyOutput = true)
         {
             _emptyOutputIfNoGroups = emptyOutput;
             return this;
