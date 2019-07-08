@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Statiq.Common.Configuration;
 using Statiq.Common.Documents;
 using Statiq.Common.Execution;
+using Statiq.Common.Meta;
 using Statiq.Common.Modules;
 using Statiq.Core.Util;
 
@@ -36,8 +37,22 @@ namespace Statiq.Core.Modules.Control
         }
 
         /// <summary>
+        /// Orders the input documents using the value of the specified metadata key.
+        /// </summary>
+        /// <param name="key">A metadata key to get the objects to use for comparison.</param>
+        public OrderDocuments(string key)
+        {
+            if (key == null)
+            {
+                throw new ArgumentNullException(nameof(key));
+            }
+
+            _orders.Push(new Order(Config.FromDocument(x => x.Get(key))));
+        }
+
+        /// <summary>
         /// Orders the input documents using the specified delegate to get a secondary ordering key.
-        /// You can chain as many ThenBy calls together as needed.
+        /// You can chain as many <c>ThenBy</c> calls together as needed.
         /// </summary>
         /// <param name="key">A delegate that should return the key to use for ordering.</param>
         /// <returns>The current module instance.</returns>
@@ -49,6 +64,23 @@ namespace Statiq.Core.Modules.Control
             }
 
             _orders.Push(new Order(key));
+            return this;
+        }
+
+        /// <summary>
+        /// Orders the input documents using the value of the specified metadata key.
+        /// You can chain as many <c>ThenBy</c> calls together as needed.
+        /// </summary>
+        /// <param name="key">A metadata key to get the objects to use for comparison.</param>
+        /// <returns>The current module instance.</returns>
+        public OrderDocuments ThenBy(string key)
+        {
+            if (key == null)
+            {
+                throw new ArgumentNullException(nameof(key));
+            }
+
+            _orders.Push(new Order(Config.FromDocument(x => x.Get(key))));
             return this;
         }
 
@@ -77,8 +109,8 @@ namespace Statiq.Core.Modules.Control
 
         /// <summary>
         /// Specifies a typed comparer to use for the ordering. A conversion to the
-        /// comparer type will be attempted for all metadata values. If the conversion fails,
-        /// the values will be considered equivalent. Note that this will also have the effect
+        /// comparer type will be attempted for the object being compared. If the conversion fails
+        /// for either object, the default object comparer will be used. Note that this will also have the effect
         /// of treating different convertible types as being of the same type. For example,
         /// if you have two keys, 1 and "1", and use a string-based comparison, the
         /// documents will compare as equal.
@@ -88,6 +120,35 @@ namespace Statiq.Core.Modules.Control
         public OrderDocuments WithComparer<TValue>(IComparer<TValue> comparer)
         {
             _orders.Peek().Comparer = comparer == null ? null : new ConvertingComparer<TValue>(comparer);
+            return this;
+        }
+
+        /// <summary>
+        /// Specifies a comparison delegate to use for the ordering.
+        /// </summary>
+        /// <param name="comparison">The comparison delegate to use.</param>
+        /// <returns>The current module instance.</returns>
+        public OrderDocuments WithComparison(Comparison<object> comparison)
+        {
+            _orders.Peek().Comparer = comparison == null ? null : new ComparisonComparer<object>(comparison);
+            return this;
+        }
+
+        /// <summary>
+        /// Specifies a typed comparison delegate to use for the ordering. A conversion to the
+        /// comparison type will be attempted for the object being compared. If the conversion fails
+        /// for either object, the default object comparer will be used. Note that this will also have the effect
+        /// of treating different convertible types as being of the same type. For example,
+        /// if you have two keys, 1 and "1", and use a string-based comparison, the
+        /// documents will compare as equal.
+        /// </summary>
+        /// <param name="comparison">The typed comparison delegate to use.</param>
+        /// <returns>The current module instance.</returns>
+        public OrderDocuments WithComparison<TValue>(Comparison<TValue> comparison)
+        {
+            _orders.Peek().Comparer = comparison == null
+                ? null
+                : new ConvertingComparer<TValue>(new ComparisonComparer<TValue>(comparison));
             return this;
         }
 

@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 using NUnit.Framework;
+using Shouldly;
 using Statiq.Common.Configuration;
 using Statiq.Common.Documents;
 using Statiq.Common.Execution;
@@ -8,6 +9,7 @@ using Statiq.Common.Meta;
 using Statiq.Core.Modules.Control;
 using Statiq.Core.Modules.Extensibility;
 using Statiq.Testing;
+using Statiq.Testing.Documents;
 using Statiq.Testing.Modules;
 
 namespace Statiq.Core.Tests.Modules.Control
@@ -18,7 +20,7 @@ namespace Statiq.Core.Tests.Modules.Control
         public class ExecuteTests : OrderDocumentsFixture
         {
             [Test]
-            public async Task OrderByOrdersInAscendingOrder()
+            public async Task OrdersInAscendingOrder()
             {
                 // Given
                 List<string> content = new List<string>();
@@ -49,7 +51,7 @@ namespace Statiq.Core.Tests.Modules.Control
             }
 
             [Test]
-            public async Task OrderByOrdersInDescendingOrder()
+            public async Task OrdersInDescendingOrder()
             {
                 // Given
                 List<string> content = new List<string>();
@@ -80,7 +82,7 @@ namespace Statiq.Core.Tests.Modules.Control
             }
 
             [Test]
-            public async Task OrderByOrdersThenByInAscendingOrder()
+            public async Task OrdersThenByInAscendingOrder()
             {
                 // Given
                 List<string> content = new List<string>();
@@ -111,7 +113,7 @@ namespace Statiq.Core.Tests.Modules.Control
             }
 
             [Test]
-            public async Task OrderByOrdersThenByInDescendingOrder()
+            public async Task OrdersThenByInDescendingOrder()
             {
                 // Given
                 List<string> content = new List<string>();
@@ -143,7 +145,7 @@ namespace Statiq.Core.Tests.Modules.Control
             }
 
             [Test]
-            public async Task OrderByOrdersDescendingThenByInDescendingOrder()
+            public async Task OrdersDescendingThenByInDescendingOrder()
             {
                 // Given
                 List<string> content = new List<string>();
@@ -176,7 +178,7 @@ namespace Statiq.Core.Tests.Modules.Control
             }
 
             [Test]
-            public async Task OrderByOrdersDescendingThenByInAscendingOrder()
+            public async Task OrdersDescendingThenByInAscendingOrder()
             {
                 // Given
                 List<string> content = new List<string>();
@@ -205,6 +207,74 @@ namespace Statiq.Core.Tests.Modules.Control
                 // Then
                 Assert.AreEqual(10, content.Count); // (4+1) * (21+1)
                 CollectionAssert.AreEqual(new[] { "59", "510", "47", "48", "35", "36", "23", "24", "11", "12" }, content);
+            }
+
+            [Test]
+            public async Task OrdersUsingMetadataKey()
+            {
+                // Given
+                TestDocument a = new TestDocument
+                {
+                    { "Foo", 5 }
+                };
+                TestDocument b = new TestDocument();
+                TestDocument c = new TestDocument
+                {
+                    { "Foo", 1 }
+                };
+                OrderDocuments order = new OrderDocuments("Foo");
+
+                // When
+                IReadOnlyList<IDocument> results = await ExecuteAsync(new[] { a, b, c }, order);
+
+                // Then
+                results.ShouldBe(new[] { b, c, a });
+            }
+
+            [Test]
+            public async Task OrdersUsingTypedComparer()
+            {
+                // Given
+                TestDocument a = new TestDocument
+                {
+                    { "Foo", 5 }
+                };
+                TestDocument b = new TestDocument();
+                TestDocument c = new TestDocument
+                {
+                    { "Foo", "1" }
+                };
+                OrderDocuments order = new OrderDocuments(Config.FromDocument(x => x.Get("Foo")))
+                    .WithComparer<int>(Comparer<int>.Default);
+
+                // When
+                IReadOnlyList<IDocument> results = await ExecuteAsync(new[] { a, b, c }, order);
+
+                // Then
+                results.ShouldBe(new[] { b, c, a });
+            }
+
+            [Test]
+            public async Task OrdersUsingTypedComparison()
+            {
+                // Given
+                TestDocument a = new TestDocument
+                {
+                    { "Foo", 5 }
+                };
+                TestDocument b = new TestDocument();
+                TestDocument c = new TestDocument
+                {
+                    { "Foo", "1" }
+                };
+                OrderDocuments order = new OrderDocuments(Config.FromDocument(x => x.Get("Foo")))
+                    .WithComparison<int>((x, y) => Comparer<int>.Default.Compare(x, y));
+
+                // When
+                IReadOnlyList<IDocument> results = await ExecuteAsync(new[] { a, b, c }, order);
+
+                // Then
+                results.ShouldBe(new[] { b, c, a });
             }
         }
     }
