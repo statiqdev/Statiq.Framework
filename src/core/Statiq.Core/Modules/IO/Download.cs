@@ -23,7 +23,7 @@ namespace Statiq.Core.Modules.IO
     /// <remarks>
     /// The original input documents are ignored and are not part of the output
     /// of this module. If you want to retain the original input documents, consider using the
-    /// <see cref="ConcatBranch"/> module.
+    /// <see cref="ExecuteModules"/> module.
     /// </remarks>
     /// <metadata cref="Keys.SourceUri" usage="Output" />
     /// <metadata cref="Keys.SourceHeaders" usage="Output" />

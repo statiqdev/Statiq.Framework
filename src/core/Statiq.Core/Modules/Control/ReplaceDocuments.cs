@@ -20,7 +20,7 @@ namespace Statiq.Core.Modules.Control
     /// does not remove the documents from their original pipeline it's likely you will end up with documents that
     /// have the same content and metadata in two different pipelines. This module does not include the input
     /// documents as part of it's output. If you want to concatenate the result of this module with the input
-    /// documents, wrap it with the <see cref="Concat"/> module.
+    /// documents, wrap it with the <see cref="ExecuteModules"/> module.
     /// </remarks>
     /// <category>Control</category>
     public class ReplaceDocuments : IModule

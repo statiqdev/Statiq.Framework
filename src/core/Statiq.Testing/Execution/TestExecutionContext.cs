@@ -139,7 +139,7 @@ namespace Statiq.Testing.Execution
             }
             foreach (IModule module in modules)
             {
-                inputs = await module.ExecuteAsync(inputs.ToList(), this);
+                inputs = await module.ExecuteAsync(inputs?.ToList() ?? (IReadOnlyList<IDocument>)Array.Empty<IDocument>(), this);
             }
             return inputs.ToImmutableArray();
         }

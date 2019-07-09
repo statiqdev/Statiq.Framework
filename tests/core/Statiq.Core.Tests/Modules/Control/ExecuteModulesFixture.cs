@@ -8,16 +8,17 @@ using Statiq.Testing.Modules;
 using Statiq.Common.Execution;
 using Statiq.Common.Configuration;
 using Statiq.Common.Documents;
+using Shouldly;
 
 namespace Statiq.Core.Tests.Modules.Control
 {
     [TestFixture]
-    public class MergeFixture : BaseFixture
+    public class ExecuteModulesFixture : BaseFixture
     {
-        public class ExecuteTests : MergeFixture
+        public class ExecuteTests : ExecuteModulesFixture
         {
             [Test]
-            public async Task ReplacesContent()
+            public async Task ReplacesContentOnMerge()
             {
                 // Given
                 CountModule a = new CountModule("A")
@@ -27,13 +28,14 @@ namespace Statiq.Core.Tests.Modules.Control
                 };
                 CountModule b = new CountModule("B")
                 {
-                    Value = 20
+                    Value = 20,
+                    EnsureInputDocument = true
                 };
 
                 // When
                 IReadOnlyList<IDocument> results = await ExecuteAsync(
                     a,
-                    new Merge(b),
+                    new ExecuteModules(b).WithResults(ExecuteModuleResults.Merge),
                     new Core.Modules.Metadata.Meta("Content", Config.FromDocument(async doc => await doc.GetStringAsync())));
 
                 // Then
@@ -41,7 +43,7 @@ namespace Statiq.Core.Tests.Modules.Control
             }
 
             [Test]
-            public async Task CombinesMetadata()
+            public async Task CombinesMetadataOnMerge()
             {
                 // Given
                 CountModule a = new CountModule("A")
@@ -51,11 +53,12 @@ namespace Statiq.Core.Tests.Modules.Control
                 };
                 CountModule b = new CountModule("B")
                 {
-                    Value = 20
+                    Value = 20,
+                    EnsureInputDocument = true
                 };
 
                 // When
-                IReadOnlyList<IDocument> results = await ExecuteAsync(a, new Merge(b));
+                IReadOnlyList<IDocument> results = await ExecuteAsync(a, new ExecuteModules(b).WithResults(ExecuteModuleResults.Merge));
 
                 // Then
                 CollectionAssert.AreEqual(new[] { 11 }, results.Select(x => x["A"]));
@@ -63,7 +66,7 @@ namespace Statiq.Core.Tests.Modules.Control
             }
 
             [Test]
-            public async Task CombinesAndOverwritesMetadata()
+            public async Task CombinesAndOverwritesMetadataOnMerge()
             {
                 // Given
                 CountModule a = new CountModule("A")
@@ -73,18 +76,19 @@ namespace Statiq.Core.Tests.Modules.Control
                 };
                 CountModule b = new CountModule("A")
                 {
-                    Value = 20
+                    Value = 20,
+                    EnsureInputDocument = true
                 };
 
                 // When
-                IReadOnlyList<IDocument> results = await ExecuteAsync(a, new Merge(b));
+                IReadOnlyList<IDocument> results = await ExecuteAsync(a, new ExecuteModules(b).WithResults(ExecuteModuleResults.Merge));
 
                 // Then
                 CollectionAssert.AreEqual(new[] { 21 }, results.Select(x => x["A"]));
             }
 
             [Test]
-            public async Task SingleInputSingleResult()
+            public async Task SingleInputSingleResultOnMerge()
             {
                 // Given
                 CountModule a = new CountModule("A")
@@ -94,11 +98,12 @@ namespace Statiq.Core.Tests.Modules.Control
                 };
                 CountModule b = new CountModule("B")
                 {
-                    Value = 20
+                    Value = 20,
+                    EnsureInputDocument = true
                 };
 
                 // When
-                IReadOnlyList<IDocument> results = await ExecuteAsync(a, new Merge(b));
+                IReadOnlyList<IDocument> results = await ExecuteAsync(a, new ExecuteModules(b).WithResults(ExecuteModuleResults.Merge));
 
                 // Then
                 Assert.AreEqual(1, a.OutputCount);
@@ -108,7 +113,7 @@ namespace Statiq.Core.Tests.Modules.Control
             }
 
             [Test]
-            public async Task SingleInputMultipleResults()
+            public async Task SingleInputMultipleResultsOnMerge()
             {
                 // Given
                 CountModule a = new CountModule("A")
@@ -119,11 +124,12 @@ namespace Statiq.Core.Tests.Modules.Control
                 CountModule b = new CountModule("B")
                 {
                     Value = 20,
-                    AdditionalOutputs = 1
+                    AdditionalOutputs = 1,
+                    EnsureInputDocument = true
                 };
 
                 // When
-                IReadOnlyList<IDocument> results = await ExecuteAsync(a, new Merge(b));
+                IReadOnlyList<IDocument> results = await ExecuteAsync(a, new ExecuteModules(b).WithResults(ExecuteModuleResults.Merge));
 
                 // Then
                 Assert.AreEqual(1, a.OutputCount);
@@ -133,7 +139,7 @@ namespace Statiq.Core.Tests.Modules.Control
             }
 
             [Test]
-            public async Task MultipleInputsSingleResult()
+            public async Task MultipleInputsSingleResultOnMerge()
             {
                 // Given
                 CountModule a = new CountModule("A")
@@ -144,11 +150,12 @@ namespace Statiq.Core.Tests.Modules.Control
                 };
                 CountModule b = new CountModule("B")
                 {
-                    Value = 20
+                    Value = 20,
+                    EnsureInputDocument = true
                 };
 
                 // When
-                IReadOnlyList<IDocument> results = await ExecuteAsync(a, new Merge(b));
+                IReadOnlyList<IDocument> results = await ExecuteAsync(a, new ExecuteModules(b).WithResults(ExecuteModuleResults.Merge));
 
                 // Then
                 Assert.AreEqual(2, a.OutputCount);
@@ -158,7 +165,7 @@ namespace Statiq.Core.Tests.Modules.Control
             }
 
             [Test]
-            public async Task MultipleInputsMultipleResults()
+            public async Task MultipleInputsMultipleResultsOnMerge()
             {
                 // Given
                 CountModule a = new CountModule("A")
@@ -170,11 +177,12 @@ namespace Statiq.Core.Tests.Modules.Control
                 CountModule b = new CountModule("B")
                 {
                     Value = 20,
-                    AdditionalOutputs = 1
+                    AdditionalOutputs = 1,
+                    EnsureInputDocument = true
                 };
 
                 // When
-                IReadOnlyList<IDocument> results = await ExecuteAsync(a, new Merge(b));
+                IReadOnlyList<IDocument> results = await ExecuteAsync(a, new ExecuteModules(b).WithResults(ExecuteModuleResults.Merge));
 
                 // Then
                 Assert.AreEqual(2, a.OutputCount);
@@ -184,111 +192,75 @@ namespace Statiq.Core.Tests.Modules.Control
             }
 
             [Test]
-            public async Task SingleInputSingleResultForEachDocument()
+            public async Task ResultsInCorrectCountsWithInputDocuments()
             {
                 // Given
                 CountModule a = new CountModule("A")
                 {
-                    Value = 10,
-                    EnsureInputDocument = true
-                };
-                CountModule b = new CountModule("B")
-                {
-                    Value = 20
-                };
-
-                // When
-                IReadOnlyList<IDocument> results = await ExecuteAsync(
-                    a,
-                    new Merge(b).ForEachDocument(),
-                    new Core.Modules.Metadata.Meta("Content", Config.FromDocument(async doc => await doc.GetStringAsync())));
-
-                // Then
-                Assert.AreEqual(1, a.OutputCount);
-                Assert.AreEqual(1, b.OutputCount);
-                CollectionAssert.AreEqual(new[] { "1121" }, results.Select(x => x["Content"]));
-            }
-
-            [Test]
-            public async Task SingleInputMultipleResultsForEachDocument()
-            {
-                // Given
-                CountModule a = new CountModule("A")
-                {
-                    Value = 10,
-                    EnsureInputDocument = true
-                };
-                CountModule b = new CountModule("B")
-                {
-                    Value = 20,
-                    AdditionalOutputs = 1
-                };
-
-                // When
-                IReadOnlyList<IDocument> results = await ExecuteAsync(
-                    a,
-                    new Merge(b).ForEachDocument(),
-                    new Core.Modules.Metadata.Meta("Content", Config.FromDocument(async doc => await doc.GetStringAsync())));
-
-                // Then
-                Assert.AreEqual(1, a.OutputCount);
-                Assert.AreEqual(2, b.OutputCount);
-                CollectionAssert.AreEqual(new[] { "1121", "1122" }, results.Select(x => x["Content"]));
-            }
-
-            [Test]
-            public async Task MultipleInputsSingleResultForEachDocument()
-            {
-                // Given
-                CountModule a = new CountModule("A")
-                {
-                    Value = 10,
                     AdditionalOutputs = 1,
                     EnsureInputDocument = true
                 };
                 CountModule b = new CountModule("B")
                 {
-                    Value = 20
+                    AdditionalOutputs = 2,
+                    EnsureInputDocument = true
+                };
+                CountModule c = new CountModule("C")
+                {
+                    AdditionalOutputs = 3,
+                    EnsureInputDocument = true
                 };
 
                 // When
-                IReadOnlyList<IDocument> results = await ExecuteAsync(
-                    a,
-                    new Merge(b).ForEachDocument(),
-                    new Core.Modules.Metadata.Meta("Content", Config.FromDocument(async doc => await doc.GetStringAsync())));
+                IReadOnlyList<IDocument> results = await ExecuteAsync(a, new ExecuteModules(b).WithInputs(), c);
 
                 // Then
+                Assert.AreEqual(1, a.ExecuteCount);
+                Assert.AreEqual(1, b.ExecuteCount);
+                Assert.AreEqual(1, c.ExecuteCount);
+                Assert.AreEqual(1, a.InputCount);
+                Assert.AreEqual(2, b.InputCount);
+                Assert.AreEqual(6, c.InputCount);
                 Assert.AreEqual(2, a.OutputCount);
-                Assert.AreEqual(2, b.OutputCount);
-                CollectionAssert.AreEqual(new[] { "1121", "1222" }, results.Select(x => x["Content"]));
+                Assert.AreEqual(6, b.OutputCount);
+                Assert.AreEqual(24, c.OutputCount);
+                results.Count.ShouldBe(24);
             }
 
             [Test]
-            public async Task MultipleInputsMultipleResultsForEachDocument()
+            public async Task ResultsInCorrectCountsWithInputDocumentsOnConcat()
             {
                 // Given
                 CountModule a = new CountModule("A")
                 {
-                    Value = 10,
                     AdditionalOutputs = 1,
                     EnsureInputDocument = true
                 };
                 CountModule b = new CountModule("B")
                 {
-                    Value = 20,
-                    AdditionalOutputs = 1
+                    AdditionalOutputs = 2,
+                    EnsureInputDocument = true
+                };
+                CountModule c = new CountModule("C")
+                {
+                    AdditionalOutputs = 3,
+                    EnsureInputDocument = true
                 };
 
                 // When
-                IReadOnlyList<IDocument> results = await ExecuteAsync(
-                    a,
-                    new Merge(b).ForEachDocument(),
-                    new Core.Modules.Metadata.Meta("Content", Config.FromDocument(async doc => await doc.GetStringAsync())));
+                IReadOnlyList<IDocument> results = await ExecuteAsync(a, new ExecuteModules(b).WithInputs().WithResults(ExecuteModuleResults.Concat), c);
 
                 // Then
+                Assert.AreEqual(1, a.ExecuteCount);
+                Assert.AreEqual(1, b.ExecuteCount);
+                Assert.AreEqual(1, c.ExecuteCount);
+                Assert.AreEqual(1, a.InputCount);
+                Assert.AreEqual(2, b.InputCount);
+                Assert.AreEqual(8, c.InputCount);
                 Assert.AreEqual(2, a.OutputCount);
-                Assert.AreEqual(4, b.OutputCount);
-                CollectionAssert.AreEqual(new[] { "1121", "1122", "1223", "1224" }, results.Select(x => x["Content"]));
+                Assert.AreEqual(6, b.OutputCount);
+                Assert.AreEqual(32, c.OutputCount);
+                results.Count.ShouldBe(32);
             }
         }
     }
