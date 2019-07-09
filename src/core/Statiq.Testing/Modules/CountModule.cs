@@ -33,7 +33,7 @@ namespace Statiq.Testing.Modules
             // Add an initial document if there isn't already one
             if (inputs.Count == 0 && EnsureInputDocument)
             {
-                inputs = new[] { context.GetDocument() };
+                inputs = new[] { context.CreateDocument() };
             }
 
             foreach (IDocument input in inputs)

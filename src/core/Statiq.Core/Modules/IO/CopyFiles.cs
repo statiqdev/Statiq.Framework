@@ -138,7 +138,7 @@ namespace Statiq.Core.Modules.IO
 
                         // Return the document
                         return input == null
-                            ? context.GetDocument(file.Path, relativePath, context.GetContentProvider(file))
+                            ? context.CreateDocument(file.Path, relativePath, context.GetContentProvider(file))
                             : input.Clone(file.Path, relativePath, context.GetContentProvider(file));
                     }
                     catch (Exception ex)

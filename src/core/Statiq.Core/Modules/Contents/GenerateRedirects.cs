@@ -121,7 +121,7 @@ namespace Statiq.Core.Modules.Contents
                     if (!string.IsNullOrEmpty(content))
                     {
                         outputs.Add(
-                            context.GetDocument(
+                            context.CreateDocument(
                                 additionalOutput.Key,
                                 await context.GetContentProviderAsync(content)));
                     }
@@ -159,7 +159,7 @@ namespace Statiq.Core.Modules.Contents
                         if (_metaRefreshPages)
                         {
                             metaRefreshDocuments.Add(
-                                context.GetDocument(
+                                context.CreateDocument(
                                     outputPath,
                                     await context.GetContentProviderAsync($@"
 <!doctype html>

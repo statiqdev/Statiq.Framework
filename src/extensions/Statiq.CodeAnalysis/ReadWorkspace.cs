@@ -131,7 +131,7 @@ namespace Statiq.CodeAnalysis
                         IDocument GetProjectDocument(IFile file)
                         {
                             Common.Tracing.Trace.Verbose($"Read file {file.Path.FullPath}");
-                            return context.GetDocument(
+                            return context.CreateDocument(
                                 file.Path,
                                 null,
                                 new MetadataItems

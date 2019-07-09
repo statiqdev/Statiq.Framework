@@ -50,7 +50,7 @@ namespace Statiq.Core.Shortcodes.Html
             string path = arguments.String("Path");
             if (LinkGenerator.TryGetAbsoluteHttpUri(path, out string absoluteUri))
             {
-                return context.GetDocument(await context.GetContentProviderAsync(absoluteUri));
+                return context.CreateDocument(await context.GetContentProviderAsync(absoluteUri));
             }
             FilePath filePath = new FilePath(path);
 
@@ -80,7 +80,7 @@ namespace Statiq.Core.Shortcodes.Html
                 ? arguments.Bool("Lowercase")
                 : context.Bool(Keys.LinkLowercase);
 
-            return context.GetDocument(await context.GetContentProviderAsync(LinkGenerator.GetLink(filePath, host, root, scheme, hidePages, hideExtensions, lowercase)));
+            return context.CreateDocument(await context.GetContentProviderAsync(LinkGenerator.GetLink(filePath, host, root, scheme, hidePages, hideExtensions, lowercase)));
         }
     }
 }

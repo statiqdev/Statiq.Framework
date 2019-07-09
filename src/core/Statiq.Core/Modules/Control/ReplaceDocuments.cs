@@ -69,7 +69,7 @@ namespace Statiq.Core.Modules.Control
                 List<IDocument> documents = new List<IDocument>();
                 for (int c = 0; c < count; c++)
                 {
-                    documents.Add(ctx.GetDocument());
+                    documents.Add(ctx.CreateDocument());
                 }
                 return (IEnumerable<IDocument>)documents;
             });
@@ -81,7 +81,7 @@ namespace Statiq.Core.Modules.Control
         /// <param name="content">The content for each output document.</param>
         public ReplaceDocuments(params string[] content)
         {
-            _documents = Config.FromContext(async ctx => await content.SelectAsync(async x => ctx.GetDocument(await ctx.GetContentProviderAsync(x))));
+            _documents = Config.FromContext(async ctx => await content.SelectAsync(async x => ctx.CreateDocument(await ctx.GetContentProviderAsync(x))));
         }
 
         /// <summary>
@@ -90,7 +90,7 @@ namespace Statiq.Core.Modules.Control
         /// <param name="metadata">The metadata for each output document.</param>
         public ReplaceDocuments(params IEnumerable<KeyValuePair<string, object>>[] metadata)
         {
-            _documents = Config.FromContext(ctx => metadata.Select(x => ctx.GetDocument(x)));
+            _documents = Config.FromContext(ctx => metadata.Select(x => ctx.CreateDocument(x)));
         }
 
         /// <summary>
@@ -99,7 +99,7 @@ namespace Statiq.Core.Modules.Control
         /// <param name="contentAndMetadata">The content and metadata for each output document.</param>
         public ReplaceDocuments(params Tuple<string, IEnumerable<KeyValuePair<string, object>>>[] contentAndMetadata)
         {
-            _documents = Config.FromContext(async ctx => await contentAndMetadata.SelectAsync(async x => ctx.GetDocument(x.Item2, await ctx.GetContentProviderAsync(x.Item1))));
+            _documents = Config.FromContext(async ctx => await contentAndMetadata.SelectAsync(async x => ctx.CreateDocument(x.Item2, await ctx.GetContentProviderAsync(x.Item1))));
         }
 
         /// <summary>

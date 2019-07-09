@@ -156,7 +156,7 @@ namespace Statiq.Common.Modules
                     }
                 }
 
-                return context.GetDocument(meta, await context.GetContentProviderAsync(content));
+                return context.CreateDocument(meta, await context.GetContentProviderAsync(content));
             }
         }
     }

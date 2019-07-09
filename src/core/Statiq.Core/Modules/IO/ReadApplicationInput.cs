@@ -26,7 +26,7 @@ namespace Statiq.Core.Modules.IO
                 return Array.Empty<IDocument>();
             }
 
-            return new[] { context.GetDocument(await context.GetContentProviderAsync(context.ApplicationInput)) };
+            return new[] { context.CreateDocument(await context.GetContentProviderAsync(context.ApplicationInput)) };
         }
     }
 }

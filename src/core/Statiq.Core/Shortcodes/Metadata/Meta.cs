@@ -21,6 +21,6 @@ namespace Statiq.Core.Shortcodes.Metadata
     {
         /// <inheritdoc />
         public async Task<IDocument> ExecuteAsync(KeyValuePair<string, string>[] args, string content, IDocument document, IExecutionContext context) =>
-            context.GetDocument(await context.GetContentProviderAsync(document.String(args.SingleValue())));
+            context.CreateDocument(await context.GetContentProviderAsync(document.String(args.SingleValue())));
     }
 }

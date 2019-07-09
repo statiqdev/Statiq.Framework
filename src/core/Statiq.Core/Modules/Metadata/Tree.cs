@@ -85,7 +85,7 @@ namespace Statiq.Core.Modules.Metadata
             _placeholderFactory = async (treePath, items, context) =>
             {
                 FilePath source = new FilePath(string.Join("/", treePath.Concat(new[] { "index.html" })));
-                return context.GetDocument((await context.FileSystem.GetInputFileAsync(source)).Path.FullPath, source, items);
+                return context.CreateDocument((await context.FileSystem.GetInputFileAsync(source)).Path.FullPath, source, items);
             };
             _sort = (x, y) => Comparer.Default.Compare(
                 x.Get<object[]>(Keys.TreePath)?.LastOrDefault(),
@@ -326,7 +326,7 @@ namespace Statiq.Core.Modules.Metadata
                 {
                     // There's no input document for this node so we need to make a placeholder
                     metadata.Add(Keys.TreePlaceholder, true);
-                    OutputDocument = await tree._placeholderFactory(TreePath, metadata, context) ?? context.GetDocument(metadata);
+                    OutputDocument = await tree._placeholderFactory(TreePath, metadata, context) ?? context.CreateDocument(metadata);
                 }
                 else
                 {

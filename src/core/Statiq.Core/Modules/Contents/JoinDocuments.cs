@@ -57,7 +57,7 @@ namespace Statiq.Core.Modules.Contents
         {
             if (inputs == null || inputs.Count < 1)
             {
-                return new[] { context.GetDocument() };
+                return new[] { context.CreateDocument() };
             }
 
             using (Stream contentStream = await context.GetContentStreamAsync())
@@ -86,7 +86,7 @@ namespace Statiq.Core.Modules.Contents
                     }
                 }
 
-                return new[] { context.GetDocument(MetadataForOutputDocument(inputs), context.GetContentProvider(contentStream)) };
+                return new[] { context.CreateDocument(MetadataForOutputDocument(inputs), context.GetContentProvider(contentStream)) };
             }
         }
 

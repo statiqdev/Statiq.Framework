@@ -141,12 +141,12 @@ namespace Statiq.Core.Tests.Modules.Control
                 Execute meta = new ExecuteContext(
                     c => new IDocument[]
                     {
-                        c.GetDocument(new MetadataItems { { "Tag", new object[] { "A", "b" } } }),
-                        c.GetDocument(new MetadataItems { { "Tag", new object[] { "B" } } }),
-                        c.GetDocument(new MetadataItems { { "Tag", new object[] { "C" } } }),
-                        c.GetDocument(new MetadataItems { { "Tag", new object[] { "c" } } }),
-                        c.GetDocument(new MetadataItems { { "Tag", new object[] { 1 } } }),
-                        c.GetDocument(new MetadataItems { { "Tag", new object[] { "1" } } })
+                        c.CreateDocument(new MetadataItems { { "Tag", new object[] { "A", "b" } } }),
+                        c.CreateDocument(new MetadataItems { { "Tag", new object[] { "B" } } }),
+                        c.CreateDocument(new MetadataItems { { "Tag", new object[] { "C" } } }),
+                        c.CreateDocument(new MetadataItems { { "Tag", new object[] { "c" } } }),
+                        c.CreateDocument(new MetadataItems { { "Tag", new object[] { 1 } } }),
+                        c.CreateDocument(new MetadataItems { { "Tag", new object[] { "1" } } })
                     });
                 GroupDocuments groupByMany = new GroupDocuments("Tag", meta);
                 Execute gatherData = new ExecuteDocument(
@@ -171,12 +171,12 @@ namespace Statiq.Core.Tests.Modules.Control
                 Execute meta = new ExecuteContext(
                     c => new IDocument[]
                     {
-                        c.GetDocument(new MetadataItems { { "Tag", new object[] { "A", "b" } } }),
-                        c.GetDocument(new MetadataItems { { "Tag", new object[] { "B" } } }),
-                        c.GetDocument(new MetadataItems { { "Tag", new object[] { "C" } } }),
-                        c.GetDocument(new MetadataItems { { "Tag", new object[] { "c" } } }),
-                        c.GetDocument(new MetadataItems { { "Tag", new object[] { 1 } } }),
-                        c.GetDocument(new MetadataItems { { "Tag", new object[] { "1" } } })
+                        c.CreateDocument(new MetadataItems { { "Tag", new object[] { "A", "b" } } }),
+                        c.CreateDocument(new MetadataItems { { "Tag", new object[] { "B" } } }),
+                        c.CreateDocument(new MetadataItems { { "Tag", new object[] { "C" } } }),
+                        c.CreateDocument(new MetadataItems { { "Tag", new object[] { "c" } } }),
+                        c.CreateDocument(new MetadataItems { { "Tag", new object[] { 1 } } }),
+                        c.CreateDocument(new MetadataItems { { "Tag", new object[] { "1" } } })
                     });
                 GroupDocuments groupByMany = new GroupDocuments("Tag", meta).WithComparer(StringComparer.OrdinalIgnoreCase);
                 Execute gatherData = new ExecuteDocument(

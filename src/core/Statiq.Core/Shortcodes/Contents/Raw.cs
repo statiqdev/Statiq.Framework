@@ -22,6 +22,6 @@ namespace Statiq.Core.Shortcodes.Contents
     {
         /// <inheritdoc />
         public async Task<IDocument> ExecuteAsync(KeyValuePair<string, string>[] args, string content, IDocument document, IExecutionContext context) =>
-            context.GetDocument(await context.GetContentProviderAsync(content));
+            context.CreateDocument(await context.GetContentProviderAsync(content));
     }
 }

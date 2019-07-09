@@ -38,7 +38,7 @@ namespace Statiq.Core.Shortcodes.Html
                 "Username",
                 "File");
             arguments.RequireKeys("Id");
-            return context.GetDocument(
+            return context.CreateDocument(
                 await context.GetContentProviderAsync(
                     $"<script src=\"//gist.github.com/{arguments.String("Username", x => x + "/")}{arguments.String("Id")}.js"
                     + $"{arguments.String("File", x => "?file=" + x)}\" type=\"text/javascript\"></script>"));

@@ -422,7 +422,7 @@ namespace Statiq.CodeAnalysis.Analysis
             // Create the document and add it to caches
             return _symbolToDocument.GetOrAdd(
                 symbol,
-                _ => _context.GetDocument(new FilePath(symbol.ToDisplayString(), PathKind.Absolute), destination, items));
+                _ => _context.CreateDocument(new FilePath(symbol.ToDisplayString(), PathKind.Absolute), destination, items));
         }
 
         private void AddXmlDocumentation(ISymbol symbol, MetadataItems metadata)
@@ -543,7 +543,7 @@ namespace Statiq.CodeAnalysis.Analysis
         private string GetSyntax(ISymbol symbol) => SyntaxHelper.GetSyntax(symbol);
 
         private IReadOnlyList<IDocument> GetAttributeDocuments(ISymbol symbol) =>
-            symbol.GetAttributes().Select(attributeData => _context.GetDocument(new MetadataItems
+            symbol.GetAttributes().Select(attributeData => _context.CreateDocument(new MetadataItems
             {
                 { CodeAnalysisKeys.AttributeData, attributeData },
                 { CodeAnalysisKeys.Type, DocumentFor(attributeData.AttributeClass) },

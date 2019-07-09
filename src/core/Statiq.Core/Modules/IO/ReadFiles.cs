@@ -83,7 +83,7 @@ namespace Statiq.Core.Modules.IO
                 {
                     Trace.Verbose($"Read file {file.Path.FullPath}");
                     return input == null
-                        ? context.GetDocument(file.Path, file.Path.GetRelativeInputPath(context), context.GetContentProvider(file))
+                        ? context.CreateDocument(file.Path, file.Path.GetRelativeInputPath(context), context.GetContentProvider(file))
                         : input.Clone(file.Path, file.Path.GetRelativeInputPath(context), context.GetContentProvider(file));
                 });
             }

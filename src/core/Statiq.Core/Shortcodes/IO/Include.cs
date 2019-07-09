@@ -65,11 +65,11 @@ namespace Statiq.Core.Shortcodes.IO
             if (!await includedFile.GetExistsAsync())
             {
                 Trace.Warning($"Included file {includedPath.FullPath} does not exist");
-                return context.GetDocument();
+                return context.CreateDocument();
             }
 
             // Set the currently included shortcode source so nested includes can use it
-            return context.GetDocument(
+            return context.CreateDocument(
                 new MetadataItems
                 {
                     { "IncludeShortcodeSource", includedFile.Path.FullPath }

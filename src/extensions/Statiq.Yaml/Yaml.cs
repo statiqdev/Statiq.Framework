@@ -118,7 +118,7 @@ namespace Statiq.Yaml
                 foreach (KeyValuePair<YamlNode, YamlNode> child in
                     mappingNode.Children.Where(y => y.Key is YamlScalarNode && y.Value is YamlSequenceNode && ((YamlSequenceNode)y.Value).All(z => z is YamlMappingNode)))
                 {
-                    metadata[((YamlScalarNode)child.Key).Value] = ((YamlSequenceNode)child.Value).Select(a => context.GetDocument(GetDocumentMetadata(a, context))).ToArray();
+                    metadata[((YamlScalarNode)child.Key).Value] = ((YamlSequenceNode)child.Value).Select(a => context.CreateDocument(GetDocumentMetadata(a, context))).ToArray();
                 }
 
                 // Note: No support for mixed sequences of YamlMappingNode and YamlScalarNode together

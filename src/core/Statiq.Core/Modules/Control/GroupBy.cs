@@ -171,7 +171,7 @@ namespace Statiq.Core.Modules.Control
                             }));
                 });
             }
-            return groupings.Select(x => context.GetDocument(
+            return groupings.Select(x => context.CreateDocument(
                 new MetadataItems
                 {
                     { Keys.GroupDocuments, x.ToImmutableArray() },

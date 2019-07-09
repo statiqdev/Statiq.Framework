@@ -172,7 +172,7 @@ namespace Statiq.Core.Shortcodes.Html
                 }
             }
 
-            return context.GetDocument(await context.GetContentProviderAsync(table.ToString()));
+            return context.CreateDocument(await context.GetContentProviderAsync(table.ToString()));
         }
     }
 }

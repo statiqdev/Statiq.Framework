@@ -201,7 +201,7 @@ namespace Statiq.Core.Modules.Control
                         { Keys.NextPage, new CachedDelegateMetadataValue(_ => pages.Length > currentI + 1 ? pages[currentI + 1].Document : null) },
                         { Keys.PreviousPage, new CachedDelegateMetadataValue(_ => currentI != 0 ? pages[currentI - 1].Document : null) }
                     };
-                    IDocument document = input?.Clone(metadata) ?? context.GetDocument(metadata);
+                    IDocument document = input?.Clone(metadata) ?? context.CreateDocument(metadata);
 
                     // Apply any page metadata
                     if (_pageMetadata.Count > 0)

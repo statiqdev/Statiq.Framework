@@ -182,7 +182,7 @@ namespace Statiq.SearchIndex
             StringBuilder scriptBuilder = BuildScript(searchIndexItems, stopwords, context);
             string script = _script(scriptBuilder, context);
 
-            return new[] { context.GetDocument(_destination, await context.GetContentProviderAsync(script)) };
+            return new[] { context.CreateDocument(_destination, await context.GetContentProviderAsync(script)) };
         }
 
         private StringBuilder BuildScript(IList<ISearchIndexItem> searchIndexItems, string[] stopwords, IExecutionContext context)

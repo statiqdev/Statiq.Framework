@@ -73,7 +73,7 @@ namespace Statiq.Highlight.Shortcodes
                     element.SetAttribute("class", $"language-{dictionary.String("Language")}");
                 }
                 Statiq.Highlight.Highlight.HighlightElement(enginePool, element);
-                return context.GetDocument(await context.GetContentProviderAsync(element.OuterHtml));
+                return context.CreateDocument(await context.GetContentProviderAsync(element.OuterHtml));
             }
         }
     }

@@ -25,7 +25,7 @@ namespace Statiq.Common.Documents
 
         private interface IFactory
         {
-            IDocument GetDocument(
+            IDocument CreateDocument(
                 IMetadata baseMetadata,
                 FilePath source,
                 FilePath destination,
@@ -43,7 +43,7 @@ namespace Statiq.Common.Documents
             {
             }
 
-            public IDocument GetDocument(
+            public IDocument CreateDocument(
                 IMetadata baseMetadata,
                 FilePath source,
                 FilePath destination,
@@ -56,25 +56,25 @@ namespace Statiq.Common.Documents
             where TDocument : FactoryDocument, IDocument, new() =>
             _defaultFactory = Factory<TDocument>.Instance;
 
-        internal IDocument InternalGetDocument(
+        internal IDocument InternalCreateDocument(
             FilePath source,
             FilePath destination,
             IEnumerable<KeyValuePair<string, object>> items,
             IContentProvider contentProvider) =>
-            _defaultFactory.GetDocument(
+            _defaultFactory.CreateDocument(
                 _settings,
                 source,
                 destination,
                 items,
                 contentProvider);
 
-        internal TDocument InternalGetDocument<TDocument>(
+        internal TDocument InternalCreateDocument<TDocument>(
             FilePath source,
             FilePath destination,
             IEnumerable<KeyValuePair<string, object>> items,
             IContentProvider contentProvider)
             where TDocument : FactoryDocument, IDocument, new() =>
-            (TDocument)Factory<TDocument>.Instance.GetDocument(
+            (TDocument)Factory<TDocument>.Instance.CreateDocument(
                 _settings,
                 source,
                 destination,

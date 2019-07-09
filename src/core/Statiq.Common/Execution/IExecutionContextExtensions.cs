@@ -20,7 +20,7 @@ namespace Statiq.Common.Execution
             this IExecutionContext context,
             IEnumerable<IModule> modules,
             IEnumerable<KeyValuePair<string, object>> metadata) =>
-            await context.ExecuteAsync(modules, new[] { context.GetDocument(metadata) });
+            await context.ExecuteAsync(modules, new[] { context.CreateDocument(metadata) });
 
         /// <summary>
         /// Executes the specified modules without an initial input document and returns the result documents.

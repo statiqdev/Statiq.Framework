@@ -124,7 +124,7 @@ namespace Statiq.Core.Modules.IO
                 }
             }
             return responses.Select(response =>
-                context.GetDocument(
+                context.CreateDocument(
                     new MetadataItems
                     {
                         { Keys.SourceUri, response.Uri },

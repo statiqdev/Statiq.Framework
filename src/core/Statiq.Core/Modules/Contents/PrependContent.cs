@@ -38,7 +38,7 @@ namespace Statiq.Core.Modules.Contents
         {
             if (input == null)
             {
-                return context.GetDocument(await context.GetContentProviderAsync(content));
+                return context.CreateDocument(await context.GetContentProviderAsync(content));
             }
             return content == null ? input : input.Clone(await context.GetContentProviderAsync(content + await input.GetStringAsync()));
         }
