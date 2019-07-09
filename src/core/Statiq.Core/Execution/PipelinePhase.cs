@@ -62,7 +62,7 @@ namespace Statiq.Core.Execution
             Engine engine,
             Guid executionId,
             IServiceProvider serviceProvider,
-            CancellationToken cancellationToken)
+            CancellationTokenSource cancellationTokenSource)
         {
             if (_disposed)
             {
@@ -84,7 +84,7 @@ namespace Statiq.Core.Execution
                 IServiceScopeFactory serviceScopeFactory = serviceProvider.GetRequiredService<IServiceScopeFactory>();
                 using (IServiceScope serviceScope = serviceScopeFactory.CreateScope())
                 {
-                    ExecutionContext context = new ExecutionContext(engine, executionId, this, serviceScope.ServiceProvider, cancellationToken);
+                    ExecutionContext context = new ExecutionContext(engine, executionId, this, serviceScope.ServiceProvider, cancellationTokenSource.Token);
                     OutputDocuments = await Engine.ExecuteAsync(context, _modules, GetInputDocuments());
                     pipelineStopwatch.Stop();
                     Trace.Information($"Executed pipeline {PipelineName}/{Phase} in {pipelineStopwatch.ElapsedMilliseconds} ms resulting in {OutputDocuments.Length} output document(s)");
@@ -94,7 +94,8 @@ namespace Statiq.Core.Execution
             {
                 if (!(ex is OperationCanceledException))
                 {
-                    Trace.Error($"Error while executing pipeline {PipelineName}/{Phase}");
+                    Trace.Critical($"Exception while executing pipeline {PipelineName}/{Phase}: {ex}");
+                    cancellationTokenSource.Cancel();
                 }
                 OutputDocuments = ImmutableArray<IDocument>.Empty;
                 throw;

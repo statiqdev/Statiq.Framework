@@ -191,31 +191,33 @@ namespace Statiq.Core.Execution
                 _phases = GetPipelinePhases(_pipelines);
             }
 
+            // Start the timer
+            Guid executionId = Guid.NewGuid();
+            System.Diagnostics.Stopwatch engineStopwatch = System.Diagnostics.Stopwatch.StartNew();
+            Trace.Information($"Executing {_pipelines.Count} pipelines (execution ID {executionId})");
+
+            // Setup (clear the document collection)
+            Documents.Clear();
+
+            // Get phase tasks
+            Task[] phaseTasks = null;
             try
             {
-                System.Diagnostics.Stopwatch engineStopwatch = System.Diagnostics.Stopwatch.StartNew();
-                Trace.Information("Executing {0} pipelines", _pipelines.Count);
-
-                // Setup (clear the document collection)
-                Documents.Clear();
-
                 // Get and execute all phases
-                Guid executionId = Guid.NewGuid();
-                Task[] phaseTasks = GetPhaseTasks(executionId, serviceProvider, cancellationTokenSource.Token);
+                phaseTasks = GetPhaseTasks(executionId, serviceProvider, cancellationTokenSource);
                 await Task.WhenAll(phaseTasks);
-
-                engineStopwatch.Stop();
-                Trace.Information($"Finished execution in {engineStopwatch.ElapsedMilliseconds} ms");
             }
             catch (Exception ex)
             {
                 if (!(ex is OperationCanceledException))
                 {
-                    Trace.Critical("Exception during execution: {0}", ex.ToString());
-                    cancellationTokenSource.Cancel();
+                    Trace.Critical("Error during execution");
                 }
-                throw;
             }
+
+            // Stop the timer
+            engineStopwatch.Stop();
+            Trace.Information($"Finished execution in {engineStopwatch.ElapsedMilliseconds} ms");
         }
 
         // The result array is sorted based on dependencies
@@ -300,22 +302,22 @@ namespace Statiq.Core.Execution
             }
         }
 
-        private Task[] GetPhaseTasks(Guid executionId, IServiceProvider serviceProvider, CancellationToken cancellationToken)
+        private Task[] GetPhaseTasks(Guid executionId, IServiceProvider serviceProvider, CancellationTokenSource cancellationTokenSource)
         {
             Dictionary<PipelinePhase, Task> phaseTasks = new Dictionary<PipelinePhase, Task>();
             foreach (PipelinePhase phase in _phases)
             {
-                phaseTasks.Add(phase, GetPhaseTask(executionId, serviceProvider, phaseTasks, phase, cancellationToken));
+                phaseTasks.Add(phase, GetPhaseTask(executionId, serviceProvider, phaseTasks, phase, cancellationTokenSource));
             }
             return phaseTasks.Values.ToArray();
         }
 
-        private Task GetPhaseTask(Guid executionId, IServiceProvider serviceProvider, Dictionary<PipelinePhase, Task> phaseTasks, PipelinePhase phase, CancellationToken cancellationToken)
+        private Task GetPhaseTask(Guid executionId, IServiceProvider serviceProvider, Dictionary<PipelinePhase, Task> phaseTasks, PipelinePhase phase, CancellationTokenSource cancellationTokenSource)
         {
             if (phase.Dependencies.Length == 0)
             {
-                // This will immediatly queue the input phase while we continue figuring out tasks, but that's okay
-                return Task.Run(() => phase.ExecuteAsync(this, executionId, serviceProvider, cancellationToken), cancellationToken);
+                // This will immediately queue the input phase while we continue figuring out tasks, but that's okay
+                return Task.Run(() => phase.ExecuteAsync(this, executionId, serviceProvider, cancellationTokenSource), cancellationTokenSource.Token);
             }
 
             // We have to explicitly wait the execution task in the continuation function
@@ -327,7 +329,7 @@ namespace Statiq.Core.Execution
                     // Only run the dependent task if all the dependencies successfully completed
                     if (dependencies.All(x => x.IsCompletedSuccessfully))
                     {
-                        Task.WaitAll(new Task[] { phase.ExecuteAsync(this, executionId, serviceProvider, cancellationToken) }, cancellationToken);
+                        Task.WaitAll(new Task[] { phase.ExecuteAsync(this, executionId, serviceProvider, cancellationTokenSource) }, cancellationTokenSource.Token);
                     }
                     else
                     {
@@ -336,7 +338,7 @@ namespace Statiq.Core.Execution
                         Trace.Error(error);
                         throw new Exception(error);
                     }
-                }, cancellationToken);
+                }, cancellationTokenSource.Token);
         }
 
         // This executes the specified modules with the specified input documents
