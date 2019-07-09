@@ -136,7 +136,7 @@ namespace Statiq.Core.Modules.Control
                 ? ImmutableArray<IDocument>.Empty
                 : await context.ExecuteAsync(Children, misses);
             Dictionary<FilePath, IGrouping<FilePath, IDocument>> resultsBySource =
-                results.GroupBy(x => x.Source).ToDictionary(x => x.Key, x => x);
+                results.Where(x => x.Source != null).GroupBy(x => x.Source).ToDictionary(x => x.Key, x => x);
             outputs.AddRange(results);
 
             // Cache all miss sources, even if they resulted in an empty result document set
