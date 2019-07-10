@@ -1,4 +1,5 @@
-﻿using Statiq.Common.Configuration;
+﻿using System.Collections.Generic;
+using Statiq.Common.Configuration;
 using Statiq.Common.Modules;
 
 namespace Statiq.Core.Modules.Control
@@ -7,13 +8,13 @@ namespace Statiq.Core.Modules.Control
     {
         public DocumentConfig<bool> Predicate { get; set; }
 
-        internal IfCondition(DocumentConfig<bool> predicate, IModule[] modules)
+        internal IfCondition(DocumentConfig<bool> predicate, IEnumerable<IModule> modules)
             : base(modules)
         {
             Predicate = predicate;
         }
 
-        internal IfCondition(IModule[] modules)
+        internal IfCondition(IEnumerable<IModule> modules)
             : base(modules)
         {
         }

@@ -212,7 +212,7 @@ namespace Statiq.Core.Tests.Modules.Control
                 };
 
                 // When
-                IReadOnlyList<IDocument> results = await ExecuteAsync(a, new ExecuteModules(b).WithInputs(), c);
+                IReadOnlyList<IDocument> results = await ExecuteAsync(a, new ExecuteModules(b).WithInputDocuments(), c);
 
                 // Then
                 Assert.AreEqual(1, a.ExecuteCount);
@@ -248,7 +248,7 @@ namespace Statiq.Core.Tests.Modules.Control
                 };
 
                 // When
-                IReadOnlyList<IDocument> results = await ExecuteAsync(a, new ExecuteModules(b).WithInputs().WithResults(ExecuteModuleResults.Concat), c);
+                IReadOnlyList<IDocument> results = await ExecuteAsync(a, new ExecuteModules(b).WithInputDocuments().WithResults(ExecuteModuleResults.Concat), c);
 
                 // Then
                 Assert.AreEqual(1, a.ExecuteCount);

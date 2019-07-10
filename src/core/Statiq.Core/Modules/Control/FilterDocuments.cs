@@ -39,6 +39,16 @@ namespace Statiq.Core.Modules.Control
         }
 
         /// <summary>
+        /// Specifies a metadata key that must be present.
+        /// Only input documents for which the key exists will be output.
+        /// </summary>
+        /// <param name="key">A metadata key that must be present.</param>
+        public FilterDocuments(string key)
+            : this(Config.FromDocument(doc => doc.ContainsKey(key)))
+        {
+        }
+
+        /// <summary>
         /// Applies an additional predicate to the filtering operation as an "or" condition.
         /// </summary>
         /// <param name="predicate">A predicate delegate that should return a <c>bool</c>.</param>
@@ -48,6 +58,13 @@ namespace Statiq.Core.Modules.Control
             _predicates.Add(predicate ?? throw new ArgumentNullException(nameof(predicate)));
             return this;
         }
+
+        /// <summary>
+        /// Checks for the presence of an additional key in the filtering operation as an "or" condition.
+        /// </summary>
+        /// <param name="key">A metadata key that must be present.</param>
+        /// <returns>The current module instance.</returns>
+        public FilterDocuments Or(string key) => Or(Config.FromDocument(doc => doc.ContainsKey(key)));
 
         /// <inheritdoc />
         public Task<IEnumerable<IDocument>> ExecuteAsync(IReadOnlyList<IDocument> inputs, IExecutionContext context) =>

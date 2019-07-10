@@ -35,6 +35,37 @@ namespace Statiq.Core.Modules.Control
         }
 
         /// <summary>
+        /// Specifies a predicate and a series of child modules to be evaluated if the predicate returns <c>true</c>.
+        /// The predicate will be evaluated against every input document individually.
+        /// </summary>
+        /// <param name="predicate">A predicate delegate that should return a <c>bool</c>.</param>
+        /// <param name="modules">The modules to execute on documents where the predicate is <c>true</c>.</param>
+        public ExecuteIf(DocumentConfig<bool> predicate, IEnumerable<IModule> modules)
+        {
+            _conditions.Add(new IfCondition(predicate, modules));
+        }
+
+        /// <summary>
+        /// Specifies child modules to be evaluated if a given metadata key is present.
+        /// </summary>
+        /// <param name="key">A metadata key that must be present.</param>
+        /// <param name="modules">The modules to execute on documents that contain the specified metadata key.</param>
+        public ExecuteIf(string key, params IModule[] modules)
+            : this(Config.FromDocument(doc => doc.ContainsKey(key)), modules)
+        {
+        }
+
+        /// <summary>
+        /// Specifies child modules to be evaluated if a given metadata key is present.
+        /// </summary>
+        /// <param name="key">A metadata key that must be present.</param>
+        /// <param name="modules">The modules to execute on documents that contain the specified metadata key.</param>
+        public ExecuteIf(string key, IEnumerable<IModule> modules)
+            : this(Config.FromDocument(doc => doc.ContainsKey(key)), modules)
+        {
+        }
+
+        /// <summary>
         /// Specifies an alternate condition to be tested on documents that did not satisfy
         /// previous conditions. You can chain together as many <c>ElseIf</c> calls as needed.
         /// The predicate will be evaluated against every input document individually.
@@ -49,6 +80,40 @@ namespace Statiq.Core.Modules.Control
         }
 
         /// <summary>
+        /// Specifies an alternate condition to be tested on documents that did not satisfy
+        /// previous conditions. You can chain together as many <c>ElseIf</c> calls as needed.
+        /// The predicate will be evaluated against every input document individually.
+        /// </summary>
+        /// <param name="predicate">A predicate delegate that should return a <c>bool</c>.</param>
+        /// <param name="modules">The modules to execute on documents where the predicate is <c>true</c>.</param>
+        /// <returns>The current module instance.</returns>
+        public ExecuteIf ElseIf(DocumentConfig<bool> predicate, IEnumerable<IModule> modules)
+        {
+            _conditions.Add(new IfCondition(predicate, modules));
+            return this;
+        }
+
+        /// <summary>
+        /// Specifies an alternate condition to be tested on documents that did not satisfy
+        /// previous conditions. You can chain together as many <c>ElseIf</c> calls as needed.
+        /// </summary>
+        /// <param name="key">A metadata key that must be present.</param>
+        /// <param name="modules">The modules to execute on documents that contain the specified metadata key.</param>
+        /// <returns>The current module instance.</returns>
+        public ExecuteIf ElseIf(string key, params IModule[] modules) =>
+            ElseIf(Config.FromDocument(doc => doc.ContainsKey(key)), modules);
+
+        /// <summary>
+        /// Specifies an alternate condition to be tested on documents that did not satisfy
+        /// previous conditions. You can chain together as many <c>ElseIf</c> calls as needed.
+        /// </summary>
+        /// <param name="key">A metadata key that must be present.</param>
+        /// <param name="modules">The modules to execute on documents that contain the specified metadata key.</param>
+        /// <returns>The current module instance.</returns>
+        public ExecuteIf ElseIf(string key, IEnumerable<IModule> modules) =>
+            ElseIf(Config.FromDocument(doc => doc.ContainsKey(key)), modules);
+
+        /// <summary>
         /// This should be at the end of your fluent method chain and will evaluate the
         /// specified child modules on all documents that did not satisfy previous predicates.
         /// The predicate will be evaluated against every input document individually.
@@ -56,6 +121,19 @@ namespace Statiq.Core.Modules.Control
         /// <param name="modules">The modules to execute on documents where no previous predicate was <c>true</c>.</param>
         /// <returns>The current module instance.</returns>
         public IModule Else(params IModule[] modules)
+        {
+            _conditions.Add(new IfCondition(modules));
+            return this;
+        }
+
+        /// <summary>
+        /// This should be at the end of your fluent method chain and will evaluate the
+        /// specified child modules on all documents that did not satisfy previous predicates.
+        /// The predicate will be evaluated against every input document individually.
+        /// </summary>
+        /// <param name="modules">The modules to execute on documents where no previous predicate was <c>true</c>.</param>
+        /// <returns>The current module instance.</returns>
+        public IModule Else(IEnumerable<IModule> modules)
         {
             _conditions.Add(new IfCondition(modules));
             return this;

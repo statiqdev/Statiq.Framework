@@ -72,10 +72,10 @@ namespace Statiq.Core.Modules.Control
         /// The input documents to GroupBy are used as
         /// the initial input documents to the specified modules.
         /// </summary>
-        /// <param name="keyMetadataKey">The key metadata key.</param>
+        /// <param name="metadataKey">The metadata key.</param>
         /// <param name="modules">Modules to execute on the input documents prior to grouping.</param>
-        public GroupDocuments(string keyMetadataKey, params IModule[] modules)
-            : this(keyMetadataKey, (IEnumerable<IModule>)modules)
+        public GroupDocuments(string metadataKey, params IModule[] modules)
+            : this(metadataKey, (IEnumerable<IModule>)modules)
         {
         }
 
@@ -86,18 +86,18 @@ namespace Statiq.Core.Modules.Control
         /// The input documents to GroupBy are used as
         /// the initial input documents to the specified modules.
         /// </summary>
-        /// <param name="keyMetadataKey">The key metadata key.</param>
+        /// <param name="metadataKey">The key metadata key.</param>
         /// <param name="modules">Modules to execute on the input documents prior to grouping.</param>
-        public GroupDocuments(string keyMetadataKey, IEnumerable<IModule> modules)
+        public GroupDocuments(string metadataKey, IEnumerable<IModule> modules)
             : base(modules)
         {
-            if (keyMetadataKey == null)
+            if (metadataKey == null)
             {
-                throw new ArgumentNullException(nameof(keyMetadataKey));
+                throw new ArgumentNullException(nameof(metadataKey));
             }
 
-            _key = Config.FromDocument(doc => doc.Get<IEnumerable<object>>(keyMetadataKey));
-            _predicate = Config.FromDocument(doc => doc.ContainsKey(keyMetadataKey));
+            _key = Config.FromDocument(doc => doc.Get<IEnumerable<object>>(metadataKey));
+            _predicate = Config.FromDocument(doc => doc.ContainsKey(metadataKey));
         }
 
         /// <summary>

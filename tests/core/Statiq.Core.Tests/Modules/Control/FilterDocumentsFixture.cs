@@ -130,6 +130,74 @@ namespace Statiq.Core.Tests.Modules.Control
                 // Then
                 results.ShouldBeEmpty();
             }
+
+            [Test]
+            public async Task FiltersWithMetadataKey()
+            {
+                // Given
+                TestDocument a = new TestDocument()
+                {
+                    { "Foo", "a" }
+                };
+                TestDocument b = new TestDocument()
+                {
+                    { "Foo", "b" }
+                };
+                TestDocument c = new TestDocument();
+                FilterDocuments filter = new FilterDocuments("Foo");
+
+                // When
+                IReadOnlyList<TestDocument> results = await ExecuteAsync(new[] { a, b, c }, filter);
+
+                // Then
+                results.Count.ShouldBe(2);
+            }
+
+            [Test]
+            public async Task FiltersWithMultipleMetadataKeys()
+            {
+                // Given
+                TestDocument a = new TestDocument()
+                {
+                    { "Foo", "a" }
+                };
+                TestDocument b = new TestDocument()
+                {
+                    { "Bar", "b" }
+                };
+                TestDocument c = new TestDocument();
+                FilterDocuments filter = new FilterDocuments("Foo")
+                    .Or("Bar");
+
+                // When
+                IReadOnlyList<TestDocument> results = await ExecuteAsync(new[] { a, b, c }, filter);
+
+                // Then
+                results.Count.ShouldBe(2);
+            }
+
+            [Test]
+            public async Task FiltersWithMetadataKeyAndPredicate()
+            {
+                // Given
+                TestDocument a = new TestDocument()
+                {
+                    { "Foo", "a" }
+                };
+                TestDocument b = new TestDocument()
+                {
+                    { "Bar", "b" }
+                };
+                TestDocument c = new TestDocument();
+                FilterDocuments filter = new FilterDocuments("Foo")
+                    .Or(Config.FromDocument(doc => doc.String("Bar") == "b"));
+
+                // When
+                IReadOnlyList<TestDocument> results = await ExecuteAsync(new[] { a, b, c }, filter);
+
+                // Then
+                results.Count.ShouldBe(2);
+            }
         }
     }
 }

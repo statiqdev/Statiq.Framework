@@ -44,11 +44,11 @@ namespace Statiq.Core.Modules.Control
         /// <summary>
         /// Controls whether the input documents are passed to the child modules.
         /// </summary>
-        /// <param name="withInputs"><c>true</c> to pass input documents to the child modules, <c>false</c> otherwise.</param>
+        /// <param name="withInputDocuments"><c>true</c> to pass input documents to the child modules, <c>false</c> otherwise.</param>
         /// <returns>The current module instance.</returns>
-        public ExecuteModules WithInputs(bool withInputs = true)
+        public ExecuteModules WithInputDocuments(bool withInputDocuments = true)
         {
-            _withInputs = withInputs;
+            _withInputs = withInputDocuments;
             return this;
         }
 

@@ -316,6 +316,72 @@ namespace Statiq.Core.Tests.Modules.Control
                 Assert.AreEqual(0, b.OutputCount);
                 Assert.AreEqual(0, c.OutputCount);
             }
+
+            [Test]
+            public async Task MetadataKeyTrueCondition()
+            {
+                // Given
+                CountModule a = new CountModule("A")
+                {
+                    AdditionalOutputs = 2,
+                    EnsureInputDocument = true
+                };
+                CountModule b = new CountModule("B")
+                {
+                    AdditionalOutputs = 2
+                };
+                CountModule c = new CountModule("C")
+                {
+                    AdditionalOutputs = 3
+                };
+
+                // When
+                await ExecuteAsync(a, new ExecuteIf("A", b), c);
+
+                // Then
+                Assert.AreEqual(1, a.ExecuteCount);
+                Assert.AreEqual(1, b.ExecuteCount);
+                Assert.AreEqual(1, c.ExecuteCount);
+                Assert.AreEqual(1, a.InputCount);
+                Assert.AreEqual(3, b.InputCount);
+                Assert.AreEqual(9, c.InputCount);
+                Assert.AreEqual(3, a.OutputCount);
+                Assert.AreEqual(9, b.OutputCount);
+                Assert.AreEqual(36, c.OutputCount);
+            }
+
+            [Test]
+            public async Task MetadataKeyFalseCondition()
+            {
+                // Given
+                CountModule a = new CountModule("A")
+                {
+                    AdditionalOutputs = 2,
+                    EnsureInputDocument = true
+                };
+                CountModule b = new CountModule("B")
+                {
+                    AdditionalOutputs = 2
+                };
+                CountModule c = new CountModule("C")
+                {
+                    AdditionalOutputs = 3
+                };
+
+                // When
+                await ExecuteAsync(a, new ExecuteIf("B", b), c);
+
+                // Then
+                Assert.AreEqual(1, a.ExecuteCount);
+                Assert.AreEqual(0, b.ExecuteCount);
+                Assert.AreEqual(1, c.ExecuteCount);
+                Assert.AreEqual(1, a.InputCount);
+                Assert.AreEqual(0, b.InputCount);
+                Assert.AreEqual(3, c.InputCount);
+                Assert.AreEqual(3, a.OutputCount);
+                Assert.AreEqual(0, b.OutputCount);
+                Assert.AreEqual(12, c.OutputCount);
+            }
         }
     }
 }
