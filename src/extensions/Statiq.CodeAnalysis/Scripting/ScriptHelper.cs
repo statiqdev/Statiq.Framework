@@ -26,6 +26,10 @@ namespace Statiq.CodeAnalysis.Scripting
 
         public static byte[] Compile(string code, IDocument document, IExecutionContext context)
         {
+            _ = code ?? throw new ArgumentNullException(nameof(code));
+            _ = document ?? throw new ArgumentNullException(nameof(document));
+            _ = context ?? throw new ArgumentNullException(nameof(context));
+
             // Parse the code
             code = Parse(code, document, context);
 
@@ -107,6 +111,10 @@ namespace Statiq.CodeAnalysis.Scripting
 
         public static Task<object> EvaluateAsync(byte[] rawAssembly, IDocument document, IExecutionContext context)
         {
+            _ = rawAssembly ?? throw new ArgumentNullException(nameof(rawAssembly));
+            _ = document ?? throw new ArgumentNullException(nameof(document));
+            _ = context ?? throw new ArgumentNullException(nameof(context));
+
             Assembly assembly = Assembly.Load(rawAssembly);
             Type scriptType = assembly.GetExportedTypes().First(t => t.Name == ScriptClassName);
             ScriptBase script = (ScriptBase)Activator.CreateInstance(scriptType, document, context);
