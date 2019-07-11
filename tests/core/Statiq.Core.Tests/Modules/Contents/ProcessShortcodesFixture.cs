@@ -261,7 +261,7 @@ namespace Statiq.Core.Tests.Modules.Contents
             public Task<IDocument> ExecuteAsync(KeyValuePair<string, string>[] args, string content, IDocument document, IExecutionContext context) =>
                 Task.FromResult<IDocument>(new TestDocument(new MetadataItems
                 {
-                    { $"Foo", document.Get<int>("Foo") + 1 }
+                    { $"Foo", document.Int("Foo") + 1 }
                 }));
         }
 

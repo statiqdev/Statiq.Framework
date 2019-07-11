@@ -96,7 +96,48 @@ namespace Statiq.Common.Documents
         }
 
         /// <summary>
-        /// Recursivly flattens metadata that contains a document or documents.
+        /// Gets the content associated with this document as a string.
+        /// This will result in reading the entire content stream.
+        /// It's preferred to read directly as a stream using <see cref="IDocument.GetStreamAsync"/> if possible.
+        /// </summary>
+        /// <param name="document">The document.</param>
+        /// <value>The content associated with this document.</value>
+        public static async Task<string> GetStringAsync(this IDocument document)
+        {
+            Stream stream = await document.GetStreamAsync();
+            if (stream == null || stream == Stream.Null)
+            {
+                return string.Empty;
+            }
+            using (StreamReader reader = new StreamReader(stream))
+            {
+                return await reader.ReadToEndAsync();
+            }
+        }
+
+        /// <summary>
+        /// Gets the content associated with this document as a byte array.
+        /// This will result in reading the entire content stream.
+        /// It's preferred to read directly as a stream using <see cref="IDocument.GetStreamAsync"/> if possible.
+        /// </summary>
+        /// <param name="document">The document.</param>
+        /// <value>The content associated with this document.</value>
+        public static async Task<byte[]> GetBytesAsync(this IDocument document)
+        {
+            using (Stream stream = await document.GetStreamAsync())
+            {
+                if (stream == null || stream == Stream.Null)
+                {
+                    return Array.Empty<byte>();
+                }
+                MemoryStream memory = new MemoryStream();
+                await stream.CopyToAsync(memory);
+                return memory.ToArray();
+            }
+        }
+
+        /// <summary>
+        /// Recursively flattens metadata that contains a document or documents.
         /// </summary>
         /// <param name="document">The parent document to flatten.</param>
         /// <returns>A set containing all nested documents in metadata including the parent document.</returns>

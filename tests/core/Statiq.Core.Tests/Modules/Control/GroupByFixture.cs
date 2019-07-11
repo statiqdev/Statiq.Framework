@@ -29,11 +29,11 @@ namespace Statiq.Core.Tests.Modules.Control
                     AdditionalOutputs = 7,
                     EnsureInputDocument = true
                 };
-                GroupBy groupBy = new GroupBy(Config.FromDocument(d => d.Get<int>("A") % 3), count);
+                GroupBy groupBy = new GroupBy(Config.FromDocument(d => d.Int("A") % 3), count);
                 Execute gatherData = new ExecuteDocument(
                     Config.FromDocument(d =>
                     {
-                        groupKey.Add(d.Get<int>(Keys.GroupKey));
+                        groupKey.Add(d.Int(Keys.GroupKey));
                         return (object)null;
                     }), false);
 
@@ -54,8 +54,8 @@ namespace Statiq.Core.Tests.Modules.Control
                     AdditionalOutputs = 7,
                     EnsureInputDocument = true
                 };
-                GroupBy groupBy = new GroupBy(Config.FromDocument(d => d.Get<int>("A") % 3), count);
-                OrderDocuments orderBy = new OrderDocuments(Config.FromDocument(d => d.Get<int>(Keys.GroupKey)));
+                GroupBy groupBy = new GroupBy(Config.FromDocument(d => d.Int("A") % 3), count);
+                OrderDocuments orderBy = new OrderDocuments(Config.FromDocument(d => d.Int(Keys.GroupKey)));
                 Execute gatherData = new ExecuteDocument(
                     Config.FromDocument(async d =>
                     {
@@ -84,12 +84,12 @@ namespace Statiq.Core.Tests.Modules.Control
                     AdditionalOutputs = 7,
                     EnsureInputDocument = true
                 };
-                Core.Modules.Metadata.Meta meta = new Core.Modules.Metadata.Meta("GroupMetadata", Config.FromDocument(d => d.Get<int>("A") % 3));
+                Core.Modules.Metadata.Meta meta = new Core.Modules.Metadata.Meta("GroupMetadata", Config.FromDocument(d => d.Int("A") % 3));
                 GroupBy groupBy = new GroupBy("GroupMetadata", count, meta);
                 Execute gatherData = new ExecuteDocument(
                     Config.FromDocument(d =>
                     {
-                        groupKey.Add(d.Get<int>(Keys.GroupKey));
+                        groupKey.Add(d.Int(Keys.GroupKey));
                         return (object)null;
                     }), false);
 
@@ -113,14 +113,14 @@ namespace Statiq.Core.Tests.Modules.Control
                 Execute meta = new ExecuteDocument(
                     Config.FromDocument(d =>
                     {
-                        int groupMetadata = d.Get<int>("A") % 3;
+                        int groupMetadata = d.Int("A") % 3;
                         return groupMetadata == 0 ? d : d.Clone(new MetadataItems { { "GroupMetadata", groupMetadata } });
                     }), false);
                 GroupBy groupBy = new GroupBy("GroupMetadata", count, meta);
                 Execute gatherData = new ExecuteDocument(
                     Config.FromDocument(d =>
                     {
-                        groupKey.Add(d.Get<int>(Keys.GroupKey));
+                        groupKey.Add(d.Int(Keys.GroupKey));
                         return (object)null;
                     }), false);
 
@@ -141,12 +141,12 @@ namespace Statiq.Core.Tests.Modules.Control
                     AdditionalOutputs = 7,
                     EnsureInputDocument = true
                 };
-                GroupBy groupBy = new GroupBy(Config.FromDocument(d => d.Get<int>("A") % 3), count)
-                    .Where(Config.FromDocument(d => d.Get<int>("A") % 3 != 0));
+                GroupBy groupBy = new GroupBy(Config.FromDocument(d => d.Int("A") % 3), count)
+                    .Where(Config.FromDocument(d => d.Int("A") % 3 != 0));
                 Execute gatherData = new ExecuteDocument(
                     Config.FromDocument(d =>
                     {
-                        groupKey.Add(d.Get<int>(Keys.GroupKey));
+                        groupKey.Add(d.Int(Keys.GroupKey));
                         return (object)null;
                     }), false);
 

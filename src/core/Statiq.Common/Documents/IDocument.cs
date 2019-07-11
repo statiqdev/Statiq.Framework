@@ -33,14 +33,6 @@ namespace Statiq.Common.Documents
         FilePath Destination { get; }
 
         /// <summary>
-        /// Gets the content associated with this document as a string.
-        /// This will result in reading the entire content stream.
-        /// It's prefered to read directly as a stream using <see cref="GetStreamAsync"/> if possible.
-        /// </summary>
-        /// <value>The content associated with this document.</value>
-        Task<string> GetStringAsync();
-
-        /// <summary>
         /// Gets the content associated with this document as a <see cref="Stream"/>.
         /// The underlying stream will be reset to position 0 each time this method is called.
         /// The stream you get from this call must be disposed as soon as reading is complete.
@@ -49,8 +41,7 @@ namespace Statiq.Common.Documents
         Task<Stream> GetStreamAsync();
 
         /// <summary>
-        /// Indicates if this document has content (if not, <see cref="GetStreamAsync()"/> will
-        /// return <see cref="Stream.Null"/> and <see cref="GetStringAsync()"/> will return <see cref="string.Empty"/>.
+        /// Indicates if this document has content (if not, <see cref="GetStreamAsync()"/> will return <see cref="Stream.Null"/>.
         /// </summary>
         bool HasContent { get; }
 

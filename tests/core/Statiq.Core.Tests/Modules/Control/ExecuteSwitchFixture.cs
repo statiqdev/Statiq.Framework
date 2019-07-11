@@ -1,6 +1,7 @@
 ﻿using System.Threading.Tasks;
 using NUnit.Framework;
 using Statiq.Common.Configuration;
+using Statiq.Common.Documents;
 using Statiq.Core.Modules.Control;
 using Statiq.Testing;
 using Statiq.Testing.Modules;

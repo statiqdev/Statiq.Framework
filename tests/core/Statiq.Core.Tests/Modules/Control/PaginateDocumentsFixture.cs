@@ -37,9 +37,9 @@ namespace Statiq.Core.Tests.Modules.Control
                 Execute gatherData = new ExecuteDocument(
                     (d, c) =>
                     {
-                        currentPage.Add(d.Get<int>(Keys.CurrentPage));
-                        totalPages.Add(d.Get<int>(Keys.TotalPages));
-                        totalItems.Add(d.Get<int>(Keys.TotalItems));
+                        currentPage.Add(d.Int(Keys.CurrentPage));
+                        totalPages.Add(d.Int(Keys.TotalPages));
+                        totalItems.Add(d.Int(Keys.TotalItems));
                         hasNextPage.Add(d.Bool(Keys.HasNextPage));
                         hasPreviousPage.Add(d.Bool(Keys.HasPreviousPage));
                         return null;

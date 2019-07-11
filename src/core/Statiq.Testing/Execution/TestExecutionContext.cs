@@ -47,7 +47,19 @@ namespace Statiq.Testing.Execution
         public IReadOnlyCollection<byte[]> DynamicAssemblies { get; set; } = new List<byte[]>();
 
         /// <inheritdoc/>
-        public IReadOnlyCollection<string> Namespaces { get; set; } = new List<string>();
+        public IReadOnlyCollection<string> Namespaces { get; set; } =
+            typeof(IEngine).Assembly.GetTypes()
+                .Where(x => x.IsPublic)
+                .Select(x => x.Namespace)
+                .Distinct()
+                .Concat(new[]
+                {
+                    "System",
+                    "System.Threading.Tasks",
+                    "System.Collections.Generic",
+                    "System.Linq"
+                })
+                .ToList();
 
         /// <inheritdoc/>
         public string PipelineName { get; set; }

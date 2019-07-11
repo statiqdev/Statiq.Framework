@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Statiq.Common.Documents;
@@ -22,6 +23,6 @@ namespace Statiq.CodeAnalysis.Scripting
 
         public IExecutionContext Context { get; }
 
-        public abstract object Evaluate();
+        public abstract Task<object> EvaluateAsync();
     }
 }

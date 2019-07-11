@@ -258,20 +258,6 @@ namespace Statiq.Common.Documents
         }
 
         /// <inheritdoc />
-        public async Task<string> GetStringAsync()
-        {
-            Stream stream = await GetStreamAsync();
-            if (stream == null || stream == Stream.Null)
-            {
-                return string.Empty;
-            }
-            using (StreamReader reader = new StreamReader(stream))
-            {
-                return await reader.ReadToEndAsync();
-            }
-        }
-
-        /// <inheritdoc />
         public async Task<Stream> GetStreamAsync() =>
             ContentProvider == null ? Stream.Null : await ContentProvider.GetStreamAsync();
 

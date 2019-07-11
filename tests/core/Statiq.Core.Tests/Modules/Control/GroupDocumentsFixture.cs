@@ -30,11 +30,11 @@ namespace Statiq.Core.Tests.Modules.Control
                     AdditionalOutputs = 7,
                     EnsureInputDocument = true
                 };
-                GroupDocuments groupByMany = new GroupDocuments(Config.FromDocument(d => new[] { d.Get<int>("A") % 3, 3 }), count);
+                GroupDocuments groupByMany = new GroupDocuments(Config.FromDocument(d => new[] { d.Int("A") % 3, 3 }), count);
                 Execute gatherData = new ExecuteDocument(
                     Config.FromDocument(d =>
                     {
-                        groupKey.Add(d.Get<int>(Keys.GroupKey));
+                        groupKey.Add(d.Int(Keys.GroupKey));
                         return d;
                     }), false);
 
@@ -55,8 +55,8 @@ namespace Statiq.Core.Tests.Modules.Control
                     AdditionalOutputs = 7,
                     EnsureInputDocument = true
                 };
-                GroupDocuments groupByMany = new GroupDocuments(Config.FromDocument(d => new[] { d.Get<int>("A") % 3, 3 }), count);
-                OrderDocuments orderBy = new OrderDocuments(Config.FromDocument(d => d.Get<int>(Keys.GroupKey)));
+                GroupDocuments groupByMany = new GroupDocuments(Config.FromDocument(d => new[] { d.Int("A") % 3, 3 }), count);
+                OrderDocuments orderBy = new OrderDocuments(Config.FromDocument(d => d.Int(Keys.GroupKey)));
                 Execute gatherData = new ExecuteDocument(
                     Config.FromDocument(async d =>
                     {
@@ -86,12 +86,12 @@ namespace Statiq.Core.Tests.Modules.Control
                     AdditionalOutputs = 7,
                     EnsureInputDocument = true
                 };
-                Core.Modules.Metadata.Meta meta = new Core.Modules.Metadata.Meta("GroupMetadata", Config.FromDocument(d => new object[] { d.Get<int>("A") % 3, 3 }));
+                Core.Modules.Metadata.Meta meta = new Core.Modules.Metadata.Meta("GroupMetadata", Config.FromDocument(d => new object[] { d.Int("A") % 3, 3 }));
                 GroupDocuments groupByMany = new GroupDocuments("GroupMetadata", count, meta);
                 Execute gatherData = new ExecuteDocument(
                     Config.FromDocument(d =>
                     {
-                        groupKey.Add(d.Get<int>(Keys.GroupKey));
+                        groupKey.Add(d.Int(Keys.GroupKey));
                         return (object)null;
                     }), false);
 
@@ -115,14 +115,14 @@ namespace Statiq.Core.Tests.Modules.Control
                 Execute meta = new ExecuteDocument(
                     Config.FromDocument(d =>
                     {
-                        int groupMetadata = d.Get<int>("A") % 3;
+                        int groupMetadata = d.Int("A") % 3;
                         return groupMetadata == 0 ? d : d.Clone(new MetadataItems { { "GroupMetadata", new object[] { groupMetadata, 3 } } });
                     }), false);
                 GroupDocuments groupByMany = new GroupDocuments("GroupMetadata", count, meta);
                 Execute gatherData = new ExecuteDocument(
                     Config.FromDocument(d =>
                     {
-                        groupKey.Add(d.Get<int>(Keys.GroupKey));
+                        groupKey.Add(d.Int(Keys.GroupKey));
                         return (object)null;
                     }), false);
 
@@ -203,12 +203,12 @@ namespace Statiq.Core.Tests.Modules.Control
                     AdditionalOutputs = 7,
                     EnsureInputDocument = true
                 };
-                GroupDocuments groupByMany = new GroupDocuments(Config.FromDocument(d => new[] { d.Get<int>("A") % 3, 3 }), count)
-                    .Where(Config.FromDocument(d => d.Get<int>("A") % 3 != 0));
+                GroupDocuments groupByMany = new GroupDocuments(Config.FromDocument(d => new[] { d.Int("A") % 3, 3 }), count)
+                    .Where(Config.FromDocument(d => d.Int("A") % 3 != 0));
                 Execute gatherData = new ExecuteDocument(
                     Config.FromDocument(d =>
                     {
-                        groupKey.Add(d.Get<int>(Keys.GroupKey));
+                        groupKey.Add(d.Int(Keys.GroupKey));
                         return (object)null;
                     }), false);
 

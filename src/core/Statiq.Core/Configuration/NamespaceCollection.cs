@@ -18,11 +18,9 @@ namespace Statiq.Core.Configuration
             _namespaces.AddRange(new[]
             {
                 "System",
+                "System.Threading.Tasks",
                 "System.Collections.Generic",
                 "System.Linq",
-                "Statiq.Core.Execution",
-                "Statiq.Core.Configuration",
-                "Statiq.Core.Documents" // For custom document type support
             });
 
             // Add all public namespaces from Statiq.Common

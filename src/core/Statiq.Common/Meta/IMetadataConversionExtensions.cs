@@ -42,6 +42,16 @@ namespace Statiq.Common.Meta
         public static bool Bool(this IMetadata metadata, string key, bool defaultValue = false) => metadata.Get(key, defaultValue);
 
         /// <summary>
+        /// Gets the value for the specified key converted to an int. This method never throws an exception. It will return the specified
+        /// default value if the key is not found.
+        /// </summary>
+        /// <param name="metadata">The metadata containing the value.</param>
+        /// <param name="key">The key of the value to get.</param>
+        /// <param name="defaultValue">The default value to use if the key is not found or cannot be converted to an int.</param>
+        /// <returns>The value for the specified key converted to an int or the specified default value.</returns>
+        public static int Int(this IMetadata metadata, string key, int defaultValue = 0) => metadata.Get(key, defaultValue);
+
+        /// <summary>
         /// Gets the value for the specified key converted to a <see cref="DateTime"/>. This method never throws an exception. It will return the specified
         /// default value if the key is not found.
         /// </summary>

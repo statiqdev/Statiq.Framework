@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text;
+using System.Threading.Tasks;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.Emit;
@@ -35,11 +36,14 @@ namespace Statiq.CodeAnalysis.Scripting
             CSharpCompilationOptions compilationOptions = new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary).
                 WithSpecificDiagnosticOptions(new Dictionary<string, ReportDiagnostic>
                 {
-                // ensure that specific warnings about assembly references are always suppressed
-                // https://github.com/dotnet/roslyn/issues/5501
-                { "CS1701", ReportDiagnostic.Suppress },
-                { "CS1702", ReportDiagnostic.Suppress },
-                { "CS1705", ReportDiagnostic.Suppress }
+                    // ensure that specific warnings about assembly references are always suppressed
+                    // https://github.com/dotnet/roslyn/issues/5501
+                    { "CS1701", ReportDiagnostic.Suppress },
+                    { "CS1702", ReportDiagnostic.Suppress },
+                    { "CS1705", ReportDiagnostic.Suppress },
+
+                    // we don't care about unreachable code
+                    { "CS0162", ReportDiagnostic.Suppress },
                 });
 
             // For some reason, Roslyn really wants these added by filename
@@ -101,12 +105,12 @@ namespace Statiq.CodeAnalysis.Scripting
             }
         }
 
-        public static object Evaluate(byte[] rawAssembly, IDocument document, IExecutionContext context)
+        public static Task<object> EvaluateAsync(byte[] rawAssembly, IDocument document, IExecutionContext context)
         {
             Assembly assembly = Assembly.Load(rawAssembly);
             Type scriptType = assembly.GetExportedTypes().First(t => t.Name == ScriptClassName);
             ScriptBase script = (ScriptBase)Activator.CreateInstance(scriptType, document, context);
-            return script.Evaluate();
+            return script.EvaluateAsync();
         }
 
         private static string GetCompilationErrorMessage(Diagnostic diagnostic)
@@ -126,7 +130,11 @@ namespace Statiq.CodeAnalysis.Scripting
             liftingWalker.Visit(syntaxTree.GetRoot(context.CancellationToken));
 
             // Get the using statements
-            string usingStatements = string.Join(Environment.NewLine, context.Namespaces.Select(x => "using " + x + ";"));
+            string usingStatements = string.Join(
+                Environment.NewLine,
+                context.Namespaces
+                    .Concat(new[] { "Statiq.CodeAnalysis.Scripting" })
+                    .Select(x => "using " + x + ";"));
 
             // Get the document metadata properties
             string metadataProperties = string.Join(
@@ -140,30 +148,23 @@ namespace Statiq.CodeAnalysis.Scripting
 
             // Return the fully parsed script
             return
-$@"// Generated: bring all module namespaces in scope
-{usingStatements}
-// Input: using directives
+$@"{usingStatements}
 {liftingWalker.UsingDirectives}
 public class {ScriptClassName} : ScriptBase
 {{
 public {ScriptClassName}(IDocument document, IExecutionContext context) : base(document, context) {{ }}
-public override object Evaluate()
+public override async Task<object> EvaluateAsync()
 {{
-// Input: script code
+await Task.CompletedTask;
 {liftingWalker.ScriptCode}
-// Generated: return statement
 {returnStatement}
 }}
-// Input: lifted methods
 {liftingWalker.MethodDeclarations}
-// Generated: metadata as properties
 {metadataProperties}
 }}
-// Input: lifted object declarations
 {liftingWalker.TypeDeclarations}
 public static class ScriptExtensionMethods
 {{
-// Input: lifted extension methods
 {liftingWalker.ExtensionMethodDeclarations}
 }}";
         }
