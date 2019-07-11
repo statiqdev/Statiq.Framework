@@ -8,7 +8,7 @@ namespace Statiq.Common.Meta
     /// <summary>
     /// Extensions to make it easier to get typed information from metadata.
     /// </summary>
-    public static class MetadataConversionExtensions
+    public static class IMetadataConversionExtensions
     {
         /// <summary>
         /// Gets the value for the specified key converted to a string. This method never throws an exception. It will return the specified
