@@ -22,8 +22,7 @@ namespace Statiq.Core.Modules.IO
     /// </summary>
     /// <remarks>
     /// The original input documents are ignored and are not part of the output
-    /// of this module. If you want to retain the original input documents, consider using the
-    /// <see cref="ExecuteModules"/> module.
+    /// of this module.
     /// </remarks>
     /// <metadata cref="Keys.SourceUri" usage="Output" />
     /// <metadata cref="Keys.SourceHeaders" usage="Output" />

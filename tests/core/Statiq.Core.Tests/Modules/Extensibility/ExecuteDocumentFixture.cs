@@ -89,11 +89,13 @@ namespace Statiq.Core.Tests.Modules.Extensibility
                     new TestDocument()
                 };
                 int count = 0;
-                ExecuteDocument execute = new ExecuteDocument(Config.FromDocument((d, c) =>
-                {
-                    count++;
-                    return (object)null;
-                }));
+                ExecuteDocument execute = new ExecuteDocument(
+                    Config.FromDocument((d, c) =>
+                    {
+                        count++;
+                        return (object)null;
+                    }),
+                    false);
 
                 // When
                 await ExecuteAsync(inputs, execute);

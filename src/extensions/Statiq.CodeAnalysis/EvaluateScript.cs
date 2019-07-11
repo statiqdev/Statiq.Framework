@@ -12,6 +12,10 @@ using Statiq.Common.Modules;
 
 namespace Statiq.CodeAnalysis
 {
+    /// <summary>
+    /// Evaluates a C# based script contained in document content.
+    /// </summary>
+    /// <category>Extensibility</category>
     public class EvaluateScript : IModule
     {
         private bool _parallel;

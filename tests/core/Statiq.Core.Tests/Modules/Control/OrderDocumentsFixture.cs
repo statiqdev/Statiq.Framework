@@ -34,7 +34,7 @@ namespace Statiq.Core.Tests.Modules.Control
                     AdditionalOutputs = 2,
                     EnsureInputDocument = true
                 };
-                ExecuteModules concat = new ExecuteModules(count2).WithResults(ExecuteModuleResults.Concat);
+                ConcatDocuments concat = new ConcatDocuments(count2);
                 OrderDocuments orderBy = new OrderDocuments(Config.FromDocument(d => d.Int("A")));
                 Execute gatherData = new ExecuteDocument(
                     Config.FromDocument(async d =>
@@ -66,7 +66,7 @@ namespace Statiq.Core.Tests.Modules.Control
                     AdditionalOutputs = 2,
                     EnsureInputDocument = true
                 };
-                ExecuteModules concat = new ExecuteModules(count2).WithResults(ExecuteModuleResults.Concat);
+                ConcatDocuments concat = new ConcatDocuments(count2);
                 OrderDocuments orderBy = new OrderDocuments(Config.FromDocument(d => d.Int("A"))).Descending();
                 Execute gatherData = new ExecuteDocument(
                     Config.FromDocument(async d =>

@@ -12,6 +12,10 @@ using Statiq.Common.Modules;
 
 namespace Statiq.CodeAnalysis
 {
+    /// <summary>
+    /// Compiles a C# based script contained in document content.
+    /// </summary>
+    /// <category>Extensibility</category>
     public class CompileScript : IModule
     {
         public const string CompiledKey = "_CompiledScript";
