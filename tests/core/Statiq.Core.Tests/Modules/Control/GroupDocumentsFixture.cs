@@ -30,7 +30,7 @@ namespace Statiq.Core.Tests.Modules.Control
                     AdditionalOutputs = 7,
                     EnsureInputDocument = true
                 };
-                GroupDocuments groupByMany = new GroupDocuments(Config.FromDocument(d => new[] { d.Int("A") % 3, 3 }), count);
+                GroupDocuments groupByMany = new GroupDocuments(Config.FromDocument(d => new[] { d.Int("A") % 3, 3 }));
                 Execute gatherData = new ExecuteDocument(
                     Config.FromDocument(d =>
                     {
@@ -39,7 +39,7 @@ namespace Statiq.Core.Tests.Modules.Control
                     }), false);
 
                 // When
-                IReadOnlyList<IDocument> results = await ExecuteAsync(groupByMany, gatherData);
+                IReadOnlyList<IDocument> results = await ExecuteAsync(count, groupByMany, gatherData);
 
                 // Then
                 CollectionAssert.AreEquivalent(new[] { 0, 1, 2, 3 }, groupKey);
@@ -55,7 +55,7 @@ namespace Statiq.Core.Tests.Modules.Control
                     AdditionalOutputs = 7,
                     EnsureInputDocument = true
                 };
-                GroupDocuments groupByMany = new GroupDocuments(Config.FromDocument(d => new[] { d.Int("A") % 3, 3 }), count);
+                GroupDocuments groupByMany = new GroupDocuments(Config.FromDocument(d => new[] { d.Int("A") % 3, 3 }));
                 OrderDocuments orderBy = new OrderDocuments(Config.FromDocument(d => d.Int(Keys.GroupKey)));
                 Execute gatherData = new ExecuteDocument(
                     Config.FromDocument(async d =>
@@ -66,7 +66,7 @@ namespace Statiq.Core.Tests.Modules.Control
                     }), false);
 
                 // When
-                IReadOnlyList<IDocument> results = await ExecuteAsync(groupByMany, orderBy, gatherData);
+                IReadOnlyList<IDocument> results = await ExecuteAsync(count, groupByMany, orderBy, gatherData);
 
                 // Then
                 Assert.AreEqual(4, content.Count);
@@ -87,7 +87,7 @@ namespace Statiq.Core.Tests.Modules.Control
                     EnsureInputDocument = true
                 };
                 Core.Modules.Metadata.Meta meta = new Core.Modules.Metadata.Meta("GroupMetadata", Config.FromDocument(d => new object[] { d.Int("A") % 3, 3 }));
-                GroupDocuments groupByMany = new GroupDocuments("GroupMetadata", count, meta);
+                GroupDocuments groupByMany = new GroupDocuments("GroupMetadata");
                 Execute gatherData = new ExecuteDocument(
                     Config.FromDocument(d =>
                     {
@@ -96,7 +96,7 @@ namespace Statiq.Core.Tests.Modules.Control
                     }), false);
 
                 // When
-                IReadOnlyList<IDocument> results = await ExecuteAsync(groupByMany, gatherData);
+                IReadOnlyList<IDocument> results = await ExecuteAsync(count, meta, groupByMany, gatherData);
 
                 // Then
                 CollectionAssert.AreEquivalent(new[] { 0, 1, 2, 3 }, groupKey);
@@ -118,7 +118,7 @@ namespace Statiq.Core.Tests.Modules.Control
                         int groupMetadata = d.Int("A") % 3;
                         return groupMetadata == 0 ? d : d.Clone(new MetadataItems { { "GroupMetadata", new object[] { groupMetadata, 3 } } });
                     }), false);
-                GroupDocuments groupByMany = new GroupDocuments("GroupMetadata", count, meta);
+                GroupDocuments groupByMany = new GroupDocuments("GroupMetadata");
                 Execute gatherData = new ExecuteDocument(
                     Config.FromDocument(d =>
                     {
@@ -127,7 +127,7 @@ namespace Statiq.Core.Tests.Modules.Control
                     }), false);
 
                 // When
-                IReadOnlyList<IDocument> results = await ExecuteAsync(groupByMany, gatherData);
+                IReadOnlyList<IDocument> results = await ExecuteAsync(count, meta, groupByMany, gatherData);
 
                 // Then
                 CollectionAssert.AreEquivalent(new[] { 1, 2, 3 }, groupKey);
@@ -148,7 +148,7 @@ namespace Statiq.Core.Tests.Modules.Control
                         c.CreateDocument(new MetadataItems { { "Tag", new object[] { 1 } } }),
                         c.CreateDocument(new MetadataItems { { "Tag", new object[] { "1" } } })
                     });
-                GroupDocuments groupByMany = new GroupDocuments("Tag", meta);
+                GroupDocuments groupByMany = new GroupDocuments("Tag");
                 Execute gatherData = new ExecuteDocument(
                     Config.FromDocument(d =>
                     {
@@ -157,7 +157,7 @@ namespace Statiq.Core.Tests.Modules.Control
                     }), false);
 
                 // When
-                IReadOnlyList<IDocument> results = await ExecuteAsync(groupByMany, gatherData);
+                IReadOnlyList<IDocument> results = await ExecuteAsync(meta, groupByMany, gatherData);
 
                 // Then
                 CollectionAssert.AreEquivalent(new object[] { "A", "B", "b", "C", "c", 1, "1" }, groupKey);
@@ -178,7 +178,7 @@ namespace Statiq.Core.Tests.Modules.Control
                         c.CreateDocument(new MetadataItems { { "Tag", new object[] { 1 } } }),
                         c.CreateDocument(new MetadataItems { { "Tag", new object[] { "1" } } })
                     });
-                GroupDocuments groupByMany = new GroupDocuments("Tag", meta).WithComparer(StringComparer.OrdinalIgnoreCase);
+                GroupDocuments groupByMany = new GroupDocuments("Tag").WithComparer(StringComparer.OrdinalIgnoreCase);
                 Execute gatherData = new ExecuteDocument(
                     Config.FromDocument(d =>
                     {
@@ -187,36 +187,10 @@ namespace Statiq.Core.Tests.Modules.Control
                     }), false);
 
                 // When
-                IReadOnlyList<IDocument> results = await ExecuteAsync(groupByMany, gatherData);
+                IReadOnlyList<IDocument> results = await ExecuteAsync(meta, groupByMany, gatherData);
 
                 // Then
                 CollectionAssert.AreEquivalent(new object[] { "A", "b", "C", 1 }, groupKey);
-            }
-
-            [Test]
-            public async Task ExcludesDocumentsThatDontMatchPredicate()
-            {
-                // Given
-                List<int> groupKey = new List<int>();
-                CountModule count = new CountModule("A")
-                {
-                    AdditionalOutputs = 7,
-                    EnsureInputDocument = true
-                };
-                GroupDocuments groupByMany = new GroupDocuments(Config.FromDocument(d => new[] { d.Int("A") % 3, 3 }), count)
-                    .Where(Config.FromDocument(d => d.Int("A") % 3 != 0));
-                Execute gatherData = new ExecuteDocument(
-                    Config.FromDocument(d =>
-                    {
-                        groupKey.Add(d.Int(Keys.GroupKey));
-                        return (object)null;
-                    }), false);
-
-                // When
-                IReadOnlyList<IDocument> results = await ExecuteAsync(groupByMany, gatherData);
-
-                // Then
-                CollectionAssert.AreEquivalent(new[] { 1, 2, 3 }, groupKey);
             }
         }
     }

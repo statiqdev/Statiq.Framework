@@ -18,78 +18,38 @@ namespace Statiq.Core.Modules.Control
     /// that returns or contains a sequence of group keys.
     /// </summary>
     /// <remarks>
-    /// This module forms groups from the output documents of the specified modules.
+    /// This module forms groups from the input documents.
     /// If the function or metadata key returns or contains an enumerable, each item in the enumerable
     /// will become one of the grouping keys. If a document contains multiple group keys, it will
     /// be included in multiple groups. A good example is a tag engine where each document can contain
     /// any number of tags and you want to make groups for each tag including all the documents with that tag.
-    /// Each input document is cloned for each group and metadata related
-    /// to the groups, including the sequence of documents for each group,
-    /// is added to each clone. For example, if you have 2 input documents
-    /// and the result of grouping is 3 groups, this module will output 6 documents.
+    /// This module outputs a new document with the documents and key for each group.
     /// </remarks>
     /// <metadata cref="Keys.GroupDocuments" usage="Output" />
     /// <metadata cref="Keys.GroupKey" usage="Output" />
     /// <category>Control</category>
-    public class GroupDocuments : ContainerModule
+    public class GroupDocuments : IModule
     {
         private readonly DocumentConfig<IEnumerable<object>> _key;
-        private DocumentConfig<bool> _predicate;
         private IEqualityComparer<object> _comparer;
-        private bool _emptyOutputIfNoGroups;
 
         /// <summary>
-        /// Partitions the result of the specified modules into groups with matching keys
+        /// Partitions the input documents into groups with matching keys
         /// based on the key delegate.
-        /// The input documents to GroupBy are used as
-        /// the initial input documents to the specified modules.
         /// </summary>
-        /// <param name="key">A delegate that returns the group keys.</param>
-        /// <param name="modules">Modules to execute on the input documents prior to grouping.</param>
-        public GroupDocuments(DocumentConfig<IEnumerable<object>> key, params IModule[] modules)
-            : this(key, (IEnumerable<IModule>)modules)
+        /// <param name="groupKeys">A delegate that returns the group key(s).</param>
+        public GroupDocuments(DocumentConfig<IEnumerable<object>> groupKeys)
         {
+            _key = groupKeys ?? throw new ArgumentNullException(nameof(groupKeys));
         }
 
         /// <summary>
-        /// Partitions the result of the specified modules into groups with matching keys
-        /// based on the key delegate.
-        /// The input documents to GroupBy are used as
-        /// the initial input documents to the specified modules.
-        /// </summary>
-        /// <param name="key">A delegate that returns the group keys.</param>
-        /// <param name="modules">Modules to execute on the input documents prior to grouping.</param>
-        public GroupDocuments(DocumentConfig<IEnumerable<object>> key, IEnumerable<IModule> modules)
-            : base(modules)
-        {
-            _key = key ?? throw new ArgumentNullException(nameof(key));
-        }
-
-        /// <summary>
-        /// Partitions the result of the specified modules into groups with matching keys
-        /// based on the value at the specified metadata key.
+        /// Partitions the result of the input documents into groups with matching keys
+        /// based on the value(s) at the specified metadata key.
         /// If a document to group does not contain the specified metadata key, it is not included in any output groups.
-        /// The input documents to GroupBy are used as
-        /// the initial input documents to the specified modules.
-        /// </summary>
-        /// <param name="metadataKey">The metadata key.</param>
-        /// <param name="modules">Modules to execute on the input documents prior to grouping.</param>
-        public GroupDocuments(string metadataKey, params IModule[] modules)
-            : this(metadataKey, (IEnumerable<IModule>)modules)
-        {
-        }
-
-        /// <summary>
-        /// Partitions the result of the specified modules into groups with matching keys
-        /// based on the value at the specified metadata key.
-        /// If a document to group does not contain the specified metadata key, it is not included in any output groups.
-        /// The input documents to GroupBy are used as
-        /// the initial input documents to the specified modules.
         /// </summary>
         /// <param name="metadataKey">The key metadata key.</param>
-        /// <param name="modules">Modules to execute on the input documents prior to grouping.</param>
-        public GroupDocuments(string metadataKey, IEnumerable<IModule> modules)
-            : base(modules)
+        public GroupDocuments(string metadataKey)
         {
             if (metadataKey == null)
             {
@@ -97,18 +57,6 @@ namespace Statiq.Core.Modules.Control
             }
 
             _key = Config.FromDocument(doc => doc.Get<IEnumerable<object>>(metadataKey));
-            _predicate = Config.FromDocument(doc => doc.ContainsKey(metadataKey));
-        }
-
-        /// <summary>
-        /// Limits the documents to be grouped to those that satisfy the supplied predicate.
-        /// </summary>
-        /// <param name="predicate">A delegate that should return a <c>bool</c>.</param>
-        /// <returns>The current module instance.</returns>
-        public GroupDocuments Where(DocumentConfig<bool> predicate)
-        {
-            _predicate = _predicate.CombineWith(predicate);
-            return this;
         }
 
         /// <summary>
@@ -138,50 +86,15 @@ namespace Statiq.Core.Modules.Control
             return this;
         }
 
-        /// <summary>
-        /// Specifies that no documents should be output if there are no groups. This is in contrast to the
-        /// default behavior of outputting the unmodified input documents if no groups were found.
-        /// </summary>
-        /// <param name="emptyOutput"><c>true</c> to not output documents when no groups are found.</param>
-        /// <returns>The current module instance.</returns>
-        public GroupDocuments WithEmptyOutputIfNoGroups(bool emptyOutput = true)
-        {
-            _emptyOutputIfNoGroups = emptyOutput;
-            return this;
-        }
-
         /// <inheritdoc />
-        public override async Task<IEnumerable<IDocument>> ExecuteAsync(IReadOnlyList<IDocument> inputs, IExecutionContext context)
-        {
-            IEnumerable<IDocument> docs = await (await context.ExecuteAsync(Children, inputs)).FilterAsync(_predicate, context);
-            IEnumerable<(IDocument x, IEnumerable<object>)> keys = await docs.SelectAsync(async x => (x, await _key.GetValueAsync(x, context)));
-            ImmutableArray<IGrouping<object, IDocument>> groupings = keys
-                .GroupByMany(x => x.Item2, x => x.Item1, _comparer)
-                .ToImmutableArray();
-            if (groupings.Length == 0)
-            {
-                return _emptyOutputIfNoGroups ? Array.Empty<IDocument>() : inputs;
-            }
-
-            if (inputs.Count > 0)
-            {
-                return inputs.SelectMany(context, input =>
-                {
-                    return groupings.Select(x =>
-                        input.Clone(
-                            new MetadataItems
-                            {
-                                { Keys.GroupDocuments, x.ToImmutableArray() },
-                                { Keys.GroupKey, x.Key }
-                            }));
-                });
-            }
-            return groupings.Select(x => context.CreateDocument(
-                new MetadataItems
-                {
-                    { Keys.GroupDocuments, x.ToImmutableArray() },
-                    { Keys.GroupKey, x.Key }
-                }));
-        }
+        public async Task<IEnumerable<IDocument>> ExecuteAsync(IReadOnlyList<IDocument> inputs, IExecutionContext context) =>
+            (await inputs.SelectAsync(context, async x => (Document: x, Keys: await _key.GetValueAsync(x, context))))
+                .GroupByMany(x => x.Keys, x => x.Document, _comparer)
+                .Select(x => context.CreateDocument(
+                    new MetadataItems
+                    {
+                        { Keys.GroupDocuments, x.ToImmutableArray() },
+                        { Keys.GroupKey, x.Key }
+                    }));
     }
 }
