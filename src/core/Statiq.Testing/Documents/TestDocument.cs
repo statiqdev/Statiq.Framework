@@ -1,10 +1,8 @@
 ﻿using System.Collections.Generic;
 using System.IO;
 using Statiq.Common;
-using Statiq.Testing.Execution;
-using Statiq.Testing.Meta;
 
-namespace Statiq.Testing.Documents
+namespace Statiq.Testing
 {
     public class TestDocument : Document<TestDocument>
     {

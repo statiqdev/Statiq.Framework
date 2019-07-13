@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Statiq.Common;
 
-namespace Statiq.Testing.Meta
+namespace Statiq.Testing
 {
     /// <summary>
     /// A test implementation of <see cref="IMetadata"/>.

@@ -4,7 +4,6 @@ using System.Threading.Tasks;
 using AngleSharp.Parser.Html;
 using NUnit.Framework;
 using Statiq.Testing;
-using Statiq.Testing.Documents;
 
 namespace Statiq.Html.Tests
 {

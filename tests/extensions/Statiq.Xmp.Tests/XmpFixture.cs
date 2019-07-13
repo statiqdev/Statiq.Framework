@@ -7,7 +7,6 @@ using NUnit.Framework;
 using Shouldly;
 using Statiq.Common;
 using Statiq.Testing;
-using Statiq.Testing.Documents;
 
 namespace Statiq.Xmp.Tests
 {

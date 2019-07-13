@@ -1,7 +1,7 @@
 ﻿using System.Runtime.InteropServices;
 using NUnit.Framework;
 
-namespace Statiq.Testing.Attributes
+namespace Statiq.Testing
 {
     public class NonWindowsTestCaseAttribute : TestCaseAttribute
     {

@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace Statiq.Testing.Execution
+namespace Statiq.Testing
 {
     public class TestServiceProvider : IServiceProvider
     {

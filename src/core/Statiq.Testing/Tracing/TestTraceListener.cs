@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using NUnit.Framework;
 
-namespace Statiq.Testing.Tracing
+namespace Statiq.Testing
 {
     /// <summary>
     /// Throws exceptions on error or warning traces, but only for the current thread

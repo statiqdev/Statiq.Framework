@@ -1,7 +1,7 @@
 ﻿using System;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace Statiq.Testing.Execution
+namespace Statiq.Testing
 {
     public class TestServiceScopeFactory : IServiceScopeFactory
     {

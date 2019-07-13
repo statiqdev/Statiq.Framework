@@ -1,12 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using NUnit.Framework;
 using Statiq.Common;
 using Statiq.Testing;
-using Statiq.Testing.Documents;
 
 namespace Statiq.Core.Tests.Modules.Contents
 {

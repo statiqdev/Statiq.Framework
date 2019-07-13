@@ -2,7 +2,7 @@
 using System.Text;
 using Statiq.Common;
 
-namespace Statiq.Testing.Execution
+namespace Statiq.Testing
 {
     public class TestMemoryStreamFactory : IMemoryStreamFactory
     {

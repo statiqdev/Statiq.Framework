@@ -5,7 +5,6 @@ using System.Threading.Tasks;
 using NUnit.Framework;
 using Statiq.Common;
 using Statiq.Testing;
-using Statiq.Testing.Modules;
 
 namespace Statiq.Core.Tests.Modules.Control
 {

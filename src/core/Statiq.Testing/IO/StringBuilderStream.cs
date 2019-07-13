@@ -3,7 +3,7 @@ using System.IO;
 using System.Text;
 using System.Threading;
 
-namespace Statiq.Testing.IO
+namespace Statiq.Testing
 {
     // Provides a writeable stream to a StringBuilder
     // Initially based on code from Simple.Web (https://github.com/markrendle/Simple.Web)

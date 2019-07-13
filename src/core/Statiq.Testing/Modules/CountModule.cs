@@ -2,7 +2,7 @@
 using System.Threading.Tasks;
 using Statiq.Common;
 
-namespace Statiq.Testing.Modules
+namespace Statiq.Testing
 {
     public class CountModule : IModule
     {

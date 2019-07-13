@@ -2,8 +2,6 @@
 using Shouldly;
 using Statiq.CodeAnalysis.Scripting;
 using Statiq.Testing;
-using Statiq.Testing.Documents;
-using Statiq.Testing.Execution;
 
 namespace Statiq.CodeAnalysis.Tests.Scripting
 {

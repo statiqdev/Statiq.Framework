@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Linq;
-using Statiq.App;
 using Statiq.Common;
 
 namespace Statiq.App

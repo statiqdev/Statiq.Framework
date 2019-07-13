@@ -2,7 +2,6 @@
 using System.Threading.Tasks;
 using NUnit.Framework;
 using Statiq.Testing;
-using Statiq.Testing.Modules;
 using Shouldly;
 using Statiq.Common;
 

@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 using ConcurrentCollections;
 using Statiq.Common;
 
-namespace Statiq.Testing.IO
+namespace Statiq.Testing
 {
     public class TestFileProvider : IFileProvider
     {

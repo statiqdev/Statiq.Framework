@@ -1,11 +1,7 @@
 ﻿using System;
 using Statiq.Common;
-using Statiq.Testing.Configuration;
-using Statiq.Testing.Documents;
-using Statiq.Testing.IO;
-using Statiq.Testing.Shortcodes;
 
-namespace Statiq.Testing.Execution
+namespace Statiq.Testing
 {
     public class TestEngine : IEngine
     {

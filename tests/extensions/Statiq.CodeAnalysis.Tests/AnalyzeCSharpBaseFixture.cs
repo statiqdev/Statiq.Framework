@@ -3,9 +3,6 @@ using System.Linq;
 using NUnit.Framework;
 using Statiq.Common;
 using Statiq.Testing;
-using Statiq.Testing.Documents;
-using Statiq.Testing.Execution;
-using Statiq.Testing.IO;
 
 namespace Statiq.CodeAnalysis.Tests
 {

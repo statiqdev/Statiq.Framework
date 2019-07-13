@@ -2,7 +2,6 @@
 using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 using Spectre.Cli;
-using Statiq.App;
 using Statiq.Common;
 using Statiq.Core;
 

@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using Statiq.Common;
 
-namespace Statiq.Testing.Execution
+namespace Statiq.Testing
 {
     /// <summary>
     /// A pipeline with utility methods for easier testing.

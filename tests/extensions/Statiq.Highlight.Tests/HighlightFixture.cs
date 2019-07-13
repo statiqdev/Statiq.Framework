@@ -6,9 +6,8 @@ using NUnit.Framework.Internal;
 using Shouldly;
 using Statiq.Common;
 using Statiq.Testing;
-using Statiq.Testing.Documents;
 using Statiq.Testing.JavaScript;
-using TestExecutionContext = Statiq.Testing.Execution.TestExecutionContext;
+using TestExecutionContext = Statiq.Testing.TestExecutionContext;
 
 namespace Statiq.Highlight.Tests
 {

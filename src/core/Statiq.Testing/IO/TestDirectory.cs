@@ -5,7 +5,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Statiq.Common;
 
-namespace Statiq.Testing.IO
+namespace Statiq.Testing
 {
     public class TestDirectory : IDirectory
     {

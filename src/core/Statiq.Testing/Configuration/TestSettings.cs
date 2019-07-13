@@ -3,9 +3,8 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using Statiq.Common;
-using Statiq.Testing.Meta;
 
-namespace Statiq.Testing.Configuration
+namespace Statiq.Testing
 {
     public class TestSettings : ISettings
     {

@@ -1,11 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
 using System.Threading.Tasks;
 using NUnit.Framework;
 using Shouldly;
 using Statiq.Testing;
-using Statiq.Testing.Shortcodes;
 
 namespace Statiq.Common.Tests.Shortcodes
 {

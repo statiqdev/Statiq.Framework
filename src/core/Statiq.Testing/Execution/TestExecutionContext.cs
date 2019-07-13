@@ -10,12 +10,8 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Statiq.Common;
-using Statiq.Testing.Configuration;
-using Statiq.Testing.Documents;
-using Statiq.Testing.IO;
-using Statiq.Testing.Shortcodes;
 
-namespace Statiq.Testing.Execution
+namespace Statiq.Testing
 {
     /// <summary>
     /// An <see cref="IExecutionContext"/> that can be used for testing.

@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using Statiq.Common;
 
-namespace Statiq.Testing.Shortcodes
+namespace Statiq.Testing
 {
     public class TestShortcodeCollection : Dictionary<string, Func<IShortcode>>, IShortcodeCollection
     {

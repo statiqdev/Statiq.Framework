@@ -3,7 +3,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Statiq.Common;
 
-namespace Statiq.Testing.IO
+namespace Statiq.Testing
 {
     public class TestFile : IFile
     {

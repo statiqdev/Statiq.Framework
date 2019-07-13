@@ -3,7 +3,7 @@ using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Statiq.Testing.Execution
+namespace Statiq.Testing
 {
     internal class TestHttpMessageHandler : HttpMessageHandler
     {

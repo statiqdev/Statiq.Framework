@@ -3,7 +3,7 @@ using System.Runtime.InteropServices;
 using NUnit.Framework;
 using NUnit.Framework.Interfaces;
 
-namespace Statiq.Testing.Attributes
+namespace Statiq.Testing
 {
     [AttributeUsage(AttributeTargets.All, AllowMultiple = false)]
     public class WindowsTestAttribute : Attribute, ITestAction

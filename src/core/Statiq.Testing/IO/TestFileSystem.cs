@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using Statiq.Common;
 
-namespace Statiq.Testing.IO
+namespace Statiq.Testing
 {
     /// <summary>
     /// A file system for testing that uses a single file provider.

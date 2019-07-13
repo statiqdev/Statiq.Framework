@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using NUnit.Framework;
 using Statiq.Testing;
-using Statiq.Testing.Documents;
 
 namespace Statiq.Common.Tests.Meta
 {

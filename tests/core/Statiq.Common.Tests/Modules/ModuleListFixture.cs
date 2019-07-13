@@ -1,7 +1,6 @@
 ﻿using NUnit.Framework;
 using Shouldly;
 using Statiq.Testing;
-using Statiq.Testing.Modules;
 
 namespace Statiq.Common.Tests.Modules
 {

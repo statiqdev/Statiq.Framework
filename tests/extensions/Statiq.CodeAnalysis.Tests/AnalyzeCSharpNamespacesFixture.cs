@@ -3,8 +3,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using NUnit.Framework;
 using Statiq.Common;
-using Statiq.Testing.Documents;
-using Statiq.Testing.Execution;
+using Statiq.Testing;
 
 namespace Statiq.CodeAnalysis.Tests
 {
