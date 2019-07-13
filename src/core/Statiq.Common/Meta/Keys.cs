@@ -1,10 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Globalization;
-using Statiq.Common.Documents;
-using Statiq.Common.IO;
 
-namespace Statiq.Common.Meta
+namespace Statiq.Common
 {
     /// <summary>
     /// Common metadata keys for modules in the core library.
@@ -182,7 +180,7 @@ namespace Statiq.Common.Meta
         /// <summary>
         /// Contains a document-specific sitemap item for use when generating a sitemap.
         /// </summary>
-        /// <type><see cref="Modules.Contents.SitemapItem"/></type>
+        /// <type><see cref="SitemapItem"/></type>
         public const string SitemapItem = nameof(SitemapItem);
 
         // Download

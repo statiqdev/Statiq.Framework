@@ -1,14 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.Immutable;
 using System.Linq;
 using System.Threading.Tasks;
-using Statiq.Common.Configuration;
-using Statiq.Common.Documents;
-using Statiq.Common.Execution;
-using Statiq.Common.Modules;
+using Statiq.Common;
 
-namespace Statiq.Core.Modules.Control
+namespace Statiq.Core
 {
     public abstract class DocumentModule<TModule> : ContainerModule
         where TModule : DocumentModule<TModule>

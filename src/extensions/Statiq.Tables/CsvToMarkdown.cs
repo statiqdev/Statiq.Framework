@@ -4,11 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Statiq.Common.Documents;
-using Statiq.Common.Execution;
-using Statiq.Common.IO;
-using Statiq.Common.Modules;
-using Statiq.Common.Tracing;
+using Statiq.Common;
 
 namespace Statiq.Tables
 {

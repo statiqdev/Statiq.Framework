@@ -3,11 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
-using Statiq.Common.Configuration;
-using Statiq.Common.Documents;
-using Statiq.Common.Execution;
-using Statiq.Common.Meta;
-using Statiq.Common.Modules;
+using Statiq.Common;
 
 namespace Statiq.AmazonWebServices
 {

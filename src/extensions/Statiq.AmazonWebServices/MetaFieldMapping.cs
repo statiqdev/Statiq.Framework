@@ -1,5 +1,5 @@
 using System;
-using Statiq.Common.Configuration;
+using Statiq.Common;
 
 namespace Statiq.AmazonWebServices
 {

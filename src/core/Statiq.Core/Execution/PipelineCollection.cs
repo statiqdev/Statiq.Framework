@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using Statiq.Common.Execution;
+using Statiq.Common;
 
-namespace Statiq.Core.Execution
+namespace Statiq.Core
 {
     // Implement dictionary explicitly so that we can disallow null pipelines
     internal class PipelineCollection : IPipelineCollection

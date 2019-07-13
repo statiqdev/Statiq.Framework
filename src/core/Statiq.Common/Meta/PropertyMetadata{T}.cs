@@ -1,21 +1,11 @@
 ﻿using System;
 using System.Collections;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
-using Statiq.Common.Configuration;
-using Statiq.Common.Content;
-using Statiq.Common.Execution;
-using Statiq.Common.IO;
-using Statiq.Common.Meta;
-using Statiq.Common.Tracing;
-using Statiq.Common.Util;
+using Statiq.Common;
 
-namespace Statiq.Common.Meta
+namespace Statiq.Common
 {
     /// <summary>
     /// Provides metadata for the properties of a given object.

@@ -1,9 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
-using Statiq.Common.Documents;
-using Statiq.Common.Execution;
-using Statiq.Common.IO;
-using Statiq.Common.Modules;
+using Statiq.Common;
 
 namespace Statiq.Testing.Modules
 {

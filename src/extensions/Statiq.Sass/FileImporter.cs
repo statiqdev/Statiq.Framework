@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Threading.Tasks;
-using Statiq.Common.IO;
+using Statiq.Common;
 
 namespace Statiq.Sass
 {

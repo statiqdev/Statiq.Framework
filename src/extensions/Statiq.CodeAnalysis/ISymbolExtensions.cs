@@ -1,8 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 using Microsoft.CodeAnalysis;
-using Statiq.Common.Util;
+using Statiq.Common;
 
 namespace Statiq.CodeAnalysis
 {

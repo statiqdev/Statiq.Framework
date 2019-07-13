@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Statiq.Common.IO
+namespace Statiq.Common
 {
     /// <summary>
     /// An ordered collection of unique <see cref="NormalizedPath"/>.
@@ -69,10 +69,10 @@ namespace Statiq.Common.IO
         }
 
         /// <summary>
-        /// Gets or sets the <see cref="Statiq.Common.IO.DirectoryPath" /> at the specified index.
+        /// Gets or sets the <see cref="Statiq.Common.DirectoryPath" /> at the specified index.
         /// </summary>
         /// <value>
-        /// The <see cref="Statiq.Common.IO.DirectoryPath" /> at the specified index.
+        /// The <see cref="Statiq.Common.DirectoryPath" /> at the specified index.
         /// </value>
         /// <param name="index">The index.</param>
         /// <returns>The path at the specified index.</returns>

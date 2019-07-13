@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace Statiq.Common.Shortcodes
+namespace Statiq.Common
 {
     public interface IReadOnlyShortcodeCollection : IReadOnlyCollection<string>
     {

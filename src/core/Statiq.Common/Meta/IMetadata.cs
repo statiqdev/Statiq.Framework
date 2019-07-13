@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace Statiq.Common.Meta
+namespace Statiq.Common
 {
     /// <summary>
     /// Contains a set of metadata with flexible runtime conversion methods. Metadata keys are case-insensitive.

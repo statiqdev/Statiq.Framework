@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.FileSystemGlobbing;
 using Microsoft.Extensions.FileSystemGlobbing.Abstractions;
 
-namespace Statiq.Common.IO.Globbing
+namespace Statiq.Common
 {
     /// <summary>
     /// Helper methods to work with globbing patterns.

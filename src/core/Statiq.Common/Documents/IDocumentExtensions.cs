@@ -2,14 +2,10 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
-using Statiq.Common.Content;
-using Statiq.Common.IO;
-using Statiq.Common.Meta;
-using Statiq.Common.Util;
+using Statiq.Common;
 
-namespace Statiq.Common.Documents
+namespace Statiq.Common
 {
     public static class IDocumentExtensions
     {

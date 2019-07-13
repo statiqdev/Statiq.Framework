@@ -1,7 +1,5 @@
 ﻿using System;
 using NUnit.Framework;
-using Statiq.Common.IO;
-using Statiq.Common.Util;
 using Statiq.Testing;
 
 namespace Statiq.Common.Tests.Util

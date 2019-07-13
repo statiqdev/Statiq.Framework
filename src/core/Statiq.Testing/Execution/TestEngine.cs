@@ -1,15 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using Statiq.Common.Configuration;
-using Statiq.Common.Documents;
-using Statiq.Common.Execution;
-using Statiq.Common.IO;
-using Statiq.Common.Shortcodes;
+using Statiq.Common;
 using Statiq.Testing.Configuration;
 using Statiq.Testing.Documents;
 using Statiq.Testing.IO;
-using Statiq.Testing.Meta;
+using Statiq.Testing.Shortcodes;
 
 namespace Statiq.Testing.Execution
 {
@@ -33,7 +27,7 @@ namespace Statiq.Testing.Execution
 
         public IPipelineCollection Pipelines => throw new NotImplementedException();
 
-        public IShortcodeCollection Shortcodes => throw new NotImplementedException();
+        public IShortcodeCollection Shortcodes => new TestShortcodeCollection();
 
         public INamespacesCollection Namespaces => throw new NotImplementedException();
 

@@ -7,22 +7,9 @@ using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 using JavaScriptEngineSwitcher.Core;
-using Statiq.Common.Configuration;
-using Statiq.Common.Documents;
-using Statiq.Common.Execution;
-using Statiq.Common.IO;
-using Statiq.Common.Meta;
-using Statiq.Common.Modules;
-using Statiq.Common.Shortcodes;
-using Statiq.Common.Tracing;
-using Statiq.Core.Configuration;
-using Statiq.Core.Documents;
-using Statiq.Core.IO;
-using Statiq.Core.Shortcodes;
-using Statiq.Core.Tracing;
-using Statiq.Core.Util;
+using Statiq.Common;
 
-namespace Statiq.Core.Execution
+namespace Statiq.Core
 {
     /// <summary>
     /// The engine is the primary entry point for the generation process.

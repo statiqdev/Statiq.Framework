@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-using Statiq.Common.IO;
+using Statiq.Common;
 
-namespace Statiq.Core.IO
+namespace Statiq.Core
 {
     // Initially based on code from Cake (http://cakebuild.net/)
     internal class LocalDirectory : IDirectory

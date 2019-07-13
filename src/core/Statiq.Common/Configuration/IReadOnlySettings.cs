@@ -1,6 +1,4 @@
-﻿using Statiq.Common.Meta;
-
-namespace Statiq.Common.Configuration
+﻿namespace Statiq.Common
 {
     /// <summary>
     /// Settings that can be globally set.

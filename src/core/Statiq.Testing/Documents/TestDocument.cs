@@ -1,13 +1,6 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Threading.Tasks;
-using Statiq.Common.Content;
-using Statiq.Common.Documents;
-using Statiq.Common.IO;
-using Statiq.Common.Meta;
+using Statiq.Common;
 using Statiq.Testing.Execution;
 using Statiq.Testing.Meta;
 

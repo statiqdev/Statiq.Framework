@@ -8,12 +8,7 @@ using AngleSharp.Extensions;
 using AngleSharp.Html;
 using AngleSharp.Parser.Html;
 using Statiq.Common;
-using Statiq.Common.Documents;
-using Statiq.Common.Execution;
-using Statiq.Common.IO;
-using Statiq.Common.JavaScript;
-using Statiq.Common.Modules;
-using Trace = Statiq.Common.Tracing.Trace;
+using Trace = Statiq.Common.Trace;
 
 namespace Statiq.Highlight
 {

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Net;
 using System.Net.Http;
 
-namespace Statiq.Core.Modules.IO
+namespace Statiq.Core
 {
     /// <summary>
     /// A download request for use with the <see cref="Download"/> module.

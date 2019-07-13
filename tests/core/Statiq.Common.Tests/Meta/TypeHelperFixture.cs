@@ -2,7 +2,6 @@
 using System.Collections;
 using System.Collections.Generic;
 using NUnit.Framework;
-using Statiq.Common.Meta;
 using Statiq.Testing;
 
 namespace Statiq.Common.Tests.Meta

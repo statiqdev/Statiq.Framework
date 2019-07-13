@@ -2,10 +2,9 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using Statiq.Common.Execution;
-using Statiq.Common.Meta;
+using Statiq.Common;
 
-namespace Statiq.Common.Meta
+namespace Statiq.Common
 {
     /// <summary>
     /// A linked list of metadata items.

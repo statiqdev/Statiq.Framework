@@ -1,4 +1,4 @@
-﻿using Statiq.Common.Execution;
+﻿using Statiq.Common;
 
 namespace Statiq.SearchIndex
 {

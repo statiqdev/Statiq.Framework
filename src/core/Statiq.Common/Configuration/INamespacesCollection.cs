@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace Statiq.Common.Configuration
+namespace Statiq.Common
 {
     /// <summary>
     /// A collection of namespace strings used to inform modules of which namespaces

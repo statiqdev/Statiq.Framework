@@ -2,10 +2,9 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using Statiq.Common.Execution;
-using Statiq.Common.Meta.TypeConversion;
+using Statiq.Common;
 
-namespace Statiq.Common.Meta
+namespace Statiq.Common
 {
     public static class TypeHelper
     {

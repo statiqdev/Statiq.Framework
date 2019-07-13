@@ -1,10 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using NUnit.Framework;
-using Statiq.Common.Documents;
-using Statiq.Common.Execution;
-using Statiq.Common.IO;
-using Statiq.Common.Meta;
+using Statiq.Common;
 using Statiq.Testing;
 using Statiq.Testing.Documents;
 using Statiq.Testing.Execution;

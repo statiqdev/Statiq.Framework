@@ -1,4 +1,4 @@
-﻿namespace Statiq.Common.IO
+﻿namespace Statiq.Common
 {
     /// <summary>
     /// A file system that can be configured.

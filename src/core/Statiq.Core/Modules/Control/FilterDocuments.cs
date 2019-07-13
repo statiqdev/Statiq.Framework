@@ -1,12 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using Statiq.Common.Configuration;
-using Statiq.Common.Documents;
-using Statiq.Common.Execution;
-using Statiq.Common.Modules;
+using Statiq.Common;
 
-namespace Statiq.Core.Modules.Control
+namespace Statiq.Core
 {
     /// <summary>
     /// Filters the current sequence of documents using a predicate.

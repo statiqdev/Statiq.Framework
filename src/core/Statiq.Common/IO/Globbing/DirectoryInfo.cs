@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Microsoft.Extensions.FileSystemGlobbing.Abstractions;
 
-namespace Statiq.Common.IO.Globbing
+namespace Statiq.Common
 {
     internal class DirectoryInfo : DirectoryInfoBase
     {

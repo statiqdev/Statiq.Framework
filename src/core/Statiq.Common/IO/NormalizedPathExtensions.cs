@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace Statiq.Common.IO
+﻿namespace Statiq.Common
 {
     public static class NormalizedPathExtensions
     {

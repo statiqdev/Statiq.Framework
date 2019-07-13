@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using Statiq.Common.Meta;
 
-namespace Statiq.Common.Meta
+namespace Statiq.Common
 {
     public class MetadataDictionary : Metadata, IMetadataDictionary
     {

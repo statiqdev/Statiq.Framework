@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
-using Statiq.Common.Modules;
 
-namespace Statiq.Common.Execution
+namespace Statiq.Common
 {
     public static class IPipelineExtensions
     {

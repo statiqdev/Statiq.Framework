@@ -2,13 +2,10 @@
 using System.Linq;
 using System.Threading.Tasks;
 using NUnit.Framework;
-using Statiq.Core.Modules.Control;
 using Statiq.Testing;
 using Statiq.Testing.Modules;
-using Statiq.Common.Execution;
-using Statiq.Common.Configuration;
-using Statiq.Common.Documents;
 using Shouldly;
+using Statiq.Common;
 
 namespace Statiq.Core.Tests.Modules.Control
 {
@@ -36,7 +33,7 @@ namespace Statiq.Core.Tests.Modules.Control
                 IReadOnlyList<IDocument> results = await ExecuteAsync(
                     a,
                     new MergeDocuments(b),
-                    new Core.Modules.Metadata.Meta("Content", Config.FromDocument(async doc => await doc.GetStringAsync())));
+                    new AddMetadata("Content", Config.FromDocument(async doc => await doc.GetStringAsync())));
 
                 // Then
                 CollectionAssert.AreEqual(new[] { "21" }, results.Select(x => x["Content"]));

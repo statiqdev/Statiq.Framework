@@ -4,11 +4,9 @@ using System.Data;
 using System.Data.SqlClient;
 using System.Linq;
 using System.Threading.Tasks;
-using Statiq.Common.Documents;
-using Statiq.Common.Execution;
-using Statiq.Common.Modules;
+using Statiq.Common;
 
-namespace Statiq.Core.Modules.Metadata
+namespace Statiq.Core
 {
     /// <summary>
     /// Creates documents from the results of a SQL query. Each row is output

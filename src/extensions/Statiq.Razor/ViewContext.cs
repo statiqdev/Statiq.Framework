@@ -2,8 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ViewEngines;
 using Microsoft.AspNetCore.Mvc.ViewFeatures;
-using Statiq.Common.Documents;
-using Statiq.Common.Execution;
+using Statiq.Common;
 
 namespace Statiq.Razor
 {

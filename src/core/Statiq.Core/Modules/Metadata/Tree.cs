@@ -5,14 +5,8 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
 using Statiq.Common;
-using Statiq.Common.Configuration;
-using Statiq.Common.Documents;
-using Statiq.Common.Execution;
-using Statiq.Common.IO;
-using Statiq.Common.Meta;
-using Statiq.Common.Modules;
 
-namespace Statiq.Core.Modules.Metadata
+namespace Statiq.Core
 {
     /// <summary>
     /// Adds metadata to the input documents that describes the position of each one in a tree structure.

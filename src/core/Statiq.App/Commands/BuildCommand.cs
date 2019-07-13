@@ -3,9 +3,9 @@ using System.ComponentModel;
 using System.Threading;
 using System.Threading.Tasks;
 using Spectre.Cli;
-using Statiq.Common.Configuration;
+using Statiq.Common;
 
-namespace Statiq.App.Commands
+namespace Statiq.App
 {
     [Description("Builds the site.")]
     public class BuildCommand : BaseCommand<BuildCommand.Settings>

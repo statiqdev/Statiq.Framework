@@ -2,9 +2,6 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using NUnit.Framework;
-using Statiq.Common.Documents;
-using Statiq.Common.Execution;
-using Statiq.Common.Modules;
 using Statiq.Testing;
 using Statiq.Testing.Modules;
 

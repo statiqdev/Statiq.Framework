@@ -7,12 +7,6 @@ using AngleSharp.Dom;
 using AngleSharp.Dom.Html;
 using AngleSharp.Parser.Html;
 using Statiq.Common;
-using Statiq.Common.Configuration;
-using Statiq.Common.Documents;
-using Statiq.Common.Execution;
-using Statiq.Common.IO;
-using Statiq.Common.Modules;
-using Statiq.Common.Tracing;
 
 namespace Statiq.Html
 {
@@ -69,12 +63,12 @@ namespace Statiq.Html
         }
 
         /// <inheritdoc />
-        public async Task<IEnumerable<Common.Documents.IDocument>> ExecuteAsync(IReadOnlyList<Common.Documents.IDocument> inputs, IExecutionContext context)
+        public async Task<IEnumerable<Common.IDocument>> ExecuteAsync(IReadOnlyList<Common.IDocument> inputs, IExecutionContext context)
         {
             HtmlParser parser = new HtmlParser();
             return await inputs.ParallelSelectAsync(context, GetDocumentAsync);
 
-            async Task<Common.Documents.IDocument> GetDocumentAsync(Common.Documents.IDocument input)
+            async Task<Common.IDocument> GetDocumentAsync(Common.IDocument input)
             {
                 // Get the replacement content
                 string content = await _content.GetValueAsync(input, context);

@@ -2,8 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using Statiq.Common.Meta;
-using Statiq.Testing.Execution;
+using Statiq.Common;
 
 namespace Statiq.Testing.Meta
 {

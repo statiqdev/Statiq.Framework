@@ -4,13 +4,9 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Xml;
 using System.Xml.Xsl;
-using Statiq.Common.Configuration;
-using Statiq.Common.Documents;
-using Statiq.Common.Execution;
-using Statiq.Common.IO;
-using Statiq.Common.Modules;
+using Statiq.Common;
 
-namespace Statiq.Core.Modules.Templates
+namespace Statiq.Core
 {
     /// <summary>
     /// Transforms input documents using a supplied XSLT template.

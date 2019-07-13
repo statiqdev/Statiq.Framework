@@ -1,4 +1,4 @@
-﻿namespace Statiq.Common.Configuration
+﻿namespace Statiq.Common
 {
     public interface IConfigurableBootstrapper : IConfigurable
     {

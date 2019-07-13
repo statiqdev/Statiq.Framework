@@ -3,14 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Statiq.Common;
-using Statiq.Common.Configuration;
-using Statiq.Common.Documents;
-using Statiq.Common.Execution;
-using Statiq.Common.IO;
-using Statiq.Common.Modules;
-using Statiq.Core.Execution;
-using Statiq.Core.Modules.Extensibility;
-using Statiq.Core.Modules.IO;
+using Statiq.Core;
 
 namespace Statiq.App
 {

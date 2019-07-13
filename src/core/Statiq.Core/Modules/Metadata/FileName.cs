@@ -3,14 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-using Statiq.Common.Configuration;
-using Statiq.Common.Documents;
-using Statiq.Common.Execution;
-using Statiq.Common.IO;
-using Statiq.Common.Meta;
-using Statiq.Common.Modules;
+using Statiq.Common;
 
-namespace Statiq.Core.Modules.Metadata
+namespace Statiq.Core
 {
     /// <summary>
     /// Optimizes a file name.

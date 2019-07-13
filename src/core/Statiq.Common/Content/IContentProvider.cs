@@ -1,8 +1,7 @@
-﻿using System;
-using System.IO;
+﻿using System.IO;
 using System.Threading.Tasks;
 
-namespace Statiq.Common.Content
+namespace Statiq.Common
 {
     /// <summary>
     /// Contains the content for a document.

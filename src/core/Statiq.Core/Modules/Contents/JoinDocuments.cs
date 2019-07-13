@@ -4,12 +4,9 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Statiq.Common.Content;
-using Statiq.Common.Documents;
-using Statiq.Common.Execution;
-using Statiq.Common.Modules;
+using Statiq.Common;
 
-namespace Statiq.Core.Modules.Contents
+namespace Statiq.Core
 {
     /// <summary>
     /// Joins documents together with an optional delimiter to form one document.

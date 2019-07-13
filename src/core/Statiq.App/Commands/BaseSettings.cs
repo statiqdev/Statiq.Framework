@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel;
 using Spectre.Cli;
 
-namespace Statiq.App.Commands
+namespace Statiq.App
 {
     public class BaseSettings : CommandSettings
     {

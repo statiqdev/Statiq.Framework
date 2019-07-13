@@ -1,7 +1,7 @@
 using System.IO;
 using System.Threading.Tasks;
 using dotless.Core.Input;
-using Statiq.Common.IO;
+using Statiq.Common;
 
 namespace Statiq.Less
 {

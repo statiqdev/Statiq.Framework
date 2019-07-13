@@ -6,12 +6,7 @@ using System.Threading.Tasks;
 using AngleSharp.Dom;
 using AngleSharp.Dom.Html;
 using AngleSharp.Parser.Html;
-using Statiq.Common.Modules;
-using Statiq.Common.Execution;
-using Statiq.Common.Tracing;
 using Statiq.Common;
-using Statiq.Common.IO;
-using Statiq.Common.Documents;
 
 namespace Statiq.Html
 {
@@ -183,12 +178,12 @@ namespace Statiq.Html
         }
 
         /// <inheritdoc />
-        public async Task<IEnumerable<Common.Documents.IDocument>> ExecuteAsync(IReadOnlyList<Common.Documents.IDocument> inputs, IExecutionContext context)
+        public async Task<IEnumerable<Common.IDocument>> ExecuteAsync(IReadOnlyList<Common.IDocument> inputs, IExecutionContext context)
         {
             HtmlParser parser = new HtmlParser();
             return await inputs.ParallelSelectManyAsync(context, GetDocumentsAsync);
 
-            async Task<IEnumerable<Common.Documents.IDocument>> GetDocumentsAsync(Common.Documents.IDocument input)
+            async Task<IEnumerable<Common.IDocument>> GetDocumentsAsync(Common.IDocument input)
             {
                 // Parse the HTML content
                 IHtmlDocument htmlDocument = await input.ParseHtmlAsync(parser);
@@ -207,7 +202,7 @@ namespace Statiq.Html
                             : htmlDocument.QuerySelectorAll(_querySelector).ToArray();
                         if (elements.Length > 0 && elements[0] != null)
                         {
-                            List<Common.Documents.IDocument> documents = new List<Common.Documents.IDocument>();
+                            List<Common.IDocument> documents = new List<Common.IDocument>();
                             foreach (IElement element in elements)
                             {
                                 // Get the metadata

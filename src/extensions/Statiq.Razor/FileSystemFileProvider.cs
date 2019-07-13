@@ -6,7 +6,7 @@ using System.IO;
 using System.Linq;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Primitives;
-using Statiq.Common.IO;
+using Statiq.Common;
 using IFileProvider = Microsoft.Extensions.FileProviders.IFileProvider;
 
 namespace Statiq.Razor

@@ -4,8 +4,7 @@ using System.Linq;
 using System.Text;
 using NUnit.Framework;
 using Shouldly;
-using Statiq.Common.Shortcodes;
-using Statiq.Core.Shortcodes;
+using Statiq.Common;
 using Statiq.Testing;
 using Statiq.Testing.Shortcodes;
 

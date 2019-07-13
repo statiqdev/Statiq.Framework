@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Statiq.Common.Execution
+namespace Statiq.Common
 {
     /// <summary>
     /// Extensions for working with pipeline collections.

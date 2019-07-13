@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace Statiq.Common.Meta
+namespace Statiq.Common
 {
     /// <summary>
     /// Provides slightly nicer syntax than <c>KeyValuePair&lt;string, object&gt;</c> for working

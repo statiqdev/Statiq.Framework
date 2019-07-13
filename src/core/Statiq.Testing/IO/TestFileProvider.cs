@@ -4,7 +4,6 @@ using System.Text;
 using System.Threading.Tasks;
 using ConcurrentCollections;
 using Statiq.Common;
-using Statiq.Common.IO;
 
 namespace Statiq.Testing.IO
 {

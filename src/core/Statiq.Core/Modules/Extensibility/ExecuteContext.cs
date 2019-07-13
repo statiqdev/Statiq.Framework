@@ -1,11 +1,8 @@
 ﻿using System;
 using System.Threading.Tasks;
-using Statiq.Common.Documents;
-using Statiq.Common.Execution;
-using Statiq.Common.Modules;
-using Statiq.Core.Modules.Contents;
+using Statiq.Common;
 
-namespace Statiq.Core.Modules.Extensibility
+namespace Statiq.Core
 {
     /// <summary>
     /// Executes custom code on the execution context.

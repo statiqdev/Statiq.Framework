@@ -4,14 +4,8 @@ using System.Collections.Immutable;
 using System.Linq;
 using System.Threading.Tasks;
 using Statiq.Common;
-using Statiq.Common.Configuration;
-using Statiq.Common.Documents;
-using Statiq.Common.Execution;
-using Statiq.Common.Meta;
-using Statiq.Common.Modules;
-using Statiq.Core.Util;
 
-namespace Statiq.Core.Modules.Control
+namespace Statiq.Core
 {
     /// <summary>
     /// Splits a sequence of documents into groups based on a specified function or metadata key

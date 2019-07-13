@@ -2,7 +2,7 @@
 using System.Runtime.CompilerServices;
 using System.Threading;
 
-namespace Statiq.Core.Util
+namespace Statiq.Core
 {
     /// <summary>
     /// Removes the <see cref="SynchronizationContext"/> for all following awaiters.

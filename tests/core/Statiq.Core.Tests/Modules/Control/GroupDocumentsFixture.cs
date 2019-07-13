@@ -4,12 +4,6 @@ using System.Linq;
 using System.Threading.Tasks;
 using NUnit.Framework;
 using Statiq.Common;
-using Statiq.Common.Configuration;
-using Statiq.Common.Documents;
-using Statiq.Common.Execution;
-using Statiq.Common.Meta;
-using Statiq.Core.Modules.Control;
-using Statiq.Core.Modules.Extensibility;
 using Statiq.Testing;
 using Statiq.Testing.Modules;
 
@@ -86,7 +80,7 @@ namespace Statiq.Core.Tests.Modules.Control
                     AdditionalOutputs = 7,
                     EnsureInputDocument = true
                 };
-                Core.Modules.Metadata.Meta meta = new Core.Modules.Metadata.Meta("GroupMetadata", Config.FromDocument(d => new object[] { d.Int("A") % 3, 3 }));
+                AddMetadata meta = new AddMetadata("GroupMetadata", Config.FromDocument(d => new object[] { d.Int("A") % 3, 3 }));
                 GroupDocuments groupByMany = new GroupDocuments("GroupMetadata");
                 Execute gatherData = new ExecuteDocument(
                     Config.FromDocument(d =>

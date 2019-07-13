@@ -1,13 +1,6 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.IO;
-using Statiq.Common.Content;
-using Statiq.Common.IO;
-using Statiq.Common.Meta;
+﻿using System.Collections.Generic;
 
-namespace Statiq.Common.Documents
+namespace Statiq.Common
 {
     /// <summary>
     /// A simple document that has content and metadata.

@@ -1,6 +1,6 @@
 ﻿using System.Threading.Tasks;
 
-namespace Statiq.Common.IO
+namespace Statiq.Common
 {
     /// <summary>
     /// A provider that can instantiate <see cref="IFile"/> and <see cref="IDirectory"/>

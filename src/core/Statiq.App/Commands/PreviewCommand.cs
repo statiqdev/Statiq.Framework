@@ -6,15 +6,10 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Spectre.Cli;
-using Statiq.App.Tracing;
-using Statiq.Common.Configuration;
-using Statiq.Common.Execution;
-using Statiq.Common.IO;
-using Statiq.Common.Meta;
-using Statiq.Common.Tracing;
 using Statiq.Hosting;
+using Statiq.Common;
 
-namespace Statiq.App.Commands
+namespace Statiq.App
 {
     [Description("Builds the site and serves it, optionally watching for changes and rebuilding by default.")]
     public class PreviewCommand : BaseCommand<PreviewCommand.Settings>

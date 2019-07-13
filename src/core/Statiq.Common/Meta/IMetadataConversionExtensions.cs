@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using Statiq.Common.Documents;
-using Statiq.Common.IO;
 
-namespace Statiq.Common.Meta
+namespace Statiq.Common
 {
     /// <summary>
     /// Extensions to make it easier to get typed information from metadata.

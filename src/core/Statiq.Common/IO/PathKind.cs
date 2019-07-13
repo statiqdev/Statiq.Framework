@@ -1,4 +1,4 @@
-﻿namespace Statiq.Common.IO
+﻿namespace Statiq.Common
 {
     /// <summary>
     /// The kind of the path.

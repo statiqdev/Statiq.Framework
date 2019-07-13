@@ -3,11 +3,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.CodeAnalysis;
 using NUnit.Framework;
-using Statiq.Common.Documents;
-using Statiq.Common.Execution;
-using Statiq.Common.IO;
-using Statiq.Common.Meta;
-using Statiq.Common.Modules;
+using Statiq.Common;
 using Statiq.Testing.Documents;
 using Statiq.Testing.Execution;
 

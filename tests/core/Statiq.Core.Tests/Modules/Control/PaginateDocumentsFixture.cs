@@ -3,12 +3,6 @@ using System.Linq;
 using System.Threading.Tasks;
 using NUnit.Framework;
 using Statiq.Common;
-using Statiq.Common.Configuration;
-using Statiq.Common.Documents;
-using Statiq.Common.Execution;
-using Statiq.Common.Meta;
-using Statiq.Core.Modules.Control;
-using Statiq.Core.Modules.Extensibility;
 using Statiq.Testing;
 using Statiq.Testing.Modules;
 

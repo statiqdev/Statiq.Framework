@@ -1,7 +1,7 @@
 ﻿using System;
 using Microsoft.Extensions.FileSystemGlobbing.Abstractions;
 
-namespace Statiq.Common.IO.Globbing
+namespace Statiq.Common
 {
     internal class FileInfo : FileInfoBase
     {

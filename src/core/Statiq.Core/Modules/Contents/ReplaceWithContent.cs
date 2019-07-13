@@ -1,11 +1,8 @@
 ﻿using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-using Statiq.Common.Configuration;
-using Statiq.Common.Documents;
-using Statiq.Common.Modules;
-using Statiq.Common.Execution;
+using Statiq.Common;
 
-namespace Statiq.Core.Modules.Contents
+namespace Statiq.Core
 {
     /// <summary>
     /// Replaces a search string in the specified content with the content of input documents.

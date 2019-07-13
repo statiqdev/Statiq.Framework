@@ -1,10 +1,9 @@
 ﻿using System;
 using System.IO;
 using System.Threading.Tasks;
-using Statiq.Common.Content;
-using Statiq.Common.IO;
+using Statiq.Common;
 
-namespace Statiq.Core.IO
+namespace Statiq.Core
 {
     // Initially based on code from Cake (http://cakebuild.net/)
     internal class LocalFile : IFile

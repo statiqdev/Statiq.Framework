@@ -2,11 +2,9 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Statiq.Common.Documents;
-using Statiq.Common.Tracing;
-using Statiq.Common.IO;
+using Statiq.Common;
 
-namespace Statiq.Common.Execution
+namespace Statiq.Common
 {
     /// <summary>
     /// Extensions to send exception messages to trace output with relevant context such as currently executing module and document.

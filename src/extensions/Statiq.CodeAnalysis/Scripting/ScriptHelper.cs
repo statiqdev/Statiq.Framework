@@ -9,10 +9,7 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.Emit;
 using Microsoft.CodeAnalysis.Text;
-using Statiq.Common.Documents;
-using Statiq.Common.Execution;
-using Statiq.Common.Meta;
-using Statiq.Common.Tracing;
+using Statiq.Common;
 
 namespace Statiq.CodeAnalysis.Scripting
 {

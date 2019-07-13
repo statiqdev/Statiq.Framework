@@ -10,12 +10,7 @@ using Markdig.Helpers;
 using Markdig.Parsers;
 using Markdig.Renderers;
 using Markdig.Syntax;
-using Statiq.Common.Documents;
-using Statiq.Common.Execution;
-using Statiq.Common.IO;
-using Statiq.Common.Meta;
-using Statiq.Common.Modules;
-using Statiq.Common.Tracing;
+using Statiq.Common;
 
 namespace Statiq.Markdown
 {

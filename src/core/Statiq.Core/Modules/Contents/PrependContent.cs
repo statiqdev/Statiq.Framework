@@ -1,10 +1,7 @@
 ﻿using System.Threading.Tasks;
-using Statiq.Common.Configuration;
-using Statiq.Common.Documents;
-using Statiq.Common.Execution;
-using Statiq.Common.Modules;
+using Statiq.Common;
 
-namespace Statiq.Core.Modules.Contents
+namespace Statiq.Core
 {
     /// <summary>
     /// Prepends the specified content to the existing content of each document.

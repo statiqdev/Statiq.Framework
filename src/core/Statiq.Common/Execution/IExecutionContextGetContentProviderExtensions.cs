@@ -1,13 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Text;
 using System.Threading.Tasks;
-using Statiq.Common.Content;
-using Statiq.Common.IO;
-using Statiq.Common.Meta;
 
-namespace Statiq.Common.Execution
+namespace Statiq.Common
 {
     public static class IExecutionContextGetContentProviderExtensions
     {

@@ -2,11 +2,7 @@
 using System.Linq;
 using System.Threading.Tasks;
 using NUnit.Framework;
-using Statiq.Common.Configuration;
-using Statiq.Common.Documents;
-using Statiq.Common.Execution;
-using Statiq.Core.Modules.Control;
-using Statiq.Core.Modules.Extensibility;
+using Statiq.Common;
 using Statiq.Testing;
 using Statiq.Testing.Documents;
 using Statiq.Testing.Execution;

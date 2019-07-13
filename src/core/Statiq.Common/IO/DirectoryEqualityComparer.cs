@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace Statiq.Common.IO
+namespace Statiq.Common
 {
     /// <summary>
     /// Compares <see cref="IDirectory"/> equality.

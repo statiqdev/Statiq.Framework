@@ -4,10 +4,9 @@ using System.Collections.Immutable;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-using Statiq.Common.IO.Globbing;
-using Statiq.Common.Util;
+using Statiq.Common;
 
-namespace Statiq.Common.IO
+namespace Statiq.Common
 {
     public static class IReadOnlyFileSystemExtensions
     {

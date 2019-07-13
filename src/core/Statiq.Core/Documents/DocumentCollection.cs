@@ -4,11 +4,9 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
-using Statiq.Common.Documents;
-using Statiq.Common.Execution;
-using Statiq.Core.Execution;
+using Statiq.Common;
 
-namespace Statiq.Core.Documents
+namespace Statiq.Core
 {
     internal class DocumentCollection : IDocumentCollection
     {

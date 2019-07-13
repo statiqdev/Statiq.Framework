@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using Statiq.Common.IO;
+using Statiq.Common;
 
-namespace Statiq.Core.IO
+namespace Statiq.Core
 {
     // Initially based on code from Cake (http://cakebuild.net/)
     internal class FileSystem : IFileSystem

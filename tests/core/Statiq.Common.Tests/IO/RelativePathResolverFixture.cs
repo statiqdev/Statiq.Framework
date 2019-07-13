@@ -1,6 +1,5 @@
 ﻿using System;
 using NUnit.Framework;
-using Statiq.Common.IO;
 using Statiq.Testing;
 using Statiq.Testing.Attributes;
 

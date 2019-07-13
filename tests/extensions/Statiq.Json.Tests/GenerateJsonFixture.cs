@@ -1,17 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using NUnit.Framework;
 using Shouldly;
 using Statiq.Common;
-using Statiq.Common.Configuration;
-using Statiq.Common.Documents;
-using Statiq.Common.Execution;
-using Statiq.Common.Meta;
 using Statiq.Testing;
 using Statiq.Testing.Documents;
-using Statiq.Testing.Execution;
 
 namespace Statiq.Json.Tests
 {

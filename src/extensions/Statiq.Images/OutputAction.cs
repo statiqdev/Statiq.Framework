@@ -2,7 +2,7 @@
 using System.IO;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
-using Statiq.Common.IO;
+using Statiq.Common;
 
 namespace Statiq.Images.Operations
 {

@@ -3,10 +3,8 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Statiq.Common.Documents;
-using Statiq.Common.Execution;
 
-namespace Statiq.Common.Configuration
+namespace Statiq.Common
 {
     /// <summary>
     /// A union configuration value that can be either a delegate

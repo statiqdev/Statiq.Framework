@@ -1,4 +1,4 @@
-﻿namespace Statiq.Core.Shortcodes
+﻿namespace Statiq.Core
 {
     internal class Delimiter
     {

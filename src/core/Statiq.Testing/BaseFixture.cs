@@ -6,14 +6,11 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using NUnit.Framework;
-using Statiq.Common.Content;
-using Statiq.Common.Documents;
-using Statiq.Common.Execution;
-using Statiq.Common.Modules;
+using Statiq.Common;
 using Statiq.Testing.Documents;
 using Statiq.Testing.Execution;
 using Statiq.Testing.Tracing;
-using Trace = Statiq.Common.Tracing.Trace;
+using Trace = Statiq.Common.Trace;
 
 namespace Statiq.Testing
 {

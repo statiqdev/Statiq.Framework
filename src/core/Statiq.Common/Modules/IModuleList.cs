@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace Statiq.Common.Modules
+namespace Statiq.Common
 {
     /// <summary>
     /// A collection of optionally named modules.

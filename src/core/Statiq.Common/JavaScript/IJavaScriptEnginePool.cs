@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Statiq.Common.JavaScript
+namespace Statiq.Common
 {
     /// <summary>
     /// Provides a shared pool of JavaScript engine instances. You should dispose the pool when

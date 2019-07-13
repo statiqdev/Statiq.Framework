@@ -1,12 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Globalization;
-using System.Linq;
-using System.Reflection;
-using System.Text;
 
-namespace Statiq.Common.Meta.TypeConversion
+namespace Statiq.Common
 {
     /// <summary>
     /// The exception that is thrown when a conversion is invalid.

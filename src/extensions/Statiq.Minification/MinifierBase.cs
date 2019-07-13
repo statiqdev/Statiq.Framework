@@ -4,10 +4,6 @@ using System.Linq;
 using System.Threading.Tasks;
 using WebMarkupMin.Core;
 using Statiq.Common;
-using Statiq.Common.Documents;
-using Statiq.Common.Execution;
-using Statiq.Common.IO;
-using Statiq.Common.Tracing;
 
 namespace Statiq.Minification
 {

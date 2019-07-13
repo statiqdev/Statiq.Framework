@@ -1,19 +1,9 @@
 ﻿using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.IO;
-using System.Linq;
 using System.Threading.Tasks;
-using Statiq.Common.Configuration;
-using Statiq.Common.Documents;
-using Statiq.Common.IO;
-using Statiq.Common.Meta;
-using Statiq.Common.Modules;
-using Statiq.Common.Execution;
-using Statiq.Common.Tracing;
 using Statiq.Common;
 
-namespace Statiq.Core.Modules.IO
+namespace Statiq.Core
 {
     /// <summary>
     /// Sets the document destination.

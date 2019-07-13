@@ -1,18 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Globalization;
-using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
 using Statiq.Common;
-using Statiq.Common.Configuration;
-using Statiq.Common.Documents;
-using Statiq.Common.Execution;
-using Statiq.Common.IO;
-using Statiq.Common.Meta;
-using Statiq.Common.Modules;
 
-namespace Statiq.Core.Modules.Metadata
+namespace Statiq.Core
 {
     /// <summary>
     /// Sets a title metadata key for documents based on their file path or source.

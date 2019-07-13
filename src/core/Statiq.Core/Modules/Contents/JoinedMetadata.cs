@@ -1,4 +1,4 @@
-namespace Statiq.Core.Modules.Contents
+namespace Statiq.Core
 {
     /// <summary>
     /// Specifies how to deal with metadata from joined documents.

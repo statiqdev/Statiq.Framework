@@ -1,10 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using Statiq.Common.Documents;
-using Statiq.Common.Execution;
 
-namespace Statiq.Common.Shortcodes
+namespace Statiq.Common
 {
     internal class FuncShortcode : IShortcode
     {

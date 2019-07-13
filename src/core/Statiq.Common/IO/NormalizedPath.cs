@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
 
-namespace Statiq.Common.IO
+namespace Statiq.Common
 {
     /// <summary>
     /// Provides properties and instance methods for working with paths.

@@ -1,12 +1,9 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Statiq.Common.Configuration;
-using Statiq.Common.Documents;
-using Statiq.Common.Execution;
-using Statiq.Common.IO;
+using Statiq.Common;
 
-namespace Statiq.Core.Modules.IO
+namespace Statiq.Core
 {
     /// <summary>
     /// Outputs only those documents that have not yet been written to the file system.

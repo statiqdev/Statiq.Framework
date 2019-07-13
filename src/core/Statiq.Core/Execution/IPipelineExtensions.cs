@@ -1,13 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
-using System.Threading;
 using System.Threading.Tasks;
-using Statiq.Common.Documents;
-using Statiq.Common.Execution;
-using Statiq.Core.Modules.Extensibility;
+using Statiq.Common;
 
-namespace Statiq.Core.Execution
+namespace Statiq.Core
 {
     public static class IPipelineExtensions
     {

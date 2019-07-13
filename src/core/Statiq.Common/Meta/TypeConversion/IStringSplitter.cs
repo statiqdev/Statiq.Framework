@@ -1,4 +1,4 @@
-﻿namespace Statiq.Common.Meta.TypeConversion
+﻿namespace Statiq.Common
 {
     /// <summary>
     /// Defines a splitter for converting a string represenation of a list of values.

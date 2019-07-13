@@ -6,20 +6,9 @@ using System.IO;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
-using Statiq.Common.Configuration;
-using Statiq.Common.Content;
-using Statiq.Common.Documents;
-using Statiq.Common.Execution;
-using Statiq.Common.IO;
-using Statiq.Common.JavaScript;
-using Statiq.Common.Meta;
-using Statiq.Common.Modules;
-using Statiq.Common.Shortcodes;
-using Statiq.Core.Content;
-using Statiq.Core.Documents;
-using Statiq.Core.JavaScript;
+using Statiq.Common;
 
-namespace Statiq.Core.Execution
+namespace Statiq.Core
 {
     internal class ExecutionContext : IExecutionContext
     {
@@ -116,7 +105,7 @@ namespace Statiq.Core.Execution
         /// <inheritdoc/>
         public async Task<Stream> GetContentStreamAsync(string content = null)
         {
-            if (this.Bool(Common.Meta.Keys.UseStringContentFiles))
+            if (this.Bool(Common.Keys.UseStringContentFiles))
             {
                 // Use a temp file for strings
                 IFile tempFile = await FileSystem.GetTempFileAsync();
@@ -129,7 +118,7 @@ namespace Statiq.Core.Execution
 
             // Otherwise get a memory stream from the pool and use that
             Stream memoryStream = MemoryStreamFactory.GetStream(content);
-            return new ContentStream(new Common.Content.StreamContent(MemoryStreamFactory, memoryStream), memoryStream, false);
+            return new ContentStream(new Common.StreamContent(MemoryStreamFactory, memoryStream), memoryStream, false);
         }
 
         /// <inheritdoc/>

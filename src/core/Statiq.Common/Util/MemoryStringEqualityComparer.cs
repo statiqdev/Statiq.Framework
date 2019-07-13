@@ -1,9 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 
-namespace Statiq.Common.Util
+namespace Statiq.Common
 {
     public class MemoryStringEqualityComparer : IEqualityComparer<ReadOnlyMemory<char>>
     {

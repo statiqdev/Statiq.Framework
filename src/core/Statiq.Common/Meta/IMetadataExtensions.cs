@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace Statiq.Common.Meta
+namespace Statiq.Common
 {
     public static class IMetadataExtensions
     {

@@ -2,9 +2,9 @@
 using System.Reflection;
 using System.Text;
 using JSPool;
-using Statiq.Common.JavaScript;
+using Statiq.Common;
 
-namespace Statiq.Core.JavaScript
+namespace Statiq.Core
 {
     /// <summary>
     /// Wraps a <see cref="JavaScriptEngine"/> but overrides the

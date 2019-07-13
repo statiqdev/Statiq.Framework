@@ -2,8 +2,6 @@
 using System.Globalization;
 using NUnit.Framework;
 using Shouldly;
-using Statiq.Common.Execution;
-using Statiq.Common.Meta;
 using Statiq.Testing;
 using Statiq.Testing.Execution;
 

@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using Statiq.Common.Configuration;
+using Statiq.Common;
 
-namespace Statiq.App.Configuration
+namespace Statiq.App
 {
     internal class ConfiguratorCollection : IConfiguratorCollection
     {

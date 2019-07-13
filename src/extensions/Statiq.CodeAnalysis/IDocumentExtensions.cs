@@ -1,9 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 using Statiq.CodeAnalysis.Scripting;
-using Statiq.Common.Documents;
-using Statiq.Common.Execution;
+using Statiq.Common;
 
 namespace Statiq.CodeAnalysis
 {

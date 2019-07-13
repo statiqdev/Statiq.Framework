@@ -3,8 +3,7 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using Microsoft.CodeAnalysis;
-using Statiq.Common.Documents;
-using Statiq.Common.Meta;
+using Statiq.Common;
 
 namespace Statiq.CodeAnalysis.Analysis
 {

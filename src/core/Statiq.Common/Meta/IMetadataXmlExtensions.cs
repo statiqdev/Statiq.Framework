@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Xml.Linq;
 
-namespace Statiq.Common.Meta
+namespace Statiq.Common
 {
     public static class IMetadataXmlExtensions
     {

@@ -1,13 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
-using Statiq.Common.Configuration;
-using Statiq.Common.Content;
-using Statiq.Common.Execution;
-using Statiq.Common.IO;
-using Statiq.Common.Meta;
 
-namespace Statiq.Common.Documents
+namespace Statiq.Common
 {
     public class DocumentFactory : IDocumentFactoryProvider
     {

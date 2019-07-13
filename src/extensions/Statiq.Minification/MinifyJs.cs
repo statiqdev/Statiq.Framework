@@ -1,9 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
+using Statiq.Common;
 using WebMarkupMin.Core;
-using Statiq.Common.Documents;
-using Statiq.Common.Execution;
-using Statiq.Common.Modules;
 
 namespace Statiq.Minification
 {

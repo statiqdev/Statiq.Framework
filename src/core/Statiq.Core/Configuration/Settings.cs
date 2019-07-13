@@ -1,16 +1,15 @@
-﻿using Statiq.Common.Configuration;
-using Statiq.Common.Meta;
+﻿using Statiq.Common;
 
-namespace Statiq.Core.Configuration
+namespace Statiq.Core
 {
     internal class Settings : MetadataDictionary, ISettings
     {
         public Settings()
         {
-            this[Common.Meta.Keys.LinkHideIndexPages] = true;
-            this[Common.Meta.Keys.LinkHideExtensions] = true;
-            this[Common.Meta.Keys.UseCache] = true;
-            this[Common.Meta.Keys.CleanOutputPath] = true;
+            this[Common.Keys.LinkHideIndexPages] = true;
+            this[Common.Keys.LinkHideExtensions] = true;
+            this[Common.Keys.UseCache] = true;
+            this[Common.Keys.CleanOutputPath] = true;
         }
     }
 }

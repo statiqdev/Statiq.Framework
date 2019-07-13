@@ -3,12 +3,8 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-using Statiq.Common.Configuration;
-using Statiq.Common.Documents;
-using Statiq.Common.Execution;
-using Statiq.Common.IO;
-using Statiq.Common.Modules;
-using Trace = Statiq.Common.Tracing.Trace;
+using Statiq.Common;
+using Trace = Statiq.Common.Trace;
 
 namespace Statiq.Razor
 {

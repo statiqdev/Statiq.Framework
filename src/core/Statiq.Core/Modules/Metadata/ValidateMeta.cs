@@ -1,12 +1,9 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using Statiq.Common.Documents;
-using Statiq.Common.Execution;
-using Statiq.Common.Meta;
-using Statiq.Common.Modules;
+using Statiq.Common;
 
-namespace Statiq.Core.Modules.Metadata
+namespace Statiq.Core
 {
     /// <summary>
     /// Tests metadata for existence, typing, and supplied assertions.

@@ -1,20 +1,12 @@
 ﻿using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.Immutable;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using ConcurrentCollections;
 using Microsoft.Extensions.DependencyInjection;
-using Statiq.Common.Documents;
-using Statiq.Common.Execution;
-using Statiq.Common.IO;
-using Statiq.Common.Modules;
-using Statiq.Common.Tracing;
-using Statiq.Core.Modules.Control;
+using Statiq.Common;
 
-namespace Statiq.Core.Execution
+namespace Statiq.Core
 {
     /// <summary>
     /// This contains the pipeline execution context and other data

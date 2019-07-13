@@ -1,6 +1,6 @@
 ﻿using System.IO;
 
-namespace Statiq.Common.Execution
+namespace Statiq.Common
 {
     public static class IMemoryStreamFactoryExtensions
     {

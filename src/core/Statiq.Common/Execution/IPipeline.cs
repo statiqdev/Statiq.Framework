@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
-using Statiq.Common.Modules;
 
-namespace Statiq.Common.Execution
+namespace Statiq.Common
 {
     /// <summary>
     /// Represents a named collection of modules that should be executed by the engine.

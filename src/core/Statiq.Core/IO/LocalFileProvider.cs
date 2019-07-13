@@ -1,9 +1,9 @@
 using System;
 using System.Threading.Tasks;
+using Statiq.Common;
 using Polly;
-using Statiq.Common.IO;
 
-namespace Statiq.Core.IO
+namespace Statiq.Core
 {
     public class LocalFileProvider : IFileProvider
     {

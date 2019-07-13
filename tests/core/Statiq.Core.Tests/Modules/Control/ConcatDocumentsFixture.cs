@@ -1,14 +1,10 @@
 ﻿using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using NUnit.Framework;
-using Statiq.Core.Modules.Control;
 using Statiq.Testing;
 using Statiq.Testing.Modules;
-using Statiq.Common.Execution;
-using Statiq.Common.Configuration;
-using Statiq.Common.Documents;
 using Shouldly;
+using Statiq.Common;
 
 namespace Statiq.Core.Tests.Modules.Control
 {

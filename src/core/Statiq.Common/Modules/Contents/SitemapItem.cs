@@ -1,6 +1,6 @@
 using System;
 
-namespace Statiq.Common.Modules.Contents
+namespace Statiq.Common
 {
     /// <summary>
     /// Represents an item in the site map.

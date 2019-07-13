@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Runtime.CompilerServices;
 
-namespace Statiq.Common.Util
+namespace Statiq.Common
 {
     /// <summary>
     /// A clever trick to get source info for declarations during reflection.

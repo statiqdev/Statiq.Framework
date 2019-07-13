@@ -3,7 +3,7 @@ using System.Reflection;
 using System.Text;
 using JavaScriptEngineSwitcher.Core;
 using JavaScriptEngineSwitcher.Jint;
-using IJavaScriptEngine = Statiq.Common.JavaScript.IJavaScriptEngine;
+using IJavaScriptEngine = Statiq.Common.IJavaScriptEngine;
 
 namespace Statiq.Testing.JavaScript
 {

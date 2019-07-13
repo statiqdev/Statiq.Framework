@@ -2,10 +2,9 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Statiq.Common.Documents;
-using Statiq.Common.Execution;
+using Statiq.Common;
 
-namespace Statiq.Common.Modules
+namespace Statiq.Common
 {
     /// <summary>
     /// A base class for modules that read documents from data that can be turned into a Dictionary&lt;string,object&gt;.

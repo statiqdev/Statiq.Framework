@@ -1,7 +1,7 @@
 ﻿using System;
 using System.IO;
 
-namespace Statiq.Common.Content
+namespace Statiq.Common
 {
     internal class SeekableStream : Stream
     {

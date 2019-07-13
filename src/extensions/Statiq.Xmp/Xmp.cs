@@ -7,12 +7,7 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using MetadataExtractor;
 using MetadataExtractor.Formats.Xmp;
-using Statiq.Common.Documents;
-using Statiq.Common.Execution;
-using Statiq.Common.IO;
-using Statiq.Common.Meta;
-using Statiq.Common.Modules;
-using Statiq.Common.Tracing;
+using Statiq.Common;
 using XmpCore;
 
 namespace Statiq.Xmp

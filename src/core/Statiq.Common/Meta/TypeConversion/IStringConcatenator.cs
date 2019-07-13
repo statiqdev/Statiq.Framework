@@ -1,4 +1,4 @@
-﻿namespace Statiq.Common.Meta.TypeConversion
+﻿namespace Statiq.Common
 {
     /// <summary>
     /// Defines a string representation builder for a value list.

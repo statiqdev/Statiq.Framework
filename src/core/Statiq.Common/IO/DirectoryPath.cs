@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Linq;
 
-namespace Statiq.Common.IO
+namespace Statiq.Common
 {
     /// <summary>
     /// Represents a directory path.

@@ -2,7 +2,7 @@
 using System.Diagnostics;
 using System.Linq;
 
-namespace Statiq.Common.Tracing
+namespace Statiq.Common
 {
     /// <summary>
     /// Provides access to tracing functionality. This class is thread safe.

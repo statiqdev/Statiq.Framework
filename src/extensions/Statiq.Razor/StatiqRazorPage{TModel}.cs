@@ -1,9 +1,6 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc.Razor;
-using Statiq.Common.Documents;
-using Statiq.Common.Execution;
-using Statiq.Common.Meta;
-using Statiq.Common.Tracing;
+using Statiq.Common;
 
 namespace Statiq.Razor
 {
@@ -18,6 +15,6 @@ namespace Statiq.Razor
 
         public IDocumentCollection Documents => ExecutionContext.Documents;
 
-        public ITrace Trace => Common.Tracing.Trace.Current;
+        public ITrace Trace => Common.Trace.Current;
     }
 }

@@ -6,14 +6,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Statiq.Common;
-using Statiq.Common.Content;
-using Statiq.Common.Documents;
-using Statiq.Common.Execution;
-using Statiq.Common.Modules;
-using Statiq.Common.Shortcodes;
-using Statiq.Core.Shortcodes;
 
-namespace Statiq.Core.Modules.Contents
+namespace Statiq.Core
 {
     /// <summary>
     /// Renders shortcodes in the input documents.
@@ -169,7 +163,7 @@ namespace Statiq.Core.Modules.Contents
                     mergedResult = input.Clone(shortcodeResult, shortcodeResult.ContentProvider);
 
                     // Don't process nested shortcodes if it's the raw shortcode
-                    if (!location.Name.Equals(nameof(Core.Shortcodes.Contents.Raw), StringComparison.OrdinalIgnoreCase))
+                    if (!location.Name.Equals(RawShortcode.RawShortcodeName, StringComparison.OrdinalIgnoreCase))
                     {
                         // Recursively parse shortcodes
                         IDocument nestedResult = await ProcessShortcodesAsync(mergedResult, context);

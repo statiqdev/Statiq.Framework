@@ -5,16 +5,8 @@ using System.IO;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
-using Statiq.Common.Configuration;
-using Statiq.Common.Content;
-using Statiq.Common.Documents;
-using Statiq.Common.IO;
-using Statiq.Common.JavaScript;
-using Statiq.Common.Meta;
-using Statiq.Common.Modules;
-using Statiq.Common.Shortcodes;
 
-namespace Statiq.Common.Execution
+namespace Statiq.Common
 {
     /// <summary>
     /// All of the information that represents a given build. Also implements

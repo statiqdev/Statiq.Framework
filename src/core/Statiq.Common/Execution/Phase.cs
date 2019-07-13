@@ -1,4 +1,4 @@
-﻿namespace Statiq.Common.Execution
+﻿namespace Statiq.Common
 {
     public enum Phase
     {

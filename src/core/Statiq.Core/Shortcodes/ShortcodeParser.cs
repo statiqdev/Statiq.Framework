@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
-using Statiq.Common.Shortcodes;
+using Statiq.Common;
 
-namespace Statiq.Core.Shortcodes
+namespace Statiq.Core
 {
     /// <summary>
     /// Parses a stream looking for shortcodes. This class is not thread-safe and maintains

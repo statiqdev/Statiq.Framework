@@ -1,7 +1,7 @@
 ﻿using System.IO;
 using System.Threading.Tasks;
 
-namespace Statiq.Common.Util
+namespace Statiq.Common
 {
     /// <summary>
     /// A helper class to quickly calculate CRC32 codes.

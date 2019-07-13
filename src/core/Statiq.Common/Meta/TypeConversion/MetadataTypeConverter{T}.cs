@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 
-namespace Statiq.Common.Meta.TypeConversion
+namespace Statiq.Common
 {
     internal class MetadataTypeConverter<T> : MetadataTypeConverter
     {

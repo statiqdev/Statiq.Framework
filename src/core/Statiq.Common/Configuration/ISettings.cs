@@ -1,6 +1,4 @@
-﻿using Statiq.Common.Meta;
-
-namespace Statiq.Common.Configuration
+﻿namespace Statiq.Common
 {
     /// <summary>
     /// Stores global settings that control behavior and execution.

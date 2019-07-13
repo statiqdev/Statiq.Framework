@@ -1,14 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using NUnit.Framework;
 using Shouldly;
 using Statiq.Common;
-using Statiq.Common.Documents;
-using Statiq.Common.Execution;
-using Statiq.Common.Meta;
-using Statiq.Common.Shortcodes;
 using Statiq.Testing;
 using Statiq.Testing.Documents;
 using Statiq.Testing.Execution;
@@ -27,7 +22,7 @@ namespace Statiq.Core.Tests.Modules.Contents
                 TestExecutionContext context = new TestExecutionContext();
                 context.Shortcodes.Add<TestShortcode>("Bar");
                 TestDocument document = new TestDocument("123<?# Bar /?>456");
-                Core.Modules.Contents.ProcessShortcodes module = new Core.Modules.Contents.ProcessShortcodes();
+                ProcessShortcodes module = new ProcessShortcodes();
 
                 // When
                 TestDocument result = await ExecuteAsync(document, context, module).SingleAsync();
@@ -44,7 +39,7 @@ namespace Statiq.Core.Tests.Modules.Contents
                 context.Shortcodes.Add<TestShortcode>("Nested");
                 context.Shortcodes.Add<NestedShortcode>("Bar");
                 TestDocument document = new TestDocument("123<?# Bar /?>456");
-                Core.Modules.Contents.ProcessShortcodes module = new Core.Modules.Contents.ProcessShortcodes();
+                ProcessShortcodes module = new ProcessShortcodes();
 
                 // When
                 TestDocument result = await ExecuteAsync(document, context, module).SingleAsync();
@@ -61,7 +56,7 @@ namespace Statiq.Core.Tests.Modules.Contents
                 context.Shortcodes.Add<RawShortcode>("Foo");
                 context.Shortcodes.Add<TestShortcode>("Bar");
                 TestDocument document = new TestDocument("123<?# Foo ?>ABC<?# Bar /?>XYZ<?#/ Foo ?>456");
-                Core.Modules.Contents.ProcessShortcodes module = new Core.Modules.Contents.ProcessShortcodes();
+                ProcessShortcodes module = new ProcessShortcodes();
 
                 // When
                 TestDocument result = await ExecuteAsync(document, context, module).SingleAsync();
@@ -78,7 +73,7 @@ namespace Statiq.Core.Tests.Modules.Contents
                 context.Shortcodes.Add<RawShortcode>("Raw");
                 context.Shortcodes.Add<TestShortcode>("Bar");
                 TestDocument document = new TestDocument("123<?# Raw ?>ABC<?# Bar /?>XYZ<?#/ Raw ?>456");
-                Core.Modules.Contents.ProcessShortcodes module = new Core.Modules.Contents.ProcessShortcodes();
+                ProcessShortcodes module = new ProcessShortcodes();
 
                 // When
                 TestDocument result = await ExecuteAsync(document, context, module).SingleAsync();
@@ -95,7 +90,7 @@ namespace Statiq.Core.Tests.Modules.Contents
                 context.Shortcodes.Add<RawShortcode>("Raw");
                 context.Shortcodes.Add<TestShortcode>("Bar");
                 TestDocument document = new TestDocument("123<?# Raw ?><?# Bar /?><?#/ Raw ?>456");
-                Core.Modules.Contents.ProcessShortcodes module = new Core.Modules.Contents.ProcessShortcodes();
+                ProcessShortcodes module = new ProcessShortcodes();
 
                 // When
                 TestDocument result = await ExecuteAsync(document, context, module).SingleAsync();
@@ -112,7 +107,7 @@ namespace Statiq.Core.Tests.Modules.Contents
                 context.Shortcodes.Add<TestShortcode>("S1");
                 context.Shortcodes.Add<NullResultShortcode>("S2");
                 TestDocument document = new TestDocument("123<?# S1 /?>456<?# S2 /?>789<?# S1 /?>");
-                Core.Modules.Contents.ProcessShortcodes module = new Core.Modules.Contents.ProcessShortcodes();
+                ProcessShortcodes module = new ProcessShortcodes();
 
                 // When
                 TestDocument result = await ExecuteAsync(document, context, module).SingleAsync();
@@ -128,7 +123,7 @@ namespace Statiq.Core.Tests.Modules.Contents
                 TestExecutionContext context = new TestExecutionContext();
                 context.Shortcodes.Add<DisposableShortcode>("Bar");
                 TestDocument document = new TestDocument("123<?# Bar /?>456");
-                Core.Modules.Contents.ProcessShortcodes module = new Core.Modules.Contents.ProcessShortcodes();
+                ProcessShortcodes module = new ProcessShortcodes();
 
                 // When
                 await ExecuteAsync(document, context, module).SingleAsync();
@@ -145,7 +140,7 @@ namespace Statiq.Core.Tests.Modules.Contents
                 context.Shortcodes.Add<AddsMetadataShortcode>("S1");
                 context.Shortcodes.Add<AddsMetadataShortcode2>("S2");
                 TestDocument document = new TestDocument("123<?# S1 /?>456<?# S2 /?>789");
-                Core.Modules.Contents.ProcessShortcodes module = new Core.Modules.Contents.ProcessShortcodes();
+                ProcessShortcodes module = new ProcessShortcodes();
 
                 // When
                 TestDocument result = await ExecuteAsync(document, context, module).SingleAsync();
@@ -168,7 +163,7 @@ namespace Statiq.Core.Tests.Modules.Contents
                 {
                     { "Foo", 10 }
                 };
-                Core.Modules.Contents.ProcessShortcodes module = new Core.Modules.Contents.ProcessShortcodes();
+                ProcessShortcodes module = new ProcessShortcodes();
 
                 // When
                 TestDocument result = await ExecuteAsync(document, context, module).SingleAsync();
@@ -185,7 +180,7 @@ namespace Statiq.Core.Tests.Modules.Contents
                 TestExecutionContext context = new TestExecutionContext();
                 context.Shortcodes.Add<IncrementingShortcode>("S");
                 TestDocument document = new TestDocument("123<?# S /?>456<?# S /?>789<?# S /?>");
-                Core.Modules.Contents.ProcessShortcodes module = new Core.Modules.Contents.ProcessShortcodes();
+                ProcessShortcodes module = new ProcessShortcodes();
 
                 // When
                 TestDocument result = await ExecuteAsync(document, context, module).SingleAsync();

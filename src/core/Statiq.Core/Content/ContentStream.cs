@@ -1,10 +1,7 @@
 ﻿using System.IO;
-using Statiq.Common.Content;
-using Statiq.Common.Execution;
-using Statiq.Common.Util;
-using Statiq.Core.Documents;
+using Statiq.Common;
 
-namespace Statiq.Core.Content
+namespace Statiq.Core
 {
     /// <summary>
     /// A special writable <see cref="Stream"/> that can be used when creating new content

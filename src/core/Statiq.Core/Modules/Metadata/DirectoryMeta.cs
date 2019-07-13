@@ -2,15 +2,8 @@
 using System.Linq;
 using System.Threading.Tasks;
 using Statiq.Common;
-using Statiq.Common.Configuration;
-using Statiq.Common.Documents;
-using Statiq.Common.Execution;
-using Statiq.Common.IO;
-using Statiq.Common.Meta;
-using Statiq.Common.Modules;
-using Statiq.Core.Modules.IO;
 
-namespace Statiq.Core.Modules.Metadata
+namespace Statiq.Core
 {
     /// <summary>
     /// Applies metadata from specified input documents to all input documents based on a directory hierarchy.

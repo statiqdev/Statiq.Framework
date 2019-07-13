@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using Microsoft.Extensions.Primitives;
-using Statiq.Common.Util;
+using Statiq.Common;
 
 namespace Statiq.Razor
 {

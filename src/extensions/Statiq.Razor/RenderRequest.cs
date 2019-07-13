@@ -1,7 +1,6 @@
 ﻿using System;
 using System.IO;
-using Statiq.Common.Documents;
-using Statiq.Common.Execution;
+using Statiq.Common;
 
 namespace Statiq.Razor
 {

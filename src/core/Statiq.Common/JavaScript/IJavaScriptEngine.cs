@@ -2,7 +2,7 @@
 using System.Reflection;
 using System.Text;
 
-namespace Statiq.Common.JavaScript
+namespace Statiq.Common
 {
     /// <summary>
     /// A common interface to a JavaScript engine. Every JavaScript engine is

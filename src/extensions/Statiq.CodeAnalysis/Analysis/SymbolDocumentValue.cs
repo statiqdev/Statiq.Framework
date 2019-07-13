@@ -1,6 +1,5 @@
 using Microsoft.CodeAnalysis;
-using Statiq.Common.Documents;
-using Statiq.Common.Meta;
+using Statiq.Common;
 
 namespace Statiq.CodeAnalysis.Analysis
 {

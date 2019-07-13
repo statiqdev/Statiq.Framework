@@ -3,10 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using ConcurrentCollections;
 using Statiq.Common;
-using Statiq.Common.Configuration;
-using Statiq.Common.Execution;
 
-namespace Statiq.Core.Configuration
+namespace Statiq.Core
 {
     internal class NamespaceCollection : INamespacesCollection
     {

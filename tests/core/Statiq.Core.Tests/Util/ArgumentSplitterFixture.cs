@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
 using NUnit.Framework;
 using Shouldly;
-using Statiq.Core.Util;
 using Statiq.Testing;
 
 namespace Statiq.Core.Tests.Util

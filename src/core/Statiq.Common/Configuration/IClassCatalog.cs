@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace Statiq.Common.Configuration
+namespace Statiq.Common
 {
     public interface IClassCatalog
     {

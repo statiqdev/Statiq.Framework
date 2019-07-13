@@ -1,15 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Threading.Tasks;
 using NUnit.Framework;
 using Shouldly;
 using Statiq.Common;
-using Statiq.Common.Configuration;
-using Statiq.Common.Documents;
-using Statiq.Common.IO;
-using Statiq.Common.Meta;
-using Statiq.Common.Modules.Contents;
-using Statiq.Core.Modules.Contents;
 using Statiq.Testing;
 using Statiq.Testing.Documents;
 using Statiq.Testing.Execution;
@@ -37,7 +30,7 @@ namespace Statiq.Core.Tests.Modules.Contents
                 TestDocument doc = new TestDocument(new FilePath("sub/testfile.html"), "Test");
                 IDocument[] inputs = { doc };
 
-                Core.Modules.Metadata.Meta m = new Core.Modules.Metadata.Meta(
+                AddMetadata m = new AddMetadata(
                     Keys.SitemapItem,
                     Config.FromDocument(d => new SitemapItem(d.Destination.FullPath)));
 
@@ -73,7 +66,7 @@ namespace Statiq.Core.Tests.Modules.Contents
                 TestDocument doc = new TestDocument(new FilePath("sub/testfile.html"), "Test");
                 IDocument[] inputs = { doc };
 
-                Core.Modules.Metadata.Meta m = new Core.Modules.Metadata.Meta(
+                AddMetadata m = new AddMetadata(
                     Keys.SitemapItem,
                     Config.FromDocument(d => d.Destination.FullPath));
 

@@ -1,16 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading;
 using System.Threading.Tasks;
 using NUnit.Framework;
-using Statiq.Common.Configuration;
-using Statiq.Common.Documents;
-using Statiq.Common.Execution;
-using Statiq.Core.Execution;
-using Statiq.Core.Modules.Extensibility;
+using Statiq.Common;
 using Statiq.Testing;
-using Statiq.Testing.Execution;
 
 namespace Statiq.Core.Tests.Modules.Control
 {
@@ -23,7 +17,7 @@ namespace Statiq.Core.Tests.Modules.Control
             public async Task CountReturnsCorrectDocuments()
             {
                 // Given
-                Core.Modules.Control.CreateDocuments documents = new Core.Modules.Control.CreateDocuments(5);
+                CreateDocuments documents = new CreateDocuments(5);
 
                 // When
                 IReadOnlyList<IDocument> results = await ExecuteAsync(documents);
@@ -37,7 +31,7 @@ namespace Statiq.Core.Tests.Modules.Control
             {
                 // Given
                 List<string> content = new List<string>();
-                Core.Modules.Control.CreateDocuments documents = new Core.Modules.Control.CreateDocuments("A", "B", "C", "D");
+                CreateDocuments documents = new CreateDocuments("A", "B", "C", "D");
                 Execute gatherData = new ExecuteDocument(
                     Config.FromDocument(async d =>
                 {
@@ -58,7 +52,7 @@ namespace Statiq.Core.Tests.Modules.Control
             {
                 // Given
                 List<object> values = new List<object>();
-                Core.Modules.Control.CreateDocuments documents = new Core.Modules.Control.CreateDocuments(
+                CreateDocuments documents = new CreateDocuments(
                     new Dictionary<string, object> { { "Foo", "a" } },
                     new Dictionary<string, object> { { "Foo", "b" } },
                     new Dictionary<string, object> { { "Foo", "c" } });
@@ -83,7 +77,7 @@ namespace Statiq.Core.Tests.Modules.Control
                 // Given
                 List<string> content = new List<string>();
                 List<object> values = new List<object>();
-                Core.Modules.Control.CreateDocuments documents = new Core.Modules.Control.CreateDocuments(
+                CreateDocuments documents = new CreateDocuments(
                     Tuple.Create("A", new Dictionary<string, object> { { "Foo", "a" } }.AsEnumerable()),
                     Tuple.Create("B", new Dictionary<string, object> { { "Foo", "b" } }.AsEnumerable()),
                     Tuple.Create("C", new Dictionary<string, object> { { "Foo", "c" } }.AsEnumerable()));

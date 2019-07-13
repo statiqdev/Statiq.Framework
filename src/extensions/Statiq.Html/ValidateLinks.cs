@@ -12,13 +12,8 @@ using AngleSharp.Parser.Html;
 using Polly;
 using Polly.Retry;
 using Statiq.Common;
-using Statiq.Common.Execution;
-using Statiq.Common.IO;
-using Statiq.Common.Meta;
-using Statiq.Common.Modules;
-using Statiq.Common.Util;
-using IDocument = Statiq.Common.Documents.IDocument;
-using Trace = Statiq.Common.Tracing.Trace;
+using IDocument = Statiq.Common.IDocument;
+using Trace = Statiq.Common.Trace;
 
 namespace Statiq.Html
 {

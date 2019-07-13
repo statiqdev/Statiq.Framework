@@ -1,6 +1,6 @@
 ﻿using System.IO;
 using System.Text;
-using Statiq.Common.Execution;
+using Statiq.Common;
 
 namespace Statiq.Testing.Execution
 {

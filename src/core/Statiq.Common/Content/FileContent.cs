@@ -1,9 +1,8 @@
 ﻿using System;
 using System.IO;
 using System.Threading.Tasks;
-using Statiq.Common.IO;
 
-namespace Statiq.Common.Content
+namespace Statiq.Common
 {
     /// <summary>
     /// A content provider for files.

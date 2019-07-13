@@ -1,8 +1,8 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
-using Statiq.Common.Configuration;
+using Statiq.Common;
 
-namespace Statiq.Core.Configuration
+namespace Statiq.Core
 {
     internal class RawAssemblyCollection : IRawAssemblyCollection
     {

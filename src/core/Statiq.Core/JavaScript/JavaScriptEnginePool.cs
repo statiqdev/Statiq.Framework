@@ -1,11 +1,11 @@
 ﻿using System;
+using Statiq.Common;
 using JavaScriptEngineSwitcher.Core;
 using JavaScriptEngineSwitcher.Jint;
 using JSPool;
-using Statiq.Common.JavaScript;
-using IJavaScriptEngine = Statiq.Common.JavaScript.IJavaScriptEngine;
+using IJavaScriptEngine = Statiq.Common.IJavaScriptEngine;
 
-namespace Statiq.Core.JavaScript
+namespace Statiq.Core
 {
     internal class JavaScriptEnginePool : IJavaScriptEnginePool
     {

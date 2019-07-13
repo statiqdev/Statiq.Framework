@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Linq;
-using Statiq.Common.IO;
+using Statiq.Common;
 
-namespace Statiq.Common.Util
+namespace Statiq.Common
 {
     /// <summary>
     /// Helps generate normalized links.

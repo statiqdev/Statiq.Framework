@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using Statiq.Common.Shortcodes;
+using Statiq.Common;
 
 namespace Statiq.Testing.Shortcodes
 {

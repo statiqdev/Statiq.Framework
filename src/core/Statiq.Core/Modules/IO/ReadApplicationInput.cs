@@ -1,11 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using Statiq.Common.Documents;
-using Statiq.Common.Modules;
-using Statiq.Common.Execution;
+using Statiq.Common;
 
-namespace Statiq.Core.Modules.IO
+namespace Statiq.Core
 {
     /// <summary>
     /// Reads text provided to the application on startup.

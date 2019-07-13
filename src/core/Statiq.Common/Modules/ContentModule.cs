@@ -1,11 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using Statiq.Common.Configuration;
-using Statiq.Common.Documents;
-using Statiq.Common.Execution;
 
-namespace Statiq.Common.Modules
+namespace Statiq.Common
 {
     /// <summary>
     /// This class can be used as a base class for modules that operate on arbitrary content (as represented by an object).

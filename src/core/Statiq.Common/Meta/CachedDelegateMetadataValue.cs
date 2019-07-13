@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Statiq.Common.Meta
+namespace Statiq.Common
 {
     /// <summary>
     /// This class uses a delegate to get a metadata value. The result of the delegate

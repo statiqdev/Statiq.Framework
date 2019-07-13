@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 
-namespace Statiq.Common.Tracing
+namespace Statiq.Common
 {
     /// <summary>
     /// An interface for tracing messages to the console and other attached outputs.

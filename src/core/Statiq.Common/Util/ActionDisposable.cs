@@ -1,6 +1,6 @@
 using System;
 
-namespace Statiq.Common.Util
+namespace Statiq.Common
 {
     /// <summary>
     /// A simple disposable that calls an action on disposal. This class

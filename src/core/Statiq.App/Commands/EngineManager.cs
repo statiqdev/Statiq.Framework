@@ -4,15 +4,11 @@ using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Statiq.App.Configuration;
-using Statiq.Common.Configuration;
-using Statiq.Common.Execution;
-using Statiq.Common.IO;
-using Statiq.Common.Meta;
-using Statiq.Common.Tracing;
-using Statiq.Core.Execution;
+using Statiq.App;
+using Statiq.Common;
+using Statiq.Core;
 
-namespace Statiq.App.Commands
+namespace Statiq.App
 {
     internal class EngineManager : IDisposable
     {

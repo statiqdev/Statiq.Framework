@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using Statiq.Common.Documents;
-using Statiq.Common.Execution;
-using Statiq.Common.Shortcodes;
+using Statiq.Common;
 
 namespace Statiq.Core.Tests.Shortcodes
 {

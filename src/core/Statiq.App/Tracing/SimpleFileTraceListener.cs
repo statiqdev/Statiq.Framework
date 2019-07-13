@@ -1,7 +1,7 @@
 ﻿using System.Diagnostics;
 using System.IO;
 
-namespace Statiq.App.Tracing
+namespace Statiq.App
 {
     // A special trace listener that doesn't output the source name or event id
     public class SimpleFileTraceListener : TextWriterTraceListener

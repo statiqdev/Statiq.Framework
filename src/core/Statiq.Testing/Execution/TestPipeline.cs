@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using Statiq.Common;
-using Statiq.Common.Execution;
-using Statiq.Common.Modules;
 
 namespace Statiq.Testing.Execution
 {

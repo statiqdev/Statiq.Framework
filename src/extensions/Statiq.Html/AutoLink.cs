@@ -8,13 +8,7 @@ using AngleSharp.Dom;
 using AngleSharp.Dom.Html;
 using AngleSharp.Extensions;
 using AngleSharp.Parser.Html;
-using Statiq.Common.Configuration;
-using Statiq.Common.Modules;
-using Statiq.Common.Execution;
-using Statiq.Common.Tracing;
 using Statiq.Common;
-using Statiq.Common.IO;
-using Statiq.Common.Documents;
 
 namespace Statiq.Html
 {
@@ -55,7 +49,7 @@ namespace Statiq.Html
         }
 
         /// <summary>
-        /// Specifies a dictionary of link mappings given an <see cref="Statiq.Common.Documents.IDocument"/> and <see cref="IExecutionContext"/>. The return
+        /// Specifies a dictionary of link mappings given an <see cref="Common.IDocument"/> and <see cref="IExecutionContext"/>. The return
         /// value is expected to be a <c>IDictionary&lt;string, string&gt;</c>. The keys specify strings to search for in the
         /// HTML content and the values specify what should be placed in the <c>href</c> attribute. This allows you
         /// to specify a different mapping for each input document.
@@ -139,12 +133,12 @@ namespace Statiq.Html
         }
 
         /// <inheritdoc />
-        public async Task<IEnumerable<Common.Documents.IDocument>> ExecuteAsync(IReadOnlyList<Common.Documents.IDocument> inputs, IExecutionContext context)
+        public async Task<IEnumerable<Common.IDocument>> ExecuteAsync(IReadOnlyList<Common.IDocument> inputs, IExecutionContext context)
         {
             HtmlParser parser = new HtmlParser();
             return await inputs.ParallelSelectAsync(context, PerformReplacementsAsync);
 
-            async Task<Common.Documents.IDocument> PerformReplacementsAsync(Common.Documents.IDocument input)
+            async Task<Common.IDocument> PerformReplacementsAsync(Common.IDocument input)
             {
                 try
                 {

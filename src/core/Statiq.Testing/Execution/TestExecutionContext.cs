@@ -9,20 +9,10 @@ using System.Net.Http;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using Statiq.Common.Configuration;
-using Statiq.Common.Content;
-using Statiq.Common.Documents;
-using Statiq.Common.Execution;
-using Statiq.Common.IO;
-using Statiq.Common.JavaScript;
-using Statiq.Common.Meta;
-using Statiq.Common.Modules;
-using Statiq.Common.Shortcodes;
-using Statiq.Common.Util;
+using Statiq.Common;
 using Statiq.Testing.Configuration;
 using Statiq.Testing.Documents;
 using Statiq.Testing.IO;
-using Statiq.Testing.Meta;
 using Statiq.Testing.Shortcodes;
 
 namespace Statiq.Testing.Execution
@@ -108,7 +98,7 @@ namespace Statiq.Testing.Execution
                 _context = context;
             }
 
-            public IContentProvider GetContentProvider() => new Common.Content.StreamContent(_context.MemoryStreamFactory, this);
+            public IContentProvider GetContentProvider() => new Common.StreamContent(_context.MemoryStreamFactory, this);
         }
 
         /// <inheritdoc/>

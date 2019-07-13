@@ -1,4 +1,4 @@
-﻿namespace Statiq.Common.Meta
+﻿namespace Statiq.Common
 {
     /// <summary>
     /// Implement this interface to provide lazy metadata values or values based on other metadata.

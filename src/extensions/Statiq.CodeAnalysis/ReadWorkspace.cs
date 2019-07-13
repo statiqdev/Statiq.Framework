@@ -7,12 +7,6 @@ using System.Threading.Tasks;
 using Buildalyzer;
 using Microsoft.CodeAnalysis;
 using Statiq.Common;
-using Statiq.Common.Configuration;
-using Statiq.Common.Documents;
-using Statiq.Common.Execution;
-using Statiq.Common.IO;
-using Statiq.Common.Meta;
-using Statiq.Common.Modules;
 
 namespace Statiq.CodeAnalysis
 {
@@ -81,16 +75,16 @@ namespace Statiq.CodeAnalysis
         protected internal static AnalyzerResult CompileProjectAndTrace(ProjectAnalyzer analyzer, StringWriter log)
         {
             log.GetStringBuilder().Clear();
-            Common.Tracing.Trace.Verbose($"Building project {analyzer.ProjectFile.Path}");
+            Common.Trace.Verbose($"Building project {analyzer.ProjectFile.Path}");
             Stopwatch sw = new Stopwatch();
             sw.Start();
             AnalyzerResult result = analyzer.Build().FirstOrDefault();
             sw.Stop();
-            Common.Tracing.Trace.Verbose($"Project {analyzer.ProjectFile.Path} built in {sw.ElapsedMilliseconds} ms");
+            Common.Trace.Verbose($"Project {analyzer.ProjectFile.Path} built in {sw.ElapsedMilliseconds} ms");
             if (result?.Succeeded != true)
             {
-                Common.Tracing.Trace.Error($"Could not compile project at {analyzer.ProjectFile.Path}");
-                Common.Tracing.Trace.Warning(log.ToString());
+                Common.Trace.Error($"Could not compile project at {analyzer.ProjectFile.Path}");
+                Common.Trace.Warning(log.ToString());
                 return null;
             }
             return result;
@@ -119,7 +113,7 @@ namespace Statiq.CodeAnalysis
 
                     async Task<IEnumerable<IDocument>> GetProjectDocumentsAsync(Project project)
                     {
-                        Common.Tracing.Trace.Verbose("Read project {0}", project.Name);
+                        Common.Trace.Verbose("Read project {0}", project.Name);
                         string assemblyName = project.AssemblyName;
                         IEnumerable<IFile> documentPaths = await project.Documents
                             .Where(x => !string.IsNullOrWhiteSpace(x.FilePath))
@@ -130,7 +124,7 @@ namespace Statiq.CodeAnalysis
 
                         IDocument GetProjectDocument(IFile file)
                         {
-                            Common.Tracing.Trace.Verbose($"Read file {file.Path.FullPath}");
+                            Common.Trace.Verbose($"Read file {file.Path.FullPath}");
                             return context.CreateDocument(
                                 file.Path,
                                 null,

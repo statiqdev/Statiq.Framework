@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Statiq.Common.Shortcodes
+namespace Statiq.Common
 {
     public interface IShortcodeCollection : IReadOnlyShortcodeCollection
     {

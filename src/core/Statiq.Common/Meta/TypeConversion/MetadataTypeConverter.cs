@@ -1,6 +1,6 @@
 ﻿using System.Collections;
 
-namespace Statiq.Common.Meta.TypeConversion
+namespace Statiq.Common
 {
     /// <summary>
     /// These are used by <see cref="TypeHelper"/> for enumerable conversions,

@@ -1,6 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using Statiq.Common.IO;
+﻿using System.Collections.Generic;
+using Statiq.Common;
 
 namespace Statiq.Testing.IO
 {

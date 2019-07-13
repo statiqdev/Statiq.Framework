@@ -2,13 +2,9 @@
 using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 using Spectre.Cli;
-using Statiq.App.Assemblies;
-using Statiq.App.Commands;
-using Statiq.App.Configuration;
-using Statiq.Common.Configuration;
-using Statiq.Common.Execution;
-using Statiq.Core.Execution;
-using Statiq.Core.Util;
+using Statiq.App;
+using Statiq.Common;
+using Statiq.Core;
 
 namespace Statiq.App
 {
@@ -43,7 +39,7 @@ namespace Statiq.App
             await default(SynchronizationContextRemover);
 
             // Output version info
-            Common.Tracing.Trace.Information($"Statiq version {Engine.Version}");
+            Trace.Information($"Statiq version {Engine.Version}");
 
             // It's not a serious console app unless there's some ASCII art
             OutputLogo();
@@ -82,16 +78,16 @@ namespace Statiq.App
         // Static factories
 
         public static IBootstrapper CreateDefault(string[] args) =>
-            CreateDefault(args, (Common.Configuration.IConfigurator<IEngine>)null);
+            CreateDefault(args, (Common.IConfigurator<IEngine>)null);
 
         public static IBootstrapper CreateDefault<TConfigurator>(string[] args)
-            where TConfigurator : Common.Configuration.IConfigurator<IEngine> =>
+            where TConfigurator : Common.IConfigurator<IEngine> =>
             CreateDefault(args, Activator.CreateInstance<TConfigurator>());
 
         public static IBootstrapper CreateDefault(string[] args, Action<IEngine> configureEngineAction) =>
             CreateDefault(args, new DelegateConfigurator<IEngine>(configureEngineAction));
 
-        public static IBootstrapper CreateDefault(string[] args, Common.Configuration.IConfigurator<IEngine> configurator) =>
+        public static IBootstrapper CreateDefault(string[] args, Common.IConfigurator<IEngine> configurator) =>
             new Bootstrapper(args)
                 .AddDefaultTracing()
                 .AddDefaultConfigurators()

@@ -1,6 +1,6 @@
 ﻿using Microsoft.Extensions.Logging;
 
-namespace Statiq.App.Tracing
+namespace Statiq.App
 {
     public class TraceLoggerProvider : ILoggerProvider
     {

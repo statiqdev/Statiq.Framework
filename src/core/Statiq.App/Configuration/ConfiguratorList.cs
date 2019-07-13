@@ -2,9 +2,9 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using Statiq.Common.Configuration;
+using Statiq.Common;
 
-namespace Statiq.App.Configuration
+namespace Statiq.App
 {
     internal class ConfiguratorList<TConfigurable> : IList<IConfigurator<TConfigurable>>
         where TConfigurable : IConfigurable

@@ -1,9 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
-using Statiq.Common.Documents;
-using Statiq.Common.Execution;
 
-namespace Statiq.Common.Modules
+namespace Statiq.Common
 {
     /// <summary>
     /// The primary module interface for classes that can transform or otherwise operate on documents.

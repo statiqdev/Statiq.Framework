@@ -5,7 +5,6 @@ using System.Linq;
 using System.Threading.Tasks;
 using NUnit.Framework;
 using Shouldly;
-using Statiq.Common.IO;
 using Statiq.Testing;
 using Statiq.Testing.IO;
 

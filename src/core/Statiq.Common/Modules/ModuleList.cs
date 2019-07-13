@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Statiq.Common.Modules
+namespace Statiq.Common
 {
     /// <summary>
     /// A collection of optionally named modules.

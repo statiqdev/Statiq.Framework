@@ -5,10 +5,9 @@ using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyModel;
-using Statiq.Common.Configuration;
-using Statiq.Common.Tracing;
+using Statiq.Common;
 
-namespace Statiq.App.Assemblies
+namespace Statiq.App
 {
     /// <summary>
     /// Responsible for iterating over a set of assemblies

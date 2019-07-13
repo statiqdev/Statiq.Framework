@@ -6,16 +6,9 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
-using Statiq.Common.Documents;
-using Statiq.Common.IO;
-using Statiq.Common.Meta;
-using Statiq.Common.Modules;
-using Statiq.Common.Execution;
-using Statiq.Common.Tracing;
-using Statiq.Core.Modules.Control;
 using Statiq.Common;
 
-namespace Statiq.Core.Modules.IO
+namespace Statiq.Core
 {
     /// <summary>
     /// Downloads from HTTP and outputs the results as new documents.

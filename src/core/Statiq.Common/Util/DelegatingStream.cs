@@ -3,7 +3,7 @@ using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Statiq.Common.Util
+namespace Statiq.Common
 {
     /// <summary>
     /// Delegates all stream access to an underlying stream. Disposing this stream

@@ -2,7 +2,7 @@
 using System.IO;
 using System.Threading.Tasks;
 
-namespace Statiq.Common.Content
+namespace Statiq.Common
 {
     /// <summary>
     /// A special <see cref="IContentProvider"/> that you can use to indicate

@@ -11,10 +11,6 @@ using AngleSharp.Parser.Html;
 using Polly;
 using Polly.Retry;
 using Statiq.Common;
-using Statiq.Common.Documents;
-using Statiq.Common.Execution;
-using Statiq.Common.IO;
-using Statiq.Common.Modules;
 
 namespace Statiq.Html
 {
@@ -60,7 +56,7 @@ namespace Statiq.Html
             _pathFunc = pathFunc ?? throw new ArgumentNullException(nameof(pathFunc));
         }
 
-        public async Task<IEnumerable<Common.Documents.IDocument>> ExecuteAsync(IReadOnlyList<Common.Documents.IDocument> inputs, IExecutionContext context)
+        public async Task<IEnumerable<Common.IDocument>> ExecuteAsync(IReadOnlyList<Common.IDocument> inputs, IExecutionContext context)
         {
 #pragma warning disable RCS1163 // Unused parameter.
             // Handle invalid HTTPS certificates and allow alternate security protocols (see http://stackoverflow.com/a/5670954/807064)
@@ -74,7 +70,7 @@ namespace Statiq.Html
             HtmlParser parser = new HtmlParser();
             return await inputs.SelectAsync(context, GetDocumentAsync);
 
-            async Task<Common.Documents.IDocument> GetDocumentAsync(Common.Documents.IDocument input)
+            async Task<Common.IDocument> GetDocumentAsync(Common.IDocument input)
             {
                 IHtmlDocument htmlDocument = await input.ParseHtmlAsync(parser);
                 if (htmlDocument != null)
@@ -153,7 +149,7 @@ namespace Statiq.Html
             IFile outputFile = await context.FileSystem.GetOutputFileAsync(path);
             if (!await outputFile.GetExistsAsync())
             {
-                Common.Tracing.Trace.Verbose($"Downloading resource from {uri} to {path.FullPath}");
+                Common.Trace.Verbose($"Downloading resource from {uri} to {path.FullPath}");
 
                 // Retry with exponential backoff links. This helps with websites like GitHub that will give us a 429 -- TooManyRequests.
                 AsyncRetryPolicy<HttpResponseMessage> retryPolicy = Policy

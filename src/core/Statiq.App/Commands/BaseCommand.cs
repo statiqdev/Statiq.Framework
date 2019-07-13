@@ -4,10 +4,9 @@ using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 using Spectre.Cli;
-using Statiq.App.Tracing;
-using Trace = Statiq.Common.Tracing.Trace;
+using Trace = Statiq.Common.Trace;
 
-namespace Statiq.App.Commands
+namespace Statiq.App
 {
     public abstract class BaseCommand<TSettings> : AsyncCommand<TSettings>
         where TSettings : BaseSettings

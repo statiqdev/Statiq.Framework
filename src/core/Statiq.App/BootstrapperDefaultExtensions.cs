@@ -1,12 +1,7 @@
 ﻿using System;
 using System.Linq;
-using Statiq.App.Commands;
-using Statiq.App.Tracing;
-using Statiq.Common.Configuration;
-using Statiq.Common.Execution;
-using Statiq.Common.IO;
-using Statiq.Common.Modules;
-using Statiq.Common.Shortcodes;
+using Statiq.App;
+using Statiq.Common;
 
 namespace Statiq.App
 {
@@ -14,13 +9,13 @@ namespace Statiq.App
     {
         public static IBootstrapper AddDefaultConfigurators(this IBootstrapper bootstrapper)
         {
-            foreach (Common.Configuration.IConfigurator<IConfigurableBootstrapper> bootstraperConfigurator
-                in bootstrapper.ClassCatalog.GetInstances<Common.Configuration.IConfigurator<IConfigurableBootstrapper>>())
+            foreach (Common.IConfigurator<IConfigurableBootstrapper> bootstraperConfigurator
+                in bootstrapper.ClassCatalog.GetInstances<Common.IConfigurator<IConfigurableBootstrapper>>())
             {
                 bootstrapper.Configurators.Add(bootstraperConfigurator);
             }
-            foreach (Common.Configuration.IConfigurator<IBootstrapper> bootstraperConfigurator
-                in bootstrapper.ClassCatalog.GetInstances<Common.Configuration.IConfigurator<IConfigurableBootstrapper>>())
+            foreach (Common.IConfigurator<IBootstrapper> bootstraperConfigurator
+                in bootstrapper.ClassCatalog.GetInstances<Common.IConfigurator<IConfigurableBootstrapper>>())
             {
                 bootstrapper.Configurators.Add(bootstraperConfigurator);
             }
@@ -35,7 +30,7 @@ namespace Statiq.App
                     engine.Shortcodes.Add(shortcode);
 
                     // Special case for the meta shortcode to register with the name "="
-                    if (shortcode.Equals(typeof(Core.Shortcodes.Metadata.Meta)))
+                    if (shortcode.Equals(typeof(Core.MetaShortcode)))
                     {
                         engine.Shortcodes.Add("=", shortcode);
                     }
@@ -71,7 +66,7 @@ namespace Statiq.App
 
         public static IBootstrapper AddDefaultTracing(this IBootstrapper bootstrapper)
         {
-            Common.Tracing.Trace.AddListener(new SimpleColorConsoleTraceListener
+            Trace.AddListener(new SimpleColorConsoleTraceListener
             {
                 TraceOutputOptions = System.Diagnostics.TraceOptions.None
             });
@@ -80,7 +75,7 @@ namespace Statiq.App
             {
                 if (e.ExceptionObject is Exception exception)
                 {
-                    Common.Tracing.Trace.Critical(exception.ToString());
+                    Trace.Critical(exception.ToString());
                 }
                 Environment.Exit((int)ExitCode.UnhandledError);
             };

@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Statiq.Common.Util
+namespace Statiq.Common
 {
     /// <summary>
     /// A disposable class that does nothing.

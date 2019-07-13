@@ -19,4 +19,7 @@
   <ItemGroup>
     <ProjectReference Include="..\Statiq.Common\Statiq.Common.csproj" />
   </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Shortcodes\Contents\" />
+  </ItemGroup>
 </Project>

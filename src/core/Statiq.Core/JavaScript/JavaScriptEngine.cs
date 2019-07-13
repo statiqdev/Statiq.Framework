@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Reflection;
 using System.Text;
+using Statiq.Common;
 using JavaScriptEngineSwitcher.Core;
-using Statiq.Common.JavaScript;
 
-namespace Statiq.Core.JavaScript
+namespace Statiq.Core
 {
     internal class JavaScriptEngine : IJavaScriptEngine
     {

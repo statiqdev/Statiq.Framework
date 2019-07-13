@@ -2,8 +2,8 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using Microsoft.Extensions.Logging;
-using Statiq.Common.Util;
-using Trace = Statiq.Common.Tracing.Trace;
+using Statiq.Common;
+using Trace = Statiq.Common.Trace;
 
 namespace Statiq.Razor
 {

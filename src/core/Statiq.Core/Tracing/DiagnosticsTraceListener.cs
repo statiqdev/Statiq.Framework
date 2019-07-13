@@ -2,29 +2,29 @@
 using System.Diagnostics;
 using System.Text;
 
-namespace Statiq.Core.Tracing
+namespace Statiq.Core
 {
     // This routes trace and debug messages from the Trace/Debug classes to the Statiq Trace TraceSource
     internal class DiagnosticsTraceListener : TraceListener
     {
         public override void Write(string message)
         {
-            Statiq.Common.Tracing.Trace.Verbose(message);
+            Statiq.Common.Trace.Verbose(message);
         }
 
         public override void WriteLine(string message)
         {
-            Statiq.Common.Tracing.Trace.Verbose(message);
+            Statiq.Common.Trace.Verbose(message);
         }
 
         public override void Fail(string message)
         {
-            Statiq.Common.Tracing.Trace.Error(message);
+            Statiq.Common.Trace.Error(message);
         }
 
         public override void Fail(string message, string detailMessage)
         {
-            Statiq.Common.Tracing.Trace.Error(message + " " + detailMessage);
+            Statiq.Common.Trace.Error(message + " " + detailMessage);
         }
 
         public override void TraceData(TraceEventCache eventCache, string source, TraceEventType eventType, int id, object data)
@@ -47,27 +47,27 @@ namespace Statiq.Core.Tracing
                 sb.Append("}");
             }
 
-            Statiq.Common.Tracing.Trace.Verbose(sb.ToString());
+            Statiq.Common.Trace.Verbose(sb.ToString());
         }
 
         public override void TraceEvent(TraceEventCache eventCache, string source, TraceEventType eventType, int id)
         {
-            Statiq.Common.Tracing.Trace.TraceEvent(eventType, id.ToString());
+            Statiq.Common.Trace.TraceEvent(eventType, id.ToString());
         }
 
         public override void TraceEvent(TraceEventCache eventCache, string source, TraceEventType eventType, int id, string format, params object[] args)
         {
-            Statiq.Common.Tracing.Trace.TraceEvent(eventType, format, args);
+            Statiq.Common.Trace.TraceEvent(eventType, format, args);
         }
 
         public override void TraceEvent(TraceEventCache eventCache, string source, TraceEventType eventType, int id, string message)
         {
-            Statiq.Common.Tracing.Trace.TraceEvent(eventType, message);
+            Statiq.Common.Trace.TraceEvent(eventType, message);
         }
 
         public override void TraceTransfer(TraceEventCache eventCache, string source, int id, string message, Guid relatedActivityId)
         {
-            Statiq.Common.Tracing.Trace.Verbose(message);
+            Statiq.Common.Trace.Verbose(message);
         }
     }
 }

@@ -3,8 +3,6 @@ using System.Threading.Tasks;
 using NUnit.Framework;
 using Shouldly;
 using Statiq.Common;
-using Statiq.Common.IO;
-using Statiq.Core.Modules.IO;
 using Statiq.Testing;
 using Statiq.Testing.Documents;
 using Statiq.Testing.Execution;

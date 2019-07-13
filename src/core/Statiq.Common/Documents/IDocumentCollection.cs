@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace Statiq.Common.Documents
+namespace Statiq.Common
 {
     /// <summary>
     /// Contains a collection of documents output by the process

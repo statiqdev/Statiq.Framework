@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Statiq.Common.Modules
+namespace Statiq.Common
 {
     /// <summary>
     /// Extensions for use with <see cref="ModuleList"/>.

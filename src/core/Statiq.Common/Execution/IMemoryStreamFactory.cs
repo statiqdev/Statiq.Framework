@@ -1,6 +1,6 @@
 ﻿using System.IO;
 
-namespace Statiq.Common.Execution
+namespace Statiq.Common
 {
     /// <summary>
     /// Provides pooled memory streams (via the RecyclableMemoryStream library).

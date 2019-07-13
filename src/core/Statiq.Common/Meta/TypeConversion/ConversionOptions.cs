@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Statiq.Common.Meta.TypeConversion
+namespace Statiq.Common
 {
     /// <summary>Defines options for a conversion.</summary>
     /// <remarks>

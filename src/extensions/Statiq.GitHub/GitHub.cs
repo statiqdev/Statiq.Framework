@@ -3,12 +3,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Octokit;
-using Statiq.Common.Documents;
-using Statiq.Common.Modules;
-using Statiq.Common.Execution;
-using Statiq.Common.Tracing;
 using Statiq.Common;
-using Statiq.Common.IO;
 
 namespace Statiq.GitHub
 {

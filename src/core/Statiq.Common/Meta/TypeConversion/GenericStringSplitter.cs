@@ -1,13 +1,6 @@
 ﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Globalization;
-using System.Linq;
-using System.Reflection;
-using System.Text;
 
-namespace Statiq.Common.Meta.TypeConversion
+namespace Statiq.Common
 {
     /// <summary>
     /// Defines a 'split by seperator process' for converting a string represenation of a list of values.

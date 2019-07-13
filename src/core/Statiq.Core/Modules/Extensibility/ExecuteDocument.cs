@@ -1,13 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using Statiq.Common.Configuration;
-using Statiq.Common.Documents;
-using Statiq.Common.Execution;
-using Statiq.Common.Modules;
-using Statiq.Core.Modules.Contents;
+using Statiq.Common;
 
-namespace Statiq.Core.Modules.Extensibility
+namespace Statiq.Core
 {
     /// <summary>
     /// Executes custom code on individual documents.

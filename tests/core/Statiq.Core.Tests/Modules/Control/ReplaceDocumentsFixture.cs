@@ -1,14 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using NUnit.Framework;
-using Statiq.Common.Configuration;
-using Statiq.Common.Documents;
-using Statiq.Common.Execution;
-using Statiq.Core.Execution;
-using Statiq.Core.Modules.Extensibility;
+using Statiq.Common;
 using Statiq.Testing;
 using Statiq.Testing.Execution;
 
@@ -33,9 +28,9 @@ namespace Statiq.Core.Tests.Modules.Control
                         content.Add(await d.GetStringAsync());
                         return (object)null;
                     }), false);
-                engine.Pipelines.Add("Foo", new TestPipeline(new Core.Modules.Control.CreateDocuments("A", "B", "C", "D")));
-                engine.Pipelines.Add("Bar", new TestPipeline(new Core.Modules.Control.CreateDocuments("E", "F")));
-                engine.Pipelines.Add(new TestPipeline(new Core.Modules.Control.ReplaceDocuments("Foo"), gatherData).WithDependencies("Foo", "Bar"));
+                engine.Pipelines.Add("Foo", new TestPipeline(new CreateDocuments("A", "B", "C", "D")));
+                engine.Pipelines.Add("Bar", new TestPipeline(new CreateDocuments("E", "F")));
+                engine.Pipelines.Add(new TestPipeline(new ReplaceDocuments("Foo"), gatherData).WithDependencies("Foo", "Bar"));
 
                 // When
                 await engine.ExecuteAsync(serviceProvider, cancellationTokenSource);
@@ -59,11 +54,11 @@ namespace Statiq.Core.Tests.Modules.Control
                         content.Add(await d.GetStringAsync());
                         return (object)null;
                     }), false);
-                engine.Pipelines.Add("Foo", new TestPipeline(new Core.Modules.Control.CreateDocuments("A", "B", "C", "D")));
-                engine.Pipelines.Add("Bar", new TestPipeline(new Core.Modules.Control.CreateDocuments("E", "F")));
-                engine.Pipelines.Add("Baz", new TestPipeline(new Core.Modules.Control.CreateDocuments("G", "H")));
+                engine.Pipelines.Add("Foo", new TestPipeline(new CreateDocuments("A", "B", "C", "D")));
+                engine.Pipelines.Add("Bar", new TestPipeline(new CreateDocuments("E", "F")));
+                engine.Pipelines.Add("Baz", new TestPipeline(new CreateDocuments("G", "H")));
                 engine.Pipelines.Add(
-                    new TestPipeline(new Core.Modules.Control.ReplaceDocuments("Foo", "Baz"), gatherData)
+                    new TestPipeline(new ReplaceDocuments("Foo", "Baz"), gatherData)
                         .WithDependencies("Foo", "Bar", "Baz"));
 
                 // When
@@ -88,11 +83,11 @@ namespace Statiq.Core.Tests.Modules.Control
                         content.Add(await d.GetStringAsync());
                         return (object)null;
                     }), false);
-                engine.Pipelines.Add("Foo", new TestPipeline(new Core.Modules.Control.CreateDocuments("A", "B", "C", "D")));
-                engine.Pipelines.Add("Bar", new TestPipeline(new Core.Modules.Control.CreateDocuments("E", "F")));
-                engine.Pipelines.Add("Baz", new TestPipeline(new Core.Modules.Control.CreateDocuments("G", "H")));
+                engine.Pipelines.Add("Foo", new TestPipeline(new CreateDocuments("A", "B", "C", "D")));
+                engine.Pipelines.Add("Bar", new TestPipeline(new CreateDocuments("E", "F")));
+                engine.Pipelines.Add("Baz", new TestPipeline(new CreateDocuments("G", "H")));
                 engine.Pipelines.Add(
-                    new TestPipeline(new Core.Modules.Control.ReplaceDocuments("Baz", "Foo"), gatherData)
+                    new TestPipeline(new ReplaceDocuments("Baz", "Foo"), gatherData)
                         .WithDependencies("Foo", "Bar", "Baz"));
 
                 // When

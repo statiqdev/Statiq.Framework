@@ -11,12 +11,6 @@ using SixLabors.ImageSharp.Processing.Filters;
 using SixLabors.ImageSharp.Processing.Overlays;
 using SixLabors.ImageSharp.Processing.Transforms;
 using Statiq.Common;
-using Statiq.Common.Documents;
-using Statiq.Common.Execution;
-using Statiq.Common.IO;
-using Statiq.Common.Meta;
-using Statiq.Common.Modules;
-using Statiq.Common.Tracing;
 using Statiq.Images.Operations;
 
 namespace Statiq.Images

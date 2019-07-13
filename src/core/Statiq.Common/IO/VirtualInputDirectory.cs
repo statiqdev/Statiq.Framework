@@ -4,7 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace Statiq.Common.IO
+namespace Statiq.Common
 {
     internal class VirtualInputDirectory : IDirectory
     {

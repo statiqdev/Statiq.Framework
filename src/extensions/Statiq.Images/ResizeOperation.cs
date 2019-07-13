@@ -2,7 +2,7 @@
 using SixLabors.ImageSharp.Processing;
 using SixLabors.ImageSharp.Processing.Transforms;
 using SixLabors.Primitives;
-using Statiq.Common.IO;
+using Statiq.Common;
 
 namespace Statiq.Images.Operations
 {

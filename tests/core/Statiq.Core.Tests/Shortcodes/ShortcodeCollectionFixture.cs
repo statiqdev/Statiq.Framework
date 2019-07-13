@@ -1,9 +1,7 @@
 ﻿using System;
 using NUnit.Framework;
 using Shouldly;
-using Statiq.Common.Execution;
-using Statiq.Common.Shortcodes;
-using Statiq.Core.Shortcodes;
+using Statiq.Common;
 
 namespace Statiq.Core.Tests.Shortcodes
 {

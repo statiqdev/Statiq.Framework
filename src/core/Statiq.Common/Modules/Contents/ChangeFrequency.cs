@@ -1,4 +1,4 @@
-namespace Statiq.Common.Modules.Contents
+namespace Statiq.Common
 {
     /// <summary>
     /// The change frequency for each item in the site map.

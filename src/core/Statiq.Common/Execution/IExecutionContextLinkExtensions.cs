@@ -1,10 +1,4 @@
-﻿using Statiq.Common.Configuration;
-using Statiq.Common.Documents;
-using Statiq.Common.IO;
-using Statiq.Common.Meta;
-using Statiq.Common.Util;
-
-namespace Statiq.Common.Execution
+﻿namespace Statiq.Common
 {
     /// <summary>
     /// Extensions to generate web links using global settings.

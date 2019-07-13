@@ -2,9 +2,9 @@
 using System.Collections.Concurrent;
 using System.IO;
 using System.Linq;
-using Statiq.Common.IO;
+using Statiq.Common;
 
-namespace Statiq.Core.IO
+namespace Statiq.Core
 {
     internal class LocalCaseSensitivityChecker
     {

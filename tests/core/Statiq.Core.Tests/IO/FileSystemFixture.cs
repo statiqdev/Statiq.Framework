@@ -1,11 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using NUnit.Framework;
-using Statiq.Common.IO;
-using Statiq.Core.IO;
 using Statiq.Testing;
-using Statiq.Testing.IO;
 
 namespace Statiq.Core.Tests.IO
 {

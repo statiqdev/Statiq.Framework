@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Reflection;
 
-namespace Statiq.App.Assemblies
+namespace Statiq.App
 {
     /// <summary>
     /// Compares two assemblies for equality by comparing at their full names.

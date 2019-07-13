@@ -1,12 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 using NUnit.Framework;
 using Shouldly;
-using Statiq.Common.Configuration;
-using Statiq.Common.Meta;
-using Statiq.Core.Modules.Control;
+using Statiq.Common;
 using Statiq.Testing;
 using Statiq.Testing.Documents;
 

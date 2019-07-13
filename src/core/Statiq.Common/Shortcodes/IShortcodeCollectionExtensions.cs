@@ -1,21 +1,18 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using Statiq.Common.Configuration;
-using Statiq.Common.Documents;
-using Statiq.Common.Execution;
 
-namespace Statiq.Common.Shortcodes
+namespace Statiq.Common
 {
     public static class IShortcodeCollectionExtensions
     {
         /// <summary>
-        /// Adds a shortcode by type, inferring the name from the type name.
+        /// Adds a shortcode by type, inferring the name from the type name and removing a trailing "Shortcode" from the type name.
         /// </summary>
         /// <param name="collection">The shortcode collection.</param>
         /// <param name="type">The type of the shortcode to add (must implement <see cref="IShortcode"/>).</param>
         public static void Add(this IShortcodeCollection collection, Type type) =>
-            collection.Add(type?.Name, type);
+            collection.Add(type?.Name.RemoveEnd("Shortcode", StringComparison.OrdinalIgnoreCase), type);
 
         /// <summary>
         /// Adds a shortcode by type, inferring the name from the type name.
@@ -24,7 +21,7 @@ namespace Statiq.Common.Shortcodes
         /// <typeparam name="TShortcode">The type of the shortcode to add.</typeparam>
         public static void Add<TShortcode>(this IShortcodeCollection collection)
             where TShortcode : IShortcode =>
-            collection.Add<TShortcode>(typeof(TShortcode).Name);
+            collection.Add<TShortcode>(typeof(TShortcode).Name.RemoveEnd("Shortcode", StringComparison.OrdinalIgnoreCase));
 
         /// <summary>
         /// Adds a shortcode by type.

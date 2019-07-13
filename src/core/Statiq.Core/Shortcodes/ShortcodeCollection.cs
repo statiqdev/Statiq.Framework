@@ -2,9 +2,9 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using Statiq.Common.Shortcodes;
+using Statiq.Common;
 
-namespace Statiq.Core.Shortcodes
+namespace Statiq.Core
 {
     internal class ShortcodeCollection : IShortcodeCollection
     {

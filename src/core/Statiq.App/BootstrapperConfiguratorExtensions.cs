@@ -1,8 +1,7 @@
 ﻿using System;
 using Microsoft.Extensions.DependencyInjection;
 using Spectre.Cli;
-using Statiq.App.Configuration;
-using Statiq.Common.Configuration;
+using Statiq.Common;
 
 namespace Statiq.App
 {
@@ -27,7 +26,7 @@ namespace Statiq.App
 
         public static IBootstrapper AddConfigurator<TConfigurable, TConfigurator>(this IBootstrapper bootstrapper)
             where TConfigurable : IConfigurable
-            where TConfigurator : Common.Configuration.IConfigurator<TConfigurable>
+            where TConfigurator : Common.IConfigurator<TConfigurable>
         {
             bootstrapper.Configurators.Add<TConfigurable, TConfigurator>();
             return bootstrapper;
@@ -35,7 +34,7 @@ namespace Statiq.App
 
         public static IBootstrapper AddConfigurator<TConfigurable>(
             this IBootstrapper bootstrapper,
-            Common.Configuration.IConfigurator<TConfigurable> configurator)
+            Common.IConfigurator<TConfigurable> configurator)
             where TConfigurable : IConfigurable
         {
             bootstrapper.Configurators.Add(configurator);

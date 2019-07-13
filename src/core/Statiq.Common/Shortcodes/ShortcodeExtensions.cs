@@ -1,10 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using Statiq.Common.Execution;
-using Statiq.Common.Meta;
+using Statiq.Common;
 
-namespace Statiq.Common.Shortcodes
+namespace Statiq.Common
 {
     public static class ShortcodeExtensions
     {

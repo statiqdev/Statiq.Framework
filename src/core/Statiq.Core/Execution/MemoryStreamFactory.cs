@@ -1,9 +1,9 @@
 ﻿using System.IO;
 using System.Text;
 using Microsoft.IO;
-using Statiq.Common.Execution;
+using Statiq.Common;
 
-namespace Statiq.Core.Execution
+namespace Statiq.Core
 {
     /// <summary>
     /// Forwards calls to an underlying <see cref="RecyclableMemoryStreamManager"/>

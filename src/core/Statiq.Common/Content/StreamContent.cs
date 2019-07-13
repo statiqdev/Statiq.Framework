@@ -2,9 +2,8 @@
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
-using Statiq.Common.Execution;
 
-namespace Statiq.Common.Content
+namespace Statiq.Common
 {
     /// <summary>
     /// A content provider for streams.

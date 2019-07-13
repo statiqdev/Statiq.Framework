@@ -2,7 +2,6 @@
 using System.Threading.Tasks;
 using NUnit.Framework;
 using Shouldly;
-using Statiq.Common.Configuration;
 using Statiq.Testing;
 
 namespace Statiq.Common.Tests.Configuration

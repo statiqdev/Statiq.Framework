@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Statiq.Core.Util
+namespace Statiq.Core
 {
     /// <summary>
     /// Splits a string into quoted arguments delimited by spaces.

@@ -1,6 +1,6 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 
-namespace Statiq.Common.Configuration
+namespace Statiq.Common
 {
     public class ConfigurableServices : IConfigurable
     {

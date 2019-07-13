@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Statiq.Common.Meta.TypeConversion
+namespace Statiq.Common
 {
     /// <summary>Defines Options for a string concatenation.</summary>
     /// <remarks>

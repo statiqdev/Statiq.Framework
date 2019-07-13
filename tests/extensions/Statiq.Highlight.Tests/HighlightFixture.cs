@@ -5,8 +5,6 @@ using NUnit.Framework;
 using NUnit.Framework.Internal;
 using Shouldly;
 using Statiq.Common;
-using Statiq.Common.Documents;
-using Statiq.Common.Execution;
 using Statiq.Testing;
 using Statiq.Testing.Documents;
 using Statiq.Testing.JavaScript;

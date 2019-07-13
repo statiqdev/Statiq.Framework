@@ -1,11 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using Statiq.Common.Documents;
-using Statiq.Common.Execution;
-using Statiq.Common.Meta;
 
-namespace Statiq.Common.Configuration
+namespace Statiq.Common
 {
     public static class DocumentConfigExtensions
     {

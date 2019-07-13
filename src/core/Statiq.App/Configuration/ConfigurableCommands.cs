@@ -1,6 +1,6 @@
-﻿using Statiq.Common.Configuration;
+﻿using Statiq.Common;
 
-namespace Statiq.App.Configuration
+namespace Statiq.App
 {
     public class ConfigurableCommands : IConfigurable
     {

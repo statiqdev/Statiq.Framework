@@ -8,10 +8,6 @@ using AngleSharp.Dom;
 using AngleSharp.Dom.Html;
 using AngleSharp.Parser.Html;
 using Statiq.Common;
-using Statiq.Common.Documents;
-using Statiq.Common.Execution;
-using Statiq.Common.Meta;
-using Statiq.Common.Modules;
 
 namespace Statiq.Html
 {
@@ -167,7 +163,7 @@ namespace Statiq.Html
         }
 
         /// <inheritdoc />
-        public async Task<IEnumerable<Common.Documents.IDocument>> ExecuteAsync(IReadOnlyList<Common.Documents.IDocument> inputs, IExecutionContext context)
+        public async Task<IEnumerable<Common.IDocument>> ExecuteAsync(IReadOnlyList<Common.IDocument> inputs, IExecutionContext context)
         {
             if (string.IsNullOrWhiteSpace(_metadataKey))
             {
@@ -189,7 +185,7 @@ namespace Statiq.Html
             HtmlParser parser = new HtmlParser();
             return await inputs.ParallelSelectAsync(context, GetDocumentAsync);
 
-            async Task<Common.Documents.IDocument> GetDocumentAsync(Common.Documents.IDocument input)
+            async Task<Common.IDocument> GetDocumentAsync(Common.IDocument input)
             {
                 // Parse the HTML content
                 IHtmlDocument htmlDocument = await input.ParseHtmlAsync(parser);
@@ -292,8 +288,8 @@ namespace Statiq.Html
             public IElement Element { get; set; }
             public Heading Previous { get; set; }
             public int Level { get; set; }
-            public Common.Documents.IDocument Document { get; set; }
-            public List<Common.Documents.IDocument> Children { get; } = new List<Common.Documents.IDocument>();
+            public Common.IDocument Document { get; set; }
+            public List<Common.IDocument> Children { get; } = new List<Common.IDocument>();
         }
     }
 }

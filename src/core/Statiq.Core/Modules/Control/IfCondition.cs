@@ -1,8 +1,7 @@
 ﻿using System.Collections.Generic;
-using Statiq.Common.Configuration;
-using Statiq.Common.Modules;
+using Statiq.Common;
 
-namespace Statiq.Core.Modules.Control
+namespace Statiq.Core
 {
     public class IfCondition : ModuleList
     {

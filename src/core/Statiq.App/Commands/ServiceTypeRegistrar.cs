@@ -2,7 +2,7 @@
 using Microsoft.Extensions.DependencyInjection;
 using Spectre.Cli;
 
-namespace Statiq.App.Commands
+namespace Statiq.App
 {
     internal class ServiceTypeRegistrar : ITypeRegistrar
     {

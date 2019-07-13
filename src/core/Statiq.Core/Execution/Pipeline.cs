@@ -1,9 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using Statiq.Common.Modules;
-using Statiq.Common.Execution;
+using Statiq.Common;
 
-namespace Statiq.Core.Execution
+namespace Statiq.Core
 {
     public class Pipeline : IPipeline
     {

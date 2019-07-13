@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace Statiq.Common.IO
+namespace Statiq.Common
 {
     internal static class RelativePathResolver
     {

@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 
-namespace Statiq.App.Tracing
+namespace Statiq.App
 {
     // A special trace listener that shows colors in the console and doesn't output the source name or event id
     // This was helpful: http://blog.flimflan.com/ASimpleColorConsoleTraceListener.html

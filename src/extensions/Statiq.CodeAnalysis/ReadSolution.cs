@@ -4,10 +4,7 @@ using System.Linq;
 using Buildalyzer;
 using Buildalyzer.Workspaces;
 using Microsoft.CodeAnalysis;
-using Statiq.Common.Configuration;
-using Statiq.Common.Execution;
-using Statiq.Common.IO;
-using Statiq.Common.Meta;
+using Statiq.Common;
 
 namespace Statiq.CodeAnalysis
 {

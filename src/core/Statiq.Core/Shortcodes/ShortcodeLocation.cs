@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace Statiq.Core.Shortcodes
+namespace Statiq.Core
 {
     internal class ShortcodeLocation
     {

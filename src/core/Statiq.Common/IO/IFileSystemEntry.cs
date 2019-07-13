@@ -1,6 +1,6 @@
 ﻿using System.Threading.Tasks;
 
-namespace Statiq.Common.IO
+namespace Statiq.Common
 {
     /// <summary>
     /// Represents an entry in the file system

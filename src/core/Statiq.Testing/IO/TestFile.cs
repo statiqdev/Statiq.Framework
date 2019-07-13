@@ -1,8 +1,7 @@
 using System.IO;
 using System.Text;
 using System.Threading.Tasks;
-using Statiq.Common.Content;
-using Statiq.Common.IO;
+using Statiq.Common;
 
 namespace Statiq.Testing.IO
 {

@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace Statiq.Common.Configuration
+namespace Statiq.Common
 {
     /// <summary>
     /// A collection of raw assembly bytes for dynamically

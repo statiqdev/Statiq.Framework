@@ -1,8 +1,7 @@
 ﻿using System;
 using System.Globalization;
-using Statiq.Common.Meta;
 
-namespace Statiq.Common.Execution
+namespace Statiq.Common
 {
     /// <summary>
     /// Extensions for working with input and output date cultures.

@@ -1,8 +1,7 @@
 ﻿using System.IO;
 using System.Threading;
-using Statiq.Common.Util;
 
-namespace Statiq.Common.Content
+namespace Statiq.Common
 {
     /// <summary>
     /// Wraps another stream and releases a mutex when it's disposed,

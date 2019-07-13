@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Statiq.Core.Modules.Metadata
+namespace Statiq.Core
 {
     internal class Assertion<T>
     {

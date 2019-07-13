@@ -1,6 +1,4 @@
-﻿using Statiq.Common.Execution;
-
-namespace Statiq.Common.Content
+﻿namespace Statiq.Common
 {
     /// <summary>
     /// Implementations of this interface can return a content provider.
