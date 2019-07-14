@@ -39,6 +39,31 @@ namespace Statiq.Core.Tests.Modules.Control
             }
 
             [Test]
+            public async Task ReverseReplacesContent()
+            {
+                // Given
+                CountModule a = new CountModule("A")
+                {
+                    Value = 10,
+                    EnsureInputDocument = true
+                };
+                CountModule b = new CountModule("B")
+                {
+                    Value = 20,
+                    EnsureInputDocument = true
+                };
+
+                // When
+                IReadOnlyList<IDocument> results = await ExecuteAsync(
+                    a,
+                    new MergeDocuments(b).Reverse(),
+                    new AddMetadata("Content", Config.FromDocument(async doc => await doc.GetStringAsync())));
+
+                // Then
+                CollectionAssert.AreEqual(new[] { "11" }, results.Select(x => x["Content"]));
+            }
+
+            [Test]
             public async Task CombinesMetadata()
             {
                 // Given
