@@ -1,11 +1,11 @@
 ﻿using System;
 using NUnit.Framework;
+using Shouldly;
 using Statiq.Testing;
 
 namespace Statiq.Common.Tests.IO
 {
     [TestFixture]
-    [Parallelizable(ParallelScope.Self | ParallelScope.Children)]
     public class DirectoryPathFixture : BaseFixture
     {
         public class NameTests : DirectoryPathFixture
@@ -232,6 +232,78 @@ namespace Statiq.Common.Tests.IO
 
                 // Then
                 Assert.Throws<ArgumentNullException>(test);
+            }
+        }
+
+        public class ContainsChildTests : DirectoryPathFixture
+        {
+            [TestCase("/a/b/c", "/a/b/test.txt", false)]
+            [TestCase("/a/b/c", "/a/b/c/test.txt", true)]
+            [TestCase("/a/b/c", "/a/b/c/d/test.txt", false)]
+            public void ShouldCheckFilePath(string directory, string path, bool expected)
+            {
+                // Given
+                DirectoryPath directoryPath = new DirectoryPath(directory);
+                FilePath filePath = new FilePath(path);
+
+                // When
+                bool result = directoryPath.ContainsChild(filePath);
+
+                // Then
+                result.ShouldBe(expected);
+            }
+
+            [TestCase("/a/b/c", "/a/b", false)]
+            [TestCase("/a/b/c", "/a/b/c", false)]
+            [TestCase("/a/b/c", "/a/b/c/d", true)]
+            [TestCase("/a/b/c", "/a/b/c/d/e", false)]
+            public void ShouldCheckDirectoryPath(string directory, string path, bool expected)
+            {
+                // Given
+                DirectoryPath directoryPath = new DirectoryPath(directory);
+                FilePath filePath = new FilePath(path);
+
+                // When
+                bool result = directoryPath.ContainsChild(filePath);
+
+                // Then
+                result.ShouldBe(expected);
+            }
+        }
+
+        public class ContainsDescendantTests : DirectoryPathFixture
+        {
+            [TestCase("/a/b/c", "/a/b/test.txt", false)]
+            [TestCase("/a/b/c", "/a/b/c/test.txt", true)]
+            [TestCase("/a/b/c", "/a/b/c/d/test.txt", true)]
+            public void ShouldCheckFilePath(string directory, string path, bool expected)
+            {
+                // Given
+                DirectoryPath directoryPath = new DirectoryPath(directory);
+                FilePath filePath = new FilePath(path);
+
+                // When
+                bool result = directoryPath.ContainsDescendant(filePath);
+
+                // Then
+                result.ShouldBe(expected);
+            }
+
+            [TestCase("/a/b/c", "/a/b", false)]
+            [TestCase("/a/b/c", "/a/b/c", false)]
+            [TestCase("/a/b/c", "/a/b/c/d", true)]
+            [TestCase("/a/b/c", "/a/b/c/d/e", true)]
+            public void ShouldCheckDirectoryPath(string directory, string path, bool expected)
+            {
+                // Given
+                DirectoryPath directoryPath = new DirectoryPath(directory);
+                FilePath filePath = new FilePath(path);
+
+                // When
+                bool result = directoryPath.ContainsDescendant(filePath);
+
+                // Then
+                result.ShouldBe(expected);
             }
         }
     }

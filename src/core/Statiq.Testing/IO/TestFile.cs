@@ -120,6 +120,7 @@ namespace Statiq.Testing
             return Task.FromResult<Stream>(new StringBuilderStream(_fileProvider.Files.AddOrUpdate(Path.FullPath, new StringBuilder(), (x, y) => y)));
         }
 
-        public IContentProvider GetContentProvider() => new FileContent(this);
+        public IContentProvider GetContentProvider() =>
+            _fileProvider.Files.ContainsKey(Path.FullPath) ? (IContentProvider)new FileContent(this) : NullContent.Provider;
     }
 }

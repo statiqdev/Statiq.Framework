@@ -11,6 +11,7 @@ using Trace = Statiq.Common.Trace;
 
 namespace Statiq.Testing
 {
+    [Parallelizable(ParallelScope.Children)]
     public abstract class BaseFixture
     {
         public static readonly IReadOnlyList<TestDocument> EmptyDocuments = ImmutableArray<TestDocument>.Empty;
@@ -24,6 +25,7 @@ namespace Statiq.Testing
         [SetUp]
         public void BaseSetUp()
         {
+            NormalizedPath.PathComparisonType = System.StringComparison.OrdinalIgnoreCase;  // Normalize for tests
             Directory.SetCurrentDirectory(TestContext.CurrentContext.TestDirectory);
             TestTraceListener listener = new TestTraceListener(TestContext.CurrentContext.Test.ID);
             _listeners.AddOrUpdate(TestContext.CurrentContext.Test.ID, listener, (x, y) => listener);

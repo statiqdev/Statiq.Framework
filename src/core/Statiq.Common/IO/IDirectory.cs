@@ -20,11 +20,6 @@ namespace Statiq.Common
         new DirectoryPath Path { get; }
 
         /// <summary>
-        /// Indicates whether this directory (and files/directories under it) are case-sensitive.
-        /// </summary>
-        bool IsCaseSensitive { get; }
-
-        /// <summary>
         /// Gets the parent directory.
         /// </summary>
         /// <returns>

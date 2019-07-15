@@ -139,6 +139,7 @@ namespace Statiq.Core
             await directory.CreateAsync();
         }
 
-        public IContentProvider GetContentProvider() => new FileContent(this);
+        public IContentProvider GetContentProvider() =>
+            _file.Exists ? (IContentProvider)new FileContent(this) : NullContent.Provider;
     }
 }

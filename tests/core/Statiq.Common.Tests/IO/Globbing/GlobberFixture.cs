@@ -9,7 +9,6 @@ using Statiq.Testing;
 namespace Statiq.Common.Tests.IO.Globbing
 {
     [TestFixture]
-    [Parallelizable(ParallelScope.Self | ParallelScope.Children)]
     public class GlobberFixture : BaseFixture
     {
         public class GetFilesTests : GlobberFixture

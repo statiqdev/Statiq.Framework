@@ -10,9 +10,6 @@ namespace Statiq.Core
     // Initially based on code from Cake (http://cakebuild.net/)
     internal class LocalDirectory : IDirectory
     {
-        private static readonly LocalCaseSensitivityChecker _caseSensitivtyChecker
-            = new LocalCaseSensitivityChecker();
-
         private readonly DirectoryInfo _directory;
 
         public DirectoryPath Path { get; }
@@ -33,8 +30,6 @@ namespace Statiq.Core
             Path = path;
             _directory = new DirectoryInfo(Path.FullPath);
         }
-
-        public bool IsCaseSensitive => _caseSensitivtyChecker.IsCaseSensitive(this);
 
         public Task<bool> GetExistsAsync() => Task.FromResult(_directory.Exists);
 

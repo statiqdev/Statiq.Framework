@@ -10,7 +10,6 @@ using Statiq.Testing;
 namespace Statiq.Json.Tests
 {
     [TestFixture]
-    [Parallelizable(ParallelScope.Self | ParallelScope.Children)]
     public class JsonFixture : BaseFixture
     {
         private static string _jsonContent = @"{
@@ -63,7 +62,7 @@ namespace Statiq.Json.Tests
             }
 
             [Test]
-            [Parallelizable(ParallelScope.None)]
+            [NonParallelizable]
             public async Task ReturnsDocumentOnError()
             {
                 // Given

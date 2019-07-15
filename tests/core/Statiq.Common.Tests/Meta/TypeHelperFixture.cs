@@ -7,7 +7,6 @@ using Statiq.Testing;
 namespace Statiq.Common.Tests.Meta
 {
     [TestFixture]
-    [Parallelizable(ParallelScope.Self | ParallelScope.Children)]
     public class TypeHelperFixture : BaseFixture
     {
         public class TryConvertTests : TypeHelperFixture

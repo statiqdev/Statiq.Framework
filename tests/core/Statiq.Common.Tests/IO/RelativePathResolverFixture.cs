@@ -5,7 +5,6 @@ using Statiq.Testing;
 namespace Statiq.Common.Tests.IO
 {
     [TestFixture]
-    [Parallelizable(ParallelScope.Self | ParallelScope.Children)]
     public class RelativePathResolverFixture : BaseFixture
     {
         public class ResolveTests : RelativePathResolverFixture

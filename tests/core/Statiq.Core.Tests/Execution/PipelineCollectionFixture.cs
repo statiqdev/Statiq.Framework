@@ -5,7 +5,6 @@ using Statiq.Testing;
 namespace Statiq.Core.Tests.Execution
 {
     [TestFixture]
-    [Parallelizable(ParallelScope.Self | ParallelScope.Children)]
     public class PipelineCollectionFixture : BaseFixture
     {
         public class AddTests : PipelineCollectionFixture

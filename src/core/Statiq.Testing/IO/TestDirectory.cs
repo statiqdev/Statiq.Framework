@@ -33,8 +33,6 @@ namespace Statiq.Testing
             return Task.FromResult<IDirectory>(new TestDirectory(_fileProvider, parentPath));
         }
 
-        public bool IsCaseSensitive => true;
-
         public Task CreateAsync()
         {
             _fileProvider.Directories.Add(Path.FullPath);

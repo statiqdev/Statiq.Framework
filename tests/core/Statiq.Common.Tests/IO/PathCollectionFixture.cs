@@ -6,7 +6,6 @@ namespace Statiq.Common.Tests.IO
 {
     [TestFixture(typeof(DirectoryPath))]
     [TestFixture(typeof(FilePath))]
-    [Parallelizable(ParallelScope.Self | ParallelScope.Children)]
     public class PathCollectionFixture<TPath> : BaseFixture
         where TPath : NormalizedPath
     {

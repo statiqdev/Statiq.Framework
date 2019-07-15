@@ -12,7 +12,6 @@ using TestExecutionContext = Statiq.Testing.TestExecutionContext;
 namespace Statiq.Highlight.Tests
 {
     [TestFixture]
-    [Parallelizable(ParallelScope.Self | ParallelScope.Children)]
     public class HighlightFixture : BaseFixture
     {
         public class ExecuteTests : HighlightFixture

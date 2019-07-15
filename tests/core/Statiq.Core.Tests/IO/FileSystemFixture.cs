@@ -6,7 +6,6 @@ using Statiq.Testing;
 namespace Statiq.Core.Tests.IO
 {
     [TestFixture]
-    [Parallelizable(ParallelScope.Self | ParallelScope.Children)]
     public class FileSystemFixture : BaseFixture
     {
         public class ConstructorTests : FileSystemFixture

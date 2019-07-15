@@ -8,7 +8,6 @@ using Statiq.Testing;
 namespace Statiq.Sass.Tests
 {
     [TestFixture]
-    [Parallelizable(ParallelScope.Self | ParallelScope.Children)]
     public class SassFixture : BaseFixture
     {
         public class ExecuteTests : SassFixture

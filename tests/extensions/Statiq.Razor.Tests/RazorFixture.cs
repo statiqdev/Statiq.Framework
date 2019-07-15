@@ -10,7 +10,6 @@ using Statiq.Testing;
 namespace Statiq.Razor.Tests
 {
     [TestFixture]
-    [Parallelizable(ParallelScope.Self | ParallelScope.Children)]
     public class RazorFixture : BaseFixture
     {
         public class ExecuteTests : RazorFixture
@@ -32,7 +31,7 @@ namespace Statiq.Razor.Tests
             }
 
             [Test]
-            [Parallelizable(ParallelScope.None)]
+            [NonParallelizable]
             public async Task Tracing()
             {
                 // Given

@@ -6,7 +6,6 @@ using Statiq.Testing;
 namespace Statiq.Core.Tests.Util
 {
     [TestFixture]
-    [Parallelizable(ParallelScope.Self | ParallelScope.Children)]
     public class ArgumentSplitterFixture : BaseFixture
     {
         public class SplitTests : ArgumentSplitterFixture

@@ -8,7 +8,6 @@ using Statiq.Testing;
 namespace Statiq.CodeAnalysis.Tests
 {
     [TestFixture]
-    [Parallelizable(ParallelScope.Self | ParallelScope.Children)]
     public class AnalyzeCSharpSyntaxFixture : AnalyzeCSharpBaseFixture
     {
         public class ExecuteTests : AnalyzeCSharpSyntaxFixture

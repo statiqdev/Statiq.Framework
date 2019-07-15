@@ -9,7 +9,6 @@ using Statiq.Yaml.Dynamic;
 namespace Statiq.Yaml.Tests
 {
     [TestFixture]
-    [Parallelizable(ParallelScope.Self | ParallelScope.Children)]
     public class YamlFixture : BaseFixture
     {
         public class ExecuteTests : YamlFixture

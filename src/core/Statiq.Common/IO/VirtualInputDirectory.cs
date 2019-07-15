@@ -126,20 +126,6 @@ namespace Statiq.Common
         /// </returns>
         public async Task<bool> GetExistsAsync() => (await GetExistingDirectoriesAsync()).Any();
 
-        /// <summary>
-        /// Returns <c>true</c> if any of the input paths are case sensitive.
-        /// </summary>
-        /// <remarks>
-        /// When dealing with virtual input directories that could be comprised of multiple
-        /// file systems with different case sensitivity, it's safer to treat the
-        /// virtual file system as case-sensitive if any of the underlying file systems
-        /// are case-sensitive. Otherwise, if we treated it as case-insensitive when
-        /// one of the file systems was actually case-sensitive we would get false-positive
-        /// results when assuming if directories and files in that file system existed
-        /// (for example, in the globber).
-        /// </remarks>
-        public bool IsCaseSensitive => GetExistingDirectoriesAsync().Result.Any(x => x.IsCaseSensitive);
-
         private async Task<IEnumerable<IDirectory>> GetExistingDirectoriesAsync()
         {
             IEnumerable<IDirectory> directories = await _fileSystem.InputPaths

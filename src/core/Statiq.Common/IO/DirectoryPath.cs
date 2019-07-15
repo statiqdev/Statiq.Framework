@@ -146,6 +146,65 @@ namespace Statiq.Common
         }
 
         /// <summary>
+        /// Checks if this directory contains the specified file as a direct child.
+        /// </summary>
+        /// <param name="path">The file path to check.</param>
+        /// <returns><c>true</c> if the directory contains this file, <c>false</c> otherwise.</returns>
+        public bool ContainsChild(FilePath path) =>
+            Equals(path?.Directory ?? throw new ArgumentNullException(nameof(path)));
+
+        /// <summary>
+        /// Checks if this directory contains the specified file as a descendant.
+        /// </summary>
+        /// <param name="path">The file path to check.</param>
+        /// <returns><c>true</c> if the directory contains this file, <c>false</c> otherwise.</returns>
+        public bool ContainsDescendant(FilePath path)
+        {
+            DirectoryPath parent = path?.Directory ?? throw new ArgumentNullException(nameof(path));
+            while (parent != null)
+            {
+                if (Equals(parent))
+                {
+                    return true;
+                }
+                parent = parent.Parent;
+            }
+            return false;
+        }
+
+        /// <summary>
+        /// Checks if this directory contains the specified directory as a direct child.
+        /// </summary>
+        /// <param name="path">The directory path to check.</param>
+        /// <returns><c>true</c> if the directory is or contains this directory, <c>false</c> otherwise.</returns>
+        public bool ContainsChild(DirectoryPath path)
+        {
+            _ = path ?? throw new ArgumentNullException(nameof(path));
+            DirectoryPath parent = path.Parent;
+            return parent != null && Equals(parent);
+        }
+
+        /// <summary>
+        /// Checks if this directory contains the specified directory as a descendant.
+        /// </summary>
+        /// <param name="path">The directory path to check.</param>
+        /// <returns><c>true</c> if the directory is or contains this directory, <c>false</c> otherwise.</returns>
+        public bool ContainsDescendant(DirectoryPath path)
+        {
+            _ = path ?? throw new ArgumentNullException(nameof(path));
+            path = path.Parent;
+            while (path != null)
+            {
+                if (Equals(path))
+                {
+                    return true;
+                }
+                path = path.Parent;
+            }
+            return false;
+        }
+
+        /// <summary>
         /// Performs an implicit conversion from <see cref="string"/> to <see cref="DirectoryPath"/>.
         /// </summary>
         /// <param name="path">The path.</param>

@@ -12,6 +12,16 @@ namespace Statiq.Common
     {
         // Initially based on code from Cake (http://cakebuild.net/)
 
+        /// <summary>
+        /// The type of string comparison to perform when comparing paths.
+        /// </summary>
+        /// <remarks>
+        /// This defaults to <see cref="StringComparison.Ordinal"/> on Linux platforms and
+        /// <see cref="StringComparison.OrdinalIgnoreCase"/> on Windows and MacOS.
+        /// </remarks>
+        public static StringComparison PathComparisonType { get; set; } =
+            RuntimeInformation.IsOSPlatform(OSPlatform.Linux) ? StringComparison.Ordinal : StringComparison.OrdinalIgnoreCase;
+
         public const string Dot = ".";
         public const string DotDot = "..";
         public const string Slash = "/";
@@ -87,7 +97,7 @@ namespace Statiq.Common
         }
 
         // Internal for testing
-        // Splits the path on /, collapses it, and then pools the segements
+        // Splits the path on /, collapses it, and then pools the segments
         internal static (string, ReadOnlyMemory<char>[]) GetFullPathAndSegments(ReadOnlySpan<char> path)
         {
             // Return the current path (.) if the path is null or empty
@@ -252,7 +262,7 @@ namespace Statiq.Common
         /// Gets the segments making up the path. These are slices of the
         /// <see cref="FullPath"/> and can be converted to either
         /// <see cref="ReadOnlySpan{T}"/> or <see cref="string"/> as needed.
-        /// This does not include directory seperator characters
+        /// This does not include directory separator characters
         /// or the leading slash if there is one.
         /// </summary>
         /// <remarks>
@@ -299,7 +309,7 @@ namespace Statiq.Common
         {
             HashCode hash = default;
             hash.Add(IsAbsolute);
-            hash.Add(FullPath);
+            hash.Add(FullPath.GetHashCode(PathComparisonType));
             return hash.ToHashCode();
         }
 
@@ -321,13 +331,13 @@ namespace Statiq.Common
                 }
             }
 
-            return other != null && ((IEquatable<NormalizedPath>)this).Equals(other);
+            return other != null && Equals(other);
         }
 
-        bool IEquatable<NormalizedPath>.Equals(NormalizedPath other) =>
+        public bool Equals(NormalizedPath other) =>
             other != null
             && IsAbsolute == other.IsAbsolute
-            && FullPath.Equals(other.FullPath, StringComparison.Ordinal);
+            && FullPath.Equals(other.FullPath, PathComparisonType);
 
         /// <inheritdoc />
         public int CompareTo(object obj) => !(obj is NormalizedPath path) ? 1 : CompareTo(path);
@@ -347,7 +357,7 @@ namespace Statiq.Common
 
             int absoluteCompare = IsAbsolute.CompareTo(other.IsAbsolute);
             return absoluteCompare == 0
-                ? string.Compare(FullPath, other.FullPath, StringComparison.Ordinal)
+                ? string.Compare(FullPath, other.FullPath, PathComparisonType)
                 : absoluteCompare;
         }
     }

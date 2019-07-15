@@ -10,7 +10,6 @@ using Statiq.Testing;
 namespace Statiq.Core.Tests.Shortcodes
 {
     [TestFixture]
-    [Parallelizable(ParallelScope.Self | ParallelScope.Children)]
     public class ShortcodeParserFixture : BaseFixture
     {
         public class ParseTests : ShortcodeParserFixture

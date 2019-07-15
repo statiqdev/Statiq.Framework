@@ -10,7 +10,6 @@ using Statiq.Testing;
 namespace Statiq.Html.Tests
 {
     [TestFixture]
-    [Parallelizable(ParallelScope.Self | ParallelScope.Children)]
     public class HtmlQueryFixture : BaseFixture
     {
         public class ExecuteTests : HtmlQueryFixture

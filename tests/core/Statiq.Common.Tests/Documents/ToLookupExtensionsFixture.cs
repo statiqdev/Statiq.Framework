@@ -6,7 +6,6 @@ using Statiq.Testing;
 namespace Statiq.Common.Tests.Documents
 {
     [TestFixture]
-    [Parallelizable(ParallelScope.Self | ParallelScope.Children)]
     public class ToLookupExtensionsFixture : BaseFixture
     {
         public class ToLookupManyTests : ToLookupExtensionsFixture

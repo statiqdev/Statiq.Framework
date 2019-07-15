@@ -9,7 +9,7 @@ namespace Statiq.Testing
     public class TestFileSystem : IFileSystem
     {
         public TestFileSystem()
-            : this(new TestFileProvider("input"))
+            : this(new TestFileProvider("input", "theme"))
         {
         }
 

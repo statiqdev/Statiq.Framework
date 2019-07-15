@@ -397,7 +397,7 @@ namespace Statiq.Common
                     FilePath filePath = negated ? new FilePath(x.Substring(1)) : new FilePath(x);
                     if (filePath.IsAbsolute)
                     {
-                        // The globber doesn't support absolute paths, so get the root directory of this path (including provider)
+                        // The globber doesn't support absolute paths, so get the root directory of this path
                         IDirectory rootDirectory = await fileSystem.GetDirectoryAsync(filePath.Root);
                         FilePath relativeFilePath = filePath.RootRelative;
                         return Tuple.Create(

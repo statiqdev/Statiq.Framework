@@ -7,7 +7,6 @@ using Statiq.Testing;
 namespace Statiq.Minification.Tests
 {
     [TestFixture]
-    [Parallelizable(ParallelScope.Self | ParallelScope.Children)]
     public class MinifyXhtmlFixture : BaseFixture
     {
         public class ExecuteTests : MinifyXhtmlFixture

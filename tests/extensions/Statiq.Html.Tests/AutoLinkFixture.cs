@@ -8,7 +8,6 @@ using Statiq.Testing;
 namespace Statiq.Html.Tests
 {
     [TestFixture]
-    [Parallelizable(ParallelScope.Self | ParallelScope.Children)]
     public class AutoLinkFixture : BaseFixture
     {
         public class ExecuteTests : AutoLinkFixture

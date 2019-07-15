@@ -12,7 +12,7 @@ namespace Statiq.Common
     /// <summary>
     /// Helper methods to work with globbing patterns.
     /// </summary>
-    internal static class Globber
+    public static class Globber
     {
         private static readonly Regex HasBraces = new Regex(@"\{.*\}");
         private static readonly Regex NumericSet = new Regex(@"^\{(-?[0-9]+)\.\.(-?[0-9]+)\}");
@@ -26,7 +26,7 @@ namespace Statiq.Common
         /// <remarks>Initially based on code from Reliak.FileSystemGlobbingExtensions (https://github.com/reliak/Reliak.FileSystemGlobbingExtensions).</remarks>
         public static async Task<IEnumerable<IFile>> GetFilesAsync(IDirectory directory, IEnumerable<string> patterns)
         {
-            Matcher matcher = new Matcher(directory.IsCaseSensitive ? StringComparison.Ordinal : StringComparison.OrdinalIgnoreCase);
+            Matcher matcher = new Matcher(NormalizedPath.PathComparisonType);
 
             // Expand braces
             IEnumerable<string> expandedPatterns = patterns
@@ -67,7 +67,7 @@ namespace Statiq.Common
         /// <summary>Expands all brace ranges in a pattern, returning a sequence containing every possible combination.</summary>
         /// <param name="pattern">The pattern to expand.</param>
         /// <returns>The expanded globbing patterns.</returns>
-        public static IEnumerable<string> ExpandBraces(string pattern)
+        internal static IEnumerable<string> ExpandBraces(string pattern)
         {
             // Initially based on code from Minimatch (https://github.com/SLaks/Minimatch/blob/master/Minimatch/Minimatcher.cs)
             // Brace expansion:

@@ -7,7 +7,6 @@ using Statiq.Testing;
 namespace Statiq.Minification.Tests
 {
     [TestFixture]
-    [Parallelizable(ParallelScope.Self | ParallelScope.Children)]
     public class MinifyJsFixture : BaseFixture
     {
         public class ExecuteTests : MinifyJsFixture

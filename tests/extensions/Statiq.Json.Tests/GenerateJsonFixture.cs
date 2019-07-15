@@ -9,7 +9,6 @@ using Statiq.Testing;
 namespace Statiq.Json.Tests
 {
     [TestFixture]
-    [Parallelizable(ParallelScope.Self | ParallelScope.Children)]
     public class GenerateJsonFixture : BaseFixture
     {
         private class Account

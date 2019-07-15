@@ -9,7 +9,6 @@ using Statiq.Testing;
 namespace Statiq.Markdown.Tests
 {
     [TestFixture]
-    [Parallelizable(ParallelScope.Self | ParallelScope.Children)]
     public class MarkdownFixture : BaseFixture
     {
         public class ExecuteTests : MarkdownFixture

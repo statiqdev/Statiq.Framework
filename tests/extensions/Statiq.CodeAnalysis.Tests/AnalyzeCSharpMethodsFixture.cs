@@ -10,7 +10,6 @@ using Statiq.Testing;
 namespace Statiq.CodeAnalysis.Tests
 {
     [TestFixture]
-    [Parallelizable(ParallelScope.Self | ParallelScope.Children)]
     public class AnalyzeCSharpMethodsFixture : AnalyzeCSharpBaseFixture
     {
         public class ExecuteTests : AnalyzeCSharpMethodsFixture

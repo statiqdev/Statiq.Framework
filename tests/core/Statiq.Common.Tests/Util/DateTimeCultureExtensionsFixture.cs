@@ -7,7 +7,6 @@ using Statiq.Testing;
 namespace Statiq.Common.Tests.Util
 {
     [TestFixture]
-    [Parallelizable(ParallelScope.Self | ParallelScope.Children)]
     public class DateTimeCultureExtensionsFixture : BaseFixture
     {
         public class GetDateTimeInputCultureTests : DateTimeCultureExtensionsFixture

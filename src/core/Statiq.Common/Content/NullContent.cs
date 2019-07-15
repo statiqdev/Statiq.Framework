@@ -15,6 +15,9 @@ namespace Statiq.Common
     {
         public static readonly NullContent Provider = new NullContent();
 
+        /// <summary>
+        /// Use the singleton <see cref="Provider"/> field to get an instance.
+        /// </summary>
         private NullContent()
         {
         }

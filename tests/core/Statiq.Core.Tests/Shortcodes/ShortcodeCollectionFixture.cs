@@ -2,12 +2,12 @@
 using NUnit.Framework;
 using Shouldly;
 using Statiq.Common;
+using Statiq.Testing;
 
 namespace Statiq.Core.Tests.Shortcodes
 {
     [TestFixture]
-    [Parallelizable(ParallelScope.Self | ParallelScope.Children)]
-    public class ShortcodeCollectionFixture
+    public class ShortcodeCollectionFixture : BaseFixture
     {
         public class CreateInstanceTests : ShortcodeCollectionFixture
         {

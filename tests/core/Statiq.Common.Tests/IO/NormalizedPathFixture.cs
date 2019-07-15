@@ -6,7 +6,6 @@ using Statiq.Testing;
 namespace Statiq.Common.Tests.IO
 {
     [TestFixture]
-    [Parallelizable(ParallelScope.Self | ParallelScope.Children)]
     public class NormalizedPathFixture : BaseFixture
     {
         private class TestPath : NormalizedPath
@@ -380,16 +379,23 @@ namespace Statiq.Common.Tests.IO
                 Assert.False(second.Equals(first));
             }
 
-            [Test]
-            public void SamePathsButDifferentCasingAreNotConsideredEqual()
+            [NonParallelizable]
+            [TestCase(StringComparison.Ordinal, false)]
+            [TestCase(StringComparison.OrdinalIgnoreCase, true)]
+            public void SamePathsButDifferentCasingFollowComparison(StringComparison comparisonType, bool expected)
             {
-                // Given, When
+                // Given
+                NormalizedPath.PathComparisonType = comparisonType;
                 FilePath first = new FilePath("shaders/basic.vert");
                 FilePath second = new FilePath("SHADERS/BASIC.VERT");
 
+                // When
+                bool firstResult = first.Equals(second);
+                bool secondResult = second.Equals(first);
+
                 // Then
-                Assert.False(first.Equals(second));
-                Assert.False(second.Equals(first));
+                firstResult.ShouldBe(expected);
+                secondResult.ShouldBe(expected);
             }
         }
 
@@ -417,15 +423,21 @@ namespace Statiq.Common.Tests.IO
                 Assert.AreNotEqual(first.GetHashCode(), second.GetHashCode());
             }
 
-            [Test]
-            public void SamePathsButDifferentCasingDoNotGetSameHashCode()
+            [NonParallelizable]
+            [TestCase(StringComparison.Ordinal, false)]
+            [TestCase(StringComparison.OrdinalIgnoreCase, true)]
+            public void SamePathsButDifferentCasingFollowComparison(StringComparison comparisonType, bool expected)
             {
-                // Given, When
+                // Given
+                NormalizedPath.PathComparisonType = comparisonType;
                 FilePath first = new FilePath("shaders/basic.vert");
                 FilePath second = new FilePath("SHADERS/BASIC.VERT");
 
+                // When
+                bool result = first.GetHashCode().Equals(second.GetHashCode());
+
                 // Then
-                Assert.AreNotEqual(first.GetHashCode(), second.GetHashCode());
+                result.ShouldBe(expected);
             }
         }
     }

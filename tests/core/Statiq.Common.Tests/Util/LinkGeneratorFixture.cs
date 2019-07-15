@@ -5,7 +5,6 @@ using Statiq.Testing;
 namespace Statiq.Common.Tests.Util
 {
     [TestFixture]
-    [Parallelizable(ParallelScope.Self | ParallelScope.Children)]
     public class LinkGeneratorFixture : BaseFixture
     {
         public class GetLinkTests : LinkGeneratorFixture

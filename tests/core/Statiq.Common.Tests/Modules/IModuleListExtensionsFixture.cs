@@ -7,7 +7,6 @@ using Statiq.Testing;
 namespace Statiq.Common.Tests.Modules
 {
     [TestFixture]
-    [Parallelizable(ParallelScope.Self | ParallelScope.Children)]
     public class IModuleListExtensionsFixture : BaseFixture
     {
         public class InsertAfterFirstTests : IModuleListExtensionsFixture

@@ -6,7 +6,6 @@ using Statiq.Testing;
 namespace Statiq.App.Tests
 {
     [TestFixture]
-    [Parallelizable(ParallelScope.Self | ParallelScope.Children)]
     public class MetadataParserFixture : BaseFixture
     {
         public class ParseTests : MetadataParserFixture

@@ -7,7 +7,6 @@ using Statiq.Testing;
 namespace Statiq.YouTube.Tests
 {
     [TestFixture]
-    [Parallelizable(ParallelScope.Self | ParallelScope.Children)]
     public class YouTubeFixture : BaseFixture
     {
         public class ExecuteTests : YouTubeFixture

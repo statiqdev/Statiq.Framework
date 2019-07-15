@@ -5,7 +5,6 @@ using Statiq.Testing;
 namespace Statiq.Common.Tests.Modules
 {
     [TestFixture]
-    [Parallelizable(ParallelScope.Self | ParallelScope.Children)]
     public class ModuleListFixture : BaseFixture
     {
         public class AddTests : ModuleListFixture
