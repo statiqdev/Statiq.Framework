@@ -42,7 +42,7 @@ namespace Statiq.Core
                 throw new ArgumentNullException(nameof(key));
             }
 
-            _orders.Push(new Order(Config.FromDocument(x => x.Get(key))));
+            _orders.Push(new Order(Config.FromDocument(key)));
         }
 
         /// <summary>
@@ -75,7 +75,7 @@ namespace Statiq.Core
                 throw new ArgumentNullException(nameof(key));
             }
 
-            _orders.Push(new Order(Config.FromDocument(x => x.Get(key))));
+            _orders.Push(new Order(Config.FromDocument(key)));
             return this;
         }
 

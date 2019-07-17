@@ -33,7 +33,7 @@ namespace Statiq.Core
         private readonly Dictionary<FilePath, Func<IDictionary<FilePath, string>, string>> _additionalOutputs =
             new Dictionary<FilePath, Func<IDictionary<FilePath, string>, string>>();
 
-        private DocumentConfig<IReadOnlyList<FilePath>> _paths = Config.FromDocument(doc => doc.List<FilePath>(Keys.RedirectFrom));
+        private DocumentConfig<IReadOnlyList<FilePath>> _paths = Config.FromDocument<IReadOnlyList<FilePath>>(Keys.RedirectFrom);
         private bool _metaRefreshPages = true;
         private bool _includeHost = false;
 

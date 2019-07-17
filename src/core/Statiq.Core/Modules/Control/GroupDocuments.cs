@@ -50,7 +50,7 @@ namespace Statiq.Core
                 throw new ArgumentNullException(nameof(metadataKey));
             }
 
-            _key = Config.FromDocument(doc => doc.Get<IEnumerable<object>>(metadataKey));
+            _key = Config.FromDocument<IEnumerable<object>>(metadataKey);
         }
 
         /// <summary>

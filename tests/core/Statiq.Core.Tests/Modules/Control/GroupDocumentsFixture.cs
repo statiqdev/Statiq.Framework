@@ -49,7 +49,7 @@ namespace Statiq.Core.Tests.Modules.Control
                     EnsureInputDocument = true
                 };
                 GroupDocuments groupByMany = new GroupDocuments(Config.FromDocument(d => new[] { d.Int("A") % 3, 3 }));
-                OrderDocuments orderBy = new OrderDocuments(Config.FromDocument(d => d.Int(Keys.GroupKey)));
+                OrderDocuments orderBy = new OrderDocuments(Config.FromDocument<int>(Keys.GroupKey));
                 Execute gatherData = new ExecuteDocument(
                     Config.FromDocument(async d =>
                     {

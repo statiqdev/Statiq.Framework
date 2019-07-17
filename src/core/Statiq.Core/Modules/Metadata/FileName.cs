@@ -45,7 +45,7 @@ namespace Statiq.Core
         public FileName(string key)
         {
             _ = key ?? throw new ArgumentNullException(nameof(key));
-            _fileName = Config.FromDocument(doc => doc.String(key));
+            _fileName = Config.FromDocument<string>(key);
             _outputKey = key;
         }
 
@@ -59,7 +59,7 @@ namespace Statiq.Core
             _ = inputKey ?? throw new ArgumentNullException(nameof(inputKey));
             _ = outputKey ?? throw new ArgumentNullException(nameof(outputKey));
 
-            _fileName = Config.FromDocument(doc => doc.String(inputKey));
+            _fileName = Config.FromDocument<string>(inputKey);
             _outputKey = outputKey;
         }
 

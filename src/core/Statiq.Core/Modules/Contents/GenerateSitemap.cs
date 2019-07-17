@@ -34,7 +34,7 @@ namespace Statiq.Core
         /// <param name="locationFormatter">A location formatter that will be applied to the location of each input after
         /// getting the value of the <c>SitemapItem</c> metadata key.</param>
         public GenerateSitemap(Func<string, string> locationFormatter = null)
-            : this(Config.FromDocument(doc => doc.Get(Keys.SitemapItem)), locationFormatter)
+            : this(Config.FromDocument(Keys.SitemapItem), locationFormatter)
         {
         }
 
@@ -49,7 +49,7 @@ namespace Statiq.Core
         /// <param name="locationFormatter">A location formatter that will be applied to the location of each input after
         /// getting the value of the specified metadata key.</param>
         public GenerateSitemap(string sitemapItemOrLocationMetadataKey, Func<string, string> locationFormatter = null)
-            : this(Config.FromDocument(doc => doc.Get(sitemapItemOrLocationMetadataKey)), locationFormatter)
+            : this(Config.FromDocument(sitemapItemOrLocationMetadataKey), locationFormatter)
         {
             if (string.IsNullOrEmpty(sitemapItemOrLocationMetadataKey))
             {
