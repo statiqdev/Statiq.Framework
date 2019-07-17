@@ -44,7 +44,7 @@ namespace Statiq.Common
         {
             // Don't call the other constructors for the empty constructor because it's a special case
             // If we do, that'll trigger initialization, but the empty constructor is also used
-            // by the document factory to instantiate a document _then_ initialze it explicitly
+            // by the document factory to instantiate a document _then_ initialize it explicitly
             // and we can't initialize twice or it'll throw
         }
 
@@ -322,7 +322,7 @@ namespace Statiq.Common
         public IMetadata GetMetadata(params string[] keys) =>
             new Metadata(this.Where(x => keys.Contains(x.Key, StringComparer.OrdinalIgnoreCase)));
 
-#pragma warning disable RCS1077 // We want to count the enumerable items, not recursivly call this
+#pragma warning disable RCS1077 // We want to count the enumerable items, not recursively call this
         [PropertyMetadata(null)] // We have to exclude properties that use the enumerator because they cause infinite recursion
         public int Count => this.Count();
 #pragma warning restore RCS1077
