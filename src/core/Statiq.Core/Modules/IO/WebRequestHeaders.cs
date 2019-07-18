@@ -7,16 +7,16 @@ using System.Text;
 namespace Statiq.Core
 {
     /// <summary>
-    /// The request headers to use with the <see cref="Download"/> module.
+    /// The request headers to use with the <see cref="ReadWeb"/> module.
     /// </summary>
-    public class RequestHeaders
+    public class WebRequestHeaders
     {
         private readonly Dictionary<string, object> _headers = new Dictionary<string, object>();
 
         /// <summary>
         /// Creates a new empty set of request headers.
         /// </summary>
-        public RequestHeaders()
+        public WebRequestHeaders()
         {
         }
 
@@ -24,7 +24,7 @@ namespace Statiq.Core
         /// Creates the specified request headers.
         /// </summary>
         /// <param name="headers">The request headers to create.</param>
-        public RequestHeaders(IEnumerable<KeyValuePair<string, string>> headers)
+        public WebRequestHeaders(IEnumerable<KeyValuePair<string, string>> headers)
         {
             _headers = headers.ToDictionary(x => x.Key, x => (object)x.Value);
         }
@@ -35,7 +35,7 @@ namespace Statiq.Core
         /// <param name="name">The name of the request header to add.</param>
         /// <param name="value">The value of the request header to add.</param>
         /// <returns>The current instance.</returns>
-        public RequestHeaders Add(string name, string value)
+        public WebRequestHeaders Add(string name, string value)
         {
             _headers.Add(name, value);
             return this;
@@ -47,7 +47,7 @@ namespace Statiq.Core
         /// <param name="name">The name of the request header to add.</param>
         /// <param name="value">The value of the request header to add.</param>
         /// <returns>The current instance.</returns>
-        public RequestHeaders Add(string name, IEnumerable<string> value)
+        public WebRequestHeaders Add(string name, IEnumerable<string> value)
         {
             _headers.Add(name, value);
             return this;
@@ -58,7 +58,7 @@ namespace Statiq.Core
         /// </summary>
         /// <param name="name">The name of the request header to remove.</param>
         /// <returns>The current instance.</returns>
-        public RequestHeaders Remove(string name)
+        public WebRequestHeaders Remove(string name)
         {
             _headers.Remove(name);
             return this;

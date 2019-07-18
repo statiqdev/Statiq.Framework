@@ -20,17 +20,17 @@ namespace Statiq.Core
     /// <metadata cref="Keys.SourceUri" usage="Output" />
     /// <metadata cref="Keys.SourceHeaders" usage="Output" />
     /// <category>Input/Output</category>
-    public class Download : IModule
+    public class ReadWeb : IModule
     {
-        private readonly List<DownloadRequest> _requests = new List<DownloadRequest>();
-        private List<DownloadResponse> _cachedResponses;
+        private readonly List<WebRequest> _requests = new List<WebRequest>();
+        private List<WebResponse> _cachedResponses;
         private bool _cacheResponses;
 
         /// <summary>
         /// Downloads the specified URIs with a default request header.
         /// </summary>
         /// <param name="uris">The URIs to download.</param>
-        public Download(params string[] uris)
+        public ReadWeb(params string[] uris)
         {
             WithUris(uris);
         }
@@ -40,7 +40,7 @@ namespace Statiq.Core
         /// </summary>
         /// <param name="uri">The URI to download.</param>
         /// <param name="headers">The request header to use.</param>
-        public Download(string uri, RequestHeaders headers)
+        public ReadWeb(string uri, WebRequestHeaders headers)
         {
             WithUri(uri, headers);
         }
@@ -50,11 +50,11 @@ namespace Statiq.Core
         /// </summary>
         /// <param name="uris">The URIs to download.</param>
         /// <returns>The current module instance.</returns>
-        public Download WithUris(params string[] uris)
+        public ReadWeb WithUris(params string[] uris)
         {
             foreach (string uri in uris)
             {
-                _requests.Add(new DownloadRequest(uri));
+                _requests.Add(new WebRequest(uri));
             }
             return this;
         }
@@ -65,9 +65,9 @@ namespace Statiq.Core
         /// <param name="uri">The URI to download.</param>
         /// <param name="headers">The request header to use.</param>
         /// <returns>The current module instance.</returns>
-        public Download WithUri(string uri, RequestHeaders headers = null)
+        public ReadWeb WithUri(string uri, WebRequestHeaders headers = null)
         {
-            _requests.Add(new DownloadRequest(uri)
+            _requests.Add(new WebRequest(uri)
             {
                 Headers = headers
             });
@@ -79,7 +79,7 @@ namespace Statiq.Core
         /// </summary>
         /// <param name="requests">The requests to download.</param>
         /// <returns>The current module instance.</returns>
-        public Download WithRequests(params DownloadRequest[] requests)
+        public ReadWeb WithRequests(params WebRequest[] requests)
         {
             if (requests == null)
             {
@@ -94,7 +94,7 @@ namespace Statiq.Core
         /// </summary>
         /// <param name="cacheResponses">If set to <c>true</c>, the response is cached (the default is <c>false</c>).</param>
         /// <returns>The current module instance.</returns>
-        public Download CacheResponses(bool cacheResponses = true)
+        public ReadWeb CacheResponses(bool cacheResponses = true)
         {
             _cacheResponses = cacheResponses;
             return this;
@@ -103,7 +103,7 @@ namespace Statiq.Core
         /// <inheritdoc />
         public async Task<IEnumerable<IDocument>> ExecuteAsync(IReadOnlyList<IDocument> inputs, IExecutionContext context)
         {
-            List<DownloadResponse> responses = _cachedResponses;
+            List<WebResponse> responses = _cachedResponses;
             if (responses == null)
             {
                 responses =
@@ -134,7 +134,7 @@ namespace Statiq.Core
                 { HttpMethod.Put, (client, uri, content) => client.PutAsync(uri, content) }
             };
 
-        private async Task<DownloadResponse> GetResponseAsync(DownloadRequest request, IExecutionContext context)
+        private async Task<WebResponse> GetResponseAsync(WebRequest request, IExecutionContext context)
         {
             // Get the HTTP client
             using (HttpClientHandler clientHandler = new HttpClientHandler())
@@ -168,7 +168,7 @@ namespace Statiq.Core
                             await result.CopyToAsync(mem);
                             Dictionary<string, string> headers = content.Headers.ToDictionary(
                                 x => CultureInfo.CurrentCulture.TextInfo.ToTitleCase(x.Key), x => string.Join(",", x.Value));
-                            return new DownloadResponse(request.Uri, mem, headers);
+                            return new WebResponse(request.Uri, mem, headers);
                         }
                     }
                 }
@@ -199,13 +199,13 @@ namespace Statiq.Core
             return builder.Uri;
         }
 
-        private class DownloadResponse
+        private class WebResponse
         {
             public Uri Uri { get; }
             public Stream Stream { get; }
             public Dictionary<string, string> Headers { get; }
 
-            public DownloadResponse(Uri uri, Stream stream, Dictionary<string, string> headers)
+            public WebResponse(Uri uri, Stream stream, Dictionary<string, string> headers)
             {
                 Uri = uri;
                 Stream = stream;

@@ -6,9 +6,9 @@ using System.Net.Http;
 namespace Statiq.Core
 {
     /// <summary>
-    /// A download request for use with the <see cref="Download"/> module.
+    /// A download request for use with the <see cref="ReadWeb"/> module.
     /// </summary>
-    public class DownloadRequest
+    public class WebRequest
     {
         /// <summary>
         /// The URI to download from.
@@ -18,7 +18,7 @@ namespace Statiq.Core
         /// <summary>
         /// Request headers.
         /// </summary>
-        public RequestHeaders Headers { get; set; }
+        public WebRequestHeaders Headers { get; set; }
 
         /// <summary>
         /// The query string parameters. These will be combined with any that already exist in <see cref="Uri"/>.
@@ -44,7 +44,7 @@ namespace Statiq.Core
         /// Creates a new download request.
         /// </summary>
         /// <param name="uri">The URI to download from.</param>
-        public DownloadRequest(string uri)
+        public WebRequest(string uri)
         {
             if (string.IsNullOrEmpty(uri))
             {
@@ -58,7 +58,7 @@ namespace Statiq.Core
         /// Creates a new download request.
         /// </summary>
         /// <param name="uri">The URI to download from.</param>
-        public DownloadRequest(Uri uri) =>
+        public WebRequest(Uri uri) =>
             Uri = uri ?? throw new ArgumentNullException(nameof(uri));
 
         /// <summary>
@@ -66,7 +66,7 @@ namespace Statiq.Core
         /// </summary>
         /// <param name="headers">The request headers to set.</param>
         /// <returns>The current instance.</returns>
-        public DownloadRequest WithHeaders(RequestHeaders headers)
+        public WebRequest WithHeaders(WebRequestHeaders headers)
         {
             Headers = headers ?? throw new ArgumentNullException(nameof(headers));
             return this;
@@ -78,7 +78,7 @@ namespace Statiq.Core
         /// <param name="name">The name of the query string parameter.</param>
         /// <param name="value">The value of the query string parameter.</param>
         /// <returns>The current instance.</returns>
-        public DownloadRequest WithQueryString(string name, string value)
+        public WebRequest WithQueryString(string name, string value)
         {
             if (name == null)
             {
@@ -94,7 +94,7 @@ namespace Statiq.Core
         /// </summary>
         /// <param name="method">The method to set.</param>
         /// <returns>The current instance.</returns>
-        public DownloadRequest WithMethod(HttpMethod method)
+        public WebRequest WithMethod(HttpMethod method)
         {
             Method = method ?? throw new ArgumentNullException(nameof(method));
             return this;
@@ -105,7 +105,7 @@ namespace Statiq.Core
         /// </summary>
         /// <param name="content">The content to set.</param>
         /// <returns>The current instance.</returns>
-        public DownloadRequest WithContent(HttpContent content)
+        public WebRequest WithContent(HttpContent content)
         {
             Content = content;
             return this;
@@ -116,7 +116,7 @@ namespace Statiq.Core
         /// </summary>
         /// <param name="content">The content to set.</param>
         /// <returns>The current instance.</returns>
-        public DownloadRequest WithContent(string content)
+        public WebRequest WithContent(string content)
         {
             if (content == null)
             {
@@ -132,7 +132,7 @@ namespace Statiq.Core
         /// </summary>
         /// <param name="credentials">The credentials to use.</param>
         /// <returns>The current instance.</returns>
-        public DownloadRequest WithCredentials(NetworkCredential credentials)
+        public WebRequest WithCredentials(NetworkCredential credentials)
         {
             Credentials = credentials ?? throw new ArgumentNullException(nameof(credentials));
             return this;
@@ -144,7 +144,7 @@ namespace Statiq.Core
         /// <param name="userName">The username to use.</param>
         /// <param name="password">The password to use.</param>
         /// <returns>The current instance.</returns>
-        public DownloadRequest WithCredentials(string userName, string password)
+        public WebRequest WithCredentials(string userName, string password)
         {
             Credentials = new NetworkCredential(userName, password);
             return this;

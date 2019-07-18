@@ -11,9 +11,9 @@ using Statiq.Testing;
 namespace Statiq.Core.Tests.Modules.IO
 {
     [TestFixture]
-    public class DownloadFixture : BaseFixture
+    public class ReadWebFixture : BaseFixture
     {
-        public class ExecuteTests : DownloadFixture
+        public class ExecuteTests : ReadWebFixture
         {
             [Test]
             public async Task SingleHtmlDownloadGetStream()
@@ -33,7 +33,7 @@ namespace Statiq.Core.Tests.Modules.IO
                         return response;
                     }
                 };
-                IModule download = new Download().WithUris("https://statiq.dev/");
+                IModule download = new ReadWeb().WithUris("https://statiq.dev/");
 
                 // When
                 TestDocument result = await ExecuteAsync(document, context, download).SingleAsync();
@@ -71,7 +71,7 @@ namespace Statiq.Core.Tests.Modules.IO
                         return response;
                     }
                 };
-                IModule download = new Download().WithUris("https://statiq.dev/", "https://github.com/statiqdev/Framework");
+                IModule download = new ReadWeb().WithUris("https://statiq.dev/", "https://github.com/statiqdev/Framework");
 
                 // When
                 IReadOnlyList<TestDocument> results = await ExecuteAsync(document, context, download);
@@ -110,7 +110,7 @@ namespace Statiq.Core.Tests.Modules.IO
                         };
                     }
                 };
-                IModule download = new Download().WithUris("https://statiq.dev/assets/img/logo.png");
+                IModule download = new ReadWeb().WithUris("https://statiq.dev/assets/img/logo.png");
 
                 // When
                 TestDocument result = await ExecuteAsync(document, context, download).SingleAsync();
@@ -138,9 +138,9 @@ namespace Statiq.Core.Tests.Modules.IO
                         };
                     }
                 };
-                RequestHeaders header = new RequestHeaders();
+                WebRequestHeaders header = new WebRequestHeaders();
                 header.Accept.Add("image/jpeg");
-                IModule download = new Download().WithUri("https://statiq.dev/assets/img/logo.png", header);
+                IModule download = new ReadWeb().WithUri("https://statiq.dev/assets/img/logo.png", header);
 
                 // When
                 TestDocument result = await ExecuteAsync(document, context, download).SingleAsync();
