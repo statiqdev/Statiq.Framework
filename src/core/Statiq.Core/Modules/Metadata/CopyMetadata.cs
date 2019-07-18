@@ -10,7 +10,7 @@ namespace Statiq.Core
     /// Copies the specified meta key to a new meta key, with an optional format argument.
     /// </summary>
     /// <category>Metadata</category>
-    public class CopyMeta : IModule
+    public class CopyMetadata : IModule
     {
         private readonly string _fromKey;
         private readonly string _toKey;
@@ -23,7 +23,7 @@ namespace Statiq.Core
         /// <param name="fromKey">The metadata key to copy from.</param>
         /// <param name="toKey">The metadata key to copy to.</param>
         /// <param name="format">The formatting to apply to the new value.</param>
-        public CopyMeta(string fromKey, string toKey, string format = null)
+        public CopyMetadata(string fromKey, string toKey, string format = null)
         {
             _fromKey = fromKey ?? throw new ArgumentNullException(nameof(fromKey));
             _toKey = toKey ?? throw new ArgumentNullException(nameof(toKey));
@@ -35,7 +35,7 @@ namespace Statiq.Core
         /// </summary>
         /// <param name="format">The format to use.</param>
         /// <returns>The current module instance.</returns>
-        public CopyMeta WithFormat(string format)
+        public CopyMetadata WithFormat(string format)
         {
             _format = format ?? throw new ArgumentNullException(nameof(format));
             return this;
@@ -46,7 +46,7 @@ namespace Statiq.Core
         /// </summary>
         /// <param name="execute">A function to get the format to use.</param>
         /// <returns>The current module instance.</returns>
-        public CopyMeta WithFormat(Func<string, string> execute)
+        public CopyMetadata WithFormat(Func<string, string> execute)
         {
             _execute = execute ?? throw new ArgumentNullException(nameof(execute));
             return this;

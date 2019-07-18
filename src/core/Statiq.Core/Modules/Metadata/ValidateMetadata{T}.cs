@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Statiq.Common;
@@ -42,31 +42,31 @@ namespace Statiq.Core
     /// </code>
     /// </example>
     /// <category>Metadata</category>
-    public class ValidateMeta<T> : IModule
+    public class ValidateMetadata<T> : IModule
     {
         private readonly string _key;
-        private readonly List<Assertion<T>> _assertions;
+        private readonly List<Assertion> _assertions;
         private bool _optional;
 
         /// <summary>
         /// Performs validation checks on metadata.
         /// </summary>
         /// <param name="key">The meta key representing the value to test.</param>
-        public ValidateMeta(string key)
+        public ValidateMetadata(string key)
         {
             if (string.IsNullOrWhiteSpace(key))
             {
                 throw new ArgumentNullException(nameof(key));
             }
             _key = key;
-            _assertions = new List<Assertion<T>>();
+            _assertions = new List<Assertion>();
         }
 
         /// <summary>
         /// Declares the entire check as optional. Is this is set, and the meta key doesn't exist, no checks will be run.
         /// </summary>
         /// <returns>The current module instance.</returns>
-        public ValidateMeta<T> IsOptional()
+        public ValidateMetadata<T> IsOptional()
         {
             _optional = true;
             return this;
@@ -80,9 +80,9 @@ namespace Statiq.Core
         /// false, the check failed, an exception will be thrown, and execution will halt.</param>
         /// <param name="message">The error message to output on failure.</param>
         /// <returns>The current module instance.</returns>
-        public ValidateMeta<T> WithAssertion(Func<T, bool> execute, string message = null)
+        public ValidateMetadata<T> WithAssertion(Func<T, bool> execute, string message = null)
         {
-            _assertions.Add(new Assertion<T>(execute, message));
+            _assertions.Add(new Assertion(execute, message));
             return this;
         }
 
@@ -112,7 +112,7 @@ namespace Statiq.Core
                 }
 
                 // Check each assertion
-                foreach (Assertion<T> assertion in _assertions)
+                foreach (Assertion assertion in _assertions)
                 {
                     if (!assertion.Execute(value))
                     {
@@ -125,5 +125,23 @@ namespace Statiq.Core
         }
 
         private Exception GetException(string message) => new Exception($"{message ?? "Assertion failed"}");
+
+        private class Assertion
+        {
+            private readonly Func<T, bool> _execute;
+
+            public string Message { get; }
+
+            public Assertion(Func<T, bool> execute, string message)
+            {
+                _execute = execute;
+                Message = message;
+            }
+
+            public bool Execute(T value)
+            {
+                return _execute(value);
+            }
+        }
     }
 }

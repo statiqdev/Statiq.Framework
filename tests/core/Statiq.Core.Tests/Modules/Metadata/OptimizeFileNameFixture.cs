@@ -7,9 +7,9 @@ using Statiq.Testing;
 namespace Statiq.Core.Tests.Modules.Metadata
 {
     [TestFixture]
-    public class FileNameFixture : BaseFixture
+    public class OptimizeFileNameFixture : BaseFixture
     {
-        public class ExecuteTests : FileNameFixture
+        public class ExecuteTests : OptimizeFileNameFixture
         {
             [TestCase(
                 "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~:?#[]@!$&'()*+,;=",
@@ -28,7 +28,7 @@ namespace Statiq.Core.Tests.Modules.Metadata
             {
                 // Given
                 TestDocument document = new TestDocument(new FilePath(input));
-                FileName fileName = new FileName();
+                OptimizeFileName fileName = new OptimizeFileName();
 
                 // When
                 TestDocument result = await ExecuteAsync(document, fileName).SingleAsync();
@@ -44,7 +44,7 @@ namespace Statiq.Core.Tests.Modules.Metadata
                 const string input = "FileName With MiXeD CapS";
                 const string output = "filename-with-mixed-caps";
                 TestDocument document = new TestDocument(new FilePath(input));
-                FileName fileName = new FileName();
+                OptimizeFileName fileName = new OptimizeFileName();
 
                 // When
                 TestDocument result = await ExecuteAsync(document, fileName).SingleAsync();
@@ -60,7 +60,7 @@ namespace Statiq.Core.Tests.Modules.Metadata
                 const string input = "this-is-a-.net-tag";
                 const string output = "this-is-a-.net-tag";
                 TestDocument document = new TestDocument(new FilePath(input));
-                FileName fileName = new FileName();
+                OptimizeFileName fileName = new OptimizeFileName();
 
                 // When
                 fileName = fileName.WithAllowedCharacters(new string[] { "-" });
@@ -77,7 +77,7 @@ namespace Statiq.Core.Tests.Modules.Metadata
                 const string input = "this-is-a-.";
                 const string output = "thisisa.";
                 TestDocument document = new TestDocument(new FilePath(input));
-                FileName fileName = new FileName();
+                OptimizeFileName fileName = new OptimizeFileName();
 
                 // When
                 fileName = fileName.WithAllowedCharacters(new string[] { "." });
@@ -87,7 +87,7 @@ namespace Statiq.Core.Tests.Modules.Metadata
                 result.Destination.FullPath.ShouldBe(output);
             }
 
-            public static string[] ReservedChars => FileName.ReservedChars;
+            public static string[] ReservedChars => OptimizeFileName.ReservedChars;
 
             [Test]
             [TestCaseSource(nameof(ReservedChars))]
@@ -100,7 +100,7 @@ namespace Statiq.Core.Tests.Modules.Metadata
                 {
                     new MetadataItem("MyKey", path)
                 };
-                FileName fileName = new FileName("MyKey");
+                OptimizeFileName fileName = new OptimizeFileName("MyKey");
 
                 // When
                 TestDocument result = await ExecuteAsync(document, fileName).SingleAsync();
@@ -119,7 +119,7 @@ namespace Statiq.Core.Tests.Modules.Metadata
                 {
                     new MetadataItem("MyKey", input)
                 };
-                FileName fileName = new FileName("MyKey");
+                OptimizeFileName fileName = new OptimizeFileName("MyKey");
 
                 // When
                 TestDocument result = await ExecuteAsync(document, fileName).SingleAsync();
@@ -139,7 +139,7 @@ namespace Statiq.Core.Tests.Modules.Metadata
                 {
                     new MetadataItem("MyKey", input)
                 };
-                FileName fileName = new FileName("MyKey");
+                OptimizeFileName fileName = new OptimizeFileName("MyKey");
 
                 // When
                 TestDocument result = await ExecuteAsync(document, fileName).SingleAsync();
@@ -158,7 +158,7 @@ namespace Statiq.Core.Tests.Modules.Metadata
                 {
                     new MetadataItem("MyKey", input)
                 };
-                FileName fileName = new FileName("MyKey");
+                OptimizeFileName fileName = new OptimizeFileName("MyKey");
 
                 // When
                 TestDocument result = await ExecuteAsync(document, fileName).SingleAsync();

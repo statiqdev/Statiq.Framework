@@ -42,7 +42,7 @@ namespace Statiq.Core
     /// </para>
     /// </remarks>
     /// <category>Metadata</category>
-    public class DirectoryMeta : IModule
+    public class ApplyDirectoryMetadata : IModule
     {
         private readonly List<MetaFileEntry> _metadataFiles = new List<MetaFileEntry>();
         private bool _preserveMetadataFiles;
@@ -52,7 +52,7 @@ namespace Statiq.Core
         /// be consumed by this module and will not be present in the module output.
         /// </summary>
         /// <returns>The current module instance.</returns>
-        public DirectoryMeta WithPreserveMetadataFiles()
+        public ApplyDirectoryMetadata WithPreserveMetadataFiles()
         {
             _preserveMetadataFiles = true;
             return this;
@@ -65,7 +65,7 @@ namespace Statiq.Core
         /// <param name="inherited">If set to <c>true</c>, metadata from documents with this file name will be inherited by documents in nested directories.</param>
         /// <param name="replace">If set to <c>true</c>, metadata from this document will replace any existing metadata on the target document.</param>
         /// <returns>The current module instance.</returns>
-        public DirectoryMeta WithMetadataFile(DocumentConfig<bool> metadataFileName, bool inherited = false, bool replace = false)
+        public ApplyDirectoryMetadata WithMetadataFile(DocumentConfig<bool> metadataFileName, bool inherited = false, bool replace = false)
         {
             _metadataFiles.Add(new MetaFileEntry(metadataFileName, inherited, replace));
             return this;
@@ -78,7 +78,7 @@ namespace Statiq.Core
         /// <param name="inherited">If set to <c>true</c>, metadata from documents with this file name will be inherited by documents in nested directories.</param>
         /// <param name="replace">If set to <c>true</c>, metadata from this document will replace any existing metadata on the target document.</param>
         /// <returns>The current module instance.</returns>
-        public DirectoryMeta WithMetadataFile(FilePath metadataFileName, bool inherited = false, bool replace = false)
+        public ApplyDirectoryMetadata WithMetadataFile(FilePath metadataFileName, bool inherited = false, bool replace = false)
         {
             return WithMetadataFile(Config.FromDocument(doc => doc.Source?.FileName.Equals(metadataFileName) == true), inherited, replace);
         }

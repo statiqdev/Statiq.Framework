@@ -9,14 +9,14 @@ namespace Statiq.Core
 {
     /// <summary>
     /// Creates new documents from elements within XML. This module will either
-    /// ignore input documents and use specificed XML content or use the content
+    /// ignore input documents and use specified XML content or use the content
     /// from input documents depending on how it's configured. An XPath expression
     /// can be used to find target XML elements, and the InnerXml of each child element
     /// of the target elements as well as the values of each attribute
     /// will be placed into the metadata of the generated documents.
     /// </summary>
     /// <category>Metadata</category>
-    public class Xml : ReadDataModule<Xml, Dictionary<string, object>>
+    public class ReadXml : ReadDataModule<ReadXml, Dictionary<string, object>>
     {
         private readonly string _data;
         private readonly Dictionary<string, string> _metadataXPaths = new Dictionary<string, string>();
@@ -25,7 +25,7 @@ namespace Statiq.Core
         /// <summary>
         /// Creates new documents from input documents. The child elements of the root element will be used.
         /// </summary>
-        public Xml()
+        public ReadXml()
         {
         }
 
@@ -33,7 +33,7 @@ namespace Statiq.Core
         /// Creates new documents from input documents.
         /// </summary>
         /// <param name="itemXPath">The XPath expression to use to find child items. If null, all child elements will be used.</param>
-        public Xml(string itemXPath)
+        public ReadXml(string itemXPath)
         {
             _itemXPath = itemXPath;
         }
@@ -43,7 +43,7 @@ namespace Statiq.Core
         /// </summary>
         /// <param name="data">The XML data.</param>
         /// <param name="itemXPath">The XPath expression to use to find child items. If <c>null</c>, all child elements will be used.</param>
-        public Xml(string data, string itemXPath)
+        public ReadXml(string data, string itemXPath)
         {
             _data = data ?? throw new ArgumentNullException(nameof(data));
             _itemXPath = itemXPath;
@@ -54,7 +54,7 @@ namespace Statiq.Core
         /// </summary>
         /// <param name="itemXPath">The XPath expression to use.</param>
         /// <returns>The current module instance.</returns>
-        public Xml WithItemXPath(string itemXPath)
+        public ReadXml WithItemXPath(string itemXPath)
         {
             _itemXPath = itemXPath;
             return this;
@@ -68,7 +68,7 @@ namespace Statiq.Core
         /// <param name="key">The metadata key to store the value in.</param>
         /// <param name="xpath">The XPath expression for the additional metadata.</param>
         /// <returns>The current module instance.</returns>
-        public Xml WithMetadataXPath(string key, string xpath)
+        public ReadXml WithMetadataXPath(string key, string xpath)
         {
             if (string.IsNullOrEmpty(key))
             {

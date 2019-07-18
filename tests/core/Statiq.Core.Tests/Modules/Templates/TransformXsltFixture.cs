@@ -7,9 +7,9 @@ using Statiq.Testing;
 namespace Statiq.Core.Tests.Modules.Templates
 {
     [TestFixture]
-    public class XsltFixture : BaseFixture
+    public class TransformXsltFixture : BaseFixture
     {
-        public class ExecuteTests : XsltFixture
+        public class ExecuteTests : TransformXsltFixture
         {
             [Test]
             public async Task TestTransform()
@@ -74,7 +74,7 @@ namespace Statiq.Core.Tests.Modules.Templates
                 TestDocument document = new TestDocument(input);
                 IDocument xsltDocument = new TestDocument(xsltInput);
                 IModule module = new ExecuteDocument(new[] { xsltDocument });
-                Xslt xslt = new Xslt(module);
+                TransformXslt xslt = new TransformXslt(module);
 
                 // When
                 TestDocument result = await ExecuteAsync(document, xslt).SingleAsync();

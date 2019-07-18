@@ -13,8 +13,8 @@ namespace Statiq.Core
     /// </summary>
     /// <remarks>
     /// <para>
-    /// By default, this module is configured to generate a tree that mimics the directory structure of each document's input path
-    /// by looking at it's RelativeFilePath metadata value. Any documents with a file name of "index.*" are automatically
+    /// By default, this module is configured to generate a tree that mimics the directory structure of each document's source path.
+    /// Any documents with a file name of "index.*" are automatically
     /// promoted to the node that represents the parent folder level. For any folder that does not contain an "index.*" file,
     /// an empty placeholder tree node is used to represent the folder.
     /// </para>
@@ -33,7 +33,7 @@ namespace Statiq.Core
     /// <metadata cref="Keys.Previous" usage="Output"/>
     /// <metadata cref="Keys.TreePath" usage="Output"/>
     /// <category>Metadata</category>
-    public class Tree : IModule
+    public class CreateTree : IModule
     {
         private static readonly ReadOnlyMemory<char> IndexFileName = "index.".AsMemory();
 
@@ -55,7 +55,7 @@ namespace Statiq.Core
         /// <summary>
         /// Creates a new tree module.
         /// </summary>
-        public Tree()
+        public CreateTree()
         {
             _isRoot = false;
             _treePath = Config.FromDocument((doc, ctx) =>
@@ -98,7 +98,7 @@ namespace Statiq.Core
         /// </remarks>
         /// <param name="factory">The factory function.</param>
         /// <returns>The current module instance.</returns>
-        public Tree WithPlaceholderFactory(Func<string[], MetadataItems, IExecutionContext, Task<IDocument>> factory)
+        public CreateTree WithPlaceholderFactory(Func<string[], MetadataItems, IExecutionContext, Task<IDocument>> factory)
         {
             _placeholderFactory = factory ?? throw new ArgumentNullException(nameof(factory));
             return this;
@@ -111,7 +111,7 @@ namespace Statiq.Core
         /// </summary>
         /// <param name="sort">A comparison delegate.</param>
         /// <returns>The current module instance.</returns>
-        public Tree WithSort(Comparison<IDocument> sort)
+        public CreateTree WithSort(Comparison<IDocument> sort)
         {
             _sort = sort ?? throw new ArgumentNullException(nameof(sort));
             return this;
@@ -123,7 +123,7 @@ namespace Statiq.Core
         /// </summary>
         /// <param name="isRoot">A predicate (must return <c>bool</c>) that specifies if the current document is treated as the root of a new tree.</param>
         /// <returns>The current module instance.</returns>
-        public Tree WithRoots(DocumentConfig<bool> isRoot)
+        public CreateTree WithRoots(DocumentConfig<bool> isRoot)
         {
             _isRoot = isRoot ?? throw new ArgumentNullException(nameof(isRoot));
             return this;
@@ -135,7 +135,7 @@ namespace Statiq.Core
         /// </summary>
         /// <param name="treePath">A delegate that must return a sequence of strings.</param>
         /// <returns>The current module instance.</returns>
-        public Tree WithTreePath(DocumentConfig<string[]> treePath)
+        public CreateTree WithTreePath(DocumentConfig<string[]> treePath)
         {
             _treePath = treePath ?? throw new ArgumentNullException(nameof(treePath));
             return this;
@@ -152,7 +152,7 @@ namespace Statiq.Core
         /// <param name="nextKey">The metadata key where the next document should be stored.</param>
         /// <param name="treePathKey">The metadata key where the tree path should be stored.</param>
         /// <returns>The current module instance.</returns>
-        public Tree WithMetadataNames(
+        public CreateTree WithMetadataNames(
             string parentKey = Keys.Parent,
             string childrenKey = Keys.Children,
             string previousSiblingKey = Keys.PreviousSibling,
@@ -182,7 +182,7 @@ namespace Statiq.Core
         /// has no effect if not nesting.
         /// </param>
         /// <returns>The current module instance.</returns>
-        public Tree WithNesting(bool nesting = true, bool collapseRoot = false)
+        public CreateTree WithNesting(bool nesting = true, bool collapseRoot = false)
         {
             _nesting = nesting;
             _collapseRoot = collapseRoot;
@@ -269,7 +269,7 @@ namespace Statiq.Core
 
             // We need to build the tree from the bottom up so that the children don't have to be lazy
             // This also sorts the children once they're created
-            public async Task GenerateOutputDocumentsAsync(Tree tree, IExecutionContext context)
+            public async Task GenerateOutputDocumentsAsync(CreateTree tree, IExecutionContext context)
             {
                 // Recursively build output documents for children
                 foreach (TreeNode child in Children)

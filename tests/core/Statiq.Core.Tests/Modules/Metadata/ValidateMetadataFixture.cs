@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Threading.Tasks;
 using NUnit.Framework;
 using Shouldly;
@@ -8,9 +8,9 @@ using Statiq.Testing;
 namespace Statiq.Core.Tests.Modules.Metadata
 {
     [TestFixture]
-    public class ValidateMetaFixture : BaseFixture
+    public class ValidateMetadataFixture : BaseFixture
     {
-        public class ExecuteTests : ValidateMetaFixture
+        public class ExecuteTests : ValidateMetadataFixture
         {
             [Test]
             public void ExistenceOfKeyDoesNotThrow()
@@ -21,7 +21,7 @@ namespace Statiq.Core.Tests.Modules.Metadata
                     {
                         { "Title", "Foo" }
                     });
-                ValidateMeta<string> validateMeta = new ValidateMeta<string>("Title");
+                ValidateMetadata<string> validateMeta = new ValidateMetadata<string>("Title");
 
                 // When, Then
                 // Convert this to Should.NotThrowAsync when https://github.com/shouldly/shouldly/pull/430 is merged
@@ -33,7 +33,7 @@ namespace Statiq.Core.Tests.Modules.Metadata
             {
                 // Given
                 TestDocument document = new TestDocument();
-                ValidateMeta<string> validateMeta = new ValidateMeta<string>("Title");
+                ValidateMetadata<string> validateMeta = new ValidateMetadata<string>("Title");
 
                 // When, Then
                 await Should.ThrowAsync<AggregateException>(async () => await ExecuteAsync(document, validateMeta));
@@ -48,7 +48,7 @@ namespace Statiq.Core.Tests.Modules.Metadata
                     {
                         { "Title", "Foo" }
                     });
-                ValidateMeta<string> validateMeta = new ValidateMeta<string>("Title").WithAssertion(x => x == "Baz");
+                ValidateMetadata<string> validateMeta = new ValidateMetadata<string>("Title").WithAssertion(x => x == "Baz");
 
                 // When, Then
                 await Should.ThrowAsync<AggregateException>(async () => await ExecuteAsync(document, validateMeta));
@@ -63,7 +63,7 @@ namespace Statiq.Core.Tests.Modules.Metadata
                     {
                         { "Title", "Foo" }
                     });
-                ValidateMeta<string> validateMeta = new ValidateMeta<string>("Title").WithAssertion(x => x == "Foo");
+                ValidateMetadata<string> validateMeta = new ValidateMetadata<string>("Title").WithAssertion(x => x == "Foo");
 
                 // When, Then
                 // Convert this to Should.NotThrowAsync when https://github.com/shouldly/shouldly/pull/430 is merged

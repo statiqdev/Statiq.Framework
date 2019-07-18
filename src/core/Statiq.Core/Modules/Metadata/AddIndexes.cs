@@ -10,7 +10,7 @@ namespace Statiq.Core
     /// </summary>
     /// <metadata cref="Keys.Index" usage="Output" />
     /// <category>Metadata</category>
-    public class Index : IModule
+    public class AddIndexes : IModule
     {
         /// <inheritdoc />
         public Task<IEnumerable<IDocument>> ExecuteAsync(IReadOnlyList<IDocument> inputs, IExecutionContext context) =>

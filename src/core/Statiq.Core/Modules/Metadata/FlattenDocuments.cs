@@ -10,14 +10,14 @@ namespace Statiq.Core
     /// </summary>
     /// <metadata cref="Keys.Children" usage="Input"/>
     /// <category>Metadata</category>
-    public class Flatten : IModule
+    public class FlattenDocuments : IModule
     {
         private readonly string _childrenKey = Keys.Children;
 
         /// <summary>
         /// Creates a new flatten module.
         /// </summary>
-        public Flatten()
+        public FlattenDocuments()
         {
         }
 
@@ -25,7 +25,7 @@ namespace Statiq.Core
         /// Creates a new flatten module with the specified children key.
         /// </summary>
         /// <param name="childrenKey">The metadata key that contains the children.</param>
-        public Flatten(string childrenKey)
+        public FlattenDocuments(string childrenKey)
         {
             _childrenKey = childrenKey;
         }

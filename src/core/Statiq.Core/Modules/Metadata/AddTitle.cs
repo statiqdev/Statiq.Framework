@@ -15,7 +15,7 @@ namespace Statiq.Core
     /// </remarks>
     /// <metadata cref="Keys.Title" usage="Output" />
     /// <category>Metadata</category>
-    public class Title : IModule
+    public class AddTitle : IModule
     {
         private static readonly ReadOnlyMemory<char> IndexFileName = "index.".AsMemory();
 
@@ -28,7 +28,7 @@ namespace Statiq.Core
         /// otherwise it will set a title based on the document source
         /// or the RelativeFilePath key if no source is available.
         /// </summary>
-        public Title()
+        public AddTitle()
         {
         }
 
@@ -36,7 +36,7 @@ namespace Statiq.Core
         /// This sets the title of all input documents to a value from the delegate.
         /// </summary>
         /// <param name="title">A delegate that must return a string.</param>
-        public Title(DocumentConfig<string> title)
+        public AddTitle(DocumentConfig<string> title)
         {
             _title = title ?? throw new ArgumentNullException(nameof(title));
         }
@@ -47,7 +47,7 @@ namespace Statiq.Core
         /// </summary>
         /// <param name="key">The metadata key to set.</param>
         /// <returns>The current module instance.</returns>
-        public Title WithKey(string key)
+        public AddTitle WithKey(string key)
         {
             if (key == null)
             {
@@ -70,7 +70,7 @@ namespace Statiq.Core
         /// </summary>
         /// <param name="keepExisting">Whether to keep the existing title metadata value.</param>
         /// <returns>The current module instance.</returns>
-        public Title KeepExisting(bool keepExisting = true)
+        public AddTitle KeepExisting(bool keepExisting = true)
         {
             _keepExisting = keepExisting;
             return this;

@@ -9,9 +9,9 @@ using Statiq.Testing;
 namespace Statiq.Core.Tests.Modules.Metadata
 {
     [TestFixture]
-    public class TreeFixture : BaseFixture
+    public class CreateTreeFixture : BaseFixture
     {
-        public class ExecuteTests : TreeFixture
+        public class ExecuteTests : CreateTreeFixture
         {
             [Test]
             public async Task GetsTreeWithCommonRoot()
@@ -24,7 +24,7 @@ namespace Statiq.Core.Tests.Modules.Metadata
                     "root/b/x/4.txt",
                     "root/c/d/5.txt",
                     "root/6.txt");
-                Tree tree = new Tree().WithNesting();
+                CreateTree tree = new CreateTree().WithNesting();
 
                 // When
                 TestDocument result = await ExecuteAsync(inputs, tree).SingleAsync();
@@ -58,7 +58,7 @@ namespace Statiq.Core.Tests.Modules.Metadata
                     "b/x/4.txt",
                     "c/d/5.txt",
                     "6.txt");
-                Tree tree = new Tree().WithNesting();
+                CreateTree tree = new CreateTree().WithNesting();
 
                 // When
                 TestDocument result = await ExecuteAsync(inputs, tree).SingleAsync();
@@ -87,7 +87,7 @@ namespace Statiq.Core.Tests.Modules.Metadata
                 TestDocument[] inputs = GetDocumentsFromRelativePaths(
                     "a/2.txt",
                     "a/1.txt");
-                Tree tree = new Tree().WithNesting();
+                CreateTree tree = new CreateTree().WithNesting();
 
                 // When
                 TestDocument result = await ExecuteAsync(inputs, tree).SingleAsync();
@@ -114,7 +114,7 @@ namespace Statiq.Core.Tests.Modules.Metadata
                     "b/x/4.txt",
                     "c/d/5.txt",
                     "6.txt");
-                Tree tree = new Tree().WithNesting(true, true);
+                CreateTree tree = new CreateTree().WithNesting(true, true);
 
                 // When
                 IReadOnlyList<TestDocument> results = await ExecuteAsync(inputs, tree);
@@ -133,7 +133,7 @@ namespace Statiq.Core.Tests.Modules.Metadata
                     "root/a/2.txt",
                     "root/a/3.txt",
                     "root/a/1.txt");
-                Tree tree = new Tree().WithNesting();
+                CreateTree tree = new CreateTree().WithNesting();
 
                 // When
                 TestDocument result = await ExecuteAsync(inputs, tree).SingleAsync();
@@ -151,7 +151,7 @@ namespace Statiq.Core.Tests.Modules.Metadata
                     "root/a/2.txt",
                     "root/a/3.txt",
                     "root/a/1.txt");
-                Tree tree = new Tree().WithNesting();
+                CreateTree tree = new CreateTree().WithNesting();
 
                 // When
                 TestDocument result = await ExecuteAsync(inputs, tree).SingleAsync();
@@ -169,7 +169,7 @@ namespace Statiq.Core.Tests.Modules.Metadata
                     "root/a/2.txt",
                     "root/a/3.txt",
                     "root/a/1.txt");
-                Tree tree = new Tree().WithNesting();
+                CreateTree tree = new CreateTree().WithNesting();
 
                 // When
                 TestDocument result = await ExecuteAsync(inputs, tree).SingleAsync();
@@ -188,7 +188,7 @@ namespace Statiq.Core.Tests.Modules.Metadata
                     "root/a/3.txt",
                     "root/a/1.txt",
                     "root/b/4.txt");
-                Tree tree = new Tree().WithNesting();
+                CreateTree tree = new CreateTree().WithNesting();
 
                 // When
                 TestDocument result = await ExecuteAsync(inputs, tree).SingleAsync();
@@ -207,7 +207,7 @@ namespace Statiq.Core.Tests.Modules.Metadata
                     "root/b/index.html",
                     "root/a/1.txt",
                     "root/b/4.txt");
-                Tree tree = new Tree()
+                CreateTree tree = new CreateTree()
                     .WithNesting()
                     .WithRoots(Config.FromDocument(doc => doc.Destination.FullPath.EndsWith("b/index.html")));
 
@@ -237,7 +237,7 @@ namespace Statiq.Core.Tests.Modules.Metadata
                     "root/a/b/2.txt",
                     "root/a/3.txt",
                     "root/a/1.txt");
-                Tree tree = new Tree();
+                CreateTree tree = new CreateTree();
 
                 // When
                 IReadOnlyList<TestDocument> results = await ExecuteAsync(inputs, tree);

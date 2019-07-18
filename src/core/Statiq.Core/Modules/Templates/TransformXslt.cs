@@ -17,7 +17,7 @@ namespace Statiq.Core
     /// see the <a href="https://msdn.microsoft.com/en-us/library/system.xml.xsl.xslcompiledtransform.aspx">MSDN documentation</a>.
     /// </remarks>
     /// <category>Templates</category>
-    public class Xslt : IModule
+    public class TransformXslt : IModule
     {
         private readonly DocumentConfig<FilePath> _xsltPath;
         private readonly IModule[] _xsltGeneration;
@@ -28,7 +28,7 @@ namespace Statiq.Core
         /// on the input document.
         /// </summary>
         /// <param name="xsltPath">A delegate that should return a <see cref="FilePath"/> with the XSLT file to use.</param>
-        public Xslt(DocumentConfig<FilePath> xsltPath)
+        public TransformXslt(DocumentConfig<FilePath> xsltPath)
         {
             _xsltPath = xsltPath;
         }
@@ -38,7 +38,7 @@ namespace Statiq.Core
         /// document with the current document as the input to the specified modules.
         /// </summary>
         /// <param name="modules">Modules that should output a single document containing the XSLT template in it's content.</param>
-        public Xslt(params IModule[] modules)
+        public TransformXslt(params IModule[] modules)
         {
             _xsltGeneration = modules;
         }

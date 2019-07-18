@@ -14,7 +14,7 @@ namespace Statiq.Core
     /// the new document. Input documents are ignored.
     /// </summary>
     /// <category>Metadata</category>
-    public class Sql : ReadDataModule<Sql, DataRow>
+    public class ReadSql : ReadDataModule<ReadSql, DataRow>
     {
         private readonly string _connectionString;
         private readonly string _sql;
@@ -24,7 +24,7 @@ namespace Statiq.Core
         /// </summary>
         /// <param name="connectionString">The connection string.</param>
         /// <param name="sql">The SQL query.</param>
-        public Sql(string connectionString, string sql)
+        public ReadSql(string connectionString, string sql)
         {
             if (string.IsNullOrEmpty(connectionString))
             {

@@ -17,7 +17,7 @@ namespace Statiq.Core
     /// the document content and metadata). Using this module can greatly improve performance
     /// on re-execution after making changes in preview mode. In general, caching works best
     /// when there is a one-to-one relationship between input and output documents. Modules
-    /// that aggregate documents into groups such as <see cref="Tree"/> should not be used as
+    /// that aggregate documents into groups such as <see cref="CreateTree"/> should not be used as
     /// child modules of the cache module. Instead they should appear after the cache module
     /// and operate on the cached outputs.
     /// </remarks>
