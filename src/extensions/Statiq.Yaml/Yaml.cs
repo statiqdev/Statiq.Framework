@@ -73,7 +73,7 @@ namespace Statiq.Yaml
                 }
                 if (documentMetadata.Count == 0 && _flatten)
                 {
-                    return new[] { input };
+                    return input.Yield();
                 }
                 return documentMetadata.Select(metadata => input.Clone(metadata));
             });

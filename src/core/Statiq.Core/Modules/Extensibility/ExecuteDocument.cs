@@ -11,7 +11,7 @@ namespace Statiq.Core
     /// <remarks>
     /// This module is very useful for customizing pipeline execution without having to write an entire module.
     /// Returning modules from the delegate is also useful for customizing existing modules based on the
-    /// current set of documents. For example, you can use this module to execute the <see cref="ReplaceContent"/> module
+    /// current set of documents. For example, you can use this module to execute the <see cref="ReplaceInContent"/> module
     /// with customized search strings based on the results of other pipelines.
     /// </remarks>
     /// <category>Extensibility</category>
@@ -42,10 +42,10 @@ namespace Statiq.Core
                     object documentResult = await execute.GetValueAsync(input, context);
                     if (documentResult == null)
                     {
-                        return new[] { input };
+                        return input.Yield();
                     }
                     return GetDocuments(documentResult)
-                        ?? await ExecuteModulesAsync(documentResult, context, new[] { input })
+                        ?? await ExecuteModulesAsync(documentResult, context, input.Yield())
                         ?? await ChangeContentAsync(documentResult, context, input);
                 }
             })

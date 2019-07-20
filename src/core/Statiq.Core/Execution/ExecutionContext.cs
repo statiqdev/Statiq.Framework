@@ -122,7 +122,7 @@ namespace Statiq.Core
         }
 
         /// <inheritdoc/>
-        public async Task<ImmutableArray<IDocument>> ExecuteAsync(IEnumerable<IModule> modules, IEnumerable<IDocument> inputs) =>
+        public async Task<IReadOnlyList<IDocument>> ExecuteAsync(IEnumerable<IModule> modules, IEnumerable<IDocument> inputs) =>
             await Engine.ExecuteAsync(this, modules, inputs?.ToImmutableArray() ?? ImmutableArray<IDocument>.Empty);
 
         /// <inheritdoc/>

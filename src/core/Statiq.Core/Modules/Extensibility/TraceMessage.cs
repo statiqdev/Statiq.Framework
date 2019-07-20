@@ -1,4 +1,5 @@
-﻿using System.Diagnostics;
+﻿using System.Collections.Generic;
+using System.Diagnostics;
 using System.Threading.Tasks;
 using Statiq.Common;
 
@@ -11,7 +12,7 @@ namespace Statiq.Core
     /// This module has no effect on documents and the input documents are passed through to output documents.
     /// </remarks>
     /// <category>Extensibility</category>
-    public class TraceMessage : ContentModule
+    public class TraceMessage : ConfigModule<string>
     {
         private TraceEventType _traceEventType = TraceEventType.Information;
 
@@ -21,17 +22,7 @@ namespace Statiq.Core
         /// </summary>
         /// <param name="content">A delegate that returns the content to trace.</param>
         public TraceMessage(DocumentConfig<string> content)
-            : base(content)
-        {
-        }
-
-        /// <summary>
-        /// The specified modules are executed against an empty initial document and the
-        /// resulting document content is output to trace.
-        /// </summary>
-        /// <param name="modules">The modules to execute.</param>
-        public TraceMessage(params IModule[] modules)
-            : base(modules)
+            : base(content, false)
         {
         }
 
@@ -46,11 +37,14 @@ namespace Statiq.Core
             return this;
         }
 
-        /// <inheritdoc />
-        protected override Task<IDocument> ExecuteAsync(string content, IDocument input, IExecutionContext context)
+        protected override Task<IEnumerable<IDocument>> ExecuteAsync(
+            IDocument input,
+            IReadOnlyList<IDocument> inputs,
+            IExecutionContext context,
+            string value)
         {
-            Common.Trace.TraceEvent(_traceEventType, content);
-            return Task.FromResult(input);
+            Common.Trace.TraceEvent(_traceEventType, value);
+            return Task.FromResult(input == null ? (IEnumerable<IDocument>)inputs : input.Yield());
         }
     }
 }

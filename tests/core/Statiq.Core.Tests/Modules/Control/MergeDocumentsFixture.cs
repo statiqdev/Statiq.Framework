@@ -35,7 +35,7 @@ namespace Statiq.Core.Tests.Modules.Control
                     new AddMetadata("Content", Config.FromDocument(async doc => await doc.GetStringAsync())));
 
                 // Then
-                CollectionAssert.AreEqual(new[] { "21" }, results.Select(x => x["Content"]));
+                CollectionAssert.AreEqual(new[] { "1121" }, results.Select(x => x["Content"]));
             }
 
             [Test]
@@ -179,10 +179,10 @@ namespace Statiq.Core.Tests.Modules.Control
                 IReadOnlyList<IDocument> results = await ExecuteAsync(a, new MergeDocuments(b));
 
                 // Then
-                Assert.AreEqual(2, a.OutputCount);
-                Assert.AreEqual(1, b.OutputCount);
-                CollectionAssert.AreEqual(new[] { 11, 12 }, results.Select(x => x["A"]));
-                CollectionAssert.AreEqual(new[] { 21, 21 }, results.Select(x => x["B"]));
+                a.OutputCount.ShouldBe(2);
+                b.OutputCount.ShouldBe(2);
+                results.Select(x => x["A"]).ShouldBe(new object[] { 11, 12, 11, 12 });
+                results.Select(x => x["B"]).ShouldBe(new object[] { 21, 22, 21, 22 });
             }
 
             [Test]
@@ -206,10 +206,10 @@ namespace Statiq.Core.Tests.Modules.Control
                 IReadOnlyList<IDocument> results = await ExecuteAsync(a, new MergeDocuments(b));
 
                 // Then
-                Assert.AreEqual(2, a.OutputCount);
-                Assert.AreEqual(2, b.OutputCount);
-                CollectionAssert.AreEqual(new[] { 11, 11, 12, 12 }, results.Select(x => x["A"]));
-                CollectionAssert.AreEqual(new[] { 21, 22, 21, 22 }, results.Select(x => x["B"]));
+                a.OutputCount.ShouldBe(2);
+                b.OutputCount.ShouldBe(4);
+                results.Select(x => x["A"]).ShouldBe(new object[] { 11, 11, 12, 12, 11, 11, 12, 12 });
+                results.Select(x => x["B"]).ShouldBe(new object[] { 21, 22, 23, 24, 21, 22, 23, 24 });
             }
 
             [Test]
@@ -233,7 +233,7 @@ namespace Statiq.Core.Tests.Modules.Control
                 };
 
                 // When
-                IReadOnlyList<IDocument> results = await ExecuteAsync(a, new MergeDocuments(b).WithInputDocuments(), c);
+                IReadOnlyList<IDocument> results = await ExecuteAsync(a, new MergeDocuments(b), c);
 
                 // Then
                 Assert.AreEqual(1, a.ExecuteCount);

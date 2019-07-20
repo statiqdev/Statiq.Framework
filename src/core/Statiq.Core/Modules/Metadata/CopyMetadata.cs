@@ -79,11 +79,11 @@ namespace Statiq.Core
                         existingValue = _execute.Invoke(existingValue.ToString());
                     }
 
-                    return new[] { input.Clone(new[] { new KeyValuePair<string, object>(_toKey, existingValue) }) };
+                    return input.Clone(new[] { new KeyValuePair<string, object>(_toKey, existingValue) }).Yield();
                 }
                 else
                 {
-                    return new[] { input };
+                    return input.Yield();
                 }
             }
         }

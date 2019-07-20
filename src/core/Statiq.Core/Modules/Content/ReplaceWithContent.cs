@@ -1,4 +1,5 @@
-﻿using System.Text.RegularExpressions;
+﻿using System.Collections.Generic;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Statiq.Common;
 
@@ -12,7 +13,7 @@ namespace Statiq.Core
     /// template substitution.
     /// </remarks>
     /// <category>Content</category>
-    public class ReplaceWithContent : ContentModule
+    public class ReplaceWithContent : ConfigModule<string>
     {
         private readonly string _search;
         private bool _isRegex;
@@ -27,21 +28,7 @@ namespace Statiq.Core
         /// <param name="content">A delegate that returns the content within which
         /// to search for the search string.</param>
         public ReplaceWithContent(string search, DocumentConfig<string> content)
-            : base(content)
-        {
-            _search = search;
-        }
-
-        /// <summary>
-        /// The specified modules are executed against an empty initial document and all
-        /// occurrences of the search string in the resulting document content are replaced by the content of
-        /// each input document (possibly creating more than one output document for each input document).
-        /// </summary>
-        /// <param name="search">The string to search for.</param>
-        /// <param name="modules">Modules that output the content within which
-        /// to search for the search string.</param>
-        public ReplaceWithContent(string search, params IModule[] modules)
-            : base(modules)
+            : base(content, true)
         {
             _search = search;
         }
@@ -60,25 +47,29 @@ namespace Statiq.Core
         }
 
         /// <inheritdoc />
-        protected override async Task<IDocument> ExecuteAsync(string content, IDocument input, IExecutionContext context)
+        protected override async Task<IEnumerable<IDocument>> ExecuteAsync(
+            IDocument input,
+            IReadOnlyList<IDocument> inputs,
+            IExecutionContext context,
+            string value)
         {
             if (input == null)
             {
                 return null;
             }
-            if (content == null)
+            if (value == null)
             {
-                content = string.Empty;
+                value = string.Empty;
             }
             if (string.IsNullOrEmpty(_search))
             {
-                return input.Clone(await context.GetContentProviderAsync(content));
+                return input.Clone(await context.GetContentProviderAsync(value)).Yield();
             }
             string inputContent = await input.GetStringAsync();
             string replaced = _isRegex
-                ? Regex.Replace(inputContent, _search, content, _regexOptions)
-                : content.Replace(_search, inputContent);
-            return input.Clone(await context.GetContentProviderAsync(replaced));
+                ? Regex.Replace(inputContent, _search, value, _regexOptions)
+                : value.Replace(_search, inputContent);
+            return input.Clone(await context.GetContentProviderAsync(replaced)).Yield();
         }
     }
 }

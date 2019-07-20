@@ -129,7 +129,7 @@ namespace Statiq.Testing
             };
 
         /// <inheritdoc/>
-        public async Task<ImmutableArray<IDocument>> ExecuteAsync(IEnumerable<IModule> modules, IEnumerable<IDocument> inputs)
+        public async Task<IReadOnlyList<IDocument>> ExecuteAsync(IEnumerable<IModule> modules, IEnumerable<IDocument> inputs)
         {
             if (modules == null)
             {

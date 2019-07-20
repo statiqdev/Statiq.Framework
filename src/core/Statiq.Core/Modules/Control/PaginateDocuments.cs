@@ -64,17 +64,6 @@ namespace Statiq.Core
         /// <param name="pageSize">The number of documents on each page.</param>
         /// <param name="modules">The modules to execute to get the documents to page.</param>
         public PaginateDocuments(int pageSize, params IModule[] modules)
-            : this(pageSize, (IEnumerable<IModule>)modules)
-        {
-        }
-
-        /// <summary>
-        /// Partitions the result of the specified modules into the specified number of pages. The
-        /// input documents to Paginate are used as the initial input documents to the specified modules.
-        /// </summary>
-        /// <param name="pageSize">The number of documents on each page.</param>
-        /// <param name="modules">The modules to execute to get the documents to page.</param>
-        public PaginateDocuments(int pageSize, IEnumerable<IModule> modules)
             : base(modules)
         {
             if (pageSize <= 0)
@@ -122,7 +111,7 @@ namespace Statiq.Core
         /// Adds the specified metadata to each page index document. This must be performed
         /// within the paginate module. If you attempt to process the page index documents
         /// from the paginate module after execution, it will "disconnect" metadata for
-        /// those documents like <see cref="Keys.NextPage"/> since you're effectivly
+        /// those documents like <see cref="Keys.NextPage"/> since you're effectively
         /// creating new documents and the ones those keys refer to will be outdated.
         /// </summary>
         /// <param name="key">The key of the metadata to add.</param>

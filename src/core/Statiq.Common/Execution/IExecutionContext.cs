@@ -86,7 +86,7 @@ namespace Statiq.Common
         string ApplicationInput { get; }
 
         /// <summary>
-        /// Gets a cancellation token that will be cancelled when processing should stop.
+        /// Gets a cancellation token that will be canceled when processing should stop.
         /// Modules should check this token and pass it on whenever possible.
         /// </summary>
         CancellationToken CancellationToken { get; }
@@ -122,7 +122,7 @@ namespace Statiq.Common
         /// <param name="modules">The modules to execute.</param>
         /// <param name="inputs">The input documents.</param>
         /// <returns>The result documents from the executed modules.</returns>
-        Task<ImmutableArray<IDocument>> ExecuteAsync(IEnumerable<IModule> modules, IEnumerable<IDocument> inputs);
+        Task<IReadOnlyList<IDocument>> ExecuteAsync(IEnumerable<IModule> modules, IEnumerable<IDocument> inputs);
 
         /// <summary>
         /// Gets a new <see cref="IJavaScriptEnginePool"/>. The returned engine pool should be disposed

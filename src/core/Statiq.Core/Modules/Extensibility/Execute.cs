@@ -12,7 +12,7 @@ namespace Statiq.Core
     /// <remarks>
     /// This module is very useful for customizing pipeline execution without having to write an entire module.
     /// Returning modules from the delegate is also useful for customizing existing modules based on the
-    /// current set of documents. For example, you can use this module to execute the <see cref="ReplaceContent"/> module
+    /// current set of documents. For example, you can use this module to execute the <see cref="ReplaceInContent"/> module
     /// with customized search strings based on the results of other pipelines.
     /// </remarks>
     /// <category>Extensibility</category>
@@ -65,7 +65,7 @@ namespace Statiq.Core
         public Task<IEnumerable<IDocument>> ExecuteAsync(IReadOnlyList<IDocument> inputs, IExecutionContext context) => _execute(inputs, context);
 
         protected static IEnumerable<IDocument> GetDocuments(object result) =>
-            result is IDocument document ? new[] { document } : result as IEnumerable<IDocument>;
+            result is IDocument document ? document.Yield() : result as IEnumerable<IDocument>;
 
         protected static async Task<IEnumerable<IDocument>> ExecuteModulesAsync(object results, IExecutionContext context, IEnumerable<IDocument> inputs)
         {
@@ -75,7 +75,7 @@ namespace Statiq.Core
         }
 
         protected static async Task<IEnumerable<IDocument>> ChangeContentAsync(object result, IExecutionContext context, IDocument document) =>
-            new[] { document.Clone(await GetContentProviderAsync(result, context)) };
+            document.Clone(await GetContentProviderAsync(result, context)).Yield();
 
         private static async Task<IContentProvider> GetContentProviderAsync(object content, IExecutionContext context)
         {

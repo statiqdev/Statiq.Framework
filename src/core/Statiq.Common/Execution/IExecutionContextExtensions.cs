@@ -13,11 +13,11 @@ namespace Statiq.Common
         /// <param name="modules">The modules to execute.</param>
         /// <param name="metadata">The metadata to use.</param>
         /// <returns>The result documents from the executed modules.</returns>
-        public static async Task<ImmutableArray<IDocument>> ExecuteAsync(
+        public static async Task<IReadOnlyList<IDocument>> ExecuteAsync(
             this IExecutionContext context,
             IEnumerable<IModule> modules,
             IEnumerable<KeyValuePair<string, object>> metadata) =>
-            await context.ExecuteAsync(modules, new[] { context.CreateDocument(metadata) });
+            await context.ExecuteAsync(modules, context.CreateDocument(metadata).Yield());
 
         /// <summary>
         /// Executes the specified modules without an initial input document and returns the result documents.
@@ -25,7 +25,7 @@ namespace Statiq.Common
         /// <param name="context">The execution context.</param>
         /// <param name="modules">The modules to execute.</param>
         /// <returns>The result documents from the executed modules.</returns>
-        public static async Task<ImmutableArray<IDocument>> ExecuteAsync(
+        public static async Task<IReadOnlyList<IDocument>> ExecuteAsync(
             this IExecutionContext context,
             IEnumerable<IModule> modules) =>
             await context.ExecuteAsync(modules, (IEnumerable<IDocument>)null);

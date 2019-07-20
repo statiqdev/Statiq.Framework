@@ -29,7 +29,7 @@ namespace Statiq.Core
                         input,
                         await context.GetContentProviderAsync(await result.GetStringAsync() + await input.GetStringAsync()));
             });
-            return new[] { result };
+            return result.Yield();
         }
     }
 }

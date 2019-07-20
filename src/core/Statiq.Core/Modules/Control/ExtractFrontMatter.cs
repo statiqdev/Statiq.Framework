@@ -30,15 +30,6 @@ namespace Statiq.Core
         /// </summary>
         /// <param name="modules">The modules to execute against the front matter.</param>
         public ExtractFrontMatter(params IModule[] modules)
-            : this((IEnumerable<IModule>)modules)
-        {
-        }
-
-        /// <summary>
-        /// Uses the default delimiter character and passes any front matter to the specified child modules for processing.
-        /// </summary>
-        /// <param name="modules">The modules to execute against the front matter.</param>
-        public ExtractFrontMatter(IEnumerable<IModule> modules)
             : base(modules)
         {
             _delimiter = "-";
@@ -51,16 +42,6 @@ namespace Statiq.Core
         /// <param name="delimiter">The delimiter to use.</param>
         /// <param name="modules">The modules to execute against the front matter.</param>
         public ExtractFrontMatter(string delimiter, params IModule[] modules)
-            : this(delimiter, (IEnumerable<IModule>)modules)
-        {
-        }
-
-        /// <summary>
-        /// Uses the specified delimiter string and passes any front matter to the specified child modules for processing.
-        /// </summary>
-        /// <param name="delimiter">The delimiter to use.</param>
-        /// <param name="modules">The modules to execute against the front matter.</param>
-        public ExtractFrontMatter(string delimiter, IEnumerable<IModule> modules)
             : base(modules)
         {
             _delimiter = delimiter;
@@ -73,16 +54,6 @@ namespace Statiq.Core
         /// <param name="delimiter">The delimiter to use.</param>
         /// <param name="modules">The modules to execute against the front matter.</param>
         public ExtractFrontMatter(char delimiter, params IModule[] modules)
-            : this(delimiter, (IEnumerable<IModule>)modules)
-        {
-        }
-
-        /// <summary>
-        /// Uses the specified delimiter character and passes any front matter to the specified child modules for processing.
-        /// </summary>
-        /// <param name="delimiter">The delimiter to use.</param>
-        /// <param name="modules">The modules to execute against the front matter.</param>
-        public ExtractFrontMatter(char delimiter, IEnumerable<IModule> modules)
             : base(modules)
         {
             _delimiter = new string(delimiter, 1);
@@ -129,7 +100,7 @@ namespace Statiq.Core
                     string frontMatter = string.Join("\n", inputLines.Skip(startLine).Take(delimiterLine - startLine)) + "\n";
                     inputLines.RemoveRange(0, delimiterLine + 1);
                     string content = string.Join("\n", inputLines);
-                    foreach (IDocument result in await context.ExecuteAsync(Children, new[] { input.Clone(await context.GetContentProviderAsync(frontMatter)) }))
+                    foreach (IDocument result in await context.ExecuteAsync(Children, input.Clone(await context.GetContentProviderAsync(frontMatter)).Yield()))
                     {
                         results.Add(result.Clone(await context.GetContentProviderAsync(content)));
                     }

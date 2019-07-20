@@ -199,7 +199,7 @@ namespace Statiq.Sass
                     return new[] { cssDocument, sourceMapDocument };
                 }
 
-                return new[] { cssDocument };
+                return cssDocument.Yield();
             }
         }
 

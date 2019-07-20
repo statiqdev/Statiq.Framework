@@ -189,7 +189,7 @@ namespace Statiq.Html
                 IHtmlDocument htmlDocument = await input.ParseHtmlAsync(parser);
                 if (htmlDocument == null)
                 {
-                    return new[] { input };
+                    return input.Yield();
                 }
 
                 // Evaluate the query selector
@@ -243,12 +243,12 @@ namespace Statiq.Html
                             return documents;
                         }
                     }
-                    return new[] { input };
+                    return input.Yield();
                 }
                 catch (Exception ex)
                 {
                     Trace.Warning("Exception while processing HTML for {0}: {1}", input.Source.ToDisplayString(), ex.Message);
-                    return new[] { input };
+                    return input.Yield();
                 }
             }
         }

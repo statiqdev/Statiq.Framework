@@ -33,7 +33,7 @@ namespace Statiq.Core.Tests.Modules.Control
                 };
 
                 // When
-                IReadOnlyList<IDocument> results = await ExecuteAsync(a, new ConcatDocuments(b).WithInputDocuments(), c);
+                IReadOnlyList<IDocument> results = await ExecuteAsync(a, new ConcatDocuments(b), c);
 
                 // Then
                 Assert.AreEqual(1, a.ExecuteCount);

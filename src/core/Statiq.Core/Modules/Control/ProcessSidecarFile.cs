@@ -27,16 +27,6 @@ namespace Statiq.Core
         /// </summary>
         /// <param name="modules">The modules to execute against the sidecar file.</param>
         public ProcessSidecarFile(params IModule[] modules)
-            : this(".meta", (IEnumerable<IModule>)modules)
-        {
-        }
-
-        /// <summary>
-        /// Searches for sidecar files at the same path as the input document SourceFilePath with the additional extension .meta.
-        /// If a sidecar file is found, it's content is passed to the specified child modules for processing.
-        /// </summary>
-        /// <param name="modules">The modules to execute against the sidecar file.</param>
-        public ProcessSidecarFile(IEnumerable<IModule> modules)
             : this(".meta", modules)
         {
         }
@@ -48,17 +38,6 @@ namespace Statiq.Core
         /// <param name="extension">The extension to search.</param>
         /// <param name="modules">The modules to execute against the sidecar file.</param>
         public ProcessSidecarFile(string extension, params IModule[] modules)
-            : this(extension, (IEnumerable<IModule>)modules)
-        {
-        }
-
-        /// <summary>
-        /// Searches for sidecar files at the same path as the input document SourceFilePath with the specified additional extension.
-        /// If a sidecar file is found, it's content is passed to the specified child modules for processing.
-        /// </summary>
-        /// <param name="extension">The extension to search.</param>
-        /// <param name="modules">The modules to execute against the sidecar file.</param>
-        public ProcessSidecarFile(string extension, IEnumerable<IModule> modules)
             : base(modules)
         {
             if (string.IsNullOrEmpty(extension))
@@ -76,17 +55,6 @@ namespace Statiq.Core
         /// <param name="sidecarPath">A delegate that returns a <see cref="FilePath"/> with the desired sidecar path.</param>
         /// <param name="modules">The modules to execute against the sidecar file.</param>
         public ProcessSidecarFile(DocumentConfig<FilePath> sidecarPath, params IModule[] modules)
-            : this(sidecarPath, (IEnumerable<IModule>)modules)
-        {
-        }
-
-        /// <summary>
-        /// Uses a delegate to describe where to find the sidecar file for each input document.
-        /// If a sidecar file is found, it's content is passed to the specified child modules for processing.
-        /// </summary>
-        /// <param name="sidecarPath">A delegate that returns a <see cref="FilePath"/> with the desired sidecar path.</param>
-        /// <param name="modules">The modules to execute against the sidecar file.</param>
-        public ProcessSidecarFile(DocumentConfig<FilePath> sidecarPath, IEnumerable<IModule> modules)
             : base(modules)
         {
             _sidecarPath = sidecarPath ?? throw new ArgumentNullException(nameof(sidecarPath));
@@ -105,7 +73,7 @@ namespace Statiq.Core
                     if (await sidecarFile.GetExistsAsync())
                     {
                         string sidecarContent = await sidecarFile.ReadAllTextAsync();
-                        foreach (IDocument result in await context.ExecuteAsync(Children, new[] { input.Clone(await context.GetContentProviderAsync(sidecarContent)) }))
+                        foreach (IDocument result in await context.ExecuteAsync(Children, input.Clone(await context.GetContentProviderAsync(sidecarContent)).Yield()))
                         {
                             results.Add(input.Clone(result));
                         }

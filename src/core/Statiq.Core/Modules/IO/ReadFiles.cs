@@ -19,9 +19,8 @@ namespace Statiq.Core
     /// to the same relative path in the output folder).
     /// </remarks>
     /// <category>Input/Output</category>
-    public class ReadFiles : IModule
+    public class ReadFiles : ConfigModule<IEnumerable<string>>
     {
-        private readonly DocumentConfig<IEnumerable<string>> _patterns;
         private Func<IFile, Task<bool>> _predicate = null;
 
         /// <summary>
@@ -30,8 +29,8 @@ namespace Statiq.Core
         /// </summary>
         /// <param name="patterns">A delegate that returns one or more globbing patterns and/or absolute paths.</param>
         public ReadFiles(DocumentConfig<IEnumerable<string>> patterns)
+            : base(patterns, false)
         {
-            _patterns = patterns ?? throw new ArgumentNullException(nameof(patterns));
         }
 
         /// <summary>
@@ -39,7 +38,7 @@ namespace Statiq.Core
         /// </summary>
         /// <param name="patterns">The globbing patterns and/or absolute paths to read.</param>
         public ReadFiles(params string[] patterns)
-            : this((DocumentConfig<IEnumerable<string>>)(patterns ?? throw new ArgumentNullException(nameof(patterns))))
+            : base((DocumentConfig<IEnumerable<string>>)(patterns ?? throw new ArgumentNullException(nameof(patterns))), false)
         {
         }
 
@@ -55,27 +54,20 @@ namespace Statiq.Core
             return this;
         }
 
-        /// <inheritdoc />
-        public async Task<IEnumerable<IDocument>> ExecuteAsync(IReadOnlyList<IDocument> inputs, IExecutionContext context)
+        protected override async Task<IEnumerable<IDocument>> ExecuteAsync(
+            IDocument input,
+            IReadOnlyList<IDocument> inputs,
+            IExecutionContext context,
+            IEnumerable<string> value)
         {
-            return _patterns.RequiresDocument
-                ? await inputs.ParallelSelectManyAsync(context, async input =>
-                    await ExecuteAsync(input, await _patterns.GetValueAsync(input, context), context))
-                : await ExecuteAsync(null, await _patterns.GetValueAsync(null, context), context);
-        }
-
-        private async Task<IEnumerable<IDocument>> ExecuteAsync(IDocument input, IEnumerable<string> patterns, IExecutionContext context)
-        {
-            if (patterns != null)
+            if (value != null)
             {
-                IEnumerable<IFile> files = await context.FileSystem.GetInputFilesAsync(patterns);
+                IEnumerable<IFile> files = await context.FileSystem.GetInputFilesAsync(value);
                 files = await files.ParallelWhereAsync(async file => _predicate == null || await _predicate(file));
                 return files.AsParallel().Select(file =>
                 {
                     Trace.Verbose($"Read file {file.Path.FullPath}");
-                    return input == null
-                        ? context.CreateDocument(file.Path, file.Path.GetRelativeInputPath(context), context.GetContentProvider(file))
-                        : input.Clone(file.Path, file.Path.GetRelativeInputPath(context), context.GetContentProvider(file));
+                    return context.CloneOrCreateDocument(input, file.Path, file.Path.GetRelativeInputPath(context), context.GetContentProvider(file));
                 });
             }
             return Array.Empty<IDocument>();

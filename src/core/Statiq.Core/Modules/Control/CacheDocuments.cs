@@ -29,11 +29,6 @@ namespace Statiq.Core
         private Dictionary<FilePath, CacheEntry> _cache = null;
 
         public CacheDocuments(params IModule[] modules)
-            : this((IEnumerable<IModule>)modules)
-        {
-        }
-
-        public CacheDocuments(IEnumerable<IModule> modules)
             : base(modules)
         {
         }
@@ -125,7 +120,7 @@ namespace Statiq.Core
             }
 
             // Execute misses
-            ImmutableArray<IDocument> results = misses.Count == 0
+            IReadOnlyList<IDocument> results = misses.Count == 0
                 ? ImmutableArray<IDocument>.Empty
                 : await context.ExecuteAsync(Children, misses);
             Dictionary<FilePath, IGrouping<FilePath, IDocument>> resultsBySource =

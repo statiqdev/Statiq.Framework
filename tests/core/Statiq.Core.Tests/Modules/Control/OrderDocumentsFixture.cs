@@ -27,7 +27,10 @@ namespace Statiq.Core.Tests.Modules.Control
                     AdditionalOutputs = 2,
                     EnsureInputDocument = true
                 };
-                ConcatDocuments concat = new ConcatDocuments(count2);
+                ConcatDocuments concat = new ConcatDocuments
+                {
+                    count2
+                };
                 OrderDocuments orderBy = new OrderDocuments(Config.FromDocument<int>("A"));
                 Execute gatherData = new ExecuteDocument(
                     Config.FromDocument(async d =>
@@ -40,8 +43,8 @@ namespace Statiq.Core.Tests.Modules.Control
                 await ExecuteAsync(count, concat, orderBy, gatherData);
 
                 // Then
-                Assert.AreEqual(8, content.Count);
-                CollectionAssert.AreEqual(new[] { "1", "1", "2", "2", "3", "3", "4", "5" }, content);
+                content.Count.ShouldBe(20);
+                content.ShouldBe(new[] { "1", "11", "2", "12", "3", "13", "4", "24", "5", "25", "26", "37", "38", "39", "410", "411", "412", "513", "514", "515" });
             }
 
             [Test]
@@ -72,8 +75,8 @@ namespace Statiq.Core.Tests.Modules.Control
                 await ExecuteAsync(count, concat, orderBy, gatherData);
 
                 // Then
-                Assert.AreEqual(8, content.Count);
-                CollectionAssert.AreEqual(new[] { "5", "4", "3", "3", "2", "2", "1", "1" }, content);
+                content.Count.ShouldBe(20);
+                content.ShouldBe(new[] { "515", "514", "513", "412", "411", "410", "39", "38", "37", "26", "5", "25", "4", "24", "3", "13", "2", "12", "1", "11" });
             }
 
             [Test]

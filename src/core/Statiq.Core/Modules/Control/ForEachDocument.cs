@@ -46,15 +46,6 @@ namespace Statiq.Core
         /// </summary>
         /// <param name="modules">The modules to execute.</param>
         public ForEachDocument(params IModule[] modules)
-            : this((IEnumerable<IModule>)modules)
-        {
-        }
-
-        /// <summary>
-        /// Specifies the modules to execute against the input document one at a time.
-        /// </summary>
-        /// <param name="modules">The modules to execute.</param>
-        public ForEachDocument(IEnumerable<IModule> modules)
             : base(modules)
         {
         }
@@ -62,7 +53,7 @@ namespace Statiq.Core
         /// <inheritdoc />
         public override async Task<IEnumerable<IDocument>> ExecuteAsync(IReadOnlyList<IDocument> inputs, IExecutionContext context)
         {
-            return await inputs.SelectManyAsync<IDocument>(context, async x => await context.ExecuteAsync(Children, new[] { x }));
+            return await inputs.SelectManyAsync<IDocument>(context, async x => await context.ExecuteAsync(Children, x.Yield()));
         }
     }
 }

@@ -147,7 +147,7 @@ namespace Statiq.Common
         }
 
         /// <summary>
-        /// Recursivly flattens metadata that contains a document or documents.
+        /// Recursively flattens metadata that contains a document or documents.
         /// </summary>
         /// <param name="document">The parent document to flatten.</param>
         /// <param name="results">A set containing all nested documents in metadata including the parent document.</param>
@@ -188,6 +188,18 @@ namespace Statiq.Common
                     }
                 }
             }
+        }
+
+        /// <summary>
+        /// Returns a document enumerable given a single document. This is just a convenience
+        /// method for converting a single document into an <see cref="IEnumerable{T}"/>.
+        /// </summary>
+        /// <param name="document">The document to return.</param>
+        /// <returns>A document enumerable.</returns>
+        public static IEnumerable<T> Yield<T>(this T document)
+            where T : IDocument
+        {
+            yield return document;
         }
     }
 }

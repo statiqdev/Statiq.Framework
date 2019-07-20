@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Statiq.Common;
@@ -9,7 +10,7 @@ namespace Statiq.Core
     /// Replaces a search string in the content of each input document with new content.
     /// </summary>
     /// <category>Content</category>
-    public class ReplaceContent : ContentModule
+    public class ReplaceInContent : ConfigModule<string>
     {
         private readonly string _search;
         private readonly Func<Match, IDocument, string> _contentFinder;
@@ -23,21 +24,8 @@ namespace Statiq.Core
         /// </summary>
         /// <param name="search">The string to search for.</param>
         /// <param name="content">A delegate that returns the content to replace the search string with.</param>
-        public ReplaceContent(string search, DocumentConfig<string> content)
-            : base(content)
-        {
-            _search = search;
-        }
-
-        /// <summary>
-        /// The specified modules are executed against an empty initial document and the resulting
-        /// document content replaces all occurrences of the search string in every input document
-        /// (possibly creating more than one output document for each input document).
-        /// </summary>
-        /// <param name="search">The string to search for.</param>
-        /// <param name="modules">Modules that output the content to replace the search string with.</param>
-        public ReplaceContent(string search, params IModule[] modules)
-            : base(modules)
+        public ReplaceInContent(string search, DocumentConfig<string> content)
+            : base(content, true)
         {
             _search = search;
         }
@@ -49,8 +37,8 @@ namespace Statiq.Core
         /// </summary>
         /// <param name="search">The string to search for (interpreted as a regular expression).</param>
         /// <param name="contentFinder">A delegate that returns the content to replace the match.</param>
-        public ReplaceContent(string search, Func<Match, string> contentFinder)
-            : base(null as string)
+        public ReplaceInContent(string search, Func<Match, string> contentFinder)
+            : base(null as string, true)
         {
             _search = search;
             _contentFinder = (match, _) => contentFinder(match);
@@ -64,8 +52,8 @@ namespace Statiq.Core
         /// </summary>
         /// <param name="search">The string to search for (interpreted as a regular expression).</param>
         /// <param name="contentFinder">A delegate that returns the content to replace the match.</param>
-        public ReplaceContent(string search, Func<Match, IDocument, string> contentFinder)
-            : base(null as string)
+        public ReplaceInContent(string search, Func<Match, IDocument, string> contentFinder)
+            : base(null as string, true)
         {
             _search = search;
             _contentFinder = contentFinder;
@@ -78,7 +66,7 @@ namespace Statiq.Core
         /// </summary>
         /// <param name="regexOptions">The options to use (if any).</param>
         /// <returns>The current module instance.</returns>
-        public ReplaceContent IsRegex(RegexOptions regexOptions = RegexOptions.None)
+        public ReplaceInContent IsRegex(RegexOptions regexOptions = RegexOptions.None)
         {
             _isRegex = true;
             _regexOptions = regexOptions;
@@ -86,19 +74,23 @@ namespace Statiq.Core
         }
 
         /// <inheritdoc />
-        protected override async Task<IDocument> ExecuteAsync(string content, IDocument input, IExecutionContext context)
+        protected override async Task<IEnumerable<IDocument>> ExecuteAsync(
+            IDocument input,
+            IReadOnlyList<IDocument> inputs,
+            IExecutionContext context,
+            string value)
         {
             if (input == null)
             {
                 return null;
             }
-            if (content == null)
+            if (value == null)
             {
-                content = string.Empty;
+                value = string.Empty;
             }
             if (string.IsNullOrEmpty(_search))
             {
-                return input;
+                return input.Yield();
             }
             string currentDocumentContent = await input.GetStringAsync();
             if (_contentFinder != null)
@@ -108,12 +100,17 @@ namespace Statiq.Core
                     _search,
                     match => _contentFinder(match, input)?.ToString() ?? string.Empty,
                     _regexOptions);
-                return currentDocumentContent == newDocumentContent ? input : input.Clone(await context.GetContentProviderAsync(newDocumentContent));
+                return new[]
+                {
+                    currentDocumentContent == newDocumentContent
+                        ? input
+                        : input.Clone(await context.GetContentProviderAsync(newDocumentContent))
+                };
             }
             string replaced = _isRegex
-                ? Regex.Replace(currentDocumentContent, _search, content, _regexOptions)
-                : currentDocumentContent.Replace(_search, content);
-            return input.Clone(await context.GetContentProviderAsync(replaced));
+                ? Regex.Replace(currentDocumentContent, _search, value, _regexOptions)
+                : currentDocumentContent.Replace(_search, value);
+            return input.Clone(await context.GetContentProviderAsync(replaced)).Yield();
         }
     }
 }

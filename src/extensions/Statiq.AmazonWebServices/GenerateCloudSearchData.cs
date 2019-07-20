@@ -151,7 +151,7 @@ namespace Statiq.AmazonWebServices
                     writer.WriteEndArray();
                     textWriter.Flush();
 
-                    return new[] { context.CreateDocument(context.GetContentProvider(contentStream)) };
+                    return context.CreateDocument(context.GetContentProvider(contentStream)).Yield();
                 }
             }
         }

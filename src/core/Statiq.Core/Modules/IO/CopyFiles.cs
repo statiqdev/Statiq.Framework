@@ -15,9 +15,8 @@ namespace Statiq.Core
     /// representing the files copied by the module. Note that the input documents are not output by this module.
     /// </remarks>
     /// <category>Input/Output</category>
-    public class CopyFiles : IModule
+    public class CopyFiles : ConfigModule<IEnumerable<string>>
     {
-        private readonly DocumentConfig<IEnumerable<string>> _patterns;
         private Func<IFile, IFile, Task<FilePath>> _destinationPath;
         private Func<IFile, Task<bool>> _predicate = null;
 
@@ -30,8 +29,8 @@ namespace Statiq.Core
         /// </summary>
         /// <param name="patterns">A delegate that returns one or more globbing patterns and/or absolute paths.</param>
         public CopyFiles(DocumentConfig<IEnumerable<string>> patterns)
+            : base(patterns, false)
         {
-            _patterns = patterns ?? throw new ArgumentNullException(nameof(patterns));
         }
 
         /// <summary>
@@ -42,7 +41,7 @@ namespace Statiq.Core
         /// </summary>
         /// <param name="patterns">The globbing patterns and/or absolute paths to read.</param>
         public CopyFiles(params string[] patterns)
-            : this((DocumentConfig<IEnumerable<string>>)(patterns ?? throw new ArgumentNullException(nameof(patterns))))
+            : base((DocumentConfig<IEnumerable<string>>)(patterns ?? throw new ArgumentNullException(nameof(patterns))), false)
         {
         }
 
@@ -96,20 +95,15 @@ namespace Statiq.Core
             return this;
         }
 
-        /// <inheritdoc />
-        public async Task<IEnumerable<IDocument>> ExecuteAsync(IReadOnlyList<IDocument> inputs, IExecutionContext context)
+        protected override async Task<IEnumerable<IDocument>> ExecuteAsync(
+            IDocument input,
+            IReadOnlyList<IDocument> inputs,
+            IExecutionContext context,
+            IEnumerable<string> value)
         {
-            return _patterns.RequiresDocument
-                ? await inputs.ParallelSelectManyAsync(context, async input =>
-                    await ExecuteAsync(input, await _patterns.GetValueAsync(input, context), context))
-                : await ExecuteAsync(null, await _patterns.GetValueAsync(null, context), context);
-        }
-
-        private async Task<IEnumerable<IDocument>> ExecuteAsync(IDocument input, IEnumerable<string> patterns, IExecutionContext context)
-        {
-            if (patterns != null)
+            if (value != null)
             {
-                IEnumerable<IFile> inputFiles = await context.FileSystem.GetInputFilesAsync(patterns);
+                IEnumerable<IFile> inputFiles = await context.FileSystem.GetInputFilesAsync(value);
                 inputFiles = await inputFiles.WhereAsync(async x => _predicate == null || await _predicate(x));
                 return (await inputFiles.SelectAsync(async file =>
                 {
@@ -130,9 +124,7 @@ namespace Statiq.Core
                         Trace.Verbose("Copied file {0} to {1}", file.Path.FullPath, destination.Path.FullPath);
 
                         // Return the document
-                        return input == null
-                            ? context.CreateDocument(file.Path, relativePath, context.GetContentProvider(file))
-                            : input.Clone(file.Path, relativePath, context.GetContentProvider(file));
+                        return context.CloneOrCreateDocument(input, file.Path, relativePath, context.GetContentProvider(file));
                     }
                     catch (Exception ex)
                     {

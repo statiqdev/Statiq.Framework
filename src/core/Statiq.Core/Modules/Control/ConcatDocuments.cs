@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using Statiq.Common;
 
 namespace Statiq.Core
@@ -11,8 +12,13 @@ namespace Statiq.Core
     /// The resulting documents of this module are concatenated after the
     /// input documents and both are output.
     /// </remarks>
-    public class ConcatDocuments : DocumentModule<ConcatDocuments>
+    /// <category>Control</category>
+    public class ConcatDocuments : DocumentModule
     {
+        public ConcatDocuments()
+        {
+        }
+
         /// <inheritdoc />
         public ConcatDocuments(params IModule[] modules)
             : base(modules)
@@ -20,29 +26,14 @@ namespace Statiq.Core
         }
 
         /// <inheritdoc />
-        public ConcatDocuments(IEnumerable<IModule> modules)
-            : base(modules)
-        {
-        }
-
-        /// <inheritdoc />
         public ConcatDocuments(params string[] pipelines)
-            : base(pipelines)
+            : base(new GetDocuments(pipelines))
         {
         }
 
-        /// <inheritdoc />
-        public ConcatDocuments(IEnumerable<string> pipelines)
-            : base(pipelines)
-        {
-        }
-
-        /// <inheritdoc />
-        public ConcatDocuments(DocumentConfig<IEnumerable<IDocument>> documents)
-            : base(documents)
-        {
-        }
-
-        protected override IEnumerable<IDocument> GetOutputDocuments(IEnumerable<IDocument> inputs, IEnumerable<IDocument> results) => inputs.Concat(results);
+        protected override Task<IEnumerable<IDocument>> GetOutputDocumentsAsync(
+            IReadOnlyList<IDocument> inputs,
+            IReadOnlyList<IDocument> childOutputs) =>
+            Task.FromResult(inputs.Concat(childOutputs));
     }
 }

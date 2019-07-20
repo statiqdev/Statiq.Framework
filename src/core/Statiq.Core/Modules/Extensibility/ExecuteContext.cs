@@ -10,7 +10,7 @@ namespace Statiq.Core
     /// <remarks>
     /// This module is very useful for customizing pipeline execution without having to write an entire module.
     /// Returning modules from the delegate is also useful for customizing existing modules based on the
-    /// current set of documents. For example, you can use this module to execute the <see cref="ReplaceContent"/> module
+    /// current set of documents. For example, you can use this module to execute the <see cref="ReplaceInContent"/> module
     /// with customized search strings based on the results of other pipelines.
     /// </remarks>
     /// <category>Extensibility</category>

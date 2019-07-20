@@ -36,16 +36,16 @@ namespace Statiq.CodeAnalysis
                 object result = await ScriptHelper.EvaluateAsync(assembly, input, context);
                 if (result == null)
                 {
-                    return new[] { input };
+                    return input.Yield();
                 }
                 return GetDocuments(result)
-                    ?? await ExecuteModulesAsync(result, context, new[] { input })
+                    ?? await ExecuteModulesAsync(result, context, input.Yield())
                     ?? await ChangeContentAsync(result, context, input);
             }
         }
 
         private static IEnumerable<IDocument> GetDocuments(object result) =>
-            result is IDocument document ? new[] { document } : result as IEnumerable<IDocument>;
+            result is IDocument document ? document.Yield() : result as IEnumerable<IDocument>;
 
         private static async Task<IEnumerable<IDocument>> ExecuteModulesAsync(object results, IExecutionContext context, IEnumerable<IDocument> inputs)
         {
@@ -55,7 +55,7 @@ namespace Statiq.CodeAnalysis
         }
 
         private static async Task<IEnumerable<IDocument>> ChangeContentAsync(object result, IExecutionContext context, IDocument document) =>
-            new[] { document.Clone(await GetContentProviderAsync(result, context)) };
+            document.Clone(await GetContentProviderAsync(result, context)).Yield();
 
         private static async Task<IContentProvider> GetContentProviderAsync(object content, IExecutionContext context)
         {

@@ -67,7 +67,7 @@ namespace Statiq.Core
                 }
                 else if (_xsltGeneration != null)
                 {
-                    IDocument xsltDocument = (await context.ExecuteAsync(_xsltGeneration, new[] { input })).Single();
+                    IDocument xsltDocument = (await context.ExecuteAsync(_xsltGeneration, input.Yield())).Single();
                     using (Stream stream = await xsltDocument.GetStreamAsync())
                     {
                         xslt.Load(XmlReader.Create(stream));
