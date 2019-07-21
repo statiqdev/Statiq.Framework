@@ -5,9 +5,9 @@ namespace Statiq.Core
 {
     public class IfCondition : ModuleList
     {
-        public DocumentConfig<bool> Predicate { get; set; }
+        public Config<bool> Predicate { get; set; }
 
-        internal IfCondition(DocumentConfig<bool> predicate, IEnumerable<IModule> modules)
+        internal IfCondition(Config<bool> predicate, IEnumerable<IModule> modules)
             : base(modules)
         {
             Predicate = predicate;

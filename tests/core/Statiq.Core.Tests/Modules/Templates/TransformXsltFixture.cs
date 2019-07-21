@@ -73,7 +73,7 @@ namespace Statiq.Core.Tests.Modules.Templates
 
                 TestDocument document = new TestDocument(input);
                 IDocument xsltDocument = new TestDocument(xsltInput);
-                IModule module = new ExecuteDocument(new[] { xsltDocument });
+                IModule module = new ExecuteConfig(new[] { xsltDocument });
                 TransformXslt xslt = new TransformXslt(module);
 
                 // When

@@ -24,7 +24,7 @@ namespace Statiq.Core
         public IEnumerator<IDocument> GetEnumerator()
         {
             Check();
-            return GetDocumentsFromDependencies().SelectMany(x => x.Value).Distinct().GetEnumerator();
+            return GetDocumentsFromDependencies().SelectMany(x => x.Value).GetEnumerator();
         }
 
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
@@ -32,19 +32,19 @@ namespace Statiq.Core
         public IReadOnlyDictionary<string, IEnumerable<IDocument>> ByPipeline()
         {
             Check();
-            return GetDocumentsFromDependencies().ToDictionary(x => x.Key, x => x.Value.Distinct());
+            return GetDocumentsFromDependencies().ToDictionary(x => x.Key, x => (IEnumerable<IDocument>)x.Value);
         }
 
         public IEnumerable<IDocument> FromPipeline(string pipeline)
         {
             Check(pipeline);
-            return _documents[pipeline].Distinct();
+            return _documents[pipeline];
         }
 
         public IEnumerable<IDocument> ExceptPipeline(string pipeline)
         {
             Check(pipeline, false);
-            return GetDocumentsFromDependencies().Where(x => x.Key != pipeline).SelectMany(x => x.Value).Distinct();
+            return GetDocumentsFromDependencies().Where(x => x.Key != pipeline).SelectMany(x => x.Value);
         }
 
         public IEnumerable<IDocument> this[string pipline] => FromPipeline(pipline);

@@ -26,7 +26,7 @@ Content1
 Content2")
                 };
                 string frontMatterContent = null;
-                ExtractFrontMatter frontMatter = new ExtractFrontMatter(new ExecuteDocument(Config.FromDocument(async x =>
+                ExtractFrontMatter frontMatter = new ExtractFrontMatter(new ExecuteConfig(Config.FromDocument(async x =>
                 {
                     frontMatterContent = await x.GetStringAsync();
                     return new[] { x };
@@ -62,7 +62,7 @@ Content1
 Content2")
                 };
                 string frontMatterContent = null;
-                ExtractFrontMatter frontMatter = new ExtractFrontMatter(new ExecuteDocument(Config.FromDocument(async x =>
+                ExtractFrontMatter frontMatter = new ExtractFrontMatter(new ExecuteConfig(Config.FromDocument(async x =>
                 {
                     frontMatterContent = await x.GetStringAsync();
                     return new[] { x };
@@ -99,7 +99,7 @@ Content1
 Content2")
                 };
                 string frontMatterContent = null;
-                ExtractFrontMatter frontMatter = new ExtractFrontMatter(new ExecuteDocument(Config.FromDocument(async x =>
+                ExtractFrontMatter frontMatter = new ExtractFrontMatter(new ExecuteConfig(Config.FromDocument(async x =>
                 {
                     frontMatterContent = await x.GetStringAsync();
                     return new[] { x };
@@ -134,7 +134,7 @@ Content1
 Content2")
                 };
                 bool executed = false;
-                ExtractFrontMatter frontMatter = new ExtractFrontMatter("-", new ExecuteDocument(Config.FromDocument(x =>
+                ExtractFrontMatter frontMatter = new ExtractFrontMatter("-", new ExecuteConfig(Config.FromDocument(x =>
                 {
                     executed = true;
                     return new[] { x };
@@ -168,7 +168,7 @@ Content1
 Content2")
                 };
                 string frontMatterContent = null;
-                ExtractFrontMatter frontMatter = new ExtractFrontMatter("ABC", new ExecuteDocument(Config.FromDocument(async x =>
+                ExtractFrontMatter frontMatter = new ExtractFrontMatter("ABC", new ExecuteConfig(Config.FromDocument(async x =>
                 {
                     frontMatterContent = await x.GetStringAsync();
                     return new[] { x };
@@ -202,7 +202,7 @@ Content1
 Content2")
                 };
                 string frontMatterContent = null;
-                ExtractFrontMatter frontMatter = new ExtractFrontMatter('!', new ExecuteDocument(Config.FromDocument(async x =>
+                ExtractFrontMatter frontMatter = new ExtractFrontMatter('!', new ExecuteConfig(Config.FromDocument(async x =>
                 {
                     frontMatterContent = await x.GetStringAsync();
                     return new[] { x };
@@ -236,7 +236,7 @@ Content1
 Content2")
                 };
                 string frontMatterContent = null;
-                ExtractFrontMatter frontMatter = new ExtractFrontMatter('!', new ExecuteDocument(Config.FromDocument(async x =>
+                ExtractFrontMatter frontMatter = new ExtractFrontMatter('!', new ExecuteConfig(Config.FromDocument(async x =>
                 {
                     frontMatterContent = await x.GetStringAsync();
                     return new[] { x };
@@ -270,7 +270,7 @@ Content1
 Content2")
                 };
                 bool executed = false;
-                ExtractFrontMatter frontMatter = new ExtractFrontMatter('!', new ExecuteDocument(Config.FromDocument(x =>
+                ExtractFrontMatter frontMatter = new ExtractFrontMatter('!', new ExecuteConfig(Config.FromDocument(x =>
                 {
                     executed = true;
                     return new[] { x };
@@ -306,7 +306,7 @@ Content1
 Content2")
                 };
                 string frontMatterContent = null;
-                ExtractFrontMatter frontMatter = new ExtractFrontMatter('!', new ExecuteDocument(Config.FromDocument(async x =>
+                ExtractFrontMatter frontMatter = new ExtractFrontMatter('!', new ExecuteConfig(Config.FromDocument(async x =>
                 {
                     frontMatterContent = await x.GetStringAsync();
                     return new[] { x };
@@ -342,7 +342,7 @@ Content1
 Content2")
                 };
                 string frontMatterContent = null;
-                ExtractFrontMatter frontMatter = new ExtractFrontMatter('!', new ExecuteDocument(Config.FromDocument(async x =>
+                ExtractFrontMatter frontMatter = new ExtractFrontMatter('!', new ExecuteConfig(Config.FromDocument(async x =>
                 {
                     frontMatterContent = await x.GetStringAsync();
                     return new[] { x };
@@ -377,7 +377,7 @@ XX"),
 YY")
                 };
                 string frontMatterContent = string.Empty;
-                ExtractFrontMatter frontMatter = new ExtractFrontMatter(new ExecuteDocument(Config.FromDocument(async x =>
+                ExtractFrontMatter frontMatter = new ExtractFrontMatter(new ExecuteConfig(Config.FromDocument(async x =>
                 {
                     frontMatterContent += await x.GetStringAsync();
                     return new[] { x };
@@ -411,7 +411,7 @@ Content1
 Content2")
                 };
                 string frontMatterContent = null;
-                ExtractFrontMatter frontMatter = new ExtractFrontMatter(new ExecuteDocument(Config.FromDocument(async x =>
+                ExtractFrontMatter frontMatter = new ExtractFrontMatter(new ExecuteConfig(Config.FromDocument(async x =>
                 {
                     frontMatterContent = await x.GetStringAsync();
                     return new[] { x };
@@ -446,7 +446,7 @@ Content1
 Content2")
                 };
                 string frontMatterContent = null;
-                ExtractFrontMatter frontMatter = new ExtractFrontMatter(new ExecuteDocument(Config.FromDocument(async x =>
+                ExtractFrontMatter frontMatter = new ExtractFrontMatter(new ExecuteConfig(Config.FromDocument(async x =>
                 {
                     frontMatterContent = await x.GetStringAsync();
                     return new[] { x };

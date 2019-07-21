@@ -65,7 +65,7 @@ namespace Statiq.Core
         /// <param name="inherited">If set to <c>true</c>, metadata from documents with this file name will be inherited by documents in nested directories.</param>
         /// <param name="replace">If set to <c>true</c>, metadata from this document will replace any existing metadata on the target document.</param>
         /// <returns>The current module instance.</returns>
-        public ApplyDirectoryMetadata WithMetadataFile(DocumentConfig<bool> metadataFileName, bool inherited = false, bool replace = false)
+        public ApplyDirectoryMetadata WithMetadataFile(Config<bool> metadataFileName, bool inherited = false, bool replace = false)
         {
             _metadataFiles.Add(new MetaFileEntry(metadataFileName, inherited, replace));
             return this;
@@ -188,10 +188,10 @@ namespace Statiq.Core
         private class MetaFileEntry
         {
             public bool Inherited { get; }
-            public DocumentConfig<bool> MetadataFileName { get; }
+            public Config<bool> MetadataFileName { get; }
             public bool Replace { get; }
 
-            public MetaFileEntry(DocumentConfig<bool> metadataFileName, bool inherited, bool replace)
+            public MetaFileEntry(Config<bool> metadataFileName, bool inherited, bool replace)
             {
                 MetadataFileName = metadataFileName;
                 Inherited = inherited;

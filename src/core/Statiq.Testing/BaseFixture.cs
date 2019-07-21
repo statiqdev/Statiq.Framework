@@ -1,4 +1,5 @@
-﻿using System.Collections.Concurrent;
+﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Diagnostics;
@@ -102,7 +103,7 @@ namespace Statiq.Testing
         {
             foreach (IModule module in modules)
             {
-                documents = (await module.ExecuteAsync(documents, context)).Cast<TestDocument>().ToArray();
+                documents = (await module.ExecuteAsync(documents, context))?.Cast<TestDocument>().ToArray() ?? Array.Empty<TestDocument>();
             }
             return documents;
         }

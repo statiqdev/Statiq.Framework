@@ -1,9 +1,9 @@
-namespace Statiq.Common
+namespace Statiq.Core
 {
     /// <summary>
     /// The change frequency for each item in the site map.
     /// </summary>
-    public enum ChangeFrequency
+    public enum SitemapChangeFrequency
     {
         /// <summary>
         /// The item always changes.

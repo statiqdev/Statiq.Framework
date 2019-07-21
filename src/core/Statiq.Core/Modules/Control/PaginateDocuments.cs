@@ -52,8 +52,8 @@ namespace Statiq.Core
     public class PaginateDocuments : ContainerModule
     {
         private readonly int _pageSize;
-        private readonly Dictionary<string, DocumentConfig<object>> _pageMetadata = new Dictionary<string, DocumentConfig<object>>();
-        private DocumentConfig<bool> _predicate;
+        private readonly Dictionary<string, Config<object>> _pageMetadata = new Dictionary<string, Config<object>>();
+        private Config<bool> _predicate;
         private int _takePages = int.MaxValue;
         private int _skipPages = 0;
 
@@ -79,7 +79,7 @@ namespace Statiq.Core
         /// </summary>
         /// <param name="predicate">A delegate that should return a <c>bool</c>.</param>
         /// <returns>The current module instance.</returns>
-        public PaginateDocuments Where(DocumentConfig<bool> predicate)
+        public PaginateDocuments Where(Config<bool> predicate)
         {
             _predicate = _predicate.CombineWith(predicate);
             return this;
@@ -117,7 +117,7 @@ namespace Statiq.Core
         /// <param name="key">The key of the metadata to add.</param>
         /// <param name="metadata">A delegate with the value for the metadata.</param>
         /// <returns>The current module instance.</returns>
-        public PaginateDocuments WithPageMetadata(string key, DocumentConfig<object> metadata)
+        public PaginateDocuments WithPageMetadata(string key, Config<object> metadata)
         {
             if (key == null)
             {

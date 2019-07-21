@@ -22,7 +22,7 @@ namespace Statiq.Core
     {
         private static readonly string[] ChangeFrequencies = { "always", "hourly", "daily", "weekly", "monthly", "yearly", "never" };
 
-        private readonly DocumentConfig<object> _sitemapItemOrLocation;
+        private readonly Config<object> _sitemapItemOrLocation;
         private readonly Func<string, string> _locationFormatter;
 
         /// <summary>
@@ -67,7 +67,7 @@ namespace Statiq.Core
         /// with the desired item location. If the delegate returns <c>null</c>, the input document is not added to the sitemap.</param>
         /// <param name="locationFormatter">A location formatter that will be applied to the location of each input after
         /// getting the value of the specified metadata key.</param>
-        public GenerateSitemap(DocumentConfig<object> sitemapItemOrLocation, Func<string, string> locationFormatter = null)
+        public GenerateSitemap(Config<object> sitemapItemOrLocation, Func<string, string> locationFormatter = null)
         {
             _sitemapItemOrLocation = sitemapItemOrLocation ?? throw new ArgumentNullException(nameof(sitemapItemOrLocation));
             _locationFormatter = locationFormatter;

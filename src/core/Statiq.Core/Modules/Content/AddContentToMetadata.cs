@@ -20,20 +20,19 @@ namespace Statiq.Core
         private readonly string _key;
 
         public AddContentToMetadata(string key)
+            : base(Array.Empty<IModule>())
         {
             _key = key ?? throw new ArgumentNullException(nameof(key));
         }
 
-        /// <inheritdoc />
         public AddContentToMetadata(string key, params IModule[] modules)
             : base(modules)
         {
             _key = key ?? throw new ArgumentNullException(nameof(key));
         }
 
-        /// <inheritdoc />
         public AddContentToMetadata(string key, params string[] pipelines)
-            : base(new GetDocuments(pipelines))
+            : base(new ExecuteConfig(Config.FromContext(ctx => ctx.Documents.FromPipelines(pipelines))))
         {
             _key = key ?? throw new ArgumentNullException(nameof(key));
         }

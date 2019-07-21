@@ -11,12 +11,12 @@ namespace Statiq.Core
     public class AppendContent : ConfigModule<string>
     {
         /// <summary>
-        /// Appends the string value of the returned object to to content of each document.
+        /// Appends the string value of the returned object to the content of each document.
         /// This allows you to specify different content to append for each document depending
         /// on the input document.
         /// </summary>
         /// <param name="content">A delegate that returns the content to append.</param>
-        public AppendContent(DocumentConfig<string> content)
+        public AppendContent(Config<string> content)
             : base(content, true)
         {
         }
@@ -32,12 +32,9 @@ namespace Statiq.Core
             {
                 return context.CreateDocument(await context.GetContentProviderAsync(value)).Yield();
             }
-            return new[]
-            {
-                value == null
-                    ? input
-                    : input.Clone(await context.GetContentProviderAsync(await input.GetStringAsync() + value))
-            };
+            return value == null
+                ? input.Yield()
+                : input.Clone(await context.GetContentProviderAsync(await input.GetStringAsync() + value)).Yield();
         }
     }
 }

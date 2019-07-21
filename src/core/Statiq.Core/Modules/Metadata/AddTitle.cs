@@ -19,7 +19,7 @@ namespace Statiq.Core
     {
         private static readonly ReadOnlyMemory<char> IndexFileName = "index.".AsMemory();
 
-        private readonly DocumentConfig<string> _title = Config.FromDocument(GetTitle);
+        private readonly Config<string> _title = Config.FromDocument(GetTitle);
         private string _key = Keys.Title;
         private bool _keepExisting = true;
 
@@ -36,7 +36,7 @@ namespace Statiq.Core
         /// This sets the title of all input documents to a value from the delegate.
         /// </summary>
         /// <param name="title">A delegate that must return a string.</param>
-        public AddTitle(DocumentConfig<string> title)
+        public AddTitle(Config<string> title)
         {
             _title = title ?? throw new ArgumentNullException(nameof(title));
         }

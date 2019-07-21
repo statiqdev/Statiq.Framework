@@ -7,87 +7,31 @@ namespace Statiq.Core
 {
     public static class IPipelineExtensions
     {
-        public static TPipeline WithInputDelegate<TPipeline>(this TPipeline pipeline, Action<IReadOnlyList<IDocument>, IExecutionContext> action)
+        public static TPipeline WithInputConfig<TPipeline>(this TPipeline pipeline, Config<object> config)
             where TPipeline : IPipeline
         {
-            pipeline.InputModules.Add(new Execute(action));
+            pipeline.InputModules.Add(new ExecuteConfig(config));
             return pipeline;
         }
 
-        public static TPipeline WithInputDelegate<TPipeline>(this TPipeline pipeline, Func<IReadOnlyList<IDocument>, IExecutionContext, Task> func)
+        public static TPipeline WithProcessConfig<TPipeline>(this TPipeline pipeline, Config<object> config)
             where TPipeline : IPipeline
         {
-            pipeline.InputModules.Add(new Execute(func));
+            pipeline.ProcessModules.Add(new ExecuteConfig(config));
             return pipeline;
         }
 
-        public static TPipeline WithInputDelegate<TPipeline>(this TPipeline pipeline, Func<IReadOnlyList<IDocument>, IExecutionContext, Task<object>> func)
+        public static TPipeline WithTransformConfig<TPipeline>(this TPipeline pipeline, Config<object> config)
             where TPipeline : IPipeline
         {
-            pipeline.InputModules.Add(new Execute(func));
+            pipeline.TransformModules.Add(new ExecuteConfig(config));
             return pipeline;
         }
 
-        public static TPipeline WithProcessDelegate<TPipeline>(this TPipeline pipeline, Action<IReadOnlyList<IDocument>, IExecutionContext> action)
+        public static TPipeline WithOutputConfig<TPipeline>(this TPipeline pipeline, Config<object> config)
             where TPipeline : IPipeline
         {
-            pipeline.ProcessModules.Add(new Execute(action));
-            return pipeline;
-        }
-
-        public static TPipeline WithProcessDelegate<TPipeline>(this TPipeline pipeline, Func<IReadOnlyList<IDocument>, IExecutionContext, Task> func)
-            where TPipeline : IPipeline
-        {
-            pipeline.ProcessModules.Add(new Execute(func));
-            return pipeline;
-        }
-
-        public static TPipeline WithProcessDelegate<TPipeline>(this TPipeline pipeline, Func<IReadOnlyList<IDocument>, IExecutionContext, Task<object>> func)
-            where TPipeline : IPipeline
-        {
-            pipeline.ProcessModules.Add(new Execute(func));
-            return pipeline;
-        }
-
-        public static TPipeline WithTransformDelegate<TPipeline>(this TPipeline pipeline, Action<IReadOnlyList<IDocument>, IExecutionContext> action)
-            where TPipeline : IPipeline
-        {
-            pipeline.TransformModules.Add(new Execute(action));
-            return pipeline;
-        }
-
-        public static TPipeline WithTransformDelegate<TPipeline>(this TPipeline pipeline, Func<IReadOnlyList<IDocument>, IExecutionContext, Task> func)
-            where TPipeline : IPipeline
-        {
-            pipeline.TransformModules.Add(new Execute(func));
-            return pipeline;
-        }
-
-        public static TPipeline WithTransformDelegate<TPipeline>(this TPipeline pipeline, Func<IReadOnlyList<IDocument>, IExecutionContext, Task<object>> func)
-            where TPipeline : IPipeline
-        {
-            pipeline.TransformModules.Add(new Execute(func));
-            return pipeline;
-        }
-
-        public static TPipeline WithOutputDelegate<TPipeline>(this TPipeline pipeline, Action<IReadOnlyList<IDocument>, IExecutionContext> action)
-            where TPipeline : IPipeline
-        {
-            pipeline.OutputModules.Add(new Execute(action));
-            return pipeline;
-        }
-
-        public static TPipeline WithOutputDelegate<TPipeline>(this TPipeline pipeline, Func<IReadOnlyList<IDocument>, IExecutionContext, Task> func)
-            where TPipeline : IPipeline
-        {
-            pipeline.OutputModules.Add(new Execute(func));
-            return pipeline;
-        }
-
-        public static TPipeline WithOutputDelegate<TPipeline>(this TPipeline pipeline, Func<IReadOnlyList<IDocument>, IExecutionContext, Task<object>> func)
-            where TPipeline : IPipeline
-        {
-            pipeline.OutputModules.Add(new Execute(func));
+            pipeline.OutputModules.Add(new ExecuteConfig(config));
             return pipeline;
         }
     }

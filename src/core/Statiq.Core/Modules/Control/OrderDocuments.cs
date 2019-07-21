@@ -21,7 +21,7 @@ namespace Statiq.Core
         /// Orders the input documents using the specified delegate to get the ordering key.
         /// </summary>
         /// <param name="key">A delegate that should return the key to use for ordering.</param>
-        public OrderDocuments(DocumentConfig<object> key)
+        public OrderDocuments(Config<object> key)
         {
             if (key == null)
             {
@@ -51,7 +51,7 @@ namespace Statiq.Core
         /// </summary>
         /// <param name="key">A delegate that should return the key to use for ordering.</param>
         /// <returns>The current module instance.</returns>
-        public OrderDocuments ThenBy(DocumentConfig<object> key)
+        public OrderDocuments ThenBy(Config<object> key)
         {
             if (key == null)
             {
@@ -172,11 +172,11 @@ namespace Statiq.Core
 
         private class Order
         {
-            public DocumentConfig<object> Key { get; }
+            public Config<object> Key { get; }
             public bool Descending { get; set; }
             public IComparer<object> Comparer { get; set; }
 
-            public Order(DocumentConfig<object> key)
+            public Order(Config<object> key)
             {
                 Key = key;
             }

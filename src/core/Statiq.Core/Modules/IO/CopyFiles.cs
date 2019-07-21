@@ -28,7 +28,7 @@ namespace Statiq.Core
         /// specify a function-based source path if there will be no overlap between the path returned from each input document.
         /// </summary>
         /// <param name="patterns">A delegate that returns one or more globbing patterns and/or absolute paths.</param>
-        public CopyFiles(DocumentConfig<IEnumerable<string>> patterns)
+        public CopyFiles(Config<IEnumerable<string>> patterns)
             : base(patterns, false)
         {
         }
@@ -41,7 +41,7 @@ namespace Statiq.Core
         /// </summary>
         /// <param name="patterns">The globbing patterns and/or absolute paths to read.</param>
         public CopyFiles(params string[] patterns)
-            : base((DocumentConfig<IEnumerable<string>>)(patterns ?? throw new ArgumentNullException(nameof(patterns))), false)
+            : base((Config<IEnumerable<string>>)(patterns ?? throw new ArgumentNullException(nameof(patterns))), false)
         {
         }
 

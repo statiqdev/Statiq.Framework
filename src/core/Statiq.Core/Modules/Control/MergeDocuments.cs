@@ -21,18 +21,17 @@ namespace Statiq.Core
         private bool _reverse;
 
         public MergeDocuments()
+            : base(Array.Empty<IModule>())
         {
         }
 
-        /// <inheritdoc />
         public MergeDocuments(params IModule[] modules)
             : base(modules)
         {
         }
 
-        /// <inheritdoc />
         public MergeDocuments(params string[] pipelines)
-            : base(new GetDocuments(pipelines))
+            : base(new ExecuteConfig(Config.FromContext(ctx => ctx.Documents.FromPipelines(pipelines))))
         {
         }
 

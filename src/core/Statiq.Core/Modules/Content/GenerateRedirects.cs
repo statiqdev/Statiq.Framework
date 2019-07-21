@@ -33,7 +33,7 @@ namespace Statiq.Core
         private readonly Dictionary<FilePath, Func<IDictionary<FilePath, string>, string>> _additionalOutputs =
             new Dictionary<FilePath, Func<IDictionary<FilePath, string>, string>>();
 
-        private DocumentConfig<IReadOnlyList<FilePath>> _paths = Config.FromDocument<IReadOnlyList<FilePath>>(Keys.RedirectFrom);
+        private Config<IReadOnlyList<FilePath>> _paths = Config.FromDocument<IReadOnlyList<FilePath>>(Keys.RedirectFrom);
         private bool _metaRefreshPages = true;
         private bool _includeHost = false;
 
@@ -43,7 +43,7 @@ namespace Statiq.Core
         /// </summary>
         /// <param name="paths">A delegate that should return one or more <see cref="FilePath"/>.</param>
         /// <returns>The current module instance.</returns>
-        public GenerateRedirects WithPaths(DocumentConfig<IReadOnlyList<FilePath>> paths)
+        public GenerateRedirects WithPaths(Config<IReadOnlyList<FilePath>> paths)
         {
             _paths = paths ?? throw new ArgumentNullException(nameof(paths));
             return this;

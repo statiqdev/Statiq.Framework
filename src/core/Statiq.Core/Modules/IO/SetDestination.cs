@@ -28,7 +28,7 @@ namespace Statiq.Core
     /// <category>Input/Output</category>
     public class SetDestination : IModule
     {
-        private readonly DocumentConfig<FilePath> _destination;
+        private readonly Config<FilePath> _destination;
 
         /// <summary>
         /// Sets the destination of input documents according to the metadata values for
@@ -61,7 +61,7 @@ namespace Statiq.Core
         /// Changes the destination of input documents to that of the delegate.
         /// </summary>
         /// <param name="destination">A delegate that returns a <see cref="FilePath"/> with the desired destination path.</param>
-        public SetDestination(DocumentConfig<FilePath> destination)
+        public SetDestination(Config<FilePath> destination)
         {
             _destination = destination ?? throw new ArgumentNullException(nameof(destination));
         }

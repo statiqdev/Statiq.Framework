@@ -17,7 +17,7 @@ namespace Statiq.Core.Tests.Modules.IO
             public void ThrowsOnNullPathFunction()
             {
                 // Given, When, Then
-                Should.Throw<ArgumentNullException>(() => new ReadFiles((DocumentConfig<IEnumerable<string>>)null));
+                Should.Throw<ArgumentNullException>(() => new ReadFiles((Config<IEnumerable<string>>)null));
             }
 
             [Test]

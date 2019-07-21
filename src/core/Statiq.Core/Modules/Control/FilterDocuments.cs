@@ -16,7 +16,7 @@ namespace Statiq.Core
     /// <category>Control</category>
     public class FilterDocuments : IModule
     {
-        private readonly List<DocumentConfig<bool>> _predicates = new List<DocumentConfig<bool>>();
+        private readonly List<Config<bool>> _predicates = new List<Config<bool>>();
 
         /// <summary>
         /// Creates a module to filter documents but applies no default filtering.
@@ -30,7 +30,7 @@ namespace Statiq.Core
         /// Only input documents for which the predicate returns <c>true</c> will be output.
         /// </summary>
         /// <param name="predicate">A predicate delegate that should return a <c>bool</c>.</param>
-        public FilterDocuments(DocumentConfig<bool> predicate)
+        public FilterDocuments(Config<bool> predicate)
         {
             _predicates.Add(predicate ?? throw new ArgumentNullException(nameof(predicate)));
         }
@@ -50,7 +50,7 @@ namespace Statiq.Core
         /// </summary>
         /// <param name="predicate">A predicate delegate that should return a <c>bool</c>.</param>
         /// <returns>The current module instance.</returns>
-        public FilterDocuments Or(DocumentConfig<bool> predicate)
+        public FilterDocuments Or(Config<bool> predicate)
         {
             _predicates.Add(predicate ?? throw new ArgumentNullException(nameof(predicate)));
             return this;

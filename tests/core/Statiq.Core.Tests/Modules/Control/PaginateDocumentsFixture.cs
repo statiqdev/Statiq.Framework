@@ -27,16 +27,15 @@ namespace Statiq.Core.Tests.Modules.Control
                     EnsureInputDocument = true
                 };
                 PaginateDocuments paginate = new PaginateDocuments(3, count);
-                Execute gatherData = new ExecuteDocument(
-                    (d, c) =>
+                ForEachDocument gatherData = new ExecuteConfig(Config.FromDocument(
+                    d =>
                     {
                         currentPage.Add(d.Int(Keys.CurrentPage));
                         totalPages.Add(d.Int(Keys.TotalPages));
                         totalItems.Add(d.Int(Keys.TotalItems));
                         hasNextPage.Add(d.Bool(Keys.HasNextPage));
                         hasPreviousPage.Add(d.Bool(Keys.HasPreviousPage));
-                        return null;
-                    }, false);
+                    })).ForEachDocument();
 
                 // When
                 await ExecuteAsync(paginate, gatherData);
@@ -60,13 +59,12 @@ namespace Statiq.Core.Tests.Modules.Control
                     EnsureInputDocument = true
                 };
                 PaginateDocuments paginate = new PaginateDocuments(3, count);
-                Execute gatherData = new ExecuteDocument(
-                    Config.FromDocument<object>(async (d, c) =>
+                ForEachDocument gatherData = new ExecuteConfig(
+                    Config.FromDocument(async d =>
                     {
                         IEnumerable<string> pageContent = await d.Get<IList<IDocument>>(Keys.PageDocuments).SelectAsync(async x => await x.GetStringAsync());
                         content.Add(pageContent.ToList());
-                        return null;
-                    }), false);
+                    })).ForEachDocument();
 
                 // When
                 await ExecuteAsync(paginate, gatherData);
@@ -90,8 +88,8 @@ namespace Statiq.Core.Tests.Modules.Control
                     EnsureInputDocument = true
                 };
                 PaginateDocuments paginate = new PaginateDocuments(3, count);
-                Execute gatherData = new ExecuteDocument(
-                    Config.FromDocument<object>(async (d, c) =>
+                ForEachDocument gatherData = new ExecuteConfig(
+                    Config.FromDocument(async d =>
                     {
                         IList<IDocument> previousPageDocuments = d.Document(Keys.PreviousPage)?.Get<IList<IDocument>>(Keys.PageDocuments);
                         IEnumerable<string> previousPageContent = previousPageDocuments == null ? null : await previousPageDocuments.SelectAsync(async x => await x.GetStringAsync());
@@ -99,8 +97,7 @@ namespace Statiq.Core.Tests.Modules.Control
                         IList<IDocument> nextPageDocuments = d.Document(Keys.NextPage)?.Get<IList<IDocument>>(Keys.PageDocuments);
                         IEnumerable<string> nextPageContent = nextPageDocuments == null ? null : await nextPageDocuments.SelectAsync(async x => await x.GetStringAsync());
                         nextPages.Add(nextPageContent?.ToList());
-                        return null;
-                    }), false);
+                    })).ForEachDocument();
 
                 // When
                 await ExecuteAsync(paginate, gatherData);
@@ -127,13 +124,12 @@ namespace Statiq.Core.Tests.Modules.Control
                     EnsureInputDocument = true
                 };
                 PaginateDocuments paginate = new PaginateDocuments(3, count).Where(Config.FromDocument(async doc => await doc.GetStringAsync() != "5"));
-                Execute gatherData = new ExecuteDocument(
-                    Config.FromDocument<object>(async (d, c) =>
+                ForEachDocument gatherData = new ExecuteConfig(
+                    Config.FromDocument(async d =>
                     {
                         IEnumerable<string> pageContent = await d.Get<IList<IDocument>>(Keys.PageDocuments).SelectAsync(async x => await x.GetStringAsync());
                         content.Add(pageContent.ToList());
-                        return null;
-                    }), false);
+                    })).ForEachDocument();
 
                 // When
                 await ExecuteAsync(paginate, gatherData);

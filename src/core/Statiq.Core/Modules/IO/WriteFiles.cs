@@ -22,7 +22,7 @@ namespace Statiq.Core
     {
         private bool _ignoreEmptyContent = true;
         private bool _append;
-        private DocumentConfig<bool> _predicate = true;
+        private Config<bool> _predicate = true;
 
         /// <summary>
         /// Ignores documents with empty content, which is the default behavior.
@@ -51,7 +51,7 @@ namespace Statiq.Core
         /// </summary>
         /// <param name="predicate">A predicate that returns <c>true</c> if the file should be written.</param>
         /// <returns>The current module instance.</returns>
-        public WriteFiles Where(DocumentConfig<bool> predicate)
+        public WriteFiles Where(Config<bool> predicate)
         {
             _predicate = _predicate.CombineWith(predicate);
             return this;

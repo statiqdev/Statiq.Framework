@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Statiq.Common;
@@ -20,18 +21,17 @@ namespace Statiq.Core
         private bool _reverse;
 
         public MergeMetadata()
+            : base(Array.Empty<IModule>())
         {
         }
 
-        /// <inheritdoc />
         public MergeMetadata(params IModule[] modules)
             : base(modules)
         {
         }
 
-        /// <inheritdoc />
         public MergeMetadata(params string[] pipelines)
-            : base(new GetDocuments(pipelines))
+            : base(new ExecuteConfig(Config.FromContext(ctx => ctx.Documents.FromPipelines(pipelines))))
         {
         }
 

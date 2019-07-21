@@ -21,7 +21,7 @@ namespace Statiq.Core
         /// you to trace different content for each document depending on the input document.
         /// </summary>
         /// <param name="content">A delegate that returns the content to trace.</param>
-        public TraceMessage(DocumentConfig<string> content)
+        public TraceMessage(Config<string> content)
             : base(content, false)
         {
         }

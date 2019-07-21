@@ -15,7 +15,7 @@ namespace Statiq.Common.Tests.Configuration
             public async Task CastsToMatchingType()
             {
                 // Given, When
-                DocumentConfig<int> config = 10;
+                Config<int> config = 10;
 
                 // Then
                 (await config.GetAndTransformValueAsync(null, null)).ShouldBe(10);
@@ -25,7 +25,7 @@ namespace Statiq.Common.Tests.Configuration
             public async Task CastsToObject()
             {
                 // Given, When
-                DocumentConfig<object> config = 10;
+                Config<object> config = 10;
 
                 // Then
                 (await config.GetAndTransformValueAsync(null, null)).ShouldBe(10);
@@ -35,7 +35,7 @@ namespace Statiq.Common.Tests.Configuration
             public async Task CastsFromDocumentConfigToObject()
             {
                 // Given, When
-                DocumentConfig<object> config = new DocumentConfig<int>((_, __) => Task.FromResult(10));
+                Config<object> config = new Config<int>((_, __) => Task.FromResult(10));
 
                 // Then
                 (await config.GetAndTransformValueAsync(null, null)).ShouldBe(10);
@@ -45,7 +45,7 @@ namespace Statiq.Common.Tests.Configuration
             public async Task CastsFromDocumentConfigToObjectEnumerable()
             {
                 // Given, When
-                DocumentConfig<IEnumerable<object>> config = new DocumentConfig<int>((_, __) => Task.FromResult(10));
+                Config<IEnumerable<object>> config = new Config<int>((_, __) => Task.FromResult(10));
 
                 // Then
                 (await config.GetAndTransformValueAsync(null, null)).ShouldBe(new object[] { 10 });
@@ -55,8 +55,8 @@ namespace Statiq.Common.Tests.Configuration
             public async Task CastsFromDocumentConfigOfEnumerableToObjectEnumerable()
             {
                 // Given, When
-                DocumentConfig<IEnumerable<object>> config =
-                    new DocumentConfig<IEnumerable<int>>((_, __) => Task.FromResult((IEnumerable<int>)new[] { 8, 9, 10 }));
+                Config<IEnumerable<object>> config =
+                    new Config<IEnumerable<int>>((_, __) => Task.FromResult((IEnumerable<int>)new[] { 8, 9, 10 }));
 
                 // Then
                 (await config.GetAndTransformValueAsync(null, null)).ShouldBe(new object[] { 8, 9, 10 });

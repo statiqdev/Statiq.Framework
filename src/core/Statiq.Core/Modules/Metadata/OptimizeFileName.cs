@@ -28,7 +28,7 @@ namespace Statiq.Core
 
         private static readonly Regex FileNameRegex = new Regex("^([a-zA-Z0-9])+$");
 
-        private readonly DocumentConfig<string> _fileName = null;
+        private readonly Config<string> _fileName = null;
         private readonly string _outputKey = null;
 
         /// <summary>
@@ -68,7 +68,7 @@ namespace Statiq.Core
         /// </summary>
         /// <param name="fileName">A delegate that should return a <see cref="string"/> file name to optimize.</param>
         /// <param name="outputKey">The metadata key to use for the optimized file name.</param>
-        public OptimizeFileName(DocumentConfig<string> fileName, string outputKey)
+        public OptimizeFileName(Config<string> fileName, string outputKey)
         {
             _ = outputKey ?? throw new ArgumentNullException(outputKey);
 

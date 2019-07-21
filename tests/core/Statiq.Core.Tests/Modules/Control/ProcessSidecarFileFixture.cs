@@ -23,7 +23,7 @@ namespace Statiq.Core.Tests.Modules.Control
                     GetDocument("a/1.md", "File a1")
                 };
                 string lodedSidecarContent = null;
-                ProcessSidecarFile sidecar = new ProcessSidecarFile(new ExecuteDocument(Config.FromDocument(async x =>
+                ProcessSidecarFile sidecar = new ProcessSidecarFile(new ExecuteConfig(Config.FromDocument(async x =>
                 {
                     lodedSidecarContent = await x.GetStringAsync();
                     return new[] { x };
@@ -48,7 +48,7 @@ namespace Statiq.Core.Tests.Modules.Control
                     GetDocument("a/1.md", "File a1")
                 };
                 string lodedSidecarContent = null;
-                ProcessSidecarFile sidecar = new ProcessSidecarFile(".other", new ExecuteDocument(Config.FromDocument(async x =>
+                ProcessSidecarFile sidecar = new ProcessSidecarFile(".other", new ExecuteConfig(Config.FromDocument(async x =>
                 {
                     lodedSidecarContent = await x.GetStringAsync();
                     return new[] { x };
@@ -73,7 +73,7 @@ namespace Statiq.Core.Tests.Modules.Control
                     GetDocument("a/1.md", "File a1")
                 };
                 bool executedSidecarModules = false;
-                ProcessSidecarFile sidecar = new ProcessSidecarFile(".foo", new ExecuteDocument(Config.FromDocument(x =>
+                ProcessSidecarFile sidecar = new ProcessSidecarFile(".foo", new ExecuteConfig(Config.FromDocument(x =>
                 {
                     executedSidecarModules = true;
                     return (object)new[] { x };

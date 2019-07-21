@@ -19,7 +19,7 @@ namespace Statiq.Core
     /// <category>Control</category>
     public class ProcessSidecarFile : ContainerModule
     {
-        private readonly DocumentConfig<FilePath> _sidecarPath;
+        private readonly Config<FilePath> _sidecarPath;
 
         /// <summary>
         /// Searches for sidecar files at the same path as the input document SourceFilePath with the additional extension .meta.
@@ -54,7 +54,7 @@ namespace Statiq.Core
         /// </summary>
         /// <param name="sidecarPath">A delegate that returns a <see cref="FilePath"/> with the desired sidecar path.</param>
         /// <param name="modules">The modules to execute against the sidecar file.</param>
-        public ProcessSidecarFile(DocumentConfig<FilePath> sidecarPath, params IModule[] modules)
+        public ProcessSidecarFile(Config<FilePath> sidecarPath, params IModule[] modules)
             : base(modules)
         {
             _sidecarPath = sidecarPath ?? throw new ArgumentNullException(nameof(sidecarPath));

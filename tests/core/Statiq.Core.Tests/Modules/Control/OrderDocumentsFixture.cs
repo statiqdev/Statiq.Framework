@@ -32,12 +32,12 @@ namespace Statiq.Core.Tests.Modules.Control
                     count2
                 };
                 OrderDocuments orderBy = new OrderDocuments(Config.FromDocument<int>("A"));
-                Execute gatherData = new ExecuteDocument(
+                ForEachDocument gatherData = new ExecuteConfig(
                     Config.FromDocument(async d =>
                     {
                         content.Add(await d.GetStringAsync());
                         return (IDocument)null;
-                    }), false);
+                    })).ForEachDocument();
 
                 // When
                 await ExecuteAsync(count, concat, orderBy, gatherData);
@@ -64,12 +64,12 @@ namespace Statiq.Core.Tests.Modules.Control
                 };
                 ConcatDocuments concat = new ConcatDocuments(count2);
                 OrderDocuments orderBy = new OrderDocuments(Config.FromDocument<int>("A")).Descending();
-                Execute gatherData = new ExecuteDocument(
+                ForEachDocument gatherData = new ExecuteConfig(
                     Config.FromDocument(async d =>
                     {
                         content.Add(await d.GetStringAsync());
                         return (IDocument)null;
-                    }), false);
+                    })).ForEachDocument();
 
                 // When
                 await ExecuteAsync(count, concat, orderBy, gatherData);
@@ -95,12 +95,12 @@ namespace Statiq.Core.Tests.Modules.Control
                 };
                 OrderDocuments orderBy = new OrderDocuments(Config.FromDocument<int>("A"))
                     .ThenBy(Config.FromDocument(d => d.Int("B")));
-                Execute gatherData = new ExecuteDocument(
+                ForEachDocument gatherData = new ExecuteConfig(
                     Config.FromDocument(async d =>
                     {
                         content.Add(await d.GetStringAsync());
                         return (IDocument)null;
-                    }), false);
+                    })).ForEachDocument();
 
                 // When
                 await ExecuteAsync(count, count2, orderBy, gatherData);
@@ -127,12 +127,12 @@ namespace Statiq.Core.Tests.Modules.Control
                 OrderDocuments orderBy = new OrderDocuments(Config.FromDocument<int>("A"))
                     .ThenBy(Config.FromDocument(d => d.Int("B")))
                     .Descending();
-                Execute gatherData = new ExecuteDocument(
+                ForEachDocument gatherData = new ExecuteConfig(
                     Config.FromDocument(async d =>
                     {
                         content.Add(await d.GetStringAsync());
                         return (IDocument)null;
-                    }), false);
+                    })).ForEachDocument();
 
                 // When
                 await ExecuteAsync(count, count2, orderBy, gatherData);
@@ -160,12 +160,12 @@ namespace Statiq.Core.Tests.Modules.Control
                     .Descending()
                     .ThenBy(Config.FromDocument(d => d.Int("B")))
                     .Descending();
-                Execute gatherData = new ExecuteDocument(
+                ForEachDocument gatherData = new ExecuteConfig(
                     Config.FromDocument(async d =>
                     {
                         content.Add(await d.GetStringAsync());
                         return (IDocument)null;
-                    }), false);
+                    })).ForEachDocument();
 
                 // When
                 await ExecuteAsync(count, count2, orderBy, gatherData);
@@ -192,12 +192,12 @@ namespace Statiq.Core.Tests.Modules.Control
                 OrderDocuments orderBy = new OrderDocuments(Config.FromDocument<int>("A"))
                     .Descending()
                     .ThenBy(Config.FromDocument(d => d.Int("B")));
-                Execute gatherData = new ExecuteDocument(
+                ForEachDocument gatherData = new ExecuteConfig(
                     Config.FromDocument(async d =>
                     {
                         content.Add(await d.GetStringAsync());
                         return (IDocument)null;
-                    }), false);
+                    })).ForEachDocument();
 
                 // When
                 await ExecuteAsync(count, count2, orderBy, gatherData);

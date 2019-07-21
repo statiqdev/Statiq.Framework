@@ -36,9 +36,9 @@ namespace Statiq.Razor
         private static Guid _executionId = Guid.Empty;
 
         private readonly Type _basePageType;
-        private DocumentConfig<FilePath> _viewStartPath;
-        private DocumentConfig<FilePath> _layoutPath;
-        private DocumentConfig<object> _model;
+        private Config<FilePath> _viewStartPath;
+        private Config<FilePath> _layoutPath;
+        private Config<object> _model;
         private string _ignorePrefix = "_";
 
         /// <summary>
@@ -80,7 +80,7 @@ namespace Statiq.Razor
         /// <param name="path">A delegate that should return the ViewStart path as a <c>FilePath</c>,
         /// or <c>null</c> for the default ViewStart search behavior.</param>
         /// <returns>The current module instance.</returns>
-        public Razor WithViewStart(DocumentConfig<FilePath> path)
+        public Razor WithViewStart(Config<FilePath> path)
         {
             _viewStartPath = path;
             return this;
@@ -92,7 +92,7 @@ namespace Statiq.Razor
         /// </summary>
         /// <param name="path">A delegate that should return the layout path as a <c>FilePath</c>.</param>
         /// <returns>The current module instance.</returns>
-        public Razor WithLayout(DocumentConfig<FilePath> path)
+        public Razor WithLayout(Config<FilePath> path)
         {
             _layoutPath = path;
             return this;
@@ -104,7 +104,7 @@ namespace Statiq.Razor
         /// </summary>
         /// <param name="model">A delegate that returns the model.</param>
         /// <returns>The current module instance.</returns>
-        public Razor WithModel(DocumentConfig<object> model)
+        public Razor WithModel(Config<object> model)
         {
             _model = model;
             return this;

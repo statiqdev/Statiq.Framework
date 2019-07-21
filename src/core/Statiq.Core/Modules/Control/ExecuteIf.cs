@@ -26,7 +26,7 @@ namespace Statiq.Core
         /// </summary>
         /// <param name="predicate">A predicate delegate that should return a <c>bool</c>.</param>
         /// <param name="modules">The modules to execute on documents where the predicate is <c>true</c>.</param>
-        public ExecuteIf(DocumentConfig<bool> predicate, params IModule[] modules)
+        public ExecuteIf(Config<bool> predicate, params IModule[] modules)
         {
             _conditions.Add(new IfCondition(predicate, modules));
         }
@@ -37,7 +37,7 @@ namespace Statiq.Core
         /// </summary>
         /// <param name="predicate">A predicate delegate that should return a <c>bool</c>.</param>
         /// <param name="modules">The modules to execute on documents where the predicate is <c>true</c>.</param>
-        public ExecuteIf(DocumentConfig<bool> predicate, IEnumerable<IModule> modules)
+        public ExecuteIf(Config<bool> predicate, IEnumerable<IModule> modules)
         {
             _conditions.Add(new IfCondition(predicate, modules));
         }
@@ -70,7 +70,7 @@ namespace Statiq.Core
         /// <param name="predicate">A predicate delegate that should return a <c>bool</c>.</param>
         /// <param name="modules">The modules to execute on documents where the predicate is <c>true</c>.</param>
         /// <returns>The current module instance.</returns>
-        public ExecuteIf ElseIf(DocumentConfig<bool> predicate, params IModule[] modules)
+        public ExecuteIf ElseIf(Config<bool> predicate, params IModule[] modules)
         {
             _conditions.Add(new IfCondition(predicate, modules));
             return this;
@@ -84,7 +84,7 @@ namespace Statiq.Core
         /// <param name="predicate">A predicate delegate that should return a <c>bool</c>.</param>
         /// <param name="modules">The modules to execute on documents where the predicate is <c>true</c>.</param>
         /// <returns>The current module instance.</returns>
-        public ExecuteIf ElseIf(DocumentConfig<bool> predicate, IEnumerable<IModule> modules)
+        public ExecuteIf ElseIf(Config<bool> predicate, IEnumerable<IModule> modules)
         {
             _conditions.Add(new IfCondition(predicate, modules));
             return this;

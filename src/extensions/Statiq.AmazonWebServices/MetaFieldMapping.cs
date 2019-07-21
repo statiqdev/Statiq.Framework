@@ -5,12 +5,12 @@ namespace Statiq.AmazonWebServices
 {
     internal class MetaFieldMapping
     {
-        public DocumentConfig<string> FieldName { get; }
-        public DocumentConfig<string> MetaKey { get; }
+        public Config<string> FieldName { get; }
+        public Config<string> MetaKey { get; }
 
         public Func<object, object> Transformer { get; }
 
-        public MetaFieldMapping(DocumentConfig<string> fieldName, DocumentConfig<string> metaKey, Func<object, object> transformer = null)
+        public MetaFieldMapping(Config<string> fieldName, Config<string> metaKey, Func<object, object> transformer = null)
         {
             FieldName = fieldName;
             MetaKey = metaKey;

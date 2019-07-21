@@ -13,7 +13,7 @@ namespace Statiq.Core
     public class AddMetadata : IModule
     {
         private readonly string _key;
-        private readonly DocumentConfig<object> _value;
+        private readonly Config<object> _value;
         private readonly IModule[] _modules;
         private bool _ignoreNull;
         private bool _onlyIfNonExisting;
@@ -24,7 +24,7 @@ namespace Statiq.Core
         /// </summary>
         /// <param name="key">The metadata key to set.</param>
         /// <param name="value">A delegate that returns the object to add as metadata.</param>
-        public AddMetadata(string key, DocumentConfig<object> value)
+        public AddMetadata(string key, Config<object> value)
         {
             _key = key ?? throw new ArgumentNullException(nameof(key));
             _value = value ?? throw new ArgumentNullException(nameof(value));

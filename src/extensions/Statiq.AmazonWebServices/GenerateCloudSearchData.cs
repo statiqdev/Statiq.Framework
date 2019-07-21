@@ -43,7 +43,7 @@ namespace Statiq.AmazonWebServices
         /// <param name="metaKey">The meta key. If the meta key does not exist, the field will not be written.</param>
         /// <param name="transformer">If specified, it will be invoked on the meta value prior to serialization. If the function returns NULL, the field will not be written.</param>
         /// <returns>The current module.</returns>
-        public GenerateCloudSearchData MapMetaField(DocumentConfig<string> fieldName, DocumentConfig<string> metaKey, Func<object, object> transformer = null)
+        public GenerateCloudSearchData MapMetaField(Config<string> fieldName, Config<string> metaKey, Func<object, object> transformer = null)
         {
             if (fieldName == null)
             {
@@ -63,7 +63,7 @@ namespace Statiq.AmazonWebServices
         /// <param name="fieldName">The CloudSearch field name.</param>
         /// <param name="fieldValue">The value.</param>
         /// <returns>The current module.</returns>
-        public GenerateCloudSearchData AddField(DocumentConfig<string> fieldName, DocumentConfig<object> fieldValue)
+        public GenerateCloudSearchData AddField(Config<string> fieldName, Config<object> fieldValue)
         {
             _fields.Add(new Field(fieldName, fieldValue));
             return this;

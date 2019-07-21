@@ -9,67 +9,70 @@ namespace Statiq.Core.Tests.Modules.Contents
     [TestFixture]
     public class ReplaceInContentFixture : BaseFixture
     {
-        [Test]
-        public async Task RecursiveReplaceWithContentFinder()
+        public class ExecuteTests : ReplaceInContentFixture
         {
-            // Given
-            const string input = @"<html>
-                        <head>
-                            <title>Foobar</title>
-                        </head>
-                        <body>
-                            <span>foo<span>bar</span></span>
-                        </body>
-                    </html>";
-            const string expected = @"<html>
-                        <head>
-                            <title>Foobar</title>
-                        </head>
-                        <body>
-                            <span>baz</span>
-                        </body>
-                    </html>";
-            TestDocument document = new TestDocument(input);
-            ReplaceInContent replace = new ReplaceInContent(@"(<span>.*<\/span>)", _ => "<span>baz</span>");
-
-            // When
-            TestDocument result = await ExecuteAsync(document, replace).SingleAsync();
-
-            // Then
-            result.Content.ShouldBe(expected);
-        }
-
-        [Test]
-        public async Task ReplaceWithContentFinderUsingDocument()
-        {
-            // Given
-            const string input = @"<html>
-                        <head>
-                            <title>Foobar</title>
-                        </head>
-                        <body>
-                            <span>foo<span>bar</span></span>
-                        </body>
-                    </html>";
-            const string expected = @"<html>
-                        <head>
-                            <title>Foobar</title>
-                        </head>
-                        <body>
-                            <div>Buzz</div>
-                        </body>
-                    </html>";
-            TestDocument document = new TestDocument(input)
+            [Test]
+            public async Task RecursiveReplaceWithContentFinder()
             {
-                { "Fizz", "Buzz" }
-            };
-            ReplaceInContent replace = new ReplaceInContent(@"(<span>.*<\/span>)", (_, doc) => $"<div>{doc["Fizz"]}</div>");
+                // Given
+                const string input = @"<html>
+                            <head>
+                                <title>Foobar</title>
+                            </head>
+                            <body>
+                                <span>foo<span>bar</span></span>
+                            </body>
+                        </html>";
+                const string expected = @"<html>
+                            <head>
+                                <title>Foobar</title>
+                            </head>
+                            <body>
+                                <span>baz</span>
+                            </body>
+                        </html>";
+                TestDocument document = new TestDocument(input);
+                ReplaceInContent replace = new ReplaceInContent(@"(<span>.*<\/span>)", _ => "<span>baz</span>");
 
-            // When
-            TestDocument result = await ExecuteAsync(document, replace).SingleAsync();
+                // When
+                TestDocument result = await ExecuteAsync(document, replace).SingleAsync();
 
-            // Then
-            result.Content.ShouldBe(expected);
+                // Then
+                result.Content.ShouldBe(expected);
+            }
+
+            [Test]
+            public async Task ReplaceWithContentFinderUsingDocument()
+            {
+                // Given
+                const string input = @"<html>
+                            <head>
+                                <title>Foobar</title>
+                            </head>
+                            <body>
+                                <span>foo<span>bar</span></span>
+                            </body>
+                        </html>";
+                const string expected = @"<html>
+                            <head>
+                                <title>Foobar</title>
+                            </head>
+                            <body>
+                                <div>Buzz</div>
+                            </body>
+                        </html>";
+                TestDocument document = new TestDocument(input)
+                {
+                    { "Fizz", "Buzz" }
+                };
+                ReplaceInContent replace = new ReplaceInContent(@"(<span>.*<\/span>)", (_, doc) => $"<div>{doc["Fizz"]}</div>");
+
+                // When
+                TestDocument result = await ExecuteAsync(document, replace).SingleAsync();
+
+                // Then
+                result.Content.ShouldBe(expected);
+            }
         }
     }
 }

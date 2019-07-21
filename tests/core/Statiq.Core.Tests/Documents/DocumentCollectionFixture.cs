@@ -76,36 +76,6 @@ namespace Statiq.Core.Tests.Documents
             }
 
             [Test]
-            public void OnlyReturnsDistinctDocuments()
-            {
-                // Given
-                TestDocument a1 = new TestDocument("a1");
-                TestDocument b1 = new TestDocument("b1");
-                TestDocument b2 = new TestDocument("b2");
-                TestDocument c1 = new TestDocument("c1");
-                TestDocument d1 = new TestDocument("d1");
-                TestDocument d2 = new TestDocument("d2");
-                ConcurrentDictionary<string, ImmutableArray<IDocument>> documents =
-                    new ConcurrentDictionary<string, ImmutableArray<IDocument>>(StringComparer.OrdinalIgnoreCase);
-                IPipelineCollection pipelines = new PipelineCollection();
-                PipelinePhase phaseA =
-                    GetPipelineAndPhase("A", Phase.Transform, pipelines, documents, new[] { a1 });
-                PipelinePhase phaseB =
-                    GetPipelineAndPhase("B", Phase.Transform, pipelines, documents, new[] { b1, b2, a1 }, phaseA);
-                PipelinePhase phaseC =
-                    GetPipelineAndPhase("C", Phase.Transform, pipelines, documents, new[] { c1 }, phaseB);
-                PipelinePhase phaseD =
-                    GetPipelineAndPhase("D", Phase.Transform, pipelines, documents, new[] { d1, d2 });
-                DocumentCollection documentCollection = new DocumentCollection(documents, phaseC, pipelines);
-
-                // When
-                IDocument[] result = documentCollection.ToArray();
-
-                // Then
-                result.ShouldBe(new[] { a1, b1, b2, c1, d1, d2 }, true);
-            }
-
-            [Test]
             public void ThrowsIfCurrentPipelineIsOsolated()
             {
                 // Given

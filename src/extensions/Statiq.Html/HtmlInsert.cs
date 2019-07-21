@@ -25,7 +25,7 @@ namespace Statiq.Html
     public class HtmlInsert : IModule
     {
         private readonly string _querySelector;
-        private readonly DocumentConfig<string> _content;
+        private readonly Config<string> _content;
         private bool _first;
         private AdjacentPosition _position = AdjacentPosition.BeforeEnd;
 
@@ -34,7 +34,7 @@ namespace Statiq.Html
         /// </summary>
         /// <param name="querySelector">The query selector to use.</param>
         /// <param name="content">The content to insert as a delegate that should return a <c>string</c>.</param>
-        public HtmlInsert(string querySelector, DocumentConfig<string> content)
+        public HtmlInsert(string querySelector, Config<string> content)
         {
             _querySelector = querySelector;
             _content = content;

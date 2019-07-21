@@ -62,18 +62,18 @@ namespace Statiq.Feeds
         private Uri _feedImageLink;
         private string _feedCopyright;
 
-        private DocumentConfig<Uri> _itemId = Config.FromDocument((doc, ctx) => TypeHelper.Convert<Uri>(ctx.GetLink(doc, true)));
-        private DocumentConfig<string> _itemTitle = Config.FromDocument(doc => doc.String(FeedKeys.Title));
-        private DocumentConfig<string> _itemDescription = Config.FromDocument(doc => doc.String(FeedKeys.Description) ?? doc.String(FeedKeys.Excerpt));
-        private DocumentConfig<string> _itemAuthor = Config.FromDocument(doc => doc.String(FeedKeys.Author));
-        private DocumentConfig<DateTime?> _itemPublished = Config.FromDocument(doc => doc.Get<DateTime?>(FeedKeys.Published));
-        private DocumentConfig<DateTime?> _itemUpdated = Config.FromDocument(doc => doc.Get<DateTime?>(FeedKeys.Updated));
-        private DocumentConfig<Uri> _itemLink = Config.FromDocument((doc, ctx) => TypeHelper.Convert<Uri>(ctx.GetLink(doc, true)));
-        private DocumentConfig<Uri> _itemImageLink = Config.FromDocument((doc, ctx) => TypeHelper.Convert<Uri>(ctx.GetLink(doc, FeedKeys.Image, true)));
-        private DocumentConfig<string> _itemContent = Config.FromDocument(doc => doc.String(FeedKeys.Content));
-        private DocumentConfig<Uri> _itemThreadLink = null;
-        private DocumentConfig<int> _itemThreadCount = null;
-        private DocumentConfig<DateTime?> _itemThreadUpdated = null;
+        private Config<Uri> _itemId = Config.FromDocument((doc, ctx) => TypeHelper.Convert<Uri>(ctx.GetLink(doc, true)));
+        private Config<string> _itemTitle = Config.FromDocument(doc => doc.String(FeedKeys.Title));
+        private Config<string> _itemDescription = Config.FromDocument(doc => doc.String(FeedKeys.Description) ?? doc.String(FeedKeys.Excerpt));
+        private Config<string> _itemAuthor = Config.FromDocument(doc => doc.String(FeedKeys.Author));
+        private Config<DateTime?> _itemPublished = Config.FromDocument(doc => doc.Get<DateTime?>(FeedKeys.Published));
+        private Config<DateTime?> _itemUpdated = Config.FromDocument(doc => doc.Get<DateTime?>(FeedKeys.Updated));
+        private Config<Uri> _itemLink = Config.FromDocument((doc, ctx) => TypeHelper.Convert<Uri>(ctx.GetLink(doc, true)));
+        private Config<Uri> _itemImageLink = Config.FromDocument((doc, ctx) => TypeHelper.Convert<Uri>(ctx.GetLink(doc, FeedKeys.Image, true)));
+        private Config<string> _itemContent = Config.FromDocument(doc => doc.String(FeedKeys.Content));
+        private Config<Uri> _itemThreadLink = null;
+        private Config<int> _itemThreadCount = null;
+        private Config<DateTime?> _itemThreadUpdated = null;
 
         /// <summary>
         /// Sets how many items the feed will contain. The default value is 20.
@@ -246,7 +246,7 @@ namespace Statiq.Feeds
         /// <param name="itemId">A delegate that should return a <c>Uri</c> with
         /// the item identifier.</param>
         /// <returns>The current module instance.</returns>
-        public GenerateFeeds WithItemId(DocumentConfig<Uri> itemId)
+        public GenerateFeeds WithItemId(Config<Uri> itemId)
         {
             _itemId = itemId;
             return this;
@@ -259,7 +259,7 @@ namespace Statiq.Feeds
         /// <param name="itemTitle">A delegate that should return a <c>string</c> with
         /// the item title.</param>
         /// <returns>The current module instance.</returns>
-        public GenerateFeeds WithItemTitle(DocumentConfig<string> itemTitle)
+        public GenerateFeeds WithItemTitle(Config<string> itemTitle)
         {
             _itemTitle = itemTitle;
             return this;
@@ -272,7 +272,7 @@ namespace Statiq.Feeds
         /// <param name="itemDescription">A delegate that should return a <c>string</c> with
         /// the item description.</param>
         /// <returns>The current module instance.</returns>
-        public GenerateFeeds WithItemDescription(DocumentConfig<string> itemDescription)
+        public GenerateFeeds WithItemDescription(Config<string> itemDescription)
         {
             _itemDescription = itemDescription;
             return this;
@@ -285,7 +285,7 @@ namespace Statiq.Feeds
         /// <param name="itemAuthor">A delegate that should return a <c>string</c> with
         /// the item author.</param>
         /// <returns>The current module instance.</returns>
-        public GenerateFeeds WithItemAuthor(DocumentConfig<string> itemAuthor)
+        public GenerateFeeds WithItemAuthor(Config<string> itemAuthor)
         {
             _itemAuthor = itemAuthor;
             return this;
@@ -298,7 +298,7 @@ namespace Statiq.Feeds
         /// <param name="itemPublished">A delegate that should return a <c>DateTime</c> with
         /// the item published time.</param>
         /// <returns>The current module instance.</returns>
-        public GenerateFeeds WithItemPublished(DocumentConfig<DateTime?> itemPublished)
+        public GenerateFeeds WithItemPublished(Config<DateTime?> itemPublished)
         {
             _itemPublished = itemPublished;
             return this;
@@ -311,7 +311,7 @@ namespace Statiq.Feeds
         /// <param name="itemUpdated">A delegate that should return a <c>DateTime</c> with
         /// the item updated time.</param>
         /// <returns>The current module instance.</returns>
-        public GenerateFeeds WithItemUpdated(DocumentConfig<DateTime?> itemUpdated)
+        public GenerateFeeds WithItemUpdated(Config<DateTime?> itemUpdated)
         {
             _itemUpdated = itemUpdated;
             return this;
@@ -323,7 +323,7 @@ namespace Statiq.Feeds
         /// <param name="itemLink">A delegate that should return a <c>Uri</c> with
         /// the item link.</param>
         /// <returns>The current module instance.</returns>
-        public GenerateFeeds WithItemLink(DocumentConfig<Uri> itemLink)
+        public GenerateFeeds WithItemLink(Config<Uri> itemLink)
         {
             _itemLink = itemLink;
             return this;
@@ -336,7 +336,7 @@ namespace Statiq.Feeds
         /// <param name="itemImageLink">A delegate that should return a <c>Uri</c> with
         /// the item image link.</param>
         /// <returns>The current module instance.</returns>
-        public GenerateFeeds WithItemImageLink(DocumentConfig<Uri> itemImageLink)
+        public GenerateFeeds WithItemImageLink(Config<Uri> itemImageLink)
         {
             _itemImageLink = itemImageLink;
             return this;
@@ -351,7 +351,7 @@ namespace Statiq.Feeds
         /// <param name="itemContent">A delegate that should return a <c>string</c> with
         /// the content of the item.</param>
         /// <returns>The current module instance.</returns>
-        public GenerateFeeds WithItemContent(DocumentConfig<string> itemContent)
+        public GenerateFeeds WithItemContent(Config<string> itemContent)
         {
             _itemContent = itemContent;
             return this;
@@ -363,7 +363,7 @@ namespace Statiq.Feeds
         /// <param name="itemThreadLink">A delegate that should return a <c>Uri</c> with
         /// the item thread link.</param>
         /// <returns>The current module instance.</returns>
-        public GenerateFeeds WithItemThreadLink(DocumentConfig<Uri> itemThreadLink)
+        public GenerateFeeds WithItemThreadLink(Config<Uri> itemThreadLink)
         {
             _itemThreadLink = itemThreadLink;
             return this;
@@ -375,7 +375,7 @@ namespace Statiq.Feeds
         /// <param name="itemThreadCount">A delegate that should return an <c>int</c> with
         /// the item thread count.</param>
         /// <returns>The current module instance.</returns>
-        public GenerateFeeds WithItemThreadCount(DocumentConfig<int> itemThreadCount)
+        public GenerateFeeds WithItemThreadCount(Config<int> itemThreadCount)
         {
             _itemThreadCount = itemThreadCount;
             return this;
@@ -387,7 +387,7 @@ namespace Statiq.Feeds
         /// <param name="itemThreadUpdated">A delegate that should return a <c>DateTime</c> with
         /// the item thread updated time.</param>
         /// <returns>The current module instance.</returns>
-        public GenerateFeeds WithItemThreadUpdated(DocumentConfig<DateTime?> itemThreadUpdated)
+        public GenerateFeeds WithItemThreadUpdated(Config<DateTime?> itemThreadUpdated)
         {
             _itemThreadUpdated = itemThreadUpdated;
             return this;

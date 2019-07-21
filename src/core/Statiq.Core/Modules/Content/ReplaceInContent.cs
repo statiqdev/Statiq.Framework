@@ -24,7 +24,7 @@ namespace Statiq.Core
         /// </summary>
         /// <param name="search">The string to search for.</param>
         /// <param name="content">A delegate that returns the content to replace the search string with.</param>
-        public ReplaceInContent(string search, DocumentConfig<string> content)
+        public ReplaceInContent(string search, Config<string> content)
             : base(content, true)
         {
             _search = search;

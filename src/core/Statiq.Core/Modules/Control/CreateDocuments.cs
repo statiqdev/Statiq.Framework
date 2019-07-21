@@ -15,7 +15,7 @@ namespace Statiq.Core
     /// <category>Control</category>
     public class CreateDocuments : IModule
     {
-        private readonly DocumentConfig<IEnumerable<IDocument>> _documents;
+        private readonly Config<IEnumerable<IDocument>> _documents;
 
         /// <summary>
         /// Generates a specified number of new empty documents.

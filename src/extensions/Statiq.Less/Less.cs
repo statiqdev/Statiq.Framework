@@ -29,7 +29,7 @@ namespace Statiq.Less
     /// <category>Templates</category>
     public class Less : IModule
     {
-        private DocumentConfig<FilePath> _inputPath = Config.FromDocument(doc => doc.Source);
+        private Config<FilePath> _inputPath = Config.FromDocument(doc => doc.Source);
 
         /// <summary>
         /// Specifies a delegate that should be used to get the input path for each
@@ -39,7 +39,7 @@ namespace Statiq.Less
         /// </summary>
         /// <param name="inputPath">A delegate that should return a <see cref="FilePath"/>.</param>
         /// <returns>The current instance.</returns>
-        public Less WithInputPath(DocumentConfig<FilePath> inputPath)
+        public Less WithInputPath(Config<FilePath> inputPath)
         {
             _inputPath = inputPath ?? throw new ArgumentNullException(nameof(inputPath));
             return this;

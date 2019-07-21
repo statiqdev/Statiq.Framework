@@ -10,7 +10,7 @@ namespace Statiq.Common
     /// </summary>
     public abstract class ConfigModule<T> : IModule
     {
-        private readonly DocumentConfig<T> _config;
+        private readonly Config<T> _config;
         private readonly bool _alwaysApplyToInputs;
 
         /// <summary>
@@ -23,7 +23,7 @@ namespace Statiq.Common
         /// to allow only calling <see cref="ExecuteAsync(IDocument, IReadOnlyList{IDocument}, IExecutionContext, T)"/> once
         /// with a null input document if the config delegate does not require a document.
         /// </param>
-        protected ConfigModule(DocumentConfig<T> config, bool alwaysApplyToInputs)
+        protected ConfigModule(Config<T> config, bool alwaysApplyToInputs)
         {
             _config = config ?? throw new ArgumentNullException(nameof(config));
             _alwaysApplyToInputs = alwaysApplyToInputs;

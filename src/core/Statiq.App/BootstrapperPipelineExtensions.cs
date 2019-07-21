@@ -118,7 +118,7 @@ namespace Statiq.App
             this IBootstrapper bootstrapper,
             string name,
             string readFilesPattern,
-            DocumentConfig<FilePath> destinationPath,
+            Config<FilePath> destinationPath,
             IEnumerable<IModule> processModules = null,
             IEnumerable<IModule> transformModules = null) =>
             AddPipeline(bootstrapper, Array.Empty<string>(), true, name, readFilesPattern, destinationPath, processModules, transformModules);
@@ -149,7 +149,7 @@ namespace Statiq.App
             this IBootstrapper bootstrapper,
             string name,
             string readFilesPattern,
-            DocumentConfig<FilePath> destinationPath,
+            Config<FilePath> destinationPath,
             params IModule[] processModules) =>
             AddPipeline(bootstrapper, Array.Empty<string>(), false, name, readFilesPattern, destinationPath, processModules, null);
 
@@ -207,7 +207,7 @@ namespace Statiq.App
             string name,
             IEnumerable<string> dependencies,
             string readFilesPattern,
-            DocumentConfig<FilePath> destinationPath,
+            Config<FilePath> destinationPath,
             IEnumerable<IModule> processModules = null,
             IEnumerable<IModule> transformModules = null) =>
             AddPipeline(bootstrapper, dependencies, true, name, readFilesPattern, destinationPath, processModules, transformModules);
@@ -242,7 +242,7 @@ namespace Statiq.App
             string name,
             IEnumerable<string> dependencies,
             string readFilesPattern,
-            DocumentConfig<FilePath> destinationPath,
+            Config<FilePath> destinationPath,
             params IModule[] processModules) =>
             AddPipeline(bootstrapper, dependencies, false, name, readFilesPattern, destinationPath, processModules, null);
 
@@ -294,7 +294,7 @@ namespace Statiq.App
             this IBootstrapper bootstrapper,
             string name,
             string readFilesPattern,
-            DocumentConfig<FilePath> destinationPath,
+            Config<FilePath> destinationPath,
             IEnumerable<IModule> processModules = null,
             IEnumerable<IModule> transformModules = null) =>
             AddPipeline(bootstrapper, null, false, name, readFilesPattern, destinationPath, processModules, transformModules);
@@ -325,7 +325,7 @@ namespace Statiq.App
             this IBootstrapper bootstrapper,
             string name,
             string readFilesPattern,
-            DocumentConfig<FilePath> destinationPath,
+            Config<FilePath> destinationPath,
             params IModule[] processModules) =>
             AddPipeline(bootstrapper, null, false, name, readFilesPattern, destinationPath, processModules, null);
 
@@ -377,7 +377,7 @@ namespace Statiq.App
             this IBootstrapper bootstrapper,
             string name,
             string readFilesPattern,
-            DocumentConfig<FilePath> destinationPath,
+            Config<FilePath> destinationPath,
             IEnumerable<IModule> processModules = null,
             IEnumerable<IModule> transformModules = null) =>
             AddPipeline(bootstrapper, null, true, name, readFilesPattern, destinationPath, processModules, transformModules);
@@ -408,7 +408,7 @@ namespace Statiq.App
             this IBootstrapper bootstrapper,
             string name,
             string readFilesPattern,
-            DocumentConfig<FilePath> destinationPath,
+            Config<FilePath> destinationPath,
             params IModule[] processModules) =>
             AddPipeline(bootstrapper, null, true, name, readFilesPattern, destinationPath, processModules, null);
 
@@ -508,7 +508,7 @@ namespace Statiq.App
             bool isolated,
             string name,
             string readFilesPattern,
-            DocumentConfig<FilePath> destinationPath,
+            Config<FilePath> destinationPath,
             IEnumerable<IModule> processModules,
             IEnumerable<IModule> transformModules) =>
             bootstrapper.BuildPipeline(name, builder =>

@@ -1,6 +1,7 @@
 using System;
+using Statiq.Common;
 
-namespace Statiq.Common
+namespace Statiq.Core
 {
     /// <summary>
     /// Represents an item in the site map.
@@ -20,7 +21,7 @@ namespace Statiq.Common
         /// <summary>
         /// Gets or sets the expected frequency of changes of the item.
         /// </summary>
-        public ChangeFrequency? ChangeFrequency { get; set; }
+        public SitemapChangeFrequency? ChangeFrequency { get; set; }
 
         /// <summary>
         /// Gets or sets the priority of the item.

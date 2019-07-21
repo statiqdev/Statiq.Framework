@@ -57,7 +57,7 @@ namespace Statiq.SearchIndex
     public class SearchIndex : IModule
     {
         private static readonly Regex StripHtmlAndSpecialChars = new Regex(@"<[^>]+>|&[a-zA-Z]{2,};|&#\d+;|[^a-zA-Z-#]", RegexOptions.Compiled);
-        private readonly DocumentConfig<ISearchIndexItem> _searchIndexItem;
+        private readonly Config<ISearchIndexItem> _searchIndexItem;
         private FilePath _stopwordsPath;
         private bool _enableStemming;
         private FilePath _destination = new FilePath("searchIndex.js");
@@ -93,7 +93,7 @@ namespace Statiq.SearchIndex
         /// <param name="searchIndexItem">A delegate that should return a <c>ISearchIndexItem</c>.</param>
         /// <param name="stopwordsPath">A file to use that contains a set of stopwords.</param>
         /// <param name="enableStemming">If set to <c>true</c>, stemming is enabled.</param>
-        public SearchIndex(DocumentConfig<ISearchIndexItem> searchIndexItem, FilePath stopwordsPath = null, bool enableStemming = false)
+        public SearchIndex(Config<ISearchIndexItem> searchIndexItem, FilePath stopwordsPath = null, bool enableStemming = false)
         {
             _searchIndexItem = searchIndexItem ?? throw new ArgumentNullException(nameof(searchIndexItem));
             _stopwordsPath = stopwordsPath;

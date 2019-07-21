@@ -41,7 +41,7 @@ namespace Statiq.Sass
     public class Sass : IModule
     {
         private readonly List<DirectoryPath> _includePaths = new List<DirectoryPath>();
-        private DocumentConfig<FilePath> _inputPath = Config.FromDocument(DefaultInputPathAsync);
+        private Config<FilePath> _inputPath = Config.FromDocument(DefaultInputPathAsync);
         private Func<string, string> _importPathFunc = null;
         private bool _includeSourceComments = false;
         private ScssOutputStyle _outputStyle = ScssOutputStyle.Compact;
@@ -55,7 +55,7 @@ namespace Statiq.Sass
         /// </summary>
         /// <param name="inputPath">A delegate that should return a <see cref="FilePath"/>.</param>
         /// <returns>The current instance.</returns>
-        public Sass WithInputPath(DocumentConfig<FilePath> inputPath)
+        public Sass WithInputPath(Config<FilePath> inputPath)
         {
             _inputPath = inputPath ?? throw new ArgumentNullException(nameof(inputPath));
             return this;

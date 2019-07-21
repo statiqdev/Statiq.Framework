@@ -11,14 +11,14 @@ namespace Statiq.Common
     /// that uses a document and context or a simple value. Use the factory methods
     /// in the <see cref="Config"/> class to create one. Instances can also be created
     /// through implicit casting from the value type. Note that due to overload ambiguity,
-    /// if a value type of object is used, then all overloads should also be <see cref="DocumentConfig{T}"/>.
+    /// if a value type of object is used, then all overloads should also be <see cref="Config{T}"/>.
     /// </summary>
     /// <typeparam name="TValue">The value type for this config data.</typeparam>
-    public class DocumentConfig<TValue>
+    public class Config<TValue>
     {
         private readonly Func<IDocument, IExecutionContext, Task<TValue>> _delegate;
 
-        internal DocumentConfig(Func<IDocument, IExecutionContext, Task<TValue>> func, bool requiresDocument = true)
+        internal Config(Func<IDocument, IExecutionContext, Task<TValue>> func, bool requiresDocument = true)
         {
             _delegate = func;
             RequiresDocument = requiresDocument;
@@ -34,20 +34,20 @@ namespace Statiq.Common
             return transform == null ? value : transform(value);
         }
 
-        public static implicit operator DocumentConfig<TValue>(TValue value) => new DocumentConfig<TValue>((_, __) => Task.FromResult(value), false);
+        public static implicit operator Config<TValue>(TValue value) => new Config<TValue>((_, __) => Task.FromResult(value), false);
 
         // These special casting operators for object variants ensure we don't accidentally "wrap" an existing ContextConfig/DocumentConfig
 
-        public static implicit operator DocumentConfig<IEnumerable<object>>(DocumentConfig<TValue> documentConfig)
+        public static implicit operator Config<IEnumerable<object>>(Config<TValue> documentConfig)
         {
             if (typeof(IEnumerable).IsAssignableFrom(typeof(TValue)))
             {
-                return new DocumentConfig<IEnumerable<object>>(async (doc, ctx) => ((IEnumerable)await documentConfig._delegate(doc, ctx)).Cast<object>(), documentConfig.RequiresDocument);
+                return new Config<IEnumerable<object>>(async (doc, ctx) => ((IEnumerable)await documentConfig._delegate(doc, ctx)).Cast<object>(), documentConfig.RequiresDocument);
             }
-            return new DocumentConfig<IEnumerable<object>>(async (doc, ctx) => new object[] { await documentConfig._delegate(doc, ctx) }, documentConfig.RequiresDocument);
+            return new Config<IEnumerable<object>>(async (doc, ctx) => new object[] { await documentConfig._delegate(doc, ctx) }, documentConfig.RequiresDocument);
         }
 
-        public static implicit operator DocumentConfig<object>(DocumentConfig<TValue> documentConfig) =>
-            new DocumentConfig<object>(async (doc, ctx) => await documentConfig._delegate(doc, ctx), documentConfig.RequiresDocument);
+        public static implicit operator Config<object>(Config<TValue> documentConfig) =>
+            new Config<object>(async (doc, ctx) => await documentConfig._delegate(doc, ctx), documentConfig.RequiresDocument);
     }
 }

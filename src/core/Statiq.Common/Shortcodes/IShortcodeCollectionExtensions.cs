@@ -56,7 +56,7 @@ namespace Statiq.Common
         }
 
         /// <summary>
-        /// Adds a shortcode and uses a <see cref="DocumentConfig{String}"/> to determine
+        /// Adds a shortcode and uses a <see cref="Config{String}"/> to determine
         /// the shortcode result.
         /// </summary>
         /// <param name="collection">The shortcode collection.</param>
@@ -65,7 +65,7 @@ namespace Statiq.Common
         public static void Add(
             this IShortcodeCollection collection,
             string name,
-            DocumentConfig<string> documentConfig) =>
+            Config<string> documentConfig) =>
             collection.Add(name, async (args, content, doc, ctx) =>
             {
                 string result = documentConfig == null ? null : await documentConfig.GetAndTransformValueAsync(doc, ctx);

@@ -19,7 +19,7 @@ namespace Statiq.Core
     /// <category>Templates</category>
     public class TransformXslt : IModule
     {
-        private readonly DocumentConfig<FilePath> _xsltPath;
+        private readonly Config<FilePath> _xsltPath;
         private readonly IModule[] _xsltGeneration;
 
         /// <summary>
@@ -28,7 +28,7 @@ namespace Statiq.Core
         /// on the input document.
         /// </summary>
         /// <param name="xsltPath">A delegate that should return a <see cref="FilePath"/> with the XSLT file to use.</param>
-        public TransformXslt(DocumentConfig<FilePath> xsltPath)
+        public TransformXslt(Config<FilePath> xsltPath)
         {
             _xsltPath = xsltPath;
         }

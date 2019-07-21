@@ -33,7 +33,7 @@ namespace Statiq.Html
     public class AutoLink : IModule
     {
         // Key = text to replace, Value = url
-        private readonly DocumentConfig<IDictionary<string, string>> _links;
+        private readonly Config<IDictionary<string, string>> _links;
         private readonly IDictionary<string, string> _extraLinks = new Dictionary<string, string>();
         private readonly List<char> _startWordSeparators = new List<char>();
         private readonly List<char> _endWordSeparators = new List<char>();
@@ -55,7 +55,7 @@ namespace Statiq.Html
         /// to specify a different mapping for each input document.
         /// </summary>
         /// <param name="links">A delegate that returns a dictionary of link mappings.</param>
-        public AutoLink(DocumentConfig<IDictionary<string, string>> links)
+        public AutoLink(Config<IDictionary<string, string>> links)
         {
             _links = links;
         }

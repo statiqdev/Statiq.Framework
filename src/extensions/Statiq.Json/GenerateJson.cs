@@ -18,7 +18,7 @@ namespace Statiq.Json
     /// <category>Content</category>
     public class GenerateJson : IModule
     {
-        private readonly DocumentConfig<object> _data;
+        private readonly Config<object> _data;
         private readonly string _destinationKey;
         private bool _indenting = true;
         private bool _camelCase = false;
@@ -31,7 +31,7 @@ namespace Statiq.Json
         /// <param name="sourceKey">The metadata key of the object to convert to JSON.</param>
         /// <param name="destinationKey">The metadata key where the JSON should be stored (or <c>null</c>
         /// to replace the content of each input document).</param>
-        public GenerateJson(DocumentConfig<string> sourceKey, string destinationKey = null)
+        public GenerateJson(Config<string> sourceKey, string destinationKey = null)
         {
             if (sourceKey == null)
             {
@@ -48,7 +48,7 @@ namespace Statiq.Json
         /// <param name="data">A delegate that returns the object to convert to JSON.</param>
         /// <param name="destinationKey">The metadata key where the JSON should be stored (or <c>null</c>
         /// to replace the content of each input document).</param>
-        public GenerateJson(DocumentConfig<object> data, string destinationKey = null)
+        public GenerateJson(Config<object> data, string destinationKey = null)
         {
             _destinationKey = destinationKey;
             _data = data ?? throw new ArgumentNullException(nameof(data));
@@ -60,7 +60,7 @@ namespace Statiq.Json
         /// <param name="keys">The metadata keys to serialize as properties.</param>
         /// <param name="destinationKey">The metadata key where the JSON should be stored (or <c>null</c>
         /// to replace the content of each input document).</param>
-        public GenerateJson(DocumentConfig<IEnumerable<string>> keys, string destinationKey = null)
+        public GenerateJson(Config<IEnumerable<string>> keys, string destinationKey = null)
         {
             if (keys == null)
             {

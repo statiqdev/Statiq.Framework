@@ -19,7 +19,7 @@ namespace Statiq.Common
     public abstract class DocumentModule : ContainerModule
     {
         /// <summary>
-        /// Executes the specified modules.
+        /// Executes the specified modules to get result documents.
         /// </summary>
         /// <param name="modules">The modules to execute.</param>
         protected DocumentModule(params IModule[] modules)

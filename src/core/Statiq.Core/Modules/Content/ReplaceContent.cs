@@ -1,21 +1,24 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Statiq.Common;
 
 namespace Statiq.Core
 {
     /// <summary>
-    /// Prepends the specified content to the existing content of each document.
+    /// Replaces the content of each document.
     /// </summary>
     /// <category>Content</category>
-    public class PrependContent : ConfigModule<string>
+    public class ReplaceContent : ConfigModule<string>
     {
         /// <summary>
-        /// Prepends the string value of the returned object to content of each document. This
-        /// allows you to specify different content to prepend for each document depending on the input document.
+        /// Replaces the content of each document with the config value.
+        /// If the value is <c>null</c>, the original input document will be output
+        /// (use <see cref="string.Empty"/> to clear the content).
         /// </summary>
-        /// <param name="content">A delegate that returns the content to prepend.</param>
-        public PrependContent(Config<string> content)
+        /// <param name="content">A delegate that returns the content to append.</param>
+        public ReplaceContent(Config<string> content)
             : base(content, true)
         {
         }
@@ -33,7 +36,7 @@ namespace Statiq.Core
             }
             return value == null
                 ? input.Yield()
-                : input.Clone(await context.GetContentProviderAsync(value + await input.GetStringAsync())).Yield();
+                : input.Clone(await context.GetContentProviderAsync(value)).Yield();
         }
     }
 }

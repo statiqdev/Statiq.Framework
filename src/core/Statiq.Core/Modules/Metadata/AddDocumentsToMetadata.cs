@@ -10,8 +10,8 @@ namespace Statiq.Core
     /// Adds the result document(s) to metadata of the input documents.
     /// </summary>
     /// <remarks>
-    /// If more than one result document is produced, it will be added as an array of documents
-    /// to the specified metadata key.
+    /// If more than one result document is produced, it will be added as a
+    /// <see cref="IReadOnlyList{IDocument}"/> to the specified metadata key.
     /// </remarks>
     /// <category>Metadata</category>
     public class AddDocumentsToMetadata : DocumentModule
@@ -19,20 +19,19 @@ namespace Statiq.Core
         private readonly string _key;
 
         public AddDocumentsToMetadata(string key)
+            : base(Array.Empty<IModule>())
         {
             _key = key ?? throw new ArgumentNullException(nameof(key));
         }
 
-        /// <inheritdoc />
         public AddDocumentsToMetadata(string key, params IModule[] modules)
             : base(modules)
         {
             _key = key ?? throw new ArgumentNullException(nameof(key));
         }
 
-        /// <inheritdoc />
         public AddDocumentsToMetadata(string key, params string[] pipelines)
-            : base(new GetDocuments(pipelines))
+            : base(new ExecuteConfig(Config.FromContext(ctx => ctx.Documents.FromPipelines(pipelines))))
         {
             _key = key ?? throw new ArgumentNullException(nameof(key));
         }

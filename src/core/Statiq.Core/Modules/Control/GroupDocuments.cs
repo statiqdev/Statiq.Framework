@@ -24,7 +24,7 @@ namespace Statiq.Core
     /// <category>Control</category>
     public class GroupDocuments : IModule
     {
-        private readonly DocumentConfig<IEnumerable<object>> _key;
+        private readonly Config<IEnumerable<object>> _key;
         private IEqualityComparer<object> _comparer;
 
         /// <summary>
@@ -32,7 +32,7 @@ namespace Statiq.Core
         /// based on the key delegate.
         /// </summary>
         /// <param name="groupKeys">A delegate that returns the group key(s).</param>
-        public GroupDocuments(DocumentConfig<IEnumerable<object>> groupKeys)
+        public GroupDocuments(Config<IEnumerable<object>> groupKeys)
         {
             _key = groupKeys ?? throw new ArgumentNullException(nameof(groupKeys));
         }

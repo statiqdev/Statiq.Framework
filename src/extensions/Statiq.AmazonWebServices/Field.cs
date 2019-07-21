@@ -4,10 +4,10 @@ namespace Statiq.AmazonWebServices
 {
     internal class Field
     {
-        public DocumentConfig<string> FieldName { get; }
-        public DocumentConfig<object> FieldValue { get; }
+        public Config<string> FieldName { get; }
+        public Config<object> FieldValue { get; }
 
-        public Field(DocumentConfig<string> fieldName, DocumentConfig<object> fieldValue)
+        public Field(Config<string> fieldName, Config<object> fieldValue)
         {
             FieldName = fieldName;
             FieldValue = fieldValue;

@@ -28,7 +28,7 @@ namespace Statiq.Core
         /// specify different patterns and/or paths depending on the input.
         /// </summary>
         /// <param name="patterns">A delegate that returns one or more globbing patterns and/or absolute paths.</param>
-        public ReadFiles(DocumentConfig<IEnumerable<string>> patterns)
+        public ReadFiles(Config<IEnumerable<string>> patterns)
             : base(patterns, false)
         {
         }
@@ -38,7 +38,7 @@ namespace Statiq.Core
         /// </summary>
         /// <param name="patterns">The globbing patterns and/or absolute paths to read.</param>
         public ReadFiles(params string[] patterns)
-            : base((DocumentConfig<IEnumerable<string>>)(patterns ?? throw new ArgumentNullException(nameof(patterns))), false)
+            : base((Config<IEnumerable<string>>)(patterns ?? throw new ArgumentNullException(nameof(patterns))), false)
         {
         }
 

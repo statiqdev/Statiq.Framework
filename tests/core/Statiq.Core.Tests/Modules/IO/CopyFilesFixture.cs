@@ -17,7 +17,7 @@ namespace Statiq.Core.Tests.Modules.IO
             public void ThrowsOnNullPathFunction()
             {
                 // Given, When, Then
-                Assert.Throws<ArgumentNullException>(() => new CopyFiles((DocumentConfig<IEnumerable<string>>)null));
+                Assert.Throws<ArgumentNullException>(() => new CopyFiles((Config<IEnumerable<string>>)null));
             }
 
             [Test]

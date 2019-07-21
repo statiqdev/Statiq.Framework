@@ -15,7 +15,7 @@ namespace Statiq.Common.Tests.Configuration
             public async Task ReturnsDefaultTaskForNullIntConfig()
             {
                 // Given, When
-                Task<int> task = ((DocumentConfig<int>)null).GetValueAsync(null, null);
+                Task<int> task = ((Config<int>)null).GetValueAsync(null, null);
 
                 // Then
                 (await task).ShouldBe(default);
@@ -25,7 +25,7 @@ namespace Statiq.Common.Tests.Configuration
             public async Task ReturnsDefaultTaskForNullObjectConfig()
             {
                 // Given, When
-                Task<object> task = ((DocumentConfig<object>)null).GetValueAsync(null, null);
+                Task<object> task = ((Config<object>)null).GetValueAsync(null, null);
 
                 // Then
                 (await task).ShouldBe(default);
@@ -36,7 +36,7 @@ namespace Statiq.Common.Tests.Configuration
             {
                 // Given
                 TestExecutionContext context = new TestExecutionContext();
-                DocumentConfig<object> config = "10";
+                Config<object> config = "10";
 
                 // When
                 int result = await config.GetValueAsync<int>(null, context);
@@ -50,7 +50,7 @@ namespace Statiq.Common.Tests.Configuration
             {
                 // Given
                 TestExecutionContext context = new TestExecutionContext();
-                DocumentConfig<object> config = "abc";
+                Config<object> config = "abc";
 
                 // When, Then
                 await Should.ThrowAsync<InvalidOperationException>(async () => await config.GetValueAsync<int>(null, context));
@@ -64,7 +64,7 @@ namespace Statiq.Common.Tests.Configuration
             {
                 // Given
                 TestExecutionContext context = new TestExecutionContext();
-                DocumentConfig<object> config = "10";
+                Config<object> config = "10";
 
                 // When
                 int result = await config.TryGetValueAsync<int>(null, context);
@@ -78,7 +78,7 @@ namespace Statiq.Common.Tests.Configuration
             {
                 // Given
                 TestExecutionContext context = new TestExecutionContext();
-                DocumentConfig<object> config = "abc";
+                Config<object> config = "abc";
 
                 // When
                 int result = await config.TryGetValueAsync<int>(null, context);

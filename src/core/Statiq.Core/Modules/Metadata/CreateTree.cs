@@ -37,8 +37,8 @@ namespace Statiq.Core
     {
         private static readonly ReadOnlyMemory<char> IndexFileName = "index.".AsMemory();
 
-        private DocumentConfig<bool> _isRoot;
-        private DocumentConfig<string[]> _treePath;
+        private Config<bool> _isRoot;
+        private Config<string[]> _treePath;
         private Func<string[], MetadataItems, IExecutionContext, Task<IDocument>> _placeholderFactory;
         private Comparison<IDocument> _sort;
         private bool _collapseRoot = false;
@@ -123,7 +123,7 @@ namespace Statiq.Core
         /// </summary>
         /// <param name="isRoot">A predicate (must return <c>bool</c>) that specifies if the current document is treated as the root of a new tree.</param>
         /// <returns>The current module instance.</returns>
-        public CreateTree WithRoots(DocumentConfig<bool> isRoot)
+        public CreateTree WithRoots(Config<bool> isRoot)
         {
             _isRoot = isRoot ?? throw new ArgumentNullException(nameof(isRoot));
             return this;
@@ -135,7 +135,7 @@ namespace Statiq.Core
         /// </summary>
         /// <param name="treePath">A delegate that must return a sequence of strings.</param>
         /// <returns>The current module instance.</returns>
-        public CreateTree WithTreePath(DocumentConfig<string[]> treePath)
+        public CreateTree WithTreePath(Config<string[]> treePath)
         {
             _treePath = treePath ?? throw new ArgumentNullException(nameof(treePath));
             return this;

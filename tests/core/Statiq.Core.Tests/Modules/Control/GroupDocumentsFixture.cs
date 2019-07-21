@@ -24,12 +24,12 @@ namespace Statiq.Core.Tests.Modules.Control
                     EnsureInputDocument = true
                 };
                 GroupDocuments groupByMany = new GroupDocuments(Config.FromDocument(d => new[] { d.Int("A") % 3, 3 }));
-                Execute gatherData = new ExecuteDocument(
+                ForEachDocument gatherData = new ExecuteConfig(
                     Config.FromDocument(d =>
                     {
                         groupKey.Add(d.Int(Keys.GroupKey));
                         return d;
-                    }), false);
+                    })).ForEachDocument();
 
                 // When
                 IReadOnlyList<IDocument> results = await ExecuteAsync(count, groupByMany, gatherData);
@@ -50,13 +50,13 @@ namespace Statiq.Core.Tests.Modules.Control
                 };
                 GroupDocuments groupByMany = new GroupDocuments(Config.FromDocument(d => new[] { d.Int("A") % 3, 3 }));
                 OrderDocuments orderBy = new OrderDocuments(Config.FromDocument<int>(Keys.GroupKey));
-                Execute gatherData = new ExecuteDocument(
+                ForEachDocument gatherData = new ExecuteConfig(
                     Config.FromDocument(async d =>
                     {
                         IEnumerable<string> groupContent = await d.Get<IList<IDocument>>(Keys.GroupDocuments).SelectAsync(async x => await x.GetStringAsync());
                         content.Add(groupContent.ToList());
                         return (object)null;
-                    }), false);
+                    })).ForEachDocument();
 
                 // When
                 IReadOnlyList<IDocument> results = await ExecuteAsync(count, groupByMany, orderBy, gatherData);
@@ -81,12 +81,12 @@ namespace Statiq.Core.Tests.Modules.Control
                 };
                 AddMetadata meta = new AddMetadata("GroupMetadata", Config.FromDocument(d => new object[] { d.Int("A") % 3, 3 }));
                 GroupDocuments groupByMany = new GroupDocuments("GroupMetadata");
-                Execute gatherData = new ExecuteDocument(
+                ForEachDocument gatherData = new ExecuteConfig(
                     Config.FromDocument(d =>
                     {
                         groupKey.Add(d.Int(Keys.GroupKey));
                         return (object)null;
-                    }), false);
+                    })).ForEachDocument();
 
                 // When
                 IReadOnlyList<IDocument> results = await ExecuteAsync(count, meta, groupByMany, gatherData);
@@ -105,19 +105,19 @@ namespace Statiq.Core.Tests.Modules.Control
                     AdditionalOutputs = 7,
                     EnsureInputDocument = true
                 };
-                Execute meta = new ExecuteDocument(
+                ForEachDocument meta = new ExecuteConfig(
                     Config.FromDocument(d =>
                     {
                         int groupMetadata = d.Int("A") % 3;
                         return groupMetadata == 0 ? d : d.Clone(new MetadataItems { { "GroupMetadata", new object[] { groupMetadata, 3 } } });
-                    }), false);
+                    })).ForEachDocument();
                 GroupDocuments groupByMany = new GroupDocuments("GroupMetadata");
-                Execute gatherData = new ExecuteDocument(
+                ForEachDocument gatherData = new ExecuteConfig(
                     Config.FromDocument(d =>
                     {
                         groupKey.Add(d.Int(Keys.GroupKey));
                         return (object)null;
-                    }), false);
+                    })).ForEachDocument();
 
                 // When
                 IReadOnlyList<IDocument> results = await ExecuteAsync(count, meta, groupByMany, gatherData);
@@ -131,7 +131,7 @@ namespace Statiq.Core.Tests.Modules.Control
             {
                 // Given
                 List<object> groupKey = new List<object>();
-                Execute meta = new ExecuteContext(
+                ExecuteConfig meta = new ExecuteConfig(Config.FromContext(
                     c => new IDocument[]
                     {
                         c.CreateDocument(new MetadataItems { { "Tag", new object[] { "A", "b" } } }),
@@ -140,14 +140,14 @@ namespace Statiq.Core.Tests.Modules.Control
                         c.CreateDocument(new MetadataItems { { "Tag", new object[] { "c" } } }),
                         c.CreateDocument(new MetadataItems { { "Tag", new object[] { 1 } } }),
                         c.CreateDocument(new MetadataItems { { "Tag", new object[] { "1" } } })
-                    });
+                    }));
                 GroupDocuments groupByMany = new GroupDocuments("Tag");
-                Execute gatherData = new ExecuteDocument(
+                ForEachDocument gatherData = new ExecuteConfig(
                     Config.FromDocument(d =>
                     {
                         groupKey.Add(d.Get(Keys.GroupKey));
                         return (object)null;
-                    }), false);
+                    })).ForEachDocument();
 
                 // When
                 IReadOnlyList<IDocument> results = await ExecuteAsync(meta, groupByMany, gatherData);
@@ -161,7 +161,7 @@ namespace Statiq.Core.Tests.Modules.Control
             {
                 // Given
                 List<object> groupKey = new List<object>();
-                Execute meta = new ExecuteContext(
+                ExecuteConfig meta = new ExecuteConfig(Config.FromContext(
                     c => new IDocument[]
                     {
                         c.CreateDocument(new MetadataItems { { "Tag", new object[] { "A", "b" } } }),
@@ -170,14 +170,14 @@ namespace Statiq.Core.Tests.Modules.Control
                         c.CreateDocument(new MetadataItems { { "Tag", new object[] { "c" } } }),
                         c.CreateDocument(new MetadataItems { { "Tag", new object[] { 1 } } }),
                         c.CreateDocument(new MetadataItems { { "Tag", new object[] { "1" } } })
-                    });
+                    }));
                 GroupDocuments groupByMany = new GroupDocuments("Tag").WithComparer(StringComparer.OrdinalIgnoreCase);
-                Execute gatherData = new ExecuteDocument(
+                ForEachDocument gatherData = new ExecuteConfig(
                     Config.FromDocument(d =>
                     {
                         groupKey.Add(d.Get(Keys.GroupKey));
                         return (object)null;
-                    }), false);
+                    })).ForEachDocument();
 
                 // When
                 IReadOnlyList<IDocument> results = await ExecuteAsync(meta, groupByMany, gatherData);

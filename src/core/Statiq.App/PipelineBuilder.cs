@@ -38,7 +38,7 @@ namespace Statiq.App
 
         public PipelineBuilder WithInputReadFiles(params string[] patterns)
         {
-            _actions.Add(x => x.InputModules.Add(new ReadFiles((DocumentConfig<IEnumerable<string>>)patterns)));
+            _actions.Add(x => x.InputModules.Add(new ReadFiles((Config<IEnumerable<string>>)patterns)));
             return this;
         }
 
@@ -46,7 +46,7 @@ namespace Statiq.App
         {
             if (patterns != null)
             {
-                _actions.Add(x => x.InputModules.Add(new ReadFiles((DocumentConfig<IEnumerable<string>>)patterns)));
+                _actions.Add(x => x.InputModules.Add(new ReadFiles((Config<IEnumerable<string>>)patterns)));
             }
             return this;
         }
@@ -65,7 +65,7 @@ namespace Statiq.App
             return this;
         }
 
-        public PipelineBuilder WithOutputWriteFiles(DocumentConfig<FilePath> path)
+        public PipelineBuilder WithOutputWriteFiles(Config<FilePath> path)
         {
             _actions.Add(x => x.OutputModules.Add(
                 new SetDestination(path),
@@ -167,75 +167,27 @@ namespace Statiq.App
             return this;
         }
 
-        public PipelineBuilder WithInputDelegate(Action<IReadOnlyList<IDocument>, IExecutionContext> action)
+        public PipelineBuilder WithInputConfig(Config<object> config)
         {
-            _actions.Add(x => x.WithInputDelegate(action));
+            _actions.Add(x => x.WithInputConfig(config));
             return this;
         }
 
-        public PipelineBuilder WithInputDelegate(Func<IReadOnlyList<IDocument>, IExecutionContext, Task> func)
+        public PipelineBuilder WithProcessConfig(Config<object> config)
         {
-            _actions.Add(x => x.WithInputDelegate(func));
+            _actions.Add(x => x.WithProcessConfig(config));
             return this;
         }
 
-        public PipelineBuilder WithInputDelegate(Func<IReadOnlyList<IDocument>, IExecutionContext, Task<object>> func)
+        public PipelineBuilder WithTransformConfig(Config<object> config)
         {
-            _actions.Add(x => x.WithInputDelegate(func));
+            _actions.Add(x => x.WithTransformConfig(config));
             return this;
         }
 
-        public PipelineBuilder WithProcessDelegate(Action<IReadOnlyList<IDocument>, IExecutionContext> action)
+        public PipelineBuilder WithOutputConfig(Config<object> config)
         {
-            _actions.Add(x => x.WithProcessDelegate(action));
-            return this;
-        }
-
-        public PipelineBuilder WithProcessDelegate(Func<IReadOnlyList<IDocument>, IExecutionContext, Task> func)
-        {
-            _actions.Add(x => x.WithProcessDelegate(func));
-            return this;
-        }
-
-        public PipelineBuilder WithProcessDelegate(Func<IReadOnlyList<IDocument>, IExecutionContext, Task<object>> func)
-        {
-            _actions.Add(x => x.WithProcessDelegate(func));
-            return this;
-        }
-
-        public PipelineBuilder WithTransformDelegate(Action<IReadOnlyList<IDocument>, IExecutionContext> action)
-        {
-            _actions.Add(x => x.WithTransformDelegate(action));
-            return this;
-        }
-
-        public PipelineBuilder WithTransformDelegate(Func<IReadOnlyList<IDocument>, IExecutionContext, Task> func)
-        {
-            _actions.Add(x => x.WithTransformDelegate(func));
-            return this;
-        }
-
-        public PipelineBuilder WithTransformDelegate(Func<IReadOnlyList<IDocument>, IExecutionContext, Task<object>> func)
-        {
-            _actions.Add(x => x.WithTransformDelegate(func));
-            return this;
-        }
-
-        public PipelineBuilder WithOutputDelegate(Action<IReadOnlyList<IDocument>, IExecutionContext> action)
-        {
-            _actions.Add(x => x.WithOutputDelegate(action));
-            return this;
-        }
-
-        public PipelineBuilder WithOutputDelegate(Func<IReadOnlyList<IDocument>, IExecutionContext, Task> func)
-        {
-            _actions.Add(x => x.WithOutputDelegate(func));
-            return this;
-        }
-
-        public PipelineBuilder WithOutputDelegate(Func<IReadOnlyList<IDocument>, IExecutionContext, Task<object>> func)
-        {
-            _actions.Add(x => x.WithOutputDelegate(func));
+            _actions.Add(x => x.WithOutputConfig(config));
             return this;
         }
     }

@@ -18,12 +18,12 @@ namespace Statiq.CodeAnalysis
     /// </summary>
     public abstract class ReadWorkspace : IModule
     {
-        private readonly DocumentConfig<FilePath> _path;
+        private readonly Config<FilePath> _path;
         private Func<string, bool> _whereProject;
         private Func<IFile, bool> _whereFile;
         private string[] _extensions;
 
-        protected ReadWorkspace(DocumentConfig<FilePath> path)
+        protected ReadWorkspace(Config<FilePath> path)
         {
             _path = path ?? throw new ArgumentNullException(nameof(path));
         }
