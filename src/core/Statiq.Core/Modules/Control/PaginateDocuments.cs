@@ -10,61 +10,28 @@ namespace Statiq.Core
     /// Splits a sequence of documents into multiple pages.
     /// </summary>
     /// <remarks>
-    /// This module forms pages from the output documents of the specified modules.
-    /// Each input document is cloned for each page and metadata related
-    /// to the pages, including the sequence of documents for each page,
-    /// is added to each clone. For example, if you have 2 input documents
-    /// and the result of paging is 3 pages, this module will output 6 documents.
+    /// This module forms pages from the input documents.
     /// Note that if there are no documents to paginate, this module will still
     /// output an empty page without any documents inside the page.
     /// </remarks>
-    /// <example>
-    /// If your input document is a Razor template for a blog archive, you can use
-    /// Paginate to get pages of 10 blog posts each. If you have 50 blog posts, the
-    /// result of the Paginate module will be 5 copies of your input archive template,
-    /// one for each page. Your configuration file might look something like this:
-    /// <code>
-    /// Pipelines.Add("Posts",
-    ///     ReadFiles("*.md"),
-    ///     Markdown(),
-    ///     WriteFiles("html")
-    /// );
-    ///
-    /// Pipelines.Add("Archive",
-    ///     ReadFiles("archive.cshtml"),
-    ///     Paginate(10,
-    ///         Documents("Posts")
-    ///     ),
-    ///     Razor(),
-    ///     WriteFiles(string.Format("archive-{0}.html", @doc["CurrentPage"]))
-    /// );
-    /// </code>
-    /// </example>
     /// <metadata cref="Keys.PageDocuments" usage="Output" />
     /// <metadata cref="Keys.CurrentPage" usage="Output" />
     /// <metadata cref="Keys.TotalPages" usage="Output" />
     /// <metadata cref="Keys.TotalItems" usage="Output" />
     /// <metadata cref="Keys.HasNextPage" usage="Output" />
     /// <metadata cref="Keys.HasPreviousPage" usage="Output" />
-    /// <metadata cref="Keys.NextPage" usage="Output" />
-    /// <metadata cref="Keys.PreviousPage" usage="Output" />
     /// <category>Control</category>
-    public class PaginateDocuments : ContainerModule
+    public class PaginateDocuments : IModule
     {
         private readonly int _pageSize;
-        private readonly Dictionary<string, Config<object>> _pageMetadata = new Dictionary<string, Config<object>>();
-        private Config<bool> _predicate;
         private int _takePages = int.MaxValue;
         private int _skipPages = 0;
 
         /// <summary>
-        /// Partitions the result of the specified modules into the specified number of pages. The
-        /// input documents to Paginate are used as the initial input documents to the specified modules.
+        /// Partitions the result of the input documents into the specified number of pages.
         /// </summary>
         /// <param name="pageSize">The number of documents on each page.</param>
-        /// <param name="modules">The modules to execute to get the documents to page.</param>
-        public PaginateDocuments(int pageSize, params IModule[] modules)
-            : base(modules)
+        public PaginateDocuments(int pageSize)
         {
             if (pageSize <= 0)
             {
@@ -75,23 +42,17 @@ namespace Statiq.Core
         }
 
         /// <summary>
-        /// Limits the documents to be paged to those that satisfy the supplied predicate.
-        /// </summary>
-        /// <param name="predicate">A delegate that should return a <c>bool</c>.</param>
-        /// <returns>The current module instance.</returns>
-        public PaginateDocuments Where(Config<bool> predicate)
-        {
-            _predicate = _predicate.CombineWith(predicate);
-            return this;
-        }
-
-        /// <summary>
         /// Only outputs a specific number of pages.
         /// </summary>
         /// <param name="count">The number of pages to output.</param>
         /// <returns>The current module instance.</returns>
         public PaginateDocuments TakePages(int count)
         {
+            if (count <= 0)
+            {
+                throw new ArgumentException(nameof(count));
+            }
+
             _takePages = count;
             return this;
         }
@@ -103,102 +64,47 @@ namespace Statiq.Core
         /// <returns>The current module instance.</returns>
         public PaginateDocuments SkipPages(int count)
         {
+            if (count <= 0)
+            {
+                throw new ArgumentException(nameof(count));
+            }
+
             _skipPages = count;
             return this;
         }
 
-        /// <summary>
-        /// Adds the specified metadata to each page index document. This must be performed
-        /// within the paginate module. If you attempt to process the page index documents
-        /// from the paginate module after execution, it will "disconnect" metadata for
-        /// those documents like <see cref="Keys.NextPage"/> since you're effectively
-        /// creating new documents and the ones those keys refer to will be outdated.
-        /// </summary>
-        /// <param name="key">The key of the metadata to add.</param>
-        /// <param name="metadata">A delegate with the value for the metadata.</param>
-        /// <returns>The current module instance.</returns>
-        public PaginateDocuments WithPageMetadata(string key, Config<object> metadata)
-        {
-            if (key == null)
-            {
-                throw new ArgumentNullException(nameof(key));
-            }
-
-            _pageMetadata[key] = metadata ?? throw new ArgumentNullException(nameof(metadata));
-            return this;
-        }
-
         /// <inheritdoc />
-        public override async Task<IEnumerable<IDocument>> ExecuteAsync(IReadOnlyList<IDocument> inputs, IExecutionContext context)
+        public Task<IEnumerable<IDocument>> ExecuteAsync(IReadOnlyList<IDocument> inputs, IExecutionContext context)
         {
-            // Partition the pages
-            IReadOnlyList<IDocument> documents = (await (await context.ExecuteAsync(Children, inputs)).FilterAsync(_predicate, context)).ToList();
-            IDocument[][] partitions =
-                Partition(documents, _pageSize)
+            // Partition the pages and get a total before skip/take
+            IDocument[][] pages =
+                Partition(inputs, _pageSize)
                 .ToArray();
-            int totalItems = partitions.Sum(x => x.Length);
+            int totalItems = pages.Sum(x => x.Length);
 
-            // Create the documents
-            if (inputs.Count > 0)
+            // Skip/take the pages
+            pages = pages
+                .Skip(_skipPages)
+                .Take(_takePages)
+                .ToArray();
+
+            // Special case for no pages, create an empty one
+            if (pages.Length == 0)
             {
-                return await inputs.SelectManyAsync(context, GetDocuments);
+                pages = new[] { Array.Empty<IDocument>() };
             }
-            return await GetDocuments(null);
 
-            async Task<IEnumerable<IDocument>> GetDocuments(IDocument input)
-            {
-                // Create the pages
-                Page[] pages = partitions
-                        .Skip(_skipPages)
-                        .Take(_takePages)
-                        .Select(x => new Page
-                        {
-                            PageDocuments = x
-                        })
-                        .ToArray();
-
-                // Special case for no pages, create an empty one
-                if (pages.Length == 0)
+            // Create the documents per page
+            return Task.FromResult(pages.Select((pageDocuments, i) => context.CreateDocument(
+                new MetadataItems
                 {
-                    pages = new[]
-                    {
-                        new Page
-                        {
-                            PageDocuments = Array.Empty<IDocument>()
-                        }
-                    };
-                }
-
-                // Create the documents per page
-                for (int i = 0; i < pages.Length; i++)
-                {
-                    // Get the current page document
-                    int currentI = i;  // Avoid modified closure for previous/next matadata delegate
-                    Dictionary<string, object> metadata = new Dictionary<string, object>
-                    {
-                        { Keys.PageDocuments, pages[i].PageDocuments },
-                        { Keys.CurrentPage, i + 1 },
-                        { Keys.TotalPages, pages.Length },
-                        { Keys.TotalItems, totalItems },
-                        { Keys.HasNextPage, pages.Length > i + 1 },
-                        { Keys.HasPreviousPage, i != 0 },
-                        { Keys.NextPage, new CachedDelegateMetadataValue(_ => pages.Length > currentI + 1 ? pages[currentI + 1].Document : null) },
-                        { Keys.PreviousPage, new CachedDelegateMetadataValue(_ => currentI != 0 ? pages[currentI - 1].Document : null) }
-                    };
-                    IDocument document = input?.Clone(metadata) ?? context.CreateDocument(metadata);
-
-                    // Apply any page metadata
-                    if (_pageMetadata.Count > 0)
-                    {
-                        IEnumerable<KeyValuePair<string, object>> pageMetadata = await _pageMetadata
-                            .SelectAsync(async kvp => new KeyValuePair<string, object>(kvp.Key, await kvp.Value.GetValueAsync(document, context)));
-                        document = document.Clone(pageMetadata);
-                    }
-
-                    pages[i].Document = document;
-                }
-                return pages.Select(x => x.Document);
-            }
+                    { Keys.PageDocuments, pageDocuments },
+                    { Keys.CurrentPage, i + 1 },
+                    { Keys.TotalPages, pages.Length },
+                    { Keys.TotalItems, totalItems },
+                    { Keys.HasNextPage, pages.Length > i + 1 },
+                    { Keys.HasPreviousPage, i != 0 }
+                })));
         }
 
         // Interesting discussion of partitioning at
@@ -212,12 +118,6 @@ namespace Statiq.Core
                 yield return source.Skip(pos).Take(size).ToArray();
                 pos += size;
             }
-        }
-
-        private class Page
-        {
-            public IDocument Document { get; set; }
-            public IDocument[] PageDocuments { get; set; }
         }
     }
 }

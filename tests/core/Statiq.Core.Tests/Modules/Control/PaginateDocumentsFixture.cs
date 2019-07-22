@@ -26,7 +26,7 @@ namespace Statiq.Core.Tests.Modules.Control
                     AdditionalOutputs = 7,
                     EnsureInputDocument = true
                 };
-                PaginateDocuments paginate = new PaginateDocuments(3, count);
+                PaginateDocuments paginate = new PaginateDocuments(3);
                 ForEachDocument gatherData = new ExecuteConfig(Config.FromDocument(
                     d =>
                     {
@@ -38,7 +38,7 @@ namespace Statiq.Core.Tests.Modules.Control
                     })).ForEachDocument();
 
                 // When
-                await ExecuteAsync(paginate, gatherData);
+                await ExecuteAsync(count, paginate, gatherData);
 
                 // Then
                 CollectionAssert.AreEqual(new[] { 1, 2, 3 }, currentPage);
@@ -58,7 +58,7 @@ namespace Statiq.Core.Tests.Modules.Control
                     AdditionalOutputs = 7,
                     EnsureInputDocument = true
                 };
-                PaginateDocuments paginate = new PaginateDocuments(3, count);
+                PaginateDocuments paginate = new PaginateDocuments(3);
                 ForEachDocument gatherData = new ExecuteConfig(
                     Config.FromDocument(async d =>
                     {
@@ -67,78 +67,13 @@ namespace Statiq.Core.Tests.Modules.Control
                     })).ForEachDocument();
 
                 // When
-                await ExecuteAsync(paginate, gatherData);
+                await ExecuteAsync(count, paginate, gatherData);
 
                 // Then
                 Assert.AreEqual(3, content.Count);
                 CollectionAssert.AreEqual(new[] { "1", "2", "3" }, content[0]);
                 CollectionAssert.AreEqual(new[] { "4", "5", "6" }, content[1]);
                 CollectionAssert.AreEqual(new[] { "7", "8" }, content[2]);
-            }
-
-            [Test]
-            public async Task SetsPreviousAndNextDocuments()
-            {
-                // Given
-                List<IList<string>> previousPages = new List<IList<string>>();
-                List<IList<string>> nextPages = new List<IList<string>>();
-                CountModule count = new CountModule("A")
-                {
-                    AdditionalOutputs = 7,
-                    EnsureInputDocument = true
-                };
-                PaginateDocuments paginate = new PaginateDocuments(3, count);
-                ForEachDocument gatherData = new ExecuteConfig(
-                    Config.FromDocument(async d =>
-                    {
-                        IList<IDocument> previousPageDocuments = d.Document(Keys.PreviousPage)?.Get<IList<IDocument>>(Keys.PageDocuments);
-                        IEnumerable<string> previousPageContent = previousPageDocuments == null ? null : await previousPageDocuments.SelectAsync(async x => await x.GetStringAsync());
-                        previousPages.Add(previousPageContent?.ToList());
-                        IList<IDocument> nextPageDocuments = d.Document(Keys.NextPage)?.Get<IList<IDocument>>(Keys.PageDocuments);
-                        IEnumerable<string> nextPageContent = nextPageDocuments == null ? null : await nextPageDocuments.SelectAsync(async x => await x.GetStringAsync());
-                        nextPages.Add(nextPageContent?.ToList());
-                    })).ForEachDocument();
-
-                // When
-                await ExecuteAsync(paginate, gatherData);
-
-                // Then
-                Assert.AreEqual(3, previousPages.Count);
-                Assert.AreEqual(3, nextPages.Count);
-                CollectionAssert.AreEqual(null, previousPages[0]);
-                CollectionAssert.AreEqual(new[] { "1", "2", "3" }, previousPages[1]);
-                CollectionAssert.AreEqual(new[] { "4", "5", "6" }, previousPages[2]);
-                CollectionAssert.AreEqual(new[] { "4", "5", "6" }, nextPages[0]);
-                CollectionAssert.AreEqual(new[] { "7", "8" }, nextPages[1]);
-                CollectionAssert.AreEqual(null, nextPages[2]);
-            }
-
-            [Test]
-            public async Task ExcludesDocumentsThatFailPredicate()
-            {
-                // Given
-                List<IList<string>> content = new List<IList<string>>();
-                CountModule count = new CountModule("A")
-                {
-                    AdditionalOutputs = 7,
-                    EnsureInputDocument = true
-                };
-                PaginateDocuments paginate = new PaginateDocuments(3, count).Where(Config.FromDocument(async doc => await doc.GetStringAsync() != "5"));
-                ForEachDocument gatherData = new ExecuteConfig(
-                    Config.FromDocument(async d =>
-                    {
-                        IEnumerable<string> pageContent = await d.Get<IList<IDocument>>(Keys.PageDocuments).SelectAsync(async x => await x.GetStringAsync());
-                        content.Add(pageContent.ToList());
-                    })).ForEachDocument();
-
-                // When
-                await ExecuteAsync(paginate, gatherData);
-
-                // Then
-                Assert.AreEqual(3, content.Count);
-                CollectionAssert.AreEqual(new[] { "1", "2", "3" }, content[0]);
-                CollectionAssert.AreEqual(new[] { "4", "6", "7" }, content[1]);
-                CollectionAssert.AreEqual(new[] { "8" }, content[2]);
             }
         }
     }
