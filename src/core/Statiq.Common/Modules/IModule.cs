@@ -11,9 +11,8 @@ namespace Statiq.Common
         /// <summary>
         /// This should not be called directly, instead call <c>IExecutionContext.Execute()</c> if you need to execute a module from within another module.
         /// </summary>
-        /// <param name="inputs">The input documents to this module.</param>
-        /// <param name="context">The execution context that can be used to access information about the environment and engine services.</param>
+        /// <param name="context">The execution context that includes input documents, information about the environment, and engine services.</param>
         /// <returns>A set of result documents (possibly the same as the input documents).</returns>
-        Task<IEnumerable<IDocument>> ExecuteAsync(IReadOnlyList<IDocument> inputs, IExecutionContext context);
+        Task<IEnumerable<IDocument>> ExecuteAsync(IExecutionContext context);
     }
 }

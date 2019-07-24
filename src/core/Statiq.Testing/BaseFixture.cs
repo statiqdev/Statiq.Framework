@@ -69,44 +69,17 @@ namespace Statiq.Testing
         /// </summary>
         /// <param name="modules">The modules to execute.</param>
         /// <returns>A materialized list of result documents from the last module.</returns>
-        public static Task<IReadOnlyList<TestDocument>> ExecuteAsync(params IModule[] modules) =>
+        public static Task<ImmutableArray<TestDocument>> ExecuteAsync(params IModule[] modules) =>
             ExecuteAsync(new TestExecutionContext(), modules);
 
         /// <summary>
         /// A utility method to execute modules in serial. The resulting documents will be materialized before returning.
-        /// An empty initial document collection will be used.
         /// </summary>
         /// <param name="context">The execution context to use.</param>
         /// <param name="modules">The modules to execute.</param>
         /// <returns>A materialized list of result documents from the last module.</returns>
-        public static Task<IReadOnlyList<TestDocument>> ExecuteAsync(TestExecutionContext context, params IModule[] modules) =>
-            ExecuteAsync(EmptyDocuments, context, modules);
-
-        /// <summary>
-        /// A utility method to execute modules in serial. The resulting documents will be materialized before returning.
-        /// A new <see cref="TestExecutionContext"/> will be created.
-        /// </summary>
-        /// <param name="documents">The initial input documents.</param>
-        /// <param name="modules">The modules to execute.</param>
-        /// <returns>A materialized list of result documents from the last module.</returns>
-        public static Task<IReadOnlyList<TestDocument>> ExecuteAsync(IReadOnlyList<TestDocument> documents, params IModule[] modules) =>
-            ExecuteAsync(documents, new TestExecutionContext(), modules);
-
-        /// <summary>
-        /// A utility method to execute modules in serial. The resulting documents will be materialized before returning.
-        /// </summary>
-        /// <param name="documents">The initial input documents.</param>
-        /// <param name="context">The execution context to use.</param>
-        /// <param name="modules">The modules to execute.</param>
-        /// <returns>A materialized list of result documents from the last module.</returns>
-        public static async Task<IReadOnlyList<TestDocument>> ExecuteAsync(IReadOnlyList<TestDocument> documents, TestExecutionContext context, params IModule[] modules)
-        {
-            foreach (IModule module in modules)
-            {
-                documents = (await module.ExecuteAsync(documents, context))?.Cast<TestDocument>().ToArray() ?? Array.Empty<TestDocument>();
-            }
-            return documents;
-        }
+        public static async Task<ImmutableArray<TestDocument>> ExecuteAsync(TestExecutionContext context, params IModule[] modules) =>
+            (await context.ExecuteAsync(modules, context.Inputs)).Cast<TestDocument>().ToImmutableArray();
 
         /// <summary>
         /// A utility method to execute modules in serial. The resulting documents will be materialized before returning.
@@ -115,17 +88,39 @@ namespace Statiq.Testing
         /// <param name="document">The initial input document.</param>
         /// <param name="modules">The modules to execute.</param>
         /// <returns>A materialized list of result documents from the last module.</returns>
-        public static Task<IReadOnlyList<TestDocument>> ExecuteAsync(TestDocument document, params IModule[] modules) =>
-            ExecuteAsync(new[] { document }, new TestExecutionContext(), modules);
+        public static Task<ImmutableArray<TestDocument>> ExecuteAsync(TestDocument document, params IModule[] modules) =>
+            ExecuteAsync(new TestExecutionContext(ImmutableArray.Create(document)), modules);
 
         /// <summary>
         /// A utility method to execute modules in serial. The resulting documents will be materialized before returning.
+        /// A new <see cref="TestExecutionContext"/> will be created.
+        /// </summary>
+        /// <param name="documents">The initial input documents.</param>
+        /// <param name="modules">The modules to execute.</param>
+        /// <returns>A materialized list of result documents from the last module.</returns>
+        public static Task<ImmutableArray<TestDocument>> ExecuteAsync(IEnumerable<TestDocument> documents, params IModule[] modules) =>
+            ExecuteAsync(new TestExecutionContext(documents), modules);
+
+        /// <summary>
+        /// A utility method to execute modules in serial. The resulting documents will be materialized before returning.
+        /// A new <see cref="TestExecutionContext"/> will be created.
         /// </summary>
         /// <param name="document">The initial input document.</param>
         /// <param name="context">The execution context to use.</param>
         /// <param name="modules">The modules to execute.</param>
         /// <returns>A materialized list of result documents from the last module.</returns>
-        public static Task<IReadOnlyList<TestDocument>> ExecuteAsync(TestDocument document, TestExecutionContext context, params IModule[] modules) =>
-            ExecuteAsync(new[] { document }, context, modules);
+        public static async Task<ImmutableArray<TestDocument>> ExecuteAsync(TestDocument document, TestExecutionContext context, params IModule[] modules) =>
+            (await context.ExecuteAsync(modules, document?.Yield())).Cast<TestDocument>().ToImmutableArray();
+
+        /// <summary>
+        /// A utility method to execute modules in serial. The resulting documents will be materialized before returning.
+        /// A new <see cref="TestExecutionContext"/> will be created.
+        /// </summary>
+        /// <param name="documents">The initial input documents.</param>
+        /// <param name="context">The execution context to use.</param>
+        /// <param name="modules">The modules to execute.</param>
+        /// <returns>A materialized list of result documents from the last module.</returns>
+        public static async Task<ImmutableArray<TestDocument>> ExecuteAsync(IEnumerable<TestDocument> documents, TestExecutionContext context, params IModule[] modules) =>
+            (await context.ExecuteAsync(modules, documents)).Cast<TestDocument>().ToImmutableArray();
     }
 }

@@ -8,7 +8,7 @@ using Statiq.Common;
 
 namespace Statiq.Core
 {
-    internal class PipelineResults : IPipelineResults
+    internal class PipelineOutputs : IPipelineOutputs
     {
         private readonly ConcurrentDictionary<string, ImmutableArray<IDocument>> _documents;
         private readonly PipelinePhase _pipelinePhase;
@@ -17,7 +17,7 @@ namespace Statiq.Core
         // Cache the dependency calculation
         private KeyValuePair<string, ImmutableArray<IDocument>>[] _cachedDependencies;
 
-        public PipelineResults(ConcurrentDictionary<string, ImmutableArray<IDocument>> documents, PipelinePhase pipelinePhase, IPipelineCollection pipelines)
+        public PipelineOutputs(ConcurrentDictionary<string, ImmutableArray<IDocument>> documents, PipelinePhase pipelinePhase, IPipelineCollection pipelines)
         {
             _documents = documents;
             _pipelinePhase = pipelinePhase;

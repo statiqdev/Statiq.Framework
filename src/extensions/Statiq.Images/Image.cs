@@ -312,10 +312,10 @@ namespace Statiq.Images
         }
 
         /// <inheritdoc />
-        public async Task<IEnumerable<IDocument>> ExecuteAsync(IReadOnlyList<IDocument> inputs, IExecutionContext context)
+        public async Task<IEnumerable<IDocument>> ExecuteAsync(IExecutionContext context)
         {
             ImageFormatManager formatManager = new ImageFormatManager();
-            return await inputs.SelectManyAsync(context, ProcessImagesAsync);
+            return await context.Inputs.SelectManyAsync(context, ProcessImagesAsync);
 
             async Task<IEnumerable<IDocument>> ProcessImagesAsync(IDocument input)
             {

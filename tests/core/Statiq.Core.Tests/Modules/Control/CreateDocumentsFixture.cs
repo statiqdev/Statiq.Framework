@@ -34,10 +34,10 @@ namespace Statiq.Core.Tests.Modules.Control
                 CreateDocuments documents = new CreateDocuments("A", "B", "C", "D");
                 ForEachDocument gatherData = new ExecuteConfig(
                     Config.FromDocument(async d =>
-                {
-                    content.Add(await d.GetStringAsync());
-                    return (object)null;
-                })).ForEachDocument();
+                    {
+                        content.Add(await d.GetStringAsync());
+                        return (object)null;
+                    })).ForEachDocument();
 
                 // When
                 IReadOnlyList<IDocument> results = await ExecuteAsync(documents, gatherData);
@@ -58,10 +58,10 @@ namespace Statiq.Core.Tests.Modules.Control
                     new Dictionary<string, object> { { "Foo", "c" } });
                 ForEachDocument gatherData = new ExecuteConfig(
                     Config.FromDocument(d =>
-                {
-                    values.Add(d["Foo"]);
-                    return (object)null;
-                })).ForEachDocument();
+                    {
+                        values.Add(d["Foo"]);
+                        return (object)null;
+                    })).ForEachDocument();
 
                 // When
                 IReadOnlyList<IDocument> results = await ExecuteAsync(documents, gatherData);
@@ -83,11 +83,11 @@ namespace Statiq.Core.Tests.Modules.Control
                     Tuple.Create("C", new Dictionary<string, object> { { "Foo", "c" } }.AsEnumerable()));
                 ForEachDocument gatherData = new ExecuteConfig(
                     Config.FromDocument(async d =>
-                {
-                    content.Add(await d.GetStringAsync());
-                    values.Add(d["Foo"]);
-                    return (object)null;
-                })).ForEachDocument();
+                    {
+                        content.Add(await d.GetStringAsync());
+                        values.Add(d["Foo"]);
+                        return (object)null;
+                    })).ForEachDocument();
 
                 // When
                 IReadOnlyList<IDocument> results = await ExecuteAsync(documents, gatherData);

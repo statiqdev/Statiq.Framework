@@ -190,11 +190,11 @@ namespace Statiq.Core
         }
 
         /// <inheritdoc />
-        public async Task<IEnumerable<IDocument>> ExecuteAsync(IReadOnlyList<IDocument> inputs, IExecutionContext context)
+        public async Task<IEnumerable<IDocument>> ExecuteAsync(IExecutionContext context)
         {
             // Create a dictionary of tree nodes
             TreeNodeEqualityComparer treeNodeEqualityComparer = new TreeNodeEqualityComparer();
-            IEnumerable<TreeNode> nodes = await inputs.SelectAsync(async x => new TreeNode(await _treePath.GetValueAsync(x, context), x));
+            IEnumerable<TreeNode> nodes = await context.Inputs.SelectAsync(async input => new TreeNode(await _treePath.GetValueAsync(input, context), input));
             nodes = nodes
                 .Where(x => x.TreePath != null)
                 .Distinct(treeNodeEqualityComparer);

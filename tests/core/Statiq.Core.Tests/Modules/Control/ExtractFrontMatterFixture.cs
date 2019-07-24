@@ -17,7 +17,7 @@ namespace Statiq.Core.Tests.Modules.Control
             {
                 // Given
                 TestExecutionContext context = new TestExecutionContext();
-                IDocument[] inputs =
+                TestDocument[] inputs =
                 {
                     new TestDocument(@"FM1
 FM2
@@ -33,7 +33,7 @@ Content2")
                 })));
 
                 // When
-                IEnumerable<IDocument> documents = await frontMatter.ExecuteAsync(inputs, context);
+                IEnumerable<IDocument> documents = await ExecuteAsync(inputs, context, frontMatter);
 
                 // Then
                 Assert.AreEqual(1, documents.Count());
@@ -51,7 +51,7 @@ Content2", await documents.First().GetStringAsync());
             {
                 // Given
                 TestExecutionContext context = new TestExecutionContext();
-                IDocument[] inputs =
+                TestDocument[] inputs =
                 {
                     new TestDocument(@"
 ---
@@ -69,7 +69,7 @@ Content2")
                 })));
 
                 // When
-                IEnumerable<IDocument> documents = await frontMatter.ExecuteAsync(inputs, context);
+                IEnumerable<IDocument> documents = await ExecuteAsync(inputs, context, frontMatter);
 
                 // Then
                 Assert.AreEqual(1, documents.Count());
@@ -89,7 +89,7 @@ Content2", await documents.First().GetStringAsync());
             {
                 // Given
                 TestExecutionContext context = new TestExecutionContext();
-                IDocument[] inputs =
+                TestDocument[] inputs =
                 {
                     new TestDocument(@"
 FM1
@@ -106,7 +106,7 @@ Content2")
                 })));
 
                 // When
-                IEnumerable<IDocument> documents = await frontMatter.ExecuteAsync(inputs, context);
+                IEnumerable<IDocument> documents = await ExecuteAsync(inputs, context, frontMatter);
 
                 // Then
                 Assert.AreEqual(1, documents.Count());
@@ -125,7 +125,7 @@ Content2", await documents.First().GetStringAsync());
             {
                 // Given
                 TestExecutionContext context = new TestExecutionContext();
-                IDocument[] inputs =
+                TestDocument[] inputs =
                 {
                     new TestDocument(@"FM1
 FM2
@@ -141,7 +141,7 @@ Content2")
                 })));
 
                 // When
-                IEnumerable<IDocument> documents = await frontMatter.ExecuteAsync(inputs, context);
+                IEnumerable<IDocument> documents = await ExecuteAsync(inputs, context, frontMatter);
 
                 // Then
                 Assert.AreEqual(1, documents.Count());
@@ -159,7 +159,7 @@ Content2", await documents.First().GetStringAsync());
             {
                 // Given
                 TestExecutionContext context = new TestExecutionContext();
-                IDocument[] inputs =
+                TestDocument[] inputs =
                 {
                     new TestDocument(@"FM1
 FM2
@@ -175,7 +175,7 @@ Content2")
                 })));
 
                 // When
-                IEnumerable<IDocument> documents = await frontMatter.ExecuteAsync(inputs, context);
+                IEnumerable<IDocument> documents = await ExecuteAsync(inputs, context, frontMatter);
 
                 // Then
                 Assert.AreEqual(1, documents.Count());
@@ -193,7 +193,7 @@ Content2", await documents.First().GetStringAsync());
             {
                 // Given
                 TestExecutionContext context = new TestExecutionContext();
-                IDocument[] inputs =
+                TestDocument[] inputs =
                 {
                     new TestDocument(@"FM1
 FM2
@@ -209,7 +209,7 @@ Content2")
                 })));
 
                 // When
-                IEnumerable<IDocument> documents = await frontMatter.ExecuteAsync(inputs, context);
+                IEnumerable<IDocument> documents = await ExecuteAsync(inputs, context, frontMatter);
 
                 // Then
                 Assert.AreEqual(1, documents.Count());
@@ -227,7 +227,7 @@ Content2", await documents.First().GetStringAsync());
             {
                 // Given
                 TestExecutionContext context = new TestExecutionContext();
-                IDocument[] inputs =
+                TestDocument[] inputs =
                 {
                     new TestDocument(@"FM1
 FM2
@@ -243,7 +243,7 @@ Content2")
                 })));
 
                 // When
-                IEnumerable<IDocument> documents = await frontMatter.ExecuteAsync(inputs, context);
+                IEnumerable<IDocument> documents = await ExecuteAsync(inputs, context, frontMatter);
 
                 // Then
                 Assert.AreEqual(1, documents.Count());
@@ -261,7 +261,7 @@ Content2", await documents.First().GetStringAsync());
             {
                 // Given
                 TestExecutionContext context = new TestExecutionContext();
-                IDocument[] inputs =
+                TestDocument[] inputs =
                 {
                     new TestDocument(@"FM1
 FM2
@@ -277,7 +277,7 @@ Content2")
                 })));
 
                 // When
-                IEnumerable<IDocument> documents = await frontMatter.ExecuteAsync(inputs, context);
+                IEnumerable<IDocument> documents = await ExecuteAsync(inputs, context, frontMatter);
 
                 // Then
                 Assert.AreEqual(1, documents.Count());
@@ -295,7 +295,7 @@ Content2", await documents.First().GetStringAsync());
             {
                 // Given
                 TestExecutionContext context = new TestExecutionContext();
-                IDocument[] inputs =
+                TestDocument[] inputs =
                 {
                      new TestDocument(@"FM1
 FM2
@@ -313,7 +313,7 @@ Content2")
                 })));
 
                 // When
-                IEnumerable<IDocument> documents = await frontMatter.ExecuteAsync(inputs, context);
+                IEnumerable<IDocument> documents = await ExecuteAsync(inputs, context, frontMatter);
 
                 // Then
                 Assert.AreEqual(1, documents.Count());
@@ -333,7 +333,7 @@ Content2", await documents.First().GetStringAsync());
             {
                 // Given
                 TestExecutionContext context = new TestExecutionContext();
-                IDocument[] inputs =
+                TestDocument[] inputs =
                 {
                     new TestDocument(@"FM1
 FM2
@@ -349,7 +349,7 @@ Content2")
                 })));
 
                 // When
-                IEnumerable<IDocument> documents = await frontMatter.ExecuteAsync(inputs, context);
+                IEnumerable<IDocument> documents = await ExecuteAsync(inputs, context, frontMatter);
 
                 // Then
                 Assert.AreEqual(1, documents.Count());
@@ -367,7 +367,7 @@ Content2", await documents.First().GetStringAsync());
             {
                 // Given
                 TestExecutionContext context = new TestExecutionContext();
-                IDocument[] inputs =
+                TestDocument[] inputs =
                 {
                     new TestDocument(@"AA
 -
@@ -384,7 +384,7 @@ YY")
                 })));
 
                 // When
-                IEnumerable<IDocument> documents = await frontMatter.ExecuteAsync(inputs, context);
+                IEnumerable<IDocument> documents = await ExecuteAsync(inputs, context, frontMatter);
 
                 // Then
                 Assert.AreEqual(2, documents.Count());
@@ -401,7 +401,7 @@ BB
             {
                 // Given
                 TestExecutionContext context = new TestExecutionContext();
-                IDocument[] inputs =
+                TestDocument[] inputs =
                 {
                     new TestDocument(@"---
 FM1
@@ -418,7 +418,7 @@ Content2")
                 })));
 
                 // When
-                IEnumerable<IDocument> documents = await frontMatter.ExecuteAsync(inputs, context);
+                IEnumerable<IDocument> documents = await ExecuteAsync(inputs, context, frontMatter);
 
                 // Then
                 Assert.AreEqual(1, documents.Count());
@@ -436,7 +436,7 @@ Content2", await documents.First().GetStringAsync());
             {
                 // Given
                 TestExecutionContext context = new TestExecutionContext();
-                IDocument[] inputs =
+                TestDocument[] inputs =
                 {
                     new TestDocument(@"---
 FM1
@@ -453,7 +453,7 @@ Content2")
                 }))).IgnoreDelimiterOnFirstLine(false);
 
                 // When
-                IEnumerable<IDocument> documents = await frontMatter.ExecuteAsync(inputs, context);
+                IEnumerable<IDocument> documents = await ExecuteAsync(inputs, context, frontMatter);
 
                 // Then
                 Assert.AreEqual(1, documents.Count());

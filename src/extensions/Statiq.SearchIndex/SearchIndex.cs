@@ -159,10 +159,10 @@ namespace Statiq.SearchIndex
         }
 
         /// <inheritdoc />
-        public async Task<IEnumerable<IDocument>> ExecuteAsync(IReadOnlyList<IDocument> inputs, IExecutionContext context)
+        public async Task<IEnumerable<IDocument>> ExecuteAsync(IExecutionContext context)
         {
             ISearchIndexItem[] searchIndexItems =
-                (await inputs.SelectAsync(context, async x => await _searchIndexItem.GetValueAsync(x, context)))
+                (await context.Inputs.SelectAsync(context, async x => await _searchIndexItem.GetValueAsync(x, context)))
                 .Where(x => !string.IsNullOrEmpty(x?.Title) && !string.IsNullOrEmpty(x.Content))
                 .ToArray();
 

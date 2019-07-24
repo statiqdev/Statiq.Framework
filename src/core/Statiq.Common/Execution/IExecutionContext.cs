@@ -62,9 +62,9 @@ namespace Statiq.Common
         IReadOnlyShortcodeCollection Shortcodes { get; }
 
         /// <summary>
-        /// Gets the collection of all previously processed documents.
+        /// Gets the collection of outputs from all previously processed documents.
         /// </summary>
-        IPipelineResults Results { get; }
+        IPipelineOutputs Outputs { get; }
 
         /// <summary>
         /// Gets the dependency injection service provider. A new scope is
@@ -100,7 +100,7 @@ namespace Statiq.Common
         /// <summary>
         /// The input documents to process.
         /// </summary>
-        ImmutableArray<IDocument> Documents { get; }
+        ImmutableArray<IDocument> Inputs { get; }
 
         /// <summary>
         /// Creates a <see cref="HttpClient"/> instance that should be used for all HTTP communication.
@@ -131,9 +131,9 @@ namespace Statiq.Common
         /// Executes the specified modules with the specified input documents and returns the result documents.
         /// </summary>
         /// <param name="modules">The modules to execute.</param>
-        /// <param name="documents">The documents to execute the modules on.</param>
+        /// <param name="inputs">The documents to execute the modules on.</param>
         /// <returns>The result documents from the executed modules.</returns>
-        Task<ImmutableArray<IDocument>> ExecuteAsync(IEnumerable<IModule> modules, IEnumerable<IDocument> documents);
+        Task<ImmutableArray<IDocument>> ExecuteAsync(IEnumerable<IModule> modules, IEnumerable<IDocument> inputs);
 
         /// <summary>
         /// Gets a new <see cref="IJavaScriptEnginePool"/>. The returned engine pool should be disposed

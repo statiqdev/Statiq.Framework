@@ -200,9 +200,9 @@ namespace Statiq.Html
         }
 
         /// <inheritdoc />
-        public async Task<IEnumerable<IDocument>> ExecuteAsync(IReadOnlyList<IDocument> inputs, IExecutionContext context)
+        public async Task<IEnumerable<IDocument>> ExecuteAsync(IExecutionContext context)
         {
-            return await inputs.ParallelSelectAsync(context, GetDocumentAsync);
+            return await context.Inputs.ParallelSelectAsync(context, GetDocumentAsync);
 
             async Task<IDocument> GetDocumentAsync(IDocument input)
             {

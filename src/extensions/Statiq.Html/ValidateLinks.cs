@@ -74,7 +74,7 @@ namespace Statiq.Html
         }
 
         /// <inheritdoc />
-        public async Task<IEnumerable<IDocument>> ExecuteAsync(IReadOnlyList<IDocument> inputs, IExecutionContext context)
+        public async Task<IEnumerable<IDocument>> ExecuteAsync(IExecutionContext context)
         {
 #pragma warning disable RCS1163 // Unused parameter.
             // Handle invalid HTTPS certificates and allow alternate security protocols (see http://stackoverflow.com/a/5670954/807064)
@@ -90,7 +90,7 @@ namespace Statiq.Html
 
             // Gather all links
             HtmlParser parser = new HtmlParser();
-            await context.ParallelForEachAsync(inputs, async input => await GatherLinksAsync(input, parser, links));
+            await context.ParallelForEachAsync(context.Inputs, async input => await GatherLinksAsync(input, parser, links));
 
             // This policy will limit the number of executing link validations.
             // Limit the amount of concurrent link checks to avoid overwhelming servers.
@@ -137,7 +137,7 @@ namespace Statiq.Html
                     $"{failureCount} link validation failures:{Environment.NewLine}{failureMessage}");
             }
 
-            return inputs;
+            return context.Inputs;
         }
 
         // Internal for testing

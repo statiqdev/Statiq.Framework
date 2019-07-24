@@ -19,9 +19,9 @@ namespace Statiq.CodeAnalysis
     /// <category>Metadata</category>
     public class InterpolateMetadata : IModule
     {
-        public Task<IEnumerable<IDocument>> ExecuteAsync(IReadOnlyList<IDocument> inputs, IExecutionContext context)
+        public Task<IEnumerable<IDocument>> ExecuteAsync(IExecutionContext context)
         {
-            return Task.FromResult<IEnumerable<IDocument>>(inputs.AsParallel().Select(input =>
+            return Task.FromResult<IEnumerable<IDocument>>(context.Inputs.AsParallel().Select(input =>
             {
                 MetadataItems interpolatedValues = null;
 

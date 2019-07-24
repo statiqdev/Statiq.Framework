@@ -56,7 +56,7 @@ namespace Statiq.Html
             _pathFunc = pathFunc ?? throw new ArgumentNullException(nameof(pathFunc));
         }
 
-        public async Task<IEnumerable<Common.IDocument>> ExecuteAsync(IReadOnlyList<Common.IDocument> inputs, IExecutionContext context)
+        public async Task<IEnumerable<Common.IDocument>> ExecuteAsync(IExecutionContext context)
         {
 #pragma warning disable RCS1163 // Unused parameter.
             // Handle invalid HTTPS certificates and allow alternate security protocols (see http://stackoverflow.com/a/5670954/807064)
@@ -68,7 +68,7 @@ namespace Statiq.Html
 
             // Iterate the input documents synchronously so we don't download the same resource more than once
             HtmlParser parser = new HtmlParser();
-            return await inputs.SelectAsync(context, GetDocumentAsync);
+            return await context.Inputs.SelectAsync(context, GetDocumentAsync);
 
             async Task<Common.IDocument> GetDocumentAsync(Common.IDocument input)
             {

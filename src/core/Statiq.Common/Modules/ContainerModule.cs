@@ -32,6 +32,6 @@ namespace Statiq.Common
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
         /// <inheritdoc />
-        public abstract Task<IEnumerable<IDocument>> ExecuteAsync(IReadOnlyList<IDocument> inputs, IExecutionContext context);
+        public abstract Task<IEnumerable<IDocument>> ExecuteAsync(IExecutionContext context);
     }
 }

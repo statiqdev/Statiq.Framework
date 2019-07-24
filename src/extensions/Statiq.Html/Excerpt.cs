@@ -110,15 +110,15 @@ namespace Statiq.Html
         }
 
         /// <inheritdoc />
-        public async Task<IEnumerable<Common.IDocument>> ExecuteAsync(IReadOnlyList<Common.IDocument> inputs, IExecutionContext context)
+        public async Task<IEnumerable<Common.IDocument>> ExecuteAsync(IExecutionContext context)
         {
             if (string.IsNullOrWhiteSpace(_metadataKey))
             {
-                return inputs;
+                return context.Inputs;
             }
 
             HtmlParser parser = new HtmlParser();
-            return await inputs.ParallelSelectAsync(context, GetDocumentAsync);
+            return await context.Inputs.ParallelSelectAsync(context, GetDocumentAsync);
 
             async Task<Common.IDocument> GetDocumentAsync(Common.IDocument input)
             {

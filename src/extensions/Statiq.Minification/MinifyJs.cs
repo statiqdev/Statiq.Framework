@@ -49,11 +49,11 @@ namespace Statiq.Minification
         }
 
         /// <inheritdoc />
-        public async Task<IEnumerable<IDocument>> ExecuteAsync(IReadOnlyList<IDocument> inputs, IExecutionContext context)
+        public async Task<IEnumerable<IDocument>> ExecuteAsync(IExecutionContext context)
         {
             CrockfordJsMinifier minifier = new CrockfordJsMinifier();
 
-            return await MinifyAsync(inputs, context, (x) => minifier.Minify(x, _isInlineCode), "JS");
+            return await MinifyAsync(context, (x) => minifier.Minify(x, _isInlineCode), "JS");
         }
     }
 }

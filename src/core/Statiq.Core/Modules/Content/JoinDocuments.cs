@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -50,9 +51,9 @@ namespace Statiq.Core
         /// Returns a single document containing the concatenated content of all input documents with an optional delimiter and configurable metadata options
         /// </summary>
         /// <returns>A single document in a list</returns>
-        public async Task<IEnumerable<IDocument>> ExecuteAsync(IReadOnlyList<IDocument> inputs, IExecutionContext context)
+        public async Task<IEnumerable<IDocument>> ExecuteAsync(IExecutionContext context)
         {
-            if (inputs == null || inputs.Count < 1)
+            if (context.Inputs.Length < 1)
             {
                 return context.CreateDocument().Yield();
             }
@@ -61,7 +62,7 @@ namespace Statiq.Core
             {
                 bool first = true;
                 byte[] delimeterBytes = Encoding.UTF8.GetBytes(_delimiter);
-                foreach (IDocument document in inputs)
+                foreach (IDocument document in context.Inputs)
                 {
                     if (document == null)
                     {
@@ -84,7 +85,7 @@ namespace Statiq.Core
                 }
 
                 return context.CreateDocument(
-                    MetadataForOutputDocument(inputs),
+                    MetadataForOutputDocument(context.Inputs),
                     context.GetContentProvider(contentStream))
                     .Yield();
             }
@@ -95,7 +96,7 @@ namespace Statiq.Core
         /// </summary>
         /// <param name="inputs">The list of input documents.</param>
         /// <returns>The set of metadata for all input documents.</returns>
-        private IEnumerable<KeyValuePair<string, object>> MetadataForOutputDocument(IReadOnlyList<IDocument> inputs)
+        private IEnumerable<KeyValuePair<string, object>> MetadataForOutputDocument(ImmutableArray<IDocument> inputs)
         {
             switch (_metaDataMode)
             {

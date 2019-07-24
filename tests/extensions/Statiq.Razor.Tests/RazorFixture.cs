@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using System.Threading.Tasks;
 using NUnit.Framework;
@@ -365,8 +366,8 @@ namespace Statiq.Razor.Tests
                 Razor razor = new Razor();
 
                 // When
-                List<IDocument> results1 = await razor.ExecuteAsync(new[] { document }, context).ToListAsync();
-                List<IDocument> results2 = await razor.ExecuteAsync(new[] { document }, context).ToListAsync();
+                ImmutableArray<TestDocument> results1 = await ExecuteAsync(document, context, razor);
+                ImmutableArray<TestDocument> results2 = await ExecuteAsync(document, context, razor);
 
                 // Then
                 (await results1.Single().GetStringAsync()).ShouldBe(

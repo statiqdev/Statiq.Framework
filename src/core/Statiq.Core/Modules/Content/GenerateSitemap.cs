@@ -74,11 +74,11 @@ namespace Statiq.Core
         }
 
         /// <inheritdoc />
-        public async Task<IEnumerable<IDocument>> ExecuteAsync(IReadOnlyList<IDocument> inputs, IExecutionContext context)
+        public async Task<IEnumerable<IDocument>> ExecuteAsync(IExecutionContext context)
         {
             StringBuilder sb = new StringBuilder();
             sb.Append("<?xml version=\"1.0\" encoding=\"UTF-8\"?><urlset xmlns=\"http://www.sitemaps.org/schemas/sitemap/0.9\">");
-            await context.ForEachAsync(inputs, AddToSiteMapAsync);
+            await context.ForEachAsync(context.Inputs, AddToSiteMapAsync);
             sb.Append("</urlset>");
 
             // Always output the sitemap document, even if it's empty

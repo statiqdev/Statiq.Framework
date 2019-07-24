@@ -91,9 +91,9 @@ namespace Statiq.CodeAnalysis
         }
 
         /// <inheritdoc />
-        public async Task<IEnumerable<IDocument>> ExecuteAsync(IReadOnlyList<IDocument> inputs, IExecutionContext context)
+        public async Task<IEnumerable<IDocument>> ExecuteAsync(IExecutionContext context)
         {
-            return await inputs.ParallelSelectManyAsync(async input =>
+            return await context.Inputs.ParallelSelectManyAsync(async input =>
                 await ExecuteAsync(input, await _path.GetValueAsync(input, context), context));
         }
 

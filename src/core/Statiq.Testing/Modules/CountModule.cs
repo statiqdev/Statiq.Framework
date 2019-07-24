@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Threading.Tasks;
 using Statiq.Common;
 
@@ -21,16 +22,17 @@ namespace Statiq.Testing
         }
 
         /// <inheritdoc />
-        public async Task<IEnumerable<IDocument>> ExecuteAsync(IReadOnlyList<IDocument> inputs, IExecutionContext context)
+        public async Task<IEnumerable<IDocument>> ExecuteAsync(IExecutionContext context)
         {
             int sourceCount = 0;
             ExecuteCount++;
             List<IDocument> results = new List<IDocument>();
 
             // Add an initial document if there isn't already one
-            if (inputs.Count == 0 && EnsureInputDocument)
+            ImmutableArray<IDocument> inputs = context.Inputs;
+            if (inputs.Length == 0 && EnsureInputDocument)
             {
-                inputs = new[] { context.CreateDocument() };
+                inputs = ImmutableArray.Create(context.CreateDocument());
             }
 
             foreach (IDocument input in inputs)

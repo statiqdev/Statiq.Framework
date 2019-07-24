@@ -31,9 +31,9 @@ namespace Statiq.Tables
         }
 
         /// <inheritdoc />
-        public async Task<IEnumerable<IDocument>> ExecuteAsync(IReadOnlyList<IDocument> inputs, IExecutionContext context)
+        public async Task<IEnumerable<IDocument>> ExecuteAsync(IExecutionContext context)
         {
-            return await inputs.ParallelSelectAsync(context, async input =>
+            return await context.Inputs.ParallelSelectAsync(context, async input =>
             {
                 try
                 {

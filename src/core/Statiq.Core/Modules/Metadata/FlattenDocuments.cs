@@ -31,10 +31,10 @@ namespace Statiq.Core
         }
 
         /// <inheritdoc />
-        public Task<IEnumerable<IDocument>> ExecuteAsync(IReadOnlyList<IDocument> inputs, IExecutionContext context)
+        public Task<IEnumerable<IDocument>> ExecuteAsync(IExecutionContext context)
         {
             HashSet<IDocument> results = new HashSet<IDocument>();
-            foreach (IDocument input in inputs)
+            foreach (IDocument input in context.Inputs)
             {
                 input.Flatten(results, _childrenKey);
             }

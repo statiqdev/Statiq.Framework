@@ -31,7 +31,7 @@ namespace Statiq.Core
         }
 
         public MergeDocuments(params string[] pipelines)
-            : base(new ExecuteConfig(Config.FromContext(ctx => ctx.Results.FromPipelines(pipelines))))
+            : base(new ExecuteConfig(Config.FromContext(ctx => ctx.Outputs.FromPipelines(pipelines))))
         {
         }
 
@@ -49,11 +49,10 @@ namespace Statiq.Core
         }
 
         protected override Task<IEnumerable<IDocument>> GetOutputDocumentsAsync(
-            IReadOnlyList<IDocument> inputs,
-            IReadOnlyList<IDocument> childOutputs,
-            IExecutionContext context) =>
+            IExecutionContext context,
+            IReadOnlyList<IDocument> childOutputs) =>
             Task.FromResult(_reverse
-                ? childOutputs.SelectMany(context, childOutput => inputs.Select(input => childOutput.Clone(input, input.ContentProvider)))
-                : inputs.SelectMany(context, input => childOutputs.Select(result => input.Clone(result, result.ContentProvider))));
+                ? childOutputs.SelectMany(context, childOutput => context.Inputs.Select(input => childOutput.Clone(input, input.ContentProvider)))
+                : context.Inputs.SelectMany(context, input => childOutputs.Select(result => input.Clone(result, result.ContentProvider))));
     }
 }

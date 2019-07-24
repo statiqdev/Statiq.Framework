@@ -53,10 +53,10 @@ namespace Statiq.Core
         }
 
         /// <inheritdoc />
-        public Task<IEnumerable<IDocument>> ExecuteAsync(IReadOnlyList<IDocument> inputs, IExecutionContext context)
+        public Task<IEnumerable<IDocument>> ExecuteAsync(IExecutionContext context)
         {
             return Task.FromResult<IEnumerable<IDocument>>(
-                inputs.AsParallel().SelectMany(context, CopyMetaSelector));
+                context.Inputs.AsParallel().SelectMany(context, CopyMetaSelector));
 
             IEnumerable<IDocument> CopyMetaSelector(IDocument input)
             {

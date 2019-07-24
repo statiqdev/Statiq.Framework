@@ -64,7 +64,7 @@ namespace Statiq.Core
         public FilterDocuments Or(string key) => Or(Config.FromDocument(doc => doc.ContainsKey(key)));
 
         /// <inheritdoc />
-        public Task<IEnumerable<IDocument>> ExecuteAsync(IReadOnlyList<IDocument> inputs, IExecutionContext context) =>
-            inputs.FilterAsync(_predicates, context);
+        public Task<IEnumerable<IDocument>> ExecuteAsync(IExecutionContext context) =>
+            context.Inputs.FilterAsync(_predicates, context);
     }
 }

@@ -20,21 +20,19 @@ namespace Statiq.Core.Tests.Modules.IO
             public async Task ShouldTruncateOldFileOnWrite()
             {
                 // Given
-                TestExecutionContext context = GetExecutionContext();
                 const string fileName = "test.txt";
                 const string oldContent = "TestTest";
                 const string newContent = "Test";
-
-                IFile file = await context.FileSystem.GetOutputFileAsync(fileName);
-                await file.WriteAllTextAsync(oldContent);
-
                 TestDocument input = new TestDocument(
                     new FilePath(fileName),
                     newContent);
+                TestExecutionContext context = GetExecutionContext(input.Yield());
+                IFile file = await context.FileSystem.GetOutputFileAsync(fileName);
+                await file.WriteAllTextAsync(oldContent);
                 WriteFiles writeFiles = new WriteFiles();
 
                 // When
-                await ExecuteAsync(input, context, writeFiles);
+                await ExecuteAsync(context, writeFiles);
 
                 // Then
                 IFile outputFile = await context.FileSystem.GetOutputFileAsync(fileName);
@@ -45,12 +43,12 @@ namespace Statiq.Core.Tests.Modules.IO
             public async Task OutputDocumentContainsSameContent()
             {
                 // Given
-                TestExecutionContext context = GetExecutionContext();
                 TestDocument input = new TestDocument("Test");
+                TestExecutionContext context = GetExecutionContext(input.Yield());
                 WriteFiles writeFiles = new WriteFiles();
 
                 // When
-                TestDocument result = await ExecuteAsync(input, context, writeFiles).SingleAsync();
+                TestDocument result = await ExecuteAsync(context, writeFiles).SingleAsync();
 
                 // Then
                 result.Content.ShouldBe("Test");
@@ -60,12 +58,12 @@ namespace Statiq.Core.Tests.Modules.IO
             public async Task ShouldReturnOriginalDocumentForFailedPredicate()
             {
                 // Given
-                TestExecutionContext context = GetExecutionContext();
                 TestDocument input = new TestDocument("Test");
+                TestExecutionContext context = GetExecutionContext(input.Yield());
                 WriteFiles writeFiles = new WriteFiles().Where(false);
 
                 // When
-                TestDocument result = await ExecuteAsync(input, context, writeFiles).SingleAsync();
+                TestDocument result = await ExecuteAsync(context, writeFiles).SingleAsync();
 
                 // Then
                 result.ShouldBe(input);
@@ -75,15 +73,15 @@ namespace Statiq.Core.Tests.Modules.IO
             public async Task InputDocumentsAreEvaluatedInOrderWhenOverwritting()
             {
                 // Given
-                TestExecutionContext context = GetExecutionContext();
                 ThrowOnTraceEventType(TraceEventType.Error);
                 TestDocument[] inputs = new[] { "A", "B", "C", "D", "E" }
                     .Select(x => new TestDocument(new FilePath("output.txt"), x))
                     .ToArray();
+                TestExecutionContext context = GetExecutionContext(inputs);
                 WriteFiles writeFiles = new WriteFiles();
 
                 // When
-                await ExecuteAsync(inputs, context, writeFiles);
+                await ExecuteAsync(context, writeFiles);
 
                 // Then
                 IFile outputFile = await context.FileSystem.GetOutputFileAsync("output.txt");
@@ -95,28 +93,28 @@ namespace Statiq.Core.Tests.Modules.IO
             public async Task DocumentsWithSameOutputGeneratesWarning()
             {
                 // Given
-                TestExecutionContext context = GetExecutionContext();
                 TestDocument[] inputs = new[] { "A", "B", "C", "D", "E" }
                     .Select(x => new TestDocument(new FilePath("output.txt"), x))
                     .ToArray();
+                TestExecutionContext context = GetExecutionContext(inputs);
                 WriteFiles writeFiles = new WriteFiles();
 
                 // When, Then
-                await Should.ThrowAsync<Exception>(async () => await ExecuteAsync(inputs, context, writeFiles));
+                await Should.ThrowAsync<Exception>(async () => await ExecuteAsync(context, writeFiles));
             }
 
             [Test]
             public async Task InputDocumentsAreEvaluatedInOrderWhenAppending()
             {
                 // Given
-                TestExecutionContext context = GetExecutionContext();
                 TestDocument[] inputs = new[] { "A", "B", "C", "D", "E" }
                     .Select(x => new TestDocument(new FilePath("output.txt"), x))
                     .ToArray();
+                TestExecutionContext context = GetExecutionContext(inputs);
                 WriteFiles writeFiles = new WriteFiles().Append();
 
                 // When
-                await ExecuteAsync(inputs, context, writeFiles);
+                await ExecuteAsync(context, writeFiles);
 
                 // Then
                 IFile outputFile = await context.FileSystem.GetOutputFileAsync("output.txt");
@@ -128,7 +126,6 @@ namespace Statiq.Core.Tests.Modules.IO
             public async Task IgnoresEmptyDocuments()
             {
                 // Given
-                TestExecutionContext context = GetExecutionContext();
                 MemoryStream emptyStream = new MemoryStream(new byte[] { });
                 TestDocument[] inputs =
                 {
@@ -142,10 +139,11 @@ namespace Statiq.Core.Tests.Modules.IO
                         new FilePath("Subfolder/stream-test"),
                         emptyStream)
                 };
+                TestExecutionContext context = GetExecutionContext(inputs);
                 WriteFiles writeFiles = new WriteFiles();
 
                 // When
-                IReadOnlyList<TestDocument> results = await ExecuteAsync(inputs, context, writeFiles);
+                IReadOnlyList<TestDocument> results = await ExecuteAsync(context, writeFiles);
 
                 // Then
                 results.Count.ShouldBe(3);
@@ -155,7 +153,7 @@ namespace Statiq.Core.Tests.Modules.IO
             }
         }
 
-        protected static TestExecutionContext GetExecutionContext()
+        protected static TestExecutionContext GetExecutionContext(IEnumerable<TestDocument> inputs)
         {
             TestFileProvider fileProvider = new TestFileProvider();
 
@@ -179,7 +177,7 @@ namespace Statiq.Core.Tests.Modules.IO
             fileSystem.InputPaths.Clear();
             fileSystem.InputPaths.Add("/TestFiles/Input");
 
-            return new TestExecutionContext
+            return new TestExecutionContext(inputs)
             {
                 FileSystem = fileSystem
             };

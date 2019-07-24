@@ -22,14 +22,13 @@ namespace Statiq.Core
         }
 
         public ReplaceDocuments(params string[] pipelines)
-            : base(new ExecuteConfig(Config.FromContext(ctx => ctx.Results.FromPipelines(pipelines))))
+            : base(new ExecuteConfig(Config.FromContext(ctx => ctx.Outputs.FromPipelines(pipelines))))
         {
         }
 
         protected override Task<IEnumerable<IDocument>> GetOutputDocumentsAsync(
-            IReadOnlyList<IDocument> inputs,
-            IReadOnlyList<IDocument> childOutputs,
-            IExecutionContext context) =>
+            IExecutionContext context,
+            IReadOnlyList<IDocument> childOutputs) =>
             Task.FromResult<IEnumerable<IDocument>>(childOutputs);
     }
 }

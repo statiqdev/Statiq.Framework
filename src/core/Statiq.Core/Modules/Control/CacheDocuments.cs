@@ -38,13 +38,13 @@ namespace Statiq.Core
         private void ResetCache() => _cache = null;
 
         /// <inheritdoc />
-        public override async Task<IEnumerable<IDocument>> ExecuteAsync(IReadOnlyList<IDocument> inputs, IExecutionContext context)
+        public override async Task<IEnumerable<IDocument>> ExecuteAsync(IExecutionContext context)
         {
             // If we're disabling the cache, clear any existing entries and just execute children
             if (context.Settings.Bool(Keys.DisableCache))
             {
                 ResetCache();
-                return await context.ExecuteAsync(Children, inputs);
+                return await context.ExecuteAsync(Children, context.Inputs);
             }
 
             // If we're reseting the cache, reset it but then continue
@@ -69,10 +69,10 @@ namespace Statiq.Core
             if (currentCache == null)
             {
                 // If the current cache is null, this is the first run through
-                misses.AddRange(inputs);
-                IEnumerable<IGrouping<FilePath, IDocument>> inputGroups = inputs
-                    .Where(x => x.Source != null)
-                    .GroupBy(x => x.Source);
+                misses.AddRange(context.Inputs);
+                IEnumerable<IGrouping<FilePath, IDocument>> inputGroups = context.Inputs
+                    .Where(input => input.Source != null)
+                    .GroupBy(input => input.Source);
                 foreach (IGrouping<FilePath, IDocument> inputGroup in inputGroups)
                 {
                     missesBySource.Add(inputGroup.Key, await CombineCacheHashCodesAsync(inputGroup));
@@ -82,7 +82,7 @@ namespace Statiq.Core
             {
                 // Note that due to cloning we could have multiple inputs and outputs with the same source
                 // so we need to check all inputs with a given source and only consider a hit when they all match
-                foreach (IGrouping<FilePath, IDocument> inputsBySource in inputs.GroupBy(x => x.Source))
+                foreach (IGrouping<FilePath, IDocument> inputsBySource in context.Inputs.GroupBy(x => x.Source))
                 {
                     string message = null;
 

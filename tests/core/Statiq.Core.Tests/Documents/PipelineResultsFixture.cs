@@ -36,7 +36,7 @@ namespace Statiq.Core.Tests.Documents
                     GetPipelineAndPhase("C", Phase.Process, pipelines, documents, new[] { c1 }, phaseB);
                 PipelinePhase phaseD =
                     GetPipelineAndPhase("D", Phase.Process, pipelines, documents, new[] { d1, d2 });
-                PipelineResults documentCollection = new PipelineResults(documents, phaseC, pipelines);
+                PipelineOutputs documentCollection = new PipelineOutputs(documents, phaseC, pipelines);
 
                 // When
                 IDocument[] result = documentCollection.ToArray();
@@ -66,7 +66,7 @@ namespace Statiq.Core.Tests.Documents
                     GetPipelineAndPhase("C", Phase.Transform, pipelines, documents, new[] { c1 }, phaseB);
                 PipelinePhase phaseD =
                     GetPipelineAndPhase("D", Phase.Transform, pipelines, documents, new[] { d1, d2 });
-                PipelineResults documentCollection = new PipelineResults(documents, phaseC, pipelines);
+                PipelineOutputs documentCollection = new PipelineOutputs(documents, phaseC, pipelines);
 
                 // When
                 IDocument[] result = documentCollection.ToArray();
@@ -84,7 +84,7 @@ namespace Statiq.Core.Tests.Documents
                 IPipelineCollection pipelines = new PipelineCollection();
                 PipelinePhase phase = GetPipelineAndPhase("A", Phase.Process, pipelines, documents, Array.Empty<IDocument>());
                 phase.Pipeline.Isolated = true;
-                PipelineResults documentCollection = new PipelineResults(documents, phase, pipelines);
+                PipelineOutputs documentCollection = new PipelineOutputs(documents, phase, pipelines);
 
                 // When, Then
                 Should.Throw<InvalidOperationException>(() => documentCollection.ToArray());
@@ -99,7 +99,7 @@ namespace Statiq.Core.Tests.Documents
                 IPipelineCollection pipelines = new PipelineCollection();
                 PipelinePhase phase = GetPipelineAndPhase("A", Phase.Input, pipelines, documents, Array.Empty<IDocument>());
                 phase.Pipeline.Isolated = true;
-                PipelineResults documentCollection = new PipelineResults(documents, phase, pipelines);
+                PipelineOutputs documentCollection = new PipelineOutputs(documents, phase, pipelines);
 
                 // When, Then
                 Should.Throw<InvalidOperationException>(() => documentCollection.ToArray());
@@ -114,7 +114,7 @@ namespace Statiq.Core.Tests.Documents
                 IPipelineCollection pipelines = new PipelineCollection();
                 PipelinePhase phase = GetPipelineAndPhase("A", Phase.Output, pipelines, documents, Array.Empty<IDocument>());
                 phase.Pipeline.Isolated = true;
-                PipelineResults documentCollection = new PipelineResults(documents, phase, pipelines);
+                PipelineOutputs documentCollection = new PipelineOutputs(documents, phase, pipelines);
 
                 // When, Then
                 Should.Throw<InvalidOperationException>(() => documentCollection.ToArray());
@@ -144,7 +144,7 @@ namespace Statiq.Core.Tests.Documents
                     GetPipelineAndPhase("C", Phase.Process, pipelines, documents, new[] { c1 }, phaseB);
                 PipelinePhase phaseD =
                     GetPipelineAndPhase("D", Phase.Process, pipelines, documents, new[] { d1, d2 });
-                PipelineResults documentCollection = new PipelineResults(documents, phaseC, pipelines);
+                PipelineOutputs documentCollection = new PipelineOutputs(documents, phaseC, pipelines);
 
                 // When
                 IDocument[] result = documentCollection.ExceptPipeline("C").ToArray();
@@ -174,7 +174,7 @@ namespace Statiq.Core.Tests.Documents
                     GetPipelineAndPhase("C", Phase.Transform, pipelines, documents, new[] { c1 }, phaseB);
                 PipelinePhase phaseD =
                     GetPipelineAndPhase("D", Phase.Transform, pipelines, documents, new[] { d1, d2 });
-                PipelineResults documentCollection = new PipelineResults(documents, phaseC, pipelines);
+                PipelineOutputs documentCollection = new PipelineOutputs(documents, phaseC, pipelines);
 
                 // When
                 IDocument[] result = documentCollection.ExceptPipeline("C").ToArray();
@@ -194,7 +194,7 @@ namespace Statiq.Core.Tests.Documents
                     new ConcurrentDictionary<string, ImmutableArray<IDocument>>(StringComparer.OrdinalIgnoreCase);
                 IPipelineCollection pipelines = new PipelineCollection();
                 PipelinePhase phase = GetPipelineAndPhase("A", Phase.Transform, pipelines, documents, Array.Empty<IDocument>());
-                PipelineResults documentCollection = new PipelineResults(documents, phase, pipelines);
+                PipelineOutputs documentCollection = new PipelineOutputs(documents, phase, pipelines);
 
                 // When, Then
                 Should.Throw<ArgumentException>(() => documentCollection.FromPipeline(null));
@@ -208,7 +208,7 @@ namespace Statiq.Core.Tests.Documents
                     new ConcurrentDictionary<string, ImmutableArray<IDocument>>(StringComparer.OrdinalIgnoreCase);
                 IPipelineCollection pipelines = new PipelineCollection();
                 PipelinePhase phase = GetPipelineAndPhase("A", Phase.Transform, pipelines, documents, Array.Empty<IDocument>());
-                PipelineResults documentCollection = new PipelineResults(documents, phase, pipelines);
+                PipelineOutputs documentCollection = new PipelineOutputs(documents, phase, pipelines);
 
                 // When, Then
                 Should.Throw<ArgumentException>(() => documentCollection.FromPipeline(string.Empty));
@@ -222,7 +222,7 @@ namespace Statiq.Core.Tests.Documents
                     new ConcurrentDictionary<string, ImmutableArray<IDocument>>(StringComparer.OrdinalIgnoreCase);
                 IPipelineCollection pipelines = new PipelineCollection();
                 PipelinePhase phase = GetPipelineAndPhase("A", Phase.Process, pipelines, documents, Array.Empty<IDocument>());
-                PipelineResults documentCollection = new PipelineResults(documents, phase, pipelines);
+                PipelineOutputs documentCollection = new PipelineOutputs(documents, phase, pipelines);
 
                 // When, Then
                 Should.Throw<InvalidOperationException>(() => documentCollection.FromPipeline("A"));
@@ -236,7 +236,7 @@ namespace Statiq.Core.Tests.Documents
                     new ConcurrentDictionary<string, ImmutableArray<IDocument>>(StringComparer.OrdinalIgnoreCase);
                 IPipelineCollection pipelines = new PipelineCollection();
                 PipelinePhase phase = GetPipelineAndPhase("A", Phase.Transform, pipelines, documents, Array.Empty<IDocument>());
-                PipelineResults documentCollection = new PipelineResults(documents, phase, pipelines);
+                PipelineOutputs documentCollection = new PipelineOutputs(documents, phase, pipelines);
 
                 // When, Then
                 Should.NotThrow(() => documentCollection.FromPipeline("A"));
@@ -263,7 +263,7 @@ namespace Statiq.Core.Tests.Documents
                     GetPipelineAndPhase("C", Phase.Process, pipelines, documents, new[] { c1 }, phaseB);
                 PipelinePhase phaseD =
                     GetPipelineAndPhase("D", Phase.Process, pipelines, documents, new[] { d1, d2 });
-                PipelineResults documentCollection = new PipelineResults(documents, phaseC, pipelines);
+                PipelineOutputs documentCollection = new PipelineOutputs(documents, phaseC, pipelines);
 
                 // When, Then
                 Should.Throw<KeyNotFoundException>(() => documentCollection.FromPipeline("E"));
@@ -290,7 +290,7 @@ namespace Statiq.Core.Tests.Documents
                     GetPipelineAndPhase("C", Phase.Transform, pipelines, documents, new[] { c1 }, phaseB);
                 PipelinePhase phaseD =
                     GetPipelineAndPhase("D", Phase.Transform, pipelines, documents, new[] { d1, d2 });
-                PipelineResults documentCollection = new PipelineResults(documents, phaseC, pipelines);
+                PipelineOutputs documentCollection = new PipelineOutputs(documents, phaseC, pipelines);
 
                 // When
                 IDocument[] result = documentCollection.FromPipeline("D").ToArray();
@@ -320,7 +320,7 @@ namespace Statiq.Core.Tests.Documents
                     GetPipelineAndPhase("C", Phase.Transform, pipelines, documents, new[] { c1 }, phaseB);
                 PipelinePhase phaseD =
                     GetPipelineAndPhase("D", Phase.Transform, pipelines, documents, new[] { d1, d2 });
-                PipelineResults documentCollection = new PipelineResults(documents, phaseC, pipelines);
+                PipelineOutputs documentCollection = new PipelineOutputs(documents, phaseC, pipelines);
 
                 // When
                 IDocument[] result = documentCollection.FromPipeline("d").ToArray();
@@ -350,7 +350,7 @@ namespace Statiq.Core.Tests.Documents
                     GetPipelineAndPhase("C", Phase.Process, pipelines, documents, new[] { c1 }, phaseB);
                 PipelinePhase phaseD =
                     GetPipelineAndPhase("D", Phase.Process, pipelines, documents, new[] { d1, d2 });
-                PipelineResults documentCollection = new PipelineResults(documents, phaseC, pipelines);
+                PipelineOutputs documentCollection = new PipelineOutputs(documents, phaseC, pipelines);
 
                 // When, Then
                 Should.Throw<InvalidOperationException>(() => documentCollection.FromPipeline("D"));
@@ -377,7 +377,7 @@ namespace Statiq.Core.Tests.Documents
                     GetPipelineAndPhase("C", Phase.Process, pipelines, documents, new[] { c1 }, phaseB);
                 PipelinePhase phaseD =
                     GetPipelineAndPhase("D", Phase.Process, pipelines, documents, new[] { d1, d2 });
-                PipelineResults documentCollection = new PipelineResults(documents, phaseC, pipelines);
+                PipelineOutputs documentCollection = new PipelineOutputs(documents, phaseC, pipelines);
 
                 // When
                 IDocument[] result = documentCollection.FromPipeline("B").ToArray();
@@ -407,7 +407,7 @@ namespace Statiq.Core.Tests.Documents
                     GetPipelineAndPhase("C", Phase.Process, pipelines, documents, new[] { c1 }, phaseB);
                 PipelinePhase phaseD =
                     GetPipelineAndPhase("D", Phase.Process, pipelines, documents, new[] { d1, d2 });
-                PipelineResults documentCollection = new PipelineResults(documents, phaseC, pipelines);
+                PipelineOutputs documentCollection = new PipelineOutputs(documents, phaseC, pipelines);
 
                 // When
                 IDocument[] result = documentCollection.FromPipeline("A").ToArray();

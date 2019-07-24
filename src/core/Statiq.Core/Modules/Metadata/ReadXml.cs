@@ -84,12 +84,12 @@ namespace Statiq.Core
         }
 
         /// <inheritdoc />
-        protected override async Task<IEnumerable<Dictionary<string, object>>> GetItemsAsync(IReadOnlyList<IDocument> inputs, IExecutionContext context)
+        protected override async Task<IEnumerable<Dictionary<string, object>>> GetItemsAsync(IExecutionContext context)
         {
             // Get XML from the input documents?
             if (_data == null)
             {
-                return await inputs.ParallelSelectManyAsync(context, async input =>
+                return await context.Inputs.ParallelSelectManyAsync(context, async input =>
                 {
                     XmlDocument inputDoc = new XmlDocument();
                     using (Stream stream = await input.GetStreamAsync())

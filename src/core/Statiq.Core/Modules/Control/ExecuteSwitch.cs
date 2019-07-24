@@ -75,10 +75,10 @@ namespace Statiq.Core
         }
 
         /// <inheritdoc />
-        public async Task<IEnumerable<IDocument>> ExecuteAsync(IReadOnlyList<IDocument> inputs, IExecutionContext context)
+        public async Task<IEnumerable<IDocument>> ExecuteAsync(IExecutionContext context)
         {
             List<IDocument> results = new List<IDocument>();
-            IEnumerable<IDocument> documents = inputs;
+            IEnumerable<IDocument> documents = context.Inputs;
             foreach (Tuple<object, IEnumerable<IModule>> c in _cases)
             {
                 List<IDocument> handled = new List<IDocument>();

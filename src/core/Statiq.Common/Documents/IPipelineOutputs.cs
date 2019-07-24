@@ -7,7 +7,7 @@ namespace Statiq.Common
     /// Contains a collection of documents output by the process
     /// phase of each pipeline (except isolated ones).
     /// </summary>
-    public interface IPipelineResults : IEnumerable<IDocument>
+    public interface IPipelineOutputs : IEnumerable<IDocument>
     {
         /// <summary>
         /// Gets documents by pipeline.

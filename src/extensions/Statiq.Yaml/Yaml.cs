@@ -48,9 +48,9 @@ namespace Statiq.Yaml
         }
 
         /// <inheritdoc />
-        public async Task<IEnumerable<IDocument>> ExecuteAsync(IReadOnlyList<IDocument> inputs, IExecutionContext context)
+        public async Task<IEnumerable<IDocument>> ExecuteAsync(IExecutionContext context)
         {
-            return await inputs.ParallelSelectManyAsync(async input =>
+            return await context.Inputs.ParallelSelectManyAsync(async input =>
             {
                 List<Dictionary<string, object>> documentMetadata = new List<Dictionary<string, object>>();
                 using (TextReader contentReader = new StreamReader(await input.GetStreamAsync()))

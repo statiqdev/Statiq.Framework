@@ -13,7 +13,7 @@ namespace Statiq.Core
     public class AddIndexes : IModule
     {
         /// <inheritdoc />
-        public Task<IEnumerable<IDocument>> ExecuteAsync(IReadOnlyList<IDocument> inputs, IExecutionContext context) =>
-            Task.FromResult(inputs.Select((x, i) => x.Clone(new MetadataItems { { Keys.Index, i + 1 } })));
+        public Task<IEnumerable<IDocument>> ExecuteAsync(IExecutionContext context) =>
+            Task.FromResult(context.Inputs.Select((x, i) => x.Clone(new MetadataItems { { Keys.Index, i + 1 } })));
     }
 }

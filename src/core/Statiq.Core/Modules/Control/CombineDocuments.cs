@@ -18,10 +18,10 @@ namespace Statiq.Core
     public class CombineDocuments : IModule
     {
         /// <inheritdoc />
-        public async Task<IEnumerable<IDocument>> ExecuteAsync(IReadOnlyList<IDocument> inputs, IExecutionContext context)
+        public async Task<IEnumerable<IDocument>> ExecuteAsync(IExecutionContext context)
         {
             IDocument result = null;
-            await context.ForEachAsync(inputs, async input =>
+            await context.ForEachAsync(context.Inputs, async input =>
             {
                 result = result == null
                     ? input

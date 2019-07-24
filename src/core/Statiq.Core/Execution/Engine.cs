@@ -329,9 +329,9 @@ namespace Statiq.Core
         }
 
         // This executes the specified modules with the specified input documents
-        internal static async Task<ImmutableArray<IDocument>> ExecuteAsync(ExecutionContextData contextData, IExecutionContext parent, IEnumerable<IModule> modules, ImmutableArray<IDocument> inputDocuments)
+        internal static async Task<ImmutableArray<IDocument>> ExecuteAsync(ExecutionContextData contextData, IExecutionContext parent, IEnumerable<IModule> modules, ImmutableArray<IDocument> inputs)
         {
-            ImmutableArray<IDocument> resultDocuments = ImmutableArray<IDocument>.Empty;
+            ImmutableArray<IDocument> outputs = ImmutableArray<IDocument>.Empty;
             if (modules != null)
             {
                 foreach (IModule module in modules.Where(x => x != null))
@@ -345,10 +345,10 @@ namespace Statiq.Core
 
                         // Execute the module
                         System.Diagnostics.Stopwatch stopwatch = System.Diagnostics.Stopwatch.StartNew();
-                        Trace.Verbose("Executing module {0} with {1} input document(s)", moduleName, inputDocuments.Length);
-                        ExecutionContext moduleContext = new ExecutionContext(contextData, parent, module, inputDocuments);
-                        IEnumerable<IDocument> moduleResult = await module.ExecuteAsync(inputDocuments, moduleContext);
-                        resultDocuments = moduleResult?.Where(x => x != null).ToImmutableArray() ?? ImmutableArray<IDocument>.Empty;
+                        Trace.Verbose("Executing module {0} with {1} input document(s)", moduleName, inputs.Length);
+                        ExecutionContext moduleContext = new ExecutionContext(contextData, parent, module, inputs);
+                        IEnumerable<IDocument> moduleResult = await module.ExecuteAsync(moduleContext);
+                        outputs = moduleResult?.Where(x => x != null).ToImmutableArray() ?? ImmutableArray<IDocument>.Empty;
 
                         // Trace results
                         stopwatch.Stop();
@@ -356,8 +356,8 @@ namespace Statiq.Core
                             "Executed module {0} in {1} ms resulting in {2} output document(s)",
                             moduleName,
                             stopwatch.ElapsedMilliseconds,
-                            resultDocuments.Length);
-                        inputDocuments = resultDocuments;
+                            outputs.Length);
+                        inputs = outputs;
                     }
                     catch (Exception ex)
                     {
@@ -365,12 +365,12 @@ namespace Statiq.Core
                         {
                             Trace.Error($"Error while executing module {moduleName}: {ex.Message}");
                         }
-                        resultDocuments = ImmutableArray<IDocument>.Empty;
+                        outputs = ImmutableArray<IDocument>.Empty;
                         throw;
                     }
                 }
             }
-            return resultDocuments;
+            return outputs;
         }
 
         /// <inheritdoc />

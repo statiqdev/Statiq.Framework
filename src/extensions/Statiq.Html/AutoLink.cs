@@ -133,10 +133,10 @@ namespace Statiq.Html
         }
 
         /// <inheritdoc />
-        public async Task<IEnumerable<Common.IDocument>> ExecuteAsync(IReadOnlyList<Common.IDocument> inputs, IExecutionContext context)
+        public async Task<IEnumerable<Common.IDocument>> ExecuteAsync(IExecutionContext context)
         {
             HtmlParser parser = new HtmlParser();
-            return await inputs.ParallelSelectAsync(context, PerformReplacementsAsync);
+            return await context.Inputs.ParallelSelectAsync(context, PerformReplacementsAsync);
 
             async Task<Common.IDocument> PerformReplacementsAsync(Common.IDocument input)
             {

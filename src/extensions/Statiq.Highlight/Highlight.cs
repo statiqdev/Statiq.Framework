@@ -75,7 +75,7 @@ namespace Statiq.Highlight
         }
 
         /// <inheritdoc />
-        public async Task<IEnumerable<IDocument>> ExecuteAsync(IReadOnlyList<IDocument> inputs, IExecutionContext context)
+        public async Task<IEnumerable<IDocument>> ExecuteAsync(IExecutionContext context)
         {
             HtmlParser parser = new HtmlParser();
             IJavaScriptEnginePool enginePool = context.GetJavaScriptEnginePool(x =>
@@ -91,7 +91,7 @@ namespace Statiq.Highlight
             });
             using (enginePool)
             {
-                IEnumerable<IDocument> results = await inputs.ParallelSelectAsync(context, async input =>
+                IEnumerable<IDocument> results = await context.Inputs.ParallelSelectAsync(context, async input =>
                 {
                     try
                     {

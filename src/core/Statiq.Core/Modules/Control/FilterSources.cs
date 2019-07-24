@@ -38,9 +38,9 @@ namespace Statiq.Core
         }
 
         /// <inheritdoc />
-        public async Task<IEnumerable<IDocument>> ExecuteAsync(IReadOnlyList<IDocument> inputs, IExecutionContext context)
+        public async Task<IEnumerable<IDocument>> ExecuteAsync(IExecutionContext context)
         {
-            DocumentFileProvider fileProvider = new DocumentFileProvider(inputs);
+            DocumentFileProvider fileProvider = new DocumentFileProvider(context.Inputs);
             IEnumerable<IDirectory> directories = await
                 (await context.FileSystem.GetInputDirectoriesAsync())
                 .SelectAsync(async x => await fileProvider.GetDirectoryAsync(x.Path));

@@ -27,14 +27,13 @@ namespace Statiq.Core
         }
 
         public ConcatDocuments(params string[] pipelines)
-            : base(new ExecuteConfig(Config.FromContext(ctx => ctx.Results.FromPipelines(pipelines))))
+            : base(new ExecuteConfig(Config.FromContext(ctx => ctx.Outputs.FromPipelines(pipelines))))
         {
         }
 
         protected override Task<IEnumerable<IDocument>> GetOutputDocumentsAsync(
-            IReadOnlyList<IDocument> inputs,
-            IReadOnlyList<IDocument> childOutputs,
-            IExecutionContext context) =>
-            Task.FromResult(inputs.Concat(childOutputs));
+            IExecutionContext context,
+            IReadOnlyList<IDocument> childOutputs) =>
+            Task.FromResult(context.Inputs.Concat(childOutputs));
     }
 }

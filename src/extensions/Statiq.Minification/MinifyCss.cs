@@ -49,11 +49,11 @@ namespace Statiq.Minification
         }
 
         /// <inheritdoc />
-        public async Task<IEnumerable<IDocument>> ExecuteAsync(IReadOnlyList<IDocument> inputs, IExecutionContext context)
+        public async Task<IEnumerable<IDocument>> ExecuteAsync(IExecutionContext context)
         {
             KristensenCssMinifier minifier = new KristensenCssMinifier();
 
-            return await MinifyAsync(inputs, context, (x) => minifier.Minify(x, _isInlineCode), "CSS");
+            return await MinifyAsync(context, (x) => minifier.Minify(x, _isInlineCode), "CSS");
         }
     }
 }

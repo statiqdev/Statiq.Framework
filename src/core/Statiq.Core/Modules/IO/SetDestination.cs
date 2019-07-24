@@ -87,8 +87,8 @@ namespace Statiq.Core
         }
 
         /// <inheritdoc />
-        public virtual async Task<IEnumerable<IDocument>> ExecuteAsync(IReadOnlyList<IDocument> inputs, IExecutionContext context) =>
-            await inputs.ParallelSelectAsync(async input =>
+        public virtual async Task<IEnumerable<IDocument>> ExecuteAsync(IExecutionContext context) =>
+            await context.Inputs.ParallelSelectAsync(async input =>
             {
                 FilePath destination = await _destination.GetValueAsync(input, context);
                 return destination == null ? input : input.Clone(destination);

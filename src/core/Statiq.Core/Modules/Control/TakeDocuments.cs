@@ -23,9 +23,6 @@ namespace Statiq.Core
         }
 
         /// <inheritdoc />
-        public Task<IEnumerable<IDocument>> ExecuteAsync(IReadOnlyList<IDocument> inputs, IExecutionContext context)
-        {
-            return Task.FromResult(inputs.Take(_x));
-        }
+        public Task<IEnumerable<IDocument>> ExecuteAsync(IExecutionContext context) => Task.FromResult(context.Inputs.Take(_x));
     }
 }

@@ -93,8 +93,7 @@ namespace Statiq.GitHub
         }
 
         protected override async Task<IEnumerable<IDocument>> ExecuteAsync(
-            IDocument i,
-            IReadOnlyList<IDocument> inputs,
+            IDocument input,
             IExecutionContext context,
             Func<GitHubClient, Task<object>> value)
         {

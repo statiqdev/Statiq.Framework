@@ -36,7 +36,7 @@ namespace Statiq.Core
         public Phase Phase => _contextData.PipelinePhase.Phase;
 
         /// <inheritdoc/>
-        public IPipelineResults Results => _contextData.Results;
+        public IPipelineOutputs Outputs => _contextData.Outputs;
 
         /// <inheritdoc/>
         public IReadOnlyFileSystem FileSystem => _contextData.Engine.FileSystem;
@@ -69,14 +69,14 @@ namespace Statiq.Core
         public IModule Module { get; }
 
         /// <inheritdoc/>
-        public ImmutableArray<IDocument> Documents { get; }
+        public ImmutableArray<IDocument> Inputs { get; }
 
-        internal ExecutionContext(ExecutionContextData contextData, IExecutionContext parent, IModule module, ImmutableArray<IDocument> documents)
+        internal ExecutionContext(ExecutionContextData contextData, IExecutionContext parent, IModule module, ImmutableArray<IDocument> inputs)
         {
             _contextData = contextData ?? throw new ArgumentNullException(nameof(contextData));
             Parent = parent;
             Module = module ?? throw new ArgumentNullException(nameof(module));
-            Documents = documents;
+            Inputs = inputs;
         }
 
         /// <inheritdoc/>
@@ -113,8 +113,8 @@ namespace Statiq.Core
         }
 
         /// <inheritdoc/>
-        public async Task<ImmutableArray<IDocument>> ExecuteAsync(IEnumerable<IModule> modules, IEnumerable<IDocument> documents) =>
-            await Engine.ExecuteAsync(_contextData, this, modules, documents?.ToImmutableArray() ?? ImmutableArray<IDocument>.Empty);
+        public async Task<ImmutableArray<IDocument>> ExecuteAsync(IEnumerable<IModule> modules, IEnumerable<IDocument> inputs) =>
+            await Engine.ExecuteAsync(_contextData, this, modules, inputs?.ToImmutableArray() ?? ImmutableArray<IDocument>.Empty);
 
         /// <inheritdoc/>
         public IJavaScriptEnginePool GetJavaScriptEnginePool(

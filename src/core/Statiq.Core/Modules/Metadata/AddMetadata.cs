@@ -64,7 +64,7 @@ namespace Statiq.Core
         }
 
         /// <inheritdoc />
-        public async Task<IEnumerable<IDocument>> ExecuteAsync(IReadOnlyList<IDocument> inputs, IExecutionContext context)
+        public async Task<IEnumerable<IDocument>> ExecuteAsync(IExecutionContext context)
         {
             if (_modules != null)
             {
@@ -81,15 +81,15 @@ namespace Statiq.Core
                         }
                     }
                 }
-                return inputs.Select(context, input => input.Clone(_onlyIfNonExisting ? metadata.Where(x => !input.ContainsKey(x.Key)) : metadata));
+                return context.Inputs.Select(context, input => input.Clone(_onlyIfNonExisting ? metadata.Where(x => !input.ContainsKey(x.Key)) : metadata));
             }
 
-            return await inputs.SelectAsync(context, async doc => _onlyIfNonExisting && doc.ContainsKey(_key)
-                ? doc
-                : doc.Clone(
+            return await context.Inputs.SelectAsync(context, async input => _onlyIfNonExisting && input.ContainsKey(_key)
+                ? input
+                : input.Clone(
                     new[]
                     {
-                        new KeyValuePair<string, object>(_key, await _value.GetValueAsync(doc, context))
+                        new KeyValuePair<string, object>(_key, await _value.GetValueAsync(input, context))
                     }));
         }
     }

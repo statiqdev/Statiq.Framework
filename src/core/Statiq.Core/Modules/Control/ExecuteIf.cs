@@ -151,10 +151,10 @@ namespace Statiq.Core
         }
 
         /// <inheritdoc />
-        public async Task<IEnumerable<IDocument>> ExecuteAsync(IReadOnlyList<IDocument> inputs, IExecutionContext context)
+        public async Task<IEnumerable<IDocument>> ExecuteAsync(IExecutionContext context)
         {
             List<IDocument> results = new List<IDocument>();
-            IReadOnlyList<IDocument> documents = inputs;
+            IReadOnlyList<IDocument> documents = context.Inputs;
             foreach (IfCondition condition in _conditions)
             {
                 // Split the documents into ones that satisfy the predicate and ones that don't

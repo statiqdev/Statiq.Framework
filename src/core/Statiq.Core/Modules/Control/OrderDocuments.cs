@@ -148,7 +148,7 @@ namespace Statiq.Core
         }
 
         /// <inheritdoc />
-        public Task<IEnumerable<IDocument>> ExecuteAsync(IReadOnlyList<IDocument> inputs, IExecutionContext context)
+        public Task<IEnumerable<IDocument>> ExecuteAsync(IExecutionContext context)
         {
             IOrderedEnumerable<IDocument> orderdList = null;
             foreach (Order order in _orders.Reverse())
@@ -156,8 +156,8 @@ namespace Statiq.Core
                 if (orderdList == null)
                 {
                     orderdList = order.Descending
-                        ? inputs.OrderByDescending(x => order.Key.GetValueAsync(x, context).Result, order.Comparer)
-                        : inputs.OrderBy(x => order.Key.GetValueAsync(x, context).Result, order.Comparer);
+                        ? context.Inputs.OrderByDescending(x => order.Key.GetValueAsync(x, context).Result, order.Comparer)
+                        : context.Inputs.OrderBy(x => order.Key.GetValueAsync(x, context).Result, order.Comparer);
                 }
                 else
                 {

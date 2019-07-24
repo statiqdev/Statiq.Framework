@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -125,7 +126,7 @@ namespace Statiq.Razor
         }
 
         /// <inheritdoc />
-        public async Task<IEnumerable<IDocument>> ExecuteAsync(IReadOnlyList<IDocument> inputs, IExecutionContext context)
+        public async Task<IEnumerable<IDocument>> ExecuteAsync(IExecutionContext context)
         {
             // Expire the internal Razor cache if this is a new execution
             // This needs to be done so that layouts/partials can be re-rendered if they've changed,
@@ -137,13 +138,13 @@ namespace Statiq.Razor
             _executionId = context.ExecutionId;
 
             // Eliminate input documents that we shouldn't process
-            List<IDocument> validInputs = inputs
+            ImmutableArray<IDocument> validInputs = context.Inputs
                 .Where(context, x => _ignorePrefix == null || x.Source?.FileName.FullPath.StartsWith(_ignorePrefix) != true)
-                .ToList();
+                .ToImmutableArray();
 
-            if (validInputs.Count < inputs.Count)
+            if (validInputs.Length < context.Inputs.Length)
             {
-                Trace.Information($"Ignoring {inputs.Count - validInputs.Count} inputs due to source file name prefix");
+                Trace.Information($"Ignoring {context.Inputs.Length - validInputs.Length} inputs due to source file name prefix");
             }
 
             // Compile and evaluate the pages in parallel

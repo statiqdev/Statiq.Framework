@@ -52,8 +52,8 @@ namespace Statiq.Core
         }
 
         /// <inheritdoc />
-        public async Task<IEnumerable<IDocument>> ExecuteAsync(IReadOnlyList<IDocument> inputs, IExecutionContext context) =>
-            await inputs.ParallelSelectAsync(context, async input => await ProcessShortcodesAsync(input, context) ?? input);
+        public async Task<IEnumerable<IDocument>> ExecuteAsync(IExecutionContext context) =>
+            await context.Inputs.ParallelSelectAsync(context, async input => await ProcessShortcodesAsync(input, context) ?? input);
 
         // The inputStream will be disposed if this returns a result document but will not otherwise
         private async Task<IDocument> ProcessShortcodesAsync(IDocument input, IExecutionContext context)

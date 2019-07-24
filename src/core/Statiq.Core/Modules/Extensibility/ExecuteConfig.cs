@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -42,15 +43,12 @@ namespace Statiq.Core
         {
         }
 
-        protected override async Task<IEnumerable<IDocument>> ExecuteAsync(
-            IDocument input,
-            IReadOnlyList<IDocument> inputs,
-            IExecutionContext context,
-            object value)
+        protected override async Task<IEnumerable<IDocument>> ExecuteAsync(IDocument input, IExecutionContext context, object value)
         {
+            ImmutableArray<IDocument> inputs = context.Inputs;
             if (input != null)
             {
-                inputs = new[] { input };
+                inputs = ImmutableArray.Create(input);
             }
 
             // This behavior is important because action-based config values always return null, so by returning
@@ -68,7 +66,7 @@ namespace Statiq.Core
         private static IEnumerable<IDocument> GetValueDocuments(object value) =>
             value is IDocument document ? document.Yield() : value as IEnumerable<IDocument>;
 
-        private static async Task<IEnumerable<IDocument>> ExecuteModulesAsync(object value, IExecutionContext context, IEnumerable<IDocument> inputs)
+        private static async Task<IEnumerable<IDocument>> ExecuteModulesAsync(object value, IExecutionContext context, ImmutableArray<IDocument> inputs)
         {
             IEnumerable<IModule> modules = value is IModule module ? new[] { module } : value as IEnumerable<IModule>;
             return modules != null ? await context.ExecuteAsync(modules, inputs) : (IEnumerable<IDocument>)null;

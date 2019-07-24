@@ -49,7 +49,6 @@ namespace Statiq.Core
         /// <inheritdoc />
         protected override async Task<IEnumerable<IDocument>> ExecuteAsync(
             IDocument input,
-            IReadOnlyList<IDocument> inputs,
             IExecutionContext context,
             string value)
         {

@@ -22,12 +22,19 @@ namespace Statiq.Testing
         {
             DocumentFactory = new DocumentFactory(_settings);
             DocumentFactory.SetDefaultDocumentType<TestDocument>();
+            Inputs = ImmutableArray<IDocument>.Empty;
         }
 
-        public TestExecutionContext(IEnumerable<IDocument> documents)
-            : this()
+        public TestExecutionContext(IEnumerable<IDocument> inputs)
         {
-            Documents = documents.ToImmutableArray();
+            DocumentFactory = new DocumentFactory(_settings);
+            DocumentFactory.SetDefaultDocumentType<TestDocument>();
+            SetInputs(inputs);
+        }
+
+        public TestExecutionContext(params IDocument[] inputs)
+            : this((IEnumerable<IDocument>)inputs)
+        {
         }
 
         private readonly TestSettings _settings = new TestSettings();
@@ -63,7 +70,7 @@ namespace Statiq.Testing
         public IReadOnlyFileSystem FileSystem { get; set; } = new TestFileSystem();
 
         /// <inheritdoc/>
-        public IPipelineResults Results { get; set; }
+        public IPipelineOutputs Outputs { get; set; }
 
         /// <inheritdoc/>
         public IServiceProvider Services { get; set; } = new TestServiceProvider();
@@ -96,7 +103,13 @@ namespace Statiq.Testing
         public IModule Module { get; set; }
 
         /// <inheritdoc/>
-        public ImmutableArray<IDocument> Documents { get; set; }
+        public ImmutableArray<IDocument> Inputs { get; private set; }
+
+        public void SetInputs(IEnumerable<IDocument> inputs) =>
+            Inputs = inputs?.Where(x => x != null).ToImmutableArray() ?? ImmutableArray<IDocument>.Empty;
+
+        public void SetInputs(params IDocument[] inputs) =>
+            SetInputs((IEnumerable<IDocument>)inputs);
 
         /// <inheritdoc/>
         public Task<Stream> GetContentStreamAsync(string content = null) => Task.FromResult<Stream>(new TestContentStream(this, content));
@@ -146,7 +159,7 @@ namespace Statiq.Testing
             };
 
         /// <inheritdoc/>
-        public async Task<ImmutableArray<IDocument>> ExecuteAsync(IEnumerable<IModule> modules, IEnumerable<IDocument> documents)
+        public async Task<ImmutableArray<IDocument>> ExecuteAsync(IEnumerable<IModule> modules, IEnumerable<IDocument> inputs)
         {
             if (modules == null)
             {
@@ -154,9 +167,14 @@ namespace Statiq.Testing
             }
             foreach (IModule module in modules)
             {
-                documents = await module.ExecuteAsync(documents?.ToList() ?? (IReadOnlyList<IDocument>)Array.Empty<IDocument>(), this);
+                // We need a new context for each module so just do a member-wise clone of this one and set module and documents
+                TestExecutionContext moduleContext = (TestExecutionContext)MemberwiseClone();
+                moduleContext.SetInputs(inputs);
+                moduleContext.Module = module;
+                moduleContext.Parent = this;
+                inputs = await module.ExecuteAsync(moduleContext);
             }
-            return documents.ToImmutableArray();
+            return inputs?.Where(x => x != null).ToImmutableArray() ?? ImmutableArray<IDocument>.Empty;
         }
 
         public Func<IJavaScriptEngine> JsEngineFunc { get; set; } = () =>

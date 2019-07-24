@@ -88,9 +88,9 @@ namespace Statiq.Core
             _documents = Config.FromContext(async ctx => await contentAndMetadata.SelectAsync(async x => ctx.CreateDocument(x.Item2, await ctx.GetContentProviderAsync(x.Item1))));
         }
 
-        public async Task<IEnumerable<IDocument>> ExecuteAsync(IReadOnlyList<IDocument> inputs, IExecutionContext context) =>
+        public async Task<IEnumerable<IDocument>> ExecuteAsync(IExecutionContext context) =>
             _documents.RequiresDocument
-                ? await inputs.SelectManyAsync(context, x => _documents.GetValueAsync(x, context))
+                ? await context.Inputs.SelectManyAsync(context, input => _documents.GetValueAsync(input, context))
                 : await _documents.GetValueAsync(null, context);
     }
 }

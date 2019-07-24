@@ -421,7 +421,7 @@ namespace Statiq.CodeAnalysis
         }
 
         /// <inheritdoc />
-        public async Task<IEnumerable<IDocument>> ExecuteAsync(IReadOnlyList<IDocument> inputs, IExecutionContext context)
+        public async Task<IEnumerable<IDocument>> ExecuteAsync(IExecutionContext context)
         {
             // Create the compilation (have to supply an XmlReferenceResolver to handle include XML doc comments)
             MetadataReference mscorlib = MetadataReference.CreateFromFile(typeof(object).Assembly.Location);
@@ -434,7 +434,7 @@ namespace Statiq.CodeAnalysis
 
             // Add the input source and references
             List<ISymbol> symbols = new List<ISymbol>();
-            compilation = await AddSourceFilesAsync(inputs, context, compilation);
+            compilation = await AddSourceFilesAsync(context.Inputs, context, compilation);
             compilation = await AddProjectReferencesAsync(context, symbols, compilation);
             compilation = await AddSolutionReferencesAsync(context, symbols, compilation);
             compilation = await AddAssemblyReferencesAsync(context, symbols, compilation);

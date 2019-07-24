@@ -66,12 +66,12 @@ namespace Statiq.Core
         protected Task<bool> ShouldProcessAsync(IDocument input, IExecutionContext context) => _predicate.GetValueAsync(input, context);
 
         /// <inheritdoc />
-        public virtual async Task<IEnumerable<IDocument>> ExecuteAsync(IReadOnlyList<IDocument> inputs, IExecutionContext context)
+        public virtual async Task<IEnumerable<IDocument>> ExecuteAsync(IExecutionContext context)
         {
             // Get the output file path for each file in sequence and set up action chains
             // Value = input source string(s) (for reporting a warning if not appending), write action
             Dictionary<FilePath, Tuple<List<string>, Func<Task>>> writesBySource = new Dictionary<FilePath, Tuple<List<string>, Func<Task>>>();
-            await context.ForEachAsync(inputs, WriteFilesAsync);
+            await context.ForEachAsync(context.Inputs, WriteFilesAsync);
 
             // Display a warning for any duplicated outputs if not appending
             if (!_append)
@@ -87,7 +87,7 @@ namespace Statiq.Core
             await writesBySource.Values.ParallelForEachAsync(async x => await x.Item2());
 
             // Return the input documents
-            return inputs;
+            return context.Inputs;
 
             async Task WriteFilesAsync(IDocument input)
             {

@@ -20,7 +20,7 @@ namespace Statiq.Core.Tests.Modules.IO
             {
                 // Given
                 TestDocument document = new TestDocument();
-                TestExecutionContext context = new TestExecutionContext
+                TestExecutionContext context = new TestExecutionContext(document)
                 {
                     HttpResponseFunc = (_, __) =>
                     {
@@ -36,7 +36,7 @@ namespace Statiq.Core.Tests.Modules.IO
                 IModule download = new ReadWeb().WithUris("https://statiq.dev/");
 
                 // When
-                TestDocument result = await ExecuteAsync(document, context, download).SingleAsync();
+                TestDocument result = await ExecuteAsync(context, download).SingleAsync();
 
                 // Then
                 Dictionary<string, string> headers = result[Keys.SourceHeaders] as Dictionary<string, string>;
@@ -58,7 +58,7 @@ namespace Statiq.Core.Tests.Modules.IO
             {
                 // Given
                 TestDocument document = new TestDocument();
-                TestExecutionContext context = new TestExecutionContext
+                TestExecutionContext context = new TestExecutionContext(document)
                 {
                     HttpResponseFunc = (_, __) =>
                     {
@@ -74,7 +74,7 @@ namespace Statiq.Core.Tests.Modules.IO
                 IModule download = new ReadWeb().WithUris("https://statiq.dev/", "https://github.com/statiqdev/Framework");
 
                 // When
-                IReadOnlyList<TestDocument> results = await ExecuteAsync(document, context, download);
+                IReadOnlyList<TestDocument> results = await ExecuteAsync(context, download);
 
                 // Then
                 foreach (TestDocument result in results)
@@ -99,7 +99,7 @@ namespace Statiq.Core.Tests.Modules.IO
             {
                 // Given
                 TestDocument document = new TestDocument();
-                TestExecutionContext context = new TestExecutionContext
+                TestExecutionContext context = new TestExecutionContext(document)
                 {
                     HttpResponseFunc = (_, __) =>
                     {
@@ -113,7 +113,7 @@ namespace Statiq.Core.Tests.Modules.IO
                 IModule download = new ReadWeb().WithUris("https://statiq.dev/assets/img/logo.png");
 
                 // When
-                TestDocument result = await ExecuteAsync(document, context, download).SingleAsync();
+                TestDocument result = await ExecuteAsync(context, download).SingleAsync();
 
                 // Then
                 using (Stream stream = await result.GetStreamAsync())
@@ -127,7 +127,7 @@ namespace Statiq.Core.Tests.Modules.IO
             {
                 // Given
                 TestDocument document = new TestDocument();
-                TestExecutionContext context = new TestExecutionContext
+                TestExecutionContext context = new TestExecutionContext(document)
                 {
                     HttpResponseFunc = (_, __) =>
                     {
@@ -143,7 +143,7 @@ namespace Statiq.Core.Tests.Modules.IO
                 IModule download = new ReadWeb().WithUri("https://statiq.dev/assets/img/logo.png", header);
 
                 // When
-                TestDocument result = await ExecuteAsync(document, context, download).SingleAsync();
+                TestDocument result = await ExecuteAsync(context, download).SingleAsync();
 
                 // Then
                 using (Stream stream = await result.GetStreamAsync())

@@ -84,10 +84,10 @@ namespace Statiq.Core
         }
 
         /// <inheritdoc />
-        public async Task<IEnumerable<IDocument>> ExecuteAsync(IReadOnlyList<IDocument> inputs, IExecutionContext context)
+        public async Task<IEnumerable<IDocument>> ExecuteAsync(IExecutionContext context)
         {
             // Find metadata files
-            IEnumerable<MetaInfo> metaInfos = await inputs
+            IEnumerable<MetaInfo> metaInfos = await context.Inputs
                 .Where(input => input.Source != null)
                 .SelectAsync(context, GetMetaInfo);
             Dictionary<DirectoryPath, MetaInfo[]> metadataDictionary = metaInfos
@@ -97,7 +97,7 @@ namespace Statiq.Core
 
             // Ignore files that define Metadata if not preserved
             IEnumerable<IDocument> filteredInputs =
-                await inputs.WhereAsync(async x => x.Source != null && (_preserveMetadataFiles || !await _metadataFiles.AnyAsync(isMetadata => isMetadata.MetadataFileName.GetValueAsync(x, context))));
+                await context.Inputs.WhereAsync(async input => input.Source != null && (_preserveMetadataFiles || !await _metadataFiles.AnyAsync(isMetadata => isMetadata.MetadataFileName.GetValueAsync(input, context))));
 
             // Apply Metadata
             return await filteredInputs.SelectAsync(context, ApplyMetadata);

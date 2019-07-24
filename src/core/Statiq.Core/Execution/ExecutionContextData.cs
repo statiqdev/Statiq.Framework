@@ -14,7 +14,7 @@ namespace Statiq.Core
             ExecutionId = executionId;
             PipelinePhase = pipelinePhase ?? throw new ArgumentNullException(nameof(pipelinePhase));
             Services = services ?? throw new ArgumentNullException(nameof(services));
-            Results = new PipelineResults(engine.Documents, pipelinePhase, engine.Pipelines);
+            Outputs = new PipelineOutputs(engine.Documents, pipelinePhase, engine.Pipelines);
             CancellationToken = cancellationToken;
         }
 
@@ -23,6 +23,6 @@ namespace Statiq.Core
         public PipelinePhase PipelinePhase { get; }
         public IServiceProvider Services { get; }
         public CancellationToken CancellationToken { get; }
-        public IPipelineResults Results { get; }
+        public IPipelineOutputs Outputs { get; }
     }
 }

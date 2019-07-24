@@ -98,13 +98,13 @@ namespace Statiq.Core
         }
 
         /// <inheritdoc />
-        public async Task<IEnumerable<IDocument>> ExecuteAsync(IReadOnlyList<IDocument> inputs, IExecutionContext context)
+        public async Task<IEnumerable<IDocument>> ExecuteAsync(IExecutionContext context)
         {
             // Iterate redirects and generate all of the per-redirect documents (I.e., meta refresh pages)
             ConcurrentDictionary<FilePath, string> redirects = new ConcurrentDictionary<FilePath, string>();
 
             // Need to materialize the parallel operation before creating the additional outputs
-            List<IDocument> outputs = (await inputs.ParallelSelectManyAsync(context, GetOutputsAsync)).ToList();
+            List<IDocument> outputs = (await context.Inputs.ParallelSelectManyAsync(context, GetOutputsAsync)).ToList();
 
             // Generate other output documents if requested
             if (redirects.Count > 0)

@@ -172,9 +172,9 @@ namespace Statiq.Markdown
         }
 
         /// <inheritdoc />
-        public async Task<IEnumerable<IDocument>> ExecuteAsync(IReadOnlyList<IDocument> inputs, IExecutionContext context)
+        public async Task<IEnumerable<IDocument>> ExecuteAsync(IExecutionContext context)
         {
-            return await inputs.ParallelSelectAsync(context, ProcessMarkdownAsync);
+            return await context.Inputs.ParallelSelectAsync(context, ProcessMarkdownAsync);
 
             async Task<IDocument> ProcessMarkdownAsync(IDocument input)
             {

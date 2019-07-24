@@ -70,7 +70,7 @@ namespace Statiq.AmazonWebServices
         }
 
         /// <inheritdoc />
-        public async Task<IEnumerable<IDocument>> ExecuteAsync(IReadOnlyList<IDocument> inputs, IExecutionContext context)
+        public async Task<IEnumerable<IDocument>> ExecuteAsync(IExecutionContext context)
         {
             Stream contentStream = await context.GetContentStreamAsync();
             using (TextWriter textWriter = new StreamWriter(contentStream))
@@ -79,7 +79,7 @@ namespace Statiq.AmazonWebServices
                 {
                     writer.WriteStartArray();
 
-                    await context.ForEachAsync(inputs, async doc =>
+                    await context.ForEachAsync(context.Inputs, async input =>
                     {
                         writer.WriteStartObject();
 
@@ -87,7 +87,7 @@ namespace Statiq.AmazonWebServices
                         writer.WriteValue("add");
 
                         writer.WritePropertyName("id");
-                        writer.WriteValue(_idMetaKey != null ? doc.String(_idMetaKey) : doc.Id.ToString());
+                        writer.WriteValue(_idMetaKey != null ? input.String(_idMetaKey) : input.Id.ToString());
 
                         writer.WritePropertyName("fields");
                         writer.WriteStartObject();
@@ -95,13 +95,13 @@ namespace Statiq.AmazonWebServices
                         if (_bodyField != null)
                         {
                             writer.WritePropertyName(_bodyField);
-                            writer.WriteValue(await doc.GetStringAsync());
+                            writer.WriteValue(await input.GetStringAsync());
                         }
 
                         foreach (Field field in _fields)
                         {
-                            string name = await field.FieldName.GetValueAsync(doc, context);
-                            object value = await field.FieldValue.GetValueAsync(doc, context);
+                            string name = await field.FieldName.GetValueAsync(input, context);
+                            object value = await field.FieldValue.GetValueAsync(input, context);
                             if (name == null || value == null)
                             {
                                 // Null fields are not written
@@ -114,15 +114,15 @@ namespace Statiq.AmazonWebServices
 
                         foreach (MetaFieldMapping field in _metaFields)
                         {
-                            string metaKey = await field.MetaKey.GetValueAsync(doc, context);
-                            string fieldName = await field.FieldName.GetValueAsync(doc, context);
+                            string metaKey = await field.MetaKey.GetValueAsync(input, context);
+                            string fieldName = await field.FieldName.GetValueAsync(input, context);
 
-                            if (!doc.ContainsKey(metaKey))
+                            if (!input.ContainsKey(metaKey))
                             {
                                 continue;
                             }
 
-                            object value = doc.Get(metaKey);
+                            object value = input.Get(metaKey);
                             if (value == null || fieldName == null)
                             {
                                 // Null fields are not written

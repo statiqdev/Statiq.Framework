@@ -105,10 +105,10 @@ namespace Statiq.Json
         }
 
         /// <inheritdoc />
-        public async Task<IEnumerable<IDocument>> ExecuteAsync(IReadOnlyList<IDocument> inputs, IExecutionContext context)
+        public async Task<IEnumerable<IDocument>> ExecuteAsync(IExecutionContext context)
         {
             // Don't use the built-in exception tracing so that we can return the original document on error
-            return await inputs.ParallelSelectAsync(GenerateJsonAsync);
+            return await context.Inputs.ParallelSelectAsync(GenerateJsonAsync);
 
             async Task<IDocument> GenerateJsonAsync(IDocument input)
             {

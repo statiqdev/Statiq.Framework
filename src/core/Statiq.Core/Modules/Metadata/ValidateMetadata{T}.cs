@@ -87,9 +87,9 @@ namespace Statiq.Core
         }
 
         /// <inheritdoc />
-        public Task<IEnumerable<IDocument>> ExecuteAsync(IReadOnlyList<IDocument> inputs, IExecutionContext context)
+        public Task<IEnumerable<IDocument>> ExecuteAsync(IExecutionContext context)
         {
-            Parallel.ForEach(inputs, input =>
+            Parallel.ForEach(context.Inputs, input =>
             {
                 // Check if the key exists
                 if (!input.ContainsKey(_key))
@@ -121,7 +121,7 @@ namespace Statiq.Core
                 }
             });
 
-            return Task.FromResult<IEnumerable<IDocument>>(inputs);
+            return Task.FromResult<IEnumerable<IDocument>>(context.Inputs);
         }
 
         private Exception GetException(string message) => new Exception($"{message ?? "Assertion failed"}");

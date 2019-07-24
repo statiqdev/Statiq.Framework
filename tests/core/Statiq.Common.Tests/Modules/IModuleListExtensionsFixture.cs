@@ -141,12 +141,12 @@ namespace Statiq.Common.Tests.Modules
 
         private class RedModule : IModule
         {
-            public Task<IEnumerable<IDocument>> ExecuteAsync(IReadOnlyList<IDocument> inputs, IExecutionContext context) => throw new NotImplementedException();
+            public Task<IEnumerable<IDocument>> ExecuteAsync(IExecutionContext context) => throw new NotImplementedException();
         }
 
         private class GreenModule : IModule
         {
-            public Task<IEnumerable<IDocument>> ExecuteAsync(IReadOnlyList<IDocument> inputs, IExecutionContext context) => throw new NotImplementedException();
+            public Task<IEnumerable<IDocument>> ExecuteAsync(IExecutionContext context) => throw new NotImplementedException();
         }
     }
 }

@@ -32,18 +32,17 @@ namespace Statiq.Core
         }
 
         public AddContentToMetadata(string key, params string[] pipelines)
-            : base(new ExecuteConfig(Config.FromContext(ctx => ctx.Results.FromPipelines(pipelines))))
+            : base(new ExecuteConfig(Config.FromContext(ctx => ctx.Outputs.FromPipelines(pipelines))))
         {
             _key = key ?? throw new ArgumentNullException(nameof(key));
         }
 
         protected override async Task<IEnumerable<IDocument>> GetOutputDocumentsAsync(
-            IReadOnlyList<IDocument> inputs,
-            IReadOnlyList<IDocument> childOutputs,
-            IExecutionContext context) =>
+            IExecutionContext context,
+            IReadOnlyList<IDocument> childOutputs) =>
             childOutputs.Count == 0
-                ? inputs
-                : await inputs.SelectAsync(context, async input => input.Clone(new MetadataItems
+                ? context.Inputs
+                : await context.Inputs.SelectAsync(context, async input => input.Clone(new MetadataItems
                 {
                     {
                         _key,

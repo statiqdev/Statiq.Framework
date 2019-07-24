@@ -14,7 +14,7 @@ namespace Statiq.Core
     /// <category>Control</category>
     public class ClearDocuments : IModule
     {
-        public Task<IEnumerable<IDocument>> ExecuteAsync(IReadOnlyList<IDocument> inputs, IExecutionContext context) =>
+        public Task<IEnumerable<IDocument>> ExecuteAsync(IExecutionContext context) =>
             Task.FromResult<IEnumerable<IDocument>>(null);
     }
 }

@@ -82,9 +82,9 @@ namespace Statiq.YouTube
         }
 
         /// <inheritdoc />
-        public Task<IEnumerable<IDocument>> ExecuteAsync(IReadOnlyList<IDocument> inputs, IExecutionContext context)
+        public Task<IEnumerable<IDocument>> ExecuteAsync(IExecutionContext context)
         {
-            ParallelQuery<IDocument> outputs = inputs.AsParallel().Select(context, input =>
+            ParallelQuery<IDocument> outputs = context.Inputs.AsParallel().Select(context, input =>
             {
                 ConcurrentDictionary<string, object> results = new ConcurrentDictionary<string, object>();
                 foreach (KeyValuePair<string, Func<IDocument, IExecutionContext, YouTubeService, object>> request in _requests.AsParallel())

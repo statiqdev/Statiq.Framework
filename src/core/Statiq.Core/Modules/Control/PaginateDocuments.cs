@@ -74,11 +74,11 @@ namespace Statiq.Core
         }
 
         /// <inheritdoc />
-        public Task<IEnumerable<IDocument>> ExecuteAsync(IReadOnlyList<IDocument> inputs, IExecutionContext context)
+        public Task<IEnumerable<IDocument>> ExecuteAsync(IExecutionContext context)
         {
             // Partition the pages and get a total before skip/take
             IDocument[][] pages =
-                Partition(inputs, _pageSize)
+                Partition(context.Inputs, _pageSize)
                 .ToArray();
             int totalItems = pages.Sum(x => x.Length);
 

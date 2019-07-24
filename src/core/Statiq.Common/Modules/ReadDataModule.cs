@@ -89,36 +89,10 @@ namespace Statiq.Common
             return (TModule)this;
         }
 
-        /// <summary>
-        /// Gets the items to convert to documents. The <see cref="GetDictionary(TItem)"/> method
-        /// is used to convert each item into a series of key-value pairs that is then used for
-        /// document creation.
-        /// </summary>
-        /// <param name="inputs">The input documents.</param>
-        /// <param name="context">The current execution context.</param>
-        /// <returns>The objects to create documents from.</returns>
-        protected abstract Task<IEnumerable<TItem>> GetItemsAsync(IReadOnlyList<IDocument> inputs, IExecutionContext context);
-
-        /// <summary>
-        /// Used to convert each object from <see cref="GetItemsAsync(IReadOnlyList{IDocument}, IExecutionContext)"/> into a IDictionary&lt;string, object&gt;.
-        /// The base implementation checks if the object implements IDictionary&lt;string, object&gt; and just
-        /// performs a cast is if it does. If not, reflection is used to construct a IDictionary&lt;string, object&gt;
-        /// from all of the object's properties. Override this method to provide an alternate way of getting
-        /// key-value pairs for each object.
-        /// </summary>
-        /// <param name="item">The object to convert to a IDictionary&lt;string, object&gt;.</param>
-        /// <returns>A IDictionary&lt;string, object&gt; containing the data used for document creation.</returns>
-        protected virtual IDictionary<string, object> GetDictionary(TItem item)
-        {
-            // If it's already what we want, then just return it
-            IDictionary<string, object> dictionary = item as IDictionary<string, object>;
-            return dictionary ?? item.GetType().GetProperties().ToDictionary(prop => prop.Name, prop => prop.GetValue(item));
-        }
-
         /// <inheritdoc />
-        public async Task<IEnumerable<IDocument>> ExecuteAsync(IReadOnlyList<IDocument> inputs, IExecutionContext context)
+        public async Task<IEnumerable<IDocument>> ExecuteAsync(IExecutionContext context)
         {
-            IEnumerable<TItem> items = await GetItemsAsync(inputs, context);
+            IEnumerable<TItem> items = await GetItemsAsync(context);
             return items == null
                 ? Array.Empty<IDocument>()
                 : await items.Where(x => x != null).Take(_limit).ParallelSelectAsync(ReadDataAsync);
@@ -157,6 +131,31 @@ namespace Statiq.Common
 
                 return context.CreateDocument(meta, await context.GetContentProviderAsync(content));
             }
+        }
+
+        /// <summary>
+        /// Gets the items to convert to documents. The <see cref="GetDictionary(TItem)"/> method
+        /// is used to convert each item into a series of key-value pairs that is then used for
+        /// document creation.
+        /// </summary>
+        /// <param name="context">The current execution context.</param>
+        /// <returns>The objects to create documents from.</returns>
+        protected abstract Task<IEnumerable<TItem>> GetItemsAsync(IExecutionContext context);
+
+        /// <summary>
+        /// Used to convert each object from <see cref="GetItemsAsync(IExecutionContext)"/> into a IDictionary&lt;string, object&gt;.
+        /// The base implementation checks if the object implements IDictionary&lt;string, object&gt; and just
+        /// performs a cast is if it does. If not, reflection is used to construct a IDictionary&lt;string, object&gt;
+        /// from all of the object's properties. Override this method to provide an alternate way of getting
+        /// key-value pairs for each object.
+        /// </summary>
+        /// <param name="item">The object to convert to a IDictionary&lt;string, object&gt;.</param>
+        /// <returns>A IDictionary&lt;string, object&gt; containing the data used for document creation.</returns>
+        protected virtual IDictionary<string, object> GetDictionary(TItem item)
+        {
+            // If it's already what we want, then just return it
+            IDictionary<string, object> dictionary = item as IDictionary<string, object>;
+            return dictionary ?? item.GetType().GetProperties().ToDictionary(prop => prop.Name, prop => prop.GetValue(item));
         }
     }
 }

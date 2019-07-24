@@ -9,9 +9,9 @@ namespace Statiq.Minification
 {
     public abstract class MinifierBase
     {
-        public async Task<IEnumerable<IDocument>> MinifyAsync(IReadOnlyList<IDocument> inputs, IExecutionContext context, Func<string, MinificationResultBase> minify, string minifierType)
+        public async Task<IEnumerable<IDocument>> MinifyAsync(IExecutionContext context, Func<string, MinificationResultBase> minify, string minifierType)
         {
-            return await inputs.SelectAsync(async input =>
+            return await context.Inputs.SelectAsync(async input =>
             {
                 try
                 {

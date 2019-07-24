@@ -41,13 +41,13 @@ namespace Statiq.Core
         /// <summary>
         /// Holds the output documents from the previous execution of this phase.
         /// </summary>
-        public ImmutableArray<IDocument> OutputDocuments { get; private set; } = ImmutableArray<IDocument>.Empty;
+        public ImmutableArray<IDocument> Outputs { get; private set; } = ImmutableArray<IDocument>.Empty;
 
         /// <summary>
         /// The first dependency always holds the input documents for this phase.
         /// </summary>
         /// <returns>The input documents for this phase.</returns>
-        private ImmutableArray<IDocument> GetInputDocuments() => Dependencies.Length == 0 ? ImmutableArray<IDocument>.Empty : Dependencies[0].OutputDocuments;
+        private ImmutableArray<IDocument> GetInputs() => Dependencies.Length == 0 ? ImmutableArray<IDocument>.Empty : Dependencies[0].Outputs;
 
         // This is the main execute method called by the engine
         public async Task ExecuteAsync(
@@ -64,7 +64,7 @@ namespace Statiq.Core
             if (_modules.Count == 0)
             {
                 Trace.Verbose($"Pipeline {PipelineName}/{Phase} contains no modules, skipping");
-                OutputDocuments = GetInputDocuments();
+                Outputs = GetInputs();
                 return;
             }
 
@@ -77,9 +77,9 @@ namespace Statiq.Core
                 using (IServiceScope serviceScope = serviceScopeFactory.CreateScope())
                 {
                     ExecutionContextData contextData = new ExecutionContextData(engine, executionId, this, serviceScope.ServiceProvider, cancellationTokenSource.Token);
-                    OutputDocuments = await Engine.ExecuteAsync(contextData, null, _modules, GetInputDocuments());
+                    Outputs = await Engine.ExecuteAsync(contextData, null, _modules, GetInputs());
                     pipelineStopwatch.Stop();
-                    Trace.Information($"Executed pipeline {PipelineName}/{Phase} in {pipelineStopwatch.ElapsedMilliseconds} ms resulting in {OutputDocuments.Length} output document(s)");
+                    Trace.Information($"Executed pipeline {PipelineName}/{Phase} in {pipelineStopwatch.ElapsedMilliseconds} ms resulting in {Outputs.Length} output document(s)");
                 }
             }
             catch (Exception ex)
@@ -89,7 +89,7 @@ namespace Statiq.Core
                     Trace.Critical($"Exception while executing pipeline {PipelineName}/{Phase}: {ex}");
                     cancellationTokenSource.Cancel();
                 }
-                OutputDocuments = ImmutableArray<IDocument>.Empty;
+                Outputs = ImmutableArray<IDocument>.Empty;
                 throw;
             }
 
@@ -98,8 +98,8 @@ namespace Statiq.Core
             {
                 engine.Documents.AddOrUpdate(
                     PipelineName,
-                    OutputDocuments,
-                    (_, __) => OutputDocuments);
+                    Outputs,
+                    (_, __) => Outputs);
             }
         }
 

@@ -103,9 +103,9 @@ namespace Statiq.Xmp
         }
 
         /// <inheritdoc />
-        public async Task<IEnumerable<IDocument>> ExecuteAsync(IReadOnlyList<IDocument> inputs, IExecutionContext context)
+        public async Task<IEnumerable<IDocument>> ExecuteAsync(IExecutionContext context)
         {
-            return (await inputs.SelectAsync(context, async input =>
+            return (await context.Inputs.SelectAsync(context, async input =>
             {
                  XmpDirectory xmpDirectory;
                  try

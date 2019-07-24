@@ -394,7 +394,7 @@ namespace Statiq.Feeds
         }
 
         /// <inheritdoc />
-        public async Task<IEnumerable<IDocument>> ExecuteAsync(IReadOnlyList<IDocument> inputs, IExecutionContext context)
+        public async Task<IEnumerable<IDocument>> ExecuteAsync(IExecutionContext context)
         {
             // Get the feed
             Feed feed = new Feed
@@ -411,7 +411,7 @@ namespace Statiq.Feeds
             };
 
             // Add items
-            await context.ForEachAsync(inputs.Take(_maximumItems), async input =>
+            await context.ForEachAsync(context.Inputs.Take(_maximumItems), async input =>
             {
                 feed.Items.Add(new FeedItem
                 {

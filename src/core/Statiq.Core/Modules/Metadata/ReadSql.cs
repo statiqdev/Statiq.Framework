@@ -40,7 +40,7 @@ namespace Statiq.Core
         }
 
         /// <inheritdoc />
-        protected override Task<IEnumerable<DataRow>> GetItemsAsync(IReadOnlyList<IDocument> inputs, IExecutionContext context)
+        protected override Task<IEnumerable<DataRow>> GetItemsAsync(IExecutionContext context)
         {
             using (SqlConnection conn = new SqlConnection(_connectionString))
             {

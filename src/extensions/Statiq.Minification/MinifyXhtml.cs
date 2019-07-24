@@ -99,11 +99,11 @@ namespace Statiq.Minification
         }
 
         /// <inheritdoc />
-        public async Task<IEnumerable<IDocument>> ExecuteAsync(IReadOnlyList<IDocument> inputs, IExecutionContext context)
+        public async Task<IEnumerable<IDocument>> ExecuteAsync(IExecutionContext context)
         {
             XhtmlMinifier minifier = new XhtmlMinifier(_minificationSettings);
 
-            return await MinifyAsync(inputs, context, minifier.Minify, "XHTML");
+            return await MinifyAsync(context, minifier.Minify, "XHTML");
         }
     }
 }

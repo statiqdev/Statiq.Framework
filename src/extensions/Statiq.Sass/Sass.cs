@@ -147,9 +147,9 @@ namespace Statiq.Sass
         }
 
         /// <inheritdoc />
-        public async Task<IEnumerable<IDocument>> ExecuteAsync(IReadOnlyList<IDocument> inputs, IExecutionContext context)
+        public async Task<IEnumerable<IDocument>> ExecuteAsync(IExecutionContext context)
         {
-            return await inputs.ParallelSelectManyAsync(context, ProcessSassAsync);
+            return await context.Inputs.ParallelSelectManyAsync(context, ProcessSassAsync);
 
             async Task<IEnumerable<IDocument>> ProcessSassAsync(IDocument input)
             {
