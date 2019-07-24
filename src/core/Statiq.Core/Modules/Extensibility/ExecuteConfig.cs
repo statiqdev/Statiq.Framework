@@ -71,7 +71,7 @@ namespace Statiq.Core
         private static async Task<IEnumerable<IDocument>> ExecuteModulesAsync(object value, IExecutionContext context, IEnumerable<IDocument> inputs)
         {
             IEnumerable<IModule> modules = value is IModule module ? new[] { module } : value as IEnumerable<IModule>;
-            return modules != null ? await context.ExecuteAsync(modules, inputs) : null;
+            return modules != null ? await context.ExecuteAsync(modules, inputs) : (IEnumerable<IDocument>)null;
         }
 
         private static async Task<IEnumerable<IDocument>> ChangeContentAsync(object value, IExecutionContext context, IDocument document)

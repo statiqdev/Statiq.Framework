@@ -7,7 +7,7 @@ namespace Statiq.Common
     public static class IExecutionContextExtensions
     {
         /// <summary>
-        /// Executes the specified modules with an empty initial input document with optional additional metadata and returns the result documents.
+        /// Executes the specified modules with an single initial input document with optional additional metadata and returns the result documents.
         /// </summary>
         /// <param name="context">The execution context.</param>
         /// <param name="modules">The modules to execute.</param>
@@ -28,6 +28,6 @@ namespace Statiq.Common
         public static async Task<IReadOnlyList<IDocument>> ExecuteAsync(
             this IExecutionContext context,
             IEnumerable<IModule> modules) =>
-            await context.ExecuteAsync(modules, (IEnumerable<IDocument>)null);
+            await context.ExecuteAsync(modules, null);
     }
 }

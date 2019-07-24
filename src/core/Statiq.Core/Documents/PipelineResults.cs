@@ -8,13 +8,16 @@ using Statiq.Common;
 
 namespace Statiq.Core
 {
-    internal class DocumentCollection : IDocumentCollection
+    internal class PipelineResults : IPipelineResults
     {
         private readonly ConcurrentDictionary<string, ImmutableArray<IDocument>> _documents;
         private readonly PipelinePhase _pipelinePhase;
         private readonly IPipelineCollection _pipelines;
 
-        public DocumentCollection(ConcurrentDictionary<string, ImmutableArray<IDocument>> documents, PipelinePhase pipelinePhase, IPipelineCollection pipelines)
+        // Cache the dependency calculation
+        private KeyValuePair<string, ImmutableArray<IDocument>>[] _cachedDependencies;
+
+        public PipelineResults(ConcurrentDictionary<string, ImmutableArray<IDocument>> documents, PipelinePhase pipelinePhase, IPipelineCollection pipelines)
         {
             _documents = documents;
             _pipelinePhase = pipelinePhase;
@@ -29,13 +32,13 @@ namespace Statiq.Core
 
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
-        public IReadOnlyDictionary<string, IEnumerable<IDocument>> ByPipeline()
+        public IReadOnlyDictionary<string, ImmutableArray<IDocument>> ByPipeline()
         {
             Check();
-            return GetDocumentsFromDependencies().ToDictionary(x => x.Key, x => (IEnumerable<IDocument>)x.Value);
+            return GetDocumentsFromDependencies().ToDictionary(x => x.Key, x => x.Value);
         }
 
-        public IEnumerable<IDocument> FromPipeline(string pipeline)
+        public ImmutableArray<IDocument> FromPipeline(string pipeline)
         {
             Check(pipeline);
             return _documents[pipeline];
@@ -47,7 +50,7 @@ namespace Statiq.Core
             return GetDocumentsFromDependencies().Where(x => x.Key != pipeline).SelectMany(x => x.Value);
         }
 
-        public IEnumerable<IDocument> this[string pipline] => FromPipeline(pipline);
+        public ImmutableArray<IDocument> this[string pipline] => FromPipeline(pipline);
 
         // If in the process phase only get documents from dependencies (including transient ones)
         private IEnumerable<KeyValuePair<string, ImmutableArray<IDocument>>> GetDocumentsFromDependencies()
@@ -57,8 +60,14 @@ namespace Statiq.Core
                 return _documents;
             }
 
+            if (_cachedDependencies != null)
+            {
+                return _cachedDependencies;
+            }
+
             HashSet<string> transientDependencies = GatherProcessPhaseDependencies(_pipelinePhase);
-            return _documents.Where(x => transientDependencies.Contains(x.Key));
+            _cachedDependencies = _documents.Where(x => transientDependencies.Contains(x.Key)).ToArray();
+            return _cachedDependencies;
         }
 
         private HashSet<string> GatherProcessPhaseDependencies(PipelinePhase phase, HashSet<string> transientDependencies = null)

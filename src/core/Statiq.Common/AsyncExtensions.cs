@@ -8,11 +8,38 @@ namespace Statiq.Common
     public static class AsyncExtensions
     {
         // https://devblogs.microsoft.com/pfxteam/implementing-a-simple-foreachasync-part-2/
+
+        /// <summary>
+        /// Invokes an async selector in parallel.
+        /// </summary>
+        /// <remarks>
+        /// This method will preserve ordering. It is recommended that
+        /// <see cref="IExecutionContextTraceExceptionsExtensions.ParallelSelectAsync{TResult}(IEnumerable{IDocument}, IExecutionContext, Func{IDocument, Task{TResult}})"/>
+        /// be used when processing <see cref="IDocument"/> objects.
+        /// </remarks>
+        /// <typeparam name="TSource">The type of the elements of <paramref name="items"/>.</typeparam>
+        /// <typeparam name="TResult">The type of the value returned by <paramref name="asyncSelector"/>.</typeparam>
+        /// <param name="items">The items to select from.</param>
+        /// <param name="asyncSelector">The selector to apply on each element of <paramref name="items"/>.</param>
+        /// <returns>The result of invoking the <paramref name="asyncSelector"/> on each element of <paramref name="items"/>.</returns>
         public static async Task<IEnumerable<TResult>> ParallelSelectAsync<TSource, TResult>(
            this IEnumerable<TSource> items,
            Func<TSource, Task<TResult>> asyncSelector) =>
            await Task.WhenAll(items.Select(x => Task.Run(() => asyncSelector(x))));
 
+        /// <summary>
+        /// Invokes an async selector that returns multiple results in parallel.
+        /// </summary>
+        /// <remarks>
+        /// This method will preserve ordering. It is recommended that
+        /// <see cref="IExecutionContextTraceExceptionsExtensions.ParallelSelectManyAsync{TResult}(IEnumerable{IDocument}, IExecutionContext, Func{IDocument, Task{IEnumerable{TResult}}})"/>
+        /// be used when processing <see cref="IDocument"/> objects.
+        /// </remarks>
+        /// <typeparam name="TSource">The type of the elements of <paramref name="items"/>.</typeparam>
+        /// <typeparam name="TResult">The type of the value returned by <paramref name="asyncSelector"/>.</typeparam>
+        /// <param name="items">The items to select from.</param>
+        /// <param name="asyncSelector">The selector to apply on each element of <paramref name="items"/>.</param>
+        /// <returns>The result of invoking the <paramref name="asyncSelector"/> on each element of <paramref name="items"/>.</returns>
         public static async Task<IEnumerable<TResult>> ParallelSelectManyAsync<TSource, TResult>(
            this IEnumerable<TSource> items,
            Func<TSource, Task<IEnumerable<TResult>>> asyncSelector) =>

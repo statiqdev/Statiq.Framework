@@ -329,7 +329,7 @@ namespace Statiq.Core
         }
 
         // This executes the specified modules with the specified input documents
-        internal static async Task<ImmutableArray<IDocument>> ExecuteAsync(ExecutionContext context, IEnumerable<IModule> modules, ImmutableArray<IDocument> inputDocuments)
+        internal static async Task<ImmutableArray<IDocument>> ExecuteAsync(ExecutionContextData contextData, IExecutionContext parent, IEnumerable<IModule> modules, ImmutableArray<IDocument> inputDocuments)
         {
             ImmutableArray<IDocument> resultDocuments = ImmutableArray<IDocument>.Empty;
             if (modules != null)
@@ -341,12 +341,12 @@ namespace Statiq.Core
                     try
                     {
                         // Check for cancellation
-                        context.CancellationToken.ThrowIfCancellationRequested();
+                        contextData.CancellationToken.ThrowIfCancellationRequested();
 
                         // Execute the module
                         System.Diagnostics.Stopwatch stopwatch = System.Diagnostics.Stopwatch.StartNew();
                         Trace.Verbose("Executing module {0} with {1} input document(s)", moduleName, inputDocuments.Length);
-                        ExecutionContext moduleContext = context.Clone(module);
+                        ExecutionContext moduleContext = new ExecutionContext(contextData, parent, module, inputDocuments);
                         IEnumerable<IDocument> moduleResult = await module.ExecuteAsync(inputDocuments, moduleContext);
                         resultDocuments = moduleResult?.Where(x => x != null).ToImmutableArray() ?? ImmutableArray<IDocument>.Empty;
 

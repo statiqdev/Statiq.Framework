@@ -9,7 +9,7 @@ namespace Statiq.Core
     /// Replaces documents in the current pipeline.
     /// </summary>
     /// <category>Control</category>
-    public class ReplaceDocuments : DocumentModule
+    public class ReplaceDocuments : ChildDocumentsModule
     {
         public ReplaceDocuments()
             : base(Array.Empty<IModule>())
@@ -22,13 +22,14 @@ namespace Statiq.Core
         }
 
         public ReplaceDocuments(params string[] pipelines)
-            : base(new ExecuteConfig(Config.FromContext(ctx => ctx.Documents.FromPipelines(pipelines))))
+            : base(new ExecuteConfig(Config.FromContext(ctx => ctx.Results.FromPipelines(pipelines))))
         {
         }
 
         protected override Task<IEnumerable<IDocument>> GetOutputDocumentsAsync(
             IReadOnlyList<IDocument> inputs,
-            IReadOnlyList<IDocument> childOutputs) =>
+            IReadOnlyList<IDocument> childOutputs,
+            IExecutionContext context) =>
             Task.FromResult<IEnumerable<IDocument>>(childOutputs);
     }
 }

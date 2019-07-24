@@ -24,6 +24,12 @@ namespace Statiq.Testing
             DocumentFactory.SetDefaultDocumentType<TestDocument>();
         }
 
+        public TestExecutionContext(IEnumerable<IDocument> documents)
+            : this()
+        {
+            Documents = documents.ToImmutableArray();
+        }
+
         private readonly TestSettings _settings = new TestSettings();
 
         /// <inheritdoc/>
@@ -54,13 +60,10 @@ namespace Statiq.Testing
         public Phase Phase { get; set; } = Phase.Process;
 
         /// <inheritdoc/>
-        public IModule Module { get; set; }
-
-        /// <inheritdoc/>
         public IReadOnlyFileSystem FileSystem { get; set; } = new TestFileSystem();
 
         /// <inheritdoc/>
-        public IDocumentCollection Documents { get; set; }
+        public IPipelineResults Results { get; set; }
 
         /// <inheritdoc/>
         public IServiceProvider Services { get; set; } = new TestServiceProvider();
@@ -71,15 +74,29 @@ namespace Statiq.Testing
         /// <inheritdoc/>
         public ISettings Settings => _settings;
 
+        /// <inheritdoc/>
         IReadOnlySettings IExecutionContext.Settings => Settings;
 
+        /// <inheritdoc/>
         public IShortcodeCollection Shortcodes { get; set; } = new TestShortcodeCollection();
 
+        /// <inheritdoc/>
         IReadOnlyShortcodeCollection IExecutionContext.Shortcodes => Shortcodes;
 
+        /// <inheritdoc/>
         public IMemoryStreamFactory MemoryStreamFactory { get; set; } = new TestMemoryStreamFactory();
 
+        /// <inheritdoc/>
         public CancellationToken CancellationToken { get; set; } = CancellationToken.None;
+
+        /// <inheritdoc/>
+        public IExecutionContext Parent { get; set; }
+
+        /// <inheritdoc/>
+        public IModule Module { get; set; }
+
+        /// <inheritdoc/>
+        public ImmutableArray<IDocument> Documents { get; set; }
 
         /// <inheritdoc/>
         public Task<Stream> GetContentStreamAsync(string content = null) => Task.FromResult<Stream>(new TestContentStream(this, content));
@@ -129,7 +146,7 @@ namespace Statiq.Testing
             };
 
         /// <inheritdoc/>
-        public async Task<IReadOnlyList<IDocument>> ExecuteAsync(IEnumerable<IModule> modules, IEnumerable<IDocument> inputs)
+        public async Task<ImmutableArray<IDocument>> ExecuteAsync(IEnumerable<IModule> modules, IEnumerable<IDocument> documents)
         {
             if (modules == null)
             {
@@ -137,9 +154,9 @@ namespace Statiq.Testing
             }
             foreach (IModule module in modules)
             {
-                inputs = await module.ExecuteAsync(inputs?.ToList() ?? (IReadOnlyList<IDocument>)Array.Empty<IDocument>(), this);
+                documents = await module.ExecuteAsync(documents?.ToList() ?? (IReadOnlyList<IDocument>)Array.Empty<IDocument>(), this);
             }
-            return inputs.ToImmutableArray();
+            return documents.ToImmutableArray();
         }
 
         public Func<IJavaScriptEngine> JsEngineFunc { get; set; } = () =>

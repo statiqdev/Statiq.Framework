@@ -4,7 +4,7 @@ using System.Linq;
 
 namespace Statiq.Common
 {
-    public static class IDocumentCollectionExtensions
+    public static class IPipelineResultsExtensions
     {
         /// <summary>
         /// Gets and concatenates all documents from multiple pipelines.
@@ -15,7 +15,7 @@ namespace Statiq.Common
         /// <param name="pipelines">The pipeline(s) to get documents from.</param>
         /// <returns>All documents from all specified pipeline(s).</returns>
         public static IEnumerable<IDocument> FromPipelines(
-            this IDocumentCollection collection,
+            this IPipelineResults collection,
             params string[] pipelines) =>
             (pipelines ?? Array.Empty<string>()).SelectMany(x => collection.FromPipeline(x));
     }

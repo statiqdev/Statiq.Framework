@@ -15,78 +15,69 @@ namespace Statiq.Core
         // Cache the HttpMessageHandler (the HttpClient is really just a thin wrapper around this)
         private static readonly HttpMessageHandler _httpMessageHandler = new HttpClientHandler();
 
-        private readonly PipelinePhase _pipelinePhase;
+        private readonly ExecutionContextData _contextData;
 
         /// <inheritdoc/>
-        public Engine Engine { get; }
+        public Engine Engine => _contextData.Engine;
 
         /// <inheritdoc/>
-        public Guid ExecutionId { get; }
+        public Guid ExecutionId => _contextData.ExecutionId;
 
         /// <inheritdoc/>
-        public IReadOnlyCollection<byte[]> DynamicAssemblies => Engine.DynamicAssemblies;
+        public IReadOnlyCollection<byte[]> DynamicAssemblies => _contextData.Engine.DynamicAssemblies;
 
         /// <inheritdoc/>
-        public IReadOnlyCollection<string> Namespaces => Engine.Namespaces;
+        public IReadOnlyCollection<string> Namespaces => _contextData.Engine.Namespaces;
 
         /// <inheritdoc/>
-        public string PipelineName => _pipelinePhase.PipelineName;
+        public string PipelineName => _contextData.PipelinePhase.PipelineName;
 
         /// <inheritdoc/>
-        public Phase Phase => _pipelinePhase.Phase;
+        public Phase Phase => _contextData.PipelinePhase.Phase;
+
+        /// <inheritdoc/>
+        public IPipelineResults Results => _contextData.Results;
+
+        /// <inheritdoc/>
+        public IReadOnlyFileSystem FileSystem => _contextData.Engine.FileSystem;
+
+        /// <inheritdoc/>
+        public IReadOnlySettings Settings => _contextData.Engine.Settings;
+
+        /// <inheritdoc/>
+        public IReadOnlyShortcodeCollection Shortcodes => _contextData.Engine.Shortcodes;
+
+        /// <inheritdoc/>
+        public IServiceProvider Services => _contextData.Services;
+
+        /// <inheritdoc/>
+        public string ApplicationInput => _contextData.Engine.ApplicationInput;
+
+        /// <inheritdoc/>
+        public DocumentFactory DocumentFactory => _contextData.Engine.DocumentFactory;
+
+        /// <inheritdoc/>
+        public IMemoryStreamFactory MemoryStreamFactory => _contextData.Engine.MemoryStreamFactory;
+
+        /// <inheritdoc/>
+        public CancellationToken CancellationToken => _contextData.CancellationToken;
+
+        /// <inheritdoc/>
+        public IExecutionContext Parent { get; }
 
         /// <inheritdoc/>
         public IModule Module { get; }
 
         /// <inheritdoc/>
-        public IDocumentCollection Documents { get; }
+        public ImmutableArray<IDocument> Documents { get; }
 
-        /// <inheritdoc/>
-        public IReadOnlyFileSystem FileSystem => Engine.FileSystem;
-
-        /// <inheritdoc/>
-        public IReadOnlySettings Settings => Engine.Settings;
-
-        /// <inheritdoc/>
-        public IReadOnlyShortcodeCollection Shortcodes => Engine.Shortcodes;
-
-        /// <inheritdoc/>
-        public IServiceProvider Services { get; }
-
-        /// <inheritdoc/>
-        public string ApplicationInput => Engine.ApplicationInput;
-
-        /// <inheritdoc/>
-        public DocumentFactory DocumentFactory => Engine.DocumentFactory;
-
-        /// <inheritdoc/>
-        public IMemoryStreamFactory MemoryStreamFactory => Engine.MemoryStreamFactory;
-
-        /// <inheritdoc/>
-        public CancellationToken CancellationToken { get; }
-
-        public ExecutionContext(Engine engine, Guid executionId, PipelinePhase pipelinePhase, IServiceProvider services, CancellationToken cancellationToken)
+        internal ExecutionContext(ExecutionContextData contextData, IExecutionContext parent, IModule module, ImmutableArray<IDocument> documents)
         {
-            Engine = engine ?? throw new ArgumentNullException(nameof(engine));
-            ExecutionId = executionId;
-            _pipelinePhase = pipelinePhase ?? throw new ArgumentNullException(nameof(pipelinePhase));
-            Services = services ?? throw new ArgumentNullException(nameof(services));
-            Documents = new DocumentCollection(engine.Documents, pipelinePhase, engine.Pipelines);
-            CancellationToken = cancellationToken;
+            _contextData = contextData ?? throw new ArgumentNullException(nameof(contextData));
+            Parent = parent;
+            Module = module ?? throw new ArgumentNullException(nameof(module));
+            Documents = documents;
         }
-
-        private ExecutionContext(ExecutionContext original, IModule module)
-        {
-            Engine = original.Engine;
-            ExecutionId = original.ExecutionId;
-            _pipelinePhase = original._pipelinePhase;
-            Services = original.Services;
-            Documents = original.Documents;
-            Module = module;
-            CancellationToken = original.CancellationToken;
-        }
-
-        internal ExecutionContext Clone(IModule module) => new ExecutionContext(this, module);
 
         /// <inheritdoc/>
         public HttpClient CreateHttpClient() => CreateHttpClient(_httpMessageHandler);
@@ -122,8 +113,8 @@ namespace Statiq.Core
         }
 
         /// <inheritdoc/>
-        public async Task<IReadOnlyList<IDocument>> ExecuteAsync(IEnumerable<IModule> modules, IEnumerable<IDocument> inputs) =>
-            await Engine.ExecuteAsync(this, modules, inputs?.ToImmutableArray() ?? ImmutableArray<IDocument>.Empty);
+        public async Task<ImmutableArray<IDocument>> ExecuteAsync(IEnumerable<IModule> modules, IEnumerable<IDocument> documents) =>
+            await Engine.ExecuteAsync(_contextData, this, modules, documents?.ToImmutableArray() ?? ImmutableArray<IDocument>.Empty);
 
         /// <inheritdoc/>
         public IJavaScriptEnginePool GetJavaScriptEnginePool(

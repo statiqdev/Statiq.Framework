@@ -15,7 +15,7 @@ namespace Statiq.Common
     public interface IExecutionContext : IMetadata, IDocumentFactoryProvider
     {
         /// <summary>
-        /// Uniquly identifies the current execution cycle. This can be used to initialize and/or
+        /// Uniquely identifies the current execution cycle. This can be used to initialize and/or
         /// reset static data for a module on new generations (I.e., due to watching).
         /// For example, cache data could be cleared when this changes between runs.
         /// </summary>
@@ -47,11 +47,6 @@ namespace Statiq.Common
         Phase Phase { get; }
 
         /// <summary>
-        /// Gets the currently executing module.
-        /// </summary>
-        IModule Module { get; }
-
-        /// <summary>
         /// Gets the current file system.
         /// </summary>
         IReadOnlyFileSystem FileSystem { get; }
@@ -69,7 +64,7 @@ namespace Statiq.Common
         /// <summary>
         /// Gets the collection of all previously processed documents.
         /// </summary>
-        IDocumentCollection Documents { get; }
+        IPipelineResults Results { get; }
 
         /// <summary>
         /// Gets the dependency injection service provider. A new scope is
@@ -90,6 +85,22 @@ namespace Statiq.Common
         /// Modules should check this token and pass it on whenever possible.
         /// </summary>
         CancellationToken CancellationToken { get; }
+
+        /// <summary>
+        /// The parent execution context if this is a nested module execution,
+        /// <c>null</c> otherwise.
+        /// </summary>
+        IExecutionContext Parent { get; }
+
+        /// <summary>
+        /// Gets the currently executing module.
+        /// </summary>
+        IModule Module { get; }
+
+        /// <summary>
+        /// The input documents to process.
+        /// </summary>
+        ImmutableArray<IDocument> Documents { get; }
 
         /// <summary>
         /// Creates a <see cref="HttpClient"/> instance that should be used for all HTTP communication.
@@ -120,9 +131,9 @@ namespace Statiq.Common
         /// Executes the specified modules with the specified input documents and returns the result documents.
         /// </summary>
         /// <param name="modules">The modules to execute.</param>
-        /// <param name="inputs">The input documents.</param>
+        /// <param name="documents">The documents to execute the modules on.</param>
         /// <returns>The result documents from the executed modules.</returns>
-        Task<IReadOnlyList<IDocument>> ExecuteAsync(IEnumerable<IModule> modules, IEnumerable<IDocument> inputs);
+        Task<ImmutableArray<IDocument>> ExecuteAsync(IEnumerable<IModule> modules, IEnumerable<IDocument> documents);
 
         /// <summary>
         /// Gets a new <see cref="IJavaScriptEnginePool"/>. The returned engine pool should be disposed

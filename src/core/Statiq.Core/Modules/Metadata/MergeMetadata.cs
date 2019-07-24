@@ -16,7 +16,7 @@ namespace Statiq.Core
     /// or use the <see cref="IModuleExtensions.ForEachDocument(IModule)"/> extension.
     /// </remarks>
     /// <category>Metadata</category>
-    public class MergeMetadata : DocumentModule
+    public class MergeMetadata : ChildDocumentsModule
     {
         private bool _reverse;
 
@@ -31,7 +31,7 @@ namespace Statiq.Core
         }
 
         public MergeMetadata(params string[] pipelines)
-            : base(new ExecuteConfig(Config.FromContext(ctx => ctx.Documents.FromPipelines(pipelines))))
+            : base(new ExecuteConfig(Config.FromContext(ctx => ctx.Results.FromPipelines(pipelines))))
         {
         }
 
@@ -50,9 +50,10 @@ namespace Statiq.Core
 
         protected override Task<IEnumerable<IDocument>> GetOutputDocumentsAsync(
             IReadOnlyList<IDocument> inputs,
-            IReadOnlyList<IDocument> childOutputs) =>
+            IReadOnlyList<IDocument> childOutputs,
+            IExecutionContext context) =>
             Task.FromResult(_reverse
-                ? childOutputs.SelectMany(result => inputs.Select(input => result.Clone(input)))
-                : inputs.SelectMany(input => childOutputs.Select(result => input.Clone(result))));
+                ? childOutputs.SelectMany(context, childOutput => inputs.Select(input => childOutput.Clone(input)))
+                : inputs.SelectMany(context, input => childOutputs.Select(result => input.Clone(result))));
     }
 }

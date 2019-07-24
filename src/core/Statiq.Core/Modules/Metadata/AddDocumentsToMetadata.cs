@@ -14,7 +14,7 @@ namespace Statiq.Core
     /// <see cref="IReadOnlyList{IDocument}"/> to the specified metadata key.
     /// </remarks>
     /// <category>Metadata</category>
-    public class AddDocumentsToMetadata : DocumentModule
+    public class AddDocumentsToMetadata : ChildDocumentsModule
     {
         private readonly string _key;
 
@@ -31,17 +31,18 @@ namespace Statiq.Core
         }
 
         public AddDocumentsToMetadata(string key, params string[] pipelines)
-            : base(new ExecuteConfig(Config.FromContext(ctx => ctx.Documents.FromPipelines(pipelines))))
+            : base(new ExecuteConfig(Config.FromContext(ctx => ctx.Results.FromPipelines(pipelines))))
         {
             _key = key ?? throw new ArgumentNullException(nameof(key));
         }
 
         protected override Task<IEnumerable<IDocument>> GetOutputDocumentsAsync(
             IReadOnlyList<IDocument> inputs,
-            IReadOnlyList<IDocument> childOutputs) =>
+            IReadOnlyList<IDocument> childOutputs,
+            IExecutionContext context) =>
             Task.FromResult(childOutputs.Count == 0
                 ? inputs
-                : inputs.Select(input => input.Clone(new MetadataItems
+                : inputs.Select(context, input => input.Clone(new MetadataItems
                 {
                     { _key, childOutputs.Count == 1 ? (object)childOutputs[0] : childOutputs }
                 })));

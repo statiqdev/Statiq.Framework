@@ -14,7 +14,7 @@ namespace Statiq.Core
     /// input documents and both are output.
     /// </remarks>
     /// <category>Control</category>
-    public class ConcatDocuments : DocumentModule
+    public class ConcatDocuments : ChildDocumentsModule
     {
         public ConcatDocuments()
             : base(Array.Empty<IModule>())
@@ -27,13 +27,14 @@ namespace Statiq.Core
         }
 
         public ConcatDocuments(params string[] pipelines)
-            : base(new ExecuteConfig(Config.FromContext(ctx => ctx.Documents.FromPipelines(pipelines))))
+            : base(new ExecuteConfig(Config.FromContext(ctx => ctx.Results.FromPipelines(pipelines))))
         {
         }
 
         protected override Task<IEnumerable<IDocument>> GetOutputDocumentsAsync(
             IReadOnlyList<IDocument> inputs,
-            IReadOnlyList<IDocument> childOutputs) =>
+            IReadOnlyList<IDocument> childOutputs,
+            IExecutionContext context) =>
             Task.FromResult(inputs.Concat(childOutputs));
     }
 }

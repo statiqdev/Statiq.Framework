@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Collections.Immutable;
 
 namespace Statiq.Common
 {
@@ -6,20 +7,20 @@ namespace Statiq.Common
     /// Contains a collection of documents output by the process
     /// phase of each pipeline (except isolated ones).
     /// </summary>
-    public interface IDocumentCollection : IEnumerable<IDocument>
+    public interface IPipelineResults : IEnumerable<IDocument>
     {
         /// <summary>
         /// Gets documents by pipeline.
         /// </summary>
         /// <returns>All documents output by each pipeline.</returns>
-        IReadOnlyDictionary<string, IEnumerable<IDocument>> ByPipeline();
+        IReadOnlyDictionary<string, ImmutableArray<IDocument>> ByPipeline();
 
         /// <summary>
         /// Gets documents from a specific pipeline.
         /// </summary>
         /// <param name="pipeline">The pipeline.</param>
         /// <returns>The documents output by the specified pipeline.</returns>
-        IEnumerable<IDocument> FromPipeline(string pipeline);
+        ImmutableArray<IDocument> FromPipeline(string pipeline);
 
         /// <summary>
         /// Gets all documents output by every pipeline except those from the specified pipeline.
@@ -36,6 +37,6 @@ namespace Statiq.Common
         /// </value>
         /// <param name="pipline">The pipeline.</param>
         /// <returns>The documents output by the specified pipeline.</returns>
-        IEnumerable<IDocument> this[string pipline] { get; }
+        ImmutableArray<IDocument> this[string pipline] { get; }
     }
 }
