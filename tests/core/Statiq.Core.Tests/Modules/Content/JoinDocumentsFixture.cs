@@ -1,4 +1,7 @@
-﻿using System.Threading.Tasks;
+﻿using System.Collections.Generic;
+using System.Collections.Immutable;
+using System.Threading.Tasks;
+using System.Linq;
 using NUnit.Framework;
 using Shouldly;
 using Statiq.Common;
@@ -18,7 +21,7 @@ namespace Statiq.Core.Tests.Modules.Contents
             JoinDocuments join = new JoinDocuments();
 
             // When
-            TestDocument result = await ExecuteAsync(new[] { first, second }, join).SingleAsync();
+            TestDocument result = await ExecuteAsync(new[] { first, second }, join).FromDerived<IEnumerable<TestDocument>, ImmutableArray<TestDocument>>().SingleAsync();
 
             // Then
             result.Content.ShouldBe("TestTest2");
@@ -34,7 +37,7 @@ namespace Statiq.Core.Tests.Modules.Contents
             JoinDocuments join = new JoinDocuments();
 
             // When
-            TestDocument result = await ExecuteAsync(new[] { first, second, third }, join).SingleAsync();
+            TestDocument result = await ExecuteAsync(new[] { first, second, third }, join).ThenAsync(x => x.Single());
 
             // Then
             result.Content.ShouldBe("TestTest2Test3");

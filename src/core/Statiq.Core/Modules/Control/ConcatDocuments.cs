@@ -31,7 +31,7 @@ namespace Statiq.Core
         {
         }
 
-        protected override Task<IEnumerable<IDocument>> GetOutputDocumentsAsync(
+        protected override Task<IEnumerable<IDocument>> ExecuteAsync(
             IExecutionContext context,
             IReadOnlyList<IDocument> childOutputs) =>
             Task.FromResult(context.Inputs.Concat(childOutputs));

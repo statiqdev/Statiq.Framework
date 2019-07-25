@@ -37,13 +37,10 @@ namespace Statiq.Core
             return this;
         }
 
-        protected override Task<IEnumerable<IDocument>> ExecuteAsync(
-            IDocument input,
-            IExecutionContext context,
-            string value)
+        protected override Task<IEnumerable<IDocument>> ExecuteAsync(IDocument input, IExecutionContext context, string value)
         {
             Common.Trace.TraceEvent(_traceEventType, value);
-            return Task.FromResult(input == null ? (IEnumerable<IDocument>)context.Inputs : input.Yield());
+            return Task.FromResult(input == null ? context.Inputs : input.Yield());
         }
     }
 }

@@ -434,7 +434,7 @@ namespace Statiq.CodeAnalysis
 
             // Add the input source and references
             List<ISymbol> symbols = new List<ISymbol>();
-            compilation = await AddSourceFilesAsync(context.Inputs, context, compilation);
+            compilation = await AddSourceFilesAsync(context, compilation);
             compilation = await AddProjectReferencesAsync(context, symbols, compilation);
             compilation = await AddSolutionReferencesAsync(context, symbols, compilation);
             compilation = await AddAssemblyReferencesAsync(context, symbols, compilation);
@@ -454,13 +454,13 @@ namespace Statiq.CodeAnalysis
             return visitor.Finish();
         }
 
-        private async Task<Compilation> AddSourceFilesAsync(IReadOnlyList<IDocument> inputs, IExecutionContext context, Compilation compilation)
+        private async Task<Compilation> AddSourceFilesAsync(IExecutionContext context, Compilation compilation)
         {
             ConcurrentBag<SyntaxTree> syntaxTrees = new ConcurrentBag<SyntaxTree>();
             if (_inputDocuments)
             {
                 // Get syntax trees (supply path so that XML doc includes can be resolved)
-                await context.ParallelForEachAsync(inputs, async x => await AddSyntaxTreesAsync(x));
+                await context.ParallelForEachInputAsync(AddSyntaxTreesAsync);
                 compilation = compilation.AddSyntaxTrees(syntaxTrees);
             }
             return compilation;

@@ -13,7 +13,7 @@ namespace Statiq.Core
     /// template substitution.
     /// </remarks>
     /// <category>Content</category>
-    public class ReplaceWithContent : ConfigModule<string>
+    public class ReplaceWithContent : ConfigModule<string>, IParallelModule
     {
         private readonly string _search;
         private bool _isRegex;
@@ -47,15 +47,8 @@ namespace Statiq.Core
         }
 
         /// <inheritdoc />
-        protected override async Task<IEnumerable<IDocument>> ExecuteAsync(
-            IDocument input,
-            IExecutionContext context,
-            string value)
+        protected override async Task<IEnumerable<IDocument>> ExecuteAsync(IDocument input, IExecutionContext context, string value)
         {
-            if (input == null)
-            {
-                return null;
-            }
             if (value == null)
             {
                 value = string.Empty;

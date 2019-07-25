@@ -90,7 +90,7 @@ namespace Statiq.Html
 
             // Gather all links
             HtmlParser parser = new HtmlParser();
-            await context.ParallelForEachAsync(context.Inputs, async input => await GatherLinksAsync(input, parser, links));
+            await context.ParallelForEachInputAsync(async input => await GatherLinksAsync(input, parser, links));
 
             // This policy will limit the number of executing link validations.
             // Limit the amount of concurrent link checks to avoid overwhelming servers.

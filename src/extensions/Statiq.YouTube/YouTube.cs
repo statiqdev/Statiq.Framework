@@ -20,7 +20,7 @@ namespace Statiq.YouTube
     /// will be sent for each input document.
     /// </remarks>
     /// <category>Metadata</category>
-    public class YouTube : IModule, IDisposable
+    public class YouTube : Module, IParallelModule, IDisposable
     {
         private readonly YouTubeService _youtube;
 
@@ -30,7 +30,7 @@ namespace Statiq.YouTube
         /// <summary>
         /// Creates a connection to the YouTube API with authenticated access.
         /// </summary>
-        /// <param name="apiKey">The apikey to use.</param>
+        /// <param name="apiKey">The API key to use.</param>
         public YouTube(string apiKey)
         {
             _youtube = new YouTubeService(
@@ -81,27 +81,22 @@ namespace Statiq.YouTube
             return this;
         }
 
-        /// <inheritdoc />
-        public Task<IEnumerable<IDocument>> ExecuteAsync(IExecutionContext context)
+        protected override Task<IEnumerable<IDocument>> ExecuteAsync(IDocument input, IExecutionContext context)
         {
-            ParallelQuery<IDocument> outputs = context.Inputs.AsParallel().Select(context, input =>
+            ConcurrentDictionary<string, object> results = new ConcurrentDictionary<string, object>();
+            _requests.ParallelForEach(context, request =>
             {
-                ConcurrentDictionary<string, object> results = new ConcurrentDictionary<string, object>();
-                foreach (KeyValuePair<string, Func<IDocument, IExecutionContext, YouTubeService, object>> request in _requests.AsParallel())
+                Trace.Verbose("Submitting {0} YouTube request for {1}", request.Key, input.Source.ToDisplayString());
+                try
                 {
-                    Trace.Verbose("Submitting {0} YouTube request for {1}", request.Key, input.Source.ToDisplayString());
-                    try
-                    {
-                        results[request.Key] = request.Value(input, context, _youtube);
-                    }
-                    catch (Exception ex)
-                    {
-                        Trace.Warning("Exception while submitting {0} YouTube request for {1}: {2}", request.Key, input.Source.ToDisplayString(), ex.ToString());
-                    }
+                    results[request.Key] = request.Value(input, context, _youtube);
                 }
-                return input.Clone(results);
+                catch (Exception ex)
+                {
+                    Trace.Warning("Exception while submitting {0} YouTube request for {1}: {2}", request.Key, input.Source.ToDisplayString(), ex.ToString());
+                }
             });
-            return Task.FromResult<IEnumerable<IDocument>>(outputs);
+            return input.Clone(results).YieldAsTask();
         }
     }
 }

@@ -99,7 +99,7 @@ namespace Statiq.CodeAnalysis
 
         private Task<IEnumerable<IDocument>> ExecuteAsync(IDocument input, FilePath projectPath, IExecutionContext context)
         {
-            return context.TraceExceptionsAsync(input, ExecuteAsync);
+            return context.CancelAndTraceAsync(input, ExecuteAsync);
 
             async Task<IEnumerable<IDocument>> ExecuteAsync(IDocument doc)
             {

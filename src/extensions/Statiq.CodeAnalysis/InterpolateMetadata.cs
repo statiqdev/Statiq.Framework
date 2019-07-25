@@ -17,27 +17,24 @@ namespace Statiq.CodeAnalysis
     /// on interpolated value shouldn't reference another.
     /// </remarks>
     /// <category>Metadata</category>
-    public class InterpolateMetadata : IModule
+    public class InterpolateMetadata : Module, IParallelModule
     {
-        public Task<IEnumerable<IDocument>> ExecuteAsync(IExecutionContext context)
+        protected override Task<IEnumerable<IDocument>> ExecuteAsync(IDocument input, IExecutionContext context)
         {
-            return Task.FromResult<IEnumerable<IDocument>>(context.Inputs.AsParallel().Select(input =>
+            MetadataItems interpolatedValues = null;
+
+            // Look for string values with braces
+            foreach (KeyValuePair<string, object> item in input)
             {
-                MetadataItems interpolatedValues = null;
-
-                // Look for string values with braces
-                foreach (KeyValuePair<string, object> item in input)
+                if (item.Value is string value && value.Contains('{') && value.Contains('}'))
                 {
-                    if (item.Value is string value && value.Contains('{') && value.Contains('}'))
-                    {
-                        (interpolatedValues ?? (interpolatedValues = new MetadataItems()))
-                            .Add(new MetadataItem(item.Key, input.Interpolate(value, context)));
-                    }
+                    (interpolatedValues ?? (interpolatedValues = new MetadataItems()))
+                        .Add(new MetadataItem(item.Key, input.Interpolate(value, context)));
                 }
+            }
 
-                // If any were found, clone the document
-                return interpolatedValues == null ? input : input.Clone(interpolatedValues);
-            }));
+            // If any were found, clone the document
+            return (interpolatedValues == null ? input : input.Clone(interpolatedValues)).YieldAsTask();
         }
     }
 }

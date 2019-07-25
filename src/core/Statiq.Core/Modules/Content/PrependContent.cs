@@ -8,7 +8,7 @@ namespace Statiq.Core
     /// Prepends the specified content to the existing content of each document.
     /// </summary>
     /// <category>Content</category>
-    public class PrependContent : ConfigModule<string>
+    public class PrependContent : ConfigModule<string>, IParallelModule
     {
         /// <summary>
         /// Prepends the string value of the returned object to content of each document. This
@@ -21,10 +21,7 @@ namespace Statiq.Core
         }
 
         /// <inheritdoc />
-        protected override async Task<IEnumerable<IDocument>> ExecuteAsync(
-            IDocument input,
-            IExecutionContext context,
-            string value)
+        protected override async Task<IEnumerable<IDocument>> ExecuteAsync(IDocument input, IExecutionContext context, string value)
         {
             if (input == null)
             {

@@ -64,7 +64,7 @@ namespace Statiq.Core
         public override async Task<IEnumerable<IDocument>> ExecuteAsync(IExecutionContext context)
         {
             List<IDocument> results = new List<IDocument>();
-            await context.ForEachAsync(context.Inputs, async input =>
+            await context.ForEachInputAsync(async input =>
             {
                 FilePath sidecarPath = await _sidecarPath.GetValueAsync(input, context);
                 if (sidecarPath != null)

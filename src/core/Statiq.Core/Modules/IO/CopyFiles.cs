@@ -15,7 +15,7 @@ namespace Statiq.Core
     /// representing the files copied by the module. Note that the input documents are not output by this module.
     /// </remarks>
     /// <category>Input/Output</category>
-    public class CopyFiles : ConfigModule<IEnumerable<string>>
+    public class CopyFiles : ConfigModule<IEnumerable<string>>, IParallelModule
     {
         private Func<IFile, IFile, Task<FilePath>> _destinationPath;
         private Func<IFile, Task<bool>> _predicate = null;
@@ -95,10 +95,7 @@ namespace Statiq.Core
             return this;
         }
 
-        protected override async Task<IEnumerable<IDocument>> ExecuteAsync(
-            IDocument input,
-            IExecutionContext context,
-            IEnumerable<string> value)
+        protected override async Task<IEnumerable<IDocument>> ExecuteAsync(IDocument input, IExecutionContext context, IEnumerable<string> value)
         {
             if (value != null)
             {
@@ -133,7 +130,7 @@ namespace Statiq.Core
                 }))
                 .Where(x => x != null);
             }
-            return Array.Empty<IDocument>();
+            return null;
         }
     }
 }

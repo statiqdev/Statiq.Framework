@@ -10,7 +10,7 @@ namespace Statiq.Core
     /// Replaces the content of each document.
     /// </summary>
     /// <category>Content</category>
-    public class ReplaceContent : ConfigModule<string>
+    public class ReplaceContent : ConfigModule<string>, IParallelModule
     {
         /// <summary>
         /// Replaces the content of each document with the config value.
@@ -24,18 +24,9 @@ namespace Statiq.Core
         }
 
         /// <inheritdoc />
-        protected override async Task<IEnumerable<IDocument>> ExecuteAsync(
-            IDocument input,
-            IExecutionContext context,
-            string value)
-        {
-            if (input == null)
-            {
-                return context.CreateDocument(await context.GetContentProviderAsync(value)).Yield();
-            }
-            return value == null
+        protected override async Task<IEnumerable<IDocument>> ExecuteAsync(IDocument input, IExecutionContext context, string value) =>
+            value == null
                 ? input.Yield()
                 : input.Clone(await context.GetContentProviderAsync(value)).Yield();
-        }
     }
 }

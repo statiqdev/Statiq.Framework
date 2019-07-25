@@ -79,7 +79,7 @@ namespace Statiq.AmazonWebServices
                 {
                     writer.WriteStartArray();
 
-                    await context.ForEachAsync(context.Inputs, async input =>
+                    await context.ForEachInputAsync(async input =>
                     {
                         writer.WriteStartObject();
 

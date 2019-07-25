@@ -36,7 +36,7 @@ namespace Statiq.Core
             _key = key ?? throw new ArgumentNullException(nameof(key));
         }
 
-        protected override Task<IEnumerable<IDocument>> GetOutputDocumentsAsync(
+        protected override Task<IEnumerable<IDocument>> ExecuteAsync(
             IExecutionContext context,
             IReadOnlyList<IDocument> childOutputs) =>
             Task.FromResult(childOutputs.Count == 0

@@ -10,12 +10,12 @@ namespace Statiq.Core
     /// Copies the specified meta key to a new meta key, with an optional format argument.
     /// </summary>
     /// <category>Metadata</category>
-    public class CopyMetadata : IModule
+    public class CopyMetadata : Module, IParallelModule
     {
         private readonly string _fromKey;
         private readonly string _toKey;
         private string _format;
-        private Func<string, string> _execute;
+        private Func<string, string> _formatFunc;
 
         /// <summary>
         /// The specified object in fromKey is copied to toKey. If a format is provided, the fromKey value is processed through string.Format before being copied (if the existing value is a DateTime, the format is passed as the argument to ToString).
@@ -44,47 +44,40 @@ namespace Statiq.Core
         /// <summary>
         /// Specifies the format to use when copying the value.
         /// </summary>
-        /// <param name="execute">A function to get the format to use.</param>
+        /// <param name="format">A function to get the format to use.</param>
         /// <returns>The current module instance.</returns>
-        public CopyMetadata WithFormat(Func<string, string> execute)
+        public CopyMetadata WithFormat(Func<string, string> format)
         {
-            _execute = execute ?? throw new ArgumentNullException(nameof(execute));
+            _formatFunc = format ?? throw new ArgumentNullException(nameof(format));
             return this;
         }
 
-        /// <inheritdoc />
-        public Task<IEnumerable<IDocument>> ExecuteAsync(IExecutionContext context)
+        protected override Task<IEnumerable<IDocument>> ExecuteAsync(IDocument input, IExecutionContext context)
         {
-            return Task.FromResult<IEnumerable<IDocument>>(
-                context.Inputs.AsParallel().SelectMany(context, CopyMetaSelector));
-
-            IEnumerable<IDocument> CopyMetaSelector(IDocument input)
+            if (input.TryGetValue(_fromKey, out object existingValue))
             {
-                if (input.TryGetValue(_fromKey, out object existingValue))
+                if (_format != null)
                 {
-                    if (_format != null)
+                    if (existingValue is DateTime)
                     {
-                        if (existingValue is DateTime)
-                        {
-                            existingValue = ((DateTime)existingValue).ToString(_format);
-                        }
-                        else
-                        {
-                            existingValue = string.Format(_format, existingValue);
-                        }
+                        existingValue = ((DateTime)existingValue).ToString(_format);
                     }
-
-                    if (_execute != null)
+                    else
                     {
-                        existingValue = _execute.Invoke(existingValue.ToString());
+                        existingValue = string.Format(_format, existingValue);
                     }
-
-                    return input.Clone(new[] { new KeyValuePair<string, object>(_toKey, existingValue) }).Yield();
                 }
-                else
+
+                if (_formatFunc != null)
                 {
-                    return input.Yield();
+                    existingValue = _formatFunc.Invoke(existingValue.ToString());
                 }
+
+                return input.Clone(new[] { new KeyValuePair<string, object>(_toKey, existingValue) }).YieldAsTask();
+            }
+            else
+            {
+                return input.YieldAsTask();
             }
         }
     }

@@ -76,7 +76,7 @@ namespace Statiq.Core
         public override async Task<IEnumerable<IDocument>> ExecuteAsync(IExecutionContext context)
         {
             List<IDocument> results = new List<IDocument>();
-            await context.ForEachAsync(context.Inputs, async input =>
+            await context.ForEachInputAsync(async input =>
             {
                 string inputContent = await input.GetStringAsync();
                 List<string> inputLines = inputContent.Split(new[] { '\n' }, StringSplitOptions.None).ToList();

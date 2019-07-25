@@ -71,7 +71,7 @@ namespace Statiq.Core
             // Get the output file path for each file in sequence and set up action chains
             // Value = input source string(s) (for reporting a warning if not appending), write action
             Dictionary<FilePath, Tuple<List<string>, Func<Task>>> writesBySource = new Dictionary<FilePath, Tuple<List<string>, Func<Task>>>();
-            await context.ForEachAsync(context.Inputs, WriteFilesAsync);
+            await context.ForEachInputAsync(WriteFilesAsync);
 
             // Display a warning for any duplicated outputs if not appending
             if (!_append)

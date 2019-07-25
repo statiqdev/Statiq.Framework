@@ -19,7 +19,7 @@ namespace Statiq.Core
     /// to the same relative path in the output folder).
     /// </remarks>
     /// <category>Input/Output</category>
-    public class ReadFiles : ConfigModule<IEnumerable<string>>
+    public class ReadFiles : ConfigModule<IEnumerable<string>>, IParallelModule
     {
         private Func<IFile, Task<bool>> _predicate = null;
 
@@ -54,22 +54,19 @@ namespace Statiq.Core
             return this;
         }
 
-        protected override async Task<IEnumerable<IDocument>> ExecuteAsync(
-            IDocument input,
-            IExecutionContext context,
-            IEnumerable<string> value)
+        protected override async Task<IEnumerable<IDocument>> ExecuteAsync(IDocument input, IExecutionContext context, IEnumerable<string> value)
         {
             if (value != null)
             {
                 IEnumerable<IFile> files = await context.FileSystem.GetInputFilesAsync(value);
                 files = await files.ParallelWhereAsync(async file => _predicate == null || await _predicate(file));
-                return files.AsParallel().Select(file =>
+                return files.AsParallel(context).Select(file =>
                 {
                     Trace.Verbose($"Read file {file.Path.FullPath}");
                     return context.CloneOrCreateDocument(input, file.Path, file.Path.GetRelativeInputPath(context), context.GetContentProvider(file));
                 });
             }
-            return Array.Empty<IDocument>();
+            return null;
         }
     }
 }

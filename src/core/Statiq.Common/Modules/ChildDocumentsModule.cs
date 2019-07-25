@@ -29,7 +29,7 @@ namespace Statiq.Common
 
         /// <inheritdoc />
         public override async Task<IEnumerable<IDocument>> ExecuteAsync(IExecutionContext context) =>
-            Children.Count > 0 ? await GetOutputDocumentsAsync(context, await context.ExecuteAsync(Children, context.Inputs)) : Array.Empty<IDocument>();
+            Children.Count > 0 ? await ExecuteAsync(context, await context.ExecuteAsync(Children, context.Inputs)) : Array.Empty<IDocument>();
 
         /// <summary>
         /// Gets the output documents given the input documents and the output documents from the execution of child modules.
@@ -37,6 +37,6 @@ namespace Statiq.Common
         /// <param name="context">The execution context.</param>
         /// <param name="childOutputs">The output documents from the child modules.</param>
         /// <returns>The output documents of this module.</returns>
-        protected abstract Task<IEnumerable<IDocument>> GetOutputDocumentsAsync(IExecutionContext context, IReadOnlyList<IDocument> childOutputs);
+        protected abstract Task<IEnumerable<IDocument>> ExecuteAsync(IExecutionContext context, IReadOnlyList<IDocument> childOutputs);
     }
 }

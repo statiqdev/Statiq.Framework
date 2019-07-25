@@ -10,7 +10,7 @@ namespace Statiq.Core
     /// Replaces a search string in the content of each input document with new content.
     /// </summary>
     /// <category>Content</category>
-    public class ReplaceInContent : ConfigModule<string>
+    public class ReplaceInContent : ConfigModule<string>, IParallelModule
     {
         private readonly string _search;
         private readonly Func<Match, IDocument, string> _contentFinder;
@@ -74,15 +74,8 @@ namespace Statiq.Core
         }
 
         /// <inheritdoc />
-        protected override async Task<IEnumerable<IDocument>> ExecuteAsync(
-            IDocument input,
-            IExecutionContext context,
-            string value)
+        protected override async Task<IEnumerable<IDocument>> ExecuteAsync(IDocument input, IExecutionContext context, string value)
         {
-            if (input == null)
-            {
-                return null;
-            }
             if (value == null)
             {
                 value = string.Empty;
@@ -99,12 +92,10 @@ namespace Statiq.Core
                     _search,
                     match => _contentFinder(match, input)?.ToString() ?? string.Empty,
                     _regexOptions);
-                return new[]
-                {
-                    currentDocumentContent == newDocumentContent
-                        ? input
-                        : input.Clone(await context.GetContentProviderAsync(newDocumentContent))
-                };
+                return (currentDocumentContent == newDocumentContent
+                    ? input
+                    : input.Clone(await context.GetContentProviderAsync(newDocumentContent)))
+                    .Yield();
             }
             string replaced = _isRegex
                 ? Regex.Replace(currentDocumentContent, _search, value, _regexOptions)

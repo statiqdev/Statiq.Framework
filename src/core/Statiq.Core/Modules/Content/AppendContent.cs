@@ -8,7 +8,7 @@ namespace Statiq.Core
     /// Appends the specified content to the existing content of each document.
     /// </summary>
     /// <category>Content</category>
-    public class AppendContent : ConfigModule<string>
+    public class AppendContent : ConfigModule<string>, IParallelModule
     {
         /// <summary>
         /// Appends the string value of the returned object to the content of each document.
@@ -22,10 +22,7 @@ namespace Statiq.Core
         }
 
         /// <inheritdoc />
-        protected override async Task<IEnumerable<IDocument>> ExecuteAsync(
-            IDocument input,
-            IExecutionContext context,
-            string value)
+        protected override async Task<IEnumerable<IDocument>> ExecuteAsync(IDocument input, IExecutionContext context, string value)
         {
             if (input == null)
             {

@@ -36,7 +36,7 @@ namespace Statiq.Core
     /// </para>
     /// </remarks>
     /// <category>Extensibility</category>
-    public class ExecuteConfig : ConfigModule<object>
+    public class ExecuteConfig : ConfigModule<object>, IParallelModule
     {
         public ExecuteConfig(Config<object> config)
             : base(config, false)
