@@ -53,8 +53,8 @@ namespace Statiq.Common
             if (_eachDocument)
             {
                 return Parallel
-                    ? context.Inputs.ParallelSelectManyAsync(context, async input => await SafeExecuteAsync(input, context))
-                    : context.Inputs.SelectManyAsync(context, async input => await SafeExecuteAsync(input, context));
+                    ? context.ParallelQueryInputs().SelectManyAsync(async input => await SafeExecuteAsync(input, context)).Task
+                    : context.QueryInputs().SelectManyAsync(async input => await SafeExecuteAsync(input, context)).Task;
             }
             return ExecuteAsync(null, context);
         }
