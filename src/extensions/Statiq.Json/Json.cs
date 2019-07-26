@@ -83,7 +83,7 @@ namespace Statiq.Json
                 }
                 catch (Exception ex)
                 {
-                    Trace.Error("Error processing JSON for {0}: {1}", input.Source.ToDisplayString(), ex.ToString());
+                    Trace.Error("Error processing JSON for {0}: {1}", input.ToSafeDisplayString(), ex.ToString());
                 }
                 return input;
             }

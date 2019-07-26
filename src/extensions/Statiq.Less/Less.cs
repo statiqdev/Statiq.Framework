@@ -56,7 +56,7 @@ namespace Statiq.Less
 
             async Task<IDocument> ProcessLessAsync(IDocument input)
             {
-                Trace.Verbose("Processing Less for {0}", input.Source.ToDisplayString());
+                Trace.Verbose("Processing Less for {0}", input.ToSafeDisplayString());
                 ILessEngine engine = engineFactory.GetEngine();
 
                 // TODO: Get rid of RefelectionMagic and this ugly hack as soon as dotless gets better external DI support
@@ -72,7 +72,7 @@ namespace Statiq.Less
                 {
                     engine.CurrentDirectory = string.Empty;
                     path = new FilePath(Path.GetRandomFileName());
-                    Trace.Warning($"No input path found for document {input.Source.ToDisplayString()}, using {path.FileName.FullPath}");
+                    Trace.Warning($"No input path found for document {input.ToSafeDisplayString()}, using {path.FileName.FullPath}");
                 }
                 string content = engine.TransformToCss(await input.GetStringAsync(), path.FileName.FullPath);
 

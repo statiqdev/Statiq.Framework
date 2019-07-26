@@ -26,6 +26,10 @@ namespace Statiq.Common
             {
                 action(item);
             }
+            catch (OperationCanceledException)
+            {
+                throw;
+            }
             catch (Exception ex)
             {
                 TraceException(ex, item, context);
@@ -46,6 +50,10 @@ namespace Statiq.Common
             try
             {
                 await action(item);
+            }
+            catch (OperationCanceledException)
+            {
+                throw;
             }
             catch (Exception ex)
             {
@@ -69,6 +77,10 @@ namespace Statiq.Common
             try
             {
                 return func(item);
+            }
+            catch (OperationCanceledException)
+            {
+                throw;
             }
             catch (Exception ex)
             {
@@ -94,6 +106,10 @@ namespace Statiq.Common
             {
                 return await func(item);
             }
+            catch (OperationCanceledException)
+            {
+                throw;
+            }
             catch (Exception ex)
             {
                 TraceException(ex, item, context);
@@ -103,14 +119,8 @@ namespace Statiq.Common
 
         private static void TraceException<TItem>(Exception ex, TItem item, IExecutionContext context)
         {
-            if (item is IDocument document)
-            {
-                Trace.Error($"Exception while processing document {document?.Source.ToDisplayString() ?? "unknown"}: {ex.Message}");
-            }
-            else
-            {
-                Trace.Error($"Exception while processing item of type {item.GetType().Name}: {ex.Message}");
-            }
+            string displayString = item is IDisplayable displayable ? $" [{displayable.ToSafeDisplayString()}]" : string.Empty;
+            Trace.Error($"Exception while processing {item.GetType().Name}{displayString}: {ex.Message}");
         }
     }
 }

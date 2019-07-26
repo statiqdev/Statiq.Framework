@@ -259,6 +259,9 @@ namespace Statiq.Common
         public override string ToString() => Source?.FullPath ?? string.Empty;
 
         /// <inheritdoc />
+        public virtual string ToDisplayString() => Source?.ToDisplayString() ?? "unknown source";
+
+        /// <inheritdoc />
         public virtual async Task<int> GetCacheHashCodeAsync()
         {
             HashCode hash = default;

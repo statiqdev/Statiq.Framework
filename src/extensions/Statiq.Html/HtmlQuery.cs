@@ -247,7 +247,7 @@ namespace Statiq.Html
                 }
                 catch (Exception ex)
                 {
-                    Trace.Warning("Exception while processing HTML for {0}: {1}", input.Source.ToDisplayString(), ex.Message);
+                    Trace.Warning("Exception while processing HTML for {0}: {1}", input.ToSafeDisplayString(), ex.Message);
                     return input.Yield();
                 }
             }

@@ -8,7 +8,7 @@ namespace Statiq.Common
     /// <summary>
     /// Provides properties and instance methods for working with paths.
     /// </summary>
-    public abstract class NormalizedPath : IComparable<NormalizedPath>, IComparable, IEquatable<NormalizedPath>
+    public abstract class NormalizedPath : IDisplayable, IComparable<NormalizedPath>, IComparable, IEquatable<NormalizedPath>
     {
         // Initially based on code from Cake (http://cakebuild.net/)
 
@@ -295,6 +295,9 @@ namespace Statiq.Common
                 return new DirectoryPath(directory);
             }
         }
+
+        /// <inheritdoc />
+        public string ToDisplayString() => FullPath;
 
         /// <summary>
         /// Returns a <see cref="string" /> that represents this path.

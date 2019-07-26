@@ -37,7 +37,7 @@ namespace Statiq.Tables
                 }
                 catch (Exception e)
                 {
-                    Trace.Error($"An {e} occurred ({input.Source.ToDisplayString()}): {e.Message}");
+                    Trace.Error($"An {e} occurred ({input.ToSafeDisplayString()}): {e.Message}");
                     return null;
                 }
             });

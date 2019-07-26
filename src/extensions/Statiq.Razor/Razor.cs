@@ -152,7 +152,7 @@ namespace Statiq.Razor
 
             async Task<IDocument> RenderDocumentAsync(IDocument input)
             {
-                Trace.Verbose("Processing Razor for {0}", input.Source.ToDisplayString());
+                Trace.Verbose("Processing Razor for {0}", input.ToSafeDisplayString());
 
                 using (Stream contentStream = await context.GetContentStreamAsync())
                 {

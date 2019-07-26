@@ -86,14 +86,14 @@ namespace Statiq.YouTube
             ConcurrentDictionary<string, object> results = new ConcurrentDictionary<string, object>();
             _requests.ParallelForEach(context, request =>
             {
-                Trace.Verbose("Submitting {0} YouTube request for {1}", request.Key, input.Source.ToDisplayString());
+                Trace.Verbose("Submitting {0} YouTube request for {1}", request.Key, input.ToSafeDisplayString());
                 try
                 {
                     results[request.Key] = request.Value(input, context, _youtube);
                 }
                 catch (Exception ex)
                 {
-                    Trace.Warning("Exception while submitting {0} YouTube request for {1}: {2}", request.Key, input.Source.ToDisplayString(), ex.ToString());
+                    Trace.Warning("Exception while submitting {0} YouTube request for {1}: {2}", request.Key, input.ToSafeDisplayString(), ex.ToString());
                 }
             });
             return input.Clone(results).YieldAsTask();

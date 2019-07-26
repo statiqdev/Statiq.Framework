@@ -140,7 +140,7 @@ namespace Statiq.Xmp
                  {
                      if (_toSearch.Any(y => y.IsMandatory))
                      {
-                         Trace.Warning($"File doe not contain Metadata or sidecar file ({input.Source.ToDisplayString()})");
+                         Trace.Warning($"File doe not contain Metadata or sidecar file ({input.ToSafeDisplayString()})");
                          if (_skipElementOnMissingData)
                          {
                              return null;
@@ -163,7 +163,7 @@ namespace Statiq.Xmp
                          {
                              if (search.IsMandatory)
                              {
-                                 Trace.Error($"Metadata does not Contain {search.XmpPath} ({input.Source.ToDisplayString()})");
+                                 Trace.Error($"Metadata does not Contain {search.XmpPath} ({input.ToSafeDisplayString()})");
                                  if (_skipElementOnMissingData)
                                  {
                                      return null;
@@ -174,7 +174,7 @@ namespace Statiq.Xmp
                          object value = GetObjectFromMetadata(metadata, hierarchicalDirectory);
                          if (newValues.ContainsKey(search.MetadataKey) && _errorOnDoubleKeys)
                          {
-                             Trace.Error($"This Module tries to write same Key multiple times {search.MetadataKey} ({input.Source.ToDisplayString()})");
+                             Trace.Error($"This Module tries to write same Key multiple times {search.MetadataKey} ({input.ToSafeDisplayString()})");
                          }
                          else
                          {

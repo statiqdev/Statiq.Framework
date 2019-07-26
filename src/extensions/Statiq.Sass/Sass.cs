@@ -153,13 +153,13 @@ namespace Statiq.Sass
 
             async Task<IEnumerable<IDocument>> ProcessSassAsync(IDocument input)
             {
-                Trace.Verbose($"Processing Sass for {input.Source.ToDisplayString()}");
+                Trace.Verbose($"Processing Sass for {input.ToSafeDisplayString()}");
 
                 FilePath inputPath = await _inputPath.GetValueAsync(input, context);
                 if (inputPath?.IsAbsolute != true)
                 {
                     inputPath = (await context.FileSystem.GetInputFileAsync(new FilePath(Path.GetRandomFileName()))).Path;
-                    Trace.Warning($"No input path found for document {input.Source.ToDisplayString()}, using {inputPath.FileName.FullPath}");
+                    Trace.Warning($"No input path found for document {input.ToSafeDisplayString()}, using {inputPath.FileName.FullPath}");
                 }
 
                 string content = await input.GetStringAsync();

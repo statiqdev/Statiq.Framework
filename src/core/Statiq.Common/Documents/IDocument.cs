@@ -8,7 +8,7 @@ namespace Statiq.Common
     /// <summary>
     /// Contains content and metadata for each item as it propagates through the pipeline.
     /// </summary>
-    public interface IDocument : IMetadata
+    public interface IDocument : IMetadata, IDisplayable
     {
         /// <summary>
         /// An identifier that is generated when the document is created and stays the same after cloning.

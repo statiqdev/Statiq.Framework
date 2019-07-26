@@ -96,7 +96,7 @@ namespace Statiq.Core
                     if (writesBySource.TryGetValue(input.Destination, out Tuple<List<string>, Func<Task>> value))
                     {
                         // This output source was already seen so nest the previous write action in a new one
-                        value.Item1.Add(input.Source.ToDisplayString());
+                        value.Item1.Add(input.Source.ToSafeDisplayString());
                         Func<Task> previousWrite = value.Item2;
                         value = new Tuple<List<string>, Func<Task>>(
                             value.Item1,
@@ -110,7 +110,7 @@ namespace Statiq.Core
                     else
                     {
                         value = new Tuple<List<string>, Func<Task>>(
-                            new List<string> { input.Source.ToDisplayString() },
+                            new List<string> { input.Source.ToSafeDisplayString() },
                             async () => await WriteAsync(input, context, input.Destination));
                     }
                     writesBySource[input.Destination] = value;
@@ -139,7 +139,7 @@ namespace Statiq.Core
                         }
                     }
                 }
-                Trace.Verbose($"Wrote file {outputFile.Path.FullPath} from {input.Source.ToDisplayString()}");
+                Trace.Verbose($"Wrote file {outputFile.Path.FullPath} from {input.Source.ToSafeDisplayString()}");
             }
         }
     }

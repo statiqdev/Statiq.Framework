@@ -135,7 +135,7 @@ namespace Statiq.Core
                         // Make sure it's a relative path
                         if (!fromPath.IsRelative)
                         {
-                            Trace.Warning($"The redirect path must be relative for document {input.Source.ToDisplayString()}: {fromPath}");
+                            Trace.Warning($"The redirect path must be relative for document {input.Source.ToSafeDisplayString()}: {fromPath}");
                             continue;
                         }
 

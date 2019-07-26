@@ -140,7 +140,7 @@ namespace Statiq.Json
                 }
                 catch (Exception ex)
                 {
-                    Trace.Error("Error serializing JSON for {0}: {1}", input.Source.ToDisplayString(), ex.ToString());
+                    Trace.Error("Error serializing JSON for {0}: {1}", input.ToSafeDisplayString(), ex.ToString());
                 }
                 return input;
             }

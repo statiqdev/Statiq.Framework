@@ -181,7 +181,7 @@ namespace Statiq.Markdown
                 Trace.Verbose(
                     "Processing Markdown {0} for {1}",
                     string.IsNullOrEmpty(_sourceKey) ? string.Empty : ("in" + _sourceKey),
-                    input.Source.ToDisplayString());
+                    input.ToSafeDisplayString());
 
                 string content;
                 if (string.IsNullOrEmpty(_sourceKey))

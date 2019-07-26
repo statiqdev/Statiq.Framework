@@ -34,7 +34,7 @@ namespace Statiq.Html
             }
             catch (Exception ex)
             {
-                Trace.Warning("Exception while parsing HTML for {0}: {1}", document.Source.ToDisplayString(), ex.Message);
+                Trace.Warning("Exception while parsing HTML for {0}: {1}", document.ToSafeDisplayString(), ex.Message);
             }
             return null;
         }
