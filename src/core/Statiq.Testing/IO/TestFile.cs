@@ -122,5 +122,7 @@ namespace Statiq.Testing
 
         public IContentProvider GetContentProvider() =>
             _fileProvider.Files.ContainsKey(Path.FullPath) ? (IContentProvider)new FileContent(this) : NullContent.Provider;
+
+        public string ToDisplayString() => Path.ToSafeDisplayString();
     }
 }

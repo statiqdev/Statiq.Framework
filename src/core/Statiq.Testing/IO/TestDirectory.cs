@@ -111,5 +111,7 @@ namespace Statiq.Testing
 
             return Task.FromResult<IFile>(new TestFile(_fileProvider, Path.CombineFile(path)));
         }
+
+        public string ToDisplayString() => Path.ToSafeDisplayString();
     }
 }

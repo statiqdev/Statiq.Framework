@@ -132,5 +132,7 @@ namespace Statiq.Common
                 .SelectAsync(async x => await _fileSystem.GetRootDirectoryAsync(x.Combine(Path)));
             return await directories.WhereAsync(async x => await x.GetExistsAsync());
         }
+
+        public string ToDisplayString() => Path.ToDisplayString();
     }
 }

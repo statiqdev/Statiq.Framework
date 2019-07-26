@@ -86,5 +86,7 @@ namespace Statiq.Core
 
             return Task.FromResult<IFile>(new LocalFile(Path.CombineFile(path)));
         }
+
+        public string ToDisplayString() => Path.ToDisplayString();
     }
 }

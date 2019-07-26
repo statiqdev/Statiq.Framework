@@ -76,5 +76,7 @@ namespace Statiq.Common
         public Task<Stream> OpenWriteAsync(bool createDirectory = true) => throw new NotSupportedException();
 
         public Task WriteAllTextAsync(string contents, bool createDirectory = true) => throw new NotSupportedException();
+
+        public string ToDisplayString() => Path.ToDisplayString();
     }
 }

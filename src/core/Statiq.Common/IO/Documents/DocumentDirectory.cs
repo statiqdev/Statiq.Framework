@@ -95,5 +95,7 @@ namespace Statiq.Common
         public Task CreateAsync() => throw new NotSupportedException();
 
         public Task DeleteAsync(bool recursive) => throw new NotSupportedException();
+
+        public string ToDisplayString() => Path.ToDisplayString();
     }
 }

@@ -3,9 +3,9 @@
 namespace Statiq.Common
 {
     /// <summary>
-    /// Represents an entry in the file system
+    /// Represents an entry in the file system.
     /// </summary>
-    public interface IFileSystemEntry
+    public interface IFileSystemEntry : IDisplayable
     {
         // Initially based on code from Cake (http://cakebuild.net/)
 

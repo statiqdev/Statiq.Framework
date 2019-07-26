@@ -141,5 +141,7 @@ namespace Statiq.Core
 
         public IContentProvider GetContentProvider() =>
             _file.Exists ? (IContentProvider)new FileContent(this) : NullContent.Provider;
+
+        public string ToDisplayString() => Path.ToDisplayString();
     }
 }
