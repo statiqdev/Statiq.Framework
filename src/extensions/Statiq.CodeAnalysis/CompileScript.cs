@@ -15,7 +15,7 @@ namespace Statiq.CodeAnalysis
         public const string CompiledKey = "_CompiledScript";
 
         public async Task<IEnumerable<IDocument>> ExecuteAsync(IExecutionContext context) =>
-            await context.Inputs.ParallelSelectAsync(context, async input =>
+            await context.ParallelQueryInputs().SelectAsync(async input =>
             {
                 byte[] assembly = ScriptHelper.Compile(await input.GetStringAsync(), input, context);
                 MemoryStream stream = context.MemoryStreamFactory.GetStream(assembly);

@@ -22,8 +22,8 @@ namespace Statiq.CodeAnalysis
         public async Task<IEnumerable<IDocument>> ExecuteAsync(IExecutionContext context)
         {
             return _parallel
-                ? await context.Inputs.ParallelSelectManyAsync(context, GetResults)
-                : await context.Inputs.SelectManyAsync(context, GetResults);
+                ? (IEnumerable<IDocument>)(await context.ParallelQueryInputs().SelectManyAsync(GetResults))
+                : (await context.QueryInputs().SelectManyAsync(GetResults));
 
             async Task<IEnumerable<IDocument>> GetResults(IDocument input)
             {

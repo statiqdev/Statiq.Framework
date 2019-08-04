@@ -149,7 +149,7 @@ namespace Statiq.Sass
         /// <inheritdoc />
         public async Task<IEnumerable<IDocument>> ExecuteAsync(IExecutionContext context)
         {
-            return await context.Inputs.ParallelSelectManyAsync(context, ProcessSassAsync);
+            return await context.ParallelQueryInputs().SelectManyAsync(ProcessSassAsync);
 
             async Task<IEnumerable<IDocument>> ProcessSassAsync(IDocument input)
             {

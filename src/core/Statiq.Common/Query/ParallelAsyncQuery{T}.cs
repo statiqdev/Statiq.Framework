@@ -23,7 +23,7 @@ namespace Statiq.Common
 
         internal IExecutionContext Context { get; }
 
-        internal ParallelAsyncQuery<TResult> ChainAsync<TResult>(Func<IEnumerable<T>, Task<IEnumerable<TResult>>> asyncFunc) =>
+        internal ParallelAsyncQuery<TResult> ThenAsync<TResult>(Func<IEnumerable<T>, Task<IEnumerable<TResult>>> asyncFunc) =>
             new ParallelAsyncQuery<TResult>(GetTaskAsync(this, asyncFunc), Context, _ordered);
 
         private static async Task<IEnumerable<TResult>> GetTaskAsync<TResult>(ParallelAsyncQuery<T> query, Func<IEnumerable<T>, Task<IEnumerable<TResult>>> asyncFunc) => await asyncFunc(await query);

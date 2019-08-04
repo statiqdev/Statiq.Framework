@@ -82,7 +82,7 @@ namespace Statiq.Core
 
         /// <inheritdoc />
         public async Task<IEnumerable<IDocument>> ExecuteAsync(IExecutionContext context) =>
-            (await context.Inputs.SelectAsync(context, async x => (Document: x, Keys: await _key.GetValueAsync(x, context))))
+            (await context.QueryInputs().SelectAsync(async x => (Document: x, Keys: await _key.GetValueAsync(x, context))))
                 .GroupByMany(x => x.Keys, x => x.Document, _comparer)
                 .Select(x => context.CreateDocument(
                     new MetadataItems

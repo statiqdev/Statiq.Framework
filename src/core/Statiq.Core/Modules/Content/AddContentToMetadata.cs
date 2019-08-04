@@ -41,8 +41,8 @@ namespace Statiq.Core
             IExecutionContext context,
             IReadOnlyList<IDocument> childOutputs) =>
             childOutputs.Count == 0
-                ? context.Inputs
-                : await context.Inputs.SelectAsync(context, async input => input.Clone(new MetadataItems
+                ? (IEnumerable<IDocument>)context.Inputs
+                : await context.QueryInputs().SelectAsync(async input => input.Clone(new MetadataItems
                 {
                     {
                         _key,

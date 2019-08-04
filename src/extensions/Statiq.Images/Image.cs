@@ -315,7 +315,7 @@ namespace Statiq.Images
         public async Task<IEnumerable<IDocument>> ExecuteAsync(IExecutionContext context)
         {
             ImageFormatManager formatManager = new ImageFormatManager();
-            return await context.Inputs.SelectManyAsync(context, ProcessImagesAsync);
+            return await context.ParallelQueryInputs().SelectManyAsync(ProcessImagesAsync);
 
             async Task<IEnumerable<IDocument>> ProcessImagesAsync(IDocument input)
             {

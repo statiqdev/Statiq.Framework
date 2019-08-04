@@ -40,7 +40,7 @@ namespace Statiq.Tables
         /// <inheritdoc />
         public async Task<IEnumerable<IDocument>> ExecuteAsync(IExecutionContext context)
         {
-            return await context.Inputs.ParallelSelectAsync(context, async input =>
+            return await context.ParallelQueryInputs().SelectAsync(async input =>
             {
                 try
                 {

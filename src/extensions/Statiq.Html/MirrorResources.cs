@@ -68,7 +68,7 @@ namespace Statiq.Html
 
             // Iterate the input documents synchronously so we don't download the same resource more than once
             HtmlParser parser = new HtmlParser();
-            return await context.Inputs.SelectAsync(context, GetDocumentAsync);
+            return await context.QueryInputs().SelectAsync(GetDocumentAsync);
 
             async Task<Common.IDocument> GetDocumentAsync(Common.IDocument input)
             {

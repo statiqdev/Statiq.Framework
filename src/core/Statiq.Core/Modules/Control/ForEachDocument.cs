@@ -52,6 +52,6 @@ namespace Statiq.Core
 
         /// <inheritdoc />
         public override async Task<IEnumerable<IDocument>> ExecuteAsync(IExecutionContext context) =>
-            await context.SelectManyInputAsync<IDocument>(async input => await context.ExecuteAsync(Children, input.Yield()));
+            await context.QueryInputs().SelectManyAsync<IDocument, IDocument>(async input => await context.ExecuteAsync(Children, input.Yield()));
     }
 }

@@ -183,7 +183,7 @@ namespace Statiq.Html
             }
 
             HtmlParser parser = new HtmlParser();
-            return await context.Inputs.ParallelSelectAsync(context, GetDocumentAsync);
+            return await context.ParallelQueryInputs().SelectAsync(GetDocumentAsync);
 
             async Task<Common.IDocument> GetDocumentAsync(Common.IDocument input)
             {

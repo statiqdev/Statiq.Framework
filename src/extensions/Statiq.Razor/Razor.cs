@@ -138,8 +138,8 @@ namespace Statiq.Razor
             _executionId = context.ExecutionId;
 
             // Eliminate input documents that we shouldn't process
-            ImmutableArray<IDocument> validInputs = context.Inputs
-                .Where(context, x => _ignorePrefix == null || x.Source?.FileName.FullPath.StartsWith(_ignorePrefix) != true)
+            ImmutableArray<IDocument> validInputs = context.QueryInputs()
+                .Where(x => _ignorePrefix == null || x.Source?.FileName.FullPath.StartsWith(_ignorePrefix) != true)
                 .ToImmutableArray();
 
             if (validInputs.Length < context.Inputs.Length)
@@ -148,7 +148,7 @@ namespace Statiq.Razor
             }
 
             // Compile and evaluate the pages in parallel
-            return await validInputs.ParallelSelectAsync(context, RenderDocumentAsync);
+            return await validInputs.AsParallel().SelectAsync(RenderDocumentAsync);
 
             async Task<IDocument> RenderDocumentAsync(IDocument input)
             {

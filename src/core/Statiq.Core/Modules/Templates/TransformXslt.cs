@@ -44,9 +44,9 @@ namespace Statiq.Core
         }
 
         /// <inheritdoc />
-        public Task<IEnumerable<IDocument>> ExecuteAsync(IExecutionContext context)
+        public async Task<IEnumerable<IDocument>> ExecuteAsync(IExecutionContext context)
         {
-            return context.Inputs.ParallelSelectAsync(context, async input =>
+            return await context.ParallelQueryInputs().SelectAsync(async input =>
             {
                 XslCompiledTransform xslt = new XslCompiledTransform();
 

@@ -20,10 +20,10 @@ namespace Statiq.Common
 
         internal IExecutionContext Context { get; }
 
-        internal Query<TResult> Chain<TResult>(Func<IEnumerable<T>, IEnumerable<TResult>> func) =>
+        internal Query<TResult> Then<TResult>(Func<IEnumerable<T>, IEnumerable<TResult>> func) =>
             new Query<TResult>(func(_items), Context);
 
-        internal AsyncQuery<TResult> ChainAsync<TResult>(Func<IEnumerable<T>, Task<IEnumerable<TResult>>> asyncFunc) =>
+        internal AsyncQuery<TResult> ThenAsync<TResult>(Func<IEnumerable<T>, Task<IEnumerable<TResult>>> asyncFunc) =>
             new AsyncQuery<TResult>(asyncFunc(_items), Context);
 
         public IEnumerator<T> GetEnumerator() => _items.GetEnumerator();

@@ -84,7 +84,7 @@ namespace Statiq.YouTube
         protected override Task<IEnumerable<IDocument>> ExecuteAsync(IDocument input, IExecutionContext context)
         {
             ConcurrentDictionary<string, object> results = new ConcurrentDictionary<string, object>();
-            _requests.ParallelForEach(context, request =>
+            _requests.AsParallel(context).ForEach(request =>
             {
                 Trace.Verbose("Submitting {0} YouTube request for {1}", request.Key, input.ToSafeDisplayString());
                 try

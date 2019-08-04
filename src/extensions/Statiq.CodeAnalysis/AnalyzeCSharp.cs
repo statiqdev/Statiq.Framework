@@ -460,7 +460,7 @@ namespace Statiq.CodeAnalysis
             if (_inputDocuments)
             {
                 // Get syntax trees (supply path so that XML doc includes can be resolved)
-                await context.ParallelForEachInputAsync(AddSyntaxTreesAsync);
+                await context.ParallelQueryInputs().ForEachAsync(AddSyntaxTreesAsync);
                 compilation = compilation.AddSyntaxTrees(syntaxTrees);
             }
             return compilation;

@@ -20,10 +20,10 @@ namespace Statiq.Common
 
         internal IExecutionContext Context { get; }
 
-        internal ParallelQuery<TResult> Chain<TResult>(Func<System.Linq.ParallelQuery<T>, System.Linq.ParallelQuery<TResult>> func) =>
+        internal ParallelQuery<TResult> Then<TResult>(Func<System.Linq.ParallelQuery<T>, System.Linq.ParallelQuery<TResult>> func) =>
             new ParallelQuery<TResult>(func(_query), Context);
 
-        internal ParallelAsyncQuery<TResult> ChainAsync<TResult>(Func<IEnumerable<T>, Task<IEnumerable<TResult>>> asyncFunc) =>
+        internal ParallelAsyncQuery<TResult> ThenAsync<TResult>(Func<IEnumerable<T>, Task<IEnumerable<TResult>>> asyncFunc) =>
             new ParallelAsyncQuery<TResult>(asyncFunc(_query), Context, _query is OrderedParallelQuery<T>);
 
         public IEnumerator<T> GetEnumerator() => _query.GetEnumerator();

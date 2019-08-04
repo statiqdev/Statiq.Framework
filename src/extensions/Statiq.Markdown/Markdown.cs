@@ -174,7 +174,7 @@ namespace Statiq.Markdown
         /// <inheritdoc />
         public async Task<IEnumerable<IDocument>> ExecuteAsync(IExecutionContext context)
         {
-            return await context.Inputs.ParallelSelectAsync(context, ProcessMarkdownAsync);
+            return await context.ParallelQueryInputs().SelectAsync(ProcessMarkdownAsync);
 
             async Task<IDocument> ProcessMarkdownAsync(IDocument input)
             {

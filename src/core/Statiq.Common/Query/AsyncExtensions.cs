@@ -146,6 +146,8 @@ namespace Statiq.Common
 
         public static Task<T[]> ToArrayAsync<T>(this Task<IEnumerable<T>> task) => task.ThenAsync(x => x.ToArray());
 
+        public static Task<ImmutableArray<T>> ToImmutableArrayAsync<T>(this Task<IEnumerable<T>> task) => task.ThenAsync(x => x.ToImmutableArray());
+
         public static Task<T> SingleAsync<T>(this Task<IEnumerable<T>> task) => task.ThenAsync(x => x.Single());
 
         public static Task<T> SingleAsync<T>(this Task<ImmutableArray<T>> task) => task.ThenAsync(x => x.Single());

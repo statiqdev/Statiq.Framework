@@ -18,13 +18,13 @@ namespace Statiq.Common
         public static Query<IDocument> QueryInputs(this IExecutionContext context) => context.Inputs.AsQuery(context);
 
         public static Query<TSource> Where<TSource>(this Query<TSource> source, Func<TSource, bool> predicate) =>
-            source.Chain(items => items.Where(item => source.Context.CancelAndTrace(item, predicate)));
+            source.Then(items => items.Where(item => source.Context.CancelAndTrace(item, predicate)));
 
         public static Query<TResult> Select<TSource, TResult>(this Query<TSource> source, Func<TSource, TResult> selector) =>
-            source.Chain(items => items.Select(item => source.Context.CancelAndTrace(item, selector)));
+            source.Then(items => items.Select(item => source.Context.CancelAndTrace(item, selector)));
 
         public static Query<TResult> SelectMany<TSource, TResult>(this Query<TSource> source, Func<TSource, IEnumerable<TResult>> selector) =>
-            source.Chain(items => items.SelectMany(item => source.Context.CancelAndTrace(item, selector)));
+            source.Then(items => items.SelectMany(item => source.Context.CancelAndTrace(item, selector)));
 
         public static void ForEach<TSource>(this Query<TSource> source, Action<TSource> action)
         {

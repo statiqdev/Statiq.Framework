@@ -90,7 +90,7 @@ namespace Statiq.Core
         /// <inheritdoc />
         public async Task<IEnumerable<IDocument>> ExecuteAsync(IExecutionContext context)
         {
-            return await context.Inputs.ParallelSelectAsync(context, async input =>
+            return await context.ParallelQueryInputs().SelectAsync(async input =>
             {
                 string fileName = _fileName == null
                     ? input.Destination.FileName.FullPath

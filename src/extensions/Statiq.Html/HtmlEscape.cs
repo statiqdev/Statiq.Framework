@@ -202,7 +202,7 @@ namespace Statiq.Html
         /// <inheritdoc />
         public async Task<IEnumerable<IDocument>> ExecuteAsync(IExecutionContext context)
         {
-            return await context.Inputs.ParallelSelectAsync(context, GetDocumentAsync);
+            return await context.ParallelQueryInputs().SelectAsync(GetDocumentAsync);
 
             async Task<IDocument> GetDocumentAsync(IDocument input)
             {

@@ -21,7 +21,7 @@ namespace Statiq.Core
         public async Task<IEnumerable<IDocument>> ExecuteAsync(IExecutionContext context)
         {
             IDocument result = null;
-            await context.ForEachInputAsync(async input =>
+            await context.QueryInputs().ForEachAsync(async input =>
             {
                 result = result == null
                     ? input

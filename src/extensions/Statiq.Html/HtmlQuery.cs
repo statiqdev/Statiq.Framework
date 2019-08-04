@@ -181,7 +181,7 @@ namespace Statiq.Html
         public async Task<IEnumerable<Common.IDocument>> ExecuteAsync(IExecutionContext context)
         {
             HtmlParser parser = new HtmlParser();
-            return await context.Inputs.ParallelSelectManyAsync(context, GetDocumentsAsync);
+            return await context.ParallelQueryInputs().SelectManyAsync(GetDocumentsAsync);
 
             async Task<IEnumerable<Common.IDocument>> GetDocumentsAsync(Common.IDocument input)
             {
