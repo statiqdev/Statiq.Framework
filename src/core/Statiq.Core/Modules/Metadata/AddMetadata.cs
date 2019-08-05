@@ -10,11 +10,9 @@ namespace Statiq.Core
     /// Adds the specified metadata to each input document.
     /// </summary>
     /// <category>Metadata</category>
-    public class AddMetadata : IModule
+    public class AddMetadata : ParallelConfigModule<object>
     {
         private readonly string _key;
-        private readonly Config<object> _value;
-        private readonly IModule[] _modules;
         private bool _ignoreNull;
         private bool _onlyIfNonExisting;
 
@@ -25,24 +23,17 @@ namespace Statiq.Core
         /// <param name="key">The metadata key to set.</param>
         /// <param name="value">A delegate that returns the object to add as metadata.</param>
         public AddMetadata(string key, Config<object> value)
+            : base(value, true)
         {
             _key = key ?? throw new ArgumentNullException(nameof(key));
-            _value = value ?? throw new ArgumentNullException(nameof(value));
-        }
-
-        /// <summary>
-        /// The specified modules are executed against an empty initial document and all metadata that exist in all of the result documents
-        /// are added as metadata to each input document.
-        /// </summary>
-        /// <param name="modules">The modules to execute.</param>
-        public AddMetadata(params IModule[] modules)
-        {
-            _modules = modules;
         }
 
         /// <summary>
         /// Ignores null values and does not add a metadata item for them.
         /// </summary>
+        /// <remarks>
+        /// The default behavior is not to ignore null values and add them to the metadata regardless.
+        /// </remarks>
         /// <param name="ignoreNull"><c>true</c> to ignore null values.</param>
         /// <returns>The current module instance.</returns>
         public AddMetadata IgnoreNull(bool ignoreNull = true)
@@ -53,8 +44,10 @@ namespace Statiq.Core
 
         /// <summary>
         /// Only sets the new metadata value if a value doesn't already exist.
-        /// The default behavior is to set the new value regardless.
         /// </summary>
+        /// <remarks>
+        /// The default behavior is to set the new value regardless.
+        /// </remarks>
         /// <param name="onlyIfNonExisting"><c>true</c> if the new value should only be set if it doesn't already exist.</param>
         /// <returns>The current module instance.</returns>
         public AddMetadata OnlyIfNonExisting(bool onlyIfNonExisting = true)
@@ -63,34 +56,10 @@ namespace Statiq.Core
             return this;
         }
 
-        /// <inheritdoc />
-        public async Task<IEnumerable<IDocument>> ExecuteAsync(IExecutionContext context)
-        {
-            if (_modules != null)
-            {
-                Dictionary<string, object> metadata = new Dictionary<string, object>();
-
-                // Execute the modules once and apply to each input document
-                foreach (IDocument result in await context.ExecuteAsync(_modules))
-                {
-                    foreach (KeyValuePair<string, object> kvp in result)
-                    {
-                        if (kvp.Value != null || !_ignoreNull)
-                        {
-                            metadata[kvp.Key] = kvp.Value;
-                        }
-                    }
-                }
-                return context.Inputs.Select(input => input.Clone(_onlyIfNonExisting ? metadata.Where(x => !input.ContainsKey(x.Key)) : metadata));
-            }
-
-            return await context.Inputs.SelectAsync(async input => _onlyIfNonExisting && input.ContainsKey(_key)
-                ? input
-                : input.Clone(
-                    new[]
-                    {
-                        new KeyValuePair<string, object>(_key, await _value.GetValueAsync(input, context))
-                    }));
-        }
+        protected override Task<IEnumerable<IDocument>> ExecuteAsync(IDocument input, IExecutionContext context, object value) =>
+            Task.FromResult(
+                (_onlyIfNonExisting && input.ContainsKey(_key)) || (_ignoreNull && value == null)
+                    ? input.Yield()
+                    : input.Clone(new MetadataItems { { _key, value } }).Yield());
     }
 }

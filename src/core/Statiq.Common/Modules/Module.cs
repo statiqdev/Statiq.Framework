@@ -26,14 +26,14 @@ namespace Statiq.Common
         /// <param name="context">The execution context.</param>
         /// <returns>The result documents.</returns>
         public virtual Task<IEnumerable<IDocument>> ExecuteAsync(IExecutionContext context) =>
-            context.Inputs.SelectManyAsync(async input => await SafeExecuteAsync(input, context)).Task;
+            context.Inputs.SelectManyAsync(async input => await SafeExecuteAsync(ExecuteAsync(input, context))).Task;
 
         /// <summary>
         /// Takes care of exceptional cases like a <c>null</c> return task or <c>null</c> result sequence.
         /// Because the result is passed to a <c>SelectMany</c> style function, execute cannot return <c>null</c>.
         /// </summary>
-        protected async Task<IEnumerable<IDocument>> SafeExecuteAsync(IDocument input, IExecutionContext context) =>
-            (await (ExecuteAsync(input, context) ?? Task.FromResult<IEnumerable<IDocument>>(Array.Empty<IDocument>()))) ?? Array.Empty<IDocument>();
+        protected async Task<IEnumerable<IDocument>> SafeExecuteAsync(Task<IEnumerable<IDocument>> executeTask) =>
+            (await (executeTask ?? Task.FromResult<IEnumerable<IDocument>>(Array.Empty<IDocument>()))) ?? Array.Empty<IDocument>();
 
         /// <summary>
         /// Executes the module.

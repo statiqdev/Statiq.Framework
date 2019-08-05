@@ -32,6 +32,7 @@ namespace Statiq.Common
             Children.Count > 0 ? await ExecuteAsync(context, await context.ExecuteAsync(Children, context.Inputs)) : Array.Empty<IDocument>();
 
         /// <inheritdoc />
+        // Unused, prevent overriding in derived classes
         protected sealed override Task<IEnumerable<IDocument>> ExecuteAsync(IDocument input, IExecutionContext context) =>
             base.ExecuteAsync(input, context);
 

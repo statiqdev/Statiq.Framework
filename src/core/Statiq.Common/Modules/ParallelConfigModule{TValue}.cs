@@ -29,17 +29,32 @@ namespace Statiq.Common
             _eachDocument = eachDocument || (config?.RequiresDocument ?? throw new ArgumentNullException(nameof(config)));
         }
 
-        public sealed override Task<IEnumerable<IDocument>> ExecuteAsync(IExecutionContext context)
+        /// <inheritdoc />
+        public sealed override async Task<IEnumerable<IDocument>> ExecuteAsync(IExecutionContext context)
         {
             if (_eachDocument)
             {
-                return base.ExecuteAsync(context);
+                if (!_config.RequiresDocument)
+                {
+                    // Only need to evaluate the config delegate once
+                    TValue value = await _config.GetValueAsync(null, context);
+                    return Parallel
+                        ? (IEnumerable<IDocument>)await context.Inputs.Parallel().SelectManyAsync(async input => await SafeExecuteAsync(ExecuteAsync(input, context, value)))
+                        : await context.Inputs.SelectManyAsync(async input => await SafeExecuteAsync(ExecuteAsync(input, context, value)));
+                }
+
+                return Parallel
+                    ? (IEnumerable<IDocument>)await context.Inputs.Parallel().SelectManyAsync(async input => await SafeExecuteAsync(ExecuteAsync(input, context, await _config.GetValueAsync(input, context))))
+                    : await context.Inputs.SelectManyAsync(async input => await SafeExecuteAsync(ExecuteAsync(input, context, await _config.GetValueAsync(input, context))));
             }
-            return ExecuteAsync(null, context);
+
+            return await ExecuteAsync(null, context, await _config.GetValueAsync(null, context));
         }
 
-        protected sealed override async Task<IEnumerable<IDocument>> ExecuteAsync(IDocument input, IExecutionContext context) =>
-            await ExecuteAsync(input, context, await _config.GetValueAsync(input, context));
+        /// <inheritdoc />
+        // Unused, prevent overriding in derived classes
+        protected sealed override Task<IEnumerable<IDocument>> ExecuteAsync(IDocument input, IExecutionContext context) =>
+            base.ExecuteAsync(input, context);
 
         /// <summary>
         /// Executes the module for each input document in parallel.
