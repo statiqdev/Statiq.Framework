@@ -17,7 +17,7 @@ namespace Statiq.Core
     /// The output document content is set to the original input document content.
     /// </remarks>
     /// <category>Control</category>
-    public class ProcessSidecarFile : ContainerModule
+    public class ProcessSidecarFile : ParentModule
     {
         private readonly Config<FilePath> _sidecarPath;
 
@@ -61,34 +61,30 @@ namespace Statiq.Core
         }
 
         /// <inheritdoc />
-        public override async Task<IEnumerable<IDocument>> ExecuteAsync(IExecutionContext context)
+        protected override async Task<IEnumerable<IDocument>> ExecuteAsync(IDocument input, IExecutionContext context)
         {
-            List<IDocument> results = new List<IDocument>();
-            await context.QueryInputs().ForEachAsync(async input =>
+            FilePath sidecarPath = await _sidecarPath.GetValueAsync(input, context);
+            if (sidecarPath != null)
             {
-                FilePath sidecarPath = await _sidecarPath.GetValueAsync(input, context);
-                if (sidecarPath != null)
+                IFile sidecarFile = await context.FileSystem.GetInputFileAsync(sidecarPath);
+                if (await sidecarFile.GetExistsAsync())
                 {
-                    IFile sidecarFile = await context.FileSystem.GetInputFileAsync(sidecarPath);
-                    if (await sidecarFile.GetExistsAsync())
+                    string sidecarContent = await sidecarFile.ReadAllTextAsync();
+                    foreach (IDocument result in await context.ExecuteAsync(Children, input.Clone(await context.GetContentProviderAsync(sidecarContent)).Yield()))
                     {
-                        string sidecarContent = await sidecarFile.ReadAllTextAsync();
-                        foreach (IDocument result in await context.ExecuteAsync(Children, input.Clone(await context.GetContentProviderAsync(sidecarContent)).Yield()))
-                        {
-                            results.Add(input.Clone(result));
-                        }
-                    }
-                    else
-                    {
-                        results.Add(input);
+                        return input.Clone(result).Yield();
                     }
                 }
                 else
                 {
-                    results.Add(input);
+                    return input.Yield();
                 }
-            });
-            return results;
+            }
+            else
+            {
+                return input.Yield();
+            }
+            return null;
         }
     }
 }

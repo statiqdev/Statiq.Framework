@@ -19,7 +19,7 @@ namespace Statiq.Core
     /// The output document content is set to the original content without the front matter.
     /// </remarks>
     /// <category>Control</category>
-    public class ExtractFrontMatter : ContainerModule
+    public class ExtractFrontMatter : ParentModule
     {
         private readonly string _delimiter;
         private readonly bool _repeated;
@@ -73,44 +73,40 @@ namespace Statiq.Core
         }
 
         /// <inheritdoc />
-        public override async Task<IEnumerable<IDocument>> ExecuteAsync(IExecutionContext context)
+        protected override async Task<IEnumerable<IDocument>> ExecuteAsync(IDocument input, IExecutionContext context)
         {
-            List<IDocument> results = new List<IDocument>();
-            await context.QueryInputs().ForEachAsync(async input =>
+            string inputContent = await input.GetStringAsync();
+            List<string> inputLines = inputContent.Split(new[] { '\n' }, StringSplitOptions.None).ToList();
+            int delimiterLine = inputLines.FindIndex(x =>
             {
-                string inputContent = await input.GetStringAsync();
-                List<string> inputLines = inputContent.Split(new[] { '\n' }, StringSplitOptions.None).ToList();
-                int delimiterLine = inputLines.FindIndex(x =>
+                string trimmed = x.TrimEnd();
+                return trimmed.Length > 0 && (_repeated ? trimmed.All(y => y == _delimiter[0]) : trimmed == _delimiter);
+            });
+            int startLine = 0;
+            if (delimiterLine == 0 && _ignoreDelimiterOnFirstLine)
+            {
+                startLine = 1;
+                delimiterLine = inputLines.FindIndex(1, x =>
                 {
                     string trimmed = x.TrimEnd();
                     return trimmed.Length > 0 && (_repeated ? trimmed.All(y => y == _delimiter[0]) : trimmed == _delimiter);
                 });
-                int startLine = 0;
-                if (delimiterLine == 0 && _ignoreDelimiterOnFirstLine)
+            }
+            if (delimiterLine != -1)
+            {
+                string frontMatter = string.Join("\n", inputLines.Skip(startLine).Take(delimiterLine - startLine)) + "\n";
+                inputLines.RemoveRange(0, delimiterLine + 1);
+                string content = string.Join("\n", inputLines);
+                foreach (IDocument result in await context.ExecuteAsync(Children, input.Clone(await context.GetContentProviderAsync(frontMatter)).Yield()))
                 {
-                    startLine = 1;
-                    delimiterLine = inputLines.FindIndex(1, x =>
-                    {
-                        string trimmed = x.TrimEnd();
-                        return trimmed.Length > 0 && (_repeated ? trimmed.All(y => y == _delimiter[0]) : trimmed == _delimiter);
-                    });
+                    return result.Clone(await context.GetContentProviderAsync(content)).Yield();
                 }
-                if (delimiterLine != -1)
-                {
-                    string frontMatter = string.Join("\n", inputLines.Skip(startLine).Take(delimiterLine - startLine)) + "\n";
-                    inputLines.RemoveRange(0, delimiterLine + 1);
-                    string content = string.Join("\n", inputLines);
-                    foreach (IDocument result in await context.ExecuteAsync(Children, input.Clone(await context.GetContentProviderAsync(frontMatter)).Yield()))
-                    {
-                        results.Add(result.Clone(await context.GetContentProviderAsync(content)));
-                    }
-                }
-                else
-                {
-                    results.Add(input);
-                }
-            });
-            return results;
+            }
+            else
+            {
+                return input.Yield();
+            }
+            return null;
         }
     }
 }

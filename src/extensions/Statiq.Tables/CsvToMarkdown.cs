@@ -23,7 +23,7 @@ namespace Statiq.Tables
     /// +--------------+-------------+
     /// </remarks>
     /// <category>Content</category>
-    public class CsvToMarkdown : IModule
+    public class CsvToMarkdown : ParallelModule
     {
         private bool _firstLineHeader = false;
 
@@ -37,59 +37,47 @@ namespace Statiq.Tables
             return this;
         }
 
-        /// <inheritdoc />
-        public async Task<IEnumerable<IDocument>> ExecuteAsync(IExecutionContext context)
+        protected override async Task<IEnumerable<IDocument>> ExecuteAsync(IDocument input, IExecutionContext context)
         {
-            return await context.ParallelQueryInputs().SelectAsync(async input =>
+            IEnumerable<IEnumerable<string>> records;
+            using (Stream stream = await input.GetStreamAsync())
             {
-                try
+                records = CsvFile.GetAllRecords(stream);
+            }
+
+            StringBuilder builder = new StringBuilder();
+
+            int columnCount = records.First().Count();
+
+            int[] columnSize = new int[columnCount];
+
+            foreach (IEnumerable<string> row in records)
+            {
+                for (int i = 0; i < row.Count(); i++)
                 {
-                    IEnumerable<IEnumerable<string>> records;
-                    using (Stream stream = await input.GetStreamAsync())
-                    {
-                        records = CsvFile.GetAllRecords(stream);
-                    }
-
-                    StringBuilder builder = new StringBuilder();
-
-                    int columnCount = records.First().Count();
-
-                    int[] columnSize = new int[columnCount];
-
-                    foreach (IEnumerable<string> row in records)
-                    {
-                        for (int i = 0; i < row.Count(); i++)
-                        {
-                            string cell = row.ElementAt(i);
-                            columnSize[i] = Math.Max(columnSize[i], cell.Length);
-                        }
-                    }
-
-                    bool firstLine = true;
-                    WriteLine(builder, columnSize);
-                    foreach (IEnumerable<string> row in records)
-                    {
-                        builder.Append("|");
-                        for (int i = 0; i < columnSize.Length; i++)
-                        {
-                            builder.Append(" ");
-                            builder.Append(row.ElementAt(i));
-                            builder.Append(' ', columnSize[i] - row.ElementAt(i).Length + 1);
-                            builder.Append("|");
-                        }
-                        builder.AppendLine();
-                        WriteLine(builder, columnSize, _firstLineHeader && firstLine);
-                        firstLine = false;
-                    }
-
-                    return input.Clone(await context.GetContentProviderAsync(builder.ToString()));
+                    string cell = row.ElementAt(i);
+                    columnSize[i] = Math.Max(columnSize[i], cell.Length);
                 }
-                catch (Exception e)
+            }
+
+            bool firstLine = true;
+            WriteLine(builder, columnSize);
+            foreach (IEnumerable<string> row in records)
+            {
+                builder.Append("|");
+                for (int i = 0; i < columnSize.Length; i++)
                 {
-                    Trace.Error($"An {e} occurred ({input.ToSafeDisplayString()}): {e.Message}");
-                    return null;
+                    builder.Append(" ");
+                    builder.Append(row.ElementAt(i));
+                    builder.Append(' ', columnSize[i] - row.ElementAt(i).Length + 1);
+                    builder.Append("|");
                 }
-            });
+                builder.AppendLine();
+                WriteLine(builder, columnSize, _firstLineHeader && firstLine);
+                firstLine = false;
+            }
+
+            return input.Clone(await context.GetContentProviderAsync(builder.ToString())).Yield();
         }
 
         private static void WriteLine(StringBuilder builder, int[] columnSize, bool isHeader = false)

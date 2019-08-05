@@ -29,8 +29,10 @@ namespace Statiq.Html
     /// <metadata cref="HtmlKeys.InnerHtml" usage="Output"/>
     /// <metadata cref="HtmlKeys.TextContent" usage="Output"/>
     /// <category>Metadata</category>
-    public class HtmlQuery : IModule
+    public class HtmlQuery : ParallelModule
     {
+        private static readonly HtmlParser HtmlParser = new HtmlParser();
+
         private readonly List<Action<IElement, Dictionary<string, object>>> _metadataActions
             = new List<Action<IElement, Dictionary<string, object>>>();
 
@@ -177,79 +179,72 @@ namespace Statiq.Html
             return this;
         }
 
-        /// <inheritdoc />
-        public async Task<IEnumerable<Common.IDocument>> ExecuteAsync(IExecutionContext context)
+        protected override async Task<IEnumerable<Common.IDocument>> ExecuteAsync(Common.IDocument input, IExecutionContext context)
         {
-            HtmlParser parser = new HtmlParser();
-            return await context.ParallelQueryInputs().SelectManyAsync(GetDocumentsAsync);
-
-            async Task<IEnumerable<Common.IDocument>> GetDocumentsAsync(Common.IDocument input)
+            // Parse the HTML content
+            IHtmlDocument htmlDocument = await input.ParseHtmlAsync(HtmlParser);
+            if (htmlDocument == null)
             {
-                // Parse the HTML content
-                IHtmlDocument htmlDocument = await input.ParseHtmlAsync(parser);
-                if (htmlDocument == null)
-                {
-                    return input.Yield();
-                }
+                return input.Yield();
+            }
 
-                // Evaluate the query selector
-                try
+            // Evaluate the query selector
+            try
+            {
+                if (!string.IsNullOrWhiteSpace(_querySelector))
                 {
-                    if (!string.IsNullOrWhiteSpace(_querySelector))
+                    IElement[] elements = _first
+                        ? new[] { htmlDocument.QuerySelector(_querySelector) }
+                        : htmlDocument.QuerySelectorAll(_querySelector).ToArray();
+                    if (elements.Length > 0 && elements[0] != null)
                     {
-                        IElement[] elements = _first
-                            ? new[] { htmlDocument.QuerySelector(_querySelector) }
-                            : htmlDocument.QuerySelectorAll(_querySelector).ToArray();
-                        if (elements.Length > 0 && elements[0] != null)
+                        List<Common.IDocument> documents = new List<Common.IDocument>();
+                        foreach (IElement element in elements)
                         {
-                            List<Common.IDocument> documents = new List<Common.IDocument>();
-                            foreach (IElement element in elements)
+                            // Get the metadata
+                            Dictionary<string, object> metadata = new Dictionary<string, object>();
+                            foreach (Action<IElement, Dictionary<string, object>> metadataAction in _metadataActions)
                             {
-                                // Get the metadata
-                                Dictionary<string, object> metadata = new Dictionary<string, object>();
-                                foreach (Action<IElement, Dictionary<string, object>> metadataAction in _metadataActions)
-                                {
-                                    metadataAction(element, metadata);
-                                }
+                                metadataAction(element, metadata);
+                            }
 
-                                // Clone the document and optionally change content to the HTML element
-                                if (_outerHtmlContent.HasValue)
+                            // Clone the document and optionally change content to the HTML element
+                            if (_outerHtmlContent.HasValue)
+                            {
+                                using (Stream contentStream = await context.GetContentStreamAsync())
                                 {
-                                    using (Stream contentStream = await context.GetContentStreamAsync())
+                                    using (StreamWriter writer = contentStream.GetWriter())
                                     {
-                                        using (StreamWriter writer = contentStream.GetWriter())
+                                        if (_outerHtmlContent.Value)
                                         {
-                                            if (_outerHtmlContent.Value)
-                                            {
-                                                element.ToHtml(writer, ProcessingInstructionFormatter.Instance);
-                                            }
-                                            else
-                                            {
-                                                element.ChildNodes.ToHtml(writer, ProcessingInstructionFormatter.Instance);
-                                            }
-                                            writer.Flush();
-                                            documents.Add(
-                                                input.Clone(
-                                                    metadata.Count == 0 ? null : metadata,
-                                                    context.GetContentProvider(contentStream)));
+                                            element.ToHtml(writer, ProcessingInstructionFormatter.Instance);
                                         }
+                                        else
+                                        {
+                                            element.ChildNodes.ToHtml(writer, ProcessingInstructionFormatter.Instance);
+                                        }
+                                        writer.Flush();
+                                        documents.Add(
+                                            input.Clone(
+                                                metadata.Count == 0 ? null : metadata,
+                                                context.GetContentProvider(contentStream)));
                                     }
                                 }
-                                else
-                                {
-                                    documents.Add(input.Clone(metadata));
-                                }
                             }
-                            return documents;
+                            else
+                            {
+                                documents.Add(input.Clone(metadata));
+                            }
                         }
+                        return documents;
                     }
-                    return input.Yield();
                 }
-                catch (Exception ex)
-                {
-                    Trace.Warning("Exception while processing HTML for {0}: {1}", input.ToSafeDisplayString(), ex.Message);
-                    return input.Yield();
-                }
+                return input.Yield();
+            }
+            catch (Exception ex)
+            {
+                Trace.Warning("Exception while processing HTML for {0}: {1}", input.ToSafeDisplayString(), ex.Message);
+                return input.Yield();
             }
         }
     }

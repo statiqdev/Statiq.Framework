@@ -13,7 +13,7 @@ namespace Statiq.Core
     /// template substitution.
     /// </remarks>
     /// <category>Content</category>
-    public class ReplaceWithContent : ConfigModule<string>, IParallelModule
+    public class ReplaceWithContent : ParallelConfigModule<string>
     {
         private readonly string _search;
         private bool _isRegex;

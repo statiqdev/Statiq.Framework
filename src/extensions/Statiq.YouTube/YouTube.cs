@@ -20,7 +20,7 @@ namespace Statiq.YouTube
     /// will be sent for each input document.
     /// </remarks>
     /// <category>Metadata</category>
-    public class YouTube : Module, IParallelModule, IDisposable
+    public class YouTube : ParallelModule, IDisposable
     {
         private readonly YouTubeService _youtube;
 

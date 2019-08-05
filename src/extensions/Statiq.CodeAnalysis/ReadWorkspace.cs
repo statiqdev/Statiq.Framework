@@ -16,16 +16,15 @@ namespace Statiq.CodeAnalysis
     /// specified. Otherwise, if a delegate is specified the module will be executed once per input
     /// document and the resulting output documents will be aggregated.
     /// </summary>
-    public abstract class ReadWorkspace : IModule
+    public abstract class ReadWorkspace : ParallelConfigModule<FilePath>
     {
-        private readonly Config<FilePath> _path;
         private Func<string, bool> _whereProject;
         private Func<IFile, bool> _whereFile;
         private string[] _extensions;
 
         protected ReadWorkspace(Config<FilePath> path)
+            : base(path, false)
         {
-            _path = path ?? throw new ArgumentNullException(nameof(path));
         }
 
         /// <summary>
@@ -90,54 +89,42 @@ namespace Statiq.CodeAnalysis
             return result;
         }
 
-        /// <inheritdoc />
-        public async Task<IEnumerable<IDocument>> ExecuteAsync(IExecutionContext context)
+        protected override async Task<IEnumerable<IDocument>> ExecuteAsync(IDocument input, IExecutionContext context, FilePath value)
         {
-            return await context.Inputs.ParallelSelectManyAsync(async input =>
-                await ExecuteAsync(input, await _path.GetValueAsync(input, context), context));
-        }
-
-        private Task<IEnumerable<IDocument>> ExecuteAsync(IDocument input, FilePath projectPath, IExecutionContext context)
-        {
-            return context.CancelAndTraceAsync(input, ExecuteAsync);
-
-            async Task<IEnumerable<IDocument>> ExecuteAsync(IDocument doc)
+            if (value != null)
             {
-                if (projectPath != null)
+                IFile projectFile = await context.FileSystem.GetInputFileAsync(value);
+
+                return await GetProjects(context, projectFile)
+                    .Where(project => project != null && (_whereProject == null || _whereProject(project.Name)))
+                    .ParallelSelectManyAsync(GetProjectDocumentsAsync);
+
+                async Task<IEnumerable<IDocument>> GetProjectDocumentsAsync(Project project)
                 {
-                    IFile projectFile = await context.FileSystem.GetInputFileAsync(projectPath);
+                    Common.Trace.Verbose("Read project {0}", project.Name);
+                    string assemblyName = project.AssemblyName;
+                    IEnumerable<IFile> documentPaths = await project.Documents
+                        .Where(x => !string.IsNullOrWhiteSpace(x.FilePath))
+                        .SelectAsync(x => context.FileSystem.GetInputFileAsync(x.FilePath));
+                    documentPaths = await documentPaths
+                        .WhereAsync(async x => await x.GetExistsAsync() && (_whereFile == null || _whereFile(x)) && (_extensions?.Contains(x.Path.Extension) != false));
+                    return documentPaths.Select(GetProjectDocument);
 
-                    return await GetProjects(context, projectFile)
-                        .Where(project => project != null && (_whereProject == null || _whereProject(project.Name)))
-                        .ParallelSelectManyAsync(GetProjectDocumentsAsync);
-
-                    async Task<IEnumerable<IDocument>> GetProjectDocumentsAsync(Project project)
+                    IDocument GetProjectDocument(IFile file)
                     {
-                        Common.Trace.Verbose("Read project {0}", project.Name);
-                        string assemblyName = project.AssemblyName;
-                        IEnumerable<IFile> documentPaths = await project.Documents
-                            .Where(x => !string.IsNullOrWhiteSpace(x.FilePath))
-                            .SelectAsync(x => context.FileSystem.GetInputFileAsync(x.FilePath));
-                        documentPaths = await documentPaths
-                            .WhereAsync(async x => await x.GetExistsAsync() && (_whereFile == null || _whereFile(x)) && (_extensions?.Contains(x.Path.Extension) != false));
-                        return documentPaths.Select(GetProjectDocument);
-
-                        IDocument GetProjectDocument(IFile file)
-                        {
-                            Common.Trace.Verbose($"Read file {file.Path.FullPath}");
-                            return context.CreateDocument(
-                                file.Path,
-                                null,
-                                new MetadataItems
-                                {
-                                    { CodeAnalysisKeys.AssemblyName, assemblyName }
-                                },
-                                context.GetContentProvider(file));
-                        }
+                        Common.Trace.Verbose($"Read file {file.Path.FullPath}");
+                        return context.CreateDocument(
+                            file.Path,
+                            null,
+                            new MetadataItems
+                            {
+                                { CodeAnalysisKeys.AssemblyName, assemblyName }
+                            },
+                            context.GetContentProvider(file));
                     }
                 }
-                return Array.Empty<IDocument>();
             }
+            return Array.Empty<IDocument>();
         }
     }
 }

@@ -16,7 +16,7 @@ namespace Statiq.Tables
     /// content must use <c>,</c> as separator and enclose every value in <c>"</c>.
     /// </remarks>
     /// <category>Content</category>
-    public class CsvToHtml : IModule
+    public class CsvToHtml : ParallelModule
     {
         private bool _firstLineHeader = false;
 
@@ -30,48 +30,36 @@ namespace Statiq.Tables
             return this;
         }
 
-        /// <inheritdoc />
-        public async Task<IEnumerable<IDocument>> ExecuteAsync(IExecutionContext context)
+        protected override async Task<IEnumerable<IDocument>> ExecuteAsync(IDocument input, IExecutionContext context)
         {
-            return await context.ParallelQueryInputs().SelectAsync(async input =>
+            IEnumerable<IEnumerable<string>> records;
+            using (Stream stream = await input.GetStreamAsync())
             {
-                try
-                {
-                    IEnumerable<IEnumerable<string>> records;
-                    using (Stream stream = await input.GetStreamAsync())
-                    {
-                        records = CsvFile.GetAllRecords(stream);
-                    }
+                records = CsvFile.GetAllRecords(stream);
+            }
 
-                    StringBuilder builder = new StringBuilder();
-                    bool firstLine = true;
-                    builder.AppendLine("<table>");
-                    foreach (IEnumerable<string> row in records)
-                    {
-                        builder.AppendLine("<tr>");
-                        foreach (string cell in row)
-                        {
-                            if (_firstLineHeader && firstLine)
-                            {
-                                builder.AppendLine($"<th>{cell}</th>");
-                            }
-                            else
-                            {
-                                builder.AppendLine($"<td>{cell}</td>");
-                            }
-                        }
-                        builder.AppendLine("</tr>");
-                        firstLine = false;
-                    }
-                    builder.Append("</table>");
-                    return input.Clone(await context.GetContentProviderAsync(builder.ToString()));
-                }
-                catch (Exception e)
+            StringBuilder builder = new StringBuilder();
+            bool firstLine = true;
+            builder.AppendLine("<table>");
+            foreach (IEnumerable<string> row in records)
+            {
+                builder.AppendLine("<tr>");
+                foreach (string cell in row)
                 {
-                    Trace.Error($"An {e} occurred ({input.ToSafeDisplayString()}): {e.Message}");
-                    return null;
+                    if (_firstLineHeader && firstLine)
+                    {
+                        builder.AppendLine($"<th>{cell}</th>");
+                    }
+                    else
+                    {
+                        builder.AppendLine($"<td>{cell}</td>");
+                    }
                 }
-            });
+                builder.AppendLine("</tr>");
+                firstLine = false;
+            }
+            builder.Append("</table>");
+            return input.Clone(await context.GetContentProviderAsync(builder.ToString())).Yield();
         }
     }
 }

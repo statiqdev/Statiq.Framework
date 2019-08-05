@@ -10,21 +10,21 @@ namespace Statiq.CodeAnalysis
     /// Compiles a C# based script contained in document content.
     /// </summary>
     /// <category>Extensibility</category>
-    public class CompileScript : IModule
+    public class CompileScript : ParallelModule
     {
         public const string CompiledKey = "_CompiledScript";
 
-        public async Task<IEnumerable<IDocument>> ExecuteAsync(IExecutionContext context) =>
-            await context.ParallelQueryInputs().SelectAsync(async input =>
-            {
-                byte[] assembly = ScriptHelper.Compile(await input.GetStringAsync(), input, context);
-                MemoryStream stream = context.MemoryStreamFactory.GetStream(assembly);
-                return input.Clone(
-                    new MetadataItems
-                    {
-                        { CompiledKey, true }
-                    },
-                    context.GetContentProvider(stream));
-            });
+        protected override async Task<IEnumerable<IDocument>> ExecuteAsync(IDocument input, IExecutionContext context)
+        {
+            byte[] assembly = ScriptHelper.Compile(await input.GetStringAsync(), input, context);
+            MemoryStream stream = context.MemoryStreamFactory.GetStream(assembly);
+            return input.Clone(
+                new MetadataItems
+                {
+                    { CompiledKey, true }
+                },
+                context.GetContentProvider(stream))
+                .Yield();
+        }
     }
 }

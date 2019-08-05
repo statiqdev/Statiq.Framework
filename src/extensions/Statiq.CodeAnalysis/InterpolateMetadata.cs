@@ -17,7 +17,7 @@ namespace Statiq.CodeAnalysis
     /// on interpolated value shouldn't reference another.
     /// </remarks>
     /// <category>Metadata</category>
-    public class InterpolateMetadata : Module, IParallelModule
+    public class InterpolateMetadata : ParallelModule
     {
         protected override Task<IEnumerable<IDocument>> ExecuteAsync(IDocument input, IExecutionContext context)
         {

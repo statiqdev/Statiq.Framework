@@ -5,80 +5,49 @@ using System.Threading.Tasks;
 namespace Statiq.Common
 {
     /// <summary>
-    /// A common base class for modules that includes
-    /// built-in support for parallelism (when also
-    /// implementing <see cref="IParallelModule"/>)
-    /// and per-document processing.
+    /// A common base class for modules.
     /// </summary>
+    /// <remarks>
+    /// Documents can either be processed one at a time by overriding
+    /// <see cref="ExecuteAsync(IDocument, IExecutionContext)"/> or all
+    /// at once by overriding <see cref="ExecuteAsync(IExecutionContext)"/>.
+    /// </remarks>
     public abstract class Module : IModule
     {
-        private readonly bool _eachDocument;
-
         /// <summary>
-        /// Indicates whether documents will be
-        /// processed by this module in parallel.
+        /// Executes the module once for all input documents.
         /// </summary>
-        public bool Parallel { get; internal set; }
-
-        /// <summary>
-        /// Creates a module, indicating if the execute
-        /// method should be called for each document
-        /// or once overall.
-        /// </summary>
-        /// <param name="eachDocument">
-        /// <c>true</c> to call <see cref="ExecuteAsync(IDocument, IExecutionContext)"/>
-        /// for each input document, <c>false</c> to call it once overall with a <c>null</c>
-        /// input argument. Note that setting this to <c>false</c> will also turn off
-        /// any parallel processing (since there's nothing to execute in parallel given
-        /// the <see cref="ExecuteAsync(IDocument, IExecutionContext)"/> is only called once).
-        /// </param>
-        protected Module(bool eachDocument)
-        {
-            _eachDocument = eachDocument;
-            Parallel = this is IParallelModule;
-        }
-
-        /// <summary>
-        /// Creates a module that will call the execute method
-        /// for each input document.
-        /// </summary>
-        protected Module()
-            : this(true)
-        {
-        }
-
-        /// <inheritdoc />
-        public Task<IEnumerable<IDocument>> ExecuteAsync(IExecutionContext context)
-        {
-            if (_eachDocument)
-            {
-                return Parallel
-                    ? context.ParallelQueryInputs().SelectManyAsync(async input => await SafeExecuteAsync(input, context)).Task
-                    : context.QueryInputs().SelectManyAsync(async input => await SafeExecuteAsync(input, context)).Task;
-            }
-            return ExecuteAsync(null, context);
-        }
+        /// <remarks>
+        /// Override this method to execute the module once for all input documents. The default behavior
+        /// calls <see cref="ExecuteAsync(IDocument, IExecutionContext)"/> for each input document (possibly
+        /// in parallel) and overriding this method will result in <see cref="ExecuteAsync(IDocument, IExecutionContext)"/>
+        /// not being called.
+        /// </remarks>
+        /// <param name="context">The execution context.</param>
+        /// <returns>The result documents.</returns>
+        public virtual Task<IEnumerable<IDocument>> ExecuteAsync(IExecutionContext context) =>
+            context.QueryInputs().SelectManyAsync(async input => await SafeExecuteAsync(input, context)).Task;
 
         /// <summary>
         /// Takes care of exceptional cases like a <c>null</c> return task or <c>null</c> result sequence.
         /// Because the result is passed to a <c>SelectMany</c> style function, execute cannot return <c>null</c>.
         /// </summary>
-        private async Task<IEnumerable<IDocument>> SafeExecuteAsync(IDocument input, IExecutionContext context) =>
+        protected async Task<IEnumerable<IDocument>> SafeExecuteAsync(IDocument input, IExecutionContext context) =>
             (await (ExecuteAsync(input, context) ?? Task.FromResult<IEnumerable<IDocument>>(Array.Empty<IDocument>()))) ?? Array.Empty<IDocument>();
 
         /// <summary>
         /// Executes the module.
         /// </summary>
         /// <remarks>
-        /// This method will be called for each document if specified in the constructor,
-        /// otherwise it will be called once with a <c>null</c> <paramref name="input"/>.
+        /// This method will be called for each document unless <see cref="ExecuteAsync(IExecutionContext)"/>
+        /// is overridden.
         /// </remarks>
         /// <param name="input">
-        /// The input document this module is currently processing or <c>null</c> if
-        /// the module does not process each document.
+        /// The input document this module is currently processing..
         /// </param>
         /// <param name="context">The execution context.</param>
         /// <returns>The result documents.</returns>
-        protected abstract Task<IEnumerable<IDocument>> ExecuteAsync(IDocument input, IExecutionContext context);
+        protected virtual Task<IEnumerable<IDocument>> ExecuteAsync(IDocument input, IExecutionContext context) =>
+            Task.FromResult<IEnumerable<IDocument>>(Array.Empty<IDocument>());
     }
 }

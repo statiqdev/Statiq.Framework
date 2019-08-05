@@ -13,7 +13,7 @@ namespace Statiq.Core
     /// Renders shortcodes in the input documents.
     /// </summary>
     /// <category>Content</category>
-    public class ProcessShortcodes : IModule
+    public class ProcessShortcodes : ParallelModule
     {
         private readonly string _startDelimiter;
         private readonly string _endDelimiter;
@@ -51,9 +51,8 @@ namespace Statiq.Core
             _endDelimiter = endDelimiter;
         }
 
-        /// <inheritdoc />
-        public async Task<IEnumerable<IDocument>> ExecuteAsync(IExecutionContext context) =>
-            await context.ParallelQueryInputs().SelectAsync(async input => await ProcessShortcodesAsync(input, context) ?? input);
+        protected override async Task<IEnumerable<IDocument>> ExecuteAsync(IDocument input, IExecutionContext context) =>
+            (await ProcessShortcodesAsync(input, context) ?? input).Yield();
 
         // The inputStream will be disposed if this returns a result document but will not otherwise
         private async Task<IDocument> ProcessShortcodesAsync(IDocument input, IExecutionContext context)

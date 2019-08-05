@@ -20,7 +20,7 @@ namespace Statiq.Xmp
     /// locate any sidecar files.
     /// </remarks>
     /// <category>Metadata</category>
-    public class Xmp : IModule
+    public class Xmp : Module
     {
         private readonly bool _skipElementOnMissingData;
         private readonly bool _errorOnDoubleKeys = true;
@@ -102,96 +102,92 @@ namespace Statiq.Xmp
             return this;
         }
 
-        /// <inheritdoc />
-        public async Task<IEnumerable<IDocument>> ExecuteAsync(IExecutionContext context)
+        protected override async Task<IEnumerable<IDocument>> ExecuteAsync(IDocument input, IExecutionContext context)
         {
-            return (await context.QueryInputs().SelectAsync(async input =>
+            XmpDirectory xmpDirectory;
+            try
             {
-                 XmpDirectory xmpDirectory;
-                 try
-                 {
-                     using (Stream stream = await input.GetStreamAsync())
-                     {
-                         xmpDirectory = ImageMetadataReader.ReadMetadata(stream).OfType<XmpDirectory>().FirstOrDefault();
-                     }
-                 }
-                 catch (Exception)
-                 {
-                     xmpDirectory = null;
-                 }
-                 if (xmpDirectory == null)
-                 {
-                     // Try to read sidecarfile
-                     if (input.Source != null)
-                     {
-                         IFile sidecarFile = await context.FileSystem.GetInputFileAsync(input.Source.AppendExtension(".xmp"));
-                         if (await sidecarFile.GetExistsAsync())
-                         {
-                             MemoryStream xmpBytes = new MemoryStream();
-                             using (Stream xmpStream = await sidecarFile.OpenReadAsync())
-                             {
-                                 await xmpStream.CopyToAsync(xmpBytes);
-                             }
-                             xmpDirectory = new XmpReader().Extract(xmpBytes.ToArray());
-                         }
-                     }
-                 }
-                 if (xmpDirectory == null)
-                 {
-                     if (_toSearch.Any(y => y.IsMandatory))
-                     {
-                         Trace.Warning($"File doe not contain Metadata or sidecar file ({input.ToSafeDisplayString()})");
-                         if (_skipElementOnMissingData)
-                         {
-                             return null;
-                         }
-                     }
-                     return input;
-                 }
+                using (Stream stream = await input.GetStreamAsync())
+                {
+                    xmpDirectory = ImageMetadataReader.ReadMetadata(stream).OfType<XmpDirectory>().FirstOrDefault();
+                }
+            }
+            catch (Exception)
+            {
+                xmpDirectory = null;
+            }
+            if (xmpDirectory == null)
+            {
+                // Try to read sidecarfile
+                if (input.Source != null)
+                {
+                    IFile sidecarFile = await context.FileSystem.GetInputFileAsync(input.Source.AppendExtension(".xmp"));
+                    if (await sidecarFile.GetExistsAsync())
+                    {
+                        MemoryStream xmpBytes = new MemoryStream();
+                        using (Stream xmpStream = await sidecarFile.OpenReadAsync())
+                        {
+                            await xmpStream.CopyToAsync(xmpBytes);
+                        }
+                        xmpDirectory = new XmpReader().Extract(xmpBytes.ToArray());
+                    }
+                }
+            }
+            if (xmpDirectory == null)
+            {
+                if (_toSearch.Any(y => y.IsMandatory))
+                {
+                    Trace.Warning($"File doe not contain Metadata or sidecar file ({input.ToSafeDisplayString()})");
+                    if (_skipElementOnMissingData)
+                    {
+                        return null;
+                    }
+                }
+                return input.Yield();
+            }
 
-                 Dictionary<string, object> newValues = new Dictionary<string, object>();
+            Dictionary<string, object> newValues = new Dictionary<string, object>();
 
-                 TreeDirectory hierarchicalDirectory = TreeDirectory.GetHierarchicalDirectory(xmpDirectory);
+            TreeDirectory hierarchicalDirectory = TreeDirectory.GetHierarchicalDirectory(xmpDirectory);
 
-                 foreach (XmpSearchEntry search in _toSearch)
-                 {
-                     try
-                     {
-                         TreeDirectory metadata = hierarchicalDirectory.Childrean.Find(y => search.PathWithoutNamespacePrefix == y.ElementName && search.Namespace == y.ElementNameSpace);
+            foreach (XmpSearchEntry search in _toSearch)
+            {
+                try
+                {
+                    TreeDirectory metadata = hierarchicalDirectory.Childrean.Find(y => search.PathWithoutNamespacePrefix == y.ElementName && search.Namespace == y.ElementNameSpace);
 
-                         if (metadata == null)
-                         {
-                             if (search.IsMandatory)
-                             {
-                                 Trace.Error($"Metadata does not Contain {search.XmpPath} ({input.ToSafeDisplayString()})");
-                                 if (_skipElementOnMissingData)
-                                 {
-                                     return null;
-                                 }
-                             }
-                             continue;
-                         }
-                         object value = GetObjectFromMetadata(metadata, hierarchicalDirectory);
-                         if (newValues.ContainsKey(search.MetadataKey) && _errorOnDoubleKeys)
-                         {
-                             Trace.Error($"This Module tries to write same Key multiple times {search.MetadataKey} ({input.ToSafeDisplayString()})");
-                         }
-                         else
-                         {
-                             newValues[search.MetadataKey] = value;
-                         }
-                     }
-                     catch (Exception e)
-                     {
-                         Trace.Error($"An exception occurred : {e} {e.Message}");
-                         if (search.IsMandatory && _skipElementOnMissingData)
-                         {
-                             return null;
-                         }
-                     }
-                 }
-                 return newValues.Count > 0 ? input.Clone(newValues) : input;
-             })).Where(x => x != null);
+                    if (metadata == null)
+                    {
+                        if (search.IsMandatory)
+                        {
+                            Trace.Error($"Metadata does not Contain {search.XmpPath} ({input.ToSafeDisplayString()})");
+                            if (_skipElementOnMissingData)
+                            {
+                                return null;
+                            }
+                        }
+                        continue;
+                    }
+                    object value = GetObjectFromMetadata(metadata, hierarchicalDirectory);
+                    if (newValues.ContainsKey(search.MetadataKey) && _errorOnDoubleKeys)
+                    {
+                        Trace.Error($"This Module tries to write same Key multiple times {search.MetadataKey} ({input.ToSafeDisplayString()})");
+                    }
+                    else
+                    {
+                        newValues[search.MetadataKey] = value;
+                    }
+                }
+                catch (Exception e)
+                {
+                    Trace.Error($"An exception occurred : {e} {e.Message}");
+                    if (search.IsMandatory && _skipElementOnMissingData)
+                    {
+                        return null;
+                    }
+                }
+            }
+            return newValues.Count > 0 ? input.Clone(newValues).Yield() : input.Yield();
         }
 
         [System.Diagnostics.DebuggerDisplay("{ElementName}: {ElementValue} [{ElementArrayIndex}] ({ElementNameSpace})")]

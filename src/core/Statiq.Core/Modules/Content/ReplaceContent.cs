@@ -10,7 +10,7 @@ namespace Statiq.Core
     /// Replaces the content of each document.
     /// </summary>
     /// <category>Content</category>
-    public class ReplaceContent : ConfigModule<string>, IParallelModule
+    public class ReplaceContent : ParallelConfigModule<string>
     {
         /// <summary>
         /// Replaces the content of each document with the config value.

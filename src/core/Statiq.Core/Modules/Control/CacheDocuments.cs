@@ -24,7 +24,7 @@ namespace Statiq.Core
     /// <metadata cref="Keys.DisableCache" usage="Input" />
     /// <metadata cref="Keys.ResetCache" usage="Input" />
     /// <category>Control</category>
-    public class CacheDocuments : ContainerModule, IDisposable
+    public class CacheDocuments : ParentModule, IDisposable
     {
         private Dictionary<FilePath, CacheEntry> _cache = null;
 

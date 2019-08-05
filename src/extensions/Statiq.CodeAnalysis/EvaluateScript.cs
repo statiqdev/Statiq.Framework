@@ -10,38 +10,24 @@ namespace Statiq.CodeAnalysis
     /// Evaluates a C# based script contained in document content.
     /// </summary>
     /// <category>Extensibility</category>
-    public class EvaluateScript : IModule
+    public class EvaluateScript : ParallelModule
     {
-        private bool _parallel;
-
-        public EvaluateScript(bool parallel = true)
+        protected override async Task<IEnumerable<IDocument>> ExecuteAsync(IDocument input, IExecutionContext context)
         {
-            _parallel = parallel;
-        }
+            // Get the assembly
+            byte[] assembly = input.Bool(CompileScript.CompiledKey)
+                ? await input.GetBytesAsync()
+                : ScriptHelper.Compile(await input.GetStringAsync(), input, context);
 
-        public async Task<IEnumerable<IDocument>> ExecuteAsync(IExecutionContext context)
-        {
-            return _parallel
-                ? (IEnumerable<IDocument>)(await context.ParallelQueryInputs().SelectManyAsync(GetResults))
-                : (await context.QueryInputs().SelectManyAsync(GetResults));
-
-            async Task<IEnumerable<IDocument>> GetResults(IDocument input)
+            // Evaluate the script
+            object result = await ScriptHelper.EvaluateAsync(assembly, input, context);
+            if (result == null)
             {
-                // Get the assembly
-                byte[] assembly = input.Bool(CompileScript.CompiledKey)
-                    ? await input.GetBytesAsync()
-                    : ScriptHelper.Compile(await input.GetStringAsync(), input, context);
-
-                // Evaluate the script
-                object result = await ScriptHelper.EvaluateAsync(assembly, input, context);
-                if (result == null)
-                {
-                    return input.Yield();
-                }
-                return GetDocuments(result)
-                    ?? await ExecuteModulesAsync(result, context, input.Yield())
-                    ?? await ChangeContentAsync(result, context, input);
+                return input.Yield();
             }
+            return GetDocuments(result)
+                ?? await ExecuteModulesAsync(result, context, input.Yield())
+                ?? await ChangeContentAsync(result, context, input);
         }
 
         private static IEnumerable<IDocument> GetDocuments(object result) =>

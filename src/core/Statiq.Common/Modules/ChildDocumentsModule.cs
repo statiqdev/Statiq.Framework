@@ -16,7 +16,7 @@ namespace Statiq.Common
     /// <c>ClearDocuments</c> module as the first child if the original input documents
     /// should not be passed to the child modules.
     /// </remarks>
-    public abstract class ChildDocumentsModule : ContainerModule
+    public abstract class ChildDocumentsModule : ParentModule
     {
         /// <summary>
         /// Executes the specified modules to get result documents.
@@ -28,8 +28,12 @@ namespace Statiq.Common
         }
 
         /// <inheritdoc />
-        public override async Task<IEnumerable<IDocument>> ExecuteAsync(IExecutionContext context) =>
+        public sealed override async Task<IEnumerable<IDocument>> ExecuteAsync(IExecutionContext context) =>
             Children.Count > 0 ? await ExecuteAsync(context, await context.ExecuteAsync(Children, context.Inputs)) : Array.Empty<IDocument>();
+
+        /// <inheritdoc />
+        protected sealed override Task<IEnumerable<IDocument>> ExecuteAsync(IDocument input, IExecutionContext context) =>
+            base.ExecuteAsync(input, context);
 
         /// <summary>
         /// Gets the output documents given the input documents and the output documents from the execution of child modules.

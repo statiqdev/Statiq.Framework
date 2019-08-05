@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Globalization;
+using System.Net;
 
 namespace Statiq.Common
 {
@@ -8,6 +10,9 @@ namespace Statiq.Common
     public sealed class FilePath : NormalizedPath
     {
         // Initially based on code from Cake (http://cakebuild.net/)
+
+        // Used by GetTitle()
+        private static readonly ReadOnlyMemory<char> IndexFileName = "index.".AsMemory();
 
         /// <summary>
         /// Initializes a new instance of the <see cref="FilePath"/> class.
@@ -201,6 +206,42 @@ namespace Statiq.Common
             return Directory.Segments.StartsWith(context.FileSystem.OutputPath.Segments)
                 ? context.FileSystem.OutputPath.GetRelativePath(this)
                 : FileName;
+        }
+
+        /// <summary>
+        /// Gets a normalized title derived from the file path.
+        /// </summary>
+        /// <returns>A normalized title.</returns>
+        public string GetTitle()
+        {
+            // Get the filename, unless an index file, then get containing directory
+            ReadOnlyMemory<char> titleMemory = Segments[Segments.Length - 1];
+            if (titleMemory.StartsWith(IndexFileName) && Segments.Length > 1)
+            {
+                titleMemory = Segments[Segments.Length - 2];
+            }
+
+            // Strip the extension(s)
+            int extensionIndex = titleMemory.Span.IndexOf('.');
+            if (extensionIndex > 0)
+            {
+                titleMemory = titleMemory.Slice(0, extensionIndex);
+            }
+
+            // Decode URL escapes
+            string title = WebUtility.UrlDecode(titleMemory.ToString());
+
+            // Replace special characters with spaces
+            title = title.Replace('-', ' ').Replace('_', ' ');
+
+            // Join adjacent spaces
+            while (title.IndexOf("  ", StringComparison.Ordinal) > 0)
+            {
+                title = title.Replace("  ", " ");
+            }
+
+            // Capitalize
+            return CultureInfo.CurrentCulture.TextInfo.ToTitleCase(title);
         }
 
         /// <summary>

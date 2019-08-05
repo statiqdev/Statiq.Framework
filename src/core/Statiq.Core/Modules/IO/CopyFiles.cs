@@ -15,7 +15,7 @@ namespace Statiq.Core
     /// representing the files copied by the module. Note that the input documents are not output by this module.
     /// </remarks>
     /// <category>Input/Output</category>
-    public class CopyFiles : ConfigModule<IEnumerable<string>>, IParallelModule
+    public class CopyFiles : ParallelConfigModule<IEnumerable<string>>
     {
         private Func<IFile, IFile, Task<FilePath>> _destinationPath;
         private Func<IFile, Task<bool>> _predicate = null;

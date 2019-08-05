@@ -191,6 +191,13 @@ namespace Statiq.Common
         }
 
         /// <summary>
+        /// Gets a normalized title derived from the document source.
+        /// </summary>
+        /// <param name="doc">The document.</param>
+        /// <returns>A normalized title.</returns>
+        public static string GetTitle(this IDocument doc) => doc.Source?.GetTitle();
+
+        /// <summary>
         /// Returns a document enumerable given a single document. This is just a convenience
         /// method for converting a single document into an <see cref="IEnumerable{T}"/>.
         /// </summary>

@@ -1,14 +1,16 @@
-﻿using System.Collections.Generic;
+﻿using System.Collections;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace Statiq.Common
 {
     /// <summary>
-    /// A module that can contain child modules.
+    /// A base class for modules that contain a collection of child modules.
     /// </summary>
     /// <remarks>
     /// <para>
     /// Implementing modules should be careful not to accept <see cref="IEnumerable{IModule}"/> as a constructor
-    /// parameter because doing so and then passing an <see cref="IContainerModule"/> as a direct child could
+    /// parameter because doing so and then passing an <see cref="ParentModule"/> as a direct child could
     /// add the modules from the child container module directly to the parent instead of adding the
     /// actual child container module.
     /// </para>
@@ -24,12 +26,22 @@ namespace Statiq.Common
     /// responsible for executing child modules.
     /// </para>
     /// </remarks>
-    public interface IContainerModule : IModule, IEnumerable<IModule>
+    public abstract class ParentModule : Module, IEnumerable<IModule>
     {
+        /// <summary>
+        /// Creates a new container module with the specified child modules.
+        /// Any <c>null</c> items in the sequence of modules will be discarded.
+        /// </summary>
+        /// <param name="children">The child modules.</param>
+        protected ParentModule(params IModule[] children)
+        {
+            Children = new ModuleList(children);
+        }
+
         /// <summary>
         /// The children of this module.
         /// </summary>
-        IModuleList Children { get; }
+        public IModuleList Children { get; }
 
         /// <summary>
         /// Adds modules as a child of this module.
@@ -40,6 +52,12 @@ namespace Statiq.Common
         /// manipulated with the <see cref="Children"/> property.
         /// </remarks>
         /// <param name="modules">The modules to add.</param>
-        void Add(params IModule[] modules);
+        public void Add(params IModule[] modules) => Children.Add(modules);
+
+        /// <inheritdoc />
+        public IEnumerator<IModule> GetEnumerator() => Children.GetEnumerator();
+
+        /// <inheritdoc />
+        IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
     }
 }

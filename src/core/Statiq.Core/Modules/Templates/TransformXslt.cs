@@ -17,7 +17,7 @@ namespace Statiq.Core
     /// see the <a href="https://msdn.microsoft.com/en-us/library/system.xml.xsl.xslcompiledtransform.aspx">MSDN documentation</a>.
     /// </remarks>
     /// <category>Templates</category>
-    public class TransformXslt : IModule
+    public class TransformXslt : ParallelModule
     {
         private readonly Config<FilePath> _xsltPath;
         private readonly IModule[] _xsltGeneration;
@@ -43,46 +43,42 @@ namespace Statiq.Core
             _xsltGeneration = modules;
         }
 
-        /// <inheritdoc />
-        public async Task<IEnumerable<IDocument>> ExecuteAsync(IExecutionContext context)
+        protected override async Task<IEnumerable<IDocument>> ExecuteAsync(IDocument input, IExecutionContext context)
         {
-            return await context.ParallelQueryInputs().SelectAsync(async input =>
-            {
-                XslCompiledTransform xslt = new XslCompiledTransform();
+            XslCompiledTransform xslt = new XslCompiledTransform();
 
-                if (_xsltPath != null)
+            if (_xsltPath != null)
+            {
+                FilePath path = await _xsltPath.GetValueAsync(input, context);
+                if (path != null)
                 {
-                    FilePath path = await _xsltPath.GetValueAsync(input, context);
-                    if (path != null)
+                    IFile file = await context.FileSystem.GetInputFileAsync(path);
+                    if (await file.GetExistsAsync())
                     {
-                        IFile file = await context.FileSystem.GetInputFileAsync(path);
-                        if (await file.GetExistsAsync())
+                        using (Stream fileStream = await file.OpenReadAsync())
                         {
-                            using (Stream fileStream = await file.OpenReadAsync())
-                            {
-                                xslt.Load(XmlReader.Create(fileStream));
-                            }
+                            xslt.Load(XmlReader.Create(fileStream));
                         }
                     }
                 }
-                else if (_xsltGeneration != null)
+            }
+            else if (_xsltGeneration != null)
+            {
+                IDocument xsltDocument = (await context.ExecuteAsync(_xsltGeneration, input.Yield())).Single();
+                using (Stream stream = await xsltDocument.GetStreamAsync())
                 {
-                    IDocument xsltDocument = (await context.ExecuteAsync(_xsltGeneration, input.Yield())).Single();
-                    using (Stream stream = await xsltDocument.GetStreamAsync())
-                    {
-                        xslt.Load(XmlReader.Create(stream));
-                    }
+                    xslt.Load(XmlReader.Create(stream));
                 }
-                using (Stream stream = await input.GetStreamAsync())
+            }
+            using (Stream stream = await input.GetStreamAsync())
+            {
+                StringWriter str = new StringWriter();
+                using (XmlTextWriter writer = new XmlTextWriter(str))
                 {
-                    StringWriter str = new StringWriter();
-                    using (XmlTextWriter writer = new XmlTextWriter(str))
-                    {
-                        xslt.Transform(XmlReader.Create(stream), writer);
-                    }
-                    return input.Clone(await context.GetContentProviderAsync(str.ToString()));
+                    xslt.Transform(XmlReader.Create(stream), writer);
                 }
-            });
+                return input.Clone(await context.GetContentProviderAsync(str.ToString())).Yield();
+            }
         }
     }
 }

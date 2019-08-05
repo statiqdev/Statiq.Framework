@@ -15,7 +15,7 @@ namespace Statiq.Core
     /// metadata key) and optimizes it by removing reserved characters, white-listing characters, etc.
     /// </remarks>
     /// <category>Metadata</category>
-    public class OptimizeFileName : IModule
+    public class OptimizeFileName : ParallelModule
     {
         private readonly List<string> _allowedCharacters = new List<string>();
 
@@ -87,39 +87,36 @@ namespace Statiq.Core
             return this;
         }
 
-        /// <inheritdoc />
-        public async Task<IEnumerable<IDocument>> ExecuteAsync(IExecutionContext context)
+        protected override async Task<IEnumerable<IDocument>> ExecuteAsync(IDocument input, IExecutionContext context)
         {
-            return await context.ParallelQueryInputs().SelectAsync(async input =>
-            {
-                string fileName = _fileName == null
-                    ? input.Destination.FileName.FullPath
-                    : await _fileName.GetValueAsync(input, context);
+            string fileName = _fileName == null
+                ? input.Destination.FileName.FullPath
+                : await _fileName.GetValueAsync(input, context);
 
+            if (!string.IsNullOrWhiteSpace(fileName))
+            {
+                fileName = GetFileName(fileName);
                 if (!string.IsNullOrWhiteSpace(fileName))
                 {
-                    fileName = GetFileName(fileName);
-                    if (!string.IsNullOrWhiteSpace(fileName))
+                    if (_fileName == null || string.IsNullOrWhiteSpace(_outputKey))
                     {
-                        if (_fileName == null || string.IsNullOrWhiteSpace(_outputKey))
-                        {
-                            // No output key so set the destination
-                            FilePath path = input.Destination.ChangeFileName(fileName);
-                            return input.Clone(path);
-                        }
-                        else
-                        {
-                            // Set the specified output key
-                            return input.Clone(
-                                new MetadataItems
-                                {
+                        // No output key so set the destination
+                        FilePath path = input.Destination.ChangeFileName(fileName);
+                        return input.Clone(path).Yield();
+                    }
+                    else
+                    {
+                        // Set the specified output key
+                        return input.Clone(
+                            new MetadataItems
+                            {
                                     { _outputKey, fileName }
-                                });
-                        }
+                            })
+                            .Yield();
                     }
                 }
-                return input;
-            });
+            }
+            return input.Yield();
         }
 
         private string GetFileName(string fileName)

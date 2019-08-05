@@ -24,7 +24,7 @@ namespace Statiq.Markdown
     /// <c>\@</c>. Use the <c>EscapeAt()</c> fluent method to modify this behavior.
     /// </remarks>
     /// <category>Templates</category>
-    public class Markdown : IModule
+    public class Markdown : ParallelModule
     {
         /// <summary>
         /// The default Markdown configuration.
@@ -171,84 +171,79 @@ namespace Statiq.Markdown
             return this;
         }
 
-        /// <inheritdoc />
-        public async Task<IEnumerable<IDocument>> ExecuteAsync(IExecutionContext context)
+        protected override async Task<IEnumerable<IDocument>> ExecuteAsync(IDocument input, IExecutionContext context)
         {
-            return await context.ParallelQueryInputs().SelectAsync(ProcessMarkdownAsync);
+            Trace.Verbose(
+                   "Processing Markdown {0} for {1}",
+                   string.IsNullOrEmpty(_sourceKey) ? string.Empty : ("in" + _sourceKey),
+                   input.ToSafeDisplayString());
 
-            async Task<IDocument> ProcessMarkdownAsync(IDocument input)
+            string content;
+            if (string.IsNullOrEmpty(_sourceKey))
             {
-                Trace.Verbose(
-                    "Processing Markdown {0} for {1}",
-                    string.IsNullOrEmpty(_sourceKey) ? string.Empty : ("in" + _sourceKey),
-                    input.ToSafeDisplayString());
-
-                string content;
-                if (string.IsNullOrEmpty(_sourceKey))
-                {
-                    content = await input.GetStringAsync();
-                }
-                else if (input.ContainsKey(_sourceKey))
-                {
-                    content = input.String(_sourceKey) ?? string.Empty;
-                }
-                else
-                {
-                    // Don't do anything if the key doesn't exist
-                    return input;
-                }
-
-                MarkdownPipeline pipeline = CreatePipeline();
-
-                string result;
-                using (StringWriter writer = new StringWriter())
-                {
-                    HtmlRenderer htmlRenderer = new HtmlRenderer(writer);
-                    pipeline.Setup(htmlRenderer);
-
-                    if (_prependLinkRoot && context.Settings.ContainsKey(Keys.LinkRoot))
-                    {
-                        htmlRenderer.LinkRewriter = (link) =>
-                        {
-                            if (string.IsNullOrEmpty(link))
-                            {
-                                return link;
-                            }
-
-                            if (link[0] == '/')
-                            {
-                                // root-based url, must be rewritten by prepending the LinkRoot setting value
-                                // ex: '/virtual/directory' + '/relative/abs/link.html' => '/virtual/directory/relative/abs/link.html'
-                                link = context.Settings[Keys.LinkRoot] + link;
-                            }
-
-                            return link;
-                        };
-                    }
-
-                    MarkdownDocument document = MarkdownParser.Parse(content, pipeline);
-                    htmlRenderer.Render(document);
-                    writer.Flush();
-                    result = writer.ToString();
-                }
-
-                if (_escapeAt)
-                {
-                    result = EscapeAtRegex.Replace(result, "&#64;");
-                    result = result.Replace("\\@", "@");
-                }
-
-                return string.IsNullOrEmpty(_sourceKey)
-                    ? input.Clone(await context.GetContentProviderAsync(result))
-                    : input.Clone(
-                        new MetadataItems
-                        {
-                            { string.IsNullOrEmpty(_destinationKey) ? _sourceKey : _destinationKey, result }
-                        });
+                content = await input.GetStringAsync();
             }
+            else if (input.ContainsKey(_sourceKey))
+            {
+                content = input.String(_sourceKey) ?? string.Empty;
+            }
+            else
+            {
+                // Don't do anything if the key doesn't exist
+                return input.Yield();
+            }
+
+            MarkdownPipeline pipeline = CreateMarkdownPipeline();
+
+            string result;
+            using (StringWriter writer = new StringWriter())
+            {
+                HtmlRenderer htmlRenderer = new HtmlRenderer(writer);
+                pipeline.Setup(htmlRenderer);
+
+                if (_prependLinkRoot && context.Settings.ContainsKey(Keys.LinkRoot))
+                {
+                    htmlRenderer.LinkRewriter = (link) =>
+                    {
+                        if (string.IsNullOrEmpty(link))
+                        {
+                            return link;
+                        }
+
+                        if (link[0] == '/')
+                        {
+                            // root-based url, must be rewritten by prepending the LinkRoot setting value
+                            // ex: '/virtual/directory' + '/relative/abs/link.html' => '/virtual/directory/relative/abs/link.html'
+                            link = context.Settings[Keys.LinkRoot] + link;
+                        }
+
+                        return link;
+                    };
+                }
+
+                MarkdownDocument document = MarkdownParser.Parse(content, pipeline);
+                htmlRenderer.Render(document);
+                writer.Flush();
+                result = writer.ToString();
+            }
+
+            if (_escapeAt)
+            {
+                result = EscapeAtRegex.Replace(result, "&#64;");
+                result = result.Replace("\\@", "@");
+            }
+
+            return string.IsNullOrEmpty(_sourceKey)
+                ? input.Clone(await context.GetContentProviderAsync(result)).Yield()
+                : input
+                    .Clone(new MetadataItems
+                    {
+                        { string.IsNullOrEmpty(_destinationKey) ? _sourceKey : _destinationKey, result }
+                    })
+                    .Yield();
         }
 
-        private MarkdownPipeline CreatePipeline()
+        private MarkdownPipeline CreateMarkdownPipeline()
         {
             MarkdownPipelineBuilder pipelineBuilder = new MarkdownPipelineBuilder();
             pipelineBuilder.Configure(_configuration);

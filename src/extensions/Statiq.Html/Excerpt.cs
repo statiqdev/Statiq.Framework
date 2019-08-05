@@ -24,8 +24,10 @@ namespace Statiq.Html
     /// </remarks>
     /// <metadata cref="HtmlKeys.Excerpt" usage="Output"/>
     /// <category>Metadata</category>
-    public class Excerpt : IModule
+    public class Excerpt : ParallelModule
     {
+        private static readonly HtmlParser HtmlParser = new HtmlParser();
+
         private string[] _separators = { "more", "excerpt" };
         private string _querySelector = "p";
         private string _metadataKey = HtmlKeys.Excerpt;
@@ -109,43 +111,38 @@ namespace Statiq.Html
             return this;
         }
 
-        /// <inheritdoc />
-        public async Task<IEnumerable<Common.IDocument>> ExecuteAsync(IExecutionContext context)
+        protected override async Task<IEnumerable<Common.IDocument>> ExecuteAsync(Common.IDocument input, IExecutionContext context)
         {
             if (string.IsNullOrWhiteSpace(_metadataKey))
             {
-                return context.Inputs;
+                return input.Yield();
             }
 
-            HtmlParser parser = new HtmlParser();
-            return await context.ParallelQueryInputs().SelectAsync(GetDocumentAsync);
-
-            async Task<Common.IDocument> GetDocumentAsync(Common.IDocument input)
+            // Parse the HTML content
+            IHtmlDocument htmlDocument = await input.ParseHtmlAsync(HtmlParser);
+            if (htmlDocument == null)
             {
-                // Parse the HTML content
-                IHtmlDocument htmlDocument = await input.ParseHtmlAsync(parser);
-                if (htmlDocument == null)
-                {
-                    return input;
-                }
+                return input.Yield();
+            }
 
-                // Get the query string excerpt first
-                string queryExcerpt = GetQueryExcerpt(htmlDocument);
+            // Get the query string excerpt first
+            string queryExcerpt = GetQueryExcerpt(htmlDocument);
 
-                // Now try to get a excerpt separator
-                string separatorExcerpt = GetSeparatorExcerpt(htmlDocument);
+            // Now try to get a excerpt separator
+            string separatorExcerpt = GetSeparatorExcerpt(htmlDocument);
 
-                // Set the metadata
-                string excerpt = separatorExcerpt ?? queryExcerpt;
-                if (excerpt != null)
-                {
-                    return input.Clone(new MetadataItems
+            // Set the metadata
+            string excerpt = separatorExcerpt ?? queryExcerpt;
+            if (excerpt != null)
+            {
+                return input
+                    .Clone(new MetadataItems
                     {
                         { _metadataKey,  excerpt.Trim() }
-                    });
-                }
-                return input;
+                    })
+                    .Yield();
             }
+            return input.Yield();
         }
 
         private string GetQueryExcerpt(IHtmlDocument htmlDocument)

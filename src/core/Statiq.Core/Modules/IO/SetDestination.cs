@@ -26,7 +26,7 @@ namespace Statiq.Core
     /// <metadata cref="Keys.DestinationFileName" usage="Input" />
     /// <metadata cref="Keys.DestinationExtension" usage="Input" />
     /// <category>Input/Output</category>
-    public class SetDestination : IModule
+    public class SetDestination : ParallelConfigModule<FilePath>
     {
         private readonly Config<FilePath> _destination;
 
@@ -37,6 +37,7 @@ namespace Statiq.Core
         /// destination will remain unchanged.
         /// </summary>
         public SetDestination()
+            : base(Config.FromDocument(GetPathFromMetadata), true)
         {
             _destination = Config.FromDocument(GetPathFromMetadata);
         }
@@ -48,13 +49,8 @@ namespace Statiq.Core
         /// </summary>
         /// <param name="extension">The extension to set the destination to.</param>
         public SetDestination(string extension)
+            : base(Config.FromDocument(doc => GetPathFromMetadata(doc) ?? doc.Destination?.ChangeExtension(extension ?? throw new ArgumentNullException(nameof(extension)))), true)
         {
-            if (extension == null)
-            {
-                throw new ArgumentNullException(nameof(extension));
-            }
-            _destination = Config.FromDocument(
-                doc => GetPathFromMetadata(doc) ?? doc.Destination?.ChangeExtension(extension));
         }
 
         /// <summary>
@@ -62,11 +58,11 @@ namespace Statiq.Core
         /// </summary>
         /// <param name="destination">A delegate that returns a <see cref="FilePath"/> with the desired destination path.</param>
         public SetDestination(Config<FilePath> destination)
+            : base(destination ?? throw new ArgumentNullException(nameof(destination)), true)
         {
-            _destination = destination ?? throw new ArgumentNullException(nameof(destination));
         }
 
-        private FilePath GetPathFromMetadata(IDocument doc)
+        private static FilePath GetPathFromMetadata(IDocument doc)
         {
             FilePath path = doc.FilePath(Keys.DestinationPath);
             if (path != null)
@@ -86,12 +82,7 @@ namespace Statiq.Core
             return null;
         }
 
-        /// <inheritdoc />
-        public virtual async Task<IEnumerable<IDocument>> ExecuteAsync(IExecutionContext context) =>
-            await context.Inputs.ParallelSelectAsync(async input =>
-            {
-                FilePath destination = await _destination.GetValueAsync(input, context);
-                return destination == null ? input : input.Clone(destination);
-            });
+        protected override Task<IEnumerable<IDocument>> ExecuteAsync(IDocument input, IExecutionContext context, FilePath value) =>
+            Task.FromResult(value == null ? input.Yield() : input.Clone(value).Yield());
     }
 }

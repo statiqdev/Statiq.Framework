@@ -39,7 +39,7 @@ namespace Statiq.Core
     /// </code>
     /// </example>
     /// <category>Control</category>
-    public class ForEachDocument : ContainerModule
+    public class ForEachDocument : ParentModule
     {
         /// <summary>
         /// Specifies the modules to execute against the input document one at a time.
@@ -51,7 +51,7 @@ namespace Statiq.Core
         }
 
         /// <inheritdoc />
-        public override async Task<IEnumerable<IDocument>> ExecuteAsync(IExecutionContext context) =>
-            await context.QueryInputs().SelectManyAsync<IDocument, IDocument>(async input => await context.ExecuteAsync(Children, input.Yield()));
+        protected override async Task<IEnumerable<IDocument>> ExecuteAsync(IDocument input, IExecutionContext context) =>
+            await context.ExecuteAsync(Children, input.Yield());
     }
 }

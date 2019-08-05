@@ -22,8 +22,10 @@ namespace Statiq.Html
     /// </para>
     /// </remarks>
     /// <category>Content</category>
-    public class HtmlInsert : IModule
+    public class HtmlInsert : ParallelModule
     {
+        private static readonly HtmlParser HtmlParser = new HtmlParser();
+
         private readonly string _querySelector;
         private readonly Config<string> _content;
         private bool _first;
@@ -62,61 +64,54 @@ namespace Statiq.Html
             return this;
         }
 
-        /// <inheritdoc />
-        public async Task<IEnumerable<Common.IDocument>> ExecuteAsync(IExecutionContext context)
+        protected override async Task<IEnumerable<Common.IDocument>> ExecuteAsync(Common.IDocument input, IExecutionContext context)
         {
-            HtmlParser parser = new HtmlParser();
-            return await context.ParallelQueryInputs().SelectAsync(GetDocumentAsync);
-
-            async Task<Common.IDocument> GetDocumentAsync(Common.IDocument input)
+            // Get the replacement content
+            string content = await _content.GetValueAsync(input, context);
+            if (content == null)
             {
-                // Get the replacement content
-                string content = await _content.GetValueAsync(input, context);
-                if (content == null)
-                {
-                    return input;
-                }
+                return input.Yield();
+            }
 
-                // Parse the HTML content
-                IHtmlDocument htmlDocument = await input.ParseHtmlAsync(parser);
-                if (htmlDocument == null)
-                {
-                    return input;
-                }
+            // Parse the HTML content
+            IHtmlDocument htmlDocument = await input.ParseHtmlAsync(HtmlParser);
+            if (htmlDocument == null)
+            {
+                return input.Yield();
+            }
 
-                // Evaluate the query selector
-                try
+            // Evaluate the query selector
+            try
+            {
+                if (!string.IsNullOrWhiteSpace(_querySelector))
                 {
-                    if (!string.IsNullOrWhiteSpace(_querySelector))
+                    IElement[] elements = _first
+                        ? new[] { htmlDocument.QuerySelector(_querySelector) }
+                        : htmlDocument.QuerySelectorAll(_querySelector).ToArray();
+                    if (elements.Length > 0 && elements[0] != null)
                     {
-                        IElement[] elements = _first
-                            ? new[] { htmlDocument.QuerySelector(_querySelector) }
-                            : htmlDocument.QuerySelectorAll(_querySelector).ToArray();
-                        if (elements.Length > 0 && elements[0] != null)
+                        foreach (IElement element in elements)
                         {
-                            foreach (IElement element in elements)
-                            {
-                                element.Insert(_position, content);
-                            }
+                            element.Insert(_position, content);
+                        }
 
-                            using (Stream contentStream = await context.GetContentStreamAsync())
+                        using (Stream contentStream = await context.GetContentStreamAsync())
+                        {
+                            using (StreamWriter writer = contentStream.GetWriter())
                             {
-                                using (StreamWriter writer = contentStream.GetWriter())
-                                {
-                                    htmlDocument.ToHtml(writer, ProcessingInstructionFormatter.Instance);
-                                    writer.Flush();
-                                    return input.Clone(context.GetContentProvider(contentStream));
-                                }
+                                htmlDocument.ToHtml(writer, ProcessingInstructionFormatter.Instance);
+                                writer.Flush();
+                                return input.Clone(context.GetContentProvider(contentStream)).Yield();
                             }
                         }
                     }
-                    return input;
                 }
-                catch (Exception ex)
-                {
-                    Trace.Warning("Exception while processing HTML for {0}: {1}", input.ToSafeDisplayString(), ex.Message);
-                    return input;
-                }
+                return input.Yield();
+            }
+            catch (Exception ex)
+            {
+                Trace.Warning("Exception while processing HTML for {0}: {1}", input.ToSafeDisplayString(), ex.Message);
+                return input.Yield();
             }
         }
     }

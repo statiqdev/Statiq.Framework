@@ -18,7 +18,7 @@ namespace Statiq.Json
     /// to the document metadata.
     /// </remarks>
     /// <category>Metadata</category>
-    public class Json : IModule
+    public class Json : ParallelModule
     {
         private readonly bool _flatten;
         private readonly string _key;
@@ -45,48 +45,42 @@ namespace Statiq.Json
             _flatten = flatten;
         }
 
-        /// <inheritdoc />
-        public Task<IEnumerable<IDocument>> ExecuteAsync(IExecutionContext context)
+        protected override async Task<IEnumerable<IDocument>> ExecuteAsync(IDocument input, IExecutionContext context)
         {
-            // Don't use the built-in exception tracing so that we can return the original document on error
-            return context.Inputs.ParallelSelectAsync(ProcessJsonAsync);
-
-            async Task<IDocument> ProcessJsonAsync(IDocument input)
+            try
             {
-                try
+                JsonSerializer serializer = new JsonSerializer();
+                Dictionary<string, object> items = new Dictionary<string, object>();
+                ExpandoObject json;
+                using (TextReader contentReader = new StreamReader(await input.GetStreamAsync()))
                 {
-                    JsonSerializer serializer = new JsonSerializer();
-                    Dictionary<string, object> items = new Dictionary<string, object>();
-                    ExpandoObject json;
-                    using (TextReader contentReader = new StreamReader(await input.GetStreamAsync()))
+                    using (JsonReader jsonReader = new JsonTextReader(contentReader))
                     {
-                        using (JsonReader jsonReader = new JsonTextReader(contentReader))
-                        {
-                            json = serializer.Deserialize<ExpandoObject>(jsonReader);
-                        }
-                    }
-                    if (json != null)
-                    {
-                        if (!string.IsNullOrEmpty(_key))
-                        {
-                            items[_key] = json;
-                        }
-                        if (_flatten)
-                        {
-                            foreach (KeyValuePair<string, object> item in json)
-                            {
-                                items[item.Key] = item.Value;
-                            }
-                        }
-                        return input.Clone(items);
+                        json = serializer.Deserialize<ExpandoObject>(jsonReader);
                     }
                 }
-                catch (Exception ex)
+                if (json != null)
                 {
-                    Trace.Error("Error processing JSON for {0}: {1}", input.ToSafeDisplayString(), ex.ToString());
+                    if (!string.IsNullOrEmpty(_key))
+                    {
+                        items[_key] = json;
+                    }
+                    if (_flatten)
+                    {
+                        foreach (KeyValuePair<string, object> item in json)
+                        {
+                            items[item.Key] = item.Value;
+                        }
+                    }
+                    return input.Clone(items).Yield();
                 }
-                return input;
             }
+            catch (Exception ex)
+            {
+                // Return original input on exception
+                Trace.Error($"Error processing JSON for {input.ToSafeDisplayString()}, returning original input document: {ex}");
+            }
+            return input.Yield();
         }
     }
 }

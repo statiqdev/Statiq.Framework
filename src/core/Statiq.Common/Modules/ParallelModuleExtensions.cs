@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 
 namespace Statiq.Common
 {
-    public static class IParallelModuleExtensions
+    public static class ParallelModuleExtensions
     {
         /// <summary>
         /// Indicates that the module should process documents in parallel.
@@ -13,7 +13,7 @@ namespace Statiq.Common
         /// <param name="module">The module that should process documents in parallel.</param>
         /// <returns>The module.</returns>
         public static TModule WithParallelExecution<TModule>(this TModule module)
-            where TModule : Module, IParallelModule
+            where TModule : ParallelModule
         {
             if (module == null)
             {
@@ -30,7 +30,7 @@ namespace Statiq.Common
         /// <param name="module">The module that should process documents sequentially.</param>
         /// <returns>The module.</returns>
         public static TModule WithSequentialExecution<TModule>(this TModule module)
-            where TModule : Module, IParallelModule
+            where TModule : ParallelModule
         {
             if (module == null)
             {

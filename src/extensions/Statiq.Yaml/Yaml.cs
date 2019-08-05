@@ -19,7 +19,7 @@ namespace Statiq.Yaml
     /// to the document metadata.
     /// </remarks>
     /// <category>Metadata</category>
-    public class Yaml : IModule
+    public class Yaml : ParallelModule
     {
         private readonly bool _flatten;
         private readonly string _key;
@@ -47,36 +47,32 @@ namespace Statiq.Yaml
             _flatten = flatten;
         }
 
-        /// <inheritdoc />
-        public async Task<IEnumerable<IDocument>> ExecuteAsync(IExecutionContext context)
+        protected override async Task<IEnumerable<IDocument>> ExecuteAsync(IDocument input, IExecutionContext context)
         {
-            return await context.Inputs.ParallelSelectManyAsync(async input =>
+            List<Dictionary<string, object>> documentMetadata = new List<Dictionary<string, object>>();
+            using (TextReader contentReader = new StreamReader(await input.GetStreamAsync()))
             {
-                List<Dictionary<string, object>> documentMetadata = new List<Dictionary<string, object>>();
-                using (TextReader contentReader = new StreamReader(await input.GetStreamAsync()))
+                YamlStream yamlStream = new YamlStream();
+                yamlStream.Load(contentReader);
+                foreach (YamlDocument document in yamlStream.Documents)
                 {
-                    YamlStream yamlStream = new YamlStream();
-                    yamlStream.Load(contentReader);
-                    foreach (YamlDocument document in yamlStream.Documents)
+                    // If this is a sequence, get a document for each item
+                    if (document.RootNode is YamlSequenceNode rootSequence)
                     {
-                        // If this is a sequence, get a document for each item
-                        if (document.RootNode is YamlSequenceNode rootSequence)
-                        {
-                            documentMetadata.AddRange(rootSequence.Children.Select(x => GetDocumentMetadata(x, context)));
-                        }
-                        else
-                        {
-                            // Otherwise, just get a single set of metadata
-                            documentMetadata.Add(GetDocumentMetadata(document.RootNode, context));
-                        }
+                        documentMetadata.AddRange(rootSequence.Children.Select(x => GetDocumentMetadata(x, context)));
+                    }
+                    else
+                    {
+                        // Otherwise, just get a single set of metadata
+                        documentMetadata.Add(GetDocumentMetadata(document.RootNode, context));
                     }
                 }
-                if (documentMetadata.Count == 0 && _flatten)
-                {
-                    return input.Yield();
-                }
-                return documentMetadata.Select(metadata => input.Clone(metadata));
-            });
+            }
+            if (documentMetadata.Count == 0 && _flatten)
+            {
+                return input.Yield();
+            }
+            return documentMetadata.Select(metadata => input.Clone(metadata));
         }
 
         private Dictionary<string, object> GetDocumentMetadata(YamlNode node, IExecutionContext context)

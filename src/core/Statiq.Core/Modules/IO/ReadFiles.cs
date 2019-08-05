@@ -19,7 +19,7 @@ namespace Statiq.Core
     /// to the same relative path in the output folder).
     /// </remarks>
     /// <category>Input/Output</category>
-    public class ReadFiles : ConfigModule<IEnumerable<string>>, IParallelModule
+    public class ReadFiles : ParallelConfigModule<IEnumerable<string>>
     {
         private Func<IFile, Task<bool>> _predicate = null;
 

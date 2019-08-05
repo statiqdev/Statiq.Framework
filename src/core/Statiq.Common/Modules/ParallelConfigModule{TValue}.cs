@@ -5,10 +5,10 @@ using System.Threading.Tasks;
 namespace Statiq.Common
 {
     /// <summary>
-    /// Base class for modules that rely on a config value and could apply to input documents (or not) depending
-    /// on whether the config delegate requires them.
+    /// Base class for modules that rely on a config value and could apply to input documents in parallel
+    /// (or not) depending on whether the config delegate requires them.
     /// </summary>
-    public abstract class ConfigModule<TValue> : Module
+    public abstract class ParallelConfigModule<TValue> : ParallelModule
     {
         private readonly Config<TValue> _config;
         private readonly bool _eachDocument;
@@ -23,7 +23,7 @@ namespace Statiq.Common
         /// to allow only calling <see cref="ExecuteAsync(IDocument, IExecutionContext, TValue)"/> once
         /// with a null input document if the config delegate does not require a document.
         /// </param>
-        protected ConfigModule(Config<TValue> config, bool eachDocument)
+        protected ParallelConfigModule(Config<TValue> config, bool eachDocument)
         {
             _config = config;
             _eachDocument = eachDocument || (config?.RequiresDocument ?? throw new ArgumentNullException(nameof(config)));

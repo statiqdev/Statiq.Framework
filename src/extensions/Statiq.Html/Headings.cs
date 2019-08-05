@@ -31,9 +31,12 @@ namespace Statiq.Html
     /// The parent heading document of the current heading document.
     /// </metadata>
     /// <category>Metadata</category>
-    public class Headings : IModule
+    public class Headings : ParallelModule
     {
+        private static readonly HtmlParser HtmlParser = new HtmlParser();
+
         private int _level;
+        private string _query;
         private bool _nesting;
         private string _metadataKey = HtmlKeys.Headings;
         private string _levelKey = HtmlKeys.Level;
@@ -69,6 +72,19 @@ namespace Statiq.Html
                 throw new ArgumentException("Level cannot be greater than 6");
             }
             _level = level;
+
+            // Build the query
+            StringBuilder query = new StringBuilder();
+            for (int l = 1; l <= _level; l++)
+            {
+                if (l > 1)
+                {
+                    query.Append(",");
+                }
+                query.Append("h");
+                query.Append(l);
+            }
+            _query = query.ToString();
 
             return this;
         }
@@ -162,125 +178,107 @@ namespace Statiq.Html
             return this;
         }
 
-        /// <inheritdoc />
-        public async Task<IEnumerable<Common.IDocument>> ExecuteAsync(IExecutionContext context)
+        protected override async Task<IEnumerable<Common.IDocument>> ExecuteAsync(Common.IDocument input, IExecutionContext context)
         {
             if (string.IsNullOrWhiteSpace(_metadataKey))
             {
-                return context.Inputs;
+                return input.Yield();
             }
 
-            // Build the query
-            StringBuilder query = new StringBuilder();
-            for (int level = 1; level <= _level; level++)
+            // Parse the HTML content
+            IHtmlDocument htmlDocument = await input.ParseHtmlAsync(HtmlParser);
+            if (htmlDocument == null)
             {
-                if (level > 1)
-                {
-                    query.Append(",");
-                }
-                query.Append("h");
-                query.Append(level);
+                return input.Yield();
             }
 
-            HtmlParser parser = new HtmlParser();
-            return await context.ParallelQueryInputs().SelectAsync(GetDocumentAsync);
+            // Evaluate the query and create the holding nodes
+            Heading previousHeading = null;
+            List<Heading> headings = htmlDocument
+                .QuerySelectorAll(_query)
+                .Select(x =>
+                {
+                    previousHeading = new Heading
+                    {
+                        Element = x,
+                        Previous = previousHeading,
+                        Level = int.Parse(x.NodeName.Substring(1))
+                    };
+                    return previousHeading;
+                })
+                .ToList();
 
-            async Task<Common.IDocument> GetDocumentAsync(Common.IDocument input)
+            // Build the tree from the bottom-up
+            for (int level = _level; level >= 1; level--)
             {
-                // Parse the HTML content
-                IHtmlDocument htmlDocument = await input.ParseHtmlAsync(parser);
-                if (htmlDocument == null)
+                int currentLevel = level;
+                foreach (Heading heading in headings.Where(x => x.Level == currentLevel))
                 {
-                    return input;
-                }
-
-                // Evaluate the query and create the holding nodes
-                Heading previousHeading = null;
-                List<Heading> headings = htmlDocument
-                    .QuerySelectorAll(query.ToString())
-                    .Select(x =>
+                    // Get the parent
+                    Heading parent = null;
+                    if (currentLevel > 1)
                     {
-                        previousHeading = new Heading
+                        parent = heading.Previous;
+                        while (parent != null && parent.Level >= currentLevel)
                         {
-                            Element = x,
-                            Previous = previousHeading,
-                            Level = int.Parse(x.NodeName.Substring(1))
-                        };
-                        return previousHeading;
-                    })
-                    .ToList();
-
-                // Build the tree from the bottom-up
-                for (int level = _level; level >= 1; level--)
-                {
-                    int currentLevel = level;
-                    foreach (Heading heading in headings.Where(x => x.Level == currentLevel))
-                    {
-                        // Get the parent
-                        Heading parent = null;
-                        if (currentLevel > 1)
-                        {
-                            parent = heading.Previous;
-                            while (parent != null && parent.Level >= currentLevel)
-                            {
-                                parent = parent.Previous;
-                            }
+                            parent = parent.Previous;
                         }
-
-                        // Create the document
-                        MetadataItems metadata = new MetadataItems();
-                        if (_levelKey != null)
-                        {
-                            metadata.Add(_levelKey, heading.Level);
-                        }
-                        if (_idKey != null && heading.Element.HasAttribute("id"))
-                        {
-                            metadata.Add(_idKey, heading.Element.GetAttribute("id"));
-                        }
-                        if (_headingKey != null)
-                        {
-                            metadata.Add(_headingKey, heading.Element.InnerHtml);
-                        }
-                        if (_childrenKey != null)
-                        {
-                            metadata.Add(_childrenKey, heading.Children.AsReadOnly());
-                        }
-                        if (_parentKey != null)
-                        {
-                            metadata.Add(_parentKey, new CachedDelegateMetadataValue(_ => parent?.Document));
-                        }
-
-                        using (Stream contentStream = await context.GetContentStreamAsync())
-                        {
-                            using (StreamWriter writer = contentStream.GetWriter())
-                            {
-                                heading.Element.ChildNodes.ToHtml(writer, ProcessingInstructionFormatter.Instance);
-                                writer.Flush();
-                                heading.Document = context.CreateDocument(metadata, context.GetContentProvider(contentStream));
-                            }
-                        }
-
-                        // Add to parent
-                        parent?.Children.Add(heading.Document);
                     }
-                }
 
-                return input.Clone(
-                    new MetadataItems
+                    // Create the document
+                    MetadataItems metadata = new MetadataItems();
+                    if (_levelKey != null)
                     {
+                        metadata.Add(_levelKey, heading.Level);
+                    }
+                    if (_idKey != null && heading.Element.HasAttribute("id"))
+                    {
+                        metadata.Add(_idKey, heading.Element.GetAttribute("id"));
+                    }
+                    if (_headingKey != null)
+                    {
+                        metadata.Add(_headingKey, heading.Element.InnerHtml);
+                    }
+                    if (_childrenKey != null)
+                    {
+                        metadata.Add(_childrenKey, heading.Children.AsReadOnly());
+                    }
+                    if (_parentKey != null)
+                    {
+                        metadata.Add(_parentKey, new CachedDelegateMetadataValue(_ => parent?.Document));
+                    }
+
+                    using (Stream contentStream = await context.GetContentStreamAsync())
+                    {
+                        using (StreamWriter writer = contentStream.GetWriter())
                         {
-                            _metadataKey,
-                            _nesting
-                                ? headings
-                                    .Where(x => x.Level == headings.Min(y => y.Level))
-                                    .Select(x => x.Document)
-                                    .ToArray()
-                                : headings
-                                    .Select(x => x.Document)
-                                    .ToArray()
+                            heading.Element.ChildNodes.ToHtml(writer, ProcessingInstructionFormatter.Instance);
+                            writer.Flush();
+                            heading.Document = context.CreateDocument(metadata, context.GetContentProvider(contentStream));
                         }
-                    });
+                    }
+
+                    // Add to parent
+                    parent?.Children.Add(heading.Document);
+                }
             }
+
+            return input
+                .Clone(new MetadataItems
+                {
+                    {
+                        _metadataKey,
+                        _nesting
+                            ? headings
+                                .Where(x => x.Level == headings.Min(y => y.Level))
+                                .Select(x => x.Document)
+                                .ToArray()
+                            : headings
+                                .Select(x => x.Document)
+                                .ToArray()
+                    }
+                })
+                .Yield();
         }
 
         private class Heading

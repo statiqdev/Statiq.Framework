@@ -14,33 +14,21 @@ namespace Statiq.Tables
     /// The output CSV content uses <c>,</c> as separator and encloses every value in <c>"</c>.
     /// </remarks>
     /// <category>Content</category>
-    public class ExcelToCsv : IModule
+    public class ExcelToCsv : ParallelModule
     {
-        /// <inheritdoc />
-        public async Task<IEnumerable<IDocument>> ExecuteAsync(IExecutionContext context)
+        protected override async Task<IEnumerable<IDocument>> ExecuteAsync(IDocument input, IExecutionContext context)
         {
-            return await context.ParallelQueryInputs().SelectAsync(async input =>
+            IEnumerable<IEnumerable<string>> records;
+            using (Stream stream = await input.GetStreamAsync())
             {
-                try
-                {
-                    IEnumerable<IEnumerable<string>> records;
-                    using (Stream stream = await input.GetStreamAsync())
-                    {
-                        records = ExcelFile.GetAllRecords(stream);
-                    }
+                records = ExcelFile.GetAllRecords(stream);
+            }
 
-                    using (Stream contentStream = await context.GetContentStreamAsync())
-                    {
-                        CsvFile.WriteAllRecords(records, contentStream);
-                        return input.Clone(context.GetContentProvider(contentStream));
-                    }
-                }
-                catch (Exception e)
-                {
-                    Trace.Error($"An {e} occurred ({input.ToSafeDisplayString()}): {e.Message}");
-                    return null;
-                }
-            });
+            using (Stream contentStream = await context.GetContentStreamAsync())
+            {
+                CsvFile.WriteAllRecords(records, contentStream);
+                return input.Clone(context.GetContentProvider(contentStream)).Yield();
+            }
         }
     }
 }

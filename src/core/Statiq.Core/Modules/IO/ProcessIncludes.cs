@@ -22,7 +22,7 @@ namespace Statiq.Core
     /// </para>
     /// </remarks>
     /// <category>Input/Output</category>
-    public class ProcessIncludes : IModule
+    public class ProcessIncludes : ParallelModule
     {
         private bool _recursion = true;
 
@@ -39,14 +39,10 @@ namespace Statiq.Core
             return this;
         }
 
-        /// <inheritdoc />
-        public async Task<IEnumerable<IDocument>> ExecuteAsync(IExecutionContext context)
+        protected override async Task<IEnumerable<IDocument>> ExecuteAsync(IDocument input, IExecutionContext context)
         {
-            return await context.ParallelQueryInputs().SelectAsync(async input =>
-            {
-                string content = await ProcessIncludesAsync(await input.GetStringAsync(), input.Source, context);
-                return content == null ? input : input.Clone(await context.GetContentProviderAsync(content));
-            });
+            string content = await ProcessIncludesAsync(await input.GetStringAsync(), input.Source, context);
+            return content == null ? input.Yield() : input.Clone(await context.GetContentProviderAsync(content)).Yield();
         }
 
         // Returns null if the content wasn't modified

@@ -38,7 +38,7 @@ namespace Statiq.Sass
     /// </code>
     /// </example>
     /// <category>Templates</category>
-    public class Sass : IModule
+    public class Sass : ParallelModule
     {
         private readonly List<DirectoryPath> _includePaths = new List<DirectoryPath>();
         private Config<FilePath> _inputPath = Config.FromDocument(DefaultInputPathAsync);
@@ -146,61 +146,55 @@ namespace Statiq.Sass
             return this;
         }
 
-        /// <inheritdoc />
-        public async Task<IEnumerable<IDocument>> ExecuteAsync(IExecutionContext context)
+        protected override async Task<IEnumerable<IDocument>> ExecuteAsync(IDocument input, IExecutionContext context)
         {
-            return await context.ParallelQueryInputs().SelectManyAsync(ProcessSassAsync);
+            Trace.Verbose($"Processing Sass for {input.ToSafeDisplayString()}");
 
-            async Task<IEnumerable<IDocument>> ProcessSassAsync(IDocument input)
+            FilePath inputPath = await _inputPath.GetValueAsync(input, context);
+            if (inputPath?.IsAbsolute != true)
             {
-                Trace.Verbose($"Processing Sass for {input.ToSafeDisplayString()}");
-
-                FilePath inputPath = await _inputPath.GetValueAsync(input, context);
-                if (inputPath?.IsAbsolute != true)
-                {
-                    inputPath = (await context.FileSystem.GetInputFileAsync(new FilePath(Path.GetRandomFileName()))).Path;
-                    Trace.Warning($"No input path found for document {input.ToSafeDisplayString()}, using {inputPath.FileName.FullPath}");
-                }
-
-                string content = await input.GetStringAsync();
-
-                // Sass conversion
-                FileImporter importer = new FileImporter(context.FileSystem, _importPathFunc);
-                ScssOptions options = new ScssOptions
-                {
-                    OutputStyle = _outputStyle,
-                    GenerateSourceMap = _generateSourceMap,
-                    SourceComments = _includeSourceComments,
-                    InputFile = inputPath.FullPath,
-                    TryImport = importer.TryImport
-                };
-                IEnumerable<string> includePaths = await _includePaths
-                    .Where(x => x != null)
-                    .SelectAsync(async x => x.IsAbsolute ? x.FullPath : (await context.FileSystem.GetContainingInputPathAsync(x))?.Combine(x)?.FullPath);
-                options.IncludePaths.AddRange(includePaths.Where(x => x != null));
-                ScssResult result = Scss.ConvertToCss(content, options);
-
-                // Process the result
-                DirectoryPath relativeDirectory = await context.FileSystem.GetContainingInputPathAsync(inputPath);
-                FilePath relativePath = relativeDirectory?.GetRelativePath(inputPath) ?? inputPath.FileName;
-
-                FilePath cssPath = relativePath.ChangeExtension("css");
-                IDocument cssDocument = input.Clone(
-                    cssPath,
-                    await context.GetContentProviderAsync(result.Css ?? string.Empty));
-
-                // Generate a source map if requested
-                if (_generateSourceMap && result.SourceMap != null)
-                {
-                    FilePath sourceMapPath = relativePath.ChangeExtension("map");
-                    IDocument sourceMapDocument = input.Clone(
-                        sourceMapPath,
-                        await context.GetContentProviderAsync(result.SourceMap));
-                    return new[] { cssDocument, sourceMapDocument };
-                }
-
-                return cssDocument.Yield();
+                inputPath = (await context.FileSystem.GetInputFileAsync(new FilePath(Path.GetRandomFileName()))).Path;
+                Trace.Warning($"No input path found for document {input.ToSafeDisplayString()}, using {inputPath.FileName.FullPath}");
             }
+
+            string content = await input.GetStringAsync();
+
+            // Sass conversion
+            FileImporter importer = new FileImporter(context.FileSystem, _importPathFunc);
+            ScssOptions options = new ScssOptions
+            {
+                OutputStyle = _outputStyle,
+                GenerateSourceMap = _generateSourceMap,
+                SourceComments = _includeSourceComments,
+                InputFile = inputPath.FullPath,
+                TryImport = importer.TryImport
+            };
+            IEnumerable<string> includePaths = await _includePaths
+                .Where(x => x != null)
+                .SelectAsync(async x => x.IsAbsolute ? x.FullPath : (await context.FileSystem.GetContainingInputPathAsync(x))?.Combine(x)?.FullPath);
+            options.IncludePaths.AddRange(includePaths.Where(x => x != null));
+            ScssResult result = Scss.ConvertToCss(content, options);
+
+            // Process the result
+            DirectoryPath relativeDirectory = await context.FileSystem.GetContainingInputPathAsync(inputPath);
+            FilePath relativePath = relativeDirectory?.GetRelativePath(inputPath) ?? inputPath.FileName;
+
+            FilePath cssPath = relativePath.ChangeExtension("css");
+            IDocument cssDocument = input.Clone(
+                cssPath,
+                await context.GetContentProviderAsync(result.Css ?? string.Empty));
+
+            // Generate a source map if requested
+            if (_generateSourceMap && result.SourceMap != null)
+            {
+                FilePath sourceMapPath = relativePath.ChangeExtension("map");
+                IDocument sourceMapDocument = input.Clone(
+                    sourceMapPath,
+                    await context.GetContentProviderAsync(result.SourceMap));
+                return new[] { cssDocument, sourceMapDocument };
+            }
+
+            return cssDocument.Yield();
         }
 
         private static async Task<FilePath> DefaultInputPathAsync(IDocument document, IExecutionContext context)

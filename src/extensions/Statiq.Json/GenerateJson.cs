@@ -16,9 +16,8 @@ namespace Statiq.Json
     /// and stores it as new content for each input document or in each document's metadata.
     /// </remarks>
     /// <category>Content</category>
-    public class GenerateJson : IModule
+    public class GenerateJson : ParallelConfigModule<object>
     {
-        private readonly Config<object> _data;
         private readonly string _destinationKey;
         private bool _indenting = true;
         private bool _camelCase = false;
@@ -32,13 +31,13 @@ namespace Statiq.Json
         /// <param name="destinationKey">The metadata key where the JSON should be stored (or <c>null</c>
         /// to replace the content of each input document).</param>
         public GenerateJson(Config<string> sourceKey, string destinationKey = null)
+            : base(Config.FromDocument(async (doc, ctx) => doc.Get(await sourceKey.GetValueAsync(doc, ctx))), true)
         {
             if (sourceKey == null)
             {
                 throw new ArgumentNullException(nameof(sourceKey));
             }
             _destinationKey = destinationKey;
-            _data = Config.FromDocument(async (doc, ctx) => doc.Get(await sourceKey.GetValueAsync(doc, ctx)));
         }
 
         /// <summary>
@@ -49,9 +48,9 @@ namespace Statiq.Json
         /// <param name="destinationKey">The metadata key where the JSON should be stored (or <c>null</c>
         /// to replace the content of each input document).</param>
         public GenerateJson(Config<object> data, string destinationKey = null)
+            : base(data, true)
         {
             _destinationKey = destinationKey;
-            _data = data ?? throw new ArgumentNullException(nameof(data));
         }
 
         /// <summary>
@@ -61,13 +60,13 @@ namespace Statiq.Json
         /// <param name="destinationKey">The metadata key where the JSON should be stored (or <c>null</c>
         /// to replace the content of each input document).</param>
         public GenerateJson(Config<IEnumerable<string>> keys, string destinationKey = null)
+            : base(Config.FromDocument(async (doc, ctx) => (await keys.GetValueAsync(doc, ctx)).Where(k => doc.ContainsKey(k)).ToDictionary(k => k, k => doc[k])), true)
         {
             if (keys == null)
             {
                 throw new ArgumentNullException(nameof(keys));
             }
             _destinationKey = destinationKey;
-            _data = Config.FromDocument(async (doc, ctx) => (await keys.GetValueAsync(doc, ctx)).Where(k => doc.ContainsKey(k)).ToDictionary(k => k, k => doc[k]));
         }
 
         /// <summary>
@@ -104,46 +103,40 @@ namespace Statiq.Json
             return this;
         }
 
-        /// <inheritdoc />
-        public async Task<IEnumerable<IDocument>> ExecuteAsync(IExecutionContext context)
+        protected override async Task<IEnumerable<IDocument>> ExecuteAsync(IDocument input, IExecutionContext context, object value)
         {
-            // Don't use the built-in exception tracing so that we can return the original document on error
-            return await context.Inputs.ParallelSelectAsync(GenerateJsonAsync);
-
-            async Task<IDocument> GenerateJsonAsync(IDocument input)
+            if (value != null)
             {
                 try
                 {
-                    object data = await _data.GetValueAsync(input, context);
-                    if (data != null)
+                    JsonSerializerSettings settings = new JsonSerializerSettings()
                     {
-                        JsonSerializerSettings settings = new JsonSerializerSettings()
-                        {
-                            Formatting = _indenting ? Formatting.Indented : Formatting.None
-                        };
-                        if (_camelCase)
-                        {
-                            settings.ContractResolver = new CamelCasePropertyNamesContractResolver();
-                        }
-                        _settings?.Invoke(settings);
-                        string result = JsonConvert.SerializeObject(data, settings);
-                        if (string.IsNullOrEmpty(_destinationKey))
-                        {
-                            return input.Clone(await context.GetContentProviderAsync(result));
-                        }
-                        return input.Clone(
-                            new MetadataItems
-                            {
-                                { _destinationKey, result }
-                            });
+                        Formatting = _indenting ? Formatting.Indented : Formatting.None
+                    };
+                    if (_camelCase)
+                    {
+                        settings.ContractResolver = new CamelCasePropertyNamesContractResolver();
                     }
+                    _settings?.Invoke(settings);
+                    string result = JsonConvert.SerializeObject(value, settings);
+                    if (string.IsNullOrEmpty(_destinationKey))
+                    {
+                        return input.Clone(await context.GetContentProviderAsync(result)).Yield();
+                    }
+                    return input
+                        .Clone(new MetadataItems
+                        {
+                            { _destinationKey, result }
+                        })
+                        .Yield();
                 }
                 catch (Exception ex)
                 {
-                    Trace.Error("Error serializing JSON for {0}: {1}", input.ToSafeDisplayString(), ex.ToString());
+                    // Return original input on exception
+                    Trace.Error($"Error serializing JSON for {input.ToSafeDisplayString()}, returning original input document: {ex}");
                 }
-                return input;
             }
+            return input.Yield();
         }
     }
 }

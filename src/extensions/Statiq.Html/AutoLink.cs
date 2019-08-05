@@ -30,8 +30,10 @@ namespace Statiq.Html
     /// </para>
     /// </remarks>
     /// <category>Content</category>
-    public class AutoLink : IModule
+    public class AutoLink : ParallelModule
     {
+        private static readonly HtmlParser HtmlParser = new HtmlParser();
+
         // Key = text to replace, Value = url
         private readonly Config<IDictionary<string, string>> _links;
         private readonly IDictionary<string, string> _extraLinks = new Dictionary<string, string>();
@@ -132,68 +134,61 @@ namespace Statiq.Html
             return this;
         }
 
-        /// <inheritdoc />
-        public async Task<IEnumerable<Common.IDocument>> ExecuteAsync(IExecutionContext context)
+        protected override async Task<IEnumerable<Common.IDocument>> ExecuteAsync(Common.IDocument input, IExecutionContext context)
         {
-            HtmlParser parser = new HtmlParser();
-            return await context.ParallelQueryInputs().SelectAsync(PerformReplacementsAsync);
-
-            async Task<Common.IDocument> PerformReplacementsAsync(Common.IDocument input)
+            try
             {
-                try
+                // Get the links and HTML decode the keys (if they're encoded) since the text nodes are decoded
+                IDictionary<string, string> links = await _links.GetValueAsync(input, context, v => _extraLinks
+                    .Concat(v.Where(l => !_extraLinks.ContainsKey(l.Key)))
+                    .Where(x => !string.IsNullOrWhiteSpace(x.Value))
+                    .ToDictionary(z => WebUtility.HtmlDecode(z.Key), z => $"<a href=\"{z.Value}\">{z.Key}</a>"));
+
+                // Enumerate all elements that match the query selector not already in a link element
+                List<KeyValuePair<IText, string>> replacements = new List<KeyValuePair<IText, string>>();
+                IHtmlDocument htmlDocument;
+                using (Stream stream = await input.GetStreamAsync())
                 {
-                    // Get the links and HTML decode the keys (if they're encoded) since the text nodes are decoded
-                    IDictionary<string, string> links = await _links.GetValueAsync(input, context, v => _extraLinks
-                        .Concat(v.Where(l => !_extraLinks.ContainsKey(l.Key)))
-                        .Where(x => !string.IsNullOrWhiteSpace(x.Value))
-                        .ToDictionary(z => WebUtility.HtmlDecode(z.Key), z => $"<a href=\"{z.Value}\">{z.Key}</a>"));
-
-                    // Enumerate all elements that match the query selector not already in a link element
-                    List<KeyValuePair<IText, string>> replacements = new List<KeyValuePair<IText, string>>();
-                    IHtmlDocument htmlDocument;
-                    using (Stream stream = await input.GetStreamAsync())
+                    htmlDocument = await HtmlParser.ParseAsync(stream);
+                }
+                foreach (IElement element in htmlDocument.QuerySelectorAll(_querySelector).Where(t => !t.Ancestors<IHtmlAnchorElement>().Any()))
+                {
+                    // Enumerate all descendant text nodes not already in a link element
+                    foreach (IText text in element.Descendents().OfType<IText>().Where(t => !t.Ancestors<IHtmlAnchorElement>().Any()))
                     {
-                        htmlDocument = await parser.ParseAsync(stream);
-                    }
-                    foreach (IElement element in htmlDocument.QuerySelectorAll(_querySelector).Where(t => !t.Ancestors<IHtmlAnchorElement>().Any()))
-                    {
-                        // Enumerate all descendant text nodes not already in a link element
-                        foreach (IText text in element.Descendents().OfType<IText>().Where(t => !t.Ancestors<IHtmlAnchorElement>().Any()))
+                        if (ReplaceStrings(text, links, out string newText))
                         {
-                            if (ReplaceStrings(text, links, out string newText))
-                            {
-                                // Only perform replacement if the text content changed
-                                replacements.Add(new KeyValuePair<IText, string>(text, newText));
-                            }
-                        }
-                    }
-
-                    // Perform the replacements if there were any, otherwise just return the same document
-                    if (replacements.Count > 0)
-                    {
-                        foreach (KeyValuePair<IText, string> replacement in replacements)
-                        {
-                            replacement.Key.Replace(parser.ParseFragment(replacement.Value, replacement.Key.ParentElement).ToArray());
-                        }
-
-                        using (Stream contentStream = await context.GetContentStreamAsync())
-                        {
-                            using (StreamWriter writer = contentStream.GetWriter())
-                            {
-                                htmlDocument.ToHtml(writer, ProcessingInstructionFormatter.Instance);
-                                writer.Flush();
-                                return input.Clone(context.GetContentProvider(contentStream));
-                            }
+                            // Only perform replacement if the text content changed
+                            replacements.Add(new KeyValuePair<IText, string>(text, newText));
                         }
                     }
                 }
-                catch (Exception ex)
-                {
-                    Trace.Warning("Exception while parsing HTML for {0}: {1}", input.ToSafeDisplayString(), ex.Message);
-                }
 
-                return input;
+                // Perform the replacements if there were any, otherwise just return the same document
+                if (replacements.Count > 0)
+                {
+                    foreach (KeyValuePair<IText, string> replacement in replacements)
+                    {
+                        replacement.Key.Replace(HtmlParser.ParseFragment(replacement.Value, replacement.Key.ParentElement).ToArray());
+                    }
+
+                    using (Stream contentStream = await context.GetContentStreamAsync())
+                    {
+                        using (StreamWriter writer = contentStream.GetWriter())
+                        {
+                            htmlDocument.ToHtml(writer, ProcessingInstructionFormatter.Instance);
+                            writer.Flush();
+                            return input.Clone(context.GetContentProvider(contentStream)).Yield();
+                        }
+                    }
+                }
             }
+            catch (Exception ex)
+            {
+                Trace.Warning("Exception while parsing HTML for {0}: {1}", input.ToSafeDisplayString(), ex.Message);
+            }
+
+            return input.Yield();
         }
 
         private bool ReplaceStrings(IText textNode, IDictionary<string, string> map, out string newText)

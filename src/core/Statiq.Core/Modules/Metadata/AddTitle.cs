@@ -15,11 +15,9 @@ namespace Statiq.Core
     /// </remarks>
     /// <metadata cref="Keys.Title" usage="Output" />
     /// <category>Metadata</category>
-    public class AddTitle : IModule
+    public class AddTitle : ParallelModule
     {
-        private static readonly ReadOnlyMemory<char> IndexFileName = "index.".AsMemory();
-
-        private readonly Config<string> _title = Config.FromDocument(GetTitle);
+        private readonly Config<string> _title = Config.FromDocument(doc => doc.GetTitle());
         private string _key = Keys.Title;
         private bool _keepExisting = true;
 
@@ -76,69 +74,19 @@ namespace Statiq.Core
             return this;
         }
 
-        /// <inheritdoc />
-        public async Task<IEnumerable<IDocument>> ExecuteAsync(IExecutionContext context)
+        protected override async Task<IEnumerable<IDocument>> ExecuteAsync(IDocument input, IExecutionContext context)
         {
-            return await context
-                .ParallelQueryInputs()
-                .SelectAsync(async input =>
-                {
-                    // Check if there's already a title set
-                    if (_keepExisting && input.ContainsKey(_key))
-                    {
-                        return input;
-                    }
-
-                    // Calculate the new title
-                    string title = await _title.GetValueAsync(input, context);
-                    return title == null
-                        ? input
-                        : input.Clone(new MetadataItems { { _key, title } });
-                });
-        }
-
-        /// <summary>
-        /// Gets a normalized title given a document.
-        /// </summary>
-        /// <param name="doc">The document.</param>
-        /// <returns>A normalized title.</returns>
-        public static string GetTitle(IDocument doc) => doc.Source == null ? null : GetTitle(doc.Source);
-
-        /// <summary>
-        /// Gets a normalized title given a file path.
-        /// </summary>
-        /// <param name="path">The file path.</param>
-        /// <returns>A normalized title.</returns>
-        public static string GetTitle(FilePath path)
-        {
-            // Get the filename, unless an index file, then get containing directory
-            ReadOnlyMemory<char> titleMemory = path.Segments[path.Segments.Length - 1];
-            if (titleMemory.StartsWith(IndexFileName) && path.Segments.Length > 1)
+            // Check if there's already a title set
+            if (_keepExisting && input.ContainsKey(_key))
             {
-                titleMemory = path.Segments[path.Segments.Length - 2];
+                return input.Yield();
             }
 
-            // Strip the extension(s)
-            int extensionIndex = titleMemory.Span.IndexOf('.');
-            if (extensionIndex > 0)
-            {
-                titleMemory = titleMemory.Slice(0, extensionIndex);
-            }
-
-            // Decode URL escapes
-            string title = WebUtility.UrlDecode(titleMemory.ToString());
-
-            // Replace special characters with spaces
-            title = title.Replace('-', ' ').Replace('_', ' ');
-
-            // Join adjacent spaces
-            while (title.IndexOf("  ", StringComparison.Ordinal) > 0)
-            {
-                title = title.Replace("  ", " ");
-            }
-
-            // Capitalize
-            return CultureInfo.CurrentCulture.TextInfo.ToTitleCase(title);
+            // Calculate the new title
+            string title = await _title.GetValueAsync(input, context);
+            return title == null
+                ? input.Yield()
+                : input.Clone(new MetadataItems { { _key, title } }).Yield();
         }
     }
 }

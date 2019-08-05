@@ -9,7 +9,7 @@ namespace Statiq.Html
     /// Automatically escapes HTML content.
     /// </summary>
     /// <category>Content</category>
-    public class HtmlEscape : IModule
+    public class HtmlEscape : ParallelModule
     {
         private readonly Dictionary<char, string> _predefinedEscapeSequences;
         private readonly Dictionary<char, string> _currentlyEscapedCharacters = new Dictionary<char, string>();
@@ -199,51 +199,45 @@ namespace Statiq.Html
             return $"&#{(int)c};";
         }
 
-        /// <inheritdoc />
-        public async Task<IEnumerable<IDocument>> ExecuteAsync(IExecutionContext context)
+        protected override async Task<IEnumerable<IDocument>> ExecuteAsync(IDocument input, IExecutionContext context)
         {
-            return await context.ParallelQueryInputs().SelectAsync(GetDocumentAsync);
+            string oldContent = await input.GetStringAsync();
+            StringWriter outputString = new StringWriter();
+            bool escaped = false;
 
-            async Task<IDocument> GetDocumentAsync(IDocument input)
+            foreach (char c in oldContent)
             {
-                string oldContent = await input.GetStringAsync();
-                StringWriter outputString = new StringWriter();
-                bool escaped = false;
-
-                foreach (char c in oldContent)
+                if (_escapeAllNonStandardCharacters)
                 {
-                    if (_escapeAllNonStandardCharacters)
+                    if (_standardCharacters.Contains(c))
                     {
-                        if (_standardCharacters.Contains(c))
-                        {
-                            outputString.Write(c);
-                        }
-                        else if (_predefinedEscapeSequences.ContainsKey(c))
-                        {
-                            outputString.Write(_predefinedEscapeSequences[c]);
-                            escaped = true;
-                        }
-                        else
-                        {
-                            outputString.Write(GenerateEscape(c));
-                            escaped = true;
-                        }
+                        outputString.Write(c);
+                    }
+                    else if (_predefinedEscapeSequences.ContainsKey(c))
+                    {
+                        outputString.Write(_predefinedEscapeSequences[c]);
+                        escaped = true;
                     }
                     else
                     {
-                        if (_currentlyEscapedCharacters.ContainsKey(c))
-                        {
-                            outputString.Write(_currentlyEscapedCharacters[c]);
-                            escaped = true;
-                        }
-                        else
-                        {
-                            outputString.Write(c);
-                        }
+                        outputString.Write(GenerateEscape(c));
+                        escaped = true;
                     }
                 }
-                return escaped ? input.Clone(await context.GetContentProviderAsync(outputString.ToString())) : input;
+                else
+                {
+                    if (_currentlyEscapedCharacters.ContainsKey(c))
+                    {
+                        outputString.Write(_currentlyEscapedCharacters[c]);
+                        escaped = true;
+                    }
+                    else
+                    {
+                        outputString.Write(c);
+                    }
+                }
             }
+            return escaped ? input.Clone(await context.GetContentProviderAsync(outputString.ToString())).Yield() : input.Yield();
         }
     }
 }
