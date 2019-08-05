@@ -12,8 +12,8 @@ namespace Statiq.Razor
 
         public IExecutionContext ExecutionContext => ViewData[ViewDataKeys.StatiqExecutionContext] as IExecutionContext;
         public new IExecutionContext Context => ExecutionContext;
-        public ImmutableArray<IDocument> Documents => ExecutionContext.Inputs;
-        public IPipelineOutputs Results => ExecutionContext.Outputs;
+        public ExecutionInputs Inputs => ExecutionContext.Inputs;
+        public IPipelineOutputs Outputs => ExecutionContext.Outputs;
 
         public HttpContext HttpContext => base.Context;
 

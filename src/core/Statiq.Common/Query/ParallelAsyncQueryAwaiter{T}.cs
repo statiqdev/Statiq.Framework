@@ -25,6 +25,6 @@ namespace Statiq.Common
 
         public bool IsCompleted => _task.IsCompleted;
 
-        public ParallelQuery<T> GetResult() => _task.Result.AsParallel(_context, _ordered);
+        public ParallelQuery<T> GetResult() => _task.Result.Query(_context).Parallel(_ordered);
     }
 }

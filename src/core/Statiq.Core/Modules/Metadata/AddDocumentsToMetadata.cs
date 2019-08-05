@@ -41,7 +41,7 @@ namespace Statiq.Core
             IReadOnlyList<IDocument> childOutputs) =>
             Task.FromResult(childOutputs.Count == 0
                 ? (IEnumerable<IDocument>)context.Inputs
-                : context.QueryInputs().Select(input => input.Clone(new MetadataItems
+                : context.Inputs.Select(input => input.Clone(new MetadataItems
                 {
                     { _key, childOutputs.Count == 1 ? (object)childOutputs[0] : childOutputs }
                 })));

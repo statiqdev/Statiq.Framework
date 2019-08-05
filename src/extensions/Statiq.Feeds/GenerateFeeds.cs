@@ -411,7 +411,7 @@ namespace Statiq.Feeds
             };
 
             // Add items
-            await context.Inputs.Take(_maximumItems).AsQuery(context).ForEachAsync(async input =>
+            await context.Inputs.Take(_maximumItems).Query(context).ForEachAsync(async input =>
             {
                 feed.Items.Add(new FeedItem
                 {

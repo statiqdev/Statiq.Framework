@@ -91,7 +91,7 @@ namespace Statiq.Highlight
             });
             using (enginePool)
             {
-                IEnumerable<IDocument> results = await context.ParallelQueryInputs().SelectAsync(async input =>
+                IEnumerable<IDocument> results = await context.Inputs.Parallel().SelectAsync(async input =>
                 {
                     try
                     {

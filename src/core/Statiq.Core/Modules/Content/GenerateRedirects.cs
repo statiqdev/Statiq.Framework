@@ -104,7 +104,7 @@ namespace Statiq.Core
             ConcurrentDictionary<FilePath, string> redirects = new ConcurrentDictionary<FilePath, string>();
 
             // Need to materialize the parallel operation before creating the additional outputs
-            List<IDocument> outputs = await context.ParallelQueryInputs().SelectManyAsync(GetOutputsAsync).ToListAsync();
+            List<IDocument> outputs = await context.Inputs.Parallel().SelectManyAsync(GetOutputsAsync).ToListAsync();
 
             // Generate other output documents if requested
             if (redirects.Count > 0)

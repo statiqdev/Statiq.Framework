@@ -53,7 +53,7 @@ namespace Statiq.Core
         /// <returns>A single document in a list</returns>
         public async Task<IEnumerable<IDocument>> ExecuteAsync(IExecutionContext context)
         {
-            if (context.Inputs.Length < 1)
+            if (context.Inputs.Count < 1)
             {
                 return context.CreateDocument().Yield();
             }

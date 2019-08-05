@@ -89,7 +89,7 @@ namespace Statiq.Core
             // Get XML from the input documents?
             if (_data == null)
             {
-                return await context.ParallelQueryInputs().SelectManyAsync(async input =>
+                return await context.Inputs.Parallel().SelectManyAsync(async input =>
                 {
                     XmlDocument inputDoc = new XmlDocument();
                     using (Stream stream = await input.GetStreamAsync())

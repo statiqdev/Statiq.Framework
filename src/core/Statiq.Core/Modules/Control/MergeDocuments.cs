@@ -52,7 +52,7 @@ namespace Statiq.Core
             IExecutionContext context,
             IReadOnlyList<IDocument> childOutputs) =>
             Task.FromResult(_reverse
-                ? (IEnumerable<IDocument>)childOutputs.AsQuery(context).SelectMany(childOutput => context.Inputs.Select(input => childOutput.Clone(input, input.ContentProvider)))
-                : context.QueryInputs().SelectMany(input => childOutputs.Select(result => input.Clone(result, result.ContentProvider))));
+                ? (IEnumerable<IDocument>)childOutputs.Query(context).SelectMany(childOutput => context.Inputs.Select(input => childOutput.Clone(input, input.ContentProvider)))
+                : context.Inputs.SelectMany(input => childOutputs.Select(result => input.Clone(result, result.ContentProvider))));
     }
 }

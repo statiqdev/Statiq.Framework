@@ -9,7 +9,7 @@ using System.Collections.Immutable;
 
 namespace Statiq.Common
 {
-    public static class AsyncQueryExtensions
+    public static class AsyncQueryLinqExtensions
     {
         public static AsyncQuery<TSource> WhereAsync<TSource>(this Query<TSource> source, Func<TSource, Task<bool>> asyncPredicate) =>
             source.ThenAsync(items => items.WhereAsync(item => source.Context.CancelAndTraceAsync(item, asyncPredicate), source.Context.CancellationToken));

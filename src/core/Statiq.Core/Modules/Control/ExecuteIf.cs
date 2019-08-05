@@ -167,7 +167,7 @@ namespace Statiq.Core
                 }
                 else if (condition.Predicate.RequiresDocument)
                 {
-                    await documents.AsQuery(context).ForEachAsync(async document =>
+                    await documents.Query(context).ForEachAsync(async document =>
                     {
                         if (await condition.Predicate.GetValueAsync(document, context))
                         {

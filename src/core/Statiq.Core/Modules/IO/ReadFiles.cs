@@ -60,7 +60,7 @@ namespace Statiq.Core
             {
                 IEnumerable<IFile> files = await context.FileSystem.GetInputFilesAsync(value);
                 files = await files.ParallelWhereAsync(async file => _predicate == null || await _predicate(file));
-                return files.AsParallel(context).Select(file =>
+                return files.Query(context).Parallel().Select(file =>
                 {
                     Trace.Verbose($"Read file {file.Path.FullPath}");
                     return context.CloneOrCreateDocument(input, file.Path, file.Path.GetRelativeInputPath(context), context.GetContentProvider(file));

@@ -138,13 +138,13 @@ namespace Statiq.Razor
             _executionId = context.ExecutionId;
 
             // Eliminate input documents that we shouldn't process
-            ImmutableArray<IDocument> validInputs = context.QueryInputs()
+            ImmutableArray<IDocument> validInputs = context.Inputs
                 .Where(x => _ignorePrefix == null || x.Source?.FileName.FullPath.StartsWith(_ignorePrefix) != true)
                 .ToImmutableArray();
 
-            if (validInputs.Length < context.Inputs.Length)
+            if (validInputs.Length < context.Inputs.Count)
             {
-                Trace.Information($"Ignoring {context.Inputs.Length - validInputs.Length} inputs due to source file name prefix");
+                Trace.Information($"Ignoring {context.Inputs.Count - validInputs.Length} inputs due to source file name prefix");
             }
 
             // Compile and evaluate the pages in parallel

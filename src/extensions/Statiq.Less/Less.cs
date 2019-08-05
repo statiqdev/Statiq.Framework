@@ -52,7 +52,7 @@ namespace Statiq.Less
             config.Logger = typeof(LessLogger);
             EngineFactory engineFactory = new EngineFactory(config);
             FileSystemReader fileSystemReader = new FileSystemReader(context.FileSystem);
-            return await context.ParallelQueryInputs().SelectAsync(ProcessLessAsync);
+            return await context.Inputs.Parallel().SelectAsync(ProcessLessAsync);
 
             async Task<IDocument> ProcessLessAsync(IDocument input)
             {

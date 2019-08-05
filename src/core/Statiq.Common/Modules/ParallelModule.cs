@@ -17,7 +17,7 @@ namespace Statiq.Common
 
         public override Task<IEnumerable<IDocument>> ExecuteAsync(IExecutionContext context) =>
             Parallel
-                ? context.ParallelQueryInputs().SelectManyAsync(async input => await SafeExecuteAsync(input, context)).Task
-                : context.QueryInputs().SelectManyAsync(async input => await SafeExecuteAsync(input, context)).Task;
+                ? context.Inputs.Parallel().SelectManyAsync(async input => await SafeExecuteAsync(input, context)).Task
+                : context.Inputs.SelectManyAsync(async input => await SafeExecuteAsync(input, context)).Task;
     }
 }

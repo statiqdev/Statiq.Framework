@@ -26,7 +26,7 @@ namespace Statiq.Common
         /// <param name="context">The execution context.</param>
         /// <returns>The result documents.</returns>
         public virtual Task<IEnumerable<IDocument>> ExecuteAsync(IExecutionContext context) =>
-            context.QueryInputs().SelectManyAsync(async input => await SafeExecuteAsync(input, context)).Task;
+            context.Inputs.SelectManyAsync(async input => await SafeExecuteAsync(input, context)).Task;
 
         /// <summary>
         /// Takes care of exceptional cases like a <c>null</c> return task or <c>null</c> result sequence.

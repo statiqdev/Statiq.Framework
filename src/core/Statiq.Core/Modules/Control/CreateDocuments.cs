@@ -90,7 +90,7 @@ namespace Statiq.Core
 
         public async Task<IEnumerable<IDocument>> ExecuteAsync(IExecutionContext context) =>
             _documents.RequiresDocument
-                ? await context.QueryInputs().SelectManyAsync(input => _documents.GetValueAsync(input, context))
+                ? await context.Inputs.SelectManyAsync(input => _documents.GetValueAsync(input, context))
                 : await _documents.GetValueAsync(null, context);
     }
 }

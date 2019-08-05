@@ -78,7 +78,7 @@ namespace Statiq.Core
         {
             StringBuilder sb = new StringBuilder();
             sb.Append("<?xml version=\"1.0\" encoding=\"UTF-8\"?><urlset xmlns=\"http://www.sitemaps.org/schemas/sitemap/0.9\">");
-            await context.QueryInputs().ForEachAsync(AddToSiteMapAsync);
+            await context.Inputs.ForEachAsync(AddToSiteMapAsync);
             sb.Append("</urlset>");
 
             // Always output the sitemap document, even if it's empty

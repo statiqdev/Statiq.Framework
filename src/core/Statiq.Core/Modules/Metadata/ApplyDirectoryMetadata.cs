@@ -87,7 +87,7 @@ namespace Statiq.Core
         public async Task<IEnumerable<IDocument>> ExecuteAsync(IExecutionContext context)
         {
             // Find metadata files
-            IEnumerable<MetaInfo> metaInfos = await context.QueryInputs()
+            IEnumerable<MetaInfo> metaInfos = await context.Inputs
                 .Where(input => input.Source != null)
                 .SelectAsync(GetMetaInfo);
             Dictionary<DirectoryPath, MetaInfo[]> metadataDictionary = metaInfos
@@ -100,7 +100,7 @@ namespace Statiq.Core
                 await context.Inputs.WhereAsync(async input => input.Source != null && (_preserveMetadataFiles || !await _metadataFiles.AnyAsync(isMetadata => isMetadata.MetadataFileName.GetValueAsync(input, context))));
 
             // Apply Metadata
-            return await filteredInputs.AsQuery(context).SelectAsync(ApplyMetadata);
+            return await filteredInputs.Query(context).SelectAsync(ApplyMetadata);
 
             async Task<MetaInfo> GetMetaInfo(IDocument input)
             {

@@ -23,6 +23,6 @@ namespace Statiq.Common
 
         public bool IsCompleted => _task.IsCompleted;
 
-        public Query<T> GetResult() => _task.Result.AsQuery(_context);
+        public Query<T> GetResult() => _task.Result.Query(_context);
     }
 }

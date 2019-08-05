@@ -22,7 +22,7 @@ namespace Statiq.Testing
         {
             DocumentFactory = new DocumentFactory(_settings);
             DocumentFactory.SetDefaultDocumentType<TestDocument>();
-            Inputs = ImmutableArray<IDocument>.Empty;
+            Inputs = new ExecutionInputs(ImmutableArray<IDocument>.Empty, this);
         }
 
         public TestExecutionContext(IEnumerable<IDocument> inputs)
@@ -103,10 +103,10 @@ namespace Statiq.Testing
         public IModule Module { get; set; }
 
         /// <inheritdoc/>
-        public ImmutableArray<IDocument> Inputs { get; private set; }
+        public ExecutionInputs Inputs { get; private set; }
 
         public void SetInputs(IEnumerable<IDocument> inputs) =>
-            Inputs = inputs?.Where(x => x != null).ToImmutableArray() ?? ImmutableArray<IDocument>.Empty;
+            Inputs = new ExecutionInputs(inputs?.Where(x => x != null).ToImmutableArray() ?? ImmutableArray<IDocument>.Empty, this);
 
         public void SetInputs(params IDocument[] inputs) =>
             SetInputs((IEnumerable<IDocument>)inputs);

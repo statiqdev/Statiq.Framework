@@ -81,10 +81,10 @@ namespace Statiq.Core
                         }
                     }
                 }
-                return context.QueryInputs().Select(input => input.Clone(_onlyIfNonExisting ? metadata.Where(x => !input.ContainsKey(x.Key)) : metadata));
+                return context.Inputs.Select(input => input.Clone(_onlyIfNonExisting ? metadata.Where(x => !input.ContainsKey(x.Key)) : metadata));
             }
 
-            return await context.QueryInputs().SelectAsync(async input => _onlyIfNonExisting && input.ContainsKey(_key)
+            return await context.Inputs.SelectAsync(async input => _onlyIfNonExisting && input.ContainsKey(_key)
                 ? input
                 : input.Clone(
                     new[]
