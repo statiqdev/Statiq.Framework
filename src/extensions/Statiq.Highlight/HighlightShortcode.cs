@@ -57,7 +57,7 @@ namespace Statiq.Highlight
                 }
                 else
                 {
-                    x.ExecuteResource("highlight-all.js", typeof(Statiq.Highlight.Highlight));
+                    x.ExecuteResource("highlight-all.js", typeof(Statiq.Highlight.HighlightCode));
                 }
             }))
             {
@@ -68,7 +68,7 @@ namespace Statiq.Highlight
                 {
                     element.SetAttribute("class", $"language-{dictionary.String("Language")}");
                 }
-                Statiq.Highlight.Highlight.HighlightElement(enginePool, element);
+                Statiq.Highlight.HighlightCode.HighlightElement(enginePool, element);
                 return context.CreateDocument(await context.GetContentProviderAsync(element.OuterHtml));
             }
         }

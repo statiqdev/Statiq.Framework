@@ -37,7 +37,7 @@
 
         /// <summary>
         /// The default metadata key for getting the excerpt of feed items. The
-        /// exceprt is typically only used for the feed item if a description
+        /// excerpt is typically only used for the feed item if a description
         /// is not provided.
         /// </summary>
         /// <type><see cref="string"/></type>
