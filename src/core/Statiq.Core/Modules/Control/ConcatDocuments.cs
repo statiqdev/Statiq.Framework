@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using System.Threading.Tasks;
 using Statiq.Common;
@@ -14,7 +15,7 @@ namespace Statiq.Core
     /// input documents and both are output.
     /// </remarks>
     /// <category>Control</category>
-    public class ConcatDocuments : ChildDocumentsModule
+    public class ConcatDocuments : SyncChildDocumentsModule
     {
         public ConcatDocuments()
             : base(Array.Empty<IModule>())
@@ -31,9 +32,9 @@ namespace Statiq.Core
         {
         }
 
-        protected override Task<IEnumerable<IDocument>> ExecuteAsync(
+        protected override IEnumerable<IDocument> Execute(
             IExecutionContext context,
-            IReadOnlyList<IDocument> childOutputs) =>
-            Task.FromResult(context.Inputs.Concat(childOutputs));
+            ImmutableArray<IDocument> childOutputs) =>
+            context.Inputs.Concat(childOutputs);
     }
 }

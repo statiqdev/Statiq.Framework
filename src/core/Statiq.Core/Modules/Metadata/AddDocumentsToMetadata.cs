@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using System.Threading.Tasks;
 using Statiq.Common;
@@ -14,7 +15,7 @@ namespace Statiq.Core
     /// <see cref="IReadOnlyList{IDocument}"/> to the specified metadata key.
     /// </remarks>
     /// <category>Metadata</category>
-    public class AddDocumentsToMetadata : ChildDocumentsModule
+    public class AddDocumentsToMetadata : SyncChildDocumentsModule
     {
         private readonly string _key;
 
@@ -36,14 +37,14 @@ namespace Statiq.Core
             _key = key ?? throw new ArgumentNullException(nameof(key));
         }
 
-        protected override Task<IEnumerable<IDocument>> ExecuteAsync(
+        protected override IEnumerable<IDocument> Execute(
             IExecutionContext context,
-            IReadOnlyList<IDocument> childOutputs) =>
-            Task.FromResult(childOutputs.Count == 0
-                ? (IEnumerable<IDocument>)context.Inputs
+            ImmutableArray<IDocument> childOutputs) =>
+            childOutputs.Length == 0
+                ? context.Inputs
                 : context.Inputs.Select(input => input.Clone(new MetadataItems
                 {
-                    { _key, childOutputs.Count == 1 ? (object)childOutputs[0] : childOutputs }
-                })));
+                    { _key, childOutputs.Length == 1 ? (object)childOutputs[0] : childOutputs }
+                }));
     }
 }

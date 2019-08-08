@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Threading.Tasks;
 using Statiq.Common;
 
@@ -9,7 +10,7 @@ namespace Statiq.Core
     /// Replaces documents in the current pipeline.
     /// </summary>
     /// <category>Control</category>
-    public class ReplaceDocuments : ChildDocumentsModule
+    public class ReplaceDocuments : SyncChildDocumentsModule
     {
         public ReplaceDocuments()
             : base(Array.Empty<IModule>())
@@ -26,9 +27,9 @@ namespace Statiq.Core
         {
         }
 
-        protected override Task<IEnumerable<IDocument>> ExecuteAsync(
+        protected override IEnumerable<IDocument> Execute(
             IExecutionContext context,
-            IReadOnlyList<IDocument> childOutputs) =>
-            Task.FromResult<IEnumerable<IDocument>>(childOutputs);
+            ImmutableArray<IDocument> childOutputs) =>
+            childOutputs;
     }
 }

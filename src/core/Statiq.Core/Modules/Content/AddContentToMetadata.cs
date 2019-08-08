@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using System.Threading.Tasks;
 using Statiq.Common;
@@ -39,17 +40,20 @@ namespace Statiq.Core
 
         protected override async Task<IEnumerable<IDocument>> ExecuteAsync(
             IExecutionContext context,
-            IReadOnlyList<IDocument> childOutputs) =>
-            childOutputs.Count == 0
-                ? context.Inputs
-                : await context.Inputs.SelectAsync(async input => input.Clone(new MetadataItems
-                {
+            ImmutableArray<IDocument> childOutputs) =>
+            childOutputs.Length == 0
+                ? (IEnumerable<IDocument>)context.Inputs
+                : await context.Inputs
+                    .ToAsyncEnumerable()
+                    .SelectAwait(async input => input.Clone(new MetadataItems
                     {
-                        _key,
-                        childOutputs.Count == 1
-                            ? (object)await childOutputs[0].GetStringAsync()
-                            : (await childOutputs.SelectAsync(x => x.GetStringAsync())).ToArray()
-                    }
-                }));
+                        {
+                            _key,
+                            childOutputs.Length == 1
+                                ? (object)await childOutputs[0].GetStringAsync()
+                                : await childOutputs.ToAsyncEnumerable().SelectAwait(async x => await x.GetStringAsync()).ToArrayAsync()
+                        }
+                    }))
+                    .ToArrayAsync();
     }
 }

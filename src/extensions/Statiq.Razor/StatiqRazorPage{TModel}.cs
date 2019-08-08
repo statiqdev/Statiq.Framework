@@ -12,11 +12,11 @@ namespace Statiq.Razor
 
         public IExecutionContext ExecutionContext => ViewData[ViewDataKeys.StatiqExecutionContext] as IExecutionContext;
         public new IExecutionContext Context => ExecutionContext;
-        public ExecutionInputs Inputs => ExecutionContext.Inputs;
+        public ImmutableArray<IDocument> Inputs => ExecutionContext.Inputs;
         public IPipelineOutputs Outputs => ExecutionContext.Outputs;
 
         public HttpContext HttpContext => base.Context;
 
-        public ITrace Trace => Common.Trace.Current;
+        public Trace Trace => Trace.Current;
     }
 }

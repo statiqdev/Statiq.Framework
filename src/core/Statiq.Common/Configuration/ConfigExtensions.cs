@@ -62,8 +62,8 @@ namespace Statiq.Common
                 first.RequiresDocument || second.RequiresDocument);
         }
 
-        public static Task<IEnumerable<IDocument>> FilterAsync(this IEnumerable<IDocument> documents, Config<bool> predicate, IExecutionContext context) =>
-            predicate == null ? Task.FromResult(documents) : documents.Query(context).WhereAsync(x => predicate.GetAndTransformValueAsync(x, context)).Task;
+        public static async Task<IEnumerable<IDocument>> FilterAsync(this IEnumerable<IDocument> documents, Config<bool> predicate, IExecutionContext context) =>
+            predicate == null ? documents : await documents.Query(context).WhereAsync(x => predicate.GetAndTransformValueAsync(x, context));
 
         /// <summary>
         /// Filters the documents using "or" logic on multiple predicates.

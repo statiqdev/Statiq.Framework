@@ -81,14 +81,17 @@ namespace Statiq.Core
         }
 
         /// <inheritdoc />
-        public async Task<IEnumerable<IDocument>> ExecuteAsync(IExecutionContext context) =>
-            (await context.Inputs.SelectAsync(async x => (Document: x, Keys: await _key.GetValueAsync(x, context))))
+        public Task<IEnumerable<IDocument>> ExecuteAsync(IExecutionContext context) =>
+            Task.FromResult(context.Inputs.Array
+                .ToAsyncEnumerable()
+                .SelectAwait(async x => (Document: x, Keys: await _key.GetValueAsync(x, context)))
+                .ToEnumerable()
                 .GroupByMany(x => x.Keys, x => x.Document, _comparer)
                 .Select(x => context.CreateDocument(
                     new MetadataItems
                     {
                         { Keys.GroupDocuments, x.ToImmutableArray() },
                         { Keys.GroupKey, x.Key }
-                    }));
+                    })));
     }
 }

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace Statiq.Common
@@ -34,14 +35,33 @@ namespace Statiq.Common
         {
             if (_eachDocument)
             {
+                IEnumerable<IDocument> aggregateResults = null;
+                TValue value = default;
+
+                // Only need to evaluate the config delegate once
                 if (!_config.RequiresDocument)
                 {
-                    // Only need to evaluate the config delegate once
-                    TValue value = await _config.GetValueAsync(null, context);
-                    return await context.Inputs.SelectManyAsync(async input => await SafeExecuteAsync(ExecuteAsync(input, context, value)));
+                    value = await _config.GetValueAsync(null, context);
                 }
 
-                return await context.Inputs.SelectManyAsync(async input => await SafeExecuteAsync(ExecuteAsync(input, context, await _config.GetValueAsync(input, context))));
+                // Iterate the inputs
+                foreach (IDocument input in context.Inputs)
+                {
+                    // If the config requires a document, evaluate it each time
+                    if (_config.RequiresDocument)
+                    {
+                        value = await _config.GetValueAsync(input, context);
+                    }
+
+                    // Get the results for this input document
+                    IEnumerable<IDocument> results = await ExecuteInput(input, context, (i, c) => ExecuteAsync(i, c, value));
+                    if (results != null)
+                    {
+                        aggregateResults = aggregateResults?.Concat(results) ?? results;
+                    }
+                }
+
+                return aggregateResults;
             }
 
             return await ExecuteAsync(null, context, await _config.GetValueAsync(null, context));

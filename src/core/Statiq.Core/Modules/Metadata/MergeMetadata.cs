@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using System.Threading.Tasks;
 using Statiq.Common;
@@ -16,7 +17,7 @@ namespace Statiq.Core
     /// or use the <see cref="IModuleExtensions.ForEachDocument(IModule)"/> extension.
     /// </remarks>
     /// <category>Metadata</category>
-    public class MergeMetadata : ChildDocumentsModule
+    public class MergeMetadata : SyncChildDocumentsModule
     {
         private bool _reverse;
 
@@ -48,11 +49,11 @@ namespace Statiq.Core
             return this;
         }
 
-        protected override Task<IEnumerable<IDocument>> ExecuteAsync(
+        protected override IEnumerable<IDocument> Execute(
             IExecutionContext context,
-            IReadOnlyList<IDocument> childOutputs) =>
-            Task.FromResult(_reverse
-                ? (IEnumerable<IDocument>)childOutputs.Query(context).SelectMany(childOutput => context.Inputs.Select(input => childOutput.Clone(input)))
-                : context.Inputs.SelectMany(input => childOutputs.Select(result => input.Clone(result))));
+            ImmutableArray<IDocument> childOutputs) =>
+            _reverse
+                ? childOutputs.SelectMany(childOutput => context.Inputs.Select(input => childOutput.Clone(input)))
+                : context.Inputs.SelectMany(input => childOutputs.Select(result => input.Clone(result)));
     }
 }

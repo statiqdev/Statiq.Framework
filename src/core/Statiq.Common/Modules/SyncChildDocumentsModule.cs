@@ -17,25 +17,11 @@ namespace Statiq.Common
     /// <c>ClearDocuments</c> module as the first child if the original input documents
     /// should not be passed to the child modules.
     /// </remarks>
-    public abstract class ChildDocumentsModule : ParentModule
+    public abstract class SyncChildDocumentsModule : ChildDocumentsModule
     {
-        /// <summary>
-        /// Executes the specified modules to get result documents.
-        /// </summary>
-        /// <param name="modules">The modules to execute.</param>
-        protected ChildDocumentsModule(params IModule[] modules)
-            : base(modules)
-        {
-        }
-
         /// <inheritdoc />
-        public sealed override async Task<IEnumerable<IDocument>> ExecuteAsync(IExecutionContext context) =>
-            Children.Count > 0 ? await ExecuteAsync(context, await context.ExecuteAsync(Children, context.Inputs)) : Array.Empty<IDocument>();
-
-        /// <inheritdoc />
-        // Unused, prevent overriding in derived classes
-        protected sealed override Task<IEnumerable<IDocument>> ExecuteAsync(IDocument input, IExecutionContext context) =>
-            base.ExecuteAsync(input, context);
+        protected sealed override Task<IEnumerable<IDocument>> ExecuteAsync(IExecutionContext context, ImmutableArray<IDocument> childOutputs) =>
+            Task.FromResult(Execute(context, childOutputs));
 
         /// <summary>
         /// Gets the output documents given the input documents and the output documents from the execution of child modules.
@@ -43,6 +29,6 @@ namespace Statiq.Common
         /// <param name="context">The execution context.</param>
         /// <param name="childOutputs">The output documents from the child modules.</param>
         /// <returns>The output documents of this module.</returns>
-        protected abstract Task<IEnumerable<IDocument>> ExecuteAsync(IExecutionContext context, ImmutableArray<IDocument> childOutputs);
+        protected abstract IEnumerable<IDocument> Execute(IExecutionContext context, ImmutableArray<IDocument> childOutputs);
     }
 }

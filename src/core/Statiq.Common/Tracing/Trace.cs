@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 
@@ -7,14 +8,14 @@ namespace Statiq.Common
     /// <summary>
     /// Provides access to tracing functionality. This class is thread safe.
     /// </summary>
-    public sealed class Trace : ITrace
+    public sealed class Trace
     {
         private static readonly TraceSource TraceSource = new TraceSource("Statiq", SourceLevels.Information);
         private static readonly object ListenersLock = new object();
 
         private static int _indent = 0;
 
-        public static ITrace Current { get; } = new Trace();
+        public static Trace Current { get; } = new Trace();
 
         private Trace()
         {
@@ -52,6 +53,8 @@ namespace Statiq.Common
             }
         }
 
+        public IEnumerable<TraceListener> Listeners => GetListeners();
+
         // Stops the application
         public static void Critical(string messageOrFormat, params object[] args) =>
             TraceEvent(TraceEventType.Critical, messageOrFormat, args);
@@ -82,34 +85,10 @@ namespace Statiq.Common
             }
         }
 
-        SourceLevels ITrace.Level
+        public static void ProcessingException<TItem>(TItem item, Exception ex)
         {
-            get { return Level; }
-            set { Level = value; }
+            string displayString = item is IDisplayable displayable ? $" [{displayable.ToSafeDisplayString()}]" : string.Empty;
+            Error($"Exception while processing {item.GetType().Name}{displayString}: {ex.Message}");
         }
-
-        void ITrace.AddListener(TraceListener listener) => AddListener(listener);
-
-        void ITrace.RemoveListener(TraceListener listener) => RemoveListener(listener);
-
-        IEnumerable<TraceListener> ITrace.Listeners => GetListeners();
-
-        void ITrace.Critical(string messageOrFormat, params object[] args) =>
-            Critical(messageOrFormat, args);
-
-        void ITrace.Error(string messageOrFormat, params object[] args) =>
-            Error(messageOrFormat, args);
-
-        void ITrace.Warning(string messageOrFormat, params object[] args) =>
-            Warning(messageOrFormat, args);
-
-        void ITrace.Information(string messageOrFormat, params object[] args) =>
-            Information(messageOrFormat, args);
-
-        void ITrace.Verbose(string messageOrFormat, params object[] args) =>
-            Verbose(messageOrFormat, args);
-
-        void ITrace.TraceEvent(TraceEventType eventType, string messageOrFormat, params object[] args) =>
-            TraceEvent(eventType, messageOrFormat, args);
     }
 }

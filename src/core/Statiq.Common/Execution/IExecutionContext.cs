@@ -100,7 +100,7 @@ namespace Statiq.Common
         /// <summary>
         /// The input documents to process.
         /// </summary>
-        ExecutionInputs Inputs { get; }
+        ImmutableArray<IDocument> Inputs { get; }
 
         /// <summary>
         /// Creates a <see cref="HttpClient"/> instance that should be used for all HTTP communication.
