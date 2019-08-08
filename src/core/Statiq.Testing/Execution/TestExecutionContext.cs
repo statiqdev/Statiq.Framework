@@ -103,10 +103,10 @@ namespace Statiq.Testing
         public IModule Module { get; set; }
 
         /// <inheritdoc/>
-        public ExecutionInputs Inputs { get; private set; }
+        public ImmutableArray<IDocument> Inputs { get; set; }
 
         public void SetInputs(IEnumerable<IDocument> inputs) =>
-            Inputs = new ExecutionInputs(inputs?.Where(x => x != null).ToImmutableArray() ?? ImmutableArray<IDocument>.Empty, this);
+            Inputs = inputs?.Where(x => x != null).ToImmutableArray() ?? ImmutableArray<IDocument>.Empty;
 
         public void SetInputs(params IDocument[] inputs) =>
             SetInputs((IEnumerable<IDocument>)inputs);

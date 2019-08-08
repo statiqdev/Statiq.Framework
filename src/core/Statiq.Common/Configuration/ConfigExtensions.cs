@@ -62,8 +62,18 @@ namespace Statiq.Common
                 first.RequiresDocument || second.RequiresDocument);
         }
 
-        public static async Task<IEnumerable<IDocument>> FilterAsync(this IEnumerable<IDocument> documents, Config<bool> predicate, IExecutionContext context) =>
-            predicate == null ? documents : await documents.Query(context).WhereAsync(x => predicate.GetAndTransformValueAsync(x, context));
+        /// <summary>
+        /// Filters the documents.
+        /// </summary>
+        /// <param name="documents">The documents to filter.</param>
+        /// <param name="predicate">The predicate.</param>
+        /// <param name="context">The current execution context.</param>
+        /// <returns>Filtered documents where the provided predicate is true.</returns>
+        public static IAsyncEnumerable<IDocument> FilterAsync(this IEnumerable<IDocument> documents, Config<bool> predicate, IExecutionContext context)
+        {
+            _ = predicate ?? throw new ArgumentNullException(nameof(predicate));
+            return documents.FilterAsync(new Config<bool>[] { predicate }, context);
+        }
 
         /// <summary>
         /// Filters the documents using "or" logic on multiple predicates.
@@ -72,11 +82,24 @@ namespace Statiq.Common
         /// <param name="predicates">The predicates to combine.</param>
         /// <param name="context">The current execution context.</param>
         /// <returns>Filtered documents where at least one of the provided predicates is true.</returns>
-        public static async Task<IEnumerable<IDocument>> FilterAsync(this IEnumerable<IDocument> documents, ICollection<Config<bool>> predicates, IExecutionContext context) =>
-            predicates == null || predicates.Count == 0
-                ? documents
-                : await documents.Query(context).WhereAsync(
-                    async doc => await predicates.AnyAsync(
-                        async pred => await pred.GetAndTransformValueAsync(doc, context)));
+        public static async IAsyncEnumerable<IDocument> FilterAsync(this IEnumerable<IDocument> documents, ICollection<Config<bool>> predicates, IExecutionContext context)
+        {
+            _ = documents ?? throw new ArgumentNullException(nameof(documents));
+            _ = predicates ?? throw new ArgumentNullException(nameof(predicates));
+
+            foreach (IDocument document in documents)
+            {
+                context.CancellationToken.ThrowIfCancellationRequested();
+                foreach (Config<bool> predicate in predicates)
+                {
+                    _ = predicate ?? throw new ArgumentException("Null predicates are not supported", nameof(predicates));
+                    if (await predicate.GetAndTransformValueAsync(document, context))
+                    {
+                        yield return document;
+                        break;
+                    }
+                }
+            }
+        }
     }
 }

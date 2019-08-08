@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>netcoreapp2.2</TargetFramework>
+    <TargetFramework>netcoreapp3.0</TargetFramework>
     <Description>Statiq is a configurable static content generation framework. This library provides utility classes to make testing JavaScript components easier.</Description>
     <PackageTags>Statiq Static StaticContent StaticSite Blog BlogEngine</PackageTags>
     <RepositoryUrl>https://github.com/statiqdev/Framework.git</RepositoryUrl>

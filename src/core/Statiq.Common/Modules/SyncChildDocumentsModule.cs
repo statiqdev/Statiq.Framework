@@ -19,6 +19,15 @@ namespace Statiq.Common
     /// </remarks>
     public abstract class SyncChildDocumentsModule : ChildDocumentsModule
     {
+        /// <summary>
+        /// Executes the specified modules to get result documents.
+        /// </summary>
+        /// <param name="modules">The modules to execute.</param>
+        protected SyncChildDocumentsModule(params IModule[] modules)
+            : base(modules)
+        {
+        }
+
         /// <inheritdoc />
         protected sealed override Task<IEnumerable<IDocument>> ExecuteAsync(IExecutionContext context, ImmutableArray<IDocument> childOutputs) =>
             Task.FromResult(Execute(context, childOutputs));

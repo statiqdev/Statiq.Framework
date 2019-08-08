@@ -12,6 +12,21 @@ namespace Statiq.Common
     /// </summary>
     public abstract class SyncConfigModule<TValue> : ConfigModule<TValue>
     {
+        /// <summary>
+        /// Creates a new config module.
+        /// </summary>
+        /// <param name="config">The delegate to use for getting a config value.</param>
+        /// <param name="eachDocument">
+        /// <c>true</c> to call <see cref="ExecuteAsync(IDocument, IExecutionContext, TValue)"/> for each
+        /// input document regardless of whether the config delegate requires a document or <c>false</c>
+        /// to allow only calling <see cref="ExecuteAsync(IDocument, IExecutionContext, TValue)"/> once
+        /// with a null input document if the config delegate does not require a document.
+        /// </param>
+        protected SyncConfigModule(Config<TValue> config, bool eachDocument)
+            : base(config, eachDocument)
+        {
+        }
+
         /// <inheritdoc />
         protected sealed override Task<IEnumerable<IDocument>> ExecuteAsync(IDocument input, IExecutionContext context, TValue value) =>
             Task.FromResult(Execute(input, context, value));

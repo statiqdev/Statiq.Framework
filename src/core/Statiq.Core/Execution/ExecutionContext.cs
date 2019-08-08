@@ -69,14 +69,14 @@ namespace Statiq.Core
         public IModule Module { get; }
 
         /// <inheritdoc/>
-        public ExecutionInputs Inputs { get; }
+        public ImmutableArray<IDocument> Inputs { get; }
 
         internal ExecutionContext(ExecutionContextData contextData, IExecutionContext parent, IModule module, ImmutableArray<IDocument> inputs)
         {
             _contextData = contextData ?? throw new ArgumentNullException(nameof(contextData));
             Parent = parent;
             Module = module ?? throw new ArgumentNullException(nameof(module));
-            Inputs = new ExecutionInputs(inputs, this);
+            Inputs = inputs;
         }
 
         /// <inheritdoc/>
