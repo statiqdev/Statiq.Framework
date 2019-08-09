@@ -17,7 +17,7 @@ namespace Statiq.Less
         public byte[] GetBinaryFileContents(string fileName)
         {
             IFile file = GetInputFileAsync(fileName).Result;
-            using (Stream stream = file.OpenReadAsync().Result)
+            using (Stream stream = file.OpenRead().Result)
             {
                 byte[] buffer = new byte[stream.Length];
                 stream.Read(buffer, 0, (int)stream.Length);
@@ -27,7 +27,7 @@ namespace Statiq.Less
 
         public string GetFileContents(string fileName) => GetInputFileAsync(fileName).Result.ReadAllTextAsync().Result;
 
-        public bool DoesFileExist(string fileName) => GetInputFileAsync(fileName).Result.GetExistsAsync().Result;
+        public bool DoesFileExist(string fileName) => GetInputFileAsync(fileName).Result.GetExists().Result;
 
         public bool UseCacheDependencies => true;
 
@@ -35,8 +35,8 @@ namespace Statiq.Less
         {
             // Find the requested file
             // ...as specified
-            IFile file = await _fileSystem.GetInputFileAsync(filePath);
-            if (await file.GetExistsAsync())
+            IFile file = await _fileSystem.GetInputFile(filePath);
+            if (await file.GetExists())
             {
                 return file;
             }
@@ -45,8 +45,8 @@ namespace Statiq.Less
             if (!filePath.HasExtension || filePath.Extension != ".less")
             {
                 FilePath extensionPath = filePath.AppendExtension(".less");
-                IFile extensionFile = await _fileSystem.GetInputFileAsync(extensionPath);
-                if (await extensionFile.GetExistsAsync())
+                IFile extensionFile = await _fileSystem.GetInputFile(extensionPath);
+                if (await extensionFile.GetExists())
                 {
                     return extensionFile;
                 }
@@ -55,8 +55,8 @@ namespace Statiq.Less
                 if (!extensionPath.FileName.FullPath.StartsWith("_"))
                 {
                     extensionPath = extensionPath.ChangeFileName("_" + extensionPath.FileName.FullPath);
-                    extensionFile = await _fileSystem.GetInputFileAsync(extensionPath);
-                    if (await extensionFile.GetExistsAsync())
+                    extensionFile = await _fileSystem.GetInputFile(extensionPath);
+                    if (await extensionFile.GetExists())
                     {
                         return extensionFile;
                     }
@@ -67,8 +67,8 @@ namespace Statiq.Less
             if (!filePath.FileName.FullPath.StartsWith("_"))
             {
                 filePath = filePath.ChangeFileName("_" + filePath.FileName.FullPath);
-                IFile underscoreFile = await _fileSystem.GetInputFileAsync(filePath);
-                if (await underscoreFile.GetExistsAsync())
+                IFile underscoreFile = await _fileSystem.GetInputFile(filePath);
+                if (await underscoreFile.GetExists())
                 {
                     return underscoreFile;
                 }

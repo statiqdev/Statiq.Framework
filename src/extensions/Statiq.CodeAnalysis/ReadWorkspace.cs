@@ -16,7 +16,7 @@ namespace Statiq.CodeAnalysis
     /// specified. Otherwise, if a delegate is specified the module will be executed once per input
     /// document and the resulting output documents will be aggregated.
     /// </summary>
-    public abstract class ReadWorkspace : ParallelConfigModule<FilePath>
+    public abstract class ReadWorkspace : ParallelSyncConfigModule<FilePath>
     {
         private Func<string, bool> _whereProject;
         private Func<IFile, bool> _whereFile;
@@ -89,26 +89,25 @@ namespace Statiq.CodeAnalysis
             return result;
         }
 
-        protected override async Task<IEnumerable<IDocument>> ExecuteAsync(IDocument input, IExecutionContext context, FilePath value)
+        protected override IEnumerable<IDocument> Execute(IDocument input, IExecutionContext context, FilePath value)
         {
             if (value != null)
             {
-                IFile projectFile = await context.FileSystem.GetInputFileAsync(value);
-
-                return await GetProjects(context, projectFile)
+                IFile projectFile = context.FileSystem.GetInputFile(value);
+                return GetProjects(context, projectFile)
                     .Where(project => project != null && (_whereProject == null || _whereProject(project.Name)))
-                    .ParallelSelectManyAsync(GetProjectDocumentsAsync);
+                    .AsParallel()
+                    .SelectMany(GetProjectDocuments);
 
-                async Task<IEnumerable<IDocument>> GetProjectDocumentsAsync(Project project)
+                IEnumerable<IDocument> GetProjectDocuments(Project project)
                 {
                     Common.Trace.Verbose("Read project {0}", project.Name);
                     string assemblyName = project.AssemblyName;
-                    IEnumerable<IFile> documentPaths = await project.Documents
+                    return project.Documents
                         .Where(x => !string.IsNullOrWhiteSpace(x.FilePath))
-                        .SelectAsync(x => context.FileSystem.GetInputFileAsync(x.FilePath));
-                    documentPaths = await documentPaths
-                        .WhereAsync(async x => await x.GetExistsAsync() && (_whereFile == null || _whereFile(x)) && (_extensions?.Contains(x.Path.Extension) != false));
-                    return documentPaths.Select(GetProjectDocument);
+                        .Select(x => context.FileSystem.GetInputFile(x.FilePath))
+                        .Where(x => x.Exists && (_whereFile == null || _whereFile(x)) && (_extensions?.Contains(x.Path.Extension) != false))
+                        .Select(GetProjectDocument);
 
                     IDocument GetProjectDocument(IFile file)
                     {
@@ -124,6 +123,7 @@ namespace Statiq.CodeAnalysis
                     }
                 }
             }
+
             return Array.Empty<IDocument>();
         }
     }

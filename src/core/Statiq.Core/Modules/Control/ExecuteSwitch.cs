@@ -101,13 +101,13 @@ namespace Statiq.Core
                     }
                 }
 
-                results.AddRange(await context.ExecuteAsync(c.Item2, handled));
+                results.AddRange(await context.ExecuteModulesAsync(c.Item2, handled));
                 documents = unhandled;
             }
 
             if (_defaultModules != null)
             {
-                results.AddRange(await context.ExecuteAsync(_defaultModules, documents));
+                results.AddRange(await context.ExecuteModulesAsync(_defaultModules, documents));
             }
             else
             {

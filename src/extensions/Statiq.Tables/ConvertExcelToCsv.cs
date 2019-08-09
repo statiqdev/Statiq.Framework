@@ -19,7 +19,7 @@ namespace Statiq.Tables
         protected override async Task<IEnumerable<IDocument>> ExecuteAsync(IDocument input, IExecutionContext context)
         {
             IEnumerable<IEnumerable<string>> records;
-            using (Stream stream = await input.GetStreamAsync())
+            using (Stream stream = await input.GetStream())
             {
                 records = ExcelFile.GetAllRecords(stream);
             }

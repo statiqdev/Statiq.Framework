@@ -13,13 +13,13 @@ namespace Statiq.Common
         /// </summary>
         /// <param name="path">The path to the file.</param>
         /// <returns>The file.</returns>
-        Task<IFile> GetFileAsync(FilePath path);
+        IFile GetFile(FilePath path);
 
         /// <summary>
         /// Gets a directory from a specified path.
         /// </summary>
         /// <param name="path">The path to the directory.</param>
         /// <returns>The directory.</returns>
-        Task<IDirectory> GetDirectoryAsync(DirectoryPath path);
+        IDirectory GetDirectory(DirectoryPath path);
     }
 }

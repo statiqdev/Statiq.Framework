@@ -17,10 +17,8 @@ namespace Statiq.Core
                 .Handle<Exception>()
                 .WaitAndRetryAsync(3, _ => TimeSpan.FromMilliseconds(100));
 
-        public Task<IFile> GetFileAsync(FilePath path) =>
-            Task.FromResult<IFile>(new LocalFile(path));
+        public IFile GetFile(FilePath path) => new LocalFile(path);
 
-        public Task<IDirectory> GetDirectoryAsync(DirectoryPath path) =>
-            Task.FromResult<IDirectory>(new LocalDirectory(path));
+        public IDirectory GetDirectory(DirectoryPath path) => new LocalDirectory(path);
     }
 }

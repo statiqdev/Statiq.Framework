@@ -230,7 +230,7 @@ namespace Statiq.Html
                     return false;
                 }
 
-                return await outputFile.GetExistsAsync();
+                return await outputFile.GetExists();
             });
 
             if (validatedPath != null)

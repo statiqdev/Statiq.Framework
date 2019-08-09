@@ -52,6 +52,6 @@ namespace Statiq.Core
 
         /// <inheritdoc />
         protected override async Task<IEnumerable<IDocument>> ExecuteAsync(IDocument input, IExecutionContext context) =>
-            await context.ExecuteAsync(Children, input.Yield());
+            await context.ExecuteModulesAsync(Children, input.Yield());
     }
 }

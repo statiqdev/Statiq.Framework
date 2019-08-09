@@ -46,7 +46,7 @@ namespace Statiq.Common.Tests.IO
                 VirtualInputDirectory directory = GetVirtualInputDirectory(virtualPath);
 
                 // When
-                IEnumerable<IDirectory> directories = await directory.GetDirectoriesAsync(searchOption);
+                IEnumerable<IDirectory> directories = await directory.GetDirectories(searchOption);
 
                 // Then
                 CollectionAssert.AreEquivalent(expectedPaths, directories.Select(x => x.Path.FullPath));
@@ -60,7 +60,7 @@ namespace Statiq.Common.Tests.IO
                 VirtualInputDirectory directory = GetVirtualInputDirectory(virtualPath);
 
                 // When
-                IEnumerable<IDirectory> directories = await directory.GetDirectoriesAsync(searchOption);
+                IEnumerable<IDirectory> directories = await directory.GetDirectories(searchOption);
 
                 // Then
                 CollectionAssert.AreEquivalent(expectedPaths, directories.Select(x => x.Path.FullPath));
@@ -79,7 +79,7 @@ namespace Statiq.Common.Tests.IO
                 VirtualInputDirectory directory = GetVirtualInputDirectory(virtualPath);
 
                 // When
-                IEnumerable<IFile> files = await directory.GetFilesAsync(searchOption);
+                IEnumerable<IFile> files = await directory.GetFiles(searchOption);
 
                 // Then
                 CollectionAssert.AreEquivalent(expectedPaths, files.Select(x => x.Path.FullPath));
@@ -102,11 +102,11 @@ namespace Statiq.Common.Tests.IO
                 VirtualInputDirectory directory = GetVirtualInputDirectory(virtualPath);
 
                 // When
-                IFile file = await directory.GetFileAsync(filePath);
+                IFile file = await directory.GetFile(filePath);
 
                 // Then
                 Assert.AreEqual(expectedPath, file.Path.FullPath);
-                Assert.AreEqual(expectedExists, await file.GetExistsAsync());
+                Assert.AreEqual(expectedExists, await file.GetExists());
             }
 
             [Test]
@@ -120,7 +120,7 @@ namespace Statiq.Common.Tests.IO
                 VirtualInputDirectory directory = new VirtualInputDirectory(fileSystem, ".");
 
                 // When
-                IFile file = await directory.GetFileAsync("../c/foo.txt");
+                IFile file = await directory.GetFile("../c/foo.txt");
 
                 // Then
                 Assert.AreEqual("/a/b/c/foo.txt", file.Path.FullPath);
@@ -133,7 +133,7 @@ namespace Statiq.Common.Tests.IO
                 VirtualInputDirectory directory = GetVirtualInputDirectory(".");
 
                 // When, Then
-                await Should.ThrowAsync<ArgumentNullException>(async () => await directory.GetFileAsync(null));
+                await Should.ThrowAsync<ArgumentNullException>(async () => await directory.GetFile(null));
             }
 
             [Test]
@@ -144,7 +144,7 @@ namespace Statiq.Common.Tests.IO
                 FilePath filePath = "/a/test.txt";
 
                 // When, Then
-                await Should.ThrowAsync<ArgumentException>(async () => await directory.GetFileAsync(filePath));
+                await Should.ThrowAsync<ArgumentException>(async () => await directory.GetFile(filePath));
             }
         }
 
@@ -162,7 +162,7 @@ namespace Statiq.Common.Tests.IO
                 VirtualInputDirectory directory = GetVirtualInputDirectory(virtualPath);
 
                 // When
-                IDirectory result = await directory.GetDirectoryAsync(path);
+                IDirectory result = await directory.GetDirectory(path);
 
                 // Then
                 Assert.AreEqual(expected, result.Path.FullPath);
@@ -175,7 +175,7 @@ namespace Statiq.Common.Tests.IO
                 VirtualInputDirectory directory = GetVirtualInputDirectory(".");
 
                 // When, Then
-                await Should.ThrowAsync<ArgumentNullException>(async () => await directory.GetDirectoryAsync(null));
+                await Should.ThrowAsync<ArgumentNullException>(async () => await directory.GetDirectory(null));
             }
 
             [Test]
@@ -186,7 +186,7 @@ namespace Statiq.Common.Tests.IO
                 DirectoryPath directoryPath = "/a/b";
 
                 // When, Then
-                await Should.ThrowAsync<ArgumentException>(async () => await directory.GetDirectoryAsync(directoryPath));
+                await Should.ThrowAsync<ArgumentException>(async () => await directory.GetDirectory(directoryPath));
             }
         }
 
@@ -202,7 +202,7 @@ namespace Statiq.Common.Tests.IO
                 VirtualInputDirectory directory = GetVirtualInputDirectory(virtualPath);
 
                 // When
-                IDirectory result = await directory.GetParentAsync();
+                IDirectory result = await directory.GetParent();
 
                 // Then
                 Assert.AreEqual(expected, result?.Path.FullPath);
@@ -221,7 +221,7 @@ namespace Statiq.Common.Tests.IO
                 VirtualInputDirectory directory = GetVirtualInputDirectory(virtualPath);
 
                 // When
-                bool exists = await directory.GetExistsAsync();
+                bool exists = await directory.GetExists();
 
                 // Then
                 exists.ShouldBeTrue();
@@ -238,7 +238,7 @@ namespace Statiq.Common.Tests.IO
                 VirtualInputDirectory directory = GetVirtualInputDirectory(virtualPath);
 
                 // When
-                bool exists = await directory.GetExistsAsync();
+                bool exists = await directory.GetExists();
 
                 // Then
                 exists.ShouldBeFalse();
@@ -269,7 +269,7 @@ namespace Statiq.Common.Tests.IO
                 VirtualInputDirectory directory = new VirtualInputDirectory(fileSystem, ".");
 
                 // When, Then
-                await Should.ThrowAsync<NotSupportedException>(async () => await directory.DeleteAsync(false));
+                await Should.ThrowAsync<NotSupportedException>(async () => await directory.Delete(false));
             }
         }
 

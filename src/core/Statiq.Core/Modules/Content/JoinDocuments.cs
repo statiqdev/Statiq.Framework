@@ -78,7 +78,7 @@ namespace Statiq.Core
                         await contentStream.WriteAsync(delimeterBytes, 0, delimeterBytes.Length);
                     }
 
-                    using (Stream inputStream = await document.GetStreamAsync())
+                    using (Stream inputStream = await document.GetStream())
                     {
                         await inputStream.CopyToAsync(contentStream);
                     }

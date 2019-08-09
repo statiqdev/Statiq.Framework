@@ -14,17 +14,16 @@ namespace Statiq.CodeAnalysis
     {
         public const string CompiledKey = "_CompiledScript";
 
-        protected override async Task<IEnumerable<IDocument>> ExecuteAsync(IDocument input, IExecutionContext context)
+        protected override async IAsyncEnumerable<IDocument> ExecuteAsync(IDocument input, IExecutionContext context)
         {
             byte[] assembly = ScriptHelper.Compile(await input.GetStringAsync(), input, context);
             MemoryStream stream = context.MemoryStreamFactory.GetStream(assembly);
-            return input.Clone(
+            yield return input.Clone(
                 new MetadataItems
                 {
                     { CompiledKey, true }
                 },
-                context.GetContentProvider(stream))
-                .Yield();
+                context.GetContentProvider(stream));
         }
     }
 }

@@ -22,21 +22,21 @@ namespace Statiq.Common
         /// <summary>
         /// Gets the parent directory.
         /// </summary>
-        /// <returns>
+        /// <value>
         /// The parent directory or <c>null</c> if the directory is a root
-        /// </returns>
-        Task<IDirectory> GetParentAsync();
+        /// </value>
+        IDirectory Parent { get; }
 
         /// <summary>
         /// Creates the directory, including any necessary parent directories.
         /// </summary>
-        Task CreateAsync();
+        void Create();
 
         /// <summary>
         /// Deletes the directory.
         /// </summary>
         /// <param name="recursive">Will perform a recursive delete if set to <c>true</c>.</param>
-        Task DeleteAsync(bool recursive);
+        void Delete(bool recursive);
 
         /// <summary>
         /// Gets directories matching the specified filter and scope.
@@ -46,7 +46,7 @@ namespace Statiq.Common
         /// the current directory or should include all subdirectories.
         /// </param>
         /// <returns>Directories matching the filter and scope.</returns>
-        Task<IEnumerable<IDirectory>> GetDirectoriesAsync(SearchOption searchOption = SearchOption.TopDirectoryOnly);
+        IEnumerable<IDirectory> GetDirectories(SearchOption searchOption = SearchOption.TopDirectoryOnly);
 
         /// <summary>
         /// Gets files matching the specified filter and scope.
@@ -56,7 +56,7 @@ namespace Statiq.Common
         /// the current directory or should include all subdirectories.
         /// </param>
         /// <returns>Files matching the specified filter and scope.</returns>
-        Task<IEnumerable<IFile>> GetFilesAsync(SearchOption searchOption = SearchOption.TopDirectoryOnly);
+        IEnumerable<IFile> GetFiles(SearchOption searchOption = SearchOption.TopDirectoryOnly);
 
         /// <summary>
         /// Gets a directory by combining it's path with the current directory's path.
@@ -64,7 +64,7 @@ namespace Statiq.Common
         /// </summary>
         /// <param name="directory">The path of the directory.</param>
         /// <returns>The directory.</returns>
-        Task<IDirectory> GetDirectoryAsync(DirectoryPath directory);
+        IDirectory GetDirectory(DirectoryPath directory);
 
         /// <summary>
         /// Gets a file by combining it's path with the current directory's path.
@@ -72,6 +72,6 @@ namespace Statiq.Common
         /// </summary>
         /// <param name="path">The path of the file.</param>
         /// <returns>The file.</returns>
-        Task<IFile> GetFileAsync(FilePath path);
+        IFile GetFile(FilePath path);
     }
 }

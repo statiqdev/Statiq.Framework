@@ -321,7 +321,7 @@ namespace Statiq.Images
                 // Get the image
                 Image<Rgba32> image;
                 IImageFormat imageFormat;
-                using (Stream stream = await input.GetStreamAsync())
+                using (Stream stream = await input.GetStream())
                 {
                     image = SixLabors.ImageSharp.Image.Load(stream, out imageFormat);
                 }

@@ -52,10 +52,10 @@ namespace Statiq.Core
                 FilePath path = await _xsltPath.GetValueAsync(input, context);
                 if (path != null)
                 {
-                    IFile file = await context.FileSystem.GetInputFileAsync(path);
-                    if (await file.GetExistsAsync())
+                    IFile file = await context.FileSystem.GetInputFile(path);
+                    if (await file.GetExists())
                     {
-                        using (Stream fileStream = await file.OpenReadAsync())
+                        using (Stream fileStream = await file.OpenRead())
                         {
                             xslt.Load(XmlReader.Create(fileStream));
                         }
@@ -64,13 +64,13 @@ namespace Statiq.Core
             }
             else if (_xsltGeneration != null)
             {
-                IDocument xsltDocument = (await context.ExecuteAsync(_xsltGeneration, input.Yield())).Single();
-                using (Stream stream = await xsltDocument.GetStreamAsync())
+                IDocument xsltDocument = (await context.ExecuteModulesAsync(_xsltGeneration, input.Yield())).Single();
+                using (Stream stream = await xsltDocument.GetStream())
                 {
                     xslt.Load(XmlReader.Create(stream));
                 }
             }
-            using (Stream stream = await input.GetStreamAsync())
+            using (Stream stream = await input.GetStream())
             {
                 StringWriter str = new StringWriter();
                 using (XmlTextWriter writer = new XmlTextWriter(str))

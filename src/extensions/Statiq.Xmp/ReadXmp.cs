@@ -107,7 +107,7 @@ namespace Statiq.Xmp
             XmpDirectory xmpDirectory;
             try
             {
-                using (Stream stream = await input.GetStreamAsync())
+                using (Stream stream = await input.GetStream())
                 {
                     xmpDirectory = ImageMetadataReader.ReadMetadata(stream).OfType<XmpDirectory>().FirstOrDefault();
                 }
@@ -121,11 +121,11 @@ namespace Statiq.Xmp
                 // Try to read sidecarfile
                 if (input.Source != null)
                 {
-                    IFile sidecarFile = await context.FileSystem.GetInputFileAsync(input.Source.AppendExtension(".xmp"));
-                    if (await sidecarFile.GetExistsAsync())
+                    IFile sidecarFile = await context.FileSystem.GetInputFile(input.Source.AppendExtension(".xmp"));
+                    if (await sidecarFile.GetExists())
                     {
                         MemoryStream xmpBytes = new MemoryStream();
-                        using (Stream xmpStream = await sidecarFile.OpenReadAsync())
+                        using (Stream xmpStream = await sidecarFile.OpenRead())
                         {
                             await xmpStream.CopyToAsync(xmpBytes);
                         }

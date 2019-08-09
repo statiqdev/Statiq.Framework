@@ -37,7 +37,7 @@ namespace Statiq.Common
             if (context.Bool(Keys.UseStringContentFiles))
             {
                 // Use a temp file for strings
-                IFile tempFile = await context.FileSystem.GetTempFileAsync();
+                IFile tempFile = context.FileSystem.GetTempFile();
                 if (!string.IsNullOrEmpty(content))
                 {
                     await tempFile.WriteAllTextAsync(content);

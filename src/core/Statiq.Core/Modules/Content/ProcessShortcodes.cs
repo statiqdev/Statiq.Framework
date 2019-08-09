@@ -60,7 +60,7 @@ namespace Statiq.Core
             // Parse the input stream looking for shortcodes
             ShortcodeParser parser = new ShortcodeParser(_startDelimiter, _endDelimiter, context.Shortcodes);
             List<ShortcodeLocation> locations;
-            using (Stream inputStream = await input.GetStreamAsync())
+            using (Stream inputStream = await input.GetStream())
             {
                 locations = parser.Parse(inputStream);
             }
@@ -106,7 +106,7 @@ namespace Statiq.Core
             using (TextWriter writer = new StreamWriter(resultStream, Encoding.UTF8, 4096, true))
             {
                 // The input stream will get disposed when the reader is
-                using (TextReader reader = new StreamReader(await input.GetStreamAsync()))
+                using (TextReader reader = new StreamReader(await input.GetStream()))
                 {
                     int position = 0;
                     int length = 0;
@@ -121,7 +121,7 @@ namespace Statiq.Core
                         if (insertingLocation.Document != null)
                         {
                             // This will dispose the shortcode content stream when done
-                            using (TextReader insertingReader = new StreamReader(await insertingLocation.Document.GetStreamAsync()))
+                            using (TextReader insertingReader = new StreamReader(await insertingLocation.Document.GetStream()))
                             {
                                 Read(insertingReader, writer, null, ref buffer);
                             }

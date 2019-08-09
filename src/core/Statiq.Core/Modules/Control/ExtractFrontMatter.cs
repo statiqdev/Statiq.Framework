@@ -97,7 +97,7 @@ namespace Statiq.Core
                 string frontMatter = string.Join("\n", inputLines.Skip(startLine).Take(delimiterLine - startLine)) + "\n";
                 inputLines.RemoveRange(0, delimiterLine + 1);
                 string content = string.Join("\n", inputLines);
-                foreach (IDocument result in await context.ExecuteAsync(Children, input.Clone(await context.GetContentProviderAsync(frontMatter)).Yield()))
+                foreach (IDocument result in await context.ExecuteModulesAsync(Children, input.Clone(await context.GetContentProviderAsync(frontMatter)).Yield()))
                 {
                     return result.Clone(await context.GetContentProviderAsync(content)).Yield();
                 }

@@ -249,8 +249,7 @@ namespace Statiq.Common
         }
 
         /// <inheritdoc />
-        public async Task<Stream> GetStreamAsync() =>
-            ContentProvider == null ? Stream.Null : await ContentProvider.GetStreamAsync();
+        public Stream GetStream() => ContentProvider == null ? Stream.Null : ContentProvider.GetStream();
 
         /// <inheritdoc />
         public bool HasContent => ContentProvider != null;
@@ -265,7 +264,7 @@ namespace Statiq.Common
         public virtual async Task<int> GetCacheHashCodeAsync()
         {
             HashCode hash = default;
-            using (Stream stream = await GetStreamAsync())
+            using (Stream stream = GetStream())
             {
                 hash.Add(await Crc32.CalculateAsync(stream));
             }

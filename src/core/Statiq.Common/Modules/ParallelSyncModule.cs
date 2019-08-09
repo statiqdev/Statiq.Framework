@@ -8,10 +8,10 @@ namespace Statiq.Common
     /// <summary>
     /// A module that processes documents in parallel (with the option to process sequentially).
     /// </summary>
-    public abstract class SyncParallelModule : ParallelModule
+    public abstract class ParallelSyncModule : ParallelModule
     {
         /// <inheritdoc />
-        public override sealed IAsyncEnumerable<IDocument> ExecuteAsync(IExecutionContext context) =>
+        public sealed override IAsyncEnumerable<IDocument> ExecuteAsync(IExecutionContext context) =>
             Execute(context).ToAsyncEnumerable();
 
         /// <inheritdoc />
@@ -35,7 +35,6 @@ namespace Statiq.Common
             if (Parallel)
             {
                 return context.Inputs
-                    .ToEnumerable()
                     .AsParallel()
                     .AsOrdered()
                     .WithCancellation(context.CancellationToken)
@@ -45,7 +44,6 @@ namespace Statiq.Common
             }
 
             return context.Inputs
-                .ToEnumerable()
                 .Select(input => ExecuteInput(input, context, Execute))
                 .Where(x => x != null)
                 .SelectMany(x => x);

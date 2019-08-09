@@ -18,13 +18,13 @@ namespace Statiq.Common
 
         public override IEnumerable<FileSystemInfoBase> EnumerateFileSystemInfos()
         {
-            if (_directory.GetExistsAsync().Result)
+            if (_directory.Exists)
             {
-                foreach (IDirectory childDirectory in _directory.GetDirectoriesAsync().Result)
+                foreach (IDirectory childDirectory in _directory.GetDirectories())
                 {
                     yield return new DirectoryInfo(childDirectory);
                 }
-                foreach (IFile childFile in _directory.GetFilesAsync().Result)
+                foreach (IFile childFile in _directory.GetFiles())
                 {
                     yield return new FileInfo(childFile);
                 }
@@ -35,15 +35,15 @@ namespace Statiq.Common
         {
             if (string.Equals(name, "..", StringComparison.Ordinal))
             {
-                return new DirectoryInfo(_directory.GetDirectoryAsync("..").Result, true);
+                return new DirectoryInfo(_directory.GetDirectory(".."), true);
             }
-            return _directory.GetDirectoriesAsync().Result
+            return _directory.GetDirectories()
                 .Where(x => x.Path.Name == name)
                 .Select(x => new DirectoryInfo(x))
                 .FirstOrDefault();
         }
 
-        public override FileInfoBase GetFile(string path) => new FileInfo(_directory.GetFileAsync(path).Result);
+        public override FileInfoBase GetFile(string path) => new FileInfo(_directory.GetFile(path));
 
         public override string Name => _isParentPath ? ".." : _directory.Path.Name;
 
@@ -53,8 +53,8 @@ namespace Statiq.Common
         {
             get
             {
-                IDirectory parent = _directory.GetParentAsync().Result;
-                return parent == null ? null : new DirectoryInfo(_directory.GetParentAsync().Result);
+                IDirectory parent = _directory.Parent;
+                return parent == null ? null : new DirectoryInfo(_directory.Parent);
             }
         }
     }

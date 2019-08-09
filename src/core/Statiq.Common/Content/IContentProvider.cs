@@ -12,6 +12,6 @@ namespace Statiq.Common
         /// Gets the content stream. The returned stream should be disposed after use.
         /// </summary>
         /// <returns>The content stream for a document.</returns>
-        Task<Stream> GetStreamAsync();
+        Stream GetStream();
     }
 }

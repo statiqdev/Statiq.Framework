@@ -26,7 +26,7 @@ namespace Statiq.Common
         private int _limit = int.MaxValue;
 
         /// <summary>
-        /// Specifies which metakey should be used for the document content
+        /// Specifies which metadata key should be used for the document content
         /// </summary>
         /// <param name="contentKey">The name of the content property.</param>
         /// <returns>The current module instance.</returns>
@@ -90,12 +90,12 @@ namespace Statiq.Common
         }
 
         /// <inheritdoc />
-        public async Task<IEnumerable<IDocument>> ExecuteAsync(IExecutionContext context)
+        public IAsyncEnumerable<IDocument> ExecuteAsync(IExecutionContext context)
         {
-            IEnumerable<TItem> items = await GetItemsAsync(context);
+            IAsyncEnumerable<TItem> items = GetItemsAsync(context);
             return items == null
-                ? Array.Empty<IDocument>()
-                : await items.Where(x => x != null).Take(_limit).ParallelSelectAsync(ReadDataAsync);
+                ? AsyncEnumerable.Empty<IDocument>()
+                : items.Where(x => x != null).Take(_limit).ParallelSelectAsync(ReadDataAsync);
 
             async Task<IDocument> ReadDataAsync(TItem item)
             {
@@ -105,7 +105,7 @@ namespace Statiq.Common
                 // Convert whatever we have into a dictionary
                 IDictionary<string, object> dict = GetDictionary(item);
 
-                // If we have a whitelist, remove anything not whitelisted
+                // If we have a allow list, remove anything not listed
                 if (_includedKeys.Count > 0)
                 {
                     dict = dict.Where(kvp => _includedKeys.Contains(kvp.Key)).ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
@@ -140,7 +140,7 @@ namespace Statiq.Common
         /// </summary>
         /// <param name="context">The current execution context.</param>
         /// <returns>The objects to create documents from.</returns>
-        protected abstract Task<IEnumerable<TItem>> GetItemsAsync(IExecutionContext context);
+        protected abstract IAsyncEnumerable<TItem> GetItemsAsync(IExecutionContext context);
 
         /// <summary>
         /// Used to convert each object from <see cref="GetItemsAsync(IExecutionContext)"/> into a IDictionary&lt;string, object&gt;.

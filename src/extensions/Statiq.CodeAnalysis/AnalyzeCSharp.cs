@@ -467,7 +467,7 @@ namespace Statiq.CodeAnalysis
 
             async Task AddSyntaxTreesAsync(IDocument input)
             {
-                using (Stream stream = await input.GetStreamAsync())
+                using (Stream stream = await input.GetStream())
                 {
                     SourceText sourceText = SourceText.From(stream);
                     syntaxTrees.Add(CSharpSyntaxTree.ParseText(
@@ -479,7 +479,7 @@ namespace Statiq.CodeAnalysis
 
         private async Task<Compilation> AddAssemblyReferencesAsync(IExecutionContext context, List<ISymbol> symbols, Compilation compilation)
         {
-            IEnumerable<IFile> assemblyFiles = await context.FileSystem.GetInputFilesAsync(_assemblyGlobs);
+            IEnumerable<IFile> assemblyFiles = await context.FileSystem.GetInputFiles(_assemblyGlobs);
             assemblyFiles = await assemblyFiles.WhereAsync(async x => (x.Path.Extension == ".dll" || x.Path.Extension == ".exe") && await x.GetExistsAsync());
             MetadataReference[] assemblyReferences = (await assemblyFiles.SelectAsync(CreateMetadataReferences)).ToArray();
             if (assemblyReferences.Length > 0)
@@ -494,8 +494,8 @@ namespace Statiq.CodeAnalysis
             async Task<MetadataReference> CreateMetadataReferences(IFile assemblyFile)
             {
                 // Create the metadata reference for the compilation
-                IFile xmlFile = await context.FileSystem.GetFileAsync(assemblyFile.Path.ChangeExtension("xml"));
-                if (await xmlFile.GetExistsAsync())
+                IFile xmlFile = await context.FileSystem.GetFile(assemblyFile.Path.ChangeExtension("xml"));
+                if (await xmlFile.GetExists())
                 {
                     Trace.Verbose($"Creating metadata reference for assembly {assemblyFile.Path.FullPath} with XML documentation file at {xmlFile.Path.FullPath}");
                     return MetadataReference.CreateFromFile(
@@ -516,7 +516,7 @@ namespace Statiq.CodeAnalysis
                 LogWriter = log
             });
             AdhocWorkspace workspace = new AdhocWorkspace();
-            IEnumerable<IFile> projectFiles = await context.FileSystem.GetInputFilesAsync(_projectGlobs);
+            IEnumerable<IFile> projectFiles = await context.FileSystem.GetInputFiles(_projectGlobs);
             projectFiles = await projectFiles.WhereAsync(async x => x.Path.Extension == ".csproj" && await x.GetExistsAsync());
             List<Project> projects = new List<Project>();
             foreach (IFile projectFile in projectFiles)
@@ -551,7 +551,7 @@ namespace Statiq.CodeAnalysis
 
         private async Task<Compilation> AddSolutionReferencesAsync(IExecutionContext context, List<ISymbol> symbols, Compilation compilation)
         {
-            IEnumerable<IFile> solutionFiles = await context.FileSystem.GetInputFilesAsync(_solutionGlobs);
+            IEnumerable<IFile> solutionFiles = await context.FileSystem.GetInputFiles(_solutionGlobs);
             solutionFiles = await solutionFiles.WhereAsync(async x => x.Path.Extension == ".sln" && await x.GetExistsAsync());
             foreach (IFile solutionFile in solutionFiles)
             {

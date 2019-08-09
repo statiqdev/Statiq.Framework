@@ -29,9 +29,9 @@ namespace Statiq.Common
         }
 
         /// <inheritdoc />
-        public sealed override IAsyncEnumerable<IDocument> ExecuteAsync(IExecutionContext context) =>
+        public sealed override async IAsyncEnumerable<IDocument> ExecuteAsync(IExecutionContext context) =>
             Children.Count > 0
-                ? ExecuteAsync(context, context.ExecuteAsync(Children, context.Inputs))
+                ? ExecuteAsync(context, await context.ExecuteModulesAsync(Children, context.Inputs))
                 : AsyncEnumerable.Empty<IDocument>();
 
         /// <inheritdoc />
@@ -45,6 +45,6 @@ namespace Statiq.Common
         /// <param name="context">The execution context.</param>
         /// <param name="childOutputs">The output documents from the child modules.</param>
         /// <returns>The output documents of this module.</returns>
-        protected abstract IAsyncEnumerable<IDocument> ExecuteAsync(IExecutionContext context, IAsyncEnumerable<IDocument> childOutputs);
+        protected abstract IAsyncEnumerable<IDocument> ExecuteAsync(IExecutionContext context, ImmutableArray<IDocument> childOutputs);
     }
 }

@@ -146,8 +146,8 @@ namespace Statiq.Html
             string link = context.GetLink(path);
 
             // Download the resource, but only if we haven't already written it to disk
-            IFile outputFile = await context.FileSystem.GetOutputFileAsync(path);
-            if (!await outputFile.GetExistsAsync())
+            IFile outputFile = await context.FileSystem.GetOutputFile(path);
+            if (!await outputFile.GetExists())
             {
                 Common.Trace.Verbose($"Downloading resource from {uri} to {path.FullPath}");
 
@@ -166,7 +166,7 @@ namespace Statiq.Html
                 response.EnsureSuccessStatusCode();
 
                 // Copy the result to output
-                using (Stream outputStream = await outputFile.OpenWriteAsync())
+                using (Stream outputStream = await outputFile.OpenWrite())
                 {
                     await response.Content.CopyToAsync(outputStream);
                 }

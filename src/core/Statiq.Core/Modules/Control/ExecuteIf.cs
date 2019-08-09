@@ -194,7 +194,7 @@ namespace Statiq.Core
                 // Run the modules on the documents that satisfy the predicate
                 if (matched.Count > 0)
                 {
-                    results.AddRange(await context.ExecuteAsync(condition, matched));
+                    results.AddRange(await context.ExecuteModulesAsync(condition, matched));
                 }
 
                 // Continue with the documents that don't satisfy the predicate

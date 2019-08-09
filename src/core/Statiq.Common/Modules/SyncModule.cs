@@ -16,7 +16,7 @@ namespace Statiq.Common
     public abstract class SyncModule : Module
     {
         /// <inheritdoc />
-        public override sealed IAsyncEnumerable<IDocument> ExecuteAsync(IExecutionContext context) =>
+        public sealed override IAsyncEnumerable<IDocument> ExecuteAsync(IExecutionContext context) =>
             Execute(context).ToAsyncEnumerable();
 
         /// <inheritdoc />
@@ -37,7 +37,6 @@ namespace Statiq.Common
         /// <returns>The result documents.</returns>
         protected virtual IEnumerable<IDocument> Execute(IExecutionContext context) =>
             context.Inputs
-                .ToEnumerable()
                 .Select(input => ExecuteInput(input, context, Execute))
                 .Where(x => x != null)
                 .SelectMany(x => x);

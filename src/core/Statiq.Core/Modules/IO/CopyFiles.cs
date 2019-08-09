@@ -99,7 +99,7 @@ namespace Statiq.Core
         {
             if (value != null)
             {
-                IEnumerable<IFile> inputFiles = await context.FileSystem.GetInputFilesAsync(value);
+                IEnumerable<IFile> inputFiles = await context.FileSystem.GetInputFiles(value);
                 inputFiles = await inputFiles.WhereAsync(async x => _predicate == null || await _predicate(x));
                 return (await inputFiles.SelectAsync(async file =>
                 {
@@ -107,7 +107,7 @@ namespace Statiq.Core
                     {
                         // Get the default destination file
                         FilePath relativePath = file.Path.GetRelativeInputPath(context);
-                        IFile destination = await context.FileSystem.GetOutputFileAsync(relativePath);
+                        IFile destination = await context.FileSystem.GetOutputFile(relativePath);
 
                         // Calculate an alternate destination if needed
                         if (_destinationPath != null)

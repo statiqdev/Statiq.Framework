@@ -27,7 +27,7 @@ namespace Statiq.Html
         {
             try
             {
-                using (Stream stream = await document.GetStreamAsync())
+                using (Stream stream = await document.GetStream())
                 {
                     return await parser.ParseAsync(stream);
                 }

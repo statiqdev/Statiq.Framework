@@ -9,7 +9,7 @@ using Statiq.Common;
 namespace Statiq.CodeAnalysis
 {
     /// <summary>
-    /// Reads all the source files from a specified msbuild solution.
+    /// Reads all the source files from a specified MSBuild solution.
     /// This module will be executed once and input documents will be ignored if a search path is
     /// specified. Otherwise, if a delegate is specified the module will be executed once per input
     /// document and the resulting output documents will be aggregated.

@@ -44,7 +44,7 @@ namespace Statiq.Common
                 }
 
                 // Iterate the inputs
-                await foreach (IDocument input in context.Inputs)
+                foreach (IDocument input in context.Inputs)
                 {
                     // If the config requires a document, evaluate it each time
                     if (_config.RequiresDocument)

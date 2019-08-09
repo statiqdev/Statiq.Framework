@@ -43,7 +43,10 @@ namespace Statiq.Common
                     value = await _config.GetValueAsync(null, context);
                 }
 
-                await foreach (IDocument result in ParallelExecuteAsync(context, (i, c) => ParallelExecuteAsync(i, c, value)))
+                IAsyncEnumerable<IDocument> results = context.Inputs
+                    .ToAsyncEnumerable()
+                    .ParallelSelectManyAsync(input => ParallelExecuteAsync(input, context, value), context.CancellationToken);
+                await foreach (IDocument result in results.WithCancellation(context.CancellationToken))
                 {
                     yield return result;
                 }

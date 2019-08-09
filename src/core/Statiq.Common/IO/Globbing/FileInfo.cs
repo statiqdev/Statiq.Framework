@@ -16,6 +16,6 @@ namespace Statiq.Common
 
         public override string FullName => _file.Path.FullPath;
 
-        public override DirectoryInfoBase ParentDirectory => new DirectoryInfo(_file.GetDirectoryAsync().Result);
+        public override DirectoryInfoBase ParentDirectory => new DirectoryInfo(_file.Directory);
     }
 }

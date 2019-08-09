@@ -20,16 +20,16 @@ namespace Statiq.Common
         /// <summary>
         /// Gets the directory of the file.
         /// </summary>
-        /// <returns>
+        /// <value>
         /// The directory of the file.
-        /// </returns>
-        Task<IDirectory> GetDirectoryAsync();
+        /// </value>
+        IDirectory Directory { get; }
 
         /// <summary>
         /// Gets the length of the file.
         /// </summary>
-        /// <returns>The length of the file.</returns>
-        Task<long> GetLengthAsync();
+        /// <value>The length of the file.</value>
+        long Length { get; }
 
         /// <summary>
         /// Copies the file to the specified destination file.
@@ -48,7 +48,7 @@ namespace Statiq.Common
         /// <summary>
         /// Deletes the file.
         /// </summary>
-        Task DeleteAsync();
+        void Delete();
 
         /// <summary>
         /// Reads all text from the file.
@@ -68,7 +68,7 @@ namespace Statiq.Common
         /// will be thrown.
         /// </summary>
         /// <returns>The stream.</returns>
-        Task<Stream> OpenReadAsync();
+        Stream OpenRead();
 
         /// <summary>
         /// Opens the file for writing. This will either create the file
@@ -76,7 +76,7 @@ namespace Statiq.Common
         /// </summary>
         /// <param name="createDirectory">Will create any needed directories that don't already exist if set to <c>true</c>.</param>
         /// <returns>The stream.</returns>
-        Task<Stream> OpenWriteAsync(bool createDirectory = true);
+        Stream OpenWrite(bool createDirectory = true);
 
         /// <summary>
         /// Opens the file for writing. This will either create the file
@@ -84,7 +84,7 @@ namespace Statiq.Common
         /// </summary>
         /// <param name="createDirectory">Will create any needed directories that don't already exist if set to <c>true</c>.</param>
         /// <returns>The stream.</returns>
-        Task<Stream> OpenAppendAsync(bool createDirectory = true);
+        Stream OpenAppend(bool createDirectory = true);
 
         /// <summary>
         /// Opens the file for reading and writing. This will either create the file
@@ -92,6 +92,6 @@ namespace Statiq.Common
         /// </summary>
         /// <param name="createDirectory">Will create any needed directories that don't already exist if set to <c>true</c>.</param>
         /// <returns>The stream.</returns>
-        Task<Stream> OpenAsync(bool createDirectory = true);
+        Stream Open(bool createDirectory = true);
     }
 }

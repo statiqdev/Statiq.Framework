@@ -124,7 +124,7 @@ namespace Statiq.Core
             {
                 // First add the inherited metadata to the temp dictionary
                 List<DirectoryPath> sourcePaths = new List<DirectoryPath>();
-                DirectoryPath inputPath = await context.FileSystem.GetContainingInputPathAsync(input.Source);
+                DirectoryPath inputPath = await context.FileSystem.GetContainingInputPath(input.Source);
                 if (inputPath != null)
                 {
                     DirectoryPath dir = input.Source.Directory;

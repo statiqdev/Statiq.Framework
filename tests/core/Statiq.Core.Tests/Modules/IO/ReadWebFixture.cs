@@ -116,7 +116,7 @@ namespace Statiq.Core.Tests.Modules.IO
                 TestDocument result = await ExecuteAsync(context, download).SingleAsync();
 
                 // Then
-                using (Stream stream = await result.GetStreamAsync())
+                using (Stream stream = await result.GetStream())
                 {
                     stream.ReadByte().ShouldNotBe(-1);
                 }
@@ -146,7 +146,7 @@ namespace Statiq.Core.Tests.Modules.IO
                 TestDocument result = await ExecuteAsync(context, download).SingleAsync();
 
                 // Then
-                using (Stream stream = await result.GetStreamAsync())
+                using (Stream stream = await result.GetStream())
                 {
                     stream.ReadByte().ShouldNotBe(-1);
                 }

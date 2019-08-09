@@ -28,7 +28,7 @@ namespace Statiq.Common
         /// <returns>The result documents.</returns>
         public virtual async IAsyncEnumerable<IDocument> ExecuteAsync(IExecutionContext context)
         {
-            await foreach (IDocument input in context.Inputs)
+            foreach (IDocument input in context.Inputs)
             {
                 IAsyncEnumerable<IDocument> results = ExecuteInput(input, context, ExecuteAsync);
                 if (results != null)
@@ -41,6 +41,9 @@ namespace Statiq.Common
             }
         }
 
+        /// <summary>
+        /// Executes a function given an input document, checks for cancellation, and traces any exceptions.
+        /// </summary>
         internal static T ExecuteInput<T>(
             IDocument input,
             IExecutionContext context,

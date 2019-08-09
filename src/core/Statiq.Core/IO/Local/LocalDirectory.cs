@@ -31,35 +31,30 @@ namespace Statiq.Core
             _directory = new DirectoryInfo(Path.FullPath);
         }
 
-        public Task<bool> GetExistsAsync() => Task.FromResult(_directory.Exists);
+        public bool Exists => _directory.Exists;
 
-        public Task<IDirectory> GetParentAsync()
+        public IDirectory Parent
         {
-            DirectoryInfo parent = _directory.Parent;
-            return Task.FromResult<IDirectory>(parent == null ? null : new LocalDirectory(new DirectoryPath(parent.FullName)));
+            get
+            {
+                DirectoryInfo parent = _directory.Parent;
+                return parent == null ? null : new LocalDirectory(new DirectoryPath(parent.FullName));
+            }
         }
 
-        public Task CreateAsync()
-        {
-            LocalFileProvider.RetryPolicy.Execute(() => _directory.Create());
-            return Task.CompletedTask;
-        }
+        public void Create() => LocalFileProvider.RetryPolicy.Execute(() => _directory.Create());
 
-        public Task DeleteAsync(bool recursive)
-        {
-            LocalFileProvider.RetryPolicy.Execute(() => _directory.Delete(recursive));
-            return Task.CompletedTask;
-        }
+        public void Delete(bool recursive) => LocalFileProvider.RetryPolicy.Execute(() => _directory.Delete(recursive));
 
-        public Task<IEnumerable<IDirectory>> GetDirectoriesAsync(SearchOption searchOption = SearchOption.TopDirectoryOnly) =>
-            Task.FromResult(LocalFileProvider.RetryPolicy.Execute(() =>
-                _directory.GetDirectories("*", searchOption).Select(directory => (IDirectory)new LocalDirectory(directory.FullName))));
+        public IEnumerable<IDirectory> GetDirectories(SearchOption searchOption = SearchOption.TopDirectoryOnly) =>
+            LocalFileProvider.RetryPolicy.Execute(() =>
+                _directory.GetDirectories("*", searchOption).Select(directory => (IDirectory)new LocalDirectory(directory.FullName)));
 
-        public Task<IEnumerable<IFile>> GetFilesAsync(SearchOption searchOption = SearchOption.TopDirectoryOnly) =>
-            Task.FromResult(LocalFileProvider.RetryPolicy.Execute(() =>
-                _directory.GetFiles("*", searchOption).Select(file => (IFile)new LocalFile(file.FullName))));
+        public IEnumerable<IFile> GetFiles(SearchOption searchOption = SearchOption.TopDirectoryOnly) =>
+            LocalFileProvider.RetryPolicy.Execute(() =>
+                _directory.GetFiles("*", searchOption).Select(file => (IFile)new LocalFile(file.FullName)));
 
-        public Task<IDirectory> GetDirectoryAsync(DirectoryPath path)
+        public IDirectory GetDirectory(DirectoryPath path)
         {
             if (path == null)
             {
@@ -70,10 +65,10 @@ namespace Statiq.Core
                 throw new ArgumentException("Path must be relative", nameof(path));
             }
 
-            return Task.FromResult<IDirectory>(new LocalDirectory(Path.Combine(path)));
+            return new LocalDirectory(Path.Combine(path));
         }
 
-        public Task<IFile> GetFileAsync(FilePath path)
+        public IFile GetFile(FilePath path)
         {
             if (path == null)
             {
@@ -84,7 +79,7 @@ namespace Statiq.Core
                 throw new ArgumentException("Path must be relative", nameof(path));
             }
 
-            return Task.FromResult<IFile>(new LocalFile(Path.CombineFile(path)));
+            return new LocalFile(Path.CombineFile(path));
         }
 
         public string ToDisplayString() => Path.ToDisplayString();

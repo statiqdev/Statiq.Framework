@@ -21,70 +21,61 @@ namespace Statiq.Testing
 
         NormalizedPath IFileSystemEntry.Path => Path;
 
-        public Task<bool> GetExistsAsync() => Task.FromResult(_fileProvider.Directories.Contains(Path.FullPath));
+        public bool Exists => _fileProvider.Directories.Contains(Path.FullPath);
 
-        public Task<IDirectory> GetParentAsync()
+        public IDirectory Parent
         {
-            DirectoryPath parentPath = Path.Parent;
-            if (parentPath == null)
+            get
             {
-                return Task.FromResult<IDirectory>(null);
+                DirectoryPath parentPath = Path.Parent;
+                return parentPath == null ? null : new TestDirectory(_fileProvider, parentPath);
             }
-            return Task.FromResult<IDirectory>(new TestDirectory(_fileProvider, parentPath));
         }
 
-        public Task CreateAsync()
-        {
-            _fileProvider.Directories.Add(Path.FullPath);
-            return Task.CompletedTask;
-        }
+        public void Create() => _fileProvider.Directories.Add(Path.FullPath);
 
-        public Task DeleteAsync(bool recursive)
-        {
-            _fileProvider.Directories.Remove(Path.FullPath);
-            return Task.CompletedTask;
-        }
+        public void Delete(bool recursive) => _fileProvider.Directories.Remove(Path.FullPath);
 
-        public Task<IEnumerable<IDirectory>> GetDirectoriesAsync(SearchOption searchOption = SearchOption.TopDirectoryOnly)
+        public IEnumerable<IDirectory> GetDirectories(SearchOption searchOption = SearchOption.TopDirectoryOnly)
         {
             if (searchOption == SearchOption.TopDirectoryOnly)
             {
                 string adjustedPath = Path.FullPath.EndsWith("/", StringComparison.Ordinal)
                     ? Path.FullPath.Substring(0, Path.FullPath.Length - 1)
                     : Path.FullPath;
-                return Task.FromResult(_fileProvider.Directories
+                return _fileProvider.Directories
                     .Where(x => x.StartsWith(adjustedPath + "/")
                         && adjustedPath.Count(c => c == '/') == x.Count(c => c == '/') - 1
                         && Path.FullPath != x)
                     .Select(x => new TestDirectory(_fileProvider, x))
-                    .Cast<IDirectory>());
+                    .Cast<IDirectory>();
             }
-            return Task.FromResult(_fileProvider.Directories
+            return _fileProvider.Directories
                 .Where(x => x.StartsWith(Path.FullPath + "/") && Path.FullPath != x)
                 .Select(x => new TestDirectory(_fileProvider, x))
-                .Cast<IDirectory>());
+                .Cast<IDirectory>();
         }
 
-        public Task<IEnumerable<IFile>> GetFilesAsync(SearchOption searchOption = SearchOption.TopDirectoryOnly)
+        public IEnumerable<IFile> GetFiles(SearchOption searchOption = SearchOption.TopDirectoryOnly)
         {
             if (searchOption == SearchOption.TopDirectoryOnly)
             {
                 string adjustedPath = Path.FullPath.EndsWith("/", StringComparison.Ordinal)
                     ? Path.FullPath.Substring(0, Path.FullPath.Length - 1)
                     : Path.FullPath;
-                return Task.FromResult(_fileProvider.Files.Keys
+                return _fileProvider.Files.Keys
                     .Where(x => x.StartsWith(adjustedPath)
                         && adjustedPath.Count(c => c == '/') == x.Count(c => c == '/') - 1)
                     .Select(x => new TestFile(_fileProvider, x))
-                    .Cast<IFile>());
+                    .Cast<IFile>();
             }
-            return Task.FromResult(_fileProvider.Files.Keys
+            return _fileProvider.Files.Keys
                 .Where(x => x.StartsWith(Path.FullPath))
                 .Select(x => new TestFile(_fileProvider, x))
-                .Cast<IFile>());
+                .Cast<IFile>();
         }
 
-        public Task<IDirectory> GetDirectoryAsync(DirectoryPath path)
+        public IDirectory GetDirectory(DirectoryPath path)
         {
             if (path == null)
             {
@@ -95,10 +86,10 @@ namespace Statiq.Testing
                 throw new ArgumentException("Path must be relative", nameof(path));
             }
 
-            return Task.FromResult<IDirectory>(new TestDirectory(_fileProvider, Path.Combine(path)));
+            return new TestDirectory(_fileProvider, Path.Combine(path));
         }
 
-        public Task<IFile> GetFileAsync(FilePath path)
+        public IFile GetFile(FilePath path)
         {
             if (path == null)
             {
@@ -109,7 +100,7 @@ namespace Statiq.Testing
                 throw new ArgumentException("Path must be relative", nameof(path));
             }
 
-            return Task.FromResult<IFile>(new TestFile(_fileProvider, Path.CombineFile(path)));
+            return new TestFile(_fileProvider, Path.CombineFile(path));
         }
 
         public string ToDisplayString() => Path.ToSafeDisplayString();

@@ -21,7 +21,7 @@ namespace Statiq.Common
         /// current input paths.
         /// </param>
         /// <returns>An input file.</returns>
-        public static async Task<IFile> GetInputFileAsync(this IReadOnlyFileSystem fileSystem, FilePath path)
+        public static IFile GetInputFile(this IReadOnlyFileSystem fileSystem, FilePath path)
         {
             _ = fileSystem ?? throw new ArgumentNullException(nameof(fileSystem));
             _ = path ?? throw new ArgumentNullException(nameof(path));
@@ -31,12 +31,12 @@ namespace Statiq.Common
                 IFile notFound = null;
                 foreach (DirectoryPath inputPath in fileSystem.InputPaths.Reverse())
                 {
-                    IFile file = await fileSystem.GetFileAsync(fileSystem.RootPath.Combine(inputPath).CombineFile(path));
+                    IFile file = fileSystem.GetFile(fileSystem.RootPath.Combine(inputPath).CombineFile(path));
                     if (notFound == null)
                     {
                         notFound = file;
                     }
-                    if (await file.GetExistsAsync())
+                    if (file.Exists)
                     {
                         return file;
                     }
@@ -47,7 +47,7 @@ namespace Statiq.Common
                 }
                 return notFound;
             }
-            return await fileSystem.GetFileAsync(path);
+            return fileSystem.GetFile(path);
         }
 
         /// <summary>
@@ -57,8 +57,8 @@ namespace Statiq.Common
         /// <param name="fileSystem">The file system.</param>
         /// <param name="patterns">The globbing patterns and/or absolute paths.</param>
         /// <returns>All input files that match the globbing patterns and/or absolute paths.</returns>
-        public static async Task<IEnumerable<IFile>> GetInputFilesAsync(this IReadOnlyFileSystem fileSystem, params string[] patterns) =>
-            await fileSystem.GetInputFilesAsync((IEnumerable<string>)patterns);
+        public static IEnumerable<IFile> GetInputFiles(this IReadOnlyFileSystem fileSystem, params string[] patterns) =>
+            fileSystem.GetInputFiles((IEnumerable<string>)patterns);
 
         /// <summary>
         /// Gets matching input files based on globbing patterns and/or absolute paths. If any absolute paths
@@ -67,15 +67,15 @@ namespace Statiq.Common
         /// <param name="fileSystem">The file system.</param>
         /// <param name="patterns">The globbing patterns and/or absolute paths.</param>
         /// <returns>All input files that match the globbing patterns and/or absolute paths.</returns>
-        public static async Task<IEnumerable<IFile>> GetInputFilesAsync(this IReadOnlyFileSystem fileSystem, IEnumerable<string> patterns) =>
-            await fileSystem.GetFilesAsync(await fileSystem.GetInputDirectoryAsync(), patterns);
+        public static IEnumerable<IFile> GetInputFiles(this IReadOnlyFileSystem fileSystem, IEnumerable<string> patterns) =>
+            fileSystem.GetFiles(fileSystem.GetInputDirectory(), patterns);
 
         /// <summary>
         /// Gets all absolute input directories.
         /// </summary>
         /// <returns>The absolute input directories.</returns>
-        public static async Task<IReadOnlyList<IDirectory>> GetInputDirectoriesAsync(this IReadOnlyFileSystem fileSystem) =>
-            (await fileSystem.InputPaths.SelectAsync(async x => await fileSystem.GetRootDirectoryAsync(x))).ToImmutableArray();
+        public static IEnumerable<IDirectory> GetInputDirectories(this IReadOnlyFileSystem fileSystem) =>
+            fileSystem.InputPaths.Select(x => fileSystem.GetRootDirectory(x)).ToImmutableArray();
 
         /// <summary>
         /// Gets the absolute input path that contains the specified file or directory. If the provided
@@ -89,7 +89,7 @@ namespace Statiq.Common
         /// <param name="path">The file path.</param>
         /// <returns>The input path that contains the specified file,
         /// or <c>null</c> if no input path does.</returns>
-        public static async Task<DirectoryPath> GetContainingInputPathAsync(this IReadOnlyFileSystem fileSystem, NormalizedPath path)
+        public static DirectoryPath GetContainingInputPath(this IReadOnlyFileSystem fileSystem, NormalizedPath path)
         {
             _ = fileSystem ?? throw new ArgumentNullException(nameof(fileSystem));
             _ = path ?? throw new ArgumentNullException(nameof(path));
@@ -101,18 +101,16 @@ namespace Statiq.Common
 
             if (path is FilePath filePath)
             {
-                IFile file = await fileSystem.GetInputFileAsync(filePath);
-                return await file.GetExistsAsync() ? await fileSystem.GetContainingInputPathAsync(file.Path) : null;
+                IFile file = fileSystem.GetInputFile(filePath);
+                return file.Exists ? fileSystem.GetContainingInputPath(file.Path) : null;
             }
             if (path is DirectoryPath directoryPath)
             {
                 IEnumerable<(DirectoryPath x, IDirectory)> rootDirectories =
-                    await fileSystem.InputPaths
+                    fileSystem.InputPaths
                         .Reverse()
-                        .SelectAsync(async x => (x, await fileSystem.GetRootDirectoryAsync(x.Combine(directoryPath))));
-                IEnumerable<(DirectoryPath x, IDirectory)> existingRootDirectories =
-                    await rootDirectories
-                        .WhereAsync(async x => await x.Item2.GetExistsAsync());
+                        .Select(x => (x, fileSystem.GetRootDirectory(x.Combine(directoryPath))));
+                IEnumerable<(DirectoryPath x, IDirectory)> existingRootDirectories = rootDirectories.Where(x => x.Item2.Exists);
                 return existingRootDirectories.Select(x => fileSystem.RootPath.Combine(x.Item1)).FirstOrDefault();
             }
 
@@ -172,8 +170,8 @@ namespace Statiq.Common
         /// current output path.
         /// </param>
         /// <returns>An output file.</returns>
-        public static async Task<IFile> GetOutputFileAsync(this IReadOnlyFileSystem fileSystem, FilePath path) =>
-            await fileSystem.GetFileAsync(fileSystem.GetOutputPath(path));
+        public static IFile GetOutputFile(this IReadOnlyFileSystem fileSystem, FilePath path) =>
+            fileSystem.GetFile(fileSystem.GetOutputPath(path));
 
         /// <summary>
         /// Gets a directory representing an output.
@@ -187,8 +185,8 @@ namespace Statiq.Common
         /// output directory is returned.
         /// </param>
         /// <returns>An output directory.</returns>
-        public static async Task<IDirectory> GetOutputDirectoryAsync(this IReadOnlyFileSystem fileSystem, DirectoryPath path = null) =>
-            await fileSystem.GetDirectoryAsync(fileSystem.GetOutputPath(path));
+        public static IDirectory GetOutputDirectory(this IReadOnlyFileSystem fileSystem, DirectoryPath path = null) =>
+            fileSystem.GetDirectory(fileSystem.GetOutputPath(path));
 
         /// <summary>
         /// Gets a temp file path by combining it with the root path and temp path.
@@ -227,16 +225,16 @@ namespace Statiq.Common
         /// current temp path.
         /// </param>
         /// <returns>A temp file.</returns>
-        public static async Task<IFile> GetTempFileAsync(this IReadOnlyFileSystem fileSystem, FilePath path) =>
-            await fileSystem.GetFileAsync(fileSystem.GetTempPath(path));
+        public static IFile GetTempFile(this IReadOnlyFileSystem fileSystem, FilePath path) =>
+            fileSystem.GetFile(fileSystem.GetTempPath(path));
 
         /// <summary>
         /// Gets a file representing a temp file with a random file name.
         /// </summary>
         /// <param name="fileSystem">The file system.</param>
         /// <returns>A temp file.</returns>
-        public static async Task<IFile> GetTempFileAsync(this IReadOnlyFileSystem fileSystem) =>
-            await fileSystem.GetTempFileAsync(Path.ChangeExtension(Path.GetRandomFileName(), "tmp"));
+        public static IFile GetTempFile(this IReadOnlyFileSystem fileSystem) =>
+            fileSystem.GetTempFile(Path.ChangeExtension(Path.GetRandomFileName(), "tmp"));
 
         /// <summary>
         /// Gets a directory representing temp files.
@@ -250,8 +248,8 @@ namespace Statiq.Common
         /// temp directory is returned.
         /// </param>
         /// <returns>A temp directory.</returns>
-        public static async Task<IDirectory> GetTempDirectoryAsync(this IReadOnlyFileSystem fileSystem, DirectoryPath path = null) =>
-            await fileSystem.GetDirectoryAsync(fileSystem.GetTempPath(path));
+        public static IDirectory GetTempDirectory(this IReadOnlyFileSystem fileSystem, DirectoryPath path = null) =>
+            fileSystem.GetDirectory(fileSystem.GetTempPath(path));
 
         /// <summary>
         /// Gets a file representing a root file.
@@ -264,12 +262,12 @@ namespace Statiq.Common
         /// current root path.
         /// </param>
         /// <returns>A root file.</returns>
-        public static async Task<IFile> GetRootFileAsync(this IReadOnlyFileSystem fileSystem, FilePath path)
+        public static IFile GetRootFile(this IReadOnlyFileSystem fileSystem, FilePath path)
         {
             _ = fileSystem ?? throw new ArgumentNullException(nameof(fileSystem));
             _ = path ?? throw new ArgumentNullException(nameof(path));
 
-            return await fileSystem.GetFileAsync(fileSystem.RootPath.CombineFile(path));
+            return fileSystem.GetFile(fileSystem.RootPath.CombineFile(path));
         }
 
         /// <summary>
@@ -284,10 +282,10 @@ namespace Statiq.Common
         /// root directory is returned.
         /// </param>
         /// <returns>A root directory.</returns>
-        public static async Task<IDirectory> GetRootDirectoryAsync(this IReadOnlyFileSystem fileSystem, DirectoryPath path = null) =>
+        public static IDirectory GetRootDirectory(this IReadOnlyFileSystem fileSystem, DirectoryPath path = null) =>
             path == null
-            ? await fileSystem.GetDirectoryAsync(fileSystem.RootPath)
-            : await fileSystem.GetDirectoryAsync(fileSystem.RootPath.Combine(path));
+            ? fileSystem.GetDirectory(fileSystem.RootPath)
+            : fileSystem.GetDirectory(fileSystem.RootPath.Combine(path));
 
         /// <summary>
         /// Gets an absolute file.
@@ -297,12 +295,12 @@ namespace Statiq.Common
         /// The absolute path of the file.
         /// </param>
         /// <returns>A file.</returns>
-        public static async Task<IFile> GetFileAsync(this IReadOnlyFileSystem fileSystem, FilePath path)
+        public static IFile GetFile(this IReadOnlyFileSystem fileSystem, FilePath path)
         {
             _ = fileSystem ?? throw new ArgumentNullException(nameof(fileSystem));
             _ = path ?? throw new ArgumentNullException(nameof(path));
 
-            return await fileSystem.FileProvider.GetFileAsync(path);
+            return fileSystem.FileProvider.GetFile(path);
         }
 
         /// <summary>
@@ -313,12 +311,12 @@ namespace Statiq.Common
         /// The absolute path of the directory.
         /// </param>
         /// <returns>A directory.</returns>
-        public static async Task<IDirectory> GetDirectoryAsync(this IReadOnlyFileSystem fileSystem, DirectoryPath path)
+        public static IDirectory GetDirectory(this IReadOnlyFileSystem fileSystem, DirectoryPath path)
         {
             _ = fileSystem ?? throw new ArgumentNullException(nameof(fileSystem));
             _ = path ?? throw new ArgumentNullException(nameof(path));
 
-            return await fileSystem.FileProvider.GetDirectoryAsync(path);
+            return fileSystem.FileProvider.GetDirectory(path);
         }
 
         /// <summary>
@@ -334,10 +332,10 @@ namespace Statiq.Common
         /// directory aggregating all input paths is returned.
         /// </param>
         /// <returns>An input directory.</returns>
-        public static async Task<IDirectory> GetInputDirectoryAsync(this IReadOnlyFileSystem fileSystem, DirectoryPath path = null) =>
+        public static IDirectory GetInputDirectory(this IReadOnlyFileSystem fileSystem, DirectoryPath path = null) =>
            path == null
                ? new VirtualInputDirectory(fileSystem, ".")
-               : (path.IsRelative ? new VirtualInputDirectory(fileSystem, path) : await fileSystem.GetDirectoryAsync(path));
+               : (path.IsRelative ? new VirtualInputDirectory(fileSystem, path) : fileSystem.GetDirectory(path));
 
         /// <summary>
         /// Gets matching files based on globbing patterns from the root path or absolute paths.
@@ -347,8 +345,8 @@ namespace Statiq.Common
         /// <returns>
         /// All files in the specified directory that match the globbing patterns and/or absolute paths.
         /// </returns>
-        public static async Task<IEnumerable<IFile>> GetFilesAsync(this IReadOnlyFileSystem fileSystem, params string[] patterns) =>
-            await fileSystem.GetFilesAsync(await fileSystem.GetRootDirectoryAsync(), patterns);
+        public static IEnumerable<IFile> GetFiles(this IReadOnlyFileSystem fileSystem, params string[] patterns) =>
+            fileSystem.GetFiles(fileSystem.GetRootDirectory(), patterns);
 
         /// <summary>
         /// Gets matching files based on globbing patterns from the root path or absolute paths.
@@ -358,8 +356,8 @@ namespace Statiq.Common
         /// <returns>
         /// All files in the specified directory that match the globbing patterns and/or absolute paths.
         /// </returns>
-        public static async Task<IEnumerable<IFile>> GetFilesAsync(this IReadOnlyFileSystem fileSystem, IEnumerable<string> patterns) =>
-            await fileSystem.GetFilesAsync(await fileSystem.GetRootDirectoryAsync(), patterns);
+        public static IEnumerable<IFile> GetFiles(this IReadOnlyFileSystem fileSystem, IEnumerable<string> patterns) =>
+            fileSystem.GetFiles(fileSystem.GetRootDirectory(), patterns);
 
         /// <summary>
         /// Gets matching files based on globbing patterns and/or absolute paths. If any absolute paths
@@ -371,8 +369,8 @@ namespace Statiq.Common
         /// <returns>
         /// All files in the specified directory that match the globbing patterns and/or absolute paths.
         /// </returns>
-        public static async Task<IEnumerable<IFile>> GetFilesAsync(this IReadOnlyFileSystem fileSystem, IDirectory directory, params string[] patterns) =>
-            await fileSystem.GetFilesAsync(directory, (IEnumerable<string>)patterns);
+        public static IEnumerable<IFile> GetFiles(this IReadOnlyFileSystem fileSystem, IDirectory directory, params string[] patterns) =>
+            fileSystem.GetFiles(directory, (IEnumerable<string>)patterns);
 
         /// <summary>
         /// Gets matching files based on globbing patterns and/or absolute paths. If any absolute paths
@@ -384,21 +382,21 @@ namespace Statiq.Common
         /// <returns>
         /// All files in the specified directory that match the globbing patterns and/or absolute paths.
         /// </returns>
-        public static async Task<IEnumerable<IFile>> GetFilesAsync(this IReadOnlyFileSystem fileSystem, IDirectory directory, IEnumerable<string> patterns)
+        public static IEnumerable<IFile> GetFiles(this IReadOnlyFileSystem fileSystem, IDirectory directory, IEnumerable<string> patterns)
         {
             _ = fileSystem ?? throw new ArgumentNullException(nameof(fileSystem));
             _ = directory ?? throw new ArgumentNullException(nameof(directory));
 
-            IEnumerable<Tuple<IDirectory, string>> directoryPatterns = await patterns
+            IEnumerable<Tuple<IDirectory, string>> directoryPatterns = patterns
                 .Where(x => x != null)
-                .SelectAsync(async x =>
+                .Select(x =>
                 {
                     bool negated = x[0] == '!';
                     FilePath filePath = negated ? new FilePath(x.Substring(1)) : new FilePath(x);
                     if (filePath.IsAbsolute)
                     {
                         // The globber doesn't support absolute paths, so get the root directory of this path
-                        IDirectory rootDirectory = await fileSystem.GetDirectoryAsync(filePath.Root);
+                        IDirectory rootDirectory = fileSystem.GetDirectory(filePath.Root);
                         FilePath relativeFilePath = filePath.RootRelative;
                         return Tuple.Create(
                             rootDirectory,
@@ -408,7 +406,7 @@ namespace Statiq.Common
                 });
             IEnumerable<IGrouping<IDirectory, string>> patternGroups = directoryPatterns
                 .GroupBy(x => x.Item1, x => x.Item2, new DirectoryEqualityComparer());
-            return await patternGroups.SelectManyAsync(async x => await Globber.GetFilesAsync(x.Key, x));
+            return patternGroups.SelectMany(x => Globber.GetFiles(x.Key, x));
         }
     }
 }

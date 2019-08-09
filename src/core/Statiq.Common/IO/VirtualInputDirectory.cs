@@ -31,39 +31,32 @@ namespace Statiq.Common
         NormalizedPath IFileSystemEntry.Path => Path;
 
         /// <inheritdoc/>
-        public Task<IDirectory> GetParentAsync()
+        public IDirectory Parent
         {
-            DirectoryPath parentPath = Path.Parent;
-            if (parentPath == null)
+            get
             {
-                return Task.FromResult<IDirectory>(null);
+                DirectoryPath parentPath = Path.Parent;
+                return parentPath == null ? null : new VirtualInputDirectory(_fileSystem, parentPath);
             }
-            return Task.FromResult<IDirectory>(new VirtualInputDirectory(_fileSystem, parentPath));
         }
 
         /// <inheritdoc/>
-        public Task CreateAsync()
-        {
-            throw new NotSupportedException("Can not create a virtual input directory");
-        }
+        public void Create() => throw new NotSupportedException("Can not create a virtual input directory");
 
         /// <inheritdoc/>
-        public Task DeleteAsync(bool recursive)
-        {
-            throw new NotSupportedException("Can not delete a virtual input directory");
-        }
+        public void Delete(bool recursive) => throw new NotSupportedException("Can not delete a virtual input directory");
 
         /// <inheritdoc/>
-        public async Task<IEnumerable<IDirectory>> GetDirectoriesAsync(SearchOption searchOption = SearchOption.TopDirectoryOnly)
+        public IEnumerable<IDirectory> GetDirectories(SearchOption searchOption = SearchOption.TopDirectoryOnly)
         {
             // For the root (".") virtual directory, this should just return the child name,
             // but for all others it should include the child directory name
 
             // Get all the relative child directories
             HashSet<DirectoryPath> directories = new HashSet<DirectoryPath>();
-            foreach (IDirectory directory in await GetExistingDirectoriesAsync())
+            foreach (IDirectory directory in GetExistingDirectories())
             {
-                foreach (IDirectory childDirectory in await directory.GetDirectoriesAsync(searchOption))
+                foreach (IDirectory childDirectory in directory.GetDirectories(searchOption))
                 {
                     directories.Add(Path.Combine(directory.Path.GetRelativePath(childDirectory.Path)));
                 }
@@ -74,13 +67,13 @@ namespace Statiq.Common
         }
 
         /// <inheritdoc/>
-        public async Task<IEnumerable<IFile>> GetFilesAsync(SearchOption searchOption = SearchOption.TopDirectoryOnly)
+        public IEnumerable<IFile> GetFiles(SearchOption searchOption = SearchOption.TopDirectoryOnly)
         {
             // Get all the files for each input directory, replacing earlier ones with later ones
             Dictionary<FilePath, IFile> files = new Dictionary<FilePath, IFile>();
-            foreach (IDirectory directory in await GetExistingDirectoriesAsync())
+            foreach (IDirectory directory in GetExistingDirectories())
             {
-                foreach (IFile file in await directory.GetFilesAsync(searchOption))
+                foreach (IFile file in directory.GetFiles(searchOption))
                 {
                     files[directory.Path.GetRelativePath(file.Path)] = file;
                 }
@@ -89,7 +82,7 @@ namespace Statiq.Common
         }
 
         /// <inheritdoc/>
-        public Task<IDirectory> GetDirectoryAsync(DirectoryPath path)
+        public IDirectory GetDirectory(DirectoryPath path)
         {
             if (path == null)
             {
@@ -100,11 +93,11 @@ namespace Statiq.Common
                 throw new ArgumentException("Path must be relative", nameof(path));
             }
 
-            return Task.FromResult<IDirectory>(new VirtualInputDirectory(_fileSystem, Path.Combine(path)));
+            return new VirtualInputDirectory(_fileSystem, Path.Combine(path));
         }
 
         /// <inheritdoc/>
-        public async Task<IFile> GetFileAsync(FilePath path)
+        public IFile GetFile(FilePath path)
         {
             if (path == null)
             {
@@ -115,7 +108,7 @@ namespace Statiq.Common
                 throw new ArgumentException("Path must be relative", nameof(path));
             }
 
-            return await _fileSystem.GetInputFileAsync(Path.CombineFile(path));
+            return _fileSystem.GetInputFile(Path.CombineFile(path));
         }
 
         /// <summary>
@@ -124,14 +117,12 @@ namespace Statiq.Common
         /// <returns>
         /// <c>true</c> if this directory exists at one of the input paths; otherwise, <c>false</c>.
         /// </returns>
-        public async Task<bool> GetExistsAsync() => (await GetExistingDirectoriesAsync()).Any();
+        public bool Exists => GetExistingDirectories().Any();
 
-        private async Task<IEnumerable<IDirectory>> GetExistingDirectoriesAsync()
-        {
-            IEnumerable<IDirectory> directories = await _fileSystem.InputPaths
-                .SelectAsync(async x => await _fileSystem.GetRootDirectoryAsync(x.Combine(Path)));
-            return await directories.WhereAsync(async x => await x.GetExistsAsync());
-        }
+        private IEnumerable<IDirectory> GetExistingDirectories() =>
+            _fileSystem.InputPaths
+                .Select(x => _fileSystem.GetRootDirectory(x.Combine(Path)))
+                .Where(x => x.Exists);
 
         public string ToDisplayString() => Path.ToDisplayString();
     }

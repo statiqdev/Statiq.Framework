@@ -17,9 +17,9 @@ namespace Statiq.CodeAnalysis
     /// on interpolated value shouldn't reference another.
     /// </remarks>
     /// <category>Metadata</category>
-    public class InterpolateMetadata : ParallelModule
+    public class InterpolateMetadata : ParallelSyncModule
     {
-        protected override Task<IEnumerable<IDocument>> ExecuteAsync(IDocument input, IExecutionContext context)
+        protected override IEnumerable<IDocument> Execute(IDocument input, IExecutionContext context)
         {
             MetadataItems interpolatedValues = null;
 
@@ -34,7 +34,7 @@ namespace Statiq.CodeAnalysis
             }
 
             // If any were found, clone the document
-            return (interpolatedValues == null ? input : input.Clone(interpolatedValues)).YieldAsTask();
+            yield return interpolatedValues == null ? input : input.Clone(interpolatedValues);
         }
     }
 }

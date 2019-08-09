@@ -19,27 +19,7 @@ namespace Statiq.Common
         /// <inheritdoc />
         public override IAsyncEnumerable<IDocument> ExecuteAsync(IExecutionContext context) =>
             Parallel
-                ? ParallelExecuteAsync(context, (i, c) => ExecuteInput(i, c, ExecuteAsync))
+                ? context.Inputs.ToAsyncEnumerable().ParallelSelectManyAsync(input => ExecuteInput(input, context, ExecuteAsync))
                 : base.ExecuteAsync(context);
-
-        internal static async IAsyncEnumerable<IDocument> ParallelExecuteAsync(
-            IExecutionContext context,
-            Func<IDocument, IExecutionContext, IAsyncEnumerable<IDocument>> executeFunc)
-        {
-            // Have to convert it to a plain IEnumerable since that's what Task.WhenAll() takes
-            IEnumerable<Task<IAsyncEnumerable<IDocument>>> tasks =
-                context.Inputs.Select(input => Task.Run(() => executeFunc(input, context), context.CancellationToken)).ToEnumerable();
-            IAsyncEnumerable<IDocument>[] results = await Task.WhenAll(tasks);
-            foreach (IAsyncEnumerable<IDocument> result in results)
-            {
-                if (result != null)
-                {
-                    await foreach (IDocument document in result)
-                    {
-                        yield return document;
-                    }
-                }
-            }
-        }
     }
 }

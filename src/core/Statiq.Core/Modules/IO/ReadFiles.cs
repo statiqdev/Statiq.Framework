@@ -58,7 +58,7 @@ namespace Statiq.Core
         {
             if (value != null)
             {
-                IEnumerable<IFile> files = await context.FileSystem.GetInputFilesAsync(value);
+                IEnumerable<IFile> files = await context.FileSystem.GetInputFiles(value);
                 files = await files.ParallelWhereAsync(async file => _predicate == null || await _predicate(file));
                 return files.Query(context).Parallel().Select(file =>
                 {

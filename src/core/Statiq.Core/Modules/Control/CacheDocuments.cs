@@ -44,7 +44,7 @@ namespace Statiq.Core
             if (context.Settings.Bool(Keys.DisableCache))
             {
                 ResetCache();
-                return await context.ExecuteAsync(Children, context.Inputs);
+                return await context.ExecuteModulesAsync(Children, context.Inputs);
             }
 
             // If we're reseting the cache, reset it but then continue
@@ -122,7 +122,7 @@ namespace Statiq.Core
             // Execute misses
             IReadOnlyList<IDocument> results = misses.Count == 0
                 ? ImmutableArray<IDocument>.Empty
-                : await context.ExecuteAsync(Children, misses);
+                : await context.ExecuteModulesAsync(Children, misses);
             Dictionary<FilePath, IGrouping<FilePath, IDocument>> resultsBySource =
                 results.Where(x => x.Source != null).GroupBy(x => x.Source).ToDictionary(x => x.Key, x => x);
             outputs.AddRange(results);

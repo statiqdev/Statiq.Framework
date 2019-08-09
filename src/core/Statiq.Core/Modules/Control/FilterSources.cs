@@ -15,7 +15,7 @@ namespace Statiq.Core
     /// after this one.
     /// </remarks>
     /// <category>Control</category>
-    public class FilterSources : IModule
+    public class FilterSources : SyncModule
     {
         private IEnumerable<string> _patterns;
 
@@ -38,14 +38,13 @@ namespace Statiq.Core
         }
 
         /// <inheritdoc />
-        public async Task<IEnumerable<IDocument>> ExecuteAsync(IExecutionContext context)
+        protected override IEnumerable<IDocument> Execute(IExecutionContext context)
         {
             DocumentFileProvider fileProvider = new DocumentFileProvider(context.Inputs);
-            IEnumerable<IDirectory> directories = await
-                (await context.FileSystem.GetInputDirectoriesAsync())
-                .SelectAsync(async x => await fileProvider.GetDirectoryAsync(x.Path));
-            IEnumerable<IFile> matches = await directories
-                .SelectManyAsync(async x => await Globber.GetFilesAsync(x, _patterns));
+            IEnumerable<IDirectory> directories = context.FileSystem
+                .GetInputDirectories()
+                .Select(x => fileProvider.GetDirectory(x.Path));
+            IEnumerable<IFile> matches = directories.SelectMany(x => Globber.GetFiles(x, _patterns));
             return matches.Select(x => x.Path).Distinct().Select(match => fileProvider.GetDocument(match));
         }
     }

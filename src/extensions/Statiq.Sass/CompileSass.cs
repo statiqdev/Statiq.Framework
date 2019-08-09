@@ -153,7 +153,7 @@ namespace Statiq.Sass
             FilePath inputPath = await _inputPath.GetValueAsync(input, context);
             if (inputPath?.IsAbsolute != true)
             {
-                inputPath = (await context.FileSystem.GetInputFileAsync(new FilePath(Path.GetRandomFileName()))).Path;
+                inputPath = (await context.FileSystem.GetInputFile(new FilePath(Path.GetRandomFileName()))).Path;
                 Trace.Warning($"No input path found for document {input.ToSafeDisplayString()}, using {inputPath.FileName.FullPath}");
             }
 
@@ -176,7 +176,7 @@ namespace Statiq.Sass
             ScssResult result = Scss.ConvertToCss(content, options);
 
             // Process the result
-            DirectoryPath relativeDirectory = await context.FileSystem.GetContainingInputPathAsync(inputPath);
+            DirectoryPath relativeDirectory = await context.FileSystem.GetContainingInputPath(inputPath);
             FilePath relativePath = relativeDirectory?.GetRelativePath(inputPath) ?? inputPath.FileName;
 
             FilePath cssPath = relativePath.ChangeExtension("css");
@@ -201,8 +201,8 @@ namespace Statiq.Sass
         {
             if (document.Source != null)
             {
-                IFile inputFile = await context.FileSystem.GetInputFileAsync(document.Source);
-                return await inputFile.GetExistsAsync() ? inputFile.Path : null;
+                IFile inputFile = await context.FileSystem.GetInputFile(document.Source);
+                return await inputFile.GetExists() ? inputFile.Path : null;
             }
             return null;
         }

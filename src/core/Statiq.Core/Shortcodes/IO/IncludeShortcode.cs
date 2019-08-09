@@ -47,17 +47,17 @@ namespace Statiq.Core
             IFile includedFile = null;
             if (includedPath.IsRelative && _sourcePath != null)
             {
-                includedFile = await context.FileSystem.GetFileAsync(_sourcePath.ChangeFileName(includedPath));
+                includedFile = await context.FileSystem.GetFile(_sourcePath.ChangeFileName(includedPath));
             }
 
             // If that didn't work, try relative to the input folder
-            if (includedFile == null || !await includedFile.GetExistsAsync())
+            if (includedFile == null || !await includedFile.GetExists())
             {
-                includedFile = await context.FileSystem.GetInputFileAsync(includedPath);
+                includedFile = await context.FileSystem.GetInputFile(includedPath);
             }
 
             // Get the included file
-            if (!await includedFile.GetExistsAsync())
+            if (!await includedFile.GetExists())
             {
                 Trace.Warning($"Included file {includedPath.FullPath} does not exist");
                 return context.CreateDocument();

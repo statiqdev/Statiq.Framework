@@ -77,7 +77,7 @@ namespace Statiq.Core
                 using (IServiceScope serviceScope = serviceScopeFactory.CreateScope())
                 {
                     ExecutionContextData contextData = new ExecutionContextData(engine, executionId, this, serviceScope.ServiceProvider, cancellationTokenSource.Token);
-                    Outputs = await Engine.ExecuteAsync(contextData, null, _modules, GetInputs());
+                    Outputs = await Engine.ExecuteModulesAsync(contextData, null, _modules, GetInputs());
                     pipelineStopwatch.Stop();
                     Trace.Information($"Executed pipeline {PipelineName}/{Phase} in {pipelineStopwatch.ElapsedMilliseconds} ms resulting in {Outputs.Length} output document(s)");
                 }

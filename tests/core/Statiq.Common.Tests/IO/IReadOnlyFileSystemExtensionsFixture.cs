@@ -30,7 +30,7 @@ namespace Statiq.Common.Tests.IO
                 fileSystem.InputPaths.Add("y");
 
                 // When
-                IFile result = await fileSystem.GetInputFileAsync(input);
+                IFile result = await fileSystem.GetInputFile(input);
 
                 // Then
                 Assert.AreEqual(expected, result.Path.FullPath);
@@ -45,7 +45,7 @@ namespace Statiq.Common.Tests.IO
                 fileSystem.InputPaths.Add("x/t");
 
                 // When
-                IFile result = await fileSystem.GetInputFileAsync("../bar.txt");
+                IFile result = await fileSystem.GetInputFile("../bar.txt");
 
                 // Then
                 Assert.AreEqual("/a/x/bar.txt", result.Path.FullPath);
@@ -60,7 +60,7 @@ namespace Statiq.Common.Tests.IO
                 fileSystem.InputPaths.Add("../x");
 
                 // When
-                IFile result = await fileSystem.GetInputFileAsync("bar.txt");
+                IFile result = await fileSystem.GetInputFile("bar.txt");
 
                 // Then
                 Assert.AreEqual("/a/x/bar.txt", result.Path.FullPath);
@@ -75,7 +75,7 @@ namespace Statiq.Common.Tests.IO
                 fileSystem.InputPaths.Add("../x/y");
 
                 // When
-                IFile result = await fileSystem.GetInputFileAsync("../bar.txt");
+                IFile result = await fileSystem.GetInputFile("../bar.txt");
 
                 // Then
                 Assert.AreEqual("/a/x/bar.txt", result.Path.FullPath);
@@ -91,7 +91,7 @@ namespace Statiq.Common.Tests.IO
                 TestFileSystem fileSystem = new TestFileSystem();
 
                 // When
-                IDirectory result = await fileSystem.GetInputDirectoryAsync("A/B/C");
+                IDirectory result = await fileSystem.GetInputDirectory("A/B/C");
 
                 // Then
                 Assert.IsInstanceOf<VirtualInputDirectory>(result);
@@ -105,7 +105,7 @@ namespace Statiq.Common.Tests.IO
                 TestFileSystem fileSystem = new TestFileSystem();
 
                 // When
-                IDirectory result = await fileSystem.GetInputDirectoryAsync("../A/B/C");
+                IDirectory result = await fileSystem.GetInputDirectory("../A/B/C");
 
                 // Then
                 Assert.IsInstanceOf<VirtualInputDirectory>(result);
@@ -119,7 +119,7 @@ namespace Statiq.Common.Tests.IO
                 TestFileSystem fileSystem = new TestFileSystem();
 
                 // When
-                IDirectory result = await fileSystem.GetInputDirectoryAsync();
+                IDirectory result = await fileSystem.GetInputDirectory();
 
                 // Then
                 Assert.IsInstanceOf<VirtualInputDirectory>(result);
@@ -133,7 +133,7 @@ namespace Statiq.Common.Tests.IO
                 TestFileSystem fileSystem = new TestFileSystem();
 
                 // When
-                IDirectory result = await fileSystem.GetInputDirectoryAsync("/A/B/C");
+                IDirectory result = await fileSystem.GetInputDirectory("/A/B/C");
 
                 // Then
                 Assert.AreEqual("/A/B/C", result.Path.FullPath);
@@ -155,7 +155,7 @@ namespace Statiq.Common.Tests.IO
                 fileSystem.InputPaths.Add("../z");
 
                 // When
-                IEnumerable<IDirectory> result = await fileSystem.GetInputDirectoriesAsync();
+                IEnumerable<IDirectory> result = await fileSystem.GetInputDirectories();
 
                 // Then
                 CollectionAssert.AreEquivalent(
@@ -240,7 +240,7 @@ namespace Statiq.Common.Tests.IO
                 TestFileSystem fileSystem = new TestFileSystem();
 
                 // When, Then
-                await Should.ThrowAsync<ArgumentNullException>(async () => await fileSystem.GetContainingInputPathAsync(null));
+                await Should.ThrowAsync<ArgumentNullException>(async () => await fileSystem.GetContainingInputPath(null));
             }
 
             [TestCase("/a/b/c/foo.txt", "/a/b")]
@@ -259,8 +259,8 @@ namespace Statiq.Common.Tests.IO
                 fileSystem.InputPaths.Add("x");
 
                 // When
-                DirectoryPath inputPathFromFilePath = await fileSystem.GetContainingInputPathAsync(new FilePath(path));
-                DirectoryPath inputPathFromDirectoryPath = await fileSystem.GetContainingInputPathAsync(new DirectoryPath(path));
+                DirectoryPath inputPathFromFilePath = await fileSystem.GetContainingInputPath(new FilePath(path));
+                DirectoryPath inputPathFromDirectoryPath = await fileSystem.GetContainingInputPath(new DirectoryPath(path));
 
                 // Then
                 Assert.AreEqual(expected, inputPathFromFilePath?.FullPath);
@@ -281,8 +281,8 @@ namespace Statiq.Common.Tests.IO
                 fileSystem.InputPaths.Add("../x");
 
                 // When
-                DirectoryPath inputPathFromFilePath = await fileSystem.GetContainingInputPathAsync(new FilePath(path));
-                DirectoryPath inputPathFromDirectoryPath = await fileSystem.GetContainingInputPathAsync(new DirectoryPath(path));
+                DirectoryPath inputPathFromFilePath = await fileSystem.GetContainingInputPath(new FilePath(path));
+                DirectoryPath inputPathFromDirectoryPath = await fileSystem.GetContainingInputPath(new DirectoryPath(path));
 
                 // Then
                 Assert.AreEqual(expected, inputPathFromFilePath?.FullPath);
@@ -304,7 +304,7 @@ namespace Statiq.Common.Tests.IO
                 fileSystem.InputPaths.Add("x");
 
                 // When
-                DirectoryPath inputPath = await fileSystem.GetContainingInputPathAsync(new FilePath(path));
+                DirectoryPath inputPath = await fileSystem.GetContainingInputPath(new FilePath(path));
 
                 // Then
                 Assert.AreEqual(expected, inputPath?.FullPath);
@@ -323,7 +323,7 @@ namespace Statiq.Common.Tests.IO
                 fileSystem.InputPaths.Add("y");
 
                 // When
-                DirectoryPath inputPath = await fileSystem.GetContainingInputPathAsync(new DirectoryPath(path));
+                DirectoryPath inputPath = await fileSystem.GetContainingInputPath(new DirectoryPath(path));
 
                 // Then
                 Assert.AreEqual(expected, inputPath?.FullPath);
@@ -343,7 +343,7 @@ namespace Statiq.Common.Tests.IO
                 fileSystem.InputPaths.Add("y");
 
                 // When
-                DirectoryPath inputPath = await fileSystem.GetContainingInputPathAsync(new FilePath("baz.txt"));
+                DirectoryPath inputPath = await fileSystem.GetContainingInputPath(new FilePath("baz.txt"));
 
                 // Then
                 Assert.AreEqual("/a/yz", inputPath?.FullPath);
@@ -359,7 +359,7 @@ namespace Statiq.Common.Tests.IO
                 TestFileSystem fileSystem = new TestFileSystem(GetFileProvider());
 
                 // When, Then
-                await Should.ThrowAsync<ArgumentNullException>(async () => await fileSystem.GetFilesAsync((IDirectory)null, "/"));
+                await Should.ThrowAsync<ArgumentNullException>(async () => await fileSystem.GetFiles((IDirectory)null, "/"));
             }
 
             [Test]
@@ -367,10 +367,10 @@ namespace Statiq.Common.Tests.IO
             {
                 // Given
                 TestFileSystem fileSystem = new TestFileSystem(GetFileProvider());
-                IDirectory dir = await fileSystem.GetDirectoryAsync("/");
+                IDirectory dir = await fileSystem.GetDirectory("/");
 
                 // When, Then
-                await Should.ThrowAsync<ArgumentNullException>(async () => await fileSystem.GetFilesAsync(dir, null));
+                await Should.ThrowAsync<ArgumentNullException>(async () => await fileSystem.GetFiles(dir, null));
             }
 
             [Test]
@@ -378,10 +378,10 @@ namespace Statiq.Common.Tests.IO
             {
                 // Given
                 TestFileSystem fileSystem = new TestFileSystem(GetFileProvider());
-                IDirectory dir = await fileSystem.GetDirectoryAsync("/");
+                IDirectory dir = await fileSystem.GetDirectory("/");
 
                 // When
-                IEnumerable<IFile> results = await fileSystem.GetFilesAsync(dir, null, "**/foo.txt");
+                IEnumerable<IFile> results = await fileSystem.GetFiles(dir, null, "**/foo.txt");
 
                 // Then
                 CollectionAssert.AreEquivalent(new[] { "/a/b/c/foo.txt" }, results.Select(x => x.Path.FullPath));
@@ -420,10 +420,10 @@ namespace Statiq.Common.Tests.IO
                 fileProvider.AddDirectory("/q");
                 fileProvider.AddFile("/q/werty.txt");
                 TestFileSystem fileSystem = new TestFileSystem(fileProvider);
-                IDirectory dir = await fileSystem.GetDirectoryAsync(directory);
+                IDirectory dir = await fileSystem.GetDirectory(directory);
 
                 // When
-                IEnumerable<IFile> results = await fileSystem.GetFilesAsync(dir, patterns);
+                IEnumerable<IFile> results = await fileSystem.GetFiles(dir, patterns);
 
                 // Then
                 CollectionAssert.AreEquivalent(expected, results.Select(x => x.Path.FullPath));
@@ -431,7 +431,7 @@ namespace Statiq.Common.Tests.IO
                 if (reverseSlashes)
                 {
                     // When
-                    results = await fileSystem.GetFilesAsync(dir, patterns.Select(x => x.Replace("/", "\\")));
+                    results = await fileSystem.GetFiles(dir, patterns.Select(x => x.Replace("/", "\\")));
 
                     // Then
                     CollectionAssert.AreEquivalent(expected, results.Select(x => x.Path.FullPath));

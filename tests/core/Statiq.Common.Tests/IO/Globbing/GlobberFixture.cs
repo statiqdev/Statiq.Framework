@@ -42,11 +42,11 @@ namespace Statiq.Common.Tests.IO.Globbing
             {
                 // Given
                 IFileProvider fileProvider = GetFileProvider();
-                IDirectory directory = await fileProvider.GetDirectoryAsync(directoryPath);
+                IDirectory directory = await fileProvider.GetDirectory(directoryPath);
 
                 // When
-                IEnumerable<IFile> matches = await Globber.GetFilesAsync(directory, patterns);
-                IEnumerable<IFile> matchesReversedSlash = await Globber.GetFilesAsync(directory, patterns.Select(x => x.Replace("/", "\\")));
+                IEnumerable<IFile> matches = await Globber.GetFiles(directory, patterns);
+                IEnumerable<IFile> matchesReversedSlash = await Globber.GetFiles(directory, patterns.Select(x => x.Replace("/", "\\")));
 
                 // Then
                 CollectionAssert.AreEquivalent(resultPaths, matches.Select(x => x.Path.FullPath));
@@ -66,10 +66,10 @@ namespace Statiq.Common.Tests.IO.Globbing
                 fileProvider.AddFile("/root/a/x.txt");
                 fileProvider.AddFile("/root/a/b/x.txt");
                 fileProvider.AddFile("/root/d/x.txt");
-                IDirectory directory = await fileProvider.GetDirectoryAsync("/");
+                IDirectory directory = await fileProvider.GetDirectory("/");
 
                 // When
-                IEnumerable<IFile> matches = await Globber.GetFilesAsync(directory, new[] { "root/{a,}/**/x.txt" });
+                IEnumerable<IFile> matches = await Globber.GetFiles(directory, new[] { "root/{a,}/**/x.txt" });
 
                 // Then
                 matches.Select(x => x.Path.FullPath).ShouldBe(
@@ -90,10 +90,10 @@ namespace Statiq.Common.Tests.IO.Globbing
                 fileProvider.AddFile("/root/a/b/x.txt");
                 fileProvider.AddFile("/root/a/b/.txt");
                 fileProvider.AddFile("/root/d/x.txt");
-                IDirectory directory = await fileProvider.GetDirectoryAsync("/");
+                IDirectory directory = await fileProvider.GetDirectory("/");
 
                 // When
-                IEnumerable<IFile> matches = await Globber.GetFilesAsync(directory, new[] { "root/**/*.txt" });
+                IEnumerable<IFile> matches = await Globber.GetFiles(directory, new[] { "root/**/*.txt" });
 
                 // Then
                 matches.Select(x => x.Path.FullPath).ShouldBe(
@@ -114,11 +114,11 @@ namespace Statiq.Common.Tests.IO.Globbing
                 fileProvider.AddDirectory("/a/b/c/d/e/1");
                 fileProvider.AddDirectory("/a/b/c/d/e/1/2");
                 fileProvider.AddFile("/a/b/c/d/e/1/2/3.txt");
-                IDirectory directory = await fileProvider.GetDirectoryAsync(directoryPath);
+                IDirectory directory = await fileProvider.GetDirectory(directoryPath);
 
                 // When
-                IEnumerable<IFile> matches = await Globber.GetFilesAsync(directory, patterns);
-                IEnumerable<IFile> matchesReversedSlash = await Globber.GetFilesAsync(directory, patterns.Select(x => x.Replace("/", "\\")));
+                IEnumerable<IFile> matches = await Globber.GetFiles(directory, patterns);
+                IEnumerable<IFile> matchesReversedSlash = await Globber.GetFiles(directory, patterns.Select(x => x.Replace("/", "\\")));
 
                 // Then
                 CollectionAssert.AreEquivalent(resultPaths, matches.Select(x => x.Path.FullPath));
@@ -140,10 +140,10 @@ namespace Statiq.Common.Tests.IO.Globbing
                 fileProvider.AddDirectory("/a/bar/foo");
                 fileProvider.AddFile("/a/b/c/x.txt");
                 fileProvider.AddFile("/a/bar/foo/y.txt");
-                IDirectory directory = await fileProvider.GetDirectoryAsync("/a");
+                IDirectory directory = await fileProvider.GetDirectory("/a");
 
                 // When
-                IEnumerable<IFile> matches = await Globber.GetFilesAsync(directory, new[] { "**/*.txt" });
+                IEnumerable<IFile> matches = await Globber.GetFiles(directory, new[] { "**/*.txt" });
 
                 // Then
                 CollectionAssert.AreEquivalent(new[] { "/a/b/c/x.txt", "/a/bar/foo/y.txt" }, matches.Select(x => x.Path.FullPath));
@@ -156,10 +156,10 @@ namespace Statiq.Common.Tests.IO.Globbing
             {
                 // Given
                 IFileProvider fileProvider = GetFileProvider();
-                IDirectory directory = await fileProvider.GetDirectoryAsync("/a");
+                IDirectory directory = await fileProvider.GetDirectory("/a");
 
                 // When, Then
-                await Should.ThrowAsync<ArgumentException>(async () => await Globber.GetFilesAsync(directory, new[] { pattern }));
+                await Should.ThrowAsync<ArgumentException>(async () => await Globber.GetFiles(directory, new[] { pattern }));
             }
         }
 

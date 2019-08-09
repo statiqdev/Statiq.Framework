@@ -24,7 +24,7 @@ namespace Statiq.Common
         /// <param name="patterns">The globbing pattern(s) to use.</param>
         /// <returns>Files that match the globbing pattern(s).</returns>
         /// <remarks>Initially based on code from Reliak.FileSystemGlobbingExtensions (https://github.com/reliak/Reliak.FileSystemGlobbingExtensions).</remarks>
-        public static async Task<IEnumerable<IFile>> GetFilesAsync(IDirectory directory, IEnumerable<string> patterns)
+        public static IEnumerable<IFile> GetFiles(IDirectory directory, IEnumerable<string> patterns)
         {
             Matcher matcher = new Matcher(NormalizedPath.PathComparisonType);
 
@@ -61,7 +61,7 @@ namespace Statiq.Common
 
             DirectoryInfoBase directoryInfo = new DirectoryInfo(directory);
             PatternMatchingResult result = matcher.Execute(directoryInfo);
-            return await result.Files.SelectAsync(async match => await directory.GetFileAsync(match.Path));
+            return result.Files.Select(match => directory.GetFile(match.Path));
         }
 
         /// <summary>Expands all brace ranges in a pattern, returning a sequence containing every possible combination.</summary>

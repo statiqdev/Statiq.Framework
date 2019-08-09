@@ -29,9 +29,9 @@ namespace Statiq.Common
             _stream = stream;
         }
 
-        public async Task<Stream> GetStreamAsync()
+        public Stream GetStream()
         {
-            await _mutex.WaitAsync();
+            _mutex.Wait();
 
             // Make sure we have a seekable stream
             Stream contentStream = _stream;

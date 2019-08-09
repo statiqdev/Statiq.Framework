@@ -79,7 +79,7 @@ namespace Statiq.Core
             _placeholderFactory = async (treePath, items, context) =>
             {
                 FilePath source = new FilePath(string.Join("/", treePath.Concat(new[] { "index.html" })));
-                return context.CreateDocument((await context.FileSystem.GetInputFileAsync(source)).Path.FullPath, source, items);
+                return context.CreateDocument((await context.FileSystem.GetInputFile(source)).Path.FullPath, source, items);
             };
             _sort = (x, y) => Comparer.Default.Compare(
                 x.Get<object[]>(Keys.TreePath)?.LastOrDefault(),

@@ -66,11 +66,11 @@ namespace Statiq.Core
             FilePath sidecarPath = await _sidecarPath.GetValueAsync(input, context);
             if (sidecarPath != null)
             {
-                IFile sidecarFile = await context.FileSystem.GetInputFileAsync(sidecarPath);
-                if (await sidecarFile.GetExistsAsync())
+                IFile sidecarFile = await context.FileSystem.GetInputFile(sidecarPath);
+                if (await sidecarFile.GetExists())
                 {
                     string sidecarContent = await sidecarFile.ReadAllTextAsync();
-                    foreach (IDocument result in await context.ExecuteAsync(Children, input.Clone(await context.GetContentProviderAsync(sidecarContent)).Yield()))
+                    foreach (IDocument result in await context.ExecuteModulesAsync(Children, input.Clone(await context.GetContentProviderAsync(sidecarContent)).Yield()))
                     {
                         return input.Clone(result).Yield();
                     }

@@ -50,7 +50,7 @@ namespace Statiq.Yaml
         protected override async Task<IEnumerable<IDocument>> ExecuteAsync(IDocument input, IExecutionContext context)
         {
             List<Dictionary<string, object>> documentMetadata = new List<Dictionary<string, object>>();
-            using (TextReader contentReader = new StreamReader(await input.GetStreamAsync()))
+            using (TextReader contentReader = new StreamReader(await input.GetStream()))
             {
                 YamlStream yamlStream = new YamlStream();
                 yamlStream.Load(contentReader);

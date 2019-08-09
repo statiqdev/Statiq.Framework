@@ -39,11 +39,9 @@ namespace Statiq.Common
 
         internal HashSet<DirectoryPath> Directories { get; } = new HashSet<DirectoryPath>();
 
-        public Task<IDirectory> GetDirectoryAsync(DirectoryPath path) =>
-            Task.FromResult<IDirectory>(new DocumentDirectory(this, path));
+        public IDirectory GetDirectory(DirectoryPath path) => new DocumentDirectory(this, path);
 
-        public Task<IFile> GetFileAsync(FilePath path) =>
-            Task.FromResult<IFile>(new DocumentFile(this, path));
+        public IFile GetFile(FilePath path) => new DocumentFile(this, path);
 
         public IDocument GetDocument(FilePath path) =>
             Files.TryGetValue(path, out IDocument document) ? document : throw new KeyNotFoundException();

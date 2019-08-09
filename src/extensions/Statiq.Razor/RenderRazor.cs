@@ -156,7 +156,7 @@ namespace Statiq.Razor
 
                 using (Stream contentStream = await context.GetContentStreamAsync())
                 {
-                    using (Stream inputStream = await input.GetStreamAsync())
+                    using (Stream inputStream = await input.GetStream())
                     {
                         FilePath viewStartLocationPath = _viewStartPath == null ? null : await _viewStartPath.GetValueAsync(input, context);
                         string layoutPath = _layoutPath == null ? null : (await _layoutPath.GetValueAsync(input, context))?.FullPath;
@@ -194,7 +194,7 @@ namespace Statiq.Razor
             // Calculate a relative path from the input path(s) (or root) to the provided path
             if (path != null)
             {
-                DirectoryPath inputPath = await context.FileSystem.GetContainingInputPathAsync(path) ?? new DirectoryPath("/");
+                DirectoryPath inputPath = await context.FileSystem.GetContainingInputPath(path) ?? new DirectoryPath("/");
                 if (path.IsRelative)
                 {
                     // If the path is relative, combine it with the input path to make it absolute

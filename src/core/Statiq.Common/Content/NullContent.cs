@@ -22,6 +22,6 @@ namespace Statiq.Common
         {
         }
 
-        public Task<Stream> GetStreamAsync() => throw new NotSupportedException();
+        public Stream GetStream() => throw new NotSupportedException();
     }
 }

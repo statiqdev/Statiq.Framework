@@ -20,23 +20,23 @@ namespace Statiq.Common
 
         NormalizedPath IFileSystemEntry.Path => Path;
 
-        public Task<IEnumerable<IDirectory>> GetDirectoriesAsync(SearchOption searchOption = SearchOption.TopDirectoryOnly)
+        public IEnumerable<IDirectory> GetDirectories(SearchOption searchOption = SearchOption.TopDirectoryOnly)
         {
             if (searchOption == SearchOption.TopDirectoryOnly)
             {
-                return Task.FromResult(_fileProvider.Directories
+                return _fileProvider.Directories
                     .Where(x => !Path.Equals(x) && Path.ContainsChild(x))
                     .Select(x => new DocumentDirectory(_fileProvider, x))
-                    .Cast<IDirectory>());
+                    .Cast<IDirectory>();
             }
 
-            return Task.FromResult(_fileProvider.Directories
+            return _fileProvider.Directories
                 .Where(x => !Path.Equals(x) && Path.ContainsDescendant(x))
                 .Select(x => new DocumentDirectory(_fileProvider, x))
-                .Cast<IDirectory>());
+                .Cast<IDirectory>();
         }
 
-        public Task<IDirectory> GetDirectoryAsync(DirectoryPath directory)
+        public IDirectory GetDirectory(DirectoryPath directory)
         {
             if (directory == null)
             {
@@ -47,12 +47,12 @@ namespace Statiq.Common
                 throw new ArgumentException("Path must be relative", nameof(directory));
             }
 
-            return Task.FromResult<IDirectory>(new DocumentDirectory(_fileProvider, Path.Combine(directory)));
+            return new DocumentDirectory(_fileProvider, Path.Combine(directory));
         }
 
-        public Task<bool> GetExistsAsync() => Task.FromResult(_fileProvider.Directories.Contains(Path));
+        public bool Exists => _fileProvider.Directories.Contains(Path);
 
-        public Task<IFile> GetFileAsync(FilePath path)
+        public IFile GetFile(FilePath path)
         {
             if (path == null)
             {
@@ -63,38 +63,37 @@ namespace Statiq.Common
                 throw new ArgumentException("Path must be relative", nameof(path));
             }
 
-            return Task.FromResult<IFile>(new DocumentFile(_fileProvider, Path.CombineFile(path)));
+            return new DocumentFile(_fileProvider, Path.CombineFile(path));
         }
 
-        public Task<IEnumerable<IFile>> GetFilesAsync(SearchOption searchOption = SearchOption.TopDirectoryOnly)
+        public IEnumerable<IFile> GetFiles(SearchOption searchOption = SearchOption.TopDirectoryOnly)
         {
             if (searchOption == SearchOption.TopDirectoryOnly)
             {
-                return Task.FromResult(_fileProvider.Files.Keys
+                return _fileProvider.Files.Keys
                     .Where(x => Path.ContainsChild(x))
                     .Select(x => new DocumentFile(_fileProvider, x))
-                    .Cast<IFile>());
+                    .Cast<IFile>();
             }
 
-            return Task.FromResult(_fileProvider.Files.Keys
+            return _fileProvider.Files.Keys
                 .Where(x => Path.ContainsDescendant(x))
                 .Select(x => new DocumentFile(_fileProvider, x))
-                .Cast<IFile>());
+                .Cast<IFile>();
         }
 
-        public Task<IDirectory> GetParentAsync()
+        public IDirectory Parent
         {
-            DirectoryPath parentPath = Path.Parent;
-            if (parentPath == null)
+            get
             {
-                return Task.FromResult<IDirectory>(null);
+                DirectoryPath parentPath = Path.Parent;
+                return parentPath == null ? null : new DocumentDirectory(_fileProvider, parentPath);
             }
-            return Task.FromResult<IDirectory>(new DocumentDirectory(_fileProvider, parentPath));
         }
 
-        public Task CreateAsync() => throw new NotSupportedException();
+        public void Create() => throw new NotSupportedException();
 
-        public Task DeleteAsync(bool recursive) => throw new NotSupportedException();
+        public void Delete(bool recursive) => throw new NotSupportedException();
 
         public string ToDisplayString() => Path.ToDisplayString();
     }

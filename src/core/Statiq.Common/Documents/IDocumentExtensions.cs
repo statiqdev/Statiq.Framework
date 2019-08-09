@@ -94,13 +94,13 @@ namespace Statiq.Common
         /// <summary>
         /// Gets the content associated with this document as a string.
         /// This will result in reading the entire content stream.
-        /// It's preferred to read directly as a stream using <see cref="IDocument.GetStreamAsync"/> if possible.
+        /// It's preferred to read directly as a stream using <see cref="IDocument.GetStream"/> if possible.
         /// </summary>
         /// <param name="document">The document.</param>
         /// <value>The content associated with this document.</value>
         public static async Task<string> GetStringAsync(this IDocument document)
         {
-            Stream stream = await document.GetStreamAsync();
+            Stream stream = document.GetStream();
             if (stream == null || stream == Stream.Null)
             {
                 return string.Empty;
@@ -114,13 +114,13 @@ namespace Statiq.Common
         /// <summary>
         /// Gets the content associated with this document as a byte array.
         /// This will result in reading the entire content stream.
-        /// It's preferred to read directly as a stream using <see cref="IDocument.GetStreamAsync"/> if possible.
+        /// It's preferred to read directly as a stream using <see cref="IDocument.GetStream"/> if possible.
         /// </summary>
         /// <param name="document">The document.</param>
         /// <value>The content associated with this document.</value>
         public static async Task<byte[]> GetBytesAsync(this IDocument document)
         {
-            using (Stream stream = await document.GetStreamAsync())
+            using (Stream stream = document.GetStream())
             {
                 if (stream == null || stream == Stream.Null)
                 {
@@ -210,15 +210,13 @@ namespace Statiq.Common
         }
 
         /// <summary>
-        /// Returns a document enumerable given a single document. This is just a convenience
-        /// method for converting a single document into an <see cref="IEnumerable{T}"/>.
+        /// Returns an async document enumerable given a single document. This is just a convenience
+        /// method for converting a single document into an <see cref="IAsyncEnumerable{T}"/>.
         /// </summary>
         /// <param name="document">The document to return.</param>
-        /// <returns>A document enumerable.</returns>
-        public static Task<IEnumerable<TDocument>> YieldAsTask<TDocument>(this TDocument document)
-            where TDocument : IDocument
-        {
-            return document.Yield().AsTask();
-        }
+        /// <returns>An async document enumerable.</returns>
+        public static IAsyncEnumerable<TDocument> YieldAsync<TDocument>(this TDocument document)
+            where TDocument : IDocument =>
+            document.Yield().ToAsyncEnumerable();
     }
 }

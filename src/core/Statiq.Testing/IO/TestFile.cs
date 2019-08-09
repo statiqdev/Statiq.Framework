@@ -19,11 +19,11 @@ namespace Statiq.Testing
 
         NormalizedPath IFileSystemEntry.Path => Path;
 
-        public Task<bool> GetExistsAsync() => Task.FromResult(_fileProvider.Files.ContainsKey(Path.FullPath));
+        public bool Exists => _fileProvider.Files.ContainsKey(Path.FullPath);
 
-        public Task<IDirectory> GetDirectoryAsync() => Task.FromResult<IDirectory>(new TestDirectory(_fileProvider, Path.Directory));
+        public IDirectory Directory => new TestDirectory(_fileProvider, Path.Directory);
 
-        public Task<long> GetLengthAsync() => Task.FromResult<long>(_fileProvider.Files[Path.FullPath].Length);
+        public long Length => _fileProvider.Files[Path.FullPath].Length;
 
         private void CreateDirectory(bool createDirectory, IFile file)
         {
@@ -73,11 +73,7 @@ namespace Statiq.Testing
             return Task.CompletedTask;
         }
 
-        public Task DeleteAsync()
-        {
-            _fileProvider.Files.TryRemove(Path.FullPath, out StringBuilder builder);
-            return Task.CompletedTask;
-        }
+        public void Delete() => _fileProvider.Files.TryRemove(Path.FullPath, out StringBuilder _);
 
         public Task<string> ReadAllTextAsync() => Task.FromResult(_fileProvider.Files[Path.FullPath].ToString());
 
@@ -88,36 +84,36 @@ namespace Statiq.Testing
             return Task.CompletedTask;
         }
 
-        public Task<Stream> OpenReadAsync()
+        public Stream OpenRead()
         {
             if (!_fileProvider.Files.TryGetValue(Path.FullPath, out StringBuilder builder))
             {
                 throw new FileNotFoundException();
             }
             byte[] bytes = Encoding.UTF8.GetBytes(builder.ToString());
-            return Task.FromResult<Stream>(new MemoryStream(bytes));
+            return new MemoryStream(bytes);
         }
 
-        public Task<Stream> OpenWriteAsync(bool createDirectory = true)
+        public Stream OpenWrite(bool createDirectory = true)
         {
             CreateDirectory(createDirectory, this);
-            return Task.FromResult<Stream>(new StringBuilderStream(_fileProvider.Files.AddOrUpdate(Path.FullPath, new StringBuilder(), (x, y) => y)));
+            return new StringBuilderStream(_fileProvider.Files.AddOrUpdate(Path.FullPath, new StringBuilder(), (x, y) => y));
         }
 
-        public Task<Stream> OpenAppendAsync(bool createDirectory = true)
+        public Stream OpenAppend(bool createDirectory = true)
         {
             CreateDirectory(createDirectory, this);
             StringBuilderStream stream = new StringBuilderStream(_fileProvider.Files.AddOrUpdate(Path.FullPath, new StringBuilder(), (x, y) => y));
 
             // Start appending at the end of the stream.
             stream.Position = stream.Length;
-            return Task.FromResult<Stream>(stream);
+            return stream;
         }
 
-        public Task<Stream> OpenAsync(bool createDirectory = true)
+        public Stream Open(bool createDirectory = true)
         {
             CreateDirectory(createDirectory, this);
-            return Task.FromResult<Stream>(new StringBuilderStream(_fileProvider.Files.AddOrUpdate(Path.FullPath, new StringBuilder(), (x, y) => y)));
+            return new StringBuilderStream(_fileProvider.Files.AddOrUpdate(Path.FullPath, new StringBuilder(), (x, y) => y));
         }
 
         public IContentProvider GetContentProvider() =>

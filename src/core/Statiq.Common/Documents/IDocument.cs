@@ -35,10 +35,10 @@ namespace Statiq.Common
         /// The stream you get from this call must be disposed as soon as reading is complete.
         /// </summary>
         /// <returns>A <see cref="Stream"/> of the content associated with this document.</returns>
-        Task<Stream> GetStreamAsync();
+        Stream GetStream();
 
         /// <summary>
-        /// Indicates if this document has content (if not, <see cref="GetStreamAsync()"/> will return <see cref="Stream.Null"/>.
+        /// Indicates if this document has content (if not, <see cref="GetStream()"/> will return <see cref="Stream.Null"/>.
         /// </summary>
         bool HasContent { get; }
 

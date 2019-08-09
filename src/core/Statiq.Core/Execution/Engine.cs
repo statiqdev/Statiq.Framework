@@ -89,10 +89,10 @@ namespace Statiq.Core
             try
             {
                 Trace.Information("Cleaning output path: {0}", FileSystem.OutputPath);
-                IDirectory outputDirectory = await FileSystem.GetOutputDirectoryAsync();
-                if (await outputDirectory.GetExistsAsync())
+                IDirectory outputDirectory = await FileSystem.GetOutputDirectory();
+                if (await outputDirectory.GetExists())
                 {
-                    await outputDirectory.DeleteAsync(true);
+                    await outputDirectory.Delete(true);
                 }
                 Trace.Information("Cleaned output directory");
             }
@@ -110,10 +110,10 @@ namespace Statiq.Core
             try
             {
                 Trace.Information("Cleaning temp path: {0}", FileSystem.TempPath);
-                IDirectory tempDirectory = await FileSystem.GetTempDirectoryAsync();
-                if (await tempDirectory.GetExistsAsync())
+                IDirectory tempDirectory = await FileSystem.GetTempDirectory();
+                if (await tempDirectory.GetExists())
                 {
-                    await tempDirectory.DeleteAsync(true);
+                    await tempDirectory.Delete(true);
                 }
                 Trace.Information("Cleaned temp directory");
             }
@@ -329,7 +329,7 @@ namespace Statiq.Core
         }
 
         // This executes the specified modules with the specified input documents
-        internal static async Task<ImmutableArray<IDocument>> ExecuteAsync(ExecutionContextData contextData, IExecutionContext parent, IEnumerable<IModule> modules, ImmutableArray<IDocument> inputs)
+        internal static async Task<ImmutableArray<IDocument>> ExecuteModulesAsync(ExecutionContextData contextData, IExecutionContext parent, IEnumerable<IModule> modules, ImmutableArray<IDocument> inputs)
         {
             ImmutableArray<IDocument> outputs = ImmutableArray<IDocument>.Empty;
             if (modules != null)
@@ -347,9 +347,8 @@ namespace Statiq.Core
                         System.Diagnostics.Stopwatch stopwatch = System.Diagnostics.Stopwatch.StartNew();
                         Trace.Verbose("Executing module {0} with {1} input document(s)", moduleName, inputs.Length);
                         ExecutionContext moduleContext = new ExecutionContext(contextData, parent, module, inputs);
-                        IEnumerable<IDocument> moduleResult = await (module.ExecuteAsync(moduleContext)
-                            ?? Task.FromResult<IEnumerable<IDocument>>(null));  // Handle a null Task return
-                        outputs = moduleResult?.Where(x => x != null).ToImmutableArray() ?? ImmutableArray<IDocument>.Empty;
+                        IAsyncEnumerable<IDocument> moduleResult = module.ExecuteAsync(moduleContext);
+                        outputs = moduleResult == null ? ImmutableArray<IDocument>.Empty : await moduleResult.Where(x => x != null).ToImmutableArrayAsync();
 
                         // Trace results
                         stopwatch.Stop();

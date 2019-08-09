@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.IO;
+using System.Linq;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
@@ -99,12 +100,12 @@ namespace Statiq.Core
             if (this.Bool(Common.Keys.UseStringContentFiles))
             {
                 // Use a temp file for strings
-                IFile tempFile = await FileSystem.GetTempFileAsync();
+                IFile tempFile = await FileSystem.GetTempFile();
                 if (!string.IsNullOrEmpty(content))
                 {
                     await tempFile.WriteAllTextAsync(content);
                 }
-                return new ContentStream(new FileContent(tempFile), await tempFile.OpenAsync(), true);
+                return new ContentStream(new FileContent(tempFile), await tempFile.Open(), true);
             }
 
             // Otherwise get a memory stream from the pool and use that
@@ -113,8 +114,8 @@ namespace Statiq.Core
         }
 
         /// <inheritdoc/>
-        public async Task<ImmutableArray<IDocument>> ExecuteAsync(IEnumerable<IModule> modules, IEnumerable<IDocument> inputs) =>
-            await Engine.ExecuteAsync(_contextData, this, modules, inputs?.ToImmutableArray() ?? ImmutableArray<IDocument>.Empty);
+        public async Task<ImmutableArray<IDocument>> ExecuteModulesAsync(IEnumerable<IModule> modules, IEnumerable<IDocument> inputs) =>
+            await Engine.ExecuteModulesAsync(_contextData, this, modules, inputs?.ToImmutableArray() ?? ImmutableArray<IDocument>.Empty);
 
         /// <inheritdoc/>
         public IJavaScriptEnginePool GetJavaScriptEnginePool(

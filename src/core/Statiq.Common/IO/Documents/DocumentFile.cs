@@ -28,18 +28,17 @@ namespace Statiq.Common
         public IContentProvider GetContentProvider() =>
             _document == null ? NullContent.Provider : _document.ContentProvider;
 
-        public Task<IDirectory> GetDirectoryAsync() =>
-            Task.FromResult<IDirectory>(new DocumentDirectory(_fileProvider, Path.Directory));
+        public IDirectory Directory => new DocumentDirectory(_fileProvider, Path.Directory);
 
-        public Task<bool> GetExistsAsync() => Task.FromResult(_document != null);
+        public bool Exists => _document != null;
 
-        public async Task<Stream> OpenReadAsync()
+        public Stream OpenRead()
         {
             if (_document == null)
             {
                 throw new FileNotFoundException();
             }
-            return await _document.GetStreamAsync();
+            return _document.GetStream();
         }
 
         public async Task<string> ReadAllTextAsync()
@@ -51,29 +50,32 @@ namespace Statiq.Common
             return await _document.GetStringAsync();
         }
 
-        public async Task<long> GetLengthAsync()
+        public long Length
         {
-            if (_document == null)
+            get
             {
-                throw new FileNotFoundException();
-            }
-            using (Stream stream = await _document.GetStreamAsync())
-            {
-                return stream.Length;
+                if (_document == null)
+                {
+                    throw new FileNotFoundException();
+                }
+                using (Stream stream = _document.GetStream())
+                {
+                    return stream.Length;
+                }
             }
         }
 
         public Task CopyToAsync(IFile destination, bool overwrite = true, bool createDirectory = true) => throw new NotSupportedException();
 
-        public Task DeleteAsync() => throw new NotSupportedException();
-
         public Task MoveToAsync(IFile destination) => throw new NotSupportedException();
 
-        public Task<Stream> OpenAppendAsync(bool createDirectory = true) => throw new NotSupportedException();
+        public void Delete() => throw new NotSupportedException();
 
-        public Task<Stream> OpenAsync(bool createDirectory = true) => throw new NotSupportedException();
+        public Stream OpenAppend(bool createDirectory = true) => throw new NotSupportedException();
 
-        public Task<Stream> OpenWriteAsync(bool createDirectory = true) => throw new NotSupportedException();
+        public Stream Open(bool createDirectory = true) => throw new NotSupportedException();
+
+        public Stream OpenWrite(bool createDirectory = true) => throw new NotSupportedException();
 
         public Task WriteAllTextAsync(string contents, bool createDirectory = true) => throw new NotSupportedException();
 

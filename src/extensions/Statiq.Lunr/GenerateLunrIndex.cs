@@ -268,8 +268,8 @@ var searchModule = function() {{
 
             if (_stopwordsPath != null)
             {
-                IFile stopwordsFile = await context.FileSystem.GetInputFileAsync(_stopwordsPath);
-                if (await stopwordsFile.GetExistsAsync())
+                IFile stopwordsFile = await context.FileSystem.GetInputFile(_stopwordsPath);
+                if (await stopwordsFile.GetExists())
                 {
                     stopwords = (await stopwordsFile.ReadAllTextAsync())
                         .Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries)

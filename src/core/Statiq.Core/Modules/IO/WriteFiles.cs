@@ -120,17 +120,17 @@ namespace Statiq.Core
 
         private async Task WriteAsync(IDocument input, IExecutionContext context, FilePath outputPath)
         {
-            IFile outputFile = await context.FileSystem.GetOutputFileAsync(outputPath);
+            IFile outputFile = await context.FileSystem.GetOutputFile(outputPath);
             if (outputFile != null)
             {
-                using (Stream inputStream = await input.GetStreamAsync())
+                using (Stream inputStream = await input.GetStream())
                 {
                     if (_ignoreEmptyContent && inputStream.Length == 0)
                     {
                         return;
                     }
 
-                    using (Stream outputStream = _append ? await outputFile.OpenAppendAsync() : await outputFile.OpenWriteAsync())
+                    using (Stream outputStream = _append ? await outputFile.OpenAppend() : await outputFile.OpenWrite())
                     {
                         await inputStream.CopyToAsync(outputStream);
                         if (!_append)

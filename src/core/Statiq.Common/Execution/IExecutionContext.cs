@@ -100,7 +100,7 @@ namespace Statiq.Common
         /// <summary>
         /// The input documents to process.
         /// </summary>
-        IAsyncEnumerable<IDocument> Inputs { get; }
+        ImmutableArray<IDocument> Inputs { get; }
 
         /// <summary>
         /// Creates a <see cref="HttpClient"/> instance that should be used for all HTTP communication.
@@ -117,7 +117,7 @@ namespace Statiq.Common
 
         /// <summary>
         /// Gets a <see cref="Stream"/> that can be used for document content. If <paramref name="content"/>
-        /// is not null, the stream is initialized with the specified content. It is prefered to use
+        /// is not null, the stream is initialized with the specified content. It is preferred to use
         /// this method to obtain a stream over creating your own if the source of the content does
         /// not already provide one. The returned streams are optimized for memory usage and performance.
         /// Instances of the returned stream should be disposed when writing is complete.
@@ -133,7 +133,7 @@ namespace Statiq.Common
         /// <param name="modules">The modules to execute.</param>
         /// <param name="inputs">The documents to execute the modules on.</param>
         /// <returns>The result documents from the executed modules.</returns>
-        IAsyncEnumerable<IDocument> ExecuteAsync(IEnumerable<IModule> modules, IAsyncEnumerable<IDocument> inputs);
+        Task<ImmutableArray<IDocument>> ExecuteModulesAsync(IEnumerable<IModule> modules, IEnumerable<IDocument> inputs);
 
         /// <summary>
         /// Gets a new <see cref="IJavaScriptEnginePool"/>. The returned engine pool should be disposed
@@ -148,7 +148,7 @@ namespace Statiq.Common
         /// <param name="maxUsagesPerEngine">The maximum number of times an engine can be reused before it is disposed.</param>
         /// <param name="engineTimeout">
         /// The default timeout to use when acquiring an engine from the pool (defaults to 5 seconds).
-        /// If an engine can not be acquired in this timeframe, an exception will be thrown.
+        /// If an engine can not be acquired in this time frame, an exception will be thrown.
         /// </param>
         /// <returns>A new JavaScript engine pool.</returns>
         IJavaScriptEnginePool GetJavaScriptEnginePool(

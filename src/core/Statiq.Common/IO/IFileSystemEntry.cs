@@ -21,6 +21,6 @@ namespace Statiq.Common
         /// <value>
         ///   <c>true</c> if the entry exists; otherwise, <c>false</c>.
         /// </value>
-        Task<bool> GetExistsAsync();
+        bool Exists { get; }
     }
 }

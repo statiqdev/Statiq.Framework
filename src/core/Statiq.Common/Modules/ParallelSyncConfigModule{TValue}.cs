@@ -6,10 +6,10 @@ using System.Threading.Tasks;
 namespace Statiq.Common
 {
     /// <summary>
-    /// Base class for modules that rely on a config value and could apply to input documents (or not) depending
-    /// on whether the config delegate requires them.
+    /// Base class for modules that rely on a config value and could apply to input documents in parallel
+    /// (or not) depending on whether the config delegate requires them.
     /// </summary>
-    public abstract class SyncConfigModule<TValue> : ConfigModule<TValue>
+    public abstract class ParallelSyncConfigModule<TValue> : ParallelConfigModule<TValue>
     {
         /// <summary>
         /// Creates a new config module.
@@ -21,12 +21,11 @@ namespace Statiq.Common
         /// to allow only calling <see cref="ExecuteAsync(IDocument, IExecutionContext, TValue)"/> once
         /// with a null input document if the config delegate does not require a document.
         /// </param>
-        protected SyncConfigModule(Config<TValue> config, bool eachDocument)
+        protected ParallelSyncConfigModule(Config<TValue> config, bool eachDocument)
             : base(config, eachDocument)
         {
         }
 
-        /// <inheritdoc />
         protected sealed override IAsyncEnumerable<IDocument> ExecuteAsync(IDocument input, IExecutionContext context, TValue value) =>
             Execute(input, context, value).ToAsyncEnumerable();
 

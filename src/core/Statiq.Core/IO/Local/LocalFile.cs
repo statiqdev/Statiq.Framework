@@ -26,11 +26,11 @@ namespace Statiq.Core
             _file = new FileInfo(Path.FullPath);
         }
 
-        public Task<IDirectory> GetDirectoryAsync() => Task.FromResult<IDirectory>(new LocalDirectory(Path.Directory));
+        public IDirectory Directory => new LocalDirectory(Path.Directory);
 
-        public Task<bool> GetExistsAsync() => Task.FromResult(_file.Exists);
+        public bool Exists => _file.Exists;
 
-        public Task<long> GetLengthAsync() => Task.FromResult(_file.Length);
+        public long Length => _file.Length;
 
         public async Task CopyToAsync(IFile destination, bool overwrite = true, bool createDirectory = true)
         {
@@ -39,8 +39,8 @@ namespace Statiq.Core
             // Create the directory
             if (createDirectory)
             {
-                IDirectory directory = await destination.GetDirectoryAsync();
-                await directory.CreateAsync();
+                IDirectory directory = destination.Directory;
+                directory.Create();
             }
 
             // Use the file system APIs if destination is also in the file system
@@ -51,9 +51,9 @@ namespace Statiq.Core
             else
             {
                 // Otherwise use streams to perform the copy
-                using (Stream sourceStream = await OpenReadAsync())
+                using (Stream sourceStream = OpenRead())
                 {
-                    using (Stream destinationStream = await destination.OpenWriteAsync())
+                    using (Stream destinationStream = destination.OpenWrite())
                     {
                         await sourceStream.CopyToAsync(destinationStream);
                     }
@@ -73,22 +73,18 @@ namespace Statiq.Core
             else
             {
                 // Otherwise use streams to perform the move
-                using (Stream sourceStream = await OpenReadAsync())
+                using (Stream sourceStream = OpenRead())
                 {
-                    using (Stream destinationStream = await destination.OpenWriteAsync())
+                    using (Stream destinationStream = destination.OpenWrite())
                     {
                         await sourceStream.CopyToAsync(destinationStream);
                     }
                 }
-                await DeleteAsync();
+                Delete();
             }
         }
 
-        public Task DeleteAsync()
-        {
-            LocalFileProvider.RetryPolicy.Execute(() => _file.Delete());
-            return Task.CompletedTask;
-        }
+        public void Delete() => LocalFileProvider.RetryPolicy.Execute(() => _file.Delete());
 
         public async Task<string> ReadAllTextAsync() =>
             await LocalFileProvider.AsyncRetryPolicy.ExecuteAsync(() => File.ReadAllTextAsync(_file.FullName));
@@ -97,47 +93,43 @@ namespace Statiq.Core
         {
             if (createDirectory)
             {
-                await CreateDirectoryAsync();
+                CreateDirectory();
             }
 
             await LocalFileProvider.AsyncRetryPolicy.ExecuteAsync(() => File.WriteAllTextAsync(_file.FullName, contents));
         }
 
-        public Task<Stream> OpenReadAsync() =>
-            Task.FromResult<Stream>(LocalFileProvider.RetryPolicy.Execute(() => _file.Open(FileMode.Open, FileAccess.Read, FileShare.ReadWrite)));
+        public Stream OpenRead() =>
+            LocalFileProvider.RetryPolicy.Execute(() => _file.Open(FileMode.Open, FileAccess.Read, FileShare.ReadWrite));
 
-        public async Task<Stream> OpenWriteAsync(bool createDirectory = true)
+        public Stream OpenWrite(bool createDirectory = true)
         {
             if (createDirectory)
             {
-                await CreateDirectoryAsync();
+                CreateDirectory();
             }
             return LocalFileProvider.RetryPolicy.Execute(() => _file.Open(FileMode.OpenOrCreate, FileAccess.Write, FileShare.ReadWrite));
         }
 
-        public async Task<Stream> OpenAppendAsync(bool createDirectory = true)
+        public Stream OpenAppend(bool createDirectory = true)
         {
             if (createDirectory)
             {
-                await CreateDirectoryAsync();
+                CreateDirectory();
             }
             return LocalFileProvider.RetryPolicy.Execute(() => _file.Open(FileMode.Append, FileAccess.Write, FileShare.ReadWrite));
         }
 
-        public async Task<Stream> OpenAsync(bool createDirectory = true)
+        public Stream Open(bool createDirectory = true)
         {
             if (createDirectory)
             {
-                await CreateDirectoryAsync();
+                CreateDirectory();
             }
             return LocalFileProvider.RetryPolicy.Execute(() => _file.Open(FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.ReadWrite));
         }
 
-        private async Task CreateDirectoryAsync()
-        {
-            IDirectory directory = await GetDirectoryAsync();
-            await directory.CreateAsync();
-        }
+        private void CreateDirectory() => Directory.Create();
 
         public IContentProvider GetContentProvider() =>
             _file.Exists ? (IContentProvider)new FileContent(this) : NullContent.Provider;

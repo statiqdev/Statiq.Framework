@@ -79,7 +79,7 @@ namespace Statiq.Testing
         /// <param name="modules">The modules to execute.</param>
         /// <returns>A materialized list of result documents from the last module.</returns>
         public static async Task<ImmutableArray<TestDocument>> ExecuteAsync(TestExecutionContext context, params IModule[] modules) =>
-            (await context.ExecuteAsync(modules, context.Inputs)).Cast<TestDocument>().ToImmutableArray();
+            (await context.ExecuteModulesAsync(modules, context.Inputs)).Cast<TestDocument>().ToImmutableArray();
 
         /// <summary>
         /// A utility method to execute modules in serial. The resulting documents will be materialized before returning.
@@ -110,7 +110,7 @@ namespace Statiq.Testing
         /// <param name="modules">The modules to execute.</param>
         /// <returns>A materialized list of result documents from the last module.</returns>
         public static async Task<ImmutableArray<TestDocument>> ExecuteAsync(TestDocument document, TestExecutionContext context, params IModule[] modules) =>
-            (await context.ExecuteAsync(modules, document?.Yield())).Cast<TestDocument>().ToImmutableArray();
+            (await context.ExecuteModulesAsync(modules, document?.Yield())).Cast<TestDocument>().ToImmutableArray();
 
         /// <summary>
         /// A utility method to execute modules in serial. The resulting documents will be materialized before returning.
@@ -121,6 +121,6 @@ namespace Statiq.Testing
         /// <param name="modules">The modules to execute.</param>
         /// <returns>A materialized list of result documents from the last module.</returns>
         public static async Task<ImmutableArray<TestDocument>> ExecuteAsync(IEnumerable<TestDocument> documents, TestExecutionContext context, params IModule[] modules) =>
-            (await context.ExecuteAsync(modules, documents)).Cast<TestDocument>().ToImmutableArray();
+            (await context.ExecuteModulesAsync(modules, documents)).Cast<TestDocument>().ToImmutableArray();
     }
 }

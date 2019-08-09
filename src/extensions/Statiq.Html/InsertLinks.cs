@@ -147,7 +147,7 @@ namespace Statiq.Html
                 // Enumerate all elements that match the query selector not already in a link element
                 List<KeyValuePair<IText, string>> replacements = new List<KeyValuePair<IText, string>>();
                 IHtmlDocument htmlDocument;
-                using (Stream stream = await input.GetStreamAsync())
+                using (Stream stream = await input.GetStream())
                 {
                     htmlDocument = await HtmlParser.ParseAsync(stream);
                 }
