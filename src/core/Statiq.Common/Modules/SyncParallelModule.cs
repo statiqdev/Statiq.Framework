@@ -11,12 +11,12 @@ namespace Statiq.Common
     public abstract class SyncParallelModule : ParallelModule
     {
         /// <inheritdoc />
-        public override sealed Task<IEnumerable<IDocument>> ExecuteAsync(IExecutionContext context) =>
-            Task.FromResult(Execute(context));
+        public override sealed IAsyncEnumerable<IDocument> ExecuteAsync(IExecutionContext context) =>
+            Execute(context).ToAsyncEnumerable();
 
         /// <inheritdoc />
         // Unused, prevent overriding in derived classes
-        protected sealed override Task<IEnumerable<IDocument>> ExecuteAsync(IDocument input, IExecutionContext context) =>
+        protected sealed override IAsyncEnumerable<IDocument> ExecuteAsync(IDocument input, IExecutionContext context) =>
             base.ExecuteAsync(input, context);
 
         /// <summary>
@@ -35,6 +35,7 @@ namespace Statiq.Common
             if (Parallel)
             {
                 return context.Inputs
+                    .ToEnumerable()
                     .AsParallel()
                     .AsOrdered()
                     .WithCancellation(context.CancellationToken)
@@ -44,6 +45,7 @@ namespace Statiq.Common
             }
 
             return context.Inputs
+                .ToEnumerable()
                 .Select(input => ExecuteInput(input, context, Execute))
                 .Where(x => x != null)
                 .SelectMany(x => x);

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace Statiq.Common
@@ -30,30 +31,52 @@ namespace Statiq.Common
         }
 
         /// <inheritdoc />
-        public sealed override async Task<IEnumerable<IDocument>> ExecuteAsync(IExecutionContext context)
+        public sealed override async IAsyncEnumerable<IDocument> ExecuteAsync(IExecutionContext context)
         {
             if (_eachDocument)
             {
+                TValue value = default;
+
+                // Only need to evaluate the config delegate once
                 if (!_config.RequiresDocument)
                 {
-                    // Only need to evaluate the config delegate once
-                    TValue value = await _config.GetValueAsync(null, context);
-                    return Parallel
-                        ? (IEnumerable<IDocument>)await context.Inputs.Parallel().SelectManyAsync(async input => await SafeExecuteAsync(ExecuteAsync(input, context, value)))
-                        : await context.Inputs.SelectManyAsync(async input => await SafeExecuteAsync(ExecuteAsync(input, context, value)));
+                    value = await _config.GetValueAsync(null, context);
                 }
 
-                return Parallel
-                    ? (IEnumerable<IDocument>)await context.Inputs.Parallel().SelectManyAsync(async input => await SafeExecuteAsync(ExecuteAsync(input, context, await _config.GetValueAsync(input, context))))
-                    : await context.Inputs.SelectManyAsync(async input => await SafeExecuteAsync(ExecuteAsync(input, context, await _config.GetValueAsync(input, context))));
+                await foreach (IDocument result in ParallelExecuteAsync(context, (i, c) => ParallelExecuteAsync(i, c, value)))
+                {
+                    yield return result;
+                }
             }
 
-            return await ExecuteAsync(null, context, await _config.GetValueAsync(null, context));
+            await foreach (IDocument result in ExecuteAsync(null, context, await _config.GetValueAsync(null, context)))
+            {
+                yield return result;
+            }
+        }
+
+        private async IAsyncEnumerable<IDocument> ParallelExecuteAsync(IDocument input, IExecutionContext context, TValue value)
+        {
+            // If the config requires a document, evaluate it each time
+            if (_config.RequiresDocument)
+            {
+                value = await _config.GetValueAsync(input, context);
+            }
+
+            // Get the results for this input document
+            IAsyncEnumerable<IDocument> results = ExecuteInput(input, context, (i, c) => ExecuteAsync(i, c, value));
+            if (results != null)
+            {
+                await foreach (IDocument result in results)
+                {
+                    yield return result;
+                }
+            }
         }
 
         /// <inheritdoc />
         // Unused, prevent overriding in derived classes
-        protected sealed override Task<IEnumerable<IDocument>> ExecuteAsync(IDocument input, IExecutionContext context) =>
+        protected sealed override IAsyncEnumerable<IDocument> ExecuteAsync(IDocument input, IExecutionContext context) =>
             base.ExecuteAsync(input, context);
 
         /// <summary>
@@ -68,6 +91,6 @@ namespace Statiq.Common
         /// <param name="context">The execution context.</param>
         /// <param name="value">The evaluated config value.</param>
         /// <returns>The result documents.</returns>
-        protected abstract Task<IEnumerable<IDocument>> ExecuteAsync(IDocument input, IExecutionContext context, TValue value);
+        protected abstract IAsyncEnumerable<IDocument> ExecuteAsync(IDocument input, IExecutionContext context, TValue value);
     }
 }

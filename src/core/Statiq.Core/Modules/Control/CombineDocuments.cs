@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Statiq.Common;
 
@@ -18,18 +19,20 @@ namespace Statiq.Core
     public class CombineDocuments : IModule
     {
         /// <inheritdoc />
-        public async Task<IEnumerable<IDocument>> ExecuteAsync(IExecutionContext context)
+        public async IAsyncEnumerable<IDocument> ExecuteAsync(IExecutionContext context)
         {
             IDocument result = null;
-            await context.Inputs.ForEachAsync(async input =>
-            {
-                result = result == null
-                    ? input
-                    : result.Clone(
-                        input,
-                        await context.GetContentProviderAsync(await result.GetStringAsync() + await input.GetStringAsync()));
-            });
-            return result.Yield();
+            await context.Inputs
+                .ToAsyncEnumerable()
+                .ForEachAwaitAsync(async input =>
+                {
+                    result = result == null
+                        ? input
+                        : result.Clone(
+                            input,
+                            await context.GetContentProviderAsync(await result.GetStringAsync() + await input.GetStringAsync()));
+                });
+            yield return result;
         }
     }
 }

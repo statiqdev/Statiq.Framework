@@ -13,6 +13,6 @@ namespace Statiq.Common
         /// </summary>
         /// <param name="context">The execution context that includes input documents, information about the environment, and engine services.</param>
         /// <returns>A set of result documents (possibly the same as the input documents).</returns>
-        Task<IEnumerable<IDocument>> ExecuteAsync(IExecutionContext context);
+        IAsyncEnumerable<IDocument> ExecuteAsync(IExecutionContext context);
     }
 }

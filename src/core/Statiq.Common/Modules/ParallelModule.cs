@@ -17,16 +17,29 @@ namespace Statiq.Common
         public bool Parallel { get; internal set; } = true;
 
         /// <inheritdoc />
-        public override async Task<IEnumerable<IDocument>> ExecuteAsync(IExecutionContext context)
-        {
-            if (Parallel)
-            {
-                IEnumerable<IDocument>[] taskResults = await Task.WhenAll(
-                    context.Inputs.Select(input => Task.Run(() => ExecuteInput(input, context, ExecuteAsync), context.CancellationToken)));
-                return taskResults.Where(x => x != null).SelectMany(x => x);
-            }
+        public override IAsyncEnumerable<IDocument> ExecuteAsync(IExecutionContext context) =>
+            Parallel
+                ? ParallelExecuteAsync(context, (i, c) => ExecuteInput(i, c, ExecuteAsync))
+                : base.ExecuteAsync(context);
 
-            return await base.ExecuteAsync(context);
+        internal static async IAsyncEnumerable<IDocument> ParallelExecuteAsync(
+            IExecutionContext context,
+            Func<IDocument, IExecutionContext, IAsyncEnumerable<IDocument>> executeFunc)
+        {
+            // Have to convert it to a plain IEnumerable since that's what Task.WhenAll() takes
+            IEnumerable<Task<IAsyncEnumerable<IDocument>>> tasks =
+                context.Inputs.Select(input => Task.Run(() => executeFunc(input, context), context.CancellationToken)).ToEnumerable();
+            IAsyncEnumerable<IDocument>[] results = await Task.WhenAll(tasks);
+            foreach (IAsyncEnumerable<IDocument> result in results)
+            {
+                if (result != null)
+                {
+                    await foreach (IDocument document in result)
+                    {
+                        yield return document;
+                    }
+                }
+            }
         }
     }
 }

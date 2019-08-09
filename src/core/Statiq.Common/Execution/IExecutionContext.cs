@@ -100,7 +100,7 @@ namespace Statiq.Common
         /// <summary>
         /// The input documents to process.
         /// </summary>
-        ImmutableArray<IDocument> Inputs { get; }
+        IAsyncEnumerable<IDocument> Inputs { get; }
 
         /// <summary>
         /// Creates a <see cref="HttpClient"/> instance that should be used for all HTTP communication.
@@ -133,7 +133,7 @@ namespace Statiq.Common
         /// <param name="modules">The modules to execute.</param>
         /// <param name="inputs">The documents to execute the modules on.</param>
         /// <returns>The result documents from the executed modules.</returns>
-        Task<ImmutableArray<IDocument>> ExecuteAsync(IEnumerable<IModule> modules, IEnumerable<IDocument> inputs);
+        IAsyncEnumerable<IDocument> ExecuteAsync(IEnumerable<IModule> modules, IAsyncEnumerable<IDocument> inputs);
 
         /// <summary>
         /// Gets a new <see cref="IJavaScriptEnginePool"/>. The returned engine pool should be disposed

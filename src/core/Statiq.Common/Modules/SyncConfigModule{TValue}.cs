@@ -28,8 +28,8 @@ namespace Statiq.Common
         }
 
         /// <inheritdoc />
-        protected sealed override Task<IEnumerable<IDocument>> ExecuteAsync(IDocument input, IExecutionContext context, TValue value) =>
-            Task.FromResult(Execute(input, context, value));
+        protected sealed override IAsyncEnumerable<IDocument> ExecuteAsync(IDocument input, IExecutionContext context, TValue value) =>
+            Execute(input, context, value).ToAsyncEnumerable();
 
         /// <summary>
         /// Executes the module for each input document in parallel.
