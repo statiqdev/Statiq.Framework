@@ -31,7 +31,7 @@ namespace Statiq.Common
         }
 
         /// <inheritdoc />
-        public sealed override async IAsyncEnumerable<IDocument> ExecuteAsync(IExecutionContext context)
+        public sealed override async Task<IEnumerable<IDocument>> ExecuteAsync(IExecutionContext context)
         {
             if (_eachDocument)
             {
@@ -43,22 +43,13 @@ namespace Statiq.Common
                     value = await _config.GetValueAsync(null, context);
                 }
 
-                IAsyncEnumerable<IDocument> results = context.Inputs
-                    .ToAsyncEnumerable()
-                    .ParallelSelectManyAsync(input => ParallelExecuteAsync(input, context, value), context.CancellationToken);
-                await foreach (IDocument result in results.WithCancellation(context.CancellationToken))
-                {
-                    yield return result;
-                }
+                return await context.Inputs.ParallelSelectManyAsync(input => ParallelExecuteAsync(input, context, value), context.CancellationToken);
             }
 
-            await foreach (IDocument result in ExecuteAsync(null, context, await _config.GetValueAsync(null, context)))
-            {
-                yield return result;
-            }
+            return await ExecuteAsync(null, context, await _config.GetValueAsync(null, context));
         }
 
-        private async IAsyncEnumerable<IDocument> ParallelExecuteAsync(IDocument input, IExecutionContext context, TValue value)
+        private async Task<IEnumerable<IDocument>> ParallelExecuteAsync(IDocument input, IExecutionContext context, TValue value)
         {
             // If the config requires a document, evaluate it each time
             if (_config.RequiresDocument)
@@ -67,19 +58,12 @@ namespace Statiq.Common
             }
 
             // Get the results for this input document
-            IAsyncEnumerable<IDocument> results = ExecuteInput(input, context, (i, c) => ExecuteAsync(i, c, value));
-            if (results != null)
-            {
-                await foreach (IDocument result in results)
-                {
-                    yield return result;
-                }
-            }
+            return await ExecuteInput(input, context, (i, c) => ExecuteAsync(i, c, value));
         }
 
         /// <inheritdoc />
         // Unused, prevent overriding in derived classes
-        protected sealed override IAsyncEnumerable<IDocument> ExecuteAsync(IDocument input, IExecutionContext context) =>
+        protected sealed override Task<IEnumerable<IDocument>> ExecuteAsync(IDocument input, IExecutionContext context) =>
             base.ExecuteAsync(input, context);
 
         /// <summary>
@@ -94,6 +78,6 @@ namespace Statiq.Common
         /// <param name="context">The execution context.</param>
         /// <param name="value">The evaluated config value.</param>
         /// <returns>The result documents.</returns>
-        protected abstract IAsyncEnumerable<IDocument> ExecuteAsync(IDocument input, IExecutionContext context, TValue value);
+        protected abstract Task<IEnumerable<IDocument>> ExecuteAsync(IDocument input, IExecutionContext context, TValue value);
     }
 }

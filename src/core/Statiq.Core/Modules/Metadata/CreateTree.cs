@@ -33,13 +33,13 @@ namespace Statiq.Core
     /// <metadata cref="Keys.Previous" usage="Output"/>
     /// <metadata cref="Keys.TreePath" usage="Output"/>
     /// <category>Metadata</category>
-    public class CreateTree : IModule
+    public class CreateTree : Module
     {
         private static readonly ReadOnlyMemory<char> IndexFileName = "index.".AsMemory();
 
         private Config<bool> _isRoot;
         private Config<string[]> _treePath;
-        private Func<string[], MetadataItems, IExecutionContext, Task<IDocument>> _placeholderFactory;
+        private Func<string[], MetadataItems, IExecutionContext, IDocument> _placeholderFactory;
         private Comparison<IDocument> _sort;
         private bool _collapseRoot = false;
         private bool _nesting = false;
@@ -76,10 +76,10 @@ namespace Statiq.Core
                 }
                 return segments.Select(x => x.ToString()).ToArray();
             });
-            _placeholderFactory = async (treePath, items, context) =>
+            _placeholderFactory = (treePath, items, context) =>
             {
                 FilePath source = new FilePath(string.Join("/", treePath.Concat(new[] { "index.html" })));
-                return context.CreateDocument((await context.FileSystem.GetInputFile(source)).Path.FullPath, source, items);
+                return context.CreateDocument(context.FileSystem.GetInputFile(source).Path.FullPath, source, items);
             };
             _sort = (x, y) => Comparer.Default.Compare(
                 x.Get<object[]>(Keys.TreePath)?.LastOrDefault(),
@@ -98,7 +98,7 @@ namespace Statiq.Core
         /// </remarks>
         /// <param name="factory">The factory function.</param>
         /// <returns>The current module instance.</returns>
-        public CreateTree WithPlaceholderFactory(Func<string[], MetadataItems, IExecutionContext, Task<IDocument>> factory)
+        public CreateTree WithPlaceholderFactory(Func<string[], MetadataItems, IExecutionContext, IDocument> factory)
         {
             _placeholderFactory = factory ?? throw new ArgumentNullException(nameof(factory));
             return this;
@@ -190,16 +190,16 @@ namespace Statiq.Core
         }
 
         /// <inheritdoc />
-        public async Task<IEnumerable<IDocument>> ExecuteAsync(IExecutionContext context)
+        public override async Task<IEnumerable<IDocument>> ExecuteAsync(IExecutionContext context)
         {
             // Create a dictionary of tree nodes
             TreeNodeEqualityComparer treeNodeEqualityComparer = new TreeNodeEqualityComparer();
-            IEnumerable<TreeNode> nodes = await context.Inputs.SelectAsync(async input => new TreeNode(await _treePath.GetValueAsync(input, context), input));
-            nodes = nodes
+            Dictionary<string[], TreeNode> nodesDictionary = await context.Inputs
+                .ToAsyncEnumerable()
+                .SelectAwait(async input => new TreeNode(await _treePath.GetValueAsync(input, context), input))
                 .Where(x => x.TreePath != null)
-                .Distinct(treeNodeEqualityComparer);
-            Dictionary<string[], TreeNode> nodesDictionary = nodes
-                .ToDictionary(x => x.TreePath, new TreePathEqualityComparer());
+                .Distinct(treeNodeEqualityComparer)
+                .ToDictionaryAsync(x => x.TreePath, new TreePathEqualityComparer());
 
             // Add links between parent and children (creating empty tree nodes as needed)
             Queue<TreeNode> nodesToProcess = new Queue<TreeNode>(nodesDictionary.Values);
@@ -237,7 +237,7 @@ namespace Statiq.Core
             // Recursively generate child output documents
             foreach (TreeNode node in nodesDictionary.Values.Where(x => x.Parent == null))
             {
-                await node.GenerateOutputDocumentsAsync(this, context);
+                node.GenerateOutputDocuments(this, context);
             }
 
             // Return parent nodes or all nodes depending on nesting
@@ -269,12 +269,12 @@ namespace Statiq.Core
 
             // We need to build the tree from the bottom up so that the children don't have to be lazy
             // This also sorts the children once they're created
-            public async Task GenerateOutputDocumentsAsync(CreateTree tree, IExecutionContext context)
+            public void GenerateOutputDocuments(CreateTree tree, IExecutionContext context)
             {
                 // Recursively build output documents for children
                 foreach (TreeNode child in Children)
                 {
-                    await child.GenerateOutputDocumentsAsync(tree, context);
+                    child.GenerateOutputDocuments(tree, context);
                 }
 
                 // We're done if we've already created the output document
@@ -320,7 +320,7 @@ namespace Statiq.Core
                 {
                     // There's no input document for this node so we need to make a placeholder
                     metadata.Add(Keys.TreePlaceholder, true);
-                    OutputDocument = await tree._placeholderFactory(TreePath, metadata, context) ?? context.CreateDocument(metadata);
+                    OutputDocument = tree._placeholderFactory(TreePath, metadata, context) ?? context.CreateDocument(metadata);
                 }
                 else
                 {

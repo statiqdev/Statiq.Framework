@@ -24,10 +24,10 @@ namespace Statiq.Core
     /// <parameter name="HideIndexPages">If set to <c>true</c>, "index.htm" and "index.html" file names will be hidden.</parameter>
     /// <parameter name="HideExtensions">If set to <c>true</c>, extensions will be hidden.</parameter>
     /// <parameter name="Lowercase">If set to <c>true</c>, links will be rendered in all lowercase.</parameter>
-    public class LinkShortcode : IShortcode
+    public class LinkShortcode : Shortcode
     {
         /// <inheritdoc />
-        public async Task<IDocument> ExecuteAsync(KeyValuePair<string, string>[] args, string content, IDocument document, IExecutionContext context)
+        public override async Task<IDocument> ExecuteAsync(KeyValuePair<string, string>[] args, string content, IDocument document, IExecutionContext context)
         {
             ConvertingDictionary arguments = args.ToDictionary(
                 "Path",

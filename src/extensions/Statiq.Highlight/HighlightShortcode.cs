@@ -38,10 +38,10 @@ namespace Statiq.Highlight
     /// <parameter name="Language">The highlight.js language name to highlight as (for example, "csharp").</parameter>
     /// <parameter name="Element">An element to wrap the highlighted content in. If omitted, <c>&lt;code&gt;</c> will be used.</parameter>
     /// <parameter name="HighlightJsFile">Sets the file path to a custom highlight.js file. If not set the embeded version will be used.</parameter>
-    public class HighlightShortcode : IShortcode
+    public class HighlightShortcode : Shortcode
     {
         /// <inheritdoc />
-        public async Task<IDocument> ExecuteAsync(KeyValuePair<string, string>[] args, string content, IDocument document, IExecutionContext context)
+        public override async Task<IDocument> ExecuteAsync(KeyValuePair<string, string>[] args, string content, IDocument document, IExecutionContext context)
         {
             ConvertingDictionary dictionary = args.ToDictionary(
                 "Language",

@@ -5,7 +5,7 @@ using Statiq.Common;
 
 namespace Statiq.Common
 {
-    public static class ShortcodeExtensions
+    public static class ShortcodeArgsExtensions
     {
         /// <summary>
         /// Validates that the arguments contain a single value and returns it.

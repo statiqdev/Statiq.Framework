@@ -16,12 +16,12 @@ namespace Statiq.Common
     public abstract class SyncModule : Module
     {
         /// <inheritdoc />
-        public sealed override IAsyncEnumerable<IDocument> ExecuteAsync(IExecutionContext context) =>
-            Execute(context).ToAsyncEnumerable();
+        public override sealed Task<IEnumerable<IDocument>> ExecuteAsync(IExecutionContext context) =>
+            Task.FromResult(Execute(context));
 
         /// <inheritdoc />
         // Unused, prevent overriding in derived classes
-        protected sealed override IAsyncEnumerable<IDocument> ExecuteAsync(IDocument input, IExecutionContext context) =>
+        protected sealed override Task<IEnumerable<IDocument>> ExecuteAsync(IDocument input, IExecutionContext context) =>
             base.ExecuteAsync(input, context);
 
         /// <summary>

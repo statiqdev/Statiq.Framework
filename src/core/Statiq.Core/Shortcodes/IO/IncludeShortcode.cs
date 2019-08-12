@@ -28,12 +28,12 @@ namespace Statiq.Core
     /// </para>
     /// </example>
     /// <parameter>The path to the file to include.</parameter>
-    public class IncludeShortcode : IShortcode
+    public class IncludeShortcode : SyncShortcode
     {
         private FilePath _sourcePath;
 
         /// <inheritdoc />
-        public async Task<IDocument> ExecuteAsync(KeyValuePair<string, string>[] args, string content, IDocument document, IExecutionContext context)
+        public override IDocument Execute(KeyValuePair<string, string>[] args, string content, IDocument document, IExecutionContext context)
         {
             // Get the included path relative to the document
             FilePath includedPath = new FilePath(args.SingleValue());
@@ -47,17 +47,17 @@ namespace Statiq.Core
             IFile includedFile = null;
             if (includedPath.IsRelative && _sourcePath != null)
             {
-                includedFile = await context.FileSystem.GetFile(_sourcePath.ChangeFileName(includedPath));
+                includedFile = context.FileSystem.GetFile(_sourcePath.ChangeFileName(includedPath));
             }
 
             // If that didn't work, try relative to the input folder
-            if (includedFile == null || !await includedFile.GetExists())
+            if (includedFile == null || !includedFile.Exists)
             {
-                includedFile = await context.FileSystem.GetInputFile(includedPath);
+                includedFile = context.FileSystem.GetInputFile(includedPath);
             }
 
             // Get the included file
-            if (!await includedFile.GetExists())
+            if (!includedFile.Exists)
             {
                 Trace.Warning($"Included file {includedPath.FullPath} does not exist");
                 return context.CreateDocument();

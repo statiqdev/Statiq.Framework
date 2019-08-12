@@ -84,15 +84,15 @@ namespace Statiq.Core
         /// <summary>
         /// Deletes the output path and all files it contains.
         /// </summary>
-        public async Task CleanOutputPathAsync()
+        public void CleanOutputPath()
         {
             try
             {
                 Trace.Information("Cleaning output path: {0}", FileSystem.OutputPath);
-                IDirectory outputDirectory = await FileSystem.GetOutputDirectory();
-                if (await outputDirectory.GetExists())
+                IDirectory outputDirectory = FileSystem.GetOutputDirectory();
+                if (outputDirectory.Exists)
                 {
-                    await outputDirectory.Delete(true);
+                    outputDirectory.Delete(true);
                 }
                 Trace.Information("Cleaned output directory");
             }
@@ -105,15 +105,15 @@ namespace Statiq.Core
         /// <summary>
         /// Deletes the temp path and all files it contains.
         /// </summary>
-        public async Task CleanTempPathAsync()
+        public void CleanTempPath()
         {
             try
             {
                 Trace.Information("Cleaning temp path: {0}", FileSystem.TempPath);
-                IDirectory tempDirectory = await FileSystem.GetTempDirectory();
-                if (await tempDirectory.GetExists())
+                IDirectory tempDirectory = FileSystem.GetTempDirectory();
+                if (tempDirectory.Exists)
                 {
-                    await tempDirectory.Delete(true);
+                    tempDirectory.Delete(true);
                 }
                 Trace.Information("Cleaned temp directory");
             }
@@ -164,12 +164,12 @@ namespace Statiq.Core
                 Trace.Warning("The output path is also one of the input paths which can cause unexpected behavior and is usually not advised");
             }
 
-            await CleanTempPathAsync();
+            CleanTempPath();
 
             // Clean the output folder if requested
             if (Settings.Bool(Keys.CleanOutputPath))
             {
-                await CleanOutputPathAsync();
+                CleanOutputPath();
             }
 
             // Create the pipeline phases
@@ -294,12 +294,12 @@ namespace Statiq.Core
             Dictionary<PipelinePhase, Task> phaseTasks = new Dictionary<PipelinePhase, Task>();
             foreach (PipelinePhase phase in _phases)
             {
-                phaseTasks.Add(phase, GetPhaseTask(executionId, serviceProvider, phaseTasks, phase, cancellationTokenSource));
+                phaseTasks.Add(phase, GetPhaseTaskAsync(executionId, serviceProvider, phaseTasks, phase, cancellationTokenSource));
             }
             return phaseTasks.Values.ToArray();
         }
 
-        private Task GetPhaseTask(Guid executionId, IServiceProvider serviceProvider, Dictionary<PipelinePhase, Task> phaseTasks, PipelinePhase phase, CancellationTokenSource cancellationTokenSource)
+        private Task GetPhaseTaskAsync(Guid executionId, IServiceProvider serviceProvider, Dictionary<PipelinePhase, Task> phaseTasks, PipelinePhase phase, CancellationTokenSource cancellationTokenSource)
         {
             if (phase.Dependencies.Length == 0)
             {
@@ -347,8 +347,8 @@ namespace Statiq.Core
                         System.Diagnostics.Stopwatch stopwatch = System.Diagnostics.Stopwatch.StartNew();
                         Trace.Verbose("Executing module {0} with {1} input document(s)", moduleName, inputs.Length);
                         ExecutionContext moduleContext = new ExecutionContext(contextData, parent, module, inputs);
-                        IAsyncEnumerable<IDocument> moduleResult = module.ExecuteAsync(moduleContext);
-                        outputs = moduleResult == null ? ImmutableArray<IDocument>.Empty : await moduleResult.Where(x => x != null).ToImmutableArrayAsync();
+                        IEnumerable<IDocument> moduleResult = await (module.ExecuteAsync(moduleContext) ?? Task.FromResult<IEnumerable<IDocument>>(null));  // Handle a null Task return
+                        outputs = moduleResult?.Where(x => x != null).ToImmutableArray() ?? ImmutableArray<IDocument>.Empty;
 
                         // Trace results
                         stopwatch.Stop();
@@ -398,7 +398,7 @@ namespace Statiq.Core
             }
 
             System.Diagnostics.Trace.Listeners.Remove(_diagnosticsTraceListener);
-            CleanTempPathAsync().Wait();
+            CleanTempPath();
             _disposed = true;
         }
 

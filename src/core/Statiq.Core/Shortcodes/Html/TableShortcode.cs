@@ -67,10 +67,10 @@ namespace Statiq.Core
     /// <parameter name="HeaderClass">The <c>class</c> attribute to apply to the <c>thead</c> element.</parameter>
     /// <parameter name="BodyClass">The <c>class</c> attribute to apply to the <c>tbody</c> element.</parameter>
     /// <parameter name="FooterClass">The <c>class</c> attribute to apply to the <c>tfoot</c> element.</parameter>
-    public class TableShortcode : IShortcode
+    public class TableShortcode : Shortcode
     {
         /// <inheritdoc />
-        public async Task<IDocument> ExecuteAsync(KeyValuePair<string, string>[] args, string content, IDocument document, IExecutionContext context)
+        public override async Task<IDocument> ExecuteAsync(KeyValuePair<string, string>[] args, string content, IDocument document, IExecutionContext context)
         {
             ConvertingDictionary dictionary = args.ToDictionary(
                 "Class",

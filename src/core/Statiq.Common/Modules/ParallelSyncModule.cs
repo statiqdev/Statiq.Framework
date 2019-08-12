@@ -11,12 +11,12 @@ namespace Statiq.Common
     public abstract class ParallelSyncModule : ParallelModule
     {
         /// <inheritdoc />
-        public sealed override IAsyncEnumerable<IDocument> ExecuteAsync(IExecutionContext context) =>
-            Execute(context).ToAsyncEnumerable();
+        public sealed override Task<IEnumerable<IDocument>> ExecuteAsync(IExecutionContext context) =>
+            Task.FromResult(Execute(context));
 
         /// <inheritdoc />
         // Unused, prevent overriding in derived classes
-        protected sealed override IAsyncEnumerable<IDocument> ExecuteAsync(IDocument input, IExecutionContext context) =>
+        protected sealed override Task<IEnumerable<IDocument>> ExecuteAsync(IDocument input, IExecutionContext context) =>
             base.ExecuteAsync(input, context);
 
         /// <summary>

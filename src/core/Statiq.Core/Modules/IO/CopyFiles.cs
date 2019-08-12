@@ -99,36 +99,39 @@ namespace Statiq.Core
         {
             if (value != null)
             {
-                IEnumerable<IFile> inputFiles = await context.FileSystem.GetInputFiles(value);
-                inputFiles = await inputFiles.WhereAsync(async x => _predicate == null || await _predicate(x));
-                return (await inputFiles.SelectAsync(async file =>
-                {
-                    try
+                IEnumerable<IFile> inputFiles = context.FileSystem.GetInputFiles(value);
+                inputFiles = await inputFiles.ParallelWhereAsync(async x => _predicate == null || await _predicate(x));
+                return await inputFiles
+                    .ToAsyncEnumerable()
+                    .SelectAwait(async file =>
                     {
-                        // Get the default destination file
-                        FilePath relativePath = file.Path.GetRelativeInputPath(context);
-                        IFile destination = await context.FileSystem.GetOutputFile(relativePath);
-
-                        // Calculate an alternate destination if needed
-                        if (_destinationPath != null)
+                        try
                         {
-                            destination = await context.FileSystem.GetOutputFileAsync(await _destinationPath(file, destination));
+                            // Get the default destination file
+                            FilePath relativePath = file.Path.GetRelativeInputPath(context);
+                            IFile destination = context.FileSystem.GetOutputFile(relativePath);
+
+                            // Calculate an alternate destination if needed
+                            if (_destinationPath != null)
+                            {
+                                destination = context.FileSystem.GetOutputFile(await _destinationPath(file, destination));
+                            }
+
+                            // Copy to the destination
+                            await file.CopyToAsync(destination);
+                            Trace.Verbose("Copied file {0} to {1}", file.Path.FullPath, destination.Path.FullPath);
+
+                            // Return the document
+                            return context.CloneOrCreateDocument(input, file.Path, relativePath, context.GetContentProvider(file));
                         }
-
-                        // Copy to the destination
-                        await file.CopyToAsync(destination);
-                        Trace.Verbose("Copied file {0} to {1}", file.Path.FullPath, destination.Path.FullPath);
-
-                        // Return the document
-                        return context.CloneOrCreateDocument(input, file.Path, relativePath, context.GetContentProvider(file));
-                    }
-                    catch (Exception ex)
-                    {
-                        Trace.Error($"Error while copying file {file.Path.FullPath}: {ex.Message}");
-                        throw;
-                    }
-                }))
-                .Where(x => x != null);
+                        catch (Exception ex)
+                        {
+                            Trace.Error($"Error while copying file {file.Path.FullPath}: {ex.Message}");
+                            throw;
+                        }
+                    })
+                    .Where(x => x != null)
+                    .ToListAsync(context.CancellationToken);
             }
             return null;
         }

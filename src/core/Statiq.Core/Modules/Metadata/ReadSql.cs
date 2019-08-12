@@ -40,7 +40,7 @@ namespace Statiq.Core
         }
 
         /// <inheritdoc />
-        protected override Task<IEnumerable<DataRow>> GetItemsAsync(IExecutionContext context)
+        protected override IEnumerable<DataRow> GetItems(IExecutionContext context)
         {
             using (SqlConnection conn = new SqlConnection(_connectionString))
             {
@@ -49,7 +49,7 @@ namespace Statiq.Core
                 {
                     DataTable dataTable = new DataTable();
                     adapter.Fill(dataTable);
-                    return Task.FromResult(dataTable.Rows.Cast<DataRow>());
+                    return dataTable.Rows.Cast<DataRow>();
                 }
             }
         }

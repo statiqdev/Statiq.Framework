@@ -24,10 +24,10 @@ namespace Statiq.Core
     /// <parameter name="Id">The ID of the gist.</parameter>
     /// <parameter name="Username">The username that the gist is under (optional).</parameter>
     /// <parameter name="File">The file within the gist to embed (optional).</parameter>
-    public class GistShortcode : IShortcode
+    public class GistShortcode : Shortcode
     {
         /// <inheritdoc />
-        public async Task<IDocument> ExecuteAsync(KeyValuePair<string, string>[] args, string content, IDocument document, IExecutionContext context)
+        public override async Task<IDocument> ExecuteAsync(KeyValuePair<string, string>[] args, string content, IDocument document, IExecutionContext context)
         {
             ConvertingDictionary arguments = args.ToDictionary(
                 "Id",

@@ -104,7 +104,14 @@ namespace Statiq.Core
             ConcurrentDictionary<FilePath, string> redirects = new ConcurrentDictionary<FilePath, string>();
 
             // Need to materialize the parallel operation before creating the additional outputs
-            List<IDocument> outputs = await context.Inputs.Parallel().SelectManyAsync(GetOutputsAsync).ToListAsync();
+            List<IDocument> outputs = new List<IDocument>();
+            foreach (IDocument input in context.Inputs)
+            {
+                await foreach (IDocument output in GetOutputsAsync(input))
+                {
+                    outputs.Add(output);
+                }
+            }
 
             // Generate other output documents if requested
             if (redirects.Count > 0)
@@ -124,12 +131,11 @@ namespace Statiq.Core
 
             return outputs;
 
-            async Task<IEnumerable<IDocument>> GetOutputsAsync(IDocument input)
+            async IAsyncEnumerable<IDocument> GetOutputsAsync(IDocument input)
             {
                 IReadOnlyList<FilePath> paths = await _paths.GetValueAsync(input, context);
                 if (paths != null)
                 {
-                    List<IDocument> metaRefreshDocuments = new List<IDocument>();
                     foreach (FilePath fromPath in paths.Where(x => x != null))
                     {
                         // Make sure it's a relative path
@@ -152,10 +158,9 @@ namespace Statiq.Core
 
                         if (_metaRefreshPages)
                         {
-                            metaRefreshDocuments.Add(
-                                context.CreateDocument(
-                                    outputPath,
-                                    await context.GetContentProviderAsync($@"
+                            yield return context.CreateDocument(
+                                outputPath,
+                                await context.GetContentProviderAsync($@"
 <!doctype html>
 <html>    
   <head>      
@@ -165,12 +170,10 @@ namespace Statiq.Core
   <body> 
     <p>This page has moved to a <a href=""{url}"">{url}</a></p> 
   </body>  
-</html>")));
+</html>"));
                         }
                     }
-                    return metaRefreshDocuments;
                 }
-                return Array.Empty<IDocument>();
             }
         }
     }

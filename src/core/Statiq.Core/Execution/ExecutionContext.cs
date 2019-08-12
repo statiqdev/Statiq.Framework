@@ -100,12 +100,12 @@ namespace Statiq.Core
             if (this.Bool(Common.Keys.UseStringContentFiles))
             {
                 // Use a temp file for strings
-                IFile tempFile = await FileSystem.GetTempFile();
+                IFile tempFile = FileSystem.GetTempFile();
                 if (!string.IsNullOrEmpty(content))
                 {
                     await tempFile.WriteAllTextAsync(content);
                 }
-                return new ContentStream(new FileContent(tempFile), await tempFile.Open(), true);
+                return new ContentStream(new FileContent(tempFile), tempFile.Open(), true);
             }
 
             // Otherwise get a memory stream from the pool and use that

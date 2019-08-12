@@ -14,10 +14,10 @@ namespace Statiq.Core
     /// with a special syntax: <c>&lt;?#= key /?&gt;</c>.
     /// </remarks>
     /// <parameter>The key of the metadata value to render.</parameter>
-    public class MetaShortcode : IShortcode
+    public class MetaShortcode : Shortcode
     {
         /// <inheritdoc />
-        public async Task<IDocument> ExecuteAsync(KeyValuePair<string, string>[] args, string content, IDocument document, IExecutionContext context) =>
+        public override async Task<IDocument> ExecuteAsync(KeyValuePair<string, string>[] args, string content, IDocument document, IExecutionContext context) =>
             context.CreateDocument(await context.GetContentProviderAsync(document.String(args.SingleValue())));
     }
 }

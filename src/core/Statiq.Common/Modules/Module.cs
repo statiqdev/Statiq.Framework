@@ -26,24 +26,20 @@ namespace Statiq.Common
         /// </remarks>
         /// <param name="context">The execution context.</param>
         /// <returns>The result documents.</returns>
-        public virtual async IAsyncEnumerable<IDocument> ExecuteAsync(IExecutionContext context)
+        public virtual async Task<IEnumerable<IDocument>> ExecuteAsync(IExecutionContext context)
         {
+            IEnumerable<IDocument> aggregateResults = null;
             foreach (IDocument input in context.Inputs)
             {
-                IAsyncEnumerable<IDocument> results = ExecuteInput(input, context, ExecuteAsync);
+                IEnumerable<IDocument> results = await ExecuteInput(input, context, ExecuteAsync);
                 if (results != null)
                 {
-                    await foreach (IDocument result in results)
-                    {
-                        yield return result;
-                    }
+                    aggregateResults = aggregateResults?.Concat(results) ?? results;
                 }
             }
+            return aggregateResults;
         }
 
-        /// <summary>
-        /// Executes a function given an input document, checks for cancellation, and traces any exceptions.
-        /// </summary>
         internal static T ExecuteInput<T>(
             IDocument input,
             IExecutionContext context,
@@ -77,6 +73,7 @@ namespace Statiq.Common
         /// </param>
         /// <param name="context">The execution context.</param>
         /// <returns>The result documents.</returns>
-        protected virtual IAsyncEnumerable<IDocument> ExecuteAsync(IDocument input, IExecutionContext context) => null;
+        protected virtual Task<IEnumerable<IDocument>> ExecuteAsync(IDocument input, IExecutionContext context) =>
+            Task.FromResult<IEnumerable<IDocument>>(null);
     }
 }

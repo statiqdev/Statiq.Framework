@@ -22,7 +22,7 @@ namespace Statiq.Core
     /// <metadata cref="Keys.GroupDocuments" usage="Output" />
     /// <metadata cref="Keys.GroupKey" usage="Output" />
     /// <category>Control</category>
-    public class GroupDocuments : IModule
+    public class GroupDocuments : Module
     {
         private readonly Config<IEnumerable<object>> _key;
         private IEqualityComparer<object> _comparer;
@@ -81,17 +81,21 @@ namespace Statiq.Core
         }
 
         /// <inheritdoc />
-        public Task<IEnumerable<IDocument>> ExecuteAsync(IExecutionContext context) =>
-            Task.FromResult(context.Inputs.Array
+        public override async Task<IEnumerable<IDocument>> ExecuteAsync(IExecutionContext context)
+        {
+            List<(IDocument Document, IEnumerable<object> Keys)> groups = await context.Inputs
                 .ToAsyncEnumerable()
                 .SelectAwait(async x => (Document: x, Keys: await _key.GetValueAsync(x, context)))
-                .ToEnumerable()
+                .ToListAsync();
+
+            return groups
                 .GroupByMany(x => x.Keys, x => x.Document, _comparer)
                 .Select(x => context.CreateDocument(
-                    new MetadataItems
-                    {
-                        { Keys.GroupDocuments, x.ToImmutableArray() },
-                        { Keys.GroupKey, x.Key }
-                    })));
+                new MetadataItems
+                {
+                    { Keys.GroupDocuments, x.ToImmutableArray() },
+                    { Keys.GroupKey, x.Key }
+                }));
+        }
     }
 }

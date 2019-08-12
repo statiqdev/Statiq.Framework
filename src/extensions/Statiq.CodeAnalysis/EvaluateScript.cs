@@ -13,7 +13,7 @@ namespace Statiq.CodeAnalysis
     /// <category>Extensibility</category>
     public class EvaluateScript : ParallelModule
     {
-        protected override async IAsyncEnumerable<IDocument> ExecuteAsync(IDocument input, IExecutionContext context)
+        protected override async Task<IEnumerable<IDocument>> ExecuteAsync(IDocument input, IExecutionContext context)
         {
             // Get the assembly
             byte[] assembly = input.Bool(CompileScript.CompiledKey)
@@ -22,10 +22,7 @@ namespace Statiq.CodeAnalysis
 
             // Evaluate the script
             object value = await ScriptHelper.EvaluateAsync(assembly, input, context);
-            await foreach (IDocument result in context.CloneOrCreateDocuments(input, value))
-            {
-                yield return result;
-            }
+            return await context.CloneOrCreateDocumentsAsync(input, input.Yield(), value);
         }
     }
 }

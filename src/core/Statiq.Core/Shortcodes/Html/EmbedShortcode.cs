@@ -23,10 +23,12 @@ namespace Statiq.Core
     /// <parameter name="Endpoint">The oEmbed endpoint.</parameter>
     /// <parameter name="Url">The embeded URL to fetch an embed for.</parameter>
     /// <parameter name="Format">An optional format to use ("xml" or "json").</parameter>
-    public class EmbedShortcode : IShortcode
+    public class EmbedShortcode : Shortcode
     {
-        /// <inheritdoc />
-        public virtual async Task<IDocument> ExecuteAsync(KeyValuePair<string, string>[] args, string content, IDocument document, IExecutionContext context)
+        /// <summary>
+        /// Shortcodes for specific oEmbed services should override this method and call one of the other execute helper methods.
+        /// </summary>
+        public override async Task<IDocument> ExecuteAsync(KeyValuePair<string, string>[] args, string content, IDocument document, IExecutionContext context)
         {
             ConvertingDictionary arguments = args.ToDictionary(
                 "Endpoint",

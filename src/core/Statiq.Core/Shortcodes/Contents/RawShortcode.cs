@@ -16,12 +16,12 @@ namespace Statiq.Core
     /// &lt;?# Raw ?>&lt;?# ThisWillBeOutputVerbatim ?>&lt;?#/ Raw ?>
     /// </code>
     /// </example>
-    public class RawShortcode : IShortcode
+    public class RawShortcode : Shortcode
     {
         public const string RawShortcodeName = "Raw";
 
         /// <inheritdoc />
-        public async Task<IDocument> ExecuteAsync(KeyValuePair<string, string>[] args, string content, IDocument document, IExecutionContext context) =>
+        public override async Task<IDocument> ExecuteAsync(KeyValuePair<string, string>[] args, string content, IDocument document, IExecutionContext context) =>
             context.CreateDocument(await context.GetContentProviderAsync(content));
     }
 }

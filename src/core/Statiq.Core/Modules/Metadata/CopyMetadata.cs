@@ -73,11 +73,11 @@ namespace Statiq.Core
                     existingValue = _formatFunc.Invoke(existingValue.ToString());
                 }
 
-                return input.Clone(new[] { new KeyValuePair<string, object>(_toKey, existingValue) }).YieldAsTask();
+                return input.Clone(new[] { new KeyValuePair<string, object>(_toKey, existingValue) }).YieldAsync();
             }
             else
             {
-                return input.YieldAsTask();
+                return input.YieldAsync();
             }
         }
     }

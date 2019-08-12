@@ -29,8 +29,8 @@ namespace Statiq.Common
         }
 
         /// <inheritdoc />
-        protected sealed override IAsyncEnumerable<IDocument> ExecuteAsync(IExecutionContext context, ImmutableArray<IDocument> childOutputs) =>
-            Execute(context, childOutputs).ToAsyncEnumerable();
+        protected sealed override Task<IEnumerable<IDocument>> ExecuteAsync(IExecutionContext context, ImmutableArray<IDocument> childOutputs) =>
+            Task.FromResult(Execute(context, childOutputs));
 
         /// <summary>
         /// Gets the output documents given the input documents and the output documents from the execution of child modules.

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 using System.Xml;
 using Statiq.Common;
@@ -84,15 +85,15 @@ namespace Statiq.Core
         }
 
         /// <inheritdoc />
-        protected override async Task<IEnumerable<Dictionary<string, object>>> GetItemsAsync(IExecutionContext context)
+        protected override IEnumerable<Dictionary<string, object>> GetItems(IExecutionContext context)
         {
             // Get XML from the input documents?
             if (_data == null)
             {
-                return await context.Inputs.Parallel().SelectManyAsync(async input =>
+                return context.Inputs.AsParallel().SelectMany(input =>
                 {
                     XmlDocument inputDoc = new XmlDocument();
-                    using (Stream stream = await input.GetStreamAsync())
+                    using (Stream stream = input.GetStream())
                     {
                         inputDoc.Load(stream);
                     }

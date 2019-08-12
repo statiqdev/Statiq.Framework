@@ -27,62 +27,47 @@ namespace Statiq.Common
         /// </remarks>
         /// <param name="context">The execution context.</param>
         /// <param name="document">The document to clone (if appropriate).</param>
+        /// <param name="moduleInputs">The inputs to use when executing if <paramref name="value"/> contains modules.</param>
         /// <param name="value">The value to clone or create documents from.</param>
         /// <returns>The result documents.</returns>
-        public static IAsyncEnumerable<IDocument> CloneOrCreateDocuments(this IExecutionContext context, IDocument document, object value) =>
+        public static async Task<IEnumerable<IDocument>> CloneOrCreateDocumentsAsync(
+            this IExecutionContext context,
+            IDocument document,
+            IEnumerable<IDocument> moduleInputs,
+            object value) =>
             value == null
-                ? document.YieldAsync()
+                ? document.Yield()
                 : GetDocuments(value)
-                    ?? ExecuteModulesAsync(context, document, value)
-                    ?? ChangeContentAsync(context, document, value);
+                    ?? await ExecuteModulesAsync(context, moduleInputs, value)
+                        ?? await ChangeContentAsync(context, document, value);
 
-        private static IAsyncEnumerable<IDocument> GetDocuments(object value)
-        {
-            if (value is IDocument document)
-            {
-                return document.YieldAsync();
-            }
-            if (value is IEnumerable<IDocument> enumerable)
-            {
-                return enumerable.ToAsyncEnumerable();
-            }
-            return value as IAsyncEnumerable<IDocument>;
-        }
+        private static IEnumerable<IDocument> GetDocuments(object value) =>
+            value is IDocument document ? document.Yield() : value as IEnumerable<IDocument>;
 
-        private static IAsyncEnumerable<IDocument> ExecuteModulesAsync(IExecutionContext context, IDocument document, object value)
+        private static async Task<IEnumerable<IDocument>> ExecuteModulesAsync(IExecutionContext context, IEnumerable<IDocument> moduleInputs, object value)
         {
             // Check for a single IModule first since some modules also implement IEnumerable<IModule>
             IEnumerable<IModule> modules = value is IModule module ? new[] { module } : value as IEnumerable<IModule>;
-            return modules == null ? null : ExecuteModulesAsync(context, document, modules);
+            return modules == null ? null : (IEnumerable<IDocument>)await context.ExecuteModulesAsync(modules, moduleInputs);
         }
 
-        private static async IAsyncEnumerable<IDocument> ExecuteModulesAsync(IExecutionContext context, IDocument document, IEnumerable<IModule> modules)
-        {
-            foreach (IDocument result in await context.ExecuteModulesAsync(modules, document.Yield()))
-            {
-                yield return result;
-            }
-        }
-
-        private static async IAsyncEnumerable<IDocument> ChangeContentAsync(IExecutionContext context, IDocument document, object value)
+        private static async Task<IEnumerable<IDocument>> ChangeContentAsync(IExecutionContext context, IDocument document, object value)
         {
             // Check if this is a known content provider type first
             IContentProvider contentProvider = await GetContentProviderAsync(context, value, false);
             if (contentProvider != null)
             {
-                yield return context.CloneOrCreateDocument(document, contentProvider);
-                yield break;
+                return context.CloneOrCreateDocument(document, contentProvider).Yield();
             }
 
             // It wasn't a known content provider type, so treat as an enumeration and convert the string value
-            IAsyncEnumerable<IDocument> results = (value as IEnumerable ?? new[] { value })
-                .Cast<object>()
-                .ToAsyncEnumerable()
-                .SelectAwait(async x => context.CloneOrCreateDocument(document, await GetContentProviderAsync(context, x, true)));
-            await foreach (IDocument result in results.WithCancellation(context.CancellationToken))
+            object[] valueObjects = (value as IEnumerable ?? new[] { value }).Cast<object>().ToArray();
+            IDocument[] results = new IDocument[valueObjects.Length];
+            for (int c = 0; c < valueObjects.Length; c++)
             {
-                yield return result;
+                results[c] = context.CloneOrCreateDocument(document, await GetContentProviderAsync(context, valueObjects[c], true));
             }
+            return results;
         }
 
         private static async Task<IContentProvider> GetContentProviderAsync(IExecutionContext context, object value, bool asString)

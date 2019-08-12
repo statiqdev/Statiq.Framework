@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Statiq.Common;
 
@@ -14,7 +15,7 @@ namespace Statiq.Core
     /// after this one.
     /// </remarks>
     /// <category>Control</category>
-    public class FilterDocuments : IModule
+    public class FilterDocuments : Module
     {
         private readonly List<Config<bool>> _predicates = new List<Config<bool>>();
 
@@ -64,7 +65,7 @@ namespace Statiq.Core
         public FilterDocuments Or(string key) => Or(Config.FromDocument(doc => doc.ContainsKey(key)));
 
         /// <inheritdoc />
-        public Task<IEnumerable<IDocument>> ExecuteAsync(IExecutionContext context) =>
-            context.Inputs.FilterAsync(_predicates, context);
+        public override async Task<IEnumerable<IDocument>> ExecuteAsync(IExecutionContext context) =>
+            await context.Inputs.FilterAsync(_predicates, context).ToListAsync(context.CancellationToken);
     }
 }

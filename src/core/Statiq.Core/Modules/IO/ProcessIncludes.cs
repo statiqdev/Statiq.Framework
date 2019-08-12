@@ -83,9 +83,9 @@ namespace Statiq.Core
                             }
 
                             // Get and read the file content
-                            IFile includedFile = await context.FileSystem.GetFile(includedPath);
+                            IFile includedFile = context.FileSystem.GetFile(includedPath);
                             string includedContent = string.Empty;
-                            if (!await includedFile.GetExists())
+                            if (!includedFile.Exists)
                             {
                                 Trace.Warning($"Included file {includedFile.Path.FullPath} does not exist");
                             }

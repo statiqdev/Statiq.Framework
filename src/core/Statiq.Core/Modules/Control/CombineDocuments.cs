@@ -16,23 +16,21 @@ namespace Statiq.Core
     /// the combined content and metadata is output.
     /// </remarks>
     /// <category>Control</category>
-    public class CombineDocuments : IModule
+    public class CombineDocuments : Module
     {
         /// <inheritdoc />
-        public async IAsyncEnumerable<IDocument> ExecuteAsync(IExecutionContext context)
+        public override async Task<IEnumerable<IDocument>> ExecuteAsync(IExecutionContext context)
         {
             IDocument result = null;
-            await context.Inputs
-                .ToAsyncEnumerable()
-                .ForEachAwaitAsync(async input =>
-                {
-                    result = result == null
-                        ? input
-                        : result.Clone(
-                            input,
-                            await context.GetContentProviderAsync(await result.GetStringAsync() + await input.GetStringAsync()));
-                });
-            yield return result;
+            foreach (IDocument input in context.Inputs)
+            {
+                result = result == null
+                    ? input
+                    : result.Clone(
+                        input,
+                        await context.GetContentProviderAsync(await result.GetStringAsync() + await input.GetStringAsync()));
+            }
+            return result.Yield();
         }
     }
 }

@@ -8,11 +8,11 @@ using Statiq.Common;
 namespace Statiq.Core
 {
     /// <summary>
-    /// Generates a sitemap from the input documents.
+    /// Generates a site map from the input documents.
     /// </summary>
     /// <remarks>
-    /// This module generates a sitemap from the input documents. The output document contains the sitemap XML as it's content.
-    /// You can supply a location for the each item in the sitemap as a <c>string</c> (with an optional function to format it
+    /// This module generates a site map from the input documents. The output document contains the site map XML as it's content.
+    /// You can supply a location for the each item in the site map as a <c>string</c> (with an optional function to format it
     /// into an absolute HTML path) or you can supply a <c>SitemapItem</c> for more control. You can also specify the
     /// <c>Hostname</c> metadata key (as a <c>string</c>) for each input document, which will be prepended to all locations.
     /// </remarks>
@@ -26,7 +26,7 @@ namespace Statiq.Core
         private readonly Func<string, string> _locationFormatter;
 
         /// <summary>
-        /// Creates a sitemap using the metadata key <c>SitemapItem</c> which should contain either a <c>string</c> that
+        /// Creates a site map using the metadata key <c>SitemapItem</c> which should contain either a <c>string</c> that
         /// contains the location for each input document or a <c>SitemapItem</c> instance with the location
         /// and other information. If the key <c>SitemapItem</c> is not found or does not contain the correct type of object,
         /// a link to the document will be used.
@@ -39,7 +39,7 @@ namespace Statiq.Core
         }
 
         /// <summary>
-        /// Creates a sitemap using the specified metadata key which should contain either a <c>string</c> that
+        /// Creates a site map using the specified metadata key which should contain either a <c>string</c> that
         /// contains the location for each input document or a <c>SitemapItem</c> instance with the location
         /// and other information. If the metadata key is not found or does not contain the correct type of object,
         /// a link to the document will be used.
@@ -58,13 +58,13 @@ namespace Statiq.Core
         }
 
         /// <summary>
-        /// Creates a sitemap using the specified delegate which should return either a <c>string</c> that
+        /// Creates a site map using the specified delegate which should return either a <c>string</c> that
         /// contains the location for each input document or a <c>SitemapItem</c> instance with the location
         /// and other information. If the delegate returns <c>null</c> or does not return the correct type of object,
         /// a link to the document will be used.
         /// </summary>
         /// <param name="sitemapItemOrLocation">A delegate that either returns a <c>SitemapItem</c> instance or a <c>string</c>
-        /// with the desired item location. If the delegate returns <c>null</c>, the input document is not added to the sitemap.</param>
+        /// with the desired item location. If the delegate returns <c>null</c>, the input document is not added to the site map.</param>
         /// <param name="locationFormatter">A location formatter that will be applied to the location of each input after
         /// getting the value of the specified metadata key.</param>
         public GenerateSitemap(Config<object> sitemapItemOrLocation, Func<string, string> locationFormatter = null)
@@ -78,10 +78,13 @@ namespace Statiq.Core
         {
             StringBuilder sb = new StringBuilder();
             sb.Append("<?xml version=\"1.0\" encoding=\"UTF-8\"?><urlset xmlns=\"http://www.sitemaps.org/schemas/sitemap/0.9\">");
-            await context.Inputs.ForEachAsync(AddToSiteMapAsync);
+            foreach (IDocument input in context.Inputs)
+            {
+                await AddToSiteMapAsync(input);
+            }
             sb.Append("</urlset>");
 
-            // Always output the sitemap document, even if it's empty
+            // Always output the site map document, even if it's empty
             return context.CreateDocument(await context.GetContentProviderAsync(sb.ToString())).Yield();
 
             async Task AddToSiteMapAsync(IDocument input)
@@ -91,7 +94,7 @@ namespace Statiq.Core
                 SitemapItem sitemapItem = delegateResult as SitemapItem
                     ?? new SitemapItem((delegateResult as string) ?? context.GetLink(input));
 
-                // Add a sitemap entry if we got an item and valid location
+                // Add a site map entry if we got an item and valid location
                 if (!string.IsNullOrWhiteSpace(sitemapItem?.Location))
                 {
                     string location = sitemapItem.Location;
@@ -102,7 +105,7 @@ namespace Statiq.Core
                         location = _locationFormatter(location);
                     }
 
-                    // Apply the hostname if defined (and the location formatter didn't already set a hostname)
+                    // Apply the host name if defined (and the location formatter didn't already set a host name)
                     if (!string.IsNullOrWhiteSpace(location))
                     {
                         if (!location.StartsWith("http://", StringComparison.InvariantCultureIgnoreCase)
@@ -112,7 +115,7 @@ namespace Statiq.Core
                         }
                     }
 
-                    // Location being null signals that this document should not be included in the sitemap
+                    // Location being null signals that this document should not be included in the site map
                     if (!string.IsNullOrWhiteSpace(location))
                     {
                         sb.Append("<url>");

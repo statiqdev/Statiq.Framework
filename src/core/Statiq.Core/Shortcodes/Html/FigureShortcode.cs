@@ -38,10 +38,10 @@ namespace Statiq.Core
     /// <parameter name="Class"><c>class</c> attribute to apply to the <c>figure</c> element.</parameter>
     /// <parameter name="Height"><c>height</c> attribute of the image.</parameter>
     /// <parameter name="Width"><c>width</c> attribute of the image.</parameter>
-    public class FigureShortcode : IShortcode
+    public class FigureShortcode : Shortcode
     {
         /// <inheritdoc />
-        public async Task<IDocument> ExecuteAsync(KeyValuePair<string, string>[] args, string content, IDocument document, IExecutionContext context)
+        public override async Task<IDocument> ExecuteAsync(KeyValuePair<string, string>[] args, string content, IDocument document, IExecutionContext context)
         {
             ConvertingDictionary arguments = args.ToDictionary(
                 "Src",

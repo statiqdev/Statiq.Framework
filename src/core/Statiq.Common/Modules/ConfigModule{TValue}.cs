@@ -31,10 +31,11 @@ namespace Statiq.Common
         }
 
         /// <inheritdoc />
-        public sealed override async IAsyncEnumerable<IDocument> ExecuteAsync(IExecutionContext context)
+        public sealed override async Task<IEnumerable<IDocument>> ExecuteAsync(IExecutionContext context)
         {
             if (_eachDocument)
             {
+                IEnumerable<IDocument> aggregateResults = null;
                 TValue value = default;
 
                 // Only need to evaluate the config delegate once
@@ -53,27 +54,22 @@ namespace Statiq.Common
                     }
 
                     // Get the results for this input document
-                    IAsyncEnumerable<IDocument> results = ExecuteInput(input, context, (i, c) => ExecuteAsync(i, c, value));
+                    IEnumerable<IDocument> results = await ExecuteInput(input, context, (i, c) => ExecuteAsync(i, c, value));
                     if (results != null)
                     {
-                        await foreach (IDocument result in results)
-                        {
-                            yield return result;
-                        }
+                        aggregateResults = aggregateResults?.Concat(results) ?? results;
                     }
                 }
-                yield break;
+
+                return aggregateResults;
             }
 
-            await foreach (IDocument result in ExecuteAsync(null, context, await _config.GetValueAsync(null, context)))
-            {
-                yield return result;
-            }
+            return await ExecuteAsync(null, context, await _config.GetValueAsync(null, context));
         }
 
         /// <inheritdoc />
         // Unused, prevent overriding in derived classes
-        protected sealed override IAsyncEnumerable<IDocument> ExecuteAsync(IDocument input, IExecutionContext context) =>
+        protected sealed override Task<IEnumerable<IDocument>> ExecuteAsync(IDocument input, IExecutionContext context) =>
             base.ExecuteAsync(input, context);
 
         /// <summary>
@@ -88,6 +84,6 @@ namespace Statiq.Common
         /// <param name="context">The execution context.</param>
         /// <param name="value">The evaluated config value.</param>
         /// <returns>The result documents.</returns>
-        protected abstract IAsyncEnumerable<IDocument> ExecuteAsync(IDocument input, IExecutionContext context, TValue value);
+        protected abstract Task<IEnumerable<IDocument>> ExecuteAsync(IDocument input, IExecutionContext context, TValue value);
     }
 }

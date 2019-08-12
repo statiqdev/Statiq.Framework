@@ -21,15 +21,6 @@ namespace Statiq.Common
                     .Where(x => x.Item2)
                     .Select(x => x.Item1);
 
-        public static async IAsyncEnumerable<TSource> ParallelWhereAsync<TSource>(
-            this IAsyncEnumerable<TSource> items,
-            Func<TSource, Task<bool>> asyncPredicate,
-            [EnumeratorCancellation] CancellationToken cancellationToken = default) =>
-                (await Task.WhenAll(items.Select(x => Task.Run(async () => (x, await asyncPredicate(x)), cancellationToken)).ToEnumerable()))
-                    .ToAsyncEnumerable()
-                    .Where(x => x.Item2)
-                    .Select(x => x.Item1);
-
         /// <summary>
         /// Invokes an async selector in parallel.
         /// </summary>
@@ -49,25 +40,6 @@ namespace Statiq.Common
                 await Task.WhenAll(items.Select(x => Task.Run(() => asyncSelector(x), cancellationToken)));
 
         /// <summary>
-        /// Invokes an async selector in parallel.
-        /// </summary>
-        /// <remarks>
-        /// This method will preserve ordering.
-        /// </remarks>
-        /// <typeparam name="TSource">The type of the elements of <paramref name="items"/>.</typeparam>
-        /// <typeparam name="TResult">The type of the value returned by <paramref name="asyncSelector"/>.</typeparam>
-        /// <param name="items">The items to select from.</param>
-        /// <param name="asyncSelector">The selector to apply on each element of <paramref name="items"/>.</param>
-        /// <param name="cancellationToken">A cancellation token that can be used to cancel the work.</param>
-        /// <returns>The result of invoking the <paramref name="asyncSelector"/> on each element of <paramref name="items"/>.</returns>
-        public static async IAsyncEnumerable<TResult> ParallelSelectAsync<TSource, TResult>(
-            this IAsyncEnumerable<TSource> items,
-            Func<TSource, Task<TResult>> asyncSelector,
-            [EnumeratorCancellation] CancellationToken cancellationToken = default) =>
-                (await Task.WhenAll(items.Select(x => Task.Run(() => asyncSelector(x), cancellationToken)).ToEnumerable()))
-                    .ToAsyncEnumerable();
-
-        /// <summary>
         /// Invokes an async selector that returns multiple results in parallel.
         /// </summary>
         /// <remarks>
@@ -85,36 +57,10 @@ namespace Statiq.Common
             CancellationToken cancellationToken = default) =>
                 (await Task.WhenAll(items.Select(x => Task.Run(() => asyncSelector(x), cancellationToken)))).SelectMany(x => x);
 
-        /// <summary>
-        /// Invokes an async selector that returns multiple results in parallel.
-        /// </summary>
-        /// <remarks>
-        /// This method will preserve ordering.
-        /// </remarks>
-        /// <typeparam name="TSource">The type of the elements of <paramref name="items"/>.</typeparam>
-        /// <typeparam name="TResult">The type of the value returned by <paramref name="asyncSelector"/>.</typeparam>
-        /// <param name="items">The items to select from.</param>
-        /// <param name="asyncSelector">The selector to apply on each element of <paramref name="items"/>.</param>
-        /// <param name="cancellationToken">A cancellation token that can be used to cancel the work.</param>
-        /// <returns>The result of invoking the <paramref name="asyncSelector"/> on each element of <paramref name="items"/>.</returns>
-        public static async IAsyncEnumerable<TResult> ParallelSelectManyAsync<TSource, TResult>(
-            this IAsyncEnumerable<TSource> items,
-            Func<TSource, IAsyncEnumerable<TResult>> asyncSelector,
-            [EnumeratorCancellation] CancellationToken cancellationToken = default) =>
-            (await Task.WhenAll(items.Select(x => Task.Run(() => asyncSelector(x), cancellationToken)).ToEnumerable()))
-                .ToAsyncEnumerable()
-                .SelectMany(x => x);
-
         public static Task ParallelForEachAsync<TSource>(
             this IEnumerable<TSource> items,
             Func<TSource, Task> asyncFunc,
             CancellationToken cancellationToken = default) =>
                 Task.WhenAll(items.Select(x => Task.Run(() => asyncFunc(x), cancellationToken)));
-
-        public static Task ParallelForEachAsync<TSource>(
-            this IAsyncEnumerable<TSource> items,
-            Func<TSource, Task> asyncFunc,
-            CancellationToken cancellationToken = default) =>
-                Task.WhenAll(items.Select(x => Task.Run(() => asyncFunc(x), cancellationToken)).ToEnumerable());
     }
 }

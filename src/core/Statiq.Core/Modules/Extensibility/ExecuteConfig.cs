@@ -46,22 +46,22 @@ namespace Statiq.Core
         {
         }
 
-        protected override IAsyncEnumerable<IDocument> ExecuteAsync(IDocument input, IExecutionContext context, object value)
+        protected override Task<IEnumerable<IDocument>> ExecuteAsync(IDocument input, IExecutionContext context, object value)
         {
-            IAsyncEnumerable<IDocument> inputs = context.Inputs;
+            IEnumerable<IDocument> inputs = context.Inputs;
             if (input != null)
             {
-                inputs = input.YieldAsync();
+                inputs = input.Yield();
             }
 
             // This behavior is important because action-based config values always return null, so by returning
             // the input(s) when the value is null it ensures actions will execute without affecting the input documents
             if (value == null)
             {
-                return inputs;
+                return Task.FromResult(inputs);
             }
 
-            return context.CloneOrCreateDocuments(input, value);
+            return context.CloneOrCreateDocumentsAsync(input, inputs, value);
         }
     }
 }

@@ -210,13 +210,15 @@ namespace Statiq.Common
         }
 
         /// <summary>
-        /// Returns an async document enumerable given a single document. This is just a convenience
-        /// method for converting a single document into an <see cref="IAsyncEnumerable{T}"/>.
+        /// Returns a document enumerable given a single document. This is just a convenience
+        /// method for converting a single document into an <see cref="IEnumerable{T}"/>.
         /// </summary>
         /// <param name="document">The document to return.</param>
-        /// <returns>An async document enumerable.</returns>
-        public static IAsyncEnumerable<TDocument> YieldAsync<TDocument>(this TDocument document)
-            where TDocument : IDocument =>
-            document.Yield().ToAsyncEnumerable();
+        /// <returns>A document enumerable.</returns>
+        public static Task<IEnumerable<TDocument>> YieldAsync<TDocument>(this TDocument document)
+            where TDocument : IDocument
+        {
+            return Task.FromResult(document.Yield());
+        }
     }
 }

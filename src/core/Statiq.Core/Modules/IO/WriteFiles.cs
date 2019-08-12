@@ -71,7 +71,10 @@ namespace Statiq.Core
             // Get the output file path for each file in sequence and set up action chains
             // Value = input source string(s) (for reporting a warning if not appending), write action
             Dictionary<FilePath, Tuple<List<string>, Func<Task>>> writesBySource = new Dictionary<FilePath, Tuple<List<string>, Func<Task>>>();
-            await context.Inputs.ForEachAsync(WriteFilesAsync);
+            foreach (IDocument input in context.Inputs)
+            {
+                await WriteFileAsync(input);
+            }
 
             // Display a warning for any duplicated outputs if not appending
             if (!_append)
@@ -89,7 +92,7 @@ namespace Statiq.Core
             // Return the input documents
             return context.Inputs;
 
-            async Task WriteFilesAsync(IDocument input)
+            async Task WriteFileAsync(IDocument input)
             {
                 if (await ShouldProcessAsync(input, context) && input.Destination != null)
                 {
@@ -120,17 +123,17 @@ namespace Statiq.Core
 
         private async Task WriteAsync(IDocument input, IExecutionContext context, FilePath outputPath)
         {
-            IFile outputFile = await context.FileSystem.GetOutputFile(outputPath);
+            IFile outputFile = context.FileSystem.GetOutputFile(outputPath);
             if (outputFile != null)
             {
-                using (Stream inputStream = await input.GetStream())
+                using (Stream inputStream = input.GetStream())
                 {
                     if (_ignoreEmptyContent && inputStream.Length == 0)
                     {
                         return;
                     }
 
-                    using (Stream outputStream = _append ? await outputFile.OpenAppend() : await outputFile.OpenWrite())
+                    using (Stream outputStream = _append ? outputFile.OpenAppend() : outputFile.OpenWrite())
                     {
                         await inputStream.CopyToAsync(outputStream);
                         if (!_append)

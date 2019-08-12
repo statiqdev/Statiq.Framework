@@ -14,7 +14,7 @@ namespace Statiq.Core
     /// outputs without modification.
     /// </remarks>
     /// <category>Control</category>
-    public class ExecuteIf : IModule, IList<IfCondition>
+    public class ExecuteIf : Module, IList<IfCondition>
     {
         private readonly List<IfCondition> _conditions = new List<IfCondition>();
 
@@ -151,7 +151,7 @@ namespace Statiq.Core
         }
 
         /// <inheritdoc />
-        public async Task<IEnumerable<IDocument>> ExecuteAsync(IExecutionContext context)
+        public override async Task<IEnumerable<IDocument>> ExecuteAsync(IExecutionContext context)
         {
             List<IDocument> results = new List<IDocument>();
             IReadOnlyList<IDocument> documents = context.Inputs;
@@ -167,7 +167,7 @@ namespace Statiq.Core
                 }
                 else if (condition.Predicate.RequiresDocument)
                 {
-                    await documents.Query(context).ForEachAsync(async document =>
+                    foreach (IDocument document in documents)
                     {
                         if (await condition.Predicate.GetValueAsync(document, context))
                         {
@@ -177,7 +177,7 @@ namespace Statiq.Core
                         {
                             unmatched.Add(document);
                         }
-                    });
+                    }
                 }
                 else
                 {

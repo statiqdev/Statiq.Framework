@@ -13,7 +13,7 @@ namespace Statiq.Core
     /// This module does not include the input documents as part of it's output.
     /// </remarks>
     /// <category>Control</category>
-    public class CreateDocuments : IModule
+    public class CreateDocuments : Module
     {
         private readonly Config<IEnumerable<IDocument>> _documents;
 
@@ -49,7 +49,11 @@ namespace Statiq.Core
         /// <param name="content">The content for each output document.</param>
         public CreateDocuments(IEnumerable<string> content)
         {
-            _documents = Config.FromContext(async ctx => await content.SelectAsync(async x => ctx.CreateDocument(await ctx.GetContentProviderAsync(x))));
+            _documents = Config.FromContext(async ctx =>
+                (IEnumerable<IDocument>)await content
+                    .ToAsyncEnumerable()
+                    .SelectAwait(async x => ctx.CreateDocument(await ctx.GetContentProviderAsync(x)))
+                    .ToListAsync(ctx.CancellationToken));
         }
 
         /// <summary>
@@ -85,12 +89,19 @@ namespace Statiq.Core
         /// <param name="contentAndMetadata">The content and metadata for each output document.</param>
         public CreateDocuments(IEnumerable<Tuple<string, IEnumerable<KeyValuePair<string, object>>>> contentAndMetadata)
         {
-            _documents = Config.FromContext(async ctx => await contentAndMetadata.SelectAsync(async x => ctx.CreateDocument(x.Item2, await ctx.GetContentProviderAsync(x.Item1))));
+            _documents = Config.FromContext(async ctx =>
+                (IEnumerable<IDocument>)await contentAndMetadata
+                    .ToAsyncEnumerable()
+                    .SelectAwait(async x => ctx.CreateDocument(x.Item2, await ctx.GetContentProviderAsync(x.Item1)))
+                    .ToListAsync(ctx.CancellationToken));
         }
 
-        public async Task<IEnumerable<IDocument>> ExecuteAsync(IExecutionContext context) =>
+        public override async Task<IEnumerable<IDocument>> ExecuteAsync(IExecutionContext context) =>
             _documents.RequiresDocument
-                ? await context.Inputs.SelectManyAsync(input => _documents.GetValueAsync(input, context))
+                ? await context.Inputs
+                    .ToAsyncEnumerable()
+                    .SelectManyAwait(async input => (await _documents.GetValueAsync(input, context)).ToAsyncEnumerable())
+                    .ToListAsync(context.CancellationToken)
                 : await _documents.GetValueAsync(null, context);
     }
 }

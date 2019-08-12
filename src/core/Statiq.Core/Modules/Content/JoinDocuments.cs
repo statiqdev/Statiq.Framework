@@ -53,7 +53,7 @@ namespace Statiq.Core
         /// <returns>A single document in a list</returns>
         public async Task<IEnumerable<IDocument>> ExecuteAsync(IExecutionContext context)
         {
-            if (context.Inputs.Count < 1)
+            if (context.Inputs.Length < 1)
             {
                 return context.CreateDocument().Yield();
             }
@@ -78,7 +78,7 @@ namespace Statiq.Core
                         await contentStream.WriteAsync(delimeterBytes, 0, delimeterBytes.Length);
                     }
 
-                    using (Stream inputStream = await document.GetStream())
+                    using (Stream inputStream = document.GetStream())
                     {
                         await inputStream.CopyToAsync(contentStream);
                     }

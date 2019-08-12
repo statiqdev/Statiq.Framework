@@ -17,9 +17,9 @@ namespace Statiq.Common
         public bool Parallel { get; internal set; } = true;
 
         /// <inheritdoc />
-        public override IAsyncEnumerable<IDocument> ExecuteAsync(IExecutionContext context) =>
+        public override Task<IEnumerable<IDocument>> ExecuteAsync(IExecutionContext context) =>
             Parallel
-                ? context.Inputs.ToAsyncEnumerable().ParallelSelectManyAsync(input => ExecuteInput(input, context, ExecuteAsync))
+                ? context.Inputs.ParallelSelectManyAsync(input => ExecuteInput(input, context, ExecuteAsync), context.CancellationToken)
                 : base.ExecuteAsync(context);
     }
 }
