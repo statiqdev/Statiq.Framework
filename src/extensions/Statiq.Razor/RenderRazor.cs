@@ -142,13 +142,13 @@ namespace Statiq.Razor
                 .Where(x => _ignorePrefix == null || x.Source?.FileName.FullPath.StartsWith(_ignorePrefix) != true)
                 .ToImmutableArray();
 
-            if (validInputs.Length < context.Inputs.Count)
+            if (validInputs.Length < context.Inputs.Length)
             {
-                Trace.Information($"Ignoring {context.Inputs.Count - validInputs.Length} inputs due to source file name prefix");
+                Trace.Information($"Ignoring {context.Inputs.Length - validInputs.Length} inputs due to source file name prefix");
             }
 
             // Compile and evaluate the pages in parallel
-            return await validInputs.AsParallel().SelectAsync(RenderDocumentAsync);
+            return await validInputs.ParallelSelectAsync(RenderDocumentAsync);
 
             async Task<IDocument> RenderDocumentAsync(IDocument input)
             {
@@ -156,7 +156,7 @@ namespace Statiq.Razor
 
                 using (Stream contentStream = await context.GetContentStreamAsync())
                 {
-                    using (Stream inputStream = await input.GetStream())
+                    using (Stream inputStream = input.GetStream())
                     {
                         FilePath viewStartLocationPath = _viewStartPath == null ? null : await _viewStartPath.GetValueAsync(input, context);
                         string layoutPath = _layoutPath == null ? null : (await _layoutPath.GetValueAsync(input, context))?.FullPath;
@@ -169,8 +169,8 @@ namespace Statiq.Razor
                             Context = context,
                             Document = input,
                             LayoutLocation = layoutPath,
-                            ViewStartLocation = viewStartLocationPath != null ? await GetRelativePathAsync(viewStartLocationPath, context) : null,
-                            RelativePath = await GetRelativePathAsync(input, context),
+                            ViewStartLocation = viewStartLocationPath != null ? GetRelativePath(viewStartLocationPath, context) : null,
+                            RelativePath = GetRelativePath(input, context),
                             Model = _model == null ? input : await _model.GetValueAsync(input, context)
                         };
 
@@ -182,19 +182,19 @@ namespace Statiq.Razor
             }
         }
 
-        private async Task<string> GetRelativePathAsync(IDocument document, IExecutionContext context)
+        private string GetRelativePath(IDocument document, IExecutionContext context)
         {
             // Use the pre-calculated relative file path if available
             FilePath relativePath = document.Source?.GetRelativeInputPath(context);
-            return relativePath != null ? $"/{relativePath.FullPath}" : await GetRelativePathAsync(document.Source, context);
+            return relativePath != null ? $"/{relativePath.FullPath}" : GetRelativePath(document.Source, context);
         }
 
-        private async Task<string> GetRelativePathAsync(FilePath path, IExecutionContext context)
+        private string GetRelativePath(FilePath path, IExecutionContext context)
         {
             // Calculate a relative path from the input path(s) (or root) to the provided path
             if (path != null)
             {
-                DirectoryPath inputPath = await context.FileSystem.GetContainingInputPath(path) ?? new DirectoryPath("/");
+                DirectoryPath inputPath = context.FileSystem.GetContainingInputPath(path) ?? new DirectoryPath("/");
                 if (path.IsRelative)
                 {
                     // If the path is relative, combine it with the input path to make it absolute

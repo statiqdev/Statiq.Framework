@@ -46,13 +46,13 @@ namespace Statiq.Less
         }
 
         /// <inheritdoc />
-        public async Task<IEnumerable<IDocument>> ExecuteAsync(IExecutionContext context)
+        public Task<IEnumerable<IDocument>> ExecuteAsync(IExecutionContext context)
         {
             DotlessConfiguration config = DotlessConfiguration.GetDefault();
             config.Logger = typeof(LessLogger);
             EngineFactory engineFactory = new EngineFactory(config);
             FileSystemReader fileSystemReader = new FileSystemReader(context.FileSystem);
-            return await context.Inputs.Parallel().SelectAsync(ProcessLessAsync);
+            return context.Inputs.ParallelSelectAsync(ProcessLessAsync);
 
             async Task<IDocument> ProcessLessAsync(IDocument input)
             {

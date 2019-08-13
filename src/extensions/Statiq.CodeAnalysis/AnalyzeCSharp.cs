@@ -434,10 +434,10 @@ namespace Statiq.CodeAnalysis
 
             // Add the input source and references
             List<ISymbol> symbols = new List<ISymbol>();
-            compilation = await AddSourceFilesAsync(context, compilation);
+            compilation = AddSourceFiles(context, compilation);
             compilation = await AddProjectReferencesAsync(context, symbols, compilation);
             compilation = await AddSolutionReferencesAsync(context, symbols, compilation);
-            compilation = await AddAssemblyReferencesAsync(context, symbols, compilation);
+            compilation = AddAssemblyReferences(context, symbols, compilation);
 
             // Get and return the document tree
             symbols.Add(compilation.Assembly.GlobalNamespace);
@@ -454,20 +454,20 @@ namespace Statiq.CodeAnalysis
             return visitor.Finish();
         }
 
-        private async Task<Compilation> AddSourceFilesAsync(IExecutionContext context, Compilation compilation)
+        private Compilation AddSourceFiles(IExecutionContext context, Compilation compilation)
         {
             ConcurrentBag<SyntaxTree> syntaxTrees = new ConcurrentBag<SyntaxTree>();
             if (_inputDocuments)
             {
                 // Get syntax trees (supply path so that XML doc includes can be resolved)
-                await context.Inputs.Parallel().ForEachAsync(AddSyntaxTreesAsync);
+                Parallel.ForEach(context.Inputs, AddSyntaxTrees);
                 compilation = compilation.AddSyntaxTrees(syntaxTrees);
             }
             return compilation;
 
-            async Task AddSyntaxTreesAsync(IDocument input)
+            void AddSyntaxTrees(IDocument input)
             {
-                using (Stream stream = await input.GetStream())
+                using (Stream stream = input.GetStream())
                 {
                     SourceText sourceText = SourceText.From(stream);
                     syntaxTrees.Add(CSharpSyntaxTree.ParseText(
@@ -477,11 +477,11 @@ namespace Statiq.CodeAnalysis
             }
         }
 
-        private async Task<Compilation> AddAssemblyReferencesAsync(IExecutionContext context, List<ISymbol> symbols, Compilation compilation)
+        private Compilation AddAssemblyReferences(IExecutionContext context, List<ISymbol> symbols, Compilation compilation)
         {
-            IEnumerable<IFile> assemblyFiles = await context.FileSystem.GetInputFiles(_assemblyGlobs);
-            assemblyFiles = await assemblyFiles.WhereAsync(async x => (x.Path.Extension == ".dll" || x.Path.Extension == ".exe") && await x.GetExistsAsync());
-            MetadataReference[] assemblyReferences = (await assemblyFiles.SelectAsync(CreateMetadataReferences)).ToArray();
+            IEnumerable<IFile> assemblyFiles = context.FileSystem.GetInputFiles(_assemblyGlobs);
+            assemblyFiles = assemblyFiles.Where(x => (x.Path.Extension == ".dll" || x.Path.Extension == ".exe") && x.Exists);
+            MetadataReference[] assemblyReferences = assemblyFiles.Select(CreateMetadataReferences).ToArray();
             if (assemblyReferences.Length > 0)
             {
                 compilation = compilation.AddReferences(assemblyReferences);
@@ -491,11 +491,11 @@ namespace Statiq.CodeAnalysis
             }
             return compilation;
 
-            async Task<MetadataReference> CreateMetadataReferences(IFile assemblyFile)
+            MetadataReference CreateMetadataReferences(IFile assemblyFile)
             {
                 // Create the metadata reference for the compilation
-                IFile xmlFile = await context.FileSystem.GetFile(assemblyFile.Path.ChangeExtension("xml"));
-                if (await xmlFile.GetExists())
+                IFile xmlFile = context.FileSystem.GetFile(assemblyFile.Path.ChangeExtension("xml"));
+                if (xmlFile.Exists)
                 {
                     Trace.Verbose($"Creating metadata reference for assembly {assemblyFile.Path.FullPath} with XML documentation file at {xmlFile.Path.FullPath}");
                     return MetadataReference.CreateFromFile(
@@ -516,8 +516,8 @@ namespace Statiq.CodeAnalysis
                 LogWriter = log
             });
             AdhocWorkspace workspace = new AdhocWorkspace();
-            IEnumerable<IFile> projectFiles = await context.FileSystem.GetInputFiles(_projectGlobs);
-            projectFiles = await projectFiles.WhereAsync(async x => x.Path.Extension == ".csproj" && await x.GetExistsAsync());
+            IEnumerable<IFile> projectFiles = context.FileSystem.GetInputFiles(_projectGlobs);
+            projectFiles = projectFiles.Where(x => x.Path.Extension == ".csproj" && x.Exists);
             List<Project> projects = new List<Project>();
             foreach (IFile projectFile in projectFiles)
             {
@@ -551,8 +551,8 @@ namespace Statiq.CodeAnalysis
 
         private async Task<Compilation> AddSolutionReferencesAsync(IExecutionContext context, List<ISymbol> symbols, Compilation compilation)
         {
-            IEnumerable<IFile> solutionFiles = await context.FileSystem.GetInputFiles(_solutionGlobs);
-            solutionFiles = await solutionFiles.WhereAsync(async x => x.Path.Extension == ".sln" && await x.GetExistsAsync());
+            IEnumerable<IFile> solutionFiles = context.FileSystem.GetInputFiles(_solutionGlobs);
+            solutionFiles = solutionFiles.Where(x => x.Path.Extension == ".sln" && x.Exists);
             foreach (IFile solutionFile in solutionFiles)
             {
                 Trace.Verbose($"Creating workspace solution for {solutionFile.Path.FullPath}");
@@ -590,15 +590,16 @@ namespace Statiq.CodeAnalysis
         private async Task<Compilation> AddProjectReferencesAsync(IEnumerable<Project> projects, List<ISymbol> symbols, Compilation compilation)
         {
             // Add a references to the compilation for each project in the solution
-            MetadataReference[] compilationReferences = (await projects
+            MetadataReference[] compilationReferences = await projects
+                .ToAsyncEnumerable()
                 .Where(x => x.SupportsCompilation)
-                .SelectAsync(async x =>
+                .SelectAwait(async x =>
                 {
                     Trace.Verbose($"Creating compilation reference for project {x.Name}");
                     Compilation projectCompilation = await x.GetCompilationAsync();
                     return projectCompilation.ToMetadataReference(new[] { x.AssemblyName }.ToImmutableArray());
-                }))
-                .ToArray();
+                })
+                .ToArrayAsync();
             if (compilationReferences.Length > 0)
             {
                 compilation = compilation.AddReferences(compilationReferences);

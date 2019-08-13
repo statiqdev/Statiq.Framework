@@ -32,7 +32,7 @@ namespace Statiq.Razor
             {
                 return new NotFoundFileInfo(subpath);
             }
-            IFile file = StatiqFileSystem.GetInputFile(subpath.TrimStart('/')).Result;
+            IFile file = StatiqFileSystem.GetInputFile(subpath.TrimStart('/'));
             return new StatiqFileInfo(file);
         }
 
@@ -42,10 +42,10 @@ namespace Statiq.Razor
             {
                 return new NotFoundDirectoryContents();
             }
-            IDirectory directory = StatiqFileSystem.GetInputDirectory(subpath).Result;
+            IDirectory directory = StatiqFileSystem.GetInputDirectory(subpath);
             List<IFileInfo> fileInfos = new List<IFileInfo>();
-            fileInfos.AddRange(directory.GetDirectories().Result.Select(x => new StatiqDirectoryInfo(x)));
-            fileInfos.AddRange(directory.GetFiles().Result.Select(x => new StatiqFileInfo(x)));
+            fileInfos.AddRange(directory.GetDirectories().Select(x => new StatiqDirectoryInfo(x)));
+            fileInfos.AddRange(directory.GetFiles().Select(x => new StatiqFileInfo(x)));
             return new EnumerableDirectoryContents(fileInfos);
         }
 
@@ -90,9 +90,9 @@ namespace Statiq.Razor
                 _file = file;
             }
 
-            public bool Exists => _file.GetExists().Result;
+            public bool Exists => _file.Exists;
 
-            public long Length => _file.GetLength().Result;
+            public long Length => _file.Length;
 
             public string PhysicalPath => _file.Path.FullPath;
 
@@ -102,7 +102,7 @@ namespace Statiq.Razor
 
             public bool IsDirectory => false;
 
-            public Stream CreateReadStream() => _file.OpenRead().Result;
+            public Stream CreateReadStream() => _file.OpenRead();
         }
 
         private class StatiqDirectoryInfo : IFileInfo
@@ -114,7 +114,7 @@ namespace Statiq.Razor
                 _directory = directory;
             }
 
-            public bool Exists => _directory.GetExists().Result;
+            public bool Exists => _directory.Exists;
 
             public long Length => -1L;
 

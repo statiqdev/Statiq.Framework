@@ -68,7 +68,10 @@ namespace Statiq.Html
 
             // Iterate the input documents synchronously so we don't download the same resource more than once
             HtmlParser parser = new HtmlParser();
-            return await context.Inputs.SelectAsync(GetDocumentAsync);
+            return (IEnumerable<Common.IDocument>)await context.Inputs
+                .ToAsyncEnumerable()
+                .Select(GetDocumentAsync)
+                .ToListAsync();
 
             async Task<Common.IDocument> GetDocumentAsync(Common.IDocument input)
             {
@@ -146,8 +149,8 @@ namespace Statiq.Html
             string link = context.GetLink(path);
 
             // Download the resource, but only if we haven't already written it to disk
-            IFile outputFile = await context.FileSystem.GetOutputFile(path);
-            if (!await outputFile.GetExists())
+            IFile outputFile = context.FileSystem.GetOutputFile(path);
+            if (!outputFile.Exists)
             {
                 Common.Trace.Verbose($"Downloading resource from {uri} to {path.FullPath}");
 
@@ -166,7 +169,7 @@ namespace Statiq.Html
                 response.EnsureSuccessStatusCode();
 
                 // Copy the result to output
-                using (Stream outputStream = await outputFile.OpenWrite())
+                using (Stream outputStream = outputFile.OpenWrite())
                 {
                     await response.Content.CopyToAsync(outputStream);
                 }

@@ -22,7 +22,7 @@ namespace Statiq.Testing
         {
             DocumentFactory = new DocumentFactory(_settings);
             DocumentFactory.SetDefaultDocumentType<TestDocument>();
-            Inputs = new ExecutionInputs(ImmutableArray<IDocument>.Empty, this);
+            Inputs = ImmutableArray<IDocument>.Empty;
         }
 
         public TestExecutionContext(IEnumerable<IDocument> inputs)

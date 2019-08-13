@@ -411,7 +411,7 @@ namespace Statiq.Feeds
             };
 
             // Add items
-            await context.Inputs.Take(_maximumItems).Query(context).ForEachAsync(async input =>
+            foreach (IDocument input in context.Inputs.Take(_maximumItems))
             {
                 feed.Items.Add(new FeedItem
                 {
@@ -428,7 +428,7 @@ namespace Statiq.Feeds
                     ThreadCount = await _itemThreadCount.GetValueAsync(input, context),
                     ThreadUpdated = await _itemThreadUpdated.GetValueAsync(input, context)
                 });
-            });
+            }
 
             // Generate the feeds
             return new[]

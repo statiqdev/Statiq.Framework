@@ -162,9 +162,11 @@ namespace Statiq.SearchIndex
         public async Task<IEnumerable<IDocument>> ExecuteAsync(IExecutionContext context)
         {
             ILunrIndexItem[] searchIndexItems =
-                (await context.Inputs.SelectAsync(async x => await _searchIndexItem.GetValueAsync(x, context)))
-                .Where(x => !string.IsNullOrEmpty(x?.Title) && !string.IsNullOrEmpty(x.Content))
-                .ToArray();
+                await context.Inputs
+                    .ToAsyncEnumerable()
+                    .SelectAwait(async x => await _searchIndexItem.GetValueAsync(x, context))
+                    .Where(x => !string.IsNullOrEmpty(x?.Title) && !string.IsNullOrEmpty(x.Content))
+                    .ToArrayAsync();
 
             if (searchIndexItems.Length == 0)
             {
@@ -268,8 +270,8 @@ var searchModule = function() {{
 
             if (_stopwordsPath != null)
             {
-                IFile stopwordsFile = await context.FileSystem.GetInputFile(_stopwordsPath);
-                if (await stopwordsFile.GetExists())
+                IFile stopwordsFile = context.FileSystem.GetInputFile(_stopwordsPath);
+                if (stopwordsFile.Exists)
                 {
                     stopwords = (await stopwordsFile.ReadAllTextAsync())
                         .Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries)

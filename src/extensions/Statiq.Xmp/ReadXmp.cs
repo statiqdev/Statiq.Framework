@@ -107,7 +107,7 @@ namespace Statiq.Xmp
             XmpDirectory xmpDirectory;
             try
             {
-                using (Stream stream = await input.GetStream())
+                using (Stream stream = input.GetStream())
                 {
                     xmpDirectory = ImageMetadataReader.ReadMetadata(stream).OfType<XmpDirectory>().FirstOrDefault();
                 }
@@ -121,11 +121,11 @@ namespace Statiq.Xmp
                 // Try to read sidecarfile
                 if (input.Source != null)
                 {
-                    IFile sidecarFile = await context.FileSystem.GetInputFile(input.Source.AppendExtension(".xmp"));
-                    if (await sidecarFile.GetExists())
+                    IFile sidecarFile = context.FileSystem.GetInputFile(input.Source.AppendExtension(".xmp"));
+                    if (sidecarFile.Exists)
                     {
                         MemoryStream xmpBytes = new MemoryStream();
-                        using (Stream xmpStream = await sidecarFile.OpenRead())
+                        using (Stream xmpStream = sidecarFile.OpenRead())
                         {
                             await xmpStream.CopyToAsync(xmpBytes);
                         }
@@ -347,7 +347,7 @@ namespace Statiq.Xmp
                     System.Globalization.CultureInfo culture;
                     if (langMetadata.ElementValue == "x-default")
                     {
-                        culture = System.Globalization.CultureInfo.InvariantCulture;
+                        culture = CultureInfo.InvariantCulture;
                     }
                     else
                     {

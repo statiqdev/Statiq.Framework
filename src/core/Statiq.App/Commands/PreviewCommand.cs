@@ -72,7 +72,7 @@ namespace Statiq.App
                     ? GetContentTypes(settings.ContentTypes)
                     : new Dictionary<string, string>();
                 Server previewServer = await StartPreviewServerAsync(
-                    (await engineManager.Engine.FileSystem.GetOutputDirectory()).Path,
+                    engineManager.Engine.FileSystem.GetOutputDirectory().Path,
                     settings.Port,
                     settings.ForceExt,
                     settings.VirtualDirectory,
@@ -85,8 +85,8 @@ namespace Statiq.App
                 {
                     Trace.Information("Watching paths(s) {0}", string.Join(", ", engineManager.Engine.FileSystem.InputPaths));
                     inputFolderWatcher = new ActionFileSystemWatcher(
-                        (await engineManager.Engine.FileSystem.GetOutputDirectory()).Path,
-                        (await engineManager.Engine.FileSystem.GetInputDirectories()).Select(x => x.Path),
+                        engineManager.Engine.FileSystem.GetOutputDirectory().Path,
+                        engineManager.Engine.FileSystem.GetInputDirectories().Select(x => x.Path),
                         true,
                         "*.*",
                         path =>

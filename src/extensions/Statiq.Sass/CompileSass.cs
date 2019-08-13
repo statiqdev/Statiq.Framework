@@ -41,7 +41,7 @@ namespace Statiq.Sass
     public class CompileSass : ParallelModule
     {
         private readonly List<DirectoryPath> _includePaths = new List<DirectoryPath>();
-        private Config<FilePath> _inputPath = Config.FromDocument(DefaultInputPathAsync);
+        private Config<FilePath> _inputPath = Config.FromDocument(DefaultInputPath);
         private Func<string, string> _importPathFunc = null;
         private bool _includeSourceComments = false;
         private ScssOutputStyle _outputStyle = ScssOutputStyle.Compact;
@@ -153,7 +153,7 @@ namespace Statiq.Sass
             FilePath inputPath = await _inputPath.GetValueAsync(input, context);
             if (inputPath?.IsAbsolute != true)
             {
-                inputPath = (await context.FileSystem.GetInputFile(new FilePath(Path.GetRandomFileName()))).Path;
+                inputPath = context.FileSystem.GetInputFile(new FilePath(Path.GetRandomFileName())).Path;
                 Trace.Warning($"No input path found for document {input.ToSafeDisplayString()}, using {inputPath.FileName.FullPath}");
             }
 
@@ -169,14 +169,15 @@ namespace Statiq.Sass
                 InputFile = inputPath.FullPath,
                 TryImport = importer.TryImport
             };
-            IEnumerable<string> includePaths = await _includePaths
+            IEnumerable<string> includePaths = _includePaths
                 .Where(x => x != null)
-                .SelectAsync(async x => x.IsAbsolute ? x.FullPath : (await context.FileSystem.GetContainingInputPathAsync(x))?.Combine(x)?.FullPath);
-            options.IncludePaths.AddRange(includePaths.Where(x => x != null));
+                .Select(x => x.IsAbsolute ? x.FullPath : context.FileSystem.GetContainingInputPath(x)?.Combine(x)?.FullPath)
+                .Where(x => x != null);
+            options.IncludePaths.AddRange(includePaths);
             ScssResult result = Scss.ConvertToCss(content, options);
 
             // Process the result
-            DirectoryPath relativeDirectory = await context.FileSystem.GetContainingInputPath(inputPath);
+            DirectoryPath relativeDirectory = context.FileSystem.GetContainingInputPath(inputPath);
             FilePath relativePath = relativeDirectory?.GetRelativePath(inputPath) ?? inputPath.FileName;
 
             FilePath cssPath = relativePath.ChangeExtension("css");
@@ -197,12 +198,12 @@ namespace Statiq.Sass
             return cssDocument.Yield();
         }
 
-        private static async Task<FilePath> DefaultInputPathAsync(IDocument document, IExecutionContext context)
+        private static FilePath DefaultInputPath(IDocument document, IExecutionContext context)
         {
             if (document.Source != null)
             {
-                IFile inputFile = await context.FileSystem.GetInputFile(document.Source);
-                return await inputFile.GetExists() ? inputFile.Path : null;
+                IFile inputFile = context.FileSystem.GetInputFile(document.Source);
+                return inputFile.Exists ? inputFile.Path : null;
             }
             return null;
         }

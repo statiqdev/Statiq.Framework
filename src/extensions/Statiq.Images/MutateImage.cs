@@ -56,7 +56,7 @@ namespace Statiq.Images
     /// </para>
     /// </remarks>
     /// <category>Content</category>
-    public class MutateImage : ParallelModule
+    public class MutateImage : ParallelSyncModule
     {
         private readonly Stack<ImageOperations> _operations = new Stack<ImageOperations>();
 
@@ -311,17 +311,17 @@ namespace Statiq.Images
             return this;
         }
 
-        protected override async Task<IEnumerable<IDocument>> ExecuteAsync(IDocument input, IExecutionContext context)
+        protected override IEnumerable<IDocument> Execute(IDocument input, IExecutionContext context)
         {
             FilePath relativePath = input.Source.GetRelativeInputPath(context);
-            return await _operations.SelectManyAsync(async operations =>
+            return _operations.SelectMany(operations =>
             {
                 FilePath destinationPath = relativePath;
 
                 // Get the image
                 Image<Rgba32> image;
                 IImageFormat imageFormat;
-                using (Stream stream = await input.GetStream())
+                using (Stream stream = input.GetStream())
                 {
                     image = SixLabors.ImageSharp.Image.Load(stream, out imageFormat);
                 }

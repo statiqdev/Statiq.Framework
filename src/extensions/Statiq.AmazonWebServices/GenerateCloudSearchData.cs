@@ -79,7 +79,7 @@ namespace Statiq.AmazonWebServices
                 {
                     writer.WriteStartArray();
 
-                    await context.Inputs.ForEachAsync(async input =>
+                    foreach (IDocument input in context.Inputs)
                     {
                         writer.WriteStartObject();
 
@@ -146,7 +146,7 @@ namespace Statiq.AmazonWebServices
                         writer.WriteEndObject();
 
                         writer.WriteEndObject();
-                    });
+                    }
 
                     writer.WriteEndArray();
                     textWriter.Flush();

@@ -20,7 +20,7 @@ namespace Statiq.YouTube
     /// will be sent for each input document.
     /// </remarks>
     /// <category>Metadata</category>
-    public class ReadYouTube : ParallelModule, IDisposable
+    public class ReadYouTube : ParallelSyncModule, IDisposable
     {
         private readonly YouTubeService _youtube;
 
@@ -81,10 +81,10 @@ namespace Statiq.YouTube
             return this;
         }
 
-        protected override Task<IEnumerable<IDocument>> ExecuteAsync(IDocument input, IExecutionContext context)
+        protected override IEnumerable<IDocument> Execute(IDocument input, IExecutionContext context)
         {
             ConcurrentDictionary<string, object> results = new ConcurrentDictionary<string, object>();
-            _requests.Query(context).Parallel().ForEach(request =>
+            System.Threading.Tasks.Parallel.ForEach(_requests, request =>
             {
                 Trace.Verbose("Submitting {0} YouTube request for {1}", request.Key, input.ToSafeDisplayString());
                 try
@@ -96,7 +96,7 @@ namespace Statiq.YouTube
                     Trace.Warning("Exception while submitting {0} YouTube request for {1}: {2}", request.Key, input.ToSafeDisplayString(), ex.ToString());
                 }
             });
-            return input.Clone(results).YieldAsTask();
+            return input.Clone(results).Yield();
         }
     }
 }

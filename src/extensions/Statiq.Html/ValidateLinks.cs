@@ -90,7 +90,7 @@ namespace Statiq.Html
 
             // Gather all links
             HtmlParser parser = new HtmlParser();
-            await context.Inputs.Parallel().ForEachAsync(async input => await GatherLinksAsync(input, parser, links));
+            await context.Inputs.ParallelForEachAsync(async input => await GatherLinksAsync(input, parser, links));
 
             // This policy will limit the number of executing link validations.
             // Limit the amount of concurrent link checks to avoid overwhelming servers.
@@ -217,12 +217,12 @@ namespace Statiq.Html
             checkPaths.AddRange(LinkGenerator.DefaultHideExtensions.SelectMany(x => checkPaths.Select(y => y.AppendExtension(x))).ToArray());
 
             // Check all the candidate paths
-            FilePath validatedPath = await checkPaths.FindAsync(async x =>
+            FilePath validatedPath = checkPaths.Find(x =>
             {
                 IFile outputFile;
                 try
                 {
-                    outputFile = await context.FileSystem.GetOutputFileAsync(x);
+                    outputFile = context.FileSystem.GetOutputFile(x);
                 }
                 catch (Exception ex)
                 {
@@ -230,7 +230,7 @@ namespace Statiq.Html
                     return false;
                 }
 
-                return await outputFile.GetExists();
+                return outputFile.Exists;
             });
 
             if (validatedPath != null)

@@ -18,7 +18,7 @@ namespace Statiq.Json
     /// to the document metadata.
     /// </remarks>
     /// <category>Metadata</category>
-    public class ParseJson : ParallelModule
+    public class ParseJson : ParallelSyncModule
     {
         private readonly bool _flatten;
         private readonly string _key;
@@ -45,14 +45,14 @@ namespace Statiq.Json
             _flatten = flatten;
         }
 
-        protected override async Task<IEnumerable<IDocument>> ExecuteAsync(IDocument input, IExecutionContext context)
+        protected override IEnumerable<IDocument> Execute(IDocument input, IExecutionContext context)
         {
             try
             {
                 JsonSerializer serializer = new JsonSerializer();
                 Dictionary<string, object> items = new Dictionary<string, object>();
                 ExpandoObject json;
-                using (TextReader contentReader = new StreamReader(await input.GetStream()))
+                using (TextReader contentReader = new StreamReader(input.GetStream()))
                 {
                     using (JsonReader jsonReader = new JsonTextReader(contentReader))
                     {

@@ -57,7 +57,7 @@ namespace Statiq.Sass
 
             // Try to get the relative path to the parent file from inside the input virtual file system
             // But if the parent file isn't under an input path, just use it directly
-            DirectoryPath containingInputPath = await _fileSystem.GetContainingInputPath(parentFilePath);
+            DirectoryPath containingInputPath = _fileSystem.GetContainingInputPath(parentFilePath);
             FilePath parentRelativePath = containingInputPath != null
                 ? containingInputPath.GetRelativePath(parentFilePath)
                 : parentFilePath;
@@ -128,8 +128,8 @@ namespace Statiq.Sass
         private async Task<string> GetFileAsync(FilePath filePath, FilePath requestedFilePath)
         {
             string scss = null;
-            IFile file = await _fileSystem.GetInputFile(filePath);
-            if (await file.GetExists())
+            IFile file = _fileSystem.GetInputFile(filePath);
+            if (file.Exists)
             {
                 if (requestedFilePath.IsRelative)
                 {

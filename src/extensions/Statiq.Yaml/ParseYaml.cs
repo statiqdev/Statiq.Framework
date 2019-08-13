@@ -19,7 +19,7 @@ namespace Statiq.Yaml
     /// to the document metadata.
     /// </remarks>
     /// <category>Metadata</category>
-    public class ParseYaml : ParallelModule
+    public class ParseYaml : ParallelSyncModule
     {
         private readonly bool _flatten;
         private readonly string _key;
@@ -47,10 +47,10 @@ namespace Statiq.Yaml
             _flatten = flatten;
         }
 
-        protected override async Task<IEnumerable<IDocument>> ExecuteAsync(IDocument input, IExecutionContext context)
+        protected override IEnumerable<IDocument> Execute(IDocument input, IExecutionContext context)
         {
             List<Dictionary<string, object>> documentMetadata = new List<Dictionary<string, object>>();
-            using (TextReader contentReader = new StreamReader(await input.GetStream()))
+            using (TextReader contentReader = new StreamReader(input.GetStream()))
             {
                 YamlStream yamlStream = new YamlStream();
                 yamlStream.Load(contentReader);
