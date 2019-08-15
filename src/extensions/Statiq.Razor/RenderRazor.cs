@@ -31,7 +31,7 @@ namespace Statiq.Razor
     /// </remarks>
     /// Used to determine if the source file name contains the ignore prefix.
     /// <category>Templates</category>
-    public class RenderRazor : IModule
+    public class RenderRazor : Module
     {
         private static readonly RazorService RazorService = new RazorService();
         private static Guid _executionId = Guid.Empty;
@@ -126,7 +126,7 @@ namespace Statiq.Razor
         }
 
         /// <inheritdoc />
-        public async Task<IEnumerable<IDocument>> ExecuteAsync(IExecutionContext context)
+        public override async Task<IEnumerable<IDocument>> ExecuteAsync(IExecutionContext context)
         {
             // Expire the internal Razor cache if this is a new execution
             // This needs to be done so that layouts/partials can be re-rendered if they've changed,

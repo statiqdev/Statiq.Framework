@@ -15,7 +15,7 @@ namespace Statiq.Common
     /// <typeparam name="TItem">
     /// The type of items this module is designed to process.
     /// </typeparam>
-    public abstract class ReadDataModule<TModule, TItem> : IModule
+    public abstract class ReadDataModule<TModule, TItem> : Module
         where TModule : ReadDataModule<TModule, TItem>
         where TItem : class
     {
@@ -26,7 +26,7 @@ namespace Statiq.Common
         private int _limit = int.MaxValue;
 
         /// <summary>
-        /// Specifies which metakey should be used for the document content
+        /// Specifies which metadata key should be used for the document content
         /// </summary>
         /// <param name="contentKey">The name of the content property.</param>
         /// <returns>The current module instance.</returns>
@@ -90,7 +90,7 @@ namespace Statiq.Common
         }
 
         /// <inheritdoc />
-        public async Task<IEnumerable<IDocument>> ExecuteAsync(IExecutionContext context)
+        public override async Task<IEnumerable<IDocument>> ExecuteAsync(IExecutionContext context)
         {
             IEnumerable<TItem> items = GetItems(context);
             return items == null

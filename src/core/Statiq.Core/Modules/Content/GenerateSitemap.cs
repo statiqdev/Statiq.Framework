@@ -18,7 +18,7 @@ namespace Statiq.Core
     /// </remarks>
     /// <metadata cref="Keys.SitemapItem" usage="Input" />
     /// <category>Content</category>
-    public class GenerateSitemap : IModule
+    public class GenerateSitemap : Module
     {
         private static readonly string[] ChangeFrequencies = { "always", "hourly", "daily", "weekly", "monthly", "yearly", "never" };
 
@@ -74,7 +74,7 @@ namespace Statiq.Core
         }
 
         /// <inheritdoc />
-        public async Task<IEnumerable<IDocument>> ExecuteAsync(IExecutionContext context)
+        public override async Task<IEnumerable<IDocument>> ExecuteAsync(IExecutionContext context)
         {
             StringBuilder sb = new StringBuilder();
             sb.Append("<?xml version=\"1.0\" encoding=\"UTF-8\"?><urlset xmlns=\"http://www.sitemaps.org/schemas/sitemap/0.9\">");

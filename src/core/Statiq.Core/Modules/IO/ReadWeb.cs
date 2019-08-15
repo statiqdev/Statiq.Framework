@@ -20,7 +20,7 @@ namespace Statiq.Core
     /// <metadata cref="Keys.SourceUri" usage="Output" />
     /// <metadata cref="Keys.SourceHeaders" usage="Output" />
     /// <category>Input/Output</category>
-    public class ReadWeb : IModule
+    public class ReadWeb : Module
     {
         private readonly List<WebRequest> _requests = new List<WebRequest>();
         private List<WebResponse> _cachedResponses;
@@ -101,7 +101,7 @@ namespace Statiq.Core
         }
 
         /// <inheritdoc />
-        public async Task<IEnumerable<IDocument>> ExecuteAsync(IExecutionContext context)
+        public override async Task<IEnumerable<IDocument>> ExecuteAsync(IExecutionContext context)
         {
             List<WebResponse> responses = _cachedResponses;
             if (responses == null)

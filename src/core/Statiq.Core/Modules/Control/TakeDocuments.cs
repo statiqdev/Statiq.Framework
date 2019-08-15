@@ -9,7 +9,7 @@ namespace Statiq.Core
     /// Takes the first X documents from the current pipeline and discards the rest.
     /// </summary>
     /// <category>Control</category>
-    public class TakeDocuments : IModule
+    public class TakeDocuments : Module
     {
         private readonly int _x;
 
@@ -23,6 +23,6 @@ namespace Statiq.Core
         }
 
         /// <inheritdoc />
-        public Task<IEnumerable<IDocument>> ExecuteAsync(IExecutionContext context) => Task.FromResult(context.Inputs.Take(_x));
+        public override Task<IEnumerable<IDocument>> ExecuteAsync(IExecutionContext context) => Task.FromResult(context.Inputs.Take(_x));
     }
 }

@@ -35,7 +35,7 @@ namespace Statiq.Highlight
     /// </code>
     /// </example>
     /// <category>Content</category>
-    public class HighlightCode : IModule
+    public class HighlightCode : Module
     {
         private string _codeQuerySelector = "pre code";
         private string _highlightJsFile;
@@ -75,7 +75,7 @@ namespace Statiq.Highlight
         }
 
         /// <inheritdoc />
-        public async Task<IEnumerable<IDocument>> ExecuteAsync(IExecutionContext context)
+        public override async Task<IEnumerable<IDocument>> ExecuteAsync(IExecutionContext context)
         {
             HtmlParser parser = new HtmlParser();
             IJavaScriptEnginePool enginePool = context.GetJavaScriptEnginePool(x =>

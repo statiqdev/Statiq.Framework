@@ -30,7 +30,7 @@ namespace Statiq.Feeds
     /// <metadata cref="FeedKeys.Updated" usage="Input"/>
     /// <metadata cref="FeedKeys.Content" usage="Input"/>
     /// <category>Content</category>
-    public class GenerateFeeds : IModule
+    public class GenerateFeeds : Module
     {
         /// <summary>
         /// The default path for RSS files.
@@ -394,7 +394,7 @@ namespace Statiq.Feeds
         }
 
         /// <inheritdoc />
-        public async Task<IEnumerable<IDocument>> ExecuteAsync(IExecutionContext context)
+        public override async Task<IEnumerable<IDocument>> ExecuteAsync(IExecutionContext context)
         {
             // Get the feed
             Feed feed = new Feed

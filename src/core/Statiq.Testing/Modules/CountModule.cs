@@ -5,7 +5,7 @@ using Statiq.Common;
 
 namespace Statiq.Testing
 {
-    public class CountModule : IModule
+    public class CountModule : Module
     {
         public int AdditionalOutputs { get; set; } // Controls how many additional outputs are spawned
         public string ValueKey { get; set; } // This is the key used for storing the value in the metadata
@@ -22,7 +22,7 @@ namespace Statiq.Testing
         }
 
         /// <inheritdoc />
-        public async Task<IEnumerable<IDocument>> ExecuteAsync(IExecutionContext context)
+        public override async Task<IEnumerable<IDocument>> ExecuteAsync(IExecutionContext context)
         {
             int sourceCount = 0;
             ExecuteCount++;

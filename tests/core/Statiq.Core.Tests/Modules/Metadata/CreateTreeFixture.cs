@@ -27,7 +27,7 @@ namespace Statiq.Core.Tests.Modules.Metadata
                 CreateTree tree = new CreateTree().WithNesting();
 
                 // When
-                TestDocument result = (await ExecuteAsync(inputs, tree)).Single();
+                TestDocument result = await ExecuteAsync(inputs, tree).SingleAsync();
 
                 // Then
                 VerifyTree(
@@ -61,7 +61,7 @@ namespace Statiq.Core.Tests.Modules.Metadata
                 CreateTree tree = new CreateTree().WithNesting();
 
                 // When
-                TestDocument result = (await ExecuteAsync(inputs, tree)).Single();
+                TestDocument result = await ExecuteAsync(inputs, tree).SingleAsync();
 
                 // Then
                 VerifyTree(
@@ -90,7 +90,7 @@ namespace Statiq.Core.Tests.Modules.Metadata
                 CreateTree tree = new CreateTree().WithNesting();
 
                 // When
-                TestDocument result = (await ExecuteAsync(inputs, tree)).Single();
+                TestDocument result = await ExecuteAsync(inputs, tree).SingleAsync();
 
                 // Then
                 VerifyTree(
@@ -136,7 +136,7 @@ namespace Statiq.Core.Tests.Modules.Metadata
                 CreateTree tree = new CreateTree().WithNesting();
 
                 // When
-                TestDocument result = (await ExecuteAsync(inputs, tree)).Single();
+                TestDocument result = await ExecuteAsync(inputs, tree).SingleAsync();
 
                 // Then
                 IDocument document = FindTreeNode(result, "root/a/2.txt");
@@ -154,7 +154,7 @@ namespace Statiq.Core.Tests.Modules.Metadata
                 CreateTree tree = new CreateTree().WithNesting();
 
                 // When
-                TestDocument result = (await ExecuteAsync(inputs, tree)).Single();
+                TestDocument result = await ExecuteAsync(inputs, tree).SingleAsync();
 
                 // Then
                 TestDocument document = FindTreeNode(result, "root/a/2.txt");
@@ -172,7 +172,7 @@ namespace Statiq.Core.Tests.Modules.Metadata
                 CreateTree tree = new CreateTree().WithNesting();
 
                 // When
-                TestDocument result = (await ExecuteAsync(inputs, tree)).Single();
+                TestDocument result = await ExecuteAsync(inputs, tree).SingleAsync();
 
                 // Then
                 TestDocument document = FindTreeNode(result, "root/a/2.txt");
@@ -191,7 +191,7 @@ namespace Statiq.Core.Tests.Modules.Metadata
                 CreateTree tree = new CreateTree().WithNesting();
 
                 // When
-                TestDocument result = (await ExecuteAsync(inputs, tree)).Single();
+                TestDocument result = await ExecuteAsync(inputs, tree).SingleAsync();
 
                 // Then
                 TestDocument document = FindTreeNode(result, "root/b/4.txt");

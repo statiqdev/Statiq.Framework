@@ -16,7 +16,7 @@ namespace Statiq.AmazonWebServices
     /// to a correctly configured CloudSearch instance using the API or Amazon CLI.
     /// </remarks>
     /// <category>Content</category>
-    public class GenerateCloudSearchData : IModule
+    public class GenerateCloudSearchData : Module
     {
         private readonly string _idMetaKey;
         private readonly string _bodyField;
@@ -70,7 +70,7 @@ namespace Statiq.AmazonWebServices
         }
 
         /// <inheritdoc />
-        public async Task<IEnumerable<IDocument>> ExecuteAsync(IExecutionContext context)
+        public override async Task<IEnumerable<IDocument>> ExecuteAsync(IExecutionContext context)
         {
             Stream contentStream = await context.GetContentStreamAsync();
             using (TextWriter textWriter = new StreamWriter(contentStream))

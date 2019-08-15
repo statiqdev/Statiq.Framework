@@ -15,11 +15,11 @@ namespace Statiq.Core
     /// defined via fluent methods that compare the returned object for each document against a supplied object (or array).
     /// If the defined object or any of the objects in the array for the case equal the one for the document, the modules
     /// in the case are executed. The output of the module is the aggregate output of executing the specified modules against
-    /// documents matching each case. If a document document match a case, it is output against the default case (if defined)
+    /// documents matching each case. If a document matches a case, it is output against the default case (if defined)
     /// or output without modification (if no default is defined).
     /// </remarks>
     /// <category>Control</category>
-    public class ExecuteSwitch : IModule
+    public class ExecuteSwitch : Module
     {
         private readonly List<Tuple<object, IEnumerable<IModule>>> _cases
             = new List<Tuple<object, IEnumerable<IModule>>>();
@@ -75,7 +75,7 @@ namespace Statiq.Core
         }
 
         /// <inheritdoc />
-        public async Task<IEnumerable<IDocument>> ExecuteAsync(IExecutionContext context)
+        public override async Task<IEnumerable<IDocument>> ExecuteAsync(IExecutionContext context)
         {
             List<IDocument> results = new List<IDocument>();
             IEnumerable<IDocument> documents = context.Inputs;

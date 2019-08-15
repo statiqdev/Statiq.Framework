@@ -10,10 +10,10 @@ namespace Statiq.Core
     /// </summary>
     /// <metadata cref="Keys.Index" usage="Output" />
     /// <category>Metadata</category>
-    public class AddIndexes : IModule
+    public class AddIndexes : Module
     {
         /// <inheritdoc />
-        public Task<IEnumerable<IDocument>> ExecuteAsync(IExecutionContext context) =>
+        public override Task<IEnumerable<IDocument>> ExecuteAsync(IExecutionContext context) =>
             Task.FromResult(context.Inputs.Select((x, i) => x.Clone(new MetadataItems { { Keys.Index, i + 1 } })));
     }
 }

@@ -13,7 +13,7 @@ namespace Statiq.Core
     /// The ordered documents are output as the result of this module.
     /// </remarks>
     /// <category>Control</category>
-    public class OrderDocuments : IModule
+    public class OrderDocuments : Module
     {
         private readonly Stack<Order> _orders = new Stack<Order>();
 
@@ -148,7 +148,7 @@ namespace Statiq.Core
         }
 
         /// <inheritdoc />
-        public Task<IEnumerable<IDocument>> ExecuteAsync(IExecutionContext context)
+        public override Task<IEnumerable<IDocument>> ExecuteAsync(IExecutionContext context)
         {
             IOrderedEnumerable<IDocument> orderdList = null;
             foreach (Order order in _orders.Reverse())

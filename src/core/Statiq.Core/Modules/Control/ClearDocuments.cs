@@ -12,9 +12,9 @@ namespace Statiq.Core
     /// to subsequent child modules.
     /// </remarks>
     /// <category>Control</category>
-    public class ClearDocuments : IModule
+    public class ClearDocuments : Module
     {
-        public Task<IEnumerable<IDocument>> ExecuteAsync(IExecutionContext context) =>
+        public override Task<IEnumerable<IDocument>> ExecuteAsync(IExecutionContext context) =>
             Task.FromResult<IEnumerable<IDocument>>(null);
     }
 }

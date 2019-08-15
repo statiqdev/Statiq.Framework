@@ -18,7 +18,7 @@ namespace Statiq.Core
     /// to set the document destination prior to using this module.
     /// </remarks>
     /// <category>Input/Output</category>
-    public class WriteFiles : IModule
+    public class WriteFiles : Module
     {
         private bool _ignoreEmptyContent = true;
         private bool _append;
@@ -66,7 +66,7 @@ namespace Statiq.Core
         protected Task<bool> ShouldProcessAsync(IDocument input, IExecutionContext context) => _predicate.GetValueAsync(input, context);
 
         /// <inheritdoc />
-        public virtual async Task<IEnumerable<IDocument>> ExecuteAsync(IExecutionContext context)
+        public override async Task<IEnumerable<IDocument>> ExecuteAsync(IExecutionContext context)
         {
             // Get the output file path for each file in sequence and set up action chains
             // Value = input source string(s) (for reporting a warning if not appending), write action

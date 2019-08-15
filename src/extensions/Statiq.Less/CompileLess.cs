@@ -27,7 +27,7 @@ namespace Statiq.Less
     /// </code>
     /// </example>
     /// <category>Templates</category>
-    public class CompileLess : IModule
+    public class CompileLess : Module
     {
         private Config<FilePath> _inputPath = Config.FromDocument(doc => doc.Source);
 
@@ -46,7 +46,7 @@ namespace Statiq.Less
         }
 
         /// <inheritdoc />
-        public Task<IEnumerable<IDocument>> ExecuteAsync(IExecutionContext context)
+        public override Task<IEnumerable<IDocument>> ExecuteAsync(IExecutionContext context)
         {
             DotlessConfiguration config = DotlessConfiguration.GetDefault();
             config.Logger = typeof(LessLogger);

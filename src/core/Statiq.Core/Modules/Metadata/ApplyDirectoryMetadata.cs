@@ -42,7 +42,7 @@ namespace Statiq.Core
     /// </para>
     /// </remarks>
     /// <category>Metadata</category>
-    public class ApplyDirectoryMetadata : IModule
+    public class ApplyDirectoryMetadata : Module
     {
         private readonly List<MetaFileEntry> _metadataFiles = new List<MetaFileEntry>();
         private bool _preserveMetadataFiles;
@@ -84,7 +84,7 @@ namespace Statiq.Core
         }
 
         /// <inheritdoc />
-        public async Task<IEnumerable<IDocument>> ExecuteAsync(IExecutionContext context)
+        public override async Task<IEnumerable<IDocument>> ExecuteAsync(IExecutionContext context)
         {
             // Find metadata files
             ILookup<DirectoryPath, MetaInfo> lookup = await context.Inputs

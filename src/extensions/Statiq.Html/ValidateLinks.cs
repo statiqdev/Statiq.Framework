@@ -25,7 +25,7 @@ namespace Statiq.Html
     /// by default due to the time it takes to check absolute links.
     /// </remarks>
     /// <category>Input/Output</category>
-    public class ValidateLinks : IModule
+    public class ValidateLinks : Module
     {
         private const int MaxAbsoluteLinkRetry = 5;
         private const HttpStatusCode TooManyRequests = (HttpStatusCode)429;
@@ -74,7 +74,7 @@ namespace Statiq.Html
         }
 
         /// <inheritdoc />
-        public async Task<IEnumerable<IDocument>> ExecuteAsync(IExecutionContext context)
+        public override async Task<IEnumerable<IDocument>> ExecuteAsync(IExecutionContext context)
         {
 #pragma warning disable RCS1163 // Unused parameter.
             // Handle invalid HTTPS certificates and allow alternate security protocols (see http://stackoverflow.com/a/5670954/807064)

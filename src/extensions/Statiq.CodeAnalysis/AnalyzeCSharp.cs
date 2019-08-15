@@ -79,7 +79,7 @@ namespace Statiq.CodeAnalysis
     /// <metadata cref="CodeAnalysisKeys.Syntax" usage="Output"/>
     /// <metadata cref="CodeAnalysisKeys.OutputBuildLog" usage="Setting"/>
     /// <category>Metadata</category>
-    public class AnalyzeCSharp : IModule
+    public class AnalyzeCSharp : Module
     {
         internal const string CompilationAssemblyName = nameof(CompilationAssemblyName);
 
@@ -421,7 +421,7 @@ namespace Statiq.CodeAnalysis
         }
 
         /// <inheritdoc />
-        public async Task<IEnumerable<IDocument>> ExecuteAsync(IExecutionContext context)
+        public override async Task<IEnumerable<IDocument>> ExecuteAsync(IExecutionContext context)
         {
             // Create the compilation (have to supply an XmlReferenceResolver to handle include XML doc comments)
             MetadataReference mscorlib = MetadataReference.CreateFromFile(typeof(object).Assembly.Location);

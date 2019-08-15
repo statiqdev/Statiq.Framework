@@ -31,7 +31,7 @@ namespace Statiq.Html
     /// </para>
     /// </remarks>
     /// <category>Input/Output</category>
-    public class MirrorResources : IModule
+    public class MirrorResources : Module
     {
         private const int MaxAbsoluteLinkRetry = 5;
         private const HttpStatusCode TooManyRequests = (HttpStatusCode)429;
@@ -56,7 +56,7 @@ namespace Statiq.Html
             _pathFunc = pathFunc ?? throw new ArgumentNullException(nameof(pathFunc));
         }
 
-        public async Task<IEnumerable<Common.IDocument>> ExecuteAsync(IExecutionContext context)
+        public override async Task<IEnumerable<Common.IDocument>> ExecuteAsync(IExecutionContext context)
         {
 #pragma warning disable RCS1163 // Unused parameter.
             // Handle invalid HTTPS certificates and allow alternate security protocols (see http://stackoverflow.com/a/5670954/807064)

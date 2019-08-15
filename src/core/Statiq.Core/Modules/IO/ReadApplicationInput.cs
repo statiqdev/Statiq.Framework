@@ -13,10 +13,10 @@ namespace Statiq.Core
     /// "piped" to the Statiq.exe via the command line from a file or prior chained executable. Also known as "Standard Input" or "STDIN".
     /// </remarks>
     /// <category>Input/Output</category>
-    public class ReadApplicationInput : IModule
+    public class ReadApplicationInput : Module
     {
         /// <inheritdoc />
-        public async Task<IEnumerable<IDocument>> ExecuteAsync(IExecutionContext context)
+        public override async Task<IEnumerable<IDocument>> ExecuteAsync(IExecutionContext context)
         {
             // If ApplicationInput is empty, return nothing
             if (string.IsNullOrWhiteSpace(context.ApplicationInput))

@@ -28,7 +28,7 @@ namespace Statiq.Core
     /// </remarks>
     /// <metadata cref="Keys.RedirectFrom" usage="Input" />
     /// <category>Content</category>
-    public class GenerateRedirects : IModule
+    public class GenerateRedirects : Module
     {
         private readonly Dictionary<FilePath, Func<IDictionary<FilePath, string>, string>> _additionalOutputs =
             new Dictionary<FilePath, Func<IDictionary<FilePath, string>, string>>();
@@ -98,7 +98,7 @@ namespace Statiq.Core
         }
 
         /// <inheritdoc />
-        public async Task<IEnumerable<IDocument>> ExecuteAsync(IExecutionContext context)
+        public override async Task<IEnumerable<IDocument>> ExecuteAsync(IExecutionContext context)
         {
             // Iterate redirects and generate all of the per-redirect documents (I.e., meta refresh pages)
             ConcurrentDictionary<FilePath, string> redirects = new ConcurrentDictionary<FilePath, string>();

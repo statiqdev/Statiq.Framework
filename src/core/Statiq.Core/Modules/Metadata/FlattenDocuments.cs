@@ -10,7 +10,7 @@ namespace Statiq.Core
     /// </summary>
     /// <metadata cref="Keys.Children" usage="Input"/>
     /// <category>Metadata</category>
-    public class FlattenDocuments : IModule
+    public class FlattenDocuments : Module
     {
         private readonly string _childrenKey = Keys.Children;
 
@@ -31,7 +31,7 @@ namespace Statiq.Core
         }
 
         /// <inheritdoc />
-        public Task<IEnumerable<IDocument>> ExecuteAsync(IExecutionContext context)
+        public override Task<IEnumerable<IDocument>> ExecuteAsync(IExecutionContext context)
         {
             HashSet<IDocument> results = new HashSet<IDocument>();
             foreach (IDocument input in context.Inputs)

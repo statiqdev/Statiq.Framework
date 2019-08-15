@@ -21,7 +21,7 @@ namespace Statiq.Core
     /// <metadata cref="Keys.HasNextPage" usage="Output" />
     /// <metadata cref="Keys.HasPreviousPage" usage="Output" />
     /// <category>Control</category>
-    public class PaginateDocuments : IModule
+    public class PaginateDocuments : Module
     {
         private readonly int _pageSize;
         private int _takePages = int.MaxValue;
@@ -74,7 +74,7 @@ namespace Statiq.Core
         }
 
         /// <inheritdoc />
-        public Task<IEnumerable<IDocument>> ExecuteAsync(IExecutionContext context)
+        public override Task<IEnumerable<IDocument>> ExecuteAsync(IExecutionContext context)
         {
             // Partition the pages and get a total before skip/take
             IDocument[][] pages =

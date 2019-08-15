@@ -54,7 +54,7 @@ namespace Statiq.SearchIndex
     /// </example>
     /// <metadata cref="GenerateLunrIndexKeys.LunrIndexItem" usage="Input" />
     /// <category>Content</category>
-    public class GenerateLunrIndex : IModule
+    public class GenerateLunrIndex : Module
     {
         private static readonly Regex StripHtmlAndSpecialChars = new Regex(@"<[^>]+>|&[a-zA-Z]{2,};|&#\d+;|[^a-zA-Z-#]", RegexOptions.Compiled);
         private readonly Config<ILunrIndexItem> _searchIndexItem;
@@ -159,7 +159,7 @@ namespace Statiq.SearchIndex
         }
 
         /// <inheritdoc />
-        public async Task<IEnumerable<IDocument>> ExecuteAsync(IExecutionContext context)
+        public override async Task<IEnumerable<IDocument>> ExecuteAsync(IExecutionContext context)
         {
             ILunrIndexItem[] searchIndexItems =
                 await context.Inputs

@@ -42,7 +42,7 @@ namespace Statiq.Core
     /// </code>
     /// </example>
     /// <category>Metadata</category>
-    public class ValidateMetadata<T> : IModule
+    public class ValidateMetadata<T> : Module
     {
         private readonly string _key;
         private readonly List<Assertion> _assertions;
@@ -87,7 +87,7 @@ namespace Statiq.Core
         }
 
         /// <inheritdoc />
-        public Task<IEnumerable<IDocument>> ExecuteAsync(IExecutionContext context)
+        public override Task<IEnumerable<IDocument>> ExecuteAsync(IExecutionContext context)
         {
             Parallel.ForEach(context.Inputs, input =>
             {

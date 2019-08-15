@@ -13,7 +13,7 @@ namespace Statiq.Core
     /// Joins documents together with an optional delimiter to form one document.
     /// </summary>
     /// <category>Content</category>
-    public class JoinDocuments : IModule
+    public class JoinDocuments : Module
     {
         private readonly string _delimiter;
         private readonly JoinedMetadata _metaDataMode;
@@ -51,7 +51,7 @@ namespace Statiq.Core
         /// Returns a single document containing the concatenated content of all input documents with an optional delimiter and configurable metadata options
         /// </summary>
         /// <returns>A single document in a list</returns>
-        public async Task<IEnumerable<IDocument>> ExecuteAsync(IExecutionContext context)
+        public override async Task<IEnumerable<IDocument>> ExecuteAsync(IExecutionContext context)
         {
             if (context.Inputs.Length < 1)
             {
