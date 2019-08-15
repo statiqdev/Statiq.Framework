@@ -53,7 +53,10 @@ namespace Statiq.Core.Tests.Modules.Control
                 ForEachDocument gatherData = new ExecuteConfig(
                     Config.FromDocument(async d =>
                     {
-                        IEnumerable<string> groupContent = await d.Get<IList<IDocument>>(Keys.GroupDocuments).SelectAsync(async x => await x.GetStringAsync());
+                        List<string> groupContent = await d.Get<IList<IDocument>>(Keys.GroupDocuments)
+                            .ToAsyncEnumerable()
+                            .SelectAwait(async x => await x.GetStringAsync())
+                            .ToListAsync();
                         content.Add(groupContent.ToList());
                         return (object)null;
                     })).ForEachDocument();

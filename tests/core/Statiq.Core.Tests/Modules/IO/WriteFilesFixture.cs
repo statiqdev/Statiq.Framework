@@ -27,7 +27,7 @@ namespace Statiq.Core.Tests.Modules.IO
                     new FilePath(fileName),
                     newContent);
                 TestExecutionContext context = GetExecutionContext(input.Yield());
-                IFile file = await context.FileSystem.GetOutputFile(fileName);
+                IFile file = context.FileSystem.GetOutputFile(fileName);
                 await file.WriteAllTextAsync(oldContent);
                 WriteFiles writeFiles = new WriteFiles();
 
@@ -35,7 +35,7 @@ namespace Statiq.Core.Tests.Modules.IO
                 await ExecuteAsync(context, writeFiles);
 
                 // Then
-                IFile outputFile = await context.FileSystem.GetOutputFile(fileName);
+                IFile outputFile = context.FileSystem.GetOutputFile(fileName);
                 (await outputFile.ReadAllTextAsync()).ShouldBe(newContent);
             }
 
@@ -84,8 +84,8 @@ namespace Statiq.Core.Tests.Modules.IO
                 await ExecuteAsync(context, writeFiles);
 
                 // Then
-                IFile outputFile = await context.FileSystem.GetOutputFile("output.txt");
-                (await outputFile.GetExists()).ShouldBeTrue();
+                IFile outputFile = context.FileSystem.GetOutputFile("output.txt");
+                outputFile.Exists.ShouldBeTrue();
                 (await outputFile.ReadAllTextAsync()).ShouldBe("E");
             }
 
@@ -117,8 +117,8 @@ namespace Statiq.Core.Tests.Modules.IO
                 await ExecuteAsync(context, writeFiles);
 
                 // Then
-                IFile outputFile = await context.FileSystem.GetOutputFile("output.txt");
-                (await outputFile.GetExists()).ShouldBeTrue();
+                IFile outputFile = context.FileSystem.GetOutputFile("output.txt");
+                outputFile.Exists.ShouldBeTrue();
                 (await outputFile.ReadAllTextAsync()).ShouldBe("ABCDE");
             }
 
@@ -147,9 +147,9 @@ namespace Statiq.Core.Tests.Modules.IO
 
                 // Then
                 results.Count.ShouldBe(3);
-                (await (await context.FileSystem.GetOutputFile("Subfolder/write-test")).GetExists()).ShouldBeTrue();
-                (await (await context.FileSystem.GetOutputFile("output/Subfolder/empty-test")).GetExists()).ShouldBeFalse();
-                (await (await context.FileSystem.GetOutputFile("output/Subfolder/stream-test")).GetExists()).ShouldBeFalse();
+                context.FileSystem.GetOutputFile("Subfolder/write-test").Exists.ShouldBeTrue();
+                context.FileSystem.GetOutputFile("output/Subfolder/empty-test").Exists.ShouldBeFalse();
+                context.FileSystem.GetOutputFile("output/Subfolder/stream-test").Exists.ShouldBeFalse();
             }
         }
 

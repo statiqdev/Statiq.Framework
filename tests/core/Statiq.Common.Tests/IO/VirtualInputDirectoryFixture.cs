@@ -40,13 +40,13 @@ namespace Statiq.Common.Tests.IO
         {
             [TestCase(".", SearchOption.AllDirectories, new[] { "c", "c/1", "d", "a", "a/b" })]
             [TestCase(".", SearchOption.TopDirectoryOnly, new[] { "c", "d", "a" })]
-            public async Task RootVirtualDirectoryDoesNotIncludeSelf(string virtualPath, SearchOption searchOption, string[] expectedPaths)
+            public void RootVirtualDirectoryDoesNotIncludeSelf(string virtualPath, SearchOption searchOption, string[] expectedPaths)
             {
                 // Given
                 VirtualInputDirectory directory = GetVirtualInputDirectory(virtualPath);
 
                 // When
-                IEnumerable<IDirectory> directories = await directory.GetDirectories(searchOption);
+                IEnumerable<IDirectory> directories = directory.GetDirectories(searchOption);
 
                 // Then
                 CollectionAssert.AreEquivalent(expectedPaths, directories.Select(x => x.Path.FullPath));
@@ -54,13 +54,13 @@ namespace Statiq.Common.Tests.IO
 
             [TestCase("a", SearchOption.AllDirectories, new[] { "a/b" })]
             [TestCase("a", SearchOption.TopDirectoryOnly, new[] { "a/b" })]
-            public async Task NonRootVirtualDirectoryIncludesSelf(string virtualPath, SearchOption searchOption, string[] expectedPaths)
+            public void NonRootVirtualDirectoryIncludesSelf(string virtualPath, SearchOption searchOption, string[] expectedPaths)
             {
                 // Given
                 VirtualInputDirectory directory = GetVirtualInputDirectory(virtualPath);
 
                 // When
-                IEnumerable<IDirectory> directories = await directory.GetDirectories(searchOption);
+                IEnumerable<IDirectory> directories = directory.GetDirectories(searchOption);
 
                 // Then
                 CollectionAssert.AreEquivalent(expectedPaths, directories.Select(x => x.Path.FullPath));
@@ -73,13 +73,13 @@ namespace Statiq.Common.Tests.IO
             [TestCase(".", SearchOption.TopDirectoryOnly, new[] { "/foo/baz.txt" })]
             [TestCase("c", SearchOption.AllDirectories, new[] { "/a/b/c/foo.txt", "/a/b/c/1/2.txt", "/foo/c/baz.txt" })]
             [TestCase("c", SearchOption.TopDirectoryOnly, new[] { "/a/b/c/foo.txt", "/foo/c/baz.txt" })]
-            public async Task GetsFiles(string virtualPath, SearchOption searchOption, string[] expectedPaths)
+            public void GetsFiles(string virtualPath, SearchOption searchOption, string[] expectedPaths)
             {
                 // Given
                 VirtualInputDirectory directory = GetVirtualInputDirectory(virtualPath);
 
                 // When
-                IEnumerable<IFile> files = await directory.GetFiles(searchOption);
+                IEnumerable<IFile> files = directory.GetFiles(searchOption);
 
                 // Then
                 CollectionAssert.AreEquivalent(expectedPaths, files.Select(x => x.Path.FullPath));
@@ -96,21 +96,21 @@ namespace Statiq.Common.Tests.IO
             [TestCase("c", "baz.txt", "/foo/c/baz.txt", true)]
             [TestCase("c", "bar.txt", "/foo/c/bar.txt", false)]
             [TestCase("x/y/z", "bar.txt", "/foo/x/y/z/bar.txt", false)]
-            public async Task GetsInputFile(string virtualPath, string filePath, string expectedPath, bool expectedExists)
+            public void GetsInputFile(string virtualPath, string filePath, string expectedPath, bool expectedExists)
             {
                 // Given
                 VirtualInputDirectory directory = GetVirtualInputDirectory(virtualPath);
 
                 // When
-                IFile file = await directory.GetFile(filePath);
+                IFile file = directory.GetFile(filePath);
 
                 // Then
                 Assert.AreEqual(expectedPath, file.Path.FullPath);
-                Assert.AreEqual(expectedExists, await file.GetExists());
+                Assert.AreEqual(expectedExists, file.Exists);
             }
 
             [Test]
-            public async Task GetsInputFileAboveInputDirectory()
+            public void GetsInputFileAboveInputDirectory()
             {
                 // Given
                 TestFileSystem fileSystem = new TestFileSystem(GetFileProvider());
@@ -120,31 +120,31 @@ namespace Statiq.Common.Tests.IO
                 VirtualInputDirectory directory = new VirtualInputDirectory(fileSystem, ".");
 
                 // When
-                IFile file = await directory.GetFile("../c/foo.txt");
+                IFile file = directory.GetFile("../c/foo.txt");
 
                 // Then
                 Assert.AreEqual("/a/b/c/foo.txt", file.Path.FullPath);
             }
 
             [Test]
-            public async Task ThrowsForNullPath()
+            public void ThrowsForNullPath()
             {
                 // Given
                 VirtualInputDirectory directory = GetVirtualInputDirectory(".");
 
                 // When, Then
-                await Should.ThrowAsync<ArgumentNullException>(async () => await directory.GetFile(null));
+                Should.Throw<ArgumentNullException>(() => directory.GetFile(null));
             }
 
             [Test]
-            public async Task ThrowsForAbsolutePath()
+            public void ThrowsForAbsolutePath()
             {
                 // Given
                 VirtualInputDirectory directory = GetVirtualInputDirectory(".");
                 FilePath filePath = "/a/test.txt";
 
                 // When, Then
-                await Should.ThrowAsync<ArgumentException>(async () => await directory.GetFile(filePath));
+                Should.Throw<ArgumentException>(() => directory.GetFile(filePath));
             }
         }
 
@@ -156,37 +156,37 @@ namespace Statiq.Common.Tests.IO
             [TestCase(".", "..", "..")]
             [TestCase("a", "..", ".")]
             [TestCase("a/b", "c", "a/b/c")]
-            public async Task ShouldReturnDirectory(string virtualPath, string path, string expected)
+            public void ShouldReturnDirectory(string virtualPath, string path, string expected)
             {
                 // Given
                 VirtualInputDirectory directory = GetVirtualInputDirectory(virtualPath);
 
                 // When
-                IDirectory result = await directory.GetDirectory(path);
+                IDirectory result = directory.GetDirectory(path);
 
                 // Then
                 Assert.AreEqual(expected, result.Path.FullPath);
             }
 
             [Test]
-            public async Task ThrowsForNullPath()
+            public void ThrowsForNullPath()
             {
                 // Given
                 VirtualInputDirectory directory = GetVirtualInputDirectory(".");
 
                 // When, Then
-                await Should.ThrowAsync<ArgumentNullException>(async () => await directory.GetDirectory(null));
+                Should.Throw<ArgumentNullException>(() => directory.GetDirectory(null));
             }
 
             [Test]
-            public async Task ThrowsForAbsolutePath()
+            public void ThrowsForAbsolutePath()
             {
                 // Given
                 VirtualInputDirectory directory = GetVirtualInputDirectory(".");
                 DirectoryPath directoryPath = "/a/b";
 
                 // When, Then
-                await Should.ThrowAsync<ArgumentException>(async () => await directory.GetDirectory(directoryPath));
+                Should.Throw<ArgumentException>(() => directory.GetDirectory(directoryPath));
             }
         }
 
@@ -196,13 +196,13 @@ namespace Statiq.Common.Tests.IO
             [TestCase("a/b/", "a")]
             [TestCase(".", null)]
             [TestCase("a", null)]
-            public async Task ShouldReturnParentDirectory(string virtualPath, string expected)
+            public void ShouldReturnParentDirectory(string virtualPath, string expected)
             {
                 // Given
                 VirtualInputDirectory directory = GetVirtualInputDirectory(virtualPath);
 
                 // When
-                IDirectory result = await directory.GetParent();
+                IDirectory result = directory.Parent;
 
                 // Then
                 Assert.AreEqual(expected, result?.Path.FullPath);
@@ -215,13 +215,13 @@ namespace Statiq.Common.Tests.IO
             [TestCase("c")]
             [TestCase("c/1")]
             [TestCase("a/b")]
-            public async Task ShouldReturnTrueForExistingPaths(string virtualPath)
+            public void ShouldReturnTrueForExistingPaths(string virtualPath)
             {
                 // Given
                 VirtualInputDirectory directory = GetVirtualInputDirectory(virtualPath);
 
                 // When
-                bool exists = await directory.GetExists();
+                bool exists = directory.Exists;
 
                 // Then
                 exists.ShouldBeTrue();
@@ -232,13 +232,13 @@ namespace Statiq.Common.Tests.IO
             [TestCase("baz")]
             [TestCase("a/b/c")]
             [TestCase("q/w/e")]
-            public async Task ShouldReturnFalseForNonExistingPaths(string virtualPath)
+            public void ShouldReturnFalseForNonExistingPaths(string virtualPath)
             {
                 // Given
                 VirtualInputDirectory directory = GetVirtualInputDirectory(virtualPath);
 
                 // When
-                bool exists = await directory.GetExists();
+                bool exists = directory.Exists;
 
                 // Then
                 exists.ShouldBeFalse();
@@ -248,28 +248,28 @@ namespace Statiq.Common.Tests.IO
         public class CreateTests : VirtualInputDirectoryFixture
         {
             [Test]
-            public async Task ShouldThrow()
+            public void ShouldThrow()
             {
                 // Given
                 TestFileSystem fileSystem = new TestFileSystem();
                 VirtualInputDirectory directory = new VirtualInputDirectory(fileSystem, ".");
 
                 // When, Then
-                await Should.ThrowAsync<NotSupportedException>(async () => await directory.CreateAsync());
+                Should.Throw<NotSupportedException>(() => directory.Create());
             }
         }
 
         public class DeleteTests : VirtualInputDirectoryFixture
         {
             [Test]
-            public async Task ShouldThrow()
+            public void ShouldThrow()
             {
                 // Given
                 TestFileSystem fileSystem = new TestFileSystem();
                 VirtualInputDirectory directory = new VirtualInputDirectory(fileSystem, ".");
 
                 // When, Then
-                await Should.ThrowAsync<NotSupportedException>(async () => await directory.Delete(false));
+                Should.Throw<NotSupportedException>(() => directory.Delete(false));
             }
         }
 

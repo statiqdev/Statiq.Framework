@@ -111,13 +111,13 @@ namespace Statiq.Html
                     }
 
                     // Relative
-                    if (!uri.IsAbsoluteUri && _validateRelativeLinks && !(await ValidateRelativeLinkAsync(uri, context).ConfigureAwait(false)))
+                    if (!uri.IsAbsoluteUri && _validateRelativeLinks && !await ValidateRelativeLinkAsync(uri, context))
                     {
                         AddOrUpdateFailure(link.Value, failures);
                     }
 
                     // Absolute
-                    if (uri.IsAbsoluteUri && _validateAbsoluteLinks && !(await ValidateAbsoluteLinkAsync(uri, context).ConfigureAwait(false)))
+                    if (uri.IsAbsoluteUri && _validateAbsoluteLinks && !await ValidateAbsoluteLinkAsync(uri, context))
                     {
                         AddOrUpdateFailure(link.Value, failures);
                     }

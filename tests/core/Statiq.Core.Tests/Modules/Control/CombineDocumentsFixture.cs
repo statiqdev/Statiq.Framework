@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using NUnit.Framework;
 using Shouldly;
@@ -25,7 +26,12 @@ namespace Statiq.Core.Tests.Modules.Control
                 IReadOnlyList<TestDocument> results = await ExecuteAsync(new[] { a, b }, combine);
 
                 // Then
-                CollectionAssert.AreEqual(new[] { "ab" }, await results.SelectAsync(async x => await x.GetStringAsync()));
+                CollectionAssert.AreEqual(
+                    new[] { "ab" },
+                    await results
+                        .ToAsyncEnumerable()
+                        .SelectAwait(async x => await x.GetStringAsync())
+                        .ToListAsync());
             }
 
             [Test]

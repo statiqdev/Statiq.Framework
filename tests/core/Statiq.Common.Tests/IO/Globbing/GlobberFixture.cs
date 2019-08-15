@@ -38,15 +38,15 @@ namespace Statiq.Common.Tests.IO.Globbing
             [TestCase("/a/x", new[] { "../b/**/1/*.txt" }, new[] { "/a/b/c/1/2.txt" })]
             [TestCase("/a/b", new[] { "**/1/*.txt" }, new[] { "/a/b/c/1/2.txt" })]
             [TestCase("/a", new[] { "x/*.{txt,xml,doc}" }, new[] { "/a/x/bar.txt", "/a/x/foo.xml", "/a/x/foo.doc" })]
-            public async Task ShouldReturnMatchedFiles(string directoryPath, string[] patterns, string[] resultPaths)
+            public void ShouldReturnMatchedFiles(string directoryPath, string[] patterns, string[] resultPaths)
             {
                 // Given
                 IFileProvider fileProvider = GetFileProvider();
-                IDirectory directory = await fileProvider.GetDirectory(directoryPath);
+                IDirectory directory = fileProvider.GetDirectory(directoryPath);
 
                 // When
-                IEnumerable<IFile> matches = await Globber.GetFiles(directory, patterns);
-                IEnumerable<IFile> matchesReversedSlash = await Globber.GetFiles(directory, patterns.Select(x => x.Replace("/", "\\")));
+                IEnumerable<IFile> matches = Globber.GetFiles(directory, patterns);
+                IEnumerable<IFile> matchesReversedSlash = Globber.GetFiles(directory, patterns.Select(x => x.Replace("/", "\\")));
 
                 // Then
                 CollectionAssert.AreEquivalent(resultPaths, matches.Select(x => x.Path.FullPath));
@@ -54,7 +54,7 @@ namespace Statiq.Common.Tests.IO.Globbing
             }
 
             [Test]
-            public async Task DoubleWildcardShouldMatchZeroOrMorePathSegments()
+            public void DoubleWildcardShouldMatchZeroOrMorePathSegments()
             {
                 // Given
                 TestFileProvider fileProvider = new TestFileProvider();
@@ -66,10 +66,10 @@ namespace Statiq.Common.Tests.IO.Globbing
                 fileProvider.AddFile("/root/a/x.txt");
                 fileProvider.AddFile("/root/a/b/x.txt");
                 fileProvider.AddFile("/root/d/x.txt");
-                IDirectory directory = await fileProvider.GetDirectory("/");
+                IDirectory directory = fileProvider.GetDirectory("/");
 
                 // When
-                IEnumerable<IFile> matches = await Globber.GetFiles(directory, new[] { "root/{a,}/**/x.txt" });
+                IEnumerable<IFile> matches = Globber.GetFiles(directory, new[] { "root/{a,}/**/x.txt" });
 
                 // Then
                 matches.Select(x => x.Path.FullPath).ShouldBe(
@@ -77,7 +77,7 @@ namespace Statiq.Common.Tests.IO.Globbing
             }
 
             [Test]
-            public async Task WildcardShouldMatchZeroOrMore()
+            public void WildcardShouldMatchZeroOrMore()
             {
                 // Given
                 TestFileProvider fileProvider = new TestFileProvider();
@@ -90,10 +90,10 @@ namespace Statiq.Common.Tests.IO.Globbing
                 fileProvider.AddFile("/root/a/b/x.txt");
                 fileProvider.AddFile("/root/a/b/.txt");
                 fileProvider.AddFile("/root/d/x.txt");
-                IDirectory directory = await fileProvider.GetDirectory("/");
+                IDirectory directory = fileProvider.GetDirectory("/");
 
                 // When
-                IEnumerable<IFile> matches = await Globber.GetFiles(directory, new[] { "root/**/*.txt" });
+                IEnumerable<IFile> matches = Globber.GetFiles(directory, new[] { "root/**/*.txt" });
 
                 // Then
                 matches.Select(x => x.Path.FullPath).ShouldBe(
@@ -102,7 +102,7 @@ namespace Statiq.Common.Tests.IO.Globbing
 
             [TestCase("/a/x", new[] { "../b/c/**/1/2/*.txt" }, new[] { "/a/b/c/d/e/1/2/3.txt" })]
             [TestCase("/a/x", new[] { "../b/c/d/e/1/2/*.txt" }, new[] { "/a/b/c/d/e/1/2/3.txt" })]
-            public async Task RecursiveWildcardTests(string directoryPath, string[] patterns, string[] resultPaths)
+            public void RecursiveWildcardTests(string directoryPath, string[] patterns, string[] resultPaths)
             {
                 // Given
                 TestFileProvider fileProvider = new TestFileProvider();
@@ -114,11 +114,11 @@ namespace Statiq.Common.Tests.IO.Globbing
                 fileProvider.AddDirectory("/a/b/c/d/e/1");
                 fileProvider.AddDirectory("/a/b/c/d/e/1/2");
                 fileProvider.AddFile("/a/b/c/d/e/1/2/3.txt");
-                IDirectory directory = await fileProvider.GetDirectory(directoryPath);
+                IDirectory directory = fileProvider.GetDirectory(directoryPath);
 
                 // When
-                IEnumerable<IFile> matches = await Globber.GetFiles(directory, patterns);
-                IEnumerable<IFile> matchesReversedSlash = await Globber.GetFiles(directory, patterns.Select(x => x.Replace("/", "\\")));
+                IEnumerable<IFile> matches = Globber.GetFiles(directory, patterns);
+                IEnumerable<IFile> matchesReversedSlash = Globber.GetFiles(directory, patterns.Select(x => x.Replace("/", "\\")));
 
                 // Then
                 CollectionAssert.AreEquivalent(resultPaths, matches.Select(x => x.Path.FullPath));
@@ -129,7 +129,7 @@ namespace Statiq.Common.Tests.IO.Globbing
             // due to an incorrect TestDirectory.GetDirectories() implementation
             // (it was returning non-existing "/a/b/foo/y.txt" as a match)
             [Test]
-            public async Task NestedFoldersWilcard()
+            public void NestedFoldersWilcard()
             {
                 // Given
                 TestFileProvider fileProvider = new TestFileProvider();
@@ -140,10 +140,10 @@ namespace Statiq.Common.Tests.IO.Globbing
                 fileProvider.AddDirectory("/a/bar/foo");
                 fileProvider.AddFile("/a/b/c/x.txt");
                 fileProvider.AddFile("/a/bar/foo/y.txt");
-                IDirectory directory = await fileProvider.GetDirectory("/a");
+                IDirectory directory = fileProvider.GetDirectory("/a");
 
                 // When
-                IEnumerable<IFile> matches = await Globber.GetFiles(directory, new[] { "**/*.txt" });
+                IEnumerable<IFile> matches = Globber.GetFiles(directory, new[] { "**/*.txt" });
 
                 // Then
                 CollectionAssert.AreEquivalent(new[] { "/a/b/c/x.txt", "/a/bar/foo/y.txt" }, matches.Select(x => x.Path.FullPath));
@@ -152,14 +152,14 @@ namespace Statiq.Common.Tests.IO.Globbing
             [TestCase("/a/b")]
             [TestCase("/**/a")]
             [WindowsTestCase("C:/a")]
-            public async Task ShouldThrowForRootPatterns(string pattern)
+            public void ShouldThrowForRootPatterns(string pattern)
             {
                 // Given
                 IFileProvider fileProvider = GetFileProvider();
-                IDirectory directory = await fileProvider.GetDirectory("/a");
+                IDirectory directory = fileProvider.GetDirectory("/a");
 
                 // When, Then
-                await Should.ThrowAsync<ArgumentException>(async () => await Globber.GetFiles(directory, new[] { pattern }));
+                Should.Throw<ArgumentException>(() => Globber.GetFiles(directory, new[] { pattern }));
             }
         }
 

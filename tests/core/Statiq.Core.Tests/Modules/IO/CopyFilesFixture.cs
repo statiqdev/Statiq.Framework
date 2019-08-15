@@ -41,12 +41,12 @@ namespace Statiq.Core.Tests.Modules.IO
                 await ExecuteAsync(context, copyFiles);
 
                 // Then
-                Assert.IsTrue(await (await context.FileSystem.GetOutputFile("test-a.txt")).GetExists());
-                Assert.IsTrue(await (await context.FileSystem.GetOutputFile("test-b.txt")).GetExists());
-                Assert.IsTrue(await (await context.FileSystem.GetOutputFile("Subfolder/test-c.txt")).GetExists());
-                Assert.IsTrue(await (await context.FileSystem.GetOutputDirectory("Subfolder")).GetExists());
-                Assert.IsFalse(await (await context.FileSystem.GetOutputFile("markdown-x.md")).GetExists());
-                Assert.IsFalse(await (await context.FileSystem.GetOutputFile("Subfolder/markdown-y.md")).GetExists());
+                Assert.IsTrue(context.FileSystem.GetOutputFile("test-a.txt").Exists);
+                Assert.IsTrue(context.FileSystem.GetOutputFile("test-b.txt").Exists);
+                Assert.IsTrue(context.FileSystem.GetOutputFile("Subfolder/test-c.txt").Exists);
+                Assert.IsTrue(context.FileSystem.GetOutputDirectory("Subfolder").Exists);
+                Assert.IsFalse(context.FileSystem.GetOutputFile("markdown-x.md").Exists);
+                Assert.IsFalse(context.FileSystem.GetOutputFile("Subfolder/markdown-y.md").Exists);
             }
 
             [Test]
@@ -60,12 +60,12 @@ namespace Statiq.Core.Tests.Modules.IO
                 await ExecuteAsync(context, copyFiles);
 
                 // Then
-                Assert.IsTrue(await (await context.FileSystem.GetOutputFile("test-a.txt")).GetExists());
-                Assert.IsTrue(await (await context.FileSystem.GetOutputFile("test-b.txt")).GetExists());
-                Assert.IsFalse(await (await context.FileSystem.GetOutputFile("Subfolder/test-c.txt")).GetExists());
-                Assert.IsFalse(await (await context.FileSystem.GetOutputDirectory("Subfolder")).GetExists());
-                Assert.IsFalse(await (await context.FileSystem.GetOutputFile("markdown-x.md")).GetExists());
-                Assert.IsFalse(await (await context.FileSystem.GetOutputFile("Subfolder/markdown-y.md")).GetExists());
+                Assert.IsTrue(context.FileSystem.GetOutputFile("test-a.txt").Exists);
+                Assert.IsTrue(context.FileSystem.GetOutputFile("test-b.txt").Exists);
+                Assert.IsFalse(context.FileSystem.GetOutputFile("Subfolder/test-c.txt").Exists);
+                Assert.IsFalse(context.FileSystem.GetOutputDirectory("Subfolder").Exists);
+                Assert.IsFalse(context.FileSystem.GetOutputFile("markdown-x.md").Exists);
+                Assert.IsFalse(context.FileSystem.GetOutputFile("Subfolder/markdown-y.md").Exists);
             }
 
             [Test]
@@ -79,12 +79,12 @@ namespace Statiq.Core.Tests.Modules.IO
                 await ExecuteAsync(context, copyFiles);
 
                 // Then
-                Assert.IsFalse(await (await context.FileSystem.GetOutputFile("test-a.txt")).GetExists());
-                Assert.IsFalse(await (await context.FileSystem.GetOutputFile("test-b.txt")).GetExists());
-                Assert.IsTrue(await (await context.FileSystem.GetOutputFile("Subfolder/test-c.txt")).GetExists());
-                Assert.IsTrue(await (await context.FileSystem.GetOutputDirectory("Subfolder")).GetExists());
-                Assert.IsFalse(await (await context.FileSystem.GetOutputFile("markdown-x.md")).GetExists());
-                Assert.IsFalse(await (await context.FileSystem.GetOutputFile("Subfolder/markdown-y.md")).GetExists());
+                Assert.IsFalse(context.FileSystem.GetOutputFile("test-a.txt").Exists);
+                Assert.IsFalse(context.FileSystem.GetOutputFile("test-b.txt").Exists);
+                Assert.IsTrue(context.FileSystem.GetOutputFile("Subfolder/test-c.txt").Exists);
+                Assert.IsTrue(context.FileSystem.GetOutputDirectory("Subfolder").Exists);
+                Assert.IsFalse(context.FileSystem.GetOutputFile("markdown-x.md").Exists);
+                Assert.IsFalse(context.FileSystem.GetOutputFile("Subfolder/markdown-y.md").Exists);
             }
 
             [Test]
@@ -98,13 +98,13 @@ namespace Statiq.Core.Tests.Modules.IO
                 await ExecuteAsync(context, copyFiles);
 
                 // Then
-                Assert.IsFalse(await (await context.FileSystem.GetOutputFile("test-a.txt")).GetExists());
-                Assert.IsFalse(await (await context.FileSystem.GetOutputFile("test-b.txt")).GetExists());
-                Assert.IsFalse(await (await context.FileSystem.GetOutputFile("Subfolder/test-c.txt")).GetExists());
-                Assert.IsFalse(await (await context.FileSystem.GetOutputDirectory("Subfolder")).GetExists());
-                Assert.IsFalse(await (await context.FileSystem.GetOutputFile("markdown-x.md")).GetExists());
-                Assert.IsFalse(await (await context.FileSystem.GetOutputFile("Subfolder/markdown-y.md")).GetExists());
-                Assert.IsTrue(await (await context.FileSystem.GetOutputFile("test-above-input.txt")).GetExists());
+                Assert.IsFalse(context.FileSystem.GetOutputFile("test-a.txt").Exists);
+                Assert.IsFalse(context.FileSystem.GetOutputFile("test-b.txt").Exists);
+                Assert.IsFalse(context.FileSystem.GetOutputFile("Subfolder/test-c.txt").Exists);
+                Assert.IsFalse(context.FileSystem.GetOutputDirectory("Subfolder").Exists);
+                Assert.IsFalse(context.FileSystem.GetOutputFile("markdown-x.md").Exists);
+                Assert.IsFalse(context.FileSystem.GetOutputFile("Subfolder/markdown-y.md").Exists);
+                Assert.IsTrue(context.FileSystem.GetOutputFile("test-above-input.txt").Exists);
             }
 
             [Test]
@@ -118,13 +118,13 @@ namespace Statiq.Core.Tests.Modules.IO
                 await ExecuteAsync(context, copyFiles);
 
                 // Then
-                Assert.IsTrue(await (await context.FileSystem.GetOutputFile("test-a.txt")).GetExists());
-                Assert.IsTrue(await (await context.FileSystem.GetOutputFile("test-b.txt")).GetExists());
-                Assert.IsTrue(await (await context.FileSystem.GetOutputFile("Subfolder/test-c.txt")).GetExists());
-                Assert.IsTrue(await (await context.FileSystem.GetOutputDirectory("Subfolder")).GetExists());
-                Assert.IsFalse(await (await context.FileSystem.GetOutputFile("markdown-x.md")).GetExists());
-                Assert.IsFalse(await (await context.FileSystem.GetOutputFile("Subfolder/markdown-y.md")).GetExists());
-                Assert.IsTrue(await (await context.FileSystem.GetOutputFile("test-above-input.txt")).GetExists());
+                Assert.IsTrue(context.FileSystem.GetOutputFile("test-a.txt").Exists);
+                Assert.IsTrue(context.FileSystem.GetOutputFile("test-b.txt").Exists);
+                Assert.IsTrue(context.FileSystem.GetOutputFile("Subfolder/test-c.txt").Exists);
+                Assert.IsTrue(context.FileSystem.GetOutputDirectory("Subfolder").Exists);
+                Assert.IsFalse(context.FileSystem.GetOutputFile("markdown-x.md").Exists);
+                Assert.IsFalse(context.FileSystem.GetOutputFile("Subfolder/markdown-y.md").Exists);
+                Assert.IsTrue(context.FileSystem.GetOutputFile("test-above-input.txt").Exists);
             }
 
             [Test]
@@ -138,12 +138,12 @@ namespace Statiq.Core.Tests.Modules.IO
                 await ExecuteAsync(context, copyFiles);
 
                 // Then
-                Assert.IsTrue(await (await context.FileSystem.GetOutputFile("test-a.txt")).GetExists());
-                Assert.IsTrue(await (await context.FileSystem.GetOutputFile("test-b.txt")).GetExists());
-                Assert.IsTrue(await (await context.FileSystem.GetOutputFile("Subfolder/test-c.txt")).GetExists());
-                Assert.IsTrue(await (await context.FileSystem.GetOutputDirectory("Subfolder")).GetExists());
-                Assert.IsFalse(await (await context.FileSystem.GetOutputFile("markdown-x.md")).GetExists());
-                Assert.IsFalse(await (await context.FileSystem.GetOutputFile("Subfolder/markdown-y.md")).GetExists());
+                Assert.IsTrue(context.FileSystem.GetOutputFile("test-a.txt").Exists);
+                Assert.IsTrue(context.FileSystem.GetOutputFile("test-b.txt").Exists);
+                Assert.IsTrue(context.FileSystem.GetOutputFile("Subfolder/test-c.txt").Exists);
+                Assert.IsTrue(context.FileSystem.GetOutputDirectory("Subfolder").Exists);
+                Assert.IsFalse(context.FileSystem.GetOutputFile("markdown-x.md").Exists);
+                Assert.IsFalse(context.FileSystem.GetOutputFile("Subfolder/markdown-y.md").Exists);
             }
 
             [Test]
@@ -157,12 +157,12 @@ namespace Statiq.Core.Tests.Modules.IO
                 await ExecuteAsync(context, copyFiles);
 
                 // Then
-                Assert.IsFalse(await (await context.FileSystem.GetOutputFile("test-a.txt")).GetExists());
-                Assert.IsFalse(await (await context.FileSystem.GetOutputFile("test-b.txt")).GetExists());
-                Assert.IsFalse(await (await context.FileSystem.GetOutputFile("Subfolder/test-c.txt")).GetExists());
-                Assert.IsFalse(await (await context.FileSystem.GetOutputDirectory("Subfolder")).GetExists());
-                Assert.IsFalse(await (await context.FileSystem.GetOutputFile("markdown-x.md")).GetExists());
-                Assert.IsFalse(await (await context.FileSystem.GetOutputFile("Subfolder/markdown-y.md")).GetExists());
+                Assert.IsFalse(context.FileSystem.GetOutputFile("test-a.txt").Exists);
+                Assert.IsFalse(context.FileSystem.GetOutputFile("test-b.txt").Exists);
+                Assert.IsFalse(context.FileSystem.GetOutputFile("Subfolder/test-c.txt").Exists);
+                Assert.IsFalse(context.FileSystem.GetOutputDirectory("Subfolder").Exists);
+                Assert.IsFalse(context.FileSystem.GetOutputFile("markdown-x.md").Exists);
+                Assert.IsFalse(context.FileSystem.GetOutputFile("Subfolder/markdown-y.md").Exists);
             }
 
             public async Task ShouldSetSourceAndDestination()

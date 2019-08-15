@@ -159,11 +159,11 @@ namespace Statiq.Core
                         Trace.Error($"Invalid download method for {request.Uri}: {request.Method.Method}");
                         return null;
                     }
-                    using (HttpResponseMessage response = await requestFunc(client, uri, request.Content).ConfigureAwait(false))
+                    using (HttpResponseMessage response = await requestFunc(client, uri, request.Content))
                     {
                         using (HttpContent content = response.Content)
                         {
-                            Stream result = await content.ReadAsStreamAsync().ConfigureAwait(false);
+                            Stream result = await content.ReadAsStreamAsync();
                             MemoryStream mem = new MemoryStream();
                             await result.CopyToAsync(mem);
                             Dictionary<string, string> headers = content.Headers.ToDictionary(

@@ -13,7 +13,7 @@ namespace Statiq.Core.Tests.Modules.Control
         public class ExecuteTests : FilterDocumentsFixture
         {
             [Test]
-            public async Task AppliesNoFilteringWithoutPredicate()
+            public async Task FiltersAllDocumentsWithoutPredicate()
             {
                 // Given
                 TestDocument a = new TestDocument()
@@ -31,7 +31,7 @@ namespace Statiq.Core.Tests.Modules.Control
                 IReadOnlyList<TestDocument> results = await ExecuteAsync(new[] { a, b, c }, filter);
 
                 // Then
-                results.Count.ShouldBe(3);
+                results.Count.ShouldBe(0);
             }
 
             [Test]

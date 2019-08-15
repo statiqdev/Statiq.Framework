@@ -21,10 +21,10 @@ namespace Statiq.Core.Tests.Modules.Contents
             JoinDocuments join = new JoinDocuments();
 
             // When
-            TestDocument result = await ExecuteAsync(new[] { first, second }, join).FromDerived<IEnumerable<TestDocument>, ImmutableArray<TestDocument>>().SingleAsync();
+            ImmutableArray<TestDocument> results = await ExecuteAsync(new[] { first, second }, join);
 
             // Then
-            result.Content.ShouldBe("TestTest2");
+            results.Single().Content.ShouldBe("TestTest2");
         }
 
         [Test]
@@ -37,10 +37,10 @@ namespace Statiq.Core.Tests.Modules.Contents
             JoinDocuments join = new JoinDocuments();
 
             // When
-            TestDocument result = await ExecuteAsync(new[] { first, second, third }, join).ThenAsync(x => x.Single());
+            ImmutableArray<TestDocument> results = await ExecuteAsync(new[] { first, second, third }, join);
 
             // Then
-            result.Content.ShouldBe("TestTest2Test3");
+            results.Single().Content.ShouldBe("TestTest2Test3");
         }
 
         [Test]
@@ -53,10 +53,10 @@ namespace Statiq.Core.Tests.Modules.Contents
             JoinDocuments join = new JoinDocuments();
 
             // When
-            TestDocument result = await ExecuteAsync(new[] { first, second, third }, join).SingleAsync();
+            ImmutableArray<TestDocument> results = await ExecuteAsync(new[] { first, second, third }, join);
 
             // Then
-            result.Content.ShouldBe("Test2Test3");
+            results.Single().Content.ShouldBe("Test2Test3");
         }
 
         [Test]
@@ -69,10 +69,10 @@ namespace Statiq.Core.Tests.Modules.Contents
             JoinDocuments join = new JoinDocuments();
 
             // When
-            TestDocument result = await ExecuteAsync(new[] { first, second, third }, join).SingleAsync();
+            ImmutableArray<TestDocument> results = await ExecuteAsync(new[] { first, second, third }, join);
 
             // Then
-            result.Content.ShouldBe("TestTest3");
+            results.Single().Content.ShouldBe("TestTest3");
         }
 
         [Test]
@@ -82,10 +82,10 @@ namespace Statiq.Core.Tests.Modules.Contents
             JoinDocuments join = new JoinDocuments();
 
             // When
-            TestDocument result = await ExecuteAsync(join).SingleAsync();
+            ImmutableArray<TestDocument> results = await ExecuteAsync(join);
 
             // Then
-            result.Content.ShouldBeEmpty();
+            results.Single().Content.ShouldBeEmpty();
         }
 
         [Test]
@@ -97,10 +97,10 @@ namespace Statiq.Core.Tests.Modules.Contents
             JoinDocuments join = new JoinDocuments(",");
 
             // When
-            TestDocument result = await ExecuteAsync(new[] { first, second }, join).SingleAsync();
+            ImmutableArray<TestDocument> results = await ExecuteAsync(new[] { first, second }, join);
 
             // Then
-            result.Content.ShouldBe("Test,Test2");
+            results.Single().Content.ShouldBe("Test,Test2");
         }
 
         [Test]
@@ -112,10 +112,10 @@ namespace Statiq.Core.Tests.Modules.Contents
             JoinDocuments join = new JoinDocuments("Test");
 
             // When
-            TestDocument result = await ExecuteAsync(new[] { first, second }, join).SingleAsync();
+            ImmutableArray<TestDocument> results = await ExecuteAsync(new[] { first, second }, join);
 
             // Then
-            result.Content.ShouldBe("TestTestTest2");
+            results.Single().Content.ShouldBe("TestTestTest2");
         }
 
         [Test]
@@ -133,9 +133,10 @@ namespace Statiq.Core.Tests.Modules.Contents
             JoinDocuments join = new JoinDocuments(JoinedMetadata.FirstDocument);
 
             // When
-            TestDocument result = await ExecuteAsync(new[] { first, second }, join).SingleAsync();
+            ImmutableArray<TestDocument> results = await ExecuteAsync(new[] { first, second }, join);
 
             // Then
+            TestDocument result = results.Single();
             result.Keys.ShouldContain("one");
             result.Keys.ShouldNotContain("three");
         }
@@ -155,9 +156,10 @@ namespace Statiq.Core.Tests.Modules.Contents
             JoinDocuments join = new JoinDocuments();
 
             // When
-            TestDocument result = await ExecuteAsync(new[] { first, second }, join).SingleAsync();
+            ImmutableArray<TestDocument> results = await ExecuteAsync(new[] { first, second }, join);
 
             // Then
+            TestDocument result = results.Single();
             result.Keys.ShouldNotContain("one");
             result.Keys.ShouldNotContain("three");
         }
@@ -177,9 +179,10 @@ namespace Statiq.Core.Tests.Modules.Contents
             JoinDocuments join = new JoinDocuments(JoinedMetadata.LastDocument);
 
             // When
-            TestDocument result = await ExecuteAsync(new[] { first, second }, join).SingleAsync();
+            ImmutableArray<TestDocument> results = await ExecuteAsync(new[] { first, second }, join);
 
             // Then
+            TestDocument result = results.Single();
             result.Keys.ShouldNotContain("one");
             result.Keys.ShouldContain("three");
         }
@@ -200,9 +203,10 @@ namespace Statiq.Core.Tests.Modules.Contents
             JoinDocuments join = new JoinDocuments(JoinedMetadata.AllWithFirstDuplicates);
 
             // When
-            TestDocument result = await ExecuteAsync(new[] { first, second }, join).SingleAsync();
+            ImmutableArray<TestDocument> results = await ExecuteAsync(new[] { first, second }, join);
 
             // Then
+            TestDocument result = results.Single();
             result.Values.ShouldContain("two");
             result.Values.ShouldNotContain("seven");
             result.Keys.ShouldContain("three");
@@ -224,9 +228,10 @@ namespace Statiq.Core.Tests.Modules.Contents
             JoinDocuments join = new JoinDocuments(JoinedMetadata.AllWithLastDuplicates);
 
             // When
-            TestDocument result = await ExecuteAsync(new[] { first, second }, join).SingleAsync();
+            ImmutableArray<TestDocument> results = await ExecuteAsync(new[] { first, second }, join);
 
             // Then
+            TestDocument result = results.Single();
             result.Values.ShouldNotContain("two");
             result.Values.ShouldContain("seven");
             result.Keys.ShouldContain("three");
@@ -239,10 +244,10 @@ namespace Statiq.Core.Tests.Modules.Contents
             JoinDocuments join = new JoinDocuments();
 
             // When
-            TestDocument result = await ExecuteAsync(join).SingleAsync();
+            ImmutableArray<TestDocument> results = await ExecuteAsync(join);
 
             // Then
-            result.Content.ShouldBeEmpty();
+            results.Single().Content.ShouldBeEmpty();
         }
 
         [Test]
@@ -252,10 +257,10 @@ namespace Statiq.Core.Tests.Modules.Contents
             JoinDocuments join = new JoinDocuments(",");
 
             // When
-            TestDocument result = await ExecuteAsync(join).SingleAsync();
+            ImmutableArray<TestDocument> results = await ExecuteAsync(join);
 
             // Then
-            result.Content.ShouldBeEmpty();
+            results.Single().Content.ShouldBeEmpty();
         }
     }
 }
