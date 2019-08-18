@@ -5,17 +5,6 @@
 // STATIQ_NUGET_API_KEY
 // STATIQ_GITHUB_TOKEN
 
-// Publishing workflow:
-// - Update ReleaseNotes.md and RELEASE in develop branch
-// - Run a normal build with Cake to set SolutionInfo.cs in the repo and run through unit tests (`build.cmd`)
-// - Push to develop and fast-forward merge to master
-// - Switch to master
-// - Wait for CI to complete build and publish to GitHub Package Repository
-// - Run a Publish build with Cake (`build -target Publish`)
-// - No need to add a version tag to the repo - added by GitHub on publish
-// - Switch back to develop branch
-// - Add a blog post about the release
-
 #addin "Cake.FileHelpers"
 #addin "Octokit"
 #tool "nuget:?package=NUnit.ConsoleRunner&version=3.7.0"
@@ -162,7 +151,7 @@ Task("Publish-Prerelease-Packages")
     .WithCriteria(() => !isLocal)
     .WithCriteria(() => !isPullRequest)
     .WithCriteria(() => isRunningOnWindows)
-    .WithCriteria(() => branch == "develop")
+    .WithCriteria(() => branch == "master")
     .Does(() =>
     {
         // Publish to the Wyam MyGet feed for now...
