@@ -8,8 +8,11 @@ namespace Statiq.Common
     /// <summary>
     /// A module that processes documents in parallel (with the option to process sequentially).
     /// </summary>
-    public abstract class ParallelSyncModule : ParallelModule
+    public abstract class ParallelSyncModule : Module, IParallelModule
     {
+        /// <inheritdoc />
+        public bool Parallel { get; set; } = true;
+
         /// <inheritdoc />
         public sealed override Task<IEnumerable<IDocument>> ExecuteAsync(IExecutionContext context) =>
             Task.FromResult(Execute(context));
@@ -19,18 +22,7 @@ namespace Statiq.Common
         protected sealed override Task<IEnumerable<IDocument>> ExecuteAsync(IDocument input, IExecutionContext context) =>
             base.ExecuteAsync(input, context);
 
-        /// <summary>
-        /// Executes the module once for all input documents.
-        /// </summary>
-        /// <remarks>
-        /// Override this method to execute the module once for all input documents. The default behavior
-        /// calls <see cref="Execute(IDocument, IExecutionContext)"/> for each input document
-        /// and overriding this method will result in <see cref="Execute(IDocument, IExecutionContext)"/>
-        /// not being called.
-        /// </remarks>
-        /// <param name="context">The execution context.</param>
-        /// <returns>The result documents.</returns>
-        protected virtual IEnumerable<IDocument> Execute(IExecutionContext context)
+        private IEnumerable<IDocument> Execute(IExecutionContext context)
         {
             if (Parallel)
             {

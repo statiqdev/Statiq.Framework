@@ -5,40 +5,26 @@ using Statiq.Common;
 namespace Statiq.Core
 {
     /// <summary>
-    /// Flattens a tree structure given child documents are stored in a given metadata key ("Children" by default).
-    /// The flattened documents are returned in no particular order.
+    /// Flattens a tree structure given child documents are stored in the
+    /// default <see cref="Keys.Children"/> metadata key.
     /// </summary>
+    /// <remarks>
+    /// The documents will be returned in no particular order and only distinct
+    /// documents will be returned (I.e., if a document exists as a
+    /// child of more than one parent, it will only appear once in the result set).
+    /// </remarks>
     /// <metadata cref="Keys.Children" usage="Input"/>
     /// <category>Metadata</category>
-    public class FlattenDocuments : Module
+    public class FlattenDocuments : SyncModule
     {
-        private readonly string _childrenKey = Keys.Children;
-
-        /// <summary>
-        /// Creates a new flatten module.
-        /// </summary>
-        public FlattenDocuments()
-        {
-        }
-
-        /// <summary>
-        /// Creates a new flatten module with the specified children key.
-        /// </summary>
-        /// <param name="childrenKey">The metadata key that contains the children.</param>
-        public FlattenDocuments(string childrenKey)
-        {
-            _childrenKey = childrenKey;
-        }
-
-        /// <inheritdoc />
-        public override Task<IEnumerable<IDocument>> ExecuteAsync(IExecutionContext context)
+        protected override IEnumerable<IDocument> Execute(IExecutionContext context)
         {
             HashSet<IDocument> results = new HashSet<IDocument>();
             foreach (IDocument input in context.Inputs)
             {
-                input.Flatten(results, _childrenKey);
+                results.AddRange(input.GetDescendantsAndSelf());
             }
-            return Task.FromResult<IEnumerable<IDocument>>(results);
+            return results;
         }
     }
 }

@@ -9,10 +9,13 @@ namespace Statiq.Common
     /// Base class for modules that rely on a config value and could apply to input documents in parallel
     /// (or not) depending on whether the config delegate requires them.
     /// </summary>
-    public abstract class ParallelConfigModule<TValue> : ParallelModule
+    public abstract class ParallelConfigModule<TValue> : Module, IParallelModule
     {
         private readonly Config<TValue> _config;
         private readonly bool _eachDocument;
+
+        /// <inheritdoc />
+        public bool Parallel { get; set; } = true;
 
         /// <summary>
         /// Creates a new config module.

@@ -369,7 +369,7 @@ namespace Statiq.Core
                         Trace.Verbose("Executing module {0} with {1} input document(s)", moduleName, inputs.Length);
                         ExecutionContext moduleContext = new ExecutionContext(contextData, parent, module, inputs);
                         IEnumerable<IDocument> moduleResult = await (module.ExecuteAsync(moduleContext) ?? Task.FromResult<IEnumerable<IDocument>>(null));  // Handle a null Task return
-                        outputs = moduleResult?.Where(x => x != null).ToImmutableArray() ?? ImmutableArray<IDocument>.Empty;
+                        outputs = moduleResult.ToImmutableDocumentArray();
 
                         // Trace results
                         stopwatch.Stop();
