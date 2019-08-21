@@ -12,7 +12,7 @@ namespace Statiq.Common
     /// All of the information that represents a given build. Also implements
     /// <see cref="IMetadata"/> to expose the global metadata.
     /// </summary>
-    public interface IExecutionContext : IMetadata, IDocumentFactoryProvider
+    public interface IExecutionContext : IMetadata, IDocumentFactory
     {
         /// <summary>
         /// Uniquely identifies the current execution cycle. This can be used to initialize and/or

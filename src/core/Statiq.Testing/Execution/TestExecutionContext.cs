@@ -18,17 +18,20 @@ namespace Statiq.Testing
     /// </summary>
     public class TestExecutionContext : IExecutionContext
     {
+        private readonly TestSettings _settings = new TestSettings();
+        private readonly DocumentFactory _documentFactory;
+
         public TestExecutionContext()
         {
-            DocumentFactory = new DocumentFactory(_settings);
-            DocumentFactory.SetDefaultDocumentType<TestDocument>();
+            _documentFactory = new DocumentFactory(_settings);
+            _documentFactory.SetDefaultDocumentType<TestDocument>();
             Inputs = ImmutableArray<IDocument>.Empty;
         }
 
         public TestExecutionContext(IEnumerable<IDocument> inputs)
         {
-            DocumentFactory = new DocumentFactory(_settings);
-            DocumentFactory.SetDefaultDocumentType<TestDocument>();
+            _documentFactory = new DocumentFactory(_settings);
+            _documentFactory.SetDefaultDocumentType<TestDocument>();
             SetInputs(inputs);
         }
 
@@ -36,8 +39,6 @@ namespace Statiq.Testing
             : this((IEnumerable<IDocument>)inputs)
         {
         }
-
-        private readonly TestSettings _settings = new TestSettings();
 
         /// <inheritdoc/>
         public Guid ExecutionId { get; set; } = Guid.NewGuid();
@@ -128,18 +129,6 @@ namespace Statiq.Testing
         }
 
         /// <inheritdoc/>
-        public IDocument GetDocument(
-            FilePath source,
-            FilePath destination,
-            IEnumerable<KeyValuePair<string, object>> items,
-            IContentProvider contentProvider = null) =>
-            new TestDocument(
-                source,
-                destination,
-                items,
-                contentProvider);
-
-        /// <inheritdoc/>
         public HttpClient CreateHttpClient() =>
             new HttpClient(new TestHttpMessageHandler(HttpResponseFunc, null));
 
@@ -222,7 +211,29 @@ namespace Statiq.Testing
             }
         }
 
-        public DocumentFactory DocumentFactory { get; }
+        /// <inheritdoc />
+        public void SetDefaultDocumentType<TDocument>()
+            where TDocument : FactoryDocument, IDocument, new() =>
+            _documentFactory.SetDefaultDocumentType<TDocument>();
+
+        // IDocumentFactory
+
+        /// <inheritdoc />
+        public IDocument CreateDocument(
+            FilePath source,
+            FilePath destination,
+            IEnumerable<KeyValuePair<string, object>> items,
+            IContentProvider contentProvider = null) =>
+            _documentFactory.CreateDocument(source, destination, items, contentProvider);
+
+        /// <inheritdoc />
+        public TDocument CreateDocument<TDocument>(
+            FilePath source,
+            FilePath destination,
+            IEnumerable<KeyValuePair<string, object>> items,
+            IContentProvider contentProvider = null)
+            where TDocument : FactoryDocument, IDocument, new() =>
+            _documentFactory.CreateDocument<TDocument>(source, destination, items, contentProvider);
 
         // IMetadata
 

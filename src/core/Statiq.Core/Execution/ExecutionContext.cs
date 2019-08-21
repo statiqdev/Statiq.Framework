@@ -55,9 +55,6 @@ namespace Statiq.Core
         public string ApplicationInput => _contextData.Engine.ApplicationInput;
 
         /// <inheritdoc/>
-        public DocumentFactory DocumentFactory => _contextData.Engine.DocumentFactory;
-
-        /// <inheritdoc/>
         public IMemoryStreamFactory MemoryStreamFactory => _contextData.Engine.MemoryStreamFactory;
 
         /// <inheritdoc/>
@@ -130,6 +127,25 @@ namespace Statiq.Core
                 maxEngines,
                 maxUsagesPerEngine,
                 engineTimeout ?? TimeSpan.FromSeconds(5));
+
+        // IDocumentFactory
+
+        /// <inheritdoc />
+        public IDocument CreateDocument(
+            FilePath source,
+            FilePath destination,
+            IEnumerable<KeyValuePair<string, object>> items,
+            IContentProvider contentProvider = null) =>
+            Engine.DocumentFactory.CreateDocument(source, destination, items, contentProvider);
+
+        /// <inheritdoc />
+        public TDocument CreateDocument<TDocument>(
+            FilePath source,
+            FilePath destination,
+            IEnumerable<KeyValuePair<string, object>> items,
+            IContentProvider contentProvider = null)
+            where TDocument : FactoryDocument, IDocument, new() =>
+            Engine.DocumentFactory.CreateDocument<TDocument>(source, destination, items, contentProvider);
 
         // IMetadata
 

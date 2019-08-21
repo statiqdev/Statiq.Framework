@@ -10,7 +10,7 @@ namespace Statiq.Core
     // Initially based on code from Cake (http://cakebuild.net/)
     internal class LocalDirectory : IDirectory
     {
-        private readonly DirectoryInfo _directory;
+        private readonly System.IO.DirectoryInfo _directory;
 
         public DirectoryPath Path { get; }
 
@@ -28,7 +28,7 @@ namespace Statiq.Core
             }
 
             Path = path;
-            _directory = new DirectoryInfo(Path.FullPath);
+            _directory = new System.IO.DirectoryInfo(Path.FullPath);
         }
 
         public bool Exists => _directory.Exists;
@@ -37,7 +37,7 @@ namespace Statiq.Core
         {
             get
             {
-                DirectoryInfo parent = _directory.Parent;
+                System.IO.DirectoryInfo parent = _directory.Parent;
                 return parent == null ? null : new LocalDirectory(new DirectoryPath(parent.FullName));
             }
         }

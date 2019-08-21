@@ -78,8 +78,29 @@ namespace Statiq.Core
         /// <inheritdoc />
         public string ApplicationInput { get; set; }
 
+        internal DocumentFactory DocumentFactory { get; }
+
         /// <inheritdoc />
-        public DocumentFactory DocumentFactory { get; }
+        public void SetDefaultDocumentType<TDocument>()
+            where TDocument : FactoryDocument, IDocument, new() =>
+            DocumentFactory.SetDefaultDocumentType<TDocument>();
+
+        /// <inheritdoc />
+        public IDocument CreateDocument(
+            FilePath source,
+            FilePath destination,
+            IEnumerable<KeyValuePair<string, object>> items,
+            IContentProvider contentProvider = null) =>
+            DocumentFactory.CreateDocument(source, destination, items, contentProvider);
+
+        /// <inheritdoc />
+        public TDocument CreateDocument<TDocument>(
+            FilePath source,
+            FilePath destination,
+            IEnumerable<KeyValuePair<string, object>> items,
+            IContentProvider contentProvider = null)
+            where TDocument : FactoryDocument, IDocument, new() =>
+            DocumentFactory.CreateDocument<TDocument>(source, destination, items, contentProvider);
 
         /// <summary>
         /// Deletes the output path and all files it contains.

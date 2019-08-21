@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using Statiq.Common;
 
 namespace Statiq.Testing
@@ -7,8 +8,8 @@ namespace Statiq.Testing
     {
         public TestEngine()
         {
-            DocumentFactory = new DocumentFactory(_settings);
-            DocumentFactory.SetDefaultDocumentType<TestDocument>();
+            _documentFactory = new DocumentFactory(_settings);
+            _documentFactory.SetDefaultDocumentType<TestDocument>();
         }
 
         private readonly TestSettings _settings = new TestSettings();
@@ -29,6 +30,28 @@ namespace Statiq.Testing
 
         public IRawAssemblyCollection DynamicAssemblies => throw new NotImplementedException();
 
-        public DocumentFactory DocumentFactory { get; }
+        private readonly DocumentFactory _documentFactory;
+
+        /// <inheritdoc />
+        public void SetDefaultDocumentType<TDocument>()
+            where TDocument : FactoryDocument, IDocument, new() =>
+            _documentFactory.SetDefaultDocumentType<TDocument>();
+
+        /// <inheritdoc />
+        public IDocument CreateDocument(
+            FilePath source,
+            FilePath destination,
+            IEnumerable<KeyValuePair<string, object>> items,
+            IContentProvider contentProvider = null) =>
+            _documentFactory.CreateDocument(source, destination, items, contentProvider);
+
+        /// <inheritdoc />
+        public TDocument CreateDocument<TDocument>(
+            FilePath source,
+            FilePath destination,
+            IEnumerable<KeyValuePair<string, object>> items,
+            IContentProvider contentProvider = null)
+            where TDocument : FactoryDocument, IDocument, new() =>
+            _documentFactory.CreateDocument<TDocument>(source, destination, items, contentProvider);
     }
 }

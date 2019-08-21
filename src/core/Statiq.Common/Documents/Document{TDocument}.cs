@@ -4,13 +4,15 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-using Statiq.Common;
 
 namespace Statiq.Common
 {
     /// <summary>
     /// A base class for custom document types.
     /// </summary>
+    /// <remarks>
+    /// Create a derived class to use a custom document type.
+    /// </remarks>
     /// <remarks>
     /// Document implementations will consolidate metadata
     /// from explicit metadata, implementation properties,
@@ -112,6 +114,10 @@ namespace Statiq.Common
             Initialize(baseMetadata, source, destination, metadata, contentProvider);
         }
 
+        // Initialization has to be performed separately from construction to maintain the illusion of immutability
+        // since clone operations perform a member-wise clone by default (and possibly even not this since it can be
+        // overridden) which results in a new document instance before we have the chance to set properties like
+        // metadata, source, and destination in the constructor
         internal override IDocument Initialize(
             IMetadata baseMetadata,
             FilePath source,

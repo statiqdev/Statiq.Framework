@@ -1,14 +1,16 @@
 ﻿using System;
+using System.Collections;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Collections.Immutable;
+using System.Linq;
+using Statiq.Common;
 
 namespace Statiq.Common
 {
-    public class DocumentFactory : IDocumentFactoryProvider
+    internal class DocumentFactory : IDocumentFactory
     {
         private readonly IReadOnlySettings _settings;
-
-        // This lets the IDocumentFactoryProvider extensions work directly on the document factory
-        DocumentFactory IDocumentFactoryProvider.DocumentFactory => this;
 
         private IFactory _defaultFactory = Factory<Document>.Instance;
 
@@ -46,11 +48,11 @@ namespace Statiq.Common
                 new TDocument().Initialize(baseMetadata, source, destination, new Metadata(items), contentProvider);
         }
 
-        internal void InternalSetDefaultDocumentType<TDocument>()
+        internal void SetDefaultDocumentType<TDocument>()
             where TDocument : FactoryDocument, IDocument, new() =>
             _defaultFactory = Factory<TDocument>.Instance;
 
-        internal IDocument InternalCreateDocument(
+        public IDocument CreateDocument(
             FilePath source,
             FilePath destination,
             IEnumerable<KeyValuePair<string, object>> items,
@@ -62,7 +64,7 @@ namespace Statiq.Common
                 items,
                 contentProvider);
 
-        internal TDocument InternalCreateDocument<TDocument>(
+        public TDocument CreateDocument<TDocument>(
             FilePath source,
             FilePath destination,
             IEnumerable<KeyValuePair<string, object>> items,

@@ -8,7 +8,7 @@ namespace Statiq.Core
     // Initially based on code from Cake (http://cakebuild.net/)
     internal class LocalFile : IFile
     {
-        private readonly FileInfo _file;
+        private readonly System.IO.FileInfo _file;
 
         public FilePath Path { get; }
 
@@ -23,7 +23,7 @@ namespace Statiq.Core
             }
 
             Path = path;
-            _file = new FileInfo(Path.FullPath);
+            _file = new System.IO.FileInfo(Path.FullPath);
         }
 
         public IDirectory Directory => new LocalDirectory(Path.Directory);

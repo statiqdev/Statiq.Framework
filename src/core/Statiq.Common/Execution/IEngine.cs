@@ -3,7 +3,7 @@
     /// <summary>
     /// The engine is the primary entry point for the generation process.
     /// </summary>
-    public interface IEngine : IConfigurable, IDocumentFactoryProvider
+    public interface IEngine : IConfigurable, IDocumentFactory
     {
         /// <summary>
         /// Gets the file system.
@@ -45,5 +45,17 @@
         /// Gets or sets the application input.
         /// </summary>
         string ApplicationInput { get; set; }
+
+        /// <summary>
+        /// Sets the default document type produced by this engine (and resulting <see cref="IExecutionContext"/> contexts).
+        /// </summary>
+        /// <remarks>
+        /// To use a custom document type, derive the document type from <see cref="Document{TDocument}"/> and then call
+        /// this method on the engine before execution to set the custom document type for calls to <c>CreateDocument</c>
+        /// and <c>CloneOrCreateDocument</c>.
+        /// </remarks>
+        /// <typeparam name="TDocument">The default document type.</typeparam>
+        void SetDefaultDocumentType<TDocument>()
+            where TDocument : FactoryDocument, IDocument, new();
     }
 }

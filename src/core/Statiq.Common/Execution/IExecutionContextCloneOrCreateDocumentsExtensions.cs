@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Statiq.Common
 {
-    public static class IExecutionContextGetDocumentsExtensions
+    public static class IExecutionContextCloneOrCreateDocumentsExtensions
     {
         /// <summary>
         /// Clones or creates documents from several types of values.
