@@ -1,13 +1,20 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Statiq.Common;
 
 namespace Statiq.Core
 {
     /// <summary>
-    /// Flattens a tree structure given child documents are stored in the
-    /// default <see cref="Keys.Children"/> metadata key.
+    /// Flattens a tree structure.
     /// </summary>
+    /// <remarks>
+    /// This module will either get all descendants of all input documents from
+    /// a given metadata key (<see cref="Keys.Children"/> by default) or all
+    /// descendants from all metadata if a <c>null</c> key is specified. The
+    /// output also includes the initial input documents in both cases.
+    /// </remarks>
     /// <remarks>
     /// The documents will be returned in no particular order and only distinct
     /// documents will be returned (I.e., if a document exists as a
@@ -17,12 +24,50 @@ namespace Statiq.Core
     /// <category>Metadata</category>
     public class FlattenDocuments : SyncModule
     {
+        private readonly string _childrenKey = Keys.Children;
+
+        /// <summary>
+        /// Creates a new flatten module.
+        /// </summary>
+        public FlattenDocuments()
+        {
+        }
+
+        /// <summary>
+        /// Creates a new flatten module with the specified key for child documents.
+        /// Specify <c>null</c> to flatten all descendant documents regardless of key.
+        /// </summary>
+        /// <param name="childrenKey">
+        /// The metadata key that contains the children or <c>null</c> to flatten all documents.
+        /// </param>
+        public FlattenDocuments(string childrenKey)
+        {
+            _childrenKey = childrenKey;
+        }
+
         protected override IEnumerable<IDocument> Execute(IExecutionContext context)
         {
+            // Use a stack so we don't overflow the call stack with recursive calls for deep trees
+            Stack<IDocument> stack = new Stack<IDocument>(context.Inputs);
             HashSet<IDocument> results = new HashSet<IDocument>();
-            foreach (IDocument input in context.Inputs)
+            while (stack.Count > 0)
             {
-                results.AddRange(input.GetDescendantsAndSelf());
+                IDocument current = stack.Pop();
+
+                // Only process if we haven't already processed this document
+                if (results.Add(current))
+                {
+                    IEnumerable<IDocument> children = _childrenKey == null
+                        ? current.SelectMany(x => current.DocumentList(x.Key) ?? Array.Empty<IDocument>())
+                        : current.DocumentList(_childrenKey);
+                    if (children != null)
+                    {
+                        foreach (IDocument child in children.Where(x => x != null))
+                        {
+                            stack.Push(child);
+                        }
+                    }
+                }
             }
             return results;
         }
