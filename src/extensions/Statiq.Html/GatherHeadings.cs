@@ -27,9 +27,6 @@ namespace Statiq.Html
     /// <metadata cref="Keys.Children" usage="Output">
     /// The child heading documents of the current heading document.
     /// </metadata>
-    /// <metadata cref="Keys.Parent" usage="Output">
-    /// The parent heading document of the current heading document.
-    /// </metadata>
     /// <category>Metadata</category>
     public class GatherHeadings : ParallelModule
     {
@@ -42,7 +39,6 @@ namespace Statiq.Html
         private string _levelKey = HtmlKeys.Level;
         private string _idKey = HtmlKeys.HeadingId;
         private string _childrenKey = Keys.Children;
-        private string _parentKey = Keys.Parent;
         private string _headingKey;
 
         public GatherHeadings()
@@ -123,18 +119,6 @@ namespace Statiq.Html
         public GatherHeadings WithChildrenKey(string childrenKey)
         {
             _childrenKey = childrenKey;
-            return this;
-        }
-
-        /// <summary>
-        /// Sets the key to use in the heading documents to store the parent
-        /// of a given heading.
-        /// </summary>
-        /// <param name="parentKey">The key to use for the parent.</param>
-        /// <returns>The current module instance.</returns>
-        public GatherHeadings WithParentKey(string parentKey)
-        {
-            _parentKey = parentKey;
             return this;
         }
 
@@ -242,10 +226,6 @@ namespace Statiq.Html
                     if (_childrenKey != null)
                     {
                         metadata.Add(_childrenKey, heading.Children.AsReadOnly());
-                    }
-                    if (_parentKey != null)
-                    {
-                        metadata.Add(_parentKey, new CachedDelegateMetadataValue(_ => parent?.Document));
                     }
 
                     using (Stream contentStream = await context.GetContentStreamAsync())

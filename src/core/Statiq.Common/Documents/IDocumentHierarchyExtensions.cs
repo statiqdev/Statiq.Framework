@@ -10,22 +10,24 @@ namespace Statiq.Common
 {
     public static class IDocumentHierarchyExtensions
     {
-        public static ImmutableArray<IDocument> GetChildren(this IDocument document)
+        public static ImmutableArray<IDocument> GetChildren(this IDocument document, string key = Keys.Children)
         {
             _ = document ?? throw new ArgumentNullException(nameof(document));
+            _ = key ?? throw new ArgumentNullException(nameof(key));
 
-            return document.DocumentList(Keys.Children).ToImmutableDocumentArray();
+            return document.DocumentList(key).ToImmutableDocumentArray();
         }
 
-        public static ImmutableArray<IDocument> GetDescendants(this IDocument document) =>
-            GetDescendants(document, false);
+        public static ImmutableArray<IDocument> GetDescendants(this IDocument document, string key = Keys.Children) =>
+            GetDescendants(document, false, key);
 
-        public static ImmutableArray<IDocument> GetDescendantsAndSelf(this IDocument document) =>
-            GetDescendants(document, true);
+        public static ImmutableArray<IDocument> GetDescendantsAndSelf(this IDocument document, string key = Keys.Children) =>
+            GetDescendants(document, true, key);
 
-        private static ImmutableArray<IDocument> GetDescendants(IDocument document, in bool self)
+        private static ImmutableArray<IDocument> GetDescendants(IDocument document, in bool self, string key = Keys.Children)
         {
             _ = document ?? throw new ArgumentNullException(nameof(document));
+            _ = key ?? throw new ArgumentNullException(nameof(key));
 
             ImmutableArray<IDocument>.Builder builder = ImmutableArray.CreateBuilder<IDocument>();
 
@@ -40,7 +42,7 @@ namespace Statiq.Common
             // Depth-first iterate children
             while (stack.Count > 0)
             {
-                foreach (IDocument child in stack.Pop().GetChildren())
+                foreach (IDocument child in stack.Pop().GetChildren(key))
                 {
                     stack.Push(child);
                     builder.Add(child);

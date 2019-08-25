@@ -14,14 +14,9 @@ namespace Statiq.Core
     /// Note that if there are no documents to paginate, this module will still
     /// output an empty page without any documents inside the page.
     /// </remarks>
-    /// <metadata cref="Keys.PageDocuments" usage="Output" />
-    /// <metadata cref="Keys.CurrentPage" usage="Output" />
-    /// <metadata cref="Keys.TotalPages" usage="Output" />
-    /// <metadata cref="Keys.TotalItems" usage="Output" />
-    /// <metadata cref="Keys.HasNextPage" usage="Output" />
-    /// <metadata cref="Keys.HasPreviousPage" usage="Output" />
+    /// <metadata cref="Keys.Children" usage="Output" />
     /// <category>Control</category>
-    public class PaginateDocuments : Module
+    public class PaginateDocuments : SyncModule
     {
         private readonly int _pageSize;
         private int _takePages = int.MaxValue;
@@ -74,7 +69,7 @@ namespace Statiq.Core
         }
 
         /// <inheritdoc />
-        public override Task<IEnumerable<IDocument>> ExecuteAsync(IExecutionContext context)
+        protected override IEnumerable<IDocument> Execute(IExecutionContext context)
         {
             // Partition the pages and get a total before skip/take
             IDocument[][] pages =
@@ -95,16 +90,7 @@ namespace Statiq.Core
             }
 
             // Create the documents per page
-            return Task.FromResult(pages.Select((pageDocuments, i) => context.CreateDocument(
-                new MetadataItems
-                {
-                    { Keys.PageDocuments, pageDocuments },
-                    { Keys.CurrentPage, i + 1 },
-                    { Keys.TotalPages, pages.Length },
-                    { Keys.TotalItems, totalItems },
-                    { Keys.HasNextPage, pages.Length > i + 1 },
-                    { Keys.HasPreviousPage, i != 0 }
-                })));
+            return pages.Select(children => context.CreateDocument(new MetadataItems { { Keys.Children, children } }));
         }
 
         // Interesting discussion of partitioning at

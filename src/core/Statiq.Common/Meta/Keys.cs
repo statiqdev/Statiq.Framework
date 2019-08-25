@@ -9,6 +9,8 @@ namespace Statiq.Common
     /// </summary>
     public static class Keys
     {
+        // Settings
+
         /// <summary>
         /// The host to use when generating links.
         /// </summary>
@@ -80,6 +82,14 @@ namespace Statiq.Common
         /// <type><see cref="string"/> or <see cref="CultureInfo"/></type>
         public const string DateTimeDisplayCulture = nameof(DateTimeDisplayCulture);
 
+        // Document
+
+        /// <summary>
+        /// All the children of this node.
+        /// </summary>
+        /// <type><see cref="IReadOnlyCollection{IDocument}"/></type>
+        public const string Children = nameof(Children);
+
         // Destination
 
         /// <summary>
@@ -103,51 +113,7 @@ namespace Statiq.Common
         /// <type><see cref="FilePath"/></type>
         public const string DestinationPath = nameof(DestinationPath);
 
-        // Paginate
-
-        /// <summary>
-        /// Contains all the documents for the current page.
-        /// </summary>
-        /// <type><c>IEnumerable&lt;IDocument&gt;</c></type>
-        public const string PageDocuments = nameof(PageDocuments);
-
-        /// <summary>
-        /// The index of the current page (1 based).
-        /// </summary>
-        /// <type><see cref="int"/></type>
-        public const string CurrentPage = nameof(CurrentPage);
-
-        /// <summary>
-        /// The total number of pages.
-        /// </summary>
-        /// <type><see cref="int"/></type>
-        public const string TotalPages = nameof(TotalPages);
-
-        /// <summary>
-        /// The total number of items across all pages.
-        /// </summary>
-        /// <type><see cref="int"/></type>
-        public const string TotalItems = nameof(TotalItems);
-
-        /// <summary>
-        /// Whether there is another page after this one.
-        /// </summary>
-        /// <type><see cref="bool"/></type>
-        public const string HasNextPage = nameof(HasNextPage);
-
-        /// <summary>
-        /// Whether there is another page before this one.
-        /// </summary>
-        /// <type><see cref="bool"/></type>
-        public const string HasPreviousPage = nameof(HasPreviousPage);
-
         // GroupBy
-
-        /// <summary>
-        /// Contains all the documents for the current group.
-        /// </summary>
-        /// <type><c>IEnumerable&lt;IDocument&gt;</c></type>
-        public const string GroupDocuments = nameof(GroupDocuments);
 
         /// <summary>
         /// The key for the current group.
@@ -186,46 +152,6 @@ namespace Statiq.Common
         public const string SourceHeaders = nameof(SourceHeaders);
 
         // Tree
-
-        /// <summary>
-        /// The parent of this node or <c>null</c> if it is a root.
-        /// </summary>
-        /// <type><see cref="IDocument"/></type>
-        public const string Parent = nameof(Parent);
-
-        /// <summary>
-        /// All the children of this node.
-        /// </summary>
-        /// <type><see cref="IReadOnlyCollection{IDocument}"/></type>
-        public const string Children = nameof(Children);
-
-        /// <summary>
-        /// The previous sibling, that is the previous node in the children
-        /// collection of the parent or <c>null</c> if this is the first node in the collection or the parent is null.
-        /// </summary>
-        /// <type><see cref="IDocument"/></type>
-        public const string PreviousSibling = nameof(PreviousSibling);
-
-        /// <summary>
-        /// The next sibling, that is the next node in the children collection
-        /// of the parent or <c>null</c> if this is the last node in the collection or the parent is null.
-        /// </summary>
-        /// <type><see cref="IDocument"/></type>
-        public const string NextSibling = nameof(NextSibling);
-
-        /// <summary>
-        /// The next node in the tree using a depth-first
-        /// search or <c>null</c> if this was the last node.
-        /// </summary>
-        /// <type><see cref="IDocument"/></type>
-        public const string Next = nameof(Next);
-
-        /// <summary>
-        /// The previous node in the tree using a depth-first
-        /// search or <c>null</c> if this was the first node.
-        /// </summary>
-        /// <type><see cref="IDocument"/></type>
-        public const string Previous = nameof(Previous);
 
         /// <summary>
         /// The path that represents this node in the tree.

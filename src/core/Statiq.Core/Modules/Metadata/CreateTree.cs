@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
@@ -25,12 +26,7 @@ namespace Statiq.Core
     /// by rerunning this module on all the newly created documents again.
     /// </para>
     /// </remarks>
-    /// <metadata cref="Keys.Parent" usage="Output"/>
     /// <metadata cref="Keys.Children" usage="Output"/>
-    /// <metadata cref="Keys.PreviousSibling" usage="Output"/>
-    /// <metadata cref="Keys.NextSibling" usage="Output"/>
-    /// <metadata cref="Keys.Next" usage="Output"/>
-    /// <metadata cref="Keys.Previous" usage="Output"/>
     /// <metadata cref="Keys.TreePath" usage="Output"/>
     /// <category>Metadata</category>
     public class CreateTree : Module
@@ -44,12 +40,7 @@ namespace Statiq.Core
         private bool _collapseRoot = false;
         private bool _nesting = false;
 
-        private string _parentKey = Keys.Parent;
         private string _childrenKey = Keys.Children;
-        private string _previousSiblingKey = Keys.PreviousSibling;
-        private string _nextSiblingKey = Keys.NextSibling;
-        private string _previousKey = Keys.Previous;
-        private string _nextKey = Keys.Next;
         private string _treePathKey = Keys.TreePath;
 
         /// <summary>
@@ -142,31 +133,23 @@ namespace Statiq.Core
         }
 
         /// <summary>
-        /// Changes the default metadata keys.
+        /// Changes the default children metadata key.
         /// </summary>
-        /// <param name="parentKey">The metadata key where parent documents should be stored.</param>
         /// <param name="childrenKey">The metadata key where child documents should be stored.</param>
-        /// <param name="previousSiblingKey">The metadata key where the previous sibling document should be stored.</param>
-        /// <param name="nextSiblingKey">The metadata key where the next sibling document should be stored.</param>
-        /// <param name="previousKey">The metadata key where the previous document should be stored.</param>
-        /// <param name="nextKey">The metadata key where the next document should be stored.</param>
+        /// <returns>The current module instance.</returns>
+        public CreateTree WithChildrenKey(string childrenKey = Keys.Children)
+        {
+            _childrenKey = childrenKey;
+            return this;
+        }
+
+        /// <summary>
+        /// Changes the default tree path metadata key.
+        /// </summary>
         /// <param name="treePathKey">The metadata key where the tree path should be stored.</param>
         /// <returns>The current module instance.</returns>
-        public CreateTree WithMetadataNames(
-            string parentKey = Keys.Parent,
-            string childrenKey = Keys.Children,
-            string previousSiblingKey = Keys.PreviousSibling,
-            string nextSiblingKey = Keys.NextSibling,
-            string previousKey = Keys.Previous,
-            string nextKey = Keys.Next,
-            string treePathKey = Keys.TreePath)
+        public CreateTree WithTreePathKey(string treePathKey = Keys.TreePath)
         {
-            _parentKey = parentKey;
-            _childrenKey = childrenKey;
-            _previousSiblingKey = previousSiblingKey;
-            _nextSiblingKey = nextSiblingKey;
-            _previousKey = previousKey;
-            _nextKey = nextKey;
             _treePathKey = treePathKey;
             return this;
         }
@@ -290,27 +273,7 @@ namespace Statiq.Core
                 MetadataItems metadata = new MetadataItems();
                 if (tree._childrenKey != null)
                 {
-                    metadata.Add(tree._childrenKey, new ReadOnlyCollection<IDocument>(Children.Select(x => x.OutputDocument).ToArray()));
-                }
-                if (tree._parentKey != null)
-                {
-                    metadata.Add(tree._parentKey, new CachedDelegateMetadataValue(_ => Parent?.OutputDocument));
-                }
-                if (tree._previousSiblingKey != null)
-                {
-                    metadata.Add(tree._previousSiblingKey, new CachedDelegateMetadataValue(_ => GetPreviousSibling()?.OutputDocument));
-                }
-                if (tree._nextSiblingKey != null)
-                {
-                    metadata.Add(tree._nextSiblingKey, new CachedDelegateMetadataValue(_ => GetNextSibling()?.OutputDocument));
-                }
-                if (tree._previousKey != null)
-                {
-                    metadata.Add(tree._previousKey, new CachedDelegateMetadataValue(_ => GetPrevious()?.OutputDocument));
-                }
-                if (tree._nextKey != null)
-                {
-                    metadata.Add(tree._nextKey, new CachedDelegateMetadataValue(_ => GetNext()?.OutputDocument));
+                    metadata.Add(tree._childrenKey, Children.Select(x => x.OutputDocument).ToImmutableArray());
                 }
                 if (tree._treePathKey != null)
                 {
@@ -329,48 +292,6 @@ namespace Statiq.Core
             }
 
             public string[] GetParentTreePath() => TreePath.Take(TreePath.Length - 1).ToArray();
-
-            private TreeNode GetPreviousSibling() =>
-                Parent?.Children.AsEnumerable().Reverse().SkipWhile(x => x != this).Skip(1).FirstOrDefault();
-
-            private TreeNode GetNextSibling() =>
-                Parent?.Children.SkipWhile(x => x != this).Skip(1).FirstOrDefault();
-
-            private TreeNode GetPrevious()
-            {
-                TreeNode previousSibling = GetPreviousSibling();
-                while (previousSibling?.Children.Count > 0)
-                {
-                    previousSibling = previousSibling.Children.Last();
-                }
-                return previousSibling ?? Parent;
-            }
-
-            private TreeNode GetNext()
-            {
-                if (Children.Count > 0)
-                {
-                    return Children.FirstOrDefault();
-                }
-
-                TreeNode nextSibling = GetNextSibling();
-                if (nextSibling != null)
-                {
-                    return nextSibling;
-                }
-
-                TreeNode current = Parent;
-                while (current?.Parent != null)
-                {
-                    nextSibling = current.GetNextSibling();
-                    if (nextSibling != null)
-                    {
-                        return nextSibling;
-                    }
-                    current = current.Parent;
-                }
-                return null;
-            }
         }
 
         private class TreeNodeEqualityComparer : IEqualityComparer<TreeNode>

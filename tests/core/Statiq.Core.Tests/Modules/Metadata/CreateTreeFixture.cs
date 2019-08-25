@@ -27,11 +27,12 @@ namespace Statiq.Core.Tests.Modules.Metadata
                 CreateTree tree = new CreateTree().WithNesting();
 
                 // When
-                TestDocument result = await ExecuteAsync(inputs, tree).SingleAsync();
+                IReadOnlyList<TestDocument> results = await ExecuteAsync(inputs, tree);
 
                 // Then
                 VerifyTree(
-                    result,
+                    results,
+                    results.Single(),
                     "index.html",
                     "root/index.html",
                     "root/6.txt",
@@ -61,11 +62,12 @@ namespace Statiq.Core.Tests.Modules.Metadata
                 CreateTree tree = new CreateTree().WithNesting();
 
                 // When
-                TestDocument result = await ExecuteAsync(inputs, tree).SingleAsync();
+                IReadOnlyList<TestDocument> results = await ExecuteAsync(inputs, tree);
 
                 // Then
                 VerifyTree(
-                    result,
+                    results,
+                    results.Single(),
                     "index.html",
                     "6.txt",
                     "a/index.html",
@@ -90,17 +92,17 @@ namespace Statiq.Core.Tests.Modules.Metadata
                 CreateTree tree = new CreateTree().WithNesting();
 
                 // When
-                TestDocument result = await ExecuteAsync(inputs, tree).SingleAsync();
+                IReadOnlyList<TestDocument> results = await ExecuteAsync(inputs, tree);
 
                 // Then
                 VerifyTree(
-                    result,
+                    results,
+                    results.Single(),
                     "index.html",
                     "a/index.html",
                     "a/1.txt",
                     "a/2.txt");
-                result.Source.ShouldBe("/input/index.html");
-                result.Document(Keys.Next).Source.ShouldBe("/input/a/index.html");
+                results.Single().Source.ShouldBe("/input/index.html");
             }
 
             [Test]
@@ -126,79 +128,6 @@ namespace Statiq.Core.Tests.Modules.Metadata
             }
 
             [Test]
-            public async Task GetsPreviousSibling()
-            {
-                // Given
-                TestDocument[] inputs = GetDocumentsFromRelativePaths(
-                    "root/a/2.txt",
-                    "root/a/3.txt",
-                    "root/a/1.txt");
-                CreateTree tree = new CreateTree().WithNesting();
-
-                // When
-                TestDocument result = await ExecuteAsync(inputs, tree).SingleAsync();
-
-                // Then
-                IDocument document = FindTreeNode(result, "root/a/2.txt");
-                document.Document(Keys.PreviousSibling).Destination.FullPath.ShouldBe("root/a/1.txt");
-            }
-
-            [Test]
-            public async Task GetsNextSibling()
-            {
-                // Given
-                TestDocument[] inputs = GetDocumentsFromRelativePaths(
-                    "root/a/2.txt",
-                    "root/a/3.txt",
-                    "root/a/1.txt");
-                CreateTree tree = new CreateTree().WithNesting();
-
-                // When
-                TestDocument result = await ExecuteAsync(inputs, tree).SingleAsync();
-
-                // Then
-                TestDocument document = FindTreeNode(result, "root/a/2.txt");
-                document.Document(Keys.NextSibling).Destination.FullPath.ShouldBe("root/a/3.txt");
-            }
-
-            [Test]
-            public async Task GetsPrevious()
-            {
-                // Given
-                TestDocument[] inputs = GetDocumentsFromRelativePaths(
-                    "root/a/2.txt",
-                    "root/a/3.txt",
-                    "root/a/1.txt");
-                CreateTree tree = new CreateTree().WithNesting();
-
-                // When
-                TestDocument result = await ExecuteAsync(inputs, tree).SingleAsync();
-
-                // Then
-                TestDocument document = FindTreeNode(result, "root/a/2.txt");
-                document.Document(Keys.Previous).Destination.FullPath.ShouldBe("root/a/1.txt");
-            }
-
-            [Test]
-            public async Task GetsPreviousUpTree()
-            {
-                // Given
-                TestDocument[] inputs = GetDocumentsFromRelativePaths(
-                    "root/a/2.txt",
-                    "root/a/3.txt",
-                    "root/a/1.txt",
-                    "root/b/4.txt");
-                CreateTree tree = new CreateTree().WithNesting();
-
-                // When
-                TestDocument result = await ExecuteAsync(inputs, tree).SingleAsync();
-
-                // Then
-                TestDocument document = FindTreeNode(result, "root/b/4.txt");
-                document.Document(Keys.Previous).Destination.FullPath.ShouldBe("root/b/index.html");
-            }
-
-            [Test]
             public async Task SplitsTree()
             {
                 // Given
@@ -217,10 +146,12 @@ namespace Statiq.Core.Tests.Modules.Metadata
                 // Then
                 results.Count.ShouldBe(2);
                 VerifyTree(
+                    results[0].GetChildren().Cast<TestDocument>().ToList(),
                     results[0],
                     "root/b/index.html",
                     "root/b/4.txt");
                 VerifyTree(
+                    results[1].GetChildren().Cast<TestDocument>().ToList(),
                     results[1],
                     "index.html",
                     "root/index.html",
@@ -268,22 +199,17 @@ namespace Statiq.Core.Tests.Modules.Metadata
                     "root/a/index.html");
             }
 
-            private TestDocument FindTreeNode(TestDocument first, string relativeFilePath)
-            {
-                while (first != null && first.Destination.FullPath != relativeFilePath)
-                {
-                    first = (TestDocument)first.Document(Keys.Next);
-                }
-                return first;
-            }
-
-            private void VerifyTree(TestDocument document, params string[] relativeFilePaths)
+            private void VerifyTree(IReadOnlyList<TestDocument> documents, TestDocument document, params string[] relativeFilePaths)
             {
                 foreach (string relativeFilePath in relativeFilePaths)
                 {
                     document.ShouldNotBeNull();
                     document.Destination.FullPath.ShouldBe(relativeFilePath);
-                    document = (TestDocument)document.Document(Keys.Next);
+                    document = documents.GetNext(document);
+                    if (document == null)
+                    {
+                        break;
+                    }
                 }
             }
 

@@ -13,42 +13,6 @@ namespace Statiq.Core.Tests.Modules.Control
         public class ExecuteTests : PaginateDocumentsFixture
         {
             [Test]
-            public async Task PaginateSetsCorrectMetadata()
-            {
-                // Given
-                List<int> currentPage = new List<int>();
-                List<int> totalPages = new List<int>();
-                List<int> totalItems = new List<int>();
-                List<bool> hasNextPage = new List<bool>();
-                List<bool> hasPreviousPage = new List<bool>();
-                CountModule count = new CountModule("A")
-                {
-                    AdditionalOutputs = 7,
-                    EnsureInputDocument = true
-                };
-                PaginateDocuments paginate = new PaginateDocuments(3);
-                ForEachDocument gatherData = new ExecuteConfig(Config.FromDocument(
-                    d =>
-                    {
-                        currentPage.Add(d.Int(Keys.CurrentPage));
-                        totalPages.Add(d.Int(Keys.TotalPages));
-                        totalItems.Add(d.Int(Keys.TotalItems));
-                        hasNextPage.Add(d.Bool(Keys.HasNextPage));
-                        hasPreviousPage.Add(d.Bool(Keys.HasPreviousPage));
-                    })).ForEachDocument();
-
-                // When
-                await ExecuteAsync(count, paginate, gatherData);
-
-                // Then
-                CollectionAssert.AreEqual(new[] { 1, 2, 3 }, currentPage);
-                CollectionAssert.AreEqual(new[] { 3, 3, 3 }, totalPages);
-                CollectionAssert.AreEqual(new[] { 8, 8, 8 }, totalItems);
-                CollectionAssert.AreEqual(new[] { true, true, false }, hasNextPage);
-                CollectionAssert.AreEqual(new[] { false, true, true }, hasPreviousPage);
-            }
-
-            [Test]
             public async Task PaginateSetsDocumentsInMetadata()
             {
                 // Given
@@ -62,7 +26,7 @@ namespace Statiq.Core.Tests.Modules.Control
                 ForEachDocument gatherData = new ExecuteConfig(
                     Config.FromDocument(async d =>
                     {
-                        List<string> pageContent = await d.Get<IList<IDocument>>(Keys.PageDocuments)
+                        List<string> pageContent = await d.GetChildren()
                             .ToAsyncEnumerable()
                             .SelectAwait(async x => await x.GetStringAsync())
                             .ToListAsync();

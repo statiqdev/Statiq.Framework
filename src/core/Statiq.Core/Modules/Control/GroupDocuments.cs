@@ -19,7 +19,7 @@ namespace Statiq.Core
     /// any number of tags and you want to make groups for each tag including all the documents with that tag.
     /// This module outputs a new document with the documents and key for each group.
     /// </remarks>
-    /// <metadata cref="Keys.GroupDocuments" usage="Output" />
+    /// <metadata cref="Keys.Children" usage="Output" />
     /// <metadata cref="Keys.GroupKey" usage="Output" />
     /// <category>Control</category>
     public class GroupDocuments : Module
@@ -93,7 +93,7 @@ namespace Statiq.Core
                 .Select(x => context.CreateDocument(
                 new MetadataItems
                 {
-                    { Keys.GroupDocuments, x.ToImmutableArray() },
+                    { Keys.Children, x.ToImmutableArray() },
                     { Keys.GroupKey, x.Key }
                 }));
         }
