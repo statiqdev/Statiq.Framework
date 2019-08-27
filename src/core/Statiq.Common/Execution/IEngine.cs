@@ -1,10 +1,18 @@
-﻿namespace Statiq.Common
+﻿using System;
+using Microsoft.Extensions.Logging;
+
+namespace Statiq.Common
 {
     /// <summary>
     /// The engine is the primary entry point for the generation process.
     /// </summary>
     public interface IEngine : IConfigurable, IDocumentFactory
     {
+        /// <summary>
+        /// Gets the dependency injection service provider.
+        /// </summary>
+        IServiceProvider Services { get; }
+
         /// <summary>
         /// Gets the file system.
         /// </summary>

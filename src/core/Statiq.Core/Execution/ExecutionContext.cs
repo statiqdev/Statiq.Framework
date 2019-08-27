@@ -5,8 +5,12 @@ using System.Collections.Immutable;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 using Statiq.Common;
 
 namespace Statiq.Core
@@ -17,9 +21,6 @@ namespace Statiq.Core
         private static readonly HttpMessageHandler _httpMessageHandler = new HttpClientHandler();
 
         private readonly ExecutionContextData _contextData;
-
-        /// <inheritdoc/>
-        public Engine Engine => _contextData.Engine;
 
         /// <inheritdoc/>
         public Guid ExecutionId => _contextData.ExecutionId;
@@ -49,7 +50,7 @@ namespace Statiq.Core
         public IReadOnlyShortcodeCollection Shortcodes => _contextData.Engine.Shortcodes;
 
         /// <inheritdoc/>
-        public IServiceProvider Services => _contextData.Services;
+        public IServiceProvider Services => _contextData.Services;  // This has to come from the context data and not the engine because it's a child provider scope
 
         /// <inheritdoc/>
         public string ApplicationInput => _contextData.Engine.ApplicationInput;
@@ -69,12 +70,28 @@ namespace Statiq.Core
         /// <inheritdoc/>
         public ImmutableArray<IDocument> Inputs { get; }
 
+        /// <inheritdoc/>
+        public ILogger Logger { get; }
+
         internal ExecutionContext(ExecutionContextData contextData, IExecutionContext parent, IModule module, ImmutableArray<IDocument> inputs)
         {
             _contextData = contextData ?? throw new ArgumentNullException(nameof(contextData));
             Parent = parent;
             Module = module ?? throw new ArgumentNullException(nameof(module));
             Inputs = inputs;
+            Logger = GetLogger(parent, module, contextData.PipelinePhase, contextData.Services.GetRequiredService<ILoggerFactory>());
+        }
+
+        private static ILogger GetLogger(IExecutionContext parent, IModule module, PipelinePhase pipelinePhase, ILoggerFactory loggerFactory)
+        {
+            Stack<string> modules = new Stack<string>();
+            modules.Push(module.GetType().Name);
+            while (parent != null)
+            {
+                modules.Push(parent.Module.GetType().Name);
+                parent = parent.Parent;
+            }
+            return loggerFactory?.CreateLogger($"[{pipelinePhase.PipelineName}][{pipelinePhase.Phase}][{string.Join('.', modules)}]") ?? NullLogger.Instance;
         }
 
         /// <inheritdoc/>
@@ -136,7 +153,7 @@ namespace Statiq.Core
             FilePath destination,
             IEnumerable<KeyValuePair<string, object>> items,
             IContentProvider contentProvider = null) =>
-            Engine.DocumentFactory.CreateDocument(source, destination, items, contentProvider);
+            _contextData.Engine.DocumentFactory.CreateDocument(source, destination, items, contentProvider);
 
         /// <inheritdoc />
         public TDocument CreateDocument<TDocument>(
@@ -145,7 +162,7 @@ namespace Statiq.Core
             IEnumerable<KeyValuePair<string, object>> items,
             IContentProvider contentProvider = null)
             where TDocument : FactoryDocument, IDocument, new() =>
-            Engine.DocumentFactory.CreateDocument<TDocument>(source, destination, items, contentProvider);
+            _contextData.Engine.DocumentFactory.CreateDocument<TDocument>(source, destination, items, contentProvider);
 
         // IMetadata
 

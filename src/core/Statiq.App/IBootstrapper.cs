@@ -8,7 +8,7 @@ namespace Statiq.App
     {
         string[] Args { get; }
 
-        void SetDefaultCommand<TCommand>()
+        IBootstrapper SetDefaultCommand<TCommand>()
             where TCommand : class, ICommand;
 
         Task<int> RunAsync();

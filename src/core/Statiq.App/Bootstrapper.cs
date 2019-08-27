@@ -1,6 +1,10 @@
 ﻿using System;
+using System.Collections;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
+using Microsoft.Extensions.Logging;
 using Spectre.Cli;
 using Statiq.Common;
 using Statiq.Core;
@@ -13,7 +17,7 @@ namespace Statiq.App
 
         private readonly ConfiguratorCollection _configurators = new ConfiguratorCollection();
 
-        private Func<ServiceTypeRegistrar, ICommandApp> _getCommandApp = x => new CommandApp(x);
+        private Func<CommandServiceTypeRegistrar, ICommandApp> _getCommandApp = x => new CommandApp(x);
 
         public Bootstrapper(string[] args)
         {
@@ -26,10 +30,11 @@ namespace Statiq.App
 
         public string[] Args { get; }
 
-        public void SetDefaultCommand<TCommand>()
+        public IBootstrapper SetDefaultCommand<TCommand>()
             where TCommand : class, ICommand
         {
             _getCommandApp = x => new CommandApp<TCommand>(x);
+            return this;
         }
 
         public async Task<int> RunAsync()
@@ -37,28 +42,32 @@ namespace Statiq.App
             // Remove the synchronization context
             await default(SynchronizationContextRemover);
 
-            // Output version info
-            Trace.Information($"Statiq version {Engine.Version}");
-
-            // It's not a serious console app unless there's some ASCII art
-            OutputLogo();
-
             // Populate the class catalog (if we haven't already)
             _classCatalog.Populate();
 
-            // Run bootstraper configurators first
+            // Run bootstrapper configurators first
             _configurators.Configure<IConfigurableBootstrapper>(this);
             _configurators.Configure<IBootstrapper>(this);
 
-            // Configure the service collection
-            IServiceCollection services = CreateServiceCollection();
-            services.AddSingleton<IConfigurableBootstrapper>(this);
-            services.AddSingleton<IBootstrapper>(this);
-            ConfigurableServices configurableServices = new ConfigurableServices(services);
+            // Create the service collection
+            IServiceCollection serviceCollection = CreateServiceCollection() ?? new ServiceCollection();
+            serviceCollection.TryAddSingleton<IConfigurableBootstrapper>(this);
+            serviceCollection.TryAddSingleton<IBootstrapper>(this);
+            serviceCollection.TryAddSingleton(_classCatalog);  // The class catalog is retrieved later for deferred logging once a service provider is built
+
+            // Run configurators on the service collection
+            ConfigurableServices configurableServices = new ConfigurableServices(serviceCollection);
             _configurators.Configure(configurableServices);
 
+            // Ensure required engine services are available after running service configurators
+            serviceCollection.AddRequiredEngineServices();
+
+            // Create the stand-alone command line service container and register a few types needed for the CLI
+            CommandServiceTypeRegistrar registrar = new CommandServiceTypeRegistrar();
+            registrar.RegisterInstance(typeof(IServiceCollection), serviceCollection);
+            registrar.RegisterInstance(typeof(IConfiguratorCollection), _configurators);
+
             // Create the command line parser and run the command
-            ServiceTypeRegistrar registrar = new ServiceTypeRegistrar(services, BuildServiceProvider);
             ICommandApp app = _getCommandApp(registrar);
             app.Configure(x =>
             {
@@ -69,51 +78,28 @@ namespace Statiq.App
             return await app.RunAsync(Args);
         }
 
-        protected virtual IServiceCollection CreateServiceCollection() => new ServiceCollection();
-
-        protected virtual IServiceProvider BuildServiceProvider(IServiceCollection serviceCollection) =>
-            serviceCollection.BuildServiceProvider();
+        /// <summary>
+        /// Creates a service collection for use by the bootstrapper.
+        /// </summary>
+        /// <remarks>
+        /// Override to perform post-creation configuration or to use an alternate service collection type.
+        /// </remarks>
+        /// <returns>A service collection for use by the bootstrapper.</returns>
+        protected virtual IServiceCollection CreateServiceCollection() => null;
 
         // Static factories
 
         public static IBootstrapper CreateDefault(string[] args) =>
-            CreateDefault(args, (Common.IConfigurator<IEngine>)null);
+            new Bootstrapper(args).AddDefaults();
 
         public static IBootstrapper CreateDefault<TConfigurator>(string[] args)
             where TConfigurator : Common.IConfigurator<IEngine> =>
-            CreateDefault(args, Activator.CreateInstance<TConfigurator>());
+            new Bootstrapper(args).AddDefaults<TConfigurator>();
 
         public static IBootstrapper CreateDefault(string[] args, Action<IEngine> configureEngineAction) =>
-            CreateDefault(args, new DelegateConfigurator<IEngine>(configureEngineAction));
+            new Bootstrapper(args).AddDefaults(configureEngineAction);
 
         public static IBootstrapper CreateDefault(string[] args, Common.IConfigurator<IEngine> configurator) =>
-            new Bootstrapper(args)
-                .AddDefaultTracing()
-                .AddDefaultConfigurators()
-                .AddDefaultCommands()
-                .AddDefaultShortcodes()
-                .AddDefaultNamespaces()
-                .AddConfigurator(configurator);
-
-        private static void OutputLogo()
-        {
-            Console.WriteLine(@"
-                ,@@@@@@p
-              ,@@@@@@@@@@g
-            z@@@@@@@@@@@@@@@
-          g@@@@@@@@@@@@@@@@@@@,
-        g@@@@@@@@@@@@@@@@@@@@@@@,
-      ,@@@@@@@@@@@@@@@@@@@@@@@@@@@
-     ,@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-     $@@@@@@@@@@@@@@@@@@@@@@@@@@@@@c
-     @@@@@@@@@@@@@@@@@@@@@@@@B@@@@@@
-     @@@@@@@@@@@@@@@@@@@@@@@  j@@@@@
-     $@@@@@@@@@@@@@@@@@@@@@F  #@@@@`
-      $@@@@@@@@@@@@@@@@@@P   g@@@@P
-       %@@@@@@@@@@@@@     ,g@@@@@P
-        3@@@@@@@@@@@@@@@@@@@@@@B`
-          `%@@@@@@@@@@@@@@@@@P
-             `*%RB@@@@@RRP`");
-        }
+            new Bootstrapper(args).AddDefaults(configurator);
     }
 }

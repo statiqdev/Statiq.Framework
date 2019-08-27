@@ -4,11 +4,11 @@ using Spectre.Cli;
 
 namespace Statiq.App
 {
-    internal class ServiceTypeResolver : ITypeResolver
+    internal class CommandServiceTypeResolver : ITypeResolver
     {
         private readonly IServiceProvider _serviceProvider;
 
-        public ServiceTypeResolver(IServiceProvider serviceProvider)
+        public CommandServiceTypeResolver(IServiceProvider serviceProvider)
         {
             _serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
         }

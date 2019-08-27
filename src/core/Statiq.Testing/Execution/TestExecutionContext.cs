@@ -9,6 +9,8 @@ using System.Net.Http;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 using Statiq.Common;
 
 namespace Statiq.Testing
@@ -105,6 +107,9 @@ namespace Statiq.Testing
 
         /// <inheritdoc/>
         public ImmutableArray<IDocument> Inputs { get; set; }
+
+        /// <inheritdoc/>
+        public ILogger Logger { get; set; } = NullLogger.Instance;
 
         public void SetInputs(IEnumerable<IDocument> inputs) =>
             Inputs = inputs?.Where(x => x != null).ToImmutableArray() ?? ImmutableArray<IDocument>.Empty;

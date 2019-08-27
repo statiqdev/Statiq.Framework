@@ -4,6 +4,8 @@ using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Statiq.Common;
 using Statiq.Core;
 
@@ -11,23 +13,27 @@ namespace Statiq.App
 {
     internal class EngineManager : IDisposable
     {
-        public EngineManager(IConfigurableBootstrapper bootstrapper, BuildCommand.Settings commandSettings)
+        private readonly ILogger _logger;
+
+        public EngineManager(IServiceProvider services, IConfiguratorCollection configurators, BuildCommand.Settings commandSettings)
         {
-            Engine = new Engine();
+            _logger = services.GetRequiredService<ILogger<Bootstrapper>>();
+
+            Engine = new Engine(services);
 
             // Apply settings
-            bootstrapper.Configurators.Configure(Engine.Settings);
+            configurators.Configure(Engine.Settings);
             ApplyCommandSettings(Engine, commandSettings);  // Apply command settings last so they can override others
 
             // Run engine configurators after command line, settings, etc. have been applied
-            bootstrapper.Configurators.Configure<IEngine>(Engine);
+            configurators.Configure<IEngine>(Engine);
 
             // Trace the full environment
-            Trace.Information($"Root path:{Environment.NewLine}    {Engine.FileSystem.RootPath}");
-            Trace.Information($"Input path(s):{Environment.NewLine}    {string.Join(Environment.NewLine + "    ", Engine.FileSystem.InputPaths)}");
-            Trace.Information($"Output path:{Environment.NewLine}    {Engine.FileSystem.OutputPath}");
-            Trace.Information($"Temp path:{Environment.NewLine}    {Engine.FileSystem.TempPath}");
-            Trace.Verbose($"Settings:{Environment.NewLine}    {string.Join(Environment.NewLine + "    ", Engine.Settings.Select(x => $"{x.Key}: {x.Value?.ToString() ?? "null"}"))}");
+            _logger.LogInformation($"Root path:{Environment.NewLine}    {Engine.FileSystem.RootPath}");
+            _logger.LogInformation($"Input path(s):{Environment.NewLine}    {string.Join(Environment.NewLine + "    ", Engine.FileSystem.InputPaths)}");
+            _logger.LogInformation($"Output path:{Environment.NewLine}    {Engine.FileSystem.OutputPath}");
+            _logger.LogInformation($"Temp path:{Environment.NewLine}    {Engine.FileSystem.TempPath}");
+            _logger.LogDebug($"Settings:{Environment.NewLine}    {string.Join(Environment.NewLine + "    ", Engine.Settings.Select(x => $"{x.Key}: {x.Value?.ToString() ?? "null"}"))}");
 
             // Make sure we clear out anything in the JavaScriptEngineSwitcher instance
             Engine.ResetJsEngines();
@@ -35,15 +41,15 @@ namespace Statiq.App
 
         public Engine Engine { get; }
 
-        public async Task<bool> ExecuteAsync(IServiceProvider serviceProvider, CancellationTokenSource cancellationTokenSource)
+        public async Task<bool> ExecuteAsync(CancellationTokenSource cancellationTokenSource)
         {
             try
             {
-                await Engine.ExecuteAsync(serviceProvider, cancellationTokenSource);
+                await Engine.ExecuteAsync(cancellationTokenSource);
             }
             catch (Exception ex)
             {
-                Trace.Critical(ex.Message);
+                _logger.LogError(ex.Message);
                 return false;
             }
             return true;

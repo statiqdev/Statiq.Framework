@@ -7,7 +7,7 @@
     <RepositoryType>git</RepositoryType>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="System.Linq.Async" Version="4.0.0-preview.6.build.801" />
+    <PackageReference Include="System.Linq.Async" Version="4.0.0-preview.8.build.9" />
     <PackageReference Include="WebMarkupMin.Core" Version="2.3.0" />
   </ItemGroup>
   <ItemGroup>

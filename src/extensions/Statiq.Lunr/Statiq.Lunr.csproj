@@ -8,7 +8,7 @@
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Newtonsoft.Json" Version="10.0.2" />
-    <PackageReference Include="System.Linq.Async" Version="4.0.0-preview.6.build.801" />
+    <PackageReference Include="System.Linq.Async" Version="4.0.0-preview.8.build.9" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\core\Statiq.Common\Statiq.Common.csproj" />

@@ -143,8 +143,6 @@ namespace Statiq.Common
             // Special case to set the content provider to null when cloning
             _contentProvider = contentProvider is NullContent ? null : contentProvider;
 
-            Trace.Verbose($"Initialized document with ID {Id} and source {Source}");
-
             _initialized = true;
             return this;
         }

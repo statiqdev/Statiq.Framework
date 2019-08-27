@@ -5,6 +5,7 @@ using System.IO;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 
 namespace Statiq.Common
 {
@@ -101,6 +102,14 @@ namespace Statiq.Common
         /// The input documents to process.
         /// </summary>
         ImmutableArray<IDocument> Inputs { get; }
+
+        /// <summary>
+        /// A logger with a category that identifies the current pipeline, phase, and module.
+        /// </summary>
+        /// <remarks>
+        /// It is preferred to use this logger instead of getting a new one through <see cref="Services"/>.
+        /// </remarks>
+        ILogger Logger { get; }
 
         /// <summary>
         /// Creates a <see cref="HttpClient"/> instance that should be used for all HTTP communication.

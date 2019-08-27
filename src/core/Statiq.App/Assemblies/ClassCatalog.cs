@@ -4,7 +4,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyModel;
+using Microsoft.Extensions.Logging;
 using Statiq.Common;
 
 namespace Statiq.App
@@ -16,6 +18,8 @@ namespace Statiq.App
     internal class ClassCatalog : IClassCatalog
     {
         private readonly ConcurrentDictionary<string, Type> _types = new ConcurrentDictionary<string, Type>();
+
+        private readonly ConcurrentQueue<string> _debugMessages = new ConcurrentQueue<string>();
 
         private readonly object _populateLock = new object();
 
@@ -45,14 +49,23 @@ namespace Statiq.App
             return type == null ? default : (T)Activator.CreateInstance(type);
         }
 
+        internal void LogDebugMessages(ILogger logger)
+        {
+            if (logger != null)
+            {
+                while (_debugMessages.TryDequeue(out string debugMessage))
+                {
+                    logger.LogDebug(debugMessage);
+                }
+            }
+        }
+
         public void Populate()
         {
             lock (_populateLock)
             {
                 if (!_populated)
                 {
-                    Trace.Verbose($"Populating class catalog...");
-
                     Assembly[] assemblies;
                     try
                     {
@@ -74,7 +87,7 @@ namespace Statiq.App
                     // Load types
                     Parallel.ForEach(assemblies, assembly =>
                     {
-                        Trace.Verbose($"Cataloging types in assembly {assembly.FullName}");
+                        _debugMessages.Enqueue($"Cataloging types in assembly {assembly.FullName}");
                         foreach (Type type in GetLoadableTypes(assembly).Where(x => x.IsPublic && !x.IsAbstract && x.IsClass))
                         {
                             _types.TryAdd(type.FullName, type);
@@ -104,17 +117,17 @@ namespace Statiq.App
                     }
                     catch (Exception ex)
                     {
-                        Trace.Verbose($"{ex.GetType().Name} exception while loading assembly {assemblyName.Name}: {ex.Message}");
+                        _debugMessages.Enqueue($"{ex.GetType().Name} exception while loading assembly {assemblyName.Name}: {ex.Message}");
                     }
                 }
             }
             catch (Exception ex)
             {
-                Trace.Verbose($"{ex.GetType().Name} exception while getting referenced assemblies from {assembly.FullName}: {ex.Message}");
+                _debugMessages.Enqueue($"{ex.GetType().Name} exception while getting referenced assemblies from {assembly.FullName}: {ex.Message}");
             }
         }
 
-        private static Type[] GetLoadableTypes(Assembly assembly)
+        private Type[] GetLoadableTypes(Assembly assembly)
         {
             try
             {
@@ -124,7 +137,7 @@ namespace Statiq.App
             {
                 foreach (Exception loaderException in ex.LoaderExceptions)
                 {
-                    Trace.Verbose($"ReflectionTypeLoadException for assembly {assembly.FullName}: {loaderException.Message}");
+                    _debugMessages.Enqueue($"ReflectionTypeLoadException for assembly {assembly.FullName}: {loaderException.Message}");
                 }
                 return ex.Types.Where(t => t != null).ToArray();
             }

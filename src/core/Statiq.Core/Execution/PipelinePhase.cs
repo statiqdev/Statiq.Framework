@@ -53,7 +53,6 @@ namespace Statiq.Core
         public async Task ExecuteAsync(
             Engine engine,
             Guid executionId,
-            IServiceProvider serviceProvider,
             CancellationTokenSource cancellationTokenSource)
         {
             if (_disposed)
@@ -73,7 +72,7 @@ namespace Statiq.Core
             try
             {
                 // Execute all modules in the pipeline with a new DI scope per phase
-                IServiceScopeFactory serviceScopeFactory = serviceProvider.GetRequiredService<IServiceScopeFactory>();
+                IServiceScopeFactory serviceScopeFactory = engine.Services.GetRequiredService<IServiceScopeFactory>();
                 using (IServiceScope serviceScope = serviceScopeFactory.CreateScope())
                 {
                     ExecutionContextData contextData = new ExecutionContextData(engine, executionId, this, serviceScope.ServiceProvider, cancellationTokenSource.Token);

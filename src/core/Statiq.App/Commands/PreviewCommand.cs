@@ -8,6 +8,8 @@ using System.Threading.Tasks;
 using Spectre.Cli;
 using Statiq.Hosting;
 using Statiq.Common;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 
 namespace Statiq.App
 {
@@ -41,28 +43,26 @@ namespace Statiq.App
             public bool NoReload { get; set; }
         }
 
-        private readonly IConfigurableBootstrapper _bootstrapper;
-        private readonly IServiceProvider _serviceProvider;
+        private readonly IConfiguratorCollection _configurators;
 
         private readonly ConcurrentQueue<string> _changedFiles = new ConcurrentQueue<string>();
         private readonly AutoResetEvent _messageEvent = new AutoResetEvent(false);
         private readonly InterlockedBool _exit = new InterlockedBool(false);
 
-        public PreviewCommand(IConfigurableBootstrapper bootstrapper, IServiceProvider serviceProvider)
+        public PreviewCommand(IServiceCollection serviceCollection, IConfiguratorCollection configurators)
+            : base(serviceCollection)
         {
-            _bootstrapper = bootstrapper;
-            _serviceProvider = serviceProvider;
+            _configurators = configurators;
         }
 
-        public override async Task<int> ExecuteCommandAsync(CommandContext context, Settings settings)
+        public override async Task<int> ExecuteCommandAsync(IServiceProvider services, CommandContext context, Settings settings)
         {
             ExitCode exitCode = ExitCode.Normal;
-
-            using (EngineManager engineManager = new EngineManager(_bootstrapper, settings))
+            using (EngineManager engineManager = new EngineManager(services, _configurators, settings))
             {
                 // Execute the engine for the first time
                 CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
-                if (!await engineManager.ExecuteAsync(_serviceProvider, cancellationTokenSource))
+                if (!await engineManager.ExecuteAsync(cancellationTokenSource))
                 {
                     return (int)ExitCode.ExecutionError;
                 }
@@ -108,7 +108,7 @@ namespace Statiq.App
                         Console.TreatControlCAsInput = true;
                         while (true)
                         {
-                            // Would have prefered to use Console.CancelKeyPress, but that bubbles up to calling batch files
+                            // Would have preferred to use Console.CancelKeyPress, but that bubbles up to calling batch files
                             // The (ConsoleKey)3 check is to support a bug in VS Code: https://github.com/Microsoft/vscode/issues/9347
                             ConsoleKeyInfo consoleKey = Console.ReadKey(true);
                             if (consoleKey.Key == (ConsoleKey)3 || (consoleKey.Key == ConsoleKey.C && (consoleKey.Modifiers & ConsoleModifiers.Control) != 0))
@@ -159,7 +159,7 @@ namespace Statiq.App
 
                         // If there was an execution error due to reload, keep previewing but clear the cache
                         cancellationTokenSource = new CancellationTokenSource();
-                        exitCode = await engineManager.ExecuteAsync(_serviceProvider, cancellationTokenSource)
+                        exitCode = await engineManager.ExecuteAsync(cancellationTokenSource)
                             ? ExitCode.Normal
                             : ExitCode.ExecutionError;
 

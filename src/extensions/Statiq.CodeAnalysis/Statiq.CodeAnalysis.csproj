@@ -9,8 +9,8 @@
   <ItemGroup>
     <PackageReference Include="Buildalyzer.Workspaces" Version="2.2.0" />
     <PackageReference Include="ConcurrentHashSet" Version="1.0.2" />
-    <PackageReference Include="System.Linq.Async" Version="4.0.0-preview.6.build.801" />
-    <PackageReference Include="System.Reflection.TypeExtensions" Version="4.5.1" />
+    <PackageReference Include="System.Linq.Async" Version="4.0.0-preview.8.build.9" />
+    <PackageReference Include="System.Reflection.TypeExtensions" Version="4.6.0-preview8.19405.3" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\core\Statiq.Common\Statiq.Common.csproj" />

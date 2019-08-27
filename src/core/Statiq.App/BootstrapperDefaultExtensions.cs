@@ -1,20 +1,44 @@
 ﻿using System;
 using System.Linq;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Console;
+using Microsoft.Extensions.Logging.Debug;
+using Microsoft.Extensions.Options;
 using Statiq.Common;
 
 namespace Statiq.App
 {
     public static class BootstrapperDefaultExtensions
     {
+        public static IBootstrapper AddDefaults(this IBootstrapper bootstrapper) =>
+            bootstrapper.AddDefaults((IConfigurator<IEngine>)null);
+
+        public static IBootstrapper AddDefaults<TConfigurator>(this IBootstrapper bootstrapper)
+            where TConfigurator : IConfigurator<IEngine> =>
+            bootstrapper.AddDefaults(Activator.CreateInstance<TConfigurator>());
+
+        public static IBootstrapper AddDefaults(this IBootstrapper bootstrapper, Action<IEngine> configureEngineAction) =>
+            bootstrapper.AddDefaults(new DelegateConfigurator<IEngine>(configureEngineAction));
+
+        public static IBootstrapper AddDefaults(this IBootstrapper bootstrapper, IConfigurator<IEngine> configurator) =>
+            bootstrapper
+                .AddDefaultLogging()
+                .AddDefaultConfigurators()
+                .AddDefaultCommands()
+                .AddDefaultShortcodes()
+                .AddDefaultNamespaces()
+                .AddConfigurator(configurator);
+
         public static IBootstrapper AddDefaultConfigurators(this IBootstrapper bootstrapper)
         {
-            foreach (Common.IConfigurator<IConfigurableBootstrapper> bootstraperConfigurator
-                in bootstrapper.ClassCatalog.GetInstances<Common.IConfigurator<IConfigurableBootstrapper>>())
+            foreach (IConfigurator<IConfigurableBootstrapper> bootstraperConfigurator
+                in bootstrapper.ClassCatalog.GetInstances<IConfigurator<IConfigurableBootstrapper>>())
             {
                 bootstrapper.Configurators.Add(bootstraperConfigurator);
             }
-            foreach (Common.IConfigurator<IBootstrapper> bootstraperConfigurator
-                in bootstrapper.ClassCatalog.GetInstances<Common.IConfigurator<IConfigurableBootstrapper>>())
+            foreach (IConfigurator<IBootstrapper> bootstraperConfigurator
+                in bootstrapper.ClassCatalog.GetInstances<IConfigurator<IConfigurableBootstrapper>>())
             {
                 bootstrapper.Configurators.Add(bootstraperConfigurator);
             }
@@ -63,22 +87,13 @@ namespace Statiq.App
             return bootstrapper;
         }
 
-        public static IBootstrapper AddDefaultTracing(this IBootstrapper bootstrapper)
+        public static IBootstrapper AddDefaultLogging(this IBootstrapper bootstrapper)
         {
-            Trace.AddListener(new SimpleColorConsoleTraceListener
+            bootstrapper.AddServices(services => services.AddLogging(logging =>
             {
-                TraceOutputOptions = System.Diagnostics.TraceOptions.None
-            });
-
-            AppDomain.CurrentDomain.UnhandledException += (sender, e) =>
-            {
-                if (e.ExceptionObject is Exception exception)
-                {
-                    Trace.Critical(exception.ToString());
-                }
-                Environment.Exit((int)ExitCode.UnhandledError);
-            };
-
+                logging.AddConsole();
+                logging.AddDebug();
+            }));
             return bootstrapper;
         }
     }

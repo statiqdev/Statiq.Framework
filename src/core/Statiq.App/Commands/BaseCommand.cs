@@ -3,26 +3,67 @@ using System.Diagnostics;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
+using NetEscapades.Extensions.Logging.RollingFile;
 using Spectre.Cli;
+using Statiq.Common;
+using Statiq.Core;
 using Trace = Statiq.Common.Trace;
 
 namespace Statiq.App
 {
+    /// <summary>
+    /// A base command type that sets up logging and debugging.
+    /// </summary>
+    /// <typeparam name="TSettings">The type of settings this command uses.</typeparam>
     public abstract class BaseCommand<TSettings> : AsyncCommand<TSettings>
         where TSettings : BaseSettings
     {
+        private readonly IServiceCollection _serviceCollection;
+
+        protected BaseCommand(IServiceCollection serviceCollection)
+        {
+            _serviceCollection = serviceCollection;
+        }
+
         public sealed override async Task<int> ExecuteAsync(CommandContext context, TSettings settings)
         {
             // Set verbose tracing
-            if (settings.Verbose)
+            if (settings.LogLevel != LogLevel.Information)
             {
-                Trace.Level = SourceLevels.Verbose;
+                _serviceCollection.Configure<LoggerFilterOptions>(options => options.MinLevel = settings.LogLevel);
+            }
+
+            // File logging
+            if (!string.IsNullOrEmpty(settings.LogFile))
+            {
+                // Add the log provider (adding it to the service collection will get picked up by the logger factory)
+                _serviceCollection.AddSingleton<ILoggerProvider, FileLoggerProvider>();
+                _serviceCollection.Configure<FileLoggerOptions>(options =>
+                {
+                    options.FileName = settings.LogFile;
+                    options.LogDirectory = string.Empty;
+                });
+            }
+
+            // Build the service provider
+            IServiceProvider services = _serviceCollection.BuildServiceProvider();
+
+            // Log pending messages
+            ILogger logger = services.GetRequiredService<ILogger<Bootstrapper>>();
+            logger.LogInformation($"Statiq version {Engine.Version}");
+            ClassCatalog classCatalog = services.GetService<ClassCatalog>();
+            if (classCatalog != null)
+            {
+                classCatalog.LogDebugMessages(logger);
             }
 
             // Attach
             if (settings.Attach)
             {
-                Trace.Information($"Waiting for a debugger to attach to process {Process.GetCurrentProcess().Id} (or press a key to continue)...");
+                logger.LogInformation($"Waiting for a debugger to attach to process {Process.GetCurrentProcess().Id} (or press a key to continue)...");
                 while (!Debugger.IsAttached && !Console.KeyAvailable)
                 {
                     Thread.Sleep(100);
@@ -30,39 +71,17 @@ namespace Statiq.App
                 if (Console.KeyAvailable)
                 {
                     Console.ReadKey(true);
-                    Trace.Information("Key pressed, continuing execution");
+                    logger.LogInformation("Key pressed, continuing execution");
                 }
                 else
                 {
-                    Trace.Information("Debugger attached, continuing execution");
+                    logger.LogInformation("Debugger attached, continuing execution");
                 }
             }
 
-            // Logging
-            if (settings.Log && string.IsNullOrEmpty(settings.LogFile))
-            {
-                settings.LogFile = $"log-{DateTime.Now:yyyyMMddHHmmssfff}.txt";
-            }
-            if (!string.IsNullOrEmpty(settings.LogFile))
-            {
-                // Delete an exiting log file if one exists
-                if (File.Exists(settings.LogFile))
-                {
-                    try
-                    {
-                        File.Delete(settings.LogFile);
-                    }
-                    catch (Exception)
-                    {
-                    }
-                }
-
-                Trace.AddListener(new SimpleFileTraceListener(settings.LogFile));
-            }
-
-            return await ExecuteCommandAsync(context, settings);
+            return await ExecuteCommandAsync(services, context, settings);
         }
 
-        public abstract Task<int> ExecuteCommandAsync(CommandContext context, TSettings settings);
+        public abstract Task<int> ExecuteCommandAsync(IServiceProvider serviceProvider, CommandContext context, TSettings settings);
     }
 }

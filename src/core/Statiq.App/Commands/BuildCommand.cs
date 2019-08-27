@@ -2,6 +2,8 @@
 using System.ComponentModel;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Spectre.Cli;
 using Statiq.Common;
 
@@ -41,21 +43,20 @@ namespace Statiq.App
             public string RootPath { get; set; }
         }
 
-        private readonly IConfigurableBootstrapper _bootstrapper;
-        private readonly IServiceProvider _serviceProvider;
+        private readonly IConfiguratorCollection _configurators;
 
-        public BuildCommand(IConfigurableBootstrapper bootstrapper, IServiceProvider serviceProvider)
+        public BuildCommand(IServiceCollection serviceCollection, IConfiguratorCollection configurators)
+            : base(serviceCollection)
         {
-            _bootstrapper = bootstrapper;
-            _serviceProvider = serviceProvider;
+            _configurators = configurators;
         }
 
-        public override async Task<int> ExecuteCommandAsync(CommandContext context, Settings settings)
+        public override async Task<int> ExecuteCommandAsync(IServiceProvider services, CommandContext context, Settings settings)
         {
             CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
-            using (EngineManager engineManager = new EngineManager(_bootstrapper, settings))
+            using (EngineManager engineManager = new EngineManager(services, _configurators, settings))
             {
-                return await engineManager.ExecuteAsync(_serviceProvider, cancellationTokenSource)
+                return await engineManager.ExecuteAsync(cancellationTokenSource)
                     ? (int)ExitCode.Normal
                     : (int)ExitCode.ExecutionError;
             }

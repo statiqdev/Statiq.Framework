@@ -7,6 +7,9 @@ using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 using JavaScriptEngineSwitcher.Core;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 using Statiq.Common;
 
 namespace Statiq.Core
@@ -37,19 +40,34 @@ namespace Statiq.Core
         private readonly PipelineCollection _pipelines = new PipelineCollection();
         private readonly DiagnosticsTraceListener _diagnosticsTraceListener = new DiagnosticsTraceListener();
 
+        private readonly ILogger _logger;
+
         // Gets initialized on first execute
         private PipelinePhase[] _phases;
 
         private bool _disposed;
 
         /// <summary>
-        /// Creates the engine.
+        /// Creates the engine with a new logger factory.
         /// </summary>
         public Engine()
+            : this(null)
         {
-            System.Diagnostics.Trace.Listeners.Add(_diagnosticsTraceListener);
-            DocumentFactory = new DocumentFactory(_settings);
         }
+
+        /// <summary>
+        /// Creates the engine with the specified service provider.
+        /// </summary>
+        /// <param name="services">The service provider.</param>
+        public Engine(IServiceProvider services)
+        {
+            Services = services ?? new ServiceCollection().AddRequiredEngineServices().BuildServiceProvider();
+            DocumentFactory = new DocumentFactory(_settings);
+            _logger = Services.GetRequiredService<ILogger<Engine>>();
+        }
+
+        /// <inheritdoc />
+        public IServiceProvider Services { get; }
 
         /// <inheritdoc />
         public IFileSystem FileSystem => _fileSystem;
@@ -158,15 +176,10 @@ namespace Statiq.Core
         /// <summary>
         /// Executes the engine. This is the primary method that kicks off generation.
         /// </summary>
-        public async Task ExecuteAsync(IServiceProvider serviceProvider, CancellationTokenSource cancellationTokenSource)
+        public async Task ExecuteAsync(CancellationTokenSource cancellationTokenSource)
         {
             // Remove the synchronization context
             await default(SynchronizationContextRemover);
-
-            if (serviceProvider == null)
-            {
-                throw new ArgumentNullException(nameof(serviceProvider));
-            }
 
             CheckDisposed();
 
@@ -212,7 +225,7 @@ namespace Statiq.Core
             try
             {
                 // Get and execute all phases
-                phaseTasks = GetPhaseTasks(executionId, serviceProvider, cancellationTokenSource);
+                phaseTasks = GetPhaseTasks(executionId, cancellationTokenSource);
                 await Task.WhenAll(phaseTasks);
             }
             catch (Exception ex)
@@ -310,22 +323,22 @@ namespace Statiq.Core
             }
         }
 
-        private Task[] GetPhaseTasks(Guid executionId, IServiceProvider serviceProvider, CancellationTokenSource cancellationTokenSource)
+        private Task[] GetPhaseTasks(Guid executionId, CancellationTokenSource cancellationTokenSource)
         {
             Dictionary<PipelinePhase, Task> phaseTasks = new Dictionary<PipelinePhase, Task>();
             foreach (PipelinePhase phase in _phases)
             {
-                phaseTasks.Add(phase, GetPhaseTaskAsync(executionId, serviceProvider, phaseTasks, phase, cancellationTokenSource));
+                phaseTasks.Add(phase, GetPhaseTaskAsync(executionId, phaseTasks, phase, cancellationTokenSource));
             }
             return phaseTasks.Values.ToArray();
         }
 
-        private Task GetPhaseTaskAsync(Guid executionId, IServiceProvider serviceProvider, Dictionary<PipelinePhase, Task> phaseTasks, PipelinePhase phase, CancellationTokenSource cancellationTokenSource)
+        private Task GetPhaseTaskAsync(Guid executionId, Dictionary<PipelinePhase, Task> phaseTasks, PipelinePhase phase, CancellationTokenSource cancellationTokenSource)
         {
             if (phase.Dependencies.Length == 0)
             {
                 // This will immediately queue the input phase while we continue figuring out tasks, but that's okay
-                return Task.Run(() => phase.ExecuteAsync(this, executionId, serviceProvider, cancellationTokenSource), cancellationTokenSource.Token);
+                return Task.Run(() => phase.ExecuteAsync(this, executionId, cancellationTokenSource), cancellationTokenSource.Token);
             }
 
             // We have to explicitly wait the execution task in the continuation function
@@ -337,7 +350,7 @@ namespace Statiq.Core
                     // Only run the dependent task if all the dependencies successfully completed
                     if (dependencies.All(x => x.IsCompletedSuccessfully))
                     {
-                        Task.WaitAll(new Task[] { phase.ExecuteAsync(this, executionId, serviceProvider, cancellationTokenSource) }, cancellationTokenSource.Token);
+                        Task.WaitAll(new Task[] { phase.ExecuteAsync(this, executionId, cancellationTokenSource) }, cancellationTokenSource.Token);
                     }
                     else
                     {
