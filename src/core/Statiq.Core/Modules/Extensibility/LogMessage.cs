@@ -28,14 +28,15 @@ namespace Statiq.Core
         }
 
         /// <summary>
-        /// Sets the log level of the message.
+        /// Outputs the string value of the returned object to trace. This allows
+        /// you to trace different content for each document depending on the input document.
         /// </summary>
         /// <param name="logLevel">The log level.</param>
-        /// <returns>The current module instance.</returns>
-        public LogMessage WithLevel(LogLevel logLevel)
+        /// <param name="content">A delegate that returns the content to trace.</param>
+        public LogMessage(LogLevel logLevel, Config<string> content)
+            : base(content, false)
         {
             _logLevel = logLevel;
-            return this;
         }
 
         protected override IEnumerable<IDocument> Execute(IDocument input, IExecutionContext context, string value)

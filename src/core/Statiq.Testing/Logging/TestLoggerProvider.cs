@@ -9,14 +9,11 @@ namespace Statiq.Testing
 {
     public class TestLoggerProvider : ILoggerProvider
     {
-        public ConcurrentQueue<TestLogger> Loggers { get; } = new ConcurrentQueue<TestLogger>();
+        public ConcurrentQueue<TestMessage> Messages { get; } = new ConcurrentQueue<TestMessage>();
 
-        public ILogger CreateLogger(string categoryName)
-        {
-            TestLogger logger = new TestLogger(categoryName);
-            Loggers.Enqueue(logger);
-            return logger;
-        }
+        public LogLevel ThrowLogLevel { get; set; } = LogLevel.Warning;
+
+        public ILogger CreateLogger(string categoryName) => new TestLogger(categoryName, Messages, ThrowLogLevel);
 
         public void Dispose()
         {

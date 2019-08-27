@@ -109,7 +109,7 @@ namespace Statiq.Testing
         public ImmutableArray<IDocument> Inputs { get; set; }
 
         /// <inheritdoc/>
-        public ILogger Logger { get; set; } = NullLogger.Instance;
+        public ILogger Logger { get; set; } = new TestLogger();
 
         public void SetInputs(IEnumerable<IDocument> inputs) =>
             Inputs = inputs?.Where(x => x != null).ToImmutableArray() ?? ImmutableArray<IDocument>.Empty;

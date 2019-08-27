@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
@@ -16,10 +17,86 @@ namespace Statiq.App.Tests
     [TestFixture]
     public class BootstrapperFixture : BaseFixture
     {
-        public class FooTests : BootstrapperFixture
+        public class RunTests : BootstrapperFixture
         {
             [Test]
-            public async Task LogLevel()
+            public async Task LogsVersion()
+            {
+                // Given
+                string[] args = new[] { "build" };
+                TestLoggerProvider provider = new TestLoggerProvider();
+                Bootstrapper bootstrapper = new Bootstrapper(args);
+                bootstrapper.AddCommand<BuildCommand>("build");
+                bootstrapper.AddServices(services => services.AddSingleton<ILoggerProvider>(provider));
+                bootstrapper.AddPipeline("Foo");
+
+                // When
+                int exitCode = await bootstrapper.RunAsync();
+
+                // Then
+                exitCode.ShouldBe((int)ExitCode.Normal);
+                provider.Messages.ShouldContain(x => x.Formatted.StartsWith("Statiq version"));
+            }
+
+            [Test]
+            public async Task NoPipelinesError()
+            {
+                // Given
+                string[] args = new[] { "build" };
+                TestLoggerProvider provider = new TestLoggerProvider
+                {
+                    ThrowLogLevel = LogLevel.None
+                };
+                Bootstrapper bootstrapper = new Bootstrapper(args);
+                bootstrapper.AddCommand<BuildCommand>("build");
+                bootstrapper.AddServices(services => services.AddSingleton<ILoggerProvider>(provider));
+
+                // When
+                int exitCode = await bootstrapper.RunAsync();
+
+                // Then
+                exitCode.ShouldBe((int)ExitCode.ExecutionError);
+                provider.Messages.ShouldContain(x =>
+                    x.LogLevel == LogLevel.Error
+                    && x.Formatted == "No pipelines are configured.");
+            }
+
+            [TestCase("Trace", 6)]
+            [TestCase("Debug", 5)]
+            [TestCase("Information", 4)]
+            [TestCase("Warning", 3)]
+            [TestCase("Error", 2)]
+            [TestCase("Critical", 1)]
+            public async Task SetsLogLevel(string logLevel, int expected)
+            {
+                // Given
+                string[] args = new[] { "build", "-l", logLevel };
+                TestLoggerProvider provider = new TestLoggerProvider
+                {
+                    ThrowLogLevel = LogLevel.None
+                };
+                Bootstrapper bootstrapper = new Bootstrapper(args);
+                bootstrapper.AddCommand<BuildCommand>("build");
+                bootstrapper.AddServices(services => services.AddSingleton<ILoggerProvider>(provider));
+                bootstrapper.AddPipeline(
+                    "Foo",
+                    new LogMessage(LogLevel.Trace, "A"),
+                    new LogMessage(LogLevel.Debug, "B"),
+                    new LogMessage(LogLevel.Information, "C"),
+                    new LogMessage(LogLevel.Warning, "D"),
+                    new LogMessage(LogLevel.Error, "E"),
+                    new LogMessage(LogLevel.Critical, "F"));
+
+                // When
+                int exitCode = await bootstrapper.RunAsync();
+
+                // Then
+                exitCode.ShouldBe((int)ExitCode.Normal);
+                provider.Messages.Count(x => x.CategoryName.StartsWith("[Foo]")).ShouldBe(expected);
+            }
+
+            [Test]
+            public async Task CatalogsType()
             {
                 // Given
                 string[] args = new[] { "build", "-l", "Debug" };
@@ -27,11 +104,15 @@ namespace Statiq.App.Tests
                 Bootstrapper bootstrapper = new Bootstrapper(args);
                 bootstrapper.AddCommand<BuildCommand>("build");
                 bootstrapper.AddServices(services => services.AddSingleton<ILoggerProvider>(provider));
-                bootstrapper.AddPipeline("Pipeline", new LogMessage("A"));
+                bootstrapper.AddPipeline("Foo");
 
+                // When
                 int exitCode = await bootstrapper.RunAsync();
 
+                // Then
                 exitCode.ShouldBe((int)ExitCode.Normal);
+                bootstrapper.ClassCatalog.GetAssignableFrom<BootstrapperFixture>().Count().ShouldBe(1);
+                provider.Messages.ShouldContain(x => x.Formatted.StartsWith("Cataloging types in assembly"));
             }
         }
     }
