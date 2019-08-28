@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 using Statiq.Common;
 
 namespace Statiq.SearchIndex
@@ -170,7 +171,7 @@ namespace Statiq.SearchIndex
 
             if (searchIndexItems.Length == 0)
             {
-                Trace.Warning("It's not possible to build the search index because no documents contain the necessary metadata.");
+                context.Logger.LogWarning("It's not possible to build the search index because no documents contain the necessary metadata.");
                 return Array.Empty<IDocument>();
             }
 

@@ -28,7 +28,7 @@ namespace Statiq.App
             // Run engine configurators after command line, settings, etc. have been applied
             configurators.Configure<IEngine>(Engine);
 
-            // Trace the full environment
+            // Log the full environment
             _logger.LogInformation($"Root path:{Environment.NewLine}    {Engine.FileSystem.RootPath}");
             _logger.LogInformation($"Input path(s):{Environment.NewLine}    {string.Join(Environment.NewLine + "    ", Engine.FileSystem.InputPaths)}");
             _logger.LogInformation($"Output path:{Environment.NewLine}    {Engine.FileSystem.OutputPath}");

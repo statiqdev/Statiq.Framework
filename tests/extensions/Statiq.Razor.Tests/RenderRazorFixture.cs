@@ -2,6 +2,8 @@
 using System.Collections.Immutable;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using NUnit.Framework;
 using Shouldly;
 using Statiq.Common;
@@ -29,46 +31,6 @@ namespace Statiq.Razor.Tests
 
                 // Then
                 result.Content.ShouldBe(" <p>0</p>  <p>1</p>  <p>2</p>  <p>3</p>  <p>4</p> ");
-            }
-
-            [Test]
-            [NonParallelizable]
-            public async Task Tracing()
-            {
-                // Given
-                Engine engine = new Engine();
-                TestExecutionContext context = GetExecutionContext(engine);
-                TestDocument document = new TestDocument(@"@{ Trace.Information(""Test""); }");
-                TraceListener traceListener = new TraceListener();
-                Trace.AddListener(traceListener);
-                RenderRazor razor = new RenderRazor();
-
-                // When
-                await ExecuteAsync(document, context, razor).SingleAsync();
-
-                // Then
-                Trace.RemoveListener(traceListener);
-                traceListener.Messages.ShouldContain("Test");
-            }
-
-            public class TraceListener : System.Diagnostics.TextWriterTraceListener
-            {
-                public List<string> Messages { get; set; } = new List<string>();
-
-                public override void TraceEvent(System.Diagnostics.TraceEventCache eventCache, string source, System.Diagnostics.TraceEventType eventType, int id, string message)
-                {
-                    LogMessage(eventType, message);
-                }
-
-                public override void TraceEvent(System.Diagnostics.TraceEventCache eventCache, string source, System.Diagnostics.TraceEventType eventType, int id, string format, params object[] args)
-                {
-                    LogMessage(eventType, string.Format(format, args));
-                }
-
-                private void LogMessage(System.Diagnostics.TraceEventType eventType, string message)
-                {
-                    Messages.Add(message);
-                }
             }
 
             [Test]
@@ -394,7 +356,12 @@ namespace Statiq.Razor.Tests
                 return new TestExecutionContext
                 {
                     Namespaces = engine.Namespaces,
-                    FileSystem = GetFileSystem()
+                    FileSystem = GetFileSystem(),
+                    Services = new TestServiceProvider(serviceCollection =>
+                    {
+                        serviceCollection.AddLogging();
+                        serviceCollection.AddSingleton<ILoggerProvider, TestLoggerProvider>();
+                    })
                 };
             }
 

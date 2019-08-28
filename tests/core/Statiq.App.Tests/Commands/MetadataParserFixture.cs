@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using NUnit.Framework;
 using Statiq.Testing;
 
-namespace Statiq.App.Tests
+namespace Statiq.App.Tests.Commands
 {
     [TestFixture]
     public class MetadataParserFixture : BaseFixture

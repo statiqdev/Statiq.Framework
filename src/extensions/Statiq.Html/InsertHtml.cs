@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using AngleSharp.Dom;
 using AngleSharp.Dom.Html;
 using AngleSharp.Parser.Html;
+using Microsoft.Extensions.Logging;
 using Statiq.Common;
 
 namespace Statiq.Html
@@ -74,7 +75,7 @@ namespace Statiq.Html
             }
 
             // Parse the HTML content
-            IHtmlDocument htmlDocument = await input.ParseHtmlAsync(HtmlParser);
+            IHtmlDocument htmlDocument = await input.ParseHtmlAsync(context, HtmlParser);
             if (htmlDocument == null)
             {
                 return input.Yield();
@@ -110,7 +111,7 @@ namespace Statiq.Html
             }
             catch (Exception ex)
             {
-                Trace.Warning("Exception while processing HTML for {0}: {1}", input.ToSafeDisplayString(), ex.Message);
+                context.Logger.LogWarning("Exception while processing HTML for {0}: {1}", input.ToSafeDisplayString(), ex.Message);
                 return input.Yield();
             }
         }

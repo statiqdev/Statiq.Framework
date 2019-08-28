@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 using Statiq.Common;
 
 namespace Statiq.Core
@@ -62,7 +63,7 @@ namespace Statiq.Core
                 files = await files.ParallelWhereAsync(async file => _predicate == null || await _predicate(file));
                 return files.AsParallel().Select(file =>
                 {
-                    Trace.Verbose($"Read file {file.Path.FullPath}");
+                    context.Logger.LogDebug($"Read file {file.Path.FullPath}");
                     return context.CloneOrCreateDocument(input, file.Path, file.Path.GetRelativeInputPath(context), context.GetContentProvider(file));
                 });
             }

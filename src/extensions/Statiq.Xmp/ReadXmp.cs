@@ -7,6 +7,7 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using MetadataExtractor;
 using MetadataExtractor.Formats.Xmp;
+using Microsoft.Extensions.Logging;
 using Statiq.Common;
 using XmpCore;
 
@@ -137,7 +138,7 @@ namespace Statiq.Xmp
             {
                 if (_toSearch.Any(y => y.IsMandatory))
                 {
-                    Trace.Warning($"File doe not contain Metadata or sidecar file ({input.ToSafeDisplayString()})");
+                    context.Logger.LogWarning($"File doe not contain Metadata or sidecar file ({input.ToSafeDisplayString()})");
                     if (_skipElementOnMissingData)
                     {
                         return null;
@@ -160,7 +161,7 @@ namespace Statiq.Xmp
                     {
                         if (search.IsMandatory)
                         {
-                            Trace.Error($"Metadata does not Contain {search.XmpPath} ({input.ToSafeDisplayString()})");
+                            context.Logger.LogError($"Metadata does not Contain {search.XmpPath} ({input.ToSafeDisplayString()})");
                             if (_skipElementOnMissingData)
                             {
                                 return null;
@@ -171,7 +172,7 @@ namespace Statiq.Xmp
                     object value = GetObjectFromMetadata(metadata, hierarchicalDirectory);
                     if (newValues.ContainsKey(search.MetadataKey) && _errorOnDoubleKeys)
                     {
-                        Trace.Error($"This Module tries to write same Key multiple times {search.MetadataKey} ({input.ToSafeDisplayString()})");
+                        context.Logger.LogError($"This Module tries to write same Key multiple times {search.MetadataKey} ({input.ToSafeDisplayString()})");
                     }
                     else
                     {
@@ -180,7 +181,7 @@ namespace Statiq.Xmp
                 }
                 catch (Exception e)
                 {
-                    Trace.Error($"An exception occurred : {e} {e.Message}");
+                    context.Logger.LogError($"An exception occurred : {e} {e.Message}");
                     if (search.IsMandatory && _skipElementOnMissingData)
                     {
                         return null;

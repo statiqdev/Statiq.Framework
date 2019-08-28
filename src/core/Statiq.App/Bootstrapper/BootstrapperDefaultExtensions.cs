@@ -38,7 +38,7 @@ namespace Statiq.App
                 bootstrapper.Configurators.Add(bootstraperConfigurator);
             }
             foreach (IConfigurator<IBootstrapper> bootstraperConfigurator
-                in bootstrapper.ClassCatalog.GetInstances<IConfigurator<IConfigurableBootstrapper>>())
+                in bootstrapper.ClassCatalog.GetInstances<IConfigurator<IBootstrapper>>())
             {
                 bootstrapper.Configurators.Add(bootstraperConfigurator);
             }

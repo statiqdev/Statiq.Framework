@@ -4,8 +4,8 @@ using System.Collections.Immutable;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 using Statiq.Common;
-using Trace = Statiq.Common.Trace;
 
 namespace Statiq.Razor
 {
@@ -144,7 +144,7 @@ namespace Statiq.Razor
 
             if (validInputs.Length < context.Inputs.Length)
             {
-                Trace.Information($"Ignoring {context.Inputs.Length - validInputs.Length} inputs due to source file name prefix");
+                context.Logger.LogInformation($"Ignoring {context.Inputs.Length - validInputs.Length} inputs due to source file name prefix");
             }
 
             // Compile and evaluate the pages in parallel
@@ -152,7 +152,7 @@ namespace Statiq.Razor
 
             async Task<IDocument> RenderDocumentAsync(IDocument input)
             {
-                Trace.Verbose("Processing Razor for {0}", input.ToSafeDisplayString());
+                context.Logger.LogDebug("Processing Razor for {0}", input.ToSafeDisplayString());
 
                 using (Stream contentStream = await context.GetContentStreamAsync())
                 {

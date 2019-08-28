@@ -8,7 +8,6 @@ using System.Linq;
 using System.Threading.Tasks;
 using NUnit.Framework;
 using Statiq.Common;
-using Trace = Statiq.Common.Trace;
 
 namespace Statiq.Testing
 {

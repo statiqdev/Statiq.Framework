@@ -9,11 +9,11 @@ using System.Threading.Tasks;
 using AngleSharp.Dom;
 using AngleSharp.Dom.Html;
 using AngleSharp.Parser.Html;
+using Microsoft.Extensions.Logging;
 using Polly;
 using Polly.Retry;
 using Statiq.Common;
 using IDocument = Statiq.Common.IDocument;
-using Trace = Statiq.Common.Trace;
 
 namespace Statiq.Html
 {
@@ -90,7 +90,7 @@ namespace Statiq.Html
 
             // Gather all links
             HtmlParser parser = new HtmlParser();
-            await context.Inputs.ParallelForEachAsync(async input => await GatherLinksAsync(input, parser, links));
+            await context.Inputs.ParallelForEachAsync(async input => await GatherLinksAsync(input, context, parser, links));
 
             // This policy will limit the number of executing link validations.
             // Limit the amount of concurrent link checks to avoid overwhelming servers.
@@ -100,26 +100,26 @@ namespace Statiq.Html
                     // Attempt to parse the URI
                     if (!Uri.TryCreate(link.Key, UriKind.RelativeOrAbsolute, out Uri uri))
                     {
-                        AddOrUpdateFailure(link.Value, failures);
+                        AddOrUpdateFailure(context, link.Value, failures);
                     }
 
                     // Adjustment for double-slash link prefix which means use http:// or https:// depending on current protocol
                     // The Uri class treats these as relative, but they're really absolute
                     if (uri.ToString().StartsWith("//") && !Uri.TryCreate($"http:{link.Key}", UriKind.Absolute, out uri))
                     {
-                        AddOrUpdateFailure(link.Value, failures);
+                        AddOrUpdateFailure(context, link.Value, failures);
                     }
 
                     // Relative
                     if (!uri.IsAbsoluteUri && _validateRelativeLinks && !await ValidateRelativeLinkAsync(uri, context))
                     {
-                        AddOrUpdateFailure(link.Value, failures);
+                        AddOrUpdateFailure(context, link.Value, failures);
                     }
 
                     // Absolute
                     if (uri.IsAbsoluteUri && _validateAbsoluteLinks && !await ValidateAbsoluteLinkAsync(uri, context))
                     {
-                        AddOrUpdateFailure(link.Value, failures);
+                        AddOrUpdateFailure(context, link.Value, failures);
                     }
                 }).ToArray();
 
@@ -132,8 +132,8 @@ namespace Statiq.Html
                 string failureMessage = string.Join(
                     Environment.NewLine,
                     failures.Select(x => $"{x.Key}{Environment.NewLine} - {string.Join(Environment.NewLine + " - ", x.Value)}"));
-                Trace.TraceEvent(
-                    _asError ? TraceEventType.Error : TraceEventType.Warning,
+                context.Logger.Log(
+                    _asError ? LogLevel.Error : LogLevel.Warning,
                     $"{failureCount} link validation failures:{Environment.NewLine}{failureMessage}");
             }
 
@@ -141,9 +141,9 @@ namespace Statiq.Html
         }
 
         // Internal for testing
-        internal static async Task GatherLinksAsync(IDocument input, HtmlParser parser, ConcurrentDictionary<string, ConcurrentBag<(string source, string outerHtml)>> links)
+        internal static async Task GatherLinksAsync(IDocument input, IExecutionContext context, HtmlParser parser, ConcurrentDictionary<string, ConcurrentBag<(string source, string outerHtml)>> links)
         {
-            IHtmlDocument htmlDocument = await input.ParseHtmlAsync(parser);
+            IHtmlDocument htmlDocument = await input.ParseHtmlAsync(context, parser);
             if (htmlDocument != null)
             {
                 // Links
@@ -226,7 +226,7 @@ namespace Statiq.Html
                 }
                 catch (Exception ex)
                 {
-                    Trace.Verbose($"Could not validate path {x.FullPath} for relative link {uri}: {ex.Message}");
+                    context.Logger.LogDebug($"Could not validate path {x.FullPath} for relative link {uri}: {ex.Message}");
                     return false;
                 }
 
@@ -235,7 +235,7 @@ namespace Statiq.Html
 
             if (validatedPath != null)
             {
-                Trace.Verbose($"Validated relative link {uri} at {validatedPath.FullPath}");
+                context.Logger.LogDebug($"Validated relative link {uri} at {validatedPath.FullPath}");
                 return true;
             }
 
@@ -245,7 +245,7 @@ namespace Statiq.Html
                 return await ValidateAbsoluteLinkAsync(absoluteCheckUri, context);
             }
 
-            Trace.Verbose($"Validation failure for relative link {uri}: could not find output file at any of {string.Join(", ", checkPaths.Select(x => x.FullPath))}");
+            context.Logger.LogDebug($"Validation failure for relative link {uri}: could not find output file at any of {string.Join(", ", checkPaths.Select(x => x.FullPath))}");
             return false;
         }
 
@@ -291,34 +291,34 @@ namespace Statiq.Html
                 // Even with exponential backoff we have TooManyRequests, just skip, since we have to assume it's valid.
                 if (response.StatusCode == TooManyRequests)
                 {
-                    Trace.Verbose($"Skipping absolute link {uri}: too many requests have been issued so can't reliably test.");
+                    context.Logger.LogDebug($"Skipping absolute link {uri}: too many requests have been issued so can't reliably test.");
                     return true;
                 }
 
                 // We don't use IsSuccessStatusCode, we consider in this case 300's valid.
                 if (response.StatusCode >= HttpStatusCode.BadRequest)
                 {
-                    Trace.Verbose($"Validation failure for absolute link {method} {uri}: returned status code {(int)response.StatusCode} {response.StatusCode}");
+                    context.Logger.LogDebug($"Validation failure for absolute link {method} {uri}: returned status code {(int)response.StatusCode} {response.StatusCode}");
                     return false;
                 }
 
                 // We don't bother disposing of the response in this case. Due to advice from here: https://stackoverflow.com/questions/15705092/do-httpclient-and-httpclienthandler-have-to-be-disposed
-                Trace.Verbose($"Validation success for absolute link {method} {uri}: returned status code {(int)response.StatusCode} {response.StatusCode}");
+                context.Logger.LogDebug($"Validation success for absolute link {method} {uri}: returned status code {(int)response.StatusCode} {response.StatusCode}");
                 return true;
             }
             catch (TaskCanceledException ex)
             {
-                Trace.Verbose($"Skipping absolute link {method} {uri} due to timeout: {ex}.");
+                context.Logger.LogDebug($"Skipping absolute link {method} {uri} due to timeout: {ex}.");
                 return true;
             }
             catch (ArgumentException ex)
             {
-                Trace.Verbose($"Skipping absolute link {method} {uri} due to invalid uri: {ex}.");
+                context.Logger.LogDebug($"Skipping absolute link {method} {uri} due to invalid uri: {ex}.");
                 return true;
             }
             catch (Exception ex)
             {
-                Trace.Verbose($"Skipping absolute link {method} {uri} due to unknown error: {ex}.");
+                context.Logger.LogDebug($"Skipping absolute link {method} {uri} due to unknown error: {ex}.");
                 return true;
             }
         }
@@ -340,13 +340,13 @@ namespace Statiq.Html
                 });
         }
 
-        private static void AddOrUpdateFailure(ConcurrentBag<(string source, string outerHtml)> links, ConcurrentDictionary<string, ConcurrentBag<string>> failures)
+        private static void AddOrUpdateFailure(IExecutionContext context, ConcurrentBag<(string source, string outerHtml)> links, ConcurrentDictionary<string, ConcurrentBag<string>> failures)
         {
             foreach ((string source, string outerHtml) in links)
             {
                 if (source == null)
                 {
-                    Trace.Warning($"Validation failure for link: unknown file for {outerHtml}.");
+                    context.Logger.LogWarning($"Validation failure for link: unknown file for {outerHtml}.");
                     continue;
                 }
 

@@ -10,6 +10,7 @@ using Markdig.Helpers;
 using Markdig.Parsers;
 using Markdig.Renderers;
 using Markdig.Syntax;
+using Microsoft.Extensions.Logging;
 using Statiq.Common;
 
 namespace Statiq.Markdown
@@ -173,7 +174,7 @@ namespace Statiq.Markdown
 
         protected override async Task<IEnumerable<IDocument>> ExecuteAsync(IDocument input, IExecutionContext context)
         {
-            Trace.Verbose(
+            context.Logger.LogDebug(
                    "Processing Markdown {0} for {1}",
                    string.IsNullOrEmpty(_sourceKey) ? string.Empty : ("in" + _sourceKey),
                    input.ToSafeDisplayString());

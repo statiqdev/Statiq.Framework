@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Dynamic;
 using System.IO;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using Statiq.Common;
 
@@ -78,7 +79,7 @@ namespace Statiq.Json
             catch (Exception ex)
             {
                 // Return original input on exception
-                Trace.Error($"Error processing JSON for {input.ToSafeDisplayString()}, returning original input document: {ex}");
+                context.Logger.LogError($"Error processing JSON for {input.ToSafeDisplayString()}, returning original input document: {ex}");
             }
             return input.Yield();
         }

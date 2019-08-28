@@ -6,6 +6,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Buildalyzer;
 using Microsoft.CodeAnalysis;
+using Microsoft.Extensions.Logging;
 using Statiq.Common;
 
 namespace Statiq.CodeAnalysis
@@ -71,19 +72,19 @@ namespace Statiq.CodeAnalysis
         /// <returns>A sequence of Roslyn <see cref="Project"/> instances in the workspace.</returns>
         protected abstract IEnumerable<Project> GetProjects(IExecutionContext context, IFile file);
 
-        protected internal static AnalyzerResult CompileProjectAndTrace(ProjectAnalyzer analyzer, StringWriter log)
+        protected internal static AnalyzerResult CompileProject(IExecutionContext context, ProjectAnalyzer analyzer, StringWriter log)
         {
             log.GetStringBuilder().Clear();
-            Common.Trace.Verbose($"Building project {analyzer.ProjectFile.Path}");
+            context.Logger.LogDebug($"Building project {analyzer.ProjectFile.Path}");
             Stopwatch sw = new Stopwatch();
             sw.Start();
             AnalyzerResult result = analyzer.Build().FirstOrDefault();
             sw.Stop();
-            Common.Trace.Verbose($"Project {analyzer.ProjectFile.Path} built in {sw.ElapsedMilliseconds} ms");
+            context.Logger.LogDebug($"Project {analyzer.ProjectFile.Path} built in {sw.ElapsedMilliseconds} ms");
             if (result?.Succeeded != true)
             {
-                Common.Trace.Error($"Could not compile project at {analyzer.ProjectFile.Path}");
-                Common.Trace.Warning(log.ToString());
+                context.Logger.LogError($"Could not compile project at {analyzer.ProjectFile.Path}");
+                context.Logger.LogWarning(log.ToString());
                 return null;
             }
             return result;
@@ -101,7 +102,7 @@ namespace Statiq.CodeAnalysis
 
                 IEnumerable<IDocument> GetProjectDocuments(Project project)
                 {
-                    Common.Trace.Verbose("Read project {0}", project.Name);
+                    context.Logger.LogDebug("Read project {0}", project.Name);
                     string assemblyName = project.AssemblyName;
                     return project.Documents
                         .Where(x => !string.IsNullOrWhiteSpace(x.FilePath))
@@ -111,7 +112,7 @@ namespace Statiq.CodeAnalysis
 
                     IDocument GetProjectDocument(IFile file)
                     {
-                        Common.Trace.Verbose($"Read file {file.Path.FullPath}");
+                        context.Logger.LogDebug($"Read file {file.Path.FullPath}");
                         return context.CreateDocument(
                             file.Path,
                             null,

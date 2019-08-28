@@ -12,7 +12,7 @@ using Statiq.Common;
 using Statiq.Core;
 using Statiq.Testing;
 
-namespace Statiq.App.Tests
+namespace Statiq.App.Tests.Bootstrapper
 {
     [TestFixture]
     public class BootstrapperFixture : BaseFixture
@@ -25,7 +25,7 @@ namespace Statiq.App.Tests
                 // Given
                 string[] args = new[] { "build" };
                 TestLoggerProvider provider = new TestLoggerProvider();
-                Bootstrapper bootstrapper = new Bootstrapper(args);
+                App.Bootstrapper bootstrapper = new App.Bootstrapper(args);
                 bootstrapper.AddCommand<BuildCommand>("build");
                 bootstrapper.AddServices(services => services.AddSingleton<ILoggerProvider>(provider));
                 bootstrapper.AddPipeline("Foo");
@@ -47,7 +47,7 @@ namespace Statiq.App.Tests
                 {
                     ThrowLogLevel = LogLevel.None
                 };
-                Bootstrapper bootstrapper = new Bootstrapper(args);
+                App.Bootstrapper bootstrapper = new App.Bootstrapper(args);
                 bootstrapper.AddCommand<BuildCommand>("build");
                 bootstrapper.AddServices(services => services.AddSingleton<ILoggerProvider>(provider));
 
@@ -75,7 +75,7 @@ namespace Statiq.App.Tests
                 {
                     ThrowLogLevel = LogLevel.None
                 };
-                Bootstrapper bootstrapper = new Bootstrapper(args);
+                App.Bootstrapper bootstrapper = new App.Bootstrapper(args);
                 bootstrapper.AddCommand<BuildCommand>("build");
                 bootstrapper.AddServices(services => services.AddSingleton<ILoggerProvider>(provider));
                 bootstrapper.AddPipeline(
@@ -92,7 +92,7 @@ namespace Statiq.App.Tests
 
                 // Then
                 exitCode.ShouldBe((int)ExitCode.Normal);
-                provider.Messages.Count(x => x.CategoryName.StartsWith("[Foo]")).ShouldBe(expected);
+                provider.Messages.Count(x => x.CategoryName.StartsWith("Foo")).ShouldBe(expected);
             }
 
             [Test]
@@ -101,7 +101,7 @@ namespace Statiq.App.Tests
                 // Given
                 string[] args = new[] { "build", "-l", "Debug" };
                 TestLoggerProvider provider = new TestLoggerProvider();
-                Bootstrapper bootstrapper = new Bootstrapper(args);
+                App.Bootstrapper bootstrapper = new App.Bootstrapper(args);
                 bootstrapper.AddCommand<BuildCommand>("build");
                 bootstrapper.AddServices(services => services.AddSingleton<ILoggerProvider>(provider));
                 bootstrapper.AddPipeline("Foo");

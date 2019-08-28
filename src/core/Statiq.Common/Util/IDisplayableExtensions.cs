@@ -3,7 +3,7 @@
     public static class IDisplayableExtensions
     {
         /// <summary>
-        /// A safe display string that can be used for tracing and returns "null" when the
+        /// A safe display string that can be used for logging and returns "null" when the
         /// underlying object is null.
         /// </summary>
         /// <param name="displayable">The <see cref="IDisplayable"/> object.</param>

@@ -15,7 +15,7 @@ namespace Statiq.App
         public bool Attach { get; set; }
 
         [CommandOption("-f|--log-file")]
-        [Description("Log all trace messages to the specified log file.")]
+        [Description("Log all messages to the specified log file.")]
         public string LogFile { get; set; }
     }
 }

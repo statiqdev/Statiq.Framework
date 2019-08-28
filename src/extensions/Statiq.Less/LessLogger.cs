@@ -1,67 +1,50 @@
 ﻿using System.Diagnostics;
-using dotless.Core.Loggers;
+using Microsoft.Extensions.Logging;
 
 namespace Statiq.Less
 {
-    internal class LessLogger : ILogger
+    internal class LessLogger : dotless.Core.Loggers.ILogger
     {
-        public void Log(LogLevel level, string message)
+        private readonly ILogger _logger;
+
+        public LessLogger(ILogger logger)
+        {
+            _logger = logger;
+        }
+
+        public void Log(dotless.Core.Loggers.LogLevel level, string message)
         {
             switch (level)
             {
-                case LogLevel.Info:
+                case dotless.Core.Loggers.LogLevel.Info:
                     Info(message);
                     break;
-                case LogLevel.Debug:
+                case dotless.Core.Loggers.LogLevel.Debug:
                     Debug(message);
                     break;
-                case LogLevel.Warn:
+                case dotless.Core.Loggers.LogLevel.Warn:
                     Warn(message);
                     break;
-                case LogLevel.Error:
+                case dotless.Core.Loggers.LogLevel.Error:
                     Error(message);
                     break;
             }
         }
 
-        public void Info(string message)
-        {
-            Trace.TraceInformation(message);
-        }
+        public void Info(string message) => _logger.LogInformation(message);
 
-        public void Info(string message, params object[] args)
-        {
-            Trace.TraceInformation(message, args);
-        }
+        public void Info(string message, params object[] args) => _logger.LogInformation(message, args);
 
-        public void Debug(string message)
-        {
-            System.Diagnostics.Debug.WriteLine(message);
-        }
+        public void Debug(string message) => _logger.LogDebug(message);
 
-        public void Debug(string message, params object[] args)
-        {
-            System.Diagnostics.Debug.WriteLine(message, args);
-        }
+        public void Debug(string message, params object[] args) => _logger.LogDebug(message, args);
 
-        public void Warn(string message)
-        {
-            Trace.TraceWarning(message);
-        }
+        public void Warn(string message) => _logger.LogWarning(message);
 
-        public void Warn(string message, params object[] args)
-        {
-            Trace.TraceWarning(message, args);
-        }
+        public void Warn(string message, params object[] args) => _logger.LogWarning(message, args);
 
-        public void Error(string message)
-        {
-            Trace.TraceError(message);
-        }
+        public void Error(string message) => _logger.LogError(message);
 
-        public void Error(string message, params object[] args)
-        {
-            Trace.TraceError(message, args);
-        }
+        public void Error(string message, params object[] args) => _logger.LogError(message, args);
     }
 }

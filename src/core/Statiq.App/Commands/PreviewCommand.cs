@@ -57,6 +57,7 @@ namespace Statiq.App
 
         public override async Task<int> ExecuteCommandAsync(IServiceProvider services, CommandContext context, Settings settings)
         {
+            ILogger logger = services.GetRequiredService<ILogger<Bootstrapper>>();
             ExitCode exitCode = ExitCode.Normal;
             using (EngineManager engineManager = new EngineManager(services, _configurators, settings))
             {
@@ -71,19 +72,22 @@ namespace Statiq.App
                 Dictionary<string, string> contentTypes = settings.ContentTypes?.Length > 0
                     ? GetContentTypes(settings.ContentTypes)
                     : new Dictionary<string, string>();
+                ILoggerProvider loggerProvider = services.GetRequiredService<ILoggerProvider>();
                 Server previewServer = await StartPreviewServerAsync(
                     engineManager.Engine.FileSystem.GetOutputDirectory().Path,
                     settings.Port,
                     settings.ForceExt,
                     settings.VirtualDirectory,
                     !settings.NoReload,
-                    contentTypes);
+                    contentTypes,
+                    loggerProvider,
+                    logger);
 
                 // Start the watchers
                 ActionFileSystemWatcher inputFolderWatcher = null;
                 if (!settings.NoWatch)
                 {
-                    Trace.Information("Watching paths(s) {0}", string.Join(", ", engineManager.Engine.FileSystem.InputPaths));
+                    logger.LogInformation("Watching paths(s) {0}", string.Join(", ", engineManager.Engine.FileSystem.InputPaths));
                     inputFolderWatcher = new ActionFileSystemWatcher(
                         engineManager.Engine.FileSystem.GetOutputDirectory().Path,
                         engineManager.Engine.FileSystem.GetInputDirectories().Select(x => x.Path),
@@ -104,7 +108,7 @@ namespace Statiq.App
                     // Start the key listening thread
                     Thread thread = new Thread(() =>
                     {
-                        Trace.Information("Hit Ctrl-C to exit");
+                        logger.LogInformation("Hit Ctrl-C to exit");
                         Console.TreatControlCAsInput = true;
                         while (true)
                         {
@@ -140,12 +144,12 @@ namespace Statiq.App
                     {
                         if (changedFiles.Add(changedFile))
                         {
-                            Trace.Verbose("{0} has changed", changedFile);
+                            logger.LogDebug($"{changedFile} has changed");
                         }
                     }
                     if (changedFiles.Count > 0)
                     {
-                        Trace.Information("{0} files have changed, re-executing", changedFiles.Count);
+                        logger.LogInformation($"{changedFiles.Count} files have changed, re-executing");
 
                         // Reset caches when an error occurs during the previous preview
                         object existingResetCacheSetting = null;
@@ -183,12 +187,12 @@ namespace Statiq.App
                     {
                         break;
                     }
-                    Trace.Information("Hit Ctrl-C to exit");
+                    logger.LogInformation("Hit Ctrl-C to exit");
                     _messageEvent.Reset();
                 }
 
                 // Shutdown
-                Trace.Information("Shutting down");
+                logger.LogInformation("Shutting down");
                 inputFolderWatcher?.Dispose();
                 previewServer.Dispose();
             }
@@ -211,22 +215,30 @@ namespace Statiq.App
             return contentTypeDictionary;
         }
 
-        private static async Task<Server> StartPreviewServerAsync(DirectoryPath path, int port, bool forceExtension, DirectoryPath virtualDirectory, bool liveReload, IDictionary<string, string> contentTypes)
+        private static async Task<Server> StartPreviewServerAsync(
+            DirectoryPath path,
+            int port,
+            bool forceExtension,
+            DirectoryPath virtualDirectory,
+            bool liveReload,
+            IDictionary<string, string> contentTypes,
+            ILoggerProvider loggerProvider,
+            ILogger logger)
         {
             Server server;
             try
             {
-                server = new Server(path.FullPath, port, !forceExtension, virtualDirectory?.FullPath, liveReload, contentTypes, new TraceLoggerProvider());
+                server = new Server(path.FullPath, port, !forceExtension, virtualDirectory?.FullPath, liveReload, contentTypes, loggerProvider);
                 await server.StartAsync();
             }
             catch (Exception ex)
             {
-                Trace.Critical($"Error while running preview server: {ex}");
+                logger.LogCritical(ex, $"Error while running preview server: {ex}");
                 return null;
             }
 
             string urlPath = server.VirtualDirectory ?? string.Empty;
-            Trace.Information($"Preview server listening at http://localhost:{port}{urlPath} and serving from path {path}"
+            logger.LogInformation($"Preview server listening at http://localhost:{port}{urlPath} and serving from path {path}"
                 + (liveReload ? " with LiveReload support" : string.Empty));
             return server;
         }

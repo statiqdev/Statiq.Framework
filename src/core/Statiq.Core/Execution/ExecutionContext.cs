@@ -91,7 +91,7 @@ namespace Statiq.Core
                 modules.Push(parent.Module.GetType().Name);
                 parent = parent.Parent;
             }
-            return loggerFactory?.CreateLogger($"[{pipelinePhase.PipelineName}][{pipelinePhase.Phase}][{string.Join('.', modules)}]") ?? NullLogger.Instance;
+            return loggerFactory?.CreateLogger($"{pipelinePhase.PipelineName} ({pipelinePhase.Phase}): {string.Join('/', modules)}") ?? NullLogger.Instance;
         }
 
         /// <inheritdoc/>

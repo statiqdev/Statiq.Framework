@@ -63,7 +63,7 @@ namespace Statiq.Razor
                 new Type[] { typeof(RazorCodeDocument), typeof(IEnumerable<RazorDiagnostic>) });
         }
 
-        public RazorCompiler(CompilationParameters parameters)
+        public RazorCompiler(CompilationParameters parameters, IExecutionContext context)
         {
             _namespaces = parameters.Namespaces;
 
@@ -84,7 +84,7 @@ namespace Statiq.Razor
             serviceCollection
                 .AddSingleton(parameters.FileSystem)
                 .AddSingleton<FileSystemFileProvider>()
-                .AddSingleton<ILoggerFactory, TraceLoggerFactory>()
+                .AddSingleton(context.Services.GetRequiredService<ILoggerFactory>())
                 .AddSingleton<DiagnosticSource, SilentDiagnosticSource>()
                 .AddSingleton<IHostingEnvironment, HostingEnvironment>()
                 .AddSingleton<ObjectPoolProvider, DefaultObjectPoolProvider>()
@@ -92,7 +92,7 @@ namespace Statiq.Razor
                 .AddSingleton<IViewCompilerProvider, StatiqRazorViewCompilerProvider>()
                 .AddSingleton<StatiqRazorProjectFileSystem>()
                 .AddSingleton<RazorProjectFileSystem, StatiqRazorProjectFileSystem>()
-                .AddSingleton<RazorProjectEngine>(x =>
+                .AddSingleton(x =>
                     RazorProjectEngine.Create(
                         RazorConfiguration.Default,
                         x.GetRequiredService<RazorProjectFileSystem>(),

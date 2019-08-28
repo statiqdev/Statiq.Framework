@@ -16,7 +16,5 @@ namespace Statiq.Razor
         public IPipelineOutputs Outputs => ExecutionContext.Outputs;
 
         public HttpContext HttpContext => base.Context;
-
-        public Trace Trace => Trace.Current;
     }
 }

@@ -3,6 +3,7 @@ using System.IO;
 using System.Threading.Tasks;
 using AngleSharp.Dom.Html;
 using AngleSharp.Parser.Html;
+using Microsoft.Extensions.Logging;
 using Statiq.Common;
 
 namespace Statiq.Html
@@ -13,17 +14,19 @@ namespace Statiq.Html
         /// Gets an <see cref="IHtmlDocument"/> by parsing the content of an <see cref="IDocument"/>.
         /// </summary>
         /// <param name="document">The document to parse.</param>
+        /// <param name="context">The current execution context.</param>
         /// <returns>The parsed HTML document.</returns>
-        public static async Task<IHtmlDocument> ParseHtmlAsync(this IDocument document) =>
-            await ParseHtmlAsync(document, new HtmlParser());
+        public static async Task<IHtmlDocument> ParseHtmlAsync(this IDocument document, IExecutionContext context) =>
+            await ParseHtmlAsync(document, context, new HtmlParser());
 
         /// <summary>
         /// Gets an <see cref="IHtmlDocument"/> by parsing the content of an <see cref="IDocument"/>.
         /// </summary>
         /// <param name="document">The document to parse.</param>
+        /// <param name="context">The current execution context.</param>
         /// <param name="parser">A parser instance.</param>
         /// <returns>The parsed HTML document.</returns>
-        public static async Task<IHtmlDocument> ParseHtmlAsync(this IDocument document, HtmlParser parser)
+        public static async Task<IHtmlDocument> ParseHtmlAsync(this IDocument document, IExecutionContext context, HtmlParser parser)
         {
             try
             {
@@ -34,7 +37,7 @@ namespace Statiq.Html
             }
             catch (Exception ex)
             {
-                Trace.Warning("Exception while parsing HTML for {0}: {1}", document.ToSafeDisplayString(), ex.Message);
+                context.Logger.LogWarning("Exception while parsing HTML for {0}: {1}", document.ToSafeDisplayString(), ex.Message);
             }
             return null;
         }

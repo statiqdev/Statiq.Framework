@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using AngleSharp.Dom;
 using AngleSharp.Dom.Html;
 using AngleSharp.Parser.Html;
+using Microsoft.Extensions.Logging;
 using Polly;
 using Polly.Retry;
 using Statiq.Common;
@@ -75,7 +76,7 @@ namespace Statiq.Html
 
             async Task<Common.IDocument> GetDocumentAsync(Common.IDocument input)
             {
-                IHtmlDocument htmlDocument = await input.ParseHtmlAsync(parser);
+                IHtmlDocument htmlDocument = await input.ParseHtmlAsync(context, parser);
                 if (htmlDocument != null)
                 {
                     bool modifiedDocument = false;
@@ -152,7 +153,7 @@ namespace Statiq.Html
             IFile outputFile = context.FileSystem.GetOutputFile(path);
             if (!outputFile.Exists)
             {
-                Common.Trace.Verbose($"Downloading resource from {uri} to {path.FullPath}");
+                context.Logger.LogDebug($"Downloading resource from {uri} to {path.FullPath}");
 
                 // Retry with exponential backoff links. This helps with websites like GitHub that will give us a 429 -- TooManyRequests.
                 AsyncRetryPolicy<HttpResponseMessage> retryPolicy = Policy

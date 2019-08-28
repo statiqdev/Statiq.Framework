@@ -48,7 +48,7 @@ namespace Statiq.CodeAnalysis
                     {
                         analyzer.AddBinaryLogger();
                     }
-                    return CompileProjectAndTrace(analyzer, log);
+                    return CompileProject(context, analyzer, log);
                 })
                 .Where(x => x != null)
                 .ToArray();

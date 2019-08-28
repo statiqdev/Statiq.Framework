@@ -16,10 +16,7 @@ namespace Statiq.Testing
         }
 
         /// <inheritdoc />
-        public IServiceProvider Services { get; set; } =
-            new ServiceCollection()
-                .AddLogging()
-                .BuildServiceProvider();
+        public IServiceProvider Services { get; set; } = new TestServiceProvider();
 
         private readonly TestSettings _settings = new TestSettings();
 

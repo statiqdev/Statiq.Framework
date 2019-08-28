@@ -6,7 +6,7 @@ using Microsoft.Extensions.Logging;
 
 namespace Statiq.Core
 {
-    // This routes trace and debug messages from the Trace/Debug classes to the Statiq Trace TraceSource
+    // This routes trace and debug messages from the Trace/Debug classes to the specified logger
     internal class DiagnosticsTraceListener : TraceListener
     {
         private static readonly Dictionary<TraceEventType, LogLevel> LogLevelMapping = new Dictionary<TraceEventType, LogLevel>

@@ -1,7 +1,7 @@
 ﻿namespace Statiq.Common
 {
     /// <summary>
-    /// Indicates the implementation supports a display string (typically used for tracing).
+    /// Indicates the implementation supports a display string (typically used for logging).
     /// </summary>
     public interface IDisplayable
     {

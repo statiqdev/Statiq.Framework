@@ -6,6 +6,7 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 using Statiq.Common;
 
 namespace Statiq.Core
@@ -156,7 +157,7 @@ namespace Statiq.Core
                         request.Method ?? HttpMethod.Get,
                         out Func<HttpClient, Uri, HttpContent, Task<HttpResponseMessage>> requestFunc))
                     {
-                        Trace.Error($"Invalid download method for {request.Uri}: {request.Method.Method}");
+                        context.Logger.LogError($"Invalid download method for {request.Uri}: {request.Method.Method}");
                         return null;
                     }
                     using (HttpResponseMessage response = await requestFunc(client, uri, request.Content))

@@ -18,21 +18,21 @@ namespace Statiq.Core
         private LogLevel _logLevel = LogLevel.Information;
 
         /// <summary>
-        /// Outputs the string value of the returned object to trace. This allows
-        /// you to trace different content for each document depending on the input document.
+        /// Logs the string value of the returned object. This allows
+        /// you to log different content for each document depending on the input document.
         /// </summary>
-        /// <param name="content">A delegate that returns the content to trace.</param>
+        /// <param name="content">A delegate that returns the content to context.Logger.Log</param>
         public LogMessage(Config<string> content)
             : base(content, false)
         {
         }
 
         /// <summary>
-        /// Outputs the string value of the returned object to trace. This allows
-        /// you to trace different content for each document depending on the input document.
+        /// Logs the string value of the returned object with a specified log level. This allows
+        /// you to log different content for each document depending on the input document.
         /// </summary>
         /// <param name="logLevel">The log level.</param>
-        /// <param name="content">A delegate that returns the content to trace.</param>
+        /// <param name="content">A delegate that returns the content to context.Logger.Log</param>
         public LogMessage(LogLevel logLevel, Config<string> content)
             : base(content, false)
         {

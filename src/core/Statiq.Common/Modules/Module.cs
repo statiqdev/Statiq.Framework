@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 
 namespace Statiq.Common
 {
@@ -56,7 +57,8 @@ namespace Statiq.Common
             }
             catch (Exception ex)
             {
-                Trace.ProcessingException(input, ex);
+                string displayString = input is IDisplayable displayable ? $" [{displayable.ToSafeDisplayString()}]" : string.Empty;
+                context.Logger.LogError($"Exception while processing {input.GetType().Name}{displayString}: {ex.Message}");
                 throw;
             }
         }

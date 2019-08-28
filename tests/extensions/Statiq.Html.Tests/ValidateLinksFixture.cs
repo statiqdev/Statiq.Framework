@@ -23,13 +23,14 @@ namespace Statiq.Html.Tests
             public async Task FindsLinksInBody(string tag, string link)
             {
                 // Given
+                TestExecutionContext context = new TestExecutionContext();
                 TestDocument document = new TestDocument($"<html><head></head><body>{tag}</body></html>");
                 HtmlParser parser = new HtmlParser();
                 ConcurrentDictionary<string, ConcurrentBag<(string source, string outerHtml)>> links =
                     new ConcurrentDictionary<string, ConcurrentBag<(string source, string outerHtml)>>();
 
                 // When
-                await ValidateLinks.GatherLinksAsync(document, parser, links);
+                await ValidateLinks.GatherLinksAsync(document, context, parser, links);
 
                 // Then
                 Assert.That(links.Count, Is.EqualTo(1));
@@ -44,13 +45,14 @@ namespace Statiq.Html.Tests
             public async Task FindsLinksInHead(string tag, string link)
             {
                 // Given
+                TestExecutionContext context = new TestExecutionContext();
                 TestDocument document = new TestDocument($"<html><head>{tag}</head><body></body></html>");
                 HtmlParser parser = new HtmlParser();
                 ConcurrentDictionary<string, ConcurrentBag<(string source, string outerHtml)>> links =
                     new ConcurrentDictionary<string, ConcurrentBag<(string source, string outerHtml)>>();
 
                 // When
-                await ValidateLinks.GatherLinksAsync(document, parser, links);
+                await ValidateLinks.GatherLinksAsync(document, context, parser, links);
 
                 // Then
                 Assert.That(links.Count, Is.EqualTo(1));

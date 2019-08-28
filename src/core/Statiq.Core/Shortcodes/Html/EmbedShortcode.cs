@@ -5,6 +5,7 @@ using System.Net.Http;
 using System.Runtime.Serialization;
 using System.Runtime.Serialization.Json;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 using Statiq.Common;
 
 namespace Statiq.Core
@@ -61,7 +62,7 @@ namespace Statiq.Core
                 HttpResponseMessage response = await httpClient.GetAsync(request);
                 if (response.StatusCode == HttpStatusCode.NotFound)
                 {
-                    Trace.Error($"Received 404 not found for oEmbed at {request}");
+                    context.Logger.LogError($"Received 404 not found for oEmbed at {request}");
                 }
                 response.EnsureSuccessStatusCode();
                 if (response.Content.Headers.ContentType.MediaType == "application/json"

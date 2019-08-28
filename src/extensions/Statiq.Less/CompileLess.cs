@@ -4,7 +4,8 @@ using System.IO;
 using System.Threading.Tasks;
 using dotless.Core;
 using dotless.Core.configuration;
-using ReflectionMagic;
+using dotless.Core.Importers;
+using Microsoft.Extensions.Logging;
 using Statiq.Common;
 
 namespace Statiq.Less
@@ -56,11 +57,10 @@ namespace Statiq.Less
 
             async Task<IDocument> ProcessLessAsync(IDocument input)
             {
-                Trace.Verbose("Processing Less for {0}", input.ToSafeDisplayString());
-                ILessEngine engine = engineFactory.GetEngine();
-
-                // TODO: Get rid of RefelectionMagic and this ugly hack as soon as dotless gets better external DI support
-                engine.AsDynamic().Underlying.Underlying.Parser.Importer.FileReader = fileSystemReader;
+                context.Logger.LogDebug("Processing Less for {0}", input.ToSafeDisplayString());
+                LessEngine engine = (LessEngine)engineFactory.GetEngine();
+                engine.Logger = new LessLogger(context.Logger);
+                ((Importer)engine.Parser.Importer).FileReader = fileSystemReader;
 
                 // Less conversion
                 FilePath path = await _inputPath.GetValueAsync(input, context);
@@ -72,7 +72,7 @@ namespace Statiq.Less
                 {
                     engine.CurrentDirectory = string.Empty;
                     path = new FilePath(Path.GetRandomFileName());
-                    Trace.Warning($"No input path found for document {input.ToSafeDisplayString()}, using {path.FileName.FullPath}");
+                    context.Logger.LogWarning($"No input path found for document {input.ToSafeDisplayString()}, using {path.FileName.FullPath}");
                 }
                 string content = engine.TransformToCss(await input.GetStringAsync(), path.FileName.FullPath);
 

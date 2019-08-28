@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
 using Statiq.Common;
@@ -133,7 +134,7 @@ namespace Statiq.Json
                 catch (Exception ex)
                 {
                     // Return original input on exception
-                    Trace.Error($"Error serializing JSON for {input.ToSafeDisplayString()}, returning original input document: {ex}");
+                    context.Logger.LogError($"Error serializing JSON for {input.ToSafeDisplayString()}, returning original input document: {ex}");
                 }
             }
             return input.Yield();

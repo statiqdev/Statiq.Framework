@@ -21,7 +21,7 @@ namespace Statiq.Razor
                 FileSystem = request.Context.FileSystem
             };
 
-            RazorCompiler compiler = _compilers.GetOrAdd(parameters, _ => new RazorCompiler(parameters));
+            RazorCompiler compiler = _compilers.GetOrAdd(parameters, _ => new RazorCompiler(parameters, request.Context));
             await compiler.RenderPageAsync(request);
         }
 

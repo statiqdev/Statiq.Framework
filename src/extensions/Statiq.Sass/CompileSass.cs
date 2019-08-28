@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 using SharpScss;
 using Statiq.Common;
 
@@ -148,13 +149,13 @@ namespace Statiq.Sass
 
         protected override async Task<IEnumerable<IDocument>> ExecuteAsync(IDocument input, IExecutionContext context)
         {
-            Trace.Verbose($"Processing Sass for {input.ToSafeDisplayString()}");
+            context.Logger.LogDebug($"Processing Sass for {input.ToSafeDisplayString()}");
 
             FilePath inputPath = await _inputPath.GetValueAsync(input, context);
             if (inputPath?.IsAbsolute != true)
             {
                 inputPath = context.FileSystem.GetInputFile(new FilePath(Path.GetRandomFileName())).Path;
-                Trace.Warning($"No input path found for document {input.ToSafeDisplayString()}, using {inputPath.FileName.FullPath}");
+                context.Logger.LogWarning($"No input path found for document {input.ToSafeDisplayString()}, using {inputPath.FileName.FullPath}");
             }
 
             string content = await input.GetStringAsync();

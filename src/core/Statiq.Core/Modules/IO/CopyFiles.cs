@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 using Statiq.Common;
 
 namespace Statiq.Core
@@ -119,14 +120,14 @@ namespace Statiq.Core
 
                             // Copy to the destination
                             await file.CopyToAsync(destination);
-                            Trace.Verbose("Copied file {0} to {1}", file.Path.FullPath, destination.Path.FullPath);
+                            context.Logger.LogDebug("Copied file {0} to {1}", file.Path.FullPath, destination.Path.FullPath);
 
                             // Return the document
                             return context.CloneOrCreateDocument(input, file.Path, relativePath, context.GetContentProvider(file));
                         }
                         catch (Exception ex)
                         {
-                            Trace.Error($"Error while copying file {file.Path.FullPath}: {ex.Message}");
+                            context.Logger.LogError($"Error while copying file {file.Path.FullPath}: {ex.Message}");
                             throw;
                         }
                     })

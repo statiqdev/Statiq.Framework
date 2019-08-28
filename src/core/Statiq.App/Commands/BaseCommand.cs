@@ -10,7 +10,6 @@ using NetEscapades.Extensions.Logging.RollingFile;
 using Spectre.Cli;
 using Statiq.Common;
 using Statiq.Core;
-using Trace = Statiq.Common.Trace;
 
 namespace Statiq.App
 {

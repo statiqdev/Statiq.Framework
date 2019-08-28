@@ -10,6 +10,7 @@ using Buildalyzer.Workspaces;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.Text;
+using Microsoft.Extensions.Logging;
 using Statiq.CodeAnalysis.Analysis;
 using Statiq.Common;
 
@@ -497,12 +498,12 @@ namespace Statiq.CodeAnalysis
                 IFile xmlFile = context.FileSystem.GetFile(assemblyFile.Path.ChangeExtension("xml"));
                 if (xmlFile.Exists)
                 {
-                    Trace.Verbose($"Creating metadata reference for assembly {assemblyFile.Path.FullPath} with XML documentation file at {xmlFile.Path.FullPath}");
+                    context.Logger.LogDebug($"Creating metadata reference for assembly {assemblyFile.Path.FullPath} with XML documentation file at {xmlFile.Path.FullPath}");
                     return MetadataReference.CreateFromFile(
                         assemblyFile.Path.FullPath,
                         documentation: XmlDocumentationProvider.CreateFromFile(xmlFile.Path.FullPath));
                 }
-                Trace.Verbose($"Creating metadata reference for assembly {assemblyFile.Path.FullPath} without XML documentation file");
+                context.Logger.LogDebug($"Creating metadata reference for assembly {assemblyFile.Path.FullPath} without XML documentation file");
                 return (MetadataReference)MetadataReference.CreateFromFile(assemblyFile.Path.FullPath);
             }
         }
@@ -524,29 +525,29 @@ namespace Statiq.CodeAnalysis
                 Project project = workspace.CurrentSolution.Projects.FirstOrDefault(x => new FilePath(x.FilePath).Equals(projectFile.Path));
                 if (project != null)
                 {
-                    Trace.Verbose($"Project {projectFile.Path.FullPath} was already in the workspace");
+                    context.Logger.LogDebug($"Project {projectFile.Path.FullPath} was already in the workspace");
                 }
                 else
                 {
-                    Trace.Verbose($"Creating workspace project for {projectFile.Path.FullPath}");
+                    context.Logger.LogDebug($"Creating workspace project for {projectFile.Path.FullPath}");
                     ProjectAnalyzer analyzer = manager.GetProject(projectFile.Path.FullPath);
                     if (context.Bool(CodeAnalysisKeys.OutputBuildLog))
                     {
                         analyzer.AddBinaryLogger();
                     }
-                    AnalyzerResult result = ReadWorkspace.CompileProjectAndTrace(analyzer, log);
+                    AnalyzerResult result = ReadWorkspace.CompileProject(context, analyzer, log);
                     if (result != null)
                     {
                         project = result.AddToWorkspace(workspace);
                         if (!project.Documents.Any())
                         {
-                            Trace.Warning($"Project at {projectFile.Path.FullPath} contains no documents, which may be an error (check previous log output for any MSBuild warnings)");
+                            context.Logger.LogWarning($"Project at {projectFile.Path.FullPath} contains no documents, which may be an error (check previous log output for any MSBuild warnings)");
                         }
                     }
                 }
                 projects.Add(project);
             }
-            return await AddProjectReferencesAsync(projects, symbols, compilation);
+            return await AddProjectReferencesAsync(context, projects, symbols, compilation);
         }
 
         private async Task<Compilation> AddSolutionReferencesAsync(IExecutionContext context, List<ISymbol> symbols, Compilation compilation)
@@ -555,7 +556,7 @@ namespace Statiq.CodeAnalysis
             solutionFiles = solutionFiles.Where(x => x.Path.Extension == ".sln" && x.Exists);
             foreach (IFile solutionFile in solutionFiles)
             {
-                Trace.Verbose($"Creating workspace solution for {solutionFile.Path.FullPath}");
+                context.Logger.LogDebug($"Creating workspace solution for {solutionFile.Path.FullPath}");
                 StringWriter log = new StringWriter();
                 AnalyzerManager manager = new AnalyzerManager(
                     solutionFile.Path.FullPath,
@@ -571,7 +572,7 @@ namespace Statiq.CodeAnalysis
                         {
                             analyzer.AddBinaryLogger();
                         }
-                        return ReadWorkspace.CompileProjectAndTrace(analyzer, log);
+                        return ReadWorkspace.CompileProject(context, analyzer, log);
                     })
                     .Where(x => x != null)
                     .ToArray();
@@ -582,12 +583,12 @@ namespace Statiq.CodeAnalysis
                     result.AddToWorkspace(workspace);
                 }
 
-                compilation = await AddProjectReferencesAsync(workspace.CurrentSolution.Projects, symbols, compilation);
+                compilation = await AddProjectReferencesAsync(context, workspace.CurrentSolution.Projects, symbols, compilation);
             }
             return compilation;
         }
 
-        private async Task<Compilation> AddProjectReferencesAsync(IEnumerable<Project> projects, List<ISymbol> symbols, Compilation compilation)
+        private async Task<Compilation> AddProjectReferencesAsync(IExecutionContext context, IEnumerable<Project> projects, List<ISymbol> symbols, Compilation compilation)
         {
             // Add a references to the compilation for each project in the solution
             MetadataReference[] compilationReferences = await projects
@@ -595,7 +596,7 @@ namespace Statiq.CodeAnalysis
                 .Where(x => x.SupportsCompilation)
                 .SelectAwait(async x =>
                 {
-                    Trace.Verbose($"Creating compilation reference for project {x.Name}");
+                    context.Logger.LogDebug($"Creating compilation reference for project {x.Name}");
                     Compilation projectCompilation = await x.GetCompilationAsync();
                     return projectCompilation.ToMetadataReference(new[] { x.AssemblyName }.ToImmutableArray());
                 })

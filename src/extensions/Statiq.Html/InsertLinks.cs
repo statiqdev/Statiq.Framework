@@ -8,6 +8,7 @@ using AngleSharp.Dom;
 using AngleSharp.Dom.Html;
 using AngleSharp.Extensions;
 using AngleSharp.Parser.Html;
+using Microsoft.Extensions.Logging;
 using Statiq.Common;
 
 namespace Statiq.Html
@@ -185,7 +186,7 @@ namespace Statiq.Html
             }
             catch (Exception ex)
             {
-                Trace.Warning("Exception while parsing HTML for {0}: {1}", input.ToSafeDisplayString(), ex.Message);
+                context.Logger.LogWarning("Exception while parsing HTML for {0}: {1}", input.ToSafeDisplayString(), ex.Message);
             }
 
             return input.Yield();

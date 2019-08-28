@@ -9,6 +9,7 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.Emit;
 using Microsoft.CodeAnalysis.Text;
+using Microsoft.Extensions.Logging;
 using Statiq.Common;
 
 namespace Statiq.CodeAnalysis.Scripting
@@ -67,28 +68,28 @@ namespace Statiq.CodeAnalysis.Scripting
             {
                 EmitResult result = compilation.Emit(ms);
 
-                // Trace warnings
+                // Log warnings
                 List<string> warningMessages = result.Diagnostics
                     .Where(x => x.Severity == DiagnosticSeverity.Warning)
                     .Select(GetCompilationErrorMessage)
                     .ToList();
                 if (warningMessages.Count > 0)
                 {
-                    Trace.Warning(
+                    context.Logger.LogWarning(
                         "{0} warnings compiling script:{1}{2}",
                         warningMessages.Count,
                         Environment.NewLine,
                         string.Join(Environment.NewLine, warningMessages));
                 }
 
-                // Trace errors
+                // Log errors
                 List<string> errorMessages = result.Diagnostics
                     .Where(x => x.Severity == DiagnosticSeverity.Error)
                     .Select(GetCompilationErrorMessage)
                     .ToList();
                 if (errorMessages.Count > 0)
                 {
-                    Trace.Error(
+                    context.Logger.LogError(
                         "{0} errors compiling script:{1}{2}",
                         errorMessages.Count,
                         Environment.NewLine,

@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 using Statiq.Common;
 
 namespace Statiq.Core
@@ -59,7 +60,7 @@ namespace Statiq.Core
             // Get the included file
             if (!includedFile.Exists)
             {
-                Trace.Warning($"Included file {includedPath.FullPath} does not exist");
+                context.Logger.LogWarning($"Included file {includedPath.FullPath} does not exist");
                 return context.CreateDocument();
             }
 
