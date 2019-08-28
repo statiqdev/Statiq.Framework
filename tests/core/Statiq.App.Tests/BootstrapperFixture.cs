@@ -39,7 +39,7 @@ namespace Statiq.App.Tests
             }
 
             [Test]
-            public async Task NoPipelinesError()
+            public async Task NoPipelinesWarning()
             {
                 // Given
                 string[] args = new[] { "build" };
@@ -55,9 +55,9 @@ namespace Statiq.App.Tests
                 int exitCode = await bootstrapper.RunAsync();
 
                 // Then
-                exitCode.ShouldBe((int)ExitCode.ExecutionError);
+                exitCode.ShouldBe((int)ExitCode.Normal);
                 provider.Messages.ShouldContain(x =>
-                    x.LogLevel == LogLevel.Error
+                    x.LogLevel == LogLevel.Warning
                     && x.Formatted == "No pipelines are configured.");
             }
 

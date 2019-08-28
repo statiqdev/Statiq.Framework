@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 using Statiq.Common;
 
 namespace Statiq.Core
@@ -82,7 +83,7 @@ namespace Statiq.Core
                 foreach (KeyValuePair<FilePath, Tuple<List<string>, Func<Task>>> kvp in writesBySource.Where(x => x.Value.Item1.Count > 1))
                 {
                     string inputSources = Environment.NewLine + "  " + string.Join(Environment.NewLine + "  ", kvp.Value.Item1);
-                    Trace.Warning($"Multiple documents output to {kvp.Key} (this probably wasn't intended):{inputSources}");
+                    context.Logger.LogWarning($"Multiple documents output to {kvp.Key} (this probably wasn't intended):{inputSources}");
                 }
             }
 
@@ -142,7 +143,7 @@ namespace Statiq.Core
                         }
                     }
                 }
-                Trace.Verbose($"Wrote file {outputFile.Path.FullPath} from {input.Source.ToSafeDisplayString()}");
+                context.Logger.LogDebug($"Wrote file {outputFile.Path.FullPath} from {input.Source.ToSafeDisplayString()}");
             }
         }
     }

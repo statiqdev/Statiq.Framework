@@ -2,7 +2,9 @@
 using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 using NUnit.Framework;
+using Shouldly;
 using Statiq.Common;
 using Statiq.Testing;
 
@@ -59,13 +61,17 @@ namespace Statiq.Core.Tests.Modules.Contents
             });
             TestDocument notRedirected = new TestDocument();
             GenerateRedirects redirect = new GenerateRedirects();
-            ThrowOnTraceEventType(null);
+            TestLogger logger = new TestLogger(LogLevel.None);
+            TestExecutionContext context = new TestExecutionContext(redirected, notRedirected)
+            {
+                Logger = logger
+            };
 
             // When
-            IReadOnlyList<TestDocument> results = await ExecuteAsync(new[] { redirected, notRedirected }, redirect);
+            IReadOnlyList<TestDocument> results = await ExecuteAsync(context, redirect);
 
             // Then
-            Assert.IsTrue(Listener.Messages.ToList().Single(x => x.Key == TraceEventType.Warning).Value.StartsWith("The redirect path must be relative"));
+            logger.Messages.ShouldContain(x => x.LogLevel == LogLevel.Warning && x.Formatted.StartsWith("The redirect path must be relative"));
             Assert.AreEqual(0, results.Count);
         }
 

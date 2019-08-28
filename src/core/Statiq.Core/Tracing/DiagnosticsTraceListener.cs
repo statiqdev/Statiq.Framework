@@ -1,36 +1,40 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Text;
+using Microsoft.Extensions.Logging;
 
 namespace Statiq.Core
 {
     // This routes trace and debug messages from the Trace/Debug classes to the Statiq Trace TraceSource
     internal class DiagnosticsTraceListener : TraceListener
     {
-        public override void Write(string message)
+        private static readonly Dictionary<TraceEventType, LogLevel> LogLevelMapping = new Dictionary<TraceEventType, LogLevel>
         {
-            Statiq.Common.Trace.Verbose(message);
+            { TraceEventType.Verbose, LogLevel.Debug },
+            { TraceEventType.Information, LogLevel.Information },
+            { TraceEventType.Warning, LogLevel.Warning },
+            { TraceEventType.Error, LogLevel.Error },
+            { TraceEventType.Critical, LogLevel.Critical }
+        };
+
+        private readonly ILogger _logger;
+
+        public DiagnosticsTraceListener(ILogger logger)
+        {
+            _logger = logger;
         }
 
-        public override void WriteLine(string message)
-        {
-            Statiq.Common.Trace.Verbose(message);
-        }
+        public override void Write(string message) => _logger.LogDebug(message);
 
-        public override void Fail(string message)
-        {
-            Statiq.Common.Trace.Error(message);
-        }
+        public override void WriteLine(string message) => _logger.LogDebug(message);
 
-        public override void Fail(string message, string detailMessage)
-        {
-            Statiq.Common.Trace.Error(message + " " + detailMessage);
-        }
+        public override void Fail(string message) => _logger.LogError(message);
 
-        public override void TraceData(TraceEventCache eventCache, string source, TraceEventType eventType, int id, object data)
-        {
+        public override void Fail(string message, string detailMessage) => _logger.LogError(message + " " + detailMessage);
+
+        public override void TraceData(TraceEventCache eventCache, string source, TraceEventType eventType, int id, object data) =>
             TraceData(eventCache, source, eventType, id, new object[] { data });
-        }
 
         public override void TraceData(TraceEventCache eventCache, string source, TraceEventType eventType, int id, params object[] data)
         {
@@ -47,27 +51,19 @@ namespace Statiq.Core
                 sb.Append("}");
             }
 
-            Statiq.Common.Trace.Verbose(sb.ToString());
+            _logger.LogDebug(sb.ToString());
         }
 
-        public override void TraceEvent(TraceEventCache eventCache, string source, TraceEventType eventType, int id)
-        {
-            Statiq.Common.Trace.TraceEvent(eventType, id.ToString());
-        }
+        public override void TraceTransfer(TraceEventCache eventCache, string source, int id, string message, Guid relatedActivityId) =>
+            _logger.LogDebug(message);
 
-        public override void TraceEvent(TraceEventCache eventCache, string source, TraceEventType eventType, int id, string format, params object[] args)
-        {
-            Statiq.Common.Trace.TraceEvent(eventType, format, args);
-        }
+        public override void TraceEvent(TraceEventCache eventCache, string source, TraceEventType eventType, int id) =>
+            _logger.Log(LogLevelMapping.TryGetValue(eventType, out LogLevel logLevel) ? logLevel : LogLevel.Trace, id.ToString());
 
-        public override void TraceEvent(TraceEventCache eventCache, string source, TraceEventType eventType, int id, string message)
-        {
-            Statiq.Common.Trace.TraceEvent(eventType, message);
-        }
+        public override void TraceEvent(TraceEventCache eventCache, string source, TraceEventType eventType, int id, string format, params object[] args) =>
+            _logger.Log(LogLevelMapping.TryGetValue(eventType, out LogLevel logLevel) ? logLevel : LogLevel.Trace, format, args);
 
-        public override void TraceTransfer(TraceEventCache eventCache, string source, int id, string message, Guid relatedActivityId)
-        {
-            Statiq.Common.Trace.Verbose(message);
-        }
+        public override void TraceEvent(TraceEventCache eventCache, string source, TraceEventType eventType, int id, string message) =>
+            _logger.Log(LogLevelMapping.TryGetValue(eventType, out LogLevel logLevel) ? logLevel : LogLevel.Trace, message);
     }
 }

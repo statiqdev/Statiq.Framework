@@ -17,44 +17,11 @@ namespace Statiq.Testing
     {
         public static readonly IReadOnlyList<TestDocument> EmptyDocuments = ImmutableArray<TestDocument>.Empty;
 
-        private readonly ConcurrentDictionary<string, TestTraceListener> _listeners =
-            new ConcurrentDictionary<string, TestTraceListener>();
-
-        public TestTraceListener Listener =>
-            _listeners.TryGetValue(TestContext.CurrentContext.Test.ID, out TestTraceListener listener) ? listener : null;
-
         [SetUp]
         public void BaseSetUp()
         {
             NormalizedPath.PathComparisonType = System.StringComparison.OrdinalIgnoreCase;  // Normalize for tests
             Directory.SetCurrentDirectory(TestContext.CurrentContext.TestDirectory);
-            TestTraceListener listener = new TestTraceListener(TestContext.CurrentContext.Test.ID);
-            _listeners.AddOrUpdate(TestContext.CurrentContext.Test.ID, listener, (x, y) => listener);
-            Trace.AddListener(Listener);
-        }
-
-        [TearDown]
-        public void BaseTearDown()
-        {
-            RemoveListener();
-        }
-
-        public void RemoveListener()
-        {
-            TestTraceListener listener = Listener;
-            if (listener != null)
-            {
-                Trace.RemoveListener(listener);
-            }
-        }
-
-        public void ThrowOnTraceEventType(TraceEventType? traceEventType)
-        {
-            TestTraceListener listener = Listener;
-            if (listener != null)
-            {
-                listener.ThrowTraceEventType = traceEventType;
-            }
         }
 
         public static MemoryStream GetTestFileStream(string fileName) =>

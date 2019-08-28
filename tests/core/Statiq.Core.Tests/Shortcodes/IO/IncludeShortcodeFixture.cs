@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 using NUnit.Framework;
 using Shouldly;
 using Statiq.Common;
@@ -50,7 +51,6 @@ namespace Statiq.Core.Tests.Shortcodes.IO
             public async Task EmptyResultIfFileDoesNotExist()
             {
                 // Given
-                ThrowOnTraceEventType(System.Diagnostics.TraceEventType.Error);
                 TestFileProvider fileProvider = new TestFileProvider();
                 fileProvider.AddDirectory("/");
                 fileProvider.AddDirectory("/A");
@@ -65,7 +65,8 @@ namespace Statiq.Core.Tests.Shortcodes.IO
 
                 TestExecutionContext context = new TestExecutionContext
                 {
-                    FileSystem = fileSystem
+                    FileSystem = fileSystem,
+                    Logger = new TestLogger(LogLevel.Error)
                 };
                 TestDocument document = new TestDocument();
                 KeyValuePair<string, string>[] args = new KeyValuePair<string, string>[]

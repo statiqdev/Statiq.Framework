@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 using NUnit.Framework;
 using Shouldly;
 using Statiq.Common;
@@ -119,7 +120,7 @@ namespace Statiq.Core.Tests.Modules.IO
             {
                 // Given
                 TestExecutionContext context = GetExecutionContext();
-                ThrowOnTraceEventType(System.Diagnostics.TraceEventType.Error);
+                context.Logger = new TestLogger(LogLevel.Error);
                 TestDocument document = new TestDocument(new FilePath("/TestFiles/Input/test.txt"), "x ^\"test-c.txt\" y");
                 ProcessIncludes include = new ProcessIncludes();
 

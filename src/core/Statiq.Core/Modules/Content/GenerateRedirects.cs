@@ -3,6 +3,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 using Statiq.Common;
 
 namespace Statiq.Core
@@ -141,7 +142,7 @@ namespace Statiq.Core
                         // Make sure it's a relative path
                         if (!fromPath.IsRelative)
                         {
-                            Trace.Warning($"The redirect path must be relative for document {input.Source.ToSafeDisplayString()}: {fromPath}");
+                            context.Logger.LogWarning($"The redirect path must be relative for document {input.Source.ToSafeDisplayString()}: {fromPath}");
                             continue;
                         }
 

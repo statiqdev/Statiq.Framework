@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Dynamic;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 using NUnit.Framework;
 using Shouldly;
 using Statiq.Common;
@@ -66,12 +67,15 @@ namespace Statiq.Json.Tests
             public async Task ReturnsDocumentOnError()
             {
                 // Given
-                RemoveListener();
                 TestDocument document = new TestDocument("asdf");
                 ParseJson json = new ParseJson("MyJson");
+                TestExecutionContext context = new TestExecutionContext(document)
+                {
+                    Logger = new TestLogger(LogLevel.None)
+                };
 
                 // When
-                TestDocument result = await ExecuteAsync(document, json).SingleAsync();
+                TestDocument result = await ExecuteAsync(context, json).SingleAsync();
 
                 // Then
                 result.ShouldBe(document);

@@ -4,6 +4,7 @@ using System.Collections.Immutable;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Statiq.Common;
 
 namespace Statiq.Core
@@ -15,14 +16,16 @@ namespace Statiq.Core
     internal class PipelinePhase : IDisposable
     {
         private readonly IList<IModule> _modules;
+        private readonly ILogger _logger;
         private bool _disposed;
 
-        public PipelinePhase(IPipeline pipeline, string pipelineName, Phase phase, IList<IModule> modules, params PipelinePhase[] dependencies)
+        public PipelinePhase(IPipeline pipeline, string pipelineName, Phase phase, IList<IModule> modules, ILogger logger, params PipelinePhase[] dependencies)
         {
             Pipeline = pipeline;
             PipelineName = pipelineName;
             Phase = phase;
             _modules = modules ?? new List<IModule>();
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             Dependencies = dependencies ?? Array.Empty<PipelinePhase>();
         }
 
@@ -62,13 +65,13 @@ namespace Statiq.Core
 
             if (_modules.Count == 0)
             {
-                Trace.Verbose($"Pipeline {PipelineName}/{Phase} contains no modules, skipping");
+                _logger.LogDebug($"Pipeline {PipelineName}/{Phase} contains no modules, skipping");
                 Outputs = GetInputs();
                 return;
             }
 
             System.Diagnostics.Stopwatch pipelineStopwatch = System.Diagnostics.Stopwatch.StartNew();
-            Trace.Verbose($"Executing pipeline {PipelineName}/{Phase} with {_modules.Count} module(s)");
+            _logger.LogDebug($"Executing pipeline {PipelineName}/{Phase} with {_modules.Count} module(s)");
             try
             {
                 // Execute all modules in the pipeline with a new DI scope per phase
@@ -76,16 +79,16 @@ namespace Statiq.Core
                 using (IServiceScope serviceScope = serviceScopeFactory.CreateScope())
                 {
                     ExecutionContextData contextData = new ExecutionContextData(engine, executionId, this, serviceScope.ServiceProvider, cancellationTokenSource.Token);
-                    Outputs = await Engine.ExecuteModulesAsync(contextData, null, _modules, GetInputs());
+                    Outputs = await Engine.ExecuteModulesAsync(contextData, null, _modules, GetInputs(), _logger);
                     pipelineStopwatch.Stop();
-                    Trace.Information($"Executed pipeline {PipelineName}/{Phase} in {pipelineStopwatch.ElapsedMilliseconds} ms resulting in {Outputs.Length} output document(s)");
+                    _logger.LogInformation($"Executed pipeline {PipelineName}/{Phase} in {pipelineStopwatch.ElapsedMilliseconds} ms resulting in {Outputs.Length} output document(s)");
                 }
             }
             catch (Exception ex)
             {
                 if (!(ex is OperationCanceledException))
                 {
-                    Trace.Critical($"Exception while executing pipeline {PipelineName}/{Phase}: {ex}");
+                    _logger.LogCritical($"Exception while executing pipeline {PipelineName}/{Phase}: {ex}");
                     cancellationTokenSource.Cancel();
                 }
                 Outputs = ImmutableArray<IDocument>.Empty;

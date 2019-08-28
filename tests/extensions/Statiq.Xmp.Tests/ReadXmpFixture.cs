@@ -3,6 +3,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 using NUnit.Framework;
 using Shouldly;
 using Statiq.Common;
@@ -37,15 +38,18 @@ namespace Statiq.Xmp.Tests
             {
                 // Given
                 System.Globalization.CultureInfo.CurrentCulture = System.Globalization.CultureInfo.GetCultureInfo("en");
-                ThrowOnTraceEventType(TraceEventType.Error);
                 IReadOnlyList<TestDocument> documents = GetDocumentsFromSources(
                     Path.Combine(TestContext.CurrentContext.TestDirectory, "Samples", "Flamme.png"),
                     Path.Combine(TestContext.CurrentContext.TestDirectory, "Samples", "RomantiqueInitials.ttf"));
                 ReadXmp directoryMetadata = new ReadXmp(skipElementOnMissingMandatoryData: true)
                     .WithMetadata("xmpRights:UsageTerms", "Copyright", true);
+                TestExecutionContext context = new TestExecutionContext(documents)
+                {
+                    Logger = new TestLogger(LogLevel.Error)
+                };
 
                 // When
-                IReadOnlyList<TestDocument> results = await ExecuteAsync(documents, directoryMetadata);
+                IReadOnlyList<TestDocument> results = await ExecuteAsync(context, directoryMetadata);
 
                 // Then
                 results.Count.ShouldBe(1);
@@ -56,15 +60,18 @@ namespace Statiq.Xmp.Tests
             {
                 // Given
                 System.Globalization.CultureInfo.CurrentCulture = System.Globalization.CultureInfo.GetCultureInfo("en");
-                ThrowOnTraceEventType(TraceEventType.Error);
                 IReadOnlyList<TestDocument> documents = GetDocumentsFromSources(
                     Path.Combine(TestContext.CurrentContext.TestDirectory, "Samples", "Flamme.png"),
                     Path.Combine(TestContext.CurrentContext.TestDirectory, "Samples", "RomantiqueInitials.ttf"));
                 ReadXmp directoryMetadata = new ReadXmp(skipElementOnMissingMandatoryData: false)
                     .WithMetadata("xmpRights:UsageTerms", "Copyright", true);
+                TestExecutionContext context = new TestExecutionContext(documents)
+                {
+                    Logger = new TestLogger(LogLevel.Error)
+                };
 
                 // When
-                IReadOnlyList<TestDocument> results = await ExecuteAsync(documents, directoryMetadata);
+                IReadOnlyList<TestDocument> results = await ExecuteAsync(context, directoryMetadata);
 
                 // Then
                 results.Count.ShouldBe(2);

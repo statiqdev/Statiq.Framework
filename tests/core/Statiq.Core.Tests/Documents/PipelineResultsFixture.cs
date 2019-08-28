@@ -3,6 +3,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
+using Microsoft.Extensions.Logging.Abstractions;
 using NUnit.Framework;
 using Shouldly;
 using Statiq.Common;
@@ -426,7 +427,7 @@ namespace Statiq.Core.Tests.Documents
             params PipelinePhase[] dependencies)
         {
             TestPipeline pipeline = new TestPipeline();
-            PipelinePhase pipelinePhase = new PipelinePhase(pipeline, pipelineName, phase, Array.Empty<IModule>(), dependencies);
+            PipelinePhase pipelinePhase = new PipelinePhase(pipeline, pipelineName, phase, Array.Empty<IModule>(), NullLogger.Instance, dependencies);
             pipelines.Add(pipelineName, pipeline);
             documentCollection.AddOrUpdate(pipelineName, documents.ToImmutableArray(), (_, __) => documents.ToImmutableArray());
             return pipelinePhase;

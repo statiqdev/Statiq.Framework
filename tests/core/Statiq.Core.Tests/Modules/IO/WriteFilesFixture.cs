@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 using NUnit.Framework;
 using Shouldly;
 using Statiq.Common;
@@ -73,11 +74,11 @@ namespace Statiq.Core.Tests.Modules.IO
             public async Task InputDocumentsAreEvaluatedInOrderWhenOverwritting()
             {
                 // Given
-                ThrowOnTraceEventType(TraceEventType.Error);
                 TestDocument[] inputs = new[] { "A", "B", "C", "D", "E" }
                     .Select(x => new TestDocument(new FilePath("output.txt"), x))
                     .ToArray();
                 TestExecutionContext context = GetExecutionContext(inputs);
+                context.Logger = new TestLogger(LogLevel.Error);
                 WriteFiles writeFiles = new WriteFiles();
 
                 // When

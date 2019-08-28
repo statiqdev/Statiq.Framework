@@ -129,7 +129,7 @@ namespace Statiq.Core
 
         /// <inheritdoc/>
         public async Task<ImmutableArray<IDocument>> ExecuteModulesAsync(IEnumerable<IModule> modules, IEnumerable<IDocument> inputs) =>
-            await Engine.ExecuteModulesAsync(_contextData, this, modules, inputs?.ToImmutableArray() ?? ImmutableArray<IDocument>.Empty);
+            await Engine.ExecuteModulesAsync(_contextData, this, modules, inputs?.ToImmutableArray() ?? ImmutableArray<IDocument>.Empty, Logger);
 
         /// <inheritdoc/>
         public IJavaScriptEnginePool GetJavaScriptEnginePool(

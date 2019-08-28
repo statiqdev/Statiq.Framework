@@ -38,7 +38,7 @@ namespace Statiq.Core
         private readonly Settings _settings = new Settings();
         private readonly ShortcodeCollection _shortcodes = new ShortcodeCollection();
         private readonly PipelineCollection _pipelines = new PipelineCollection();
-        private readonly DiagnosticsTraceListener _diagnosticsTraceListener = new DiagnosticsTraceListener();
+        private readonly DiagnosticsTraceListener _diagnosticsTraceListener;
 
         private readonly ILogger _logger;
 
@@ -62,8 +62,10 @@ namespace Statiq.Core
         public Engine(IServiceProvider services)
         {
             Services = services ?? new ServiceCollection().AddRequiredEngineServices().BuildServiceProvider();
-            DocumentFactory = new DocumentFactory(_settings);
             _logger = Services.GetRequiredService<ILogger<Engine>>();
+            DocumentFactory = new DocumentFactory(_settings);
+            _diagnosticsTraceListener = new DiagnosticsTraceListener(_logger);
+            System.Diagnostics.Trace.Listeners.Add(_diagnosticsTraceListener);
         }
 
         /// <inheritdoc />
@@ -127,17 +129,17 @@ namespace Statiq.Core
         {
             try
             {
-                Trace.Information("Cleaning output path: {0}", FileSystem.OutputPath);
+                _logger.LogInformation("Cleaning output path: {0}", FileSystem.OutputPath);
                 IDirectory outputDirectory = FileSystem.GetOutputDirectory();
                 if (outputDirectory.Exists)
                 {
                     outputDirectory.Delete(true);
                 }
-                Trace.Information("Cleaned output directory");
+                _logger.LogInformation("Cleaned output directory");
             }
             catch (Exception ex)
             {
-                Trace.Warning("Error while cleaning output path: {0} - {1}", ex.GetType(), ex.Message);
+                _logger.LogWarning("Error while cleaning output path: {0} - {1}", ex.GetType(), ex.Message);
             }
         }
 
@@ -148,17 +150,17 @@ namespace Statiq.Core
         {
             try
             {
-                Trace.Information("Cleaning temp path: {0}", FileSystem.TempPath);
+                _logger.LogInformation("Cleaning temp path: {0}", FileSystem.TempPath);
                 IDirectory tempDirectory = FileSystem.GetTempDirectory();
                 if (tempDirectory.Exists)
                 {
                     tempDirectory.Delete(true);
                 }
-                Trace.Information("Cleaned temp directory");
+                _logger.LogInformation("Cleaned temp directory");
             }
             catch (Exception ex)
             {
-                Trace.Warning("Error while cleaning temp path: {0} - {1}", ex.GetType(), ex.Message);
+                _logger.LogWarning("Error while cleaning temp path: {0} - {1}", ex.GetType(), ex.Message);
             }
         }
 
@@ -183,19 +185,19 @@ namespace Statiq.Core
 
             CheckDisposed();
 
-            Trace.Information($"Using {JsEngineSwitcher.Current.DefaultEngineName} as the JavaScript engine");
+            _logger.LogInformation($"Using {JsEngineSwitcher.Current.DefaultEngineName} as the JavaScript engine");
 
             // Make sure we've actually configured some pipelines
             if (_pipelines.Count == 0)
             {
-                Trace.Error("No pipelines are configured.");
+                _logger.LogWarning("No pipelines are configured.");
                 return;
             }
 
             // Do a check for the same input/output path
             if (FileSystem.InputPaths.Any(x => x.Equals(FileSystem.OutputPath)))
             {
-                Trace.Warning("The output path is also one of the input paths which can cause unexpected behavior and is usually not advised");
+                _logger.LogWarning("The output path is also one of the input paths which can cause unexpected behavior and is usually not advised");
             }
 
             CleanTempPath();
@@ -209,13 +211,13 @@ namespace Statiq.Core
             // Create the pipeline phases
             if (_phases == null)
             {
-                _phases = GetPipelinePhases(_pipelines);
+                _phases = GetPipelinePhases(_pipelines, _logger);
             }
 
             // Start the timer
             Guid executionId = Guid.NewGuid();
             System.Diagnostics.Stopwatch engineStopwatch = System.Diagnostics.Stopwatch.StartNew();
-            Trace.Information($"Executing {_pipelines.Count} pipelines (execution ID {executionId})");
+            _logger.LogInformation($"Executing {_pipelines.Count} pipelines (execution ID {executionId})");
 
             // Setup (clear the document collection)
             Documents.Clear();
@@ -232,17 +234,17 @@ namespace Statiq.Core
             {
                 if (!(ex is OperationCanceledException))
                 {
-                    Trace.Critical("Error during execution");
+                    _logger.LogCritical("Error during execution");
                 }
             }
 
             // Stop the timer
             engineStopwatch.Stop();
-            Trace.Information($"Finished execution in {engineStopwatch.ElapsedMilliseconds} ms");
+            _logger.LogInformation($"Finished execution in {engineStopwatch.ElapsedMilliseconds} ms");
         }
 
         // The result array is sorted based on dependencies
-        private static PipelinePhase[] GetPipelinePhases(PipelineCollection pipelines)
+        private static PipelinePhase[] GetPipelinePhases(PipelineCollection pipelines, ILogger logger)
         {
             // Perform a topological sort to create phases down the dependency tree
             Dictionary<string, PipelinePhases> phases = new Dictionary<string, PipelinePhases>(StringComparer.OrdinalIgnoreCase);
@@ -278,10 +280,10 @@ namespace Statiq.Core
                 {
                     // This is an isolated pipeline so just add the phases in a chain
                     pipelinePhases = new PipelinePhases(true);
-                    pipelinePhases.Input = new PipelinePhase(pipeline, name, Phase.Input, pipeline.InputModules);
-                    pipelinePhases.Process = new PipelinePhase(pipeline, name, Phase.Process, pipeline.ProcessModules,  pipelinePhases.Input);
-                    pipelinePhases.Transform = new PipelinePhase(pipeline, name, Phase.Transform, pipeline.TransformModules, pipelinePhases.Process);
-                    pipelinePhases.Output = new PipelinePhase(pipeline, name, Phase.Output, pipeline.OutputModules, pipelinePhases.Transform);
+                    pipelinePhases.Input = new PipelinePhase(pipeline, name, Phase.Input, pipeline.InputModules, logger);
+                    pipelinePhases.Process = new PipelinePhase(pipeline, name, Phase.Process, pipeline.ProcessModules, logger, pipelinePhases.Input);
+                    pipelinePhases.Transform = new PipelinePhase(pipeline, name, Phase.Transform, pipeline.TransformModules, logger, pipelinePhases.Process);
+                    pipelinePhases.Output = new PipelinePhase(pipeline, name, Phase.Output, pipeline.OutputModules, logger, pipelinePhases.Transform);
                     phases.Add(name, pipelinePhases);
                     sortedPhases.Add(pipelinePhases);
                     return pipelinePhases;
@@ -306,11 +308,11 @@ namespace Statiq.Core
 
                     // Add the phases (by this time all dependencies should have been added)
                     pipelinePhases = new PipelinePhases(false);
-                    pipelinePhases.Input = new PipelinePhase(pipeline, name, Phase.Input, pipeline.InputModules);
+                    pipelinePhases.Input = new PipelinePhase(pipeline, name, Phase.Input, pipeline.InputModules, logger);
                     processDependencies.Insert(0, pipelinePhases.Input);  // Makes sure the process phase is also dependent on it's input phase
-                    pipelinePhases.Process = new PipelinePhase(pipeline, name, Phase.Process, pipeline.ProcessModules, processDependencies.ToArray());
-                    pipelinePhases.Transform = new PipelinePhase(pipeline, name, Phase.Transform, pipeline.TransformModules, pipelinePhases.Process);  // Transform dependencies will be added after all pipelines have been processed
-                    pipelinePhases.Output = new PipelinePhase(pipeline, name, Phase.Output, pipeline.OutputModules, pipelinePhases.Transform);
+                    pipelinePhases.Process = new PipelinePhase(pipeline, name, Phase.Process, pipeline.ProcessModules, logger, processDependencies.ToArray());
+                    pipelinePhases.Transform = new PipelinePhase(pipeline, name, Phase.Transform, pipeline.TransformModules, logger, pipelinePhases.Process);  // Transform dependencies will be added after all pipelines have been processed
+                    pipelinePhases.Output = new PipelinePhase(pipeline, name, Phase.Output, pipeline.OutputModules, logger, pipelinePhases.Transform);
                     phases.Add(name, pipelinePhases);
                     sortedPhases.Add(pipelinePhases);
                 }
@@ -356,14 +358,14 @@ namespace Statiq.Core
                     {
                         // Otherwise, throw an exception so that this dependency is also skipped by it's dependents
                         string error = $"Skipping pipeline {phase.PipelineName}/{phase.Phase} due to dependency error";
-                        Trace.Error(error);
+                        _logger.LogError(error);
                         throw new Exception(error);
                     }
                 }, cancellationTokenSource.Token);
         }
 
         // This executes the specified modules with the specified input documents
-        internal static async Task<ImmutableArray<IDocument>> ExecuteModulesAsync(ExecutionContextData contextData, IExecutionContext parent, IEnumerable<IModule> modules, ImmutableArray<IDocument> inputs)
+        internal static async Task<ImmutableArray<IDocument>> ExecuteModulesAsync(ExecutionContextData contextData, IExecutionContext parent, IEnumerable<IModule> modules, ImmutableArray<IDocument> inputs, ILogger logger)
         {
             ImmutableArray<IDocument> outputs = ImmutableArray<IDocument>.Empty;
             if (modules != null)
@@ -379,14 +381,14 @@ namespace Statiq.Core
 
                         // Execute the module
                         System.Diagnostics.Stopwatch stopwatch = System.Diagnostics.Stopwatch.StartNew();
-                        Trace.Verbose("Executing module {0} with {1} input document(s)", moduleName, inputs.Length);
+                        logger.LogDebug("Executing module {0} with {1} input document(s)", moduleName, inputs.Length);
                         ExecutionContext moduleContext = new ExecutionContext(contextData, parent, module, inputs);
                         IEnumerable<IDocument> moduleResult = await (module.ExecuteAsync(moduleContext) ?? Task.FromResult<IEnumerable<IDocument>>(null));  // Handle a null Task return
                         outputs = moduleResult.ToImmutableDocumentArray();
 
-                        // Trace results
+                        // Log results
                         stopwatch.Stop();
-                        Trace.Verbose(
+                        logger.LogDebug(
                             "Executed module {0} in {1} ms resulting in {2} output document(s)",
                             moduleName,
                             stopwatch.ElapsedMilliseconds,
@@ -397,7 +399,7 @@ namespace Statiq.Core
                     {
                         if (!(ex is OperationCanceledException))
                         {
-                            Trace.Error($"Error while executing module {moduleName}: {ex.Message}");
+                            logger.LogError($"Error while executing module {moduleName}: {ex.Message}");
                         }
                         outputs = ImmutableArray<IDocument>.Empty;
                         throw;

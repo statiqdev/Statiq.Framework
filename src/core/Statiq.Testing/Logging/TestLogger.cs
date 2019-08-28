@@ -19,6 +19,11 @@ namespace Statiq.Testing
         {
         }
 
+        public TestLogger(LogLevel throwLogLevel)
+            : this(null, null, throwLogLevel)
+        {
+        }
+
         public TestLogger(string categoryName)
             : this(categoryName, null, LogLevel.Warning)
         {

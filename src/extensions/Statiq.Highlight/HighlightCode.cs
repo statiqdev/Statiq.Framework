@@ -7,8 +7,8 @@ using AngleSharp.Dom.Html;
 using AngleSharp.Extensions;
 using AngleSharp.Html;
 using AngleSharp.Parser.Html;
+using Microsoft.Extensions.Logging;
 using Statiq.Common;
-using Trace = Statiq.Common.Trace;
 
 namespace Statiq.Highlight
 {
@@ -115,11 +115,11 @@ namespace Statiq.Highlight
                                     {
                                         if (innerEx.Message.Contains("Unknown language: ") && _warnOnMissingLanguage)
                                         {
-                                            Trace.Warning($"Exception while highlighting source code: {innerEx.Message}");
+                                            context.Logger.LogWarning($"Exception while highlighting source code: {innerEx.Message}");
                                         }
                                         else
                                         {
-                                            Trace.Information($"Exception while highlighting source code: {innerEx.Message}");
+                                            context.Logger.LogInformation($"Exception while highlighting source code: {innerEx.Message}");
                                         }
                                     }
                                 }
@@ -138,7 +138,7 @@ namespace Statiq.Highlight
                     }
                     catch (Exception ex)
                     {
-                        Trace.Warning("Exception while highlighting source code for {0}: {1}", input.ToSafeDisplayString(), ex.Message);
+                        context.Logger.LogWarning("Exception while highlighting source code for {0}: {1}", input.ToSafeDisplayString(), ex.Message);
                         return input;
                     }
                 });
