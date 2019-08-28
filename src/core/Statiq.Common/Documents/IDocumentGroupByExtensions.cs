@@ -154,7 +154,7 @@ namespace Statiq.Common
             return documents
                 .Distinct()
                 .Where(x => x.ContainsKey(keyMetadataKey))
-                .GroupByMany(x => x.List<TKey>(keyMetadataKey), comparer);
+                .GroupByMany(x => x.GetList<TKey>(keyMetadataKey), comparer);
         }
 
         /// <summary>
@@ -211,7 +211,7 @@ namespace Statiq.Common
             return documents
                 .Distinct()
                 .Where(x => x.ContainsKey(keyMetadataKey) && x.ContainsKey(elementMetadataKey))
-                .GroupByMany(x => x.List<TKey>(keyMetadataKey), x => x.Get<TElement>(elementMetadataKey), comparer);
+                .GroupByMany(x => x.GetList<TKey>(keyMetadataKey), x => x.Get<TElement>(elementMetadataKey), comparer);
         }
 
         /// <summary>
@@ -268,7 +268,7 @@ namespace Statiq.Common
             return documents
                 .Distinct()
                 .Where(x => x.ContainsKey(keyMetadataKey) && x.ContainsKey(elementMetadataKey))
-                .GroupByManyToMany(x => x.List<TKey>(keyMetadataKey), x => x.List<TElement>(elementMetadataKey), comparer);
+                .GroupByManyToMany(x => x.GetList<TKey>(keyMetadataKey), x => x.GetList<TElement>(elementMetadataKey), comparer);
         }
     }
 }

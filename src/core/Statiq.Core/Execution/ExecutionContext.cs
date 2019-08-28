@@ -111,7 +111,7 @@ namespace Statiq.Core
         /// <inheritdoc/>
         public async Task<Stream> GetContentStreamAsync(string content = null)
         {
-            if (this.Bool(Common.Keys.UseStringContentFiles))
+            if (Settings.GetBool(Keys.UseStringContentFiles))
             {
                 // Use a temp file for strings
                 IFile tempFile = FileSystem.GetTempFile();
@@ -163,40 +163,5 @@ namespace Statiq.Core
             IContentProvider contentProvider = null)
             where TDocument : FactoryDocument, IDocument, new() =>
             _contextData.Engine.DocumentFactory.CreateDocument<TDocument>(source, destination, items, contentProvider);
-
-        // IMetadata
-
-        /// <inheritdoc/>
-        IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
-
-        /// <inheritdoc/>
-        public IEnumerator<KeyValuePair<string, object>> GetEnumerator() => Settings.GetEnumerator();
-
-        /// <inheritdoc/>
-        public int Count => Settings.Count;
-
-        /// <inheritdoc/>
-        public bool ContainsKey(string key) => Settings.ContainsKey(key);
-
-        /// <inheritdoc/>
-        public object this[string key] => Settings[key];
-
-        /// <inheritdoc/>
-        public IEnumerable<string> Keys => Settings.Keys;
-
-        /// <inheritdoc/>
-        public IEnumerable<object> Values => Settings.Values;
-
-        /// <inheritdoc/>
-        public bool TryGetRaw(string key, out object value) => Settings.TryGetRaw(key, out value);
-
-        /// <inheritdoc/>
-        public bool TryGetValue(string key, out object value) => TryGetValue<object>(key, out value);
-
-        /// <inheritdoc/>
-        public bool TryGetValue<TValue>(string key, out TValue value) => Settings.TryGetValue(key, out value);
-
-        /// <inheritdoc/>
-        public IMetadata GetMetadata(params string[] keys) => Settings.GetMetadata(keys);
     }
 }

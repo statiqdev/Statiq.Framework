@@ -47,7 +47,7 @@ namespace Statiq.CodeAnalysis.Tests
             public async Task CanAccessDocument()
             {
                 // Given
-                TestDocument document = new TestDocument("return Document.Int(\"Foo\") + 2;")
+                TestDocument document = new TestDocument("return Document.GetInt(\"Foo\") + 2;")
                 {
                     { "Foo", "5" }
                 };

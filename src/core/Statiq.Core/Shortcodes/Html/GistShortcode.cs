@@ -36,8 +36,8 @@ namespace Statiq.Core
             arguments.RequireKeys("Id");
             return context.CreateDocument(
                 await context.GetContentProviderAsync(
-                    $"<script src=\"//gist.github.com/{arguments.String("Username", x => x + "/")}{arguments.String("Id")}.js"
-                    + $"{arguments.String("File", x => "?file=" + x)}\" type=\"text/javascript\"></script>"));
+                    $"<script src=\"//gist.github.com/{arguments.GetString("Username", x => x + "/")}{arguments.GetString("Id")}.js"
+                    + $"{arguments.GetString("File", x => "?file=" + x)}\" type=\"text/javascript\"></script>"));
         }
     }
 }

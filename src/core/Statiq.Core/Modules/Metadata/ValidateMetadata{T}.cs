@@ -108,7 +108,7 @@ namespace Statiq.Core
                 if (!input.TryGetValue(_key, out T value))
                 {
                     // Report the original string, as the value coming out of TryGetValue might not be the same as what went in.
-                    throw GetException($"Value \"{input.String(_key)}\" could not be converted to type \"{typeof(T).Name}\".");
+                    throw GetException($"Value \"{input.GetString(_key)}\" could not be converted to type \"{typeof(T).Name}\".");
                 }
 
                 // Check each assertion

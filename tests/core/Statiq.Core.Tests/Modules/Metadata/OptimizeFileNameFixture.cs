@@ -106,7 +106,7 @@ namespace Statiq.Core.Tests.Modules.Metadata
                 TestDocument result = await ExecuteAsync(document, fileName).SingleAsync();
 
                 // Then
-                result.String("MyKey").ShouldBe("testing-some-of-these-");
+                result.GetString("MyKey").ShouldBe("testing-some-of-these-");
             }
 
             [TestCase(null)]
@@ -125,7 +125,7 @@ namespace Statiq.Core.Tests.Modules.Metadata
                 TestDocument result = await ExecuteAsync(document, fileName).SingleAsync();
 
                 // Then
-                result.String("MyKey").ShouldBe(input);
+                result.GetString("MyKey").ShouldBe(input);
             }
 
             [Test]
@@ -145,7 +145,7 @@ namespace Statiq.Core.Tests.Modules.Metadata
                 TestDocument result = await ExecuteAsync(document, fileName).SingleAsync();
 
                 // Then
-                result.FilePath("MyKey").FullPath.ShouldBe(output);
+                result.GetFilePath("MyKey").FullPath.ShouldBe(output);
             }
 
             [Test]
@@ -164,7 +164,7 @@ namespace Statiq.Core.Tests.Modules.Metadata
                 TestDocument result = await ExecuteAsync(document, fileName).SingleAsync();
 
                 // Then
-                result.FilePath("MyKey").FullPath.ShouldBe(output);
+                result.GetFilePath("MyKey").FullPath.ShouldBe(output);
             }
         }
     }

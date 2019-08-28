@@ -416,10 +416,10 @@ namespace Statiq.CodeAnalysis.Tests
                 // Then
                 Assert.AreEqual(
                     "bar",
-                    GetMember(results, "Green", "Go").List<ReferenceComment>("Params")[0].Name);
+                    GetMember(results, "Green", "Go").GetList<ReferenceComment>("Params")[0].Name);
                 Assert.AreEqual(
                     "comment",
-                    GetMember(results, "Green", "Go").List<ReferenceComment>("Params")[0].Html);
+                    GetMember(results, "Green", "Go").GetList<ReferenceComment>("Params")[0].Html);
             }
 
             [Test]
@@ -446,7 +446,7 @@ namespace Statiq.CodeAnalysis.Tests
                 IReadOnlyList<TestDocument> results = await ExecuteAsync(document, context, module);
 
                 // Then
-                CollectionAssert.IsEmpty(GetMember(results, "Green", "Go").List<ReferenceComment>("Params"));
+                CollectionAssert.IsEmpty(GetMember(results, "Green", "Go").GetList<ReferenceComment>("Params"));
             }
 
             [Test]
@@ -479,13 +479,13 @@ namespace Statiq.CodeAnalysis.Tests
                 // Then
                 Assert.AreEqual(
                     "FooException",
-                    GetMember(results, "Green", "Go").List<ReferenceComment>("Exceptions")[0].Name);
+                    GetMember(results, "Green", "Go").GetList<ReferenceComment>("Exceptions")[0].Name);
                 Assert.AreEqual(
                     "<code><a href=\"/Foo/FooException/index.html\">FooException</a></code>",
-                    GetMember(results, "Green", "Go").List<ReferenceComment>("Exceptions")[0].Link);
+                    GetMember(results, "Green", "Go").GetList<ReferenceComment>("Exceptions")[0].Link);
                 Assert.AreEqual(
                     "Throws when null",
-                    GetMember(results, "Green", "Go").List<ReferenceComment>("Exceptions")[0].Html);
+                    GetMember(results, "Green", "Go").GetList<ReferenceComment>("Exceptions")[0].Html);
             }
 
             [Test]
@@ -514,13 +514,13 @@ namespace Statiq.CodeAnalysis.Tests
                 // Then
                 Assert.AreEqual(
                     "FooException",
-                    GetMember(results, "Green", "Go").List<ReferenceComment>("Exceptions")[0].Name);
+                    GetMember(results, "Green", "Go").GetList<ReferenceComment>("Exceptions")[0].Name);
                 Assert.AreEqual(
                     "FooException",
-                    GetMember(results, "Green", "Go").List<ReferenceComment>("Exceptions")[0].Link);
+                    GetMember(results, "Green", "Go").GetList<ReferenceComment>("Exceptions")[0].Link);
                 Assert.AreEqual(
                     "Throws when null",
-                    GetMember(results, "Green", "Go").List<ReferenceComment>("Exceptions")[0].Html);
+                    GetMember(results, "Green", "Go").GetList<ReferenceComment>("Exceptions")[0].Html);
             }
 
             [Test]
@@ -549,10 +549,10 @@ namespace Statiq.CodeAnalysis.Tests
                 // Then
                 Assert.AreEqual(
                     string.Empty,
-                    GetMember(results, "Green", "Go").List<ReferenceComment>("Exceptions")[0].Name);
+                    GetMember(results, "Green", "Go").GetList<ReferenceComment>("Exceptions")[0].Name);
                 Assert.AreEqual(
                     "Throws when null",
-                    GetMember(results, "Green", "Go").List<ReferenceComment>("Exceptions")[0].Html);
+                    GetMember(results, "Green", "Go").GetList<ReferenceComment>("Exceptions")[0].Html);
             }
 
             [Test]
@@ -584,25 +584,25 @@ namespace Statiq.CodeAnalysis.Tests
                 IReadOnlyList<TestDocument> results = await ExecuteAsync(document, context, module);
 
                 // Then
-                Assert.AreEqual(2, GetMember(results, "Green", "Go").List<ReferenceComment>("Exceptions").Count);
+                Assert.AreEqual(2, GetMember(results, "Green", "Go").GetList<ReferenceComment>("Exceptions").Count);
                 Assert.AreEqual(
                     "<code><a href=\"/Foo/FooException/index.html\">FooException</a></code>",
-                    GetMember(results, "Green", "Go").List<ReferenceComment>("Exceptions")[0].Link);
+                    GetMember(results, "Green", "Go").GetList<ReferenceComment>("Exceptions")[0].Link);
                 Assert.AreEqual(
                     "FooException",
-                    GetMember(results, "Green", "Go").List<ReferenceComment>("Exceptions")[0].Name);
+                    GetMember(results, "Green", "Go").GetList<ReferenceComment>("Exceptions")[0].Name);
                 Assert.AreEqual(
                     "Throws when null",
-                    GetMember(results, "Green", "Go").List<ReferenceComment>("Exceptions")[0].Html);
+                    GetMember(results, "Green", "Go").GetList<ReferenceComment>("Exceptions")[0].Html);
                 Assert.AreEqual(
                     "BarException",
-                    GetMember(results, "Green", "Go").List<ReferenceComment>("Exceptions")[1].Link);
+                    GetMember(results, "Green", "Go").GetList<ReferenceComment>("Exceptions")[1].Link);
                 Assert.AreEqual(
                     "BarException",
-                    GetMember(results, "Green", "Go").List<ReferenceComment>("Exceptions")[1].Name);
+                    GetMember(results, "Green", "Go").GetList<ReferenceComment>("Exceptions")[1].Name);
                 Assert.AreEqual(
                     "Throws for another reason",
-                    GetMember(results, "Green", "Go").List<ReferenceComment>("Exceptions")[1].Html);
+                    GetMember(results, "Green", "Go").GetList<ReferenceComment>("Exceptions")[1].Html);
             }
 
             [Test]
@@ -1057,7 +1057,7 @@ namespace Statiq.CodeAnalysis.Tests
                 // Then
                 Assert.AreEqual(
                     "Check <code><a href=\"/Foo/Red/index.html\">Red</a></code> class",
-                    GetResult(results, "Green").List<OtherComment>("BarComments")[0].Html);
+                    GetResult(results, "Green").GetList<OtherComment>("BarComments")[0].Html);
             }
 
             [Test]
@@ -1089,16 +1089,16 @@ namespace Statiq.CodeAnalysis.Tests
                 // Then
                 Assert.AreEqual(
                     3,
-                    GetResult(results, "Green").List<OtherComment>("BarComments").Count);
+                    GetResult(results, "Green").GetList<OtherComment>("BarComments").Count);
                 Assert.AreEqual(
                     "Circle",
-                    GetResult(results, "Green").List<OtherComment>("BarComments")[0].Html);
+                    GetResult(results, "Green").GetList<OtherComment>("BarComments")[0].Html);
                 Assert.AreEqual(
                     "Square",
-                    GetResult(results, "Green").List<OtherComment>("BarComments")[1].Html);
+                    GetResult(results, "Green").GetList<OtherComment>("BarComments")[1].Html);
                 Assert.AreEqual(
                     "Rectangle",
-                    GetResult(results, "Green").List<OtherComment>("BarComments")[2].Html);
+                    GetResult(results, "Green").GetList<OtherComment>("BarComments")[2].Html);
             }
 
             [Test]
@@ -1129,19 +1129,19 @@ namespace Statiq.CodeAnalysis.Tests
                 // Then
                 Assert.AreEqual(
                     1,
-                    GetResult(results, "Green").List<OtherComment>("BarComments")[0].Attributes.Count);
+                    GetResult(results, "Green").GetList<OtherComment>("BarComments")[0].Attributes.Count);
                 Assert.AreEqual(
                     "x",
-                    GetResult(results, "Green").List<OtherComment>("BarComments")[0].Attributes["a"]);
+                    GetResult(results, "Green").GetList<OtherComment>("BarComments")[0].Attributes["a"]);
                 Assert.AreEqual(
                     2,
-                    GetResult(results, "Green").List<OtherComment>("BarComments")[1].Attributes.Count);
+                    GetResult(results, "Green").GetList<OtherComment>("BarComments")[1].Attributes.Count);
                 Assert.AreEqual(
                     "y",
-                    GetResult(results, "Green").List<OtherComment>("BarComments")[1].Attributes["a"]);
+                    GetResult(results, "Green").GetList<OtherComment>("BarComments")[1].Attributes["a"]);
                 Assert.AreEqual(
                     "z",
-                    GetResult(results, "Green").List<OtherComment>("BarComments")[1].Attributes["b"]);
+                    GetResult(results, "Green").GetList<OtherComment>("BarComments")[1].Attributes["b"]);
             }
 
             [Test]
@@ -1520,16 +1520,16 @@ namespace Statiq.CodeAnalysis.Tests
                 // Then
                 Assert.AreEqual(
                     "b",
-                    GetMember(results, "Blue", "Foo").List<ReferenceComment>("Params")[0].Name);
+                    GetMember(results, "Blue", "Foo").GetList<ReferenceComment>("Params")[0].Name);
                 Assert.AreEqual(
                     "XXX",
-                    GetMember(results, "Blue", "Foo").List<ReferenceComment>("Params")[0].Html);
+                    GetMember(results, "Blue", "Foo").GetList<ReferenceComment>("Params")[0].Html);
                 Assert.AreEqual(
                     "a",
-                    GetMember(results, "Blue", "Foo").List<ReferenceComment>("Params")[1].Name);
+                    GetMember(results, "Blue", "Foo").GetList<ReferenceComment>("Params")[1].Name);
                 Assert.AreEqual(
                     "AAA",
-                    GetMember(results, "Blue", "Foo").List<ReferenceComment>("Params")[1].Html);
+                    GetMember(results, "Blue", "Foo").GetList<ReferenceComment>("Params")[1].Html);
             }
 
             [Test]

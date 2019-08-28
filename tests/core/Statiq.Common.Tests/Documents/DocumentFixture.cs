@@ -80,8 +80,8 @@ namespace Statiq.Common.Tests.Documents
                 IDocument cloned = document.Clone(new MetadataItems { { "A", "b" } });
 
                 // When
-                string initialValue = document.String("A");
-                string clonedValue = cloned.String("A");
+                string initialValue = document.GetString("A");
+                string clonedValue = cloned.GetString("A");
 
                 // Then
                 initialValue.ShouldBe("a");
@@ -99,8 +99,8 @@ namespace Statiq.Common.Tests.Documents
                 IDocument cloned = document.Clone(new MetadataItems { { "Foo", "xyz" } });
 
                 // When
-                string initialValue = document.String("Foo");
-                string clonedValue = cloned.String("Foo");
+                string initialValue = document.GetString("Foo");
+                string clonedValue = cloned.GetString("Foo");
 
                 // Then
                 initialValue.ShouldBe("abc");

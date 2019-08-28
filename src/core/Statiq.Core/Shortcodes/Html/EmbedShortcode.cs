@@ -37,10 +37,10 @@ namespace Statiq.Core
                 "Format");
             arguments.RequireKeys("Endpoint", "Url");
             return await ExecuteAsync(
-                arguments.String("Endpoint"),
-                arguments.String("Url"),
+                arguments.GetString("Endpoint"),
+                arguments.GetString("Url"),
                 arguments.ContainsKey("Format")
-                    ? new string[] { $"format={arguments.String("Format")}" }
+                    ? new string[] { $"format={arguments.GetString("Format")}" }
                     : null,
                 context);
         }

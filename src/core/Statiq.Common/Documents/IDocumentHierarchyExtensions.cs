@@ -15,7 +15,7 @@ namespace Statiq.Common
             _ = document ?? throw new ArgumentNullException(nameof(document));
             _ = key ?? throw new ArgumentNullException(nameof(key));
 
-            return document.DocumentList(key).ToImmutableDocumentArray();
+            return document.GetDocumentList(key).ToImmutableDocumentArray();
         }
 
         public static ImmutableArray<IDocument> GetDescendants(this IDocument document, string key = Keys.Children) =>

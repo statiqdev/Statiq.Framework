@@ -239,46 +239,5 @@ namespace Statiq.Testing
             IContentProvider contentProvider = null)
             where TDocument : FactoryDocument, IDocument, new() =>
             _documentFactory.CreateDocument<TDocument>(source, destination, items, contentProvider);
-
-        // IMetadata
-
-        /// <inheritdoc/>
-        public IEnumerator<KeyValuePair<string, object>> GetEnumerator()
-        {
-            return _settings.GetEnumerator();
-        }
-
-        /// <inheritdoc/>
-        IEnumerator IEnumerable.GetEnumerator()
-        {
-            return ((IEnumerable)_settings).GetEnumerator();
-        }
-
-        /// <inheritdoc/>
-        public int Count => _settings.Count;
-
-        /// <inheritdoc/>
-        public bool ContainsKey(string key) => _settings.ContainsKey(key);
-
-        /// <inheritdoc/>
-        public object this[string key] => _settings[key];
-
-        /// <inheritdoc/>
-        public IEnumerable<string> Keys => _settings.Keys;
-
-        /// <inheritdoc/>
-        public IEnumerable<object> Values => _settings.Values;
-
-        /// <inheritdoc/>
-        public bool TryGetRaw(string key, out object value) => _settings.TryGetRaw(key, out value);
-
-        /// <inheritdoc/>
-        public bool TryGetValue<TValue>(string key, out TValue value) => _settings.TryGetValue<TValue>(key, out value);
-
-        /// <inheritdoc />
-        public bool TryGetValue(string key, out object value) => TryGetValue<object>(key, out value);
-
-        /// <inheritdoc />
-        public IMetadata GetMetadata(params string[] keys) => _settings.GetMetadata(keys);
     }
 }

@@ -127,8 +127,8 @@ namespace Statiq.Common
         /// <typeparam name="TValue">The type of config value.</typeparam>
         /// <param name="key">The metadata key to get the value from.</param>
         /// <returns>A config object.</returns>
-        public static Config<TValue> FromContext<TValue>(string key) =>
-            new Config<TValue>((_, ctx) => Task.FromResult(ctx.Get<TValue>(key)), false);
+        public static Config<TValue> FromSetting<TValue>(string key) =>
+            new Config<TValue>((_, ctx) => Task.FromResult(ctx.Settings.Get<TValue>(key)), false);
 
         /// <summary>
         /// Creates a config value by getting the metadata value from the execution context of a specified key.
@@ -137,8 +137,8 @@ namespace Statiq.Common
         /// <param name="key">The metadata key to get the value from.</param>
         /// <param name="defaultValue">The default value to use if the key cannot be found, is null, or cannot be converted to <typeparamref name="TValue"/>.</param>
         /// <returns>A config object.</returns>
-        public static Config<TValue> FromContext<TValue>(string key, TValue defaultValue) =>
-            new Config<TValue>((_, ctx) => Task.FromResult(ctx.Get(key, defaultValue)), false);
+        public static Config<TValue> FromSetting<TValue>(string key, TValue defaultValue) =>
+            new Config<TValue>((_, ctx) => Task.FromResult(ctx.Settings.Get(key, defaultValue)), false);
 
         /// <summary>
         /// Creates a config value by getting the metadata value from the execution context of a specified key.
@@ -146,8 +146,8 @@ namespace Statiq.Common
         /// <param name="key">The metadata key to get the value from.</param>
         /// <param name="defaultValue">The default value to use if the key cannot be found or is null.</param>
         /// <returns>A config object.</returns>
-        public static Config<object> FromContext(string key, object defaultValue = null) =>
-            new Config<object>((_, ctx) => Task.FromResult(ctx.Get(key, defaultValue)), false);
+        public static Config<object> FromSetting(string key, object defaultValue = null) =>
+            new Config<object>((_, ctx) => Task.FromResult(ctx.Settings.Get(key, defaultValue)), false);
 
         /// <summary>
         /// Creates a config value from a delegate that uses a document.

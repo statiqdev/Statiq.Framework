@@ -42,14 +42,14 @@ namespace Statiq.Core
         public override async Task<IEnumerable<IDocument>> ExecuteAsync(IExecutionContext context)
         {
             // If we're disabling the cache, clear any existing entries and just execute children
-            if (context.Settings.Bool(Keys.DisableCache))
+            if (context.Settings.GetBool(Keys.DisableCache))
             {
                 ResetCache();
                 return await context.ExecuteModulesAsync(Children, context.Inputs);
             }
 
             // If we're reseting the cache, reset it but then continue
-            if (context.Settings.Bool(Keys.ResetCache))
+            if (context.Settings.GetBool(Keys.ResetCache))
             {
                 ResetCache();
             }

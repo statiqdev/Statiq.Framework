@@ -33,7 +33,7 @@ namespace Statiq.Core
     /// </para>
     /// <para>
     /// If the provided config value does not require a document (for example, it's created with the
-    /// <see cref="Config.FromContext(string, object)"/> factory method) then it will be invoked once for all input documents.
+    /// <see cref="Config.FromSetting(string, object)"/> factory method) then it will be invoked once for all input documents.
     /// If the provided config value does require a document (for example, it's created with the
     /// <see cref="Config.FromDocument(string, object)"/> factory method) then if will be invoked once for each input document.
     /// </para>

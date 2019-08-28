@@ -531,7 +531,7 @@ namespace Statiq.CodeAnalysis
                 {
                     context.Logger.LogDebug($"Creating workspace project for {projectFile.Path.FullPath}");
                     ProjectAnalyzer analyzer = manager.GetProject(projectFile.Path.FullPath);
-                    if (context.Bool(CodeAnalysisKeys.OutputBuildLog))
+                    if (context.Settings.GetBool(CodeAnalysisKeys.OutputBuildLog))
                     {
                         analyzer.AddBinaryLogger();
                     }
@@ -568,7 +568,7 @@ namespace Statiq.CodeAnalysis
                 AnalyzerResult[] results = manager.Projects.Values
                     .Select(analyzer =>
                     {
-                        if (context.Bool(CodeAnalysisKeys.OutputBuildLog))
+                        if (context.Settings.GetBool(CodeAnalysisKeys.OutputBuildLog))
                         {
                             analyzer.AddBinaryLogger();
                         }

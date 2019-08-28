@@ -16,7 +16,7 @@ namespace Statiq.CodeAnalysis
         protected override async Task<IEnumerable<IDocument>> ExecuteAsync(IDocument input, IExecutionContext context)
         {
             // Get the assembly
-            byte[] assembly = input.Bool(CompileScript.CompiledKey)
+            byte[] assembly = input.GetBool(CompileScript.CompiledKey)
                 ? await input.GetBytesAsync()
                 : ScriptHelper.Compile(await input.GetStringAsync(), input, context);
 

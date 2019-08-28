@@ -203,7 +203,7 @@ namespace Statiq.Core
             CleanTempPath();
 
             // Clean the output folder if requested
-            if (Settings.Bool(Keys.CleanOutputPath))
+            if (Settings.GetBool(Keys.CleanOutputPath))
             {
                 CleanOutputPath();
             }

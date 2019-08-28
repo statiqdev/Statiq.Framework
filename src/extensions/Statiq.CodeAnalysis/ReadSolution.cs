@@ -44,7 +44,7 @@ namespace Statiq.CodeAnalysis
             AnalyzerResult[] results = manager.Projects.Values
                 .Select(analyzer =>
                 {
-                    if (context.Bool(CodeAnalysisKeys.OutputBuildLog))
+                    if (context.Settings.GetBool(CodeAnalysisKeys.OutputBuildLog))
                     {
                         analyzer.AddBinaryLogger();
                     }

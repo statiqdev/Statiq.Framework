@@ -40,7 +40,7 @@ namespace Statiq.CodeAnalysis
                 LogWriter = log
             });
             ProjectAnalyzer analyzer = manager.GetProject(file.Path.FullPath);
-            if (context.Bool(CodeAnalysisKeys.OutputBuildLog))
+            if (context.Settings.GetBool(CodeAnalysisKeys.OutputBuildLog))
             {
                 analyzer.AddBinaryLogger();
             }

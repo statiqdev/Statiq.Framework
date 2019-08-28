@@ -15,29 +15,6 @@ namespace Statiq.Sass
     /// <remarks>
     /// The content of the input document is compiled to CSS and the content of the output document contains the compiled CSS stylesheet.
     /// </remarks>
-    /// <example>
-    /// This is a pipeline that compiles two Sass CSS files, one for Bootstrap (which contains a lot of includes) and a second for custom CSS.
-    /// <code>
-    /// Pipelines.Add("Sass",
-    ///     ReadFiles("master.scss"),
-    ///     Concat(ReadFiles("foundation.scss")),
-    ///     Sass().WithCompactOutputStyle(),
-    ///     WriteFiles(".css")
-    /// );
-    /// </code>
-    /// Another common pattern is building Bootstrap from npm sitting alongside your "input" folder in a "node_modules" folder. This can be accomplished with
-    /// a pipeline that looks similar to the following. It loads the Bootstrap Sass files that don't begin with "_" from the Bootstrap node module and then
-    /// outputs the results to a specific path under your output folder (in this case, "assets/css/bootstrap.css").
-    /// <code>
-    /// Pipelines.Add("Bootstrap",
-    ///     ReadFiles("../node_modules/bootstrap/scss/**/{!_,}*.scss"),
-    ///     Sass()
-    ///         .WithCompactOutputStyle(),
-    ///     WriteFiles((doc, ctx) => $"assets/css/{doc.String(Keys.RelativeFilePath)}")
-    ///         .UseWriteMetadata(false)
-    /// );
-    /// </code>
-    /// </example>
     /// <category>Templates</category>
     public class CompileSass : ParallelModule
     {

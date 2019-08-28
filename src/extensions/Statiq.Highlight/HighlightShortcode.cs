@@ -53,7 +53,7 @@ namespace Statiq.Highlight
             {
                 if (dictionary.ContainsKey("HighlightJsFile"))
                 {
-                    x.ExecuteFile(dictionary.String("HighlightJsFile"));
+                    x.ExecuteFile(dictionary.GetString("HighlightJsFile"));
                 }
                 else
                 {
@@ -62,11 +62,11 @@ namespace Statiq.Highlight
             }))
             {
                 AngleSharp.Dom.IDocument htmlDocument = parser.Parse(string.Empty);
-                AngleSharp.Dom.IElement element = htmlDocument.CreateElement(dictionary.String("Element", "code"));
+                AngleSharp.Dom.IElement element = htmlDocument.CreateElement(dictionary.GetString("Element", "code"));
                 element.InnerHtml = content.Trim();
                 if (dictionary.ContainsKey("Language"))
                 {
-                    element.SetAttribute("class", $"language-{dictionary.String("Language")}");
+                    element.SetAttribute("class", $"language-{dictionary.GetString("Language")}");
                 }
                 Statiq.Highlight.HighlightCode.HighlightElement(enginePool, element);
                 return context.CreateDocument(await context.GetContentProviderAsync(element.OuterHtml));

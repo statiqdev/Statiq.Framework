@@ -186,7 +186,7 @@ namespace Statiq.Markdown
             }
             else if (input.ContainsKey(_sourceKey))
             {
-                content = input.String(_sourceKey) ?? string.Empty;
+                content = input.GetString(_sourceKey) ?? string.Empty;
             }
             else
             {

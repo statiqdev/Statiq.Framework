@@ -281,7 +281,7 @@ namespace Statiq.CodeAnalysis.Tests
                 CollectionAssert.AreEquivalent(new[] { string.Empty, "Foo", "Blue", "Red" }, results.Select(x => x["Name"]));
                 CollectionAssert.AreEquivalent(
                     new[] { "Red" },
-                    GetResult(results, "Blue").Get<IReadOnlyList<IDocument>>("Members").Where(x => x.Bool("IsResult")).Select(x => x["Name"]));
+                    GetResult(results, "Blue").Get<IReadOnlyList<IDocument>>("Members").Where(x => x.GetBool("IsResult")).Select(x => x["Name"]));
                 CollectionAssert.AreEquivalent(
                     new[] { "Red", "Green", "ToString", "Equals", "Equals", "ReferenceEquals", "GetHashCode", "GetType", "Finalize", "MemberwiseClone" },
                     GetResult(results, "Blue").Get<IReadOnlyList<IDocument>>("Members").Select(x => x["Name"]));

@@ -64,17 +64,17 @@ namespace Statiq.Core
 
         private static FilePath GetPathFromMetadata(IDocument doc)
         {
-            FilePath path = doc.FilePath(Keys.DestinationPath);
+            FilePath path = doc.GetFilePath(Keys.DestinationPath);
             if (path != null)
             {
                 return path;
             }
-            path = doc.FilePath(Keys.DestinationFileName);
+            path = doc.GetFilePath(Keys.DestinationFileName);
             if (path != null)
             {
                 return doc.Destination == null ? path : doc.Destination.ChangeFileName(path);
             }
-            string extension = doc.String(Keys.DestinationExtension);
+            string extension = doc.GetString(Keys.DestinationExtension);
             if (!string.IsNullOrEmpty(extension) && doc.Destination != null)
             {
                 return doc.Destination.ChangeExtension(extension);

@@ -316,7 +316,7 @@ namespace Statiq.Common.Tests.Meta
                 Metadata metadata = new Metadata(initialMetadata);
 
                 // When
-                IReadOnlyList<int> result = metadata.List<int>("A");
+                IReadOnlyList<int> result = metadata.GetList<int>("A");
 
                 // Then
                 Assert.IsNotNull(result);
@@ -331,7 +331,7 @@ namespace Statiq.Common.Tests.Meta
                 Metadata metadata = new Metadata(initialMetadata);
 
                 // When
-                IReadOnlyList<int> result = metadata.List<int>("A");
+                IReadOnlyList<int> result = metadata.GetList<int>("A");
 
                 // Then
                 Assert.IsNotNull(result);
@@ -346,7 +346,7 @@ namespace Statiq.Common.Tests.Meta
                 Metadata metadata = new Metadata(initialMetadata);
 
                 // When
-                IReadOnlyList<string> result = metadata.List<string>("A");
+                IReadOnlyList<string> result = metadata.GetList<string>("A");
 
                 // Then
                 Assert.IsNotNull(result);
@@ -361,7 +361,7 @@ namespace Statiq.Common.Tests.Meta
                 Metadata metadata = new Metadata(initialMetadata);
 
                 // When
-                IReadOnlyList<int> result = metadata.List<int>("A");
+                IReadOnlyList<int> result = metadata.GetList<int>("A");
 
                 // Then
                 Assert.IsNotNull(result);
@@ -379,7 +379,7 @@ namespace Statiq.Common.Tests.Meta
                 Metadata metadata = new Metadata(initialMetadata);
 
                 // When
-                IReadOnlyList<IDocument> result = metadata.DocumentList("A");
+                IReadOnlyList<IDocument> result = metadata.GetDocumentList("A");
 
                 // Then
                 Assert.IsNull(result);
@@ -396,7 +396,7 @@ namespace Statiq.Common.Tests.Meta
                 Metadata metadata = new Metadata(initialMetadata);
 
                 // When
-                IReadOnlyList<IDocument> result = metadata.DocumentList("A");
+                IReadOnlyList<IDocument> result = metadata.GetDocumentList("A");
 
                 // Then
                 Assert.IsNotNull(result);
@@ -411,7 +411,7 @@ namespace Statiq.Common.Tests.Meta
                 Metadata metadata = new Metadata(initialMetadata);
 
                 // When
-                IReadOnlyList<IDocument> result = metadata.DocumentList("A");
+                IReadOnlyList<IDocument> result = metadata.GetDocumentList("A");
 
                 // Then
                 Assert.IsNotNull(result);
@@ -426,7 +426,7 @@ namespace Statiq.Common.Tests.Meta
                 Metadata metadata = new Metadata(initialMetadata);
 
                 // When
-                IReadOnlyList<IDocument> result = metadata.DocumentList("A");
+                IReadOnlyList<IDocument> result = metadata.GetDocumentList("A");
 
                 // Then
                 Assert.IsNotNull(result);
@@ -446,7 +446,7 @@ namespace Statiq.Common.Tests.Meta
 
                 // When
                 metadata = new Metadata(metadata, new[] { new KeyValuePair<string, object>("A", new FilePath(path)) });
-                object result = metadata.String("A");
+                object result = metadata.GetString("A");
 
                 // Then
                 Assert.IsInstanceOf<string>(result);
@@ -463,7 +463,7 @@ namespace Statiq.Common.Tests.Meta
 
                 // When
                 metadata = new Metadata(metadata, new[] { new KeyValuePair<string, object>("A", new DirectoryPath(path)) });
-                object result = metadata.String("A");
+                object result = metadata.GetString("A");
 
                 // Then
                 Assert.IsInstanceOf<string>(result);
@@ -483,7 +483,7 @@ namespace Statiq.Common.Tests.Meta
 
                 // When
                 metadata = new Metadata(metadata, new[] { new KeyValuePair<string, object>("A", new FilePath(path)) });
-                object result = metadata.FilePath("A");
+                object result = metadata.GetFilePath("A");
 
                 // Then
                 Assert.IsInstanceOf<FilePath>(result);
@@ -501,7 +501,7 @@ namespace Statiq.Common.Tests.Meta
 
                 // When
                 metadata = new Metadata(metadata, new[] { new KeyValuePair<string, object>("A", path) });
-                object result = metadata.FilePath("A");
+                object result = metadata.GetFilePath("A");
 
                 // Then
                 if (expected == null)
@@ -528,7 +528,7 @@ namespace Statiq.Common.Tests.Meta
 
                 // When
                 metadata = new Metadata(metadata, new[] { new KeyValuePair<string, object>("A", new DirectoryPath(path)) });
-                object result = metadata.DirectoryPath("A");
+                object result = metadata.GetDirectoryPath("A");
 
                 // Then
                 Assert.IsInstanceOf<DirectoryPath>(result);
@@ -546,7 +546,7 @@ namespace Statiq.Common.Tests.Meta
 
                 // When
                 metadata = new Metadata(metadata, new[] { new KeyValuePair<string, object>("A", path) });
-                object result = metadata.DirectoryPath("A");
+                object result = metadata.GetDirectoryPath("A");
 
                 // Then
                 if (expected == null)

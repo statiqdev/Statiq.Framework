@@ -252,12 +252,12 @@ namespace Statiq.Html.Tests
                     "<p>This is some Foobar text</p>",
                     "<p>This is some other text</p>"
                 });
-                results.Select(x => x.String("InnerHtmlKey")).ShouldBe(new[]
+                results.Select(x => x.GetString("InnerHtmlKey")).ShouldBe(new[]
                 {
                     "This is some Foobar text",
                     "This is some other text"
                 });
-                results.Select(x => x.String("OuterHtmlKey")).ShouldBe(new[]
+                results.Select(x => x.GetString("OuterHtmlKey")).ShouldBe(new[]
                 {
                     "<p>This is some Foobar text</p>",
                     "<p>This is some other text</p>"
@@ -286,7 +286,7 @@ namespace Statiq.Html.Tests
                 IReadOnlyList<TestDocument> results = await ExecuteAsync(document, query);
 
                 // Then
-                results.Select(x => x.String("TextContentKey")).ShouldBe(new[]
+                results.Select(x => x.GetString("TextContentKey")).ShouldBe(new[]
                 {
                     "This is some Foobar text",
                     "This is some other text"
@@ -315,7 +315,7 @@ namespace Statiq.Html.Tests
                 IReadOnlyList<TestDocument> results = await ExecuteAsync(document, query);
 
                 // Then
-                results.Select(x => x.String("Foo")).ShouldBe(new[]
+                results.Select(x => x.GetString("Foo")).ShouldBe(new[]
                 {
                     "bar",
                     "baz"
@@ -344,7 +344,7 @@ namespace Statiq.Html.Tests
                 IReadOnlyList<TestDocument> results = await ExecuteAsync(document, query);
 
                 // Then
-                results.Select(x => x.String("foo")).ShouldBe(new[]
+                results.Select(x => x.GetString("foo")).ShouldBe(new[]
                 {
                     "bar",
                     "baz"
@@ -373,7 +373,7 @@ namespace Statiq.Html.Tests
                 IReadOnlyList<TestDocument> results = await ExecuteAsync(document, query);
 
                 // Then
-                results.Select(x => x.String("foo")).ShouldBe(new[]
+                results.Select(x => x.GetString("foo")).ShouldBe(new[]
                 {
                     "bar",
                     "baz"

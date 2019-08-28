@@ -194,10 +194,10 @@ namespace Statiq.Html
             }
 
             // Remove the link root if there is one and remove the preceding slash
-            if (context.Settings.DirectoryPath(Keys.LinkRoot) != null
-                && normalizedPath.StartsWith(context.Settings.DirectoryPath(Keys.LinkRoot).FullPath))
+            if (context.Settings.GetDirectoryPath(Keys.LinkRoot) != null
+                && normalizedPath.StartsWith(context.Settings.GetDirectoryPath(Keys.LinkRoot).FullPath))
             {
-                normalizedPath = normalizedPath.Substring(context.Settings.DirectoryPath(Keys.LinkRoot).FullPath.Length);
+                normalizedPath = normalizedPath.Substring(context.Settings.GetDirectoryPath(Keys.LinkRoot).FullPath.Length);
             }
             if (normalizedPath.StartsWith("/"))
             {

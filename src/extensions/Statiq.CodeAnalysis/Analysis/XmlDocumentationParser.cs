@@ -496,7 +496,7 @@ namespace Statiq.CodeAnalysis.Analysis
                 ISymbol crefSymbol = DocumentationCommentId.GetFirstSymbolForDeclarationId(cref, _compilation);
                 if (crefSymbol != null && _symbolToDocument.TryGetValue(crefSymbol, out IDocument crefDoc))
                 {
-                    string name = crefDoc.String(CodeAnalysisKeys.DisplayName);
+                    string name = crefDoc.GetString(CodeAnalysisKeys.DisplayName);
                     link = $"<code><a href=\"{_context.GetLink(crefDoc)}\">{WebUtility.HtmlEncode(name)}</a></code>";
                     return name;
                 }

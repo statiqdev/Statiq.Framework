@@ -238,7 +238,7 @@ the family Rosaceae.</dd>
                 TestDocument result = await ExecuteAsync(document, markdown).SingleAsync();
 
                 // Then
-                result.String("meta").ShouldBe(output, StringCompareShould.IgnoreLineEndings);
+                result.GetString("meta").ShouldBe(output, StringCompareShould.IgnoreLineEndings);
             }
 
             [Test]
@@ -262,7 +262,7 @@ the family Rosaceae.</dd>
                 TestDocument result = await ExecuteAsync(document, markdown).SingleAsync();
 
                 // Then
-                result.String("meta2").ShouldBe(output, StringCompareShould.IgnoreLineEndings);
+                result.GetString("meta2").ShouldBe(output, StringCompareShould.IgnoreLineEndings);
             }
 
             [Test]

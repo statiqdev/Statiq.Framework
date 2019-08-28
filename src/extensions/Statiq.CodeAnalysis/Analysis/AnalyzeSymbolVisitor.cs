@@ -392,7 +392,7 @@ namespace Statiq.CodeAnalysis.Analysis
                 new MetadataItem(CodeAnalysisKeys.IsResult, !_finished),
                 new MetadataItem(CodeAnalysisKeys.SymbolId, _ => symbol.GetId(), true),
                 new MetadataItem(CodeAnalysisKeys.CommentId, commentId),
-                new MetadataItem(CodeAnalysisKeys.Name, metadata => string.IsNullOrEmpty(symbol.Name) ? metadata.String(CodeAnalysisKeys.FullName) : symbol.Name),
+                new MetadataItem(CodeAnalysisKeys.Name, metadata => string.IsNullOrEmpty(symbol.Name) ? metadata.GetString(CodeAnalysisKeys.FullName) : symbol.Name),
                 new MetadataItem(CodeAnalysisKeys.FullName, _ => symbol.GetFullName(), true),
                 new MetadataItem(CodeAnalysisKeys.DisplayName, _ => symbol.GetDisplayName(), true),
                 new MetadataItem(CodeAnalysisKeys.QualifiedName, _ => symbol.GetQualifiedName(), true),

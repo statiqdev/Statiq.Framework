@@ -14,9 +14,9 @@
             GetLink(
                 context,
                 (NormalizedPath)null,
-                context.String(Keys.Host),
-                context.DirectoryPath(Keys.LinkRoot),
-                context.Bool(Keys.LinksUseHttps),
+                context.Settings.GetString(Keys.Host),
+                context.Settings.GetDirectoryPath(Keys.LinkRoot),
+                context.Settings.GetBool(Keys.LinksUseHttps),
                 false,
                 false);
 
@@ -61,13 +61,13 @@
             if (metadata?.ContainsKey(key) == true)
             {
                 // Return the actual URI if it's absolute
-                if (LinkGenerator.TryGetAbsoluteHttpUri(metadata.String(key), out string absoluteUri))
+                if (LinkGenerator.TryGetAbsoluteHttpUri(metadata.GetString(key), out string absoluteUri))
                 {
                     return absoluteUri;
                 }
 
                 // Otherwise try to process the value as a file path
-                FilePath filePath = metadata.FilePath(key);
+                FilePath filePath = metadata.GetFilePath(key);
                 return filePath != null ? GetLink(context, filePath, includeHost) : null;
             }
             return null;
@@ -99,12 +99,12 @@
             return GetLink(
                 context,
                 path == null ? null : new FilePath(path),
-                includeHost ? context.String(Keys.Host) : null,
-                context.DirectoryPath(Keys.LinkRoot),
-                context.Bool(Keys.LinksUseHttps),
-                context.Bool(Keys.LinkHideIndexPages),
-                context.Bool(Keys.LinkHideExtensions),
-                context.Bool(Keys.LinkLowercase));
+                includeHost ? context.Settings.GetString(Keys.Host) : null,
+                context.Settings.GetDirectoryPath(Keys.LinkRoot),
+                context.Settings.GetBool(Keys.LinksUseHttps),
+                context.Settings.GetBool(Keys.LinkHideIndexPages),
+                context.Settings.GetBool(Keys.LinkHideExtensions),
+                context.Settings.GetBool(Keys.LinkLowercase));
         }
 
         /// <summary>
@@ -153,12 +153,12 @@
             GetLink(
                 context,
                 path,
-                includeHost ? context.String(Keys.Host) : null,
-                context.DirectoryPath(Keys.LinkRoot),
-                context.Bool(Keys.LinksUseHttps),
-                context.Bool(Keys.LinkHideIndexPages),
-                context.Bool(Keys.LinkHideExtensions),
-                context.Bool(Keys.LinkLowercase));
+                includeHost ? context.Settings.GetString(Keys.Host) : null,
+                context.Settings.GetDirectoryPath(Keys.LinkRoot),
+                context.Settings.GetBool(Keys.LinksUseHttps),
+                context.Settings.GetBool(Keys.LinkHideIndexPages),
+                context.Settings.GetBool(Keys.LinkHideExtensions),
+                context.Settings.GetBool(Keys.LinkLowercase));
 
         /// <summary>
         /// Converts the path into a string appropriate for use as a link, overriding one or more
@@ -192,7 +192,7 @@
                 useHttps,
                 hideIndexPages,
                 hideExtensions,
-                context.Bool(Keys.LinkLowercase));
+                context.Settings.GetBool(Keys.LinkLowercase));
 
         /// <summary>
         /// Converts the path into a string appropriate for use as a link, overriding one or more

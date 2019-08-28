@@ -23,11 +23,11 @@ namespace Statiq.Core.Tests.Modules.Control
                     AdditionalOutputs = 7,
                     EnsureInputDocument = true
                 };
-                GroupDocuments groupByMany = new GroupDocuments(Config.FromDocument(d => new[] { d.Int("A") % 3, 3 }));
+                GroupDocuments groupByMany = new GroupDocuments(Config.FromDocument(d => new[] { d.GetInt("A") % 3, 3 }));
                 ForEachDocument gatherData = new ExecuteConfig(
                     Config.FromDocument(d =>
                     {
-                        groupKey.Add(d.Int(Keys.GroupKey));
+                        groupKey.Add(d.GetInt(Keys.GroupKey));
                         return d;
                     })).ForEachDocument();
 
@@ -48,7 +48,7 @@ namespace Statiq.Core.Tests.Modules.Control
                     AdditionalOutputs = 7,
                     EnsureInputDocument = true
                 };
-                GroupDocuments groupByMany = new GroupDocuments(Config.FromDocument(d => new[] { d.Int("A") % 3, 3 }));
+                GroupDocuments groupByMany = new GroupDocuments(Config.FromDocument(d => new[] { d.GetInt("A") % 3, 3 }));
                 OrderDocuments orderBy = new OrderDocuments(Config.FromDocument<int>(Keys.GroupKey));
                 ForEachDocument gatherData = new ExecuteConfig(
                     Config.FromDocument(async d =>
@@ -82,12 +82,12 @@ namespace Statiq.Core.Tests.Modules.Control
                     AdditionalOutputs = 7,
                     EnsureInputDocument = true
                 };
-                AddMetadata meta = new AddMetadata("GroupMetadata", Config.FromDocument(d => new object[] { d.Int("A") % 3, 3 }));
+                AddMetadata meta = new AddMetadata("GroupMetadata", Config.FromDocument(d => new object[] { d.GetInt("A") % 3, 3 }));
                 GroupDocuments groupByMany = new GroupDocuments("GroupMetadata");
                 ForEachDocument gatherData = new ExecuteConfig(
                     Config.FromDocument(d =>
                     {
-                        groupKey.Add(d.Int(Keys.GroupKey));
+                        groupKey.Add(d.GetInt(Keys.GroupKey));
                         return (object)null;
                     })).ForEachDocument();
 
@@ -111,14 +111,14 @@ namespace Statiq.Core.Tests.Modules.Control
                 ForEachDocument meta = new ExecuteConfig(
                     Config.FromDocument(d =>
                     {
-                        int groupMetadata = d.Int("A") % 3;
+                        int groupMetadata = d.GetInt("A") % 3;
                         return groupMetadata == 0 ? d : d.Clone(new MetadataItems { { "GroupMetadata", new object[] { groupMetadata, 3 } } });
                     })).ForEachDocument();
                 GroupDocuments groupByMany = new GroupDocuments("GroupMetadata");
                 ForEachDocument gatherData = new ExecuteConfig(
                     Config.FromDocument(d =>
                     {
-                        groupKey.Add(d.Int(Keys.GroupKey));
+                        groupKey.Add(d.GetInt(Keys.GroupKey));
                         return (object)null;
                     })).ForEachDocument();
 

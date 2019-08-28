@@ -25,11 +25,11 @@ namespace Statiq.Common
         /// <returns>The date input culture.</returns>
         public static CultureInfo GetDateTimeInputCulture(this IExecutionContext context)
         {
-            if (!context.ContainsKey(Keys.DateTimeInputCulture))
+            if (!context.Settings.ContainsKey(Keys.DateTimeInputCulture))
             {
                 return CultureInfo.CurrentCulture;
             }
-            object value = context.Get(Keys.DateTimeInputCulture);
+            object value = context.Settings.Get(Keys.DateTimeInputCulture);
             return value as CultureInfo ?? CultureInfo.GetCultureInfo(value.ToString());
         }
 
@@ -70,13 +70,13 @@ namespace Statiq.Common
         /// <returns>The date display culture.</returns>
         public static CultureInfo GetDateTimeDisplayCulture(this IExecutionContext context, string targetCulture = "en-GB")
         {
-            if (!context.ContainsKey(Keys.DateTimeDisplayCulture))
+            if (!context.Settings.ContainsKey(Keys.DateTimeDisplayCulture))
             {
                 CultureInfo target = CultureInfo.GetCultureInfo(targetCulture);
                 return CultureInfo.CurrentCulture.TwoLetterISOLanguageName.Equals(target.TwoLetterISOLanguageName, StringComparison.OrdinalIgnoreCase)
                     ? CultureInfo.CurrentCulture : target;
             }
-            object value = context.Get(Keys.DateTimeDisplayCulture);
+            object value = context.Settings.Get(Keys.DateTimeDisplayCulture);
             return value as CultureInfo ?? CultureInfo.GetCultureInfo(value.ToString());
         }
     }

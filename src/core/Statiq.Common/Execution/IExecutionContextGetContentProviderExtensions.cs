@@ -34,7 +34,7 @@ namespace Statiq.Common
                 return null;
             }
 
-            if (context.Bool(Keys.UseStringContentFiles))
+            if (context.Settings.GetBool(Keys.UseStringContentFiles))
             {
                 // Use a temp file for strings
                 IFile tempFile = context.FileSystem.GetTempFile();

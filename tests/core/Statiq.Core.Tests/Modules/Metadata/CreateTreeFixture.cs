@@ -217,7 +217,7 @@ namespace Statiq.Core.Tests.Modules.Metadata
             {
                 parent.ShouldNotBeNull();
                 parent.Destination.FullPath.ShouldBe(parentPath);
-                IReadOnlyList<IDocument> children = parent.DocumentList(Keys.Children);
+                IReadOnlyList<IDocument> children = parent.GetDocumentList(Keys.Children);
                 children.Select(x => x.Destination.FullPath).ShouldBe(childFilePaths);
             }
 

@@ -94,7 +94,7 @@ namespace Statiq.Core.Tests.Modules.Control
                     AdditionalOutputs = 1
                 };
                 OrderDocuments orderBy = new OrderDocuments(Config.FromDocument<int>("A"))
-                    .ThenBy(Config.FromDocument(d => d.Int("B")));
+                    .ThenBy(Config.FromDocument(d => d.GetInt("B")));
                 ForEachDocument gatherData = new ExecuteConfig(
                     Config.FromDocument(async d =>
                     {
@@ -125,7 +125,7 @@ namespace Statiq.Core.Tests.Modules.Control
                     AdditionalOutputs = 1
                 };
                 OrderDocuments orderBy = new OrderDocuments(Config.FromDocument<int>("A"))
-                    .ThenBy(Config.FromDocument(d => d.Int("B")))
+                    .ThenBy(Config.FromDocument(d => d.GetInt("B")))
                     .Descending();
                 ForEachDocument gatherData = new ExecuteConfig(
                     Config.FromDocument(async d =>
@@ -158,7 +158,7 @@ namespace Statiq.Core.Tests.Modules.Control
                 };
                 OrderDocuments orderBy = new OrderDocuments(Config.FromDocument<int>("A"))
                     .Descending()
-                    .ThenBy(Config.FromDocument(d => d.Int("B")))
+                    .ThenBy(Config.FromDocument(d => d.GetInt("B")))
                     .Descending();
                 ForEachDocument gatherData = new ExecuteConfig(
                     Config.FromDocument(async d =>
@@ -191,7 +191,7 @@ namespace Statiq.Core.Tests.Modules.Control
                 };
                 OrderDocuments orderBy = new OrderDocuments(Config.FromDocument<int>("A"))
                     .Descending()
-                    .ThenBy(Config.FromDocument(d => d.Int("B")));
+                    .ThenBy(Config.FromDocument(d => d.GetInt("B")));
                 ForEachDocument gatherData = new ExecuteConfig(
                     Config.FromDocument(async d =>
                     {

@@ -41,7 +41,7 @@ namespace Statiq.Core
                 "Lowercase");
             arguments.RequireKeys("Path");
 
-            string path = arguments.String("Path");
+            string path = arguments.GetString("Path");
             if (LinkGenerator.TryGetAbsoluteHttpUri(path, out string absoluteUri))
             {
                 return context.CreateDocument(await context.GetContentProviderAsync(absoluteUri));
@@ -49,30 +49,30 @@ namespace Statiq.Core
             FilePath filePath = new FilePath(path);
 
             // Use "Host" if it's provided, otherwise use Host setting if "IncludeHost" is true
-            string host = arguments.String("Host", arguments.Bool("IncludeHost") ? context.String(Keys.Host) : null);
+            string host = arguments.GetString("Host", arguments.GetBool("IncludeHost") ? context.Settings.GetString(Keys.Host) : null);
 
             // Use "Root" if it's provided, otherwise LinkRoot setting
-            DirectoryPath root = arguments.DirectoryPath("Root", context.DirectoryPath(Keys.LinkRoot));
+            DirectoryPath root = arguments.GetDirectoryPath("Root", context.Settings.GetDirectoryPath(Keys.LinkRoot));
 
             // Use "Scheme" if it's provided, otherwise if "UseHttps" is true use "https" or use LinksUseHttps setting
-            string scheme = arguments.String("Scheme", arguments.ContainsKey("UseHttps")
-                ? (arguments.Bool("UseHttps") ? "https" : null)
-                : (context.Bool(Keys.LinksUseHttps) ? "https" : null));
+            string scheme = arguments.GetString("Scheme", arguments.ContainsKey("UseHttps")
+                ? (arguments.GetBool("UseHttps") ? "https" : null)
+                : (context.Settings.GetBool(Keys.LinksUseHttps) ? "https" : null));
 
             // If "HideIndexPages" is provided and true use default hide pages, otherwise use default hide pages if LinkHideIndexPages is true
             string[] hidePages = arguments.ContainsKey("HideIndexPages")
-                ? (arguments.Bool("HideIndexPages") ? LinkGenerator.DefaultHidePages : null)
-                : (context.Bool(Keys.LinkHideIndexPages) ? LinkGenerator.DefaultHidePages : null);
+                ? (arguments.GetBool("HideIndexPages") ? LinkGenerator.DefaultHidePages : null)
+                : (context.Settings.GetBool(Keys.LinkHideIndexPages) ? LinkGenerator.DefaultHidePages : null);
 
             // If "HideExtensions" is provided and true use default hide extensions, otherwise use default hide extensions if LinkHideExtensions is true
             string[] hideExtensions = arguments.ContainsKey("HideExtensions")
-                ? (arguments.Bool("HideExtensions") ? LinkGenerator.DefaultHideExtensions : null)
-                : (context.Bool(Keys.LinkHideExtensions) ? LinkGenerator.DefaultHideExtensions : null);
+                ? (arguments.GetBool("HideExtensions") ? LinkGenerator.DefaultHideExtensions : null)
+                : (context.Settings.GetBool(Keys.LinkHideExtensions) ? LinkGenerator.DefaultHideExtensions : null);
 
             // If "Lowercase" is provided use that, otherwise use LinkLowercase setting
             bool lowercase = arguments.ContainsKey("Lowercase")
-                ? arguments.Bool("Lowercase")
-                : context.Bool(Keys.LinkLowercase);
+                ? arguments.GetBool("Lowercase")
+                : context.Settings.GetBool(Keys.LinkLowercase);
 
             return context.CreateDocument(await context.GetContentProviderAsync(LinkGenerator.GetLink(filePath, host, root, scheme, hidePages, hideExtensions, lowercase)));
         }

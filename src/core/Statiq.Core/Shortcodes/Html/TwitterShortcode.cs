@@ -34,19 +34,19 @@ namespace Statiq.Core
 
             // Create the url
             List<string> query = new List<string>();
-            if (arguments.Bool("HideMedia"))
+            if (arguments.GetBool("HideMedia"))
             {
                 query.Add("hide_media=true");
             }
-            if (arguments.Bool("HideThread"))
+            if (arguments.GetBool("HideThread"))
             {
                 query.Add("hide_thread=true");
             }
             if (arguments.ContainsKey("Theme"))
             {
-                query.Add($"theme={arguments.String("theme")}");
+                query.Add($"theme={arguments.GetString("theme")}");
             }
-            if (_omitScript || arguments.Bool("OmitScript"))
+            if (_omitScript || arguments.GetBool("OmitScript"))
             {
                 query.Add("omit_script=true");
             }
@@ -54,7 +54,7 @@ namespace Statiq.Core
             // Omit the script on the next Twitter embed
             _omitScript = true;
 
-            return await ExecuteAsync("https://publish.twitter.com/oembed", $"https://twitter.com/username/status/{arguments.String("Id")}", query, context);
+            return await ExecuteAsync("https://publish.twitter.com/oembed", $"https://twitter.com/username/status/{arguments.GetString("Id")}", query, context);
         }
     }
 }

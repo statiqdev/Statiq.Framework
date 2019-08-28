@@ -47,7 +47,7 @@ namespace Statiq.Core.Tests.Modules.Control
                     { "Foo", "b" }
                 };
                 TestDocument c = new TestDocument();
-                FilterDocuments filter = new FilterDocuments(Config.FromDocument(x => x.String("Foo") == "b"));
+                FilterDocuments filter = new FilterDocuments(Config.FromDocument(x => x.GetString("Foo") == "b"));
 
                 // When
                 IReadOnlyList<TestDocument> results = await ExecuteAsync(new[] { a, b, c }, filter);
@@ -70,8 +70,8 @@ namespace Statiq.Core.Tests.Modules.Control
                 };
                 TestDocument c = new TestDocument();
                 FilterDocuments filter = new FilterDocuments(
-                    Config.FromDocument(x => x.String("Foo") == "b"))
-                    .Or(Config.FromDocument(x => x.String("Foo") == "a"));
+                    Config.FromDocument(x => x.GetString("Foo") == "b"))
+                    .Or(Config.FromDocument(x => x.GetString("Foo") == "a"));
 
                 // When
                 IReadOnlyList<TestDocument> results = await ExecuteAsync(new[] { a, b, c }, filter);
@@ -94,8 +94,8 @@ namespace Statiq.Core.Tests.Modules.Control
                 };
                 TestDocument c = new TestDocument();
                 FilterDocuments filter = new FilterDocuments(
-                    Config.FromDocument(x => x.String("Foo") == "c"))
-                    .Or(Config.FromDocument(x => x.String("Foo") == "a"));
+                    Config.FromDocument(x => x.GetString("Foo") == "c"))
+                    .Or(Config.FromDocument(x => x.GetString("Foo") == "a"));
 
                 // When
                 IReadOnlyList<TestDocument> results = await ExecuteAsync(new[] { a, b, c }, filter);
@@ -117,7 +117,7 @@ namespace Statiq.Core.Tests.Modules.Control
                     { "Foo", "b" }
                 };
                 TestDocument c = new TestDocument();
-                FilterDocuments filter = new FilterDocuments(Config.FromDocument(x => x.String("Foo") == "c"));
+                FilterDocuments filter = new FilterDocuments(Config.FromDocument(x => x.GetString("Foo") == "c"));
 
                 // When
                 IReadOnlyList<TestDocument> results = await ExecuteAsync(new[] { a, b, c }, filter);
@@ -185,7 +185,7 @@ namespace Statiq.Core.Tests.Modules.Control
                 };
                 TestDocument c = new TestDocument();
                 FilterDocuments filter = new FilterDocuments("Foo")
-                    .Or(Config.FromDocument(doc => doc.String("Bar") == "b"));
+                    .Or(Config.FromDocument(doc => doc.GetString("Bar") == "b"));
 
                 // When
                 IReadOnlyList<TestDocument> results = await ExecuteAsync(new[] { a, b, c }, filter);

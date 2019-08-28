@@ -466,12 +466,12 @@ namespace Statiq.CodeAnalysis.Tests
                 IReadOnlyList<TestDocument> results = await ExecuteAsync(document, context, module);
 
                 // Then
-                Assert.AreEqual("Object", results.Single(x => x["Name"].Equals("Red")).DocumentList("BaseTypes").First()["Name"]);
-                Assert.AreEqual("Red", results.Single(x => x["Name"].Equals("Green")).DocumentList("BaseTypes").First()["Name"]);
-                Assert.AreEqual("ValueType", results.Single(x => x["Name"].Equals("Blue")).DocumentList("BaseTypes").First()["Name"]);
-                CollectionAssert.IsEmpty(results.Single(x => x["Name"].Equals("Yellow")).DocumentList("BaseTypes"));
-                CollectionAssert.IsEmpty(results.Single(x => x["Name"].Equals("Purple")).DocumentList("BaseTypes"));
-                Assert.AreEqual("Enum", results.Single(x => x["Name"].Equals("Orange")).DocumentList("BaseTypes").First()["Name"]);
+                Assert.AreEqual("Object", results.Single(x => x["Name"].Equals("Red")).GetDocumentList("BaseTypes").First()["Name"]);
+                Assert.AreEqual("Red", results.Single(x => x["Name"].Equals("Green")).GetDocumentList("BaseTypes").First()["Name"]);
+                Assert.AreEqual("ValueType", results.Single(x => x["Name"].Equals("Blue")).GetDocumentList("BaseTypes").First()["Name"]);
+                CollectionAssert.IsEmpty(results.Single(x => x["Name"].Equals("Yellow")).GetDocumentList("BaseTypes"));
+                CollectionAssert.IsEmpty(results.Single(x => x["Name"].Equals("Purple")).GetDocumentList("BaseTypes"));
+                Assert.AreEqual("Enum", results.Single(x => x["Name"].Equals("Orange")).GetDocumentList("BaseTypes").First()["Name"]);
             }
 
             [Test]
@@ -612,7 +612,7 @@ namespace Statiq.CodeAnalysis.Tests
                 IReadOnlyList<TestDocument> results = await ExecuteAsync(document, context, module);
 
                 // Then
-                Assert.AreEqual("Object", GetResult(results, "Red").DocumentList("BaseTypes").First()["Name"]);
+                Assert.AreEqual("Object", GetResult(results, "Red").GetDocumentList("BaseTypes").First()["Name"]);
             }
 
             [Test]

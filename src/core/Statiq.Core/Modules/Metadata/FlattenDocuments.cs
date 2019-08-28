@@ -58,8 +58,8 @@ namespace Statiq.Core
                 if (results.Add(current))
                 {
                     IEnumerable<IDocument> children = _childrenKey == null
-                        ? current.SelectMany(x => current.DocumentList(x.Key) ?? Array.Empty<IDocument>())
-                        : current.DocumentList(_childrenKey);
+                        ? current.SelectMany(x => current.GetDocumentList(x.Key) ?? Array.Empty<IDocument>())
+                        : current.GetDocumentList(_childrenKey);
                     if (children != null)
                     {
                         foreach (IDocument child in children.Where(x => x != null))

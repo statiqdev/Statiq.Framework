@@ -18,6 +18,6 @@ namespace Statiq.Core
     {
         /// <inheritdoc />
         public override async Task<IDocument> ExecuteAsync(KeyValuePair<string, string>[] args, string content, IDocument document, IExecutionContext context) =>
-            context.CreateDocument(await context.GetContentProviderAsync(document.String(args.SingleValue())));
+            context.CreateDocument(await context.GetContentProviderAsync(document.GetString(args.SingleValue())));
     }
 }
