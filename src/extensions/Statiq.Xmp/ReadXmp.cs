@@ -138,7 +138,7 @@ namespace Statiq.Xmp
             {
                 if (_toSearch.Any(y => y.IsMandatory))
                 {
-                    context.Logger.LogWarning($"File doe not contain Metadata or sidecar file ({input.ToSafeDisplayString()})");
+                    context.LogWarning($"File doe not contain Metadata or sidecar file ({input.ToSafeDisplayString()})");
                     if (_skipElementOnMissingData)
                     {
                         return null;
@@ -161,7 +161,7 @@ namespace Statiq.Xmp
                     {
                         if (search.IsMandatory)
                         {
-                            context.Logger.LogError($"Metadata does not Contain {search.XmpPath} ({input.ToSafeDisplayString()})");
+                            context.LogError($"Metadata does not Contain {search.XmpPath} ({input.ToSafeDisplayString()})");
                             if (_skipElementOnMissingData)
                             {
                                 return null;
@@ -172,7 +172,7 @@ namespace Statiq.Xmp
                     object value = GetObjectFromMetadata(metadata, hierarchicalDirectory);
                     if (newValues.ContainsKey(search.MetadataKey) && _errorOnDoubleKeys)
                     {
-                        context.Logger.LogError($"This Module tries to write same Key multiple times {search.MetadataKey} ({input.ToSafeDisplayString()})");
+                        context.LogError($"This Module tries to write same Key multiple times {search.MetadataKey} ({input.ToSafeDisplayString()})");
                     }
                     else
                     {
@@ -181,7 +181,7 @@ namespace Statiq.Xmp
                 }
                 catch (Exception e)
                 {
-                    context.Logger.LogError($"An exception occurred : {e} {e.Message}");
+                    context.LogError($"An exception occurred : {e} {e.Message}");
                     if (search.IsMandatory && _skipElementOnMissingData)
                     {
                         return null;

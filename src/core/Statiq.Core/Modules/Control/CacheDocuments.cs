@@ -99,7 +99,7 @@ namespace Statiq.Core
                             // If the aggregate hash matches then it's a hit
                             if (inputHash == entry.InputHash)
                             {
-                                context.Logger.LogDebug($"Cache hit for {inputsBySource.Key}, using cached results");
+                                context.LogDebug($"Cache hit for {inputsBySource.Key}, using cached results");
                                 _cache.Add(inputsBySource.Key, entry);
                                 outputs.AddRange(entry.Documents);
                                 continue;  // Go to the next source group since misses are dealt with below
@@ -115,7 +115,7 @@ namespace Statiq.Core
                     }
 
                     // Miss, add inputs to execute
-                    context.Logger.LogDebug(message ?? "Cache miss for null source, null sources are never cached");
+                    context.LogDebug(message ?? "Cache miss for null source, null sources are never cached");
                     misses.AddRange(inputsBySource);
                 }
             }

@@ -75,16 +75,16 @@ namespace Statiq.CodeAnalysis
         protected internal static AnalyzerResult CompileProject(IExecutionContext context, ProjectAnalyzer analyzer, StringWriter log)
         {
             log.GetStringBuilder().Clear();
-            context.Logger.LogDebug($"Building project {analyzer.ProjectFile.Path}");
+            context.LogDebug($"Building project {analyzer.ProjectFile.Path}");
             Stopwatch sw = new Stopwatch();
             sw.Start();
             AnalyzerResult result = analyzer.Build().FirstOrDefault();
             sw.Stop();
-            context.Logger.LogDebug($"Project {analyzer.ProjectFile.Path} built in {sw.ElapsedMilliseconds} ms");
+            context.LogDebug($"Project {analyzer.ProjectFile.Path} built in {sw.ElapsedMilliseconds} ms");
             if (result?.Succeeded != true)
             {
-                context.Logger.LogError($"Could not compile project at {analyzer.ProjectFile.Path}");
-                context.Logger.LogWarning(log.ToString());
+                context.LogError($"Could not compile project at {analyzer.ProjectFile.Path}");
+                context.LogWarning(log.ToString());
                 return null;
             }
             return result;
@@ -102,7 +102,7 @@ namespace Statiq.CodeAnalysis
 
                 IEnumerable<IDocument> GetProjectDocuments(Project project)
                 {
-                    context.Logger.LogDebug("Read project {0}", project.Name);
+                    context.LogDebug("Read project {0}", project.Name);
                     string assemblyName = project.AssemblyName;
                     return project.Documents
                         .Where(x => !string.IsNullOrWhiteSpace(x.FilePath))
@@ -112,7 +112,7 @@ namespace Statiq.CodeAnalysis
 
                     IDocument GetProjectDocument(IFile file)
                     {
-                        context.Logger.LogDebug($"Read file {file.Path.FullPath}");
+                        context.LogDebug($"Read file {file.Path.FullPath}");
                         return context.CreateDocument(
                             file.Path,
                             null,

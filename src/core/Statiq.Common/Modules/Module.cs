@@ -58,7 +58,7 @@ namespace Statiq.Common
             catch (Exception ex)
             {
                 string displayString = input is IDisplayable displayable ? $" [{displayable.ToSafeDisplayString()}]" : string.Empty;
-                context.Logger.LogError($"Exception while processing {input.GetType().Name}{displayString}: {ex.Message}");
+                context.LogError($"Exception while processing {input.GetType().Name}{displayString}: {ex.Message}");
                 throw;
             }
         }

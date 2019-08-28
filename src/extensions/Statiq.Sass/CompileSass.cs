@@ -126,13 +126,13 @@ namespace Statiq.Sass
 
         protected override async Task<IEnumerable<IDocument>> ExecuteAsync(IDocument input, IExecutionContext context)
         {
-            context.Logger.LogDebug($"Processing Sass for {input.ToSafeDisplayString()}");
+            context.LogDebug($"Processing Sass for {input.ToSafeDisplayString()}");
 
             FilePath inputPath = await _inputPath.GetValueAsync(input, context);
             if (inputPath?.IsAbsolute != true)
             {
                 inputPath = context.FileSystem.GetInputFile(new FilePath(Path.GetRandomFileName())).Path;
-                context.Logger.LogWarning($"No input path found for document {input.ToSafeDisplayString()}, using {inputPath.FileName.FullPath}");
+                context.LogWarning($"No input path found for document {input.ToSafeDisplayString()}, using {inputPath.FileName.FullPath}");
             }
 
             string content = await input.GetStringAsync();

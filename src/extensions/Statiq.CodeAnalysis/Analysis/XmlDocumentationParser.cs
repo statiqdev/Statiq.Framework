@@ -150,7 +150,7 @@ namespace Statiq.CodeAnalysis.Analysis
                 }
                 catch (Exception ex)
                 {
-                    _context.Logger.LogWarning($"Could not parse XML documentation comments for {_symbol.Name}: {ex.Message}");
+                    _context.LogWarning($"Could not parse XML documentation comments for {_symbol.Name}: {ex.Message}");
                 }
             }
 
@@ -385,7 +385,7 @@ namespace Statiq.CodeAnalysis.Analysis
             }
             catch (Exception ex)
             {
-                _context.Logger.LogWarning($"Could not parse <seealso> XML documentation comments for {_symbol.Name}: {ex.Message}");
+                _context.LogWarning($"Could not parse <seealso> XML documentation comments for {_symbol.Name}: {ex.Message}");
             }
             return ImmutableArray<string>.Empty;
         }
@@ -406,7 +406,7 @@ namespace Statiq.CodeAnalysis.Analysis
             }
             catch (Exception ex)
             {
-                _context.Logger.LogWarning($"Could not parse <{elementName}> XML documentation comments for {_symbol.Name}: {ex.Message}");
+                _context.LogWarning($"Could not parse <{elementName}> XML documentation comments for {_symbol.Name}: {ex.Message}");
             }
             return string.Empty;
         }
@@ -437,7 +437,7 @@ namespace Statiq.CodeAnalysis.Analysis
             }
             catch (Exception ex)
             {
-                _context.Logger.LogWarning($"Could not parse <{elementName}> XML documentation comments for {_symbol.Name}: {ex.Message}");
+                _context.LogWarning($"Could not parse <{elementName}> XML documentation comments for {_symbol.Name}: {ex.Message}");
             }
             return ImmutableArray<ReferenceComment>.Empty;
         }
@@ -459,7 +459,7 @@ namespace Statiq.CodeAnalysis.Analysis
             }
             catch (Exception ex)
             {
-                _context.Logger.LogWarning($"Could not parse other XML documentation comments for {_symbol.Name}: {ex.Message}");
+                _context.LogWarning($"Could not parse other XML documentation comments for {_symbol.Name}: {ex.Message}");
             }
             return ImmutableArray<OtherComment>.Empty;
         }

@@ -120,14 +120,14 @@ namespace Statiq.Core
 
                             // Copy to the destination
                             await file.CopyToAsync(destination);
-                            context.Logger.LogDebug("Copied file {0} to {1}", file.Path.FullPath, destination.Path.FullPath);
+                            context.LogDebug("Copied file {0} to {1}", file.Path.FullPath, destination.Path.FullPath);
 
                             // Return the document
                             return context.CloneOrCreateDocument(input, file.Path, relativePath, context.GetContentProvider(file));
                         }
                         catch (Exception ex)
                         {
-                            context.Logger.LogError($"Error while copying file {file.Path.FullPath}: {ex.Message}");
+                            context.LogError($"Error while copying file {file.Path.FullPath}: {ex.Message}");
                             throw;
                         }
                     })

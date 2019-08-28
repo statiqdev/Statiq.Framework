@@ -88,7 +88,7 @@ namespace Statiq.Core
                             string includedContent = string.Empty;
                             if (!includedFile.Exists)
                             {
-                                context.Logger.LogWarning($"Included file {includedFile.Path.FullPath} does not exist");
+                                context.LogWarning($"Included file {includedFile.Path.FullPath} does not exist");
                             }
                             else
                             {

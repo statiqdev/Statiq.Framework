@@ -79,7 +79,7 @@ namespace Statiq.Json
             catch (Exception ex)
             {
                 // Return original input on exception
-                context.Logger.LogError($"Error processing JSON for {input.ToSafeDisplayString()}, returning original input document: {ex}");
+                context.LogError($"Error processing JSON for {input.ToSafeDisplayString()}, returning original input document: {ex}");
             }
             return input.Yield();
         }

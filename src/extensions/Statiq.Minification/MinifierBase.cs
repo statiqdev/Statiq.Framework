@@ -22,20 +22,20 @@ namespace Statiq.Minification
 
                         if (result.Errors.Count > 0)
                         {
-                            context.Logger.LogError("{0} errors found while minifying {4} for {1}:{2}{3}", result.Errors.Count, input.ToSafeDisplayString(), Environment.NewLine, string.Join(Environment.NewLine, result.Errors.Select(MinificationErrorInfoToString)), minifierType);
+                            context.LogError("{0} errors found while minifying {4} for {1}:{2}{3}", result.Errors.Count, input.ToSafeDisplayString(), Environment.NewLine, string.Join(Environment.NewLine, result.Errors.Select(MinificationErrorInfoToString)), minifierType);
                             return input;
                         }
 
                         if (result.Warnings.Count > 0)
                         {
-                            context.Logger.LogWarning("{0} warnings found while minifying {4} for {1}:{2}{3}", result.Warnings.Count, input.ToSafeDisplayString(), Environment.NewLine, string.Join(Environment.NewLine, result.Warnings.Select(MinificationErrorInfoToString)), minifierType);
+                            context.LogWarning("{0} warnings found while minifying {4} for {1}:{2}{3}", result.Warnings.Count, input.ToSafeDisplayString(), Environment.NewLine, string.Join(Environment.NewLine, result.Warnings.Select(MinificationErrorInfoToString)), minifierType);
                         }
 
                         return input.Clone(await context.GetContentProviderAsync(result.MinifiedContent));
                     }
                     catch (Exception ex)
                     {
-                        context.Logger.LogError("Exception while minifying {2} for {0}: {1}", input.ToSafeDisplayString(), ex.Message, minifierType);
+                        context.LogError("Exception while minifying {2} for {0}: {1}", input.ToSafeDisplayString(), ex.Message, minifierType);
                         return input;
                     }
                 })

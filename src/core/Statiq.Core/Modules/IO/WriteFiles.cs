@@ -83,7 +83,7 @@ namespace Statiq.Core
                 foreach (KeyValuePair<FilePath, Tuple<List<string>, Func<Task>>> kvp in writesBySource.Where(x => x.Value.Item1.Count > 1))
                 {
                     string inputSources = Environment.NewLine + "  " + string.Join(Environment.NewLine + "  ", kvp.Value.Item1);
-                    context.Logger.LogWarning($"Multiple documents output to {kvp.Key} (this probably wasn't intended):{inputSources}");
+                    context.LogWarning($"Multiple documents output to {kvp.Key} (this probably wasn't intended):{inputSources}");
                 }
             }
 
@@ -143,7 +143,7 @@ namespace Statiq.Core
                         }
                     }
                 }
-                context.Logger.LogDebug($"Wrote file {outputFile.Path.FullPath} from {input.Source.ToSafeDisplayString()}");
+                context.LogDebug($"Wrote file {outputFile.Path.FullPath} from {input.Source.ToSafeDisplayString()}");
             }
         }
     }

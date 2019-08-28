@@ -60,7 +60,7 @@ namespace Statiq.Core
             // Get the included file
             if (!includedFile.Exists)
             {
-                context.Logger.LogWarning($"Included file {includedPath.FullPath} does not exist");
+                context.LogWarning($"Included file {includedPath.FullPath} does not exist");
                 return context.CreateDocument();
             }
 

@@ -153,7 +153,7 @@ namespace Statiq.Html
             IFile outputFile = context.FileSystem.GetOutputFile(path);
             if (!outputFile.Exists)
             {
-                context.Logger.LogDebug($"Downloading resource from {uri} to {path.FullPath}");
+                context.LogDebug($"Downloading resource from {uri} to {path.FullPath}");
 
                 // Retry with exponential backoff links. This helps with websites like GitHub that will give us a 429 -- TooManyRequests.
                 AsyncRetryPolicy<HttpResponseMessage> retryPolicy = Policy

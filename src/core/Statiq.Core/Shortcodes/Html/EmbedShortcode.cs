@@ -62,7 +62,7 @@ namespace Statiq.Core
                 HttpResponseMessage response = await httpClient.GetAsync(request);
                 if (response.StatusCode == HttpStatusCode.NotFound)
                 {
-                    context.Logger.LogError($"Received 404 not found for oEmbed at {request}");
+                    context.LogError($"Received 404 not found for oEmbed at {request}");
                 }
                 response.EnsureSuccessStatusCode();
                 if (response.Content.Headers.ContentType.MediaType == "application/json"

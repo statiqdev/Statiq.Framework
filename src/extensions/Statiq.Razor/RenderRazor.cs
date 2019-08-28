@@ -144,7 +144,7 @@ namespace Statiq.Razor
 
             if (validInputs.Length < context.Inputs.Length)
             {
-                context.Logger.LogInformation($"Ignoring {context.Inputs.Length - validInputs.Length} inputs due to source file name prefix");
+                context.LogInformation($"Ignoring {context.Inputs.Length - validInputs.Length} inputs due to source file name prefix");
             }
 
             // Compile and evaluate the pages in parallel
@@ -152,7 +152,7 @@ namespace Statiq.Razor
 
             async Task<IDocument> RenderDocumentAsync(IDocument input)
             {
-                context.Logger.LogDebug("Processing Razor for {0}", input.ToSafeDisplayString());
+                context.LogDebug("Processing Razor for {0}", input.ToSafeDisplayString());
 
                 using (Stream contentStream = await context.GetContentStreamAsync())
                 {

@@ -132,7 +132,7 @@ namespace Statiq.Html
                 string failureMessage = string.Join(
                     Environment.NewLine,
                     failures.Select(x => $"{x.Key}{Environment.NewLine} - {string.Join(Environment.NewLine + " - ", x.Value)}"));
-                context.Logger.Log(
+                context.Log(
                     _asError ? LogLevel.Error : LogLevel.Warning,
                     $"{failureCount} link validation failures:{Environment.NewLine}{failureMessage}");
             }
@@ -226,7 +226,7 @@ namespace Statiq.Html
                 }
                 catch (Exception ex)
                 {
-                    context.Logger.LogDebug($"Could not validate path {x.FullPath} for relative link {uri}: {ex.Message}");
+                    context.LogDebug($"Could not validate path {x.FullPath} for relative link {uri}: {ex.Message}");
                     return false;
                 }
 
@@ -235,7 +235,7 @@ namespace Statiq.Html
 
             if (validatedPath != null)
             {
-                context.Logger.LogDebug($"Validated relative link {uri} at {validatedPath.FullPath}");
+                context.LogDebug($"Validated relative link {uri} at {validatedPath.FullPath}");
                 return true;
             }
 
@@ -245,7 +245,7 @@ namespace Statiq.Html
                 return await ValidateAbsoluteLinkAsync(absoluteCheckUri, context);
             }
 
-            context.Logger.LogDebug($"Validation failure for relative link {uri}: could not find output file at any of {string.Join(", ", checkPaths.Select(x => x.FullPath))}");
+            context.LogDebug($"Validation failure for relative link {uri}: could not find output file at any of {string.Join(", ", checkPaths.Select(x => x.FullPath))}");
             return false;
         }
 
@@ -291,34 +291,34 @@ namespace Statiq.Html
                 // Even with exponential backoff we have TooManyRequests, just skip, since we have to assume it's valid.
                 if (response.StatusCode == TooManyRequests)
                 {
-                    context.Logger.LogDebug($"Skipping absolute link {uri}: too many requests have been issued so can't reliably test.");
+                    context.LogDebug($"Skipping absolute link {uri}: too many requests have been issued so can't reliably test.");
                     return true;
                 }
 
                 // We don't use IsSuccessStatusCode, we consider in this case 300's valid.
                 if (response.StatusCode >= HttpStatusCode.BadRequest)
                 {
-                    context.Logger.LogDebug($"Validation failure for absolute link {method} {uri}: returned status code {(int)response.StatusCode} {response.StatusCode}");
+                    context.LogDebug($"Validation failure for absolute link {method} {uri}: returned status code {(int)response.StatusCode} {response.StatusCode}");
                     return false;
                 }
 
                 // We don't bother disposing of the response in this case. Due to advice from here: https://stackoverflow.com/questions/15705092/do-httpclient-and-httpclienthandler-have-to-be-disposed
-                context.Logger.LogDebug($"Validation success for absolute link {method} {uri}: returned status code {(int)response.StatusCode} {response.StatusCode}");
+                context.LogDebug($"Validation success for absolute link {method} {uri}: returned status code {(int)response.StatusCode} {response.StatusCode}");
                 return true;
             }
             catch (TaskCanceledException ex)
             {
-                context.Logger.LogDebug($"Skipping absolute link {method} {uri} due to timeout: {ex}.");
+                context.LogDebug($"Skipping absolute link {method} {uri} due to timeout: {ex}.");
                 return true;
             }
             catch (ArgumentException ex)
             {
-                context.Logger.LogDebug($"Skipping absolute link {method} {uri} due to invalid uri: {ex}.");
+                context.LogDebug($"Skipping absolute link {method} {uri} due to invalid uri: {ex}.");
                 return true;
             }
             catch (Exception ex)
             {
-                context.Logger.LogDebug($"Skipping absolute link {method} {uri} due to unknown error: {ex}.");
+                context.LogDebug($"Skipping absolute link {method} {uri} due to unknown error: {ex}.");
                 return true;
             }
         }
@@ -346,7 +346,7 @@ namespace Statiq.Html
             {
                 if (source == null)
                 {
-                    context.Logger.LogWarning($"Validation failure for link: unknown file for {outerHtml}.");
+                    context.LogWarning($"Validation failure for link: unknown file for {outerHtml}.");
                     continue;
                 }
 

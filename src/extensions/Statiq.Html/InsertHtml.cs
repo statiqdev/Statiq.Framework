@@ -111,7 +111,7 @@ namespace Statiq.Html
             }
             catch (Exception ex)
             {
-                context.Logger.LogWarning("Exception while processing HTML for {0}: {1}", input.ToSafeDisplayString(), ex.Message);
+                context.LogWarning("Exception while processing HTML for {0}: {1}", input.ToSafeDisplayString(), ex.Message);
                 return input.Yield();
             }
         }

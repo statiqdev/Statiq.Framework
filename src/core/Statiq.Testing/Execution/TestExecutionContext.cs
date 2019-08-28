@@ -42,6 +42,16 @@ namespace Statiq.Testing
         {
         }
 
+        public IServiceProvider Services { get; set; } = new TestServiceProvider();
+
+        public ILogger Logger { get; set; } = new TestLogger();
+
+        public IShortcodeCollection Shortcodes { get; set; } = new TestShortcodeCollection();
+
+        public ISettings Settings => _settings;
+
+        // IExecutionContext
+
         /// <inheritdoc/>
         public Guid ExecutionId { get; set; } = Guid.NewGuid();
 
@@ -76,19 +86,10 @@ namespace Statiq.Testing
         public IPipelineOutputs Outputs { get; set; }
 
         /// <inheritdoc/>
-        public IServiceProvider Services { get; set; } = new TestServiceProvider();
-
-        /// <inheritdoc/>
         public string ApplicationInput { get; set; }
 
         /// <inheritdoc/>
-        public ISettings Settings => _settings;
-
-        /// <inheritdoc/>
         IReadOnlySettings IExecutionContext.Settings => Settings;
-
-        /// <inheritdoc/>
-        public IShortcodeCollection Shortcodes { get; set; } = new TestShortcodeCollection();
 
         /// <inheritdoc/>
         IReadOnlyShortcodeCollection IExecutionContext.Shortcodes => Shortcodes;
@@ -107,9 +108,6 @@ namespace Statiq.Testing
 
         /// <inheritdoc/>
         public ImmutableArray<IDocument> Inputs { get; set; }
-
-        /// <inheritdoc/>
-        public ILogger Logger { get; set; } = new TestLogger();
 
         public void SetInputs(IEnumerable<IDocument> inputs) =>
             Inputs = inputs?.Where(x => x != null).ToImmutableArray() ?? ImmutableArray<IDocument>.Empty;
@@ -239,5 +237,18 @@ namespace Statiq.Testing
             IContentProvider contentProvider = null)
             where TDocument : FactoryDocument, IDocument, new() =>
             _documentFactory.CreateDocument<TDocument>(source, destination, items, contentProvider);
+
+        // IServiceProvider
+
+        public object GetService(Type serviceType) => Services.GetService(serviceType);
+
+        // ILogger
+
+        public void Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception exception, Func<TState, Exception, string> formatter) =>
+            Logger.Log(logLevel, eventId, state, exception, formatter);
+
+        public bool IsEnabled(LogLevel logLevel) => Logger.IsEnabled(logLevel);
+
+        public IDisposable BeginScope<TState>(TState state) => Logger.BeginScope(state);
     }
 }

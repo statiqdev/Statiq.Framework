@@ -84,7 +84,7 @@ namespace Statiq.Razor
             serviceCollection
                 .AddSingleton(parameters.FileSystem)
                 .AddSingleton<FileSystemFileProvider>()
-                .AddSingleton(context.Services.GetRequiredService<ILoggerFactory>())
+                .AddSingleton(context.GetRequiredService<ILoggerFactory>())
                 .AddSingleton<DiagnosticSource, SilentDiagnosticSource>()
                 .AddSingleton<IHostingEnvironment, HostingEnvironment>()
                 .AddSingleton<ObjectPoolProvider, DefaultObjectPoolProvider>()

@@ -171,7 +171,7 @@ namespace Statiq.SearchIndex
 
             if (searchIndexItems.Length == 0)
             {
-                context.Logger.LogWarning("It's not possible to build the search index because no documents contain the necessary metadata.");
+                context.LogWarning("It's not possible to build the search index because no documents contain the necessary metadata.");
                 return Array.Empty<IDocument>();
             }
 

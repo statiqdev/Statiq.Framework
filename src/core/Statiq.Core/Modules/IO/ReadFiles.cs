@@ -63,7 +63,7 @@ namespace Statiq.Core
                 files = await files.ParallelWhereAsync(async file => _predicate == null || await _predicate(file));
                 return files.AsParallel().Select(file =>
                 {
-                    context.Logger.LogDebug($"Read file {file.Path.FullPath}");
+                    context.LogDebug($"Read file {file.Path.FullPath}");
                     return context.CloneOrCreateDocument(input, file.Path, file.Path.GetRelativeInputPath(context), context.GetContentProvider(file));
                 });
             }

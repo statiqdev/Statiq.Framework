@@ -21,6 +21,7 @@ namespace Statiq.Core
         private static readonly HttpMessageHandler _httpMessageHandler = new HttpClientHandler();
 
         private readonly ExecutionContextData _contextData;
+        private readonly ILogger _logger;
 
         /// <inheritdoc/>
         public Guid ExecutionId => _contextData.ExecutionId;
@@ -50,9 +51,6 @@ namespace Statiq.Core
         public IReadOnlyShortcodeCollection Shortcodes => _contextData.Engine.Shortcodes;
 
         /// <inheritdoc/>
-        public IServiceProvider Services => _contextData.Services;  // This has to come from the context data and not the engine because it's a child provider scope
-
-        /// <inheritdoc/>
         public string ApplicationInput => _contextData.Engine.ApplicationInput;
 
         /// <inheritdoc/>
@@ -70,19 +68,17 @@ namespace Statiq.Core
         /// <inheritdoc/>
         public ImmutableArray<IDocument> Inputs { get; }
 
-        /// <inheritdoc/>
-        public ILogger Logger { get; }
-
         internal ExecutionContext(ExecutionContextData contextData, IExecutionContext parent, IModule module, ImmutableArray<IDocument> inputs)
         {
             _contextData = contextData ?? throw new ArgumentNullException(nameof(contextData));
+            _logger = CreateLogger(parent, module, contextData.PipelinePhase, contextData.Services.GetRequiredService<ILoggerFactory>());
+
             Parent = parent;
             Module = module ?? throw new ArgumentNullException(nameof(module));
             Inputs = inputs;
-            Logger = GetLogger(parent, module, contextData.PipelinePhase, contextData.Services.GetRequiredService<ILoggerFactory>());
         }
 
-        private static ILogger GetLogger(IExecutionContext parent, IModule module, PipelinePhase pipelinePhase, ILoggerFactory loggerFactory)
+        private static ILogger CreateLogger(IExecutionContext parent, IModule module, PipelinePhase pipelinePhase, ILoggerFactory loggerFactory)
         {
             Stack<string> modules = new Stack<string>();
             modules.Push(module.GetType().Name);
@@ -91,7 +87,7 @@ namespace Statiq.Core
                 modules.Push(parent.Module.GetType().Name);
                 parent = parent.Parent;
             }
-            return loggerFactory?.CreateLogger($"{pipelinePhase.PipelineName} ({pipelinePhase.Phase}): {string.Join('/', modules)}") ?? NullLogger.Instance;
+            return loggerFactory?.CreateLogger($"{pipelinePhase.PipelineName}/{pipelinePhase.Phase}: {string.Join('/', modules)}") ?? NullLogger.Instance;
         }
 
         /// <inheritdoc/>
@@ -129,7 +125,7 @@ namespace Statiq.Core
 
         /// <inheritdoc/>
         public async Task<ImmutableArray<IDocument>> ExecuteModulesAsync(IEnumerable<IModule> modules, IEnumerable<IDocument> inputs) =>
-            await Engine.ExecuteModulesAsync(_contextData, this, modules, inputs?.ToImmutableArray() ?? ImmutableArray<IDocument>.Empty, Logger);
+            await Engine.ExecuteModulesAsync(_contextData, this, modules, inputs?.ToImmutableArray() ?? ImmutableArray<IDocument>.Empty, this);
 
         /// <inheritdoc/>
         public IJavaScriptEnginePool GetJavaScriptEnginePool(
@@ -163,5 +159,18 @@ namespace Statiq.Core
             IContentProvider contentProvider = null)
             where TDocument : FactoryDocument, IDocument, new() =>
             _contextData.Engine.DocumentFactory.CreateDocument<TDocument>(source, destination, items, contentProvider);
+
+        // IServiceProvider
+
+        public object GetService(Type serviceType) => _contextData.Services.GetService(serviceType);
+
+        // ILogger
+
+        public void Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception exception, Func<TState, Exception, string> formatter) =>
+            _logger.Log(logLevel, eventId, state, exception, formatter);
+
+        public bool IsEnabled(LogLevel logLevel) => _logger.IsEnabled(logLevel);
+
+        public IDisposable BeginScope<TState>(TState state) => _logger.BeginScope(state);
     }
 }

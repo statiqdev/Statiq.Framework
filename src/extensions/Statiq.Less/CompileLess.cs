@@ -57,9 +57,9 @@ namespace Statiq.Less
 
             async Task<IDocument> ProcessLessAsync(IDocument input)
             {
-                context.Logger.LogDebug("Processing Less for {0}", input.ToSafeDisplayString());
+                context.LogDebug("Processing Less for {0}", input.ToSafeDisplayString());
                 LessEngine engine = (LessEngine)engineFactory.GetEngine();
-                engine.Logger = new LessLogger(context.Logger);
+                engine.Logger = new LessLogger(context);
                 ((Importer)engine.Parser.Importer).FileReader = fileSystemReader;
 
                 // Less conversion
@@ -72,7 +72,7 @@ namespace Statiq.Less
                 {
                     engine.CurrentDirectory = string.Empty;
                     path = new FilePath(Path.GetRandomFileName());
-                    context.Logger.LogWarning($"No input path found for document {input.ToSafeDisplayString()}, using {path.FileName.FullPath}");
+                    context.LogWarning($"No input path found for document {input.ToSafeDisplayString()}, using {path.FileName.FullPath}");
                 }
                 string content = engine.TransformToCss(await input.GetStringAsync(), path.FileName.FullPath);
 

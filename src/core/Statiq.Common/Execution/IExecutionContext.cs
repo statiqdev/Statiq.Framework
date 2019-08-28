@@ -13,7 +13,7 @@ namespace Statiq.Common
     /// All of the information that represents a given build. Also implements
     /// <see cref="IMetadata"/> to expose the global metadata.
     /// </summary>
-    public interface IExecutionContext : IDocumentFactory
+    public interface IExecutionContext : IDocumentFactory, IServiceProvider, ILogger
     {
         /// <summary>
         /// Uniquely identifies the current execution cycle. This can be used to initialize and/or
@@ -68,12 +68,6 @@ namespace Statiq.Common
         IPipelineOutputs Outputs { get; }
 
         /// <summary>
-        /// Gets the dependency injection service provider. A new scope is
-        /// created for each pipeline phase.
-        /// </summary>
-        IServiceProvider Services { get; }
-
-        /// <summary>
         /// Gets any input that was passed to the application (for example, on stdin via piping).
         /// </summary>
         /// <value>
@@ -102,14 +96,6 @@ namespace Statiq.Common
         /// The input documents to process.
         /// </summary>
         ImmutableArray<IDocument> Inputs { get; }
-
-        /// <summary>
-        /// A logger with a category that identifies the current pipeline, phase, and module.
-        /// </summary>
-        /// <remarks>
-        /// It is preferred to use this logger instead of getting a new one through <see cref="Services"/>.
-        /// </remarks>
-        ILogger Logger { get; }
 
         /// <summary>
         /// Creates a <see cref="HttpClient"/> instance that should be used for all HTTP communication.

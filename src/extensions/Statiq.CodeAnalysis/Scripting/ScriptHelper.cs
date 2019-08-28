@@ -75,7 +75,7 @@ namespace Statiq.CodeAnalysis.Scripting
                     .ToList();
                 if (warningMessages.Count > 0)
                 {
-                    context.Logger.LogWarning(
+                    context.LogWarning(
                         "{0} warnings compiling script:{1}{2}",
                         warningMessages.Count,
                         Environment.NewLine,
@@ -89,7 +89,7 @@ namespace Statiq.CodeAnalysis.Scripting
                     .ToList();
                 if (errorMessages.Count > 0)
                 {
-                    context.Logger.LogError(
+                    context.LogError(
                         "{0} errors compiling script:{1}{2}",
                         errorMessages.Count,
                         Environment.NewLine,

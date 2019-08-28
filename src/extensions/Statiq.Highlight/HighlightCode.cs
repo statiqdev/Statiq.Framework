@@ -115,11 +115,11 @@ namespace Statiq.Highlight
                                     {
                                         if (innerEx.Message.Contains("Unknown language: ") && _warnOnMissingLanguage)
                                         {
-                                            context.Logger.LogWarning($"Exception while highlighting source code: {innerEx.Message}");
+                                            context.LogWarning($"Exception while highlighting source code: {innerEx.Message}");
                                         }
                                         else
                                         {
-                                            context.Logger.LogInformation($"Exception while highlighting source code: {innerEx.Message}");
+                                            context.LogInformation($"Exception while highlighting source code: {innerEx.Message}");
                                         }
                                     }
                                 }
@@ -138,7 +138,7 @@ namespace Statiq.Highlight
                     }
                     catch (Exception ex)
                     {
-                        context.Logger.LogWarning("Exception while highlighting source code for {0}: {1}", input.ToSafeDisplayString(), ex.Message);
+                        context.LogWarning("Exception while highlighting source code for {0}: {1}", input.ToSafeDisplayString(), ex.Message);
                         return input;
                     }
                 });

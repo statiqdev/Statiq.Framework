@@ -21,7 +21,7 @@ namespace Statiq.Core
         /// Logs the string value of the returned object. This allows
         /// you to log different content for each document depending on the input document.
         /// </summary>
-        /// <param name="content">A delegate that returns the content to context.Logger.Log</param>
+        /// <param name="content">A delegate that returns the content to context.Log</param>
         public LogMessage(Config<string> content)
             : base(content, false)
         {
@@ -32,7 +32,7 @@ namespace Statiq.Core
         /// you to log different content for each document depending on the input document.
         /// </summary>
         /// <param name="logLevel">The log level.</param>
-        /// <param name="content">A delegate that returns the content to context.Logger.Log</param>
+        /// <param name="content">A delegate that returns the content to context.Log</param>
         public LogMessage(LogLevel logLevel, Config<string> content)
             : base(content, false)
         {
@@ -41,7 +41,7 @@ namespace Statiq.Core
 
         protected override IEnumerable<IDocument> Execute(IDocument input, IExecutionContext context, string value)
         {
-            context.Logger.Log(_logLevel, value);
+            context.Log(_logLevel, value);
             return input == null ? context.Inputs : input.Yield();
         }
     }

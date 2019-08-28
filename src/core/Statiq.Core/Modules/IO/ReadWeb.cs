@@ -157,7 +157,7 @@ namespace Statiq.Core
                         request.Method ?? HttpMethod.Get,
                         out Func<HttpClient, Uri, HttpContent, Task<HttpResponseMessage>> requestFunc))
                     {
-                        context.Logger.LogError($"Invalid download method for {request.Uri}: {request.Method.Method}");
+                        context.LogError($"Invalid download method for {request.Uri}: {request.Method.Method}");
                         return null;
                     }
                     using (HttpResponseMessage response = await requestFunc(client, uri, request.Content))
