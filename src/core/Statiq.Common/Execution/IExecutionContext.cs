@@ -25,12 +25,12 @@ namespace Statiq.Common
         /// <summary>
         /// Gets the raw bytes for dynamically compiled assemblies (such as the configuration script).
         /// </summary>
-        IReadOnlyCollection<byte[]> DynamicAssemblies { get; }
+        IRawAssemblyCollection DynamicAssemblies { get; }
 
         /// <summary>
         /// Gets a set of namespaces that should be brought into scope for modules that perform dynamic compilation.
         /// </summary>
-        IReadOnlyCollection<string> Namespaces { get; }
+        INamespacesCollection Namespaces { get; }
 
         /// <summary>
         /// Provides pooled memory streams (via the RecyclableMemoryStream library).

@@ -17,7 +17,7 @@ namespace Statiq.CodeAnalysis.Tests.Scripting
                 TestDocument document = new TestDocument();
                 TestExecutionContext context = new TestExecutionContext()
                 {
-                    Namespaces = new[] { "Foo.Bar" }
+                    Namespaces = new TestNamespacesCollection(new[] { "Foo.Bar" })
                 };
                 string code = "int x = 0;";
                 string expected =
@@ -61,7 +61,7 @@ public static class ScriptExtensionMethods
                 TestDocument document = new TestDocument();
                 TestExecutionContext context = new TestExecutionContext()
                 {
-                    Namespaces = new[] { "Foo.Bar" }
+                    Namespaces = new TestNamespacesCollection(new[] { "Foo.Bar" })
                 };
                 string code = "return 0;";
                 string expected =
@@ -105,7 +105,7 @@ public static class ScriptExtensionMethods
                 TestDocument document = new TestDocument();
                 TestExecutionContext context = new TestExecutionContext()
                 {
-                    Namespaces = new[] { "Foo.Bar" }
+                    Namespaces = new TestNamespacesCollection(new[] { "Foo.Bar" })
                 };
                 string code =
 @"public class Foo
@@ -182,7 +182,7 @@ public static class ScriptExtensionMethods
                 TestDocument document = new TestDocument();
                 TestExecutionContext context = new TestExecutionContext()
                 {
-                    Namespaces = new[] { "Foo.Bar" }
+                    Namespaces = new TestNamespacesCollection(new[] { "Foo.Bar" })
                 };
                 string code =
 @"using Red.Blue;
@@ -249,7 +249,7 @@ public static class ScriptExtensionMethods
                 TestDocument document = new TestDocument();
                 TestExecutionContext context = new TestExecutionContext()
                 {
-                    Namespaces = new[] { "Foo.Bar" }
+                    Namespaces = new TestNamespacesCollection(new[] { "Foo.Bar" })
                 };
                 string code =
 @"public static class Foo
@@ -312,7 +312,7 @@ public static class ScriptExtensionMethods
                 TestDocument document = new TestDocument();
                 TestExecutionContext context = new TestExecutionContext()
                 {
-                    Namespaces = new[] { "Foo.Bar" }
+                    Namespaces = new TestNamespacesCollection(new[] { "Foo.Bar" })
                 };
                 string code =
 @"public static class Foo
@@ -375,7 +375,7 @@ public static string Self(this string x)
                 TestDocument document = new TestDocument();
                 TestExecutionContext context = new TestExecutionContext()
                 {
-                    Namespaces = new[] { "Foo.Bar" }
+                    Namespaces = new TestNamespacesCollection(new[] { "Foo.Bar" })
                 };
                 string code =
 @"// XYZ

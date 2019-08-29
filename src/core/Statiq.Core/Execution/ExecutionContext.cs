@@ -27,10 +27,10 @@ namespace Statiq.Core
         public Guid ExecutionId => _contextData.ExecutionId;
 
         /// <inheritdoc/>
-        public IReadOnlyCollection<byte[]> DynamicAssemblies => _contextData.Engine.DynamicAssemblies;
+        public IRawAssemblyCollection DynamicAssemblies => _contextData.Engine.DynamicAssemblies;
 
         /// <inheritdoc/>
-        public IReadOnlyCollection<string> Namespaces => _contextData.Engine.Namespaces;
+        public INamespacesCollection Namespaces => _contextData.Engine.Namespaces;
 
         /// <inheritdoc/>
         public string PipelineName => _contextData.PipelinePhase.PipelineName;

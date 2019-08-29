@@ -61,7 +61,9 @@ namespace Statiq.Core
         /// <param name="services">The service provider.</param>
         public Engine(IServiceProvider services)
         {
-            Services = services ?? new ServiceCollection().AddRequiredEngineServices().BuildServiceProvider();
+            Services = new EngineServiceProvider(
+                this,
+                services ?? new ServiceCollection().AddEngineServices().BuildServiceProvider());
             _logger = Services.GetRequiredService<ILogger<Engine>>();
             DocumentFactory = new DocumentFactory(_settings);
             _diagnosticsTraceListener = new DiagnosticsTraceListener(_logger);
@@ -83,9 +85,6 @@ namespace Statiq.Core
         /// <inheritdoc />
         public IPipelineCollection Pipelines => _pipelines;
 
-        internal ConcurrentDictionary<string, ImmutableArray<IDocument>> Documents { get; }
-            = new ConcurrentDictionary<string, ImmutableArray<IDocument>>(StringComparer.OrdinalIgnoreCase);
-
         /// <inheritdoc />
         public INamespacesCollection Namespaces { get; } = new NamespaceCollection();
 
@@ -97,6 +96,9 @@ namespace Statiq.Core
 
         /// <inheritdoc />
         public string ApplicationInput { get; set; }
+
+        internal ConcurrentDictionary<string, ImmutableArray<IDocument>> Documents { get; }
+            = new ConcurrentDictionary<string, ImmutableArray<IDocument>>(StringComparer.OrdinalIgnoreCase);
 
         internal DocumentFactory DocumentFactory { get; }
 

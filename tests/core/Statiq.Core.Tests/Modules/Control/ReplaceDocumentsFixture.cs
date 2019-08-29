@@ -21,7 +21,7 @@ namespace Statiq.Core.Tests.Modules.Control
                 // Given
                 List<string> content = new List<string>();
                 IServiceProvider services = new ServiceCollection()
-                    .AddRequiredEngineServices()
+                    .AddEngineServices()
                     .AddSingleton<ILoggerProvider>(new TestLoggerProvider())
                     .BuildServiceProvider();
                 Engine engine = new Engine(services);
@@ -46,7 +46,7 @@ namespace Statiq.Core.Tests.Modules.Control
                 // Given
                 List<string> content = new List<string>();
                 IServiceProvider services = new ServiceCollection()
-                    .AddRequiredEngineServices()
+                    .AddEngineServices()
                     .AddSingleton<ILoggerProvider>(new TestLoggerProvider())
                     .BuildServiceProvider();
                 Engine engine = new Engine(services);
@@ -74,7 +74,7 @@ namespace Statiq.Core.Tests.Modules.Control
                 // Given
                 List<string> content = new List<string>();
                 IServiceProvider services = new ServiceCollection()
-                    .AddRequiredEngineServices()
+                    .AddEngineServices()
                     .AddSingleton<ILoggerProvider>(new TestLoggerProvider())
                     .BuildServiceProvider();
                 Engine engine = new Engine(services);

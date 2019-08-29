@@ -56,22 +56,10 @@ namespace Statiq.Testing
         public Guid ExecutionId { get; set; } = Guid.NewGuid();
 
         /// <inheritdoc/>
-        public IReadOnlyCollection<byte[]> DynamicAssemblies { get; set; } = new List<byte[]>();
+        public IRawAssemblyCollection DynamicAssemblies { get; set; } = new TestRawAssemblyCollection();
 
         /// <inheritdoc/>
-        public IReadOnlyCollection<string> Namespaces { get; set; } =
-            typeof(IEngine).Assembly.GetTypes()
-                .Where(x => x.IsPublic)
-                .Select(x => x.Namespace)
-                .Distinct()
-                .Concat(new[]
-                {
-                    "System",
-                    "System.Threading.Tasks",
-                    "System.Collections.Generic",
-                    "System.Linq"
-                })
-                .ToList();
+        public INamespacesCollection Namespaces { get; set; } = new TestNamespacesCollection();
 
         /// <inheritdoc/>
         public string PipelineName { get; set; }
