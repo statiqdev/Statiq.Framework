@@ -47,7 +47,7 @@ namespace Statiq.App
                 });
             }
 
-            // Build the service provider
+            // Build a temporary service provider so we can log
             IServiceProvider services = _serviceCollection.BuildServiceProvider();
 
             // Log pending messages
@@ -78,9 +78,9 @@ namespace Statiq.App
                 }
             }
 
-            return await ExecuteCommandAsync(services, context, settings);
+            return await ExecuteCommandAsync(_serviceCollection, context, settings);
         }
 
-        public abstract Task<int> ExecuteCommandAsync(IServiceProvider serviceProvider, CommandContext context, TSettings settings);
+        public abstract Task<int> ExecuteCommandAsync(IServiceCollection serviceCollection, CommandContext context, TSettings settings);
     }
 }

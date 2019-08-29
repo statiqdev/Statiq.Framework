@@ -1,9 +1,7 @@
-﻿using System;
-using System.ComponentModel;
+﻿using System.ComponentModel;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 using Spectre.Cli;
 using Statiq.Common;
 
@@ -51,10 +49,10 @@ namespace Statiq.App
             _configurators = configurators;
         }
 
-        public override async Task<int> ExecuteCommandAsync(IServiceProvider services, CommandContext context, Settings settings)
+        public override async Task<int> ExecuteCommandAsync(IServiceCollection serviceCollection, CommandContext context, Settings settings)
         {
             CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
-            using (EngineManager engineManager = new EngineManager(services, _configurators, settings))
+            using (EngineManager engineManager = new EngineManager(serviceCollection, _configurators, settings))
             {
                 return await engineManager.ExecuteAsync(cancellationTokenSource)
                     ? (int)ExitCode.Normal

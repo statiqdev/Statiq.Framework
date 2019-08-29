@@ -15,11 +15,10 @@ namespace Statiq.App
     {
         private readonly ILogger _logger;
 
-        public EngineManager(IServiceProvider services, IConfiguratorCollection configurators, BuildCommand.Settings commandSettings)
+        public EngineManager(IServiceCollection serviceCollection, IConfiguratorCollection configurators, BuildCommand.Settings commandSettings)
         {
-            _logger = services.GetRequiredService<ILogger<Bootstrapper>>();
-
-            Engine = new Engine(services);
+            Engine = new Engine(serviceCollection);
+            _logger = Engine.Services.GetRequiredService<ILogger<Bootstrapper>>();
 
             // Apply settings
             configurators.Configure(Engine.Settings);

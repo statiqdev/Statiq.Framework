@@ -59,8 +59,8 @@ namespace Statiq.App
             ConfigurableServices configurableServices = new ConfigurableServices(serviceCollection);
             _configurators.Configure(configurableServices);
 
-            // Ensure required engine services are available after running service configurators
-            serviceCollection.AddEngineServices();
+            // Add simple logging to make sure it's available in commands before the engine adds in
+            serviceCollection.AddLogging();
 
             // Create the stand-alone command line service container and register a few types needed for the CLI
             CommandServiceTypeRegistrar registrar = new CommandServiceTypeRegistrar();

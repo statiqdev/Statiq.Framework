@@ -9,9 +9,9 @@ using Statiq.Testing;
 namespace Statiq.Core.Tests.Execution
 {
     [TestFixture]
-    public class EngineServiceProviderFixture : BaseFixture
+    public class EngineFixture : BaseFixture
     {
-        public class GetServiceTests : EngineServiceProviderFixture
+        public class GetServiceTests : EngineFixture
         {
             [Test]
             public void GetsEngineService()
@@ -32,9 +32,8 @@ namespace Statiq.Core.Tests.Execution
                 // Given
                 TestFileProvider testFileProvider = new TestFileProvider();
                 ServiceCollection serviceCollection = new ServiceCollection();
-                serviceCollection.AddEngineServices();
                 serviceCollection.AddSingleton<IFileProvider>(testFileProvider);
-                Engine engine = new Engine(serviceCollection.BuildServiceProvider());
+                Engine engine = new Engine(serviceCollection);
 
                 // When
                 IFileProvider fileProvider = engine.Services.GetRequiredService<IFileProvider>();

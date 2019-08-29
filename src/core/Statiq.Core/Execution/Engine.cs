@@ -8,6 +8,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using JavaScriptEngineSwitcher.Core;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using Statiq.Common;
@@ -58,16 +59,27 @@ namespace Statiq.Core
         /// <summary>
         /// Creates the engine with the specified service provider.
         /// </summary>
-        /// <param name="services">The service provider.</param>
-        public Engine(IServiceProvider services)
+        /// <param name="serviceCollection">The service collection.</param>
+        public Engine(IServiceCollection serviceCollection)
         {
-            Services = new EngineServiceProvider(
-                this,
-                services ?? new ServiceCollection().AddEngineServices().BuildServiceProvider());
+            Services = GetServiceProvider(serviceCollection);
             _logger = Services.GetRequiredService<ILogger<Engine>>();
             DocumentFactory = new DocumentFactory(_settings);
             _diagnosticsTraceListener = new DiagnosticsTraceListener(_logger);
             System.Diagnostics.Trace.Listeners.Add(_diagnosticsTraceListener);
+        }
+
+        private IServiceProvider GetServiceProvider(IServiceCollection serviceCollection)
+        {
+            serviceCollection ??= new ServiceCollection();
+            serviceCollection.AddLogging();
+            serviceCollection.AddSingleton<IReadOnlyFileSystem>(FileSystem);
+            serviceCollection.AddSingleton<IReadOnlySettings>(Settings);
+            serviceCollection.AddSingleton<IReadOnlyShortcodeCollection>(Shortcodes);
+            serviceCollection.AddSingleton<IMemoryStreamFactory>(MemoryStreamFactory);
+            serviceCollection.AddSingleton<INamespacesCollection>(Namespaces);
+            serviceCollection.AddSingleton<IRawAssemblyCollection>(DynamicAssemblies);
+            return serviceCollection.BuildServiceProvider();
         }
 
         /// <inheritdoc />

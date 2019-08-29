@@ -20,11 +20,9 @@ namespace Statiq.Core.Tests.Modules.Control
             {
                 // Given
                 List<string> content = new List<string>();
-                IServiceProvider services = new ServiceCollection()
-                    .AddEngineServices()
-                    .AddSingleton<ILoggerProvider>(new TestLoggerProvider())
-                    .BuildServiceProvider();
-                Engine engine = new Engine(services);
+                IServiceCollection serviceCollection = new ServiceCollection()
+                    .AddSingleton<ILoggerProvider>(new TestLoggerProvider());
+                Engine engine = new Engine(serviceCollection);
                 CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
                 ForEachDocument gatherData = new ExecuteConfig(
                     Config.FromDocument(async d => content.Add(await d.GetStringAsync()))).ForEachDocument();
@@ -45,11 +43,9 @@ namespace Statiq.Core.Tests.Modules.Control
             {
                 // Given
                 List<string> content = new List<string>();
-                IServiceProvider services = new ServiceCollection()
-                    .AddEngineServices()
-                    .AddSingleton<ILoggerProvider>(new TestLoggerProvider())
-                    .BuildServiceProvider();
-                Engine engine = new Engine(services);
+                IServiceCollection serviceCollection = new ServiceCollection()
+                    .AddSingleton<ILoggerProvider>(new TestLoggerProvider());
+                Engine engine = new Engine(serviceCollection);
                 CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
                 ForEachDocument gatherData = new ExecuteConfig(
                     Config.FromDocument(async d => content.Add(await d.GetStringAsync()))).ForEachDocument();
@@ -73,11 +69,9 @@ namespace Statiq.Core.Tests.Modules.Control
             {
                 // Given
                 List<string> content = new List<string>();
-                IServiceProvider services = new ServiceCollection()
-                    .AddEngineServices()
-                    .AddSingleton<ILoggerProvider>(new TestLoggerProvider())
-                    .BuildServiceProvider();
-                Engine engine = new Engine(services);
+                IServiceCollection serviceCollection = new ServiceCollection()
+                    .AddSingleton<ILoggerProvider>(new TestLoggerProvider());
+                Engine engine = new Engine(serviceCollection);
                 CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
                 ForEachDocument gatherData = new ExecuteConfig(
                     Config.FromDocument(async d => content.Add(await d.GetStringAsync()))).ForEachDocument();

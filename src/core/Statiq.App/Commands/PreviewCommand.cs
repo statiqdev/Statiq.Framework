@@ -55,12 +55,13 @@ namespace Statiq.App
             _configurators = configurators;
         }
 
-        public override async Task<int> ExecuteCommandAsync(IServiceProvider services, CommandContext context, Settings settings)
+        public override async Task<int> ExecuteCommandAsync(IServiceCollection serviceCollection, CommandContext context, Settings settings)
         {
-            ILogger logger = services.GetRequiredService<ILogger<Bootstrapper>>();
             ExitCode exitCode = ExitCode.Normal;
-            using (EngineManager engineManager = new EngineManager(services, _configurators, settings))
+            using (EngineManager engineManager = new EngineManager(serviceCollection, _configurators, settings))
             {
+                ILogger logger = engineManager.Engine.Services.GetRequiredService<ILogger<Bootstrapper>>();
+
                 // Execute the engine for the first time
                 CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
                 if (!await engineManager.ExecuteAsync(cancellationTokenSource))
@@ -72,7 +73,7 @@ namespace Statiq.App
                 Dictionary<string, string> contentTypes = settings.ContentTypes?.Length > 0
                     ? GetContentTypes(settings.ContentTypes)
                     : new Dictionary<string, string>();
-                ILoggerProvider loggerProvider = services.GetRequiredService<ILoggerProvider>();
+                ILoggerProvider loggerProvider = engineManager.Engine.Services.GetRequiredService<ILoggerProvider>();
                 Server previewServer = await StartPreviewServerAsync(
                     engineManager.Engine.FileSystem.GetOutputDirectory().Path,
                     settings.Port,
