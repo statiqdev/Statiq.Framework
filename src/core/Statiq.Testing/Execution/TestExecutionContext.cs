@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.IO;
@@ -9,6 +10,7 @@ using System.Net.Http;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using Statiq.Common;
@@ -28,6 +30,15 @@ namespace Statiq.Testing
             _documentFactory = new DocumentFactory(_settings);
             _documentFactory.SetDefaultDocumentType<TestDocument>();
             Inputs = ImmutableArray<IDocument>.Empty;
+
+            TestLoggerProvider loggerProvider = new TestLoggerProvider(LogMessages);
+            Services = new TestServiceProvider(
+                serviceCollection =>
+                {
+                    serviceCollection.AddLogging();
+                    serviceCollection.AddSingleton<ILoggerProvider>(loggerProvider);
+                });
+            Logger = new TestLogger(LogMessages);
         }
 
         public TestExecutionContext(IEnumerable<IDocument> inputs)
@@ -35,6 +46,15 @@ namespace Statiq.Testing
             _documentFactory = new DocumentFactory(_settings);
             _documentFactory.SetDefaultDocumentType<TestDocument>();
             SetInputs(inputs);
+
+            TestLoggerProvider loggerProvider = new TestLoggerProvider(LogMessages);
+            Services = new TestServiceProvider(
+                serviceCollection =>
+                {
+                    serviceCollection.AddLogging();
+                    serviceCollection.AddSingleton<ILoggerProvider>(loggerProvider);
+                });
+            Logger = new TestLogger(LogMessages);
         }
 
         public TestExecutionContext(params IDocument[] inputs)
@@ -42,9 +62,11 @@ namespace Statiq.Testing
         {
         }
 
-        public IServiceProvider Services { get; set; } = new TestServiceProvider();
+        public IServiceProvider Services { get; set; }
 
-        public ILogger Logger { get; set; } = new TestLogger();
+        public ILogger Logger { get; set; }
+
+        public ConcurrentQueue<TestMessage> LogMessages { get; } = new ConcurrentQueue<TestMessage>();
 
         public IShortcodeCollection Shortcodes { get; set; } = new TestShortcodeCollection();
 

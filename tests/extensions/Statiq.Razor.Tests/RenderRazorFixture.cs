@@ -356,12 +356,7 @@ namespace Statiq.Razor.Tests
                 return new TestExecutionContext
                 {
                     Namespaces = engine.Namespaces,
-                    FileSystem = GetFileSystem(),
-                    Services = new TestServiceProvider(serviceCollection =>
-                    {
-                        serviceCollection.AddLogging();
-                        serviceCollection.AddSingleton<ILoggerProvider, TestLoggerProvider>();
-                    })
+                    FileSystem = GetFileSystem()
                 };
             }
 

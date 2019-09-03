@@ -14,25 +14,25 @@ namespace Statiq.Testing
 
         public string CategoryName { get; }
 
-        public TestLogger()
-            : this(null, null, LogLevel.Warning)
+        public TestLogger(ConcurrentQueue<TestMessage> messages = null)
+            : this(null, LogLevel.Warning, messages)
         {
         }
 
-        public TestLogger(LogLevel throwLogLevel)
-            : this(null, null, throwLogLevel)
+        public TestLogger(LogLevel throwLogLevel, ConcurrentQueue<TestMessage> messages = null)
+            : this(null, throwLogLevel, messages)
         {
         }
 
-        public TestLogger(string categoryName)
-            : this(categoryName, null, LogLevel.Warning)
+        public TestLogger(string categoryName, ConcurrentQueue<TestMessage> messages = null)
+            : this(categoryName, LogLevel.Warning, messages)
         {
         }
 
-        public TestLogger(string categoryName, ConcurrentQueue<TestMessage> messages, LogLevel throwLogLevel)
+        public TestLogger(string categoryName, LogLevel throwLogLevel, ConcurrentQueue<TestMessage> messages = null)
         {
-            CategoryName = categoryName;
             Messages = messages ?? new ConcurrentQueue<TestMessage>();
+            CategoryName = categoryName;
             ThrowLogLevel = throwLogLevel;
         }
 

@@ -35,7 +35,7 @@ namespace Statiq.App.Tests.Bootstrapper
 
                 // Then
                 exitCode.ShouldBe((int)ExitCode.Normal);
-                provider.Messages.ShouldContain(x => x.Formatted.StartsWith("Statiq version"));
+                provider.Messages.ShouldContain(x => x.FormattedMessage.StartsWith("Statiq version"));
             }
 
             [Test]
@@ -58,7 +58,7 @@ namespace Statiq.App.Tests.Bootstrapper
                 exitCode.ShouldBe((int)ExitCode.Normal);
                 provider.Messages.ShouldContain(x =>
                     x.LogLevel == LogLevel.Warning
-                    && x.Formatted == "No pipelines are configured.");
+                    && x.FormattedMessage == "No pipelines are configured.");
             }
 
             [TestCase("Trace", 6)]
@@ -112,7 +112,7 @@ namespace Statiq.App.Tests.Bootstrapper
                 // Then
                 exitCode.ShouldBe((int)ExitCode.Normal);
                 bootstrapper.ClassCatalog.GetAssignableFrom<BootstrapperFixture>().Count().ShouldBe(1);
-                provider.Messages.ShouldContain(x => x.Formatted.StartsWith("Cataloging types in assembly"));
+                provider.Messages.ShouldContain(x => x.FormattedMessage.StartsWith("Cataloging types in assembly"));
             }
         }
     }

@@ -50,7 +50,8 @@ namespace Statiq.Less
         public override Task<IEnumerable<IDocument>> ExecuteAsync(IExecutionContext context)
         {
             DotlessConfiguration config = DotlessConfiguration.GetDefault();
-            config.Logger = typeof(LessLogger);
+
+            // config.Logger = typeof(LessLogger);
             EngineFactory engineFactory = new EngineFactory(config);
             FileSystemReader fileSystemReader = new FileSystemReader(context.FileSystem);
             return context.Inputs.ParallelSelectAsync(ProcessLessAsync);
@@ -58,7 +59,11 @@ namespace Statiq.Less
             async Task<IDocument> ProcessLessAsync(IDocument input)
             {
                 context.LogDebug("Processing Less for {0}", input.ToSafeDisplayString());
-                LessEngine engine = (LessEngine)engineFactory.GetEngine();
+
+                // This is a hack to get to the underlying engine
+                ParameterDecorator parameterDecorator = (ParameterDecorator)engineFactory.GetEngine();
+                CacheDecorator cacheDecorator = (CacheDecorator)parameterDecorator.Underlying;
+                LessEngine engine = (LessEngine)cacheDecorator.Underlying;
                 engine.Logger = new LessLogger(context);
                 ((Importer)engine.Parser.Importer).FileReader = fileSystemReader;
 

@@ -14,7 +14,7 @@ namespace Statiq.Testing
         public EventId EventId { get; }
         public object State { get; }
         public Exception Exception { get; }
-        public string Formatted { get; }
+        public string FormattedMessage { get; }
 
         public TestMessage(string categoryName, LogLevel logLevel, EventId eventId, object state, Exception exception, string formatted)
         {
@@ -23,7 +23,7 @@ namespace Statiq.Testing
             EventId = eventId;
             State = state;
             Exception = exception;
-            Formatted = formatted;
+            FormattedMessage = formatted;
         }
     }
 }

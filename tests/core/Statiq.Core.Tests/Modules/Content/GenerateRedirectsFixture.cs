@@ -71,7 +71,7 @@ namespace Statiq.Core.Tests.Modules.Contents
             IReadOnlyList<TestDocument> results = await ExecuteAsync(context, redirect);
 
             // Then
-            logger.Messages.ShouldContain(x => x.LogLevel == LogLevel.Warning && x.Formatted.StartsWith("The redirect path must be relative"));
+            logger.Messages.ShouldContain(x => x.LogLevel == LogLevel.Warning && x.FormattedMessage.StartsWith("The redirect path must be relative"));
             Assert.AreEqual(0, results.Count);
         }
 
