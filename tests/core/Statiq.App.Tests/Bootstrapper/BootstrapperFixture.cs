@@ -25,7 +25,7 @@ namespace Statiq.App.Tests.Bootstrapper
                 // Given
                 string[] args = new[] { "build" };
                 TestLoggerProvider provider = new TestLoggerProvider();
-                App.Bootstrapper bootstrapper = new App.Bootstrapper(args);
+                IBootstrapper bootstrapper = App.Bootstrapper.Create(args);
                 bootstrapper.AddCommand<BuildCommand>("build");
                 bootstrapper.AddServices(services => services.AddSingleton<ILoggerProvider>(provider));
                 bootstrapper.AddPipeline("Foo");
@@ -47,7 +47,7 @@ namespace Statiq.App.Tests.Bootstrapper
                 {
                     ThrowLogLevel = LogLevel.None
                 };
-                App.Bootstrapper bootstrapper = new App.Bootstrapper(args);
+                IBootstrapper bootstrapper = App.Bootstrapper.Create(args);
                 bootstrapper.AddCommand<BuildCommand>("build");
                 bootstrapper.AddServices(services => services.AddSingleton<ILoggerProvider>(provider));
 
@@ -75,7 +75,7 @@ namespace Statiq.App.Tests.Bootstrapper
                 {
                     ThrowLogLevel = LogLevel.None
                 };
-                App.Bootstrapper bootstrapper = new App.Bootstrapper(args);
+                IBootstrapper bootstrapper = App.Bootstrapper.Create(args);
                 bootstrapper.AddCommand<BuildCommand>("build");
                 bootstrapper.AddServices(services => services.AddSingleton<ILoggerProvider>(provider));
                 bootstrapper.AddPipeline(
@@ -101,7 +101,7 @@ namespace Statiq.App.Tests.Bootstrapper
                 // Given
                 string[] args = new[] { "build", "-l", "Debug" };
                 TestLoggerProvider provider = new TestLoggerProvider();
-                App.Bootstrapper bootstrapper = new App.Bootstrapper(args);
+                IBootstrapper bootstrapper = App.Bootstrapper.Create(args);
                 bootstrapper.AddCommand<BuildCommand>("build");
                 bootstrapper.AddServices(services => services.AddSingleton<ILoggerProvider>(provider));
                 bootstrapper.AddPipeline("Foo");

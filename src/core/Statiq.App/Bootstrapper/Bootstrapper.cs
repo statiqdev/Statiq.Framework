@@ -19,17 +19,22 @@ namespace Statiq.App
 
         private Func<CommandServiceTypeRegistrar, ICommandApp> _getCommandApp = x => new CommandApp(x);
 
-        public Bootstrapper(string[] args)
+        // Private constructor to force factory use which returns the interface to get access to default interface implementations
+        private Bootstrapper(string[] args)
         {
             Args = args ?? throw new ArgumentNullException(nameof(args));
         }
 
+        /// <inheritdoc/>
         public IClassCatalog ClassCatalog => _classCatalog;
 
+        /// <inheritdoc/>
         public IConfiguratorCollection Configurators => _configurators;
 
+        /// <inheritdoc/>
         public string[] Args { get; }
 
+        /// <inheritdoc/>
         public IBootstrapper SetDefaultCommand<TCommand>()
             where TCommand : class, ICommand
         {
@@ -37,6 +42,7 @@ namespace Statiq.App
             return this;
         }
 
+        /// <inheritdoc/>
         public async Task<int> RunAsync()
         {
             // Remove the synchronization context
@@ -89,17 +95,55 @@ namespace Statiq.App
 
         // Static factories
 
-        public static IBootstrapper CreateDefault(string[] args) =>
-            new Bootstrapper(args).AddDefaults();
+        /// <summary>
+        /// Creates an empty bootstrapper without any default configuration.
+        /// </summary>
+        /// <remarks>
+        /// Use this method when you want to fully customize the bootstrapper and engine.
+        /// Otherwise use on of the <see cref="CreateDefault(string[])"/> overloads to
+        /// create an initialize a bootstrapper with an initial set of default configurations.
+        /// </remarks>
+        /// <param name="args">The command line arguments.</param>
+        /// <returns>The bootstrapper.</returns>
+        public static IBootstrapper Create(string[] args) => new Bootstrapper(args);
 
+        /// <summary>
+        /// Creates a bootstrapper with a default configuration including logging, commands,
+        /// shortcodes, and assembly scanning.
+        /// </summary>
+        /// <param name="args">The command line arguments.</param>
+        /// <returns>The bootstrapper.</returns>
+        public static IBootstrapper CreateDefault(string[] args) => Create(args).AddDefaults();
+
+        /// <summary>
+        /// Creates a bootstrapper with a default configuration including logging, commands,
+        /// shortcodes, and assembly scanning while specifying an additional engine configurator.
+        /// </summary>
+        /// <typeparam name="TConfigurator">The type of engine configurator to use.</typeparam>
+        /// <param name="args">The command line arguments.</param>
+        /// <returns>The bootstrapper.</returns>
         public static IBootstrapper CreateDefault<TConfigurator>(string[] args)
             where TConfigurator : Common.IConfigurator<IEngine> =>
-            new Bootstrapper(args).AddDefaults<TConfigurator>();
+            Create(args).AddDefaults<TConfigurator>();
 
+        /// <summary>
+        /// Creates a bootstrapper with a default configuration including logging, commands,
+        /// shortcodes, and assembly scanning while specifying a delegate to configure the engine.
+        /// </summary>
+        /// <param name="args">The command line arguments.</param>
+        /// <param name="configureEngineAction">A delegate to configure the engine.</param>
+        /// <returns>The bootstrapper.</returns>
         public static IBootstrapper CreateDefault(string[] args, Action<IEngine> configureEngineAction) =>
-            new Bootstrapper(args).AddDefaults(configureEngineAction);
+            Create(args).AddDefaults(configureEngineAction);
 
+        /// <summary>
+        /// Creates a bootstrapper with a default configuration including logging, commands,
+        /// shortcodes, and assembly scanning while specifying an additional engine configurator.
+        /// </summary>
+        /// <param name="args">The command line arguments.</param>
+        /// <param name="configurator">The engine configurator.</param>
+        /// <returns>The bootstrapper.</returns>
         public static IBootstrapper CreateDefault(string[] args, Common.IConfigurator<IEngine> configurator) =>
-            new Bootstrapper(args).AddDefaults(configurator);
+            Create(args).AddDefaults(configurator);
     }
 }
