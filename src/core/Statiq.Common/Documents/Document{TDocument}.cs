@@ -252,23 +252,12 @@ namespace Statiq.Common
             }
         }
 
-        /// <inheritdoc />
-        public Stream GetStream() => ContentProvider == null ? Stream.Null : ContentProvider.GetStream();
-
-        /// <inheritdoc />
-        public bool HasContent => ContentProvider != null;
-
-        /// <inheritdoc />
-        public override string ToString() => Source?.FullPath ?? string.Empty;
-
-        /// <inheritdoc />
-        public virtual string ToDisplayString() => Source?.ToDisplayString() ?? "unknown source";
-
-        /// <inheritdoc />
+        // Allow overrides
+        // TODO: Replace with base(IDocument).GetCacheHashCodeAsync() when available
         public virtual async Task<int> GetCacheHashCodeAsync()
         {
             HashCode hash = default;
-            using (Stream stream = GetStream())
+            using (Stream stream = ((IDocument)this).GetStream())
             {
                 hash.Add(await Crc32.CalculateAsync(stream));
             }
@@ -281,6 +270,13 @@ namespace Statiq.Common
 
             return hash.ToHashCode();
         }
+
+        // Allow overrides
+        // TODO: Replace with base(IDocument).ToDisplayString() when available
+        public virtual string ToDisplayString() => Source?.ToDisplayString() ?? "unknown source";
+
+        /// <inheritdoc />
+        public override string ToString() => Source?.FullPath ?? string.Empty;
 
         // IMetadata
 

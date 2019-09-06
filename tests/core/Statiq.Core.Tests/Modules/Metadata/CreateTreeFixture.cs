@@ -141,17 +141,17 @@ namespace Statiq.Core.Tests.Modules.Metadata
                     .WithRoots(Config.FromDocument(doc => doc.Destination.FullPath.EndsWith("b/index.html")));
 
                 // When
-                IReadOnlyList<TestDocument> results = await ExecuteAsync(inputs, tree);
+                IReadOnlyList<IDocument> results = await ExecuteAsync(inputs, tree);
 
                 // Then
                 results.Count.ShouldBe(2);
                 VerifyTree(
-                    results[0].GetChildren().Cast<TestDocument>().ToList(),
+                    results[0].GetChildren().ToList(),
                     results[0],
                     "root/b/index.html",
                     "root/b/4.txt");
                 VerifyTree(
-                    results[1].GetChildren().Cast<TestDocument>().ToList(),
+                    results[1].GetChildren().ToList(),
                     results[1],
                     "index.html",
                     "root/index.html",
@@ -199,7 +199,7 @@ namespace Statiq.Core.Tests.Modules.Metadata
                     "root/a/index.html");
             }
 
-            private void VerifyTree(IReadOnlyList<TestDocument> documents, TestDocument document, params string[] relativeFilePaths)
+            private void VerifyTree(IReadOnlyList<IDocument> documents, IDocument document, params string[] relativeFilePaths)
             {
                 foreach (string relativeFilePath in relativeFilePaths)
                 {

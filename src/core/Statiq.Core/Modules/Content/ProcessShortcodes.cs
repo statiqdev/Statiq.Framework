@@ -155,7 +155,7 @@ namespace Statiq.Core
 
             if (shortcodeResult != null)
             {
-                if (shortcodeResult.HasContent)
+                if (shortcodeResult.ContentProvider != null)
                 {
                     // Merge output metadata with the current input document
                     // Creating a new document is the easiest way to ensure all the metadata from shortcodes gets accumulated correctly

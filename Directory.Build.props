@@ -33,4 +33,8 @@
       <Link>Properties\SolutionInfo.cs</Link>
     </Compile>
   </ItemGroup>
+  <ItemGroup>
+    <ProjectCapability Include="DynamicDependentFile"/>
+    <ProjectCapability Include="DynamicFileNesting"/>
+  </ItemGroup>
 </Project>

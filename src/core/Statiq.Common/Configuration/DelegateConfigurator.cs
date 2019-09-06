@@ -1,7 +1,7 @@
 ﻿using System;
 using Statiq.Common;
 
-namespace Statiq.App
+namespace Statiq.Common
 {
     public class DelegateConfigurator<TConfigurable> : IConfigurator<TConfigurable>
         where TConfigurable : IConfigurable

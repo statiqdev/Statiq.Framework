@@ -8,19 +8,6 @@ namespace Statiq.App
     {
         private readonly Dictionary<Type, List<object>> _configurators = new Dictionary<Type, List<object>>();
 
-        public void Add<TConfigurable, TConfigurator>()
-            where TConfigurable : IConfigurable
-            where TConfigurator : IConfigurator<TConfigurable> =>
-            Get<TConfigurable>().Add(Activator.CreateInstance<TConfigurator>());
-
-        public void Add<TConfigurable>(Action<TConfigurable> action)
-            where TConfigurable : IConfigurable =>
-            Add(new DelegateConfigurator<TConfigurable>(action));
-
-        public void Add<TConfigurable>(IConfigurator<TConfigurable> configurator)
-            where TConfigurable : IConfigurable =>
-            Get<TConfigurable>().Add(configurator);
-
         public IList<IConfigurator<TConfigurable>> Get<TConfigurable>()
             where TConfigurable : IConfigurable
         {

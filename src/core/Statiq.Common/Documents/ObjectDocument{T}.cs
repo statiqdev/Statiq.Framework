@@ -17,7 +17,7 @@ namespace Statiq.Common
     /// derived documents, settings are not "bubbled up" through the document metadata.
     /// </remarks>
     /// <typeparam name="T">The type of underlying object.</typeparam>
-    public class ObjectDocument<T> : IDocument
+    public sealed class ObjectDocument<T> : IDocument
     {
         private readonly IMetadata _metadata;
 
@@ -149,35 +149,7 @@ namespace Statiq.Common
                 contentProvider ?? ContentProvider);
 
         /// <inheritdoc />
-        public Stream GetStream() =>
-            ContentProvider == null ? Stream.Null : ContentProvider.GetStream();
-
-        /// <inheritdoc />
-        public bool HasContent => ContentProvider != null;
-
-        /// <inheritdoc />
         public override string ToString() => Source?.FullPath ?? string.Empty;
-
-        /// <inheritdoc />
-        public virtual string ToDisplayString() => Source?.ToDisplayString() ?? "unknown source";
-
-        /// <inheritdoc />
-        public virtual async Task<int> GetCacheHashCodeAsync()
-        {
-            HashCode hash = default;
-            using (Stream stream = GetStream())
-            {
-                hash.Add(await Crc32.CalculateAsync(stream));
-            }
-
-            foreach (KeyValuePair<string, object> item in this)
-            {
-                hash.Add(item.Key);
-                hash.Add(item.Value);
-            }
-
-            return hash.ToHashCode();
-        }
 
         // IMetadata
 

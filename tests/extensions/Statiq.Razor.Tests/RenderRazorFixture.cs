@@ -328,8 +328,8 @@ namespace Statiq.Razor.Tests
                 RenderRazor razor = new RenderRazor();
 
                 // When
-                ImmutableArray<TestDocument> results1 = await ExecuteAsync(document, context, razor);
-                ImmutableArray<TestDocument> results2 = await ExecuteAsync(document, context, razor);
+                IReadOnlyList<IDocument> results1 = await ExecuteAsync(document, context, razor);
+                IReadOnlyList<IDocument> results2 = await ExecuteAsync(document, context, razor);
 
                 // Then
                 (await results1.Single().GetStringAsync()).ShouldBe(

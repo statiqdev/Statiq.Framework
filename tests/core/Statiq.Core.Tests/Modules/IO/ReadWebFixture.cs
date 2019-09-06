@@ -113,7 +113,7 @@ namespace Statiq.Core.Tests.Modules.IO
                 IModule download = new ReadWeb().WithUris("https://statiq.dev/assets/img/logo.png");
 
                 // When
-                TestDocument result = await ExecuteAsync(context, download).SingleAsync();
+                IDocument result = await ExecuteAsync(context, download).SingleAsync();
 
                 // Then
                 using (Stream stream = result.GetStream())
@@ -143,7 +143,7 @@ namespace Statiq.Core.Tests.Modules.IO
                 IModule download = new ReadWeb().WithUri("https://statiq.dev/assets/img/logo.png", header);
 
                 // When
-                TestDocument result = await ExecuteAsync(context, download).SingleAsync();
+                IDocument result = await ExecuteAsync(context, download).SingleAsync();
 
                 // Then
                 using (Stream stream = result.GetStream())

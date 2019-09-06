@@ -39,7 +39,6 @@ public object Id => Document.Get(""Id"");
 public object Source => Document.Get(""Source"");
 public object Destination => Document.Get(""Destination"");
 public object ContentProvider => Document.Get(""ContentProvider"");
-public object HasContent => Document.Get(""HasContent"");
 }
 
 public static class ScriptExtensionMethods
@@ -83,7 +82,6 @@ public object Id => Document.Get(""Id"");
 public object Source => Document.Get(""Source"");
 public object Destination => Document.Get(""Destination"");
 public object ContentProvider => Document.Get(""ContentProvider"");
-public object HasContent => Document.Get(""HasContent"");
 }
 
 public static class ScriptExtensionMethods
@@ -145,7 +143,6 @@ public object Id => Document.Get(""Id"");
 public object Source => Document.Get(""Source"");
 public object Destination => Document.Get(""Destination"");
 public object ContentProvider => Document.Get(""ContentProvider"");
-public object HasContent => Document.Get(""HasContent"");
 }
 #line 1
 public class Foo
@@ -222,7 +219,6 @@ public object Id => Document.Get(""Id"");
 public object Source => Document.Get(""Source"");
 public object Destination => Document.Get(""Destination"");
 public object ContentProvider => Document.Get(""ContentProvider"");
-public object HasContent => Document.Get(""HasContent"");
 }
 #line 3
 public static class Foo
@@ -285,7 +281,6 @@ public object Id => Document.Get(""Id"");
 public object Source => Document.Get(""Source"");
 public object Destination => Document.Get(""Destination"");
 public object ContentProvider => Document.Get(""ContentProvider"");
-public object HasContent => Document.Get(""HasContent"");
 }
 #line 1
 public static class Foo
@@ -344,7 +339,6 @@ public object Id => Document.Get(""Id"");
 public object Source => Document.Get(""Source"");
 public object Destination => Document.Get(""Destination"");
 public object ContentProvider => Document.Get(""ContentProvider"");
-public object HasContent => Document.Get(""HasContent"");
 }
 #line 1
 public static class Foo
@@ -419,7 +413,6 @@ public object Id => Document.Get(""Id"");
 public object Source => Document.Get(""Source"");
 public object Destination => Document.Get(""Destination"");
 public object ContentProvider => Document.Get(""ContentProvider"");
-public object HasContent => Document.Get(""HasContent"");
 }
 #line 1
 // XYZ

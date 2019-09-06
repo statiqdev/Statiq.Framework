@@ -3,18 +3,11 @@ using System.Collections.Generic;
 
 namespace Statiq.Common
 {
-    public interface IConfiguratorCollection
+    /// <summary>
+    /// Contains a collection of configurators that can be used to configure a given type of object.
+    /// </summary>
+    public partial interface IConfiguratorCollection
     {
-        void Add<TConfigurable, TConfigurator>()
-            where TConfigurable : IConfigurable
-            where TConfigurator : IConfigurator<TConfigurable>;
-
-        void Add<TConfigurable>(Action<TConfigurable> action)
-            where TConfigurable : IConfigurable;
-
-        void Add<TConfigurable>(IConfigurator<TConfigurable> configurator)
-            where TConfigurable : IConfigurable;
-
         IList<IConfigurator<TConfigurable>> Get<TConfigurable>()
             where TConfigurable : IConfigurable;
 

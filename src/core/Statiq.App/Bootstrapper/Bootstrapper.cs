@@ -15,8 +15,6 @@ namespace Statiq.App
     {
         private readonly ClassCatalog _classCatalog = new ClassCatalog();
 
-        private readonly ConfiguratorCollection _configurators = new ConfiguratorCollection();
-
         private Func<CommandServiceTypeRegistrar, ICommandApp> _getCommandApp = x => new CommandApp(x);
 
         // Private constructor to force factory use which returns the interface to get access to default interface implementations
@@ -29,7 +27,7 @@ namespace Statiq.App
         public IClassCatalog ClassCatalog => _classCatalog;
 
         /// <inheritdoc/>
-        public IConfiguratorCollection Configurators => _configurators;
+        public IConfiguratorCollection Configurators { get; } = new ConfiguratorCollection();
 
         /// <inheritdoc/>
         public string[] Args { get; }
@@ -52,8 +50,8 @@ namespace Statiq.App
             _classCatalog.Populate();
 
             // Run bootstrapper configurators first
-            _configurators.Configure<IConfigurableBootstrapper>(this);
-            _configurators.Configure<IBootstrapper>(this);
+            Configurators.Configure<IConfigurableBootstrapper>(this);
+            Configurators.Configure<IBootstrapper>(this);
 
             // Create the service collection
             IServiceCollection serviceCollection = CreateServiceCollection() ?? new ServiceCollection();
@@ -63,7 +61,7 @@ namespace Statiq.App
 
             // Run configurators on the service collection
             ConfigurableServices configurableServices = new ConfigurableServices(serviceCollection);
-            _configurators.Configure(configurableServices);
+            Configurators.Configure(configurableServices);
 
             // Add simple logging to make sure it's available in commands before the engine adds in
             serviceCollection.AddLogging();
@@ -71,7 +69,7 @@ namespace Statiq.App
             // Create the stand-alone command line service container and register a few types needed for the CLI
             CommandServiceTypeRegistrar registrar = new CommandServiceTypeRegistrar();
             registrar.RegisterInstance(typeof(IServiceCollection), serviceCollection);
-            registrar.RegisterInstance(typeof(IConfiguratorCollection), _configurators);
+            registrar.RegisterInstance(typeof(IConfiguratorCollection), Configurators);
 
             // Create the command line parser and run the command
             ICommandApp app = _getCommandApp(registrar);
@@ -79,7 +77,7 @@ namespace Statiq.App
             {
                 x.ValidateExamples();
                 ConfigurableCommands configurableCommands = new ConfigurableCommands(x);
-                _configurators.Configure(configurableCommands);
+                Configurators.Configure(configurableCommands);
             });
             return await app.RunAsync(Args);
         }

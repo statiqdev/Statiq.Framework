@@ -21,7 +21,7 @@ namespace Statiq.Common
                 new Dictionary<string, IPropertyCallAdapter>(StringComparer.OrdinalIgnoreCase);
 
             // Do a first pass for non-attribute properties
-            // This ensures actual properties will get added first and take precedince over any attributes that define colliding names
+            // This ensures actual properties will get added first and take precedence over any attributes that define colliding names
             List<(PropertyMetadataAttribute, MethodInfo)> attributeProperties =
                 new List<(PropertyMetadataAttribute Property, MethodInfo Getter)>();
             foreach ((PropertyInfo property, MethodInfo getter) in

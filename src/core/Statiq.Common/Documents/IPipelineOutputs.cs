@@ -7,7 +7,7 @@ namespace Statiq.Common
     /// Contains a collection of documents output by the process
     /// phase of each pipeline (except isolated ones).
     /// </summary>
-    public interface IPipelineOutputs : IEnumerable<IDocument>
+    public partial interface IPipelineOutputs : IEnumerable<IDocument>
     {
         /// <summary>
         /// Gets documents by pipeline.
@@ -28,15 +28,5 @@ namespace Statiq.Common
         /// <param name="pipeline">The pipeline.</param>
         /// <returns>All documents output by every pipeline except the specified one.</returns>
         IEnumerable<IDocument> ExceptPipeline(string pipeline);
-
-        /// <summary>
-        /// Gets documents from a specific pipeline.
-        /// </summary>
-        /// <value>
-        /// The documents output by the specified pipeline..
-        /// </value>
-        /// <param name="pipline">The pipeline.</param>
-        /// <returns>The documents output by the specified pipeline.</returns>
-        ImmutableArray<IDocument> this[string pipline] { get; }
     }
 }

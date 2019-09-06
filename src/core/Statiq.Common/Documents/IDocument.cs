@@ -8,7 +8,7 @@ namespace Statiq.Common
     /// <summary>
     /// Contains content and metadata for each item as it propagates through the pipeline.
     /// </summary>
-    public interface IDocument : IMetadata, IDisplayable
+    public partial interface IDocument : IMetadata, IDisplayable
     {
         /// <summary>
         /// An identifier that is generated when the document is created and stays the same after cloning.
@@ -30,30 +30,9 @@ namespace Statiq.Common
         FilePath Destination { get; }
 
         /// <summary>
-        /// Gets the content associated with this document as a <see cref="Stream"/>.
-        /// The underlying stream will be reset to position 0 each time this method is called.
-        /// The stream you get from this call must be disposed as soon as reading is complete.
-        /// </summary>
-        /// <returns>A <see cref="Stream"/> of the content associated with this document.</returns>
-        Stream GetStream();
-
-        /// <summary>
-        /// Indicates if this document has content (if not, <see cref="GetStream()"/> will return <see cref="Stream.Null"/>.
-        /// </summary>
-        bool HasContent { get; }
-
-        /// <summary>
         /// The content provider responsible for creating content streams for the document.
         /// </summary>
         IContentProvider ContentProvider { get; }
-
-        /// <summary>
-        /// Gets a hash of the provided document content and metadata appropriate for caching.
-        /// Custom <see cref="IDocument"/> implementations may also contribute additional state
-        /// data to the resulting hash code.
-        /// </summary>
-        /// <returns>A hash appropriate for caching.</returns>
-        Task<int> GetCacheHashCodeAsync();
 
         /// <summary>
         /// Clones this document.

@@ -50,8 +50,6 @@ namespace Statiq.Core
             return GetDocumentsFromDependencies().Where(x => x.Key != pipeline).SelectMany(x => x.Value);
         }
 
-        public ImmutableArray<IDocument> this[string pipline] => FromPipeline(pipline);
-
         // If in the process phase only get documents from dependencies (including transient ones)
         private IEnumerable<KeyValuePair<string, ImmutableArray<IDocument>>> GetDocumentsFromDependencies()
         {

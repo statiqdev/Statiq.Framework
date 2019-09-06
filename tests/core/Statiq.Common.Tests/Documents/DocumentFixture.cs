@@ -27,7 +27,7 @@ namespace Statiq.Common.Tests.Documents
             public void IdIsTheSameAfterClone()
             {
                 // Given
-                Document document = new Document();
+                IDocument document = new Document();
 
                 // When
                 IDocument cloned = document.Clone(null);
@@ -40,7 +40,7 @@ namespace Statiq.Common.Tests.Documents
             public void DocumentTypeTheSameAfterClone()
             {
                 // Given
-                CustomDocument document = new CustomDocument();
+                IDocument document = new CustomDocument();
 
                 // When
                 IDocument cloned = document.Clone(null);
@@ -53,7 +53,7 @@ namespace Statiq.Common.Tests.Documents
             public void MembersAreCloned()
             {
                 // Given
-                CustomDocument document = new CustomDocument
+                IDocument document = new CustomDocument
                 {
                     Foo = "abc"
                 };
@@ -76,7 +76,7 @@ namespace Statiq.Common.Tests.Documents
                 {
                     { "A", "a" }
                 };
-                Document document = new Document(new Metadata(settings), null, null, null, null);
+                IDocument document = new Document(new Metadata(settings), null, null, null, null);
                 IDocument cloned = document.Clone(new MetadataItems { { "A", "b" } });
 
                 // When
@@ -92,7 +92,7 @@ namespace Statiq.Common.Tests.Documents
             public void GetsPropertyMetadata()
             {
                 // Given
-                CustomDocument document = new CustomDocument
+                IDocument document = new CustomDocument
                 {
                     Foo = "abc"
                 };
@@ -114,7 +114,7 @@ namespace Statiq.Common.Tests.Documents
                 Document document = new Document();
 
                 // Then
-                document.Keys.ShouldBe(new[] { "Id", "Source", "Destination", "ContentProvider", "HasContent" }, true);
+                document.Keys.ShouldBe(new[] { "Id", "Source", "Destination", "ContentProvider" }, true);
             }
         }
 

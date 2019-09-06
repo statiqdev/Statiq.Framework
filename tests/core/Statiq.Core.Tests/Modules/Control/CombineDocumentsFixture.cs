@@ -23,7 +23,7 @@ namespace Statiq.Core.Tests.Modules.Control
                 CombineDocuments combine = new CombineDocuments();
 
                 // When
-                IReadOnlyList<TestDocument> results = await ExecuteAsync(new[] { a, b }, combine);
+                IReadOnlyList<IDocument> results = await ExecuteAsync(new[] { a, b }, combine);
 
                 // Then
                 CollectionAssert.AreEqual(
