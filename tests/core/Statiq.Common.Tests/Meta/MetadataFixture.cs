@@ -260,7 +260,7 @@ namespace Statiq.Common.Tests.Meta
             {
                 // Given
                 MetadataItems initialMetadata = new MetadataItems { { "A", "a" } };
-                Metadata metadata = new Metadata(initialMetadata);
+                IMetadata metadata = new Metadata(initialMetadata);
 
                 // When
                 object value = metadata.Get("A");
@@ -278,7 +278,7 @@ namespace Statiq.Common.Tests.Meta
                     { "A", new DerivedMetadataValue { Key = "X" } },
                     { "X", "x" }
                 };
-                Metadata metadata = new Metadata(initialMetadata);
+                IMetadata metadata = new Metadata(initialMetadata);
 
                 // When
                 object value = metadata.Get("A");
@@ -293,7 +293,7 @@ namespace Statiq.Common.Tests.Meta
                 // Given
                 SimpleMetadataValue metadataValue = new SimpleMetadataValue { Value = "a" };
                 MetadataItems initialMetadata = new MetadataItems { { "A", metadataValue } };
-                Metadata metadata = new Metadata(initialMetadata);
+                IMetadata metadata = new Metadata(initialMetadata);
 
                 // When
                 object value = metadata.Get("A");
@@ -313,7 +313,7 @@ namespace Statiq.Common.Tests.Meta
             {
                 // Given
                 MetadataItems initialMetadata = new MetadataItems { { "A", new List<int> { 1, 2, 3 } } };
-                Metadata metadata = new Metadata(initialMetadata);
+                IMetadata metadata = new Metadata(initialMetadata);
 
                 // When
                 IReadOnlyList<int> result = metadata.GetList<int>("A");
@@ -328,7 +328,7 @@ namespace Statiq.Common.Tests.Meta
             {
                 // Given
                 MetadataItems initialMetadata = new MetadataItems { { "A", new List<string> { "1", "2", "3" } } };
-                Metadata metadata = new Metadata(initialMetadata);
+                IMetadata metadata = new Metadata(initialMetadata);
 
                 // When
                 IReadOnlyList<int> result = metadata.GetList<int>("A");
@@ -343,7 +343,7 @@ namespace Statiq.Common.Tests.Meta
             {
                 // Given
                 MetadataItems initialMetadata = new MetadataItems { { "A", new List<int> { 1, 2, 3 } } };
-                Metadata metadata = new Metadata(initialMetadata);
+                IMetadata metadata = new Metadata(initialMetadata);
 
                 // When
                 IReadOnlyList<string> result = metadata.GetList<string>("A");
@@ -358,7 +358,7 @@ namespace Statiq.Common.Tests.Meta
             {
                 // Given
                 MetadataItems initialMetadata = new MetadataItems { { "A", new[] { 1, 2, 3 } } };
-                Metadata metadata = new Metadata(initialMetadata);
+                IMetadata metadata = new Metadata(initialMetadata);
 
                 // When
                 IReadOnlyList<int> result = metadata.GetList<int>("A");
@@ -376,7 +376,7 @@ namespace Statiq.Common.Tests.Meta
             {
                 // Given
                 MetadataItems initialMetadata = new MetadataItems();
-                Metadata metadata = new Metadata(initialMetadata);
+                IMetadata metadata = new Metadata(initialMetadata);
 
                 // When
                 IReadOnlyList<IDocument> result = metadata.GetDocumentList("A");
@@ -393,7 +393,7 @@ namespace Statiq.Common.Tests.Meta
                 IDocument b = new TestDocument();
                 IDocument c = new TestDocument();
                 MetadataItems initialMetadata = new MetadataItems { { "A", new List<IDocument> { a, b, c } } };
-                Metadata metadata = new Metadata(initialMetadata);
+                IMetadata metadata = new Metadata(initialMetadata);
 
                 // When
                 IReadOnlyList<IDocument> result = metadata.GetDocumentList("A");
@@ -408,7 +408,7 @@ namespace Statiq.Common.Tests.Meta
             {
                 // Given
                 MetadataItems initialMetadata = new MetadataItems { { "A", new List<int> { 1, 2, 3 } } };
-                Metadata metadata = new Metadata(initialMetadata);
+                IMetadata metadata = new Metadata(initialMetadata);
 
                 // When
                 IReadOnlyList<IDocument> result = metadata.GetDocumentList("A");
@@ -423,7 +423,7 @@ namespace Statiq.Common.Tests.Meta
             {
                 // Given
                 MetadataItems initialMetadata = new MetadataItems { { "A", 1 } };
-                Metadata metadata = new Metadata(initialMetadata);
+                IMetadata metadata = new Metadata(initialMetadata);
 
                 // When
                 IReadOnlyList<IDocument> result = metadata.GetDocumentList("A");
@@ -442,7 +442,7 @@ namespace Statiq.Common.Tests.Meta
             {
                 // Given
                 MetadataItems initialMetadata = new MetadataItems();
-                Metadata metadata = new Metadata(initialMetadata);
+                IMetadata metadata = new Metadata(initialMetadata);
 
                 // When
                 metadata = new Metadata(metadata, new[] { new KeyValuePair<string, object>("A", new FilePath(path)) });
@@ -459,7 +459,7 @@ namespace Statiq.Common.Tests.Meta
             {
                 // Given
                 MetadataItems initialMetadata = new MetadataItems();
-                Metadata metadata = new Metadata(initialMetadata);
+                IMetadata metadata = new Metadata(initialMetadata);
 
                 // When
                 metadata = new Metadata(metadata, new[] { new KeyValuePair<string, object>("A", new DirectoryPath(path)) });
@@ -479,7 +479,7 @@ namespace Statiq.Common.Tests.Meta
             {
                 // Given
                 MetadataItems initialMetadata = new MetadataItems();
-                Metadata metadata = new Metadata(initialMetadata);
+                IMetadata metadata = new Metadata(initialMetadata);
 
                 // When
                 metadata = new Metadata(metadata, new[] { new KeyValuePair<string, object>("A", new FilePath(path)) });
@@ -497,7 +497,7 @@ namespace Statiq.Common.Tests.Meta
             {
                 // Given
                 MetadataItems initialMetadata = new MetadataItems();
-                Metadata metadata = new Metadata(initialMetadata);
+                IMetadata metadata = new Metadata(initialMetadata);
 
                 // When
                 metadata = new Metadata(metadata, new[] { new KeyValuePair<string, object>("A", path) });
@@ -524,7 +524,7 @@ namespace Statiq.Common.Tests.Meta
             {
                 // Given
                 MetadataItems initialMetadata = new MetadataItems();
-                Metadata metadata = new Metadata(initialMetadata);
+                IMetadata metadata = new Metadata(initialMetadata);
 
                 // When
                 metadata = new Metadata(metadata, new[] { new KeyValuePair<string, object>("A", new DirectoryPath(path)) });
@@ -542,7 +542,7 @@ namespace Statiq.Common.Tests.Meta
             {
                 // Given
                 MetadataItems initialMetadata = new MetadataItems();
-                Metadata metadata = new Metadata(initialMetadata);
+                IMetadata metadata = new Metadata(initialMetadata);
 
                 // When
                 metadata = new Metadata(metadata, new[] { new KeyValuePair<string, object>("A", path) });

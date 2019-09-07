@@ -5,7 +5,7 @@ namespace Statiq.Common
     /// <summary>
     /// Contains a set of metadata with flexible runtime conversion methods. Metadata keys are case-insensitive.
     /// </summary>
-    public interface IMetadata : IReadOnlyDictionary<string, object>
+    public partial interface IMetadata : IReadOnlyDictionary<string, object>
     {
         /// <summary>
         /// Tries to get the raw value for the specified key. This method will not materialize <see cref="IMetadataValue"/>

@@ -103,7 +103,7 @@ namespace Statiq.Core.Tests.Modules.Metadata
                 OptimizeFileName fileName = new OptimizeFileName("MyKey");
 
                 // When
-                TestDocument result = await ExecuteAsync(document, fileName).SingleAsync();
+                IDocument result = await ExecuteAsync(document, fileName).SingleAsync();
 
                 // Then
                 result.GetString("MyKey").ShouldBe("testing-some-of-these-");
@@ -122,7 +122,7 @@ namespace Statiq.Core.Tests.Modules.Metadata
                 OptimizeFileName fileName = new OptimizeFileName("MyKey");
 
                 // When
-                TestDocument result = await ExecuteAsync(document, fileName).SingleAsync();
+                IDocument result = await ExecuteAsync(document, fileName).SingleAsync();
 
                 // Then
                 result.GetString("MyKey").ShouldBe(input);
@@ -142,7 +142,7 @@ namespace Statiq.Core.Tests.Modules.Metadata
                 OptimizeFileName fileName = new OptimizeFileName("MyKey");
 
                 // When
-                TestDocument result = await ExecuteAsync(document, fileName).SingleAsync();
+                IDocument result = await ExecuteAsync(document, fileName).SingleAsync();
 
                 // Then
                 result.GetFilePath("MyKey").FullPath.ShouldBe(output);
@@ -161,7 +161,7 @@ namespace Statiq.Core.Tests.Modules.Metadata
                 OptimizeFileName fileName = new OptimizeFileName("MyKey");
 
                 // When
-                TestDocument result = await ExecuteAsync(document, fileName).SingleAsync();
+                IDocument result = await ExecuteAsync(document, fileName).SingleAsync();
 
                 // Then
                 result.GetFilePath("MyKey").FullPath.ShouldBe(output);

@@ -43,7 +43,7 @@ namespace Statiq.Highlight
         /// <inheritdoc />
         public override async Task<IDocument> ExecuteAsync(KeyValuePair<string, string>[] args, string content, IDocument document, IExecutionContext context)
         {
-            ConvertingDictionary dictionary = args.ToDictionary(
+            IMetadataDictionary dictionary = args.ToDictionary(
                 "Language",
                 "Element",
                 "HighlightJsFile");

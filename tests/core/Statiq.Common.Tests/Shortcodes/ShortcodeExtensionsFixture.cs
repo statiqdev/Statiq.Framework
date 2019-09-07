@@ -22,7 +22,7 @@ namespace Statiq.Common.Tests.Shortcodes
                 };
 
                 // When
-                ConvertingDictionary dictionary = args.ToDictionary("A", "B", "C");
+                IMetadataDictionary dictionary = args.ToDictionary("A", "B", "C");
 
                 // Then
                 dictionary.ShouldBe(
@@ -47,7 +47,7 @@ namespace Statiq.Common.Tests.Shortcodes
                 };
 
                 // When
-                ConvertingDictionary dictionary = args.ToDictionary("A", "B", "C");
+                IMetadataDictionary dictionary = args.ToDictionary("A", "B", "C");
 
                 // Then
                 dictionary.ShouldBe(
@@ -72,7 +72,7 @@ namespace Statiq.Common.Tests.Shortcodes
                 };
 
                 // When
-                ConvertingDictionary dictionary = args.ToDictionary("A", "B", "C");
+                IMetadataDictionary dictionary = args.ToDictionary("A", "B", "C");
 
                 // Then
                 dictionary.ShouldBe(

@@ -235,7 +235,7 @@ the family Rosaceae.</dd>
                 RenderMarkdown markdown = new RenderMarkdown("meta");
 
                 // When
-                TestDocument result = await ExecuteAsync(document, markdown).SingleAsync();
+                IDocument result = await ExecuteAsync(document, markdown).SingleAsync();
 
                 // Then
                 result.GetString("meta").ShouldBe(output, StringCompareShould.IgnoreLineEndings);
@@ -259,7 +259,7 @@ the family Rosaceae.</dd>
                 RenderMarkdown markdown = new RenderMarkdown("meta", "meta2");
 
                 // When
-                TestDocument result = await ExecuteAsync(document, markdown).SingleAsync();
+                IDocument result = await ExecuteAsync(document, markdown).SingleAsync();
 
                 // Then
                 result.GetString("meta2").ShouldBe(output, StringCompareShould.IgnoreLineEndings);

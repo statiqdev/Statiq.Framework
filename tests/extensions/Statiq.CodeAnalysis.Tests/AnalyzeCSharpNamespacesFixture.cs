@@ -58,7 +58,7 @@ namespace Statiq.CodeAnalysis.Tests
                 IModule module = new AnalyzeCSharp();
 
                 // When
-                IReadOnlyList<TestDocument> results = await ExecuteAsync(document, context, module);
+                IReadOnlyList<IDocument> results = await ExecuteAsync(document, context, module);
 
                 // Then
                 CollectionAssert.AreEquivalent(new[] { string.Empty, "Foo", "Baz", "Bar" }, results.Select(x => x["Name"]));
@@ -89,7 +89,7 @@ namespace Statiq.CodeAnalysis.Tests
                 IModule module = new AnalyzeCSharp();
 
                 // When
-                IReadOnlyList<TestDocument> results = await ExecuteAsync(document, context, module);
+                IReadOnlyList<IDocument> results = await ExecuteAsync(document, context, module);
 
                 // Then
                 CollectionAssert.AreEquivalent(new[] { string.Empty, "Foo", "Baz", "Bar" }, results.Select(x => x["Name"]));
@@ -212,7 +212,7 @@ namespace Statiq.CodeAnalysis.Tests
                 IModule module = new AnalyzeCSharp();
 
                 // When
-                IReadOnlyList<TestDocument> results = await ExecuteAsync(document, context, module);
+                IReadOnlyList<IDocument> results = await ExecuteAsync(document, context, module);
 
                 // Then
                 Assert.AreEqual("Foo", results.Single(x => x["Name"].Equals("Bar")).Get<IDocument>("ContainingNamespace")["Name"]);
@@ -247,7 +247,7 @@ namespace Statiq.CodeAnalysis.Tests
                 IModule module = new AnalyzeCSharp();
 
                 // When
-                IReadOnlyList<TestDocument> results = await ExecuteAsync(document, context, module);
+                IReadOnlyList<IDocument> results = await ExecuteAsync(document, context, module);
 
                 // Then
                 CollectionAssert.AreEquivalent(
@@ -278,7 +278,7 @@ namespace Statiq.CodeAnalysis.Tests
                 IModule module = new AnalyzeCSharp();
 
                 // When
-                IReadOnlyList<TestDocument> results = await ExecuteAsync(document, context, module);
+                IReadOnlyList<IDocument> results = await ExecuteAsync(document, context, module);
 
                 // Then
                 CollectionAssert.AreEquivalent(

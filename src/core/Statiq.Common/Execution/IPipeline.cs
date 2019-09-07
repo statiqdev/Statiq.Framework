@@ -7,13 +7,13 @@ namespace Statiq.Common
     /// </summary>
     public interface IPipeline
     {
-        IModuleList InputModules { get; }
+        ModuleList InputModules { get; }
 
-        IModuleList ProcessModules { get; }
+        ModuleList ProcessModules { get; }
 
-        IModuleList TransformModules { get; }
+        ModuleList TransformModules { get; }
 
-        IModuleList OutputModules { get; }
+        ModuleList OutputModules { get; }
 
         HashSet<string> Dependencies { get; }
 

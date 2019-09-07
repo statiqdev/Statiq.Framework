@@ -29,7 +29,7 @@ namespace Statiq.Html.Tests
                 GatherHeadings headings = new GatherHeadings();
 
                 // When
-                TestDocument result = await ExecuteAsync(document, headings).SingleAsync();
+                IDocument result = await ExecuteAsync(document, headings).SingleAsync();
 
                 // Then
                 result.GetDocumentList(HtmlKeys.Headings).Cast<TestDocument>().Select(x => x.Content).ShouldBe(new[] { "Foo", "Bar" });
@@ -52,7 +52,7 @@ namespace Statiq.Html.Tests
                 GatherHeadings headings = new GatherHeadings().WithHeadingKey("HContent");
 
                 // When
-                TestDocument result = await ExecuteAsync(document, headings).SingleAsync();
+                IDocument result = await ExecuteAsync(document, headings).SingleAsync();
 
                 // Then
                 result.GetDocumentList(HtmlKeys.Headings).Select(x => x.GetString("HContent")).ShouldBe(new[] { "Foo", "Bar" });
@@ -75,7 +75,7 @@ namespace Statiq.Html.Tests
                 GatherHeadings headings = new GatherHeadings();
 
                 // When
-                TestDocument result = await ExecuteAsync(document, headings).SingleAsync();
+                IDocument result = await ExecuteAsync(document, headings).SingleAsync();
 
                 // Then
                 result.GetDocumentList(HtmlKeys.Headings).Select(x => x.GetString("HContent")).ShouldBe(new string[] { null, null });
@@ -99,7 +99,7 @@ namespace Statiq.Html.Tests
                 GatherHeadings headings = new GatherHeadings();
 
                 // When
-                TestDocument result = await ExecuteAsync(document, headings).SingleAsync();
+                IDocument result = await ExecuteAsync(document, headings).SingleAsync();
 
                 // Then
                 result.GetDocumentList(HtmlKeys.Headings).Cast<TestDocument>().Select(x => x.Content).ShouldBe(new[] { "Foo", "Bar" });
@@ -123,7 +123,7 @@ namespace Statiq.Html.Tests
                 GatherHeadings headings = new GatherHeadings(3);
 
                 // When
-                TestDocument result = await ExecuteAsync(document, headings).SingleAsync();
+                IDocument result = await ExecuteAsync(document, headings).SingleAsync();
 
                 // Then
                 result.GetDocumentList(HtmlKeys.Headings).Cast<TestDocument>().Select(x => x.Content).ShouldBe(new[] { "Foo", "Baz", "Bar" });
@@ -149,7 +149,7 @@ namespace Statiq.Html.Tests
                 GatherHeadings headings = new GatherHeadings(3).WithNesting();
 
                 // When
-                TestDocument result = await ExecuteAsync(document, headings).SingleAsync();
+                IDocument result = await ExecuteAsync(document, headings).SingleAsync();
 
                 // Then
                 result.GetDocumentList(HtmlKeys.Headings).Cast<TestDocument>().Select(x => x.Content).ShouldBe(new[] { "Foo", "Bar" });
@@ -177,7 +177,7 @@ namespace Statiq.Html.Tests
                 GatherHeadings headings = new GatherHeadings(3);
 
                 // When
-                TestDocument result = await ExecuteAsync(document, headings).SingleAsync();
+                IDocument result = await ExecuteAsync(document, headings).SingleAsync();
 
                 // Then
                 result.GetDocumentList(HtmlKeys.Headings).Cast<TestDocument>().Select(x => x.Content).ShouldBe(new[] { "Foo", "Baz", "Boz", "Bar", "Boo" });
@@ -202,7 +202,7 @@ namespace Statiq.Html.Tests
                 GatherHeadings headings = new GatherHeadings();
 
                 // When
-                TestDocument result = await ExecuteAsync(document, headings).SingleAsync();
+                IDocument result = await ExecuteAsync(document, headings).SingleAsync();
 
                 // Then
                 result.GetDocumentList(HtmlKeys.Headings).Select(x => x.GetString(HtmlKeys.HeadingId)).ShouldBe(new[] { null, "bar" });

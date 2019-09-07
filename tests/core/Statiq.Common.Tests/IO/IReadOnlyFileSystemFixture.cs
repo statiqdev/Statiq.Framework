@@ -9,9 +9,9 @@ using Statiq.Testing;
 namespace Statiq.Common.Tests.IO
 {
     [TestFixture]
-    public class IReadOnlyFileSystemExtensionsFixture : BaseFixture
+    public class IReadOnlyFileSystemFixture : BaseFixture
     {
-        public class GetInputFileTests : IReadOnlyFileSystemExtensionsFixture
+        public class GetInputFileTests : IReadOnlyFileSystemFixture
         {
             [TestCase("foo.txt", "/a/b/c/foo.txt")]
             [TestCase("bar.txt", "/a/x/bar.txt")]
@@ -21,7 +21,7 @@ namespace Statiq.Common.Tests.IO
             public void ReturnsInputFile(string input, string expected)
             {
                 // Given
-                TestFileSystem fileSystem = new TestFileSystem(GetFileProvider());
+                IFileSystem fileSystem = new TestFileSystem(GetFileProvider());
                 fileSystem.RootPath = "/a";
                 fileSystem.InputPaths.Add("b/c");
                 fileSystem.InputPaths.Add("b/d");
@@ -39,7 +39,7 @@ namespace Statiq.Common.Tests.IO
             public void ReturnsInputFileAboveInputDirectory()
             {
                 // Given
-                TestFileSystem fileSystem = new TestFileSystem(GetFileProvider());
+                IFileSystem fileSystem = new TestFileSystem(GetFileProvider());
                 fileSystem.RootPath = "/a";
                 fileSystem.InputPaths.Add("x/t");
 
@@ -54,7 +54,7 @@ namespace Statiq.Common.Tests.IO
             public void ReturnsInputFileWhenInputDirectoryAboveRoot()
             {
                 // Given
-                TestFileSystem fileSystem = new TestFileSystem(GetFileProvider());
+                IFileSystem fileSystem = new TestFileSystem(GetFileProvider());
                 fileSystem.RootPath = "/a/b";
                 fileSystem.InputPaths.Add("../x");
 
@@ -69,7 +69,7 @@ namespace Statiq.Common.Tests.IO
             public void ReturnsInputFileWhenInputDirectoryAndFileAscend()
             {
                 // Given
-                TestFileSystem fileSystem = new TestFileSystem(GetFileProvider());
+                IFileSystem fileSystem = new TestFileSystem(GetFileProvider());
                 fileSystem.RootPath = "/a/b";
                 fileSystem.InputPaths.Add("../x/y");
 
@@ -81,13 +81,13 @@ namespace Statiq.Common.Tests.IO
             }
         }
 
-        public class GetInputDirectoryTests : IReadOnlyFileSystemExtensionsFixture
+        public class GetInputDirectoryTests : IReadOnlyFileSystemFixture
         {
             [Test]
             public void ReturnsVirtualInputDirectoryForRelativePath()
             {
                 // Given
-                TestFileSystem fileSystem = new TestFileSystem();
+                IFileSystem fileSystem = new TestFileSystem();
 
                 // When
                 IDirectory result = fileSystem.GetInputDirectory("A/B/C");
@@ -101,7 +101,7 @@ namespace Statiq.Common.Tests.IO
             public void ReturnsVirtualInputDirectoryForAscendingPath()
             {
                 // Given
-                TestFileSystem fileSystem = new TestFileSystem();
+                IFileSystem fileSystem = new TestFileSystem();
 
                 // When
                 IDirectory result = fileSystem.GetInputDirectory("../A/B/C");
@@ -115,7 +115,7 @@ namespace Statiq.Common.Tests.IO
             public void ReturnsVirtualInputDirectoryForNullPath()
             {
                 // Given
-                TestFileSystem fileSystem = new TestFileSystem();
+                IFileSystem fileSystem = new TestFileSystem();
 
                 // When
                 IDirectory result = fileSystem.GetInputDirectory();
@@ -129,7 +129,7 @@ namespace Statiq.Common.Tests.IO
             public void ReturnsDirectoryForAbsolutePath()
             {
                 // Given
-                TestFileSystem fileSystem = new TestFileSystem();
+                IFileSystem fileSystem = new TestFileSystem();
 
                 // When
                 IDirectory result = fileSystem.GetInputDirectory("/A/B/C");
@@ -139,13 +139,13 @@ namespace Statiq.Common.Tests.IO
             }
         }
 
-        public class GetInputDirectoriesTests : IReadOnlyFileSystemExtensionsFixture
+        public class GetInputDirectoriesTests : IReadOnlyFileSystemFixture
         {
             [Test]
             public void ReturnsCombinedInputDirectories()
             {
                 // Given
-                TestFileSystem fileSystem = new TestFileSystem(GetFileProvider());
+                IFileSystem fileSystem = new TestFileSystem(GetFileProvider());
                 fileSystem.RootPath = "/a";
                 fileSystem.InputPaths.Add("b/c");
                 fileSystem.InputPaths.Add("b/d");
@@ -171,13 +171,13 @@ namespace Statiq.Common.Tests.IO
             }
         }
 
-        public class GetContainingInputPathForAbsolutePathTests : IReadOnlyFileSystemExtensionsFixture
+        public class GetContainingInputPathForAbsolutePathTests : IReadOnlyFileSystemFixture
         {
             [Test]
             public void ThrowsForNullPath()
             {
                 // Given
-                TestFileSystem fileSystem = new TestFileSystem();
+                IFileSystem fileSystem = new TestFileSystem();
 
                 // When, Then
                 Should.Throw<ArgumentNullException>(() => fileSystem.GetContainingInputPathForAbsolutePath(null));
@@ -193,7 +193,7 @@ namespace Statiq.Common.Tests.IO
             public void ShouldReturnContainingPathForAbsolutePath(string path, string expected)
             {
                 // Given
-                TestFileSystem fileSystem = new TestFileSystem(GetFileProvider());
+                IFileSystem fileSystem = new TestFileSystem(GetFileProvider());
                 fileSystem.RootPath = "/a";
                 fileSystem.InputPaths.Add("b");
                 fileSystem.InputPaths.Add("x");
@@ -215,7 +215,7 @@ namespace Statiq.Common.Tests.IO
             public void ShouldReturnContainingPathForInputPathAboveRootPath(string path, string expected)
             {
                 // Given
-                TestFileSystem fileSystem = new TestFileSystem(GetFileProvider());
+                IFileSystem fileSystem = new TestFileSystem(GetFileProvider());
                 fileSystem.RootPath = "/a/y";
                 fileSystem.InputPaths.Add("../b");
                 fileSystem.InputPaths.Add("../x");
@@ -230,13 +230,13 @@ namespace Statiq.Common.Tests.IO
             }
         }
 
-        public class GetContainingInputPathTests : IReadOnlyFileSystemExtensionsFixture
+        public class GetContainingInputPathTests : IReadOnlyFileSystemFixture
         {
             [Test]
             public void ThrowsForNullPath()
             {
                 // Given
-                TestFileSystem fileSystem = new TestFileSystem();
+                IFileSystem fileSystem = new TestFileSystem();
 
                 // When, Then
                 Should.Throw<ArgumentNullException>(() => fileSystem.GetContainingInputPath(null));
@@ -252,7 +252,7 @@ namespace Statiq.Common.Tests.IO
             public void ShouldReturnContainingPathForAbsolutePath(string path, string expected)
             {
                 // Given
-                TestFileSystem fileSystem = new TestFileSystem(GetFileProvider());
+                IFileSystem fileSystem = new TestFileSystem(GetFileProvider());
                 fileSystem.RootPath = "/a";
                 fileSystem.InputPaths.Add("b");
                 fileSystem.InputPaths.Add("x");
@@ -274,7 +274,7 @@ namespace Statiq.Common.Tests.IO
             public void ShouldReturnContainingPathForInputPathAboveRootPath(string path, string expected)
             {
                 // Given
-                TestFileSystem fileSystem = new TestFileSystem(GetFileProvider());
+                IFileSystem fileSystem = new TestFileSystem(GetFileProvider());
                 fileSystem.RootPath = "/a/y";
                 fileSystem.InputPaths.Add("../b");
                 fileSystem.InputPaths.Add("../x");
@@ -297,7 +297,7 @@ namespace Statiq.Common.Tests.IO
             public void ShouldReturnContainingPathForRelativeFilePath(string path, string expected)
             {
                 // Given
-                TestFileSystem fileSystem = new TestFileSystem(GetFileProvider());
+                IFileSystem fileSystem = new TestFileSystem(GetFileProvider());
                 fileSystem.RootPath = "/a";
                 fileSystem.InputPaths.Add("b");
                 fileSystem.InputPaths.Add("x");
@@ -316,7 +316,7 @@ namespace Statiq.Common.Tests.IO
             public void ShouldReturnContainingPathForRelativeDirectoryPath(string path, string expected)
             {
                 // Given
-                TestFileSystem fileSystem = new TestFileSystem(GetFileProvider());
+                IFileSystem fileSystem = new TestFileSystem(GetFileProvider());
                 fileSystem.RootPath = "/a";
                 fileSystem.InputPaths.Add("b");
                 fileSystem.InputPaths.Add("y");
@@ -336,7 +336,7 @@ namespace Statiq.Common.Tests.IO
                 fileProvider.AddDirectory("yz");
                 fileProvider.AddDirectory("y");
                 fileProvider.AddFile("/a/yz/baz.txt");
-                TestFileSystem fileSystem = new TestFileSystem(fileProvider);
+                IFileSystem fileSystem = new TestFileSystem(fileProvider);
                 fileSystem.RootPath = "/a";
                 fileSystem.InputPaths.Add("yz");
                 fileSystem.InputPaths.Add("y");
@@ -349,13 +349,13 @@ namespace Statiq.Common.Tests.IO
             }
         }
 
-        public class GetFilesTests : IReadOnlyFileSystemExtensionsFixture
+        public class GetFilesTests : IReadOnlyFileSystemFixture
         {
             [Test]
             public void ShouldThrowForNullDirectory()
             {
                 // Given
-                TestFileSystem fileSystem = new TestFileSystem(GetFileProvider());
+                IFileSystem fileSystem = new TestFileSystem(GetFileProvider());
 
                 // When, Then
                 Should.Throw<ArgumentNullException>(() => fileSystem.GetFiles((IDirectory)null, "/"));
@@ -365,7 +365,7 @@ namespace Statiq.Common.Tests.IO
             public void ShouldThrowForNullPatterns()
             {
                 // Given
-                TestFileSystem fileSystem = new TestFileSystem(GetFileProvider());
+                IFileSystem fileSystem = new TestFileSystem(GetFileProvider());
                 IDirectory dir = fileSystem.GetDirectory("/");
 
                 // When, Then
@@ -376,7 +376,7 @@ namespace Statiq.Common.Tests.IO
             public void ShouldNotThrowForNullPattern()
             {
                 // Given
-                TestFileSystem fileSystem = new TestFileSystem(GetFileProvider());
+                IFileSystem fileSystem = new TestFileSystem(GetFileProvider());
                 IDirectory dir = fileSystem.GetDirectory("/");
 
                 // When
@@ -418,7 +418,7 @@ namespace Statiq.Common.Tests.IO
                 fileProvider.AddDirectory("/");
                 fileProvider.AddDirectory("/q");
                 fileProvider.AddFile("/q/werty.txt");
-                TestFileSystem fileSystem = new TestFileSystem(fileProvider);
+                IFileSystem fileSystem = new TestFileSystem(fileProvider);
                 IDirectory dir = fileSystem.GetDirectory(directory);
 
                 // When

@@ -6,7 +6,7 @@ namespace Statiq.Common
     /// <summary>
     /// Represents a file system.
     /// </summary>
-    public interface IReadOnlyFileSystem
+    public partial interface IReadOnlyFileSystem
     {
         // Initially based on code from Cake (http://cakebuild.net/)
 

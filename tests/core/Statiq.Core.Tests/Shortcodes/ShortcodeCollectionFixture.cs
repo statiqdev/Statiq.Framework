@@ -15,7 +15,7 @@ namespace Statiq.Core.Tests.Shortcodes
             public void CreatesInstance()
             {
                 // Given
-                ShortcodeCollection shortcodes = new ShortcodeCollection();
+                IShortcodeCollection shortcodes = new ShortcodeCollection();
                 shortcodes.Add<TestShortcode>("Foo");
 
                 // When
@@ -29,7 +29,7 @@ namespace Statiq.Core.Tests.Shortcodes
             public void IgnoresCase()
             {
                 // Given
-                ShortcodeCollection shortcodes = new ShortcodeCollection();
+                IShortcodeCollection shortcodes = new ShortcodeCollection();
                 shortcodes.Add<TestShortcode>("Foo");
 
                 // When
@@ -46,7 +46,7 @@ namespace Statiq.Core.Tests.Shortcodes
             public void ThrowsForNullName()
             {
                 // Given
-                ShortcodeCollection shortcodes = new ShortcodeCollection();
+                IShortcodeCollection shortcodes = new ShortcodeCollection();
 
                 // When, Then
                 Should.Throw<ArgumentException>(() => shortcodes.Add<TestShortcode>(null));
@@ -56,7 +56,7 @@ namespace Statiq.Core.Tests.Shortcodes
             public void ThrowsForWhiteSpaceName()
             {
                 // Given
-                ShortcodeCollection shortcodes = new ShortcodeCollection();
+                IShortcodeCollection shortcodes = new ShortcodeCollection();
 
                 // When, Then
                 Should.Throw<ArgumentException>(() => shortcodes.Add<TestShortcode>("  "));
@@ -66,7 +66,7 @@ namespace Statiq.Core.Tests.Shortcodes
             public void ThrowsForWhiteSpaceInName()
             {
                 // Given
-                ShortcodeCollection shortcodes = new ShortcodeCollection();
+                IShortcodeCollection shortcodes = new ShortcodeCollection();
 
                 // When, Then
                 Should.Throw<ArgumentException>(() => shortcodes.Add<TestShortcode>("  xyz  "));

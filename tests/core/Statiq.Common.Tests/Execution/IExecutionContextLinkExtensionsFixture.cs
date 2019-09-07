@@ -30,7 +30,7 @@ namespace Statiq.Common.Tests.Execution
                 };
 
                 // When
-                string result = context.GetLink(document, "Path", includeHost);
+                string result = ((IExecutionContext)context).GetLink(document, "Path", includeHost);
 
                 // Then
                 result.ShouldBe(expected);
@@ -46,7 +46,7 @@ namespace Statiq.Common.Tests.Execution
                 TestDocument document = new TestDocument(null, new FilePath(destination));
 
                 // When
-                string result = context.GetLink(document, includeHost);
+                string result = ((IExecutionContext)context).GetLink(document, includeHost);
 
                 // Then
                 result.ShouldBe(expected);

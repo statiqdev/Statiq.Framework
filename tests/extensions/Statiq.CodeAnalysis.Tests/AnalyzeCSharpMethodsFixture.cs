@@ -275,7 +275,7 @@ namespace Statiq.CodeAnalysis.Tests
                 IModule module = new AnalyzeCSharp().WhereSymbol(x => x.Name != "Green");
 
                 // When
-                IReadOnlyList<TestDocument> results = await ExecuteAsync(document, context, module);
+                IReadOnlyList<IDocument> results = await ExecuteAsync(document, context, module);
 
                 // Then
                 CollectionAssert.AreEquivalent(new[] { string.Empty, "Foo", "Blue", "Red" }, results.Select(x => x["Name"]));

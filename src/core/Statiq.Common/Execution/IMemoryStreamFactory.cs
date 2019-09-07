@@ -5,7 +5,7 @@ namespace Statiq.Common
     /// <summary>
     /// Provides pooled memory streams (via the RecyclableMemoryStream library).
     /// </summary>
-    public interface IMemoryStreamFactory
+    public partial interface IMemoryStreamFactory
     {
         /// <summary>
         /// Retrieve a new <see cref="MemoryStream"/> object with a default initial capacity.

@@ -7,16 +7,16 @@ namespace Statiq.Core
     public class Pipeline : IPipeline
     {
         /// <inheritdoc/>
-        public IModuleList InputModules { get; } = new ModuleList();
+        public ModuleList InputModules { get; } = new ModuleList();
 
         /// <inheritdoc/>
-        public IModuleList ProcessModules { get; } = new ModuleList();
+        public ModuleList ProcessModules { get; } = new ModuleList();
 
         /// <inheritdoc/>
-        public IModuleList TransformModules { get; } = new ModuleList();
+        public ModuleList TransformModules { get; } = new ModuleList();
 
         /// <inheritdoc/>
-        public IModuleList OutputModules { get; } = new ModuleList();
+        public ModuleList OutputModules { get; } = new ModuleList();
 
         /// <inheritdoc/>
         public HashSet<string> Dependencies { get; } = new HashSet<string>(StringComparer.OrdinalIgnoreCase);

@@ -65,9 +65,9 @@ namespace Statiq.Common
         /// <param name="args">The original shortcode arguments.</param>
         /// <param name="keys">The parameter names in expected order.</param>
         /// <returns>A dictionary containing the parameters and their values.</returns>
-        public static ConvertingDictionary ToDictionary(this KeyValuePair<string, string>[] args, params string[] keys)
+        public static IMetadataDictionary ToDictionary(this KeyValuePair<string, string>[] args, params string[] keys)
         {
-            ConvertingDictionary dictionary = new ConvertingDictionary();
+            IMetadataDictionary dictionary = new ConvertingDictionary();
 
             bool nullKeyAllowed = true;
             for (int c = 0; c < args.Length; c++)

@@ -244,10 +244,10 @@ namespace Statiq.Html.Tests
                     .GetOuterHtml("OuterHtmlKey");
 
                 // When
-                IReadOnlyList<TestDocument> results = await ExecuteAsync(document, query);
+                IReadOnlyList<IDocument> results = await ExecuteAsync(document, query);
 
                 // Then
-                results.Select(x => x.Content).ShouldBe(new[]
+                results.Select(x => ((TestDocument)x).Content).ShouldBe(new[]
                 {
                     "<p>This is some Foobar text</p>",
                     "<p>This is some other text</p>"
@@ -283,7 +283,7 @@ namespace Statiq.Html.Tests
                     .GetTextContent("TextContentKey");
 
                 // When
-                IReadOnlyList<TestDocument> results = await ExecuteAsync(document, query);
+                IReadOnlyList<IDocument> results = await ExecuteAsync(document, query);
 
                 // Then
                 results.Select(x => x.GetString("TextContentKey")).ShouldBe(new[]
@@ -312,7 +312,7 @@ namespace Statiq.Html.Tests
                     .GetAttributeValue("foo", "Foo");
 
                 // When
-                IReadOnlyList<TestDocument> results = await ExecuteAsync(document, query);
+                IReadOnlyList<IDocument> results = await ExecuteAsync(document, query);
 
                 // Then
                 results.Select(x => x.GetString("Foo")).ShouldBe(new[]
@@ -341,7 +341,7 @@ namespace Statiq.Html.Tests
                     .GetAttributeValue("foo");
 
                 // When
-                IReadOnlyList<TestDocument> results = await ExecuteAsync(document, query);
+                IReadOnlyList<IDocument> results = await ExecuteAsync(document, query);
 
                 // Then
                 results.Select(x => x.GetString("foo")).ShouldBe(new[]
@@ -370,7 +370,7 @@ namespace Statiq.Html.Tests
                     .GetAttributeValue("foo");
 
                 // When
-                IReadOnlyList<TestDocument> results = await ExecuteAsync(document, query);
+                IReadOnlyList<IDocument> results = await ExecuteAsync(document, query);
 
                 // Then
                 results.Select(x => x.GetString("foo")).ShouldBe(new[]

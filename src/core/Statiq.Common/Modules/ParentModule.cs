@@ -41,7 +41,7 @@ namespace Statiq.Common
         /// <summary>
         /// The children of this module.
         /// </summary>
-        public IModuleList Children { get; }
+        public ModuleList Children { get; }
 
         /// <summary>
         /// Adds modules as a child of this module.

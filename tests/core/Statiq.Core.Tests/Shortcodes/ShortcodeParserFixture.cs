@@ -38,13 +38,12 @@ namespace Statiq.Core.Tests.Shortcodes
             {
                 // Given
                 Stream stream = new MemoryStream(Encoding.UTF8.GetBytes(input));
+                IShortcodeCollection shortcodeCollection = new TestShortcodeCollection();
+                shortcodeCollection.Add("name", typeof(TestShortcode));
                 ShortcodeParser parser = new ShortcodeParser(
                     ShortcodeParser.DefaultPostRenderStartDelimiter,
                     ShortcodeParser.DefaultPostRenderEndDelimiter,
-                    new TestShortcodeCollection
-                    {
-                        { "name", typeof(TestShortcode) }
-                    });
+                    shortcodeCollection);
 
                 // When
                 List<ShortcodeLocation> result = parser.Parse(stream);
@@ -82,13 +81,12 @@ namespace Statiq.Core.Tests.Shortcodes
             {
                 // Given
                 Stream stream = new MemoryStream(Encoding.UTF8.GetBytes(input));
+                IShortcodeCollection shortcodeCollection = new TestShortcodeCollection();
+                shortcodeCollection.Add("name", typeof(TestShortcode));
                 ShortcodeParser parser = new ShortcodeParser(
                     ShortcodeParser.DefaultPostRenderStartDelimiter,
                     ShortcodeParser.DefaultPostRenderEndDelimiter,
-                    new TestShortcodeCollection
-                    {
-                        { "name", typeof(TestShortcode) }
-                    });
+                    shortcodeCollection);
 
                 // When
                 List<ShortcodeLocation> result = parser.Parse(stream);
@@ -108,14 +106,13 @@ namespace Statiq.Core.Tests.Shortcodes
             {
                 // Given
                 Stream stream = new MemoryStream(Encoding.UTF8.GetBytes(input));
+                IShortcodeCollection shortcodeCollection = new TestShortcodeCollection();
+                shortcodeCollection.Add("foo", typeof(TestShortcode));
+                shortcodeCollection.Add("bar", typeof(TestShortcode));
                 ShortcodeParser parser = new ShortcodeParser(
                     ShortcodeParser.DefaultPostRenderStartDelimiter,
                     ShortcodeParser.DefaultPostRenderEndDelimiter,
-                    new TestShortcodeCollection
-                    {
-                        { "foo", typeof(TestShortcode) },
-                        { "bar", typeof(TestShortcode) }
-                    });
+                    shortcodeCollection);
 
                 // When, Then
                 Should.Throw<ShortcodeParserException>(() => parser.Parse(stream));
@@ -151,13 +148,12 @@ namespace Statiq.Core.Tests.Shortcodes
             {
                 // Given
                 Stream stream = new MemoryStream(Encoding.UTF8.GetBytes(input));
+                IShortcodeCollection shortcodeCollection = new TestShortcodeCollection();
+                shortcodeCollection.Add("name", typeof(TestShortcode));
                 ShortcodeParser parser = new ShortcodeParser(
                     startDelimiter,
                     endDelimiter,
-                    new TestShortcodeCollection
-                    {
-                        { "name", typeof(TestShortcode) }
-                    });
+                    shortcodeCollection);
 
                 // When
                 List<ShortcodeLocation> result = parser.Parse(stream);
@@ -185,13 +181,12 @@ namespace Statiq.Core.Tests.Shortcodes
             {
                 // Given
                 Stream stream = new MemoryStream(Encoding.UTF8.GetBytes(input));
+                IShortcodeCollection shortcodeCollection = new TestShortcodeCollection();
+                shortcodeCollection.Add("name", typeof(TestShortcode));
                 ShortcodeParser parser = new ShortcodeParser(
                     ShortcodeParser.DefaultPostRenderStartDelimiter,
                     ShortcodeParser.DefaultPostRenderEndDelimiter,
-                    new TestShortcodeCollection
-                    {
-                        { "name", typeof(TestShortcode) }
-                    });
+                    shortcodeCollection);
 
                 // When
                 List<ShortcodeLocation> result = parser.Parse(stream);
@@ -212,13 +207,12 @@ namespace Statiq.Core.Tests.Shortcodes
             {
                 // Given
                 Stream stream = new MemoryStream(Encoding.UTF8.GetBytes(input));
+                IShortcodeCollection shortcodeCollection = new TestShortcodeCollection();
+                shortcodeCollection.Add("name", typeof(TestShortcode));
                 ShortcodeParser parser = new ShortcodeParser(
                     ShortcodeParser.DefaultPostRenderStartDelimiter,
                     ShortcodeParser.DefaultPostRenderEndDelimiter,
-                    new TestShortcodeCollection
-                    {
-                        { "name", typeof(TestShortcode) }
-                    });
+                    shortcodeCollection);
 
                 // When
                 List<ShortcodeLocation> result = parser.Parse(stream);
@@ -232,13 +226,12 @@ namespace Statiq.Core.Tests.Shortcodes
             {
                 // Given
                 Stream stream = new MemoryStream(Encoding.UTF8.GetBytes("<?# ?>abc<?#/ ?>"));
+                IShortcodeCollection shortcodeCollection = new TestShortcodeCollection();
+                shortcodeCollection.Add("bar", typeof(TestShortcode));
                 ShortcodeParser parser = new ShortcodeParser(
                     ShortcodeParser.DefaultPostRenderStartDelimiter,
                     ShortcodeParser.DefaultPostRenderEndDelimiter,
-                    new TestShortcodeCollection
-                    {
-                        { "bar", typeof(TestShortcode) }
-                    });
+                    shortcodeCollection);
 
                 // When, Then
                 Should.Throw<ShortcodeParserException>(() => parser.Parse(stream));
@@ -249,13 +242,12 @@ namespace Statiq.Core.Tests.Shortcodes
             {
                 // Given
                 Stream stream = new MemoryStream(Encoding.UTF8.GetBytes("<?# foo ?>abc<?#/ foo ?>"));
+                IShortcodeCollection shortcodeCollection = new TestShortcodeCollection();
+                shortcodeCollection.Add("bar", typeof(TestShortcode));
                 ShortcodeParser parser = new ShortcodeParser(
                     ShortcodeParser.DefaultPostRenderStartDelimiter,
                     ShortcodeParser.DefaultPostRenderEndDelimiter,
-                    new TestShortcodeCollection
-                    {
-                        { "bar", typeof(TestShortcode) }
-                    });
+                    shortcodeCollection);
 
                 // When, Then
                 Should.Throw<ShortcodeParserException>(() => parser.Parse(stream));
@@ -266,13 +258,12 @@ namespace Statiq.Core.Tests.Shortcodes
             {
                 // Given
                 Stream stream = new MemoryStream(Encoding.UTF8.GetBytes("<?# foo ?>abc<?#/ foo bar ?>"));
+                IShortcodeCollection shortcodeCollection = new TestShortcodeCollection();
+                shortcodeCollection.Add("foo", typeof(TestShortcode));
                 ShortcodeParser parser = new ShortcodeParser(
                     ShortcodeParser.DefaultPostRenderStartDelimiter,
                     ShortcodeParser.DefaultPostRenderEndDelimiter,
-                    new TestShortcodeCollection
-                    {
-                        { "foo", typeof(TestShortcode) }
-                    });
+                    shortcodeCollection);
 
                 // When, Then
                 Should.Throw<ShortcodeParserException>(() => parser.Parse(stream));

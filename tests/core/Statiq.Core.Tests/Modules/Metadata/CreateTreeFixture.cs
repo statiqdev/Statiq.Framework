@@ -213,7 +213,7 @@ namespace Statiq.Core.Tests.Modules.Metadata
                 }
             }
 
-            private void VerifyTreeChildren(TestDocument parent, string parentPath, params string[] childFilePaths)
+            private void VerifyTreeChildren(IDocument parent, string parentPath, params string[] childFilePaths)
             {
                 parent.ShouldNotBeNull();
                 parent.Destination.FullPath.ShouldBe(parentPath);

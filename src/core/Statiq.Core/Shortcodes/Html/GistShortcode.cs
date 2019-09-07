@@ -29,7 +29,7 @@ namespace Statiq.Core
         /// <inheritdoc />
         public override async Task<IDocument> ExecuteAsync(KeyValuePair<string, string>[] args, string content, IDocument document, IExecutionContext context)
         {
-            ConvertingDictionary arguments = args.ToDictionary(
+            IMetadataDictionary arguments = args.ToDictionary(
                 "Id",
                 "Username",
                 "File");

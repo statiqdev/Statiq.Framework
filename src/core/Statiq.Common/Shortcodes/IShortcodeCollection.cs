@@ -2,7 +2,7 @@
 
 namespace Statiq.Common
 {
-    public interface IShortcodeCollection : IReadOnlyShortcodeCollection
+    public partial interface IShortcodeCollection : IReadOnlyShortcodeCollection
     {
         /// <summary>
         /// Adds a shortcode using a factory.

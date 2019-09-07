@@ -9,13 +9,13 @@ namespace Statiq.Testing
     /// </summary>
     public class TestPipeline : IPipeline
     {
-        public IModuleList InputModules { get; } = new ModuleList();
+        public ModuleList InputModules { get; } = new ModuleList();
 
-        public IModuleList ProcessModules { get; } = new ModuleList();
+        public ModuleList ProcessModules { get; } = new ModuleList();
 
-        public IModuleList TransformModules { get; } = new ModuleList();
+        public ModuleList TransformModules { get; } = new ModuleList();
 
-        public IModuleList OutputModules { get; } = new ModuleList();
+        public ModuleList OutputModules { get; } = new ModuleList();
 
         public HashSet<string> Dependencies { get; } = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 

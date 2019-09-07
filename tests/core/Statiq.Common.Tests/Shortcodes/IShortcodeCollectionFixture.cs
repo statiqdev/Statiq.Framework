@@ -8,9 +8,9 @@ using Statiq.Testing;
 namespace Statiq.Common.Tests.Shortcodes
 {
     [TestFixture]
-    public class IShortcodeCollectionExtensionsFixture : BaseFixture
+    public class IShortcodeCollectionFixture : BaseFixture
     {
-        public class AddTests : IShortcodeCollectionExtensionsFixture
+        public class AddTests : IShortcodeCollectionFixture
         {
             [Test]
             public void RemovesShortcodeSuffixForType()
@@ -19,7 +19,7 @@ namespace Statiq.Common.Tests.Shortcodes
                 TestShortcodeCollection shortcodes = new TestShortcodeCollection();
 
                 // When
-                shortcodes.Add(typeof(FooShortcode));
+                ((IShortcodeCollection)shortcodes).Add(typeof(FooShortcode));
 
                 // Then
                 shortcodes.Keys.ShouldBe(new[] { "Foo" });
@@ -32,7 +32,7 @@ namespace Statiq.Common.Tests.Shortcodes
                 TestShortcodeCollection shortcodes = new TestShortcodeCollection();
 
                 // When
-                shortcodes.Add(typeof(Barshortcode));
+                ((IShortcodeCollection)shortcodes).Add(typeof(Barshortcode));
 
                 // Then
                 shortcodes.Keys.ShouldBe(new[] { "Bar" });
@@ -45,7 +45,7 @@ namespace Statiq.Common.Tests.Shortcodes
                 TestShortcodeCollection shortcodes = new TestShortcodeCollection();
 
                 // When
-                shortcodes.Add(typeof(BazShortcodeFoo));
+                ((IShortcodeCollection)shortcodes).Add(typeof(BazShortcodeFoo));
 
                 // Then
                 shortcodes.Keys.ShouldBe(new[] { "BazShortcodeFoo" });
@@ -58,7 +58,7 @@ namespace Statiq.Common.Tests.Shortcodes
                 TestShortcodeCollection shortcodes = new TestShortcodeCollection();
 
                 // When
-                shortcodes.Add<FooShortcode>();
+                ((IShortcodeCollection)shortcodes).Add<FooShortcode>();
 
                 // Then
                 shortcodes.Keys.ShouldBe(new[] { "Foo" });
@@ -71,7 +71,7 @@ namespace Statiq.Common.Tests.Shortcodes
                 TestShortcodeCollection shortcodes = new TestShortcodeCollection();
 
                 // When
-                shortcodes.Add<Barshortcode>();
+                ((IShortcodeCollection)shortcodes).Add<Barshortcode>();
 
                 // Then
                 shortcodes.Keys.ShouldBe(new[] { "Bar" });
@@ -84,7 +84,7 @@ namespace Statiq.Common.Tests.Shortcodes
                 TestShortcodeCollection shortcodes = new TestShortcodeCollection();
 
                 // When
-                shortcodes.Add<BazShortcodeFoo>();
+                ((IShortcodeCollection)shortcodes).Add<BazShortcodeFoo>();
 
                 // Then
                 shortcodes.Keys.ShouldBe(new[] { "BazShortcodeFoo" });
