@@ -1,9 +1,9 @@
-// The following environment variables need to be set for Build target:
-// SIGNTOOL (to sign the executable)
-
 // The following environment variables need to be set for Publish target:
 // STATIQ_NUGET_API_KEY
 // STATIQ_GITHUB_TOKEN
+
+// The following environment variables need to be set for Sign-Packages target:
+// STATIQ_CERTPASS
 
 #addin "Cake.FileHelpers"
 #addin "Octokit"
@@ -32,10 +32,11 @@ var isPullRequest = !string.IsNullOrWhiteSpace(EnvironmentVariable("SYSTEM_PULLR
 var buildNumber = TFBuild.Environment.Build.Number.Replace('.', '-');
 var branch = TFBuild.Environment.Repository.Branch;
 
-var releaseNotes = ParseReleaseNotes("./ReleaseNotes.md");
+var releaseNotes = ParseReleaseNotes("./RELEASE.md");
 
 var version = releaseNotes.Version.ToString();
-var semVersion = version + (isLocal ? string.Empty : string.Concat("-build-", buildNumber));
+var semVersion = releaseNotes.RawVersionLine.Split(' ', StringSplitOptions.RemoveEmptyEntries)[1]
+    + (isLocal ? string.Empty : string.Concat("-build-", buildNumber));
 
 var msBuildSettings = new DotNetCoreMSBuildSettings()
     .WithProperty("Version", semVersion)
@@ -52,7 +53,7 @@ var binDir = buildDir + Directory("bin");
 
 Setup(context =>
 {
-    Information("Building version {0} of Statiq.", semVersion);
+    Information("Building version {0} (semver {1}) of Statiq.", version, semVersion);
 });
 
 //////////////////////////////////////////////////////////////////////
@@ -204,13 +205,29 @@ Task("Publish-Prerelease-Packages")
                 Source = "https://nuget.pkg.github.com/statiqdev/index.json"
             });
         }
+    });    
+
+Task("Sign-Packages")
+    .IsDependentOn("Create-Packages")
+    .WithCriteria(() => isLocal)
+    .Does(() =>
+    {
+        var certPass = EnvironmentVariable("STATIQ_CERTPASS");
+        if (string.IsNullOrEmpty(certPass))
+        {
+            throw new InvalidOperationException("Could not resolve certificate password.");
+        }
+
+        foreach (var nupkg in GetFiles(nugetRoot.Path.FullPath + "/*.nupkg"))
+        {
+            StartProcess("nuget", "sign \"" + nupkg.ToString() + "\" -CertificatePath \"digicert-davidglick.pfx\" -CertificatePassword \"" + certPass + "\"-Timestamper \"http://timestamp.digicert.com\" -NonInteractive");
+        }        
     });
     
 Task("Publish-Packages")
-    .IsDependentOn("Create-Packages")
+    .IsDependentOn("Sign-Packages")
     .WithCriteria(() => isLocal)
     .WithCriteria(() => isRunningOnWindows)
-    // TODO: Add criteria that makes sure this is the master branch
     .Does(() =>
     {
         var apiKey = EnvironmentVariable("STATIQ_NUGET_API_KEY");
@@ -233,7 +250,6 @@ Task("Publish-Release")
     .IsDependentOn("Build")
     .WithCriteria(() => isLocal)
     .WithCriteria(() => isRunningOnWindows)
-    // TODO: Add criteria that makes sure this is the master branch
     .Does(() =>
     {
         var githubToken = EnvironmentVariable("STATIQ_GITHUB_TOKEN");

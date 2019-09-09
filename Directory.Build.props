@@ -11,9 +11,10 @@
     <GenerateAssemblyConfigurationAttribute>false</GenerateAssemblyConfigurationAttribute>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <Authors>Dave Glick, Other Awesome Contributors</Authors>
-    <PackageLicenseExpression>MIT</PackageLicenseExpression>
-    <PackageIconUrl>https://statiq.dev/logo-square-64.png</PackageIconUrl>
+    <PackageLicenseFile>LICENSE</PackageLicenseFile>
+    <PackageIcon>icon.png</PackageIcon>
     <PackageProjectUrl>https://github.com/statiqdev/Framework</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/statiqdev/Framework.git</RepositoryUrl>
     <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
     <Copyright>Copyright © Statiq Contributors</Copyright>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
@@ -23,6 +24,10 @@
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>
     <LangVersion>preview</LangVersion>
   </PropertyGroup>
+  <ItemGroup>
+    <None Include="..\..\..\LICENSE" Pack="true" PackagePath=""/>
+    <None Include="..\..\..\icon.png" Pack="true" PackagePath="\"/>
+  </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0-beta2-19367-01" PrivateAssets="All"/>
     <PackageReference Include="StyleCop.Analyzers" Version="1.1.118" PrivateAssets="All" />
