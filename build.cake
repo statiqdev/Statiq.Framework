@@ -47,6 +47,8 @@ var buildDir = Directory("./build");
 var nugetRoot = buildDir + Directory("nuget");
 var binDir = buildDir + Directory("bin");
 
+var zipFile = "StatiqFramework-v" + semVersion + ".zip";
+
 ///////////////////////////////////////////////////////////////////////////////
 // SETUP / TEARDOWN
 ///////////////////////////////////////////////////////////////////////////////
@@ -100,6 +102,14 @@ Task("Build")
             NoRestore = true,
             MSBuildSettings = msBuildSettings
         });
+    });
+
+Task("Copy-Files")
+    .IsDependentOn("Build")
+    .Does(() =>
+    {
+        CopyFiles("./src/**/bin/" + configuration + "/*/*", binDir);
+        CopyFiles(new FilePath[] { "LICENSE", "README.md", "RELEASE.md", "LICENSING.md" }, buildDir);
     });
 
 Task("Run-Unit-Tests")
@@ -223,6 +233,18 @@ Task("Sign-Packages")
             StartProcess("nuget", "sign \"" + nupkg.ToString() + "\" -CertificatePath \"digicert-davidglick.pfx\" -CertificatePassword \"" + certPass + "\" -Timestamper \"http://timestamp.digicert.com\" -NonInteractive");
         }        
     });
+
+Task("Zip-Files")
+    .IsDependentOn("Copy-Files")
+    .IsDependentOn("Sign-Packages")
+    .WithCriteria(() => isLocal)
+    .WithCriteria(() => isRunningOnWindows)
+    .Does(() =>
+    {
+        var zipPath = buildDir + File(zipFile);
+        var files = GetFiles(buildDir.Path.FullPath + "/**/*");
+        Zip(buildDir, zipPath, files);
+    });
     
 Task("Publish-Packages")
     .IsDependentOn("Sign-Packages")
@@ -247,7 +269,7 @@ Task("Publish-Packages")
     });
 
 Task("Publish-Release")
-    .IsDependentOn("Build")
+    .IsDependentOn("Zip-Files")
     .WithCriteria(() => isLocal)
     .WithCriteria(() => isRunningOnWindows)
     .Does(() =>
@@ -266,8 +288,15 @@ Task("Publish-Release")
         {
             Name = semVersion,
             Body = string.Join(Environment.NewLine, releaseNotes.Notes),
-            TargetCommitish = "master"
+            TargetCommitish = "master",
+            Prerelease = semVersion.Contains('-')
         }).Result;
+        
+        var zipPath = buildDir + File(zipFile);
+        using (var zipStream = System.IO.File.OpenRead(zipPath.Path.FullPath))
+        {
+            var releaseAsset = github.Repository.Release.UploadAsset(release, new ReleaseAssetUpload(zipFile, "application/zip", zipStream, null)).Result;
+        }
     });
     
 //////////////////////////////////////////////////////////////////////
