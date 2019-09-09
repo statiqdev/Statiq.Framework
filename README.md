@@ -16,7 +16,7 @@ Statiq Framework is oriented around three main concepts:
 
 ### The Bootstrapper
 
-The easiest way to get started with Statiq Framework is to use the `Bootstrapper`. This class helps create an `Engine`, which is the core runtime component of Statiq Framework. The `Boostrapper` has fluent methods to configure the `Engine`, add modules and pipelines, and process command-line arguments.
+The easiest way to get started with Statiq Framework is to use the `Bootstrapper` from the [Statiq.App](https://www.nuget.org/packages/Statiq.App) package. This class helps create an `Engine`, which is the core runtime component of Statiq Framework. The `Boostrapper` has fluent methods to configure the `Engine`, add modules and pipelines, and process command-line arguments.
 
 In general, a Statiq Framework application looks something like the following:
 
@@ -37,6 +37,20 @@ public class Program
 ```
 
 More exhaustive code samples and examples will be provided soon.
+
+### Libraries and Extensions
+
+Statiq Framework consists of many different packages to help you craft exactly the static generator that you need.
+
+The core packages include:
+
+- **[Statiq.App](https://www.nuget.org/packages/Statiq.App)**: contains the `Bootstrapper` and other functionality like command-line parsing. This package should be referenced by generator applications to get up and running quickly.
+- **[Statiq.Core](https://www.nuget.org/packages/Statiq.Core)**: contains the core implementation including the `Engine`. This package should be referenced by generator applications for full control over the engine (it's installed automatically when using `Statiq.App`).
+- **[Statiq.Common](https://www.nuget.org/packages/Statiq.Common)**: contains abstractions and other common code that extension libraries might need. This package should be referenced by extension libraries such as modules.
+- **[Statiq.Hosting](https://www.nuget.org/packages/Statiq.Hosting)**: contains the functionality related to the embedded preview server, live reload, etc.
+- **[Statiq.Testing](https://www.nuget.org/packages/Statiq.Testing)**: contains mock classes for most of the interfaces in Statiq.Common and is useful for writing tests that use Statiq objects.
+
+The core packages contain many useful modules, but there are also lots of extension packages that provide additional modules. In general if a module requires additional libraries, it's split out into a separate package. These include [Statiq.Yaml](https://www.nuget.org/packages/Statiq.Yaml), [Statiq.Markdown](https://www.nuget.org/packages/Statiq.Markdown), and [Statiq.Razor](https://www.nuget.org/packages/Statiq.Razor). Reference these packages to gain access to modules like `ParseYaml`, `RenderMarkdown`, and `RenderRazor`.
 
 ### Module Guidelines
 
