@@ -10,9 +10,9 @@ using Statiq.Testing;
 namespace Statiq.Core.Tests.Modules.Metadata
 {
     [TestFixture]
-    public class FlattenDocumentsFixture : BaseFixture
+    public class FlattenTreeFixture : BaseFixture
     {
-        public class ExecuteTests : CreateTreeFixture
+        public class ExecuteTests : FlattenTreeFixture
         {
             [Test]
             public async Task FlattensDefaultKey()
@@ -37,7 +37,7 @@ namespace Statiq.Core.Tests.Modules.Metadata
                         }
                     }
                 };
-                FlattenDocuments module = new FlattenDocuments();
+                FlattenTree module = new FlattenTree();
 
                 // When
                 ImmutableArray<TestDocument> results = await ExecuteAsync(input, module);
@@ -69,7 +69,7 @@ namespace Statiq.Core.Tests.Modules.Metadata
                         }
                     }
                 };
-                FlattenDocuments module = new FlattenDocuments("Foo");
+                FlattenTree module = new FlattenTree("Foo");
 
                 // When
                 ImmutableArray<TestDocument> results = await ExecuteAsync(input, module);
@@ -101,7 +101,7 @@ namespace Statiq.Core.Tests.Modules.Metadata
                         }
                     }
                 };
-                FlattenDocuments module = new FlattenDocuments(null);
+                FlattenTree module = new FlattenTree(null);
 
                 // When
                 ImmutableArray<TestDocument> results = await ExecuteAsync(input, module);

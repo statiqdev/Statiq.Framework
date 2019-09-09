@@ -174,7 +174,7 @@ Task("Publish-Prerelease-Packages")
 
         return;
 
-        // Eventually publish to GitHub Package Registry
+        // Eventually publish to GitHub Package Registry (or a public Azure Artifacts feed?)
         var githubToken = EnvironmentVariable("STATIQ_GITHUB_TOKEN");
         if (string.IsNullOrEmpty(githubToken))
         {
@@ -220,7 +220,7 @@ Task("Sign-Packages")
 
         foreach (var nupkg in GetFiles(nugetRoot.Path.FullPath + "/*.nupkg"))
         {
-            StartProcess("nuget", "sign \"" + nupkg.ToString() + "\" -CertificatePath \"digicert-davidglick.pfx\" -CertificatePassword \"" + certPass + "\"-Timestamper \"http://timestamp.digicert.com\" -NonInteractive");
+            StartProcess("nuget", "sign \"" + nupkg.ToString() + "\" -CertificatePath \"digicert-davidglick.pfx\" -CertificatePassword \"" + certPass + "\" -Timestamper \"http://timestamp.digicert.com\" -NonInteractive");
         }        
     });
     
