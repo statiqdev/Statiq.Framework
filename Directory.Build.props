@@ -15,6 +15,7 @@
     <PackageIcon>icon.png</PackageIcon>
     <PackageProjectUrl>https://github.com/statiqdev/Framework</PackageProjectUrl>
     <RepositoryUrl>https://github.com/statiqdev/Framework.git</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
     <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
     <Copyright>Copyright © Statiq Contributors</Copyright>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>

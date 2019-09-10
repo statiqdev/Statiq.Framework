@@ -3,8 +3,6 @@
     <TargetFramework>netcoreapp3.0</TargetFramework>
     <Description>Statiq is a configurable static content generation framework.</Description>
     <PackageTags>Statiq Static StaticContent StaticSite Blog BlogEngine</PackageTags>
-    <RepositoryUrl>https://github.com/statiqdev/Framework.git</RepositoryUrl>
-    <RepositoryType>git</RepositoryType>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="ConcurrentHashSet" Version="1.0.2" />

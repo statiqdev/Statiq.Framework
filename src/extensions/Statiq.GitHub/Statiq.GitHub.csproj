@@ -3,8 +3,6 @@
     <TargetFramework>netcoreapp3.0</TargetFramework>
     <Description>Statiq is a configurable static content generation framework. This library contains modules for interacting with GitHub.</Description>
     <PackageTags>Statiq Static StaticContent StaticSite Blog BlogEngine Git GitHub</PackageTags>
-    <RepositoryUrl>https://github.com/statiqdev/Framework.git</RepositoryUrl>
-    <RepositoryType>git</RepositoryType>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Octokit" Version="0.29.0" />

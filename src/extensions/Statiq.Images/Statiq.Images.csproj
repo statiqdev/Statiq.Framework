@@ -3,8 +3,6 @@
     <TargetFramework>netcoreapp3.0</TargetFramework>
     <Description>Statiq is a configurable static content generation framework. This library provides support for manipulating images.</Description>
     <PackageTags>Statiq Static StaticContent StaticSite Blog BlogEngine Images ImageProcessor</PackageTags>
-    <RepositoryUrl>https://github.com/statiqdev/Framework.git</RepositoryUrl>
-    <RepositoryType>git</RepositoryType>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="SixLabors.ImageSharp" Version="1.0.0-beta0004" />

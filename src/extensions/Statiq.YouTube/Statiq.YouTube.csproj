@@ -3,8 +3,6 @@
     <TargetFramework>netcoreapp3.0</TargetFramework>
     <Description>Statiq is a configurable static content generation framework. This library provides support for interacting with YouTube.</Description>
     <PackageTags>Statiq Static StaticContent StaticSite Blog BlogEngine YouTube</PackageTags>
-    <RepositoryUrl>https://github.com/statiqdev/Framework.git</RepositoryUrl>
-    <RepositoryType>git</RepositoryType>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Google.Apis" Version="1.29.1" />

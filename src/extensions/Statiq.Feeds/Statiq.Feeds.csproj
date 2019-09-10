@@ -3,8 +3,6 @@
     <TargetFramework>netcoreapp3.0</TargetFramework>
     <Description>Statiq is a configurable static content generation framework. This library provides support for feeds and syndication including RSS and Atom.</Description>
     <PackageTags>Statiq Static StaticContent StaticSite RSS Atom Syndication</PackageTags>
-    <RepositoryUrl>https://github.com/statiqdev/Framework.git</RepositoryUrl>
-    <RepositoryType>git</RepositoryType>
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\core\Statiq.Common\Statiq.Common.csproj" />

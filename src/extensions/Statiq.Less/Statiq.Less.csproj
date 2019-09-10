@@ -3,8 +3,6 @@
     <TargetFramework>netcoreapp3.0</TargetFramework>
     <Description>Statiq is a configurable static content generation framework. This library provides support for parsing Less CSS content.</Description>
     <PackageTags>Statiq Static StaticContent StaticSite Blog BlogEngine CSS Less LessCSS</PackageTags>
-    <RepositoryUrl>https://github.com/statiqdev/Framework.git</RepositoryUrl>
-    <RepositoryType>git</RepositoryType>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="dotless.Core" Version="0.0.1" />

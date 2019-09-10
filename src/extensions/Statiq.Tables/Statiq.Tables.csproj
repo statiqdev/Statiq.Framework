@@ -3,8 +3,6 @@
     <TargetFramework>netcoreapp3.0</TargetFramework>
     <Description>Statiq is a configurable static content generation framework. This library provides support for importing and exporting CSV and Excel files.</Description>
     <PackageTags>Statiq Static StaticContent StaticSite Blog BlogEngine CSV Excel</PackageTags>
-    <RepositoryUrl>https://github.com/statiqdev/Framework.git</RepositoryUrl>
-    <RepositoryType>git</RepositoryType>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="CsvHelper" Version="7.1.0" />
