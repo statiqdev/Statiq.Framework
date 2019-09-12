@@ -18,10 +18,10 @@ namespace Statiq.Core
             return pipeline;
         }
 
-        public IPipeline this[string key]
+        public IPipeline this[string name]
         {
-            get => _pipelines[key];
-            set => _pipelines[key] = value ?? throw new ArgumentNullException(nameof(value));
+            get => _pipelines[name];
+            set => _pipelines[name] = value ?? throw new ArgumentNullException(nameof(value));
         }
 
         public ICollection<string> Keys => ((IDictionary<string, IPipeline>)_pipelines).Keys;
@@ -32,8 +32,10 @@ namespace Statiq.Core
 
         public bool IsReadOnly => ((IDictionary<string, IPipeline>)_pipelines).IsReadOnly;
 
-        public void Add(string key, IPipeline value) =>
-            _pipelines.Add(key, value ?? throw new ArgumentNullException(nameof(value)));
+        public void Add(string name, IPipeline value) =>
+            _pipelines.Add(
+                name ?? throw new ArgumentNullException(nameof(name)),
+                value ?? throw new ArgumentNullException(nameof(value)));
 
         public void Add(KeyValuePair<string, IPipeline> item)
         {
@@ -48,19 +50,19 @@ namespace Statiq.Core
 
         public bool Contains(KeyValuePair<string, IPipeline> item) => ((IDictionary<string, IPipeline>)_pipelines).Contains(item);
 
-        public bool ContainsKey(string key) => _pipelines.ContainsKey(key);
+        public bool ContainsKey(string name) => _pipelines.ContainsKey(name);
 
         public void CopyTo(KeyValuePair<string, IPipeline>[] array, int arrayIndex) =>
             ((IDictionary<string, IPipeline>)_pipelines).CopyTo(array, arrayIndex);
 
-        public bool Remove(string key) =>
-            _pipelines.Remove(key);
+        public bool Remove(string name) =>
+            _pipelines.Remove(name);
 
         public bool Remove(KeyValuePair<string, IPipeline> item) =>
             ((IDictionary<string, IPipeline>)_pipelines).Remove(item);
 
-        public bool TryGetValue(string key, out IPipeline value) =>
-            _pipelines.TryGetValue(key, out value);
+        public bool TryGetValue(string name, out IPipeline value) =>
+            _pipelines.TryGetValue(name, out value);
 
         public IEnumerator<KeyValuePair<string, IPipeline>> GetEnumerator() =>
             ((IDictionary<string, IPipeline>)_pipelines).GetEnumerator();
