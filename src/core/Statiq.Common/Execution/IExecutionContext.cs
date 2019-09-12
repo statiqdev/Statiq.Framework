@@ -68,12 +68,9 @@ namespace Statiq.Common
         IPipelineOutputs Outputs { get; }
 
         /// <summary>
-        /// Gets any input that was passed to the application (for example, on stdin via piping).
+        /// Gets the state of the application when it was run.
         /// </summary>
-        /// <value>
-        /// The application input.
-        /// </value>
-        string ApplicationInput { get; }
+        IReadOnlyApplicationState ApplicationState { get; }
 
         /// <summary>
         /// Gets a cancellation token that will be canceled when processing should stop.

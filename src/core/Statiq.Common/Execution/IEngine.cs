@@ -50,9 +50,9 @@ namespace Statiq.Common
         IMemoryStreamFactory MemoryStreamFactory { get; }
 
         /// <summary>
-        /// Gets or sets the application input.
+        /// Gets the state of the application when it was run.
         /// </summary>
-        string ApplicationInput { get; set; }
+        ApplicationState ApplicationState { get; }
 
         /// <summary>
         /// Sets the default document type produced by this engine (and resulting <see cref="IExecutionContext"/> contexts).

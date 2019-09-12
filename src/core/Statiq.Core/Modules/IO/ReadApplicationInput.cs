@@ -19,13 +19,13 @@ namespace Statiq.Core
         public override async Task<IEnumerable<IDocument>> ExecuteAsync(IExecutionContext context)
         {
             // If ApplicationInput is empty, return nothing
-            if (string.IsNullOrWhiteSpace(context.ApplicationInput))
+            if (string.IsNullOrWhiteSpace(context.ApplicationState.Input))
             {
                 return Array.Empty<IDocument>();
             }
 
             return context.CreateDocument(
-                await context.GetContentProviderAsync(context.ApplicationInput))
+                await context.GetContentProviderAsync(context.ApplicationState.Input))
                 .Yield();
         }
     }

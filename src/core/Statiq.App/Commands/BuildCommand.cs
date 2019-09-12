@@ -41,18 +41,20 @@ namespace Statiq.App
             public string RootPath { get; set; }
         }
 
-        private readonly IConfiguratorCollection _configurators;
+        private readonly IServiceCollection _serviceCollection;
+        private readonly IBootstrapper _bootstrapper;
 
-        public BuildCommand(IServiceCollection serviceCollection, IConfiguratorCollection configurators)
+        public BuildCommand(IServiceCollection serviceCollection, IBootstrapper bootstrapper)
             : base(serviceCollection)
         {
-            _configurators = configurators;
+            _serviceCollection = serviceCollection;
+            _bootstrapper = bootstrapper;
         }
 
-        public override async Task<int> ExecuteCommandAsync(IServiceCollection serviceCollection, CommandContext context, Settings settings)
+        public override async Task<int> ExecuteCommandAsync(CommandContext context, Settings settings)
         {
             CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
-            using (EngineManager engineManager = new EngineManager(serviceCollection, _configurators, settings))
+            using (EngineManager engineManager = new EngineManager(_serviceCollection, _bootstrapper, settings))
             {
                 return await engineManager.ExecuteAsync(cancellationTokenSource)
                     ? (int)ExitCode.Normal

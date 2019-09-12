@@ -107,7 +107,7 @@ namespace Statiq.Core
         public IMemoryStreamFactory MemoryStreamFactory { get; } = new MemoryStreamFactory();
 
         /// <inheritdoc />
-        public string ApplicationInput { get; set; }
+        public ApplicationState ApplicationState { get; } = new ApplicationState();
 
         internal ConcurrentDictionary<string, ImmutableArray<IDocument>> Documents { get; }
             = new ConcurrentDictionary<string, ImmutableArray<IDocument>>(StringComparer.OrdinalIgnoreCase);

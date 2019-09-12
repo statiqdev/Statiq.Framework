@@ -30,7 +30,7 @@ namespace Statiq.Testing
         public IMemoryStreamFactory MemoryStreamFactory { get; set; } = new TestMemoryStreamFactory();
 
         /// <inheritdoc />
-        public string ApplicationInput { get; set; }
+        public ApplicationState ApplicationState { get; set; }
 
         /// <inheritdoc />
         public IPipelineCollection Pipelines => throw new NotImplementedException();

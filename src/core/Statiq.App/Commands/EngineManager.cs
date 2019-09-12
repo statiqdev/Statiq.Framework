@@ -6,6 +6,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Spectre.Cli;
 using Statiq.Common;
 using Statiq.Core;
 
@@ -15,17 +16,20 @@ namespace Statiq.App
     {
         private readonly ILogger _logger;
 
-        public EngineManager(IServiceCollection serviceCollection, IConfiguratorCollection configurators, BuildCommand.Settings commandSettings)
+        public EngineManager(IServiceCollection serviceCollection, IBootstrapper bootstrapper, BuildCommand.Settings commandSettings)
         {
             Engine = new Engine(serviceCollection);
             _logger = Engine.Services.GetRequiredService<ILogger<Bootstrapper>>();
 
+            // Record the arguments
+            Engine.ApplicationState.Arguments = bootstrapper.Arguments;
+
             // Apply settings
-            configurators.Configure(Engine.Settings);
+            bootstrapper.Configurators.Configure(Engine.Settings);
             ApplyCommandSettings(Engine, commandSettings);  // Apply command settings last so they can override others
 
             // Run engine configurators after command line, settings, etc. have been applied
-            configurators.Configure<IEngine>(Engine);
+            bootstrapper.Configurators.Configure<IEngine>(Engine);
 
             // Log the full environment
             _logger.LogInformation($"Root path:{Environment.NewLine}    {Engine.FileSystem.RootPath}");
@@ -90,7 +94,7 @@ namespace Statiq.App
             {
                 using (StreamReader reader = new StreamReader(Console.OpenStandardInput(), Console.InputEncoding))
                 {
-                    engine.ApplicationInput = reader.ReadToEnd();
+                    engine.ApplicationState.Input = reader.ReadToEnd();
                 }
             }
 

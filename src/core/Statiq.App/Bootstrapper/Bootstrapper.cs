@@ -18,9 +18,9 @@ namespace Statiq.App
         private Func<CommandServiceTypeRegistrar, ICommandApp> _getCommandApp = x => new CommandApp(x);
 
         // Private constructor to force factory use which returns the interface to get access to default interface implementations
-        private Bootstrapper(string[] args)
+        private Bootstrapper(string[] arguments)
         {
-            Args = args ?? throw new ArgumentNullException(nameof(args));
+            Arguments = arguments ?? throw new ArgumentNullException(nameof(arguments));
         }
 
         /// <inheritdoc/>
@@ -30,7 +30,7 @@ namespace Statiq.App
         public IConfiguratorCollection Configurators { get; } = new ConfiguratorCollection();
 
         /// <inheritdoc/>
-        public string[] Args { get; }
+        public string[] Arguments { get; }
 
         /// <inheritdoc/>
         public IBootstrapper SetDefaultCommand<TCommand>()
@@ -69,7 +69,7 @@ namespace Statiq.App
             // Create the stand-alone command line service container and register a few types needed for the CLI
             CommandServiceTypeRegistrar registrar = new CommandServiceTypeRegistrar();
             registrar.RegisterInstance(typeof(IServiceCollection), serviceCollection);
-            registrar.RegisterInstance(typeof(IConfiguratorCollection), Configurators);
+            registrar.RegisterInstance(typeof(IBootstrapper), this);
 
             // Create the command line parser and run the command
             ICommandApp app = _getCommandApp(registrar);
@@ -79,7 +79,7 @@ namespace Statiq.App
                 ConfigurableCommands configurableCommands = new ConfigurableCommands(x);
                 Configurators.Configure(configurableCommands);
             });
-            return await app.RunAsync(Args);
+            return await app.RunAsync(Arguments);
         }
 
         /// <summary>

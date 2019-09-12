@@ -9,7 +9,7 @@ namespace Statiq.App
         /// <summary>
         /// The command line arguments.
         /// </summary>
-        string[] Args { get; }
+        string[] Arguments { get; }
 
         /// <summary>
         /// Sets the default command used by the application.

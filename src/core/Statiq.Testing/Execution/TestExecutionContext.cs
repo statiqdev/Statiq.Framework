@@ -96,7 +96,7 @@ namespace Statiq.Testing
         public IPipelineOutputs Outputs { get; set; }
 
         /// <inheritdoc/>
-        public string ApplicationInput { get; set; }
+        public IReadOnlyApplicationState ApplicationState { get; set; }
 
         /// <inheritdoc/>
         IReadOnlySettings IExecutionContext.Settings => Settings;

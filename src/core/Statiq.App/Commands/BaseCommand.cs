@@ -78,9 +78,9 @@ namespace Statiq.App
                 }
             }
 
-            return await ExecuteCommandAsync(_serviceCollection, context, settings);
+            return await ExecuteCommandAsync(context, settings);
         }
 
-        public abstract Task<int> ExecuteCommandAsync(IServiceCollection serviceCollection, CommandContext context, TSettings settings);
+        public abstract Task<int> ExecuteCommandAsync(CommandContext context, TSettings settings);
     }
 }

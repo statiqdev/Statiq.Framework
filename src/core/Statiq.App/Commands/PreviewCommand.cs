@@ -43,22 +43,24 @@ namespace Statiq.App
             public bool NoReload { get; set; }
         }
 
-        private readonly IConfiguratorCollection _configurators;
+        private readonly IServiceCollection _serviceCollection;
+        private readonly IBootstrapper _bootstrapper;
 
         private readonly ConcurrentQueue<string> _changedFiles = new ConcurrentQueue<string>();
         private readonly AutoResetEvent _messageEvent = new AutoResetEvent(false);
         private readonly InterlockedBool _exit = new InterlockedBool(false);
 
-        public PreviewCommand(IServiceCollection serviceCollection, IConfiguratorCollection configurators)
+        public PreviewCommand(IServiceCollection serviceCollection, IBootstrapper bootstrapper)
             : base(serviceCollection)
         {
-            _configurators = configurators;
+            _serviceCollection = serviceCollection;
+            _bootstrapper = bootstrapper;
         }
 
-        public override async Task<int> ExecuteCommandAsync(IServiceCollection serviceCollection, CommandContext context, Settings settings)
+        public override async Task<int> ExecuteCommandAsync(CommandContext context, Settings settings)
         {
             ExitCode exitCode = ExitCode.Normal;
-            using (EngineManager engineManager = new EngineManager(serviceCollection, _configurators, settings))
+            using (EngineManager engineManager = new EngineManager(_serviceCollection, _bootstrapper, settings))
             {
                 ILogger logger = engineManager.Engine.Services.GetRequiredService<ILogger<Bootstrapper>>();
 

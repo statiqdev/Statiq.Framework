@@ -51,7 +51,7 @@ namespace Statiq.Core
         public IReadOnlyShortcodeCollection Shortcodes => _contextData.Engine.Shortcodes;
 
         /// <inheritdoc/>
-        public string ApplicationInput => _contextData.Engine.ApplicationInput;
+        public IReadOnlyApplicationState ApplicationState => _contextData.Engine.ApplicationState;
 
         /// <inheritdoc/>
         public IMemoryStreamFactory MemoryStreamFactory => _contextData.Engine.MemoryStreamFactory;
