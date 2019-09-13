@@ -40,7 +40,7 @@ namespace Statiq.Common
             {
                 foreach (IModule module in modules.Where(x => x != null))
                 {
-                    Add(module);
+                    _modules.Add(module);
                 }
             }
         }
@@ -61,7 +61,7 @@ namespace Statiq.Common
         {
             foreach (IModule module in modules.Where(x => x != null))
             {
-                Add(module);
+                _modules.Add(module);
             }
         }
 
@@ -95,7 +95,7 @@ namespace Statiq.Common
             IModule[] moduleArray = modules.Where(x => x != null).ToArray();
             for (int i = index; i < index + moduleArray.Length; i++)
             {
-                Insert(i, moduleArray[i - index]);
+                _modules.Insert(i, moduleArray[i - index]);
             }
         }
 
