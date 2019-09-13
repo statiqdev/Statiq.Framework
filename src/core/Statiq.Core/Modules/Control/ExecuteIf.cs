@@ -63,6 +63,12 @@ namespace Statiq.Core
         }
 
         /// <summary>
+        /// Adds a module to the initial condition. This method is mainly to support collection initialization of the module.
+        /// </summary>
+        /// <param name="module">The module to add.</param>
+        public void Add(IModule module) => _conditions[0].Add(module);
+
+        /// <summary>
         /// Specifies an alternate condition to be tested on documents that did not satisfy
         /// previous conditions. You can chain together as many <c>ElseIf</c> calls as needed.
         /// The predicate will be evaluated against every input document individually.

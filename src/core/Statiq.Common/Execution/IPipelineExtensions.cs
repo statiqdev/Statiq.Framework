@@ -7,7 +7,7 @@ namespace Statiq.Common
         public static TPipeline WithInputModules<TPipeline>(this TPipeline pipeline, IEnumerable<IModule> modules)
             where TPipeline : IPipeline
         {
-            pipeline.InputModules.Add(modules);
+            pipeline.InputModules.AddRange(modules);
             return pipeline;
         }
 
@@ -21,7 +21,7 @@ namespace Statiq.Common
         public static TPipeline WithProcessModules<TPipeline>(this TPipeline pipeline, IEnumerable<IModule> modules)
             where TPipeline : IPipeline
         {
-            pipeline.ProcessModules.Add(modules);
+            pipeline.ProcessModules.AddRange(modules);
             return pipeline;
         }
 
@@ -35,7 +35,7 @@ namespace Statiq.Common
         public static TPipeline WithTransformModules<TPipeline>(this TPipeline pipeline, IEnumerable<IModule> modules)
             where TPipeline : IPipeline
         {
-            pipeline.TransformModules.Add(modules);
+            pipeline.TransformModules.AddRange(modules);
             return pipeline;
         }
 
@@ -49,7 +49,7 @@ namespace Statiq.Common
         public static TPipeline WithOutputModules<TPipeline>(this TPipeline pipeline, IEnumerable<IModule> modules)
             where TPipeline : IPipeline
         {
-            pipeline.OutputModules.Add(modules);
+            pipeline.OutputModules.AddRange(modules);
             return pipeline;
         }
 

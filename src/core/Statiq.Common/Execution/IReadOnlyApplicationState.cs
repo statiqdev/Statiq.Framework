@@ -10,11 +10,17 @@ namespace Statiq.Common
         /// <summary>
         /// Gets the raw arguments passed to the application (the first argument is typically the "command").
         /// </summary>
+        /// <remarks>
+        /// The value will never be null (though it may be empty).
+        /// </remarks>
         public string[] Arguments { get; }
 
         /// <summary>
         /// Gets any input that was passed to the application (for example, on stdin via piping).
         /// </summary>
+        /// <remarks>
+        /// The value may be null if unset or if no input was passed to the application.
+        /// </remarks>
         public string Input { get; }
     }
 }

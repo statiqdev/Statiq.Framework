@@ -25,12 +25,12 @@ namespace Statiq.Testing
 
         public TestPipeline(params IModule[] processModules)
         {
-            ProcessModules.AddRange(processModules);
+            ICollectionExtensions.AddRange(ProcessModules, processModules);
         }
 
         public TestPipeline(IEnumerable<IModule> processModules)
         {
-            ProcessModules.AddRange(processModules);
+            ICollectionExtensions.AddRange(ProcessModules, processModules);
         }
     }
 }

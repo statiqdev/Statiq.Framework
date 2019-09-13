@@ -38,6 +38,18 @@ public class Program
 
 More exhaustive code samples and examples will be provided soon.
 
+### Defining Pipelines and Adding Modules
+
+Pipelines can be defined in several different ways depending on your requirements and style preferences.
+
+TODO: Clean up this section, loose thoughts below
+
+- Through the builder
+- By creating a `Pipeline` class
+- Adding modules using a fluent API in pipeline constructor
+- Adding modules using collection initialization
+- Adding child modules using collection initialization
+
 ### Libraries and Extensions
 
 Statiq Framework consists of many different packages to help you craft exactly the static generator that you need.

@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace Statiq.Common
 {
@@ -7,8 +8,14 @@ namespace Statiq.Common
     /// </summary>
     public class ApplicationState : IReadOnlyApplicationState
     {
+        private string[] _arguments = new string[0];
+
         /// <inheritdoc />
-        public string[] Arguments { get; set; }
+        public string[] Arguments
+        {
+            get => _arguments;
+            set => _arguments = value ?? throw new ArgumentNullException(nameof(value));
+        }
 
         /// <inheritdoc />
         public string Input { get; set; }

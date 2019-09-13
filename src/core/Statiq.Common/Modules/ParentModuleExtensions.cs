@@ -13,7 +13,7 @@ namespace Statiq.Common
             where TModule : ParentModule
         {
             _ = module ?? throw new ArgumentNullException(nameof(module));
-            module.Children.Add(modules);
+            module.Children.AddRange(modules);
             return module;
         }
     }

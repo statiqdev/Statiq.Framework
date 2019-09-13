@@ -50,15 +50,14 @@ namespace Statiq.Common
         /// Any <c>null</c> items in the sequence of modules will be discarded.
         /// </summary>
         /// <param name="modules">The modules to add.</param>
-        public void Add(params IModule[] modules) =>
-            Add((IEnumerable<IModule>)modules);
+        public void Add(params IModule[] modules) => AddRange(modules);
 
         /// <summary>
         /// Adds modules to the list.
         /// Any <c>null</c> items in the sequence of modules will be discarded.
         /// </summary>
         /// <param name="modules">The modules to add.</param>
-        public void Add(IEnumerable<IModule> modules)
+        public void AddRange(IEnumerable<IModule> modules)
         {
             foreach (IModule module in modules.Where(x => x != null))
             {
@@ -67,7 +66,7 @@ namespace Statiq.Common
         }
 
         /// <inheritdoc />
-        public void Add(IModule item)
+        void ICollection<IModule>.Add(IModule item)
         {
             if (item == null)
             {
@@ -83,7 +82,7 @@ namespace Statiq.Common
         /// <param name="index">The index at which to insert the modules.</param>
         /// <param name="modules">The modules to insert.</param>
         public void Insert(int index, params IModule[] modules) =>
-            Insert(index, (IEnumerable<IModule>)modules);
+            InsertRange(index, (IEnumerable<IModule>)modules);
 
         /// <summary>
         /// Inserts modules into the list.
@@ -91,7 +90,7 @@ namespace Statiq.Common
         /// </summary>
         /// <param name="index">The index at which to insert the modules.</param>
         /// <param name="modules">The modules to insert.</param>
-        public void Insert(int index, IEnumerable<IModule> modules)
+        public void InsertRange(int index, IEnumerable<IModule> modules)
         {
             IModule[] moduleArray = modules.Where(x => x != null).ToArray();
             for (int i = index; i < index + moduleArray.Length; i++)
@@ -154,6 +153,8 @@ namespace Statiq.Common
 
         /// <inheritdoc />
         public IEnumerator<IModule> GetEnumerator() => _modules.GetEnumerator();
+
+        public static implicit operator ModuleList(IModule[] modules) => new ModuleList(modules);
 
         /// <summary>
         /// Appends modules.
