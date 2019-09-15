@@ -73,7 +73,7 @@ namespace Statiq.Core
         }
 
         /// <inheritdoc />
-        protected override async Task<IEnumerable<IDocument>> ExecuteAsync(IDocument input, IExecutionContext context)
+        protected override async Task<IEnumerable<IDocument>> ExecuteInputAsync(IDocument input, IExecutionContext context)
         {
             string inputContent = await input.GetStringAsync();
             List<string> inputLines = inputContent.Split(new[] { '\n' }, StringSplitOptions.None).ToList();

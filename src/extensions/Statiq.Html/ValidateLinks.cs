@@ -74,7 +74,7 @@ namespace Statiq.Html
         }
 
         /// <inheritdoc />
-        public override async Task<IEnumerable<IDocument>> ExecuteAsync(IExecutionContext context)
+        protected override async Task<IEnumerable<IDocument>> ExecuteContextAsync(IExecutionContext context)
         {
 #pragma warning disable RCS1163 // Unused parameter.
             // Handle invalid HTTPS certificates and allow alternate security protocols (see http://stackoverflow.com/a/5670954/807064)

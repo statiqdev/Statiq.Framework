@@ -49,7 +49,7 @@ namespace Statiq.Core
             return this;
         }
 
-        protected override IEnumerable<IDocument> Execute(
+        protected override IEnumerable<IDocument> ExecuteChildren(
             IExecutionContext context,
             ImmutableArray<IDocument> childOutputs) =>
             _reverse

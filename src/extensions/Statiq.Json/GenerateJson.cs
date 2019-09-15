@@ -104,7 +104,7 @@ namespace Statiq.Json
             return this;
         }
 
-        protected override async Task<IEnumerable<IDocument>> ExecuteAsync(IDocument input, IExecutionContext context, object value)
+        protected override async Task<IEnumerable<IDocument>> ExecuteConfigAsync(IDocument input, IExecutionContext context, object value)
         {
             if (value != null)
             {

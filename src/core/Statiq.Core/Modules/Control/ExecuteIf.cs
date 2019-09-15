@@ -157,7 +157,7 @@ namespace Statiq.Core
         }
 
         /// <inheritdoc />
-        public override async Task<IEnumerable<IDocument>> ExecuteAsync(IExecutionContext context)
+        protected override async Task<IEnumerable<IDocument>> ExecuteContextAsync(IExecutionContext context)
         {
             List<IDocument> results = new List<IDocument>();
             IReadOnlyList<IDocument> documents = context.Inputs;

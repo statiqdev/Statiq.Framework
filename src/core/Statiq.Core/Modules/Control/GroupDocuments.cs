@@ -81,7 +81,7 @@ namespace Statiq.Core
         }
 
         /// <inheritdoc />
-        public override async Task<IEnumerable<IDocument>> ExecuteAsync(IExecutionContext context)
+        protected override async Task<IEnumerable<IDocument>> ExecuteContextAsync(IExecutionContext context)
         {
             List<(IDocument Document, IEnumerable<object> Keys)> groups = await context.Inputs
                 .ToAsyncEnumerable()

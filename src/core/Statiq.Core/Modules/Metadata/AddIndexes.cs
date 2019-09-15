@@ -13,7 +13,7 @@ namespace Statiq.Core
     public class AddIndexes : Module
     {
         /// <inheritdoc />
-        public override Task<IEnumerable<IDocument>> ExecuteAsync(IExecutionContext context) =>
+        protected override Task<IEnumerable<IDocument>> ExecuteContextAsync(IExecutionContext context) =>
             Task.FromResult(context.Inputs.Select((x, i) => x.Clone(new MetadataItems { { Keys.Index, i + 1 } })));
     }
 }

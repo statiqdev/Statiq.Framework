@@ -162,7 +162,7 @@ namespace Statiq.Html
             return this;
         }
 
-        protected override async Task<IEnumerable<Common.IDocument>> ExecuteAsync(Common.IDocument input, IExecutionContext context)
+        protected override async Task<IEnumerable<Common.IDocument>> ExecuteInputAsync(Common.IDocument input, IExecutionContext context)
         {
             if (string.IsNullOrWhiteSpace(_metadataKey))
             {

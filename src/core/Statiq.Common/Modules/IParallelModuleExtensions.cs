@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 
 namespace Statiq.Common
 {
+    // Needs to be extensions instead of default interface members to preserve module type
     public static class IParallelModuleExtensions
     {
         /// <summary>

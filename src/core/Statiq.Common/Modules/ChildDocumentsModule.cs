@@ -29,13 +29,13 @@ namespace Statiq.Common
         }
 
         /// <inheritdoc />
-        public sealed override async Task<IEnumerable<IDocument>> ExecuteAsync(IExecutionContext context) =>
-            Children.Count > 0 ? await ExecuteAsync(context, await context.ExecuteModulesAsync(Children, context.Inputs)) : Array.Empty<IDocument>();
+        protected sealed override async Task<IEnumerable<IDocument>> ExecuteContextAsync(IExecutionContext context) =>
+            Children.Count > 0 ? await ExecuteChildrenAsync(context, await context.ExecuteModulesAsync(Children, context.Inputs)) : Array.Empty<IDocument>();
 
         /// <inheritdoc />
         // Unused, prevent overriding in derived classes
-        protected sealed override Task<IEnumerable<IDocument>> ExecuteAsync(IDocument input, IExecutionContext context) =>
-            base.ExecuteAsync(input, context);
+        protected sealed override Task<IEnumerable<IDocument>> ExecuteInputAsync(IDocument input, IExecutionContext context) =>
+            throw new NotSupportedException();
 
         /// <summary>
         /// Gets the output documents given the input documents and the output documents from the execution of child modules.
@@ -43,6 +43,6 @@ namespace Statiq.Common
         /// <param name="context">The execution context.</param>
         /// <param name="childOutputs">The output documents from the child modules.</param>
         /// <returns>The output documents of this module.</returns>
-        protected abstract Task<IEnumerable<IDocument>> ExecuteAsync(IExecutionContext context, ImmutableArray<IDocument> childOutputs);
+        protected abstract Task<IEnumerable<IDocument>> ExecuteChildrenAsync(IExecutionContext context, ImmutableArray<IDocument> childOutputs);
     }
 }

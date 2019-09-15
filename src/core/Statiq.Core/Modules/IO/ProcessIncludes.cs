@@ -40,7 +40,7 @@ namespace Statiq.Core
             return this;
         }
 
-        protected override async Task<IEnumerable<IDocument>> ExecuteAsync(IDocument input, IExecutionContext context)
+        protected override async Task<IEnumerable<IDocument>> ExecuteInputAsync(IDocument input, IExecutionContext context)
         {
             string content = await ProcessIncludesAsync(await input.GetStringAsync(), input.Source, context);
             return content == null ? input.Yield() : input.Clone(await context.GetContentProviderAsync(content)).Yield();

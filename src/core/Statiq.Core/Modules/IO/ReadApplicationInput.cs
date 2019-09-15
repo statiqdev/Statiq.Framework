@@ -16,7 +16,7 @@ namespace Statiq.Core
     public class ReadApplicationInput : Module
     {
         /// <inheritdoc />
-        public override async Task<IEnumerable<IDocument>> ExecuteAsync(IExecutionContext context)
+        protected override async Task<IEnumerable<IDocument>> ExecuteContextAsync(IExecutionContext context)
         {
             // If ApplicationInput is empty, return nothing
             if (string.IsNullOrWhiteSpace(context.ApplicationState.Input))

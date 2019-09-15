@@ -57,7 +57,7 @@ namespace Statiq.Html
             _pathFunc = pathFunc ?? throw new ArgumentNullException(nameof(pathFunc));
         }
 
-        public override async Task<IEnumerable<Common.IDocument>> ExecuteAsync(IExecutionContext context)
+        protected override async Task<IEnumerable<Common.IDocument>> ExecuteContextAsync(IExecutionContext context)
         {
 #pragma warning disable RCS1163 // Unused parameter.
             // Handle invalid HTTPS certificates and allow alternate security protocols (see http://stackoverflow.com/a/5670954/807064)

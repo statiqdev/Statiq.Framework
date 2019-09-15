@@ -1,5 +1,6 @@
 # 1.0.0-alpha-2
 
+- Refactored the base module classes to include a before/after execution method, made the execution methods `protected`, and renamed the execution methods for clarity.
 - Added property setters with null checks to `Pipeline` so it works better as a base class and you can define the phase modules directly as properties.
 - Cleaned up `ModuleList` methods to remove overload ambiguity between `params IModule[]` and `IEnumerable<IModule>`.
 - Added an implicit operator from `IModule[]` to `ModuleList`.

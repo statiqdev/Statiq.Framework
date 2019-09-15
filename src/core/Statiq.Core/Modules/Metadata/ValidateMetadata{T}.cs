@@ -87,7 +87,7 @@ namespace Statiq.Core
         }
 
         /// <inheritdoc />
-        public override Task<IEnumerable<IDocument>> ExecuteAsync(IExecutionContext context)
+        protected override Task<IEnumerable<IDocument>> ExecuteContextAsync(IExecutionContext context)
         {
             Parallel.ForEach(context.Inputs, input =>
             {

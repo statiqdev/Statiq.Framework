@@ -82,7 +82,7 @@ namespace Statiq.Core
             return null;
         }
 
-        protected override Task<IEnumerable<IDocument>> ExecuteAsync(IDocument input, IExecutionContext context, FilePath value) =>
+        protected override Task<IEnumerable<IDocument>> ExecuteConfigAsync(IDocument input, IExecutionContext context, FilePath value) =>
             Task.FromResult(value == null ? input.Yield() : input.Clone(value).Yield());
     }
 }

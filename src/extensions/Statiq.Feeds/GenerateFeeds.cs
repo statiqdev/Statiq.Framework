@@ -394,7 +394,7 @@ namespace Statiq.Feeds
         }
 
         /// <inheritdoc />
-        public override async Task<IEnumerable<IDocument>> ExecuteAsync(IExecutionContext context)
+        protected override async Task<IEnumerable<IDocument>> ExecuteContextAsync(IExecutionContext context)
         {
             // Get the feed
             Feed feed = new Feed

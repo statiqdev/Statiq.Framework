@@ -51,7 +51,7 @@ namespace Statiq.Core
         /// Returns a single document containing the concatenated content of all input documents with an optional delimiter and configurable metadata options
         /// </summary>
         /// <returns>A single document in a list</returns>
-        public override async Task<IEnumerable<IDocument>> ExecuteAsync(IExecutionContext context)
+        protected override async Task<IEnumerable<IDocument>> ExecuteContextAsync(IExecutionContext context)
         {
             if (context.Inputs.Length < 1)
             {

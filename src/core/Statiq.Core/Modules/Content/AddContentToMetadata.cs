@@ -38,7 +38,7 @@ namespace Statiq.Core
             _key = key ?? throw new ArgumentNullException(nameof(key));
         }
 
-        protected override async Task<IEnumerable<IDocument>> ExecuteAsync(
+        protected override async Task<IEnumerable<IDocument>> ExecuteChildrenAsync(
             IExecutionContext context,
             ImmutableArray<IDocument> childOutputs)
         {

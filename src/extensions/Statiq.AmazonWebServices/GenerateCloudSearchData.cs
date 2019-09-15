@@ -70,7 +70,7 @@ namespace Statiq.AmazonWebServices
         }
 
         /// <inheritdoc />
-        public override async Task<IEnumerable<IDocument>> ExecuteAsync(IExecutionContext context)
+        protected override async Task<IEnumerable<IDocument>> ExecuteContextAsync(IExecutionContext context)
         {
             Stream contentStream = await context.GetContentStreamAsync();
             using (TextWriter textWriter = new StreamWriter(contentStream))

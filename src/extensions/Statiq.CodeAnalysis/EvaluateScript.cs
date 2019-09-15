@@ -13,7 +13,7 @@ namespace Statiq.CodeAnalysis
     /// <category>Extensibility</category>
     public class EvaluateScript : ParallelModule
     {
-        protected override async Task<IEnumerable<IDocument>> ExecuteAsync(IDocument input, IExecutionContext context)
+        protected override async Task<IEnumerable<IDocument>> ExecuteInputAsync(IDocument input, IExecutionContext context)
         {
             // Get the assembly
             byte[] assembly = input.GetBool(CompileScript.CompiledKey)

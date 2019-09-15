@@ -39,7 +39,7 @@ namespace Statiq.Core
         private void ResetCache() => _cache = null;
 
         /// <inheritdoc />
-        public override async Task<IEnumerable<IDocument>> ExecuteAsync(IExecutionContext context)
+        protected override async Task<IEnumerable<IDocument>> ExecuteContextAsync(IExecutionContext context)
         {
             // If we're disabling the cache, clear any existing entries and just execute children
             if (context.Settings.GetBool(Keys.DisableCache))

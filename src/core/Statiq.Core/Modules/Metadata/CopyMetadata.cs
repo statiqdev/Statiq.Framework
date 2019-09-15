@@ -52,7 +52,7 @@ namespace Statiq.Core
             return this;
         }
 
-        protected override Task<IEnumerable<IDocument>> ExecuteAsync(IDocument input, IExecutionContext context)
+        protected override Task<IEnumerable<IDocument>> ExecuteInputAsync(IDocument input, IExecutionContext context)
         {
             if (input.TryGetValue(_fromKey, out object existingValue))
             {

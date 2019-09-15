@@ -311,7 +311,7 @@ namespace Statiq.Images
             return this;
         }
 
-        protected override IEnumerable<IDocument> Execute(IDocument input, IExecutionContext context)
+        protected override IEnumerable<IDocument> ExecuteInput(IDocument input, IExecutionContext context)
         {
             FilePath relativePath = input.Source.GetRelativeInputPath(context);
             return _operations.SelectMany(operations =>

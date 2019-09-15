@@ -92,7 +92,7 @@ namespace Statiq.GitHub
             return this;
         }
 
-        protected override async Task<IEnumerable<IDocument>> ExecuteAsync(
+        protected override async Task<IEnumerable<IDocument>> ExecuteConfigAsync(
             IDocument input,
             IExecutionContext context,
             Func<GitHubClient, Task<object>> value)

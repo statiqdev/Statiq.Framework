@@ -102,7 +102,7 @@ namespace Statiq.Core
         }
 
         /// <inheritdoc />
-        public override async Task<IEnumerable<IDocument>> ExecuteAsync(IExecutionContext context)
+        protected override async Task<IEnumerable<IDocument>> ExecuteContextAsync(IExecutionContext context)
         {
             List<WebResponse> responses = _cachedResponses;
             if (responses == null)

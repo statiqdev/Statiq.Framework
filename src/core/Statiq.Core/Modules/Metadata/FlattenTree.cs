@@ -45,7 +45,7 @@ namespace Statiq.Core
             _childrenKey = childrenKey;
         }
 
-        protected override IEnumerable<IDocument> Execute(IExecutionContext context)
+        protected override IEnumerable<IDocument> ExecuteContext(IExecutionContext context)
         {
             // Use a stack so we don't overflow the call stack with recursive calls for deep trees
             Stack<IDocument> stack = new Stack<IDocument>(context.Inputs);

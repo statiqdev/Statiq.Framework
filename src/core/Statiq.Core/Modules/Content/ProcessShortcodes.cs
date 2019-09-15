@@ -51,7 +51,7 @@ namespace Statiq.Core
             _endDelimiter = endDelimiter;
         }
 
-        protected override async Task<IEnumerable<IDocument>> ExecuteAsync(IDocument input, IExecutionContext context) =>
+        protected override async Task<IEnumerable<IDocument>> ExecuteInputAsync(IDocument input, IExecutionContext context) =>
             (await ProcessShortcodesAsync(input, context) ?? input).Yield();
 
         // The inputStream will be disposed if this returns a result document but will not otherwise

@@ -22,7 +22,7 @@ namespace Statiq.Testing
         }
 
         /// <inheritdoc />
-        public override async Task<IEnumerable<IDocument>> ExecuteAsync(IExecutionContext context)
+        protected override async Task<IEnumerable<IDocument>> ExecuteContextAsync(IExecutionContext context)
         {
             int sourceCount = 0;
             ExecuteCount++;

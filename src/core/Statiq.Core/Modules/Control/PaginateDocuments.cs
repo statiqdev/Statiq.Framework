@@ -69,7 +69,7 @@ namespace Statiq.Core
         }
 
         /// <inheritdoc />
-        protected override IEnumerable<IDocument> Execute(IExecutionContext context)
+        protected override IEnumerable<IDocument> ExecuteContext(IExecutionContext context)
         {
             // Partition the pages and get a total before skip/take
             IDocument[][] pages =

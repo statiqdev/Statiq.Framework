@@ -99,7 +99,7 @@ namespace Statiq.Core
         }
 
         /// <inheritdoc />
-        public override async Task<IEnumerable<IDocument>> ExecuteAsync(IExecutionContext context)
+        protected override async Task<IEnumerable<IDocument>> ExecuteContextAsync(IExecutionContext context)
         {
             // Iterate redirects and generate all of the per-redirect documents (I.e., meta refresh pages)
             ConcurrentDictionary<FilePath, string> redirects = new ConcurrentDictionary<FilePath, string>();

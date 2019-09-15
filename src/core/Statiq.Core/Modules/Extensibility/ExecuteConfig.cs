@@ -46,7 +46,7 @@ namespace Statiq.Core
         {
         }
 
-        protected override Task<IEnumerable<IDocument>> ExecuteAsync(IDocument input, IExecutionContext context, object value)
+        protected override Task<IEnumerable<IDocument>> ExecuteConfigAsync(IDocument input, IExecutionContext context, object value)
         {
             IEnumerable<IDocument> inputs = context.Inputs;
             if (input != null)

@@ -38,7 +38,7 @@ namespace Statiq.Core
         }
 
         /// <inheritdoc />
-        protected override IEnumerable<IDocument> Execute(IExecutionContext context)
+        protected override IEnumerable<IDocument> ExecuteContext(IExecutionContext context)
         {
             DocumentFileProvider fileProvider = new DocumentFileProvider(context.Inputs);
             IEnumerable<IDirectory> directories = context.FileSystem

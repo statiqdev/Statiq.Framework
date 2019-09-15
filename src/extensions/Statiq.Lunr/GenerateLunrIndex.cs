@@ -160,7 +160,7 @@ namespace Statiq.SearchIndex
         }
 
         /// <inheritdoc />
-        public override async Task<IEnumerable<IDocument>> ExecuteAsync(IExecutionContext context)
+        protected override async Task<IEnumerable<IDocument>> ExecuteContextAsync(IExecutionContext context)
         {
             ILunrIndexItem[] searchIndexItems =
                 await context.Inputs

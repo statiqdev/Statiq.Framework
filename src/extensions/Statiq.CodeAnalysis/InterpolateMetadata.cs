@@ -19,7 +19,7 @@ namespace Statiq.CodeAnalysis
     /// <category>Metadata</category>
     public class InterpolateMetadata : ParallelSyncModule
     {
-        protected override IEnumerable<IDocument> Execute(IDocument input, IExecutionContext context)
+        protected override IEnumerable<IDocument> ExecuteInput(IDocument input, IExecutionContext context)
         {
             MetadataItems interpolatedValues = null;
 

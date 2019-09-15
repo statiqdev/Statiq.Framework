@@ -56,7 +56,7 @@ namespace Statiq.Core
             return this;
         }
 
-        protected override Task<IEnumerable<IDocument>> ExecuteAsync(IDocument input, IExecutionContext context, object value) =>
+        protected override Task<IEnumerable<IDocument>> ExecuteConfigAsync(IDocument input, IExecutionContext context, object value) =>
             Task.FromResult(
                 (_onlyIfNonExisting && input.ContainsKey(_key)) || (_ignoreNull && value == null)
                     ? input.Yield()

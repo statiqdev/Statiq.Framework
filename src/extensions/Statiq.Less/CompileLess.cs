@@ -47,7 +47,7 @@ namespace Statiq.Less
         }
 
         /// <inheritdoc />
-        public override Task<IEnumerable<IDocument>> ExecuteAsync(IExecutionContext context)
+        protected override Task<IEnumerable<IDocument>> ExecuteContextAsync(IExecutionContext context)
         {
             DotlessConfiguration config = DotlessConfiguration.GetDefault();
 

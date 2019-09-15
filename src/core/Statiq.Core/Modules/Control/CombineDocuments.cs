@@ -19,7 +19,7 @@ namespace Statiq.Core
     public class CombineDocuments : Module
     {
         /// <inheritdoc />
-        public override async Task<IEnumerable<IDocument>> ExecuteAsync(IExecutionContext context)
+        protected override async Task<IEnumerable<IDocument>> ExecuteContextAsync(IExecutionContext context)
         {
             IDocument result = null;
             foreach (IDocument input in context.Inputs)

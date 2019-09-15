@@ -126,7 +126,7 @@ namespace Statiq.Razor
         }
 
         /// <inheritdoc />
-        public override async Task<IEnumerable<IDocument>> ExecuteAsync(IExecutionContext context)
+        protected override async Task<IEnumerable<IDocument>> ExecuteContextAsync(IExecutionContext context)
         {
             // Expire the internal Razor cache if this is a new execution
             // This needs to be done so that layouts/partials can be re-rendered if they've changed,

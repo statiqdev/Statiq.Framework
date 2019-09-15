@@ -90,7 +90,7 @@ namespace Statiq.CodeAnalysis
             return result;
         }
 
-        protected override IEnumerable<IDocument> Execute(IDocument input, IExecutionContext context, FilePath value)
+        protected override IEnumerable<IDocument> ExecuteConfig(IDocument input, IExecutionContext context, FilePath value)
         {
             if (value != null)
             {

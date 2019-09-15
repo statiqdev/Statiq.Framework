@@ -37,7 +37,7 @@ namespace Statiq.Core
             _key = key ?? throw new ArgumentNullException(nameof(key));
         }
 
-        protected override IEnumerable<IDocument> Execute(
+        protected override IEnumerable<IDocument> ExecuteChildren(
             IExecutionContext context,
             ImmutableArray<IDocument> childOutputs) =>
             childOutputs.Length == 0

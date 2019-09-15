@@ -96,7 +96,7 @@ namespace Statiq.Core
                     .ToListAsync(ctx.CancellationToken));
         }
 
-        public override async Task<IEnumerable<IDocument>> ExecuteAsync(IExecutionContext context) =>
+        protected override async Task<IEnumerable<IDocument>> ExecuteContextAsync(IExecutionContext context) =>
             _documents.RequiresDocument
                 ? await context.Inputs
                     .ToAsyncEnumerable()

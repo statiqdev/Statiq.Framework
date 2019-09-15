@@ -39,7 +39,7 @@ namespace Statiq.Core
             _logLevel = logLevel;
         }
 
-        protected override IEnumerable<IDocument> Execute(IDocument input, IExecutionContext context, string value)
+        protected override IEnumerable<IDocument> ExecuteConfig(IDocument input, IExecutionContext context, string value)
         {
             context.Log(_logLevel, value);
             return input == null ? context.Inputs : input.Yield();

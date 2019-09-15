@@ -46,7 +46,7 @@ namespace Statiq.Json
             _flatten = flatten;
         }
 
-        protected override IEnumerable<IDocument> Execute(IDocument input, IExecutionContext context)
+        protected override IEnumerable<IDocument> ExecuteInput(IDocument input, IExecutionContext context)
         {
             try
             {

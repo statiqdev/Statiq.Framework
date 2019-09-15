@@ -47,7 +47,7 @@ namespace Statiq.Yaml
             _flatten = flatten;
         }
 
-        protected override IEnumerable<IDocument> Execute(IDocument input, IExecutionContext context)
+        protected override IEnumerable<IDocument> ExecuteInput(IDocument input, IExecutionContext context)
         {
             List<Dictionary<string, object>> documentMetadata = new List<Dictionary<string, object>>();
             using (TextReader contentReader = new StreamReader(input.GetStream()))

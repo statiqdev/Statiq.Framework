@@ -199,7 +199,7 @@ namespace Statiq.Html
             return $"&#{(int)c};";
         }
 
-        protected override async Task<IEnumerable<IDocument>> ExecuteAsync(IDocument input, IExecutionContext context)
+        protected override async Task<IEnumerable<IDocument>> ExecuteInputAsync(IDocument input, IExecutionContext context)
         {
             string oldContent = await input.GetStringAsync();
             StringWriter outputString = new StringWriter();

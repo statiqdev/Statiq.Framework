@@ -84,7 +84,7 @@ namespace Statiq.Core
         }
 
         /// <inheritdoc />
-        public override async Task<IEnumerable<IDocument>> ExecuteAsync(IExecutionContext context)
+        protected override async Task<IEnumerable<IDocument>> ExecuteContextAsync(IExecutionContext context)
         {
             // Find metadata files
             ILookup<DirectoryPath, MetaInfo> lookup = await context.Inputs

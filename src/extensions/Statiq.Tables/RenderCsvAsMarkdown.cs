@@ -37,7 +37,7 @@ namespace Statiq.Tables
             return this;
         }
 
-        protected override async Task<IEnumerable<IDocument>> ExecuteAsync(IDocument input, IExecutionContext context)
+        protected override async Task<IEnumerable<IDocument>> ExecuteInputAsync(IDocument input, IExecutionContext context)
         {
             IEnumerable<IEnumerable<string>> records;
             using (Stream stream = input.GetStream())

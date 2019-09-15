@@ -14,7 +14,7 @@ namespace Statiq.Core
     /// <category>Control</category>
     public class ClearDocuments : Module
     {
-        public override Task<IEnumerable<IDocument>> ExecuteAsync(IExecutionContext context) =>
+        protected override Task<IEnumerable<IDocument>> ExecuteContextAsync(IExecutionContext context) =>
             Task.FromResult<IEnumerable<IDocument>>(null);
     }
 }

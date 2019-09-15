@@ -67,7 +67,7 @@ namespace Statiq.Core
         protected Task<bool> ShouldProcessAsync(IDocument input, IExecutionContext context) => _predicate.GetValueAsync(input, context);
 
         /// <inheritdoc />
-        public override async Task<IEnumerable<IDocument>> ExecuteAsync(IExecutionContext context)
+        protected override async Task<IEnumerable<IDocument>> ExecuteContextAsync(IExecutionContext context)
         {
             // Get the output file path for each file in sequence and set up action chains
             // Value = input source string(s) (for reporting a warning if not appending), write action

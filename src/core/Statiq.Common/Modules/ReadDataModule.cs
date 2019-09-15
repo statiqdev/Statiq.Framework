@@ -90,7 +90,7 @@ namespace Statiq.Common
         }
 
         /// <inheritdoc />
-        public override async Task<IEnumerable<IDocument>> ExecuteAsync(IExecutionContext context)
+        protected override async Task<IEnumerable<IDocument>> ExecuteContextAsync(IExecutionContext context)
         {
             IEnumerable<TItem> items = GetItems(context);
             return items == null
@@ -132,6 +132,11 @@ namespace Statiq.Common
                 return context.CreateDocument(meta, await context.GetContentProviderAsync(content));
             }
         }
+
+        /// <inheritdoc />
+        // Unused, prevent overriding in derived classes
+        protected sealed override Task<IEnumerable<IDocument>> ExecuteInputAsync(IDocument input, IExecutionContext context) =>
+            throw new NotSupportedException();
 
         /// <summary>
         /// Gets the items to convert to documents. The <see cref="GetDictionary(TItem)"/> method

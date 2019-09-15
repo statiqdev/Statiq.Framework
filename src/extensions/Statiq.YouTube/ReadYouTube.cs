@@ -82,7 +82,7 @@ namespace Statiq.YouTube
             return this;
         }
 
-        protected override IEnumerable<IDocument> Execute(IDocument input, IExecutionContext context)
+        protected override IEnumerable<IDocument> ExecuteInput(IDocument input, IExecutionContext context)
         {
             ConcurrentDictionary<string, object> results = new ConcurrentDictionary<string, object>();
             System.Threading.Tasks.Parallel.ForEach(_requests, request =>

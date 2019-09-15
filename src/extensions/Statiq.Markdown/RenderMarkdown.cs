@@ -172,7 +172,7 @@ namespace Statiq.Markdown
             return this;
         }
 
-        protected override async Task<IEnumerable<IDocument>> ExecuteAsync(IDocument input, IExecutionContext context)
+        protected override async Task<IEnumerable<IDocument>> ExecuteInputAsync(IDocument input, IExecutionContext context)
         {
             context.LogDebug(
                    "Processing Markdown {0} for {1}",

@@ -180,7 +180,7 @@ namespace Statiq.Html
             return this;
         }
 
-        protected override async Task<IEnumerable<Common.IDocument>> ExecuteAsync(Common.IDocument input, IExecutionContext context)
+        protected override async Task<IEnumerable<Common.IDocument>> ExecuteInputAsync(Common.IDocument input, IExecutionContext context)
         {
             // Parse the HTML content
             IHtmlDocument htmlDocument = await input.ParseHtmlAsync(context, HtmlParser);
