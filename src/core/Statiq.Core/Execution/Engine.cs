@@ -49,25 +49,48 @@ namespace Statiq.Core
         private bool _disposed;
 
         /// <summary>
-        /// Creates the engine with a new logger factory.
+        /// Creates an engine.
         /// </summary>
         public Engine()
-            : this(null)
+            : this(null, null)
         {
         }
 
         /// <summary>
-        /// Creates the engine with the specified service provider.
+        /// Creates an engine with the specified application state .
         /// </summary>
-        /// <param name="serviceCollection">The service collection.</param>
-        public Engine(IServiceCollection serviceCollection)
+        /// <param name="applicationState">The state of the application (or <c>null</c> for an empty application state).</param>
+        public Engine(ApplicationState applicationState)
+            : this(applicationState, null)
         {
+        }
+
+        /// <summary>
+        /// Creates an engine with the specified service provider.
+        /// </summary>
+        /// <param name="serviceCollection">The service collection (or <c>null</c> for an empty default service collection).</param>
+        public Engine(IServiceCollection serviceCollection)
+            : this(null, serviceCollection)
+        {
+        }
+
+        /// <summary>
+        /// Creates an engine with the specified application state and service provider.
+        /// </summary>
+        /// <param name="applicationState">The state of the application (or <c>null</c> for an empty application state).</param>
+        /// <param name="serviceCollection">The service collection (or <c>null</c> for an empty default service collection).</param>
+        public Engine(ApplicationState applicationState, IServiceCollection serviceCollection)
+        {
+            ApplicationState = applicationState ?? new ApplicationState(null, null, null);
             Services = GetServiceProvider(serviceCollection);
             _logger = Services.GetRequiredService<ILogger<Engine>>();
             DocumentFactory = new DocumentFactory(_settings);
             _diagnosticsTraceListener = new DiagnosticsTraceListener(_logger);
             System.Diagnostics.Trace.Listeners.Add(_diagnosticsTraceListener);
         }
+
+        /// <inheritdoc />
+        public ApplicationState ApplicationState { get; }
 
         private IServiceProvider GetServiceProvider(IServiceCollection serviceCollection)
         {
@@ -105,9 +128,6 @@ namespace Statiq.Core
 
         /// <inheritdoc />
         public IMemoryStreamFactory MemoryStreamFactory { get; } = new MemoryStreamFactory();
-
-        /// <inheritdoc />
-        public ApplicationState ApplicationState { get; } = new ApplicationState();
 
         internal ConcurrentDictionary<string, ImmutableArray<IDocument>> Documents { get; }
             = new ConcurrentDictionary<string, ImmutableArray<IDocument>>(StringComparer.OrdinalIgnoreCase);

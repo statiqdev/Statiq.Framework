@@ -16,13 +16,35 @@ namespace Statiq.App
     {
         private readonly ILogger _logger;
 
-        public EngineManager(IServiceCollection serviceCollection, IBootstrapper bootstrapper, BuildCommand.Settings commandSettings)
+        public EngineManager(
+            IServiceCollection serviceCollection,
+            IBootstrapper bootstrapper,
+            ICommand command,
+            BuildCommand.Settings commandSettings)
         {
-            Engine = new Engine(serviceCollection);
-            _logger = Engine.Services.GetRequiredService<ILogger<Bootstrapper>>();
+            // Get the standard input stream
+            string input = null;
+            if (commandSettings.StdIn)
+            {
+                using (StreamReader reader = new StreamReader(Console.OpenStandardInput(), Console.InputEncoding))
+                {
+                    input = reader.ReadToEnd();
+                }
+            }
 
-            // Record the arguments
-            Engine.ApplicationState.Arguments = bootstrapper.Arguments;
+            // Create the application state
+            if (!bootstrapper.CommandNames.TryGetValue(command.GetType(), out string commandName))
+            {
+                commandName = null;
+            }
+            ApplicationState applicationState = new ApplicationState(
+                bootstrapper.Arguments,
+                commandName,
+                input);
+
+            // Create the engine and get a logger
+            Engine = new Engine(applicationState, serviceCollection);
+            _logger = Engine.Services.GetRequiredService<ILogger<Bootstrapper>>();
 
             // Apply settings
             bootstrapper.Configurators.Configure(Engine.Settings);
@@ -87,15 +109,6 @@ namespace Statiq.App
             if (commandSettings.NoCache)
             {
                 engine.Settings[Keys.UseCache] = false;
-            }
-
-            // Get the standard input stream
-            if (commandSettings.StdIn)
-            {
-                using (StreamReader reader = new StreamReader(Console.OpenStandardInput(), Console.InputEncoding))
-                {
-                    engine.ApplicationState.Input = reader.ReadToEnd();
-                }
             }
 
             // Add settings

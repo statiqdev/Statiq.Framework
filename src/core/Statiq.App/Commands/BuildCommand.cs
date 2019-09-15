@@ -54,7 +54,7 @@ namespace Statiq.App
         public override async Task<int> ExecuteCommandAsync(CommandContext context, Settings settings)
         {
             CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
-            using (EngineManager engineManager = new EngineManager(_serviceCollection, _bootstrapper, settings))
+            using (EngineManager engineManager = new EngineManager(_serviceCollection, _bootstrapper, this, settings))
             {
                 return await engineManager.ExecuteAsync(cancellationTokenSource)
                     ? (int)ExitCode.Normal

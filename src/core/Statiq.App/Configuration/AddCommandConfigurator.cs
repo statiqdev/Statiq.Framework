@@ -17,6 +17,6 @@ namespace Statiq.App
         }
 
         public void Configure(ConfigurableCommands configurableCommands) =>
-            configurableCommands.CommandConfigurator.AddCommand<TCommand>(_name);
+            configurableCommands.AddCommand<TCommand>(_name);
     }
 }

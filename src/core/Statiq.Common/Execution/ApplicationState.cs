@@ -8,16 +8,20 @@ namespace Statiq.Common
     /// </summary>
     public class ApplicationState : IReadOnlyApplicationState
     {
-        private string[] _arguments = new string[0];
-
-        /// <inheritdoc />
-        public string[] Arguments
+        public ApplicationState(string[] arguments, string commandName, string input)
         {
-            get => _arguments;
-            set => _arguments = value ?? throw new ArgumentNullException(nameof(value));
+            Arguments = arguments ?? new string[] { };
+            CommandName = commandName;
+            Input = input;
         }
 
         /// <inheritdoc />
-        public string Input { get; set; }
+        public string[] Arguments { get; }
+
+        /// <inheritdoc />
+        public string CommandName { get; }
+
+        /// <inheritdoc />
+        public string Input { get; }
     }
 }

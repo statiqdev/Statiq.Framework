@@ -15,6 +15,8 @@ namespace Statiq.App
     {
         private readonly ClassCatalog _classCatalog = new ClassCatalog();
 
+        private readonly Dictionary<Type, string> _commandNames = new Dictionary<Type, string>();
+
         private Func<CommandServiceTypeRegistrar, ICommandApp> _getCommandApp = x => new CommandApp(x);
 
         // Private constructor to force factory use which returns the interface to get access to default interface implementations
@@ -31,6 +33,9 @@ namespace Statiq.App
 
         /// <inheritdoc/>
         public string[] Arguments { get; }
+
+        /// <inheritdoc/>
+        public IReadOnlyDictionary<Type, string> CommandNames => _commandNames;
 
         /// <inheritdoc/>
         public IBootstrapper SetDefaultCommand<TCommand>()
@@ -76,7 +81,7 @@ namespace Statiq.App
             app.Configure(x =>
             {
                 x.ValidateExamples();
-                ConfigurableCommands configurableCommands = new ConfigurableCommands(x);
+                ConfigurableCommands configurableCommands = new ConfigurableCommands(x, _commandNames);
                 Configurators.Configure(configurableCommands);
             });
             return await app.RunAsync(Arguments);

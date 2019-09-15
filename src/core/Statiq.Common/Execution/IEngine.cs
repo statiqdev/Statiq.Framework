@@ -9,6 +9,11 @@ namespace Statiq.Common
     public interface IEngine : IConfigurable, IDocumentFactory
     {
         /// <summary>
+        /// Gets the state of the application when it was run.
+        /// </summary>
+        ApplicationState ApplicationState { get; }
+
+        /// <summary>
         /// Gets the dependency injection service provider.
         /// </summary>
         IServiceProvider Services { get; }
@@ -48,11 +53,6 @@ namespace Statiq.Common
         /// Provides pooled memory streams (via the RecyclableMemoryStream library).
         /// </summary>
         IMemoryStreamFactory MemoryStreamFactory { get; }
-
-        /// <summary>
-        /// Gets the state of the application when it was run.
-        /// </summary>
-        ApplicationState ApplicationState { get; }
 
         /// <summary>
         /// Sets the default document type produced by this engine (and resulting <see cref="IExecutionContext"/> contexts).
