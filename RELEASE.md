@@ -1,5 +1,6 @@
 # 1.0.0-alpha-2
 
+- The engine now returns a `IPipelineOutputs` with the result documents from each pipeline.
 - Adds global events `BeforeModuleExecution` and `AfterModuleExecution` with ability to override outputs.
 - Adds a new global event mechanism via `IEventCollection`, `IReadOnlyEventCollection`, `IEngine.Events`, and `IExecutionContext.Events`.
 - Refactored the base module classes to include a before/after execution method, made the execution methods `protected`, and renamed the execution methods for clarity.

@@ -13,9 +13,9 @@ namespace Statiq.Common
         public void Subscribe<TEventArgs>(EventHandler<TEventArgs> handler)
         {
             _ = handler ?? throw new ArgumentNullException(nameof(handler));
-            Subscribe((AsyncEventHandler<TEventArgs>)((sender, args) =>
+            Subscribe((AsyncEventHandler<TEventArgs>)(args =>
             {
-                handler.Invoke(sender, args);
+                handler(args);
                 return Task.CompletedTask;
             }));
         }

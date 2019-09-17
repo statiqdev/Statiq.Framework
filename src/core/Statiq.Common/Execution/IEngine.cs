@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Collections.Immutable;
 using Microsoft.Extensions.Logging;
 
 namespace Statiq.Common

@@ -18,15 +18,15 @@ namespace Statiq.Common
         /// <summary>
         /// Gets documents from a specific pipeline.
         /// </summary>
-        /// <param name="pipeline">The pipeline.</param>
+        /// <param name="pipelineName">The pipeline.</param>
         /// <returns>The documents output by the specified pipeline.</returns>
-        ImmutableArray<IDocument> FromPipeline(string pipeline);
+        ImmutableArray<IDocument> FromPipeline(string pipelineName);
 
         /// <summary>
         /// Gets all documents output by every pipeline except those from the specified pipeline.
         /// </summary>
-        /// <param name="pipeline">The pipeline.</param>
+        /// <param name="pipelineName">The pipeline.</param>
         /// <returns>All documents output by every pipeline except the specified one.</returns>
-        IEnumerable<IDocument> ExceptPipeline(string pipeline);
+        IEnumerable<IDocument> ExceptPipeline(string pipelineName);
     }
 }

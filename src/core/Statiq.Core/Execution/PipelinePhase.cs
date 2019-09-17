@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Threading;
@@ -56,6 +57,7 @@ namespace Statiq.Core
         public async Task ExecuteAsync(
             Engine engine,
             Guid executionId,
+            ConcurrentDictionary<string, PhaseResult[]> phaseResults,
             CancellationTokenSource cancellationTokenSource)
         {
             if (_disposed)
@@ -63,6 +65,7 @@ namespace Statiq.Core
                 throw new ObjectDisposedException(nameof(PipelinePhase));
             }
 
+            // Skip the phase if there are no modules
             if (_modules.Count == 0)
             {
                 _logger.LogDebug($"Pipeline {PipelineName}/{Phase} contains no modules, skipping");
@@ -70,6 +73,7 @@ namespace Statiq.Core
                 return;
             }
 
+            // Execute the phase
             System.Diagnostics.Stopwatch pipelineStopwatch = System.Diagnostics.Stopwatch.StartNew();
             _logger.LogDebug($"Executing pipeline {PipelineName}/{Phase} with {_modules.Count} module(s)");
             try
@@ -78,7 +82,7 @@ namespace Statiq.Core
                 IServiceScopeFactory serviceScopeFactory = engine.Services.GetRequiredService<IServiceScopeFactory>();
                 using (IServiceScope serviceScope = serviceScopeFactory.CreateScope())
                 {
-                    ExecutionContextData contextData = new ExecutionContextData(engine, executionId, this, serviceScope.ServiceProvider, cancellationTokenSource.Token);
+                    ExecutionContextData contextData = new ExecutionContextData(this, engine, executionId, phaseResults, serviceScope.ServiceProvider, cancellationTokenSource.Token);
                     Outputs = await Engine.ExecuteModulesAsync(contextData, null, _modules, GetInputs(), _logger);
                     pipelineStopwatch.Stop();
                     _logger.LogInformation($"Executed pipeline {PipelineName}/{Phase} in {pipelineStopwatch.ElapsedMilliseconds} ms resulting in {Outputs.Length} output document(s)");
@@ -94,15 +98,31 @@ namespace Statiq.Core
                 Outputs = ImmutableArray<IDocument>.Empty;
                 throw;
             }
-
-            // Store the result documents, but only if this is the Process phase of a non-isolated pipeline
-            if (!Pipeline.Isolated && Phase == Phase.Process)
+            finally
             {
-                engine.Documents.AddOrUpdate(
-                    PipelineName,
-                    Outputs,
-                    (_, __) => Outputs);
+                pipelineStopwatch.Stop();
             }
+
+            // Record the results
+            PhaseResult phaseResult = new PhaseResult(PipelineName, Phase, Outputs, pipelineStopwatch.ElapsedMilliseconds);
+            phaseResults.AddOrUpdate(
+                phaseResult.PipelineName,
+                _ =>
+                {
+                    PhaseResult[] results = new PhaseResult[4];
+                    results[(int)phaseResult.Phase] = phaseResult;
+                    return results;
+                },
+                (_, results) =>
+                {
+                    if (results[(int)phaseResult.Phase] != null)
+                    {
+                        // Sanity check, we should never hit this
+                        throw new InvalidOperationException($"Results for phase {phaseResult.Phase} have already been added");
+                    }
+                    results[(int)phaseResult.Phase] = phaseResult;
+                    return results;
+                });
         }
 
         public void Dispose()

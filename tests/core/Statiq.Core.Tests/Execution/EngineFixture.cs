@@ -1,4 +1,7 @@
 ﻿using System;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using NUnit.Framework;
@@ -55,6 +58,80 @@ namespace Statiq.Core.Tests.Execution
 
                 // Then
                 fileSystem.ShouldBe(engine.FileSystem);
+            }
+        }
+
+        public class ExecuteTests : EngineFixture
+        {
+            [Test]
+            public async Task ExecutesModule()
+            {
+                // Given
+                Engine engine = new Engine();
+                IPipeline pipeline = engine.Pipelines.Add("TestPipeline");
+                CountModule module = new CountModule("Foo")
+                {
+                    EnsureInputDocument = true
+                };
+                pipeline.ProcessModules.Add(module);
+                CancellationTokenSource cts = new CancellationTokenSource();
+
+                // When
+                IPipelineOutputs outputs = await engine.ExecuteAsync(cts);
+
+                // Then
+                module.ExecuteCount.ShouldBe(1);
+                outputs["TestPipeline"].Select(x => x.GetInt("Foo")).ShouldBe(new int[] { 1 });
+            }
+
+            [Test]
+            public async Task BeforeModuleEventOverriddesOutputs()
+            {
+                // Given
+                Engine engine = new Engine();
+                IPipeline pipeline = engine.Pipelines.Add("TestPipeline");
+                CountModule module = new CountModule("Foo")
+                {
+                    EnsureInputDocument = true
+                };
+                pipeline.ProcessModules.Add(module);
+                CancellationTokenSource cts = new CancellationTokenSource();
+                engine.Events.Subscribe<BeforeModuleExecution>(x => x.OverrideOutputs(new TestDocument()
+                {
+                    { "Foo", 123 }
+                }.Yield()));
+
+                // When
+                IPipelineOutputs outputs = await engine.ExecuteAsync(cts);
+
+                // Then
+                module.ExecuteCount.ShouldBe(0);
+                outputs["TestPipeline"].Select(x => x.GetInt("Foo")).ShouldBe(new int[] { 123 });
+            }
+
+            [Test]
+            public async Task AfterModuleEventOverriddesOutputs()
+            {
+                // Given
+                Engine engine = new Engine();
+                IPipeline pipeline = engine.Pipelines.Add("TestPipeline");
+                CountModule module = new CountModule("Foo")
+                {
+                    EnsureInputDocument = true
+                };
+                pipeline.ProcessModules.Add(module);
+                CancellationTokenSource cts = new CancellationTokenSource();
+                engine.Events.Subscribe<AfterModuleExecution>(x => x.OverrideOutputs(new TestDocument()
+                {
+                    { "Foo", x.Outputs[0].GetInt("Foo") + 123 }
+                }.Yield()));
+
+                // When
+                IPipelineOutputs outputs = await engine.ExecuteAsync(cts);
+
+                // Then
+                module.ExecuteCount.ShouldBe(1);
+                outputs["TestPipeline"].Select(x => x.GetInt("Foo")).ShouldBe(new int[] { 124 });
             }
         }
     }

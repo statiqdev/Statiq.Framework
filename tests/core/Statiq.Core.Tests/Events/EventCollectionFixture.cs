@@ -17,7 +17,7 @@ namespace Statiq.Core.Tests.Events
             {
                 // Given
                 IEventCollection eventCollection = new EventCollection();
-                eventCollection.Subscribe<TestEventArgs>(async (sender, args) =>
+                eventCollection.Subscribe<TestEventArgs>(async args =>
                 {
                     args.Foo = 4;
                     await Task.CompletedTask;
@@ -25,7 +25,7 @@ namespace Statiq.Core.Tests.Events
                 TestEventArgs args = new TestEventArgs { Foo = 1 };
 
                 // When
-                await eventCollection.RaiseAsync(null, args);
+                await eventCollection.RaiseAsync(args);
 
                 // Then
                 args.Foo.ShouldBe(4);
@@ -36,14 +36,14 @@ namespace Statiq.Core.Tests.Events
             {
                 // Given
                 IEventCollection eventCollection = new EventCollection();
-                eventCollection.Subscribe<TestEventArgs>((sender, args) =>
+                eventCollection.Subscribe<TestEventArgs>(args =>
                 {
                     args.Foo = 4;
                 });
                 TestEventArgs args = new TestEventArgs { Foo = 1 };
 
                 // When
-                await eventCollection.RaiseAsync(null, args);
+                await eventCollection.RaiseAsync(args);
 
                 // Then
                 args.Foo.ShouldBe(4);
@@ -54,24 +54,24 @@ namespace Statiq.Core.Tests.Events
             {
                 // Given
                 IEventCollection eventCollection = new EventCollection();
-                eventCollection.Subscribe<TestEventArgs>(async (sender, args) =>
+                eventCollection.Subscribe<TestEventArgs>(async args =>
                 {
                     args.Foo++;
                     await Task.CompletedTask;
                 });
-                eventCollection.Subscribe<TestEventArgs>(async (sender, args) =>
+                eventCollection.Subscribe<TestEventArgs>(async args =>
                 {
                     args.Foo++;
                     await Task.CompletedTask;
                 });
-                eventCollection.Subscribe<TestEventArgs>((sender, args) =>
+                eventCollection.Subscribe<TestEventArgs>(args =>
                 {
                     args.Foo++;
                 });
                 TestEventArgs args = new TestEventArgs { Foo = 3 };
 
                 // When
-                await eventCollection.RaiseAsync(null, args);
+                await eventCollection.RaiseAsync(args);
 
                 // Then
                 args.Foo.ShouldBe(6);

@@ -35,14 +35,14 @@ namespace Statiq.Core
                 });
 
         /// <inheritdoc />
-        public async Task<bool> RaiseAsync<TArgs>(object sender, TArgs args)
+        public async Task<bool> RaiseAsync<TArgs>(TArgs args)
         {
             _ = args ?? throw new ArgumentNullException(nameof(args));
             if (_events.TryGetValue(typeof(TArgs), out List<Delegate> handlers))
             {
                 foreach (Delegate handler in handlers)
                 {
-                    await ((AsyncEventHandler<TArgs>)handler)(sender, args);
+                    await ((AsyncEventHandler<TArgs>)handler)(args);
                 }
                 return true;
             }

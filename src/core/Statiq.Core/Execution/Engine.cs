@@ -37,7 +37,6 @@ namespace Statiq.Core
 
         private readonly PipelineCollection _pipelines = new PipelineCollection();
         private readonly DiagnosticsTraceListener _diagnosticsTraceListener;
-
         private readonly ILogger _logger;
 
         // Gets initialized on first execute
@@ -137,9 +136,6 @@ namespace Statiq.Core
         /// <inheritdoc />
         public IMemoryStreamFactory MemoryStreamFactory { get; } = new MemoryStreamFactory();
 
-        internal ConcurrentDictionary<string, ImmutableArray<IDocument>> Documents { get; }
-            = new ConcurrentDictionary<string, ImmutableArray<IDocument>>(StringComparer.OrdinalIgnoreCase);
-
         internal DocumentFactory DocumentFactory { get; }
 
         /// <inheritdoc />
@@ -220,20 +216,24 @@ namespace Statiq.Core
         /// <summary>
         /// Executes the engine. This is the primary method that kicks off generation.
         /// </summary>
-        public async Task ExecuteAsync(CancellationTokenSource cancellationTokenSource)
+        public async Task<IPipelineOutputs> ExecuteAsync(CancellationTokenSource cancellationTokenSource)
         {
-            // Remove the synchronization context
+            // Setup
             await default(SynchronizationContextRemover);
-
             CheckDisposed();
-
+            Guid executionId = Guid.NewGuid();
+            System.Diagnostics.Stopwatch engineStopwatch = System.Diagnostics.Stopwatch.StartNew();
+            ConcurrentDictionary<string, PhaseResult[]> phaseResults =
+                new ConcurrentDictionary<string, PhaseResult[]>(StringComparer.OrdinalIgnoreCase);
+            PipelineOutputs outputs = new PipelineOutputs(phaseResults);
+            _logger.LogInformation($"Executing {_pipelines.Count} pipelines (execution ID {executionId})");
             _logger.LogInformation($"Using {JsEngineSwitcher.Current.DefaultEngineName} as the JavaScript engine");
 
             // Make sure we've actually configured some pipelines
             if (_pipelines.Count == 0)
             {
                 _logger.LogWarning("No pipelines are configured.");
-                return;
+                return outputs;
             }
 
             // Do a check for the same input/output path
@@ -256,20 +256,12 @@ namespace Statiq.Core
                 _phases = GetPipelinePhases(_pipelines, _logger);
             }
 
-            // Start the timer
-            Guid executionId = Guid.NewGuid();
-            System.Diagnostics.Stopwatch engineStopwatch = System.Diagnostics.Stopwatch.StartNew();
-            _logger.LogInformation($"Executing {_pipelines.Count} pipelines (execution ID {executionId})");
-
-            // Setup (clear the document collection)
-            Documents.Clear();
-
             // Get phase tasks
             Task[] phaseTasks = null;
             try
             {
                 // Get and execute all phases
-                phaseTasks = GetPhaseTasks(executionId, cancellationTokenSource);
+                phaseTasks = GetPhaseTasks(executionId, phaseResults, cancellationTokenSource);
                 await Task.WhenAll(phaseTasks);
             }
             catch (Exception ex)
@@ -280,9 +272,12 @@ namespace Statiq.Core
                 }
             }
 
-            // Stop the timer
+            // TODO: Log execution summary table
+
+            // Clean up
             engineStopwatch.Stop();
             _logger.LogInformation($"Finished execution in {engineStopwatch.ElapsedMilliseconds} ms");
+            return outputs;
         }
 
         // The result array is sorted based on dependencies
@@ -367,22 +362,30 @@ namespace Statiq.Core
             }
         }
 
-        private Task[] GetPhaseTasks(Guid executionId, CancellationTokenSource cancellationTokenSource)
+        private Task[] GetPhaseTasks(
+            Guid executionId,
+            ConcurrentDictionary<string, PhaseResult[]> phaseResults,
+            CancellationTokenSource cancellationTokenSource)
         {
             Dictionary<PipelinePhase, Task> phaseTasks = new Dictionary<PipelinePhase, Task>();
             foreach (PipelinePhase phase in _phases)
             {
-                phaseTasks.Add(phase, GetPhaseTaskAsync(executionId, phaseTasks, phase, cancellationTokenSource));
+                phaseTasks.Add(phase, GetPhaseTaskAsync(executionId, phaseResults, phaseTasks, phase, cancellationTokenSource));
             }
             return phaseTasks.Values.ToArray();
         }
 
-        private Task GetPhaseTaskAsync(Guid executionId, Dictionary<PipelinePhase, Task> phaseTasks, PipelinePhase phase, CancellationTokenSource cancellationTokenSource)
+        private Task GetPhaseTaskAsync(
+            Guid executionId,
+            ConcurrentDictionary<string, PhaseResult[]> phaseResults,
+            Dictionary<PipelinePhase, Task> phaseTasks,
+            PipelinePhase phase,
+            CancellationTokenSource cancellationTokenSource)
         {
             if (phase.Dependencies.Length == 0)
             {
                 // This will immediately queue the input phase while we continue figuring out tasks, but that's okay
-                return Task.Run(() => phase.ExecuteAsync(this, executionId, cancellationTokenSource), cancellationTokenSource.Token);
+                return Task.Run(() => phase.ExecuteAsync(this, executionId, phaseResults, cancellationTokenSource), cancellationTokenSource.Token);
             }
 
             // We have to explicitly wait the execution task in the continuation function
@@ -394,7 +397,7 @@ namespace Statiq.Core
                     // Only run the dependent task if all the dependencies successfully completed
                     if (dependencies.All(x => x.IsCompletedSuccessfully))
                     {
-                        Task.WaitAll(new Task[] { phase.ExecuteAsync(this, executionId, cancellationTokenSource) }, cancellationTokenSource.Token);
+                        Task.WaitAll(new Task[] { phase.ExecuteAsync(this, executionId, phaseResults, cancellationTokenSource) }, cancellationTokenSource.Token);
                     }
                     else
                     {
@@ -428,7 +431,7 @@ namespace Statiq.Core
 
                         // Raise the before event and use overridden results if provided
                         BeforeModuleExecution beforeEvent = new BeforeModuleExecution(moduleContext);
-                        bool raised = await contextData.Engine.Events.RaiseAsync(module, beforeEvent);
+                        bool raised = await contextData.Engine.Events.RaiseAsync(beforeEvent);
                         if (raised && beforeEvent.OverriddenOutputs != null)
                         {
                             outputs = beforeEvent.OverriddenOutputs.ToImmutableDocumentArray();
@@ -442,7 +445,7 @@ namespace Statiq.Core
 
                         // Raise the after event
                         AfterModuleExecution afterEvent = new AfterModuleExecution(moduleContext, outputs);
-                        raised = await contextData.Engine.Events.RaiseAsync(module, afterEvent);
+                        raised = await contextData.Engine.Events.RaiseAsync(afterEvent);
                         if (raised && afterEvent.OverriddenOutputs != null)
                         {
                             outputs = afterEvent.OverriddenOutputs.ToImmutableDocumentArray();

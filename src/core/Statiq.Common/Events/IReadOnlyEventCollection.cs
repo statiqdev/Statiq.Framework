@@ -14,9 +14,8 @@ namespace Statiq.Common
         /// (as indicated by the <typeparamref name="TEventArgs"/> type).
         /// </summary>
         /// <typeparam name="TEventArgs">The type of event arguments to raise an event for.</typeparam>
-        /// <param name="sender">The sender of the event.</param>
         /// <param name="args">The event arguments.</param>
         /// <returns><c>true</c> if registered handlers were found, <c>false</c> otherwise.</returns>
-        Task<bool> RaiseAsync<TEventArgs>(object sender, TEventArgs args);
+        Task<bool> RaiseAsync<TEventArgs>(TEventArgs args);
     }
 }
