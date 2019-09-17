@@ -48,6 +48,11 @@ namespace Statiq.Common
         Phase Phase { get; }
 
         /// <summary>
+        /// Gets global events and event handlers.
+        /// </summary>
+        IReadOnlyEventCollection Events { get; }
+
+        /// <summary>
         /// Gets the current file system.
         /// </summary>
         IReadOnlyFileSystem FileSystem { get; }

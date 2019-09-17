@@ -14,6 +14,11 @@ namespace Statiq.Common
         ApplicationState ApplicationState { get; }
 
         /// <summary>
+        /// Gets global events and event handlers.
+        /// </summary>
+        IEventCollection Events { get; }
+
+        /// <summary>
         /// Gets the dependency injection service provider.
         /// </summary>
         IServiceProvider Services { get; }

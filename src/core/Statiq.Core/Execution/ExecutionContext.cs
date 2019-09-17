@@ -39,6 +39,9 @@ namespace Statiq.Core
         public Phase Phase => _contextData.PipelinePhase.Phase;
 
         /// <inheritdoc/>
+        public IReadOnlyEventCollection Events => _contextData.Engine.Events;
+
+        /// <inheritdoc/>
         public IPipelineOutputs Outputs => _contextData.Outputs;
 
         /// <inheritdoc/>

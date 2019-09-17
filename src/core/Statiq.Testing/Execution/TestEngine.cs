@@ -16,6 +16,12 @@ namespace Statiq.Testing
         }
 
         /// <inheritdoc />
+        public ApplicationState ApplicationState { get; set; }
+
+        /// <inheritdoc />
+        public IEventCollection Events { get; set; } = new TestEventCollection();
+
+        /// <inheritdoc />
         public IServiceProvider Services { get; set; } = new TestServiceProvider();
 
         private readonly TestSettings _settings = new TestSettings();
@@ -30,19 +36,16 @@ namespace Statiq.Testing
         public IMemoryStreamFactory MemoryStreamFactory { get; set; } = new TestMemoryStreamFactory();
 
         /// <inheritdoc />
-        public ApplicationState ApplicationState { get; set; }
-
-        /// <inheritdoc />
         public IPipelineCollection Pipelines => throw new NotImplementedException();
 
         /// <inheritdoc />
         public IShortcodeCollection Shortcodes => new TestShortcodeCollection();
 
         /// <inheritdoc />
-        public INamespacesCollection Namespaces => throw new NotImplementedException();
+        public INamespacesCollection Namespaces { get; set; } = new TestNamespacesCollection();
 
         /// <inheritdoc />
-        public IRawAssemblyCollection DynamicAssemblies => throw new NotImplementedException();
+        public IRawAssemblyCollection DynamicAssemblies { get; set; } = new TestRawAssemblyCollection();
 
         private readonly DocumentFactory _documentFactory;
 

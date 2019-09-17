@@ -35,9 +35,6 @@ namespace Statiq.Core
             }
         }
 
-        private readonly FileSystem _fileSystem = new FileSystem();
-        private readonly Settings _settings = new Settings();
-        private readonly ShortcodeCollection _shortcodes = new ShortcodeCollection();
         private readonly PipelineCollection _pipelines = new PipelineCollection();
         private readonly DiagnosticsTraceListener _diagnosticsTraceListener;
 
@@ -84,18 +81,23 @@ namespace Statiq.Core
             ApplicationState = applicationState ?? new ApplicationState(null, null, null);
             Services = GetServiceProvider(serviceCollection);
             _logger = Services.GetRequiredService<ILogger<Engine>>();
-            DocumentFactory = new DocumentFactory(_settings);
+            DocumentFactory = new DocumentFactory(Settings);
             _diagnosticsTraceListener = new DiagnosticsTraceListener(_logger);
             System.Diagnostics.Trace.Listeners.Add(_diagnosticsTraceListener);
         }
 
-        /// <inheritdoc />
-        public ApplicationState ApplicationState { get; }
-
+        /// <summary>
+        /// Creates a service provider by registering engine
+        /// types to the provided service collection or creating a new one.
+        /// </summary>
+        /// <param name="serviceCollection">The service collection to create a provider for.</param>
+        /// <returns>A built service provider.</returns>
         private IServiceProvider GetServiceProvider(IServiceCollection serviceCollection)
         {
             serviceCollection ??= new ServiceCollection();
             serviceCollection.AddLogging();
+            serviceCollection.AddSingleton<ApplicationState>(ApplicationState);
+            serviceCollection.AddSingleton<IReadOnlyEventCollection>(Events);
             serviceCollection.AddSingleton<IReadOnlyFileSystem>(FileSystem);
             serviceCollection.AddSingleton<IReadOnlySettings>(Settings);
             serviceCollection.AddSingleton<IReadOnlyShortcodeCollection>(Shortcodes);
@@ -109,13 +111,19 @@ namespace Statiq.Core
         public IServiceProvider Services { get; }
 
         /// <inheritdoc />
-        public IFileSystem FileSystem => _fileSystem;
+        public ApplicationState ApplicationState { get; }
 
         /// <inheritdoc />
-        public ISettings Settings => _settings;
+        public IEventCollection Events { get; } = new EventCollection();
 
         /// <inheritdoc />
-        public IShortcodeCollection Shortcodes => _shortcodes;
+        public IFileSystem FileSystem { get; } = new FileSystem();
+
+        /// <inheritdoc />
+        public ISettings Settings { get; } = new Settings();
+
+        /// <inheritdoc />
+        public IShortcodeCollection Shortcodes { get; } = new ShortcodeCollection();
 
         /// <inheritdoc />
         public IPipelineCollection Pipelines => _pipelines;
@@ -413,12 +421,32 @@ namespace Statiq.Core
                         // Check for cancellation
                         contextData.CancellationToken.ThrowIfCancellationRequested();
 
-                        // Execute the module
+                        // Get the context
                         System.Diagnostics.Stopwatch stopwatch = System.Diagnostics.Stopwatch.StartNew();
                         logger.LogDebug("Executing module {0} with {1} input document(s)", moduleName, inputs.Length);
                         ExecutionContext moduleContext = new ExecutionContext(contextData, parent, module, inputs);
-                        IEnumerable<IDocument> moduleResult = await (module.ExecuteAsync(moduleContext) ?? Task.FromResult<IEnumerable<IDocument>>(null));  // Handle a null Task return
-                        outputs = moduleResult.ToImmutableDocumentArray();
+
+                        // Raise the before event and use overridden results if provided
+                        BeforeModuleExecution beforeEvent = new BeforeModuleExecution(moduleContext);
+                        bool raised = await contextData.Engine.Events.RaiseAsync(module, beforeEvent);
+                        if (raised && beforeEvent.OverriddenOutputs != null)
+                        {
+                            outputs = beforeEvent.OverriddenOutputs.ToImmutableDocumentArray();
+                        }
+                        else
+                        {
+                            // Execute the module
+                            IEnumerable<IDocument> moduleResult = await (module.ExecuteAsync(moduleContext) ?? Task.FromResult<IEnumerable<IDocument>>(null));  // Handle a null Task return
+                            outputs = moduleResult.ToImmutableDocumentArray();
+                        }
+
+                        // Raise the after event
+                        AfterModuleExecution afterEvent = new AfterModuleExecution(moduleContext, outputs);
+                        raised = await contextData.Engine.Events.RaiseAsync(module, afterEvent);
+                        if (raised && afterEvent.OverriddenOutputs != null)
+                        {
+                            outputs = afterEvent.OverriddenOutputs.ToImmutableDocumentArray();
+                        }
 
                         // Log results
                         stopwatch.Stop();

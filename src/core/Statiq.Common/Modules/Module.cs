@@ -19,10 +19,10 @@ namespace Statiq.Common
         /// <inheritdoc />
         public async Task<IEnumerable<IDocument>> ExecuteAsync(IExecutionContext context)
         {
-            IDisposable disposable = await BeforeExecuteAsync(context);
+            IDisposable disposable = await BeforeExecutionAsync(context);
             try
             {
-                return await AfterExecuteAsync(context, await ExecuteContextAsync(context));
+                return await AfterExecutionAsync(context, await ExecuteContextAsync(context));
             }
             finally
             {
@@ -35,7 +35,7 @@ namespace Statiq.Common
         /// </summary>
         /// <param name="context">The execution context.</param>
         /// <returns>A disposable that is guaranteed to be disposed when the module finishes the current execution cycle (or <c>null</c>).</returns>
-        protected virtual Task<IDisposable> BeforeExecuteAsync(IExecutionContext context) => Task.FromResult((IDisposable)null);
+        protected virtual Task<IDisposable> BeforeExecutionAsync(IExecutionContext context) => Task.FromResult((IDisposable)null);
 
         /// <summary>
         /// Called after the current module execution cycle and is typically used for cleaning up module state
@@ -43,12 +43,12 @@ namespace Statiq.Common
         /// </summary>
         /// <remarks>
         /// If an exception is thrown during module execution, this method is never called. Return an <see cref="IDisposable"/>
-        /// from <see cref="BeforeExecuteAsync(IExecutionContext)"/> if resources should be disposed even if an exception is thrown.
+        /// from <see cref="BeforeExecutionAsync(IExecutionContext)"/> if resources should be disposed even if an exception is thrown.
         /// </remarks>
         /// <param name="context">The execution context.</param>
         /// <param name="results">The results of module execution.</param>
         /// <returns>The final module results.</returns>
-        protected virtual Task<IEnumerable<IDocument>> AfterExecuteAsync(IExecutionContext context, IEnumerable<IDocument> results) => Task.FromResult(results);
+        protected virtual Task<IEnumerable<IDocument>> AfterExecutionAsync(IExecutionContext context, IEnumerable<IDocument> results) => Task.FromResult(results);
 
         /// <summary>
         /// Executes the module once for all input documents.

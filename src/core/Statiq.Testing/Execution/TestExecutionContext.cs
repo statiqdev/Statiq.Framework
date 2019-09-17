@@ -89,6 +89,9 @@ namespace Statiq.Testing
         /// <inheritdoc/>
         public Phase Phase { get; set; } = Phase.Process;
 
+        /// <inheritdoc />
+        public IReadOnlyEventCollection Events { get; set; } = new TestEventCollection();
+
         /// <inheritdoc/>
         public IReadOnlyFileSystem FileSystem { get; set; } = new TestFileSystem();
 
