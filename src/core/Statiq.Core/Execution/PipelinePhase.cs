@@ -65,6 +65,9 @@ namespace Statiq.Core
                 throw new ObjectDisposedException(nameof(PipelinePhase));
             }
 
+            // Raise the before event
+            await engine.Events.RaiseAsync(new BeforePipelinePhaseExecution(executionId, PipelineName, Phase));
+
             // Skip the phase if there are no modules
             if (_modules.Count == 0)
             {
@@ -74,7 +77,7 @@ namespace Statiq.Core
             }
 
             // Execute the phase
-            System.Diagnostics.Stopwatch pipelineStopwatch = System.Diagnostics.Stopwatch.StartNew();
+            System.Diagnostics.Stopwatch stopwatch = System.Diagnostics.Stopwatch.StartNew();
             _logger.LogDebug($"Executing pipeline {PipelineName}/{Phase} with {_modules.Count} module(s)");
             try
             {
@@ -84,8 +87,8 @@ namespace Statiq.Core
                 {
                     ExecutionContextData contextData = new ExecutionContextData(this, engine, executionId, phaseResults, serviceScope.ServiceProvider, cancellationTokenSource.Token);
                     Outputs = await Engine.ExecuteModulesAsync(contextData, null, _modules, GetInputs(), _logger);
-                    pipelineStopwatch.Stop();
-                    _logger.LogInformation($"Executed pipeline {PipelineName}/{Phase} in {pipelineStopwatch.ElapsedMilliseconds} ms resulting in {Outputs.Length} output document(s)");
+                    stopwatch.Stop();
+                    _logger.LogInformation($"Executed pipeline {PipelineName}/{Phase} in {stopwatch.ElapsedMilliseconds} ms resulting in {Outputs.Length} output document(s)");
                 }
             }
             catch (Exception ex)
@@ -100,11 +103,14 @@ namespace Statiq.Core
             }
             finally
             {
-                pipelineStopwatch.Stop();
+                stopwatch.Stop();
             }
 
+            // Raise the after event
+            await engine.Events.RaiseAsync(new AfterPipelinePhaseExecution(executionId, PipelineName, Phase, Outputs, stopwatch.ElapsedMilliseconds));
+
             // Record the results
-            PhaseResult phaseResult = new PhaseResult(PipelineName, Phase, Outputs, pipelineStopwatch.ElapsedMilliseconds);
+            PhaseResult phaseResult = new PhaseResult(PipelineName, Phase, Outputs, stopwatch.ElapsedMilliseconds);
             phaseResults.AddOrUpdate(
                 phaseResult.PipelineName,
                 _ =>

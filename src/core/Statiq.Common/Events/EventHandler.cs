@@ -6,7 +6,7 @@ namespace Statiq.Common
     /// <summary>
     /// An asynchronous event handler.
     /// </summary>
-    /// <typeparam name="TEventArgs">The type of <see cref="EventArgs"/></typeparam>
-    /// <param name="args">Event arguments.</param>
-    public delegate void EventHandler<TEventArgs>(TEventArgs args);
+    /// <typeparam name="TEvent">The type of event.</typeparam>
+    /// <param name="evt">The event instance.</param>
+    public delegate void EventHandler<TEvent>(TEvent evt);
 }

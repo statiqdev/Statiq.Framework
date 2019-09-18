@@ -12,11 +12,19 @@ Statiq Framework is oriented around three main concepts:
 - **Modules** create, manipulate, and operate on documents. Modules form the logic and processing core of a Statiq Framework application and the framework comes with many modules for performing different operations. You can also easily write your own modules to fully customize generation.
 - **Pipelines** execute one or more modules in sequence. Pipelines have four phases, any of which may contain a sequence of modules to execute: input, process, transform, output. Pipelines are executed concurrently and can specify dependencies.
 
+In many ways, Statiq Framework can be viewed as an implementation of the [model-view-controller](https://en.wikipedia.org/wiki/Model-view-controller) (MVC) pattern. This analogy can be helpful when figuring out how to apply the different components of the framework. Documents contain the data model, pipelines and modules act as controllers, and your layouts and themes are the view.
+
 ## Usage
+
+### The Engine
+
+The core runtime component of a Statiq Framework application is the `Engine` which contains the collections of pipelines, settings, and services. The term _execution_ is generally used to describe applying pipelines and modules to documents and the primary responsibility of the engine is to determine the pipeline dependency hierarchy and coordinate the execution of pipelines (and their modules).
+
+You can create and use the `Engine` class directly, but using the bootstrapper (described below) is recommended.
 
 ### The Bootstrapper
 
-The easiest way to get started with Statiq Framework is to use the `Bootstrapper` from the [Statiq.App](https://www.nuget.org/packages/Statiq.App) package. This class helps create an `Engine`, which is the core runtime component of Statiq Framework. The `Boostrapper` has fluent methods to configure the `Engine`, add modules and pipelines, and process command-line arguments.
+The easiest way to get started with Statiq Framework is to use the `Bootstrapper` from the [Statiq.App](https://www.nuget.org/packages/Statiq.App) package. This class helps create an engine and has fluent methods to configure it, add modules and pipelines, and process command-line arguments.
 
 In general, a Statiq Framework application looks something like the following:
 
@@ -81,6 +89,8 @@ If the out-of-the-box modules don't satisfy your use case, it's easy to customiz
 - Only reference `Statiq.Common`:
   - If a module is in a separate assembly from your application you shouldn't need a reference to `Statiq.Core`, and if you find that you do please open an issue so the appropriate functionality can be moved to `Statiq.Common`.
 
+### Documents
+
 If your module creates or manipulates documents, follow these guidelines and tips on document creation and working with documents:
 
 - Call `IDocument.Clone()` on existing documents to clone with new properties.
@@ -98,6 +108,51 @@ Statiq is very flexible with what can be considered a document. You may find tha
   - Override `IDocument.Clone()` in custom document types as needed. The default behavior is to perform a member-wise clone.
 - Convert an existing object of any type into a `IDocument` using `.ToDocument()` extensions:
   - This wraps the object in an `ObjectDocument<T>`.
+
+### Execution Context
+
+While executing pipelines and modules, the current state and other functionality is passed in an instance of `IExecutionContext`. This object contains lots of information such as the current pipeline, phase, and module, the settings and file system, the input documents to the module, and more.
+
+The context also implements `IDocumentFactory` so it can be used to create documents (see above), `ILogger` so it can be used for logging, and `IServiceProvider` so it can be used as a dependency injection service provider.
+
+### Events
+
+Events can be helpful when you need to implement cross-cutting behavior at runtime. Statiq Framework has a global event mechanism makes it easy to subscribe and handle events.
+
+You can subscribe to an event in an engine through the `Events` property:
+
+```csharp
+engine.Events.Subscribe<BeforeModuleExecution>(
+  evt => evt.Context.LogInformation("I'm in a module!"));
+```
+
+You can also subscribe to an event using the bootstrapper:
+
+```csharp
+await Bootstrapper
+  .CreateDefault(args)
+  .SubscribeEvent<BeforeModuleExecution>(
+    evt => evt.Context.LogInformation("I'm in a module!"))
+  // ...
+  .RunAsync();
+```
+
+Events are represented by an _event object_ which doesn't have to follow any pattern or derive from any special base class. To expose your own events, create an object that will represent the event and it's data and then raise subscribers through the execution context:
+
+```csharp
+await context.Events.RaiseAsync(new MyEvent("some data"));
+```
+
+All subscribers to the `MyEvent` object will be invoked in the order in which they were subscribed.
+
+Some of the events Statiq Framework supports are:
+
+- `BeforeEngineExecution` - raised before the engine executes pipelines.
+- `AfterEngineExecution` - raised after the engine executes pipelines.
+- `BeforePipelinePhaseExecution` - raised before a pipeline phase is executed.
+- `AfterPipelinePhaseExecution` - raised after a pipeline phase is executed.
+- `BeforeModuleExecution` - raised before a module is executed and provides an opportunity to "short-circuit" the module and provide alternate output documents.
+- `AfterModuleExecution` - raised after a module has executed and provides an opportunity to further operate on output documents or provide alternate output documents.
 
 ## Licensing
 

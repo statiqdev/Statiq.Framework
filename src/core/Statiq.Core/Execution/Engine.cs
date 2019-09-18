@@ -222,12 +222,15 @@ namespace Statiq.Core
             await default(SynchronizationContextRemover);
             CheckDisposed();
             Guid executionId = Guid.NewGuid();
-            System.Diagnostics.Stopwatch engineStopwatch = System.Diagnostics.Stopwatch.StartNew();
             ConcurrentDictionary<string, PhaseResult[]> phaseResults =
                 new ConcurrentDictionary<string, PhaseResult[]>(StringComparer.OrdinalIgnoreCase);
             PipelineOutputs outputs = new PipelineOutputs(phaseResults);
             _logger.LogInformation($"Executing {_pipelines.Count} pipelines (execution ID {executionId})");
             _logger.LogInformation($"Using {JsEngineSwitcher.Current.DefaultEngineName} as the JavaScript engine");
+            System.Diagnostics.Stopwatch stopwatch = System.Diagnostics.Stopwatch.StartNew();
+
+            // Raise before event
+            await Events.RaiseAsync(new BeforeEngineExecution(this, executionId));
 
             // Make sure we've actually configured some pipelines
             if (_pipelines.Count == 0)
@@ -271,12 +274,15 @@ namespace Statiq.Core
                     _logger.LogCritical("Error during execution");
                 }
             }
+            stopwatch.Stop();
+
+            // Raise after event
+            await Events.RaiseAsync(new AfterEngineExecution(this, executionId, outputs, stopwatch.ElapsedMilliseconds));
 
             // TODO: Log execution summary table
 
             // Clean up
-            engineStopwatch.Stop();
-            _logger.LogInformation($"Finished execution in {engineStopwatch.ElapsedMilliseconds} ms");
+            _logger.LogInformation($"Finished execution in {stopwatch.ElapsedMilliseconds} ms");
             return outputs;
         }
 
@@ -442,9 +448,10 @@ namespace Statiq.Core
                             IEnumerable<IDocument> moduleResult = await (module.ExecuteAsync(moduleContext) ?? Task.FromResult<IEnumerable<IDocument>>(null));  // Handle a null Task return
                             outputs = moduleResult.ToImmutableDocumentArray();
                         }
+                        stopwatch.Stop();
 
                         // Raise the after event
-                        AfterModuleExecution afterEvent = new AfterModuleExecution(moduleContext, outputs);
+                        AfterModuleExecution afterEvent = new AfterModuleExecution(moduleContext, outputs, stopwatch.ElapsedMilliseconds);
                         raised = await contextData.Engine.Events.RaiseAsync(afterEvent);
                         if (raised && afterEvent.OverriddenOutputs != null)
                         {
@@ -452,7 +459,6 @@ namespace Statiq.Core
                         }
 
                         // Log results
-                        stopwatch.Stop();
                         logger.LogDebug(
                             "Executed module {0} in {1} ms resulting in {2} output document(s)",
                             moduleName,

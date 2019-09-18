@@ -15,7 +15,7 @@ using Statiq.Common;
 
 namespace Statiq.Core
 {
-    public class BeforeModuleExecution : EventArgs
+    public class BeforeModuleExecution
     {
         internal BeforeModuleExecution(IExecutionContext context)
         {

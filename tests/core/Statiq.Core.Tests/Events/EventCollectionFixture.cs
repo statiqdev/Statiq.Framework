@@ -17,12 +17,12 @@ namespace Statiq.Core.Tests.Events
             {
                 // Given
                 IEventCollection eventCollection = new EventCollection();
-                eventCollection.Subscribe<TestEventArgs>(async args =>
+                eventCollection.Subscribe<TestEvent>(async args =>
                 {
                     args.Foo = 4;
                     await Task.CompletedTask;
                 });
-                TestEventArgs args = new TestEventArgs { Foo = 1 };
+                TestEvent args = new TestEvent { Foo = 1 };
 
                 // When
                 await eventCollection.RaiseAsync(args);
@@ -36,11 +36,11 @@ namespace Statiq.Core.Tests.Events
             {
                 // Given
                 IEventCollection eventCollection = new EventCollection();
-                eventCollection.Subscribe<TestEventArgs>(args =>
+                eventCollection.Subscribe<TestEvent>(args =>
                 {
                     args.Foo = 4;
                 });
-                TestEventArgs args = new TestEventArgs { Foo = 1 };
+                TestEvent args = new TestEvent { Foo = 1 };
 
                 // When
                 await eventCollection.RaiseAsync(args);
@@ -54,21 +54,21 @@ namespace Statiq.Core.Tests.Events
             {
                 // Given
                 IEventCollection eventCollection = new EventCollection();
-                eventCollection.Subscribe<TestEventArgs>(async args =>
+                eventCollection.Subscribe<TestEvent>(async args =>
                 {
                     args.Foo++;
                     await Task.CompletedTask;
                 });
-                eventCollection.Subscribe<TestEventArgs>(async args =>
+                eventCollection.Subscribe<TestEvent>(async args =>
                 {
                     args.Foo++;
                     await Task.CompletedTask;
                 });
-                eventCollection.Subscribe<TestEventArgs>(args =>
+                eventCollection.Subscribe<TestEvent>(args =>
                 {
                     args.Foo++;
                 });
-                TestEventArgs args = new TestEventArgs { Foo = 3 };
+                TestEvent args = new TestEvent { Foo = 3 };
 
                 // When
                 await eventCollection.RaiseAsync(args);
@@ -78,7 +78,7 @@ namespace Statiq.Core.Tests.Events
             }
         }
 
-        public class TestEventArgs
+        public class TestEvent
         {
             public int Foo { get; set; }
         }

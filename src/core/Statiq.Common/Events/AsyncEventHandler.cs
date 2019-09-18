@@ -6,8 +6,8 @@ namespace Statiq.Common
     /// <summary>
     /// An asynchronous event handler.
     /// </summary>
-    /// <typeparam name="TEventArgs">The type of <see cref="EventArgs"/></typeparam>
-    /// <param name="args">Event arguments.</param>
+    /// <typeparam name="TEvent">The type of event.</typeparam>
+    /// <param name="evt">The event instance.</param>
     /// <returns>A task whose completion signals handling is finished.</returns>
-    public delegate Task AsyncEventHandler<TEventArgs>(TEventArgs args);
+    public delegate Task AsyncEventHandler<TEvent>(TEvent evt);
 }

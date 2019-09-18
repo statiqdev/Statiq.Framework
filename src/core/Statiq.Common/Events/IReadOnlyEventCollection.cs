@@ -10,12 +10,12 @@ namespace Statiq.Common
     public interface IReadOnlyEventCollection
     {
         /// <summary>
-        /// Raises all handlers for a registered event type
-        /// (as indicated by the <typeparamref name="TEventArgs"/> type).
+        /// Raises all handlers for a registered event
+        /// (as indicated by the <typeparamref name="TEvent"/> type).
         /// </summary>
-        /// <typeparam name="TEventArgs">The type of event arguments to raise an event for.</typeparam>
-        /// <param name="args">The event arguments.</param>
+        /// <typeparam name="TEvent">The type of event to raise an event for.</typeparam>
+        /// <param name="evt">The event instance.</param>
         /// <returns><c>true</c> if registered handlers were found, <c>false</c> otherwise.</returns>
-        Task<bool> RaiseAsync<TEventArgs>(TEventArgs args);
+        Task<bool> RaiseAsync<TEvent>(TEvent evt);
     }
 }

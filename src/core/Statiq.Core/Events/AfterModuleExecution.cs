@@ -15,17 +15,20 @@ using Statiq.Common;
 
 namespace Statiq.Core
 {
-    public class AfterModuleExecution : EventArgs
+    public class AfterModuleExecution
     {
-        internal AfterModuleExecution(IExecutionContext context, ImmutableArray<IDocument> outputs)
+        internal AfterModuleExecution(IExecutionContext context, ImmutableArray<IDocument> outputs, long elapsedMilliseconds)
         {
             Context = context;
             Outputs = outputs;
+            ElapsedMilliseconds = elapsedMilliseconds;
         }
 
         public IExecutionContext Context { get; }
 
         public ImmutableArray<IDocument> Outputs { get; }
+
+        public long ElapsedMilliseconds { get; }
 
         internal IEnumerable<IDocument> OverriddenOutputs { get; private set; }
 

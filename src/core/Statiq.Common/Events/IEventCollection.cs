@@ -8,10 +8,10 @@ namespace Statiq.Common
     public partial interface IEventCollection : IReadOnlyEventCollection
     {
         /// <summary>
-        /// Subscribes a new handler for the given <typeparamref name="TEventArgs"/> type.
+        /// Subscribes a new handler for the given <typeparamref name="TEvent"/> type.
         /// </summary>
-        /// <typeparam name="TEventArgs">The type of event arguments to subscribe and handler for.</typeparam>
+        /// <typeparam name="TEvent">The type of event to subscribe and handler for.</typeparam>
         /// <param name="handler">The handler to subscribe to the event.</param>
-        void Subscribe<TEventArgs>(AsyncEventHandler<TEventArgs> handler);
+        void Subscribe<TEvent>(AsyncEventHandler<TEvent> handler);
     }
 }

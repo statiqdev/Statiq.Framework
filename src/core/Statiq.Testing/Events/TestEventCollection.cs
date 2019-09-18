@@ -15,9 +15,9 @@ namespace Statiq.Testing
             new ConcurrentDictionary<Type, List<Delegate>>();
 
         /// <inheritdoc />
-        public void Subscribe<TEventArgs>(AsyncEventHandler<TEventArgs> handler) =>
+        public void Subscribe<TEvent>(AsyncEventHandler<TEvent> handler) =>
             _events.AddOrUpdate(
-                typeof(TEventArgs),
+                typeof(TEvent),
                 _ => new List<Delegate> { handler ?? throw new ArgumentNullException(nameof(handler)) },
                 (_, handlers) =>
                 {
@@ -26,14 +26,14 @@ namespace Statiq.Testing
                 });
 
         /// <inheritdoc />
-        public async Task<bool> RaiseAsync<TArgs>(TArgs args)
+        public async Task<bool> RaiseAsync<TEvent>(TEvent evt)
         {
-            _ = args ?? throw new ArgumentNullException(nameof(args));
-            if (_events.TryGetValue(typeof(TArgs), out List<Delegate> handlers))
+            _ = evt ?? throw new ArgumentNullException(nameof(evt));
+            if (_events.TryGetValue(typeof(TEvent), out List<Delegate> handlers))
             {
                 foreach (Delegate handler in handlers)
                 {
-                    await ((AsyncEventHandler<TArgs>)handler)(args);
+                    await ((AsyncEventHandler<TEvent>)handler)(evt);
                 }
                 return true;
             }
