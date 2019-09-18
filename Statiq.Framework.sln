@@ -106,8 +106,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "misc", "misc", "{9B01F618-6
 		LICENSING.md = LICENSING.md
 		README.md = README.md
 		RELEASE.md = RELEASE.md
-		statiq.ruleset = statiq.ruleset
+		SolutionInfo.cs = SolutionInfo.cs
 		Statiq.Framework.sln.DotSettings = Statiq.Framework.sln.DotSettings
+		statiq.ruleset = statiq.ruleset
 		stylecop.json = stylecop.json
 		tests.ruleset = tests.ruleset
 	EndProjectSection
