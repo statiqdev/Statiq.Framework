@@ -71,7 +71,7 @@ namespace Statiq.Core.Tests.Modules.IO
                         return response;
                     }
                 };
-                IModule download = new ReadWeb().WithUris("https://statiq.dev/", "https://github.com/statiqdev/Framework");
+                IModule download = new ReadWeb().WithUris("https://statiq.dev/", "https://github.com/statiqdev/Statiq.Framework");
 
                 // When
                 IReadOnlyList<TestDocument> results = await ExecuteAsync(context, download);

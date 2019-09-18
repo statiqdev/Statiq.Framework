@@ -45,4 +45,4 @@ from Powershell
 
 ## From Visual Studio
 
-If you want to open and build Statiq from Visual Studio, the main solution is in the root folder as `StatiqFramework.sln`.
+If you want to open and build Statiq from Visual Studio, the main solution is in the root folder as `Statiq.Framework.sln`.

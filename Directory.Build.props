@@ -13,8 +13,8 @@
     <Authors>Dave Glick, Other Awesome Contributors</Authors>
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
     <PackageIcon>icon.png</PackageIcon>
-    <PackageProjectUrl>https://github.com/statiqdev/Framework</PackageProjectUrl>
-    <RepositoryUrl>https://github.com/statiqdev/Framework.git</RepositoryUrl>
+    <PackageProjectUrl>https://github.com/statiqdev/Statiq.Framework</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/statiqdev/Statiq.Framework.git</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
     <Copyright>Copyright © Statiq Contributors</Copyright>

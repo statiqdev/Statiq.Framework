@@ -33,5 +33,5 @@ TestResult.xml
 /packages.xml
 *.ncrunch*
 .*crunch*.local.xml
-/_NCrunch_StatiqFramework
+/_NCrunch_Statiq.Framework
 .vscode

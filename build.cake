@@ -86,7 +86,7 @@ Task("Restore-Packages")
     .IsDependentOn("Patch-Assembly-Info")
     .Does(() =>
     {
-        DotNetCoreRestore("./StatiqFramework.sln", new DotNetCoreRestoreSettings
+        DotNetCoreRestore("./Statiq.Framework.sln", new DotNetCoreRestoreSettings
         {
             MSBuildSettings = msBuildSettings
         });
@@ -96,7 +96,7 @@ Task("Build")
     .IsDependentOn("Restore-Packages")
     .Does(() =>
     {
-        DotNetCoreBuild("./StatiqFramework.sln", new DotNetCoreBuildSettings
+        DotNetCoreBuild("./Statiq.Framework.sln", new DotNetCoreBuildSettings
         {
             Configuration = configuration,
             NoRestore = true,

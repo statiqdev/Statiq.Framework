@@ -117,7 +117,7 @@ The context also implements `IDocumentFactory` so it can be used to create docum
 
 ### Events
 
-Events can be helpful when you need to implement cross-cutting behavior at runtime. Statiq Framework has a global event mechanism makes it easy to subscribe and handle events.
+Events can be helpful when you need to implement cross-cutting behavior at runtime or when you need to modify the behavior of pipelines from other sources. Statiq Framework has a global event mechanism that makes it easy to subscribe to and handle events.
 
 You can subscribe to an event in an engine through the `Events` property:
 
