@@ -336,17 +336,20 @@ namespace Statiq.Core
                 {
                     // Visit dependencies if this isn't an isolated pipeline
                     List<PipelinePhase> processDependencies = new List<PipelinePhase>();
-                    foreach (string dependencyName in pipeline.Dependencies)
+                    if (pipeline.Dependencies != null)
                     {
-                        if (!pipelines.TryGetValue(dependencyName, out IPipeline dependency))
+                        foreach (string dependencyName in pipeline.Dependencies)
                         {
-                            throw new Exception($"Could not find pipeline dependency {dependencyName} of {name}");
+                            if (!pipelines.TryGetValue(dependencyName, out IPipeline dependency))
+                            {
+                                throw new Exception($"Could not find pipeline dependency {dependencyName} of {name}");
+                            }
+                            if (dependency.Isolated)
+                            {
+                                throw new Exception($"Pipeline {name} has dependency on isolated pipeline {dependencyName}");
+                            }
+                            processDependencies.Add(Visit(dependencyName, dependency).Process);
                         }
-                        if (dependency.Isolated)
-                        {
-                            throw new Exception($"Pipeline {name} has dependency on isolated pipeline {dependencyName}");
-                        }
-                        processDependencies.Add(Visit(dependencyName, dependency).Process);
                     }
 
                     // Add the phases (by this time all dependencies should have been added)

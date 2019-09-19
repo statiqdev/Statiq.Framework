@@ -19,36 +19,91 @@ namespace Statiq.Common
         /// <inheritdoc />
         public async Task<IEnumerable<IDocument>> ExecuteAsync(IExecutionContext context)
         {
-            IDisposable disposable = await BeforeExecutionAsync(context);
+            BeforeExecution(context);
+            await BeforeExecutionAsync(context);
             try
             {
-                return await AfterExecutionAsync(context, await ExecuteContextAsync(context));
+                IEnumerable<IDocument> outputs = await ExecuteContextAsync(context);
+                AfterExecution(context, ref outputs);
+                await AfterExecutionAsync(context, ref outputs);
+                return outputs;
             }
             finally
             {
-                disposable?.Dispose();
+                Finally(context);
+                await FinallyAsync(context);
             }
         }
 
         /// <summary>
-        /// Called before the current module execution cycle and is typically used for configuring module state.
-        /// </summary>
-        /// <param name="context">The execution context.</param>
-        /// <returns>A disposable that is guaranteed to be disposed when the module finishes the current execution cycle (or <c>null</c>).</returns>
-        protected virtual Task<IDisposable> BeforeExecutionAsync(IExecutionContext context) => Task.FromResult((IDisposable)null);
-
-        /// <summary>
-        /// Called after the current module execution cycle and is typically used for cleaning up module state
-        /// or transforming the execution results.
+        /// Called before each module execution.
         /// </summary>
         /// <remarks>
-        /// If an exception is thrown during module execution, this method is never called. Return an <see cref="IDisposable"/>
-        /// from <see cref="BeforeExecutionAsync(IExecutionContext)"/> if resources should be disposed even if an exception is thrown.
+        /// Override this method to configure module state before execution.
         /// </remarks>
         /// <param name="context">The execution context.</param>
-        /// <param name="results">The results of module execution.</param>
-        /// <returns>The final module results.</returns>
-        protected virtual Task<IEnumerable<IDocument>> AfterExecutionAsync(IExecutionContext context, IEnumerable<IDocument> results) => Task.FromResult(results);
+        protected virtual Task BeforeExecutionAsync(IExecutionContext context) => Task.CompletedTask;
+
+        /// <summary>
+        /// Called before each module execution.
+        /// </summary>
+        /// <remarks>
+        /// Override this method to configure module state before execution.
+        /// </remarks>
+        /// <param name="context">The execution context.</param>
+        protected virtual void BeforeExecution(IExecutionContext context)
+        {
+        }
+
+        /// <summary>
+        /// Called after each module execution.
+        /// </summary>
+        /// <remarks>
+        /// Override this method to examine or adjust the module outputs.
+        /// If an exception is thrown during module execution, this method is never called.
+        /// Use <see cref="FinallyAsync(IExecutionContext)"/> to clean up module state after execution.
+        /// </remarks>
+        /// <param name="context">The execution context.</param>
+        /// <param name="outputs">
+        /// The module outputs which can be modified by changing the reference.
+        /// </param>
+        protected virtual Task AfterExecutionAsync(IExecutionContext context, ref IEnumerable<IDocument> outputs) => Task.CompletedTask;
+
+        /// <summary>
+        /// Called after each module execution.
+        /// </summary>
+        /// <remarks>
+        /// Override this method to examine or adjust the module outputs.
+        /// If an exception is thrown during module execution, this method is never called.
+        /// Use <see cref="Finally(IExecutionContext)"/> to clean up module state after execution.
+        /// </remarks>
+        /// <param name="context">The execution context.</param>
+        /// <param name="outputs">
+        /// The module outputs which can be modified by changing the reference.
+        /// </param>
+        protected virtual void AfterExecution(IExecutionContext context, ref IEnumerable<IDocument> outputs)
+        {
+        }
+
+        /// <summary>
+        /// Called after each module execution, even if an exception is thrown during execution.
+        /// </summary>
+        /// <remarks>
+        /// Override this method to clean up module state after execution.
+        /// </remarks>
+        /// <param name="context">The execution context.</param>
+        protected virtual Task FinallyAsync(IExecutionContext context) => Task.CompletedTask;
+
+        /// <summary>
+        /// Called after each module execution, even if an exception is thrown during execution.
+        /// </summary>
+        /// <remarks>
+        /// Override this method to clean up module state after execution.
+        /// </remarks>
+        /// <param name="context">The execution context.</param>
+        protected virtual void Finally(IExecutionContext context)
+        {
+        }
 
         /// <summary>
         /// Executes the module once for all input documents.
