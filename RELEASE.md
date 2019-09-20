@@ -1,5 +1,7 @@
 # 1.0.0-alpha.3
 
+- New execution summary table logged after execution.
+- New console logger with better output.
 - More refactoring of base `Module` before/after methods.
 
 # 1.0.0-alpha.2
