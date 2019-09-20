@@ -71,7 +71,7 @@ namespace Statiq.Core
             // Skip the phase if there are no modules
             if (_modules.Count == 0)
             {
-                _logger.LogDebug($"Pipeline {PipelineName}/{Phase} contains no modules, skipping");
+                _logger.LogDebug($"{PipelineName}/{Phase} » Pipeline contains no modules, skipping");
                 Outputs = GetInputs();
                 return;
             }
@@ -79,7 +79,7 @@ namespace Statiq.Core
             // Execute the phase
             ImmutableArray<IDocument> inputs = GetInputs();
             System.Diagnostics.Stopwatch stopwatch = System.Diagnostics.Stopwatch.StartNew();
-            _logger.LogInformation($"-> {PipelineName}/{Phase} ({inputs.Length} input document(s), {_modules.Count} module(s))");
+            _logger.LogInformation($"-> {PipelineName}/{Phase} » Starting pipeline phase execution... ({inputs.Length} input document(s), {_modules.Count} module(s))");
             try
             {
                 // Execute all modules in the pipeline with a new DI scope per phase
@@ -89,7 +89,7 @@ namespace Statiq.Core
                     ExecutionContextData contextData = new ExecutionContextData(this, engine, executionId, phaseResults, serviceScope.ServiceProvider, cancellationTokenSource.Token);
                     Outputs = await Engine.ExecuteModulesAsync(contextData, null, _modules, inputs, _logger);
                     stopwatch.Stop();
-                    _logger.LogInformation($"   ({PipelineName}/{Phase} executed resulting in {Outputs.Length} output document(s), {stopwatch.ElapsedMilliseconds} ms)");
+                    _logger.LogInformation($"{PipelineName}/{Phase} » Finished pipeline phase execution ({Outputs.Length} output document(s), {stopwatch.ElapsedMilliseconds} ms)");
                 }
             }
             catch (Exception ex)

@@ -167,17 +167,17 @@ namespace Statiq.Core
         {
             try
             {
-                _logger.LogInformation("Cleaning output path: {0}", FileSystem.OutputPath);
+                _logger.LogDebug($"Cleaning output directory: {FileSystem.OutputPath}...");
                 IDirectory outputDirectory = FileSystem.GetOutputDirectory();
                 if (outputDirectory.Exists)
                 {
                     outputDirectory.Delete(true);
                 }
-                _logger.LogInformation("Cleaned output directory");
+                _logger.LogInformation($"Cleaned output directory: {FileSystem.OutputPath}");
             }
             catch (Exception ex)
             {
-                _logger.LogWarning("Error while cleaning output path: {0} - {1}", ex.GetType(), ex.Message);
+                _logger.LogWarning("Error while cleaning output directory: {0} - {1}", ex.GetType(), ex.Message);
             }
         }
 
@@ -188,17 +188,17 @@ namespace Statiq.Core
         {
             try
             {
-                _logger.LogInformation("Cleaning temp path: {0}", FileSystem.TempPath);
+                _logger.LogDebug($"Cleaning temp directory: {FileSystem.TempPath}...");
                 IDirectory tempDirectory = FileSystem.GetTempDirectory();
                 if (tempDirectory.Exists)
                 {
                     tempDirectory.Delete(true);
                 }
-                _logger.LogInformation("Cleaned temp directory");
+                _logger.LogInformation($"Cleaned temp directory: {FileSystem.TempPath}");
             }
             catch (Exception ex)
             {
-                _logger.LogWarning("Error while cleaning temp path: {0} - {1}", ex.GetType(), ex.Message);
+                _logger.LogWarning("Error while cleaning temp directory: {0} - {1}", ex.GetType(), ex.Message);
             }
         }
 
@@ -281,7 +281,7 @@ namespace Statiq.Core
 
             // Log execution summary table
             _logger.LogInformation(
-                "Execution summary (number of output documents per pipeline and phase):"
+                "Execution summary: (number of output documents per pipeline and phase)"
                 + Environment.NewLine
                 + Environment.NewLine
                 + phaseResults
@@ -443,7 +443,7 @@ namespace Statiq.Core
                     else
                     {
                         // Otherwise, throw an exception so that this dependency is also skipped by it's dependents
-                        string error = $"Skipping pipeline {phase.PipelineName}/{phase.Phase} due to dependency error";
+                        string error = $"{phase.PipelineName}/{phase.Phase} » Skipping pipeline due to dependency error";
                         _logger.LogError(error);
                         throw new Exception(error);
                     }
@@ -467,8 +467,8 @@ namespace Statiq.Core
 
                         // Get the context
                         System.Diagnostics.Stopwatch stopwatch = System.Diagnostics.Stopwatch.StartNew();
-                        logger.LogDebug("Executing module {0} with {1} input document(s)", moduleName, inputs.Length);
                         ExecutionContext moduleContext = new ExecutionContext(contextData, parent, module, inputs);
+                        moduleContext.LogDebug($"Starting module execution... ({inputs.Length} input document(s))");
 
                         // Raise the before event and use overridden results if provided
                         BeforeModuleExecution beforeEvent = new BeforeModuleExecution(moduleContext);
@@ -494,11 +494,7 @@ namespace Statiq.Core
                         }
 
                         // Log results
-                        logger.LogDebug(
-                            "Executed module {0} in {1} ms resulting in {2} output document(s)",
-                            moduleName,
-                            stopwatch.ElapsedMilliseconds,
-                            outputs.Length);
+                        moduleContext.LogDebug($"Finished module execution ({outputs.Length} output document(s), {stopwatch.ElapsedMilliseconds} ms)");
                         inputs = outputs;
                     }
                     catch (Exception ex)

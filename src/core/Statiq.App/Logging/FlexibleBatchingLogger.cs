@@ -13,12 +13,12 @@ namespace Statiq.App
     internal class FlexibleBatchingLogger : ILogger
     {
         private readonly FlexibleBatchingLoggerProvider _provider;
-        private readonly string _category;
+        private readonly string _categoryName;
 
         public FlexibleBatchingLogger(FlexibleBatchingLoggerProvider loggerProvider, string categoryName)
         {
             _provider = loggerProvider;
-            _category = categoryName;
+            _categoryName = categoryName;
         }
 
         public IDisposable BeginScope<TState>(TState state)
@@ -44,7 +44,7 @@ namespace Statiq.App
                 throw new ArgumentNullException(nameof(formatter));
             }
 
-            _provider.AddMessage(new FlexibleLogMessage(timestamp, logLevel, eventId, formatter(state, exception), exception));
+            _provider.AddMessage(new FlexibleLogMessage(_categoryName, timestamp, logLevel, eventId, formatter(state, exception), exception));
         }
 
         public void Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception exception, Func<TState, Exception, string> formatter)

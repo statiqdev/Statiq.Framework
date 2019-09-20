@@ -22,6 +22,7 @@ namespace Statiq.Core
 
         private readonly ExecutionContextData _contextData;
         private readonly ILogger _logger;
+        private readonly string _logPrefix;
 
         /// <inheritdoc/>
         public Guid ExecutionId => _contextData.ExecutionId;
@@ -74,14 +75,15 @@ namespace Statiq.Core
         internal ExecutionContext(ExecutionContextData contextData, IExecutionContext parent, IModule module, ImmutableArray<IDocument> inputs)
         {
             _contextData = contextData ?? throw new ArgumentNullException(nameof(contextData));
-            _logger = CreateLogger(parent, module, contextData.PipelinePhase, contextData.Services.GetRequiredService<ILoggerFactory>());
+            _logger = contextData.Services.GetRequiredService<ILogger<ExecutionContext>>();
+            _logPrefix = GetLogPrefix(parent, module, contextData.PipelinePhase);
 
             Parent = parent;
             Module = module ?? throw new ArgumentNullException(nameof(module));
             Inputs = inputs;
         }
 
-        private static ILogger CreateLogger(IExecutionContext parent, IModule module, PipelinePhase pipelinePhase, ILoggerFactory loggerFactory)
+        private static string GetLogPrefix(IExecutionContext parent, IModule module, PipelinePhase pipelinePhase)
         {
             Stack<string> modules = new Stack<string>();
             modules.Push(module.GetType().Name);
@@ -90,7 +92,7 @@ namespace Statiq.Core
                 modules.Push(parent.Module.GetType().Name);
                 parent = parent.Parent;
             }
-            return loggerFactory?.CreateLogger($"{pipelinePhase.PipelineName}/{pipelinePhase.Phase}: {string.Join('/', modules)}") ?? NullLogger.Instance;
+            return $"{pipelinePhase.PipelineName}/{pipelinePhase.Phase} » {string.Join(" » ", modules)} » ";
         }
 
         /// <inheritdoc/>
@@ -170,7 +172,7 @@ namespace Statiq.Core
         // ILogger
 
         public void Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception exception, Func<TState, Exception, string> formatter) =>
-            _logger.Log(logLevel, eventId, state, exception, formatter);
+            _logger.Log(logLevel, eventId, state, exception, (s, e) => _logPrefix + formatter(s, e));
 
         public bool IsEnabled(LogLevel logLevel) => _logger.IsEnabled(logLevel);
 

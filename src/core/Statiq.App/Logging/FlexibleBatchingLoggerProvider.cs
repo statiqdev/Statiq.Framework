@@ -71,7 +71,7 @@ namespace Statiq.App
             }
         }
 
-        protected abstract Task WriteMessagesAsync(IEnumerable<FlexibleLogMessage> messages, CancellationToken token);
+        protected abstract void WriteMessages(IEnumerable<FlexibleLogMessage> messages, CancellationToken token);
 
         private async Task ProcessLogQueueAsync()
         {
@@ -89,7 +89,7 @@ namespace Statiq.App
                 {
                     try
                     {
-                        await WriteMessagesAsync(_currentBatch, _cancellationTokenSource.Token);
+                        WriteMessages(_currentBatch, _cancellationTokenSource.Token);
                     }
                     catch (Exception ex)
                     {
@@ -135,15 +135,13 @@ namespace Statiq.App
 
         private void Stop()
         {
-            // _cancellationTokenSource.Cancel();
+            _cancellationTokenSource.Cancel();
             _messageQueue.CompleteAdding();
 
             try
             {
-                while (_messageQueue.Count > 0)
-                {
-                    _outputTask.Wait(_interval);
-                }
+                // Write all remaining messages to flush the log
+                WriteMessages(_messageQueue, CancellationToken.None);
             }
             catch (TaskCanceledException)
             {

@@ -13,12 +13,14 @@ namespace Statiq.App
     public class FlexibleLogMessage
     {
         public FlexibleLogMessage(
+            string categoryName,
             DateTimeOffset timestamp,
             LogLevel logLevel,
             EventId eventId,
             string formattedMessage,
             Exception exception)
         {
+            CategoryName = categoryName;
             Timestamp = timestamp;
             LogLevel = logLevel;
             EventId = eventId;
@@ -26,6 +28,7 @@ namespace Statiq.App
             Exception = exception;
         }
 
+        public string CategoryName { get; }
         public DateTimeOffset Timestamp { get; }
         public LogLevel LogLevel { get; }
         public EventId EventId { get; }
