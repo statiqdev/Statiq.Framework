@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace Statiq.Common
@@ -6,6 +7,10 @@ namespace Statiq.Common
     /// <summary>
     /// The primary module interface for classes that can transform or otherwise operate on documents.
     /// </summary>
+    /// <remarks>
+    /// If the module implements <see cref="IDisposable"/>, <see cref="IDisposable.Dispose"/>
+    /// will be called when the engine is disposed (I.e., on application exit).
+    /// </remarks>
     public interface IModule
     {
         /// <summary>

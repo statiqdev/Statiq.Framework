@@ -2,7 +2,6 @@
 using System.Linq;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Logging.Console;
 using Microsoft.Extensions.Logging.Debug;
 using Microsoft.Extensions.Options;
 using Statiq.Common;
@@ -88,11 +87,11 @@ namespace Statiq.App
 
         public IBootstrapper AddDefaultLogging()
         {
-            AddServices(services => services.AddLogging(logging =>
+            AddServices(services =>
             {
-                logging.AddConsole();
-                logging.AddDebug();
-            }));
+                services.AddSingleton<ILoggerProvider, ConsoleLoggerProvider>();
+                services.AddLogging(logging => logging.AddDebug());
+            });
             return this;
         }
     }

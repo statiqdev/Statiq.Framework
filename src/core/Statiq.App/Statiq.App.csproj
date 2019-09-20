@@ -10,7 +10,6 @@
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="3.0.0-preview9.19423.4" />
     <PackageReference Include="Microsoft.Extensions.DependencyModel" Version="3.0.0-preview9-19423-09" />
     <PackageReference Include="Microsoft.Extensions.Logging" Version="3.0.0-preview9.19423.4" />
-    <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="3.0.0-preview9.19423.4" />
     <PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="3.0.0-preview9.19423.4" />
     <PackageReference Include="NetEscapades.Extensions.Logging.RollingFile" Version="2.2.0" />
     <PackageReference Include="Spectre.Cli" Version="0.22.0" />

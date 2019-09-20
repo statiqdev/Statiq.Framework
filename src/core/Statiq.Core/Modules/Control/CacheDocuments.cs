@@ -34,6 +34,7 @@ namespace Statiq.Core
         {
         }
 
+        // Called when the engine is disposed just in case the module gets reused in another engine (unlikely)
         public void Dispose() => ResetCache();
 
         private void ResetCache() => _cache = null;

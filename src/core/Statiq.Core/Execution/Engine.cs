@@ -279,7 +279,32 @@ namespace Statiq.Core
             // Raise after event
             await Events.RaiseAsync(new AfterEngineExecution(this, executionId, outputs, stopwatch.ElapsedMilliseconds));
 
-            // TODO: Log execution summary table
+            // Log execution summary table
+            _logger.LogInformation(
+                "Execution summary (number of output documents per pipeline and phase):"
+                + Environment.NewLine
+                + Environment.NewLine
+                + phaseResults
+                    .OrderBy(x => x.Key)
+                    .ToStringTable(
+                        new[]
+                        {
+                            "Pipeline",
+                            nameof(Phase.Input),
+                            nameof(Phase.Process),
+                            nameof(Phase.Transform),
+                            nameof(Phase.Output)
+                        },
+                        x => x.Key,
+                        x => GetPhaseResultTableString(x.Value[(int)Phase.Input]),
+                        x => GetPhaseResultTableString(x.Value[(int)Phase.Process]),
+                        x => GetPhaseResultTableString(x.Value[(int)Phase.Transform]),
+                        x => GetPhaseResultTableString(x.Value[(int)Phase.Output])));
+
+            static string GetPhaseResultTableString(PhaseResult phaseResult) =>
+                phaseResult == null
+                    ? string.Empty
+                    : $"{phaseResult.Outputs.Length} ({phaseResult.ElapsedMilliseconds} ms)";
 
             // Clean up
             _logger.LogInformation($"Finished execution in {stopwatch.ElapsedMilliseconds} ms");
