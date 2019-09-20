@@ -91,9 +91,9 @@ namespace Statiq.App
                     {
                         await WriteMessagesAsync(_currentBatch, _cancellationTokenSource.Token);
                     }
-                    catch
+                    catch (Exception ex)
                     {
-                        // ignored
+                        Console.WriteLine(ex);
                     }
 
                     _currentBatch.Clear();
@@ -135,12 +135,15 @@ namespace Statiq.App
 
         private void Stop()
         {
-            _cancellationTokenSource.Cancel();
+            // _cancellationTokenSource.Cancel();
             _messageQueue.CompleteAdding();
 
             try
             {
-                _outputTask.Wait(_interval);
+                while (_messageQueue.Count > 0)
+                {
+                    _outputTask.Wait(_interval);
+                }
             }
             catch (TaskCanceledException)
             {

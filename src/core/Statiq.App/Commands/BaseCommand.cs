@@ -54,10 +54,7 @@ namespace Statiq.App
             ILogger logger = services.GetRequiredService<ILogger<Bootstrapper>>();
             logger.LogInformation($"Statiq version {Engine.Version}");
             ClassCatalog classCatalog = services.GetService<ClassCatalog>();
-            if (classCatalog != null)
-            {
-                classCatalog.LogDebugMessages(logger);
-            }
+            classCatalog?.LogDebugMessages(logger);
 
             // Attach
             if (settings.Attach)

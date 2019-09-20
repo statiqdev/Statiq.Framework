@@ -293,13 +293,20 @@ namespace Statiq.Core
                             nameof(Phase.Input),
                             nameof(Phase.Process),
                             nameof(Phase.Transform),
-                            nameof(Phase.Output)
+                            nameof(Phase.Output),
+                            "Total Time"
                         },
                         x => x.Key,
                         x => GetPhaseResultTableString(x.Value[(int)Phase.Input]),
                         x => GetPhaseResultTableString(x.Value[(int)Phase.Process]),
                         x => GetPhaseResultTableString(x.Value[(int)Phase.Transform]),
-                        x => GetPhaseResultTableString(x.Value[(int)Phase.Output])));
+                        x => GetPhaseResultTableString(x.Value[(int)Phase.Output]),
+                        x =>
+                            ((x.Value[(int)Phase.Input]?.ElapsedMilliseconds ?? 0)
+                            + (x.Value[(int)Phase.Process]?.ElapsedMilliseconds ?? 0)
+                            + (x.Value[(int)Phase.Transform]?.ElapsedMilliseconds ?? 0)
+                            + (x.Value[(int)Phase.Output]?.ElapsedMilliseconds ?? 0)).ToString()
+                            + " ms"));
 
             static string GetPhaseResultTableString(PhaseResult phaseResult) =>
                 phaseResult == null

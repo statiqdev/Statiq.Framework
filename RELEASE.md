@@ -1,3 +1,7 @@
+# 1.0.0-alpha.4
+
+- Ongoing console logging improvements
+
 # 1.0.0-alpha.3
 
 - New execution summary table logged after execution.

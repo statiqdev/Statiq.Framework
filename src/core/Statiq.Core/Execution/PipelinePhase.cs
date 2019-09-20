@@ -79,7 +79,7 @@ namespace Statiq.Core
             // Execute the phase
             ImmutableArray<IDocument> inputs = GetInputs();
             System.Diagnostics.Stopwatch stopwatch = System.Diagnostics.Stopwatch.StartNew();
-            _logger.LogInformation($"Executing pipeline {PipelineName}/{Phase} with {inputs.Length} input document(s) and {_modules.Count} module(s)");
+            _logger.LogInformation($"-> {PipelineName}/{Phase} ({inputs.Length} input document(s), {_modules.Count} module(s))");
             try
             {
                 // Execute all modules in the pipeline with a new DI scope per phase
@@ -89,7 +89,7 @@ namespace Statiq.Core
                     ExecutionContextData contextData = new ExecutionContextData(this, engine, executionId, phaseResults, serviceScope.ServiceProvider, cancellationTokenSource.Token);
                     Outputs = await Engine.ExecuteModulesAsync(contextData, null, _modules, inputs, _logger);
                     stopwatch.Stop();
-                    _logger.LogInformation($"Executed pipeline {PipelineName}/{Phase} in {stopwatch.ElapsedMilliseconds} ms resulting in {Outputs.Length} output document(s)");
+                    _logger.LogInformation($"   ({PipelineName}/{Phase} executed resulting in {Outputs.Length} output document(s), {stopwatch.ElapsedMilliseconds} ms)");
                 }
             }
             catch (Exception ex)
