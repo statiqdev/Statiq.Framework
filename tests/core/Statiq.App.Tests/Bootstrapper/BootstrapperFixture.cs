@@ -58,7 +58,7 @@ namespace Statiq.App.Tests.Bootstrapper
                 exitCode.ShouldBe((int)ExitCode.Normal);
                 provider.Messages.ShouldContain(x =>
                     x.LogLevel == LogLevel.Warning
-                    && x.FormattedMessage == "No pipelines are configured.");
+                    && x.FormattedMessage == "No pipelines are configured or specified.");
             }
 
             [TestCase("Trace", 6)]
@@ -92,7 +92,7 @@ namespace Statiq.App.Tests.Bootstrapper
 
                 // Then
                 exitCode.ShouldBe((int)ExitCode.Normal);
-                provider.Messages.Count(x => x.CategoryName.StartsWith("Foo")).ShouldBe(expected);
+                provider.Messages.Count(x => x.FormattedMessage.StartsWith("Foo")).ShouldBe(expected);
             }
 
             [Test]

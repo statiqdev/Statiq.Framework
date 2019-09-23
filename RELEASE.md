@@ -1,6 +1,8 @@
 # 1.0.0-alpha.4
 
 - Ongoing console logging improvements
+- Added trigger conditions to pipelines to include always running or manually running
+- Added a `-p`/`--pipeline` CLI argument to indicate which pipelines to execute
 
 # 1.0.0-alpha.3
 

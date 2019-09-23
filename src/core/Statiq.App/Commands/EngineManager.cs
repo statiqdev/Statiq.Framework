@@ -66,11 +66,13 @@ namespace Statiq.App
 
         public Engine Engine { get; }
 
-        public async Task<bool> ExecuteAsync(CancellationTokenSource cancellationTokenSource)
+        public async Task<bool> ExecuteAsync(string[] pipelines, CancellationTokenSource cancellationTokenSource)
         {
             try
             {
-                await Engine.ExecuteAsync(cancellationTokenSource);
+                await Engine.ExecuteAsync(
+                    pipelines == null || pipelines.Length == 0 ? null : pipelines,
+                    cancellationTokenSource);
             }
             catch (Exception ex)
             {

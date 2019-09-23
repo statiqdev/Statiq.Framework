@@ -57,6 +57,6 @@ namespace Statiq.Core
         public bool Isolated { get; set; }
 
         /// <inheritdoc/>
-        public bool AlwaysProcess { get; set; }
+        public PipelineTrigger Trigger { get; set; }
     }
 }

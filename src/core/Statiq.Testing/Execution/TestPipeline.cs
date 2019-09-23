@@ -9,28 +9,28 @@ namespace Statiq.Testing
     /// </summary>
     public class TestPipeline : IPipeline
     {
-        public ModuleList InputModules { get; } = new ModuleList();
+        public ModuleList InputModules { get; set; } = new ModuleList();
 
-        public ModuleList ProcessModules { get; } = new ModuleList();
+        public ModuleList ProcessModules { get; set;  } = new ModuleList();
 
-        public ModuleList TransformModules { get; } = new ModuleList();
+        public ModuleList TransformModules { get; set;  } = new ModuleList();
 
-        public ModuleList OutputModules { get; } = new ModuleList();
+        public ModuleList OutputModules { get; set;  } = new ModuleList();
 
-        public HashSet<string> Dependencies { get; } = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        public HashSet<string> Dependencies { get; set; } = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
         public bool Isolated { get; set; }
 
-        public bool AlwaysProcess { get; set; }
+        public PipelineTrigger Trigger { get; set; }
 
         public TestPipeline(params IModule[] processModules)
         {
-            ICollectionExtensions.AddRange(ProcessModules, processModules);
+            ProcessModules.AddRange(processModules);
         }
 
         public TestPipeline(IEnumerable<IModule> processModules)
         {
-            ICollectionExtensions.AddRange(ProcessModules, processModules);
+            ProcessModules.AddRange(processModules);
         }
     }
 }

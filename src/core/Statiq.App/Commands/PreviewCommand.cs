@@ -18,7 +18,7 @@ namespace Statiq.App
     {
         public class Settings : BuildCommand.Settings
         {
-            [CommandOption("-p|--port")]
+            [CommandOption("--port")]
             [Description("Start the preview web server on the specified port (default is 5080).")]
             public int Port { get; set; } = 5080;
 
@@ -65,10 +65,12 @@ namespace Statiq.App
                 ILogger logger = engineManager.Engine.Services.GetRequiredService<ILogger<Bootstrapper>>();
 
                 // Execute the engine for the first time
-                CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
-                if (!await engineManager.ExecuteAsync(cancellationTokenSource))
+                using (CancellationTokenSource cancellationTokenSource = new CancellationTokenSource())
                 {
-                    return (int)ExitCode.ExecutionError;
+                    if (!await engineManager.ExecuteAsync(settings.Pipelines, cancellationTokenSource))
+                    {
+                        return (int)ExitCode.ExecutionError;
+                    }
                 }
 
                 // Start the preview server
@@ -165,10 +167,12 @@ namespace Statiq.App
                         }
 
                         // If there was an execution error due to reload, keep previewing but clear the cache
-                        cancellationTokenSource = new CancellationTokenSource();
-                        exitCode = await engineManager.ExecuteAsync(cancellationTokenSource)
-                            ? ExitCode.Normal
-                            : ExitCode.ExecutionError;
+                        using (CancellationTokenSource cancellationTokenSource = new CancellationTokenSource())
+                        {
+                            exitCode = await engineManager.ExecuteAsync(settings.Pipelines, cancellationTokenSource)
+                                ? ExitCode.Normal
+                                : ExitCode.ExecutionError;
+                        }
 
                         // Reset the reset cache setting after removing it
                         if (setResetCacheSetting)

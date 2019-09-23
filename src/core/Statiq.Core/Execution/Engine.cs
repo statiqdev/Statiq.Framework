@@ -35,11 +35,11 @@ namespace Statiq.Core
             }
         }
 
-        private readonly PipelineCollection _pipelines = new PipelineCollection();
+        private readonly PipelineCollection _pipelines;
         private readonly DiagnosticsTraceListener _diagnosticsTraceListener;
         private readonly ILogger _logger;
 
-        // Gets initialized on first execute
+        // Gets initialized on first execute and reset when the pipeline collection changes
         private PipelinePhase[] _phases;
 
         private bool _disposed;
@@ -77,6 +77,7 @@ namespace Statiq.Core
         /// <param name="serviceCollection">The service collection (or <c>null</c> for an empty default service collection).</param>
         public Engine(ApplicationState applicationState, IServiceCollection serviceCollection)
         {
+            _pipelines = new PipelineCollection(this);
             ApplicationState = applicationState ?? new ApplicationState(null, null, null);
             Services = GetServiceProvider(serviceCollection);
             _logger = Services.GetRequiredService<ILogger<Engine>>();
@@ -137,6 +138,8 @@ namespace Statiq.Core
         public IMemoryStreamFactory MemoryStreamFactory { get; } = new MemoryStreamFactory();
 
         internal DocumentFactory DocumentFactory { get; }
+
+        internal void ResetPipelinePhases() => _phases = null;
 
         /// <inheritdoc />
         public void SetDefaultDocumentType<TDocument>()
@@ -214,9 +217,28 @@ namespace Statiq.Core
         }
 
         /// <summary>
-        /// Executes the engine. This is the primary method that kicks off generation.
+        /// Executes pipelines with <see cref="PipelineTrigger.Default"/> and <see cref="PipelineTrigger.Always"/> triggers.
         /// </summary>
-        public async Task<IPipelineOutputs> ExecuteAsync(CancellationTokenSource cancellationTokenSource)
+        /// <param name="cancellationTokenSource">
+        /// A cancellation token source that can be used to cancel the execution.
+        /// </param>
+        /// <returns>The output documents from each executed pipeline.</returns>
+        public Task<IPipelineOutputs> ExecuteAsync(CancellationTokenSource cancellationTokenSource) =>
+            ExecuteAsync(null, cancellationTokenSource);
+
+        /// <summary>
+        /// Executes the specified pipelines and pipelines with <see cref="PipelineTrigger.Always"/> triggers.
+        /// </summary>
+        /// <param name="pipelines">
+        /// The pipelines to trigger or <c>null</c> to trigger pipelines with
+        /// <see cref="PipelineTrigger.Default"/> and <see cref="PipelineTrigger.Always"/> triggers.
+        /// To only trigger pipelines with <see cref="PipelineTrigger.Always"/> provide a zero-length array.
+        /// </param>
+        /// <param name="cancellationTokenSource">
+        /// A cancellation token source that can be used to cancel the execution.
+        /// </param>
+        /// <returns>The output documents from each executed pipeline.</returns>
+        public async Task<IPipelineOutputs> ExecuteAsync(string[] pipelines, CancellationTokenSource cancellationTokenSource)
         {
             // Setup
             await default(SynchronizationContextRemover);
@@ -225,19 +247,29 @@ namespace Statiq.Core
             ConcurrentDictionary<string, PhaseResult[]> phaseResults =
                 new ConcurrentDictionary<string, PhaseResult[]>(StringComparer.OrdinalIgnoreCase);
             PipelineOutputs outputs = new PipelineOutputs(phaseResults);
-            _logger.LogInformation($"Executing {_pipelines.Count} pipelines (execution ID {executionId})");
+
+            // Create the pipeline phases (this also validates the pipeline graph)
+            if (_phases == null)
+            {
+                _phases = GetPipelinePhases(_pipelines, _logger);
+            }
+
+            // Verify pipelines
+            HashSet<string> triggeredPipelines = GetTriggeredPipelines(pipelines);
+            if (triggeredPipelines.Count == 0)
+            {
+                _logger.LogWarning("No pipelines are configured or specified.");
+                return outputs;
+            }
+
+            // Log
+            _logger.LogInformation($"Executing {triggeredPipelines.Count} pipelines ({string.Join(", ", triggeredPipelines.OrderBy(x => x))}");
+            _logger.LogDebug($"Execution ID {executionId}");
             _logger.LogInformation($"Using {JsEngineSwitcher.Current.DefaultEngineName} as the JavaScript engine");
             System.Diagnostics.Stopwatch stopwatch = System.Diagnostics.Stopwatch.StartNew();
 
             // Raise before event
             await Events.RaiseAsync(new BeforeEngineExecution(this, executionId));
-
-            // Make sure we've actually configured some pipelines
-            if (_pipelines.Count == 0)
-            {
-                _logger.LogWarning("No pipelines are configured.");
-                return outputs;
-            }
 
             // Do a check for the same input/output path
             if (FileSystem.InputPaths.Any(x => x.Equals(FileSystem.OutputPath)))
@@ -245,18 +277,11 @@ namespace Statiq.Core
                 _logger.LogWarning("The output path is also one of the input paths which can cause unexpected behavior and is usually not advised");
             }
 
+            // Clean paths
             CleanTempPath();
-
-            // Clean the output folder if requested
             if (Settings.GetBool(Keys.CleanOutputPath))
             {
                 CleanOutputPath();
-            }
-
-            // Create the pipeline phases
-            if (_phases == null)
-            {
-                _phases = GetPipelinePhases(_pipelines, _logger);
             }
 
             // Get phase tasks
@@ -264,7 +289,7 @@ namespace Statiq.Core
             try
             {
                 // Get and execute all phases
-                phaseTasks = GetPhaseTasks(executionId, phaseResults, cancellationTokenSource);
+                phaseTasks = GetPhaseTasks(executionId, triggeredPipelines, phaseResults, cancellationTokenSource);
                 await Task.WhenAll(phaseTasks);
             }
             catch (Exception ex)
@@ -318,8 +343,52 @@ namespace Statiq.Core
             return outputs;
         }
 
+        // Internal for testing
+        internal HashSet<string> GetTriggeredPipelines(string[] pipelines)
+        {
+            // Validate
+            if (pipelines != null)
+            {
+                foreach (string pipeline in pipelines)
+                {
+                    if (!_pipelines.ContainsKey(pipeline))
+                    {
+                        throw new ArgumentException($"Pipeline {pipeline} does not exist", nameof(pipelines));
+                    }
+                }
+            }
+
+            HashSet<string> triggered = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            foreach (KeyValuePair<string, IPipeline> kvp in _pipelines)
+            {
+                // If it's always triggered,
+                // there are no specified pipelines and it's default triggered,
+                // or it's one of the specified pipelines...
+                if (kvp.Value.Trigger == PipelineTrigger.Always
+                    || (pipelines == null && kvp.Value.Trigger == PipelineTrigger.Default)
+                    || (pipelines?.Any(x => x.Equals(kvp.Key, StringComparison.OrdinalIgnoreCase)) == true))
+                {
+                    AddPipelineAndDependencies(kvp.Key);
+                }
+            }
+
+            void AddPipelineAndDependencies(string pipelineName)
+            {
+                if (triggered.Add(pipelineName))
+                {
+                    foreach (string dependency in _pipelines[pipelineName].Dependencies)
+                    {
+                        AddPipelineAndDependencies(dependency);
+                    }
+                }
+            }
+
+            return triggered;
+        }
+
         // The result array is sorted based on dependencies
-        private static PipelinePhase[] GetPipelinePhases(PipelineCollection pipelines, ILogger logger)
+        // Internal for testing
+        internal static PipelinePhase[] GetPipelinePhases(IPipelineCollection pipelines, ILogger logger)
         {
             // Perform a topological sort to create phases down the dependency tree
             Dictionary<string, PipelinePhases> phases = new Dictionary<string, PipelinePhases>(StringComparer.OrdinalIgnoreCase);
@@ -353,6 +422,12 @@ namespace Statiq.Core
 
                 if (pipeline.Isolated)
                 {
+                    // Sanity check
+                    if (pipeline.Dependencies?.Count > 0)
+                    {
+                        throw new PipelineException($"Isolated pipeline {name} can not have dependencies");
+                    }
+
                     // This is an isolated pipeline so just add the phases in a chain
                     pipelinePhases = new PipelinePhases(true);
                     pipelinePhases.Input = new PipelinePhase(pipeline, name, Phase.Input, pipeline.InputModules, logger);
@@ -374,11 +449,15 @@ namespace Statiq.Core
                         {
                             if (!pipelines.TryGetValue(dependencyName, out IPipeline dependency))
                             {
-                                throw new Exception($"Could not find pipeline dependency {dependencyName} of {name}");
+                                throw new PipelineException($"Could not find pipeline dependency {dependencyName} of {name}");
                             }
                             if (dependency.Isolated)
                             {
-                                throw new Exception($"Pipeline {name} has dependency on isolated pipeline {dependencyName}");
+                                throw new PipelineException($"Pipeline {name} can not have dependency on isolated pipeline {dependencyName}");
+                            }
+                            if (dependency.Trigger == PipelineTrigger.Manual)
+                            {
+                                throw new PipelineException($"Pipeline {name} can not have dependency on manually triggered pipeline {dependencyName}");
                             }
                             processDependencies.Add(Visit(dependencyName, dependency).Process);
                         }
@@ -396,7 +475,7 @@ namespace Statiq.Core
                 }
                 else if (!phases.TryGetValue(name, out pipelinePhases))
                 {
-                    throw new Exception($"Pipeline cyclical dependency detected involving {name}");
+                    throw new PipelineException($"Pipeline cyclical dependency detected involving {name}");
                 }
 
                 return pipelinePhases;
@@ -405,11 +484,12 @@ namespace Statiq.Core
 
         private Task[] GetPhaseTasks(
             Guid executionId,
+            HashSet<string> triggeredPipelines,
             ConcurrentDictionary<string, PhaseResult[]> phaseResults,
             CancellationTokenSource cancellationTokenSource)
         {
             Dictionary<PipelinePhase, Task> phaseTasks = new Dictionary<PipelinePhase, Task>();
-            foreach (PipelinePhase phase in _phases)
+            foreach (PipelinePhase phase in _phases.Where(x => triggeredPipelines.Contains(x.PipelineName)))
             {
                 phaseTasks.Add(phase, GetPhaseTaskAsync(executionId, phaseResults, phaseTasks, phase, cancellationTokenSource));
             }
@@ -445,7 +525,7 @@ namespace Statiq.Core
                         // Otherwise, throw an exception so that this dependency is also skipped by it's dependents
                         string error = $"{phase.PipelineName}/{phase.Phase} » Skipping pipeline due to dependency error";
                         _logger.LogError(error);
-                        throw new Exception(error);
+                        throw new ExecutionException(error);
                     }
                 }, cancellationTokenSource.Token);
         }

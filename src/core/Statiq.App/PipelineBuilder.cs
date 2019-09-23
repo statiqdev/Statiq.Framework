@@ -140,33 +140,6 @@ namespace Statiq.App
             return this;
         }
 
-        public PipelineBuilder WithDependencies(params string[] dependencies)
-        {
-            _actions.Add(x => x.WithDependencies(dependencies));
-            return this;
-        }
-
-        public PipelineBuilder WithDependencies(IEnumerable<string> dependencies)
-        {
-            if (dependencies != null)
-            {
-                _actions.Add(x => x.WithDependencies(dependencies));
-            }
-            return this;
-        }
-
-        public PipelineBuilder AsIsolated(bool isolated = true)
-        {
-            _actions.Add(x => x.AsIsolated(isolated));
-            return this;
-        }
-
-        public PipelineBuilder AlwaysProcess(bool alwaysProcess = true)
-        {
-            _actions.Add(x => x.AlwaysProcess(alwaysProcess));
-            return this;
-        }
-
         public PipelineBuilder WithInputConfig(Config<object> config)
         {
             _actions.Add(x => x.WithInputConfig(config));
@@ -188,6 +161,51 @@ namespace Statiq.App
         public PipelineBuilder WithOutputConfig(Config<object> config)
         {
             _actions.Add(x => x.WithOutputConfig(config));
+            return this;
+        }
+
+        public PipelineBuilder WithDependencies(params string[] dependencies)
+        {
+            _actions.Add(x => x.WithDependencies(dependencies));
+            return this;
+        }
+
+        public PipelineBuilder WithDependencies(IEnumerable<string> dependencies)
+        {
+            if (dependencies != null)
+            {
+                _actions.Add(x => x.WithDependencies(dependencies));
+            }
+            return this;
+        }
+
+        public PipelineBuilder AsIsolated(bool isolated = true)
+        {
+            _actions.Add(x => x.AsIsolated(isolated));
+            return this;
+        }
+
+        public PipelineBuilder WithTrigger(PipelineTrigger trigger)
+        {
+            _actions.Add(x => x.WithTrigger(trigger));
+            return this;
+        }
+
+        public PipelineBuilder WithManualTrigger()
+        {
+            _actions.Add(x => x.WithManualTrigger());
+            return this;
+        }
+
+        public PipelineBuilder WithDependencyTrigger()
+        {
+            _actions.Add(x => x.WithDependencyTrigger());
+            return this;
+        }
+
+        public PipelineBuilder WithAlwaysTrigger()
+        {
+            _actions.Add(x => x.WithAlwaysTrigger());
             return this;
         }
     }

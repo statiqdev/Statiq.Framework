@@ -12,18 +12,40 @@ namespace Statiq.Common
     /// </remarks>
     public interface IPipeline
     {
+        /// <summary>
+        /// Modules that will execute during the input phase.
+        /// </summary>
         ModuleList InputModules { get; }
 
+        /// <summary>
+        /// Modules that will execute during the process phase.
+        /// </summary>
         ModuleList ProcessModules { get; }
 
+        /// <summary>
+        /// Modules that will execute during the transform phase.
+        /// </summary>
         ModuleList TransformModules { get; }
 
+        /// <summary>
+        /// Modules that will execute during the output phase.
+        /// </summary>
         ModuleList OutputModules { get; }
 
+        /// <summary>
+        /// The names of pipelines this pipeline depends on.
+        /// </summary>
         HashSet<string> Dependencies { get; }
 
+        /// <summary>
+        /// An isolated pipeline runs immediately without any dependencies and
+        /// has restrictions on accessing documents from other pipelines.
+        /// </summary>
         bool Isolated { get; set; }
 
-        bool AlwaysProcess { get; set; }
+        /// <summary>
+        /// Indicates when the pipeline is executed.
+        /// </summary>
+        PipelineTrigger Trigger { get; set; }
     }
 }

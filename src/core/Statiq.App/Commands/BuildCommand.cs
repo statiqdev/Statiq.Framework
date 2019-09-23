@@ -36,6 +36,10 @@ namespace Statiq.App
             [Description("Specifies a setting as a key=value pair. Use the syntax [x,y] to specify an array value.")]
             public string[] MetadataSettings { get; set; }
 
+            [CommandOption("-p|--pipeline")]
+            [Description("Explicitly specifies one or more pipelines to execute.")]
+            public string[] Pipelines { get; set; }
+
             [CommandArgument(0, "[root]")]
             [Description("The root folder to use.")]
             public string RootPath { get; set; }
@@ -53,12 +57,14 @@ namespace Statiq.App
 
         public override async Task<int> ExecuteCommandAsync(CommandContext context, Settings settings)
         {
-            CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
-            using (EngineManager engineManager = new EngineManager(_serviceCollection, _bootstrapper, this, settings))
+            using (CancellationTokenSource cancellationTokenSource = new CancellationTokenSource())
             {
-                return await engineManager.ExecuteAsync(cancellationTokenSource)
-                    ? (int)ExitCode.Normal
-                    : (int)ExitCode.ExecutionError;
+                using (EngineManager engineManager = new EngineManager(_serviceCollection, _bootstrapper, this, settings))
+                {
+                    return await engineManager.ExecuteAsync(settings.Pipelines, cancellationTokenSource)
+                        ? (int)ExitCode.Normal
+                        : (int)ExitCode.ExecutionError;
+                }
             }
         }
     }

@@ -28,7 +28,7 @@ namespace Statiq.Core.Tests.Documents
                 TestDocument d2 = new TestDocument("d2");
                 ConcurrentDictionary<string, PhaseResult[]> phaseResults =
                     new ConcurrentDictionary<string, PhaseResult[]>(StringComparer.OrdinalIgnoreCase);
-                IPipelineCollection pipelines = new PipelineCollection();
+                IPipelineCollection pipelines = new TestPipelineCollection();
                 PipelinePhase phaseA =
                     GetPipelineAndPhase("A", Phase.Process, pipelines, phaseResults, new[] { a1 });
                 PipelinePhase phaseB =
@@ -58,7 +58,7 @@ namespace Statiq.Core.Tests.Documents
                 TestDocument d2 = new TestDocument("d2");
                 ConcurrentDictionary<string, PhaseResult[]> phaseResults =
                     new ConcurrentDictionary<string, PhaseResult[]>(StringComparer.OrdinalIgnoreCase);
-                IPipelineCollection pipelines = new PipelineCollection();
+                IPipelineCollection pipelines = new TestPipelineCollection();
                 PipelinePhase phaseA =
                     GetPipelineAndPhase("A", Phase.Transform, pipelines, phaseResults, new[] { a1 });
                 PipelinePhase phaseB =
@@ -82,7 +82,7 @@ namespace Statiq.Core.Tests.Documents
                 // Given
                 ConcurrentDictionary<string, PhaseResult[]> phaseResults =
                     new ConcurrentDictionary<string, PhaseResult[]>(StringComparer.OrdinalIgnoreCase);
-                IPipelineCollection pipelines = new PipelineCollection();
+                IPipelineCollection pipelines = new TestPipelineCollection();
                 PipelinePhase phase = GetPipelineAndPhase("A", Phase.Process, pipelines, phaseResults, Array.Empty<IDocument>());
                 phase.Pipeline.Isolated = true;
                 ProcessPhaseOutputs documentCollection = new ProcessPhaseOutputs(phaseResults, phase, pipelines);
@@ -97,7 +97,7 @@ namespace Statiq.Core.Tests.Documents
                 // Given
                 ConcurrentDictionary<string, PhaseResult[]> documents =
                     new ConcurrentDictionary<string, PhaseResult[]>(StringComparer.OrdinalIgnoreCase);
-                IPipelineCollection pipelines = new PipelineCollection();
+                IPipelineCollection pipelines = new TestPipelineCollection();
                 PipelinePhase phase = GetPipelineAndPhase("A", Phase.Input, pipelines, documents, Array.Empty<IDocument>());
                 phase.Pipeline.Isolated = true;
                 ProcessPhaseOutputs documentCollection = new ProcessPhaseOutputs(documents, phase, pipelines);
@@ -112,7 +112,7 @@ namespace Statiq.Core.Tests.Documents
                 // Given
                 ConcurrentDictionary<string, PhaseResult[]> phaseResults =
                     new ConcurrentDictionary<string, PhaseResult[]>(StringComparer.OrdinalIgnoreCase);
-                IPipelineCollection pipelines = new PipelineCollection();
+                IPipelineCollection pipelines = new TestPipelineCollection();
                 PipelinePhase phase = GetPipelineAndPhase("A", Phase.Output, pipelines, phaseResults, Array.Empty<IDocument>());
                 phase.Pipeline.Isolated = true;
                 ProcessPhaseOutputs documentCollection = new ProcessPhaseOutputs(phaseResults, phase, pipelines);
@@ -136,7 +136,7 @@ namespace Statiq.Core.Tests.Documents
                 TestDocument d2 = new TestDocument("d2");
                 ConcurrentDictionary<string, PhaseResult[]> phaseResults =
                     new ConcurrentDictionary<string, PhaseResult[]>(StringComparer.OrdinalIgnoreCase);
-                IPipelineCollection pipelines = new PipelineCollection();
+                IPipelineCollection pipelines = new TestPipelineCollection();
                 PipelinePhase phaseA =
                     GetPipelineAndPhase("A", Phase.Process, pipelines, phaseResults, new[] { a1 });
                 PipelinePhase phaseB =
@@ -166,7 +166,7 @@ namespace Statiq.Core.Tests.Documents
                 TestDocument d2 = new TestDocument("d2");
                 ConcurrentDictionary<string, PhaseResult[]> phaseResults =
                     new ConcurrentDictionary<string, PhaseResult[]>(StringComparer.OrdinalIgnoreCase);
-                IPipelineCollection pipelines = new PipelineCollection();
+                IPipelineCollection pipelines = new TestPipelineCollection();
                 PipelinePhase phaseA =
                     GetPipelineAndPhase("A", Phase.Transform, pipelines, phaseResults, new[] { a1 });
                 PipelinePhase phaseB =
@@ -193,7 +193,7 @@ namespace Statiq.Core.Tests.Documents
                 // Given
                 ConcurrentDictionary<string, PhaseResult[]> phaseResults =
                     new ConcurrentDictionary<string, PhaseResult[]>(StringComparer.OrdinalIgnoreCase);
-                IPipelineCollection pipelines = new PipelineCollection();
+                IPipelineCollection pipelines = new TestPipelineCollection();
                 PipelinePhase phase = GetPipelineAndPhase("A", Phase.Transform, pipelines, phaseResults, Array.Empty<IDocument>());
                 ProcessPhaseOutputs documentCollection = new ProcessPhaseOutputs(phaseResults, phase, pipelines);
 
@@ -207,7 +207,7 @@ namespace Statiq.Core.Tests.Documents
                 // Given
                 ConcurrentDictionary<string, PhaseResult[]> phaseResults =
                     new ConcurrentDictionary<string, PhaseResult[]>(StringComparer.OrdinalIgnoreCase);
-                IPipelineCollection pipelines = new PipelineCollection();
+                IPipelineCollection pipelines = new TestPipelineCollection();
                 PipelinePhase phase = GetPipelineAndPhase("A", Phase.Transform, pipelines, phaseResults, Array.Empty<IDocument>());
                 ProcessPhaseOutputs documentCollection = new ProcessPhaseOutputs(phaseResults, phase, pipelines);
 
@@ -221,7 +221,7 @@ namespace Statiq.Core.Tests.Documents
                 // Given
                 ConcurrentDictionary<string, PhaseResult[]> phaseResults =
                     new ConcurrentDictionary<string, PhaseResult[]>(StringComparer.OrdinalIgnoreCase);
-                IPipelineCollection pipelines = new PipelineCollection();
+                IPipelineCollection pipelines = new TestPipelineCollection();
                 PipelinePhase phase = GetPipelineAndPhase("A", Phase.Process, pipelines, phaseResults, Array.Empty<IDocument>());
                 ProcessPhaseOutputs documentCollection = new ProcessPhaseOutputs(phaseResults, phase, pipelines);
 
@@ -235,7 +235,7 @@ namespace Statiq.Core.Tests.Documents
                 // Given
                 ConcurrentDictionary<string, PhaseResult[]> phaseResults =
                     new ConcurrentDictionary<string, PhaseResult[]>(StringComparer.OrdinalIgnoreCase);
-                IPipelineCollection pipelines = new PipelineCollection();
+                IPipelineCollection pipelines = new TestPipelineCollection();
                 PipelinePhase phase = GetPipelineAndPhase("A", Phase.Transform, pipelines, phaseResults, Array.Empty<IDocument>());
                 ProcessPhaseOutputs documentCollection = new ProcessPhaseOutputs(phaseResults, phase, pipelines);
 
@@ -255,7 +255,7 @@ namespace Statiq.Core.Tests.Documents
                 TestDocument d2 = new TestDocument("d2");
                 ConcurrentDictionary<string, PhaseResult[]> phaseResults =
                     new ConcurrentDictionary<string, PhaseResult[]>(StringComparer.OrdinalIgnoreCase);
-                IPipelineCollection pipelines = new PipelineCollection();
+                IPipelineCollection pipelines = new TestPipelineCollection();
                 PipelinePhase phaseA =
                     GetPipelineAndPhase("A", Phase.Process, pipelines, phaseResults, new[] { a1 });
                 PipelinePhase phaseB =
@@ -282,7 +282,7 @@ namespace Statiq.Core.Tests.Documents
                 TestDocument d2 = new TestDocument("d2");
                 ConcurrentDictionary<string, PhaseResult[]> phaseResults =
                     new ConcurrentDictionary<string, PhaseResult[]>(StringComparer.OrdinalIgnoreCase);
-                IPipelineCollection pipelines = new PipelineCollection();
+                IPipelineCollection pipelines = new TestPipelineCollection();
                 PipelinePhase phaseA =
                     GetPipelineAndPhase("A", Phase.Transform, pipelines, phaseResults, new[] { a1 });
                 PipelinePhase phaseB =
@@ -312,7 +312,7 @@ namespace Statiq.Core.Tests.Documents
                 TestDocument d2 = new TestDocument("d2");
                 ConcurrentDictionary<string, PhaseResult[]> phaseResults =
                     new ConcurrentDictionary<string, PhaseResult[]>(StringComparer.OrdinalIgnoreCase);
-                IPipelineCollection pipelines = new PipelineCollection();
+                IPipelineCollection pipelines = new TestPipelineCollection();
                 PipelinePhase phaseA =
                     GetPipelineAndPhase("A", Phase.Transform, pipelines, phaseResults, new[] { a1 });
                 PipelinePhase phaseB =
@@ -342,7 +342,7 @@ namespace Statiq.Core.Tests.Documents
                 TestDocument d2 = new TestDocument("d2");
                 ConcurrentDictionary<string, PhaseResult[]> phaseResults =
                     new ConcurrentDictionary<string, PhaseResult[]>(StringComparer.OrdinalIgnoreCase);
-                IPipelineCollection pipelines = new PipelineCollection();
+                IPipelineCollection pipelines = new TestPipelineCollection();
                 PipelinePhase phaseA =
                     GetPipelineAndPhase("A", Phase.Process, pipelines, phaseResults, new[] { a1 });
                 PipelinePhase phaseB =
@@ -369,7 +369,7 @@ namespace Statiq.Core.Tests.Documents
                 TestDocument d2 = new TestDocument("d2");
                 ConcurrentDictionary<string, PhaseResult[]> phaseResults =
                     new ConcurrentDictionary<string, PhaseResult[]>(StringComparer.OrdinalIgnoreCase);
-                IPipelineCollection pipelines = new PipelineCollection();
+                IPipelineCollection pipelines = new TestPipelineCollection();
                 PipelinePhase phaseA =
                     GetPipelineAndPhase("A", Phase.Process, pipelines, phaseResults, new[] { a1 });
                 PipelinePhase phaseB =
@@ -399,7 +399,7 @@ namespace Statiq.Core.Tests.Documents
                 TestDocument d2 = new TestDocument("d2");
                 ConcurrentDictionary<string, PhaseResult[]> phaseResults =
                     new ConcurrentDictionary<string, PhaseResult[]>(StringComparer.OrdinalIgnoreCase);
-                IPipelineCollection pipelines = new PipelineCollection();
+                IPipelineCollection pipelines = new TestPipelineCollection();
                 PipelinePhase phaseA =
                     GetPipelineAndPhase("A", Phase.Process, pipelines, phaseResults, new[] { a1 });
                 PipelinePhase phaseB =

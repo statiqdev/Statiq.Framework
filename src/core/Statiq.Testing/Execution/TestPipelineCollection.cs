@@ -3,37 +3,23 @@ using System.Collections;
 using System.Collections.Generic;
 using Statiq.Common;
 
-namespace Statiq.Core
+namespace Statiq.Testing
 {
-    // Implement dictionary explicitly so that we can disallow null pipelines
-    // This resets the pipeline phases collection in the engine on changes
-    internal class PipelineCollection : IPipelineCollection
+    public class TestPipelineCollection : IPipelineCollection
     {
-        private readonly Dictionary<string, IPipeline> _pipelines =
-            new Dictionary<string, IPipeline>(StringComparer.OrdinalIgnoreCase);
-        private readonly Engine _engine;
-
-        public PipelineCollection(Engine engine)
-        {
-            _engine = engine;
-        }
+        private readonly Dictionary<string, IPipeline> _pipelines = new Dictionary<string, IPipeline>();
 
         public IPipeline Add(string name)
         {
-            IPipeline pipeline = new Pipeline();
+            IPipeline pipeline = new TestPipeline();
             Add(name, pipeline);
-            _engine.ResetPipelinePhases();
             return pipeline;
         }
 
         public IPipeline this[string name]
         {
             get => _pipelines[name];
-            set
-            {
-                _pipelines[name] = value ?? throw new ArgumentNullException(nameof(value));
-                _engine.ResetPipelinePhases();
-            }
+            set => _pipelines[name] = value ?? throw new ArgumentNullException(nameof(value));
         }
 
         public ICollection<string> Keys => ((IDictionary<string, IPipeline>)_pipelines).Keys;
@@ -44,13 +30,10 @@ namespace Statiq.Core
 
         public bool IsReadOnly => ((IDictionary<string, IPipeline>)_pipelines).IsReadOnly;
 
-        public void Add(string name, IPipeline value)
-        {
+        public void Add(string name, IPipeline value) =>
             _pipelines.Add(
                 name ?? throw new ArgumentNullException(nameof(name)),
                 value ?? throw new ArgumentNullException(nameof(value)));
-            _engine.ResetPipelinePhases();
-        }
 
         public void Add(KeyValuePair<string, IPipeline> item)
         {
@@ -59,14 +42,9 @@ namespace Statiq.Core
                 throw new ArgumentNullException(nameof(item.Value));
             }
             ((IDictionary<string, IPipeline>)_pipelines).Add(item);
-            _engine.ResetPipelinePhases();
         }
 
-        public void Clear()
-        {
-            _pipelines.Clear();
-            _engine.ResetPipelinePhases();
-        }
+        public void Clear() => _pipelines.Clear();
 
         public bool Contains(KeyValuePair<string, IPipeline> item) => ((IDictionary<string, IPipeline>)_pipelines).Contains(item);
 
@@ -75,25 +53,10 @@ namespace Statiq.Core
         public void CopyTo(KeyValuePair<string, IPipeline>[] array, int arrayIndex) =>
             ((IDictionary<string, IPipeline>)_pipelines).CopyTo(array, arrayIndex);
 
-        public bool Remove(string name)
-        {
-            if (_pipelines.Remove(name))
-            {
-                _engine.ResetPipelinePhases();
-                return true;
-            }
-            return false;
-        }
+        public bool Remove(string name) => _pipelines.Remove(name);
 
-        public bool Remove(KeyValuePair<string, IPipeline> item)
-        {
-            if (((IDictionary<string, IPipeline>)_pipelines).Remove(item))
-            {
-                _engine.ResetPipelinePhases();
-                return true;
-            }
-            return false;
-        }
+        public bool Remove(KeyValuePair<string, IPipeline> item) =>
+            ((IDictionary<string, IPipeline>)_pipelines).Remove(item);
 
         public bool TryGetValue(string name, out IPipeline value) =>
             _pipelines.TryGetValue(name, out value);

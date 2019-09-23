@@ -81,10 +81,31 @@ namespace Statiq.Common
             return pipeline;
         }
 
-        public static TPipeline AlwaysProcess<TPipeline>(this TPipeline pipeline, bool alwaysProcess = true)
+        public static TPipeline WithTrigger<TPipeline>(this TPipeline pipeline, PipelineTrigger trigger)
             where TPipeline : IPipeline
         {
-            pipeline.AlwaysProcess = alwaysProcess;
+            pipeline.Trigger = trigger;
+            return pipeline;
+        }
+
+        public static TPipeline WithManualTrigger<TPipeline>(this TPipeline pipeline)
+            where TPipeline : IPipeline
+        {
+            pipeline.Trigger = PipelineTrigger.Manual;
+            return pipeline;
+        }
+
+        public static TPipeline WithDependencyTrigger<TPipeline>(this TPipeline pipeline)
+            where TPipeline : IPipeline
+        {
+            pipeline.Trigger = PipelineTrigger.Dependency;
+            return pipeline;
+        }
+
+        public static TPipeline WithAlwaysTrigger<TPipeline>(this TPipeline pipeline)
+            where TPipeline : IPipeline
+        {
+            pipeline.Trigger = PipelineTrigger.Always;
             return pipeline;
         }
     }

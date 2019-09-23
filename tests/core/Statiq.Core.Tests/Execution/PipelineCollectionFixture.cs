@@ -13,7 +13,8 @@ namespace Statiq.Core.Tests.Execution
             public void ThrowsForDuplicateName()
             {
                 // Given
-                PipelineCollection pipelines = new PipelineCollection();
+                Engine engine = new Engine();
+                PipelineCollection pipelines = new PipelineCollection(engine);
                 pipelines.Add("Foo");
 
                 // When, Then
@@ -24,7 +25,8 @@ namespace Statiq.Core.Tests.Execution
             public void ThrowsForDuplicateNameWithDifferentCase()
             {
                 // Given
-                PipelineCollection pipelines = new PipelineCollection();
+                Engine engine = new Engine();
+                PipelineCollection pipelines = new PipelineCollection(engine);
                 pipelines.Add("Foo");
 
                 // When, Then
@@ -38,7 +40,8 @@ namespace Statiq.Core.Tests.Execution
             public void ReturnsTrueForDifferentCase()
             {
                 // Given
-                PipelineCollection pipelines = new PipelineCollection();
+                Engine engine = new Engine();
+                PipelineCollection pipelines = new PipelineCollection(engine);
                 pipelines.Add("Test");
 
                 // When
