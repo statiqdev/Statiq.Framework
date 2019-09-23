@@ -7,7 +7,8 @@ namespace Statiq.Testing
 {
     public class TestPipelineCollection : IPipelineCollection
     {
-        private readonly Dictionary<string, IPipeline> _pipelines = new Dictionary<string, IPipeline>();
+        private readonly Dictionary<string, IPipeline> _pipelines =
+            new Dictionary<string, IPipeline>(StringComparer.OrdinalIgnoreCase);
 
         public IPipeline Add(string name)
         {

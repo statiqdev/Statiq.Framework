@@ -61,9 +61,9 @@ namespace Statiq.App.Tests.Bootstrapper
                     && x.FormattedMessage == "No pipelines are configured or specified.");
             }
 
-            [TestCase("Trace", 6)]
-            [TestCase("Debug", 5)]
-            [TestCase("Information", 4)]
+            [TestCase("Trace", 19)] // Includes module start/finish
+            [TestCase("Debug", 18)] // Include modules start/finish
+            [TestCase("Information", 5)] // Includes pipeline finish
             [TestCase("Warning", 3)]
             [TestCase("Error", 2)]
             [TestCase("Critical", 1)]
@@ -92,7 +92,7 @@ namespace Statiq.App.Tests.Bootstrapper
 
                 // Then
                 exitCode.ShouldBe((int)ExitCode.Normal);
-                provider.Messages.Count(x => x.FormattedMessage.StartsWith("Foo")).ShouldBe(expected);
+                provider.Messages.Count(x => x.FormattedMessage.StartsWith("Foo/Process")).ShouldBe(expected);
             }
 
             [Test]
