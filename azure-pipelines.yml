@@ -9,7 +9,6 @@ jobs:
   - task: UseDotNet@2
     inputs:
       version: '3.x'
-      includePreviewVersions: true
   - script: build -target BuildServer
     env:
       SYSTEM_ACCESSTOKEN: $(System.AccessToken)

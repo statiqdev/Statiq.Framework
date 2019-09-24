@@ -1,5 +1,6 @@
 # 1.0.0-alpha.4
 
+- Updated to .NET Core 3.0 final
 - Ongoing console logging improvements
 - Added trigger conditions to pipelines to include always running or manually running
 - Added a `-p`/`--pipeline` CLI argument to indicate which pipelines to execute
