@@ -1,6 +1,8 @@
 # 1.0.0-alpha.4
 
 - Updated to .NET Core 3.0 final
+- The bootstrapper now adds environment variables to the settings by default with ALL_CAPS keys
+- Any setting with an ALL_CAPS key is masked during debug output on startup
 - Ongoing console logging improvements
 - Added trigger conditions to pipelines to include always running or manually running
 - Added a `-p`/`--pipeline` CLI argument to indicate which pipelines to execute

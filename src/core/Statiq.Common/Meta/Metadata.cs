@@ -80,9 +80,8 @@ namespace Statiq.Common
 
         public IEnumerable<object> Values => this.Select(x => x.Value);
 
-#pragma warning disable RCS1077 // We want to count the enumerable items, not recursivly call this property
-        public int Count => this.Count();
-#pragma warning restore RCS1077
+        // The Select ensures LINQ optimizations won't turn this into a recursive call to Count
+        public int Count => this.Select(_ => (object)null).Count();
 
         public IEnumerator<KeyValuePair<string, object>> GetEnumerator()
         {

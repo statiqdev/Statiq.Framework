@@ -58,7 +58,7 @@ namespace Statiq.App
             _logger.LogInformation($"Input path(s):{Environment.NewLine}       {string.Join(Environment.NewLine + "       ", Engine.FileSystem.InputPaths)}");
             _logger.LogInformation($"Output path:{Environment.NewLine}       {Engine.FileSystem.OutputPath}");
             _logger.LogInformation($"Temp path:{Environment.NewLine}       {Engine.FileSystem.TempPath}");
-            _logger.LogDebug($"Settings:{Environment.NewLine}       {string.Join(Environment.NewLine + "       ", Engine.Settings.Select(x => $"{x.Key}: {x.Value?.ToString() ?? "null"}"))}");
+            _logger.LogDebug($"Settings:{Environment.NewLine}       {string.Join(Environment.NewLine + "       ", Engine.Settings.Select(x => $"{x.Key}: {(x.Key.ToUpper() == x.Key ? "****" : (x.Value?.ToString() ?? "null"))}"))}");
 
             // Make sure we clear out anything in the JavaScriptEngineSwitcher instance
             Engine.ResetJsEngines();

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Linq;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -22,11 +23,33 @@ namespace Statiq.App
 
         public IBootstrapper AddDefaults(IConfigurator<IEngine> configurator) =>
             AddDefaultLogging()
+            .AddDefaultSettings()
             .AddDefaultConfigurators()
             .AddDefaultCommands()
             .AddDefaultShortcodes()
             .AddDefaultNamespaces()
             .AddConfigurator(configurator);
+
+        public IBootstrapper AddDefaultLogging() =>
+            AddServices(services =>
+            {
+                services.AddSingleton<ILoggerProvider, ConsoleLoggerProvider>();
+                services.AddLogging(logging => logging.AddDebug());
+            });
+
+        public IBootstrapper AddDefaultSettings() =>
+            Configure<ISettings>(settings =>
+            {
+                settings.Add(Keys.LinkHideIndexPages, true);
+                settings.Add(Keys.LinkHideExtensions, true);
+                settings.Add(Keys.UseCache, true);
+                settings.Add(Keys.CleanOutputPath, true);
+
+                foreach (DictionaryEntry entry in Environment.GetEnvironmentVariables())
+                {
+                    settings.Add(entry.Key.ToString().ToUpper(), entry.Value);
+                }
+            });
 
         public IBootstrapper AddDefaultConfigurators()
         {
@@ -40,6 +63,14 @@ namespace Statiq.App
             {
                 Configurators.Add(bootstraperConfigurator);
             }
+            return this;
+        }
+
+        public IBootstrapper AddDefaultCommands()
+        {
+            SetDefaultCommand<BuildCommand>();
+            AddCommand<BuildCommand>("build");
+            AddCommand<PreviewCommand>("preview");
             return this;
         }
 
@@ -76,23 +107,5 @@ namespace Statiq.App
                         .GetAssignableFrom<IModule>()
                         .Select(x => x.Namespace));
             });
-
-        public IBootstrapper AddDefaultCommands()
-        {
-            SetDefaultCommand<BuildCommand>();
-            AddCommand<BuildCommand>("build");
-            AddCommand<PreviewCommand>("preview");
-            return this;
-        }
-
-        public IBootstrapper AddDefaultLogging()
-        {
-            AddServices(services =>
-            {
-                services.AddSingleton<ILoggerProvider, ConsoleLoggerProvider>();
-                services.AddLogging(logging => logging.AddDebug());
-            });
-            return this;
-        }
     }
 }

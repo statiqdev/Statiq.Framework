@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using NUnit.Framework;
+using Shouldly;
 using Statiq.Testing;
 
 namespace Statiq.Common.Tests.Meta
@@ -580,6 +581,54 @@ namespace Statiq.Common.Tests.Meta
 
                 // Then
                 CollectionAssert.AreEquivalent(new[] { "a", "b", "c" }, values);
+            }
+        }
+
+        public class CountTests : MetadataFixture
+        {
+            [Test]
+            public void GetsCorrectCount()
+            {
+                // Given
+                MetadataItems initialMetadata = new MetadataItems
+                {
+                    { "A", new SimpleMetadataValue { Value = "a" } },
+                    { "B", new SimpleMetadataValue { Value = "b" } },
+                    { "C", new SimpleMetadataValue { Value = "c" } }
+                };
+                Metadata metadata = new Metadata(initialMetadata);
+
+                // When
+                int count = metadata.Count;
+
+                // Then
+                count.ShouldBe(3);
+            }
+
+            [Test]
+            public void GetsCorrectCountWithPrevious()
+            {
+                // Given
+                MetadataItems initialMetadata = new MetadataItems
+                {
+                    { "A", new SimpleMetadataValue { Value = "a" } },
+                    { "B", new SimpleMetadataValue { Value = "b" } },
+                    { "C", new SimpleMetadataValue { Value = "c" } }
+                };
+                MetadataItems newMetadata = new MetadataItems
+                {
+                    { "A", new SimpleMetadataValue { Value = "a" } },
+                    { "D", new SimpleMetadataValue { Value = "b" } },
+                    { "E", new SimpleMetadataValue { Value = "c" } }
+                };
+                Metadata previous = new Metadata(initialMetadata);
+                Metadata metadata = new Metadata(previous, newMetadata);
+
+                // When
+                int count = metadata.Count;
+
+                // Then
+                count.ShouldBe(5);
             }
         }
 

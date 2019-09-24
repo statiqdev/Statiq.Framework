@@ -20,7 +20,9 @@ namespace Statiq.Common
         /// <summary>
         /// Creates a new config module.
         /// </summary>
-        /// <param name="config">The delegate to use for getting a config value.</param>
+        /// <param name="config">
+        /// The delegate to use for getting a config value. If <c>null</c>, default <typeparamref name="TValue"/> will be the value.
+        /// </param>
         /// <param name="eachDocument">
         /// <c>true</c> to call <see cref="ExecuteConfigAsync(IDocument, IExecutionContext, TValue)"/> for each
         /// input document regardless of whether the config delegate requires a document or <c>false</c>
@@ -29,8 +31,8 @@ namespace Statiq.Common
         /// </param>
         protected ParallelConfigModule(Config<TValue> config, bool eachDocument)
         {
-            _config = config;
-            _eachDocument = eachDocument || (config?.RequiresDocument ?? throw new ArgumentNullException(nameof(config)));
+            _config = config ?? Config.FromValue(default(TValue));
+            _eachDocument = eachDocument || _config.RequiresDocument;
         }
 
         /// <inheritdoc />

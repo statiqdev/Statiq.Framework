@@ -324,10 +324,10 @@ namespace Statiq.Common
         public IMetadata GetMetadata(params string[] keys) =>
             new Metadata(this.Where(x => keys.Contains(x.Key, StringComparer.OrdinalIgnoreCase)));
 
-#pragma warning disable RCS1077 // We want to count the enumerable items, not recursively call this
-        [PropertyMetadata(null)] // We have to exclude properties that use the enumerator because they cause infinite recursion
-        public int Count => this.Count();
-#pragma warning restore RCS1077
+        // We have to exclude properties that use the enumerator because they cause infinite recursion
+        // The Select ensures LINQ optimizations won't turn this into a recursive call to Count
+        [PropertyMetadata(null)]
+        public int Count => this.Select(_ => (object)null).Count();
 
         public IEnumerator<KeyValuePair<string, object>> GetEnumerator()
         {

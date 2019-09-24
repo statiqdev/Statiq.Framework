@@ -6,29 +6,31 @@ using Statiq.Testing;
 namespace Statiq.Common.Tests.Documents
 {
     [TestFixture]
-    public class DocumentFixture : BaseFixture
+    public class ObjectDocumentFixture : BaseFixture
     {
-        public class ConstructorTests : DocumentFixture
+        public class ConstructorTests : ObjectDocumentFixture
         {
             [Test]
             public void IdIsNotTheSameForDifferentDocuments()
             {
                 // Given, When
-                Document a = new Document();
-                Document b = new Document();
+                CustomObject obj = new CustomObject();
+                IDocument a = new ObjectDocument<CustomObject>(obj);
+                IDocument b = new ObjectDocument<CustomObject>(obj);
 
                 // Then
                 Assert.AreNotEqual(a.Id, b.Id);
             }
         }
 
-        public class CloneTests : DocumentFixture
+        public class CloneTests : ObjectDocumentFixture
         {
             [Test]
             public void IdIsTheSameAfterClone()
             {
                 // Given
-                IDocument document = new Document();
+                CustomObject obj = new CustomObject();
+                IDocument document = new ObjectDocument<CustomObject>(obj);
 
                 // When
                 IDocument cloned = document.Clone(null);
@@ -41,43 +43,49 @@ namespace Statiq.Common.Tests.Documents
             public void DocumentTypeTheSameAfterClone()
             {
                 // Given
-                IDocument document = new CustomDocument();
+                CustomObject obj = new CustomObject();
+                IDocument document = new ObjectDocument<CustomObject>(obj);
 
                 // When
                 IDocument cloned = document.Clone(null);
 
                 // Then
-                cloned.ShouldBeOfType<CustomDocument>();
+                cloned.ShouldBeOfType<ObjectDocument<CustomObject>>();
             }
 
             [Test]
             public void MembersAreCloned()
             {
                 // Given
-                IDocument document = new CustomDocument
+                CustomObject obj = new CustomObject
                 {
                     Foo = "abc"
                 };
+                IDocument document = new ObjectDocument<CustomObject>(obj);
 
                 // When
                 IDocument cloned = document.Clone(null);
 
                 // Then
-                ((CustomDocument)cloned).Foo.ShouldBe("abc");
+                ((ObjectDocument<CustomObject>)cloned).Object.Foo.ShouldBe("abc");
             }
         }
 
-        public class MetadataTests : DocumentFixture
+        public class MetadataTests : ObjectDocumentFixture
         {
             [Test]
             public void MetadataOverwritesSettings()
             {
                 // Given
+                CustomObject obj = new CustomObject
+                {
+                    Foo = "abc"
+                };
                 MetadataItems settings = new MetadataItems
                 {
                     { "A", "a" }
                 };
-                IDocument document = new Document(new Metadata(settings), null, null, null, null);
+                IDocument document = new ObjectDocument<CustomObject>(obj, new Metadata(settings));
                 IDocument cloned = document.Clone(new MetadataItems { { "A", "b" } });
 
                 // When
@@ -93,10 +101,11 @@ namespace Statiq.Common.Tests.Documents
             public void GetsPropertyMetadata()
             {
                 // Given
-                IDocument document = new CustomDocument
+                CustomObject obj = new CustomObject
                 {
                     Foo = "abc"
                 };
+                IDocument document = new ObjectDocument<CustomObject>(obj);
                 IDocument cloned = document.Clone(new MetadataItems { { "Foo", "xyz" } });
 
                 // When
@@ -107,43 +116,41 @@ namespace Statiq.Common.Tests.Documents
                 initialValue.ShouldBe("abc");
                 clonedValue.ShouldBe("xyz");
             }
-
-            [Test]
-            public void IncludesBaseDocumentProperties()
-            {
-                // Given, When
-                Document document = new Document();
-
-                // Then
-                document.Keys.ShouldBe(new[] { "Id", "Source", "Destination", "ContentProvider" }, true);
-            }
         }
 
-        public class CountTests : DocumentFixture
+        public class CountTests : ObjectDocumentFixture
         {
             [Test]
             public void GetsCorrectCount()
             {
                 // Given
+                CustomObject obj = new CustomObject
+                {
+                    Foo = "abc"
+                };
                 MetadataItems initialMetadata = new MetadataItems
                 {
                     { "A", "a" },
                     { "B", "b" },
                     { "C", "c" }
                 };
-                CustomDocument document = new CustomDocument(initialMetadata);
+                IDocument document = new ObjectDocument<CustomObject>(obj, initialMetadata);
 
                 // When
                 int count = document.Count;
 
                 // Then
-                count.ShouldBe(8);
+                count.ShouldBe(4);
             }
 
             [Test]
             public void GetsCorrectCountWithProperty()
             {
                 // Given
+                CustomObject obj = new CustomObject
+                {
+                    Foo = "abc"
+                };
                 MetadataItems initialMetadata = new MetadataItems
                 {
                     { "A", "a" },
@@ -151,27 +158,18 @@ namespace Statiq.Common.Tests.Documents
                     { "C", "c" },
                     { "Foo", "foo" }
                 };
-                CustomDocument document = new CustomDocument(initialMetadata);
+                IDocument document = new ObjectDocument<CustomObject>(obj, initialMetadata);
 
                 // When
                 int count = document.Count;
 
                 // Then
-                count.ShouldBe(8);
+                count.ShouldBe(4);
             }
         }
 
-        private class CustomDocument : Document<CustomDocument>
+        private class CustomObject
         {
-            public CustomDocument()
-            {
-            }
-
-            public CustomDocument(IEnumerable<KeyValuePair<string, object>> items)
-                : base(items)
-            {
-            }
-
             public string Foo { get; set; }
         }
     }
