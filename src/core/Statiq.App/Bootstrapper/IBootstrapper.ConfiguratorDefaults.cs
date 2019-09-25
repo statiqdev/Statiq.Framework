@@ -14,8 +14,14 @@ namespace Statiq.App
             return this;
         }
 
-        public IBootstrapper AddServices(Action<IServiceCollection> action) =>
+        public IBootstrapper ConfigureSettings(Action<ISettings> action) =>
+            Configure<ISettings>(x => action(x));
+
+        public IBootstrapper ConfigureServices(Action<IServiceCollection> action) =>
             Configure<ConfigurableServices>(x => action(x.Services));
+
+        public IBootstrapper ConfigureEngine(Action<IEngine> action) =>
+            Configure<IEngine>(x => action(x));
 
         public IBootstrapper Configure<TConfigurable>(Action<TConfigurable> action)
             where TConfigurable : IConfigurable

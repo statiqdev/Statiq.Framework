@@ -10,38 +10,38 @@ namespace Statiq.App
 
         public IBootstrapper AddPipelines(
             Action<IPipelineCollection> action) =>
-            Configure<IEngine>(x => action(x.Pipelines));
+            ConfigureEngine(x => action(x.Pipelines));
 
         public IBootstrapper AddPipelines(
             Action<IReadOnlySettings, IPipelineCollection> action) =>
-            Configure<IEngine>(x => action(x.Settings, x.Pipelines));
+            ConfigureEngine(x => action(x.Settings, x.Pipelines));
 
         // By type
 
         public IBootstrapper AddPipeline(string name, IPipeline pipeline) =>
-            Configure<IEngine>(x => x.Pipelines.Add(name, pipeline));
+            ConfigureEngine(x => x.Pipelines.Add(name, pipeline));
 
         public IBootstrapper AddPipeline(IPipeline pipeline) =>
-            Configure<IEngine>(x => x.Pipelines.Add(pipeline));
+            ConfigureEngine(x => x.Pipelines.Add(pipeline));
 
         public IBootstrapper AddPipeline(string name, Func<IReadOnlySettings, IPipeline> pipelineFunc) =>
-            Configure<IEngine>(x => x.Pipelines.Add(name, pipelineFunc(x.Settings)));
+            ConfigureEngine(x => x.Pipelines.Add(name, pipelineFunc(x.Settings)));
 
         public IBootstrapper AddPipeline(Func<IReadOnlySettings, IPipeline> pipelineFunc) =>
-            Configure<IEngine>(x => x.Pipelines.Add(pipelineFunc(x.Settings)));
+            ConfigureEngine(x => x.Pipelines.Add(pipelineFunc(x.Settings)));
 
         public IBootstrapper AddPipeline<TPipeline>(string name)
             where TPipeline : IPipeline =>
-            Configure<IEngine>(x => x.Pipelines.Add<TPipeline>(name));
+            ConfigureEngine(x => x.Pipelines.Add<TPipeline>(name));
 
         public IBootstrapper AddPipeline<TPipeline>()
             where TPipeline : IPipeline =>
-            Configure<IEngine>(x => x.Pipelines.Add<TPipeline>());
+            ConfigureEngine(x => x.Pipelines.Add<TPipeline>());
 
         // Builder
 
         public IBootstrapper BuildPipeline(string name, Action<PipelineBuilder> buildAction) =>
-            Configure<IEngine>(x =>
+            ConfigureEngine(x =>
             {
                 PipelineBuilder builder = new PipelineBuilder(x.Pipelines, x.Settings);
                 buildAction(builder);

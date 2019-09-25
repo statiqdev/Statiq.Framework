@@ -24,6 +24,7 @@ namespace Statiq.App
         public IBootstrapper AddDefaults(IConfigurator<IEngine> configurator) =>
             AddDefaultLogging()
             .AddDefaultSettings()
+            .AddEnvironmentVariables()
             .AddDefaultConfigurators()
             .AddDefaultCommands()
             .AddDefaultShortcodes()
@@ -31,20 +32,24 @@ namespace Statiq.App
             .AddConfigurator(configurator);
 
         public IBootstrapper AddDefaultLogging() =>
-            AddServices(services =>
+            ConfigureServices(services =>
             {
                 services.AddSingleton<ILoggerProvider, ConsoleLoggerProvider>();
                 services.AddLogging(logging => logging.AddDebug());
             });
 
         public IBootstrapper AddDefaultSettings() =>
-            Configure<ISettings>(settings =>
+            ConfigureSettings(settings =>
             {
                 settings.Add(Keys.LinkHideIndexPages, true);
                 settings.Add(Keys.LinkHideExtensions, true);
                 settings.Add(Keys.UseCache, true);
                 settings.Add(Keys.CleanOutputPath, true);
+            });
 
+        public IBootstrapper AddEnvironmentVariables() =>
+            ConfigureSettings(settings =>
+            {
                 foreach (DictionaryEntry entry in Environment.GetEnvironmentVariables())
                 {
                     settings.Add(entry.Key.ToString().ToUpper(), entry.Value);
@@ -75,7 +80,7 @@ namespace Statiq.App
         }
 
         public IBootstrapper AddDefaultShortcodes() =>
-            Configure<IEngine>(engine =>
+            ConfigureEngine(engine =>
             {
                 foreach (Type shortcode in ClassCatalog.GetAssignableFrom<IShortcode>())
                 {
@@ -90,7 +95,7 @@ namespace Statiq.App
             });
 
         public IBootstrapper AddDefaultNamespaces() =>
-            Configure<IEngine>(engine =>
+            ConfigureEngine(engine =>
             {
                 // Add all Statiq.Common namespaces
                 // the JetBrains.Profiler filter is needed due to DotTrace dynamically
