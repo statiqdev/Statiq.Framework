@@ -18,7 +18,7 @@ namespace Statiq.Common
         /// Creates a new config module.
         /// </summary>
         /// <param name="config">
-        /// The delegate to use for getting a config value. If <c>null</c>, default <typeparamref name="TValue"/> will be the value.
+        /// The delegate to use for getting a config value.
         /// </param>
         /// <param name="eachDocument">
         /// <c>true</c> to call <see cref="ExecuteConfigAsync(IDocument, IExecutionContext, TValue)"/> for each
@@ -28,8 +28,8 @@ namespace Statiq.Common
         /// </param>
         protected ConfigModule(Config<TValue> config, bool eachDocument)
         {
-            _config = config ?? Config.FromValue(default(TValue));
-            _eachDocument = eachDocument || _config.RequiresDocument;
+            _config = config ?? throw new ArgumentNullException(nameof(config));
+            _eachDocument = eachDocument || config.RequiresDocument;
         }
 
         /// <inheritdoc />

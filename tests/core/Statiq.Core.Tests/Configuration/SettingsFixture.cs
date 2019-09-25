@@ -24,7 +24,7 @@ namespace Statiq.Core.Tests.Configuration
                 int count = settings.Count;
 
                 // Then
-                count.ShouldBe(5); // Includes the default settings
+                count.ShouldBe(1); // Includes the default settings
             }
         }
     }
