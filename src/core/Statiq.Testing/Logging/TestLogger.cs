@@ -51,9 +51,6 @@ namespace Statiq.Testing
 
         public bool IsEnabled(LogLevel logLevel) => true;
 
-        public IDisposable BeginScope<TState>(TState state)
-        {
-            return new EmptyDisposable();
-        }
+        public IDisposable BeginScope<TState>(TState state) => new EmptyDisposable();
     }
 }

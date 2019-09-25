@@ -4,6 +4,7 @@ using System.Collections.Immutable;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 using NUnit.Framework;
 using Shouldly;
 using Statiq.Common;
@@ -17,20 +18,37 @@ namespace Statiq.Core.Tests.Modules.Extensibility
         public class ExecuteTests : StartProcessFixture
         {
             [Test]
+            public async Task LogsOutputToTraceByDefault()
+            {
+                // Given
+                TestExecutionContext context = new TestExecutionContext();
+                ((TestLogger)context.Logger).ThrowLogLevel = LogLevel.None;
+                StartProcess startProcess = new StartProcess("dotnet", "--info");
+
+                // When
+                await ExecuteAsync(context, startProcess);
+
+                // Then
+                context.LogMessages.Where(x => x.LogLevel == LogLevel.Debug).ShouldContain(x => x.FormattedMessage.Contains("Started process"));
+                context.LogMessages.Where(x => x.LogLevel == LogLevel.Debug).ShouldContain(x => x.FormattedMessage.Contains("exited with code 0"));
+                context.LogMessages.Where(x => x.LogLevel == LogLevel.Debug).ShouldContain(x => x.FormattedMessage.Contains(".NET Core runtimes installed"));
+            }
+
+            [Test]
             public async Task LogsOutput()
             {
                 // Given
                 TestExecutionContext context = new TestExecutionContext();
-                ((TestLogger)context.Logger).ThrowLogLevel = Microsoft.Extensions.Logging.LogLevel.None;
+                ((TestLogger)context.Logger).ThrowLogLevel = LogLevel.None;
                 StartProcess startProcess = new StartProcess("dotnet", "--info").LogOutput();
 
                 // When
                 await ExecuteAsync(context, startProcess);
 
                 // Then
-                context.LogMessages.ShouldContain(x => x.FormattedMessage.Contains("Started process"));
-                context.LogMessages.ShouldContain(x => x.FormattedMessage.Contains("exited with code 0"));
-                context.LogMessages.ShouldContain(x => x.FormattedMessage.Contains(".NET Core runtimes installed"));
+                context.LogMessages.Where(x => x.LogLevel == LogLevel.Information).ShouldContain(x => x.FormattedMessage.Contains("Started process"));
+                context.LogMessages.Where(x => x.LogLevel == LogLevel.Information).ShouldContain(x => x.FormattedMessage.Contains("exited with code 0"));
+                context.LogMessages.Where(x => x.LogLevel == LogLevel.Information).ShouldContain(x => x.FormattedMessage.Contains(".NET Core runtimes installed"));
             }
 
             [Test]
@@ -38,14 +56,46 @@ namespace Statiq.Core.Tests.Modules.Extensibility
             {
                 // Given
                 TestExecutionContext context = new TestExecutionContext();
-                ((TestLogger)context.Logger).ThrowLogLevel = Microsoft.Extensions.Logging.LogLevel.None;
+                ((TestLogger)context.Logger).ThrowLogLevel = LogLevel.None;
                 StartProcess startProcess = new StartProcess("dotnet", "--info");
 
                 // When
                 ImmutableArray<TestDocument> results = await ExecuteAsync(context, startProcess);
 
                 // Then
-                results.Single().Content.ShouldContain(".NET Core runtimes installed");
+                results.Single().Content.ShouldStartWith(".NET Core SDK");
+                results.Single().Content.ShouldContain(Environment.NewLine);
+                ((IDocument)results.Single()).GetInt(StartProcess.ExitCode).ShouldBe(0);
+            }
+
+            [Test]
+            public async Task ThrowsForNonZeroExitCode()
+            {
+                // Given
+                TestExecutionContext context = new TestExecutionContext();
+                ((TestLogger)context.Logger).ThrowLogLevel = LogLevel.None;
+                StartProcess startProcess = new StartProcess("dotnet", "--foo").LogOutput();
+
+                // When, Then
+                await Should.ThrowAsync<ExecutionException>(async () => await ExecuteAsync(context, startProcess));
+            }
+
+            [Test]
+            public async Task ContinuesOnError()
+            {
+                // Given
+                TestExecutionContext context = new TestExecutionContext();
+                ((TestLogger)context.Logger).ThrowLogLevel = LogLevel.None;
+                StartProcess startProcess = new StartProcess("dotnet", "--foo").ContinueOnError();
+
+                // When
+                ImmutableArray<TestDocument> results = await ExecuteAsync(context, startProcess);
+
+                // Then
+                results.Single().Content.ShouldStartWith(".NET Core SDK");
+                results.Single().Content.ShouldContain(Environment.NewLine);
+                ((IDocument)results.Single()).GetString(StartProcess.ErrorData).ShouldStartWith("Unknown option");
+                ((IDocument)results.Single()).GetInt(StartProcess.ExitCode).ShouldNotBe(0);
             }
         }
     }

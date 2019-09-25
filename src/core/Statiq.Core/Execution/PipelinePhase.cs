@@ -97,7 +97,6 @@ namespace Statiq.Core
                 if (!(ex is OperationCanceledException))
                 {
                     _logger.LogCritical($"Exception while executing pipeline {PipelineName}/{Phase}: {ex}");
-                    cancellationTokenSource.Cancel();
                 }
                 Outputs = ImmutableArray<IDocument>.Empty;
                 throw;

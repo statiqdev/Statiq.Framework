@@ -48,30 +48,33 @@ namespace Statiq.App
             }
 
             // Build a temporary service provider so we can log
+            // Make sure to place it in it's own scope so transient services get correctly disposed
             IServiceProvider services = _serviceCollection.BuildServiceProvider();
-
-            // Log pending messages
-            ILogger logger = services.GetRequiredService<ILogger<Bootstrapper>>();
-            logger.LogInformation($"Statiq version {Engine.Version}");
             ClassCatalog classCatalog = services.GetService<ClassCatalog>();
-            classCatalog?.LogDebugMessages(logger);
-
-            // Attach
-            if (settings.Attach)
+            using (IServiceScope serviceScope = services.CreateScope())
             {
-                logger.LogInformation($"Waiting for a debugger to attach to process {Process.GetCurrentProcess().Id} (or press a key to continue)...");
-                while (!Debugger.IsAttached && !Console.KeyAvailable)
+                // Log pending messages
+                ILogger logger = serviceScope.ServiceProvider.GetRequiredService<ILogger<Bootstrapper>>();
+                logger.LogInformation($"Statiq version {Engine.Version}");
+                classCatalog?.LogDebugMessages(logger);
+
+                // Attach
+                if (settings.Attach)
                 {
-                    Thread.Sleep(100);
-                }
-                if (Console.KeyAvailable)
-                {
-                    Console.ReadKey(true);
-                    logger.LogInformation("Key pressed, continuing execution");
-                }
-                else
-                {
-                    logger.LogInformation("Debugger attached, continuing execution");
+                    logger.LogInformation($"Waiting for a debugger to attach to process {Process.GetCurrentProcess().Id} (or press a key to continue)...");
+                    while (!Debugger.IsAttached && !Console.KeyAvailable)
+                    {
+                        Thread.Sleep(100);
+                    }
+                    if (Console.KeyAvailable)
+                    {
+                        Console.ReadKey(true);
+                        logger.LogInformation("Key pressed, continuing execution");
+                    }
+                    else
+                    {
+                        logger.LogInformation("Debugger attached, continuing execution");
+                    }
                 }
             }
 

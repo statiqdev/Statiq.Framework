@@ -29,7 +29,7 @@ namespace Statiq.Core
             {
                 if (!(Attribute.GetCustomAttribute(typeof(Engine).Assembly, typeof(AssemblyInformationalVersionAttribute)) is AssemblyInformationalVersionAttribute versionAttribute))
                 {
-                    throw new Exception("Something went terribly wrong, could not determine Statiq version");
+                    throw new InvalidOperationException("Something went terribly wrong, could not determine Statiq version");
                 }
                 return versionAttribute.InformationalVersion;
             }
@@ -37,6 +37,7 @@ namespace Statiq.Core
 
         private readonly PipelineCollection _pipelines;
         private readonly DiagnosticsTraceListener _diagnosticsTraceListener;
+        private readonly IServiceScope _serviceScope;
         private readonly ILogger _logger;
 
         // Gets initialized on first execute and reset when the pipeline collection changes
@@ -79,7 +80,7 @@ namespace Statiq.Core
         {
             _pipelines = new PipelineCollection(this);
             ApplicationState = applicationState ?? new ApplicationState(null, null, null);
-            Services = GetServiceProvider(serviceCollection);
+            _serviceScope = GetServiceScope(serviceCollection);
             _logger = Services.GetRequiredService<ILogger<Engine>>();
             DocumentFactory = new DocumentFactory(Settings);
             _diagnosticsTraceListener = new DiagnosticsTraceListener(_logger);
@@ -87,14 +88,20 @@ namespace Statiq.Core
         }
 
         /// <summary>
-        /// Creates a service provider by registering engine
+        /// Creates a service scope by registering engine
         /// types to the provided service collection or creating a new one.
         /// </summary>
-        /// <param name="serviceCollection">The service collection to create a provider for.</param>
-        /// <returns>A built service provider.</returns>
-        private IServiceProvider GetServiceProvider(IServiceCollection serviceCollection)
+        /// <remarks>
+        /// Creates a new top-level scope so that transient services can be disposed with the engine
+        /// See https://stackoverflow.com/questions/43244316/iserviceprovider-garbage-collection-disposal
+        /// And https://github.com/aspnet/DependencyInjection/issues/456
+        /// </remarks>
+        /// <param name="serviceCollection">The service collection to create a scope for.</param>
+        /// <returns>A built service scope (and provider).</returns>
+        private IServiceScope GetServiceScope(IServiceCollection serviceCollection)
         {
             serviceCollection ??= new ServiceCollection();
+
             serviceCollection.AddLogging();
             serviceCollection.AddSingleton<ApplicationState>(ApplicationState);
             serviceCollection.AddSingleton<IReadOnlyEventCollection>(Events);
@@ -104,11 +111,13 @@ namespace Statiq.Core
             serviceCollection.AddSingleton<IMemoryStreamFactory>(MemoryStreamFactory);
             serviceCollection.AddSingleton<INamespacesCollection>(Namespaces);
             serviceCollection.AddSingleton<IRawAssemblyCollection>(DynamicAssemblies);
-            return serviceCollection.BuildServiceProvider();
+
+            IServiceProvider serviceProvider = serviceCollection.BuildServiceProvider();
+            return serviceProvider.CreateScope();
         }
 
         /// <inheritdoc />
-        public IServiceProvider Services { get; }
+        public IServiceProvider Services => _serviceScope.ServiceProvider;
 
         /// <inheritdoc />
         public ApplicationState ApplicationState { get; }
@@ -263,7 +272,7 @@ namespace Statiq.Core
             }
 
             // Log
-            _logger.LogInformation($"Executing {triggeredPipelines.Count} pipelines ({string.Join(", ", triggeredPipelines.OrderBy(x => x))}");
+            _logger.LogInformation($"Executing {triggeredPipelines.Count} pipelines ({string.Join(", ", triggeredPipelines.OrderBy(x => x))})");
             _logger.LogDebug($"Execution ID {executionId}");
             _logger.LogInformation($"Using {JsEngineSwitcher.Current.DefaultEngineName} as the JavaScript engine");
             System.Diagnostics.Stopwatch stopwatch = System.Diagnostics.Stopwatch.StartNew();
@@ -298,8 +307,12 @@ namespace Statiq.Core
                 {
                     _logger.LogCritical("Error during execution");
                 }
+                throw;
             }
-            stopwatch.Stop();
+            finally
+            {
+                stopwatch.Stop();
+            }
 
             // Raise after event
             await Events.RaiseAsync(new AfterEngineExecution(this, executionId, outputs, stopwatch.ElapsedMilliseconds));
@@ -617,6 +630,7 @@ namespace Statiq.Core
 
             System.Diagnostics.Trace.Listeners.Remove(_diagnosticsTraceListener);
             CleanTempPath();
+            _serviceScope.Dispose();
             _disposed = true;
         }
 

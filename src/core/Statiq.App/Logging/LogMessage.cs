@@ -10,9 +10,9 @@ using NetEscapades.Extensions.Logging.RollingFile.Internal;
 
 namespace Statiq.App
 {
-    public class FlexibleLogMessage
+    internal class LogMessage
     {
-        public FlexibleLogMessage(
+        public LogMessage(
             string categoryName,
             DateTimeOffset timestamp,
             LogLevel logLevel,

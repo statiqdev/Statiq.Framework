@@ -78,7 +78,7 @@ namespace Statiq.Core
                             {
                                 if (source == null)
                                 {
-                                    throw new Exception($"Cannot include file at relative path {includedPath.FullPath} because document source is null");
+                                    throw new ExecutionException($"Cannot include file at relative path {includedPath.FullPath} because document source is null");
                                 }
                                 includedPath = source.ChangeFileName(includedPath);
                             }

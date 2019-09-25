@@ -84,7 +84,12 @@ namespace Statiq.App
                 ConfigurableCommands configurableCommands = new ConfigurableCommands(x, _commandNames);
                 Configurators.Configure(configurableCommands);
             });
-            return await app.RunAsync(Arguments);
+            int exitCode = await app.RunAsync(Arguments);
+
+            // Dispose all instances of the console logger to flush the message queue and stop the listening thread
+            ConsoleLoggerProvider.DisposeAll();
+
+            return exitCode;
         }
 
         /// <summary>

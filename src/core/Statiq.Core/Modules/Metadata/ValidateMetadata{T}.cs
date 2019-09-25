@@ -124,7 +124,7 @@ namespace Statiq.Core
             return Task.FromResult<IEnumerable<IDocument>>(context.Inputs);
         }
 
-        private Exception GetException(string message) => new Exception($"{message ?? "Assertion failed"}");
+        private ExecutionException GetException(string message) => new ExecutionException($"{message ?? "Assertion failed"}");
 
         private class Assertion
         {

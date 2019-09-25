@@ -80,12 +80,12 @@ namespace Statiq.App.Tests.Bootstrapper
                 bootstrapper.ConfigureServices(services => services.AddSingleton<ILoggerProvider>(provider));
                 bootstrapper.AddPipeline(
                     "Foo",
-                    new LogMessage(LogLevel.Trace, "A"),
-                    new LogMessage(LogLevel.Debug, "B"),
-                    new LogMessage(LogLevel.Information, "C"),
-                    new LogMessage(LogLevel.Warning, "D"),
-                    new LogMessage(LogLevel.Error, "E"),
-                    new LogMessage(LogLevel.Critical, "F"));
+                    new Core.LogMessage(LogLevel.Trace, "A"),
+                    new Core.LogMessage(LogLevel.Debug, "B"),
+                    new Core.LogMessage(LogLevel.Information, "C"),
+                    new Core.LogMessage(LogLevel.Warning, "D"),
+                    new Core.LogMessage(LogLevel.Error, "E"),
+                    new Core.LogMessage(LogLevel.Critical, "F"));
 
                 // When
                 int exitCode = await bootstrapper.RunAsync();
@@ -122,7 +122,7 @@ namespace Statiq.App.Tests.Bootstrapper
                 Environment.SetEnvironmentVariable("Foo", "Bar");
                 string[] args = new[] { "build" };
                 IBootstrapper bootstrapper = App.Bootstrapper.Create(args);
-                bootstrapper.AddDefaultSettings();
+                bootstrapper.AddEnvironmentVariables();
                 bootstrapper.AddCommand<BuildCommand>("build");
                 ISettings settings = null;
                 bootstrapper.ConfigureEngine(engine => settings = engine.Settings);
@@ -139,13 +139,14 @@ namespace Statiq.App.Tests.Bootstrapper
             public async Task LogsEvironmentVariablesAsMasked()
             {
                 // Given
+                Environment.SetEnvironmentVariable("Foo", "Bar");
                 string[] args = new[] { "build", "-l", "Debug" };
                 TestLoggerProvider provider = new TestLoggerProvider
                 {
                     ThrowLogLevel = LogLevel.None
                 };
                 IBootstrapper bootstrapper = App.Bootstrapper.Create(args);
-                bootstrapper.AddDefaultSettings();
+                bootstrapper.AddEnvironmentVariables();
                 bootstrapper.AddCommand<BuildCommand>("build");
                 bootstrapper.ConfigureServices(services => services.AddSingleton<ILoggerProvider>(provider));
 

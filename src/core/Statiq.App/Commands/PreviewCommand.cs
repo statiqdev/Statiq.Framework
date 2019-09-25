@@ -215,7 +215,7 @@ namespace Statiq.App
                 string[] splitContentType = contentType.Split('=');
                 if (splitContentType.Length != 2)
                 {
-                    throw new Exception($"Invalid content type {contentType} specified.");
+                    throw new ArgumentException($"Invalid content type {contentType} specified.");
                 }
                 contentTypeDictionary[splitContentType[0].Trim().Trim('\"')] = splitContentType[1].Trim().Trim('\"');
             }

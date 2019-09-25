@@ -145,7 +145,7 @@ namespace Statiq.Html
             FilePath path = _pathFunc(uri);
             if (path == null)
             {
-                throw new Exception($"Null resource mirror path for {source}");
+                throw new ExecutionException($"Null resource mirror path for {source}");
             }
             string link = context.GetLink(path);
 
