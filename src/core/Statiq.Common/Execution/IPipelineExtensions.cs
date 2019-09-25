@@ -95,10 +95,10 @@ namespace Statiq.Common
             return pipeline;
         }
 
-        public static TPipeline WithDependencyTrigger<TPipeline>(this TPipeline pipeline)
+        public static TPipeline WithManualOrDependencyTrigger<TPipeline>(this TPipeline pipeline)
             where TPipeline : IPipeline
         {
-            pipeline.Trigger = PipelineTrigger.Dependency;
+            pipeline.Trigger = PipelineTrigger.ManualOrDependency;
             return pipeline;
         }
 

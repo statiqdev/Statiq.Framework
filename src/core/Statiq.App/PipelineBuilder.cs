@@ -197,9 +197,9 @@ namespace Statiq.App
             return this;
         }
 
-        public PipelineBuilder WithDependencyTrigger()
+        public PipelineBuilder WithManualOrDependencyTrigger()
         {
-            _actions.Add(x => x.WithDependencyTrigger());
+            _actions.Add(x => x.WithManualOrDependencyTrigger());
             return this;
         }
 

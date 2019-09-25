@@ -92,11 +92,11 @@ namespace Statiq.Core.Tests.Execution
                 });
                 engine.Pipelines.Add("C", new TestPipeline
                 {
-                    Trigger = PipelineTrigger.Dependency
+                    Trigger = PipelineTrigger.ManualOrDependency
                 });
                 engine.Pipelines.Add("D", new TestPipeline
                 {
-                    Trigger = PipelineTrigger.Dependency,
+                    Trigger = PipelineTrigger.ManualOrDependency,
                     Dependencies = new HashSet<string>(new[] { "A" })
                 });
                 engine.Pipelines.Add("E", new TestPipeline
@@ -173,25 +173,6 @@ namespace Statiq.Core.Tests.Execution
                 pipelines.Add("Bar", new TestPipeline
                 {
                     Dependencies = new HashSet<string>(new[] { "Baz" })
-                });
-                pipelines.Add("Foo", new TestPipeline
-                {
-                    Dependencies = new HashSet<string>(new[] { "Bar" })
-                });
-                TestLogger logger = new TestLogger();
-
-                // When, Then
-                Should.Throw<PipelineException>(() => Engine.GetPipelinePhases(pipelines, logger));
-            }
-
-            [Test]
-            public void ThrowsForIsolatedDependency()
-            {
-                // Given
-                IPipelineCollection pipelines = new TestPipelineCollection();
-                pipelines.Add("Bar", new TestPipeline
-                {
-                    Isolated = true
                 });
                 pipelines.Add("Foo", new TestPipeline
                 {

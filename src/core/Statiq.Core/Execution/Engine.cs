@@ -464,15 +464,15 @@ namespace Statiq.Core
                             {
                                 throw new PipelineException($"Could not find pipeline dependency {dependencyName} of {name}");
                             }
-                            if (dependency.Isolated)
-                            {
-                                throw new PipelineException($"Pipeline {name} can not have dependency on isolated pipeline {dependencyName}");
-                            }
                             if (dependency.Trigger == PipelineTrigger.Manual)
                             {
                                 throw new PipelineException($"Pipeline {name} can not have dependency on manually triggered pipeline {dependencyName}");
                             }
-                            processDependencies.Add(Visit(dependencyName, dependency).Process);
+                            if (!dependency.Isolated)
+                            {
+                                // Only add the phase dependency if the dependency is not isolated
+                                processDependencies.Add(Visit(dependencyName, dependency).Process);
+                            }
                         }
                     }
 

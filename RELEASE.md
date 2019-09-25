@@ -1,9 +1,10 @@
 # 1.0.0-alpha.4
 
 - Updated to .NET Core 3.0 final
-- Renames delegate-based `IBootstrapper.AddSettings()` overload to `IBoostrapper.ConfigureSettings()`
-- Renames `IBootstrapper.AddServices()` to `IBoostrapper.ConfigureServices()`
-- Adds `IBootstrapper.ConfigureEngine()`
+- Isolated pipelines can now be dependencies of other pipelines (but output documents still can't be accessed).
+- Renames delegate-based `IBootstrapper.AddSettings()` overload to `IBoostrapper.ConfigureSettings()`.
+- Renames `IBootstrapper.AddServices()` to `IBoostrapper.ConfigureServices()`.
+- Adds `IBootstrapper.ConfigureEngine()`.
 - Adds a `StartProcess` module to start a process and create a document from it's output or run it in the background.
 - The bootstrapper now adds environment variables to the settings by default with ALL_CAPS keys.
 - Any setting with an ALL_CAPS key is masked during debug output on startup.

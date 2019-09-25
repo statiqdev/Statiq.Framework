@@ -23,10 +23,7 @@
         /// The pipeline is not normally executed unless explicitly specified
         /// or as a dependency of an executing pipeline.
         /// </summary>
-        /// <remarks>
-        /// Pipelines triggered by a dependency can also be triggered manually.
-        /// </remarks>
-        Dependency,
+        ManualOrDependency,
 
         /// <summary>
         /// The pipeline is always executed, regardless of explicitly specified pipelines.
