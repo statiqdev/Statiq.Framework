@@ -4,6 +4,7 @@ using System.Collections.Immutable;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using NUnit.Framework;
 using Shouldly;
@@ -18,11 +19,11 @@ namespace Statiq.Core.Tests.Modules.Extensibility
         public class ExecuteTests : StartProcessFixture
         {
             [Test]
-            public async Task LogsOutputToTraceByDefault()
+            public async Task LogsOutputToDebugByDefault()
             {
                 // Given
                 TestExecutionContext context = new TestExecutionContext();
-                ((TestLogger)context.Logger).ThrowLogLevel = LogLevel.None;
+                ((TestLoggerProvider)context.Services.GetRequiredService<ILoggerProvider>()).ThrowLogLevel = LogLevel.None;
                 StartProcess startProcess = new StartProcess("dotnet", "--info");
 
                 // When
@@ -39,7 +40,7 @@ namespace Statiq.Core.Tests.Modules.Extensibility
             {
                 // Given
                 TestExecutionContext context = new TestExecutionContext();
-                ((TestLogger)context.Logger).ThrowLogLevel = LogLevel.None;
+                ((TestLoggerProvider)context.Services.GetRequiredService<ILoggerProvider>()).ThrowLogLevel = LogLevel.None;
                 StartProcess startProcess = new StartProcess("dotnet", "--info").LogOutput();
 
                 // When
@@ -56,7 +57,7 @@ namespace Statiq.Core.Tests.Modules.Extensibility
             {
                 // Given
                 TestExecutionContext context = new TestExecutionContext();
-                ((TestLogger)context.Logger).ThrowLogLevel = LogLevel.None;
+                ((TestLoggerProvider)context.Services.GetRequiredService<ILoggerProvider>()).ThrowLogLevel = LogLevel.None;
                 StartProcess startProcess = new StartProcess("dotnet", "--info");
 
                 // When
@@ -73,7 +74,7 @@ namespace Statiq.Core.Tests.Modules.Extensibility
             {
                 // Given
                 TestExecutionContext context = new TestExecutionContext();
-                ((TestLogger)context.Logger).ThrowLogLevel = LogLevel.None;
+                ((TestLoggerProvider)context.Services.GetRequiredService<ILoggerProvider>()).ThrowLogLevel = LogLevel.None;
                 StartProcess startProcess = new StartProcess("dotnet", "--foo").LogOutput();
 
                 // When, Then
@@ -85,7 +86,7 @@ namespace Statiq.Core.Tests.Modules.Extensibility
             {
                 // Given
                 TestExecutionContext context = new TestExecutionContext();
-                ((TestLogger)context.Logger).ThrowLogLevel = LogLevel.None;
+                ((TestLoggerProvider)context.Services.GetRequiredService<ILoggerProvider>()).ThrowLogLevel = LogLevel.None;
                 StartProcess startProcess = new StartProcess("dotnet", "--foo").ContinueOnError();
 
                 // When

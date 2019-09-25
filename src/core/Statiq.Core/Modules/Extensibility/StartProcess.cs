@@ -6,6 +6,7 @@ using System.Collections.Immutable;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -29,6 +30,7 @@ namespace Statiq.Core
         public const string ExitCode = nameof(ExitCode);
         public const string ErrorData = nameof(ErrorData);
 
+        private readonly object _startLock = new object();
         private readonly ConcurrentDictionary<int, (Process, ILogger)> _processes = new ConcurrentDictionary<int, (Process, ILogger)>();
         private readonly Dictionary<string, string> _environmentVariables = new Dictionary<string, string>();
 
@@ -204,16 +206,9 @@ namespace Statiq.Core
                 StartInfo = startInfo
             };
 
-            // Use a separate logger if a background job
-            ILogger logger = context;
-            if (_background)
-            {
-                ILoggerFactory loggerFactory = context.GetService<ILoggerFactory>();
-                if (loggerFactory != null)
-                {
-                    logger = loggerFactory.CreateLogger(string.Empty);
-                }
-            }
+            // Raises Process.Exited immediately instead of when checked via .WaitForExit() or .HasExited
+            process.EnableRaisingEvents = true;
+            process.Exited += ProcessExited;
 
             // Prepare the streams
             using (Stream contentStream = _background ? null : await context.GetContentStreamAsync())
@@ -223,11 +218,16 @@ namespace Statiq.Core
                     using (StringWriter errorWriter = !_background && _continueOnError ? new StringWriter() : null)
                     {
                         // Write to the stream on data received
+                        // If we happen to write before we've created and added the process to the collection, go ahead and do that too
+                        ILoggerFactory loggerFactory = context.GetService<ILoggerFactory>();
                         process.OutputDataReceived += (_, e) =>
                         {
                             if (!string.IsNullOrEmpty(e.Data))
                             {
-                                logger?.Log(_logOutput ? LogLevel.Information : LogLevel.Debug, e.Data);
+                                (Process, ILogger) item = _processes.GetOrAdd(
+                                    process.Id,
+                                    _ => (process, loggerFactory?.CreateLogger($"{process.Id}: {Path.GetFileName(startInfo.FileName)}")));
+                                item.Item2?.Log(_logOutput ? LogLevel.Information : LogLevel.Debug, e.Data);
                                 contentWriter?.WriteLine(e.Data);
                             }
                         };
@@ -235,25 +235,27 @@ namespace Statiq.Core
                         {
                             if (!string.IsNullOrEmpty(e.Data))
                             {
-                                logger?.LogError(e.Data);
+                                (Process, ILogger) item = _processes.GetOrAdd(
+                                    process.Id,
+                                    _ => (process, loggerFactory?.CreateLogger($"{process.Id}: {Path.GetFileName(startInfo.FileName)}")));
+                                item.Item2?.LogError(e.Data);
                                 errorWriter?.WriteLine(e.Data);
                             }
                         };
 
-                        // Raises Process.Exited immediately instead of when checked via .WaitForExit() or .HasExited
-                        process.EnableRaisingEvents = true;
-                        process.Exited += ProcessExited;
-
                         // Start the process
                         process.Start();
-                        logger?.Log(
-                            _logOutput ? LogLevel.Information : LogLevel.Debug,
-                            $"Started {(_background ? "background " : string.Empty)}process {process.Id}: {process.StartInfo.FileName} {process.StartInfo.Arguments}");
-                        _processes.TryAdd(process.Id, (process, logger));
-
-                        // Start reading the streams
                         process.BeginOutputReadLine();
                         process.BeginErrorReadLine();
+
+                        // Use a separate logger, but only create and add it if it wasn't already from one of the received events
+                        _processes.GetOrAdd(
+                            process.Id,
+                            _ => (process, loggerFactory?.CreateLogger($"{process.Id}: {Path.GetFileName(startInfo.FileName)}")));
+
+                        context.Log(
+                            _logOutput ? LogLevel.Information : LogLevel.Debug,
+                            $"Started {(_background ? "background " : string.Empty)}process {process.Id}: {process.StartInfo.FileName} {process.StartInfo.Arguments}");
 
                         // If this is a background process, let it run and just return the original document
                         if (_background)
@@ -309,7 +311,7 @@ namespace Statiq.Core
             Process process = (Process)sender;
             if (_processes.TryRemove(process.Id, out (Process, ILogger) item))
             {
-                item.Item2.Log(
+                item.Item2?.Log(
                     _logOutput ? LogLevel.Information : LogLevel.Debug,
                     $"Process {process.Id} exited with code {process.ExitCode}");
             }

@@ -37,6 +37,7 @@ namespace Statiq.Testing
                 {
                     serviceCollection.AddLogging();
                     serviceCollection.AddSingleton<ILoggerProvider>(loggerProvider);
+                    serviceCollection.Configure<LoggerFilterOptions>(options => options.MinLevel = LogLevel.Trace);
                 });
             Logger = new TestLogger(LogMessages);
         }
@@ -53,6 +54,7 @@ namespace Statiq.Testing
                 {
                     serviceCollection.AddLogging();
                     serviceCollection.AddSingleton<ILoggerProvider>(loggerProvider);
+                    serviceCollection.Configure<LoggerFilterOptions>(options => options.MinLevel = LogLevel.Trace);
                 });
             Logger = new TestLogger(LogMessages);
         }

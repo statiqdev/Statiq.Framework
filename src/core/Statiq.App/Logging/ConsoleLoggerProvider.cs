@@ -13,6 +13,8 @@ namespace Statiq.App
 {
     public class ConsoleLoggerProvider : ILoggerProvider
     {
+        private const string NamespacePrefix = nameof(Statiq) + ".";
+
         private static readonly object WriteLock = new object();
         private static readonly List<ConsoleContent> ConsoleContents = new List<ConsoleContent>();
         private static readonly ConcurrentBag<ConsoleLoggerProvider> Instances = new ConcurrentBag<ConsoleLoggerProvider>();
@@ -83,58 +85,75 @@ namespace Statiq.App
                         lastAngle = -1;
                     }
 
-                    // Scan for parenthesis and split into segments
+                    // Then add the category
                     int normalStart = lastAngle + 1;
-                    int openStart = -1;
-                    int openCount = 0;
-                    for (int c = normalStart; c < message.FormattedMessage.Length; c++)
+                    if (message.CategoryName?.StartsWith(NamespacePrefix) == false)
                     {
-                        if (message.FormattedMessage[c] == '(')
+                        ConsoleContents.Add(new ConsoleContent(ConsoleColor.DarkGray, ConsoleColor.Black, $"[{message.CategoryName}] ".AsMemory()));
+                        ConsoleContents.Add(new ConsoleContent(
+                            message.FormattedMessage.AsMemory(normalStart, message.FormattedMessage.Length - normalStart)));
+                    }
+                    else
+                    {
+                        // Scan for parenthesis and split into segments (but only if we're not in an external category)
+                        int openStart = -1;
+                        int openCount = 0;
+                        for (int c = normalStart; c < message.FormattedMessage.Length; c++)
                         {
-                            if (openCount == 0)
+                            if (message.FormattedMessage[c] == '(')
                             {
-                                openStart = c;
-                            }
-                            openCount++;
-                        }
-                        else if (message.FormattedMessage[c] == ')')
-                        {
-                            if (openCount > 0)
-                            {
-                                openCount--;
                                 if (openCount == 0)
                                 {
-                                    // Ignore "(s)"
-                                    if (c < 2 || message.FormattedMessage[c - 1] != 's' || message.FormattedMessage[c - 2] != '(')
+                                    openStart = c;
+                                }
+                                openCount++;
+                            }
+                            else if (message.FormattedMessage[c] == ')')
+                            {
+                                if (openCount > 0)
+                                {
+                                    openCount--;
+                                    if (openCount == 0)
                                     {
-                                        if (openStart > normalStart)
+                                        // Ignore "(s)"
+                                        if (c < 2 || message.FormattedMessage[c - 1] != 's' || message.FormattedMessage[c - 2] != '(')
                                         {
+                                            if (openStart > normalStart)
+                                            {
+                                                ConsoleContents.Add(new ConsoleContent(
+                                                    message.FormattedMessage.AsMemory(normalStart, openStart - normalStart)));
+                                            }
+
+                                            // Inside parenthesis
                                             ConsoleContents.Add(new ConsoleContent(
-                                                message.FormattedMessage.AsMemory(normalStart, openStart - normalStart)));
+                                                ConsoleColor.DarkGray,
+                                                ConsoleColor.Black,
+                                                message.FormattedMessage.AsMemory(openStart, c - openStart + 1)));
+
+                                            normalStart = c + 1;
                                         }
 
-                                        // Inside parenthesis
-                                        ConsoleContents.Add(new ConsoleContent(
-                                            ConsoleColor.DarkGray,
-                                            ConsoleColor.Black,
-                                            message.FormattedMessage.AsMemory(openStart, c - openStart + 1)));
-
-                                        normalStart = c + 1;
+                                        openStart = -1;
                                     }
-
-                                    openStart = -1;
                                 }
                             }
                         }
-                    }
-                    if (normalStart <= message.FormattedMessage.Length - 1)
-                    {
-                        ConsoleContents.Add(new ConsoleContent(
-                            message.FormattedMessage.AsMemory(normalStart, message.FormattedMessage.Length - normalStart)));
+                        if (normalStart <= message.FormattedMessage.Length - 1)
+                        {
+                            ConsoleContents.Add(new ConsoleContent(
+                                message.FormattedMessage.AsMemory(normalStart, message.FormattedMessage.Length - normalStart)));
+                        }
                     }
                 }
                 else
                 {
+                    // Add the category
+                    if (message.CategoryName?.StartsWith(NamespacePrefix) == false)
+                    {
+                        ConsoleContents.Add(new ConsoleContent(ConsoleColor.DarkGray, ConsoleColor.Black, $"[{message.CategoryName}] ".AsMemory()));
+                    }
+
+                    // Then add the message
                     ConsoleContents.Add(GetLogLevelConsoleContent(message.LogLevel, message.FormattedMessage.AsMemory()));
                 }
 
