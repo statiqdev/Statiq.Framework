@@ -521,7 +521,7 @@ namespace Statiq.Core
             // We have to explicitly wait the execution task in the continuation function
             // (the continuation task doesn't wait for the tasks it continues)
             return Task.Factory.ContinueWhenAll(
-                phase.Dependencies.Select(x => phaseTasks[x]).ToArray(),
+                phase.Dependencies.Select(x => phaseTasks.TryGetValue(x, out Task dependencyTask) ? dependencyTask : null).Where(x => x != null).ToArray(),
                 dependencies =>
                 {
                     // Only run the dependent task if all the dependencies successfully completed
