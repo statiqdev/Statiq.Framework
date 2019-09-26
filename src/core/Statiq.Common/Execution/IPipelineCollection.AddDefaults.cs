@@ -9,6 +9,23 @@ namespace Statiq.Common
     {
         public void Add(IPipeline pipeline) => Add(pipeline?.GetType().Name.RemoveEnd("Pipeline", StringComparison.OrdinalIgnoreCase), pipeline);
 
+        public IPipeline Add(Type pipelineType) =>
+            Add(
+                pipelineType ?? throw new ArgumentNullException(nameof(pipelineType)),
+                pipelineType.Name.RemoveEnd("Pipeline", StringComparison.OrdinalIgnoreCase));
+
+        public IPipeline Add(Type pipelineType, string name)
+        {
+            _ = pipelineType ?? throw new ArgumentNullException(nameof(pipelineType));
+            if (!typeof(IPipeline).IsAssignableFrom(pipelineType))
+            {
+                throw new ArgumentException("Provided type is not a pipeline");
+            }
+            IPipeline pipeline = (IPipeline)Activator.CreateInstance(pipelineType);
+            Add(name ?? throw new ArgumentNullException(nameof(name)), pipeline);
+            return pipeline;
+        }
+
         public IPipeline Add<TPipeline>()
             where TPipeline : IPipeline =>
             Add<TPipeline>(typeof(TPipeline).Name.RemoveEnd("Pipeline", StringComparison.OrdinalIgnoreCase));
@@ -17,7 +34,7 @@ namespace Statiq.Common
             where TPipeline : IPipeline
         {
             IPipeline pipeline = Activator.CreateInstance<TPipeline>();
-            Add(name, pipeline);
+            Add(name ?? throw new ArgumentNullException(nameof(name)), pipeline);
             return pipeline;
         }
     }

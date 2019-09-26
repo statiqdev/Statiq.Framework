@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Reflection;
 using Statiq.Common;
 
 namespace Statiq.App
@@ -30,6 +32,12 @@ namespace Statiq.App
         public IBootstrapper AddPipeline(Func<IReadOnlySettings, IPipeline> pipelineFunc) =>
             ConfigureEngine(x => x.Pipelines.Add(pipelineFunc(x.Settings)));
 
+        public IBootstrapper AddPipeline(Type pipelineType, string name) =>
+            ConfigureEngine(x => x.Pipelines.Add(pipelineType, name));
+
+        public IBootstrapper AddPipeline(Type pipelineType) =>
+            ConfigureEngine(x => x.Pipelines.Add(pipelineType));
+
         public IBootstrapper AddPipeline<TPipeline>(string name)
             where TPipeline : IPipeline =>
             ConfigureEngine(x => x.Pipelines.Add<TPipeline>(name));
@@ -37,6 +45,16 @@ namespace Statiq.App
         public IBootstrapper AddPipeline<TPipeline>()
             where TPipeline : IPipeline =>
             ConfigureEngine(x => x.Pipelines.Add<TPipeline>());
+
+        public IBootstrapper AddPipelines() =>
+            ConfigureEngine(engine =>
+            {
+                Type[] callingTypes = Assembly.GetEntryAssembly().GetTypes();
+                foreach (Type pipelineType in callingTypes.Where(x => typeof(IPipeline).IsAssignableFrom(x)))
+                {
+                    engine.Pipelines.Add(pipelineType);
+                }
+            });
 
         // Builder
 
