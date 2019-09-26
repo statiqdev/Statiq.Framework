@@ -58,7 +58,7 @@ namespace Statiq.App.Tests.Bootstrapper
                 exitCode.ShouldBe((int)ExitCode.Normal);
                 provider.Messages.ShouldContain(x =>
                     x.LogLevel == LogLevel.Warning
-                    && x.FormattedMessage == "No pipelines are configured or specified.");
+                    && x.FormattedMessage == "No pipelines are configured or specified for execution.");
             }
 
             [TestCase("Trace", 19)] // Includes module start/finish

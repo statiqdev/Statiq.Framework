@@ -21,7 +21,7 @@ namespace Statiq.Testing
 
         public bool Isolated { get; set; }
 
-        public PipelineTrigger Trigger { get; set; }
+        public ExecutionPolicy ExecutionPolicy { get; set; }
 
         public TestPipeline(params IModule[] processModules)
         {

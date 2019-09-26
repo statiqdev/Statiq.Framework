@@ -185,27 +185,21 @@ namespace Statiq.App
             return this;
         }
 
-        public PipelineBuilder WithTrigger(PipelineTrigger trigger)
+        public PipelineBuilder WithExecutionPolicy(ExecutionPolicy policy)
         {
-            _actions.Add(x => x.WithTrigger(trigger));
+            _actions.Add(x => x.WithExecutionPolicy(policy));
             return this;
         }
 
-        public PipelineBuilder WithManualTrigger()
+        public PipelineBuilder ManuallyExecute()
         {
-            _actions.Add(x => x.WithManualTrigger());
+            _actions.Add(x => x.ManuallyExecute());
             return this;
         }
 
-        public PipelineBuilder WithManualOrDependencyTrigger()
+        public PipelineBuilder AlwaysExecute()
         {
-            _actions.Add(x => x.WithManualOrDependencyTrigger());
-            return this;
-        }
-
-        public PipelineBuilder WithAlwaysTrigger()
-        {
-            _actions.Add(x => x.WithAlwaysTrigger());
+            _actions.Add(x => x.AlwaysExecute());
             return this;
         }
     }

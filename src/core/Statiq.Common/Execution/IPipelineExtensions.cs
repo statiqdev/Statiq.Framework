@@ -81,31 +81,24 @@ namespace Statiq.Common
             return pipeline;
         }
 
-        public static TPipeline WithTrigger<TPipeline>(this TPipeline pipeline, PipelineTrigger trigger)
+        public static TPipeline WithExecutionPolicy<TPipeline>(this TPipeline pipeline, ExecutionPolicy policy)
             where TPipeline : IPipeline
         {
-            pipeline.Trigger = trigger;
+            pipeline.ExecutionPolicy = policy;
             return pipeline;
         }
 
-        public static TPipeline WithManualTrigger<TPipeline>(this TPipeline pipeline)
+        public static TPipeline ManuallyExecute<TPipeline>(this TPipeline pipeline)
             where TPipeline : IPipeline
         {
-            pipeline.Trigger = PipelineTrigger.Manual;
+            pipeline.ExecutionPolicy = ExecutionPolicy.Manual;
             return pipeline;
         }
 
-        public static TPipeline WithManualOrDependencyTrigger<TPipeline>(this TPipeline pipeline)
+        public static TPipeline AlwaysExecute<TPipeline>(this TPipeline pipeline)
             where TPipeline : IPipeline
         {
-            pipeline.Trigger = PipelineTrigger.ManualOrDependency;
-            return pipeline;
-        }
-
-        public static TPipeline WithAlwaysTrigger<TPipeline>(this TPipeline pipeline)
-            where TPipeline : IPipeline
-        {
-            pipeline.Trigger = PipelineTrigger.Always;
+            pipeline.ExecutionPolicy = ExecutionPolicy.Always;
             return pipeline;
         }
     }

@@ -15,7 +15,7 @@ namespace Statiq.Core.Tests.Execution
     [TestFixture]
     public class EngineFixture : BaseFixture
     {
-        public class GetTriggeredPipelines : EngineFixture
+        public class GetExecutingPipelines : EngineFixture
         {
             [Test]
             public void GetsAllForNull()
@@ -24,10 +24,10 @@ namespace Statiq.Core.Tests.Execution
                 Engine engine = GetEngine();
 
                 // When
-                HashSet<string> triggeredPipelines = engine.GetTriggeredPipelines(null);
+                HashSet<string> executingPipelines = engine.GetExecutingPipelines(null);
 
                 // Then
-                triggeredPipelines.ShouldBe(new[] { "A", "D", "E", "F" }, true);
+                executingPipelines.ShouldBe(new[] { "A", "D", "E", "F" }, true);
             }
 
             [Test]
@@ -37,10 +37,10 @@ namespace Statiq.Core.Tests.Execution
                 Engine engine = GetEngine();
 
                 // When
-                HashSet<string> triggeredPipelines = engine.GetTriggeredPipelines(Array.Empty<string>());
+                HashSet<string> executingPipelines = engine.GetExecutingPipelines(Array.Empty<string>());
 
                 // Then
-                triggeredPipelines.ShouldBe(new[] { "F" }, true);
+                executingPipelines.ShouldBe(new[] { "F" }, true);
             }
 
             [Test]
@@ -50,10 +50,10 @@ namespace Statiq.Core.Tests.Execution
                 Engine engine = GetEngine();
 
                 // When
-                HashSet<string> triggeredPipelines = engine.GetTriggeredPipelines(new[] { "A", "B" });
+                HashSet<string> executingPipelines = engine.GetExecutingPipelines(new[] { "A", "B" });
 
                 // Then
-                triggeredPipelines.ShouldBe(new[] { "A", "B", "F" }, true);
+                executingPipelines.ShouldBe(new[] { "A", "B", "F" }, true);
             }
 
             [Test]
@@ -63,10 +63,10 @@ namespace Statiq.Core.Tests.Execution
                 Engine engine = GetEngine();
 
                 // When
-                HashSet<string> triggeredPipelines = engine.GetTriggeredPipelines(new[] { "E" });
+                HashSet<string> executingPipelines = engine.GetExecutingPipelines(new[] { "E" });
 
                 // Then
-                triggeredPipelines.ShouldBe(new[] { "A", "D", "E", "F" }, true);
+                executingPipelines.ShouldBe(new[] { "A", "D", "E", "F" }, true);
             }
 
             [Test]
@@ -76,7 +76,7 @@ namespace Statiq.Core.Tests.Execution
                 Engine engine = GetEngine();
 
                 // When, Then
-                Should.Throw<ArgumentException>(() => engine.GetTriggeredPipelines(new[] { "Z" }));
+                Should.Throw<ArgumentException>(() => engine.GetExecutingPipelines(new[] { "Z" }));
             }
 
             private Engine GetEngine()
@@ -84,29 +84,29 @@ namespace Statiq.Core.Tests.Execution
                 Engine engine = new Engine();
                 engine.Pipelines.Add("A", new TestPipeline
                 {
-                    Trigger = PipelineTrigger.Default
+                    ExecutionPolicy = ExecutionPolicy.Default
                 });
                 engine.Pipelines.Add("B", new TestPipeline
                 {
-                    Trigger = PipelineTrigger.Manual
+                    ExecutionPolicy = ExecutionPolicy.Manual
                 });
                 engine.Pipelines.Add("C", new TestPipeline
                 {
-                    Trigger = PipelineTrigger.ManualOrDependency
+                    ExecutionPolicy = ExecutionPolicy.Manual
                 });
                 engine.Pipelines.Add("D", new TestPipeline
                 {
-                    Trigger = PipelineTrigger.ManualOrDependency,
+                    ExecutionPolicy = ExecutionPolicy.Manual,
                     Dependencies = new HashSet<string>(new[] { "A" })
                 });
                 engine.Pipelines.Add("E", new TestPipeline
                 {
-                    Trigger = PipelineTrigger.Default,
+                    ExecutionPolicy = ExecutionPolicy.Default,
                     Dependencies = new HashSet<string>(new[] { "D" })
                 });
                 engine.Pipelines.Add("F", new TestPipeline
                 {
-                    Trigger = PipelineTrigger.Always
+                    ExecutionPolicy = ExecutionPolicy.Always
                 });
                 return engine;
             }
@@ -185,13 +185,13 @@ namespace Statiq.Core.Tests.Execution
             }
 
             [Test]
-            public void ThrowsForManualDependency()
+            public void DoesNotThrowForManualDependency()
             {
                 // Given
                 IPipelineCollection pipelines = new TestPipelineCollection();
                 pipelines.Add("Bar", new TestPipeline
                 {
-                    Trigger = PipelineTrigger.Manual
+                    ExecutionPolicy = ExecutionPolicy.Manual
                 });
                 pipelines.Add("Foo", new TestPipeline
                 {
@@ -199,8 +199,21 @@ namespace Statiq.Core.Tests.Execution
                 });
                 TestLogger logger = new TestLogger();
 
-                // When, Then
-                Should.Throw<PipelineException>(() => Engine.GetPipelinePhases(pipelines, logger));
+                // When
+                PipelinePhase[] phases = Engine.GetPipelinePhases(pipelines, logger);
+
+                // Then
+                phases.Select(x => (x.PipelineName, x.Phase)).ShouldBe(new (string, Phase)[]
+                {
+                    ("Bar", Phase.Input),
+                    ("Foo", Phase.Input),
+                    ("Bar", Phase.Process),
+                    ("Foo", Phase.Process),
+                    ("Bar", Phase.Transform),
+                    ("Foo", Phase.Transform),
+                    ("Bar", Phase.Output),
+                    ("Foo", Phase.Output)
+                });
             }
 
             [Test]

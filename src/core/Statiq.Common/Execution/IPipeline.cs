@@ -46,6 +46,6 @@ namespace Statiq.Common
         /// <summary>
         /// Indicates when the pipeline is executed.
         /// </summary>
-        PipelineTrigger Trigger { get; set; }
+        ExecutionPolicy ExecutionPolicy { get; set; }
     }
 }

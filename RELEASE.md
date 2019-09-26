@@ -1,3 +1,7 @@
+# 1.0.0-alpha.5
+
+- Renamed `PipelineTrigger` to `ExecutionPolicy`
+
 # 1.0.0-alpha.4
 
 - Updated to .NET Core 3.0 final

@@ -226,7 +226,7 @@ namespace Statiq.Core
         }
 
         /// <summary>
-        /// Executes pipelines with <see cref="PipelineTrigger.Default"/> and <see cref="PipelineTrigger.Always"/> triggers.
+        /// Executes pipelines with <see cref="ExecutionPolicy.Default"/> and <see cref="ExecutionPolicy.Always"/> policies.
         /// </summary>
         /// <param name="cancellationTokenSource">
         /// A cancellation token source that can be used to cancel the execution.
@@ -236,12 +236,12 @@ namespace Statiq.Core
             ExecuteAsync(null, cancellationTokenSource);
 
         /// <summary>
-        /// Executes the specified pipelines and pipelines with <see cref="PipelineTrigger.Always"/> triggers.
+        /// Executes the specified pipelines and pipelines with <see cref="ExecutionPolicy.Always"/> policies.
         /// </summary>
         /// <param name="pipelines">
-        /// The pipelines to trigger or <c>null</c> to trigger pipelines with
-        /// <see cref="PipelineTrigger.Default"/> and <see cref="PipelineTrigger.Always"/> triggers.
-        /// To only trigger pipelines with <see cref="PipelineTrigger.Always"/> provide a zero-length array.
+        /// The pipelines to execute or <c>null</c> to execute pipelines with
+        /// <see cref="ExecutionPolicy.Default"/> and <see cref="ExecutionPolicy.Always"/> policies.
+        /// To only execute pipelines with <see cref="ExecutionPolicy.Always"/> provide a zero-length array.
         /// </param>
         /// <param name="cancellationTokenSource">
         /// A cancellation token source that can be used to cancel the execution.
@@ -264,15 +264,15 @@ namespace Statiq.Core
             }
 
             // Verify pipelines
-            HashSet<string> triggeredPipelines = GetTriggeredPipelines(pipelines);
-            if (triggeredPipelines.Count == 0)
+            HashSet<string> executingPipelines = GetExecutingPipelines(pipelines);
+            if (executingPipelines.Count == 0)
             {
-                _logger.LogWarning("No pipelines are configured or specified.");
+                _logger.LogWarning("No pipelines are configured or specified for execution.");
                 return outputs;
             }
 
             // Log
-            _logger.LogInformation($"Executing {triggeredPipelines.Count} pipelines ({string.Join(", ", triggeredPipelines.OrderBy(x => x))})");
+            _logger.LogInformation($"Executing {executingPipelines.Count} pipelines ({string.Join(", ", executingPipelines.OrderBy(x => x))})");
             _logger.LogDebug($"Execution ID {executionId}");
             _logger.LogInformation($"Using {JsEngineSwitcher.Current.DefaultEngineName} as the JavaScript engine");
             System.Diagnostics.Stopwatch stopwatch = System.Diagnostics.Stopwatch.StartNew();
@@ -298,7 +298,7 @@ namespace Statiq.Core
             try
             {
                 // Get and execute all phases
-                phaseTasks = GetPhaseTasks(executionId, triggeredPipelines, phaseResults, cancellationTokenSource);
+                phaseTasks = GetPhaseTasks(executionId, executingPipelines, phaseResults, cancellationTokenSource);
                 await Task.WhenAll(phaseTasks);
             }
             catch (Exception ex)
@@ -357,7 +357,7 @@ namespace Statiq.Core
         }
 
         // Internal for testing
-        internal HashSet<string> GetTriggeredPipelines(string[] pipelines)
+        internal HashSet<string> GetExecutingPipelines(string[] pipelines)
         {
             // Validate
             if (pipelines != null)
@@ -371,14 +371,14 @@ namespace Statiq.Core
                 }
             }
 
-            HashSet<string> triggered = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            HashSet<string> executing = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
             foreach (KeyValuePair<string, IPipeline> kvp in _pipelines)
             {
-                // If it's always triggered,
-                // there are no specified pipelines and it's default triggered,
+                // If it's always executed,
+                // there are no specified pipelines and it's executed by default,
                 // or it's one of the specified pipelines...
-                if (kvp.Value.Trigger == PipelineTrigger.Always
-                    || (pipelines == null && kvp.Value.Trigger == PipelineTrigger.Default)
+                if (kvp.Value.ExecutionPolicy == ExecutionPolicy.Always
+                    || (pipelines == null && kvp.Value.ExecutionPolicy == ExecutionPolicy.Default)
                     || (pipelines?.Any(x => x.Equals(kvp.Key, StringComparison.OrdinalIgnoreCase)) == true))
                 {
                     AddPipelineAndDependencies(kvp.Key);
@@ -387,7 +387,7 @@ namespace Statiq.Core
 
             void AddPipelineAndDependencies(string pipelineName)
             {
-                if (triggered.Add(pipelineName))
+                if (executing.Add(pipelineName))
                 {
                     foreach (string dependency in _pipelines[pipelineName].Dependencies)
                     {
@@ -396,7 +396,7 @@ namespace Statiq.Core
                 }
             }
 
-            return triggered;
+            return executing;
         }
 
         // The result array is sorted based on dependencies
@@ -464,10 +464,6 @@ namespace Statiq.Core
                             {
                                 throw new PipelineException($"Could not find pipeline dependency {dependencyName} of {name}");
                             }
-                            if (dependency.Trigger == PipelineTrigger.Manual)
-                            {
-                                throw new PipelineException($"Pipeline {name} can not have dependency on manually triggered pipeline {dependencyName}");
-                            }
                             if (!dependency.Isolated)
                             {
                                 // Only add the phase dependency if the dependency is not isolated
@@ -497,12 +493,12 @@ namespace Statiq.Core
 
         private Task[] GetPhaseTasks(
             Guid executionId,
-            HashSet<string> triggeredPipelines,
+            HashSet<string> executingPipelines,
             ConcurrentDictionary<string, PhaseResult[]> phaseResults,
             CancellationTokenSource cancellationTokenSource)
         {
             Dictionary<PipelinePhase, Task> phaseTasks = new Dictionary<PipelinePhase, Task>();
-            foreach (PipelinePhase phase in _phases.Where(x => triggeredPipelines.Contains(x.PipelineName)))
+            foreach (PipelinePhase phase in _phases.Where(x => executingPipelines.Contains(x.PipelineName)))
             {
                 phaseTasks.Add(phase, GetPhaseTaskAsync(executionId, phaseResults, phaseTasks, phase, cancellationTokenSource));
             }
