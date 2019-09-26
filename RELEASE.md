@@ -1,5 +1,7 @@
 # 1.0.0-alpha.5
 
+- Adds `StartProcess.KeepContent()` to prevent replacing document content with process output
+- Adds `StartProcess.OnlyOnce()` to only execute the process once
 - Renamed `PipelineTrigger` to `ExecutionPolicy`
 
 # 1.0.0-alpha.4

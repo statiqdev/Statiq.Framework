@@ -27,10 +27,16 @@ namespace Statiq.Core
     /// <category>Extensibility</category>
     public class StartProcess : ConfigModule<string>, IDisposable
     {
+        /// <summary>
+        /// A metadata key that contains the process exit code.
+        /// </summary>
         public const string ExitCode = nameof(ExitCode);
+
+        /// <summary>
+        /// A metadata key that contains any error data from the process.
+        /// </summary>
         public const string ErrorData = nameof(ErrorData);
 
-        private readonly object _startLock = new object();
         private readonly ConcurrentDictionary<int, (Process, ILogger)> _processes = new ConcurrentDictionary<int, (Process, ILogger)>();
         private readonly Dictionary<string, string> _environmentVariables = new Dictionary<string, string>();
 
@@ -38,8 +44,11 @@ namespace Statiq.Core
         private string _workingDirectory;
         private int _timeout;
         private bool _background;
+        private bool _onlyOnce;
+        private bool _executed;
         private bool _logOutput;
         private bool _continueOnError;
+        private bool _keepContent;
 
         /// <summary>
         /// Starts a process for the specified file name.
@@ -130,10 +139,29 @@ namespace Statiq.Core
         /// but no output document will be generated and it will log with a debug level.
         /// </remarks>
         /// <param name="background"><c>true</c> to start this process in the background, <c>false</c> otherwise.</param>
+        /// <param name="onlyOnce">
+        /// <c>true</c> to start the process the first time the module is executed and not on re-execution,
+        /// <c>false</c> to start a new process on every execution.
+        /// </param>
         /// <returns>The current module instance.</returns>
-        public StartProcess AsBackground(bool background = true)
+        public StartProcess AsBackground(bool background = true, bool onlyOnce = true)
         {
             _background = background;
+            _onlyOnce = onlyOnce;
+            return this;
+        }
+
+        /// <summary>
+        /// Only starts the process on the first module execution.
+        /// </summary>
+        /// <param name="onlyOnce">
+        /// <c>true</c> to start the process the first time the module is executed and not on re-execution,
+        /// <c>false</c> to start a new process on every execution.
+        /// </param>
+        /// <returns>The current module instance.</returns>
+        public StartProcess OnlyOnce(bool onlyOnce = true)
+        {
+            _onlyOnce = onlyOnce;
             return this;
         }
 
@@ -165,8 +193,32 @@ namespace Statiq.Core
             return this;
         }
 
+        /// <summary>
+        /// Keeps the existing document content instead of replacing it with the process output.
+        /// </summary>
+        /// <remarks>
+        /// This has no effect if the process is a background process.
+        /// </remarks>
+        /// <param name="keepContent">
+        /// <c>true</c> to keep the existing document content,
+        /// <c>false</c> to replace it with the process output.
+        /// </param>
+        /// <returns>The current module instance.</returns>
+        public StartProcess KeepContent(bool keepContent = true)
+        {
+            _keepContent = keepContent;
+            return this;
+        }
+
         protected override async Task<IEnumerable<IDocument>> ExecuteConfigAsync(IDocument input, IExecutionContext context, string value)
         {
+            // Only execute once if requested
+            if (_onlyOnce && _executed)
+            {
+                return input.Yield();
+            }
+            _executed = true;
+
             // Create the process start info
             ProcessStartInfo startInfo = new ProcessStartInfo
             {
@@ -211,7 +263,7 @@ namespace Statiq.Core
             process.Exited += ProcessExited;
 
             // Prepare the streams
-            using (Stream contentStream = _background ? null : await context.GetContentStreamAsync())
+            using (Stream contentStream = _background || _keepContent ? null : await context.GetContentStreamAsync())
             {
                 using (StreamWriter contentWriter = contentStream == null ? null : new StreamWriter(contentStream))
                 {
@@ -300,7 +352,11 @@ namespace Statiq.Core
                         {
                             metadata.Add(ErrorData, errorData);
                         }
-                        return context.CloneOrCreateDocument(input, metadata, context.GetContentProvider(contentStream)).Yield();
+                        return context.CloneOrCreateDocument(
+                            input,
+                            metadata,
+                            contentStream == null ? null : context.GetContentProvider(contentStream))
+                            .Yield();
                     }
                 }
             }
