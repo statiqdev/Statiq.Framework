@@ -1,33 +1,62 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Reflection;
 
 namespace Statiq.Common
 {
-    public interface IClassCatalog
+    public partial interface IClassCatalog
     {
         /// <summary>
         /// Gets all types assignable from a specified type.
         /// </summary>
-        /// <typeparam name="T">The type of classes to get.</typeparam>
-        /// <returns>All classes of type <c>T</c>.</returns>
-        IEnumerable<Type> GetAssignableFrom<T>();
+        /// <param name="assignableType">The type of classes to get.</param>
+        /// <returns>All classes of the specified type.</returns>
+        IEnumerable<Type> GetAssignableFrom(Type assignableType);
 
         /// <summary>
-        /// Gets instances for all classes of a specified type..
+        /// Gets all types from a specified assembly.
         /// </summary>
-        /// <typeparam name="T">The type of instances to get.</typeparam>
-        /// <returns>Instances for all classes of type <c>T</c>.</returns>
-        IEnumerable<T> GetInstances<T>();
+        /// <param name="assembly">The assembly to get types from.</param>
+        /// <returns>All types from the specified assembly.</returns>
+        IEnumerable<Type> GetFromAssembly(Assembly assembly);
 
         /// <summary>
-        /// Gets an instance for a class of a specified type and name.
+        /// Gets instances for all classes of a specified assignable type.
         /// </summary>
-        /// <typeparam name="T">The type of the instance to get.</typeparam>
+        /// <param name="assignableType">The type of instances to get.</param>
+        /// <returns>Instances for all classes of the specified type.</returns>
+        IEnumerable<object> GetInstances(Type assignableType);
+
+        /// <summary>
+        /// Gets a type for the specified full name.
+        /// </summary>
+        /// <param name="fullName">The full name of the type.</param>
+        /// <returns>
+        /// A <see cref="Type"/> that matches the specified full name or <c>null</c>
+        /// if a corresponding type could not be found.
+        /// </returns>
+        Type GetType(string fullName);
+
+        /// <summary>
+        /// Gets an instance for a specified full name.
+        /// </summary>
+        /// <param name="fullName">The full name of the type.</param>
+        /// <returns>
+        /// An instance of the type that matches the full name or <c>null</c>
+        /// if a corresponding type could not be found.
+        /// </returns>
+        object GetInstance(string fullName);
+
+        /// <summary>
+        /// Gets an instance for a class of a specified assignable type and name.
+        /// </summary>
+        /// <param name="assignableType">The assignable type of instance to get.</param>
         /// <param name="typeName">The name of the type.</param>
         /// <param name="ignoreCase">if set to <c>true</c> ignore the case of the type name.</param>
         /// <returns>
-        /// An instance of the first class that matches the specified type and name.
+        /// An instance of the first class that matches the specified type and name or <c>null</c>
+        /// if a corresponding type could not be found.
         /// </returns>
-        T GetInstance<T>(string typeName, bool ignoreCase = false);
+        object GetInstance(Type assignableType, string typeName, bool ignoreCase = false);
     }
 }

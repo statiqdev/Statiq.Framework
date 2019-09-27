@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyModel;
 using Microsoft.Extensions.Logging;
 using Statiq.Common;
@@ -26,27 +25,55 @@ namespace Statiq.App
         private bool _populated;
 
         /// <inheritdoc/>
-        public IEnumerable<Type> GetAssignableFrom<T>()
+        public IEnumerable<Type> GetAssignableFrom(Type assignableType)
         {
+            _ = assignableType ?? throw new ArgumentNullException(nameof(assignableType));
             Populate();
-            return _types.Values.Where(x => typeof(T).IsAssignableFrom(x));
+            return _types.Values.Where(x => assignableType.IsAssignableFrom(x));
         }
 
         /// <inheritdoc/>
-        public IEnumerable<T> GetInstances<T>()
+        public IEnumerable<Type> GetFromAssembly(Assembly assembly)
         {
+            _ = assembly ?? throw new ArgumentNullException(nameof(assembly));
             Populate();
-            return GetAssignableFrom<T>().Select(x => (T)Activator.CreateInstance(x));
+            return _types.Values.Where(x => x.Assembly.Equals(assembly));
         }
 
         /// <inheritdoc/>
-        public T GetInstance<T>(string typeName, bool ignoreCase = false)
+        public IEnumerable<object> GetInstances(Type assignableType)
         {
+            _ = assignableType ?? throw new ArgumentNullException(nameof(assignableType));
             Populate();
-            Type type = GetAssignableFrom<T>().FirstOrDefault(x => x.Name.Equals(
+            return GetAssignableFrom(assignableType).Select(Activator.CreateInstance);
+        }
+
+        /// <inheritdoc/>
+        public Type GetType(string fullName)
+        {
+            _ = fullName ?? throw new ArgumentNullException(nameof(fullName));
+            Populate();
+            return _types.TryGetValue(fullName, out Type type) ? type : default;
+        }
+
+        public object GetInstance(string fullName)
+        {
+            _ = fullName ?? throw new ArgumentNullException(nameof(fullName));
+            Populate();
+            return _types.TryGetValue(fullName, out Type type)
+                ? Activator.CreateInstance(type)
+                : default;
+        }
+
+        /// <inheritdoc/>
+        public object GetInstance(Type assignableType, string typeName, bool ignoreCase = false)
+        {
+            _ = assignableType ?? throw new ArgumentNullException(nameof(assignableType));
+            Populate();
+            Type type = GetAssignableFrom(assignableType).FirstOrDefault(x => x.Name.Equals(
                 typeName,
                 ignoreCase ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal));
-            return type == null ? default : (T)Activator.CreateInstance(type);
+            return type == null ? default : Activator.CreateInstance(type);
         }
 
         internal void LogDebugMessages(ILogger logger)
