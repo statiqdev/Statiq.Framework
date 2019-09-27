@@ -12,7 +12,10 @@ using Statiq.Core;
 
 namespace Statiq.App
 {
-    internal class EngineManager : IDisposable
+    /// <summary>
+    /// This class can be used from commands to wrap engine execution and apply settings, etc.
+    /// </summary>
+    public class EngineManager : IDisposable
     {
         private readonly ILogger _logger;
 
@@ -24,7 +27,7 @@ namespace Statiq.App
         {
             // Get the standard input stream
             string input = null;
-            if (commandSettings.StdIn)
+            if (commandSettings?.StdIn == true)
             {
                 using (StreamReader reader = new StreamReader(Console.OpenStandardInput(), Console.InputEncoding))
                 {
@@ -48,7 +51,10 @@ namespace Statiq.App
 
             // Apply settings
             bootstrapper.Configurators.Configure(Engine.Settings);
-            ApplyCommandSettings(Engine, commandSettings);  // Apply command settings last so they can override others
+            if (commandSettings != null)
+            {
+                ApplyCommandSettings(Engine, commandSettings);  // Apply command settings last so they can override others
+            }
 
             // Run engine configurators after command line, settings, etc. have been applied
             bootstrapper.Configurators.Configure<IEngine>(Engine);
