@@ -101,15 +101,15 @@ namespace Statiq.App
         public IBootstrapper AddDefaultCommands()
         {
             SetDefaultCommand<BuildCommand>();
-            AddCommand<BuildCommand>("build");
-            AddCommand<PreviewCommand>("preview");
+            AddCommands(typeof(BuildCommand).Assembly);
+            AddCommands();
             return this;
         }
 
         public IBootstrapper AddDefaultShortcodes() =>
             ConfigureEngine(engine =>
             {
-                foreach (Type shortcode in ClassCatalog.GetAssignableFrom<IShortcode>())
+                foreach (Type shortcode in ClassCatalog.GetTypesAssignableTo<IShortcode>())
                 {
                     engine.Shortcodes.Add(shortcode);
 
@@ -136,7 +136,7 @@ namespace Statiq.App
                 // Add all module namespaces
                 engine.Namespaces.AddRange(
                     ClassCatalog
-                        .GetAssignableFrom<IModule>()
+                        .GetTypesAssignableTo<IModule>()
                         .Select(x => x.Namespace));
             });
 

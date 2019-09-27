@@ -25,7 +25,7 @@ namespace Statiq.App
         private bool _populated;
 
         /// <inheritdoc/>
-        public IEnumerable<Type> GetAssignableFrom(Type assignableType)
+        public IEnumerable<Type> GetTypesAssignableTo(Type assignableType)
         {
             _ = assignableType ?? throw new ArgumentNullException(nameof(assignableType));
             Populate();
@@ -33,7 +33,7 @@ namespace Statiq.App
         }
 
         /// <inheritdoc/>
-        public IEnumerable<Type> GetFromAssembly(Assembly assembly)
+        public IEnumerable<Type> GetTypesFromAssembly(Assembly assembly)
         {
             _ = assembly ?? throw new ArgumentNullException(nameof(assembly));
             Populate();
@@ -45,7 +45,7 @@ namespace Statiq.App
         {
             _ = assignableType ?? throw new ArgumentNullException(nameof(assignableType));
             Populate();
-            return GetAssignableFrom(assignableType).Select(Activator.CreateInstance);
+            return GetTypesAssignableTo(assignableType).Select(Activator.CreateInstance);
         }
 
         /// <inheritdoc/>
@@ -70,7 +70,7 @@ namespace Statiq.App
         {
             _ = assignableType ?? throw new ArgumentNullException(nameof(assignableType));
             Populate();
-            Type type = GetAssignableFrom(assignableType).FirstOrDefault(x => x.Name.Equals(
+            Type type = GetTypesAssignableTo(assignableType).FirstOrDefault(x => x.Name.Equals(
                 typeName,
                 ignoreCase ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal));
             return type == null ? default : Activator.CreateInstance(type);

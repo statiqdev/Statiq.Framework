@@ -1,12 +1,15 @@
 # 1.0.0-alpha.5
 
-- Adds `StartProcess.KeepContent()` to prevent replacing document content with process output
-- Adds `StartProcess.OnlyOnce()` to only execute the process once
-- Renamed `PipelineTrigger` to `ExecutionPolicy`
-- Adds type-based methods for adding pipelines
-- All `IPipeline` implementations from the entry assembly are added by the bootstrapper by default
-- Adds ability to specify which defaults to add to the bootstrapper
-- Made `EngineManager` public so it can be used by custom commands
+- Adds `StartProcess.KeepContent()` to prevent replacing document content with process output.
+- Adds `StartProcess.OnlyOnce()` to only execute the process once.
+- Renamed `PipelineTrigger` to `ExecutionPolicy`.
+- Adds type-based methods for adding pipelines.
+- All `IPipeline` implementations from the entry assembly are added by the bootstrapper by default.
+- All `ICommand` implementations from the entry assembly are added by the bootstrapper by default.
+- Adds ability to specify which defaults to add to the bootstrapper.
+- Made `EngineManager` public so it can be used by custom commands.
+- Adds a new `SimpleBuildCommand` base command to make creating new pipeline-specific build commands easier.
+- Adds `AddPipelines()` and `AddCommands()` methods to add pipelines and commands from the entry or a given assembly.
 
 # 1.0.0-alpha.4
 

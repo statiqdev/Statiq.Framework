@@ -7,13 +7,6 @@ namespace Statiq.App
 {
     public partial interface IBootstrapper
     {
-        public IBootstrapper AddCommand<TCommand>(string name)
-            where TCommand : class, ICommand
-        {
-            Configurators.Add(new AddCommandConfigurator<TCommand>(name));
-            return this;
-        }
-
         public IBootstrapper ConfigureSettings(Action<ISettings> action) =>
             Configure<ISettings>(x => action(x));
 

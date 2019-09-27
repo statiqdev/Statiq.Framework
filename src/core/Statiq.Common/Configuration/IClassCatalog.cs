@@ -7,18 +7,18 @@ namespace Statiq.Common
     public partial interface IClassCatalog
     {
         /// <summary>
-        /// Gets all types assignable from a specified type.
+        /// Gets all types assignable to a specified type.
         /// </summary>
         /// <param name="assignableType">The type of classes to get.</param>
         /// <returns>All classes of the specified type.</returns>
-        IEnumerable<Type> GetAssignableFrom(Type assignableType);
+        IEnumerable<Type> GetTypesAssignableTo(Type assignableType);
 
         /// <summary>
         /// Gets all types from a specified assembly.
         /// </summary>
         /// <param name="assembly">The assembly to get types from.</param>
         /// <returns>All types from the specified assembly.</returns>
-        IEnumerable<Type> GetFromAssembly(Assembly assembly);
+        IEnumerable<Type> GetTypesFromAssembly(Assembly assembly);
 
         /// <summary>
         /// Gets instances for all classes of a specified assignable type.

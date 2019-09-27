@@ -12,7 +12,7 @@ namespace Statiq.Common
         /// </summary>
         /// <typeparam name="T">The type of classes to get.</typeparam>
         /// <returns>All classes of type <c>T</c>.</returns>
-        public IEnumerable<Type> GetAssignableFrom<T>() => GetAssignableFrom(typeof(T));
+        public IEnumerable<Type> GetTypesAssignableTo<T>() => GetTypesAssignableTo(typeof(T));
 
         /// <summary>
         /// Gets instances for all classes of a specified assignable type..

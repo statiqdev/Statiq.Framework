@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Text.RegularExpressions;
 
 namespace Statiq.Common
 {
@@ -15,5 +16,12 @@ namespace Statiq.Common
 
         public static string RemoveEnd(this string str, string value, StringComparison comparisonType) =>
             str != null && value != null && str.EndsWith(value, comparisonType) ? str.Substring(0, str.Length - value.Length) : str;
+
+        public static string ToKebab(this string str) =>
+            Regex.Replace(
+                str,
+                "([a-z])([A-Z])",
+                "$1-$2")
+                .ToLower();
     }
 }

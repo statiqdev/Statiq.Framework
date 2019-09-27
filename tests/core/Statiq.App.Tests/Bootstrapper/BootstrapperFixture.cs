@@ -111,7 +111,7 @@ namespace Statiq.App.Tests.Bootstrapper
 
                 // Then
                 exitCode.ShouldBe((int)ExitCode.Normal);
-                bootstrapper.ClassCatalog.GetAssignableFrom<BootstrapperFixture>().Count().ShouldBe(1);
+                bootstrapper.ClassCatalog.GetTypesAssignableTo<BootstrapperFixture>().Count().ShouldBe(1);
                 provider.Messages.ShouldContain(x => x.FormattedMessage.StartsWith("Cataloging types in assembly"));
             }
 

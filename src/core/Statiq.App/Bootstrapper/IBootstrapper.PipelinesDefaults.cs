@@ -46,15 +46,19 @@ namespace Statiq.App
             where TPipeline : IPipeline =>
             ConfigureEngine(x => x.Pipelines.Add<TPipeline>());
 
-        public IBootstrapper AddPipelines() =>
-            ConfigureEngine(engine =>
+        public IBootstrapper AddPipelines(Assembly assembly)
+        {
+            _ = assembly ?? throw new ArgumentNullException(nameof(assembly));
+            return ConfigureEngine(engine =>
             {
-                Type[] callingTypes = Assembly.GetEntryAssembly().GetTypes();
-                foreach (Type pipelineType in callingTypes.Where(x => typeof(IPipeline).IsAssignableFrom(x)))
+                foreach (Type pipelineType in ClassCatalog.GetTypesAssignableTo<IPipeline>().Where(x => x.Assembly.Equals(assembly)))
                 {
                     engine.Pipelines.Add(pipelineType);
                 }
             });
+        }
+
+        public IBootstrapper AddPipelines() => AddPipelines(Assembly.GetEntryAssembly());
 
         // Builder
 
