@@ -29,6 +29,7 @@ namespace Statiq.App
             .AddDefaultCommands()
             .AddDefaultShortcodes()
             .AddDefaultNamespaces()
+            .AddDefaultPipelines()
             .AddConfigurator(configurator);
 
         public IBootstrapper AddDefaultLogging() =>
@@ -112,5 +113,7 @@ namespace Statiq.App
                         .GetAssignableFrom<IModule>()
                         .Select(x => x.Namespace));
             });
+
+        public IBootstrapper AddDefaultPipelines() => AddPipelines();
     }
 }
