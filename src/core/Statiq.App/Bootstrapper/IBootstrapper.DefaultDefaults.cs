@@ -11,26 +11,52 @@ namespace Statiq.App
 {
     public partial interface IBootstrapper
     {
-        public IBootstrapper AddDefaults() =>
-            AddDefaults((IConfigurator<IEngine>)null);
+        public IBootstrapper AddDefaults(DefaultsToAdd defaultsToAdd = DefaultsToAdd.All) =>
+            AddDefaults((IConfigurator<IEngine>)null, defaultsToAdd);
 
-        public IBootstrapper AddDefaults<TConfigurator>()
+        public IBootstrapper AddDefaults<TConfigurator>(DefaultsToAdd defaultsToAdd = DefaultsToAdd.All)
             where TConfigurator : IConfigurator<IEngine> =>
-            AddDefaults(Activator.CreateInstance<TConfigurator>());
+            AddDefaults(Activator.CreateInstance<TConfigurator>(), defaultsToAdd);
 
-        public IBootstrapper AddDefaults(Action<IEngine> configureEngineAction) =>
-            AddDefaults(new DelegateConfigurator<IEngine>(configureEngineAction));
+        public IBootstrapper AddDefaults(Action<IEngine> configureEngineAction, DefaultsToAdd defaultsToAdd = DefaultsToAdd.All) =>
+            AddDefaults(new DelegateConfigurator<IEngine>(configureEngineAction), defaultsToAdd);
 
-        public IBootstrapper AddDefaults(IConfigurator<IEngine> configurator) =>
-            AddDefaultLogging()
-            .AddDefaultSettings()
-            .AddEnvironmentVariables()
-            .AddDefaultConfigurators()
-            .AddDefaultCommands()
-            .AddDefaultShortcodes()
-            .AddDefaultNamespaces()
-            .AddDefaultPipelines()
-            .AddConfigurator(configurator);
+        public IBootstrapper AddDefaults(IConfigurator<IEngine> configurator, DefaultsToAdd defaultsToAdd = DefaultsToAdd.All)
+        {
+            if (defaultsToAdd.HasFlag(DefaultsToAdd.Logging))
+            {
+                AddDefaultLogging();
+            }
+            if (defaultsToAdd.HasFlag(DefaultsToAdd.Settings))
+            {
+                AddDefaultSettings();
+            }
+            if (defaultsToAdd.HasFlag(DefaultsToAdd.EnvironmentVariables))
+            {
+                AddEnvironmentVariables();
+            }
+            if (defaultsToAdd.HasFlag(DefaultsToAdd.Configurators))
+            {
+                AddDefaultConfigurators();
+            }
+            if (defaultsToAdd.HasFlag(DefaultsToAdd.Commands))
+            {
+                AddDefaultCommands();
+            }
+            if (defaultsToAdd.HasFlag(DefaultsToAdd.Shortcodes))
+            {
+                AddDefaultShortcodes();
+            }
+            if (defaultsToAdd.HasFlag(DefaultsToAdd.Namespaces))
+            {
+                AddDefaultNamespaces();
+            }
+            if (defaultsToAdd.HasFlag(DefaultsToAdd.Pipelines))
+            {
+                AddDefaultPipelines();
+            }
+            return AddConfigurator(configurator);
+        }
 
         public IBootstrapper AddDefaultLogging() =>
             ConfigureServices(services =>

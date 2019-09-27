@@ -5,6 +5,7 @@
 - Renamed `PipelineTrigger` to `ExecutionPolicy`
 - Adds type-based methods for adding pipelines
 - All `IPipeline` implementations from the entry assembly are added by the bootstrapper by default
+- Adds ability to specify which defaults to add to the bootstrapper
 
 # 1.0.0-alpha.4
 
