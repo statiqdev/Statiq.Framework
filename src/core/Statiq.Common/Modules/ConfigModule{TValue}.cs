@@ -11,8 +11,8 @@ namespace Statiq.Common
     /// </summary>
     public abstract class ConfigModule<TValue> : Module
     {
-        private readonly Config<TValue> _config;
-        private readonly bool _eachDocument;
+        private readonly bool _forceDocumentExecution;
+        private Config<TValue> _config;
 
         /// <summary>
         /// Creates a new config module.
@@ -20,22 +20,28 @@ namespace Statiq.Common
         /// <param name="config">
         /// The delegate to use for getting a config value.
         /// </param>
-        /// <param name="eachDocument">
-        /// <c>true</c> to call <see cref="ExecuteConfigAsync(IDocument, IExecutionContext, TValue)"/> for each
+        /// <param name="forceDocumentExecution">
+        /// <c>true</c> to force calling <see cref="ExecuteConfigAsync(IDocument, IExecutionContext, TValue)"/> for each
         /// input document regardless of whether the config delegate requires a document or <c>false</c>
-        /// to allow only calling <see cref="ExecuteConfigAsync(IDocument, IExecutionContext, TValue)"/> once
+        /// to allow calling <see cref="ExecuteConfigAsync(IDocument, IExecutionContext, TValue)"/> once
         /// with a null input document if the config delegate does not require a document.
         /// </param>
-        protected ConfigModule(Config<TValue> config, bool eachDocument)
+        protected ConfigModule(Config<TValue> config, bool forceDocumentExecution)
         {
             _config = config ?? throw new ArgumentNullException(nameof(config));
-            _eachDocument = eachDocument || config.RequiresDocument;
+            _forceDocumentExecution = forceDocumentExecution;
+        }
+
+        protected ConfigModule<TValue> SetConfig(Config<TValue> config)
+        {
+            _config = config ?? throw new ArgumentNullException(nameof(config));
+            return this;
         }
 
         /// <inheritdoc />
         protected sealed override async Task<IEnumerable<IDocument>> ExecuteContextAsync(IExecutionContext context)
         {
-            if (_eachDocument)
+            if (_forceDocumentExecution || _config.RequiresDocument)
             {
                 IEnumerable<IDocument> aggregateResults = null;
                 TValue value = default;
@@ -62,7 +68,6 @@ namespace Statiq.Common
                         aggregateResults = aggregateResults?.Concat(results) ?? results;
                     }
                 }
-
                 return aggregateResults;
             }
 
@@ -75,7 +80,7 @@ namespace Statiq.Common
             base.ExecuteInputAsync(input, context);
 
         /// <summary>
-        /// Executes the module for each input document in parallel.
+        /// Executes the module for each input document.
         /// If there aren't any input documents and the config delegate doesn't require documents,
         /// this will be called once with a null <paramref name="input"/>.
         /// </summary>

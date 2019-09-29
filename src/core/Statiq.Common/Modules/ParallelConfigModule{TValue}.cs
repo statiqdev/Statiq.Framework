@@ -11,8 +11,8 @@ namespace Statiq.Common
     /// </summary>
     public abstract class ParallelConfigModule<TValue> : Module, IParallelModule
     {
-        private readonly Config<TValue> _config;
-        private readonly bool _eachDocument;
+        private readonly bool _forceDocumentExecution;
+        private Config<TValue> _config;
 
         /// <inheritdoc />
         public bool Parallel { get; set; } = true;
@@ -23,47 +23,67 @@ namespace Statiq.Common
         /// <param name="config">
         /// The delegate to use for getting a config value.
         /// </param>
-        /// <param name="eachDocument">
-        /// <c>true</c> to call <see cref="ExecuteConfigAsync(IDocument, IExecutionContext, TValue)"/> for each
+        /// <param name="forceDocumentExecution">
+        /// <c>true</c> to force calling <see cref="ExecuteConfigAsync(IDocument, IExecutionContext, TValue)"/> for each
         /// input document regardless of whether the config delegate requires a document or <c>false</c>
-        /// to allow only calling <see cref="ExecuteConfigAsync(IDocument, IExecutionContext, TValue)"/> once
+        /// to allow calling <see cref="ExecuteConfigAsync(IDocument, IExecutionContext, TValue)"/> once
         /// with a null input document if the config delegate does not require a document.
         /// </param>
-        protected ParallelConfigModule(Config<TValue> config, bool eachDocument)
+        protected ParallelConfigModule(Config<TValue> config, bool forceDocumentExecution)
         {
             _config = config ?? throw new ArgumentNullException(nameof(config));
-            _eachDocument = eachDocument || config.RequiresDocument;
+            _forceDocumentExecution = forceDocumentExecution;
+        }
+
+        protected ParallelConfigModule<TValue> SetConfig(Config<TValue> config)
+        {
+            _config = config ?? throw new ArgumentNullException(nameof(config));
+            return this;
         }
 
         /// <inheritdoc />
         protected sealed override async Task<IEnumerable<IDocument>> ExecuteContextAsync(IExecutionContext context)
         {
-            if (_eachDocument)
+            if (_forceDocumentExecution || _config.RequiresDocument)
             {
-                TValue value = default;
-
-                // Only need to evaluate the config delegate once
+                // Only need to evaluate a context config delegate once
+                TValue contextValue = default;
                 if (!_config.RequiresDocument)
                 {
-                    value = await _config.GetValueAsync(null, context);
+                    contextValue = await _config.GetValueAsync(null, context);
                 }
 
-                return await context.Inputs.ParallelSelectManyAsync(input => ParallelExecuteConfigAsync(input, context, value), context.CancellationToken);
+                // Parallel
+                if (Parallel)
+                {
+                    return await context.Inputs.ParallelSelectManyAsync(
+                        async input =>
+                        {
+                            TValue value = _config.RequiresDocument
+                                ? await _config.GetValueAsync(input, context)
+                                : contextValue;
+                            return await ExecuteInputFunc(input, context, (i, c) => ExecuteConfigAsync(i, c, value));
+                        },
+                        context.CancellationToken);
+                }
+
+                // Not parallel
+                IEnumerable<IDocument> aggregateResults = null;
+                foreach (IDocument input in context.Inputs)
+                {
+                    TValue value = _config.RequiresDocument
+                        ? await _config.GetValueAsync(input, context)
+                        : contextValue;
+                    IEnumerable<IDocument> results = await ExecuteInputFunc(input, context, (i, c) => ExecuteConfigAsync(i, c, value));
+                    if (results != null)
+                    {
+                        aggregateResults = aggregateResults?.Concat(results) ?? results;
+                    }
+                }
+                return aggregateResults;
             }
 
             return await ExecuteConfigAsync(null, context, await _config.GetValueAsync(null, context));
-        }
-
-        private async Task<IEnumerable<IDocument>> ParallelExecuteConfigAsync(IDocument input, IExecutionContext context, TValue value)
-        {
-            // If the config requires a document, evaluate it each time
-            if (_config.RequiresDocument)
-            {
-                value = await _config.GetValueAsync(input, context);
-            }
-
-            // Get the results for this input document
-            return await ExecuteInputFunc(input, context, (i, c) => ExecuteConfigAsync(i, c, value));
         }
 
         /// <inheritdoc />

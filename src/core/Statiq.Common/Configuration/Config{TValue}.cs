@@ -14,7 +14,7 @@ namespace Statiq.Common
     /// if a value type of object is used, then all overloads should also be <see cref="Config{T}"/>.
     /// </summary>
     /// <typeparam name="TValue">The value type for this config data.</typeparam>
-    public class Config<TValue>
+    public class Config<TValue> : IConfig
     {
         private readonly Func<IDocument, IExecutionContext, Task<TValue>> _delegate;
 
@@ -25,6 +25,9 @@ namespace Statiq.Common
         }
 
         public bool RequiresDocument { get; }
+
+        Task<object> IConfig.GetValueAsync(IDocument document, IExecutionContext context) =>
+            GetAndTransformValueAsync(document, context).FromDerivedAsync<object, TValue>();
 
         // This should only be accessed via the extension method(s) that guard against null so that null coalescing operators can be used
         // See the discussion at https://github.com/dotnet/roslyn/issues/7171

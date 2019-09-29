@@ -15,14 +15,14 @@ namespace Statiq.Common
         /// Creates a new config module.
         /// </summary>
         /// <param name="config">The delegate to use for getting a config value.</param>
-        /// <param name="eachDocument">
-        /// <c>true</c> to call <see cref="ExecuteConfigAsync(IDocument, IExecutionContext, TValue)"/> for each
+        /// <param name="forceDocumentExecution">
+        /// <c>true</c> to force calling <see cref="ExecuteConfigAsync(IDocument, IExecutionContext, TValue)"/> for each
         /// input document regardless of whether the config delegate requires a document or <c>false</c>
-        /// to allow only calling <see cref="ExecuteConfigAsync(IDocument, IExecutionContext, TValue)"/> once
+        /// to allow calling <see cref="ExecuteConfigAsync(IDocument, IExecutionContext, TValue)"/> once
         /// with a null input document if the config delegate does not require a document.
         /// </param>
-        protected SyncConfigModule(Config<TValue> config, bool eachDocument)
-            : base(config, eachDocument)
+        protected SyncConfigModule(Config<TValue> config, bool forceDocumentExecution)
+            : base(config, forceDocumentExecution)
         {
         }
 

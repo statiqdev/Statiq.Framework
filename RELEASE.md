@@ -10,6 +10,7 @@
 - Made `EngineManager` public so it can be used by custom commands.
 - Adds a new `SimpleBuildCommand` base command to make creating new pipeline-specific build commands easier.
 - Adds `AddPipelines()` and `AddCommands()` methods to add pipelines and commands from the entry or a given assembly.
+- Adds `MultiConfigModule`, `ParallelMultiConfigModule`, `SyncMultiConfigModule`, and `ParallelSyncMultiConfigModule` base classes for modules that use multiple `Config<T>` values.
 
 # 1.0.0-alpha.4
 
