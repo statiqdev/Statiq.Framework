@@ -70,32 +70,29 @@ namespace Statiq.Common
         /// <inheritdoc />
         protected sealed override async Task<IEnumerable<IDocument>> ExecuteContextAsync(IExecutionContext context)
         {
-            ImmutableDictionary<string, object>.Builder valuesBuilder;
-            IMetadata values;
-
             if (_forceDocumentExecution || _configs.Any(x => x.Value.RequiresDocument))
             {
                 // Only need to evaluate the context config delegates once
-                valuesBuilder = ImmutableDictionary.CreateBuilder<string, object>(StringComparer.OrdinalIgnoreCase);
+                ImmutableDictionary<string, object>.Builder configValuesBuilder = ImmutableDictionary.CreateBuilder<string, object>(StringComparer.OrdinalIgnoreCase);
                 foreach (KeyValuePair<string, IConfig> config in _configs.Where(x => !x.Value.RequiresDocument))
                 {
-                    valuesBuilder[config.Key] = await config.Value.GetValueAsync(null, context);
+                    configValuesBuilder[config.Key] = await config.Value.GetValueAsync(null, context);
                 }
-                ImmutableDictionary<string, object> configValues = valuesBuilder.ToImmutable();
+                ImmutableDictionary<string, object> configValues = configValuesBuilder.ToImmutable();
 
                 // Iterate the inputs
                 IEnumerable<IDocument> aggregateResults = null;
                 foreach (IDocument input in context.Inputs)
                 {
                     // If the config requires a document, evaluate it each time
-                    valuesBuilder = configValues.ToBuilder();
+                    ImmutableDictionary<string, object>.Builder valuesBuilder = configValues.ToBuilder();
                     foreach (KeyValuePair<string, IConfig> config in _configs.Where(x => x.Value.RequiresDocument))
                     {
                         valuesBuilder[config.Key] = await config.Value.GetValueAsync(input, context);
                     }
 
                     // Get the results for this input document
-                    values = new ReadOnlyConvertingDictionary(valuesBuilder.ToImmutable());
+                    IMetadata values = new ReadOnlyConvertingDictionary(valuesBuilder.ToImmutable());
                     IEnumerable<IDocument> results = await ExecuteInputFunc(input, context, (i, c) => ExecuteConfigAsync(i, c, values));
                     if (results != null)
                     {
@@ -104,15 +101,17 @@ namespace Statiq.Common
                 }
                 return aggregateResults;
             }
-
-            // Only context configs
-            valuesBuilder = ImmutableDictionary.CreateBuilder<string, object>();
-            foreach (KeyValuePair<string, IConfig> config in _configs)
+            else
             {
-                valuesBuilder[config.Key] = await config.Value.GetValueAsync(null, context);
+                // Only context configs
+                ImmutableDictionary<string, object>.Builder valuesBuilder = ImmutableDictionary.CreateBuilder<string, object>();
+                foreach (KeyValuePair<string, IConfig> config in _configs)
+                {
+                    valuesBuilder[config.Key] = await config.Value.GetValueAsync(null, context);
+                }
+                IMetadata values = new ReadOnlyConvertingDictionary(valuesBuilder.ToImmutable());
+                return await ExecuteConfigAsync(null, context, values);
             }
-            values = new ReadOnlyConvertingDictionary(valuesBuilder.ToImmutable());
-            return await ExecuteConfigAsync(null, context, values);
         }
 
         /// <inheritdoc />
