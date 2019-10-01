@@ -25,7 +25,7 @@ namespace Statiq.Core
     /// but no output document will be generated and it will log with a debug level.
     /// </remarks>
     /// <category>Extensibility</category>
-    public class StartProcess : ConfigModule<string>, IDisposable
+    public class StartProcess : ParallelMultiConfigModule, IDisposable
     {
         /// <summary>
         /// A metadata key that contains the process exit code.
@@ -37,11 +37,14 @@ namespace Statiq.Core
         /// </summary>
         public const string ErrorData = nameof(ErrorData);
 
+        // Config keys
+        private const string FileName = nameof(FileName);
+        private const string Arguments = nameof(Arguments);
+        private const string WorkingDirectory = nameof(WorkingDirectory);
+
         private readonly ConcurrentDictionary<int, (Process, ILogger)> _processes = new ConcurrentDictionary<int, (Process, ILogger)>();
         private readonly Dictionary<string, string> _environmentVariables = new Dictionary<string, string>();
 
-        private readonly string _fileName;
-        private string _workingDirectory;
         private int _timeout;
         private bool _background;
         private bool _onlyOnce;
@@ -51,10 +54,10 @@ namespace Statiq.Core
         private bool _keepContent;
 
         /// <summary>
-        /// Starts a process for the specified file name.
+        /// Starts a process for the specified file name and arguments.
         /// </summary>
         /// <param name="fileName">The file name of the process to start.</param>
-        public StartProcess(string fileName)
+        public StartProcess(Config<string> fileName)
             : this(fileName, Config.FromValue((string)null))
         {
         }
@@ -64,20 +67,15 @@ namespace Statiq.Core
         /// </summary>
         /// <param name="fileName">The file name of the process to start.</param>
         /// <param name="arguments">The arguments to pass to the process.</param>
-        public StartProcess(string fileName, string arguments)
-            : this(fileName, Config.FromValue(arguments))
+        public StartProcess(Config<string> fileName, Config<string> arguments)
+            : base(
+                new Dictionary<string, IConfig>
+                {
+                    { nameof(FileName), fileName ?? throw new ArgumentNullException(nameof(fileName)) },
+                    { nameof(Arguments), arguments ?? throw new ArgumentNullException(nameof(arguments)) }
+                },
+                false)
         {
-        }
-
-        /// <summary>
-        /// Starts a process for the specified file name and arguments.
-        /// </summary>
-        /// <param name="fileName">The file name of the process to start.</param>
-        /// <param name="arguments">The arguments to pass to the process.</param>
-        public StartProcess(string fileName, Config<string> arguments)
-            : base(arguments, false)
-        {
-            _fileName = fileName ?? throw new ArgumentNullException(nameof(fileName));
         }
 
         /// <summary>
@@ -85,11 +83,8 @@ namespace Statiq.Core
         /// </summary>
         /// <param name="workingDirectory">The working directory.</param>
         /// <returns>The current module instance.</returns>
-        public StartProcess WithWorkingDirectory(string workingDirectory)
-        {
-            _workingDirectory = workingDirectory;
-            return this;
-        }
+        public StartProcess WithWorkingDirectory(Config<string> workingDirectory) =>
+            (StartProcess)SetConfig(nameof(WorkingDirectory), workingDirectory);
 
         /// <summary>
         /// Sets process-specific environment variables.
@@ -210,19 +205,28 @@ namespace Statiq.Core
             return this;
         }
 
-        protected override async Task<IEnumerable<IDocument>> ExecuteConfigAsync(IDocument input, IExecutionContext context, string value)
+        protected override async Task<IEnumerable<IDocument>> ExecuteConfigAsync(IDocument input, IExecutionContext context, IMetadata values)
         {
             // Only execute once if requested
             if (_onlyOnce && _executed)
             {
+                context.LogDebug("Process was configured to execute once, returning input document");
                 return input.Yield();
             }
             _executed = true;
 
+            // Get the filename
+            string fileName = values.GetString(nameof(FileName));
+            if (string.IsNullOrWhiteSpace(fileName))
+            {
+                context.LogDebug("Provided file name was null or empty, skipping and returning input document");
+                return input.Yield();
+            }
+
             // Create the process start info
             ProcessStartInfo startInfo = new ProcessStartInfo
             {
-                FileName = _fileName,
+                FileName = fileName,
                 CreateNoWindow = true,
                 UseShellExecute = false,
                 RedirectStandardOutput = true,
@@ -230,19 +234,21 @@ namespace Statiq.Core
             };
 
             // Set arguments
-            if (!string.IsNullOrEmpty(value))
+            string arguments = values.GetString(nameof(Arguments));
+            if (!string.IsNullOrEmpty(arguments))
             {
-                startInfo.Arguments = value;
+                startInfo.Arguments = arguments;
             }
 
             // Set working directory
-            if (string.IsNullOrWhiteSpace(_workingDirectory))
+            string workingDirectory = values.GetString(nameof(WorkingDirectory));
+            if (string.IsNullOrWhiteSpace(workingDirectory))
             {
                 startInfo.WorkingDirectory = context.FileSystem.RootPath.FullPath;
             }
             else
             {
-                startInfo.WorkingDirectory = context.FileSystem.RootPath.Combine(_workingDirectory).FullPath;
+                startInfo.WorkingDirectory = context.FileSystem.RootPath.Combine(workingDirectory).FullPath;
             }
 
             // Set environment variables for the process

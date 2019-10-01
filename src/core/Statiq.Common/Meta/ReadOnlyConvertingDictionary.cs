@@ -10,35 +10,43 @@ namespace Statiq.Common
     /// A dictionary with metadata type conversion superpowers.
     /// </summary>
     /// <remarks>
-    /// This class wraps an underlying <see cref="IDictionary{TKey, TValue}"/> but
+    /// This class wraps an underlying <see cref="IReadOnlyDictionary{TKey, TValue}"/> but
     /// uses the provided <see cref="IExecutionContext"/> to perform type conversions
     /// when requesting values.
     /// </remarks>
-    public class ConvertingDictionary : IMetadataDictionary
+    public class ReadOnlyConvertingDictionary : IMetadata
     {
-        private readonly IDictionary<string, object> _dictionary;
+        private readonly IReadOnlyDictionary<string, object> _dictionary;
 
-        public ConvertingDictionary()
-        {
-            _dictionary = new Dictionary<string, object>(StringComparer.OrdinalIgnoreCase);
-        }
-
-        public ConvertingDictionary(IDictionary<string, object> dictionary)
+        public ReadOnlyConvertingDictionary(IReadOnlyDictionary<string, object> dictionary)
         {
             _dictionary = dictionary ?? throw new ArgumentNullException(nameof(dictionary));
         }
 
-        public ConvertingDictionary(IEnumerable<KeyValuePair<string, object>> items)
+        public ReadOnlyConvertingDictionary(IEnumerable<KeyValuePair<string, object>> items)
         {
             _ = items ?? throw new ArgumentNullException(nameof(items));
-            _dictionary = new Dictionary<string, object>(StringComparer.OrdinalIgnoreCase);
+            Dictionary<string, object> dictionary = new Dictionary<string, object>(StringComparer.OrdinalIgnoreCase);
 
             // Copy over in case there are duplicate keys
             foreach (KeyValuePair<string, object> item in items)
             {
-                _dictionary[item.Key] = item.Value;
+                dictionary[item.Key] = item.Value;
             }
+            _dictionary = dictionary;
         }
+
+        /// <inheritdoc />
+        public int Count => _dictionary.Count;
+
+        /// <inheritdoc />
+        public IEnumerable<string> Keys => _dictionary.Keys;
+
+        /// <inheritdoc />
+        public IEnumerable<object> Values => _dictionary.Values.Select(GetValue);
+
+        /// <inheritdoc />
+        public bool ContainsKey(string key) => _dictionary.ContainsKey(key);
 
         /// <inheritdoc />
         public object this[string key]
@@ -55,50 +63,7 @@ namespace Statiq.Common
                 }
                 return value;
             }
-
-            set => _dictionary[key] = value;
         }
-
-        /// <inheritdoc />
-        object IReadOnlyDictionary<string, object>.this[string key] => this[key];
-
-        /// <inheritdoc />
-        public int Count => _dictionary.Count;
-
-        /// <inheritdoc />
-        public ICollection<string> Keys => _dictionary.Keys;
-
-        /// <inheritdoc />
-        public ICollection<object> Values => _dictionary.Values.Select(GetValue).ToArray();
-
-        /// <inheritdoc />
-        public bool IsReadOnly => false;
-
-        /// <inheritdoc />
-        IEnumerable<string> IReadOnlyDictionary<string, object>.Keys => Keys;
-
-        /// <inheritdoc />
-        IEnumerable<object> IReadOnlyDictionary<string, object>.Values => Values;
-
-        /// <inheritdoc />
-        public void Add(string key, object value) => _dictionary.Add(key, value);
-
-        /// <inheritdoc />
-        public void Add(KeyValuePair<string, object> item) => _dictionary.Add(item);
-
-        /// <inheritdoc />
-        public void Clear() => _dictionary.Clear();
-
-        /// <inheritdoc />
-        public bool Contains(KeyValuePair<string, object> item) =>
-            _dictionary.Select(GetItem).Contains(item);
-
-        /// <inheritdoc />
-        public bool ContainsKey(string key) => _dictionary.ContainsKey(key);
-
-        /// <inheritdoc />
-        public void CopyTo(KeyValuePair<string, object>[] array, int arrayIndex) =>
-            _dictionary.Select(GetItem).ToArray().CopyTo(array, arrayIndex);
 
         /// <inheritdoc />
         public IEnumerator<KeyValuePair<string, object>> GetEnumerator() => _dictionary.Select(GetItem).GetEnumerator();
@@ -107,10 +72,11 @@ namespace Statiq.Common
         public bool TryGetRaw(string key, out object value) => _dictionary.TryGetValue(key, out value);
 
         /// <inheritdoc />
-        public bool Remove(string key) => _dictionary.Remove(key);
+        IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
         /// <inheritdoc />
-        public bool Remove(KeyValuePair<string, object> item) => _dictionary.Remove(item);
+        public IMetadata GetMetadata(params string[] keys) =>
+            throw new NotSupportedException();
 
         /// <inheritdoc />
         public bool TryGetValue<TValue>(string key, out TValue value)
@@ -126,13 +92,6 @@ namespace Statiq.Common
 
         /// <inheritdoc />
         public bool TryGetValue(string key, out object value) => TryGetValue<object>(key, out value);
-
-        /// <inheritdoc />
-        IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
-
-        /// <inheritdoc />
-        public IMetadata GetMetadata(params string[] keys) =>
-            throw new NotSupportedException();
 
         /// <summary>
         /// This resolves the metadata value by recursively expanding IMetadataValue.

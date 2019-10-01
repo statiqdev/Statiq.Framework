@@ -12,7 +12,7 @@ namespace Statiq.Common
     /// </summary>
     public abstract class ParallelMultiConfigModule : Module, IParallelModule
     {
-        private readonly Dictionary<string, IConfig> _configs = new Dictionary<string, IConfig>();
+        private readonly Dictionary<string, IConfig> _configs = new Dictionary<string, IConfig>(StringComparer.OrdinalIgnoreCase);
         private readonly bool _forceDocumentExecution;
 
         /// <inheritdoc />
@@ -25,9 +25,9 @@ namespace Statiq.Common
         /// The delegates to use for getting a config value.
         /// </param>
         /// <param name="forceDocumentExecution">
-        /// <c>true</c> to force calling <see cref="ExecuteConfigAsync(IDocument, IExecutionContext, ImmutableDictionary{string, object})"/> for each
+        /// <c>true</c> to force calling <see cref="ExecuteConfigAsync(IDocument, IExecutionContext, IMetadata)"/> for each
         /// input document regardless of whether the config delegate requires a document or <c>false</c>
-        /// to allow calling <see cref="ExecuteConfigAsync(IDocument, IExecutionContext, ImmutableDictionary{string, object})"/> once
+        /// to allow calling <see cref="ExecuteConfigAsync(IDocument, IExecutionContext, IMetadata)"/> once
         /// with a null input document if the config delegate does not require a document.
         /// </param>
         protected ParallelMultiConfigModule(IEnumerable<KeyValuePair<string, IConfig>> configs, bool forceDocumentExecution)
@@ -46,9 +46,9 @@ namespace Statiq.Common
         /// Creates a new config module.
         /// </summary>
         /// <param name="forceDocumentExecution">
-        /// <c>true</c> to force calling <see cref="ExecuteConfigAsync(IDocument, IExecutionContext, ImmutableDictionary{string, object})"/> for each
+        /// <c>true</c> to force calling <see cref="ExecuteConfigAsync(IDocument, IExecutionContext, IMetadata)"/> for each
         /// input document regardless of whether the config delegate requires a document or <c>false</c>
-        /// to allow calling <see cref="ExecuteConfigAsync(IDocument, IExecutionContext, ImmutableDictionary{string, object})"/> once
+        /// to allow calling <see cref="ExecuteConfigAsync(IDocument, IExecutionContext, IMetadata)"/> once
         /// with a null input document if the config delegate does not require a document.
         /// </param>
         protected ParallelMultiConfigModule(bool forceDocumentExecution)
@@ -74,11 +74,12 @@ namespace Statiq.Common
         protected sealed override async Task<IEnumerable<IDocument>> ExecuteContextAsync(IExecutionContext context)
         {
             ImmutableDictionary<string, object>.Builder valuesBuilder;
+            IMetadata values;
 
             if (_forceDocumentExecution || _configs.Any(x => x.Value.RequiresDocument))
             {
                 // Only need to evaluate the context config delegates once
-                valuesBuilder = ImmutableDictionary.CreateBuilder<string, object>();
+                valuesBuilder = ImmutableDictionary.CreateBuilder<string, object>(StringComparer.OrdinalIgnoreCase);
                 foreach (KeyValuePair<string, IConfig> config in _configs.Where(x => !x.Value.RequiresDocument))
                 {
                     valuesBuilder[config.Key] = await config.Value.GetValueAsync(null, context);
@@ -97,7 +98,8 @@ namespace Statiq.Common
                             {
                                 valuesBuilder[config.Key] = await config.Value.GetValueAsync(input, context);
                             }
-                            return await ExecuteInputFunc(input, context, (i, c) => ExecuteConfigAsync(i, c, valuesBuilder.ToImmutable()));
+                            values = new ReadOnlyConvertingDictionary(valuesBuilder.ToImmutable());
+                            return await ExecuteInputFunc(input, context, (i, c) => ExecuteConfigAsync(i, c, values));
                         },
                         context.CancellationToken);
                 }
@@ -114,7 +116,8 @@ namespace Statiq.Common
                     }
 
                     // Get the results for this input document
-                    IEnumerable<IDocument> results = await ExecuteInputFunc(input, context, (i, c) => ExecuteConfigAsync(i, c, valuesBuilder.ToImmutable()));
+                    values = new ReadOnlyConvertingDictionary(valuesBuilder.ToImmutable());
+                    IEnumerable<IDocument> results = await ExecuteInputFunc(input, context, (i, c) => ExecuteConfigAsync(i, c, values));
                     if (results != null)
                     {
                         aggregateResults = aggregateResults?.Concat(results) ?? results;
@@ -129,7 +132,8 @@ namespace Statiq.Common
             {
                 valuesBuilder[config.Key] = await config.Value.GetValueAsync(null, context);
             }
-            return await ExecuteConfigAsync(null, context, valuesBuilder.ToImmutable());
+            values = new ReadOnlyConvertingDictionary(valuesBuilder.ToImmutable());
+            return await ExecuteConfigAsync(null, context, values);
         }
 
         /// <inheritdoc />
@@ -149,6 +153,6 @@ namespace Statiq.Common
         /// <param name="context">The execution context.</param>
         /// <param name="values">The evaluated config values.</param>
         /// <returns>The result documents.</returns>
-        protected abstract Task<IEnumerable<IDocument>> ExecuteConfigAsync(IDocument input, IExecutionContext context, ImmutableDictionary<string, object> values);
+        protected abstract Task<IEnumerable<IDocument>> ExecuteConfigAsync(IDocument input, IExecutionContext context, IMetadata values);
     }
 }

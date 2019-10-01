@@ -19,9 +19,9 @@ namespace Statiq.Common
         /// The delegates to use for getting a config value.
         /// </param>
         /// <param name="forceDocumentExecution">
-        /// <c>true</c> to force calling <see cref="ExecuteConfigAsync(IDocument, IExecutionContext, ImmutableDictionary{string, object})"/> for each
+        /// <c>true</c> to force calling <see cref="ExecuteConfigAsync(IDocument, IExecutionContext, IMetadata)"/> for each
         /// input document regardless of whether the config delegate requires a document or <c>false</c>
-        /// to allow calling <see cref="ExecuteConfigAsync(IDocument, IExecutionContext, ImmutableDictionary{string, object})"/> once
+        /// to allow calling <see cref="ExecuteConfigAsync(IDocument, IExecutionContext, IMetadata)"/> once
         /// with a null input document if the config delegate does not require a document.
         /// </param>
         protected SyncMultiConfigModule(IEnumerable<KeyValuePair<string, IConfig>> configs, bool forceDocumentExecution)
@@ -33,9 +33,9 @@ namespace Statiq.Common
         /// Creates a new config module.
         /// </summary>
         /// <param name="forceDocumentExecution">
-        /// <c>true</c> to force calling <see cref="ExecuteConfigAsync(IDocument, IExecutionContext, ImmutableDictionary{string, object})"/> for each
+        /// <c>true</c> to force calling <see cref="ExecuteConfigAsync(IDocument, IExecutionContext, IMetadata)"/> for each
         /// input document regardless of whether the config delegate requires a document or <c>false</c>
-        /// to allow calling <see cref="ExecuteConfigAsync(IDocument, IExecutionContext, ImmutableDictionary{string, object})"/> once
+        /// to allow calling <see cref="ExecuteConfigAsync(IDocument, IExecutionContext, IMetadata)"/> once
         /// with a null input document if the config delegate does not require a document.
         /// </param>
         protected SyncMultiConfigModule(bool forceDocumentExecution)
@@ -44,7 +44,7 @@ namespace Statiq.Common
         }
 
         /// <inheritdoc />
-        protected sealed override Task<IEnumerable<IDocument>> ExecuteConfigAsync(IDocument input, IExecutionContext context, ImmutableDictionary<string, object> values) =>
+        protected sealed override Task<IEnumerable<IDocument>> ExecuteConfigAsync(IDocument input, IExecutionContext context, IMetadata values) =>
             Task.FromResult(ExecuteConfig(input, context, values));
 
         /// <summary>
@@ -59,6 +59,6 @@ namespace Statiq.Common
         /// <param name="context">The execution context.</param>
         /// <param name="values">The evaluated config values.</param>
         /// <returns>The result documents.</returns>
-        protected abstract IEnumerable<IDocument> ExecuteConfig(IDocument input, IExecutionContext context, ImmutableDictionary<string, object> values);
+        protected abstract IEnumerable<IDocument> ExecuteConfig(IDocument input, IExecutionContext context, IMetadata values);
     }
 }
