@@ -206,6 +206,7 @@ namespace Statiq.Core
                 {
                     tempDirectory.Delete(true);
                 }
+                tempDirectory.Create();
                 _logger.LogInformation($"Cleaned temp directory: {FileSystem.TempPath}");
             }
             catch (Exception ex)
