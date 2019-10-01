@@ -13,10 +13,13 @@
 - Adds `MultiConfigModule`, `ParallelMultiConfigModule`, `SyncMultiConfigModule`, and `ParallelSyncMultiConfigModule` base classes for modules that use multiple `Config<T>` values.
 - Adds `ExecutionPipeline` base pipeline for use when a custom pipeline that runs code for each phase is needed.
 - Adds new `ZipDirectory` module.
+- Renames the `Statiq.AmazonWebServices` extension library to `Statiq.Aws`.
+- Adds `Statiq.Azure` extension library.
+- Adds new `DeployAppService` module.
 
 # 1.0.0-alpha.4
 
-- Updated to .NET Core 3.0 final
+- Updated to .NET Core 3.0 final.
 - Isolated pipelines can now be dependencies of other pipelines (but output documents still can't be accessed).
 - Renames delegate-based `IBootstrapper.AddSettings()` overload to `IBoostrapper.ConfigureSettings()`.
 - Renames `IBootstrapper.AddServices()` to `IBoostrapper.ConfigureServices()`.

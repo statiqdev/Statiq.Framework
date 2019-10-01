@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 using Newtonsoft.Json;
 using Statiq.Common;
 
-namespace Statiq.AmazonWebServices
+namespace Statiq.Aws
 {
     /// <summary>
     /// Generates bulk JSON upload data to get documents into Amazon CloudSearch.

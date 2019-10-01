@@ -82,12 +82,14 @@ If the out-of-the-box modules don't satisfy your use case, it's easy to customiz
   - Even though implementing the `IModule` interface is the only requirement, strongly consider using one of the many base module classes like `Module` or `SyncModule`.
 - Use `Config<T>`:
   - If your module needs to accept user-configurable values, use `Config<T>`.
+  - Consider using one of the base module classes that deals with `Config<T>` like `ConfigModule` or `MultiConfigModule`.
 - Avoid document-to-document references (especially to/from children):
   - Try to avoid creating documents that reference other documents, especially in the top-level output documents (parent documents that reference children may be okay in some cases). If a document references another document and a following module clones the referenced document, the reference will still point to the old document and not the new clone.
 - Preserve input ordering:
   - Many modules output documents in a specific order and following modules should preserve that order whenever possible. The base module classes do this by default, but any explicit parallel operations should preserve ordering as well (I.e., by calling `.AsParallel().AsOrdered()`).
 - Only reference `Statiq.Common`:
   - If a module is in a separate assembly from your application you shouldn't need a reference to `Statiq.Core`, and if you find that you do please open an issue so the appropriate functionality can be moved to `Statiq.Common`.
+- Name modules using a VerbNoun convention when possible.
 
 ### Documents
 

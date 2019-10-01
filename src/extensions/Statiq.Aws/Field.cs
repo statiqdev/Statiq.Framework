@@ -1,6 +1,6 @@
 using Statiq.Common;
 
-namespace Statiq.AmazonWebServices
+namespace Statiq.Aws
 {
     internal class Field
     {

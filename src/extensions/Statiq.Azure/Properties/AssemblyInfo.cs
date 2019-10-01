@@ -1,7 +1,7 @@
 ﻿using System.Reflection;
 using System.Runtime.InteropServices;
 
-[assembly: AssemblyTitle("Statiq.AmazonWebServices")]
+[assembly: AssemblyTitle("Statiq.Azure")]
 [assembly: AssemblyDescription("")]
 [assembly: ComVisible(false)]
-[assembly: Guid("327a23f7-ae78-48b3-97b0-7180492cf08c")]
+[assembly: Guid("adc6d8d4-872d-458e-85a9-e6620162ca80")]
