@@ -19,7 +19,7 @@ namespace Statiq.Core
     /// current set of documents.
     /// </para>
     /// <para>
-    /// If the value is <c>null</c> the provided document will this module will output the original input document(s).
+    /// If the value is <c>null</c> this module will output the original input document(s).
     /// If the value is a <see cref="IDocument"/>, <see cref="IEnumerable{IDocument}"/>, or
     /// <see cref="IAsyncEnumerable{IDocument}"/>, the document(s) will be the output(s) of this module.
     /// If the value is a <see cref="IEnumerable{IModule}"/> or <see cref="IModule"/>,
