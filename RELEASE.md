@@ -12,6 +12,7 @@
 - Adds `AddPipelines()` and `AddCommands()` methods to add pipelines and commands from the entry or a given assembly.
 - Adds `MultiConfigModule`, `ParallelMultiConfigModule`, `SyncMultiConfigModule`, and `ParallelSyncMultiConfigModule` base classes for modules that use multiple `Config<T>` values.
 - Adds `ExecutionPipeline` base pipeline for use when a custom pipeline that runs code for each phase is needed.
+- Adds new `ZipDirectory` module.
 
 # 1.0.0-alpha.4
 
