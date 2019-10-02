@@ -35,7 +35,7 @@ namespace Statiq.Core
 
         private Config<bool> _isRoot;
         private Config<string[]> _treePath;
-        private Func<string[], MetadataItems, IExecutionContext, IDocument> _placeholderFactory;
+        private Func<string[], IMetadata, IExecutionContext, Task<IDocument>> _placeholderFactory;
         private Comparison<IDocument> _sort;
         private bool _collapseRoot = false;
         private bool _nesting = false;
@@ -70,7 +70,7 @@ namespace Statiq.Core
             _placeholderFactory = (treePath, items, context) =>
             {
                 FilePath source = new FilePath(string.Join("/", treePath.Concat(new[] { "index.html" })));
-                return context.CreateDocument(context.FileSystem.GetInputFile(source).Path.FullPath, source, items);
+                return Task.FromResult(context.CreateDocument(context.FileSystem.GetInputFile(source).Path.FullPath, source, items));
             };
             _sort = (x, y) => Comparer.Default.Compare(
                 x.Get<object[]>(Keys.TreePath)?.LastOrDefault(),
@@ -85,11 +85,12 @@ namespace Statiq.Core
         /// returns null, a new document with the tree metadata is created.
         /// </summary>
         /// <remarks>
+        /// You should also turn on nesting with <see cref="WithNesting(bool, bool)"/> to generate placeholder documents.
         /// The default placeholder factory creates a document at the current tree path with a file name of <c>index.html</c>.
         /// </remarks>
         /// <param name="factory">The factory function.</param>
         /// <returns>The current module instance.</returns>
-        public CreateTree WithPlaceholderFactory(Func<string[], MetadataItems, IExecutionContext, IDocument> factory)
+        public CreateTree WithPlaceholderFactory(Func<string[], IMetadata, IExecutionContext, Task<IDocument>> factory)
         {
             _placeholderFactory = factory ?? throw new ArgumentNullException(nameof(factory));
             return this;
@@ -220,7 +221,7 @@ namespace Statiq.Core
             // Recursively generate child output documents
             foreach (TreeNode node in nodesDictionary.Values.Where(x => x.Parent == null))
             {
-                node.GenerateOutputDocuments(this, context);
+                await node.GenerateOutputDocumentsAsync(this, context);
             }
 
             // Return parent nodes or all nodes depending on nesting
@@ -252,12 +253,12 @@ namespace Statiq.Core
 
             // We need to build the tree from the bottom up so that the children don't have to be lazy
             // This also sorts the children once they're created
-            public void GenerateOutputDocuments(CreateTree tree, IExecutionContext context)
+            public async Task GenerateOutputDocumentsAsync(CreateTree tree, IExecutionContext context)
             {
                 // Recursively build output documents for children
                 foreach (TreeNode child in Children)
                 {
-                    child.GenerateOutputDocuments(tree, context);
+                    await child.GenerateOutputDocumentsAsync(tree, context);
                 }
 
                 // We're done if we've already created the output document
@@ -270,7 +271,7 @@ namespace Statiq.Core
                 Children.Sort((x, y) => tree._sort(x.OutputDocument, y.OutputDocument));
 
                 // Create this output document
-                MetadataItems metadata = new MetadataItems();
+                MetadataDictionary metadata = new MetadataDictionary();
                 if (tree._childrenKey != null)
                 {
                     metadata.Add(tree._childrenKey, Children.Select(x => x.OutputDocument).ToImmutableArray());
@@ -283,7 +284,7 @@ namespace Statiq.Core
                 {
                     // There's no input document for this node so we need to make a placeholder
                     metadata.Add(Keys.TreePlaceholder, true);
-                    OutputDocument = tree._placeholderFactory(TreePath, metadata, context) ?? context.CreateDocument(metadata);
+                    OutputDocument = await tree._placeholderFactory(TreePath, metadata, context) ?? context.CreateDocument(metadata);
                 }
                 else
                 {

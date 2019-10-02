@@ -1,6 +1,7 @@
 # 1.0.0-alpha.6
 
 - Adds back a `ExecuteModules` module that works like the old `Branch` module used to by dropping any output documents from the child modules.
+- Tweaks to the placeholder factory in `CreateTree`.
 
 # 1.0.0-alpha.5
 
