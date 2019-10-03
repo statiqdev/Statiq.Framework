@@ -216,17 +216,6 @@ namespace Statiq.Core
         }
 
         /// <summary>
-        /// Resets the JavaScript Engine pool and clears the JavaScript Engine Switcher
-        /// to an empty list of engine factories and default engine. Useful on configuration
-        /// change where we might have a new configuration.
-        /// </summary>
-        public static void ResetJsEngines()
-        {
-            JsEngineSwitcher.Current.EngineFactories.Clear();
-            JsEngineSwitcher.Current.DefaultEngineName = string.Empty;
-        }
-
-        /// <summary>
         /// Executes pipelines with <see cref="ExecutionPolicy.Default"/> and <see cref="ExecutionPolicy.Always"/> policies.
         /// </summary>
         /// <param name="cancellationTokenSource">
