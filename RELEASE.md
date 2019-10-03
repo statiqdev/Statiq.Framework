@@ -1,6 +1,7 @@
 # 1.0.0-alpha.7
 
 - Adds support for deployment pipelines (`IPipeline.Deployment`) which run their output phase only after other output phases (#57).
+- Fixes a bug when specifying a setting on the CLI and the bootstrapper.
 
 # 1.0.0-alpha.6
 

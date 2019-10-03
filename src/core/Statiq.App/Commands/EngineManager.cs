@@ -119,9 +119,9 @@ namespace Statiq.App
             // Add settings
             if (commandSettings.MetadataSettings?.Length > 0)
             {
-                foreach (KeyValuePair<string, object> metadata in MetadataParser.Parse(commandSettings.MetadataSettings))
+                foreach (KeyValuePair<string, object> setting in MetadataParser.Parse(commandSettings.MetadataSettings))
                 {
-                    engine.Settings.Add(metadata);
+                    engine.Settings[setting.Key] = setting.Value;
                 }
             }
         }
