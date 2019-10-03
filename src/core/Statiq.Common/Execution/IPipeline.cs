@@ -44,6 +44,14 @@ namespace Statiq.Common
         bool Isolated { get; set; }
 
         /// <summary>
+        /// A deployment pipeline works just like other pipelines except
+        /// it's <see cref="Phase.Output"/> phase will only execute when
+        /// all other non-deployment pipelines have completed their
+        /// <see cref="Phase.Output"/> phase (including isolated pipelines).
+        /// </summary>
+        bool Deployment { get; set; }
+
+        /// <summary>
         /// Indicates when the pipeline is executed.
         /// </summary>
         ExecutionPolicy ExecutionPolicy { get; set; }

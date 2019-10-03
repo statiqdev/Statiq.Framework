@@ -402,11 +402,20 @@ namespace Statiq.Core
             }
 
             // Make a pass through non-isolated transform phases to set dependencies to all non-isolated process phases
-            foreach (PipelinePhases pipelinePhases in phases.Values.Where(x => !x.Isolated))
+            foreach (PipelinePhases pipelinePhases in phases.Values.Where(x => !x.Pipeline.Isolated))
             {
                 pipelinePhases.Transform.Dependencies =
                     pipelinePhases.Transform.Dependencies
-                        .Concat(phases.Values.Where(x => x != pipelinePhases && !x.Isolated).Select(x => x.Process))
+                        .Concat(phases.Values.Where(x => x != pipelinePhases && !x.Pipeline.Isolated).Select(x => x.Process))
+                        .ToArray();
+            }
+
+            // Make a pass through deployment pipeline output phases to set dependencies to all non-deployment output phases
+            foreach (PipelinePhases pipelinePhases in phases.Values.Where(x => x.Pipeline.Deployment))
+            {
+                pipelinePhases.Output.Dependencies =
+                    pipelinePhases.Output.Dependencies
+                        .Concat(phases.Values.Where(x => x != pipelinePhases && !x.Pipeline.Deployment).Select(x => x.Output))
                         .ToArray();
             }
 
@@ -431,7 +440,7 @@ namespace Statiq.Core
                     }
 
                     // This is an isolated pipeline so just add the phases in a chain
-                    pipelinePhases = new PipelinePhases(true);
+                    pipelinePhases = new PipelinePhases(pipeline);
                     pipelinePhases.Input = new PipelinePhase(pipeline, name, Phase.Input, pipeline.InputModules, logger);
                     pipelinePhases.Process = new PipelinePhase(pipeline, name, Phase.Process, pipeline.ProcessModules, logger, pipelinePhases.Input);
                     pipelinePhases.Transform = new PipelinePhase(pipeline, name, Phase.Transform, pipeline.TransformModules, logger, pipelinePhases.Process);
@@ -462,7 +471,7 @@ namespace Statiq.Core
                     }
 
                     // Add the phases (by this time all dependencies should have been added)
-                    pipelinePhases = new PipelinePhases(false);
+                    pipelinePhases = new PipelinePhases(pipeline);
                     pipelinePhases.Input = new PipelinePhase(pipeline, name, Phase.Input, pipeline.InputModules, logger);
                     processDependencies.Insert(0, pipelinePhases.Input);  // Makes sure the process phase is also dependent on it's input phase
                     pipelinePhases.Process = new PipelinePhase(pipeline, name, Phase.Process, pipeline.ProcessModules, logger, processDependencies.ToArray());
@@ -629,12 +638,12 @@ namespace Statiq.Core
 
         private class PipelinePhases
         {
-            public PipelinePhases(bool isolated)
+            public PipelinePhases(IPipeline pipeline)
             {
-                Isolated = isolated;
+                Pipeline = pipeline;
             }
 
-            public bool Isolated { get; }
+            public IPipeline Pipeline { get; }
             public PipelinePhase Input { get; set; }
             public PipelinePhase Process { get; set; }
             public PipelinePhase Transform { get; set; }

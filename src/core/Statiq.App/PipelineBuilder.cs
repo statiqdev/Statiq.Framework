@@ -185,6 +185,12 @@ namespace Statiq.App
             return this;
         }
 
+        public PipelineBuilder AsDeployment(bool deployment = true)
+        {
+            _actions.Add(x => x.AsDeployment(deployment));
+            return this;
+        }
+
         public PipelineBuilder WithExecutionPolicy(ExecutionPolicy policy)
         {
             _actions.Add(x => x.WithExecutionPolicy(policy));

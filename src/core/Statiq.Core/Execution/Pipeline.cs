@@ -58,6 +58,9 @@ namespace Statiq.Core
         public bool Isolated { get; set; }
 
         /// <inheritdoc/>
+        public bool Deployment { get; set; }
+
+        /// <inheritdoc/>
         public ExecutionPolicy ExecutionPolicy { get; set; }
     }
 }

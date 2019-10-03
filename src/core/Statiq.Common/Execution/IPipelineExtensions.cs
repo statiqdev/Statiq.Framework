@@ -81,6 +81,13 @@ namespace Statiq.Common
             return pipeline;
         }
 
+        public static TPipeline AsDeployment<TPipeline>(this TPipeline pipeline, bool deployment = true)
+            where TPipeline : IPipeline
+        {
+            pipeline.Deployment = deployment;
+            return pipeline;
+        }
+
         public static TPipeline WithExecutionPolicy<TPipeline>(this TPipeline pipeline, ExecutionPolicy policy)
             where TPipeline : IPipeline
         {

@@ -1,3 +1,7 @@
+# 1.0.0-alpha.7
+
+- Adds support for deployment pipelines (`IPipeline.Deployment`) which run their output phase only after other output phases (#57).
+
 # 1.0.0-alpha.6
 
 - Adds back a `ExecuteModules` module that works like the old `Branch` module used to by dropping any output documents from the child modules.
