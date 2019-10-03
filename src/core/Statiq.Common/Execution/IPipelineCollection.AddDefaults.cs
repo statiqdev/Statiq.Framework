@@ -7,12 +7,10 @@ namespace Statiq.Common
     /// </summary>
     public partial interface IPipelineCollection
     {
-        public void Add(IPipeline pipeline) => Add(pipeline?.GetType().Name.RemoveEnd("Pipeline", StringComparison.OrdinalIgnoreCase), pipeline);
+        public void Add(IPipeline pipeline) => Add(pipeline?.GetType().Name, pipeline);
 
         public IPipeline Add(Type pipelineType) =>
-            Add(
-                pipelineType ?? throw new ArgumentNullException(nameof(pipelineType)),
-                pipelineType.Name.RemoveEnd("Pipeline", StringComparison.OrdinalIgnoreCase));
+            Add(pipelineType ?? throw new ArgumentNullException(nameof(pipelineType)), pipelineType.Name);
 
         public IPipeline Add(Type pipelineType, string name)
         {
@@ -28,7 +26,7 @@ namespace Statiq.Common
 
         public IPipeline Add<TPipeline>()
             where TPipeline : IPipeline =>
-            Add<TPipeline>(typeof(TPipeline).Name.RemoveEnd("Pipeline", StringComparison.OrdinalIgnoreCase));
+            Add<TPipeline>(typeof(TPipeline).Name);
 
         public IPipeline Add<TPipeline>(string name)
             where TPipeline : IPipeline

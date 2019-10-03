@@ -3,6 +3,7 @@
 - Adds back a `ExecuteModules` module that works like the old `Branch` module used to by dropping any output documents from the child modules.
 - Tweaks to the placeholder factory in `CreateTree`.
 - Fix for the JavaScript engine getting reset on execution.
+- No longer strips "Pipeline" from the end of pipeline classes for the pipeline name since `nameof` is often used to refer to pipelines.
 
 # 1.0.0-alpha.5
 
