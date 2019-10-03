@@ -74,10 +74,10 @@ namespace Statiq.App
                     if (lastAngle > 0)
                     {
                         int firstAngle = message.FormattedMessage.IndexOf('»');
-                        ConsoleContents.Add(new ConsoleContent(ConsoleColor.DarkBlue, ConsoleColor.Black, message.FormattedMessage.AsMemory(0, firstAngle + 1)));
+                        ConsoleContents.Add(new ConsoleContent(ConsoleColor.Blue, ConsoleColor.Black, message.FormattedMessage.AsMemory(0, firstAngle + 1)));
                         if (firstAngle < lastAngle)
                         {
-                            ConsoleContents.Add(new ConsoleContent(ConsoleColor.Blue, ConsoleColor.Black, message.FormattedMessage.AsMemory(firstAngle + 1, lastAngle - (firstAngle + 1) + 1)));
+                            ConsoleContents.Add(new ConsoleContent(ConsoleColor.Cyan, ConsoleColor.Black, message.FormattedMessage.AsMemory(firstAngle + 1, lastAngle - (firstAngle + 1) + 1)));
                         }
                     }
                     else
