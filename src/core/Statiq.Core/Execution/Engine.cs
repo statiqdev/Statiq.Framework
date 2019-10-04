@@ -588,7 +588,7 @@ namespace Statiq.Core
                     {
                         if (!(ex is OperationCanceledException))
                         {
-                            logger.LogError($"Error while executing module {moduleName}: {ex.Message}");
+                            logger.LogError($"Error while executing module {moduleName} in {contextData.PipelinePhase.PipelineName}/{contextData.PipelinePhase.Phase}: {ex.Message}");
                         }
                         outputs = ImmutableArray<IDocument>.Empty;
                         throw;

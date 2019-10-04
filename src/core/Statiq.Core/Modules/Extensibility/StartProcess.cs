@@ -52,6 +52,7 @@ namespace Statiq.Core
         private bool _logOutput;
         private bool _continueOnError;
         private bool _keepContent;
+        private Func<int, bool> _errorExitCode = x => x != 0;
 
         /// <summary>
         /// Starts a process for the specified file name and arguments.
@@ -185,6 +186,21 @@ namespace Statiq.Core
         public StartProcess ContinueOnError(bool continueOnError = true)
         {
             _continueOnError = continueOnError;
+            return this;
+        }
+
+        /// <summary>
+        /// Provides a function that determines if the exit code from the process was an error.
+        /// </summary>
+        /// <remarks>
+        /// By default any non-zero exit code is considered an error. Some processes return non-zero
+        /// exit codes to indicate success and this lets you treat those as successful.
+        /// </remarks>
+        /// <param name="errorExitCode">A function that determines if the exit code is an error by returning <c>true</c>.</param>
+        /// <returns>The current module instance.</returns>
+        public StartProcess WithErrorExitCode(Func<int, bool> errorExitCode)
+        {
+            _errorExitCode = errorExitCode ?? throw new ArgumentNullException(nameof(errorExitCode));
             return this;
         }
 
@@ -336,9 +352,14 @@ namespace Statiq.Core
 
                             // Log exit code and throw if non-zero
                             exitCode = process.ExitCode;
-                            if (process.ExitCode != 0 && !_continueOnError)
+                            if (_errorExitCode(process.ExitCode))
                             {
-                                throw new ExecutionException($"Process {process.Id} exited with non-zero code {process.ExitCode}");
+                                string errorMessage = $"Process {process.Id} exited with error code {process.ExitCode}";
+                                if (!_continueOnError)
+                                {
+                                    throw new ExecutionException(errorMessage);
+                                }
+                                context.LogError(errorMessage);
                             }
                         }
                         finally
