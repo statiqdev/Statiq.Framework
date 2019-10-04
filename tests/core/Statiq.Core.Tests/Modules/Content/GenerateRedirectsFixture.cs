@@ -61,17 +61,14 @@ namespace Statiq.Core.Tests.Modules.Contents
             });
             TestDocument notRedirected = new TestDocument();
             GenerateRedirects redirect = new GenerateRedirects();
-            TestLogger logger = new TestLogger(LogLevel.None);
-            TestExecutionContext context = new TestExecutionContext(redirected, notRedirected)
-            {
-                Logger = logger
-            };
+            TestExecutionContext context = new TestExecutionContext(redirected, notRedirected);
+            context.TestLoggerProvider.ThrowLogLevel = LogLevel.None;
 
             // When
             IReadOnlyList<TestDocument> results = await ExecuteAsync(context, redirect);
 
             // Then
-            logger.Messages.ShouldContain(x => x.LogLevel == LogLevel.Warning && x.FormattedMessage.StartsWith("The redirect path must be relative"));
+            context.LogMessages.ShouldContain(x => x.LogLevel == LogLevel.Warning && x.FormattedMessage.StartsWith("The redirect path must be relative"));
             Assert.AreEqual(0, results.Count);
         }
 

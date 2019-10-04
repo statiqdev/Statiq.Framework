@@ -69,10 +69,8 @@ namespace Statiq.Json.Tests
                 // Given
                 TestDocument document = new TestDocument("asdf");
                 ParseJson json = new ParseJson("MyJson");
-                TestExecutionContext context = new TestExecutionContext(document)
-                {
-                    Logger = new TestLogger(LogLevel.None)
-                };
+                TestExecutionContext context = new TestExecutionContext(document);
+                context.TestLoggerProvider.ThrowLogLevel = LogLevel.None;
 
                 // When
                 TestDocument result = await ExecuteAsync(context, json).SingleAsync();

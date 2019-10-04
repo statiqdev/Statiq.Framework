@@ -12,13 +12,19 @@ namespace Statiq.Testing
         public ConcurrentQueue<TestMessage> Messages { get; }
 
         public TestLoggerProvider(ConcurrentQueue<TestMessage> messages = null)
+            : this(LogLevel.Warning, messages)
         {
+        }
+
+        public TestLoggerProvider(LogLevel throwLogLevel, ConcurrentQueue<TestMessage> messages = null)
+        {
+            ThrowLogLevel = throwLogLevel;
             Messages = messages ?? new ConcurrentQueue<TestMessage>();
         }
 
-        public LogLevel ThrowLogLevel { get; set; } = LogLevel.Warning;
+        public LogLevel ThrowLogLevel { get; set; }
 
-        public ILogger CreateLogger(string categoryName) => new TestLogger(categoryName, ThrowLogLevel, Messages);
+        public ILogger CreateLogger(string categoryName) => new TestLogger(this, categoryName, Messages);
 
         public void Dispose()
         {

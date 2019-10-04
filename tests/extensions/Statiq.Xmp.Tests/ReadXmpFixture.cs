@@ -43,10 +43,8 @@ namespace Statiq.Xmp.Tests
                     Path.Combine(TestContext.CurrentContext.TestDirectory, "Samples", "RomantiqueInitials.ttf"));
                 ReadXmp directoryMetadata = new ReadXmp(skipElementOnMissingMandatoryData: true)
                     .WithMetadata("xmpRights:UsageTerms", "Copyright", true);
-                TestExecutionContext context = new TestExecutionContext(documents)
-                {
-                    Logger = new TestLogger(LogLevel.Error)
-                };
+                TestExecutionContext context = new TestExecutionContext(documents);
+                context.TestLoggerProvider.ThrowLogLevel = LogLevel.Error;
 
                 // When
                 IReadOnlyList<TestDocument> results = await ExecuteAsync(context, directoryMetadata);
@@ -65,10 +63,8 @@ namespace Statiq.Xmp.Tests
                     Path.Combine(TestContext.CurrentContext.TestDirectory, "Samples", "RomantiqueInitials.ttf"));
                 ReadXmp directoryMetadata = new ReadXmp(skipElementOnMissingMandatoryData: false)
                     .WithMetadata("xmpRights:UsageTerms", "Copyright", true);
-                TestExecutionContext context = new TestExecutionContext(documents)
-                {
-                    Logger = new TestLogger(LogLevel.Error)
-                };
+                TestExecutionContext context = new TestExecutionContext(documents);
+                context.TestLoggerProvider.ThrowLogLevel = LogLevel.Error;
 
                 // When
                 IReadOnlyList<TestDocument> results = await ExecuteAsync(context, directoryMetadata);

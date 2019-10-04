@@ -7,27 +7,30 @@ using Statiq.Common;
 
 namespace Statiq.App
 {
-    public abstract class SimpleBuildCommand : BaseCommand<BaseSettings>
+    public abstract class CustomBuildCommand : BaseCommand<BaseSettings>
     {
         private readonly IServiceCollection _serviceCollection;
         private readonly IBootstrapper _bootstrapper;
-        private readonly string[] _pipelines;
         private readonly BuildCommand.Settings _settings;
 
-        public SimpleBuildCommand(IServiceCollection serviceCollection, IBootstrapper bootstrapper)
-            : this(null, null, serviceCollection, bootstrapper)
+        public CustomBuildCommand(IServiceCollection serviceCollection, IBootstrapper bootstrapper)
+            : this((BuildCommand.Settings)null, serviceCollection, bootstrapper)
         {
         }
 
-        public SimpleBuildCommand(string[] pipelines, IServiceCollection serviceCollection, IBootstrapper bootstrapper)
-            : this(pipelines, null, serviceCollection, bootstrapper)
+        public CustomBuildCommand(string[] pipelines, IServiceCollection serviceCollection, IBootstrapper bootstrapper)
+            : this(new BuildCommand.Settings { Pipelines = pipelines }, serviceCollection, bootstrapper)
         {
         }
 
-        public SimpleBuildCommand(string[] pipelines, BuildCommand.Settings settings, IServiceCollection serviceCollection, IBootstrapper bootstrapper)
+        public CustomBuildCommand(string[] pipelines, bool defaultPipelines, IServiceCollection serviceCollection, IBootstrapper bootstrapper)
+            : this(new BuildCommand.Settings { Pipelines = pipelines, DefaultPipelines = defaultPipelines }, serviceCollection, bootstrapper)
+        {
+        }
+
+        public CustomBuildCommand(BuildCommand.Settings settings, IServiceCollection serviceCollection, IBootstrapper bootstrapper)
             : base(serviceCollection)
         {
-            _pipelines = pipelines;
             _settings = settings;
             _serviceCollection = serviceCollection;
             _bootstrapper = bootstrapper;
@@ -39,7 +42,7 @@ namespace Statiq.App
             {
                 using (EngineManager engineManager = new EngineManager(_serviceCollection, _bootstrapper, this, _settings))
                 {
-                    return await engineManager.ExecuteAsync(_pipelines, cancellationTokenSource)
+                    return await engineManager.ExecuteAsync(cancellationTokenSource)
                         ? (int)ExitCode.Normal
                         : (int)ExitCode.ExecutionError;
                 }

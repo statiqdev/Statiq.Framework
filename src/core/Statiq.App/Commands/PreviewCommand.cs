@@ -67,7 +67,7 @@ namespace Statiq.App
                 // Execute the engine for the first time
                 using (CancellationTokenSource cancellationTokenSource = new CancellationTokenSource())
                 {
-                    if (!await engineManager.ExecuteAsync(settings.Pipelines, cancellationTokenSource))
+                    if (!await engineManager.ExecuteAsync(cancellationTokenSource))
                     {
                         return (int)ExitCode.ExecutionError;
                     }
@@ -169,7 +169,7 @@ namespace Statiq.App
                         // If there was an execution error due to reload, keep previewing but clear the cache
                         using (CancellationTokenSource cancellationTokenSource = new CancellationTokenSource())
                         {
-                            exitCode = await engineManager.ExecuteAsync(settings.Pipelines, cancellationTokenSource)
+                            exitCode = await engineManager.ExecuteAsync(cancellationTokenSource)
                                 ? ExitCode.Normal
                                 : ExitCode.ExecutionError;
                         }

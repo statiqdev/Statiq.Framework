@@ -18,16 +18,18 @@ namespace Statiq.App
     public class EngineManager : IDisposable
     {
         private readonly ILogger _logger;
+        private readonly string[] _pipelines;
+        private readonly bool _defaultPipelines;
 
         public EngineManager(
             IServiceCollection serviceCollection,
             IBootstrapper bootstrapper,
             ICommand command,
-            BuildCommand.Settings commandSettings)
+            BuildCommand.Settings settings)
         {
             // Get the standard input stream
             string input = null;
-            if (commandSettings?.StdIn == true)
+            if (settings?.StdIn == true)
             {
                 using (StreamReader reader = new StreamReader(Console.OpenStandardInput(), Console.InputEncoding))
                 {
@@ -51,10 +53,12 @@ namespace Statiq.App
 
             // Apply settings
             bootstrapper.Configurators.Configure(Engine.Settings);
-            if (commandSettings != null)
+            if (settings != null)
             {
-                ApplyCommandSettings(Engine, commandSettings);  // Apply command settings last so they can override others
+                ApplyCommandSettings(Engine, settings);  // Apply command settings last so they can override others
             }
+            _pipelines = settings?.Pipelines;
+            _defaultPipelines = settings == null || settings.Pipelines == null || settings.Pipelines.Length == 0 || settings.DefaultPipelines;
 
             // Run engine configurators after command line, settings, etc. have been applied
             bootstrapper.Configurators.Configure<IEngine>(Engine);
@@ -69,13 +73,11 @@ namespace Statiq.App
 
         public Engine Engine { get; }
 
-        public async Task<bool> ExecuteAsync(string[] pipelines, CancellationTokenSource cancellationTokenSource)
+        public async Task<bool> ExecuteAsync(CancellationTokenSource cancellationTokenSource)
         {
             try
             {
-                await Engine.ExecuteAsync(
-                    pipelines == null || pipelines.Length == 0 ? null : pipelines,
-                    cancellationTokenSource);
+                await Engine.ExecuteAsync(_pipelines, _defaultPipelines, cancellationTokenSource);
             }
             catch (Exception ex)
             {

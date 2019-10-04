@@ -223,7 +223,7 @@ namespace Statiq.Core
         /// </param>
         /// <returns>The output documents from each executed pipeline.</returns>
         public Task<IPipelineOutputs> ExecuteAsync(CancellationTokenSource cancellationTokenSource) =>
-            ExecuteAsync(null, cancellationTokenSource);
+            ExecuteAsync(null, true, cancellationTokenSource);
 
         /// <summary>
         /// Executes the specified pipelines and pipelines with <see cref="ExecutionPolicy.Always"/> policies.
@@ -237,7 +237,24 @@ namespace Statiq.Core
         /// A cancellation token source that can be used to cancel the execution.
         /// </param>
         /// <returns>The output documents from each executed pipeline.</returns>
-        public async Task<IPipelineOutputs> ExecuteAsync(string[] pipelines, CancellationTokenSource cancellationTokenSource)
+        public Task<IPipelineOutputs> ExecuteAsync(string[] pipelines, CancellationTokenSource cancellationTokenSource) =>
+            ExecuteAsync(pipelines, false, cancellationTokenSource);
+
+        /// <summary>
+        /// Executes the specified pipelines and pipelines with <see cref="ExecutionPolicy.Always"/> policies.
+        /// </summary>
+        /// <param name="pipelines">
+        /// The pipelines to execute or <c>null</c>/empty to only execute pipelines with the <see cref="ExecutionPolicy.Always"/> policy.
+        /// </param>
+        /// <param name="defaultPipelines">
+        /// <c>true</c> to run the default pipelines in addition to the pipelines specified
+        /// or <c>false</c> to only run the specified pipelines.
+        /// </param>
+        /// <param name="cancellationTokenSource">
+        /// A cancellation token source that can be used to cancel the execution.
+        /// </param>
+        /// <returns>The output documents from each executed pipeline.</returns>
+        public async Task<IPipelineOutputs> ExecuteAsync(string[] pipelines, bool defaultPipelines, CancellationTokenSource cancellationTokenSource)
         {
             // Setup
             await default(SynchronizationContextRemover);
@@ -254,7 +271,7 @@ namespace Statiq.Core
             }
 
             // Verify pipelines
-            HashSet<string> executingPipelines = GetExecutingPipelines(pipelines);
+            HashSet<string> executingPipelines = GetExecutingPipelines(pipelines, defaultPipelines);
             if (executingPipelines.Count == 0)
             {
                 _logger.LogWarning("No pipelines are configured or specified for execution.");
@@ -346,7 +363,7 @@ namespace Statiq.Core
         }
 
         // Internal for testing
-        internal HashSet<string> GetExecutingPipelines(string[] pipelines)
+        internal HashSet<string> GetExecutingPipelines(string[] pipelines, bool defaultPipelines)
         {
             // Validate
             if (pipelines != null)
@@ -363,11 +380,8 @@ namespace Statiq.Core
             HashSet<string> executing = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
             foreach (KeyValuePair<string, IPipeline> kvp in _pipelines)
             {
-                // If it's always executed,
-                // there are no specified pipelines and it's executed by default,
-                // or it's one of the specified pipelines...
                 if (kvp.Value.ExecutionPolicy == ExecutionPolicy.Always
-                    || (pipelines == null && kvp.Value.ExecutionPolicy == ExecutionPolicy.Default)
+                    || (defaultPipelines && kvp.Value.ExecutionPolicy == ExecutionPolicy.Default)
                     || (pipelines?.Any(x => x.Equals(kvp.Key, StringComparison.OrdinalIgnoreCase)) == true))
                 {
                     AddPipelineAndDependencies(kvp.Key);

@@ -24,39 +24,11 @@ namespace Statiq.Testing
     {
         private readonly TestSettings _settings = new TestSettings();
         private readonly DocumentFactory _documentFactory;
+        private readonly ILogger _logger;
 
         public TestExecutionContext()
+            : this((IEnumerable<IDocument>)null)
         {
-            _documentFactory = new DocumentFactory(_settings);
-            _documentFactory.SetDefaultDocumentType<TestDocument>();
-            Inputs = ImmutableArray<IDocument>.Empty;
-
-            TestLoggerProvider loggerProvider = new TestLoggerProvider(LogMessages);
-            Services = new TestServiceProvider(
-                serviceCollection =>
-                {
-                    serviceCollection.AddLogging();
-                    serviceCollection.AddSingleton<ILoggerProvider>(loggerProvider);
-                    serviceCollection.Configure<LoggerFilterOptions>(options => options.MinLevel = LogLevel.Trace);
-                });
-            Logger = new TestLogger(LogMessages);
-        }
-
-        public TestExecutionContext(IEnumerable<IDocument> inputs)
-        {
-            _documentFactory = new DocumentFactory(_settings);
-            _documentFactory.SetDefaultDocumentType<TestDocument>();
-            SetInputs(inputs);
-
-            TestLoggerProvider loggerProvider = new TestLoggerProvider(LogMessages);
-            Services = new TestServiceProvider(
-                serviceCollection =>
-                {
-                    serviceCollection.AddLogging();
-                    serviceCollection.AddSingleton<ILoggerProvider>(loggerProvider);
-                    serviceCollection.Configure<LoggerFilterOptions>(options => options.MinLevel = LogLevel.Trace);
-                });
-            Logger = new TestLogger(LogMessages);
         }
 
         public TestExecutionContext(params IDocument[] inputs)
@@ -64,9 +36,29 @@ namespace Statiq.Testing
         {
         }
 
+        public TestExecutionContext(IEnumerable<IDocument> inputs)
+        {
+            _documentFactory = new DocumentFactory(_settings);
+            _documentFactory.SetDefaultDocumentType<TestDocument>();
+            if (inputs != null)
+            {
+                SetInputs(inputs);
+            }
+
+            TestLoggerProvider = new TestLoggerProvider(LogMessages);
+            Services = new TestServiceProvider(
+                serviceCollection =>
+                {
+                    serviceCollection.AddLogging();
+                    serviceCollection.AddSingleton<ILoggerProvider>(TestLoggerProvider);
+                    serviceCollection.Configure<LoggerFilterOptions>(options => options.MinLevel = LogLevel.Trace);
+                });
+            _logger = TestLoggerProvider.CreateLogger(null);
+        }
+
         public IServiceProvider Services { get; set; }
 
-        public ILogger Logger { get; set; }
+        public TestLoggerProvider TestLoggerProvider { get; }
 
         public ConcurrentQueue<TestMessage> LogMessages { get; } = new ConcurrentQueue<TestMessage>();
 
@@ -122,7 +114,7 @@ namespace Statiq.Testing
         public IModule Module { get; set; }
 
         /// <inheritdoc/>
-        public ImmutableArray<IDocument> Inputs { get; set; }
+        public ImmutableArray<IDocument> Inputs { get; set; } = ImmutableArray<IDocument>.Empty;
 
         public void SetInputs(IEnumerable<IDocument> inputs) =>
             Inputs = inputs?.Where(x => x != null).ToImmutableArray() ?? ImmutableArray<IDocument>.Empty;
@@ -260,10 +252,10 @@ namespace Statiq.Testing
         // ILogger
 
         public void Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception exception, Func<TState, Exception, string> formatter) =>
-            Logger.Log(logLevel, eventId, state, exception, formatter);
+            _logger.Log(logLevel, eventId, state, exception, formatter);
 
-        public bool IsEnabled(LogLevel logLevel) => Logger.IsEnabled(logLevel);
+        public bool IsEnabled(LogLevel logLevel) => _logger.IsEnabled(logLevel);
 
-        public IDisposable BeginScope<TState>(TState state) => Logger.BeginScope(state);
+        public IDisposable BeginScope<TState>(TState state) => _logger.BeginScope(state);
     }
 }

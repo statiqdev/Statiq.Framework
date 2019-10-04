@@ -10,40 +10,25 @@ namespace Statiq.Testing
 {
     public class TestLogger : ILogger
     {
+        private readonly TestLoggerProvider _provider;
+
         public ConcurrentQueue<TestMessage> Messages { get; }
 
         public string CategoryName { get; }
 
-        public TestLogger(ConcurrentQueue<TestMessage> messages = null)
-            : this(null, LogLevel.Warning, messages)
+        public TestLogger(TestLoggerProvider provider, string categoryName, ConcurrentQueue<TestMessage> messages = null)
         {
-        }
-
-        public TestLogger(LogLevel throwLogLevel, ConcurrentQueue<TestMessage> messages = null)
-            : this(null, throwLogLevel, messages)
-        {
-        }
-
-        public TestLogger(string categoryName, ConcurrentQueue<TestMessage> messages = null)
-            : this(categoryName, LogLevel.Warning, messages)
-        {
-        }
-
-        public TestLogger(string categoryName, LogLevel throwLogLevel, ConcurrentQueue<TestMessage> messages = null)
-        {
+            _provider = provider;
             Messages = messages ?? new ConcurrentQueue<TestMessage>();
             CategoryName = categoryName;
-            ThrowLogLevel = throwLogLevel;
         }
-
-        public LogLevel ThrowLogLevel { get; set; } = LogLevel.Warning;
 
         public void Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception exception, Func<TState, Exception, string> formatter)
         {
             string formatted = formatter(state, exception);
             Messages.Enqueue(new TestMessage(CategoryName, logLevel, eventId, state, exception, formatted));
             TestContext.Out.WriteLine(formatted);
-            if ((int)logLevel >= (int)ThrowLogLevel)
+            if ((int)logLevel >= (int)_provider.ThrowLogLevel)
             {
                 throw new Exception(formatted);
             }

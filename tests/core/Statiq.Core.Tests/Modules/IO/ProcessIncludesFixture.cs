@@ -120,7 +120,7 @@ namespace Statiq.Core.Tests.Modules.IO
             {
                 // Given
                 TestExecutionContext context = GetExecutionContext();
-                context.Logger = new TestLogger(LogLevel.Error);
+                context.TestLoggerProvider.ThrowLogLevel = LogLevel.Error;
                 TestDocument document = new TestDocument(new FilePath("/TestFiles/Input/test.txt"), "x ^\"test-c.txt\" y");
                 ProcessIncludes include = new ProcessIncludes();
 

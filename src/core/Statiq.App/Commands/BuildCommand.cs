@@ -40,6 +40,10 @@ namespace Statiq.App
             [Description("Explicitly specifies one or more pipelines to execute.")]
             public string[] Pipelines { get; set; }
 
+            [CommandOption("-d|--defaults")]
+            [Description("Executes default pipelines in addition to the ones specified.")]
+            public bool DefaultPipelines { get; set; }
+
             [CommandArgument(0, "[root]")]
             [Description("The root folder to use.")]
             public string RootPath { get; set; }
@@ -61,7 +65,7 @@ namespace Statiq.App
             {
                 using (EngineManager engineManager = new EngineManager(_serviceCollection, _bootstrapper, this, settings))
                 {
-                    return await engineManager.ExecuteAsync(settings.Pipelines, cancellationTokenSource)
+                    return await engineManager.ExecuteAsync(cancellationTokenSource)
                         ? (int)ExitCode.Normal
                         : (int)ExitCode.ExecutionError;
                 }

@@ -3,6 +3,8 @@
 - Adds support for deployment pipelines (`IPipeline.Deployment`) which run their output phase only after other output phases (#57).
 - Fixes a bug when specifying a setting on the CLI and the bootstrapper.
 - Adds `StartProcess.WithErrorExitCode()` to define a custom function for determining if the process existed in error.
+- Adds new `-d`/`--defaults` and a flag to the engine to indicate if default pipelines should be run independent of specified pipelines.
+- Renames `SimpleBuildCommand` to `CustomBuildCommand` and adds support for the default pipelines flag.
 
 # 1.0.0-alpha.6
 

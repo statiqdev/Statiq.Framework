@@ -78,7 +78,7 @@ namespace Statiq.Core.Tests.Modules.IO
                     .Select(x => new TestDocument(new FilePath("output.txt"), x))
                     .ToArray();
                 TestExecutionContext context = GetExecutionContext(inputs);
-                context.Logger = new TestLogger(LogLevel.Error);
+                context.TestLoggerProvider.ThrowLogLevel = LogLevel.Error;
                 WriteFiles writeFiles = new WriteFiles();
 
                 // When

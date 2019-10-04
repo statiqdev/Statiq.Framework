@@ -18,52 +18,104 @@ namespace Statiq.Core.Tests.Execution
         public class GetExecutingPipelines : EngineFixture
         {
             [Test]
-            public void GetsAllForNull()
+            public void NullPipelinesAndNoDefaults()
             {
                 // Given
                 Engine engine = GetEngine();
 
                 // When
-                HashSet<string> executingPipelines = engine.GetExecutingPipelines(null);
-
-                // Then
-                executingPipelines.ShouldBe(new[] { "A", "D", "E", "F" }, true);
-            }
-
-            [Test]
-            public void GetsAlwaysForZeroLength()
-            {
-                // Given
-                Engine engine = GetEngine();
-
-                // When
-                HashSet<string> executingPipelines = engine.GetExecutingPipelines(Array.Empty<string>());
+                HashSet<string> executingPipelines = engine.GetExecutingPipelines(null, false);
 
                 // Then
                 executingPipelines.ShouldBe(new[] { "F" }, true);
             }
 
             [Test]
-            public void GetsSpecifiedPipelines()
+            public void NullPipelinesAndDefaults()
             {
                 // Given
                 Engine engine = GetEngine();
 
                 // When
-                HashSet<string> executingPipelines = engine.GetExecutingPipelines(new[] { "A", "B" });
+                HashSet<string> executingPipelines = engine.GetExecutingPipelines(null, true);
+
+                // Then
+                executingPipelines.ShouldBe(new[] { "A", "D", "E", "F" }, true);
+            }
+
+            [Test]
+            public void ZeroLengthAndNoDefaults()
+            {
+                // Given
+                Engine engine = GetEngine();
+
+                // When
+                HashSet<string> executingPipelines = engine.GetExecutingPipelines(Array.Empty<string>(), false);
+
+                // Then
+                executingPipelines.ShouldBe(new[] { "F" }, true);
+            }
+
+            [Test]
+            public void ZeroLengthAndDefaults()
+            {
+                // Given
+                Engine engine = GetEngine();
+
+                // When
+                HashSet<string> executingPipelines = engine.GetExecutingPipelines(Array.Empty<string>(), true);
+
+                // Then
+                executingPipelines.ShouldBe(new[] { "A", "D", "E", "F" }, true);
+            }
+
+            [Test]
+            public void SpecifiedAndNoDefaults()
+            {
+                // Given
+                Engine engine = GetEngine();
+
+                // When
+                HashSet<string> executingPipelines = engine.GetExecutingPipelines(new[] { "A", "B" }, false);
 
                 // Then
                 executingPipelines.ShouldBe(new[] { "A", "B", "F" }, true);
             }
 
             [Test]
-            public void GetsTransativeDependency()
+            public void SpecifiedAndDefaults()
             {
                 // Given
                 Engine engine = GetEngine();
 
                 // When
-                HashSet<string> executingPipelines = engine.GetExecutingPipelines(new[] { "E" });
+                HashSet<string> executingPipelines = engine.GetExecutingPipelines(new[] { "A", "B" }, true);
+
+                // Then
+                executingPipelines.ShouldBe(new[] { "A", "B", "E", "D", "F" }, true);
+            }
+
+            [Test]
+            public void SpecifiedAndTransitiveAndNoDefaults()
+            {
+                // Given
+                Engine engine = GetEngine();
+
+                // When
+                HashSet<string> executingPipelines = engine.GetExecutingPipelines(new[] { "E" }, false);
+
+                // Then
+                executingPipelines.ShouldBe(new[] { "A", "D", "E", "F" }, true);
+            }
+
+            [Test]
+            public void SpecifiedAndTransitiveAndDefaults()
+            {
+                // Given
+                Engine engine = GetEngine();
+
+                // When
+                HashSet<string> executingPipelines = engine.GetExecutingPipelines(new[] { "E" }, true);
 
                 // Then
                 executingPipelines.ShouldBe(new[] { "A", "D", "E", "F" }, true);
@@ -76,7 +128,7 @@ namespace Statiq.Core.Tests.Execution
                 Engine engine = GetEngine();
 
                 // When, Then
-                Should.Throw<ArgumentException>(() => engine.GetExecutingPipelines(new[] { "Z" }));
+                Should.Throw<ArgumentException>(() => engine.GetExecutingPipelines(new[] { "Z" }, false));
             }
 
             private Engine GetEngine()
@@ -125,7 +177,7 @@ namespace Statiq.Core.Tests.Execution
                     Dependencies = new HashSet<string>(new[] { "Bar" }),
                     Isolated = true
                 });
-                TestLogger logger = new TestLogger();
+                ILogger logger = new TestLoggerProvider().CreateLogger(null);
 
                 // When, Then
                 Should.Throw<PipelineException>(() => Engine.GetPipelinePhases(pipelines, logger));
@@ -140,7 +192,7 @@ namespace Statiq.Core.Tests.Execution
                 {
                     Dependencies = new HashSet<string>(new[] { "Bar" })
                 });
-                TestLogger logger = new TestLogger();
+                ILogger logger = new TestLoggerProvider().CreateLogger(null);
 
                 // When, Then
                 Should.Throw<PipelineException>(() => Engine.GetPipelinePhases(pipelines, logger));
@@ -155,7 +207,7 @@ namespace Statiq.Core.Tests.Execution
                 {
                     Dependencies = new HashSet<string>(new[] { "Foo" })
                 });
-                TestLogger logger = new TestLogger();
+                ILogger logger = new TestLoggerProvider().CreateLogger(null);
 
                 // When, Then
                 Should.Throw<PipelineException>(() => Engine.GetPipelinePhases(pipelines, logger));
@@ -178,7 +230,7 @@ namespace Statiq.Core.Tests.Execution
                 {
                     Dependencies = new HashSet<string>(new[] { "Bar" })
                 });
-                TestLogger logger = new TestLogger();
+                ILogger logger = new TestLoggerProvider().CreateLogger(null);
 
                 // When, Then
                 Should.Throw<PipelineException>(() => Engine.GetPipelinePhases(pipelines, logger));
@@ -197,7 +249,7 @@ namespace Statiq.Core.Tests.Execution
                 {
                     Dependencies = new HashSet<string>(new[] { "Bar" })
                 });
-                TestLogger logger = new TestLogger();
+                ILogger logger = new TestLoggerProvider().CreateLogger(null);
 
                 // When
                 PipelinePhase[] phases = Engine.GetPipelinePhases(pipelines, logger);
@@ -226,7 +278,7 @@ namespace Statiq.Core.Tests.Execution
                 {
                     Dependencies = new HashSet<string>(new[] { "bar" })
                 });
-                TestLogger logger = new TestLogger();
+                ILogger logger = new TestLoggerProvider().CreateLogger(null);
 
                 // When
                 PipelinePhase[] phases = Engine.GetPipelinePhases(pipelines, logger);
@@ -257,7 +309,7 @@ namespace Statiq.Core.Tests.Execution
                 pipelines.Add("Foo", new TestPipeline
                 {
                 });
-                TestLogger logger = new TestLogger();
+                ILogger logger = new TestLoggerProvider().CreateLogger(null);
 
                 // When
                 PipelinePhase[] phases = Engine.GetPipelinePhases(pipelines, logger);

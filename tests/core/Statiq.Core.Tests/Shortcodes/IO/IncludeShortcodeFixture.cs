@@ -65,9 +65,9 @@ namespace Statiq.Core.Tests.Shortcodes.IO
 
                 TestExecutionContext context = new TestExecutionContext
                 {
-                    FileSystem = fileSystem,
-                    Logger = new TestLogger(LogLevel.Error)
+                    FileSystem = fileSystem
                 };
+                context.TestLoggerProvider.ThrowLogLevel = LogLevel.Error;
                 TestDocument document = new TestDocument();
                 KeyValuePair<string, string>[] args = new KeyValuePair<string, string>[]
                 {
