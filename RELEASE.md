@@ -1,3 +1,7 @@
+# 1.0.0-alpha.8
+
+- Added `==` overloads to `NormalizedPath`
+
 # 1.0.0-alpha.7
 
 - Adds support for deployment pipelines (`IPipeline.Deployment`) which run their output phase only after other output phases (#57).

@@ -22,7 +22,7 @@ namespace Statiq.Common.Tests.IO
             public void ShouldThrowIfPathIsNull()
             {
                 // Given, When, Then
-                Assert.Throws<ArgumentNullException>(() => new TestPath(null));
+                Should.Throw<ArgumentNullException>(() => new TestPath(null));
             }
 
             [TestCase("")]
@@ -30,7 +30,7 @@ namespace Statiq.Common.Tests.IO
             public void ShouldThrowIfPathIsEmpty(string fullPath)
             {
                 // Given, When, Then
-                Assert.Throws<ArgumentException>(() => new TestPath(fullPath));
+                Should.Throw<ArgumentException>(() => new TestPath(fullPath));
             }
 
             [Test]
@@ -40,7 +40,7 @@ namespace Statiq.Common.Tests.IO
                 TestPath path = new TestPath("./");
 
                 // Then
-                Assert.AreEqual(".", path.FullPath);
+                path.FullPath.ShouldBe(".");
             }
 
             [Test]
@@ -50,7 +50,7 @@ namespace Statiq.Common.Tests.IO
                 TestPath path = new TestPath("shaders\\basic");
 
                 // Then
-                Assert.AreEqual("shaders/basic", path.FullPath);
+                path.FullPath.ShouldBe("shaders/basic");
             }
 
             [Test]
@@ -60,7 +60,7 @@ namespace Statiq.Common.Tests.IO
                 TestPath path = new TestPath("\t\r\nshaders/basic ");
 
                 // Then
-                Assert.AreEqual("shaders/basic ", path.FullPath);
+                path.FullPath.ShouldBe("shaders/basic ");
             }
 
             [Test]
@@ -70,7 +70,7 @@ namespace Statiq.Common.Tests.IO
                 TestPath path = new TestPath("my awesome shaders/basic");
 
                 // Then
-                Assert.AreEqual("my awesome shaders/basic", path.FullPath);
+                path.FullPath.ShouldBe("my awesome shaders/basic");
             }
 
             [TestCase("/Hello/World/", "/Hello/World")]
@@ -85,7 +85,7 @@ namespace Statiq.Common.Tests.IO
                 TestPath path = new TestPath(value);
 
                 // Then
-                Assert.AreEqual(expected, path.FullPath);
+                path.FullPath.ShouldBe(expected);
             }
 
             [TestCase("\\")]
@@ -96,7 +96,7 @@ namespace Statiq.Common.Tests.IO
                 TestPath path = new TestPath(value);
 
                 // Then
-                Assert.AreEqual("/", path.FullPath);
+                path.FullPath.ShouldBe("/");
             }
 
             [TestCase("./Hello/World/", "Hello/World")]
@@ -109,7 +109,7 @@ namespace Statiq.Common.Tests.IO
                 TestPath path = new TestPath(value);
 
                 // Then
-                Assert.AreEqual(expected, path.FullPath);
+                path.FullPath.ShouldBe(expected);
             }
 
             [TestCase("\\")]
@@ -120,7 +120,7 @@ namespace Statiq.Common.Tests.IO
                 TestPath path = new TestPath(value);
 
                 // Then
-                Assert.AreEqual("/", path.FullPath);
+                path.FullPath.ShouldBe("/");
             }
         }
 
@@ -136,9 +136,9 @@ namespace Statiq.Common.Tests.IO
                 TestPath path = new TestPath(pathName);
 
                 // Then
-                Assert.AreEqual(2, path.Segments.Length);
-                Assert.AreEqual("Hello", path.Segments[0].ToString());
-                Assert.AreEqual("World", path.Segments[1].ToString());
+                path.Segments.Length.ShouldBe(2);
+                path.Segments[0].ToString().ShouldBe("Hello");
+                path.Segments[1].ToString().ShouldBe("World");
             }
         }
 
@@ -207,7 +207,7 @@ namespace Statiq.Common.Tests.IO
                 DirectoryPath root = path.Root;
 
                 // Then
-                Assert.AreEqual(expected, root.FullPath);
+                root.FullPath.ShouldBe(expected);
             }
 
             [TestCase(@"\a\b\c")]
@@ -227,7 +227,7 @@ namespace Statiq.Common.Tests.IO
                 DirectoryPath root = path.Root;
 
                 // Then
-                Assert.AreEqual(".", root.FullPath);
+                root.FullPath.ShouldBe(".");
             }
         }
 
@@ -243,7 +243,7 @@ namespace Statiq.Common.Tests.IO
                 TestPath path = new TestPath(fullPath);
 
                 // Then
-                Assert.AreEqual(expected, path.IsRelative);
+                path.IsRelative.ShouldBe(expected);
             }
 
             [WindowsTestCase("c:/assets/shaders", false)]
@@ -256,7 +256,7 @@ namespace Statiq.Common.Tests.IO
                 TestPath path = new TestPath(fullPath);
 
                 // Then
-                Assert.AreEqual(expected, path.IsRelative);
+                path.IsRelative.ShouldBe(expected);
             }
         }
 
@@ -271,7 +271,7 @@ namespace Statiq.Common.Tests.IO
                 TestPath testPath = new TestPath(path);
 
                 // Then
-                Assert.AreEqual(expected, testPath.ToString());
+                testPath.ToString().ShouldBe(expected);
             }
         }
 
@@ -332,66 +332,65 @@ namespace Statiq.Common.Tests.IO
 
         public class EqualsTests : NormalizedPathFixture
         {
-            [TestCase(true)]
-            [TestCase(false)]
-            public void SameAssetInstancesIsConsideredEqual(bool isCaseSensitive)
+            [TestCase(StringComparison.Ordinal)]
+            [TestCase(StringComparison.OrdinalIgnoreCase)]
+            public void SameAssetInstanceIsEqual(StringComparison comparisonType)
             {
                 // Given, When
                 FilePath path = new FilePath("shaders/basic.vert");
 
                 // Then
-                Assert.True(path.Equals(path));
+                path.Equals(path, comparisonType).ShouldBeTrue();
             }
 
-            [TestCase(true)]
-            [TestCase(false)]
-            public void PathsAreConsideredInequalIfAnyIsNull(bool isCaseSensitive)
+            [TestCase(StringComparison.Ordinal)]
+            [TestCase(StringComparison.OrdinalIgnoreCase)]
+            public void PathsAreInequalIfAnyIsNull(StringComparison comparisonType)
             {
                 // Given, When
-                bool result = new FilePath("test.txt").Equals(null);
+                bool result = new FilePath("test.txt").Equals(null, comparisonType);
 
                 // Then
-                Assert.False(result);
+                result.ShouldBeFalse();
             }
 
-            [TestCase(true)]
-            [TestCase(false)]
-            public void SamePathsAreConsideredEqual(bool isCaseSensitive)
+            [TestCase(StringComparison.Ordinal)]
+            [TestCase(StringComparison.OrdinalIgnoreCase)]
+            public void SamePathsAreEqual(StringComparison comparisonType)
             {
                 // Given, When
                 FilePath first = new FilePath("shaders/basic.vert");
                 FilePath second = new FilePath("shaders/basic.vert");
 
                 // Then
-                Assert.True(first.Equals(second));
-                Assert.True(second.Equals(first));
+                first.Equals(second, comparisonType).ShouldBeTrue();
+                second.Equals(first, comparisonType).ShouldBeTrue();
             }
 
-            [Test]
-            public void DifferentPathsAreNotConsideredEqual()
+            [TestCase(StringComparison.Ordinal)]
+            [TestCase(StringComparison.OrdinalIgnoreCase)]
+            public void DifferentPathsAreNotEqual(StringComparison comparisonType)
             {
                 // Given, When
                 FilePath first = new FilePath("shaders/basic.vert");
                 FilePath second = new FilePath("shaders/basic.frag");
 
                 // Then
-                Assert.False(first.Equals(second));
-                Assert.False(second.Equals(first));
+                first.Equals(second, comparisonType).ShouldBeFalse();
+                second.Equals(first, comparisonType).ShouldBeFalse();
             }
 
-            [NonParallelizable]
             [TestCase(StringComparison.Ordinal, false)]
             [TestCase(StringComparison.OrdinalIgnoreCase, true)]
             public void SamePathsButDifferentCasingFollowComparison(StringComparison comparisonType, bool expected)
             {
                 // Given
-                NormalizedPath.PathComparisonType = comparisonType;
                 FilePath first = new FilePath("shaders/basic.vert");
                 FilePath second = new FilePath("SHADERS/BASIC.VERT");
 
                 // When
-                bool firstResult = first.Equals(second);
-                bool secondResult = second.Equals(first);
+                bool firstResult = first.Equals(second, comparisonType);
+                bool secondResult = second.Equals(first, comparisonType);
 
                 // Then
                 firstResult.ShouldBe(expected);
@@ -401,43 +400,146 @@ namespace Statiq.Common.Tests.IO
 
         public class GetHashCodeTests : NormalizedPathFixture
         {
-            [Test]
-            public void SamePathsGetSameHashCode()
+            [TestCase(StringComparison.Ordinal)]
+            [TestCase(StringComparison.OrdinalIgnoreCase)]
+            public void SamePathsGetSameHashCode(StringComparison comparisonType)
             {
                 // Given, When
                 FilePath first = new FilePath("shaders/basic.vert");
                 FilePath second = new FilePath("shaders/basic.vert");
 
                 // Then
-                Assert.AreEqual(first.GetHashCode(), second.GetHashCode());
+                first.GetHashCode(comparisonType).ShouldBe(second.GetHashCode(comparisonType));
             }
 
-            [Test]
-            public void DifferentPathsGetDifferentHashCodes()
+            [TestCase(StringComparison.Ordinal)]
+            [TestCase(StringComparison.OrdinalIgnoreCase)]
+            public void DifferentPathsGetDifferentHashCodes(StringComparison comparisonType)
             {
                 // Given, When
                 FilePath first = new FilePath("shaders/basic.vert");
                 FilePath second = new FilePath("shaders/basic.frag");
 
                 // Then
-                Assert.AreNotEqual(first.GetHashCode(), second.GetHashCode());
+                first.GetHashCode(comparisonType).ShouldNotBe(second.GetHashCode(comparisonType));
             }
 
-            [NonParallelizable]
             [TestCase(StringComparison.Ordinal, false)]
             [TestCase(StringComparison.OrdinalIgnoreCase, true)]
             public void SamePathsButDifferentCasingFollowComparison(StringComparison comparisonType, bool expected)
             {
                 // Given
-                NormalizedPath.PathComparisonType = comparisonType;
                 FilePath first = new FilePath("shaders/basic.vert");
                 FilePath second = new FilePath("SHADERS/BASIC.VERT");
 
                 // When
-                bool result = first.GetHashCode().Equals(second.GetHashCode());
+                bool result = first.GetHashCode(comparisonType).Equals(second.GetHashCode(comparisonType));
 
                 // Then
                 result.ShouldBe(expected);
+            }
+        }
+
+        public class EqualityOperatorTests : NormalizedPathFixture
+        {
+            [Test]
+            public void SameAssetInstanceIsEqual()
+            {
+                // Given, When
+                FilePath path = new FilePath("shaders/basic.vert");
+
+                // Then
+#pragma warning disable CS1718 // Comparison made to same variable
+                (path == path).ShouldBeTrue();
+#pragma warning restore CS1718 // Comparison made to same variable
+            }
+
+            [Test]
+            public void PathsAreInequalIfAnyIsNull()
+            {
+                // Given, When
+                FilePath result = new FilePath("test.txt");
+
+                // Then
+                (result == null).ShouldBeFalse();
+            }
+
+            [Test]
+            public void SamePathsAreEqual()
+            {
+                // Given, When
+                FilePath first = new FilePath("shaders/basic.vert");
+                FilePath second = new FilePath("shaders/basic.vert");
+
+                // Then
+                (first == second).ShouldBeTrue();
+                (second == first).ShouldBeTrue();
+            }
+
+            [Test]
+            public void DifferentPathsAreNotEqual()
+            {
+                // Given, When
+                FilePath first = new FilePath("shaders/basic.vert");
+                FilePath second = new FilePath("shaders/basic.frag");
+
+                // Then
+                (first == second).ShouldBeFalse();
+                (second == first).ShouldBeFalse();
+            }
+
+            [Test]
+            public void StringPathsAreEqual()
+            {
+                // Given, When
+                FilePath first = new FilePath("shaders/basic.vert");
+                string second = "shaders/basic.vert";
+
+                // Then
+                (first == second).ShouldBeTrue();
+            }
+
+            [Test]
+            public void DifferentStringPathIsNotEqual()
+            {
+                // Given, When
+                FilePath first = new FilePath("shaders/basic.vert");
+                string second = "shaders/basic.frag";
+
+                // Then
+                (first == second).ShouldBeFalse();
+            }
+
+            [Test]
+            public void AbsoluteStringAndPathAreNotEqual()
+            {
+                // Given, When
+                FilePath first = new FilePath("shaders/basic.vert");
+                string second = "/shaders/basic.frag";
+
+                // Then
+                (first == second).ShouldBeFalse();
+            }
+
+            [Test]
+            public void StringAndAbsolutePathAreNotEqual()
+            {
+                // Given, When
+                FilePath first = new FilePath("/shaders/basic.vert");
+                string second = "shaders/basic.frag";
+
+                // Then
+                (first == second).ShouldBeFalse();
+            }
+
+            [Test]
+            public void BothNullAreEqual()
+            {
+                // Given, When
+                FilePath first = null;
+
+                // Then
+                (first == null).ShouldBeTrue();
             }
         }
     }

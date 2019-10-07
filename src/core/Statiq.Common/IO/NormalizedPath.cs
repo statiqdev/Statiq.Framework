@@ -19,7 +19,7 @@ namespace Statiq.Common
         /// This defaults to <see cref="StringComparison.Ordinal"/> on Linux platforms and
         /// <see cref="StringComparison.OrdinalIgnoreCase"/> on Windows and MacOS.
         /// </remarks>
-        public static StringComparison PathComparisonType { get; set; } =
+        public static StringComparison DefaultComparisonType { get; set; } =
             RuntimeInformation.IsOSPlatform(OSPlatform.Linux) ? StringComparison.Ordinal : StringComparison.OrdinalIgnoreCase;
 
         public const string Dot = ".";
@@ -308,21 +308,25 @@ namespace Statiq.Common
         public override string ToString() => FullPath;
 
         /// <inheritdoc />
-        public override int GetHashCode()
+        public override int GetHashCode() => GetHashCode(DefaultComparisonType);
+
+        public int GetHashCode(StringComparison comparisonType)
         {
             HashCode hash = default;
             hash.Add(IsAbsolute);
-            hash.Add(FullPath.GetHashCode(PathComparisonType));
+            hash.Add(FullPath.GetHashCode(comparisonType));
             return hash.ToHashCode();
         }
 
         /// <inheritdoc />
-        public override bool Equals(object obj)
+        public override bool Equals(object obj) => Equals(obj, DefaultComparisonType);
+
+        public bool Equals(object obj, StringComparison comparisonType)
         {
             NormalizedPath other = obj as NormalizedPath;
 
             // Special case for string, attempt to create like-typed path from the value
-            if (other == null && obj is string path)
+            if (((object)other) == null && obj is string path)
             {
                 if (this is FilePath)
                 {
@@ -334,13 +338,25 @@ namespace Statiq.Common
                 }
             }
 
-            return other != null && Equals(other);
+            return ((object)other) != null && Equals(other, comparisonType);
         }
 
-        public bool Equals(NormalizedPath other) =>
-            other != null
+        public bool Equals(NormalizedPath other) => Equals(other, DefaultComparisonType);
+
+        public bool Equals(NormalizedPath other, StringComparison comparisonType) =>
+            ((object)other) != null
             && IsAbsolute == other.IsAbsolute
-            && FullPath.Equals(other.FullPath, PathComparisonType);
+            && FullPath.Equals(other.FullPath, comparisonType);
+
+        public static bool operator ==(NormalizedPath a, NormalizedPath b) =>
+            ReferenceEquals(a, b) || (((object)a) != null && a.Equals(b));
+
+        public static bool operator !=(NormalizedPath a, NormalizedPath b) => !(a == b);
+
+        public static bool operator ==(NormalizedPath a, object b) =>
+            (((object)a) == null && b == null) || (((object)a) != null && a.Equals(b));
+
+        public static bool operator !=(NormalizedPath a, object b) => !(a == b);
 
         /// <inheritdoc />
         public int CompareTo(object obj) => !(obj is NormalizedPath path) ? 1 : CompareTo(path);
@@ -360,7 +376,7 @@ namespace Statiq.Common
 
             int absoluteCompare = IsAbsolute.CompareTo(other.IsAbsolute);
             return absoluteCompare == 0
-                ? string.Compare(FullPath, other.FullPath, PathComparisonType)
+                ? string.Compare(FullPath, other.FullPath, DefaultComparisonType)
                 : absoluteCompare;
         }
     }

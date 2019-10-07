@@ -19,7 +19,6 @@ namespace Statiq.Testing
         [SetUp]
         public void BaseSetUp()
         {
-            NormalizedPath.PathComparisonType = System.StringComparison.OrdinalIgnoreCase;  // Normalize for tests
             Directory.SetCurrentDirectory(TestContext.CurrentContext.TestDirectory);
         }
 
