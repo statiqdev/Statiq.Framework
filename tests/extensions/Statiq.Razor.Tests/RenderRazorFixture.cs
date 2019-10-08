@@ -332,7 +332,7 @@ namespace Statiq.Razor.Tests
                 IReadOnlyList<IDocument> results2 = await ExecuteAsync(document, context, razor);
 
                 // Then
-                (await results1.Single().GetStringAsync()).ShouldBe(
+                (await results1.Single().GetContentStringAsync()).ShouldBe(
                     @"LAYOUT5
 
 <p>Section Content</p>
@@ -340,7 +340,7 @@ namespace Statiq.Razor.Tests
 <p>This is a test</p>",
                     StringCompareShould.IgnoreLineEndings);
 
-                (await results2.Single().GetStringAsync()).ShouldBe(
+                (await results2.Single().GetContentStringAsync()).ShouldBe(
                     @"LAYOUT5
 
 <p>Section Content</p>

@@ -30,7 +30,7 @@ namespace Statiq.Core.Tests.Modules.Control
                     new[] { "ab" },
                     await results
                         .ToAsyncEnumerable()
-                        .SelectAwait(async x => await x.GetStringAsync())
+                        .SelectAwait(async x => await x.GetContentStringAsync())
                         .ToListAsync());
             }
 

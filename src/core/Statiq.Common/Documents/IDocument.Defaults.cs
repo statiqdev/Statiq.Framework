@@ -15,7 +15,7 @@ namespace Statiq.Common
         /// The stream you get from this call must be disposed as soon as reading is complete.
         /// </summary>
         /// <returns>A <see cref="Stream"/> of the content associated with this document.</returns>
-        public Stream GetStream() =>
+        public Stream GetContentStream() =>
             ContentProvider == null
                 ? Stream.Null
                 : ContentProvider.GetStream();
@@ -23,12 +23,12 @@ namespace Statiq.Common
         /// <summary>
         /// Gets the content associated with this document as a string.
         /// This will result in reading the entire content stream.
-        /// It's preferred to read directly as a stream using <see cref="GetStream"/> if possible.
+        /// It's preferred to read directly as a stream using <see cref="GetContentStream"/> if possible.
         /// </summary>
         /// <value>The content associated with this document.</value>
-        public async Task<string> GetStringAsync()
+        public async Task<string> GetContentStringAsync()
         {
-            Stream stream = GetStream();
+            Stream stream = GetContentStream();
             if (stream == null || stream == Stream.Null)
             {
                 return string.Empty;
@@ -42,12 +42,12 @@ namespace Statiq.Common
         /// <summary>
         /// Gets the content associated with this document as a byte array.
         /// This will result in reading the entire content stream.
-        /// It's preferred to read directly as a stream using <see cref="GetStream"/> if possible.
+        /// It's preferred to read directly as a stream using <see cref="GetContentStream"/> if possible.
         /// </summary>
         /// <value>The content associated with this document.</value>
-        public async Task<byte[]> GetBytesAsync()
+        public async Task<byte[]> GetContentBytesAsync()
         {
-            using (Stream stream = GetStream())
+            using (Stream stream = GetContentStream())
             {
                 if (stream == null || stream == Stream.Null)
                 {
@@ -68,7 +68,7 @@ namespace Statiq.Common
         public async Task<int> GetCacheHashCodeAsync()
         {
             HashCode hash = default;
-            using (Stream stream = GetStream())
+            using (Stream stream = GetContentStream())
             {
                 hash.Add(await Crc32.CalculateAsync(stream));
             }

@@ -18,7 +18,7 @@ namespace Statiq.Minification
                 {
                     try
                     {
-                        MinificationResultBase result = minify(await input.GetStringAsync());
+                        MinificationResultBase result = minify(await input.GetContentStringAsync());
 
                         if (result.Errors.Count > 0)
                         {

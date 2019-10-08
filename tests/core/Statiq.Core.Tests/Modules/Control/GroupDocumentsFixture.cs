@@ -55,7 +55,7 @@ namespace Statiq.Core.Tests.Modules.Control
                     {
                         List<string> groupContent = await d.GetChildren()
                             .ToAsyncEnumerable()
-                            .SelectAwait(async x => await x.GetStringAsync())
+                            .SelectAwait(async x => await x.GetContentStringAsync())
                             .ToListAsync();
                         content.Add(groupContent.ToList());
                         return (object)null;

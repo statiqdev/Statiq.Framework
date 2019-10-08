@@ -201,7 +201,7 @@ namespace Statiq.Html
 
         protected override async Task<IEnumerable<IDocument>> ExecuteInputAsync(IDocument input, IExecutionContext context)
         {
-            string oldContent = await input.GetStringAsync();
+            string oldContent = await input.GetContentStringAsync();
             StringWriter outputString = new StringWriter();
             bool escaped = false;
 

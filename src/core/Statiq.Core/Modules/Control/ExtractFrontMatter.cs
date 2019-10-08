@@ -75,7 +75,7 @@ namespace Statiq.Core
         /// <inheritdoc />
         protected override async Task<IEnumerable<IDocument>> ExecuteInputAsync(IDocument input, IExecutionContext context)
         {
-            string inputContent = await input.GetStringAsync();
+            string inputContent = await input.GetContentStringAsync();
             List<string> inputLines = inputContent.Split(new[] { '\n' }, StringSplitOptions.None).ToList();
             int delimiterLine = inputLines.FindIndex(x =>
             {

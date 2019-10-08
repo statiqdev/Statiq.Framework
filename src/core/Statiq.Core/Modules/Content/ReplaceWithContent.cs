@@ -57,7 +57,7 @@ namespace Statiq.Core
             {
                 return input.Clone(await context.GetContentProviderAsync(value)).Yield();
             }
-            string inputContent = await input.GetStringAsync();
+            string inputContent = await input.GetContentStringAsync();
             string replaced = _isRegex
                 ? Regex.Replace(inputContent, _search, value, _regexOptions)
                 : value.Replace(_search, inputContent);

@@ -65,12 +65,12 @@ namespace Statiq.Core
             else if (_xsltGeneration != null)
             {
                 IDocument xsltDocument = (await context.ExecuteModulesAsync(_xsltGeneration, input.Yield())).Single();
-                using (Stream stream = xsltDocument.GetStream())
+                using (Stream stream = xsltDocument.GetContentStream())
                 {
                     xslt.Load(XmlReader.Create(stream));
                 }
             }
-            using (Stream stream = input.GetStream())
+            using (Stream stream = input.GetContentStream())
             {
                 StringWriter str = new StringWriter();
                 using (XmlTextWriter writer = new XmlTextWriter(str))

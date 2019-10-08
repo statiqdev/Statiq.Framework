@@ -29,7 +29,7 @@ namespace Statiq.Core.Tests.Modules.Control
                 };
 
                 // When
-                await ExecuteAsync(a, new ExecuteIf(Config.FromDocument(async doc => await doc.GetStringAsync() == "1"), b), c);
+                await ExecuteAsync(a, new ExecuteIf(Config.FromDocument(async doc => await doc.GetContentStringAsync() == "1"), b), c);
 
                 // Then
                 Assert.AreEqual(1, a.ExecuteCount);
@@ -68,8 +68,8 @@ namespace Statiq.Core.Tests.Modules.Control
                 // When
                 await ExecuteAsync(
                     a,
-                    new ExecuteIf(Config.FromDocument(async doc => await doc.GetStringAsync() == "1"), b)
-                        .ElseIf(Config.FromDocument(async doc => await doc.GetStringAsync() == "2"), c),
+                    new ExecuteIf(Config.FromDocument(async doc => await doc.GetContentStringAsync() == "1"), b)
+                        .ElseIf(Config.FromDocument(async doc => await doc.GetContentStringAsync() == "2"), c),
                     d);
 
                 // Then
@@ -112,7 +112,7 @@ namespace Statiq.Core.Tests.Modules.Control
                 // When
                 await ExecuteAsync(
                     a,
-                    new ExecuteIf(Config.FromDocument(async doc => await doc.GetStringAsync() == "1"), b)
+                    new ExecuteIf(Config.FromDocument(async doc => await doc.GetContentStringAsync() == "1"), b)
                         .Else(c),
                     d);
 
@@ -160,8 +160,8 @@ namespace Statiq.Core.Tests.Modules.Control
                 // When
                 await ExecuteAsync(
                     a,
-                    new ExecuteIf(Config.FromDocument(async doc => await doc.GetStringAsync() == "1"), b)
-                        .ElseIf(Config.FromDocument(async doc => await doc.GetStringAsync() == "3"), c)
+                    new ExecuteIf(Config.FromDocument(async doc => await doc.GetContentStringAsync() == "1"), b)
+                        .ElseIf(Config.FromDocument(async doc => await doc.GetContentStringAsync() == "3"), c)
                         .Else(d),
                     e);
 

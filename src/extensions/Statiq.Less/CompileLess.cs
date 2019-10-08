@@ -79,7 +79,7 @@ namespace Statiq.Less
                     path = new FilePath(Path.GetRandomFileName());
                     context.LogWarning($"No input path found for document {input.ToSafeDisplayString()}, using {path.FileName.FullPath}");
                 }
-                string content = engine.TransformToCss(await input.GetStringAsync(), path.FileName.FullPath);
+                string content = engine.TransformToCss(await input.GetContentStringAsync(), path.FileName.FullPath);
 
                 // Process the result
                 FilePath cssPath = path.GetRelativeInputPath(context).ChangeExtension("css");

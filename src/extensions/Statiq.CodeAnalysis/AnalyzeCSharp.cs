@@ -468,7 +468,7 @@ namespace Statiq.CodeAnalysis
 
             void AddSyntaxTrees(IDocument input)
             {
-                using (Stream stream = input.GetStream())
+                using (Stream stream = input.GetContentStream())
                 {
                     SourceText sourceText = SourceText.From(stream);
                     syntaxTrees.Add(CSharpSyntaxTree.ParseText(

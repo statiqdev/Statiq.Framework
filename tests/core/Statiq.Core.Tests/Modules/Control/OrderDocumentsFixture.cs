@@ -35,7 +35,7 @@ namespace Statiq.Core.Tests.Modules.Control
                 ForEachDocument gatherData = new ExecuteConfig(
                     Config.FromDocument(async d =>
                     {
-                        content.Add(await d.GetStringAsync());
+                        content.Add(await d.GetContentStringAsync());
                         return (IDocument)null;
                     })).ForEachDocument();
 
@@ -67,7 +67,7 @@ namespace Statiq.Core.Tests.Modules.Control
                 ForEachDocument gatherData = new ExecuteConfig(
                     Config.FromDocument(async d =>
                     {
-                        content.Add(await d.GetStringAsync());
+                        content.Add(await d.GetContentStringAsync());
                         return (IDocument)null;
                     })).ForEachDocument();
 
@@ -98,7 +98,7 @@ namespace Statiq.Core.Tests.Modules.Control
                 ForEachDocument gatherData = new ExecuteConfig(
                     Config.FromDocument(async d =>
                     {
-                        content.Add(await d.GetStringAsync());
+                        content.Add(await d.GetContentStringAsync());
                         return (IDocument)null;
                     })).ForEachDocument();
 
@@ -130,7 +130,7 @@ namespace Statiq.Core.Tests.Modules.Control
                 ForEachDocument gatherData = new ExecuteConfig(
                     Config.FromDocument(async d =>
                     {
-                        content.Add(await d.GetStringAsync());
+                        content.Add(await d.GetContentStringAsync());
                         return (IDocument)null;
                     })).ForEachDocument();
 
@@ -163,7 +163,7 @@ namespace Statiq.Core.Tests.Modules.Control
                 ForEachDocument gatherData = new ExecuteConfig(
                     Config.FromDocument(async d =>
                     {
-                        content.Add(await d.GetStringAsync());
+                        content.Add(await d.GetContentStringAsync());
                         return (IDocument)null;
                     })).ForEachDocument();
 
@@ -195,7 +195,7 @@ namespace Statiq.Core.Tests.Modules.Control
                 ForEachDocument gatherData = new ExecuteConfig(
                     Config.FromDocument(async d =>
                     {
-                        content.Add(await d.GetStringAsync());
+                        content.Add(await d.GetContentStringAsync());
                         return (IDocument)null;
                     })).ForEachDocument();
 

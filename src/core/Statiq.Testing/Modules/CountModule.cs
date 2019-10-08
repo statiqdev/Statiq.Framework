@@ -37,7 +37,7 @@ namespace Statiq.Testing
 
             foreach (IDocument input in inputs)
             {
-                string inputContent = await input.GetStringAsync();
+                string inputContent = await input.GetContentStringAsync();
                 InputCount++;
                 for (int c = 0; c < AdditionalOutputs + 1; c++)
                 {

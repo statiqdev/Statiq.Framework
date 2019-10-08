@@ -53,7 +53,7 @@ namespace Statiq.Json
                 JsonSerializer serializer = new JsonSerializer();
                 Dictionary<string, object> items = new Dictionary<string, object>();
                 ExpandoObject json;
-                using (TextReader contentReader = new StreamReader(input.GetStream()))
+                using (TextReader contentReader = new StreamReader(input.GetContentStream()))
                 {
                     using (JsonReader jsonReader = new JsonTextReader(contentReader))
                     {

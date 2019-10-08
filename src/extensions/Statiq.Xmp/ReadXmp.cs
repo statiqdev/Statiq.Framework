@@ -108,7 +108,7 @@ namespace Statiq.Xmp
             XmpDirectory xmpDirectory;
             try
             {
-                using (Stream stream = input.GetStream())
+                using (Stream stream = input.GetContentStream())
                 {
                     xmpDirectory = ImageMetadataReader.ReadMetadata(stream).OfType<XmpDirectory>().FirstOrDefault();
                 }

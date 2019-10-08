@@ -84,7 +84,7 @@ namespace Statiq.Core
             {
                 return input.Yield();
             }
-            string currentDocumentContent = await input.GetStringAsync();
+            string currentDocumentContent = await input.GetContentStringAsync();
             if (_contentFinder != null)
             {
                 string newDocumentContent = Regex.Replace(

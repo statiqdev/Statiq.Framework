@@ -28,7 +28,7 @@ Content2")
                 string frontMatterContent = null;
                 ExtractFrontMatter frontMatter = new ExtractFrontMatter(new ExecuteConfig(Config.FromDocument(async x =>
                 {
-                    frontMatterContent = await x.GetStringAsync();
+                    frontMatterContent = await x.GetContentStringAsync();
                     return new[] { x };
                 })));
 
@@ -43,7 +43,7 @@ FM2
 ", frontMatterContent);
                 Assert.AreEqual(
                     @"Content1
-Content2", await documents.First().GetStringAsync());
+Content2", await documents.First().GetContentStringAsync());
             }
 
             [Test]
@@ -64,7 +64,7 @@ Content2")
                 string frontMatterContent = null;
                 ExtractFrontMatter frontMatter = new ExtractFrontMatter(new ExecuteConfig(Config.FromDocument(async x =>
                 {
-                    frontMatterContent = await x.GetStringAsync();
+                    frontMatterContent = await x.GetContentStringAsync();
                     return new[] { x };
                 })));
 
@@ -81,7 +81,7 @@ Content2")
 FM2
 ---
 Content1
-Content2", await documents.First().GetStringAsync());
+Content2", await documents.First().GetContentStringAsync());
             }
 
             [Test]
@@ -101,7 +101,7 @@ Content2")
                 string frontMatterContent = null;
                 ExtractFrontMatter frontMatter = new ExtractFrontMatter(new ExecuteConfig(Config.FromDocument(async x =>
                 {
-                    frontMatterContent = await x.GetStringAsync();
+                    frontMatterContent = await x.GetContentStringAsync();
                     return new[] { x };
                 })));
 
@@ -117,7 +117,7 @@ FM2
 ", frontMatterContent);
                 Assert.AreEqual(
                     @"Content1
-Content2", await documents.First().GetStringAsync());
+Content2", await documents.First().GetContentStringAsync());
             }
 
             [Test]
@@ -151,7 +151,7 @@ Content2")
 FM2
 ---
 Content1
-Content2", await documents.First().GetStringAsync());
+Content2", await documents.First().GetContentStringAsync());
             }
 
             [Test]
@@ -170,7 +170,7 @@ Content2")
                 string frontMatterContent = null;
                 ExtractFrontMatter frontMatter = new ExtractFrontMatter("ABC", new ExecuteConfig(Config.FromDocument(async x =>
                 {
-                    frontMatterContent = await x.GetStringAsync();
+                    frontMatterContent = await x.GetContentStringAsync();
                     return new[] { x };
                 })));
 
@@ -185,7 +185,7 @@ FM2
 ", frontMatterContent);
                 Assert.AreEqual(
                     @"Content1
-Content2", await documents.First().GetStringAsync());
+Content2", await documents.First().GetContentStringAsync());
             }
 
             [Test]
@@ -204,7 +204,7 @@ Content2")
                 string frontMatterContent = null;
                 ExtractFrontMatter frontMatter = new ExtractFrontMatter('!', new ExecuteConfig(Config.FromDocument(async x =>
                 {
-                    frontMatterContent = await x.GetStringAsync();
+                    frontMatterContent = await x.GetContentStringAsync();
                     return new[] { x };
                 })));
 
@@ -219,7 +219,7 @@ FM2
 ", frontMatterContent);
                 Assert.AreEqual(
                     @"Content1
-Content2", await documents.First().GetStringAsync());
+Content2", await documents.First().GetContentStringAsync());
             }
 
             [Test]
@@ -238,7 +238,7 @@ Content2")
                 string frontMatterContent = null;
                 ExtractFrontMatter frontMatter = new ExtractFrontMatter('!', new ExecuteConfig(Config.FromDocument(async x =>
                 {
-                    frontMatterContent = await x.GetStringAsync();
+                    frontMatterContent = await x.GetContentStringAsync();
                     return new[] { x };
                 })));
 
@@ -253,7 +253,7 @@ FM2
 ", frontMatterContent);
                 Assert.AreEqual(
                     @"Content1
-Content2", await documents.First().GetStringAsync());
+Content2", await documents.First().GetContentStringAsync());
             }
 
             [Test]
@@ -287,7 +287,7 @@ Content2")
 FM2
   !!!!
 Content1
-Content2", await documents.First().GetStringAsync());
+Content2", await documents.First().GetContentStringAsync());
             }
 
             [Test]
@@ -308,7 +308,7 @@ Content2")
                 string frontMatterContent = null;
                 ExtractFrontMatter frontMatter = new ExtractFrontMatter('!', new ExecuteConfig(Config.FromDocument(async x =>
                 {
-                    frontMatterContent = await x.GetStringAsync();
+                    frontMatterContent = await x.GetContentStringAsync();
                     return new[] { x };
                 })));
 
@@ -325,7 +325,7 @@ FM2
                 Assert.AreEqual(
                     @"
 Content1
-Content2", await documents.First().GetStringAsync());
+Content2", await documents.First().GetContentStringAsync());
             }
 
             [Test]
@@ -344,7 +344,7 @@ Content2")
                 string frontMatterContent = null;
                 ExtractFrontMatter frontMatter = new ExtractFrontMatter('!', new ExecuteConfig(Config.FromDocument(async x =>
                 {
-                    frontMatterContent = await x.GetStringAsync();
+                    frontMatterContent = await x.GetContentStringAsync();
                     return new[] { x };
                 })));
 
@@ -359,7 +359,7 @@ FM2
 ", frontMatterContent);
                 Assert.AreEqual(
                     @"Content1
-Content2", await documents.First().GetStringAsync());
+Content2", await documents.First().GetContentStringAsync());
             }
 
             [Test]
@@ -379,7 +379,7 @@ YY")
                 string frontMatterContent = string.Empty;
                 ExtractFrontMatter frontMatter = new ExtractFrontMatter(new ExecuteConfig(Config.FromDocument(async x =>
                 {
-                    frontMatterContent += await x.GetStringAsync();
+                    frontMatterContent += await x.GetContentStringAsync();
                     return new[] { x };
                 })));
 
@@ -392,8 +392,8 @@ YY")
                     @"AA
 BB
 ", frontMatterContent);
-                Assert.AreEqual("XX", await documents.First().GetStringAsync());
-                Assert.AreEqual("YY", await documents.Skip(1).First().GetStringAsync());
+                Assert.AreEqual("XX", await documents.First().GetContentStringAsync());
+                Assert.AreEqual("YY", await documents.Skip(1).First().GetContentStringAsync());
             }
 
             [Test]
@@ -413,7 +413,7 @@ Content2")
                 string frontMatterContent = null;
                 ExtractFrontMatter frontMatter = new ExtractFrontMatter(new ExecuteConfig(Config.FromDocument(async x =>
                 {
-                    frontMatterContent = await x.GetStringAsync();
+                    frontMatterContent = await x.GetContentStringAsync();
                     return new[] { x };
                 })));
 
@@ -428,7 +428,7 @@ FM2
 ", frontMatterContent);
                 Assert.AreEqual(
                     @"Content1
-Content2", await documents.First().GetStringAsync());
+Content2", await documents.First().GetContentStringAsync());
             }
 
             [Test]
@@ -448,7 +448,7 @@ Content2")
                 string frontMatterContent = null;
                 ExtractFrontMatter frontMatter = new ExtractFrontMatter(new ExecuteConfig(Config.FromDocument(async x =>
                 {
-                    frontMatterContent = await x.GetStringAsync();
+                    frontMatterContent = await x.GetContentStringAsync();
                     return new[] { x };
                 }))).IgnoreDelimiterOnFirstLine(false);
 
@@ -463,7 +463,7 @@ Content2")
 FM2
 ---
 Content1
-Content2", await documents.First().GetStringAsync());
+Content2", await documents.First().GetContentStringAsync());
             }
         }
     }

@@ -28,7 +28,7 @@ namespace Statiq.Core.Tests.Modules.Control
                     {
                         List<string> pageContent = await d.GetChildren()
                             .ToAsyncEnumerable()
-                            .SelectAwait(async x => await x.GetStringAsync())
+                            .SelectAwait(async x => await x.GetContentStringAsync())
                             .ToListAsync();
                         content.Add(pageContent);
                     })).ForEachDocument();

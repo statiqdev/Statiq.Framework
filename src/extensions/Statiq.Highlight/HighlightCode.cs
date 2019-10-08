@@ -95,7 +95,7 @@ namespace Statiq.Highlight
                 {
                     try
                     {
-                        using (Stream stream = input.GetStream())
+                        using (Stream stream = input.GetContentStream())
                         {
                             using (IHtmlDocument htmlDocument = await parser.ParseAsync(stream))
                             {

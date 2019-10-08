@@ -257,7 +257,7 @@ namespace Statiq.Common
         public virtual async Task<int> GetCacheHashCodeAsync()
         {
             HashCode hash = default;
-            using (Stream stream = ((IDocument)this).GetStream())
+            using (Stream stream = ((IDocument)this).GetContentStream())
             {
                 hash.Add(await Crc32.CalculateAsync(stream));
             }

@@ -135,7 +135,7 @@ namespace Statiq.Sass
                 context.LogWarning($"No input path found for document {input.ToSafeDisplayString()}, using {inputPath.FileName.FullPath}");
             }
 
-            string content = await input.GetStringAsync();
+            string content = await input.GetContentStringAsync();
 
             // Sass conversion
             FileImporter importer = new FileImporter(context.FileSystem, _importPathFunc);

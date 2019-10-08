@@ -25,7 +25,7 @@ namespace Statiq.Core.Tests.Modules.Control
                 string lodedSidecarContent = null;
                 ProcessSidecarFile sidecar = new ProcessSidecarFile(new ExecuteConfig(Config.FromDocument(async x =>
                 {
-                    lodedSidecarContent = await x.GetStringAsync();
+                    lodedSidecarContent = await x.GetContentStringAsync();
                     return new[] { x };
                 })));
 
@@ -50,7 +50,7 @@ namespace Statiq.Core.Tests.Modules.Control
                 string lodedSidecarContent = null;
                 ProcessSidecarFile sidecar = new ProcessSidecarFile(".other", new ExecuteConfig(Config.FromDocument(async x =>
                 {
-                    lodedSidecarContent = await x.GetStringAsync();
+                    lodedSidecarContent = await x.GetContentStringAsync();
                     return new[] { x };
                 })));
 

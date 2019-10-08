@@ -38,7 +38,7 @@ namespace Statiq.Common
             {
                 throw new FileNotFoundException();
             }
-            return _document.GetStream();
+            return _document.GetContentStream();
         }
 
         public async Task<string> ReadAllTextAsync()
@@ -47,7 +47,7 @@ namespace Statiq.Common
             {
                 throw new FileNotFoundException();
             }
-            return await _document.GetStringAsync();
+            return await _document.GetContentStringAsync();
         }
 
         public long Length
@@ -58,7 +58,7 @@ namespace Statiq.Common
                 {
                     throw new FileNotFoundException();
                 }
-                using (Stream stream = _document.GetStream())
+                using (Stream stream = _document.GetContentStream())
                 {
                     return stream.Length;
                 }

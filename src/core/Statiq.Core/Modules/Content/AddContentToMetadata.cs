@@ -48,8 +48,8 @@ namespace Statiq.Core
             }
 
             object content = childOutputs.Length == 1
-                ? (object)await childOutputs[0].GetStringAsync()
-                : await childOutputs.ToAsyncEnumerable().SelectAwait(async x => await x.GetStringAsync()).ToArrayAsync();
+                ? (object)await childOutputs[0].GetContentStringAsync()
+                : await childOutputs.ToAsyncEnumerable().SelectAwait(async x => await x.GetContentStringAsync()).ToArrayAsync();
 
             return context.Inputs.Select(input => input.Clone(new MetadataItems { { _key, content } }));
         }

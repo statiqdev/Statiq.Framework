@@ -95,7 +95,7 @@ namespace Statiq.Aws
                         if (_bodyField != null)
                         {
                             writer.WritePropertyName(_bodyField);
-                            writer.WriteValue(await input.GetStringAsync());
+                            writer.WriteValue(await input.GetContentStringAsync());
                         }
 
                         foreach (Field field in _fields)

@@ -127,7 +127,7 @@ namespace Statiq.Core
             IFile outputFile = context.FileSystem.GetOutputFile(outputPath);
             if (outputFile != null)
             {
-                using (Stream inputStream = input.GetStream())
+                using (Stream inputStream = input.GetContentStream())
                 {
                     if (_ignoreEmptyContent && inputStream.Length == 0)
                     {

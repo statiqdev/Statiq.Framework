@@ -17,8 +17,8 @@ namespace Statiq.CodeAnalysis
         {
             // Get the assembly
             byte[] assembly = input.GetBool(CompileScript.CompiledKey)
-                ? await input.GetBytesAsync()
-                : ScriptHelper.Compile(await input.GetStringAsync(), input, context);
+                ? await input.GetContentBytesAsync()
+                : ScriptHelper.Compile(await input.GetContentStringAsync(), input, context);
 
             // Evaluate the script
             object value = await ScriptHelper.EvaluateAsync(assembly, input, context);

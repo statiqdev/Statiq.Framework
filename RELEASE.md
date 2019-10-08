@@ -1,7 +1,10 @@
 # 1.0.0-alpha.8
 
-- Adds `==` overloads to `NormalizedPath`
+- Adds `==` overloads to `NormalizedPath`.
 - Adds a special `RenderSection()` to `StatiqRazorPage` that renders default content if the section is not defined.
+- Renamed `IDocument.GetStream()` to `IDocument.GetContentStream()`.
+- Renamed `IDocument.GetStringAsync()` to `IDocument.GetContentStringAsync()`.
+- Renamed `IDocument.GetBytesAsync()` to `IDocument.GetContentBytesAsync()`.
 
 # 1.0.0-alpha.7
 

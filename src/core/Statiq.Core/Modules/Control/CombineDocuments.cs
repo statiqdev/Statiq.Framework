@@ -28,7 +28,7 @@ namespace Statiq.Core
                     ? input
                     : result.Clone(
                         input,
-                        await context.GetContentProviderAsync(await result.GetStringAsync() + await input.GetStringAsync()));
+                        await context.GetContentProviderAsync(await result.GetContentStringAsync() + await input.GetContentStringAsync()));
             }
             return result.Yield();
         }

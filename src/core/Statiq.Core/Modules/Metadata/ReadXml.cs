@@ -93,7 +93,7 @@ namespace Statiq.Core
                 return context.Inputs.AsParallel().SelectMany(input =>
                 {
                     XmlDocument inputDoc = new XmlDocument();
-                    using (Stream stream = input.GetStream())
+                    using (Stream stream = input.GetContentStream())
                     {
                         inputDoc.Load(stream);
                     }

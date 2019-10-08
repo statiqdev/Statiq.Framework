@@ -156,7 +156,7 @@ namespace Statiq.Razor
 
                 using (Stream contentStream = await context.GetContentStreamAsync())
                 {
-                    using (Stream inputStream = input.GetStream())
+                    using (Stream inputStream = input.GetContentStream())
                     {
                         FilePath viewStartLocationPath = _viewStartPath == null ? null : await _viewStartPath.GetValueAsync(input, context);
                         string layoutPath = _layoutPath == null ? null : (await _layoutPath.GetValueAsync(input, context))?.FullPath;

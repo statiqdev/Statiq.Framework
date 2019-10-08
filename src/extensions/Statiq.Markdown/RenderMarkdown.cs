@@ -182,7 +182,7 @@ namespace Statiq.Markdown
             string content;
             if (string.IsNullOrEmpty(_sourceKey))
             {
-                content = await input.GetStringAsync();
+                content = await input.GetContentStringAsync();
             }
             else if (input.ContainsKey(_sourceKey))
             {
