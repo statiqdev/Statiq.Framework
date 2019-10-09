@@ -5,6 +5,7 @@
 - Renamed `IDocument.GetStream()` to `IDocument.GetContentStream()`.
 - Renamed `IDocument.GetStringAsync()` to `IDocument.GetContentStringAsync()`.
 - Renamed `IDocument.GetBytesAsync()` to `IDocument.GetContentBytesAsync()`.
+- Added `IEngine.SerialExecution` and `--serial` CLI argument to run pipelines and modules in serial (#58).
 
 # 1.0.0-alpha.7
 

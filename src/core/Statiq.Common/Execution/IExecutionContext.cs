@@ -78,6 +78,11 @@ namespace Statiq.Common
         IReadOnlyApplicationState ApplicationState { get; }
 
         /// <summary>
+        ///  Indicates that the engine is executing pipeline phases and modules in serial.
+        /// </summary>
+        bool SerialExecution { get; }
+
+        /// <summary>
         /// Gets a cancellation token that will be canceled when processing should stop.
         /// Modules should check this token and pass it on whenever possible.
         /// </summary>

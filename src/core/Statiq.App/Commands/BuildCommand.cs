@@ -44,6 +44,10 @@ namespace Statiq.App
             [Description("Executes default pipelines in addition to the ones specified.")]
             public bool DefaultPipelines { get; set; }
 
+            [CommandOption("--serial")]
+            [Description("Executes pipeline phases and modules in serial.")]
+            public bool SerialExecution { get; set; }
+
             [CommandArgument(0, "[root]")]
             [Description("The root folder to use.")]
             public string RootPath { get; set; }

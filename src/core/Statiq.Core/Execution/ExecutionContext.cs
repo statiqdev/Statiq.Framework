@@ -58,6 +58,9 @@ namespace Statiq.Core
         public IReadOnlyApplicationState ApplicationState => _contextData.Engine.ApplicationState;
 
         /// <inheritdoc/>
+        public bool SerialExecution => _contextData.Engine.SerialExecution;
+
+        /// <inheritdoc/>
         public IMemoryStreamFactory MemoryStreamFactory => _contextData.Engine.MemoryStreamFactory;
 
         /// <inheritdoc/>

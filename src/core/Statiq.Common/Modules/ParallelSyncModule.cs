@@ -24,7 +24,7 @@ namespace Statiq.Common
 
         private IEnumerable<IDocument> ExecuteInput(IExecutionContext context)
         {
-            if (Parallel)
+            if (Parallel && !context.SerialExecution)
             {
                 return context.Inputs
                     .AsParallel()

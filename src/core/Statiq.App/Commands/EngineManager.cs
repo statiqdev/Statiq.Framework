@@ -118,6 +118,12 @@ namespace Statiq.App
                 engine.Settings[Keys.UseCache] = false;
             }
 
+            // Set serial mode
+            if (commandSettings.SerialExecution)
+            {
+                engine.SerialExecution = true;
+            }
+
             // Add settings
             if (commandSettings.MetadataSettings?.Length > 0)
             {

@@ -62,6 +62,14 @@ namespace Statiq.Common
         IMemoryStreamFactory MemoryStreamFactory { get; }
 
         /// <summary>
+        /// Executes pipeline phases and modules in serial.
+        /// </summary>
+        /// <remarks>
+        /// Setting this to <c>true</c> will disable most (but not all) concurrency and is useful for debugging.
+        /// </remarks>
+        bool SerialExecution { get; set; }
+
+        /// <summary>
         /// Sets the default document type produced by this engine (and resulting <see cref="IExecutionContext"/> contexts).
         /// </summary>
         /// <remarks>

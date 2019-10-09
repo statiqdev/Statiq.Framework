@@ -84,7 +84,7 @@ namespace Statiq.Common
                 ImmutableDictionary<string, object> configValues = configValuesBuilder.ToImmutable();
 
                 // Parallel
-                if (Parallel)
+                if (Parallel && !context.SerialExecution)
                 {
                     return await context.Inputs.ParallelSelectManyAsync(
                         async input =>

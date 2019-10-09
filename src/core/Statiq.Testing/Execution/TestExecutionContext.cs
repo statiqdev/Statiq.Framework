@@ -96,6 +96,9 @@ namespace Statiq.Testing
         public IReadOnlyApplicationState ApplicationState { get; set; }
 
         /// <inheritdoc/>
+        public bool SerialExecution { get; set; }
+
+        /// <inheritdoc/>
         IReadOnlySettings IExecutionContext.Settings => Settings;
 
         /// <inheritdoc/>

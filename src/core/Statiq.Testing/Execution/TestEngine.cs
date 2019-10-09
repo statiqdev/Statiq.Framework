@@ -49,6 +49,9 @@ namespace Statiq.Testing
         /// <inheritdoc />
         public IRawAssemblyCollection DynamicAssemblies { get; set; } = new TestRawAssemblyCollection();
 
+        /// <inheritdoc />
+        public bool SerialExecution { get; set; }
+
         private readonly DocumentFactory _documentFactory;
 
         /// <inheritdoc />

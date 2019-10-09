@@ -146,6 +146,9 @@ namespace Statiq.Core
         /// <inheritdoc />
         public IMemoryStreamFactory MemoryStreamFactory { get; } = new MemoryStreamFactory();
 
+        /// <inheritdoc />
+        public bool SerialExecution { get; set; }
+
         internal DocumentFactory DocumentFactory { get; }
 
         internal void ResetPipelinePhases() => _phases = null;
@@ -512,7 +515,13 @@ namespace Statiq.Core
             Dictionary<PipelinePhase, Task> phaseTasks = new Dictionary<PipelinePhase, Task>();
             foreach (PipelinePhase phase in _phases.Where(x => executingPipelines.Contains(x.PipelineName)))
             {
-                phaseTasks.Add(phase, GetPhaseTaskAsync(executionId, phaseResults, phaseTasks, phase, cancellationTokenSource));
+                Task phaseTask = GetPhaseTaskAsync(executionId, phaseResults, phaseTasks, phase, cancellationTokenSource);
+                if (SerialExecution)
+                {
+                    // If we're running serially, immediately wait for this phase task before getting the next one
+                    phaseTask.Wait(cancellationTokenSource.Token);
+                }
+                phaseTasks.Add(phase, phaseTask);
             }
             return phaseTasks.Values.ToArray();
         }
