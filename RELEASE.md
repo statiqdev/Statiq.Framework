@@ -1,3 +1,7 @@
+# 1.0.0-alpha.9
+
+- Changes `Module.AfterExecution()` and `Module.AfterExecutionAsync()` to pass a new `ExecutionOutputs` class instead of by ref (which doesn't work with async).
+
 # 1.0.0-alpha.8
 
 - Adds `==` overloads to `NormalizedPath`.

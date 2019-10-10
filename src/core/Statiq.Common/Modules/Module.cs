@@ -24,9 +24,10 @@ namespace Statiq.Common
             try
             {
                 IEnumerable<IDocument> outputs = await ExecuteContextAsync(context);
-                AfterExecution(context, ref outputs);
-                await AfterExecutionAsync(context, ref outputs);
-                return outputs;
+                ExecutionOutputs executionOutputs = new ExecutionOutputs(outputs);
+                AfterExecution(context, executionOutputs);
+                await AfterExecutionAsync(context, executionOutputs);
+                return executionOutputs.Outputs;
             }
             finally
             {
@@ -65,9 +66,9 @@ namespace Statiq.Common
         /// </remarks>
         /// <param name="context">The execution context.</param>
         /// <param name="outputs">
-        /// The module outputs which can be modified by changing the reference.
+        /// The module outputs which can be modified by changing the <see cref="ExecutionOutputs.Outputs"/> property.
         /// </param>
-        protected virtual Task AfterExecutionAsync(IExecutionContext context, ref IEnumerable<IDocument> outputs) => Task.CompletedTask;
+        protected virtual Task AfterExecutionAsync(IExecutionContext context, ExecutionOutputs outputs) => Task.CompletedTask;
 
         /// <summary>
         /// Called after each module execution.
@@ -79,9 +80,9 @@ namespace Statiq.Common
         /// </remarks>
         /// <param name="context">The execution context.</param>
         /// <param name="outputs">
-        /// The module outputs which can be modified by changing the reference.
+        /// The module outputs which can be modified by changing the <see cref="ExecutionOutputs.Outputs"/> property.
         /// </param>
-        protected virtual void AfterExecution(IExecutionContext context, ref IEnumerable<IDocument> outputs)
+        protected virtual void AfterExecution(IExecutionContext context, ExecutionOutputs outputs)
         {
         }
 

@@ -163,16 +163,16 @@ namespace Statiq.Common.Tests.Modules
                 return Task.CompletedTask;
             }
 
-            protected override void AfterExecution(IExecutionContext context, ref IEnumerable<IDocument> outputs)
+            protected override void AfterExecution(IExecutionContext context, ExecutionOutputs outputs)
             {
                 AfterExecutionCount++;
                 if (_afterExecutionOutputs != null)
                 {
-                    outputs = _afterExecutionOutputs;
+                    outputs.Outputs = _afterExecutionOutputs;
                 }
             }
 
-            protected override Task AfterExecutionAsync(IExecutionContext context, ref IEnumerable<IDocument> outputs)
+            protected override Task AfterExecutionAsync(IExecutionContext context, ExecutionOutputs outputs)
             {
                 AfterExecutionAsyncCount++;
                 return Task.CompletedTask;

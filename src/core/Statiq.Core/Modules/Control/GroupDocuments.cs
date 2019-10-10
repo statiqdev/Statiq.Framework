@@ -31,7 +31,7 @@ namespace Statiq.Core
         /// Partitions the input documents into groups with matching keys
         /// based on the key delegate.
         /// </summary>
-        /// <param name="groupKeys">A delegate that returns the group key(s).</param>
+        /// <param name="groupKeys">A delegate that returns group key(s) (multiple keys can be returned for each document and they'll be aggregated).</param>
         public GroupDocuments(Config<IEnumerable<object>> groupKeys)
         {
             _key = groupKeys ?? throw new ArgumentNullException(nameof(groupKeys));
