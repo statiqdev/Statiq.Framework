@@ -46,14 +46,36 @@ public class Program
 
 More exhaustive code samples and examples will be provided soon.
 
+### About Pipelines and Phases
+
+Pipelines define the work to be done by the engine and contain a sequence of modules that operate on documents. A pipeline has four phases, any of which can contain modules (or not). While the phases serve as a useful organizational tool, they also have a practical purpose with regard to how pipelines manage concurrency. The outputs from the last module of a particular phase are used as the inputs to the first module of the next phase. Pipeline phases follow rules for when each executes (described below) but will execute as soon as possible within those rules. In other words, the engine doesn't run one phase for all the pipelines and then wait to run the next phase for all the pipelines (except for the transform phase which does wait for all process phases to complete).
+
+The four phases are:
+
+- **Input** is generally used for fetching data from an outside source and creating documents from it. For example, the file system, a database, a web API, etc. The input phase is immediatly started for all pipelines concurrently and cannot access outputs from other pipelines.
+- **Process** is where documents are manipulated and most of the pipeline logic should go. For simple pipelines, all modules can be placed in the process phase. Process phases for each pipeline are executed in dependency order (and currently when possible) and a process phase can access output documents from the process phase(s) of other _dependent pipelines_.
+- **Transform** contains modules that apply templates or otherwise render the output documents from the process phase into something that should be output. The transform phase for each pipeline is only executed after all process phases have finished and therefore has access to the process phase outputs from _all pipelines_.
+- **Output** is used for modules that output the finished documents somewhere (usually to disk, but could also be to a database, web service, etc.). A pipeline's output phase is executed immediatly following it's transform phase.
+
+A pipeline can also follow one of three execution policies that defines if that pipeline is executed:
+
+- **Default** means that the pipeline is executed unless other pipelines are explicitly specifed on the command line or when running the engine. A default pipeline will also be executed if it's the dependent of an executing pipeline. This policy is the most common and should be used for most pipelines.
+- **Manual** means that the pipeline is only executed if explicity specified on the command line or when running the engine. A manual pipeline will also be executed if it's the dependent of an executing pipeline. This policy is useful for specialized pipelines that should only be executed on-demand and are not part of the normal generation process.
+- **Always** means that the pipeline should always execute regardless of what pipelines are explicitly specified (if any). Pipelines with an always policy are useful for housekeeping and other tasks that should be carried out no matter what.
+
+Finally, pipelines can also have a couple additional modifiers:
+
+- **Isolated** pipelines are executed independant of any other pipelines and cannot have dependencies or be dependant. The outputs from isolated pipelines are also not available to other pipelines regardless of phase. This allows an isolated pipeline to execute immediatly and to begin each phase as soon as the previous one finishes without waiting on other pipelines. This is useful for pipelines that you know will not have any dependencies or be dependent, for example processing Sass files.
+- **Deployment** pipelines work like normal pipelines except their output phase is only executed after all other output phases. This allows them to access the final results of other pipelines in order to do things like upload to a server. Generally a deployment pipeline will also have a manual execution policy so that deployment only happens when specified (as opposed to every execution).
+
 ### Defining Pipelines and Adding Modules
 
 Pipelines can be defined in several different ways depending on your requirements and style preferences.
 
 TODO: Clean up this section, loose thoughts below
 
-- Through the builder
-- By creating a `Pipeline` class
+- Through the builder fluent API
+- By creating a `Pipeline` class, which are automatically discovered in the entry assembly
 - Adding modules using a fluent API in pipeline constructor
 - Adding modules using collection initialization
 - Adding child modules using collection initialization
@@ -80,6 +102,8 @@ If the out-of-the-box modules don't satisfy your use case, it's easy to customiz
   - You may not even need a new module. The `ExecuteConfig` module lets you specify a delegate that can return documents, content, and other types of data which will be converted to output documents as appropriate.
 - Use base classes:
   - Even though implementing the `IModule` interface is the only requirement, strongly consider using one of the many base module classes like `Module` or `SyncModule`.
+  - Most of the module base classes (there are many in order to satisfy different use cases) have both an `ExecuteContext` virtual method and an `ExecuteInput` virtual method. Overload the `ExecuteContext` method to have your code called once for all the inputs (available via `IExecutionContext.Inputs`). This is useful for modules that need to create new documents from scratch or that need to aggregate or operate on the input documents as a set. Overload the `ExecuteInput` method to have you code called once per document. This is useful when the module transforms or manipulates documents unrelated to each other.
+  - Many existing modules are derived from `ParallelModule` and similar base module classes and implement `IParallelModule`. You can also derive from these base parallel module classes. Note the "parallel" in this context refers to processing input documents in parallel within the module, not how the module is executed in relation to other modules (see the discussion about regarding phases which is what controls when modules are run in relation to each other).
 - Use `Config<T>`:
   - If your module needs to accept user-configurable values, use `Config<T>`.
   - Consider using one of the base module classes that deals with `Config<T>` like `ConfigModule` or `MultiConfigModule`.
