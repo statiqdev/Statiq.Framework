@@ -268,8 +268,10 @@ namespace Statiq.Core
             PipelineOutputs outputs = new PipelineOutputs(phaseResults);
 
             // Create the pipeline phases (this also validates the pipeline graph)
+            // Also add the service-based pipelines as late as possible so other services have been configured
             if (_phases == null)
             {
+                AddServicePipelines();
                 _phases = GetPipelinePhases(_pipelines, _logger);
             }
 
@@ -403,6 +405,17 @@ namespace Statiq.Core
             }
 
             return executing;
+        }
+
+        /// <summary>
+        /// Adds pipelines from the DI container to the pipeline collection.
+        /// </summary>
+        private void AddServicePipelines()
+        {
+            foreach (IPipeline pipeline in Services.GetServices<IPipeline>())
+            {
+                Pipelines.Add(pipeline);
+            }
         }
 
         // The result array is sorted based on dependencies

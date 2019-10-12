@@ -1,5 +1,7 @@
 # 1.0.0-alpha.9
 
+- Lazily creates type-based pipelines using the DI container so they can have injected services (#59)
+- Adds `INamedPipeline` to allow pipeline instances to provide names.
 - Changes `Module.AfterExecution()` and `Module.AfterExecutionAsync()` to pass a new `ExecutionOutputs` class instead of by ref (which doesn't work with async).
 - Some tweaks to the `MirrorResources` retry policy.
 

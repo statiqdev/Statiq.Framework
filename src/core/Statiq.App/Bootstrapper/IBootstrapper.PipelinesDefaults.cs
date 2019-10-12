@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using Microsoft.Extensions.DependencyInjection;
 using Statiq.Common;
 
 namespace Statiq.App
@@ -32,28 +33,28 @@ namespace Statiq.App
         public IBootstrapper AddPipeline(Func<IReadOnlySettings, IPipeline> pipelineFunc) =>
             ConfigureEngine(x => x.Pipelines.Add(pipelineFunc(x.Settings)));
 
-        public IBootstrapper AddPipeline(Type pipelineType, string name) =>
-            ConfigureEngine(x => x.Pipelines.Add(pipelineType, name));
-
-        public IBootstrapper AddPipeline(Type pipelineType) =>
-            ConfigureEngine(x => x.Pipelines.Add(pipelineType));
-
-        public IBootstrapper AddPipeline<TPipeline>(string name)
-            where TPipeline : IPipeline =>
-            ConfigureEngine(x => x.Pipelines.Add<TPipeline>(name));
+        public IBootstrapper AddPipeline(Type pipelineType)
+        {
+            _ = pipelineType ?? throw new ArgumentNullException(nameof(pipelineType));
+            if (!typeof(IPipeline).IsAssignableFrom(pipelineType))
+            {
+                throw new ArgumentException("Provided type is not a pipeline");
+            }
+            return ConfigureServices(x => x.AddSingleton(typeof(IPipeline), pipelineType));
+        }
 
         public IBootstrapper AddPipeline<TPipeline>()
             where TPipeline : IPipeline =>
-            ConfigureEngine(x => x.Pipelines.Add<TPipeline>());
+            ConfigureServices(x => x.AddSingleton(typeof(IPipeline), typeof(TPipeline)));
 
         public IBootstrapper AddPipelines(Assembly assembly)
         {
             _ = assembly ?? throw new ArgumentNullException(nameof(assembly));
-            return ConfigureEngine(engine =>
+            return ConfigureServices(x =>
             {
                 foreach (Type pipelineType in ClassCatalog.GetTypesAssignableTo<IPipeline>().Where(x => x.Assembly.Equals(assembly)))
                 {
-                    engine.Pipelines.Add(pipelineType);
+                    x.AddSingleton(typeof(IPipeline), pipelineType);
                 }
             });
         }
