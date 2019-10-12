@@ -159,7 +159,11 @@ namespace Statiq.Html
                 AsyncRetryPolicy<HttpResponseMessage> retryPolicy = Policy
                     .Handle<HttpRequestException>()
                     .OrResult<HttpResponseMessage>(r => r.StatusCode == TooManyRequests)
-                    .WaitAndRetryAsync(MaxAbsoluteLinkRetry, attempt => TimeSpan.FromSeconds(0.1 * Math.Pow(2, attempt)));
+                    .WaitAndRetryAsync(MaxAbsoluteLinkRetry, attempt =>
+                    {
+                        context.LogDebug($"Retry {attempt}");
+                        return TimeSpan.FromSeconds(0.5 * Math.Pow(2, attempt));
+                    });
                 HttpResponseMessage response = await retryPolicy.ExecuteAsync(async () =>
                 {
                     using (HttpClient httpClient = context.CreateHttpClient())

@@ -1,6 +1,7 @@
 # 1.0.0-alpha.9
 
 - Changes `Module.AfterExecution()` and `Module.AfterExecutionAsync()` to pass a new `ExecutionOutputs` class instead of by ref (which doesn't work with async).
+- Some tweaks to the `MirrorResources` retry policy.
 
 # 1.0.0-alpha.8
 
