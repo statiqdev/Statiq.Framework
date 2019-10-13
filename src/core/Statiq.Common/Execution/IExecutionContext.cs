@@ -5,6 +5,7 @@ using System.IO;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 
 namespace Statiq.Common
@@ -61,6 +62,11 @@ namespace Statiq.Common
         /// Gets the current settings metadata.
         /// </summary>
         IReadOnlySettings Settings { get; }
+
+        /// <summary>
+        /// The application configuration.
+        /// </summary>
+        IConfiguration Configuration { get; }
 
         /// <summary>
         /// Gets the available shortcodes.

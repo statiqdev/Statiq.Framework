@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Statiq.Common;
@@ -86,7 +87,13 @@ namespace Statiq.Core
                 IServiceScopeFactory serviceScopeFactory = engine.Services.GetRequiredService<IServiceScopeFactory>();
                 using (IServiceScope serviceScope = serviceScopeFactory.CreateScope())
                 {
-                    ExecutionContextData contextData = new ExecutionContextData(this, engine, executionId, phaseResults, serviceScope.ServiceProvider, cancellationTokenSource.Token);
+                    ExecutionContextData contextData = new ExecutionContextData(
+                        this,
+                        engine,
+                        executionId,
+                        phaseResults,
+                        serviceScope.ServiceProvider,
+                        cancellationTokenSource.Token);
                     Outputs = await Engine.ExecuteModulesAsync(contextData, null, _modules, inputs, _logger);
                     stopwatch.Stop();
                     _logger.LogInformation($"{PipelineName}/{Phase} » Finished {PipelineName} {Phase} phase execution ({Outputs.Length} output document(s), {stopwatch.ElapsedMilliseconds} ms)");

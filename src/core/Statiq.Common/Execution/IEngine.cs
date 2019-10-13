@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 
 namespace Statiq.Common
@@ -14,6 +15,11 @@ namespace Statiq.Common
         /// Gets the state of the application when it was run.
         /// </summary>
         ApplicationState ApplicationState { get; }
+
+        /// <summary>
+        /// The application configuration.
+        /// </summary>
+        IConfiguration Configuration { get; }
 
         /// <summary>
         /// Gets global events and event handlers.

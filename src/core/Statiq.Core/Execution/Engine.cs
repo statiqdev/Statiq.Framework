@@ -7,6 +7,7 @@ using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 using JavaScriptEngineSwitcher.Core;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Logging;
@@ -103,6 +104,7 @@ namespace Statiq.Core
             serviceCollection ??= new ServiceCollection();
 
             serviceCollection.AddLogging();
+            serviceCollection.AddOptions();
             serviceCollection.AddSingleton<ApplicationState>(ApplicationState);
             serviceCollection.AddSingleton<IReadOnlyEventCollection>(Events);
             serviceCollection.AddSingleton<IReadOnlyFileSystem>(FileSystem);
@@ -121,6 +123,9 @@ namespace Statiq.Core
 
         /// <inheritdoc />
         public ApplicationState ApplicationState { get; }
+
+        /// <inheritdoc />
+        public IConfiguration Configuration { get; } todo pass in or build
 
         /// <inheritdoc />
         public IEventCollection Events { get; } = new EventCollection();
@@ -528,7 +533,12 @@ namespace Statiq.Core
             Dictionary<PipelinePhase, Task> phaseTasks = new Dictionary<PipelinePhase, Task>();
             foreach (PipelinePhase phase in _phases.Where(x => executingPipelines.Contains(x.PipelineName)))
             {
-                Task phaseTask = GetPhaseTaskAsync(executionId, phaseResults, phaseTasks, phase, cancellationTokenSource);
+                Task phaseTask = GetPhaseTaskAsync(
+                    executionId,
+                    phaseResults,
+                    phaseTasks,
+                    phase,
+                    cancellationTokenSource);
                 if (SerialExecution)
                 {
                     // If we're running serially, immediately wait for this phase task before getting the next one
@@ -549,7 +559,9 @@ namespace Statiq.Core
             if (phase.Dependencies.Length == 0)
             {
                 // This will immediately queue the input phase while we continue figuring out tasks, but that's okay
-                return Task.Run(() => phase.ExecuteAsync(this, executionId, phaseResults, cancellationTokenSource), cancellationTokenSource.Token);
+                return Task.Run(
+                    () => phase.ExecuteAsync(this, executionId, phaseResults, cancellationTokenSource),
+                    cancellationTokenSource.Token);
             }
 
             // We have to explicitly wait the execution task in the continuation function
@@ -561,7 +573,9 @@ namespace Statiq.Core
                     // Only run the dependent task if all the dependencies successfully completed
                     if (dependencies.All(x => x.IsCompletedSuccessfully))
                     {
-                        Task.WaitAll(new Task[] { phase.ExecuteAsync(this, executionId, phaseResults, cancellationTokenSource) }, cancellationTokenSource.Token);
+                        Task.WaitAll(
+                            new Task[] { phase.ExecuteAsync(this, executionId, phaseResults, cancellationTokenSource) },
+                            cancellationTokenSource.Token);
                     }
                     else
                     {
@@ -574,7 +588,12 @@ namespace Statiq.Core
         }
 
         // This executes the specified modules with the specified input documents
-        internal static async Task<ImmutableArray<IDocument>> ExecuteModulesAsync(ExecutionContextData contextData, IExecutionContext parent, IEnumerable<IModule> modules, ImmutableArray<IDocument> inputs, ILogger logger)
+        internal static async Task<ImmutableArray<IDocument>> ExecuteModulesAsync(
+            ExecutionContextData contextData,
+            IExecutionContext parent,
+            IEnumerable<IModule> modules,
+            ImmutableArray<IDocument> inputs,
+            ILogger logger)
         {
             ImmutableArray<IDocument> outputs = ImmutableArray<IDocument>.Empty;
             if (modules != null)

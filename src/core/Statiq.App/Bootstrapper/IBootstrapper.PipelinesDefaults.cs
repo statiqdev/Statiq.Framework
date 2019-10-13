@@ -66,7 +66,7 @@ namespace Statiq.App
         public IBootstrapper BuildPipeline(string name, Action<PipelineBuilder> buildAction) =>
             ConfigureEngine(x =>
             {
-                PipelineBuilder builder = new PipelineBuilder(x.Pipelines, x.Settings);
+                PipelineBuilder builder = new PipelineBuilder(x.Pipelines, x.Configuration);
                 buildAction(builder);
                 IPipeline pipeline = builder.Build();
                 if (pipeline != null)

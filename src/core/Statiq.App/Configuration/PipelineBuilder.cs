@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Configuration;
 using Statiq.Common;
 using Statiq.Core;
 
@@ -13,13 +14,13 @@ namespace Statiq.App
 
         private readonly IPipelineCollection _collection;
 
-        internal PipelineBuilder(IPipelineCollection collection, IReadOnlySettings settings)
+        internal PipelineBuilder(IPipelineCollection collection, IConfiguration configuration)
         {
             _collection = collection;
-            Settings = settings;
+            Configuration = configuration;
         }
 
-        public IReadOnlySettings Settings { get; }
+        public IConfiguration Configuration { get; }
 
         internal IPipeline Build()
         {

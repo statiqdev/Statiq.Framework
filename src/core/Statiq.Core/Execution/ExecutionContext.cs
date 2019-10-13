@@ -8,6 +8,7 @@ using System.Net.Http;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
@@ -50,6 +51,9 @@ namespace Statiq.Core
 
         /// <inheritdoc/>
         public IReadOnlySettings Settings => _contextData.Engine.Settings;
+
+        /// <inheritdoc/>
+        public IConfiguration Configuration => _contextData.Engine.Configuration;
 
         /// <inheritdoc/>
         public IReadOnlyShortcodeCollection Shortcodes => _contextData.Engine.Shortcodes;

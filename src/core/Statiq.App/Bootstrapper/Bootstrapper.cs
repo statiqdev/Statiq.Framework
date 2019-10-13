@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Logging;
@@ -58,17 +59,25 @@ namespace Statiq.App
             Configurators.Configure<IConfigurableBootstrapper>(this);
             Configurators.Configure<IBootstrapper>(this);
 
+            // Run the configuration configurator and get the configuration root
+            ConfigurationBuilder configurationBuilder = new ConfigurationBuilder();
+            ConfigurableConfiguration configurableConfiguration = new ConfigurableConfiguration(configurationBuilder);
+            Configurators.Configure(configurableConfiguration);
+            IConfigurationRoot configurationRoot = configurationBuilder.Build();
+
             // Create the service collection
             IServiceCollection serviceCollection = CreateServiceCollection() ?? new ServiceCollection();
             serviceCollection.TryAddSingleton<IConfigurableBootstrapper>(this);
             serviceCollection.TryAddSingleton<IBootstrapper>(this);
             serviceCollection.TryAddSingleton(_classCatalog);  // The class catalog is retrieved later for deferred logging once a service provider is built
+            serviceCollection.TryAddSingleton<IConfiguration>(configurationRoot);
 
             // Run configurators on the service collection
-            ConfigurableServices configurableServices = new ConfigurableServices(serviceCollection);
+            ConfigurableServices configurableServices = new ConfigurableServices(serviceCollection, configurationRoot);
             Configurators.Configure(configurableServices);
 
             // Add simple logging to make sure it's available in commands before the engine adds in
+            // But add it after the configurators have a chance to configure logging
             serviceCollection.AddLogging();
 
             // Create the stand-alone command line service container and register a few types needed for the CLI
