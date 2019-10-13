@@ -6,7 +6,7 @@ using Statiq.Common;
 namespace Statiq.Core
 {
     /// <summary>
-    /// A base class for custom pipelines.
+    /// A base pipeline class.
     /// </summary>
     /// <remarks>
     /// Use the derived constructor to initialize the phases and other properties.

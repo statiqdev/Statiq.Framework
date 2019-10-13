@@ -6,6 +6,9 @@ using Statiq.Common;
 
 namespace Statiq.Core
 {
+    /// <summary>
+    /// A base pipeline that runs code for each execution phase.
+    /// </summary>
     public abstract class ExecutionPipeline : Common.Module, IPipeline
     {
         protected ExecutionPipeline()
@@ -15,39 +18,39 @@ namespace Statiq.Core
                 .GetMethod(nameof(ExecuteInputAsync), BindingFlags.Instance | BindingFlags.NonPublic)
                 .DeclaringType != typeof(ExecutionPipeline))
             {
-                InputModules.Add(this);
+                ((IPipeline)this).InputModules.Add(this);
             }
             if (GetType()
                 .GetMethod(nameof(ExecuteProcessPhaseAsync), BindingFlags.Instance | BindingFlags.NonPublic)
                 .DeclaringType != typeof(ExecutionPipeline))
             {
-                ProcessModules.Add(this);
+                ((IPipeline)this).ProcessModules.Add(this);
             }
             if (GetType()
                 .GetMethod(nameof(ExecuteTransformPhaseAsync), BindingFlags.Instance | BindingFlags.NonPublic)
                 .DeclaringType != typeof(ExecutionPipeline))
             {
-                TransformModules.Add(this);
+                ((IPipeline)this).TransformModules.Add(this);
             }
             if (GetType()
                 .GetMethod(nameof(ExecuteOutputPhaseAsync), BindingFlags.Instance | BindingFlags.NonPublic)
                 .DeclaringType != typeof(ExecutionPipeline))
             {
-                OutputModules.Add(this);
+                ((IPipeline)this).OutputModules.Add(this);
             }
         }
 
         /// <inheritdoc/>
-        public ModuleList InputModules { get; } = new ModuleList();
+        ModuleList IPipeline.InputModules { get; } = new ModuleList();
 
         /// <inheritdoc/>
-        public ModuleList ProcessModules { get; } = new ModuleList();
+        ModuleList IPipeline.ProcessModules { get; } = new ModuleList();
 
         /// <inheritdoc/>
-        public ModuleList TransformModules { get; } = new ModuleList();
+        ModuleList IPipeline.TransformModules { get; } = new ModuleList();
 
         /// <inheritdoc/>
-        public ModuleList OutputModules { get; } = new ModuleList();
+        ModuleList IPipeline.OutputModules { get; } = new ModuleList();
 
         /// <inheritdoc/>
         public virtual HashSet<string> Dependencies { get; } = new HashSet<string>();
