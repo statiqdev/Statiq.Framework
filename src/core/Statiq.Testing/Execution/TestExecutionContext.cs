@@ -10,6 +10,7 @@ using System.Net.Http;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
@@ -56,15 +57,21 @@ namespace Statiq.Testing
             _logger = TestLoggerProvider.CreateLogger(null);
         }
 
+        /// <inheritdoc />
         public IServiceProvider Services { get; set; }
 
         public TestLoggerProvider TestLoggerProvider { get; }
 
         public ConcurrentQueue<TestMessage> LogMessages { get; } = new ConcurrentQueue<TestMessage>();
 
+        /// <inheritdoc />
         public IShortcodeCollection Shortcodes { get; set; } = new TestShortcodeCollection();
 
+        /// <inheritdoc />
         public ISettings Settings => _settings;
+
+        /// <inheritdoc />
+        public IConfiguration Configuration { get; set; } = new ConfigurationRoot(Array.Empty<IConfigurationProvider>());
 
         // IExecutionContext
 

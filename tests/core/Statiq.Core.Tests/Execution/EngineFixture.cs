@@ -357,7 +357,7 @@ namespace Statiq.Core.Tests.Execution
                 TestFileProvider testFileProvider = new TestFileProvider();
                 ServiceCollection serviceCollection = new ServiceCollection();
                 serviceCollection.AddSingleton<IFileProvider>(testFileProvider);
-                Engine engine = new Engine(serviceCollection);
+                Engine engine = new Engine(null, null, serviceCollection);
 
                 // When
                 IFileProvider fileProvider = engine.Services.GetRequiredService<IFileProvider>();

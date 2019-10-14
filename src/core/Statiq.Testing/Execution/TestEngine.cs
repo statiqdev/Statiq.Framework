@@ -2,6 +2,7 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
@@ -19,6 +20,9 @@ namespace Statiq.Testing
 
         /// <inheritdoc />
         public ApplicationState ApplicationState { get; set; }
+
+        /// <inheritdoc />
+        public IConfiguration Configuration { get; set; } = new ConfigurationRoot(Array.Empty<IConfigurationProvider>());
 
         /// <inheritdoc />
         public IEventCollection Events { get; set; } = new TestEventCollection();

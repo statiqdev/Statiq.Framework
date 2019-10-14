@@ -52,9 +52,10 @@ namespace Statiq.App
         private readonly AutoResetEvent _messageEvent = new AutoResetEvent(false);
         private readonly InterlockedBool _exit = new InterlockedBool(false);
 
-        public PreviewCommand(IServiceCollection serviceCollection, IBootstrapper bootstrapper)
+        public PreviewCommand(IConfiguration configuration, IServiceCollection serviceCollection, IBootstrapper bootstrapper)
             : base(serviceCollection)
         {
+            _configuration = configuration;
             _serviceCollection = serviceCollection;
             _bootstrapper = bootstrapper;
         }

@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using System.Linq;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
@@ -63,7 +64,7 @@ namespace Statiq.App
             ConfigurationBuilder configurationBuilder = new ConfigurationBuilder();
             ConfigurableConfiguration configurableConfiguration = new ConfigurableConfiguration(configurationBuilder);
             Configurators.Configure(configurableConfiguration);
-            // TODO: Add command line configuration
+            configurationBuilder.AddCommandLine(Arguments);  // Add the arguments last so they take precedence
             IConfigurationRoot configurationRoot = configurationBuilder.Build();
 
             // Create the service collection
