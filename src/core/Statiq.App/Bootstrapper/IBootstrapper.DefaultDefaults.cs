@@ -1,6 +1,9 @@
 ﻿using System;
 using System.Collections;
+using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Debug;
@@ -23,21 +26,22 @@ namespace Statiq.App
 
         public IBootstrapper AddDefaults(IConfigurator<IEngine> configurator, DefaultsToAdd defaultsToAdd = DefaultsToAdd.All)
         {
+            if (defaultsToAdd.HasFlag(DefaultsToAdd.BootstrapperConfigurators))
+            {
+                AddBootstrapperConfigurators();
+            }
             if (defaultsToAdd.HasFlag(DefaultsToAdd.Logging))
             {
                 AddDefaultLogging();
             }
-            if (defaultsToAdd.HasFlag(DefaultsToAdd.Settings))
-            {
-                AddDefaultSettings();
-            }
             if (defaultsToAdd.HasFlag(DefaultsToAdd.EnvironmentVariables))
             {
+                // Add the environment variables before the other configuration providers so they're lowest precedence
                 AddEnvironmentVariables();
             }
-            if (defaultsToAdd.HasFlag(DefaultsToAdd.Configurators))
+            if (defaultsToAdd.HasFlag(DefaultsToAdd.Configuration))
             {
-                AddDefaultConfigurators();
+                AddDefaultConfiguration();
             }
             if (defaultsToAdd.HasFlag(DefaultsToAdd.Commands))
             {
@@ -58,32 +62,7 @@ namespace Statiq.App
             return AddConfigurator(configurator);
         }
 
-        public IBootstrapper AddDefaultLogging() =>
-            ConfigureServices(services =>
-            {
-                services.AddSingleton<ILoggerProvider, ConsoleLoggerProvider>();
-                services.AddLogging(logging => logging.AddDebug());
-            });
-
-        public IBootstrapper AddDefaultSettings() =>
-            ConfigureSettings(settings =>
-            {
-                settings.Add(Keys.LinkHideIndexPages, true);
-                settings.Add(Keys.LinkHideExtensions, true);
-                settings.Add(Keys.UseCache, true);
-                settings.Add(Keys.CleanOutputPath, true);
-            });
-
-        public IBootstrapper AddEnvironmentVariables() =>
-            ConfigureSettings(settings =>
-            {
-                foreach (DictionaryEntry entry in Environment.GetEnvironmentVariables())
-                {
-                    settings.Add(entry.Key.ToString().ToUpper(), entry.Value);
-                }
-            });
-
-        public IBootstrapper AddDefaultConfigurators()
+        public IBootstrapper AddBootstrapperConfigurators()
         {
             foreach (IConfigurator<IConfigurableBootstrapper> bootstraperConfigurator
                 in ClassCatalog.GetInstances<IConfigurator<IConfigurableBootstrapper>>())
@@ -97,6 +76,29 @@ namespace Statiq.App
             }
             return this;
         }
+
+        public IBootstrapper AddDefaultLogging() =>
+            ConfigureServices(services =>
+            {
+                services.AddSingleton<ILoggerProvider, ConsoleLoggerProvider>();
+                services.AddLogging(logging => logging.AddDebug());
+            });
+
+        public IBootstrapper AddEnvironmentVariables() =>
+            BuildConfiguration(builder => builder.AddEnvironmentVariables());
+
+        public IBootstrapper AddDefaultConfiguration() =>
+            BuildConfiguration(builder => builder
+                .SetBasePath(Directory.GetCurrentDirectory())
+                .AddInMemoryCollection(new Dictionary<string, string>
+                {
+                    { Keys.LinkHideIndexPages, "true" },
+                    { Keys.LinkHideExtensions, "true" },
+                    { Keys.UseCache, "true" },
+                    { Keys.CleanOutputPath, "true" }
+                })
+                .AddJsonFile("appsettings.json", true)
+                .AddJsonFile("statiq.json", true));
 
         public IBootstrapper AddDefaultCommands()
         {

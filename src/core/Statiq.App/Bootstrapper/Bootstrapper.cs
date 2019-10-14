@@ -63,6 +63,7 @@ namespace Statiq.App
             ConfigurationBuilder configurationBuilder = new ConfigurationBuilder();
             ConfigurableConfiguration configurableConfiguration = new ConfigurableConfiguration(configurationBuilder);
             Configurators.Configure(configurableConfiguration);
+            // TODO: Add command line configuration
             IConfigurationRoot configurationRoot = configurationBuilder.Build();
 
             // Create the service collection
@@ -76,12 +77,13 @@ namespace Statiq.App
             ConfigurableServices configurableServices = new ConfigurableServices(serviceCollection, configurationRoot);
             Configurators.Configure(configurableServices);
 
-            // Add simple logging to make sure it's available in commands before the engine adds in
-            // But add it after the configurators have a chance to configure logging
+            // Add simple logging to make sure it's available in commands before the engine adds in,
+            // but add it after the configurators have a chance to configure logging
             serviceCollection.AddLogging();
 
             // Create the stand-alone command line service container and register a few types needed for the CLI
             CommandServiceTypeRegistrar registrar = new CommandServiceTypeRegistrar();
+            registrar.RegisterInstance(typeof(IConfiguration), configurationRoot);
             registrar.RegisterInstance(typeof(IServiceCollection), serviceCollection);
             registrar.RegisterInstance(typeof(IBootstrapper), this);
 

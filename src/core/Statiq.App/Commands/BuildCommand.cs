@@ -1,6 +1,7 @@
 ﻿using System.ComponentModel;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Spectre.Cli;
 using Statiq.Common;
@@ -53,12 +54,14 @@ namespace Statiq.App
             public string RootPath { get; set; }
         }
 
+        private readonly IConfiguration _configuration;
         private readonly IServiceCollection _serviceCollection;
         private readonly IBootstrapper _bootstrapper;
 
-        public BuildCommand(IServiceCollection serviceCollection, IBootstrapper bootstrapper)
+        public BuildCommand(IConfiguration configuration, IServiceCollection serviceCollection, IBootstrapper bootstrapper)
             : base(serviceCollection)
         {
+            _configuration = configuration;
             _serviceCollection = serviceCollection;
             _bootstrapper = bootstrapper;
         }
@@ -67,7 +70,12 @@ namespace Statiq.App
         {
             using (CancellationTokenSource cancellationTokenSource = new CancellationTokenSource())
             {
-                using (EngineManager engineManager = new EngineManager(_serviceCollection, _bootstrapper, this, settings))
+                using (EngineManager engineManager = new EngineManager(
+                    _configuration,
+                    _serviceCollection,
+                    _bootstrapper,
+                    this,
+                    settings))
                 {
                     return await engineManager.ExecuteAsync(cancellationTokenSource)
                         ? (int)ExitCode.Normal

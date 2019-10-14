@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Spectre.Cli;
@@ -22,6 +23,7 @@ namespace Statiq.App
         private readonly bool _defaultPipelines;
 
         public EngineManager(
+            IConfiguration configuration,
             IServiceCollection serviceCollection,
             IBootstrapper bootstrapper,
             ICommand command,
@@ -48,7 +50,7 @@ namespace Statiq.App
                 input);
 
             // Create the engine and get a logger
-            Engine = new Engine(applicationState, serviceCollection);
+            Engine = new Engine(applicationState, configuration, serviceCollection);
             _logger = Engine.Services.GetRequiredService<ILogger<Bootstrapper>>();
 
             // Apply settings

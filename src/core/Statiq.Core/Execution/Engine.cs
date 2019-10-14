@@ -47,28 +47,10 @@ namespace Statiq.Core
         private bool _disposed;
 
         /// <summary>
-        /// Creates an engine.
+        /// Creates an engine with empty application state, configuration, and services.
         /// </summary>
         public Engine()
-            : this(null, null)
-        {
-        }
-
-        /// <summary>
-        /// Creates an engine with the specified application state .
-        /// </summary>
-        /// <param name="applicationState">The state of the application (or <c>null</c> for an empty application state).</param>
-        public Engine(ApplicationState applicationState)
-            : this(applicationState, null)
-        {
-        }
-
-        /// <summary>
-        /// Creates an engine with the specified service provider.
-        /// </summary>
-        /// <param name="serviceCollection">The service collection (or <c>null</c> for an empty default service collection).</param>
-        public Engine(IServiceCollection serviceCollection)
-            : this(null, serviceCollection)
+            : this(null, null, null)
         {
         }
 
@@ -76,11 +58,13 @@ namespace Statiq.Core
         /// Creates an engine with the specified application state and service provider.
         /// </summary>
         /// <param name="applicationState">The state of the application (or <c>null</c> for an empty application state).</param>
+        /// <param name="configuration">The application configuration.</param>
         /// <param name="serviceCollection">The service collection (or <c>null</c> for an empty default service collection).</param>
-        public Engine(ApplicationState applicationState, IServiceCollection serviceCollection)
+        public Engine(ApplicationState applicationState, IConfiguration configuration, IServiceCollection serviceCollection)
         {
             _pipelines = new PipelineCollection(this);
             ApplicationState = applicationState ?? new ApplicationState(null, null, null);
+            Configuration = configuration ?? new ConfigurationRoot(Array.Empty<IConfigurationProvider>());
             _serviceScope = GetServiceScope(serviceCollection);
             _logger = Services.GetRequiredService<ILogger<Engine>>();
             DocumentFactory = new DocumentFactory(Settings);
@@ -125,7 +109,7 @@ namespace Statiq.Core
         public ApplicationState ApplicationState { get; }
 
         /// <inheritdoc />
-        public IConfiguration Configuration { get; } todo pass in or build
+        public IConfiguration Configuration { get; }
 
         /// <inheritdoc />
         public IEventCollection Events { get; } = new EventCollection();

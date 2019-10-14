@@ -10,6 +10,7 @@ using Statiq.Hosting;
 using Statiq.Common;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Configuration;
 
 namespace Statiq.App
 {
@@ -43,6 +44,7 @@ namespace Statiq.App
             public bool NoReload { get; set; }
         }
 
+        private readonly IConfiguration _configuration;
         private readonly IServiceCollection _serviceCollection;
         private readonly IBootstrapper _bootstrapper;
 
@@ -60,7 +62,12 @@ namespace Statiq.App
         public override async Task<int> ExecuteCommandAsync(CommandContext context, Settings settings)
         {
             ExitCode exitCode = ExitCode.Normal;
-            using (EngineManager engineManager = new EngineManager(_serviceCollection, _bootstrapper, this, settings))
+            using (EngineManager engineManager = new EngineManager(
+                _configuration,
+                _serviceCollection,
+                _bootstrapper,
+                this,
+                settings))
             {
                 ILogger logger = engineManager.Engine.Services.GetRequiredService<ILogger<Bootstrapper>>();
 
