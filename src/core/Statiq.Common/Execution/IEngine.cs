@@ -22,6 +22,11 @@ namespace Statiq.Common
         IConfiguration Configuration { get; }
 
         /// <summary>
+        /// The application configuration as metadata.
+        /// </summary>
+        IMetadata Settings { get; }
+
+        /// <summary>
         /// Gets global events and event handlers.
         /// </summary>
         IEventCollection Events { get; }
@@ -35,11 +40,6 @@ namespace Statiq.Common
         /// Gets the file system.
         /// </summary>
         IFileSystem FileSystem { get; }
-
-        /// <summary>
-        /// Gets the settings.
-        /// </summary>
-        ISettings Settings { get; }
 
         /// <summary>
         /// Gets the pipelines.

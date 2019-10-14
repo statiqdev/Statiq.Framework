@@ -50,10 +50,10 @@ namespace Statiq.Core
         public IReadOnlyFileSystem FileSystem => _contextData.Engine.FileSystem;
 
         /// <inheritdoc/>
-        public IReadOnlySettings Settings => _contextData.Engine.Settings;
+        public IConfiguration Configuration => _contextData.Engine.Configuration;
 
         /// <inheritdoc/>
-        public IConfiguration Configuration => _contextData.Engine.Configuration;
+        public IMetadata Settings => _contextData.Engine.Settings;
 
         /// <inheritdoc/>
         public IReadOnlyShortcodeCollection Shortcodes => _contextData.Engine.Shortcodes;
@@ -119,7 +119,7 @@ namespace Statiq.Core
         /// <inheritdoc/>
         public async Task<Stream> GetContentStreamAsync(string content = null)
         {
-            if (Settings.GetBool(Keys.UseStringContentFiles))
+            if (Configuration.GetValue<bool>(Keys.UseStringContentFiles))
             {
                 // Use a temp file for strings
                 IFile tempFile = FileSystem.GetTempFile();

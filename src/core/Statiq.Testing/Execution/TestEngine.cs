@@ -13,8 +13,14 @@ namespace Statiq.Testing
     public class TestEngine : IEngine
     {
         public TestEngine()
+            : this(null)
         {
-            _documentFactory = new DocumentFactory(_settings);
+        }
+
+        public TestEngine(IConfiguration configuration)
+        {
+            Configuration = configuration ?? new ConfigurationRoot(Array.Empty<IConfigurationProvider>());
+            _documentFactory = new DocumentFactory(Configuration.AsMetadata());
             _documentFactory.SetDefaultDocumentType<TestDocument>();
         }
 
@@ -22,18 +28,16 @@ namespace Statiq.Testing
         public ApplicationState ApplicationState { get; set; }
 
         /// <inheritdoc />
-        public IConfiguration Configuration { get; set; } = new ConfigurationRoot(Array.Empty<IConfigurationProvider>());
+        public IConfiguration Configuration { get; set; }
+
+        /// <inheritdoc />
+        public IMetadata Settings => Configuration.AsMetadata();
 
         /// <inheritdoc />
         public IEventCollection Events { get; set; } = new TestEventCollection();
 
         /// <inheritdoc />
         public IServiceProvider Services { get; set; } = new TestServiceProvider();
-
-        private readonly TestSettings _settings = new TestSettings();
-
-        /// <inheritdoc />
-        public ISettings Settings => _settings;
 
         /// <inheritdoc />
         public IFileSystem FileSystem { get; set; } = new TestFileSystem();

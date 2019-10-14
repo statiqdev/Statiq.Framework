@@ -10,13 +10,13 @@ namespace Statiq.Common
 {
     internal class DocumentFactory : IDocumentFactory
     {
-        private readonly IReadOnlySettings _settings;
+        private readonly IMetadata _baseMetadata;
 
         private IFactory _defaultFactory = Factory<Document>.Instance;
 
-        public DocumentFactory(IReadOnlySettings settings)
+        public DocumentFactory(IMetadata baseMetadata)
         {
-            _settings = settings ?? throw new ArgumentNullException(nameof(settings));
+            _baseMetadata = baseMetadata ?? throw new ArgumentNullException(nameof(baseMetadata));
         }
 
         private interface IFactory
@@ -58,7 +58,7 @@ namespace Statiq.Common
             IEnumerable<KeyValuePair<string, object>> items,
             IContentProvider contentProvider) =>
             _defaultFactory.CreateDocument(
-                _settings,
+                _baseMetadata,
                 source,
                 destination,
                 items,
@@ -71,7 +71,7 @@ namespace Statiq.Common
             IContentProvider contentProvider)
             where TDocument : FactoryDocument, IDocument, new() =>
             (TDocument)Factory<TDocument>.Instance.CreateDocument(
-                _settings,
+                _baseMetadata,
                 source,
                 destination,
                 items,

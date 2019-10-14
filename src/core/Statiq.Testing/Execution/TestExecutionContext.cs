@@ -23,23 +23,38 @@ namespace Statiq.Testing
     /// </summary>
     public class TestExecutionContext : IExecutionContext
     {
-        private readonly TestSettings _settings = new TestSettings();
         private readonly DocumentFactory _documentFactory;
         private readonly ILogger _logger;
 
         public TestExecutionContext()
-            : this((IEnumerable<IDocument>)null)
+            : this(null, (IEnumerable<IDocument>)null)
+        {
+        }
+
+        public TestExecutionContext(IConfiguration configuration)
+            : this(configuration, (IEnumerable<IDocument>)null)
         {
         }
 
         public TestExecutionContext(params IDocument[] inputs)
-            : this((IEnumerable<IDocument>)inputs)
+            : this(null, (IEnumerable<IDocument>)inputs)
+        {
+        }
+
+        public TestExecutionContext(IConfiguration configuration, params IDocument[] inputs)
+            : this(configuration, (IEnumerable<IDocument>)inputs)
         {
         }
 
         public TestExecutionContext(IEnumerable<IDocument> inputs)
+            : this(null, inputs)
         {
-            _documentFactory = new DocumentFactory(_settings);
+        }
+
+        public TestExecutionContext(IConfiguration configuration, IEnumerable<IDocument> inputs)
+        {
+            Configuration = configuration ?? new ConfigurationRoot(Array.Empty<IConfigurationProvider>());
+            _documentFactory = new DocumentFactory(Configuration.AsMetadata());
             _documentFactory.SetDefaultDocumentType<TestDocument>();
             if (inputs != null)
             {
@@ -67,16 +82,16 @@ namespace Statiq.Testing
         /// <inheritdoc />
         public IShortcodeCollection Shortcodes { get; set; } = new TestShortcodeCollection();
 
-        /// <inheritdoc />
-        public ISettings Settings => _settings;
-
-        /// <inheritdoc />
-        public IConfiguration Configuration { get; set; } = new ConfigurationRoot(Array.Empty<IConfigurationProvider>());
-
         // IExecutionContext
 
         /// <inheritdoc/>
         public Guid ExecutionId { get; set; } = Guid.NewGuid();
+
+        /// <inheritdoc />
+        public IConfiguration Configuration { get; set; }
+
+        /// <inheritdoc />
+        public IMetadata Settings => Configuration.AsMetadata();
 
         /// <inheritdoc/>
         public IRawAssemblyCollection DynamicAssemblies { get; set; } = new TestRawAssemblyCollection();
@@ -104,9 +119,6 @@ namespace Statiq.Testing
 
         /// <inheritdoc/>
         public bool SerialExecution { get; set; }
-
-        /// <inheritdoc/>
-        IReadOnlySettings IExecutionContext.Settings => Settings;
 
         /// <inheritdoc/>
         IReadOnlyShortcodeCollection IExecutionContext.Shortcodes => Shortcodes;

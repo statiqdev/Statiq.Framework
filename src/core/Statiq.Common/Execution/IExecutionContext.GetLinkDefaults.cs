@@ -35,7 +35,7 @@
 
         /// <summary>
         /// Gets a link for the specified metadata using the specified metadata value and the default settings from the
-        /// <see cref="IReadOnlySettings" />. This version should be used inside modules to ensure
+        /// configuration. This version should be used inside modules to ensure
         /// consistent link generation. Note that you can optionally include the host or not depending
         /// on if you want to generate host-specific links. By default, the host is not included so that
         /// sites work the same on any server including the preview server.
@@ -68,7 +68,7 @@
 
         /// <summary>
         /// Converts the specified path into a string appropriate for use as a link using default settings from the
-        /// <see cref="IReadOnlySettings" />. This version should be used inside modules to ensure
+        /// configuration. This version should be used inside modules to ensure
         /// consistent link generation. Note that you can optionally include the host or not depending
         /// on if you want to generate host-specific links. By default, the host is not included so that
         /// sites work the same on any server including the preview server.
@@ -100,7 +100,7 @@
 
         /// <summary>
         /// Converts the path into a string appropriate for use as a link, overriding one or more
-        /// settings from the <see cref="IReadOnlySettings" />.
+        /// settings from the configuration.
         /// </summary>
         /// <param name="path">The path to generate a link for.</param>
         /// <param name="host">The host to use for the link.</param>
@@ -127,7 +127,7 @@
 
         /// <summary>
         /// Converts the specified path into a string appropriate for use as a link using default settings from the
-        /// <see cref="IReadOnlySettings" />. This version should be used inside modules to ensure
+        /// configuration. This version should be used inside modules to ensure
         /// consistent link generation. Note that you can optionally include the host or not depending
         /// on if you want to generate host-specific links. By default, the host is not included so that
         /// sites work the same on any server including the preview server.
@@ -150,7 +150,7 @@
 
         /// <summary>
         /// Converts the path into a string appropriate for use as a link, overriding one or more
-        /// settings from the <see cref="IReadOnlySettings" />.
+        /// settings from the configuration.
         /// </summary>
         /// <param name="path">The path to generate a link for.</param>
         /// <param name="host">The host to use for the link.</param>
@@ -181,7 +181,7 @@
 
         /// <summary>
         /// Converts the path into a string appropriate for use as a link, overriding one or more
-        /// settings from the <see cref="IReadOnlySettings" />.
+        /// settings from the configuration.
         /// </summary>
         /// <param name="path">The path to generate a link for.</param>
         /// <param name="host">The host to use for the link.</param>

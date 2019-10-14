@@ -65,9 +65,10 @@ namespace Statiq.Core
             _pipelines = new PipelineCollection(this);
             ApplicationState = applicationState ?? new ApplicationState(null, null, null);
             Configuration = configuration ?? new ConfigurationRoot(Array.Empty<IConfigurationProvider>());
+            Settings = Configuration.AsMetadata();
             _serviceScope = GetServiceScope(serviceCollection);
             _logger = Services.GetRequiredService<ILogger<Engine>>();
-            DocumentFactory = new DocumentFactory(Settings);
+            DocumentFactory = new DocumentFactory(Configuration.AsMetadata());
             _diagnosticsTraceListener = new DiagnosticsTraceListener(_logger);
             System.Diagnostics.Trace.Listeners.Add(_diagnosticsTraceListener);
         }
@@ -92,7 +93,7 @@ namespace Statiq.Core
             serviceCollection.AddSingleton<ApplicationState>(ApplicationState);
             serviceCollection.AddSingleton<IReadOnlyEventCollection>(Events);
             serviceCollection.AddSingleton<IReadOnlyFileSystem>(FileSystem);
-            serviceCollection.AddSingleton<IReadOnlySettings>(Settings);
+            serviceCollection.AddSingleton<IConfiguration>(Configuration);
             serviceCollection.AddSingleton<IReadOnlyShortcodeCollection>(Shortcodes);
             serviceCollection.AddSingleton<IMemoryStreamFactory>(MemoryStreamFactory);
             serviceCollection.AddSingleton<INamespacesCollection>(Namespaces);
@@ -112,13 +113,13 @@ namespace Statiq.Core
         public IConfiguration Configuration { get; }
 
         /// <inheritdoc />
+        public IMetadata Settings { get; }
+
+        /// <inheritdoc />
         public IEventCollection Events { get; } = new EventCollection();
 
         /// <inheritdoc />
         public IFileSystem FileSystem { get; } = new FileSystem();
-
-        /// <inheritdoc />
-        public ISettings Settings { get; } = new Settings();
 
         /// <inheritdoc />
         public IShortcodeCollection Shortcodes { get; } = new ShortcodeCollection();
