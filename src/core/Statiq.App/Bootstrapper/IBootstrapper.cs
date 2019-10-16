@@ -22,11 +22,6 @@ namespace Statiq.App
             where TCommand : class, ICommand;
 
         /// <summary>
-        /// All of the registered commands by name.
-        /// </summary>
-        IReadOnlyDictionary<Type, string> CommandNames { get; }
-
-        /// <summary>
         /// Runs the command specified by the command line arguments.
         /// </summary>
         /// <returns>The resulting exit code (see <see cref="ExitCode"/>).</returns>

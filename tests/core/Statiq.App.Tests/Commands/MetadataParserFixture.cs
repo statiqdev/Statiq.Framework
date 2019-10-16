@@ -17,12 +17,12 @@ namespace Statiq.App.Tests.Commands
                 string[] expected = { "hi", "=hello", "\\=abcd", "key\\=val", "     bjorn  \\=   dad" };
 
                 // When
-                IReadOnlyDictionary<string, object> args = MetadataParser.Parse(expected);
+                IReadOnlyDictionary<string, string> args = MetadataParser.Parse(expected);
 
                 // Then
                 Assert.AreEqual(expected.Length, args.Count);
                 int i = 0;
-                foreach (KeyValuePair<string, object> arg in args)
+                foreach (KeyValuePair<string, string> arg in args)
                 {
                     Assert.AreEqual(expected[i].Replace("\\=", "=").Trim(), arg.Key);
                     Assert.IsNull(arg.Value);
@@ -37,11 +37,11 @@ namespace Statiq.App.Tests.Commands
                 string[] pairs = { "key=value", "k=v", "except=bro", "awesome====123123", "   keytrimmed    =    value trimmed   " };
 
                 // When
-                IReadOnlyDictionary<string, object> args = MetadataParser.Parse(pairs);
+                IReadOnlyDictionary<string, string> args = MetadataParser.Parse(pairs);
 
                 // Then
                 Assert.AreEqual(pairs.Length, args.Count);
-                foreach (KeyValuePair<string, object> arg in args)
+                foreach (KeyValuePair<string, string> arg in args)
                 {
                     Assert.NotNull(arg.Value, "Argument value should not be null.");
                     StringAssert.DoesNotStartWith(" ", arg.Key, "Arguments key should be trimmed.");
@@ -49,20 +49,6 @@ namespace Statiq.App.Tests.Commands
                     StringAssert.DoesNotStartWith(" ", (string)arg.Value, "Arguments value should be trimmed.");
                     StringAssert.DoesNotEndWith(" ", (string)arg.Value, "Arguments value should be trimmed.");
                 }
-            }
-
-            [Test]
-            public void ArrayValue()
-            {
-                // Given
-                string[] pairs = { "foo = [bar,baz boo,baz\\, boo, a, b\\\"b]" };
-
-                // When
-                IReadOnlyDictionary<string, object> args = MetadataParser.Parse(pairs);
-
-                // Then
-                CollectionAssert.AreEqual(new[] { "foo" }, args.Keys);
-                CollectionAssert.AreEqual(new[] { "bar", "baz boo", "baz, boo", "a", "b\"b" }, args["foo"] as object[]);
             }
 
             /// <summary>

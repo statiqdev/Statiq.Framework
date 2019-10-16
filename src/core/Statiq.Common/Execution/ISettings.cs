@@ -2,14 +2,14 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using System.Linq;
 using System.Text;
 using Microsoft.Extensions.Configuration;
 
 namespace Statiq.Common
 {
-    public static class IConfigurationExtensions
+    public interface ISettings : IMetadata
     {
-        public static IMetadata AsMetadata(this IConfiguration configuration) =>
-            new ConfigurationMetadata(configuration);
+        IConfiguration Configuration { get; }
     }
 }

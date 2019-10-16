@@ -4,7 +4,7 @@ using Spectre.Cli;
 
 namespace Statiq.App
 {
-    public class BaseSettings : CommandSettings
+    public class BaseCommandSettings : CommandSettings
     {
         [CommandOption("-l|--log-level")]
         [Description("Sets the minimum log level (\"Critical\", \"Error\", \"Warning\", \"Information\", \"Debug\", \"Trace\", \"None\").")]

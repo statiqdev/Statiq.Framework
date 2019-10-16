@@ -1,4 +1,5 @@
-﻿using Spectre.Cli;
+﻿using System;
+using Spectre.Cli;
 
 namespace Statiq.App
 {
@@ -13,10 +14,10 @@ namespace Statiq.App
 
         public AddCommandConfigurator(string name)
         {
-            _name = name;
+            _name = name ?? throw new ArgumentNullException(nameof(name));
         }
 
         public void Configure(ConfigurableCommands configurableCommands) =>
-            configurableCommands.AddCommand<TCommand>(_name);
+            configurableCommands.Configurator.AddCommand<TCommand>(_name);
     }
 }

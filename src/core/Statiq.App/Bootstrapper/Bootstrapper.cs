@@ -37,9 +37,6 @@ namespace Statiq.App
         public string[] Arguments { get; }
 
         /// <inheritdoc/>
-        public IReadOnlyDictionary<Type, string> CommandNames => _commandNames;
-
-        /// <inheritdoc/>
         public IBootstrapper SetDefaultCommand<TCommand>()
             where TCommand : class, ICommand
         {
@@ -60,11 +57,15 @@ namespace Statiq.App
             Configurators.Configure<IConfigurableBootstrapper>(this);
             Configurators.Configure<IBootstrapper>(this);
 
+            // Get our initial settings for configuration
+            SettingsConfigurationProvider settingsProvider = new SettingsConfigurationProvider();
+            ConfigurableSettings configurableSettings = new ConfigurableSettings(settingsProvider);
+            Configurators.Configure(configurableSettings);
+
             // Run the configuration configurator and get the configuration root
-            ConfigurationBuilder configurationBuilder = new ConfigurationBuilder();
+            IConfigurationBuilder configurationBuilder = new ConfigurationBuilder().Add(settingsProvider);
             ConfigurableConfiguration configurableConfiguration = new ConfigurableConfiguration(configurationBuilder);
             Configurators.Configure(configurableConfiguration);
-            configurationBuilder.AddCommandLine(Arguments);  // Add the arguments last so they take precedence
             IConfigurationRoot configurationRoot = configurationBuilder.Build();
 
             // Create the service collection
@@ -84,16 +85,17 @@ namespace Statiq.App
 
             // Create the stand-alone command line service container and register a few types needed for the CLI
             CommandServiceTypeRegistrar registrar = new CommandServiceTypeRegistrar();
+            registrar.RegisterInstance(typeof(SettingsConfigurationProvider), settingsProvider);
             registrar.RegisterInstance(typeof(IConfiguration), configurationRoot);
             registrar.RegisterInstance(typeof(IServiceCollection), serviceCollection);
             registrar.RegisterInstance(typeof(IBootstrapper), this);
 
             // Create the command line parser and run the command
             ICommandApp app = _getCommandApp(registrar);
-            app.Configure(x =>
+            app.Configure(commandConfigurator =>
             {
-                x.ValidateExamples();
-                ConfigurableCommands configurableCommands = new ConfigurableCommands(x, _commandNames);
+                commandConfigurator.ValidateExamples();
+                ConfigurableCommands configurableCommands = new ConfigurableCommands(commandConfigurator);
                 Configurators.Configure(configurableCommands);
             });
             int exitCode = await app.RunAsync(Arguments);

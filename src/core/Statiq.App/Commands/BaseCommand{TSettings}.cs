@@ -18,7 +18,7 @@ namespace Statiq.App
     /// </summary>
     /// <typeparam name="TSettings">The type of settings this command uses.</typeparam>
     public abstract class BaseCommand<TSettings> : AsyncCommand<TSettings>
-        where TSettings : BaseSettings
+        where TSettings : BaseCommandSettings
     {
         private readonly IServiceCollection _serviceCollection;
 

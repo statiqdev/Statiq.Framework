@@ -1,36 +1,34 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
 using System.Linq;
-using System.Text;
 using Microsoft.Extensions.Configuration;
 
 namespace Statiq.Common
 {
     /// <summary>
-    /// Adapts an <see cref="IConfiguration"/> to <see cref="IMetadata"/>.
+    /// Wraps a <see cref="IConfiguration"/> as presents it as metadata.
     /// </summary>
-    internal class ConfigurationMetadata : IMetadata
+    public class ConfigurationMetadata : IMetadata
     {
-        private readonly IConfiguration _configuration;
-
         public ConfigurationMetadata(IConfiguration configuration)
         {
-            _configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
+            Configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
         }
+
+        public IConfiguration Configuration { get; protected set; }
 
         public bool ContainsKey(string key)
         {
             _ = key ?? throw new ArgumentNullException(nameof(key));
-            IConfigurationSection section = _configuration.GetSection(key);
+            IConfigurationSection section = Configuration.GetSection(key);
             return section.Exists() && section.Value != null;
         }
 
         public bool TryGetRaw(string key, out object value)
         {
             _ = key ?? throw new ArgumentNullException(nameof(key));
-            IConfigurationSection section = _configuration.GetSection(key);
+            IConfigurationSection section = Configuration.GetSection(key);
             if (section.Exists() && section.Value != null)
             {
                 value = section.Value;
@@ -76,7 +74,7 @@ namespace Statiq.Common
         public int Count => this.Select(_ => (object)null).Count();
 
         public IEnumerator<KeyValuePair<string, object>> GetEnumerator() =>
-            _configuration.AsEnumerable().Select(x => new KeyValuePair<string, object>(x.Key, x.Value)).GetEnumerator();
+            Configuration.AsEnumerable().Select(x => new KeyValuePair<string, object>(x.Key, x.Value)).GetEnumerator();
 
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 

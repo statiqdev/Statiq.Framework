@@ -53,8 +53,8 @@ namespace Statiq.Testing
 
         public TestExecutionContext(IConfiguration configuration, IEnumerable<IDocument> inputs)
         {
-            Configuration = configuration ?? new ConfigurationRoot(Array.Empty<IConfigurationProvider>());
-            _documentFactory = new DocumentFactory(Configuration.AsMetadata());
+            TestSettings = new TestSettings(configuration);
+            _documentFactory = new DocumentFactory(TestSettings);
             _documentFactory.SetDefaultDocumentType<TestDocument>();
             if (inputs != null)
             {
@@ -77,6 +77,8 @@ namespace Statiq.Testing
 
         public TestLoggerProvider TestLoggerProvider { get; }
 
+        public TestSettings TestSettings { get; }
+
         public ConcurrentQueue<TestMessage> LogMessages { get; } = new ConcurrentQueue<TestMessage>();
 
         /// <inheritdoc />
@@ -91,7 +93,7 @@ namespace Statiq.Testing
         public IConfiguration Configuration { get; set; }
 
         /// <inheritdoc />
-        public IMetadata Settings => Configuration.AsMetadata();
+        public ISettings Settings => TestSettings;
 
         /// <inheritdoc/>
         public IRawAssemblyCollection DynamicAssemblies { get; set; } = new TestRawAssemblyCollection();

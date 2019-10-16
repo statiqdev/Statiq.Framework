@@ -64,11 +64,10 @@ namespace Statiq.Core
         {
             _pipelines = new PipelineCollection(this);
             ApplicationState = applicationState ?? new ApplicationState(null, null, null);
-            Configuration = configuration ?? new ConfigurationRoot(Array.Empty<IConfigurationProvider>());
-            Settings = Configuration.AsMetadata();
+            Settings = new Settings(configuration ?? new ConfigurationRoot(Array.Empty<IConfigurationProvider>()));
             _serviceScope = GetServiceScope(serviceCollection);
             _logger = Services.GetRequiredService<ILogger<Engine>>();
-            DocumentFactory = new DocumentFactory(Configuration.AsMetadata());
+            DocumentFactory = new DocumentFactory(Settings);
             _diagnosticsTraceListener = new DiagnosticsTraceListener(_logger);
             System.Diagnostics.Trace.Listeners.Add(_diagnosticsTraceListener);
         }
@@ -93,7 +92,8 @@ namespace Statiq.Core
             serviceCollection.AddSingleton<ApplicationState>(ApplicationState);
             serviceCollection.AddSingleton<IReadOnlyEventCollection>(Events);
             serviceCollection.AddSingleton<IReadOnlyFileSystem>(FileSystem);
-            serviceCollection.AddSingleton<IConfiguration>(Configuration);
+            serviceCollection.AddSingleton<ISettings>(Settings);
+            serviceCollection.AddSingleton<IConfiguration>(Settings.Configuration);
             serviceCollection.AddSingleton<IReadOnlyShortcodeCollection>(Shortcodes);
             serviceCollection.AddSingleton<IMemoryStreamFactory>(MemoryStreamFactory);
             serviceCollection.AddSingleton<INamespacesCollection>(Namespaces);
@@ -110,10 +110,7 @@ namespace Statiq.Core
         public ApplicationState ApplicationState { get; }
 
         /// <inheritdoc />
-        public IConfiguration Configuration { get; }
-
-        /// <inheritdoc />
-        public IMetadata Settings { get; }
+        public ISettings Settings { get; }
 
         /// <inheritdoc />
         public IEventCollection Events { get; } = new EventCollection();

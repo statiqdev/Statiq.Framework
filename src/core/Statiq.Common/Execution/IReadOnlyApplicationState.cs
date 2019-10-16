@@ -16,11 +16,6 @@ namespace Statiq.Common
         public string[] Arguments { get; }
 
         /// <summary>
-        /// The CLI command that was run.
-        /// </summary>
-        public string CommandName { get; }
-
-        /// <summary>
         /// Gets any input that was passed to the application (for example, on stdin via piping).
         /// </summary>
         /// <remarks>

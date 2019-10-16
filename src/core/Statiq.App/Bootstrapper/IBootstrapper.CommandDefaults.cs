@@ -14,12 +14,8 @@ namespace Statiq.App
             AddCommand<TCommand>(typeof(TCommand).Name.RemoveEnd("Command", StringComparison.OrdinalIgnoreCase).ToKebab());
 
         public IBootstrapper AddCommand<TCommand>(string name)
-            where TCommand : class, ICommand
-        {
-            _ = name ?? throw new ArgumentNullException(nameof(name));
-            Configurators.Add(new AddCommandConfigurator<TCommand>(name));
-            return this;
-        }
+            where TCommand : class, ICommand =>
+            ConfigureCommands(x => x.AddCommand<TCommand>(name));
 
         public IBootstrapper AddCommand(Type commandType) =>
             AddCommand(
@@ -40,6 +36,9 @@ namespace Statiq.App
             Configurators.Add(configurator);
             return this;
         }
+
+        public IBootstrapper AddPipelineCommand() =>
+            ConfigureCommands(x => x.)
 
         public IBootstrapper AddCommands(Assembly assembly)
         {

@@ -4,10 +4,8 @@ using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Spectre.Cli;
 using Statiq.Common;
 using Statiq.Core;
 
@@ -16,18 +14,14 @@ namespace Statiq.App
     /// <summary>
     /// This class can be used from commands to wrap engine execution and apply settings, etc.
     /// </summary>
-    public class EngineManager : IDisposable
+    internal class EngineManager<TSettings> : IDisposable
+        where TSettings : EngineCommandSettings
     {
         private readonly ILogger _logger;
         private readonly string[] _pipelines;
         private readonly bool _defaultPipelines;
 
-        public EngineManager(
-            IConfiguration configuration,
-            IServiceCollection serviceCollection,
-            IBootstrapper bootstrapper,
-            ICommand command,
-            BuildCommand.Settings settings)
+        public EngineManager(EngineCommand<TSettings> command, TSettings settings)
         {
             // Get the standard input stream
             string input = null;
@@ -40,30 +34,22 @@ namespace Statiq.App
             }
 
             // Create the application state
-            if (!bootstrapper.CommandNames.TryGetValue(command.GetType(), out string commandName))
-            {
-                commandName = null;
-            }
-            ApplicationState applicationState = new ApplicationState(
-                bootstrapper.Arguments,
-                commandName,
-                input);
+            ApplicationState applicationState = new ApplicationState(command.Bootstrapper.Arguments, input);
 
             // Create the engine and get a logger
-            Engine = new Engine(applicationState, configuration, serviceCollection);
+            Engine = new Engine(applicationState, command.Configuration, command.ServiceCollection);
             _logger = Engine.Services.GetRequiredService<ILogger<Bootstrapper>>();
 
-            // Apply settings
-            bootstrapper.Configurators.Configure(Engine.Settings);
+            // Apply command settings
             if (settings != null)
             {
-                ApplyCommandSettings(Engine, settings);  // Apply command settings last so they can override others
+                ApplyCommandSettings(Engine, command.SettingsProvider, settings);
             }
             _pipelines = settings?.Pipelines;
             _defaultPipelines = settings == null || settings.Pipelines == null || settings.Pipelines.Length == 0 || settings.DefaultPipelines;
 
             // Run engine configurators after command line, settings, etc. have been applied
-            bootstrapper.Configurators.Configure<IEngine>(Engine);
+            command.Bootstrapper.Configurators.Configure<IEngine>(Engine);
 
             // Log the full environment
             _logger.LogInformation($"Root path:{Environment.NewLine}       {Engine.FileSystem.RootPath}");
@@ -91,7 +77,7 @@ namespace Statiq.App
 
         public void Dispose() => Engine.Dispose();
 
-        private static void ApplyCommandSettings(Engine engine, BuildCommand.Settings commandSettings)
+        private static void ApplyCommandSettings(Engine engine, IDictionary<string, string> settings, EngineCommandSettings commandSettings)
         {
             // Set folders
             DirectoryPath currentDirectory = Environment.CurrentDirectory;
@@ -111,13 +97,13 @@ namespace Statiq.App
             }
             if (commandSettings.NoClean)
             {
-                engine.Settings[Keys.CleanOutputPath] = false;
+                settings[Keys.CleanOutputPath] = "false";
             }
 
             // Set no cache if requested
             if (commandSettings.NoCache)
             {
-                engine.Settings[Keys.UseCache] = false;
+                settings[Keys.UseCache] = "false";
             }
 
             // Set serial mode
@@ -129,9 +115,9 @@ namespace Statiq.App
             // Add settings
             if (commandSettings.MetadataSettings?.Length > 0)
             {
-                foreach (KeyValuePair<string, object> setting in MetadataParser.Parse(commandSettings.MetadataSettings))
+                foreach (KeyValuePair<string, string> setting in MetadataParser.Parse(commandSettings.MetadataSettings))
                 {
-                    engine.Settings[setting.Key] = setting.Value;
+                    settings[setting.Key] = setting.Value;
                 }
             }
         }

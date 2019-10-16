@@ -16,7 +16,7 @@ namespace Statiq.App
             ConfigureEngine(x => action(x.Pipelines));
 
         public IBootstrapper AddPipelines(
-            Action<IReadOnlySettings, IPipelineCollection> action) =>
+            Action<ISettings, IPipelineCollection> action) =>
             ConfigureEngine(x => action(x.Settings, x.Pipelines));
 
         // By type
@@ -27,10 +27,10 @@ namespace Statiq.App
         public IBootstrapper AddPipeline(IPipeline pipeline) =>
             ConfigureEngine(x => x.Pipelines.Add(pipeline));
 
-        public IBootstrapper AddPipeline(string name, Func<IReadOnlySettings, IPipeline> pipelineFunc) =>
+        public IBootstrapper AddPipeline(string name, Func<ISettings, IPipeline> pipelineFunc) =>
             ConfigureEngine(x => x.Pipelines.Add(name, pipelineFunc(x.Settings)));
 
-        public IBootstrapper AddPipeline(Func<IReadOnlySettings, IPipeline> pipelineFunc) =>
+        public IBootstrapper AddPipeline(Func<ISettings, IPipeline> pipelineFunc) =>
             ConfigureEngine(x => x.Pipelines.Add(pipelineFunc(x.Settings)));
 
         public IBootstrapper AddPipeline(Type pipelineType)
@@ -66,7 +66,7 @@ namespace Statiq.App
         public IBootstrapper BuildPipeline(string name, Action<PipelineBuilder> buildAction) =>
             ConfigureEngine(x =>
             {
-                PipelineBuilder builder = new PipelineBuilder(x.Pipelines, x.Configuration);
+                PipelineBuilder builder = new PipelineBuilder(x.Pipelines, x.Settings);
                 buildAction(builder);
                 IPipeline pipeline = builder.Build();
                 if (pipeline != null)

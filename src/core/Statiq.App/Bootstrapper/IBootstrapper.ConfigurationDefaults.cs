@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Spectre.Cli;
@@ -8,8 +9,11 @@ namespace Statiq.App
 {
     public partial interface IBootstrapper
     {
-        public IBootstrapper ConfigureSettings(Action<ISettings> action) =>
-            Configure<ISettings>(x => action(x));
+        public IBootstrapper ConfigureCommands(Action<IConfigurator> action) =>
+            Configure<ConfigurableCommands>(x => action(x.Configurator));
+
+        public IBootstrapper ConfigureSettings(Action<IDictionary<string, string>> action) =>
+            Configure<ConfigurableSettings>(x => action(x.Settings));
 
         public IBootstrapper BuildConfiguration(Action<IConfigurationBuilder> action) =>
             Configure<ConfigurableConfiguration>(x => action(x.Builder));

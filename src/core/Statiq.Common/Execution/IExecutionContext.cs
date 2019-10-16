@@ -59,14 +59,9 @@ namespace Statiq.Common
         IReadOnlyFileSystem FileSystem { get; }
 
         /// <summary>
-        /// The application configuration.
-        /// </summary>
-        IConfiguration Configuration { get; }
-
-        /// <summary>
         /// The application configuration as metadata.
         /// </summary>
-        IMetadata Settings { get; }
+        ISettings Settings { get; }
 
         /// <summary>
         /// Gets the available shortcodes.

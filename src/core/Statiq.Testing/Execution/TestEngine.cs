@@ -19,8 +19,8 @@ namespace Statiq.Testing
 
         public TestEngine(IConfiguration configuration)
         {
-            Configuration = configuration ?? new ConfigurationRoot(Array.Empty<IConfigurationProvider>());
-            _documentFactory = new DocumentFactory(Configuration.AsMetadata());
+            Settings = new TestSettings(configuration);
+            _documentFactory = new DocumentFactory(Settings);
             _documentFactory.SetDefaultDocumentType<TestDocument>();
         }
 
@@ -28,10 +28,7 @@ namespace Statiq.Testing
         public ApplicationState ApplicationState { get; set; }
 
         /// <inheritdoc />
-        public IConfiguration Configuration { get; set; }
-
-        /// <inheritdoc />
-        public IMetadata Settings => Configuration.AsMetadata();
+        public ISettings Settings { get; }
 
         /// <inheritdoc />
         public IEventCollection Events { get; set; } = new TestEventCollection();

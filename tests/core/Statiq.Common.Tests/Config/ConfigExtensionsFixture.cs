@@ -4,12 +4,12 @@ using NUnit.Framework;
 using Shouldly;
 using Statiq.Testing;
 
-namespace Statiq.Common.Tests.Configuration
+namespace Statiq.Common.Tests.Config
 {
     [TestFixture]
-    public class DocumentConfigExtensionsFixture : BaseFixture
+    public class ConfigExtensionsFixture : BaseFixture
     {
-        public class GetValueAsyncTests : DocumentConfigExtensionsFixture
+        public class GetValueAsyncTests : ConfigExtensionsFixture
         {
             [Test]
             public async Task ReturnsDefaultTaskForNullIntConfig()
@@ -57,7 +57,7 @@ namespace Statiq.Common.Tests.Configuration
             }
         }
 
-        public class TryGetValueAsyncTests : DocumentConfigExtensionsFixture
+        public class TryGetValueAsyncTests : ConfigExtensionsFixture
         {
             [Test]
             public async Task ConvertsValue()

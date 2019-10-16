@@ -4,12 +4,12 @@ using NUnit.Framework;
 using Shouldly;
 using Statiq.Testing;
 
-namespace Statiq.Common.Tests.Configuration
+namespace Statiq.Common.Tests.Config
 {
     [TestFixture]
-    public class DocumentConfigFixture : BaseFixture
+    public class ConfigFixture : BaseFixture
     {
-        public class CastOperatorTests : DocumentConfigFixture
+        public class CastOperatorTests : ConfigFixture
         {
             [Test]
             public async Task CastsToMatchingType()

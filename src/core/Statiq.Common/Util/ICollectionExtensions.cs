@@ -17,9 +17,14 @@ namespace Statiq.Common
         /// <param name="items">The items to add.</param>
         public static void AddRange<T>(this ICollection<T> collection, IEnumerable<T> items)
         {
-            foreach (T item in items)
+            _ = collection ?? throw new ArgumentNullException(nameof(collection));
+
+            if (items != null)
             {
-                collection.Add(item);
+                foreach (T item in items)
+                {
+                    collection.Add(item);
+                }
             }
         }
 
@@ -32,6 +37,8 @@ namespace Statiq.Common
         /// <returns>The number of items removed.</returns>
         public static int RemoveAll<T>(this ICollection<T> collection, Func<T, bool> match)
         {
+            _ = collection ?? throw new ArgumentNullException(nameof(collection));
+
             IList<T> toRemove = collection.Where(match).ToList();
             foreach (T item in toRemove)
             {

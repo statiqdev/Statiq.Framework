@@ -15,60 +15,21 @@ using Microsoft.Extensions.Configuration;
 namespace Statiq.App
 {
     [Description("Builds the site and serves it, optionally watching for changes and rebuilding by default.")]
-    public class PreviewCommand : BaseCommand<PreviewCommand.Settings>
+    internal class PreviewCommand : EngineCommand<PreviewCommandSettings>
     {
-        public class Settings : BuildCommand.Settings
-        {
-            [CommandOption("--port")]
-            [Description("Start the preview web server on the specified port (default is 5080).")]
-            public int Port { get; set; } = 5080;
-
-            [CommandOption("--force-ext")]
-            [Description("Force the use of extensions in the preview web server (by default, extensionless URLs may be used).")]
-            public bool ForceExt { get; set; }
-
-            [CommandOption("--virtual-dir")]
-            [Description("Serve files in the preview web server under the specified virtual directory.")]
-            public string VirtualDirectory { get; set; }
-
-            [CommandOption("--content-type")]
-            [Description("Specifies additional supported content types for the preview server as extension=contenttype.")]
-            public string[] ContentTypes { get; set; }
-
-            [CommandOption("--no-watch")]
-            [Description("Turns off watching the input folder(s) for changes and rebuilding.")]
-            public bool NoWatch { get; set; }
-
-            [CommandOption("--no-reload")]
-            [Description("urns off LiveReload support in the preview server.")]
-            public bool NoReload { get; set; }
-        }
-
-        private readonly IConfiguration _configuration;
-        private readonly IServiceCollection _serviceCollection;
-        private readonly IBootstrapper _bootstrapper;
-
         private readonly ConcurrentQueue<string> _changedFiles = new ConcurrentQueue<string>();
         private readonly AutoResetEvent _messageEvent = new AutoResetEvent(false);
         private readonly InterlockedBool _exit = new InterlockedBool(false);
 
-        public PreviewCommand(IConfiguration configuration, IServiceCollection serviceCollection, IBootstrapper bootstrapper)
-            : base(serviceCollection)
+        public PreviewCommand(SettingsConfigurationProvider settingsProvider, IConfiguration configuration, IServiceCollection serviceCollection, IBootstrapper bootstrapper)
+            : base(settingsProvider, configuration, serviceCollection, bootstrapper)
         {
-            _configuration = configuration;
-            _serviceCollection = serviceCollection;
-            _bootstrapper = bootstrapper;
         }
 
-        public override async Task<int> ExecuteCommandAsync(CommandContext context, Settings settings)
+        public override async Task<int> ExecuteCommandAsync(CommandContext context, PreviewCommandSettings settings)
         {
             ExitCode exitCode = ExitCode.Normal;
-            using (EngineManager engineManager = new EngineManager(
-                _configuration,
-                _serviceCollection,
-                _bootstrapper,
-                this,
-                settings))
+            using (EngineManager<PreviewCommandSettings> engineManager = new EngineManager<PreviewCommandSettings>(this, settings))
             {
                 ILogger logger = engineManager.Engine.Services.GetRequiredService<ILogger<Bootstrapper>>();
 
@@ -165,13 +126,13 @@ namespace Statiq.App
                         logger.LogInformation($"{changedFiles.Count} files have changed, re-executing");
 
                         // Reset caches when an error occurs during the previous preview
-                        object existingResetCacheSetting = null;
+                        string existingResetCacheSetting = null;
                         bool setResetCacheSetting = false;
                         if (exitCode == ExitCode.ExecutionError)
                         {
-                            existingResetCacheSetting = engineManager.Engine.Settings.GetValueOrDefault(Keys.ResetCache);
+                            existingResetCacheSetting = engineManager.Engine.Settings.GetString(Keys.ResetCache);
                             setResetCacheSetting = true;
-                            engineManager.Engine.Settings[Keys.ResetCache] = true;
+                            SettingsProvider[Keys.ResetCache] = "true";
                         }
 
                         // If there was an execution error due to reload, keep previewing but clear the cache
@@ -187,10 +148,10 @@ namespace Statiq.App
                         {
                             if (existingResetCacheSetting == null)
                             {
-                                engineManager.Engine.Settings.Remove(Keys.ResetCache);
+                                SettingsProvider.Remove(Keys.ResetCache);
                             }
                             {
-                                engineManager.Engine.Settings[Keys.ResetCache] = existingResetCacheSetting;
+                                SettingsProvider[Keys.ResetCache] = existingResetCacheSetting;
                             }
                         }
 

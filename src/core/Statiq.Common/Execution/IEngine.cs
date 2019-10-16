@@ -17,14 +17,9 @@ namespace Statiq.Common
         ApplicationState ApplicationState { get; }
 
         /// <summary>
-        /// The application configuration.
-        /// </summary>
-        IConfiguration Configuration { get; }
-
-        /// <summary>
         /// The application configuration as metadata.
         /// </summary>
-        IMetadata Settings { get; }
+        ISettings Settings { get; }
 
         /// <summary>
         /// Gets global events and event handlers.

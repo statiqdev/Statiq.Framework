@@ -34,6 +34,10 @@ namespace Statiq.App
             {
                 AddDefaultLogging();
             }
+            if (defaultsToAdd.HasFlag(DefaultsToAdd.Settings))
+            {
+                AddDefaultSettings();
+            }
             if (defaultsToAdd.HasFlag(DefaultsToAdd.EnvironmentVariables))
             {
                 // Add the environment variables before the other configuration providers so they're lowest precedence
@@ -84,19 +88,22 @@ namespace Statiq.App
                 services.AddLogging(logging => logging.AddDebug());
             });
 
+        public IBootstrapper AddDefaultSettings() =>
+            ConfigureSettings(settings => settings.AddOrReplaceRange(
+                new Dictionary<string, string>
+                {
+                    { Keys.LinkHideIndexPages, "true" },
+                    { Keys.LinkHideExtensions, "true" },
+                    { Keys.UseCache, "true" },
+                    { Keys.CleanOutputPath, "true" }
+                }));
+
         public IBootstrapper AddEnvironmentVariables() =>
             BuildConfiguration(builder => builder.AddEnvironmentVariables());
 
         public IBootstrapper AddDefaultConfiguration() =>
             BuildConfiguration(builder => builder
                 .SetBasePath(Directory.GetCurrentDirectory())
-                .AddInMemoryCollection(new Dictionary<string, string>
-                {
-                    { Keys.LinkHideIndexPages, "true" },
-                    { Keys.LinkHideExtensions, "true" },
-                    { Keys.UseCache, "true" },
-                    { Keys.CleanOutputPath, "true" }
-                })
                 .AddJsonFile("appsettings.json", true)
                 .AddJsonFile("statiq.json", true));
 

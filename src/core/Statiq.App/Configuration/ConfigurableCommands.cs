@@ -6,22 +6,11 @@ namespace Statiq.App
 {
     public class ConfigurableCommands : IConfigurable
     {
-        private readonly Spectre.Cli.IConfigurator _commandConfigurator;
-        private readonly Dictionary<Type, string> _commandNames;
-
-        internal ConfigurableCommands(
-            Spectre.Cli.IConfigurator commandConfigurator,
-            Dictionary<Type, string> commandNames)
+        internal ConfigurableCommands(Spectre.Cli.IConfigurator configurator)
         {
-            _commandConfigurator = commandConfigurator;
-            _commandNames = commandNames;
+            Configurator = configurator;
         }
 
-        public void AddCommand<TCommand>(string name)
-            where TCommand : class, Spectre.Cli.ICommand
-        {
-            _commandConfigurator.AddCommand<TCommand>(name);
-            _commandNames.Add(typeof(TCommand), name);
-        }
+        public Spectre.Cli.IConfigurator Configurator { get; }
     }
 }
