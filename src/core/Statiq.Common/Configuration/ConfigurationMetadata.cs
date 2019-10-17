@@ -11,9 +11,9 @@ namespace Statiq.Common
     /// </summary>
     public class ConfigurationMetadata : IMetadata
     {
-        public ConfigurationMetadata(IConfiguration configuration)
+        internal ConfigurationMetadata(IConfiguration configuration)
         {
-            Configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
+            Configuration = configuration;
         }
 
         public IConfiguration Configuration { get; protected set; }

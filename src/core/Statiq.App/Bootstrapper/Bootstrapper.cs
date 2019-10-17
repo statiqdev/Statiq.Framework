@@ -86,7 +86,7 @@ namespace Statiq.App
             // Create the stand-alone command line service container and register a few types needed for the CLI
             CommandServiceTypeRegistrar registrar = new CommandServiceTypeRegistrar();
             registrar.RegisterInstance(typeof(SettingsConfigurationProvider), settingsProvider);
-            registrar.RegisterInstance(typeof(IConfiguration), configurationRoot);
+            registrar.RegisterInstance(typeof(IConfigurationRoot), configurationRoot);
             registrar.RegisterInstance(typeof(IServiceCollection), serviceCollection);
             registrar.RegisterInstance(typeof(IBootstrapper), this);
 

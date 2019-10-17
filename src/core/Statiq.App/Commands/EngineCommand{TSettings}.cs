@@ -17,18 +17,18 @@ namespace Statiq.App
     internal abstract class EngineCommand<TSettings> : BaseCommand<TSettings>
         where TSettings : EngineCommandSettings
     {
-        protected EngineCommand(SettingsConfigurationProvider settingsProvider, IConfiguration configuration, IServiceCollection serviceCollection, IBootstrapper bootstrapper)
+        protected EngineCommand(SettingsConfigurationProvider settingsProvider, IConfigurationRoot configurationRoot, IServiceCollection serviceCollection, IBootstrapper bootstrapper)
             : base(serviceCollection)
         {
             SettingsProvider = settingsProvider;
-            Configuration = configuration;
+            ConfigurationRoot = configurationRoot;
             ServiceCollection = serviceCollection;
             Bootstrapper = bootstrapper;
         }
 
         public SettingsConfigurationProvider SettingsProvider { get; }
 
-        public IConfiguration Configuration { get; }
+        public IConfigurationRoot ConfigurationRoot { get; }
 
         public IServiceCollection ServiceCollection { get; }
 

@@ -116,26 +116,6 @@ namespace Statiq.App.Tests.Bootstrapper
             }
 
             [Test]
-            public async Task AddsEnvironmentVariablesAsUpperCase()
-            {
-                // Given
-                Environment.SetEnvironmentVariable("Foo", "Bar");
-                string[] args = new[] { "build" };
-                IBootstrapper bootstrapper = App.Bootstrapper.Create(args);
-                bootstrapper.AddEnvironmentVariables();
-                bootstrapper.AddCommand<BuildCommand>("build");
-                ISettings settings = null;
-                bootstrapper.ConfigureEngine(engine => settings = engine.Settings);
-
-                // When
-                int exitCode = await bootstrapper.RunAsync();
-
-                // Then
-                exitCode.ShouldBe((int)ExitCode.Normal);
-                settings.Keys.ShouldContain("FOO");
-            }
-
-            [Test]
             public async Task LogsEvironmentVariablesAsMasked()
             {
                 // Given
@@ -155,7 +135,7 @@ namespace Statiq.App.Tests.Bootstrapper
 
                 // Then
                 exitCode.ShouldBe((int)ExitCode.Normal);
-                provider.Messages.ShouldContain(x => x.FormattedMessage.Contains("FOO: ****"));
+                provider.Messages.ShouldContain(x => x.FormattedMessage.Contains("Foo=***"));
             }
         }
     }

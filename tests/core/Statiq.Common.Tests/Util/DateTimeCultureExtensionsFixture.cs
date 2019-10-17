@@ -35,7 +35,7 @@ namespace Statiq.Common.Tests.Util
             {
                 // Given
                 TestExecutionContext context = new TestExecutionContext();
-                context.Settings[Keys.DateTimeInputCulture] = CultureInfo.GetCultureInfo("en-GB");
+                context.Settings[Keys.DateTimeInputCulture] = "en-GB";
 
                 // When
                 CultureInfo result = context.GetDateTimeInputCulture();
@@ -50,7 +50,7 @@ namespace Statiq.Common.Tests.Util
             [SetUp]
             public void SetThreadCulture()
             {
-                CultureInfo.CurrentCulture = CultureInfo.GetCultureInfo("en-US");
+                CultureInfo.CurrentCulture = new CultureInfo("en-US");
             }
 
             [Test]
@@ -84,7 +84,7 @@ namespace Statiq.Common.Tests.Util
             {
                 // Given
                 TestExecutionContext context = new TestExecutionContext();
-                context.Settings[Keys.DateTimeDisplayCulture] = CultureInfo.GetCultureInfo("en-US");
+                context.Settings[Keys.DateTimeDisplayCulture] = "en-US";
 
                 // When
                 CultureInfo result = context.GetDateTimeDisplayCulture();
@@ -98,7 +98,7 @@ namespace Statiq.Common.Tests.Util
             {
                 // Given
                 TestExecutionContext context = new TestExecutionContext();
-                context.Settings[Keys.DateTimeDisplayCulture] = CultureInfo.GetCultureInfo("fr-FR");
+                context.Settings[Keys.DateTimeDisplayCulture] = "fr-FR";
 
                 // When
                 CultureInfo result = context.GetDateTimeDisplayCulture();
@@ -112,7 +112,7 @@ namespace Statiq.Common.Tests.Util
             {
                 // Given
                 TestExecutionContext context = new TestExecutionContext();
-                context.Settings[Keys.DateTimeDisplayCulture] = CultureInfo.GetCultureInfo("fr-FR");
+                context.Settings[Keys.DateTimeDisplayCulture] = "fr-FR";
 
                 // When
                 CultureInfo result = context.GetDateTimeDisplayCulture("fr");
@@ -126,7 +126,7 @@ namespace Statiq.Common.Tests.Util
             {
                 // Given
                 TestExecutionContext context = new TestExecutionContext();
-                context.Settings[Keys.DateTimeDisplayCulture] = CultureInfo.GetCultureInfo("fr-FR");
+                context.Settings[Keys.DateTimeDisplayCulture] = "fr-FR";
 
                 // When
                 CultureInfo result = context.GetDateTimeDisplayCulture("fr-LU");
@@ -147,56 +147,6 @@ namespace Statiq.Common.Tests.Util
 
                 // Then
                 Assert.That(result, Is.EqualTo(CultureInfo.GetCultureInfo("en-GB")));
-            }
-        }
-
-        public class ToShortDateStringTests : DateTimeCultureExtensionsFixture
-        {
-            [SetUp]
-            public void SetThreadCulture()
-            {
-                CultureInfo.CurrentCulture = CultureInfo.GetCultureInfo("en-US");
-            }
-
-            [Test]
-            public void IncludesShortNameOfFrenchDayAndMonth()
-            {
-                // Given
-                TestExecutionContext context = new TestExecutionContext();
-                CultureInfo culture = (CultureInfo)CultureInfo.GetCultureInfo("fr-FR").Clone();
-                culture.DateTimeFormat.ShortDatePattern = "ddd MMM";
-                context.Settings[Keys.DateTimeDisplayCulture] = culture;
-                DateTime dateTime = new DateTime(2000, 3, 1);
-
-                // When
-                string result = dateTime.ToShortDateString(context);
-
-                // Then
-                result.ShouldBe("mer. mars", StringCompareShould.IgnoreCase);
-            }
-        }
-
-        public class ToLongDateStringTests : DateTimeCultureExtensionsFixture
-        {
-            [SetUp]
-            public void SetThreadCulture()
-            {
-                CultureInfo.CurrentCulture = CultureInfo.GetCultureInfo("en-US");
-            }
-
-            [Test]
-            public void IncludesNameOfGermanDayAndMonth()
-            {
-                // Given
-                TestExecutionContext context = new TestExecutionContext();
-                context.Settings[Keys.DateTimeDisplayCulture] = CultureInfo.GetCultureInfo("de-DE");
-                DateTime dateTime = new DateTime(2000, 3, 1);
-
-                // When
-                string result = dateTime.ToLongDateString(context);
-
-                // Then
-                Assert.That(result, Is.EqualTo("Mittwoch, 1. März 2000"));
             }
         }
     }

@@ -24,10 +24,7 @@ namespace Statiq.Common.Tests.Execution
             {
                 // Given
                 TestExecutionContext context = new TestExecutionContext();
-                context.TestSettings.SetConfigurationData(new Dictionary<string, string>
-                {
-                    { Keys.Host, "domain.com" }
-                });
+                context.Settings[Keys.Host] = "domain.com";
                 TestDocument document = new TestDocument
                 {
                     { "Path", value }
@@ -46,10 +43,7 @@ namespace Statiq.Common.Tests.Execution
             {
                 // Given
                 TestExecutionContext context = new TestExecutionContext();
-                context.TestSettings.SetConfigurationData(new Dictionary<string, string>
-                {
-                    { Keys.Host, "domain.com" }
-                });
+                context.Settings[Keys.Host] = "domain.com";
                 TestDocument document = new TestDocument(null, new FilePath(destination));
 
                 // When

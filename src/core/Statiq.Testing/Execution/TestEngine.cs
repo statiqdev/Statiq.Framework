@@ -13,22 +13,18 @@ namespace Statiq.Testing
     public class TestEngine : IEngine
     {
         public TestEngine()
-            : this(null)
         {
-        }
-
-        public TestEngine(IConfiguration configuration)
-        {
-            Settings = new TestSettings(configuration);
             _documentFactory = new DocumentFactory(Settings);
             _documentFactory.SetDefaultDocumentType<TestDocument>();
         }
+
+        public TestSettings Settings { get; } = new TestSettings();
 
         /// <inheritdoc />
         public ApplicationState ApplicationState { get; set; }
 
         /// <inheritdoc />
-        public ISettings Settings { get; }
+        ISettings IEngine.Settings => Settings;
 
         /// <inheritdoc />
         public IEventCollection Events { get; set; } = new TestEventCollection();

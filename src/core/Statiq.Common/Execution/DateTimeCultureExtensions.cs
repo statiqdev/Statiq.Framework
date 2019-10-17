@@ -70,14 +70,24 @@ namespace Statiq.Common
         /// <returns>The date display culture.</returns>
         public static CultureInfo GetDateTimeDisplayCulture(this IExecutionContext context, string targetCulture = "en-GB")
         {
-            if (!context.Settings.ContainsKey(Keys.DateTimeDisplayCulture))
+            // Get the culture info
+            CultureInfo cultureInfo = null;
+            if (context.Settings.ContainsKey(Keys.DateTimeDisplayCulture))
+            {
+                string cultureName = context.Settings.GetString(Keys.DateTimeDisplayCulture);
+                if (!string.IsNullOrWhiteSpace(cultureName))
+                {
+                    cultureInfo = CultureInfo.GetCultureInfo(cultureName);
+                }
+            }
+            if (cultureInfo == null)
             {
                 CultureInfo target = CultureInfo.GetCultureInfo(targetCulture);
-                return CultureInfo.CurrentCulture.TwoLetterISOLanguageName.Equals(target.TwoLetterISOLanguageName, StringComparison.OrdinalIgnoreCase)
+                cultureInfo = CultureInfo.CurrentCulture.TwoLetterISOLanguageName.Equals(target.TwoLetterISOLanguageName, StringComparison.OrdinalIgnoreCase)
                     ? CultureInfo.CurrentCulture : target;
             }
-            object value = context.Settings.Get(Keys.DateTimeDisplayCulture);
-            return value as CultureInfo ?? CultureInfo.GetCultureInfo(value.ToString());
+
+            return cultureInfo;
         }
     }
 }

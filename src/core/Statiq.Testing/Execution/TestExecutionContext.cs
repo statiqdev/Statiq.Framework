@@ -27,34 +27,18 @@ namespace Statiq.Testing
         private readonly ILogger _logger;
 
         public TestExecutionContext()
-            : this(null, (IEnumerable<IDocument>)null)
-        {
-        }
-
-        public TestExecutionContext(IConfiguration configuration)
-            : this(configuration, (IEnumerable<IDocument>)null)
+            : this((IEnumerable<IDocument>)null)
         {
         }
 
         public TestExecutionContext(params IDocument[] inputs)
-            : this(null, (IEnumerable<IDocument>)inputs)
-        {
-        }
-
-        public TestExecutionContext(IConfiguration configuration, params IDocument[] inputs)
-            : this(configuration, (IEnumerable<IDocument>)inputs)
+            : this((IEnumerable<IDocument>)inputs)
         {
         }
 
         public TestExecutionContext(IEnumerable<IDocument> inputs)
-            : this(null, inputs)
         {
-        }
-
-        public TestExecutionContext(IConfiguration configuration, IEnumerable<IDocument> inputs)
-        {
-            TestSettings = new TestSettings(configuration);
-            _documentFactory = new DocumentFactory(TestSettings);
+            _documentFactory = new DocumentFactory(Settings);
             _documentFactory.SetDefaultDocumentType<TestDocument>();
             if (inputs != null)
             {
@@ -77,7 +61,7 @@ namespace Statiq.Testing
 
         public TestLoggerProvider TestLoggerProvider { get; }
 
-        public TestSettings TestSettings { get; }
+        public TestSettings Settings { get; } = new TestSettings();
 
         public ConcurrentQueue<TestMessage> LogMessages { get; } = new ConcurrentQueue<TestMessage>();
 
@@ -90,10 +74,7 @@ namespace Statiq.Testing
         public Guid ExecutionId { get; set; } = Guid.NewGuid();
 
         /// <inheritdoc />
-        public IConfiguration Configuration { get; set; }
-
-        /// <inheritdoc />
-        public ISettings Settings => TestSettings;
+        ISettings IExecutionContext.Settings => Settings;
 
         /// <inheritdoc/>
         public IRawAssemblyCollection DynamicAssemblies { get; set; } = new TestRawAssemblyCollection();

@@ -21,15 +21,15 @@ namespace Statiq.App
         private readonly AutoResetEvent _messageEvent = new AutoResetEvent(false);
         private readonly InterlockedBool _exit = new InterlockedBool(false);
 
-        public PreviewCommand(SettingsConfigurationProvider settingsProvider, IConfiguration configuration, IServiceCollection serviceCollection, IBootstrapper bootstrapper)
-            : base(settingsProvider, configuration, serviceCollection, bootstrapper)
+        public PreviewCommand(SettingsConfigurationProvider settingsProvider, IConfigurationRoot configurationRoot, IServiceCollection serviceCollection, IBootstrapper bootstrapper)
+            : base(settingsProvider, configurationRoot, serviceCollection, bootstrapper)
         {
         }
 
         public override async Task<int> ExecuteCommandAsync(CommandContext context, PreviewCommandSettings settings)
         {
             ExitCode exitCode = ExitCode.Normal;
-            using (EngineManager<PreviewCommandSettings> engineManager = new EngineManager<PreviewCommandSettings>(this, settings))
+            using (EngineManager<PreviewCommandSettings> engineManager = new EngineManager<PreviewCommandSettings>(context, this, settings))
             {
                 ILogger logger = engineManager.Engine.Services.GetRequiredService<ILogger<Bootstrapper>>();
 

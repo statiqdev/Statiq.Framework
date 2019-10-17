@@ -11,8 +11,8 @@ namespace Statiq.App
     [Description("Builds the site.")]
     internal class BuildCommand : EngineCommand<EngineCommandSettings>
     {
-        public BuildCommand(SettingsConfigurationProvider settingsProvider, IConfiguration configuration, IServiceCollection serviceCollection, IBootstrapper bootstrapper)
-            : base(settingsProvider, configuration, serviceCollection, bootstrapper)
+        public BuildCommand(SettingsConfigurationProvider settingsProvider, IConfigurationRoot configurationRoot, IServiceCollection serviceCollection, IBootstrapper bootstrapper)
+            : base(settingsProvider, configurationRoot, serviceCollection, bootstrapper)
         {
         }
 
@@ -20,7 +20,7 @@ namespace Statiq.App
         {
             using (CancellationTokenSource cancellationTokenSource = new CancellationTokenSource())
             {
-                using (EngineManager<EngineCommandSettings> engineManager = new EngineManager<EngineCommandSettings>(this, settings))
+                using (EngineManager<EngineCommandSettings> engineManager = new EngineManager<EngineCommandSettings>(context, this, settings))
                 {
                     return await engineManager.ExecuteAsync(cancellationTokenSource)
                         ? (int)ExitCode.Normal

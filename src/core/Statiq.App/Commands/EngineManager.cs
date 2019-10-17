@@ -4,8 +4,10 @@ using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Spectre.Cli;
 using Statiq.Common;
 using Statiq.Core;
 
@@ -21,7 +23,7 @@ namespace Statiq.App
         private readonly string[] _pipelines;
         private readonly bool _defaultPipelines;
 
-        public EngineManager(EngineCommand<TSettings> command, TSettings settings)
+        public EngineManager(CommandContext context, EngineCommand<TSettings> command, TSettings settings)
         {
             // Get the standard input stream
             string input = null;
@@ -34,10 +36,11 @@ namespace Statiq.App
             }
 
             // Create the application state
-            ApplicationState applicationState = new ApplicationState(command.Bootstrapper.Arguments, input);
+            // TODO: Set the command name from the context
+            ApplicationState applicationState = new ApplicationState(command.Bootstrapper.Arguments, null, input);
 
             // Create the engine and get a logger
-            Engine = new Engine(applicationState, command.Configuration, command.ServiceCollection);
+            Engine = new Engine(applicationState, command.ConfigurationRoot, command.ServiceCollection);
             _logger = Engine.Services.GetRequiredService<ILogger<Bootstrapper>>();
 
             // Apply command settings
@@ -56,7 +59,7 @@ namespace Statiq.App
             _logger.LogInformation($"Input path(s):{Environment.NewLine}       {string.Join(Environment.NewLine + "       ", Engine.FileSystem.InputPaths)}");
             _logger.LogInformation($"Output path:{Environment.NewLine}       {Engine.FileSystem.OutputPath}");
             _logger.LogInformation($"Temp path:{Environment.NewLine}       {Engine.FileSystem.TempPath}");
-            _logger.LogDebug($"Settings:{Environment.NewLine}       {string.Join(Environment.NewLine + "       ", Engine.Settings.Select(x => $"{x.Key}: {(x.Key.ToUpper() == x.Key ? "****" : (x.Value?.ToString() ?? "null"))}"))}");
+            _logger.LogDebug($"Configuration:{Environment.NewLine}{command.ConfigurationRoot.GetSafeDebugView()}");
         }
 
         public Engine Engine { get; }

@@ -37,9 +37,6 @@ namespace Statiq.App
             return this;
         }
 
-        public IBootstrapper AddPipelineCommand() =>
-            ConfigureCommands(x => x.)
-
         public IBootstrapper AddCommands(Assembly assembly)
         {
             _ = assembly ?? throw new ArgumentNullException(nameof(assembly));
