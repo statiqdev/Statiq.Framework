@@ -8,7 +8,7 @@ using Statiq.Common;
 
 namespace Statiq.App
 {
-    [Description("Builds the site.")]
+    [Description("Runs the pipelines.")]
     internal class BuildCommand : EngineCommand<EngineCommandSettings>
     {
         public BuildCommand(SettingsConfigurationProvider settingsProvider, IConfigurationRoot configurationRoot, IServiceCollection serviceCollection, IBootstrapper bootstrapper)
@@ -20,7 +20,7 @@ namespace Statiq.App
         {
             using (CancellationTokenSource cancellationTokenSource = new CancellationTokenSource())
             {
-                using (EngineManager<EngineCommandSettings> engineManager = new EngineManager<EngineCommandSettings>(context, this, settings))
+                using (EngineManager engineManager = new EngineManager(context, this, settings))
                 {
                     return await engineManager.ExecuteAsync(cancellationTokenSource)
                         ? (int)ExitCode.Normal

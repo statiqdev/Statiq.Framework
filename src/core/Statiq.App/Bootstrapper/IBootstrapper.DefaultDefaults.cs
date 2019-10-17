@@ -110,7 +110,8 @@ namespace Statiq.App
         public IBootstrapper AddDefaultCommands()
         {
             SetDefaultCommand<BuildCommand>();
-            AddCommands(typeof(BuildCommand).Assembly);
+            AddCommand<BuildCommand>();
+            AddCommand<PreviewCommand>();
             AddCommands();
             return this;
         }

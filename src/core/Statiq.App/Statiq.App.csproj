@@ -14,7 +14,7 @@
     <PackageReference Include="Microsoft.Extensions.Logging" Version="3.0.0" />
     <PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="3.0.0" />
     <PackageReference Include="NetEscapades.Extensions.Logging.RollingFile" Version="2.2.0" />
-    <PackageReference Include="Spectre.Cli" Version="0.22.0" />
+    <PackageReference Include="Spectre.Cli" Version="0.24.0" />
   </ItemGroup>
 
   <ItemGroup>

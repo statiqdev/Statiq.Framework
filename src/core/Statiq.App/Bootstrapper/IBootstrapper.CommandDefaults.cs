@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using Microsoft.Extensions.DependencyInjection;
@@ -36,6 +37,28 @@ namespace Statiq.App
             Configurators.Add(configurator);
             return this;
         }
+
+        public IBootstrapper AddCommand(string name, EngineCommandSettings commandSettings)
+        {
+            _ = name ?? throw new ArgumentNullException(nameof(name));
+            _ = commandSettings ?? throw new ArgumentNullException(nameof(commandSettings));
+            return ConfigureCommands(x => x.AddCommand<CustomBuildCommand>(name).WithData(commandSettings));
+        }
+
+        public IBootstrapper AddCommand(
+            string name,
+            params string[] pipelines) =>
+            AddCommand(name, false, pipelines);
+
+        public IBootstrapper AddCommand(
+            string name,
+            bool defaultPipelines,
+            params string[] pipelines) =>
+                AddCommand(name, new EngineCommandSettings
+                {
+                    Pipelines = pipelines,
+                    DefaultPipelines = defaultPipelines
+                });
 
         public IBootstrapper AddCommands(Assembly assembly)
         {

@@ -29,7 +29,7 @@ namespace Statiq.App
         public override async Task<int> ExecuteCommandAsync(CommandContext context, PreviewCommandSettings settings)
         {
             ExitCode exitCode = ExitCode.Normal;
-            using (EngineManager<PreviewCommandSettings> engineManager = new EngineManager<PreviewCommandSettings>(context, this, settings))
+            using (EngineManager engineManager = new EngineManager(context, this, settings))
             {
                 ILogger logger = engineManager.Engine.Services.GetRequiredService<ILogger<Bootstrapper>>();
 

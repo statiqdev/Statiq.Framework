@@ -14,8 +14,8 @@ using Statiq.Core;
 
 namespace Statiq.App
 {
-    internal abstract class EngineCommand<TSettings> : BaseCommand<TSettings>
-        where TSettings : EngineCommandSettings
+    internal abstract class EngineCommand<TSettings> : BaseCommand<TSettings>, IEngineCommand
+        where TSettings : BaseCommandSettings
     {
         protected EngineCommand(SettingsConfigurationProvider settingsProvider, IConfigurationRoot configurationRoot, IServiceCollection serviceCollection, IBootstrapper bootstrapper)
             : base(serviceCollection)

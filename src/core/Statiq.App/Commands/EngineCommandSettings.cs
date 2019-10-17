@@ -8,7 +8,7 @@ using Statiq.Common;
 
 namespace Statiq.App
 {
-    internal class EngineCommandSettings : BaseCommandSettings
+    public class EngineCommandSettings : BaseCommandSettings
     {
         [CommandOption("-i|--input")]
         [Description("The path(s) of input files, can be absolute or relative to the current folder.")]

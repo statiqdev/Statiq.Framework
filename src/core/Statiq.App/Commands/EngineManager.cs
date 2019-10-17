@@ -16,14 +16,13 @@ namespace Statiq.App
     /// <summary>
     /// This class can be used from commands to wrap engine execution and apply settings, etc.
     /// </summary>
-    internal class EngineManager<TSettings> : IDisposable
-        where TSettings : EngineCommandSettings
+    internal class EngineManager : IDisposable
     {
         private readonly ILogger _logger;
         private readonly string[] _pipelines;
         private readonly bool _defaultPipelines;
 
-        public EngineManager(CommandContext context, EngineCommand<TSettings> command, TSettings settings)
+        public EngineManager(CommandContext context, IEngineCommand command, EngineCommandSettings settings)
         {
             // Get the standard input stream
             string input = null;
@@ -36,8 +35,7 @@ namespace Statiq.App
             }
 
             // Create the application state
-            // TODO: Set the command name from the context
-            ApplicationState applicationState = new ApplicationState(command.Bootstrapper.Arguments, null, input);
+            ApplicationState applicationState = new ApplicationState(command.Bootstrapper.Arguments, context.Name, input);
 
             // Create the engine and get a logger
             Engine = new Engine(applicationState, command.ConfigurationRoot, command.ServiceCollection);
