@@ -1,6 +1,7 @@
 # 1.0.0-alpha.10
 
 - Added extensions for CLI `IConfigurator` to allow more flexible direct configuration (such as command branches).
+- Removed configuration/settings debug output on startup as it could leak secrets via environment variables or other configuration providers.
 
 # 1.0.0-alpha.9
 

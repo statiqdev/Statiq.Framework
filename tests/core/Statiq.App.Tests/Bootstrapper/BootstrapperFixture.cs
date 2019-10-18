@@ -114,29 +114,6 @@ namespace Statiq.App.Tests.Bootstrapper
                 bootstrapper.ClassCatalog.GetTypesAssignableTo<BootstrapperFixture>().Count().ShouldBe(1);
                 provider.Messages.ShouldContain(x => x.FormattedMessage.StartsWith("Cataloging types in assembly"));
             }
-
-            [Test]
-            public async Task LogsEvironmentVariablesAsMasked()
-            {
-                // Given
-                Environment.SetEnvironmentVariable("Foo", "Bar");
-                string[] args = new[] { "build", "-l", "Debug" };
-                TestLoggerProvider provider = new TestLoggerProvider
-                {
-                    ThrowLogLevel = LogLevel.None
-                };
-                IBootstrapper bootstrapper = App.Bootstrapper.Create(args);
-                bootstrapper.AddEnvironmentVariables();
-                bootstrapper.AddCommand<BuildCommand<EngineCommandSettings>>("build");
-                bootstrapper.ConfigureServices(services => services.AddSingleton<ILoggerProvider>(provider));
-
-                // When
-                int exitCode = await bootstrapper.RunAsync();
-
-                // Then
-                exitCode.ShouldBe((int)ExitCode.Normal);
-                provider.Messages.ShouldContain(x => x.FormattedMessage.Contains("Foo=***"));
-            }
         }
     }
 }

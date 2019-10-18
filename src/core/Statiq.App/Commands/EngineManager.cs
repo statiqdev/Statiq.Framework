@@ -63,7 +63,6 @@ namespace Statiq.App
             _logger.LogInformation($"Input path(s):{Environment.NewLine}       {string.Join(Environment.NewLine + "       ", Engine.FileSystem.InputPaths)}");
             _logger.LogInformation($"Output path:{Environment.NewLine}       {Engine.FileSystem.OutputPath}");
             _logger.LogInformation($"Temp path:{Environment.NewLine}       {Engine.FileSystem.TempPath}");
-            _logger.LogDebug($"Configuration:{Environment.NewLine}{configurationRoot.GetSafeDebugView()}");
         }
 
         public Engine Engine { get; }
