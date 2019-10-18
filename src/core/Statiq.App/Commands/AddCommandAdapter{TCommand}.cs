@@ -4,20 +4,19 @@ using Spectre.Cli;
 namespace Statiq.App
 {
     /// <summary>
-    /// Adds a specified command type to the CLI command set.
+    /// Adapts a command type to the generic <see cref="IConfigurator.AddCommand{TCommand}(string)"/> call.
     /// </summary>
     /// <typeparam name="TCommand">The type of CLI command to add.</typeparam>
-    public class AddCommandConfigurator<TCommand> : Common.IConfigurator<ConfigurableCommands>
+    internal class AddCommandAdapter<TCommand> : IAddCommandAdapter
         where TCommand : class, ICommand
     {
         private readonly string _name;
 
-        public AddCommandConfigurator(string name)
+        public AddCommandAdapter(string name)
         {
             _name = name ?? throw new ArgumentNullException(nameof(name));
         }
 
-        public void Configure(ConfigurableCommands configurableCommands) =>
-            configurableCommands.Configurator.AddCommand<TCommand>(_name);
+        public ICommandConfigurator AddCommand(IConfigurator configurator) => configurator.AddCommand<TCommand>(_name);
     }
 }

@@ -1,3 +1,7 @@
+# 1.0.0-alpha.10
+
+- Added extensions for CLI `IConfigurator` to allow more flexible direct configuration (such as command branches).
+
 # 1.0.0-alpha.9
 
 - Added `IBootstrapper.AddDelegateCommand()` fluent methods to configure delegate-based commands.
