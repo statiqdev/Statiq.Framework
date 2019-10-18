@@ -8,24 +8,29 @@ using Statiq.Common;
 
 namespace Statiq.App
 {
-    [Description("Runs the pipelines.")]
-    internal class BuildCommand : EngineCommand<EngineCommandSettings>
+    [Description("Executes the pipelines.")]
+    internal class BuildCommand<TSettings> : EngineCommand<TSettings>
+        where TSettings : BaseCommandSettings
     {
-        public BuildCommand(SettingsConfigurationProvider settingsProvider, IConfigurationRoot configurationRoot, IServiceCollection serviceCollection, IBootstrapper bootstrapper)
-            : base(settingsProvider, configurationRoot, serviceCollection, bootstrapper)
+        public BuildCommand(
+            IEngineSettingsDictionary engineSettings,
+            IConfigurationRoot configurationRoot,
+            IServiceCollection serviceCollection,
+            IBootstrapper bootstrapper)
+            : base(engineSettings, configurationRoot, serviceCollection, bootstrapper)
         {
         }
 
-        public override async Task<int> ExecuteCommandAsync(CommandContext context, EngineCommandSettings settings)
+        protected override async Task<int> ExecuteEngineAsync(
+            CommandContext commandContext,
+            TSettings commandSettings,
+            IEngineManager engineManager)
         {
             using (CancellationTokenSource cancellationTokenSource = new CancellationTokenSource())
             {
-                using (EngineManager engineManager = new EngineManager(context, this, settings))
-                {
-                    return await engineManager.ExecuteAsync(cancellationTokenSource)
-                        ? (int)ExitCode.Normal
-                        : (int)ExitCode.ExecutionError;
-                }
+                return await engineManager.ExecuteAsync(cancellationTokenSource)
+                    ? (int)ExitCode.Normal
+                    : (int)ExitCode.ExecutionError;
             }
         }
     }

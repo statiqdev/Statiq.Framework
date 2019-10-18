@@ -1,6 +1,9 @@
 # 1.0.0-alpha.9
 
-- Removed `CustomBuildCommand` and replaced with fluent `IBootstrapper.AddCommand()` overloads.
+- Added `IBootstrapper.AddDelegateCommand()` fluent methods to configure delegate-based commands.
+- Added `IBootstrapper.AddBuildCommand()` fluent methods to configure simple commands that build specified pipelines.
+- Refactored the base commands to allow consumers to derive from `EngineCommand`.
+- Added a new `IEngineManager` interface to expose the engine manager to commands that derive from `EngineCommand`.
 - Refactored `IEngine.Settings` and `IExecutionContext.Settings` to use a `IConfiguration` as the backing store and present it as metadata.
 - Lazily creates type-based pipelines using the DI container so they can have injected services (#59).
 - Adds `INamedPipeline` to allow pipeline instances to provide names.

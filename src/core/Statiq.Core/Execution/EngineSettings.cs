@@ -10,9 +10,9 @@ using Statiq.Common;
 
 namespace Statiq.Core
 {
-    internal class Settings : ConfigurationMetadata, ISettings
+    internal class EngineSettings : ConfigurationMetadata, IEngineSettings
     {
-        public Settings(IConfiguration configuration)
+        public EngineSettings(IConfiguration configuration)
             : base(configuration)
         {
         }

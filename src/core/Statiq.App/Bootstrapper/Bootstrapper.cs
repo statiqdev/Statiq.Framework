@@ -58,7 +58,7 @@ namespace Statiq.App
             Configurators.Configure<IBootstrapper>(this);
 
             // Get our initial settings for configuration
-            SettingsConfigurationProvider settingsProvider = new SettingsConfigurationProvider();
+            EngineSettingsConfigurationProvider settingsProvider = new EngineSettingsConfigurationProvider();
             ConfigurableSettings configurableSettings = new ConfigurableSettings(settingsProvider);
             Configurators.Configure(configurableSettings);
 
@@ -85,7 +85,7 @@ namespace Statiq.App
 
             // Create the stand-alone command line service container and register a few types needed for the CLI
             CommandServiceTypeRegistrar registrar = new CommandServiceTypeRegistrar();
-            registrar.RegisterInstance(typeof(SettingsConfigurationProvider), settingsProvider);
+            registrar.RegisterInstance(typeof(IEngineSettingsDictionary), settingsProvider);
             registrar.RegisterInstance(typeof(IConfigurationRoot), configurationRoot);
             registrar.RegisterInstance(typeof(IServiceCollection), serviceCollection);
             registrar.RegisterInstance(typeof(IBootstrapper), this);

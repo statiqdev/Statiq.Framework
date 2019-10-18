@@ -4,7 +4,7 @@ using Microsoft.Extensions.Configuration;
 
 namespace Statiq.Common
 {
-    public interface ISettings : IMetadata
+    public interface IEngineSettings : IMetadata
     {
         IConfiguration Configuration { get; }
     }

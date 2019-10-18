@@ -50,7 +50,7 @@ namespace Statiq.Core
         public IReadOnlyFileSystem FileSystem => _contextData.Engine.FileSystem;
 
         /// <inheritdoc/>
-        public ISettings Settings => _contextData.Engine.Settings;
+        public IEngineSettings Settings => _contextData.Engine.Settings;
 
         /// <inheritdoc/>
         public IReadOnlyShortcodeCollection Shortcodes => _contextData.Engine.Shortcodes;

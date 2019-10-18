@@ -26,7 +26,7 @@ namespace Statiq.App.Tests.Bootstrapper
                 string[] args = new[] { "build" };
                 TestLoggerProvider provider = new TestLoggerProvider();
                 IBootstrapper bootstrapper = App.Bootstrapper.Create(args);
-                bootstrapper.AddCommand<BuildCommand>("build");
+                bootstrapper.AddCommand<BuildCommand<EngineCommandSettings>>("build");
                 bootstrapper.ConfigureServices(services => services.AddSingleton<ILoggerProvider>(provider));
                 bootstrapper.AddPipeline("Foo");
 
@@ -48,7 +48,7 @@ namespace Statiq.App.Tests.Bootstrapper
                     ThrowLogLevel = LogLevel.None
                 };
                 IBootstrapper bootstrapper = App.Bootstrapper.Create(args);
-                bootstrapper.AddCommand<BuildCommand>("build");
+                bootstrapper.AddCommand<BuildCommand<EngineCommandSettings>>("build");
                 bootstrapper.ConfigureServices(services => services.AddSingleton<ILoggerProvider>(provider));
 
                 // When
@@ -76,7 +76,7 @@ namespace Statiq.App.Tests.Bootstrapper
                     ThrowLogLevel = LogLevel.None
                 };
                 IBootstrapper bootstrapper = App.Bootstrapper.Create(args);
-                bootstrapper.AddCommand<BuildCommand>("build");
+                bootstrapper.AddCommand<BuildCommand<EngineCommandSettings>>("build");
                 bootstrapper.ConfigureServices(services => services.AddSingleton<ILoggerProvider>(provider));
                 bootstrapper.AddPipeline(
                     "Foo",
@@ -102,7 +102,7 @@ namespace Statiq.App.Tests.Bootstrapper
                 string[] args = new[] { "build", "-l", "Debug" };
                 TestLoggerProvider provider = new TestLoggerProvider();
                 IBootstrapper bootstrapper = App.Bootstrapper.Create(args);
-                bootstrapper.AddCommand<BuildCommand>("build");
+                bootstrapper.AddCommand<BuildCommand<EngineCommandSettings>>("build");
                 bootstrapper.ConfigureServices(services => services.AddSingleton<ILoggerProvider>(provider));
                 bootstrapper.AddPipeline("Foo");
 
@@ -127,7 +127,7 @@ namespace Statiq.App.Tests.Bootstrapper
                 };
                 IBootstrapper bootstrapper = App.Bootstrapper.Create(args);
                 bootstrapper.AddEnvironmentVariables();
-                bootstrapper.AddCommand<BuildCommand>("build");
+                bootstrapper.AddCommand<BuildCommand<EngineCommandSettings>>("build");
                 bootstrapper.ConfigureServices(services => services.AddSingleton<ILoggerProvider>(provider));
 
                 // When

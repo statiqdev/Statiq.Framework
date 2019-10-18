@@ -16,17 +16,23 @@ namespace Statiq.App
     /// <summary>
     /// This class can be used from commands to wrap engine execution and apply settings, etc.
     /// </summary>
-    internal class EngineManager : IDisposable
+    internal class EngineManager : IEngineManager, IDisposable
     {
         private readonly ILogger _logger;
         private readonly string[] _pipelines;
         private readonly bool _defaultPipelines;
 
-        public EngineManager(CommandContext context, IEngineCommand command, EngineCommandSettings settings)
+        public EngineManager(
+            CommandContext commandContext,
+            EngineCommandSettings commandSettings,
+            IDictionary<string, string> engineSettings,
+            IConfigurationRoot configurationRoot,
+            IServiceCollection serviceCollection,
+            IBootstrapper bootstrapper)
         {
             // Get the standard input stream
             string input = null;
-            if (settings?.StdIn == true)
+            if (commandSettings?.StdIn == true)
             {
                 using (StreamReader reader = new StreamReader(Console.OpenStandardInput(), Console.InputEncoding))
                 {
@@ -35,29 +41,29 @@ namespace Statiq.App
             }
 
             // Create the application state
-            ApplicationState applicationState = new ApplicationState(command.Bootstrapper.Arguments, context.Name, input);
+            ApplicationState applicationState = new ApplicationState(bootstrapper.Arguments, commandContext.Name, input);
 
             // Create the engine and get a logger
-            Engine = new Engine(applicationState, command.ConfigurationRoot, command.ServiceCollection);
+            Engine = new Engine(applicationState, configurationRoot, serviceCollection);
             _logger = Engine.Services.GetRequiredService<ILogger<Bootstrapper>>();
 
             // Apply command settings
-            if (settings != null)
+            if (commandSettings != null)
             {
-                ApplyCommandSettings(Engine, command.SettingsProvider, settings);
+                ApplyCommandSettings(Engine, engineSettings, commandSettings);
             }
-            _pipelines = settings?.Pipelines;
-            _defaultPipelines = settings == null || settings.Pipelines == null || settings.Pipelines.Length == 0 || settings.DefaultPipelines;
+            _pipelines = commandSettings?.Pipelines;
+            _defaultPipelines = commandSettings == null || commandSettings.Pipelines == null || commandSettings.Pipelines.Length == 0 || commandSettings.DefaultPipelines;
 
             // Run engine configurators after command line, settings, etc. have been applied
-            command.Bootstrapper.Configurators.Configure<IEngine>(Engine);
+            bootstrapper.Configurators.Configure<IEngine>(Engine);
 
             // Log the full environment
             _logger.LogInformation($"Root path:{Environment.NewLine}       {Engine.FileSystem.RootPath}");
             _logger.LogInformation($"Input path(s):{Environment.NewLine}       {string.Join(Environment.NewLine + "       ", Engine.FileSystem.InputPaths)}");
             _logger.LogInformation($"Output path:{Environment.NewLine}       {Engine.FileSystem.OutputPath}");
             _logger.LogInformation($"Temp path:{Environment.NewLine}       {Engine.FileSystem.TempPath}");
-            _logger.LogDebug($"Configuration:{Environment.NewLine}{command.ConfigurationRoot.GetSafeDebugView()}");
+            _logger.LogDebug($"Configuration:{Environment.NewLine}{configurationRoot.GetSafeDebugView()}");
         }
 
         public Engine Engine { get; }

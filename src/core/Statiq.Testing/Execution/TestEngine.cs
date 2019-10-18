@@ -24,7 +24,7 @@ namespace Statiq.Testing
         public ApplicationState ApplicationState { get; set; }
 
         /// <inheritdoc />
-        ISettings IEngine.Settings => Settings;
+        IEngineSettings IEngine.Settings => Settings;
 
         /// <inheritdoc />
         public IEventCollection Events { get; set; } = new TestEventCollection();

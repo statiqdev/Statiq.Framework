@@ -1,37 +1,61 @@
-﻿using System;
-using System.Diagnostics;
-using System.IO;
-using System.Threading;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
-using NetEscapades.Extensions.Logging.RollingFile;
 using Spectre.Cli;
-using Statiq.Common;
-using Statiq.Core;
 
 namespace Statiq.App
 {
-    internal abstract class EngineCommand<TSettings> : BaseCommand<TSettings>, IEngineCommand
+    public abstract class EngineCommand<TSettings> : BaseCommand<TSettings>
         where TSettings : BaseCommandSettings
     {
-        protected EngineCommand(SettingsConfigurationProvider settingsProvider, IConfigurationRoot configurationRoot, IServiceCollection serviceCollection, IBootstrapper bootstrapper)
+        protected EngineCommand(
+            IEngineSettingsDictionary engineSettings,
+            IConfigurationRoot configurationRoot,
+            IServiceCollection serviceCollection,
+            IBootstrapper bootstrapper)
             : base(serviceCollection)
         {
-            SettingsProvider = settingsProvider;
+            EngineSettings = engineSettings;
             ConfigurationRoot = configurationRoot;
             ServiceCollection = serviceCollection;
             Bootstrapper = bootstrapper;
         }
 
-        public SettingsConfigurationProvider SettingsProvider { get; }
+        public IEngineSettingsDictionary EngineSettings { get; }
 
         public IConfigurationRoot ConfigurationRoot { get; }
 
         public IServiceCollection ServiceCollection { get; }
 
         public IBootstrapper Bootstrapper { get; }
+
+        public override sealed async Task<int> ExecuteCommandAsync(CommandContext commandContext, TSettings commandSettings)
+        {
+            // We need to get the engine command settings to pass to the engine manager
+            // First try the actual command settings
+            if (!(commandSettings is EngineCommandSettings engineCommandSettings))
+            {
+                // Then try the command data or create one and either way copy over the base command settings
+                engineCommandSettings = commandContext.Data as EngineCommandSettings ?? new EngineCommandSettings();
+                engineCommandSettings.LogLevel = commandSettings.LogLevel;
+                engineCommandSettings.Attach = commandSettings.Attach;
+                engineCommandSettings.LogFile = commandSettings.LogFile;
+            }
+
+            // Execute the engine manager and dispose it when done
+            using (EngineManager engineManager =
+                new EngineManager(
+                    commandContext,
+                    engineCommandSettings,
+                    EngineSettings,
+                    ConfigurationRoot,
+                    ServiceCollection,
+                    Bootstrapper))
+            {
+                return await ExecuteEngineAsync(commandContext, commandSettings, engineManager);
+            }
+        }
+
+        protected abstract Task<int> ExecuteEngineAsync(CommandContext commandContext, TSettings commandSettings, IEngineManager engineManager);
     }
 }

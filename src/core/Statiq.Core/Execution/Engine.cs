@@ -64,7 +64,7 @@ namespace Statiq.Core
         {
             _pipelines = new PipelineCollection(this);
             ApplicationState = applicationState ?? new ApplicationState(null, null, null);
-            Settings = new Settings(configuration ?? new ConfigurationRoot(Array.Empty<IConfigurationProvider>()));
+            Settings = new EngineSettings(configuration ?? new ConfigurationRoot(Array.Empty<IConfigurationProvider>()));
             _serviceScope = GetServiceScope(serviceCollection);
             _logger = Services.GetRequiredService<ILogger<Engine>>();
             DocumentFactory = new DocumentFactory(Settings);
@@ -92,7 +92,7 @@ namespace Statiq.Core
             serviceCollection.AddSingleton<ApplicationState>(ApplicationState);
             serviceCollection.AddSingleton<IReadOnlyEventCollection>(Events);
             serviceCollection.AddSingleton<IReadOnlyFileSystem>(FileSystem);
-            serviceCollection.AddSingleton<ISettings>(Settings);
+            serviceCollection.AddSingleton<IEngineSettings>(Settings);
             serviceCollection.AddSingleton<IConfiguration>(Settings.Configuration);
             serviceCollection.AddSingleton<IReadOnlyShortcodeCollection>(Shortcodes);
             serviceCollection.AddSingleton<IMemoryStreamFactory>(MemoryStreamFactory);
@@ -110,7 +110,7 @@ namespace Statiq.Core
         public ApplicationState ApplicationState { get; }
 
         /// <inheritdoc />
-        public ISettings Settings { get; }
+        public IEngineSettings Settings { get; }
 
         /// <inheritdoc />
         public IEventCollection Events { get; } = new EventCollection();

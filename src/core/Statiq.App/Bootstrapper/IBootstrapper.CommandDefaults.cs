@@ -38,27 +38,60 @@ namespace Statiq.App
             return this;
         }
 
-        public IBootstrapper AddCommand(string name, EngineCommandSettings commandSettings)
-        {
-            _ = name ?? throw new ArgumentNullException(nameof(name));
-            _ = commandSettings ?? throw new ArgumentNullException(nameof(commandSettings));
-            return ConfigureCommands(x => x.AddCommand<CustomBuildCommand>(name).WithData(commandSettings));
-        }
-
-        public IBootstrapper AddCommand(
+        public IBootstrapper AddBuildCommand(
             string name,
             params string[] pipelines) =>
-            AddCommand(name, false, pipelines);
+            AddBuildCommand(name, null, false, pipelines);
 
-        public IBootstrapper AddCommand(
+        public IBootstrapper AddBuildCommand(
+            string name,
+            string description,
+            params string[] pipelines) =>
+            AddBuildCommand(name, description, false, pipelines);
+
+        public IBootstrapper AddBuildCommand(
             string name,
             bool defaultPipelines,
             params string[] pipelines) =>
-                AddCommand(name, new EngineCommandSettings
+            AddBuildCommand(name, null, defaultPipelines, pipelines);
+
+        public IBootstrapper AddBuildCommand(
+            string name,
+            string description,
+            bool defaultPipelines,
+            params string[] pipelines) =>
+                AddBuildCommand(name, description, new EngineCommandSettings
                 {
                     Pipelines = pipelines,
                     DefaultPipelines = defaultPipelines
                 });
+
+        public IBootstrapper AddBuildCommand(string name, EngineCommandSettings commandSettings) =>
+            AddBuildCommand(name, null, commandSettings);
+
+        public IBootstrapper AddBuildCommand(string name, string description, EngineCommandSettings commandSettings)
+        {
+            _ = name ?? throw new ArgumentNullException(nameof(name));
+            _ = commandSettings ?? throw new ArgumentNullException(nameof(commandSettings));
+            return ConfigureCommands(x => x
+                .AddCommand<BuildCommand<BaseCommandSettings>>(name)
+                .WithData(commandSettings)
+                .WithDescription(description));
+        }
+
+        public IBootstrapper AddDelegateCommand(string name, Func<CommandContext, int> func) =>
+            AddDelegateCommand<EmptyCommandSettings>(name, null, (c, _) => func(c));
+
+        public IBootstrapper AddDelegateCommand(string name, string description, Func<CommandContext, int> func) =>
+            AddDelegateCommand<EmptyCommandSettings>(name, description, (c, _) => func(c));
+
+        public IBootstrapper AddDelegateCommand<TSettings>(string name, Func<CommandContext, TSettings, int> func)
+            where TSettings : CommandSettings =>
+            AddDelegateCommand(name, null, func);
+
+        public IBootstrapper AddDelegateCommand<TSettings>(string name, string description, Func<CommandContext, TSettings, int> func)
+            where TSettings : CommandSettings =>
+            ConfigureCommands(x => x.AddDelegate(name, func).WithDescription(description));
 
         public IBootstrapper AddCommands(Assembly assembly)
         {

@@ -18,20 +18,16 @@ namespace Statiq.Common
 
         public IConfiguration Configuration { get; protected set; }
 
-        public bool ContainsKey(string key)
-        {
-            _ = key ?? throw new ArgumentNullException(nameof(key));
-            IConfigurationSection section = Configuration.GetSection(key);
-            return section.Exists() && section.Value != null;
-        }
+        public bool ContainsKey(string key) =>
+            Configuration.GetSection(key ?? throw new ArgumentNullException(nameof(key))).Exists();
 
         public bool TryGetRaw(string key, out object value)
         {
             _ = key ?? throw new ArgumentNullException(nameof(key));
             IConfigurationSection section = Configuration.GetSection(key);
-            if (section.Exists() && section.Value != null)
+            if (section.Exists())
             {
-                value = section.Value;
+                value = section.Value ?? (object)new ConfigurationMetadata(section);
                 return true;
             }
             value = default;
