@@ -2,6 +2,7 @@
 
 - Added extensions for CLI `IConfigurator` to allow more flexible direct configuration (such as command branches).
 - Removed configuration/settings debug output on startup as it could leak secrets via environment variables or other configuration providers.
+- Fix for `GenerateJson` so it executes when no input documents are provided.
 
 # 1.0.0-alpha.9
 

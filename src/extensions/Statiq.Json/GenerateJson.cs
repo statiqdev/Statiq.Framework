@@ -49,7 +49,7 @@ namespace Statiq.Json
         /// <param name="destinationKey">The metadata key where the JSON should be stored (or <c>null</c>
         /// to replace the content of each input document).</param>
         public GenerateJson(Config<object> data, string destinationKey = null)
-            : base(data, true)
+            : base(data, false)
         {
             _destinationKey = destinationKey;
         }
@@ -122,10 +122,11 @@ namespace Statiq.Json
                     string result = JsonConvert.SerializeObject(value, settings);
                     if (string.IsNullOrEmpty(_destinationKey))
                     {
-                        return input.Clone(await context.GetContentProviderAsync(result)).Yield();
+                        return context.CloneOrCreateDocument(input, await context.GetContentProviderAsync(result)).Yield();
                     }
-                    return input
-                        .Clone(new MetadataItems
+                    return context.CloneOrCreateDocument(
+                        input,
+                        new MetadataItems
                         {
                             { _destinationKey, result }
                         })
