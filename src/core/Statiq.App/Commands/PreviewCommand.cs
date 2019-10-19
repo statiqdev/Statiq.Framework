@@ -52,15 +52,20 @@ namespace Statiq.App
                 ? GetContentTypes(commandSettings.ContentTypes)
                 : new Dictionary<string, string>();
             ILoggerProvider loggerProvider = engineManager.Engine.Services.GetRequiredService<ILoggerProvider>();
-            Server previewServer = await StartPreviewServerAsync(
-                engineManager.Engine.FileSystem.GetOutputDirectory().Path,
-                commandSettings.Port,
-                commandSettings.ForceExt,
-                commandSettings.VirtualDirectory,
-                !commandSettings.NoReload,
-                contentTypes,
-                loggerProvider,
-                logger);
+            IDirectory outputDirectory = engineManager.Engine.FileSystem.GetOutputDirectory();
+            Server previewServer = null;
+            if (outputDirectory.Exists)
+            {
+                previewServer = await StartPreviewServerAsync(
+                    outputDirectory.Path,
+                    commandSettings.Port,
+                    commandSettings.ForceExt,
+                    commandSettings.VirtualDirectory,
+                    !commandSettings.NoReload,
+                    contentTypes,
+                    loggerProvider,
+                    logger);
+            }
 
             // Start the watchers
             ActionFileSystemWatcher inputFolderWatcher = null;
@@ -68,7 +73,7 @@ namespace Statiq.App
             {
                 logger.LogInformation("Watching paths(s) {0}", string.Join(", ", engineManager.Engine.FileSystem.InputPaths));
                 inputFolderWatcher = new ActionFileSystemWatcher(
-                    engineManager.Engine.FileSystem.GetOutputDirectory().Path,
+                    outputDirectory.Path,
                     engineManager.Engine.FileSystem.GetInputDirectories().Select(x => x.Path),
                     true,
                     "*.*",
@@ -160,7 +165,25 @@ namespace Statiq.App
                         }
                     }
 
-                    await previewServer.TriggerReloadAsync();
+                    if (previewServer == null)
+                    {
+                        if (outputDirectory.Exists)
+                        {
+                            previewServer = await StartPreviewServerAsync(
+                                outputDirectory.Path,
+                                commandSettings.Port,
+                                commandSettings.ForceExt,
+                                commandSettings.VirtualDirectory,
+                                !commandSettings.NoReload,
+                                contentTypes,
+                                loggerProvider,
+                                logger);
+                        }
+                    }
+                    else
+                    {
+                        await previewServer.TriggerReloadAsync();
+                    }
                 }
 
                 // Check one more time for exit
@@ -175,7 +198,7 @@ namespace Statiq.App
             // Shutdown
             logger.LogInformation("Shutting down");
             inputFolderWatcher?.Dispose();
-            previewServer.Dispose();
+            previewServer?.Dispose();
 
             return (int)exitCode;
         }
