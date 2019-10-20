@@ -21,7 +21,7 @@ namespace Statiq.Common
 
         public async Task<IContentProvider> GetContentProviderAsync(string content)
         {
-            if (string.IsNullOrEmpty(content))
+            if (content == null)
             {
                 return null;
             }
