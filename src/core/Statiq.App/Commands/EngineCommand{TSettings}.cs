@@ -2,6 +2,7 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Spectre.Cli;
+using Statiq.Common;
 
 namespace Statiq.App
 {
@@ -9,11 +10,12 @@ namespace Statiq.App
         where TSettings : BaseCommandSettings
     {
         protected EngineCommand(
+            IConfiguratorCollection configurators,
             IConfigurationSettingsDictionary configurationSettings,
             IConfigurationRoot configurationRoot,
             IServiceCollection serviceCollection,
             IBootstrapper bootstrapper)
-            : base(configurationSettings, serviceCollection)
+            : base(configurators, configurationSettings, serviceCollection)
         {
             ConfigurationRoot = configurationRoot;
             Bootstrapper = bootstrapper;

@@ -22,11 +22,12 @@ namespace Statiq.App
         private readonly InterlockedBool _exit = new InterlockedBool(false);
 
         public PreviewCommand(
+            IConfiguratorCollection configurators,
             IConfigurationSettingsDictionary configurationSettings,
             IConfigurationRoot configurationRoot,
             IServiceCollection serviceCollection,
             IBootstrapper bootstrapper)
-            : base(configurationSettings, configurationRoot, serviceCollection, bootstrapper)
+            : base(configurators, configurationSettings, configurationRoot, serviceCollection, bootstrapper)
         {
         }
 

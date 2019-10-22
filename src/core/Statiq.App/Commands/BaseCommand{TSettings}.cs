@@ -21,8 +21,12 @@ namespace Statiq.App
     public abstract class BaseCommand<TSettings> : AsyncCommand<TSettings>
         where TSettings : BaseCommandSettings
     {
-        protected BaseCommand(IConfigurationSettingsDictionary configurationSettings, IServiceCollection serviceCollection)
+        protected BaseCommand(
+            IConfiguratorCollection configurators,
+            IConfigurationSettingsDictionary configurationSettings,
+            IServiceCollection serviceCollection)
         {
+            Configurators = configurators;
             ConfigurationSettings = configurationSettings;
             ServiceCollection = serviceCollection;
         }
@@ -30,6 +34,8 @@ namespace Statiq.App
         public IConfigurationSettingsDictionary ConfigurationSettings { get; }
 
         public IServiceCollection ServiceCollection { get; }
+
+        public IConfiguratorCollection Configurators { get; }
 
         public sealed override async Task<int> ExecuteAsync(CommandContext context, TSettings commandSettings)
         {
@@ -90,6 +96,10 @@ namespace Statiq.App
                     ConfigurationSettings[setting.Key] = setting.Value;
                 }
             }
+
+            // Configure settings after other configuration so they can use the values
+            ConfigurableSettings configurableSettings = new ConfigurableSettings(ConfigurationSettings);
+            Configurators.Configure(configurableSettings);
 
             return await ExecuteCommandAsync(context, commandSettings);
         }

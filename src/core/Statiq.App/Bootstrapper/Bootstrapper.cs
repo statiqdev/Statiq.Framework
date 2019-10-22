@@ -17,8 +17,6 @@ namespace Statiq.App
     {
         private readonly ClassCatalog _classCatalog = new ClassCatalog();
 
-        private readonly Dictionary<Type, string> _commandNames = new Dictionary<Type, string>();
-
         private Func<CommandServiceTypeRegistrar, ICommandApp> _getCommandApp = x => new CommandApp(x);
 
         // Private constructor to force factory use which returns the interface to get access to default interface implementations
@@ -57,12 +55,8 @@ namespace Statiq.App
             Configurators.Configure<IConfigurableBootstrapper>(this);
             Configurators.Configure<IBootstrapper>(this);
 
-            // Get our initial settings for configuration
-            SettingsConfigurationProvider settingsProvider = new SettingsConfigurationProvider();
-            ConfigurableSettings configurableSettings = new ConfigurableSettings(settingsProvider);
-            Configurators.Configure(configurableSettings);
-
             // Run the configuration configurator and get the configuration root
+            SettingsConfigurationProvider settingsProvider = new SettingsConfigurationProvider();
             IConfigurationBuilder configurationBuilder = new ConfigurationBuilder();
             ConfigurableConfiguration configurableConfiguration = new ConfigurableConfiguration(configurationBuilder);
             Configurators.Configure(configurableConfiguration);
@@ -89,6 +83,7 @@ namespace Statiq.App
             registrar.RegisterInstance(typeof(IConfigurationSettingsDictionary), settingsProvider);
             registrar.RegisterInstance(typeof(IConfigurationRoot), configurationRoot);
             registrar.RegisterInstance(typeof(IServiceCollection), serviceCollection);
+            registrar.RegisterInstance(typeof(IConfiguratorCollection), Configurators);
             registrar.RegisterInstance(typeof(IBootstrapper), this);
 
             // Create the command line parser and run the command

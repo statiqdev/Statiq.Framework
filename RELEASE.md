@@ -1,3 +1,7 @@
+# 1.0.0-alpha.11
+
+- Changed `IBootstrapper.AddSettings()` calls to run after other configuration.
+
 # 1.0.0-alpha.10
 
 - Added extensions for CLI `IConfigurator` to allow more flexible direct configuration (such as command branches).
