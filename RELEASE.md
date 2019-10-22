@@ -1,6 +1,7 @@
 # 1.0.0-alpha.11
 
 - Changed `IBootstrapper.AddSettings()` calls to run after other configuration.
+- Adds a single pattern overload to `ReadFiles`.
 
 # 1.0.0-alpha.10
 

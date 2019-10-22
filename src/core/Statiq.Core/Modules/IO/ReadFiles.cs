@@ -35,6 +35,20 @@ namespace Statiq.Core
         }
 
         /// <summary>
+        /// Reads all files that match the specified globbing pattern and/or absolute path. This allows you to
+        /// specify different patterns and/or paths depending on the input.
+        /// </summary>
+        /// <param name="pattern">A delegate that returns a globbing patterns and/or absolute paths.</param>
+        public ReadFiles(Config<string> pattern)
+            : base(
+                pattern.RequiresDocument
+                    ? Config.FromDocument(async (doc, ctx) => (IEnumerable<string>)new string[] { await pattern.GetValueAsync(doc, ctx) })
+                    : Config.FromContext(async ctx => (IEnumerable<string>)new string[] { await pattern.GetValueAsync(null, ctx) }),
+                false)
+        {
+        }
+
+        /// <summary>
         /// Reads all files that match the specified globbing patterns and/or absolute paths.
         /// </summary>
         /// <param name="patterns">The globbing patterns and/or absolute paths to read.</param>
