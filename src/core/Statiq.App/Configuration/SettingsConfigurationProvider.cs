@@ -6,7 +6,7 @@ using Spectre.Cli;
 
 namespace Statiq.App
 {
-    internal class EngineSettingsConfigurationProvider : ConfigurationProvider, IConfigurationSource, IEngineSettingsDictionary
+    internal class SettingsConfigurationProvider : ConfigurationProvider, IConfigurationSource, IConfigurationSettingsDictionary
     {
         public IConfigurationProvider Build(IConfigurationBuilder builder) => this;
 

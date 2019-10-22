@@ -40,7 +40,7 @@ namespace Statiq.Common
         /// <typeparam name="TValue">The type of config value.</typeparam>
         /// <param name="func">The delegate that produces the config value.</param>
         /// <returns>A config object.</returns>
-        public static Config<TValue> FromSettings<TValue>(Func<IEngineSettings, TValue> func)
+        public static Config<TValue> FromSettings<TValue>(Func<IConfigurationSettings, TValue> func)
         {
             _ = func ?? throw new ArgumentNullException(nameof(func));
             return new Config<TValue>((_, ctx) => Task.FromResult(func(ctx.Settings)), false);
@@ -52,7 +52,7 @@ namespace Statiq.Common
         /// <typeparam name="TValue">The type of config value.</typeparam>
         /// <param name="func">The delegate that produces the config value.</param>
         /// <returns>A config object.</returns>
-        public static Config<TValue> FromSettings<TValue>(Func<IEngineSettings, Task<TValue>> func)
+        public static Config<TValue> FromSettings<TValue>(Func<IConfigurationSettings, Task<TValue>> func)
         {
             _ = func ?? throw new ArgumentNullException(nameof(func));
             return new Config<TValue>((_, ctx) => func(ctx.Settings), false);
@@ -65,7 +65,7 @@ namespace Statiq.Common
         /// <typeparam name="TValue">The type of config value.</typeparam>
         /// <param name="action">A delegate action to evaluate.</param>
         /// <returns>A config object.</returns>
-        public static Config<TValue> FromSettings<TValue>(Action<IEngineSettings> action) =>
+        public static Config<TValue> FromSettings<TValue>(Action<IConfigurationSettings> action) =>
             new Config<TValue>((__, ctx) =>
             {
                 _ = action ?? throw new ArgumentNullException(nameof(action));
@@ -80,7 +80,7 @@ namespace Statiq.Common
         /// <typeparam name="TValue">The type of config value.</typeparam>
         /// <param name="action">A delegate action to evaluate.</param>
         /// <returns>A config object.</returns>
-        public static Config<TValue> FromSettings<TValue>(Func<IEngineSettings, Task> action) =>
+        public static Config<TValue> FromSettings<TValue>(Func<IConfigurationSettings, Task> action) =>
             new Config<TValue>(async (__, ctx) =>
             {
                 _ = action ?? throw new ArgumentNullException(nameof(action));
@@ -93,7 +93,7 @@ namespace Statiq.Common
         /// </summary>
         /// <param name="action">A delegate action to evaluate.</param>
         /// <returns>A config object.</returns>
-        public static Config<object> FromSettings(Action<IEngineSettings> action) =>
+        public static Config<object> FromSettings(Action<IConfigurationSettings> action) =>
             FromSettings<object>(action);
 
         /// <summary>
@@ -101,7 +101,7 @@ namespace Statiq.Common
         /// </summary>
         /// <param name="action">A delegate action to evaluate.</param>
         /// <returns>A config object.</returns>
-        public static Config<object> FromSettings(Func<IEngineSettings, Task> action) =>
+        public static Config<object> FromSettings(Func<IConfigurationSettings, Task> action) =>
             FromSettings<object>(action);
     }
 }

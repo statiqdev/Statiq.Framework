@@ -38,14 +38,14 @@ namespace Statiq.App
             {
                 AddDefaultSettings();
             }
+            if (defaultsToAdd.HasFlag(DefaultsToAdd.ConfigurationFiles))
+            {
+                AddDefaultConfigurationFiles();
+            }
             if (defaultsToAdd.HasFlag(DefaultsToAdd.EnvironmentVariables))
             {
                 // Add the environment variables before the other configuration providers so they're lowest precedence
                 AddEnvironmentVariables();
-            }
-            if (defaultsToAdd.HasFlag(DefaultsToAdd.Configuration))
-            {
-                AddDefaultConfiguration();
             }
             if (defaultsToAdd.HasFlag(DefaultsToAdd.Commands))
             {
@@ -98,14 +98,14 @@ namespace Statiq.App
                     { Keys.CleanOutputPath, "true" }
                 }));
 
-        public IBootstrapper AddEnvironmentVariables() =>
-            BuildConfiguration(builder => builder.AddEnvironmentVariables());
-
-        public IBootstrapper AddDefaultConfiguration() =>
+        public IBootstrapper AddDefaultConfigurationFiles() =>
             BuildConfiguration(builder => builder
                 .SetBasePath(Directory.GetCurrentDirectory())
                 .AddJsonFile("appsettings.json", true)
                 .AddJsonFile("statiq.json", true));
+
+        public IBootstrapper AddEnvironmentVariables() =>
+            BuildConfiguration(builder => builder.AddEnvironmentVariables());
 
         public IBootstrapper AddDefaultCommands()
         {

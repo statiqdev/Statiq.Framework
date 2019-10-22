@@ -74,7 +74,7 @@ namespace Statiq.Testing
         public Guid ExecutionId { get; set; } = Guid.NewGuid();
 
         /// <inheritdoc />
-        IEngineSettings IExecutionContext.Settings => Settings;
+        IConfigurationSettings IExecutionContext.Settings => Settings;
 
         /// <inheritdoc/>
         public IRawAssemblyCollection DynamicAssemblies { get; set; } = new TestRawAssemblyCollection();

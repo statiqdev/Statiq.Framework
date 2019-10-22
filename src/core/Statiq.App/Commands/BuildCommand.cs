@@ -13,11 +13,11 @@ namespace Statiq.App
         where TSettings : BaseCommandSettings
     {
         public BuildCommand(
-            IEngineSettingsDictionary engineSettings,
+            IConfigurationSettingsDictionary configurationSettings,
             IConfigurationRoot configurationRoot,
             IServiceCollection serviceCollection,
             IBootstrapper bootstrapper)
-            : base(engineSettings, configurationRoot, serviceCollection, bootstrapper)
+            : base(configurationSettings, configurationRoot, serviceCollection, bootstrapper)
         {
         }
 

@@ -9,7 +9,7 @@ namespace Statiq.App
     /// <summary>
     /// Parses INI-like args in key=value format.
     /// </summary>
-    internal static class MetadataParser
+    internal static class SettingsParser
     {
         public static IReadOnlyDictionary<string, string> Parse(IEnumerable<string> args) =>
             args.Select(ParsePair).ToDictionary(pair => pair.Key, pair => pair.Value);
@@ -27,8 +27,8 @@ namespace Statiq.App
                 }
             }
 
-            // If one wasn't found, just unescape the whole string and set a null value
-            return new KeyValuePair<string, string>(Unescape(arg.Trim()), null);
+            // If one wasn't found, just unescape the whole string and set a true value
+            return new KeyValuePair<string, string>(Unescape(arg.Trim()), "true");
         }
 
         // Based on code from StackOverflow: http://stackoverflow.com/a/25471811/807064

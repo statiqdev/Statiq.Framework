@@ -15,7 +15,7 @@ using Statiq.Common;
 
 namespace Statiq.Testing
 {
-    public class TestSettings : ConfigurationMetadata, IConfigurationProvider, IConfigurationSource, IDictionary<string, string>, IEngineSettings
+    public class TestSettings : ConfigurationMetadata, IConfigurationProvider, IConfigurationSource, IDictionary<string, string>, IConfigurationSettings
     {
         private readonly Dictionary<string, string> _settings = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
 

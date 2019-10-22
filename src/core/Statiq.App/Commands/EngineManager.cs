@@ -25,7 +25,7 @@ namespace Statiq.App
         public EngineManager(
             CommandContext commandContext,
             EngineCommandSettings commandSettings,
-            IDictionary<string, string> engineSettings,
+            IDictionary<string, string> configurationSettings,
             IConfigurationRoot configurationRoot,
             IServiceCollection serviceCollection,
             IBootstrapper bootstrapper)
@@ -50,7 +50,7 @@ namespace Statiq.App
             // Apply command settings
             if (commandSettings != null)
             {
-                ApplyCommandSettings(Engine, engineSettings, commandSettings);
+                ApplyCommandSettings(Engine, configurationSettings, commandSettings);
             }
             _pipelines = commandSettings?.Pipelines;
             _defaultPipelines = commandSettings == null || commandSettings.Pipelines == null || commandSettings.Pipelines.Length == 0 || commandSettings.DefaultPipelines;
@@ -83,7 +83,7 @@ namespace Statiq.App
 
         public void Dispose() => Engine.Dispose();
 
-        private static void ApplyCommandSettings(Engine engine, IDictionary<string, string> settings, EngineCommandSettings commandSettings)
+        private static void ApplyCommandSettings(Engine engine, IDictionary<string, string> configurationSettings, EngineCommandSettings commandSettings)
         {
             // Set folders
             DirectoryPath currentDirectory = Environment.CurrentDirectory;
@@ -103,28 +103,19 @@ namespace Statiq.App
             }
             if (commandSettings.NoClean)
             {
-                settings[Keys.CleanOutputPath] = "false";
+                configurationSettings[Keys.CleanOutputPath] = "false";
             }
 
             // Set no cache if requested
             if (commandSettings.NoCache)
             {
-                settings[Keys.UseCache] = "false";
+                configurationSettings[Keys.UseCache] = "false";
             }
 
             // Set serial mode
             if (commandSettings.SerialExecution)
             {
                 engine.SerialExecution = true;
-            }
-
-            // Add settings
-            if (commandSettings.MetadataSettings?.Length > 0)
-            {
-                foreach (KeyValuePair<string, string> setting in MetadataParser.Parse(commandSettings.MetadataSettings))
-                {
-                    settings[setting.Key] = setting.Value;
-                }
             }
         }
     }

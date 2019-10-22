@@ -17,5 +17,9 @@ namespace Statiq.App
         [CommandOption("-f|--log-file")]
         [Description("Log all messages to the specified log file.")]
         public string LogFile { get; set; }
+
+        [CommandOption("-s|--setting")]
+        [Description("Specifies a setting as a key=value pair (the value can be omited .")]
+        public string[] Settings { get; set; }
     }
 }

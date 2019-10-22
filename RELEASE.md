@@ -5,6 +5,7 @@
 - Fix for `GenerateJson` so it executes when no input documents are provided.
 - Fix for preview command when no output is generated and the output directory does not exist.
 - Fix for clearing content with empty string in `ReplaceContent`.
+- Renamed `EngineSettings` to `ConfigurationSettings` to reflect a broader use than just the engine.
 
 # 1.0.0-alpha.9
 

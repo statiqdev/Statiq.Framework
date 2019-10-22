@@ -30,10 +30,6 @@ namespace Statiq.App
         [Description("Reads standard input at startup and sets ApplicationInput in the execution context.")]
         public bool StdIn { get; set; }
 
-        [CommandOption("-s|--setting")]
-        [Description("Specifies a setting as a key=value pair. Use the syntax [x,y] to specify an array value.")]
-        public string[] MetadataSettings { get; set; }
-
         [CommandOption("-p|--pipeline")]
         [Description("Explicitly specifies one or more pipelines to execute.")]
         public string[] Pipelines { get; set; }

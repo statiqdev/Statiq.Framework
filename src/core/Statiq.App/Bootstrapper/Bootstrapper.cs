@@ -58,14 +58,15 @@ namespace Statiq.App
             Configurators.Configure<IBootstrapper>(this);
 
             // Get our initial settings for configuration
-            EngineSettingsConfigurationProvider settingsProvider = new EngineSettingsConfigurationProvider();
+            SettingsConfigurationProvider settingsProvider = new SettingsConfigurationProvider();
             ConfigurableSettings configurableSettings = new ConfigurableSettings(settingsProvider);
             Configurators.Configure(configurableSettings);
 
             // Run the configuration configurator and get the configuration root
-            IConfigurationBuilder configurationBuilder = new ConfigurationBuilder().Add(settingsProvider);
+            IConfigurationBuilder configurationBuilder = new ConfigurationBuilder();
             ConfigurableConfiguration configurableConfiguration = new ConfigurableConfiguration(configurationBuilder);
             Configurators.Configure(configurableConfiguration);
+            configurationBuilder.Add(settingsProvider);
             IConfigurationRoot configurationRoot = configurationBuilder.Build();
 
             // Create the service collection
@@ -85,7 +86,7 @@ namespace Statiq.App
 
             // Create the stand-alone command line service container and register a few types needed for the CLI
             CommandServiceTypeRegistrar registrar = new CommandServiceTypeRegistrar();
-            registrar.RegisterInstance(typeof(IEngineSettingsDictionary), settingsProvider);
+            registrar.RegisterInstance(typeof(IConfigurationSettingsDictionary), settingsProvider);
             registrar.RegisterInstance(typeof(IConfigurationRoot), configurationRoot);
             registrar.RegisterInstance(typeof(IServiceCollection), serviceCollection);
             registrar.RegisterInstance(typeof(IBootstrapper), this);

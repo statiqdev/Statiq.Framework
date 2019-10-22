@@ -9,23 +9,17 @@ namespace Statiq.App
         where TSettings : BaseCommandSettings
     {
         protected EngineCommand(
-            IEngineSettingsDictionary engineSettings,
+            IConfigurationSettingsDictionary configurationSettings,
             IConfigurationRoot configurationRoot,
             IServiceCollection serviceCollection,
             IBootstrapper bootstrapper)
-            : base(serviceCollection)
+            : base(configurationSettings, serviceCollection)
         {
-            EngineSettings = engineSettings;
             ConfigurationRoot = configurationRoot;
-            ServiceCollection = serviceCollection;
             Bootstrapper = bootstrapper;
         }
 
-        public IEngineSettingsDictionary EngineSettings { get; }
-
         public IConfigurationRoot ConfigurationRoot { get; }
-
-        public IServiceCollection ServiceCollection { get; }
 
         public IBootstrapper Bootstrapper { get; }
 
@@ -47,7 +41,7 @@ namespace Statiq.App
                 new EngineManager(
                     commandContext,
                     engineCommandSettings,
-                    EngineSettings,
+                    ConfigurationSettings,
                     ConfigurationRoot,
                     ServiceCollection,
                     Bootstrapper))

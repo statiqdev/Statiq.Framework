@@ -22,11 +22,11 @@ namespace Statiq.App
         private readonly InterlockedBool _exit = new InterlockedBool(false);
 
         public PreviewCommand(
-            IEngineSettingsDictionary engineSettings,
+            IConfigurationSettingsDictionary configurationSettings,
             IConfigurationRoot configurationRoot,
             IServiceCollection serviceCollection,
             IBootstrapper bootstrapper)
-            : base(engineSettings, configurationRoot, serviceCollection, bootstrapper)
+            : base(configurationSettings, configurationRoot, serviceCollection, bootstrapper)
         {
         }
 
@@ -142,7 +142,7 @@ namespace Statiq.App
                     {
                         existingResetCacheSetting = engineManager.Engine.Settings.GetString(Keys.ResetCache);
                         setResetCacheSetting = true;
-                        EngineSettings[Keys.ResetCache] = "true";
+                        ConfigurationSettings[Keys.ResetCache] = "true";
                     }
 
                     // If there was an execution error due to reload, keep previewing but clear the cache
@@ -158,10 +158,10 @@ namespace Statiq.App
                     {
                         if (existingResetCacheSetting == null)
                         {
-                            EngineSettings.Remove(Keys.ResetCache);
+                            ConfigurationSettings.Remove(Keys.ResetCache);
                         }
                         {
-                            EngineSettings[Keys.ResetCache] = existingResetCacheSetting;
+                            ConfigurationSettings[Keys.ResetCache] = existingResetCacheSetting;
                         }
                     }
 

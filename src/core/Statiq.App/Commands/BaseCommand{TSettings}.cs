@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Threading;
@@ -20,36 +21,39 @@ namespace Statiq.App
     public abstract class BaseCommand<TSettings> : AsyncCommand<TSettings>
         where TSettings : BaseCommandSettings
     {
-        private readonly IServiceCollection _serviceCollection;
-
-        protected BaseCommand(IServiceCollection serviceCollection)
+        protected BaseCommand(IConfigurationSettingsDictionary configurationSettings, IServiceCollection serviceCollection)
         {
-            _serviceCollection = serviceCollection;
+            ConfigurationSettings = configurationSettings;
+            ServiceCollection = serviceCollection;
         }
 
-        public sealed override async Task<int> ExecuteAsync(CommandContext context, TSettings settings)
+        public IConfigurationSettingsDictionary ConfigurationSettings { get; }
+
+        public IServiceCollection ServiceCollection { get; }
+
+        public sealed override async Task<int> ExecuteAsync(CommandContext context, TSettings commandSettings)
         {
             // Set verbose tracing
-            if (settings.LogLevel != LogLevel.Information)
+            if (commandSettings.LogLevel != LogLevel.Information)
             {
-                _serviceCollection.Configure<LoggerFilterOptions>(options => options.MinLevel = settings.LogLevel);
+                ServiceCollection.Configure<LoggerFilterOptions>(options => options.MinLevel = commandSettings.LogLevel);
             }
 
             // File logging
-            if (!string.IsNullOrEmpty(settings.LogFile))
+            if (!string.IsNullOrEmpty(commandSettings.LogFile))
             {
                 // Add the log provider (adding it to the service collection will get picked up by the logger factory)
-                _serviceCollection.AddSingleton<ILoggerProvider, FileLoggerProvider>();
-                _serviceCollection.Configure<FileLoggerOptions>(options =>
+                ServiceCollection.AddSingleton<ILoggerProvider, FileLoggerProvider>();
+                ServiceCollection.Configure<FileLoggerOptions>(options =>
                 {
-                    options.FileName = settings.LogFile;
+                    options.FileName = commandSettings.LogFile;
                     options.LogDirectory = string.Empty;
                 });
             }
 
             // Build a temporary service provider so we can log
             // Make sure to place it in it's own scope so transient services get correctly disposed
-            IServiceProvider services = _serviceCollection.BuildServiceProvider();
+            IServiceProvider services = ServiceCollection.BuildServiceProvider();
             ClassCatalog classCatalog = services.GetService<ClassCatalog>();
             using (IServiceScope serviceScope = services.CreateScope())
             {
@@ -59,7 +63,7 @@ namespace Statiq.App
                 classCatalog?.LogDebugMessages(logger);
 
                 // Attach
-                if (settings.Attach)
+                if (commandSettings.Attach)
                 {
                     logger.LogInformation($"Waiting for a debugger to attach to process {Process.GetCurrentProcess().Id} (or press a key to continue)...");
                     while (!Debugger.IsAttached && !Console.KeyAvailable)
@@ -78,7 +82,16 @@ namespace Statiq.App
                 }
             }
 
-            return await ExecuteCommandAsync(context, settings);
+            // Add settings
+            if (commandSettings.Settings?.Length > 0)
+            {
+                foreach (KeyValuePair<string, string> setting in SettingsParser.Parse(commandSettings.Settings))
+                {
+                    ConfigurationSettings[setting.Key] = setting.Value;
+                }
+            }
+
+            return await ExecuteCommandAsync(context, commandSettings);
         }
 
         public abstract Task<int> ExecuteCommandAsync(CommandContext context, TSettings settings);
