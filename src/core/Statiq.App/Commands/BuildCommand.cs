@@ -14,15 +14,15 @@ namespace Statiq.App
     {
         public BuildCommand(
             IConfiguratorCollection configurators,
-            IConfigurationSettingsDictionary configurationSettings,
-            IConfigurationRoot configurationRoot,
+            IConfigurationSettings configurationSettings,
             IServiceCollection serviceCollection,
+            IConfigurationRoot configurationRoot,
             IBootstrapper bootstrapper)
             : base(
                   configurators,
                   configurationSettings,
-                  configurationRoot,
                   serviceCollection,
+                  configurationRoot,
                   bootstrapper)
         {
         }

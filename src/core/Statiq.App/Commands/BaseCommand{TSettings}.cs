@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -23,7 +24,7 @@ namespace Statiq.App
     {
         protected BaseCommand(
             IConfiguratorCollection configurators,
-            IConfigurationSettingsDictionary configurationSettings,
+            IConfigurationSettings configurationSettings,
             IServiceCollection serviceCollection)
         {
             Configurators = configurators;
@@ -31,11 +32,11 @@ namespace Statiq.App
             ServiceCollection = serviceCollection;
         }
 
-        public IConfigurationSettingsDictionary ConfigurationSettings { get; }
+        public IConfiguratorCollection Configurators { get; }
+
+        public IConfigurationSettings ConfigurationSettings { get; }
 
         public IServiceCollection ServiceCollection { get; }
-
-        public IConfiguratorCollection Configurators { get; }
 
         public sealed override async Task<int> ExecuteAsync(CommandContext context, TSettings commandSettings)
         {

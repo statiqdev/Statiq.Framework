@@ -115,5 +115,100 @@ namespace Statiq.App.Tests.Bootstrapper
                 provider.Messages.ShouldContain(x => x.FormattedMessage.StartsWith("Cataloging types in assembly"));
             }
         }
+
+        public class CreateDefaultTests : BootstrapperFixture
+        {
+            [Test]
+            public async Task EnvironmentVariableConfiguration()
+            {
+                // Given
+                string[] args = new string[] { };
+                Environment.SetEnvironmentVariable(nameof(EnvironmentVariableConfiguration), "Foo");
+                IBootstrapper bootstrapper = App.Bootstrapper.CreateDefault(args);
+                object variable = null;
+                bootstrapper.AddPipeline("Foo", new ExecuteConfig(Config.FromContext(x => variable = x.Settings[nameof(EnvironmentVariableConfiguration)])));
+
+                // When
+                int exitCode = await bootstrapper.RunAsync();
+
+                // Then
+                exitCode.ShouldBe((int)ExitCode.Normal);
+                variable.ShouldBe("Foo");
+            }
+
+            [Test]
+            public async Task CommandLineSettingTakesPrecedenceOverEnvironmentVariables()
+            {
+                // Given
+                string[] args = new string[] { "-s", $"{nameof(CommandLineSettingTakesPrecedenceOverEnvironmentVariables)}=Bar" };
+                Environment.SetEnvironmentVariable(nameof(CommandLineSettingTakesPrecedenceOverEnvironmentVariables), "Foo");
+                IBootstrapper bootstrapper = App.Bootstrapper.CreateDefault(args);
+                object variable = null;
+                bootstrapper.AddPipeline("Foo", new ExecuteConfig(Config.FromContext(x => variable = x.Settings[nameof(CommandLineSettingTakesPrecedenceOverEnvironmentVariables)])));
+
+                // When
+                int exitCode = await bootstrapper.RunAsync();
+
+                // Then
+                exitCode.ShouldBe((int)ExitCode.Normal);
+                variable.ShouldBe("Bar");
+            }
+
+            [Test]
+            public async Task SetsDefaultSettings()
+            {
+                // Given
+                string[] args = new string[] { };
+                IBootstrapper bootstrapper = App.Bootstrapper.CreateDefault(args);
+                object variable = null;
+                bootstrapper.AddPipeline("Foo", new ExecuteConfig(Config.FromContext(x => variable = x.Settings[Keys.LinkHideIndexPages])));
+
+                // When
+                int exitCode = await bootstrapper.RunAsync();
+
+                // Then
+                exitCode.ShouldBe((int)ExitCode.Normal);
+                variable.ShouldBe("true");
+            }
+
+            [Test]
+            public async Task CommandLineSettingTakesPrecedenceOverDefaultSettings()
+            {
+                // Given
+                string[] args = new string[] { "-s", $"{Keys.LinkHideIndexPages}=false" };
+                IBootstrapper bootstrapper = App.Bootstrapper.CreateDefault(args);
+                object variable = null;
+                bootstrapper.AddPipeline("Foo", new ExecuteConfig(Config.FromContext(x => variable = x.Settings[Keys.LinkHideIndexPages])));
+
+                // When
+                int exitCode = await bootstrapper.RunAsync();
+
+                // Then
+                exitCode.ShouldBe((int)ExitCode.Normal);
+                variable.ShouldBe("false");
+            }
+        }
+
+        public class ConfigureSettingsTests : BootstrapperFixture
+        {
+            [Test]
+            public async Task CanReadConfigurationValues()
+            {
+                // Given
+                string[] args = new string[] { };
+                Environment.SetEnvironmentVariable(nameof(CanReadConfigurationValues), "Foo");
+                IBootstrapper bootstrapper = App.Bootstrapper.CreateDefault(args);
+                string variable = null;
+                bootstrapper.ConfigureSettings(x => variable = x[nameof(CanReadConfigurationValues)]);
+                bootstrapper.AddPipeline("Foo");
+
+                // When
+                int exitCode = await bootstrapper.RunAsync();
+
+                // Then
+                exitCode.ShouldBe((int)ExitCode.Normal);
+                variable.ShouldBe("Foo");
+            }
+        }
     }
 }

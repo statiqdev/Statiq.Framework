@@ -12,7 +12,7 @@ namespace Statiq.App
         public IBootstrapper ConfigureCommands(Action<IConfigurator> action) =>
             Configure<ConfigurableCommands>(x => action(x.Configurator));
 
-        public IBootstrapper ConfigureSettings(Action<IDictionary<string, string>> action) =>
+        public IBootstrapper ConfigureSettings(Action<IConfigurationSettings> action) =>
             Configure<ConfigurableSettings>(x => action(x.Settings));
 
         public IBootstrapper BuildConfiguration(Action<IConfigurationBuilder> action) =>

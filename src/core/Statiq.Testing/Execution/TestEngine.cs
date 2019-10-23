@@ -18,13 +18,13 @@ namespace Statiq.Testing
             _documentFactory.SetDefaultDocumentType<TestDocument>();
         }
 
-        public TestSettings Settings { get; } = new TestSettings();
+        public TestConfigurationSettings Settings { get; } = new TestConfigurationSettings();
 
         /// <inheritdoc />
         public ApplicationState ApplicationState { get; set; }
 
         /// <inheritdoc />
-        IConfigurationSettings IEngine.Settings => Settings;
+        IReadOnlyConfigurationSettings IEngine.Settings => Settings;
 
         /// <inheritdoc />
         public IEventCollection Events { get; set; } = new TestEventCollection();

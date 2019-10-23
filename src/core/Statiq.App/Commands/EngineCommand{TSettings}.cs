@@ -11,9 +11,9 @@ namespace Statiq.App
     {
         protected EngineCommand(
             IConfiguratorCollection configurators,
-            IConfigurationSettingsDictionary configurationSettings,
-            IConfigurationRoot configurationRoot,
+            IConfigurationSettings configurationSettings,
             IServiceCollection serviceCollection,
+            IConfigurationRoot configurationRoot,
             IBootstrapper bootstrapper)
             : base(configurators, configurationSettings, serviceCollection)
         {

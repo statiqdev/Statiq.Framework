@@ -15,13 +15,13 @@ using Statiq.Common;
 
 namespace Statiq.Testing
 {
-    public class TestSettings : ConfigurationMetadata, IConfigurationProvider, IConfigurationSource, IDictionary<string, string>, IConfigurationSettings
+    public class TestConfigurationSettings : ConfigurationMetadata, IConfigurationProvider, IConfigurationSource, IDictionary<string, string>, IReadOnlyConfigurationSettings
     {
         private readonly Dictionary<string, string> _settings = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
 
         private ConfigurationReloadToken _reloadToken = new ConfigurationReloadToken();
 
-        public TestSettings()
+        public TestConfigurationSettings()
             : base(null)
         {
             Configuration = new ConfigurationBuilder().Add(this).Build();

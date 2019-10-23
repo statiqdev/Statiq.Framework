@@ -11,7 +11,7 @@ namespace Statiq.Common
     /// </summary>
     public class ConfigurationMetadata : IMetadata
     {
-        internal ConfigurationMetadata(IConfiguration configuration)
+        protected internal ConfigurationMetadata(IConfiguration configuration)
         {
             Configuration = configuration;
         }

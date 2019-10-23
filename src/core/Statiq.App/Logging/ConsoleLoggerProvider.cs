@@ -203,11 +203,10 @@ namespace Statiq.App
 
         internal static void DisposeAll()
         {
-            foreach (ConsoleLoggerProvider instance in Instances)
+            while (Instances.TryTake(out ConsoleLoggerProvider instance))
             {
                 instance.Dispose();
             }
-            Instances.Clear();
         }
 
         public void Dispose()

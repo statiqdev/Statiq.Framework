@@ -25,7 +25,7 @@ namespace Statiq.App
         public EngineManager(
             CommandContext commandContext,
             EngineCommandSettings commandSettings,
-            IDictionary<string, string> configurationSettings,
+            IConfigurationSettings configurationSettings,
             IConfigurationRoot configurationRoot,
             IServiceCollection serviceCollection,
             IBootstrapper bootstrapper)
@@ -83,7 +83,7 @@ namespace Statiq.App
 
         public void Dispose() => Engine.Dispose();
 
-        private static void ApplyCommandSettings(Engine engine, IDictionary<string, string> configurationSettings, EngineCommandSettings commandSettings)
+        private static void ApplyCommandSettings(Engine engine, IConfigurationSettings configurationSettings, EngineCommandSettings commandSettings)
         {
             // Set folders
             DirectoryPath currentDirectory = Environment.CurrentDirectory;

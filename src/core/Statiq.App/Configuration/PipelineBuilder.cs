@@ -14,13 +14,13 @@ namespace Statiq.App
 
         private readonly IPipelineCollection _collection;
 
-        internal PipelineBuilder(IPipelineCollection collection, IConfigurationSettings settings)
+        internal PipelineBuilder(IPipelineCollection collection, IReadOnlyConfigurationSettings settings)
         {
             _collection = collection;
             Settings = settings;
         }
 
-        public IConfigurationSettings Settings { get; }
+        public IReadOnlyConfigurationSettings Settings { get; }
 
         internal IPipeline Build()
         {

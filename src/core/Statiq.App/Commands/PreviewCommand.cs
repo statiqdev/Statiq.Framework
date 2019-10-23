@@ -23,11 +23,16 @@ namespace Statiq.App
 
         public PreviewCommand(
             IConfiguratorCollection configurators,
-            IConfigurationSettingsDictionary configurationSettings,
-            IConfigurationRoot configurationRoot,
+            IConfigurationSettings configurationSettings,
             IServiceCollection serviceCollection,
+            IConfigurationRoot configurationRoot,
             IBootstrapper bootstrapper)
-            : base(configurators, configurationSettings, configurationRoot, serviceCollection, bootstrapper)
+            : base(
+                  configurators,
+                  configurationSettings,
+                  serviceCollection,
+                  configurationRoot,
+                  bootstrapper)
         {
         }
 

@@ -1,3 +1,9 @@
+# 1.0.0-alpha.12
+
+- Changed `IBoostrapper.ConfigureSettings()` to use a new `IConfigurationSettings` object that exposes the settings and the underlying `IConfiguration`
+- Renamed the execution-time `IConfigurationSettings` to `IReadOnlyConfigurationSettings` and introduced a new mutable `IConfigurationSettings` to use in the bootstrapper.
+- Several bug fixes related to settings and configuration.
+
 # 1.0.0-alpha.11
 
 - Changed `IBootstrapper.AddSettings()` calls to run after other configuration.

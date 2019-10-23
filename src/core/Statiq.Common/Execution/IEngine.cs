@@ -19,7 +19,7 @@ namespace Statiq.Common
         /// <summary>
         /// The application configuration as metadata.
         /// </summary>
-        IConfigurationSettings Settings { get; }
+        IReadOnlyConfigurationSettings Settings { get; }
 
         /// <summary>
         /// Gets global events and event handlers.

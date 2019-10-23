@@ -62,6 +62,7 @@ namespace Statiq.App
             Configurators.Configure(configurableConfiguration);
             configurationBuilder.Add(settingsProvider);
             IConfigurationRoot configurationRoot = configurationBuilder.Build();
+            ConfigurationSettings configurationSettings = new ConfigurationSettings(settingsProvider, configurationRoot);
 
             // Create the service collection
             IServiceCollection serviceCollection = CreateServiceCollection() ?? new ServiceCollection();
@@ -80,7 +81,7 @@ namespace Statiq.App
 
             // Create the stand-alone command line service container and register a few types needed for the CLI
             CommandServiceTypeRegistrar registrar = new CommandServiceTypeRegistrar();
-            registrar.RegisterInstance(typeof(IConfigurationSettingsDictionary), settingsProvider);
+            registrar.RegisterInstance(typeof(IConfigurationSettings), configurationSettings);
             registrar.RegisterInstance(typeof(IConfigurationRoot), configurationRoot);
             registrar.RegisterInstance(typeof(IServiceCollection), serviceCollection);
             registrar.RegisterInstance(typeof(IConfiguratorCollection), Configurators);

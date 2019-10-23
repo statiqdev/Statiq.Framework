@@ -61,7 +61,7 @@ namespace Statiq.Testing
 
         public TestLoggerProvider TestLoggerProvider { get; }
 
-        public TestSettings Settings { get; } = new TestSettings();
+        public TestConfigurationSettings Settings { get; } = new TestConfigurationSettings();
 
         public ConcurrentQueue<TestMessage> LogMessages { get; } = new ConcurrentQueue<TestMessage>();
 
@@ -74,7 +74,7 @@ namespace Statiq.Testing
         public Guid ExecutionId { get; set; } = Guid.NewGuid();
 
         /// <inheritdoc />
-        IConfigurationSettings IExecutionContext.Settings => Settings;
+        IReadOnlyConfigurationSettings IExecutionContext.Settings => Settings;
 
         /// <inheritdoc/>
         public IRawAssemblyCollection DynamicAssemblies { get; set; } = new TestRawAssemblyCollection();

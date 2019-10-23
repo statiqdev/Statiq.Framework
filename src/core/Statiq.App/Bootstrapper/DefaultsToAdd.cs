@@ -9,8 +9,8 @@ namespace Statiq.App
         BootstrapperConfigurators = 1 << 0,
         Logging = 1 << 1,
         Settings = 1 << 2,
-        ConfigurationFiles = 1 << 3,
-        EnvironmentVariables = 1 << 4,
+        EnvironmentVariables = 1 << 3,
+        ConfigurationFiles = 1 << 4,
         Commands = 1 << 5,
         Shortcodes = 1 << 6,
         Namespaces = 1 << 7,
@@ -19,8 +19,8 @@ namespace Statiq.App
             BootstrapperConfigurators
             | Logging
             | Settings
-            | ConfigurationFiles
             | EnvironmentVariables
+            | ConfigurationFiles
             | Commands
             | Shortcodes
             | Namespaces
