@@ -17,42 +17,37 @@ namespace Statiq.Core
         private ModuleList _processModules;
         private ModuleList _transformModules;
         private ModuleList _outputModules;
-        private HashSet<string> _dependencies;
 
         /// <inheritdoc/>
         public ModuleList InputModules
         {
             get => _inputModules ?? (_inputModules = new ModuleList());
-            set => _inputModules = value;
+            protected set => _inputModules = value;
         }
 
         /// <inheritdoc/>
         public ModuleList ProcessModules
         {
             get => _processModules ?? (_processModules = new ModuleList());
-            set => _processModules = value;
+            protected set => _processModules = value;
         }
 
         /// <inheritdoc/>
         public ModuleList TransformModules
         {
             get => _transformModules ?? (_transformModules = new ModuleList());
-            set => _transformModules = value;
+            protected set => _transformModules = value;
         }
 
         /// <inheritdoc/>
         public ModuleList OutputModules
         {
             get => _outputModules ?? (_outputModules = new ModuleList());
-            set => _outputModules = value;
+            protected set => _outputModules = value;
         }
 
         /// <inheritdoc/>
-        public HashSet<string> Dependencies
-        {
-            get => _dependencies ?? (_dependencies = new HashSet<string>(StringComparer.OrdinalIgnoreCase));
-            set => _dependencies = value;
-        }
+        public HashSet<string> Dependencies { get; } = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
         /// <inheritdoc/>
         public bool Isolated { get; set; }
