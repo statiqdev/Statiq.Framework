@@ -1,5 +1,8 @@
-﻿using System.Threading.Tasks;
+﻿using System.Collections.Immutable;
+using System.Linq;
+using System.Threading.Tasks;
 using NUnit.Framework;
+using Shouldly;
 using Statiq.Common;
 using Statiq.Testing;
 
@@ -32,15 +35,15 @@ namespace Statiq.Core.Tests.Modules.Control
                 await ExecuteAsync(a, new ExecuteIf(Config.FromDocument(async doc => await doc.GetContentStringAsync() == "1"), b), c);
 
                 // Then
-                Assert.AreEqual(1, a.ExecuteCount);
-                Assert.AreEqual(1, b.ExecuteCount);
-                Assert.AreEqual(1, c.ExecuteCount);
-                Assert.AreEqual(1, a.InputCount);
-                Assert.AreEqual(1, b.InputCount);
-                Assert.AreEqual(5, c.InputCount);
-                Assert.AreEqual(3, a.OutputCount);
-                Assert.AreEqual(3, b.OutputCount);
-                Assert.AreEqual(20, c.OutputCount);
+                a.ExecuteCount.ShouldBe(1);
+                b.ExecuteCount.ShouldBe(1);
+                c.ExecuteCount.ShouldBe(1);
+                a.InputCount.ShouldBe(1);
+                b.InputCount.ShouldBe(1);
+                c.InputCount.ShouldBe(5);
+                a.OutputCount.ShouldBe(3);
+                b.OutputCount.ShouldBe(3);
+                c.OutputCount.ShouldBe(20);
             }
 
             [Test]
@@ -73,18 +76,18 @@ namespace Statiq.Core.Tests.Modules.Control
                     d);
 
                 // Then
-                Assert.AreEqual(1, a.ExecuteCount);
-                Assert.AreEqual(1, b.ExecuteCount);
-                Assert.AreEqual(1, c.ExecuteCount);
-                Assert.AreEqual(1, d.ExecuteCount);
-                Assert.AreEqual(1, a.InputCount);
-                Assert.AreEqual(1, b.InputCount);
-                Assert.AreEqual(1, c.InputCount);
-                Assert.AreEqual(8, d.InputCount);
-                Assert.AreEqual(3, a.OutputCount);
-                Assert.AreEqual(3, b.OutputCount);
-                Assert.AreEqual(4, c.OutputCount);
-                Assert.AreEqual(24, d.OutputCount);
+                a.ExecuteCount.ShouldBe(1);
+                b.ExecuteCount.ShouldBe(1);
+                c.ExecuteCount.ShouldBe(1);
+                d.ExecuteCount.ShouldBe(1);
+                a.InputCount.ShouldBe(1);
+                b.InputCount.ShouldBe(1);
+                c.InputCount.ShouldBe(1);
+                d.InputCount.ShouldBe(8);
+                a.OutputCount.ShouldBe(3);
+                b.OutputCount.ShouldBe(3);
+                c.OutputCount.ShouldBe(4);
+                d.OutputCount.ShouldBe(24);
             }
 
             [Test]
@@ -117,18 +120,18 @@ namespace Statiq.Core.Tests.Modules.Control
                     d);
 
                 // Then
-                Assert.AreEqual(1, a.ExecuteCount);
-                Assert.AreEqual(1, b.ExecuteCount);
-                Assert.AreEqual(1, c.ExecuteCount);
-                Assert.AreEqual(1, d.ExecuteCount);
-                Assert.AreEqual(1, a.InputCount);
-                Assert.AreEqual(1, b.InputCount);
-                Assert.AreEqual(2, c.InputCount);
-                Assert.AreEqual(11, d.InputCount);
-                Assert.AreEqual(3, a.OutputCount);
-                Assert.AreEqual(3, b.OutputCount);
-                Assert.AreEqual(8, c.OutputCount);
-                Assert.AreEqual(33, d.OutputCount);
+                a.ExecuteCount.ShouldBe(1);
+                b.ExecuteCount.ShouldBe(1);
+                c.ExecuteCount.ShouldBe(1);
+                d.ExecuteCount.ShouldBe(1);
+                a.InputCount.ShouldBe(1);
+                b.InputCount.ShouldBe(1);
+                c.InputCount.ShouldBe(2);
+                d.InputCount.ShouldBe(11);
+                a.OutputCount.ShouldBe(3);
+                b.OutputCount.ShouldBe(3);
+                c.OutputCount.ShouldBe(8);
+                d.OutputCount.ShouldBe(33);
             }
 
             [Test]
@@ -166,21 +169,21 @@ namespace Statiq.Core.Tests.Modules.Control
                     e);
 
                 // Then
-                Assert.AreEqual(1, a.ExecuteCount);
-                Assert.AreEqual(1, b.ExecuteCount);
-                Assert.AreEqual(1, c.ExecuteCount);
-                Assert.AreEqual(1, d.ExecuteCount);
-                Assert.AreEqual(1, e.ExecuteCount);
-                Assert.AreEqual(1, a.InputCount);
-                Assert.AreEqual(1, b.InputCount);
-                Assert.AreEqual(1, c.InputCount);
-                Assert.AreEqual(2, d.InputCount);
-                Assert.AreEqual(13, e.InputCount);
-                Assert.AreEqual(4, a.OutputCount);
-                Assert.AreEqual(3, b.OutputCount);
-                Assert.AreEqual(4, c.OutputCount);
-                Assert.AreEqual(6, d.OutputCount);
-                Assert.AreEqual(52, e.OutputCount);
+                a.ExecuteCount.ShouldBe(1);
+                b.ExecuteCount.ShouldBe(1);
+                c.ExecuteCount.ShouldBe(1);
+                d.ExecuteCount.ShouldBe(1);
+                e.ExecuteCount.ShouldBe(1);
+                a.InputCount.ShouldBe(1);
+                b.InputCount.ShouldBe(1);
+                c.InputCount.ShouldBe(1);
+                d.InputCount.ShouldBe(2);
+                e.InputCount.ShouldBe(13);
+                a.OutputCount.ShouldBe(4);
+                b.OutputCount.ShouldBe(3);
+                c.OutputCount.ShouldBe(4);
+                d.OutputCount.ShouldBe(6);
+                e.OutputCount.ShouldBe(52);
             }
 
             [Test]
@@ -205,15 +208,15 @@ namespace Statiq.Core.Tests.Modules.Control
                 await ExecuteAsync(a, new ExecuteIf(Config.FromContext(x => true), b), c);
 
                 // Then
-                Assert.AreEqual(1, a.ExecuteCount);
-                Assert.AreEqual(1, b.ExecuteCount);
-                Assert.AreEqual(1, c.ExecuteCount);
-                Assert.AreEqual(1, a.InputCount);
-                Assert.AreEqual(3, b.InputCount);
-                Assert.AreEqual(9, c.InputCount);
-                Assert.AreEqual(3, a.OutputCount);
-                Assert.AreEqual(9, b.OutputCount);
-                Assert.AreEqual(36, c.OutputCount);
+                a.ExecuteCount.ShouldBe(1);
+                b.ExecuteCount.ShouldBe(1);
+                c.ExecuteCount.ShouldBe(1);
+                a.InputCount.ShouldBe(1);
+                b.InputCount.ShouldBe(3);
+                c.InputCount.ShouldBe(9);
+                a.OutputCount.ShouldBe(3);
+                b.OutputCount.ShouldBe(9);
+                c.OutputCount.ShouldBe(36);
             }
 
             [Test]
@@ -238,15 +241,15 @@ namespace Statiq.Core.Tests.Modules.Control
                 await ExecuteAsync(a, new ExecuteIf(Config.FromContext(x => false), b), c);
 
                 // Then
-                Assert.AreEqual(1, a.ExecuteCount);
-                Assert.AreEqual(0, b.ExecuteCount);
-                Assert.AreEqual(1, c.ExecuteCount);
-                Assert.AreEqual(1, a.InputCount);
-                Assert.AreEqual(0, b.InputCount);
-                Assert.AreEqual(3, c.InputCount);
-                Assert.AreEqual(3, a.OutputCount);
-                Assert.AreEqual(0, b.OutputCount);
-                Assert.AreEqual(12, c.OutputCount);
+                a.ExecuteCount.ShouldBe(1);
+                b.ExecuteCount.ShouldBe(0);
+                c.ExecuteCount.ShouldBe(1);
+                a.InputCount.ShouldBe(1);
+                b.InputCount.ShouldBe(0);
+                c.InputCount.ShouldBe(3);
+                a.OutputCount.ShouldBe(3);
+                b.OutputCount.ShouldBe(0);
+                c.OutputCount.ShouldBe(12);
             }
 
             [Test]
@@ -271,15 +274,15 @@ namespace Statiq.Core.Tests.Modules.Control
                 await ExecuteAsync(a, new ExecuteIf(Config.FromDocument((doc, ctx) => false), b), c);
 
                 // Then
-                Assert.AreEqual(1, a.ExecuteCount);
-                Assert.AreEqual(0, b.ExecuteCount);
-                Assert.AreEqual(1, c.ExecuteCount);
-                Assert.AreEqual(1, a.InputCount);
-                Assert.AreEqual(0, b.InputCount);
-                Assert.AreEqual(3, c.InputCount);
-                Assert.AreEqual(3, a.OutputCount);
-                Assert.AreEqual(0, b.OutputCount);
-                Assert.AreEqual(12, c.OutputCount);
+                a.ExecuteCount.ShouldBe(1);
+                b.ExecuteCount.ShouldBe(0);
+                c.ExecuteCount.ShouldBe(1);
+                a.InputCount.ShouldBe(1);
+                b.InputCount.ShouldBe(0);
+                c.InputCount.ShouldBe(3);
+                a.OutputCount.ShouldBe(3);
+                b.OutputCount.ShouldBe(0);
+                c.OutputCount.ShouldBe(12);
             }
 
             [Test]
@@ -304,15 +307,15 @@ namespace Statiq.Core.Tests.Modules.Control
                 await ExecuteAsync(a, new ExecuteIf(false, b).WithoutUnmatchedDocuments(), c);
 
                 // Then
-                Assert.AreEqual(1, a.ExecuteCount);
-                Assert.AreEqual(0, b.ExecuteCount);
-                Assert.AreEqual(1, c.ExecuteCount);
-                Assert.AreEqual(1, a.InputCount);
-                Assert.AreEqual(0, b.InputCount);
-                Assert.AreEqual(0, c.InputCount);
-                Assert.AreEqual(3, a.OutputCount);
-                Assert.AreEqual(0, b.OutputCount);
-                Assert.AreEqual(0, c.OutputCount);
+                a.ExecuteCount.ShouldBe(1);
+                b.ExecuteCount.ShouldBe(0);
+                c.ExecuteCount.ShouldBe(1);
+                a.InputCount.ShouldBe(1);
+                b.InputCount.ShouldBe(0);
+                c.InputCount.ShouldBe(0);
+                a.OutputCount.ShouldBe(3);
+                b.OutputCount.ShouldBe(0);
+                c.OutputCount.ShouldBe(0);
             }
 
             [Test]
@@ -337,15 +340,15 @@ namespace Statiq.Core.Tests.Modules.Control
                 await ExecuteAsync(a, new ExecuteIf("A", b), c);
 
                 // Then
-                Assert.AreEqual(1, a.ExecuteCount);
-                Assert.AreEqual(1, b.ExecuteCount);
-                Assert.AreEqual(1, c.ExecuteCount);
-                Assert.AreEqual(1, a.InputCount);
-                Assert.AreEqual(3, b.InputCount);
-                Assert.AreEqual(9, c.InputCount);
-                Assert.AreEqual(3, a.OutputCount);
-                Assert.AreEqual(9, b.OutputCount);
-                Assert.AreEqual(36, c.OutputCount);
+                a.ExecuteCount.ShouldBe(1);
+                b.ExecuteCount.ShouldBe(1);
+                c.ExecuteCount.ShouldBe(1);
+                a.InputCount.ShouldBe(1);
+                b.InputCount.ShouldBe(3);
+                c.InputCount.ShouldBe(9);
+                a.OutputCount.ShouldBe(3);
+                b.OutputCount.ShouldBe(9);
+                c.OutputCount.ShouldBe(36);
             }
 
             [Test]
@@ -370,15 +373,45 @@ namespace Statiq.Core.Tests.Modules.Control
                 await ExecuteAsync(a, new ExecuteIf("B", b), c);
 
                 // Then
-                Assert.AreEqual(1, a.ExecuteCount);
-                Assert.AreEqual(0, b.ExecuteCount);
-                Assert.AreEqual(1, c.ExecuteCount);
-                Assert.AreEqual(1, a.InputCount);
-                Assert.AreEqual(0, b.InputCount);
-                Assert.AreEqual(3, c.InputCount);
-                Assert.AreEqual(3, a.OutputCount);
-                Assert.AreEqual(0, b.OutputCount);
-                Assert.AreEqual(12, c.OutputCount);
+                a.ExecuteCount.ShouldBe(1);
+                b.ExecuteCount.ShouldBe(0);
+                c.ExecuteCount.ShouldBe(1);
+                a.InputCount.ShouldBe(1);
+                b.InputCount.ShouldBe(0);
+                c.InputCount.ShouldBe(3);
+                a.OutputCount.ShouldBe(3);
+                b.OutputCount.ShouldBe(0);
+                c.OutputCount.ShouldBe(12);
+            }
+
+            [Test]
+            public async Task ExecutesWhenNoInputDocumentsForTrue()
+            {
+                // Given
+                TestExecutionContext context = new TestExecutionContext();
+                context.Settings.Set("Foo", "true");
+                ExecuteIf module = new ExecuteIf(Config.FromContext(x => x.Settings.GetBool("Foo")), new CreateDocuments("Bar"));
+
+                // When
+                ImmutableArray<TestDocument> results = await ExecuteAsync(context, module);
+
+                // Then
+                results.Select(x => x.Content).ShouldBe(new[] { "Bar" });
+            }
+
+            [Test]
+            public async Task DoesNotExecuteWhenNoInputDocumentsForFalse()
+            {
+                // Given
+                TestExecutionContext context = new TestExecutionContext();
+                context.Settings.Set("Foo", "true");
+                ExecuteIf module = new ExecuteIf(Config.FromContext(x => !x.Settings.GetBool("Foo")), new CreateDocuments("Bar"));
+
+                // When
+                ImmutableArray<TestDocument> results = await ExecuteAsync(context, module);
+
+                // Then
+                results.ShouldBeEmpty();
             }
         }
     }

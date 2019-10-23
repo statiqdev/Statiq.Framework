@@ -1,5 +1,7 @@
 # 1.0.0-alpha.13
 
+- Fixes `ExecuteIf` to work when there are no input documents and the config doesn't require one.
+
 # 1.0.0-alpha.12
 
 - Changed `IBoostrapper.ConfigureSettings()` to use a new `IConfigurationSettings` object that exposes the settings and the underlying `IConfiguration`

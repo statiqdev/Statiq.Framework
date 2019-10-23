@@ -22,8 +22,11 @@ namespace Statiq.Core
 
         /// <summary>
         /// Specifies a predicate and a series of child modules to be evaluated if the predicate returns <c>true</c>.
-        /// The predicate will be evaluated against every input document individually.
         /// </summary>
+        /// <remarks>
+        /// If the config requires a document, the predicate will be evaluated against each input document individually.
+        /// Otherwise the predicate will be evaluated against the context.
+        /// </remarks>
         /// <param name="predicate">A predicate delegate that should return a <c>bool</c>.</param>
         /// <param name="modules">The modules to execute on documents where the predicate is <c>true</c>.</param>
         public ExecuteIf(Config<bool> predicate, params IModule[] modules)
@@ -33,8 +36,11 @@ namespace Statiq.Core
 
         /// <summary>
         /// Specifies a predicate and a series of child modules to be evaluated if the predicate returns <c>true</c>.
-        /// The predicate will be evaluated against every input document individually.
         /// </summary>
+        /// <remarks>
+        /// If the config requires a document, the predicate will be evaluated against each input document individually.
+        /// Otherwise the predicate will be evaluated against the context.
+        /// </remarks>
         /// <param name="predicate">A predicate delegate that should return a <c>bool</c>.</param>
         /// <param name="modules">The modules to execute on documents where the predicate is <c>true</c>.</param>
         public ExecuteIf(Config<bool> predicate, IEnumerable<IModule> modules)
@@ -45,6 +51,9 @@ namespace Statiq.Core
         /// <summary>
         /// Specifies child modules to be evaluated if a given metadata key is present.
         /// </summary>
+        /// <remarks>
+        /// Only input documents will be processed and the modules will not be run if there are no input documents.
+        /// </remarks>
         /// <param name="key">A metadata key that must be present.</param>
         /// <param name="modules">The modules to execute on documents that contain the specified metadata key.</param>
         public ExecuteIf(string key, params IModule[] modules)
@@ -55,6 +64,9 @@ namespace Statiq.Core
         /// <summary>
         /// Specifies child modules to be evaluated if a given metadata key is present.
         /// </summary>
+        /// <remarks>
+        /// Only input documents will be processed and the modules will not be run if there are no input documents.
+        /// </remarks>
         /// <param name="key">A metadata key that must be present.</param>
         /// <param name="modules">The modules to execute on documents that contain the specified metadata key.</param>
         public ExecuteIf(string key, IEnumerable<IModule> modules)
@@ -71,8 +83,11 @@ namespace Statiq.Core
         /// <summary>
         /// Specifies an alternate condition to be tested on documents that did not satisfy
         /// previous conditions. You can chain together as many <c>ElseIf</c> calls as needed.
-        /// The predicate will be evaluated against every input document individually.
         /// </summary>
+        /// <remarks>
+        /// If the config requires a document, the predicate will be evaluated against each input document individually.
+        /// Otherwise the predicate will be evaluated against the context.
+        /// </remarks>
         /// <param name="predicate">A predicate delegate that should return a <c>bool</c>.</param>
         /// <param name="modules">The modules to execute on documents where the predicate is <c>true</c>.</param>
         /// <returns>The current module instance.</returns>
@@ -85,8 +100,11 @@ namespace Statiq.Core
         /// <summary>
         /// Specifies an alternate condition to be tested on documents that did not satisfy
         /// previous conditions. You can chain together as many <c>ElseIf</c> calls as needed.
-        /// The predicate will be evaluated against every input document individually.
         /// </summary>
+        /// <remarks>
+        /// If the config requires a document, the predicate will be evaluated against each input document individually.
+        /// Otherwise the predicate will be evaluated against the context.
+        /// </remarks>
         /// <param name="predicate">A predicate delegate that should return a <c>bool</c>.</param>
         /// <param name="modules">The modules to execute on documents where the predicate is <c>true</c>.</param>
         /// <returns>The current module instance.</returns>
@@ -100,6 +118,9 @@ namespace Statiq.Core
         /// Specifies an alternate condition to be tested on documents that did not satisfy
         /// previous conditions. You can chain together as many <c>ElseIf</c> calls as needed.
         /// </summary>
+        /// <remarks>
+        /// Only input documents will be processed and the modules will not be run if there are no input documents.
+        /// </remarks>
         /// <param name="key">A metadata key that must be present.</param>
         /// <param name="modules">The modules to execute on documents that contain the specified metadata key.</param>
         /// <returns>The current module instance.</returns>
@@ -110,6 +131,9 @@ namespace Statiq.Core
         /// Specifies an alternate condition to be tested on documents that did not satisfy
         /// previous conditions. You can chain together as many <c>ElseIf</c> calls as needed.
         /// </summary>
+        /// <remarks>
+        /// Only input documents will be processed and the modules will not be run if there are no input documents.
+        /// </remarks>
         /// <param name="key">A metadata key that must be present.</param>
         /// <param name="modules">The modules to execute on documents that contain the specified metadata key.</param>
         /// <returns>The current module instance.</returns>
@@ -166,6 +190,7 @@ namespace Statiq.Core
                 // Split the documents into ones that satisfy the predicate and ones that don't
                 List<IDocument> matched = new List<IDocument>();
                 List<IDocument> unmatched = new List<IDocument>();
+                bool predicateResult = false;
                 if (condition.Predicate == null)
                 {
                     // This is the final else without a predicate
@@ -177,6 +202,7 @@ namespace Statiq.Core
                     {
                         if (await condition.Predicate.GetValueAsync(document, context))
                         {
+                            predicateResult = true;
                             matched.Add(document);
                         }
                         else
@@ -189,6 +215,7 @@ namespace Statiq.Core
                 {
                     if (await condition.Predicate.GetValueAsync(null, context))
                     {
+                        predicateResult = true;
                         matched.AddRange(documents);
                     }
                     else
@@ -198,7 +225,7 @@ namespace Statiq.Core
                 }
 
                 // Run the modules on the documents that satisfy the predicate
-                if (matched.Count > 0)
+                if (matched.Count > 0 || (!condition.Predicate.RequiresDocument && predicateResult))
                 {
                     results.AddRange(await context.ExecuteModulesAsync(condition, matched));
                 }
