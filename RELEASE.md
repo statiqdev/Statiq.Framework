@@ -1,3 +1,5 @@
+# 1.0.0-alpha.13
+
 # 1.0.0-alpha.12
 
 - Changed `IBoostrapper.ConfigureSettings()` to use a new `IConfigurationSettings` object that exposes the settings and the underlying `IConfiguration`
