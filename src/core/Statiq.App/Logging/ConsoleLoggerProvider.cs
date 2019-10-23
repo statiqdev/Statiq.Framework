@@ -201,11 +201,17 @@ namespace Statiq.App
                 _ => new ConsoleContent(message),
             };
 
+        // Use in a testing environment
+        internal static bool PreventDisposeAll { get; set; }
+
         internal static void DisposeAll()
         {
-            while (Instances.TryTake(out ConsoleLoggerProvider instance))
+            if (!PreventDisposeAll)
             {
-                instance.Dispose();
+                while (Instances.TryTake(out ConsoleLoggerProvider instance))
+                {
+                    instance.Dispose();
+                }
             }
         }
 

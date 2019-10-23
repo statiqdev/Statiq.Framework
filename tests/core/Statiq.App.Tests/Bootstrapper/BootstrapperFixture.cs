@@ -15,8 +15,15 @@ using Statiq.Testing;
 namespace Statiq.App.Tests.Bootstrapper
 {
     [TestFixture]
+    [NonParallelizable]
     public class BootstrapperFixture : BaseFixture
     {
+        [OneTimeSetUp]
+        public void OneTimeSetUp()
+        {
+            ConsoleLoggerProvider.PreventDisposeAll = true;
+        }
+
         public class RunTests : BootstrapperFixture
         {
             [Test]
