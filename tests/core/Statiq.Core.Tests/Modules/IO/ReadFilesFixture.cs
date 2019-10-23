@@ -24,7 +24,7 @@ namespace Statiq.Core.Tests.Modules.IO
             public void ThrowsOnNullPatterns()
             {
                 // Given, When, Then
-                Should.Throw<ArgumentNullException>(() => new ReadFiles(null));
+                Should.Throw<ArgumentNullException>(() => new ReadFiles((string[])null));
             }
         }
 
