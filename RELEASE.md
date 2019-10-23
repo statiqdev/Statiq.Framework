@@ -2,6 +2,8 @@
 
 - Changed `IBootstrapper.AddSettings()` calls to run after other configuration.
 - Adds a single pattern overload to `ReadFiles`.
+- Some refactoring of the base `Pipeline` class (most importantly to remove the `Dependencies` setter in favor of adding to the existing hash set).
+- Adds `IReadOnlyApplicationState.IsCommand()` to determine the current command.
 
 # 1.0.0-alpha.10
 
