@@ -185,6 +185,7 @@ namespace Statiq.Core
         {
             List<IDocument> results = new List<IDocument>();
             IReadOnlyList<IDocument> documents = context.Inputs;
+            bool hasExecuted = false;
             foreach (IfCondition condition in _conditions)
             {
                 // Split the documents into ones that satisfy the predicate and ones that don't
@@ -225,8 +226,11 @@ namespace Statiq.Core
                 }
 
                 // Run the modules on the documents that satisfy the predicate
-                if (matched.Count > 0 || (!condition.Predicate.RequiresDocument && predicateResult))
+                if (matched.Count > 0
+                    || (condition.Predicate == null && !hasExecuted)
+                    || (condition.Predicate != null && !condition.Predicate.RequiresDocument && predicateResult))
                 {
+                    hasExecuted = true; // Need to track if one of the pre-else conditions was executed
                     results.AddRange(await context.ExecuteModulesAsync(condition, matched));
                 }
 

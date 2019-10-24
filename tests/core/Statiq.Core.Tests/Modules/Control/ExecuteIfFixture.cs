@@ -413,6 +413,36 @@ namespace Statiq.Core.Tests.Modules.Control
                 // Then
                 results.ShouldBeEmpty();
             }
+
+            [Test]
+            public async Task DoesNotExecuteElseWhenNoInputDocumentsForTrue()
+            {
+                // Given
+                IModule module = new ExecuteIf(
+                    Config.FromContext(_ => true), new CreateDocuments("Bar"))
+                    .Else(new CreateDocuments("Baz"));
+
+                // When
+                ImmutableArray<TestDocument> results = await ExecuteAsync(module);
+
+                // Then
+                results.Select(x => x.Content).ShouldBe(new[] { "Bar" });
+            }
+
+            [Test]
+            public async Task ExecutesElseWhenNoInputDocumentsForFalse()
+            {
+                // Given
+                IModule module = new ExecuteIf(
+                    Config.FromContext(_ => false), new CreateDocuments("Bar"))
+                    .Else(new CreateDocuments("Baz"));
+
+                // When
+                ImmutableArray<TestDocument> results = await ExecuteAsync(module);
+
+                // Then
+                results.Select(x => x.Content).ShouldBe(new[] { "Baz" });
+            }
         }
     }
 }
