@@ -55,13 +55,28 @@ namespace Statiq.Core.Tests.Modules.IO
                 result.Destination.ShouldBe(expected);
             }
 
-            [TestCase("foo", "Subfolder/write-test.foo")]
             [TestCase(".foo", "Subfolder/write-test.foo")]
+            [TestCase(".foo.bar", "Subfolder/write-test.foo.bar")]
             public async Task SetsDestinationUsingExtension(string extension, string expected)
             {
                 // Given
                 TestDocument input = new TestDocument(new FilePath("Subfolder/write-test.abc"));
                 SetDestination setDestination = new SetDestination(extension);
+
+                // When
+                TestDocument result = await ExecuteAsync(input, setDestination).SingleAsync();
+
+                // Then
+                result.Destination.ShouldBe(expected);
+            }
+
+            [TestCase("foo", "foo")]
+            [TestCase("abc/foo", "abc/foo")]
+            public async Task SetsDestinationUsingPath(string path, string expected)
+            {
+                // Given
+                TestDocument input = new TestDocument(new FilePath("Subfolder/write-test.abc"));
+                SetDestination setDestination = new SetDestination(path);
 
                 // When
                 TestDocument result = await ExecuteAsync(input, setDestination).SingleAsync();
@@ -145,20 +160,6 @@ namespace Statiq.Core.Tests.Modules.IO
                 // Given
                 TestDocument input = new TestDocument(new FilePath("Subfolder/write-test.abc"));
                 SetDestination setDestination = new SetDestination(".txt");
-
-                // When
-                TestDocument result = await ExecuteAsync(input, setDestination).SingleAsync();
-
-                // Then
-                result.Destination.ShouldBe("Subfolder/write-test.txt");
-            }
-
-            [Test]
-            public async Task ExtensionWithoutDotWritesFiles()
-            {
-                // Given
-                TestDocument input = new TestDocument(new FilePath("Subfolder/write-test.abc"));
-                SetDestination setDestination = new SetDestination("txt");
 
                 // When
                 TestDocument result = await ExecuteAsync(input, setDestination).SingleAsync();

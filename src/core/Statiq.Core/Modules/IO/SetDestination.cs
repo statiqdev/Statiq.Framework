@@ -47,9 +47,18 @@ namespace Statiq.Core
         /// If <c>DestinationPath</c>, <c>DestinationFileName</c>, or <c>DestinationExtension</c>
         /// metadata values are set, those will take precedence.
         /// </summary>
-        /// <param name="extension">The extension to set the destination to.</param>
-        public SetDestination(string extension)
-            : base(Config.FromDocument(doc => GetPathFromMetadata(doc) ?? doc.Destination?.ChangeExtension(extension ?? throw new ArgumentNullException(nameof(extension)))), true)
+        /// <param name="pathOrExtension">
+        /// The path or extension to set the destination to.
+        /// If the value starts with a "." then it will be treated as an extension and the existing destination path will be changed (if there is one).
+        /// If the value does not start with a "." then it will be treated as a path and the destination will be set to the value.
+        /// Use <see cref="SetDestination(Config{FilePath})"/> for more control.
+        /// </param>
+        public SetDestination(string pathOrExtension)
+            : base(
+                (pathOrExtension ?? throw new ArgumentNullException(nameof(pathOrExtension))).StartsWith('.')
+                    ? Config.FromDocument(doc => GetPathFromMetadata(doc) ?? doc.Destination?.ChangeExtension(pathOrExtension))
+                    : Config.FromValue((FilePath)pathOrExtension),
+                true)
         {
         }
 
