@@ -1,6 +1,7 @@
 # 1.0.0-alpha.13
 
 - Fixes `ExecuteIf` to work when there are no input documents and the config doesn't require one.
+- Fixes bug calculating command name for generic command types.
 
 # 1.0.0-alpha.12
 

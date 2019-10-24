@@ -13,12 +13,23 @@ namespace Statiq.App
     {
         public static ICommandConfigurator AddCommand<TCommand>(this IConfigurator configurator)
             where TCommand : class, ICommand =>
-            configurator.AddCommand<TCommand>(typeof(TCommand).Name.RemoveEnd("Command", StringComparison.OrdinalIgnoreCase).ToKebab());
+            configurator.AddCommand<TCommand>(GetCommandName(typeof(TCommand)));
 
         public static ICommandConfigurator AddCommand(this IConfigurator configurator, Type commandType) =>
             configurator.AddCommand(
                 commandType ?? throw new ArgumentNullException(nameof(commandType)),
-                commandType.Name.RemoveEnd("Command", StringComparison.OrdinalIgnoreCase).ToKebab());
+                GetCommandName(commandType));
+
+        private static string GetCommandName(Type commandType)
+        {
+            string name = commandType.Name;
+            int genericParametersIndex = name.IndexOf('`');
+            if (genericParametersIndex > 0)
+            {
+                name = name.Substring(0, genericParametersIndex);
+            }
+            return name.RemoveEnd("Command", StringComparison.OrdinalIgnoreCase).ToKebab();
+        }
 
         public static ICommandConfigurator AddCommand(this IConfigurator configurator, Type commandType, string name)
         {
