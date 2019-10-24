@@ -88,7 +88,7 @@ namespace Statiq.Hosting.Tests.Middleware
                     .Configure(app =>
                     {
                         IFileProvider embeddedFileProvider = new ManifestEmbeddedFileProvider(AssemblyHelper.TestAssembly, "wwwroot");
-                        IWebHostEnvironment host = app.ApplicationServices.GetService<IWebHostEnvironment>();
+                        IHostingEnvironment host = app.ApplicationServices.GetService<IHostingEnvironment>();
                         host.WebRootFileProvider = embeddedFileProvider;
                         app
                             .UseDefaultExtensions(options)
