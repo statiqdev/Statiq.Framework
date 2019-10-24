@@ -16,13 +16,11 @@ using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.AspNetCore.Mvc.Razor;
 using Microsoft.AspNetCore.Mvc.Razor.Compilation;
 using Microsoft.AspNetCore.Mvc.Razor.Extensions;
-using Microsoft.AspNetCore.Mvc.Razor.Internal;
 using Microsoft.AspNetCore.Mvc.ViewEngines;
 using Microsoft.AspNetCore.Mvc.ViewFeatures;
 using Microsoft.AspNetCore.Razor.Hosting;
 using Microsoft.AspNetCore.Razor.Language;
 using Microsoft.AspNetCore.Routing;
-using Microsoft.CodeAnalysis.Razor;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.ObjectPool;
@@ -86,33 +84,11 @@ namespace Statiq.Razor
                 .AddSingleton<FileSystemFileProvider>()
                 .AddSingleton(context.GetRequiredService<ILoggerFactory>())
                 .AddSingleton<DiagnosticSource, SilentDiagnosticSource>()
-                .AddSingleton<IHostingEnvironment, HostingEnvironment>()
+                .AddSingleton<IWebHostEnvironment, HostEnvironment>()
                 .AddSingleton<ObjectPoolProvider, DefaultObjectPoolProvider>()
-                .AddSingleton<IRazorViewEngineFileProviderAccessor, DefaultRazorViewEngineFileProviderAccessor>()
                 .AddSingleton<IViewCompilerProvider, StatiqRazorViewCompilerProvider>()
                 .AddSingleton<StatiqRazorProjectFileSystem>()
-                .AddSingleton<RazorProjectFileSystem, StatiqRazorProjectFileSystem>()
-                .AddSingleton(x =>
-                    RazorProjectEngine.Create(
-                        RazorConfiguration.Default,
-                        x.GetRequiredService<RazorProjectFileSystem>(),
-                        b =>
-                        {
-                            // See MvcRazorMvcCoreBuilderExtensions.AddRazorViewEngineServices(IServiceCollection)
-                            RazorExtensions.Register(b);
-                            b.Features.Add(x.GetRequiredService<LazyMetadataReferenceFeature>()); // Lazily calls the MetadataReferenceFeatureProvider
-                            b.Features.Add(new CompilationTagHelperFeature());
-                            b.Features.Add(new DefaultTagHelperDescriptorProvider());
-                            b.Features.Add(new ViewComponentTagHelperDescriptorProvider());
-
-                            // We need to register a new document classifier phase because builder.SetBaseType() (which uses builder.ConfigureClass())
-                            // use the DefaultRazorDocumentClassifierPhase which stops applying document classifier passes after DocumentIntermediateNode.DocumentKind is set
-                            // (which gets set by the Razor document classifier passes registered in RazorExtensions.Register())
-                            // Also need to add it just after the DocumentClassifierPhase, otherwise it'll miss the C# lowering phase
-                            b.Phases.Insert(
-                                b.Phases.IndexOf(b.Phases.OfType<IRazorDocumentClassifierPhase>().Last()) + 1,
-                                new StatiqDocumentPhase(_baseType, _namespaces));
-                        }));
+                .AddSingleton<RazorProjectFileSystem, StatiqRazorProjectFileSystem>();
 
             // Register the view location expander
             serviceCollection.Configure<RazorViewEngineOptions>(x => x.ViewLocationExpanders.Add(new ViewLocationExpander()));
@@ -121,7 +97,8 @@ namespace Statiq.Razor
             // (most default registration use .TryAdd...() so they skip already registered types)
             IMvcCoreBuilder builder = serviceCollection
                 .AddMvcCore()
-                .AddRazorViewEngine();
+                .AddRazorViewEngine()
+                .AddRazorRuntimeCompilation();
 
             // Get and register MetadataReferences
             builder.PartManager.FeatureProviders.Add(
@@ -129,6 +106,15 @@ namespace Statiq.Razor
 
             IServiceProvider serviceProvider = serviceCollection.BuildServiceProvider();
             _serviceScopeFactory = serviceProvider.GetRequiredService<IServiceScopeFactory>();
+
+            // We need to register a new document classifier phase because builder.SetBaseType() (which uses builder.ConfigureClass())
+            // use the DefaultRazorDocumentClassifierPhase which stops applying document classifier passes after DocumentIntermediateNode.DocumentKind is set
+            // (which gets set by the Razor document classifier passes registered in RazorExtensions.Register())
+            // Also need to add it just after the DocumentClassifierPhase, otherwise it'll miss the C# lowering phase
+            RazorProjectEngine razorProjectEngine = serviceProvider.GetRequiredService<RazorProjectEngine>();
+            razorProjectEngine.Phases.Insert(
+                razorProjectEngine.Phases.IndexOf(razorProjectEngine.Phases.OfType<IRazorDocumentClassifierPhase>().Last()) + 1,
+                new StatiqDocumentPhase(_baseType, _namespaces));
         }
 
         public void ExpireChangeTokens()

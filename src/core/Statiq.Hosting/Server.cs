@@ -23,7 +23,6 @@ namespace Statiq.Hosting
     {
         private readonly IDictionary<string, string> _contentTypes;
         private readonly IWebHost _host;
-        private readonly ILoggerProvider _loggerProvider;
         private readonly LiveReloadServer _liveReloadServer;
 
         public bool Extensionless { get; }
@@ -78,7 +77,6 @@ namespace Statiq.Hosting
         /// <param name="contentTypes">Additional content types the server should support.</param>
         public Server(string localPath, int port, bool extensionless, string virtualDirectory, bool liveReload, IDictionary<string, string> contentTypes, ILoggerProvider loggerProvider)
         {
-            _loggerProvider = loggerProvider;
             _contentTypes = contentTypes;
             LocalPath = localPath ?? throw new ArgumentNullException(nameof(localPath));
             Port = port <= 0 ? throw new ArgumentException("The port must be greater than 0") : port;
@@ -130,21 +128,13 @@ namespace Statiq.Hosting
             CompositeFileProvider compositeFileProvider = new CompositeFileProvider(
                 new PhysicalFileProvider(LocalPath),
                 new ManifestEmbeddedFileProvider(typeof(Server).Assembly, "wwwroot"));
-            IHostingEnvironment host = app.ApplicationServices.GetService<IHostingEnvironment>();
+            IWebHostEnvironment host = app.ApplicationServices.GetService<IWebHostEnvironment>();
             host.WebRootFileProvider = compositeFileProvider;
 
             if (_liveReloadServer != null)
             {
                 // Inject LiveReload script tags to HTML documents, needs to run first as it overrides output stream
                 app.UseScriptInjection($"{VirtualDirectory ?? string.Empty}/livereload.js?host=localhost&port={Port}");
-
-                // Host ws:// (this also needs to go early in the pipeline so WS can return before virtual directory, etc.)
-                // app.MapFleckRoute<ReloadClient>("/livereload", connection =>
-                // {
-                //    ReloadClient reloadClient = (ReloadClient)connection;
-                //    reloadClient.Logger = _loggerProvider?.CreateLogger("LiveReload");
-                //    LiveReloadClients.Add(reloadClient);
-                // });
 
                 // Turn on web sockets and the live reload middleware
                 app.UseWebSockets();
@@ -194,21 +184,6 @@ namespace Statiq.Hosting
                 ServeUnknownFileTypes = true,
                 ContentTypeProvider = contentTypeProvider
             });
-
-            // if (LiveReloadClients != null)
-            // {
-            //    // Host livereload.js (do this last so virtual directory rewriting applies)
-            //    Assembly liveReloadAssembly = typeof(ReloadClient).Assembly;
-            //    string rootNamespace = typeof(ReloadClient).Namespace;
-            //    IFileSystem reloadFilesystem = new EmbeddedResourceFileSystem(liveReloadAssembly, $"{rootNamespace}");
-            //    app.UseStaticFiles(new StaticFileOptions
-            //    {
-            //        RequestPath = PathString.Empty,
-            //        FileSystem = reloadFilesystem,
-            //        ServeUnknownFileTypes = true,
-            //        ContentTypeProvider = contentTypeProvider
-            //    });
-            // }
         }
 
         public async Task TriggerReloadAsync()

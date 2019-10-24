@@ -7,11 +7,11 @@ namespace Statiq.Hosting.Middleware
 {
     internal class DisableCacheMiddleware
     {
-        private readonly IHostingEnvironment _hostingEnv;
+        private readonly IWebHostEnvironment _hostingEnv;
         private readonly ILoggerFactory _loggerFactory;
         private readonly RequestDelegate _next;
 
-        public DisableCacheMiddleware(RequestDelegate next, IHostingEnvironment hostingEnv, ILoggerFactory loggerFactory)
+        public DisableCacheMiddleware(RequestDelegate next, IWebHostEnvironment hostingEnv, ILoggerFactory loggerFactory)
         {
             _next = next;
             _hostingEnv = hostingEnv;

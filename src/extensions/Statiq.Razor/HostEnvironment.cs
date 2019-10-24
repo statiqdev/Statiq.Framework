@@ -1,24 +1,23 @@
 ﻿using Microsoft.AspNetCore.Hosting;
+using Microsoft.Extensions.FileProviders;
 using IFileProvider = Microsoft.Extensions.FileProviders.IFileProvider;
 
 namespace Statiq.Razor
 {
-    internal class HostingEnvironment : IHostingEnvironment
+    internal class HostEnvironment : IWebHostEnvironment
     {
-        public HostingEnvironment(FileSystemFileProvider fileProvider)
+        public HostEnvironment(FileSystemFileProvider fileProvider)
         {
             EnvironmentName = "Statiq";
 
             // This gets used to load dependencies and is passed to Assembly.Load()
-            ApplicationName = typeof(HostingEnvironment).Assembly.FullName;
+            ApplicationName = typeof(HostEnvironment).Assembly.FullName;
 
             WebRootPath = fileProvider.StatiqFileSystem.RootPath.FullPath;
             WebRootFileProvider = fileProvider;
             ContentRootPath = WebRootPath;
             ContentRootFileProvider = WebRootFileProvider;
         }
-
-        public void ExpireChangeTokens() => ((FileSystemFileProvider)WebRootFileProvider).ExpireChangeTokens();
 
         public string EnvironmentName { get; set; }
         public string ApplicationName { get; set; }
