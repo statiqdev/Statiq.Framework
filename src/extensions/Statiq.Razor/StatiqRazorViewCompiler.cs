@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc.Razor.Compilation;
 using Microsoft.AspNetCore.Mvc.Razor.Internal;
 using Microsoft.AspNetCore.Razor.Language;
@@ -8,7 +9,8 @@ using Microsoft.Extensions.Logging;
 
 namespace Statiq.Razor
 {
-    internal class StatiqRazorViewCompiler : RazorViewCompiler
+    /*
+    internal class StatiqRazorViewCompiler : IViewCompiler
     {
         public StatiqRazorViewCompiler(
             IFileProvider fileProvider,
@@ -27,6 +29,11 @@ namespace Statiq.Razor
         {
         }
 
+        public Task<CompiledViewDescriptor> CompileAsync(string relativePath)
+        {
+            throw new NotImplementedException();
+        }
+
         protected override CompiledViewDescriptor CompileAndEmit(string relativePath)
         {
             CompiledViewDescriptor descriptor = base.CompileAndEmit(relativePath);
@@ -42,5 +49,22 @@ namespace Statiq.Razor
 
             return descriptor;
         }
+
+        private string GetNormalizedPath(string relativePath)
+        {
+            if (relativePath.Length == 0)
+            {
+                return relativePath;
+            }
+
+            if (!_normalizedPathCache.TryGetValue(relativePath, out var normalizedPath))
+            {
+                normalizedPath = ViewPath.NormalizePath(relativePath);
+                _normalizedPathCache[relativePath] = normalizedPath;
+            }
+
+            return normalizedPath;
+        }
     }
+    */
 }

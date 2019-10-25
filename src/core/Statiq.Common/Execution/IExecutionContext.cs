@@ -24,11 +24,6 @@ namespace Statiq.Common
         Guid ExecutionId { get; }
 
         /// <summary>
-        /// Gets the raw bytes for dynamically compiled assemblies (such as the configuration script).
-        /// </summary>
-        IRawAssemblyCollection DynamicAssemblies { get; }
-
-        /// <summary>
         /// Gets a set of namespaces that should be brought into scope for modules that perform dynamic compilation.
         /// </summary>
         INamespacesCollection Namespaces { get; }

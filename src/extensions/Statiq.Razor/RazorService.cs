@@ -16,7 +16,6 @@ namespace Statiq.Razor
             CompilationParameters parameters = new CompilationParameters
             {
                 BasePageType = request.BaseType,
-                DynamicAssemblies = new DynamicAssemblyCollection(request.Context.DynamicAssemblies),
                 Namespaces = new NamespaceCollection(request.Context.Namespaces),
                 FileSystem = request.Context.FileSystem
             };

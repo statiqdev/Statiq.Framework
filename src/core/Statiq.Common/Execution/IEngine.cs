@@ -52,12 +52,6 @@ namespace Statiq.Common
         INamespacesCollection Namespaces { get; }
 
         /// <summary>
-        /// Gets a collection of all the raw assemblies that should be referenced by modules
-        /// that support dynamic compilation (such as configuration assemblies).
-        /// </summary>
-        IRawAssemblyCollection DynamicAssemblies { get; }
-
-        /// <summary>
         /// Provides pooled memory streams (via the RecyclableMemoryStream library).
         /// </summary>
         IMemoryStreamFactory MemoryStreamFactory { get; }

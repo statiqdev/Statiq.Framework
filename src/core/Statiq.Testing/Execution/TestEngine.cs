@@ -48,9 +48,6 @@ namespace Statiq.Testing
         public INamespacesCollection Namespaces { get; set; } = new TestNamespacesCollection();
 
         /// <inheritdoc />
-        public IRawAssemblyCollection DynamicAssemblies { get; set; } = new TestRawAssemblyCollection();
-
-        /// <inheritdoc />
         public bool SerialExecution { get; set; }
 
         private readonly DocumentFactory _documentFactory;

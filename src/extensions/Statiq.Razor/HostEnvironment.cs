@@ -6,14 +6,14 @@ namespace Statiq.Razor
 {
     internal class HostEnvironment : IWebHostEnvironment
     {
-        public HostEnvironment(FileSystemFileProvider fileProvider)
+        public HostEnvironment(IFileProvider fileProvider)
         {
             EnvironmentName = "Statiq";
 
             // This gets used to load dependencies and is passed to Assembly.Load()
             ApplicationName = typeof(HostEnvironment).Assembly.FullName;
 
-            WebRootPath = fileProvider.StatiqFileSystem.RootPath.FullPath;
+            WebRootPath = ((FileSystemFileProvider)fileProvider).StatiqFileSystem.RootPath.FullPath;
             WebRootFileProvider = fileProvider;
             ContentRootPath = WebRootPath;
             ContentRootFileProvider = WebRootFileProvider;

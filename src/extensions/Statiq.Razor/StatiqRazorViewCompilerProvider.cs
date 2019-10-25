@@ -11,6 +11,7 @@ using Microsoft.Extensions.Options;
 
 namespace Statiq.Razor
 {
+    /*
     /// <summary>
     /// This is copied from <see cref="RazorViewCompilerProvider"/> and exists entirely to provide
     /// <see cref="StatiqRazorViewCompiler"/> instead of <see cref="RazorViewCompiler"/>.
@@ -55,4 +56,5 @@ namespace Statiq.Razor
             return (IViewCompiler)new StatiqRazorViewCompiler(_fileProviderAccessor.FileProvider, _razorProjectEngine, _csharpCompiler, _viewEngineOptions.CompilationCallback, feature.ViewDescriptors, (ILogger)_logger);
         }
     }
+    */
 }

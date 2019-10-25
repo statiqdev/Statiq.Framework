@@ -77,9 +77,6 @@ namespace Statiq.Testing
         IReadOnlyConfigurationSettings IExecutionContext.Settings => Settings;
 
         /// <inheritdoc/>
-        public IRawAssemblyCollection DynamicAssemblies { get; set; } = new TestRawAssemblyCollection();
-
-        /// <inheritdoc/>
         public INamespacesCollection Namespaces { get; set; } = new TestNamespacesCollection();
 
         /// <inheritdoc/>

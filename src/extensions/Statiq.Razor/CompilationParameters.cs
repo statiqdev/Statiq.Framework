@@ -7,7 +7,6 @@ namespace Statiq.Razor
     {
         public IReadOnlyFileSystem FileSystem { get; set; }
         public NamespaceCollection Namespaces { get; set; }
-        public DynamicAssemblyCollection DynamicAssemblies { get; set; }
         public Type BasePageType { get; set; }
     }
 }

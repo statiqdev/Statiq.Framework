@@ -9,6 +9,7 @@ using System.Security.Cryptography;
 using System.Text.Encodings.Web;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Html;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Abstractions;
@@ -16,11 +17,13 @@ using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.AspNetCore.Mvc.Razor;
 using Microsoft.AspNetCore.Mvc.Razor.Compilation;
 using Microsoft.AspNetCore.Mvc.Razor.Extensions;
+using Microsoft.AspNetCore.Mvc.Razor.RuntimeCompilation;
 using Microsoft.AspNetCore.Mvc.ViewEngines;
 using Microsoft.AspNetCore.Mvc.ViewFeatures;
 using Microsoft.AspNetCore.Razor.Hosting;
 using Microsoft.AspNetCore.Razor.Language;
 using Microsoft.AspNetCore.Routing;
+using Microsoft.CodeAnalysis;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.ObjectPool;
@@ -42,20 +45,20 @@ namespace Statiq.Razor
         private readonly ConcurrentDictionary<CompilerCacheKey, CompilationResult> _compilationCache
             = new ConcurrentDictionary<CompilerCacheKey, CompilationResult>();
 
-        private readonly NamespaceCollection _namespaces;
-        private readonly string _baseType;
         private readonly IServiceScopeFactory _serviceScopeFactory;
 
         static RazorCompiler()
         {
-            CompileAndEmitMethod = typeof(RazorViewCompiler).GetMethod(
+            Type runtimeViewCompilerType = typeof(FileProviderRazorProjectItem).Assembly
+                .GetType("Microsoft.AspNetCore.Mvc.Razor.RuntimeCompilation.RuntimeViewCompiler");
+            CompileAndEmitMethod = runtimeViewCompilerType.GetMethod(
                 "CompileAndEmit",
                 BindingFlags.Instance | BindingFlags.NonPublic,
                 Type.DefaultBinder,
                 new Type[] { typeof(RazorCodeDocument), typeof(string) },
                 null);
-            Type compilationFailedExceptionFactory = typeof(IRazorPage).Assembly
-                .GetType("Microsoft.AspNetCore.Mvc.Razor.Internal.CompilationFailedExceptionFactory");
+            Type compilationFailedExceptionFactory = typeof(FileProviderRazorProjectItem).Assembly
+                .GetType("Microsoft.AspNetCore.Mvc.Razor.RuntimeCompilation.CompilationFailedExceptionFactory");
             CreateCompilationFailedException = compilationFailedExceptionFactory.GetMethod(
                 "Create",
                 new Type[] { typeof(RazorCodeDocument), typeof(IEnumerable<RazorDiagnostic>) });
@@ -63,30 +66,22 @@ namespace Statiq.Razor
 
         public RazorCompiler(CompilationParameters parameters, IExecutionContext context)
         {
-            _namespaces = parameters.Namespaces;
-
-            // Calculate the base page type
-            Type basePageType = parameters.BasePageType ?? typeof(StatiqRazorPage<>);
-            string baseClassName = basePageType.FullName;
-            int tickIndex = baseClassName.IndexOf('`');
-            if (tickIndex > 0)
-            {
-                baseClassName = baseClassName.Substring(0, tickIndex);
-            }
-            _baseType = basePageType.IsGenericTypeDefinition ? $"{baseClassName}<TModel>" : baseClassName;
-
             // Create the service collection that MVC needs and add default MVC services
             ServiceCollection serviceCollection = new ServiceCollection();
+
+            DiagnosticListener listener = new DiagnosticListener("Razor");
 
             // Register some of our own types
             serviceCollection
                 .AddSingleton(parameters.FileSystem)
-                .AddSingleton<FileSystemFileProvider>()
+                .AddSingleton<Microsoft.Extensions.FileProviders.IFileProvider, FileSystemFileProvider>()
                 .AddSingleton(context.GetRequiredService<ILoggerFactory>())
                 .AddSingleton<DiagnosticSource, SilentDiagnosticSource>()
+                .AddSingleton<DiagnosticListener>(listener)
                 .AddSingleton<IWebHostEnvironment, HostEnvironment>()
                 .AddSingleton<ObjectPoolProvider, DefaultObjectPoolProvider>()
-                .AddSingleton<IViewCompilerProvider, StatiqRazorViewCompilerProvider>()
+
+                // .AddSingleton<IViewCompilerProvider, StatiqRazorViewCompilerProvider>()
                 .AddSingleton<StatiqRazorProjectFileSystem>()
                 .AddSingleton<RazorProjectFileSystem, StatiqRazorProjectFileSystem>();
 
@@ -100,21 +95,33 @@ namespace Statiq.Razor
                 .AddRazorViewEngine()
                 .AddRazorRuntimeCompilation();
 
-            // Get and register MetadataReferences
-            builder.PartManager.FeatureProviders.Add(
-                new MetadataReferenceFeatureProvider(parameters.DynamicAssemblies));
-
             IServiceProvider serviceProvider = serviceCollection.BuildServiceProvider();
             _serviceScopeFactory = serviceProvider.GetRequiredService<IServiceScopeFactory>();
+
+            // Calculate the base page type
+            Type basePageType = parameters.BasePageType ?? typeof(StatiqRazorPage<>);
+            string baseClassName = basePageType.FullName;
+            int tickIndex = baseClassName.IndexOf('`');
+            if (tickIndex > 0)
+            {
+                baseClassName = baseClassName.Substring(0, tickIndex);
+            }
+            string baseType = basePageType.IsGenericTypeDefinition ? $"{baseClassName}<TModel>" : baseClassName;
 
             // We need to register a new document classifier phase because builder.SetBaseType() (which uses builder.ConfigureClass())
             // use the DefaultRazorDocumentClassifierPhase which stops applying document classifier passes after DocumentIntermediateNode.DocumentKind is set
             // (which gets set by the Razor document classifier passes registered in RazorExtensions.Register())
             // Also need to add it just after the DocumentClassifierPhase, otherwise it'll miss the C# lowering phase
             RazorProjectEngine razorProjectEngine = serviceProvider.GetRequiredService<RazorProjectEngine>();
-            razorProjectEngine.Phases.Insert(
-                razorProjectEngine.Phases.IndexOf(razorProjectEngine.Phases.OfType<IRazorDocumentClassifierPhase>().Last()) + 1,
-                new StatiqDocumentPhase(_baseType, _namespaces));
+            List<IRazorEnginePhase> phases = razorProjectEngine.Engine.Phases.ToList();
+            phases.Insert(
+                phases.IndexOf(phases.OfType<IRazorDocumentClassifierPhase>().Last()) + 1,
+                new StatiqDocumentPhase(baseType, parameters.Namespaces)
+                {
+                    Engine = razorProjectEngine.Engine
+                });
+            FieldInfo phasesField = razorProjectEngine.Engine.GetType().GetField("<Phases>k__BackingField", BindingFlags.Instance | BindingFlags.NonPublic);
+            phasesField.SetValue(razorProjectEngine.Engine, phases.ToArray());
         }
 
         public void ExpireChangeTokens()
@@ -197,9 +204,9 @@ namespace Statiq.Razor
             IRazorViewEngine viewEngine = serviceProvider.GetRequiredService<IRazorViewEngine>();
             IRazorPageActivator pageActivator = serviceProvider.GetRequiredService<IRazorPageActivator>();
             HtmlEncoder htmlEncoder = serviceProvider.GetRequiredService<HtmlEncoder>();
-            DiagnosticSource diagnosticSource = serviceProvider.GetRequiredService<DiagnosticSource>();
+            DiagnosticListener diagnosticListener = serviceProvider.GetRequiredService<DiagnosticListener>();
 
-            return new RazorView(viewEngine, pageActivator, viewStartPages, page, htmlEncoder, diagnosticSource);
+            return new RazorView(viewEngine, pageActivator, viewStartPages, page, htmlEncoder, diagnosticListener);
         }
 
         /// <summary>

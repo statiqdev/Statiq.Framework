@@ -29,9 +29,6 @@ namespace Statiq.Core
         public Guid ExecutionId => _contextData.ExecutionId;
 
         /// <inheritdoc/>
-        public IRawAssemblyCollection DynamicAssemblies => _contextData.Engine.DynamicAssemblies;
-
-        /// <inheritdoc/>
         public INamespacesCollection Namespaces => _contextData.Engine.Namespaces;
 
         /// <inheritdoc/>

@@ -97,7 +97,6 @@ namespace Statiq.Core
             serviceCollection.AddSingleton<IReadOnlyShortcodeCollection>(Shortcodes);
             serviceCollection.AddSingleton<IMemoryStreamFactory>(MemoryStreamFactory);
             serviceCollection.AddSingleton<INamespacesCollection>(Namespaces);
-            serviceCollection.AddSingleton<IRawAssemblyCollection>(DynamicAssemblies);
 
             IServiceProvider serviceProvider = serviceCollection.BuildServiceProvider();
             return serviceProvider.CreateScope();
@@ -126,9 +125,6 @@ namespace Statiq.Core
 
         /// <inheritdoc />
         public INamespacesCollection Namespaces { get; } = new NamespaceCollection();
-
-        /// <inheritdoc />
-        public IRawAssemblyCollection DynamicAssemblies { get; } = new RawAssemblyCollection();
 
         /// <inheritdoc />
         public IMemoryStreamFactory MemoryStreamFactory { get; } = new MemoryStreamFactory();
