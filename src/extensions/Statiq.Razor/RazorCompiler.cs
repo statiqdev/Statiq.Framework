@@ -102,6 +102,10 @@ namespace Statiq.Razor
                 builder.AddApplicationPart(assembly);
             }
 
+            // And a couple needed assemblies that might not be loaded in the AppDomain yet
+            builder.AddApplicationPart(typeof(IHtmlContent).Assembly);
+            builder.AddApplicationPart(Assembly.Load(new AssemblyName("Microsoft.CSharp")));
+
             // Build the service provider and local scope
             IServiceProvider serviceProvider = serviceCollection.BuildServiceProvider();
             _serviceScopeFactory = serviceProvider.GetRequiredService<IServiceScopeFactory>();
