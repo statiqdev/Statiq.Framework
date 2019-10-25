@@ -95,6 +95,14 @@ namespace Statiq.Razor
                 .AddRazorViewEngine()
                 .AddRazorRuntimeCompilation();
 
+            // Add all loaded assemblies
+            foreach (Assembly assembly in AppDomain.CurrentDomain.GetAssemblies()
+                .Where(x => !x.IsDynamic && !string.IsNullOrEmpty(x.Location)))
+            {
+                builder.AddApplicationPart(assembly);
+            }
+
+            // Build the service provider and local scope
             IServiceProvider serviceProvider = serviceCollection.BuildServiceProvider();
             _serviceScopeFactory = serviceProvider.GetRequiredService<IServiceScopeFactory>();
 
@@ -129,8 +137,9 @@ namespace Statiq.Razor
             // Use a new scope to get the file provider
             using (IServiceScope scope = _serviceScopeFactory.CreateScope())
             {
-                FileSystemFileProvider fileProvider = scope.ServiceProvider.GetService<FileSystemFileProvider>();
-                fileProvider.ExpireChangeTokens();
+                Microsoft.Extensions.FileProviders.IFileProvider fileProvider =
+                    scope.ServiceProvider.GetService<Microsoft.Extensions.FileProviders.IFileProvider>();
+                ((FileSystemFileProvider)fileProvider).ExpireChangeTokens();
             }
         }
 
