@@ -111,6 +111,7 @@ namespace Statiq.App
             SetDefaultCommand<BuildCommand<EngineCommandSettings>>();
             AddCommand<BuildCommand<EngineCommandSettings>>();
             AddCommand<PreviewCommand>();
+            AddCommand<ServeCommand>();
             AddCommands();
             return this;
         }
