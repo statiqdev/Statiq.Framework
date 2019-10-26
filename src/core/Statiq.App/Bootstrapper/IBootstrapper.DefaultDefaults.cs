@@ -113,6 +113,7 @@ namespace Statiq.App
             AddCommand<BuildCommand<BuildCommandSettings>>();
             AddCommand<PreviewCommand>();
             AddCommand<DeployCommand>();
+            AddCommand<ServeCommand>();
             AddCommands();
             return this;
         }
