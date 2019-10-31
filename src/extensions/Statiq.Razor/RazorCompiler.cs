@@ -13,6 +13,7 @@ using Microsoft.AspNetCore.Html;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Abstractions;
+using Microsoft.AspNetCore.Mvc.ApplicationParts;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.AspNetCore.Mvc.Razor;
 using Microsoft.AspNetCore.Mvc.Razor.Compilation;
@@ -96,15 +97,15 @@ namespace Statiq.Razor
                 .AddRazorRuntimeCompilation();
 
             // Add all loaded assemblies
-            foreach (Assembly assembly in AppDomain.CurrentDomain.GetAssemblies()
-                .Where(x => !x.IsDynamic && !string.IsNullOrEmpty(x.Location)))
-            {
-                builder.AddApplicationPart(assembly);
-            }
+            CompilationReferencesProvider referencesProvider = new CompilationReferencesProvider();
+            referencesProvider.Assemblies.AddRange(AppDomain.CurrentDomain.GetAssemblies());
 
             // And a couple needed assemblies that might not be loaded in the AppDomain yet
-            builder.AddApplicationPart(typeof(IHtmlContent).Assembly);
-            builder.AddApplicationPart(Assembly.Load(new AssemblyName("Microsoft.CSharp")));
+            referencesProvider.Assemblies.Add(typeof(IHtmlContent).Assembly);
+            referencesProvider.Assemblies.Add(Assembly.Load(new AssemblyName("Microsoft.CSharp")));
+
+            // Add the reference provider as an ApplicationPart
+            builder.ConfigureApplicationPartManager(x => x.ApplicationParts.Add(referencesProvider));
 
             // Build the service provider and local scope
             IServiceProvider serviceProvider = serviceCollection.BuildServiceProvider();
@@ -134,6 +135,21 @@ namespace Statiq.Razor
                 });
             FieldInfo phasesField = razorProjectEngine.Engine.GetType().GetField("<Phases>k__BackingField", BindingFlags.Instance | BindingFlags.NonPublic);
             phasesField.SetValue(razorProjectEngine.Engine, phases.ToArray());
+        }
+
+        // Need to use a custom ICompilationReferencesProvider because the default one won't provide a path for the running assembly
+        // (see Microsoft.AspNetCore.Mvc.ApplicationParts.AssemblyPartExtensions.GetReferencePaths() for why,
+        // the running assembly returns a DependencyContext when used with "dotnet run" and therefore won't return it's own path)
+        private class CompilationReferencesProvider : ApplicationPart, ICompilationReferencesProvider
+        {
+            public List<Assembly> Assemblies { get; } = new List<Assembly>();
+
+            public override string Name => nameof(CompilationReferencesProvider);
+
+            public IEnumerable<string> GetReferencePaths() =>
+                Assemblies
+                    .Where(x => !x.IsDynamic && !string.IsNullOrEmpty(x.Location))
+                    .Select(x => x.Location);
         }
 
         public void ExpireChangeTokens()
@@ -246,18 +262,18 @@ namespace Statiq.Razor
             byte[] hash = SHA512.Create().ComputeHash(request.Input);
             request.Input.Position = 0;
 
-            CompilationResult compilationResult = CompilePage(serviceProvider, request, hash, projectItem, projectFileSystem);
+            CompilationResult compilationResult = CompilePage(request, hash, projectItem);
 
             return compilationResult.GetPage(request.RelativePath);
         }
 
-        private CompilationResult CompilePage(IServiceProvider serviceProvider, RenderRequest request, byte[] hash, RazorProjectItem projectItem, RazorProjectFileSystem projectFileSystem)
+        private CompilationResult CompilePage(RenderRequest request, byte[] hash, RazorProjectItem projectItem)
         {
             CompilerCacheKey cacheKey = new CompilerCacheKey(request, hash);
-            return _compilationCache.GetOrAdd(cacheKey, _ => GetCompilation(projectItem, projectFileSystem));
+            return _compilationCache.GetOrAdd(cacheKey, _ => GetCompilation(projectItem));
         }
 
-        private CompilationResult GetCompilation(RazorProjectItem projectItem, RazorProjectFileSystem projectFileSystem)
+        private CompilationResult GetCompilation(RazorProjectItem projectItem)
         {
             using (IServiceScope scope = _serviceScopeFactory.CreateScope())
             {

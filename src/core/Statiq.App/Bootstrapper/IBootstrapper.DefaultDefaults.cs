@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -147,6 +148,17 @@ namespace Statiq.App
                     ClassCatalog
                         .GetTypesAssignableTo<IModule>()
                         .Select(x => x.Namespace));
+
+                // Add all namespaces from the entry app
+                Assembly entryAssembly = Assembly.GetEntryAssembly();
+                if (entryAssembly != null)
+                {
+                    engine.Namespaces.AddRange(
+                        ClassCatalog
+                            .GetTypesFromAssembly(entryAssembly)
+                            .Select(x => x.Namespace)
+                            .Distinct());
+                }
             });
 
         public IBootstrapper AddDefaultPipelines() => AddPipelines();
