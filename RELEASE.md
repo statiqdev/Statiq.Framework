@@ -1,6 +1,8 @@
 # 1.0.0-alpha.14
 
 - The string overload of `SetDestination` now takes either an extension or a path distinguished by a preceding dot.
+- Updated Statiq.Razor to 3.0 libraries.
+- Updated Statiq.Hosting to 3.0 libraries.
 
 # 1.0.0-alpha.13
 
