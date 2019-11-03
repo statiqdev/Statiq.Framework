@@ -95,6 +95,13 @@ namespace Statiq.Common
             return pipeline;
         }
 
+        public static TPipeline NormallyExecute<TPipeline>(this TPipeline pipeline)
+            where TPipeline : IPipeline
+        {
+            pipeline.ExecutionPolicy = ExecutionPolicy.Normal;
+            return pipeline;
+        }
+
         public static TPipeline ManuallyExecute<TPipeline>(this TPipeline pipeline)
             where TPipeline : IPipeline
         {

@@ -1,3 +1,7 @@
+# 1.0.0-alpha.15
+
+- Added a new `ExecutionPolicy.Normal` policy and changed `ExecutionPolicy.Default` to specify different behavior depending on if the pipeline is a deployment pipeline.
+
 # 1.0.0-alpha.14
 
 - The string overload of `SetDestination` now takes either an extension or a path distinguished by a preceding dot.

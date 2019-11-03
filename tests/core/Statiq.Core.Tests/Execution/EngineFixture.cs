@@ -18,7 +18,7 @@ namespace Statiq.Core.Tests.Execution
         public class GetExecutingPipelines : EngineFixture
         {
             [Test]
-            public void NullPipelinesAndNoDefaults()
+            public void NullPipelinesAndNoNormal()
             {
                 // Given
                 Engine engine = GetEngine();
@@ -31,7 +31,7 @@ namespace Statiq.Core.Tests.Execution
             }
 
             [Test]
-            public void NullPipelinesAndDefaults()
+            public void NullPipelinesNormalAndNotDeployment()
             {
                 // Given
                 Engine engine = GetEngine();
@@ -40,11 +40,11 @@ namespace Statiq.Core.Tests.Execution
                 HashSet<string> executingPipelines = engine.GetExecutingPipelines(null, true);
 
                 // Then
-                executingPipelines.ShouldBe(new[] { "A", "D", "E", "F" }, true);
+                executingPipelines.ShouldBe(new[] { "A", "D", "E", "F", "H" }, true);
             }
 
             [Test]
-            public void ZeroLengthAndNoDefaults()
+            public void ZeroLengthAndNoNormal()
             {
                 // Given
                 Engine engine = GetEngine();
@@ -57,7 +57,7 @@ namespace Statiq.Core.Tests.Execution
             }
 
             [Test]
-            public void ZeroLengthAndDefaults()
+            public void ZeroLengthAndNormal()
             {
                 // Given
                 Engine engine = GetEngine();
@@ -66,11 +66,11 @@ namespace Statiq.Core.Tests.Execution
                 HashSet<string> executingPipelines = engine.GetExecutingPipelines(Array.Empty<string>(), true);
 
                 // Then
-                executingPipelines.ShouldBe(new[] { "A", "D", "E", "F" }, true);
+                executingPipelines.ShouldBe(new[] { "A", "D", "E", "F", "H" }, true);
             }
 
             [Test]
-            public void SpecifiedAndNoDefaults()
+            public void SpecifiedAndNoNormal()
             {
                 // Given
                 Engine engine = GetEngine();
@@ -83,7 +83,7 @@ namespace Statiq.Core.Tests.Execution
             }
 
             [Test]
-            public void SpecifiedAndDefaults()
+            public void SpecifiedAndNormal()
             {
                 // Given
                 Engine engine = GetEngine();
@@ -92,11 +92,11 @@ namespace Statiq.Core.Tests.Execution
                 HashSet<string> executingPipelines = engine.GetExecutingPipelines(new[] { "A", "B" }, true);
 
                 // Then
-                executingPipelines.ShouldBe(new[] { "A", "B", "E", "D", "F" }, true);
+                executingPipelines.ShouldBe(new[] { "A", "B", "E", "D", "F", "H" }, true);
             }
 
             [Test]
-            public void SpecifiedAndTransitiveAndNoDefaults()
+            public void SpecifiedAndTransitiveAndNoNormal()
             {
                 // Given
                 Engine engine = GetEngine();
@@ -109,7 +109,7 @@ namespace Statiq.Core.Tests.Execution
             }
 
             [Test]
-            public void SpecifiedAndTransitiveAndDefaults()
+            public void SpecifiedAndTransitiveAndNormal()
             {
                 // Given
                 Engine engine = GetEngine();
@@ -118,7 +118,7 @@ namespace Statiq.Core.Tests.Execution
                 HashSet<string> executingPipelines = engine.GetExecutingPipelines(new[] { "E" }, true);
 
                 // Then
-                executingPipelines.ShouldBe(new[] { "A", "D", "E", "F" }, true);
+                executingPipelines.ShouldBe(new[] { "A", "D", "E", "F", "H" }, true);
             }
 
             [Test]
@@ -136,7 +136,7 @@ namespace Statiq.Core.Tests.Execution
                 Engine engine = new Engine();
                 engine.Pipelines.Add("A", new TestPipeline
                 {
-                    ExecutionPolicy = ExecutionPolicy.Default
+                    ExecutionPolicy = ExecutionPolicy.Normal
                 });
                 engine.Pipelines.Add("B", new TestPipeline
                 {
@@ -153,12 +153,20 @@ namespace Statiq.Core.Tests.Execution
                 });
                 engine.Pipelines.Add("E", new TestPipeline
                 {
-                    ExecutionPolicy = ExecutionPolicy.Default,
                     Dependencies = new HashSet<string>(new[] { "D" })
                 });
                 engine.Pipelines.Add("F", new TestPipeline
                 {
                     ExecutionPolicy = ExecutionPolicy.Always
+                });
+                engine.Pipelines.Add("G", new TestPipeline
+                {
+                    Deployment = true
+                });
+                engine.Pipelines.Add("H", new TestPipeline
+                {
+                    Deployment = true,
+                    ExecutionPolicy = ExecutionPolicy.Normal
                 });
                 return engine;
             }
