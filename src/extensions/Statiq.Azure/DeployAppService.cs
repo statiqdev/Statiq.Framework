@@ -22,20 +22,34 @@ namespace Statiq.Azure
         private const string Password = nameof(Password);
         private const string Directory = nameof(Directory);
 
+        /// <summary>
+        /// Deploys the output folder to Azure App Service.
+        /// </summary>
+        /// <param name="siteName">The name of the site to deploy.</param>
+        /// <param name="username">The username to authenticate with.</param>
+        /// <param name="password">The password to authenticate with.</param>
         public DeployAppService(Config<string> siteName, Config<string> username, Config<string> password)
             : this(siteName, username, password, Config.FromValue((DirectoryPath)null))
         {
         }
 
-        // Directory is from root (not input)
+        /// <summary>
+        /// Deploys a specified folder to Azure App Service.
+        /// </summary>
+        /// <param name="siteName">The name of the site to deploy.</param>
+        /// <param name="username">The username to authenticate with.</param>
+        /// <param name="password">The password to authenticate with.</param>
+        /// <param name="directory">
+        /// The directory containing the files to deploy (from the root folder, not the input folder).
+        /// </param>
         public DeployAppService(Config<string> siteName, Config<string> username, Config<string> password, Config<DirectoryPath> directory)
             : base(
                 new Dictionary<string, IConfig>
                 {
-                    { nameof(SiteName), siteName ?? throw new ArgumentNullException(nameof(SiteName)) },
-                    { nameof(Username), username ?? throw new ArgumentNullException(nameof(Username)) },
-                    { nameof(Password), password ?? throw new ArgumentNullException(nameof(Password)) },
-                    { nameof(Directory), directory ?? throw new ArgumentNullException(nameof(Directory)) }
+                    { SiteName, siteName ?? throw new ArgumentNullException(nameof(siteName)) },
+                    { Username, username ?? throw new ArgumentNullException(nameof(username)) },
+                    { Password, password ?? throw new ArgumentNullException(nameof(password)) },
+                    { Directory, directory ?? throw new ArgumentNullException(nameof(directory)) }
                 },
                 false)
         {
@@ -44,17 +58,17 @@ namespace Statiq.Azure
         protected override async Task<IEnumerable<IDocument>> ExecuteConfigAsync(IDocument input, IExecutionContext context, IMetadata values)
         {
             // Get the site name
-            string siteName = values.GetString(nameof(SiteName)) ?? throw new ExecutionException("Invalid site name");
+            string siteName = values.GetString(SiteName) ?? throw new ExecutionException("Invalid site name");
 
             // Get the username and password
             // See https://stackoverflow.com/a/45083787/807064 if we ever want to accept an authorization file
-            string username = values.GetString(nameof(Username)) ?? throw new ExecutionException("Invalid username");
-            string password = values.GetString(nameof(Password)) ?? throw new ExecutionException("Invalid password");
+            string username = values.GetString(Username) ?? throw new ExecutionException("Invalid username");
+            string password = values.GetString(Password) ?? throw new ExecutionException("Invalid password");
             byte[] authParameterBytes = Encoding.ASCII.GetBytes(username + ":" + password);
             string authParameter = Convert.ToBase64String(authParameterBytes);
 
             // If the directory is null, use the output directory
-            DirectoryPath directory = values.GetDirectoryPath(nameof(Directory), context.FileSystem.GetOutputPath()) ?? context.FileSystem.GetOutputPath();
+            DirectoryPath directory = values.GetDirectoryPath(Directory, context.FileSystem.GetOutputPath()) ?? context.FileSystem.GetOutputPath();
 
             // Create the zip file
             IFile zipFile = ZipFileHelper.CreateZipFile(context, directory);
@@ -66,7 +80,7 @@ namespace Statiq.Azure
                 {
                     client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", authParameter);
                     System.Net.Http.StreamContent zipContent = new System.Net.Http.StreamContent(zipStream);
-                    HttpResponseMessage response = await client.PostAsync($"https://{siteName}.scm.azurewebsites.net/api/zipdeploy", zipContent);
+                    HttpResponseMessage response = await client.PostAsync($"https://{siteName}.scm.azurewebsites.net/api/zipdeploy", zipContent, context.CancellationToken);
                     if (!response.IsSuccessStatusCode)
                     {
                         string responseContent = await response.Content.ReadAsStringAsync();
