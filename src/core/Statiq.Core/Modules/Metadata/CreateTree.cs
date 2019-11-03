@@ -14,7 +14,7 @@ namespace Statiq.Core
     /// </summary>
     /// <remarks>
     /// <para>
-    /// By default, this module is configured to generate a tree that mimics the directory structure of each document's source path.
+    /// By default, this module is configured to generate a tree that mimics the directory structure of each document's destination path.
     /// Any documents with a file name of "index.*" are automatically
     /// promoted to the node that represents the parent folder level. For any folder that does not contain an "index.*" file,
     /// an empty placeholder tree node is used to represent the folder.
@@ -51,10 +51,8 @@ namespace Statiq.Core
             _isRoot = false;
             _treePath = Config.FromDocument((doc, ctx) =>
             {
-                // Attempt to get the segments from the source path and then the destination path
-                ReadOnlyMemory<char>[] segments =
-                    doc.Source?.GetRelativeInputPath(ctx)?.Segments
-                        ?? doc.Destination?.GetRelativeInputPath(ctx)?.Segments;
+                // Attempt to get the segments from the destination path
+                ReadOnlyMemory<char>[] segments = doc.Destination?.GetRelativeInputPath(ctx)?.Segments;
                 if (segments == null)
                 {
                     return null;
@@ -69,8 +67,8 @@ namespace Statiq.Core
             });
             _placeholderFactory = (treePath, items, context) =>
             {
-                FilePath source = new FilePath(string.Join("/", treePath.Concat(new[] { "index.html" })));
-                return Task.FromResult(context.CreateDocument(context.FileSystem.GetInputFile(source).Path.FullPath, source, items));
+                FilePath filePath = new FilePath(string.Join("/", treePath.Concat(new[] { "index.html" })));
+                return Task.FromResult(context.CreateDocument(context.FileSystem.GetInputFile(filePath).Path.FullPath, filePath, items));
             };
             _sort = (x, y) => Comparer.Default.Compare(
                 x.Get<object[]>(Keys.TreePath)?.LastOrDefault(),

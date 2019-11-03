@@ -103,7 +103,7 @@ namespace Statiq.Azure
             await client.Indexes.CreateAsync(index, null, context.CancellationToken);
 
             // Upload the documents to the search index in batches
-            context.LogDebug($"Uploading documents to search index {indexName}...");
+            context.LogDebug($"Uploading {context.Inputs.Length} documents to search index {indexName}...");
             ISearchIndexClient indexClient = client.Indexes.GetClient(indexName);
             int start = 0;
             do
