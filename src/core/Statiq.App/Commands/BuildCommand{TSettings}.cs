@@ -8,7 +8,7 @@ using Statiq.Common;
 
 namespace Statiq.App
 {
-    [Description("Executes the pipelines.")]
+    [Description("Executes normal (or explicitly specified) pipelines.")]
     internal class BuildCommand<TSettings> : EngineCommand<TSettings>
         where TSettings : BaseCommandSettings
     {
@@ -32,11 +32,25 @@ namespace Statiq.App
             TSettings commandSettings,
             IEngineManager engineManager)
         {
+            SetPipelines(commandContext, commandSettings, engineManager);
             using (CancellationTokenSource cancellationTokenSource = new CancellationTokenSource())
             {
                 return await engineManager.ExecuteAsync(cancellationTokenSource)
                     ? (int)ExitCode.Normal
                     : (int)ExitCode.ExecutionError;
+            }
+        }
+
+        protected virtual void SetPipelines(
+            CommandContext commandContext,
+            TSettings commandSettings,
+            IEngineManager engineManager)
+        {
+            BuildCommandSettings buildSettings = commandSettings as BuildCommandSettings ?? commandContext.Data as BuildCommandSettings;
+            if (buildSettings != null)
+            {
+                engineManager.Pipelines = buildSettings.Pipelines;
+                engineManager.NormalPipelines = buildSettings.Pipelines == null || buildSettings.Pipelines.Length == 0 || buildSettings.NormalPipelines;
             }
         }
     }

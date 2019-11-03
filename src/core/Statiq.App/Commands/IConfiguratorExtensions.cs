@@ -54,12 +54,12 @@ namespace Statiq.App
         public static ICommandConfigurator AddBuild(
             this IConfigurator configurator,
             string name,
-            bool defaultPipelines,
+            bool normalPipelines,
             params string[] pipelines) =>
-                configurator.AddBuild(name, new EngineCommandSettings
+                configurator.AddBuild(name, new BuildCommandSettings
                 {
                     Pipelines = pipelines,
-                    DefaultPipelines = defaultPipelines
+                    NormalPipelines = normalPipelines
                 });
 
         public static ICommandConfigurator AddBuild(

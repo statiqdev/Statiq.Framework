@@ -8,6 +8,10 @@ namespace Statiq.App
     {
         Engine Engine { get; }
 
+        string[] Pipelines { get; set; }
+
+        bool NormalPipelines { get; set; }
+
         Task<bool> ExecuteAsync(CancellationTokenSource cancellationTokenSource);
     }
 }

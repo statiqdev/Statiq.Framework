@@ -1,5 +1,6 @@
 # 1.0.0-alpha.15
 
+- Added a new `deploy` command that executes deployment pipelines.
 - Added a new `ExecutionPolicy.Normal` policy and changed `ExecutionPolicy.Default` to specify different behavior depending on if the pipeline is a deployment pipeline.
 
 # 1.0.0-alpha.14

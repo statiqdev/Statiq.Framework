@@ -70,6 +70,9 @@ namespace Statiq.Core
             DocumentFactory = new DocumentFactory(Settings);
             _diagnosticsTraceListener = new DiagnosticsTraceListener(_logger);
             System.Diagnostics.Trace.Listeners.Add(_diagnosticsTraceListener);
+
+            // Add the service-based pipelines as late as possible so other services have been configured
+            AddServicePipelines();
         }
 
         /// <summary>
@@ -100,6 +103,17 @@ namespace Statiq.Core
 
             IServiceProvider serviceProvider = serviceCollection.BuildServiceProvider();
             return serviceProvider.CreateScope();
+        }
+
+        /// <summary>
+        /// Adds pipelines from the DI container to the pipeline collection.
+        /// </summary>
+        private void AddServicePipelines()
+        {
+            foreach (IPipeline pipeline in Services.GetServices<IPipeline>())
+            {
+                Pipelines.AddIfNonExisting(pipeline);
+            }
         }
 
         /// <inheritdoc />
@@ -249,10 +263,8 @@ namespace Statiq.Core
             PipelineOutputs outputs = new PipelineOutputs(phaseResults);
 
             // Create the pipeline phases (this also validates the pipeline graph)
-            // Also add the service-based pipelines as late as possible so other services have been configured
             if (_phases == null)
             {
-                AddServicePipelines();
                 _phases = GetPipelinePhases(_pipelines, _logger);
             }
 
@@ -393,17 +405,6 @@ namespace Statiq.Core
             pipeline.ExecutionPolicy == ExecutionPolicy.Default
                 ? pipeline.Deployment ? ExecutionPolicy.Manual : ExecutionPolicy.Normal
                 : pipeline.ExecutionPolicy;
-
-        /// <summary>
-        /// Adds pipelines from the DI container to the pipeline collection.
-        /// </summary>
-        private void AddServicePipelines()
-        {
-            foreach (IPipeline pipeline in Services.GetServices<IPipeline>())
-            {
-                Pipelines.Add(pipeline);
-            }
-        }
 
         // The result array is sorted based on dependencies
         // Internal for testing

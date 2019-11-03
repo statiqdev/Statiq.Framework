@@ -110,8 +110,9 @@ namespace Statiq.App
         public IBootstrapper AddDefaultCommands()
         {
             SetDefaultCommand<BuildCommand<EngineCommandSettings>>();
-            AddCommand<BuildCommand<EngineCommandSettings>>();
+            AddCommand<BuildCommand<BuildCommandSettings>>();
             AddCommand<PreviewCommand>();
+            AddCommand<DeployCommand>();
             AddCommands();
             return this;
         }

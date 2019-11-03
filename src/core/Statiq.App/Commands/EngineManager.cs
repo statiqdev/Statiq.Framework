@@ -19,8 +19,6 @@ namespace Statiq.App
     internal class EngineManager : IEngineManager, IDisposable
     {
         private readonly ILogger _logger;
-        private readonly string[] _pipelines;
-        private readonly bool _defaultPipelines;
 
         public EngineManager(
             CommandContext commandContext,
@@ -52,8 +50,6 @@ namespace Statiq.App
             {
                 ApplyCommandSettings(Engine, configurationSettings, commandSettings);
             }
-            _pipelines = commandSettings?.Pipelines;
-            _defaultPipelines = commandSettings == null || commandSettings.Pipelines == null || commandSettings.Pipelines.Length == 0 || commandSettings.DefaultPipelines;
 
             // Run engine configurators after command line, settings, etc. have been applied
             bootstrapper.Configurators.Configure<IEngine>(Engine);
@@ -67,11 +63,15 @@ namespace Statiq.App
 
         public Engine Engine { get; }
 
+        public string[] Pipelines { get; set; }
+
+        public bool NormalPipelines { get; set; } = true;
+
         public async Task<bool> ExecuteAsync(CancellationTokenSource cancellationTokenSource)
         {
             try
             {
-                await Engine.ExecuteAsync(_pipelines, _defaultPipelines, cancellationTokenSource);
+                await Engine.ExecuteAsync(Pipelines, NormalPipelines, cancellationTokenSource);
             }
             catch (Exception ex)
             {

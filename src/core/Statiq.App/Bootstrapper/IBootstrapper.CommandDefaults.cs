@@ -71,6 +71,11 @@ namespace Statiq.App
             where TSettings : CommandSettings =>
             ConfigureCommands(x => x.AddDelegate(name, func).WithDescription(description));
 
+        /// <summary>
+        /// Adds all commands that implement <see cref="ICommand"/> from the specified assembly.
+        /// </summary>
+        /// <param name="assembly">The assembly to add commands from.</param>
+        /// <returns>The current bootstrapper.</returns>
         public IBootstrapper AddCommands(Assembly assembly)
         {
             _ = assembly ?? throw new ArgumentNullException(nameof(assembly));
@@ -81,6 +86,10 @@ namespace Statiq.App
             return this;
         }
 
+        /// <summary>
+        /// Adds all commands that implement <see cref="ICommand"/> from the entry assembly.
+        /// </summary>
+        /// <returns>The current bootstrapper.</returns>
         public IBootstrapper AddCommands() => AddCommands(Assembly.GetEntryAssembly());
     }
 }

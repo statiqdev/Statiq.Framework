@@ -30,14 +30,6 @@ namespace Statiq.App
         [Description("Reads standard input at startup and sets ApplicationInput in the execution context.")]
         public bool StdIn { get; set; }
 
-        [CommandOption("-p|--pipeline")]
-        [Description("Explicitly specifies one or more pipelines to execute.")]
-        public string[] Pipelines { get; set; }
-
-        [CommandOption("-d|--defaults")]
-        [Description("Executes default pipelines in addition to the ones specified.")]
-        public bool DefaultPipelines { get; set; }
-
         [CommandOption("--serial")]
         [Description("Executes pipeline phases and modules in serial.")]
         public bool SerialExecution { get; set; }

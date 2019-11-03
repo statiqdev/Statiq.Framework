@@ -15,7 +15,7 @@ using Microsoft.Extensions.Configuration;
 namespace Statiq.App
 {
     [Description("Builds the site and serves it, optionally watching for changes and rebuilding by default.")]
-    internal class PreviewCommand : EngineCommand<PreviewCommandSettings>
+    internal class PreviewCommand : BuildCommand<PreviewCommandSettings>
     {
         private readonly ConcurrentQueue<string> _changedFiles = new ConcurrentQueue<string>();
         private readonly AutoResetEvent _messageEvent = new AutoResetEvent(false);
@@ -41,6 +41,8 @@ namespace Statiq.App
             PreviewCommandSettings commandSettings,
             IEngineManager engineManager)
         {
+            SetPipelines(commandContext, commandSettings, engineManager);
+
             ExitCode exitCode = ExitCode.Normal;
             ILogger logger = engineManager.Engine.Services.GetRequiredService<ILogger<Bootstrapper>>();
 
