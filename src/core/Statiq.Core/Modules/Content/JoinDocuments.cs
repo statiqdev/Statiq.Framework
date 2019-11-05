@@ -62,6 +62,7 @@ namespace Statiq.Core
             {
                 bool first = true;
                 byte[] delimeterBytes = Encoding.UTF8.GetBytes(_delimiter);
+                string mediaType = null;
                 foreach (IDocument document in context.Inputs)
                 {
                     if (document == null)
@@ -69,24 +70,32 @@ namespace Statiq.Core
                         continue;
                     }
 
-                    if (first)
+                    if (document.ContentProvider != null)
                     {
-                        first = false;
-                    }
-                    else
-                    {
-                        await contentStream.WriteAsync(delimeterBytes, 0, delimeterBytes.Length);
-                    }
+                        if (first)
+                        {
+                            first = false;
+                            mediaType = document.ContentProvider.MediaType;
+                        }
+                        else
+                        {
+                            await contentStream.WriteAsync(delimeterBytes, 0, delimeterBytes.Length);
+                            if (!string.Equals(mediaType, document.ContentProvider.MediaType))
+                            {
+                                mediaType = null;
+                            }
+                        }
 
-                    using (Stream inputStream = document.GetContentStream())
-                    {
-                        await inputStream.CopyToAsync(contentStream);
+                        using (Stream inputStream = document.GetContentStream())
+                        {
+                            await inputStream.CopyToAsync(contentStream);
+                        }
                     }
                 }
 
                 return context.CreateDocument(
                     MetadataForOutputDocument(context.Inputs),
-                    context.GetContentProvider(contentStream))
+                    context.GetContentProvider(contentStream, mediaType))
                     .Yield();
             }
         }

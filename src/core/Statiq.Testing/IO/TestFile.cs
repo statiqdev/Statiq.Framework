@@ -25,6 +25,8 @@ namespace Statiq.Testing
 
         public long Length => _fileProvider.Files[Path.FullPath].Length;
 
+        public string MediaType => MediaTypes.TryGet(Path.Extension, out string mediaType) ? mediaType : null;
+
         private void CreateDirectory(bool createDirectory, IFile file)
         {
             if (!createDirectory && !_fileProvider.Directories.Contains(file.Path.Directory.FullPath))
@@ -117,7 +119,7 @@ namespace Statiq.Testing
         }
 
         public IContentProvider GetContentProvider() =>
-            _fileProvider.Files.ContainsKey(Path.FullPath) ? (IContentProvider)new FileContent(this) : NullContent.Provider;
+            _fileProvider.Files.ContainsKey(Path.FullPath) ? (IContentProvider)new FileContent(this, MediaType) : NullContent.Provider;
 
         public string ToDisplayString() => Path.ToSafeDisplayString();
     }

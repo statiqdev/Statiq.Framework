@@ -151,7 +151,7 @@ namespace Statiq.Aws
                     writer.WriteEndArray();
                     textWriter.Flush();
 
-                    return context.CreateDocument(context.GetContentProvider(contentStream)).Yield();
+                    return context.CreateDocument(context.GetContentProvider(contentStream, MediaTypes.Json)).Yield();
                 }
             }
         }

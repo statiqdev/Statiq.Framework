@@ -30,7 +30,7 @@ namespace Statiq.Core
             }
             return value == null
                 ? input.Yield()
-                : input.Clone(await context.GetContentProviderAsync(await input.GetContentStringAsync() + value)).Yield();
+                : input.Clone(await context.GetContentProviderAsync(await input.GetContentStringAsync() + value, input.ContentProvider?.MediaType)).Yield();
         }
     }
 }

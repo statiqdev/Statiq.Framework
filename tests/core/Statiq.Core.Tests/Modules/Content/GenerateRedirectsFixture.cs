@@ -28,7 +28,25 @@ namespace Statiq.Core.Tests.Modules.Contents
             IReadOnlyList<TestDocument> results = await ExecuteAsync(new[] { redirected, notRedirected }, redirect);
 
             // Then
-            CollectionAssert.AreEqual(new[] { "foo.html" }, results.Select(x => x.Destination.FullPath));
+            results.Select(x => x.Destination.FullPath).ShouldBe(new[] { "foo.html" });
+        }
+
+        [Test]
+        public async Task SetsHtmlMediaType()
+        {
+            // Given
+            TestDocument redirected = new TestDocument(new MetadataItems
+            {
+                { Keys.RedirectFrom, new List<FilePath> { new FilePath("foo.html") } }
+            });
+            TestDocument notRedirected = new TestDocument();
+            GenerateRedirects redirect = new GenerateRedirects();
+
+            // When
+            IReadOnlyList<TestDocument> results = await ExecuteAsync(new[] { redirected, notRedirected }, redirect);
+
+            // Then
+            results.Single().ContentProvider.MediaType.ShouldBe(MediaTypes.Html);
         }
 
         [TestCase("foo/bar", "foo/bar.html")]
@@ -48,7 +66,7 @@ namespace Statiq.Core.Tests.Modules.Contents
             IReadOnlyList<TestDocument> results = await ExecuteAsync(new[] { redirected, notRedirected }, redirect);
 
             // Then
-            CollectionAssert.AreEqual(new[] { expected }, results.Select(x => x.Destination.FullPath));
+            results.Select(x => x.Destination.FullPath).ShouldBe(new[] { expected });
         }
 
         [Test]
@@ -69,7 +87,7 @@ namespace Statiq.Core.Tests.Modules.Contents
 
             // Then
             context.LogMessages.ShouldContain(x => x.LogLevel == LogLevel.Warning && x.FormattedMessage.StartsWith("The redirect path must be relative"));
-            Assert.AreEqual(0, results.Count);
+            results.ShouldBeEmpty();
         }
 
         [Test]
@@ -90,7 +108,7 @@ namespace Statiq.Core.Tests.Modules.Contents
             IReadOnlyList<TestDocument> results = await ExecuteAsync(new[] { redirected1, redirected2 }, redirect);
 
             // Then
-            CollectionAssert.AreEquivalent(new[] { "foo.html", "bar/baz.html" }, results.Select(x => x.Destination.FullPath));
+            results.Select(x => x.Destination.FullPath).ShouldBe(new[] { "foo.html", "bar/baz.html" });
         }
 
         [Test]
@@ -113,8 +131,8 @@ namespace Statiq.Core.Tests.Modules.Contents
             IReadOnlyList<TestDocument> results = await ExecuteAsync(new[] { redirected1, redirected2 }, redirect);
 
             // Then
-            CollectionAssert.AreEquivalent(new[] { "foo.html", "bar/baz.html", "a/b" }, results.Select(x => x.Destination.FullPath));
-            Assert.IsTrue(results.Single(x => x.Destination.FullPath == "a/b").Content.Contains("foo.html /foo2.html"));
+            results.Select(x => x.Destination.FullPath).ShouldBe(new[] { "foo.html", "bar/baz.html", "a/b" });
+            results.Single(x => x.Destination.FullPath == "a/b").Content.ShouldContain("foo.html /foo2.html");
         }
 
         [Test]
@@ -139,7 +157,7 @@ namespace Statiq.Core.Tests.Modules.Contents
             IReadOnlyList<TestDocument> results = await ExecuteAsync(new[] { redirected1, redirected2 }, redirect);
 
             // Then
-            CollectionAssert.AreEquivalent(new[] { "a/b" }, results.Select(x => x.Destination.FullPath));
+            results.Select(x => x.Destination.FullPath).ShouldBe(new[] { "a/b" });
         }
     }
 }

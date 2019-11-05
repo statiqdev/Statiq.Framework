@@ -121,12 +121,12 @@ namespace Statiq.Core
                 {
                     await tempFile.WriteAllTextAsync(content);
                 }
-                return new ContentStream(new FileContent(tempFile), tempFile.Open(), true);
+                return new ContentStream(x => new FileContent(tempFile, x), tempFile.Open(), true);
             }
 
             // Otherwise get a memory stream from the pool and use that
             Stream memoryStream = MemoryStreamFactory.GetStream(content);
-            return new ContentStream(new Common.StreamContent(MemoryStreamFactory, memoryStream), memoryStream, false);
+            return new ContentStream(x => new Common.StreamContent(MemoryStreamFactory, memoryStream, x), memoryStream, false);
         }
 
         /// <inheritdoc/>

@@ -32,6 +32,8 @@ namespace Statiq.Core
 
         public long Length => _file.Length;
 
+        public string MediaType => MediaTypes.TryGet(Path.Extension, out string mediaType) ? mediaType : null;
+
         public async Task CopyToAsync(IFile destination, bool overwrite = true, bool createDirectory = true)
         {
             _ = destination ?? throw new ArgumentNullException(nameof(destination));
@@ -132,7 +134,7 @@ namespace Statiq.Core
         private void CreateDirectory() => Directory.Create();
 
         public IContentProvider GetContentProvider() =>
-            _file.Exists ? (IContentProvider)new FileContent(this) : NullContent.Provider;
+            _file.Exists ? (IContentProvider)new FileContent(this, MediaType) : NullContent.Provider;
 
         public string ToDisplayString() => Path.ToDisplayString();
     }

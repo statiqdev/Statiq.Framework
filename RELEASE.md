@@ -1,5 +1,9 @@
 # 1.0.0-alpha.15
 
+- Added overloads of methods that create content providers to set the media type.
+- Updated all built-in modules to set the media type whenever appropriate.
+- Added `IContentProvider.MediaType` to surface the media type of content.
+- Added a `MediaTypes` static class that contains an exhaustive set of media type (MIME) mappings by file extension.
 - Added a `DeploySearchIndex` module that deploys an Azure search index from input document metadata.
 - Added a `deploy` command that executes deployment pipelines.
 - Added a new `ExecutionPolicy.Normal` policy and changed `ExecutionPolicy.Default` to specify different behavior depending on if the pipeline is a deployment pipeline.

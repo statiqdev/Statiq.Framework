@@ -13,5 +13,15 @@ namespace Statiq.Common
         /// </summary>
         /// <returns>The content stream for a document.</returns>
         Stream GetStream();
+
+        /// <summary>
+        /// Gets the media type of the content.
+        /// </summary>
+        /// <remarks>
+        /// A registered IANA media type will be used if available.
+        /// Unregistered media type names may be returned if a registered type is unavailable.
+        /// If the media type is unknown this may null or empty.
+        /// </remarks>
+        string MediaType { get; }
     }
 }

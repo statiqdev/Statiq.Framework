@@ -44,43 +44,43 @@ namespace Statiq.Testing
 
         // Special test constructors
 
-        public TestDocument(string content)
-            : this(GetContentProvider(content))
+        public TestDocument(string content, string mediaType = null)
+            : this(GetContentProvider(content, mediaType))
         {
         }
 
-        public TestDocument(Stream content)
-            : this(GetContentProvider(content))
+        public TestDocument(Stream content, string mediaType = null)
+            : this(GetContentProvider(content, mediaType))
         {
         }
 
-        public TestDocument(IEnumerable<KeyValuePair<string, object>> metadata, string content)
-            : this(metadata, GetContentProvider(content))
+        public TestDocument(IEnumerable<KeyValuePair<string, object>> metadata, string content, string mediaType = null)
+            : this(metadata, GetContentProvider(content, mediaType))
         {
         }
 
-        public TestDocument(IEnumerable<KeyValuePair<string, object>> metadata, Stream content)
-            : this(metadata, GetContentProvider(content))
+        public TestDocument(IEnumerable<KeyValuePair<string, object>> metadata, Stream content, string mediaType = null)
+            : this(metadata, GetContentProvider(content, mediaType))
         {
         }
 
-        public TestDocument(FilePath source, FilePath destination, IEnumerable<KeyValuePair<string, object>> metadata, string content)
-            : this(source, destination, metadata, GetContentProvider(content))
+        public TestDocument(FilePath source, FilePath destination, IEnumerable<KeyValuePair<string, object>> metadata, string content, string mediaType = null)
+            : this(source, destination, metadata, GetContentProvider(content, mediaType))
         {
         }
 
-        public TestDocument(FilePath source, FilePath destination, IEnumerable<KeyValuePair<string, object>> metadata, Stream content)
-            : this(source, destination, metadata, GetContentProvider(content))
+        public TestDocument(FilePath source, FilePath destination, IEnumerable<KeyValuePair<string, object>> metadata, Stream content, string mediaType = null)
+            : this(source, destination, metadata, GetContentProvider(content, mediaType))
         {
         }
 
-        public TestDocument(FilePath source, FilePath destination, string content)
-            : this(source, destination, GetContentProvider(content))
+        public TestDocument(FilePath source, FilePath destination, string content, string mediaType = null)
+            : this(source, destination, GetContentProvider(content, mediaType))
         {
         }
 
-        public TestDocument(FilePath source, FilePath destination, Stream content)
-            : this(source, destination, GetContentProvider(content))
+        public TestDocument(FilePath source, FilePath destination, Stream content, string mediaType = null)
+            : this(source, destination, GetContentProvider(content, mediaType))
         {
         }
 
@@ -94,13 +94,13 @@ namespace Statiq.Testing
         {
         }
 
-        public TestDocument(FilePath path, IEnumerable<KeyValuePair<string, object>> metadata, string content)
-            : this(GetSourcePath(path), GetDestinationPath(path), metadata, GetContentProvider(content))
+        public TestDocument(FilePath path, IEnumerable<KeyValuePair<string, object>> metadata, string content, string mediaType = null)
+            : this(GetSourcePath(path), GetDestinationPath(path), metadata, GetContentProvider(content, mediaType))
         {
         }
 
-        public TestDocument(FilePath path, IEnumerable<KeyValuePair<string, object>> metadata, Stream content)
-            : this(GetSourcePath(path), GetDestinationPath(path), metadata, GetContentProvider(content))
+        public TestDocument(FilePath path, IEnumerable<KeyValuePair<string, object>> metadata, Stream content, string mediaType = null)
+            : this(GetSourcePath(path), GetDestinationPath(path), metadata, GetContentProvider(content, mediaType))
         {
         }
 
@@ -109,13 +109,13 @@ namespace Statiq.Testing
         {
         }
 
-        public TestDocument(FilePath path, string content)
-            : this(GetSourcePath(path), GetDestinationPath(path), GetContentProvider(content))
+        public TestDocument(FilePath path, string content, string mediaType = null)
+            : this(GetSourcePath(path), GetDestinationPath(path), GetContentProvider(content, mediaType))
         {
         }
 
-        public TestDocument(FilePath path, Stream content)
-            : this(GetSourcePath(path), GetDestinationPath(path), GetContentProvider(content))
+        public TestDocument(FilePath path, Stream content, string mediaType = null)
+            : this(GetSourcePath(path), GetDestinationPath(path), GetContentProvider(content, mediaType))
         {
         }
 
@@ -126,16 +126,16 @@ namespace Statiq.Testing
 
         // Constructor helpers
 
-        private static IContentProvider GetContentProvider(string content)
+        private static IContentProvider GetContentProvider(string content, string mediaType)
         {
             TestMemoryStreamFactory memoryStreamFactory = new TestMemoryStreamFactory();
-            return content == null ? null : new StreamContent(memoryStreamFactory, memoryStreamFactory.GetStream(content));
+            return content == null ? null : new StreamContent(memoryStreamFactory, memoryStreamFactory.GetStream(content), mediaType);
         }
 
-        private static IContentProvider GetContentProvider(Stream content)
+        private static IContentProvider GetContentProvider(Stream content, string mediaType)
         {
             TestMemoryStreamFactory memoryStreamFactory = new TestMemoryStreamFactory();
-            return content == null ? null : new StreamContent(memoryStreamFactory, content);
+            return content == null ? null : new StreamContent(memoryStreamFactory, content, mediaType);
         }
 
         private static FilePath GetSourcePath(FilePath path) =>

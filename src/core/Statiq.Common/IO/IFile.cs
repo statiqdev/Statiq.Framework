@@ -32,6 +32,16 @@ namespace Statiq.Common
         long Length { get; }
 
         /// <summary>
+        /// Gets the media type of the file.
+        /// </summary>
+        /// <remarks>
+        /// A registered IANA media type will be used if available.
+        /// Unregistered media type names may be returned if a registered type is unavailable.
+        /// If the media type is unknown this may null or empty.
+        /// </remarks>
+        string MediaType { get; }
+
+        /// <summary>
         /// Copies the file to the specified destination file.
         /// </summary>
         /// <param name="destination">The destination file.</param>

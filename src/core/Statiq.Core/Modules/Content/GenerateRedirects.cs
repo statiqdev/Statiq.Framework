@@ -161,7 +161,8 @@ namespace Statiq.Core
                         {
                             yield return context.CreateDocument(
                                 outputPath,
-                                await context.GetContentProviderAsync($@"
+                                await context.GetContentProviderAsync(
+                                    $@"
 <!doctype html>
 <html>    
   <head>      
@@ -171,7 +172,8 @@ namespace Statiq.Core
   <body> 
     <p>This page has moved to a <a href=""{url}"">{url}</a></p> 
   </body>  
-</html>"));
+</html>",
+                                    MediaTypes.Html));
                         }
                     }
                 }

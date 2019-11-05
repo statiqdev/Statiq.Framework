@@ -13,7 +13,7 @@ namespace Statiq.Core.Tests.Modules.Contents
     public class JoinDocumentsFixture : BaseFixture
     {
         [Test]
-        public async Task JoinTwoDocumentsJoinWithNoDelimiter()
+        public async Task TwoDocumentsWithNoDelimiter()
         {
             // Given
             TestDocument first = new TestDocument("Test");
@@ -28,7 +28,7 @@ namespace Statiq.Core.Tests.Modules.Contents
         }
 
         [Test]
-        public async Task JoinThreeDocumentsJoinWithNoDelimiter()
+        public async Task ThreeDocumentsWithNoDelimiter()
         {
             // Given
             TestDocument first = new TestDocument("Test");
@@ -44,7 +44,60 @@ namespace Statiq.Core.Tests.Modules.Contents
         }
 
         [Test]
-        public async Task JoinThreeDocumentsJoinWithNoDelimiter_firstnull()
+        public async Task ThreeDocumentsWithDelimiterAndNoContent()
+        {
+            // Given
+            TestDocument first = new TestDocument("Test");
+            TestDocument second = new TestDocument();
+            TestDocument third = new TestDocument("Test3");
+            JoinDocuments join = new JoinDocuments(",");
+
+            // When
+            ImmutableArray<TestDocument> results = await ExecuteAsync(new[] { first, second, third }, join);
+
+            // Then
+            second.ContentProvider.ShouldBeNull();
+            results.Single().Content.ShouldBe("Test,Test3");
+        }
+
+        [Test]
+        public async Task ResultHasSameMediaTypeWhenSame()
+        {
+            // Given
+            TestDocument first = new TestDocument("Test", "Foo");
+            TestDocument second = new TestDocument();
+            TestDocument third = new TestDocument("Test3", "Foo");
+            JoinDocuments join = new JoinDocuments(",");
+
+            // When
+            ImmutableArray<TestDocument> results = await ExecuteAsync(new[] { first, second, third }, join);
+
+            // Then
+            second.ContentProvider.ShouldBeNull();
+            results.Single().Content.ShouldBe("Test,Test3");
+            results.Single().ContentProvider.MediaType.ShouldBe("Foo");
+        }
+
+        [Test]
+        public async Task ResultHasNoMediaTypeWhenDifferent()
+        {
+            // Given
+            TestDocument first = new TestDocument("Test", "Foo");
+            TestDocument second = new TestDocument();
+            TestDocument third = new TestDocument("Test3", "Bar");
+            JoinDocuments join = new JoinDocuments(",");
+
+            // When
+            ImmutableArray<TestDocument> results = await ExecuteAsync(new[] { first, second, third }, join);
+
+            // Then
+            second.ContentProvider.ShouldBeNull();
+            results.Single().Content.ShouldBe("Test,Test3");
+            results.Single().ContentProvider.MediaType.ShouldBe(null);
+        }
+
+        [Test]
+        public async Task ThreeDocumentsWithNoDelimiterWhenFirstIsNull()
         {
             // Given
             TestDocument first = null;
@@ -60,7 +113,7 @@ namespace Statiq.Core.Tests.Modules.Contents
         }
 
         [Test]
-        public async Task JoinThreeDocumentsJoinWithNoDelimiter_secondnull()
+        public async Task ThreeDocumentsWithNoDelimiterWhenSecondIsNull()
         {
             // Given
             TestDocument first = new TestDocument("Test");
@@ -76,7 +129,7 @@ namespace Statiq.Core.Tests.Modules.Contents
         }
 
         [Test]
-        public async Task JoinnullPassedInAsDocumentList()
+        public async Task NullPassedInAsDocumentList()
         {
             // Given
             JoinDocuments join = new JoinDocuments();
@@ -89,7 +142,7 @@ namespace Statiq.Core.Tests.Modules.Contents
         }
 
         [Test]
-        public async Task JoinTwoDocumentsJoinWithCommaDelimiter()
+        public async Task TwoDocumentsJoinWithCommaDelimiter()
         {
             // Given
             TestDocument first = new TestDocument("Test");
@@ -104,7 +157,7 @@ namespace Statiq.Core.Tests.Modules.Contents
         }
 
         [Test]
-        public async Task JoinTwoDocumentsJoinWithDelimiterInText()
+        public async Task TwoDocumentsJoinWithDelimiterInText()
         {
             // Given
             TestDocument first = new TestDocument("Test");
@@ -119,7 +172,7 @@ namespace Statiq.Core.Tests.Modules.Contents
         }
 
         [Test]
-        public async Task JoinTwoDocumentsWithKeepFirstMetaDataReturnKeepsFirstMetaData()
+        public async Task TwoDocumentsWithKeepFirstMetaDataReturnKeepsFirstMetaData()
         {
             // Given
             TestDocument first = new TestDocument("Test")
@@ -142,7 +195,7 @@ namespace Statiq.Core.Tests.Modules.Contents
         }
 
         [Test]
-        public async Task JoinTwoDocumentsWithMetaDataReturnDefaultMetaData()
+        public async Task TwoDocumentsWithMetaDataReturnDefaultMetaData()
         {
             // Given
             TestDocument first = new TestDocument("Test")
@@ -165,7 +218,7 @@ namespace Statiq.Core.Tests.Modules.Contents
         }
 
         [Test]
-        public async Task JoinTwoDocumentsWithKeepLastMetaDataReturnKeepsLastMetaData()
+        public async Task TwoDocumentsWithKeepLastMetaDataReturnKeepsLastMetaData()
         {
             // Given
             TestDocument first = new TestDocument("Test")
@@ -188,7 +241,7 @@ namespace Statiq.Core.Tests.Modules.Contents
         }
 
         [Test]
-        public async Task JoinTwoDocumentsWithAllKeepFirstMetaData()
+        public async Task TwoDocumentsWithAllKeepFirstMetaData()
         {
             // Given
             TestDocument first = new TestDocument("Test")
@@ -213,7 +266,7 @@ namespace Statiq.Core.Tests.Modules.Contents
         }
 
         [Test]
-        public async Task JoinTwoDocumentsWithAllKeepLastMetaData()
+        public async Task TwoDocumentsWithAllKeepLastMetaData()
         {
             // Given
             TestDocument first = new TestDocument("Test")

@@ -20,6 +20,17 @@ namespace Statiq.Common
         /// <param name="memoryStreamFactory">A memory stream factory for use if the content stream can't seek and a buffer needs to be created.</param>
         /// <param name="stream">The stream that contains content.</param>
         public StreamContent(IMemoryStreamFactory memoryStreamFactory, Stream stream)
+            : this(memoryStreamFactory, stream, null)
+        {
+        }
+
+        /// <summary>
+        /// Creates a stream-based content provider.
+        /// </summary>
+        /// <param name="memoryStreamFactory">A memory stream factory for use if the content stream can't seek and a buffer needs to be created.</param>
+        /// <param name="stream">The stream that contains content.</param>
+        /// <param name="mediaType">The media type of the content.</param>
+        public StreamContent(IMemoryStreamFactory memoryStreamFactory, Stream stream, string mediaType)
         {
             if (!stream?.CanRead ?? throw new ArgumentNullException(nameof(stream)))
             {
@@ -27,6 +38,7 @@ namespace Statiq.Common
             }
             _memoryStreamFactory = memoryStreamFactory ?? throw new ArgumentNullException(nameof(memoryStreamFactory));
             _stream = stream;
+            MediaType = mediaType;
         }
 
         public Stream GetStream()
@@ -48,5 +60,7 @@ namespace Statiq.Common
             // stream isn't disposed after every use
             return new SynchronizedStream(contentStream, _mutex);
         }
+
+        public string MediaType { get; }
     }
 }

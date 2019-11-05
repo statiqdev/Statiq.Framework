@@ -78,7 +78,7 @@ namespace Statiq.Core
                 return files.AsParallel().Select(file =>
                 {
                     context.LogDebug($"Read file {file.Path.FullPath}");
-                    return context.CloneOrCreateDocument(input, file.Path, file.Path.GetRelativeInputPath(context), context.GetContentProvider(file));
+                    return context.CloneOrCreateDocument(input, file.Path, file.Path.GetRelativeInputPath(context), file?.GetContentProvider());
                 });
             }
             return null;

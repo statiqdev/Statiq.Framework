@@ -120,7 +120,7 @@ namespace Statiq.CodeAnalysis
                             {
                                 { CodeAnalysisKeys.AssemblyName, assemblyName }
                             },
-                            context.GetContentProvider(file));
+                            file.GetContentProvider());
                     }
                 }
             }

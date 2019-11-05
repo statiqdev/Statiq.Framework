@@ -70,7 +70,7 @@ namespace Statiq.Core
                 {
                     { "IncludeShortcodeSource", includedFile.Path.FullPath }
                 },
-                context.GetContentProvider(includedFile));
+                includedFile.GetContentProvider());
         }
     }
 }

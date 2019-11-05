@@ -123,7 +123,7 @@ namespace Statiq.Core
                             context.LogDebug("Copied file {0} to {1}", file.Path.FullPath, destination.Path.FullPath);
 
                             // Return the document
-                            return context.CloneOrCreateDocument(input, file.Path, relativePath, context.GetContentProvider(file));
+                            return context.CloneOrCreateDocument(input, file.Path, relativePath, file?.GetContentProvider());
                         }
                         catch (Exception ex)
                         {

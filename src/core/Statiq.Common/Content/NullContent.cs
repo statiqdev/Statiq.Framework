@@ -23,5 +23,7 @@ namespace Statiq.Common
         }
 
         public Stream GetStream() => throw new NotSupportedException();
+
+        public string MediaType => null;
     }
 }

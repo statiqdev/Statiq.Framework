@@ -75,7 +75,7 @@ namespace Statiq.Common
                 case IContentProvider contentProvider:
                     return contentProvider;
                 case IContentProviderFactory factory:
-                    return context.GetContentProvider(factory);
+                    return factory.GetContentProvider();
                 case Stream stream:
                     return context.GetContentProvider(stream);
                 case string str:

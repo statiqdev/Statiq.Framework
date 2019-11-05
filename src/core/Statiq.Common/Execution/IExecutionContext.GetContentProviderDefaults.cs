@@ -6,20 +6,22 @@ namespace Statiq.Common
 {
     public partial interface IExecutionContext
     {
-        public IContentProvider GetContentProvider(IContentProviderFactory factory) => factory?.GetContentProvider();
+        public IContentProvider GetContentProvider(Stream stream) => GetContentProvider(stream, null);
 
-        public IContentProvider GetContentProvider(Stream stream)
+        public IContentProvider GetContentProvider(Stream stream, string mediaType)
         {
-            // Special case if this is a content stream (which implements IContentProviderFactory)
-            if (stream is IContentProviderFactory factory)
+            // Special case if this is a content stream
+            if (stream is ContentStream contentStream)
             {
-                return GetContentProvider(factory);
+                return contentStream.GetContentProvider(mediaType);
             }
 
-            return stream == null ? null : new StreamContent(MemoryStreamFactory, stream);
+            return stream == null ? null : new StreamContent(MemoryStreamFactory, stream, mediaType);
         }
 
-        public async Task<IContentProvider> GetContentProviderAsync(string content)
+        public Task<IContentProvider> GetContentProviderAsync(string content) => GetContentProviderAsync(content, null);
+
+        public async Task<IContentProvider> GetContentProviderAsync(string content, string mediaType)
         {
             if (content == null)
             {
@@ -34,11 +36,11 @@ namespace Statiq.Common
                 {
                     await tempFile.WriteAllTextAsync(content);
                 }
-                return new FileContent(tempFile);
+                return new FileContent(tempFile, mediaType);
             }
 
             // Otherwise get a memory stream from the pool and use that
-            return new StreamContent(MemoryStreamFactory, MemoryStreamFactory.GetStream(content));
+            return new StreamContent(MemoryStreamFactory, MemoryStreamFactory.GetStream(content), mediaType);
         }
     }
 }
