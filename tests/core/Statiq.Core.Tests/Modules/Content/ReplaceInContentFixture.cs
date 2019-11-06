@@ -42,6 +42,21 @@ namespace Statiq.Core.Tests.Modules.Contents
             }
 
             [Test]
+            public async Task KeepsExistingMediaType()
+            {
+                // Given
+                TestDocument document = new TestDocument("ABC", "Foo");
+                ReplaceInContent replace = new ReplaceInContent("ABC", "123");
+
+                // When
+                TestDocument result = await ExecuteAsync(document, replace).SingleAsync();
+
+                // Then
+                result.Content.ShouldBe("123");
+                result.ContentProvider.MediaType.ShouldBe("Foo");
+            }
+
+            [Test]
             public async Task ReplaceWithContentFinderUsingDocument()
             {
                 // Given

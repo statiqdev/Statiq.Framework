@@ -26,6 +26,34 @@ namespace Statiq.Core.Tests.Modules.Contents
             }
 
             [Test]
+            public async Task KeepsOriginalMediaType()
+            {
+                // Given
+                TestDocument document = new TestDocument("Original", "Foo");
+                ReplaceContent replace = new ReplaceContent("Replaced");
+
+                // When
+                TestDocument result = await ExecuteAsync(document, replace).SingleAsync();
+
+                // Then
+                result.ContentProvider.MediaType.ShouldBe("Foo");
+            }
+
+            [Test]
+            public async Task ChangesMediaType()
+            {
+                // Given
+                TestDocument document = new TestDocument("Original", "Foo");
+                ReplaceContent replace = new ReplaceContent("Replaced", "Bar");
+
+                // When
+                TestDocument result = await ExecuteAsync(document, replace).SingleAsync();
+
+                // Then
+                result.ContentProvider.MediaType.ShouldBe("Bar");
+            }
+
+            [Test]
             public async Task ReplacesContentWithEmptyString()
             {
                 // Given

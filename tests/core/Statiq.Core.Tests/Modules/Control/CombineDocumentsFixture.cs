@@ -35,6 +35,51 @@ namespace Statiq.Core.Tests.Modules.Control
             }
 
             [Test]
+            public async Task KeepsSameMediaType()
+            {
+                // Given
+                TestDocument a = new TestDocument("a", "Foo");
+                TestDocument b = new TestDocument("b", "Foo");
+                CombineDocuments combine = new CombineDocuments();
+
+                // When
+                IReadOnlyList<IDocument> results = await ExecuteAsync(new[] { a, b }, combine);
+
+                // Then
+                results.Single().ContentProvider.MediaType.ShouldBe("Foo");
+            }
+
+            [Test]
+            public async Task DifferentMediaTypes()
+            {
+                // Given
+                TestDocument a = new TestDocument("a", "Foo");
+                TestDocument b = new TestDocument("b", "Bar");
+                CombineDocuments combine = new CombineDocuments();
+
+                // When
+                IReadOnlyList<IDocument> results = await ExecuteAsync(new[] { a, b }, combine);
+
+                // Then
+                results.Single().ContentProvider.MediaType.ShouldBeNull();
+            }
+
+            [Test]
+            public async Task NullMediaType()
+            {
+                // Given
+                TestDocument a = new TestDocument("a", "Foo");
+                TestDocument b = new TestDocument("b");
+                CombineDocuments combine = new CombineDocuments();
+
+                // When
+                IReadOnlyList<IDocument> results = await ExecuteAsync(new[] { a, b }, combine);
+
+                // Then
+                results.Single().ContentProvider.MediaType.ShouldBeNull();
+            }
+
+            [Test]
             public async Task MergesMetadata()
             {
                 // Given

@@ -228,7 +228,7 @@ namespace Statiq.Html
                                         documents.Add(
                                             input.Clone(
                                                 metadata.Count == 0 ? null : metadata,
-                                                context.GetContentProvider(contentStream)));
+                                                context.GetContentProvider(contentStream, MediaTypes.Html)));
                                     }
                                 }
                             }

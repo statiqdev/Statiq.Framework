@@ -32,7 +32,7 @@ namespace Statiq.Core
 
         public long Length => _file.Length;
 
-        public string MediaType => MediaTypes.TryGet(Path.Extension, out string mediaType) ? mediaType : null;
+        public string MediaType => Path.MediaType;
 
         public async Task CopyToAsync(IFile destination, bool overwrite = true, bool createDirectory = true)
         {
@@ -133,8 +133,10 @@ namespace Statiq.Core
 
         private void CreateDirectory() => Directory.Create();
 
-        public IContentProvider GetContentProvider() =>
-            _file.Exists ? (IContentProvider)new FileContent(this, MediaType) : NullContent.Provider;
+        public IContentProvider GetContentProvider() => GetContentProvider(MediaType);
+
+        public IContentProvider GetContentProvider(string mediaType) =>
+            _file.Exists ? (IContentProvider)new FileContent(this, mediaType) : NullContent.Provider;
 
         public string ToDisplayString() => Path.ToDisplayString();
     }

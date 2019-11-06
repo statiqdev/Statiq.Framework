@@ -20,13 +20,14 @@ namespace Statiq.Core
         /// Creates a new document with the specified content.
         /// </summary>
         /// <param name="content">The content for the output document.</param>
-        public CreateDocuments(Config<string> content)
+        /// <param name="mediaType">The media type of the output document.</param>
+        public CreateDocuments(Config<string> content, string mediaType = null)
             : base(
                 content.RequiresDocument
                     ? Config.FromDocument(async (doc, ctx) => ctx.CreateDocument(
-                        await ctx.GetContentProviderAsync(await content.GetValueAsync(doc, ctx))).Yield())
+                        await ctx.GetContentProviderAsync(await content.GetValueAsync(doc, ctx), mediaType)).Yield())
                     : Config.FromContext(async ctx => ctx.CreateDocument(
-                        await ctx.GetContentProviderAsync(await content.GetValueAsync(null, ctx))).Yield()),
+                        await ctx.GetContentProviderAsync(await content.GetValueAsync(null, ctx), mediaType)).Yield()),
                 false)
         {
         }
@@ -35,16 +36,17 @@ namespace Statiq.Core
         /// Creates new documents with the specified content.
         /// </summary>
         /// <param name="content">The content for each output document.</param>
-        public CreateDocuments(Config<IEnumerable<string>> content)
+        /// <param name="mediaType">The media type of each output document.</param>
+        public CreateDocuments(Config<IEnumerable<string>> content, string mediaType = null)
             : base(
                 content.RequiresDocument
                     ? Config.FromDocument(async (doc, ctx) => (IEnumerable<IDocument>)await (await content.GetValueAsync(doc, ctx))
                         .ToAsyncEnumerable()
-                        .SelectAwait(async x => ctx.CreateDocument(await ctx.GetContentProviderAsync(x)))
+                        .SelectAwait(async x => ctx.CreateDocument(await ctx.GetContentProviderAsync(x, mediaType)))
                         .ToListAsync(ctx.CancellationToken))
                     : Config.FromContext(async ctx => (IEnumerable<IDocument>)await (await content.GetValueAsync(null, ctx))
                         .ToAsyncEnumerable()
-                        .SelectAwait(async x => ctx.CreateDocument(await ctx.GetContentProviderAsync(x)))
+                        .SelectAwait(async x => ctx.CreateDocument(await ctx.GetContentProviderAsync(x, mediaType)))
                         .ToListAsync(ctx.CancellationToken)),
                 false)
         {
@@ -82,12 +84,13 @@ namespace Statiq.Core
         /// Creates new documents with the specified content.
         /// </summary>
         /// <param name="content">The content for each output document.</param>
-        public CreateDocuments(IEnumerable<string> content)
+        /// <param name="mediaType">The media type of each output document.</param>
+        public CreateDocuments(IEnumerable<string> content, string mediaType = null)
             : base(
                 Config.FromContext(async ctx =>
                     (IEnumerable<IDocument>)await content
                         .ToAsyncEnumerable()
-                        .SelectAwait(async x => ctx.CreateDocument(await ctx.GetContentProviderAsync(x)))
+                        .SelectAwait(async x => ctx.CreateDocument(await ctx.GetContentProviderAsync(x, mediaType)))
                         .ToListAsync(ctx.CancellationToken)),
                 false)
         {
@@ -124,12 +127,13 @@ namespace Statiq.Core
         /// Creates new documents with the specified content and metadata.
         /// </summary>
         /// <param name="contentAndMetadata">The content and metadata for each output document.</param>
-        public CreateDocuments(IEnumerable<Tuple<string, IEnumerable<KeyValuePair<string, object>>>> contentAndMetadata)
+        /// <param name="mediaType">The media type of each output document.</param>
+        public CreateDocuments(IEnumerable<Tuple<string, IEnumerable<KeyValuePair<string, object>>>> contentAndMetadata, string mediaType = null)
             : base(
                 Config.FromContext(async ctx =>
                     (IEnumerable<IDocument>)await contentAndMetadata
                         .ToAsyncEnumerable()
-                        .SelectAwait(async x => ctx.CreateDocument(x.Item2, await ctx.GetContentProviderAsync(x.Item1)))
+                        .SelectAwait(async x => ctx.CreateDocument(x.Item2, await ctx.GetContentProviderAsync(x.Item1, mediaType)))
                         .ToListAsync(ctx.CancellationToken)),
                 false)
         {

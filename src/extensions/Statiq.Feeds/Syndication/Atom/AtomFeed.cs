@@ -22,7 +22,6 @@ namespace Statiq.Feeds.Syndication.Atom
         protected internal const string Prefix = "";
         protected internal const string Namespace = "http://www.w3.org/2005/Atom";
         protected internal const string RootElement = "feed";
-        public const string MimeType = "application/atom+xml";
 
         public AtomFeed()
         {
@@ -121,7 +120,7 @@ namespace Statiq.Feeds.Syndication.Atom
         [XmlIgnore]
         FeedType IFeed.FeedType => FeedType.Atom;
 
-        string IFeed.MimeType => MimeType;
+        string IFeed.MimeType => FeedType.Atom.MediaType;
 
         string IFeed.Copyright => Rights?.StringValue;
 

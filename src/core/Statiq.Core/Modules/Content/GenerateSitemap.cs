@@ -85,7 +85,7 @@ namespace Statiq.Core
             sb.Append("</urlset>");
 
             // Always output the site map document, even if it's empty
-            return context.CreateDocument(await context.GetContentProviderAsync(sb.ToString())).Yield();
+            return context.CreateDocument(await context.GetContentProviderAsync(sb.ToString(), MediaTypes.Xml)).Yield();
 
             async Task AddToSiteMapAsync(IDocument input)
             {

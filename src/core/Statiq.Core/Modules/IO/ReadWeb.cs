@@ -123,7 +123,7 @@ namespace Statiq.Core
                         { Keys.SourceUri, response.Uri },
                         { Keys.SourceHeaders, response.Headers }
                     },
-                    context.GetContentProvider(response.Stream)));
+                    context.GetContentProvider(response.Stream, response.MediaType)));
         }
 
         private static readonly Dictionary<HttpMethod, Func<HttpClient, Uri, HttpContent, Task<HttpResponseMessage>>> MethodMapping =
@@ -165,11 +165,11 @@ namespace Statiq.Core
                         using (HttpContent content = response.Content)
                         {
                             Stream result = await content.ReadAsStreamAsync();
-                            MemoryStream mem = new MemoryStream();
-                            await result.CopyToAsync(mem);
+                            MemoryStream memoryStream = new MemoryStream();
+                            await result.CopyToAsync(memoryStream);
                             Dictionary<string, string> headers = content.Headers.ToDictionary(
                                 x => CultureInfo.CurrentCulture.TextInfo.ToTitleCase(x.Key), x => string.Join(",", x.Value));
-                            return new WebResponse(request.Uri, mem, headers);
+                            return new WebResponse(request.Uri, memoryStream, response.Content.Headers.ContentType?.MediaType, headers);
                         }
                     }
                 }
@@ -204,12 +204,14 @@ namespace Statiq.Core
         {
             public Uri Uri { get; }
             public Stream Stream { get; }
+            public string MediaType { get; }
             public Dictionary<string, string> Headers { get; }
 
-            public WebResponse(Uri uri, Stream stream, Dictionary<string, string> headers)
+            public WebResponse(Uri uri, Stream stream, string mediaType, Dictionary<string, string> headers)
             {
                 Uri = uri;
                 Stream = stream;
+                MediaType = mediaType;
                 Headers = headers;
             }
         }

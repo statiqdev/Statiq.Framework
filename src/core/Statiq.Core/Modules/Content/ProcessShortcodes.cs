@@ -21,23 +21,10 @@ namespace Statiq.Core
         /// <summary>
         /// Renders shortcodes in the input documents using the default start and end delimiters.
         /// </summary>
-        /// <param name="preRender">
-        /// Indicates if the module is being executed pre-template-rendering (<c>true</c>)
-        /// or post-template-rendering (<c>false</c>). The default delimiters are different
-        /// depending on when the module is executed.
-        /// </param>
-        public ProcessShortcodes(bool preRender = false)
+        public ProcessShortcodes()
         {
-            if (preRender)
-            {
-                _startDelimiter = ShortcodeParser.DefaultPreRenderStartDelimiter;
-                _endDelimiter = ShortcodeParser.DefaultPreRenderEndDelimiter;
-            }
-            else
-            {
-                _startDelimiter = ShortcodeParser.DefaultPostRenderStartDelimiter;
-                _endDelimiter = ShortcodeParser.DefaultPostRenderEndDelimiter;
-            }
+            _startDelimiter = ShortcodeParser.DefaultStartDelimiter;
+            _endDelimiter = ShortcodeParser.DefaultEndDelimiter;
         }
 
         /// <summary>
@@ -140,7 +127,7 @@ namespace Statiq.Core
                     Read(reader, writer, null, ref buffer);
                 }
             }
-            return input.Clone(context.GetContentProvider(resultStream));
+            return input.Clone(context.GetContentProvider(resultStream, input.ContentProvider?.MediaType));
         }
 
         private async Task<InsertingStreamLocation> ExecuteShortcodesAsync(

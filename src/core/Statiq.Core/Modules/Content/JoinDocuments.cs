@@ -80,7 +80,7 @@ namespace Statiq.Core
                         else
                         {
                             await contentStream.WriteAsync(delimeterBytes, 0, delimeterBytes.Length);
-                            if (!string.Equals(mediaType, document.ContentProvider.MediaType))
+                            if (!document.MediaTypeEquals(mediaType))
                             {
                                 mediaType = null;
                             }

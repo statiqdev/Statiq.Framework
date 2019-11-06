@@ -11,19 +11,18 @@ namespace Statiq.Common
     {
         // Some common and relevant media types
         // Use lookups to make sure we reflect any changes to the mapping
-        public static string Assembly => "application/x-cil"; // No extension and doesn't appear to be an accepted standard
-        public static string Css => TryGet(".css", out string mediaType) ? mediaType : null;
-        public static string Gif => TryGet(".gif", out string mediaType) ? mediaType : null;
-        public static string Html => TryGet(".html", out string mediaType) ? mediaType : null;
-        public static string Jpg => TryGet(".jpg", out string mediaType) ? mediaType : null;
-        public static string Json => TryGet(".json", out string mediaType) ? mediaType : null;
-        public static string Markdown => TryGet(".md", out string mediaType) ? mediaType : null;
-        public static string Png => TryGet(".png", out string mediaType) ? mediaType : null;
-        public static string Razor => TryGet(".cshtml", out string mediaType) ? mediaType : null;
-        public static string Sass => TryGet(".sass", out string mediaType) ? mediaType : null;
-        public static string Scss => TryGet(".scss", out string mediaType) ? mediaType : null;
-        public static string Xml => TryGet(".xml", out string mediaType) ? mediaType : null;
-        public static string Yaml => TryGet(".yaml", out string mediaType) ? mediaType : null;
+        public static string Css => Get(".css");
+        public static string Gif => Get(".gif");
+        public static string Html => Get(".html");
+        public static string Jpg => Get(".jpg");
+        public static string Json => Get(".json");
+        public static string Markdown => Get(".md");
+        public static string Png => Get(".png");
+        public static string Razor => Get(".cshtml");
+        public static string Sass => Get(".sass");
+        public static string Scss => Get(".scss");
+        public static string Xml => Get(".xml");
+        public static string Yaml => Get(".yaml");
 
         /// <summary>
         /// A mapping of file extension to both registered IANA media types
@@ -1062,10 +1061,10 @@ namespace Statiq.Common
             };
 
         /// <summary>
-        /// Given a file path, determine the MIME type
+        /// Given a file path, determine the media type
         /// </summary>
         /// <param name="path">A file path.</param>
-        /// <param name="mediaType">The resulting media type.</param>
+        /// <param name="mediaType">The media type.</param>
         /// <param name="defaultIfNotFound">Will return a "text/x-[extension]" default media type if a mapping is not found.</param>
         /// <returns><c>true</c> if the media type could be determined, <c>false</c> otherwise.</returns>
         public static bool TryGet(string path, out string mediaType, bool defaultIfNotFound = true)
@@ -1092,5 +1091,14 @@ namespace Statiq.Common
             }
             return false;
         }
+
+        /// <summary>
+        /// Given a file path, determine the media type
+        /// </summary>
+        /// <param name="path">A file path.</param>
+        /// <param name="defaultIfNotFound">Will return a "text/x-[extension]" default media type if a mapping is not found.</param>
+        /// <returns>The media type.</returns>
+        public static string Get(string path, bool defaultIfNotFound = true) =>
+            TryGet(path, out string mediaType, defaultIfNotFound) ? mediaType : null;
     }
 }

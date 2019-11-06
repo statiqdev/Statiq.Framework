@@ -234,7 +234,7 @@ namespace Statiq.Html
                         {
                             heading.Element.ChildNodes.ToHtml(writer, ProcessingInstructionFormatter.Instance);
                             writer.Flush();
-                            heading.Document = context.CreateDocument(metadata, context.GetContentProvider(contentStream));
+                            heading.Document = context.CreateDocument(metadata, context.GetContentProvider(contentStream, MediaTypes.Html));
                         }
                     }
 

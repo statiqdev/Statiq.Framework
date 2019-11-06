@@ -77,7 +77,7 @@ namespace Statiq.Tables
                 firstLine = false;
             }
 
-            return input.Clone(await context.GetContentProviderAsync(builder.ToString())).Yield();
+            return input.Clone(await context.GetContentProviderAsync(builder.ToString(), MediaTypes.Markdown)).Yield();
         }
 
         private static void WriteLine(StringBuilder builder, int[] columnSize, bool isHeader = false)

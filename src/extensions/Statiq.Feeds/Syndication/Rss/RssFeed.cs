@@ -16,7 +16,6 @@ namespace Statiq.Feeds.Syndication.Rss
         public const string SpecificationUrl = "http://blogs.law.harvard.edu/tech/rss";
         protected internal const string RootElement = "rss";
         protected internal const string Namespace = "";
-        public const string MimeType = "application/rss+xml";
 
         private RssChannel _channel = null;
         private Version _version = new Version(2, 0);
@@ -121,7 +120,7 @@ namespace Statiq.Feeds.Syndication.Rss
         [XmlIgnore]
         FeedType IFeed.FeedType => FeedType.Rss;
 
-        string IFeed.MimeType => MimeType;
+        string IFeed.MimeType => FeedType.Rss.MediaType;
 
         string IFeed.Copyright => Channel.Copyright;
 

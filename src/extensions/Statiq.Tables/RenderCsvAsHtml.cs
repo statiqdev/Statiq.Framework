@@ -59,7 +59,7 @@ namespace Statiq.Tables
                 firstLine = false;
             }
             builder.Append("</table>");
-            return input.Clone(await context.GetContentProviderAsync(builder.ToString())).Yield();
+            return input.Clone(await context.GetContentProviderAsync(builder.ToString(), MediaTypes.Html)).Yield();
         }
     }
 }

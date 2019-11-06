@@ -353,7 +353,7 @@ namespace Statiq.Images
                     MemoryStream outputStream = new MemoryStream();
                     action.Invoke(image, outputStream);
                     outputStream.Seek(0, SeekOrigin.Begin);
-                    return input.Clone(formatPath, context.GetContentProvider(outputStream));
+                    return input.Clone(formatPath, context.GetContentProvider(outputStream, formatPath.MediaType));
                 });
             });
         }

@@ -13,11 +13,8 @@ namespace Statiq.Core
     /// </summary>
     internal class ShortcodeParser
     {
-        public const string DefaultPreRenderStartDelimiter = "<?!";
-        public const string DefaultPreRenderEndDelimiter = "?>";
-
-        public const string DefaultPostRenderStartDelimiter = "<?#";
-        public const string DefaultPostRenderEndDelimiter = "?>";
+        public const string DefaultStartDelimiter = "<?#";
+        public const string DefaultEndDelimiter = "?>";
 
         public const string TrimStartDelimiter = "<?*";
         public const string TrimEndDelimiter = "?>";

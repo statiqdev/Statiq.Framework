@@ -11,6 +11,7 @@ using Microsoft.AspNetCore.StaticFiles;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Logging;
+using Statiq.Common;
 using Statiq.Hosting.LiveReload;
 using Statiq.Hosting.Middleware;
 
@@ -157,10 +158,8 @@ namespace Statiq.Hosting
                 app.UseDefaultExtensions(new DefaultExtensionsOptions());
             }
 
-            // Add JSON content type
-            // TODO: let the user specify additional content types
-            FileExtensionContentTypeProvider contentTypeProvider = new FileExtensionContentTypeProvider();
-            contentTypeProvider.Mappings[".json"] = "application/json";
+            // Use our large set of mappings and add any additional ones
+            FileExtensionContentTypeProvider contentTypeProvider = new FileExtensionContentTypeProvider(MediaTypes.ExtensionMappings);
             if (_contentTypes != null)
             {
                 foreach (KeyValuePair<string, string> contentType in _contentTypes)

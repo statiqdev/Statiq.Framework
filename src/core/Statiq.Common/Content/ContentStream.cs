@@ -9,7 +9,7 @@ namespace Statiq.Common
     /// that provides an appropriate <see cref="IContentProvider"/>.
     /// Instances of this stream should be disposed when writing is complete.
     /// </summary>
-    internal class ContentStream : DelegatingStream
+    internal class ContentStream : DelegatingStream, IContentProviderFactory
     {
         private readonly Func<string, IContentProvider> _contentProviderFactory;
         private bool _disposeStream;
@@ -39,5 +39,7 @@ namespace Statiq.Common
             Dispose();
             return _contentProviderFactory(mediaType);
         }
+
+        public IContentProvider GetContentProvider() => GetContentProvider(null);
     }
 }

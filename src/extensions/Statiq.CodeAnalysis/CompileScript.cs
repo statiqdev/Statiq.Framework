@@ -12,11 +12,13 @@ namespace Statiq.CodeAnalysis
     /// <category>Extensibility</category>
     public class CompileScript : ParallelModule
     {
+        public const string ScriptMediaType = "application/x.csx";
+
         protected override async Task<IEnumerable<IDocument>> ExecuteInputAsync(IDocument input, IExecutionContext context)
         {
             byte[] assembly = ScriptHelper.Compile(await input.GetContentStringAsync(), input, context);
             MemoryStream stream = context.MemoryStreamFactory.GetStream(assembly);
-            return input.Clone(context.GetContentProvider(stream, MediaTypes.Assembly)).Yield();
+            return input.Clone(context.GetContentProvider(stream, ScriptMediaType)).Yield();
         }
     }
 }

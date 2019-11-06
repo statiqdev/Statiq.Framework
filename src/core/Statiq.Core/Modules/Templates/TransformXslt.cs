@@ -77,7 +77,7 @@ namespace Statiq.Core
                 {
                     xslt.Transform(XmlReader.Create(stream), writer);
                 }
-                return input.Clone(await context.GetContentProviderAsync(str.ToString())).Yield();
+                return input.Clone(await context.GetContentProviderAsync(str.ToString(), MediaTypes.Xml)).Yield();
             }
         }
     }

@@ -65,8 +65,8 @@ namespace Statiq.Core
                     context.LogError($"Received 404 not found for oEmbed at {request}");
                 }
                 response.EnsureSuccessStatusCode();
-                if (response.Content.Headers.ContentType.MediaType == "application/json"
-                    || response.Content.Headers.ContentType.MediaType == "text/html")
+                if (response.Content.Headers.ContentType.MediaType == MediaTypes.Json
+                    || response.Content.Headers.ContentType.MediaType == MediaTypes.Html)
                 {
                     DataContractJsonSerializer serializer = new DataContractJsonSerializer(typeof(EmbedResponse));
                     using (Stream stream = await response.Content.ReadAsStreamAsync())
@@ -74,7 +74,7 @@ namespace Statiq.Core
                         embedResponse = (EmbedResponse)serializer.ReadObject(stream);
                     }
                 }
-                else if (response.Content.Headers.ContentType.MediaType == "text/xml")
+                else if (response.Content.Headers.ContentType.MediaType == MediaTypes.Xml)
                 {
                     DataContractSerializer serializer = new DataContractSerializer(typeof(EmbedResponse));
                     using (Stream stream = await response.Content.ReadAsStreamAsync())

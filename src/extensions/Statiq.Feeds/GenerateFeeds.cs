@@ -455,7 +455,7 @@ namespace Statiq.Feeds
             using (Stream contentStream = await context.GetContentStreamAsync())
             {
                 FeedSerializer.SerializeXml(feedType, feed, contentStream);
-                return context.CreateDocument(path, context.GetContentProvider(contentStream));
+                return context.CreateDocument(path, context.GetContentProvider(contentStream, feedType.MediaType));
             }
         }
     }

@@ -108,7 +108,7 @@ namespace Statiq.Feeds.Syndication.Atom
                 string value = _type;
                 if (ThreadCount > 0 && string.IsNullOrEmpty(value))
                 {
-                    return AtomFeed.MimeType;
+                    return FeedType.Atom.MediaType;
                 }
                 return value;
             }

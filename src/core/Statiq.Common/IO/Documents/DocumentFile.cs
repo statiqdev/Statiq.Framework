@@ -28,6 +28,8 @@ namespace Statiq.Common
         public IContentProvider GetContentProvider() =>
             _document == null ? NullContent.Provider : _document.ContentProvider;
 
+        public IContentProvider GetContentProvider(string mediaType) => throw new NotSupportedException();
+
         public IDirectory Directory => new DocumentDirectory(_fileProvider, Path.Directory);
 
         public bool Exists => _document != null;

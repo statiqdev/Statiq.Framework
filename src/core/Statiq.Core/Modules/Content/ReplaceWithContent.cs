@@ -55,13 +55,13 @@ namespace Statiq.Core
             }
             if (string.IsNullOrEmpty(_search))
             {
-                return input.Clone(await context.GetContentProviderAsync(value)).Yield();
+                return input.Clone(await context.GetContentProviderAsync(value, input.ContentProvider?.MediaType)).Yield();
             }
             string inputContent = await input.GetContentStringAsync();
             string replaced = _isRegex
                 ? Regex.Replace(inputContent, _search, value, _regexOptions)
                 : value.Replace(_search, inputContent);
-            return input.Clone(await context.GetContentProviderAsync(replaced)).Yield();
+            return input.Clone(await context.GetContentProviderAsync(replaced, input.ContentProvider?.MediaType)).Yield();
         }
     }
 }

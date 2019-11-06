@@ -1,5 +1,6 @@
 # 1.0.0-alpha.15
 
+- Removed the pre/post render flag from `ProcessShortcodes` and uses a default delimiter of `<?# ... ?>` (the forthcoming site generator will need to define the alternate delimiter for pre-transform shortcodes directly).
 - Added overloads of methods that create content providers to set the media type.
 - Updated all built-in modules to set the media type whenever appropriate.
 - Added `IContentProvider.MediaType` to surface the media type of content.

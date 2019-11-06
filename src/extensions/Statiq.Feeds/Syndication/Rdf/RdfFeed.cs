@@ -112,7 +112,7 @@ namespace Statiq.Feeds.Syndication.Rdf
         [XmlIgnore]
         FeedType IFeed.FeedType => FeedType.Rdf;
 
-        string IFeed.MimeType => MimeType;
+        string IFeed.MimeType => FeedType.Rdf.MediaType;
 
         string IFeed.Copyright => Channel.Copyright;
 

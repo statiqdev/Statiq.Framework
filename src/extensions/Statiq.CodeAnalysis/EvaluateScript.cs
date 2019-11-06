@@ -16,7 +16,7 @@ namespace Statiq.CodeAnalysis
         protected override async Task<IEnumerable<IDocument>> ExecuteInputAsync(IDocument input, IExecutionContext context)
         {
             // Get the assembly
-            byte[] assembly = string.Equals(input.ContentProvider?.MediaType, MediaTypes.Assembly)
+            byte[] assembly = input.MediaTypeEquals(CompileScript.ScriptMediaType)
                 ? await input.GetContentBytesAsync()
                 : ScriptHelper.Compile(await input.GetContentStringAsync(), input, context);
 

@@ -235,7 +235,7 @@ namespace Statiq.Markdown
             }
 
             return string.IsNullOrEmpty(_sourceKey)
-                ? input.Clone(await context.GetContentProviderAsync(result)).Yield()
+                ? input.Clone(await context.GetContentProviderAsync(result, MediaTypes.Html)).Yield()
                 : input
                     .Clone(new MetadataItems
                     {

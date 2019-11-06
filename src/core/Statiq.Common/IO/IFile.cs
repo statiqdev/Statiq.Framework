@@ -37,9 +37,15 @@ namespace Statiq.Common
         /// <remarks>
         /// A registered IANA media type will be used if available.
         /// Unregistered media type names may be returned if a registered type is unavailable.
-        /// If the media type is unknown this may null or empty.
+        /// If the media type is unknown this may be null or empty.
         /// </remarks>
         string MediaType { get; }
+
+        /// <summary>
+        /// Gets the content provider.
+        /// </summary>
+        /// <returns>The content provider to use with a document.</returns>
+        IContentProvider GetContentProvider(string mediaType);
 
         /// <summary>
         /// Copies the file to the specified destination file.

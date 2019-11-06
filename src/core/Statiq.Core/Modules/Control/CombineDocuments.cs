@@ -28,7 +28,11 @@ namespace Statiq.Core
                     ? input
                     : result.Clone(
                         input,
-                        await context.GetContentProviderAsync(await result.GetContentStringAsync() + await input.GetContentStringAsync()));
+                        await context.GetContentProviderAsync(
+                            await result.GetContentStringAsync() + await input.GetContentStringAsync(),
+                            result.ContentProvider?.MediaType == null
+                                ? null
+                                : (result.MediaTypeEquals(input.ContentProvider?.MediaType) ? result.ContentProvider.MediaType : null)));
             }
             return result.Yield();
         }

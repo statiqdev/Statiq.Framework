@@ -99,7 +99,7 @@ namespace Statiq.Core
                 string content = string.Join("\n", inputLines);
                 foreach (IDocument result in await context.ExecuteModulesAsync(Children, input.Clone(await context.GetContentProviderAsync(frontMatter)).Yield()))
                 {
-                    return result.Clone(await context.GetContentProviderAsync(content)).Yield();
+                    return result.Clone(await context.GetContentProviderAsync(content, input.ContentProvider?.MediaType)).Yield();
                 }
             }
             else

@@ -41,8 +41,8 @@ namespace Statiq.Core.Tests.Shortcodes
                 IShortcodeCollection shortcodeCollection = new TestShortcodeCollection();
                 shortcodeCollection.Add("name", typeof(TestShortcode));
                 ShortcodeParser parser = new ShortcodeParser(
-                    ShortcodeParser.DefaultPostRenderStartDelimiter,
-                    ShortcodeParser.DefaultPostRenderEndDelimiter,
+                    ShortcodeParser.DefaultStartDelimiter,
+                    ShortcodeParser.DefaultEndDelimiter,
                     shortcodeCollection);
 
                 // When
@@ -84,8 +84,8 @@ namespace Statiq.Core.Tests.Shortcodes
                 IShortcodeCollection shortcodeCollection = new TestShortcodeCollection();
                 shortcodeCollection.Add("name", typeof(TestShortcode));
                 ShortcodeParser parser = new ShortcodeParser(
-                    ShortcodeParser.DefaultPostRenderStartDelimiter,
-                    ShortcodeParser.DefaultPostRenderEndDelimiter,
+                    ShortcodeParser.DefaultStartDelimiter,
+                    ShortcodeParser.DefaultEndDelimiter,
                     shortcodeCollection);
 
                 // When
@@ -110,8 +110,8 @@ namespace Statiq.Core.Tests.Shortcodes
                 shortcodeCollection.Add("foo", typeof(TestShortcode));
                 shortcodeCollection.Add("bar", typeof(TestShortcode));
                 ShortcodeParser parser = new ShortcodeParser(
-                    ShortcodeParser.DefaultPostRenderStartDelimiter,
-                    ShortcodeParser.DefaultPostRenderEndDelimiter,
+                    ShortcodeParser.DefaultStartDelimiter,
+                    ShortcodeParser.DefaultEndDelimiter,
                     shortcodeCollection);
 
                 // When, Then
@@ -184,8 +184,8 @@ namespace Statiq.Core.Tests.Shortcodes
                 IShortcodeCollection shortcodeCollection = new TestShortcodeCollection();
                 shortcodeCollection.Add("name", typeof(TestShortcode));
                 ShortcodeParser parser = new ShortcodeParser(
-                    ShortcodeParser.DefaultPostRenderStartDelimiter,
-                    ShortcodeParser.DefaultPostRenderEndDelimiter,
+                    ShortcodeParser.DefaultStartDelimiter,
+                    ShortcodeParser.DefaultEndDelimiter,
                     shortcodeCollection);
 
                 // When
@@ -210,8 +210,8 @@ namespace Statiq.Core.Tests.Shortcodes
                 IShortcodeCollection shortcodeCollection = new TestShortcodeCollection();
                 shortcodeCollection.Add("name", typeof(TestShortcode));
                 ShortcodeParser parser = new ShortcodeParser(
-                    ShortcodeParser.DefaultPostRenderStartDelimiter,
-                    ShortcodeParser.DefaultPostRenderEndDelimiter,
+                    ShortcodeParser.DefaultStartDelimiter,
+                    ShortcodeParser.DefaultEndDelimiter,
                     shortcodeCollection);
 
                 // When
@@ -229,8 +229,8 @@ namespace Statiq.Core.Tests.Shortcodes
                 IShortcodeCollection shortcodeCollection = new TestShortcodeCollection();
                 shortcodeCollection.Add("bar", typeof(TestShortcode));
                 ShortcodeParser parser = new ShortcodeParser(
-                    ShortcodeParser.DefaultPostRenderStartDelimiter,
-                    ShortcodeParser.DefaultPostRenderEndDelimiter,
+                    ShortcodeParser.DefaultStartDelimiter,
+                    ShortcodeParser.DefaultEndDelimiter,
                     shortcodeCollection);
 
                 // When, Then
@@ -245,8 +245,8 @@ namespace Statiq.Core.Tests.Shortcodes
                 IShortcodeCollection shortcodeCollection = new TestShortcodeCollection();
                 shortcodeCollection.Add("bar", typeof(TestShortcode));
                 ShortcodeParser parser = new ShortcodeParser(
-                    ShortcodeParser.DefaultPostRenderStartDelimiter,
-                    ShortcodeParser.DefaultPostRenderEndDelimiter,
+                    ShortcodeParser.DefaultStartDelimiter,
+                    ShortcodeParser.DefaultEndDelimiter,
                     shortcodeCollection);
 
                 // When, Then
@@ -261,8 +261,8 @@ namespace Statiq.Core.Tests.Shortcodes
                 IShortcodeCollection shortcodeCollection = new TestShortcodeCollection();
                 shortcodeCollection.Add("foo", typeof(TestShortcode));
                 ShortcodeParser parser = new ShortcodeParser(
-                    ShortcodeParser.DefaultPostRenderStartDelimiter,
-                    ShortcodeParser.DefaultPostRenderEndDelimiter,
+                    ShortcodeParser.DefaultStartDelimiter,
+                    ShortcodeParser.DefaultEndDelimiter,
                     shortcodeCollection);
 
                 // When, Then

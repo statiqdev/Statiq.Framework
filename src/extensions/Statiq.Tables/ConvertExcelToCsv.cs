@@ -27,7 +27,7 @@ namespace Statiq.Tables
             using (Stream contentStream = await context.GetContentStreamAsync())
             {
                 CsvFile.WriteAllRecords(records, contentStream);
-                return input.Clone(context.GetContentProvider(contentStream)).Yield();
+                return input.Clone(context.GetContentProvider(contentStream, MediaTypes.Get(".csv"))).Yield();
             }
         }
     }

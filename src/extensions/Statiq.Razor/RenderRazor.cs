@@ -177,7 +177,7 @@ namespace Statiq.Razor
                         await RazorService.RenderAsync(request);
                     }
 
-                    return input.Clone(context.GetContentProvider(contentStream));
+                    return input.Clone(context.GetContentProvider(contentStream, MediaTypes.Html));
                 }
             }
         }

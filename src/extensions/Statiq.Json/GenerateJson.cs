@@ -122,7 +122,7 @@ namespace Statiq.Json
                     string result = JsonConvert.SerializeObject(value, settings);
                     if (string.IsNullOrEmpty(_destinationKey))
                     {
-                        return context.CloneOrCreateDocument(input, await context.GetContentProviderAsync(result)).Yield();
+                        return context.CloneOrCreateDocument(input, await context.GetContentProviderAsync(result, MediaTypes.Json)).Yield();
                     }
                     return context.CloneOrCreateDocument(
                         input,

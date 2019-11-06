@@ -179,7 +179,7 @@ namespace Statiq.SearchIndex
             StringBuilder scriptBuilder = BuildScript(searchIndexItems, stopwords, context);
             string script = _script(scriptBuilder, context);
 
-            return context.CreateDocument(_destination, await context.GetContentProviderAsync(script)).Yield();
+            return context.CreateDocument(_destination, await context.GetContentProviderAsync(script, MediaTypes.Get(".js"))).Yield();
         }
 
         private StringBuilder BuildScript(IList<ILunrIndexItem> searchIndexItems, string[] stopwords, IExecutionContext context)

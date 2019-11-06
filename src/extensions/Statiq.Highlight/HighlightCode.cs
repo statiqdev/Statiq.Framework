@@ -130,7 +130,7 @@ namespace Statiq.Highlight
                                     {
                                         htmlDocument.ToHtml(writer, HtmlMarkupFormatter.Instance);
                                         writer.Flush();
-                                        return input.Clone(context.GetContentProvider(contentStream));
+                                        return input.Clone(context.GetContentProvider(contentStream, MediaTypes.Html));
                                     }
                                 }
                             }

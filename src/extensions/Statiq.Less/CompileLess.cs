@@ -85,7 +85,7 @@ namespace Statiq.Less
                 FilePath cssPath = path.GetRelativeInputPath(context).ChangeExtension("css");
                 return input.Clone(
                     cssPath,
-                    await context.GetContentProviderAsync(content));
+                    await context.GetContentProviderAsync(content, MediaTypes.Css));
             }
         }
     }

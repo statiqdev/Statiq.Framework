@@ -112,6 +112,16 @@ namespace Statiq.Common
         }
 
         /// <summary>
+        /// Gets the media type of the path.
+        /// </summary>
+        /// <remarks>
+        /// A registered IANA media type will be used if available.
+        /// Unregistered media type names may be returned if a registered type is unavailable.
+        /// If the media type is unknown this may be null or empty.
+        /// </remarks>
+        public string MediaType => MediaTypes.Get(Extension);
+
+        /// <summary>
         /// Changes the file extension of the path.
         /// </summary>
         /// <param name="extension">The new extension.</param>

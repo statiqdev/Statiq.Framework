@@ -23,6 +23,7 @@ namespace Statiq.Core
     public class ReadFiles : ParallelConfigModule<IEnumerable<string>>
     {
         private Func<IFile, Task<bool>> _predicate = null;
+        private Func<IFile, string> _mediaType = null;
 
         /// <summary>
         /// Reads all files that match the specified globbing patterns and/or absolute paths. This allows you to
@@ -69,6 +70,17 @@ namespace Statiq.Core
             return this;
         }
 
+        /// <summary>
+        /// Specifies a function to set the media type for each file.
+        /// </summary>
+        /// <param name="mediaType">A function that determines the media type for each file.</param>
+        /// <returns>The current module instance.</returns>
+        public ReadFiles WithMediaType(Func<IFile, string> mediaType)
+        {
+            _mediaType = mediaType;
+            return this;
+        }
+
         protected override async Task<IEnumerable<IDocument>> ExecuteConfigAsync(IDocument input, IExecutionContext context, IEnumerable<string> value)
         {
             if (value != null)
@@ -78,7 +90,10 @@ namespace Statiq.Core
                 return files.AsParallel().Select(file =>
                 {
                     context.LogDebug($"Read file {file.Path.FullPath}");
-                    return context.CloneOrCreateDocument(input, file.Path, file.Path.GetRelativeInputPath(context), file?.GetContentProvider());
+                    IContentProvider contentProvider = _mediaType == null
+                        ? file?.GetContentProvider()
+                        : file?.GetContentProvider(_mediaType(file));
+                    return context.CloneOrCreateDocument(input, file.Path, file.Path.GetRelativeInputPath(context), contentProvider);
                 });
             }
             return null;

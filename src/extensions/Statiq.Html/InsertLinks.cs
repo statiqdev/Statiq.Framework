@@ -179,7 +179,7 @@ namespace Statiq.Html
                         {
                             htmlDocument.ToHtml(writer, ProcessingInstructionFormatter.Instance);
                             writer.Flush();
-                            return input.Clone(context.GetContentProvider(contentStream)).Yield();
+                            return input.Clone(context.GetContentProvider(contentStream, MediaTypes.Html)).Yield();
                         }
                     }
                 }

@@ -232,7 +232,7 @@ namespace Statiq.Core
             _executed = true;
 
             // Get the filename
-            string fileName = values.GetString(nameof(FileName));
+            string fileName = values.GetString(FileName);
             if (string.IsNullOrWhiteSpace(fileName))
             {
                 context.LogDebug("Provided file name was null or empty, skipping and returning input document");
@@ -250,14 +250,14 @@ namespace Statiq.Core
             };
 
             // Set arguments
-            string arguments = values.GetString(nameof(Arguments));
+            string arguments = values.GetString(Arguments);
             if (!string.IsNullOrEmpty(arguments))
             {
                 startInfo.Arguments = arguments;
             }
 
             // Set working directory
-            string workingDirectory = values.GetString(nameof(WorkingDirectory));
+            string workingDirectory = values.GetString(WorkingDirectory);
             if (string.IsNullOrWhiteSpace(workingDirectory))
             {
                 startInfo.WorkingDirectory = context.FileSystem.RootPath.FullPath;

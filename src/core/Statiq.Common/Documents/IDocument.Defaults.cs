@@ -60,6 +60,16 @@ namespace Statiq.Common
         }
 
         /// <summary>
+        /// Determines if the supplied media type equals the media type of the content.
+        /// </summary>
+        /// <param name="mediaType">The media type to check.</param>
+        /// <returns><c>true</c> if the media types are equal, <c>false</c> otherwise.</returns>
+        public bool MediaTypeEquals(string mediaType) =>
+            ContentProvider == null
+                ? false
+                : string.Equals(ContentProvider.MediaType, mediaType, StringComparison.OrdinalIgnoreCase);
+
+        /// <summary>
         /// Gets a hash of the provided document content and metadata appropriate for caching.
         /// Custom <see cref="IDocument"/> implementations may also contribute additional state
         /// data to the resulting hash code.
