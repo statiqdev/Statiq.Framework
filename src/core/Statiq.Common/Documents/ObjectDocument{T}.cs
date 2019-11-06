@@ -130,9 +130,7 @@ namespace Statiq.Common
             Source = source;
             Destination = destination;
             _metadata = metadata ?? new Metadata();
-
-            // Special case to set the content provider to null when cloning
-            ContentProvider = contentProvider is NullContent ? null : contentProvider;
+            ContentProvider = contentProvider ?? new NullContent();
         }
 
         public IDocument Clone(

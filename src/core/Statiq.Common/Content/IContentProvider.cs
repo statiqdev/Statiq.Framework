@@ -15,6 +15,11 @@ namespace Statiq.Common
         Stream GetStream();
 
         /// <summary>
+        /// Gets the length in bytes of the content stream.
+        /// </summary>
+        long Length { get; }
+
+        /// <summary>
         /// Gets the media type of the content.
         /// </summary>
         /// <remarks>
@@ -23,5 +28,12 @@ namespace Statiq.Common
         /// If the media type is unknown this may null or empty.
         /// </remarks>
         string MediaType { get; }
+
+        /// <summary>
+        /// Clones the current content provider with a new media type.
+        /// </summary>
+        /// <param name="mediaType">The new media type.</param>
+        /// <returns>A clone of the current content provider.</returns>
+        IContentProvider CloneWithMediaType(string mediaType);
     }
 }

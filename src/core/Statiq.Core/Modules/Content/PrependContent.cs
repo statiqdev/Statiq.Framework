@@ -29,7 +29,7 @@ namespace Statiq.Core
             }
             return value == null
                 ? input.Yield()
-                : input.Clone(await context.GetContentProviderAsync(value + await input.GetContentStringAsync(), input.ContentProvider?.MediaType)).Yield();
+                : input.Clone(await context.GetContentProviderAsync(value + await input.GetContentStringAsync(), input.ContentProvider.MediaType)).Yield();
         }
     }
 }

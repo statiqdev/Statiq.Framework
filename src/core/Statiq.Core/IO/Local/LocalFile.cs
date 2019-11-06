@@ -136,7 +136,7 @@ namespace Statiq.Core
         public IContentProvider GetContentProvider() => GetContentProvider(MediaType);
 
         public IContentProvider GetContentProvider(string mediaType) =>
-            _file.Exists ? (IContentProvider)new FileContent(this, mediaType) : NullContent.Provider;
+            _file.Exists ? (IContentProvider)new FileContent(this, mediaType) : new NullContent(mediaType);
 
         public string ToDisplayString() => Path.ToDisplayString();
     }

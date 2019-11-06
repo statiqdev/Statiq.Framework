@@ -13,17 +13,27 @@ namespace Statiq.Common
     /// </summary>
     public sealed class NullContent : IContentProvider
     {
-        public static readonly NullContent Provider = new NullContent();
-
-        /// <summary>
-        /// Use the singleton <see cref="Provider"/> field to get an instance.
-        /// </summary>
-        private NullContent()
+        public NullContent()
+            : this(null)
         {
         }
 
-        public Stream GetStream() => throw new NotSupportedException();
+        public NullContent(string mediaType)
+        {
+            MediaType = mediaType;
+        }
 
-        public string MediaType => null;
+        /// <inheritdoc />
+        public Stream GetStream() => Stream.Null;
+
+        /// <inheritdoc />
+        public long Length => 0;
+
+        /// <inheritdoc />
+        public string MediaType { get; }
+
+        /// <inheritdoc />
+        public IContentProvider CloneWithMediaType(string mediaType) =>
+            string.Equals(MediaType, mediaType, StringComparison.OrdinalIgnoreCase) ? this : new NullContent(mediaType);
     }
 }

@@ -22,8 +22,17 @@ namespace Statiq.Common
             MediaType = mediaType;
         }
 
+        /// <inheritdoc />
         public Stream GetStream() => _file.OpenRead();
 
+        /// <inheritdoc />
+        public long Length => _file.Length;
+
+        /// <inheritdoc />
         public string MediaType { get; }
+
+        /// <inheritdoc />
+        public IContentProvider CloneWithMediaType(string mediaType) =>
+            string.Equals(MediaType, mediaType, StringComparison.OrdinalIgnoreCase) ? this : new FileContent(_file, mediaType);
     }
 }

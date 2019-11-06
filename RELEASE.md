@@ -1,7 +1,10 @@
 # 1.0.0-alpha.15
 
-- Renamed `AddMetadata` to `SetMetadata` to better match other module naming conventions and to reflect the metadata key being set might already exist
-- Renamed `ReplaceContent` to `SetContent` to better match other module naming conventions
+- Added `SetMediaType` module to set the media type without changing the content.
+- Changed the semantics of `IDocument.ContentProvider` so that it's never null.
+- Added `IContentProvider.Length` to get the content length without needing to get the stream.
+- Renamed `AddMetadata` to `SetMetadata` to better match other module naming conventions and to reflect the metadata key being set might already exist.
+- Renamed `ReplaceContent` to `SetContent` to better match other module naming conventions.
 - Removed the pre/post render flag from `ProcessShortcodes` and uses a default delimiter of `<?# ... ?>` (the forthcoming site generator will need to define the alternate delimiter for pre-transform shortcodes directly).
 - Added overloads of methods that create content providers to set the media type.
 - Updated all built-in modules to set the media type whenever appropriate.

@@ -10,7 +10,7 @@ namespace Statiq.Common
     /// </summary>
     public class StreamContent : IContentProvider
     {
-        private readonly SemaphoreSlim _mutex = new SemaphoreSlim(1);
+        private readonly SemaphoreSlim _mutex;
         private readonly IMemoryStreamFactory _memoryStreamFactory;
         private readonly Stream _stream;
 
@@ -36,11 +36,22 @@ namespace Statiq.Common
             {
                 throw new ArgumentException("Content streams must support reading.", nameof(stream));
             }
+            _mutex = new SemaphoreSlim(1);
             _memoryStreamFactory = memoryStreamFactory ?? throw new ArgumentNullException(nameof(memoryStreamFactory));
             _stream = stream;
             MediaType = mediaType;
         }
 
+        // Used for cloning the content provider with the same stream and locking mutex
+        private StreamContent(SemaphoreSlim mutex, IMemoryStreamFactory memoryStreamFactory, Stream stream, string mediaType)
+        {
+            _mutex = mutex;
+            _memoryStreamFactory = memoryStreamFactory;
+            _stream = stream;
+            MediaType = mediaType;
+        }
+
+        /// <inheritdoc />
         public Stream GetStream()
         {
             _mutex.Wait();
@@ -61,6 +72,23 @@ namespace Statiq.Common
             return new SynchronizedStream(contentStream, _mutex);
         }
 
+        /// <inheritdoc />
+        public long Length
+        {
+            get
+            {
+                _mutex.Wait();
+                long length = _stream.Length;
+                _mutex.Release();
+                return length;
+            }
+        }
+
+        /// <inheritdoc />
         public string MediaType { get; }
+
+        /// <inheritdoc />
+        public IContentProvider CloneWithMediaType(string mediaType) =>
+            new StreamContent(_mutex, _memoryStreamFactory, _stream, mediaType);
     }
 }

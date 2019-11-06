@@ -26,9 +26,10 @@ namespace Statiq.Common
         NormalizedPath IFileSystemEntry.Path => Path;
 
         public IContentProvider GetContentProvider() =>
-            _document == null ? NullContent.Provider : _document.ContentProvider;
+            _document?.ContentProvider ?? new NullContent();
 
-        public IContentProvider GetContentProvider(string mediaType) => throw new NotSupportedException();
+        public IContentProvider GetContentProvider(string mediaType) =>
+            _document?.ContentProvider.CloneWithMediaType(mediaType) ?? new NullContent(mediaType);
 
         public IDirectory Directory => new DocumentDirectory(_fileProvider, Path.Directory);
 
@@ -67,7 +68,7 @@ namespace Statiq.Common
             }
         }
 
-        public string MediaType => _document?.ContentProvider?.MediaType;
+        public string MediaType => _document?.ContentProvider.MediaType;
 
         public Task CopyToAsync(IFile destination, bool overwrite = true, bool createDirectory = true) => throw new NotSupportedException();
 

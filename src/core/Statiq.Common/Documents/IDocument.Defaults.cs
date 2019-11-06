@@ -15,10 +15,7 @@ namespace Statiq.Common
         /// The stream you get from this call must be disposed as soon as reading is complete.
         /// </summary>
         /// <returns>A <see cref="Stream"/> of the content associated with this document.</returns>
-        public Stream GetContentStream() =>
-            ContentProvider == null
-                ? Stream.Null
-                : ContentProvider.GetStream();
+        public Stream GetContentStream() => ContentProvider.GetStream();
 
         /// <summary>
         /// Gets the content associated with this document as a string.
@@ -65,9 +62,7 @@ namespace Statiq.Common
         /// <param name="mediaType">The media type to check.</param>
         /// <returns><c>true</c> if the media types are equal, <c>false</c> otherwise.</returns>
         public bool MediaTypeEquals(string mediaType) =>
-            ContentProvider == null
-                ? false
-                : string.Equals(ContentProvider.MediaType, mediaType, StringComparison.OrdinalIgnoreCase);
+            string.Equals(ContentProvider.MediaType, mediaType, StringComparison.OrdinalIgnoreCase);
 
         /// <summary>
         /// Gets a hash of the provided document content and metadata appropriate for caching.

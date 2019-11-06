@@ -6,9 +6,12 @@ namespace Statiq.Testing
 {
     public class TestDocument : Document<TestDocument>
     {
+        // The empty constructor should not call the base constructor
+        // Otherwise the document will be initialized after empty construction and the factory will initialize it again
         public TestDocument()
         {
             Metadata = new TestMetadata();
+            ContentProvider = new NullContent();
         }
 
         public TestDocument(IContentProvider contentProvider)
@@ -129,13 +132,13 @@ namespace Statiq.Testing
         private static IContentProvider GetContentProvider(string content, string mediaType)
         {
             TestMemoryStreamFactory memoryStreamFactory = new TestMemoryStreamFactory();
-            return content == null ? null : new StreamContent(memoryStreamFactory, memoryStreamFactory.GetStream(content), mediaType);
+            return content == null ? (IContentProvider)new NullContent() : new StreamContent(memoryStreamFactory, memoryStreamFactory.GetStream(content), mediaType);
         }
 
         private static IContentProvider GetContentProvider(Stream content, string mediaType)
         {
             TestMemoryStreamFactory memoryStreamFactory = new TestMemoryStreamFactory();
-            return content == null ? null : new StreamContent(memoryStreamFactory, content, mediaType);
+            return content == null ? (IContentProvider)new NullContent() : new StreamContent(memoryStreamFactory, content, mediaType);
         }
 
         private static FilePath GetSourcePath(FilePath path) =>

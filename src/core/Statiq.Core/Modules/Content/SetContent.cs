@@ -23,7 +23,7 @@ namespace Statiq.Core
         /// </summary>
         /// <param name="content">A delegate that returns the content to set.</param>
         public SetContent(Config<string> content)
-            : this(content, Config.FromDocument(doc => doc.ContentProvider?.MediaType))
+            : this(content, Config.FromDocument(doc => doc.ContentProvider.MediaType))
         {
         }
 

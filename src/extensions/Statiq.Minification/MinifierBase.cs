@@ -31,7 +31,7 @@ namespace Statiq.Minification
                             context.LogWarning("{0} warnings found while minifying {4} for {1}:{2}{3}", result.Warnings.Count, input.ToSafeDisplayString(), Environment.NewLine, string.Join(Environment.NewLine, result.Warnings.Select(MinificationErrorInfoToString)), minifierType);
                         }
 
-                        return input.Clone(await context.GetContentProviderAsync(result.MinifiedContent, input.ContentProvider?.MediaType));
+                        return input.Clone(await context.GetContentProviderAsync(result.MinifiedContent, input.ContentProvider.MediaType));
                     }
                     catch (Exception ex)
                     {

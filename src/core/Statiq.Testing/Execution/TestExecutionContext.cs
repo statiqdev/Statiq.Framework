@@ -137,7 +137,9 @@ namespace Statiq.Testing
                 _context = context;
             }
 
-            public IContentProvider GetContentProvider() => new Common.StreamContent(_context.MemoryStreamFactory, this);
+            public IContentProvider GetContentProvider() => GetContentProvider(null);
+
+            public IContentProvider GetContentProvider(string mediaType) => new Common.StreamContent(_context.MemoryStreamFactory, this, mediaType);
         }
 
         /// <inheritdoc/>

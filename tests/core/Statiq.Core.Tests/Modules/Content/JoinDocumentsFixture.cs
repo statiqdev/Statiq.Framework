@@ -56,7 +56,6 @@ namespace Statiq.Core.Tests.Modules.Contents
             ImmutableArray<TestDocument> results = await ExecuteAsync(new[] { first, second, third }, join);
 
             // Then
-            second.ContentProvider.ShouldBeNull();
             results.Single().Content.ShouldBe("Test,Test3");
         }
 
@@ -73,7 +72,6 @@ namespace Statiq.Core.Tests.Modules.Contents
             ImmutableArray<TestDocument> results = await ExecuteAsync(new[] { first, second, third }, join);
 
             // Then
-            second.ContentProvider.ShouldBeNull();
             results.Single().Content.ShouldBe("Test,Test3");
             results.Single().ContentProvider.MediaType.ShouldBe("Foo");
         }
@@ -91,7 +89,6 @@ namespace Statiq.Core.Tests.Modules.Contents
             ImmutableArray<TestDocument> results = await ExecuteAsync(new[] { first, second, third }, join);
 
             // Then
-            second.ContentProvider.ShouldBeNull();
             results.Single().Content.ShouldBe("Test,Test3");
             results.Single().ContentProvider.MediaType.ShouldBe(null);
         }

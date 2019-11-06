@@ -137,7 +137,7 @@ namespace Statiq.Core
                     Read(reader, writer, null, ref buffer);
                 }
             }
-            return input.Clone(context.GetContentProvider(resultStream, input.ContentProvider?.MediaType));
+            return input.Clone(context.GetContentProvider(resultStream, input.ContentProvider.MediaType));
         }
 
         private async Task<InsertingStreamLocation> ExecuteShortcodesAsync(
@@ -152,29 +152,21 @@ namespace Statiq.Core
 
             if (shortcodeResult != null)
             {
-                if (shortcodeResult.ContentProvider != null)
-                {
-                    // Merge output metadata with the current input document
-                    // Creating a new document is the easiest way to ensure all the metadata from shortcodes gets accumulated correctly
-                    mergedResult = input.Clone(shortcodeResult, shortcodeResult.ContentProvider);
+                // Merge output metadata with the current input document
+                // Creating a new document is the easiest way to ensure all the metadata from shortcodes gets accumulated correctly
+                mergedResult = input.Clone(shortcodeResult, shortcodeResult.ContentProvider);
 
-                    // Don't process nested shortcodes if it's the raw shortcode
-                    if (!location.Name.Equals(RawShortcode.RawShortcodeName, StringComparison.OrdinalIgnoreCase))
-                    {
-                        // Recursively parse shortcodes
-                        IDocument nestedResult = await ProcessShortcodesAsync(mergedResult, context);
-                        if (nestedResult != null)
-                        {
-                            mergedResult = nestedResult;
-                        }
-                    }
-                    return new InsertingStreamLocation(location.FirstIndex, location.LastIndex, mergedResult);
-                }
-                else
+                // Don't process nested shortcodes if it's the raw shortcode
+                if (!location.Name.Equals(RawShortcode.RawShortcodeName, StringComparison.OrdinalIgnoreCase))
                 {
-                    // Don't copy the content provider from the input document if the shortcode doesn't have content
-                    mergedResult = input.Clone(shortcodeResult, NullContent.Provider);
+                    // Recursively parse shortcodes
+                    IDocument nestedResult = await ProcessShortcodesAsync(mergedResult, context);
+                    if (nestedResult != null)
+                    {
+                        mergedResult = nestedResult;
+                    }
                 }
+                return new InsertingStreamLocation(location.FirstIndex, location.LastIndex, mergedResult);
             }
 
             return new InsertingStreamLocation(location.FirstIndex, location.LastIndex, mergedResult);

@@ -70,7 +70,7 @@ namespace Statiq.Core
                         continue;
                     }
 
-                    if (document.ContentProvider != null)
+                    if (document.ContentProvider.Length > 0)
                     {
                         if (first)
                         {

@@ -42,12 +42,6 @@ namespace Statiq.Common
         string MediaType { get; }
 
         /// <summary>
-        /// Gets the content provider.
-        /// </summary>
-        /// <returns>The content provider to use with a document.</returns>
-        IContentProvider GetContentProvider(string mediaType);
-
-        /// <summary>
         /// Copies the file to the specified destination file.
         /// </summary>
         /// <param name="destination">The destination file.</param>

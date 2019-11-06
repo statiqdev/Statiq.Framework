@@ -32,6 +32,9 @@ namespace Statiq.Common
         /// <summary>
         /// The content provider responsible for creating content streams for the document.
         /// </summary>
+        /// <remarks>
+        /// This will always return a content provider, even if there is empty or no content.
+        /// </remarks>
         IContentProvider ContentProvider { get; }
 
         /// <summary>

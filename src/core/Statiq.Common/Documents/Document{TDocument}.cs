@@ -139,9 +139,7 @@ namespace Statiq.Common
             _metadata = metadata;
             _source = source;
             _destination = destination;
-
-            // Special case to set the content provider to null when cloning
-            _contentProvider = contentProvider is NullContent ? null : contentProvider;
+            _contentProvider = contentProvider ?? new NullContent();
 
             _initialized = true;
             return this;
@@ -248,12 +246,12 @@ namespace Statiq.Common
             protected set
             {
                 CheckInitialized();
-                _contentProvider = value;
+                _contentProvider = value ?? new NullContent();
             }
         }
 
         // Allow overrides
-        // TODO: Replace with base(IDocument).GetCacheHashCodeAsync() when available
+        // TODO: Replace with base(IDocument).GetCacheHashCodeAsync() when available (base interface method call not in language yet)
         public virtual async Task<int> GetCacheHashCodeAsync()
         {
             HashCode hash = default;
@@ -272,7 +270,7 @@ namespace Statiq.Common
         }
 
         // Allow overrides
-        // TODO: Replace with base(IDocument).ToDisplayString() when available
+        // TODO: Replace with base(IDocument).ToDisplayString() when available (base interface method call not in language yet)
         public virtual string ToDisplayString() => Source?.ToDisplayString() ?? "unknown source";
 
         /// <inheritdoc />
