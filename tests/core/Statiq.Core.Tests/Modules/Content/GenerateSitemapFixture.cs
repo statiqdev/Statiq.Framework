@@ -28,7 +28,7 @@ namespace Statiq.Core.Tests.Modules.Contents
                 TestDocument doc = new TestDocument(new FilePath("sub/testfile.html"), "Test");
                 IDocument[] inputs = { doc };
 
-                AddMetadata m = new AddMetadata(
+                SetMetadata m = new SetMetadata(
                     Keys.SitemapItem,
                     Config.FromDocument(d => new SitemapItem(d.Destination.FullPath)));
 
@@ -64,7 +64,7 @@ namespace Statiq.Core.Tests.Modules.Contents
                 TestDocument doc = new TestDocument(new FilePath("sub/testfile.html"), "Test");
                 IDocument[] inputs = { doc };
 
-                AddMetadata m = new AddMetadata(
+                SetMetadata m = new SetMetadata(
                     Keys.SitemapItem,
                     Config.FromDocument(d => d.Destination.FullPath));
 

@@ -82,7 +82,7 @@ namespace Statiq.Core.Tests.Modules.Control
                     AdditionalOutputs = 7,
                     EnsureInputDocument = true
                 };
-                AddMetadata meta = new AddMetadata("GroupMetadata", Config.FromDocument(d => new object[] { d.GetInt("A") % 3, 3 }));
+                SetMetadata meta = new SetMetadata("GroupMetadata", Config.FromDocument(d => new object[] { d.GetInt("A") % 3, 3 }));
                 GroupDocuments groupByMany = new GroupDocuments("GroupMetadata");
                 ForEachDocument gatherData = new ExecuteConfig(
                     Config.FromDocument(d =>

@@ -7,36 +7,36 @@ using Statiq.Common;
 namespace Statiq.Core
 {
     /// <summary>
-    /// Adds the specified metadata to each input document.
+    /// Sets the specified metadata in each input document.
     /// </summary>
     /// <category>Metadata</category>
-    public class AddMetadata : ParallelConfigModule<object>
+    public class SetMetadata : ParallelConfigModule<object>
     {
         private readonly string _key;
         private bool _ignoreNull;
         private bool _onlyIfNonExisting;
 
         /// <summary>
-        /// Uses a delegate (or value) to determine an object to be added as metadata for each document.
+        /// Uses a delegate (or value) to determine an object to be set as metadata for each document.
         /// This allows you to specify different metadata for each document depending on the input.
         /// </summary>
         /// <param name="key">The metadata key to set.</param>
         /// <param name="value">A delegate that returns the object to add as metadata.</param>
-        public AddMetadata(string key, Config<object> value)
+        public SetMetadata(string key, Config<object> value)
             : base(value, true)
         {
             _key = key ?? throw new ArgumentNullException(nameof(key));
         }
 
         /// <summary>
-        /// Ignores null values and does not add a metadata item for them.
+        /// Ignores null values and does not set a metadata item for them.
         /// </summary>
         /// <remarks>
-        /// The default behavior is not to ignore null values and add them to the metadata regardless.
+        /// The default behavior is not to ignore null values and set them in the metadata regardless.
         /// </remarks>
         /// <param name="ignoreNull"><c>true</c> to ignore null values.</param>
         /// <returns>The current module instance.</returns>
-        public AddMetadata IgnoreNull(bool ignoreNull = true)
+        public SetMetadata IgnoreNull(bool ignoreNull = true)
         {
             _ignoreNull = ignoreNull;
             return this;
@@ -50,7 +50,7 @@ namespace Statiq.Core
         /// </remarks>
         /// <param name="onlyIfNonExisting"><c>true</c> if the new value should only be set if it doesn't already exist.</param>
         /// <returns>The current module instance.</returns>
-        public AddMetadata OnlyIfNonExisting(bool onlyIfNonExisting = true)
+        public SetMetadata OnlyIfNonExisting(bool onlyIfNonExisting = true)
         {
             _onlyIfNonExisting = onlyIfNonExisting;
             return this;

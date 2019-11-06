@@ -32,7 +32,7 @@ namespace Statiq.Core.Tests.Modules.Control
                 IReadOnlyList<IDocument> results = await ExecuteAsync(
                     a,
                     new MergeDocuments(b),
-                    new AddMetadata("Content", Config.FromDocument(async doc => await doc.GetContentStringAsync())));
+                    new SetMetadata("Content", Config.FromDocument(async doc => await doc.GetContentStringAsync())));
 
                 // Then
                 CollectionAssert.AreEqual(new[] { "1121" }, results.Select(x => x["Content"]));
@@ -57,7 +57,7 @@ namespace Statiq.Core.Tests.Modules.Control
                 IReadOnlyList<IDocument> results = await ExecuteAsync(
                     a,
                     new MergeDocuments(b).Reverse(),
-                    new AddMetadata("Content", Config.FromDocument(async doc => await doc.GetContentStringAsync())));
+                    new SetMetadata("Content", Config.FromDocument(async doc => await doc.GetContentStringAsync())));
 
                 // Then
                 CollectionAssert.AreEqual(new[] { "11" }, results.Select(x => x["Content"]));

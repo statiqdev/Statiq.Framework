@@ -11,7 +11,7 @@ namespace Statiq.Core
     /// </summary>
     /// <remarks>
     /// This module does not include the input documents as part of it's output
-    /// (if you need to change the content of an existing document, use <see cref="ReplaceContent"/>).
+    /// (if you need to change the content of an existing document, use <see cref="SetContent"/>).
     /// </remarks>
     /// <category>Control</category>
     public class CreateDocuments : ConfigModule<IEnumerable<IDocument>>

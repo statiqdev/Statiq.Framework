@@ -10,19 +10,19 @@ using Statiq.Testing;
 namespace Statiq.Core.Tests.Modules.Metadata
 {
     [TestFixture]
-    public class AddMetadataFixture : BaseFixture
+    public class SetMetadataFixture : BaseFixture
     {
-        public class ExecuteTests : AddMetadataFixture
+        public class ExecuteTests : SetMetadataFixture
         {
             [Test]
             public async Task AddsMetadata()
             {
                 // Given
                 TestDocument input = new TestDocument();
-                AddMetadata addMetadata = new AddMetadata("Foo", "Bar");
+                SetMetadata module = new SetMetadata("Foo", "Bar");
 
                 // When
-                IReadOnlyList<TestDocument> results = await ExecuteAsync(input, addMetadata);
+                IReadOnlyList<TestDocument> results = await ExecuteAsync(input, module);
 
                 // Then
                 results.Single()["Foo"].ShouldBe("Bar");
@@ -36,10 +36,10 @@ namespace Statiq.Core.Tests.Modules.Metadata
                 {
                     { "Foo", "Baz" }
                 };
-                AddMetadata addMetadata = new AddMetadata("Foo", "Bar");
+                SetMetadata module = new SetMetadata("Foo", "Bar");
 
                 // When
-                IReadOnlyList<TestDocument> results = await ExecuteAsync(input, addMetadata);
+                IReadOnlyList<TestDocument> results = await ExecuteAsync(input, module);
 
                 // Then
                 results.Single()["Foo"].ShouldBe("Bar");
@@ -53,10 +53,10 @@ namespace Statiq.Core.Tests.Modules.Metadata
                 {
                     { "Foo", "Baz" }
                 };
-                AddMetadata addMetadata = new AddMetadata("Foo", "Bar").OnlyIfNonExisting();
+                SetMetadata module = new SetMetadata("Foo", "Bar").OnlyIfNonExisting();
 
                 // When
-                IReadOnlyList<TestDocument> results = await ExecuteAsync(input, addMetadata);
+                IReadOnlyList<TestDocument> results = await ExecuteAsync(input, module);
 
                 // Then
                 results.Single()["Foo"].ShouldBe("Baz");
@@ -67,10 +67,10 @@ namespace Statiq.Core.Tests.Modules.Metadata
             {
                 // Given
                 TestDocument input = new TestDocument();
-                AddMetadata addMetadata = new AddMetadata("Foo", (string)null);
+                SetMetadata module = new SetMetadata("Foo", (string)null);
 
                 // When
-                IReadOnlyList<TestDocument> results = await ExecuteAsync(input, addMetadata);
+                IReadOnlyList<TestDocument> results = await ExecuteAsync(input, module);
 
                 // Then
                 results.Single()["Foo"].ShouldBe((string)null);
@@ -81,10 +81,10 @@ namespace Statiq.Core.Tests.Modules.Metadata
             {
                 // Given
                 TestDocument input = new TestDocument();
-                AddMetadata addMetadata = new AddMetadata("Foo", (string)null).IgnoreNull();
+                SetMetadata module = new SetMetadata("Foo", (string)null).IgnoreNull();
 
                 // When
-                IReadOnlyList<TestDocument> results = await ExecuteAsync(input, addMetadata);
+                IReadOnlyList<TestDocument> results = await ExecuteAsync(input, module);
 
                 // Then
                 results.Single().Keys.ShouldNotContain("Foo");
