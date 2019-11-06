@@ -28,6 +28,16 @@ namespace Statiq.Core
         }
 
         /// <summary>
+        /// Renders shortcodes in the input documents using an XML processing instruction with the specified target.
+        /// </summary>
+        /// <param name="processingInstructionTarget">The processing instruction target this shortcode processing module should handle.</param>
+        public ProcessShortcodes(string processingInstructionTarget)
+        {
+            _startDelimiter = ShortcodeParser.ProcessingInstructionStartDelimiter + processingInstructionTarget;
+            _endDelimiter = ShortcodeParser.ProcessingInstructionEndDelimiter;
+        }
+
+        /// <summary>
         /// Renders shortcodes in the input documents using custom start and end delimiters.
         /// </summary>
         /// <param name="startDelimiter">The shortcode start delimiter.</param>
