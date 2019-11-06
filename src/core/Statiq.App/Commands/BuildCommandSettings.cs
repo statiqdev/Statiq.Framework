@@ -10,7 +10,7 @@ namespace Statiq.App
 {
     public class BuildCommandSettings : EngineCommandSettings
     {
-        [CommandOption("-p|--pipeline")]
+        [CommandOption("-p|--pipeline <PIPELINE>")]
         [Description("Explicitly specifies one or more pipelines to execute.")]
         public string[] Pipelines { get; set; }
 

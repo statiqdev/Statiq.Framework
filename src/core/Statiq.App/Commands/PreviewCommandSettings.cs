@@ -16,7 +16,7 @@ namespace Statiq.App
 {
     internal class PreviewCommandSettings : BuildCommandSettings
     {
-        [CommandOption("--port")]
+        [CommandOption("--port <PORT>")]
         [Description("Start the preview web server on the specified port (default is 5080).")]
         public int Port { get; set; } = 5080;
 
@@ -24,11 +24,11 @@ namespace Statiq.App
         [Description("Force the use of extensions in the preview web server (by default, extensionless URLs may be used).")]
         public bool ForceExt { get; set; }
 
-        [CommandOption("--virtual-dir")]
+        [CommandOption("--virtual-dir <PATH>")]
         [Description("Serve files in the preview web server under the specified virtual directory.")]
         public string VirtualDirectory { get; set; }
 
-        [CommandOption("--content-type")]
+        [CommandOption("--content-type <TYPE>")]
         [Description("Specifies additional supported content types for the preview server as extension=contenttype.")]
         public string[] ContentTypes { get; set; }
 
