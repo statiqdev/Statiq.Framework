@@ -96,7 +96,7 @@ namespace Statiq.Core
                         cancellationTokenSource.Token);
                     Outputs = await Engine.ExecuteModulesAsync(contextData, null, _modules, inputs, _logger);
                     stopwatch.Stop();
-                    _logger.LogInformation($"{PipelineName}/{Phase} » Finished {PipelineName} {Phase} phase execution ({Outputs.Length} output document(s), {stopwatch.ElapsedMilliseconds} ms)");
+                    _logger.LogInformation($"-- {PipelineName}/{Phase} » Finished {PipelineName} {Phase} phase execution ({Outputs.Length} output document(s), {stopwatch.ElapsedMilliseconds} ms)");
                 }
             }
             catch (Exception ex)
