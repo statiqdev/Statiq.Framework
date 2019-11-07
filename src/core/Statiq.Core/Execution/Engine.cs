@@ -411,38 +411,44 @@ namespace Statiq.Core
         internal static PipelinePhase[] GetPipelinePhases(IPipelineCollection pipelines, ILogger logger)
         {
             // Perform a topological sort to create phases down the dependency tree
-            Dictionary<string, PipelinePhases> phases = new Dictionary<string, PipelinePhases>(StringComparer.OrdinalIgnoreCase);
-            List<PipelinePhases> sortedPhases = new List<PipelinePhases>();
-            HashSet<string> visited = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            Dictionary<string, PipelinePhases> phasesByPipeline = new Dictionary<string, PipelinePhases>(StringComparer.OrdinalIgnoreCase);
+            HashSet<string> visitedPipelines = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
             foreach (KeyValuePair<string, IPipeline> pipelineEntry in pipelines)
             {
                 Visit(pipelineEntry.Key, pipelineEntry.Value);
             }
 
             // Make a pass through non-isolated transform phases to set dependencies to all non-isolated process phases
-            foreach (PipelinePhases pipelinePhases in phases.Values.Where(x => !x.Pipeline.Isolated))
+            foreach (PipelinePhases pipelinePhases in phasesByPipeline.Values.Where(x => !x.Pipeline.Isolated))
             {
                 pipelinePhases.Transform.Dependencies =
                     pipelinePhases.Transform.Dependencies
-                        .Concat(phases.Values.Where(x => x != pipelinePhases && !x.Pipeline.Isolated).Select(x => x.Process))
+                        .Concat(phasesByPipeline.Values.Where(x => x != pipelinePhases && !x.Pipeline.Isolated).Select(x => x.Process))
                         .ToArray();
             }
 
             // Make a pass through deployment pipeline output phases to set dependencies to all non-deployment output phases
-            foreach (PipelinePhases pipelinePhases in phases.Values.Where(x => x.Pipeline.Deployment))
+            foreach (PipelinePhases pipelinePhases in phasesByPipeline.Values.Where(x => x.Pipeline.Deployment))
             {
                 pipelinePhases.Output.Dependencies =
                     pipelinePhases.Output.Dependencies
-                        .Concat(phases.Values.Where(x => x != pipelinePhases && !x.Pipeline.Deployment).Select(x => x.Output))
+                        .Concat(phasesByPipeline.Values.Where(x => x != pipelinePhases && !x.Pipeline.Deployment).Select(x => x.Output))
                         .ToArray();
             }
 
-            return sortedPhases
-                .Select(x => x.Input)
-                .Concat(sortedPhases.Select(x => x.Process))
-                .Concat(sortedPhases.Select(x => x.Transform))
-                .Concat(sortedPhases.Select(x => x.Output))
-                .ToArray();
+            // Perform another topological sort for phases based on their dependencies which is important
+            // because tasks will be created in the order of the result array and we need tasks for
+            // dependencies to be available for the continuation before the task that depends on them
+            HashSet<PipelinePhase> visitedPhases = new HashSet<PipelinePhase>();
+            Queue<PipelinePhase> sortedPhases = new Queue<PipelinePhase>();
+            foreach (PipelinePhases pipelinePhases in phasesByPipeline.Values)
+            {
+                SortPhases(pipelinePhases.Input);
+                SortPhases(pipelinePhases.Process);
+                SortPhases(pipelinePhases.Transform);
+                SortPhases(pipelinePhases.Output);
+            }
+            return sortedPhases.ToArray();
 
             // Returns the process phases (if not isolated)
             PipelinePhases Visit(string name, IPipeline pipeline)
@@ -463,12 +469,11 @@ namespace Statiq.Core
                     pipelinePhases.Process = new PipelinePhase(pipeline, name, Phase.Process, pipeline.ProcessModules, logger, pipelinePhases.Input);
                     pipelinePhases.Transform = new PipelinePhase(pipeline, name, Phase.Transform, pipeline.TransformModules, logger, pipelinePhases.Process);
                     pipelinePhases.Output = new PipelinePhase(pipeline, name, Phase.Output, pipeline.OutputModules, logger, pipelinePhases.Transform);
-                    phases.Add(name, pipelinePhases);
-                    sortedPhases.Add(pipelinePhases);
+                    phasesByPipeline.Add(name, pipelinePhases);
                     return pipelinePhases;
                 }
 
-                if (visited.Add(name))
+                if (visitedPipelines.Add(name))
                 {
                     // Visit dependencies if this isn't an isolated pipeline
                     List<PipelinePhase> processDependencies = new List<PipelinePhase>();
@@ -494,16 +499,28 @@ namespace Statiq.Core
                     processDependencies.Insert(0, pipelinePhases.Input);  // Makes sure the process phase is also dependent on it's input phase
                     pipelinePhases.Process = new PipelinePhase(pipeline, name, Phase.Process, pipeline.ProcessModules, logger, processDependencies.ToArray());
                     pipelinePhases.Transform = new PipelinePhase(pipeline, name, Phase.Transform, pipeline.TransformModules, logger, pipelinePhases.Process);  // Transform dependencies will be added after all pipelines have been processed
-                    pipelinePhases.Output = new PipelinePhase(pipeline, name, Phase.Output, pipeline.OutputModules, logger, pipelinePhases.Transform);
-                    phases.Add(name, pipelinePhases);
-                    sortedPhases.Add(pipelinePhases);
+                    pipelinePhases.Output = new PipelinePhase(pipeline, name, Phase.Output, pipeline.OutputModules, logger, pipelinePhases.Transform);  // Output dependencies for deployment pipelines will be added after all pipelines have been processed
+                    phasesByPipeline.Add(name, pipelinePhases);
                 }
-                else if (!phases.TryGetValue(name, out pipelinePhases))
+                else if (!phasesByPipeline.TryGetValue(name, out pipelinePhases))
                 {
                     throw new PipelineException($"Pipeline cyclical dependency detected involving {name}");
                 }
 
                 return pipelinePhases;
+            }
+
+            // Simple topological sort without cycle checking (we already checked for cycles)
+            void SortPhases(PipelinePhase phase)
+            {
+                if (visitedPhases.Add(phase))
+                {
+                    foreach (PipelinePhase dependency in phase.Dependencies)
+                    {
+                        SortPhases(dependency);
+                    }
+                    sortedPhases.Enqueue(phase);
+                }
             }
         }
 
@@ -539,6 +556,7 @@ namespace Statiq.Core
             PipelinePhase phase,
             CancellationTokenSource cancellationTokenSource)
         {
+            // Only the input phase won't have dependencies, all other phases at least depend on the previous phase of their pipeline
             if (phase.Dependencies.Length == 0)
             {
                 // This will immediately queue the input phase while we continue figuring out tasks, but that's okay
@@ -550,7 +568,7 @@ namespace Statiq.Core
             // We have to explicitly wait the execution task in the continuation function
             // (the continuation task doesn't wait for the tasks it continues)
             return Task.Factory.ContinueWhenAll(
-                phase.Dependencies.Select(x => phaseTasks.TryGetValue(x, out Task dependencyTask) ? dependencyTask : null).Where(x => x != null).ToArray(),
+                phase.Dependencies.Select(x => phaseTasks[x]).ToArray(),
                 dependencies =>
                 {
                     // Only run the dependent task if all the dependencies successfully completed

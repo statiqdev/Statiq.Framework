@@ -266,13 +266,46 @@ namespace Statiq.Core.Tests.Execution
                 phases.Select(x => (x.PipelineName, x.Phase)).ShouldBe(new (string, Phase)[]
                 {
                     ("Bar", Phase.Input),
-                    ("Foo", Phase.Input),
                     ("Bar", Phase.Process),
+                    ("Foo", Phase.Input),
+                    ("Foo", Phase.Process),
+                    ("Bar", Phase.Transform),
+                    ("Bar", Phase.Output),
+                    ("Foo", Phase.Transform),
+                    ("Foo", Phase.Output)
+                });
+            }
+
+            [Test]
+            public void DeploymentOutputPhaseComesAfterOthers()
+            {
+                // Given
+                IPipelineCollection pipelines = new TestPipelineCollection();
+                pipelines.Add("Bar", new TestPipeline
+                {
+                    Deployment = true,
+                    ExecutionPolicy = ExecutionPolicy.Manual
+                });
+                pipelines.Add("Foo", new TestPipeline
+                {
+                    Dependencies = new HashSet<string>(new[] { "Bar" })
+                });
+                ILogger logger = new TestLoggerProvider().CreateLogger(null);
+
+                // When
+                PipelinePhase[] phases = Engine.GetPipelinePhases(pipelines, logger);
+
+                // Then
+                phases.Select(x => (x.PipelineName, x.Phase)).ShouldBe(new (string, Phase)[]
+                {
+                    ("Bar", Phase.Input),
+                    ("Bar", Phase.Process),
+                    ("Foo", Phase.Input),
                     ("Foo", Phase.Process),
                     ("Bar", Phase.Transform),
                     ("Foo", Phase.Transform),
+                    ("Foo", Phase.Output),
                     ("Bar", Phase.Output),
-                    ("Foo", Phase.Output)
                 });
             }
 
@@ -295,12 +328,12 @@ namespace Statiq.Core.Tests.Execution
                 phases.Select(x => (x.PipelineName, x.Phase)).ShouldBe(new (string, Phase)[]
                 {
                     ("Bar", Phase.Input),
-                    ("Foo", Phase.Input),
                     ("Bar", Phase.Process),
+                    ("Foo", Phase.Input),
                     ("Foo", Phase.Process),
                     ("Bar", Phase.Transform),
-                    ("Foo", Phase.Transform),
                     ("Bar", Phase.Output),
+                    ("Foo", Phase.Transform),
                     ("Foo", Phase.Output)
                 });
             }

@@ -1,3 +1,7 @@
+# 1.0.0-alpha.16
+
+- Fixes a bug in dependency ordering where deployment pipeline output phases were being run too early.
+
 # 1.0.0-alpha.15
 
 - Added `SetMediaType` module to set the media type without changing the content.

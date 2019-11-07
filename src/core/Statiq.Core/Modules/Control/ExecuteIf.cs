@@ -49,7 +49,7 @@ namespace Statiq.Core
         }
 
         /// <summary>
-        /// Specifies child modules to be evaluated if a given metadata key is present.
+        /// Specifies child modules to be evaluated if a given metadata key is present in the input document.
         /// </summary>
         /// <remarks>
         /// Only input documents will be processed and the modules will not be run if there are no input documents.
@@ -62,7 +62,7 @@ namespace Statiq.Core
         }
 
         /// <summary>
-        /// Specifies child modules to be evaluated if a given metadata key is present.
+        /// Specifies child modules to be evaluated if a given metadata key is present in the input document.
         /// </summary>
         /// <remarks>
         /// Only input documents will be processed and the modules will not be run if there are no input documents.
