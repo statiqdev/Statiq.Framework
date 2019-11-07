@@ -21,6 +21,7 @@ namespace Statiq.Azure
         private const string Username = nameof(Username);
         private const string Password = nameof(Password);
         private const string Directory = nameof(Directory);
+        private const string ZipPath = nameof(ZipPath);
 
         /// <summary>
         /// Deploys the output folder to Azure App Service.
@@ -55,6 +56,26 @@ namespace Statiq.Azure
         {
         }
 
+        /// <summary>
+        /// Deploys a specified zip file to Azure App Service.
+        /// </summary>
+        /// <param name="siteName">The name of the site to deploy.</param>
+        /// <param name="username">The username to authenticate with.</param>
+        /// <param name="password">The password to authenticate with.</param>
+        /// <param name="zipPath">The zip file to deploy.</param>
+        public DeployAppService(Config<string> siteName, Config<string> username, Config<string> password, Config<FilePath> zipPath)
+            : base(
+                new Dictionary<string, IConfig>
+                {
+                    { SiteName, siteName ?? throw new ArgumentNullException(nameof(siteName)) },
+                    { Username, username ?? throw new ArgumentNullException(nameof(username)) },
+                    { Password, password ?? throw new ArgumentNullException(nameof(password)) },
+                    { ZipPath, zipPath ?? throw new ArgumentNullException(nameof(zipPath)) }
+                },
+                false)
+        {
+        }
+
         protected override async Task<IEnumerable<IDocument>> ExecuteConfigAsync(IDocument input, IExecutionContext context, IMetadata values)
         {
             // Get the site name
@@ -67,13 +88,32 @@ namespace Statiq.Azure
             byte[] authParameterBytes = Encoding.ASCII.GetBytes(username + ":" + password);
             string authParameter = Convert.ToBase64String(authParameterBytes);
 
-            // If the directory is null, use the output directory
-            DirectoryPath directory = values.GetDirectoryPath(Directory, context.FileSystem.GetOutputPath()) ?? context.FileSystem.GetOutputPath();
+            // If a zip file is already provided, use that
+            IFile zipFile = null;
+            FilePath zipPath = values.GetFilePath(ZipPath);
+            if (zipPath != null)
+            {
+                zipFile = context.FileSystem.GetFile(zipPath);
+            }
 
-            // Create the zip file
-            IFile zipFile = ZipFileHelper.CreateZipFile(context, directory);
+            // If we don't have a zip file, create one
+            if (zipFile == null)
+            {
+                // If the directory is null, use the output directory
+                DirectoryPath directory = values.GetDirectoryPath(Directory, context.FileSystem.GetOutputPath()) ?? context.FileSystem.GetOutputPath();
+
+                // Create the zip file
+                zipFile = ZipFileHelper.CreateZipFile(context, directory);
+            }
+
+            // Sanity check
+            if (!zipFile.Exists)
+            {
+                throw new ExecutionException($"Zip file at {zipFile.Path} does not exist");
+            }
 
             // Upload it via Kudu REST API
+            context.LogDebug($"Starting App Service deployment to {siteName}...");
             using (Stream zipStream = zipFile.OpenRead())
             {
                 using (HttpClient client = context.CreateHttpClient())
@@ -89,7 +129,7 @@ namespace Statiq.Azure
                     }
                     else
                     {
-                        context.LogInformation($"App Service deployment success to {siteName}");
+                        context.LogDebug($"App Service deployment success to {siteName}");
                     }
                 }
             }

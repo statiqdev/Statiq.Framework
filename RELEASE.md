@@ -1,3 +1,7 @@
+# 1.0.0-alpha.17
+
+- Added support for uploading a zip file to Azure App Service (useful for artifact-based release processes).
+
 # 1.0.0-alpha.16
 
 - Fixes a bug in dependency ordering where deployment pipeline output phases were being run too early.
