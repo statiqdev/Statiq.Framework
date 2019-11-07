@@ -1,3 +1,5 @@
+# 1.0.0-alpha.18
+
 # 1.0.0-alpha.17
 
 - Small -- prefix in console/logs to help indicate when a pipeline phase is finished.

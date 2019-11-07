@@ -68,9 +68,9 @@ namespace Statiq.App.Tests.Bootstrapper
                     && x.FormattedMessage == "No pipelines are configured or specified for execution.");
             }
 
-            [TestCase("Trace", 19)] // Includes module start/finish
-            [TestCase("Debug", 18)] // Include modules start/finish
-            [TestCase("Information", 5)] // Includes pipeline finish
+            [TestCase("Trace", 18)] // Includes module start/finish
+            [TestCase("Debug", 17)] // Include modules start/finish
+            [TestCase("Information", 4)] // Includes pipeline finish
             [TestCase("Warning", 3)]
             [TestCase("Error", 2)]
             [TestCase("Critical", 1)]
