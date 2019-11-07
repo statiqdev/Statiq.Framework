@@ -114,24 +114,33 @@ namespace Statiq.Azure
 
             // Upload it via Kudu REST API
             context.LogDebug($"Starting App Service deployment to {siteName}...");
-            using (Stream zipStream = zipFile.OpenRead())
+            try
             {
-                using (HttpClient client = context.CreateHttpClient())
+                using (Stream zipStream = zipFile.OpenRead())
                 {
-                    client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", authParameter);
-                    System.Net.Http.StreamContent zipContent = new System.Net.Http.StreamContent(zipStream);
-                    HttpResponseMessage response = await client.PostAsync($"https://{siteName}.scm.azurewebsites.net/api/zipdeploy", zipContent, context.CancellationToken);
-                    if (!response.IsSuccessStatusCode)
+                    using (HttpClient client = context.CreateHttpClient())
                     {
-                        string responseContent = await response.Content.ReadAsStringAsync();
-                        context.LogError($"App Service deployment error: {response.StatusCode} {responseContent}");
-                        response.EnsureSuccessStatusCode();
-                    }
-                    else
-                    {
-                        context.LogDebug($"App Service deployment success to {siteName}");
+                        client.Timeout = TimeSpan.FromMinutes(10);  // Set a long timeout for App Service uploads
+                        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", authParameter);
+                        System.Net.Http.StreamContent zipContent = new System.Net.Http.StreamContent(zipStream);
+                        HttpResponseMessage response = await client.PostAsync($"https://{siteName}.scm.azurewebsites.net/api/zipdeploy", zipContent, context.CancellationToken);
+                        if (!response.IsSuccessStatusCode)
+                        {
+                            string responseContent = await response.Content.ReadAsStringAsync();
+                            context.LogError($"App Service deployment error: {response.StatusCode} {responseContent}");
+                            response.EnsureSuccessStatusCode();
+                        }
+                        else
+                        {
+                            context.LogDebug($"App Service deployment success to {siteName}");
+                        }
                     }
                 }
+            }
+            catch (Exception ex)
+            {
+                context.LogError($"Exception while deploying App Service {ex.Message}");
+                throw;
             }
 
             return await input.YieldAsync();

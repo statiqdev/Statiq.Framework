@@ -1,5 +1,7 @@
 # 1.0.0-alpha.17
 
+- Small -- prefix in console/logs to help indicate when a pipeline phase is finished.
+- Set longer timeouts for App Service uploads.
 - Added support for uploading a zip file to Azure App Service (useful for artifact-based release processes).
 
 # 1.0.0-alpha.16
