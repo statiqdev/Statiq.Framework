@@ -1,5 +1,6 @@
 # 1.0.0-alpha.18
 
+- Updated several low-risk package versions.
 - Adds option names to all command option values (#64, thanks @patriksvensson).
 - New `serve` command for serving arbitrary folders with a local preview server (#55, #60, thanks @duracellko).
 - Fix for regression when there are dependencies on pipelines that aren't executing.
