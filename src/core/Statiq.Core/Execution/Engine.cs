@@ -567,8 +567,13 @@ namespace Statiq.Core
 
             // We have to explicitly wait the execution task in the continuation function
             // (the continuation task doesn't wait for the tasks it continues)
+            // Note that we need to check if each dependency actually has a task since some pipelines might not be in this execution
+            // For example, the transform phase of every pipeline depends on the process phase of every other pipeline, including manual ones
             return Task.Factory.ContinueWhenAll(
-                phase.Dependencies.Select(x => phaseTasks[x]).ToArray(),
+                phase.Dependencies.Select(x => phaseTasks
+                    .TryGetValue(x, out Task dependencyTask) ? dependencyTask : null)
+                    .Where(x => x != null)
+                    .ToArray(),
                 dependencies =>
                 {
                     // Only run the dependent task if all the dependencies successfully completed
