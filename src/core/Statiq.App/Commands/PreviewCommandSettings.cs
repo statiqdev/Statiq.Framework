@@ -37,7 +37,7 @@ namespace Statiq.App
         public bool NoWatch { get; set; }
 
         [CommandOption("--no-reload")]
-        [Description("urns off LiveReload support in the preview server.")]
+        [Description("Turns off LiveReload support after changes.")]
         public bool NoReload { get; set; }
     }
 }

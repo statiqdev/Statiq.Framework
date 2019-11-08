@@ -1,5 +1,8 @@
 # 1.0.0-alpha.18
 
+- New `serve` command for serving arbitrary folders with a local preview server (#55, #60, thanks @duracellko).
+- Fix for regression when there are dependencies on pipelines that aren't executing.
+
 # 1.0.0-alpha.17
 
 - Small -- prefix in console/logs to help indicate when a pipeline phase is finished.

@@ -14,7 +14,7 @@ using Microsoft.Extensions.Configuration;
 
 namespace Statiq.App
 {
-    [Description("Builds the site and serves it, optionally watching for changes and rebuilding by default.")]
+    [Description("Builds the site and serves it, optionally watching for changes, rebuilding, and triggering client reload by default.")]
     internal class PreviewCommand : BuildCommand<PreviewCommandSettings>
     {
         private readonly ConcurrentQueue<string> _changedFiles = new ConcurrentQueue<string>();

@@ -6,7 +6,7 @@ namespace Statiq.App
     internal class ServeCommandSettings : BaseCommandSettings
     {
         [CommandArgument(0, "[root]")]
-        [Description("The root folder to serve.")]
+        [Description("The root folder to serve (the output directory by default).")]
         public string RootPath { get; set; }
 
         [CommandOption("--port")]
@@ -25,8 +25,8 @@ namespace Statiq.App
         [Description("Specifies additional supported content types for the preview server as extension=contenttype.")]
         public string[] ContentTypes { get; set; }
 
-        [CommandOption("--no-watch")]
-        [Description("Turns off watching the input folder(s) for changes and rebuilding.")]
-        public bool NoWatch { get; set; }
+        [CommandOption("--no-reload")]
+        [Description("Turns off LiveReload support after changes.")]
+        public bool NoReload { get; set; }
     }
 }

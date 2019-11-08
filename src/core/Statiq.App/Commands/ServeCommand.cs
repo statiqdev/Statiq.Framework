@@ -14,7 +14,7 @@ using Statiq.Hosting;
 
 namespace Statiq.App
 {
-    [Description("Serves the generated site, optionally watching for changes and reloads by default.")]
+    [Description("Serves a folder, optionally watching for changes and triggering client reload by default.")]
     internal class ServeCommand : EngineCommand<ServeCommandSettings>
     {
         private readonly ConcurrentQueue<string> _changedFiles = new ConcurrentQueue<string>();
@@ -75,13 +75,13 @@ namespace Statiq.App
                     commandSettings.Port,
                     commandSettings.ForceExt,
                     commandSettings.VirtualDirectory,
-                    !commandSettings.NoWatch,
+                    !commandSettings.NoReload,
                     contentTypes,
                     loggerProvider,
                     logger);
 
                 // Start the watchers
-                if (!commandSettings.NoWatch)
+                if (!commandSettings.NoReload)
                 {
                     logger.LogInformation("Watching path {0}", serveDirectory.Path);
                     serveFolderWatcher = new FileSystemWatcher(serveDirectory.Path.FullPath, "*.*")
