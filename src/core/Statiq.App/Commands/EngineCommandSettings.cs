@@ -10,11 +10,11 @@ namespace Statiq.App
 {
     public class EngineCommandSettings : BaseCommandSettings
     {
-        [CommandOption("-i|--input")]
+        [CommandOption("-i|--input <PATH>")]
         [Description("The path(s) of input files, can be absolute or relative to the current folder.")]
         public string[] InputPaths { get; set; }
 
-        [CommandOption("-o|--output")]
+        [CommandOption("-o|--output <PATH>")]
         [Description("The path to output files, can be absolute or relative to the current folder.")]
         public string OutputPath { get; set; }
 
