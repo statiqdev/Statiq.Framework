@@ -1,3 +1,5 @@
+# 1.0.0-alpha.19
+
 # 1.0.0-alpha.18
 
 - Updated several low-risk package versions.
