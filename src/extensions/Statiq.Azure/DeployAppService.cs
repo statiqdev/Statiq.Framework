@@ -20,8 +20,7 @@ namespace Statiq.Azure
         private const string SiteName = nameof(SiteName);
         private const string Username = nameof(Username);
         private const string Password = nameof(Password);
-        private const string Directory = nameof(Directory);
-        private const string ZipPath = nameof(ZipPath);
+        private const string ContentProvider = nameof(ContentProvider);
 
         /// <summary>
         /// Deploys the output folder to Azure App Service.
@@ -30,7 +29,7 @@ namespace Statiq.Azure
         /// <param name="username">The username to authenticate with.</param>
         /// <param name="password">The password to authenticate with.</param>
         public DeployAppService(Config<string> siteName, Config<string> username, Config<string> password)
-            : this(siteName, username, password, Config.FromValue((DirectoryPath)null))
+            : this(siteName, username, password, Config.FromContext(ctx => ctx.FileSystem.GetOutputPath()))
         {
         }
 
@@ -44,16 +43,27 @@ namespace Statiq.Azure
         /// The directory containing the files to deploy (from the root folder, not the input folder).
         /// </param>
         public DeployAppService(Config<string> siteName, Config<string> username, Config<string> password, Config<DirectoryPath> directory)
-            : base(
-                new Dictionary<string, IConfig>
-                {
-                    { SiteName, siteName ?? throw new ArgumentNullException(nameof(siteName)) },
-                    { Username, username ?? throw new ArgumentNullException(nameof(username)) },
-                    { Password, password ?? throw new ArgumentNullException(nameof(password)) },
-                    { Directory, directory ?? throw new ArgumentNullException(nameof(directory)) }
-                },
-                false)
+            : this(siteName, username, password, GetContentProviderFromDirectory(directory))
         {
+        }
+
+        private static Config<IContentProvider> GetContentProviderFromDirectory(Config<DirectoryPath> directory)
+        {
+            _ = directory ?? throw new ArgumentNullException(nameof(directory));
+
+            return directory.RequiresDocument
+                ? Config.FromDocument(async (doc, ctx) => GetContentProvider(await directory.GetValueAsync(doc, ctx), ctx))
+                : Config.FromContext(async ctx => GetContentProvider(await directory.GetValueAsync(null, ctx), ctx));
+
+            static IContentProvider GetContentProvider(DirectoryPath path, IExecutionContext context)
+            {
+                if (path == null)
+                {
+                    throw new ExecutionException("Invalid directory");
+                }
+                IFile zipFile = ZipFileHelper.CreateZipFile(context, path);
+                return zipFile.GetContentProvider();
+            }
         }
 
         /// <summary>
@@ -64,13 +74,69 @@ namespace Statiq.Azure
         /// <param name="password">The password to authenticate with.</param>
         /// <param name="zipPath">The zip file to deploy.</param>
         public DeployAppService(Config<string> siteName, Config<string> username, Config<string> password, Config<FilePath> zipPath)
+            : this(siteName, username, password, GetContentProviderFromZipFile(zipPath))
+        {
+        }
+
+        private static Config<IContentProvider> GetContentProviderFromZipFile(Config<FilePath> zipPath)
+        {
+            _ = zipPath ?? throw new ArgumentNullException(nameof(zipPath));
+
+            return zipPath.RequiresDocument
+                ? Config.FromDocument(async (doc, ctx) => GetContentProvider(await zipPath.GetValueAsync(doc, ctx), ctx))
+                : Config.FromContext(async ctx => GetContentProvider(await zipPath.GetValueAsync(null, ctx), ctx));
+
+            static IContentProvider GetContentProvider(FilePath filePath, IExecutionContext context)
+            {
+                if (filePath == null)
+                {
+                    throw new ExecutionException("Invalid zip path");
+                }
+                IFile zipFile = context.FileSystem.GetFile(filePath);
+                if (!zipFile.Exists)
+                {
+                    throw new ExecutionException("Zip file does not exist");
+                }
+                return zipFile.GetContentProvider();
+            }
+        }
+
+        /// <summary>
+        /// Deploys a specified folder to Azure App Service.
+        /// </summary>
+        /// <param name="siteName">The name of the site to deploy.</param>
+        /// <param name="username">The username to authenticate with.</param>
+        /// <param name="password">The password to authenticate with.</param>
+        /// <param name="contentProviderFactory">A content provider factory that should provide a ZIP stream content provider to deploy.</param>
+        public DeployAppService(Config<string> siteName, Config<string> username, Config<string> password, Config<IContentProviderFactory> contentProviderFactory)
+            : this(siteName, username, password, GetContentProviderFromContentProviderFactory(contentProviderFactory))
+        {
+        }
+
+        private static Config<IContentProvider> GetContentProviderFromContentProviderFactory(Config<IContentProviderFactory> contentProviderFactory)
+        {
+            _ = contentProviderFactory ?? throw new ArgumentNullException(nameof(contentProviderFactory));
+
+            return contentProviderFactory.RequiresDocument
+                ? Config.FromDocument(async (doc, ctx) => (await contentProviderFactory.GetValueAsync(doc, ctx))?.GetContentProvider())
+                : Config.FromContext(async ctx => (await contentProviderFactory.GetValueAsync(null, ctx))?.GetContentProvider());
+        }
+
+        /// <summary>
+        /// Deploys a specified zip file to Azure App Service.
+        /// </summary>
+        /// <param name="siteName">The name of the site to deploy.</param>
+        /// <param name="username">The username to authenticate with.</param>
+        /// <param name="password">The password to authenticate with.</param>
+        /// <param name="contentProvider">A content provider that should provide a ZIP stream to deploy.</param>
+        public DeployAppService(Config<string> siteName, Config<string> username, Config<string> password, Config<IContentProvider> contentProvider)
             : base(
                 new Dictionary<string, IConfig>
                 {
                     { SiteName, siteName ?? throw new ArgumentNullException(nameof(siteName)) },
                     { Username, username ?? throw new ArgumentNullException(nameof(username)) },
                     { Password, password ?? throw new ArgumentNullException(nameof(password)) },
-                    { ZipPath, zipPath ?? throw new ArgumentNullException(nameof(zipPath)) }
+                    { ContentProvider, contentProvider ?? throw new ArgumentNullException(nameof(contentProvider)) }
                 },
                 false)
         {
@@ -88,35 +154,13 @@ namespace Statiq.Azure
             byte[] authParameterBytes = Encoding.ASCII.GetBytes(username + ":" + password);
             string authParameter = Convert.ToBase64String(authParameterBytes);
 
-            // If a zip file is already provided, use that
-            IFile zipFile = null;
-            FilePath zipPath = values.GetFilePath(ZipPath);
-            if (zipPath != null)
-            {
-                zipFile = context.FileSystem.GetFile(zipPath);
-            }
-
-            // If we don't have a zip file, create one
-            if (zipFile == null)
-            {
-                // If the directory is null, use the output directory
-                DirectoryPath directory = values.GetDirectoryPath(Directory, context.FileSystem.GetOutputPath()) ?? context.FileSystem.GetOutputPath();
-
-                // Create the zip file
-                zipFile = ZipFileHelper.CreateZipFile(context, directory);
-            }
-
-            // Sanity check
-            if (!zipFile.Exists)
-            {
-                throw new ExecutionException($"Zip file at {zipFile.Path} does not exist");
-            }
+            IContentProvider contentProvider = values.Get<IContentProvider>(ContentProvider) ?? throw new Exception("Invalid content provider");
 
             // Upload it via Kudu REST API
             context.LogDebug($"Starting App Service deployment to {siteName}...");
             try
             {
-                using (Stream zipStream = zipFile.OpenRead())
+                using (Stream zipStream = contentProvider.GetStream())
                 {
                     using (HttpClient client = context.CreateHttpClient())
                     {

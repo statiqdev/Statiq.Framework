@@ -9,6 +9,12 @@ namespace Statiq.Common
 {
     public partial interface IDocument
     {
+        /// <inheritdoc />
+        IContentProvider IContentProviderFactory.GetContentProvider() => ContentProvider;
+
+        /// <inheritdoc />
+        IContentProvider IContentProviderFactory.GetContentProvider(string mediaType) => ContentProvider.CloneWithMediaType(mediaType);
+
         /// <summary>
         /// Gets the content associated with this document as a <see cref="Stream"/>.
         /// The underlying stream will be reset to position 0 each time this method is called.

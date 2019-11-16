@@ -1,5 +1,8 @@
 # 1.0.0-alpha.19
 
+- `IDocument` now implements `IContentProviderFactory`.
+- Added some additional `IContentProvider` overloads to DeployAppService.
+
 # 1.0.0-alpha.18
 
 - Updated several low-risk package versions.
