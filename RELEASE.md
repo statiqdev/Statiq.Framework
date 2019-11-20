@@ -1,7 +1,8 @@
 # 1.0.0-alpha.19
 
+- Added a `Statiq.Netlify` extension with a `DeployNetlifySite` module.
 - `IDocument` now implements `IContentProviderFactory`.
-- Added some additional `IContentProvider` overloads to DeployAppService.
+- Added some additional `IContentProvider` overloads to the `DeployAppService` module.
 
 # 1.0.0-alpha.18
 
