@@ -123,6 +123,8 @@ namespace Statiq.Testing
         public IContentProvider GetContentProvider(string mediaType) =>
             _fileProvider.Files.ContainsKey(Path.FullPath) ? (IContentProvider)new FileContent(this, mediaType) : new NullContent(mediaType);
 
+        public override string ToString() => Path.ToString();
+
         public string ToDisplayString() => Path.ToSafeDisplayString();
     }
 }

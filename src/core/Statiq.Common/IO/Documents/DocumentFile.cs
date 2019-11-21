@@ -84,6 +84,8 @@ namespace Statiq.Common
 
         public Task WriteAllTextAsync(string contents, bool createDirectory = true) => throw new NotSupportedException();
 
+        public override string ToString() => Path.ToString();
+
         public string ToDisplayString() => Path.ToDisplayString();
     }
 }

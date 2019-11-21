@@ -124,6 +124,8 @@ namespace Statiq.Common
                 .Select(x => _fileSystem.GetRootDirectory(x.Combine(Path)))
                 .Where(x => x.Exists);
 
+        public override string ToString() => Path.ToString();
+
         public string ToDisplayString() => Path.ToDisplayString();
     }
 }

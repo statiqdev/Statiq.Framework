@@ -82,6 +82,8 @@ namespace Statiq.Core
             return new LocalFile(Path.CombineFile(path));
         }
 
+        public override string ToString() => Path.ToString();
+
         public string ToDisplayString() => Path.ToDisplayString();
     }
 }

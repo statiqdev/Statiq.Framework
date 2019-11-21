@@ -303,7 +303,7 @@ namespace Statiq.Common
         /// Returns a <see cref="string" /> that represents this path.
         /// </summary>
         /// <returns>
-        /// A <see cref="string" /> that represents this instance.
+        /// A <see cref="string" /> that represents this path.
         /// </returns>
         public override string ToString() => FullPath;
 

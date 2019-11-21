@@ -22,5 +22,13 @@ namespace Statiq.Common
         ///   <c>true</c> if the entry exists; otherwise, <c>false</c>.
         /// </value>
         bool Exists { get; }
+
+        /// <summary>
+        /// Returns a <see cref="string" /> that represents this file system entry.
+        /// </summary>
+        /// <returns>
+        /// The full path of the file system entry.
+        /// </returns>
+        string ToString();
     }
 }

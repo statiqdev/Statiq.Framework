@@ -138,6 +138,8 @@ namespace Statiq.Core
         public IContentProvider GetContentProvider(string mediaType) =>
             _file.Exists ? (IContentProvider)new FileContent(this, mediaType) : new NullContent(mediaType);
 
+        public override string ToString() => Path.ToString();
+
         public string ToDisplayString() => Path.ToDisplayString();
     }
 }

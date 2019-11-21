@@ -95,6 +95,8 @@ namespace Statiq.Common
 
         public void Delete(bool recursive) => throw new NotSupportedException();
 
+        public override string ToString() => Path.ToString();
+
         public string ToDisplayString() => Path.ToDisplayString();
     }
 }

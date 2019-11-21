@@ -103,6 +103,8 @@ namespace Statiq.Testing
             return new TestFile(_fileProvider, Path.CombineFile(path));
         }
 
+        public override string ToString() => Path.ToString();
+
         public string ToDisplayString() => Path.ToSafeDisplayString();
     }
 }
