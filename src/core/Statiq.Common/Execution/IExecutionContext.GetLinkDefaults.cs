@@ -9,9 +9,9 @@
         public string GetLink() =>
             GetLink(
                 (NormalizedPath)null,
-                Settings.GetString(Keys.Host),
-                Settings.GetDirectoryPath(Keys.LinkRoot),
-                Settings.GetBool(Keys.LinksUseHttps),
+                Settings.GetString(Common.Keys.Host),
+                Settings.GetDirectoryPath(Common.Keys.LinkRoot),
+                Settings.GetBool(Common.Keys.LinksUseHttps),
                 false,
                 false);
 
@@ -90,12 +90,12 @@
             // Otherwise process the path as a FilePath
             return GetLink(
                 path == null ? null : new FilePath(path),
-                includeHost ? Settings.GetString(Keys.Host) : null,
-                Settings.GetDirectoryPath(Keys.LinkRoot),
-                Settings.GetBool(Keys.LinksUseHttps),
-                Settings.GetBool(Keys.LinkHideIndexPages),
-                Settings.GetBool(Keys.LinkHideExtensions),
-                Settings.GetBool(Keys.LinkLowercase));
+                includeHost ? Settings.GetString(Common.Keys.Host) : null,
+                Settings.GetDirectoryPath(Common.Keys.LinkRoot),
+                Settings.GetBool(Common.Keys.LinksUseHttps),
+                Settings.GetBool(Common.Keys.LinkHideIndexPages),
+                Settings.GetBool(Common.Keys.LinkHideExtensions),
+                Settings.GetBool(Common.Keys.LinkLowercase));
         }
 
         /// <summary>
@@ -141,12 +141,12 @@
         public string GetLink(NormalizedPath path, bool includeHost = false) =>
             GetLink(
                 path,
-                includeHost ? Settings.GetString(Keys.Host) : null,
-                Settings.GetDirectoryPath(Keys.LinkRoot),
-                Settings.GetBool(Keys.LinksUseHttps),
-                Settings.GetBool(Keys.LinkHideIndexPages),
-                Settings.GetBool(Keys.LinkHideExtensions),
-                Settings.GetBool(Keys.LinkLowercase));
+                includeHost ? Settings.GetString(Common.Keys.Host) : null,
+                Settings.GetDirectoryPath(Common.Keys.LinkRoot),
+                Settings.GetBool(Common.Keys.LinksUseHttps),
+                Settings.GetBool(Common.Keys.LinkHideIndexPages),
+                Settings.GetBool(Common.Keys.LinkHideExtensions),
+                Settings.GetBool(Common.Keys.LinkLowercase));
 
         /// <summary>
         /// Converts the path into a string appropriate for use as a link, overriding one or more
@@ -177,7 +177,7 @@
                 useHttps,
                 hideIndexPages,
                 hideExtensions,
-                Settings.GetBool(Keys.LinkLowercase));
+                Settings.GetBool(Common.Keys.LinkLowercase));
 
         /// <summary>
         /// Converts the path into a string appropriate for use as a link, overriding one or more

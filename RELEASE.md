@@ -1,5 +1,7 @@
 # 1.0.0-alpha.19
 
+- Made `IExecutionContext` (re)implement `IMetadata` through `Settings`.
+- Added `ToString()` overloads to `IFileSystemEntry` (can't believe those weren't already there).
 - Added a `Statiq.Netlify` extension with a `DeployNetlifySite` module.
 - `IDocument` now implements `IContentProviderFactory`.
 - Added some additional `IContentProvider` overloads to the `DeployAppService` module.

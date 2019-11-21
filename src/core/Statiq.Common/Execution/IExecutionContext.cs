@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.IO;
@@ -14,7 +15,7 @@ namespace Statiq.Common
     /// All of the information that represents a given build. Also implements
     /// <see cref="IMetadata"/> to expose the global metadata.
     /// </summary>
-    public partial interface IExecutionContext : IDocumentFactory, IServiceProvider, ILogger
+    public partial interface IExecutionContext : IMetadata, IDocumentFactory, IServiceProvider, ILogger
     {
         /// <summary>
         /// Uniquely identifies the current execution cycle. This can be used to initialize and/or
