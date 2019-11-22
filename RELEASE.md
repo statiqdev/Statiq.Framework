@@ -1,5 +1,6 @@
 # 1.0.0-alpha.19
 
+- Added `StartProcess.WithArgument()` methods to add arguments to the module using a fluent interface.
 - Added `Config<TValue>.CombineWith()` extensions for combining two configs.
 - Added `Config<TValue>.Transform()` extensions for transforming from one value to another.
 - Made `IExecutionContext` (re)implement `IMetadata` through `Settings`.

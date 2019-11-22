@@ -72,12 +72,48 @@ namespace Statiq.Core
             : base(
                 new Dictionary<string, IConfig>
                 {
-                    { nameof(FileName), fileName ?? throw new ArgumentNullException(nameof(fileName)) },
-                    { nameof(Arguments), arguments ?? throw new ArgumentNullException(nameof(arguments)) }
+                    { FileName, fileName ?? throw new ArgumentNullException(nameof(fileName)) },
+                    { Arguments, arguments ?? throw new ArgumentNullException(nameof(arguments)) }
                 },
                 false)
         {
         }
+
+        /// <summary>
+        /// Appends an argument to the command.
+        /// </summary>
+        /// <param name="argument">The argument to append.</param>
+        /// <param name="quoted">Whether the argument should be quoted or not.</param>
+        /// <returns>The current module instance.</returns>
+        public StartProcess WithArgument(Config<string> argument, bool quoted = false)
+        {
+            _ = argument ?? throw new ArgumentNullException(nameof(argument));
+            return (StartProcess)SetConfig(
+                Arguments,
+                ((Config<string>)GetConfig(Arguments)).CombineWith(argument, (first, second) =>
+                {
+                    string space = first == null || second == null ? string.Empty : " ";
+                    first ??= string.Empty;
+                    second = second == null ? string.Empty : (quoted ? "\"" + second + "\"" : second);
+                    return first + space + second;
+                }));
+        }
+
+        /// <summary>
+        /// Appends an argument to the command.
+        /// </summary>
+        /// <param name="name">The name of the argument to append including any prefixes like a dash or slash.</param>
+        /// <param name="value">The value of the argument.</param>
+        /// <param name="quoted">Whether the value should be quoted or not.</param>
+        /// <returns>The current module instance.</returns>
+        public StartProcess WithArgument(Config<string> name, Config<string> value, bool quoted = false) =>
+            WithArgument(name.CombineWith(value, (name, value) =>
+            {
+                string space = name == null || value == null ? string.Empty : " ";
+                name ??= string.Empty;
+                value = value == null ? string.Empty : (quoted ? "\"" + value + "\"" : value);
+                return name + space + value;
+            }));
 
         /// <summary>
         /// Sets the working directory to use for the process.
@@ -85,7 +121,7 @@ namespace Statiq.Core
         /// <param name="workingDirectory">The working directory.</param>
         /// <returns>The current module instance.</returns>
         public StartProcess WithWorkingDirectory(Config<string> workingDirectory) =>
-            (StartProcess)SetConfig(nameof(WorkingDirectory), workingDirectory);
+            (StartProcess)SetConfig(WorkingDirectory, workingDirectory);
 
         /// <summary>
         /// Sets process-specific environment variables.
