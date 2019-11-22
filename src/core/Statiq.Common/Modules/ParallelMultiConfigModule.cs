@@ -70,6 +70,10 @@ namespace Statiq.Common
             return this;
         }
 
+        protected IConfig GetConfig(string key) => _configs.TryGetValue(key, out IConfig config) ? config : null;
+
+        protected bool TryGetConfig(string key, out IConfig config) => _configs.TryGetValue(key, out config);
+
         /// <inheritdoc />
         protected sealed override async Task<IEnumerable<IDocument>> ExecuteContextAsync(IExecutionContext context)
         {

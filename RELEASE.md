@@ -1,5 +1,7 @@
 # 1.0.0-alpha.19
 
+- Added `Config<TValue>.CombineWith()` extensions for combining two configs.
+- Added `Config<TValue>.Transform()` extensions for transforming from one value to another.
 - Made `IExecutionContext` (re)implement `IMetadata` through `Settings`.
 - Added `ToString()` overloads to `IFileSystemEntry` (can't believe those weren't already there).
 - Added a `Statiq.Netlify` extension with a `DeployNetlifySite` module.

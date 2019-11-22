@@ -41,11 +41,7 @@ namespace Statiq.Core
         /// </summary>
         /// <param name="pattern">A delegate that returns a globbing patterns and/or absolute paths.</param>
         public ReadFiles(Config<string> pattern)
-            : base(
-                pattern.RequiresDocument
-                    ? Config.FromDocument(async (doc, ctx) => (IEnumerable<string>)new string[] { await pattern.GetValueAsync(doc, ctx) })
-                    : Config.FromContext(async ctx => (IEnumerable<string>)new string[] { await pattern.GetValueAsync(null, ctx) }),
-                false)
+            : base(pattern.Transform(x => (IEnumerable<string>)new string[] { x }), false)
         {
         }
 
@@ -54,7 +50,7 @@ namespace Statiq.Core
         /// </summary>
         /// <param name="patterns">The globbing patterns and/or absolute paths to read.</param>
         public ReadFiles(params string[] patterns)
-            : base((Config<IEnumerable<string>>)(patterns ?? throw new ArgumentNullException(nameof(patterns))), false)
+            : base(patterns ?? throw new ArgumentNullException(nameof(patterns)), false)
         {
         }
 

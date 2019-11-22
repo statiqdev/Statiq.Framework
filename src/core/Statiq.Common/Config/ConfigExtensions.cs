@@ -47,21 +47,6 @@ namespace Statiq.Common
             return TypeHelper.TryConvert(value, out TValue result) ? result : default;
         }
 
-        public static Config<bool> CombineWith(this Config<bool> first, Config<bool> second)
-        {
-            if (first == null)
-            {
-                return second;
-            }
-            if (second == null)
-            {
-                return first;
-            }
-            return new Config<bool>(
-                async (doc, ctx) => await first.GetValueAsync(doc, ctx) && await second.GetValueAsync(doc, ctx),
-                first.RequiresDocument || second.RequiresDocument);
-        }
-
         /// <summary>
         /// Filters the documents.
         /// </summary>

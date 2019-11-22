@@ -44,10 +44,7 @@ namespace Statiq.Netlify
         private static Config<IContentProvider> GetContentProviderFromDirectory(Config<DirectoryPath> directory)
         {
             _ = directory ?? throw new ArgumentNullException(nameof(directory));
-
-            return directory.RequiresDocument
-                ? Config.FromDocument(async (doc, ctx) => GetContentProvider(await directory.GetValueAsync(doc, ctx), ctx))
-                : Config.FromContext(async ctx => GetContentProvider(await directory.GetValueAsync(null, ctx), ctx));
+            return directory.Transform(GetContentProvider);
 
             static IContentProvider GetContentProvider(DirectoryPath path, IExecutionContext context)
             {
@@ -74,10 +71,7 @@ namespace Statiq.Netlify
         private static Config<IContentProvider> GetContentProviderFromZipFile(Config<FilePath> zipPath)
         {
             _ = zipPath ?? throw new ArgumentNullException(nameof(zipPath));
-
-            return zipPath.RequiresDocument
-                ? Config.FromDocument(async (doc, ctx) => GetContentProvider(await zipPath.GetValueAsync(doc, ctx), ctx))
-                : Config.FromContext(async ctx => GetContentProvider(await zipPath.GetValueAsync(null, ctx), ctx));
+            return zipPath.Transform(GetContentProvider);
 
             static IContentProvider GetContentProvider(FilePath filePath, IExecutionContext context)
             {
@@ -108,10 +102,7 @@ namespace Statiq.Netlify
         private static Config<IContentProvider> GetContentProviderFromContentProviderFactory(Config<IContentProviderFactory> contentProviderFactory)
         {
             _ = contentProviderFactory ?? throw new ArgumentNullException(nameof(contentProviderFactory));
-
-            return contentProviderFactory.RequiresDocument
-                ? Config.FromDocument(async (doc, ctx) => (await contentProviderFactory.GetValueAsync(doc, ctx))?.GetContentProvider())
-                : Config.FromContext(async ctx => (await contentProviderFactory.GetValueAsync(null, ctx))?.GetContentProvider());
+            return contentProviderFactory.Transform(factory => factory?.GetContentProvider());
         }
 
         /// <summary>
