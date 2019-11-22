@@ -45,24 +45,24 @@ namespace Statiq.App
             return adapter.AddCommand(configurator);
         }
 
-        public static ICommandConfigurator AddBuild(
+        public static ICommandConfigurator AddPipelineCommand(
             this IConfigurator configurator,
             string name,
             params string[] pipelines) =>
-            configurator.AddBuild(name, false, pipelines);
+            configurator.AddPipelineCommand(name, false, pipelines);
 
-        public static ICommandConfigurator AddBuild(
+        public static ICommandConfigurator AddPipelineCommand(
             this IConfigurator configurator,
             string name,
             bool normalPipelines,
             params string[] pipelines) =>
-                configurator.AddBuild(name, new BuildCommandSettings
+                configurator.AddPipelineCommand(name, new BuildCommandSettings
                 {
                     Pipelines = pipelines,
                     NormalPipelines = normalPipelines
                 });
 
-        public static ICommandConfigurator AddBuild(
+        public static ICommandConfigurator AddPipelineCommand(
             this IConfigurator configurator,
             string name,
             EngineCommandSettings commandSettings)
@@ -74,7 +74,7 @@ namespace Statiq.App
                 .WithData(commandSettings);
         }
 
-        public static ICommandConfigurator AddDelegate(
+        public static ICommandConfigurator AddDelegateCommand(
             this IConfigurator configurator,
             string name,
             Func<CommandContext, int> func) =>

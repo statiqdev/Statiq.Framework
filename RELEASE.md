@@ -1,3 +1,7 @@
+# 1.0.0-alpha.20
+
+- Renamed `IBootstrapper.AddBuildCommand()` methods to `IBootstrapper.AddPipelineCommand()`.
+
 # 1.0.0-alpha.19
 
 - Added `StartProcess.WithArgument()` methods to add arguments to the module using a fluent interface.

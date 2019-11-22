@@ -27,41 +27,41 @@ namespace Statiq.App
         public IBootstrapper AddCommand(Type commandType, string name, string description) =>
             ConfigureCommands(x => x.AddCommand(commandType, name).WithDescription(description));
 
-        public IBootstrapper AddBuildCommand(
+        public IBootstrapper AddPipelineCommand(
             string name,
             params string[] pipelines) =>
-            ConfigureCommands(x => x.AddBuild(name, pipelines));
+            ConfigureCommands(x => x.AddPipelineCommand(name, pipelines));
 
-        public IBootstrapper AddBuildCommand(
+        public IBootstrapper AddPipelineCommand(
             string name,
             string description,
             params string[] pipelines) =>
-            ConfigureCommands(x => x.AddBuild(name, pipelines).WithDescription(description));
+            ConfigureCommands(x => x.AddPipelineCommand(name, pipelines).WithDescription(description));
 
-        public IBootstrapper AddBuildCommand(
+        public IBootstrapper AddPipelineCommand(
             string name,
             bool defaultPipelines,
             params string[] pipelines) =>
-            ConfigureCommands(x => x.AddBuild(name, defaultPipelines, pipelines));
+            ConfigureCommands(x => x.AddPipelineCommand(name, defaultPipelines, pipelines));
 
-        public IBootstrapper AddBuildCommand(
+        public IBootstrapper AddPipelineCommand(
             string name,
             string description,
             bool defaultPipelines,
             params string[] pipelines) =>
-            ConfigureCommands(x => x.AddBuild(name, defaultPipelines, pipelines).WithDescription(description));
+            ConfigureCommands(x => x.AddPipelineCommand(name, defaultPipelines, pipelines).WithDescription(description));
 
-        public IBootstrapper AddBuildCommand(string name, EngineCommandSettings commandSettings) =>
-            ConfigureCommands(x => x.AddBuild(name, commandSettings));
+        public IBootstrapper AddPipelineCommand(string name, EngineCommandSettings commandSettings) =>
+            ConfigureCommands(x => x.AddPipelineCommand(name, commandSettings));
 
-        public IBootstrapper AddBuildCommand(string name, string description, EngineCommandSettings commandSettings) =>
-            ConfigureCommands(x => x.AddBuild(name, commandSettings).WithDescription(description));
+        public IBootstrapper AddPipelineCommand(string name, string description, EngineCommandSettings commandSettings) =>
+            ConfigureCommands(x => x.AddPipelineCommand(name, commandSettings).WithDescription(description));
 
         public IBootstrapper AddDelegateCommand(string name, Func<CommandContext, int> func) =>
-            ConfigureCommands(x => x.AddDelegate(name, func));
+            ConfigureCommands(x => x.AddDelegateCommand(name, func));
 
         public IBootstrapper AddDelegateCommand(string name, string description, Func<CommandContext, int> func) =>
-            ConfigureCommands(x => x.AddDelegate(name, func).WithDescription(description));
+            ConfigureCommands(x => x.AddDelegateCommand(name, func).WithDescription(description));
 
         public IBootstrapper AddDelegateCommand<TSettings>(string name, Func<CommandContext, TSettings, int> func)
             where TSettings : CommandSettings =>
