@@ -1,5 +1,6 @@
 # 1.0.0-alpha.20
 
+- Added `Bootstrapper.CreateDefaultWithout()` and `IBootstrapper.AddDefaultsWithout()` to create a default bootstrapper without specific components.
 - Renamed `IBootstrapper.AddBuildCommand()` methods to `IBootstrapper.AddPipelineCommand()`.
 
 # 1.0.0-alpha.19

@@ -136,38 +136,7 @@ namespace Statiq.App
         public static IBootstrapper CreateDefault(string[] args, DefaultsToAdd defaultsToAdd = DefaultsToAdd.All) =>
             Create(args).AddDefaults(defaultsToAdd);
 
-        /// <summary>
-        /// Creates a bootstrapper with a default configuration including logging, commands,
-        /// shortcodes, and assembly scanning while specifying an additional engine configurator.
-        /// </summary>
-        /// <typeparam name="TConfigurator">The type of engine configurator to use.</typeparam>
-        /// <param name="args">The command line arguments.</param>
-        /// <param name="defaultsToAdd">The default configurations to add to the bootstrapper.</param>
-        /// <returns>The bootstrapper.</returns>
-        public static IBootstrapper CreateDefault<TConfigurator>(string[] args, DefaultsToAdd defaultsToAdd = DefaultsToAdd.All)
-            where TConfigurator : Common.IConfigurator<IEngine> =>
-            Create(args).AddDefaults<TConfigurator>(defaultsToAdd);
-
-        /// <summary>
-        /// Creates a bootstrapper with a default configuration including logging, commands,
-        /// shortcodes, and assembly scanning while specifying a delegate to configure the engine.
-        /// </summary>
-        /// <param name="args">The command line arguments.</param>
-        /// <param name="configureEngineAction">A delegate to configure the engine.</param>
-        /// <param name="defaultsToAdd">The default configurations to add to the bootstrapper.</param>
-        /// <returns>The bootstrapper.</returns>
-        public static IBootstrapper CreateDefault(string[] args, Action<IEngine> configureEngineAction, DefaultsToAdd defaultsToAdd = DefaultsToAdd.All) =>
-            Create(args).AddDefaults(configureEngineAction, defaultsToAdd);
-
-        /// <summary>
-        /// Creates a bootstrapper with a default configuration including logging, commands,
-        /// shortcodes, and assembly scanning while specifying an additional engine configurator.
-        /// </summary>
-        /// <param name="args">The command line arguments.</param>
-        /// <param name="configurator">The engine configurator.</param>
-        /// <param name="defaultsToAdd">The default configurations to add to the bootstrapper.</param>
-        /// <returns>The bootstrapper.</returns>
-        public static IBootstrapper CreateDefault(string[] args, Common.IConfigurator<IEngine> configurator, DefaultsToAdd defaultsToAdd = DefaultsToAdd.All) =>
-            Create(args).AddDefaults(configurator, defaultsToAdd);
+        public static IBootstrapper CreateDefaultWithout(string[] args, DefaultsToAdd withoutDefaults) =>
+            Create(args).AddDefaultsWithout(withoutDefaults);
     }
 }

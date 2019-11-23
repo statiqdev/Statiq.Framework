@@ -15,17 +15,7 @@ namespace Statiq.App
 {
     public partial interface IBootstrapper
     {
-        public IBootstrapper AddDefaults(DefaultsToAdd defaultsToAdd = DefaultsToAdd.All) =>
-            AddDefaults((IConfigurator<IEngine>)null, defaultsToAdd);
-
-        public IBootstrapper AddDefaults<TConfigurator>(DefaultsToAdd defaultsToAdd = DefaultsToAdd.All)
-            where TConfigurator : IConfigurator<IEngine> =>
-            AddDefaults(Activator.CreateInstance<TConfigurator>(), defaultsToAdd);
-
-        public IBootstrapper AddDefaults(Action<IEngine> configureEngineAction, DefaultsToAdd defaultsToAdd = DefaultsToAdd.All) =>
-            AddDefaults(new DelegateConfigurator<IEngine>(configureEngineAction), defaultsToAdd);
-
-        public IBootstrapper AddDefaults(IConfigurator<IEngine> configurator, DefaultsToAdd defaultsToAdd = DefaultsToAdd.All)
+        public IBootstrapper AddDefaults(DefaultsToAdd defaultsToAdd = DefaultsToAdd.All)
         {
             if (defaultsToAdd.HasFlag(DefaultsToAdd.BootstrapperConfigurators))
             {
@@ -63,8 +53,11 @@ namespace Statiq.App
             {
                 AddDefaultPipelines();
             }
-            return AddConfigurator(configurator);
+            return this;
         }
+
+        public IBootstrapper AddDefaultsWithout(DefaultsToAdd withoutDefaults) =>
+            AddDefaults(DefaultsToAdd.All & ~withoutDefaults);
 
         public IBootstrapper AddBootstrapperConfigurators()
         {
