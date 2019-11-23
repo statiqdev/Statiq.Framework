@@ -91,5 +91,14 @@ namespace Statiq.App
         /// </summary>
         /// <returns>The current bootstrapper.</returns>
         public IBootstrapper AddCommands() => AddCommands(Assembly.GetEntryAssembly());
+
+        public IBootstrapper AddCommands<TParent>()
+        {
+            foreach (Type commandType in typeof(TParent).GetNestedTypes().Where(x => typeof(ICommand).IsAssignableFrom(x)))
+            {
+                AddCommand(commandType);
+            }
+            return this;
+        }
     }
 }

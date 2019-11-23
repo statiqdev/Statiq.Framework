@@ -61,6 +61,15 @@ namespace Statiq.App
 
         public IBootstrapper AddPipelines() => AddPipelines(Assembly.GetEntryAssembly());
 
+        public IBootstrapper AddPipelines<TParent>() =>
+            ConfigureServices(x =>
+            {
+                foreach (Type pipelineType in typeof(TParent).GetNestedTypes().Where(t => typeof(IPipeline).IsAssignableFrom(t)))
+                {
+                    x.AddSingleton(typeof(IPipeline), pipelineType);
+                }
+            });
+
         // Builder
 
         public IBootstrapper BuildPipeline(string name, Action<PipelineBuilder> buildAction) =>

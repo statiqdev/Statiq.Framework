@@ -1,5 +1,7 @@
 # 1.0.0-alpha.20
 
+- Added `IBootstrapper.AddCommands<TParent>()` to add all nested class commands of a parent type.
+- Added `IBootstrapper.AddPipelines<TParent>()` to add all nested class pipelines of a parent type.
 - Added `Bootstrapper.CreateDefaultWithout()` and `IBootstrapper.AddDefaultsWithout()` to create a default bootstrapper without specific components.
 - Renamed `IBootstrapper.AddBuildCommand()` methods to `IBootstrapper.AddPipelineCommand()`.
 
