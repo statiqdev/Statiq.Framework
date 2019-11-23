@@ -8,11 +8,11 @@ using Statiq.Common;
 
 namespace Statiq.App
 {
-    [Description("Executes normal (or explicitly specified) pipelines.")]
-    internal class BuildCommand<TSettings> : EngineCommand<TSettings>
+    [Description("Executes the specified pipelines.")]
+    internal class PipelinesCommand<TSettings> : EngineCommand<TSettings>
         where TSettings : BaseCommandSettings
     {
-        public BuildCommand(
+        public PipelinesCommand(
             IConfiguratorCollection configurators,
             IConfigurationSettings configurationSettings,
             IServiceCollection serviceCollection,
@@ -46,7 +46,7 @@ namespace Statiq.App
             TSettings commandSettings,
             IEngineManager engineManager)
         {
-            BuildCommandSettings buildSettings = commandSettings as BuildCommandSettings ?? commandContext.Data as BuildCommandSettings;
+            PipelinesCommandSettings buildSettings = commandSettings as PipelinesCommandSettings ?? commandContext.Data as PipelinesCommandSettings;
             if (buildSettings != null)
             {
                 engineManager.Pipelines = buildSettings.Pipelines;

@@ -32,7 +32,7 @@ namespace Statiq.App.Tests.Bootstrapper
                 // Given
                 string[] args = new[] { "build" };
                 IBootstrapper bootstrapper = App.Bootstrapper.Create(args);
-                bootstrapper.AddCommand<BuildCommand<EngineCommandSettings>>("build");
+                bootstrapper.AddCommand<PipelinesCommand<EngineCommandSettings>>("build");
                 TestLoggerProvider provider = new TestLoggerProvider();
                 bootstrapper.ConfigureServices(services => services.AddSingleton<ILoggerProvider>(provider));
                 bootstrapper.AddPipeline("Foo");
@@ -51,7 +51,7 @@ namespace Statiq.App.Tests.Bootstrapper
                 // Given
                 string[] args = new[] { "build" };
                 IBootstrapper bootstrapper = App.Bootstrapper.Create(args);
-                bootstrapper.AddCommand<BuildCommand<EngineCommandSettings>>("build");
+                bootstrapper.AddCommand<PipelinesCommand<EngineCommandSettings>>("build");
                 TestLoggerProvider provider = new TestLoggerProvider
                 {
                     ThrowLogLevel = LogLevel.None
@@ -79,7 +79,7 @@ namespace Statiq.App.Tests.Bootstrapper
                 // Given
                 string[] args = new[] { "build", "-l", logLevel };
                 IBootstrapper bootstrapper = App.Bootstrapper.Create(args);
-                bootstrapper.AddCommand<BuildCommand<EngineCommandSettings>>("build");
+                bootstrapper.AddCommand<PipelinesCommand<EngineCommandSettings>>("build");
                 TestLoggerProvider provider = new TestLoggerProvider
                 {
                     ThrowLogLevel = LogLevel.None
@@ -108,7 +108,7 @@ namespace Statiq.App.Tests.Bootstrapper
                 // Given
                 string[] args = new[] { "build", "-l", "Debug" };
                 IBootstrapper bootstrapper = App.Bootstrapper.Create(args);
-                bootstrapper.AddCommand<BuildCommand<EngineCommandSettings>>("build");
+                bootstrapper.AddCommand<PipelinesCommand<EngineCommandSettings>>("build");
                 TestLoggerProvider provider = new TestLoggerProvider();
                 bootstrapper.ConfigureServices(services => services.AddSingleton<ILoggerProvider>(provider));
                 bootstrapper.AddPipeline("Foo");

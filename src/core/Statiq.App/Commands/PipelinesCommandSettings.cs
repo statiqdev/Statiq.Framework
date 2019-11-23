@@ -8,14 +8,14 @@ using Statiq.Common;
 
 namespace Statiq.App
 {
-    public class BuildCommandSettings : EngineCommandSettings
+    public class PipelinesCommandSettings : EngineCommandSettings
     {
-        [CommandOption("-p|--pipeline <PIPELINE>")]
-        [Description("Explicitly specifies one or more pipelines to execute.")]
-        public string[] Pipelines { get; set; }
-
         [CommandOption("-n|--normal")]
-        [Description("If pipelines are explicitly specified, executes normal pipelines as well.")]
+        [Description("Executes normal pipelines as well as those specified.")]
         public bool NormalPipelines { get; set; }
+
+        [CommandArgument(0, "[pipelines]")]
+        [Description("The pipeline(s) to execute.")]
+        public string[] Pipelines { get; set; }
     }
 }

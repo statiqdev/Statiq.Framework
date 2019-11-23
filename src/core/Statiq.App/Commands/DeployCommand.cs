@@ -10,7 +10,7 @@ using Statiq.Common;
 namespace Statiq.App
 {
     [Description("Executes deployment pipelines.")]
-    internal class DeployCommand : BuildCommand<DeployCommandSettings>
+    internal class DeployCommand : PipelinesCommand<DeployCommandSettings>
     {
         public DeployCommand(
             IConfiguratorCollection configurators,

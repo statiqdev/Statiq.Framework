@@ -102,8 +102,8 @@ namespace Statiq.App
 
         public IBootstrapper AddDefaultCommands()
         {
-            SetDefaultCommand<BuildCommand<EngineCommandSettings>>();
-            AddCommand<BuildCommand<BuildCommandSettings>>();
+            SetDefaultCommand<PipelinesCommand<PipelinesCommandSettings>>();
+            AddCommand<PipelinesCommand<PipelinesCommandSettings>>();
             AddCommand<PreviewCommand>();
             AddCommand<DeployCommand>();
             AddCommand<ServeCommand>();

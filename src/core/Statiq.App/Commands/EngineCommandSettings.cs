@@ -34,7 +34,7 @@ namespace Statiq.App
         [Description("Executes pipeline phases and modules in serial.")]
         public bool SerialExecution { get; set; }
 
-        [CommandArgument(0, "[root]")]
+        [CommandOption("-r|--root")]
         [Description("The root folder to use.")]
         public string RootPath { get; set; }
     }

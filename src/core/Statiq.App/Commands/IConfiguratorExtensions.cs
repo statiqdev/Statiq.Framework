@@ -56,7 +56,7 @@ namespace Statiq.App
             string name,
             bool normalPipelines,
             params string[] pipelines) =>
-                configurator.AddPipelineCommand(name, new BuildCommandSettings
+                configurator.AddPipelineCommand(name, new PipelinesCommandSettings
                 {
                     Pipelines = pipelines,
                     NormalPipelines = normalPipelines
@@ -70,7 +70,7 @@ namespace Statiq.App
             _ = name ?? throw new ArgumentNullException(nameof(name));
             _ = commandSettings ?? throw new ArgumentNullException(nameof(commandSettings));
             return configurator
-                .AddCommand<BuildCommand<BaseCommandSettings>>(name)
+                .AddCommand<PipelinesCommand<BaseCommandSettings>>(name)
                 .WithData(commandSettings);
         }
 

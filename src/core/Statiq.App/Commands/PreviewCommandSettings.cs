@@ -14,7 +14,7 @@ using Microsoft.Extensions.Configuration;
 
 namespace Statiq.App
 {
-    internal class PreviewCommandSettings : BuildCommandSettings
+    internal class PreviewCommandSettings : PipelinesCommandSettings
     {
         [CommandOption("--port <PORT>")]
         [Description("Start the preview web server on the specified port (default is 5080).")]

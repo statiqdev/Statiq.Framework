@@ -1,5 +1,7 @@
 # 1.0.0-alpha.20
 
+- Renames `BuildCommand` to `PipelinesCommand`.
+- Refactors default commands by renaming `build` to `pipelines` and accepting pipelines to execute as an argument (moving the root path to an option).
 - Added `IBootstrapper.AddCommands<TParent>()` to add all nested class commands of a parent type.
 - Added `IBootstrapper.AddPipelines<TParent>()` to add all nested class pipelines of a parent type.
 - Added `Bootstrapper.CreateDefaultWithout()` and `IBootstrapper.AddDefaultsWithout()` to create a default bootstrapper without specific components.
