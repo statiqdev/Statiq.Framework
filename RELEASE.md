@@ -1,5 +1,6 @@
 # 1.0.0-alpha.20
 
+- Adds a new `ThrowException` module that can be used to throw exceptions based on a config value.
 - Renames `BuildCommand` to `PipelinesCommand`.
 - Refactors default commands by renaming `build` to `pipelines` and accepting pipelines to execute as an argument (moving the root path to an option).
 - Added `IBootstrapper.AddCommands<TParent>()` to add all nested class commands of a parent type.
