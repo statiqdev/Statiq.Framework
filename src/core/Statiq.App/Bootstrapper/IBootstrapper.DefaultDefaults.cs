@@ -15,49 +15,57 @@ namespace Statiq.App
 {
     public partial interface IBootstrapper
     {
-        public IBootstrapper AddDefaults(DefaultsToAdd defaultsToAdd = DefaultsToAdd.All)
+        public IBootstrapper AddDefaults(DefaultFeatures features = DefaultFeatures.All)
         {
-            if (defaultsToAdd.HasFlag(DefaultsToAdd.BootstrapperConfigurators))
+            if (features.HasFlag(DefaultFeatures.BootstrapperConfigurators))
             {
                 AddBootstrapperConfigurators();
             }
-            if (defaultsToAdd.HasFlag(DefaultsToAdd.Logging))
+            if (features.HasFlag(DefaultFeatures.Logging))
             {
                 AddDefaultLogging();
             }
-            if (defaultsToAdd.HasFlag(DefaultsToAdd.Settings))
+            if (features.HasFlag(DefaultFeatures.Settings))
             {
                 AddDefaultSettings();
             }
-            if (defaultsToAdd.HasFlag(DefaultsToAdd.EnvironmentVariables))
+            if (features.HasFlag(DefaultFeatures.EnvironmentVariables))
             {
                 AddEnvironmentVariables();
             }
-            if (defaultsToAdd.HasFlag(DefaultsToAdd.ConfigurationFiles))
+            if (features.HasFlag(DefaultFeatures.ConfigurationFiles))
             {
                 AddDefaultConfigurationFiles();
             }
-            if (defaultsToAdd.HasFlag(DefaultsToAdd.Commands))
+            if (features.HasFlag(DefaultFeatures.BuildCommands))
             {
-                AddDefaultCommands();
+                AddBuildCommands();
             }
-            if (defaultsToAdd.HasFlag(DefaultsToAdd.Shortcodes))
+            if (features.HasFlag(DefaultFeatures.HostingCommands))
+            {
+                AddHostingCommands();
+            }
+            if (features.HasFlag(DefaultFeatures.CustomCommands))
+            {
+                AddCustomCommands();
+            }
+            if (features.HasFlag(DefaultFeatures.Shortcodes))
             {
                 AddDefaultShortcodes();
             }
-            if (defaultsToAdd.HasFlag(DefaultsToAdd.Namespaces))
+            if (features.HasFlag(DefaultFeatures.Namespaces))
             {
                 AddDefaultNamespaces();
             }
-            if (defaultsToAdd.HasFlag(DefaultsToAdd.Pipelines))
+            if (features.HasFlag(DefaultFeatures.Pipelines))
             {
                 AddDefaultPipelines();
             }
             return this;
         }
 
-        public IBootstrapper AddDefaultsWithout(DefaultsToAdd withoutDefaults) =>
-            AddDefaults(DefaultsToAdd.All & ~withoutDefaults);
+        public IBootstrapper AddDefaultsWithout(DefaultFeatures withoutFeatures) =>
+            AddDefaults(DefaultFeatures.All & ~withoutFeatures);
 
         public IBootstrapper AddBootstrapperConfigurators()
         {
@@ -100,13 +108,24 @@ namespace Statiq.App
                 .AddJsonFile("appsettings.json", true)
                 .AddJsonFile("statiq.json", true));
 
-        public IBootstrapper AddDefaultCommands()
+        public IBootstrapper AddBuildCommands()
         {
             SetDefaultCommand<PipelinesCommand<PipelinesCommandSettings>>();
             AddCommand<PipelinesCommand<PipelinesCommandSettings>>();
-            AddCommand<PreviewCommand>();
             AddCommand<DeployCommand>();
+            AddCommands();
+            return this;
+        }
+
+        public IBootstrapper AddHostingCommands()
+        {
+            AddCommand<PreviewCommand>();
             AddCommand<ServeCommand>();
+            return this;
+        }
+
+        public IBootstrapper AddCustomCommands()
+        {
             AddCommands();
             return this;
         }

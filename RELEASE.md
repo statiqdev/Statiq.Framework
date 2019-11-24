@@ -1,5 +1,7 @@
 # 1.0.0-alpha.20
 
+- Split `DefaultFeatures.Commands` into `DefaultFeatures.BuildCommands`, `DefaultFeatures.HostingCommands`, and `DefaultFeatures.CustomCommands` for finer control.
+- Renamed `DefaultsToAdd` to `DefaultFeatures`.
 - Adds a new `ThrowException` module that can be used to throw exceptions based on a config value.
 - Renames `BuildCommand` to `PipelinesCommand`.
 - Refactors default commands by renaming `build` to `pipelines` and accepting pipelines to execute as an argument (moving the root path to an option).

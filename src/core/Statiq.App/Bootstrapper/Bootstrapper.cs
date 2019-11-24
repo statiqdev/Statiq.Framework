@@ -119,7 +119,7 @@ namespace Statiq.App
         /// </summary>
         /// <remarks>
         /// Use this method when you want to fully customize the bootstrapper and engine.
-        /// Otherwise use on of the <see cref="CreateDefault(string[], DefaultsToAdd)"/> overloads to
+        /// Otherwise use on of the <see cref="CreateDefault(string[], DefaultFeatures)"/> overloads to
         /// create an initialize a bootstrapper with an initial set of default configurations.
         /// </remarks>
         /// <param name="args">The command line arguments.</param>
@@ -131,12 +131,12 @@ namespace Statiq.App
         /// shortcodes, and assembly scanning.
         /// </summary>
         /// <param name="args">The command line arguments.</param>
-        /// <param name="defaultsToAdd">The default configurations to add to the bootstrapper.</param>
+        /// <param name="features">The default configurations to add to the bootstrapper.</param>
         /// <returns>The bootstrapper.</returns>
-        public static IBootstrapper CreateDefault(string[] args, DefaultsToAdd defaultsToAdd = DefaultsToAdd.All) =>
-            Create(args).AddDefaults(defaultsToAdd);
+        public static IBootstrapper CreateDefault(string[] args, DefaultFeatures features = DefaultFeatures.All) =>
+            Create(args).AddDefaults(features);
 
-        public static IBootstrapper CreateDefaultWithout(string[] args, DefaultsToAdd withoutDefaults) =>
-            Create(args).AddDefaultsWithout(withoutDefaults);
+        public static IBootstrapper CreateDefaultWithout(string[] args, DefaultFeatures features) =>
+            Create(args).AddDefaultsWithout(features);
     }
 }
