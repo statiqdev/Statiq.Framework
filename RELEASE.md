@@ -1,3 +1,7 @@
+# 1.0.0-alpha.21
+
+- Fixes bugs with parallel modules when they return a null enumerable.
+
 # 1.0.0-alpha.20
 
 - Split `DefaultFeatures.Commands` into `DefaultFeatures.BuildCommands`, `DefaultFeatures.HostingCommands`, and `DefaultFeatures.CustomCommands` for finer control.

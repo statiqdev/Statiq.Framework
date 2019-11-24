@@ -122,7 +122,7 @@ namespace Statiq.Common
             IEnumerable<IDocument> aggregateResults = null;
             foreach (IDocument input in context.Inputs)
             {
-                IEnumerable<IDocument> results = await ExecuteInputFunc(input, context, ExecuteInputAsync);
+                IEnumerable<IDocument> results = await ExecuteInputFuncAsync(input, context, ExecuteInputAsync);
                 if (results != null)
                 {
                     aggregateResults = aggregateResults?.Concat(results) ?? results;
@@ -150,20 +150,49 @@ namespace Statiq.Common
         /// Used by module base classes to execute an input while checking
         /// for cancellation and logging exceptions.
         /// </summary>
-        /// <typeparam name="T">The return type.</typeparam>
         /// <param name="input">The input document.</param>
         /// <param name="context">The execution context.</param>
         /// <param name="executeFunc">The per-document execution function.</param>
         /// <returns>The results of the execution function.</returns>
-        internal static T ExecuteInputFunc<T>(
+        internal static async Task<IEnumerable<IDocument>> ExecuteInputFuncAsync(
             IDocument input,
             IExecutionContext context,
-            Func<IDocument, IExecutionContext, T> executeFunc)
+            Func<IDocument, IExecutionContext, Task<IEnumerable<IDocument>>> executeFunc)
         {
             context.CancellationToken.ThrowIfCancellationRequested();
             try
             {
-                return executeFunc(input, context);
+                return (await executeFunc(input, context)) ?? Array.Empty<IDocument>();
+            }
+            catch (OperationCanceledException)
+            {
+                throw;
+            }
+            catch (Exception ex)
+            {
+                string displayString = input is IDisplayable displayable ? $" [{displayable.ToSafeDisplayString()}]" : string.Empty;
+                context.LogError($"Exception while processing {input.GetType().Name}{displayString}: {ex.Message}");
+                throw;
+            }
+        }
+
+        /// <summary>
+        /// Used by module base classes to execute an input while checking
+        /// for cancellation and logging exceptions.
+        /// </summary>
+        /// <param name="input">The input document.</param>
+        /// <param name="context">The execution context.</param>
+        /// <param name="executeFunc">The per-document execution function.</param>
+        /// <returns>The results of the execution function.</returns>
+        internal static IEnumerable<IDocument> ExecuteInputFunc(
+            IDocument input,
+            IExecutionContext context,
+            Func<IDocument, IExecutionContext, IEnumerable<IDocument>> executeFunc)
+        {
+            context.CancellationToken.ThrowIfCancellationRequested();
+            try
+            {
+                return executeFunc(input, context) ?? Array.Empty<IDocument>();
             }
             catch (OperationCanceledException)
             {

@@ -38,7 +38,6 @@ namespace Statiq.Common
         protected virtual IEnumerable<IDocument> ExecuteContext(IExecutionContext context) =>
             context.Inputs
                 .Select(input => ExecuteInputFunc(input, context, ExecuteInput))
-                .Where(x => x != null)
                 .SelectMany(x => x);
 
         /// <summary>

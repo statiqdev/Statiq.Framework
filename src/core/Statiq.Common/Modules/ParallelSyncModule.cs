@@ -31,13 +31,11 @@ namespace Statiq.Common
                     .AsOrdered()
                     .WithCancellation(context.CancellationToken)
                     .Select(input => ExecuteInputFunc(input, context, ExecuteInput))
-                    .Where(x => x != null)
                     .SelectMany(x => x);
             }
 
             return context.Inputs
                 .Select(input => ExecuteInputFunc(input, context, ExecuteInput))
-                .Where(x => x != null)
                 .SelectMany(x => x);
         }
 

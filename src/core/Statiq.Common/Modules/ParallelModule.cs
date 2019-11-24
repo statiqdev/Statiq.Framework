@@ -16,7 +16,7 @@ namespace Statiq.Common
         /// <inheritdoc />
         protected sealed override Task<IEnumerable<IDocument>> ExecuteContextAsync(IExecutionContext context) =>
             Parallel && !context.SerialExecution
-                ? context.Inputs.ParallelSelectManyAsync(input => ExecuteInputFunc(input, context, ExecuteInputAsync), context.CancellationToken)
+                ? context.Inputs.ParallelSelectManyAsync(input => ExecuteInputFuncAsync(input, context, ExecuteInputAsync), context.CancellationToken)
                 : base.ExecuteContextAsync(context);
     }
 }

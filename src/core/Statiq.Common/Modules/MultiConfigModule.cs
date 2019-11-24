@@ -93,7 +93,7 @@ namespace Statiq.Common
 
                     // Get the results for this input document
                     IMetadata values = new ReadOnlyConvertingDictionary(valuesBuilder.ToImmutable());
-                    IEnumerable<IDocument> results = await ExecuteInputFunc(input, context, (i, c) => ExecuteConfigAsync(i, c, values));
+                    IEnumerable<IDocument> results = await ExecuteInputFuncAsync(input, context, (i, c) => ExecuteConfigAsync(i, c, values));
                     if (results != null)
                     {
                         aggregateResults = aggregateResults?.Concat(results) ?? results;

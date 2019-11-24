@@ -62,7 +62,7 @@ namespace Statiq.Common
                             TValue value = _config.RequiresDocument
                                 ? await _config.GetValueAsync(input, context)
                                 : contextValue;
-                            return await ExecuteInputFunc(input, context, (i, c) => ExecuteConfigAsync(i, c, value));
+                            return await ExecuteInputFuncAsync(input, context, (i, c) => ExecuteConfigAsync(i, c, value));
                         },
                         context.CancellationToken);
                 }
@@ -74,7 +74,7 @@ namespace Statiq.Common
                     TValue value = _config.RequiresDocument
                         ? await _config.GetValueAsync(input, context)
                         : contextValue;
-                    IEnumerable<IDocument> results = await ExecuteInputFunc(input, context, (i, c) => ExecuteConfigAsync(i, c, value));
+                    IEnumerable<IDocument> results = await ExecuteInputFuncAsync(input, context, (i, c) => ExecuteConfigAsync(i, c, value));
                     if (results != null)
                     {
                         aggregateResults = aggregateResults?.Concat(results) ?? results;
