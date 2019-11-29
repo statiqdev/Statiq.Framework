@@ -9,7 +9,7 @@ namespace Statiq.Core
     /// </summary>
     /// <example>
     /// <code>
-    /// &lt;?# Eval ?>&lt;?# return 1 + 2 ?>&lt;?#/ Eval ?>
+    /// &lt;?# Eval ?>&lt;?# return 1 + 2; ?>&lt;?#/ Eval ?>
     /// </code>
     /// </example>
     public class EvalShortcode : Shortcode
