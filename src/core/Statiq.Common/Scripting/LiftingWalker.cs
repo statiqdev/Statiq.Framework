@@ -4,7 +4,7 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
-namespace Statiq.CodeAnalysis.Scripting
+namespace Statiq.Common
 {
     internal class LiftingWalker : CSharpSyntaxWalker
     {
