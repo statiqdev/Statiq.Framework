@@ -1,8 +1,9 @@
 # 1.0.0-alpha.21
 
 - Fixes a bug with parallel modules when they return a null enumerable.
-- Adds `AnalyzeCSharp.WithCompilationAssemblyName()` to set the name of the module compilation (#71)
-- Adds a metadata key "Compilation" to `AnalyzeCSharp` output documents to get the Roslyn `Compilation` from the module (#71)
+- Adds `AnalyzeCSharp.WithCompilationAssemblyName()` to set the name of the module compilation (#71).
+- Adds a metadata key "Compilation" to `AnalyzeCSharp` output documents to get the Roslyn `Compilation` from the module (#71).
+- Adds `IConfig.EnsureNonNull()` and `IConfig.EnsureNonDocument()` extensions to simplify config parameter checks.
 
 # 1.0.0-alpha.20
 

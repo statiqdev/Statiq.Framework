@@ -45,29 +45,13 @@ namespace Statiq.Azure
             : base(
                 new Dictionary<string, IConfig>
                 {
-                    { SearchServiceName, searchServiceName ?? throw new ArgumentNullException(nameof(searchServiceName)) },
-                    { IndexName, indexName ?? throw new ArgumentNullException(nameof(indexName)) },
-                    { ApiKey, apiKey ?? throw new ArgumentNullException(nameof(apiKey)) },
-                    { Fields, fields ?? throw new ArgumentNullException(nameof(fields)) }
+                    { SearchServiceName, searchServiceName.EnsureNonDocument(nameof(searchServiceName)) },
+                    { IndexName, indexName.EnsureNonDocument(nameof(indexName)) },
+                    { ApiKey, apiKey.EnsureNonDocument(nameof(apiKey)) },
+                    { Fields, fields.EnsureNonDocument(nameof(fields)) }
                 },
                 false)
         {
-            if (searchServiceName.RequiresDocument)
-            {
-                throw new ArgumentException($"The config value must not require a document", nameof(searchServiceName));
-            }
-            if (indexName.RequiresDocument)
-            {
-                throw new ArgumentException("The config value must not require a document", nameof(indexName));
-            }
-            if (apiKey.RequiresDocument)
-            {
-                throw new ArgumentException("The config value must not require a document", nameof(apiKey));
-            }
-            if (fields.RequiresDocument)
-            {
-                throw new ArgumentException("The config value must not require a document", nameof(fields));
-            }
         }
 
         protected override async Task<IEnumerable<IDocument>> ExecuteConfigAsync(IDocument input, IExecutionContext context, IMetadata values)

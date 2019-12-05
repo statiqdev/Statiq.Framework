@@ -86,5 +86,30 @@ namespace Statiq.Common
                 }
             }
         }
+
+        /// <summary>
+        /// Ensures that the config is not null and throws <see cref="ArgumentNullException"/> if it is.
+        /// </summary>
+        /// <typeparam name="TConfig">The config type.</typeparam>
+        /// <param name="config">The config.</param>
+        /// <param name="paramName">The name of the config parameter.</param>
+        /// <returns>The config if non-null.</returns>
+        public static TConfig EnsureNonNull<TConfig>(this TConfig config, string paramName = null)
+            where TConfig : IConfig =>
+            config ?? throw new ArgumentNullException(paramName);
+
+        /// <summary>
+        /// Ensures that the config is not null and doesn't require a document and throws
+        /// <see cref="ArgumentNullException"/> or <see cref="ArgumentException"/> if it is.
+        /// </summary>
+        /// <typeparam name="TConfig">The config type.</typeparam>
+        /// <param name="config">The config.</param>
+        /// <param name="paramName">The name of the config parameter.</param>
+        /// <returns>The config if non-null and non-document.</returns>
+        public static TConfig EnsureNonDocument<TConfig>(this TConfig config, string paramName = null)
+            where TConfig : IConfig =>
+            config.EnsureNonNull().RequiresDocument
+                ? throw new ArgumentException("Config must not require a document", paramName)
+                : config;
     }
 }

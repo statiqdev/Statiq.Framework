@@ -87,5 +87,61 @@ namespace Statiq.Common.Tests.Config
                 result.ShouldBe(default);
             }
         }
+
+        public class EnsureNonNullTests : ConfigExtensionsFixture
+        {
+            [Test]
+            public void ThrowsForNullConfig()
+            {
+                // Given
+                Config<object> config = null;
+
+                // When, Then
+                Should.Throw<ArgumentNullException>(() => config.EnsureNonNull());
+            }
+
+            [Test]
+            public void DoesNotThrowForNonNullConfig()
+            {
+                // Given
+                Config<object> config = Common.Config.FromValue(true);
+
+                // When, Then
+                Should.NotThrow(() => config.EnsureNonNull());
+            }
+        }
+
+        public class EnsureNonDocumentTests : ConfigExtensionsFixture
+        {
+            [Test]
+            public void ThrowsForNullConfig()
+            {
+                // Given
+                Config<object> config = null;
+
+                // When, Then
+                Should.Throw<ArgumentNullException>(() => config.EnsureNonDocument());
+            }
+
+            [Test]
+            public void ThrowsForDocumentConfig()
+            {
+                // Given
+                Config<object> config = Common.Config.FromDocument(_ => true);
+
+                // When, Then
+                Should.Throw<ArgumentException>(() => config.EnsureNonDocument());
+            }
+
+            [Test]
+            public void DoesNotThrowForNonDocumentConfig()
+            {
+                // Given
+                Config<object> config = Common.Config.FromContext(_ => true);
+
+                // When, Then
+                Should.NotThrow(() => config.EnsureNonDocument());
+            }
+        }
     }
 }
