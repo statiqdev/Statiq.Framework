@@ -92,7 +92,7 @@ namespace Statiq.CodeAnalysis.Analysis
         {
             if (ShouldIncludeSymbol(symbol))
             {
-                AddDocument(symbol, false, new MetadataItems());
+                AddDocumentCommon(symbol, false, new MetadataItems());
             }
 
             base.DefaultVisit(symbol);
@@ -102,7 +102,7 @@ namespace Statiq.CodeAnalysis.Analysis
         {
             if (ShouldIncludeSymbol(symbol))
             {
-                AddDocument(symbol, true, new MetadataItems
+                AddDocumentCommon(symbol, true, new MetadataItems
                 {
                     { CodeAnalysisKeys.SpecificKind, _ => symbol.Kind.ToString() },
                     { CodeAnalysisKeys.MemberNamespaces, DocumentsFor(symbol.GlobalNamespace.GetNamespaceMembers()) }
@@ -180,7 +180,7 @@ namespace Statiq.CodeAnalysis.Analysis
                         new MetadataItem(CodeAnalysisKeys.ImplementingTypes, _ => GetImplementingTypes(symbol), true)
                     });
                 }
-                AddDocument(symbol, true, metadata);
+                AddDocumentCommon(symbol, true, metadata);
 
                 // Descend if not finished, and only if this type was included
                 if (!_finished)
@@ -347,7 +347,7 @@ namespace Statiq.CodeAnalysis.Analysis
             {
                 new MetadataItem(CodeAnalysisKeys.ContainingType, DocumentFor(symbol.ContainingType))
             });
-            return AddDocument(symbol, xmlDocumentation, items);
+            return AddDocumentCommon(symbol, xmlDocumentation, items);
         }
 
         private IDocument AddNamespaceDocument(INamespaceSymbol symbol, bool xmlDocumentation)
@@ -355,7 +355,6 @@ namespace Statiq.CodeAnalysis.Analysis
             string displayName = symbol.GetDisplayName();
             MetadataItems items = new MetadataItems
             {
-                { CodeAnalysisKeys.Symbol, _ => _namespaceDisplayNameToSymbols[displayName].ToImmutableList() },
                 { CodeAnalysisKeys.SpecificKind, _ => symbol.Kind.ToString() },
 
                 // We need to aggregate the results across all matching namespaces
@@ -365,24 +364,7 @@ namespace Statiq.CodeAnalysis.Analysis
             return AddDocumentCommon(symbol, xmlDocumentation, items);
         }
 
-        // Used for everything but namespace documents
-        private IDocument AddDocument(ISymbol symbol, bool xmlDocumentation, MetadataItems items)
-        {
-            items.AddRange(new[]
-            {
-                new MetadataItem(CodeAnalysisKeys.Symbol, symbol)
-            });
-
-            // Add the containing assembly, but only if it's not the code analysis compilation
-            if (symbol.ContainingAssembly?.Name != _compilation.AssemblyName && _assemblySymbols)
-            {
-                items.Add(new MetadataItem(CodeAnalysisKeys.ContainingAssembly, DocumentFor(symbol.ContainingAssembly)));
-            }
-
-            return AddDocumentCommon(symbol, xmlDocumentation, items);
-        }
-
-        // Used for everything including namespace documents
+        // Used for everything
         private IDocument AddDocumentCommon(ISymbol symbol, bool xmlDocumentation, MetadataItems items)
         {
             // Get universal metadata
@@ -407,6 +389,22 @@ namespace Statiq.CodeAnalysis.Analysis
                 new MetadataItem(CodeAnalysisKeys.OriginalDefinition, DocumentFor(GetOriginalSymbolDefinition(symbol))),
                 new MetadataItem(CodeAnalysisKeys.Compilation, _compilation)
             });
+
+            // If it's a namespace look up the common symbol using the name, otherwise add the original symbol
+            if (symbol is INamespaceSymbol)
+            {
+                items.Add(new MetadataItem(CodeAnalysisKeys.Symbol, _ => _namespaceDisplayNameToSymbols[symbol.GetDisplayName()].ToImmutableList()));
+            }
+            else
+            {
+                items.Add(new MetadataItem(CodeAnalysisKeys.Symbol, symbol));
+            }
+
+            // Add the containing assembly, but only if it's not the code analysis compilation
+            if (symbol.ContainingAssembly?.Name != _compilation.AssemblyName && _assemblySymbols)
+            {
+                items.Add(new MetadataItem(CodeAnalysisKeys.ContainingAssembly, DocumentFor(symbol.ContainingAssembly)));
+            }
 
             // XML Documentation
             if (xmlDocumentation && (!_finished || _docsForImplicitSymbols))
