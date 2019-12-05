@@ -116,7 +116,7 @@ namespace Statiq.Core
             }));
 
         /// <summary>
-        /// Sets the working directory to use for the process.
+        /// Sets the working directory to use for the process relative to the root path.
         /// </summary>
         /// <param name="workingDirectory">The working directory.</param>
         /// <returns>The current module instance.</returns>

@@ -31,6 +31,7 @@ namespace Statiq.CodeAnalysis
     /// <metadata cref="CodeAnalysisKeys.IsResult" usage="Output"/>
     /// <metadata cref="CodeAnalysisKeys.SymbolId" usage="Output"/>
     /// <metadata cref="CodeAnalysisKeys.Symbol" usage="Output"/>
+    /// <metadata cref="CodeAnalysisKeys.Compilation" usage="Output"/>
     /// <metadata cref="CodeAnalysisKeys.Name" usage="Output"/>
     /// <metadata cref="CodeAnalysisKeys.FullName" usage="Output"/>
     /// <metadata cref="CodeAnalysisKeys.QualifiedName" usage="Output"/>
@@ -82,8 +83,6 @@ namespace Statiq.CodeAnalysis
     /// <category>Metadata</category>
     public class AnalyzeCSharp : Module
     {
-        internal const string CompilationAssemblyName = nameof(CompilationAssemblyName);
-
         // Use an intermediate Dictionary to initialize with defaults
         private readonly ConcurrentDictionary<string, string> _cssClasses
             = new ConcurrentDictionary<string, string>(
@@ -96,13 +95,14 @@ namespace Statiq.CodeAnalysis
         private readonly List<string> _projectGlobs = new List<string>();
         private readonly List<string> _solutionGlobs = new List<string>();
 
-        private Func<ISymbol, bool> _symbolPredicate;
-        private Func<ISymbol, FilePath> _destination;
+        private Func<ISymbol, Compilation, bool> _symbolPredicate;
+        private Func<ISymbol, Compilation, FilePath> _destination;
         private DirectoryPath _destinationPrefix = null;
         private bool _docsForImplicitSymbols = false;
         private bool _inputDocuments = true;
         private bool _assemblySymbols = false;
         private bool _implicitInheritDoc = false;
+        private Config<string> _compilationAssemblyName = Config.FromContext(_ => Path.GetRandomFileName());
 
         /// <summary>
         /// This will assume <c>inheritdoc</c> if a symbol has no other code comments.
@@ -229,12 +229,20 @@ namespace Statiq.CodeAnalysis
         /// </summary>
         /// <param name="predicate">A predicate that returns <c>true</c> if the symbol should be included in the initial result set.</param>
         /// <returns>The current module instance.</returns>
-        public AnalyzeCSharp WhereSymbol(Func<ISymbol, bool> predicate)
+        public AnalyzeCSharp WhereSymbol(Func<ISymbol, bool> predicate) =>
+            WhereSymbol(predicate == null ? (Func<ISymbol, Compilation, bool>)null : (s, _) => predicate(s));
+
+        /// <summary>
+        /// Controls which symbols are processed as part of the initial result set.
+        /// </summary>
+        /// <param name="predicate">A predicate that returns <c>true</c> if the symbol should be included in the initial result set.</param>
+        /// <returns>The current module instance.</returns>
+        public AnalyzeCSharp WhereSymbol(Func<ISymbol, Compilation, bool> predicate)
         {
             if (predicate != null)
             {
-                Func<ISymbol, bool> currentPredicate = _symbolPredicate;
-                _symbolPredicate = currentPredicate == null ? predicate : x => currentPredicate(x) && predicate(x);
+                Func<ISymbol, Compilation, bool> currentPredicate = _symbolPredicate;
+                _symbolPredicate = currentPredicate == null ? predicate : (s, c) => currentPredicate(s, c) && predicate(s, c);
             }
             return this;
         }
@@ -350,7 +358,7 @@ namespace Statiq.CodeAnalysis
         public AnalyzeCSharp WithAssemblySymbols(bool assemblySymbols = true)
         {
             _assemblySymbols = assemblySymbols;
-            return WhereSymbol(x => !(x is IAssemblySymbol) || (_assemblySymbols && x.Name != CompilationAssemblyName));
+            return WhereSymbol((s, c) => !(s is IAssemblySymbol) || (_assemblySymbols && s.Name != c.AssemblyName));
         }
 
         /// <summary>
@@ -363,9 +371,40 @@ namespace Statiq.CodeAnalysis
         /// A function that takes the metadata for a given symbol and returns a <c>FilePath</c> to use for the destination.
         /// </param>
         /// <returns>The current module instance.</returns>
-        public AnalyzeCSharp WithDestination(Func<ISymbol, FilePath> destination)
+        public AnalyzeCSharp WithDestination(Func<ISymbol, FilePath> destination) =>
+            WithDestination(destination == null ? (Func<ISymbol, Compilation, FilePath>)null : (s, _) => destination(s));
+
+        /// <summary>
+        /// This changes the default behavior for the generated destination paths, which is to place files in a path
+        /// with the same name as their containing namespace. Namespace documents will be named "index.html" while other type documents
+        /// will get a name equal to their SymbolId. Member documents will get the same name as their containing type plus an
+        /// anchor to their SymbolId.
+        /// </summary>
+        /// <param name="destination">
+        /// A function that takes the metadata for a given symbol and returns a <c>FilePath</c> to use for the destination.
+        /// </param>
+        /// <returns>The current module instance.</returns>
+        public AnalyzeCSharp WithDestination(Func<ISymbol, Compilation, FilePath> destination)
         {
             _destination = destination;
+            return this;
+        }
+
+        /// <summary>
+        /// Allows you to change the name of the assembly created by the compilation this module produces. This can be
+        /// useful for uniquely identifying multiple instances of the module, for example. By default
+        /// <see cref="Path.GetRandomFileName"/> is used to derive the compilation assembly name.
+        /// </summary>
+        /// <param name="compilationAssemblyName">The name of the compilation assembly.</param>
+        /// <returns>The current module instance.</returns>
+        public AnalyzeCSharp WithCompilationAssemblyName(Config<string> compilationAssemblyName)
+        {
+            _ = compilationAssemblyName ?? throw new ArgumentNullException(nameof(compilationAssemblyName));
+            if (compilationAssemblyName.RequiresDocument)
+            {
+                throw new ArgumentException("The compilation assembly name config must not require a document", nameof(compilationAssemblyName));
+            }
+            _compilationAssemblyName = compilationAssemblyName;
             return this;
         }
 
@@ -427,7 +466,7 @@ namespace Statiq.CodeAnalysis
             // Create the compilation (have to supply an XmlReferenceResolver to handle include XML doc comments)
             MetadataReference mscorlib = MetadataReference.CreateFromFile(typeof(object).Assembly.Location);
             Compilation compilation = CSharpCompilation
-                .Create(CompilationAssemblyName)
+                .Create(await _compilationAssemblyName.GetValueAsync(null, context))
                 .WithReferences(mscorlib)
                 .WithOptions(new CSharpCompilationOptions(
                     OutputKind.DynamicallyLinkedLibrary,
@@ -446,7 +485,7 @@ namespace Statiq.CodeAnalysis
                 compilation,
                 context,
                 _symbolPredicate,
-                _destination ?? (x => DefaultDestination(x, _destinationPrefix)),
+                _destination ?? ((s, _) => DefaultDestination(s, _destinationPrefix)),
                 _cssClasses,
                 _docsForImplicitSymbols,
                 _assemblySymbols,

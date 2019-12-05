@@ -28,8 +28,8 @@ namespace Statiq.CodeAnalysis.Analysis
 
         private readonly Compilation _compilation;
         private readonly IExecutionContext _context;
-        private readonly Func<ISymbol, bool> _symbolPredicate;
-        private readonly Func<ISymbol, FilePath> _destination;
+        private readonly Func<ISymbol, Compilation, bool> _symbolPredicate;
+        private readonly Func<ISymbol, Compilation, FilePath> _destination;
         private readonly ConcurrentDictionary<string, string> _cssClasses;
         private readonly bool _docsForImplicitSymbols;
         private readonly bool _assemblySymbols;
@@ -46,8 +46,8 @@ namespace Statiq.CodeAnalysis.Analysis
         public AnalyzeSymbolVisitor(
             Compilation compilation,
             IExecutionContext context,
-            Func<ISymbol, bool> symbolPredicate,
-            Func<ISymbol, FilePath> destination,
+            Func<ISymbol, Compilation, bool> symbolPredicate,
+            Func<ISymbol, Compilation, FilePath> destination,
             ConcurrentDictionary<string, string> cssClasses,
             bool docsForImplicitSymbols,
             bool assemblySymbols,
@@ -63,7 +63,7 @@ namespace Statiq.CodeAnalysis.Analysis
             _implicitInheritDoc = implicitInheritDoc;
 
             // Get any reflected methods we need
-            Assembly reflectedAssembly = typeof(Microsoft.CodeAnalysis.Workspace).Assembly;
+            Assembly reflectedAssembly = typeof(Workspace).Assembly;
             Type reflectedType = reflectedAssembly.GetType("Microsoft.CodeAnalysis.Shared.Extensions.ITypeSymbolExtensions");
             MethodInfo reflectedMethod = reflectedType.GetMethod("GetAccessibleMembersInThisAndBaseTypes");
             _getAccessibleMembersInThisAndBaseTypes = reflectedMethod.MakeGenericMethod(typeof(ISymbol));
@@ -124,7 +124,7 @@ namespace Statiq.CodeAnalysis.Analysis
             symbols.Add(symbol);
 
             // Create the document (but not if none of the members would be included)
-            if (ShouldIncludeSymbol(symbol, x => _symbolPredicate == null || x.GetMembers().Any(m => _symbolPredicate(m))))
+            if (ShouldIncludeSymbol(symbol, x => _symbolPredicate == null || x.GetMembers().Any(m => _symbolPredicate(m, _compilation))))
             {
                 _namespaceDisplayNameToDocument.AddOrUpdate(
                     displayName,
@@ -300,7 +300,7 @@ namespace Statiq.CodeAnalysis.Analysis
             {
                 return false;
             }
-            return _finished || ((_symbolPredicate == null || _symbolPredicate(symbol)) && (additionalCondition == null || additionalCondition(symbol)));
+            return _finished || ((_symbolPredicate == null || _symbolPredicate(symbol, _compilation)) && (additionalCondition == null || additionalCondition(symbol)));
         }
 
         // This was helpful: http://stackoverflow.com/a/30445814/807064
@@ -374,7 +374,7 @@ namespace Statiq.CodeAnalysis.Analysis
             });
 
             // Add the containing assembly, but only if it's not the code analysis compilation
-            if (symbol.ContainingAssembly?.Name != AnalyzeCSharp.CompilationAssemblyName && _assemblySymbols)
+            if (symbol.ContainingAssembly?.Name != _compilation.AssemblyName && _assemblySymbols)
             {
                 items.Add(new MetadataItem(CodeAnalysisKeys.ContainingAssembly, DocumentFor(symbol.ContainingAssembly)));
             }
@@ -382,6 +382,7 @@ namespace Statiq.CodeAnalysis.Analysis
             return AddDocumentCommon(symbol, xmlDocumentation, items);
         }
 
+        // Used for everything including namespace documents
         private IDocument AddDocumentCommon(ISymbol symbol, bool xmlDocumentation, MetadataItems items)
         {
             // Get universal metadata
@@ -403,7 +404,8 @@ namespace Statiq.CodeAnalysis.Analysis
                 new MetadataItem(CodeAnalysisKeys.IsAbstract, _ => symbol.IsAbstract),
                 new MetadataItem(CodeAnalysisKeys.IsVirtual, _ => symbol.IsVirtual),
                 new MetadataItem(CodeAnalysisKeys.IsOverride, _ => symbol.IsOverride),
-                new MetadataItem(CodeAnalysisKeys.OriginalDefinition, DocumentFor(GetOriginalSymbolDefinition(symbol)))
+                new MetadataItem(CodeAnalysisKeys.OriginalDefinition, DocumentFor(GetOriginalSymbolDefinition(symbol))),
+                new MetadataItem(CodeAnalysisKeys.Compilation, _compilation)
             });
 
             // XML Documentation
@@ -413,7 +415,7 @@ namespace Statiq.CodeAnalysis.Analysis
             }
 
             // Add a destination for initially-processed symbols
-            FilePath destination = _finished ? null : _destination(symbol);
+            FilePath destination = _finished ? null : _destination(symbol, _compilation);
 
             // Create the document and add it to caches
             return _symbolToDocument.GetOrAdd(

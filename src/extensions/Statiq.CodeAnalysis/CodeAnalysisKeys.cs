@@ -42,6 +42,12 @@ namespace Statiq.CodeAnalysis
         public const string Symbol = nameof(Symbol);
 
         /// <summary>
+        /// The <see cref="Microsoft.CodeAnalysis.Compilation"/> produced by the module.
+        /// </summary>
+        /// <type><see cref="Microsoft.CodeAnalysis.Compilation"/></type>
+        public const string Compilation = nameof(Compilation);
+
+        /// <summary>
         /// The name of the symbol, or an empty string if the symbol has no name (like the global namespace).
         /// </summary>
         /// <type><see cref="string"/></type>
