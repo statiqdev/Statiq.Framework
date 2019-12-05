@@ -91,28 +91,28 @@ namespace Statiq.CodeAnalysis
                     { "table", "table" }
                 });
 
-        private readonly List<string> _assemblyGlobs = new List<string>();
-        private readonly List<string> _projectGlobs = new List<string>();
-        private readonly List<string> _solutionGlobs = new List<string>();
+        private readonly List<Config<IEnumerable<string>>> _assemblyGlobs = new List<Config<IEnumerable<string>>>();
+        private readonly List<Config<IEnumerable<string>>> _projectGlobs = new List<Config<IEnumerable<string>>>();
+        private readonly List<Config<IEnumerable<string>>> _solutionGlobs = new List<Config<IEnumerable<string>>>();
 
         private Func<ISymbol, Compilation, bool> _symbolPredicate;
         private Func<ISymbol, Compilation, FilePath> _destination;
         private DirectoryPath _destinationPrefix = null;
-        private bool _docsForImplicitSymbols = false;
-        private bool _inputDocuments = true;
+        private Config<bool> _docsForImplicitSymbols = false;
+        private Config<bool> _inputDocuments = true;
         private bool _assemblySymbols = false;
-        private bool _implicitInheritDoc = false;
+        private Config<bool> _implicitInheritDoc = false;
         private Config<string> _compilationAssemblyName = Config.FromContext(_ => Path.GetRandomFileName());
 
         /// <summary>
         /// This will assume <c>inheritdoc</c> if a symbol has no other code comments.
         /// </summary>
-        /// <param name="implicitInheritDoc">If set to <c>true</c>, the symbol will inherit documentation comments
+        /// <param name="implicitInheritDoc">If set to <c>true</c> or <c>null</c>, the symbol will inherit documentation comments
         /// if no other comments are provided.</param>
         /// <returns>The current module instance.</returns>
-        public AnalyzeCSharp WithImplicitInheritDoc(bool implicitInheritDoc = true)
+        public AnalyzeCSharp WithImplicitInheritDoc(Config<bool> implicitInheritDoc = null)
         {
-            _implicitInheritDoc = implicitInheritDoc;
+            _implicitInheritDoc = (implicitInheritDoc ?? true).EnsureNonDocument(nameof(implicitInheritDoc));
             return this;
         }
 
@@ -121,22 +121,22 @@ namespace Statiq.CodeAnalysis
         /// of the initial result set. This can control that behavior and be used to generate documentation
         /// metadata for all documents, regardless if they were part of the initial result set.
         /// </summary>
-        /// <param name="docsForImplicitSymbols">If set to <c>true</c>, documentation metadata is generated for XML comments on all symbols.</param>
+        /// <param name="docsForImplicitSymbols">If set to <c>true</c> or <c>null</c>, documentation metadata is generated for XML comments on all symbols.</param>
         /// <returns>The current module instance.</returns>
-        public AnalyzeCSharp WithDocsForImplicitSymbols(bool docsForImplicitSymbols = true)
+        public AnalyzeCSharp WithDocsForImplicitSymbols(Config<bool> docsForImplicitSymbols = null)
         {
-            _docsForImplicitSymbols = docsForImplicitSymbols;
+            _docsForImplicitSymbols = (docsForImplicitSymbols ?? true).EnsureNonDocument(nameof(docsForImplicitSymbols));
             return this;
         }
 
         /// <summary>
         /// Controls whether the content of input documents is treated as code and used in the analysis (the default is <c>true</c>).
         /// </summary>
-        /// <param name="inputDocuments"><c>true</c> to analyze the content of input documents.</param>
+        /// <param name="inputDocuments"><c>true</c> or <c>null</c> to analyze the content of input documents.</param>
         /// <returns>The current module instance.</returns>
-        public AnalyzeCSharp WithInputDocuments(bool inputDocuments = true)
+        public AnalyzeCSharp WithInputDocuments(Config<bool> inputDocuments = null)
         {
-            _inputDocuments = inputDocuments;
+            _inputDocuments = (inputDocuments ?? true).EnsureNonDocument(nameof(inputDocuments));
             return this;
         }
 
@@ -145,12 +145,9 @@ namespace Statiq.CodeAnalysis
         /// </summary>
         /// <param name="assemblies">A globbing pattern indicating the assemblies to analyze.</param>
         /// <returns>The current module instance.</returns>
-        public AnalyzeCSharp WithAssemblies(string assemblies)
+        public AnalyzeCSharp WithAssemblies(Config<string> assemblies)
         {
-            if (!string.IsNullOrEmpty(assemblies))
-            {
-                _assemblyGlobs.Add(assemblies);
-            }
+            _assemblyGlobs.Add(assemblies.EnsureNonDocument(nameof(assemblies)).Transform(x => (IEnumerable<string>)new[] { x }));
             return this;
         }
 
@@ -159,12 +156,9 @@ namespace Statiq.CodeAnalysis
         /// </summary>
         /// <param name="assemblies">Globbing patterns indicating the assemblies to analyze.</param>
         /// <returns>The current module instance.</returns>
-        public AnalyzeCSharp WithAssemblies(IEnumerable<string> assemblies)
+        public AnalyzeCSharp WithAssemblies(Config<IEnumerable<string>> assemblies)
         {
-            if (assemblies != null)
-            {
-                _assemblyGlobs.AddRange(assemblies.Where(x => !string.IsNullOrEmpty(x)));
-            }
+            _assemblyGlobs.Add(assemblies.EnsureNonDocument(nameof(assemblies)));
             return this;
         }
 
@@ -173,12 +167,9 @@ namespace Statiq.CodeAnalysis
         /// </summary>
         /// <param name="projects">A globbing pattern indicating the projects to analyze.</param>
         /// <returns>The current module instance.</returns>
-        public AnalyzeCSharp WithProjects(string projects)
+        public AnalyzeCSharp WithProjects(Config<string> projects)
         {
-            if (!string.IsNullOrEmpty(projects))
-            {
-                _projectGlobs.Add(projects);
-            }
+            _projectGlobs.Add(projects.EnsureNonDocument(nameof(projects)).Transform(x => (IEnumerable<string>)new[] { x }));
             return this;
         }
 
@@ -187,12 +178,9 @@ namespace Statiq.CodeAnalysis
         /// </summary>
         /// <param name="projects">Globbing patterns indicating the projects to analyze.</param>
         /// <returns>The current module instance.</returns>
-        public AnalyzeCSharp WithProjects(IEnumerable<string> projects)
+        public AnalyzeCSharp WithProjects(Config<IEnumerable<string>> projects)
         {
-            if (projects != null)
-            {
-                _projectGlobs.AddRange(projects.Where(x => !string.IsNullOrEmpty(x)));
-            }
+            _projectGlobs.Add(projects.EnsureNonDocument(nameof(projects)));
             return this;
         }
 
@@ -201,12 +189,9 @@ namespace Statiq.CodeAnalysis
         /// </summary>
         /// <param name="solutions">A globbing pattern indicating the solutions to analyze.</param>
         /// <returns>The current module instance.</returns>
-        public AnalyzeCSharp WithSolutions(string solutions)
+        public AnalyzeCSharp WithSolutions(Config<string> solutions)
         {
-            if (!string.IsNullOrEmpty(solutions))
-            {
-                _solutionGlobs.Add(solutions);
-            }
+            _solutionGlobs.Add(solutions.EnsureNonDocument(nameof(solutions)).Transform(x => (IEnumerable<string>)new[] { x }));
             return this;
         }
 
@@ -215,12 +200,9 @@ namespace Statiq.CodeAnalysis
         /// </summary>
         /// <param name="solutions">Globbing patterns indicating the solutions to analyze.</param>
         /// <returns>The current module instance.</returns>
-        public AnalyzeCSharp WithSolutions(IEnumerable<string> solutions)
+        public AnalyzeCSharp WithSolutions(Config<IEnumerable<string>> solutions)
         {
-            if (solutions != null)
-            {
-                _solutionGlobs.AddRange(solutions.Where(x => !string.IsNullOrEmpty(x)));
-            }
+            _solutionGlobs.Add(solutions.EnsureNonDocument(nameof(solutions)));
             return this;
         }
 
@@ -399,12 +381,7 @@ namespace Statiq.CodeAnalysis
         /// <returns>The current module instance.</returns>
         public AnalyzeCSharp WithCompilationAssemblyName(Config<string> compilationAssemblyName)
         {
-            _ = compilationAssemblyName ?? throw new ArgumentNullException(nameof(compilationAssemblyName));
-            if (compilationAssemblyName.RequiresDocument)
-            {
-                throw new ArgumentException("The compilation assembly name config must not require a document", nameof(compilationAssemblyName));
-            }
-            _compilationAssemblyName = compilationAssemblyName;
+            _compilationAssemblyName = compilationAssemblyName.EnsureNonDocument(nameof(compilationAssemblyName));
             return this;
         }
 
@@ -474,10 +451,10 @@ namespace Statiq.CodeAnalysis
 
             // Add the input source and references
             List<ISymbol> symbols = new List<ISymbol>();
-            compilation = AddSourceFiles(context, compilation);
+            compilation = await AddSourceFilesAsync(context, compilation);
             compilation = await AddProjectReferencesAsync(context, symbols, compilation);
             compilation = await AddSolutionReferencesAsync(context, symbols, compilation);
-            compilation = AddAssemblyReferences(context, symbols, compilation);
+            compilation = await AddAssemblyReferencesAsync(context, symbols, compilation);
 
             // Get and return the document tree
             symbols.Add(compilation.Assembly.GlobalNamespace);
@@ -487,17 +464,17 @@ namespace Statiq.CodeAnalysis
                 _symbolPredicate,
                 _destination ?? ((s, _) => DefaultDestination(s, _destinationPrefix)),
                 _cssClasses,
-                _docsForImplicitSymbols,
+                await _docsForImplicitSymbols.GetValueAsync(null, context),
                 _assemblySymbols,
-                _implicitInheritDoc);
+                await _implicitInheritDoc.GetValueAsync(null, context));
             Parallel.ForEach(symbols, s => visitor.Visit(s));
             return visitor.Finish();
         }
 
-        private Compilation AddSourceFiles(IExecutionContext context, Compilation compilation)
+        private async Task<Compilation> AddSourceFilesAsync(IExecutionContext context, Compilation compilation)
         {
             ConcurrentBag<SyntaxTree> syntaxTrees = new ConcurrentBag<SyntaxTree>();
-            if (_inputDocuments)
+            if (await _inputDocuments.GetValueAsync(null, context))
             {
                 // Get syntax trees (supply path so that XML doc includes can be resolved)
                 Parallel.ForEach(context.Inputs, AddSyntaxTrees);
@@ -517,9 +494,24 @@ namespace Statiq.CodeAnalysis
             }
         }
 
-        private Compilation AddAssemblyReferences(IExecutionContext context, List<ISymbol> symbols, Compilation compilation)
+        private static async Task<List<string>> GetGlobValuesAsync(List<Config<IEnumerable<string>>> globConfigs, IExecutionContext context)
         {
-            IEnumerable<IFile> assemblyFiles = context.FileSystem.GetInputFiles(_assemblyGlobs);
+            List<string> result = new List<string>();
+            foreach (Config<IEnumerable<string>> config in globConfigs)
+            {
+                IEnumerable<string> globs = await config.GetValueAsync(null, context);
+                if (globs != null)
+                {
+                    result.AddRange(globs.Where(x => !string.IsNullOrWhiteSpace(x)));
+                }
+            }
+            return result;
+        }
+
+        private async Task<Compilation> AddAssemblyReferencesAsync(IExecutionContext context, List<ISymbol> symbols, Compilation compilation)
+        {
+            List<string> assemblyGlobs = await GetGlobValuesAsync(_assemblyGlobs, context);
+            IEnumerable<IFile> assemblyFiles = context.FileSystem.GetInputFiles(assemblyGlobs);
             assemblyFiles = assemblyFiles.Where(x => (x.Path.Extension == ".dll" || x.Path.Extension == ".exe") && x.Exists);
             MetadataReference[] assemblyReferences = assemblyFiles.Select(CreateMetadataReferences).ToArray();
             if (assemblyReferences.Length > 0)
@@ -556,7 +548,8 @@ namespace Statiq.CodeAnalysis
                 LogWriter = log
             });
             AdhocWorkspace workspace = new AdhocWorkspace();
-            IEnumerable<IFile> projectFiles = context.FileSystem.GetInputFiles(_projectGlobs);
+            List<string> projectGlobs = await GetGlobValuesAsync(_projectGlobs, context);
+            IEnumerable<IFile> projectFiles = context.FileSystem.GetInputFiles(projectGlobs);
             projectFiles = projectFiles.Where(x => x.Path.Extension == ".csproj" && x.Exists);
             List<Project> projects = new List<Project>();
             foreach (IFile projectFile in projectFiles)
@@ -591,7 +584,8 @@ namespace Statiq.CodeAnalysis
 
         private async Task<Compilation> AddSolutionReferencesAsync(IExecutionContext context, List<ISymbol> symbols, Compilation compilation)
         {
-            IEnumerable<IFile> solutionFiles = context.FileSystem.GetInputFiles(_solutionGlobs);
+            List<string> solutionGlobs = await GetGlobValuesAsync(_solutionGlobs, context);
+            IEnumerable<IFile> solutionFiles = context.FileSystem.GetInputFiles(solutionGlobs);
             solutionFiles = solutionFiles.Where(x => x.Path.Extension == ".sln" && x.Exists);
             foreach (IFile solutionFile in solutionFiles)
             {
