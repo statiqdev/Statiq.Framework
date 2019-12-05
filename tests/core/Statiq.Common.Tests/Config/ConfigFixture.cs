@@ -11,6 +11,7 @@ namespace Statiq.Common.Tests.Config
     {
         public class CastOperatorTests : ConfigFixture
         {
+#pragma warning disable CS0618 // Type or member is obsolete
             [Test]
             public async Task CastsToMatchingType()
             {
@@ -61,6 +62,7 @@ namespace Statiq.Common.Tests.Config
                 // Then
                 (await config.GetAndTransformValueAsync(null, null)).ShouldBe(new object[] { 8, 9, 10 });
             }
+#pragma warning restore CS0618 // Type or member is obsolete
         }
     }
 }

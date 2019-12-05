@@ -10,11 +10,10 @@ namespace Statiq.Common
     /// Base class for modules that rely on multiple config values and could apply to input documents (or not) depending
     /// on whether the config delegates require them.
     /// </summary>
-    public abstract class MultiConfigModule : Module
+#pragma warning disable CS0618 // Type or member is obsolete
+    public abstract class MultiConfigModule : MultiConfigModuleBase
+#pragma warning restore CS0618 // Type or member is obsolete
     {
-        private readonly Dictionary<string, IConfig> _configs = new Dictionary<string, IConfig>(StringComparer.OrdinalIgnoreCase);
-        private readonly bool _forceDocumentExecution;
-
         /// <summary>
         /// Creates a new config module.
         /// </summary>
@@ -22,59 +21,38 @@ namespace Statiq.Common
         /// The delegates to use for getting a config value.
         /// </param>
         /// <param name="forceDocumentExecution">
-        /// <c>true</c> to force calling <see cref="ExecuteConfigAsync(IDocument, IExecutionContext, IMetadata)"/> for each
+        /// <c>true</c> to force calling <see cref="MultiConfigModuleBase.ExecuteConfigAsync(IDocument, IExecutionContext, IMetadata)"/> for each
         /// input document regardless of whether the config delegate requires a document or <c>false</c>
-        /// to allow calling <see cref="ExecuteConfigAsync(IDocument, IExecutionContext, IMetadata)"/> once
+        /// to allow calling <see cref="MultiConfigModuleBase.ExecuteConfigAsync(IDocument, IExecutionContext, IMetadata)"/> once
         /// with a null input document if the config delegate does not require a document.
         /// </param>
         protected MultiConfigModule(IEnumerable<KeyValuePair<string, IConfig>> configs, bool forceDocumentExecution)
+            : base(configs, forceDocumentExecution)
         {
-            if (configs != null)
-            {
-                foreach (KeyValuePair<string, IConfig> config in configs)
-                {
-                    SetConfig(config.Key, config.Value);
-                }
-            }
-            _forceDocumentExecution = forceDocumentExecution;
         }
 
         /// <summary>
         /// Creates a new config module.
         /// </summary>
         /// <param name="forceDocumentExecution">
-        /// <c>true</c> to force calling <see cref="ExecuteConfigAsync(IDocument, IExecutionContext, IMetadata)"/> for each
+        /// <c>true</c> to force calling <see cref="MultiConfigModuleBase.ExecuteConfigAsync(IDocument, IExecutionContext, IMetadata)"/> for each
         /// input document regardless of whether the config delegate requires a document or <c>false</c>
-        /// to allow calling <see cref="ExecuteConfigAsync(IDocument, IExecutionContext, IMetadata)"/> once
+        /// to allow calling <see cref="MultiConfigModuleBase.ExecuteConfigAsync(IDocument, IExecutionContext, IMetadata)"/> once
         /// with a null input document if the config delegate does not require a document.
         /// </param>
         protected MultiConfigModule(bool forceDocumentExecution)
-            : this(null, forceDocumentExecution)
+            : base(forceDocumentExecution)
         {
-        }
-
-        protected MultiConfigModule SetConfig(string key, IConfig config)
-        {
-            _ = key ?? throw new ArgumentNullException(nameof(key));
-            if (config == null)
-            {
-                _configs.Remove(key);
-            }
-            else
-            {
-                _configs[key] = config;
-            }
-            return this;
         }
 
         /// <inheritdoc />
         protected sealed override async Task<IEnumerable<IDocument>> ExecuteContextAsync(IExecutionContext context)
         {
-            if (_forceDocumentExecution || _configs.Any(x => x.Value.RequiresDocument))
+            if (ForceDocumentExecution || Configs.Any(x => x.Value.RequiresDocument))
             {
                 // Only need to evaluate the context config delegates once
                 ImmutableDictionary<string, object>.Builder configValuesBuilder = ImmutableDictionary.CreateBuilder<string, object>(StringComparer.OrdinalIgnoreCase);
-                foreach (KeyValuePair<string, IConfig> config in _configs.Where(x => !x.Value.RequiresDocument))
+                foreach (KeyValuePair<string, IConfig> config in Configs.Where(x => !x.Value.RequiresDocument))
                 {
                     configValuesBuilder[config.Key] = await config.Value.GetValueAsync(null, context);
                 }
@@ -86,7 +64,7 @@ namespace Statiq.Common
                 {
                     // If the config requires a document, evaluate it each time
                     ImmutableDictionary<string, object>.Builder valuesBuilder = configValues.ToBuilder();
-                    foreach (KeyValuePair<string, IConfig> config in _configs.Where(x => x.Value.RequiresDocument))
+                    foreach (KeyValuePair<string, IConfig> config in Configs.Where(x => x.Value.RequiresDocument))
                     {
                         valuesBuilder[config.Key] = await config.Value.GetValueAsync(input, context);
                     }
@@ -105,7 +83,7 @@ namespace Statiq.Common
             {
                 // Only context configs
                 ImmutableDictionary<string, object>.Builder valuesBuilder = ImmutableDictionary.CreateBuilder<string, object>();
-                foreach (KeyValuePair<string, IConfig> config in _configs)
+                foreach (KeyValuePair<string, IConfig> config in Configs)
                 {
                     valuesBuilder[config.Key] = await config.Value.GetValueAsync(null, context);
                 }
@@ -113,24 +91,5 @@ namespace Statiq.Common
                 return await ExecuteConfigAsync(null, context, values);
             }
         }
-
-        /// <inheritdoc />
-        // Unused, prevent overriding in derived classes
-        protected sealed override Task<IEnumerable<IDocument>> ExecuteInputAsync(IDocument input, IExecutionContext context) =>
-            base.ExecuteInputAsync(input, context);
-
-        /// <summary>
-        /// Executes the module for each input document.
-        /// If there aren't any input documents and the config delegate doesn't require documents,
-        /// this will be called once with a null <paramref name="input"/>.
-        /// </summary>
-        /// <param name="input">
-        /// The input document this module is currently applying to or <c>null</c> if there aren't any
-        /// input documents or if the config delegate doesn't require documents.
-        /// </param>
-        /// <param name="context">The execution context.</param>
-        /// <param name="values">The evaluated config values.</param>
-        /// <returns>The result documents.</returns>
-        protected abstract Task<IEnumerable<IDocument>> ExecuteConfigAsync(IDocument input, IExecutionContext context, IMetadata values);
     }
 }

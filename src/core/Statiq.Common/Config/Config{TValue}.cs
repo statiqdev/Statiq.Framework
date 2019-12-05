@@ -26,11 +26,14 @@ namespace Statiq.Common
 
         public bool RequiresDocument { get; }
 
+#pragma warning disable CS0618 // Type or member is obsolete
         Task<object> IConfig.GetValueAsync(IDocument document, IExecutionContext context) =>
             GetAndTransformValueAsync(document, context).FromDerivedAsync<object, TValue>();
+#pragma warning restore CS0618 // Type or member is obsolete
 
         // This should only be accessed via the extension method(s) that guard against null so that null coalescing operators can be used
         // See the discussion at https://github.com/dotnet/roslyn/issues/7171
+        [Obsolete("Use config extension methods instead.")]
         internal async Task<TValue> GetAndTransformValueAsync(IDocument document, IExecutionContext context, Func<TValue, TValue> transform = null)
         {
             TValue value = await _delegate(document, context);

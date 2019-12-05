@@ -41,7 +41,7 @@ namespace Statiq.Core
         /// </summary>
         /// <param name="pattern">A delegate that returns a globbing patterns and/or absolute paths.</param>
         public ReadFiles(Config<string> pattern)
-            : base(pattern.Transform(x => (IEnumerable<string>)new string[] { x }), false)
+            : base(pattern.MakeEnumerable(), false)
         {
         }
 

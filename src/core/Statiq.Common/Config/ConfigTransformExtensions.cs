@@ -79,5 +79,12 @@ namespace Statiq.Common
             }
             return Config.FromDocument(async (doc, ctx) => await transform(await config.GetValueAsync(doc, ctx), doc, ctx));
         }
+
+        public static Config<IEnumerable<TValue>> MakeEnumerable<TValue>(this Config<TValue> config) => config.Transform(YieldValue);
+
+        private static IEnumerable<TValue> YieldValue<TValue>(TValue value)
+        {
+            yield return value;
+        }
     }
 }

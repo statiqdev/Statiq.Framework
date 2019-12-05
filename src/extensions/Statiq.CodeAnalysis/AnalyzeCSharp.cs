@@ -147,7 +147,7 @@ namespace Statiq.CodeAnalysis
         /// <returns>The current module instance.</returns>
         public AnalyzeCSharp WithAssemblies(Config<string> assemblies)
         {
-            _assemblyGlobs.Add(assemblies.EnsureNonDocument(nameof(assemblies)).Transform(x => (IEnumerable<string>)new[] { x }));
+            _assemblyGlobs.Add(assemblies.EnsureNonDocument(nameof(assemblies)).MakeEnumerable());
             return this;
         }
 
@@ -169,7 +169,7 @@ namespace Statiq.CodeAnalysis
         /// <returns>The current module instance.</returns>
         public AnalyzeCSharp WithProjects(Config<string> projects)
         {
-            _projectGlobs.Add(projects.EnsureNonDocument(nameof(projects)).Transform(x => (IEnumerable<string>)new[] { x }));
+            _projectGlobs.Add(projects.EnsureNonDocument(nameof(projects)).MakeEnumerable());
             return this;
         }
 
@@ -191,7 +191,7 @@ namespace Statiq.CodeAnalysis
         /// <returns>The current module instance.</returns>
         public AnalyzeCSharp WithSolutions(Config<string> solutions)
         {
-            _solutionGlobs.Add(solutions.EnsureNonDocument(nameof(solutions)).Transform(x => (IEnumerable<string>)new[] { x }));
+            _solutionGlobs.Add(solutions.EnsureNonDocument(nameof(solutions)).MakeEnumerable());
             return this;
         }
 

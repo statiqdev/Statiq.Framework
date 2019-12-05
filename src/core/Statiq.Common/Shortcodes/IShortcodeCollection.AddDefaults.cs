@@ -56,7 +56,7 @@ namespace Statiq.Common
         public void Add(string name, Config<string> shortcode) =>
             Add(name, async (_, __, doc, ctx) =>
             {
-                string result = shortcode == null ? null : await shortcode.GetAndTransformValueAsync(doc, ctx);
+                string result = shortcode == null ? null : await shortcode.GetValueAsync(doc, ctx);
                 return result != null ? ctx.CreateDocument(await ctx.GetContentProviderAsync(result)) : null;
             });
 

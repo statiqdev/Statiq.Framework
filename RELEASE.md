@@ -6,6 +6,11 @@
 - Adds `IConfig.EnsureNonNull()` and `IConfig.EnsureNonDocument()` extensions to simplify config parameter checks.
 - Refactors many of the configuration methods in `AnalyzeCSharp` to take configs instead of atomic values.
 - Ensures namespace documents from `AnalyzeCSharp` contain the "ContainingAssembly" metadata (#70).
+- Build script support for non-Windows platforms via a new `build.sh` (#65, thanks @khalidabuhakmeh).
+- Adds a `Config<TValue>.MakeEnumerable()` extension to transform a config into an enumerable value.
+- Adds a common `MultiConfigModuleBase` for `MultiConfigModule` and `ParallelMultiConfigModule`.
+- Adds `CombineConfig` helper methods to `MultiConfigModuleBase` to help with combining config values during configuration.
+- Refactors several of the `StartProcess` configuration methods to take configs.
 
 # 1.0.0-alpha.20
 

@@ -41,17 +41,17 @@ namespace Statiq.Core
         private const string FileName = nameof(FileName);
         private const string Arguments = nameof(Arguments);
         private const string WorkingDirectory = nameof(WorkingDirectory);
+        private const string Timeout = nameof(Timeout);
+        private const string ContinueOnErrorKey = nameof(ContinueOnErrorKey);
+        private const string KeepContentKey = nameof(KeepContentKey);
+        private const string EnvironmentVariables = nameof(EnvironmentVariables);
 
         private readonly ConcurrentDictionary<int, (Process, ILogger)> _processes = new ConcurrentDictionary<int, (Process, ILogger)>();
-        private readonly Dictionary<string, string> _environmentVariables = new Dictionary<string, string>();
 
-        private int _timeout;
+        private bool _logOutput;
         private bool _background;
         private bool _onlyOnce;
         private bool _executed;
-        private bool _logOutput;
-        private bool _continueOnError;
-        private bool _keepContent;
         private Func<int, bool> _errorExitCode = x => x != 0;
 
         /// <summary>
@@ -88,15 +88,13 @@ namespace Statiq.Core
         public StartProcess WithArgument(Config<string> argument, bool quoted = false)
         {
             _ = argument ?? throw new ArgumentNullException(nameof(argument));
-            return (StartProcess)SetConfig(
-                Arguments,
-                ((Config<string>)GetConfig(Arguments)).CombineWith(argument, (first, second) =>
-                {
-                    string space = first == null || second == null ? string.Empty : " ";
-                    first ??= string.Empty;
-                    second = second == null ? string.Empty : (quoted ? "\"" + second + "\"" : second);
-                    return first + space + second;
-                }));
+            return (StartProcess)CombineConfig(Arguments, argument, (first, second) =>
+            {
+                string space = first == null || second == null ? string.Empty : " ";
+                first ??= string.Empty;
+                second = second == null ? string.Empty : (quoted ? "\"" + second + "\"" : second);
+                return first + space + second;
+            });
         }
 
         /// <summary>
@@ -128,14 +126,10 @@ namespace Statiq.Core
         /// </summary>
         /// <param name="environmentVariables">The environment variables to set.</param>
         /// <returns>The current module instance.</returns>
-        public StartProcess WithEnvironmentVariables(IEnumerable<KeyValuePair<string, string>> environmentVariables)
+        public StartProcess WithEnvironmentVariables(Config<IEnumerable<KeyValuePair<string, string>>> environmentVariables)
         {
             _ = environmentVariables ?? throw new ArgumentNullException(nameof(environmentVariables));
-            foreach (KeyValuePair<string, string> environmentVariable in environmentVariables)
-            {
-                _environmentVariables[environmentVariable.Key] = environmentVariable.Value;
-            }
-            return this;
+            return (StartProcess)CombineConfig(EnvironmentVariables, environmentVariables, (first, second) => second == null ? first : first?.Concat(second) ?? second);
         }
 
         /// <summary>
@@ -143,10 +137,10 @@ namespace Statiq.Core
         /// </summary>
         /// <param name="environmentVariable">The name and value of the environment variable to set.</param>
         /// <returns>The current module instance.</returns>
-        public StartProcess WithEnvironmentVariable(KeyValuePair<string, string> environmentVariable)
+        public StartProcess WithEnvironmentVariable(Config<KeyValuePair<string, string>> environmentVariable)
         {
-            _environmentVariables[environmentVariable.Key] = environmentVariable.Value;
-            return this;
+            _ = environmentVariable ?? throw new ArgumentNullException(nameof(environmentVariable));
+            return WithEnvironmentVariables(environmentVariable.MakeEnumerable());
         }
 
         /// <summary>
@@ -157,11 +151,7 @@ namespace Statiq.Core
         /// </remarks>
         /// <param name="timeout">The timeout in milliseconds.</param>
         /// <returns>The current module instance.</returns>
-        public StartProcess WithTimeout(int timeout)
-        {
-            _timeout = timeout;
-            return this;
-        }
+        public StartProcess WithTimeout(Config<int> timeout) => (StartProcess)SetConfig(Timeout, timeout);
 
         /// <summary>
         /// Starts the process and leaves it running in the background.
@@ -203,7 +193,7 @@ namespace Statiq.Core
         /// <remarks>
         /// By default, process output is only logged as debug messages. Output to standard error will always be logged.
         /// </remarks>
-        /// <param name="logOutput"><c>true</c> to log process output, <c>false</c> otherwise.</param>
+        /// <param name="logOutput"><c>true</c> or <c>null</c> to log process output, <c>false</c> otherwise.</param>
         /// <returns>The current module instance.</returns>
         public StartProcess LogOutput(bool logOutput = true)
         {
@@ -217,13 +207,9 @@ namespace Statiq.Core
         /// <remarks>
         /// By default the module will throw an exception if the process exits with a non-zero exit code.
         /// </remarks>
-        /// <param name="continueOnError"><c>true</c> to continue when the process exits with a non-zero exit code, <c>false</c> to throw an exception.</param>
+        /// <param name="continueOnError"><c>true</c> or <c>null</c> to continue when the process exits with a non-zero exit code, <c>false</c> to throw an exception.</param>
         /// <returns>The current module instance.</returns>
-        public StartProcess ContinueOnError(bool continueOnError = true)
-        {
-            _continueOnError = continueOnError;
-            return this;
-        }
+        public StartProcess ContinueOnError(Config<bool> continueOnError = null) => (StartProcess)SetConfig(ContinueOnErrorKey, continueOnError ?? true);
 
         /// <summary>
         /// Provides a function that determines if the exit code from the process was an error.
@@ -247,15 +233,11 @@ namespace Statiq.Core
         /// This has no effect if the process is a background process.
         /// </remarks>
         /// <param name="keepContent">
-        /// <c>true</c> to keep the existing document content,
+        /// <c>true</c> or <c>null</c> to keep the existing document content,
         /// <c>false</c> to replace it with the process output.
         /// </param>
         /// <returns>The current module instance.</returns>
-        public StartProcess KeepContent(bool keepContent = true)
-        {
-            _keepContent = keepContent;
-            return this;
-        }
+        public StartProcess KeepContent(Config<bool> keepContent = null) => (StartProcess)SetConfig(KeepContentKey, keepContent ?? true);
 
         protected override async Task<IEnumerable<IDocument>> ExecuteConfigAsync(IDocument input, IExecutionContext context, IMetadata values)
         {
@@ -304,7 +286,7 @@ namespace Statiq.Core
             }
 
             // Set environment variables for the process
-            foreach (KeyValuePair<string, string> environmentVariable in _environmentVariables)
+            foreach (KeyValuePair<string, string> environmentVariable in values.GetList(EnvironmentVariables, Array.Empty<KeyValuePair<string, string>>()))
             {
                 startInfo.Environment[environmentVariable.Key] = environmentVariable.Value;
                 startInfo.EnvironmentVariables[environmentVariable.Key] = environmentVariable.Value;
@@ -321,11 +303,13 @@ namespace Statiq.Core
             process.Exited += ProcessExited;
 
             // Prepare the streams
-            using (Stream contentStream = _background || _keepContent ? null : await context.GetContentStreamAsync())
+            bool keepContent = values.GetBool(KeepContentKey);
+            bool continueOnError = values.GetBool(ContinueOnErrorKey);
+            using (Stream contentStream = _background || keepContent ? null : await context.GetContentStreamAsync())
             {
                 using (StreamWriter contentWriter = contentStream == null ? null : new StreamWriter(contentStream))
                 {
-                    using (StringWriter errorWriter = !_background && _continueOnError ? new StringWriter() : null)
+                    using (StringWriter errorWriter = !_background && continueOnError ? new StringWriter() : null)
                     {
                         // Write to the stream on data received
                         // If we happen to write before we've created and added the process to the collection, go ahead and do that too
@@ -374,12 +358,13 @@ namespace Statiq.Core
                         }
 
                         // Otherwise wait for exit
+                        int timeout = values.GetInt(Timeout);
                         int exitCode = 0;
                         try
                         {
-                            if (_timeout > 0)
+                            if (timeout > 0)
                             {
-                                process.WaitForExit(_timeout);
+                                process.WaitForExit(timeout);
                             }
                             else
                             {
@@ -391,7 +376,7 @@ namespace Statiq.Core
                             if (_errorExitCode(process.ExitCode))
                             {
                                 string errorMessage = $"Process {process.Id} exited with error code {process.ExitCode}";
-                                if (!_continueOnError)
+                                if (!continueOnError)
                                 {
                                     throw new ExecutionException(errorMessage);
                                 }

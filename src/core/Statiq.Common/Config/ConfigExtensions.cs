@@ -6,6 +6,7 @@ namespace Statiq.Common
 {
     public static class ConfigExtensions
     {
+#pragma warning disable CS0618 // Type or member is obsolete, suppress since this is the only place we should call .GetAndTransformValueAsync()
         public static Task<TValue> GetValueAsync<TValue>(
             this Config<TValue> config,
             IDocument document,
@@ -86,6 +87,7 @@ namespace Statiq.Common
                 }
             }
         }
+#pragma warning restore CS0618 // Type or member is obsolete
 
         /// <summary>
         /// Ensures that the config is not null and throws <see cref="ArgumentNullException"/> if it is.
