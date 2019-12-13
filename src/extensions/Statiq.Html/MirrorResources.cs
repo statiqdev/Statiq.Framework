@@ -138,9 +138,10 @@ namespace Statiq.Html
                 source = $"http:{source}";
             }
 
-            Uri.TryCreate(source, UriKind.Absolute, out Uri uri);
-            if (uri is null ||
-                (uri is object && uri.Scheme != Uri.UriSchemeHttp && uri.Scheme != Uri.UriSchemeHttps))
+            // Make sure it's a valid HTTP or HTTPS URI
+            if (!Uri.TryCreate(source, UriKind.Absolute, out Uri uri)
+                || uri is null
+                || (uri.Scheme != Uri.UriSchemeHttp && uri.Scheme != Uri.UriSchemeHttps))
             {
                 return null;
             }
