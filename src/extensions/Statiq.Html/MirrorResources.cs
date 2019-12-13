@@ -137,11 +137,15 @@ namespace Statiq.Html
             {
                 source = $"http:{source}";
             }
-            if (!Uri.TryCreate(source, UriKind.Absolute, out Uri uri))
+
+            // Make sure it's a valid HTTP or HTTPS URI
+            if (!Uri.TryCreate(source, UriKind.Absolute, out Uri uri)
+                || uri is null
+                || (uri.Scheme != Uri.UriSchemeHttp && uri.Scheme != Uri.UriSchemeHttps))
             {
-                // Not absolute
                 return null;
             }
+
             FilePath path = _pathFunc(uri);
             if (path == null)
             {
