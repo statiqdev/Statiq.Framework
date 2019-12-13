@@ -66,6 +66,34 @@ namespace Statiq.Html.Tests
             }
 
             [Test]
+            public async Task DoesNotReplaceRelativePaths()
+            {
+                // Given
+                TestDocument document = new TestDocument(
+                    @"<html>
+                      <head>
+                        <link rel=""apple-touch-icon"" sizes=""120x120"" href=""/apple-touch-icon.png"">
+                      </head>
+                      <body>
+                      </body>
+                    </html>");
+                MirrorResources module = new MirrorResources();
+
+                // When
+                TestDocument result = await ExecuteAsync(document, module).SingleAsync();
+
+                // Then
+                result.Content.ShouldBe(
+                    @"<html>
+                      <head>
+                        <link rel=""apple-touch-icon"" sizes=""120x120"" href=""/apple-touch-icon.png"">
+                      </head>
+                      <body>
+                      </body>
+                    </html>", StringCompareShould.IgnoreLineEndings);
+            }
+
+            [Test]
             public async Task DoesNotReplaceDataNoMirrorAttribute()
             {
                 // Given
