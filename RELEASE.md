@@ -1,5 +1,6 @@
 # 1.0.0-alpha.22
 
+- The `PhaseOutputs` collection now returns output documents from the most recent available phase or an empty result set if no phases were defined.
 - Adds .wasm as a supported media type (required for WebAssembly streaming).
 
 # 1.0.0-alpha.21

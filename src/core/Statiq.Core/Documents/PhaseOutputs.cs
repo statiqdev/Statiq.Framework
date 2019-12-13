@@ -31,12 +31,11 @@ namespace Statiq.Core
         {
             ValidateCurrent();
             ValidateArguments(pipelineName);
+            ValidatePipeline(pipelineName);
 
-            // If we're in the output phase (which will only happen if this is a deployment module)
-            // get documents from the output phase, otherwise get documents from the process phase
-            Phase phase = _currentPhase.Phase == Phase.Output ? Phase.Output : Phase.Process;
-            ValidatePipeline(pipelineName, phase);
-            return _phaseResults[pipelineName][(int)phase].Outputs;
+            // If we're in the output phase (which will only happen if this is a deployment module because the checks
+            // will throw otherwise) get documents from the output phase, otherwise get documents from the process phase
+            return GetOutputs(_phaseResults[pipelineName], _currentPhase.Phase == Phase.Output ? Phase.Output : Phase.Process);
         }
 
         public IReadOnlyDictionary<string, ImmutableArray<IDocument>> ByPipeline()
@@ -71,8 +70,7 @@ namespace Statiq.Core
             if (_currentPhase.Phase == Phase.Transform)
             {
                 return _phaseResults
-                    .Where(x => x.Value[(int)Phase.Process] != null)
-                    .Select(x => KeyValuePair.Create(x.Key, x.Value[(int)Phase.Process].Outputs))
+                    .Select(x => KeyValuePair.Create(x.Key, GetOutputs(x.Value, Phase.Process)))
                     .ToArray();
             }
 
@@ -82,9 +80,7 @@ namespace Statiq.Core
             {
                 return _pipelines
                     .Where(x => !x.Value.Deployment)
-                    .Select(x => KeyValuePair.Create(x.Key, _phaseResults[x.Key]))
-                    .Where(x => x.Value[(int)Phase.Output] != null)
-                    .Select(x => KeyValuePair.Create(x.Key, x.Value[(int)Phase.Output].Outputs))
+                    .Select(x => KeyValuePair.Create(x.Key, GetOutputs(_phaseResults[x.Key], Phase.Output)))
                     .ToArray();
             }
 
@@ -93,11 +89,22 @@ namespace Statiq.Core
             {
                 HashSet<string> transientDependencies = GatherProcessPhaseDependencies(_currentPhase);
                 _cachedDependencyOutputs = _phaseResults
-                    .Where(x => transientDependencies.Contains(x.Key) && x.Value[(int)Phase.Process] != null)
-                    .Select(x => KeyValuePair.Create(x.Key, x.Value[(int)Phase.Process].Outputs))
+                    .Where(x => transientDependencies.Contains(x.Key))
+                    .Select(x => KeyValuePair.Create(x.Key, GetOutputs(x.Value, Phase.Process)))
                     .ToArray();
             }
             return _cachedDependencyOutputs;
+        }
+
+        // Crawl up the phases looking for one with outputs if the one specified below doesn't have any
+        private static ImmutableArray<IDocument> GetOutputs(PhaseResult[] phaseResults, Phase phase)
+        {
+            int p = (int)phase;
+            while (p >= 0 && phaseResults[p] == null)
+            {
+                p--;
+            }
+            return p == -1 ? ImmutableArray<IDocument>.Empty : phaseResults[p].Outputs;
         }
 
         private HashSet<string> GatherProcessPhaseDependencies(PipelinePhase phase, HashSet<string> transientDependencies = null)
@@ -132,7 +139,7 @@ namespace Statiq.Core
         /// <summary>
         /// Validates the requested pipeline.
         /// </summary>
-        private void ValidatePipeline(string pipelineName, Phase phase)
+        private void ValidatePipeline(string pipelineName)
         {
             // Make sure the pipeline isn't isolated
             if (_pipelines[pipelineName].Isolated)
@@ -150,12 +157,6 @@ namespace Statiq.Core
             if (!_phaseResults.TryGetValue(pipelineName, out PhaseResult[] phaseResults))
             {
                 throw new KeyNotFoundException($"The pipeline results for {pipelineName} could not be found");
-            }
-
-            // Make sure the pipeline has results for the requested phase
-            if (phaseResults[(int)phase] == null)
-            {
-                throw new KeyNotFoundException($"{phase} phase outputs for pipeline {pipelineName} could not be found");
             }
 
             // Make sure we're not accessing our own documents or documents from a non-dependency while in the process phase

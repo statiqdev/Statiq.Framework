@@ -558,22 +558,123 @@ namespace Statiq.Core.Tests.Documents
                 // Then
                 result.ShouldBe(new[] { a1 });
             }
+
+            [Test]
+            public void GetsDocumentsForInputPhaseDuringProcessPhase()
+            {
+                // Given
+                TestDocument a1 = new TestDocument("a1");
+                TestDocument a2 = new TestDocument("a2");
+                TestDocument b1 = new TestDocument("b1");
+                TestDocument b2 = new TestDocument("b2");
+                ConcurrentDictionary<string, PhaseResult[]> phaseResults =
+                    new ConcurrentDictionary<string, PhaseResult[]>(StringComparer.OrdinalIgnoreCase);
+                IPipelineCollection pipelines = new TestPipelineCollection();
+                PipelinePhase phaseA =
+                    GetPipelineAndPhase("A", Phase.Process, pipelines, phaseResults, new[] { a1, a2 }, Phase.Input);
+                PipelinePhase phaseB =
+                    GetPipelineAndPhase("B", Phase.Process, pipelines, phaseResults, new[] { b1, b2 }, phaseA);
+                PhaseOutputs documentCollection = new PhaseOutputs(phaseResults, phaseB, pipelines);
+
+                // When
+                IDocument[] result = documentCollection.FromPipeline("A").ToArray();
+
+                // Then
+                result.ShouldBe(new[] { a1, a2 });
+            }
+
+            [Test]
+            public void GetsEmptyDocumentsForNoPhasesDuringProcessPhase()
+            {
+                // Given
+                TestDocument a1 = new TestDocument("a1");
+                TestDocument a2 = new TestDocument("a2");
+                TestDocument b1 = new TestDocument("b1");
+                TestDocument b2 = new TestDocument("b2");
+                ConcurrentDictionary<string, PhaseResult[]> phaseResults =
+                    new ConcurrentDictionary<string, PhaseResult[]>(StringComparer.OrdinalIgnoreCase);
+                IPipelineCollection pipelines = new TestPipelineCollection();
+                PipelinePhase phaseA =
+                    GetPipelineAndPhase("A", Phase.Process, pipelines, phaseResults, null, Phase.Input);
+                PipelinePhase phaseB =
+                    GetPipelineAndPhase("B", Phase.Process, pipelines, phaseResults, new[] { b1, b2 }, phaseA);
+
+                PhaseOutputs documentCollection = new PhaseOutputs(phaseResults, phaseB, pipelines);
+
+                // When
+                IDocument[] result = documentCollection.FromPipeline("A").ToArray();
+
+                // Then
+                result.ShouldBeEmpty();
+            }
+
+            [Test]
+            public void GetsDocumentsForInputPhaseDuringTransformPhase()
+            {
+                // Given
+                TestDocument a1 = new TestDocument("a1");
+                TestDocument a2 = new TestDocument("a2");
+                TestDocument b1 = new TestDocument("b1");
+                TestDocument b2 = new TestDocument("b2");
+                ConcurrentDictionary<string, PhaseResult[]> phaseResults =
+                    new ConcurrentDictionary<string, PhaseResult[]>(StringComparer.OrdinalIgnoreCase);
+                IPipelineCollection pipelines = new TestPipelineCollection();
+                PipelinePhase phaseA =
+                    GetPipelineAndPhase("A", Phase.Transform, pipelines, phaseResults, new[] { a1, a2 }, Phase.Input);
+                PipelinePhase phaseB =
+                    GetPipelineAndPhase("B", Phase.Transform, pipelines, phaseResults, new[] { b1, b2 }, phaseA);
+                PhaseOutputs documentCollection = new PhaseOutputs(phaseResults, phaseB, pipelines);
+
+                // When
+                IDocument[] result = documentCollection.FromPipeline("A").ToArray();
+
+                // Then
+                result.ShouldBe(new[] { a1, a2 });
+            }
+
+            [Test]
+            public void GetsDocumentsForInputPhaseDuringDeploymentOutputPhase()
+            {
+                // Given
+                TestDocument a1 = new TestDocument("a1");
+                TestDocument a2 = new TestDocument("a2");
+                TestDocument b1 = new TestDocument("b1");
+                TestDocument b2 = new TestDocument("b2");
+                ConcurrentDictionary<string, PhaseResult[]> phaseResults =
+                    new ConcurrentDictionary<string, PhaseResult[]>(StringComparer.OrdinalIgnoreCase);
+                IPipelineCollection pipelines = new TestPipelineCollection();
+                PipelinePhase phaseA =
+                    GetPipelineAndPhase("A", Phase.Output, pipelines, phaseResults, new[] { a1, a2 }, Phase.Input);
+                PipelinePhase phaseB =
+                    GetPipelineAndPhase("B", Phase.Output, pipelines, phaseResults, new[] { b1, b2 }, phaseA);
+                phaseB.Pipeline.Deployment = true;
+                PhaseOutputs documentCollection = new PhaseOutputs(phaseResults, phaseB, pipelines);
+
+                // When
+                IDocument[] result = documentCollection.FromPipeline("A").ToArray();
+
+                // Then
+                result.ShouldBe(new[] { a1, a2 });
+            }
         }
 
         private PipelinePhase GetPipelineAndPhase(
             string pipelineName,
-            Phase phase,
+            Phase currentPhase,
             IPipelineCollection pipelines,
             ConcurrentDictionary<string, PhaseResult[]> phaseResults,
             IDocument[] outputs,
-            Phase outputPhase,
+            Phase phaseForOutputs,
             params PipelinePhase[] dependencies)
         {
             TestPipeline pipeline = new TestPipeline();
-            PipelinePhase pipelinePhase = new PipelinePhase(pipeline, pipelineName, phase, Array.Empty<IModule>(), NullLogger.Instance, dependencies);
+            PipelinePhase pipelinePhase = new PipelinePhase(pipeline, pipelineName, currentPhase, Array.Empty<IModule>(), NullLogger.Instance, dependencies);
             pipelines.Add(pipelineName, pipeline);
             PhaseResult[] results = new PhaseResult[4];
-            results[(int)outputPhase] = new PhaseResult(pipelineName, outputPhase, outputs.ToImmutableArray(), 0);
+            if (outputs != null)
+            {
+                results[(int)phaseForOutputs] = new PhaseResult(pipelineName, phaseForOutputs, outputs.ToImmutableArray(), 0);
+            }
             phaseResults.TryAdd(pipelineName, results);
             return pipelinePhase;
         }
