@@ -1,3 +1,7 @@
+# 1.0.0-alpha.22
+
+- Adds .wasm as a supported media type (required for WebAssembly streaming).
+
 # 1.0.0-alpha.21
 
 - Fixes a bug with parallel modules when they return a null enumerable.
