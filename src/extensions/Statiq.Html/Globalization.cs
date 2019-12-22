@@ -31,10 +31,7 @@ namespace Statiq.Html
                     continue;
                 }
 
-                foreach (IElement element in htmlDocument.Children)
-                {
-                    SetAttributes(element);
-                }
+                SetAttributes(htmlDocument);
 
                 using (Stream contentStream = await context.GetContentStreamAsync())
                 {
@@ -50,40 +47,41 @@ namespace Statiq.Html
             return list;
         }
 
-        private void SetAttributes(IElement element, Direction defaultDirection = Direction.LeftToRight)
+        private void SetAttributes(IHtmlDocument htmlDocument)
         {
-            if (IsBlockElement(element))
-            {
-                if (defaultDirection == Direction.LeftToRight
-                 && GetTextDirection(element.TextContent) == Direction.RightToLeft)
-                {
-                    defaultDirection = Direction.RightToLeft;
+            ITreeWalker walker = htmlDocument.CreateTreeWalker(htmlDocument.DocumentElement, FilterSettings.Element);
+            IElement element = (IElement)walker.ToFirst();
+            Direction direction = Direction.LeftToRight;
 
-                    element.SetAttribute("dir", "rtl");
-                    if (element.TagName == "TABLE")
+            while (element != null)
+            {
+                if (IsBlockElement(element))
+                {
+                    if (direction == Direction.LeftToRight
+                     && GetTextDirection(element.TextContent) == Direction.RightToLeft)
                     {
-                        element.SetAttribute("align", "right");
+                        direction = Direction.RightToLeft;
+
+                        element.SetAttribute("dir", "rtl");
+                        if (element.TagName == "TABLE")
+                        {
+                            element.SetAttribute("align", "right");
+                        }
+                    }
+                    else if (direction == Direction.RightToLeft
+                          && GetTextDirection(element.TextContent) == Direction.LeftToRight)
+                    {
+                        direction = Direction.LeftToRight;
+                        element.SetAttribute("dir", "ltr");
+
+                        if (element.TagName == "TABLE")
+                        {
+                            element.SetAttribute("align", "left");
+                        }
                     }
                 }
-                else if (defaultDirection == Direction.RightToLeft
-                      && GetTextDirection(element.TextContent) == Direction.LeftToRight)
-                {
-                    defaultDirection = Direction.LeftToRight;
-                    element.SetAttribute("dir", "ltr");
 
-                    if (element.TagName == "TABLE")
-                    {
-                        element.SetAttribute("align", "left");
-                    }
-                }
-            }
-
-            if (element.HasChildNodes)
-            {
-                foreach (IElement child in element.Children)
-                {
-                    SetAttributes(child, defaultDirection);
-                }
+                element = (IElement)walker.ToNext();
             }
         }
 
