@@ -175,6 +175,7 @@ namespace Statiq.Common
         }
 
         /// <inheritdoc />
+        [PropertyMetadata(null)]
         public Guid Id { get; private set; } = Guid.NewGuid();
 
         protected IMetadata BaseMetadata

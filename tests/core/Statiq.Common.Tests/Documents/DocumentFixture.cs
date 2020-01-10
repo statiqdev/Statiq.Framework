@@ -115,7 +115,7 @@ namespace Statiq.Common.Tests.Documents
                 Document document = new Document();
 
                 // Then
-                document.Keys.ShouldBe(new[] { "Id", "Source", "Destination", "ContentProvider" }, true);
+                document.Keys.ShouldBe(new[] { "Source", "Destination", "ContentProvider" }, true);
             }
         }
 
@@ -137,7 +137,7 @@ namespace Statiq.Common.Tests.Documents
                 int count = document.Count;
 
                 // Then
-                count.ShouldBe(8);
+                count.ShouldBe(7);
             }
 
             [Test]
@@ -157,7 +157,7 @@ namespace Statiq.Common.Tests.Documents
                 int count = document.Count;
 
                 // Then
-                count.ShouldBe(8);
+                count.ShouldBe(7);
             }
         }
 
