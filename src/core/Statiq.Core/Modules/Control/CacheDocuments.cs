@@ -111,7 +111,7 @@ namespace Statiq.Core
                         }
 
                         // Miss with non-null source: track source and input documents so we can cache for next pass
-                        message = $"Cache miss for {inputsBySource.Key}, source not cached";
+                        message ??= $"Cache miss for {inputsBySource.Key}, source not cached";
                         missesBySource.Add(inputsBySource.Key, inputHash);
                     }
 
