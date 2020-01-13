@@ -10,11 +10,10 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.Emit;
 using Microsoft.CodeAnalysis.Text;
 using Microsoft.Extensions.Logging;
-using Statiq.Common;
 
-namespace Statiq.CodeAnalysis.Scripting
+namespace Statiq.Common
 {
-    internal static class ScriptHelper
+    public static class ScriptHelper
     {
         public const string AssemblyName = "ScriptAssembly";
         public const string ScriptClassName = "Script";
@@ -139,7 +138,6 @@ namespace Statiq.CodeAnalysis.Scripting
             string usingStatements = string.Join(
                 Environment.NewLine,
                 context.Namespaces
-                    .Concat(new[] { "Statiq.CodeAnalysis.Scripting" })
                     .Select(x => "using " + x + ";"));
 
             // Get the document metadata properties

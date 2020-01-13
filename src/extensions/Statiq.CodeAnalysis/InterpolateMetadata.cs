@@ -2,7 +2,6 @@
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-using Statiq.CodeAnalysis.Scripting;
 using Statiq.Common;
 
 namespace Statiq.CodeAnalysis

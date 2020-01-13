@@ -1,9 +1,9 @@
 ﻿using NUnit.Framework;
 using Shouldly;
-using Statiq.CodeAnalysis.Scripting;
+using Statiq.Common;
 using Statiq.Testing;
 
-namespace Statiq.CodeAnalysis.Tests.Scripting
+namespace Statiq.Tests.Scripting
 {
     [TestFixture]
     public class ScriptHelperFixture : BaseFixture
@@ -22,7 +22,6 @@ namespace Statiq.CodeAnalysis.Tests.Scripting
                 string code = "int x = 0;";
                 string expected =
 @"using Foo.Bar;
-using Statiq.CodeAnalysis.Scripting;
 
 public class Script : ScriptBase
 {
@@ -65,7 +64,6 @@ public static class ScriptExtensionMethods
                 string code = "return 0;";
                 string expected =
 @"using Foo.Bar;
-using Statiq.CodeAnalysis.Scripting;
 
 public class Script : ScriptBase
 {
@@ -124,7 +122,6 @@ public class Baz
 }";
                 string expected =
 @"using Foo.Bar;
-using Statiq.CodeAnalysis.Scripting;
 
 public class Script : ScriptBase
 {
@@ -195,7 +192,6 @@ public string Self(string x)
 }";
                 string expected =
 @"using Foo.Bar;
-using Statiq.CodeAnalysis.Scripting;
 using Red.Blue;
 using Yellow;
 
@@ -259,7 +255,6 @@ public string Self(string x)
 }";
                 string expected =
 @"using Foo.Bar;
-using Statiq.CodeAnalysis.Scripting;
 
 public class Script : ScriptBase
 {
@@ -321,7 +316,6 @@ public static string Self(this string x)
 }";
                 string expected =
 @"using Foo.Bar;
-using Statiq.CodeAnalysis.Scripting;
 
 public class Script : ScriptBase
 {
@@ -388,7 +382,6 @@ public string Self(string x)
 }";
                 string expected =
 @"using Foo.Bar;
-using Statiq.CodeAnalysis.Scripting;
 
 public class Script : ScriptBase
 {
