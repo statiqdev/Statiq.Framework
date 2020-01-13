@@ -1,3 +1,5 @@
+# 1.0.0-alpha.23
+
 # 1.0.0-alpha.22
 
 - Fixes a bug with `MirrorResources` and relative links (#72, thanks @dafergu2)
