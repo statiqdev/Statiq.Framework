@@ -19,4 +19,9 @@
   <ItemGroup>
     <ProjectReference Include="..\Statiq.Common\Statiq.Common.csproj" />
   </ItemGroup>
+  <ItemGroup>
+    <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleTo">
+      <_Parameter1>Statiq.Common.Tests</_Parameter1>
+    </AssemblyAttribute>
+  </ItemGroup>
 </Project>

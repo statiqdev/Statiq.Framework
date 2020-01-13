@@ -68,22 +68,8 @@ Task("Clean")
         CleanDirectories(new DirectoryPath[] { buildDir, binDir, nugetRoot });
     });
 
-Task("Patch-Assembly-Info")
-    .IsDependentOn("Clean")
-    .Does(() =>
-    {
-        var file = "./SolutionInfo.cs";
-        CreateAssemblyInfo(file, new AssemblyInfoSettings {
-            Product = "Statiq",
-            Copyright = "Copyright \xa9 Statiq Contributors",
-            Version = version,
-            FileVersion = version,
-            InformationalVersion = semVersion
-        });
-    });
-
 Task("Restore-Packages")
-    .IsDependentOn("Patch-Assembly-Info")
+    .IsDependentOn("Clean")
     .Does(() =>
     {
         DotNetCoreRestore("./Statiq.Framework.sln", new DotNetCoreRestoreSettings

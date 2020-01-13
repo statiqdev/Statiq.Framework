@@ -1,5 +1,7 @@
 # 1.0.0-alpha.23
 
+- New `Eval` shortcode (#37, #68, thanks @ProH4Ck)
+
 # 1.0.0-alpha.22
 
 - Fixes a bug with `MirrorResources` and relative links (#72, thanks @dafergu2)
