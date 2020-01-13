@@ -148,7 +148,7 @@ namespace Statiq.CodeAnalysis.Analysis
         {
             // Only visit the original definition until we're finished
             INamedTypeSymbol originalDefinition = GetOriginalSymbolDefinition(symbol);
-            if (!_finished && originalDefinition != symbol)
+            if (!_finished && !SymbolEqualityComparer.Default.Equals(originalDefinition, symbol))
             {
                 VisitNamedType(originalDefinition);
                 return;
@@ -526,7 +526,7 @@ namespace Statiq.CodeAnalysis.Analysis
 
         private IReadOnlyList<IDocument> GetDerivedTypes(INamedTypeSymbol symbol) =>
             _namedTypes
-                .Where(x => x.Key.BaseType != null && GetOriginalSymbolDefinition(x.Key.BaseType).Equals(GetOriginalSymbolDefinition(symbol)))
+                .Where(x => x.Key.BaseType != null && SymbolEqualityComparer.Default.Equals(GetOriginalSymbolDefinition(x.Key.BaseType), GetOriginalSymbolDefinition(symbol)))
                 .Select(x => x.Value)
                 .ToImmutableArray();
 
