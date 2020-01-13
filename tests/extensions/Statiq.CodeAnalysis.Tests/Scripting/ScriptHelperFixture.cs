@@ -36,7 +36,6 @@ int x = 0;
 return null;
 }
 
-public object Id => Document.Get(""Id"");
 public object Source => Document.Get(""Source"");
 public object Destination => Document.Get(""Destination"");
 public object ContentProvider => Document.Get(""ContentProvider"");
@@ -79,7 +78,6 @@ return 0;
 return null;
 }
 
-public object Id => Document.Get(""Id"");
 public object Source => Document.Get(""Source"");
 public object Destination => Document.Get(""Destination"");
 public object ContentProvider => Document.Get(""ContentProvider"");
@@ -140,7 +138,6 @@ Pipelines.Add(Content());
 return null;
 }
 
-public object Id => Document.Get(""Id"");
 public object Source => Document.Get(""Source"");
 public object Destination => Document.Get(""Destination"");
 public object ContentProvider => Document.Get(""ContentProvider"");
@@ -216,7 +213,6 @@ public string Self(string x)
 {
     return x.ToLower();
 }
-public object Id => Document.Get(""Id"");
 public object Source => Document.Get(""Source"");
 public object Destination => Document.Get(""Destination"");
 public object ContentProvider => Document.Get(""ContentProvider"");
@@ -278,7 +274,6 @@ public string Self(string x)
 {
     return x.ToLower();
 }
-public object Id => Document.Get(""Id"");
 public object Source => Document.Get(""Source"");
 public object Destination => Document.Get(""Destination"");
 public object ContentProvider => Document.Get(""ContentProvider"");
@@ -336,7 +331,6 @@ Pipelines.Add(Content());
 return null;
 }
 
-public object Id => Document.Get(""Id"");
 public object Source => Document.Get(""Source"");
 public object Destination => Document.Get(""Destination"");
 public object ContentProvider => Document.Get(""ContentProvider"");
@@ -410,7 +404,6 @@ public string Self(string x)
     // RTY
     return x.ToLower();
 }
-public object Id => Document.Get(""Id"");
 public object Source => Document.Get(""Source"");
 public object Destination => Document.Get(""Destination"");
 public object ContentProvider => Document.Get(""ContentProvider"");

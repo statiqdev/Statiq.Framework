@@ -175,6 +175,7 @@ namespace Statiq.Common
         }
 
         /// <inheritdoc />
+        [PropertyMetadata(null)]
         public Guid Id { get; private set; } = Guid.NewGuid();
 
         protected IMetadata BaseMetadata
@@ -260,7 +261,9 @@ namespace Statiq.Common
                 hash.Add(await Crc32.CalculateAsync(stream));
             }
 
-            foreach (KeyValuePair<string, object> item in this)
+            // We exclude ContentProvider from hash as we already added CRC for content above.
+            foreach (KeyValuePair<string, object> item in this
+                .Where(x => x.Key != nameof(ContentProvider)))
             {
                 hash.Add(item.Key);
                 hash.Add(item.Value);
