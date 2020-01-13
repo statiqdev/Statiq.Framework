@@ -1,7 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netcoreapp3.0</TargetFramework>
     <Description>Statiq is a configurable static content generation framework. This library provides everything you need to start using it to make your own static generator.</Description>
     <PackageTags>Statiq Static StaticContent StaticSite</PackageTags>
   </PropertyGroup>

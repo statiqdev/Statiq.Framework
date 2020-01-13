@@ -1,6 +1,5 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>netcoreapp3.0</TargetFramework>
     <Description>Statiq is a configurable static content generation framework. This library contains support for parsing JSON content.</Description>
     <PackageTags>Statiq Static StaticContent StaticSite Blog BlogEngine JSON</PackageTags>
   </PropertyGroup>

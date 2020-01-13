@@ -1,7 +1,4 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-  <PropertyGroup>
-    <TargetFramework>netcoreapp3.0</TargetFramework>
-  </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\..\src\core\Statiq.Common\Statiq.Common.csproj" />
     <ProjectReference Include="..\..\..\src\core\Statiq.Testing\Statiq.Testing.csproj" />

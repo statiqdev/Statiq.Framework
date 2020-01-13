@@ -1,6 +1,5 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>netcoreapp3.0</TargetFramework>
     <Description>Statiq is a configurable static content generation framework. This library provides support for importing and exporting CSV and Excel files.</Description>
     <PackageTags>Statiq Static StaticContent StaticSite Blog BlogEngine CSV Excel</PackageTags>
   </PropertyGroup>

@@ -8,7 +8,7 @@ jobs:
       version: '2.x'
   - task: UseDotNet@2
     inputs:
-      version: '3.0.x'
+      version: '3.1.x'
   - script: build -target BuildServer
     env:
       SYSTEM_ACCESSTOKEN: $(System.AccessToken)
@@ -23,7 +23,7 @@ jobs:
       version: '2.x'
   - task: UseDotNet@2
     inputs:
-      version: '3.0.x'
+      version: '3.1.x'
       includePreviewVersions: true
   - script: pwsh ./build.ps1 -target BuildServer
     env:
@@ -37,7 +37,7 @@ jobs:
       version: '2.x'
   - task: UseDotNet@2
     inputs:
-      version: '3.0.x'
+      version: '3.1.x'
       includePreviewVersions: true
   - script: pwsh ./build.ps1 -target BuildServer
     env:

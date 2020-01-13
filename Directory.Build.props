@@ -4,7 +4,7 @@
     <AssemblyVersion>1.0.0</AssemblyVersion>
     <FileVersion>1.0.0</FileVersion>
     <Product>Statiq</Product>
-    <Copyright>Copyright © Statiq Contributors</Copyright>
+    <Copyright>Copyright © Statiq/Dave Glick</Copyright>
     <Authors>Dave Glick, Other Awesome Contributors</Authors>
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
     <PackageIcon>icon.png</PackageIcon>
@@ -12,13 +12,13 @@
     <RepositoryUrl>https://github.com/statiqdev/Statiq.Framework.git</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
-    <Copyright>Copyright © Statiq Contributors</Copyright>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <CodeAnalysisTreatWarningsAsErrors>true</CodeAnalysisTreatWarningsAsErrors>
     <PublishRepositoryUrl>true</PublishRepositoryUrl>
     <IncludeSymbols>true</IncludeSymbols>
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
   </PropertyGroup>
   <ItemGroup>
     <None Include="..\..\..\LICENSE" Pack="true" PackagePath=""/>

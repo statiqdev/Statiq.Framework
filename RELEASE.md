@@ -1,6 +1,8 @@
 # 1.0.0-alpha.23
 
+- Changing target for all projects to .NET Core 3.1 LTS
 - New `Eval` shortcode (#37, #68, thanks @ProH4Ck)
+- Fixes the `CacheDocuments` module and excludes `IDocument.Id` from hash calculation (#74, thanks @mholo65)
 
 # 1.0.0-alpha.22
 
