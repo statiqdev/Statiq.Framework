@@ -208,7 +208,7 @@ Task("Sign-Packages")
     .WithCriteria(() => isLocal)
     .Does(() =>
     {
-        var certPass = EnvironmentVariable("STATIQ_CERTPASS");
+        var certPass = EnvironmentVariable("DAVIDGLICK_CERTPASS");
         if (string.IsNullOrEmpty(certPass))
         {
             throw new InvalidOperationException("Could not resolve certificate password.");
@@ -216,7 +216,7 @@ Task("Sign-Packages")
 
         foreach (var nupkg in GetFiles(nugetRoot.Path.FullPath + "/*.nupkg"))
         {
-            StartProcess("nuget", "sign \"" + nupkg.ToString() + "\" -CertificatePath \"digicert-davidglick.pfx\" -CertificatePassword \"" + certPass + "\" -Timestamper \"http://timestamp.digicert.com\" -NonInteractive");
+            StartProcess("nuget", "sign \"" + nupkg.ToString() + "\" -CertificatePath \"davidglick.pfx\" -CertificatePassword \"" + certPass + "\" -Timestamper \"http://timestamp.digicert.com\" -NonInteractive");
         }        
     });
 
