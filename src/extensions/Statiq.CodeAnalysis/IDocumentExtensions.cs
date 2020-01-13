@@ -1,4 +1,5 @@
 ﻿using System;
+using Statiq.CodeAnalysis.Scripting;
 using Statiq.Common;
 
 namespace Statiq.CodeAnalysis

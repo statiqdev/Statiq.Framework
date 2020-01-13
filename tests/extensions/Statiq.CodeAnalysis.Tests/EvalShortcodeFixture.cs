@@ -3,7 +3,7 @@ using NUnit.Framework;
 using Shouldly;
 using Statiq.Testing;
 
-namespace Statiq.Core.Tests.Shortcodes.Contents
+namespace Statiq.CodeAnalysis.Tests
 {
     [TestFixture]
     public class EvalShortcodeFixture : BaseFixture
@@ -23,6 +23,24 @@ namespace Statiq.Core.Tests.Shortcodes.Contents
 
                 // Then
                 result.Content.ShouldBe("3");
+            }
+
+            [Test]
+            public async Task CanAccessDocumentMetadata()
+            {
+                TestExecutionContext context = new TestExecutionContext();
+                TestDocument document = new TestDocument
+                {
+                    { "Foo", "4" }
+                };
+                EvalShortcode shortcode = new EvalShortcode();
+                string shortcodeContent = "return 1 + Document.GetInt(\"Foo\");";
+
+                // When
+                TestDocument result = (TestDocument)await shortcode.ExecuteAsync(null, shortcodeContent, document, context);
+
+                // Then
+                result.Content.ShouldBe("5");
             }
         }
     }

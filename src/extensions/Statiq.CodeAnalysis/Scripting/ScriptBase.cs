@@ -1,6 +1,7 @@
 ﻿using System.Threading.Tasks;
+using Statiq.Common;
 
-namespace Statiq.Common
+namespace Statiq.CodeAnalysis.Scripting
 {
     public abstract class ScriptBase
     {

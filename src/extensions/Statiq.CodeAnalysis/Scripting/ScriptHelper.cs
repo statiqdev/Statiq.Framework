@@ -10,8 +10,9 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.Emit;
 using Microsoft.CodeAnalysis.Text;
 using Microsoft.Extensions.Logging;
+using Statiq.Common;
 
-namespace Statiq.Common
+namespace Statiq.CodeAnalysis.Scripting
 {
     public static class ScriptHelper
     {
@@ -138,6 +139,7 @@ namespace Statiq.Common
             string usingStatements = string.Join(
                 Environment.NewLine,
                 context.Namespaces
+                    .Concat(new[] { "Statiq.CodeAnalysis.Scripting" })
                     .Select(x => "using " + x + ";"));
 
             // Get the document metadata properties

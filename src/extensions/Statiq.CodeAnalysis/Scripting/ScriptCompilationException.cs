@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace Statiq.Common
+namespace Statiq.CodeAnalysis.Scripting
 {
     public class ScriptCompilationException : Exception
     {

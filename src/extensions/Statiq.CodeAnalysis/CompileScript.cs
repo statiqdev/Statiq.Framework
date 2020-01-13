@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
+using Statiq.CodeAnalysis.Scripting;
 using Statiq.Common;
 
 namespace Statiq.CodeAnalysis

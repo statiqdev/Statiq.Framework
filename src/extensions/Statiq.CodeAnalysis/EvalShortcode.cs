@@ -1,12 +1,14 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
+using Statiq.CodeAnalysis.Scripting;
 using Statiq.Common;
 
-namespace Statiq.Core
+namespace Statiq.CodeAnalysis
 {
     /// <summary>
-    /// Evaluate C# code in content
+    /// Evaluates C# code.
     /// </summary>
+    /// <remarks>The current context and document are in-scope as <c>Context</c> and <c>Document</c> respectively and can be used from within the script.</remarks>
     /// <example>
     /// <code>
     /// &lt;?# Eval ?>&lt;?# return 1 + 2; ?>&lt;?#/ Eval ?>
