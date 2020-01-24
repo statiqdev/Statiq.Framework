@@ -26,7 +26,7 @@ namespace Statiq.App
             IConfigurationSettings configurationSettings,
             IConfigurationRoot configurationRoot,
             IServiceCollection serviceCollection,
-            IBootstrapper bootstrapper)
+            Bootstrapper bootstrapper)
         {
             // Get the standard input stream
             string input = null;

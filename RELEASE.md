@@ -1,3 +1,8 @@
+# 1.0.0-alpha.24
+
+- Removed `IBootstrapper` and refactored to the one true `Bootstrapper`.
+- Added a `BootstrapperFactory` available via `Bootstrapper.Factory` to create bootstrappers (this will make specialized creation extensions easier to discover).
+
 # 1.0.0-alpha.23
 
 - Changing target for all projects to .NET Core 3.1 LTS

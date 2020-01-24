@@ -31,7 +31,7 @@ namespace Statiq.App.Tests.Bootstrapper
             {
                 // Given
                 string[] args = new[] { "build" };
-                IBootstrapper bootstrapper = App.Bootstrapper.Create(args);
+                App.Bootstrapper bootstrapper = App.Bootstrapper.Factory.Create(args);
                 bootstrapper.AddCommand<PipelinesCommand<EngineCommandSettings>>("build");
                 TestLoggerProvider provider = new TestLoggerProvider();
                 bootstrapper.ConfigureServices(services => services.AddSingleton<ILoggerProvider>(provider));
@@ -50,7 +50,7 @@ namespace Statiq.App.Tests.Bootstrapper
             {
                 // Given
                 string[] args = new[] { "build" };
-                IBootstrapper bootstrapper = App.Bootstrapper.Create(args);
+                App.Bootstrapper bootstrapper = App.Bootstrapper.Factory.Create(args);
                 bootstrapper.AddCommand<PipelinesCommand<EngineCommandSettings>>("build");
                 TestLoggerProvider provider = new TestLoggerProvider
                 {
@@ -78,7 +78,7 @@ namespace Statiq.App.Tests.Bootstrapper
             {
                 // Given
                 string[] args = new[] { "build", "-l", logLevel };
-                IBootstrapper bootstrapper = App.Bootstrapper.Create(args);
+                App.Bootstrapper bootstrapper = App.Bootstrapper.Factory.Create(args);
                 bootstrapper.AddCommand<PipelinesCommand<EngineCommandSettings>>("build");
                 TestLoggerProvider provider = new TestLoggerProvider
                 {
@@ -107,7 +107,7 @@ namespace Statiq.App.Tests.Bootstrapper
             {
                 // Given
                 string[] args = new[] { "build", "-l", "Debug" };
-                IBootstrapper bootstrapper = App.Bootstrapper.Create(args);
+                App.Bootstrapper bootstrapper = App.Bootstrapper.Factory.Create(args);
                 bootstrapper.AddCommand<PipelinesCommand<EngineCommandSettings>>("build");
                 TestLoggerProvider provider = new TestLoggerProvider();
                 bootstrapper.ConfigureServices(services => services.AddSingleton<ILoggerProvider>(provider));
@@ -131,7 +131,7 @@ namespace Statiq.App.Tests.Bootstrapper
                 // Given
                 string[] args = new string[] { };
                 Environment.SetEnvironmentVariable(nameof(EnvironmentVariableConfiguration), "Foo");
-                IBootstrapper bootstrapper = App.Bootstrapper.CreateDefault(args);
+                App.Bootstrapper bootstrapper = App.Bootstrapper.Factory.CreateDefault(args);
                 TestLoggerProvider provider = new TestLoggerProvider();
                 bootstrapper.ConfigureServices(services => services.AddSingleton<ILoggerProvider>(provider));
                 object variable = null;
@@ -151,7 +151,7 @@ namespace Statiq.App.Tests.Bootstrapper
                 // Given
                 string[] args = new string[] { "-s", $"{nameof(CommandLineSettingTakesPrecedenceOverEnvironmentVariables)}=Bar" };
                 Environment.SetEnvironmentVariable(nameof(CommandLineSettingTakesPrecedenceOverEnvironmentVariables), "Foo");
-                IBootstrapper bootstrapper = App.Bootstrapper.CreateDefault(args);
+                App.Bootstrapper bootstrapper = App.Bootstrapper.Factory.CreateDefault(args);
                 TestLoggerProvider provider = new TestLoggerProvider();
                 bootstrapper.ConfigureServices(services => services.AddSingleton<ILoggerProvider>(provider));
                 object variable = null;
@@ -170,7 +170,7 @@ namespace Statiq.App.Tests.Bootstrapper
             {
                 // Given
                 string[] args = new string[] { };
-                IBootstrapper bootstrapper = App.Bootstrapper.CreateDefault(args);
+                App.Bootstrapper bootstrapper = App.Bootstrapper.Factory.CreateDefault(args);
                 TestLoggerProvider provider = new TestLoggerProvider();
                 bootstrapper.ConfigureServices(services => services.AddSingleton<ILoggerProvider>(provider));
                 object variable = null;
@@ -189,7 +189,7 @@ namespace Statiq.App.Tests.Bootstrapper
             {
                 // Given
                 string[] args = new string[] { "-s", $"{Keys.LinkHideIndexPages}=false" };
-                IBootstrapper bootstrapper = App.Bootstrapper.CreateDefault(args);
+                App.Bootstrapper bootstrapper = App.Bootstrapper.Factory.CreateDefault(args);
                 TestLoggerProvider provider = new TestLoggerProvider();
                 bootstrapper.ConfigureServices(services => services.AddSingleton<ILoggerProvider>(provider));
                 object variable = null;
@@ -212,7 +212,7 @@ namespace Statiq.App.Tests.Bootstrapper
                 // Given
                 string[] args = new string[] { };
                 Environment.SetEnvironmentVariable(nameof(CanReadConfigurationValues), "Foo");
-                IBootstrapper bootstrapper = App.Bootstrapper.CreateDefault(args);
+                App.Bootstrapper bootstrapper = App.Bootstrapper.Factory.CreateDefault(args);
                 TestLoggerProvider provider = new TestLoggerProvider();
                 bootstrapper.ConfigureServices(services => services.AddSingleton<ILoggerProvider>(provider));
                 string variable = null;

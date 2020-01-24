@@ -14,7 +14,7 @@ namespace Statiq.App
             IConfigurationSettings configurationSettings,
             IServiceCollection serviceCollection,
             IConfigurationRoot configurationRoot,
-            IBootstrapper bootstrapper)
+            Bootstrapper bootstrapper)
             : base(configurators, configurationSettings, serviceCollection)
         {
             ConfigurationRoot = configurationRoot;
@@ -23,7 +23,7 @@ namespace Statiq.App
 
         public IConfigurationRoot ConfigurationRoot { get; }
 
-        public IBootstrapper Bootstrapper { get; }
+        public Bootstrapper Bootstrapper { get; }
 
         public override sealed async Task<int> ExecuteCommandAsync(CommandContext commandContext, TSettings commandSettings)
         {

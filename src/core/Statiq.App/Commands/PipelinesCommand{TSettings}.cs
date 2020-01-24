@@ -17,7 +17,7 @@ namespace Statiq.App
             IConfigurationSettings configurationSettings,
             IServiceCollection serviceCollection,
             IConfigurationRoot configurationRoot,
-            IBootstrapper bootstrapper)
+            Bootstrapper bootstrapper)
             : base(
                   configurators,
                   configurationSettings,

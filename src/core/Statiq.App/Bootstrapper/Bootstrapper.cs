@@ -13,14 +13,14 @@ using Statiq.Core;
 
 namespace Statiq.App
 {
-    public class Bootstrapper : IBootstrapper
+    public class Bootstrapper : IConfigurableBootstrapper
     {
         private readonly ClassCatalog _classCatalog = new ClassCatalog();
 
         private Func<CommandServiceTypeRegistrar, ICommandApp> _getCommandApp = x => new CommandApp(x);
 
         // Private constructor to force factory use which returns the interface to get access to default interface implementations
-        private Bootstrapper(string[] arguments)
+        internal Bootstrapper(string[] arguments)
         {
             Arguments = arguments ?? throw new ArgumentNullException(nameof(arguments));
         }
@@ -35,7 +35,7 @@ namespace Statiq.App
         public string[] Arguments { get; }
 
         /// <inheritdoc/>
-        public IBootstrapper SetDefaultCommand<TCommand>()
+        public Bootstrapper SetDefaultCommand<TCommand>()
             where TCommand : class, ICommand
         {
             _getCommandApp = x => new CommandApp<TCommand>(x);
@@ -53,7 +53,7 @@ namespace Statiq.App
 
             // Run bootstrapper configurators first
             Configurators.Configure<IConfigurableBootstrapper>(this);
-            Configurators.Configure<IBootstrapper>(this);
+            Configurators.Configure(this);
 
             // Run the configuration configurator and get the configuration root
             SettingsConfigurationProvider settingsProvider = new SettingsConfigurationProvider();
@@ -66,8 +66,8 @@ namespace Statiq.App
 
             // Create the service collection
             IServiceCollection serviceCollection = CreateServiceCollection() ?? new ServiceCollection();
+            serviceCollection.TryAddSingleton(this);
             serviceCollection.TryAddSingleton<IConfigurableBootstrapper>(this);
-            serviceCollection.TryAddSingleton<IBootstrapper>(this);
             serviceCollection.TryAddSingleton(_classCatalog);  // The class catalog is retrieved later for deferred logging once a service provider is built
             serviceCollection.TryAddSingleton<IConfiguration>(configurationRoot);
 
@@ -85,7 +85,7 @@ namespace Statiq.App
             registrar.RegisterInstance(typeof(IConfigurationRoot), configurationRoot);
             registrar.RegisterInstance(typeof(IServiceCollection), serviceCollection);
             registrar.RegisterInstance(typeof(IConfiguratorCollection), Configurators);
-            registrar.RegisterInstance(typeof(IBootstrapper), this);
+            registrar.RegisterInstance(typeof(Bootstrapper), this);
 
             // Create the command line parser and run the command
             ICommandApp app = _getCommandApp(registrar);
@@ -112,31 +112,8 @@ namespace Statiq.App
         /// <returns>A service collection for use by the bootstrapper.</returns>
         protected virtual IServiceCollection CreateServiceCollection() => null;
 
-        // Static factories
+        // Factory
 
-        /// <summary>
-        /// Creates an empty bootstrapper without any default configuration.
-        /// </summary>
-        /// <remarks>
-        /// Use this method when you want to fully customize the bootstrapper and engine.
-        /// Otherwise use on of the <see cref="CreateDefault(string[], DefaultFeatures)"/> overloads to
-        /// create an initialize a bootstrapper with an initial set of default configurations.
-        /// </remarks>
-        /// <param name="args">The command line arguments.</param>
-        /// <returns>The bootstrapper.</returns>
-        public static IBootstrapper Create(string[] args) => new Bootstrapper(args);
-
-        /// <summary>
-        /// Creates a bootstrapper with a default configuration including logging, commands,
-        /// shortcodes, and assembly scanning.
-        /// </summary>
-        /// <param name="args">The command line arguments.</param>
-        /// <param name="features">The default configurations to add to the bootstrapper.</param>
-        /// <returns>The bootstrapper.</returns>
-        public static IBootstrapper CreateDefault(string[] args, DefaultFeatures features = DefaultFeatures.All) =>
-            Create(args).AddDefaults(features);
-
-        public static IBootstrapper CreateDefaultWithout(string[] args, DefaultFeatures features) =>
-            Create(args).AddDefaultsWithout(features);
+        public static readonly BootstrapperFactory Factory = new BootstrapperFactory();
     }
 }

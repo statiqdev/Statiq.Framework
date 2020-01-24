@@ -13,84 +13,86 @@ using Statiq.Common;
 
 namespace Statiq.App
 {
-    public partial interface IBootstrapper
+    public static class BootstrapperDefaultExtensions
     {
-        public IBootstrapper AddDefaults(DefaultFeatures features = DefaultFeatures.All)
+        public static Bootstrapper AddDefaults(this Bootstrapper bootstrapper, DefaultFeatures features = DefaultFeatures.All)
         {
+            _ = bootstrapper ?? throw new ArgumentNullException(nameof(bootstrapper));
             if (features.HasFlag(DefaultFeatures.BootstrapperConfigurators))
             {
-                AddBootstrapperConfigurators();
+                bootstrapper.AddBootstrapperConfigurators();
             }
             if (features.HasFlag(DefaultFeatures.Logging))
             {
-                AddDefaultLogging();
+                bootstrapper.AddDefaultLogging();
             }
             if (features.HasFlag(DefaultFeatures.Settings))
             {
-                AddDefaultSettings();
+                bootstrapper.AddDefaultSettings();
             }
             if (features.HasFlag(DefaultFeatures.EnvironmentVariables))
             {
-                AddEnvironmentVariables();
+                bootstrapper.AddEnvironmentVariables();
             }
             if (features.HasFlag(DefaultFeatures.ConfigurationFiles))
             {
-                AddDefaultConfigurationFiles();
+                bootstrapper.AddDefaultConfigurationFiles();
             }
             if (features.HasFlag(DefaultFeatures.BuildCommands))
             {
-                AddBuildCommands();
+                bootstrapper.AddBuildCommands();
             }
             if (features.HasFlag(DefaultFeatures.HostingCommands))
             {
-                AddHostingCommands();
+                bootstrapper.AddHostingCommands();
             }
             if (features.HasFlag(DefaultFeatures.CustomCommands))
             {
-                AddCustomCommands();
+                bootstrapper.AddCustomCommands();
             }
             if (features.HasFlag(DefaultFeatures.Shortcodes))
             {
-                AddDefaultShortcodes();
+                bootstrapper.AddDefaultShortcodes();
             }
             if (features.HasFlag(DefaultFeatures.Namespaces))
             {
-                AddDefaultNamespaces();
+                bootstrapper.AddDefaultNamespaces();
             }
             if (features.HasFlag(DefaultFeatures.Pipelines))
             {
-                AddDefaultPipelines();
+                bootstrapper.AddDefaultPipelines();
             }
-            return this;
+            return bootstrapper;
         }
 
-        public IBootstrapper AddDefaultsWithout(DefaultFeatures withoutFeatures) =>
-            AddDefaults(DefaultFeatures.All & ~withoutFeatures);
+        public static Bootstrapper AddDefaultsWithout(this Bootstrapper bootstrapper, DefaultFeatures withoutFeatures) =>
+            bootstrapper.AddDefaults(DefaultFeatures.All & ~withoutFeatures);
 
-        public IBootstrapper AddBootstrapperConfigurators()
+        public static Bootstrapper AddBootstrapperConfigurators(this Bootstrapper bootstrapper)
         {
+            _ = bootstrapper ?? throw new ArgumentNullException(nameof(bootstrapper));
             foreach (IConfigurator<IConfigurableBootstrapper> bootstraperConfigurator
-                in ClassCatalog.GetInstances<IConfigurator<IConfigurableBootstrapper>>())
+                in bootstrapper.ClassCatalog.GetInstances<IConfigurator<IConfigurableBootstrapper>>())
             {
-                Configurators.Add(bootstraperConfigurator);
+                bootstrapper.Configurators.Add(bootstraperConfigurator);
             }
-            foreach (IConfigurator<IBootstrapper> bootstraperConfigurator
-                in ClassCatalog.GetInstances<IConfigurator<IBootstrapper>>())
+            foreach (IConfigurator<Bootstrapper> bootstraperConfigurator
+                in bootstrapper.ClassCatalog.GetInstances<IConfigurator<Bootstrapper>>())
             {
-                Configurators.Add(bootstraperConfigurator);
+                bootstrapper.Configurators.Add(bootstraperConfigurator);
             }
-            return this;
+            return bootstrapper;
         }
 
-        public IBootstrapper AddDefaultLogging() =>
-            ConfigureServices(services =>
+        public static Bootstrapper AddDefaultLogging(this Bootstrapper bootstrapper) =>
+            bootstrapper.ConfigureServices(services =>
             {
                 services.AddSingleton<ILoggerProvider, ConsoleLoggerProvider>();
                 services.AddLogging(logging => logging.AddDebug());
             });
 
-        public IBootstrapper AddDefaultSettings() =>
-            AddSettingsIfNonExisting(
+        public static Bootstrapper AddDefaultSettings(this Bootstrapper bootstrapper) =>
+            bootstrapper.AddSettingsIfNonExisting(
                 new Dictionary<string, string>
                 {
                     { Keys.LinkHideIndexPages, "true" },
@@ -99,41 +101,39 @@ namespace Statiq.App
                     { Keys.CleanOutputPath, "true" }
                 });
 
-        public IBootstrapper AddEnvironmentVariables() =>
-            BuildConfiguration(builder => builder.AddEnvironmentVariables());
+        public static Bootstrapper AddEnvironmentVariables(this Bootstrapper bootstrapper) =>
+            bootstrapper.BuildConfiguration(builder => builder.AddEnvironmentVariables());
 
-        public IBootstrapper AddDefaultConfigurationFiles() =>
-            BuildConfiguration(builder => builder
+        public static Bootstrapper AddDefaultConfigurationFiles(this Bootstrapper bootstrapper) =>
+            bootstrapper.BuildConfiguration(builder => builder
                 .SetBasePath(Directory.GetCurrentDirectory())
                 .AddJsonFile("appsettings.json", true)
                 .AddJsonFile("statiq.json", true));
 
-        public IBootstrapper AddBuildCommands()
+        public static Bootstrapper AddBuildCommands(this Bootstrapper bootstrapper)
         {
-            SetDefaultCommand<PipelinesCommand<PipelinesCommandSettings>>();
-            AddCommand<PipelinesCommand<PipelinesCommandSettings>>();
-            AddCommand<DeployCommand>();
-            AddCommands();
-            return this;
+            _ = bootstrapper ?? throw new ArgumentNullException(nameof(bootstrapper));
+            bootstrapper.SetDefaultCommand<PipelinesCommand<PipelinesCommandSettings>>();
+            bootstrapper.AddCommand<PipelinesCommand<PipelinesCommandSettings>>();
+            bootstrapper.AddCommand<DeployCommand>();
+            bootstrapper.AddCommands();
+            return bootstrapper;
         }
 
-        public IBootstrapper AddHostingCommands()
+        public static Bootstrapper AddHostingCommands(this Bootstrapper bootstrapper)
         {
-            AddCommand<PreviewCommand>();
-            AddCommand<ServeCommand>();
-            return this;
+            _ = bootstrapper ?? throw new ArgumentNullException(nameof(bootstrapper));
+            bootstrapper.AddCommand<PreviewCommand>();
+            bootstrapper.AddCommand<ServeCommand>();
+            return bootstrapper;
         }
 
-        public IBootstrapper AddCustomCommands()
-        {
-            AddCommands();
-            return this;
-        }
+        public static Bootstrapper AddCustomCommands(this Bootstrapper bootstrapper) => bootstrapper.AddCommands();
 
-        public IBootstrapper AddDefaultShortcodes() =>
-            ConfigureEngine(engine =>
+        public static Bootstrapper AddDefaultShortcodes(this Bootstrapper bootstrapper) =>
+            bootstrapper.ConfigureEngine(engine =>
             {
-                foreach (Type shortcode in ClassCatalog.GetTypesAssignableTo<IShortcode>())
+                foreach (Type shortcode in bootstrapper.ClassCatalog.GetTypesAssignableTo<IShortcode>())
                 {
                     engine.Shortcodes.Add(shortcode);
 
@@ -145,8 +145,8 @@ namespace Statiq.App
                 }
             });
 
-        public IBootstrapper AddDefaultNamespaces() =>
-            ConfigureEngine(engine =>
+        public static Bootstrapper AddDefaultNamespaces(this Bootstrapper bootstrapper) =>
+            bootstrapper.ConfigureEngine(engine =>
             {
                 // Add all Statiq.Common namespaces
                 // the JetBrains.Profiler filter is needed due to DotTrace dynamically
@@ -159,7 +159,7 @@ namespace Statiq.App
 
                 // Add all module namespaces
                 engine.Namespaces.AddRange(
-                    ClassCatalog
+                    bootstrapper.ClassCatalog
                         .GetTypesAssignableTo<IModule>()
                         .Select(x => x.Namespace));
 
@@ -168,13 +168,13 @@ namespace Statiq.App
                 if (entryAssembly != null)
                 {
                     engine.Namespaces.AddRange(
-                        ClassCatalog
+                        bootstrapper.ClassCatalog
                             .GetTypesFromAssembly(entryAssembly)
                             .Select(x => x.Namespace)
                             .Distinct());
                 }
             });
 
-        public IBootstrapper AddDefaultPipelines() => AddPipelines();
+        public static Bootstrapper AddDefaultPipelines(this Bootstrapper bootstrapper) => bootstrapper.AddPipelines();
     }
 }
