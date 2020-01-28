@@ -1,5 +1,6 @@
 # 1.0.0-alpha.24
 
+- Adds a new `DocumentIdComparer` to compare documents by ID (#69, thanks @mholo65).
 - Removed `IParallelModule.WithSequentialExecution()` and standardized on `.WithParallelExecution(false)` instead to make default behavior of running in parallel clearer (I.e., you have to turn it off).
 - Adds additional configuration methods to `CacheDocuments` providing more control over when to invalidate cached documents (#78).
 - Adds `IReadOnlyPipeline` for runtime access to pipeline data without changing modules.
