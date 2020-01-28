@@ -355,7 +355,7 @@ namespace Statiq.Razor.Tests
             {
                 return new TestExecutionContext
                 {
-                    Namespaces = engine.Namespaces,
+                    Namespaces = new TestNamespacesCollection(engine.Namespaces.ToArray()),
                     FileSystem = GetFileSystem()
                 };
             }

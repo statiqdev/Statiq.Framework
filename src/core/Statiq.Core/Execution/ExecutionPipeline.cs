@@ -56,6 +56,9 @@ namespace Statiq.Core
         public virtual HashSet<string> Dependencies { get; } = new HashSet<string>();
 
         /// <inheritdoc/>
+        IReadOnlyCollection<string> IReadOnlyPipeline.Dependencies => Dependencies;
+
+        /// <inheritdoc/>
         public virtual bool Isolated { get; set; }
 
         /// <inheritdoc/>

@@ -57,5 +57,8 @@ namespace Statiq.Core
 
         /// <inheritdoc/>
         public ExecutionPolicy ExecutionPolicy { get; set; }
+
+        /// <inheritdoc/>
+        IReadOnlyCollection<string> IReadOnlyPipeline.Dependencies => Dependencies;
     }
 }

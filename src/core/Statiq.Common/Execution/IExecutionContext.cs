@@ -40,7 +40,12 @@ namespace Statiq.Common
         string PipelineName { get; }
 
         /// <summary>
-        /// Gets the name of the currently executing pipeline phase.
+        /// Gets the currently executing pipeline.
+        /// </summary>
+        IReadOnlyPipeline Pipeline { get; }
+
+        /// <summary>
+        /// Gets the currently executing pipeline phase.
         /// </summary>
         Phase Phase { get; }
 

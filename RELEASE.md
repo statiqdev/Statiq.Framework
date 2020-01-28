@@ -1,5 +1,9 @@
 # 1.0.0-alpha.24
 
+- Removed `IParallelModule.WithSequentialExecution()` and standardized on `.WithParallelExecution(false)` instead to make default behavior of running in parallel clearer (I.e., you have to turn it off).
+- Adds additional configuration methods to `CacheDocuments` providing more control over when to invalidate cached documents (#78).
+- Adds `IReadOnlyPipeline` for runtime access to pipeline data without changing modules.
+- Adds `IExecutionContext.Pipeline` to get the currently executing pipeline from the execution context.
 - Removed `IBootstrapper` and refactored to the one true `Bootstrapper`.
 - Added a `BootstrapperFactory` available via `Bootstrapper.Factory` to create bootstrappers (this will make specialized creation extensions easier to discover).
 

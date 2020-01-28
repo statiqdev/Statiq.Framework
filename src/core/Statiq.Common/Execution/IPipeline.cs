@@ -10,7 +10,7 @@ namespace Statiq.Common
     /// If the pipeline implements <see cref="IDisposable"/>, <see cref="IDisposable.Dispose"/>
     /// will be called when the engine is disposed (I.e., on application exit).
     /// </remarks>
-    public interface IPipeline
+    public interface IPipeline : IReadOnlyPipeline
     {
         /// <summary>
         /// Modules that will execute during the input phase.
@@ -32,28 +32,16 @@ namespace Statiq.Common
         /// </summary>
         ModuleList OutputModules { get; }
 
-        /// <summary>
-        /// The names of pipelines this pipeline depends on.
-        /// </summary>
-        HashSet<string> Dependencies { get; }
+        /// <inheritdoc/>
+        new HashSet<string> Dependencies { get; }
 
-        /// <summary>
-        /// An isolated pipeline runs immediately without any dependencies and
-        /// has restrictions on accessing documents from other pipelines.
-        /// </summary>
-        bool Isolated { get; set; }
+        /// <inheritdoc/>
+        new bool Isolated { get; set; }
 
-        /// <summary>
-        /// A deployment pipeline works just like other pipelines except
-        /// it's <see cref="Phase.Output"/> phase will only execute when
-        /// all other non-deployment pipelines have completed their
-        /// <see cref="Phase.Output"/> phase (including isolated pipelines).
-        /// </summary>
-        bool Deployment { get; set; }
+        /// <inheritdoc/>
+        new bool Deployment { get; set; }
 
-        /// <summary>
-        /// Indicates when the pipeline is executed.
-        /// </summary>
-        ExecutionPolicy ExecutionPolicy { get; set; }
+        /// <inheritdoc/>
+        new ExecutionPolicy ExecutionPolicy { get; set; }
     }
 }

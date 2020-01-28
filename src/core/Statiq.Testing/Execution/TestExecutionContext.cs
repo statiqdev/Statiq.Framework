@@ -61,12 +61,7 @@ namespace Statiq.Testing
 
         public TestLoggerProvider TestLoggerProvider { get; }
 
-        public TestConfigurationSettings Settings { get; } = new TestConfigurationSettings();
-
         public ConcurrentQueue<TestMessage> LogMessages { get; } = new ConcurrentQueue<TestMessage>();
-
-        /// <inheritdoc />
-        public IShortcodeCollection Shortcodes { get; set; } = new TestShortcodeCollection();
 
         // IExecutionContext
 
@@ -74,25 +69,46 @@ namespace Statiq.Testing
         public Guid ExecutionId { get; set; } = Guid.NewGuid();
 
         /// <inheritdoc />
+        public TestConfigurationSettings Settings { get; } = new TestConfigurationSettings();
+
+        /// <inheritdoc />
         IReadOnlyConfigurationSettings IExecutionContext.Settings => Settings;
 
         /// <inheritdoc/>
-        public INamespacesCollection Namespaces { get; set; } = new TestNamespacesCollection();
+        public TestNamespacesCollection Namespaces { get; set; } = new TestNamespacesCollection();
+
+        /// <inheritdoc/>
+        INamespacesCollection IExecutionContext.Namespaces => Namespaces;
 
         /// <inheritdoc/>
         public string PipelineName { get; set; }
 
         /// <inheritdoc/>
+        public TestPipeline Pipeline { get; set; } = new TestPipeline();
+
+        /// <inheritdoc/>
+        IReadOnlyPipeline IExecutionContext.Pipeline => Pipeline;
+
+        /// <inheritdoc/>
         public Phase Phase { get; set; } = Phase.Process;
 
         /// <inheritdoc />
-        public IReadOnlyEventCollection Events { get; set; } = new TestEventCollection();
+        public TestEventCollection Events { get; set; } = new TestEventCollection();
+
+        /// <inheritdoc />
+        IReadOnlyEventCollection IExecutionContext.Events => Events;
 
         /// <inheritdoc/>
-        public IReadOnlyFileSystem FileSystem { get; set; } = new TestFileSystem();
+        public TestFileSystem FileSystem { get; set; } = new TestFileSystem();
 
         /// <inheritdoc/>
-        public IPipelineOutputs Outputs { get; set; }
+        IReadOnlyFileSystem IExecutionContext.FileSystem => FileSystem;
+
+        /// <inheritdoc/>
+        public TestPipelineOutputs Outputs { get; set; } = new TestPipelineOutputs();
+
+        /// <inheritdoc/>
+        IPipelineOutputs IExecutionContext.Outputs => Outputs;
 
         /// <inheritdoc/>
         public IReadOnlyApplicationState ApplicationState { get; set; }
@@ -100,11 +116,17 @@ namespace Statiq.Testing
         /// <inheritdoc/>
         public bool SerialExecution { get; set; }
 
+        /// <inheritdoc />
+        public TestShortcodeCollection Shortcodes { get; set; } = new TestShortcodeCollection();
+
         /// <inheritdoc/>
         IReadOnlyShortcodeCollection IExecutionContext.Shortcodes => Shortcodes;
 
         /// <inheritdoc/>
-        public IMemoryStreamFactory MemoryStreamFactory { get; set; } = new TestMemoryStreamFactory();
+        public TestMemoryStreamFactory MemoryStreamFactory { get; set; } = new TestMemoryStreamFactory();
+
+        /// <inheritdoc/>
+        IMemoryStreamFactory IExecutionContext.MemoryStreamFactory => MemoryStreamFactory;
 
         /// <inheritdoc/>
         public CancellationToken CancellationToken { get; set; } = CancellationToken.None;

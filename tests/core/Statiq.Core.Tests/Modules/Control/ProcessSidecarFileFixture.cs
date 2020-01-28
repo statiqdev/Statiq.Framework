@@ -96,7 +96,7 @@ namespace Statiq.Core.Tests.Modules.Control
             private TestExecutionContext GetExecutionContext(Engine engine) =>
                 new TestExecutionContext
                 {
-                    Namespaces = engine.Namespaces,
+                    Namespaces = new TestNamespacesCollection(engine.Namespaces.ToArray()),
                     FileSystem = GetFileSystem()
                 };
 

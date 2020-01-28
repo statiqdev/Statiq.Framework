@@ -32,6 +32,9 @@ namespace Statiq.Core
         public INamespacesCollection Namespaces => _contextData.Engine.Namespaces;
 
         /// <inheritdoc/>
+        public IReadOnlyPipeline Pipeline => _contextData.PipelinePhase.Pipeline;
+
+        /// <inheritdoc/>
         public string PipelineName => _contextData.PipelinePhase.PipelineName;
 
         /// <inheritdoc/>
