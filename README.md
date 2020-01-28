@@ -53,7 +53,7 @@ Pipelines define the work to be done by the engine and contain a sequence of mod
 The four phases are:
 
 - **Input** is generally used for fetching data from an outside source and creating documents from it. For example, the file system, a database, a web API, etc. The input phase is immediatly started for all pipelines concurrently and cannot access outputs from other pipelines.
-- **Process** is where documents are manipulated and most of the pipeline logic should go. For simple pipelines, all modules can be placed in the process phase. Process phases for each pipeline are executed in dependency order (and currently when possible) and a process phase can access output documents from the process phase(s) of other _dependent pipelines_.
+- **Process** is where documents are manipulated and most of the pipeline logic should go. For simple pipelines, all modules can be placed in the process phase. Process phases for each pipeline are executed in dependency order (and concurrently when possible) and a process phase can access output documents from the process phase(s) of other _dependent pipelines_.
 - **Transform** contains modules that apply templates or otherwise render the output documents from the process phase into something that should be output. The transform phase for each pipeline is only executed after all process phases have finished and therefore has access to the process phase outputs from _all pipelines_.
 - **Output** is used for modules that output the finished documents somewhere (usually to disk, but could also be to a database, web service, etc.). A pipeline's output phase is executed immediatly following it's transform phase.
 
