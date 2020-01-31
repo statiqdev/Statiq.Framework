@@ -21,40 +21,112 @@ namespace Statiq.CodeAnalysis.Tests.Scripting
                     Namespaces = new TestNamespacesCollection(new[] { "Foo.Bar" })
                 };
                 string code = "int x = 0;";
-                string expected =
+                string expectedStart =
 @"using Foo.Bar;
 using Statiq.CodeAnalysis.Scripting;
+using System.Collections;
 
-public class Script : ScriptBase
+public class Script : ScriptBase, IExecutionState, IMetadata
 {
-public Script(IDocument document, IExecutionContext context) : base(document, context) { }
+public Script(IMetadata metadata, IExecutionState executionState) : base(metadata, executionState) { }
 public override async Task<object> EvaluateAsync()
 {
 await Task.CompletedTask;
+
 #line 1
 int x = 0;
 return null;
 }
 
-public object Source => Document.Get(""Source"");
-public object Destination => Document.Get(""Destination"");
-public object ContentProvider => Document.Get(""ContentProvider"");
-}
-
-public static class ScriptExtensionMethods
-{
-
-}";
+public object Source => Metadata.Get(""Source"");
+public object Destination => Metadata.Get(""Destination"");
+public object ContentProvider => Metadata.Get(""ContentProvider"");";
 
                 // When
-                string actual = ScriptHelper.Parse(code, document, context);
+                string actual = ScriptHelper.Parse(code, document.Keys, context);
 
                 // Then
-                actual.ShouldBe(expected, StringCompareShould.IgnoreLineEndings);
+                actual.Substring(0, expectedStart.Length).ShouldBe(expectedStart, StringCompareShould.IgnoreLineEndings);
             }
 
             [Test]
-            public void OmitsReturnStatement()
+            public void ConvertsExpressionToReturnStatement()
+            {
+                // Given
+                TestDocument document = new TestDocument();
+                TestExecutionContext context = new TestExecutionContext()
+                {
+                    Namespaces = new TestNamespacesCollection(new[] { "Foo.Bar" })
+                };
+                string code = "1 + 2";
+                string expectedStart =
+@"using Foo.Bar;
+using Statiq.CodeAnalysis.Scripting;
+using System.Collections;
+
+public class Script : ScriptBase, IExecutionState, IMetadata
+{
+public Script(IMetadata metadata, IExecutionState executionState) : base(metadata, executionState) { }
+public override async Task<object> EvaluateAsync()
+{
+await Task.CompletedTask;
+return
+#line 1
+1 + 2
+;
+}
+
+public object Source => Metadata.Get(""Source"");
+public object Destination => Metadata.Get(""Destination"");
+public object ContentProvider => Metadata.Get(""ContentProvider"");";
+
+                // When
+                string actual = ScriptHelper.Parse(code, document.Keys, context);
+
+                // Then
+                actual.Substring(0, expectedStart.Length).ShouldBe(expectedStart, StringCompareShould.IgnoreLineEndings);
+            }
+
+            [Test]
+            public void AddsReturnForExpressionWithSemi()
+            {
+                // Given
+                TestDocument document = new TestDocument();
+                TestExecutionContext context = new TestExecutionContext()
+                {
+                    Namespaces = new TestNamespacesCollection(new[] { "Foo.Bar" })
+                };
+                string code = "1 + 2;";
+                string expectedStart =
+@"using Foo.Bar;
+using Statiq.CodeAnalysis.Scripting;
+using System.Collections;
+
+public class Script : ScriptBase, IExecutionState, IMetadata
+{
+public Script(IMetadata metadata, IExecutionState executionState) : base(metadata, executionState) { }
+public override async Task<object> EvaluateAsync()
+{
+await Task.CompletedTask;
+
+#line 1
+1 + 2;
+return null;
+}
+
+public object Source => Metadata.Get(""Source"");
+public object Destination => Metadata.Get(""Destination"");
+public object ContentProvider => Metadata.Get(""ContentProvider"");";
+
+                // When
+                string actual = ScriptHelper.Parse(code, document.Keys, context);
+
+                // Then
+                actual.Substring(0, expectedStart.Length).ShouldBe(expectedStart, StringCompareShould.IgnoreLineEndings);
+            }
+
+            [Test]
+            public void EmitsReturnStatement()
             {
                 // Given
                 TestDocument document = new TestDocument();
@@ -63,36 +135,32 @@ public static class ScriptExtensionMethods
                     Namespaces = new TestNamespacesCollection(new[] { "Foo.Bar" })
                 };
                 string code = "return 0;";
-                string expected =
+                string expectedStart =
 @"using Foo.Bar;
 using Statiq.CodeAnalysis.Scripting;
+using System.Collections;
 
-public class Script : ScriptBase
+public class Script : ScriptBase, IExecutionState, IMetadata
 {
-public Script(IDocument document, IExecutionContext context) : base(document, context) { }
+public Script(IMetadata metadata, IExecutionState executionState) : base(metadata, executionState) { }
 public override async Task<object> EvaluateAsync()
 {
 await Task.CompletedTask;
+
 #line 1
 return 0;
 return null;
 }
 
-public object Source => Document.Get(""Source"");
-public object Destination => Document.Get(""Destination"");
-public object ContentProvider => Document.Get(""ContentProvider"");
-}
-
-public static class ScriptExtensionMethods
-{
-
-}";
+public object Source => Metadata.Get(""Source"");
+public object Destination => Metadata.Get(""Destination"");
+public object ContentProvider => Metadata.Get(""ContentProvider"");";
 
                 // When
-                string actual = ScriptHelper.Parse(code, document, context);
+                string actual = ScriptHelper.Parse(code, document.Keys, context);
 
                 // Then
-                actual.ShouldBe(expected, StringCompareShould.IgnoreLineEndings);
+                actual.Substring(0, expectedStart.Length).ShouldBe(expectedStart, StringCompareShould.IgnoreLineEndings);
             }
 
             [Test]
@@ -121,16 +189,18 @@ Pipelines.Add(Content());
 public class Baz
 {
 }";
-                string expected =
+                string expectedStart =
 @"using Foo.Bar;
 using Statiq.CodeAnalysis.Scripting;
+using System.Collections;
 
-public class Script : ScriptBase
+public class Script : ScriptBase, IExecutionState, IMetadata
 {
-public Script(IDocument document, IExecutionContext context) : base(document, context) { }
+public Script(IMetadata metadata, IExecutionState executionState) : base(metadata, executionState) { }
 public override async Task<object> EvaluateAsync()
 {
 await Task.CompletedTask;
+
 #line 12
 int x = 1 + 2;
 Pipelines.Add(Content());
@@ -138,11 +208,11 @@ Pipelines.Add(Content());
 return null;
 }
 
-public object Source => Document.Get(""Source"");
-public object Destination => Document.Get(""Destination"");
-public object ContentProvider => Document.Get(""ContentProvider"");
-}
-#line 1
+public object Source => Metadata.Get(""Source"");
+public object Destination => Metadata.Get(""Destination"");
+public object ContentProvider => Metadata.Get(""ContentProvider"");";
+                string expectedEnd =
+@"#line 1
 public class Foo
 {
     int X { get; set; }
@@ -164,10 +234,11 @@ public static class ScriptExtensionMethods
 }";
 
                 // When
-                string actual = ScriptHelper.Parse(code, document, context);
+                string actual = ScriptHelper.Parse(code, document.Keys, context);
 
                 // Then
-                actual.ShouldBe(expected, StringCompareShould.IgnoreLineEndings);
+                actual.Substring(0, expectedStart.Length).ShouldBe(expectedStart, StringCompareShould.IgnoreLineEndings);
+                actual.Substring(actual.Length - expectedEnd.Length).ShouldBe(expectedEnd, StringCompareShould.IgnoreLineEndings);
             }
 
             [Test]
@@ -191,18 +262,20 @@ public string Self(string x)
 {
     return x.ToLower();
 }";
-                string expected =
+                string expectedStart =
 @"using Foo.Bar;
 using Statiq.CodeAnalysis.Scripting;
+using System.Collections;
 using Red.Blue;
 using Yellow;
 
-public class Script : ScriptBase
+public class Script : ScriptBase, IExecutionState, IMetadata
 {
-public Script(IDocument document, IExecutionContext context) : base(document, context) { }
+public Script(IMetadata metadata, IExecutionState executionState) : base(metadata, executionState) { }
 public override async Task<object> EvaluateAsync()
 {
 await Task.CompletedTask;
+
 #line 7
 Pipelines.Add(Content());
 
@@ -213,11 +286,11 @@ public string Self(string x)
 {
     return x.ToLower();
 }
-public object Source => Document.Get(""Source"");
-public object Destination => Document.Get(""Destination"");
-public object ContentProvider => Document.Get(""ContentProvider"");
-}
-#line 3
+public object Source => Metadata.Get(""Source"");
+public object Destination => Metadata.Get(""Destination"");
+public object ContentProvider => Metadata.Get(""ContentProvider"");";
+                string expectedEnd =
+@"#line 3
 public static class Foo
 {
     public static string Bar(this string x) => x;
@@ -229,10 +302,11 @@ public static class ScriptExtensionMethods
 }";
 
                 // When
-                string actual = ScriptHelper.Parse(code, document, context);
+                string actual = ScriptHelper.Parse(code, document.Keys, context);
 
                 // Then
-                actual.ShouldBe(expected, StringCompareShould.IgnoreLineEndings);
+                actual.Substring(0, expectedStart.Length).ShouldBe(expectedStart, StringCompareShould.IgnoreLineEndings);
+                actual.Substring(actual.Length - expectedEnd.Length).ShouldBe(expectedEnd, StringCompareShould.IgnoreLineEndings);
             }
 
             [Test]
@@ -254,16 +328,18 @@ public string Self(string x)
 {
     return x.ToLower();
 }";
-                string expected =
+                string expectedStart =
 @"using Foo.Bar;
 using Statiq.CodeAnalysis.Scripting;
+using System.Collections;
 
-public class Script : ScriptBase
+public class Script : ScriptBase, IExecutionState, IMetadata
 {
-public Script(IDocument document, IExecutionContext context) : base(document, context) { }
+public Script(IMetadata metadata, IExecutionState executionState) : base(metadata, executionState) { }
 public override async Task<object> EvaluateAsync()
 {
 await Task.CompletedTask;
+
 #line 5
 Pipelines.Add(Content());
 
@@ -274,11 +350,11 @@ public string Self(string x)
 {
     return x.ToLower();
 }
-public object Source => Document.Get(""Source"");
-public object Destination => Document.Get(""Destination"");
-public object ContentProvider => Document.Get(""ContentProvider"");
-}
-#line 1
+public object Source => Metadata.Get(""Source"");
+public object Destination => Metadata.Get(""Destination"");
+public object ContentProvider => Metadata.Get(""ContentProvider"");";
+                string expectedEnd =
+@"#line 1
 public static class Foo
 {
     public static string Bar(this string x) => x;
@@ -290,10 +366,11 @@ public static class ScriptExtensionMethods
 }";
 
                 // When
-                string actual = ScriptHelper.Parse(code, document, context);
+                string actual = ScriptHelper.Parse(code, document.Keys, context);
 
                 // Then
-                actual.ShouldBe(expected, StringCompareShould.IgnoreLineEndings);
+                actual.Substring(0, expectedStart.Length).ShouldBe(expectedStart, StringCompareShould.IgnoreLineEndings);
+                actual.Substring(actual.Length - expectedEnd.Length).ShouldBe(expectedEnd, StringCompareShould.IgnoreLineEndings);
             }
 
             [Test]
@@ -315,27 +392,29 @@ public static string Self(this string x)
 {
     return x.ToLower();
 }";
-                string expected =
+                string expectedStart =
 @"using Foo.Bar;
 using Statiq.CodeAnalysis.Scripting;
+using System.Collections;
 
-public class Script : ScriptBase
+public class Script : ScriptBase, IExecutionState, IMetadata
 {
-public Script(IDocument document, IExecutionContext context) : base(document, context) { }
+public Script(IMetadata metadata, IExecutionState executionState) : base(metadata, executionState) { }
 public override async Task<object> EvaluateAsync()
 {
 await Task.CompletedTask;
+
 #line 5
 Pipelines.Add(Content());
 
 return null;
 }
 
-public object Source => Document.Get(""Source"");
-public object Destination => Document.Get(""Destination"");
-public object ContentProvider => Document.Get(""ContentProvider"");
-}
-#line 1
+public object Source => Metadata.Get(""Source"");
+public object Destination => Metadata.Get(""Destination"");
+public object ContentProvider => Metadata.Get(""ContentProvider"");";
+                string expectedEnd =
+@"#line 1
 public static class Foo
 {
     public static string Bar(this string x) => x;
@@ -351,10 +430,11 @@ public static string Self(this string x)
 }";
 
                 // When
-                string actual = ScriptHelper.Parse(code, document, context);
+                string actual = ScriptHelper.Parse(code, document.Keys, context);
 
                 // Then
-                actual.ShouldBe(expected, StringCompareShould.IgnoreLineEndings);
+                actual.Substring(0, expectedStart.Length).ShouldBe(expectedStart, StringCompareShould.IgnoreLineEndings);
+                actual.Substring(actual.Length - expectedEnd.Length).ShouldBe(expectedEnd, StringCompareShould.IgnoreLineEndings);
             }
 
             [Test]
@@ -381,16 +461,18 @@ public string Self(string x)
     // RTY
     return x.ToLower();
 }";
-                string expected =
+                string expectedStart =
 @"using Foo.Bar;
 using Statiq.CodeAnalysis.Scripting;
+using System.Collections;
 
-public class Script : ScriptBase
+public class Script : ScriptBase, IExecutionState, IMetadata
 {
-public Script(IDocument document, IExecutionContext context) : base(document, context) { }
+public Script(IMetadata metadata, IExecutionState executionState) : base(metadata, executionState) { }
 public override async Task<object> EvaluateAsync()
 {
 await Task.CompletedTask;
+
 #line 7
 // 123
 Pipelines.Add(Content());
@@ -404,11 +486,11 @@ public string Self(string x)
     // RTY
     return x.ToLower();
 }
-public object Source => Document.Get(""Source"");
-public object Destination => Document.Get(""Destination"");
-public object ContentProvider => Document.Get(""ContentProvider"");
-}
-#line 1
+public object Source => Metadata.Get(""Source"");
+public object Destination => Metadata.Get(""Destination"");
+public object ContentProvider => Metadata.Get(""ContentProvider"");";
+                string expectedEnd =
+@"#line 1
 // XYZ
 public class Foo
 {
@@ -422,10 +504,29 @@ public static class ScriptExtensionMethods
 }";
 
                 // When
-                string actual = ScriptHelper.Parse(code, document, context);
+                string actual = ScriptHelper.Parse(code, document.Keys, context);
 
                 // Then
-                actual.ShouldBe(expected, StringCompareShould.IgnoreLineEndings);
+                actual.Substring(0, expectedStart.Length).ShouldBe(expectedStart, StringCompareShould.IgnoreLineEndings);
+                actual.Substring(actual.Length - expectedEnd.Length).ShouldBe(expectedEnd, StringCompareShould.IgnoreLineEndings);
+            }
+
+            [Test]
+            public void ContainsMetadataExtensions()
+            {
+                // Given
+                TestDocument document = new TestDocument();
+                TestExecutionContext context = new TestExecutionContext()
+                {
+                    Namespaces = new TestNamespacesCollection(new[] { "Foo.Bar" })
+                };
+                string code = "int x = 0;";
+
+                // When
+                string actual = ScriptHelper.Parse(code, document.Keys, context);
+
+                // Then
+                actual.ShouldContain("public string GetString(string key, string defaultValue = default) => Metadata.GetString(key, defaultValue);");
             }
         }
     }

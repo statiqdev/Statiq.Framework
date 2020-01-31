@@ -62,7 +62,8 @@ namespace Statiq.Common
             }
         }
 
-        public IEnumerable<string> Keys => this.Select(x => x.Key);
+        // Enumerate the keys seperatly so we don't evaluate values
+        public IEnumerable<string> Keys => Configuration.AsEnumerable().Select(x => x.Key);
 
         public IEnumerable<object> Values => this.Select(x => x.Value);
 

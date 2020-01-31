@@ -9,7 +9,7 @@ using Statiq.Common;
 namespace Statiq.Core
 {
     /// <summary>
-    /// Presents the outputs from the last phase of all pipelines.
+    /// Provides outputs from the most recently executed phase of each pipeline.
     /// </summary>
     internal class PipelineOutputs : IPipelineOutputs
     {

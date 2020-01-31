@@ -26,7 +26,22 @@ namespace Statiq.CodeAnalysis.Tests
             }
 
             [Test]
-            public async Task CanAccessDocumentMetadata()
+            public async Task EvaluatesExpression()
+            {
+                TestExecutionContext context = new TestExecutionContext();
+                TestDocument document = new TestDocument();
+                EvalShortcode shortcode = new EvalShortcode();
+                string shortcodeContent = "1 + 2";
+
+                // When
+                TestDocument result = (TestDocument)await shortcode.ExecuteAsync(null, shortcodeContent, document, context);
+
+                // Then
+                result.Content.ShouldBe("3");
+            }
+
+            [Test]
+            public async Task CanAccessMetadata()
             {
                 TestExecutionContext context = new TestExecutionContext();
                 TestDocument document = new TestDocument
@@ -34,7 +49,25 @@ namespace Statiq.CodeAnalysis.Tests
                     { "Foo", "4" }
                 };
                 EvalShortcode shortcode = new EvalShortcode();
-                string shortcodeContent = "return 1 + Document.GetInt(\"Foo\");";
+                string shortcodeContent = "return 1 + GetInt(\"Foo\");";
+
+                // When
+                TestDocument result = (TestDocument)await shortcode.ExecuteAsync(null, shortcodeContent, document, context);
+
+                // Then
+                result.Content.ShouldBe("5");
+            }
+
+            [Test]
+            public async Task CanAccessMetadataAsProperties()
+            {
+                TestExecutionContext context = new TestExecutionContext();
+                TestDocument document = new TestDocument
+                {
+                    { "Foo", 4 }
+                };
+                EvalShortcode shortcode = new EvalShortcode();
+                string shortcodeContent = "return 1 + (int)Foo;";
 
                 // When
                 TestDocument result = (TestDocument)await shortcode.ExecuteAsync(null, shortcodeContent, document, context);

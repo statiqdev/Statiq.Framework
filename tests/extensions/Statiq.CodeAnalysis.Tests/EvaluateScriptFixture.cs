@@ -27,7 +27,7 @@ namespace Statiq.CodeAnalysis.Tests
             }
 
             [Test]
-            public async Task CanAccessDocumentMetadataAsGlobalProperty()
+            public async Task CanAccessMetadataAsGlobalProperty()
             {
                 // Given
                 TestDocument document = new TestDocument("return (int)Foo + 2;")
@@ -44,10 +44,10 @@ namespace Statiq.CodeAnalysis.Tests
             }
 
             [Test]
-            public async Task CanAccessDocument()
+            public async Task CanAccessMetadata()
             {
                 // Given
-                TestDocument document = new TestDocument("return Document.GetInt(\"Foo\") + 2;")
+                TestDocument document = new TestDocument("return GetInt(\"Foo\") + 2;")
                 {
                     { "Foo", "5" }
                 };
@@ -76,6 +76,48 @@ namespace Statiq.CodeAnalysis.Tests
 
                 // Then
                 result.Single().Content.ShouldBe("7");
+            }
+
+            [Test]
+            public async Task MultipleStatements()
+            {
+                // Given
+                TestDocument document = new TestDocument("int x = 1 + 2; return x;");
+                EvaluateScript evaluateScript = new EvaluateScript();
+
+                // When
+                IReadOnlyList<TestDocument> result = await ExecuteAsync(document, evaluateScript);
+
+                // Then
+                result.Single().Content.ShouldBe("3");
+            }
+
+            [Test]
+            public async Task DoesNotRequireReturn()
+            {
+                // Given
+                TestDocument document = new TestDocument("1 + 2");
+                EvaluateScript evaluateScript = new EvaluateScript();
+
+                // When
+                IReadOnlyList<TestDocument> result = await ExecuteAsync(document, evaluateScript);
+
+                // Then
+                result.Single().Content.ShouldBe("3");
+            }
+
+            [Test]
+            public async Task ReturnsEmptyContentForExpression()
+            {
+                // Given
+                TestDocument document = new TestDocument("_ = 1 + 2;");
+                EvaluateScript evaluateScript = new EvaluateScript();
+
+                // When
+                IReadOnlyList<TestDocument> result = await ExecuteAsync(document, evaluateScript);
+
+                // Then
+                result.Single().Content.ShouldBeEmpty();
             }
         }
     }

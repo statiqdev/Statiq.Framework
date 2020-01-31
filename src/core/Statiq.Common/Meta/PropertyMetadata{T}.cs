@@ -125,9 +125,10 @@ namespace Statiq.Common
                 }
             }
 
-            public IEnumerable<string> Keys => this.Select(x => x.Key);
+            // Enumerate the keys seperatly so we don't evaluate values
+            public IEnumerable<string> Keys => Properties.Keys;
 
-            public IEnumerable<object> Values => this.Select(x => x.Value);
+            public IEnumerable<object> Values => Properties.Values.Select(x => x.GetValue(_instance));
 
             public bool TryGetRaw(string key, out object value)
             {

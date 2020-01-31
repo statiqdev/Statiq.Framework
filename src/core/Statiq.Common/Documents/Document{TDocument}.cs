@@ -298,8 +298,47 @@ namespace Statiq.Common
             }
         }
 
+        // Enumerate the keys seperatly so we don't evaluate values
         [PropertyMetadata(null)]
-        public IEnumerable<string> Keys => this.Select(x => x.Key);
+        public IEnumerable<string> Keys
+        {
+            get
+            {
+                {
+                    HashSet<string> keys = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
+                    if (Metadata != null)
+                    {
+                        foreach (string key in Metadata.Keys)
+                        {
+                            if (keys.Add(key))
+                            {
+                                yield return key;
+                            }
+                        }
+                    }
+
+                    foreach (string key in PropertyMetadata<TDocument>.For((TDocument)this).Keys)
+                    {
+                        if (keys.Add(key))
+                        {
+                            yield return key;
+                        }
+                    }
+
+                    if (BaseMetadata != null)
+                    {
+                        foreach (string key in BaseMetadata.Keys)
+                        {
+                            if (keys.Add(key))
+                            {
+                                yield return key;
+                            }
+                        }
+                    }
+                }
+            }
+        }
 
         [PropertyMetadata(null)]
         public IEnumerable<object> Values => this.Select(x => x.Value);

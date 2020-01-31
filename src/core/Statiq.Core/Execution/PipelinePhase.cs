@@ -55,11 +55,7 @@ namespace Statiq.Core
         private ImmutableArray<IDocument> GetInputs() => Dependencies.Length == 0 ? ImmutableArray<IDocument>.Empty : Dependencies[0].Outputs;
 
         // This is the main execute method called by the engine
-        public async Task ExecuteAsync(
-            Engine engine,
-            Guid executionId,
-            ConcurrentDictionary<string, PhaseResult[]> phaseResults,
-            CancellationTokenSource cancellationTokenSource)
+        public async Task ExecuteAsync(Engine engine, ConcurrentDictionary<string, PhaseResult[]> phaseResults)
         {
             if (_disposed)
             {
@@ -67,7 +63,7 @@ namespace Statiq.Core
             }
 
             // Raise the before event
-            await engine.Events.RaiseAsync(new BeforePipelinePhaseExecution(executionId, PipelineName, Phase));
+            await engine.Events.RaiseAsync(new BeforePipelinePhaseExecution(engine.ExecutionId, PipelineName, Phase));
 
             // Skip the phase if there are no modules
             if (_modules.Count == 0)
@@ -90,10 +86,8 @@ namespace Statiq.Core
                     ExecutionContextData contextData = new ExecutionContextData(
                         this,
                         engine,
-                        executionId,
                         phaseResults,
-                        serviceScope.ServiceProvider,
-                        cancellationTokenSource.Token);
+                        serviceScope.ServiceProvider);
                     Outputs = await Engine.ExecuteModulesAsync(contextData, null, _modules, inputs, _logger);
                     stopwatch.Stop();
                     _logger.LogInformation($"   {PipelineName}/{Phase} » Finished {PipelineName} {Phase} phase execution ({Outputs.Length} output document(s), {stopwatch.ElapsedMilliseconds} ms)");
@@ -114,7 +108,7 @@ namespace Statiq.Core
             }
 
             // Raise the after event
-            await engine.Events.RaiseAsync(new AfterPipelinePhaseExecution(executionId, PipelineName, Phase, Outputs, stopwatch.ElapsedMilliseconds));
+            await engine.Events.RaiseAsync(new AfterPipelinePhaseExecution(engine.ExecutionId, PipelineName, Phase, Outputs, stopwatch.ElapsedMilliseconds));
 
             // Record the results
             PhaseResult phaseResult = new PhaseResult(PipelineName, Phase, Outputs, stopwatch.ElapsedMilliseconds);

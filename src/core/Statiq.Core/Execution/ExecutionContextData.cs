@@ -12,24 +12,18 @@ namespace Statiq.Core
         public ExecutionContextData(
             PipelinePhase pipelinePhase,
             Engine engine,
-            Guid executionId,
             IReadOnlyDictionary<string, PhaseResult[]> phaseResults,
-            IServiceProvider services,
-            CancellationToken cancellationToken)
+            IServiceProvider services)
         {
             Engine = engine ?? throw new ArgumentNullException(nameof(engine));
-            ExecutionId = executionId;
             PipelinePhase = pipelinePhase ?? throw new ArgumentNullException(nameof(pipelinePhase));
             Services = services ?? throw new ArgumentNullException(nameof(services));
             Outputs = new PhaseOutputs(phaseResults, pipelinePhase, engine.Pipelines);
-            CancellationToken = cancellationToken;
         }
 
         public PipelinePhase PipelinePhase { get; }
         public Engine Engine { get; }
-        public Guid ExecutionId { get; }
         public IServiceProvider Services { get; }
-        public CancellationToken CancellationToken { get; }
         public IPipelineOutputs Outputs { get; }
     }
 }

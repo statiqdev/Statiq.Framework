@@ -22,7 +22,7 @@ namespace Statiq.CodeAnalysis
 
             // Evaluate the script
             object value = await ScriptHelper.EvaluateAsync(assembly, input, context);
-            return await context.CloneOrCreateDocumentsAsync(input, input.Yield(), value);
+            return await context.CloneOrCreateDocumentsAsync(input, input.Yield(), value ?? new NullContent());
         }
     }
 }

@@ -166,7 +166,21 @@ namespace Statiq.Common
             }
         }
 
-        public IEnumerable<string> Keys => this.Select(x => x.Key);
+        // Enumerate the keys seperatly so we don't evaluate values
+        public IEnumerable<string> Keys
+        {
+            get
+            {
+                HashSet<string> keys = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+                foreach (string key in _metadata.Keys.Concat(PropertyMetadata<T>.For(Object).Keys))
+                {
+                    if (keys.Add(key))
+                    {
+                        yield return key;
+                    }
+                }
+            }
+        }
 
         public IEnumerable<object> Values => this.Select(x => x.Value);
 

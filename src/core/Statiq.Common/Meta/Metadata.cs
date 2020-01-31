@@ -76,7 +76,30 @@ namespace Statiq.Common
             }
         }
 
-        public IEnumerable<string> Keys => this.Select(x => x.Key);
+        // Enumerate the keys seperatly so we don't evaluate values
+        public IEnumerable<string> Keys
+        {
+            get
+            {
+                if (Dictionary != null)
+                {
+                    foreach (string key in Dictionary.Keys)
+                    {
+                        yield return key;
+                    }
+                }
+                if (_previous != null)
+                {
+                    foreach (string previousKey in _previous.Keys)
+                    {
+                        if (!Dictionary.ContainsKey(previousKey))
+                        {
+                            yield return previousKey;
+                        }
+                    }
+                }
+            }
+        }
 
         public IEnumerable<object> Values => this.Select(x => x.Value);
 

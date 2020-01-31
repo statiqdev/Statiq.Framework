@@ -439,7 +439,7 @@ namespace Statiq.Core.Tests.Execution
                 CancellationTokenSource cts = new CancellationTokenSource();
 
                 // When
-                IPipelineOutputs outputs = await engine.ExecuteAsync(cts);
+                IPipelineOutputs outputs = await engine.ExecuteAsync(cts.Token);
 
                 // Then
                 module.ExecuteCount.ShouldBe(1);
@@ -464,7 +464,7 @@ namespace Statiq.Core.Tests.Execution
                 }.Yield()));
 
                 // When
-                IPipelineOutputs outputs = await engine.ExecuteAsync(cts);
+                IPipelineOutputs outputs = await engine.ExecuteAsync(cts.Token);
 
                 // Then
                 module.ExecuteCount.ShouldBe(0);
@@ -489,7 +489,7 @@ namespace Statiq.Core.Tests.Execution
                 }.Yield()));
 
                 // When
-                IPipelineOutputs outputs = await engine.ExecuteAsync(cts);
+                IPipelineOutputs outputs = await engine.ExecuteAsync(cts.Token);
 
                 // Then
                 module.ExecuteCount.ShouldBe(1);

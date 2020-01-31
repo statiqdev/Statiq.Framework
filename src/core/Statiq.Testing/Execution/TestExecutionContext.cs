@@ -40,45 +40,132 @@ namespace Statiq.Testing
         {
             _documentFactory = new DocumentFactory(Settings);
             _documentFactory.SetDefaultDocumentType<TestDocument>();
+
             if (inputs != null)
             {
                 SetInputs(inputs);
             }
 
-            TestLoggerProvider = new TestLoggerProvider(LogMessages);
-            Services = new TestServiceProvider(
-                serviceCollection =>
-                {
-                    serviceCollection.AddLogging();
-                    serviceCollection.AddSingleton<ILoggerProvider>(TestLoggerProvider);
-                    serviceCollection.Configure<LoggerFilterOptions>(options => options.MinLevel = LogLevel.Trace);
-                });
-            _logger = TestLoggerProvider.CreateLogger(null);
+            _logger = Engine.TestLoggerProvider.CreateLogger(null);
         }
 
-        /// <inheritdoc />
-        public IServiceProvider Services { get; set; }
+        public TestLoggerProvider TestLoggerProvider => Engine.TestLoggerProvider;
 
-        public TestLoggerProvider TestLoggerProvider { get; }
-
-        public ConcurrentQueue<TestMessage> LogMessages { get; } = new ConcurrentQueue<TestMessage>();
+        public ConcurrentQueue<TestMessage> LogMessages => Engine.LogMessages;
 
         // IExecutionContext
 
+        public TestEngine Engine { get; set; } = new TestEngine();
+
         /// <inheritdoc/>
-        public Guid ExecutionId { get; set; } = Guid.NewGuid();
+        public Guid ExecutionId => Engine.ExecutionId;
+
+        /// <inheritdoc/>
+        IExecutionState IExecutionContext.ExecutionState => Engine;
 
         /// <inheritdoc />
-        public TestConfigurationSettings Settings { get; } = new TestConfigurationSettings();
+        public TestServiceProvider Services
+        {
+            get => Engine.Services;
+            set => Engine.Services = value;
+        }
 
         /// <inheritdoc />
-        IReadOnlyConfigurationSettings IExecutionContext.Settings => Settings;
+        IServiceProvider IExecutionState.Services => Services;
+
+        /// <inheritdoc />
+        public TestConfigurationSettings Settings
+        {
+            get => Engine.Settings;
+            set => Engine.Settings = value;
+        }
+
+        /// <inheritdoc />
+        IReadOnlyConfigurationSettings IExecutionState.Settings => Settings;
 
         /// <inheritdoc/>
-        public TestNamespacesCollection Namespaces { get; set; } = new TestNamespacesCollection();
+        public TestNamespacesCollection Namespaces
+        {
+            get => Engine.Namespaces;
+            set => Engine.Namespaces = value;
+        }
 
         /// <inheritdoc/>
-        INamespacesCollection IExecutionContext.Namespaces => Namespaces;
+        INamespacesCollection IExecutionState.Namespaces => Namespaces;
+
+        /// <inheritdoc />
+        public TestEventCollection Events
+        {
+            get => Engine.Events;
+            set => Engine.Events = value;
+        }
+
+        /// <inheritdoc />
+        IReadOnlyEventCollection IExecutionState.Events => Events;
+
+        /// <inheritdoc/>
+        public TestFileSystem FileSystem
+        {
+            get => Engine.FileSystem;
+            set => Engine.FileSystem = value;
+        }
+
+        /// <inheritdoc/>
+        IReadOnlyFileSystem IExecutionState.FileSystem => FileSystem;
+
+        /// <inheritdoc/>
+        public TestPipelineOutputs Outputs
+        {
+            get => Engine.Outputs;
+            set => Engine.Outputs = value;
+        }
+
+        /// <inheritdoc/>
+        IPipelineOutputs IExecutionState.Outputs => Outputs;
+
+        /// <inheritdoc/>
+        public ApplicationState ApplicationState
+        {
+            get => Engine.ApplicationState;
+            set => Engine.ApplicationState = value;
+        }
+
+        /// <inheritdoc/>
+        IReadOnlyApplicationState IExecutionState.ApplicationState => ApplicationState;
+
+        /// <inheritdoc/>
+        public bool SerialExecution
+        {
+            get => Engine.SerialExecution;
+            set => Engine.SerialExecution = value;
+        }
+
+        /// <inheritdoc />
+        public TestShortcodeCollection Shortcodes
+        {
+            get => Engine.Shortcodes;
+            set => Engine.Shortcodes = value;
+        }
+
+        /// <inheritdoc/>
+        IReadOnlyShortcodeCollection IExecutionState.Shortcodes => Shortcodes;
+
+        /// <inheritdoc/>
+        public TestMemoryStreamFactory MemoryStreamFactory
+        {
+            get => Engine.MemoryStreamFactory;
+            set => Engine.MemoryStreamFactory = value;
+        }
+
+        /// <inheritdoc/>
+        IMemoryStreamFactory IExecutionState.MemoryStreamFactory => MemoryStreamFactory;
+
+        /// <inheritdoc/>
+        public CancellationToken CancellationToken
+        {
+            get => Engine.CancellationToken;
+            set => Engine.CancellationToken = value;
+        }
 
         /// <inheritdoc/>
         public string PipelineName { get; set; }
@@ -91,45 +178,6 @@ namespace Statiq.Testing
 
         /// <inheritdoc/>
         public Phase Phase { get; set; } = Phase.Process;
-
-        /// <inheritdoc />
-        public TestEventCollection Events { get; set; } = new TestEventCollection();
-
-        /// <inheritdoc />
-        IReadOnlyEventCollection IExecutionContext.Events => Events;
-
-        /// <inheritdoc/>
-        public TestFileSystem FileSystem { get; set; } = new TestFileSystem();
-
-        /// <inheritdoc/>
-        IReadOnlyFileSystem IExecutionContext.FileSystem => FileSystem;
-
-        /// <inheritdoc/>
-        public TestPipelineOutputs Outputs { get; set; } = new TestPipelineOutputs();
-
-        /// <inheritdoc/>
-        IPipelineOutputs IExecutionContext.Outputs => Outputs;
-
-        /// <inheritdoc/>
-        public IReadOnlyApplicationState ApplicationState { get; set; }
-
-        /// <inheritdoc/>
-        public bool SerialExecution { get; set; }
-
-        /// <inheritdoc />
-        public TestShortcodeCollection Shortcodes { get; set; } = new TestShortcodeCollection();
-
-        /// <inheritdoc/>
-        IReadOnlyShortcodeCollection IExecutionContext.Shortcodes => Shortcodes;
-
-        /// <inheritdoc/>
-        public TestMemoryStreamFactory MemoryStreamFactory { get; set; } = new TestMemoryStreamFactory();
-
-        /// <inheritdoc/>
-        IMemoryStreamFactory IExecutionContext.MemoryStreamFactory => MemoryStreamFactory;
-
-        /// <inheritdoc/>
-        public CancellationToken CancellationToken { get; set; } = CancellationToken.None;
 
         /// <inheritdoc/>
         public IExecutionContext Parent { get; set; }

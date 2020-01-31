@@ -26,7 +26,7 @@ namespace Statiq.Core.Tests.Execution
                 CancellationTokenSource cts = new CancellationTokenSource();
 
                 // When
-                IPipelineOutputs outputs = await engine.ExecuteAsync(cts);
+                IPipelineOutputs outputs = await engine.ExecuteAsync(cts.Token);
 
                 // Then
                 outputs["TestExecutionPipeline"].Cast<TestDocument>().Select(x => x.Content).Single().ShouldBe("Foo");

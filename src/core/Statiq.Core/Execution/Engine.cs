@@ -117,10 +117,19 @@ namespace Statiq.Core
         }
 
         /// <inheritdoc />
+        public Guid ExecutionId { get; private set; } = Guid.Empty;
+
+        /// <inheritdoc />
+        public CancellationToken CancellationToken { get; private set; }
+
+        /// <inheritdoc />
         public IServiceProvider Services => _serviceScope.ServiceProvider;
 
         /// <inheritdoc />
         public ApplicationState ApplicationState { get; }
+
+        /// <inheritdoc />
+        IReadOnlyApplicationState IExecutionState.ApplicationState => ApplicationState;
 
         /// <inheritdoc />
         public IReadOnlyConfigurationSettings Settings { get; }
@@ -129,10 +138,19 @@ namespace Statiq.Core
         public IEventCollection Events { get; } = new EventCollection();
 
         /// <inheritdoc />
+        IReadOnlyEventCollection IExecutionState.Events => Events;
+
+        /// <inheritdoc />
         public IFileSystem FileSystem { get; } = new FileSystem();
 
         /// <inheritdoc />
+        IReadOnlyFileSystem IExecutionState.FileSystem => FileSystem;
+
+        /// <inheritdoc />
         public IShortcodeCollection Shortcodes { get; } = new ShortcodeCollection();
+
+        /// <inheritdoc />
+        IReadOnlyShortcodeCollection IExecutionState.Shortcodes => Shortcodes;
 
         /// <inheritdoc />
         public IPipelineCollection Pipelines => _pipelines;
@@ -142,6 +160,9 @@ namespace Statiq.Core
 
         /// <inheritdoc />
         public IMemoryStreamFactory MemoryStreamFactory { get; } = new MemoryStreamFactory();
+
+        /// <inheritdoc />
+        public IPipelineOutputs Outputs { get; private set; }
 
         /// <inheritdoc />
         public bool SerialExecution { get; set; }
@@ -218,12 +239,12 @@ namespace Statiq.Core
         /// <summary>
         /// Executes pipelines with <see cref="ExecutionPolicy.Normal"/> and <see cref="ExecutionPolicy.Always"/> policies.
         /// </summary>
-        /// <param name="cancellationTokenSource">
-        /// A cancellation token source that can be used to cancel the execution.
+        /// <param name="cancellationToken">
+        /// A cancellation token that can be used to cancel the execution.
         /// </param>
         /// <returns>The output documents from each executed pipeline.</returns>
-        public Task<IPipelineOutputs> ExecuteAsync(CancellationTokenSource cancellationTokenSource) =>
-            ExecuteAsync(null, true, cancellationTokenSource);
+        public Task<IPipelineOutputs> ExecuteAsync(CancellationToken cancellationToken = default) =>
+            ExecuteAsync(null, true, cancellationToken);
 
         /// <summary>
         /// Executes the specified pipelines and pipelines with <see cref="ExecutionPolicy.Always"/> policies.
@@ -231,12 +252,12 @@ namespace Statiq.Core
         /// <param name="pipelines">
         /// The pipelines to execute or <c>null</c>/empty to only execute pipelines with the <see cref="ExecutionPolicy.Always"/> policy.
         /// </param>
-        /// <param name="cancellationTokenSource">
-        /// A cancellation token source that can be used to cancel the execution.
+        /// <param name="cancellationToken">
+        /// A cancellation token that can be used to cancel the execution.
         /// </param>
         /// <returns>The output documents from each executed pipeline.</returns>
-        public Task<IPipelineOutputs> ExecuteAsync(string[] pipelines, CancellationTokenSource cancellationTokenSource) =>
-            ExecuteAsync(pipelines, false, cancellationTokenSource);
+        public Task<IPipelineOutputs> ExecuteAsync(string[] pipelines, CancellationToken cancellationToken = default) =>
+            ExecuteAsync(pipelines, false, cancellationToken);
 
         /// <summary>
         /// Executes the specified pipelines and pipelines with <see cref="ExecutionPolicy.Always"/> policies.
@@ -248,116 +269,132 @@ namespace Statiq.Core
         /// <c>true</c> to run pipelines with the <see cref="ExecutionPolicy.Normal"/> policy in addition
         /// to the pipelines specified or <c>false</c> to only run the specified pipelines.
         /// </param>
-        /// <param name="cancellationTokenSource">
-        /// A cancellation token source that can be used to cancel the execution.
+        /// <param name="cancellationToken">
+        /// A cancellation token that can be used to cancel the execution.
         /// </param>
         /// <returns>The output documents from each executed pipeline.</returns>
-        public async Task<IPipelineOutputs> ExecuteAsync(string[] pipelines, bool normalPipelines, CancellationTokenSource cancellationTokenSource)
+        public async Task<IPipelineOutputs> ExecuteAsync(string[] pipelines, bool normalPipelines, CancellationToken cancellationToken = default)
         {
             // Setup
             await default(SynchronizationContextRemover);
             CheckDisposed();
-            Guid executionId = Guid.NewGuid();
-            ConcurrentDictionary<string, PhaseResult[]> phaseResults =
-                new ConcurrentDictionary<string, PhaseResult[]>(StringComparer.OrdinalIgnoreCase);
-            PipelineOutputs outputs = new PipelineOutputs(phaseResults);
 
-            // Create the pipeline phases (this also validates the pipeline graph)
-            if (_phases == null)
+            // Make sure only one execution is running
+            if (ExecutionId != Guid.Empty)
             {
-                _phases = GetPipelinePhases(_pipelines, _logger);
+                throw new ExecutionException($"Execution with ID {ExecutionId} is already executing, only one execution can be run at once");
             }
-
-            // Verify pipelines
-            HashSet<string> executingPipelines = GetExecutingPipelines(pipelines, normalPipelines);
-            if (executingPipelines.Count == 0)
-            {
-                _logger.LogWarning("No pipelines are configured or specified for execution.");
-                return outputs;
-            }
-
-            // Log
-            _logger.LogInformation($"Executing {executingPipelines.Count} pipelines ({string.Join(", ", executingPipelines.OrderBy(x => x))})");
-            _logger.LogDebug($"Execution ID {executionId}");
-            System.Diagnostics.Stopwatch stopwatch = System.Diagnostics.Stopwatch.StartNew();
-
-            // Raise before event
-            await Events.RaiseAsync(new BeforeEngineExecution(this, executionId));
-
-            // Do a check for the same input/output path
-            if (FileSystem.InputPaths.Any(x => x.Equals(FileSystem.OutputPath)))
-            {
-                _logger.LogWarning("The output path is also one of the input paths which can cause unexpected behavior and is usually not advised");
-            }
-
-            // Clean paths
-            CleanTempPath();
-            if (Settings.GetBool(Keys.CleanOutputPath))
-            {
-                CleanOutputPath();
-            }
-
-            // Get phase tasks
-            Task[] phaseTasks = null;
+            ExecutionId = Guid.NewGuid();
+            CancellationToken = cancellationToken;
             try
             {
-                // Get and execute all phases
-                phaseTasks = GetPhaseTasks(executionId, executingPipelines, phaseResults, cancellationTokenSource);
-                await Task.WhenAll(phaseTasks);
-            }
-            catch (Exception ex)
-            {
-                if (!(ex is OperationCanceledException))
+                // Create the phase results for this execution
+                ConcurrentDictionary<string, PhaseResult[]> phaseResults =
+                    new ConcurrentDictionary<string, PhaseResult[]>(StringComparer.OrdinalIgnoreCase);
+                Outputs = new PipelineOutputs(phaseResults);
+
+                // Create the pipeline phases (this also validates the pipeline graph)
+                if (_phases == null)
                 {
-                    _logger.LogCritical("Error during execution");
+                    _phases = GetPipelinePhases(_pipelines, _logger);
                 }
-                throw;
+
+                // Verify pipelines
+                HashSet<string> executingPipelines = GetExecutingPipelines(pipelines, normalPipelines);
+                if (executingPipelines.Count == 0)
+                {
+                    _logger.LogWarning("No pipelines are configured or specified for execution.");
+                    return Outputs;
+                }
+
+                // Log
+                _logger.LogInformation($"Executing {executingPipelines.Count} pipelines ({string.Join(", ", executingPipelines.OrderBy(x => x))})");
+                _logger.LogDebug($"Execution ID {ExecutionId}");
+                System.Diagnostics.Stopwatch stopwatch = System.Diagnostics.Stopwatch.StartNew();
+
+                // Raise before event
+                await Events.RaiseAsync(new BeforeEngineExecution(this, ExecutionId));
+
+                // Do a check for the same input/output path
+                if (FileSystem.InputPaths.Any(x => x.Equals(FileSystem.OutputPath)))
+                {
+                    _logger.LogWarning("The output path is also one of the input paths which can cause unexpected behavior and is usually not advised");
+                }
+
+                // Clean paths
+                CleanTempPath();
+                if (Settings.GetBool(Keys.CleanOutputPath))
+                {
+                    CleanOutputPath();
+                }
+
+                // Get and run all phase tasks
+                Task[] phaseTasks = null;
+                try
+                {
+                    // Get and execute all phases
+                    phaseTasks = GetPhaseTasks(executingPipelines, phaseResults);
+                    await Task.WhenAll(phaseTasks);
+                }
+                catch (Exception ex)
+                {
+                    if (!(ex is OperationCanceledException))
+                    {
+                        _logger.LogCritical("Error during execution");
+                    }
+                    throw;
+                }
+                finally
+                {
+                    stopwatch.Stop();
+                }
+
+                // Raise after event
+                await Events.RaiseAsync(new AfterEngineExecution(this, ExecutionId, Outputs, stopwatch.ElapsedMilliseconds));
+
+                // Log execution summary table
+                _logger.LogInformation(
+                    "Execution summary: (number of output documents per pipeline and phase)"
+                    + Environment.NewLine
+                    + Environment.NewLine
+                    + phaseResults
+                        .OrderBy(x => x.Key)
+                        .ToStringTable(
+                            new[]
+                            {
+                                "Pipeline",
+                                nameof(Phase.Input),
+                                nameof(Phase.Process),
+                                nameof(Phase.Transform),
+                                nameof(Phase.Output),
+                                "Total Time"
+                            },
+                            x => x.Key,
+                            x => GetPhaseResultTableString(x.Value[(int)Phase.Input]),
+                            x => GetPhaseResultTableString(x.Value[(int)Phase.Process]),
+                            x => GetPhaseResultTableString(x.Value[(int)Phase.Transform]),
+                            x => GetPhaseResultTableString(x.Value[(int)Phase.Output]),
+                            x =>
+                                ((x.Value[(int)Phase.Input]?.ElapsedMilliseconds ?? 0)
+                                + (x.Value[(int)Phase.Process]?.ElapsedMilliseconds ?? 0)
+                                + (x.Value[(int)Phase.Transform]?.ElapsedMilliseconds ?? 0)
+                                + (x.Value[(int)Phase.Output]?.ElapsedMilliseconds ?? 0)).ToString()
+                                + " ms"));
+
+                static string GetPhaseResultTableString(PhaseResult phaseResult) =>
+                    phaseResult == null
+                        ? string.Empty
+                        : $"{phaseResult.Outputs.Length} ({phaseResult.ElapsedMilliseconds} ms)";
+
+                // Clean up
+                _logger.LogInformation($"Finished execution in {stopwatch.ElapsedMilliseconds} ms");
+                return Outputs;
             }
             finally
             {
-                stopwatch.Stop();
+                ExecutionId = Guid.Empty;
+                CancellationToken = default;
             }
-
-            // Raise after event
-            await Events.RaiseAsync(new AfterEngineExecution(this, executionId, outputs, stopwatch.ElapsedMilliseconds));
-
-            // Log execution summary table
-            _logger.LogInformation(
-                "Execution summary: (number of output documents per pipeline and phase)"
-                + Environment.NewLine
-                + Environment.NewLine
-                + phaseResults
-                    .OrderBy(x => x.Key)
-                    .ToStringTable(
-                        new[]
-                        {
-                            "Pipeline",
-                            nameof(Phase.Input),
-                            nameof(Phase.Process),
-                            nameof(Phase.Transform),
-                            nameof(Phase.Output),
-                            "Total Time"
-                        },
-                        x => x.Key,
-                        x => GetPhaseResultTableString(x.Value[(int)Phase.Input]),
-                        x => GetPhaseResultTableString(x.Value[(int)Phase.Process]),
-                        x => GetPhaseResultTableString(x.Value[(int)Phase.Transform]),
-                        x => GetPhaseResultTableString(x.Value[(int)Phase.Output]),
-                        x =>
-                            ((x.Value[(int)Phase.Input]?.ElapsedMilliseconds ?? 0)
-                            + (x.Value[(int)Phase.Process]?.ElapsedMilliseconds ?? 0)
-                            + (x.Value[(int)Phase.Transform]?.ElapsedMilliseconds ?? 0)
-                            + (x.Value[(int)Phase.Output]?.ElapsedMilliseconds ?? 0)).ToString()
-                            + " ms"));
-
-            static string GetPhaseResultTableString(PhaseResult phaseResult) =>
-                phaseResult == null
-                    ? string.Empty
-                    : $"{phaseResult.Outputs.Length} ({phaseResult.ElapsedMilliseconds} ms)";
-
-            // Clean up
-            _logger.LogInformation($"Finished execution in {stopwatch.ElapsedMilliseconds} ms");
-            return outputs;
         }
 
         // Internal for testing
@@ -525,24 +562,20 @@ namespace Statiq.Core
         }
 
         private Task[] GetPhaseTasks(
-            Guid executionId,
             HashSet<string> executingPipelines,
-            ConcurrentDictionary<string, PhaseResult[]> phaseResults,
-            CancellationTokenSource cancellationTokenSource)
+            ConcurrentDictionary<string, PhaseResult[]> phaseResults)
         {
             Dictionary<PipelinePhase, Task> phaseTasks = new Dictionary<PipelinePhase, Task>();
             foreach (PipelinePhase phase in _phases.Where(x => executingPipelines.Contains(x.PipelineName)))
             {
                 Task phaseTask = GetPhaseTaskAsync(
-                    executionId,
                     phaseResults,
                     phaseTasks,
-                    phase,
-                    cancellationTokenSource);
+                    phase);
                 if (SerialExecution)
                 {
                     // If we're running serially, immediately wait for this phase task before getting the next one
-                    phaseTask.Wait(cancellationTokenSource.Token);
+                    phaseTask.Wait(CancellationToken);
                 }
                 phaseTasks.Add(phase, phaseTask);
             }
@@ -550,19 +583,15 @@ namespace Statiq.Core
         }
 
         private Task GetPhaseTaskAsync(
-            Guid executionId,
             ConcurrentDictionary<string, PhaseResult[]> phaseResults,
             Dictionary<PipelinePhase, Task> phaseTasks,
-            PipelinePhase phase,
-            CancellationTokenSource cancellationTokenSource)
+            PipelinePhase phase)
         {
             // Only the input phase won't have dependencies, all other phases at least depend on the previous phase of their pipeline
             if (phase.Dependencies.Length == 0)
             {
                 // This will immediately queue the input phase while we continue figuring out tasks, but that's okay
-                return Task.Run(
-                    () => phase.ExecuteAsync(this, executionId, phaseResults, cancellationTokenSource),
-                    cancellationTokenSource.Token);
+                return Task.Run(() => phase.ExecuteAsync(this, phaseResults), CancellationToken);
             }
 
             // We have to explicitly wait the execution task in the continuation function
@@ -579,9 +608,7 @@ namespace Statiq.Core
                     // Only run the dependent task if all the dependencies successfully completed
                     if (dependencies.All(x => x.IsCompletedSuccessfully))
                     {
-                        Task.WaitAll(
-                            new Task[] { phase.ExecuteAsync(this, executionId, phaseResults, cancellationTokenSource) },
-                            cancellationTokenSource.Token);
+                        Task.WaitAll(new Task[] { phase.ExecuteAsync(this, phaseResults) }, CancellationToken);
                     }
                     else
                     {
@@ -590,7 +617,7 @@ namespace Statiq.Core
                         _logger.LogError(error);
                         throw new ExecutionException(error);
                     }
-                }, cancellationTokenSource.Token);
+                }, CancellationToken);
         }
 
         // This executes the specified modules with the specified input documents
@@ -611,7 +638,7 @@ namespace Statiq.Core
                     try
                     {
                         // Check for cancellation
-                        contextData.CancellationToken.ThrowIfCancellationRequested();
+                        contextData.Engine.CancellationToken.ThrowIfCancellationRequested();
 
                         // Get the context
                         System.Diagnostics.Stopwatch stopwatch = System.Diagnostics.Stopwatch.StartNew();

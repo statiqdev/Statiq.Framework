@@ -1,5 +1,11 @@
 # 1.0.0-alpha.24
 
+- Renamed the `InterpolateMetadata` module to `EvaluateMetadata` to better represent a more powerful metadata scripting capability.
+- Removed the `Statiq.CodeAnalysis.IDocumentExtensions.Interpolate()` extension method in favor of more robust metadata evaluation through the `EvaluateMetadata` module.
+- Changed `CancellationTokenSource` uses inside the engine to `CancellationToken` since the engine does not itself cancel execution.
+- Surfaced the `CancellationToken` for a given execution through the `IExecutionState`.
+- Added a check to ensure the engine is only performing one execution at a time (the outer execution loop is not concurrently safe).
+- Major refactoring involving engine and execution context interfaces, added a new `IExecutionState` interface that essentially represents a run-time engine.
 - Adds a new `DocumentIdComparer` to compare documents by ID (#69, thanks @mholo65).
 - Removed `IParallelModule.WithSequentialExecution()` and standardized on `.WithParallelExecution(false)` instead to make default behavior of running in parallel clearer (I.e., you have to turn it off).
 - Adds additional configuration methods to `CacheDocuments` providing more control over when to invalidate cached documents (#78).

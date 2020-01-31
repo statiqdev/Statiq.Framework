@@ -31,7 +31,7 @@ namespace Statiq.Core.Tests.Modules.Control
                 engine.Pipelines.Add(new TestPipeline(new ReplaceDocuments("Foo"), gatherData).WithDependencies("Foo", "Bar"));
 
                 // When
-                await engine.ExecuteAsync(cancellationTokenSource);
+                await engine.ExecuteAsync(cancellationTokenSource.Token);
 
                 // Then
                 Assert.AreEqual(4, content.Count);
@@ -57,7 +57,7 @@ namespace Statiq.Core.Tests.Modules.Control
                         .WithDependencies("Foo", "Bar", "Baz"));
 
                 // When
-                await engine.ExecuteAsync(cancellationTokenSource);
+                await engine.ExecuteAsync(cancellationTokenSource.Token);
 
                 // Then
                 Assert.AreEqual(6, content.Count);
@@ -83,7 +83,7 @@ namespace Statiq.Core.Tests.Modules.Control
                         .WithDependencies("Foo", "Bar", "Baz"));
 
                 // When
-                await engine.ExecuteAsync(cancellationTokenSource);
+                await engine.ExecuteAsync(cancellationTokenSource.Token);
 
                 // Then
                 Assert.AreEqual(6, content.Count);

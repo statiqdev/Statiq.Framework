@@ -2,6 +2,7 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Threading;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -16,39 +17,95 @@ namespace Statiq.Testing
         {
             _documentFactory = new DocumentFactory(Settings);
             _documentFactory.SetDefaultDocumentType<TestDocument>();
+
+            TestLoggerProvider = new TestLoggerProvider(LogMessages);
+            Services = new TestServiceProvider(
+                serviceCollection =>
+                {
+                    serviceCollection.AddLogging();
+                    serviceCollection.AddSingleton<ILoggerProvider>(TestLoggerProvider);
+                    serviceCollection.Configure<LoggerFilterOptions>(options => options.MinLevel = LogLevel.Trace);
+                });
         }
 
-        public TestConfigurationSettings Settings { get; } = new TestConfigurationSettings();
+        public TestLoggerProvider TestLoggerProvider { get; }
+
+        public ConcurrentQueue<TestMessage> LogMessages { get; } = new ConcurrentQueue<TestMessage>();
+
+        /// <inheritdoc />
+        public Guid ExecutionId { get; set; } = Guid.Empty;
+
+        /// <inheritdoc />
+        public CancellationToken CancellationToken { get; set; }
 
         /// <inheritdoc />
         public ApplicationState ApplicationState { get; set; }
 
         /// <inheritdoc />
-        IReadOnlyConfigurationSettings IEngine.Settings => Settings;
+        IReadOnlyApplicationState IExecutionState.ApplicationState => ApplicationState;
 
         /// <inheritdoc />
-        public IEventCollection Events { get; set; } = new TestEventCollection();
+        public TestConfigurationSettings Settings { get; set; } = new TestConfigurationSettings();
 
         /// <inheritdoc />
-        public IServiceProvider Services { get; set; } = new TestServiceProvider();
+        IReadOnlyConfigurationSettings IExecutionState.Settings => Settings;
 
         /// <inheritdoc />
-        public IFileSystem FileSystem { get; set; } = new TestFileSystem();
+        public TestEventCollection Events { get; set; } = new TestEventCollection();
 
         /// <inheritdoc />
-        public IMemoryStreamFactory MemoryStreamFactory { get; set; } = new TestMemoryStreamFactory();
+        IEventCollection IEngine.Events => Events;
+
+        /// <inheritdoc />
+        IReadOnlyEventCollection IExecutionState.Events => Events;
+
+        /// <inheritdoc />
+        public TestServiceProvider Services { get; set; }
+
+        /// <inheritdoc />
+        IServiceProvider IExecutionState.Services => Services;
+
+        /// <inheritdoc />
+        public TestFileSystem FileSystem { get; set; } = new TestFileSystem();
+
+        /// <inheritdoc />
+        IFileSystem IEngine.FileSystem => FileSystem;
+
+        /// <inheritdoc />
+        IReadOnlyFileSystem IExecutionState.FileSystem => FileSystem;
+
+        /// <inheritdoc />
+        public TestMemoryStreamFactory MemoryStreamFactory { get; set; } = new TestMemoryStreamFactory();
+
+        /// <inheritdoc />
+        IMemoryStreamFactory IExecutionState.MemoryStreamFactory => MemoryStreamFactory;
 
         /// <inheritdoc />
         public IPipelineCollection Pipelines => throw new NotImplementedException();
 
         /// <inheritdoc />
-        public IShortcodeCollection Shortcodes => new TestShortcodeCollection();
+        public TestShortcodeCollection Shortcodes { get; set; } = new TestShortcodeCollection();
 
         /// <inheritdoc />
-        public INamespacesCollection Namespaces { get; set; } = new TestNamespacesCollection();
+        IShortcodeCollection IEngine.Shortcodes => Shortcodes;
+
+        /// <inheritdoc />
+        IReadOnlyShortcodeCollection IExecutionState.Shortcodes => Shortcodes;
+
+        /// <inheritdoc />
+        public TestNamespacesCollection Namespaces { get; set; } = new TestNamespacesCollection();
+
+        /// <inheritdoc />
+        INamespacesCollection IExecutionState.Namespaces => Namespaces;
 
         /// <inheritdoc />
         public bool SerialExecution { get; set; }
+
+        /// <inheritdoc/>
+        public TestPipelineOutputs Outputs { get; set; } = new TestPipelineOutputs();
+
+        /// <inheritdoc />
+        IPipelineOutputs IExecutionState.Outputs => Outputs;
 
         private readonly DocumentFactory _documentFactory;
 

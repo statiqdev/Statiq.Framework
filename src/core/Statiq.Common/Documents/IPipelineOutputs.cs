@@ -4,8 +4,7 @@ using System.Collections.Immutable;
 namespace Statiq.Common
 {
     /// <summary>
-    /// Contains a collection of documents output by the process
-    /// phase of each pipeline (except isolated ones).
+    /// Contains a collection of documents output by pipelines.
     /// </summary>
     public partial interface IPipelineOutputs : IEnumerable<IDocument>
     {

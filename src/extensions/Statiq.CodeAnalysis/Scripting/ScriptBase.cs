@@ -1,19 +1,24 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
+using System.Threading;
+using System.Threading.Tasks;
 using Statiq.Common;
 
 namespace Statiq.CodeAnalysis.Scripting
 {
     public abstract class ScriptBase
     {
-        protected ScriptBase(IDocument document, IExecutionContext context)
+        protected ScriptBase(IMetadata metadata, IExecutionState executionState)
         {
-            Document = document;
-            Context = context;
+            Metadata = metadata;
+            ExecutionState = executionState;
         }
 
-        public IDocument Document { get; }
+        public IExecutionState ExecutionState { get; }
 
-        public IExecutionContext Context { get; }
+        public IMetadata Metadata { get; }
 
         public abstract Task<object> EvaluateAsync();
     }

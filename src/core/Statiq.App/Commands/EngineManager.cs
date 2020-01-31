@@ -71,7 +71,7 @@ namespace Statiq.App
         {
             try
             {
-                await Engine.ExecuteAsync(Pipelines, NormalPipelines, cancellationTokenSource);
+                await Engine.ExecuteAsync(Pipelines, NormalPipelines, cancellationTokenSource?.Token ?? CancellationToken.None);
             }
             catch (Exception ex)
             {

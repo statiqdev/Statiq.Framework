@@ -26,7 +26,10 @@ namespace Statiq.Core
         private readonly string _logPrefix;
 
         /// <inheritdoc/>
-        public Guid ExecutionId => _contextData.ExecutionId;
+        public IExecutionState ExecutionState => _contextData.Engine;
+
+        /// <inheritdoc/>
+        public Guid ExecutionId => _contextData.Engine.ExecutionId;
 
         /// <inheritdoc/>
         public INamespacesCollection Namespaces => _contextData.Engine.Namespaces;
@@ -59,13 +62,16 @@ namespace Statiq.Core
         public IReadOnlyApplicationState ApplicationState => _contextData.Engine.ApplicationState;
 
         /// <inheritdoc/>
+        public IServiceProvider Services => _contextData.Services; // Expose the scoped provider inside the execution context
+
+        /// <inheritdoc/>
         public bool SerialExecution => _contextData.Engine.SerialExecution;
 
         /// <inheritdoc/>
         public IMemoryStreamFactory MemoryStreamFactory => _contextData.Engine.MemoryStreamFactory;
 
         /// <inheritdoc/>
-        public CancellationToken CancellationToken => _contextData.CancellationToken;
+        public CancellationToken CancellationToken => _contextData.Engine.CancellationToken;
 
         /// <inheritdoc/>
         public IExecutionContext Parent { get; }
