@@ -13,7 +13,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Statiq.Common;
 
-namespace Statiq.CodeAnalysis.Scripting
+namespace Statiq.Core
 {
     public static class ScriptHelper
     {
@@ -224,15 +224,14 @@ namespace Statiq.CodeAnalysis.Scripting
             liftingWalker.Visit(syntaxTree.GetRoot(executionState.CancellationToken));
 
             // Get the using statements
-            string usingStatements = string.Join(
-                Environment.NewLine,
-                executionState.Namespaces
-                    .Concat(new[]
-                    {
-                        "Statiq.CodeAnalysis.Scripting",
-                        "System.Collections"
-                    })
-                    .Select(x => "using " + x + ";"));
+            HashSet<string> namespaces = new HashSet<string>(executionState.Namespaces);
+            namespaces.Add("System");
+            namespaces.Add("System.Collections");
+            namespaces.Add("System.Collections.Generic");
+            namespaces.Add("System.Linq");
+            namespaces.Add("System.Text");
+            namespaces.Add("Statiq.Core");
+            string usingStatements = string.Join(Environment.NewLine, namespaces.Select(x => "using " + x + ";"));
 
             // Get the document metadata properties and add to the script host object,
             // but only if they don't conflict with properties from ScriptBase

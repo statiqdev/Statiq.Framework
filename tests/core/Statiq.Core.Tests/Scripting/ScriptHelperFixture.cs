@@ -1,10 +1,9 @@
 ﻿using NUnit.Framework;
 using Shouldly;
-using Statiq.CodeAnalysis.Scripting;
 using Statiq.Common;
 using Statiq.Testing;
 
-namespace Statiq.CodeAnalysis.Tests.Scripting
+namespace Statiq.Core.Tests.Scripting
 {
     [TestFixture]
     public class ScriptHelperFixture : BaseFixture
@@ -23,8 +22,12 @@ namespace Statiq.CodeAnalysis.Tests.Scripting
                 string code = "int x = 0;";
                 string expectedStart =
 @"using Foo.Bar;
-using Statiq.CodeAnalysis.Scripting;
+using System;
 using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using Statiq.Core;
 
 public class Script : ScriptBase, IExecutionState, IMetadata
 {
@@ -61,8 +64,12 @@ public object ContentProvider => Metadata.Get(""ContentProvider"");";
                 string code = "1 + 2";
                 string expectedStart =
 @"using Foo.Bar;
-using Statiq.CodeAnalysis.Scripting;
+using System;
 using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using Statiq.Core;
 
 public class Script : ScriptBase, IExecutionState, IMetadata
 {
@@ -99,8 +106,12 @@ public object ContentProvider => Metadata.Get(""ContentProvider"");";
                 string code = "1 + 2;";
                 string expectedStart =
 @"using Foo.Bar;
-using Statiq.CodeAnalysis.Scripting;
+using System;
 using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using Statiq.Core;
 
 public class Script : ScriptBase, IExecutionState, IMetadata
 {
@@ -137,8 +148,12 @@ public object ContentProvider => Metadata.Get(""ContentProvider"");";
                 string code = "return 0;";
                 string expectedStart =
 @"using Foo.Bar;
-using Statiq.CodeAnalysis.Scripting;
+using System;
 using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using Statiq.Core;
 
 public class Script : ScriptBase, IExecutionState, IMetadata
 {
@@ -191,8 +206,12 @@ public class Baz
 }";
                 string expectedStart =
 @"using Foo.Bar;
-using Statiq.CodeAnalysis.Scripting;
+using System;
 using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using Statiq.Core;
 
 public class Script : ScriptBase, IExecutionState, IMetadata
 {
@@ -264,8 +283,12 @@ public string Self(string x)
 }";
                 string expectedStart =
 @"using Foo.Bar;
-using Statiq.CodeAnalysis.Scripting;
+using System;
 using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using Statiq.Core;
 using Red.Blue;
 using Yellow;
 
@@ -330,8 +353,12 @@ public string Self(string x)
 }";
                 string expectedStart =
 @"using Foo.Bar;
-using Statiq.CodeAnalysis.Scripting;
+using System;
 using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using Statiq.Core;
 
 public class Script : ScriptBase, IExecutionState, IMetadata
 {
@@ -394,8 +421,12 @@ public static string Self(this string x)
 }";
                 string expectedStart =
 @"using Foo.Bar;
-using Statiq.CodeAnalysis.Scripting;
+using System;
 using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using Statiq.Core;
 
 public class Script : ScriptBase, IExecutionState, IMetadata
 {
@@ -463,8 +494,12 @@ public string Self(string x)
 }";
                 string expectedStart =
 @"using Foo.Bar;
-using Statiq.CodeAnalysis.Scripting;
+using System;
 using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using Statiq.Core;
 
 public class Script : ScriptBase, IExecutionState, IMetadata
 {

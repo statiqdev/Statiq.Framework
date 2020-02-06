@@ -6,7 +6,7 @@ using NUnit.Framework;
 using Shouldly;
 using Statiq.Testing;
 
-namespace Statiq.CodeAnalysis.Tests
+namespace Statiq.Core.Tests.Scripting
 {
     [TestFixture]
     public class ReflectionHelperFixture : BaseFixture

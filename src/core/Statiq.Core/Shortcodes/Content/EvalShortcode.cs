@@ -1,9 +1,8 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
-using Statiq.CodeAnalysis.Scripting;
 using Statiq.Common;
 
-namespace Statiq.CodeAnalysis
+namespace Statiq.Core
 {
     /// <summary>
     /// Evaluates C# code.

@@ -1,10 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using Statiq.CodeAnalysis.Scripting;
 using Statiq.Common;
 
-namespace Statiq.CodeAnalysis.Scripting
+namespace Statiq.Core
 {
     /// <summary>
     /// A lazily evaluated metadata value based on script code.

@@ -2,10 +2,9 @@
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-using Statiq.CodeAnalysis.Scripting;
 using Statiq.Common;
 
-namespace Statiq.CodeAnalysis
+namespace Statiq.Core
 {
     /// <summary>
     /// Evaluates a C# based script contained in document content.

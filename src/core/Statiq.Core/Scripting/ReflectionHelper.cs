@@ -5,7 +5,7 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 
-namespace Statiq.CodeAnalysis
+namespace Statiq.Core
 {
     // From https://gist.github.com/jamietre/4476307
     // See also https://stackoverflow.com/a/13318056
