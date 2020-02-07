@@ -39,12 +39,12 @@ namespace Statiq.Common
         /// document factory to use. The empty constructor _should not_ call other constructors
         /// (otherwise the document will be incorrectly marked as fully initialized).
         /// If properties like <see cref="Source"/> or <see cref="Metadata"/> need to be initialized
-        /// to default values, most provide protected setters that can be called until the document
+        /// to default values, protected setters are provided that can be called until the document
         /// has been accessed or fully initialized by the factory (at which point the setters will throw).
         /// </summary>
         protected Document()
         {
-            // Don't call the other constructors for the empty constructor because it's a special case
+            // Don't call the other constructors from the empty constructor because it's a special case
             // If we do, that'll trigger initialization, but the empty constructor is also used
             // by the document factory to instantiate a document _then_ initialize it explicitly
             // and we can't initialize twice or it'll throw
@@ -360,9 +360,6 @@ namespace Statiq.Common
         }
 
         public bool TryGetValue(string key, out object value) => TryGetValue<object>(key, out value);
-
-        public IMetadata GetMetadata(params string[] keys) =>
-            new Metadata(this.Where(x => keys.Contains(x.Key, StringComparer.OrdinalIgnoreCase)));
 
         // We have to exclude properties that use the enumerator because they cause infinite recursion
         // The Select ensures LINQ optimizations won't turn this into a recursive call to Count

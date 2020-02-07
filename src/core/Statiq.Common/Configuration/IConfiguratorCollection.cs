@@ -6,7 +6,7 @@ namespace Statiq.Common
     /// <summary>
     /// Contains a collection of configurators that can be used to configure a given type of object.
     /// </summary>
-    public partial interface IConfiguratorCollection
+    public interface IConfiguratorCollection
     {
         IList<IConfigurator<TConfigurable>> Get<TConfigurable>()
             where TConfigurable : IConfigurable;

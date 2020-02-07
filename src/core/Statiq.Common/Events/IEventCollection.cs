@@ -5,7 +5,7 @@ namespace Statiq.Common
     /// <summary>
     /// Contains global events and event handlers.
     /// </summary>
-    public partial interface IEventCollection : IReadOnlyEventCollection
+    public interface IEventCollection : IReadOnlyEventCollection
     {
         /// <summary>
         /// Subscribes a new handler for the given <typeparamref name="TEvent"/> type.

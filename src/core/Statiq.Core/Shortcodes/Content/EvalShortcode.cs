@@ -17,8 +17,8 @@ namespace Statiq.Core
     {
         public override async Task<IDocument> ExecuteAsync(KeyValuePair<string, string>[] args, string content, IDocument document, IExecutionContext context)
         {
-            byte[] assembly = ScriptHelper.Compile(content, document, context);
-            object value = await ScriptHelper.EvaluateAsync(assembly, document, context);
+            byte[] assembly = context.ScriptHelper.Compile(content, document);
+            object value = await context.ScriptHelper.EvaluateAsync(assembly, document);
             return context.CreateDocument(await context.GetContentProviderAsync(value.ToString()));
         }
     }

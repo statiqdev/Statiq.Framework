@@ -28,6 +28,37 @@ namespace Statiq.Common
         public static T Convert<T>(object value, Func<T> defaultValueFactory) =>
             TryConvert(value, out T result) ? result : (defaultValueFactory == null ? default : defaultValueFactory());
 
+        /// <summary>
+        /// Trys to convert the provided value to the specified type while recursivly expanding <see cref="IMetadataValue"/>.
+        /// </summary>
+        /// <typeparam name="T">The desired return type.</typeparam>
+        /// <param name="value">The value to convert.</param>
+        /// <param name="metadata">The current metadata instance.</param>
+        /// <param name="result">The result of conversion.</param>
+        /// <returns><c>true</c> if the value could be converted to the desired type, <c>false</c> otherwise.</returns>
+        public static bool TryExpandAndConvert<T>(object value, IMetadata metadata, out T result) => TryConvert(ExpandValue(value, metadata), out result);
+
+        /// <summary>
+        /// This resolves the value by recursively expanding <see cref="IMetadataValue"/>.
+        /// </summary>
+        public static object ExpandValue(object value, IMetadata metadata) =>
+            value is IMetadataValue metadataValue ? ExpandValue(metadataValue.Get(metadata), metadata) : value;
+
+        /// <summary>
+        /// This resolves the value by recursively expanding <see cref="IMetadataValue"/>.
+        /// </summary>
+        public static KeyValuePair<TKey, object> ExpandKeyValuePair<TKey>(KeyValuePair<TKey, object> item, IMetadata metadata) =>
+            item.Value is IMetadataValue
+                ? new KeyValuePair<TKey, object>(item.Key, ExpandValue(item.Value, metadata))
+                : item;
+
+        /// <summary>
+        /// Trys to convert the provided value to the specified type.
+        /// </summary>
+        /// <typeparam name="T">The desired return type.</typeparam>
+        /// <param name="value">The value to convert.</param>
+        /// <param name="result">The result of conversion.</param>
+        /// <returns><c>true</c> if the value could be converted to the desired type, <c>false</c> otherwise.</returns>
         public static bool TryConvert<T>(object value, out T result)
         {
             // Check for null

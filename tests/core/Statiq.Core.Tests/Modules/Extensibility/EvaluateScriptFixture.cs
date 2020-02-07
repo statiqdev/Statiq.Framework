@@ -16,11 +16,13 @@ namespace Statiq.Core.Tests.Modules.Extensibility
             public async Task ChangesContentWhenStringResult()
             {
                 // Given
+                TestExecutionContext context = new TestExecutionContext();
+                context.ScriptHelper = new ScriptHelper(context);
                 TestDocument document = new TestDocument("return 1 + 2;");
                 EvaluateScript evaluateScript = new EvaluateScript();
 
                 // When
-                IReadOnlyList<TestDocument> result = await ExecuteAsync(document, evaluateScript);
+                IReadOnlyList<TestDocument> result = await ExecuteAsync(document, context, evaluateScript);
 
                 // Then
                 result.Single().Content.ShouldBe("3");
@@ -30,6 +32,8 @@ namespace Statiq.Core.Tests.Modules.Extensibility
             public async Task CanAccessMetadataAsGlobalProperty()
             {
                 // Given
+                TestExecutionContext context = new TestExecutionContext();
+                context.ScriptHelper = new ScriptHelper(context);
                 TestDocument document = new TestDocument("return (int)Foo + 2;")
                 {
                     { "Foo", 5 }
@@ -37,7 +41,7 @@ namespace Statiq.Core.Tests.Modules.Extensibility
                 EvaluateScript evaluateScript = new EvaluateScript();
 
                 // When
-                IReadOnlyList<TestDocument> result = await ExecuteAsync(document, evaluateScript);
+                IReadOnlyList<TestDocument> result = await ExecuteAsync(document, context, evaluateScript);
 
                 // Then
                 result.Single().Content.ShouldBe("7");
@@ -47,6 +51,8 @@ namespace Statiq.Core.Tests.Modules.Extensibility
             public async Task CanAccessMetadata()
             {
                 // Given
+                TestExecutionContext context = new TestExecutionContext();
+                context.ScriptHelper = new ScriptHelper(context);
                 TestDocument document = new TestDocument("return GetInt(\"Foo\") + 2;")
                 {
                     { "Foo", "5" }
@@ -54,7 +60,7 @@ namespace Statiq.Core.Tests.Modules.Extensibility
                 EvaluateScript evaluateScript = new EvaluateScript();
 
                 // When
-                IReadOnlyList<TestDocument> result = await ExecuteAsync(document, evaluateScript);
+                IReadOnlyList<TestDocument> result = await ExecuteAsync(document, context, evaluateScript);
 
                 // Then
                 result.Single().Content.ShouldBe("7");
@@ -64,6 +70,8 @@ namespace Statiq.Core.Tests.Modules.Extensibility
             public async Task CompileThenEvaluate()
             {
                 // Given
+                TestExecutionContext context = new TestExecutionContext();
+                context.ScriptHelper = new ScriptHelper(context);
                 TestDocument document = new TestDocument("return (int)Foo + 2;")
                 {
                     { "Foo", 5 }
@@ -72,7 +80,7 @@ namespace Statiq.Core.Tests.Modules.Extensibility
                 EvaluateScript evaluateScript = new EvaluateScript();
 
                 // When
-                IReadOnlyList<TestDocument> result = await ExecuteAsync(document, compileScript, evaluateScript);
+                IReadOnlyList<TestDocument> result = await ExecuteAsync(document, context, compileScript, evaluateScript);
 
                 // Then
                 result.Single().Content.ShouldBe("7");
@@ -82,11 +90,13 @@ namespace Statiq.Core.Tests.Modules.Extensibility
             public async Task MultipleStatements()
             {
                 // Given
+                TestExecutionContext context = new TestExecutionContext();
+                context.ScriptHelper = new ScriptHelper(context);
                 TestDocument document = new TestDocument("int x = 1 + 2; return x;");
                 EvaluateScript evaluateScript = new EvaluateScript();
 
                 // When
-                IReadOnlyList<TestDocument> result = await ExecuteAsync(document, evaluateScript);
+                IReadOnlyList<TestDocument> result = await ExecuteAsync(document, context, evaluateScript);
 
                 // Then
                 result.Single().Content.ShouldBe("3");
@@ -96,11 +106,13 @@ namespace Statiq.Core.Tests.Modules.Extensibility
             public async Task DoesNotRequireReturn()
             {
                 // Given
+                TestExecutionContext context = new TestExecutionContext();
+                context.ScriptHelper = new ScriptHelper(context);
                 TestDocument document = new TestDocument("1 + 2");
                 EvaluateScript evaluateScript = new EvaluateScript();
 
                 // When
-                IReadOnlyList<TestDocument> result = await ExecuteAsync(document, evaluateScript);
+                IReadOnlyList<TestDocument> result = await ExecuteAsync(document, context, evaluateScript);
 
                 // Then
                 result.Single().Content.ShouldBe("3");
@@ -110,11 +122,13 @@ namespace Statiq.Core.Tests.Modules.Extensibility
             public async Task ReturnsEmptyContentForExpression()
             {
                 // Given
+                TestExecutionContext context = new TestExecutionContext();
+                context.ScriptHelper = new ScriptHelper(context);
                 TestDocument document = new TestDocument("_ = 1 + 2;");
                 EvaluateScript evaluateScript = new EvaluateScript();
 
                 // When
-                IReadOnlyList<TestDocument> result = await ExecuteAsync(document, evaluateScript);
+                IReadOnlyList<TestDocument> result = await ExecuteAsync(document, context, evaluateScript);
 
                 // Then
                 result.Single().Content.ShouldBeEmpty();

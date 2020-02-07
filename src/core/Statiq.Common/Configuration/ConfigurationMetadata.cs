@@ -13,7 +13,7 @@ namespace Statiq.Common
     {
         protected internal ConfigurationMetadata(IConfiguration configuration)
         {
-            Configuration = configuration;
+            Configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
         }
 
         public IConfiguration Configuration { get; protected set; }
@@ -21,25 +21,27 @@ namespace Statiq.Common
         public bool ContainsKey(string key) =>
             Configuration.GetSection(key ?? throw new ArgumentNullException(nameof(key))).Exists();
 
-        public bool TryGetRaw(string key, out object value)
+        public virtual bool TryGetRaw(string key, out object value)
         {
             _ = key ?? throw new ArgumentNullException(nameof(key));
             IConfigurationSection section = Configuration.GetSection(key);
             if (section.Exists())
             {
-                value = section.Value ?? (object)new ConfigurationMetadata(section);
+                value = section.Value ?? GetSectionMetadata(section);
                 return true;
             }
             value = default;
             return false;
         }
 
+        protected virtual object GetSectionMetadata(IConfigurationSection section) => new ConfigurationMetadata(section);
+
         public bool TryGetValue<TValue>(string key, out TValue value)
         {
             value = default;
             if (key != null && TryGetRaw(key, out object raw))
             {
-                return TypeHelper.TryConvert(raw, out value);
+                return TypeHelper.TryExpandAndConvert(raw, this, out value);
             }
             return false;
         }
@@ -74,8 +76,5 @@ namespace Statiq.Common
             Configuration.AsEnumerable().Select(x => new KeyValuePair<string, object>(x.Key, x.Value)).GetEnumerator();
 
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
-
-        public IMetadata GetMetadata(params string[] keys) =>
-            new Metadata(this.Where(x => keys.Contains(x.Key, StringComparer.OrdinalIgnoreCase)));
     }
 }

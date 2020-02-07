@@ -17,10 +17,10 @@ namespace Statiq.Core
             // Get the assembly
             byte[] assembly = input.MediaTypeEquals(CompileScript.ScriptMediaType)
                 ? await input.GetContentBytesAsync()
-                : ScriptHelper.Compile(await input.GetContentStringAsync(), input, context);
+                : context.ScriptHelper.Compile(await input.GetContentStringAsync(), input);
 
             // Evaluate the script
-            object value = await ScriptHelper.EvaluateAsync(assembly, input, context);
+            object value = await context.ScriptHelper.EvaluateAsync(assembly, input);
             return await context.CloneOrCreateDocumentsAsync(input, input.Yield(), value ?? new NullContent());
         }
     }

@@ -72,15 +72,11 @@ namespace Statiq.Testing
             {
                 return false;
             }
-            rawValue = GetValue(rawValue);
-            return TypeHelper.TryConvert(rawValue, out value);
+            return TypeHelper.TryExpandAndConvert(rawValue, this, out value);
         }
 
         /// <inheritdoc />
         public bool TryGetValue(string key, out object value) => TryGetValue<object>(key, out value);
-
-        /// <inhertdoc />
-        public IMetadata GetMetadata(params string[] keys) => new TestMetadata(keys.Where(ContainsKey).ToDictionary(x => x, x => this[x]));
 
         /// <inhertdoc />
         public object this[string key]
@@ -107,15 +103,18 @@ namespace Statiq.Testing
         /// <inhertdoc />
         public IEnumerable<string> Keys => _dictionary.Keys;
 
-        ICollection<object> IDictionary<string, object>.Values => _dictionary.Values;
+        /// <inhertdoc />
+        ICollection<object> IDictionary<string, object>.Values => _dictionary.Values.Select(x => TypeHelper.ExpandValue(x, this)).ToArray();
 
+        /// <inhertdoc />
         ICollection<string> IDictionary<string, object>.Keys => _dictionary.Keys;
 
         /// <inhertdoc />
-        public IEnumerable<object> Values => _dictionary.Select(x => GetValue(x.Value));
+        public IEnumerable<object> Values => _dictionary.Values.Select(x => TypeHelper.ExpandValue(x, this)).ToArray();
 
         /// <inhertdoc />
-        public IEnumerator<KeyValuePair<string, object>> GetEnumerator() => _dictionary.Select(GetItem).GetEnumerator();
+        public IEnumerator<KeyValuePair<string, object>> GetEnumerator() =>
+            _dictionary.Select(x => TypeHelper.ExpandKeyValuePair(x, this)).GetEnumerator();
 
         /// <inhertdoc />
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
@@ -139,23 +138,5 @@ namespace Statiq.Testing
         public int Count => _dictionary.Count;
 
         public bool IsReadOnly => ((IDictionary<string, object>)_dictionary).IsReadOnly;
-
-        /// <summary>
-        /// This resolves the metadata value by recursively expanding IMetadataValue.
-        /// </summary>
-        private object GetValue(object originalValue)
-        {
-            IMetadataValue metadataValue = originalValue as IMetadataValue;
-            return metadataValue != null ? GetValue(metadataValue.Get(this)) : originalValue;
-        }
-
-        /// <summary>
-        /// This resolves the metadata value by expanding IMetadataValue.
-        /// </summary>
-        private KeyValuePair<string, object> GetItem(KeyValuePair<string, object> item)
-        {
-            IMetadataValue metadataValue = item.Value as IMetadataValue;
-            return metadataValue != null ? new KeyValuePair<string, object>(item.Key, GetValue(metadataValue.Get(this))) : item;
-        }
     }
 }

@@ -22,7 +22,7 @@ namespace Statiq.Testing
         private ConfigurationReloadToken _reloadToken = new ConfigurationReloadToken();
 
         public TestConfigurationSettings()
-            : base(null)
+            : base(new ConfigurationRoot(Array.Empty<IConfigurationProvider>()))
         {
             Configuration = new ConfigurationBuilder().Add(this).Build();
         }

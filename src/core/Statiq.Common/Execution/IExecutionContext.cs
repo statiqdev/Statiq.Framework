@@ -15,7 +15,7 @@ namespace Statiq.Common
     /// All of the information that represents a given build. Also implements
     /// <see cref="IMetadata"/> to expose the global metadata.
     /// </summary>
-    public partial interface IExecutionContext : IExecutionState, IMetadata, IServiceProvider, ILogger
+    public interface IExecutionContext : IExecutionState, IMetadata, IServiceProvider, ILogger
     {
         /// <summary>
         /// Gets the current execution state.
@@ -108,5 +108,33 @@ namespace Statiq.Common
             int maxEngines = 25,
             int maxUsagesPerEngine = 100,
             TimeSpan? engineTimeout = null);
+
+        // IMetadata
+
+        bool IMetadata.TryGetRaw(string key, out object value) => Settings.TryGetRaw(key, out value);
+
+        bool IMetadata.TryGetValue<TValue>(string key, out TValue value) => Settings.TryGetValue(key, out value);
+
+        // IReadOnlyDictionary<string, object>
+
+        IEnumerable<string> IReadOnlyDictionary<string, object>.Keys => Settings.Keys;
+
+        IEnumerable<object> IReadOnlyDictionary<string, object>.Values => Settings.Values;
+
+        object IReadOnlyDictionary<string, object>.this[string key] => Settings[key];
+
+        bool IReadOnlyDictionary<string, object>.ContainsKey(string key) => Settings.ContainsKey(key);
+
+        bool IReadOnlyDictionary<string, object>.TryGetValue(string key, out object value) => Settings.TryGetValue(key, out value);
+
+        // IReadOnlyCollection<KeyValuePair<string, object>>
+
+        int IReadOnlyCollection<KeyValuePair<string, object>>.Count => Settings.Count;
+
+        // IEnumerable<KeyValuePair<string, object>>
+
+        IEnumerator<KeyValuePair<string, object>> IEnumerable<KeyValuePair<string, object>>.GetEnumerator() => Settings.GetEnumerator();
+
+        IEnumerator IEnumerable.GetEnumerator() => Settings.GetEnumerator();
     }
 }

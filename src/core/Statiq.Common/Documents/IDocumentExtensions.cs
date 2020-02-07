@@ -7,31 +7,27 @@ using Statiq.Common;
 
 namespace Statiq.Common
 {
-    public partial interface IDocument
+    public static class IDocumentExtensions
     {
-        /// <inheritdoc />
-        IContentProvider IContentProviderFactory.GetContentProvider() => ContentProvider;
-
-        /// <inheritdoc />
-        IContentProvider IContentProviderFactory.GetContentProvider(string mediaType) => ContentProvider.CloneWithMediaType(mediaType);
-
         /// <summary>
         /// Gets the content associated with this document as a <see cref="Stream"/>.
         /// The underlying stream will be reset to position 0 each time this method is called.
         /// The stream you get from this call must be disposed as soon as reading is complete.
         /// </summary>
+        /// <param name="document">The document.</param>
         /// <returns>A <see cref="Stream"/> of the content associated with this document.</returns>
-        public Stream GetContentStream() => ContentProvider.GetStream();
+        public static Stream GetContentStream(this IDocument document) => document.ContentProvider.GetStream();
 
         /// <summary>
         /// Gets the content associated with this document as a string.
         /// This will result in reading the entire content stream.
         /// It's preferred to read directly as a stream using <see cref="GetContentStream"/> if possible.
         /// </summary>
+        /// <param name="document">The document.</param>
         /// <value>The content associated with this document.</value>
-        public async Task<string> GetContentStringAsync()
+        public static async Task<string> GetContentStringAsync(this IDocument document)
         {
-            Stream stream = GetContentStream();
+            Stream stream = document.GetContentStream();
             if (stream == null || stream == Stream.Null)
             {
                 return string.Empty;
@@ -47,10 +43,11 @@ namespace Statiq.Common
         /// This will result in reading the entire content stream.
         /// It's preferred to read directly as a stream using <see cref="GetContentStream"/> if possible.
         /// </summary>
+        /// <param name="document">The document.</param>
         /// <value>The content associated with this document.</value>
-        public async Task<byte[]> GetContentBytesAsync()
+        public static async Task<byte[]> GetContentBytesAsync(this IDocument document)
         {
-            using (Stream stream = GetContentStream())
+            using (Stream stream = document.GetContentStream())
             {
                 if (stream == null || stream == Stream.Null)
                 {
@@ -65,28 +62,30 @@ namespace Statiq.Common
         /// <summary>
         /// Determines if the supplied media type equals the media type of the content.
         /// </summary>
+        /// <param name="document">The document.</param>
         /// <param name="mediaType">The media type to check.</param>
         /// <returns><c>true</c> if the media types are equal, <c>false</c> otherwise.</returns>
-        public bool MediaTypeEquals(string mediaType) =>
-            string.Equals(ContentProvider.MediaType, mediaType, StringComparison.OrdinalIgnoreCase);
+        public static bool MediaTypeEquals(this IDocument document, string mediaType) =>
+            string.Equals(document.ContentProvider.MediaType, mediaType, StringComparison.OrdinalIgnoreCase);
 
         /// <summary>
         /// Gets a hash of the provided document content and metadata appropriate for caching.
         /// Custom <see cref="IDocument"/> implementations may also contribute additional state
         /// data to the resulting hash code.
         /// </summary>
+        /// <param name="document">The document.</param>
         /// <returns>A hash appropriate for caching.</returns>
-        public async Task<int> GetCacheHashCodeAsync()
+        public static async Task<int> GetCacheHashCodeAsync(this IDocument document)
         {
             HashCode hash = default;
-            using (Stream stream = GetContentStream())
+            using (Stream stream = document.GetContentStream())
             {
                 hash.Add(await Crc32.CalculateAsync(stream));
             }
 
             // We exclude ContentProvider from hash as we already added CRC for content above.
-            foreach (KeyValuePair<string, object> item in this
-                .Where(x => x.Key != nameof(ContentProvider)))
+            foreach (KeyValuePair<string, object> item in document
+                .Where(x => x.Key != nameof(IDocument.ContentProvider)))
             {
                 hash.Add(item.Key);
                 hash.Add(item.Value);
@@ -98,10 +97,8 @@ namespace Statiq.Common
         /// <summary>
         /// Gets a normalized title derived from the document source.
         /// </summary>
+        /// <param name="document">The document.</param>
         /// <returns>A normalized title.</returns>
-        public string GetTitle() => Source?.GetTitle();
-
-        /// <inheritdoc />
-        string IDisplayable.ToDisplayString() => Source?.ToDisplayString() ?? "unknown source";
+        public static string GetTitle(this IDocument document) => document.Source?.GetTitle();
     }
 }

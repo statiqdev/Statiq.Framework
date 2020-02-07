@@ -15,7 +15,7 @@ namespace Statiq.Core
 
         protected override async Task<IEnumerable<IDocument>> ExecuteInputAsync(IDocument input, IExecutionContext context)
         {
-            byte[] assembly = ScriptHelper.Compile(await input.GetContentStringAsync(), input, context);
+            byte[] assembly = context.ScriptHelper.Compile(await input.GetContentStringAsync(), input);
             MemoryStream stream = context.MemoryStreamFactory.GetStream(assembly);
             return input.Clone(context.GetContentProvider(stream, ScriptMediaType)).Yield();
         }

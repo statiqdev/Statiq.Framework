@@ -3,26 +3,64 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Text;
+using Statiq.Common;
 
 namespace Statiq.Core
 {
     // From https://gist.github.com/jamietre/4476307
     // See also https://stackoverflow.com/a/13318056
-    public static class ReflectionHelper
+    internal static class ReflectionHelper
     {
-        public static string[] GetCallSignatures(Type type, string callThrough)
+        public static IEnumerable<string> GetCallSignatures(Type type, string callThrough, bool extensions = true)
         {
             Type[] types = type.IsInterface
                 ? type.GetInterfaces().Concat(new[] { type }).ToArray()
                 : new[] { type };
-            return types.SelectMany(t => t.GetMethods()
+
+            // Methods
+            HashSet<string> signatures = new HashSet<string>(
+                types.SelectMany(t => t.GetMethods()
                     .Where(m => !m.IsSpecialName && !m.DeclaringType.Equals(typeof(object)))
-                    .Select(m => $"{GetMethodSignature(m)} => {callThrough}.{GetMethodSignature(m, true)};"))
-                .Concat(types.SelectMany(t => t.GetProperties()
+                    .Select(m => $"{GetMethodSignature(m)} => {callThrough}.{GetMethodSignature(m, true)};")));
+
+            // Properties
+            signatures.AddRange(
+                types.SelectMany(t => t.GetProperties()
                     .Where(m => !m.IsSpecialName && !m.DeclaringType.Equals(typeof(object)))
-                    .Select(p => $"public {TypeName(p.PropertyType)} {PropertyName(p, false)} => {callThrough}{PropertyName(p, true)};")))
-                .ToArray();
+                    .Select(p => $"public {TypeName(p.PropertyType)} {PropertyName(p, false)} => {callThrough}{PropertyName(p, true)};")));
+
+            // Extensions
+            if (extensions)
+            {
+                signatures.AddRange(
+                    types.SelectMany(t => GetExtensionMethods(t)
+                        .Select(m => $"{GetMethodSignature(m, false, true)} => {callThrough}.{GetMethodSignature(m, true, true)};")));
+            }
+
+            return signatures;
+        }
+
+        public static IEnumerable<MethodInfo> GetExtensionMethods(Type type)
+        {
+            foreach (Type candidateType in type.Assembly.GetTypes())
+            {
+                if (candidateType.IsSealed && !candidateType.IsGenericType && !candidateType.IsNested)
+                {
+                    foreach (MethodInfo method in candidateType.GetMethods(BindingFlags.Static | BindingFlags.Public))
+                    {
+                        if (method.IsDefined(typeof(ExtensionAttribute), false))
+                        {
+                            Type parameterType = method.GetParameters().FirstOrDefault()?.ParameterType;
+                            if (parameterType != null && parameterType.IsAssignableFrom(type))
+                            {
+                                yield return method;
+                            }
+                        }
+                    }
+                }
+            }
         }
 
         private static string PropertyName(PropertyInfo propertyInfo, bool callable)
@@ -31,7 +69,7 @@ namespace Statiq.Core
             if (parameters.Length > 0)
             {
                 // Indexer
-                return $"{(callable ? string.Empty : "this")}[{BuildParameterSignature(parameters, null, callable)}]";
+                return $"{(callable ? string.Empty : "this")}[{BuildParameterSignature(parameters, null, callable, false)}]";
             }
             return $"{(callable ? "." : string.Empty)}{propertyInfo.Name}";
         }
@@ -45,10 +83,13 @@ namespace Statiq.Core
         /// <param name="callable">
         /// Return as an callable string(public void a(string b) would return a(b))
         /// </param>
+        /// <param name="convertExtensionsToInstance">
+        /// Converts extension methods to an instance signature as if they were defined on the extended class.
+        /// </param>
         /// <returns>
         /// Method signature.
         /// </returns>
-        public static string GetMethodSignature(MethodInfo method, bool callable = false)
+        public static string GetMethodSignature(MethodInfo method, bool callable = false, bool convertExtensionsToInstance = false)
         {
             // Special case to use interface syntax for GetEnumerator() methods
             if (method.Name.Equals(nameof(IEnumerable.GetEnumerator))
@@ -62,10 +103,10 @@ namespace Statiq.Core
 
             StringBuilder sigBuilder = new StringBuilder();
 
-            BuildReturnSignature(sigBuilder, method, callable);
+            BuildReturnSignature(sigBuilder, method, callable, convertExtensionsToInstance);
 
             sigBuilder.Append("(");
-            sigBuilder.Append(BuildParameterSignature(method.GetParameters(), method, callable));
+            sigBuilder.Append(BuildParameterSignature(method.GetParameters(), method, callable, convertExtensionsToInstance));
             sigBuilder.Append(")");
 
             // Generic constraints
@@ -101,7 +142,7 @@ namespace Statiq.Core
             return sigBuilder.ToString();
         }
 
-        private static string BuildParameterSignature(ParameterInfo[] parameters, MethodInfo method, bool callable)
+        private static string BuildParameterSignature(ParameterInfo[] parameters, MethodInfo method, bool callable, bool convertExtensionsToInstance)
         {
             StringBuilder sigBuilder = new StringBuilder();
             bool firstParam = true;
@@ -111,9 +152,9 @@ namespace Statiq.Core
                 if (firstParam)
                 {
                     firstParam = false;
-                    if (method?.IsDefined(typeof(System.Runtime.CompilerServices.ExtensionAttribute), false) == true)
+                    if (method?.IsDefined(typeof(ExtensionAttribute), false) == true)
                     {
-                        if (callable)
+                        if (callable || convertExtensionsToInstance)
                         {
                             secondParam = true;
                             continue;
@@ -223,14 +264,14 @@ namespace Statiq.Core
             return sb.ToString();
         }
 
-        private static void BuildReturnSignature(StringBuilder sigBuilder, MethodInfo method, bool callable = false)
+        private static void BuildReturnSignature(StringBuilder sigBuilder, MethodInfo method, bool callable, bool convertExtensionsToInstance)
         {
             bool firstParam = true;
             if (!callable)
             {
                 sigBuilder.Append(Visibility(method)).Append(' ');
 
-                if (method.IsStatic)
+                if (method.IsStatic && (method?.IsDefined(typeof(ExtensionAttribute), false) == false || !convertExtensionsToInstance))
                 {
                     sigBuilder.Append("static ");
                 }

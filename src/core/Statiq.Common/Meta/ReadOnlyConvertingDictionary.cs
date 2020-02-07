@@ -43,7 +43,7 @@ namespace Statiq.Common
         public IEnumerable<string> Keys => _dictionary.Keys;
 
         /// <inheritdoc />
-        public IEnumerable<object> Values => _dictionary.Values.Select(GetValue);
+        public IEnumerable<object> Values => _dictionary.Values.Select(x => TypeHelper.ExpandValue(x, this)).ToArray();
 
         /// <inheritdoc />
         public bool ContainsKey(string key) => _dictionary.ContainsKey(key);
@@ -66,17 +66,14 @@ namespace Statiq.Common
         }
 
         /// <inheritdoc />
-        public IEnumerator<KeyValuePair<string, object>> GetEnumerator() => _dictionary.Select(GetItem).GetEnumerator();
+        public IEnumerator<KeyValuePair<string, object>> GetEnumerator() =>
+            _dictionary.Select(x => TypeHelper.ExpandKeyValuePair(x, this)).GetEnumerator();
 
         /// <inheritdoc />
         public bool TryGetRaw(string key, out object value) => _dictionary.TryGetValue(key, out value);
 
         /// <inheritdoc />
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
-
-        /// <inheritdoc />
-        public IMetadata GetMetadata(params string[] keys) =>
-            throw new NotSupportedException();
 
         /// <inheritdoc />
         public bool TryGetValue<TValue>(string key, out TValue value)
@@ -86,25 +83,10 @@ namespace Statiq.Common
             {
                 return false;
             }
-            rawValue = GetValue(rawValue);
-            return TypeHelper.TryConvert(rawValue, out value);
+            return TypeHelper.TryExpandAndConvert(rawValue, this, out value);
         }
 
         /// <inheritdoc />
         public bool TryGetValue(string key, out object value) => TryGetValue<object>(key, out value);
-
-        /// <summary>
-        /// This resolves the metadata value by recursively expanding IMetadataValue.
-        /// </summary>
-        private object GetValue(object originalValue) =>
-            originalValue is IMetadataValue metadataValue ? GetValue(metadataValue.Get(this)) : originalValue;
-
-        /// <summary>
-        /// This resolves the metadata value by expanding IMetadataValue.
-        /// </summary>
-        private KeyValuePair<string, object> GetItem(KeyValuePair<string, object> item) =>
-            item.Value is IMetadataValue metadataValue
-                ? new KeyValuePair<string, object>(item.Key, GetValue(metadataValue.Get(this)))
-                : item;
     }
 }

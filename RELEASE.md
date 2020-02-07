@@ -1,7 +1,14 @@
 # 1.0.0-alpha.24
 
-- Renamed the `InterpolateMetadata` module to `EvaluateMetadata` to better represent a more powerful metadata scripting capability.
-- Removed the `Statiq.CodeAnalysis.IDocumentExtensions.Interpolate()` extension method in favor of more robust metadata evaluation through the `EvaluateMetadata` module.
+- Adds `IMetadata.GetNestedMetadata()` to get a nested metadata value (not called `IMetadata.GetMetadata()` to avoid conflicts with the old previous method of that name).
+- Renamed `IMetadata.GetMetadata()` to `IMetadata.FilterMetadata()` which now returns a `FilteredMetadata` instance.
+- Adds new `FilteredMetadata` class to filter underlying metadata items by key(s).
+- Refactored a bunch of default interface implementations back to extension methods (turns out default interface implementations are a little awkward to maintain).
+- Moved scripting support and the `CompileScript` and `EvaluateScript` modules to `Statiq.Core`.
+- Added `Microsoft.CodeAnalysis` to `Statiq.Core`.
+- Metadata and configuration settings that are a string starting with "=>" are now considered "scripted" and the content to the right of the arrow will be lazily evaluated as C# code - this is a **big deal** and the use cases will become apparent over time (I have lots of big ideas around this feature).
+- Removed the `InterpolateMetadata` module in favor of more robust built-in scripted metadata.
+- Removed the `Statiq.CodeAnalysis.IDocumentExtensions.Interpolate()` extension method in favor of more robust built-in scripted metadata.
 - Changed `CancellationTokenSource` uses inside the engine to `CancellationToken` since the engine does not itself cancel execution.
 - Surfaced the `CancellationToken` for a given execution through the `IExecutionState`.
 - Added a check to ensure the engine is only performing one execution at a time (the outer execution loop is not concurrently safe).

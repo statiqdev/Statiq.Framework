@@ -15,7 +15,7 @@ namespace Statiq.Testing
     {
         public TestEngine()
         {
-            _documentFactory = new DocumentFactory(Settings);
+            _documentFactory = new DocumentFactory(this, Settings);
             _documentFactory.SetDefaultDocumentType<TestDocument>();
 
             TestLoggerProvider = new TestLoggerProvider(LogMessages);
@@ -106,6 +106,12 @@ namespace Statiq.Testing
 
         /// <inheritdoc />
         IPipelineOutputs IExecutionState.Outputs => Outputs;
+
+        /// <inheritdoc/>
+        public IScriptHelper ScriptHelper { get; set; }
+
+        /// <inheritdoc />
+        IScriptHelper IExecutionState.ScriptHelper => ScriptHelper;
 
         private readonly DocumentFactory _documentFactory;
 

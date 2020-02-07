@@ -4,7 +4,7 @@ using System.Reflection;
 
 namespace Statiq.Common
 {
-    public partial interface IClassCatalog
+    public interface IClassCatalog
     {
         /// <summary>
         /// Gets all types assignable to a specified type.

@@ -69,7 +69,7 @@ namespace Statiq.Common
         public ICollection<string> Keys => _dictionary.Keys;
 
         /// <inheritdoc />
-        public ICollection<object> Values => _dictionary.Values.Select(GetValue).ToArray();
+        public ICollection<object> Values => _dictionary.Values.Select(x => TypeHelper.ExpandValue(x, this)).ToArray();
 
         /// <inheritdoc />
         public bool IsReadOnly => false;
@@ -91,17 +91,18 @@ namespace Statiq.Common
 
         /// <inheritdoc />
         public bool Contains(KeyValuePair<string, object> item) =>
-            _dictionary.Select(GetItem).Contains(item);
+            _dictionary.Select(x => TypeHelper.ExpandKeyValuePair(x, this)).Contains(item);
 
         /// <inheritdoc />
         public bool ContainsKey(string key) => _dictionary.ContainsKey(key);
 
         /// <inheritdoc />
         public void CopyTo(KeyValuePair<string, object>[] array, int arrayIndex) =>
-            _dictionary.Select(GetItem).ToArray().CopyTo(array, arrayIndex);
+            _dictionary.Select(x => TypeHelper.ExpandKeyValuePair(x, this)).ToArray().CopyTo(array, arrayIndex);
 
         /// <inheritdoc />
-        public IEnumerator<KeyValuePair<string, object>> GetEnumerator() => _dictionary.Select(GetItem).GetEnumerator();
+        public IEnumerator<KeyValuePair<string, object>> GetEnumerator() =>
+            _dictionary.Select(x => TypeHelper.ExpandKeyValuePair(x, this)).GetEnumerator();
 
         /// <inheritdoc />
         public bool TryGetRaw(string key, out object value) => _dictionary.TryGetValue(key, out value);
@@ -120,8 +121,7 @@ namespace Statiq.Common
             {
                 return false;
             }
-            rawValue = GetValue(rawValue);
-            return TypeHelper.TryConvert(rawValue, out value);
+            return TypeHelper.TryExpandAndConvert(rawValue, this, out value);
         }
 
         /// <inheritdoc />
@@ -129,23 +129,5 @@ namespace Statiq.Common
 
         /// <inheritdoc />
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
-
-        /// <inheritdoc />
-        public IMetadata GetMetadata(params string[] keys) =>
-            throw new NotSupportedException();
-
-        /// <summary>
-        /// This resolves the metadata value by recursively expanding IMetadataValue.
-        /// </summary>
-        private object GetValue(object originalValue) =>
-            originalValue is IMetadataValue metadataValue ? GetValue(metadataValue.Get(this)) : originalValue;
-
-        /// <summary>
-        /// This resolves the metadata value by expanding IMetadataValue.
-        /// </summary>
-        private KeyValuePair<string, object> GetItem(KeyValuePair<string, object> item) =>
-            item.Value is IMetadataValue metadataValue
-                ? new KeyValuePair<string, object>(item.Key, GetValue(metadataValue.Get(this)))
-                : item;
     }
 }

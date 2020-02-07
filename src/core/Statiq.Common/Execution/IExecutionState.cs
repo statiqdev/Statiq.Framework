@@ -69,5 +69,10 @@ namespace Statiq.Common
         /// Gets the dependency injection service provider.
         /// </summary>
         IServiceProvider Services { get; }
+
+        /// <summary>
+        /// Gets a helper that can compile and evaluate C# scripts.
+        /// </summary>
+        IScriptHelper ScriptHelper { get; }
     }
 }

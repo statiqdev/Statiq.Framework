@@ -209,7 +209,7 @@ namespace Statiq.Json.Tests
                     { "Foo", "fuz" },
                     { "Bar", "baz" }
                 });
-                GenerateJson generateJson = new GenerateJson(Config.FromDocument(doc => (object)doc.GetMetadata("Bar")));
+                GenerateJson generateJson = new GenerateJson(Config.FromDocument(doc => (object)doc.FilterMetadata("Bar")));
 
                 // When
                 TestDocument result = await ExecuteAsync(document, generateJson).SingleAsync();
@@ -231,7 +231,7 @@ namespace Statiq.Json.Tests
                     { "Foo", "fuz" },
                     { "Bar", "baz" }
                 });
-                GenerateJson generateJson = new GenerateJson(Config.FromDocument(doc => (object)doc.GetMetadata("Bar"))).WithCamelCase();
+                GenerateJson generateJson = new GenerateJson(Config.FromDocument(doc => (object)doc.FilterMetadata("Bar"))).WithCamelCase();
 
                 // When
                 TestDocument result = await ExecuteAsync(document, generateJson).SingleAsync();

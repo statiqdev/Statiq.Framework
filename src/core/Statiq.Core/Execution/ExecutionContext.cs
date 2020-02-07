@@ -71,6 +71,9 @@ namespace Statiq.Core
         public IMemoryStreamFactory MemoryStreamFactory => _contextData.Engine.MemoryStreamFactory;
 
         /// <inheritdoc/>
+        public IScriptHelper ScriptHelper => _contextData.Engine.ScriptHelper;
+
+        /// <inheritdoc/>
         public CancellationToken CancellationToken => _contextData.Engine.CancellationToken;
 
         /// <inheritdoc/>

@@ -64,10 +64,11 @@ namespace Statiq.Core
         {
             _pipelines = new PipelineCollection(this);
             ApplicationState = applicationState ?? new ApplicationState(null, null, null);
-            Settings = new ReadOnlyConfigurationSettings(configuration ?? new ConfigurationRoot(Array.Empty<IConfigurationProvider>()));
+            ScriptHelper = new ScriptHelper(this);
+            Settings = new ReadOnlyConfigurationSettings(configuration ?? new ConfigurationRoot(Array.Empty<IConfigurationProvider>()), this);
             _serviceScope = GetServiceScope(serviceCollection);
             _logger = Services.GetRequiredService<ILogger<Engine>>();
-            DocumentFactory = new DocumentFactory(Settings);
+            DocumentFactory = new DocumentFactory(this, Settings);
             _diagnosticsTraceListener = new DiagnosticsTraceListener(_logger);
             System.Diagnostics.Trace.Listeners.Add(_diagnosticsTraceListener);
 
@@ -100,6 +101,7 @@ namespace Statiq.Core
             serviceCollection.AddSingleton<IReadOnlyShortcodeCollection>(Shortcodes);
             serviceCollection.AddSingleton<IMemoryStreamFactory>(MemoryStreamFactory);
             serviceCollection.AddSingleton<INamespacesCollection>(Namespaces);
+            serviceCollection.AddSingleton<IScriptHelper>(ScriptHelper);
 
             IServiceProvider serviceProvider = serviceCollection.BuildServiceProvider();
             return serviceProvider.CreateScope();
@@ -160,6 +162,9 @@ namespace Statiq.Core
 
         /// <inheritdoc />
         public IMemoryStreamFactory MemoryStreamFactory { get; } = new MemoryStreamFactory();
+
+        /// <inheritdoc/>
+        public IScriptHelper ScriptHelper { get; }
 
         /// <inheritdoc />
         public IPipelineOutputs Outputs { get; private set; }

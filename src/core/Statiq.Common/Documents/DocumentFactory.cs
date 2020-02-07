@@ -10,12 +10,14 @@ namespace Statiq.Common
 {
     internal class DocumentFactory : IDocumentFactory
     {
+        private readonly IExecutionState _executionState;
         private readonly IMetadata _baseMetadata;
 
         private IFactory _defaultFactory = Factory<Document>.Instance;
 
-        public DocumentFactory(IMetadata baseMetadata)
+        public DocumentFactory(IExecutionState executionState, IMetadata baseMetadata)
         {
+            _executionState = executionState ?? throw new ArgumentNullException(nameof(executionState));
             _baseMetadata = baseMetadata ?? throw new ArgumentNullException(nameof(baseMetadata));
         }
 
@@ -25,7 +27,7 @@ namespace Statiq.Common
                 IMetadata baseMetadata,
                 FilePath source,
                 FilePath destination,
-                IEnumerable<KeyValuePair<string, object>> items,
+                IMetadata metadata,
                 IContentProvider contentProvider);
         }
 
@@ -43,9 +45,9 @@ namespace Statiq.Common
                 IMetadata baseMetadata,
                 FilePath source,
                 FilePath destination,
-                IEnumerable<KeyValuePair<string, object>> items,
+                IMetadata metadata,
                 IContentProvider contentProvider) =>
-                new TDocument().Initialize(baseMetadata, source, destination, new Metadata(items), contentProvider);
+                new TDocument().Initialize(baseMetadata, source, destination, metadata, contentProvider);
         }
 
         internal void SetDefaultDocumentType<TDocument>()
@@ -61,7 +63,7 @@ namespace Statiq.Common
                 _baseMetadata,
                 source,
                 destination,
-                items,
+                new Metadata(_executionState, items),
                 contentProvider);
 
         public TDocument CreateDocument<TDocument>(
@@ -74,7 +76,7 @@ namespace Statiq.Common
                 _baseMetadata,
                 source,
                 destination,
-                items,
+                new Metadata(_executionState, items),
                 contentProvider);
     }
 }

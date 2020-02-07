@@ -15,14 +15,70 @@ namespace Statiq.Common
 
         protected IDictionary<string, object> Dictionary { get; }
 
-        public Metadata(IMetadata previous, IEnumerable<KeyValuePair<string, object>> items = null)
+        /// <summary>
+        /// Creates a new set of metadata.
+        /// </summary>
+        /// <param name="executionState">The current execution state.</param>
+        /// <param name="previous">The previous set of metadata this one should extend.</param>
+        /// <param name="items">The initial set of items. If null, no underlying dictionary will be created.</param>
+        public Metadata(IExecutionState executionState, IMetadata previous, IEnumerable<KeyValuePair<string, object>> items = null)
+            : this(executionState, items)
+        {
+            _previous = previous;
+        }
+
+        /// <summary>
+        /// Creates a new set of metadata.
+        /// </summary>
+        /// <param name="executionState">The current execution state.</param>
+        /// <param name="items">The initial set of items. If null, no underlying dictionary will be created.</param>
+        public Metadata(IExecutionState executionState, IEnumerable<KeyValuePair<string, object>> items = null)
+        {
+            _ = executionState ?? throw new ArgumentNullException(nameof(executionState));
+
+            if (items != null)
+            {
+                Dictionary = new Dictionary<string, object>(StringComparer.OrdinalIgnoreCase);
+                foreach (KeyValuePair<string, object> item in items)
+                {
+                    if (ScriptMetadataValue.TryGetMetadataValue(item.Value, executionState, out ScriptMetadataValue metadataValue))
+                    {
+                        Dictionary[item.Key] = metadataValue;
+                    }
+                    else
+                    {
+                        Dictionary[item.Key] = item.Value;
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// Creates a new set of metadata without evaluating scripted metadata.
+        /// </summary>
+        /// <remarks>
+        /// This is marked as <c>protected internal</c> to discourage public use. When at all possible, metadata
+        /// should be created such that it evaluated scripted metadata. If a <see cref="IExecutionState"/> isn't
+        /// available for use at the time the metadata is needed, then a derived type should be created for use.
+        /// </remarks>
+        /// <param name="previous">The previous set of metadata this one should extend.</param>
+        /// <param name="items">The initial set of items. If null, no underlying dictionary will be created.</param>
+        protected internal Metadata(IMetadata previous, IEnumerable<KeyValuePair<string, object>> items = null)
             : this(items)
         {
             _previous = previous;
         }
 
-        // null items will mean a Dictionary doesn't get created, pass in an empty items array to ensure a Dictionary
-        public Metadata(IEnumerable<KeyValuePair<string, object>> items = null)
+        /// <summary>
+        /// Creates a new set of metadata without evaluating scripted metadata.
+        /// </summary>
+        /// <remarks>
+        /// This is marked as <c>protected internal</c> to discourage public use. When at all possible, metadata
+        /// should be created such that it evaluated scripted metadata. If a <see cref="IExecutionState"/> isn't
+        /// available for use at the time the metadata is needed, then a derived type should be created for use.
+        /// </remarks>
+        /// <param name="items">The initial set of items. If null, no underlying dictionary will be created.</param>
+        protected internal Metadata(IEnumerable<KeyValuePair<string, object>> items = null)
         {
             if (items != null)
             {
@@ -50,10 +106,9 @@ namespace Statiq.Common
         public bool TryGetValue<TValue>(string key, out TValue value)
         {
             value = default;
-            if (key != null && TryGetRaw(key, out object raw))
+            if (key != null && TryGetRaw(key, out object rawValue))
             {
-                object expanded = GetValue(raw);
-                return TypeHelper.TryConvert(expanded, out value);
+                return TypeHelper.TryExpandAndConvert(rawValue, this, out value);
             }
             return false;
         }
@@ -64,10 +119,7 @@ namespace Statiq.Common
         {
             get
             {
-                if (key == null)
-                {
-                    throw new ArgumentNullException(nameof(key));
-                }
+                _ = key ?? throw new ArgumentNullException(nameof(key));
                 if (!TryGetValue(key, out object value))
                 {
                     throw new KeyNotFoundException("The key " + key + " was not found in metadata, use Get() to provide a default value.");
@@ -112,7 +164,7 @@ namespace Statiq.Common
             {
                 foreach (KeyValuePair<string, object> item in Dictionary)
                 {
-                    yield return GetItem(item);
+                    yield return TypeHelper.ExpandKeyValuePair(item, this);
                 }
             }
             if (_previous != null)
@@ -128,22 +180,5 @@ namespace Statiq.Common
         }
 
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
-
-        public IMetadata GetMetadata(params string[] keys) =>
-            new Metadata(this.Where(x => keys.Contains(x.Key, StringComparer.OrdinalIgnoreCase)));
-
-        /// <summary>
-        /// This resolves the metadata value by recursively expanding IMetadataValue.
-        /// </summary>
-        private object GetValue(object originalValue) =>
-            originalValue is IMetadataValue metadataValue ? GetValue(metadataValue.Get(this)) : originalValue;
-
-        /// <summary>
-        /// This resolves the metadata value by expanding IMetadataValue.
-        /// </summary>
-        private KeyValuePair<string, object> GetItem(KeyValuePair<string, object> item) =>
-            item.Value is IMetadataValue metadataValue
-                ? new KeyValuePair<string, object>(item.Key, GetValue(metadataValue.Get(this)))
-                : item;
     }
 }

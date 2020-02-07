@@ -192,9 +192,6 @@ namespace Statiq.Common
 
         public bool TryGetValue(string key, out object value) => TryGetValue<object>(key, out value);
 
-        public IMetadata GetMetadata(params string[] keys) =>
-            new Metadata(this.Where(x => keys.Contains(x.Key, StringComparer.OrdinalIgnoreCase)));
-
         // The Select ensures LINQ optimizations won't turn this into a recursive call to Count
         public int Count => this.Select(_ => (object)null).Count();
 

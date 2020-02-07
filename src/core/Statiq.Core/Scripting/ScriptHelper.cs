@@ -15,7 +15,7 @@ using Statiq.Common;
 
 namespace Statiq.Core
 {
-    public static class ScriptHelper
+    internal class ScriptHelper : IScriptHelper
     {
         public const string AssemblyName = "ScriptAssembly";
         public const string ScriptClassName = "Script";
@@ -23,112 +23,64 @@ namespace Statiq.Core
         private static readonly HashSet<string> ReservedPropertyNames =
             new HashSet<string>(typeof(ScriptBase).GetMembers().Select(x => x.Name), StringComparer.OrdinalIgnoreCase);
 
-        /// <summary>
-        /// Compiles and evaluates a script.
-        /// </summary>
-        /// <param name="code">The code to compile.</param>
-        /// <param name="metadata">
-        /// The metadata used to construct the script. Metadata items are exposed a properties with
-        /// the name of the key and can be used directly in the script.
-        /// </param>
-        /// <param name="executionState">The current execution state.</param>
-        /// <returns>Raw assembly bytes.</returns>
-        public static async Task<object> EvaluateAsync(string code, IMetadata metadata, IExecutionState executionState)
+        private readonly IExecutionState _executionState;
+
+        public ScriptHelper(IExecutionState executionState)
         {
-            byte[] rawAssembly = Compile(code, metadata, executionState);
-            return await EvaluateAsync(rawAssembly, metadata, executionState);
+            _executionState = executionState ?? throw new ArgumentNullException(nameof(executionState));
         }
 
-        /// <summary>
-        /// Evaluates a script stored as raw assembly bytes.
-        /// </summary>
-        /// <remarks>
-        /// This loads the assembly, finds the first <see cref="ScriptBase"/> type, instantiates it, and evaluates it.
-        /// </remarks>
-        /// <param name="rawAssembly">The raw assembly bytes.</param>
-        /// <param name="metadata">The metadata that should be used for evaluation.</param>
-        /// <param name="executionState">The execution state that should be used for evaluation.</param>
-        /// <returns>The result of the script.</returns>
-        public static async Task<object> EvaluateAsync(byte[] rawAssembly, IMetadata metadata, IExecutionState executionState)
+        /// <inheritdoc/>
+        public async Task<object> EvaluateAsync(string code, IMetadata metadata)
+        {
+            byte[] rawAssembly = Compile(code, metadata);
+            return await EvaluateAsync(rawAssembly, metadata);
+        }
+
+        /// <inheritdoc/>
+        public async Task<object> EvaluateAsync(byte[] rawAssembly, IMetadata metadata)
         {
             Type scriptType = Load(rawAssembly);
             if (scriptType == null)
             {
                 throw new ArgumentException("The assembly does not contain a script object", nameof(rawAssembly));
             }
-            return await EvaluateAsync(scriptType, metadata, executionState);
+            return await EvaluateAsync(scriptType, metadata);
         }
 
-        /// <summary>
-        /// Evaluates a script stored as raw assembly bytes.
-        /// </summary>
-        /// <remarks>
-        /// This instantiates the script and evaluates it.
-        /// </remarks>
-        /// <param name="scriptType">A type derived from <see cref="ScriptBase"/>.</param>
-        /// <param name="metadata">The metadata that should be used for evaluation.</param>
-        /// <param name="executionState">The execution state that should be used for evaluation.</param>
-        /// <returns>The result of the script.</returns>
-        public static async Task<object> EvaluateAsync(Type scriptType, IMetadata metadata, IExecutionState executionState)
+        /// <inheritdoc/>
+        public async Task<object> EvaluateAsync(Type scriptType, IMetadata metadata)
         {
             _ = scriptType ?? throw new ArgumentNullException(nameof(scriptType));
             _ = metadata ?? throw new ArgumentNullException(nameof(metadata));
-            _ = executionState ?? throw new ArgumentNullException(nameof(executionState));
 
             if (!typeof(ScriptBase).IsAssignableFrom(scriptType))
             {
                 throw new ArgumentException("Provided type is not a script", nameof(scriptType));
             }
 
-            ScriptBase script = (ScriptBase)Activator.CreateInstance(scriptType, metadata, executionState);
+            ScriptBase script = (ScriptBase)Activator.CreateInstance(scriptType, metadata, _executionState);
             return await script.EvaluateAsync();
         }
 
-        /// <summary>
-        /// Loads a script from a raw script assembly.
-        /// </summary>
-        /// <remarks>
-        /// This loads the assembly and finds the first <see cref="ScriptBase"/> type.
-        /// </remarks>
-        /// <param name="rawAssembly">The raw assembly bytes.</param>
-        /// <returns>The script type or <c>null</c> if a script was not found in the assembly.</returns>
-        public static Type Load(byte[] rawAssembly)
+        /// <inheritdoc/>
+        public Type Load(byte[] rawAssembly)
         {
             _ = rawAssembly ?? throw new ArgumentNullException(nameof(rawAssembly));
             Assembly assembly = Assembly.Load(rawAssembly);
             return Array.Find(assembly.GetExportedTypes(), t => t.Name == ScriptClassName);
         }
 
-        /// <summary>
-        /// Compiles a script into an in-memory script assembly for later evaluation.
-        /// </summary>
-        /// <param name="code">The code to compile.</param>
-        /// <param name="metadata">
-        /// The metadata used to construct the script. Metadata items are exposed a properties with
-        /// the name of the key and can be used directly in the script.
-        /// </param>
-        /// <param name="executionState">The current execution state.</param>
-        /// <returns>Raw assembly bytes.</returns>
-        public static byte[] Compile(string code, IMetadata metadata, IExecutionState executionState) =>
-            Compile(code, metadata?.Keys, executionState);
+        /// <inheritdoc/>
+        public byte[] Compile(string code, IMetadata metadata) => Compile(code, metadata?.Keys);
 
-        /// <summary>
-        /// Compiles a script into an in-memory script assembly for later evaluation.
-        /// </summary>
-        /// <param name="code">The code to compile.</param>
-        /// <param name="metadataPropertyKeys">
-        /// Metadata property keys that will be exposed as properties in the script as
-        /// the name of the key and can be used directly in the script.
-        /// </param>
-        /// <param name="executionState">The current execution state.</param>
-        /// <returns>Raw assembly bytes.</returns>
-        public static byte[] Compile(string code, IEnumerable<string> metadataPropertyKeys, IExecutionState executionState)
+        /// <inheritdoc/>
+        public byte[] Compile(string code, IEnumerable<string> metadataPropertyKeys)
         {
             _ = code ?? throw new ArgumentNullException(nameof(code));
-            _ = executionState ?? throw new ArgumentNullException(nameof(executionState));
 
             // Parse the code
-            code = Parse(code, metadataPropertyKeys, executionState);
+            code = Parse(code, metadataPropertyKeys, _executionState);
 
             // Get the compilation
             CSharpParseOptions parseOptions = new CSharpParseOptions();
@@ -163,7 +115,7 @@ namespace Statiq.Core
                         MetadataReference.CreateFromFile(Path.Combine(assemblyPath, "System.Runtime.dll")));
 
             // Emit the assembly
-            ILogger logger = executionState.Services.GetRequiredService<ILoggerFactory>().CreateLogger(nameof(ScriptBase));
+            ILogger logger = _executionState.Services.GetRequiredService<ILogger<ScriptHelper>>();
             using (MemoryStream ms = new MemoryStream())
             {
                 EmitResult result = compilation.Emit(ms);

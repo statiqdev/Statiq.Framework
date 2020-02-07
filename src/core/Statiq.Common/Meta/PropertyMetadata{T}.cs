@@ -149,17 +149,14 @@ namespace Statiq.Common
 
                 if (Properties.TryGetValue(key, out IPropertyCallAdapter adapter))
                 {
-                    object raw = adapter.GetValue(_instance);
-                    return TypeHelper.TryConvert(raw, out value);
+                    object rawValue = adapter.GetValue(_instance);
+                    return TypeHelper.TryExpandAndConvert(rawValue, this, out value);
                 }
 
                 return false;
             }
 
             public bool TryGetValue(string key, out object value) => TryGetValue<object>(key, out value);
-
-            public IMetadata GetMetadata(params string[] keys) =>
-                new Metadata(this.Where(x => keys.Contains(x.Key, StringComparer.OrdinalIgnoreCase)));
 
             // The Select ensures LINQ optimizations won't turn this into a recursive call to Count
             public int Count => this.Select(_ => (object)null).Count();
@@ -168,7 +165,8 @@ namespace Statiq.Common
             {
                 foreach (KeyValuePair<string, IPropertyCallAdapter> item in Properties)
                 {
-                    yield return new KeyValuePair<string, object>(item.Key, item.Value.GetValue(_instance));
+                    object rawValue = item.Value.GetValue(_instance);
+                    yield return new KeyValuePair<string, object>(item.Key, TypeHelper.ExpandValue(rawValue, this));
                 }
             }
 

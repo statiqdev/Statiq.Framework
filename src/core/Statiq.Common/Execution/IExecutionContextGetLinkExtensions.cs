@@ -1,17 +1,18 @@
 ﻿namespace Statiq.Common
 {
-    public partial interface IExecutionContext
+    public static class IExecutionContextGetLinkExtensions
     {
         /// <summary>
         /// Gets a link for the root of the site using the host and root path specified in the settings.
         /// </summary>
+        /// <param name="executionContext">The execution context.</param>
         /// <returns>A link for the root of the site.</returns>
-        public string GetLink() =>
-            GetLink(
+        public static string GetLink(this IExecutionContext executionContext) =>
+            executionContext.GetLink(
                 (NormalizedPath)null,
-                Settings.GetString(Common.Keys.Host),
-                Settings.GetDirectoryPath(Common.Keys.LinkRoot),
-                Settings.GetBool(Common.Keys.LinksUseHttps),
+                executionContext.Settings.GetString(Keys.Host),
+                executionContext.Settings.GetDirectoryPath(Keys.LinkRoot),
+                executionContext.Settings.GetBool(Keys.LinksUseHttps),
                 false,
                 false);
 
@@ -22,6 +23,7 @@
         /// on if you want to generate host-specific links. By default, the host is not included so that
         /// sites work the same on any server including the preview server.
         /// </summary>
+        /// <param name="executionContext">The execution context.</param>
         /// <param name="document">The document to generate a link for.</param>
         /// <param name="includeHost">
         /// If set to <c>true</c> the host configured in the output settings will
@@ -30,8 +32,11 @@
         /// <returns>
         /// A string representation of the path suitable for a web link.
         /// </returns>
-        public string GetLink(IDocument document, bool includeHost = false) =>
-            document.Destination == null ? null : GetLink(document.Destination, includeHost);
+        public static string GetLink(
+            this IExecutionContext executionContext,
+            IDocument document,
+            bool includeHost = false) =>
+            document.Destination == null ? null : executionContext.GetLink(document.Destination, includeHost);
 
         /// <summary>
         /// Gets a link for the specified metadata using the specified metadata value and the default settings from the
@@ -40,6 +45,7 @@
         /// on if you want to generate host-specific links. By default, the host is not included so that
         /// sites work the same on any server including the preview server.
         /// </summary>
+        /// <param name="executionContext">The execution context.</param>
         /// <param name="metadata">The metadata or document to generate a link for.</param>
         /// <param name="key">The key at which a <see cref="FilePath"/> can be found for generating the link.</param>
         /// <param name="includeHost">
@@ -49,7 +55,11 @@
         /// <returns>
         /// A string representation of the path suitable for a web link.
         /// </returns>
-        public string GetLink(IMetadata metadata, string key, bool includeHost = false)
+        public static string GetLink(
+            this IExecutionContext executionContext,
+            IMetadata metadata,
+            string key,
+            bool includeHost = false)
         {
             if (metadata?.ContainsKey(key) == true)
             {
@@ -61,7 +71,7 @@
 
                 // Otherwise try to process the value as a file path
                 FilePath filePath = metadata.GetFilePath(key);
-                return filePath != null ? GetLink(filePath, includeHost) : null;
+                return filePath != null ? executionContext.GetLink(filePath, includeHost) : null;
             }
             return null;
         }
@@ -73,13 +83,17 @@
         /// on if you want to generate host-specific links. By default, the host is not included so that
         /// sites work the same on any server including the preview server.
         /// </summary>
+        /// <param name="executionContext">The execution context.</param>
         /// <param name="path">The path to generate a link for.</param>
         /// <param name="includeHost">If set to <c>true</c> the host configured in the output settings will
         /// be included in the link, otherwise the host will be omitted and only the root path will be included (default).</param>
         /// <returns>
         /// A string representation of the path suitable for a web link.
         /// </returns>
-        public string GetLink(string path, bool includeHost = false)
+        public static string GetLink(
+            this IExecutionContext executionContext,
+            string path,
+            bool includeHost = false)
         {
             // Return the actual URI if it's absolute
             if (path != null && LinkGenerator.TryGetAbsoluteHttpUri(path, out string absoluteUri))
@@ -88,20 +102,21 @@
             }
 
             // Otherwise process the path as a FilePath
-            return GetLink(
+            return executionContext.GetLink(
                 path == null ? null : new FilePath(path),
-                includeHost ? Settings.GetString(Common.Keys.Host) : null,
-                Settings.GetDirectoryPath(Common.Keys.LinkRoot),
-                Settings.GetBool(Common.Keys.LinksUseHttps),
-                Settings.GetBool(Common.Keys.LinkHideIndexPages),
-                Settings.GetBool(Common.Keys.LinkHideExtensions),
-                Settings.GetBool(Common.Keys.LinkLowercase));
+                includeHost ? executionContext.Settings.GetString(Keys.Host) : null,
+                executionContext.Settings.GetDirectoryPath(Keys.LinkRoot),
+                executionContext.Settings.GetBool(Keys.LinksUseHttps),
+                executionContext.Settings.GetBool(Keys.LinkHideIndexPages),
+                executionContext.Settings.GetBool(Keys.LinkHideExtensions),
+                executionContext.Settings.GetBool(Keys.LinkLowercase));
         }
 
         /// <summary>
         /// Converts the path into a string appropriate for use as a link, overriding one or more
         /// settings from the configuration.
         /// </summary>
+        /// <param name="executionContext">The execution context.</param>
         /// <param name="path">The path to generate a link for.</param>
         /// <param name="host">The host to use for the link.</param>
         /// <param name="root">The root of the link. The value of this parameter is prepended to the path.</param>
@@ -113,7 +128,14 @@
         /// A string representation of the path suitable for a web link with the specified
         /// root and hidden file name or extension.
         /// </returns>
-        public string GetLink(string path, string host, DirectoryPath root, bool useHttps, bool hideIndexPages, bool hideExtensions)
+        public static string GetLink(
+            this IExecutionContext executionContext,
+            string path,
+            string host,
+            DirectoryPath root,
+            bool useHttps,
+            bool hideIndexPages,
+            bool hideExtensions)
         {
             // Return the actual URI if it's absolute
             if (path != null && LinkGenerator.TryGetAbsoluteHttpUri(path, out string absoluteUri))
@@ -122,7 +144,7 @@
             }
 
             // Otherwise process the path as a FilePath
-            return GetLink(path == null ? null : new FilePath(path), host, root, useHttps, hideIndexPages, hideExtensions);
+            return executionContext.GetLink(path == null ? null : new FilePath(path), host, root, useHttps, hideIndexPages, hideExtensions);
         }
 
         /// <summary>
@@ -132,26 +154,31 @@
         /// on if you want to generate host-specific links. By default, the host is not included so that
         /// sites work the same on any server including the preview server.
         /// </summary>
+        /// <param name="executionContext">The execution context.</param>
         /// <param name="path">The path to generate a link for.</param>
         /// <param name="includeHost">If set to <c>true</c> the host configured in the output settings will
         /// be included in the link, otherwise the host will be omitted and only the root path will be included (default).</param>
         /// <returns>
         /// A string representation of the path suitable for a web link.
         /// </returns>
-        public string GetLink(NormalizedPath path, bool includeHost = false) =>
-            GetLink(
+        public static string GetLink(
+            this IExecutionContext executionContext,
+            NormalizedPath path,
+            bool includeHost = false) =>
+            executionContext.GetLink(
                 path,
-                includeHost ? Settings.GetString(Common.Keys.Host) : null,
-                Settings.GetDirectoryPath(Common.Keys.LinkRoot),
-                Settings.GetBool(Common.Keys.LinksUseHttps),
-                Settings.GetBool(Common.Keys.LinkHideIndexPages),
-                Settings.GetBool(Common.Keys.LinkHideExtensions),
-                Settings.GetBool(Common.Keys.LinkLowercase));
+                includeHost ? executionContext.Settings.GetString(Keys.Host) : null,
+                executionContext.Settings.GetDirectoryPath(Keys.LinkRoot),
+                executionContext.Settings.GetBool(Keys.LinksUseHttps),
+                executionContext.Settings.GetBool(Keys.LinkHideIndexPages),
+                executionContext.Settings.GetBool(Keys.LinkHideExtensions),
+                executionContext.Settings.GetBool(Keys.LinkLowercase));
 
         /// <summary>
         /// Converts the path into a string appropriate for use as a link, overriding one or more
         /// settings from the configuration.
         /// </summary>
+        /// <param name="executionContext">The execution context.</param>
         /// <param name="path">The path to generate a link for.</param>
         /// <param name="host">The host to use for the link.</param>
         /// <param name="root">The root of the link. The value of this parameter is prepended to the path.</param>
@@ -163,26 +190,28 @@
         /// A string representation of the path suitable for a web link with the specified
         /// root and hidden file name or extension.
         /// </returns>
-        public string GetLink(
+        public static string GetLink(
+            this IExecutionContext executionContext,
             NormalizedPath path,
             string host,
             DirectoryPath root,
             bool useHttps,
             bool hideIndexPages,
             bool hideExtensions) =>
-            GetLink(
+            executionContext.GetLink(
                 path,
                 host,
                 root,
                 useHttps,
                 hideIndexPages,
                 hideExtensions,
-                Settings.GetBool(Common.Keys.LinkLowercase));
+                executionContext.Settings.GetBool(Keys.LinkLowercase));
 
         /// <summary>
         /// Converts the path into a string appropriate for use as a link, overriding one or more
         /// settings from the configuration.
         /// </summary>
+        /// <param name="executionContext">The execution context.</param>
         /// <param name="path">The path to generate a link for.</param>
         /// <param name="host">The host to use for the link.</param>
         /// <param name="root">The root of the link. The value of this parameter is prepended to the path.</param>
@@ -195,7 +224,8 @@
         /// A string representation of the path suitable for a web link with the specified
         /// root and hidden file name or extension.
         /// </returns>
-        public string GetLink(
+        public static string GetLink(
+            this IExecutionContext executionContext,
             NormalizedPath path,
             string host,
             DirectoryPath root,

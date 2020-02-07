@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Statiq.Common
 {
-    public partial interface IExecutionContext
+    public static class IExecutionContextCloneOrCreateDocumentsExtensions
     {
         /// <summary>
         /// Clones or creates documents from several types of values.
@@ -25,19 +25,21 @@ namespace Statiq.Common
         /// If config value is anything else, the content of the input document will be
         /// changed to (or a new document created with) the string value.
         /// </remarks>
+        /// <param name="executionContext">The execution context.</param>
         /// <param name="document">The document to clone (if appropriate).</param>
         /// <param name="moduleInputs">The inputs to use when executing if <paramref name="value"/> contains modules.</param>
         /// <param name="value">The value to clone or create documents from.</param>
         /// <returns>The result documents.</returns>
-        public async Task<IEnumerable<IDocument>> CloneOrCreateDocumentsAsync(
+        public static async Task<IEnumerable<IDocument>> CloneOrCreateDocumentsAsync(
+            this IExecutionContext executionContext,
             IDocument document,
             IEnumerable<IDocument> moduleInputs,
             object value) =>
             value == null
                 ? document.Yield()
                 : GetDocuments(value)
-                    ?? await ExecuteModulesAsync(this, moduleInputs, value)
-                        ?? await ChangeContentAsync(this, document, value);
+                    ?? await ExecuteModulesAsync(executionContext, moduleInputs, value)
+                        ?? await ChangeContentAsync(executionContext, document, value);
 
         private static IEnumerable<IDocument> GetDocuments(object value) =>
             value is IDocument document ? document.Yield() : value as IEnumerable<IDocument>;

@@ -14,6 +14,7 @@ namespace Statiq.Core.Tests.Shortcodes.Content
             public async Task RendersEval()
             {
                 TestExecutionContext context = new TestExecutionContext();
+                context.ScriptHelper = new ScriptHelper(context);
                 TestDocument document = new TestDocument();
                 EvalShortcode shortcode = new EvalShortcode();
                 string shortcodeContent = "return 1 + 2;";
@@ -29,6 +30,7 @@ namespace Statiq.Core.Tests.Shortcodes.Content
             public async Task EvaluatesExpression()
             {
                 TestExecutionContext context = new TestExecutionContext();
+                context.ScriptHelper = new ScriptHelper(context);
                 TestDocument document = new TestDocument();
                 EvalShortcode shortcode = new EvalShortcode();
                 string shortcodeContent = "1 + 2";
@@ -44,6 +46,7 @@ namespace Statiq.Core.Tests.Shortcodes.Content
             public async Task CanAccessMetadata()
             {
                 TestExecutionContext context = new TestExecutionContext();
+                context.ScriptHelper = new ScriptHelper(context);
                 TestDocument document = new TestDocument
                 {
                     { "Foo", "4" }
@@ -62,6 +65,7 @@ namespace Statiq.Core.Tests.Shortcodes.Content
             public async Task CanAccessMetadataAsProperties()
             {
                 TestExecutionContext context = new TestExecutionContext();
+                context.ScriptHelper = new ScriptHelper(context);
                 TestDocument document = new TestDocument
                 {
                     { "Foo", 4 }

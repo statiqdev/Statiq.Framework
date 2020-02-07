@@ -2,152 +2,174 @@
 
 namespace Statiq.Common
 {
-    public partial interface IDocumentFactory
+    public static class IDocumentFactoryCreateDocumentExtensions
     {
-        public IDocument CreateDocument(
+        public static IDocument CreateDocument(
+            this IDocumentFactory documentFactory,
             FilePath destination,
             IEnumerable<KeyValuePair<string, object>> items,
             IContentProvider contentProvider = null) =>
-            CreateDocument(null, destination, items, contentProvider);
+            documentFactory.CreateDocument(null, destination, items, contentProvider);
 
-        public IDocument CreateDocument(
+        public static IDocument CreateDocument(
+            this IDocumentFactory documentFactory,
             FilePath source,
             FilePath destination,
             IContentProvider contentProvider = null) =>
-            CreateDocument(source, destination, null, contentProvider);
+            documentFactory.CreateDocument(source, destination, null, contentProvider);
 
-        public IDocument CreateDocument(
+        public static IDocument CreateDocument(
+            this IDocumentFactory documentFactory,
             FilePath destination,
             IContentProvider contentProvider = null) =>
-            CreateDocument(null, destination, null, contentProvider);
+            documentFactory.CreateDocument(null, destination, null, contentProvider);
 
-        public IDocument CreateDocument(
+        public static IDocument CreateDocument(
+            this IDocumentFactory documentFactory,
             IEnumerable<KeyValuePair<string, object>> items,
             IContentProvider contentProvider = null) =>
-            CreateDocument(null, null, items, contentProvider);
+            documentFactory.CreateDocument(null, null, items, contentProvider);
 
-        public IDocument CreateDocument(
+        public static IDocument CreateDocument(
+            this IDocumentFactory documentFactory,
             IContentProvider contentProvider = null) =>
-            CreateDocument(null, null, null, contentProvider);
+            documentFactory.CreateDocument(null, null, null, contentProvider);
 
-        public TDocument CreateDocument<TDocument>(
+        public static TDocument CreateDocument<TDocument>(
+            this IDocumentFactory documentFactory,
             FilePath destination,
             IEnumerable<KeyValuePair<string, object>> items,
             IContentProvider contentProvider = null)
             where TDocument : FactoryDocument, IDocument, new() =>
-            CreateDocument<TDocument>(null, destination, items, contentProvider);
+            documentFactory.CreateDocument<TDocument>(null, destination, items, contentProvider);
 
-        public TDocument CreateDocument<TDocument>(
+        public static TDocument CreateDocument<TDocument>(
+            this IDocumentFactory documentFactory,
             FilePath source,
             FilePath destination,
             IContentProvider contentProvider = null)
             where TDocument : FactoryDocument, IDocument, new() =>
-            CreateDocument<TDocument>(source, destination, null, contentProvider);
+            documentFactory.CreateDocument<TDocument>(source, destination, null, contentProvider);
 
-        public TDocument CreateDocument<TDocument>(
+        public static TDocument CreateDocument<TDocument>(
+            this IDocumentFactory documentFactory,
             FilePath destination,
             IContentProvider contentProvider = null)
             where TDocument : FactoryDocument, IDocument, new() =>
-            CreateDocument<TDocument>(null, destination, null, contentProvider);
+            documentFactory.CreateDocument<TDocument>(null, destination, null, contentProvider);
 
-        public TDocument CreateDocument<TDocument>(
+        public static TDocument CreateDocument<TDocument>(
+            this IDocumentFactory documentFactory,
             IEnumerable<KeyValuePair<string, object>> items,
             IContentProvider contentProvider = null)
             where TDocument : FactoryDocument, IDocument, new() =>
-            CreateDocument<TDocument>(null, null, items, contentProvider);
+            documentFactory.CreateDocument<TDocument>(null, null, items, contentProvider);
 
-        public TDocument CreateDocument<TDocument>(
+        public static TDocument CreateDocument<TDocument>(
+            this IDocumentFactory documentFactory,
             IContentProvider contentProvider = null)
             where TDocument : FactoryDocument, IDocument, new() =>
-            CreateDocument<TDocument>(null, null, null, contentProvider);
+            documentFactory.CreateDocument<TDocument>(null, null, null, contentProvider);
 
-        public IDocument CloneOrCreateDocument(
+        public static IDocument CloneOrCreateDocument(
+            this IDocumentFactory documentFactory,
             IDocument document,
             FilePath destination,
             IEnumerable<KeyValuePair<string, object>> items,
             IContentProvider contentProvider = null) =>
             document?.Clone(destination, items, contentProvider)
-                ?? CreateDocument(destination, items, contentProvider);
+                ?? documentFactory.CreateDocument(destination, items, contentProvider);
 
-        public IDocument CloneOrCreateDocument(
+        public static IDocument CloneOrCreateDocument(
+            this IDocumentFactory documentFactory,
             IDocument document,
             FilePath source,
             FilePath destination,
             IContentProvider contentProvider = null) =>
             document?.Clone(source, destination, contentProvider)
-                ?? CreateDocument(source, destination, contentProvider);
+                ?? documentFactory.CreateDocument(source, destination, contentProvider);
 
-        public IDocument CloneOrCreateDocument(
+        public static IDocument CloneOrCreateDocument(
+            this IDocumentFactory documentFactory,
             IDocument document,
             FilePath destination,
             IContentProvider contentProvider = null) =>
             document?.Clone(destination, contentProvider)
-                ?? CreateDocument(destination, contentProvider);
+                ?? documentFactory.CreateDocument(destination, contentProvider);
 
-        public IDocument CloneOrCreateDocument(
+        public static IDocument CloneOrCreateDocument(
+            this IDocumentFactory documentFactory,
             IDocument document,
             IEnumerable<KeyValuePair<string, object>> items,
             IContentProvider contentProvider = null) =>
             document?.Clone(items, contentProvider)
-                ?? CreateDocument(items, contentProvider);
+                ?? documentFactory.CreateDocument(items, contentProvider);
 
-        public IDocument CloneOrCreateDocument(
+        public static IDocument CloneOrCreateDocument(
+            this IDocumentFactory documentFactory,
             IDocument document,
             IContentProvider contentProvider = null) =>
             document?.Clone(contentProvider)
-                ?? CreateDocument(contentProvider);
+                ?? documentFactory.CreateDocument(contentProvider);
 
-        public IDocument CloneOrCreateDocument(
+        public static IDocument CloneOrCreateDocument(
+            this IDocumentFactory documentFactory,
             IDocument document,
             FilePath source,
             FilePath destination,
             IEnumerable<KeyValuePair<string, object>> items,
             IContentProvider contentProvider = null) =>
             document?.Clone(source, destination, items, contentProvider)
-                ?? CreateDocument(source, destination, items, contentProvider);
+                ?? documentFactory.CreateDocument(source, destination, items, contentProvider);
 
-        public TDocument CloneOrCreateDocument<TDocument>(
+        public static TDocument CloneOrCreateDocument<TDocument>(
+            this IDocumentFactory documentFactory,
             TDocument document,
             FilePath destination,
             IEnumerable<KeyValuePair<string, object>> items,
             IContentProvider contentProvider = null)
             where TDocument : FactoryDocument, IDocument, new() =>
             (TDocument)document?.Clone(destination, items, contentProvider)
-                ?? CreateDocument<TDocument>(destination, items, contentProvider);
+                ?? documentFactory.CreateDocument<TDocument>(destination, items, contentProvider);
 
-        public TDocument CloneOrCreateDocument<TDocument>(
+        public static TDocument CloneOrCreateDocument<TDocument>(
+            this IDocumentFactory documentFactory,
             TDocument document,
             FilePath source,
             FilePath destination,
             IContentProvider contentProvider = null)
             where TDocument : FactoryDocument, IDocument, new() =>
             (TDocument)document?.Clone(source, destination, contentProvider)
-                ?? CreateDocument<TDocument>(source, destination, contentProvider);
+                ?? documentFactory.CreateDocument<TDocument>(source, destination, contentProvider);
 
-        public TDocument CloneOrCreateDocument<TDocument>(
+        public static TDocument CloneOrCreateDocument<TDocument>(
+            this IDocumentFactory documentFactory,
             TDocument document,
             FilePath destination,
             IContentProvider contentProvider = null)
             where TDocument : FactoryDocument, IDocument, new() =>
             (TDocument)document?.Clone(destination, contentProvider)
-                ?? CreateDocument<TDocument>(destination, contentProvider);
+                ?? documentFactory.CreateDocument<TDocument>(destination, contentProvider);
 
-        public TDocument CloneOrCreateDocument<TDocument>(
+        public static TDocument CloneOrCreateDocument<TDocument>(
+            this IDocumentFactory documentFactory,
             TDocument document,
             IEnumerable<KeyValuePair<string, object>> items,
             IContentProvider contentProvider = null)
             where TDocument : FactoryDocument, IDocument, new() =>
             (TDocument)document?.Clone(items, contentProvider)
-                ?? CreateDocument<TDocument>(items, contentProvider);
+                ?? documentFactory.CreateDocument<TDocument>(items, contentProvider);
 
-        public TDocument CloneOrCreateDocument<TDocument>(
+        public static TDocument CloneOrCreateDocument<TDocument>(
+            this IDocumentFactory documentFactory,
             TDocument document,
             IContentProvider contentProvider = null)
             where TDocument : FactoryDocument, IDocument, new() =>
             (TDocument)document?.Clone(contentProvider)
-                ?? CreateDocument<TDocument>(contentProvider);
+                ?? documentFactory.CreateDocument<TDocument>(contentProvider);
 
-        public TDocument CloneOrCreateDocument<TDocument>(
+        public static TDocument CloneOrCreateDocument<TDocument>(
+            this IDocumentFactory documentFactory,
             TDocument document,
             FilePath source,
             FilePath destination,
@@ -155,6 +177,6 @@ namespace Statiq.Common
             IContentProvider contentProvider = null)
             where TDocument : FactoryDocument, IDocument, new() =>
             (TDocument)document?.Clone(source, destination, items, contentProvider)
-                ?? CreateDocument<TDocument>(source, destination, items, contentProvider);
+                ?? documentFactory.CreateDocument<TDocument>(source, destination, items, contentProvider);
     }
 }

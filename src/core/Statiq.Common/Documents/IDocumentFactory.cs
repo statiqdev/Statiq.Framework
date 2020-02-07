@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace Statiq.Common
 {
-    public partial interface IDocumentFactory
+    public interface IDocumentFactory
     {
         IDocument CreateDocument(
             FilePath source,

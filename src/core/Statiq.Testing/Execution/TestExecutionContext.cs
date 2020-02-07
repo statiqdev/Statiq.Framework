@@ -38,7 +38,7 @@ namespace Statiq.Testing
 
         public TestExecutionContext(IEnumerable<IDocument> inputs)
         {
-            _documentFactory = new DocumentFactory(Settings);
+            _documentFactory = new DocumentFactory(this, Settings);
             _documentFactory.SetDefaultDocumentType<TestDocument>();
 
             if (inputs != null)
@@ -159,6 +159,16 @@ namespace Statiq.Testing
 
         /// <inheritdoc/>
         IMemoryStreamFactory IExecutionState.MemoryStreamFactory => MemoryStreamFactory;
+
+        /// <inheritdoc/>
+        public IScriptHelper ScriptHelper
+        {
+            get => Engine.ScriptHelper;
+            set => Engine.ScriptHelper = value;
+        }
+
+        /// <inheritdoc/>
+        IScriptHelper IExecutionState.ScriptHelper => ScriptHelper;
 
         /// <inheritdoc/>
         public CancellationToken CancellationToken
