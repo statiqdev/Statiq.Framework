@@ -41,7 +41,7 @@ namespace Statiq.Common
                 Dictionary = new Dictionary<string, object>(StringComparer.OrdinalIgnoreCase);
                 foreach (KeyValuePair<string, object> item in items)
                 {
-                    if (ScriptMetadataValue.TryGetMetadataValue(item.Value, executionState, out ScriptMetadataValue metadataValue))
+                    if (ScriptMetadataValue.TryGetScriptMetadataValue(item.Key, item.Value, executionState, out ScriptMetadataValue metadataValue))
                     {
                         Dictionary[item.Key] = metadataValue;
                     }

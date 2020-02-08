@@ -8,44 +8,62 @@ namespace Statiq.Common
     /// <summary>
     /// A lazily evaluated metadata value based on script code.
     /// </summary>
-    public class ScriptMetadataValue : IMetadataValue
+    public sealed class ScriptMetadataValue : IMetadataValue
     {
-        private readonly string _code;
+        private readonly string _key;
+        private readonly string _originalPrefix;
+        private readonly string _script;
         private readonly IExecutionState _executionState;
         private HashSet<string> _cachedMetadataKeys;
         private Type _cachedScriptType;
 
-        public ScriptMetadataValue(string code, IExecutionState executionState)
+        private ScriptMetadataValue(string key, string originalPrefix, string script, IExecutionState executionState)
         {
-            _code = code ?? throw new ArgumentNullException(nameof(code));
+            _key = key ?? throw new ArgumentNullException(nameof(key));
+            _originalPrefix = originalPrefix ?? throw new ArgumentNullException(nameof(originalPrefix));
+            _script = script ?? throw new ArgumentNullException(nameof(script));
             _executionState = executionState ?? throw new ArgumentNullException(nameof(executionState));
         }
 
         public object Get(IMetadata metadata)
         {
+            // Check if we're excluded from evaluation
+            if (metadata.TryGetValue(Keys.ExcludeFromEvaluation, out object excludeObject)
+                && ((excludeObject is bool excludeBool && excludeBool)
+                    || metadata.GetList<string>(Keys.ExcludeFromEvaluation).Contains(_key, StringComparer.OrdinalIgnoreCase)))
+            {
+                return _originalPrefix + _script;
+            }
+
+            // Check if we've already cached a compilation for the current set of metadata keys
             if (_cachedMetadataKeys?.SetEquals(metadata.Keys) != true)
             {
-                // Compilation cache miss: not cached or the metadata keys are different
+                // Compilation cache miss, not cached or the metadata keys are different
                 string[] keys = metadata.Keys.ToArray();
                 _cachedMetadataKeys = new HashSet<string>(keys);
-                byte[] rawAssembly = _executionState.ScriptHelper.Compile(_code, keys);
+                byte[] rawAssembly = _executionState.ScriptHelper.Compile(_script, keys);
                 _cachedScriptType = _executionState.ScriptHelper.Load(rawAssembly);
             }
+
             return _executionState.ScriptHelper.EvaluateAsync(_cachedScriptType, metadata).Result;
         }
 
-        public static bool TryGetMetadataValue(object value, IExecutionState executionState, out ScriptMetadataValue metadataValue)
+        public static bool TryGetScriptMetadataValue(string key, object value, IExecutionState executionState, out ScriptMetadataValue scriptMetadataValue)
         {
-            metadataValue = default;
-            if (value is string stringValue)
+            scriptMetadataValue = default;
+            if (value is string script)
             {
-                stringValue = stringValue.TrimStart();
-                if (stringValue.StartsWith("=>"))
+                script = script.TrimStart();
+                if (script.StartsWith("=>"))
                 {
-                    stringValue = stringValue.Substring(2);
-                    if (!string.IsNullOrWhiteSpace(stringValue))
+                    script = script.Substring(2);
+                    if (!string.IsNullOrWhiteSpace(script))
                     {
-                        metadataValue = new ScriptMetadataValue(stringValue, executionState);
+                        scriptMetadataValue = new ScriptMetadataValue(
+                            key,
+                            ((string)value).Substring(0, ((string)value).Length - script.Length),
+                            script,
+                            executionState);
                         return true;
                     }
                 }

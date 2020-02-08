@@ -191,5 +191,14 @@ namespace Statiq.Common
         /// the cache will always be reinitialized.
         /// </summary>
         public const string ResetCache = nameof(ResetCache);
+
+        /// <summary>
+        /// Indicates that the current metadata object, document, or metadata values should
+        /// be excluded from script evaluation typically triggered by a <c>=></c> prefix.
+        /// If this value is <c>true</c> no metadata values will be evaluated. If it's a
+        /// <see cref="IEnumerable{String}"/> then the indicated metadata values will be
+        /// excluded from evaluation.
+        /// </summary>
+        public const string ExcludeFromEvaluation = nameof(ExcludeFromEvaluation);
     }
 }

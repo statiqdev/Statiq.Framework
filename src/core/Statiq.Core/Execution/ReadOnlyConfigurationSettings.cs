@@ -16,7 +16,7 @@ namespace Statiq.Core
             _valueOverrides = new Dictionary<string, IMetadataValue>();
             foreach (KeyValuePair<string, string> item in configuration.AsEnumerable())
             {
-                if (ScriptMetadataValue.TryGetMetadataValue(item.Value, executionState, out ScriptMetadataValue metadataValue))
+                if (ScriptMetadataValue.TryGetScriptMetadataValue(item.Key, item.Value, executionState, out ScriptMetadataValue metadataValue))
                 {
                     _valueOverrides[item.Key] = metadataValue;
                 }
