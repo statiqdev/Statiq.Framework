@@ -31,7 +31,8 @@ using Statiq.Core;
 
 public class Script : ScriptBase, IExecutionState, IMetadata
 {
-public Script(IMetadata metadata, IExecutionState executionState) : base(metadata, executionState) { }
+public Script(IMetadata metadata, IExecutionState executionState, IExecutionContext executionContext)
+    : base(metadata, executionState, executionContext) { }
 public override async Task<object> EvaluateAsync()
 {
 await Task.CompletedTask;
@@ -73,7 +74,8 @@ using Statiq.Core;
 
 public class Script : ScriptBase, IExecutionState, IMetadata
 {
-public Script(IMetadata metadata, IExecutionState executionState) : base(metadata, executionState) { }
+public Script(IMetadata metadata, IExecutionState executionState, IExecutionContext executionContext)
+    : base(metadata, executionState, executionContext) { }
 public override async Task<object> EvaluateAsync()
 {
 await Task.CompletedTask;
@@ -115,7 +117,8 @@ using Statiq.Core;
 
 public class Script : ScriptBase, IExecutionState, IMetadata
 {
-public Script(IMetadata metadata, IExecutionState executionState) : base(metadata, executionState) { }
+public Script(IMetadata metadata, IExecutionState executionState, IExecutionContext executionContext)
+    : base(metadata, executionState, executionContext) { }
 public override async Task<object> EvaluateAsync()
 {
 await Task.CompletedTask;
@@ -157,7 +160,8 @@ using Statiq.Core;
 
 public class Script : ScriptBase, IExecutionState, IMetadata
 {
-public Script(IMetadata metadata, IExecutionState executionState) : base(metadata, executionState) { }
+public Script(IMetadata metadata, IExecutionState executionState, IExecutionContext executionContext)
+    : base(metadata, executionState, executionContext) { }
 public override async Task<object> EvaluateAsync()
 {
 await Task.CompletedTask;
@@ -215,7 +219,8 @@ using Statiq.Core;
 
 public class Script : ScriptBase, IExecutionState, IMetadata
 {
-public Script(IMetadata metadata, IExecutionState executionState) : base(metadata, executionState) { }
+public Script(IMetadata metadata, IExecutionState executionState, IExecutionContext executionContext)
+    : base(metadata, executionState, executionContext) { }
 public override async Task<object> EvaluateAsync()
 {
 await Task.CompletedTask;
@@ -294,7 +299,8 @@ using Yellow;
 
 public class Script : ScriptBase, IExecutionState, IMetadata
 {
-public Script(IMetadata metadata, IExecutionState executionState) : base(metadata, executionState) { }
+public Script(IMetadata metadata, IExecutionState executionState, IExecutionContext executionContext)
+    : base(metadata, executionState, executionContext) { }
 public override async Task<object> EvaluateAsync()
 {
 await Task.CompletedTask;
@@ -362,7 +368,8 @@ using Statiq.Core;
 
 public class Script : ScriptBase, IExecutionState, IMetadata
 {
-public Script(IMetadata metadata, IExecutionState executionState) : base(metadata, executionState) { }
+public Script(IMetadata metadata, IExecutionState executionState, IExecutionContext executionContext)
+    : base(metadata, executionState, executionContext) { }
 public override async Task<object> EvaluateAsync()
 {
 await Task.CompletedTask;
@@ -430,7 +437,8 @@ using Statiq.Core;
 
 public class Script : ScriptBase, IExecutionState, IMetadata
 {
-public Script(IMetadata metadata, IExecutionState executionState) : base(metadata, executionState) { }
+public Script(IMetadata metadata, IExecutionState executionState, IExecutionContext executionContext)
+    : base(metadata, executionState, executionContext) { }
 public override async Task<object> EvaluateAsync()
 {
 await Task.CompletedTask;
@@ -503,7 +511,8 @@ using Statiq.Core;
 
 public class Script : ScriptBase, IExecutionState, IMetadata
 {
-public Script(IMetadata metadata, IExecutionState executionState) : base(metadata, executionState) { }
+public Script(IMetadata metadata, IExecutionState executionState, IExecutionContext executionContext)
+    : base(metadata, executionState, executionContext) { }
 public override async Task<object> EvaluateAsync()
 {
 await Task.CompletedTask;

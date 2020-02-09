@@ -200,5 +200,16 @@ namespace Statiq.Common
         /// excluded from evaluation.
         /// </summary>
         public const string ExcludeFromEvaluation = nameof(ExcludeFromEvaluation);
+
+        /// <summary>
+        /// Holds the current value when enumerating values as documents using the EnumerateValues module.
+        /// </summary>
+        public const string Current = nameof(Current);
+
+        /// <summary>
+        /// The default key used by the EnumerateValues module to locate values to enumerate
+        /// within a document.
+        /// </summary>
+        public const string Enumerate = nameof(Enumerate);
     }
 }

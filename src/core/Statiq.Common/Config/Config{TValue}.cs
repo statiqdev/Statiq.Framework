@@ -44,16 +44,21 @@ namespace Statiq.Common
 
         // These special casting operators for object variants ensure we don't accidentally "wrap" an existing ContextConfig/DocumentConfig
 
-        public static implicit operator Config<IEnumerable<object>>(Config<TValue> documentConfig)
+        public static implicit operator Config<IEnumerable<object>>(Config<TValue> config)
         {
             if (typeof(IEnumerable).IsAssignableFrom(typeof(TValue)))
             {
-                return new Config<IEnumerable<object>>(async (doc, ctx) => ((IEnumerable)await documentConfig._delegate(doc, ctx)).Cast<object>(), documentConfig.RequiresDocument);
+                return new Config<IEnumerable<object>>(async (doc, ctx) => ((IEnumerable)await config._delegate(doc, ctx))?.Cast<object>(), config.RequiresDocument);
             }
-            return new Config<IEnumerable<object>>(async (doc, ctx) => new object[] { await documentConfig._delegate(doc, ctx) }, documentConfig.RequiresDocument);
+            return new Config<IEnumerable<object>>(async (doc, ctx) => Yield(await config._delegate(doc, ctx)), config.RequiresDocument);
         }
 
-        public static implicit operator Config<object>(Config<TValue> documentConfig) =>
-            new Config<object>(async (doc, ctx) => await documentConfig._delegate(doc, ctx), documentConfig.RequiresDocument);
+        private static IEnumerable<object> Yield(object value)
+        {
+            yield return value;
+        }
+
+        public static implicit operator Config<object>(Config<TValue> config) =>
+            new Config<object>(async (doc, ctx) => await config._delegate(doc, ctx), config.RequiresDocument);
     }
 }

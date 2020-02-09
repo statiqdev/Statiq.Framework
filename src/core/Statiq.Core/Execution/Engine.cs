@@ -2,7 +2,9 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.IO;
 using System.Linq;
+using System.Net.Http;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
@@ -35,6 +37,9 @@ namespace Statiq.Core
                 return versionAttribute.InformationalVersion;
             }
         }
+
+        // Cache the HttpMessageHandler (the HttpClient is really just a thin wrapper around this)
+        private static readonly HttpMessageHandler _httpMessageHandler = new HttpClientHandler();
 
         private readonly PipelineCollection _pipelines;
         private readonly DiagnosticsTraceListener _diagnosticsTraceListener;
@@ -163,8 +168,11 @@ namespace Statiq.Core
         /// <inheritdoc />
         public IMemoryStreamFactory MemoryStreamFactory { get; } = new MemoryStreamFactory();
 
-        /// <inheritdoc/>
+        /// <inheritdoc />
         public IScriptHelper ScriptHelper { get; }
+
+        /// <inheritdoc />
+        public IExecutionContext CurrentContext => ExecutionContext.Current;
 
         /// <inheritdoc />
         public IPipelineOutputs Outputs { get; private set; }
@@ -690,6 +698,53 @@ namespace Statiq.Core
             }
             return outputs;
         }
+
+        /// <inheritdoc />
+        public async Task<Stream> GetContentStreamAsync(string content = null)
+        {
+            if (Settings.GetBool(Keys.UseStringContentFiles))
+            {
+                // Use a temp file for strings
+                IFile tempFile = FileSystem.GetTempFile();
+                if (!string.IsNullOrEmpty(content))
+                {
+                    await tempFile.WriteAllTextAsync(content);
+                }
+                return new ContentStream(x => new FileContent(tempFile, x), tempFile.Open(), true);
+            }
+
+            // Otherwise get a memory stream from the pool and use that
+            Stream memoryStream = MemoryStreamFactory.GetStream(content);
+            return new ContentStream(x => new Common.StreamContent(MemoryStreamFactory, memoryStream, x), memoryStream, false);
+        }
+
+        /// <inheritdoc/>
+        public HttpClient CreateHttpClient() => CreateHttpClient(_httpMessageHandler);
+
+        /// <inheritdoc/>
+        public HttpClient CreateHttpClient(HttpMessageHandler handler)
+        {
+            HttpClient client = new HttpClient(handler, false)
+            {
+                Timeout = TimeSpan.FromSeconds(60)
+            };
+            client.DefaultRequestHeaders.Add("User-Agent", "Statiq");
+            return client;
+        }
+
+        /// <inheritdoc/>
+        public IJavaScriptEnginePool GetJavaScriptEnginePool(
+            Action<IJavaScriptEngine> initializer = null,
+            int startEngines = 10,
+            int maxEngines = 25,
+            int maxUsagesPerEngine = 100,
+            TimeSpan? engineTimeout = null) =>
+            new JavaScriptEnginePool(
+                initializer,
+                startEngines,
+                maxEngines,
+                maxUsagesPerEngine,
+                engineTimeout ?? TimeSpan.FromSeconds(5));
 
         /// <inheritdoc />
         public void Dispose()

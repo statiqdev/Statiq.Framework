@@ -18,12 +18,38 @@ namespace Statiq.Core
 {
     internal class ExecutionContext : IExecutionContext
     {
-        // Cache the HttpMessageHandler (the HttpClient is really just a thin wrapper around this)
-        private static readonly HttpMessageHandler _httpMessageHandler = new HttpClientHandler();
+        private static readonly AsyncLocal<ExecutionContext> _current = new AsyncLocal<ExecutionContext>();
+
+        public static ExecutionContext Current => _current.Value;
 
         private readonly ExecutionContextData _contextData;
         private readonly ILogger _logger;
         private readonly string _logPrefix;
+
+        internal ExecutionContext(ExecutionContextData contextData, IExecutionContext parent, IModule module, ImmutableArray<IDocument> inputs)
+        {
+            _contextData = contextData ?? throw new ArgumentNullException(nameof(contextData));
+            _logger = contextData.Services.GetRequiredService<ILogger<ExecutionContext>>();
+            _logPrefix = GetLogPrefix(parent, module, contextData.PipelinePhase);
+
+            Parent = parent;
+            Module = module ?? throw new ArgumentNullException(nameof(module));
+            Inputs = inputs;
+
+            _current.Value = this;
+        }
+
+        private static string GetLogPrefix(IExecutionContext parent, IModule module, PipelinePhase pipelinePhase)
+        {
+            Stack<string> modules = new Stack<string>();
+            modules.Push(module.GetType().Name);
+            while (parent != null)
+            {
+                modules.Push(parent.Module.GetType().Name);
+                parent = parent.Parent;
+            }
+            return $"{pipelinePhase.PipelineName}/{pipelinePhase.Phase} » {string.Join(" » ", modules)} » ";
+        }
 
         /// <inheritdoc/>
         public IExecutionState ExecutionState => _contextData.Engine;
@@ -85,65 +111,22 @@ namespace Statiq.Core
         /// <inheritdoc/>
         public ImmutableArray<IDocument> Inputs { get; }
 
-        internal ExecutionContext(ExecutionContextData contextData, IExecutionContext parent, IModule module, ImmutableArray<IDocument> inputs)
-        {
-            _contextData = contextData ?? throw new ArgumentNullException(nameof(contextData));
-            _logger = contextData.Services.GetRequiredService<ILogger<ExecutionContext>>();
-            _logPrefix = GetLogPrefix(parent, module, contextData.PipelinePhase);
-
-            Parent = parent;
-            Module = module ?? throw new ArgumentNullException(nameof(module));
-            Inputs = inputs;
-        }
-
-        private static string GetLogPrefix(IExecutionContext parent, IModule module, PipelinePhase pipelinePhase)
-        {
-            Stack<string> modules = new Stack<string>();
-            modules.Push(module.GetType().Name);
-            while (parent != null)
-            {
-                modules.Push(parent.Module.GetType().Name);
-                parent = parent.Parent;
-            }
-            return $"{pipelinePhase.PipelineName}/{pipelinePhase.Phase} » {string.Join(" » ", modules)} » ";
-        }
+        /// <inheritdoc/>
+        public IExecutionContext CurrentContext => this;
 
         /// <inheritdoc/>
-        public HttpClient CreateHttpClient() => CreateHttpClient(_httpMessageHandler);
+        public HttpClient CreateHttpClient() => _contextData.Engine.CreateHttpClient();
 
         /// <inheritdoc/>
-        public HttpClient CreateHttpClient(HttpMessageHandler handler)
-        {
-            HttpClient client = new HttpClient(handler, false)
-            {
-                Timeout = TimeSpan.FromSeconds(60)
-            };
-            client.DefaultRequestHeaders.Add("User-Agent", "Statiq");
-            return client;
-        }
-
-        /// <inheritdoc/>
-        public async Task<Stream> GetContentStreamAsync(string content = null)
-        {
-            if (Settings.GetBool(Keys.UseStringContentFiles))
-            {
-                // Use a temp file for strings
-                IFile tempFile = FileSystem.GetTempFile();
-                if (!string.IsNullOrEmpty(content))
-                {
-                    await tempFile.WriteAllTextAsync(content);
-                }
-                return new ContentStream(x => new FileContent(tempFile, x), tempFile.Open(), true);
-            }
-
-            // Otherwise get a memory stream from the pool and use that
-            Stream memoryStream = MemoryStreamFactory.GetStream(content);
-            return new ContentStream(x => new Common.StreamContent(MemoryStreamFactory, memoryStream, x), memoryStream, false);
-        }
+        public HttpClient CreateHttpClient(HttpMessageHandler handler) => _contextData.Engine.CreateHttpClient(handler);
 
         /// <inheritdoc/>
         public async Task<ImmutableArray<IDocument>> ExecuteModulesAsync(IEnumerable<IModule> modules, IEnumerable<IDocument> inputs) =>
             await Engine.ExecuteModulesAsync(_contextData, this, modules, inputs?.ToImmutableArray() ?? ImmutableArray<IDocument>.Empty, this);
+
+        /// <inheritdoc/>
+        public Task<Stream> GetContentStreamAsync(string content = null) =>
+            _contextData.Engine.GetContentStreamAsync(content);
 
         /// <inheritdoc/>
         public IJavaScriptEnginePool GetJavaScriptEnginePool(
@@ -152,12 +135,7 @@ namespace Statiq.Core
             int maxEngines = 25,
             int maxUsagesPerEngine = 100,
             TimeSpan? engineTimeout = null) =>
-            new JavaScriptEnginePool(
-                initializer,
-                startEngines,
-                maxEngines,
-                maxUsagesPerEngine,
-                engineTimeout ?? TimeSpan.FromSeconds(5));
+            _contextData.Engine.GetJavaScriptEnginePool(initializer, startEngines, maxEngines, maxUsagesPerEngine, engineTimeout);
 
         // IDocumentFactory
 

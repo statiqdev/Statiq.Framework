@@ -2,7 +2,11 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.IO;
+using System.Net;
+using System.Net.Http;
 using System.Threading;
+using System.Threading.Tasks;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -113,7 +117,44 @@ namespace Statiq.Testing
         /// <inheritdoc />
         IScriptHelper IExecutionState.ScriptHelper => ScriptHelper;
 
+        /// <inheritdoc />
+        public IExecutionContext CurrentContext => TestExecutionContext.Current;
+
         private readonly DocumentFactory _documentFactory;
+
+        /// <inheritdoc/>
+        public Task<Stream> GetContentStreamAsync(string content = null) => Task.FromResult<Stream>(new TestContentStream(this, content));
+
+        /// <inheritdoc/>
+        public HttpClient CreateHttpClient() =>
+            new HttpClient(new TestHttpMessageHandler(HttpResponseFunc, null));
+
+        /// <inheritdoc/>
+        public HttpClient CreateHttpClient(HttpMessageHandler handler) =>
+            new HttpClient(new TestHttpMessageHandler(HttpResponseFunc, handler));
+
+        /// <summary>
+        /// A message handler that should be used to register <see cref="HttpResponseMessage"/>
+        /// instances for a given request.
+        /// </summary>
+        public Func<HttpRequestMessage, HttpMessageHandler, HttpResponseMessage> HttpResponseFunc { get; set; }
+            = (_, __) => new HttpResponseMessage
+            {
+                StatusCode = HttpStatusCode.OK,
+                Content = new StringContent(string.Empty)
+            };
+
+        /// <inheritdoc/>
+        public IJavaScriptEnginePool GetJavaScriptEnginePool(
+            Action<IJavaScriptEngine> initializer = null,
+            int startEngines = 10,
+            int maxEngines = 25,
+            int maxUsagesPerEngine = 100,
+            TimeSpan? engineTimeout = null) =>
+            new TestJsEnginePool(JsEngineFunc, initializer);
+
+        public Func<IJavaScriptEngine> JsEngineFunc { get; set; } = () =>
+            throw new NotImplementedException("JavaScript test engine not initialized. Statiq.Testing.JavaScript can be used to return a working JavaScript engine");
 
         /// <inheritdoc />
         public void SetDefaultDocumentType<TDocument>()

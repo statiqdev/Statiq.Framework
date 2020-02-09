@@ -26,6 +26,10 @@ namespace Statiq.Testing
         private readonly DocumentFactory _documentFactory;
         private readonly ILogger _logger;
 
+        private static readonly AsyncLocal<TestExecutionContext> _current = new AsyncLocal<TestExecutionContext>();
+
+        public static TestExecutionContext Current => _current.Value;
+
         public TestExecutionContext()
             : this((IEnumerable<IDocument>)null)
         {
@@ -47,6 +51,8 @@ namespace Statiq.Testing
             }
 
             _logger = Engine.TestLoggerProvider.CreateLogger(null);
+
+            _current.Value = this;
         }
 
         public TestLoggerProvider TestLoggerProvider => Engine.TestLoggerProvider;
@@ -171,6 +177,9 @@ namespace Statiq.Testing
         IScriptHelper IExecutionState.ScriptHelper => ScriptHelper;
 
         /// <inheritdoc/>
+        public IExecutionContext CurrentContext => this;
+
+        /// <inheritdoc/>
         public CancellationToken CancellationToken
         {
             get => Engine.CancellationToken;
@@ -205,41 +214,23 @@ namespace Statiq.Testing
             SetInputs((IEnumerable<IDocument>)inputs);
 
         /// <inheritdoc/>
-        public Task<Stream> GetContentStreamAsync(string content = null) => Task.FromResult<Stream>(new TestContentStream(this, content));
-
-        private class TestContentStream : DelegatingStream, IContentProviderFactory
-        {
-            private readonly TestExecutionContext _context;
-
-            public TestContentStream(TestExecutionContext context, string content)
-                : base(string.IsNullOrEmpty(content) ? new MemoryStream() : new MemoryStream(Encoding.UTF8.GetBytes(content)))
-            {
-                _context = context;
-            }
-
-            public IContentProvider GetContentProvider() => GetContentProvider(null);
-
-            public IContentProvider GetContentProvider(string mediaType) => new Common.StreamContent(_context.MemoryStreamFactory, this, mediaType);
-        }
+        public Task<Stream> GetContentStreamAsync(string content = null) => Engine.GetContentStreamAsync(content);
 
         /// <inheritdoc/>
-        public HttpClient CreateHttpClient() =>
-            new HttpClient(new TestHttpMessageHandler(HttpResponseFunc, null));
+        public HttpClient CreateHttpClient() => Engine.CreateHttpClient();
 
         /// <inheritdoc/>
-        public HttpClient CreateHttpClient(HttpMessageHandler handler) =>
-            new HttpClient(new TestHttpMessageHandler(HttpResponseFunc, handler));
+        public HttpClient CreateHttpClient(HttpMessageHandler handler) => Engine.CreateHttpClient(handler);
 
         /// <summary>
         /// A message handler that should be used to register <see cref="HttpResponseMessage"/>
         /// instances for a given request.
         /// </summary>
-        public Func<HttpRequestMessage, HttpMessageHandler, HttpResponseMessage> HttpResponseFunc { get; set; }
-            = (_, __) => new HttpResponseMessage
-            {
-                StatusCode = HttpStatusCode.OK,
-                Content = new StringContent(string.Empty)
-            };
+        public Func<HttpRequestMessage, HttpMessageHandler, HttpResponseMessage> HttpResponseFunc
+        {
+            get => Engine.HttpResponseFunc;
+            set => Engine.HttpResponseFunc = value;
+        }
 
         /// <inheritdoc/>
         public async Task<ImmutableArray<IDocument>> ExecuteModulesAsync(IEnumerable<IModule> modules, IEnumerable<IDocument> inputs)
@@ -260,9 +251,6 @@ namespace Statiq.Testing
             return inputs?.Where(x => x != null).ToImmutableArray() ?? ImmutableArray<IDocument>.Empty;
         }
 
-        public Func<IJavaScriptEngine> JsEngineFunc { get; set; } = () =>
-            throw new NotImplementedException("JavaScript test engine not initialized. Statiq.Testing.JavaScript can be used to return a working JavaScript engine");
-
         /// <inheritdoc/>
         public IJavaScriptEnginePool GetJavaScriptEnginePool(
             Action<IJavaScriptEngine> initializer = null,
@@ -270,39 +258,12 @@ namespace Statiq.Testing
             int maxEngines = 25,
             int maxUsagesPerEngine = 100,
             TimeSpan? engineTimeout = null) =>
-            new TestJsEnginePool(JsEngineFunc, initializer);
+            Engine.GetJavaScriptEnginePool(initializer, startEngines, maxEngines, maxUsagesPerEngine, engineTimeout);
 
-        private class TestJsEnginePool : IJavaScriptEnginePool
+        public Func<IJavaScriptEngine> JsEngineFunc
         {
-            private readonly Func<IJavaScriptEngine> _engineFunc;
-            private readonly Action<IJavaScriptEngine> _initializer;
-
-            public TestJsEnginePool(Func<IJavaScriptEngine> engineFunc, Action<IJavaScriptEngine> initializer)
-            {
-                _engineFunc = engineFunc;
-                _initializer = initializer;
-            }
-
-            public IJavaScriptEngine GetEngine(TimeSpan? timeout = null)
-            {
-                IJavaScriptEngine engine = _engineFunc();
-                _initializer?.Invoke(engine);
-                return engine;
-            }
-
-            public void Dispose()
-            {
-            }
-
-            public void RecycleEngine(IJavaScriptEngine engine)
-            {
-                throw new NotImplementedException();
-            }
-
-            public void RecycleAllEngines()
-            {
-                throw new NotImplementedException();
-            }
+            get => Engine.JsEngineFunc;
+            set => Engine.JsEngineFunc = value;
         }
 
         /// <inheritdoc />

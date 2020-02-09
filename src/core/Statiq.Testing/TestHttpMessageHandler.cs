@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace Statiq.Testing
 {
-    internal class TestHttpMessageHandler : HttpMessageHandler
+    public class TestHttpMessageHandler : HttpMessageHandler
     {
         private readonly Func<HttpRequestMessage, HttpMessageHandler, HttpResponseMessage> _httpResponseFunc;
         private readonly HttpMessageHandler _httpMessageHandler;

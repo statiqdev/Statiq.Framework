@@ -1,5 +1,7 @@
 # 1.0.0-alpha.24
 
+- Refactored some methods from `IExecutionContext` into `IExecutionState` and moved implementation to `Engine`.
+- Adds new `EnumerateValues` module that will clone or create documents for each item in an enumeration.
 - Adds `Keys.ExcludeFromEvaluation` that can exclude all or some metadata values from automatic script evaluation.
 - Adds `IMetadata.GetNestedMetadata()` to get a nested metadata value (not called `IMetadata.GetMetadata()` to avoid conflicts with the old previous method of that name).
 - Renamed `IMetadata.GetMetadata()` to `IMetadata.FilterMetadata()` which now returns a `FilteredMetadata` instance.

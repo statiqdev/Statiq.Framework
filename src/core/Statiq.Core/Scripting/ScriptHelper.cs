@@ -59,7 +59,12 @@ namespace Statiq.Core
                 throw new ArgumentException("Provided type is not a script", nameof(scriptType));
             }
 
-            ScriptBase script = (ScriptBase)Activator.CreateInstance(scriptType, metadata, _executionState);
+            // Try to use the current execution context if there is one and fall back to the initial execution state (the engine)
+            ScriptBase script = (ScriptBase)Activator.CreateInstance(
+                scriptType,
+                metadata,
+                _executionState.CurrentContext ?? _executionState,
+                _executionState.CurrentContext);
             return await script.EvaluateAsync();
         }
 
@@ -225,7 +230,8 @@ $@"{usingStatements}
 {liftingWalker.UsingDirectives}
 public class {ScriptClassName} : ScriptBase, IExecutionState, IMetadata
 {{
-public {ScriptClassName}(IMetadata metadata, IExecutionState executionState) : base(metadata, executionState) {{ }}
+public {ScriptClassName}(IMetadata metadata, IExecutionState executionState, IExecutionContext executionContext)
+    : base(metadata, executionState, executionContext) {{ }}
 public override async Task<object> EvaluateAsync()
 {{
 await Task.CompletedTask;
