@@ -26,10 +26,6 @@ namespace Statiq.Testing
         private readonly DocumentFactory _documentFactory;
         private readonly ILogger _logger;
 
-        private static readonly AsyncLocal<TestExecutionContext> _current = new AsyncLocal<TestExecutionContext>();
-
-        public static TestExecutionContext Current => _current.Value;
-
         public TestExecutionContext()
             : this((IEnumerable<IDocument>)null)
         {
@@ -52,7 +48,7 @@ namespace Statiq.Testing
 
             _logger = Engine.TestLoggerProvider.CreateLogger(null);
 
-            _current.Value = this;
+            IExecutionContext.Current = this;
         }
 
         public TestLoggerProvider TestLoggerProvider => Engine.TestLoggerProvider;
@@ -175,9 +171,6 @@ namespace Statiq.Testing
 
         /// <inheritdoc/>
         IScriptHelper IExecutionState.ScriptHelper => ScriptHelper;
-
-        /// <inheritdoc/>
-        public IExecutionContext CurrentContext => this;
 
         /// <inheritdoc/>
         public CancellationToken CancellationToken

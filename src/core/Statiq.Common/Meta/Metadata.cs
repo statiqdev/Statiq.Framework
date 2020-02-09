@@ -54,7 +54,7 @@ namespace Statiq.Common
         }
 
         /// <summary>
-        /// Creates a new set of metadata without evaluating scripted metadata.
+        /// Creates a new set of metadata.
         /// </summary>
         /// <remarks>
         /// This is marked as <c>protected internal</c> to discourage public use. When at all possible, metadata
@@ -63,14 +63,13 @@ namespace Statiq.Common
         /// </remarks>
         /// <param name="previous">The previous set of metadata this one should extend.</param>
         /// <param name="items">The initial set of items. If null, no underlying dictionary will be created.</param>
-        protected internal Metadata(IMetadata previous, IEnumerable<KeyValuePair<string, object>> items = null)
-            : this(items)
+        public Metadata(IMetadata previous, IEnumerable<KeyValuePair<string, object>> items = null)
+            : this(IExecutionContext.Current, previous, items)
         {
-            _previous = previous;
         }
 
         /// <summary>
-        /// Creates a new set of metadata without evaluating scripted metadata.
+        /// Creates a new set of metadata.
         /// </summary>
         /// <remarks>
         /// This is marked as <c>protected internal</c> to discourage public use. When at all possible, metadata
@@ -78,16 +77,9 @@ namespace Statiq.Common
         /// available for use at the time the metadata is needed, then a derived type should be created for use.
         /// </remarks>
         /// <param name="items">The initial set of items. If null, no underlying dictionary will be created.</param>
-        protected internal Metadata(IEnumerable<KeyValuePair<string, object>> items = null)
+        public Metadata(IEnumerable<KeyValuePair<string, object>> items = null)
+            : this((IExecutionState)IExecutionContext.Current, items)
         {
-            if (items != null)
-            {
-                Dictionary = new Dictionary<string, object>(StringComparer.OrdinalIgnoreCase);
-                foreach (KeyValuePair<string, object> item in items)
-                {
-                    Dictionary[item.Key] = item.Value;
-                }
-            }
         }
 
         public bool ContainsKey(string key)

@@ -17,6 +17,17 @@ namespace Statiq.Common
     /// </summary>
     public interface IExecutionContext : IExecutionState, IMetadata, IServiceProvider, ILogger
     {
+        private static readonly AsyncLocal<IExecutionContext> _current = new AsyncLocal<IExecutionContext>();
+
+        /// <summary>
+        /// The current execution context.
+        /// </summary>
+        public static IExecutionContext Current
+        {
+            get => _current.Value;
+            internal set => _current.Value = value;
+        }
+
         /// <summary>
         /// Gets the current execution state.
         /// </summary>

@@ -117,9 +117,6 @@ namespace Statiq.Testing
         /// <inheritdoc />
         IScriptHelper IExecutionState.ScriptHelper => ScriptHelper;
 
-        /// <inheritdoc />
-        public IExecutionContext CurrentContext => TestExecutionContext.Current;
-
         private readonly DocumentFactory _documentFactory;
 
         /// <inheritdoc/>

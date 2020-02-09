@@ -18,10 +18,6 @@ namespace Statiq.Core
 {
     internal class ExecutionContext : IExecutionContext
     {
-        private static readonly AsyncLocal<ExecutionContext> _current = new AsyncLocal<ExecutionContext>();
-
-        public static ExecutionContext Current => _current.Value;
-
         private readonly ExecutionContextData _contextData;
         private readonly ILogger _logger;
         private readonly string _logPrefix;
@@ -36,7 +32,7 @@ namespace Statiq.Core
             Module = module ?? throw new ArgumentNullException(nameof(module));
             Inputs = inputs;
 
-            _current.Value = this;
+            IExecutionContext.Current = this;
         }
 
         private static string GetLogPrefix(IExecutionContext parent, IModule module, PipelinePhase pipelinePhase)
@@ -110,9 +106,6 @@ namespace Statiq.Core
 
         /// <inheritdoc/>
         public ImmutableArray<IDocument> Inputs { get; }
-
-        /// <inheritdoc/>
-        public IExecutionContext CurrentContext => this;
 
         /// <inheritdoc/>
         public HttpClient CreateHttpClient() => _contextData.Engine.CreateHttpClient();

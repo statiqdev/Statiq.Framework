@@ -63,8 +63,8 @@ namespace Statiq.Core
             ScriptBase script = (ScriptBase)Activator.CreateInstance(
                 scriptType,
                 metadata,
-                _executionState.CurrentContext ?? _executionState,
-                _executionState.CurrentContext);
+                IExecutionContext.Current ?? _executionState,
+                IExecutionContext.Current);
             return await script.EvaluateAsync();
         }
 

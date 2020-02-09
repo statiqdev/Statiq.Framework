@@ -172,9 +172,6 @@ namespace Statiq.Core
         public IScriptHelper ScriptHelper { get; }
 
         /// <inheritdoc />
-        public IExecutionContext CurrentContext => ExecutionContext.Current;
-
-        /// <inheritdoc />
         public IPipelineOutputs Outputs { get; private set; }
 
         /// <inheritdoc />
