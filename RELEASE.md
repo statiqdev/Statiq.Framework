@@ -1,5 +1,6 @@
 # 1.0.0-alpha.24
 
+- Adds a `Config.ContainsSettings(params string[] keys)` config factory to return whether the settings contain all the specified keys.
 - Refactored some methods from `IExecutionContext` into `IExecutionState` and moved implementation to `Engine`.
 - Adds new `EnumerateValues` module that will clone or create documents for each item in an enumeration.
 - Adds `Keys.ExcludeFromEvaluation` that can exclude all or some metadata values from automatic script evaluation.

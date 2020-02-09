@@ -13,6 +13,7 @@ namespace Statiq.Common.Tests.Documents
             public void GetsParent()
             {
                 // Given
+                _ = new TestExecutionContext();
                 IDocument a = new TestDocument("A");
                 IDocument x = new TestDocument("X")
                 {
@@ -62,6 +63,7 @@ namespace Statiq.Common.Tests.Documents
             public void GetsRecursiveParent()
             {
                 // Given
+                _ = new TestExecutionContext();
                 IDocument a = new TestDocument("A");
                 IDocument x = new TestDocument("X")
                 {
@@ -98,6 +100,7 @@ namespace Statiq.Common.Tests.Documents
             public void ReturnsNullForRecursiveParentWhenNotRecursive()
             {
                 // Given
+                _ = new TestExecutionContext();
                 IDocument a = new TestDocument("A");
                 IDocument x = new TestDocument("X")
                 {

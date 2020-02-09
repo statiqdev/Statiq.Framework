@@ -13,6 +13,9 @@ namespace Statiq.Core
     /// <remarks>
     /// Enumerates values returned by a config and clones a document for each one.
     /// The current value for each cloned document is contained in <see cref="Keys.Current"/>.
+    /// Generally speaking you shouldn't enumerate documents since they get cloned as
+    /// a pipeline progresses. Instead you should enumerate some identifier and operate on that
+    /// to find the correct documents when the template gets rendered.
     /// </remarks>
     /// <category>Control</category>
     public class EnumerateValues : ParallelSyncConfigModule<IEnumerable<object>>

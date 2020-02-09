@@ -20,6 +20,9 @@ namespace Statiq.Testing
         public void BaseSetUp()
         {
             Directory.SetCurrentDirectory(TestContext.CurrentContext.TestDirectory);
+
+            // Make sure we set an AsycLocal IExecutionContext (might get overridden in the actual test)
+            _ = new TestExecutionContext();
         }
 
         public static MemoryStream GetTestFileStream(string fileName) =>

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace Statiq.Common
@@ -103,5 +104,13 @@ namespace Statiq.Common
         /// <returns>A config object.</returns>
         public static Config<object> FromSettings(Func<IReadOnlyConfigurationSettings, Task> action) =>
             FromSettings<object>(action);
+
+        /// <summary>
+        /// Creates a config value that returns <c>true</c> if the settings contains all the specified keys.
+        /// </summary>
+        /// <param name="keys">The keys to check.</param>
+        /// <returns>A config object.</returns>
+        public static Config<bool> ContainsSettings(params string[] keys) =>
+            FromSettings(settings => keys.All(x => settings.ContainsKey(x)));
     }
 }
