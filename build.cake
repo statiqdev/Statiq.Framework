@@ -246,11 +246,18 @@ Task("Publish-Packages")
 
         foreach (var nupkg in GetFiles(nugetRoot.Path.FullPath + "/*.nupkg"))
         {
-            NuGetPush(nupkg, new NuGetPushSettings 
+            try
             {
-                ApiKey = apiKey,
-                Source = "https://api.nuget.org/v3/index.json"
-            });
+                NuGetPush(nupkg, new NuGetPushSettings 
+                {
+                    ApiKey = apiKey,
+                    Source = "https://api.nuget.org/v3/index.json"
+                });
+            }
+            catch(Exception ex)
+            {
+                Error(ex.Message);
+            }
         }
     });
 
