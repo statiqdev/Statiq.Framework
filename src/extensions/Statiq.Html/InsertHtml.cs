@@ -25,8 +25,6 @@ namespace Statiq.Html
     /// <category>Content</category>
     public class InsertHtml : ParallelModule
     {
-        private static readonly HtmlParser HtmlParser = new HtmlParser();
-
         private readonly string _querySelector;
         private readonly Config<string> _content;
         private bool _first;
@@ -74,46 +72,12 @@ namespace Statiq.Html
                 return input.Yield();
             }
 
-            // Parse the HTML content
-            IHtmlDocument htmlDocument = await input.ParseHtmlAsync(context, HtmlParser);
-            if (htmlDocument == null)
-            {
-                return input.Yield();
-            }
-
-            // Evaluate the query selector
-            try
-            {
-                if (!string.IsNullOrWhiteSpace(_querySelector))
-                {
-                    IElement[] elements = _first
-                        ? new[] { htmlDocument.QuerySelector(_querySelector) }
-                        : htmlDocument.QuerySelectorAll(_querySelector).ToArray();
-                    if (elements.Length > 0 && elements[0] != null)
-                    {
-                        foreach (IElement element in elements)
-                        {
-                            element.Insert(_position, content);
-                        }
-
-                        using (Stream contentStream = await context.GetContentStreamAsync())
-                        {
-                            using (StreamWriter writer = contentStream.GetWriter())
-                            {
-                                htmlDocument.ToHtml(writer, ProcessingInstructionFormatter.Instance);
-                                writer.Flush();
-                                return input.Clone(context.GetContentProvider(contentStream, MediaTypes.Html)).Yield();
-                            }
-                        }
-                    }
-                }
-                return input.Yield();
-            }
-            catch (Exception ex)
-            {
-                context.LogWarning("Exception while processing HTML for {0}: {1}", input.ToSafeDisplayString(), ex.Message);
-                return input.Yield();
-            }
+            return await ProcessHtml.ProcessElementsAsync(
+                input,
+                context,
+                _querySelector,
+                _first,
+                (i, c, e, m) => e.Insert(_position, content));
         }
     }
 }

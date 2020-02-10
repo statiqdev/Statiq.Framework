@@ -1,5 +1,6 @@
 # 1.0.0-alpha.24
 
+- Added new `ProcessHtml` module for more flexible processing of DOM nodes.
 - Added new `IEnumerable<IDocument>.Flatten()` extension to flatten document trees.
 - Added new `IEnumerable<IDocument>.FilterSources()` and `IEnumerable<IDocument>.FilterDestinations()` extension methods.
 - Added a new `FilterDestinations` module to filter documents by destination path.
