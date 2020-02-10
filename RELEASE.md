@@ -1,7 +1,8 @@
 # 1.0.0-alpha.25
 
-- Changes behavior of `SetDestination` when using a config value to make `DestinationPath`, `DestinationFileName`, and `DestinationExtension` take precedence (with an option to override).
-- Adds a `Context` property for the current `IExecutionContext` to the available script properties (I.e., for use in metadata value scripts via "=>" notation).
+- Fixed a race condition in `ScriptMetadataValue`.
+- Changed behavior of `SetDestination` when using a config value to make `DestinationPath`, `DestinationFileName`, and `DestinationExtension` take precedence (with an option to override).
+- Added a `Context` property for the current `IExecutionContext` to the available script properties (I.e., for use in metadata value scripts via "=>" notation).
 
 # 1.0.0-alpha.24
 

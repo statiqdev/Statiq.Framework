@@ -10,6 +10,8 @@ namespace Statiq.Common
     /// </summary>
     public sealed class ScriptMetadataValue : IMetadataValue
     {
+        private static readonly object Lock = new object();
+
         private readonly string _key;
         private readonly string _originalPrefix;
         private readonly string _script;
@@ -27,22 +29,26 @@ namespace Statiq.Common
 
         public object Get(IMetadata metadata)
         {
-            // Check if we're excluded from evaluation
-            if (metadata.TryGetValue(Keys.ExcludeFromEvaluation, out object excludeObject)
-                && ((excludeObject is bool excludeBool && excludeBool)
-                    || metadata.GetList<string>(Keys.ExcludeFromEvaluation).Contains(_key, StringComparer.OrdinalIgnoreCase)))
+            // The metadata value could get resolved concurrently so we need to lock it while caching
+            lock (Lock)
             {
-                return _originalPrefix + _script;
-            }
+                // Check if we're excluded from evaluation
+                if (metadata.TryGetValue(Keys.ExcludeFromEvaluation, out object excludeObject)
+                    && ((excludeObject is bool excludeBool && excludeBool)
+                        || metadata.GetList<string>(Keys.ExcludeFromEvaluation).Contains(_key, StringComparer.OrdinalIgnoreCase)))
+                {
+                    return _originalPrefix + _script;
+                }
 
-            // Check if we've already cached a compilation for the current set of metadata keys
-            if (_cachedMetadataKeys?.SetEquals(metadata.Keys) != true)
-            {
-                // Compilation cache miss, not cached or the metadata keys are different
-                string[] keys = metadata.Keys.ToArray();
-                _cachedMetadataKeys = new HashSet<string>(keys);
-                byte[] rawAssembly = _executionState.ScriptHelper.Compile(_script, keys);
-                _cachedScriptType = _executionState.ScriptHelper.Load(rawAssembly);
+                // Check if we've already cached a compilation for the current set of metadata keys
+                if (_cachedMetadataKeys?.SetEquals(metadata.Keys) != true)
+                {
+                    // Compilation cache miss, not cached or the metadata keys are different
+                    string[] keys = metadata.Keys.ToArray();
+                    _cachedMetadataKeys = new HashSet<string>(keys);
+                    byte[] rawAssembly = _executionState.ScriptHelper.Compile(_script, keys);
+                    _cachedScriptType = _executionState.ScriptHelper.Load(rawAssembly);
+                }
             }
 
             return _executionState.ScriptHelper.EvaluateAsync(_cachedScriptType, metadata).Result;
