@@ -11,34 +11,34 @@ namespace Statiq.Core
 {
     public abstract class ScriptBase
     {
-        private readonly IExecutionContext _executionContext;
-
         protected ScriptBase(IMetadata metadata, IExecutionState executionState, IExecutionContext executionContext)
         {
             Metadata = metadata;
             ExecutionState = executionState;
-            _executionContext = executionContext;
+            Context = executionContext;
         }
 
         public IExecutionState ExecutionState { get; }
 
         public IMetadata Metadata { get; }
 
+        public IExecutionContext Context { get; }
+
         public abstract Task<object> EvaluateAsync();
 
         // Manually implement IExecutionContext pass-throughs since we don't
         // want to automatically proxy everything in IExecutionContext
 
-        public string PipelineName => _executionContext?.PipelineName;
+        public string PipelineName => Context?.PipelineName;
 
-        public IReadOnlyPipeline Pipeline => _executionContext?.Pipeline;
+        public IReadOnlyPipeline Pipeline => Context?.Pipeline;
 
-        public Phase Phase => _executionContext?.Phase ?? default;
+        public Phase Phase => Context?.Phase ?? default;
 
-        public IExecutionContext Parent => _executionContext?.Parent;
+        public IExecutionContext Parent => Context?.Parent;
 
-        public IModule Module => _executionContext?.Module;
+        public IModule Module => Context?.Module;
 
-        public ImmutableArray<IDocument> Inputs => _executionContext?.Inputs ?? default;
+        public ImmutableArray<IDocument> Inputs => Context?.Inputs ?? default;
     }
 }

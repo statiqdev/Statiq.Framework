@@ -1,5 +1,7 @@
 # 1.0.0-alpha.25
 
+- Adds a `Context` property for the current `IExecutionContext` to the available script properties (I.e., for use in metadata value scripts via "=>" notation).
+
 # 1.0.0-alpha.24
 
 - Added new `ProcessHtml` module for more flexible processing of DOM nodes.
