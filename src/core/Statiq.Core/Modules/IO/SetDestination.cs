@@ -51,7 +51,7 @@ namespace Statiq.Core
         /// The path or extension to set the destination to.
         /// If the value starts with a "." then it will be treated as an extension and the existing destination path will be changed (if there is one).
         /// If the value does not start with a "." then it will be treated as a path and the destination will be set to the value.
-        /// Use <see cref="SetDestination(Config{FilePath})"/> for more control.
+        /// Use <see cref="SetDestination(Config{FilePath}, bool)"/> for more control.
         /// </param>
         public SetDestination(string pathOrExtension)
             : base(
@@ -66,9 +66,16 @@ namespace Statiq.Core
         /// Changes the destination of input documents to that of the delegate.
         /// </summary>
         /// <param name="destination">A delegate that returns a <see cref="FilePath"/> with the desired destination path.</param>
-        public SetDestination(Config<FilePath> destination)
-            : base(destination ?? throw new ArgumentNullException(nameof(destination)), true)
+        /// <param name="ignoreMetadata">
+        /// If <c>true</c> existing <c>DestinationPath</c>, <c>DestinationFileName</c>, and <c>DestinationExtension</c>
+        /// metadata values will be ignored and the provided config will take precedence, otherwise if <c>false</c>
+        /// and if <c>DestinationPath</c>, <c>DestinationFileName</c>, or <c>DestinationExtension</c>
+        /// metadata values are set, those will take precedence.
+        /// </param>
+        public SetDestination(Config<FilePath> destination, bool ignoreMetadata = false)
+            : base(Config.FromDocument(async (doc, ctx) => (ignoreMetadata ? null : GetPathFromMetadata(doc)) ?? await destination.GetValueAsync(doc, ctx)), true)
         {
+            _ = destination ?? throw new ArgumentNullException(nameof(destination));
         }
 
         private static FilePath GetPathFromMetadata(IDocument doc)

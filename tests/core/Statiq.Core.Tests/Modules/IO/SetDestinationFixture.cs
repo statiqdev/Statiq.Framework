@@ -118,13 +118,34 @@ namespace Statiq.Core.Tests.Modules.IO
                     { key, "foo" }
                 };
                 SetDestination setDestination = new SetDestination(
-                    Config.FromDocument(doc => doc.Destination.ChangeExtension(".bar")));
+                    Config.FromDocument(doc => doc.Destination.ChangeExtension(".bar")),
+                    true);
 
                 // When
                 TestDocument result = await ExecuteAsync(input, setDestination).SingleAsync();
 
                 // Then
                 result.Destination.ShouldBe("Subfolder/write-test.bar");
+            }
+
+            [TestCase(Keys.DestinationPath, "Subfolder/bar.baz", "Subfolder/bar.baz")]
+            [TestCase(Keys.DestinationFileName, "fizz.buzz", "Subfolder/fizz.buzz")]
+            [TestCase(Keys.DestinationExtension, "baz", "Subfolder/write-test.baz")]
+            public async Task SetsDestinationFromDelegateDoesNotOverrideMetadata(string key, string value, string expected)
+            {
+                // Given
+                TestDocument input = new TestDocument(new FilePath("Subfolder/write-test.abc"))
+                {
+                    { key, value }
+                };
+                SetDestination setDestination = new SetDestination(
+                    Config.FromDocument(doc => doc.Destination.ChangeExtension(".bar")));
+
+                // When
+                TestDocument result = await ExecuteAsync(input, setDestination).SingleAsync();
+
+                // Then
+                result.Destination.ShouldBe(expected);
             }
 
             public async Task SetsDestinationFromDocumentDelegate()
