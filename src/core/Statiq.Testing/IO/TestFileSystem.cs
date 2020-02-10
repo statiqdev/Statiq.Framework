@@ -24,7 +24,7 @@ namespace Statiq.Testing
         public IFileProvider FileProvider { get; set; }
 
         /// <inheritdoc />
-        public DirectoryPath RootPath { get; set; } = new DirectoryPath("/");
+        public DirectoryPath RootPath { get; set; } = DirectoryPath.RootPath;
 
         /// <inheritdoc />
         public PathCollection<DirectoryPath> InputPaths { get; set; } = new PathCollection<DirectoryPath>(new[]

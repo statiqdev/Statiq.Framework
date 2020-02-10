@@ -1,12 +1,15 @@
 # 1.0.0-alpha.24
 
-- Adds a `Config.ContainsSettings(params string[] keys)` config factory to return whether the settings contain all the specified keys.
+- Added new `IEnumerable<IDocument>.Flatten()` extension to flatten document trees.
+- Added new `IEnumerable<IDocument>.FilterSources()` and `IEnumerable<IDocument>.FilterDestinations()` extension methods.
+- Added a new `FilterDestinations` module to filter documents by destination path.
+- Added a `Config.ContainsSettings(params string[] keys)` config factory to return whether the settings contain all the specified keys.
 - Refactored some methods from `IExecutionContext` into `IExecutionState` and moved implementation to `Engine`.
-- Adds new `EnumerateValues` module that will clone or create documents for each item in an enumeration.
-- Adds `Keys.ExcludeFromEvaluation` that can exclude all or some metadata values from automatic script evaluation.
-- Adds `IMetadata.GetNestedMetadata()` to get a nested metadata value (not called `IMetadata.GetMetadata()` to avoid conflicts with the old previous method of that name).
+- Added new `EnumerateValues` module that will clone or create documents for each item in an enumeration.
+- Added `Keys.ExcludeFromEvaluation` that can exclude all or some metadata values from automatic script evaluation.
+- Added `IMetadata.GetNestedMetadata()` to get a nested metadata value (not called `IMetadata.GetMetadata()` to avoid conflicts with the old previous method of that name).
 - Renamed `IMetadata.GetMetadata()` to `IMetadata.FilterMetadata()` which now returns a `FilteredMetadata` instance.
-- Adds new `FilteredMetadata` class to filter underlying metadata items by key(s).
+- Added new `FilteredMetadata` class to filter underlying metadata items by key(s).
 - Refactored a bunch of default interface implementations back to extension methods (turns out default interface implementations are a little awkward to maintain).
 - Moved scripting support and the `CompileScript` and `EvaluateScript` modules to `Statiq.Core`.
 - Added `Microsoft.CodeAnalysis` to `Statiq.Core`.
@@ -17,11 +20,11 @@
 - Surfaced the `CancellationToken` for a given execution through the `IExecutionState`.
 - Added a check to ensure the engine is only performing one execution at a time (the outer execution loop is not concurrently safe).
 - Major refactoring involving engine and execution context interfaces, added a new `IExecutionState` interface that essentially represents a run-time engine.
-- Adds a new `DocumentIdComparer` to compare documents by ID (#69, thanks @mholo65).
+- Added a new `DocumentIdComparer` to compare documents by ID (#69, thanks @mholo65).
 - Removed `IParallelModule.WithSequentialExecution()` and standardized on `.WithParallelExecution(false)` instead to make default behavior of running in parallel clearer (I.e., you have to turn it off).
-- Adds additional configuration methods to `CacheDocuments` providing more control over when to invalidate cached documents (#78).
-- Adds `IReadOnlyPipeline` for runtime access to pipeline data without changing modules.
-- Adds `IExecutionContext.Pipeline` to get the currently executing pipeline from the execution context.
+- Added additional configuration methods to `CacheDocuments` providing more control over when to invalidate cached documents (#78).
+- Added `IReadOnlyPipeline` for runtime access to pipeline data without changing modules.
+- Added `IExecutionContext.Pipeline` to get the currently executing pipeline from the execution context.
 - Removed `IBootstrapper` and refactored to the one true `Bootstrapper`.
 - Added a `BootstrapperFactory` available via `Bootstrapper.Factory` to create bootstrappers (this will make specialized creation extensions easier to discover).
 

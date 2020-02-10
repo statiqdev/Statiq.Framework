@@ -45,31 +45,7 @@ namespace Statiq.Core
             _childrenKey = childrenKey;
         }
 
-        protected override IEnumerable<IDocument> ExecuteContext(IExecutionContext context)
-        {
-            // Use a stack so we don't overflow the call stack with recursive calls for deep trees
-            Stack<IDocument> stack = new Stack<IDocument>(context.Inputs);
-            HashSet<IDocument> results = new HashSet<IDocument>();
-            while (stack.Count > 0)
-            {
-                IDocument current = stack.Pop();
-
-                // Only process if we haven't already processed this document
-                if (results.Add(current))
-                {
-                    IEnumerable<IDocument> children = _childrenKey == null
-                        ? current.SelectMany(x => current.GetDocumentList(x.Key) ?? Array.Empty<IDocument>())
-                        : current.GetDocumentList(_childrenKey);
-                    if (children != null)
-                    {
-                        foreach (IDocument child in children.Where(x => x != null))
-                        {
-                            stack.Push(child);
-                        }
-                    }
-                }
-            }
-            return results;
-        }
+        protected override IEnumerable<IDocument> ExecuteContext(IExecutionContext context) =>
+            context.Inputs.Flatten(_childrenKey);
     }
 }

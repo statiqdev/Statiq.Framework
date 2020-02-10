@@ -93,5 +93,51 @@ namespace Statiq.Common
 
             return builder.ToImmutable();
         }
+
+        /// <summary>
+        /// Flattens a tree structure.
+        /// </summary>
+        /// <remarks>
+        /// This extension will either get all descendants of all documents from
+        /// a given metadata key (<see cref="Keys.Children"/> by default) or all
+        /// descendants from all metadata if a <c>null</c> key is specified. The
+        /// result also includes the initial documents in both cases.
+        /// </remarks>
+        /// <remarks>
+        /// The documents will be returned in no particular order and only distinct
+        /// documents will be returned (I.e., if a document exists as a
+        /// child of more than one parent, it will only appear once in the result set).
+        /// </remarks>
+        /// <param name="documents">The documents.</param>
+        /// <param name="childrenKey">The metadata key that contains the children or <c>null</c> to flatten all documents.</param>
+        /// <returns>The flattened documents.</returns>
+        public static IEnumerable<IDocument> Flatten(this IEnumerable<IDocument> documents, string childrenKey = Keys.Children)
+        {
+            _ = documents ?? throw new ArgumentNullException(nameof(documents));
+
+            // Use a stack so we don't overflow the call stack with recursive calls for deep trees
+            Stack<IDocument> stack = new Stack<IDocument>(documents);
+            HashSet<IDocument> results = new HashSet<IDocument>();
+            while (stack.Count > 0)
+            {
+                IDocument current = stack.Pop();
+
+                // Only process if we haven't already processed this document
+                if (results.Add(current))
+                {
+                    IEnumerable<IDocument> children = childrenKey == null
+                        ? current.SelectMany(x => current.GetDocumentList(x.Key) ?? Array.Empty<IDocument>())
+                        : current.GetDocumentList(childrenKey);
+                    if (children != null)
+                    {
+                        foreach (IDocument child in children.Where(x => x != null))
+                        {
+                            stack.Push(child);
+                        }
+                    }
+                }
+            }
+            return results;
+        }
     }
 }

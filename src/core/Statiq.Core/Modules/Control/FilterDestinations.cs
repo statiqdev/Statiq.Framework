@@ -7,15 +7,15 @@ using Statiq.Common;
 namespace Statiq.Core
 {
     /// <summary>
-    /// Filters the current sequence of documents by source.
+    /// Filters the current sequence of documents by destination.
     /// </summary>
     /// <remarks>
     /// This module filters documents using "or" logic. If you want to also apply
-    /// "and" conditions, place additional <see cref="FilterSources"/> modules
+    /// "and" conditions, place additional <see cref="FilterDestinations"/> modules
     /// after this one.
     /// </remarks>
     /// <category>Control</category>
-    public class FilterSources : SyncModule
+    public class FilterDestinations : SyncModule
     {
         private IEnumerable<string> _patterns;
 
@@ -23,7 +23,7 @@ namespace Statiq.Core
         /// Filters input document by using globbing pattern(s) on the document source.
         /// </summary>
         /// <param name="patterns">The globbing patterns to apply.</param>
-        public FilterSources(params string[] patterns)
+        public FilterDestinations(params string[] patterns)
             : this((IEnumerable<string>)patterns)
         {
         }
@@ -32,13 +32,13 @@ namespace Statiq.Core
         /// Filters input document by using globbing pattern(s) on the document source.
         /// </summary>
         /// <param name="patterns">The globbing patterns to apply.</param>
-        public FilterSources(IEnumerable<string> patterns)
+        public FilterDestinations(IEnumerable<string> patterns)
         {
             _patterns = patterns ?? throw new ArgumentNullException(nameof(patterns));
         }
 
         /// <inheritdoc />
         protected override IEnumerable<IDocument> ExecuteContext(IExecutionContext context) =>
-            context.Inputs.FilterSources(context, _patterns);
+            context.Inputs.FilterDestinations(_patterns);
     }
 }

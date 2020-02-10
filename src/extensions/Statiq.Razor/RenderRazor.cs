@@ -194,7 +194,7 @@ namespace Statiq.Razor
             // Calculate a relative path from the input path(s) (or root) to the provided path
             if (path != null)
             {
-                DirectoryPath inputPath = context.FileSystem.GetContainingInputPath(path) ?? new DirectoryPath("/");
+                DirectoryPath inputPath = context.FileSystem.GetContainingInputPath(path) ?? DirectoryPath.RootPath;
                 if (path.IsRelative)
                 {
                     // If the path is relative, combine it with the input path to make it absolute

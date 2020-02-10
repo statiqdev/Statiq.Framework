@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 
@@ -61,5 +62,85 @@ namespace Statiq.Common
         public static IEnumerable<TDocument> WhereContainsAnyKeys<TDocument>(this IEnumerable<TDocument> documents, params string[] metadataKeys)
             where TDocument : IDocument =>
             documents.Where(x => metadataKeys.Any(x.ContainsKey));
+
+        /// <summary>
+        /// Filters the documents by source.
+        /// </summary>
+        /// <remarks>
+        /// This module filters documents using "or" logic. If you want to also apply
+        /// "and" conditions, chain additional calls.
+        /// </remarks>
+        /// <typeparam name="TDocument">The document type.</typeparam>
+        /// <param name="documents">The documents.</param>
+        /// <param name="context">The current execution context.</param>
+        /// <param name="patterns">The globbing pattern(s) to match.</param>
+        /// <returns>The documents that match the globbing pattern(s).</returns>
+        public static IEnumerable<TDocument> FilterSources<TDocument>(this IEnumerable<TDocument> documents, IExecutionContext context, params string[] patterns)
+            where TDocument : IDocument =>
+            documents.FilterSources(context, (IEnumerable<string>)patterns);
+
+        /// <summary>
+        /// Filters the documents by source.
+        /// </summary>
+        /// <remarks>
+        /// This module filters documents using "or" logic. If you want to also apply
+        /// "and" conditions, chain additional calls.
+        /// </remarks>
+        /// <typeparam name="TDocument">The document type.</typeparam>
+        /// <param name="documents">The documents.</param>
+        /// <param name="context">The current execution context.</param>
+        /// <param name="patterns">The globbing pattern(s) to match.</param>
+        /// <returns>The documents that match the globbing pattern(s).</returns>
+        public static IEnumerable<TDocument> FilterSources<TDocument>(this IEnumerable<TDocument> documents, IExecutionContext context, IEnumerable<string> patterns)
+            where TDocument : IDocument
+        {
+            _ = documents ?? throw new ArgumentNullException(nameof(documents));
+            _ = context ?? throw new ArgumentNullException(nameof(context));
+            _ = patterns ?? throw new ArgumentNullException(nameof(patterns));
+
+            DocumentFileProvider fileProvider = new DocumentFileProvider((IEnumerable<IDocument>)documents, true);
+            IEnumerable<IDirectory> directories = context.FileSystem
+                .GetInputDirectories()
+                .Select(x => fileProvider.GetDirectory(x.Path));
+            IEnumerable<IFile> matches = directories.SelectMany(x => Globber.GetFiles(x, patterns));
+            return matches.Select(x => x.Path).Distinct().Select(match => fileProvider.GetDocument(match)).Cast<TDocument>();
+        }
+
+        /// <summary>
+        /// Filters the documents by destination.
+        /// </summary>
+        /// <remarks>
+        /// This module filters documents using "or" logic. If you want to also apply
+        /// "and" conditions, chain additional calls.
+        /// </remarks>
+        /// <typeparam name="TDocument">The document type.</typeparam>
+        /// <param name="documents">The documents.</param>
+        /// <param name="patterns">The globbing pattern(s) to match.</param>
+        /// <returns>The documents that match the globbing pattern(s).</returns>
+        public static IEnumerable<TDocument> FilterDestinations<TDocument>(this IEnumerable<TDocument> documents, params string[] patterns)
+            where TDocument : IDocument =>
+            documents.FilterDestinations((IEnumerable<string>)patterns);
+
+        /// <summary>
+        /// Filters the documents by destination.
+        /// </summary>
+        /// <remarks>
+        /// This module filters documents using "or" logic. If you want to also apply
+        /// "and" conditions, chain additional calls.
+        /// </remarks>
+        /// <typeparam name="TDocument">The document type.</typeparam>
+        /// <param name="documents">The documents.</param>
+        /// <param name="patterns">The globbing pattern(s) to match.</param>
+        /// <returns>The documents that match the globbing pattern(s).</returns>
+        public static IEnumerable<TDocument> FilterDestinations<TDocument>(this IEnumerable<TDocument> documents, IEnumerable<string> patterns)
+            where TDocument : IDocument
+        {
+            _ = documents ?? throw new ArgumentNullException(nameof(documents));
+            _ = patterns ?? throw new ArgumentNullException(nameof(patterns));
+
+            DocumentFileProvider fileProvider = new DocumentFileProvider((IEnumerable<IDocument>)documents, false);
+            IEnumerable<IFile> matches = Globber.GetFiles(fileProvider.GetDirectory("/"), patterns);
+            return matches.Select(x => x.Path).Distinct().Select(match => fileProvider.GetDocument(match)).Cast<TDocument>();
+        }
     }
 }

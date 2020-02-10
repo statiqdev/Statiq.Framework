@@ -15,16 +15,21 @@ namespace Statiq.Common
         /// Creates a file provider for a sequence of documents.
         /// </summary>
         /// <param name="documents">The documents to provide virtual directories and files for.</param>
-        public DocumentFileProvider(IEnumerable<IDocument> documents)
+        /// <param name="source">
+        /// <c>true</c> to use <see cref="IDocument.Source"/> as the basis for paths,
+        /// <c>false</c> to use <see cref="IDocument.Destination"/>.
+        /// </param>
+        public DocumentFileProvider(IEnumerable<IDocument> documents, bool source)
         {
             if (documents != null)
             {
                 foreach (IDocument document in documents)
                 {
-                    if (document.Source != null)
+                    FilePath path = source ? document.Source : DirectoryPath.RootPath.CombineFile(document.Destination);
+                    if (path != null)
                     {
-                        Files[document.Source] = document;
-                        DirectoryPath directory = document.Source.Directory;
+                        Files[path] = document;
+                        DirectoryPath directory = path.Directory;
                         while (directory != null)
                         {
                             Directories.Add(directory);

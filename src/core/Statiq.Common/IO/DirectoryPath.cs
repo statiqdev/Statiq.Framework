@@ -10,6 +10,8 @@ namespace Statiq.Common
     {
         // Initially based on code from Cake (http://cakebuild.net/)
 
+        public static readonly DirectoryPath RootPath = new DirectoryPath("/");
+
         /// <summary>
         /// Initializes a new instance of the <see cref="DirectoryPath"/> class.
         /// The path will be considered absolute if the underlying OS file system

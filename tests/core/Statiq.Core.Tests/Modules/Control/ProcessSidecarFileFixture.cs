@@ -105,7 +105,7 @@ namespace Statiq.Core.Tests.Modules.Control
                 {
                     InputPaths = new PathCollection<DirectoryPath>(new[]
                     {
-                        new DirectoryPath("/")
+                        DirectoryPath.RootPath
                     }),
                     FileProvider = GetFileProvider()
                 };
