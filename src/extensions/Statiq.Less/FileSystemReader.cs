@@ -25,7 +25,7 @@ namespace Statiq.Less
             }
         }
 
-        public string GetFileContents(string fileName) => GetInputFile(fileName).ReadAllTextAsync().Result;
+        public string GetFileContents(string fileName) => GetInputFile(fileName).ReadAllTextAsync().GetAwaiter().GetResult();
 
         public bool DoesFileExist(string fileName) => GetInputFile(fileName).Exists;
 

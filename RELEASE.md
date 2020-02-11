@@ -1,5 +1,6 @@
 # 1.0.0-alpha.25
 
+- Added support for `IConfig` metadata values.
 - Added `LastWriteTime` and `CreationTime` to `IFileSystemEntry`.
 - Fixed a race condition in `ScriptMetadataValue`.
 - Changed behavior of `SetDestination` when using a config value to make `DestinationPath`, `DestinationFileName`, and `DestinationExtension` take precedence (with an option to override).

@@ -25,7 +25,7 @@ namespace Statiq.Core.Tests.Modules.Metadata
 
                 // When, Then
                 // Convert this to Should.NotThrowAsync when https://github.com/shouldly/shouldly/pull/430 is merged
-                Should.NotThrow(() => ExecuteAsync(document, validateMeta).Result);
+                Should.NotThrow(() => ExecuteAsync(document, validateMeta).GetAwaiter().GetResult());
             }
 
             [Test]
@@ -67,7 +67,7 @@ namespace Statiq.Core.Tests.Modules.Metadata
 
                 // When, Then
                 // Convert this to Should.NotThrowAsync when https://github.com/shouldly/shouldly/pull/430 is merged
-                Should.NotThrow(() => ExecuteAsync(document, validateMeta).Result);
+                Should.NotThrow(() => ExecuteAsync(document, validateMeta).GetAwaiter().GetResult());
             }
         }
     }

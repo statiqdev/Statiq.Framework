@@ -156,14 +156,14 @@ namespace Statiq.Core
                 if (orderdList == null)
                 {
                     orderdList = order.Descending
-                        ? context.Inputs.OrderByDescending(x => order.Key.GetValueAsync(x, context).Result, order.Comparer)
-                        : context.Inputs.OrderBy(x => order.Key.GetValueAsync(x, context).Result, order.Comparer);
+                        ? context.Inputs.OrderByDescending(x => order.Key.GetValueAsync(x, context).GetAwaiter().GetResult(), order.Comparer)
+                        : context.Inputs.OrderBy(x => order.Key.GetValueAsync(x, context).GetAwaiter().GetResult(), order.Comparer);
                 }
                 else
                 {
                     orderdList = order.Descending
-                        ? orderdList.ThenByDescending(x => order.Key.GetValueAsync(x, context).Result, order.Comparer)
-                        : orderdList.ThenBy(x => order.Key.GetValueAsync(x, context).Result, order.Comparer);
+                        ? orderdList.ThenByDescending(x => order.Key.GetValueAsync(x, context).GetAwaiter().GetResult(), order.Comparer)
+                        : orderdList.ThenBy(x => order.Key.GetValueAsync(x, context).GetAwaiter().GetResult(), order.Comparer);
                 }
             }
 

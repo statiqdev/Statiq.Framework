@@ -41,8 +41,27 @@ namespace Statiq.Common
         /// <summary>
         /// This resolves the value by recursively expanding <see cref="IMetadataValue"/>.
         /// </summary>
-        public static object ExpandValue(object value, IMetadata metadata) =>
-            value is IMetadataValue metadataValue ? ExpandValue(metadataValue.Get(metadata), metadata) : value;
+        public static object ExpandValue(object value, IMetadata metadata)
+        {
+            if (value is IConfig config)
+            {
+                IExecutionContext context = IExecutionContext.Current;
+                if (context == null)
+                {
+                    throw new InvalidOperationException("Cannot expand metadata config value that requires an execution context, no execution context is available");
+                }
+                if (config.RequiresDocument)
+                {
+                    if (metadata is IDocument document)
+                    {
+                        return config.GetValueAsync(document, context).GetAwaiter().GetResult();
+                    }
+                    throw new InvalidOperationException("Cannot expand metadata config value that requires a document from non-document metadata");
+                }
+                return config.GetValueAsync(null, context).GetAwaiter().GetResult();
+            }
+            return value is IMetadataValue metadataValue ? ExpandValue(metadataValue.Get(metadata), metadata) : value;
+        }
 
         /// <summary>
         /// This resolves the value by recursively expanding <see cref="IMetadataValue"/>.

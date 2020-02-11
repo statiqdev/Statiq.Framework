@@ -26,7 +26,7 @@ namespace Statiq.Common
                     }
                     else
                     {
-                        tcs.TrySetResult(t.Result);
+                        tcs.TrySetResult(t.GetAwaiter().GetResult());
                     }
                 },
                 TaskContinuationOptions.ExecuteSynchronously);

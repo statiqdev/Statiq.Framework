@@ -51,7 +51,7 @@ namespace Statiq.Common
                 }
             }
 
-            return _executionState.ScriptHelper.EvaluateAsync(_cachedScriptType, metadata).Result;
+            return _executionState.ScriptHelper.EvaluateAsync(_cachedScriptType, metadata).GetAwaiter().GetResult();
         }
 
         public static bool TryGetScriptMetadataValue(string key, object value, IExecutionState executionState, out ScriptMetadataValue scriptMetadataValue)

@@ -157,7 +157,7 @@ namespace Statiq.Testing
         // Test helpers
 
         [PropertyMetadata(null)]
-        public string Content => ((IDocument)this).GetContentStringAsync().Result;
+        public string Content => ((IDocument)this).GetContentStringAsync().GetAwaiter().GetResult();
 
         [PropertyMetadata(null)]
         public TestMetadata TestMetadata => (TestMetadata)Metadata;

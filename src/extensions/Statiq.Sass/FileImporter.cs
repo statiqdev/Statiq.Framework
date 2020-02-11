@@ -24,7 +24,7 @@ namespace Statiq.Sass
         // This is a TryImportDelegate which unfortunately isn't async
         public bool TryImport(string requestedFile, string parentPath, out string scss, out string map)
         {
-            scss = TryImportAsync(requestedFile, parentPath).Result;
+            scss = TryImportAsync(requestedFile, parentPath).GetAwaiter().GetResult();
             map = null;
             return scss != null;
         }

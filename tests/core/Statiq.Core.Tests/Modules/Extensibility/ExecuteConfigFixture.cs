@@ -22,7 +22,7 @@ namespace Statiq.Core.Tests.Modules.Extensibility
                 ExecuteConfig execute = new ExecuteConfig(Config.FromContext(_ => (object)null));
 
                 // When, Then
-                Should.NotThrow(() => ExecuteAsync(Array.Empty<TestDocument>(), execute).Result);
+                Should.NotThrow(() => ExecuteAsync(Array.Empty<TestDocument>(), execute).GetAwaiter().GetResult());
             }
 
             [Test]
