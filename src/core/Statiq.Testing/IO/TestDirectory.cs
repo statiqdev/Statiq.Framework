@@ -23,6 +23,10 @@ namespace Statiq.Testing
 
         public bool Exists => _fileProvider.Directories.Contains(Path.FullPath);
 
+        public DateTime LastWriteTime { get; set; }
+
+        public DateTime CreationTime { get; set; }
+
         public IDirectory Parent
         {
             get

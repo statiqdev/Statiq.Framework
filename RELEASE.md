@@ -1,5 +1,6 @@
 # 1.0.0-alpha.25
 
+- Added `LastWriteTime` and `CreationTime` to `IFileSystemEntry`.
 - Fixed a race condition in `ScriptMetadataValue`.
 - Changed behavior of `SetDestination` when using a config value to make `DestinationPath`, `DestinationFileName`, and `DestinationExtension` take precedence (with an option to override).
 - Added a `Context` property for the current `IExecutionContext` to the available script properties (I.e., for use in metadata value scripts via "=>" notation).

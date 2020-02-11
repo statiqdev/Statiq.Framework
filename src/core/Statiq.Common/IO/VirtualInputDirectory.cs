@@ -40,6 +40,10 @@ namespace Statiq.Common
             }
         }
 
+        public DateTime LastWriteTime => throw new NotSupportedException();
+
+        public DateTime CreationTime => throw new NotSupportedException();
+
         /// <inheritdoc/>
         public void Create() => throw new NotSupportedException("Can not create a virtual input directory");
 

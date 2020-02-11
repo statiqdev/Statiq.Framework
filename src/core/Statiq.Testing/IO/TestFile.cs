@@ -1,3 +1,4 @@
+using System;
 using System.IO;
 using System.Text;
 using System.Threading.Tasks;
@@ -26,6 +27,10 @@ namespace Statiq.Testing
         public long Length => _fileProvider.Files[Path.FullPath].Length;
 
         public string MediaType => Path.MediaType;
+
+        public DateTime LastWriteTime { get; set; }
+
+        public DateTime CreationTime { get; set; }
 
         private void CreateDirectory(bool createDirectory, IFile file)
         {

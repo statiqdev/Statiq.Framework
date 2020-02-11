@@ -70,6 +70,10 @@ namespace Statiq.Common
 
         public string MediaType => _document?.ContentProvider.MediaType;
 
+        public DateTime LastWriteTime => throw new NotSupportedException();
+
+        public DateTime CreationTime => throw new NotSupportedException();
+
         public Task CopyToAsync(IFile destination, bool overwrite = true, bool createDirectory = true) => throw new NotSupportedException();
 
         public Task MoveToAsync(IFile destination) => throw new NotSupportedException();

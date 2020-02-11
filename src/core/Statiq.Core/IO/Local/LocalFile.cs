@@ -34,6 +34,10 @@ namespace Statiq.Core
 
         public string MediaType => Path.MediaType;
 
+        public DateTime LastWriteTime => _file.LastWriteTime;
+
+        public DateTime CreationTime => _file.CreationTime;
+
         public async Task CopyToAsync(IFile destination, bool overwrite = true, bool createDirectory = true)
         {
             _ = destination ?? throw new ArgumentNullException(nameof(destination));

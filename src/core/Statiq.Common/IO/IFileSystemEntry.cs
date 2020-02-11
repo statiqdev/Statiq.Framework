@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Threading.Tasks;
 
 namespace Statiq.Common
 {
@@ -22,6 +23,16 @@ namespace Statiq.Common
         ///   <c>true</c> if the entry exists; otherwise, <c>false</c>.
         /// </value>
         bool Exists { get; }
+
+        /// <summary>
+        /// Gets the time when the current entry was last written to.
+        /// </summary>
+        public DateTime LastWriteTime { get; }
+
+        /// <summary>
+        /// Gets the time when the current entry was created.
+        /// </summary>
+        public DateTime CreationTime { get; }
 
         /// <summary>
         /// Returns a <see cref="string" /> that represents this file system entry.

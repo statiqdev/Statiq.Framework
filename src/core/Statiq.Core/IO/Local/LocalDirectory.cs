@@ -33,6 +33,10 @@ namespace Statiq.Core
 
         public bool Exists => _directory.Exists;
 
+        public DateTime LastWriteTime => _directory.LastWriteTime;
+
+        public DateTime CreationTime => _directory.CreationTime;
+
         public IDirectory Parent
         {
             get

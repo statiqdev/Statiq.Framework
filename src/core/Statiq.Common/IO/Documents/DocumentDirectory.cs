@@ -91,6 +91,10 @@ namespace Statiq.Common
             }
         }
 
+        public DateTime LastWriteTime => throw new NotSupportedException();
+
+        public DateTime CreationTime => throw new NotSupportedException();
+
         public void Create() => throw new NotSupportedException();
 
         public void Delete(bool recursive) => throw new NotSupportedException();
