@@ -132,27 +132,22 @@ namespace Statiq.Common
 
             public bool TryGetRaw(string key, out object value)
             {
-                value = default;
-
                 if (Properties.TryGetValue(key, out IPropertyCallAdapter adapter))
                 {
                     value = adapter.GetValue(_instance);
                     return true;
                 }
-
+                value = default;
                 return false;
             }
 
             public bool TryGetValue<TValue>(string key, out TValue value)
             {
-                value = default;
-
-                if (Properties.TryGetValue(key, out IPropertyCallAdapter adapter))
+                if (TryGetRaw(key, out object rawValue))
                 {
-                    object rawValue = adapter.GetValue(_instance);
                     return TypeHelper.TryExpandAndConvert(rawValue, this, out value);
                 }
-
+                value = default;
                 return false;
             }
 

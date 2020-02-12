@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using NUnit.Framework;
@@ -398,7 +399,7 @@ namespace Statiq.Core.Tests.Execution
                 TestFileProvider testFileProvider = new TestFileProvider();
                 ServiceCollection serviceCollection = new ServiceCollection();
                 serviceCollection.AddSingleton<IFileProvider>(testFileProvider);
-                Engine engine = new Engine(null, null, serviceCollection);
+                Engine engine = new Engine(serviceCollection);
 
                 // When
                 IFileProvider fileProvider = engine.Services.GetRequiredService<IFileProvider>();

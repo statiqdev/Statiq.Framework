@@ -353,10 +353,12 @@ namespace Statiq.Common
 
         public bool TryGetValue<TValue>(string key, out TValue value)
         {
+            if (TryGetRaw(key, out object rawValue))
+            {
+                return TypeHelper.TryExpandAndConvert(rawValue, this, out value);
+            }
             value = default;
-            return (Metadata?.TryGetValue(key, out value) ?? false)
-                || PropertyMetadata<TDocument>.For((TDocument)this).TryGetValue(key, out value)
-                || (BaseMetadata?.TryGetValue(key, out value) ?? false);
+            return false;
         }
 
         public bool TryGetValue(string key, out object value) => TryGetValue<object>(key, out value);

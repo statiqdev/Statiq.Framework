@@ -1,5 +1,6 @@
 # 1.0.0-alpha.25
 
+- Added support for object-based settings to the bootstrapper (as opposed to just initial string-based configuration).
 - Added support for `IConfig` metadata values.
 - Added `LastWriteTime` and `CreationTime` to `IFileSystemEntry`.
 - Fixed a race condition in `ScriptMetadataValue`.

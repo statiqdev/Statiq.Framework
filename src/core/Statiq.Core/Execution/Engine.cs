@@ -55,7 +55,25 @@ namespace Statiq.Core
         /// Creates an engine with empty application state, configuration, and services.
         /// </summary>
         public Engine()
-            : this(null, null, null)
+            : this(null, null, null, null)
+        {
+        }
+
+        /// <summary>
+        /// Creates an engine with the specified service provider.
+        /// </summary>
+        /// <param name="serviceCollection">The service collection (or <c>null</c> for an empty default service collection).</param>
+        public Engine(IServiceCollection serviceCollection)
+            : this(null, serviceCollection, null, null)
+        {
+        }
+
+        /// <summary>
+        /// Creates an engine with the specified application state.
+        /// </summary>
+        /// <param name="applicationState">The state of the application (or <c>null</c> for an empty application state).</param>
+        public Engine(ApplicationState applicationState)
+            : this(applicationState, null, null, null)
         {
         }
 
@@ -63,14 +81,39 @@ namespace Statiq.Core
         /// Creates an engine with the specified application state and service provider.
         /// </summary>
         /// <param name="applicationState">The state of the application (or <c>null</c> for an empty application state).</param>
-        /// <param name="configuration">The application configuration.</param>
         /// <param name="serviceCollection">The service collection (or <c>null</c> for an empty default service collection).</param>
-        public Engine(ApplicationState applicationState, IConfiguration configuration, IServiceCollection serviceCollection)
+        public Engine(ApplicationState applicationState, IServiceCollection serviceCollection)
+            : this(applicationState, serviceCollection, null, null)
+        {
+        }
+
+        /// <summary>
+        /// Creates an engine with the specified application state, configuration, and service provider.
+        /// </summary>
+        /// <param name="applicationState">The state of the application (or <c>null</c> for an empty application state).</param>
+        /// <param name="serviceCollection">The service collection (or <c>null</c> for an empty default service collection).</param>
+        /// <param name="configuration">The application configuration.</param>
+        public Engine(ApplicationState applicationState, IServiceCollection serviceCollection, IConfiguration configuration)
+            : this(applicationState, serviceCollection, configuration, null)
+        {
+        }
+
+        /// <summary>
+        /// Creates an engine with the specified application state, configuration, and service provider.
+        /// </summary>
+        /// <param name="applicationState">The state of the application (or <c>null</c> for an empty application state).</param>
+        /// <param name="serviceCollection">The service collection (or <c>null</c> for an empty default service collection).</param>
+        /// <param name="configurationOverrides">Values that should override configuration values.</param>
+        /// <param name="configuration">The application configuration.</param>
+        public Engine(ApplicationState applicationState, IServiceCollection serviceCollection, IConfiguration configuration, IDictionary<string, object> configurationOverrides)
         {
             _pipelines = new PipelineCollection(this);
             ApplicationState = applicationState ?? new ApplicationState(null, null, null);
             ScriptHelper = new ScriptHelper(this);
-            Settings = new ReadOnlyConfigurationSettings(configuration ?? new ConfigurationRoot(Array.Empty<IConfigurationProvider>()), this);
+            Settings = new ReadOnlyConfigurationSettings(
+                this,
+                configuration ?? new ConfigurationRoot(Array.Empty<IConfigurationProvider>()),
+                configurationOverrides);
             _serviceScope = GetServiceScope(serviceCollection);
             _logger = Services.GetRequiredService<ILogger<Engine>>();
             DocumentFactory = new DocumentFactory(this, Settings);

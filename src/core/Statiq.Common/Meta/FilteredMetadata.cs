@@ -56,9 +56,12 @@ namespace Statiq.Common
 
         public bool TryGetValue<TValue>(string key, out TValue value)
         {
-            _ = key ?? throw new ArgumentNullException(nameof(key));
+            if (TryGetRaw(key, out object rawValue))
+            {
+                return TypeHelper.TryExpandAndConvert(rawValue, this, out value);
+            }
             value = default;
-            return _keys.Contains(key) && _metadata.TryGetValue(key, out value);
+            return false;
         }
 
         public bool TryGetValue(string key, out object value)

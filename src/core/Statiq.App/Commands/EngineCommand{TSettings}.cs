@@ -44,7 +44,6 @@ namespace Statiq.App
                     commandContext,
                     engineCommandSettings,
                     ConfigurationSettings,
-                    ConfigurationRoot,
                     ServiceCollection,
                     Bootstrapper))
             {

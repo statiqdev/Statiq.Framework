@@ -43,24 +43,31 @@ namespace Statiq.Common
         /// </summary>
         public static object ExpandValue(object value, IMetadata metadata)
         {
-            if (value is IConfig config)
+            // Perform special expansions of IConfig and IMetadataValue
+            switch (value)
             {
-                IExecutionContext context = IExecutionContext.Current;
-                if (context == null)
-                {
-                    throw new InvalidOperationException("Cannot expand metadata config value that requires an execution context, no execution context is available");
-                }
-                if (config.RequiresDocument)
-                {
-                    if (metadata is IDocument document)
+                case IConfig config:
+                    IExecutionContext context = IExecutionContext.Current;
+                    if (context == null)
                     {
-                        return config.GetValueAsync(document, context).GetAwaiter().GetResult();
+                        throw new InvalidOperationException("Cannot expand metadata config value that requires an execution context, no execution context is available");
                     }
-                    throw new InvalidOperationException("Cannot expand metadata config value that requires a document from non-document metadata");
-                }
-                return config.GetValueAsync(null, context).GetAwaiter().GetResult();
+                    if (config.RequiresDocument)
+                    {
+                        if (metadata is IDocument document)
+                        {
+                            return config.GetValueAsync(document, context).GetAwaiter().GetResult();
+                        }
+
+                        // The source metadata isn't a document but we need one so go ahead and create a dummy one that wraps the metadata
+                        return config.GetValueAsync(context.CreateDocument(metadata), context).GetAwaiter().GetResult();
+                    }
+                    return config.GetValueAsync(null, context).GetAwaiter().GetResult();
+                case IMetadataValue metadataValue:
+                    return ExpandValue(metadataValue.Get(metadata), metadata);
             }
-            return value is IMetadataValue metadataValue ? ExpandValue(metadataValue.Get(metadata), metadata) : value;
+
+            return value;
         }
 
         /// <summary>

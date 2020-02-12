@@ -15,13 +15,6 @@ namespace Statiq.Common
 
         public void Clear() => Dictionary.Clear();
 
-        public bool Contains(KeyValuePair<string, object> item) => Dictionary.Contains(item);
-
-        public void CopyTo(KeyValuePair<string, object>[] array, int arrayIndex)
-            => Dictionary.CopyTo(array, arrayIndex);
-
-        public bool Remove(KeyValuePair<string, object> item) => Dictionary.Remove(item);
-
         public bool IsReadOnly { get; } = false;
 
         public void Add(string key, object value) => Dictionary.Add(key, value);
@@ -47,5 +40,14 @@ namespace Statiq.Common
         ICollection<string> IMetadataDictionary.Keys => ((IDictionary<string, object>)this).Keys;
 
         ICollection<object> IMetadataDictionary.Values => ((IDictionary<string, object>)this).Values;
+
+        // Not supported because the value of the item is raw vs. the expanded values presented by the dictionary
+        public bool Contains(KeyValuePair<string, object> item) => throw new NotSupportedException();
+
+        // Not supported because the value of the item is raw vs. the expanded values presented by the dictionary
+        public void CopyTo(KeyValuePair<string, object>[] array, int arrayIndex) => throw new NotSupportedException();
+
+        // Not supported because the value of the item is raw vs. the expanded values presented by the dictionary
+        public bool Remove(KeyValuePair<string, object> item) => throw new NotSupportedException();
     }
 }

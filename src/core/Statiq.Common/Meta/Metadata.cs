@@ -97,11 +97,11 @@ namespace Statiq.Common
 
         public bool TryGetValue<TValue>(string key, out TValue value)
         {
-            value = default;
             if (key != null && TryGetRaw(key, out object rawValue))
             {
                 return TypeHelper.TryExpandAndConvert(rawValue, this, out value);
             }
+            value = default;
             return false;
         }
 
@@ -136,7 +136,7 @@ namespace Statiq.Common
                 {
                     foreach (string previousKey in _previous.Keys)
                     {
-                        if (!Dictionary.ContainsKey(previousKey))
+                        if (Dictionary?.ContainsKey(previousKey) != true)
                         {
                             yield return previousKey;
                         }
@@ -163,7 +163,7 @@ namespace Statiq.Common
             {
                 foreach (KeyValuePair<string, object> previousItem in _previous)
                 {
-                    if (!Dictionary.ContainsKey(previousItem.Key))
+                    if (Dictionary?.ContainsKey(previousItem.Key) != true)
                     {
                         yield return previousItem;
                     }

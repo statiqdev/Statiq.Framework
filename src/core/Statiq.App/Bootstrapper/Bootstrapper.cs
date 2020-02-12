@@ -56,13 +56,11 @@ namespace Statiq.App
             Configurators.Configure(this);
 
             // Run the configuration configurator and get the configuration root
-            SettingsConfigurationProvider settingsProvider = new SettingsConfigurationProvider();
             IConfigurationBuilder configurationBuilder = new ConfigurationBuilder();
             ConfigurableConfiguration configurableConfiguration = new ConfigurableConfiguration(configurationBuilder);
             Configurators.Configure(configurableConfiguration);
-            configurationBuilder.Add(settingsProvider);
             IConfigurationRoot configurationRoot = configurationBuilder.Build();
-            ConfigurationSettings configurationSettings = new ConfigurationSettings(settingsProvider, configurationRoot);
+            ConfigurationSettings configurationSettings = new ConfigurationSettings(configurationRoot);
 
             // Create the service collection
             IServiceCollection serviceCollection = CreateServiceCollection() ?? new ServiceCollection();

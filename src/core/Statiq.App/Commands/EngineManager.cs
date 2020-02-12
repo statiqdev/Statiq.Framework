@@ -24,7 +24,6 @@ namespace Statiq.App
             CommandContext commandContext,
             EngineCommandSettings commandSettings,
             IConfigurationSettings configurationSettings,
-            IConfigurationRoot configurationRoot,
             IServiceCollection serviceCollection,
             Bootstrapper bootstrapper)
         {
@@ -42,7 +41,8 @@ namespace Statiq.App
             ApplicationState applicationState = new ApplicationState(bootstrapper.Arguments, commandContext.Name, input);
 
             // Create the engine and get a logger
-            Engine = new Engine(applicationState, configurationRoot, serviceCollection);
+            IDictionary<string, object> configurationOverrides = (configurationSettings as ConfigurationSettings)?.Dictionary;
+            Engine = new Engine(applicationState, serviceCollection, configurationSettings.Configuration, configurationOverrides);
             _logger = Engine.Services.GetRequiredService<ILogger<Bootstrapper>>();
 
             // Apply command settings
@@ -103,13 +103,13 @@ namespace Statiq.App
             }
             if (commandSettings.NoClean)
             {
-                configurationSettings[Keys.CleanOutputPath] = "false";
+                configurationSettings[Keys.CleanOutputPath] = false;
             }
 
             // Set no cache if requested
             if (commandSettings.NoCache)
             {
-                configurationSettings[Keys.UseCache] = "false";
+                configurationSettings[Keys.UseCache] = false;
             }
 
             // Set serial mode

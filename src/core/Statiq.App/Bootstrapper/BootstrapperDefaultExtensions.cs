@@ -93,12 +93,12 @@ namespace Statiq.App
 
         public static Bootstrapper AddDefaultSettings(this Bootstrapper bootstrapper) =>
             bootstrapper.AddSettingsIfNonExisting(
-                new Dictionary<string, string>
+                new Dictionary<string, object>
                 {
-                    { Keys.LinkHideIndexPages, "true" },
-                    { Keys.LinkHideExtensions, "true" },
-                    { Keys.UseCache, "true" },
-                    { Keys.CleanOutputPath, "true" }
+                    { Keys.LinkHideIndexPages, true },
+                    { Keys.LinkHideExtensions, true },
+                    { Keys.UseCache, true },
+                    { Keys.CleanOutputPath, true }
                 });
 
         public static Bootstrapper AddEnvironmentVariables(this Bootstrapper bootstrapper) =>

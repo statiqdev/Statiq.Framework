@@ -63,16 +63,12 @@ namespace Statiq.Testing
         /// <inheritdoc />
         public bool TryGetValue<TValue>(string key, out TValue value)
         {
-            if (key == null)
+            if (TryGetRaw(key, out object rawValue))
             {
-                throw new ArgumentNullException(nameof(key));
+                return TypeHelper.TryExpandAndConvert(rawValue, this, out value);
             }
             value = default;
-            if (!_dictionary.TryGetValue(key, out object rawValue))
-            {
-                return false;
-            }
-            return TypeHelper.TryExpandAndConvert(rawValue, this, out value);
+            return false;
         }
 
         /// <inheritdoc />

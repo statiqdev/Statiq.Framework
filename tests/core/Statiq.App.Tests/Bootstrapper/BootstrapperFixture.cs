@@ -181,7 +181,7 @@ namespace Statiq.App.Tests.Bootstrapper
 
                 // Then
                 exitCode.ShouldBe((int)ExitCode.Normal);
-                variable.ShouldBe("true");
+                variable.ShouldBe(true);
             }
 
             [Test]
@@ -215,7 +215,7 @@ namespace Statiq.App.Tests.Bootstrapper
                 App.Bootstrapper bootstrapper = App.Bootstrapper.Factory.CreateDefault(args);
                 TestLoggerProvider provider = new TestLoggerProvider();
                 bootstrapper.ConfigureServices(services => services.AddSingleton<ILoggerProvider>(provider));
-                string variable = null;
+                object variable = null;
                 bootstrapper.ConfigureSettings(x => variable = x[nameof(CanReadConfigurationValues)]);
                 bootstrapper.AddPipeline("Foo");
 

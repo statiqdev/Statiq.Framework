@@ -20,7 +20,7 @@ namespace Statiq.Core.Tests.Execution
         public class TryGetValueTests : ReadOnlyConfigurationSettingsFixture
         {
             [Test]
-            public void GetsNormalValues()
+            public void GetsNormalValue()
             {
                 // Given
                 IConfiguration configuration = GetConfiguration(@"
@@ -29,7 +29,7 @@ namespace Statiq.Core.Tests.Execution
 }");
                 TestExecutionContext context = new TestExecutionContext();
                 context.ScriptHelper = new ScriptHelper(context);
-                ReadOnlyConfigurationSettings settings = new ReadOnlyConfigurationSettings(configuration, context);
+                ReadOnlyConfigurationSettings settings = new ReadOnlyConfigurationSettings(context, configuration, null);
 
                 // When
                 bool result = settings.TryGetValue("foo", out object value);
@@ -37,6 +37,30 @@ namespace Statiq.Core.Tests.Execution
                 // Then
                 result.ShouldBeTrue();
                 value.ShouldBe("ABC {1+2} XYZ");
+            }
+
+            [Test]
+            public void GetsOVerridenValue()
+            {
+                // Given
+                IConfiguration configuration = GetConfiguration(@"
+{
+  ""foo"": ""ABC {1+2} XYZ""
+}");
+                TestExecutionContext context = new TestExecutionContext();
+                context.ScriptHelper = new ScriptHelper(context);
+                Dictionary<string, object> overrides = new Dictionary<string, object>
+                {
+                    { "foo", 123 }
+                };
+                ReadOnlyConfigurationSettings settings = new ReadOnlyConfigurationSettings(context, configuration, overrides);
+
+                // When
+                bool result = settings.TryGetValue("foo", out object value);
+
+                // Then
+                result.ShouldBeTrue();
+                value.ShouldBe(123);
             }
 
             [Test]
@@ -49,7 +73,7 @@ namespace Statiq.Core.Tests.Execution
 }");
                 TestExecutionContext context = new TestExecutionContext();
                 context.ScriptHelper = new ScriptHelper(context);
-                ReadOnlyConfigurationSettings settings = new ReadOnlyConfigurationSettings(configuration, context);
+                ReadOnlyConfigurationSettings settings = new ReadOnlyConfigurationSettings(context, configuration, null);
 
                 // When
                 bool result = settings.TryGetValue("foo", out object value);
@@ -69,7 +93,7 @@ namespace Statiq.Core.Tests.Execution
 }");
                 TestExecutionContext context = new TestExecutionContext();
                 context.ScriptHelper = new ScriptHelper(context);
-                ReadOnlyConfigurationSettings settings = new ReadOnlyConfigurationSettings(configuration, context);
+                ReadOnlyConfigurationSettings settings = new ReadOnlyConfigurationSettings(context, configuration, null);
 
                 // When
                 bool result = settings.TryGetValue("foo", out object value);
@@ -89,7 +113,7 @@ namespace Statiq.Core.Tests.Execution
 }");
                 TestExecutionContext context = new TestExecutionContext();
                 context.ScriptHelper = new ScriptHelper(context);
-                ReadOnlyConfigurationSettings settings = new ReadOnlyConfigurationSettings(configuration, context);
+                ReadOnlyConfigurationSettings settings = new ReadOnlyConfigurationSettings(context, configuration, null);
 
                 // When
                 bool result = settings.TryGetValue("foo", out object value);
@@ -109,7 +133,7 @@ namespace Statiq.Core.Tests.Execution
 }");
                 TestExecutionContext context = new TestExecutionContext();
                 context.ScriptHelper = new ScriptHelper(context);
-                ReadOnlyConfigurationSettings settings = new ReadOnlyConfigurationSettings(configuration, context);
+                ReadOnlyConfigurationSettings settings = new ReadOnlyConfigurationSettings(context, configuration, null);
 
                 // When
                 bool result = settings.TryGetValue("foo", out object value);
@@ -129,7 +153,7 @@ namespace Statiq.Core.Tests.Execution
 }");
                 TestExecutionContext context = new TestExecutionContext();
                 context.ScriptHelper = new ScriptHelper(context);
-                ReadOnlyConfigurationSettings settings = new ReadOnlyConfigurationSettings(configuration, context);
+                ReadOnlyConfigurationSettings settings = new ReadOnlyConfigurationSettings(context, configuration, null);
 
                 // When
                 bool result = settings.TryGetValue("foo", out object value);
@@ -151,7 +175,7 @@ namespace Statiq.Core.Tests.Execution
 }");
                 TestExecutionContext context = new TestExecutionContext();
                 context.ScriptHelper = new ScriptHelper(context);
-                ReadOnlyConfigurationSettings settings = new ReadOnlyConfigurationSettings(configuration, context);
+                ReadOnlyConfigurationSettings settings = new ReadOnlyConfigurationSettings(context, configuration, null);
 
                 // When
                 bool result = settings.TryGetValue("section0:foo", out object value);
@@ -173,7 +197,7 @@ namespace Statiq.Core.Tests.Execution
 }");
                 TestExecutionContext context = new TestExecutionContext();
                 context.ScriptHelper = new ScriptHelper(context);
-                ReadOnlyConfigurationSettings settings = new ReadOnlyConfigurationSettings(configuration, context);
+                ReadOnlyConfigurationSettings settings = new ReadOnlyConfigurationSettings(context, configuration, null);
 
                 // When
                 bool sectionResult = settings.TryGetValue<IMetadata>("section0", out IMetadata section);
@@ -197,7 +221,7 @@ namespace Statiq.Core.Tests.Execution
 }");
                 TestExecutionContext context = new TestExecutionContext();
                 context.ScriptHelper = new ScriptHelper(context);
-                ReadOnlyConfigurationSettings settings = new ReadOnlyConfigurationSettings(configuration, context);
+                ReadOnlyConfigurationSettings settings = new ReadOnlyConfigurationSettings(context, configuration, null);
 
                 // When
                 bool result = settings.TryGetValue("foo", out object value);
