@@ -364,7 +364,13 @@ namespace Statiq.Core
                         {
                             if (timeout > 0)
                             {
-                                process.WaitForExit(timeout);
+                                if (process.WaitForExit(timeout))
+                                {
+                                    // To ensure that asynchronous event handling has been completed, call the WaitForExit() overload that takes no parameter after receiving a true from this overload.
+                                    // From https://docs.microsoft.com/en-us/dotnet/api/system.diagnostics.process.waitforexit?redirectedfrom=MSDN&view=netcore-3.1#System_Diagnostics_Process_WaitForExit_System_Int32_
+                                    // See also https://github.com/dotnet/runtime/issues/27128
+                                    process.WaitForExit();
+                                }
                             }
                             else
                             {

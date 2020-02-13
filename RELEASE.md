@@ -1,3 +1,7 @@
+# 1.0.0-alpha.26
+
+- Fixes a race condition in `Process.WaitForExit(int)` calls (thanks @duncanawoods)
+
 # 1.0.0-alpha.25
 
 - Added support for object-based settings to the bootstrapper (as opposed to just initial string-based configuration).
