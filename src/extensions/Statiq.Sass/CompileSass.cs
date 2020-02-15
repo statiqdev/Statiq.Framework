@@ -18,8 +18,8 @@ namespace Statiq.Sass
     /// <category>Templates</category>
     public class CompileSass : ParallelModule
     {
-        private readonly List<DirectoryPath> _includePaths = new List<DirectoryPath>();
-        private Config<FilePath> _inputPath = Config.FromDocument(DefaultInputPath);
+        private readonly List<NormalizedPath> _includePaths = new List<NormalizedPath>();
+        private Config<NormalizedPath> _inputPath = Config.FromDocument(DefaultInputPath);
         private Func<string, string> _importPathFunc = null;
         private bool _includeSourceComments = false;
         private ScssOutputStyle _outputStyle = ScssOutputStyle.Compact;
@@ -31,9 +31,9 @@ namespace Statiq.Sass
         /// file system and paths for include files. By default, the <see cref="IDocument.Source"/>
         /// value is used for the input document path.
         /// </summary>
-        /// <param name="inputPath">A delegate that should return a <see cref="FilePath"/>.</param>
+        /// <param name="inputPath">A delegate that should return a <see cref="NormalizedPath"/>.</param>
         /// <returns>The current instance.</returns>
-        public CompileSass WithInputPath(Config<FilePath> inputPath)
+        public CompileSass WithInputPath(Config<NormalizedPath> inputPath)
         {
             _inputPath = inputPath ?? throw new ArgumentNullException(nameof(inputPath));
             return this;
@@ -44,7 +44,7 @@ namespace Statiq.Sass
         /// </summary>
         /// <param name="paths">The paths to include.</param>
         /// <returns>The current instance.</returns>
-        public CompileSass WithIncludePaths(params DirectoryPath[] paths)
+        public CompileSass WithIncludePaths(params NormalizedPath[] paths)
         {
             _includePaths.AddRange(paths);
             return this;
@@ -128,10 +128,10 @@ namespace Statiq.Sass
         {
             context.LogDebug($"Processing Sass for {input.ToSafeDisplayString()}");
 
-            FilePath inputPath = await _inputPath.GetValueAsync(input, context);
+            NormalizedPath inputPath = await _inputPath.GetValueAsync(input, context);
             if (inputPath?.IsAbsolute != true)
             {
-                inputPath = context.FileSystem.GetInputFile(new FilePath(Path.GetRandomFileName())).Path;
+                inputPath = context.FileSystem.GetInputFile(new NormalizedPath(Path.GetRandomFileName())).Path;
                 context.LogWarning($"No input path found for document {input.ToSafeDisplayString()}, using {inputPath.FileName.FullPath}");
             }
 
@@ -155,10 +155,10 @@ namespace Statiq.Sass
             ScssResult result = Scss.ConvertToCss(content, options);
 
             // Process the result
-            DirectoryPath relativeDirectory = context.FileSystem.GetContainingInputPath(inputPath);
-            FilePath relativePath = relativeDirectory?.GetRelativePath(inputPath) ?? inputPath.FileName;
+            NormalizedPath relativeDirectory = context.FileSystem.GetContainingInputPath(inputPath);
+            NormalizedPath relativePath = relativeDirectory?.GetRelativePath(inputPath) ?? inputPath.FileName;
 
-            FilePath cssPath = relativePath.ChangeExtension("css");
+            NormalizedPath cssPath = relativePath.ChangeExtension("css");
             IDocument cssDocument = input.Clone(
                 cssPath,
                 await context.GetContentProviderAsync(result.Css ?? string.Empty, MediaTypes.Css));
@@ -166,7 +166,7 @@ namespace Statiq.Sass
             // Generate a source map if requested
             if (_generateSourceMap && result.SourceMap != null)
             {
-                FilePath sourceMapPath = relativePath.ChangeExtension("map");
+                NormalizedPath sourceMapPath = relativePath.ChangeExtension("map");
                 IDocument sourceMapDocument = input.Clone(
                     sourceMapPath,
                     await context.GetContentProviderAsync(result.SourceMap));
@@ -176,7 +176,7 @@ namespace Statiq.Sass
             return cssDocument.Yield();
         }
 
-        private static FilePath DefaultInputPath(IDocument document, IExecutionContext context)
+        private static NormalizedPath DefaultInputPath(IDocument document, IExecutionContext context)
         {
             if (document.Source != null)
             {

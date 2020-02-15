@@ -31,8 +31,8 @@ namespace Statiq.Common
         private IMetadata _metadata;
         private IMetadata _baseMetadata;
         private IContentProvider _contentProvider;
-        private FilePath _destination;
-        private FilePath _source;
+        private NormalizedPath _destination;
+        private NormalizedPath _source;
 
         /// <summary>
         /// Every derived document type should implement an empty default constructor for the
@@ -51,7 +51,7 @@ namespace Statiq.Common
         }
 
         protected Document(
-            FilePath destination,
+            NormalizedPath destination,
             IEnumerable<KeyValuePair<string, object>> items,
             IContentProvider contentProvider = null)
             : this(null, null, destination, items, contentProvider)
@@ -59,15 +59,15 @@ namespace Statiq.Common
         }
 
         protected Document(
-            FilePath source,
-            FilePath destination,
+            NormalizedPath source,
+            NormalizedPath destination,
             IContentProvider contentProvider = null)
             : this(null, source, destination, null, contentProvider)
         {
         }
 
         protected Document(
-            FilePath destination,
+            NormalizedPath destination,
             IContentProvider contentProvider = null)
             : this(null, null, destination, null, contentProvider)
         {
@@ -86,8 +86,8 @@ namespace Statiq.Common
         }
 
         protected Document(
-            FilePath source,
-            FilePath destination,
+            NormalizedPath source,
+            NormalizedPath destination,
             IEnumerable<KeyValuePair<string, object>> items,
             IContentProvider contentProvider = null)
             : this(null, source, destination, items, contentProvider)
@@ -96,8 +96,8 @@ namespace Statiq.Common
 
         protected Document(
             IMetadata baseMetadata,
-            FilePath source,
-            FilePath destination,
+            NormalizedPath source,
+            NormalizedPath destination,
             IEnumerable<KeyValuePair<string, object>> items,
             IContentProvider contentProvider = null)
             : this(baseMetadata, source, destination, items == null ? null : new Metadata(items), contentProvider)
@@ -106,8 +106,8 @@ namespace Statiq.Common
 
         protected Document(
             IMetadata baseMetadata,
-            FilePath source,
-            FilePath destination,
+            NormalizedPath source,
+            NormalizedPath destination,
             IMetadata metadata,
             IContentProvider contentProvider = null)
         {
@@ -120,8 +120,8 @@ namespace Statiq.Common
         // metadata, source, and destination in the constructor
         internal override IDocument Initialize(
             IMetadata baseMetadata,
-            FilePath source,
-            FilePath destination,
+            NormalizedPath source,
+            NormalizedPath destination,
             IMetadata metadata,
             IContentProvider contentProvider)
         {
@@ -147,8 +147,8 @@ namespace Statiq.Common
 
         /// <inheritdoc />
         public IDocument Clone(
-            FilePath source,
-            FilePath destination,
+            NormalizedPath source,
+            NormalizedPath destination,
             IEnumerable<KeyValuePair<string, object>> items,
             IContentProvider contentProvider)
         {
@@ -207,7 +207,7 @@ namespace Statiq.Common
         }
 
         /// <inheritdoc />
-        public FilePath Source
+        public NormalizedPath Source
         {
             get
             {
@@ -222,7 +222,7 @@ namespace Statiq.Common
         }
 
         /// <inheritdoc />
-        public FilePath Destination
+        public NormalizedPath Destination
         {
             get
             {

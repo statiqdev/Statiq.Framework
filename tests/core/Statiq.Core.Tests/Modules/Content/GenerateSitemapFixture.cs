@@ -25,7 +25,7 @@ namespace Statiq.Core.Tests.Modules.Contents
                     context.Settings[Keys.Host] = hostname;
                 }
 
-                TestDocument doc = new TestDocument(new FilePath("sub/testfile.html"), "Test");
+                TestDocument doc = new TestDocument(new NormalizedPath("sub/testfile.html"), "Test");
                 IDocument[] inputs = { doc };
 
                 SetMetadata m = new SetMetadata(
@@ -61,7 +61,7 @@ namespace Statiq.Core.Tests.Modules.Contents
                     context.Settings[Keys.Host] = hostname;
                 }
 
-                TestDocument doc = new TestDocument(new FilePath("sub/testfile.html"), "Test");
+                TestDocument doc = new TestDocument(new NormalizedPath("sub/testfile.html"), "Test");
                 IDocument[] inputs = { doc };
 
                 SetMetadata m = new SetMetadata(
@@ -97,7 +97,7 @@ namespace Statiq.Core.Tests.Modules.Contents
                     context.Settings[Keys.Host] = hostname;
                 }
 
-                TestDocument doc = new TestDocument(new FilePath("sub/testfile.html"), "Test");
+                TestDocument doc = new TestDocument(new NormalizedPath("sub/testfile.html"), "Test");
 
                 Func<string, string> formatter = null;
 

@@ -204,7 +204,7 @@ namespace Statiq.Common.Tests.IO
                 TestPath path = new TestPath(fullPath);
 
                 // When
-                DirectoryPath root = path.Root;
+                NormalizedPath root = path.Root;
 
                 // Then
                 root.FullPath.ShouldBe(expected);
@@ -224,7 +224,7 @@ namespace Statiq.Common.Tests.IO
                 TestPath path = new TestPath(fullPath, PathKind.Relative);
 
                 // When
-                DirectoryPath root = path.Root;
+                NormalizedPath root = path.Root;
 
                 // Then
                 root.FullPath.ShouldBe(".");
@@ -337,7 +337,7 @@ namespace Statiq.Common.Tests.IO
             public void SameAssetInstanceIsEqual(StringComparison comparisonType)
             {
                 // Given, When
-                FilePath path = new FilePath("shaders/basic.vert");
+                NormalizedPath path = new NormalizedPath("shaders/basic.vert");
 
                 // Then
                 path.Equals(path, comparisonType).ShouldBeTrue();
@@ -348,7 +348,7 @@ namespace Statiq.Common.Tests.IO
             public void PathsAreInequalIfAnyIsNull(StringComparison comparisonType)
             {
                 // Given, When
-                bool result = new FilePath("test.txt").Equals(null, comparisonType);
+                bool result = new NormalizedPath("test.txt").Equals(null, comparisonType);
 
                 // Then
                 result.ShouldBeFalse();
@@ -359,8 +359,8 @@ namespace Statiq.Common.Tests.IO
             public void SamePathsAreEqual(StringComparison comparisonType)
             {
                 // Given, When
-                FilePath first = new FilePath("shaders/basic.vert");
-                FilePath second = new FilePath("shaders/basic.vert");
+                NormalizedPath first = new NormalizedPath("shaders/basic.vert");
+                NormalizedPath second = new NormalizedPath("shaders/basic.vert");
 
                 // Then
                 first.Equals(second, comparisonType).ShouldBeTrue();
@@ -372,8 +372,8 @@ namespace Statiq.Common.Tests.IO
             public void DifferentPathsAreNotEqual(StringComparison comparisonType)
             {
                 // Given, When
-                FilePath first = new FilePath("shaders/basic.vert");
-                FilePath second = new FilePath("shaders/basic.frag");
+                NormalizedPath first = new NormalizedPath("shaders/basic.vert");
+                NormalizedPath second = new NormalizedPath("shaders/basic.frag");
 
                 // Then
                 first.Equals(second, comparisonType).ShouldBeFalse();
@@ -385,8 +385,8 @@ namespace Statiq.Common.Tests.IO
             public void SamePathsButDifferentCasingFollowComparison(StringComparison comparisonType, bool expected)
             {
                 // Given
-                FilePath first = new FilePath("shaders/basic.vert");
-                FilePath second = new FilePath("SHADERS/BASIC.VERT");
+                NormalizedPath first = new NormalizedPath("shaders/basic.vert");
+                NormalizedPath second = new NormalizedPath("SHADERS/BASIC.VERT");
 
                 // When
                 bool firstResult = first.Equals(second, comparisonType);
@@ -405,8 +405,8 @@ namespace Statiq.Common.Tests.IO
             public void SamePathsGetSameHashCode(StringComparison comparisonType)
             {
                 // Given, When
-                FilePath first = new FilePath("shaders/basic.vert");
-                FilePath second = new FilePath("shaders/basic.vert");
+                NormalizedPath first = new NormalizedPath("shaders/basic.vert");
+                NormalizedPath second = new NormalizedPath("shaders/basic.vert");
 
                 // Then
                 first.GetHashCode(comparisonType).ShouldBe(second.GetHashCode(comparisonType));
@@ -417,8 +417,8 @@ namespace Statiq.Common.Tests.IO
             public void DifferentPathsGetDifferentHashCodes(StringComparison comparisonType)
             {
                 // Given, When
-                FilePath first = new FilePath("shaders/basic.vert");
-                FilePath second = new FilePath("shaders/basic.frag");
+                NormalizedPath first = new NormalizedPath("shaders/basic.vert");
+                NormalizedPath second = new NormalizedPath("shaders/basic.frag");
 
                 // Then
                 first.GetHashCode(comparisonType).ShouldNotBe(second.GetHashCode(comparisonType));
@@ -429,8 +429,8 @@ namespace Statiq.Common.Tests.IO
             public void SamePathsButDifferentCasingFollowComparison(StringComparison comparisonType, bool expected)
             {
                 // Given
-                FilePath first = new FilePath("shaders/basic.vert");
-                FilePath second = new FilePath("SHADERS/BASIC.VERT");
+                NormalizedPath first = new NormalizedPath("shaders/basic.vert");
+                NormalizedPath second = new NormalizedPath("SHADERS/BASIC.VERT");
 
                 // When
                 bool result = first.GetHashCode(comparisonType).Equals(second.GetHashCode(comparisonType));
@@ -446,7 +446,7 @@ namespace Statiq.Common.Tests.IO
             public void SameAssetInstanceIsEqual()
             {
                 // Given, When
-                FilePath path = new FilePath("shaders/basic.vert");
+                NormalizedPath path = new NormalizedPath("shaders/basic.vert");
 
                 // Then
 #pragma warning disable CS1718 // Comparison made to same variable
@@ -458,7 +458,7 @@ namespace Statiq.Common.Tests.IO
             public void PathsAreInequalIfAnyIsNull()
             {
                 // Given, When
-                FilePath result = new FilePath("test.txt");
+                NormalizedPath result = new NormalizedPath("test.txt");
 
                 // Then
                 (result == null).ShouldBeFalse();
@@ -468,8 +468,8 @@ namespace Statiq.Common.Tests.IO
             public void SamePathsAreEqual()
             {
                 // Given, When
-                FilePath first = new FilePath("shaders/basic.vert");
-                FilePath second = new FilePath("shaders/basic.vert");
+                NormalizedPath first = new NormalizedPath("shaders/basic.vert");
+                NormalizedPath second = new NormalizedPath("shaders/basic.vert");
 
                 // Then
                 (first == second).ShouldBeTrue();
@@ -480,8 +480,8 @@ namespace Statiq.Common.Tests.IO
             public void DifferentPathsAreNotEqual()
             {
                 // Given, When
-                FilePath first = new FilePath("shaders/basic.vert");
-                FilePath second = new FilePath("shaders/basic.frag");
+                NormalizedPath first = new NormalizedPath("shaders/basic.vert");
+                NormalizedPath second = new NormalizedPath("shaders/basic.frag");
 
                 // Then
                 (first == second).ShouldBeFalse();
@@ -492,7 +492,7 @@ namespace Statiq.Common.Tests.IO
             public void StringPathsAreEqual()
             {
                 // Given, When
-                FilePath first = new FilePath("shaders/basic.vert");
+                NormalizedPath first = new NormalizedPath("shaders/basic.vert");
                 string second = "shaders/basic.vert";
 
                 // Then
@@ -503,7 +503,7 @@ namespace Statiq.Common.Tests.IO
             public void DifferentStringPathIsNotEqual()
             {
                 // Given, When
-                FilePath first = new FilePath("shaders/basic.vert");
+                NormalizedPath first = new NormalizedPath("shaders/basic.vert");
                 string second = "shaders/basic.frag";
 
                 // Then
@@ -514,7 +514,7 @@ namespace Statiq.Common.Tests.IO
             public void AbsoluteStringAndPathAreNotEqual()
             {
                 // Given, When
-                FilePath first = new FilePath("shaders/basic.vert");
+                NormalizedPath first = new NormalizedPath("shaders/basic.vert");
                 string second = "/shaders/basic.frag";
 
                 // Then
@@ -525,7 +525,7 @@ namespace Statiq.Common.Tests.IO
             public void StringAndAbsolutePathAreNotEqual()
             {
                 // Given, When
-                FilePath first = new FilePath("/shaders/basic.vert");
+                NormalizedPath first = new NormalizedPath("/shaders/basic.vert");
                 string second = "shaders/basic.frag";
 
                 // Then
@@ -536,7 +536,7 @@ namespace Statiq.Common.Tests.IO
             public void BothNullAreEqual()
             {
                 // Given, When
-                FilePath first = null;
+                NormalizedPath first = null;
 
                 // Then
                 (first == null).ShouldBeTrue();

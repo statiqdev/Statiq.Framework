@@ -24,7 +24,7 @@ namespace Statiq.Common.Tests.IO
             public void ShouldReturnDirectoryName(string directoryPath, string name)
             {
                 // Given
-                DirectoryPath path = new DirectoryPath(directoryPath);
+                NormalizedPath path = new NormalizedPath(directoryPath);
 
                 // When
                 string result = path.Name;
@@ -45,10 +45,10 @@ namespace Statiq.Common.Tests.IO
             public void ReturnsParent(string directoryPath, string expected)
             {
                 // Given
-                DirectoryPath path = new DirectoryPath(directoryPath);
+                NormalizedPath path = new NormalizedPath(directoryPath);
 
                 // When
-                DirectoryPath parent = path.Parent;
+                NormalizedPath parent = path.Parent;
 
                 // Then
                 Assert.AreEqual(expected, parent.FullPath);
@@ -61,10 +61,10 @@ namespace Statiq.Common.Tests.IO
             public void RootDirectoryReturnsNullParent(string directoryPath)
             {
                 // Given
-                DirectoryPath path = new DirectoryPath(directoryPath);
+                NormalizedPath path = new NormalizedPath(directoryPath);
 
                 // When
-                DirectoryPath parent = path.Parent;
+                NormalizedPath parent = path.Parent;
 
                 // Then
                 Assert.IsNull(parent);
@@ -77,7 +77,7 @@ namespace Statiq.Common.Tests.IO
             public void ShouldThrowIfPathIsNull()
             {
                 // Given
-                DirectoryPath path = new DirectoryPath("assets");
+                NormalizedPath path = new NormalizedPath("assets");
 
                 // When
                 TestDelegate test = () => path.GetFilePath(null);
@@ -104,10 +104,10 @@ namespace Statiq.Common.Tests.IO
             public void ShouldCombinePaths(string first, string second, string expected)
             {
                 // Given
-                DirectoryPath path = new DirectoryPath(first);
+                NormalizedPath path = new NormalizedPath(first);
 
                 // When
-                FilePath result = path.GetFilePath(new FilePath(second));
+                NormalizedPath result = path.GetFilePath(new NormalizedPath(second));
 
                 // Then
                 Assert.AreEqual(expected, result.FullPath);
@@ -127,10 +127,10 @@ namespace Statiq.Common.Tests.IO
             public void ShouldReturnRootRelativePath(string fullPath, string expected)
             {
                 // Given
-                DirectoryPath path = new DirectoryPath(fullPath);
+                NormalizedPath path = new NormalizedPath(fullPath);
 
                 // When
-                DirectoryPath rootRelative = path.RootRelative;
+                NormalizedPath rootRelative = path.RootRelative;
 
                 // Then
                 Assert.AreEqual(expected, rootRelative.FullPath);
@@ -147,10 +147,10 @@ namespace Statiq.Common.Tests.IO
             public void ShouldReturnSelfForExplicitRelativePath(string fullPath)
             {
                 // Given
-                DirectoryPath path = new DirectoryPath(fullPath, PathKind.Relative);
+                NormalizedPath path = new NormalizedPath(fullPath, PathKind.Relative);
 
                 // When
-                DirectoryPath rootRelative = path.RootRelative;
+                NormalizedPath rootRelative = path.RootRelative;
 
                 // Then
                 Assert.AreEqual(path.FullPath, rootRelative.FullPath);
@@ -163,10 +163,10 @@ namespace Statiq.Common.Tests.IO
             public void ShouldThrowIfPathIsNull()
             {
                 // Given
-                DirectoryPath path = new DirectoryPath("assets");
+                NormalizedPath path = new NormalizedPath("assets");
 
                 // When
-                TestDelegate test = () => path.CombineFile(null);
+                TestDelegate test = () => path.Combine(null);
 
                 // Then
                 Assert.Throws<ArgumentNullException>(test);
@@ -190,10 +190,10 @@ namespace Statiq.Common.Tests.IO
             public void ShouldCombinePaths(string first, string second, string expected)
             {
                 // Given
-                DirectoryPath path = new DirectoryPath(first);
+                NormalizedPath path = new NormalizedPath(first);
 
                 // When
-                FilePath result = path.CombineFile(new FilePath(second));
+                NormalizedPath result = path.Combine(new NormalizedPath(second));
 
                 // Then
                 Assert.AreEqual(expected, result.FullPath);
@@ -212,10 +212,10 @@ namespace Statiq.Common.Tests.IO
             public void ShouldCombinePaths(string first, string second, string expected)
             {
                 // Given
-                DirectoryPath path = new DirectoryPath(first);
+                NormalizedPath path = new NormalizedPath(first);
 
                 // When
-                DirectoryPath result = path.Combine(new DirectoryPath(second));
+                NormalizedPath result = path.Combine(new NormalizedPath(second));
 
                 // Then
                 Assert.AreEqual(expected, result.FullPath);
@@ -225,7 +225,7 @@ namespace Statiq.Common.Tests.IO
             public void ShouldThrowIfPathIsNull()
             {
                 // Given
-                DirectoryPath path = new DirectoryPath("assets");
+                NormalizedPath path = new NormalizedPath("assets");
 
                 // When
                 TestDelegate test = () => path.Combine(null);
@@ -243,8 +243,8 @@ namespace Statiq.Common.Tests.IO
             public void ShouldCheckFilePath(string directory, string path, bool expected)
             {
                 // Given
-                DirectoryPath directoryPath = new DirectoryPath(directory);
-                FilePath filePath = new FilePath(path);
+                NormalizedPath directoryPath = new NormalizedPath(directory);
+                NormalizedPath filePath = new NormalizedPath(path);
 
                 // When
                 bool result = directoryPath.ContainsChild(filePath);
@@ -260,8 +260,8 @@ namespace Statiq.Common.Tests.IO
             public void ShouldCheckDirectoryPath(string directory, string path, bool expected)
             {
                 // Given
-                DirectoryPath directoryPath = new DirectoryPath(directory);
-                FilePath filePath = new FilePath(path);
+                NormalizedPath directoryPath = new NormalizedPath(directory);
+                NormalizedPath filePath = new NormalizedPath(path);
 
                 // When
                 bool result = directoryPath.ContainsChild(filePath);
@@ -279,8 +279,8 @@ namespace Statiq.Common.Tests.IO
             public void ShouldCheckFilePath(string directory, string path, bool expected)
             {
                 // Given
-                DirectoryPath directoryPath = new DirectoryPath(directory);
-                FilePath filePath = new FilePath(path);
+                NormalizedPath directoryPath = new NormalizedPath(directory);
+                NormalizedPath filePath = new NormalizedPath(path);
 
                 // When
                 bool result = directoryPath.ContainsDescendant(filePath);
@@ -296,8 +296,8 @@ namespace Statiq.Common.Tests.IO
             public void ShouldCheckDirectoryPath(string directory, string path, bool expected)
             {
                 // Given
-                DirectoryPath directoryPath = new DirectoryPath(directory);
-                FilePath filePath = new FilePath(path);
+                NormalizedPath directoryPath = new NormalizedPath(directory);
+                NormalizedPath filePath = new NormalizedPath(path);
 
                 // When
                 bool result = directoryPath.ContainsDescendant(filePath);

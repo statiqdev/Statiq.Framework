@@ -19,7 +19,7 @@ namespace Statiq.Core
     /// <category>Templates</category>
     public class TransformXslt : ParallelModule
     {
-        private readonly Config<FilePath> _xsltPath;
+        private readonly Config<NormalizedPath> _xsltPath;
         private readonly IModule[] _xsltGeneration;
 
         /// <summary>
@@ -27,8 +27,8 @@ namespace Statiq.Core
         /// as provided by a delegate. This allows you to use different XSLT files depending
         /// on the input document.
         /// </summary>
-        /// <param name="xsltPath">A delegate that should return a <see cref="FilePath"/> with the XSLT file to use.</param>
-        public TransformXslt(Config<FilePath> xsltPath)
+        /// <param name="xsltPath">A delegate that should return a <see cref="NormalizedPath"/> with the XSLT file to use.</param>
+        public TransformXslt(Config<NormalizedPath> xsltPath)
         {
             _xsltPath = xsltPath;
         }
@@ -49,7 +49,7 @@ namespace Statiq.Core
 
             if (_xsltPath != null)
             {
-                FilePath path = await _xsltPath.GetValueAsync(input, context);
+                NormalizedPath path = await _xsltPath.GetValueAsync(input, context);
                 if (path != null)
                 {
                     IFile file = context.FileSystem.GetInputFile(path);

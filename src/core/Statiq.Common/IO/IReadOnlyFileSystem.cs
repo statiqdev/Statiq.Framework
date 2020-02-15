@@ -24,7 +24,7 @@ namespace Statiq.Common
         /// <value>
         /// The root path.
         /// </value>
-        DirectoryPath RootPath { get; }
+        NormalizedPath RootPath { get; }
 
         /// <summary>
         /// Gets the input paths. These are searched in reverse order for
@@ -40,7 +40,7 @@ namespace Statiq.Common
         /// <value>
         /// The input paths.
         /// </value>
-        IReadOnlyList<DirectoryPath> InputPaths { get; }
+        IReadOnlyList<NormalizedPath> InputPaths { get; }
 
         /// <summary>
         /// Gets the output path.
@@ -48,7 +48,7 @@ namespace Statiq.Common
         /// <value>
         /// The output path.
         /// </value>
-        DirectoryPath OutputPath { get; }
+        NormalizedPath OutputPath { get; }
 
         /// <summary>
         /// Gets the temporary file path.
@@ -56,6 +56,6 @@ namespace Statiq.Common
         /// <value>
         /// The temporary file path.
         /// </value>
-        DirectoryPath TempPath { get; }
+        NormalizedPath TempPath { get; }
     }
 }

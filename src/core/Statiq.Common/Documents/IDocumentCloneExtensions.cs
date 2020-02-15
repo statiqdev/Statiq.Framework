@@ -19,7 +19,7 @@ namespace Statiq.Common
         /// <returns>A new document of the same type as this document.</returns>
         public static IDocument Clone(
             this IDocument document,
-            FilePath destination,
+            NormalizedPath destination,
             IEnumerable<KeyValuePair<string, object>> items,
             IContentProvider contentProvider = null) =>
             document.Clone(null, destination, items, contentProvider);
@@ -34,8 +34,8 @@ namespace Statiq.Common
         /// <returns>A new document of the same type as this document.</returns>
         public static IDocument Clone(
             this IDocument document,
-            FilePath source,
-            FilePath destination,
+            NormalizedPath source,
+            NormalizedPath destination,
             IContentProvider contentProvider = null) =>
             document.Clone(source, destination, null, contentProvider);
 
@@ -48,7 +48,7 @@ namespace Statiq.Common
         /// <returns>A new document of the same type as this document.</returns>
         public static IDocument Clone(
             this IDocument document,
-            FilePath destination,
+            NormalizedPath destination,
             IContentProvider contentProvider = null) =>
             document.Clone(null, destination, null, contentProvider);
 

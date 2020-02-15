@@ -25,7 +25,7 @@ namespace Statiq.Core.Tests.Modules.IO
                 const string oldContent = "TestTest";
                 const string newContent = "Test";
                 TestDocument input = new TestDocument(
-                    new FilePath(fileName),
+                    new NormalizedPath(fileName),
                     newContent);
                 TestExecutionContext context = GetExecutionContext(input.Yield());
                 IFile file = context.FileSystem.GetOutputFile(fileName);
@@ -75,7 +75,7 @@ namespace Statiq.Core.Tests.Modules.IO
             {
                 // Given
                 TestDocument[] inputs = new[] { "A", "B", "C", "D", "E" }
-                    .Select(x => new TestDocument(new FilePath("output.txt"), x))
+                    .Select(x => new TestDocument(new NormalizedPath("output.txt"), x))
                     .ToArray();
                 TestExecutionContext context = GetExecutionContext(inputs);
                 context.TestLoggerProvider.ThrowLogLevel = LogLevel.Error;
@@ -95,7 +95,7 @@ namespace Statiq.Core.Tests.Modules.IO
             {
                 // Given
                 TestDocument[] inputs = new[] { "A", "B", "C", "D", "E" }
-                    .Select(x => new TestDocument(new FilePath("output.txt"), x))
+                    .Select(x => new TestDocument(new NormalizedPath("output.txt"), x))
                     .ToArray();
                 TestExecutionContext context = GetExecutionContext(inputs);
                 WriteFiles writeFiles = new WriteFiles();
@@ -109,7 +109,7 @@ namespace Statiq.Core.Tests.Modules.IO
             {
                 // Given
                 TestDocument[] inputs = new[] { "A", "B", "C", "D", "E" }
-                    .Select(x => new TestDocument(new FilePath("output.txt"), x))
+                    .Select(x => new TestDocument(new NormalizedPath("output.txt"), x))
                     .ToArray();
                 TestExecutionContext context = GetExecutionContext(inputs);
                 WriteFiles writeFiles = new WriteFiles().Append();
@@ -131,13 +131,13 @@ namespace Statiq.Core.Tests.Modules.IO
                 TestDocument[] inputs =
                 {
                     new TestDocument(
-                        new FilePath("Subfolder/write-test"),
+                        new NormalizedPath("Subfolder/write-test"),
                         "Test"),
                     new TestDocument(
-                        new FilePath("Subfolder/empty-test"),
+                        new NormalizedPath("Subfolder/empty-test"),
                         string.Empty),
                     new TestDocument(
-                        new FilePath("Subfolder/stream-test"),
+                        new NormalizedPath("Subfolder/stream-test"),
                         emptyStream)
                 };
                 TestExecutionContext context = GetExecutionContext(inputs);

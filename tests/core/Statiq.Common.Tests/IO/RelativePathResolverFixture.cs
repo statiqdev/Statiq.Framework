@@ -50,11 +50,11 @@ namespace Statiq.Common.Tests.IO
             public void ShouldReturnRelativePathWithDirectoryPath(string source, string target, string expected)
             {
                 // Given
-                DirectoryPath sourcePath = new DirectoryPath(source);
-                DirectoryPath targetPath = new DirectoryPath(target);
+                NormalizedPath sourcePath = new NormalizedPath(source);
+                NormalizedPath targetPath = new NormalizedPath(target);
 
                 // When
-                DirectoryPath relativePath = RelativePathResolver.Resolve(sourcePath, targetPath);
+                NormalizedPath relativePath = RelativePathResolver.Resolve(sourcePath, targetPath);
 
                 // Then
                 Assert.AreEqual(expected, relativePath.FullPath);
@@ -97,11 +97,11 @@ namespace Statiq.Common.Tests.IO
             public void ShouldReturnRelativePathWithFilePath(string source, string target, string expected)
             {
                 // Given
-                DirectoryPath sourcePath = new DirectoryPath(source);
-                FilePath targetPath = new FilePath(target);
+                NormalizedPath sourcePath = new NormalizedPath(source);
+                NormalizedPath targetPath = new NormalizedPath(target);
 
                 // When
-                FilePath relativePath = RelativePathResolver.Resolve(sourcePath, targetPath);
+                NormalizedPath relativePath = RelativePathResolver.Resolve(sourcePath, targetPath);
 
                 // Then
                 Assert.AreEqual(expected, relativePath.FullPath);
@@ -111,7 +111,7 @@ namespace Statiq.Common.Tests.IO
             public void ShouldThrowIfSourceIsNullWithDirectoryPath()
             {
                 // Given
-                DirectoryPath targetPath = new DirectoryPath("/A");
+                NormalizedPath targetPath = new NormalizedPath("/A");
 
                 // When, Then
                 Assert.Throws<ArgumentNullException>(() => RelativePathResolver.Resolve(null, targetPath));
@@ -121,10 +121,10 @@ namespace Statiq.Common.Tests.IO
             public void ShouldThrowIfTargetIsNullWithDirectoryPath()
             {
                 // Given
-                DirectoryPath sourcePath = new DirectoryPath("/A");
+                NormalizedPath sourcePath = new NormalizedPath("/A");
 
                 // When, Then
-                Assert.Throws<ArgumentNullException>(() => RelativePathResolver.Resolve(sourcePath, (DirectoryPath)null));
+                Assert.Throws<ArgumentNullException>(() => RelativePathResolver.Resolve(sourcePath, (NormalizedPath)null));
             }
 
             [Test]
@@ -133,8 +133,8 @@ namespace Statiq.Common.Tests.IO
             public void ShouldThrowIfNotBothSameAbsoluteWithDirectoryPath(string source, string target)
             {
                 // Given
-                DirectoryPath sourcePath = new DirectoryPath(source);
-                DirectoryPath targetPath = new DirectoryPath(target);
+                NormalizedPath sourcePath = new NormalizedPath(source);
+                NormalizedPath targetPath = new NormalizedPath(target);
 
                 // When, Then
                 Assert.Throws<ArgumentException>(() => RelativePathResolver.Resolve(sourcePath, targetPath));
@@ -144,7 +144,7 @@ namespace Statiq.Common.Tests.IO
             public void ShouldThrowIfSourceIsNullWithFilePath()
             {
                 // Given
-                FilePath targetPath = new FilePath("/A/hello.txt");
+                NormalizedPath targetPath = new NormalizedPath("/A/hello.txt");
 
                 // When, Then
                 Assert.Throws<ArgumentNullException>(() => RelativePathResolver.Resolve(null, targetPath));
@@ -154,10 +154,10 @@ namespace Statiq.Common.Tests.IO
             public void ShouldThrowIfTargetIsNullWithFilePath()
             {
                 // Given
-                DirectoryPath sourcePath = new DirectoryPath("/A");
+                NormalizedPath sourcePath = new NormalizedPath("/A");
 
                 // When, Then
-                Assert.Throws<ArgumentNullException>(() => RelativePathResolver.Resolve(sourcePath, (FilePath)null));
+                Assert.Throws<ArgumentNullException>(() => RelativePathResolver.Resolve(sourcePath, (NormalizedPath)null));
             }
 
             [Test]
@@ -166,8 +166,8 @@ namespace Statiq.Common.Tests.IO
             public void ShouldThrowIfNotBothSameAbsoluteWithFilePath(string source, string target)
             {
                 // Given
-                DirectoryPath sourcePath = new DirectoryPath(source);
-                FilePath targetPath = new FilePath(target);
+                NormalizedPath sourcePath = new NormalizedPath(source);
+                NormalizedPath targetPath = new NormalizedPath(target);
 
                 // When, Then
                 Assert.Throws<ArgumentException>(() => RelativePathResolver.Resolve(sourcePath, targetPath));

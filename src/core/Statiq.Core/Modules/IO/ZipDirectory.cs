@@ -13,18 +13,18 @@ namespace Statiq.Core
     /// Zips the contents of a given directory.
     /// </summary>
     /// <category>Input/Output</category>
-    public class ZipDirectory : SyncConfigModule<DirectoryPath>
+    public class ZipDirectory : SyncConfigModule<NormalizedPath>
     {
         /// <summary>
         /// Zips all files in the given directory.
         /// </summary>
         /// <param name="directory">The path to zip (absolute or relative to the root directory).</param>
-        public ZipDirectory(Config<DirectoryPath> directory)
+        public ZipDirectory(Config<NormalizedPath> directory)
             : base(directory, false)
         {
         }
 
-        protected override IEnumerable<IDocument> ExecuteConfig(IDocument input, IExecutionContext context, DirectoryPath value) =>
+        protected override IEnumerable<IDocument> ExecuteConfig(IDocument input, IExecutionContext context, NormalizedPath value) =>
             context.CloneOrCreateDocument(input, ZipFileHelper.CreateZipFile(context, value).GetContentProvider()).Yield();
     }
 }

@@ -8,14 +8,12 @@ namespace Statiq.Common
     /// <summary>
     /// An ordered collection of unique <see cref="NormalizedPath"/>.
     /// </summary>
-    /// <typeparam name="TPath">The type of the path (file or directory).</typeparam>
-    public class PathCollection<TPath> : IReadOnlyList<TPath>
-        where TPath : NormalizedPath
+    public class PathCollection : IReadOnlyList<NormalizedPath>
     {
         private static readonly PathEqualityComparer _comparer = new PathEqualityComparer();
 
         private readonly object _pathsLock = new object();
-        private readonly List<TPath> _paths = new List<TPath>();
+        private readonly List<NormalizedPath> _paths = new List<NormalizedPath>();
 
         /// <summary>
         /// Initializes a new path collection.
@@ -28,7 +26,7 @@ namespace Statiq.Common
         /// Initializes a new path collection.
         /// </summary>
         /// <param name="paths">The paths.</param>
-        public PathCollection(IEnumerable<TPath> paths)
+        public PathCollection(IEnumerable<NormalizedPath> paths)
         {
             AddRange(paths);
         }
@@ -37,9 +35,9 @@ namespace Statiq.Common
         /// Returns an enumerator that iterates through the collection.
         /// </summary>
         /// <returns>
-        /// An <c>IEnumerator&lt;TPath&gt;</c> that can be used to iterate through the collection.
+        /// An <c>IEnumerator&lt;NormalizedPath&gt;</c> that can be used to iterate through the collection.
         /// </returns>
-        public IEnumerator<TPath> GetEnumerator()
+        public IEnumerator<NormalizedPath> GetEnumerator()
         {
             lock (_pathsLock)
             {
@@ -69,14 +67,14 @@ namespace Statiq.Common
         }
 
         /// <summary>
-        /// Gets or sets the <see cref="Statiq.Common.DirectoryPath" /> at the specified index.
+        /// Gets or sets the <see cref="Statiq.Common.NormalizedPath" /> at the specified index.
         /// </summary>
         /// <value>
-        /// The <see cref="Statiq.Common.DirectoryPath" /> at the specified index.
+        /// The <see cref="Statiq.Common.NormalizedPath" /> at the specified index.
         /// </value>
         /// <param name="index">The index.</param>
         /// <returns>The path at the specified index.</returns>
-        public TPath this[int index]
+        public NormalizedPath this[int index]
         {
             get
             {
@@ -87,8 +85,7 @@ namespace Statiq.Common
             }
             set
             {
-                _ = value ?? throw new ArgumentNullException(nameof(value));
-
+                value.ThrowIfNull(nameof(value));
                 lock (_pathsLock)
                 {
                     _paths[index] = value;
@@ -103,13 +100,9 @@ namespace Statiq.Common
         /// <returns>
         /// <c>true</c> if the path was added; <c>false</c> if the path was already present.
         /// </returns>
-        public bool Add(TPath path)
+        public bool Add(NormalizedPath path)
         {
-            if (path == null)
-            {
-                throw new ArgumentNullException(nameof(path));
-            }
-
+            path.ThrowIfNull(nameof(path));
             lock (_pathsLock)
             {
                 if (_paths.Contains(path, new PathEqualityComparer()))
@@ -125,16 +118,13 @@ namespace Statiq.Common
         /// Adds the specified paths to the collection.
         /// </summary>
         /// <param name="paths">The paths to add.</param>
-        public void AddRange(IEnumerable<TPath> paths)
+        public void AddRange(IEnumerable<NormalizedPath> paths)
         {
-            if (paths == null)
-            {
-                throw new ArgumentNullException(nameof(paths));
-            }
+            _ = paths ?? throw new ArgumentNullException(nameof(paths));
 
             lock (_pathsLock)
             {
-                foreach (TPath path in paths)
+                foreach (NormalizedPath path in paths)
                 {
                     if (!_paths.Contains(path, _comparer))
                     {
@@ -160,7 +150,7 @@ namespace Statiq.Common
         /// </summary>
         /// <param name="path">The path.</param>
         /// <returns><c>true</c> if the collection contains the path, otherwise <c>false</c>.</returns>
-        public bool Contains(TPath path)
+        public bool Contains(NormalizedPath path)
         {
             lock (_pathsLock)
             {
@@ -173,13 +163,9 @@ namespace Statiq.Common
         /// </summary>
         /// <param name="path">The path to remove.</param>
         /// <returns><c>true</c> if the collection contained the path, otherwise <c>false</c>.</returns>
-        public bool Remove(TPath path)
+        public bool Remove(NormalizedPath path)
         {
-            if (path == null)
-            {
-                throw new ArgumentNullException(nameof(path));
-            }
-
+            path.ThrowIfNull(nameof(path));
             lock (_pathsLock)
             {
                 int index = _paths.FindIndex(x => x.Equals(path));
@@ -196,16 +182,13 @@ namespace Statiq.Common
         /// Removes the specified paths from the collection.
         /// </summary>
         /// <param name="paths">The paths to remove.</param>
-        public void RemoveRange(IEnumerable<TPath> paths)
+        public void RemoveRange(IEnumerable<NormalizedPath> paths)
         {
-            if (paths == null)
-            {
-                throw new ArgumentNullException(nameof(paths));
-            }
+            _ = paths ?? throw new ArgumentNullException(nameof(paths));
 
             lock (_pathsLock)
             {
-                foreach (TPath path in paths)
+                foreach (NormalizedPath path in paths)
                 {
                     int index = _paths.FindIndex(x => x.Equals(path));
                     if (index != -1)
@@ -221,13 +204,9 @@ namespace Statiq.Common
         /// </summary>
         /// <param name="path">The path.</param>
         /// <returns>The index of the specified path, or -1 if not found.</returns>
-        public int IndexOf(TPath path)
+        public int IndexOf(NormalizedPath path)
         {
-            if (path == null)
-            {
-                throw new ArgumentNullException(nameof(path));
-            }
-
+            path.ThrowIfNull(nameof(path));
             lock (_pathsLock)
             {
                 return _paths.FindIndex(x => x.Equals(path));
@@ -240,13 +219,9 @@ namespace Statiq.Common
         /// <param name="index">The index where the path should be inserted.</param>
         /// <param name="path">The path to insert.</param>
         /// <returns><c>true</c> if the collection did not contain the path and it was inserted, otherwise <c>false</c></returns>
-        public bool Insert(int index, TPath path)
+        public bool Insert(int index, NormalizedPath path)
         {
-            if (path == null)
-            {
-                throw new ArgumentNullException(nameof(path));
-            }
-
+            path.ThrowIfNull(nameof(path));
             lock (_pathsLock)
             {
                 if (_paths.Contains(path, _comparer))

@@ -6,14 +6,14 @@ namespace Statiq.Common
     public interface IDocumentFactory
     {
         IDocument CreateDocument(
-            FilePath source,
-            FilePath destination,
+            NormalizedPath source,
+            NormalizedPath destination,
             IEnumerable<KeyValuePair<string, object>> items,
             IContentProvider contentProvider = null);
 
         TDocument CreateDocument<TDocument>(
-            FilePath source,
-            FilePath destination,
+            NormalizedPath source,
+            NormalizedPath destination,
             IEnumerable<KeyValuePair<string, object>> items,
             IContentProvider contentProvider = null)
             where TDocument : FactoryDocument, IDocument, new();

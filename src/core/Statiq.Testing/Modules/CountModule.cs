@@ -47,7 +47,7 @@ namespace Statiq.Testing
                     {
                         results.Add(
                             input.Clone(
-                                new FilePath(ValueKey + sourceCount++, PathKind.Absolute),
+                                new NormalizedPath(ValueKey + sourceCount++, PathKind.Absolute),
                                 null,
                                 new Dictionary<string, object> { { ValueKey, Value } },
                                 await context.GetContentProviderAsync(inputContent == null ? Value.ToString() : inputContent + Value)));

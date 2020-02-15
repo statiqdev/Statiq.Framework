@@ -222,7 +222,7 @@ namespace Statiq.Core.Tests.Modules.Metadata
             }
 
             private TestDocument[] GetDocumentsFromRelativePaths(params string[] relativeFilePaths) =>
-                relativeFilePaths.Select(x => new TestDocument(new FilePath(x))).ToArray();
+                relativeFilePaths.Select(x => new TestDocument(new NormalizedPath(x))).ToArray();
         }
     }
 }

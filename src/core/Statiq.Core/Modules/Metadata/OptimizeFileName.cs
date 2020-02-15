@@ -101,7 +101,7 @@ namespace Statiq.Core
                     if (_fileName == null || string.IsNullOrWhiteSpace(_outputKey))
                     {
                         // No output key so set the destination
-                        FilePath path = input.Destination.ChangeFileName(fileName);
+                        NormalizedPath path = input.Destination.ChangeFileName(fileName);
                         return input.Clone(path).Yield();
                     }
                     else

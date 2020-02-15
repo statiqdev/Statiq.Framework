@@ -10,13 +10,13 @@ namespace Statiq.Common
     {
         private readonly DocumentFileProvider _fileProvider;
 
-        internal DocumentDirectory(DocumentFileProvider fileProvider, DirectoryPath path)
+        internal DocumentDirectory(DocumentFileProvider fileProvider, NormalizedPath path)
         {
             _fileProvider = fileProvider ?? throw new ArgumentNullException(nameof(fileProvider));
             Path = path ?? throw new ArgumentNullException(nameof(path));
         }
 
-        public DirectoryPath Path { get; }
+        public NormalizedPath Path { get; }
 
         NormalizedPath IFileSystemEntry.Path => Path;
 
@@ -36,7 +36,7 @@ namespace Statiq.Common
                 .Cast<IDirectory>();
         }
 
-        public IDirectory GetDirectory(DirectoryPath directory)
+        public IDirectory GetDirectory(NormalizedPath directory)
         {
             if (directory == null)
             {
@@ -52,7 +52,7 @@ namespace Statiq.Common
 
         public bool Exists => _fileProvider.Directories.Contains(Path);
 
-        public IFile GetFile(FilePath path)
+        public IFile GetFile(NormalizedPath path)
         {
             if (path == null)
             {
@@ -63,7 +63,7 @@ namespace Statiq.Common
                 throw new ArgumentException("Path must be relative", nameof(path));
             }
 
-            return new DocumentFile(_fileProvider, Path.CombineFile(path));
+            return new DocumentFile(_fileProvider, Path.Combine(path));
         }
 
         public IEnumerable<IFile> GetFiles(SearchOption searchOption = SearchOption.TopDirectoryOnly)
@@ -86,8 +86,8 @@ namespace Statiq.Common
         {
             get
             {
-                DirectoryPath parentPath = Path.Parent;
-                return parentPath == null ? null : new DocumentDirectory(_fileProvider, parentPath);
+                NormalizedPath parentPath = Path.Parent;
+                return parentPath.IsNull ? null : new DocumentDirectory(_fileProvider, parentPath);
             }
         }
 

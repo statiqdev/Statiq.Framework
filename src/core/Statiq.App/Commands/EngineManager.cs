@@ -86,7 +86,7 @@ namespace Statiq.App
         private static void ApplyCommandSettings(Engine engine, IConfigurationSettings configurationSettings, EngineCommandSettings commandSettings)
         {
             // Set folders
-            DirectoryPath currentDirectory = Environment.CurrentDirectory;
+            NormalizedPath currentDirectory = Environment.CurrentDirectory;
             engine.FileSystem.RootPath = string.IsNullOrEmpty(commandSettings.RootPath)
                 ? currentDirectory
                 : currentDirectory.Combine(commandSettings.RootPath);
@@ -95,7 +95,7 @@ namespace Statiq.App
                 // Clear existing default paths if new ones are set
                 // and reverse the inputs so the last one is first to match the semantics of multiple occurrence single options
                 engine.FileSystem.InputPaths.Clear();
-                engine.FileSystem.InputPaths.AddRange(commandSettings.InputPaths.Select(x => new DirectoryPath(x)).Reverse());
+                engine.FileSystem.InputPaths.AddRange(commandSettings.InputPaths.Select(x => new NormalizedPath(x)).Reverse());
             }
             if (!string.IsNullOrEmpty(commandSettings.OutputPath))
             {

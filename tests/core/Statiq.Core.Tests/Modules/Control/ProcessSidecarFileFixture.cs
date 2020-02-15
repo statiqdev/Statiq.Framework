@@ -89,8 +89,8 @@ namespace Statiq.Core.Tests.Modules.Control
 
             private TestDocument GetDocument(string source, string content) =>
                 new TestDocument(
-                    new FilePath("/" + source),
-                    new FilePath(source),
+                    new NormalizedPath("/" + source),
+                    new NormalizedPath(source),
                     content);
 
             private TestExecutionContext GetExecutionContext(Engine engine) =>
@@ -103,9 +103,9 @@ namespace Statiq.Core.Tests.Modules.Control
             private TestFileSystem GetFileSystem() =>
                 new TestFileSystem
                 {
-                    InputPaths = new PathCollection<DirectoryPath>(new[]
+                    InputPaths = new PathCollection<NormalizedPath>(new[]
                     {
-                        DirectoryPath.RootPath
+                        NormalizedPath.Root
                     }),
                     FileProvider = GetFileProvider()
                 };

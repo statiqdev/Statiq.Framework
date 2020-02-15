@@ -27,7 +27,7 @@ namespace Statiq.Core.Tests.Modules.Metadata
             public async Task FileNameIsConvertedCorrectly(string input, string output)
             {
                 // Given
-                TestDocument document = new TestDocument(new FilePath(input));
+                TestDocument document = new TestDocument(new NormalizedPath(input));
                 OptimizeFileName fileName = new OptimizeFileName();
 
                 // When
@@ -43,7 +43,7 @@ namespace Statiq.Core.Tests.Modules.Metadata
                 // Given
                 const string input = "FileName With MiXeD CapS";
                 const string output = "filename-with-mixed-caps";
-                TestDocument document = new TestDocument(new FilePath(input));
+                TestDocument document = new TestDocument(new NormalizedPath(input));
                 OptimizeFileName fileName = new OptimizeFileName();
 
                 // When
@@ -59,7 +59,7 @@ namespace Statiq.Core.Tests.Modules.Metadata
                 // Given
                 const string input = "this-is-a-.net-tag";
                 const string output = "this-is-a-.net-tag";
-                TestDocument document = new TestDocument(new FilePath(input));
+                TestDocument document = new TestDocument(new NormalizedPath(input));
                 OptimizeFileName fileName = new OptimizeFileName();
 
                 // When
@@ -76,7 +76,7 @@ namespace Statiq.Core.Tests.Modules.Metadata
                 // Given
                 const string input = "this-is-a-.";
                 const string output = "thisisa.";
-                TestDocument document = new TestDocument(new FilePath(input));
+                TestDocument document = new TestDocument(new NormalizedPath(input));
                 OptimizeFileName fileName = new OptimizeFileName();
 
                 // When

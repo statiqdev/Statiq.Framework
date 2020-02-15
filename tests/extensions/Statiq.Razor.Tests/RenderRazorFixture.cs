@@ -58,7 +58,7 @@ namespace Statiq.Razor.Tests
                 // Given
                 Engine engine = new Engine();
                 TestExecutionContext context = GetExecutionContext(engine);
-                TestDocument document = new TestDocument(new FilePath("/Temp/temp.txt"), (FilePath)null, "<p>@Document.Source</p>");
+                TestDocument document = new TestDocument(new NormalizedPath("/Temp/temp.txt"), (NormalizedPath)null, "<p>@Document.Source</p>");
                 RenderRazor razor = new RenderRazor();
 
                 // When
@@ -135,7 +135,7 @@ namespace Statiq.Razor.Tests
                 TestDocument document = GetDocument(
                     "/Layout/Test.cshtml",
                     "<p>This is a test</p>");
-                RenderRazor razor = new RenderRazor().WithLayout((FilePath)"_Layout.cshtml");
+                RenderRazor razor = new RenderRazor().WithLayout((NormalizedPath)"_Layout.cshtml");
 
                 // When
                 TestDocument result = await ExecuteAsync(document, context, razor).SingleAsync();
@@ -177,7 +177,7 @@ namespace Statiq.Razor.Tests
                 TestDocument document = GetDocument(
                     "/AlternateViewStartPath/Test.cshtml",
                     "<p>This is a test</p>");
-                RenderRazor razor = new RenderRazor().WithViewStart((FilePath)"/AlternateViewStart/_ViewStart.cshtml");
+                RenderRazor razor = new RenderRazor().WithViewStart((NormalizedPath)"/AlternateViewStart/_ViewStart.cshtml");
 
                 // When
                 TestDocument result = await ExecuteAsync(document, context, razor).SingleAsync();
@@ -198,7 +198,7 @@ namespace Statiq.Razor.Tests
                 TestDocument document = GetDocument(
                     "/AlternateViewStartPath/Test.cshtml",
                     "<p>This is a test</p>");
-                RenderRazor razor = new RenderRazor().WithViewStart((FilePath)"/AlternateViewStart/_ViewStartRelativeLayout.cshtml");
+                RenderRazor razor = new RenderRazor().WithViewStart((NormalizedPath)"/AlternateViewStart/_ViewStartRelativeLayout.cshtml");
 
                 // When
                 TestDocument result = await ExecuteAsync(document, context, razor).SingleAsync();
@@ -219,7 +219,7 @@ namespace Statiq.Razor.Tests
                 TestDocument document = GetDocument(
                     "/AlternateViewStartPath/Test.cshtml",
                     "<p>This is a test</p>");
-                RenderRazor razor = new RenderRazor().WithViewStart((FilePath)"AlternateViewStart/_ViewStartRelativeLayout.cshtml");
+                RenderRazor razor = new RenderRazor().WithViewStart((NormalizedPath)"AlternateViewStart/_ViewStartRelativeLayout.cshtml");
 
                 // When
                 TestDocument result = await ExecuteAsync(document, context, razor).SingleAsync();
@@ -349,7 +349,7 @@ namespace Statiq.Razor.Tests
                     StringCompareShould.IgnoreLineEndings);
             }
 
-            private TestDocument GetDocument(string source, string content) => new TestDocument(new FilePath(source), (FilePath)null, content);
+            private TestDocument GetDocument(string source, string content) => new TestDocument(new NormalizedPath(source), (NormalizedPath)null, content);
 
             private TestExecutionContext GetExecutionContext(Engine engine)
             {
@@ -365,10 +365,10 @@ namespace Statiq.Razor.Tests
                 TestFileProvider fileProvider = GetFileProvider();
                 return new TestFileSystem()
                 {
-                    RootPath = DirectoryPath.RootPath,
-                    InputPaths = new PathCollection<DirectoryPath>()
+                    RootPath = NormalizedPath.Root,
+                    InputPaths = new PathCollection<NormalizedPath>()
                     {
-                        DirectoryPath.RootPath
+                        NormalizedPath.Root
                     },
                     FileProvider = fileProvider
                 };

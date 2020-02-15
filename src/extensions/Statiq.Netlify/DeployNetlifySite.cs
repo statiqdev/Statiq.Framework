@@ -36,17 +36,17 @@ namespace Statiq.Netlify
         /// <param name="directory">
         /// The directory containing the files to deploy (from the root folder, not the input folder).
         /// </param>
-        public DeployNetlifySite(Config<string> siteId, Config<string> accessToken, Config<DirectoryPath> directory)
+        public DeployNetlifySite(Config<string> siteId, Config<string> accessToken, Config<NormalizedPath> directory)
             : this(siteId, accessToken, GetContentProviderFromDirectory(directory))
         {
         }
 
-        private static Config<IContentProvider> GetContentProviderFromDirectory(Config<DirectoryPath> directory)
+        private static Config<IContentProvider> GetContentProviderFromDirectory(Config<NormalizedPath> directory)
         {
             _ = directory ?? throw new ArgumentNullException(nameof(directory));
             return directory.Transform(GetContentProvider);
 
-            static IContentProvider GetContentProvider(DirectoryPath path, IExecutionContext context)
+            static IContentProvider GetContentProvider(NormalizedPath path, IExecutionContext context)
             {
                 if (path == null)
                 {
@@ -63,17 +63,17 @@ namespace Statiq.Netlify
         /// <param name="siteId">The ID of the site to deploy.</param>
         /// <param name="accessToken">The access token to authenticate with.</param>
         /// <param name="zipPath">The zip file to deploy.</param>
-        public DeployNetlifySite(Config<string> siteId, Config<string> accessToken, Config<FilePath> zipPath)
+        public DeployNetlifySite(Config<string> siteId, Config<string> accessToken, Config<NormalizedPath> zipPath)
             : this(siteId, accessToken, GetContentProviderFromZipFile(zipPath))
         {
         }
 
-        private static Config<IContentProvider> GetContentProviderFromZipFile(Config<FilePath> zipPath)
+        private static Config<IContentProvider> GetContentProviderFromZipFile(Config<NormalizedPath> zipPath)
         {
             _ = zipPath ?? throw new ArgumentNullException(nameof(zipPath));
             return zipPath.Transform(GetContentProvider);
 
-            static IContentProvider GetContentProvider(FilePath filePath, IExecutionContext context)
+            static IContentProvider GetContentProvider(NormalizedPath filePath, IExecutionContext context)
             {
                 if (filePath == null)
                 {

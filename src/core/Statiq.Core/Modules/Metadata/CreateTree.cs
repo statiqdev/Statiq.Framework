@@ -67,7 +67,7 @@ namespace Statiq.Core
             });
             _placeholderFactory = (treePath, items, context) =>
             {
-                FilePath filePath = new FilePath(string.Join("/", treePath.Concat(new[] { "index.html" })));
+                NormalizedPath filePath = new NormalizedPath(string.Join("/", treePath.Concat(new[] { "index.html" })));
                 return Task.FromResult(context.CreateDocument(context.FileSystem.GetInputFile(filePath).Path.FullPath, filePath, items));
             };
             _sort = (x, y) => Comparer.Default.Compare(

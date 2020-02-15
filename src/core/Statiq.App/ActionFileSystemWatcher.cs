@@ -15,7 +15,7 @@ namespace Statiq.App
         private readonly string _outputPath;
         private readonly Action<string> _callback;
 
-        public ActionFileSystemWatcher(DirectoryPath outputDirectory, IEnumerable<DirectoryPath> inputDirectories, bool includeSubdirectories, string filter, Action<string> callback)
+        public ActionFileSystemWatcher(NormalizedPath outputDirectory, IEnumerable<NormalizedPath> inputDirectories, bool includeSubdirectories, string filter, Action<string> callback)
         {
             foreach (string inputDirectory in inputDirectories.Select(x => x.FullPath).Where(Directory.Exists))
             {

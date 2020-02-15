@@ -35,22 +35,22 @@ namespace Statiq.Feeds
         /// <summary>
         /// The default path for RSS files.
         /// </summary>
-        public static readonly FilePath DefaultRssPath = new FilePath("feed.rss");
+        public static readonly NormalizedPath DefaultRssPath = new NormalizedPath("feed.rss");
 
         /// <summary>
         /// The default path for Atom files.
         /// </summary>
-        public static readonly FilePath DefaultAtomPath = new FilePath("feed.atom");
+        public static readonly NormalizedPath DefaultAtomPath = new NormalizedPath("feed.atom");
 
         /// <summary>
         /// The default path for RDF files.
         /// </summary>
-        public static readonly FilePath DefaultRdfPath = null;
+        public static readonly NormalizedPath DefaultRdfPath = null;
 
         private int _maximumItems = 20;
-        private FilePath _rssPath = DefaultRssPath;
-        private FilePath _atomPath = DefaultAtomPath;
-        private FilePath _rdfPath = DefaultRdfPath;
+        private NormalizedPath _rssPath = DefaultRssPath;
+        private NormalizedPath _atomPath = DefaultAtomPath;
+        private NormalizedPath _rdfPath = DefaultRdfPath;
 
         private Uri _feedId;
         private string _feedTitle;
@@ -93,10 +93,10 @@ namespace Statiq.Feeds
         /// Sets the path to the generated RSS file. The default behavior is to generate a RSS feed with
         /// a path of "feed.rss".
         /// </summary>
-        /// <param name="rssPath">A delegate that should return a <see cref="FilePath"/> for the RSS path.
+        /// <param name="rssPath">A delegate that should return a <see cref="NormalizedPath"/> for the RSS path.
         /// If the delegate is <c>null</c> or returns <c>null</c>, no RSS file will be generated.</param>
         /// <returns>The current module instance.</returns>
-        public GenerateFeeds WithRssPath(FilePath rssPath)
+        public GenerateFeeds WithRssPath(NormalizedPath rssPath)
         {
             _rssPath = rssPath;
             return this;
@@ -106,10 +106,10 @@ namespace Statiq.Feeds
         /// Sets the path to the generated Atom file. The default behavior is to generate a RSS feed with
         /// a path of "feed.atom".
         /// </summary>
-        /// <param name="atomPath">A delegate that should return a <see cref="FilePath"/> for the Atom path.
+        /// <param name="atomPath">A delegate that should return a <see cref="NormalizedPath"/> for the Atom path.
         /// If the delegate is <c>null</c> or returns <c>null</c>, no Atom file will be generated.</param>
         /// <returns>The current module instance.</returns>
-        public GenerateFeeds WithAtomPath(FilePath atomPath)
+        public GenerateFeeds WithAtomPath(NormalizedPath atomPath)
         {
             _atomPath = atomPath;
             return this;
@@ -118,10 +118,10 @@ namespace Statiq.Feeds
         /// <summary>
         /// Sets the path to the generated RDF file. The default behavior is not to generate a RDF feed.
         /// </summary>
-        /// <param name="rdfPath">A delegate that should return a <see cref="FilePath"/> for the RDF path.
+        /// <param name="rdfPath">A delegate that should return a <see cref="NormalizedPath"/> for the RDF path.
         /// If the delegate is <c>null</c> or returns <c>null</c>, no RDF file will be generated.</param>
         /// <returns>The current module instance.</returns>
-        public GenerateFeeds WithRdfPath(FilePath rdfPath)
+        public GenerateFeeds WithRdfPath(NormalizedPath rdfPath)
         {
             _rdfPath = rdfPath;
             return this;
@@ -439,7 +439,7 @@ namespace Statiq.Feeds
             }.Where(x => x != null);
         }
 
-        private async Task<IDocument> GenerateFeedAsync(FeedType feedType, Feed feed, FilePath path, IExecutionContext context)
+        private async Task<IDocument> GenerateFeedAsync(FeedType feedType, Feed feed, NormalizedPath path, IExecutionContext context)
         {
             // Get the output path
             if (path == null)

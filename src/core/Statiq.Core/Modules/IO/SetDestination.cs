@@ -26,9 +26,9 @@ namespace Statiq.Core
     /// <metadata cref="Keys.DestinationFileName" usage="Input" />
     /// <metadata cref="Keys.DestinationExtension" usage="Input" />
     /// <category>Input/Output</category>
-    public class SetDestination : ParallelConfigModule<FilePath>
+    public class SetDestination : ParallelConfigModule<NormalizedPath>
     {
-        private readonly Config<FilePath> _destination;
+        private readonly Config<NormalizedPath> _destination;
 
         /// <summary>
         /// Sets the destination of input documents according to the metadata values for
@@ -51,13 +51,13 @@ namespace Statiq.Core
         /// The path or extension to set the destination to.
         /// If the value starts with a "." then it will be treated as an extension and the existing destination path will be changed (if there is one).
         /// If the value does not start with a "." then it will be treated as a path and the destination will be set to the value.
-        /// Use <see cref="SetDestination(Config{FilePath}, bool)"/> for more control.
+        /// Use <see cref="SetDestination(Config{NormalizedPath}, bool)"/> for more control.
         /// </param>
         public SetDestination(string pathOrExtension)
             : base(
                 (pathOrExtension ?? throw new ArgumentNullException(nameof(pathOrExtension))).StartsWith('.')
                     ? Config.FromDocument(doc => GetPathFromMetadata(doc) ?? doc.Destination?.ChangeExtension(pathOrExtension))
-                    : Config.FromValue((FilePath)pathOrExtension),
+                    : Config.FromValue((NormalizedPath)pathOrExtension),
                 true)
         {
         }
@@ -65,22 +65,22 @@ namespace Statiq.Core
         /// <summary>
         /// Changes the destination of input documents to that of the delegate.
         /// </summary>
-        /// <param name="destination">A delegate that returns a <see cref="FilePath"/> with the desired destination path.</param>
+        /// <param name="destination">A delegate that returns a <see cref="NormalizedPath"/> with the desired destination path.</param>
         /// <param name="ignoreMetadata">
         /// If <c>true</c> existing <c>DestinationPath</c>, <c>DestinationFileName</c>, and <c>DestinationExtension</c>
         /// metadata values will be ignored and the provided config will take precedence, otherwise if <c>false</c>
         /// and if <c>DestinationPath</c>, <c>DestinationFileName</c>, or <c>DestinationExtension</c>
         /// metadata values are set, those will take precedence.
         /// </param>
-        public SetDestination(Config<FilePath> destination, bool ignoreMetadata = false)
+        public SetDestination(Config<NormalizedPath> destination, bool ignoreMetadata = false)
             : base(Config.FromDocument(async (doc, ctx) => (ignoreMetadata ? null : GetPathFromMetadata(doc)) ?? await destination.GetValueAsync(doc, ctx)), true)
         {
             _ = destination ?? throw new ArgumentNullException(nameof(destination));
         }
 
-        private static FilePath GetPathFromMetadata(IDocument doc)
+        private static NormalizedPath GetPathFromMetadata(IDocument doc)
         {
-            FilePath path = doc.GetFilePath(Keys.DestinationPath);
+            NormalizedPath path = doc.GetFilePath(Keys.DestinationPath);
             if (path != null)
             {
                 return path;
@@ -98,7 +98,7 @@ namespace Statiq.Core
             return null;
         }
 
-        protected override Task<IEnumerable<IDocument>> ExecuteConfigAsync(IDocument input, IExecutionContext context, FilePath value) =>
+        protected override Task<IEnumerable<IDocument>> ExecuteConfigAsync(IDocument input, IExecutionContext context, NormalizedPath value) =>
             Task.FromResult(value == null ? input.Yield() : input.Clone(value).Yield());
     }
 }

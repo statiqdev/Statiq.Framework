@@ -16,7 +16,7 @@ namespace Statiq.Common.Tests.IO
             public void CanSeeIfAPathHasAnExtension(string fullPath, bool expected)
             {
                 // Given, When
-                FilePath path = new FilePath(fullPath);
+                NormalizedPath path = new NormalizedPath(fullPath);
 
                 // Then
                 Assert.AreEqual(expected, path.HasExtension);
@@ -32,7 +32,7 @@ namespace Statiq.Common.Tests.IO
             public void CanGetExtension(string fullPath, string expected)
             {
                 // Given
-                FilePath result = new FilePath(fullPath);
+                NormalizedPath result = new NormalizedPath(fullPath);
 
                 // When
                 string extension = result.Extension;
@@ -48,10 +48,10 @@ namespace Statiq.Common.Tests.IO
             public void CanGetDirectoryForFilePath()
             {
                 // Given
-                FilePath path = new FilePath("temp/hello.txt");
+                NormalizedPath path = new NormalizedPath("temp/hello.txt");
 
                 // When
-                DirectoryPath directory = path.Directory;
+                NormalizedPath directory = path.Parent;
 
                 // Then
                 Assert.AreEqual("temp", directory.FullPath);
@@ -61,10 +61,10 @@ namespace Statiq.Common.Tests.IO
             public void CanGetDirectoryForFilePathInRoot()
             {
                 // Given
-                FilePath path = new FilePath("hello.txt");
+                NormalizedPath path = new NormalizedPath("hello.txt");
 
                 // When
-                DirectoryPath directory = path.Directory;
+                NormalizedPath directory = path.Parent;
 
                 // Then
                 Assert.AreEqual(".", directory.FullPath);
@@ -84,10 +84,10 @@ namespace Statiq.Common.Tests.IO
             public void ShouldReturnRootRelativePath(string fullPath, string expected)
             {
                 // Given
-                FilePath path = new FilePath(fullPath);
+                NormalizedPath path = new NormalizedPath(fullPath);
 
                 // When
-                FilePath rootRelative = path.RootRelative;
+                NormalizedPath rootRelative = path.RootRelative;
 
                 // Then
                 Assert.AreEqual(expected, rootRelative.FullPath);
@@ -104,10 +104,10 @@ namespace Statiq.Common.Tests.IO
             public void ShouldReturnSelfForExplicitRelativePath(string fullPath)
             {
                 // Given
-                FilePath path = new FilePath(fullPath, PathKind.Relative);
+                NormalizedPath path = new NormalizedPath(fullPath, PathKind.Relative);
 
                 // When
-                FilePath rootRelative = path.RootRelative;
+                NormalizedPath rootRelative = path.RootRelative;
 
                 // Then
                 Assert.AreEqual(path.FullPath, rootRelative.FullPath);
@@ -125,7 +125,7 @@ namespace Statiq.Common.Tests.IO
             public void ShouldChangeExtension(string extension, string expected)
             {
                 // Given
-                FilePath path = new FilePath("temp/hello.txt");
+                NormalizedPath path = new NormalizedPath("temp/hello.txt");
 
                 // When
                 path = path.ChangeExtension(extension);
@@ -141,7 +141,7 @@ namespace Statiq.Common.Tests.IO
             public void ShouldThrowIfExtensionIsNull()
             {
                 // Given
-                FilePath path = new FilePath("temp/hello.txt");
+                NormalizedPath path = new NormalizedPath("temp/hello.txt");
 
                 // When
                 TestDelegate test = () => path.AppendExtension(null);
@@ -155,7 +155,7 @@ namespace Statiq.Common.Tests.IO
             public void CanAppendExtensionToPath(string extension, string expected)
             {
                 // Given
-                FilePath path = new FilePath("temp/hello.txt");
+                NormalizedPath path = new NormalizedPath("temp/hello.txt");
 
                 // When
                 path = path.AppendExtension(extension);
@@ -171,7 +171,7 @@ namespace Statiq.Common.Tests.IO
             public void ShouldThrowIfSuffixIsNull()
             {
                 // Given
-                FilePath path = new FilePath("temp/hello.txt");
+                NormalizedPath path = new NormalizedPath("temp/hello.txt");
 
                 // When
                 TestDelegate test = () => path.InsertSuffix(null);
@@ -187,7 +187,7 @@ namespace Statiq.Common.Tests.IO
             public void CanInsertSuffixToPath(string path, string suffix, string expected)
             {
                 // Given
-                FilePath filePath = new FilePath(path);
+                NormalizedPath filePath = new NormalizedPath(path);
 
                 // When
                 filePath = filePath.InsertSuffix(suffix);
@@ -203,7 +203,7 @@ namespace Statiq.Common.Tests.IO
             public void ShouldThrowIfPRefixIsNull()
             {
                 // Given
-                FilePath path = new FilePath("temp/hello.txt");
+                NormalizedPath path = new NormalizedPath("temp/hello.txt");
 
                 // When
                 TestDelegate test = () => path.InsertPrefix(null);
@@ -220,7 +220,7 @@ namespace Statiq.Common.Tests.IO
             public void CanInsertPrefixToPath(string path, string prefix, string expected)
             {
                 // Given
-                FilePath filePath = new FilePath(path);
+                NormalizedPath filePath = new NormalizedPath(path);
 
                 // When
                 filePath = filePath.InsertPrefix(prefix);
@@ -236,10 +236,10 @@ namespace Statiq.Common.Tests.IO
             public void CanGetFilenameFromPath()
             {
                 // Given
-                FilePath path = new FilePath("/input/test.txt");
+                NormalizedPath path = new NormalizedPath("/input/test.txt");
 
                 // When
-                FilePath result = path.FileName;
+                NormalizedPath result = path.FileName;
 
                 // Then
                 Assert.AreEqual("test.txt", result.FullPath);
@@ -249,10 +249,10 @@ namespace Statiq.Common.Tests.IO
             public void GetsFileNameIfJustFileName()
             {
                 // Given
-                FilePath path = new FilePath("test.txt");
+                NormalizedPath path = new NormalizedPath("test.txt");
 
                 // When
-                FilePath result = path.FileName;
+                NormalizedPath result = path.FileName;
 
                 // Then
                 Assert.AreEqual("test.txt", result.FullPath);
@@ -268,10 +268,10 @@ namespace Statiq.Common.Tests.IO
             public void ShouldReturnFilenameWithoutExtensionFromPath(string fullPath, string expected)
             {
                 // Given
-                FilePath path = new FilePath(fullPath);
+                NormalizedPath path = new NormalizedPath(fullPath);
 
                 // When
-                FilePath result = path.FileNameWithoutExtension;
+                NormalizedPath result = path.FileNameWithoutExtension;
 
                 // Then
                 Assert.AreEqual(expected, result.FullPath);
@@ -282,10 +282,10 @@ namespace Statiq.Common.Tests.IO
             public void ShouldReturnNullIfOnlyExtension(string fullPath)
             {
                 // Given
-                FilePath path = new FilePath(fullPath);
+                NormalizedPath path = new NormalizedPath(fullPath);
 
                 // When
-                FilePath result = path.FileNameWithoutExtension;
+                NormalizedPath result = path.FileNameWithoutExtension;
 
                 // Then
                 Assert.IsNull(result);
@@ -313,10 +313,10 @@ namespace Statiq.Common.Tests.IO
             public void ShouldChangeFileName(string fullPath, string fileName, string expected)
             {
                 // Given
-                FilePath path = new FilePath(fullPath);
+                NormalizedPath path = new NormalizedPath(fullPath);
 
                 // When
-                FilePath result = path.ChangeFileName(fileName);
+                NormalizedPath result = path.ChangeFileName(fileName);
 
                 // Then
                 result.FullPath.ShouldBe(expected);

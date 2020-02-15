@@ -19,7 +19,7 @@
         /// <value>
         /// The root path.
         /// </value>
-        new DirectoryPath RootPath { get; set; }
+        new NormalizedPath RootPath { get; set; }
 
         /// <summary>
         /// Gets the input paths collection which can be used
@@ -28,7 +28,7 @@
         /// <value>
         /// The input paths.
         /// </value>
-        new PathCollection<DirectoryPath> InputPaths { get; }
+        new PathCollection InputPaths { get; }
 
         /// <summary>
         /// Gets or sets the output path.
@@ -36,11 +36,11 @@
         /// <value>
         /// The output path.
         /// </value>
-        new DirectoryPath OutputPath { get; set; }
+        new NormalizedPath OutputPath { get; set; }
 
         /// <summary>
         /// Gets or sets the temporary file path.
         /// </summary>
-        new DirectoryPath TempPath { get; set; }
+        new NormalizedPath TempPath { get; set; }
     }
 }

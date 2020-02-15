@@ -12,16 +12,14 @@ namespace Statiq.Core
     {
         private readonly System.IO.DirectoryInfo _directory;
 
-        public DirectoryPath Path { get; }
+        public NormalizedPath Path { get; }
 
         NormalizedPath IFileSystemEntry.Path => Path;
 
-        public LocalDirectory(DirectoryPath path)
+        public LocalDirectory(NormalizedPath path)
         {
-            if (path == null)
-            {
-                throw new ArgumentNullException(nameof(path));
-            }
+            path.ThrowIfNull(nameof(path));
+
             if (path.IsRelative)
             {
                 throw new ArgumentException("Path must be absolute", nameof(path));
@@ -42,7 +40,7 @@ namespace Statiq.Core
             get
             {
                 System.IO.DirectoryInfo parent = _directory.Parent;
-                return parent == null ? null : new LocalDirectory(new DirectoryPath(parent.FullName));
+                return parent == null ? null : new LocalDirectory(new NormalizedPath(parent.FullName));
             }
         }
 
@@ -58,12 +56,10 @@ namespace Statiq.Core
             LocalFileProvider.RetryPolicy.Execute(() =>
                 _directory.GetFiles("*", searchOption).Select(file => (IFile)new LocalFile(file.FullName)));
 
-        public IDirectory GetDirectory(DirectoryPath path)
+        public IDirectory GetDirectory(NormalizedPath path)
         {
-            if (path == null)
-            {
-                throw new ArgumentNullException(nameof(path));
-            }
+            path.ThrowIfNull(nameof(path));
+
             if (!path.IsRelative)
             {
                 throw new ArgumentException("Path must be relative", nameof(path));
@@ -72,18 +68,16 @@ namespace Statiq.Core
             return new LocalDirectory(Path.Combine(path));
         }
 
-        public IFile GetFile(FilePath path)
+        public IFile GetFile(NormalizedPath path)
         {
-            if (path == null)
-            {
-                throw new ArgumentNullException(nameof(path));
-            }
+            path.ThrowIfNull(nameof(path));
+
             if (!path.IsRelative)
             {
                 throw new ArgumentException("Path must be relative", nameof(path));
             }
 
-            return new LocalFile(Path.CombineFile(path));
+            return new LocalFile(Path.Combine(path));
         }
 
         public override string ToString() => Path.ToString();

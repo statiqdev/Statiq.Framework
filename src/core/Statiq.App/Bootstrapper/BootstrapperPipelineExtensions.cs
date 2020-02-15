@@ -131,7 +131,7 @@ namespace Statiq.App
             this Bootstrapper bootstrapper,
             string name,
             string readFilesPattern,
-            Config<FilePath> destinationPath,
+            Config<NormalizedPath> destinationPath,
             IEnumerable<IModule> processModules = null,
             IEnumerable<IModule> transformModules = null) =>
             bootstrapper.AddPipeline(Array.Empty<string>(), true, name, readFilesPattern, destinationPath, processModules, transformModules);
@@ -162,7 +162,7 @@ namespace Statiq.App
             this Bootstrapper bootstrapper,
             string name,
             string readFilesPattern,
-            Config<FilePath> destinationPath,
+            Config<NormalizedPath> destinationPath,
             params IModule[] processModules) =>
             bootstrapper.AddPipeline(Array.Empty<string>(), false, name, readFilesPattern, destinationPath, processModules, null);
 
@@ -220,7 +220,7 @@ namespace Statiq.App
             string name,
             IEnumerable<string> dependencies,
             string readFilesPattern,
-            Config<FilePath> destinationPath,
+            Config<NormalizedPath> destinationPath,
             IEnumerable<IModule> processModules = null,
             IEnumerable<IModule> transformModules = null) =>
             bootstrapper.AddPipeline(dependencies, true, name, readFilesPattern, destinationPath, processModules, transformModules);
@@ -255,7 +255,7 @@ namespace Statiq.App
             string name,
             IEnumerable<string> dependencies,
             string readFilesPattern,
-            Config<FilePath> destinationPath,
+            Config<NormalizedPath> destinationPath,
             params IModule[] processModules) =>
             bootstrapper.AddPipeline(dependencies, false, name, readFilesPattern, destinationPath, processModules, null);
 
@@ -307,7 +307,7 @@ namespace Statiq.App
             this Bootstrapper bootstrapper,
             string name,
             string readFilesPattern,
-            Config<FilePath> destinationPath,
+            Config<NormalizedPath> destinationPath,
             IEnumerable<IModule> processModules = null,
             IEnumerable<IModule> transformModules = null) =>
             bootstrapper.AddPipeline(null, false, name, readFilesPattern, destinationPath, processModules, transformModules);
@@ -338,7 +338,7 @@ namespace Statiq.App
             this Bootstrapper bootstrapper,
             string name,
             string readFilesPattern,
-            Config<FilePath> destinationPath,
+            Config<NormalizedPath> destinationPath,
             params IModule[] processModules) =>
             bootstrapper.AddPipeline(null, false, name, readFilesPattern, destinationPath, processModules, null);
 
@@ -390,7 +390,7 @@ namespace Statiq.App
             this Bootstrapper bootstrapper,
             string name,
             string readFilesPattern,
-            Config<FilePath> destinationPath,
+            Config<NormalizedPath> destinationPath,
             IEnumerable<IModule> processModules = null,
             IEnumerable<IModule> transformModules = null) =>
             bootstrapper.AddPipeline(null, true, name, readFilesPattern, destinationPath, processModules, transformModules);
@@ -421,7 +421,7 @@ namespace Statiq.App
             this Bootstrapper bootstrapper,
             string name,
             string readFilesPattern,
-            Config<FilePath> destinationPath,
+            Config<NormalizedPath> destinationPath,
             params IModule[] processModules) =>
             bootstrapper.AddPipeline(null, true, name, readFilesPattern, destinationPath, processModules, null);
 
@@ -517,7 +517,7 @@ namespace Statiq.App
             bool isolated,
             string name,
             string readFilesPattern,
-            Config<FilePath> destinationPath,
+            Config<NormalizedPath> destinationPath,
             IEnumerable<IModule> processModules,
             IEnumerable<IModule> transformModules) =>
             bootstrapper.BuildPipeline(name, builder =>

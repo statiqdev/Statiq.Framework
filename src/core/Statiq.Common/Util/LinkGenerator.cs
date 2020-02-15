@@ -30,15 +30,15 @@ namespace Statiq.Common
         /// <param name="hideExtensions">An array of file extensions to hide (or <c>null</c> to not hide extensions or an empty array to hide all file extensions).</param>
         /// <param name="lowercase">Indicates that the link should be rendered in all lowercase.</param>
         /// <returns>A generated link.</returns>
-        public static string GetLink(NormalizedPath path, string host, DirectoryPath root, string scheme, string[] hidePages, string[] hideExtensions, bool lowercase)
+        public static string GetLink(NormalizedPath path, string host, NormalizedPath root, string scheme, string[] hidePages, string[] hideExtensions, bool lowercase)
         {
             // Remove index pages and extensions if a file path
-            if (path is FilePath filePath)
+            if (path is NormalizedPath filePath)
             {
                 if (hidePages != null && filePath.FullPath != "/"
                     && hidePages.Where(x => x != null).Select(x => x.EndsWith(".") ? x : x + ".").Any(x => filePath.FileName.FullPath.StartsWith(x)))
                 {
-                    path = filePath.Directory;
+                    path = filePath.Parent;
                 }
                 else if (hideExtensions != null
                     && (hideExtensions.Length == 0 || hideExtensions.Where(x => x != null).Select(x => x.StartsWith(".") ? x : "." + x).Contains(filePath.Extension)))

@@ -103,7 +103,7 @@ namespace Statiq.Core.Tests.Shortcodes.IO
                 {
                     FileSystem = fileSystem
                 };
-                TestDocument document = new TestDocument(new FilePath("/A/D/x.txt"), (FilePath)null);
+                TestDocument document = new TestDocument(new NormalizedPath("/A/D/x.txt"), (NormalizedPath)null);
                 KeyValuePair<string, string>[] args = new KeyValuePair<string, string>[]
                 {
                     new KeyValuePair<string, string>(null, "../B/c.txt")

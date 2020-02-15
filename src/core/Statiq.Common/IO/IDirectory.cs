@@ -17,7 +17,7 @@ namespace Statiq.Common
         /// Gets the path to the directory.
         /// </summary>
         /// <value>The path.</value>
-        new DirectoryPath Path { get; }
+        new NormalizedPath Path { get; }
 
         /// <summary>
         /// Gets the parent directory.
@@ -64,7 +64,7 @@ namespace Statiq.Common
         /// </summary>
         /// <param name="directory">The path of the directory.</param>
         /// <returns>The directory.</returns>
-        IDirectory GetDirectory(DirectoryPath directory);
+        IDirectory GetDirectory(NormalizedPath directory);
 
         /// <summary>
         /// Gets a file by combining it's path with the current directory's path.
@@ -72,6 +72,6 @@ namespace Statiq.Common
         /// </summary>
         /// <param name="path">The path of the file.</param>
         /// <returns>The file.</returns>
-        IFile GetFile(FilePath path);
+        IFile GetFile(NormalizedPath path);
     }
 }

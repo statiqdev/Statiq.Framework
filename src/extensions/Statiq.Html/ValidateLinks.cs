@@ -175,7 +175,7 @@ namespace Statiq.Html
         // Internal for testing
         internal static async Task<bool> ValidateRelativeLinkAsync(Uri uri, IExecutionContext context)
         {
-            List<FilePath> checkPaths = new List<FilePath>();
+            List<NormalizedPath> checkPaths = new List<NormalizedPath>();
 
             // Remove the query string and fragment, if any
             string normalizedPath = uri.ToString();
@@ -207,17 +207,17 @@ namespace Statiq.Html
             // Add the base path
             if (normalizedPath != string.Empty)
             {
-                checkPaths.Add(new FilePath(normalizedPath));
+                checkPaths.Add(new NormalizedPath(normalizedPath));
             }
 
             // Add filenames
-            checkPaths.AddRange(LinkGenerator.DefaultHidePages.Select(x => new FilePath(normalizedPath?.Length == 0 ? x : $"{normalizedPath}/{x}")));
+            checkPaths.AddRange(LinkGenerator.DefaultHidePages.Select(x => new NormalizedPath(normalizedPath?.Length == 0 ? x : $"{normalizedPath}/{x}")));
 
             // Add extensions
             checkPaths.AddRange(LinkGenerator.DefaultHideExtensions.SelectMany(x => checkPaths.Select(y => y.AppendExtension(x))).ToArray());
 
             // Check all the candidate paths
-            FilePath validatedPath = checkPaths.Find(x =>
+            NormalizedPath validatedPath = checkPaths.Find(x =>
             {
                 IFile outputFile;
                 try

@@ -19,7 +19,7 @@ namespace Statiq.Core
     /// <category>Control</category>
     public class ProcessSidecarFile : ParentModule
     {
-        private readonly Config<FilePath> _sidecarPath;
+        private readonly Config<NormalizedPath> _sidecarPath;
 
         /// <summary>
         /// Searches for sidecar files at the same path as the input document SourceFilePath with the additional extension .meta.
@@ -52,9 +52,9 @@ namespace Statiq.Core
         /// Uses a delegate to describe where to find the sidecar file for each input document.
         /// If a sidecar file is found, it's content is passed to the specified child modules for processing.
         /// </summary>
-        /// <param name="sidecarPath">A delegate that returns a <see cref="FilePath"/> with the desired sidecar path.</param>
+        /// <param name="sidecarPath">A delegate that returns a <see cref="NormalizedPath"/> with the desired sidecar path.</param>
         /// <param name="modules">The modules to execute against the sidecar file.</param>
-        public ProcessSidecarFile(Config<FilePath> sidecarPath, params IModule[] modules)
+        public ProcessSidecarFile(Config<NormalizedPath> sidecarPath, params IModule[] modules)
             : base(modules)
         {
             _sidecarPath = sidecarPath ?? throw new ArgumentNullException(nameof(sidecarPath));
@@ -63,7 +63,7 @@ namespace Statiq.Core
         /// <inheritdoc />
         protected override async Task<IEnumerable<IDocument>> ExecuteInputAsync(IDocument input, IExecutionContext context)
         {
-            FilePath sidecarPath = await _sidecarPath.GetValueAsync(input, context);
+            NormalizedPath sidecarPath = await _sidecarPath.GetValueAsync(input, context);
             if (sidecarPath != null)
             {
                 IFile sidecarFile = context.FileSystem.GetInputFile(sidecarPath);

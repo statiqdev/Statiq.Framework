@@ -160,16 +160,16 @@ namespace Statiq.Testing
 
         /// <inheritdoc />
         public IDocument CreateDocument(
-            FilePath source,
-            FilePath destination,
+            NormalizedPath source,
+            NormalizedPath destination,
             IEnumerable<KeyValuePair<string, object>> items,
             IContentProvider contentProvider = null) =>
             _documentFactory.CreateDocument(source, destination, items, contentProvider);
 
         /// <inheritdoc />
         public TDocument CreateDocument<TDocument>(
-            FilePath source,
-            FilePath destination,
+            NormalizedPath source,
+            NormalizedPath destination,
             IEnumerable<KeyValuePair<string, object>> items,
             IContentProvider contentProvider = null)
             where TDocument : FactoryDocument, IDocument, new() =>

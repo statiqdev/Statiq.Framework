@@ -39,6 +39,6 @@ namespace Statiq.SearchIndex
 
         /// <inheritdoc />
         public string GetLink(IExecutionContext context, bool includeHost) =>
-            context.GetLink(new FilePath(Url), includeHost);
+            context.GetLink(new NormalizedPath(Url), includeHost);
     }
 }

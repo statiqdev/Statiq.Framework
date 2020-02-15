@@ -23,7 +23,7 @@ namespace Statiq.Common.Tests.Util
             public void ShouldReturnLinkForFilePath(string path, string expected)
             {
                 // Given
-                FilePath filePath = path == null ? null : new FilePath(path);
+                NormalizedPath filePath = path == null ? null : new NormalizedPath(path);
 
                 // When
                 string link = LinkGenerator.GetLink(filePath, null, null, null, null, null, false);
@@ -46,10 +46,10 @@ namespace Statiq.Common.Tests.Util
             public void ShouldJoinHostAndRootForFilePath(string host, string root, string path, string expected)
             {
                 // Given
-                FilePath filePath = path == null ? null : new FilePath(path);
+                NormalizedPath filePath = path == null ? null : new NormalizedPath(path);
 
                 // When
-                string link = LinkGenerator.GetLink(filePath, host, root == null ? null : new DirectoryPath(root), null, null, null, false);
+                string link = LinkGenerator.GetLink(filePath, host, root == null ? null : new NormalizedPath(root), null, null, null, false);
 
                 // Then
                 Assert.AreEqual(expected, link);
@@ -67,7 +67,7 @@ namespace Statiq.Common.Tests.Util
             public void ShouldHideIndexPagesForFilePath(string path, string expected)
             {
                 // Given
-                FilePath filePath = new FilePath(path);
+                NormalizedPath filePath = new NormalizedPath(path);
 
                 // When
                 string link = LinkGenerator.GetLink(filePath, null, null, null, new[] { "index" }, null, false);
@@ -88,7 +88,7 @@ namespace Statiq.Common.Tests.Util
             public void ShouldHideExtensionsForFilePath(string path, string expected)
             {
                 // Given
-                FilePath filePath = new FilePath(path);
+                NormalizedPath filePath = new NormalizedPath(path);
 
                 // When
                 string link = LinkGenerator.GetLink(filePath, null, null, null, null, Array.Empty<string>(), false);
@@ -103,7 +103,7 @@ namespace Statiq.Common.Tests.Util
             public void ShouldHideSpecificExtensionsForFilePath(string path, string expected)
             {
                 // Given
-                FilePath filePath = new FilePath(path);
+                NormalizedPath filePath = new NormalizedPath(path);
 
                 // When
                 string link = LinkGenerator.GetLink(filePath, null, null, null, null, new[] { "html", ".htm" }, false);
@@ -130,10 +130,10 @@ namespace Statiq.Common.Tests.Util
             public void ShouldJoinHostAndRootForDirectoryPath(string host, string root, string path, string expected)
             {
                 // Given
-                DirectoryPath directoryPath = path == null ? null : new DirectoryPath(path);
+                NormalizedPath directoryPath = path == null ? null : new NormalizedPath(path);
 
                 // When
-                string link = LinkGenerator.GetLink(directoryPath, host, root == null ? null : new DirectoryPath(root), null, null, null, false);
+                string link = LinkGenerator.GetLink(directoryPath, host, root == null ? null : new NormalizedPath(root), null, null, null, false);
 
                 // Then
                 Assert.AreEqual(expected, link);
@@ -143,7 +143,7 @@ namespace Statiq.Common.Tests.Util
             public void ShouldUseSpecifiedScheme()
             {
                 // Given
-                DirectoryPath directoryPath = new DirectoryPath("/foo/bar");
+                NormalizedPath directoryPath = new NormalizedPath("/foo/bar");
 
                 // When
                 string link = LinkGenerator.GetLink(directoryPath, "www.google.com", null, "https", null, null, false);
@@ -156,7 +156,7 @@ namespace Statiq.Common.Tests.Util
             public void SupportsSingleSlash()
             {
                 // Given
-                FilePath path = new FilePath("/");
+                NormalizedPath path = new NormalizedPath("/");
 
                 // When
                 string link = LinkGenerator.GetLink(path, null, null, null, null, null, false);
@@ -169,7 +169,7 @@ namespace Statiq.Common.Tests.Util
             public void SupportsSingleSlashWithRoot()
             {
                 // Given
-                FilePath path = new FilePath("/");
+                NormalizedPath path = new NormalizedPath("/");
 
                 // When
                 string link = LinkGenerator.GetLink(path, null, "root", null, null, null, false);
@@ -182,7 +182,7 @@ namespace Statiq.Common.Tests.Util
             public void SupportsSingleSlashWithHidePages()
             {
                 // Given
-                FilePath path = new FilePath("/");
+                NormalizedPath path = new NormalizedPath("/");
 
                 // When
                 string link = LinkGenerator.GetLink(path, null, null, null, new[] { "index" }, null, false);
@@ -195,7 +195,7 @@ namespace Statiq.Common.Tests.Util
             public void SupportsSingleSlashWithHideExtensions()
             {
                 // Given
-                FilePath path = new FilePath("/");
+                NormalizedPath path = new NormalizedPath("/");
 
                 // When
                 string link = LinkGenerator.GetLink(path, null, null, null, null, new[] { "html" }, false);
@@ -208,7 +208,7 @@ namespace Statiq.Common.Tests.Util
             public void ShouldGenerateMixedCaseLinks()
             {
                 // Given
-                DirectoryPath directoryPath = new DirectoryPath("/Foo/Bar");
+                NormalizedPath directoryPath = new NormalizedPath("/Foo/Bar");
 
                 // When
                 string link = LinkGenerator.GetLink(directoryPath, "www.google.com", null, "http", null, null, false);
@@ -221,7 +221,7 @@ namespace Statiq.Common.Tests.Util
             public void ShouldGenerateLowercaseLinks()
             {
                 // Given
-                DirectoryPath directoryPath = new DirectoryPath("/Foo/Bar");
+                NormalizedPath directoryPath = new NormalizedPath("/Foo/Bar");
 
                 // When
                 string link = LinkGenerator.GetLink(directoryPath, "www.google.com", null, "http", null, null, true);

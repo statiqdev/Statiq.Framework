@@ -18,7 +18,7 @@ namespace Statiq.Images.Tests
                 // Given
                 MemoryStream fileStream = GetTestFileStream("logo-square.png");
                 TestDocument document = new TestDocument(
-                    new FilePath("/input/a/b/test.png"),
+                    new NormalizedPath("/input/a/b/test.png"),
                     fileStream);
                 MutateImage module = new MutateImage();
 
@@ -35,7 +35,7 @@ namespace Statiq.Images.Tests
                 // Given
                 MemoryStream fileStream = GetTestFileStream("logo-square.png");
                 TestDocument document = new TestDocument(
-                    new FilePath("/input/a/b/test.png"),
+                    new NormalizedPath("/input/a/b/test.png"),
                     fileStream);
                 MutateImage module = new MutateImage().OutputAsGif();
 
@@ -52,7 +52,7 @@ namespace Statiq.Images.Tests
                 // Given
                 MemoryStream fileStream = GetTestFileStream("logo-square.png");
                 TestDocument document = new TestDocument(
-                    new FilePath("/input/a/b/test.png"),
+                    new NormalizedPath("/input/a/b/test.png"),
                     fileStream);
                 MutateImage module = new MutateImage().Brightness(123);
 

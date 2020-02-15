@@ -16,10 +16,10 @@ namespace Statiq.Common.Tests.Documents
             {
                 // Given
                 TestExecutionContext context = new TestExecutionContext();
-                TestDocument a = new TestDocument(new FilePath("/input/Foo/a.txt"));
-                TestDocument b = new TestDocument(new FilePath("/theme/Foo/Bar/b.txt"));
-                TestDocument c = new TestDocument(new FilePath("/Foo/Bar/c.txt"));
-                TestDocument d = new TestDocument(new FilePath("/Baz/d.txt"));
+                TestDocument a = new TestDocument(new NormalizedPath("/input/Foo/a.txt"));
+                TestDocument b = new TestDocument(new NormalizedPath("/theme/Foo/Bar/b.txt"));
+                TestDocument c = new TestDocument(new NormalizedPath("/Foo/Bar/c.txt"));
+                TestDocument d = new TestDocument(new NormalizedPath("/Baz/d.txt"));
                 TestDocument[] documents = new[] { a, b, c, d };
 
                 // When
@@ -37,10 +37,10 @@ namespace Statiq.Common.Tests.Documents
             {
                 // Given
                 TestExecutionContext context = new TestExecutionContext();
-                TestDocument a = new TestDocument(new FilePath("/input/Foo/a.txt"), new FilePath("a/b/c.txt"));
-                TestDocument b = new TestDocument(new FilePath("/theme/Foo/Bar/b.txt"), new FilePath("a/x/y.txt"));
-                TestDocument c = new TestDocument(new FilePath("/Foo/Bar/c.txt"), new FilePath("l/m.txt"));
-                TestDocument d = new TestDocument(new FilePath("/Baz/d.txt"), new FilePath("l/n.md"));
+                TestDocument a = new TestDocument(new NormalizedPath("/input/Foo/a.txt"), new NormalizedPath("a/b/c.txt"));
+                TestDocument b = new TestDocument(new NormalizedPath("/theme/Foo/Bar/b.txt"), new NormalizedPath("a/x/y.txt"));
+                TestDocument c = new TestDocument(new NormalizedPath("/Foo/Bar/c.txt"), new NormalizedPath("l/m.txt"));
+                TestDocument d = new TestDocument(new NormalizedPath("/Baz/d.txt"), new NormalizedPath("l/n.md"));
                 TestDocument[] documents = new[] { a, b, c, d };
 
                 // When
@@ -55,10 +55,10 @@ namespace Statiq.Common.Tests.Documents
             {
                 // Given
                 TestExecutionContext context = new TestExecutionContext();
-                TestDocument a = new TestDocument(new FilePath("/input/Foo/a.txt"), new FilePath("c.txt"));
-                TestDocument b = new TestDocument(new FilePath("/theme/Foo/Bar/b.txt"), new FilePath("a/x/y.txt"));
-                TestDocument c = new TestDocument(new FilePath("/Foo/Bar/c.txt"), new FilePath("m.txt"));
-                TestDocument d = new TestDocument(new FilePath("/Baz/d.txt"), new FilePath("l/n.md"));
+                TestDocument a = new TestDocument(new NormalizedPath("/input/Foo/a.txt"), new NormalizedPath("c.txt"));
+                TestDocument b = new TestDocument(new NormalizedPath("/theme/Foo/Bar/b.txt"), new NormalizedPath("a/x/y.txt"));
+                TestDocument c = new TestDocument(new NormalizedPath("/Foo/Bar/c.txt"), new NormalizedPath("m.txt"));
+                TestDocument d = new TestDocument(new NormalizedPath("/Baz/d.txt"), new NormalizedPath("l/n.md"));
                 TestDocument[] documents = new[] { a, b, c, d };
 
                 // When

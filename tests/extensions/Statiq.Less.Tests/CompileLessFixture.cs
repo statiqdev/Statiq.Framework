@@ -44,8 +44,8 @@ div {
                     FileSystem = fileSystem
                 };
                 TestDocument document = new TestDocument(
-                    new FilePath("/input/assets/test.less"),
-                    new FilePath("assets/test.less"),
+                    new NormalizedPath("/input/assets/test.less"),
+                    new NormalizedPath("assets/test.less"),
                     input);
                 CompileLess less = new CompileLess();
 
@@ -82,8 +82,8 @@ div {
                     FileSystem = fileSystem
                 };
                 TestDocument document = new TestDocument(
-                    new FilePath("/input/assets/test.less"),
-                    new FilePath("assets/test.less"),
+                    new NormalizedPath("/input/assets/test.less"),
+                    new NormalizedPath("assets/test.less"),
                     input);
                 CompileLess less = new CompileLess();
 

@@ -11,13 +11,13 @@ namespace Statiq.Testing
     {
         private readonly TestFileProvider _fileProvider;
 
-        public TestDirectory(TestFileProvider fileProvider, DirectoryPath path)
+        public TestDirectory(TestFileProvider fileProvider, NormalizedPath path)
         {
             _fileProvider = fileProvider;
             Path = path;
         }
 
-        public DirectoryPath Path { get; }
+        public NormalizedPath Path { get; }
 
         NormalizedPath IFileSystemEntry.Path => Path;
 
@@ -31,8 +31,8 @@ namespace Statiq.Testing
         {
             get
             {
-                DirectoryPath parentPath = Path.Parent;
-                return parentPath == null ? null : new TestDirectory(_fileProvider, parentPath);
+                NormalizedPath parentPath = Path.Parent;
+                return parentPath.IsNull ? null : new TestDirectory(_fileProvider, parentPath);
             }
         }
 
@@ -79,12 +79,10 @@ namespace Statiq.Testing
                 .Cast<IFile>();
         }
 
-        public IDirectory GetDirectory(DirectoryPath path)
+        public IDirectory GetDirectory(NormalizedPath path)
         {
-            if (path == null)
-            {
-                throw new ArgumentNullException(nameof(path));
-            }
+            path.ThrowIfNull(nameof(path));
+
             if (!path.IsRelative)
             {
                 throw new ArgumentException("Path must be relative", nameof(path));
@@ -93,18 +91,16 @@ namespace Statiq.Testing
             return new TestDirectory(_fileProvider, Path.Combine(path));
         }
 
-        public IFile GetFile(FilePath path)
+        public IFile GetFile(NormalizedPath path)
         {
-            if (path == null)
-            {
-                throw new ArgumentNullException(nameof(path));
-            }
+            path.ThrowIfNull(nameof(path));
+
             if (!path.IsRelative)
             {
                 throw new ArgumentException("Path must be relative", nameof(path));
             }
 
-            return new TestFile(_fileProvider, Path.CombineFile(path));
+            return new TestFile(_fileProvider, Path.Combine(path));
         }
 
         public override string ToString() => Path.ToString();

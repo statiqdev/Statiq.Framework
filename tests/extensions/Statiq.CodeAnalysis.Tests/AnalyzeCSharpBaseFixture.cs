@@ -14,7 +14,7 @@ namespace Statiq.CodeAnalysis.Tests
         {
             FileSystem = new TestFileSystem
             {
-                RootPath = new DirectoryPath(TestContext.CurrentContext.TestDirectory)
+                RootPath = new NormalizedPath(TestContext.CurrentContext.TestDirectory)
             }
         };
 

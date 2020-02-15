@@ -25,8 +25,8 @@ namespace Statiq.Common
         {
             IDocument CreateDocument(
                 IMetadata baseMetadata,
-                FilePath source,
-                FilePath destination,
+                NormalizedPath source,
+                NormalizedPath destination,
                 IMetadata metadata,
                 IContentProvider contentProvider);
         }
@@ -43,8 +43,8 @@ namespace Statiq.Common
 
             public IDocument CreateDocument(
                 IMetadata baseMetadata,
-                FilePath source,
-                FilePath destination,
+                NormalizedPath source,
+                NormalizedPath destination,
                 IMetadata metadata,
                 IContentProvider contentProvider) =>
                 new TDocument().Initialize(baseMetadata, source, destination, metadata, contentProvider);
@@ -55,8 +55,8 @@ namespace Statiq.Common
             _defaultFactory = Factory<TDocument>.Instance;
 
         public IDocument CreateDocument(
-            FilePath source,
-            FilePath destination,
+            NormalizedPath source,
+            NormalizedPath destination,
             IEnumerable<KeyValuePair<string, object>> items,
             IContentProvider contentProvider) =>
             _defaultFactory.CreateDocument(
@@ -67,8 +67,8 @@ namespace Statiq.Common
                 contentProvider);
 
         public TDocument CreateDocument<TDocument>(
-            FilePath source,
-            FilePath destination,
+            NormalizedPath source,
+            NormalizedPath destination,
             IEnumerable<KeyValuePair<string, object>> items,
             IContentProvider contentProvider)
             where TDocument : FactoryDocument, IDocument, new() =>

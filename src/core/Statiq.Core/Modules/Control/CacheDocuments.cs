@@ -33,7 +33,7 @@ namespace Statiq.Core
     /// <category>Control</category>
     public class CacheDocuments : ParentModule, IDisposable
     {
-        private Dictionary<FilePath, CacheEntry> _cache = null;
+        private Dictionary<NormalizedPath, CacheEntry> _cache = null;
         private int _dependentPipelinesHash;
 
         private Config<bool> _invalidateDocuments;
@@ -155,21 +155,21 @@ namespace Statiq.Core
             // Need to track misses by their source and map it to the aggregate input document hash
             // Go ahead and calculate a single hash for all input documents since we'd end up having to
             // get each individual hash anyway, whether while checking for a complete hit or recording for the next time
-            Dictionary<FilePath, int> missesBySource = new Dictionary<FilePath, int>();
+            Dictionary<NormalizedPath, int> missesBySource = new Dictionary<NormalizedPath, int>();
 
             // Creating a new cache and swapping is the easiest way to expire old entries
-            Dictionary<FilePath, CacheEntry> currentCache = _cache;
-            _cache = new Dictionary<FilePath, CacheEntry>();
+            Dictionary<NormalizedPath, CacheEntry> currentCache = _cache;
+            _cache = new Dictionary<NormalizedPath, CacheEntry>();
 
             // Check for hits and misses
             if (currentCache == null)
             {
                 // If the current cache is null, this is the first run through
                 misses.AddRange(context.Inputs);
-                IEnumerable<IGrouping<FilePath, IDocument>> inputGroups = context.Inputs
+                IEnumerable<IGrouping<NormalizedPath, IDocument>> inputGroups = context.Inputs
                     .Where(input => input.Source != null)
                     .GroupBy(input => input.Source);
-                foreach (IGrouping<FilePath, IDocument> inputGroup in inputGroups)
+                foreach (IGrouping<NormalizedPath, IDocument> inputGroup in inputGroups)
                 {
                     missesBySource.Add(inputGroup.Key, await CombineCacheHashCodesAsync(inputGroup, context));
                 }
@@ -178,7 +178,7 @@ namespace Statiq.Core
             {
                 // Note that due to cloning we could have multiple inputs and outputs with the same source
                 // so we need to check all inputs with a given source and only consider a hit when they all match
-                foreach (IGrouping<FilePath, IDocument> inputGroup in context.Inputs.GroupBy(x => x.Source))
+                foreach (IGrouping<NormalizedPath, IDocument> inputGroup in context.Inputs.GroupBy(x => x.Source))
                 {
                     string message = null;
 
@@ -239,16 +239,16 @@ namespace Statiq.Core
             IReadOnlyList<IDocument> results = misses.Count == 0
                 ? ImmutableArray<IDocument>.Empty
                 : await context.ExecuteModulesAsync(Children, misses);
-            Dictionary<FilePath, IGrouping<FilePath, IDocument>> resultsBySource =
+            Dictionary<NormalizedPath, IGrouping<NormalizedPath, IDocument>> resultsBySource =
                 results.Where(x => x.Source != null).GroupBy(x => x.Source).ToDictionary(x => x.Key, x => x);
             outputs.AddRange(results);
 
             // Cache all miss sources, even if they resulted in an empty result document set
-            foreach (KeyValuePair<FilePath, int> inputGroup in missesBySource)
+            foreach (KeyValuePair<NormalizedPath, int> inputGroup in missesBySource)
             {
                 // Did we get any results from this input source?
                 IDocument[] cacheDocuments = null;
-                if (resultsBySource.TryGetValue(inputGroup.Key, out IGrouping<FilePath, IDocument> sourceResults))
+                if (resultsBySource.TryGetValue(inputGroup.Key, out IGrouping<NormalizedPath, IDocument> sourceResults))
                 {
                     cacheDocuments = sourceResults.ToArray();
                 }

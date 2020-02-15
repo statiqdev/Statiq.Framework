@@ -27,7 +27,7 @@ namespace Statiq.CodeAnalysis
         /// Reads the solution file at the specified path. This allows you to specify a different solution file depending on the input.
         /// </summary>
         /// <param name="path">A delegate that returns a <c>FilePath</c> with the solution file path.</param>
-        public ReadSolution(Config<FilePath> path)
+        public ReadSolution(Config<NormalizedPath> path)
             : base(path)
         {
         }
@@ -36,7 +36,7 @@ namespace Statiq.CodeAnalysis
         protected override IEnumerable<Project> GetProjects(IExecutionContext context, IFile file)
         {
             StringWriter log = new StringWriter();
-            AnalyzerManager manager = new AnalyzerManager(file.Path.Directory.FullPath, new AnalyzerManagerOptions
+            AnalyzerManager manager = new AnalyzerManager(file.Path.Parent.FullPath, new AnalyzerManagerOptions
             {
                 LogWriter = log
             });

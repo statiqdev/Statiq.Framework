@@ -71,7 +71,7 @@ namespace Statiq.Core
         {
             // Get the output file path for each file in sequence and set up action chains
             // Value = input source string(s) (for reporting a warning if not appending), write action
-            Dictionary<FilePath, Tuple<List<string>, Func<Task>>> writesBySource = new Dictionary<FilePath, Tuple<List<string>, Func<Task>>>();
+            Dictionary<NormalizedPath, Tuple<List<string>, Func<Task>>> writesBySource = new Dictionary<NormalizedPath, Tuple<List<string>, Func<Task>>>();
             foreach (IDocument input in context.Inputs)
             {
                 await WriteFileAsync(input);
@@ -80,7 +80,7 @@ namespace Statiq.Core
             // Display a warning for any duplicated outputs if not appending
             if (!_append)
             {
-                foreach (KeyValuePair<FilePath, Tuple<List<string>, Func<Task>>> kvp in writesBySource.Where(x => x.Value.Item1.Count > 1))
+                foreach (KeyValuePair<NormalizedPath, Tuple<List<string>, Func<Task>>> kvp in writesBySource.Where(x => x.Value.Item1.Count > 1))
                 {
                     string inputSources = Environment.NewLine + "  " + string.Join(Environment.NewLine + "  ", kvp.Value.Item1);
                     context.LogWarning($"Multiple documents output to {kvp.Key} (this probably wasn't intended):{inputSources}");
@@ -122,7 +122,7 @@ namespace Statiq.Core
             }
         }
 
-        private async Task WriteAsync(IDocument input, IExecutionContext context, FilePath outputPath)
+        private async Task WriteAsync(IDocument input, IExecutionContext context, NormalizedPath outputPath)
         {
             IFile outputFile = context.FileSystem.GetOutputFile(outputPath);
             if (outputFile != null)

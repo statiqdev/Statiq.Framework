@@ -59,9 +59,9 @@ namespace Statiq.SearchIndex
     {
         private static readonly Regex StripHtmlAndSpecialChars = new Regex(@"<[^>]+>|&[a-zA-Z]{2,};|&#\d+;|[^a-zA-Z-#]", RegexOptions.Compiled);
         private readonly Config<ILunrIndexItem> _searchIndexItem;
-        private FilePath _stopwordsPath;
+        private NormalizedPath _stopwordsPath;
         private bool _enableStemming;
-        private FilePath _destination = new FilePath("searchIndex.js");
+        private NormalizedPath _destination = new NormalizedPath("searchIndex.js");
         private bool _includeHost = false;
         private Func<StringBuilder, IExecutionContext, string> _script = (builder, _) => builder.ToString();
 
@@ -71,7 +71,7 @@ namespace Statiq.SearchIndex
         /// </summary>
         /// <param name="stopwordsPath">A file to use that contains a set of stopwords.</param>
         /// <param name="enableStemming">If set to <c>true</c>, stemming is enabled.</param>
-        public GenerateLunrIndex(FilePath stopwordsPath = null, bool enableStemming = false)
+        public GenerateLunrIndex(NormalizedPath stopwordsPath = null, bool enableStemming = false)
             : this(Config.FromDocument(doc => doc.Get<ILunrIndexItem>(GenerateLunrIndexKeys.LunrIndexItem)), stopwordsPath, enableStemming)
         {
         }
@@ -83,7 +83,7 @@ namespace Statiq.SearchIndex
         /// <param name="searchIndexItemMetadataKey">The metadata key that contains the <c>SearchIndexItem</c> instance.</param>
         /// <param name="stopwordsPath">A file to use that contains a set of stopwords.</param>
         /// <param name="enableStemming">If set to <c>true</c>, stemming is enabled.</param>
-        public GenerateLunrIndex(string searchIndexItemMetadataKey, FilePath stopwordsPath = null, bool enableStemming = false)
+        public GenerateLunrIndex(string searchIndexItemMetadataKey, NormalizedPath stopwordsPath = null, bool enableStemming = false)
             : this(Config.FromDocument(doc => doc.Get<ILunrIndexItem>(searchIndexItemMetadataKey)), stopwordsPath, enableStemming)
         {
         }
@@ -94,7 +94,7 @@ namespace Statiq.SearchIndex
         /// <param name="searchIndexItem">A delegate that should return a <c>ISearchIndexItem</c>.</param>
         /// <param name="stopwordsPath">A file to use that contains a set of stopwords.</param>
         /// <param name="enableStemming">If set to <c>true</c>, stemming is enabled.</param>
-        public GenerateLunrIndex(Config<ILunrIndexItem> searchIndexItem, FilePath stopwordsPath = null, bool enableStemming = false)
+        public GenerateLunrIndex(Config<ILunrIndexItem> searchIndexItem, NormalizedPath stopwordsPath = null, bool enableStemming = false)
         {
             _searchIndexItem = searchIndexItem ?? throw new ArgumentNullException(nameof(searchIndexItem));
             _stopwordsPath = stopwordsPath;
@@ -117,7 +117,7 @@ namespace Statiq.SearchIndex
         /// </summary>
         /// <param name="stopwordsPath">A file to use that contains a set of stopwords.</param>
         /// <returns>The current module instance.</returns>
-        public GenerateLunrIndex WithStopwordsPath(FilePath stopwordsPath)
+        public GenerateLunrIndex WithStopwordsPath(NormalizedPath stopwordsPath)
         {
             _stopwordsPath = stopwordsPath;
             return this;
@@ -140,7 +140,7 @@ namespace Statiq.SearchIndex
         /// </summary>
         /// <param name="destination">The destination path.</param>
         /// <returns>The current module instance.</returns>
-        public GenerateLunrIndex WithDestination(FilePath destination)
+        public GenerateLunrIndex WithDestination(NormalizedPath destination)
         {
             _destination = destination;
             return this;

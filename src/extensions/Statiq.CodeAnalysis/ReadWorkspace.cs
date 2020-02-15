@@ -17,13 +17,13 @@ namespace Statiq.CodeAnalysis
     /// specified. Otherwise, if a delegate is specified the module will be executed once per input
     /// document and the resulting output documents will be aggregated.
     /// </summary>
-    public abstract class ReadWorkspace : ParallelSyncConfigModule<FilePath>
+    public abstract class ReadWorkspace : ParallelSyncConfigModule<NormalizedPath>
     {
         private Func<string, bool> _whereProject;
         private Func<IFile, bool> _whereFile;
         private string[] _extensions;
 
-        protected ReadWorkspace(Config<FilePath> path)
+        protected ReadWorkspace(Config<NormalizedPath> path)
             : base(path, false)
         {
         }
@@ -90,7 +90,7 @@ namespace Statiq.CodeAnalysis
             return result;
         }
 
-        protected override IEnumerable<IDocument> ExecuteConfig(IDocument input, IExecutionContext context, FilePath value)
+        protected override IEnumerable<IDocument> ExecuteConfig(IDocument input, IExecutionContext context, NormalizedPath value)
         {
             if (value != null)
             {

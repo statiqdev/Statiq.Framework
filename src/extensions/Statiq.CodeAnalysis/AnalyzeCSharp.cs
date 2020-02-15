@@ -96,8 +96,8 @@ namespace Statiq.CodeAnalysis
         private readonly List<Config<IEnumerable<string>>> _solutionGlobs = new List<Config<IEnumerable<string>>>();
 
         private Func<ISymbol, Compilation, bool> _symbolPredicate;
-        private Func<ISymbol, Compilation, FilePath> _destination;
-        private DirectoryPath _destinationPrefix = null;
+        private Func<ISymbol, Compilation, NormalizedPath> _destination;
+        private NormalizedPath _destinationPrefix = null;
         private Config<bool> _docsForImplicitSymbols = false;
         private Config<bool> _inputDocuments = true;
         private bool _assemblySymbols = false;
@@ -353,8 +353,8 @@ namespace Statiq.CodeAnalysis
         /// A function that takes the metadata for a given symbol and returns a <c>FilePath</c> to use for the destination.
         /// </param>
         /// <returns>The current module instance.</returns>
-        public AnalyzeCSharp WithDestination(Func<ISymbol, FilePath> destination) =>
-            WithDestination(destination == null ? (Func<ISymbol, Compilation, FilePath>)null : (s, _) => destination(s));
+        public AnalyzeCSharp WithDestination(Func<ISymbol, NormalizedPath> destination) =>
+            WithDestination(destination == null ? (Func<ISymbol, Compilation, NormalizedPath>)null : (s, _) => destination(s));
 
         /// <summary>
         /// This changes the default behavior for the generated destination paths, which is to place files in a path
@@ -366,7 +366,7 @@ namespace Statiq.CodeAnalysis
         /// A function that takes the metadata for a given symbol and returns a <c>FilePath</c> to use for the destination.
         /// </param>
         /// <returns>The current module instance.</returns>
-        public AnalyzeCSharp WithDestination(Func<ISymbol, Compilation, FilePath> destination)
+        public AnalyzeCSharp WithDestination(Func<ISymbol, Compilation, NormalizedPath> destination)
         {
             _destination = destination;
             return this;
@@ -392,46 +392,46 @@ namespace Statiq.CodeAnalysis
         /// </summary>
         /// <param name="destinationPreview">The prefix to use for each generated destination.</param>
         /// <returns>The current module instance.</returns>
-        public AnalyzeCSharp WithDestinationPrefix(DirectoryPath destinationPreview)
+        public AnalyzeCSharp WithDestinationPrefix(NormalizedPath destinationPreview)
         {
             _destinationPrefix = destinationPreview;
             return this;
         }
 
-        private FilePath DefaultDestination(ISymbol symbol, DirectoryPath prefix)
+        private NormalizedPath DefaultDestination(ISymbol symbol, NormalizedPath prefix)
         {
             INamespaceSymbol containingNamespace = symbol.ContainingNamespace;
-            FilePath destinationPath;
+            NormalizedPath destinationPath;
 
             if (symbol.Kind == SymbolKind.Assembly)
             {
                 // Assemblies output to the index page in a folder of their name
-                destinationPath = new FilePath($"{symbol.GetDisplayName()}/index.html");
+                destinationPath = new NormalizedPath($"{symbol.GetDisplayName()}/index.html");
             }
             else if (symbol.Kind == SymbolKind.Namespace)
             {
                 // Namespaces output to the index page in a folder of their full name
                 // If this namespace does not have a containing namespace, it's the global namespace
-                destinationPath = new FilePath(containingNamespace == null ? "global/index.html" : $"{symbol.GetDisplayName()}/index.html");
+                destinationPath = new NormalizedPath(containingNamespace == null ? "global/index.html" : $"{symbol.GetDisplayName()}/index.html");
             }
             else if (symbol.Kind == SymbolKind.NamedType)
             {
                 // Types output to the index page in a folder of their SymbolId under the folder for their namespace
-                destinationPath = new FilePath(containingNamespace.ContainingNamespace == null
+                destinationPath = new NormalizedPath(containingNamespace.ContainingNamespace == null
                     ? $"global/{symbol.GetId()}/index.html"
                     : $"{containingNamespace.GetDisplayName()}/{symbol.GetId()}/index.html");
             }
             else
             {
                 // Members output to a page equal to their SymbolId under the folder for their type
-                FilePath containingPath = DefaultDestination(symbol.ContainingType, null);
+                NormalizedPath containingPath = DefaultDestination(symbol.ContainingType, null);
                 destinationPath = containingPath.ChangeFileName($"{symbol.GetId()}.html");
             }
 
             // Add the prefix
             if (prefix != null)
             {
-                destinationPath = prefix.CombineFile(destinationPath);
+                destinationPath = prefix.Combine(destinationPath);
             }
 
             return destinationPath;
@@ -554,7 +554,7 @@ namespace Statiq.CodeAnalysis
             List<Project> projects = new List<Project>();
             foreach (IFile projectFile in projectFiles)
             {
-                Project project = workspace.CurrentSolution.Projects.FirstOrDefault(x => new FilePath(x.FilePath).Equals(projectFile.Path));
+                Project project = workspace.CurrentSolution.Projects.FirstOrDefault(x => new NormalizedPath(x.FilePath).Equals(projectFile.Path));
                 if (project != null)
                 {
                     context.LogDebug($"Project {projectFile.Path.FullPath} was already in the workspace");

@@ -18,7 +18,7 @@ namespace Statiq.Common.Tests.IO
             public void ThrowsForNullFileSystem()
             {
                 // Given, When, Then
-                Assert.Throws<ArgumentNullException>(() => new VirtualInputDirectory(null, new DirectoryPath("A")));
+                Assert.Throws<ArgumentNullException>(() => new VirtualInputDirectory(null, new NormalizedPath("A")));
             }
 
             [Test]
@@ -32,7 +32,7 @@ namespace Statiq.Common.Tests.IO
             public void ThrowsForNonRelativePath()
             {
                 // Given, When, Then
-                Assert.Throws<ArgumentException>(() => new VirtualInputDirectory(new TestFileSystem(), new DirectoryPath("/A")));
+                Assert.Throws<ArgumentException>(() => new VirtualInputDirectory(new TestFileSystem(), new NormalizedPath("/A")));
             }
         }
 
@@ -141,7 +141,7 @@ namespace Statiq.Common.Tests.IO
             {
                 // Given
                 VirtualInputDirectory directory = GetVirtualInputDirectory(".");
-                FilePath filePath = "/a/test.txt";
+                NormalizedPath filePath = "/a/test.txt";
 
                 // When, Then
                 Should.Throw<ArgumentException>(() => directory.GetFile(filePath));
@@ -183,7 +183,7 @@ namespace Statiq.Common.Tests.IO
             {
                 // Given
                 VirtualInputDirectory directory = GetVirtualInputDirectory(".");
-                DirectoryPath directoryPath = "/a/b";
+                NormalizedPath directoryPath = "/a/b";
 
                 // When, Then
                 Should.Throw<ArgumentException>(() => directory.GetDirectory(directoryPath));

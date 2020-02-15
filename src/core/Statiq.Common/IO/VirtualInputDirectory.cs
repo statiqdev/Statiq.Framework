@@ -10,12 +10,10 @@ namespace Statiq.Common
     {
         private readonly IReadOnlyFileSystem _fileSystem;
 
-        public VirtualInputDirectory(IReadOnlyFileSystem fileSystem, DirectoryPath path)
+        public VirtualInputDirectory(IReadOnlyFileSystem fileSystem, NormalizedPath path)
         {
-            if (path == null)
-            {
-                throw new ArgumentNullException(nameof(path));
-            }
+            path.ThrowIfNull(nameof(path));
+
             if (!path.IsRelative)
             {
                 throw new ArgumentException("Virtual input paths should always be relative", nameof(path));
@@ -26,7 +24,7 @@ namespace Statiq.Common
         }
 
         /// <inheritdoc/>
-        public DirectoryPath Path { get; }
+        public NormalizedPath Path { get; }
 
         NormalizedPath IFileSystemEntry.Path => Path;
 
@@ -35,8 +33,8 @@ namespace Statiq.Common
         {
             get
             {
-                DirectoryPath parentPath = Path.Parent;
-                return parentPath == null ? null : new VirtualInputDirectory(_fileSystem, parentPath);
+                NormalizedPath parentPath = Path.Parent;
+                return parentPath.IsNull ? null : new VirtualInputDirectory(_fileSystem, parentPath);
             }
         }
 
@@ -57,7 +55,7 @@ namespace Statiq.Common
             // but for all others it should include the child directory name
 
             // Get all the relative child directories
-            HashSet<DirectoryPath> directories = new HashSet<DirectoryPath>();
+            HashSet<NormalizedPath> directories = new HashSet<NormalizedPath>();
             foreach (IDirectory directory in GetExistingDirectories())
             {
                 foreach (IDirectory childDirectory in directory.GetDirectories(searchOption))
@@ -74,7 +72,7 @@ namespace Statiq.Common
         public IEnumerable<IFile> GetFiles(SearchOption searchOption = SearchOption.TopDirectoryOnly)
         {
             // Get all the files for each input directory, replacing earlier ones with later ones
-            Dictionary<FilePath, IFile> files = new Dictionary<FilePath, IFile>();
+            Dictionary<NormalizedPath, IFile> files = new Dictionary<NormalizedPath, IFile>();
             foreach (IDirectory directory in GetExistingDirectories())
             {
                 foreach (IFile file in directory.GetFiles(searchOption))
@@ -86,12 +84,10 @@ namespace Statiq.Common
         }
 
         /// <inheritdoc/>
-        public IDirectory GetDirectory(DirectoryPath path)
+        public IDirectory GetDirectory(NormalizedPath path)
         {
-            if (path == null)
-            {
-                throw new ArgumentNullException(nameof(path));
-            }
+            path.ThrowIfNull(nameof(path));
+
             if (!path.IsRelative)
             {
                 throw new ArgumentException("Path must be relative", nameof(path));
@@ -101,18 +97,16 @@ namespace Statiq.Common
         }
 
         /// <inheritdoc/>
-        public IFile GetFile(FilePath path)
+        public IFile GetFile(NormalizedPath path)
         {
-            if (path == null)
-            {
-                throw new ArgumentNullException(nameof(path));
-            }
+            path.ThrowIfNull(nameof(path));
+
             if (!path.IsRelative)
             {
                 throw new ArgumentException("Path must be relative", nameof(path));
             }
 
-            return _fileSystem.GetInputFile(Path.CombineFile(path));
+            return _fileSystem.GetInputFile(Path.Combine(path));
         }
 
         /// <summary>

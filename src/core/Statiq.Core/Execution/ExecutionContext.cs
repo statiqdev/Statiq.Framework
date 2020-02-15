@@ -134,16 +134,16 @@ namespace Statiq.Core
 
         /// <inheritdoc />
         public IDocument CreateDocument(
-            FilePath source,
-            FilePath destination,
+            NormalizedPath source,
+            NormalizedPath destination,
             IEnumerable<KeyValuePair<string, object>> items,
             IContentProvider contentProvider = null) =>
             _contextData.Engine.DocumentFactory.CreateDocument(source, destination, items, contentProvider);
 
         /// <inheritdoc />
         public TDocument CreateDocument<TDocument>(
-            FilePath source,
-            FilePath destination,
+            NormalizedPath source,
+            NormalizedPath destination,
             IEnumerable<KeyValuePair<string, object>> items,
             IContentProvider contentProvider = null)
             where TDocument : FactoryDocument, IDocument, new() =>

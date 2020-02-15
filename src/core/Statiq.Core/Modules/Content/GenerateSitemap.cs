@@ -111,7 +111,7 @@ namespace Statiq.Core
                         if (!location.StartsWith("http://", StringComparison.InvariantCultureIgnoreCase)
                             && !location.StartsWith("https://", StringComparison.InvariantCultureIgnoreCase))
                         {
-                            location = context.GetLink(new FilePath(location), true);
+                            location = context.GetLink(new NormalizedPath(location), true);
                         }
                     }
 

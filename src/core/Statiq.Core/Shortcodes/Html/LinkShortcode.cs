@@ -46,13 +46,13 @@ namespace Statiq.Core
             {
                 return context.CreateDocument(await context.GetContentProviderAsync(absoluteUri));
             }
-            FilePath filePath = new FilePath(path);
+            NormalizedPath filePath = new NormalizedPath(path);
 
             // Use "Host" if it's provided, otherwise use Host setting if "IncludeHost" is true
             string host = arguments.GetString("Host", arguments.GetBool("IncludeHost") ? context.Settings.GetString(Keys.Host) : null);
 
             // Use "Root" if it's provided, otherwise LinkRoot setting
-            DirectoryPath root = arguments.GetDirectoryPath("Root", context.Settings.GetDirectoryPath(Keys.LinkRoot));
+            NormalizedPath root = arguments.GetDirectoryPath("Root", context.Settings.GetDirectoryPath(Keys.LinkRoot));
 
             // Use "Scheme" if it's provided, otherwise if "UseHttps" is true use "https" or use LinksUseHttps setting
             string scheme = arguments.GetString("Scheme", arguments.ContainsKey("UseHttps")

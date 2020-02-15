@@ -47,7 +47,7 @@
         /// </summary>
         /// <param name="executionContext">The execution context.</param>
         /// <param name="metadata">The metadata or document to generate a link for.</param>
-        /// <param name="key">The key at which a <see cref="FilePath"/> can be found for generating the link.</param>
+        /// <param name="key">The key at which a <see cref="NormalizedPath"/> can be found for generating the link.</param>
         /// <param name="includeHost">
         /// If set to <c>true</c> the host configured in the output settings will
         /// be included in the link, otherwise the host will be omitted and only the root path will be included (default).
@@ -70,7 +70,7 @@
                 }
 
                 // Otherwise try to process the value as a file path
-                FilePath filePath = metadata.GetFilePath(key);
+                NormalizedPath filePath = metadata.GetFilePath(key);
                 return filePath != null ? executionContext.GetLink(filePath, includeHost) : null;
             }
             return null;
@@ -103,7 +103,7 @@
 
             // Otherwise process the path as a FilePath
             return executionContext.GetLink(
-                path == null ? null : new FilePath(path),
+                path == null ? null : new NormalizedPath(path),
                 includeHost ? executionContext.Settings.GetString(Keys.Host) : null,
                 executionContext.Settings.GetDirectoryPath(Keys.LinkRoot),
                 executionContext.Settings.GetBool(Keys.LinksUseHttps),
@@ -132,7 +132,7 @@
             this IExecutionContext executionContext,
             string path,
             string host,
-            DirectoryPath root,
+            NormalizedPath root,
             bool useHttps,
             bool hideIndexPages,
             bool hideExtensions)
@@ -144,7 +144,7 @@
             }
 
             // Otherwise process the path as a FilePath
-            return executionContext.GetLink(path == null ? null : new FilePath(path), host, root, useHttps, hideIndexPages, hideExtensions);
+            return executionContext.GetLink(path == null ? null : new NormalizedPath(path), host, root, useHttps, hideIndexPages, hideExtensions);
         }
 
         /// <summary>
@@ -194,7 +194,7 @@
             this IExecutionContext executionContext,
             NormalizedPath path,
             string host,
-            DirectoryPath root,
+            NormalizedPath root,
             bool useHttps,
             bool hideIndexPages,
             bool hideExtensions) =>
@@ -228,7 +228,7 @@
             this IExecutionContext executionContext,
             NormalizedPath path,
             string host,
-            DirectoryPath root,
+            NormalizedPath root,
             bool useHttps,
             bool hideIndexPages,
             bool hideExtensions,

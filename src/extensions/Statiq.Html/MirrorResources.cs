@@ -37,7 +37,7 @@ namespace Statiq.Html
         private const int MaxAbsoluteLinkRetry = 5;
         private const HttpStatusCode TooManyRequests = (HttpStatusCode)429;
 
-        private readonly Func<Uri, FilePath> _pathFunc;
+        private readonly Func<Uri, NormalizedPath> _pathFunc;
 
         /// <summary>
         /// Mirrors external resources locally. By default, resources will be copied into the output folder
@@ -52,7 +52,7 @@ namespace Statiq.Html
         /// Mirrors external resources locally, specifying the output location where they should be copied.
         /// </summary>
         /// <param name="pathFunc">A function that specifies where downloaded external resources should be copied to.</param>
-        public MirrorResources(Func<Uri, FilePath> pathFunc)
+        public MirrorResources(Func<Uri, NormalizedPath> pathFunc)
         {
             _pathFunc = pathFunc ?? throw new ArgumentNullException(nameof(pathFunc));
         }
@@ -146,7 +146,7 @@ namespace Statiq.Html
                 return null;
             }
 
-            FilePath path = _pathFunc(uri);
+            NormalizedPath path = _pathFunc(uri);
             if (path == null)
             {
                 throw new ExecutionException($"Null resource mirror path for {source}");

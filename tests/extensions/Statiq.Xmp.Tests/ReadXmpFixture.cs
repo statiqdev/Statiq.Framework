@@ -92,7 +92,7 @@ namespace Statiq.Xmp.Tests
             }
 
             private IReadOnlyList<TestDocument> GetDocumentsFromSources(params string[] pathArray) =>
-                pathArray.Select(x => new TestDocument(x, (FilePath)null, File.OpenRead(x))).ToList();
+                pathArray.Select(x => new TestDocument(x, (NormalizedPath)null, File.OpenRead(x))).ToList();
         }
     }
 }

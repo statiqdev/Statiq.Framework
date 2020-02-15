@@ -11,21 +11,21 @@ namespace Statiq.Common
 
         public static ObjectDocument<T> ToDocument<T>(
             this T obj,
-            FilePath destination,
+            NormalizedPath destination,
             IEnumerable<KeyValuePair<string, object>> items,
             IContentProvider contentProvider = null) =>
             new ObjectDocument<T>(obj, null, destination, items, contentProvider);
 
         public static ObjectDocument<T> ToDocument<T>(
             this T obj,
-            FilePath source,
-            FilePath destination,
+            NormalizedPath source,
+            NormalizedPath destination,
             IContentProvider contentProvider = null) =>
             new ObjectDocument<T>(obj, source, destination, null, contentProvider);
 
         public static ObjectDocument<T> ToDocument<T>(
             this T obj,
-            FilePath destination,
+            NormalizedPath destination,
             IContentProvider contentProvider = null) =>
             new ObjectDocument<T>(obj, null, destination, null, contentProvider);
 
@@ -42,8 +42,8 @@ namespace Statiq.Common
 
         public static ObjectDocument<T> ToDocument<T>(
             this T obj,
-            FilePath source,
-            FilePath destination,
+            NormalizedPath source,
+            NormalizedPath destination,
             IEnumerable<KeyValuePair<string, object>> items,
             IContentProvider contentProvider = null) =>
             new ObjectDocument<T>(obj, source, destination, items, contentProvider);
@@ -52,7 +52,7 @@ namespace Statiq.Common
 
         public static IEnumerable<ObjectDocument<T>> ToDocuments<T>(
             this IEnumerable<T> objs,
-            Func<T, FilePath> destinationFunc,
+            Func<T, NormalizedPath> destinationFunc,
             Func<T, IEnumerable<KeyValuePair<string, object>>> itemsFunc,
             Func<T, IContentProvider> contentProviderFunc = null) =>
             objs?.Select(x => x == null
@@ -66,8 +66,8 @@ namespace Statiq.Common
 
         public static IEnumerable<ObjectDocument<T>> ToDocuments<T>(
             this IEnumerable<T> objs,
-            Func<T, FilePath> sourceFunc,
-            Func<T, FilePath> destinationFunc,
+            Func<T, NormalizedPath> sourceFunc,
+            Func<T, NormalizedPath> destinationFunc,
             Func<T, IContentProvider> contentProviderFunc = null) =>
             objs?.Select(x => x == null
                 ? null
@@ -80,7 +80,7 @@ namespace Statiq.Common
 
         public static IEnumerable<ObjectDocument<T>> ToDocuments<T>(
             this IEnumerable<T> objs,
-            Func<T, FilePath> destinationFunc,
+            Func<T, NormalizedPath> destinationFunc,
             Func<T, IContentProvider> contentProviderFunc = null) =>
             objs?.Select(x => x == null
                 ? null
@@ -118,8 +118,8 @@ namespace Statiq.Common
 
         public static IEnumerable<ObjectDocument<T>> ToDocuments<T>(
             this IEnumerable<T> objs,
-            Func<T, FilePath> sourceFunc,
-            Func<T, FilePath> destinationFunc,
+            Func<T, NormalizedPath> sourceFunc,
+            Func<T, NormalizedPath> destinationFunc,
             Func<T, IEnumerable<KeyValuePair<string, object>>> itemsFunc,
             Func<T, IContentProvider> contentProviderFunc = null) =>
             objs?.Select(x => x == null

@@ -135,7 +135,7 @@ namespace Statiq.Html.Tests
                       <body>
                       </body>
                     </html>");
-                MirrorResources module = new MirrorResources(x => new FilePath("/foo/bar.js"));
+                MirrorResources module = new MirrorResources(x => new NormalizedPath("/foo/bar.js"));
 
                 // When
                 TestDocument result = await ExecuteAsync(document, module).SingleAsync();

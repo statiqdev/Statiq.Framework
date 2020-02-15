@@ -36,7 +36,7 @@ namespace Statiq.Images.Operations
             });
         }
 
-        public FilePath GetPath(FilePath path)
+        public NormalizedPath GetPath(NormalizedPath path)
         {
             if (_width.HasValue && _height.HasValue)
             {

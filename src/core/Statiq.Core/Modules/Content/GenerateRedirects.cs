@@ -31,10 +31,10 @@ namespace Statiq.Core
     /// <category>Content</category>
     public class GenerateRedirects : Module
     {
-        private readonly Dictionary<FilePath, Func<IDictionary<FilePath, string>, string>> _additionalOutputs =
-            new Dictionary<FilePath, Func<IDictionary<FilePath, string>, string>>();
+        private readonly Dictionary<NormalizedPath, Func<IDictionary<NormalizedPath, string>, string>> _additionalOutputs =
+            new Dictionary<NormalizedPath, Func<IDictionary<NormalizedPath, string>, string>>();
 
-        private Config<IReadOnlyList<FilePath>> _paths = Config.FromDocument<IReadOnlyList<FilePath>>(Keys.RedirectFrom);
+        private Config<IReadOnlyList<NormalizedPath>> _paths = Config.FromDocument<IReadOnlyList<NormalizedPath>>(Keys.RedirectFrom);
         private bool _metaRefreshPages = true;
         private bool _includeHost = false;
 
@@ -42,9 +42,9 @@ namespace Statiq.Core
         /// Controls where the redirected paths come from. By default, values from the metadata
         /// key <c>RedirectFrom</c> are used.
         /// </summary>
-        /// <param name="paths">A delegate that should return one or more <see cref="FilePath"/>.</param>
+        /// <param name="paths">A delegate that should return one or more <see cref="NormalizedPath"/>.</param>
         /// <returns>The current module instance.</returns>
-        public GenerateRedirects WithPaths(Config<IReadOnlyList<FilePath>> paths)
+        public GenerateRedirects WithPaths(Config<IReadOnlyList<NormalizedPath>> paths)
         {
             _paths = paths ?? throw new ArgumentNullException(nameof(paths));
             return this;
@@ -80,12 +80,9 @@ namespace Statiq.Core
         /// <param name="content">A delegate that takes a dictionary with keys equal to each redirected file
         /// and values equal to the destination URL. The delegate should return the content of the output file.</param>
         /// <returns>The current module instance.</returns>
-        public GenerateRedirects WithAdditionalOutput(FilePath path, Func<IDictionary<FilePath, string>, string> content)
+        public GenerateRedirects WithAdditionalOutput(NormalizedPath path, Func<IDictionary<NormalizedPath, string>, string> content)
         {
-            if (path == null)
-            {
-                throw new ArgumentNullException(nameof(path));
-            }
+            path.ThrowIfNull(nameof(path));
             if (content == null)
             {
                 throw new ArgumentNullException(nameof(content));
@@ -102,7 +99,7 @@ namespace Statiq.Core
         protected override async Task<IEnumerable<IDocument>> ExecuteContextAsync(IExecutionContext context)
         {
             // Iterate redirects and generate all of the per-redirect documents (I.e., meta refresh pages)
-            ConcurrentDictionary<FilePath, string> redirects = new ConcurrentDictionary<FilePath, string>();
+            ConcurrentDictionary<NormalizedPath, string> redirects = new ConcurrentDictionary<NormalizedPath, string>();
 
             // Need to materialize the parallel operation before creating the additional outputs
             List<IDocument> outputs = new List<IDocument>();
@@ -117,7 +114,7 @@ namespace Statiq.Core
             // Generate other output documents if requested
             if (redirects.Count > 0)
             {
-                foreach (KeyValuePair<FilePath, Func<IDictionary<FilePath, string>, string>> additionalOutput in _additionalOutputs)
+                foreach (KeyValuePair<NormalizedPath, Func<IDictionary<NormalizedPath, string>, string>> additionalOutput in _additionalOutputs)
                 {
                     string content = additionalOutput.Value(redirects);
                     if (!string.IsNullOrEmpty(content))
@@ -134,10 +131,10 @@ namespace Statiq.Core
 
             async IAsyncEnumerable<IDocument> GetOutputsAsync(IDocument input)
             {
-                IReadOnlyList<FilePath> paths = await _paths.GetValueAsync(input, context);
+                IReadOnlyList<NormalizedPath> paths = await _paths.GetValueAsync(input, context);
                 if (paths != null)
                 {
-                    foreach (FilePath fromPath in paths.Where(x => x != null))
+                    foreach (NormalizedPath fromPath in paths.Where(x => x != null))
                     {
                         // Make sure it's a relative path
                         if (!fromPath.IsRelative)
@@ -151,7 +148,7 @@ namespace Statiq.Core
                         redirects.TryAdd(fromPath, url);
 
                         // Meta refresh documents
-                        FilePath outputPath = fromPath;
+                        NormalizedPath outputPath = fromPath;
                         if (!string.Equals(outputPath.Extension, ".html", StringComparison.OrdinalIgnoreCase))
                         {
                             outputPath = outputPath.AppendExtension(".html");

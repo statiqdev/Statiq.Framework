@@ -8,23 +8,23 @@ namespace Statiq.Core
     // Initially based on code from Cake (http://cakebuild.net/)
     internal class FileSystem : IFileSystem
     {
-        private DirectoryPath _rootPath = Directory.GetCurrentDirectory();
-        private DirectoryPath _outputPath = "output";
-        private DirectoryPath _tempPath = "temp";
+        private NormalizedPath _rootPath = Directory.GetCurrentDirectory();
+        private NormalizedPath _outputPath = "output";
+        private NormalizedPath _tempPath = "temp";
 
         public FileSystem()
         {
             FileProvider = new LocalFileProvider();
-            InputPaths = new PathCollection<DirectoryPath>(new[]
+            InputPaths = new PathCollection<NormalizedPath>(new[]
             {
-                new DirectoryPath("theme"),
-                new DirectoryPath("input")
+                new NormalizedPath("theme"),
+                new NormalizedPath("input")
             });
         }
 
         public IFileProvider FileProvider { get; set; }
 
-        public DirectoryPath RootPath
+        public NormalizedPath RootPath
         {
             get => _rootPath;
 
@@ -41,17 +41,17 @@ namespace Statiq.Core
             }
         }
 
-        public PathCollection<DirectoryPath> InputPaths { get; }
+        public PathCollection<NormalizedPath> InputPaths { get; }
 
-        IReadOnlyList<DirectoryPath> IReadOnlyFileSystem.InputPaths => InputPaths;
+        IReadOnlyList<NormalizedPath> IReadOnlyFileSystem.InputPaths => InputPaths;
 
-        public DirectoryPath OutputPath
+        public NormalizedPath OutputPath
         {
             get => _outputPath;
             set => _outputPath = value ?? throw new ArgumentNullException(nameof(OutputPath));
         }
 
-        public DirectoryPath TempPath
+        public NormalizedPath TempPath
         {
             get => _tempPath;
             set => _tempPath = value ?? throw new ArgumentNullException(nameof(TempPath));

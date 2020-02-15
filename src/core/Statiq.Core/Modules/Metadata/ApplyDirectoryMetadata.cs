@@ -78,7 +78,7 @@ namespace Statiq.Core
         /// <param name="inherited">If set to <c>true</c>, metadata from documents with this file name will be inherited by documents in nested directories.</param>
         /// <param name="replace">If set to <c>true</c>, metadata from this document will replace any existing metadata on the target document.</param>
         /// <returns>The current module instance.</returns>
-        public ApplyDirectoryMetadata WithMetadataFile(FilePath metadataFileName, bool inherited = false, bool replace = false)
+        public ApplyDirectoryMetadata WithMetadataFile(NormalizedPath metadataFileName, bool inherited = false, bool replace = false)
         {
             return WithMetadataFile(Config.FromDocument(doc => doc.Source?.FileName.Equals(metadataFileName) == true), inherited, replace);
         }
@@ -87,13 +87,13 @@ namespace Statiq.Core
         protected override async Task<IEnumerable<IDocument>> ExecuteContextAsync(IExecutionContext context)
         {
             // Find metadata files
-            ILookup<DirectoryPath, MetaInfo> lookup = await context.Inputs
+            ILookup<NormalizedPath, MetaInfo> lookup = await context.Inputs
                 .ToAsyncEnumerable()
                 .Where(input => input.Source != null)
                 .SelectAwait(GetMetaInfo)
                 .Where(x => x != null)
                 .ToLookupAsync(x => x.Path);
-            Dictionary<DirectoryPath, MetaInfo[]> metadataDictionary = lookup
+            Dictionary<NormalizedPath, MetaInfo[]> metadataDictionary = lookup
                 .ToDictionary(x => x.Key, x => x.OrderBy(y => y.Priority).ToArray());
 
             // Ignore files that define Metadata if not preserved and apply the metadata
@@ -113,7 +113,7 @@ namespace Statiq.Core
                         return new MetaInfo
                         {
                             Priority = c,
-                            Path = input.Source.Directory,
+                            Path = input.Source.Parent,
                             MetadataFileEntry = _metadataFiles[c],
                             Metadata = input
                         };
@@ -125,11 +125,11 @@ namespace Statiq.Core
             IDocument ApplyMetadata(IDocument input)
             {
                 // First add the inherited metadata to the temp dictionary
-                List<DirectoryPath> sourcePaths = new List<DirectoryPath>();
-                DirectoryPath inputPath = context.FileSystem.GetContainingInputPath(input.Source);
+                List<NormalizedPath> sourcePaths = new List<NormalizedPath>();
+                NormalizedPath inputPath = context.FileSystem.GetContainingInputPath(input.Source);
                 if (inputPath != null)
                 {
-                    DirectoryPath dir = input.Source.Directory;
+                    NormalizedPath dir = input.Source.Parent;
                     while (dir?.FullPath.StartsWith(inputPath.FullPath) == true)
                     {
                         sourcePaths.Add(dir);
@@ -141,7 +141,7 @@ namespace Statiq.Core
                 List<KeyValuePair<string, object>> newMetadata = new List<KeyValuePair<string, object>>();
 
                 bool firstLevel = true;
-                foreach (DirectoryPath path in sourcePaths)
+                foreach (NormalizedPath path in sourcePaths)
                 {
                     if (metadataDictionary.ContainsKey(path))
                     {
@@ -182,7 +182,7 @@ namespace Statiq.Core
         private class MetaInfo
         {
             public int Priority { get; set; }
-            public DirectoryPath Path { get; set; }
+            public NormalizedPath Path { get; set; }
             public MetaFileEntry MetadataFileEntry { get; set; }
             public IMetadata Metadata { get; set; }
         }

@@ -9,8 +9,8 @@ namespace Statiq.Sass
     {
         // Maps each parent path to the containing path for use in nested imports
         // since the parent path may be relative in those cases
-        private readonly ConcurrentDictionary<FilePath, FilePath> _parentAbsolutePaths
-            = new ConcurrentDictionary<FilePath, FilePath>();
+        private readonly ConcurrentDictionary<NormalizedPath, NormalizedPath> _parentAbsolutePaths
+            = new ConcurrentDictionary<NormalizedPath, NormalizedPath>();
 
         private readonly IReadOnlyFileSystem _fileSystem;
         private readonly Func<string, string> _importPathFunc;
@@ -45,25 +45,25 @@ namespace Statiq.Sass
 
             // Get the input relative path to the parent file
             // Make sure to try checking for a previously processed parent post-modification
-            FilePath parentFilePath = new FilePath(parentPath);
-            FilePath requestedFilePath = new FilePath(requestedFile);
+            NormalizedPath parentFilePath = new NormalizedPath(parentPath);
+            NormalizedPath requestedFilePath = new NormalizedPath(requestedFile);
             if (parentFilePath.IsRelative
                 && !_parentAbsolutePaths.TryGetValue(parentFilePath, out parentFilePath)
                 && (modifiedParentPath == null || !_parentAbsolutePaths.TryGetValue(modifiedParentPath, out parentFilePath)))
             {
                 // Relative parent path and no available absolute path, try with the relative path
-                parentFilePath = new FilePath(parentPath);
+                parentFilePath = new NormalizedPath(parentPath);
             }
 
             // Try to get the relative path to the parent file from inside the input virtual file system
             // But if the parent file isn't under an input path, just use it directly
-            DirectoryPath containingInputPath = _fileSystem.GetContainingInputPath(parentFilePath);
-            FilePath parentRelativePath = containingInputPath != null
+            NormalizedPath containingInputPath = _fileSystem.GetContainingInputPath(parentFilePath);
+            NormalizedPath parentRelativePath = containingInputPath != null
                 ? containingInputPath.GetRelativePath(parentFilePath)
                 : parentFilePath;
 
             // Find the requested file by first combining with the parent
-            FilePath filePath = parentRelativePath.ChangeFileName(requestedFilePath);
+            NormalizedPath filePath = parentRelativePath.ChangeFileName(requestedFilePath);
             string scss = await GetFileVariationsAsync(filePath, requestedFilePath);
             if (scss != null)
             {
@@ -80,7 +80,7 @@ namespace Statiq.Sass
             return null;
         }
 
-        private async Task<string> GetFileVariationsAsync(FilePath filePath, FilePath requestedFilePath)
+        private async Task<string> GetFileVariationsAsync(NormalizedPath filePath, NormalizedPath requestedFilePath)
         {
             // ...as specified
             string scss = await GetFileAsync(filePath, requestedFilePath);
@@ -92,7 +92,7 @@ namespace Statiq.Sass
             // ...with extension (if not already)
             if (!filePath.HasExtension || filePath.Extension != ".scss")
             {
-                FilePath extensionPath = filePath.AppendExtension(".scss");
+                NormalizedPath extensionPath = filePath.AppendExtension(".scss");
                 scss = await GetFileAsync(extensionPath, requestedFilePath);
                 if (scss != null)
                 {
@@ -125,7 +125,7 @@ namespace Statiq.Sass
             return null;
         }
 
-        private async Task<string> GetFileAsync(FilePath filePath, FilePath requestedFilePath)
+        private async Task<string> GetFileAsync(NormalizedPath filePath, NormalizedPath requestedFilePath)
         {
             string scss = null;
             IFile file = _fileSystem.GetInputFile(filePath);

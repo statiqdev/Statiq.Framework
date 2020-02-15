@@ -18,8 +18,8 @@ namespace Statiq.Core.Tests.Modules.Control
             public async Task CachesDocuments()
             {
                 // Given
-                TestDocument a1 = new TestDocument(new FilePath("/a"), "a");
-                TestDocument b1 = new TestDocument(new FilePath("/b"), "b");
+                TestDocument a1 = new TestDocument(new NormalizedPath("/a"), "a");
+                TestDocument b1 = new TestDocument(new NormalizedPath("/b"), "b");
 
                 List<string> missedContent = new List<string>();
                 CacheDocuments cacheDocuments = new CacheDocuments(
@@ -42,9 +42,9 @@ namespace Statiq.Core.Tests.Modules.Control
             public async Task CachesDocumentsWithSameSource()
             {
                 // Given
-                TestDocument a1 = new TestDocument(new FilePath("/a"), "a1");
-                TestDocument a2 = new TestDocument(new FilePath("/a"), "a2");
-                TestDocument b1 = new TestDocument(new FilePath("/b"), "b");
+                TestDocument a1 = new TestDocument(new NormalizedPath("/a"), "a1");
+                TestDocument a2 = new TestDocument(new NormalizedPath("/a"), "a2");
+                TestDocument b1 = new TestDocument(new NormalizedPath("/b"), "b");
 
                 List<string> missedContent = new List<string>();
                 CacheDocuments cacheDocuments = new CacheDocuments(
@@ -67,10 +67,10 @@ namespace Statiq.Core.Tests.Modules.Control
             public async Task InvalidatesAllWithSameSource()
             {
                 // Given
-                TestDocument a1 = new TestDocument(new FilePath("/a"), "a1");
-                TestDocument a2 = new TestDocument(new FilePath("/a"), "a2");
-                TestDocument a3 = new TestDocument(new FilePath("/a"), "a3");
-                TestDocument b1 = new TestDocument(new FilePath("/b"), "b");
+                TestDocument a1 = new TestDocument(new NormalizedPath("/a"), "a1");
+                TestDocument a2 = new TestDocument(new NormalizedPath("/a"), "a2");
+                TestDocument a3 = new TestDocument(new NormalizedPath("/a"), "a3");
+                TestDocument b1 = new TestDocument(new NormalizedPath("/b"), "b");
 
                 List<string> missedContent = new List<string>();
                 CacheDocuments cacheDocuments = new CacheDocuments(
@@ -93,9 +93,9 @@ namespace Statiq.Core.Tests.Modules.Control
             public async Task OnlySendsCacheMissesToChildModules()
             {
                 // Given
-                TestDocument a1 = new TestDocument(new FilePath("/a"), "a");
-                TestDocument b1 = new TestDocument(new FilePath("/b"), "b");
-                TestDocument b2 = new TestDocument(new FilePath("/b"), "b2");
+                TestDocument a1 = new TestDocument(new NormalizedPath("/a"), "a");
+                TestDocument b1 = new TestDocument(new NormalizedPath("/b"), "b");
+                TestDocument b2 = new TestDocument(new NormalizedPath("/b"), "b2");
 
                 List<string> missedContent = new List<string>();
                 CacheDocuments cacheDocuments = new CacheDocuments(
@@ -118,9 +118,9 @@ namespace Statiq.Core.Tests.Modules.Control
             public async Task DisablesCache()
             {
                 // Given
-                TestDocument a1 = new TestDocument(new FilePath("/a"), "a");
-                TestDocument b1 = new TestDocument(new FilePath("/b"), "b");
-                TestDocument b2 = new TestDocument(new FilePath("/b"), "b2");
+                TestDocument a1 = new TestDocument(new NormalizedPath("/a"), "a");
+                TestDocument b1 = new TestDocument(new NormalizedPath("/b"), "b");
+                TestDocument b2 = new TestDocument(new NormalizedPath("/b"), "b2");
 
                 TestExecutionContext executionContext1 = new TestExecutionContext(new[] { a1, b1 });
                 executionContext1.Settings.Add(Keys.DisableCache, "true");
@@ -148,9 +148,9 @@ namespace Statiq.Core.Tests.Modules.Control
             public async Task ResetsCache()
             {
                 // Given
-                TestDocument a1 = new TestDocument(new FilePath("/a"), "a");
-                TestDocument b1 = new TestDocument(new FilePath("/b"), "b");
-                TestDocument b2 = new TestDocument(new FilePath("/b"), "b2");
+                TestDocument a1 = new TestDocument(new NormalizedPath("/a"), "a");
+                TestDocument b1 = new TestDocument(new NormalizedPath("/b"), "b");
+                TestDocument b2 = new TestDocument(new NormalizedPath("/b"), "b2");
 
                 TestExecutionContext executionContext1 = new TestExecutionContext(new[] { a1, b1 });
                 TestExecutionContext executionContext2 = new TestExecutionContext(new[] { a1, b2 });
@@ -179,10 +179,10 @@ namespace Statiq.Core.Tests.Modules.Control
             public async Task CachesDocumentsForSameDependencies()
             {
                 // Given
-                TestDocument a1 = new TestDocument(new FilePath("/a"), "a");
-                TestDocument b1 = new TestDocument(new FilePath("/b"), "b");
-                TestDocument d1 = new TestDocument(new FilePath("/d1"), "d1");
-                TestDocument d2 = new TestDocument(new FilePath("/d2"), "d2");
+                TestDocument a1 = new TestDocument(new NormalizedPath("/a"), "a");
+                TestDocument b1 = new TestDocument(new NormalizedPath("/b"), "b");
+                TestDocument d1 = new TestDocument(new NormalizedPath("/d1"), "d1");
+                TestDocument d2 = new TestDocument(new NormalizedPath("/d2"), "d2");
 
                 TestExecutionContext executionContext = new TestExecutionContext(new[] { a1, b1 });
                 executionContext.Outputs.Dictionary["Foo"] = ImmutableArray.Create<IDocument>(d1, d2);
@@ -217,11 +217,11 @@ namespace Statiq.Core.Tests.Modules.Control
             public async Task PipelineDependencies(Phase phase, string[] pipelineDependencies, string[] expectedMissedContent)
             {
                 // Given
-                TestDocument a1 = new TestDocument(new FilePath("/a"), "a");
-                TestDocument b1 = new TestDocument(new FilePath("/b"), "b");
-                TestDocument d1 = new TestDocument(new FilePath("/d1"), "d1");
-                TestDocument d2 = new TestDocument(new FilePath("/d2"), "d2");
-                TestDocument d3 = new TestDocument(new FilePath("/d2"), "d3");
+                TestDocument a1 = new TestDocument(new NormalizedPath("/a"), "a");
+                TestDocument b1 = new TestDocument(new NormalizedPath("/b"), "b");
+                TestDocument d1 = new TestDocument(new NormalizedPath("/d1"), "d1");
+                TestDocument d2 = new TestDocument(new NormalizedPath("/d2"), "d2");
+                TestDocument d3 = new TestDocument(new NormalizedPath("/d2"), "d3");
 
                 TestExecutionContext executionContext1 = new TestExecutionContext(new[] { a1, b1 });
                 executionContext1.Outputs.Dictionary["Foo"] = ImmutableArray.Create<IDocument>(d1, d2);
@@ -254,8 +254,8 @@ namespace Statiq.Core.Tests.Modules.Control
             public async Task ExplicitlyInvalidateDocument()
             {
                 // Given
-                TestDocument a1 = new TestDocument(new FilePath("/a"), "a");
-                TestDocument b1 = new TestDocument(new FilePath("/b"), "b");
+                TestDocument a1 = new TestDocument(new NormalizedPath("/a"), "a");
+                TestDocument b1 = new TestDocument(new NormalizedPath("/b"), "b");
 
                 List<string> missedContent = new List<string>();
                 CacheDocuments cacheDocuments = new CacheDocuments(
@@ -279,9 +279,9 @@ namespace Statiq.Core.Tests.Modules.Control
             public async Task ExplicitlyInvalidateDocumentIfAny()
             {
                 // Given
-                TestDocument a1 = new TestDocument(new FilePath("/a"), "a1");
-                TestDocument a2 = new TestDocument(new FilePath("/a"), "a2");
-                TestDocument b1 = new TestDocument(new FilePath("/b"), "b");
+                TestDocument a1 = new TestDocument(new NormalizedPath("/a"), "a1");
+                TestDocument a2 = new TestDocument(new NormalizedPath("/a"), "a2");
+                TestDocument b1 = new TestDocument(new NormalizedPath("/b"), "b");
 
                 List<string> missedContent = new List<string>();
                 CacheDocuments cacheDocuments = new CacheDocuments(
@@ -305,11 +305,11 @@ namespace Statiq.Core.Tests.Modules.Control
             public async Task DocumentDependenciesStayTheSame()
             {
                 // Given
-                TestDocument a1 = new TestDocument(new FilePath("/a"), "a1");
-                TestDocument a2 = new TestDocument(new FilePath("/a"), "a2");
-                TestDocument b1 = new TestDocument(new FilePath("/b"), "b");
-                TestDocument d1 = new TestDocument(new FilePath("/d1"), "d1");
-                TestDocument d2 = new TestDocument(new FilePath("/d2"), "d2");
+                TestDocument a1 = new TestDocument(new NormalizedPath("/a"), "a1");
+                TestDocument a2 = new TestDocument(new NormalizedPath("/a"), "a2");
+                TestDocument b1 = new TestDocument(new NormalizedPath("/b"), "b");
+                TestDocument d1 = new TestDocument(new NormalizedPath("/d1"), "d1");
+                TestDocument d2 = new TestDocument(new NormalizedPath("/d2"), "d2");
 
                 List<string> missedContent = new List<string>();
                 CacheDocuments cacheDocuments = new CacheDocuments(
@@ -333,12 +333,12 @@ namespace Statiq.Core.Tests.Modules.Control
             public async Task DocumentDependenciesChange()
             {
                 // Given
-                TestDocument a1 = new TestDocument(new FilePath("/a"), "a1");
-                TestDocument a2 = new TestDocument(new FilePath("/a"), "a2");
-                TestDocument b1 = new TestDocument(new FilePath("/b"), "b");
-                TestDocument d1 = new TestDocument(new FilePath("/d1"), "d1");
-                TestDocument d2 = new TestDocument(new FilePath("/d2"), "d2");
-                TestDocument d3 = new TestDocument(new FilePath("/d2"), "d3");
+                TestDocument a1 = new TestDocument(new NormalizedPath("/a"), "a1");
+                TestDocument a2 = new TestDocument(new NormalizedPath("/a"), "a2");
+                TestDocument b1 = new TestDocument(new NormalizedPath("/b"), "b");
+                TestDocument d1 = new TestDocument(new NormalizedPath("/d1"), "d1");
+                TestDocument d2 = new TestDocument(new NormalizedPath("/d2"), "d2");
+                TestDocument d3 = new TestDocument(new NormalizedPath("/d2"), "d3");
 
                 List<string> missedContent = new List<string>();
                 CacheDocuments cacheDocuments = new CacheDocuments(

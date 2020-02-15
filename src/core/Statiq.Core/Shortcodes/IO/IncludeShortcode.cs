@@ -31,14 +31,14 @@ namespace Statiq.Core
     /// <parameter>The path to the file to include.</parameter>
     public class IncludeShortcode : SyncShortcode
     {
-        private FilePath _sourcePath;
+        private NormalizedPath _sourcePath = NormalizedPath.Null;
 
         /// <inheritdoc />
         public override IDocument Execute(KeyValuePair<string, string>[] args, string content, IDocument document, IExecutionContext context)
         {
             // Get the included path relative to the document
-            FilePath includedPath = new FilePath(args.SingleValue());
-            if (_sourcePath == null)
+            NormalizedPath includedPath = new NormalizedPath(args.SingleValue());
+            if (_sourcePath.IsNull)
             {
                 // Cache the source path for this shortcode instance since it'll be the same for all future shortcodes
                 _sourcePath = document.GetFilePath("IncludeShortcodeSource", document.Source);
@@ -46,13 +46,13 @@ namespace Statiq.Core
 
             // Try to find the file relative to the current document path
             IFile includedFile = null;
-            if (includedPath.IsRelative && _sourcePath != null)
+            if (includedPath.IsRelative && !_sourcePath.IsNull)
             {
                 includedFile = context.FileSystem.GetFile(_sourcePath.ChangeFileName(includedPath));
             }
 
             // If that didn't work, try relative to the input folder
-            if (includedFile == null || !includedFile.Exists)
+            if (includedFile?.Exists != true)
             {
                 includedFile = context.FileSystem.GetInputFile(includedPath);
             }

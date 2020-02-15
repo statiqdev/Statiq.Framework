@@ -30,10 +30,10 @@ namespace Statiq.Common
         public T Object { get; }
 
         /// <inheritdoc />
-        public FilePath Source { get; }
+        public NormalizedPath Source { get; }
 
         /// <inheritdoc />
-        public FilePath Destination { get; }
+        public NormalizedPath Destination { get; }
 
         /// <inheritdoc />
         public IContentProvider ContentProvider { get; }
@@ -45,7 +45,7 @@ namespace Statiq.Common
 
         public ObjectDocument(
             T obj,
-            FilePath destination,
+            NormalizedPath destination,
             IEnumerable<KeyValuePair<string, object>> items,
             IContentProvider contentProvider = null)
             : this(obj, null, destination, items, contentProvider)
@@ -54,8 +54,8 @@ namespace Statiq.Common
 
         public ObjectDocument(
             T obj,
-            FilePath source,
-            FilePath destination,
+            NormalizedPath source,
+            NormalizedPath destination,
             IContentProvider contentProvider = null)
             : this(obj, source, destination, null, contentProvider)
         {
@@ -63,7 +63,7 @@ namespace Statiq.Common
 
         public ObjectDocument(
             T obj,
-            FilePath destination,
+            NormalizedPath destination,
             IContentProvider contentProvider = null)
             : this(obj, null, destination, null, contentProvider)
         {
@@ -86,8 +86,8 @@ namespace Statiq.Common
 
         public ObjectDocument(
             T obj,
-            FilePath source,
-            FilePath destination,
+            NormalizedPath source,
+            NormalizedPath destination,
             IEnumerable<KeyValuePair<string, object>> items,
             IContentProvider contentProvider = null)
             : this(Guid.NewGuid(), obj, source, destination, new Metadata(items), contentProvider)
@@ -96,8 +96,8 @@ namespace Statiq.Common
 
         public ObjectDocument(
             T obj,
-            FilePath source,
-            FilePath destination,
+            NormalizedPath source,
+            NormalizedPath destination,
             IMetadata metadata,
             IContentProvider contentProvider = null)
             : this(Guid.NewGuid(), obj, source, destination, metadata, contentProvider)
@@ -107,8 +107,8 @@ namespace Statiq.Common
         private ObjectDocument(
             Guid id,
             T obj,
-            FilePath source,
-            FilePath destination,
+            NormalizedPath source,
+            NormalizedPath destination,
             IMetadata metadata,
             IContentProvider contentProvider)
         {
@@ -134,8 +134,8 @@ namespace Statiq.Common
         }
 
         public IDocument Clone(
-            FilePath source,
-            FilePath destination,
+            NormalizedPath source,
+            NormalizedPath destination,
             IEnumerable<KeyValuePair<string, object>> items,
             IContentProvider contentProvider) =>
             new ObjectDocument<T>(

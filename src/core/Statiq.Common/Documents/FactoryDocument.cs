@@ -14,8 +14,8 @@
 
         internal abstract IDocument Initialize(
             IMetadata defaultMetadata,
-            FilePath source,
-            FilePath destination,
+            NormalizedPath source,
+            NormalizedPath destination,
             IMetadata metadata,
             IContentProvider contentProvider);
     }

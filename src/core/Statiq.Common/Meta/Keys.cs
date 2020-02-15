@@ -103,14 +103,14 @@ namespace Statiq.Common
         /// The destination will be set to the given file name at the same
         /// relative path.
         /// </summary>
-        /// <type><see cref="FilePath"/></type>
+        /// <type><see cref="NormalizedPath"/></type>
         public const string DestinationFileName = nameof(DestinationFileName);
 
         /// <summary>
         /// The path to use when setting the destination of a document.
         /// The specified path can be either relative to the output path or absolute.
         /// </summary>
-        /// <type><see cref="FilePath"/></type>
+        /// <type><see cref="NormalizedPath"/></type>
         public const string DestinationPath = nameof(DestinationPath);
 
         // GroupBy
@@ -178,7 +178,7 @@ namespace Statiq.Common
         /// <summary>
         /// The path(s) where the document should be redirected from.
         /// </summary>
-        /// <type><see cref="FilePath"/></type>
+        /// <type><see cref="NormalizedPath"/></type>
         public const string RedirectFrom = nameof(RedirectFrom);
 
         /// <summary>

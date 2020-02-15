@@ -20,7 +20,7 @@ namespace Statiq.Core.Tests.Modules.IO
             public async Task SetsDestinationFromMetadata(string key, string value, string expected)
             {
                 // Given
-                TestDocument input = new TestDocument(new FilePath("Subfolder/write-test.abc"))
+                TestDocument input = new TestDocument(new NormalizedPath("Subfolder/write-test.abc"))
                 {
                     { key, value }
                 };
@@ -60,7 +60,7 @@ namespace Statiq.Core.Tests.Modules.IO
             public async Task SetsDestinationUsingExtension(string extension, string expected)
             {
                 // Given
-                TestDocument input = new TestDocument(new FilePath("Subfolder/write-test.abc"));
+                TestDocument input = new TestDocument(new NormalizedPath("Subfolder/write-test.abc"));
                 SetDestination setDestination = new SetDestination(extension);
 
                 // When
@@ -75,7 +75,7 @@ namespace Statiq.Core.Tests.Modules.IO
             public async Task SetsDestinationUsingPath(string path, string expected)
             {
                 // Given
-                TestDocument input = new TestDocument(new FilePath("Subfolder/write-test.abc"));
+                TestDocument input = new TestDocument(new NormalizedPath("Subfolder/write-test.abc"));
                 SetDestination setDestination = new SetDestination(path);
 
                 // When
@@ -94,7 +94,7 @@ namespace Statiq.Core.Tests.Modules.IO
             public async Task SetsDestinationFromMetadataOverridesExtension(string key, string value, string expected)
             {
                 // Given
-                TestDocument input = new TestDocument(new FilePath("Subfolder/write-test.abc"))
+                TestDocument input = new TestDocument(new NormalizedPath("Subfolder/write-test.abc"))
                 {
                     { key, value }
                 };
@@ -113,7 +113,7 @@ namespace Statiq.Core.Tests.Modules.IO
             public async Task SetsDestinationFromDelegateOverridesMetadata(string key)
             {
                 // Given
-                TestDocument input = new TestDocument(new FilePath("Subfolder/write-test.abc"))
+                TestDocument input = new TestDocument(new NormalizedPath("Subfolder/write-test.abc"))
                 {
                     { key, "foo" }
                 };
@@ -134,7 +134,7 @@ namespace Statiq.Core.Tests.Modules.IO
             public async Task SetsDestinationFromDelegateDoesNotOverrideMetadata(string key, string value, string expected)
             {
                 // Given
-                TestDocument input = new TestDocument(new FilePath("Subfolder/write-test.abc"))
+                TestDocument input = new TestDocument(new NormalizedPath("Subfolder/write-test.abc"))
                 {
                     { key, value }
                 };
@@ -151,7 +151,7 @@ namespace Statiq.Core.Tests.Modules.IO
             public async Task SetsDestinationFromDocumentDelegate()
             {
                 // Given
-                TestDocument input = new TestDocument(new FilePath("Subfolder/write-test.abc"));
+                TestDocument input = new TestDocument(new NormalizedPath("Subfolder/write-test.abc"));
                 SetDestination setDestination = new SetDestination(
                     Config.FromDocument(doc => doc.Destination.ChangeExtension(".bar")));
 
@@ -165,7 +165,7 @@ namespace Statiq.Core.Tests.Modules.IO
             public async Task SetsDestinationFromStringDelegate()
             {
                 // Given
-                TestDocument input = new TestDocument(new FilePath("Subfolder/write-test.abc"));
+                TestDocument input = new TestDocument(new NormalizedPath("Subfolder/write-test.abc"));
                 SetDestination setDestination = new SetDestination("foo/bar.txt");
 
                 // When
@@ -179,7 +179,7 @@ namespace Statiq.Core.Tests.Modules.IO
             public async Task ExtensionWithDot()
             {
                 // Given
-                TestDocument input = new TestDocument(new FilePath("Subfolder/write-test.abc"));
+                TestDocument input = new TestDocument(new NormalizedPath("Subfolder/write-test.abc"));
                 SetDestination setDestination = new SetDestination(".txt");
 
                 // When
@@ -194,7 +194,7 @@ namespace Statiq.Core.Tests.Modules.IO
             {
                 // Given
                 TestDocument input = new TestDocument();
-                SetDestination setDestination = new SetDestination((FilePath)".dotfile");
+                SetDestination setDestination = new SetDestination((NormalizedPath)".dotfile");
 
                 // When
                 TestDocument result = await ExecuteAsync(input, setDestination).SingleAsync();

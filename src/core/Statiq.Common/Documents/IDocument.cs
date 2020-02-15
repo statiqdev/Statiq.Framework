@@ -17,17 +17,17 @@ namespace Statiq.Common
 
         /// <summary>
         /// An identifier for the document meant to reflect the source of the data. These should be unique (such as a file name).
-        /// This property is always an absolute path. If you want to get a relative path, use <see cref="FilePath.GetRelativeInputPath(IExecutionContext)"/>.
+        /// This property is always an absolute path. If you want to get a relative path, use <see cref="NormalizedPath.GetRelativeInputPath(IExecutionContext)"/>.
         /// </summary>
         /// <value>
         /// The source of the document, or <c>null</c> if the document doesn't have a source.
         /// </value>
-        FilePath Source { get; }
+        NormalizedPath Source { get; }
 
         /// <summary>
         /// The destination of the document. Can be either relative or absolute.
         /// </summary>
-        FilePath Destination { get; }
+        NormalizedPath Destination { get; }
 
         /// <summary>
         /// The content provider responsible for creating content streams for the document.
@@ -46,8 +46,8 @@ namespace Statiq.Common
         /// <param name="contentProvider">The new content provider or <c>null</c> to keep the existing content provider.</param>
         /// <returns>A new document of the same type as this document.</returns>
         IDocument Clone(
-            FilePath source,
-            FilePath destination,
+            NormalizedPath source,
+            NormalizedPath destination,
             IEnumerable<KeyValuePair<string, object>> items,
             IContentProvider contentProvider = null);
 

@@ -10,19 +10,19 @@ namespace Statiq.Testing
     {
         private readonly TestFileProvider _fileProvider;
 
-        public TestFile(TestFileProvider fileProvider, FilePath path)
+        public TestFile(TestFileProvider fileProvider, NormalizedPath path)
         {
             _fileProvider = fileProvider;
             Path = path;
         }
 
-        public FilePath Path { get; }
+        public NormalizedPath Path { get; }
 
         NormalizedPath IFileSystemEntry.Path => Path;
 
         public bool Exists => _fileProvider.Files.ContainsKey(Path.FullPath);
 
-        public IDirectory Directory => new TestDirectory(_fileProvider, Path.Directory);
+        public IDirectory Directory => new TestDirectory(_fileProvider, Path.Parent);
 
         public long Length => _fileProvider.Files[Path.FullPath].Length;
 
@@ -34,13 +34,13 @@ namespace Statiq.Testing
 
         private void CreateDirectory(bool createDirectory, IFile file)
         {
-            if (!createDirectory && !_fileProvider.Directories.Contains(file.Path.Directory.FullPath))
+            if (!createDirectory && !_fileProvider.Directories.Contains(file.Path.Parent.FullPath))
             {
-                throw new IOException($"Directory {file.Path.Directory.FullPath} does not exist");
+                throw new IOException($"Directory {file.Path.Parent.FullPath} does not exist");
             }
             if (createDirectory)
             {
-                DirectoryPath parent = file.Path.Directory;
+                NormalizedPath parent = file.Path.Parent;
                 while (parent != null)
                 {
                     _fileProvider.Directories.Add(parent.FullPath);

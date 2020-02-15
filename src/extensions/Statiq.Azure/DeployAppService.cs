@@ -42,19 +42,19 @@ namespace Statiq.Azure
         /// <param name="directory">
         /// The directory containing the files to deploy (from the root folder, not the input folder).
         /// </param>
-        public DeployAppService(Config<string> siteName, Config<string> username, Config<string> password, Config<DirectoryPath> directory)
+        public DeployAppService(Config<string> siteName, Config<string> username, Config<string> password, Config<NormalizedPath> directory)
             : this(siteName, username, password, GetContentProviderFromDirectory(directory))
         {
         }
 
-        private static Config<IContentProvider> GetContentProviderFromDirectory(Config<DirectoryPath> directory)
+        private static Config<IContentProvider> GetContentProviderFromDirectory(Config<NormalizedPath> directory)
         {
             _ = directory ?? throw new ArgumentNullException(nameof(directory));
             return directory.Transform(GetContentProvider);
 
-            static IContentProvider GetContentProvider(DirectoryPath path, IExecutionContext context)
+            static IContentProvider GetContentProvider(NormalizedPath path, IExecutionContext context)
             {
-                if (path == null)
+                if (path.IsNull)
                 {
                     throw new ExecutionException("Invalid directory");
                 }
@@ -66,23 +66,23 @@ namespace Statiq.Azure
         /// <summary>
         /// Deploys a specified zip file to Azure App Service.
         /// </summary>
+        /// <param name="zipPath">The zip file to deploy.</param>
         /// <param name="siteName">The name of the site to deploy.</param>
         /// <param name="username">The username to authenticate with.</param>
         /// <param name="password">The password to authenticate with.</param>
-        /// <param name="zipPath">The zip file to deploy.</param>
-        public DeployAppService(Config<string> siteName, Config<string> username, Config<string> password, Config<FilePath> zipPath)
+        public DeployAppService(Config<NormalizedPath> zipPath, Config<string> siteName, Config<string> username, Config<string> password)
             : this(siteName, username, password, GetContentProviderFromZipFile(zipPath))
         {
         }
 
-        private static Config<IContentProvider> GetContentProviderFromZipFile(Config<FilePath> zipPath)
+        private static Config<IContentProvider> GetContentProviderFromZipFile(Config<NormalizedPath> zipPath)
         {
             _ = zipPath ?? throw new ArgumentNullException(nameof(zipPath));
             return zipPath.Transform(GetContentProvider);
 
-            static IContentProvider GetContentProvider(FilePath filePath, IExecutionContext context)
+            static IContentProvider GetContentProvider(NormalizedPath filePath, IExecutionContext context)
             {
-                if (filePath == null)
+                if (filePath.IsNull)
                 {
                     throw new ExecutionException("Invalid zip path");
                 }

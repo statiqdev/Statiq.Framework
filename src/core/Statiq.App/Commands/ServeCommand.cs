@@ -46,7 +46,7 @@ namespace Statiq.App
 
             // Set folders
             IFileSystem fileSystem = engineManager.Engine.FileSystem;
-            DirectoryPath currentDirectory = Environment.CurrentDirectory;
+            NormalizedPath currentDirectory = Environment.CurrentDirectory;
             IDirectory serveDirectory;
             if (string.IsNullOrEmpty(commandSettings.RootPath))
             {

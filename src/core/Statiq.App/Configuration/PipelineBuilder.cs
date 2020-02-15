@@ -66,7 +66,7 @@ namespace Statiq.App
             return this;
         }
 
-        public PipelineBuilder WithOutputWriteFiles(Config<FilePath> path)
+        public PipelineBuilder WithOutputWriteFiles(Config<NormalizedPath> path)
         {
             _actions.Add(x => x.OutputModules.Add(
                 new SetDestination(path),

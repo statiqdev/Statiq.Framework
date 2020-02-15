@@ -31,7 +31,7 @@ namespace Statiq.Less
 
         public bool UseCacheDependencies => true;
 
-        private IFile GetInputFile(FilePath filePath)
+        private IFile GetInputFile(NormalizedPath filePath)
         {
             // Find the requested file
             // ...as specified
@@ -44,7 +44,7 @@ namespace Statiq.Less
             // ...with extension (if not already)
             if (!filePath.HasExtension || filePath.Extension != ".less")
             {
-                FilePath extensionPath = filePath.AppendExtension(".less");
+                NormalizedPath extensionPath = filePath.AppendExtension(".less");
                 IFile extensionFile = _fileSystem.GetInputFile(extensionPath);
                 if (extensionFile.Exists)
                 {

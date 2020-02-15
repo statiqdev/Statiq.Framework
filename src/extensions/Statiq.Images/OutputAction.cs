@@ -9,11 +9,11 @@ namespace Statiq.Images.Operations
     internal class OutputAction
     {
         private readonly Action<Image<Rgba32>, Stream> _action;
-        private readonly Func<FilePath, FilePath> _pathModifier;
+        private readonly Func<NormalizedPath, NormalizedPath> _pathModifier;
 
         public OutputAction(
             Action<Image<Rgba32>, Stream> action,
-            Func<FilePath, FilePath> pathModifier)
+            Func<NormalizedPath, NormalizedPath> pathModifier)
         {
             _action = action;
             _pathModifier = pathModifier;
@@ -22,7 +22,7 @@ namespace Statiq.Images.Operations
         public void Invoke(Image<Rgba32> image, Stream stream) =>
             _action?.Invoke(image, stream);
 
-        public FilePath GetPath(FilePath path) =>
+        public NormalizedPath GetPath(NormalizedPath path) =>
             _pathModifier == null ? path : _pathModifier(path);
     }
 }

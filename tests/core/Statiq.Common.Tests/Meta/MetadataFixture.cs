@@ -446,7 +446,7 @@ namespace Statiq.Common.Tests.Meta
                 IMetadata metadata = new Metadata(initialMetadata);
 
                 // When
-                metadata = new Metadata(metadata, new[] { new KeyValuePair<string, object>("A", new FilePath(path)) });
+                metadata = new Metadata(metadata, new[] { new KeyValuePair<string, object>("A", new NormalizedPath(path)) });
                 object result = metadata.GetString("A");
 
                 // Then
@@ -463,7 +463,7 @@ namespace Statiq.Common.Tests.Meta
                 IMetadata metadata = new Metadata(initialMetadata);
 
                 // When
-                metadata = new Metadata(metadata, new[] { new KeyValuePair<string, object>("A", new DirectoryPath(path)) });
+                metadata = new Metadata(metadata, new[] { new KeyValuePair<string, object>("A", new NormalizedPath(path)) });
                 object result = metadata.GetString("A");
 
                 // Then
@@ -483,12 +483,12 @@ namespace Statiq.Common.Tests.Meta
                 IMetadata metadata = new Metadata(initialMetadata);
 
                 // When
-                metadata = new Metadata(metadata, new[] { new KeyValuePair<string, object>("A", new FilePath(path)) });
+                metadata = new Metadata(metadata, new[] { new KeyValuePair<string, object>("A", new NormalizedPath(path)) });
                 object result = metadata.GetFilePath("A");
 
                 // Then
-                Assert.IsInstanceOf<FilePath>(result);
-                Assert.AreEqual(expected, ((FilePath)result).FullPath);
+                Assert.IsInstanceOf<NormalizedPath>(result);
+                Assert.AreEqual(expected, ((NormalizedPath)result).FullPath);
             }
 
             [TestCase("/a/b/c.txt", "/a/b/c.txt")]
@@ -511,8 +511,8 @@ namespace Statiq.Common.Tests.Meta
                 }
                 else
                 {
-                    Assert.IsInstanceOf<FilePath>(result);
-                    Assert.AreEqual(expected, ((FilePath)result).FullPath);
+                    Assert.IsInstanceOf<NormalizedPath>(result);
+                    Assert.AreEqual(expected, ((NormalizedPath)result).FullPath);
                 }
             }
         }
@@ -528,12 +528,12 @@ namespace Statiq.Common.Tests.Meta
                 IMetadata metadata = new Metadata(initialMetadata);
 
                 // When
-                metadata = new Metadata(metadata, new[] { new KeyValuePair<string, object>("A", new DirectoryPath(path)) });
+                metadata = new Metadata(metadata, new[] { new KeyValuePair<string, object>("A", new NormalizedPath(path)) });
                 object result = metadata.GetDirectoryPath("A");
 
                 // Then
-                Assert.IsInstanceOf<DirectoryPath>(result);
-                Assert.AreEqual(expected, ((DirectoryPath)result).FullPath);
+                Assert.IsInstanceOf<NormalizedPath>(result);
+                Assert.AreEqual(expected, ((NormalizedPath)result).FullPath);
             }
 
             [TestCase("/a/b/c", "/a/b/c")]
@@ -556,8 +556,8 @@ namespace Statiq.Common.Tests.Meta
                 }
                 else
                 {
-                    Assert.IsInstanceOf<DirectoryPath>(result);
-                    Assert.AreEqual(expected, ((DirectoryPath)result).FullPath);
+                    Assert.IsInstanceOf<NormalizedPath>(result);
+                    Assert.AreEqual(expected, ((NormalizedPath)result).FullPath);
                 }
             }
         }

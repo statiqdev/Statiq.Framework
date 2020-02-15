@@ -19,7 +19,7 @@ namespace Statiq.Core.Tests.Modules.Contents
             // Given
             TestDocument redirected = new TestDocument(new MetadataItems
             {
-                { Keys.RedirectFrom, new List<FilePath> { new FilePath("foo.html") } }
+                { Keys.RedirectFrom, new List<NormalizedPath> { new NormalizedPath("foo.html") } }
             });
             TestDocument notRedirected = new TestDocument();
             GenerateRedirects redirect = new GenerateRedirects();
@@ -37,7 +37,7 @@ namespace Statiq.Core.Tests.Modules.Contents
             // Given
             TestDocument redirected = new TestDocument(new MetadataItems
             {
-                { Keys.RedirectFrom, new List<FilePath> { new FilePath("foo.html") } }
+                { Keys.RedirectFrom, new List<NormalizedPath> { new NormalizedPath("foo.html") } }
             });
             TestDocument notRedirected = new TestDocument();
             GenerateRedirects redirect = new GenerateRedirects();
@@ -57,7 +57,7 @@ namespace Statiq.Core.Tests.Modules.Contents
             // Given
             TestDocument redirected = new TestDocument(new MetadataItems
             {
-                { Keys.RedirectFrom, new List<FilePath> { new FilePath(input) } }
+                { Keys.RedirectFrom, new List<NormalizedPath> { new NormalizedPath(input) } }
             });
             TestDocument notRedirected = new TestDocument();
             GenerateRedirects redirect = new GenerateRedirects();
@@ -73,9 +73,9 @@ namespace Statiq.Core.Tests.Modules.Contents
         public async Task WarnsForAbsoluteRedirectFromPath()
         {
             // Given
-            TestDocument redirected = new TestDocument(new FilePath("/"), null, new MetadataItems
+            TestDocument redirected = new TestDocument(new NormalizedPath("/"), null, new MetadataItems
             {
-                { Keys.RedirectFrom, new List<FilePath> { new FilePath("/foo/bar") } }
+                { Keys.RedirectFrom, new List<NormalizedPath> { new NormalizedPath("/foo/bar") } }
             });
             TestDocument notRedirected = new TestDocument();
             GenerateRedirects redirect = new GenerateRedirects();
@@ -96,11 +96,11 @@ namespace Statiq.Core.Tests.Modules.Contents
             // Given
             TestDocument redirected1 = new TestDocument(new MetadataItems
             {
-                { Keys.RedirectFrom, new List<FilePath> { new FilePath("foo.html") } }
+                { Keys.RedirectFrom, new List<NormalizedPath> { new NormalizedPath("foo.html") } }
             });
             TestDocument redirected2 = new TestDocument(new MetadataItems
             {
-                { Keys.RedirectFrom, new List<FilePath> { new FilePath("bar/baz.html") } }
+                { Keys.RedirectFrom, new List<NormalizedPath> { new NormalizedPath("bar/baz.html") } }
             });
             GenerateRedirects redirect = new GenerateRedirects();
 
@@ -116,16 +116,16 @@ namespace Statiq.Core.Tests.Modules.Contents
         {
             // Given
             TestDocument redirected1 = new TestDocument(
-                new FilePath("foo2.html"),
+                new NormalizedPath("foo2.html"),
                 new MetadataItems
                 {
-                    { Keys.RedirectFrom, new List<FilePath> { new FilePath("foo.html") } }
+                    { Keys.RedirectFrom, new List<NormalizedPath> { new NormalizedPath("foo.html") } }
                 });
             TestDocument redirected2 = new TestDocument(new MetadataItems
             {
-                { Keys.RedirectFrom, new List<FilePath> { new FilePath("bar/baz.html") } }
+                { Keys.RedirectFrom, new List<NormalizedPath> { new NormalizedPath("bar/baz.html") } }
             });
-            GenerateRedirects redirect = new GenerateRedirects().WithAdditionalOutput(new FilePath("a/b"), x => string.Join("|", x.Select(y => $"{y.Key} {y.Value}")));
+            GenerateRedirects redirect = new GenerateRedirects().WithAdditionalOutput(new NormalizedPath("a/b"), x => string.Join("|", x.Select(y => $"{y.Key} {y.Value}")));
 
             // When
             IReadOnlyList<TestDocument> results = await ExecuteAsync(new[] { redirected1, redirected2 }, redirect);
@@ -140,17 +140,17 @@ namespace Statiq.Core.Tests.Modules.Contents
         {
             // Given
             TestDocument redirected1 = new TestDocument(
-                new FilePath("foo2.html"),
+                new NormalizedPath("foo2.html"),
                 new MetadataItems
                 {
-                    { Keys.RedirectFrom, new List<FilePath> { new FilePath("foo.html") } }
+                    { Keys.RedirectFrom, new List<NormalizedPath> { new NormalizedPath("foo.html") } }
                 });
             TestDocument redirected2 = new TestDocument(new MetadataItems
             {
-                { Keys.RedirectFrom, new List<FilePath> { new FilePath("bar/baz.html") } }
+                { Keys.RedirectFrom, new List<NormalizedPath> { new NormalizedPath("bar/baz.html") } }
             });
             GenerateRedirects redirect = new GenerateRedirects()
-                .WithAdditionalOutput(new FilePath("a/b"), x => string.Join("|", x.Select(y => $"{y.Key} {y.Value}")))
+                .WithAdditionalOutput(new NormalizedPath("a/b"), x => string.Join("|", x.Select(y => $"{y.Key} {y.Value}")))
                 .WithMetaRefreshPages(false);
 
             // When

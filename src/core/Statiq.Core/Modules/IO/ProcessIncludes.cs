@@ -14,7 +14,7 @@ namespace Statiq.Core
     /// This module will look for include statements in the content of each document and
     /// will replace them with the content of the requested file from the file system.
     /// Include statements take the form <c>^"folder/file.ext"</c>. The given path will be
-    /// converted to a <see cref="FilePath"/> and can be absolute or relative. If relative,
+    /// converted to a <see cref="NormalizedPath"/> and can be absolute or relative. If relative,
     /// it should be relative to the document source. You can escape the include syntax by
     /// prefixing the <c>^</c> with a forward slash <c>\</c>.
     /// </para>
@@ -47,7 +47,7 @@ namespace Statiq.Core
         }
 
         // Returns null if the content wasn't modified
-        private async Task<string> ProcessIncludesAsync(string content, FilePath source, IExecutionContext context)
+        private async Task<string> ProcessIncludesAsync(string content, NormalizedPath source, IExecutionContext context)
         {
             bool modified = false;
 
@@ -73,7 +73,7 @@ namespace Statiq.Core
                             modified = true;
 
                             // Get the correct included path
-                            FilePath includedPath = new FilePath(content.Substring(start + 2, end - (start + 2)));
+                            NormalizedPath includedPath = new NormalizedPath(content.Substring(start + 2, end - (start + 2)));
                             if (includedPath.IsRelative)
                             {
                                 if (source == null)

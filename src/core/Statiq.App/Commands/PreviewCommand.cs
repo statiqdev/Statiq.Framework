@@ -207,10 +207,10 @@ namespace Statiq.App
         }
 
         internal static async Task<Server> StartPreviewServerAsync(
-            DirectoryPath path,
+            NormalizedPath path,
             int port,
             bool forceExtension,
-            DirectoryPath virtualDirectory,
+            NormalizedPath virtualDirectory,
             bool liveReload,
             IDictionary<string, string> contentTypes,
             ILoggerProvider loggerProvider,

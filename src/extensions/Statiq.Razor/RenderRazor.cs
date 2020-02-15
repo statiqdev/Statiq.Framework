@@ -37,8 +37,8 @@ namespace Statiq.Razor
         private static Guid _executionId = Guid.Empty;
 
         private readonly Type _basePageType;
-        private Config<FilePath> _viewStartPath;
-        private Config<FilePath> _layoutPath;
+        private Config<NormalizedPath> _viewStartPath;
+        private Config<NormalizedPath> _layoutPath;
         private Config<object> _model;
         private string _ignorePrefix = "_";
 
@@ -81,7 +81,7 @@ namespace Statiq.Razor
         /// <param name="path">A delegate that should return the ViewStart path as a <c>FilePath</c>,
         /// or <c>null</c> for the default ViewStart search behavior.</param>
         /// <returns>The current module instance.</returns>
-        public RenderRazor WithViewStart(Config<FilePath> path)
+        public RenderRazor WithViewStart(Config<NormalizedPath> path)
         {
             _viewStartPath = path;
             return this;
@@ -93,7 +93,7 @@ namespace Statiq.Razor
         /// </summary>
         /// <param name="path">A delegate that should return the layout path as a <c>FilePath</c>.</param>
         /// <returns>The current module instance.</returns>
-        public RenderRazor WithLayout(Config<FilePath> path)
+        public RenderRazor WithLayout(Config<NormalizedPath> path)
         {
             _layoutPath = path;
             return this;
@@ -158,7 +158,7 @@ namespace Statiq.Razor
                 {
                     using (Stream inputStream = input.GetContentStream())
                     {
-                        FilePath viewStartLocationPath = _viewStartPath == null ? null : await _viewStartPath.GetValueAsync(input, context);
+                        NormalizedPath viewStartLocationPath = _viewStartPath == null ? null : await _viewStartPath.GetValueAsync(input, context);
                         string layoutPath = _layoutPath == null ? null : (await _layoutPath.GetValueAsync(input, context))?.FullPath;
 
                         RenderRequest request = new RenderRequest
@@ -185,20 +185,20 @@ namespace Statiq.Razor
         private string GetRelativePath(IDocument document, IExecutionContext context)
         {
             // Use the pre-calculated relative file path if available
-            FilePath relativePath = document.Source?.GetRelativeInputPath(context);
+            NormalizedPath relativePath = document.Source?.GetRelativeInputPath(context);
             return relativePath != null ? $"/{relativePath.FullPath}" : GetRelativePath(document.Source, context);
         }
 
-        private string GetRelativePath(FilePath path, IExecutionContext context)
+        private string GetRelativePath(NormalizedPath path, IExecutionContext context)
         {
             // Calculate a relative path from the input path(s) (or root) to the provided path
             if (path != null)
             {
-                DirectoryPath inputPath = context.FileSystem.GetContainingInputPath(path) ?? DirectoryPath.RootPath;
+                NormalizedPath inputPath = context.FileSystem.GetContainingInputPath(path) ?? NormalizedPath.Root;
                 if (path.IsRelative)
                 {
                     // If the path is relative, combine it with the input path to make it absolute
-                    path = inputPath.CombineFile(path);
+                    path = inputPath.Combine(path);
                 }
                 return $"/{inputPath.GetRelativePath(path).FullPath}";
             }

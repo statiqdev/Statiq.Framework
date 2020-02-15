@@ -4,8 +4,8 @@ using Statiq.Testing;
 
 namespace Statiq.Common.Tests.IO
 {
-    [TestFixture(typeof(DirectoryPath))]
-    [TestFixture(typeof(FilePath))]
+    [TestFixture(typeof(NormalizedPath))]
+    [TestFixture(typeof(NormalizedPath))]
     public class PathCollectionFixture<TPath> : BaseFixture
         where TPath : NormalizedPath
     {
@@ -18,23 +18,23 @@ namespace Statiq.Common.Tests.IO
 
         public PathCollectionFixture()
         {
-            if (typeof(TPath) == typeof(DirectoryPath))
+            if (typeof(TPath) == typeof(NormalizedPath))
             {
-                _upperCaseA = (TPath)(NormalizedPath)new DirectoryPath("A");
-                _lowerCaseA = (TPath)(NormalizedPath)new DirectoryPath("a");
-                _upperCaseB = (TPath)(NormalizedPath)new DirectoryPath("B");
-                _lowerCaseB = (TPath)(NormalizedPath)new DirectoryPath("b");
-                _upperCaseC = (TPath)(NormalizedPath)new DirectoryPath("C");
-                _lowerCaseC = (TPath)(NormalizedPath)new DirectoryPath("c");
+                _upperCaseA = (TPath)(NormalizedPath)new NormalizedPath("A");
+                _lowerCaseA = (TPath)(NormalizedPath)new NormalizedPath("a");
+                _upperCaseB = (TPath)(NormalizedPath)new NormalizedPath("B");
+                _lowerCaseB = (TPath)(NormalizedPath)new NormalizedPath("b");
+                _upperCaseC = (TPath)(NormalizedPath)new NormalizedPath("C");
+                _lowerCaseC = (TPath)(NormalizedPath)new NormalizedPath("c");
             }
-            else if (typeof(TPath) == typeof(FilePath))
+            else if (typeof(TPath) == typeof(NormalizedPath))
             {
-                _upperCaseA = (TPath)(NormalizedPath)new FilePath("A.txt");
-                _lowerCaseA = (TPath)(NormalizedPath)new FilePath("a.txt");
-                _upperCaseB = (TPath)(NormalizedPath)new FilePath("B.txt");
-                _lowerCaseB = (TPath)(NormalizedPath)new FilePath("b.txt");
-                _upperCaseC = (TPath)(NormalizedPath)new FilePath("C.txt");
-                _lowerCaseC = (TPath)(NormalizedPath)new FilePath("c.txt");
+                _upperCaseA = (TPath)(NormalizedPath)new NormalizedPath("A.txt");
+                _lowerCaseA = (TPath)(NormalizedPath)new NormalizedPath("a.txt");
+                _upperCaseB = (TPath)(NormalizedPath)new NormalizedPath("B.txt");
+                _lowerCaseB = (TPath)(NormalizedPath)new NormalizedPath("b.txt");
+                _upperCaseC = (TPath)(NormalizedPath)new NormalizedPath("C.txt");
+                _lowerCaseC = (TPath)(NormalizedPath)new NormalizedPath("c.txt");
             }
             else
             {

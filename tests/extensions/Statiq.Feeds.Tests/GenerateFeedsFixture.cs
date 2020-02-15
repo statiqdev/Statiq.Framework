@@ -21,8 +21,8 @@ namespace Statiq.Feeds.Tests
                 TestExecutionContext context = new TestExecutionContext();
                 context.Settings[Keys.Host] = "buzz.com";
                 TestDocument document = new TestDocument(
-                    new FilePath("/input/fizz/buzz"),
-                    new FilePath("fizz/buzz"),
+                    new NormalizedPath("/input/fizz/buzz"),
+                    new NormalizedPath("fizz/buzz"),
                     new Dictionary<string, object>
                     {
                         { FeedKeys.Image, new Uri("http://foo.com/bar/baz.png") }

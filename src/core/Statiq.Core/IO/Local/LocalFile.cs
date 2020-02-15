@@ -10,11 +10,11 @@ namespace Statiq.Core
     {
         private readonly System.IO.FileInfo _file;
 
-        public FilePath Path { get; }
+        public NormalizedPath Path { get; }
 
         NormalizedPath IFileSystemEntry.Path => Path;
 
-        public LocalFile(FilePath path)
+        public LocalFile(NormalizedPath path)
         {
             _ = path ?? throw new ArgumentNullException(nameof(path));
             if (path.IsRelative)
@@ -26,7 +26,7 @@ namespace Statiq.Core
             _file = new System.IO.FileInfo(Path.FullPath);
         }
 
-        public IDirectory Directory => new LocalDirectory(Path.Directory);
+        public IDirectory Directory => new LocalDirectory(Path.Parent);
 
         public bool Exists => _file.Exists;
 

@@ -11,7 +11,7 @@ namespace Statiq.Common
         private readonly DocumentFileProvider _fileProvider;
         private readonly IDocument _document;
 
-        internal DocumentFile(DocumentFileProvider fileProvider, FilePath path)
+        internal DocumentFile(DocumentFileProvider fileProvider, NormalizedPath path)
         {
             _fileProvider = fileProvider ?? throw new ArgumentNullException(nameof(fileProvider));
             if (!fileProvider.Files.TryGetValue(path, out _document))
@@ -21,7 +21,7 @@ namespace Statiq.Common
             Path = path ?? throw new ArgumentNullException(nameof(path));
         }
 
-        public FilePath Path { get; }
+        public NormalizedPath Path { get; }
 
         NormalizedPath IFileSystemEntry.Path => Path;
 
@@ -31,7 +31,7 @@ namespace Statiq.Common
         public IContentProvider GetContentProvider(string mediaType) =>
             _document?.ContentProvider.CloneWithMediaType(mediaType) ?? new NullContent(mediaType);
 
-        public IDirectory Directory => new DocumentDirectory(_fileProvider, Path.Directory);
+        public IDirectory Directory => new DocumentDirectory(_fileProvider, Path.Parent);
 
         public bool Exists => _document != null;
 

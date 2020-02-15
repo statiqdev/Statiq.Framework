@@ -41,8 +41,8 @@ body {
                     FileSystem = fileSystem
                 };
                 TestDocument document = new TestDocument(
-                    new FilePath("/input/assets/test.scss"),
-                    new FilePath("assets/test.scss"),
+                    new NormalizedPath("/input/assets/test.scss"),
+                    new NormalizedPath("assets/test.scss"),
                     input);
 
                 CompileSass sass = new CompileSass().WithCompactOutputStyle();
@@ -75,8 +75,8 @@ body {
                     FileSystem = fileSystem
                 };
                 TestDocument document = new TestDocument(
-                    new FilePath("/input/assets/test.scss"),
-                    new FilePath("assets/test.scss"),
+                    new NormalizedPath("/input/assets/test.scss"),
+                    new NormalizedPath("assets/test.scss"),
                     input);
 
                 CompileSass sass = new CompileSass();
@@ -115,8 +115,8 @@ body {
                     FileSystem = fileSystem
                 };
                 TestDocument document = new TestDocument(
-                    new FilePath("/input/assets/test.scss"),
-                    new FilePath("assets/test.scss"),
+                    new NormalizedPath("/input/assets/test.scss"),
+                    new NormalizedPath("assets/test.scss"),
                     input);
 
                 CompileSass sass = new CompileSass();
@@ -160,8 +160,8 @@ body {
                     FileSystem = fileSystem
                 };
                 TestDocument document = new TestDocument(
-                    new FilePath("/input/assets/test.scss"),
-                    new FilePath("assets/test.scss"),
+                    new NormalizedPath("/input/assets/test.scss"),
+                    new NormalizedPath("assets/test.scss"),
                     input);
 
                 CompileSass sass = new CompileSass().IncludeSourceComments(false).WithCompactOutputStyle();
@@ -206,8 +206,8 @@ body {
                     FileSystem = fileSystem
                 };
                 TestDocument document = new TestDocument(
-                    new FilePath("/input/assets/test.scss"),
-                    new FilePath("assets/test.scss"),
+                    new NormalizedPath("/input/assets/test.scss"),
+                    new NormalizedPath("assets/test.scss"),
                     input);
 
                 CompileSass sass = new CompileSass().IncludeSourceComments(false).WithCompactOutputStyle();
@@ -252,8 +252,8 @@ body {
                     FileSystem = fileSystem
                 };
                 TestDocument document = new TestDocument(
-                    new FilePath("/input/assets/test.scss"),
-                    new FilePath("assets/test.scss"),
+                    new NormalizedPath("/input/assets/test.scss"),
+                    new NormalizedPath("assets/test.scss"),
                     input);
 
                 CompileSass sass = new CompileSass().IncludeSourceComments(false).WithCompactOutputStyle();
@@ -298,8 +298,8 @@ body {
                     FileSystem = fileSystem
                 };
                 TestDocument document = new TestDocument(
-                    new FilePath("/input/assets/test.scss"),
-                    new FilePath("assets/test.scss"),
+                    new NormalizedPath("/input/assets/test.scss"),
+                    new NormalizedPath("assets/test.scss"),
                     input);
 
                 CompileSass sass = new CompileSass().IncludeSourceComments(false).WithCompactOutputStyle();

@@ -21,9 +21,9 @@ namespace Statiq.Testing
         public ICollection<string> Directories { get; } = new ConcurrentHashSet<string>();
         public ConcurrentDictionary<string, StringBuilder> Files { get; } = new ConcurrentDictionary<string, StringBuilder>();
 
-        public IDirectory GetDirectory(DirectoryPath path) => new TestDirectory(this, path.FullPath);
+        public IDirectory GetDirectory(NormalizedPath path) => new TestDirectory(this, path.FullPath);
 
-        public IFile GetFile(FilePath path) => new TestFile(this, path.FullPath);
+        public IFile GetFile(NormalizedPath path) => new TestFile(this, path.FullPath);
 
         public void AddDirectory(string path) => Directories.Add(path);
 

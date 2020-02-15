@@ -24,21 +24,21 @@ namespace Statiq.Testing
         public IFileProvider FileProvider { get; set; }
 
         /// <inheritdoc />
-        public DirectoryPath RootPath { get; set; } = DirectoryPath.RootPath;
+        public NormalizedPath RootPath { get; set; } = NormalizedPath.Root;
 
         /// <inheritdoc />
-        public PathCollection<DirectoryPath> InputPaths { get; set; } = new PathCollection<DirectoryPath>(new[]
+        public PathCollection<NormalizedPath> InputPaths { get; set; } = new PathCollection<NormalizedPath>(new[]
         {
-            new DirectoryPath("theme"),
-            new DirectoryPath("input")
+            new NormalizedPath("theme"),
+            new NormalizedPath("input")
         });
 
-        IReadOnlyList<DirectoryPath> IReadOnlyFileSystem.InputPaths => InputPaths;
+        IReadOnlyList<NormalizedPath> IReadOnlyFileSystem.InputPaths => InputPaths;
 
         /// <inheritdoc />
-        public DirectoryPath OutputPath { get; set; } = "output";
+        public NormalizedPath OutputPath { get; set; } = "output";
 
         /// <inheritdoc />
-        public DirectoryPath TempPath { get; set; } = "temp";
+        public NormalizedPath TempPath { get; set; } = "temp";
     }
 }

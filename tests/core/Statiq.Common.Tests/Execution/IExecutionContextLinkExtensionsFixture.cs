@@ -44,7 +44,7 @@ namespace Statiq.Common.Tests.Execution
                 // Given
                 TestExecutionContext context = new TestExecutionContext();
                 context.Settings[Keys.Host] = "domain.com";
-                TestDocument document = new TestDocument(null, new FilePath(destination));
+                TestDocument document = new TestDocument(null, new NormalizedPath(destination));
 
                 // When
                 string result = ((IExecutionContext)context).GetLink(document, includeHost);

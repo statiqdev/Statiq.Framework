@@ -30,7 +30,7 @@ namespace Statiq.Less
     /// <category>Templates</category>
     public class CompileLess : Module
     {
-        private Config<FilePath> _inputPath = Config.FromDocument(doc => doc.Source);
+        private Config<NormalizedPath> _inputPath = Config.FromDocument(doc => doc.Source);
 
         /// <summary>
         /// Specifies a delegate that should be used to get the input path for each
@@ -38,9 +38,9 @@ namespace Statiq.Less
         /// file system and paths for include files. By default, the value of
         /// <see cref="IDocument.Source"/> is used for the input document path.
         /// </summary>
-        /// <param name="inputPath">A delegate that should return a <see cref="FilePath"/>.</param>
+        /// <param name="inputPath">A delegate that should return a <see cref="NormalizedPath"/>.</param>
         /// <returns>The current instance.</returns>
-        public CompileLess WithInputPath(Config<FilePath> inputPath)
+        public CompileLess WithInputPath(Config<NormalizedPath> inputPath)
         {
             _inputPath = inputPath ?? throw new ArgumentNullException(nameof(inputPath));
             return this;
@@ -68,21 +68,21 @@ namespace Statiq.Less
                 ((Importer)engine.Parser.Importer).FileReader = fileSystemReader;
 
                 // Less conversion
-                FilePath path = await _inputPath.GetValueAsync(input, context);
+                NormalizedPath path = await _inputPath.GetValueAsync(input, context);
                 if (path != null)
                 {
-                    engine.CurrentDirectory = path.Directory.FullPath;
+                    engine.CurrentDirectory = path.Parent.FullPath;
                 }
                 else
                 {
                     engine.CurrentDirectory = string.Empty;
-                    path = new FilePath(Path.GetRandomFileName());
+                    path = new NormalizedPath(Path.GetRandomFileName());
                     context.LogWarning($"No input path found for document {input.ToSafeDisplayString()}, using {path.FileName.FullPath}");
                 }
                 string content = engine.TransformToCss(await input.GetContentStringAsync(), path.FileName.FullPath);
 
                 // Process the result
-                FilePath cssPath = path.GetRelativeInputPath(context).ChangeExtension("css");
+                NormalizedPath cssPath = path.GetRelativeInputPath(context).ChangeExtension("css");
                 return input.Clone(
                     cssPath,
                     await context.GetContentProviderAsync(content, MediaTypes.Css));

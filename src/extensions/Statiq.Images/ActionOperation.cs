@@ -8,11 +8,11 @@ namespace Statiq.Images.Operations
     internal class ActionOperation : IImageOperation
     {
         private readonly Func<IImageProcessingContext<Rgba32>, IImageProcessingContext<Rgba32>> _operation;
-        private readonly Func<FilePath, FilePath> _pathModifier;
+        private readonly Func<NormalizedPath, NormalizedPath> _pathModifier;
 
         public ActionOperation(
             Func<IImageProcessingContext<Rgba32>, IImageProcessingContext<Rgba32>> operation,
-            Func<FilePath, FilePath> pathModifier)
+            Func<NormalizedPath, NormalizedPath> pathModifier)
         {
             _operation = operation;
             _pathModifier = pathModifier;
@@ -21,7 +21,7 @@ namespace Statiq.Images.Operations
         public IImageProcessingContext<Rgba32> Apply(IImageProcessingContext<Rgba32> image) =>
             _operation == null ? image : _operation(image);
 
-        public FilePath GetPath(FilePath path) =>
+        public NormalizedPath GetPath(NormalizedPath path) =>
             _pathModifier == null ? path : _pathModifier(path);
     }
 }

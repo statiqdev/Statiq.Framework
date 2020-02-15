@@ -15,7 +15,7 @@ namespace Statiq.Common
         /// Gets the path to the file.
         /// </summary>
         /// <value>The path.</value>
-        new FilePath Path { get; }
+        new NormalizedPath Path { get; }
 
         /// <summary>
         /// Gets the directory of the file.

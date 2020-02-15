@@ -29,7 +29,7 @@ namespace Statiq.CodeAnalysis.Analysis
         private readonly Compilation _compilation;
         private readonly IExecutionContext _context;
         private readonly Func<ISymbol, Compilation, bool> _symbolPredicate;
-        private readonly Func<ISymbol, Compilation, FilePath> _destination;
+        private readonly Func<ISymbol, Compilation, NormalizedPath> _destination;
         private readonly ConcurrentDictionary<string, string> _cssClasses;
         private readonly bool _docsForImplicitSymbols;
         private readonly bool _assemblySymbols;
@@ -47,7 +47,7 @@ namespace Statiq.CodeAnalysis.Analysis
             Compilation compilation,
             IExecutionContext context,
             Func<ISymbol, Compilation, bool> symbolPredicate,
-            Func<ISymbol, Compilation, FilePath> destination,
+            Func<ISymbol, Compilation, NormalizedPath> destination,
             ConcurrentDictionary<string, string> cssClasses,
             bool docsForImplicitSymbols,
             bool assemblySymbols,
@@ -413,12 +413,12 @@ namespace Statiq.CodeAnalysis.Analysis
             }
 
             // Add a destination for initially-processed symbols
-            FilePath destination = _finished ? null : _destination(symbol, _compilation);
+            NormalizedPath destination = _finished ? null : _destination(symbol, _compilation);
 
             // Create the document and add it to caches
             return _symbolToDocument.GetOrAdd(
                 symbol,
-                _ => _context.CreateDocument(new FilePath(symbol.ToDisplayString(), PathKind.Absolute), destination, items));
+                _ => _context.CreateDocument(new NormalizedPath(symbol.ToDisplayString(), PathKind.Absolute), destination, items));
         }
 
         private void AddXmlDocumentation(ISymbol symbol, MetadataItems metadata)

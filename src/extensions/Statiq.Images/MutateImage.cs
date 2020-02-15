@@ -124,7 +124,7 @@ namespace Statiq.Images
         /// <param name="action">An action that should write the provided image to the provided stream.</param>
         /// <param name="pathModifier">Modifies the destination path after applying the operation (for example, to set the extension).</param>
         /// <returns>The current module instance.</returns>
-        public MutateImage OutputAs(Action<Image<Rgba32>, Stream> action, Func<FilePath, FilePath> pathModifier = null)
+        public MutateImage OutputAs(Action<Image<Rgba32>, Stream> action, Func<NormalizedPath, NormalizedPath> pathModifier = null)
         {
             _operations.Peek().OutputActions.Add(new OutputAction(action, pathModifier));
             return this;
@@ -138,7 +138,7 @@ namespace Statiq.Images
         /// <returns>The current module instance.</returns>
         public MutateImage Operation(
             Func<IImageProcessingContext<Rgba32>, IImageProcessingContext<Rgba32>> operation,
-            Func<FilePath, FilePath> pathModifier = null)
+            Func<NormalizedPath, NormalizedPath> pathModifier = null)
         {
             _operations.Peek().Enqueue(new ActionOperation(operation, pathModifier));
             return this;
@@ -313,10 +313,10 @@ namespace Statiq.Images
 
         protected override IEnumerable<IDocument> ExecuteInput(IDocument input, IExecutionContext context)
         {
-            FilePath relativePath = input.Source.GetRelativeInputPath(context);
+            NormalizedPath relativePath = input.Source.GetRelativeInputPath(context);
             return _operations.SelectMany(operations =>
             {
-                FilePath destinationPath = relativePath;
+                NormalizedPath destinationPath = relativePath;
 
                 // Get the image
                 Image<Rgba32> image;
@@ -349,7 +349,7 @@ namespace Statiq.Images
                     : operations.OutputActions;
                 return outputActions.Select(action =>
                 {
-                    FilePath formatPath = action.GetPath(destinationPath) ?? destinationPath;
+                    NormalizedPath formatPath = action.GetPath(destinationPath) ?? destinationPath;
                     MemoryStream outputStream = new MemoryStream();
                     action.Invoke(image, outputStream);
                     outputStream.Seek(0, SeekOrigin.Begin);

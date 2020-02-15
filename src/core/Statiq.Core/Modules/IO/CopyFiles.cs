@@ -18,7 +18,7 @@ namespace Statiq.Core
     /// <category>Input/Output</category>
     public class CopyFiles : ParallelConfigModule<IEnumerable<string>>
     {
-        private Func<IFile, IFile, Task<FilePath>> _destinationPath;
+        private Func<IFile, IFile, Task<NormalizedPath>> _destinationPath;
         private Func<IFile, Task<bool>> _predicate = null;
 
         /// <summary>
@@ -67,7 +67,7 @@ namespace Statiq.Core
         /// <param name="destinationPath">A delegate that specifies an alternate destination.
         /// The parameter contains the source <see cref="IFile"/>.</param>
         /// <returns>The current module instance.</returns>
-        public CopyFiles To(Func<IFile, Task<FilePath>> destinationPath)
+        public CopyFiles To(Func<IFile, Task<NormalizedPath>> destinationPath)
         {
             if (destinationPath == null)
             {
@@ -90,7 +90,7 @@ namespace Statiq.Core
         /// The first parameter contains the source <see cref="IFile"/> and the second contains
         /// an <see cref="IFile"/> representing the calculated destination.</param>
         /// <returns>The current module instance.</returns>
-        public CopyFiles To(Func<IFile, IFile, Task<FilePath>> destinationPath)
+        public CopyFiles To(Func<IFile, IFile, Task<NormalizedPath>> destinationPath)
         {
             _destinationPath = destinationPath ?? throw new ArgumentNullException(nameof(destinationPath));
             return this;
@@ -109,7 +109,7 @@ namespace Statiq.Core
                         try
                         {
                             // Get the default destination file
-                            FilePath relativePath = file.Path.GetRelativeInputPath(context);
+                            NormalizedPath relativePath = file.Path.GetRelativeInputPath(context);
                             IFile destination = context.FileSystem.GetOutputFile(relativePath);
 
                             // Calculate an alternate destination if needed

@@ -25,11 +25,11 @@ namespace Statiq.Common
             {
                 foreach (IDocument document in documents)
                 {
-                    FilePath path = source ? document.Source : DirectoryPath.RootPath.CombineFile(document.Destination);
+                    NormalizedPath path = source ? document.Source : NormalizedPath.Root.Combine(document.Destination);
                     if (path != null)
                     {
                         Files[path] = document;
-                        DirectoryPath directory = path.Directory;
+                        NormalizedPath directory = path.Parent;
                         while (directory != null)
                         {
                             Directories.Add(directory);
@@ -40,15 +40,15 @@ namespace Statiq.Common
             }
         }
 
-        internal Dictionary<FilePath, IDocument> Files { get; } = new Dictionary<FilePath, IDocument>();
+        internal Dictionary<NormalizedPath, IDocument> Files { get; } = new Dictionary<NormalizedPath, IDocument>();
 
-        internal HashSet<DirectoryPath> Directories { get; } = new HashSet<DirectoryPath>();
+        internal HashSet<NormalizedPath> Directories { get; } = new HashSet<NormalizedPath>();
 
-        public IDirectory GetDirectory(DirectoryPath path) => new DocumentDirectory(this, path);
+        public IDirectory GetDirectory(NormalizedPath path) => new DocumentDirectory(this, path);
 
-        public IFile GetFile(FilePath path) => new DocumentFile(this, path);
+        public IFile GetFile(NormalizedPath path) => new DocumentFile(this, path);
 
-        public IDocument GetDocument(FilePath path) =>
+        public IDocument GetDocument(NormalizedPath path) =>
             Files.TryGetValue(path, out IDocument document) ? document : throw new KeyNotFoundException();
     }
 }
