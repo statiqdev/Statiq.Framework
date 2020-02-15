@@ -9,10 +9,8 @@ namespace Statiq.Common
     {
         public static IFile CreateZipFile(IExecutionContext context, NormalizedPath directory)
         {
-            if (directory == null)
-            {
-                throw new ExecutionException("No directory specified");
-            }
+            directory.ThrowIfNull(nameof(directory));
+
             IDirectory sourceDirectory = context.FileSystem.GetRootDirectory(directory);
             if (!sourceDirectory.Exists)
             {

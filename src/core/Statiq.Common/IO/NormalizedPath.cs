@@ -32,6 +32,10 @@ namespace Statiq.Common
 
         public static readonly NormalizedPath Current = new NormalizedPath(Dot);
 
+        public static readonly NormalizedPath Up = new NormalizedPath(DotDot);
+
+        public static readonly NormalizedPath AbsoluteRoot = new NormalizedPath(Slash);
+
         public static readonly NormalizedPath Null = new NormalizedPath(null);
 
         public static readonly NormalizedPath Empty = new NormalizedPath(string.Empty);
@@ -307,6 +311,11 @@ namespace Statiq.Common
         public bool IsEmpty => FullPath?.Length == 0;
 
         /// <summary>
+        /// Indicates if this is a null or empty path.
+        /// </summary>
+        public bool IsNullOrEmpty => IsNull || IsEmpty;
+
+        /// <summary>
         /// Gets the segments making up the path. These are slices of the
         /// <see cref="FullPath"/> and can be converted to either
         /// <see cref="ReadOnlySpan{T}"/> or <see cref="string"/> as needed.
@@ -325,7 +334,7 @@ namespace Statiq.Common
         public ReadOnlyMemory<char>[] Segments { get; }
 
         /// <inheritdoc />
-        public string ToDisplayString() => FullPath;
+        public string ToDisplayString() => IsNull ? string.Empty : FullPath;
 
         /// <summary>
         /// Returns a <see cref="string" /> that represents this path.
@@ -683,12 +692,12 @@ namespace Statiq.Common
         /// Gets the file extension.
         /// </summary>
         /// <value>The file extension (including the preceding ".") or <see cref="Empty"/> if the path contains no extension.</value>
-        public NormalizedPath Extension
+        public string Extension
         {
             get
             {
                 ThrowIfNull();
-                return new NormalizedPath(System.IO.Path.GetExtension(FullPath), PathKind.Relative);
+                return System.IO.Path.GetExtension(FullPath);
             }
         }
 
@@ -826,19 +835,19 @@ namespace Statiq.Common
         /// <summary>
         /// Gets a normalized title derived from the file path.
         /// </summary>
-        /// <returns>A normalized title.</returns>
+        /// <returns>A normalized title or null if the path is null.</returns>
         public string GetTitle()
         {
             if (IsNull)
             {
-                throw new NullReferenceException();
+                return null;
             }
 
             // Get the filename, unless an index file, then get containing directory
-            ReadOnlyMemory<char> titleMemory = Segments[Segments.Length - 1];
+            ReadOnlyMemory<char> titleMemory = Segments[^1];
             if (titleMemory.StartsWith(IndexFileName) && Segments.Length > 1)
             {
-                titleMemory = Segments[Segments.Length - 2];
+                titleMemory = Segments[^2];
             }
 
             // Strip the extension(s)

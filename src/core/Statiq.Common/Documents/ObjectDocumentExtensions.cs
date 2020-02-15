@@ -60,7 +60,7 @@ namespace Statiq.Common
                 : new ObjectDocument<T>(
                     x,
                     null,
-                    destinationFunc?.Invoke(x),
+                    destinationFunc?.Invoke(x) ?? NormalizedPath.Null,
                     itemsFunc?.Invoke(x),
                     contentProviderFunc?.Invoke(x)));
 
@@ -73,8 +73,8 @@ namespace Statiq.Common
                 ? null
                 : new ObjectDocument<T>(
                     x,
-                    sourceFunc?.Invoke(x),
-                    destinationFunc?.Invoke(x),
+                    sourceFunc?.Invoke(x) ?? NormalizedPath.Null,
+                    destinationFunc?.Invoke(x) ?? NormalizedPath.Null,
                     null,
                     contentProviderFunc?.Invoke(x)));
 
@@ -87,7 +87,7 @@ namespace Statiq.Common
                 : new ObjectDocument<T>(
                     x,
                     null,
-                    destinationFunc?.Invoke(x),
+                    destinationFunc?.Invoke(x) ?? NormalizedPath.Null,
                     null,
                     contentProviderFunc?.Invoke(x)));
 
@@ -126,8 +126,8 @@ namespace Statiq.Common
                 ? null
                 : new ObjectDocument<T>(
                     x,
-                    sourceFunc?.Invoke(x),
-                    destinationFunc?.Invoke(x),
+                    sourceFunc?.Invoke(x) ?? NormalizedPath.Null,
+                    destinationFunc?.Invoke(x) ?? NormalizedPath.Null,
                     itemsFunc?.Invoke(x),
                     contentProviderFunc?.Invoke(x)));
     }

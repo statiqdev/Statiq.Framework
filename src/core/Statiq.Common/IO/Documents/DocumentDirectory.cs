@@ -13,7 +13,7 @@ namespace Statiq.Common
         internal DocumentDirectory(DocumentFileProvider fileProvider, NormalizedPath path)
         {
             _fileProvider = fileProvider ?? throw new ArgumentNullException(nameof(fileProvider));
-            Path = path ?? throw new ArgumentNullException(nameof(path));
+            path.ThrowIfNull(nameof(path));
         }
 
         public NormalizedPath Path { get; }
@@ -38,10 +38,8 @@ namespace Statiq.Common
 
         public IDirectory GetDirectory(NormalizedPath directory)
         {
-            if (directory == null)
-            {
-                throw new ArgumentNullException(nameof(directory));
-            }
+            directory.ThrowIfNull(nameof(directory));
+
             if (!directory.IsRelative)
             {
                 throw new ArgumentException("Path must be relative", nameof(directory));
@@ -54,10 +52,8 @@ namespace Statiq.Common
 
         public IFile GetFile(NormalizedPath path)
         {
-            if (path == null)
-            {
-                throw new ArgumentNullException(nameof(path));
-            }
+            path.ThrowIfNull(nameof(path));
+
             if (!path.IsRelative)
             {
                 throw new ArgumentException("Path must be relative", nameof(path));

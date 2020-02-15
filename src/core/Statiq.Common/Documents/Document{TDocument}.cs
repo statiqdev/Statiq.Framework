@@ -126,11 +126,11 @@ namespace Statiq.Common
             IContentProvider contentProvider)
         {
             CheckInitialized();
-            if (source?.IsAbsolute == false)
+            if (!source.IsAbsolute)
             {
                 throw new ArgumentException("Document sources must be absolute", nameof(source));
             }
-            if (destination?.IsRelative == false)
+            if (!destination.IsRelative)
             {
                 throw new ArgumentException("Document destinations must be relative to the output path", nameof(destination));
             }
@@ -158,8 +158,8 @@ namespace Statiq.Common
             document.Id = Id;  // Make sure it's got the same ID in case implementation overrode Clone()
             return document.Initialize(
                 _baseMetadata,
-                _source ?? source,
-                destination ?? _destination,
+                _source.IsNull ? source : _source,
+                destination.IsNull ? _destination : destination,
                 items == null ? _metadata : new Metadata(_metadata, items),
                 contentProvider ?? _contentProvider);
         }
@@ -274,10 +274,10 @@ namespace Statiq.Common
 
         // Allow overrides
         // TODO: Replace with base(IDocument).ToDisplayString() when available (base interface method call not in language yet)
-        public virtual string ToDisplayString() => Source?.ToDisplayString() ?? "unknown source";
+        public virtual string ToDisplayString() => Source.IsNull ? "unknown source" : Source.ToDisplayString();
 
         /// <inheritdoc />
-        public override string ToString() => Source?.FullPath ?? string.Empty;
+        public override string ToString() => Source.IsNull ? string.Empty : Source.FullPath;
 
         // IMetadata
 

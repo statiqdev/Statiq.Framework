@@ -58,6 +58,6 @@ namespace Statiq.Common
         IContentProvider IContentProviderFactory.GetContentProvider(string mediaType) => ContentProvider.CloneWithMediaType(mediaType);
 
         /// <inheritdoc />
-        string IDisplayable.ToDisplayString() => Source?.ToDisplayString() ?? "unknown source";
+        string IDisplayable.ToDisplayString() => Source.IsNull ? "unknown source" : Source.ToDisplayString();
     }
 }

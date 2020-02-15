@@ -18,11 +18,11 @@ namespace Statiq.Common
         /// </returns>
         public bool Equals(NormalizedPath x, NormalizedPath y)
         {
-            if (x == null && y == null)
+            if (x.IsNull && y.IsNull)
             {
                 return true;
             }
-            if (x == null || y == null)
+            if (x.IsNull || y.IsNull)
             {
                 return false;
             }
@@ -33,17 +33,10 @@ namespace Statiq.Common
         /// <summary>
         /// Returns a hash code for the specified <see cref="NormalizedPath"/>.
         /// </summary>
-        /// <param name="obj">The path.</param>
+        /// <param name="path">The path.</param>
         /// <returns>
         /// A hash code for this instance, suitable for use in hashing algorithms and data structures like a hash table.
         /// </returns>
-        public int GetHashCode(NormalizedPath obj)
-        {
-            if (obj == null)
-            {
-                throw new ArgumentNullException(nameof(obj));
-            }
-            return obj.GetHashCode();
-        }
+        public int GetHashCode(NormalizedPath path) => path.GetHashCode();
     }
 }

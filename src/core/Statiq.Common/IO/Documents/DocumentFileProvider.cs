@@ -25,12 +25,12 @@ namespace Statiq.Common
             {
                 foreach (IDocument document in documents)
                 {
-                    NormalizedPath path = source ? document.Source : NormalizedPath.Root.Combine(document.Destination);
-                    if (path != null)
+                    NormalizedPath path = source ? document.Source : NormalizedPath.AbsoluteRoot.Combine(document.Destination);
+                    if (!path.IsNull)
                     {
                         Files[path] = document;
                         NormalizedPath directory = path.Parent;
-                        while (directory != null)
+                        while (!directory.IsNullOrEmpty)
                         {
                             Directories.Add(directory);
                             directory = directory.Parent;

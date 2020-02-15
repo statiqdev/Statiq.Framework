@@ -98,7 +98,7 @@ namespace Statiq.Common
         /// Gets a normalized title derived from the document source.
         /// </summary>
         /// <param name="document">The document.</param>
-        /// <returns>A normalized title.</returns>
-        public static string GetTitle(this IDocument document) => document.Source?.GetTitle();
+        /// <returns>A normalized title or <c>null</c> if the source is null.</returns>
+        public static string GetTitle(this IDocument document) => document.Source.GetTitle();
     }
 }

@@ -116,11 +116,11 @@ namespace Statiq.Common
             {
                 throw new ArgumentNullException(nameof(obj));
             }
-            if (source?.IsAbsolute == false)
+            if (!source.IsAbsolute)
             {
                 throw new ArgumentException("Document sources must be absolute", nameof(source));
             }
-            if (destination?.IsRelative == false)
+            if (!destination.IsRelative)
             {
                 throw new ArgumentException("Document destinations must be relative to the output path", nameof(source));
             }
@@ -141,13 +141,13 @@ namespace Statiq.Common
             new ObjectDocument<T>(
                 Id,
                 Object,
-                Source ?? source,
-                destination ?? Destination,
+                Source.IsNull ? source : Source,
+                destination.IsNull ? Destination : destination,
                 items == null ? _metadata : new Metadata(_metadata, items),
                 contentProvider ?? ContentProvider);
 
         /// <inheritdoc />
-        public override string ToString() => Source?.FullPath ?? string.Empty;
+        public override string ToString() => Source.IsNull ? string.Empty : Source.FullPath;
 
         // IMetadata
 

@@ -36,7 +36,7 @@
             this IExecutionContext executionContext,
             IDocument document,
             bool includeHost = false) =>
-            document.Destination == null ? null : executionContext.GetLink(document.Destination, includeHost);
+            document.Destination.IsNull ? null : executionContext.GetLink(document.Destination, includeHost);
 
         /// <summary>
         /// Gets a link for the specified metadata using the specified metadata value and the default settings from the
@@ -71,7 +71,7 @@
 
                 // Otherwise try to process the value as a file path
                 NormalizedPath filePath = metadata.GetFilePath(key);
-                return filePath != null ? executionContext.GetLink(filePath, includeHost) : null;
+                return filePath.IsNull ? null : executionContext.GetLink(filePath, includeHost);
             }
             return null;
         }

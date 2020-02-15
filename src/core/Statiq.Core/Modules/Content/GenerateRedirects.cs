@@ -134,7 +134,7 @@ namespace Statiq.Core
                 IReadOnlyList<NormalizedPath> paths = await _paths.GetValueAsync(input, context);
                 if (paths != null)
                 {
-                    foreach (NormalizedPath fromPath in paths.Where(x => x != null))
+                    foreach (NormalizedPath fromPath in paths.Where(x => !x.IsNull))
                     {
                         // Make sure it's a relative path
                         if (!fromPath.IsRelative)
