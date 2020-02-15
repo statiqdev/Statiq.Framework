@@ -147,7 +147,7 @@ namespace Statiq.Html
             }
 
             NormalizedPath path = _pathFunc(uri);
-            if (path == null)
+            if (path.IsNull)
             {
                 throw new ExecutionException($"Null resource mirror path for {source}");
             }

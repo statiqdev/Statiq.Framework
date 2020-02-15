@@ -338,7 +338,11 @@ namespace Statiq.Images
                             workingImageContext = operation.Apply(workingImageContext);
 
                             // Modify the path
-                            destinationPath = operation.GetPath(destinationPath) ?? destinationPath;
+                            NormalizedPath operationPath = operation.GetPath(destinationPath);
+                            if (!operationPath.IsNull)
+                            {
+                                destinationPath = operationPath;
+                            }
                         }
                     });
                 }
@@ -349,7 +353,11 @@ namespace Statiq.Images
                     : operations.OutputActions;
                 return outputActions.Select(action =>
                 {
-                    NormalizedPath formatPath = action.GetPath(destinationPath) ?? destinationPath;
+                    NormalizedPath formatPath = action.GetPath(destinationPath);
+                    if (formatPath.IsNull)
+                    {
+                        formatPath = destinationPath;
+                    }
                     MemoryStream outputStream = new MemoryStream();
                     action.Invoke(image, outputStream);
                     outputStream.Seek(0, SeekOrigin.Begin);

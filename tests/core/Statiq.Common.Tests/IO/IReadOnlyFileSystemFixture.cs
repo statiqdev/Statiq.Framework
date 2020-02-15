@@ -199,12 +199,10 @@ namespace Statiq.Common.Tests.IO
                 fileSystem.InputPaths.Add("x");
 
                 // When
-                NormalizedPath inputPathFromFilePath = fileSystem.GetContainingInputPathForAbsolutePath(new NormalizedPath(path));
-                NormalizedPath inputPathFromDirectoryPath = fileSystem.GetContainingInputPathForAbsolutePath(new NormalizedPath(path));
+                NormalizedPath inputPath = fileSystem.GetContainingInputPathForAbsolutePath(new NormalizedPath(path));
 
                 // Then
-                Assert.AreEqual(expected, inputPathFromFilePath?.FullPath);
-                Assert.AreEqual(expected, inputPathFromDirectoryPath?.FullPath);
+                inputPath.FullPath.ShouldBe(expected);
             }
 
             [TestCase("/a/b/c/foo.txt", "/a/b")]
@@ -221,12 +219,10 @@ namespace Statiq.Common.Tests.IO
                 fileSystem.InputPaths.Add("../x");
 
                 // When
-                NormalizedPath inputPathFromFilePath = fileSystem.GetContainingInputPathForAbsolutePath(new NormalizedPath(path));
-                NormalizedPath inputPathFromDirectoryPath = fileSystem.GetContainingInputPathForAbsolutePath(new NormalizedPath(path));
+                NormalizedPath inputPath = fileSystem.GetContainingInputPathForAbsolutePath(new NormalizedPath(path));
 
                 // Then
-                Assert.AreEqual(expected, inputPathFromFilePath?.FullPath);
-                Assert.AreEqual(expected, inputPathFromDirectoryPath?.FullPath);
+                inputPath.FullPath.ShouldBe(expected);
             }
         }
 
@@ -258,12 +254,10 @@ namespace Statiq.Common.Tests.IO
                 fileSystem.InputPaths.Add("x");
 
                 // When
-                NormalizedPath inputPathFromFilePath = fileSystem.GetContainingInputPath(new NormalizedPath(path));
-                NormalizedPath inputPathFromDirectoryPath = fileSystem.GetContainingInputPath(new NormalizedPath(path));
+                NormalizedPath inputPath = fileSystem.GetContainingInputPath(new NormalizedPath(path));
 
                 // Then
-                Assert.AreEqual(expected, inputPathFromFilePath?.FullPath);
-                Assert.AreEqual(expected, inputPathFromDirectoryPath?.FullPath);
+                inputPath.FullPath.ShouldBe(expected);
             }
 
             [TestCase("/a/b/c/foo.txt", "/a/b")]
@@ -280,12 +274,10 @@ namespace Statiq.Common.Tests.IO
                 fileSystem.InputPaths.Add("../x");
 
                 // When
-                NormalizedPath inputPathFromFilePath = fileSystem.GetContainingInputPath(new NormalizedPath(path));
-                NormalizedPath inputPathFromDirectoryPath = fileSystem.GetContainingInputPath(new NormalizedPath(path));
+                NormalizedPath inputPath = fileSystem.GetContainingInputPath(new NormalizedPath(path));
 
                 // Then
-                Assert.AreEqual(expected, inputPathFromFilePath?.FullPath);
-                Assert.AreEqual(expected, inputPathFromDirectoryPath?.FullPath);
+                inputPath.FullPath.ShouldBe(expected);
             }
 
             [TestCase("c/foo.txt", "/a/b")]
@@ -306,7 +298,7 @@ namespace Statiq.Common.Tests.IO
                 NormalizedPath inputPath = fileSystem.GetContainingInputPath(new NormalizedPath(path));
 
                 // Then
-                Assert.AreEqual(expected, inputPath?.FullPath);
+                inputPath.FullPath.ShouldBe(expected);
             }
 
             [TestCase("c", "/a/b")]
@@ -325,7 +317,7 @@ namespace Statiq.Common.Tests.IO
                 NormalizedPath inputPath = fileSystem.GetContainingInputPath(new NormalizedPath(path));
 
                 // Then
-                Assert.AreEqual(expected, inputPath?.FullPath);
+                inputPath.FullPath.ShouldBe(expected);
             }
 
             [Test]
@@ -345,7 +337,7 @@ namespace Statiq.Common.Tests.IO
                 NormalizedPath inputPath = fileSystem.GetContainingInputPath(new NormalizedPath("baz.txt"));
 
                 // Then
-                Assert.AreEqual("/a/yz", inputPath?.FullPath);
+                inputPath.FullPath.ShouldBe("/a/yz");
             }
         }
 

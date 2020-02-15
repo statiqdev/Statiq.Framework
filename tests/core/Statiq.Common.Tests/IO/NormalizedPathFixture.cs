@@ -11,6 +11,16 @@ namespace Statiq.Common.Tests.IO
         public class ConstructorTests : NormalizedPathFixture
         {
             [Test]
+            public void DefaultIsNull()
+            {
+                // Given, When
+                NormalizedPath path = default;
+
+                // Then
+                path.IsNull.ShouldBeTrue();
+            }
+
+            [Test]
             public void ShouldThrowIfPathIsNull()
             {
                 // Given, When, Then

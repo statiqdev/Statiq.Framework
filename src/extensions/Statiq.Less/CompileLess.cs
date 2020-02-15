@@ -69,7 +69,7 @@ namespace Statiq.Less
 
                 // Less conversion
                 NormalizedPath path = await _inputPath.GetValueAsync(input, context);
-                if (path != null)
+                if (!path.IsNull)
                 {
                     engine.CurrentDirectory = path.Parent.FullPath;
                 }

@@ -139,7 +139,7 @@ namespace Statiq.Razor
 
             // Eliminate input documents that we shouldn't process
             ImmutableArray<IDocument> validInputs = context.Inputs
-                .Where(x => _ignorePrefix == null || x.Source?.FileName.FullPath.StartsWith(_ignorePrefix) != true)
+                .Where(x => _ignorePrefix == null || x.Source.IsNull || !x.Source.FileName.FullPath.StartsWith(_ignorePrefix))
                 .ToImmutableArray();
 
             if (validInputs.Length < context.Inputs.Length)
@@ -159,7 +159,8 @@ namespace Statiq.Razor
                     using (Stream inputStream = input.GetContentStream())
                     {
                         NormalizedPath viewStartLocationPath = _viewStartPath == null ? null : await _viewStartPath.GetValueAsync(input, context);
-                        string layoutPath = _layoutPath == null ? null : (await _layoutPath.GetValueAsync(input, context))?.FullPath;
+                        NormalizedPath layoutPath = _layoutPath == null ? NormalizedPath.Null : (await _layoutPath.GetValueAsync(input, context));
+                        string layoutLocation = layoutPath.IsNull ? null : layoutPath.FullPath;
 
                         RenderRequest request = new RenderRequest
                         {
@@ -168,8 +169,8 @@ namespace Statiq.Razor
                             BaseType = _basePageType,
                             Context = context,
                             Document = input,
-                            LayoutLocation = layoutPath,
-                            ViewStartLocation = viewStartLocationPath != null ? GetRelativePath(viewStartLocationPath, context) : null,
+                            LayoutLocation = layoutLocation,
+                            ViewStartLocation = viewStartLocationPath.IsNull ? null : GetRelativePath(viewStartLocationPath, context),
                             RelativePath = GetRelativePath(input, context),
                             Model = _model == null ? input : await _model.GetValueAsync(input, context)
                         };
@@ -185,16 +186,20 @@ namespace Statiq.Razor
         private string GetRelativePath(IDocument document, IExecutionContext context)
         {
             // Use the pre-calculated relative file path if available
-            NormalizedPath relativePath = document.Source?.GetRelativeInputPath(context);
-            return relativePath != null ? $"/{relativePath.FullPath}" : GetRelativePath(document.Source, context);
+            NormalizedPath relativePath = document.Source.IsNull ? NormalizedPath.Null : document.Source.GetRelativeInputPath(context);
+            return relativePath.IsNull ? GetRelativePath(document.Source, context) : $"/{relativePath.FullPath}";
         }
 
         private string GetRelativePath(NormalizedPath path, IExecutionContext context)
         {
             // Calculate a relative path from the input path(s) (or root) to the provided path
-            if (path != null)
+            if (!path.IsNull)
             {
-                NormalizedPath inputPath = context.FileSystem.GetContainingInputPath(path) ?? NormalizedPath.Root;
+                NormalizedPath inputPath = context.FileSystem.GetContainingInputPath(path);
+                if (inputPath.IsNull)
+                {
+                    inputPath = NormalizedPath.AbsoluteRoot;
+                }
                 if (path.IsRelative)
                 {
                     // If the path is relative, combine it with the input path to make it absolute

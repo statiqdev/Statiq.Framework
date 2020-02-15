@@ -149,14 +149,26 @@ namespace Statiq.Sass
             };
             IEnumerable<string> includePaths = _includePaths
                 .Where(x => !x.IsNull)
-                .Select(x => x.IsAbsolute ? x.FullPath : context.FileSystem.GetContainingInputPath(x)?.Combine(x)?.FullPath)
+                .Select(x =>
+                {
+                    if (x.IsAbsolute)
+                    {
+                        return x.FullPath;
+                    }
+                    NormalizedPath containingInputPath = context.FileSystem.GetContainingInputPath(x);
+                    return containingInputPath.IsNull ? null : containingInputPath.Combine(x).FullPath;
+                })
                 .Where(x => x != null);
             options.IncludePaths.AddRange(includePaths);
             ScssResult result = Scss.ConvertToCss(content, options);
 
             // Process the result
             NormalizedPath relativeDirectory = context.FileSystem.GetContainingInputPath(inputPath);
-            NormalizedPath relativePath = relativeDirectory?.GetRelativePath(inputPath) ?? inputPath.FileName;
+            NormalizedPath relativePath = relativeDirectory.IsNull ? NormalizedPath.Null : relativeDirectory.GetRelativePath(inputPath);
+            if (relativePath.IsNull)
+            {
+                relativePath = inputPath.FileName;
+            }
 
             NormalizedPath cssPath = relativePath.ChangeExtension("css");
             IDocument cssDocument = input.Clone(
