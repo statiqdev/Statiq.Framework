@@ -8,21 +8,13 @@ namespace Statiq.Common.Tests.IO
     [TestFixture]
     public class NormalizedPathFixture : BaseFixture
     {
-        private class TestPath : NormalizedPath
-        {
-            public TestPath(string path, PathKind pathKind = PathKind.RelativeOrAbsolute)
-                : base(path, pathKind)
-            {
-            }
-        }
-
         public class ConstructorTests : NormalizedPathFixture
         {
             [Test]
             public void ShouldThrowIfPathIsNull()
             {
                 // Given, When, Then
-                Should.Throw<ArgumentNullException>(() => new TestPath(null));
+                Should.Throw<ArgumentNullException>(() => new NormalizedPath(null));
             }
 
             [TestCase("")]
@@ -30,14 +22,14 @@ namespace Statiq.Common.Tests.IO
             public void ShouldThrowIfPathIsEmpty(string fullPath)
             {
                 // Given, When, Then
-                Should.Throw<ArgumentException>(() => new TestPath(fullPath));
+                Should.Throw<ArgumentException>(() => new NormalizedPath(fullPath));
             }
 
             [Test]
             public void CurrentDirectoryReturnsDot()
             {
                 // Given, When
-                TestPath path = new TestPath("./");
+                NormalizedPath path = new NormalizedPath("./");
 
                 // Then
                 path.FullPath.ShouldBe(".");
@@ -47,7 +39,7 @@ namespace Statiq.Common.Tests.IO
             public void ShouldNormalizePathSeparators()
             {
                 // Given, When
-                TestPath path = new TestPath("shaders\\basic");
+                NormalizedPath path = new NormalizedPath("shaders\\basic");
 
                 // Then
                 path.FullPath.ShouldBe("shaders/basic");
@@ -57,7 +49,7 @@ namespace Statiq.Common.Tests.IO
             public void ShouldTrimWhiteSpaceFromPathAndLeaveSpaces()
             {
                 // Given, When
-                TestPath path = new TestPath("\t\r\nshaders/basic ");
+                NormalizedPath path = new NormalizedPath("\t\r\nshaders/basic ");
 
                 // Then
                 path.FullPath.ShouldBe("shaders/basic ");
@@ -67,7 +59,7 @@ namespace Statiq.Common.Tests.IO
             public void ShouldNotRemoveWhiteSpaceWithinPath()
             {
                 // Given, When
-                TestPath path = new TestPath("my awesome shaders/basic");
+                NormalizedPath path = new NormalizedPath("my awesome shaders/basic");
 
                 // Then
                 path.FullPath.ShouldBe("my awesome shaders/basic");
@@ -82,7 +74,7 @@ namespace Statiq.Common.Tests.IO
             public void ShouldRemoveTrailingSlashes(string value, string expected)
             {
                 // Given, When
-                TestPath path = new TestPath(value);
+                NormalizedPath path = new NormalizedPath(value);
 
                 // Then
                 path.FullPath.ShouldBe(expected);
@@ -93,7 +85,7 @@ namespace Statiq.Common.Tests.IO
             public void ShouldNotRemoveSingleTrailingSlash(string value)
             {
                 // Given, When
-                TestPath path = new TestPath(value);
+                NormalizedPath path = new NormalizedPath(value);
 
                 // Then
                 path.FullPath.ShouldBe("/");
@@ -106,7 +98,7 @@ namespace Statiq.Common.Tests.IO
             public void ShouldRemoveRelativePrefix(string value, string expected)
             {
                 // Given, When
-                TestPath path = new TestPath(value);
+                NormalizedPath path = new NormalizedPath(value);
 
                 // Then
                 path.FullPath.ShouldBe(expected);
@@ -117,7 +109,7 @@ namespace Statiq.Common.Tests.IO
             public void ShouldNotRemoveOnlyRelativePart(string value)
             {
                 // Given, When
-                TestPath path = new TestPath(value);
+                NormalizedPath path = new NormalizedPath(value);
 
                 // Then
                 path.FullPath.ShouldBe("/");
@@ -133,7 +125,7 @@ namespace Statiq.Common.Tests.IO
             public void ShouldReturnSegmentsOfPath(string pathName)
             {
                 // Given, When
-                TestPath path = new TestPath(pathName);
+                NormalizedPath path = new NormalizedPath(pathName);
 
                 // Then
                 path.Segments.Length.ShouldBe(2);
@@ -149,7 +141,7 @@ namespace Statiq.Common.Tests.IO
             {
                 // Given, When
                 const string expected = "shaders/basic";
-                TestPath path = new TestPath(expected);
+                NormalizedPath path = new NormalizedPath(expected);
 
                 // Then
                 path.FullPath.ShouldBe(expected);
@@ -160,7 +152,7 @@ namespace Statiq.Common.Tests.IO
             {
                 // Given, When
                 const string expected = "/shaders/basic";
-                TestPath path = new TestPath(expected);
+                NormalizedPath path = new NormalizedPath(expected);
 
                 // Then
                 path.FullPath.ShouldBe(expected);
@@ -171,7 +163,7 @@ namespace Statiq.Common.Tests.IO
             {
                 // Given, When
                 const string expected = "shaders/basic";
-                TestPath path = new TestPath(expected, PathKind.Absolute);
+                NormalizedPath path = new NormalizedPath(expected, PathKind.Absolute);
 
                 // Then
                 path.FullPath.ShouldBe(expected);
@@ -181,7 +173,7 @@ namespace Statiq.Common.Tests.IO
             public void ShouldNotPrependSlashForRootedPath()
             {
                 // Given, When
-                TestPath path = new TestPath("C:/shaders/basic");
+                NormalizedPath path = new NormalizedPath("C:/shaders/basic");
 
                 // Then
                 path.FullPath.ShouldBe("C:\\shaders/basic");
@@ -201,7 +193,7 @@ namespace Statiq.Common.Tests.IO
             public void ShouldReturnRootPath(string fullPath, string expected)
             {
                 // Given
-                TestPath path = new TestPath(fullPath);
+                NormalizedPath path = new NormalizedPath(fullPath);
 
                 // When
                 NormalizedPath root = path.Root;
@@ -221,7 +213,7 @@ namespace Statiq.Common.Tests.IO
             public void ShouldReturnDottedRootForExplicitRelativePath(string fullPath)
             {
                 // Given
-                TestPath path = new TestPath(fullPath, PathKind.Relative);
+                NormalizedPath path = new NormalizedPath(fullPath, PathKind.Relative);
 
                 // When
                 NormalizedPath root = path.Root;
@@ -240,7 +232,7 @@ namespace Statiq.Common.Tests.IO
             public void ShouldReturnWhetherOrNotAPathIsRelative(string fullPath, bool expected)
             {
                 // Given, When
-                TestPath path = new TestPath(fullPath);
+                NormalizedPath path = new NormalizedPath(fullPath);
 
                 // Then
                 path.IsRelative.ShouldBe(expected);
@@ -253,7 +245,7 @@ namespace Statiq.Common.Tests.IO
             public void ShouldReturnWhetherOrNotAPathIsRelativeOnWindows(string fullPath, bool expected)
             {
                 // Given, When
-                TestPath path = new TestPath(fullPath);
+                NormalizedPath path = new NormalizedPath(fullPath);
 
                 // Then
                 path.IsRelative.ShouldBe(expected);
@@ -268,7 +260,7 @@ namespace Statiq.Common.Tests.IO
             public void ShouldReturnStringRepresentation(string path, string expected)
             {
                 // Given, When
-                TestPath testPath = new TestPath(path);
+                NormalizedPath testPath = new NormalizedPath(path);
 
                 // Then
                 testPath.ToString().ShouldBe(expected);
@@ -311,7 +303,7 @@ namespace Statiq.Common.Tests.IO
             public void ShouldCollapsePath(string fullPath, string expectedFullPath, string[] expectedSegments = null)
             {
                 // Given, When
-                (string, ReadOnlyMemory<char>[]) fullPathAndSegments = NormalizedPath.GetFullPathAndSegments(fullPath.AsSpan());
+                (string, ReadOnlyMemory<char>[]) fullPathAndSegments = Common.NormalizedPath.GetFullPathAndSegments(fullPath.AsSpan());
 
                 // Then
                 fullPathAndSegments.Item1.ShouldBe(expectedFullPath);
@@ -322,7 +314,7 @@ namespace Statiq.Common.Tests.IO
             public void SegmentsShouldBeEmptyForRoot()
             {
                 // Given, When
-                (string, ReadOnlyMemory<char>[]) fullPathAndSegments = NormalizedPath.GetFullPathAndSegments("/".AsSpan());
+                (string, ReadOnlyMemory<char>[]) fullPathAndSegments = Common.NormalizedPath.GetFullPathAndSegments("/".AsSpan());
 
                 // Then
                 fullPathAndSegments.Item1.ShouldBe("/");
@@ -443,25 +435,13 @@ namespace Statiq.Common.Tests.IO
         public class EqualityOperatorTests : NormalizedPathFixture
         {
             [Test]
-            public void SameAssetInstanceIsEqual()
-            {
-                // Given, When
-                NormalizedPath path = new NormalizedPath("shaders/basic.vert");
-
-                // Then
-#pragma warning disable CS1718 // Comparison made to same variable
-                (path == path).ShouldBeTrue();
-#pragma warning restore CS1718 // Comparison made to same variable
-            }
-
-            [Test]
             public void PathsAreInequalIfAnyIsNull()
             {
                 // Given, When
                 NormalizedPath result = new NormalizedPath("test.txt");
 
                 // Then
-                (result == null).ShouldBeFalse();
+                result.IsNull.ShouldBeFalse();
             }
 
             [Test]
@@ -539,7 +519,577 @@ namespace Statiq.Common.Tests.IO
                 NormalizedPath first = null;
 
                 // Then
-                (first == null).ShouldBeTrue();
+                first.IsNull.ShouldBeTrue();
+            }
+        }
+        public class HasExtensionTests : NormalizedPathFixture
+        {
+            [TestCase("assets/shaders/basic.txt", true)]
+            [TestCase("assets/shaders/basic", false)]
+            [TestCase("assets/shaders/basic/", false)]
+            public void CanSeeIfAPathHasAnExtension(string fullPath, bool expected)
+            {
+                // Given, When
+                NormalizedPath path = new NormalizedPath(fullPath);
+
+                // Then
+                Assert.AreEqual(expected, path.HasExtension);
+            }
+        }
+
+        public class ExtensionTests : NormalizedPathFixture
+        {
+            [TestCase("assets/shaders/basic.frag", ".frag")]
+            [TestCase("assets/shaders/basic.frag/test.vert", ".vert")]
+            [TestCase("assets/shaders/basic", null)]
+            [TestCase("assets/shaders/basic.frag/test", null)]
+            public void CanGetExtension(string fullPath, string expected)
+            {
+                // Given
+                NormalizedPath result = new NormalizedPath(fullPath);
+
+                // When
+                string extension = result.Extension;
+
+                // Then
+                Assert.AreEqual(expected, extension);
+            }
+        }
+
+        public class DirectoryTests : NormalizedPathFixture
+        {
+            [Test]
+            public void CanGetDirectoryForFilePath()
+            {
+                // Given
+                NormalizedPath path = new NormalizedPath("temp/hello.txt");
+
+                // When
+                NormalizedPath directory = path.Parent;
+
+                // Then
+                Assert.AreEqual("temp", directory.FullPath);
+            }
+
+            [Test]
+            public void CanGetDirectoryForFilePathInRoot()
+            {
+                // Given
+                NormalizedPath path = new NormalizedPath("hello.txt");
+
+                // When
+                NormalizedPath directory = path.Parent;
+
+                // Then
+                Assert.AreEqual(".", directory.FullPath);
+            }
+        }
+
+        public class RootRelativeTests : NormalizedPathFixture
+        {
+            [TestCase(@"\a\b\c", "a/b/c")]
+            [TestCase("/a/b/c", "a/b/c")]
+            [TestCase("a/b/c", "a/b/c")]
+            [TestCase(@"a\b\c", "a/b/c")]
+            [TestCase("foo.txt", "foo.txt")]
+            [TestCase("foo", "foo")]
+            [WindowsTestCase(@"c:\a\b\c", "a/b/c")]
+            [WindowsTestCase("c:/a/b/c", "a/b/c")]
+            public void ShouldReturnRootRelativePath(string fullPath, string expected)
+            {
+                // Given
+                NormalizedPath path = new NormalizedPath(fullPath);
+
+                // When
+                NormalizedPath rootRelative = path.RootRelative;
+
+                // Then
+                Assert.AreEqual(expected, rootRelative.FullPath);
+            }
+
+            [TestCase(@"\a\b\c")]
+            [TestCase("/a/b/c")]
+            [TestCase("a/b/c")]
+            [TestCase(@"a\b\c")]
+            [TestCase("foo.txt")]
+            [TestCase("foo")]
+            [WindowsTestCase(@"c:\a\b\c")]
+            [WindowsTestCase("c:/a/b/c")]
+            public void ShouldReturnSelfForExplicitRelativePath(string fullPath)
+            {
+                // Given
+                NormalizedPath path = new NormalizedPath(fullPath, PathKind.Relative);
+
+                // When
+                NormalizedPath rootRelative = path.RootRelative;
+
+                // Then
+                Assert.AreEqual(path.FullPath, rootRelative.FullPath);
+            }
+        }
+
+        public class ChangeExtensionTests : NormalizedPathFixture
+        {
+            [TestCase(".dat", "temp/hello.dat")]
+            [TestCase("dat", "temp/hello.dat")]
+            [TestCase(".txt", "temp/hello.txt")]
+            [TestCase("txt", "temp/hello.txt")]
+            [TestCase("", "temp/hello.")]
+            [TestCase(null, "temp/hello")]
+            public void ShouldChangeExtension(string extension, string expected)
+            {
+                // Given
+                NormalizedPath path = new NormalizedPath("temp/hello.txt");
+
+                // When
+                path = path.ChangeExtension(extension);
+
+                // Then
+                Assert.AreEqual(expected, path.ToString());
+            }
+        }
+
+        public class AppendExtensionTests : NormalizedPathFixture
+        {
+            [Test]
+            public void ShouldThrowIfExtensionIsNull()
+            {
+                // Given
+                NormalizedPath path = new NormalizedPath("temp/hello.txt");
+
+                // When
+                TestDelegate test = () => path.AppendExtension(null);
+
+                // Then
+                Assert.Throws<ArgumentNullException>(test);
+            }
+
+            [TestCase("dat", "temp/hello.txt.dat")]
+            [TestCase(".dat", "temp/hello.txt.dat")]
+            public void CanAppendExtensionToPath(string extension, string expected)
+            {
+                // Given
+                NormalizedPath path = new NormalizedPath("temp/hello.txt");
+
+                // When
+                path = path.AppendExtension(extension);
+
+                // Then
+                Assert.AreEqual(expected, path.ToString());
+            }
+        }
+
+        public class InsertSuffixTests : NormalizedPathFixture
+        {
+            [Test]
+            public void ShouldThrowIfSuffixIsNull()
+            {
+                // Given
+                NormalizedPath path = new NormalizedPath("temp/hello.txt");
+
+                // When
+                TestDelegate test = () => path.InsertSuffix(null);
+
+                // Then
+                Assert.Throws<ArgumentNullException>(test);
+            }
+
+            [TestCase("temp/hello.txt", "123", "temp/hello123.txt")]
+            [TestCase("/hello.txt", "123", "/hello123.txt")]
+            [TestCase("temp/hello", "123", "temp/hello123")]
+            [TestCase("temp/hello.txt.dat", "123", "temp/hello.txt123.dat")]
+            public void CanInsertSuffixToPath(string path, string suffix, string expected)
+            {
+                // Given
+                NormalizedPath filePath = new NormalizedPath(path);
+
+                // When
+                filePath = filePath.InsertSuffix(suffix);
+
+                // Then
+                Assert.AreEqual(expected, filePath.FullPath);
+            }
+        }
+
+        public class InserPrefixTests : NormalizedPathFixture
+        {
+            [Test]
+            public void ShouldThrowIfPRefixIsNull()
+            {
+                // Given
+                NormalizedPath path = new NormalizedPath("temp/hello.txt");
+
+                // When
+                TestDelegate test = () => path.InsertPrefix(null);
+
+                // Then
+                Assert.Throws<ArgumentNullException>(test);
+            }
+
+            [TestCase("temp/hello.txt", "123", "temp/123hello.txt")]
+            [TestCase("/hello.txt", "123", "/123hello.txt")]
+            [TestCase("hello.txt", "123", "123hello.txt")]
+            [TestCase("temp/hello", "123", "temp/123hello")]
+            [TestCase("temp/hello.txt.dat", "123", "temp/123hello.txt.dat")]
+            public void CanInsertPrefixToPath(string path, string prefix, string expected)
+            {
+                // Given
+                NormalizedPath filePath = new NormalizedPath(path);
+
+                // When
+                filePath = filePath.InsertPrefix(prefix);
+
+                // Then
+                Assert.AreEqual(expected, filePath.FullPath);
+            }
+        }
+
+        public class FileNameTests : NormalizedPathFixture
+        {
+            [Test]
+            public void CanGetFilenameFromPath()
+            {
+                // Given
+                NormalizedPath path = new NormalizedPath("/input/test.txt");
+
+                // When
+                NormalizedPath result = path.FileName;
+
+                // Then
+                Assert.AreEqual("test.txt", result.FullPath);
+            }
+
+            [Test]
+            public void GetsFileNameIfJustFileName()
+            {
+                // Given
+                NormalizedPath path = new NormalizedPath("test.txt");
+
+                // When
+                NormalizedPath result = path.FileName;
+
+                // Then
+                Assert.AreEqual("test.txt", result.FullPath);
+            }
+        }
+
+        public class FileNameWithoutExtensionTests : NormalizedPathFixture
+        {
+            [TestCase("/input/test.txt", "test")]
+            [TestCase("/input/test", "test")]
+            [TestCase("test.txt", "test")]
+            [TestCase("test", "test")]
+            public void ShouldReturnFilenameWithoutExtensionFromPath(string fullPath, string expected)
+            {
+                // Given
+                NormalizedPath path = new NormalizedPath(fullPath);
+
+                // When
+                NormalizedPath result = path.FileNameWithoutExtension;
+
+                // Then
+                Assert.AreEqual(expected, result.FullPath);
+            }
+
+            [TestCase("/input/.test")]
+            [TestCase(".test")]
+            public void ShouldReturnNullIfOnlyExtension(string fullPath)
+            {
+                // Given
+                NormalizedPath path = new NormalizedPath(fullPath);
+
+                // When
+                NormalizedPath result = path.FileNameWithoutExtension;
+
+                // Then
+                Assert.IsNull(result);
+            }
+        }
+
+        public class ChangeFileNameTests : NormalizedPathFixture
+        {
+            [TestCase("/input/test.txt", "foo.bar", "/input/foo.bar")]
+            [TestCase("/input/test", "foo.bar", "/input/foo.bar")]
+            [TestCase("input/test.txt", "foo.bar", "input/foo.bar")]
+            [TestCase("input/test", "foo.bar", "input/foo.bar")]
+            [TestCase("/test.txt", "foo.bar", "/foo.bar")]
+            [TestCase("/test", "foo.bar", "/foo.bar")]
+            [TestCase("test.txt", "foo.bar", "foo.bar")]
+            [TestCase("test", "foo.bar", "foo.bar")]
+            [TestCase("/input/test.txt", "foo", "/input/foo")]
+            [TestCase("/input/test", "foo", "/input/foo")]
+            [TestCase("input/test.txt", "foo", "input/foo")]
+            [TestCase("input/test", "foo", "input/foo")]
+            [TestCase("/test.txt", "foo", "/foo")]
+            [TestCase("/test", "foo", "/foo")]
+            [TestCase("test.txt", "foo", "foo")]
+            [TestCase("test", "foo", "foo")]
+            public void ShouldChangeFileName(string fullPath, string fileName, string expected)
+            {
+                // Given
+                NormalizedPath path = new NormalizedPath(fullPath);
+
+                // When
+                NormalizedPath result = path.ChangeFileName(fileName);
+
+                // Then
+                result.FullPath.ShouldBe(expected);
+            }
+        }
+
+        public class NameTests : NormalizedPathFixture
+        {
+            [TestCase("/a/b", "b")]
+            [TestCase("/a/b/", "b")]
+            [TestCase("/a/b/../c", "c")]
+            [TestCase("/a/b/..", "a")]
+            [TestCase("/a", "a")]
+            [TestCase("/", "/")]
+            [WindowsTestCase("C:/", "C:")]
+            [WindowsTestCase("C:", "C:")]
+            [WindowsTestCase("C:/Data", "Data")]
+            [WindowsTestCase("C:/Data/Work", "Work")]
+            [WindowsTestCase("C:/Data/Work/file.txt", "file.txt")]
+            public void ShouldReturnDirectoryName(string directoryPath, string name)
+            {
+                // Given
+                NormalizedPath path = new NormalizedPath(directoryPath);
+
+                // When
+                string result = path.Name;
+
+                // Then
+                Assert.AreEqual(name, result);
+            }
+        }
+
+        public class ParentTests : NormalizedPathFixture
+        {
+            [TestCase("/a/b", "/a")]
+            [TestCase("/a/b/", "/a")]
+            [TestCase("/a/b/../c", "/a")]
+            [TestCase("/a", "/")]
+            [WindowsTestCase("C:/a/b", "C:/a")]
+            [WindowsTestCase("C:/a", "C:/")]
+            public void ReturnsParent(string directoryPath, string expected)
+            {
+                // Given
+                NormalizedPath path = new NormalizedPath(directoryPath);
+
+                // When
+                NormalizedPath parent = path.Parent;
+
+                // Then
+                Assert.AreEqual(expected, parent.FullPath);
+            }
+
+            [TestCase(".")]
+            [TestCase("/")]
+            [TestCase("a")]
+            [WindowsTestCase("C:")]
+            public void RootDirectoryReturnsNullParent(string directoryPath)
+            {
+                // Given
+                NormalizedPath path = new NormalizedPath(directoryPath);
+
+                // When
+                NormalizedPath parent = path.Parent;
+
+                // Then
+                Assert.IsNull(parent);
+            }
+        }
+
+        public class GetFilePathTests : NormalizedPathFixture
+        {
+            [Test]
+            public void ShouldThrowIfPathIsNull()
+            {
+                // Given
+                NormalizedPath path = new NormalizedPath("assets");
+
+                // When
+                TestDelegate test = () => path.GetFilePath(null);
+
+                // Then
+                Assert.Throws<ArgumentNullException>(test);
+            }
+
+            [WindowsTestCase("c:/assets/shaders/", "simple.frag", "c:/assets/shaders/simple.frag")]
+            [WindowsTestCase("c:/", "simple.frag", "c:/simple.frag")]
+            [WindowsTestCase("c:/", "c:/simple.frag", "c:/simple.frag")]
+            [WindowsTestCase("c:/", "c:/test/simple.frag", "c:/simple.frag")]
+            [WindowsTestCase("c:/assets/shaders/", "test/simple.frag", "c:/assets/shaders/simple.frag")]
+            [WindowsTestCase("c:/", "test/simple.frag", "c:/simple.frag")]
+            [TestCase("assets/shaders", "simple.frag", "assets/shaders/simple.frag")]
+            [TestCase("assets/shaders/", "simple.frag", "assets/shaders/simple.frag")]
+            [TestCase("/assets/shaders/", "simple.frag", "/assets/shaders/simple.frag")]
+            [TestCase("assets/shaders", "test/simple.frag", "assets/shaders/simple.frag")]
+            [TestCase("assets/shaders", "/test/simple.frag", "assets/shaders/simple.frag")]
+            [TestCase("assets/shaders/", "test/simple.frag", "assets/shaders/simple.frag")]
+            [TestCase("assets/shaders/", "/test/simple.frag", "assets/shaders/simple.frag")]
+            [TestCase("/assets/shaders/", "test/simple.frag", "/assets/shaders/simple.frag")]
+            [TestCase("/assets/shaders/", "/test/simple.frag", "/assets/shaders/simple.frag")]
+            public void ShouldCombinePaths(string first, string second, string expected)
+            {
+                // Given
+                NormalizedPath path = new NormalizedPath(first);
+
+                // When
+                NormalizedPath result = path.GetFilePath(new NormalizedPath(second));
+
+                // Then
+                Assert.AreEqual(expected, result.FullPath);
+            }
+        }
+
+        public class CombineFileTests : NormalizedPathFixture
+        {
+            [Test]
+            public void ShouldThrowIfPathIsNull()
+            {
+                // Given
+                NormalizedPath path = new NormalizedPath("assets");
+
+                // When
+                TestDelegate test = () => path.Combine(null);
+
+                // Then
+                Assert.Throws<ArgumentNullException>(test);
+            }
+
+            [WindowsTestCase("c:/assets/shaders/", "simple.frag", "c:/assets/shaders/simple.frag")]
+            [WindowsTestCase("c:/", "simple.frag", "c:/simple.frag")]
+            [WindowsTestCase("c:/assets/shaders/", "test/simple.frag", "c:/assets/shaders/test/simple.frag")]
+            [WindowsTestCase("c:/", "test/simple.frag", "c:/test/simple.frag")]
+            [WindowsTestCase("c:/", "c:/test/simple.frag", "c:/test/simple.frag")]
+            [TestCase("assets/shaders", "simple.frag", "assets/shaders/simple.frag")]
+            [TestCase("assets/shaders/", "simple.frag", "assets/shaders/simple.frag")]
+            [TestCase("/assets/shaders/", "simple.frag", "/assets/shaders/simple.frag")]
+            [TestCase("assets/shaders", "test/simple.frag", "assets/shaders/test/simple.frag")]
+            [TestCase("assets/shaders/", "test/simple.frag", "assets/shaders/test/simple.frag")]
+            [TestCase("/assets/shaders/", "test/simple.frag", "/assets/shaders/test/simple.frag")]
+            [TestCase("assets", "/other/asset.txt", "/other/asset.txt")]
+            [TestCase(".", "asset.txt", "asset.txt")]
+            [TestCase(".", "other/asset.txt", "other/asset.txt")]
+            [TestCase(".", "/other/asset.txt", "/other/asset.txt")]
+            public void ShouldCombinePaths(string first, string second, string expected)
+            {
+                // Given
+                NormalizedPath path = new NormalizedPath(first);
+
+                // When
+                NormalizedPath result = path.Combine(new NormalizedPath(second));
+
+                // Then
+                Assert.AreEqual(expected, result.FullPath);
+            }
+        }
+
+        public class CombineTests : NormalizedPathFixture
+        {
+            [WindowsTestCase("c:/assets/shaders/", "simple", "c:/assets/shaders/simple")]
+            [WindowsTestCase("c:/", "simple", "c:/simple")]
+            [WindowsTestCase("c:/assets/shaders/", "c:/simple", "c:/simple")]
+            [TestCase("assets/shaders", "simple", "assets/shaders/simple")]
+            [TestCase("assets/shaders/", "simple", "assets/shaders/simple")]
+            [TestCase("/assets/shaders/", "simple", "/assets/shaders/simple")]
+            [TestCase("assets", "/other/assets", "/other/assets")]
+            public void ShouldCombinePaths(string first, string second, string expected)
+            {
+                // Given
+                NormalizedPath path = new NormalizedPath(first);
+
+                // When
+                NormalizedPath result = path.Combine(new NormalizedPath(second));
+
+                // Then
+                Assert.AreEqual(expected, result.FullPath);
+            }
+
+            [Test]
+            public void ShouldThrowIfPathIsNull()
+            {
+                // Given
+                NormalizedPath path = new NormalizedPath("assets");
+
+                // When
+                TestDelegate test = () => path.Combine(null);
+
+                // Then
+                Assert.Throws<ArgumentNullException>(test);
+            }
+        }
+
+        public class ContainsChildTests : NormalizedPathFixture
+        {
+            [TestCase("/a/b/c", "/a/b/test.txt", false)]
+            [TestCase("/a/b/c", "/a/b/c/test.txt", true)]
+            [TestCase("/a/b/c", "/a/b/c/d/test.txt", false)]
+            public void ShouldCheckFilePath(string directory, string path, bool expected)
+            {
+                // Given
+                NormalizedPath directoryPath = new NormalizedPath(directory);
+                NormalizedPath filePath = new NormalizedPath(path);
+
+                // When
+                bool result = directoryPath.ContainsChild(filePath);
+
+                // Then
+                result.ShouldBe(expected);
+            }
+
+            [TestCase("/a/b/c", "/a/b", false)]
+            [TestCase("/a/b/c", "/a/b/c", false)]
+            [TestCase("/a/b/c", "/a/b/c/d", true)]
+            [TestCase("/a/b/c", "/a/b/c/d/e", false)]
+            public void ShouldCheckDirectoryPath(string directory, string path, bool expected)
+            {
+                // Given
+                NormalizedPath directoryPath = new NormalizedPath(directory);
+                NormalizedPath filePath = new NormalizedPath(path);
+
+                // When
+                bool result = directoryPath.ContainsChild(filePath);
+
+                // Then
+                result.ShouldBe(expected);
+            }
+        }
+
+        public class ContainsDescendantTests : NormalizedPathFixture
+        {
+            [TestCase("/a/b/c", "/a/b/test.txt", false)]
+            [TestCase("/a/b/c", "/a/b/c/test.txt", true)]
+            [TestCase("/a/b/c", "/a/b/c/d/test.txt", true)]
+            public void ShouldCheckFilePath(string directory, string path, bool expected)
+            {
+                // Given
+                NormalizedPath directoryPath = new NormalizedPath(directory);
+                NormalizedPath filePath = new NormalizedPath(path);
+
+                // When
+                bool result = directoryPath.ContainsDescendant(filePath);
+
+                // Then
+                result.ShouldBe(expected);
+            }
+
+            [TestCase("/a/b/c", "/a/b", false)]
+            [TestCase("/a/b/c", "/a/b/c", false)]
+            [TestCase("/a/b/c", "/a/b/c/d", true)]
+            [TestCase("/a/b/c", "/a/b/c/d/e", true)]
+            public void ShouldCheckDirectoryPath(string directory, string path, bool expected)
+            {
+                // Given
+                NormalizedPath directoryPath = new NormalizedPath(directory);
+                NormalizedPath filePath = new NormalizedPath(path);
+
+                // When
+                bool result = directoryPath.ContainsDescendant(filePath);
+
+                // Then
+                result.ShouldBe(expected);
             }
         }
     }

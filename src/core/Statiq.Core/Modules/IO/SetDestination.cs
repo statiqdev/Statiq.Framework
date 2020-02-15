@@ -56,7 +56,15 @@ namespace Statiq.Core
         public SetDestination(string pathOrExtension)
             : base(
                 (pathOrExtension ?? throw new ArgumentNullException(nameof(pathOrExtension))).StartsWith('.')
-                    ? Config.FromDocument(doc => GetPathFromMetadata(doc) ?? doc.Destination?.ChangeExtension(pathOrExtension))
+                    ? Config.FromDocument(doc =>
+                    {
+                        NormalizedPath path = GetPathFromMetadata(doc);
+                        if (path.IsNull)
+                        {
+                            path = doc.Destination.IsNull ? NormalizedPath.Null : doc.Destination.ChangeExtension(pathOrExtension);
+                        }
+                        return path;
+                    })
                     : Config.FromValue((NormalizedPath)pathOrExtension),
                 true)
         {
@@ -73,7 +81,17 @@ namespace Statiq.Core
         /// metadata values are set, those will take precedence.
         /// </param>
         public SetDestination(Config<NormalizedPath> destination, bool ignoreMetadata = false)
-            : base(Config.FromDocument(async (doc, ctx) => (ignoreMetadata ? null : GetPathFromMetadata(doc)) ?? await destination.GetValueAsync(doc, ctx)), true)
+            : base(
+                Config.FromDocument(
+                    async (doc, ctx) =>
+                    {
+                        NormalizedPath path = ignoreMetadata ? NormalizedPath.Null : GetPathFromMetadata(doc);
+                        if (path.IsNull)
+                        {
+                            path = await destination.GetValueAsync(doc, ctx);
+                        }
+                        return path;
+                    }), true)
         {
             _ = destination ?? throw new ArgumentNullException(nameof(destination));
         }
@@ -81,17 +99,17 @@ namespace Statiq.Core
         private static NormalizedPath GetPathFromMetadata(IDocument doc)
         {
             NormalizedPath path = doc.GetFilePath(Keys.DestinationPath);
-            if (path != null)
+            if (!path.IsNull)
             {
                 return path;
             }
             path = doc.GetFilePath(Keys.DestinationFileName);
-            if (path != null)
+            if (!path.IsNull)
             {
-                return doc.Destination == null ? path : doc.Destination.ChangeFileName(path);
+                return doc.Destination.IsNull ? path : doc.Destination.ChangeFileName(path);
             }
             string extension = doc.GetString(Keys.DestinationExtension);
-            if (!string.IsNullOrEmpty(extension) && doc.Destination != null)
+            if (!string.IsNullOrEmpty(extension) && !doc.Destination.IsNull)
             {
                 return doc.Destination.ChangeExtension(extension);
             }
@@ -99,6 +117,6 @@ namespace Statiq.Core
         }
 
         protected override Task<IEnumerable<IDocument>> ExecuteConfigAsync(IDocument input, IExecutionContext context, NormalizedPath value) =>
-            Task.FromResult(value == null ? input.Yield() : input.Clone(value).Yield());
+            Task.FromResult(value.IsNull ? input.Yield() : input.Clone(value).Yield());
     }
 }

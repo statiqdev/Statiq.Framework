@@ -58,9 +58,9 @@ namespace Statiq.Sass
             // Try to get the relative path to the parent file from inside the input virtual file system
             // But if the parent file isn't under an input path, just use it directly
             NormalizedPath containingInputPath = _fileSystem.GetContainingInputPath(parentFilePath);
-            NormalizedPath parentRelativePath = containingInputPath != null
-                ? containingInputPath.GetRelativePath(parentFilePath)
-                : parentFilePath;
+            NormalizedPath parentRelativePath = containingInputPath.IsNull
+                ? parentFilePath
+                : containingInputPath.GetRelativePath(parentFilePath);
 
             // Find the requested file by first combining with the parent
             NormalizedPath filePath = parentRelativePath.ChangeFileName(requestedFilePath);

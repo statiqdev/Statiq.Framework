@@ -167,7 +167,7 @@ namespace Statiq.Core
                 // If the current cache is null, this is the first run through
                 misses.AddRange(context.Inputs);
                 IEnumerable<IGrouping<NormalizedPath, IDocument>> inputGroups = context.Inputs
-                    .Where(input => input.Source != null)
+                    .Where(input => !input.Source.IsNull)
                     .GroupBy(input => input.Source);
                 foreach (IGrouping<NormalizedPath, IDocument> inputGroup in inputGroups)
                 {
@@ -183,7 +183,7 @@ namespace Statiq.Core
                     string message = null;
 
                     // Documents with a null source are never cached
-                    if (inputGroup.Key != null)
+                    if (!inputGroup.Key.IsNull)
                     {
                         // Get the aggregate input hash for all documents with this source and all document dependencies
                         // (we need it one way or the other to check if it's a hit or to record for next time)
@@ -240,7 +240,7 @@ namespace Statiq.Core
                 ? ImmutableArray<IDocument>.Empty
                 : await context.ExecuteModulesAsync(Children, misses);
             Dictionary<NormalizedPath, IGrouping<NormalizedPath, IDocument>> resultsBySource =
-                results.Where(x => x.Source != null).GroupBy(x => x.Source).ToDictionary(x => x.Key, x => x);
+                results.Where(x => !x.Source.IsNull).GroupBy(x => x.Source).ToDictionary(x => x.Key, x => x);
             outputs.AddRange(results);
 
             // Cache all miss sources, even if they resulted in an empty result document set

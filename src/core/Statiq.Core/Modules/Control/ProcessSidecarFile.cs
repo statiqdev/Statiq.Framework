@@ -45,7 +45,7 @@ namespace Statiq.Core
                 throw new ArgumentException("Value cannot be null or empty.", nameof(extension));
             }
 
-            _sidecarPath = Config.FromDocument(doc => doc.Source?.AppendExtension(extension));
+            _sidecarPath = Config.FromDocument(doc => doc.Source.IsNull ? NormalizedPath.Null : doc.Source.AppendExtension(extension));
         }
 
         /// <summary>
@@ -64,7 +64,7 @@ namespace Statiq.Core
         protected override async Task<IEnumerable<IDocument>> ExecuteInputAsync(IDocument input, IExecutionContext context)
         {
             NormalizedPath sidecarPath = await _sidecarPath.GetValueAsync(input, context);
-            if (sidecarPath != null)
+            if (!sidecarPath.IsNull)
             {
                 IFile sidecarFile = context.FileSystem.GetInputFile(sidecarPath);
                 if (sidecarFile.Exists)

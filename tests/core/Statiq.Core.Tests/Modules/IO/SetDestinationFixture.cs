@@ -30,7 +30,7 @@ namespace Statiq.Core.Tests.Modules.IO
                 TestDocument result = await ExecuteAsync(input, setDestination).SingleAsync();
 
                 // Then
-                result.Destination.ShouldBe(expected);
+                result.Destination.FullPath.ShouldBe(expected);
             }
 
             [TestCase(Keys.DestinationPath, "OtherFolder/foo.bar", "OtherFolder/foo.bar")]
@@ -52,7 +52,7 @@ namespace Statiq.Core.Tests.Modules.IO
                 TestDocument result = await ExecuteAsync(input, setDestination).SingleAsync();
 
                 // Then
-                result.Destination.ShouldBe(expected);
+                result.Destination.FullPath.ShouldBe(expected);
             }
 
             [TestCase(".foo", "Subfolder/write-test.foo")]
@@ -67,7 +67,7 @@ namespace Statiq.Core.Tests.Modules.IO
                 TestDocument result = await ExecuteAsync(input, setDestination).SingleAsync();
 
                 // Then
-                result.Destination.ShouldBe(expected);
+                result.Destination.FullPath.ShouldBe(expected);
             }
 
             [TestCase("foo", "foo")]
@@ -82,7 +82,7 @@ namespace Statiq.Core.Tests.Modules.IO
                 TestDocument result = await ExecuteAsync(input, setDestination).SingleAsync();
 
                 // Then
-                result.Destination.ShouldBe(expected);
+                result.Destination.FullPath.ShouldBe(expected);
             }
 
             [TestCase(Keys.DestinationPath, "OtherFolder/foo.bar", "OtherFolder/foo.bar")]
@@ -104,7 +104,7 @@ namespace Statiq.Core.Tests.Modules.IO
                 TestDocument result = await ExecuteAsync(input, setDestination).SingleAsync();
 
                 // Then
-                result.Destination.ShouldBe(expected);
+                result.Destination.FullPath.ShouldBe(expected);
             }
 
             [TestCase(Keys.DestinationPath)]
@@ -125,7 +125,7 @@ namespace Statiq.Core.Tests.Modules.IO
                 TestDocument result = await ExecuteAsync(input, setDestination).SingleAsync();
 
                 // Then
-                result.Destination.ShouldBe("Subfolder/write-test.bar");
+                result.Destination.FullPath.ShouldBe("Subfolder/write-test.bar");
             }
 
             [TestCase(Keys.DestinationPath, "Subfolder/bar.baz", "Subfolder/bar.baz")]
@@ -145,7 +145,7 @@ namespace Statiq.Core.Tests.Modules.IO
                 TestDocument result = await ExecuteAsync(input, setDestination).SingleAsync();
 
                 // Then
-                result.Destination.ShouldBe(expected);
+                result.Destination.FullPath.ShouldBe(expected);
             }
 
             public async Task SetsDestinationFromDocumentDelegate()
@@ -159,7 +159,7 @@ namespace Statiq.Core.Tests.Modules.IO
                 TestDocument result = await ExecuteAsync(input, setDestination).SingleAsync();
 
                 // Then
-                result.Destination.ShouldBe("Subfolder/write-test.bar");
+                result.Destination.FullPath.ShouldBe("Subfolder/write-test.bar");
             }
 
             public async Task SetsDestinationFromStringDelegate()
@@ -172,7 +172,7 @@ namespace Statiq.Core.Tests.Modules.IO
                 TestDocument result = await ExecuteAsync(input, setDestination).SingleAsync();
 
                 // Then
-                result.Destination.ShouldBe("foo/bar.txt");
+                result.Destination.FullPath.ShouldBe("foo/bar.txt");
             }
 
             [Test]
@@ -186,7 +186,7 @@ namespace Statiq.Core.Tests.Modules.IO
                 TestDocument result = await ExecuteAsync(input, setDestination).SingleAsync();
 
                 // Then
-                result.Destination.ShouldBe("Subfolder/write-test.txt");
+                result.Destination.FullPath.ShouldBe("Subfolder/write-test.txt");
             }
 
             [Test]
@@ -200,7 +200,7 @@ namespace Statiq.Core.Tests.Modules.IO
                 TestDocument result = await ExecuteAsync(input, setDestination).SingleAsync();
 
                 // Then
-                result.Destination.ShouldBe(".dotfile");
+                result.Destination.FullPath.ShouldBe(".dotfile");
             }
         }
     }

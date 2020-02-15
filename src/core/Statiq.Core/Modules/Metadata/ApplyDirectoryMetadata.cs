@@ -78,10 +78,8 @@ namespace Statiq.Core
         /// <param name="inherited">If set to <c>true</c>, metadata from documents with this file name will be inherited by documents in nested directories.</param>
         /// <param name="replace">If set to <c>true</c>, metadata from this document will replace any existing metadata on the target document.</param>
         /// <returns>The current module instance.</returns>
-        public ApplyDirectoryMetadata WithMetadataFile(NormalizedPath metadataFileName, bool inherited = false, bool replace = false)
-        {
-            return WithMetadataFile(Config.FromDocument(doc => doc.Source?.FileName.Equals(metadataFileName) == true), inherited, replace);
-        }
+        public ApplyDirectoryMetadata WithMetadataFile(NormalizedPath metadataFileName, bool inherited = false, bool replace = false) =>
+            WithMetadataFile(Config.FromDocument(doc => !doc.Source.IsNull && doc.Source.FileName.Equals(metadataFileName)), inherited, replace);
 
         /// <inheritdoc />
         protected override async Task<IEnumerable<IDocument>> ExecuteContextAsync(IExecutionContext context)
@@ -89,7 +87,7 @@ namespace Statiq.Core
             // Find metadata files
             ILookup<NormalizedPath, MetaInfo> lookup = await context.Inputs
                 .ToAsyncEnumerable()
-                .Where(input => input.Source != null)
+                .Where(input => !input.Source.IsNull)
                 .SelectAwait(GetMetaInfo)
                 .Where(x => x != null)
                 .ToLookupAsync(x => x.Path);
@@ -99,7 +97,7 @@ namespace Statiq.Core
             // Ignore files that define Metadata if not preserved and apply the metadata
             return await context.Inputs
                 .ToAsyncEnumerable()
-                .WhereAwait(async input => input.Source != null
+                .WhereAwait(async input => !input.Source.IsNull
                     && (_preserveMetadataFiles || !await _metadataFiles.ToAsyncEnumerable().AnyAwaitAsync(async isMetadata => await isMetadata.MetadataFileName.GetValueAsync(input, context))))
                 .Select(ApplyMetadata)
                 .ToListAsync(context.CancellationToken);
@@ -127,13 +125,13 @@ namespace Statiq.Core
                 // First add the inherited metadata to the temp dictionary
                 List<NormalizedPath> sourcePaths = new List<NormalizedPath>();
                 NormalizedPath inputPath = context.FileSystem.GetContainingInputPath(input.Source);
-                if (inputPath != null)
+                if (!inputPath.IsNull)
                 {
-                    NormalizedPath dir = input.Source.Parent;
-                    while (dir?.FullPath.StartsWith(inputPath.FullPath) == true)
+                    NormalizedPath directory = input.Source.Parent;
+                    while (directory.FullPath.StartsWith(inputPath.FullPath))
                     {
-                        sourcePaths.Add(dir);
-                        dir = dir.Parent;
+                        sourcePaths.Add(directory);
+                        directory = directory.Parent;
                     }
                 }
 

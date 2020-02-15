@@ -41,7 +41,7 @@ namespace Statiq.Testing
             if (createDirectory)
             {
                 NormalizedPath parent = file.Path.Parent;
-                while (parent != null)
+                while (!parent.IsNull)
                 {
                     _fileProvider.Directories.Add(parent.FullPath);
                     parent = parent.Parent;

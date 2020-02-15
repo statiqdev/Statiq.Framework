@@ -129,7 +129,7 @@ namespace Statiq.Sass
             context.LogDebug($"Processing Sass for {input.ToSafeDisplayString()}");
 
             NormalizedPath inputPath = await _inputPath.GetValueAsync(input, context);
-            if (inputPath?.IsAbsolute != true)
+            if (inputPath.IsNull || inputPath.IsRelative)
             {
                 inputPath = context.FileSystem.GetInputFile(new NormalizedPath(Path.GetRandomFileName())).Path;
                 context.LogWarning($"No input path found for document {input.ToSafeDisplayString()}, using {inputPath.FileName.FullPath}");
@@ -148,7 +148,7 @@ namespace Statiq.Sass
                 TryImport = importer.TryImport
             };
             IEnumerable<string> includePaths = _includePaths
-                .Where(x => x != null)
+                .Where(x => !x.IsNull)
                 .Select(x => x.IsAbsolute ? x.FullPath : context.FileSystem.GetContainingInputPath(x)?.Combine(x)?.FullPath)
                 .Where(x => x != null);
             options.IncludePaths.AddRange(includePaths);
@@ -178,7 +178,7 @@ namespace Statiq.Sass
 
         private static NormalizedPath DefaultInputPath(IDocument document, IExecutionContext context)
         {
-            if (document.Source != null)
+            if (!document.Source.IsNull)
             {
                 IFile inputFile = context.FileSystem.GetInputFile(document.Source);
                 return inputFile.Exists ? inputFile.Path : null;

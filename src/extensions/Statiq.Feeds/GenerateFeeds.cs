@@ -442,7 +442,7 @@ namespace Statiq.Feeds
         private async Task<IDocument> GenerateFeedAsync(FeedType feedType, Feed feed, NormalizedPath path, IExecutionContext context)
         {
             // Get the output path
-            if (path == null)
+            if (path.IsNull)
             {
                 return null;
             }

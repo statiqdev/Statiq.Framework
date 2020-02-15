@@ -429,7 +429,7 @@ namespace Statiq.CodeAnalysis
             }
 
             // Add the prefix
-            if (prefix != null)
+            if (!prefix.IsNull)
             {
                 destinationPath = prefix.Combine(destinationPath);
             }
@@ -489,7 +489,7 @@ namespace Statiq.CodeAnalysis
                     SourceText sourceText = SourceText.From(stream);
                     syntaxTrees.Add(CSharpSyntaxTree.ParseText(
                         sourceText,
-                        path: input.Source?.FullPath ?? string.Empty));
+                        path: input.Source.IsNull ? string.Empty : input.Source.FullPath));
                 }
             }
         }

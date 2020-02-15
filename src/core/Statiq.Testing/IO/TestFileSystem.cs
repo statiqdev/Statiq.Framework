@@ -24,14 +24,12 @@ namespace Statiq.Testing
         public IFileProvider FileProvider { get; set; }
 
         /// <inheritdoc />
-        public NormalizedPath RootPath { get; set; } = NormalizedPath.Root;
+        public NormalizedPath RootPath { get; set; } = NormalizedPath.AbsoluteRoot;
 
         /// <inheritdoc />
-        public PathCollection<NormalizedPath> InputPaths { get; set; } = new PathCollection<NormalizedPath>(new[]
-        {
+        public PathCollection InputPaths { get; set; } = new PathCollection(
             new NormalizedPath("theme"),
-            new NormalizedPath("input")
-        });
+            new NormalizedPath("input"));
 
         IReadOnlyList<NormalizedPath> IReadOnlyFileSystem.InputPaths => InputPaths;
 

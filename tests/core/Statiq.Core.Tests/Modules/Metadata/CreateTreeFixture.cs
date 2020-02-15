@@ -102,7 +102,7 @@ namespace Statiq.Core.Tests.Modules.Metadata
                     "a/index.html",
                     "a/1.txt",
                     "a/2.txt");
-                results.Single().Source.ShouldBe("/input/index.html");
+                results.Single().Source.FullPath.ShouldBe("/input/index.html");
             }
 
             [Test]

@@ -219,7 +219,7 @@ namespace Statiq.App
             Server server;
             try
             {
-                server = new Server(path.FullPath, port, !forceExtension, virtualDirectory?.FullPath, liveReload, contentTypes, loggerProvider);
+                server = new Server(path.FullPath, port, !forceExtension, virtualDirectory.IsNull ? null : virtualDirectory.FullPath, liveReload, contentTypes, loggerProvider);
                 await server.StartAsync();
             }
             catch (Exception ex)

@@ -15,11 +15,9 @@ namespace Statiq.Core
         public FileSystem()
         {
             FileProvider = new LocalFileProvider();
-            InputPaths = new PathCollection<NormalizedPath>(new[]
-            {
+            InputPaths = new PathCollection(
                 new NormalizedPath("theme"),
-                new NormalizedPath("input")
-            });
+                new NormalizedPath("input"));
         }
 
         public IFileProvider FileProvider { get; set; }
@@ -30,7 +28,7 @@ namespace Statiq.Core
 
             set
             {
-                _ = value ?? throw new ArgumentNullException(nameof(RootPath));
+                value.ThrowIfNull(nameof(value));
 
                 if (value.IsRelative)
                 {
@@ -41,20 +39,28 @@ namespace Statiq.Core
             }
         }
 
-        public PathCollection<NormalizedPath> InputPaths { get; }
+        public PathCollection InputPaths { get; }
 
         IReadOnlyList<NormalizedPath> IReadOnlyFileSystem.InputPaths => InputPaths;
 
         public NormalizedPath OutputPath
         {
             get => _outputPath;
-            set => _outputPath = value ?? throw new ArgumentNullException(nameof(OutputPath));
+            set
+            {
+                value.ThrowIfNull(nameof(value));
+                _outputPath = value;
+            }
         }
 
         public NormalizedPath TempPath
         {
             get => _tempPath;
-            set => _tempPath = value ?? throw new ArgumentNullException(nameof(TempPath));
+            set
+            {
+                value.ThrowIfNull(nameof(value));
+                _tempPath = value;
+            }
         }
     }
 }

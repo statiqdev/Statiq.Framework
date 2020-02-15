@@ -16,7 +16,8 @@ namespace Statiq.Core
 
         public LocalFile(NormalizedPath path)
         {
-            _ = path ?? throw new ArgumentNullException(nameof(path));
+            path.ThrowIfNull(nameof(path));
+
             if (path.IsRelative)
             {
                 throw new ArgumentException("Path must be absolute", nameof(path));

@@ -95,7 +95,7 @@ namespace Statiq.Core
 
             async Task WriteFileAsync(IDocument input)
             {
-                if (await ShouldProcessAsync(input, context) && input.Destination != null)
+                if (await ShouldProcessAsync(input, context) && !input.Destination.IsNull)
                 {
                     if (writesBySource.TryGetValue(input.Destination, out Tuple<List<string>, Func<Task>> value))
                     {

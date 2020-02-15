@@ -4,37 +4,34 @@ using Statiq.Testing;
 
 namespace Statiq.Common.Tests.IO
 {
-    [TestFixture(typeof(NormalizedPath))]
-    [TestFixture(typeof(NormalizedPath))]
-    public class PathCollectionFixture<TPath> : BaseFixture
-        where TPath : NormalizedPath
+    public class PathCollectionFixture : BaseFixture
     {
-        private readonly TPath _upperCaseA;
-        private readonly TPath _lowerCaseA;
-        private readonly TPath _upperCaseB;
-        private readonly TPath _lowerCaseB;
-        private readonly TPath _upperCaseC;
-        private readonly TPath _lowerCaseC;
+        private readonly NormalizedPath _upperCaseA;
+        private readonly NormalizedPath _lowerCaseA;
+        private readonly NormalizedPath _upperCaseB;
+        private readonly NormalizedPath _lowerCaseB;
+        private readonly NormalizedPath _upperCaseC;
+        private readonly NormalizedPath _lowerCaseC;
 
         public PathCollectionFixture()
         {
-            if (typeof(TPath) == typeof(NormalizedPath))
+            if (typeof(NormalizedPath) == typeof(NormalizedPath))
             {
-                _upperCaseA = (TPath)(NormalizedPath)new NormalizedPath("A");
-                _lowerCaseA = (TPath)(NormalizedPath)new NormalizedPath("a");
-                _upperCaseB = (TPath)(NormalizedPath)new NormalizedPath("B");
-                _lowerCaseB = (TPath)(NormalizedPath)new NormalizedPath("b");
-                _upperCaseC = (TPath)(NormalizedPath)new NormalizedPath("C");
-                _lowerCaseC = (TPath)(NormalizedPath)new NormalizedPath("c");
+                _upperCaseA = new NormalizedPath("A");
+                _lowerCaseA = new NormalizedPath("a");
+                _upperCaseB = new NormalizedPath("B");
+                _lowerCaseB = new NormalizedPath("b");
+                _upperCaseC = new NormalizedPath("C");
+                _lowerCaseC = new NormalizedPath("c");
             }
-            else if (typeof(TPath) == typeof(NormalizedPath))
+            else if (typeof(NormalizedPath) == typeof(NormalizedPath))
             {
-                _upperCaseA = (TPath)(NormalizedPath)new NormalizedPath("A.txt");
-                _lowerCaseA = (TPath)(NormalizedPath)new NormalizedPath("a.txt");
-                _upperCaseB = (TPath)(NormalizedPath)new NormalizedPath("B.txt");
-                _lowerCaseB = (TPath)(NormalizedPath)new NormalizedPath("b.txt");
-                _upperCaseC = (TPath)(NormalizedPath)new NormalizedPath("C.txt");
-                _lowerCaseC = (TPath)(NormalizedPath)new NormalizedPath("c.txt");
+                _upperCaseA = new NormalizedPath("A.txt");
+                _lowerCaseA = new NormalizedPath("a.txt");
+                _upperCaseB = new NormalizedPath("B.txt");
+                _lowerCaseB = new NormalizedPath("b.txt");
+                _upperCaseC = new NormalizedPath("C.txt");
+                _lowerCaseC = new NormalizedPath("c.txt");
             }
             else
             {
@@ -42,26 +39,26 @@ namespace Statiq.Common.Tests.IO
             }
         }
 
-        public class CountTests : PathCollectionFixture<TPath>
+        public class CountTests : PathCollectionFixture
         {
             [Test]
             public void ShouldReturnTheNumberOfPathsInTheCollection()
             {
                 // Given
-                PathCollection<TPath> collection = new PathCollection<TPath>(new[] { _upperCaseA, _upperCaseB });
+                PathCollection collection = new PathCollection(new[] { _upperCaseA, _upperCaseB });
 
                 // When, Then
                 Assert.AreEqual(2, collection.Count);
             }
         }
 
-        public class AddTests : PathCollectionFixture<TPath>
+        public class AddTests : PathCollectionFixture
         {
             [Test]
             public void ShouldAddPathIfNotAlreadyPresent()
             {
                 // Given
-                PathCollection<TPath> collection = new PathCollection<TPath>();
+                PathCollection collection = new PathCollection();
                 collection.Add(_upperCaseB);
 
                 // When
@@ -72,13 +69,13 @@ namespace Statiq.Common.Tests.IO
             }
         }
 
-        public class AddRangeTests : PathCollectionFixture<TPath>
+        public class AddRangeTests : PathCollectionFixture
         {
             [Test]
             public void ShouldAddPathsThatAreNotPresent()
             {
                 // Given
-                PathCollection<TPath> collection = new PathCollection<TPath>(
+                PathCollection collection = new PathCollection(
                     new[] { _upperCaseA, _upperCaseB });
 
                 // When

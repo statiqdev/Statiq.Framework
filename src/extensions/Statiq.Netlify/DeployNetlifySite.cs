@@ -48,7 +48,7 @@ namespace Statiq.Netlify
 
             static IContentProvider GetContentProvider(NormalizedPath path, IExecutionContext context)
             {
-                if (path == null)
+                if (path.IsNull)
                 {
                     throw new ExecutionException("Invalid directory");
                 }
@@ -63,7 +63,7 @@ namespace Statiq.Netlify
         /// <param name="siteId">The ID of the site to deploy.</param>
         /// <param name="accessToken">The access token to authenticate with.</param>
         /// <param name="zipPath">The zip file to deploy.</param>
-        public DeployNetlifySite(Config<string> siteId, Config<string> accessToken, Config<NormalizedPath> zipPath)
+        public DeployNetlifySite(Config<NormalizedPath> zipPath, Config<string> siteId, Config<string> accessToken)
             : this(siteId, accessToken, GetContentProviderFromZipFile(zipPath))
         {
         }
@@ -75,7 +75,7 @@ namespace Statiq.Netlify
 
             static IContentProvider GetContentProvider(NormalizedPath filePath, IExecutionContext context)
             {
-                if (filePath == null)
+                if (filePath.IsNull)
                 {
                     throw new ExecutionException("Invalid zip path");
                 }

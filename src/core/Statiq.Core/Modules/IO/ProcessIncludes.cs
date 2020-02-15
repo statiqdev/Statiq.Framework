@@ -76,7 +76,7 @@ namespace Statiq.Core
                             NormalizedPath includedPath = new NormalizedPath(content.Substring(start + 2, end - (start + 2)));
                             if (includedPath.IsRelative)
                             {
-                                if (source == null)
+                                if (source.IsNull)
                                 {
                                     throw new ExecutionException($"Cannot include file at relative path {includedPath.FullPath} because document source is null");
                                 }

@@ -103,10 +103,7 @@ namespace Statiq.Core.Tests.Modules.Control
             private TestFileSystem GetFileSystem() =>
                 new TestFileSystem
                 {
-                    InputPaths = new PathCollection<NormalizedPath>(new[]
-                    {
-                        NormalizedPath.Root
-                    }),
+                    InputPaths = new PathCollection(NormalizedPath.AbsoluteRoot),
                     FileProvider = GetFileProvider()
                 };
 

@@ -50,7 +50,7 @@ namespace Statiq.Core
             if (_xsltPath != null)
             {
                 NormalizedPath path = await _xsltPath.GetValueAsync(input, context);
-                if (path != null)
+                if (!path.IsNull)
                 {
                     IFile file = context.FileSystem.GetInputFile(path);
                     if (file.Exists)

@@ -32,6 +32,15 @@ namespace Statiq.Common
         }
 
         /// <summary>
+        /// Initializes a new path collection.
+        /// </summary>
+        /// <param name="paths">The paths.</param>
+        public PathCollection(params NormalizedPath[] paths)
+            : this((IEnumerable<NormalizedPath>)paths)
+        {
+        }
+
+        /// <summary>
         /// Returns an enumerator that iterates through the collection.
         /// </summary>
         /// <returns>

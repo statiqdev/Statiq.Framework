@@ -120,7 +120,7 @@ namespace Statiq.Xmp
             if (xmpDirectory == null)
             {
                 // Try to read sidecarfile
-                if (input.Source != null)
+                if (!input.Source.IsNull)
                 {
                     IFile sidecarFile = context.FileSystem.GetInputFile(input.Source.AppendExtension(".xmp"));
                     if (sidecarFile.Exists)

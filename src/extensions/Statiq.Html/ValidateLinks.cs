@@ -149,25 +149,25 @@ namespace Statiq.Html
                 // Links
                 foreach (IElement element in htmlDocument.Links)
                 {
-                    AddOrUpdateLink(element.GetAttribute("href"), element, input.Source?.FullPath, links);
+                    AddOrUpdateLink(element.GetAttribute("href"), element, input.Source.IsNull ? null : input.Source.FullPath, links);
                 }
 
                 // Link element
                 foreach (IElement element in htmlDocument.GetElementsByTagName("link").Where(x => x.HasAttribute("href")))
                 {
-                    AddOrUpdateLink(element.GetAttribute("href"), element, input.Source?.FullPath, links);
+                    AddOrUpdateLink(element.GetAttribute("href"), element, input.Source.IsNull ? null : input.Source.FullPath, links);
                 }
 
                 // Images
                 foreach (IHtmlImageElement element in htmlDocument.Images)
                 {
-                    AddOrUpdateLink(element.GetAttribute("src"), element, input.Source?.FullPath, links);
+                    AddOrUpdateLink(element.GetAttribute("src"), element, input.Source.IsNull ? null : input.Source.FullPath, links);
                 }
 
                 // Scripts
                 foreach (IHtmlScriptElement element in htmlDocument.Scripts)
                 {
-                    AddOrUpdateLink(element.Source, element, input.Source?.FullPath, links);
+                    AddOrUpdateLink(element.Source, element, input.Source.IsNull ? null : input.Source.FullPath, links);
                 }
             }
         }
@@ -194,7 +194,7 @@ namespace Statiq.Html
             }
 
             // Remove the link root if there is one and remove the preceding slash
-            if (context.Settings.GetDirectoryPath(Keys.LinkRoot) != null
+            if (!context.Settings.GetDirectoryPath(Keys.LinkRoot).IsNull
                 && normalizedPath.StartsWith(context.Settings.GetDirectoryPath(Keys.LinkRoot).FullPath))
             {
                 normalizedPath = normalizedPath.Substring(context.Settings.GetDirectoryPath(Keys.LinkRoot).FullPath.Length);
@@ -233,7 +233,7 @@ namespace Statiq.Html
                 return outputFile.Exists;
             });
 
-            if (validatedPath != null)
+            if (!validatedPath.IsNull)
             {
                 context.LogDebug($"Validated relative link {uri} at {validatedPath.FullPath}");
                 return true;

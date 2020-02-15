@@ -52,14 +52,14 @@ namespace Statiq.Core
             _treePath = Config.FromDocument((doc, ctx) =>
             {
                 // Attempt to get the segments from the destination path
-                ReadOnlyMemory<char>[] segments = doc.Destination?.GetRelativeInputPath(ctx)?.Segments;
-                if (segments == null)
+                if (doc.Destination.IsNull)
                 {
                     return null;
                 }
+                ReadOnlyMemory<char>[] segments = doc.Destination.Segments;
 
                 // Promote "index." pages up a level
-                if (segments.Length > 0 && segments[segments.Length - 1].StartsWith(IndexFileName))
+                if (segments.Length > 0 && segments[^1].StartsWith(IndexFileName))
                 {
                     return segments.Take(segments.Length - 1).Select(x => x.ToString()).ToArray();
                 }

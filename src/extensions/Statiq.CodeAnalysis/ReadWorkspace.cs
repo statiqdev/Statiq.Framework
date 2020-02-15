@@ -92,7 +92,7 @@ namespace Statiq.CodeAnalysis
 
         protected override IEnumerable<IDocument> ExecuteConfig(IDocument input, IExecutionContext context, NormalizedPath value)
         {
-            if (value != null)
+            if (!value.IsNull)
             {
                 IFile projectFile = context.FileSystem.GetInputFile(value);
                 return GetProjects(context, projectFile)

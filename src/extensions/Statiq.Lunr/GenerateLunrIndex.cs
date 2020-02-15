@@ -71,7 +71,7 @@ namespace Statiq.SearchIndex
         /// </summary>
         /// <param name="stopwordsPath">A file to use that contains a set of stopwords.</param>
         /// <param name="enableStemming">If set to <c>true</c>, stemming is enabled.</param>
-        public GenerateLunrIndex(NormalizedPath stopwordsPath = null, bool enableStemming = false)
+        public GenerateLunrIndex(NormalizedPath stopwordsPath = default, bool enableStemming = false)
             : this(Config.FromDocument(doc => doc.Get<ILunrIndexItem>(GenerateLunrIndexKeys.LunrIndexItem)), stopwordsPath, enableStemming)
         {
         }
@@ -83,7 +83,7 @@ namespace Statiq.SearchIndex
         /// <param name="searchIndexItemMetadataKey">The metadata key that contains the <c>SearchIndexItem</c> instance.</param>
         /// <param name="stopwordsPath">A file to use that contains a set of stopwords.</param>
         /// <param name="enableStemming">If set to <c>true</c>, stemming is enabled.</param>
-        public GenerateLunrIndex(string searchIndexItemMetadataKey, NormalizedPath stopwordsPath = null, bool enableStemming = false)
+        public GenerateLunrIndex(string searchIndexItemMetadataKey, NormalizedPath stopwordsPath = default, bool enableStemming = false)
             : this(Config.FromDocument(doc => doc.Get<ILunrIndexItem>(searchIndexItemMetadataKey)), stopwordsPath, enableStemming)
         {
         }
@@ -94,7 +94,7 @@ namespace Statiq.SearchIndex
         /// <param name="searchIndexItem">A delegate that should return a <c>ISearchIndexItem</c>.</param>
         /// <param name="stopwordsPath">A file to use that contains a set of stopwords.</param>
         /// <param name="enableStemming">If set to <c>true</c>, stemming is enabled.</param>
-        public GenerateLunrIndex(Config<ILunrIndexItem> searchIndexItem, NormalizedPath stopwordsPath = null, bool enableStemming = false)
+        public GenerateLunrIndex(Config<ILunrIndexItem> searchIndexItem, NormalizedPath stopwordsPath = default, bool enableStemming = false)
         {
             _searchIndexItem = searchIndexItem ?? throw new ArgumentNullException(nameof(searchIndexItem));
             _stopwordsPath = stopwordsPath;
@@ -269,7 +269,7 @@ var searchModule = function() {{
         {
             string[] stopwords = new string[0];
 
-            if (_stopwordsPath != null)
+            if (!_stopwordsPath.IsNull)
             {
                 IFile stopwordsFile = context.FileSystem.GetInputFile(_stopwordsPath);
                 if (stopwordsFile.Exists)

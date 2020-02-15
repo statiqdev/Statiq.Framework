@@ -365,11 +365,8 @@ namespace Statiq.Razor.Tests
                 TestFileProvider fileProvider = GetFileProvider();
                 return new TestFileSystem()
                 {
-                    RootPath = NormalizedPath.Root,
-                    InputPaths = new PathCollection<NormalizedPath>()
-                    {
-                        NormalizedPath.Root
-                    },
+                    RootPath = NormalizedPath.AbsoluteRoot,
+                    InputPaths = new PathCollection(NormalizedPath.AbsoluteRoot),
                     FileProvider = fileProvider
                 };
             }
