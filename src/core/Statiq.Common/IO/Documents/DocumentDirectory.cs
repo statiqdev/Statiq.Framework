@@ -14,6 +14,7 @@ namespace Statiq.Common
         {
             _fileProvider = fileProvider ?? throw new ArgumentNullException(nameof(fileProvider));
             path.ThrowIfNull(nameof(path));
+            Path = path;
         }
 
         public NormalizedPath Path { get; }

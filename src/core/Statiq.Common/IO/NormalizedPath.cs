@@ -30,13 +30,13 @@ namespace Statiq.Common
 
         private const string WhitespaceChars = "\r\n\t";
 
+        public static readonly NormalizedPath Null;
+
         public static readonly NormalizedPath Current = new NormalizedPath(Dot);
 
         public static readonly NormalizedPath Up = new NormalizedPath(DotDot);
 
         public static readonly NormalizedPath AbsoluteRoot = new NormalizedPath(Slash);
-
-        public static readonly NormalizedPath Null = new NormalizedPath(null);
 
         public static readonly NormalizedPath Empty = new NormalizedPath(string.Empty);
 
@@ -58,22 +58,38 @@ namespace Statiq.Common
         {
             if (path == null)
             {
-                if (pathKind == PathKind.Absolute)
-                {
-                    throw new Exception("A null path cannot be absolute");
-                }
-                FullPath = null;
-                Segments = null;
-                IsAbsolute = false;
+                throw new ArgumentNullException(nameof(path));
             }
-            else if (path == string.Empty)
+
+            // Try known paths first
+            if (path == string.Empty)
             {
                 if (pathKind == PathKind.Absolute)
                 {
-                    throw new Exception("An empty path cannot be absolute");
+                    throw new ArgumentException("An empty path cannot be absolute");
                 }
                 FullPath = string.Empty;
                 Segments = new ReadOnlyMemory<char>[] { ReadOnlyMemory<char>.Empty };
+                IsAbsolute = false;
+            }
+            else if (path == Slash || path == "\\")
+            {
+                if (pathKind == PathKind.Relative)
+                {
+                    throw new ArgumentException("An absolute root path cannot be relative");
+                }
+                FullPath = Slash;
+                Segments = new ReadOnlyMemory<char>[] { Slash.AsMemory() };
+                IsAbsolute = true;
+            }
+            else if (path == Dot || path == DotDot)
+            {
+                if (pathKind == PathKind.Absolute)
+                {
+                    throw new ArgumentException("A dotted relative path cannot be absolute");
+                }
+                FullPath = path;
+                Segments = new ReadOnlyMemory<char>[] { path.AsMemory() };
                 IsAbsolute = false;
             }
             else
@@ -86,11 +102,6 @@ namespace Statiq.Common
 
         private static ReadOnlySpan<char> GetFullPath(string path)
         {
-            if (string.IsNullOrWhiteSpace(path))
-            {
-                throw new ArgumentException("Path cannot be empty");
-            }
-
             // Normalize slashes and trim whitespace
             // Leave spaces since they're valid path chars
             ReadOnlySpan<char> fullPath = path
@@ -373,6 +384,10 @@ namespace Statiq.Common
             {
                 return IsNull;
             }
+            if (IsNull)
+            {
+                return false;
+            }
             return IsAbsolute == other.IsAbsolute
                 && FullPath.Equals(other.FullPath, comparisonType);
         }
@@ -406,7 +421,7 @@ namespace Statiq.Common
         /// </summary>
         /// <param name="path">The path as a string.</param>
         /// <returns>The result of the conversion.</returns>
-        public static implicit operator NormalizedPath(string path) => new NormalizedPath(path);
+        public static implicit operator NormalizedPath(string path) => path == null ? NormalizedPath.Null : new NormalizedPath(path);
 
         /// <summary>
         /// Performs an explicit conversion from <see cref="NormalizedPath"/> to <see cref="string"/>.
@@ -467,7 +482,7 @@ namespace Statiq.Common
         {
             ThrowIfNull();
             path.ThrowIfNull(nameof(path));
-            return Combine(path);
+            return Combine(this, path);
         }
 
         /// <summary>
@@ -636,7 +651,7 @@ namespace Statiq.Common
             path.ThrowIfNull(nameof(path));
 
             path = path.Parent;
-            while (path != Current)
+            while (!path.IsNullOrEmpty)
             {
                 if (Equals(path))
                 {
@@ -726,6 +741,12 @@ namespace Statiq.Common
         public NormalizedPath ChangeExtension(string extension)
         {
             ThrowIfNull();
+            if (IsEmpty)
+            {
+                return extension.StartsWith('.')
+                    ? new NormalizedPath(extension)
+                    : new NormalizedPath("." + extension);
+            }
             return new NormalizedPath(System.IO.Path.ChangeExtension(FullPath, extension));
         }
 

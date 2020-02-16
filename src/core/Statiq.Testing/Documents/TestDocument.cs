@@ -146,7 +146,7 @@ namespace Statiq.Testing
 
         private static NormalizedPath GetDestinationPath(NormalizedPath path)
         {
-            if (path.IsAbsolute)
+            if (path.IsNull || path.IsRelative)
             {
                 return path;
             }

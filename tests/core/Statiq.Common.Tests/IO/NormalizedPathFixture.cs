@@ -27,12 +27,37 @@ namespace Statiq.Common.Tests.IO
                 Should.Throw<ArgumentNullException>(() => new NormalizedPath(null));
             }
 
-            [TestCase("")]
-            [TestCase("\t ")]
-            public void ShouldThrowIfPathIsEmpty(string fullPath)
+            [Test]
+            public void EmptyPath()
             {
-                // Given, When, Then
-                Should.Throw<ArgumentException>(() => new NormalizedPath(fullPath));
+                // Given, When
+                NormalizedPath path = new NormalizedPath(string.Empty);
+
+                // Then
+                path.FullPath.ShouldBe(string.Empty);
+                path.IsEmpty.ShouldBeTrue();
+            }
+
+            [Test]
+            public void WhitespacePath()
+            {
+                // Given, When
+                NormalizedPath path = new NormalizedPath(" ");
+
+                // Then
+                path.FullPath.ShouldBe(" ");
+                path.IsEmpty.ShouldBeFalse();
+            }
+
+            [Test]
+            public void TrimsWhitespace()
+            {
+                // Given, When
+                NormalizedPath path = new NormalizedPath("\t ");
+
+                // Then
+                path.FullPath.ShouldBe(" ");
+                path.IsEmpty.ShouldBeFalse();
             }
 
             [Test]
@@ -194,10 +219,10 @@ namespace Statiq.Common.Tests.IO
         {
             [TestCase(@"\a\b\c", "/")]
             [TestCase("/a/b/c", "/")]
-            [TestCase("a/b/c", ".")]
-            [TestCase(@"a\b\c", ".")]
-            [TestCase("foo.txt", ".")]
-            [TestCase("foo", ".")]
+            [TestCase("a/b/c", "")]
+            [TestCase(@"a\b\c", "")]
+            [TestCase("foo.txt", "")]
+            [TestCase("foo", "")]
             [WindowsTestCase(@"c:\a\b\c", "c:/")]
             [WindowsTestCase("c:/a/b/c", "c:/")]
             public void ShouldReturnRootPath(string fullPath, string expected)
@@ -220,7 +245,7 @@ namespace Statiq.Common.Tests.IO
             [TestCase("foo")]
             [WindowsTestCase(@"c:\a\b\c")]
             [WindowsTestCase("c:/a/b/c")]
-            public void ShouldReturnDottedRootForExplicitRelativePath(string fullPath)
+            public void ShouldReturnEmptyRootForExplicitRelativePath(string fullPath)
             {
                 // Given
                 NormalizedPath path = new NormalizedPath(fullPath, PathKind.Relative);
@@ -229,7 +254,7 @@ namespace Statiq.Common.Tests.IO
                 NormalizedPath root = path.Root;
 
                 // Then
-                root.FullPath.ShouldBe(".");
+                root.FullPath.ShouldBeEmpty();
             }
         }
 
@@ -551,8 +576,8 @@ namespace Statiq.Common.Tests.IO
         {
             [TestCase("assets/shaders/basic.frag", ".frag")]
             [TestCase("assets/shaders/basic.frag/test.vert", ".vert")]
-            [TestCase("assets/shaders/basic", null)]
-            [TestCase("assets/shaders/basic.frag/test", null)]
+            [TestCase("assets/shaders/basic", "")]
+            [TestCase("assets/shaders/basic.frag/test", "")]
             public void CanGetExtension(string fullPath, string expected)
             {
                 // Given
@@ -591,7 +616,7 @@ namespace Statiq.Common.Tests.IO
                 NormalizedPath directory = path.Parent;
 
                 // Then
-                Assert.AreEqual(".", directory.FullPath);
+                directory.FullPath.ShouldBeEmpty();
             }
         }
 
@@ -656,6 +681,20 @@ namespace Statiq.Common.Tests.IO
 
                 // Then
                 Assert.AreEqual(expected, path.ToString());
+            }
+
+            [TestCase("foo")]
+            [TestCase(".foo")]
+            public void AddsExtensionToEmptyPath(string extension)
+            {
+                // Given
+                NormalizedPath path = NormalizedPath.Empty;
+
+                // When
+                path = path.ChangeExtension(extension);
+
+                // Then
+                path.FullPath.ShouldBe(".foo");
             }
         }
 
@@ -812,7 +851,7 @@ namespace Statiq.Common.Tests.IO
                 NormalizedPath result = path.FileNameWithoutExtension;
 
                 // Then
-                Assert.IsNull(result);
+                result.FullPath.ShouldBeEmpty();
             }
         }
 
@@ -894,10 +933,9 @@ namespace Statiq.Common.Tests.IO
             }
 
             [TestCase(".")]
-            [TestCase("/")]
             [TestCase("a")]
-            [WindowsTestCase("C:")]
-            public void RootDirectoryReturnsNullParent(string directoryPath)
+            [TestCase("")]
+            public void RelativeRootDirectoryReturnsEmptyParent(string directoryPath)
             {
                 // Given
                 NormalizedPath path = new NormalizedPath(directoryPath);
@@ -906,7 +944,21 @@ namespace Statiq.Common.Tests.IO
                 NormalizedPath parent = path.Parent;
 
                 // Then
-                Assert.IsNull(parent);
+                parent.FullPath.ShouldBeEmpty();
+            }
+
+            [TestCase("/")]
+            [WindowsTestCase("C:")]
+            public void AbsoluteRootDirectoryReturnsNull(string directoryPath)
+            {
+                // Given
+                NormalizedPath path = new NormalizedPath(directoryPath);
+
+                // When
+                NormalizedPath parent = path.Parent;
+
+                // Then
+                parent.FullPath.ShouldBeNull();
             }
         }
 

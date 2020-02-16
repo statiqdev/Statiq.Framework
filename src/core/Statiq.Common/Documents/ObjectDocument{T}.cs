@@ -116,13 +116,13 @@ namespace Statiq.Common
             {
                 throw new ArgumentNullException(nameof(obj));
             }
-            if (!source.IsAbsolute)
+            if (!source.IsNull && !source.IsAbsolute)
             {
                 throw new ArgumentException("Document sources must be absolute", nameof(source));
             }
-            if (!destination.IsRelative)
+            if (!destination.IsNull && !destination.IsRelative)
             {
-                throw new ArgumentException("Document destinations must be relative to the output path", nameof(source));
+                throw new ArgumentException("Document destinations must be relative to the output path", nameof(destination));
             }
 
             Id = id;
