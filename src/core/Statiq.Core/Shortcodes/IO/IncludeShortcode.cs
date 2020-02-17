@@ -41,7 +41,7 @@ namespace Statiq.Core
             if (_sourcePath.IsNull)
             {
                 // Cache the source path for this shortcode instance since it'll be the same for all future shortcodes
-                _sourcePath = document.GetFilePath("IncludeShortcodeSource", document.Source);
+                _sourcePath = document.GetPath("IncludeShortcodeSource", document.Source);
             }
 
             // Try to find the file relative to the current document path

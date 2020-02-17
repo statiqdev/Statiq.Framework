@@ -60,24 +60,14 @@ namespace Statiq.Common
         public static DateTime GetDateTime(this IMetadata metadata, string key, DateTime defaultValue = default) => metadata.Get(key, defaultValue);
 
         /// <summary>
-        /// Gets the value for the specified key converted to a <see cref="NormalizedPath"/>. This method never throws an exception. It will
-        /// return the specified default value if the key is not found or if the string value can't be converted to a <see cref="GetFilePath"/>.
+        /// Gets the value for the specified key converted to a <see cref="NormalizedPath"/>. This method never throws an exception.
+        /// It will return the specified default value if the key is not found.
         /// </summary>
         /// <param name="metadata">The metadata instance.</param>
         /// <param name="key">The key of the value to get.</param>
-        /// <param name="defaultValue">The default value to use if the key is not found or cannot be converted to a <see cref="GetFilePath"/>.</param>
+        /// <param name="defaultValue">The default value to use if the key is not found.</param>
         /// <returns>The value for the specified key converted to a <see cref="NormalizedPath"/> or the specified default value.</returns>
-        public static NormalizedPath GetFilePath(this IMetadata metadata, string key, NormalizedPath defaultValue = default) => metadata.Get(key, defaultValue);
-
-        /// <summary>
-        /// Gets the value for the specified key converted to a <see cref="NormalizedPath"/>. This method never throws an exception. It will
-        /// return the specified default value if the key is not found or if the string value can't be converted to a <see cref="GetDirectoryPath"/>.
-        /// </summary>
-        /// <param name="metadata">The metadata instance.</param>
-        /// <param name="key">The key of the value to get.</param>
-        /// <param name="defaultValue">The default value to use if the key is not found or cannot be converted to a <see cref="GetDirectoryPath"/>.</param>
-        /// <returns>The value for the specified key converted to a <see cref="NormalizedPath"/> or the specified default value.</returns>
-        public static NormalizedPath GetDirectoryPath(this IMetadata metadata, string key, NormalizedPath defaultValue = default) => metadata.Get(key, defaultValue);
+        public static NormalizedPath GetPath(this IMetadata metadata, string key, NormalizedPath defaultValue = default) => metadata.Get(key, defaultValue);
 
         /// <summary>
         /// Gets the value for the specified key converted to a <see cref="IReadOnlyList{T}"/>. This method never throws an exception. It will return the specified

@@ -307,7 +307,7 @@ namespace Statiq.Common.Tests.Meta
             }
         }
 
-        public class ListTests : MetadataFixture
+        public class GetListTests : MetadataFixture
         {
             [Test]
             public void ReturnsCorrectResultForList()
@@ -370,7 +370,7 @@ namespace Statiq.Common.Tests.Meta
             }
         }
 
-        public class DocumentListTests : MetadataFixture
+        public class GetDocumentListTests : MetadataFixture
         {
             [Test]
             public void ReturnsNullWhenKeyNotFound()
@@ -435,7 +435,7 @@ namespace Statiq.Common.Tests.Meta
             }
         }
 
-        public class StringTests : MetadataFixture
+        public class GetStringTests : MetadataFixture
         {
             [TestCase("/a/b/c.txt", "/a/b/c.txt")]
             [TestCase("a/b/c.txt", "a/b/c.txt")]
@@ -472,7 +472,7 @@ namespace Statiq.Common.Tests.Meta
             }
         }
 
-        public class FilePathTests : MetadataFixture
+        public class GetPathTests : MetadataFixture
         {
             [TestCase("/a/b/c.txt", "/a/b/c.txt")]
             [TestCase("a/b/c.txt", "a/b/c.txt")]
@@ -484,11 +484,10 @@ namespace Statiq.Common.Tests.Meta
 
                 // When
                 metadata = new Metadata(metadata, new[] { new KeyValuePair<string, object>("A", new NormalizedPath(path)) });
-                object result = metadata.GetFilePath("A");
+                NormalizedPath result = metadata.GetPath("A");
 
                 // Then
-                Assert.IsInstanceOf<NormalizedPath>(result);
-                Assert.AreEqual(expected, ((NormalizedPath)result).FullPath);
+                result.FullPath.ShouldBe(expected);
             }
 
             [TestCase("/a/b/c.txt", "/a/b/c.txt")]
@@ -502,23 +501,19 @@ namespace Statiq.Common.Tests.Meta
 
                 // When
                 metadata = new Metadata(metadata, new[] { new KeyValuePair<string, object>("A", path) });
-                object result = metadata.GetFilePath("A");
+                NormalizedPath result = metadata.GetPath("A");
 
                 // Then
                 if (expected == null)
                 {
-                    Assert.IsNull(result);
+                    result.IsNull.ShouldBeTrue();
                 }
                 else
                 {
-                    Assert.IsInstanceOf<NormalizedPath>(result);
-                    Assert.AreEqual(expected, ((NormalizedPath)result).FullPath);
+                    result.FullPath.ShouldBe(expected);
                 }
             }
-        }
 
-        public class DirectoryPathTests : MetadataFixture
-        {
             [TestCase("/a/b/c", "/a/b/c")]
             [TestCase("a/b/c", "a/b/c")]
             public void ReturnsCorrectDirectoryPathForDirectoryPath(string path, string expected)
@@ -529,11 +524,10 @@ namespace Statiq.Common.Tests.Meta
 
                 // When
                 metadata = new Metadata(metadata, new[] { new KeyValuePair<string, object>("A", new NormalizedPath(path)) });
-                object result = metadata.GetDirectoryPath("A");
+                NormalizedPath result = metadata.GetPath("A");
 
                 // Then
-                Assert.IsInstanceOf<NormalizedPath>(result);
-                Assert.AreEqual(expected, ((NormalizedPath)result).FullPath);
+                result.FullPath.ShouldBe(expected);
             }
 
             [TestCase("/a/b/c", "/a/b/c")]
@@ -547,17 +541,16 @@ namespace Statiq.Common.Tests.Meta
 
                 // When
                 metadata = new Metadata(metadata, new[] { new KeyValuePair<string, object>("A", path) });
-                object result = metadata.GetDirectoryPath("A");
+                NormalizedPath result = metadata.GetPath("A");
 
                 // Then
                 if (expected == null)
                 {
-                    Assert.IsNull(result);
+                    result.IsNull.ShouldBeTrue();
                 }
                 else
                 {
-                    Assert.IsInstanceOf<NormalizedPath>(result);
-                    Assert.AreEqual(expected, ((NormalizedPath)result).FullPath);
+                    result.FullPath.ShouldBe(expected);
                 }
             }
         }

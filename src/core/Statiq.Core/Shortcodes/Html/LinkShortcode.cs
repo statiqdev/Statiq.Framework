@@ -52,7 +52,7 @@ namespace Statiq.Core
             string host = arguments.GetString("Host", arguments.GetBool("IncludeHost") ? context.Settings.GetString(Keys.Host) : null);
 
             // Use "Root" if it's provided, otherwise LinkRoot setting
-            NormalizedPath root = arguments.GetDirectoryPath("Root", context.Settings.GetDirectoryPath(Keys.LinkRoot));
+            NormalizedPath root = arguments.GetPath("Root", context.Settings.GetPath(Keys.LinkRoot));
 
             // Use "Scheme" if it's provided, otherwise if "UseHttps" is true use "https" or use LinksUseHttps setting
             string scheme = arguments.GetString("Scheme", arguments.ContainsKey("UseHttps")

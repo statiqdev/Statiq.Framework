@@ -1,5 +1,6 @@
 ﻿using System;
 using NUnit.Framework;
+using Shouldly;
 using Statiq.Testing;
 
 namespace Statiq.Common.Tests.IO
@@ -9,21 +10,29 @@ namespace Statiq.Common.Tests.IO
     {
         public class ResolveTests : RelativePathResolverFixture
         {
-            [WindowsTestCase("C:/A/B/C", "C:/A/B/C", ".")]
-            [WindowsTestCase("C:/", "C:/", ".")]
+            [WindowsTestCase("C:/A/B/C", "C:/A/B/C", "")]
+            [WindowsTestCase("C:/", "C:/", "")]
+            [WindowsTestCase("C:/", "C:", "")]
+            [WindowsTestCase("C:", "C:/", "")]
+            [WindowsTestCase("C:", "C:", "")]
             [WindowsTestCase("C:/A/B/C", "C:/A/D/E", "../../D/E")]
             [WindowsTestCase("C:/A/B/C", "C:/", "../../..")]
+            [WindowsTestCase("C:/A/B/C", "C:", "../../..")]
             [WindowsTestCase("C:/A/B/C/D/E/F", "C:/A/B/C", "../../..")]
             [WindowsTestCase("C:/A/B/C", "C:/A/B/C/D/E/F", "D/E/F")]
             [WindowsTestCase("C:/A/B/C", "W:/X/Y/Z", "W:/X/Y/Z")]
             [WindowsTestCase("C:/A/B/C", "D:/A/B/C", "D:/A/B/C")]
             [WindowsTestCase("C:/A/B", "D:/E/", "D:/E")]
             [WindowsTestCase("C:/", "B:/", "B:/")]
+            [WindowsTestCase("C:/", "B:", "B:/")]
+            [WindowsTestCase("C:", "B:/", "B:/")]
+            [WindowsTestCase("C:", "B:", "B:/")]
             [WindowsTestCase("C:/", "/", "/")]
+            [WindowsTestCase("C:", "/", "/")]
 
             // Absolute
-            [TestCase("/C/A/B/C", "/C/A/B/C", ".")]
-            [TestCase("/C/", "/C/", ".")]
+            [TestCase("/C/A/B/C", "/C/A/B/C", "")]
+            [TestCase("/C/", "/C/", "")]
             [TestCase("/C/A/B/C", "/C/A/D/E", "../../D/E")]
             [TestCase("/C/A/B/C", "/C/", "../../..")]
             [TestCase("/C/A/B/C/D/E/F", "/C/A/B/C", "../../..")]
@@ -36,8 +45,8 @@ namespace Statiq.Common.Tests.IO
             [TestCase("/C/A/B", "/", "/")]
 
             // Relative
-            [TestCase("C/A/B/C", "C/A/B/C", ".")]
-            [TestCase("C/", "C/", ".")]
+            [TestCase("C/A/B/C", "C/A/B/C", "")]
+            [TestCase("C/", "C/", "")]
             [TestCase("C/A/B/C", "C/A/D/E", "../../D/E")]
             [TestCase("C/A/B/C", "C/", "../../..")]
             [TestCase("C/A/B/C/D/E/F", "C/A/B/C", "../../..")]
@@ -57,11 +66,16 @@ namespace Statiq.Common.Tests.IO
                 NormalizedPath relativePath = RelativePathResolver.Resolve(sourcePath, targetPath);
 
                 // Then
-                Assert.AreEqual(expected, relativePath.FullPath);
+                expected.ShouldBe(relativePath);
+                if (targetPath.IsAbsolute)
+                {
+                    sourcePath.Combine(relativePath).ShouldBe(targetPath);
+                }
             }
 
             [WindowsTestCase("C:/A/B/C", "C:/A/B/C/hello.txt", "hello.txt")]
             [WindowsTestCase("C:/", "C:/hello.txt", "hello.txt")]
+            [WindowsTestCase("C:", "C:/hello.txt", "hello.txt")]
             [WindowsTestCase("C:/A/B/C", "C:/A/D/E/hello.txt", "../../D/E/hello.txt")]
             [WindowsTestCase("C:/A/B/C", "C:/hello.txt", "../../../hello.txt")]
             [WindowsTestCase("C:/A/B/C/D/E/F", "C:/A/B/C/hello.txt", "../../../hello.txt")]
@@ -70,6 +84,7 @@ namespace Statiq.Common.Tests.IO
             [WindowsTestCase("C:/A/B/C", "D:/A/B/C/hello.txt", "D:/A/B/C/hello.txt")]
             [WindowsTestCase("C:/A/B", "D:/E/hello.txt", "D:/E/hello.txt")]
             [WindowsTestCase("C:/", "B:/hello.txt", "B:/hello.txt")]
+            [WindowsTestCase("C:", "B:/hello.txt", "B:/hello.txt")]
 
             // Absolute
             [TestCase("/C/A/B/C", "/C/A/B/C/hello.txt", "hello.txt")]
@@ -104,7 +119,11 @@ namespace Statiq.Common.Tests.IO
                 NormalizedPath relativePath = RelativePathResolver.Resolve(sourcePath, targetPath);
 
                 // Then
-                Assert.AreEqual(expected, relativePath.FullPath);
+                expected.ShouldBe(relativePath);
+                if (targetPath.IsAbsolute)
+                {
+                    sourcePath.Combine(relativePath).ShouldBe(targetPath);
+                }
             }
 
             [Test]

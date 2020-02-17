@@ -135,19 +135,14 @@ namespace Statiq.Common
             return fullPath;
         }
 
-        private static bool GetIsAbsolute(PathKind pathKind, ReadOnlySpan<char> path)
-        {
-            switch (pathKind)
+        private static bool GetIsAbsolute(PathKind pathKind, ReadOnlySpan<char> path) =>
+            pathKind switch
             {
-                case PathKind.RelativeOrAbsolute:
-                    return System.IO.Path.IsPathRooted(path);
-                case PathKind.Absolute:
-                    return true;
-                case PathKind.Relative:
-                    return false;
-            }
-            return false;
-        }
+                PathKind.RelativeOrAbsolute => System.IO.Path.IsPathRooted(path),
+                PathKind.Absolute => true,
+                PathKind.Relative => false,
+                _ => false,
+            };
 
         // Internal for testing
         // Splits the path on /, collapses it, and then pools the segments
@@ -174,7 +169,7 @@ namespace Statiq.Common
                 return (pathString, new ReadOnlyMemory<char>[] { pathString.AsMemory() });
             }
 
-            // Special case if path is just a windows drive
+            // Special case if path is a windows drive
             // (it will always have a trailing slash because that got added earlier)
             // The segment should not have the trailing slash
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows)
@@ -280,6 +275,23 @@ namespace Statiq.Common
                     segments[c] = (i - offset, segments[c].Item2);
                 }
             });
+
+            // Do one more check if it's a windows root
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows)
+                && fullPath.Length > 1
+                && fullPath[^1] == ':')
+            {
+                // Windows path without trailing slash so add one (but not to the segments)
+                fullPath += Slash;
+                return (fullPath, new ReadOnlyMemory<char>[] { fullPath.AsMemory().Slice(0, fullPath.Length - 1) });
+            }
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows)
+                && fullPath.Length > 2
+                && (fullPath[^1] == '/' && fullPath[^2] == ':'))
+            {
+                // Windows path with trailing slash so remove from the segment
+                return (fullPath, new ReadOnlyMemory<char>[] { fullPath.AsMemory().Slice(0, fullPath.Length - 1) });
+            }
 
             // Get memory slices and return
             ReadOnlyMemory<char> fullPathMemory = fullPath.AsMemory();

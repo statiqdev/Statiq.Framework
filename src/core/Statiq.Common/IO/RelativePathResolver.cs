@@ -23,7 +23,7 @@ namespace Statiq.Common
             }
 
             // Special case if source is just root
-            if (source.IsAbsolute && source.Segments.Length == 0)
+            if (source.IsAbsolute && source == NormalizedPath.AbsoluteRoot)
             {
                 return new NormalizedPath(string.Join(NormalizedPath.Slash, target.Segments));
             }

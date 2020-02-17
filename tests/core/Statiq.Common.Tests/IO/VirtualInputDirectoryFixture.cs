@@ -194,8 +194,8 @@ namespace Statiq.Common.Tests.IO
         {
             [TestCase("a/b", "a")]
             [TestCase("a/b/", "a")]
-            [TestCase(".", null)]
-            [TestCase("a", null)]
+            [TestCase(".", "")]
+            [TestCase("a", "")]
             public void ShouldReturnParentDirectory(string virtualPath, string expected)
             {
                 // Given

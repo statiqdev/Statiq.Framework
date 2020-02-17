@@ -11,7 +11,7 @@
             executionContext.GetLink(
                 (NormalizedPath)null,
                 executionContext.Settings.GetString(Keys.Host),
-                executionContext.Settings.GetDirectoryPath(Keys.LinkRoot),
+                executionContext.Settings.GetPath(Keys.LinkRoot),
                 executionContext.Settings.GetBool(Keys.LinksUseHttps),
                 false,
                 false);
@@ -70,7 +70,7 @@
                 }
 
                 // Otherwise try to process the value as a file path
-                NormalizedPath filePath = metadata.GetFilePath(key);
+                NormalizedPath filePath = metadata.GetPath(key);
                 return filePath.IsNull ? null : executionContext.GetLink(filePath, includeHost);
             }
             return null;
@@ -105,7 +105,7 @@
             return executionContext.GetLink(
                 path == null ? null : new NormalizedPath(path),
                 includeHost ? executionContext.Settings.GetString(Keys.Host) : null,
-                executionContext.Settings.GetDirectoryPath(Keys.LinkRoot),
+                executionContext.Settings.GetPath(Keys.LinkRoot),
                 executionContext.Settings.GetBool(Keys.LinksUseHttps),
                 executionContext.Settings.GetBool(Keys.LinkHideIndexPages),
                 executionContext.Settings.GetBool(Keys.LinkHideExtensions),
@@ -168,7 +168,7 @@
             executionContext.GetLink(
                 path,
                 includeHost ? executionContext.Settings.GetString(Keys.Host) : null,
-                executionContext.Settings.GetDirectoryPath(Keys.LinkRoot),
+                executionContext.Settings.GetPath(Keys.LinkRoot),
                 executionContext.Settings.GetBool(Keys.LinksUseHttps),
                 executionContext.Settings.GetBool(Keys.LinkHideIndexPages),
                 executionContext.Settings.GetBool(Keys.LinkHideExtensions),

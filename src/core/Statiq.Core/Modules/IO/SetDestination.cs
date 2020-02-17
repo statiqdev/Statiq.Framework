@@ -98,12 +98,12 @@ namespace Statiq.Core
 
         private static NormalizedPath GetPathFromMetadata(IDocument doc)
         {
-            NormalizedPath path = doc.GetFilePath(Keys.DestinationPath);
+            NormalizedPath path = doc.GetPath(Keys.DestinationPath);
             if (!path.IsNull)
             {
                 return path;
             }
-            path = doc.GetFilePath(Keys.DestinationFileName);
+            path = doc.GetPath(Keys.DestinationFileName);
             if (!path.IsNull)
             {
                 return doc.Destination.IsNull ? path : doc.Destination.ChangeFileName(path);
