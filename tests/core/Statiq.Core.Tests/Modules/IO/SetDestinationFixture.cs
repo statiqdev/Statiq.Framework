@@ -194,7 +194,7 @@ namespace Statiq.Core.Tests.Modules.IO
             {
                 // Given
                 TestDocument input = new TestDocument();
-                SetDestination setDestination = new SetDestination((NormalizedPath)".dotfile");
+                SetDestination setDestination = new SetDestination(Config.FromValue<NormalizedPath>(".dotfile"));
 
                 // When
                 TestDocument result = await ExecuteAsync(input, setDestination).SingleAsync();

@@ -148,12 +148,6 @@ namespace Statiq.Common
         // Splits the path on /, collapses it, and then pools the segments
         internal static (string, ReadOnlyMemory<char>[]) GetFullPathAndSegments(ReadOnlySpan<char> path)
         {
-            // Return the current path (.) if the path is null or empty
-            if (path == default || path.IsEmpty)
-            {
-                return (Dot, new ReadOnlyMemory<char>[] { Dot.AsMemory() });
-            }
-
             // If the path is only one character, we don't need to do anything
             if (path.Length == 1)
             {
