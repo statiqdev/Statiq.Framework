@@ -1,5 +1,6 @@
 # 1.0.0-alpha.26
 
+- Added a new `ExecuteBranch` module that can execute multiple branches of modules.
 - Added config overrides to the modules that operate on document sets.
 - Fixes a bug with `MirrorResources` and files that contain "index" in their name.
 - Combines `FilePath` and `DirectoryPath` into a single consolidated `NormalizedPath (#79).
