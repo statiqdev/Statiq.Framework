@@ -17,7 +17,7 @@ namespace Statiq.Xmp
     /// Reads XMP data from the input documents and adds it to the document metadata.
     /// </summary>
     /// <remarks>
-    /// The <c>SourceFilePath</c> metadata key of each input document will be used to
+    /// The <see cref="IDocument.Source"/> of each input document will be used to
     /// locate any sidecar files.
     /// </remarks>
     /// <category>Metadata</category>

@@ -35,6 +35,8 @@ namespace Statiq.Common.Tests.IO
 
                 // Then
                 path.FullPath.ShouldBe(string.Empty);
+                path.Segments.ShouldBeEmpty();
+                path.IsAbsolute.ShouldBeFalse();
                 path.IsEmpty.ShouldBeTrue();
             }
 
@@ -47,6 +49,33 @@ namespace Statiq.Common.Tests.IO
                 // Then
                 path.FullPath.ShouldBe(" ");
                 path.IsEmpty.ShouldBeFalse();
+                path.Segments.Length.ShouldBe(1);
+                path.Segments[0].ToString().ShouldBe(" ");
+                path.IsAbsolute.ShouldBeFalse();
+            }
+
+            [Test]
+            public void BackslashPath()
+            {
+                // Given, When
+                NormalizedPath path = new NormalizedPath("/");
+
+                // Then
+                path.FullPath.ShouldBe("/");
+                path.Segments.ShouldBeEmpty();
+                path.IsAbsolute.ShouldBeTrue();
+            }
+
+            [Test]
+            public void ForwardSlashPath()
+            {
+                // Given, When
+                NormalizedPath path = new NormalizedPath("\\");
+
+                // Then
+                path.FullPath.ShouldBe("/");
+                path.Segments.ShouldBeEmpty();
+                path.IsAbsolute.ShouldBeTrue();
             }
 
             [Test]

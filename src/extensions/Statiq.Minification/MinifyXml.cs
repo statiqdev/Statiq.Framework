@@ -12,23 +12,6 @@ namespace Statiq.Minification
     /// <remarks>
     /// This module takes the XML content and uses minification to reduce the output.
     /// </remarks>
-    /// <example>
-    /// <code>
-    /// Pipelines.Add("Blog posts",
-    ///     ReadFiles("posts/*.md"),
-    ///     FrontMatter(Yaml()),
-    ///     Markdown(),
-    ///     WriteFiles(".html"),
-    ///     Rss(siteUri: "http://example.org",
-    ///         rssPath: new FilePath("posts/feed.rss"),
-    ///         feedTitle: "My awesome blog",
-    ///         feedDescription: "Blog about something"
-    ///     ),
-    ///     MinifyXml(),
-    ///     WriteFiles()
-    /// );
-    /// </code>
-    /// </example>
     /// <category>Content</category>
     public class MinifyXml : MinifierBase, IModule
     {

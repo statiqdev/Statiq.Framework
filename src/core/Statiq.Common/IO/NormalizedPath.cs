@@ -69,7 +69,7 @@ namespace Statiq.Common
                     throw new ArgumentException("An empty path cannot be absolute");
                 }
                 FullPath = string.Empty;
-                Segments = new ReadOnlyMemory<char>[] { ReadOnlyMemory<char>.Empty };
+                Segments = Array.Empty<ReadOnlyMemory<char>>();
                 IsAbsolute = false;
             }
             else if (path == Slash || path == "\\")
@@ -79,7 +79,7 @@ namespace Statiq.Common
                     throw new ArgumentException("An absolute root path cannot be relative");
                 }
                 FullPath = Slash;
-                Segments = new ReadOnlyMemory<char>[] { Slash.AsMemory() };
+                Segments = Array.Empty<ReadOnlyMemory<char>>();
                 IsAbsolute = true;
             }
             else if (path == Dot || path == DotDot)
@@ -427,14 +427,17 @@ namespace Statiq.Common
         /// </summary>
         /// <param name="path">The path as a string.</param>
         /// <returns>The result of the conversion.</returns>
-        public static implicit operator NormalizedPath(string path) => path == null ? NormalizedPath.Null : new NormalizedPath(path);
+        public static implicit operator NormalizedPath(string path) => path == null ? Null : new NormalizedPath(path);
 
         /// <summary>
         /// Performs an explicit conversion from <see cref="NormalizedPath"/> to <see cref="string"/>.
         /// </summary>
+        /// <remarks>
+        /// No implicit conversion to string on purpose, don't want bugs due to choosing string overloads over what should be paths
+        /// </remarks>
         /// <param name="path">The path.</param>
         /// <returns>The result as a string of the conversion.</returns>
-        public static implicit operator string(NormalizedPath path) => path.ToString();
+        public static explicit operator string(NormalizedPath path) => path.ToString();
 
         /// <summary>
         /// Combines two paths into a new path.

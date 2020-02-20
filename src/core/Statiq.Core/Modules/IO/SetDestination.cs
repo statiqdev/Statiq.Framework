@@ -65,7 +65,7 @@ namespace Statiq.Core
                         }
                         return path;
                     })
-                    : Config.FromValue((NormalizedPath)pathOrExtension),
+                    : Config.FromValue<NormalizedPath>(pathOrExtension),
                 true)
         {
         }

@@ -22,7 +22,7 @@ namespace Statiq.Core
         private readonly Config<NormalizedPath> _sidecarPath;
 
         /// <summary>
-        /// Searches for sidecar files at the same path as the input document SourceFilePath with the additional extension .meta.
+        /// Searches for sidecar files at the same path as the input document <see cref="IDocument.Source"/> with the additional extension .meta.
         /// If a sidecar file is found, it's content is passed to the specified child modules for processing.
         /// </summary>
         /// <param name="modules">The modules to execute against the sidecar file.</param>
@@ -32,7 +32,7 @@ namespace Statiq.Core
         }
 
         /// <summary>
-        /// Searches for sidecar files at the same path as the input document SourceFilePath with the specified additional extension.
+        /// Searches for sidecar files at the same path as the input document <see cref="IDocument.Source"/> with the specified additional extension.
         /// If a sidecar file is found, it's content is passed to the specified child modules for processing.
         /// </summary>
         /// <param name="extension">The extension to search.</param>

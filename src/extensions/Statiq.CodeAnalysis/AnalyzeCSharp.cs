@@ -350,7 +350,7 @@ namespace Statiq.CodeAnalysis
         /// anchor to their SymbolId.
         /// </summary>
         /// <param name="destination">
-        /// A function that takes the metadata for a given symbol and returns a <c>FilePath</c> to use for the destination.
+        /// A function that takes the metadata for a given symbol and returns a <see cref="NormalizedPath"/> to use for the destination.
         /// </param>
         /// <returns>The current module instance.</returns>
         public AnalyzeCSharp WithDestination(Func<ISymbol, NormalizedPath> destination) =>
@@ -363,7 +363,7 @@ namespace Statiq.CodeAnalysis
         /// anchor to their SymbolId.
         /// </summary>
         /// <param name="destination">
-        /// A function that takes the metadata for a given symbol and returns a <c>FilePath</c> to use for the destination.
+        /// A function that takes the metadata for a given symbol and returns a <see cref="NormalizedPath"/> to use for the destination.
         /// </param>
         /// <returns>The current module instance.</returns>
         public AnalyzeCSharp WithDestination(Func<ISymbol, Compilation, NormalizedPath> destination)

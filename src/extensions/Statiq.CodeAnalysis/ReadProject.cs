@@ -25,9 +25,18 @@ namespace Statiq.CodeAnalysis
         /// <summary>
         /// Reads the project file at the specified path. This allows you to specify a different project file depending on the input.
         /// </summary>
-        /// <param name="path">A delegate that returns a <c>FilePath</c> with the project file path.</param>
+        /// <param name="path">A delegate that returns a <see cref="NormalizedPath"/> with the project file path.</param>
         public ReadProject(Config<NormalizedPath> path)
             : base(path)
+        {
+        }
+
+        /// <summary>
+        /// Reads the project file at the specified path. This allows you to specify a different project file depending on the input.
+        /// </summary>
+        /// <param name="path">A delegate that returns a path with the project file path.</param>
+        public ReadProject(Config<string> path)
+            : this(path?.Transform(x => (NormalizedPath)x))
         {
         }
 

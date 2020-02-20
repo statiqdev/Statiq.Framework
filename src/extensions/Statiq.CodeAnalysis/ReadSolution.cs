@@ -26,9 +26,18 @@ namespace Statiq.CodeAnalysis
         /// <summary>
         /// Reads the solution file at the specified path. This allows you to specify a different solution file depending on the input.
         /// </summary>
-        /// <param name="path">A delegate that returns a <c>FilePath</c> with the solution file path.</param>
+        /// <param name="path">A delegate that returns a <see cref="NormalizedPath"/> with the solution file path.</param>
         public ReadSolution(Config<NormalizedPath> path)
             : base(path)
+        {
+        }
+
+        /// <summary>
+        /// Reads the solution file at the specified path. This allows you to specify a different solution file depending on the input.
+        /// </summary>
+        /// <param name="path">A delegate that returns a path with the solution file path.</param>
+        public ReadSolution(Config<string> path)
+            : this(path?.Transform(x => (NormalizedPath)x))
         {
         }
 

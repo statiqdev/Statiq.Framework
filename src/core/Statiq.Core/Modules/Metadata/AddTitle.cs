@@ -23,8 +23,7 @@ namespace Statiq.Core
 
         /// <summary>
         /// This will use the existing title metadata key if one exists,
-        /// otherwise it will set a title based on the document source
-        /// or the RelativeFilePath key if no source is available.
+        /// otherwise it will set a title based on the document source.
         /// </summary>
         public AddTitle()
         {

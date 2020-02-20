@@ -9,7 +9,7 @@
         /// <returns>A link for the root of the site.</returns>
         public static string GetLink(this IExecutionContext executionContext) =>
             executionContext.GetLink(
-                (NormalizedPath)null,
+                NormalizedPath.Null,
                 executionContext.Settings.GetString(Keys.Host),
                 executionContext.Settings.GetPath(Keys.LinkRoot),
                 executionContext.Settings.GetBool(Keys.LinksUseHttps),
@@ -69,9 +69,9 @@
                     return absoluteUri;
                 }
 
-                // Otherwise try to process the value as a file path
-                NormalizedPath filePath = metadata.GetPath(key);
-                return filePath.IsNull ? null : executionContext.GetLink(filePath, includeHost);
+                // Otherwise try to process the path
+                NormalizedPath path = metadata.GetPath(key);
+                return path.IsNull ? null : executionContext.GetLink(path, includeHost);
             }
             return null;
         }
@@ -101,9 +101,9 @@
                 return absoluteUri;
             }
 
-            // Otherwise process the path as a FilePath
+            // Otherwise process the path
             return executionContext.GetLink(
-                path == null ? null : new NormalizedPath(path),
+                path == null ? NormalizedPath.Null : new NormalizedPath(path),
                 includeHost ? executionContext.Settings.GetString(Keys.Host) : null,
                 executionContext.Settings.GetPath(Keys.LinkRoot),
                 executionContext.Settings.GetBool(Keys.LinksUseHttps),
@@ -143,8 +143,14 @@
                 return absoluteUri;
             }
 
-            // Otherwise process the path as a FilePath
-            return executionContext.GetLink(path == null ? null : new NormalizedPath(path), host, root, useHttps, hideIndexPages, hideExtensions);
+            // Otherwise process the path
+            return executionContext.GetLink(
+                path == null ? NormalizedPath.Null : new NormalizedPath(path),
+                host,
+                root,
+                useHttps,
+                hideIndexPages,
+                hideExtensions);
         }
 
         /// <summary>

@@ -78,7 +78,7 @@ namespace Statiq.Razor
         /// ViewStart based on document location or document metadata. Returning <c>null</c> from the
         /// function reverts back to the default ViewStart search behavior for that document.
         /// </summary>
-        /// <param name="path">A delegate that should return the ViewStart path as a <c>FilePath</c>,
+        /// <param name="path">A delegate that should return the ViewStart path as a <see cref="NormalizedPath"/>,
         /// or <c>null</c> for the default ViewStart search behavior.</param>
         /// <returns>The current module instance.</returns>
         public RenderRazor WithViewStart(Config<NormalizedPath> path)
@@ -88,14 +88,41 @@ namespace Statiq.Razor
         }
 
         /// <summary>
+        /// Specifies an alternate ViewStart file to use for all Razor pages processed by this module. This
+        /// lets you specify a different ViewStart file for each document. For example, you could return a
+        /// ViewStart based on document location or document metadata. Returning <c>null</c> from the
+        /// function reverts back to the default ViewStart search behavior for that document.
+        /// </summary>
+        /// <param name="path">A delegate that should return the ViewStart path as a path,
+        /// or <c>null</c> for the default ViewStart search behavior.</param>
+        /// <returns>The current module instance.</returns>
+        public RenderRazor WithViewStart(Config<string> path)
+        {
+            _viewStartPath = path?.Transform(x => (NormalizedPath)x);
+            return this;
+        }
+
+        /// <summary>
         /// Specifies a layout file to use for all Razor pages processed by this module. This
         /// lets you specify a different layout file for each document.
         /// </summary>
-        /// <param name="path">A delegate that should return the layout path as a <c>FilePath</c>.</param>
+        /// <param name="path">A delegate that should return the layout path as a <see cref="NormalizedPath"/>.</param>
         /// <returns>The current module instance.</returns>
         public RenderRazor WithLayout(Config<NormalizedPath> path)
         {
             _layoutPath = path;
+            return this;
+        }
+
+        /// <summary>
+        /// Specifies a layout file to use for all Razor pages processed by this module. This
+        /// lets you specify a different layout file for each document.
+        /// </summary>
+        /// <param name="path">A delegate that should return the layout path as a path.</param>
+        /// <returns>The current module instance.</returns>
+        public RenderRazor WithLayout(Config<string> path)
+        {
+            _layoutPath = path?.Transform(x => (NormalizedPath)x);
             return this;
         }
 

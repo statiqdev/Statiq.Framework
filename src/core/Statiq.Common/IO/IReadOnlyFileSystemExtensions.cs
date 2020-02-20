@@ -449,15 +449,15 @@ namespace Statiq.Common
                 .Select(x =>
                 {
                     bool negated = x[0] == '!';
-                    NormalizedPath filePath = negated ? new NormalizedPath(x.Substring(1)) : new NormalizedPath(x);
-                    if (filePath.IsAbsolute)
+                    NormalizedPath path = negated ? new NormalizedPath(x.Substring(1)) : new NormalizedPath(x);
+                    if (path.IsAbsolute)
                     {
                         // The globber doesn't support absolute paths, so get the root directory of this path
-                        IDirectory rootDirectory = fileSystem.GetDirectory(filePath.Root);
-                        NormalizedPath relativeFilePath = filePath.RootRelative;
+                        IDirectory rootDirectory = fileSystem.GetDirectory(path.Root);
+                        NormalizedPath relativePath = path.RootRelative;
                         return Tuple.Create(
                             rootDirectory,
-                            negated ? ('!' + relativeFilePath.FullPath) : relativeFilePath.FullPath);
+                            negated ? ('!' + relativePath.FullPath) : relativePath.FullPath);
                     }
                     return Tuple.Create(directory, x);
                 });

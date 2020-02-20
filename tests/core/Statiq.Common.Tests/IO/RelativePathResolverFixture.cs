@@ -66,7 +66,7 @@ namespace Statiq.Common.Tests.IO
                 NormalizedPath relativePath = RelativePathResolver.Resolve(sourcePath, targetPath);
 
                 // Then
-                expected.ShouldBe(relativePath);
+                expected.ShouldBe((string)relativePath);
                 if (targetPath.IsAbsolute)
                 {
                     sourcePath.Combine(relativePath).ShouldBe(targetPath);
@@ -119,7 +119,7 @@ namespace Statiq.Common.Tests.IO
                 NormalizedPath relativePath = RelativePathResolver.Resolve(sourcePath, targetPath);
 
                 // Then
-                expected.ShouldBe(relativePath);
+                expected.ShouldBe((string)relativePath);
                 if (targetPath.IsAbsolute)
                 {
                     sourcePath.Combine(relativePath).ShouldBe(targetPath);
