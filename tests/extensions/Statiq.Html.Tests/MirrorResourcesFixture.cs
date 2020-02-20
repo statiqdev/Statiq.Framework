@@ -39,6 +39,35 @@ namespace Statiq.Html.Tests
             }
 
             [Test]
+            public async Task KeepsIndexFileName()
+            {
+                // Given
+                TestExecutionContext context = new TestExecutionContext();
+                context.Settings[Keys.LinkHideIndexPages] = "true";
+                TestDocument document = new TestDocument(
+                    @"<html>
+                      <head>
+                        <script src=""https://cdn.jsdelivr.net/npm/es6-promise/dist/index.min.js""></script>
+                      </head>
+                      <body>
+                      </body>
+                    </html>");
+                MirrorResources module = new MirrorResources();
+
+                // When
+                TestDocument result = await ExecuteAsync(document, context, module).SingleAsync();
+
+                // Then
+                result.Content.ShouldBe(
+                    @"<html><head>
+                        <script src=""/mirror/cdn.jsdelivr.net/npm/es6-promise/dist/index.min.js""></script>
+                      </head>
+                      <body>
+                      
+                    </body></html>", StringCompareShould.IgnoreLineEndings);
+            }
+
+            [Test]
             public async Task ReplacesLinkResource()
             {
                 // Given

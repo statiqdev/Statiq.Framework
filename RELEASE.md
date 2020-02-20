@@ -1,6 +1,8 @@
 # 1.0.0-alpha.26
 
-- Fixes a race condition in `Process.WaitForExit(int)` calls (thanks @duncanawoods)
+- Fixes a bug with `MirrorResources` and files that contain "index" in their name.
+- Combines `FilePath` and `DirectoryPath` into a single consolidated `NormalizedPath (#79).
+- Fixes a race condition in `Process.WaitForExit(int)` calls (thanks @duncanawoods).
 
 # 1.0.0-alpha.25
 
@@ -44,13 +46,13 @@
 
 # 1.0.0-alpha.23
 
-- Changing target for all projects to .NET Core 3.1 LTS
-- New `Eval` shortcode (#37, #68, thanks @ProH4Ck)
-- Fixes the `CacheDocuments` module and excludes `IDocument.Id` from hash calculation (#74, thanks @mholo65)
+- Changing target for all projects to .NET Core 3.1 LTS.
+- New `Eval` shortcode (#37, #68, thanks @ProH4Ck).
+- Fixes the `CacheDocuments` module and excludes `IDocument.Id` from hash calculation (#74, thanks @mholo65).
 
 # 1.0.0-alpha.22
 
-- Fixes a bug with `MirrorResources` and relative links (#72, thanks @dafergu2)
+- Fixes a bug with `MirrorResources` and relative links (#72, thanks @dafergu2).
 - The `PhaseOutputs` collection now returns output documents from the most recent available phase or an empty result set if no phases were defined.
 - Adds .wasm as a supported media type (required for WebAssembly streaming).
 

@@ -151,7 +151,14 @@ namespace Statiq.Html
             {
                 throw new ExecutionException($"Null resource mirror path for {source}");
             }
-            string link = context.GetLink(path);
+            string link = context.GetLink(
+                path,
+                null,
+                context.Settings.GetPath(Keys.LinkRoot),
+                context.Settings.GetBool(Keys.LinksUseHttps),
+                false,
+                false,
+                context.Settings.GetBool(Keys.LinkLowercase));
 
             // Download the resource, but only if we haven't already written it to disk
             IFile outputFile = context.FileSystem.GetOutputFile(path);
