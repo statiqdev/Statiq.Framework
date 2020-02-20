@@ -745,6 +745,11 @@ namespace Statiq.Common
         /// <summary>
         /// Changes the file extension of the path.
         /// </summary>
+        /// <remarks>
+        /// Passing in <see cref="string.Empty"/> will result in an
+        /// empty extension while retaining the <c>.</c>. Passing in
+        /// null will result in removing the extension.
+        /// </remarks>
         /// <param name="extension">The new extension.</param>
         /// <returns>A new path with the new extension.</returns>
         public NormalizedPath ChangeExtension(string extension)

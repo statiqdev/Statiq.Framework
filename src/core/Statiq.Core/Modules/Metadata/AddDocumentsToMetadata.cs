@@ -37,6 +37,12 @@ namespace Statiq.Core
             _key = key ?? throw new ArgumentNullException(nameof(key));
         }
 
+        public AddDocumentsToMetadata(string key, Config<IEnumerable<IDocument>> documents)
+            : base(new ExecuteConfig(documents))
+        {
+            _key = key ?? throw new ArgumentNullException(nameof(key));
+        }
+
         protected override IEnumerable<IDocument> ExecuteChildren(
             IExecutionContext context,
             ImmutableArray<IDocument> childOutputs) =>

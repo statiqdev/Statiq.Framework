@@ -36,6 +36,11 @@ namespace Statiq.Core
         {
         }
 
+        public MergeMetadata(Config<IEnumerable<IDocument>> documents)
+            : base(new ExecuteConfig(documents))
+        {
+        }
+
         /// <summary>
         /// The default behavior of this module is to clone each input document with the metadata
         /// from each result document. This method reverses that logic by cloning each child result document with the

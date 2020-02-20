@@ -32,6 +32,11 @@ namespace Statiq.Core
         {
         }
 
+        public ConcatDocuments(Config<IEnumerable<IDocument>> documents)
+            : base(new ExecuteConfig(documents))
+        {
+        }
+
         protected override IEnumerable<IDocument> ExecuteChildren(
             IExecutionContext context,
             ImmutableArray<IDocument> childOutputs) =>

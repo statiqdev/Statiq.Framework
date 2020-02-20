@@ -28,9 +28,6 @@ namespace Statiq.Core.Tests.Modules.Control
                 results.Select(x => x[Keys.Current]).ShouldBe(new object[] { 1, 2, 3 }, true);
             }
 
-            // TODO: Empty enumerable and no inputs
-            // TODO: null enumerable and no inputs
-
             [Test]
             public async Task EnumeratesSingleValue()
             {

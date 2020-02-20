@@ -27,6 +27,11 @@ namespace Statiq.Core
         {
         }
 
+        public ReplaceDocuments(Config<IEnumerable<IDocument>> documents)
+            : base(new ExecuteConfig(documents))
+        {
+        }
+
         protected override IEnumerable<IDocument> ExecuteChildren(
             IExecutionContext context,
             ImmutableArray<IDocument> childOutputs) =>
