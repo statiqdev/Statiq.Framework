@@ -102,12 +102,12 @@ namespace Statiq.Common
 
         private static ReadOnlySpan<char> GetFullPath(string path)
         {
-            // Normalize slashes and trim whitespace
+            // Normalize slashes, remove invalid chars, and trim whitespace
             // Leave spaces since they're valid path chars
-            ReadOnlySpan<char> fullPath = path
-                .Replace('\\', '/')
-                .AsSpan()
-                .Trim(WhitespaceChars.AsSpan());
+            Span<char> fullPath = path.ToSpan();
+            fullPath.Replace('\\', '/');
+            fullPath = fullPath.Trim(WhitespaceChars.AsSpan());
+            ReplaceInvalidPathChars(fullPath);
 
             // Remove relative part of a path, but only if it's not the only part
             if (fullPath.Length > 2 && fullPath[0] == '.' && fullPath[1] == '/')
@@ -907,5 +907,23 @@ namespace Statiq.Common
             // Capitalize
             return CultureInfo.CurrentCulture.TextInfo.ToTitleCase(title);
         }
+
+        public static string ReplaceInvalidFileNameChars(string fileName, char newChar = '-')
+        {
+            Span<char> chars = fileName.ToSpan();
+            return ReplaceInvalidFileNameChars(chars, newChar) ? new string(chars) : fileName;
+        }
+
+        public static bool ReplaceInvalidFileNameChars(Span<char> fileName, char newChar = '-') =>
+            fileName.Replace(System.IO.Path.GetInvalidFileNameChars(), newChar);
+
+        public static string ReplaceInvalidPathChars(string path, char newChar = '-')
+        {
+            Span<char> chars = path.ToSpan();
+            return ReplaceInvalidPathChars(chars, newChar) ? new string(chars) : path;
+        }
+
+        public static bool ReplaceInvalidPathChars(Span<char> path, char newChar = '-') =>
+            path.Replace(System.IO.Path.GetInvalidPathChars(), newChar);
     }
 }

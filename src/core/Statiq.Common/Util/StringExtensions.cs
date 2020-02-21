@@ -23,5 +23,29 @@ namespace Statiq.Common
                 "([a-z])([A-Z])",
                 "$1-$2")
                 .ToLower();
+
+        /// <summary>
+        /// Allocates a <see cref="Span{T}"/> and copies the characters of the string into it.
+        /// </summary>
+        /// <param name="str">The string to copy to a <see cref="Span{T}"/>.</param>
+        /// <returns>A new <see cref="Span{T}"/> with the characters of the string.</returns>
+        public static Span<char> ToSpan(this string str)
+        {
+            Span<char> chars = new char[str.Length];
+            str.AsSpan().CopyTo(chars);
+            return chars;
+        }
+
+        /// <summary>
+        /// Allocates a <see cref="Memory{T}"/> and copies the characters of the string into it.
+        /// </summary>
+        /// <param name="str">The string to copy to a <see cref="Memory{T}"/>.</param>
+        /// <returns>A new <see cref="Memory{T}"/> with the characters of the string.</returns>
+        public static Memory<char> ToMemory(this string str)
+        {
+            Memory<char> chars = new char[str.Length];
+            str.AsMemory().CopyTo(chars);
+            return chars;
+        }
     }
 }
