@@ -14,11 +14,13 @@ namespace Statiq.Core
             string pipelineName,
             Phase phase,
             ImmutableArray<IDocument> outputs,
+            DateTimeOffset startTime,
             long elapsedMilliseconds)
         {
             PipelineName = pipelineName;
             Phase = phase;
             Outputs = outputs;
+            StartTime = startTime;
             ElapsedMilliseconds = elapsedMilliseconds;
         }
 
@@ -27,6 +29,8 @@ namespace Statiq.Core
         public Phase Phase { get; }
 
         public ImmutableArray<IDocument> Outputs { get; }
+
+        public DateTimeOffset StartTime { get; }
 
         public long ElapsedMilliseconds { get; }
     }

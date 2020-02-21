@@ -673,7 +673,7 @@ namespace Statiq.Core.Tests.Documents
             PhaseResult[] results = new PhaseResult[4];
             if (outputs != null)
             {
-                results[(int)phaseForOutputs] = new PhaseResult(pipelineName, phaseForOutputs, outputs.ToImmutableArray(), 0);
+                results[(int)phaseForOutputs] = new PhaseResult(pipelineName, phaseForOutputs, outputs.ToImmutableArray(), default, 0);
             }
             phaseResults.TryAdd(pipelineName, results);
             return pipelinePhase;

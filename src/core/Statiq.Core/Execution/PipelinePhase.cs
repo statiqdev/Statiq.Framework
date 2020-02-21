@@ -75,6 +75,7 @@ namespace Statiq.Core
 
             // Execute the phase
             ImmutableArray<IDocument> inputs = GetInputs();
+            DateTimeOffset startTime = DateTimeOffset.Now;
             System.Diagnostics.Stopwatch stopwatch = System.Diagnostics.Stopwatch.StartNew();
             _logger.LogInformation($"-> {PipelineName}/{Phase} » Starting {PipelineName} {Phase} phase execution... ({inputs.Length} input document(s), {_modules.Count} module(s))");
             try
@@ -111,7 +112,7 @@ namespace Statiq.Core
             await engine.Events.RaiseAsync(new AfterPipelinePhaseExecution(engine.ExecutionId, PipelineName, Phase, Outputs, stopwatch.ElapsedMilliseconds));
 
             // Record the results
-            PhaseResult phaseResult = new PhaseResult(PipelineName, Phase, Outputs, stopwatch.ElapsedMilliseconds);
+            PhaseResult phaseResult = new PhaseResult(PipelineName, Phase, Outputs, startTime, stopwatch.ElapsedMilliseconds);
             phaseResults.AddOrUpdate(
                 phaseResult.PipelineName,
                 _ =>

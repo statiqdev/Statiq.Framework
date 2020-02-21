@@ -1,5 +1,6 @@
 # 1.0.0-alpha.26
 
+- Added a phase timeline graphic to the execution summary output.
 - Added some `Span<char>.Replace()` extension methods.
 - Added `NormalizedPath.ReplaceInvalidFileNameChars()` and `NormalizedPath.ReplaceInvalidPathChars()` static methods.
 - Added `IMetadata.GetRawEnumerable()` and an `IMetadata.GetRawEnumerable()` extension method to make enumerating raw key-value pairs easier.

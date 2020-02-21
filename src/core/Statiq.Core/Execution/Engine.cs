@@ -6,6 +6,7 @@ using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Reflection;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using JavaScriptEngineSwitcher.Core;
@@ -406,38 +407,10 @@ namespace Statiq.Core
                 await Events.RaiseAsync(new AfterEngineExecution(this, ExecutionId, Outputs, stopwatch.ElapsedMilliseconds));
 
                 // Log execution summary table
-                _logger.LogInformation(
-                    "Execution summary: (number of output documents per pipeline and phase)"
-                    + Environment.NewLine
-                    + Environment.NewLine
-                    + phaseResults
-                        .OrderBy(x => x.Key)
-                        .ToStringTable(
-                            new[]
-                            {
-                                "Pipeline",
-                                nameof(Phase.Input),
-                                nameof(Phase.Process),
-                                nameof(Phase.Transform),
-                                nameof(Phase.Output),
-                                "Total Time"
-                            },
-                            x => x.Key,
-                            x => GetPhaseResultTableString(x.Value[(int)Phase.Input]),
-                            x => GetPhaseResultTableString(x.Value[(int)Phase.Process]),
-                            x => GetPhaseResultTableString(x.Value[(int)Phase.Transform]),
-                            x => GetPhaseResultTableString(x.Value[(int)Phase.Output]),
-                            x =>
-                                ((x.Value[(int)Phase.Input]?.ElapsedMilliseconds ?? 0)
-                                + (x.Value[(int)Phase.Process]?.ElapsedMilliseconds ?? 0)
-                                + (x.Value[(int)Phase.Transform]?.ElapsedMilliseconds ?? 0)
-                                + (x.Value[(int)Phase.Output]?.ElapsedMilliseconds ?? 0)).ToString()
-                                + " ms"));
-
-                static string GetPhaseResultTableString(PhaseResult phaseResult) =>
-                    phaseResult == null
-                        ? string.Empty
-                        : $"{phaseResult.Outputs.Length} ({phaseResult.ElapsedMilliseconds} ms)";
+                if (phaseResults.Count > 0)
+                {
+                    _logger.LogInformation(GetExecutionSummary(phaseResults));
+                }
 
                 // Clean up
                 _logger.LogInformation($"Finished execution in {stopwatch.ElapsedMilliseconds} ms");
@@ -447,6 +420,132 @@ namespace Statiq.Core
             {
                 ExecutionId = Guid.Empty;
                 CancellationToken = default;
+            }
+        }
+
+        private static string GetExecutionSummary(ConcurrentDictionary<string, PhaseResult[]> phaseResults)
+        {
+            const int slices = 80;
+
+            StringBuilder builder = new StringBuilder();
+            builder.AppendLine("Execution summary...");
+            builder.AppendLine();
+
+            builder.AppendLine("Number of output documents per pipeline and phase:");
+            builder.AppendLine();
+            builder.AppendLine(phaseResults
+                .OrderBy(x => x.Key)
+                .ToStringTable(
+                    new[]
+                    {
+                        "Pipeline",
+                        nameof(Phase.Input),
+                        nameof(Phase.Process),
+                        nameof(Phase.Transform),
+                        nameof(Phase.Output),
+                        "Total Time"
+                    },
+                    x => x.Key,
+                    x => GetPhaseResultTableString(x.Value[(int)Phase.Input]),
+                    x => GetPhaseResultTableString(x.Value[(int)Phase.Process]),
+                    x => GetPhaseResultTableString(x.Value[(int)Phase.Transform]),
+                    x => GetPhaseResultTableString(x.Value[(int)Phase.Output]),
+                    x =>
+                        ((x.Value[(int)Phase.Input]?.ElapsedMilliseconds ?? 0)
+                        + (x.Value[(int)Phase.Process]?.ElapsedMilliseconds ?? 0)
+                        + (x.Value[(int)Phase.Transform]?.ElapsedMilliseconds ?? 0)
+                        + (x.Value[(int)Phase.Output]?.ElapsedMilliseconds ?? 0)).ToString()
+                        + " ms"));
+
+            long startTime = phaseResults.Values
+                .SelectMany(x => x)
+                .Where(x => x != null)
+                .Min(x => x.StartTime)
+                .ToUnixTimeMilliseconds();
+            long endTime = phaseResults.Values
+                .SelectMany(x => x)
+                .Where(x => x != null)
+                .Max(x => x.StartTime.AddMilliseconds(x.ElapsedMilliseconds))
+                .ToUnixTimeMilliseconds();
+            long duration = endTime - startTime;
+            long sliceMilliseconds = duration / slices;
+
+            builder.AppendLine("Pipeline phase timeline:");
+            builder.AppendLine();
+            builder.AppendLine(phaseResults
+                .OrderBy(x => x.Key)
+                .ToStringTable(
+                    new[]
+                    {
+                        "Pipeline",
+                        $"Timeline ({duration} total ms)"
+                    },
+                    x => x.Key,
+                    x => GetPhaseResultsTimeline(x.Value)));
+
+            return builder.ToString();
+
+            static string GetPhaseResultTableString(PhaseResult result) =>
+                result == null
+                    ? string.Empty
+                    : $"{result.Outputs.Length} ({result.ElapsedMilliseconds} ms)";
+
+            string GetPhaseResultsTimeline(PhaseResult[] results)
+            {
+                Queue<(Phase Phase, long Start, long End)> times =
+                    new Queue<(Phase Phase, long Start, long End)>(
+                        results
+                            .Where(x => x != null)
+                            .Select(x => (x.Phase, x.StartTime.ToUnixTimeMilliseconds(), EndTime: x.StartTime.AddMilliseconds(x.ElapsedMilliseconds).ToUnixTimeMilliseconds())));
+
+                // Add a few extra columns to account for squeezing phases together
+                char[] timeline = new char[slices + 4];
+                (Phase Phase, long Start, long End) current = default;
+
+                for (int c = 0; c < slices + 4; c++)
+                {
+                    long sliceStart = startTime + (sliceMilliseconds * c);
+                    long sliceEnd = sliceStart + sliceMilliseconds;
+
+                    // If we were outputting a phase but now it's ended, drop it
+                    if (current != default && sliceStart > current.End)
+                    {
+                        current = default;
+                    }
+
+                    // If we're not outputting a phase, see if we're in the next one
+                    bool dequeued = false;
+                    if (current == default && times.Count > 0 && times.Peek().Start <= sliceStart)
+                    {
+                        current = times.Dequeue();
+                        dequeued = true;
+                    }
+
+                    // Output the phase
+                    if (current == default)
+                    {
+                        timeline[c] = ' ';
+                    }
+                    else if (dequeued)
+                    {
+                        // We just dequeued this phase so output the name
+                        timeline[c] = current.Phase switch
+                        {
+                            Phase.Input => 'I',
+                            Phase.Process => 'P',
+                            Phase.Transform => 'T',
+                            Phase.Output => 'O',
+                            _ => ' '
+                        };
+                    }
+                    else
+                    {
+                        // We've already output the phase name so just continue
+                        timeline[c] = '-';
+                    }
+                }
+
+                return new string(timeline);
             }
         }
 
