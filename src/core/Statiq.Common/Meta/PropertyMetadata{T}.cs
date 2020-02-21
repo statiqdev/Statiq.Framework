@@ -98,6 +98,7 @@ namespace Statiq.Common
         {
             private readonly T _instance;
 
+            /// <inheritdoc/>
             public PropertyMetadataInstance(T instance)
             {
                 if (instance == null)
@@ -107,8 +108,10 @@ namespace Statiq.Common
                 _instance = instance;
             }
 
+            /// <inheritdoc/>
             public bool ContainsKey(string key) => Properties.ContainsKey(key);
 
+            /// <inheritdoc/>
             public object this[string key]
             {
                 get
@@ -125,11 +128,14 @@ namespace Statiq.Common
                 }
             }
 
+            /// <inheritdoc/>
             // Enumerate the keys seperatly so we don't evaluate values
             public IEnumerable<string> Keys => Properties.Keys;
 
+            /// <inheritdoc/>
             public IEnumerable<object> Values => Properties.Values.Select(x => x.GetValue(_instance));
 
+            /// <inheritdoc/>
             public bool TryGetRaw(string key, out object value)
             {
                 if (Properties.TryGetValue(key, out IPropertyCallAdapter adapter))
@@ -141,6 +147,7 @@ namespace Statiq.Common
                 return false;
             }
 
+            /// <inheritdoc/>
             public bool TryGetValue<TValue>(string key, out TValue value)
             {
                 if (TryGetRaw(key, out object rawValue))
@@ -151,11 +158,14 @@ namespace Statiq.Common
                 return false;
             }
 
+            /// <inheritdoc/>
             public bool TryGetValue(string key, out object value) => TryGetValue<object>(key, out value);
 
+            /// <inheritdoc/>
             // The Select ensures LINQ optimizations won't turn this into a recursive call to Count
             public int Count => this.Select(_ => (object)null).Count();
 
+            /// <inheritdoc/>
             public IEnumerator<KeyValuePair<string, object>> GetEnumerator()
             {
                 foreach (KeyValuePair<string, IPropertyCallAdapter> item in Properties)
@@ -165,7 +175,18 @@ namespace Statiq.Common
                 }
             }
 
+            /// <inheritdoc/>
             IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
+
+            /// <inheritdoc/>
+            public IEnumerator<KeyValuePair<string, object>> GetRawEnumerator()
+            {
+                foreach (KeyValuePair<string, IPropertyCallAdapter> item in Properties)
+                {
+                    object rawValue = item.Value.GetValue(_instance);
+                    yield return new KeyValuePair<string, object>(item.Key, rawValue);
+                }
+            }
         }
     }
 }

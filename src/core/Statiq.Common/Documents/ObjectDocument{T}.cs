@@ -133,6 +133,7 @@ namespace Statiq.Common
             ContentProvider = contentProvider ?? new NullContent();
         }
 
+        /// <inheritdoc />
         public IDocument Clone(
             NormalizedPath source,
             NormalizedPath destination,
@@ -151,9 +152,11 @@ namespace Statiq.Common
 
         // IMetadata
 
+        /// <inheritdoc />
         public bool ContainsKey(string key) =>
             _metadata.ContainsKey(key) || PropertyMetadata<T>.For(Object).ContainsKey(key);
 
+        /// <inheritdoc />
         public object this[string key]
         {
             get
@@ -166,6 +169,7 @@ namespace Statiq.Common
             }
         }
 
+        /// <inheritdoc />
         // Enumerate the keys seperatly so we don't evaluate values
         public IEnumerable<string> Keys
         {
@@ -182,11 +186,14 @@ namespace Statiq.Common
             }
         }
 
+        /// <inheritdoc />
         public IEnumerable<object> Values => this.Select(x => x.Value);
 
+        /// <inheritdoc />
         public bool TryGetRaw(string key, out object value) =>
             _metadata.TryGetRaw(key, out value) || PropertyMetadata<T>.For(Object).TryGetRaw(key, out value);
 
+        /// <inheritdoc />
         public bool TryGetValue<TValue>(string key, out TValue value)
         {
             if (TryGetRaw(key, out object rawValue))
@@ -197,15 +204,27 @@ namespace Statiq.Common
             return false;
         }
 
+        /// <inheritdoc />
         public bool TryGetValue(string key, out object value) => TryGetValue<object>(key, out value);
 
+        /// <inheritdoc />
         // The Select ensures LINQ optimizations won't turn this into a recursive call to Count
         public int Count => this.Select(_ => (object)null).Count();
 
+        /// <inheritdoc />
         public IEnumerator<KeyValuePair<string, object>> GetEnumerator()
         {
             HashSet<string> keys = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-            foreach (KeyValuePair<string, object> item in _metadata.Concat(PropertyMetadata<T>.For(Object)))
+
+            foreach (KeyValuePair<string, object> item in _metadata)
+            {
+                if (keys.Add(item.Key))
+                {
+                    yield return item;
+                }
+            }
+
+            foreach (KeyValuePair<string, object> item in PropertyMetadata<T>.For(Object))
             {
                 if (keys.Add(item.Key))
                 {
@@ -214,6 +233,29 @@ namespace Statiq.Common
             }
         }
 
+        /// <inheritdoc />
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
+
+        /// <inheritdoc />
+        public IEnumerator<KeyValuePair<string, object>> GetRawEnumerator()
+        {
+            HashSet<string> keys = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
+            foreach (KeyValuePair<string, object> item in _metadata.GetRawEnumerable())
+            {
+                if (keys.Add(item.Key))
+                {
+                    yield return item;
+                }
+            }
+
+            foreach (KeyValuePair<string, object> item in PropertyMetadata<T>.For(Object).GetRawEnumerable())
+            {
+                if (keys.Add(item.Key))
+                {
+                    yield return item;
+                }
+            }
+        }
     }
 }

@@ -116,6 +116,9 @@ namespace Statiq.Testing
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
         /// <inhertdoc />
+        public IEnumerator<KeyValuePair<string, object>> GetRawEnumerator() => _dictionary.GetEnumerator();
+
+        /// <inhertdoc />
         public void Add(KeyValuePair<string, object> item) => ((IDictionary<string, object>)_dictionary).Add(item);
 
         /// <inhertdoc />

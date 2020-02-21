@@ -19,6 +19,7 @@ namespace Statiq.Common
                 : new HashSet<string>(keys.Where(x => metadata.ContainsKey(x)), StringComparer.OrdinalIgnoreCase);
         }
 
+        /// <inheritdoc/>
         public object this[string key]
         {
             get
@@ -32,21 +33,23 @@ namespace Statiq.Common
             }
         }
 
+        /// <inheritdoc/>
         public IEnumerable<string> Keys => _keys;
 
+        /// <inheritdoc/>
         public IEnumerable<object> Values => _keys.Select(x => _metadata[x]);
 
+        /// <inheritdoc/>
         public int Count => _keys.Count;
 
+        /// <inheritdoc/>
         public bool ContainsKey(string key)
         {
             _ = key ?? throw new ArgumentNullException(nameof(key));
             return _keys.Contains(key);
         }
 
-        public IEnumerator<KeyValuePair<string, object>> GetEnumerator() =>
-            _keys.Select(x => KeyValuePair.Create(x, _metadata[x])).GetEnumerator();
-
+        /// <inheritdoc/>
         public bool TryGetRaw(string key, out object value)
         {
             _ = key ?? throw new ArgumentNullException(nameof(key));
@@ -54,6 +57,7 @@ namespace Statiq.Common
             return _keys.Contains(key) && _metadata.TryGetRaw(key, out value);
         }
 
+        /// <inheritdoc/>
         public bool TryGetValue<TValue>(string key, out TValue value)
         {
             if (TryGetRaw(key, out object rawValue))
@@ -64,6 +68,7 @@ namespace Statiq.Common
             return false;
         }
 
+        /// <inheritdoc/>
         public bool TryGetValue(string key, out object value)
         {
             _ = key ?? throw new ArgumentNullException(nameof(key));
@@ -71,6 +76,15 @@ namespace Statiq.Common
             return _keys.Contains(key) && _metadata.TryGetValue(key, out value);
         }
 
+        /// <inheritdoc/>
+        public IEnumerator<KeyValuePair<string, object>> GetEnumerator() =>
+            _keys.Select(x => KeyValuePair.Create(x, _metadata[x])).GetEnumerator();
+
+        /// <inheritdoc/>
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
+
+        /// <inheritdoc/>
+        public IEnumerator<KeyValuePair<string, object>> GetRawEnumerator() =>
+            _keys.Select(x => KeyValuePair.Create(x, _metadata.GetRaw(x))).GetEnumerator();
     }
 }

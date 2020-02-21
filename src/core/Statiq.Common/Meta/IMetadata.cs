@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace Statiq.Common
 {
@@ -25,5 +26,12 @@ namespace Statiq.Common
         /// <param name="value">The value of the key if it was found and could be converted to the desired return type.</param>
         /// <returns><c>true</c> if the key was found and the value could be converted to the desired return type, <c>false</c> otherwise.</returns>
         bool TryGetValue<TValue>(string key, out TValue value);
+
+        /// <summary>
+        /// Enumerates raw key-value pairs
+        /// (I.e., the values have not been expanded similar to <see cref="TryGetRaw(string, out object)"/>).
+        /// </summary>
+        /// <returns>An enumerator over raw key-value pairs.</returns>
+        IEnumerator<KeyValuePair<string, object>> GetRawEnumerator();
     }
 }

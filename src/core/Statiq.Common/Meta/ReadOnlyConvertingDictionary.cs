@@ -66,14 +66,7 @@ namespace Statiq.Common
         }
 
         /// <inheritdoc />
-        public IEnumerator<KeyValuePair<string, object>> GetEnumerator() =>
-            _dictionary.Select(x => TypeHelper.ExpandKeyValuePair(x, this)).GetEnumerator();
-
-        /// <inheritdoc />
         public bool TryGetRaw(string key, out object value) => _dictionary.TryGetValue(key, out value);
-
-        /// <inheritdoc />
-        IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
         /// <inheritdoc />
         public bool TryGetValue<TValue>(string key, out TValue value)
@@ -88,5 +81,15 @@ namespace Statiq.Common
 
         /// <inheritdoc />
         public bool TryGetValue(string key, out object value) => TryGetValue<object>(key, out value);
+
+        /// <inheritdoc />
+        public IEnumerator<KeyValuePair<string, object>> GetEnumerator() =>
+            _dictionary.Select(x => TypeHelper.ExpandKeyValuePair(x, this)).GetEnumerator();
+
+        /// <inheritdoc />
+        IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
+
+        /// <inheritdoc />
+        public IEnumerator<KeyValuePair<string, object>> GetRawEnumerator() => _dictionary.GetEnumerator();
     }
 }

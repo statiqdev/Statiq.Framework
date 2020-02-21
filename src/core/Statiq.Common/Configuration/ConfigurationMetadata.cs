@@ -18,11 +18,13 @@ namespace Statiq.Common
 
         public IConfiguration Configuration { get; protected set; }
 
+        /// <inheritdoc/>
         public virtual bool ContainsKey(string key) =>
             Configuration.GetSection(key ?? throw new ArgumentNullException(nameof(key))).Exists();
 
         protected virtual object GetSectionMetadata(IConfigurationSection section) => new ConfigurationMetadata(section);
 
+        /// <inheritdoc/>
         public virtual bool TryGetRaw(string key, out object value)
         {
             _ = key ?? throw new ArgumentNullException(nameof(key));
@@ -36,6 +38,7 @@ namespace Statiq.Common
             return false;
         }
 
+        /// <inheritdoc/>
         public bool TryGetValue<TValue>(string key, out TValue value)
         {
             if (key != null && TryGetRaw(key, out object raw))
@@ -46,8 +49,10 @@ namespace Statiq.Common
             return false;
         }
 
+        /// <inheritdoc/>
         public bool TryGetValue(string key, out object value) => TryGetValue<object>(key, out value);
 
+        /// <inheritdoc/>
         public object this[string key]
         {
             get
@@ -61,17 +66,25 @@ namespace Statiq.Common
             }
         }
 
+        /// <inheritdoc/>
         // Enumerate the keys seperatly so we don't evaluate values
         public virtual IEnumerable<string> Keys => Configuration.AsEnumerable().Select(x => x.Key);
 
+        /// <inheritdoc/>
         public IEnumerable<object> Values => this.Select(x => x.Value);
 
+        /// <inheritdoc/>
         // The Select ensures LINQ optimizations won't turn this into a recursive call to Count
         public int Count => this.Select(_ => (object)null).Count();
 
+        /// <inheritdoc/>
         public virtual IEnumerator<KeyValuePair<string, object>> GetEnumerator() =>
             Configuration.AsEnumerable().Select(x => new KeyValuePair<string, object>(x.Key, x.Value)).GetEnumerator();
 
+        /// <inheritdoc/>
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
+
+        /// <inheritdoc/>
+        public virtual IEnumerator<KeyValuePair<string, object>> GetRawEnumerator() => GetEnumerator();
     }
 }

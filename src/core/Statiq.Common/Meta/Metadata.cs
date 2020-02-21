@@ -39,6 +39,14 @@ namespace Statiq.Common
             if (items != null)
             {
                 Dictionary = new Dictionary<string, object>(StringComparer.OrdinalIgnoreCase);
+
+                // If items is an IMetadata, use the raw enumerable so that we don't expand IMetadataValue and Config values
+                if (items is IMetadata metadata)
+                {
+                    items = metadata.GetRawEnumerable();
+                }
+
+                // Iterate the items, checking for script values
                 foreach (KeyValuePair<string, object> item in items)
                 {
                     if (ScriptMetadataValue.TryGetScriptMetadataValue(item.Key, item.Value, executionState, out ScriptMetadataValue metadataValue))
@@ -82,12 +90,14 @@ namespace Statiq.Common
         {
         }
 
+        /// <inheritdoc/>
         public bool ContainsKey(string key)
         {
             _ = key ?? throw new ArgumentNullException(nameof(key));
             return (Dictionary?.ContainsKey(key) ?? false) || (_previous?.ContainsKey(key) ?? false);
         }
 
+        /// <inheritdoc/>
         public bool TryGetRaw(string key, out object value)
         {
             _ = key ?? throw new ArgumentNullException(nameof(key));
@@ -95,6 +105,7 @@ namespace Statiq.Common
             return (Dictionary?.TryGetValue(key, out value) ?? false) || (_previous?.TryGetRaw(key, out value) ?? false);
         }
 
+        /// <inheritdoc/>
         public bool TryGetValue<TValue>(string key, out TValue value)
         {
             if (key != null && TryGetRaw(key, out object rawValue))
@@ -105,8 +116,10 @@ namespace Statiq.Common
             return false;
         }
 
+        /// <inheritdoc/>
         public bool TryGetValue(string key, out object value) => TryGetValue<object>(key, out value);
 
+        /// <inheritdoc/>
         public object this[string key]
         {
             get
@@ -120,6 +133,7 @@ namespace Statiq.Common
             }
         }
 
+        /// <inheritdoc/>
         // Enumerate the keys seperatly so we don't evaluate values
         public IEnumerable<string> Keys
         {
@@ -145,11 +159,14 @@ namespace Statiq.Common
             }
         }
 
+        /// <inheritdoc/>
         public IEnumerable<object> Values => this.Select(x => x.Value);
 
+        /// <inheritdoc/>
         // The Select ensures LINQ optimizations won't turn this into a recursive call to Count
         public int Count => this.Select(_ => (object)null).Count();
 
+        /// <inheritdoc/>
         public IEnumerator<KeyValuePair<string, object>> GetEnumerator()
         {
             if (Dictionary != null)
@@ -171,6 +188,29 @@ namespace Statiq.Common
             }
         }
 
+        /// <inheritdoc/>
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
+
+        /// <inheritdoc/>
+        public IEnumerator<KeyValuePair<string, object>> GetRawEnumerator()
+        {
+            if (Dictionary != null)
+            {
+                foreach (KeyValuePair<string, object> item in Dictionary)
+                {
+                    yield return item;
+                }
+            }
+            if (_previous != null)
+            {
+                foreach (KeyValuePair<string, object> previousItem in _previous.GetRawEnumerable())
+                {
+                    if (Dictionary?.ContainsKey(previousItem.Key) != true)
+                    {
+                        yield return previousItem;
+                    }
+                }
+            }
+        }
     }
 }

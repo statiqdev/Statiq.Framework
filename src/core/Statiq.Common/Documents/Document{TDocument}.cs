@@ -251,12 +251,11 @@ namespace Statiq.Common
             }
         }
 
-        // Allow overrides
-        // TODO: Replace with base(IDocument).GetCacheHashCodeAsync() when available (base interface method call not in language yet)
+        /// <inheritdoc />
         public virtual async Task<int> GetCacheHashCodeAsync()
         {
             HashCode hash = default;
-            using (Stream stream = ((IDocument)this).GetContentStream())
+            using (Stream stream = this.GetContentStream())
             {
                 hash.Add(await Crc32.CalculateAsync(stream));
             }
@@ -272,8 +271,7 @@ namespace Statiq.Common
             return hash.ToHashCode();
         }
 
-        // Allow overrides
-        // TODO: Replace with base(IDocument).ToDisplayString() when available (base interface method call not in language yet)
+        /// <inheritdoc />
         public virtual string ToDisplayString() => Source.IsNull ? "unknown source" : Source.ToDisplayString();
 
         /// <inheritdoc />
@@ -281,11 +279,13 @@ namespace Statiq.Common
 
         // IMetadata
 
+        /// <inheritdoc />
         public bool ContainsKey(string key) =>
             (Metadata?.ContainsKey(key) ?? false)
             || PropertyMetadata<TDocument>.For((TDocument)this).ContainsKey(key)
             || (BaseMetadata?.ContainsKey(key) ?? false);
 
+        /// <inheritdoc />
         public object this[string key]
         {
             get
@@ -298,6 +298,7 @@ namespace Statiq.Common
             }
         }
 
+        /// <inheritdoc />
         // Enumerate the keys seperatly so we don't evaluate values
         [PropertyMetadata(null)]
         public IEnumerable<string> Keys
@@ -340,9 +341,11 @@ namespace Statiq.Common
             }
         }
 
+        /// <inheritdoc />
         [PropertyMetadata(null)]
         public IEnumerable<object> Values => this.Select(x => x.Value);
 
+        /// <inheritdoc />
         public bool TryGetRaw(string key, out object value)
         {
             value = default;
@@ -351,6 +354,7 @@ namespace Statiq.Common
                 || (BaseMetadata?.TryGetRaw(key, out value) ?? false);
         }
 
+        /// <inheritdoc />
         public bool TryGetValue<TValue>(string key, out TValue value)
         {
             if (TryGetRaw(key, out object rawValue))
@@ -361,13 +365,16 @@ namespace Statiq.Common
             return false;
         }
 
+        /// <inheritdoc />
         public bool TryGetValue(string key, out object value) => TryGetValue<object>(key, out value);
 
+        /// <inheritdoc />
         // We have to exclude properties that use the enumerator because they cause infinite recursion
         // The Select ensures LINQ optimizations won't turn this into a recursive call to Count
         [PropertyMetadata(null)]
         public int Count => this.Select(_ => (object)null).Count();
 
+        /// <inheritdoc />
         public IEnumerator<KeyValuePair<string, object>> GetEnumerator()
         {
             HashSet<string> keys = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
@@ -403,6 +410,43 @@ namespace Statiq.Common
             }
         }
 
+        /// <inheritdoc />
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
+
+        /// <inheritdoc />
+        public IEnumerator<KeyValuePair<string, object>> GetRawEnumerator()
+        {
+            HashSet<string> keys = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
+            if (Metadata != null)
+            {
+                foreach (KeyValuePair<string, object> item in Metadata.GetRawEnumerable())
+                {
+                    if (keys.Add(item.Key))
+                    {
+                        yield return item;
+                    }
+                }
+            }
+
+            foreach (KeyValuePair<string, object> item in PropertyMetadata<TDocument>.For((TDocument)this).GetRawEnumerable())
+            {
+                if (keys.Add(item.Key))
+                {
+                    yield return item;
+                }
+            }
+
+            if (BaseMetadata != null)
+            {
+                foreach (KeyValuePair<string, object> item in BaseMetadata.GetRawEnumerable())
+                {
+                    if (keys.Add(item.Key))
+                    {
+                        yield return item;
+                    }
+                }
+            }
+        }
     }
 }

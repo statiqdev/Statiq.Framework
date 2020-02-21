@@ -86,6 +86,8 @@ namespace Statiq.Common
             return false;
         }
 
+        IEnumerator<KeyValuePair<string, object>> IMetadata.GetRawEnumerator() => Settings.GetRawEnumerator();
+
         // IReadOnlyDictionary<string, object>
 
         IEnumerable<string> IReadOnlyDictionary<string, object>.Keys => Settings.Keys;

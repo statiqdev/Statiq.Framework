@@ -61,5 +61,14 @@ namespace Statiq.Common
         /// <param name="keys">The keys to include in the new filtered metadata object.</param>
         /// <returns>A new filtered <see cref="IMetadata"/> containing the specified keys and their values.</returns>
         public static IMetadata FilterMetadata(this IMetadata metadata, params string[] keys) => new FilteredMetadata(metadata, keys);
+
+        /// <summary>
+        /// Gets an enumerable that enumerates raw key-value pairs
+        /// (I.e., the values have not been expanded similar to <see cref="IMetadata.TryGetRaw(string, out object)"/>).
+        /// </summary>
+        /// <param name="metadata">The metadata instance.</param>
+        /// <returns>An enumerable over raw key-value pairs.</returns>
+        public static IEnumerable<KeyValuePair<string, object>> GetRawEnumerable(this IMetadata metadata) =>
+            new RawMetadataEnumerable(metadata ?? throw new ArgumentNullException(nameof(metadata)));
     }
 }
