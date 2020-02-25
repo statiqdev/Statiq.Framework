@@ -63,6 +63,22 @@ namespace Statiq.App
             }
         }
 
+        public override IEnumerator<KeyValuePair<string, object>> GetRawEnumerator()
+        {
+            foreach (KeyValuePair<string, object> item in Dictionary)
+            {
+                yield return item;
+            }
+            IEnumerator<KeyValuePair<string, object>> baseEnumerator = base.GetEnumerator();
+            while (baseEnumerator.MoveNext())
+            {
+                if (!Dictionary.ContainsKey(baseEnumerator.Current.Key))
+                {
+                    yield return baseEnumerator.Current;
+                }
+            }
+        }
+
         object IDictionary<string, object>.this[string key]
         {
             get => this[key];

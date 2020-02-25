@@ -39,6 +39,59 @@ namespace Statiq.Core
         protected override object GetSectionMetadata(IConfigurationSection section) =>
             new ReadOnlyConfigurationSettings(section, _valueOverrides);
 
+        public override bool ContainsKey(string key) => base.ContainsKey(key) || _valueOverrides.ContainsKey(key);
+
+        // Enumerate the keys seperatly so we don't evaluate values
+        public override IEnumerable<string> Keys
+        {
+            get
+            {
+                foreach (string key in _valueOverrides.Keys)
+                {
+                    yield return key;
+                }
+                foreach (string baseKey in base.Keys)
+                {
+                    if (!_valueOverrides.ContainsKey(baseKey))
+                    {
+                        yield return baseKey;
+                    }
+                }
+            }
+        }
+
+        public override IEnumerator<KeyValuePair<string, object>> GetEnumerator()
+        {
+            foreach (KeyValuePair<string, object> item in _valueOverrides)
+            {
+                yield return TypeHelper.ExpandKeyValuePair(item, this);
+            }
+            IEnumerator<KeyValuePair<string, object>> baseEnumerator = base.GetEnumerator();
+            while (baseEnumerator.MoveNext())
+            {
+                if (!_valueOverrides.ContainsKey(baseEnumerator.Current.Key))
+                {
+                    yield return baseEnumerator.Current;
+                }
+            }
+        }
+
+        public override IEnumerator<KeyValuePair<string, object>> GetRawEnumerator()
+        {
+            foreach (KeyValuePair<string, object> item in _valueOverrides)
+            {
+                yield return item;
+            }
+            IEnumerator<KeyValuePair<string, object>> baseEnumerator = base.GetEnumerator();
+            while (baseEnumerator.MoveNext())
+            {
+                if (!_valueOverrides.ContainsKey(baseEnumerator.Current.Key))
+                {
+                    yield return baseEnumerator.Current;
+                }
+            }
+        }
+
         public override bool TryGetRaw(string key, out object value)
         {
             _ = key ?? throw new ArgumentNullException(nameof(key));
