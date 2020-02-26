@@ -90,7 +90,7 @@ namespace Statiq.Common
         /// <type><see cref="IReadOnlyCollection{IDocument}"/></type>
         public const string Children = nameof(Children);
 
-        // Destination
+        // SetDestination
 
         /// <summary>
         /// The extension to use when setting the destination of a document.
@@ -113,7 +113,7 @@ namespace Statiq.Common
         /// <type><see cref="NormalizedPath"/></type>
         public const string DestinationPath = nameof(DestinationPath);
 
-        // GroupBy
+        // GroupDocuments
 
         /// <summary>
         /// The key for the current group.
@@ -121,7 +121,7 @@ namespace Statiq.Common
         /// <type><see cref="object"/></type>
         public const string GroupKey = nameof(GroupKey);
 
-        // Index
+        // AddIndexs
 
         /// <summary>
         /// The one-based index of the current document relative to other documents in the pipeline.
@@ -129,7 +129,7 @@ namespace Statiq.Common
         /// <type><see cref="int"/></type>
         public const string Index = nameof(Index);
 
-        // Sitemap
+        // GenerateSitemap
 
         /// <summary>
         /// Contains a document-specific sitemap item for use when generating a sitemap.
@@ -137,7 +137,7 @@ namespace Statiq.Common
         /// <type><see cref="SitemapItem"/></type>
         public const string SitemapItem = nameof(SitemapItem);
 
-        // Download
+        // ReadWeb
 
         /// <summary>
         /// The URI where the document was downloaded from.
@@ -151,7 +151,7 @@ namespace Statiq.Common
         /// <type><c>Dictionary&lt;string, string&gt;</c></type>
         public const string SourceHeaders = nameof(SourceHeaders);
 
-        // Tree
+        // CreateTree
 
         /// <summary>
         /// The path that represents this node in the tree.
@@ -165,7 +165,7 @@ namespace Statiq.Common
         /// <type><see cref="bool"/></type>
         public const string TreePlaceholder = nameof(TreePlaceholder);
 
-        // Title
+        // AddTitle
 
         /// <summary>
         /// The calculated title of the document.
@@ -173,7 +173,17 @@ namespace Statiq.Common
         /// <type><see cref="string"/></type>
         public const string Title = nameof(Title);
 
-        // RedirectFrom
+        // PaginateDocuments
+
+        public const string Next = nameof(Next);
+
+        public const string Previous = nameof(Previous);
+
+        public const string TotalPages = nameof(TotalPages);
+
+        public const string TotalItems = nameof(TotalItems);
+
+        // GenerateRedirects
 
         /// <summary>
         /// The path(s) where the document should be redirected from.

@@ -15,6 +15,9 @@ namespace Statiq.Core
     /// output an empty page without any documents inside the page.
     /// </remarks>
     /// <metadata cref="Keys.Children" usage="Output" />
+    /// <metadata cref="Keys.Next" usage="Output" />
+    /// <metadata cref="Keys.Previous" usage="Output" />
+    /// <metadata cref="Keys.Index" usage="Output" />
     /// <category>Control</category>
     public class PaginateDocuments : SyncModule
     {
@@ -75,7 +78,6 @@ namespace Statiq.Core
             IDocument[][] pages =
                 Partition(context.Inputs, _pageSize)
                 .ToArray();
-            int totalItems = pages.Sum(x => x.Length);
 
             // Skip/take the pages
             pages = pages
@@ -89,8 +91,36 @@ namespace Statiq.Core
                 pages = new[] { Array.Empty<IDocument>() };
             }
 
-            // Create the documents per page
-            return pages.Select(children => context.CreateDocument(new MetadataItems { { Keys.Children, children } }));
+            // Create the documents per page, setting previous and next values as we go
+            Stack<(IDocument, LazyDocumentMetadataValue)> results = new Stack<(IDocument, LazyDocumentMetadataValue)>();
+            for (int c = 0; c < pages.Length; c++)
+            {
+                MetadataItems items = new MetadataItems
+                {
+                    { Keys.Children, pages[c] },
+                    { Keys.Index, c + 1 },
+                    { Keys.TotalPages, pages.Length },
+                    { Keys.TotalItems, context.Inputs.Length }
+                };
+                if (results.Count > 0)
+                {
+                    items.Add(Keys.Previous, new LazyDocumentMetadataValue(results.Peek().Item1.Id));
+                }
+                LazyDocumentMetadataValue next = null;
+                if (c < pages.Length - 1)
+                {
+                    next = new LazyDocumentMetadataValue();
+                    items.Add(Keys.Next, next);
+                }
+                IDocument document = context.CreateDocument(items);
+                if (results.Count > 0)
+                {
+                    results.Peek().Item2.Id = document.Id;
+                }
+                results.Push((document, next));
+            }
+
+            return results.Select(x => x.Item1).Reverse();
         }
 
         // Interesting discussion of partitioning at

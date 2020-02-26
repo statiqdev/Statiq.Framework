@@ -1,5 +1,6 @@
 # 1.0.0-alpha.27
 
+- Adds several new document metadata outputs to the `Paginate` module include `Previous` and `Next`.
 - Adds a new `LazyDocumentMetadataValue` that can be used to lazily find a given document as a metadata value (I.e. after cloning).
 - Renamed the "Transform" phase to "PostProcess" to better reflect the intended semantics and make it easier to explain.
 
