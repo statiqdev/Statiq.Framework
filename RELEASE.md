@@ -1,5 +1,6 @@
 # 1.0.0-alpha.27
 
+- Adds a new `LazyDocumentMetadataValue` that can be used to lazily find a given document as a metadata value (I.e. after cloning).
 - Renamed the "Transform" phase to "PostProcess" to better reflect the intended semantics and make it easier to explain.
 
 # 1.0.0-alpha.26
