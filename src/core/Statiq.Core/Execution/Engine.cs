@@ -441,19 +441,19 @@ namespace Statiq.Core
                         "Pipeline",
                         nameof(Phase.Input),
                         nameof(Phase.Process),
-                        nameof(Phase.Transform),
+                        nameof(Phase.PostProcess),
                         nameof(Phase.Output),
                         "Total Time"
                     },
                     x => x.Key,
                     x => GetPhaseResultTableString(x.Value[(int)Phase.Input]),
                     x => GetPhaseResultTableString(x.Value[(int)Phase.Process]),
-                    x => GetPhaseResultTableString(x.Value[(int)Phase.Transform]),
+                    x => GetPhaseResultTableString(x.Value[(int)Phase.PostProcess]),
                     x => GetPhaseResultTableString(x.Value[(int)Phase.Output]),
                     x =>
                         ((x.Value[(int)Phase.Input]?.ElapsedMilliseconds ?? 0)
                         + (x.Value[(int)Phase.Process]?.ElapsedMilliseconds ?? 0)
-                        + (x.Value[(int)Phase.Transform]?.ElapsedMilliseconds ?? 0)
+                        + (x.Value[(int)Phase.PostProcess]?.ElapsedMilliseconds ?? 0)
                         + (x.Value[(int)Phase.Output]?.ElapsedMilliseconds ?? 0)).ToString()
                         + " ms"));
 
@@ -533,7 +533,7 @@ namespace Statiq.Core
                         {
                             Phase.Input => 'I',
                             Phase.Process => 'P',
-                            Phase.Transform => 'T',
+                            Phase.PostProcess => 'T',
                             Phase.Output => 'O',
                             _ => ' '
                         };
@@ -656,7 +656,7 @@ namespace Statiq.Core
                     pipelinePhases = new PipelinePhases(pipeline);
                     pipelinePhases.Input = new PipelinePhase(pipeline, name, Phase.Input, pipeline.InputModules, logger);
                     pipelinePhases.Process = new PipelinePhase(pipeline, name, Phase.Process, pipeline.ProcessModules, logger, pipelinePhases.Input);
-                    pipelinePhases.Transform = new PipelinePhase(pipeline, name, Phase.Transform, pipeline.TransformModules, logger, pipelinePhases.Process);
+                    pipelinePhases.Transform = new PipelinePhase(pipeline, name, Phase.PostProcess, pipeline.PostProcessModules, logger, pipelinePhases.Process);
                     pipelinePhases.Output = new PipelinePhase(pipeline, name, Phase.Output, pipeline.OutputModules, logger, pipelinePhases.Transform);
                     phasesByPipeline.Add(name, pipelinePhases);
                     return pipelinePhases;
@@ -687,7 +687,7 @@ namespace Statiq.Core
                     pipelinePhases.Input = new PipelinePhase(pipeline, name, Phase.Input, pipeline.InputModules, logger);
                     processDependencies.Insert(0, pipelinePhases.Input);  // Makes sure the process phase is also dependent on it's input phase
                     pipelinePhases.Process = new PipelinePhase(pipeline, name, Phase.Process, pipeline.ProcessModules, logger, processDependencies.ToArray());
-                    pipelinePhases.Transform = new PipelinePhase(pipeline, name, Phase.Transform, pipeline.TransformModules, logger, pipelinePhases.Process);  // Transform dependencies will be added after all pipelines have been processed
+                    pipelinePhases.Transform = new PipelinePhase(pipeline, name, Phase.PostProcess, pipeline.PostProcessModules, logger, pipelinePhases.Process);  // Transform dependencies will be added after all pipelines have been processed
                     pipelinePhases.Output = new PipelinePhase(pipeline, name, Phase.Output, pipeline.OutputModules, logger, pipelinePhases.Transform);  // Output dependencies for deployment pipelines will be added after all pipelines have been processed
                     phasesByPipeline.Add(name, pipelinePhases);
                 }

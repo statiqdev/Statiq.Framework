@@ -270,9 +270,9 @@ namespace Statiq.Core.Tests.Execution
                     ("Bar", Phase.Process),
                     ("Foo", Phase.Input),
                     ("Foo", Phase.Process),
-                    ("Bar", Phase.Transform),
+                    ("Bar", Phase.PostProcess),
                     ("Bar", Phase.Output),
-                    ("Foo", Phase.Transform),
+                    ("Foo", Phase.PostProcess),
                     ("Foo", Phase.Output)
                 });
             }
@@ -303,8 +303,8 @@ namespace Statiq.Core.Tests.Execution
                     ("Bar", Phase.Process),
                     ("Foo", Phase.Input),
                     ("Foo", Phase.Process),
-                    ("Bar", Phase.Transform),
-                    ("Foo", Phase.Transform),
+                    ("Bar", Phase.PostProcess),
+                    ("Foo", Phase.PostProcess),
                     ("Foo", Phase.Output),
                     ("Bar", Phase.Output),
                 });
@@ -332,9 +332,9 @@ namespace Statiq.Core.Tests.Execution
                     ("Bar", Phase.Process),
                     ("Foo", Phase.Input),
                     ("Foo", Phase.Process),
-                    ("Bar", Phase.Transform),
+                    ("Bar", Phase.PostProcess),
                     ("Bar", Phase.Output),
-                    ("Foo", Phase.Transform),
+                    ("Foo", Phase.PostProcess),
                     ("Foo", Phase.Output)
                 });
             }
@@ -363,7 +363,7 @@ namespace Statiq.Core.Tests.Execution
                     .Select(x => (x.PipelineName, x.Phase))
                     .ShouldBe(new (string, Phase)[]
                     {
-                        ("Bar", Phase.Transform),
+                        ("Bar", Phase.PostProcess),
                         ("Foo", Phase.Output)
                     });
                 phases
@@ -372,7 +372,7 @@ namespace Statiq.Core.Tests.Execution
                     .Select(x => (x.PipelineName, x.Phase))
                     .ShouldBe(new (string, Phase)[]
                     {
-                        ("Foo", Phase.Transform)
+                        ("Foo", Phase.PostProcess)
                     });
             }
         }

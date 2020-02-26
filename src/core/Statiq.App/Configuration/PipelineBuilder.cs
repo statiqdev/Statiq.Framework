@@ -115,14 +115,14 @@ namespace Statiq.App
         {
             if (modules != null)
             {
-                _actions.Add(x => x.WithTransformModules(modules));
+                _actions.Add(x => x.WithPostProcessModules(modules));
             }
             return this;
         }
 
         public PipelineBuilder WithTransformModules(params IModule[] modules)
         {
-            _actions.Add(x => x.WithTransformModules(modules));
+            _actions.Add(x => x.WithPostProcessModules(modules));
             return this;
         }
 

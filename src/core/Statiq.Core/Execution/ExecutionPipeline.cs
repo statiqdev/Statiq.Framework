@@ -30,7 +30,7 @@ namespace Statiq.Core
                 .GetMethod(nameof(ExecuteTransformPhaseAsync), BindingFlags.Instance | BindingFlags.NonPublic)
                 .DeclaringType != typeof(ExecutionPipeline))
             {
-                ((IPipeline)this).TransformModules.Add(this);
+                ((IPipeline)this).PostProcessModules.Add(this);
             }
             if (GetType()
                 .GetMethod(nameof(ExecuteOutputPhaseAsync), BindingFlags.Instance | BindingFlags.NonPublic)
@@ -47,7 +47,7 @@ namespace Statiq.Core
         ModuleList IPipeline.ProcessModules { get; } = new ModuleList();
 
         /// <inheritdoc/>
-        ModuleList IPipeline.TransformModules { get; } = new ModuleList();
+        ModuleList IPipeline.PostProcessModules { get; } = new ModuleList();
 
         /// <inheritdoc/>
         ModuleList IPipeline.OutputModules { get; } = new ModuleList();
@@ -72,7 +72,7 @@ namespace Statiq.Core
             {
                 Phase.Input => ExecuteInputPhaseAsync(context),
                 Phase.Process => ExecuteProcessPhaseAsync(context),
-                Phase.Transform => ExecuteTransformPhaseAsync(context),
+                Phase.PostProcess => ExecuteTransformPhaseAsync(context),
                 Phase.Output => ExecuteOutputPhaseAsync(context),
                 _ => base.ExecuteContextAsync(context),
             };

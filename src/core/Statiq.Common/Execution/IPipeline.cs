@@ -23,9 +23,9 @@ namespace Statiq.Common
         ModuleList ProcessModules { get; }
 
         /// <summary>
-        /// Modules that will execute during the transform phase.
+        /// Modules that will execute during the post-process phase.
         /// </summary>
-        ModuleList TransformModules { get; }
+        ModuleList PostProcessModules { get; }
 
         /// <summary>
         /// Modules that will execute during the output phase.

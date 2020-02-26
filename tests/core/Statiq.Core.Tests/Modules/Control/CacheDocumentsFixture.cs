@@ -207,11 +207,11 @@ namespace Statiq.Core.Tests.Modules.Control
 
             [TestCase(Phase.Input, null, new string[] { "a", "b" })]
             [TestCase(Phase.Process, null, new[] { "a", "b", "a", "b" })]
-            [TestCase(Phase.Transform, null, new[] { "a", "b" })]
+            [TestCase(Phase.PostProcess, null, new[] { "a", "b" })]
             [TestCase(Phase.Output, null, new[] { "a", "b" })]
             [TestCase(Phase.Input, new[] { "Foo" }, new[] { "a", "b", "a", "b" })]
             [TestCase(Phase.Process, new[] { "Foo" }, new[] { "a", "b", "a", "b" })]
-            [TestCase(Phase.Transform, new[] { "Foo" }, new[] { "a", "b", "a", "b" })]
+            [TestCase(Phase.PostProcess, new[] { "Foo" }, new[] { "a", "b", "a", "b" })]
             [TestCase(Phase.Output, new[] { "Foo" }, new[] { "a", "b", "a", "b" })]
             [TestCase(Phase.Process, new string[] { }, new string[] { "a", "b" })]
             public async Task PipelineDependencies(Phase phase, string[] pipelineDependencies, string[] expectedMissedContent)

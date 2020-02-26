@@ -33,7 +33,7 @@ namespace Statiq.Core
         }
 
         /// <inheritdoc/>
-        public ModuleList TransformModules
+        public ModuleList PostProcessModules
         {
             get => _transformModules ?? (_transformModules = new ModuleList());
             protected set => _transformModules = value;

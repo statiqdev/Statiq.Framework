@@ -32,17 +32,17 @@ namespace Statiq.Common
             return pipeline;
         }
 
-        public static TPipeline WithTransformModules<TPipeline>(this TPipeline pipeline, IEnumerable<IModule> modules)
+        public static TPipeline WithPostProcessModules<TPipeline>(this TPipeline pipeline, IEnumerable<IModule> modules)
             where TPipeline : IPipeline
         {
-            pipeline.TransformModules.AddRange(modules);
+            pipeline.PostProcessModules.AddRange(modules);
             return pipeline;
         }
 
-        public static TPipeline WithTransformModules<TPipeline>(this TPipeline pipeline, params IModule[] modules)
+        public static TPipeline WithPostProcessModules<TPipeline>(this TPipeline pipeline, params IModule[] modules)
             where TPipeline : IPipeline
         {
-            pipeline.TransformModules.Add(modules);
+            pipeline.PostProcessModules.Add(modules);
             return pipeline;
         }
 

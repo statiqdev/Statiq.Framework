@@ -13,7 +13,7 @@ namespace Statiq.Testing
 
         public ModuleList ProcessModules { get; set;  } = new ModuleList();
 
-        public ModuleList TransformModules { get; set;  } = new ModuleList();
+        public ModuleList PostProcessModules { get; set;  } = new ModuleList();
 
         public ModuleList OutputModules { get; set;  } = new ModuleList();
 

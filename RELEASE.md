@@ -1,5 +1,7 @@
 # 1.0.0-alpha.27
 
+- Renamed the "Transform" phase to "PostProcess" to better reflect the intended semantics and make it easier to explain.
+
 # 1.0.0-alpha.26
 
 - Added a phase timeline graphic to the execution summary output.

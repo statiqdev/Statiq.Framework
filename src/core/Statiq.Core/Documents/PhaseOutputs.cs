@@ -67,7 +67,7 @@ namespace Statiq.Core
         private IEnumerable<KeyValuePair<string, ImmutableArray<IDocument>>> GetOutputsFromDependencies()
         {
             // If we're in the transform phase, get outputs from all process phases including this one
-            if (_currentPhase.Phase == Phase.Transform)
+            if (_currentPhase.Phase == Phase.PostProcess)
             {
                 return _phaseResults
                     .Select(x => KeyValuePair.Create(x.Key, GetOutputs(x.Value, Phase.Process)))
