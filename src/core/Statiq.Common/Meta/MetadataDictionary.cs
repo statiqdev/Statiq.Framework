@@ -7,8 +7,13 @@ namespace Statiq.Common
     {
         // Ensure items is not null when calling the base ctor so the dictionary gets instantiated
         public MetadataDictionary(IEnumerable<KeyValuePair<string, object>> items = null)
-            : base(items ?? Array.Empty<KeyValuePair<string, object>>())
+            : base(Array.Empty<KeyValuePair<string, object>>())
         {
+            // Add the items directly to the dictionary instead of through the constructor so raw values won't get interpreted
+            if (items != null)
+            {
+                Dictionary.AddRange(items);
+            }
         }
 
         public void Add(KeyValuePair<string, object> item) => Dictionary.Add(item);

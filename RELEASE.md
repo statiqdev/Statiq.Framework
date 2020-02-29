@@ -1,7 +1,11 @@
 # 1.0.0-alpha.27
 
-- Adds several new document metadata outputs to the `Paginate` module include `Previous` and `Next`.
-- Adds a new `LazyDocumentMetadataValue` that can be used to lazily find a given document as a metadata value (I.e. after cloning).
+- Added support to `MergeDocuments` and `MergeMetadata` for keeping existing metadata when merging.
+- Added a new `MergeContent` module that merges content from child modules to input documents.
+- Added an overload to the `SetContent` module that accepts a full `IContentProvider`.
+- Fixed a small bug with `MetadataDictionary` initialization when items content `IMetadataValue` or `Config<T>` values.
+- Added several new document metadata outputs to the `Paginate` module include `Previous` and `Next`.
+- Added a new `LazyDocumentMetadataValue` that can be used to lazily find a given document as a metadata value (I.e. after cloning).
 - Renamed the "Transform" phase to "PostProcess" to better reflect the intended semantics and make it easier to explain.
 
 # 1.0.0-alpha.26
