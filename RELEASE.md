@@ -1,3 +1,5 @@
+# 1.0.0-alpha.28
+
 # 1.0.0-alpha.27
 
 - Added support to `MergeDocuments` and `MergeMetadata` for keeping existing metadata when merging.
