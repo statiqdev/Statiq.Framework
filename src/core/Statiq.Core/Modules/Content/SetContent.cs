@@ -10,14 +10,19 @@ namespace Statiq.Core
     /// Sets the content of each document.
     /// </summary>
     /// <category>Content</category>
-    public class SetContent : ParallelMultiConfigModule
+    public class SetContent : ParallelSyncConfigModule<IContentProvider>
     {
-        // Config keys
-        private const string Content = nameof(Content);
-        private const string MediaType = nameof(MediaType);
+        /// <summary>
+        /// Sets the content of each document to the config value.
+        /// </summary>
+        /// <param name="contentProvider">A delegate that returns the content provider to set.</param>
+        public SetContent(Config<IContentProvider> contentProvider)
+            : base(contentProvider, false)
+        {
+        }
 
         /// <summary>
-        /// Sets the content of each document with the config value.
+        /// Sets the content of each document to the config value.
         /// If the value is <c>null</c>, the original input document will be output
         /// (use <see cref="string.Empty"/> to clear the content).
         /// </summary>
@@ -28,29 +33,18 @@ namespace Statiq.Core
         }
 
         /// <summary>
-        /// Sets the content of each document with the config value.
+        /// Sets the content of each document to the config value.
         /// If the value is <c>null</c>, the original input document will be output
         /// (use <see cref="string.Empty"/> to clear the content).
         /// </summary>
         /// <param name="content">A delegate that returns the content to set.</param>
         /// <param name="mediaType">The media type of the new content.</param>
         public SetContent(Config<string> content, Config<string> mediaType)
-            : base(
-                new Dictionary<string, IConfig>
-                {
-                    { nameof(Content), content },
-                    { nameof(MediaType), mediaType }
-                },
-                true)
+            : base(content.CombineWith(mediaType, async (c, m, ctx) => await ctx.GetContentProviderAsync(c, m)), false)
         {
         }
 
-        protected override async Task<IEnumerable<IDocument>> ExecuteConfigAsync(IDocument input, IExecutionContext context, IMetadata values)
-        {
-            string content = values.GetString(Content);
-            return content == null
-                ? input.Yield()
-                : input.Clone(await context.GetContentProviderAsync(content, values.GetString(MediaType))).Yield();
-        }
+        protected override IEnumerable<IDocument> ExecuteConfig(IDocument input, IExecutionContext context, IContentProvider value) =>
+            value == null ? input.Yield() : input.Clone(value).Yield();
     }
 }
