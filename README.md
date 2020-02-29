@@ -22,26 +22,113 @@ The core runtime component of a Statiq Framework application is the `Engine` whi
 
 You can create and use the `Engine` class directly, but using the bootstrapper (described below) is recommended.
 
-### The Bootstrapper
+### Getting Started
 
 The easiest way to get started with Statiq Framework is to use the `Bootstrapper` from the [Statiq.App](https://www.nuget.org/packages/Statiq.App) package. This class helps create an engine and has fluent methods to configure it, add modules and pipelines, and process command-line arguments.
 
-In general, a Statiq Framework application looks something like the following:
+For this sample, you'll need the following NuGet Packages.
+
+```console
+> dotnet add package Statiq.App
+> dotnet add package Statiq.Common
+> dotnet add package Statiq.Markdown
+```
 
 ```csharp
-public class Program
+using Statiq.App;
+using Statiq.Markdown;
+using System.Threading.Tasks;
+
+namespace HelloStatiq
 {
-  private static async Task<int> Main(string[] args) =>
-    await Bootstrapper
-      .CreateDefault(args)
-      .BuildPipeline(
-        "Pages",
-        builder => builder
-          .WithInputReadFiles("**/*.md")
-          .WithProcessModules(new RenderMarkdown())
-          .WithOutputWriteFiles(".html"))
-      .RunAsync();
+    class Program
+    {
+        private static async Task<int> Main(string[] args) =>
+            await Bootstrapper
+                .Factory
+                .CreateDefault(args)
+                .BuildPipeline(
+                    "Pages",
+                    builder => builder
+                        .WithInputReadFiles("**/*.md")
+                        .WithProcessModules(new RenderMarkdown())
+                        .WithOutputWriteFiles(".html"))
+                .RunAsync();
+    }
 }
+```
+
+Next, create a directory named `input` in your project. Create a new `index.md` file within the newly created `input` folder.
+
+```md
+# Hello World!
+## From Statiq
+
+> This is the first page I've generated with Statiq. 
+> <br> -- Statiq Generator
+```
+
+Be sure to mark the new file to be copied to the build directory. This can be accomplished by right clicking the properties of the file and choosing to copy it to the build directory at compile time. You may also modify the `.csproj` file to accomplish the same thing.
+
+```xml
+    <ItemGroup>
+      <Content Include="input\index.md">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </Content>
+    </ItemGroup>
+```
+
+Now we are ready to run the project. During the build process, Statiq will show the results of each pipeline.
+
+```console
+[INFO] Statiq version 1.0.0-alpha.26+0ba395e08ff85c191f88e053e829add9e7bb6d58
+[INFO] Root path:
+       /Users/<user>/Projects/dotnet/HelloStatiq/bin/Debug/netcoreapp3.1
+[INFO] Input path(s):
+       theme
+       input
+[INFO] Output path:
+       output
+[INFO] Temp path:
+       temp
+[INFO] Executing 1 pipelines (Pages)
+[INFO] Cleaned temp directory: temp
+[INFO] Cleaned output directory: output
+[INFO] -> Pages/Input » Starting Pages Input phase execution... (0 input document(s), 1 module(s))
+[INFO]    Pages/Input » Finished Pages Input phase execution (1 output document(s), 114 ms)
+[INFO] -> Pages/Process » Starting Pages Process phase execution... (1 input document(s), 1 module(s))
+[INFO]    Pages/Process » Finished Pages Process phase execution (1 output document(s), 94 ms)
+[INFO] -> Pages/Output » Starting Pages Output phase execution... (1 input document(s), 2 module(s))
+[INFO]    Pages/Output » Finished Pages Output phase execution (1 output document(s), 41 ms)
+[INFO] Execution summary...
+
+Number of output documents per pipeline and phase:
+
+ | Pipeline | Input      | Process   | Transform | Output    | Total Time | 
+ |------------------------------------------------------------------------| 
+ | Pages    | 1 (114 ms) | 1 (94 ms) |           | 1 (41 ms) | 249 ms     | 
+
+Pipeline phase timeline:
+
+ | Pipeline | Timeline (253 total ms)                                                              | 
+ |-------------------------------------------------------------------------------------------------| 
+ | Pages    | I--------------------------------------P-------------------------------O------------ | 
+
+
+[INFO] Finished execution in 290 ms
+[INFO] Cleaned temp directory: temp
+```
+
+With a resulting output file in our build directory `\output\index.html`.
+
+```html
+<h1>Hello World!</h1>
+<h2>From Statiq</h2>
+<blockquote>
+<p>This is the first page I've generated
+with Statiq.
+<br> -- Statiq Generator</p>
+</blockquote>
 ```
 
 More exhaustive code samples and examples will be provided soon.
