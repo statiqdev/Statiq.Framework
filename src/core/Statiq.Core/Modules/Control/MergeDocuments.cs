@@ -20,6 +20,7 @@ namespace Statiq.Core
     public class MergeDocuments : SyncChildDocumentsModule
     {
         private bool _reverse;
+        private bool _keepExistingMetadata;
 
         public MergeDocuments()
             : base(Array.Empty<IModule>())
@@ -54,11 +55,26 @@ namespace Statiq.Core
             return this;
         }
 
+        /// <summary>
+        /// The default behavior of this module is to replace all existing metadata with metadata from
+        /// the merged document. This method ensures that any existing metadata values are kept and only
+        /// non-existing values are merged.
+        /// </summary>
+        /// <param name="keepExistingMetadata"><c>true</c> to keep existing metadata values, <c>false</c> to allow overwriting metadata with values from the merged document.</param>
+        /// <returns>The current module instance.</returns>
+        public MergeDocuments KeepExistingMetadata(bool keepExistingMetadata = true)
+        {
+            _keepExistingMetadata = keepExistingMetadata;
+            return this;
+        }
+
         protected override IEnumerable<IDocument> ExecuteChildren(
             IExecutionContext context,
             ImmutableArray<IDocument> childOutputs) =>
             _reverse
-                ? childOutputs.SelectMany(childOutput => context.Inputs.Select(input => childOutput.Clone(input, input.ContentProvider)))
-                : context.Inputs.SelectMany(input => childOutputs.Select(result => input.Clone(result, result.ContentProvider)));
+                ? childOutputs.SelectMany(childOutput => context.Inputs.Select(input =>
+                    childOutput.Clone(_keepExistingMetadata ? input.GetRawEnumerable().Where(x => !childOutput.ContainsKey(x.Key)) : input, input.ContentProvider)))
+                : context.Inputs.SelectMany(input => childOutputs.Select(result =>
+                    input.Clone(_keepExistingMetadata ? result.GetRawEnumerable().Where(x => !input.ContainsKey(x.Key)) : result, result.ContentProvider)));
     }
 }
