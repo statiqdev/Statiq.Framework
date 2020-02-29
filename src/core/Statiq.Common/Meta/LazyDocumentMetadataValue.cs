@@ -17,6 +17,8 @@ namespace Statiq.Common
     /// </remarks>
     public class LazyDocumentMetadataValue : IMetadataValue
     {
+        private static readonly object Lock = new object();
+
         // Cache the results for a given context
         private IExecutionContext _context;
         private IDocument _result;
@@ -44,30 +46,33 @@ namespace Statiq.Common
 
         public object Get(IMetadata metadata)
         {
-            IExecutionContext context = IExecutionContext.Current;
-            if (context == null)
+            lock (Lock)
             {
-                return null;
-            }
-            if (context == _context)
-            {
-                return _result;
-            }
-
-            // Try the current inputs first then crawl up parent contexts
-            _context = context;
-            _result = null;
-            HashSet<IDocument> visited = new HashSet<IDocument>();
-            while (context != null)
-            {
-                _result = Find(context.Inputs, visited);
-                if (_result != null)
+                IExecutionContext context = IExecutionContext.Current;
+                if (context == null)
+                {
+                    return null;
+                }
+                if (context == _context)
                 {
                     return _result;
                 }
-                context = context.Parent;
+
+                // Try the current inputs first then crawl up parent contexts
+                _context = context;
+                _result = null;
+                HashSet<IDocument> visited = new HashSet<IDocument>();
+                while (context != null)
+                {
+                    _result = Find(context.Inputs, visited);
+                    if (_result != null)
+                    {
+                        return _result;
+                    }
+                    context = context.Parent;
+                }
+                return _result;
             }
-            return _result;
         }
 
         private IDocument Find(ImmutableArray<IDocument> documents, HashSet<IDocument> visited)
