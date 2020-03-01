@@ -1,11 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 
 namespace Statiq.Common
 {
     /// <summary>
     /// Contains a set of metadata with flexible runtime conversion methods. Metadata keys are case-insensitive.
     /// </summary>
+    [TypeConverter(typeof(IMetadataToIDocumentTypeConverter))]
     public interface IMetadata : IReadOnlyDictionary<string, object>
     {
         /// <summary>

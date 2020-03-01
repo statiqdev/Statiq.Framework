@@ -1,5 +1,8 @@
 # 1.0.0-alpha.28
 
+- Added `TypeHelper.RegisterTypeConverter()` methods to register type converters at runtime.
+- Added a type converter that can convert `IMetadata` to `IDocument`.
+
 # 1.0.0-alpha.27
 
 - Added support to `MergeDocuments` and `MergeMetadata` for keeping existing metadata when merging.

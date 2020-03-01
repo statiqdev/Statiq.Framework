@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using Statiq.Common;
 
@@ -8,6 +9,47 @@ namespace Statiq.Common
 {
     public static class TypeHelper
     {
+        /// <summary>
+        /// Registers a type converter at runtime.
+        /// </summary>
+        /// <param name="type">The type the converter applies to.</param>
+        /// <param name="typeConverterType">The type of the type converter (should be a <see cref="TypeConverter"/>).</param>
+        public static void RegisterTypeConverter(Type type, Type typeConverterType) =>
+            TypeDescriptor.AddAttributes(type, new TypeConverterAttribute(typeConverterType));
+
+        /// <summary>
+        /// Registers a type converter at runtime.
+        /// </summary>
+        /// <param name="type">The type the converter applies to.</param>
+        /// <param name="typeConverterTypeName">The type name of the type converter (should be a <see cref="TypeConverter"/>).</param>
+        public static void RegisterTypeConverter(Type type, string typeConverterTypeName) =>
+            TypeDescriptor.AddAttributes(type, new TypeConverterAttribute(typeConverterTypeName));
+
+        /// <summary>
+        /// Registers a type converter at runtime.
+        /// </summary>
+        /// <typeparam name="TType">The type the converter applies to.</typeparam>
+        /// <param name="typeConverterType">The type of the type converter (should be a <see cref="TypeConverter"/>).</param>
+        public static void RegisterTypeConverter<TType>(Type typeConverterType) =>
+            TypeDescriptor.AddAttributes(typeof(TType), new TypeConverterAttribute(typeConverterType));
+
+        /// <summary>
+        /// Registers a type converter at runtime.
+        /// </summary>
+        /// <typeparam name="TType">The type the converter applies to.</typeparam>
+        /// <param name="typeConverterTypeName">The type name of the type converter (should be a <see cref="TypeConverter"/>).</param>
+        public static void RegisterTypeConverter<TType>(string typeConverterTypeName) =>
+            TypeDescriptor.AddAttributes(typeof(TType), new TypeConverterAttribute(typeConverterTypeName));
+
+        /// <summary>
+        /// Registers a type converter at runtime.
+        /// </summary>
+        /// <typeparam name="TType">The type the converter applies to.</typeparam>
+        /// <typeparam name="TTypeConverter">The type of the type converter (should be a <see cref="TypeConverter"/>).</typeparam>
+        public static void RegisterTypeConverter<TType, TTypeConverter>()
+            where TTypeConverter : TypeConverter =>
+            TypeDescriptor.AddAttributes(typeof(TType), new TypeConverterAttribute(typeof(TTypeConverter)));
+
         /// <summary>
         /// Converts the provided value to the specified type. This method never throws an exception.
         /// It will return default(T) if the value cannot be converted to T.

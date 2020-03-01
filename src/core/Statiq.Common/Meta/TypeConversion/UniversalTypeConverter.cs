@@ -60,9 +60,9 @@ namespace Statiq.Common
             }
 
             TypeInfo typeInfo = destinationType.GetTypeInfo();
-            if (TryConvertByIConvertibleImplementation(value, destinationType, (IFormatProvider)culture, ref result)
-                || TryConvertXPlicit(value, typeInfo, ExplicitOperatorMethodName, ref result)
-                || (TryConvertXPlicit(value, typeInfo, ImplicitOperatorMethodName, ref result)
+            if (TryConvertByIConvertibleImplementation(value, destinationType, culture, ref result)
+                || TryConvertWithConversionOperator(value, typeInfo, ExplicitOperatorMethodName, ref result)
+                || (TryConvertWithConversionOperator(value, typeInfo, ImplicitOperatorMethodName, ref result)
                 || TryConvertByIntermediateConversion(value, destinationType, ref result, culture, options))
                 || ((typeInfo.IsEnum && TryConvertToEnum(value, destinationType, ref result))
                 || ((options & ConversionOptions.EnhancedTypicalValues) == ConversionOptions.EnhancedTypicalValues && TryConvertSpecialValues(value, destinationType, ref result))))
@@ -88,7 +88,7 @@ namespace Statiq.Common
                 {
                     try
                     {
-                        result = converter1.ConvertFrom((ITypeDescriptorContext)null, culture, value);
+                        result = converter1.ConvertFrom(null, culture, value);
                         return true;
                     }
                     catch
@@ -103,7 +103,7 @@ namespace Statiq.Common
                 {
                     try
                     {
-                        result = converter2.ConvertTo((ITypeDescriptorContext)null, culture, value, destinationType);
+                        result = converter2.ConvertTo(null, culture, value, destinationType);
                         return true;
                     }
                     catch
@@ -123,72 +123,72 @@ namespace Statiq.Common
                 {
                     if (destinationType == typeof(bool))
                     {
-                        result = (object)convertible.ToBoolean(formatProvider);
+                        result = convertible.ToBoolean(formatProvider);
                         return true;
                     }
                     if (destinationType == typeof(byte))
                     {
-                        result = (object)convertible.ToByte(formatProvider);
+                        result = convertible.ToByte(formatProvider);
                         return true;
                     }
                     if (destinationType == typeof(char))
                     {
-                        result = (object)convertible.ToChar(formatProvider);
+                        result = convertible.ToChar(formatProvider);
                         return true;
                     }
                     if (destinationType == typeof(DateTime))
                     {
-                        result = (object)convertible.ToDateTime(formatProvider);
+                        result = convertible.ToDateTime(formatProvider);
                         return true;
                     }
                     if (destinationType == typeof(decimal))
                     {
-                        result = (object)convertible.ToDecimal(formatProvider);
+                        result = convertible.ToDecimal(formatProvider);
                         return true;
                     }
                     if (destinationType == typeof(double))
                     {
-                        result = (object)convertible.ToDouble(formatProvider);
+                        result = convertible.ToDouble(formatProvider);
                         return true;
                     }
                     if (destinationType == typeof(short))
                     {
-                        result = (object)convertible.ToInt16(formatProvider);
+                        result = convertible.ToInt16(formatProvider);
                         return true;
                     }
                     if (destinationType == typeof(int))
                     {
-                        result = (object)convertible.ToInt32(formatProvider);
+                        result = convertible.ToInt32(formatProvider);
                         return true;
                     }
                     if (destinationType == typeof(long))
                     {
-                        result = (object)convertible.ToInt64(formatProvider);
+                        result = convertible.ToInt64(formatProvider);
                         return true;
                     }
                     if (destinationType == typeof(sbyte))
                     {
-                        result = (object)convertible.ToSByte(formatProvider);
+                        result = convertible.ToSByte(formatProvider);
                         return true;
                     }
                     if (destinationType == typeof(float))
                     {
-                        result = (object)convertible.ToSingle(formatProvider);
+                        result = convertible.ToSingle(formatProvider);
                         return true;
                     }
                     if (destinationType == typeof(ushort))
                     {
-                        result = (object)convertible.ToUInt16(formatProvider);
+                        result = convertible.ToUInt16(formatProvider);
                         return true;
                     }
                     if (destinationType == typeof(uint))
                     {
-                        result = (object)convertible.ToUInt32(formatProvider);
+                        result = convertible.ToUInt32(formatProvider);
                         return true;
                     }
                     if (destinationType == typeof(ulong))
                     {
-                        result = (object)convertible.ToUInt64(formatProvider);
+                        result = convertible.ToUInt64(formatProvider);
                         return true;
                     }
                 }
@@ -200,14 +200,13 @@ namespace Statiq.Common
             return false;
         }
 
-        private static bool TryConvertXPlicit(object value, TypeInfo destinationType, string operatorMethodName, ref object result)
-        {
-            return TryConvertXPlicit(value, value.GetType().GetTypeInfo(), destinationType, operatorMethodName, ref result) || TryConvertXPlicit(value, destinationType, destinationType, operatorMethodName, ref result);
-        }
+        private static bool TryConvertWithConversionOperator(object value, TypeInfo destinationType, string operatorMethodName, ref object result) =>
+            TryConvertWithConversionOperator(value, value.GetType().GetTypeInfo(), destinationType, operatorMethodName, ref result)
+                || TryConvertWithConversionOperator(value, destinationType, destinationType, operatorMethodName, ref result);
 
-        private static bool TryConvertXPlicit(object value, TypeInfo invokerType, TypeInfo destinationType, string xPlicitMethodName, ref object result)
+        private static bool TryConvertWithConversionOperator(object value, TypeInfo invokerType, TypeInfo destinationType, string operatorMethodName, ref object result)
         {
-            foreach (MethodInfo methodInfo in invokerType.DeclaredMethods.Where((Func<MethodInfo, bool>)(method =>
+            foreach (MethodInfo methodInfo in invokerType.DeclaredMethods.Where(method =>
             {
                 if (method.IsPublic)
                 {
@@ -215,26 +214,20 @@ namespace Statiq.Common
                 }
 
                 return false;
-            })).Where((Func<MethodInfo, bool>)(m => m.Name == xPlicitMethodName)))
+            }).Where(m => m.Name == operatorMethodName))
             {
                 if (destinationType.IsAssignableFrom(methodInfo.ReturnType.GetTypeInfo()))
                 {
                     ParameterInfo[] parameters = methodInfo.GetParameters();
-                    if (((IEnumerable<ParameterInfo>)parameters).Count() == 1)
+                    if (parameters.Length == 1 && parameters[0].ParameterType == value.GetType())
                     {
-                        if (parameters[0].ParameterType == value.GetType())
+                        try
                         {
-                            try
-                            {
-                                result = methodInfo.Invoke((object)null, new object[1]
-                                {
-                  value
-                                });
-                                return true;
-                            }
-                            catch
-                            {
-                            }
+                            result = methodInfo.Invoke(null, new object[1] { value });
+                            return true;
+                        }
+                        catch
+                        {
                         }
                     }
                 }
@@ -246,12 +239,12 @@ namespace Statiq.Common
         {
             if (value is char && (destinationType == typeof(double) || destinationType == typeof(float)))
             {
-                return TryConvertCore((object)System.Convert.ToInt16(value), destinationType, ref result, culture, options);
+                return TryConvertCore(System.Convert.ToInt16(value), destinationType, ref result, culture, options);
             }
 
             if ((value is double || value is float) && destinationType == typeof(char))
             {
-                return TryConvertCore((object)System.Convert.ToInt16(value), destinationType, ref result, culture, options);
+                return TryConvertCore(System.Convert.ToInt16(value), destinationType, ref result, culture, options);
             }
 
             return false;
@@ -294,7 +287,7 @@ namespace Statiq.Common
         {
             if ("1JYT".Contains(value.ToString().ToUpper()))
             {
-                result = (object)true;
+                result = true;
                 return true;
             }
             if (!"0NF".Contains(value.ToString().ToUpper()))
@@ -302,13 +295,13 @@ namespace Statiq.Common
                 return false;
             }
 
-            result = (object)false;
+            result = false;
             return true;
         }
 
         private static bool TryConvertStringToBool(string value, ref object result)
         {
-            if (new List<string>((IEnumerable<string>)new string[8]
+            if (new List<string>(new string[8]
             {
         "1",
         "j",
@@ -320,10 +313,10 @@ namespace Statiq.Common
         ".t."
             }).Contains(value.Trim().ToLower()))
             {
-                result = (object)true;
+                result = true;
                 return true;
             }
-            if (!new List<string>((IEnumerable<string>)new string[7]
+            if (!new List<string>(new string[7]
             {
         "0",
         "n",
@@ -337,13 +330,13 @@ namespace Statiq.Common
                 return false;
             }
 
-            result = (object)false;
+            result = false;
             return true;
         }
 
         private static bool ConvertBoolToChar(bool value, out object result)
         {
-            result = (object)(char)(value ? 84 : 70);
+            result = (char)(value ? 84 : 70);
             return true;
         }
 
@@ -632,13 +625,13 @@ namespace Statiq.Common
                 return true;
             }
             Type destinationType1 = IsGenericNullable(typeInfo) ? GetUnderlyingType(destinationType) : destinationType;
-            object result1 = (object)null;
+            object result1 = null;
             if (TryConvertCore(value, destinationType1, ref result1, culture, options))
             {
                 result = result1;
                 return true;
             }
-            result = (object)null;
+            result = null;
             return false;
         }
 
@@ -717,7 +710,7 @@ namespace Statiq.Common
         /// <returns>List of converted values.</returns>
         public static EnumerableStringConversion<T> ConvertToEnumerable<T>(string valueList)
         {
-            return ConvertToEnumerable<T>(valueList, (IStringSplitter)new GenericStringSplitter());
+            return ConvertToEnumerable<T>(valueList, new GenericStringSplitter());
         }
 
         /// <summary>
@@ -730,7 +723,7 @@ namespace Statiq.Common
         /// <returns>List of converted values.</returns>
         public static EnumerableStringConversion<T> ConvertToEnumerable<T>(string valueList, string seperator)
         {
-            return ConvertToEnumerable<T>(valueList, (IStringSplitter)new GenericStringSplitter(seperator));
+            return ConvertToEnumerable<T>(valueList, new GenericStringSplitter(seperator));
         }
 
         /// <summary>
@@ -780,7 +773,7 @@ namespace Statiq.Common
         /// <returns>List of converted values.</returns>
         public static EnumerableStringConversion<object> ConvertToEnumerable(string valueList, Type destinationType, string seperator)
         {
-            return ConvertToEnumerable(valueList, destinationType, (IStringSplitter)new GenericStringSplitter(seperator));
+            return ConvertToEnumerable(valueList, destinationType, new GenericStringSplitter(seperator));
         }
 
         /// <summary>
@@ -803,7 +796,7 @@ namespace Statiq.Common
         /// <returns>String representation of the given value list.</returns>
         public static string ConvertToStringRepresentation(IEnumerable values)
         {
-            return ConvertToStringRepresentation(values, DefaultCulture, (IStringConcatenator)new GenericStringConcatenator());
+            return ConvertToStringRepresentation(values, DefaultCulture, new GenericStringConcatenator());
         }
 
         /// <summary>
@@ -814,7 +807,7 @@ namespace Statiq.Common
         /// <returns>String representation of the given value list.</returns>
         public static string ConvertToStringRepresentation(IEnumerable values, string seperator)
         {
-            return ConvertToStringRepresentation(values, DefaultCulture, (IStringConcatenator)new GenericStringConcatenator(seperator));
+            return ConvertToStringRepresentation(values, DefaultCulture, new GenericStringConcatenator(seperator));
         }
 
         /// <summary>
@@ -826,7 +819,7 @@ namespace Statiq.Common
         /// <returns>String representation of the given value list.</returns>
         public static string ConvertToStringRepresentation(IEnumerable values, string seperator, string nullValue)
         {
-            return ConvertToStringRepresentation(values, DefaultCulture, (IStringConcatenator)new GenericStringConcatenator(seperator, nullValue));
+            return ConvertToStringRepresentation(values, DefaultCulture, new GenericStringConcatenator(seperator, nullValue));
         }
 
         /// <summary>
@@ -837,7 +830,7 @@ namespace Statiq.Common
         /// <returns>String representation of the given value list.</returns>
         public static string ConvertToStringRepresentation(IEnumerable values, CultureInfo culture)
         {
-            return ConvertToStringRepresentation(values, culture, (IStringConcatenator)new GenericStringConcatenator());
+            return ConvertToStringRepresentation(values, culture, new GenericStringConcatenator());
         }
 
         /// <summary>Converts the given value list to a string.</summary>
@@ -884,7 +877,7 @@ namespace Statiq.Common
         {
             if (!type.IsValueType)
             {
-                return (object)null;
+                return null;
             }
 
             return Activator.CreateInstance(type.AsType());
@@ -990,7 +983,7 @@ namespace Statiq.Common
 
             IEnumerator IEnumerable.GetEnumerator()
             {
-                return (IEnumerator)GetEnumerator();
+                return GetEnumerator();
             }
 
             /// <summary>
@@ -1027,8 +1020,8 @@ namespace Statiq.Common
                         {
                             if (!_ignoreNonConvertibleElements)
                             {
-                                result = (IEnumerable<T>)null;
-                                exception = (Exception)new InvalidConversionException(valueToConvert, _destinationType);
+                                result = null;
+                                exception = new InvalidConversionException(valueToConvert, _destinationType);
                                 return false;
                             }
                         }
@@ -1038,8 +1031,8 @@ namespace Statiq.Common
                         }
                     }
                 }
-                result = (IEnumerable<T>)objList;
-                exception = (Exception)null;
+                result = objList;
+                exception = null;
                 return true;
             }
 
@@ -1064,12 +1057,12 @@ namespace Statiq.Common
             private bool _trimEnd;
 
             internal EnumerableStringConversion(string valueList, IStringSplitter stringSplitter)
-              : base((IEnumerable)stringSplitter.Split(valueList))
+              : base(stringSplitter.Split(valueList))
             {
             }
 
             internal EnumerableStringConversion(string valueList, Type destinationType, IStringSplitter stringSplitter)
-              : base((IEnumerable)stringSplitter.Split(valueList), destinationType)
+              : base(stringSplitter.Split(valueList), destinationType)
             {
             }
 
@@ -1127,7 +1120,7 @@ namespace Statiq.Common
                         stringList.Add(convert);
                     }
                 }
-                return (IEnumerable)stringList;
+                return stringList;
             }
 
             private string PreProcessValueToConvert(string value)
@@ -1161,7 +1154,7 @@ namespace Statiq.Common
                 string str = value;
                 if (((IEnumerable<string>)_nullValues).Contains(value))
                 {
-                    str = (string)null;
+                    str = null;
                 }
 
                 return str;

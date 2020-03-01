@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using NUnit.Framework;
+using Shouldly;
 using Statiq.Testing;
 
 namespace Statiq.Common.Tests.Meta
@@ -18,12 +20,11 @@ namespace Statiq.Common.Tests.Meta
                 Array value = new[] { 1, 2, 3 };
 
                 // When
-                Array result;
-                bool convert = TypeHelper.TryConvert(value, out result);
+                bool convert = TypeHelper.TryConvert(value, out Array result);
 
                 // Then
-                Assert.IsTrue(convert);
-                CollectionAssert.AreEqual(value, result);
+                convert.ShouldBeTrue();
+                result.ShouldBe((IEnumerable)value);
             }
 
             [Test]
@@ -33,12 +34,11 @@ namespace Statiq.Common.Tests.Meta
                 Array value = new[] { 1, 2, 3 };
 
                 // When
-                IReadOnlyList<int> result;
-                bool convert = TypeHelper.TryConvert(value, out result);
+                bool convert = TypeHelper.TryConvert(value, out IReadOnlyList<int> result);
 
                 // Then
-                Assert.IsTrue(convert);
-                CollectionAssert.AreEqual(value, result);
+                convert.ShouldBeTrue();
+                result.ShouldBe((IEnumerable)value);
             }
 
             [Test]
@@ -48,12 +48,11 @@ namespace Statiq.Common.Tests.Meta
                 Array value = new[] { 1, 2, 3 };
 
                 // When
-                IList<int> result;
-                bool convert = TypeHelper.TryConvert(value, out result);
+                bool convert = TypeHelper.TryConvert(value, out IList<int> result);
 
                 // Then
-                Assert.IsTrue(convert);
-                CollectionAssert.AreEqual(value, result);
+                convert.ShouldBeTrue();
+                result.ShouldBe((IEnumerable)value);
             }
 
             [Test]
@@ -63,12 +62,11 @@ namespace Statiq.Common.Tests.Meta
                 Array value = new[] { 1, 2, 3 };
 
                 // When
-                List<int> result;
-                bool convert = TypeHelper.TryConvert(value, out result);
+                bool convert = TypeHelper.TryConvert(value, out List<int> result);
 
                 // Then
-                Assert.IsTrue(convert);
-                CollectionAssert.AreEqual(value, result);
+                convert.ShouldBeTrue();
+                result.ShouldBe((IEnumerable)value);
             }
 
             [Test]
@@ -78,12 +76,11 @@ namespace Statiq.Common.Tests.Meta
                 List<int> value = new List<int> { 1, 2, 3 };
 
                 // When
-                int[] result;
-                bool convert = TypeHelper.TryConvert(value, out result);
+                bool convert = TypeHelper.TryConvert(value, out int[] result);
 
                 // Then
-                Assert.IsTrue(convert);
-                CollectionAssert.AreEqual(value, result);
+                convert.ShouldBeTrue();
+                result.ShouldBe((IEnumerable)value);
             }
 
             [Test]
@@ -93,12 +90,11 @@ namespace Statiq.Common.Tests.Meta
                 Array value = new[] { 1.0, 2.0 };
 
                 // When
-                IEnumerable<int> result;
-                bool convert = TypeHelper.TryConvert(value, out result);
+                bool convert = TypeHelper.TryConvert(value, out IEnumerable<int> result);
 
                 // Then
-                Assert.IsTrue(convert);
-                CollectionAssert.AreEqual(value, result);
+                convert.ShouldBeTrue();
+                result.ShouldBe((IEnumerable)value);
             }
 
             [Test]
@@ -108,12 +104,11 @@ namespace Statiq.Common.Tests.Meta
                 Array value = new[] { 1, 2, 3 };
 
                 // When
-                IReadOnlyList<Array> result;
-                bool convert = TypeHelper.TryConvert(value, out result);
+                bool convert = TypeHelper.TryConvert(value, out IReadOnlyList<Array> result);
 
                 // Then
-                Assert.IsTrue(convert);
-                CollectionAssert.AreEquivalent(new[] { value }, result);
+                convert.ShouldBeTrue();
+                result.ShouldBe((IEnumerable)new[] { value });
             }
 
             [Test]
@@ -123,12 +118,11 @@ namespace Statiq.Common.Tests.Meta
                 Array value = new[] { 1, 2, 3 };
 
                 // When
-                IList<Array> result;
-                bool convert = TypeHelper.TryConvert(value, out result);
+                bool convert = TypeHelper.TryConvert(value, out IList<Array> result);
 
                 // Then
-                Assert.IsTrue(convert);
-                CollectionAssert.AreEquivalent(new[] { value }, result);
+                convert.ShouldBeTrue();
+                result.ShouldBe((IEnumerable)new[] { value });
             }
 
             [Test]
@@ -138,12 +132,11 @@ namespace Statiq.Common.Tests.Meta
                 Array value = new[] { 1, 2, 3 };
 
                 // When
-                List<Array> result;
-                bool convert = TypeHelper.TryConvert(value, out result);
+                bool convert = TypeHelper.TryConvert(value, out List<Array> result);
 
                 // Then
-                Assert.IsTrue(convert);
-                CollectionAssert.AreEquivalent(new[] { value }, result);
+                convert.ShouldBeTrue();
+                result.ShouldBe((IEnumerable)new[] { value });
             }
 
             [Test]
@@ -153,12 +146,11 @@ namespace Statiq.Common.Tests.Meta
                 List<int> value = new List<int> { 1, 2, 3 };
 
                 // When
-                List<int>[] result;
-                bool convert = TypeHelper.TryConvert(value, out result);
+                bool convert = TypeHelper.TryConvert(value, out List<int>[] result);
 
                 // Then
-                Assert.IsTrue(convert);
-                CollectionAssert.AreEquivalent(new[] { value }, result);
+                convert.ShouldBeTrue();
+                result.ShouldBe((IEnumerable)new[] { value });
             }
 
             [Test]
@@ -168,12 +160,11 @@ namespace Statiq.Common.Tests.Meta
                 Array value = new[] { 1, 2, 3 };
 
                 // When
-                IEnumerable<Array> result;
-                bool convert = TypeHelper.TryConvert(value, out result);
+                bool convert = TypeHelper.TryConvert(value, out IEnumerable<Array> result);
 
                 // Then
-                Assert.IsTrue(convert);
-                CollectionAssert.AreEquivalent(new[] { value }, result);
+                convert.ShouldBeTrue();
+                result.ShouldBe((IEnumerable)new[] { value });
             }
 
             [Test]
@@ -187,12 +178,11 @@ namespace Statiq.Common.Tests.Meta
                 };
 
                 // When
-                IList<IEnumerable<int>> result;
-                bool convert = TypeHelper.TryConvert(value, out result);
+                bool convert = TypeHelper.TryConvert(value, out IList<IEnumerable<int>> result);
 
                 // Then
-                Assert.IsTrue(convert);
-                CollectionAssert.AreEquivalent(value, result);
+                convert.ShouldBeTrue();
+                result.ShouldBe((IEnumerable)value);
             }
 
             [Test]
@@ -206,14 +196,13 @@ namespace Statiq.Common.Tests.Meta
                 };
 
                 // When
-                IList<IList<IEnumerable<int>>> result;
-                bool convert = TypeHelper.TryConvert(value, out result);
+                bool convert = TypeHelper.TryConvert(value, out IList<IList<IEnumerable<int>>> result);
 
                 // Then
-                Assert.IsTrue(convert);
-                CollectionAssert.AreEquivalent(new[] { value }, result);
-                CollectionAssert.AreEquivalent((IEnumerable)value.GetValue(0), result[0][0]);
-                CollectionAssert.AreEquivalent((IEnumerable)value.GetValue(1), result[0][1]);
+                convert.ShouldBeTrue();
+                result.ShouldBe((IEnumerable)new[] { value });
+                result[0][0].ShouldBe((IEnumerable)value.GetValue(0));
+                result[0][1].ShouldBe((IEnumerable)value.GetValue(1));
             }
 
             [Test]
@@ -223,12 +212,11 @@ namespace Statiq.Common.Tests.Meta
                 Array value = new[] { "Red", "Green", "Blue" };
 
                 // When
-                string result;
-                bool convert = TypeHelper.TryConvert(value, out result);
+                bool convert = TypeHelper.TryConvert(value, out string result);
 
                 // Then
-                Assert.IsTrue(convert);
-                Assert.AreEqual("Red", result);
+                convert.ShouldBeTrue();
+                result.ShouldBe("Red");
             }
 
             [Test]
@@ -238,12 +226,11 @@ namespace Statiq.Common.Tests.Meta
                 Array value = new[] { 1, 2, 3 };
 
                 // When
-                int result;
-                bool convert = TypeHelper.TryConvert(value, out result);
+                bool convert = TypeHelper.TryConvert(value, out int result);
 
                 // Then
-                Assert.IsTrue(convert);
-                Assert.AreEqual(1, result);
+                convert.ShouldBeTrue();
+                result.ShouldBe(1);
             }
 
             [Test]
@@ -253,12 +240,11 @@ namespace Statiq.Common.Tests.Meta
                 Array value = new[] { 1, 2, 3 };
 
                 // When
-                string result;
-                bool convert = TypeHelper.TryConvert(value, out result);
+                bool convert = TypeHelper.TryConvert(value, out string result);
 
                 // Then
-                Assert.IsTrue(convert);
-                Assert.AreEqual("1", result);
+                convert.ShouldBeTrue();
+                result.ShouldBe("1");
             }
 
             [Test]
@@ -268,12 +254,11 @@ namespace Statiq.Common.Tests.Meta
                 Array value = new[] { "1", "2", "3" };
 
                 // When
-                int result;
-                bool convert = TypeHelper.TryConvert(value, out result);
+                bool convert = TypeHelper.TryConvert(value, out int result);
 
                 // Then
-                Assert.IsTrue(convert);
-                Assert.AreEqual(1, result);
+                convert.ShouldBeTrue();
+                result.ShouldBe(1);
             }
 
             [Test]
@@ -283,12 +268,11 @@ namespace Statiq.Common.Tests.Meta
                 Array value = new object[] { "1", 2, 3.0 };
 
                 // When
-                int result;
-                bool convert = TypeHelper.TryConvert(value, out result);
+                bool convert = TypeHelper.TryConvert(value, out int result);
 
                 // Then
-                Assert.IsTrue(convert);
-                Assert.AreEqual(1, result);
+                convert.ShouldBeTrue();
+                result.ShouldBe(1);
             }
 
             [Test]
@@ -298,12 +282,11 @@ namespace Statiq.Common.Tests.Meta
                 Array value = new object[] { "a", 2, 3.0 };
 
                 // When
-                int result;
-                bool convert = TypeHelper.TryConvert(value, out result);
+                bool convert = TypeHelper.TryConvert(value, out int result);
 
                 // Then
-                Assert.IsTrue(convert);
-                Assert.AreEqual(2, result);
+                convert.ShouldBeTrue();
+                result.ShouldBe(2);
             }
 
             [Test]
@@ -313,12 +296,11 @@ namespace Statiq.Common.Tests.Meta
                 Array value = new[] { 1, 2, 3 };
 
                 // When
-                IEnumerable<string> result;
-                bool convert = TypeHelper.TryConvert(value, out result);
+                bool convert = TypeHelper.TryConvert(value, out IEnumerable<string> result);
 
                 // Then
-                Assert.IsTrue(convert);
-                CollectionAssert.AreEqual(new[] { "1", "2", "3" }, result);
+                convert.ShouldBeTrue();
+                result.ShouldBe(new[] { "1", "2", "3" });
             }
 
             [Test]
@@ -328,12 +310,11 @@ namespace Statiq.Common.Tests.Meta
                 Array value = new[] { 1, 2, 3 };
 
                 // When
-                IEnumerable<object> result;
-                bool convert = TypeHelper.TryConvert(value, out result);
+                bool convert = TypeHelper.TryConvert(value, out IEnumerable<object> result);
 
                 // Then
-                Assert.IsTrue(convert);
-                CollectionAssert.AreEqual(value, result);
+                convert.ShouldBeTrue();
+                result.ShouldBe(value.Cast<object>());
             }
 
             [Test]
@@ -343,12 +324,11 @@ namespace Statiq.Common.Tests.Meta
                 const string value = "http://google.com/";
 
                 // When
-                Uri uri;
-                bool convert = TypeHelper.TryConvert(value, out uri);
+                bool convert = TypeHelper.TryConvert(value, out Uri uri);
 
                 // Then
-                Assert.IsTrue(convert);
-                Assert.AreEqual(value, uri.ToString());
+                convert.ShouldBeTrue();
+                uri.ToString().ShouldBe(value);
             }
 
             [Test]
@@ -358,12 +338,11 @@ namespace Statiq.Common.Tests.Meta
                 const string value = "2016-10-17 08:00";
 
                 // When
-                DateTime dateTime;
-                bool convert = TypeHelper.TryConvert(value, out dateTime);
+                bool convert = TypeHelper.TryConvert(value, out DateTime dateTime);
 
                 // Then
-                Assert.IsTrue(convert);
-                Assert.AreEqual(new DateTime(2016, 10, 17, 8, 0, 0), dateTime);
+                convert.ShouldBeTrue();
+                dateTime.ShouldBe(new DateTime(2016, 10, 17, 8, 0, 0));
             }
 
             [Test]
@@ -373,12 +352,11 @@ namespace Statiq.Common.Tests.Meta
                 object value = null;
 
                 // When
-                DateTime? result;
-                bool convert = TypeHelper.TryConvert(value, out result);
+                bool convert = TypeHelper.TryConvert(value, out DateTime? result);
 
                 // Then
-                Assert.IsTrue(convert);
-                Assert.IsNull(result);
+                convert.ShouldBeTrue();
+                result.ShouldBeNull();
             }
 
             [Test]
@@ -388,11 +366,10 @@ namespace Statiq.Common.Tests.Meta
                 object value = null;
 
                 // When
-                int result;
-                bool convert = TypeHelper.TryConvert(value, out result);
+                bool convert = TypeHelper.TryConvert(value, out int result);
 
                 // Then
-                Assert.IsFalse(convert);
+                convert.ShouldBeFalse();
             }
 
             [Test]
@@ -402,12 +379,11 @@ namespace Statiq.Common.Tests.Meta
                 object value = null;
 
                 // When
-                object result;
-                bool convert = TypeHelper.TryConvert(value, out result);
+                bool convert = TypeHelper.TryConvert(value, out object result);
 
                 // Then
-                Assert.IsTrue(convert);
-                Assert.IsNull(result);
+                convert.ShouldBeTrue();
+                result.ShouldBeNull();
             }
 
             [Test]
@@ -417,13 +393,52 @@ namespace Statiq.Common.Tests.Meta
                 DateTime value = new DateTime(2015, 1, 1);
 
                 // When
-                DateTime? result;
-                bool convert = TypeHelper.TryConvert(value, out result);
+                bool convert = TypeHelper.TryConvert(value, out DateTime? result);
 
                 // Then
-                Assert.IsTrue(convert);
-                Assert.IsTrue(result.HasValue);
-                Assert.AreEqual(value, result.Value);
+                convert.ShouldBeTrue();
+                result.HasValue.ShouldBeTrue();
+                result.Value.ShouldBe(value);
+            }
+
+            [Test]
+            public void IMetadataConvertsToIDocument()
+            {
+                // Given
+                IMetadata value = new MetadataDictionary
+                {
+                    { "Foo", "bar" },
+                    { "A", 1 }
+                };
+
+                // When
+                bool convert = TypeHelper.TryConvert(value, out IDocument result);
+
+                // Then
+                convert.ShouldBeTrue();
+                result.ShouldNotBeNull();
+                result["Foo"].ShouldBe("bar");
+                result["A"].ShouldBe(1);
+            }
+
+            [Test]
+            public void IDocumentConvertsToIMetadata()
+            {
+                // Given
+                IDocument value = new TestDocument
+                {
+                    { "Foo", "bar" },
+                    { "A", 1 }
+                };
+
+                // When
+                bool convert = TypeHelper.TryConvert(value, out IMetadata result);
+
+                // Then
+                convert.ShouldBeTrue();
+                result.ShouldNotBeNull();
+                result["Foo"].ShouldBe("bar");
+                result["A"].ShouldBe(1);
             }
         }
     }
