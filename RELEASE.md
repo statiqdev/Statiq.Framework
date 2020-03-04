@@ -1,5 +1,6 @@
 # 1.0.0-alpha.28
 
+- Renamed `IMetadata.GetNestedMetadata()` to `IMetadata.GetMetadata()`.
 - Added `TypeHelper.RegisterTypeConverter()` methods to register type converters at runtime.
 - Added a type converter that can convert `IMetadata` to `IDocument`.
 

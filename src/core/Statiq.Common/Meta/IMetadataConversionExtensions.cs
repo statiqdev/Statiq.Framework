@@ -88,7 +88,7 @@ namespace Statiq.Common
         /// <param name="key">The key of the nested metadata to get.</param>
         /// <param name="defaultValue">The default value to use if the key is not found or cannot be converted to nested metadata.</param>
         /// <returns>The value for the specified key converted to a nested metadata instance or null.</returns>
-        public static IMetadata GetNestedMetadata(this IMetadata metadata, string key, IMetadata defaultValue = null) => metadata.Get(key, defaultValue);
+        public static IMetadata GetMetadata(this IMetadata metadata, string key, IMetadata defaultValue = null) => metadata.Get(key, defaultValue);
 
         /// <summary>
         /// Gets the value for the specified key converted to a <see cref="IDocument"/>. This method never throws an exception.
