@@ -14,5 +14,9 @@ namespace Statiq.Hosting.LiveReload.Messages
         {
             Protocols = protocols;
         }
+
+        public HelloMessage()
+        {
+        }
     }
 }
