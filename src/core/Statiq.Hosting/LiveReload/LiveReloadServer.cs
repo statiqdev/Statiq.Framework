@@ -3,9 +3,9 @@ using System.Collections.Concurrent;
 using System.Linq;
 using System.Net.WebSockets;
 using System.Text;
+using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
-using Newtonsoft.Json;
 using Statiq.Hosting.LiveReload.Messages;
 
 namespace Statiq.Hosting.LiveReload
@@ -26,7 +26,7 @@ namespace Statiq.Hosting.LiveReload
         public async Task SendMessageAsync<TMessage>(TMessage message)
             where TMessage : ILiveReloadMessage
         {
-            string json = JsonConvert.SerializeObject(message, LiveReloadSocket.DefaultJsonSerializerSettings);
+            string json = JsonSerializer.Serialize(message, LiveReloadSocket.DefaultJsonSerializerOptions);
             byte[] bytes = Encoding.UTF8.GetBytes(json); // UTF-8 by spec
             ArraySegment<byte> segment = new ArraySegment<byte>(bytes, 0, bytes.Length);
             foreach (LiveReloadSocket socket in _sockets.Where(x => x.IsConnected))

@@ -1,5 +1,7 @@
 # 1.0.0-alpha.28
 
+- Refactored Statiq.Hosting usage of Newtonsoft.Json to System.Text.Json.
+- Moved the `ParseJson` module into Statiq.Core, refactored it to use System.Text.Json, and removed the `Statiq.Json` extension library.
 - Renamed `IMetadata.GetNestedMetadata()` to `IMetadata.GetMetadata()`.
 - Added `TypeHelper.RegisterTypeConverter()` methods to register type converters at runtime.
 - Added a type converter that can convert `IMetadata` to `IDocument`.

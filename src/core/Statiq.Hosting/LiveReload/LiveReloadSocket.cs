@@ -4,20 +4,20 @@ using System.IO;
 using System.Linq;
 using System.Net.WebSockets;
 using System.Text;
+using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Serialization;
 using Statiq.Hosting.LiveReload.Messages;
 
 namespace Statiq.Hosting.LiveReload
 {
     internal class LiveReloadSocket
     {
-        internal static readonly JsonSerializerSettings DefaultJsonSerializerSettings = new JsonSerializerSettings
+        internal static readonly JsonSerializerOptions DefaultJsonSerializerOptions = new JsonSerializerOptions
         {
-            ContractResolver = new CamelCasePropertyNamesContractResolver(),
-            Formatting = Formatting.Indented
+            PropertyNameCaseInsensitive = true,
+            PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+            WriteIndented = true
         };
 
         private static readonly HashSet<string> SupportedProtocols = new HashSet<string>
@@ -73,7 +73,7 @@ namespace Statiq.Hosting.LiveReload
         private async Task HandleMessageAsync(byte[] message)
         {
             string json = Encoding.UTF8.GetString(message);
-            BasicMessage parsedMessage = JsonConvert.DeserializeObject<BasicMessage>(json, DefaultJsonSerializerSettings);
+            BasicMessage parsedMessage = JsonSerializer.Deserialize<BasicMessage>(json, DefaultJsonSerializerOptions);
             switch (parsedMessage.Command)
             {
                 case "info":
@@ -92,14 +92,14 @@ namespace Statiq.Hosting.LiveReload
 
         private void HandleInfo(string json)
         {
-            InfoMessage info = JsonConvert.DeserializeObject<InfoMessage>(json, DefaultJsonSerializerSettings);
+            InfoMessage info = JsonSerializer.Deserialize<InfoMessage>(json, DefaultJsonSerializerOptions);
 
             // noop
         }
 
         private async Task HandleHelloAsync(string json)
         {
-            HelloMessage hello = JsonConvert.DeserializeObject<HelloMessage>(json, DefaultJsonSerializerSettings);
+            HelloMessage hello = JsonSerializer.Deserialize<HelloMessage>(json, DefaultJsonSerializerOptions);
 
             string negotiatedProtocol = hello
                 .Protocols
@@ -128,7 +128,7 @@ namespace Statiq.Hosting.LiveReload
         public async Task SendMessageAsync<TMessage>(TMessage message)
             where TMessage : ILiveReloadMessage
         {
-            string json = JsonConvert.SerializeObject(message, DefaultJsonSerializerSettings);
+            string json = JsonSerializer.Serialize(message, DefaultJsonSerializerOptions);
             byte[] bytes = Encoding.UTF8.GetBytes(json); // UTF-8 by spec
             ArraySegment<byte> segment = new ArraySegment<byte>(bytes, 0, bytes.Length);
             await SendMessageAsync(segment);

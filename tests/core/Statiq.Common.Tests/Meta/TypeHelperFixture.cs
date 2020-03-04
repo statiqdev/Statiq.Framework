@@ -346,6 +346,34 @@ namespace Statiq.Common.Tests.Meta
             }
 
             [Test]
+            public void Iso8601StringConvertsToDateTimeOffset()
+            {
+                // Given
+                const string value = "2013-02-03T04:05:06.0070000+04:00";
+
+                // When
+                bool convert = TypeHelper.TryConvert(value, out DateTimeOffset dateTime);
+
+                // Then
+                convert.ShouldBeTrue();
+                dateTime.ShouldBe(new DateTimeOffset(2013, 2, 3, 4, 5, 6, 7, TimeSpan.FromHours(4)));
+            }
+
+            [Test]
+            public void SimpleIso8601StringConvertsToDateTimeOffset()
+            {
+                // Given
+                const string value = "2013-02-03T04:05:06Z";
+
+                // When
+                bool convert = TypeHelper.TryConvert(value, out DateTimeOffset dateTime);
+
+                // Then
+                convert.ShouldBeTrue();
+                dateTime.ShouldBe(new DateTimeOffset(2013, 2, 3, 4, 5, 6, TimeSpan.Zero));
+            }
+
+            [Test]
             public void NullConvertsToNullable()
             {
                 // Given
