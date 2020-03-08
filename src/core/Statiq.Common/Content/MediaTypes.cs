@@ -1058,6 +1058,7 @@ namespace Statiq.Common
                 { ".sass", "text/x-sass" },
                 { ".scss", "text/x-scss" },
                 { ".yaml", "text/yaml" },
+                { ".yml", "text/yaml" },
                 { ".wasm", "application/wasm" }
             };
 

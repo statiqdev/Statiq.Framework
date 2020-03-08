@@ -70,7 +70,7 @@ namespace Statiq.Feeds
         private Config<DateTime?> _itemUpdated = Config.FromDocument(doc => doc.Get<DateTime?>(FeedKeys.Updated));
         private Config<Uri> _itemLink = Config.FromDocument((doc, ctx) => TypeHelper.Convert<Uri>(ctx.GetLink(doc, true)));
         private Config<Uri> _itemImageLink = Config.FromDocument((doc, ctx) => TypeHelper.Convert<Uri>(ctx.GetLink(doc, FeedKeys.Image, true)));
-        private Config<string> _itemContent = Config.FromDocument(doc => doc.GetString(FeedKeys.Content));
+        private Config<string> _itemContent = Config.FromDocument(async doc => doc.GetString(FeedKeys.Content) ?? await doc.GetContentStringAsync());
         private Config<Uri> _itemThreadLink = null;
         private Config<int> _itemThreadCount = null;
         private Config<DateTime?> _itemThreadUpdated = null;
@@ -79,7 +79,8 @@ namespace Statiq.Feeds
         /// Sets how many items the feed will contain. The default value is 20.
         /// Note that documents will be used in the order in which they are input
         /// into this module, so a <c>OrderBy</c> module or similar should be used
-        /// to order the documents prior to this module.
+        /// to order the documents prior to this module. Use a value of 0 to include
+        /// all input documents.
         /// </summary>
         /// <param name="maximumItems">The maximum number of items.</param>
         /// <returns>The current module instance.</returns>
@@ -184,7 +185,7 @@ namespace Statiq.Feeds
         /// <param name="feedPublished">A delegate that should return a <c>DateTime</c> with
         /// the feed published time.</param>
         /// <returns>The current module instance.</returns>
-        public GenerateFeeds WithFeedPublished(DateTime feedPublished)
+        public GenerateFeeds WithFeedPublished(DateTime? feedPublished)
         {
             _feedPublished = feedPublished;
             return this;
@@ -196,7 +197,7 @@ namespace Statiq.Feeds
         /// <param name="feedUpdated">A delegate that should return a <c>DateTime</c> with
         /// the feed updated time.</param>
         /// <returns>The current module instance.</returns>
-        public GenerateFeeds WithFeedUpdated(DateTime feedUpdated)
+        public GenerateFeeds WithFeedUpdated(DateTime? feedUpdated)
         {
             _feedUpdated = feedUpdated;
             return this;
@@ -344,9 +345,7 @@ namespace Statiq.Feeds
 
         /// <summary>
         /// Sets the content of the item. The default value is the value for the "Content" key
-        /// in the input document. Note that the entire document content is not used because
-        /// it will most likely contain layout, scripts, and other code that shouldn't be part
-        /// of the feed item.
+        /// in the input document. If that is undefined, the current document content will be used.
         /// </summary>
         /// <param name="itemContent">A delegate that should return a <c>string</c> with
         /// the content of the item.</param>
@@ -411,7 +410,7 @@ namespace Statiq.Feeds
             };
 
             // Add items
-            foreach (IDocument input in context.Inputs.Take(_maximumItems))
+            foreach (IDocument input in _maximumItems <= 0 ? context.Inputs : context.Inputs.Take(_maximumItems))
             {
                 feed.Items.Add(new FeedItem
                 {

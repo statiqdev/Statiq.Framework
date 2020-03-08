@@ -1,5 +1,7 @@
 # 1.0.0-alpha.28
 
+- Added ".yml" to file extensions mapped to the "text/yaml" media type.
+- Added ability to include all inputs in generated feeds from `GenerateFeeds` by setting maximum items to 0
 - Refactored Statiq.Hosting usage of Newtonsoft.Json to System.Text.Json.
 - Moved the `ParseJson` module into Statiq.Core, refactored it to use System.Text.Json, and removed the `Statiq.Json` extension library.
 - Renamed `IMetadata.GetNestedMetadata()` to `IMetadata.GetMetadata()`.
