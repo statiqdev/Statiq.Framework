@@ -257,5 +257,8 @@ namespace Statiq.Common
                 }
             }
         }
+
+        /// <inheritdoc />
+        public async Task<int> GetCacheHashCodeAsync() => await IDocument.GetCacheHashCodeAsync(this);
     }
 }

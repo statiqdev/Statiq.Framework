@@ -1,5 +1,7 @@
 # 1.0.0-alpha.28
 
+- Added `ctx` and `doc` shorthand properties to the scripted metadata script host.
+- Ensured that scripted metadata uses a strongly-typed property in the script host for metadata properties like `Source` and `Destination`.
 - Added ".yml" to file extensions mapped to the "text/yaml" media type.
 - Added ability to include all inputs in generated feeds from `GenerateFeeds` by setting maximum items to 0
 - Refactored Statiq.Hosting usage of Newtonsoft.Json to System.Text.Json.

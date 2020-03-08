@@ -65,11 +65,22 @@ namespace Statiq.Common
         /// Compiles a script into an in-memory script assembly for later evaluation.
         /// </summary>
         /// <param name="code">The code to compile.</param>
-        /// <param name="metadataPropertyKeys">
+        /// <param name="metadataProperties">
         /// Metadata property keys that will be exposed as properties in the script as
         /// the name of the key and can be used directly in the script.
+        /// The <see cref="KeyValuePair{TKey, TValue}.Key"/> should be the name of the
+        /// property and <see cref="KeyValuePair{TKey, TValue}.Value"/> should be the name
+        /// of the property type (or <c>null</c> for "object").
         /// </param>
         /// <returns>Raw assembly bytes.</returns>
-        byte[] Compile(string code, IEnumerable<string> metadataPropertyKeys);
+        byte[] Compile(string code, IEnumerable<KeyValuePair<string, string>> metadataProperties);
+
+        /// <summary>
+        /// Gets property name and scripting types for a given <see cref="IMetadata"/> object
+        /// by mapping metadata properties to their defined types and other metadata to <see cref="object"/>.
+        /// </summary>
+        /// <param name="metadata">The metadata to get scriptable properties for.</param>
+        /// <returns>The property name and scriptable type for each property of the metadata.</returns>
+        IEnumerable<KeyValuePair<string, string>> GetMetadataProperties(IMetadata metadata);
     }
 }

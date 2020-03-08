@@ -1,4 +1,6 @@
-﻿using NUnit.Framework;
+﻿using System.Collections.Generic;
+using System.Linq;
+using NUnit.Framework;
 using Shouldly;
 using Statiq.Common;
 using Statiq.Testing;
@@ -15,6 +17,7 @@ namespace Statiq.Core.Tests.Scripting
             {
                 // Given
                 TestDocument document = new TestDocument();
+                KeyValuePair<string, string>[] properties = ScriptHelper.GetMetadataProperties(document).ToArray();
                 TestExecutionContext context = new TestExecutionContext()
                 {
                     Namespaces = new TestNamespacesCollection(new[] { "Foo.Bar" })
@@ -42,12 +45,12 @@ int x = 0;
 return null;
 }
 
-public object Source => Metadata.Get(""Source"");
-public object Destination => Metadata.Get(""Destination"");
-public object ContentProvider => Metadata.Get(""ContentProvider"");";
+public Statiq.Common.NormalizedPath Source => Metadata.Get<Statiq.Common.NormalizedPath>(""Source"");
+public Statiq.Common.NormalizedPath Destination => Metadata.Get<Statiq.Common.NormalizedPath>(""Destination"");
+public Statiq.Common.IContentProvider ContentProvider => Metadata.Get<Statiq.Common.IContentProvider>(""ContentProvider"");";
 
                 // When
-                string actual = ScriptHelper.Parse(code, document.Keys, context);
+                string actual = ScriptHelper.Parse(code, properties, context);
 
                 // Then
                 actual.Substring(0, expectedStart.Length).ShouldBe(expectedStart, StringCompareShould.IgnoreLineEndings);
@@ -58,6 +61,7 @@ public object ContentProvider => Metadata.Get(""ContentProvider"");";
             {
                 // Given
                 TestDocument document = new TestDocument();
+                KeyValuePair<string, string>[] properties = ScriptHelper.GetMetadataProperties(document).ToArray();
                 TestExecutionContext context = new TestExecutionContext()
                 {
                     Namespaces = new TestNamespacesCollection(new[] { "Foo.Bar" })
@@ -85,12 +89,12 @@ return
 ;
 }
 
-public object Source => Metadata.Get(""Source"");
-public object Destination => Metadata.Get(""Destination"");
-public object ContentProvider => Metadata.Get(""ContentProvider"");";
+public Statiq.Common.NormalizedPath Source => Metadata.Get<Statiq.Common.NormalizedPath>(""Source"");
+public Statiq.Common.NormalizedPath Destination => Metadata.Get<Statiq.Common.NormalizedPath>(""Destination"");
+public Statiq.Common.IContentProvider ContentProvider => Metadata.Get<Statiq.Common.IContentProvider>(""ContentProvider"");";
 
                 // When
-                string actual = ScriptHelper.Parse(code, document.Keys, context);
+                string actual = ScriptHelper.Parse(code, properties, context);
 
                 // Then
                 actual.Substring(0, expectedStart.Length).ShouldBe(expectedStart, StringCompareShould.IgnoreLineEndings);
@@ -101,6 +105,7 @@ public object ContentProvider => Metadata.Get(""ContentProvider"");";
             {
                 // Given
                 TestDocument document = new TestDocument();
+                KeyValuePair<string, string>[] properties = ScriptHelper.GetMetadataProperties(document).ToArray();
                 TestExecutionContext context = new TestExecutionContext()
                 {
                     Namespaces = new TestNamespacesCollection(new[] { "Foo.Bar" })
@@ -128,12 +133,12 @@ await Task.CompletedTask;
 return null;
 }
 
-public object Source => Metadata.Get(""Source"");
-public object Destination => Metadata.Get(""Destination"");
-public object ContentProvider => Metadata.Get(""ContentProvider"");";
+public Statiq.Common.NormalizedPath Source => Metadata.Get<Statiq.Common.NormalizedPath>(""Source"");
+public Statiq.Common.NormalizedPath Destination => Metadata.Get<Statiq.Common.NormalizedPath>(""Destination"");
+public Statiq.Common.IContentProvider ContentProvider => Metadata.Get<Statiq.Common.IContentProvider>(""ContentProvider"");";
 
                 // When
-                string actual = ScriptHelper.Parse(code, document.Keys, context);
+                string actual = ScriptHelper.Parse(code, properties, context);
 
                 // Then
                 actual.Substring(0, expectedStart.Length).ShouldBe(expectedStart, StringCompareShould.IgnoreLineEndings);
@@ -144,6 +149,7 @@ public object ContentProvider => Metadata.Get(""ContentProvider"");";
             {
                 // Given
                 TestDocument document = new TestDocument();
+                KeyValuePair<string, string>[] properties = ScriptHelper.GetMetadataProperties(document).ToArray();
                 TestExecutionContext context = new TestExecutionContext()
                 {
                     Namespaces = new TestNamespacesCollection(new[] { "Foo.Bar" })
@@ -171,12 +177,12 @@ return 0;
 return null;
 }
 
-public object Source => Metadata.Get(""Source"");
-public object Destination => Metadata.Get(""Destination"");
-public object ContentProvider => Metadata.Get(""ContentProvider"");";
+public Statiq.Common.NormalizedPath Source => Metadata.Get<Statiq.Common.NormalizedPath>(""Source"");
+public Statiq.Common.NormalizedPath Destination => Metadata.Get<Statiq.Common.NormalizedPath>(""Destination"");
+public Statiq.Common.IContentProvider ContentProvider => Metadata.Get<Statiq.Common.IContentProvider>(""ContentProvider"");";
 
                 // When
-                string actual = ScriptHelper.Parse(code, document.Keys, context);
+                string actual = ScriptHelper.Parse(code, properties, context);
 
                 // Then
                 actual.Substring(0, expectedStart.Length).ShouldBe(expectedStart, StringCompareShould.IgnoreLineEndings);
@@ -187,6 +193,7 @@ public object ContentProvider => Metadata.Get(""ContentProvider"");";
             {
                 // Given
                 TestDocument document = new TestDocument();
+                KeyValuePair<string, string>[] properties = ScriptHelper.GetMetadataProperties(document).ToArray();
                 TestExecutionContext context = new TestExecutionContext()
                 {
                     Namespaces = new TestNamespacesCollection(new[] { "Foo.Bar" })
@@ -232,9 +239,9 @@ Pipelines.Add(Content());
 return null;
 }
 
-public object Source => Metadata.Get(""Source"");
-public object Destination => Metadata.Get(""Destination"");
-public object ContentProvider => Metadata.Get(""ContentProvider"");";
+public Statiq.Common.NormalizedPath Source => Metadata.Get<Statiq.Common.NormalizedPath>(""Source"");
+public Statiq.Common.NormalizedPath Destination => Metadata.Get<Statiq.Common.NormalizedPath>(""Destination"");
+public Statiq.Common.IContentProvider ContentProvider => Metadata.Get<Statiq.Common.IContentProvider>(""ContentProvider"");";
                 string expectedEnd =
 @"#line 1
 public class Foo
@@ -258,7 +265,7 @@ public static class ScriptExtensionMethods
 }";
 
                 // When
-                string actual = ScriptHelper.Parse(code, document.Keys, context);
+                string actual = ScriptHelper.Parse(code, properties, context);
 
                 // Then
                 actual.Substring(0, expectedStart.Length).ShouldBe(expectedStart, StringCompareShould.IgnoreLineEndings);
@@ -270,6 +277,7 @@ public static class ScriptExtensionMethods
             {
                 // Given
                 TestDocument document = new TestDocument();
+                KeyValuePair<string, string>[] properties = ScriptHelper.GetMetadataProperties(document).ToArray();
                 TestExecutionContext context = new TestExecutionContext()
                 {
                     Namespaces = new TestNamespacesCollection(new[] { "Foo.Bar" })
@@ -315,9 +323,9 @@ public string Self(string x)
 {
     return x.ToLower();
 }
-public object Source => Metadata.Get(""Source"");
-public object Destination => Metadata.Get(""Destination"");
-public object ContentProvider => Metadata.Get(""ContentProvider"");";
+public Statiq.Common.NormalizedPath Source => Metadata.Get<Statiq.Common.NormalizedPath>(""Source"");
+public Statiq.Common.NormalizedPath Destination => Metadata.Get<Statiq.Common.NormalizedPath>(""Destination"");
+public Statiq.Common.IContentProvider ContentProvider => Metadata.Get<Statiq.Common.IContentProvider>(""ContentProvider"");";
                 string expectedEnd =
 @"#line 3
 public static class Foo
@@ -331,7 +339,7 @@ public static class ScriptExtensionMethods
 }";
 
                 // When
-                string actual = ScriptHelper.Parse(code, document.Keys, context);
+                string actual = ScriptHelper.Parse(code, properties, context);
 
                 // Then
                 actual.Substring(0, expectedStart.Length).ShouldBe(expectedStart, StringCompareShould.IgnoreLineEndings);
@@ -343,6 +351,7 @@ public static class ScriptExtensionMethods
             {
                 // Given
                 TestDocument document = new TestDocument();
+                KeyValuePair<string, string>[] properties = ScriptHelper.GetMetadataProperties(document).ToArray();
                 TestExecutionContext context = new TestExecutionContext()
                 {
                     Namespaces = new TestNamespacesCollection(new[] { "Foo.Bar" })
@@ -384,9 +393,9 @@ public string Self(string x)
 {
     return x.ToLower();
 }
-public object Source => Metadata.Get(""Source"");
-public object Destination => Metadata.Get(""Destination"");
-public object ContentProvider => Metadata.Get(""ContentProvider"");";
+public Statiq.Common.NormalizedPath Source => Metadata.Get<Statiq.Common.NormalizedPath>(""Source"");
+public Statiq.Common.NormalizedPath Destination => Metadata.Get<Statiq.Common.NormalizedPath>(""Destination"");
+public Statiq.Common.IContentProvider ContentProvider => Metadata.Get<Statiq.Common.IContentProvider>(""ContentProvider"");";
                 string expectedEnd =
 @"#line 1
 public static class Foo
@@ -400,7 +409,7 @@ public static class ScriptExtensionMethods
 }";
 
                 // When
-                string actual = ScriptHelper.Parse(code, document.Keys, context);
+                string actual = ScriptHelper.Parse(code, properties, context);
 
                 // Then
                 actual.Substring(0, expectedStart.Length).ShouldBe(expectedStart, StringCompareShould.IgnoreLineEndings);
@@ -412,6 +421,7 @@ public static class ScriptExtensionMethods
             {
                 // Given
                 TestDocument document = new TestDocument();
+                KeyValuePair<string, string>[] properties = ScriptHelper.GetMetadataProperties(document).ToArray();
                 TestExecutionContext context = new TestExecutionContext()
                 {
                     Namespaces = new TestNamespacesCollection(new[] { "Foo.Bar" })
@@ -449,9 +459,9 @@ Pipelines.Add(Content());
 return null;
 }
 
-public object Source => Metadata.Get(""Source"");
-public object Destination => Metadata.Get(""Destination"");
-public object ContentProvider => Metadata.Get(""ContentProvider"");";
+public Statiq.Common.NormalizedPath Source => Metadata.Get<Statiq.Common.NormalizedPath>(""Source"");
+public Statiq.Common.NormalizedPath Destination => Metadata.Get<Statiq.Common.NormalizedPath>(""Destination"");
+public Statiq.Common.IContentProvider ContentProvider => Metadata.Get<Statiq.Common.IContentProvider>(""ContentProvider"");";
                 string expectedEnd =
 @"#line 1
 public static class Foo
@@ -469,7 +479,7 @@ public static string Self(this string x)
 }";
 
                 // When
-                string actual = ScriptHelper.Parse(code, document.Keys, context);
+                string actual = ScriptHelper.Parse(code, properties, context);
 
                 // Then
                 actual.Substring(0, expectedStart.Length).ShouldBe(expectedStart, StringCompareShould.IgnoreLineEndings);
@@ -481,6 +491,7 @@ public static string Self(this string x)
             {
                 // Given
                 TestDocument document = new TestDocument();
+                KeyValuePair<string, string>[] properties = ScriptHelper.GetMetadataProperties(document).ToArray();
                 TestExecutionContext context = new TestExecutionContext()
                 {
                     Namespaces = new TestNamespacesCollection(new[] { "Foo.Bar" })
@@ -530,9 +541,9 @@ public string Self(string x)
     // RTY
     return x.ToLower();
 }
-public object Source => Metadata.Get(""Source"");
-public object Destination => Metadata.Get(""Destination"");
-public object ContentProvider => Metadata.Get(""ContentProvider"");";
+public Statiq.Common.NormalizedPath Source => Metadata.Get<Statiq.Common.NormalizedPath>(""Source"");
+public Statiq.Common.NormalizedPath Destination => Metadata.Get<Statiq.Common.NormalizedPath>(""Destination"");
+public Statiq.Common.IContentProvider ContentProvider => Metadata.Get<Statiq.Common.IContentProvider>(""ContentProvider"");";
                 string expectedEnd =
 @"#line 1
 // XYZ
@@ -548,7 +559,7 @@ public static class ScriptExtensionMethods
 }";
 
                 // When
-                string actual = ScriptHelper.Parse(code, document.Keys, context);
+                string actual = ScriptHelper.Parse(code, properties, context);
 
                 // Then
                 actual.Substring(0, expectedStart.Length).ShouldBe(expectedStart, StringCompareShould.IgnoreLineEndings);
@@ -560,6 +571,7 @@ public static class ScriptExtensionMethods
             {
                 // Given
                 TestDocument document = new TestDocument();
+                KeyValuePair<string, string>[] properties = ScriptHelper.GetMetadataProperties(document).ToArray();
                 TestExecutionContext context = new TestExecutionContext()
                 {
                     Namespaces = new TestNamespacesCollection(new[] { "Foo.Bar" })
@@ -567,7 +579,7 @@ public static class ScriptExtensionMethods
                 string code = "int x = 0;";
 
                 // When
-                string actual = ScriptHelper.Parse(code, document.Keys, context);
+                string actual = ScriptHelper.Parse(code, properties, context);
 
                 // Then
                 actual.ShouldContain("public string GetString(string key, string defaultValue = default) => Metadata.GetString(key, defaultValue);");

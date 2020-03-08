@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace Statiq.Common
@@ -59,5 +60,36 @@ namespace Statiq.Common
 
         /// <inheritdoc />
         string IDisplayable.ToDisplayString() => Source.IsNull ? "unknown source" : Source.ToDisplayString();
+
+        /// <summary>
+        /// Gets a hash of the provided document content and metadata appropriate for caching.
+        /// Custom <see cref="IDocument"/> implementations may also contribute additional state
+        /// data to the resulting hash code by overriding this method.
+        /// </summary>
+        /// <returns>A hash appropriate for caching.</returns>
+        Task<int> GetCacheHashCodeAsync();
+
+        /// <summary>
+        /// A default implementation of <see cref="GetCacheHashCodeAsync()"/>.
+        /// </summary>
+        /// <returns>A hash appropriate for caching.</returns>
+        public static async Task<int> GetCacheHashCodeAsync(IDocument document)
+        {
+            HashCode hash = default;
+            using (Stream stream = document.GetContentStream())
+            {
+                hash.Add(await Crc32.CalculateAsync(stream));
+            }
+
+            // We exclude ContentProvider from hash as we already added CRC for content above.
+            foreach (KeyValuePair<string, object> item in document.GetRawEnumerable()
+                .Where(x => x.Key != nameof(ContentProvider)))
+            {
+                hash.Add(item.Key);
+                hash.Add(item.Value);
+            }
+
+            return hash.ToHashCode();
+        }
     }
 }

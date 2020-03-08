@@ -16,7 +16,7 @@ namespace Statiq.Common
         private readonly string _originalPrefix;
         private readonly string _script;
         private readonly IExecutionState _executionState;
-        private HashSet<string> _cachedMetadataKeys;
+        private HashSet<KeyValuePair<string, string>> _cachedMetadataProperties;
         private Type _cachedScriptType;
 
         private ScriptMetadataValue(string key, string originalPrefix, string script, IExecutionState executionState)
@@ -41,12 +41,12 @@ namespace Statiq.Common
                 }
 
                 // Check if we've already cached a compilation for the current set of metadata keys
-                if (_cachedMetadataKeys?.SetEquals(metadata.Keys) != true)
+                KeyValuePair<string, string>[] metadataProperties = _executionState.ScriptHelper.GetMetadataProperties(metadata).ToArray();
+                if (_cachedMetadataProperties?.SetEquals(metadataProperties) != true)
                 {
                     // Compilation cache miss, not cached or the metadata keys are different
-                    string[] keys = metadata.Keys.ToArray();
-                    _cachedMetadataKeys = new HashSet<string>(keys);
-                    byte[] rawAssembly = _executionState.ScriptHelper.Compile(_script, keys);
+                    _cachedMetadataProperties = new HashSet<KeyValuePair<string, string>>(metadataProperties);
+                    byte[] rawAssembly = _executionState.ScriptHelper.Compile(_script, metadataProperties);
                     _cachedScriptType = _executionState.ScriptHelper.Load(rawAssembly);
                 }
             }

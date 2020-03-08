@@ -24,6 +24,16 @@ namespace Statiq.Core
 
         public IExecutionContext Context { get; }
 
+#pragma warning disable SA1300 // Element should begin with upper-case letter
+        public IExecutionContext ctx => Context;
+#pragma warning restore SA1300 // Element should begin with upper-case letter
+
+        public IDocument Document => Metadata as IDocument ?? throw new InvalidOperationException("Script object is not a document");
+
+#pragma warning disable SA1300 // Element should begin with upper-case letter
+        public IDocument doc => Document;
+#pragma warning restore SA1300 // Element should begin with upper-case letter
+
         public abstract Task<object> EvaluateAsync();
 
         // Manually implement IExecutionContext pass-throughs since we don't

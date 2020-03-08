@@ -69,32 +69,6 @@ namespace Statiq.Common
             string.Equals(document.ContentProvider.MediaType, mediaType, StringComparison.OrdinalIgnoreCase);
 
         /// <summary>
-        /// Gets a hash of the provided document content and metadata appropriate for caching.
-        /// Custom <see cref="IDocument"/> implementations may also contribute additional state
-        /// data to the resulting hash code.
-        /// </summary>
-        /// <param name="document">The document.</param>
-        /// <returns>A hash appropriate for caching.</returns>
-        public static async Task<int> GetCacheHashCodeAsync(this IDocument document)
-        {
-            HashCode hash = default;
-            using (Stream stream = document.GetContentStream())
-            {
-                hash.Add(await Crc32.CalculateAsync(stream));
-            }
-
-            // We exclude ContentProvider from hash as we already added CRC for content above.
-            foreach (KeyValuePair<string, object> item in document
-                .Where(x => x.Key != nameof(IDocument.ContentProvider)))
-            {
-                hash.Add(item.Key);
-                hash.Add(item.Value);
-            }
-
-            return hash.ToHashCode();
-        }
-
-        /// <summary>
         /// Gets a normalized title derived from the document source.
         /// </summary>
         /// <param name="document">The document.</param>

@@ -77,10 +77,25 @@ namespace Statiq.Core
         }
 
         /// <inheritdoc/>
-        public byte[] Compile(string code, IMetadata metadata) => Compile(code, metadata?.Keys);
+        IEnumerable<KeyValuePair<string, string>> IScriptHelper.GetMetadataProperties(IMetadata metadata) => GetMetadataProperties(metadata);
+
+        public static IEnumerable<KeyValuePair<string, string>> GetMetadataProperties(IMetadata metadata)
+        {
+            if (metadata != null)
+            {
+                Type metadataType = metadata.GetType();
+                foreach (string key in metadata.Keys)
+                {
+                    yield return new KeyValuePair<string, string>(key, metadataType.GetProperty(key)?.PropertyType.FullName);
+                }
+            }
+        }
 
         /// <inheritdoc/>
-        public byte[] Compile(string code, IEnumerable<string> metadataPropertyKeys)
+        public byte[] Compile(string code, IMetadata metadata) => Compile(code, GetMetadataProperties(metadata));
+
+        /// <inheritdoc/>
+        public byte[] Compile(string code, IEnumerable<KeyValuePair<string, string>> metadataPropertyKeys)
         {
             _ = code ?? throw new ArgumentNullException(nameof(code));
 
@@ -171,7 +186,8 @@ namespace Statiq.Core
         }
 
         // Internal for testing
-        internal static string Parse(string code, IEnumerable<string> metadataPropertyKeys, IExecutionState executionState)
+        // metadataPropertyKeys.Key = property name, metadataPropertyKeys.Value = property type
+        internal static string Parse(string code, IEnumerable<KeyValuePair<string, string>> metadataPropertyKeys, IExecutionState executionState)
         {
             // Generate a syntax tree from the code
             SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText(code, new CSharpParseOptions(kind: SourceCodeKind.Script), cancellationToken: executionState.CancellationToken);
@@ -198,8 +214,8 @@ namespace Statiq.Core
                     : string.Join(
                         Environment.NewLine,
                         metadataPropertyKeys
-                            .Where(x => !string.IsNullOrWhiteSpace(x) && !ReservedPropertyNames.Contains(x))
-                            .Select(x => $"public object {GetValidIdentifier(x)} => Metadata.Get(\"{x}\");"));
+                            .Where(x => !string.IsNullOrWhiteSpace(x.Key) && !ReservedPropertyNames.Contains(x.Key))
+                            .Select(x => $"public {x.Value ?? "object"} {GetValidIdentifier(x.Key)} => Metadata.Get<{x.Value ?? "object"}>(\"{x.Key}\");"));
 
             // Determine if we need a return statement
             string preScript = null;

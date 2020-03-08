@@ -252,24 +252,7 @@ namespace Statiq.Common
         }
 
         /// <inheritdoc />
-        public virtual async Task<int> GetCacheHashCodeAsync()
-        {
-            HashCode hash = default;
-            using (Stream stream = this.GetContentStream())
-            {
-                hash.Add(await Crc32.CalculateAsync(stream));
-            }
-
-            // We exclude ContentProvider from hash as we already added CRC for content above.
-            foreach (KeyValuePair<string, object> item in this
-                .Where(x => x.Key != nameof(ContentProvider)))
-            {
-                hash.Add(item.Key);
-                hash.Add(item.Value);
-            }
-
-            return hash.ToHashCode();
-        }
+        public virtual async Task<int> GetCacheHashCodeAsync() => await IDocument.GetCacheHashCodeAsync(this);
 
         /// <inheritdoc />
         public virtual string ToDisplayString() => Source.IsNull ? "unknown source" : Source.ToDisplayString();
