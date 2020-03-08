@@ -277,7 +277,7 @@ Task("Publish-Release")
         {
             Credentials = new Credentials(githubToken)
         };
-        var release = github.Repository.Release.Create("statiqdev", "Framework", new NewRelease("v" + semVersion) 
+        var release = github.Repository.Release.Create("statiqdev", "Statiq.Framework", new NewRelease("v" + semVersion) 
         {
             Name = semVersion,
             Body = string.Join(Environment.NewLine, releaseNotes.Notes),

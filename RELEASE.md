@@ -1,3 +1,5 @@
+# 1.0.0-alpha.29
+
 # 1.0.0-alpha.28
 
 - Added `ctx` and `doc` shorthand properties to the scripted metadata script host.
