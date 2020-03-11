@@ -80,6 +80,23 @@ namespace Statiq.Common
             return Config.FromDocument(async (doc, ctx) => await transform(await config.GetValueAsync(doc, ctx), doc, ctx));
         }
 
+        /// <summary>
+        /// Casts the config delegate to the specified type.
+        /// </summary>
+        /// <typeparam name="TValue">The type to cast the value to.</typeparam>
+        /// <param name="config">The config delegate to cast.</param>
+        /// <returns>The config value as the specified type or <c>default</c> if <paramref name="config"/> is null.</returns>
+        public static Config<TValue> Cast<TValue>(this IConfig config)
+        {
+            if (config == null)
+            {
+                return Config.FromValue(default(TValue));
+            }
+            return config.RequiresDocument
+                ? Config.FromDocument(async (doc, ctx) => (TValue)await config.GetValueAsync(doc, ctx))
+                : Config.FromContext(async ctx => (TValue)await config.GetValueAsync(null, ctx));
+        }
+
         public static Config<IEnumerable<TValue>> MakeEnumerable<TValue>(this Config<TValue> config) => config.Transform(YieldValue);
 
         private static IEnumerable<TValue> YieldValue<TValue>(TValue value)

@@ -1,5 +1,7 @@
 # 1.0.0-alpha.29
 
+- Added a `IConfig.Cast<TValue>()` convenience extension method.
+
 # 1.0.0-alpha.28
 
 - Added `ctx` and `doc` shorthand properties to the scripted metadata script host.
