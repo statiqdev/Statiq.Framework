@@ -1,5 +1,6 @@
 # 1.0.0-alpha.29
 
+- Added a `IDocument.GetLink()` extension method that calls `IExecutionContext.GetLink()`.
 - Added a `IDocument.HasChildren()` extension method.
 - Added an empty constructor to `OrderDocuments` that orders documents by the `Keys.Index` value and then the file name by default.
 - Added a `IConfig.Cast<TValue>()` convenience extension method.
