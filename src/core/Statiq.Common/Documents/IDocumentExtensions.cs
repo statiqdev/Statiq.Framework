@@ -69,6 +69,15 @@ namespace Statiq.Common
             string.Equals(document.ContentProvider.MediaType, mediaType, StringComparison.OrdinalIgnoreCase);
 
         /// <summary>
+        /// Determines if a document is equal by comparing their IDs.
+        /// </summary>
+        /// <param name="document">The first document.</param>
+        /// <param name="other">The second document.</param>
+        /// <returns><c>true</c> if the documents have the same ID (they come from the same initial document), <c>false</c> otherwise.</returns>
+        public static bool IdEquals(this IDocument document, IDocument other) =>
+            DocumentIdComparer.Instance.Equals(document, other);
+
+        /// <summary>
         /// Gets a normalized title derived from the document source (or <see cref="Keys.Title"/> if defined).
         /// </summary>
         /// <param name="document">The document.</param>
