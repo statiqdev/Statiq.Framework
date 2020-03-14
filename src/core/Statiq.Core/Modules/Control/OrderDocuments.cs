@@ -18,6 +18,19 @@ namespace Statiq.Core
         private readonly Stack<Order> _orders = new Stack<Order>();
 
         /// <summary>
+        /// Orders the input documents using the <see cref="Keys.Index"/> value first
+        /// and then by the document file name.
+        /// </summary>
+        public OrderDocuments()
+        {
+            _orders.Push(new Order(Config.FromDocument(Keys.Index)));
+            _orders.Push(new Order(Config.FromDocument(doc =>
+                doc.Destination.IsNull
+                    ? (doc.Source.IsNull ? null : doc.Source.FileName.FullPath)
+                    : doc.Destination.FileName.FullPath)));
+        }
+
+        /// <summary>
         /// Orders the input documents using the specified delegate to get the ordering key.
         /// </summary>
         /// <param name="key">A delegate that should return the key to use for ordering.</param>

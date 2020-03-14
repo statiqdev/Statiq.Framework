@@ -69,10 +69,10 @@ namespace Statiq.Common
             string.Equals(document.ContentProvider.MediaType, mediaType, StringComparison.OrdinalIgnoreCase);
 
         /// <summary>
-        /// Gets a normalized title derived from the document source.
+        /// Gets a normalized title derived from the document source (or <see cref="Keys.Title"/> if defined).
         /// </summary>
         /// <param name="document">The document.</param>
         /// <returns>A normalized title or <c>null</c> if the source is null.</returns>
-        public static string GetTitle(this IDocument document) => document.Source.GetTitle();
+        public static string GetTitle(this IDocument document) => document.GetString(Keys.Title) ?? document.Source.GetTitle();
     }
 }
