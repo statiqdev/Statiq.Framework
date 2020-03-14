@@ -36,7 +36,7 @@ namespace Statiq.Core
         private Config<bool> _isRoot;
         private Config<string[]> _treePath;
         private Func<string[], IMetadata, IExecutionContext, Task<IDocument>> _placeholderFactory;
-        private Comparison<IDocument> _sort;
+        private Func<IDocument, IDocument, IExecutionContext, int> _sort;
         private bool _collapseRoot = false;
         private bool _nesting = false;
 
@@ -70,9 +70,7 @@ namespace Statiq.Core
                 NormalizedPath filePath = new NormalizedPath(string.Join("/", treePath.Concat(new[] { "index.html" })));
                 return Task.FromResult(context.CreateDocument(context.FileSystem.GetInputFile(filePath).Path.FullPath, filePath, items));
             };
-            _sort = (x, y) => Comparer.Default.Compare(
-                x.Get<object[]>(Keys.TreePath)?.LastOrDefault(),
-                y.Get<object[]>(Keys.TreePath)?.LastOrDefault());
+            _sort = (a, b, ctx) => ctx.Inputs.IndexOf(a).CompareTo(ctx.Inputs.IndexOf(b));
         }
 
         /// <summary>
@@ -95,13 +93,12 @@ namespace Statiq.Core
         }
 
         /// <summary>
-        /// This specifies how the children of a given tree node should be sorted. The default behavior is to
-        /// sort based on the string value of the last component of the child node's tree path (I.e., the folder
-        /// or file name). The output document for each tree node is used as the input to the sort delegate.
+        /// This specifies how the children of a given tree node should be sorted.
+        /// The default behavior is to preserve the original sorting order of the input documents.
         /// </summary>
         /// <param name="sort">A comparison delegate.</param>
         /// <returns>The current module instance.</returns>
-        public CreateTree WithSort(Comparison<IDocument> sort)
+        public CreateTree WithSort(Func<IDocument, IDocument, IExecutionContext, int> sort)
         {
             _sort = sort ?? throw new ArgumentNullException(nameof(sort));
             return this;
@@ -266,7 +263,7 @@ namespace Statiq.Core
                 }
 
                 // Sort the child documents since they're created now
-                Children.Sort((x, y) => tree._sort(x.OutputDocument, y.OutputDocument));
+                Children.Sort((x, y) => tree._sort(x.OutputDocument, y.OutputDocument, context));
 
                 // Create this output document
                 MetadataDictionary metadata = new MetadataDictionary();

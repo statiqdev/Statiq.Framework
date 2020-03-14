@@ -23,11 +23,11 @@ namespace Statiq.Core
         /// </summary>
         public OrderDocuments()
         {
-            _orders.Push(new Order(Config.FromDocument(Keys.Index)));
             _orders.Push(new Order(Config.FromDocument(doc =>
                 doc.Destination.IsNull
                     ? (doc.Source.IsNull ? null : doc.Source.FileName.FullPath)
                     : doc.Destination.FileName.FullPath)));
+            _orders.Push(new Order(Config.FromDocument(Keys.Index)));
         }
 
         /// <summary>

@@ -1,5 +1,6 @@
 # 1.0.0-alpha.29
 
+- Modified `CreateTree` sort delegate to include the `IExecutionContext` and to sort by input document order by default (instead of path/file name).
 - Added a `IDocument.IdEquals()` extension method.
 - Added a `IDocument.GetLink()` extension method that calls `IExecutionContext.GetLink()`.
 - Added a `IDocument.HasChildren()` extension method.
