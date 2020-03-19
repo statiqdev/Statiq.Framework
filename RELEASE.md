@@ -1,5 +1,6 @@
 # 1.0.0-alpha.29
 
+- Added a new `ForAllDocuments` module that can act as a parent module to arbitrary child modules.
 - Added a new `If` shortcode (#789).
 - Added a new `ForEach` shortcode (#789).
 - Added a `TypeHelper.TryConvert()` method that takes a target `Type`.

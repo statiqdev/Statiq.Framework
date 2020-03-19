@@ -5,7 +5,8 @@ using System.Threading.Tasks;
 namespace Statiq.Common
 {
     /// <summary>
-    /// A base class for modules that contain a collection of child modules.
+    /// A base class for modules that contain a collection of child modules. Note that this does
+    /// not call an execute method and derived modules need to override one.
     /// </summary>
     /// <remarks>
     /// <para>
