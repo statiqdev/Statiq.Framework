@@ -194,18 +194,7 @@ namespace Statiq.Common
             _metadata.TryGetRaw(key, out value) || PropertyMetadata<T>.For(Object).TryGetRaw(key, out value);
 
         /// <inheritdoc />
-        public bool TryGetValue<TValue>(string key, out TValue value)
-        {
-            if (TryGetRaw(key, out object rawValue))
-            {
-                return TypeHelper.TryExpandAndConvert(rawValue, this, out value);
-            }
-            value = default;
-            return false;
-        }
-
-        /// <inheritdoc />
-        public bool TryGetValue(string key, out object value) => TryGetValue<object>(key, out value);
+        public bool TryGetValue(string key, out object value) => this.TryGetValue<object>(key, out value);
 
         /// <inheritdoc />
         // The Select ensures LINQ optimizations won't turn this into a recursive call to Count

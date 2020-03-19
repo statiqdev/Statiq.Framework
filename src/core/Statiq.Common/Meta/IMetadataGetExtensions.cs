@@ -8,6 +8,49 @@ namespace Statiq.Common
     public static class IMetadataGetExtensions
     {
         /// <summary>
+        /// Tries to get the value for the specified key.
+        /// </summary>
+        /// <remarks>
+        /// This method will also materialize <see cref="IMetadataValue"/> and
+        /// evaluate script strings (a key that starts with "=>" will be treated
+        /// as a script and evaluated).
+        /// </remarks>
+        /// <param name="metadata">The metadata instance.</param>
+        /// <typeparam name="TValue">The desired return type.</typeparam>
+        /// <param name="key">The key of the value to get. If the key is <c>null</c>, this will return the default value.</param>
+        /// <param name="value">The value of the key if it was found and could be converted to the desired return type.</param>
+        /// <returns><c>true</c> if the key was found and the value could be converted to the desired return type, <c>false</c> otherwise.</returns>
+        public static bool TryGetValue<TValue>(
+            this IMetadata metadata,
+            string key,
+            out TValue value)
+        {
+            if (metadata != null && key != null)
+            {
+                // Script
+                if (IScriptHelper.TryGetScriptString(key, out string script))
+                {
+                    IExecutionContext context = IExecutionContext.Current;
+                    if (context == null)
+                    {
+                        throw new ExecutionException("Could not get execution context for script evaluation");
+                    }
+                    object result = context.ScriptHelper.EvaluateAsync(script, metadata).GetAwaiter().GetResult();
+                    return TypeHelper.TryExpandAndConvert(result, metadata, out value);
+                }
+
+                // Value
+                if (metadata.TryGetRaw(key, out object raw))
+                {
+                    return TypeHelper.TryExpandAndConvert(raw, metadata, out value);
+                }
+            }
+
+            value = default;
+            return false;
+        }
+
+        /// <summary>
         /// Gets the value for the specified key. This method never throws an exception. It will return the specified
         /// default value or null if the key is not found or is <c>null</c>.
         /// </summary>

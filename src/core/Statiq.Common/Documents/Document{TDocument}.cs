@@ -338,18 +338,7 @@ namespace Statiq.Common
         }
 
         /// <inheritdoc />
-        public bool TryGetValue<TValue>(string key, out TValue value)
-        {
-            if (TryGetRaw(key, out object rawValue))
-            {
-                return TypeHelper.TryExpandAndConvert(rawValue, this, out value);
-            }
-            value = default;
-            return false;
-        }
-
-        /// <inheritdoc />
-        public bool TryGetValue(string key, out object value) => TryGetValue<object>(key, out value);
+        public bool TryGetValue(string key, out object value) => this.TryGetValue<object>(key, out value);
 
         /// <inheritdoc />
         // We have to exclude properties that use the enumerator because they cause infinite recursion

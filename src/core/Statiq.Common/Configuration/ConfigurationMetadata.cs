@@ -39,18 +39,7 @@ namespace Statiq.Common
         }
 
         /// <inheritdoc/>
-        public bool TryGetValue<TValue>(string key, out TValue value)
-        {
-            if (key != null && TryGetRaw(key, out object raw))
-            {
-                return TypeHelper.TryExpandAndConvert(raw, this, out value);
-            }
-            value = default;
-            return false;
-        }
-
-        /// <inheritdoc/>
-        public bool TryGetValue(string key, out object value) => TryGetValue<object>(key, out value);
+        public bool TryGetValue(string key, out object value) => this.TryGetValue<object>(key, out value);
 
         /// <inheritdoc/>
         public object this[string key]

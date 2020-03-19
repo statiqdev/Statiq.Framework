@@ -76,16 +76,6 @@ namespace Statiq.Common
 
         bool IMetadata.TryGetRaw(string key, out object value) => Settings.TryGetRaw(key, out value);
 
-        bool IMetadata.TryGetValue<TValue>(string key, out TValue value)
-        {
-            if (TryGetRaw(key, out object rawValue))
-            {
-                return TypeHelper.TryExpandAndConvert(rawValue, this, out value);
-            }
-            value = default;
-            return false;
-        }
-
         IEnumerator<KeyValuePair<string, object>> IMetadata.GetRawEnumerator() => Settings.GetRawEnumerator();
 
         // IReadOnlyDictionary<string, object>

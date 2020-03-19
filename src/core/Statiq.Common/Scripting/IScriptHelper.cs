@@ -7,6 +7,8 @@ namespace Statiq.Common
 {
     public interface IScriptHelper
     {
+        public const string ScriptStringPrefix = "=>";
+
         /// <summary>
         /// Compiles and evaluates a script.
         /// </summary>
@@ -82,5 +84,30 @@ namespace Statiq.Common
         /// <param name="metadata">The metadata to get scriptable properties for.</param>
         /// <returns>The property name and scriptable type for each property of the metadata.</returns>
         IEnumerable<KeyValuePair<string, string>> GetMetadataProperties(IMetadata metadata);
+
+        /// <summary>
+        /// Checks if the string is a "script" string (it starts with <c>=></c>)
+        /// and trims the string if it is.
+        /// </summary>
+        /// <param name="str">The candidate string.</param>
+        /// <param name="script">The trimmed script.</param>
+        /// <returns><c>true</c> if the candidate string is a script string, <c>false</c> otherwise.</returns>
+        public static bool TryGetScriptString(string str, out string script)
+        {
+            script = str;
+            if (!string.IsNullOrWhiteSpace(str))
+            {
+                script = str.TrimStart();
+                if (script.StartsWith(ScriptStringPrefix))
+                {
+                    script = script.Substring(2);
+                    if (!string.IsNullOrWhiteSpace(script))
+                    {
+                        return true;
+                    }
+                }
+            }
+            return false;
+        }
     }
 }

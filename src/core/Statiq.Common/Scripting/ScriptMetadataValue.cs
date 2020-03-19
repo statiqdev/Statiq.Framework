@@ -57,22 +57,14 @@ namespace Statiq.Common
         public static bool TryGetScriptMetadataValue(string key, object value, IExecutionState executionState, out ScriptMetadataValue scriptMetadataValue)
         {
             scriptMetadataValue = default;
-            if (value is string script)
+            if (value is string stringValue && IScriptHelper.TryGetScriptString(stringValue, out string script))
             {
-                script = script.TrimStart();
-                if (script.StartsWith("=>"))
-                {
-                    script = script.Substring(2);
-                    if (!string.IsNullOrWhiteSpace(script))
-                    {
-                        scriptMetadataValue = new ScriptMetadataValue(
-                            key,
-                            ((string)value).Substring(0, ((string)value).Length - script.Length),
-                            script,
-                            executionState);
-                        return true;
-                    }
-                }
+                scriptMetadataValue = new ScriptMetadataValue(
+                    key,
+                    stringValue.Substring(0, stringValue.Length - script.Length),
+                    script,
+                    executionState);
+                return true;
             }
             return false;
         }
