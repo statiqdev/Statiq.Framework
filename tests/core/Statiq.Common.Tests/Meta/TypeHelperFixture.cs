@@ -468,6 +468,20 @@ namespace Statiq.Common.Tests.Meta
                 result["Foo"].ShouldBe("bar");
                 result["A"].ShouldBe(1);
             }
+
+            [Test]
+            public void ConvertsToType()
+            {
+                // Given
+                const string value = "2016-10-17 08:00";
+
+                // When
+                bool convert = TypeHelper.TryConvert(value, typeof(DateTime), out object dateTime);
+
+                // Then
+                convert.ShouldBeTrue();
+                dateTime.ShouldBeOfType<DateTime>().ShouldBe(new DateTime(2016, 10, 17, 8, 0, 0));
+            }
         }
     }
 }

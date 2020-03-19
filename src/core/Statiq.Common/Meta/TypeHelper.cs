@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
+using System.Reflection;
 using Statiq.Common;
 
 namespace Statiq.Common
@@ -119,6 +120,38 @@ namespace Statiq.Common
             item.Value is IMetadataValue
                 ? new KeyValuePair<TKey, object>(item.Key, ExpandValue(item.Value, metadata))
                 : item;
+
+        /// <summary>
+        /// Trys to convert the provided value to the specified type.
+        /// </summary>
+        /// <param name="value">The value to convert.</param>
+        /// <param name="type">The desired return type.</param>
+        /// <param name="result">The result of conversion.</param>
+        /// <returns><c>true</c> if the value could be converted to the desired type, <c>false</c> otherwise.</returns>
+        public static bool TryConvert(object value, Type type, out object result)
+        {
+            _ = type ?? throw new ArgumentNullException(nameof(type));
+            Type adapter = typeof(TryConvertAdapter<>).MakeGenericType(type);
+            object[] args = new object[] { value, null };
+            bool ret = (bool)adapter.InvokeMember(
+                nameof(TryConvertAdapter<object>.TryConvert),
+                BindingFlags.Public | BindingFlags.Static | BindingFlags.InvokeMethod,
+                null,
+                null,
+                args);
+            result = args[1];
+            return ret;
+        }
+
+        private static class TryConvertAdapter<TValue>
+        {
+            public static bool TryConvert(object value, out object result)
+            {
+                bool ret = TryConvert<TValue>(value, out TValue typedResult);
+                result = typedResult;
+                return ret;
+            }
+        }
 
         /// <summary>
         /// Trys to convert the provided value to the specified type.

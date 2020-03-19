@@ -1,5 +1,8 @@
 # 1.0.0-alpha.29
 
+- Added a new `If` shortcode (#789).
+- Added a new `ForEach` shortcode (#789).
+- Added a `TypeHelper.TryConvert()` method that takes a target `Type`.
 - Added support for "script strings" to metadata get extensions (if the key starts with "=>" it will be treated as a script and evaluated instead of getting the metadata value directly).
 - Refactored `IShortcode` to return multiple shortcode result documents and concatenates their content.
 - Modified `CreateTree` sort delegate to include the `IExecutionContext` and to sort by input document order by default (instead of path/file name).
