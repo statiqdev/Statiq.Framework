@@ -93,7 +93,7 @@ namespace Statiq.Common.Tests.Shortcodes
 
         public class FooShortcode : IShortcode
         {
-            public Task<IDocument> ExecuteAsync(KeyValuePair<string, string>[] args, string content, IDocument document, IExecutionContext context)
+            public Task<IEnumerable<IDocument>> ExecuteAsync(KeyValuePair<string, string>[] args, string content, IDocument document, IExecutionContext context)
             {
                 throw new NotImplementedException();
             }
@@ -101,7 +101,7 @@ namespace Statiq.Common.Tests.Shortcodes
 
         public class Barshortcode : IShortcode
         {
-            public Task<IDocument> ExecuteAsync(KeyValuePair<string, string>[] args, string content, IDocument document, IExecutionContext context)
+            public Task<IEnumerable<IDocument>> ExecuteAsync(KeyValuePair<string, string>[] args, string content, IDocument document, IExecutionContext context)
             {
                 throw new NotImplementedException();
             }
@@ -109,7 +109,7 @@ namespace Statiq.Common.Tests.Shortcodes
 
         public class BazShortcodeFoo : IShortcode
         {
-            public Task<IDocument> ExecuteAsync(KeyValuePair<string, string>[] args, string content, IDocument document, IExecutionContext context)
+            public Task<IEnumerable<IDocument>> ExecuteAsync(KeyValuePair<string, string>[] args, string content, IDocument document, IExecutionContext context)
             {
                 throw new NotImplementedException();
             }

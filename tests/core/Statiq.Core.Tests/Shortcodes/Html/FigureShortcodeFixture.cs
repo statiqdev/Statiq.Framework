@@ -2,6 +2,7 @@
 using System.Threading.Tasks;
 using NUnit.Framework;
 using Shouldly;
+using Statiq.Common;
 using Statiq.Testing;
 
 namespace Statiq.Core.Tests.Shortcodes.Html
@@ -31,10 +32,10 @@ namespace Statiq.Core.Tests.Shortcodes.Html
                 FigureShortcode shortcode = new FigureShortcode();
 
                 // When
-                TestDocument result = (TestDocument)await shortcode.ExecuteAsync(args, "foo bar", document, context);
+                IEnumerable<IDocument> result = await shortcode.ExecuteAsync(args, "foo bar", document, context);
 
                 // Then
-                result.Content.ShouldBe(
+                result.ShouldHaveSingleItem().ShouldBeOfType<TestDocument>().Content.ShouldBe(
                     @"<figure class=""jkl"">
   <a href=""/c/d"" target=""abc"" rel=""def"">
     <img src=""/a/b"" alt=""ghi"" height=""100px"" width=""200px"" />
@@ -61,10 +62,10 @@ namespace Statiq.Core.Tests.Shortcodes.Html
                 FigureShortcode shortcode = new FigureShortcode();
 
                 // When
-                TestDocument result = (TestDocument)await shortcode.ExecuteAsync(args, "foo bar", document, context);
+                IEnumerable<IDocument> result = await shortcode.ExecuteAsync(args, "foo bar", document, context);
 
                 // Then
-                result.Content.ShouldBe(
+                result.ShouldHaveSingleItem().ShouldBeOfType<TestDocument>().Content.ShouldBe(
                     @"<figure class=""jkl"">
   <img src=""/a/b"" alt=""ghi"" height=""100px"" width=""200px"" />
   <figcaption>foo bar</figcaption>
@@ -91,10 +92,10 @@ namespace Statiq.Core.Tests.Shortcodes.Html
                 FigureShortcode shortcode = new FigureShortcode();
 
                 // When
-                TestDocument result = (TestDocument)await shortcode.ExecuteAsync(args, "foo bar", document, context);
+                IEnumerable<IDocument> result = await shortcode.ExecuteAsync(args, "foo bar", document, context);
 
                 // Then
-                result.Content.ShouldBe(
+                result.ShouldHaveSingleItem().ShouldBeOfType<TestDocument>().Content.ShouldBe(
                     @"<figure class=""jkl"">
   <figcaption>foo bar</figcaption>
 </figure>",

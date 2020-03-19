@@ -226,5 +226,24 @@ namespace Statiq.Common
             _ = shortcodes ?? throw new ArgumentNullException(nameof(shortcodes));
             shortcodes.Add(name, () => new FuncShortcode(shortcode));
         }
+
+        /// <summary>
+        /// Adds a shortcode that determines the result content
+        /// using the declared arguments and content and the current document and execution context.
+        /// </summary>
+        /// <param name="shortcodes">The shortcodes.</param>
+        /// <param name="name">The name of the shortcode.</param>
+        /// <param name="shortcode">
+        /// A function that has the declared arguments and content and the current document and execution context as inputs
+        /// and a <see cref="IDocument"/> collection as an output which allows the shortcode to add metadata to the document.
+        /// </param>
+        public static void Add(
+            this IShortcodeCollection shortcodes,
+            string name,
+            Func<KeyValuePair<string, string>[], string, IDocument, IExecutionContext, Task<IEnumerable<IDocument>>> shortcode)
+        {
+            _ = shortcodes ?? throw new ArgumentNullException(nameof(shortcodes));
+            shortcodes.Add(name, () => new FuncShortcode(shortcode));
+        }
     }
 }

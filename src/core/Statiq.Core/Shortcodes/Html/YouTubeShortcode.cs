@@ -21,7 +21,7 @@ namespace Statiq.Core
     /// <parameter>The ID of the video.</parameter>
     public class YouTubeShortcode : EmbedShortcode
     {
-        public override async Task<IDocument> ExecuteAsync(KeyValuePair<string, string>[] args, string content, IDocument document, IExecutionContext context) =>
+        public override async Task<IDocument> ExecuteAsync(KeyValuePair<string, string>[] args, IDocument document, IExecutionContext context) =>
             await ExecuteAsync("https://www.youtube.com/oembed", $"https://www.youtube.com/watch?v={args.SingleValue()}", context);
     }
 }

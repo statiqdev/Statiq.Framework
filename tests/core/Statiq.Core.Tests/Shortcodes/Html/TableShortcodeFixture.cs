@@ -2,6 +2,7 @@
 using System.Threading.Tasks;
 using NUnit.Framework;
 using Shouldly;
+using Statiq.Common;
 using Statiq.Testing;
 
 namespace Statiq.Core.Tests.Shortcodes.Html
@@ -29,10 +30,10 @@ l=m nop
                 TableShortcode shortcode = new TableShortcode();
 
                 // When
-                TestDocument result = (TestDocument)await shortcode.ExecuteAsync(args, content, document, context);
+                IEnumerable<IDocument> result = await shortcode.ExecuteAsync(args, content, document, context);
 
                 // Then
-                result.Content.ShouldBe(
+                result.ShouldHaveSingleItem().ShouldBeOfType<TestDocument>().Content.ShouldBe(
                     @"<table>
   <tbody>
     <tr>
@@ -95,10 +96,10 @@ l=m nop
                 TableShortcode shortcode = new TableShortcode();
 
                 // When
-                TestDocument result = (TestDocument)await shortcode.ExecuteAsync(args, content, document, context);
+                IEnumerable<IDocument> result = await shortcode.ExecuteAsync(args, content, document, context);
 
                 // Then
-                result.Content.ShouldBe(
+                result.ShouldHaveSingleItem().ShouldBeOfType<TestDocument>().Content.ShouldBe(
                     @"<table class=""tclass"">
   <thead class=""hclass"">
     <tr>

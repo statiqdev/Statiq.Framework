@@ -1,5 +1,6 @@
 # 1.0.0-alpha.29
 
+- Refactored `IShortcode` to return multiple shortcode result documents and concatenates their content.
 - Modified `CreateTree` sort delegate to include the `IExecutionContext` and to sort by input document order by default (instead of path/file name).
 - Added a `IDocument.IdEquals()` extension method.
 - Added a `IDocument.GetLink()` extension method that calls `IExecutionContext.GetLink()`.

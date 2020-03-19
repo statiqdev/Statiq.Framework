@@ -41,10 +41,10 @@ namespace Statiq.Core.Tests.Shortcodes.IO
                 IncludeShortcode shortcode = new IncludeShortcode();
 
                 // When
-                TestDocument result = (TestDocument)await shortcode.ExecuteAsync(args, string.Empty, document, context);
+                IEnumerable<IDocument> result = await shortcode.ExecuteAsync(args, string.Empty, document, context);
 
                 // Then
-                result.Content.ShouldBe("foo");
+                result.ShouldHaveSingleItem().ShouldBeOfType<TestDocument>().Content.ShouldBe("foo");
             }
 
             [Test]
@@ -76,10 +76,10 @@ namespace Statiq.Core.Tests.Shortcodes.IO
                 IncludeShortcode shortcode = new IncludeShortcode();
 
                 // When
-                TestDocument result = (TestDocument)await shortcode.ExecuteAsync(args, string.Empty, document, context);
+                IEnumerable<IDocument> result = await shortcode.ExecuteAsync(args, string.Empty, document, context);
 
                 // Then
-                result.Content.ShouldBeEmpty();
+                result.ShouldHaveSingleItem().ShouldBeOfType<TestDocument>().Content.ShouldBeEmpty();
             }
 
             [Test]
@@ -111,10 +111,10 @@ namespace Statiq.Core.Tests.Shortcodes.IO
                 IncludeShortcode shortcode = new IncludeShortcode();
 
                 // When
-                TestDocument result = (TestDocument)await shortcode.ExecuteAsync(args, string.Empty, document, context);
+                IEnumerable<IDocument> result = await shortcode.ExecuteAsync(args, string.Empty, document, context);
 
                 // Then
-                result.Content.ShouldBe("foo");
+                result.ShouldHaveSingleItem().ShouldBeOfType<TestDocument>().Content.ShouldBe("foo");
             }
         }
     }

@@ -70,7 +70,7 @@ namespace Statiq.Core
     public class TableShortcode : Shortcode
     {
         /// <inheritdoc />
-        public override async Task<IDocument> ExecuteAsync(KeyValuePair<string, string>[] args, string content, IDocument document, IExecutionContext context)
+        public override async Task<IEnumerable<IDocument>> ExecuteAsync(KeyValuePair<string, string>[] args, string content, IDocument document, IExecutionContext context)
         {
             IMetadataDictionary dictionary = args.ToDictionary(
                 "Class",
@@ -169,7 +169,7 @@ namespace Statiq.Core
                 }
             }
 
-            return context.CreateDocument(await context.GetContentProviderAsync(table.ToString()));
+            return context.CreateDocument(await context.GetContentProviderAsync(table.ToString())).Yield();
         }
     }
 }

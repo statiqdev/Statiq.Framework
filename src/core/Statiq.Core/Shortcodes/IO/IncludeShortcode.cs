@@ -34,7 +34,7 @@ namespace Statiq.Core
         private NormalizedPath _sourcePath = NormalizedPath.Null;
 
         /// <inheritdoc />
-        public override IDocument Execute(KeyValuePair<string, string>[] args, string content, IDocument document, IExecutionContext context)
+        public override IEnumerable<IDocument> Execute(KeyValuePair<string, string>[] args, string content, IDocument document, IExecutionContext context)
         {
             // Get the included path relative to the document
             NormalizedPath includedPath = new NormalizedPath(args.SingleValue());
@@ -61,16 +61,18 @@ namespace Statiq.Core
             if (!includedFile.Exists)
             {
                 context.LogWarning($"Included file {includedPath.FullPath} does not exist");
-                return context.CreateDocument();
+                return context.CreateDocument().Yield();
             }
 
             // Set the currently included shortcode source so nested includes can use it
-            return context.CreateDocument(
-                new MetadataItems
-                {
-                    { "IncludeShortcodeSource", includedFile.Path.FullPath }
-                },
-                includedFile.GetContentProvider());
+            return context
+                .CreateDocument(
+                    new MetadataItems
+                    {
+                        { "IncludeShortcodeSource", includedFile.Path.FullPath }
+                    },
+                    includedFile.GetContentProvider())
+                .Yield();
         }
     }
 }

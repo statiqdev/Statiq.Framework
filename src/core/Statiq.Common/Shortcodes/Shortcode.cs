@@ -9,6 +9,6 @@ namespace Statiq.Common
     public abstract class Shortcode : IShortcode
     {
         /// <inheritdoc />
-        public abstract Task<IDocument> ExecuteAsync(KeyValuePair<string, string>[] args, string content, IDocument document, IExecutionContext context);
+        public abstract Task<IEnumerable<IDocument>> ExecuteAsync(KeyValuePair<string, string>[] args, string content, IDocument document, IExecutionContext context);
     }
 }

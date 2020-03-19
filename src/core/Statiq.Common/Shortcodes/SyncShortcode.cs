@@ -10,7 +10,7 @@ namespace Statiq.Common
     public abstract class SyncShortcode : Shortcode
     {
         /// <inheritdoc />
-        public sealed override Task<IDocument> ExecuteAsync(KeyValuePair<string, string>[] args, string content, IDocument document, IExecutionContext context) =>
+        public sealed override Task<IEnumerable<IDocument>> ExecuteAsync(KeyValuePair<string, string>[] args, string content, IDocument document, IExecutionContext context) =>
             Task.FromResult(Execute(args, content, document, context));
 
         /// <summary>
@@ -25,10 +25,10 @@ namespace Statiq.Common
         /// <param name="document">The current document (including metadata from previous shortcodes in the same document).</param>
         /// <param name="context">The current execution context.</param>
         /// <returns>
-        /// A shortcode result that contains a stream and new metadata as a result of executing this shortcode.
+        /// A shortcode result that contains a collection of documents containing a stream and new metadata as a result of executing this shortcode.
         /// The result can be <c>null</c> in which case the shortcode declaration will be removed from the document
         /// but no replacement content will be added and the metadata will not change.
         /// </returns>
-        public abstract IDocument Execute(KeyValuePair<string, string>[] args, string content, IDocument document, IExecutionContext context);
+        public abstract IEnumerable<IDocument> Execute(KeyValuePair<string, string>[] args, string content, IDocument document, IExecutionContext context);
     }
 }

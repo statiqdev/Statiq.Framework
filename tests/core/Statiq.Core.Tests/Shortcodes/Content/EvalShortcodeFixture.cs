@@ -1,6 +1,8 @@
-﻿using System.Threading.Tasks;
+﻿using System.Collections.Generic;
+using System.Threading.Tasks;
 using NUnit.Framework;
 using Shouldly;
+using Statiq.Common;
 using Statiq.Testing;
 
 namespace Statiq.Core.Tests.Shortcodes.Content
@@ -20,10 +22,10 @@ namespace Statiq.Core.Tests.Shortcodes.Content
                 string shortcodeContent = "return 1 + 2;";
 
                 // When
-                TestDocument result = (TestDocument)await shortcode.ExecuteAsync(null, shortcodeContent, document, context);
+                IEnumerable<IDocument> result = await shortcode.ExecuteAsync(null, shortcodeContent, document, context);
 
                 // Then
-                result.Content.ShouldBe("3");
+                result.ShouldHaveSingleItem().ShouldBeOfType<TestDocument>().Content.ShouldBe("3");
             }
 
             [Test]
@@ -36,10 +38,10 @@ namespace Statiq.Core.Tests.Shortcodes.Content
                 string shortcodeContent = "1 + 2";
 
                 // When
-                TestDocument result = (TestDocument)await shortcode.ExecuteAsync(null, shortcodeContent, document, context);
+                IEnumerable<IDocument> result = await shortcode.ExecuteAsync(null, shortcodeContent, document, context);
 
                 // Then
-                result.Content.ShouldBe("3");
+                result.ShouldHaveSingleItem().ShouldBeOfType<TestDocument>().Content.ShouldBe("3");
             }
 
             [Test]
@@ -55,10 +57,10 @@ namespace Statiq.Core.Tests.Shortcodes.Content
                 string shortcodeContent = "return 1 + GetInt(\"Foo\");";
 
                 // When
-                TestDocument result = (TestDocument)await shortcode.ExecuteAsync(null, shortcodeContent, document, context);
+                IEnumerable<IDocument> result = await shortcode.ExecuteAsync(null, shortcodeContent, document, context);
 
                 // Then
-                result.Content.ShouldBe("5");
+                result.ShouldHaveSingleItem().ShouldBeOfType<TestDocument>().Content.ShouldBe("5");
             }
 
             [Test]
@@ -74,10 +76,10 @@ namespace Statiq.Core.Tests.Shortcodes.Content
                 string shortcodeContent = "return 1 + (int)Foo;";
 
                 // When
-                TestDocument result = (TestDocument)await shortcode.ExecuteAsync(null, shortcodeContent, document, context);
+                IEnumerable<IDocument> result = await shortcode.ExecuteAsync(null, shortcodeContent, document, context);
 
                 // Then
-                result.Content.ShouldBe("5");
+                result.ShouldHaveSingleItem().ShouldBeOfType<TestDocument>().Content.ShouldBe("5");
             }
         }
     }

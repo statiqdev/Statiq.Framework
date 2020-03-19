@@ -28,10 +28,10 @@ namespace Statiq.Core.Tests.Shortcodes.Metadata
                 MetaShortcode shortcode = new MetaShortcode();
 
                 // When
-                TestDocument result = (TestDocument)await shortcode.ExecuteAsync(args, string.Empty, document, context);
+                IEnumerable<IDocument> result = await shortcode.ExecuteAsync(args, string.Empty, document, context);
 
                 // Then
-                result.Content.ShouldBe("Bar");
+                result.ShouldHaveSingleItem().ShouldBeOfType<TestDocument>().Content.ShouldBe("Bar");
             }
 
             [Test]
@@ -50,10 +50,10 @@ namespace Statiq.Core.Tests.Shortcodes.Metadata
                 MetaShortcode shortcode = new MetaShortcode();
 
                 // When
-                TestDocument result = (TestDocument)await shortcode.ExecuteAsync(args, string.Empty, document, context);
+                IEnumerable<IDocument> result = await shortcode.ExecuteAsync(args, string.Empty, document, context);
 
                 // Then
-                result.Content.ShouldBeEmpty();
+                result.ShouldHaveSingleItem().ShouldBeOfType<TestDocument>().Content.ShouldBeEmpty();
             }
         }
     }

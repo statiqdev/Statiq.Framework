@@ -27,7 +27,7 @@ namespace Statiq.Core
     public class LinkShortcode : Shortcode
     {
         /// <inheritdoc />
-        public override async Task<IDocument> ExecuteAsync(KeyValuePair<string, string>[] args, string content, IDocument document, IExecutionContext context)
+        public override async Task<IEnumerable<IDocument>> ExecuteAsync(KeyValuePair<string, string>[] args, string content, IDocument document, IExecutionContext context)
         {
             IMetadataDictionary arguments = args.ToDictionary(
                 "Path",
@@ -44,7 +44,7 @@ namespace Statiq.Core
             string path = arguments.GetString("Path");
             if (LinkGenerator.TryGetAbsoluteHttpUri(path, out string absoluteUri))
             {
-                return context.CreateDocument(await context.GetContentProviderAsync(absoluteUri));
+                return context.CreateDocument(await context.GetContentProviderAsync(absoluteUri)).Yield();
             }
             NormalizedPath filePath = new NormalizedPath(path);
 
@@ -74,7 +74,9 @@ namespace Statiq.Core
                 ? arguments.GetBool("Lowercase")
                 : context.Settings.GetBool(Keys.LinkLowercase);
 
-            return context.CreateDocument(await context.GetContentProviderAsync(LinkGenerator.GetLink(filePath, host, root, scheme, hidePages, hideExtensions, lowercase)));
+            return context
+                .CreateDocument(await context.GetContentProviderAsync(LinkGenerator.GetLink(filePath, host, root, scheme, hidePages, hideExtensions, lowercase)))
+                .Yield();
         }
     }
 }

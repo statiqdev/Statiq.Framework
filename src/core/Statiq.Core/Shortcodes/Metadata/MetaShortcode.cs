@@ -17,7 +17,7 @@ namespace Statiq.Core
     public class MetaShortcode : Shortcode
     {
         /// <inheritdoc />
-        public override async Task<IDocument> ExecuteAsync(KeyValuePair<string, string>[] args, string content, IDocument document, IExecutionContext context) =>
-            context.CreateDocument(await context.GetContentProviderAsync(document.GetString(args.SingleValue())));
+        public override async Task<IEnumerable<IDocument>> ExecuteAsync(KeyValuePair<string, string>[] args, string content, IDocument document, IExecutionContext context) =>
+            context.CreateDocument(await context.GetContentProviderAsync(document.GetString(args.SingleValue()))).Yield();
     }
 }

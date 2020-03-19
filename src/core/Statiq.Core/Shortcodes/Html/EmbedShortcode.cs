@@ -26,10 +26,13 @@ namespace Statiq.Core
     /// <parameter name="Format">An optional format to use ("xml" or "json").</parameter>
     public class EmbedShortcode : Shortcode
     {
+        public sealed override async Task<IEnumerable<IDocument>> ExecuteAsync(KeyValuePair<string, string>[] args, string content, IDocument document, IExecutionContext context) =>
+            (await ExecuteAsync(args, document, context)).Yield();
+
         /// <summary>
         /// Shortcodes for specific oEmbed services should override this method and call one of the other execute helper methods.
         /// </summary>
-        public override async Task<IDocument> ExecuteAsync(KeyValuePair<string, string>[] args, string content, IDocument document, IExecutionContext context)
+        public virtual async Task<IDocument> ExecuteAsync(KeyValuePair<string, string>[] args, IDocument document, IExecutionContext context)
         {
             IMetadataDictionary arguments = args.ToDictionary(
                 "Endpoint",

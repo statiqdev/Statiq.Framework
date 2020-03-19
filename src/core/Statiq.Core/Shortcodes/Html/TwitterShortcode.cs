@@ -22,7 +22,7 @@ namespace Statiq.Core
         private bool _omitScript;
 
         /// <inheritdoc />
-        public override async Task<IDocument> ExecuteAsync(KeyValuePair<string, string>[] args, string content, IDocument document, IExecutionContext context)
+        public override async Task<IDocument> ExecuteAsync(KeyValuePair<string, string>[] args, IDocument document, IExecutionContext context)
         {
             IMetadataDictionary arguments = args.ToDictionary(
                 "Id",

@@ -15,11 +15,11 @@ namespace Statiq.Core
     /// </example>
     public class EvalShortcode : Shortcode
     {
-        public override async Task<IDocument> ExecuteAsync(KeyValuePair<string, string>[] args, string content, IDocument document, IExecutionContext context)
+        public override async Task<IEnumerable<IDocument>> ExecuteAsync(KeyValuePair<string, string>[] args, string content, IDocument document, IExecutionContext context)
         {
             byte[] assembly = context.ScriptHelper.Compile(content, document);
             object value = await context.ScriptHelper.EvaluateAsync(assembly, document);
-            return context.CreateDocument(await context.GetContentProviderAsync(value.ToString()));
+            return context.CreateDocument(await context.GetContentProviderAsync(value.ToString())).Yield();
         }
     }
 }

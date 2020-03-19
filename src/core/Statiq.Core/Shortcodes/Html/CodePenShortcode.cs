@@ -21,7 +21,7 @@ namespace Statiq.Core
     /// <parameter>The path of the pen.</parameter>
     public class CodePenShortcode : EmbedShortcode
     {
-        public override async Task<IDocument> ExecuteAsync(KeyValuePair<string, string>[] args, string content, IDocument document, IExecutionContext context) =>
+        public override async Task<IDocument> ExecuteAsync(KeyValuePair<string, string>[] args, IDocument document, IExecutionContext context) =>
             await ExecuteAsync("https://codepen.io/api/oembed", $"https://codepen.io/{args.SingleValue()}", new[] { "format=json" }, context);
     }
 }

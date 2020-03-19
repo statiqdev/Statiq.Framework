@@ -41,7 +41,7 @@ namespace Statiq.Highlight
     public class HighlightShortcode : Shortcode
     {
         /// <inheritdoc />
-        public override async Task<IDocument> ExecuteAsync(KeyValuePair<string, string>[] args, string content, IDocument document, IExecutionContext context)
+        public override async Task<IEnumerable<IDocument>> ExecuteAsync(KeyValuePair<string, string>[] args, string content, IDocument document, IExecutionContext context)
         {
             IMetadataDictionary dictionary = args.ToDictionary(
                 "Language",
@@ -69,7 +69,7 @@ namespace Statiq.Highlight
                     element.SetAttribute("class", $"language-{dictionary.GetString("Language")}");
                 }
                 Statiq.Highlight.HighlightCode.HighlightElement(enginePool, element);
-                return context.CreateDocument(await context.GetContentProviderAsync(element.OuterHtml));
+                return context.CreateDocument(await context.GetContentProviderAsync(element.OuterHtml)).Yield();
             }
         }
     }

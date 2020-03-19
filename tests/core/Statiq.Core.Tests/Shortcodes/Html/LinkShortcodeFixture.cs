@@ -29,10 +29,10 @@ namespace Statiq.Core.Tests.Shortcodes.Html
                 LinkShortcode shortcode = new LinkShortcode();
 
                 // When
-                TestDocument result = (TestDocument)await shortcode.ExecuteAsync(args, string.Empty, document, context);
+                IEnumerable<IDocument> result = await shortcode.ExecuteAsync(args, string.Empty, document, context);
 
                 // Then
-                result.Content.ShouldBe(expected);
+                result.ShouldHaveSingleItem().ShouldBeOfType<TestDocument>().Content.ShouldBe(expected);
             }
 
             [TestCase("http://foo.com/bar", "http://foo.com/bar")]
@@ -54,10 +54,10 @@ namespace Statiq.Core.Tests.Shortcodes.Html
                 LinkShortcode shortcode = new LinkShortcode();
 
                 // When
-                TestDocument result = (TestDocument)await shortcode.ExecuteAsync(args, string.Empty, document, context);
+                IEnumerable<IDocument> result = await shortcode.ExecuteAsync(args, string.Empty, document, context);
 
                 // Then
-                result.Content.ShouldBe(expected);
+                result.ShouldHaveSingleItem().ShouldBeOfType<TestDocument>().Content.ShouldBe(expected);
             }
 
             [TestCase("http://foo.com/bar", "http://foo.com/bar")]
@@ -79,10 +79,10 @@ namespace Statiq.Core.Tests.Shortcodes.Html
                 LinkShortcode shortcode = new LinkShortcode();
 
                 // When
-                TestDocument result = (TestDocument)await shortcode.ExecuteAsync(args, string.Empty, document, context);
+                IEnumerable<IDocument> result = await shortcode.ExecuteAsync(args, string.Empty, document, context);
 
                 // Then
-                result.Content.ShouldBe(expected);
+                result.ShouldHaveSingleItem().ShouldBeOfType<TestDocument>().Content.ShouldBe(expected);
             }
         }
     }

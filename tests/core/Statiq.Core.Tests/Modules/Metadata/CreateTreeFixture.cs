@@ -190,8 +190,8 @@ namespace Statiq.Core.Tests.Modules.Metadata
                 VerifyTreeChildren(
                     results[4],
                     "root/a/index.html",
-                    "root/a/1.txt",
                     "root/a/3.txt",
+                    "root/a/1.txt",
                     "root/a/b/index.html");
                 VerifyTreeChildren(
                     results[5],

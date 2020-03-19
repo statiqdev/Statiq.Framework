@@ -21,7 +21,7 @@ namespace Statiq.Core
     /// <parameter>The ID of the gif.</parameter>
     public class GiphyShortcode : EmbedShortcode
     {
-        public override async Task<IDocument> ExecuteAsync(KeyValuePair<string, string>[] args, string content, IDocument document, IExecutionContext context) =>
+        public override async Task<IDocument> ExecuteAsync(KeyValuePair<string, string>[] args, IDocument document, IExecutionContext context) =>
             await ExecuteAsync("https://giphy.com/services/oembed", $"https://giphy.com/gifs/{args.SingleValue()}", context);
     }
 }

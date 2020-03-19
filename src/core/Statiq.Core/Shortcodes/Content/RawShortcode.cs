@@ -21,7 +21,7 @@ namespace Statiq.Core
         public const string RawShortcodeName = "Raw";
 
         /// <inheritdoc />
-        public override async Task<IDocument> ExecuteAsync(KeyValuePair<string, string>[] args, string content, IDocument document, IExecutionContext context) =>
-            context.CreateDocument(await context.GetContentProviderAsync(content));
+        public override async Task<IEnumerable<IDocument>> ExecuteAsync(KeyValuePair<string, string>[] args, string content, IDocument document, IExecutionContext context) =>
+            context.CreateDocument(await context.GetContentProviderAsync(content)).Yield();
     }
 }

@@ -187,29 +187,49 @@ namespace Statiq.Core.Tests.Modules.Contents
                 result.Content.ShouldBe("123456789");
                 result["Foo"].ShouldBe(22);
             }
+
+            [Test]
+            public async Task MultipleShortcodeResultDocuments()
+            {
+                // Given
+                TestExecutionContext context = new TestExecutionContext();
+                context.Shortcodes.Add<MultiShortcode>("S");
+                TestDocument document = new TestDocument("123<?# S /?>456")
+                {
+                    { "Foo", 10 }
+                };
+                ProcessShortcodes module = new ProcessShortcodes();
+
+                // When
+                TestDocument result = await ExecuteAsync(document, context, module).SingleAsync();
+
+                // Then
+                result.Content.ShouldBe("123aaaBBB456");
+                result["Foo"].ShouldBe(12);
+            }
         }
 
         public class TestShortcode : IShortcode
         {
-            public Task<IDocument> ExecuteAsync(KeyValuePair<string, string>[] args, string content, IDocument document, IExecutionContext context) =>
-                Task.FromResult<IDocument>(new TestDocument("Foo"));
+            public Task<IEnumerable<IDocument>> ExecuteAsync(KeyValuePair<string, string>[] args, string content, IDocument document, IExecutionContext context) =>
+                Task.FromResult<IEnumerable<IDocument>>(new TestDocument("Foo").Yield());
         }
 
         public class NestedShortcode : IShortcode
         {
-            public Task<IDocument> ExecuteAsync(KeyValuePair<string, string>[] args, string content, IDocument document, IExecutionContext context) =>
-                Task.FromResult<IDocument>(new TestDocument("ABC<?# Nested /?>XYZ"));
+            public Task<IEnumerable<IDocument>> ExecuteAsync(KeyValuePair<string, string>[] args, string content, IDocument document, IExecutionContext context) =>
+                Task.FromResult<IEnumerable<IDocument>>(new TestDocument("ABC<?# Nested /?>XYZ").Yield());
         }
 
         public class RawShortcode : IShortcode
         {
-            public async Task<IDocument> ExecuteAsync(KeyValuePair<string, string>[] args, string content, IDocument document, IExecutionContext context) =>
-                new TestDocument(await context.GetContentStreamAsync(content));
+            public async Task<IEnumerable<IDocument>> ExecuteAsync(KeyValuePair<string, string>[] args, string content, IDocument document, IExecutionContext context) =>
+                new TestDocument(await context.GetContentStreamAsync(content)).Yield();
         }
 
         public class NullResultShortcode : IShortcode
         {
-            public Task<IDocument> ExecuteAsync(KeyValuePair<string, string>[] args, string content, IDocument document, IExecutionContext context) => Task.FromResult<IDocument>(null);
+            public Task<IEnumerable<IDocument>> ExecuteAsync(KeyValuePair<string, string>[] args, string content, IDocument document, IExecutionContext context) => Task.FromResult<IEnumerable<IDocument>>(null);
         }
 
         public class DisposableShortcode : IShortcode, IDisposable
@@ -222,8 +242,8 @@ namespace Statiq.Core.Tests.Modules.Contents
                 Disposed = false;
             }
 
-            public async Task<IDocument> ExecuteAsync(KeyValuePair<string, string>[] args, string content, IDocument document, IExecutionContext context) =>
-                new TestDocument(await context.GetContentStreamAsync("Foo"));
+            public async Task<IEnumerable<IDocument>> ExecuteAsync(KeyValuePair<string, string>[] args, string content, IDocument document, IExecutionContext context) =>
+                new TestDocument(await context.GetContentStreamAsync("Foo")).Yield();
 
             public void Dispose() =>
                 Disposed = true;
@@ -231,42 +251,58 @@ namespace Statiq.Core.Tests.Modules.Contents
 
         public class AddsMetadataShortcode : IShortcode
         {
-            public Task<IDocument> ExecuteAsync(KeyValuePair<string, string>[] args, string content, IDocument document, IExecutionContext context) =>
-                Task.FromResult<IDocument>(new TestDocument(new MetadataItems
+            public Task<IEnumerable<IDocument>> ExecuteAsync(KeyValuePair<string, string>[] args, string content, IDocument document, IExecutionContext context) =>
+                Task.FromResult<IEnumerable<IDocument>>(new TestDocument(new MetadataItems
                 {
                     { "A", "1" },
                     { "B", "2" }
-                }));
+                }).Yield());
         }
 
         public class AddsMetadataShortcode2 : IShortcode
         {
-            public Task<IDocument> ExecuteAsync(KeyValuePair<string, string>[] args, string content, IDocument document, IExecutionContext context) =>
-                Task.FromResult<IDocument>(new TestDocument(new MetadataItems
+            public Task<IEnumerable<IDocument>> ExecuteAsync(KeyValuePair<string, string>[] args, string content, IDocument document, IExecutionContext context) =>
+                Task.FromResult<IEnumerable<IDocument>>(new TestDocument(new MetadataItems
                 {
                     { "A", "3" },
                     { "C", "4" }
-                }));
+                }).Yield());
         }
 
         public class ReadsMetadataShortcode : IShortcode
         {
-            public Task<IDocument> ExecuteAsync(KeyValuePair<string, string>[] args, string content, IDocument document, IExecutionContext context) =>
-                Task.FromResult<IDocument>(new TestDocument(new MetadataItems
+            public Task<IEnumerable<IDocument>> ExecuteAsync(KeyValuePair<string, string>[] args, string content, IDocument document, IExecutionContext context) =>
+                Task.FromResult<IEnumerable<IDocument>>(new TestDocument(new MetadataItems
                 {
                     { $"Foo", document.GetInt("Foo") + 1 }
-                }));
+                }).Yield());
         }
 
         public class IncrementingShortcode : IShortcode
         {
             private int _value = 20;
 
-            public Task<IDocument> ExecuteAsync(KeyValuePair<string, string>[] args, string content, IDocument document, IExecutionContext context) =>
-                Task.FromResult<IDocument>(new TestDocument(new MetadataItems
+            public Task<IEnumerable<IDocument>> ExecuteAsync(KeyValuePair<string, string>[] args, string content, IDocument document, IExecutionContext context) =>
+                Task.FromResult<IEnumerable<IDocument>>(new TestDocument(new MetadataItems
                 {
                     { $"Foo", _value++ }
-                }));
+                }).Yield());
+        }
+
+        public class MultiShortcode : IShortcode
+        {
+            public Task<IEnumerable<IDocument>> ExecuteAsync(KeyValuePair<string, string>[] args, string content, IDocument document, IExecutionContext context) =>
+                Task.FromResult<IEnumerable<IDocument>>(new IDocument[]
+                {
+                    new TestDocument("aaa")
+                    {
+                        { $"Foo", document.GetInt("Foo") + 1 }
+                    },
+                    new TestDocument("BBB")
+                    {
+                        { $"Foo", document.GetInt("Foo") + 2 }
+                    }
+                });
         }
     }
 }

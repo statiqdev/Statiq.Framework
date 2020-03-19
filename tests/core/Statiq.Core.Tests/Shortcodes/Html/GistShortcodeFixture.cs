@@ -2,6 +2,7 @@
 using System.Threading.Tasks;
 using NUnit.Framework;
 using Shouldly;
+using Statiq.Common;
 using Statiq.Testing;
 
 namespace Statiq.Core.Tests.Shortcodes.Html
@@ -25,10 +26,10 @@ namespace Statiq.Core.Tests.Shortcodes.Html
                 GistShortcode shortcode = new GistShortcode();
 
                 // When
-                TestDocument result = (TestDocument)await shortcode.ExecuteAsync(args, null, document, context);
+                IEnumerable<IDocument> result = await shortcode.ExecuteAsync(args, null, document, context);
 
                 // Then
-                result.Content.ShouldBe("<script src=\"//gist.github.com/def/abc.js?file=ghi\" type=\"text/javascript\"></script>");
+                result.ShouldHaveSingleItem().ShouldBeOfType<TestDocument>().Content.ShouldBe("<script src=\"//gist.github.com/def/abc.js?file=ghi\" type=\"text/javascript\"></script>");
             }
 
             [Test]
@@ -44,10 +45,10 @@ namespace Statiq.Core.Tests.Shortcodes.Html
                 GistShortcode shortcode = new GistShortcode();
 
                 // When
-                TestDocument result = (TestDocument)await shortcode.ExecuteAsync(args, null, document, context);
+                IEnumerable<IDocument> result = await shortcode.ExecuteAsync(args, null, document, context);
 
                 // Then
-                result.Content.ShouldBe("<script src=\"//gist.github.com/abc.js?file=ghi\" type=\"text/javascript\"></script>");
+                result.ShouldHaveSingleItem().ShouldBeOfType<TestDocument>().Content.ShouldBe("<script src=\"//gist.github.com/abc.js?file=ghi\" type=\"text/javascript\"></script>");
             }
 
             [Test]
@@ -63,10 +64,10 @@ namespace Statiq.Core.Tests.Shortcodes.Html
                 GistShortcode shortcode = new GistShortcode();
 
                 // When
-                TestDocument result = (TestDocument)await shortcode.ExecuteAsync(args, null, document, context);
+                IEnumerable<IDocument> result = await shortcode.ExecuteAsync(args, null, document, context);
 
                 // Then
-                result.Content.ShouldBe("<script src=\"//gist.github.com/def/abc.js\" type=\"text/javascript\"></script>");
+                result.ShouldHaveSingleItem().ShouldBeOfType<TestDocument>().Content.ShouldBe("<script src=\"//gist.github.com/def/abc.js\" type=\"text/javascript\"></script>");
             }
         }
     }

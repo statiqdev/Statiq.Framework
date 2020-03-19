@@ -83,9 +83,12 @@ namespace Statiq.Core
                 insertingLocations.Add(insertingLocation);
 
                 // Accumulate metadata for the following shortcodes
-                if (insertingLocation.Document != null)
+                if (insertingLocation.Documents != null)
                 {
-                    input = input.Clone(insertingLocation.Document);
+                    foreach (IDocument insertingDocument in insertingLocation.Documents)
+                    {
+                        input = input.Clone(insertingDocument);
+                    }
                 }
             }
 
@@ -115,16 +118,19 @@ namespace Statiq.Core
                         position += length;
 
                         // Copy the shortcode content to the result stream
-                        if (insertingLocation.Document != null)
+                        if (insertingLocation.Documents != null)
                         {
-                            // This will dispose the shortcode content stream when done
-                            using (TextReader insertingReader = new StreamReader(insertingLocation.Document.GetContentStream()))
+                            foreach (IDocument insertingDocument in insertingLocation.Documents)
                             {
-                                Read(insertingReader, writer, null, ref buffer);
-                            }
+                                // This will dispose the shortcode content stream when done
+                                using (TextReader insertingReader = new StreamReader(insertingDocument.GetContentStream()))
+                                {
+                                    Read(insertingReader, writer, null, ref buffer);
+                                }
 
-                            // Merge shortcode metadata with the current document
-                            input = input.Clone(insertingLocation.Document);
+                                // Merge shortcode metadata with the current document
+                                input = input.Clone(insertingDocument);
+                            }
                         }
 
                         // Skip the shortcode text
@@ -147,29 +153,40 @@ namespace Statiq.Core
             ImmutableDictionary<string, IShortcode> shortcodes)
         {
             // Execute the shortcode
-            IDocument shortcodeResult = await shortcodes[location.Name].ExecuteAsync(location.Arguments, location.Content, input, context);
-            IDocument mergedResult = null;
-
-            if (shortcodeResult != null)
+            IEnumerable<IDocument> shortcodeResults = await shortcodes[location.Name].ExecuteAsync(location.Arguments, location.Content, input, context);
+            if (shortcodeResults != null)
             {
-                // Merge output metadata with the current input document
-                // Creating a new document is the easiest way to ensure all the metadata from shortcodes gets accumulated correctly
-                mergedResult = input.Clone(shortcodeResult, shortcodeResult.ContentProvider);
-
-                // Don't process nested shortcodes if it's the raw shortcode
-                if (!location.Name.Equals(RawShortcode.RawShortcodeName, StringComparison.OrdinalIgnoreCase))
+                List<IDocument> mergedResults = new List<IDocument>();
+                foreach (IDocument shortcodeResult in shortcodeResults)
                 {
-                    // Recursively parse shortcodes
-                    IDocument nestedResult = await ProcessShortcodesAsync(mergedResult, context);
-                    if (nestedResult != null)
+                    if (shortcodeResult != null)
                     {
-                        mergedResult = nestedResult;
+                        // Merge output metadata with the current input document
+                        // Creating a new document is the easiest way to ensure all the metadata from shortcodes gets accumulated correctly
+                        IDocument mergedResult = input.Clone(shortcodeResult, shortcodeResult.ContentProvider);
+
+                        // Don't process nested shortcodes if it's the raw shortcode
+                        if (!location.Name.Equals(RawShortcode.RawShortcodeName, StringComparison.OrdinalIgnoreCase))
+                        {
+                            // Recursively parse shortcodes
+                            IDocument nestedResult = await ProcessShortcodesAsync(mergedResult, context);
+                            if (nestedResult != null)
+                            {
+                                mergedResult = nestedResult;
+                            }
+                        }
+
+                        mergedResults.Add(mergedResult);
                     }
                 }
-                return new InsertingStreamLocation(location.FirstIndex, location.LastIndex, mergedResult);
+
+                if (mergedResults.Count > 0)
+                {
+                    return new InsertingStreamLocation(location.FirstIndex, location.LastIndex, mergedResults);
+                }
             }
 
-            return new InsertingStreamLocation(location.FirstIndex, location.LastIndex, mergedResult);
+            return new InsertingStreamLocation(location.FirstIndex, location.LastIndex, null);
         }
 
         // writer = null to just skip length in reader
@@ -197,16 +214,16 @@ namespace Statiq.Core
 
         private class InsertingStreamLocation
         {
-            public InsertingStreamLocation(int firstIndex, int lastIndex, IDocument document)
+            public InsertingStreamLocation(int firstIndex, int lastIndex, List<IDocument> documents)
             {
                 FirstIndex = firstIndex;
                 LastIndex = lastIndex;
-                Document = document;
+                Documents = documents;
             }
 
             public int FirstIndex { get; }
             public int LastIndex { get; }
-            public IDocument Document { get; }
+            public IReadOnlyList<IDocument> Documents { get; }
         }
     }
 }
