@@ -68,58 +68,22 @@ namespace Statiq.Common
             });
 
         /// <summary>
-        /// Adds a shortcode that determines the result content using the declared content.
-        /// </summary>
-        /// <param name="shortcodes">The shortcodes.</param>
-        /// <param name="name">The name of the shortcode.</param>
-        /// <param name="shortcode">A function that has the declared content as an input and the result content as an output.</param>
-        public static void Add(this IShortcodeCollection shortcodes, string name, Func<string, string> shortcode) =>
-            shortcodes.Add(name, async (_, content, __, ctx) =>
-            {
-                string result = shortcode?.Invoke(content);
-                return result != null ? ctx.CreateDocument(await ctx.GetContentProviderAsync(result)) : null;
-            });
-
-        /// <summary>
-        /// Adds a shortcode that determines the result content using the declared arguments.
-        /// </summary>
-        /// <param name="shortcodes">The shortcodes.</param>
-        /// <param name="name">The name of the shortcode.</param>
-        /// <param name="shortcode">A function that has the declared arguments as an input and the result content as an output.</param>
-        public static void Add(this IShortcodeCollection shortcodes, string name, Func<KeyValuePair<string, string>[], string> shortcode) =>
-            shortcodes.Add(name, async (args, _, __, ctx) =>
-            {
-                string result = shortcode?.Invoke(args);
-                return result != null ? ctx.CreateDocument(await ctx.GetContentProviderAsync(result)) : null;
-            });
-
-        /// <summary>
-        /// Adds a shortcode that determines the result content using the declared arguments and content.
-        /// </summary>
-        /// <param name="shortcodes">The shortcodes.</param>
-        /// <param name="name">The name of the shortcode.</param>
-        /// <param name="shortcode">A function that has the declared arguments and content as inputs and the result content as an output.</param>
-        public static void Add(this IShortcodeCollection shortcodes, string name, Func<KeyValuePair<string, string>[], string, string> shortcode) =>
-            shortcodes.Add(name, async (args, content, _, ctx) =>
-            {
-                string result = shortcode?.Invoke(args, content);
-                return result != null ? ctx.CreateDocument(await ctx.GetContentProviderAsync(result)) : null;
-            });
-
-        /// <summary>
         /// Adds a shortcode that determines the result content
-        /// using the declared arguments and content and the current execution context.
+        /// using the declared arguments and content and the current document and execution context.
         /// </summary>
         /// <param name="shortcodes">The shortcodes.</param>
         /// <param name="name">The name of the shortcode.</param>
         /// <param name="shortcode">
-        /// A function that has the declared arguments and content and the current execution context as inputs
+        /// A function that has the declared arguments and content and the current document and execution context as inputs
         /// and the result content as an output.
         /// </param>
-        public static void Add(this IShortcodeCollection shortcodes, string name, Func<KeyValuePair<string, string>[], string, IExecutionContext, string> shortcode) =>
-            shortcodes.Add(name, async (args, content, _, ctx) =>
+        public static void Add(
+            this IShortcodeCollection shortcodes,
+            string name,
+            Func<KeyValuePair<string, string>[], string, IDocument, IExecutionContext, string> shortcode) =>
+            shortcodes.Add(name, async (args, content, doc, ctx) =>
             {
-                string result = shortcode?.Invoke(args, content, ctx);
+                string result = shortcode?.Invoke(args, content, doc, ctx);
                 return result != null ? ctx.CreateDocument(await ctx.GetContentProviderAsync(result)) : null;
             });
 
@@ -133,80 +97,56 @@ namespace Statiq.Common
         /// A function that has the declared arguments and content and the current document and execution context as inputs
         /// and the result content as an output.
         /// </param>
-        public static void Add(this IShortcodeCollection shortcodes, string name, Func<KeyValuePair<string, string>[], string, IDocument, IExecutionContext, string> shortcode) =>
+        public static void Add(
+            this IShortcodeCollection shortcodes,
+            string name,
+            Func<KeyValuePair<string, string>[], string, IDocument, IExecutionContext, Task<string>> shortcode)
+        {
+            _ = shortcodes ?? throw new ArgumentNullException(nameof(shortcodes));
             shortcodes.Add(name, async (args, content, doc, ctx) =>
             {
-                string result = shortcode?.Invoke(args, content, doc, ctx);
+                string result = await shortcode?.Invoke(args, content, doc, ctx);
                 return result != null ? ctx.CreateDocument(await ctx.GetContentProviderAsync(result)) : null;
             });
+        }
 
         /// <summary>
         /// Adds a shortcode that determines the result content
-        /// using the declared arguments and the current execution context.
+        /// using the declared arguments and content and the current document and execution context.
         /// </summary>
         /// <param name="shortcodes">The shortcodes.</param>
         /// <param name="name">The name of the shortcode.</param>
         /// <param name="shortcode">
-        /// A function that has the declared arguments and the current execution context as inputs
-        /// and the result content as an output.
+        /// A function that has the declared arguments and content and the current document and execution context as inputs
+        /// and a <see cref="IDocument"/> as an output which allows the shortcode to add metadata to the document.
         /// </param>
-        public static void Add(this IShortcodeCollection shortcodes, string name, Func<KeyValuePair<string, string>[], IExecutionContext, string> shortcode) =>
-            shortcodes.Add(name, async (args, _, __, ctx) =>
-            {
-                string result = shortcode?.Invoke(args, ctx);
-                return result != null ? ctx.CreateDocument(await ctx.GetContentProviderAsync(result)) : null;
-            });
+        public static void Add(
+            this IShortcodeCollection shortcodes,
+            string name,
+            Func<KeyValuePair<string, string>[], string, IDocument, IExecutionContext, IDocument> shortcode)
+        {
+            _ = shortcodes ?? throw new ArgumentNullException(nameof(shortcodes));
+            shortcodes.Add(name, (args, content, doc, ctx) => Task.FromResult(shortcode?.Invoke(args, content, doc, ctx)));
+        }
 
         /// <summary>
         /// Adds a shortcode that determines the result content
-        /// using the declared arguments and the current document and execution context.
+        /// using the declared arguments and content and the current document and execution context.
         /// </summary>
         /// <param name="shortcodes">The shortcodes.</param>
         /// <param name="name">The name of the shortcode.</param>
         /// <param name="shortcode">
-        /// A function that has the declared arguments and the current document and execution context as inputs
-        /// and the result content as an output.
+        /// A function that has the declared arguments and content and the current document and execution context as inputs
+        /// and a <see cref="IDocument"/> as an output which allows the shortcode to add metadata to the document.
         /// </param>
-        public static void Add(this IShortcodeCollection shortcodes, string name, Func<KeyValuePair<string, string>[], IDocument, IExecutionContext, string> shortcode) =>
-            shortcodes.Add(name, async (args, _, doc, ctx) =>
-            {
-                string result = shortcode?.Invoke(args, doc, ctx);
-                return result != null ? ctx.CreateDocument(await ctx.GetContentProviderAsync(result)) : null;
-            });
-
-        /// <summary>
-        /// Adds a shortcode that determines the result content
-        /// using the declared content and the current execution context.
-        /// </summary>
-        /// <param name="shortcodes">The shortcodes.</param>
-        /// <param name="name">The name of the shortcode.</param>
-        /// <param name="shortcode">
-        /// A function that has the declared content and the current execution context as inputs
-        /// and the result content as an output.
-        /// </param>
-        public static void Add(this IShortcodeCollection shortcodes, string name, Func<string, IExecutionContext, string> shortcode) =>
-            shortcodes.Add(name, async (_, content, __, ctx) =>
-            {
-                string result = shortcode?.Invoke(content, ctx);
-                return result != null ? ctx.CreateDocument(await ctx.GetContentProviderAsync(result)) : null;
-            });
-
-        /// <summary>
-        /// Adds a shortcode that determines the result content
-        /// using the declared content and the current document and execution context.
-        /// </summary>
-        /// <param name="shortcodes">The shortcodes.</param>
-        /// <param name="name">The name of the shortcode.</param>
-        /// <param name="shortcode">
-        /// A function that has the declared content and the current document and execution context as inputs
-        /// and the result content as an output.
-        /// </param>
-        public static void Add(this IShortcodeCollection shortcodes, string name, Func<string, IDocument, IExecutionContext, string> shortcode) =>
-            shortcodes.Add(name, async (_, content, doc, ctx) =>
-            {
-                string result = shortcode?.Invoke(content, doc, ctx);
-                return result != null ? ctx.CreateDocument(await ctx.GetContentProviderAsync(result)) : null;
-            });
+        public static void Add(
+            this IShortcodeCollection shortcodes,
+            string name,
+            Func<KeyValuePair<string, string>[], string, IDocument, IExecutionContext, IEnumerable<IDocument>> shortcode)
+        {
+            _ = shortcodes ?? throw new ArgumentNullException(nameof(shortcodes));
+            shortcodes.Add(name, (args, content, doc, ctx) => Task.FromResult(shortcode?.Invoke(args, content, doc, ctx)));
+        }
 
         /// <summary>
         /// Adds a shortcode that determines the result content

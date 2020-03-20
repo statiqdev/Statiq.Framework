@@ -1,5 +1,6 @@
 # 1.0.0-alpha.29
 
+- Removed some ambiguous `IShortcodeColletion.Add()` extensions.
 - Added a bunch of `Bootstrapper.AddShortcode()` extensions.
 - Added a new `ForAllDocuments` module that can act as a parent module to arbitrary child modules.
 - Added a new `If` shortcode (#789).
