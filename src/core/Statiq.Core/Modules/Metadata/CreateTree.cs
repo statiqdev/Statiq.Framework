@@ -70,7 +70,7 @@ namespace Statiq.Core
                 NormalizedPath filePath = new NormalizedPath(string.Join("/", treePath.Concat(new[] { "index.html" })));
                 return Task.FromResult(context.CreateDocument(context.FileSystem.GetInputFile(filePath).Path.FullPath, filePath, items));
             };
-            _sort = (a, b, ctx) => ctx.Inputs.IndexOf(a).CompareTo(ctx.Inputs.IndexOf(b));
+            _sort = (a, b, ctx) => ctx.Inputs.IndexOf(a, DocumentIdComparer.Instance).CompareTo(ctx.Inputs.IndexOf(b, DocumentIdComparer.Instance));
         }
 
         /// <summary>

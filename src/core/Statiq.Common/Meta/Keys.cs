@@ -129,6 +129,14 @@ namespace Statiq.Common
         /// <type><see cref="int"/></type>
         public const string Index = nameof(Index);
 
+        // OrderDocuments
+
+        /// <summary>
+        /// A loose ordering key used by <c>OrderDocuments</c>.
+        /// </summary>
+        /// <type><see cref="int"/></type>
+        public const string Order = nameof(Order);
+
         // GenerateSitemap
 
         /// <summary>
