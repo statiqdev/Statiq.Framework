@@ -28,6 +28,7 @@ namespace Statiq.Html
     {
         private static readonly HtmlParser HtmlParser = new HtmlParser();
 
+        private bool _keepExisting = true;
         private string[] _separators = { "more", "excerpt" };
         private string _querySelector = "p";
         private string _metadataKey = HtmlKeys.Excerpt;
@@ -36,8 +37,10 @@ namespace Statiq.Html
         /// <summary>
         /// Creates the module with the default query selector of <c>p</c>.
         /// </summary>
-        public GenerateExcerpt()
+        /// <param name="keepExisting"><c>true</c> to keep existing exerpt metadata, <c>false</c> to always replace it with a calculated excerpt.</param>
+        public GenerateExcerpt(bool keepExisting = true)
         {
+            _keepExisting = keepExisting;
         }
 
         /// <summary>
@@ -46,18 +49,22 @@ namespace Statiq.Html
         /// and rely only on the query selector.
         /// </summary>
         /// <param name="separators">The excerpt separators.</param>
-        public GenerateExcerpt(string[] separators)
+        /// <param name="keepExisting"><c>true</c> to keep existing exerpt metadata, <c>false</c> to always replace it with a calculated excerpt.</param>
+        public GenerateExcerpt(string[] separators, bool keepExisting = true)
         {
             _separators = separators;
+            _keepExisting = keepExisting;
         }
 
         /// <summary>
         /// Specifies an alternate query selector for the content.
         /// </summary>
         /// <param name="querySelector">The query selector to use.</param>
-        public GenerateExcerpt(string querySelector)
+        /// <param name="keepExisting"><c>true</c> to keep existing exerpt metadata, <c>false</c> to always replace it with a calculated excerpt.</param>
+        public GenerateExcerpt(string querySelector, bool keepExisting = true)
         {
             _querySelector = querySelector;
+            _keepExisting = keepExisting;
         }
 
         /// <summary>
@@ -113,7 +120,7 @@ namespace Statiq.Html
 
         protected override async Task<IEnumerable<Common.IDocument>> ExecuteInputAsync(Common.IDocument input, IExecutionContext context)
         {
-            if (string.IsNullOrWhiteSpace(_metadataKey))
+            if (string.IsNullOrWhiteSpace(_metadataKey) || (_keepExisting && input.ContainsKey(_metadataKey)))
             {
                 return input.Yield();
             }

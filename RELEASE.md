@@ -1,5 +1,6 @@
 # 1.0.0-alpha.29
 
+- Added a `keepExisting` parameter to the `GenerateExcerpt` module.
 - Removed some ambiguous `IShortcodeColletion.Add()` extensions.
 - Added a bunch of `Bootstrapper.AddShortcode()` extensions.
 - Added a new `ForAllDocuments` module that can act as a parent module to arbitrary child modules.

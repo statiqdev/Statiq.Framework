@@ -12,6 +12,33 @@ namespace Statiq.Html.Tests
         public class ExecuteTests : GenerateExcerptFixture
         {
             [Test]
+            public async Task KeepsExisting()
+            {
+                // Given
+                const string input = @"<html>
+                        <head>
+                            <title>Foobar</title>
+                        </head>
+                        <body>
+                            <h1>Title</h1>
+                            <p>This is some Foobar text</p>
+                            <p>This is some other text</p>
+                        </body>
+                    </html>";
+                TestDocument document = new TestDocument(input)
+                {
+                    { HtmlKeys.Excerpt, "Foobar" }
+                };
+                GenerateExcerpt excerpt = new GenerateExcerpt();
+
+                // When
+                TestDocument result = await ExecuteAsync(document, excerpt).SingleAsync();
+
+                // Then
+                result["Excerpt"].ShouldBe("Foobar");
+            }
+
+            [Test]
             public async Task ExcerptFirstParagraph()
             {
                 // Given
