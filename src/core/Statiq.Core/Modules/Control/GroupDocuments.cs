@@ -25,6 +25,7 @@ namespace Statiq.Core
     public class GroupDocuments : Module
     {
         private readonly Config<IEnumerable<object>> _key;
+        private NormalizedPath _source;
         private IEqualityComparer<object> _comparer;
 
         /// <summary>
@@ -80,6 +81,17 @@ namespace Statiq.Core
             return this;
         }
 
+        /// <summary>
+        /// Sets the source (and destination) of the output document(s).
+        /// </summary>
+        /// <param name="source">The source to set for the output document(s).</param>
+        /// <returns>The current module instance.</returns>
+        public GroupDocuments WithSource(NormalizedPath source)
+        {
+            _source = source;
+            return this;
+        }
+
         /// <inheritdoc />
         protected override async Task<IEnumerable<IDocument>> ExecuteContextAsync(IExecutionContext context)
         {
@@ -91,11 +103,13 @@ namespace Statiq.Core
             return groups
                 .GroupByMany(x => x.Keys, x => x.Document, _comparer)
                 .Select(x => context.CreateDocument(
-                new MetadataItems
-                {
-                    { Keys.Children, x.ToImmutableArray() },
-                    { Keys.GroupKey, x.Key }
-                }));
+                    _source,
+                    _source.IsNull ? _source : _source.GetRelativeInputPath(context),
+                    new MetadataItems
+                    {
+                        { Keys.Children, x.ToImmutableArray() },
+                        { Keys.GroupKey, x.Key }
+                    }));
         }
     }
 }

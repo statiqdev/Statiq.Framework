@@ -24,6 +24,7 @@ namespace Statiq.Core
         private readonly int _pageSize;
         private int _takePages = int.MaxValue;
         private int _skipPages = 0;
+        private NormalizedPath _source;
 
         /// <summary>
         /// Partitions the result of the input documents into the specified number of pages.
@@ -71,6 +72,17 @@ namespace Statiq.Core
             return this;
         }
 
+        /// <summary>
+        /// Sets the source (and destination) of the output document(s).
+        /// </summary>
+        /// <param name="source">The source to set for the output document(s).</param>
+        /// <returns>The current module instance.</returns>
+        public PaginateDocuments WithSource(NormalizedPath source)
+        {
+            _source = source;
+            return this;
+        }
+
         /// <inheritdoc />
         protected override IEnumerable<IDocument> ExecuteContext(IExecutionContext context)
         {
@@ -112,7 +124,10 @@ namespace Statiq.Core
                     next = new LazyDocumentMetadataValue();
                     items.Add(Keys.Next, next);
                 }
-                IDocument document = context.CreateDocument(items);
+                IDocument document = context.CreateDocument(
+                    _source,
+                    _source.IsNull ? _source : _source.GetRelativeInputPath(context),
+                    items);
                 if (results.Count > 0)
                 {
                     results.Peek().Item2.Id = document.Id;

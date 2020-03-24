@@ -1,5 +1,6 @@
 # 1.0.0-alpha.29
 
+- Added `.WithSource()` to the `PaginateDocuments` and `GroupDocuments` modules.
 - Added a new `Keys.Order` key and made the `OrderDocuments` module support it.
 - Added a `keepExisting` parameter to the `GenerateExcerpt` module.
 - Removed some ambiguous `IShortcodeColletion.Add()` extensions.
