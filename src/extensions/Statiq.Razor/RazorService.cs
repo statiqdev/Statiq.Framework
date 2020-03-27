@@ -16,8 +16,7 @@ namespace Statiq.Razor
             CompilationParameters parameters = new CompilationParameters
             {
                 BasePageType = request.BaseType,
-                Namespaces = new NamespaceCollection(request.Context.Namespaces),
-                FileSystem = request.Context.FileSystem
+                Namespaces = new NamespaceCollection(request.Context.Namespaces)
             };
 
             RazorCompiler compiler = _compilers.GetOrAdd(parameters, _ => new RazorCompiler(parameters, request.Context));

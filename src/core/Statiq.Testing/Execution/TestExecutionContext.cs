@@ -136,6 +136,9 @@ namespace Statiq.Testing
         IReadOnlyApplicationState IExecutionState.ApplicationState => ApplicationState;
 
         /// <inheritdoc/>
+        public ClassCatalog ClassCatalog => Engine.ClassCatalog;
+
+        /// <inheritdoc/>
         public bool SerialExecution
         {
             get => Engine.SerialExecution;

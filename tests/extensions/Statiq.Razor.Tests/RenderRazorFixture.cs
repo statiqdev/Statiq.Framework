@@ -34,6 +34,23 @@ namespace Statiq.Razor.Tests
             }
 
             [Test]
+            public async Task SimpleTemplateWithPreregisteredServices()
+            {
+                // Given
+                Engine engine = new Engine();
+                TestExecutionContext context = GetExecutionContext(engine);
+                context.Services.AddRazor(null, context.ClassCatalog);
+                TestDocument document = new TestDocument("@for(int c = 0 ; c < 5 ; c++) { <p>@c</p> }");
+                RenderRazor razor = new RenderRazor();
+
+                // When
+                TestDocument result = await ExecuteAsync(document, context, razor).SingleAsync();
+
+                // Then
+                result.Content.ShouldBe(" <p>0</p>  <p>1</p>  <p>2</p>  <p>3</p>  <p>4</p> ");
+            }
+
+            [Test]
             public async Task Metadata()
             {
                 // Given
@@ -353,11 +370,13 @@ namespace Statiq.Razor.Tests
 
             private TestExecutionContext GetExecutionContext(Engine engine)
             {
-                return new TestExecutionContext
+                TestExecutionContext context = new TestExecutionContext
                 {
                     Namespaces = new TestNamespacesCollection(engine.Namespaces.ToArray()),
                     FileSystem = GetFileSystem()
                 };
+                context.Services.AddSingleton<IReadOnlyFileSystem>(context.FileSystem);
+                return context;
             }
 
             private TestFileSystem GetFileSystem()

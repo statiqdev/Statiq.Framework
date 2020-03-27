@@ -5,7 +5,7 @@ using System.Reflection;
 
 namespace Statiq.Common
 {
-    public static class IClassCatalogExtensions
+    public static class ClassCatalogExtensions
     {
         /// <summary>
         /// Gets all types assignable from a specified type.
@@ -13,7 +13,7 @@ namespace Statiq.Common
         /// <typeparam name="T">The type of classes to get.</typeparam>
         /// <param name="classCatalog">The class catalog.</param>
         /// <returns>All classes of type <c>T</c>.</returns>
-        public static IEnumerable<Type> GetTypesAssignableTo<T>(this IClassCatalog classCatalog) =>
+        public static IEnumerable<Type> GetTypesAssignableTo<T>(this ClassCatalog classCatalog) =>
             classCatalog.GetTypesAssignableTo(typeof(T));
 
         /// <summary>
@@ -22,7 +22,7 @@ namespace Statiq.Common
         /// <typeparam name="T">The type of instances to get.</typeparam>
         /// <param name="classCatalog">The class catalog.</param>
         /// <returns>Instances for all classes of type <c>T</c>.</returns>
-        public static IEnumerable<T> GetInstances<T>(this IClassCatalog classCatalog) =>
+        public static IEnumerable<T> GetInstances<T>(this ClassCatalog classCatalog) =>
             classCatalog.GetInstances(typeof(T)).Cast<T>();
 
         /// <summary>
@@ -35,7 +35,7 @@ namespace Statiq.Common
         /// <returns>
         /// An instance of the first class that matches the specified type and name.
         /// </returns>
-        public static T GetInstance<T>(this IClassCatalog classCatalog, string typeName, bool ignoreCase = false) =>
+        public static T GetInstance<T>(this ClassCatalog classCatalog, string typeName, bool ignoreCase = false) =>
             (T)classCatalog.GetInstance(typeof(T), typeName, ignoreCase);
     }
 }

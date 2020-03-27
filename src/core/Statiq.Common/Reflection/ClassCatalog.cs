@@ -6,15 +6,14 @@ using System.Reflection;
 using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyModel;
 using Microsoft.Extensions.Logging;
-using Statiq.Common;
 
-namespace Statiq.App
+namespace Statiq.Common
 {
     /// <summary>
     /// Responsible for iterating over a set of assemblies
     /// looking for implementations of predefined interfaces.
     /// </summary>
-    internal class ClassCatalog : IClassCatalog
+    public class ClassCatalog
     {
         private readonly ConcurrentDictionary<string, Type> _types = new ConcurrentDictionary<string, Type>();
 
@@ -22,9 +21,23 @@ namespace Statiq.App
 
         private readonly object _populateLock = new object();
 
-        private bool _populated;
+        private Assembly[] _assemblies;
 
-        /// <inheritdoc/>
+        /// <summary>
+        /// Gets all loaded assemblies.
+        /// </summary>
+        /// <returns>A collection of available assemblies.</returns>
+        public IReadOnlyList<Assembly> GetAssemblies()
+        {
+            Populate();
+            return _assemblies;
+        }
+
+        /// <summary>
+        /// Gets all types assignable to a specified type.
+        /// </summary>
+        /// <param name="assignableType">The type of classes to get.</param>
+        /// <returns>All classes of the specified type.</returns>
         public IEnumerable<Type> GetTypesAssignableTo(Type assignableType)
         {
             _ = assignableType ?? throw new ArgumentNullException(nameof(assignableType));
@@ -32,7 +45,11 @@ namespace Statiq.App
             return _types.Values.Where(x => assignableType.IsAssignableFrom(x));
         }
 
-        /// <inheritdoc/>
+        /// <summary>
+        /// Gets all types from a specified assembly.
+        /// </summary>
+        /// <param name="assembly">The assembly to get types from.</param>
+        /// <returns>All types from the specified assembly.</returns>
         public IEnumerable<Type> GetTypesFromAssembly(Assembly assembly)
         {
             _ = assembly ?? throw new ArgumentNullException(nameof(assembly));
@@ -40,7 +57,11 @@ namespace Statiq.App
             return _types.Values.Where(x => x.Assembly.Equals(assembly));
         }
 
-        /// <inheritdoc/>
+        /// <summary>
+        /// Gets instances for all classes of a specified assignable type.
+        /// </summary>
+        /// <param name="assignableType">The type of instances to get.</param>
+        /// <returns>Instances for all classes of the specified type.</returns>
         public IEnumerable<object> GetInstances(Type assignableType)
         {
             _ = assignableType ?? throw new ArgumentNullException(nameof(assignableType));
@@ -48,7 +69,14 @@ namespace Statiq.App
             return GetTypesAssignableTo(assignableType).Select(Activator.CreateInstance);
         }
 
-        /// <inheritdoc/>
+        /// <summary>
+        /// Gets a type for the specified full name.
+        /// </summary>
+        /// <param name="fullName">The full name of the type.</param>
+        /// <returns>
+        /// A <see cref="Type"/> that matches the specified full name or <c>null</c>
+        /// if a corresponding type could not be found.
+        /// </returns>
         public Type GetType(string fullName)
         {
             _ = fullName ?? throw new ArgumentNullException(nameof(fullName));
@@ -56,6 +84,14 @@ namespace Statiq.App
             return _types.TryGetValue(fullName, out Type type) ? type : default;
         }
 
+        /// <summary>
+        /// Gets an instance for a specified full name.
+        /// </summary>
+        /// <param name="fullName">The full name of the type.</param>
+        /// <returns>
+        /// An instance of the type that matches the full name or <c>null</c>
+        /// if a corresponding type could not be found.
+        /// </returns>
         public object GetInstance(string fullName)
         {
             _ = fullName ?? throw new ArgumentNullException(nameof(fullName));
@@ -65,7 +101,16 @@ namespace Statiq.App
                 : default;
         }
 
-        /// <inheritdoc/>
+        /// <summary>
+        /// Gets an instance for a class of a specified assignable type and name.
+        /// </summary>
+        /// <param name="assignableType">The assignable type of instance to get.</param>
+        /// <param name="typeName">The name of the type.</param>
+        /// <param name="ignoreCase">if set to <c>true</c> ignore the case of the type name.</param>
+        /// <returns>
+        /// An instance of the first class that matches the specified type and name or <c>null</c>
+        /// if a corresponding type could not be found.
+        /// </returns>
         public object GetInstance(Type assignableType, string typeName, bool ignoreCase = false)
         {
             _ = assignableType ?? throw new ArgumentNullException(nameof(assignableType));
@@ -76,7 +121,7 @@ namespace Statiq.App
             return type == null ? default : Activator.CreateInstance(type);
         }
 
-        internal void LogDebugMessages(ILogger logger)
+        public void LogDebugMessagesTo(ILogger logger)
         {
             if (logger != null)
             {
@@ -87,31 +132,38 @@ namespace Statiq.App
             }
         }
 
+        /// <summary>
+        /// Populates the catalog. Population will only occur once and if the catalog has already been
+        /// populated this method will immediatly return.
+        /// </summary>
         public void Populate()
         {
             lock (_populateLock)
             {
-                if (!_populated)
+                if (_assemblies == null)
                 {
-                    Assembly[] assemblies;
+                    // Add (and load) all assembly dependencies
+                    HashSet<Assembly> assemblies;
                     try
                     {
-                        assemblies = DependencyContext.Default.RuntimeLibraries
-                            .SelectMany(library => library.GetDefaultAssemblyNames(DependencyContext.Default))
-                            .Select(Assembly.Load)
-                            .Distinct(new AssemblyComparer())
-                            .ToArray();
+                        assemblies = new HashSet<Assembly>(
+                            DependencyContext.Default.RuntimeLibraries
+                                .SelectMany(library => library.GetDefaultAssemblyNames(DependencyContext.Default))
+                                .Select(Assembly.Load),
+                            new AssemblyComparer());
                     }
                     catch
                     {
                         // The DependencyContext may not be available on all platforms so fall
                         // back to recursively loading all referenced assemblies of the entry assembly
-                        HashSet<Assembly> visited = new HashSet<Assembly>(new AssemblyComparer());
-                        LoadAssemblies(Assembly.GetEntryAssembly(), visited);
-                        assemblies = visited.ToArray();
+                        assemblies = new HashSet<Assembly>(new AssemblyComparer());
+                        LoadAssemblies(Assembly.GetEntryAssembly(), assemblies);
                     }
 
-                    // Load types
+                    // Make sure we've also got all assemblies from the current domain
+                    assemblies.AddRange(AppDomain.CurrentDomain.GetAssemblies());
+
+                    // Load types in parallel
                     Parallel.ForEach(assemblies, assembly =>
                     {
                         _debugMessages.Enqueue($"Cataloging types in assembly {assembly.FullName}");
@@ -120,8 +172,9 @@ namespace Statiq.App
                             _types.TryAdd(type.FullName, type);
                         }
                     });
+
+                    _assemblies = assemblies.ToArray();
                 }
-                _populated = true;
             }
         }
 

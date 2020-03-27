@@ -15,8 +15,6 @@ namespace Statiq.App
 {
     public class Bootstrapper : IConfigurableBootstrapper
     {
-        private readonly ClassCatalog _classCatalog = new ClassCatalog();
-
         private Func<CommandServiceTypeRegistrar, ICommandApp> _getCommandApp = x => new CommandApp(x);
 
         // Private constructor to force factory use which returns the interface to get access to default interface implementations
@@ -26,7 +24,7 @@ namespace Statiq.App
         }
 
         /// <inheritdoc/>
-        public IClassCatalog ClassCatalog => _classCatalog;
+        public ClassCatalog ClassCatalog { get; } = new ClassCatalog();
 
         /// <inheritdoc/>
         public IConfiguratorCollection Configurators { get; } = new ConfiguratorCollection();
@@ -49,7 +47,7 @@ namespace Statiq.App
             await default(SynchronizationContextRemover);
 
             // Populate the class catalog (if we haven't already)
-            _classCatalog.Populate();
+            ClassCatalog.Populate();
 
             // Run bootstrapper configurators first
             Configurators.Configure<IConfigurableBootstrapper>(this);
@@ -66,7 +64,7 @@ namespace Statiq.App
             IServiceCollection serviceCollection = CreateServiceCollection() ?? new ServiceCollection();
             serviceCollection.TryAddSingleton(this);
             serviceCollection.TryAddSingleton<IConfigurableBootstrapper>(this);
-            serviceCollection.TryAddSingleton(_classCatalog);  // The class catalog is retrieved later for deferred logging once a service provider is built
+            serviceCollection.TryAddSingleton(ClassCatalog);  // The class catalog is retrieved later for deferred logging once a service provider is built
             serviceCollection.TryAddSingleton<IConfiguration>(configurationRoot);
 
             // Run configurators on the service collection

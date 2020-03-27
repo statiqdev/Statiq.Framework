@@ -46,6 +46,9 @@ namespace Statiq.Testing
         public ApplicationState ApplicationState { get; set; }
 
         /// <inheritdoc />
+        public ClassCatalog ClassCatalog { get; } = new ClassCatalog();  // Don't initially populate in case we don't actually need it
+
+        /// <inheritdoc />
         IReadOnlyApplicationState IExecutionState.ApplicationState => ApplicationState;
 
         /// <inheritdoc />

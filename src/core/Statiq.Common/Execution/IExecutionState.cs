@@ -29,6 +29,11 @@ namespace Statiq.Common
         IReadOnlyApplicationState ApplicationState { get; }
 
         /// <summary>
+        /// A catalog of all classes in all assemblies loaded by the current application context.
+        /// </summary>
+        ClassCatalog ClassCatalog { get; }
+
+        /// <summary>
         ///  Indicates that the engine is executing pipeline phases and modules in serial.
         /// </summary>
         bool SerialExecution { get; }

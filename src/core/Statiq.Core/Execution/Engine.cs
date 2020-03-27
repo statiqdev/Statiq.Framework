@@ -56,7 +56,7 @@ namespace Statiq.Core
         /// Creates an engine with empty application state, configuration, and services.
         /// </summary>
         public Engine()
-            : this(null, null, null, null)
+            : this(null, null, null, null, null)
         {
         }
 
@@ -65,7 +65,7 @@ namespace Statiq.Core
         /// </summary>
         /// <param name="serviceCollection">The service collection (or <c>null</c> for an empty default service collection).</param>
         public Engine(IServiceCollection serviceCollection)
-            : this(null, serviceCollection, null, null)
+            : this(null, serviceCollection, null, null, null)
         {
         }
 
@@ -74,7 +74,7 @@ namespace Statiq.Core
         /// </summary>
         /// <param name="applicationState">The state of the application (or <c>null</c> for an empty application state).</param>
         public Engine(ApplicationState applicationState)
-            : this(applicationState, null, null, null)
+            : this(applicationState, null, null, null, null)
         {
         }
 
@@ -84,7 +84,7 @@ namespace Statiq.Core
         /// <param name="applicationState">The state of the application (or <c>null</c> for an empty application state).</param>
         /// <param name="serviceCollection">The service collection (or <c>null</c> for an empty default service collection).</param>
         public Engine(ApplicationState applicationState, IServiceCollection serviceCollection)
-            : this(applicationState, serviceCollection, null, null)
+            : this(applicationState, serviceCollection, null, null, null)
         {
         }
 
@@ -95,7 +95,7 @@ namespace Statiq.Core
         /// <param name="serviceCollection">The service collection (or <c>null</c> for an empty default service collection).</param>
         /// <param name="configuration">The application configuration.</param>
         public Engine(ApplicationState applicationState, IServiceCollection serviceCollection, IConfiguration configuration)
-            : this(applicationState, serviceCollection, configuration, null)
+            : this(applicationState, serviceCollection, configuration, null, null)
         {
         }
 
@@ -107,9 +107,24 @@ namespace Statiq.Core
         /// <param name="configurationOverrides">Values that should override configuration values.</param>
         /// <param name="configuration">The application configuration.</param>
         public Engine(ApplicationState applicationState, IServiceCollection serviceCollection, IConfiguration configuration, IDictionary<string, object> configurationOverrides)
+            : this(applicationState, serviceCollection, configuration, configurationOverrides, null)
+        {
+        }
+
+        /// <summary>
+        /// Creates an engine with the specified application state, configuration, and service provider.
+        /// </summary>
+        /// <param name="applicationState">The state of the application (or <c>null</c> for an empty application state).</param>
+        /// <param name="serviceCollection">The service collection (or <c>null</c> for an empty default service collection).</param>
+        /// <param name="configuration">The application configuration.</param>
+        /// <param name="configurationOverrides">Values that should override configuration values.</param>
+        /// <param name="classCatalog">A class catalog of all assemblies in scope.</param>
+        public Engine(ApplicationState applicationState, IServiceCollection serviceCollection, IConfiguration configuration, IDictionary<string, object> configurationOverrides, ClassCatalog classCatalog)
         {
             _pipelines = new PipelineCollection(this);
             ApplicationState = applicationState ?? new ApplicationState(null, null, null);
+            ClassCatalog = classCatalog ?? new ClassCatalog();
+            ClassCatalog.Populate();
             ScriptHelper = new ScriptHelper(this);
             Settings = new ReadOnlyConfigurationSettings(
                 this,
@@ -142,15 +157,16 @@ namespace Statiq.Core
 
             serviceCollection.AddLogging();
             serviceCollection.AddOptions();
-            serviceCollection.AddSingleton<ApplicationState>(ApplicationState);
-            serviceCollection.AddSingleton<IReadOnlyEventCollection>(Events);
-            serviceCollection.AddSingleton<IReadOnlyFileSystem>(FileSystem);
-            serviceCollection.AddSingleton<IReadOnlyConfigurationSettings>(Settings);
-            serviceCollection.AddSingleton<IConfiguration>(Settings.Configuration);
-            serviceCollection.AddSingleton<IReadOnlyShortcodeCollection>(Shortcodes);
-            serviceCollection.AddSingleton<IMemoryStreamFactory>(MemoryStreamFactory);
-            serviceCollection.AddSingleton<INamespacesCollection>(Namespaces);
-            serviceCollection.AddSingleton<IScriptHelper>(ScriptHelper);
+            serviceCollection.TryAddSingleton<ApplicationState>(ApplicationState);
+            serviceCollection.TryAddSingleton<IReadOnlyEventCollection>(Events);
+            serviceCollection.TryAddSingleton<IReadOnlyFileSystem>(FileSystem);
+            serviceCollection.TryAddSingleton<IReadOnlyConfigurationSettings>(Settings);
+            serviceCollection.TryAddSingleton<IConfiguration>(Settings.Configuration);
+            serviceCollection.TryAddSingleton<IReadOnlyShortcodeCollection>(Shortcodes);
+            serviceCollection.TryAddSingleton<IMemoryStreamFactory>(MemoryStreamFactory);
+            serviceCollection.TryAddSingleton<INamespacesCollection>(Namespaces);
+            serviceCollection.TryAddSingleton<IScriptHelper>(ScriptHelper);
+            serviceCollection.TryAddSingleton<ClassCatalog>(ClassCatalog);
 
             IServiceProvider serviceProvider = serviceCollection.BuildServiceProvider();
             return serviceProvider.CreateScope();
@@ -181,6 +197,9 @@ namespace Statiq.Core
 
         /// <inheritdoc />
         IReadOnlyApplicationState IExecutionState.ApplicationState => ApplicationState;
+
+        /// <inheritdoc />
+        public ClassCatalog ClassCatalog { get; }
 
         /// <inheritdoc />
         public IReadOnlyConfigurationSettings Settings { get; }

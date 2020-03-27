@@ -1,12 +1,12 @@
 ﻿using System.Collections.Generic;
 using System.Reflection;
 
-namespace Statiq.App
+namespace Statiq.Common
 {
     /// <summary>
     /// Compares two assemblies for equality by comparing at their full names.
     /// </summary>
-    internal class AssemblyComparer : IEqualityComparer<Assembly>
+    public class AssemblyComparer : IEqualityComparer<Assembly>
     {
         /// <inheritdoc/>
         public bool Equals(Assembly x, Assembly y) => x?.FullName.Equals(y?.FullName) ?? false;

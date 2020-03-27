@@ -42,7 +42,7 @@ namespace Statiq.App
 
             // Create the engine and get a logger
             IDictionary<string, object> configurationOverrides = (configurationSettings as ConfigurationSettings)?.Dictionary;
-            Engine = new Engine(applicationState, serviceCollection, configurationSettings.Configuration, configurationOverrides);
+            Engine = new Engine(applicationState, serviceCollection, configurationSettings.Configuration, configurationOverrides, bootstrapper.ClassCatalog);
             _logger = Engine.Services.GetRequiredService<ILogger<Bootstrapper>>();
 
             // Apply command settings

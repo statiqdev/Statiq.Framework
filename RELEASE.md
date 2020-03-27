@@ -1,5 +1,9 @@
 # 1.0.0-alpha.29
 
+- Added a new `IInitializer` interface that can be used for library/module initialization (but only when using the `Bootstrapper`).
+- Refactored the `RenderRazor` module to use the built-in service collection when possible.
+- Added a new `IServiceCollection.AddRazor()` extension to register Razor services out-of-band.
+- Refactored the `ClassCatalog` to `Statiq.Common` and exposed it via the `IExecutionState` interface.
 - Added `.WithSource()` to the `PaginateDocuments` and `GroupDocuments` modules.
 - Added a new `Keys.Order` key and made the `OrderDocuments` module support it.
 - Added a `keepExisting` parameter to the `GenerateExcerpt` module.

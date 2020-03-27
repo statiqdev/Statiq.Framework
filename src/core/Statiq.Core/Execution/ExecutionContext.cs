@@ -84,6 +84,9 @@ namespace Statiq.Core
         public IReadOnlyApplicationState ApplicationState => _contextData.Engine.ApplicationState;
 
         /// <inheritdoc/>
+        public ClassCatalog ClassCatalog => _contextData.Engine.ClassCatalog;
+
+        /// <inheritdoc/>
         public IServiceProvider Services => _contextData.Services; // Expose the scoped provider inside the execution context
 
         /// <inheritdoc/>

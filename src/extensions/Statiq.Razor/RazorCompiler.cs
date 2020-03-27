@@ -9,25 +9,20 @@ using System.Security.Cryptography;
 using System.Text.Encodings.Web;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Html;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Abstractions;
-using Microsoft.AspNetCore.Mvc.ApplicationParts;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.AspNetCore.Mvc.Razor;
 using Microsoft.AspNetCore.Mvc.Razor.Compilation;
-using Microsoft.AspNetCore.Mvc.Razor.Extensions;
 using Microsoft.AspNetCore.Mvc.Razor.RuntimeCompilation;
 using Microsoft.AspNetCore.Mvc.ViewEngines;
 using Microsoft.AspNetCore.Mvc.ViewFeatures;
 using Microsoft.AspNetCore.Razor.Hosting;
 using Microsoft.AspNetCore.Razor.Language;
 using Microsoft.AspNetCore.Routing;
-using Microsoft.CodeAnalysis;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.ObjectPool;
 using Statiq.Common;
 
 namespace Statiq.Razor
@@ -65,50 +60,29 @@ namespace Statiq.Razor
                 new Type[] { typeof(RazorCodeDocument), typeof(IEnumerable<RazorDiagnostic>) });
         }
 
-        public RazorCompiler(CompilationParameters parameters, IExecutionContext context)
+        /// <summary>
+        /// Creates a Razor compiler using an existing set of services (which must already have Razor services registered).
+        /// </summary>
+        /// <param name="parameters">The compilation parameters.</param>
+        /// <param name="serviceProvider">The service provider to use.</param>
+        public RazorCompiler(CompilationParameters parameters, IServiceProvider serviceProvider)
         {
-            // Create the service collection that MVC needs and add default MVC services
-            ServiceCollection serviceCollection = new ServiceCollection();
+            _ = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
 
-            DiagnosticListener listener = new DiagnosticListener("Razor");
+            // Do a check to make sure required services are registered
+            RazorProjectEngine razorProjectEngine = serviceProvider.GetService<RazorProjectEngine>();
+            if (razorProjectEngine == null)
+            {
+                // Razor services haven't been registered so create a new services container for this compiler
+                ServiceCollection serviceCollection = new ServiceCollection();
+                serviceCollection.AddSingleton(serviceProvider.GetRequiredService<ILoggerFactory>());
+                serviceCollection.AddRazor(
+                    serviceProvider.GetRequiredService<IReadOnlyFileSystem>(),
+                    serviceProvider.GetService<ClassCatalog>());
+                serviceProvider = serviceCollection.BuildServiceProvider();
+                razorProjectEngine = serviceProvider.GetRequiredService<RazorProjectEngine>();
+            }
 
-            // Register some of our own types
-            serviceCollection
-                .AddSingleton(parameters.FileSystem)
-                .AddSingleton<Microsoft.Extensions.FileProviders.IFileProvider, FileSystemFileProvider>()
-                .AddSingleton(context.GetRequiredService<ILoggerFactory>())
-                .AddSingleton<DiagnosticSource, SilentDiagnosticSource>()
-                .AddSingleton<DiagnosticListener>(listener)
-                .AddSingleton<IWebHostEnvironment, HostEnvironment>()
-                .AddSingleton<ObjectPoolProvider, DefaultObjectPoolProvider>()
-
-                // .AddSingleton<IViewCompilerProvider, StatiqRazorViewCompilerProvider>()
-                .AddSingleton<StatiqRazorProjectFileSystem>()
-                .AddSingleton<RazorProjectFileSystem, StatiqRazorProjectFileSystem>();
-
-            // Register the view location expander
-            serviceCollection.Configure<RazorViewEngineOptions>(x => x.ViewLocationExpanders.Add(new ViewLocationExpander()));
-
-            // Add the default services _after_ adding our own
-            // (most default registration use .TryAdd...() so they skip already registered types)
-            IMvcCoreBuilder builder = serviceCollection
-                .AddMvcCore()
-                .AddRazorViewEngine()
-                .AddRazorRuntimeCompilation();
-
-            // Add all loaded assemblies
-            CompilationReferencesProvider referencesProvider = new CompilationReferencesProvider();
-            referencesProvider.Assemblies.AddRange(AppDomain.CurrentDomain.GetAssemblies());
-
-            // And a couple needed assemblies that might not be loaded in the AppDomain yet
-            referencesProvider.Assemblies.Add(typeof(IHtmlContent).Assembly);
-            referencesProvider.Assemblies.Add(Assembly.Load(new AssemblyName("Microsoft.CSharp")));
-
-            // Add the reference provider as an ApplicationPart
-            builder.ConfigureApplicationPartManager(x => x.ApplicationParts.Add(referencesProvider));
-
-            // Build the service provider and local scope
-            IServiceProvider serviceProvider = serviceCollection.BuildServiceProvider();
             _serviceScopeFactory = serviceProvider.GetRequiredService<IServiceScopeFactory>();
 
             // Calculate the base page type
@@ -125,7 +99,6 @@ namespace Statiq.Razor
             // use the DefaultRazorDocumentClassifierPhase which stops applying document classifier passes after DocumentIntermediateNode.DocumentKind is set
             // (which gets set by the Razor document classifier passes registered in RazorExtensions.Register())
             // Also need to add it just after the DocumentClassifierPhase, otherwise it'll miss the C# lowering phase
-            RazorProjectEngine razorProjectEngine = serviceProvider.GetRequiredService<RazorProjectEngine>();
             List<IRazorEnginePhase> phases = razorProjectEngine.Engine.Phases.ToList();
             phases.Insert(
                 phases.IndexOf(phases.OfType<IRazorDocumentClassifierPhase>().Last()) + 1,
@@ -135,21 +108,6 @@ namespace Statiq.Razor
                 });
             FieldInfo phasesField = razorProjectEngine.Engine.GetType().GetField("<Phases>k__BackingField", BindingFlags.Instance | BindingFlags.NonPublic);
             phasesField.SetValue(razorProjectEngine.Engine, phases.ToArray());
-        }
-
-        // Need to use a custom ICompilationReferencesProvider because the default one won't provide a path for the running assembly
-        // (see Microsoft.AspNetCore.Mvc.ApplicationParts.AssemblyPartExtensions.GetReferencePaths() for why,
-        // the running assembly returns a DependencyContext when used with "dotnet run" and therefore won't return it's own path)
-        private class CompilationReferencesProvider : ApplicationPart, ICompilationReferencesProvider
-        {
-            public List<Assembly> Assemblies { get; } = new List<Assembly>();
-
-            public override string Name => nameof(CompilationReferencesProvider);
-
-            public IEnumerable<string> GetReferencePaths() =>
-                Assemblies
-                    .Where(x => !x.IsDynamic && !string.IsNullOrEmpty(x.Location))
-                    .Select(x => x.Location);
         }
 
         public void ExpireChangeTokens()
