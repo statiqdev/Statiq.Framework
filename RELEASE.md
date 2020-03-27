@@ -1,5 +1,9 @@
+# 1.0.0-alpha.30
+
 # 1.0.0-alpha.29
 
+- Moved a bunch of `IBootstrapper` extensions to Statiq.Common so they're available from extension libraries in an `IInitializer`.
+- Renamed `IConfigurableBootstrapper` to `IBootstrapper`.
 - Added a new `IInitializer` interface that can be used for library/module initialization (but only when using the `Bootstrapper`).
 - Refactored the `RenderRazor` module to use the built-in service collection when possible.
 - Added a new `IServiceCollection.AddRazor()` extension to register Razor services out-of-band.
