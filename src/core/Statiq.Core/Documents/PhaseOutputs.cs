@@ -27,7 +27,7 @@ namespace Statiq.Core
             _pipelines = pipelines ?? throw new ArgumentNullException(nameof(pipelines));
         }
 
-        public ImmutableArray<IDocument> FromPipeline(string pipelineName)
+        public DocumentList<IDocument> FromPipeline(string pipelineName)
         {
             ValidateCurrent();
             ValidateArguments(pipelineName);
@@ -35,24 +35,25 @@ namespace Statiq.Core
 
             // If we're in the output phase (which will only happen if this is a deployment module because the checks
             // will throw otherwise) get documents from the output phase, otherwise get documents from the process phase
-            return GetOutputs(_phaseResults[pipelineName], _currentPhase.Phase == Phase.Output ? Phase.Output : Phase.Process);
+            return GetOutputs(_phaseResults[pipelineName], _currentPhase.Phase == Phase.Output ? Phase.Output : Phase.Process).ToDocumentList();
         }
 
-        public IReadOnlyDictionary<string, ImmutableArray<IDocument>> ByPipeline()
+        public IReadOnlyDictionary<string, DocumentList<IDocument>> ByPipeline()
         {
             ValidateCurrent();
 
-            return GetOutputsFromDependencies().ToDictionary(x => x.Key, x => x.Value);
+            return GetOutputsFromDependencies().ToDictionary(x => x.Key, x => x.Value.ToDocumentList());
         }
 
-        public IEnumerable<IDocument> ExceptPipeline(string pipelineName)
+        public DocumentList<IDocument> ExceptPipeline(string pipelineName)
         {
             ValidateCurrent();
             ValidateArguments(pipelineName);
 
             return GetOutputsFromDependencies()
                 .Where(x => !x.Key.Equals(pipelineName, StringComparison.OrdinalIgnoreCase))
-                .SelectMany(x => x.Value);
+                .SelectMany(x => x.Value)
+                .ToDocumentList();
         }
 
         public IEnumerator<IDocument> GetEnumerator()

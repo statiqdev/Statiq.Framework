@@ -15,9 +15,9 @@ namespace Statiq.Common
         /// <param name="pipelineOutputs">The pipeline outputs.</param>
         /// <param name="pipelines">The pipeline(s) to get documents from.</param>
         /// <returns>All documents from all specified pipeline(s).</returns>
-        public static IEnumerable<IDocument> FromPipelines(
+        public static DocumentList<IDocument> FromPipelines(
             this IPipelineOutputs pipelineOutputs,
             params string[] pipelines) =>
-            (pipelines ?? Array.Empty<string>()).SelectMany(x => pipelineOutputs.FromPipeline(x));
+            (pipelines ?? Array.Empty<string>()).SelectMany(x => pipelineOutputs.FromPipeline(x)).ToDocumentList();
     }
 }

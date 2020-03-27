@@ -17,23 +17,24 @@ namespace Statiq.Testing
 
         public IDictionary<string, ImmutableArray<IDocument>> Dictionary { get; }
 
-        public IReadOnlyDictionary<string, ImmutableArray<IDocument>> ByPipeline() =>
-            Dictionary.ToDictionary(x => x.Key, x => x.Value);
+        public IReadOnlyDictionary<string, DocumentList<IDocument>> ByPipeline() =>
+            Dictionary.ToDictionary(x => x.Key, x => x.Value.ToDocumentList());
 
-        public IEnumerable<IDocument> ExceptPipeline(string pipelineName)
+        public DocumentList<IDocument> ExceptPipeline(string pipelineName)
         {
             _ = pipelineName ?? throw new ArgumentNullException(nameof(pipelineName));
             return Dictionary
                 .Where(x => !x.Key.Equals(pipelineName, StringComparison.OrdinalIgnoreCase))
-                .SelectMany(x => x.Value);
+                .SelectMany(x => x.Value)
+                .ToDocumentList();
         }
 
-        public ImmutableArray<IDocument> FromPipeline(string pipelineName)
+        public DocumentList<IDocument> FromPipeline(string pipelineName)
         {
             _ = pipelineName ?? throw new ArgumentNullException(nameof(pipelineName));
             return Dictionary.TryGetValue(pipelineName, out ImmutableArray<IDocument> results)
-                ? results
-                : ImmutableArray<IDocument>.Empty;
+                ? results.ToDocumentList()
+                : DocumentList<IDocument>.Empty;
         }
 
         public IEnumerator<IDocument> GetEnumerator() =>

@@ -12,21 +12,21 @@ namespace Statiq.Common
         /// Gets documents by pipeline.
         /// </summary>
         /// <returns>All documents output by each pipeline.</returns>
-        IReadOnlyDictionary<string, ImmutableArray<IDocument>> ByPipeline();
+        IReadOnlyDictionary<string, DocumentList<IDocument>> ByPipeline();
 
         /// <summary>
         /// Gets documents from a specific pipeline.
         /// </summary>
         /// <param name="pipelineName">The pipeline.</param>
         /// <returns>The documents output by the specified pipeline.</returns>
-        ImmutableArray<IDocument> FromPipeline(string pipelineName);
+        DocumentList<IDocument> FromPipeline(string pipelineName);
 
         /// <summary>
         /// Gets all documents output by every pipeline except those from the specified pipeline.
         /// </summary>
         /// <param name="pipelineName">The pipeline.</param>
         /// <returns>All documents output by every pipeline except the specified one.</returns>
-        IEnumerable<IDocument> ExceptPipeline(string pipelineName);
+        DocumentList<IDocument> ExceptPipeline(string pipelineName);
 
         /// <summary>
         /// Gets documents from a specific pipeline.
@@ -36,6 +36,6 @@ namespace Statiq.Common
         /// </value>
         /// <param name="pipline">The pipeline.</param>
         /// <returns>The documents output by the specified pipeline.</returns>
-        public ImmutableArray<IDocument> this[string pipline] => FromPipeline(pipline);
+        public DocumentList<IDocument> this[string pipline] => FromPipeline(pipline);
     }
 }

@@ -1,5 +1,9 @@
 # 1.0.0-alpha.30
 
+- Changed `IPipelineOutputs` and `IEnumerable<IDocument>` extensions to return `DocumentList<TDocument>`.
+- Added `DocumentList<TDocument>` which wraps a set of documents, eliminating nulls, and provides an indexer for filtering destinations.
+- Added `IEnumerable<IDocument>.FirstOrDefaultSource()` and `IEnumerable<IDocument>.FirstOrDefaultDestination()` extensions.
+
 # 1.0.0-alpha.29
 
 - Moved a bunch of `IBootstrapper` extensions to Statiq.Common so they're available from extension libraries in an `IInitializer`.

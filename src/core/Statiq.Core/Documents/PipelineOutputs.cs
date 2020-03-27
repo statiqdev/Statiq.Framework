@@ -20,23 +20,24 @@ namespace Statiq.Core
             _phaseResults = phaseResults ?? throw new ArgumentNullException(nameof(phaseResults));
         }
 
-        public IReadOnlyDictionary<string, ImmutableArray<IDocument>> ByPipeline() =>
-            _phaseResults.ToDictionary(x => x.Key, x => x.Value.Last(x => x != null).Outputs);
+        public IReadOnlyDictionary<string, DocumentList<IDocument>> ByPipeline() =>
+            _phaseResults.ToDictionary(x => x.Key, x => x.Value.Last(x => x != null).Outputs.ToDocumentList());
 
-        public IEnumerable<IDocument> ExceptPipeline(string pipelineName)
+        public DocumentList<IDocument> ExceptPipeline(string pipelineName)
         {
             _ = pipelineName ?? throw new ArgumentNullException(nameof(pipelineName));
             return _phaseResults
                 .Where(x => !x.Key.Equals(pipelineName, StringComparison.OrdinalIgnoreCase))
-                .SelectMany(x => x.Value.Last(x => x != null).Outputs);
+                .SelectMany(x => x.Value.Last(x => x != null).Outputs)
+                .ToDocumentList();
         }
 
-        public ImmutableArray<IDocument> FromPipeline(string pipelineName)
+        public DocumentList<IDocument> FromPipeline(string pipelineName)
         {
             _ = pipelineName ?? throw new ArgumentNullException(nameof(pipelineName));
             return _phaseResults.TryGetValue(pipelineName, out PhaseResult[] results)
-                ? results.Last(x => x != null).Outputs
-                : ImmutableArray<IDocument>.Empty;
+                ? results.Last(x => x != null).Outputs.ToDocumentList()
+                : DocumentList<IDocument>.Empty;
         }
 
         public IEnumerator<IDocument> GetEnumerator() =>

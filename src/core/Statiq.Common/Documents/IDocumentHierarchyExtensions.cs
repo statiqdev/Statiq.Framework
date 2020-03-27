@@ -54,8 +54,8 @@ namespace Statiq.Common
         /// <param name="document">The document.</param>
         /// <param name="key">The metadata key containing child documents.</param>
         /// <returns>The child documents.</returns>
-        public static ImmutableArray<IDocument> GetChildren(this IDocument document, string key = Keys.Children) =>
-            document.GetDocumentList(key ?? throw new ArgumentNullException(nameof(key))).ToImmutableDocumentArray();
+        public static DocumentList<IDocument> GetChildren(this IDocument document, string key = Keys.Children) =>
+            document.GetDocumentList(key ?? throw new ArgumentNullException(nameof(key))).ToDocumentList();
 
         /// <summary>
         /// Gets the descendant documents of the current document.
@@ -63,7 +63,7 @@ namespace Statiq.Common
         /// <param name="document">The document.</param>
         /// <param name="key">The metadata key containing child documents.</param>
         /// <returns>The descendant documents.</returns>
-        public static ImmutableArray<IDocument> GetDescendants(this IDocument document, string key = Keys.Children) => GetDescendants(document, false, key);
+        public static DocumentList<IDocument> GetDescendants(this IDocument document, string key = Keys.Children) => GetDescendants(document, false, key);
 
         /// <summary>
         /// Gets the descendant documents of the current document and the current document.
@@ -74,9 +74,9 @@ namespace Statiq.Common
         /// <param name="document">The document.</param>
         /// <param name="key">The metadata key containing child documents.</param>
         /// <returns>The descendant documents.</returns>
-        public static ImmutableArray<IDocument> GetDescendantsAndSelf(this IDocument document, string key = Keys.Children) => GetDescendants(document, true, key);
+        public static DocumentList<IDocument> GetDescendantsAndSelf(this IDocument document, string key = Keys.Children) => GetDescendants(document, true, key);
 
-        private static ImmutableArray<IDocument> GetDescendants(IDocument document, in bool self, string key = Keys.Children)
+        private static DocumentList<IDocument> GetDescendants(IDocument document, in bool self, string key = Keys.Children)
         {
             _ = key ?? throw new ArgumentNullException(nameof(key));
 
@@ -100,7 +100,7 @@ namespace Statiq.Common
                 }
             }
 
-            return builder.ToImmutable();
+            return builder.ToImmutable().ToDocumentList();
         }
 
         /// <summary>
@@ -120,7 +120,7 @@ namespace Statiq.Common
         /// <param name="documents">The documents.</param>
         /// <param name="childrenKey">The metadata key that contains the children or <c>null</c> to flatten all documents.</param>
         /// <returns>The flattened documents.</returns>
-        public static IEnumerable<IDocument> Flatten(this IEnumerable<IDocument> documents, string childrenKey = Keys.Children)
+        public static DocumentList<IDocument> Flatten(this IEnumerable<IDocument> documents, string childrenKey = Keys.Children)
         {
             _ = documents ?? throw new ArgumentNullException(nameof(documents));
 
@@ -146,7 +146,7 @@ namespace Statiq.Common
                     }
                 }
             }
-            return results;
+            return results.ToDocumentList();
         }
     }
 }
