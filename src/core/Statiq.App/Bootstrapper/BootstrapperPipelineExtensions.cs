@@ -9,72 +9,17 @@ namespace Statiq.App
 {
     public static class BootstrapperPipelineExtensions
     {
-        // Directly
-
-        public static Bootstrapper AddPipelines(
-            this Bootstrapper bootstrapper,
-            Action<IPipelineCollection> action) =>
-            bootstrapper.ConfigureEngine(x => action(x.Pipelines));
-
-        public static Bootstrapper AddPipelines(
-            this Bootstrapper bootstrapper,
-            Action<IReadOnlyConfigurationSettings, IPipelineCollection> action) =>
-            bootstrapper.ConfigureEngine(x => action(x.Settings, x.Pipelines));
-
-        // By type
-
-        public static Bootstrapper AddPipeline(this Bootstrapper bootstrapper, string name, IPipeline pipeline) =>
-            bootstrapper.ConfigureEngine(x => x.Pipelines.Add(name, pipeline));
-
-        public static Bootstrapper AddPipeline(this Bootstrapper bootstrapper, IPipeline pipeline) =>
-            bootstrapper.ConfigureEngine(x => x.Pipelines.Add(pipeline));
-
-        public static Bootstrapper AddPipeline(this Bootstrapper bootstrapper, string name, Func<IReadOnlyConfigurationSettings, IPipeline> pipelineFunc) =>
-            bootstrapper.ConfigureEngine(x => x.Pipelines.Add(name, pipelineFunc(x.Settings)));
-
-        public static Bootstrapper AddPipeline(this Bootstrapper bootstrapper, Func<IReadOnlyConfigurationSettings, IPipeline> pipelineFunc) =>
-            bootstrapper.ConfigureEngine(x => x.Pipelines.Add(pipelineFunc(x.Settings)));
-
-        public static Bootstrapper AddPipeline(this Bootstrapper bootstrapper, Type pipelineType)
-        {
-            _ = pipelineType ?? throw new ArgumentNullException(nameof(pipelineType));
-            if (!typeof(IPipeline).IsAssignableFrom(pipelineType))
-            {
-                throw new ArgumentException("Provided type is not a pipeline");
-            }
-            return bootstrapper.ConfigureServices(x => x.AddSingleton(typeof(IPipeline), pipelineType));
-        }
-
         public static Bootstrapper AddPipeline<TPipeline>(this Bootstrapper bootstrapper)
             where TPipeline : IPipeline =>
             bootstrapper.ConfigureServices(x => x.AddSingleton(typeof(IPipeline), typeof(TPipeline)));
 
-        public static Bootstrapper AddPipelines(this Bootstrapper bootstrapper, Assembly assembly)
-        {
-            _ = assembly ?? throw new ArgumentNullException(nameof(assembly));
-            return bootstrapper.ConfigureServices(x =>
-            {
-                foreach (Type pipelineType in bootstrapper.ClassCatalog.GetTypesAssignableTo<IPipeline>().Where(x => x.Assembly.Equals(assembly)))
-                {
-                    x.AddSingleton(typeof(IPipeline), pipelineType);
-                }
-            });
-        }
-
-        public static Bootstrapper AddPipelines(this Bootstrapper bootstrapper) => bootstrapper.AddPipelines(Assembly.GetEntryAssembly());
-
         public static Bootstrapper AddPipelines<TParent>(this Bootstrapper bootstrapper) =>
-            bootstrapper.ConfigureServices(x =>
-            {
-                foreach (Type pipelineType in typeof(TParent).GetNestedTypes().Where(t => typeof(IPipeline).IsAssignableFrom(t)))
-                {
-                    x.AddSingleton(typeof(IPipeline), pipelineType);
-                }
-            });
+            bootstrapper.AddPipelines(typeof(TParent));
 
         // Builder
 
-        public static Bootstrapper BuildPipeline(this Bootstrapper bootstrapper, string name, Action<PipelineBuilder> buildAction) =>
+        public static TBootstrapper BuildPipeline<TBootstrapper>(this TBootstrapper bootstrapper, string name, Action<PipelineBuilder> buildAction)
+            where TBootstrapper : IBootstrapper =>
             bootstrapper.ConfigureEngine(x =>
             {
                 PipelineBuilder builder = new PipelineBuilder(x.Pipelines, x.Settings);
@@ -88,354 +33,395 @@ namespace Statiq.App
 
         // Without dependencies
 
-        public static Bootstrapper AddPipeline(this Bootstrapper bootstrapper, string name, IEnumerable<IModule> processModules) =>
+        public static TBootstrapper AddPipeline<TBootstrapper>(this TBootstrapper bootstrapper, string name, IEnumerable<IModule> processModules)
+            where TBootstrapper : IBootstrapper =>
             bootstrapper.AddPipeline(Array.Empty<string>(), true, name, (IEnumerable<IModule>)null, processModules, null, null);
 
-        public static Bootstrapper AddPipeline(
-            this Bootstrapper bootstrapper,
+        public static TBootstrapper AddPipeline<TBootstrapper>(
+            this TBootstrapper bootstrapper,
             string name,
             IEnumerable<IModule> inputModules = null,
             IEnumerable<IModule> processModules = null,
             IEnumerable<IModule> transformModules = null,
-            IEnumerable<IModule> outputModules = null) =>
+            IEnumerable<IModule> outputModules = null)
+            where TBootstrapper : IBootstrapper =>
             bootstrapper.AddPipeline(Array.Empty<string>(), true, name, inputModules, processModules, transformModules, outputModules);
 
-        public static Bootstrapper AddPipeline(
-            this Bootstrapper bootstrapper,
+        public static TBootstrapper AddPipeline<TBootstrapper>(
+            this TBootstrapper bootstrapper,
             string name,
             string readFilesPattern,
             IEnumerable<IModule> processModules = null,
             IEnumerable<IModule> transformModules = null,
-            IEnumerable<IModule> outputModules = null) =>
+            IEnumerable<IModule> outputModules = null)
+            where TBootstrapper : IBootstrapper =>
             bootstrapper.AddPipeline(Array.Empty<string>(), true, name, readFilesPattern, processModules, transformModules, outputModules);
 
-        public static Bootstrapper AddPipeline(
-            this Bootstrapper bootstrapper,
+        public static TBootstrapper AddPipeline<TBootstrapper>(
+            this TBootstrapper bootstrapper,
             string name,
             string readFilesPattern,
             bool writeFiles,
             IEnumerable<IModule> processModules = null,
-            IEnumerable<IModule> transformModules = null) =>
+            IEnumerable<IModule> transformModules = null)
+            where TBootstrapper : IBootstrapper =>
             bootstrapper.AddPipeline(Array.Empty<string>(), true, name, readFilesPattern, writeFiles, processModules, transformModules);
 
-        public static Bootstrapper AddPipeline(
-            this Bootstrapper bootstrapper,
+        public static TBootstrapper AddPipeline<TBootstrapper>(
+            this TBootstrapper bootstrapper,
             string name,
             string readFilesPattern,
             string destinationExtension,
             IEnumerable<IModule> processModules = null,
-            IEnumerable<IModule> transformModules = null) =>
+            IEnumerable<IModule> transformModules = null)
+            where TBootstrapper : IBootstrapper =>
             bootstrapper.AddPipeline(Array.Empty<string>(), true, name, readFilesPattern, destinationExtension, processModules, transformModules);
 
-        public static Bootstrapper AddPipeline(
-            this Bootstrapper bootstrapper,
+        public static TBootstrapper AddPipeline<TBootstrapper>(
+            this TBootstrapper bootstrapper,
             string name,
             string readFilesPattern,
             Config<NormalizedPath> destinationPath,
             IEnumerable<IModule> processModules = null,
-            IEnumerable<IModule> transformModules = null) =>
+            IEnumerable<IModule> transformModules = null)
+            where TBootstrapper : IBootstrapper =>
             bootstrapper.AddPipeline(Array.Empty<string>(), true, name, readFilesPattern, destinationPath, processModules, transformModules);
 
-        public static Bootstrapper AddPipeline(
-            this Bootstrapper bootstrapper,
+        public static TBootstrapper AddPipeline<TBootstrapper>(
+            this TBootstrapper bootstrapper,
             string name,
-            params IModule[] processModules) =>
+            params IModule[] processModules)
+            where TBootstrapper : IBootstrapper =>
             bootstrapper.AddPipeline(Array.Empty<string>(), true, name, (IEnumerable<IModule>)null, processModules, null, null);
 
-        public static Bootstrapper AddPipeline(
-            this Bootstrapper bootstrapper,
+        public static TBootstrapper AddPipeline<TBootstrapper>(
+            this TBootstrapper bootstrapper,
             string name,
             string readFilesPattern,
             bool writeFiles,
-            params IModule[] processModules) =>
+            params IModule[] processModules)
+            where TBootstrapper : IBootstrapper =>
             bootstrapper.AddPipeline(Array.Empty<string>(), false, name, readFilesPattern, writeFiles, processModules, null);
 
-        public static Bootstrapper AddPipeline(
-            this Bootstrapper bootstrapper,
+        public static TBootstrapper AddPipeline<TBootstrapper>(
+            this TBootstrapper bootstrapper,
             string name,
             string readFilesPattern,
             string destinationExtension,
-            params IModule[] processModules) =>
+            params IModule[] processModules)
+            where TBootstrapper : IBootstrapper =>
             bootstrapper.AddPipeline(Array.Empty<string>(), false, name, readFilesPattern, destinationExtension, processModules, null);
 
-        public static Bootstrapper AddPipeline(
-            this Bootstrapper bootstrapper,
+        public static TBootstrapper AddPipeline<TBootstrapper>(
+            this TBootstrapper bootstrapper,
             string name,
             string readFilesPattern,
             Config<NormalizedPath> destinationPath,
-            params IModule[] processModules) =>
+            params IModule[] processModules)
+            where TBootstrapper : IBootstrapper =>
             bootstrapper.AddPipeline(Array.Empty<string>(), false, name, readFilesPattern, destinationPath, processModules, null);
 
         // With dependencies
 
-        public static Bootstrapper AddPipeline(
-            this Bootstrapper bootstrapper,
+        public static TBootstrapper AddPipeline<TBootstrapper>(
+            this TBootstrapper bootstrapper,
             string name,
             IEnumerable<string> dependencies,
-            IEnumerable<IModule> processModules) =>
+            IEnumerable<IModule> processModules)
+            where TBootstrapper : IBootstrapper =>
             bootstrapper.AddPipeline(dependencies, true, name, (IEnumerable<IModule>)null, processModules, null, null);
 
-        public static Bootstrapper AddPipeline(
-            this Bootstrapper bootstrapper,
+        public static TBootstrapper AddPipeline<TBootstrapper>(
+            this TBootstrapper bootstrapper,
             string name,
             IEnumerable<string> dependencies,
             IEnumerable<IModule> inputModules = null,
             IEnumerable<IModule> processModules = null,
             IEnumerable<IModule> transformModules = null,
-            IEnumerable<IModule> outputModules = null) =>
+            IEnumerable<IModule> outputModules = null)
+            where TBootstrapper : IBootstrapper =>
             bootstrapper.AddPipeline(dependencies, true, name, inputModules, processModules, transformModules, outputModules);
 
-        public static Bootstrapper AddPipeline(
-            this Bootstrapper bootstrapper,
+        public static TBootstrapper AddPipeline<TBootstrapper>(
+            this TBootstrapper bootstrapper,
             string name,
             IEnumerable<string> dependencies,
             string readFilesPattern,
             IEnumerable<IModule> processModules = null,
             IEnumerable<IModule> transformModules = null,
-            IEnumerable<IModule> outputModules = null) =>
+            IEnumerable<IModule> outputModules = null)
+            where TBootstrapper : IBootstrapper =>
             bootstrapper.AddPipeline(dependencies, true, name, readFilesPattern, processModules, transformModules, outputModules);
 
-        public static Bootstrapper AddPipeline(
-            this Bootstrapper bootstrapper,
+        public static TBootstrapper AddPipeline<TBootstrapper>(
+            this TBootstrapper bootstrapper,
             string name,
             IEnumerable<string> dependencies,
             string readFilesPattern,
             bool writeFiles,
             IEnumerable<IModule> processModules = null,
-            IEnumerable<IModule> transformModules = null) =>
+            IEnumerable<IModule> transformModules = null)
+            where TBootstrapper : IBootstrapper =>
             bootstrapper.AddPipeline(dependencies, true, name, readFilesPattern, writeFiles, processModules, transformModules);
 
-        public static Bootstrapper AddPipeline(
-            this Bootstrapper bootstrapper,
+        public static TBootstrapper AddPipeline<TBootstrapper>(
+            this TBootstrapper bootstrapper,
             string name,
             IEnumerable<string> dependencies,
             string readFilesPattern,
             string destinationExtension,
             IEnumerable<IModule> processModules = null,
-            IEnumerable<IModule> transformModules = null) =>
+            IEnumerable<IModule> transformModules = null)
+            where TBootstrapper : IBootstrapper =>
             bootstrapper.AddPipeline(dependencies, true, name, readFilesPattern, destinationExtension, processModules, transformModules);
 
-        public static Bootstrapper AddPipeline(
-            this Bootstrapper bootstrapper,
+        public static TBootstrapper AddPipeline<TBootstrapper>(
+            this TBootstrapper bootstrapper,
             string name,
             IEnumerable<string> dependencies,
             string readFilesPattern,
             Config<NormalizedPath> destinationPath,
             IEnumerable<IModule> processModules = null,
-            IEnumerable<IModule> transformModules = null) =>
+            IEnumerable<IModule> transformModules = null)
+            where TBootstrapper : IBootstrapper =>
             bootstrapper.AddPipeline(dependencies, true, name, readFilesPattern, destinationPath, processModules, transformModules);
 
-        public static Bootstrapper AddPipeline(
-            this Bootstrapper bootstrapper,
+        public static TBootstrapper AddPipeline<TBootstrapper>(
+            this TBootstrapper bootstrapper,
             string name,
             IEnumerable<string> dependencies,
-            params IModule[] processModules) =>
+            params IModule[] processModules)
+            where TBootstrapper : IBootstrapper =>
             bootstrapper.AddPipeline(dependencies, true, name, (IEnumerable<IModule>)null, processModules, null, null);
 
-        public static Bootstrapper AddPipeline(
-            this Bootstrapper bootstrapper,
+        public static TBootstrapper AddPipeline<TBootstrapper>(
+            this TBootstrapper bootstrapper,
             string name,
             IEnumerable<string> dependencies,
             string readFilesPattern,
             bool writeFiles,
-            params IModule[] processModules) =>
+            params IModule[] processModules)
+            where TBootstrapper : IBootstrapper =>
             bootstrapper.AddPipeline(dependencies, false, name, readFilesPattern, writeFiles, processModules, null);
 
-        public static Bootstrapper AddPipeline(
-            this Bootstrapper bootstrapper,
+        public static TBootstrapper AddPipeline<TBootstrapper>(
+            this TBootstrapper bootstrapper,
             string name,
             IEnumerable<string> dependencies,
             string readFilesPattern,
             string destinationExtension,
-            params IModule[] processModules) =>
+            params IModule[] processModules)
+            where TBootstrapper : IBootstrapper =>
             bootstrapper.AddPipeline(dependencies, false, name, readFilesPattern, destinationExtension, processModules, null);
 
-        public static Bootstrapper AddPipeline(
-            this Bootstrapper bootstrapper,
+        public static TBootstrapper AddPipeline<TBootstrapper>(
+            this TBootstrapper bootstrapper,
             string name,
             IEnumerable<string> dependencies,
             string readFilesPattern,
             Config<NormalizedPath> destinationPath,
-            params IModule[] processModules) =>
+            params IModule[] processModules)
+            where TBootstrapper : IBootstrapper =>
             bootstrapper.AddPipeline(dependencies, false, name, readFilesPattern, destinationPath, processModules, null);
 
         // Serial
 
-        public static Bootstrapper AddSerialPipeline(
-            this Bootstrapper bootstrapper,
+        public static TBootstrapper AddSerialPipeline<TBootstrapper>(
+            this TBootstrapper bootstrapper,
             string name,
-            IEnumerable<IModule> processModules) =>
+            IEnumerable<IModule> processModules)
+            where TBootstrapper : IBootstrapper =>
             bootstrapper.AddPipeline(null, false, name, (IEnumerable<IModule>)null, processModules, null, null);
 
-        public static Bootstrapper AddSerialPipeline(
-            this Bootstrapper bootstrapper,
+        public static TBootstrapper AddSerialPipeline<TBootstrapper>(
+            this TBootstrapper bootstrapper,
             string name,
             IEnumerable<IModule> inputModules = null,
             IEnumerable<IModule> processModules = null,
             IEnumerable<IModule> transformModules = null,
-            IEnumerable<IModule> outputModules = null) =>
+            IEnumerable<IModule> outputModules = null)
+            where TBootstrapper : IBootstrapper =>
             bootstrapper.AddPipeline(null, false, name, inputModules, processModules, transformModules, outputModules);
 
-        public static Bootstrapper AddSerialPipeline(
-            this Bootstrapper bootstrapper,
+        public static TBootstrapper AddSerialPipeline<TBootstrapper>(
+            this TBootstrapper bootstrapper,
             string name,
             string readFilesPattern,
             IEnumerable<IModule> processModules = null,
             IEnumerable<IModule> transformModules = null,
-            IEnumerable<IModule> outputModules = null) =>
+            IEnumerable<IModule> outputModules = null)
+            where TBootstrapper : IBootstrapper =>
             bootstrapper.AddPipeline(null, false, name, readFilesPattern, processModules, transformModules, outputModules);
 
-        public static Bootstrapper AddSerialPipeline(
-            this Bootstrapper bootstrapper,
+        public static TBootstrapper AddSerialPipeline<TBootstrapper>(
+            this TBootstrapper bootstrapper,
             string name,
             string readFilesPattern,
             bool writeFiles,
             IEnumerable<IModule> processModules = null,
-            IEnumerable<IModule> transformModules = null) =>
+            IEnumerable<IModule> transformModules = null)
+            where TBootstrapper : IBootstrapper =>
             bootstrapper.AddPipeline(null, false, name, readFilesPattern, writeFiles, processModules, transformModules);
 
-        public static Bootstrapper AddSerialPipeline(
-            this Bootstrapper bootstrapper,
+        public static TBootstrapper AddSerialPipeline<TBootstrapper>(
+            this TBootstrapper bootstrapper,
             string name,
             string readFilesPattern,
             string destinationExtension,
             IEnumerable<IModule> processModules = null,
-            IEnumerable<IModule> transformModules = null) =>
+            IEnumerable<IModule> transformModules = null)
+            where TBootstrapper : IBootstrapper =>
             bootstrapper.AddPipeline(null, false, name, readFilesPattern, destinationExtension, processModules, transformModules);
 
-        public static Bootstrapper AddSerialPipeline(
-            this Bootstrapper bootstrapper,
+        public static TBootstrapper AddSerialPipeline<TBootstrapper>(
+            this TBootstrapper bootstrapper,
             string name,
             string readFilesPattern,
             Config<NormalizedPath> destinationPath,
             IEnumerable<IModule> processModules = null,
-            IEnumerable<IModule> transformModules = null) =>
+            IEnumerable<IModule> transformModules = null)
+            where TBootstrapper : IBootstrapper =>
             bootstrapper.AddPipeline(null, false, name, readFilesPattern, destinationPath, processModules, transformModules);
 
-        public static Bootstrapper AddSerialPipeline(
-            this Bootstrapper bootstrapper,
+        public static TBootstrapper AddSerialPipeline<TBootstrapper>(
+            this TBootstrapper bootstrapper,
             string name,
-            params IModule[] processModules) =>
+            params IModule[] processModules)
+            where TBootstrapper : IBootstrapper =>
             bootstrapper.AddPipeline(null, false, name, (IEnumerable<IModule>)null, processModules, null, null);
 
-        public static Bootstrapper AddSerialPipeline(
-            this Bootstrapper bootstrapper,
+        public static TBootstrapper AddSerialPipeline<TBootstrapper>(
+            this TBootstrapper bootstrapper,
             string name,
             string readFilesPattern,
             bool writeFiles,
-            params IModule[] processModules) =>
+            params IModule[] processModules)
+            where TBootstrapper : IBootstrapper =>
             bootstrapper.AddPipeline(null, false, name, readFilesPattern, writeFiles, processModules, null);
 
-        public static Bootstrapper AddSerialPipeline(
-            this Bootstrapper bootstrapper,
+        public static TBootstrapper AddSerialPipeline<TBootstrapper>(
+            this TBootstrapper bootstrapper,
             string name,
             string readFilesPattern,
             string destinationExtension,
-            params IModule[] processModules) =>
+            params IModule[] processModules)
+            where TBootstrapper : IBootstrapper =>
             bootstrapper.AddPipeline(null, false, name, readFilesPattern, destinationExtension, processModules, null);
 
-        public static Bootstrapper AddSerialPipeline(
-            this Bootstrapper bootstrapper,
+        public static TBootstrapper AddSerialPipeline<TBootstrapper>(
+            this TBootstrapper bootstrapper,
             string name,
             string readFilesPattern,
             Config<NormalizedPath> destinationPath,
-            params IModule[] processModules) =>
+            params IModule[] processModules)
+            where TBootstrapper : IBootstrapper =>
             bootstrapper.AddPipeline(null, false, name, readFilesPattern, destinationPath, processModules, null);
 
         // Isolated
 
-        public static Bootstrapper AddIsolatedPipeline(
-            this Bootstrapper bootstrapper,
+        public static TBootstrapper AddIsolatedPipeline<TBootstrapper>(
+            this TBootstrapper bootstrapper,
             string name,
-            IEnumerable<IModule> processModules) =>
+            IEnumerable<IModule> processModules)
+            where TBootstrapper : IBootstrapper =>
             bootstrapper.AddPipeline(null, true, name, (IEnumerable<IModule>)null, processModules, null, null);
 
-        public static Bootstrapper AddIsolatedPipeline(
-            this Bootstrapper bootstrapper,
+        public static TBootstrapper AddIsolatedPipeline<TBootstrapper>(
+            this TBootstrapper bootstrapper,
             string name,
             IEnumerable<IModule> inputModules = null,
             IEnumerable<IModule> processModules = null,
             IEnumerable<IModule> transformModules = null,
-            IEnumerable<IModule> outputModules = null) =>
+            IEnumerable<IModule> outputModules = null)
+            where TBootstrapper : IBootstrapper =>
             bootstrapper.AddPipeline(null, true, name, inputModules, processModules, transformModules, outputModules);
 
-        public static Bootstrapper AddIsolatedPipeline(
-            this Bootstrapper bootstrapper,
+        public static TBootstrapper AddIsolatedPipeline<TBootstrapper>(
+            this TBootstrapper bootstrapper,
             string name,
             string readFilesPattern,
             IEnumerable<IModule> processModules = null,
             IEnumerable<IModule> transformModules = null,
-            IEnumerable<IModule> outputModules = null) =>
+            IEnumerable<IModule> outputModules = null)
+            where TBootstrapper : IBootstrapper =>
             bootstrapper.AddPipeline(null, true, name, readFilesPattern, processModules, transformModules, outputModules);
 
-        public static Bootstrapper AddIsolatedPipeline(
-            this Bootstrapper bootstrapper,
+        public static TBootstrapper AddIsolatedPipeline<TBootstrapper>(
+            this TBootstrapper bootstrapper,
             string name,
             string readFilesPattern,
             bool writeFiles,
             IEnumerable<IModule> processModules = null,
-            IEnumerable<IModule> transformModules = null) =>
+            IEnumerable<IModule> transformModules = null)
+            where TBootstrapper : IBootstrapper =>
             bootstrapper.AddPipeline(null, true, name, readFilesPattern, writeFiles, processModules, transformModules);
 
-        public static Bootstrapper AddIsolatedPipeline(
-            this Bootstrapper bootstrapper,
+        public static TBootstrapper AddIsolatedPipeline<TBootstrapper>(
+            this TBootstrapper bootstrapper,
             string name,
             string readFilesPattern,
             string destinationExtension,
             IEnumerable<IModule> processModules = null,
-            IEnumerable<IModule> transformModules = null) =>
+            IEnumerable<IModule> transformModules = null)
+            where TBootstrapper : IBootstrapper =>
             bootstrapper.AddPipeline(null, true, name, readFilesPattern, destinationExtension, processModules, transformModules);
 
-        public static Bootstrapper AddIsolatedPipeline(
-            this Bootstrapper bootstrapper,
+        public static TBootstrapper AddIsolatedPipeline<TBootstrapper>(
+            this TBootstrapper bootstrapper,
             string name,
             string readFilesPattern,
             Config<NormalizedPath> destinationPath,
             IEnumerable<IModule> processModules = null,
-            IEnumerable<IModule> transformModules = null) =>
+            IEnumerable<IModule> transformModules = null)
+            where TBootstrapper : IBootstrapper =>
             bootstrapper.AddPipeline(null, true, name, readFilesPattern, destinationPath, processModules, transformModules);
 
-        public static Bootstrapper AddIsolatedPipeline(
-            this Bootstrapper bootstrapper,
+        public static TBootstrapper AddIsolatedPipeline<TBootstrapper>(
+            this TBootstrapper bootstrapper,
             string name,
-            params IModule[] processModules) =>
+            params IModule[] processModules)
+            where TBootstrapper : IBootstrapper =>
             bootstrapper.AddPipeline(null, true, name, (IEnumerable<IModule>)null, processModules, null, null);
 
-        public static Bootstrapper AddIsolatedPipeline(
-            this Bootstrapper bootstrapper,
+        public static TBootstrapper AddIsolatedPipeline<TBootstrapper>(
+            this TBootstrapper bootstrapper,
             string name,
             string readFilesPattern,
             bool writeFiles,
-            params IModule[] processModules) =>
+            params IModule[] processModules)
+            where TBootstrapper : IBootstrapper =>
             bootstrapper.AddPipeline(null, true, name, readFilesPattern, writeFiles, processModules, null);
 
-        public static Bootstrapper AddIsolatedPipeline(
-            this Bootstrapper bootstrapper,
+        public static TBootstrapper AddIsolatedPipeline<TBootstrapper>(
+            this TBootstrapper bootstrapper,
             string name,
             string readFilesPattern,
             string destinationExtension,
-            params IModule[] processModules) =>
+            params IModule[] processModules)
+            where TBootstrapper : IBootstrapper =>
             bootstrapper.AddPipeline(null, true, name, readFilesPattern, destinationExtension, processModules, null);
 
-        public static Bootstrapper AddIsolatedPipeline(
-            this Bootstrapper bootstrapper,
+        public static TBootstrapper AddIsolatedPipeline<TBootstrapper>(
+            this TBootstrapper bootstrapper,
             string name,
             string readFilesPattern,
             Config<NormalizedPath> destinationPath,
-            params IModule[] processModules) =>
+            params IModule[] processModules)
+            where TBootstrapper : IBootstrapper =>
             bootstrapper.AddPipeline(null, true, name, readFilesPattern, destinationPath, processModules, null);
 
         // Helpers for adding pipelines from modules
 
-        private static Bootstrapper AddPipeline(
-            this Bootstrapper bootstrapper,
+        private static TBootstrapper AddPipeline<TBootstrapper>(
+            this TBootstrapper bootstrapper,
             IEnumerable<string> dependencies,
             bool isolated,
             string name,
             IEnumerable<IModule> inputModules,
             IEnumerable<IModule> processModules,
             IEnumerable<IModule> transformModules,
-            IEnumerable<IModule> outputModules) =>
+            IEnumerable<IModule> outputModules)
+            where TBootstrapper : IBootstrapper =>
             bootstrapper.BuildPipeline(name, builder =>
             {
                 ConfigureBuilder(builder, dependencies, isolated)
@@ -445,15 +431,16 @@ namespace Statiq.App
                     .WithOutputModules(outputModules);
             });
 
-        private static Bootstrapper AddPipeline(
-            this Bootstrapper bootstrapper,
+        private static TBootstrapper AddPipeline<TBootstrapper>(
+            this TBootstrapper bootstrapper,
             IEnumerable<string> dependencies,
             bool isolated,
             string name,
             string readFilesPattern,
             IEnumerable<IModule> processModules,
             IEnumerable<IModule> transformModules,
-            IEnumerable<IModule> outputModules) =>
+            IEnumerable<IModule> outputModules)
+            where TBootstrapper : IBootstrapper =>
             bootstrapper.BuildPipeline(name, builder =>
             {
                 ConfigureBuilder(builder, dependencies, isolated)
@@ -466,15 +453,16 @@ namespace Statiq.App
                 }
             });
 
-        private static Bootstrapper AddPipeline(
-            this Bootstrapper bootstrapper,
+        private static TBootstrapper AddPipeline<TBootstrapper>(
+            this TBootstrapper bootstrapper,
             IEnumerable<string> dependencies,
             bool isolated,
             string name,
             string readFilesPattern,
             bool writeFiles,
             IEnumerable<IModule> processModules,
-            IEnumerable<IModule> transformModules) =>
+            IEnumerable<IModule> transformModules)
+            where TBootstrapper : IBootstrapper =>
             bootstrapper.BuildPipeline(name, builder =>
             {
                 ConfigureBuilder(builder, dependencies, isolated)
@@ -490,15 +478,16 @@ namespace Statiq.App
                 }
             });
 
-        private static Bootstrapper AddPipeline(
-            this Bootstrapper bootstrapper,
+        private static TBootstrapper AddPipeline<TBootstrapper>(
+            this TBootstrapper bootstrapper,
             IEnumerable<string> dependencies,
             bool isolated,
             string name,
             string readFilesPattern,
             string destinationExtension,
             IEnumerable<IModule> processModules,
-            IEnumerable<IModule> transformModules) =>
+            IEnumerable<IModule> transformModules)
+            where TBootstrapper : IBootstrapper =>
             bootstrapper.BuildPipeline(name, builder =>
             {
                 ConfigureBuilder(builder, dependencies, isolated)
@@ -511,15 +500,16 @@ namespace Statiq.App
                 }
             });
 
-        private static Bootstrapper AddPipeline(
-            this Bootstrapper bootstrapper,
+        private static TBootstrapper AddPipeline<TBootstrapper>(
+            this TBootstrapper bootstrapper,
             IEnumerable<string> dependencies,
             bool isolated,
             string name,
             string readFilesPattern,
             Config<NormalizedPath> destinationPath,
             IEnumerable<IModule> processModules,
-            IEnumerable<IModule> transformModules) =>
+            IEnumerable<IModule> transformModules)
+            where TBootstrapper : IBootstrapper =>
             bootstrapper.BuildPipeline(name, builder =>
             {
                 ConfigureBuilder(builder, dependencies, isolated)

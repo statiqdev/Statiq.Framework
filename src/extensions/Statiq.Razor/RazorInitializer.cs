@@ -4,7 +4,7 @@ namespace Statiq.Razor
 {
     public class RazorInitializer : IInitializer
     {
-        public void Configure(IConfigurableBootstrapper configurable) =>
-            configurable.Configurators.Add<ConfigurableServices>(x => x.Services.AddRazor(null));
+        public void Configure(IBootstrapper bootstrapper) =>
+            bootstrapper.ConfigureServices(x => x.AddRazor(null));
     }
 }

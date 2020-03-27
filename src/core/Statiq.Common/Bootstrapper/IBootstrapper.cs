@@ -1,6 +1,6 @@
 ﻿namespace Statiq.Common
 {
-    public interface IConfigurableBootstrapper : IConfigurable
+    public interface IBootstrapper : IConfigurable
     {
         /// <summary>
         /// A catalog of all classes in all assemblies loaded by the current application context.

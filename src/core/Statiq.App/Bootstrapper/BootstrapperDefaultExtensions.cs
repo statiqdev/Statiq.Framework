@@ -71,8 +71,8 @@ namespace Statiq.App
         public static Bootstrapper AddBootstrapperConfigurators(this Bootstrapper bootstrapper)
         {
             _ = bootstrapper ?? throw new ArgumentNullException(nameof(bootstrapper));
-            foreach (IConfigurator<IConfigurableBootstrapper> bootstraperConfigurator
-                in bootstrapper.ClassCatalog.GetInstances<IConfigurator<IConfigurableBootstrapper>>())
+            foreach (IConfigurator<IBootstrapper> bootstraperConfigurator
+                in bootstrapper.ClassCatalog.GetInstances<IConfigurator<IBootstrapper>>())
             {
                 bootstrapper.Configurators.Add(bootstraperConfigurator);
             }

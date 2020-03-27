@@ -13,7 +13,7 @@ using Statiq.Core;
 
 namespace Statiq.App
 {
-    public class Bootstrapper : IConfigurableBootstrapper
+    public class Bootstrapper : IBootstrapper
     {
         private Func<CommandServiceTypeRegistrar, ICommandApp> _getCommandApp = x => new CommandApp(x);
 
@@ -50,7 +50,7 @@ namespace Statiq.App
             ClassCatalog.Populate();
 
             // Run bootstrapper configurators first
-            Configurators.Configure<IConfigurableBootstrapper>(this);
+            Configurators.Configure<IBootstrapper>(this);
             Configurators.Configure(this);
 
             // Run the configuration configurator and get the configuration root
@@ -63,7 +63,7 @@ namespace Statiq.App
             // Create the service collection
             IServiceCollection serviceCollection = CreateServiceCollection() ?? new ServiceCollection();
             serviceCollection.TryAddSingleton(this);
-            serviceCollection.TryAddSingleton<IConfigurableBootstrapper>(this);
+            serviceCollection.TryAddSingleton<IBootstrapper>(this);
             serviceCollection.TryAddSingleton(ClassCatalog);  // The class catalog is retrieved later for deferred logging once a service provider is built
             serviceCollection.TryAddSingleton<IConfiguration>(configurationRoot);
 

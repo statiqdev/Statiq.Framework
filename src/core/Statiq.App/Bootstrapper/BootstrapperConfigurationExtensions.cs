@@ -9,23 +9,13 @@ namespace Statiq.App
 {
     public static class BootstrapperConfigurationExtensions
     {
-        public static Bootstrapper ConfigureCommands(this Bootstrapper bootstrapper, Action<IConfigurator> action) =>
-            bootstrapper.Configure<ConfigurableCommands>(x => action(x.Configurator));
-
-        public static Bootstrapper ConfigureSettings(this Bootstrapper bootstrapper, Action<IConfigurationSettings> action) =>
-            bootstrapper.Configure<ConfigurableSettings>(x => action(x.Settings));
-
-        public static Bootstrapper BuildConfiguration(this Bootstrapper bootstrapper, Action<IConfigurationBuilder> action) =>
-            bootstrapper.Configure<ConfigurableConfiguration>(x => action(x.Builder));
-
-        public static Bootstrapper ConfigureServices(this Bootstrapper bootstrapper, Action<IServiceCollection> action) =>
-            bootstrapper.Configure<ConfigurableServices>(x => action(x.Services));
-
-        public static Bootstrapper ConfigureServices(this Bootstrapper bootstrapper, Action<IServiceCollection, IConfigurationRoot> action) =>
-            bootstrapper.Configure<ConfigurableServices>(x => action(x.Services, x.Configuration));
-
-        public static Bootstrapper ConfigureEngine(this Bootstrapper bootstrapper, Action<IEngine> action) =>
-            bootstrapper.Configure<IEngine>(x => action(x));
+        public static TBootstrapper ConfigureCommands<TBootstrapper>(this TBootstrapper bootstrapper, Action<IConfigurator> action)
+            where TBootstrapper : IBootstrapper
+        {
+            _ = bootstrapper ?? throw new ArgumentNullException(nameof(bootstrapper));
+            bootstrapper.Configurators.Add<ConfigurableCommands>(x => action(x.Configurator));
+            return bootstrapper;
+        }
 
         public static Bootstrapper Configure<TConfigurable>(this Bootstrapper bootstrapper, Action<TConfigurable> action)
             where TConfigurable : IConfigurable

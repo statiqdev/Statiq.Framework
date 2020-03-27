@@ -10,6 +10,10 @@ namespace Statiq.App
 {
     public static class BootstrapperCommandExtensions
     {
+        // Extensions that can use TBootstrapper (I.e. they don't use other generic parameters) need to
+        // stay in Statiq.App since commands depend on Spectre.Cli, but they should still use a generic
+        // TBootstrapper in case other libraries want to use IInitalizer and depend on Statiq.App
+
         public static Bootstrapper AddCommand<TCommand>(this Bootstrapper bootstrapper)
             where TCommand : class, ICommand =>
             bootstrapper.ConfigureCommands(x => x.AddCommand<TCommand>());
@@ -18,67 +22,78 @@ namespace Statiq.App
             where TCommand : class, ICommand =>
             bootstrapper.ConfigureCommands(x => x.AddCommand<TCommand>(name));
 
-        public static Bootstrapper AddCommand(this Bootstrapper bootstrapper, Type commandType) =>
+        public static TBootstrapper AddCommand<TBootstrapper>(this TBootstrapper bootstrapper, Type commandType)
+            where TBootstrapper : IBootstrapper =>
             bootstrapper.ConfigureCommands(x => x.AddCommand(commandType));
 
-        public static Bootstrapper AddCommand(this Bootstrapper bootstrapper, Type commandType, string name) =>
+        public static TBootstrapper AddCommand<TBootstrapper>(this TBootstrapper bootstrapper, Type commandType, string name)
+            where TBootstrapper : IBootstrapper =>
             bootstrapper.ConfigureCommands(x => x.AddCommand(commandType, name));
 
-        public static Bootstrapper AddCommand(this Bootstrapper bootstrapper, Type commandType, string name, string description) =>
+        public static TBootstrapper AddCommand<TBootstrapper>(this TBootstrapper bootstrapper, Type commandType, string name, string description)
+            where TBootstrapper : IBootstrapper =>
             bootstrapper.ConfigureCommands(x => x.AddCommand(commandType, name).WithDescription(description));
 
-        public static Bootstrapper AddPipelineCommand(
-            this Bootstrapper bootstrapper,
+        public static TBootstrapper AddPipelineCommand<TBootstrapper>(
+            this TBootstrapper bootstrapper,
             string name,
-            params string[] pipelines) =>
+            params string[] pipelines)
+            where TBootstrapper : IBootstrapper =>
             bootstrapper.ConfigureCommands(x => x.AddPipelineCommand(name, pipelines));
 
-        public static Bootstrapper AddPipelineCommand(
-            this Bootstrapper bootstrapper,
+        public static TBootstrapper AddPipelineCommand<TBootstrapper>(
+            this TBootstrapper bootstrapper,
             string name,
             string description,
-            params string[] pipelines) =>
+            params string[] pipelines)
+            where TBootstrapper : IBootstrapper =>
             bootstrapper.ConfigureCommands(x => x.AddPipelineCommand(name, pipelines).WithDescription(description));
 
-        public static Bootstrapper AddPipelineCommand(
-            this Bootstrapper bootstrapper,
+        public static TBootstrapper AddPipelineCommand<TBootstrapper>(
+            this TBootstrapper bootstrapper,
             string name,
             bool defaultPipelines,
-            params string[] pipelines) =>
+            params string[] pipelines)
+            where TBootstrapper : IBootstrapper =>
             bootstrapper.ConfigureCommands(x => x.AddPipelineCommand(name, defaultPipelines, pipelines));
 
-        public static Bootstrapper AddPipelineCommand(
-            this Bootstrapper bootstrapper,
+        public static TBootstrapper AddPipelineCommand<TBootstrapper>(
+            this TBootstrapper bootstrapper,
             string name,
             string description,
             bool defaultPipelines,
-            params string[] pipelines) =>
+            params string[] pipelines)
+            where TBootstrapper : IBootstrapper =>
             bootstrapper.ConfigureCommands(x => x.AddPipelineCommand(name, defaultPipelines, pipelines).WithDescription(description));
 
-        public static Bootstrapper AddPipelineCommand(
-            this Bootstrapper bootstrapper,
+        public static TBootstrapper AddPipelineCommand<TBootstrapper>(
+            this TBootstrapper bootstrapper,
             string name,
-            EngineCommandSettings commandSettings) =>
+            EngineCommandSettings commandSettings)
+            where TBootstrapper : IBootstrapper =>
             bootstrapper.ConfigureCommands(x => x.AddPipelineCommand(name, commandSettings));
 
-        public static Bootstrapper AddPipelineCommand(
-            this Bootstrapper bootstrapper,
+        public static TBootstrapper AddPipelineCommand<TBootstrapper>(
+            this TBootstrapper bootstrapper,
             string name,
             string description,
-            EngineCommandSettings commandSettings) =>
+            EngineCommandSettings commandSettings)
+            where TBootstrapper : IBootstrapper =>
             bootstrapper.ConfigureCommands(x => x.AddPipelineCommand(name, commandSettings).WithDescription(description));
 
-        public static Bootstrapper AddDelegateCommand(
-            this Bootstrapper bootstrapper,
+        public static TBootstrapper AddDelegateCommand<TBootstrapper>(
+            this TBootstrapper bootstrapper,
             string name,
-            Func<CommandContext, int> func) =>
+            Func<CommandContext, int> func)
+            where TBootstrapper : IBootstrapper =>
             bootstrapper.ConfigureCommands(x => x.AddDelegateCommand(name, func));
 
-        public static Bootstrapper AddDelegateCommand(
-            this Bootstrapper bootstrapper,
+        public static TBootstrapper AddDelegateCommand<TBootstrapper>(
+            this TBootstrapper bootstrapper,
             string name,
             string description,
-            Func<CommandContext, int> func) =>
+            Func<CommandContext, int> func)
+            where TBootstrapper : IBootstrapper =>
             bootstrapper.ConfigureCommands(x => x.AddDelegateCommand(name, func).WithDescription(description));
 
         public static Bootstrapper AddDelegateCommand<TSettings>(
@@ -102,7 +117,8 @@ namespace Statiq.App
         /// <param name="bootstrapper">The bootstrapper.</param>
         /// <param name="assembly">The assembly to add commands from.</param>
         /// <returns>The current bootstrapper.</returns>
-        public static Bootstrapper AddCommands(this Bootstrapper bootstrapper, Assembly assembly)
+        public static TBootstrapper AddCommands<TBootstrapper>(this TBootstrapper bootstrapper, Assembly assembly)
+            where TBootstrapper : IBootstrapper
         {
             _ = bootstrapper ?? throw new ArgumentNullException(nameof(bootstrapper));
             _ = assembly ?? throw new ArgumentNullException(nameof(assembly));
@@ -118,12 +134,18 @@ namespace Statiq.App
         /// </summary>
         /// <param name="bootstrapper">The bootstrapper.</param>
         /// <returns>The current bootstrapper.</returns>
-        public static Bootstrapper AddCommands(this Bootstrapper bootstrapper) => bootstrapper.AddCommands(Assembly.GetEntryAssembly());
+        public static TBootstrapper AddCommands<TBootstrapper>(this TBootstrapper bootstrapper)
+            where TBootstrapper : IBootstrapper =>
+            bootstrapper.AddCommands(Assembly.GetEntryAssembly());
 
-        public static Bootstrapper AddCommands<TParent>(this Bootstrapper bootstrapper)
+        public static Bootstrapper AddCommands<TParent>(this Bootstrapper bootstrapper) => bootstrapper.AddCommands(typeof(TParent));
+
+        public static TBootstrapper AddCommands<TBootstrapper>(this TBootstrapper bootstrapper, Type parentType)
+            where TBootstrapper : IBootstrapper
         {
             _ = bootstrapper ?? throw new ArgumentNullException(nameof(bootstrapper));
-            foreach (Type commandType in typeof(TParent).GetNestedTypes().Where(x => typeof(ICommand).IsAssignableFrom(x)))
+            _ = parentType ?? throw new ArgumentNullException(nameof(parentType));
+            foreach (Type commandType in parentType.GetNestedTypes().Where(x => typeof(ICommand).IsAssignableFrom(x)))
             {
                 bootstrapper.AddCommand(commandType);
             }
