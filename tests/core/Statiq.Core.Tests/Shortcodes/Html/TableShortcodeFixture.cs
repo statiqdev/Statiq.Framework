@@ -13,7 +13,7 @@ namespace Statiq.Core.Tests.Shortcodes.Html
         public class ExecuteTests : TableShortcodeFixture
         {
             [Test]
-            public async Task RendersTableWithoutSettings()
+            public void RendersTableWithoutSettings()
             {
                 // Given
                 TestExecutionContext context = new TestExecutionContext();
@@ -30,10 +30,10 @@ l=m nop
                 TableShortcode shortcode = new TableShortcode();
 
                 // When
-                IEnumerable<IDocument> result = await shortcode.ExecuteAsync(args, content, document, context);
+                string result = shortcode.Execute(args, content, document, context);
 
                 // Then
-                result.ShouldHaveSingleItem().ShouldBeOfType<TestDocument>().Content.ShouldBe(
+                result.ShouldBe(
                     @"<table>
   <tbody>
     <tr>
@@ -70,7 +70,7 @@ l=m nop
             }
 
             [Test]
-            public async Task RendersTableWithSettings()
+            public void RendersTableWithSettings()
             {
                 // Given
                 TestExecutionContext context = new TestExecutionContext();
@@ -96,10 +96,10 @@ l=m nop
                 TableShortcode shortcode = new TableShortcode();
 
                 // When
-                IEnumerable<IDocument> result = await shortcode.ExecuteAsync(args, content, document, context);
+                string result = shortcode.Execute(args, content, document, context);
 
                 // Then
-                result.ShouldHaveSingleItem().ShouldBeOfType<TestDocument>().Content.ShouldBe(
+                result.ShouldBe(
                     @"<table class=""tclass"">
   <thead class=""hclass"">
     <tr>

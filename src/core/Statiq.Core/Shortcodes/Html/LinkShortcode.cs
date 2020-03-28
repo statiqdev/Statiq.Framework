@@ -24,10 +24,10 @@ namespace Statiq.Core
     /// <parameter name="HideIndexPages">If set to <c>true</c>, "index.htm" and "index.html" file names will be hidden.</parameter>
     /// <parameter name="HideExtensions">If set to <c>true</c>, extensions will be hidden.</parameter>
     /// <parameter name="Lowercase">If set to <c>true</c>, links will be rendered in all lowercase.</parameter>
-    public class LinkShortcode : Shortcode
+    public class LinkShortcode : SyncContentShortcode
     {
         /// <inheritdoc />
-        public override async Task<IEnumerable<IDocument>> ExecuteAsync(KeyValuePair<string, string>[] args, string content, IDocument document, IExecutionContext context)
+        public override string Execute(KeyValuePair<string, string>[] args, string content, IDocument document, IExecutionContext context)
         {
             IMetadataDictionary arguments = args.ToDictionary(
                 "Path",
@@ -44,7 +44,7 @@ namespace Statiq.Core
             string path = arguments.GetString("Path");
             if (LinkGenerator.TryGetAbsoluteHttpUri(path, out string absoluteUri))
             {
-                return context.CreateDocument(await context.GetContentProviderAsync(absoluteUri)).Yield();
+                return absoluteUri;
             }
             NormalizedPath filePath = new NormalizedPath(path);
 
@@ -74,9 +74,7 @@ namespace Statiq.Core
                 ? arguments.GetBool("Lowercase")
                 : context.Settings.GetBool(Keys.LinkLowercase);
 
-            return context
-                .CreateDocument(await context.GetContentProviderAsync(LinkGenerator.GetLink(filePath, host, root, scheme, hidePages, hideExtensions, lowercase)))
-                .Yield();
+            return LinkGenerator.GetLink(filePath, host, root, scheme, hidePages, hideExtensions, lowercase);
         }
     }
 }

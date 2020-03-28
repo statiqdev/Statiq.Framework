@@ -24,9 +24,14 @@ namespace Statiq.Common
         /// </summary>
         public static IExecutionContext Current
         {
-            get => _current.Value;
+            get => _current.Value ?? throw new ExecutionException("Could not get current execution context");
             internal set => _current.Value = value;
         }
+
+        /// <summary>
+        /// Returns <c>true</c> if there is a current <see cref="IExecutionContext"/>, <c>false</c> otherwise.
+        /// </summary>
+        public static bool HasCurrent => _current.Value != null;
 
         /// <summary>
         /// Gets the current execution state.

@@ -11,9 +11,9 @@ namespace Statiq.Core
     /// </summary>
     /// <parameter name="Key">The key that contains the value.</parameter>
     /// <parameter name="Value">The value to compare (or <c>true</c> if not provided).</parameter>
-    public class IfShortcode : Shortcode
+    public class IfShortcode : DocumentShortcode
     {
-        public override async Task<IEnumerable<IDocument>> ExecuteAsync(
+        public override async Task<IDocument> ExecuteAsync(
             KeyValuePair<string, string>[] args,
             string content,
             IDocument document,
@@ -29,12 +29,12 @@ namespace Statiq.Core
             {
                 return TypeHelper.TryConvert(dictionary.Get("Value"), keyValue.GetType(), out object value)
                     && (keyValue?.Equals(value) ?? (keyValue == null && value == null))
-                    ? document.Clone(await context.GetContentProviderAsync(content)).Yield()
+                    ? await document.CloneAsync(content)
                     : null;
             }
 
             return TypeHelper.TryConvert(keyValue, out bool result) && result
-                ? document.Clone(await context.GetContentProviderAsync(content)).Yield()
+                ? await document.CloneAsync(content)
                 : null;
         }
     }

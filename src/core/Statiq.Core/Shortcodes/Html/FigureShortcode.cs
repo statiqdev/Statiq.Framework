@@ -38,10 +38,9 @@ namespace Statiq.Core
     /// <parameter name="Class"><c>class</c> attribute to apply to the <c>figure</c> element.</parameter>
     /// <parameter name="Height"><c>height</c> attribute of the image.</parameter>
     /// <parameter name="Width"><c>width</c> attribute of the image.</parameter>
-    public class FigureShortcode : Shortcode
+    public class FigureShortcode : SyncContentShortcode
     {
-        /// <inheritdoc />
-        public override async Task<IEnumerable<IDocument>> ExecuteAsync(KeyValuePair<string, string>[] args, string content, IDocument document, IExecutionContext context)
+        public override string Execute(KeyValuePair<string, string>[] args, string content, IDocument document, IExecutionContext context)
         {
             IMetadataDictionary arguments = args.ToDictionary(
                 "Src",
@@ -89,7 +88,7 @@ namespace Statiq.Core
                 figure.Add(new XElement("figcaption", content));
             }
 
-            return context.CreateDocument(await context.GetContentProviderAsync(figure.ToString())).Yield();
+            return figure.ToString();
         }
     }
 }

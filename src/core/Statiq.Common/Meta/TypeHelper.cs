@@ -91,10 +91,6 @@ namespace Statiq.Common
             {
                 case IConfig config:
                     IExecutionContext context = IExecutionContext.Current;
-                    if (context == null)
-                    {
-                        throw new InvalidOperationException("Cannot expand metadata config value that requires an execution context, no execution context is available");
-                    }
                     if (config.RequiresDocument)
                     {
                         if (metadata is IDocument document)

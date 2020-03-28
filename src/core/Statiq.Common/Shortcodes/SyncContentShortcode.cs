@@ -4,15 +4,16 @@ using System.Threading.Tasks;
 namespace Statiq.Common
 {
     /// <summary>
-    /// A base class for simple shortcodes that return string content.
+    /// A base class for synchronous simple shortcodes that return string content.
     /// </summary>
-    public abstract class SimpleShortcode : IShortcode
+    public abstract class SyncContentShortcode : IShortcode
     {
-        public abstract Task<string> ExecuteAsync(KeyValuePair<string, string>[] args, string content, IDocument document, IExecutionContext context);
+        public abstract string Execute(KeyValuePair<string, string>[] args, string content, IDocument document, IExecutionContext context);
 
+        /// <inheritdoc />
         async Task<IEnumerable<IDocument>> IShortcode.ExecuteAsync(KeyValuePair<string, string>[] args, string content, IDocument document, IExecutionContext context)
         {
-            string result = await ExecuteAsync(args, content, document, context);
+            string result = Execute(args, content, document, context);
             if (string.IsNullOrEmpty(result))
             {
                 return null;

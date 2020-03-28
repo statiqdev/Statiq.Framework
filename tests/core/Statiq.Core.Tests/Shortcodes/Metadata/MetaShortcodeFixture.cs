@@ -13,7 +13,7 @@ namespace Statiq.Core.Tests.Shortcodes.Metadata
         public class ExecuteTests : MetaShortcodeFixture
         {
             [Test]
-            public async Task RendersMetadata()
+            public void RendersMetadata()
             {
                 // Given
                 TestExecutionContext context = new TestExecutionContext();
@@ -28,14 +28,14 @@ namespace Statiq.Core.Tests.Shortcodes.Metadata
                 MetaShortcode shortcode = new MetaShortcode();
 
                 // When
-                IEnumerable<IDocument> result = await shortcode.ExecuteAsync(args, string.Empty, document, context);
+                string result = shortcode.Execute(args, string.Empty, document, context);
 
                 // Then
-                result.ShouldHaveSingleItem().ShouldBeOfType<TestDocument>().Content.ShouldBe("Bar");
+                result.ShouldBe("Bar");
             }
 
             [Test]
-            public async Task EmptyForMissingMetadata()
+            public void EmptyForMissingMetadata()
             {
                 // Given
                 TestExecutionContext context = new TestExecutionContext();
@@ -50,10 +50,10 @@ namespace Statiq.Core.Tests.Shortcodes.Metadata
                 MetaShortcode shortcode = new MetaShortcode();
 
                 // When
-                IEnumerable<IDocument> result = await shortcode.ExecuteAsync(args, string.Empty, document, context);
+                string result = shortcode.Execute(args, string.Empty, document, context);
 
                 // Then
-                result.ShouldHaveSingleItem().ShouldBeOfType<TestDocument>().Content.ShouldBeEmpty();
+                result.ShouldBeNull();
             }
         }
     }

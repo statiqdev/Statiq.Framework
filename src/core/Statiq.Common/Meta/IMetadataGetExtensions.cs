@@ -31,10 +31,6 @@ namespace Statiq.Common
                 if (IScriptHelper.TryGetScriptString(key, out string script))
                 {
                     IExecutionContext context = IExecutionContext.Current;
-                    if (context == null)
-                    {
-                        throw new ExecutionException("Could not get execution context for script evaluation");
-                    }
                     object result = context.ScriptHelper.EvaluateAsync(script, metadata).GetAwaiter().GetResult();
                     return TypeHelper.TryExpandAndConvert(result, metadata, out value);
                 }

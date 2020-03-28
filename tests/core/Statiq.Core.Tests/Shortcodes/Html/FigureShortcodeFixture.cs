@@ -13,7 +13,7 @@ namespace Statiq.Core.Tests.Shortcodes.Html
         public class ExecuteTests : FigureShortcodeFixture
         {
             [Test]
-            public async Task RendersFigure()
+            public void RendersFigure()
             {
                 // Given
                 TestExecutionContext context = new TestExecutionContext();
@@ -32,10 +32,10 @@ namespace Statiq.Core.Tests.Shortcodes.Html
                 FigureShortcode shortcode = new FigureShortcode();
 
                 // When
-                IEnumerable<IDocument> result = await shortcode.ExecuteAsync(args, "foo bar", document, context);
+                string result = shortcode.Execute(args, "foo bar", document, context);
 
                 // Then
-                result.ShouldHaveSingleItem().ShouldBeOfType<TestDocument>().Content.ShouldBe(
+                result.ShouldBe(
                     @"<figure class=""jkl"">
   <a href=""/c/d"" target=""abc"" rel=""def"">
     <img src=""/a/b"" alt=""ghi"" height=""100px"" width=""200px"" />
@@ -46,7 +46,7 @@ namespace Statiq.Core.Tests.Shortcodes.Html
             }
 
             [Test]
-            public async Task RendersFigureWithoutLink()
+            public void RendersFigureWithoutLink()
             {
                 // Given
                 TestExecutionContext context = new TestExecutionContext();
@@ -62,10 +62,10 @@ namespace Statiq.Core.Tests.Shortcodes.Html
                 FigureShortcode shortcode = new FigureShortcode();
 
                 // When
-                IEnumerable<IDocument> result = await shortcode.ExecuteAsync(args, "foo bar", document, context);
+                string result = shortcode.Execute(args, "foo bar", document, context);
 
                 // Then
-                result.ShouldHaveSingleItem().ShouldBeOfType<TestDocument>().Content.ShouldBe(
+                result.ShouldBe(
                     @"<figure class=""jkl"">
   <img src=""/a/b"" alt=""ghi"" height=""100px"" width=""200px"" />
   <figcaption>foo bar</figcaption>
@@ -74,7 +74,7 @@ namespace Statiq.Core.Tests.Shortcodes.Html
             }
 
             [Test]
-            public async Task DoesNotRenderLinkIfNoImage()
+            public void DoesNotRenderLinkIfNoImage()
             {
                 // Given
                 TestExecutionContext context = new TestExecutionContext();
@@ -92,10 +92,10 @@ namespace Statiq.Core.Tests.Shortcodes.Html
                 FigureShortcode shortcode = new FigureShortcode();
 
                 // When
-                IEnumerable<IDocument> result = await shortcode.ExecuteAsync(args, "foo bar", document, context);
+                string result = shortcode.Execute(args, "foo bar", document, context);
 
                 // Then
-                result.ShouldHaveSingleItem().ShouldBeOfType<TestDocument>().Content.ShouldBe(
+                result.ShouldBe(
                     @"<figure class=""jkl"">
   <figcaption>foo bar</figcaption>
 </figure>",

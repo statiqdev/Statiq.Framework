@@ -13,13 +13,13 @@ namespace Statiq.Core
     /// &lt;?# Eval ?>&lt;?# return 1 + 2; ?>&lt;?#/ Eval ?>
     /// </code>
     /// </example>
-    public class EvalShortcode : Shortcode
+    public class EvalShortcode : ContentShortcode
     {
-        public override async Task<IEnumerable<IDocument>> ExecuteAsync(KeyValuePair<string, string>[] args, string content, IDocument document, IExecutionContext context)
+        public override async Task<string> ExecuteAsync(KeyValuePair<string, string>[] args, string content, IDocument document, IExecutionContext context)
         {
             byte[] assembly = context.ScriptHelper.Compile(content, document);
             object value = await context.ScriptHelper.EvaluateAsync(assembly, document);
-            return context.CreateDocument(await context.GetContentProviderAsync(value.ToString())).Yield();
+            return value.ToString();
         }
     }
 }

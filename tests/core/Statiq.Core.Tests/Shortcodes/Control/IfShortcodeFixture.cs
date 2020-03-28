@@ -28,7 +28,7 @@ namespace Statiq.Core.Tests.Shortcodes.Control
                 IfShortcode shortcode = new IfShortcode();
 
                 // When
-                IEnumerable<IDocument> result = await shortcode.ExecuteAsync(args, "Fizzbuzz", document, context);
+                IDocument result = await shortcode.ExecuteAsync(args, "Fizzbuzz", document, context);
 
                 // Then
                 result.ShouldBeNull();
@@ -51,10 +51,10 @@ namespace Statiq.Core.Tests.Shortcodes.Control
                 IfShortcode shortcode = new IfShortcode();
 
                 // When
-                IEnumerable<IDocument> result = await shortcode.ExecuteAsync(args, "Fizzbuzz", document, context);
+                IDocument result = await shortcode.ExecuteAsync(args, "Fizzbuzz", document, context);
 
                 // Then
-                result.ShouldHaveSingleItem().ShouldBeOfType<TestDocument>().Content.ShouldBe("Fizzbuzz");
+                result.ShouldBeOfType<TestDocument>().Content.ShouldBe("Fizzbuzz");
             }
 
             [Test]
@@ -74,7 +74,7 @@ namespace Statiq.Core.Tests.Shortcodes.Control
                 IfShortcode shortcode = new IfShortcode();
 
                 // When
-                IEnumerable<IDocument> result = await shortcode.ExecuteAsync(args, "Fizzbuzz", document, context);
+                IDocument result = await shortcode.ExecuteAsync(args, "Fizzbuzz", document, context);
 
                 // Then
                 result.ShouldBeNull();
@@ -97,10 +97,10 @@ namespace Statiq.Core.Tests.Shortcodes.Control
                 IfShortcode shortcode = new IfShortcode();
 
                 // When
-                IEnumerable<IDocument> result = await shortcode.ExecuteAsync(args, "Fizzbuzz", document, context);
+                IDocument result = await shortcode.ExecuteAsync(args, "Fizzbuzz", document, context);
 
                 // Then
-                result.ShouldHaveSingleItem().ShouldBeOfType<TestDocument>().Content.ShouldBe("Fizzbuzz");
+                result.ShouldBeOfType<TestDocument>().Content.ShouldBe("Fizzbuzz");
             }
 
             [Test]
@@ -120,7 +120,7 @@ namespace Statiq.Core.Tests.Shortcodes.Control
                 IfShortcode shortcode = new IfShortcode();
 
                 // When
-                IEnumerable<IDocument> result = await shortcode.ExecuteAsync(args, "Fizzbuzz", document, context);
+                IDocument result = await shortcode.ExecuteAsync(args, "Fizzbuzz", document, context);
 
                 // Then
                 result.ShouldBeNull();
@@ -142,10 +142,10 @@ namespace Statiq.Core.Tests.Shortcodes.Control
                 IfShortcode shortcode = new IfShortcode();
 
                 // When
-                IEnumerable<IDocument> result = await shortcode.ExecuteAsync(args, "Fizzbuzz", document, context);
+                IDocument result = await shortcode.ExecuteAsync(args, "Fizzbuzz", document, context);
 
                 // Then
-                result.ShouldHaveSingleItem().ShouldBeOfType<TestDocument>().Content.ShouldBe("Fizzbuzz");
+                result.ShouldBeOfType<TestDocument>().Content.ShouldBe("Fizzbuzz");
             }
 
             [Test]
@@ -164,10 +164,10 @@ namespace Statiq.Core.Tests.Shortcodes.Control
                 IfShortcode shortcode = new IfShortcode();
 
                 // When
-                IEnumerable<IDocument> result = await shortcode.ExecuteAsync(args, "Fizzbuzz", document, context);
+                IDocument result = await shortcode.ExecuteAsync(args, "Fizzbuzz", document, context);
 
                 // Then
-                result.ShouldHaveSingleItem().ShouldBeOfType<TestDocument>().Content.ShouldBe("Fizzbuzz");
+                result.ShouldBeOfType<TestDocument>().Content.ShouldBe("Fizzbuzz");
             }
 
             [Test]
@@ -186,7 +186,7 @@ namespace Statiq.Core.Tests.Shortcodes.Control
                 IfShortcode shortcode = new IfShortcode();
 
                 // When
-                IEnumerable<IDocument> result = await shortcode.ExecuteAsync(args, "Fizzbuzz", document, context);
+                IDocument result = await shortcode.ExecuteAsync(args, "Fizzbuzz", document, context);
 
                 // Then
                 result.ShouldBeNull();
@@ -208,7 +208,7 @@ namespace Statiq.Core.Tests.Shortcodes.Control
                 IfShortcode shortcode = new IfShortcode();
 
                 // When
-                IEnumerable<IDocument> result = await shortcode.ExecuteAsync(args, "Fizzbuzz", document, context);
+                IDocument result = await shortcode.ExecuteAsync(args, "Fizzbuzz", document, context);
 
                 // Then
                 result.ShouldBeNull();
@@ -230,7 +230,7 @@ namespace Statiq.Core.Tests.Shortcodes.Control
                 IfShortcode shortcode = new IfShortcode();
 
                 // When
-                IEnumerable<IDocument> result = await shortcode.ExecuteAsync(args, "Fizzbuzz", document, context);
+                IDocument result = await shortcode.ExecuteAsync(args, "Fizzbuzz", document, context);
 
                 // Then
                 result.ShouldBeNull();
@@ -253,7 +253,7 @@ namespace Statiq.Core.Tests.Shortcodes.Control
                 IfShortcode shortcode = new IfShortcode();
 
                 // When
-                IEnumerable<IDocument> result = await shortcode.ExecuteAsync(args, "Fizzbuzz", document, context);
+                IDocument result = await shortcode.ExecuteAsync(args, "Fizzbuzz", document, context);
 
                 // Then
                 result.ShouldBeNull();
@@ -277,10 +277,10 @@ namespace Statiq.Core.Tests.Shortcodes.Control
                 IfShortcode shortcode = new IfShortcode();
 
                 // When
-                IEnumerable<IDocument> result = await shortcode.ExecuteAsync(args, "Fizzbuzz", document, context);
+                IDocument result = await shortcode.ExecuteAsync(args, "Fizzbuzz", document, context);
 
                 // Then
-                result.ShouldHaveSingleItem().ShouldBeOfType<TestDocument>().Content.ShouldBe("Fizzbuzz");
+                result.ShouldBeOfType<TestDocument>().Content.ShouldBe("Fizzbuzz");
             }
         }
     }

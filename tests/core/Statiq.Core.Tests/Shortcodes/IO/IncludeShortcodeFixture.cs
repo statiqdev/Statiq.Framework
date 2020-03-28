@@ -14,7 +14,7 @@ namespace Statiq.Core.Tests.Shortcodes.IO
         public class ExecuteTests : IncludeShortcodeFixture
         {
             [Test]
-            public async Task IncludesFile()
+            public void IncludesFile()
             {
                 // Given
                 TestFileProvider fileProvider = new TestFileProvider();
@@ -41,14 +41,14 @@ namespace Statiq.Core.Tests.Shortcodes.IO
                 IncludeShortcode shortcode = new IncludeShortcode();
 
                 // When
-                IEnumerable<IDocument> result = await shortcode.ExecuteAsync(args, string.Empty, document, context);
+                IDocument result = shortcode.Execute(args, string.Empty, document, context);
 
                 // Then
-                result.ShouldHaveSingleItem().ShouldBeOfType<TestDocument>().Content.ShouldBe("foo");
+                result.ShouldBeOfType<TestDocument>().Content.ShouldBe("foo");
             }
 
             [Test]
-            public async Task EmptyResultIfFileDoesNotExist()
+            public void EmptyResultIfFileDoesNotExist()
             {
                 // Given
                 TestFileProvider fileProvider = new TestFileProvider();
@@ -76,14 +76,14 @@ namespace Statiq.Core.Tests.Shortcodes.IO
                 IncludeShortcode shortcode = new IncludeShortcode();
 
                 // When
-                IEnumerable<IDocument> result = await shortcode.ExecuteAsync(args, string.Empty, document, context);
+                IDocument result = shortcode.Execute(args, string.Empty, document, context);
 
                 // Then
-                result.ShouldHaveSingleItem().ShouldBeOfType<TestDocument>().Content.ShouldBeEmpty();
+                result.ShouldBeOfType<TestDocument>().Content.ShouldBeEmpty();
             }
 
             [Test]
-            public async Task IncludesFileRelativeToSource()
+            public void IncludesFileRelativeToSource()
             {
                 // Given
                 TestFileProvider fileProvider = new TestFileProvider();
@@ -111,10 +111,10 @@ namespace Statiq.Core.Tests.Shortcodes.IO
                 IncludeShortcode shortcode = new IncludeShortcode();
 
                 // When
-                IEnumerable<IDocument> result = await shortcode.ExecuteAsync(args, string.Empty, document, context);
+                IDocument result = shortcode.Execute(args, string.Empty, document, context);
 
                 // Then
-                result.ShouldHaveSingleItem().ShouldBeOfType<TestDocument>().Content.ShouldBe("foo");
+                result.ShouldBeOfType<TestDocument>().Content.ShouldBe("foo");
             }
         }
     }

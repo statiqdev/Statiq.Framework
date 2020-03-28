@@ -67,10 +67,10 @@ namespace Statiq.Core
     /// <parameter name="HeaderClass">The <c>class</c> attribute to apply to the <c>thead</c> element.</parameter>
     /// <parameter name="BodyClass">The <c>class</c> attribute to apply to the <c>tbody</c> element.</parameter>
     /// <parameter name="FooterClass">The <c>class</c> attribute to apply to the <c>tfoot</c> element.</parameter>
-    public class TableShortcode : Shortcode
+    public class TableShortcode : SyncContentShortcode
     {
         /// <inheritdoc />
-        public override async Task<IEnumerable<IDocument>> ExecuteAsync(KeyValuePair<string, string>[] args, string content, IDocument document, IExecutionContext context)
+        public override string Execute(KeyValuePair<string, string>[] args, string content, IDocument document, IExecutionContext context)
         {
             IMetadataDictionary dictionary = args.ToDictionary(
                 "Class",
@@ -169,7 +169,7 @@ namespace Statiq.Core
                 }
             }
 
-            return context.CreateDocument(await context.GetContentProviderAsync(table.ToString())).Yield();
+            return table.ToString();
         }
     }
 }

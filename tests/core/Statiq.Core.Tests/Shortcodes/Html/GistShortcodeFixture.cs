@@ -13,7 +13,7 @@ namespace Statiq.Core.Tests.Shortcodes.Html
         public class ExecuteTests : GistShortcodeFixture
         {
             [Test]
-            public async Task RendersGist()
+            public void RendersGist()
             {
                 TestExecutionContext context = new TestExecutionContext();
                 TestDocument document = new TestDocument();
@@ -26,14 +26,14 @@ namespace Statiq.Core.Tests.Shortcodes.Html
                 GistShortcode shortcode = new GistShortcode();
 
                 // When
-                IEnumerable<IDocument> result = await shortcode.ExecuteAsync(args, null, document, context);
+                string result = shortcode.Execute(args, null, document, context);
 
                 // Then
-                result.ShouldHaveSingleItem().ShouldBeOfType<TestDocument>().Content.ShouldBe("<script src=\"//gist.github.com/def/abc.js?file=ghi\" type=\"text/javascript\"></script>");
+                result.ShouldBe("<script src=\"//gist.github.com/def/abc.js?file=ghi\" type=\"text/javascript\"></script>");
             }
 
             [Test]
-            public async Task RendersGistWithoutUsername()
+            public void RendersGistWithoutUsername()
             {
                 TestExecutionContext context = new TestExecutionContext();
                 TestDocument document = new TestDocument();
@@ -45,14 +45,14 @@ namespace Statiq.Core.Tests.Shortcodes.Html
                 GistShortcode shortcode = new GistShortcode();
 
                 // When
-                IEnumerable<IDocument> result = await shortcode.ExecuteAsync(args, null, document, context);
+                string result = shortcode.Execute(args, null, document, context);
 
                 // Then
-                result.ShouldHaveSingleItem().ShouldBeOfType<TestDocument>().Content.ShouldBe("<script src=\"//gist.github.com/abc.js?file=ghi\" type=\"text/javascript\"></script>");
+                result.ShouldBe("<script src=\"//gist.github.com/abc.js?file=ghi\" type=\"text/javascript\"></script>");
             }
 
             [Test]
-            public async Task RendersGistWithoutFile()
+            public void RendersGistWithoutFile()
             {
                 TestExecutionContext context = new TestExecutionContext();
                 TestDocument document = new TestDocument();
@@ -64,10 +64,10 @@ namespace Statiq.Core.Tests.Shortcodes.Html
                 GistShortcode shortcode = new GistShortcode();
 
                 // When
-                IEnumerable<IDocument> result = await shortcode.ExecuteAsync(args, null, document, context);
+                string result = shortcode.Execute(args, null, document, context);
 
                 // Then
-                result.ShouldHaveSingleItem().ShouldBeOfType<TestDocument>().Content.ShouldBe("<script src=\"//gist.github.com/def/abc.js\" type=\"text/javascript\"></script>");
+                result.ShouldBe("<script src=\"//gist.github.com/def/abc.js\" type=\"text/javascript\"></script>");
             }
         }
     }

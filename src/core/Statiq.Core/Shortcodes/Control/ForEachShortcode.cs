@@ -48,7 +48,7 @@ namespace Statiq.Core
                         metadata.Add(indexKey, index);
                     }
 
-                    results.Add(document.Clone(metadata, await context.GetContentProviderAsync(content)));
+                    results.Add(await document.CloneAsync(metadata, content));
 
                     index++;
                 }

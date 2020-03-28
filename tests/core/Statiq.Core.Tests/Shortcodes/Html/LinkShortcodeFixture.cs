@@ -17,7 +17,7 @@ namespace Statiq.Core.Tests.Shortcodes.Html
             [TestCase("foo/bar", "/foo/bar")]
             [TestCase("/foo/bar", "/foo/bar")]
             [TestCase("//foo/bar", "/foo/bar")]
-            public async Task RendersLink(string path, string expected)
+            public void RendersLink(string path, string expected)
             {
                 // Given
                 TestExecutionContext context = new TestExecutionContext();
@@ -29,10 +29,10 @@ namespace Statiq.Core.Tests.Shortcodes.Html
                 LinkShortcode shortcode = new LinkShortcode();
 
                 // When
-                IEnumerable<IDocument> result = await shortcode.ExecuteAsync(args, string.Empty, document, context);
+                string result = shortcode.Execute(args, string.Empty, document, context);
 
                 // Then
-                result.ShouldHaveSingleItem().ShouldBeOfType<TestDocument>().Content.ShouldBe(expected);
+                result.ShouldBe(expected);
             }
 
             [TestCase("http://foo.com/bar", "http://foo.com/bar")]
@@ -40,7 +40,7 @@ namespace Statiq.Core.Tests.Shortcodes.Html
             [TestCase("foo/bar", "http://domain.com/foo/bar")]
             [TestCase("/foo/bar", "http://domain.com/foo/bar")]
             [TestCase("//foo/bar", "http://domain.com/foo/bar")]
-            public async Task RendersLinkWithHost(string path, string expected)
+            public void RendersLinkWithHost(string path, string expected)
             {
                 // Given
                 TestExecutionContext context = new TestExecutionContext();
@@ -54,10 +54,10 @@ namespace Statiq.Core.Tests.Shortcodes.Html
                 LinkShortcode shortcode = new LinkShortcode();
 
                 // When
-                IEnumerable<IDocument> result = await shortcode.ExecuteAsync(args, string.Empty, document, context);
+                string result = shortcode.Execute(args, string.Empty, document, context);
 
                 // Then
-                result.ShouldHaveSingleItem().ShouldBeOfType<TestDocument>().Content.ShouldBe(expected);
+                result.ShouldBe(expected);
             }
 
             [TestCase("http://foo.com/bar", "http://foo.com/bar")]
@@ -65,7 +65,7 @@ namespace Statiq.Core.Tests.Shortcodes.Html
             [TestCase("foo/bar", "http://google.com/foo/bar")]
             [TestCase("/foo/bar", "http://google.com/foo/bar")]
             [TestCase("//foo/bar", "http://google.com/foo/bar")]
-            public async Task RendersLinkWithAlternateHost(string path, string expected)
+            public void RendersLinkWithAlternateHost(string path, string expected)
             {
                 // Given
                 TestExecutionContext context = new TestExecutionContext();
@@ -79,10 +79,10 @@ namespace Statiq.Core.Tests.Shortcodes.Html
                 LinkShortcode shortcode = new LinkShortcode();
 
                 // When
-                IEnumerable<IDocument> result = await shortcode.ExecuteAsync(args, string.Empty, document, context);
+                string result = shortcode.Execute(args, string.Empty, document, context);
 
                 // Then
-                result.ShouldHaveSingleItem().ShouldBeOfType<TestDocument>().Content.ShouldBe(expected);
+                result.ShouldBe(expected);
             }
         }
     }

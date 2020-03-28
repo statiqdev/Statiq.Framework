@@ -7,12 +7,8 @@ namespace Statiq.Common
     /// <summary>
     /// A base class for synchronous shortcodes.
     /// </summary>
-    public abstract class SyncShortcode : Shortcode
+    public abstract class SyncShortcode : IShortcode
     {
-        /// <inheritdoc />
-        public sealed override Task<IEnumerable<IDocument>> ExecuteAsync(KeyValuePair<string, string>[] args, string content, IDocument document, IExecutionContext context) =>
-            Task.FromResult(Execute(args, content, document, context));
-
         /// <summary>
         /// Executes the shortcode and returns an <see cref="IDocument"/> with the shortcode result content and metadata.
         /// </summary>
@@ -30,5 +26,9 @@ namespace Statiq.Common
         /// but no replacement content will be added and the metadata will not change.
         /// </returns>
         public abstract IEnumerable<IDocument> Execute(KeyValuePair<string, string>[] args, string content, IDocument document, IExecutionContext context);
+
+        /// <inheritdoc />
+        Task<IEnumerable<IDocument>> IShortcode.ExecuteAsync(KeyValuePair<string, string>[] args, string content, IDocument document, IExecutionContext context) =>
+            Task.FromResult(Execute(args, content, document, context));
     }
 }

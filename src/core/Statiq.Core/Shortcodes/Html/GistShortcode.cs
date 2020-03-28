@@ -24,21 +24,18 @@ namespace Statiq.Core
     /// <parameter name="Id">The ID of the gist.</parameter>
     /// <parameter name="Username">The username that the gist is under (optional).</parameter>
     /// <parameter name="File">The file within the gist to embed (optional).</parameter>
-    public class GistShortcode : Shortcode
+    public class GistShortcode : SyncContentShortcode
     {
         /// <inheritdoc />
-        public override async Task<IEnumerable<IDocument>> ExecuteAsync(KeyValuePair<string, string>[] args, string content, IDocument document, IExecutionContext context)
+        public override string Execute(KeyValuePair<string, string>[] args, string content, IDocument document, IExecutionContext context)
         {
             IMetadataDictionary arguments = args.ToDictionary(
                 "Id",
                 "Username",
                 "File");
             arguments.RequireKeys("Id");
-            return context.CreateDocument(
-                await context.GetContentProviderAsync(
-                    $"<script src=\"//gist.github.com/{arguments.GetString("Username", x => x + "/")}{arguments.GetString("Id")}.js"
-                    + $"{arguments.GetString("File", x => "?file=" + x)}\" type=\"text/javascript\"></script>"))
-                .Yield();
+            return $"<script src=\"//gist.github.com/{arguments.GetString("Username", x => x + "/")}{arguments.GetString("Id")}.js"
+                + $"{arguments.GetString("File", x => "?file=" + x)}\" type=\"text/javascript\"></script>";
         }
     }
 }
