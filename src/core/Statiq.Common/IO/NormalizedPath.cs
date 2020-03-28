@@ -830,9 +830,8 @@ namespace Statiq.Common
         /// Gets path to this file relative to it's containing input directory in the current file system.
         /// If no input directories contain this file, then the file name is returned.
         /// </summary>
-        /// <param name="context">The current execution context.</param>
         /// <returns>A path to this file relative to it's containing input directory in the current file system.</returns>
-        public NormalizedPath GetRelativeInputPath(IExecutionContext context)
+        public NormalizedPath GetRelativeInputPath()
         {
             ThrowIfNull();
 
@@ -841,7 +840,7 @@ namespace Statiq.Common
                 return this;
             }
 
-            NormalizedPath containingPath = context.FileSystem.GetContainingInputPathForAbsolutePath(this);
+            NormalizedPath containingPath = IExecutionContext.Current.FileSystem.GetContainingInputPathForAbsolutePath(this);
             return containingPath.IsNull ? FileName : containingPath.GetRelativePath(this);
         }
 
@@ -849,9 +848,8 @@ namespace Statiq.Common
         /// Gets path to this file relative to the output directory in the current file system.
         /// If this path is not relative to the output directory, then the file name is returned.
         /// </summary>
-        /// <param name="context">The current execution context.</param>
         /// <returns>A path to this file relative to it's containing input directory in the current file system.</returns>
-        public NormalizedPath GetRelativeOutputPath(IExecutionContext context)
+        public NormalizedPath GetRelativeOutputPath()
         {
             ThrowIfNull();
 
@@ -860,8 +858,8 @@ namespace Statiq.Common
                 return this;
             }
 
-            return Parent.Segments.StartsWith(context.FileSystem.OutputPath.Segments)
-                ? context.FileSystem.OutputPath.GetRelativePath(this)
+            return Parent.Segments.StartsWith(IExecutionContext.Current.FileSystem.OutputPath.Segments)
+                ? IExecutionContext.Current.FileSystem.OutputPath.GetRelativePath(this)
                 : FileName;
         }
 

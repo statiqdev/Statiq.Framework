@@ -29,6 +29,11 @@ namespace Statiq.Common
         }
 
         /// <summary>
+        /// The current execution context or <c>null</c> if a current context is unavailable.
+        /// </summary>
+        public static IExecutionContext CurrentOrNull => _current.Value;
+
+        /// <summary>
         /// Returns <c>true</c> if there is a current <see cref="IExecutionContext"/>, <c>false</c> otherwise.
         /// </summary>
         public static bool HasCurrent => _current.Value != null;

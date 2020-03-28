@@ -15,7 +15,7 @@ namespace Statiq.Core
     /// is specified, the module will be executed once per input document and the resulting output documents will be
     /// aggregated. In either case, the input documents will not be returned as output of this module.
     /// <see cref="IDocument.Source"/> will be set to the absolute path of the file
-    /// (use <see cref="NormalizedPath.GetRelativeInputPath(IExecutionContext)"/> to get a source path relative to the input folders).
+    /// (use <see cref="NormalizedPath.GetRelativeInputPath()"/> to get a source path relative to the input folders).
     /// <see cref="IDocument.Destination"/> will be set to the relative path of the file (so that <see cref="WriteFiles"/> will write it
     /// to the same relative path in the output folder).
     /// </remarks>
@@ -89,7 +89,7 @@ namespace Statiq.Core
                     IContentProvider contentProvider = _mediaType == null
                         ? file?.GetContentProvider()
                         : file?.GetContentProvider(_mediaType(file));
-                    return context.CloneOrCreateDocument(input, file.Path, file.Path.GetRelativeInputPath(context), contentProvider);
+                    return context.CloneOrCreateDocument(input, file.Path, file.Path.GetRelativeInputPath(), contentProvider);
                 });
             }
             return null;

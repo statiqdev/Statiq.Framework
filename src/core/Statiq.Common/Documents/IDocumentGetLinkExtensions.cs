@@ -16,7 +16,6 @@ namespace Statiq.Common
         /// sites work the same on any server including the preview server.
         /// </summary>
         /// <param name="document">The document to generate a link for.</param>
-        /// <param name="executionContext">The execution context.</param>
         /// <param name="includeHost">
         /// If set to <c>true</c> the host configured in the output settings will
         /// be included in the link, otherwise the host will be omitted and only the root path will be included (default).
@@ -24,7 +23,7 @@ namespace Statiq.Common
         /// <returns>
         /// A string representation of the path suitable for a web link.
         /// </returns>
-        public static string GetLink(this IDocument document, IExecutionContext executionContext, bool includeHost = false) =>
-            executionContext.GetLink(document, includeHost);
+        public static string GetLink(this IDocument document, bool includeHost = false) =>
+            IExecutionContext.Current.GetLink(document, includeHost);
     }
 }

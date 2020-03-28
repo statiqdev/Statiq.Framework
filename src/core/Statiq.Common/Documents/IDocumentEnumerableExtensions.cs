@@ -76,12 +76,11 @@ namespace Statiq.Common
         /// </remarks>
         /// <typeparam name="TDocument">The document type.</typeparam>
         /// <param name="documents">The documents.</param>
-        /// <param name="context">The current execution context.</param>
         /// <param name="patterns">The globbing pattern(s) to match.</param>
         /// <returns>The documents that match the globbing pattern(s).</returns>
-        public static DocumentList<TDocument> FilterSources<TDocument>(this IEnumerable<TDocument> documents, IExecutionContext context, params string[] patterns)
+        public static DocumentList<TDocument> FilterSources<TDocument>(this IEnumerable<TDocument> documents, params string[] patterns)
             where TDocument : IDocument =>
-            documents.FilterSources(context, (IEnumerable<string>)patterns).ToDocumentList();
+            documents.FilterSources((IEnumerable<string>)patterns).ToDocumentList();
 
         /// <summary>
         /// Filters the documents by source.
@@ -92,18 +91,16 @@ namespace Statiq.Common
         /// </remarks>
         /// <typeparam name="TDocument">The document type.</typeparam>
         /// <param name="documents">The documents.</param>
-        /// <param name="context">The current execution context.</param>
         /// <param name="patterns">The globbing pattern(s) to match.</param>
         /// <returns>The documents that match the globbing pattern(s).</returns>
-        public static DocumentList<TDocument> FilterSources<TDocument>(this IEnumerable<TDocument> documents, IExecutionContext context, IEnumerable<string> patterns)
+        public static DocumentList<TDocument> FilterSources<TDocument>(this IEnumerable<TDocument> documents, IEnumerable<string> patterns)
             where TDocument : IDocument
         {
             _ = documents ?? throw new ArgumentNullException(nameof(documents));
-            _ = context ?? throw new ArgumentNullException(nameof(context));
             _ = patterns ?? throw new ArgumentNullException(nameof(patterns));
 
             DocumentFileProvider fileProvider = new DocumentFileProvider((IEnumerable<IDocument>)documents, true);
-            IEnumerable<IDirectory> directories = context.FileSystem
+            IEnumerable<IDirectory> directories = IExecutionContext.Current.FileSystem
                 .GetInputDirectories()
                 .Select(x => fileProvider.GetDirectory(x.Path));
             IEnumerable<IFile> matches = directories.SelectMany(x => Globber.GetFiles(x, patterns));
@@ -147,13 +144,13 @@ namespace Statiq.Common
             return matches.Select(x => x.Path).Distinct().Select(match => fileProvider.GetDocument(match)).Cast<TDocument>().ToDocumentList();
         }
 
-        public static TDocument FirstOrDefaultSource<TDocument>(this IEnumerable<TDocument> documents, IExecutionContext context, IEnumerable<string> patterns)
+        public static TDocument FirstOrDefaultSource<TDocument>(this IEnumerable<TDocument> documents, IEnumerable<string> patterns)
             where TDocument : IDocument =>
-            documents.FilterSources(context, patterns).FirstOrDefault();
+            documents.FilterSources(patterns).FirstOrDefault();
 
-        public static TDocument FirstOrDefaultSource<TDocument>(this IEnumerable<TDocument> documents, IExecutionContext context, params string[] patterns)
+        public static TDocument FirstOrDefaultSource<TDocument>(this IEnumerable<TDocument> documents, params string[] patterns)
             where TDocument : IDocument =>
-            documents.FirstOrDefaultSource(context, (IEnumerable<string>)patterns);
+            documents.FirstOrDefaultSource((IEnumerable<string>)patterns);
 
         public static TDocument FirstOrDefaultDestination<TDocument>(this IEnumerable<TDocument> documents, IEnumerable<string> patterns)
             where TDocument : IDocument =>

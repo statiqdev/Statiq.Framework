@@ -25,7 +25,7 @@ namespace Statiq.Common
         /// <returns>The date input culture.</returns>
         public static CultureInfo GetDateTimeInputCulture(this IExecutionContext context)
         {
-            if (!context.Settings.ContainsKey(Keys.DateTimeInputCulture))
+            if (context?.Settings.ContainsKey(Keys.DateTimeInputCulture) != true)
             {
                 return CultureInfo.CurrentCulture;
             }

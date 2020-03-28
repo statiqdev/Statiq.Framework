@@ -104,7 +104,7 @@ namespace Statiq.Core
                 .GroupByMany(x => x.Keys, x => x.Document, _comparer)
                 .Select(x => context.CreateDocument(
                     _source,
-                    _source.IsNull ? _source : _source.GetRelativeInputPath(context),
+                    _source.IsNull ? _source : _source.GetRelativeInputPath(),
                     new MetadataItems
                     {
                         { Keys.Children, x.ToImmutableArray() },

@@ -126,7 +126,7 @@ namespace Statiq.Core
                 }
                 IDocument document = context.CreateDocument(
                     _source,
-                    _source.IsNull ? _source : _source.GetRelativeInputPath(context),
+                    _source.IsNull ? _source : _source.GetRelativeInputPath(),
                     items);
                 if (results.Count > 0)
                 {

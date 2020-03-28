@@ -213,7 +213,7 @@ namespace Statiq.Razor
         private string GetRelativePath(IDocument document, IExecutionContext context)
         {
             // Use the pre-calculated relative file path if available
-            NormalizedPath relativePath = document.Source.IsNull ? NormalizedPath.Null : document.Source.GetRelativeInputPath(context);
+            NormalizedPath relativePath = document.Source.IsNull ? NormalizedPath.Null : document.Source.GetRelativeInputPath();
             return relativePath.IsNull ? GetRelativePath(document.Source, context) : $"/{relativePath.FullPath}";
         }
 

@@ -82,7 +82,7 @@ namespace Statiq.Less
                 string content = engine.TransformToCss(await input.GetContentStringAsync(), path.FileName.FullPath);
 
                 // Process the result
-                NormalizedPath cssPath = path.GetRelativeInputPath(context).ChangeExtension("css");
+                NormalizedPath cssPath = path.GetRelativeInputPath().ChangeExtension("css");
                 return input.Clone(
                     cssPath,
                     await context.GetContentProviderAsync(content, MediaTypes.Css));

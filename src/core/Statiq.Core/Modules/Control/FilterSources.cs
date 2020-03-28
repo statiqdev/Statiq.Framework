@@ -39,6 +39,6 @@ namespace Statiq.Core
 
         /// <inheritdoc />
         protected override IEnumerable<IDocument> ExecuteContext(IExecutionContext context) =>
-            context.Inputs.FilterSources(context, _patterns);
+            context.Inputs.FilterSources(_patterns);
     }
 }

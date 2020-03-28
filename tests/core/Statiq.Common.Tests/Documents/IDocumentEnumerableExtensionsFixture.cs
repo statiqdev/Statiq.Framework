@@ -23,7 +23,7 @@ namespace Statiq.Common.Tests.Documents
                 TestDocument[] documents = new[] { a, b, c, d };
 
                 // When
-                TestDocument[] results = documents.FilterSources(context, "Foo/**/*.txt").ToArray();
+                TestDocument[] results = documents.FilterSources("Foo/**/*.txt").ToArray();
 
                 // Then
                 results.ShouldBe(new[] { a, b }, true);

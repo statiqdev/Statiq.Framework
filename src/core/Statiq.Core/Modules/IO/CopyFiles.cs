@@ -109,7 +109,7 @@ namespace Statiq.Core
                         try
                         {
                             // Get the default destination file
-                            NormalizedPath relativePath = file.Path.GetRelativeInputPath(context);
+                            NormalizedPath relativePath = file.Path.GetRelativeInputPath();
                             IFile destination = context.FileSystem.GetOutputFile(relativePath);
 
                             // Calculate an alternate destination if needed

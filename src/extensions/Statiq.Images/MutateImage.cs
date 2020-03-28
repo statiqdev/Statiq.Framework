@@ -313,7 +313,7 @@ namespace Statiq.Images
 
         protected override IEnumerable<IDocument> ExecuteInput(IDocument input, IExecutionContext context)
         {
-            NormalizedPath relativePath = input.Source.GetRelativeInputPath(context);
+            NormalizedPath relativePath = input.Source.GetRelativeInputPath();
             return _operations.SelectMany(operations =>
             {
                 NormalizedPath destinationPath = relativePath;
