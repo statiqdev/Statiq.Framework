@@ -370,7 +370,7 @@ namespace Statiq.Common.Tests.Meta
             }
         }
 
-        public class GetDocumentListTests : MetadataFixture
+        public class GetDocumentsTests : MetadataFixture
         {
             [Test]
             public void ReturnsNullWhenKeyNotFound()
@@ -380,10 +380,10 @@ namespace Statiq.Common.Tests.Meta
                 IMetadata metadata = new Metadata(initialMetadata);
 
                 // When
-                IReadOnlyList<IDocument> result = metadata.GetDocumentList("A");
+                IEnumerable<IDocument> result = metadata.GetDocuments("A");
 
                 // Then
-                Assert.IsNull(result);
+                result.ShouldBeNull();
             }
 
             [Test]
@@ -397,7 +397,7 @@ namespace Statiq.Common.Tests.Meta
                 IMetadata metadata = new Metadata(initialMetadata);
 
                 // When
-                IReadOnlyList<IDocument> result = metadata.GetDocumentList("A");
+                IEnumerable<IDocument> result = metadata.GetDocuments("A");
 
                 // Then
                 Assert.IsNotNull(result);
@@ -412,7 +412,7 @@ namespace Statiq.Common.Tests.Meta
                 IMetadata metadata = new Metadata(initialMetadata);
 
                 // When
-                IReadOnlyList<IDocument> result = metadata.GetDocumentList("A");
+                IEnumerable<IDocument> result = metadata.GetDocuments("A");
 
                 // Then
                 Assert.IsNotNull(result);
@@ -427,7 +427,72 @@ namespace Statiq.Common.Tests.Meta
                 IMetadata metadata = new Metadata(initialMetadata);
 
                 // When
-                IReadOnlyList<IDocument> result = metadata.GetDocumentList("A");
+                IEnumerable<IDocument> result = metadata.GetDocuments("A");
+
+                // Then
+                Assert.IsNotNull(result);
+                CollectionAssert.IsEmpty(result);
+            }
+        }
+
+        public class GetDocumentListTests : MetadataFixture
+        {
+            [Test]
+            public void ReturnsEmptyListWhenKeyNotFound()
+            {
+                // Given
+                MetadataItems initialMetadata = new MetadataItems();
+                IMetadata metadata = new Metadata(initialMetadata);
+
+                // When
+                DocumentList<IDocument> result = metadata.GetDocumentList("A");
+
+                // Then
+                Assert.IsEmpty(result);
+            }
+
+            [Test]
+            public void ReturnsListForList()
+            {
+                // Given
+                IDocument a = new TestDocument();
+                IDocument b = new TestDocument();
+                IDocument c = new TestDocument();
+                MetadataItems initialMetadata = new MetadataItems { { "A", new List<IDocument> { a, b, c } } };
+                IMetadata metadata = new Metadata(initialMetadata);
+
+                // When
+                DocumentList<IDocument> result = metadata.GetDocumentList("A");
+
+                // Then
+                Assert.IsNotNull(result);
+                CollectionAssert.AreEqual(new[] { a, b, c }, result);
+            }
+
+            [Test]
+            public void ReturnsEmptyListForListOfInt()
+            {
+                // Given
+                MetadataItems initialMetadata = new MetadataItems { { "A", new List<int> { 1, 2, 3 } } };
+                IMetadata metadata = new Metadata(initialMetadata);
+
+                // When
+                DocumentList<IDocument> result = metadata.GetDocumentList("A");
+
+                // Then
+                Assert.IsNotNull(result);
+                CollectionAssert.IsEmpty(result);
+            }
+
+            [Test]
+            public void ReturnsEmptyListForSingleInt()
+            {
+                // Given
+                MetadataItems initialMetadata = new MetadataItems { { "A", 1 } };
+                IMetadata metadata = new Metadata(initialMetadata);
+
+                // When
+                DocumentList<IDocument> result = metadata.GetDocumentList("A");
 
                 // Then
                 Assert.IsNotNull(result);

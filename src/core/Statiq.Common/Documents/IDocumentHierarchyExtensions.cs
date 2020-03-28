@@ -135,7 +135,7 @@ namespace Statiq.Common
                 if (results.Add(current))
                 {
                     IEnumerable<IDocument> children = childrenKey == null
-                        ? current.SelectMany(x => current.GetDocumentList(x.Key) ?? Array.Empty<IDocument>())
+                        ? current.SelectMany(x => current.GetDocumentList(x.Key))
                         : current.GetDocumentList(childrenKey);
                     if (children != null)
                     {
