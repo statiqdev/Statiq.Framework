@@ -1,5 +1,7 @@
 # 1.0.0-alpha.30
 
+- Added `ShortcodeHelper` static class to Statiq.Common and moved shortcode argument parsing helper method there. 
+- Moved HTML-based shortcodes to Statiq.Web.
 - Removed the need to pass `IExecutionContext` to a bunch of different extension methods that can rely on `IExecutionContext.Current`.
 - Added `IExecutionContext.HasCurrent` to check if a current execution context is available.
 - Changed `IExecutionContext.Current` to throw if no execution context is available.

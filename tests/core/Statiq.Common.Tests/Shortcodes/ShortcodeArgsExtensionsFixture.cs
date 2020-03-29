@@ -6,9 +6,9 @@ using Statiq.Testing;
 namespace Statiq.Common.Tests.Shortcodes
 {
     [TestFixture]
-    public class ShortcodeExtensionsFixture : BaseFixture
+    public class ShortcodeArgsExtensionsFixture : BaseFixture
     {
-        public class ToDictionaryTests : ShortcodeExtensionsFixture
+        public class ToDictionaryTests : ShortcodeArgsExtensionsFixture
         {
             [Test]
             public void MatchesInCorrectOrder()
