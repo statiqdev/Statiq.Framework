@@ -42,10 +42,6 @@ namespace Statiq.App
             {
                 bootstrapper.AddBuildCommands();
             }
-            if (features.HasFlag(DefaultFeatures.HostingCommands))
-            {
-                bootstrapper.AddHostingCommands();
-            }
             if (features.HasFlag(DefaultFeatures.CustomCommands))
             {
                 bootstrapper.AddCustomCommands();
@@ -117,14 +113,6 @@ namespace Statiq.App
             bootstrapper.AddCommand<PipelinesCommand<PipelinesCommandSettings>>();
             bootstrapper.AddCommand<DeployCommand>();
             bootstrapper.AddCommands();
-            return bootstrapper;
-        }
-
-        public static Bootstrapper AddHostingCommands(this Bootstrapper bootstrapper)
-        {
-            _ = bootstrapper ?? throw new ArgumentNullException(nameof(bootstrapper));
-            bootstrapper.AddCommand<PreviewCommand>();
-            bootstrapper.AddCommand<ServeCommand>();
             return bootstrapper;
         }
 

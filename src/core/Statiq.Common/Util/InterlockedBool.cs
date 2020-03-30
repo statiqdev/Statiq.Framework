@@ -1,8 +1,9 @@
-﻿using System.Threading;
+﻿using System;
+using System.Threading;
 
-namespace Statiq.App
+namespace Statiq.Common
 {
-    internal class InterlockedBool
+    public class InterlockedBool
     {
         private volatile int _set;
 

@@ -4,7 +4,7 @@ namespace Statiq.Common
 {
     /// <summary>
     /// A simple disposable that calls an action on disposal. This class
-    /// will also throw an exception on subsiquent disposals.
+    /// will also throw an exception on subsequent disposals.
     /// </summary>
     public class ActionDisposable : IDisposable
     {

@@ -1,5 +1,12 @@
 # 1.0.0-alpha.30
 
+- Removed "theme" from the set of default input paths (added by default only in Statiq Web).
+- Changed `CommandUtilities` in Statiq.App public.
+- Moved the serve command to Statiq Web.
+- Moved the preview command to Statiq Web.
+- Moved Statiq.Hosting to Statiq Web as Statiq.Web.Hosting.
+- Moved `ActionFileSystemWatcher` to Statiq.Common and made it public.
+- Moved `InterlockedBool` to Statiq.Common and made it public.
 - Added `ShortcodeHelper` static class to Statiq.Common and moved shortcode argument parsing helper method there. 
 - Moved HTML-based shortcodes to Statiq.Web.
 - Removed the need to pass `IExecutionContext` to a bunch of different extension methods that can rely on `IExecutionContext.Current`.
