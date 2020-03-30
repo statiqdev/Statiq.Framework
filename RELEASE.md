@@ -5,6 +5,9 @@
 - Moved the serve command to Statiq Web.
 - Moved the preview command to Statiq Web.
 - Moved Statiq.Hosting to Statiq Web as Statiq.Web.Hosting.
+- Moved Statiq.Aws to Statiq Web as Statiq.Web.Aws.
+- Moved Statiq.Azure to Statiq Web as Statiq.Web.Azure.
+- Moved Statiq.Netlify to Statiq Web as Statiq.Web.Netlify.
 - Moved `ActionFileSystemWatcher` to Statiq.Common and made it public.
 - Moved `InterlockedBool` to Statiq.Common and made it public.
 - Added `ShortcodeHelper` static class to Statiq.Common and moved shortcode argument parsing helper method there. 
