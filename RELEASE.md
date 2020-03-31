@@ -1,5 +1,6 @@
 # 1.0.0-alpha.30
 
+- Added some `IDocument.GetAnchor()` extensions.
 - Removed "theme" from the set of default input paths (added by default only in Statiq Web).
 - Changed `CommandUtilities` in Statiq.App public.
 - Moved the serve command to Statiq Web.
