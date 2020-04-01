@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Dynamic;
 using System.Threading.Tasks;
@@ -12,15 +13,22 @@ namespace Statiq.Handlebars
     {
         private readonly string _sourceKey;
         private readonly string _destinationKey;
+        private readonly IDictionary<string, Config<string>> _partials;
+        private readonly IDictionary<string, Config<HandlebarsHelper>> _helpers;
+        private readonly IDictionary<string, Config<HandlebarsBlockHelper>> _blockHelpers;
+
         private Config<object> _model;
-        private Config<IEnumerable<KeyValuePair<string, string>>> _partials;
         private Func<IExecutionContext, IDocument, HandlebarsConfiguration, Task<HandlebarsConfiguration>> _configure;
 
         public RenderHandlebars()
         {
+            _partials = new Dictionary<string, Config<string>>(StringComparer.Ordinal);
+            _helpers = new Dictionary<string, Config<HandlebarsHelper>>(StringComparer.Ordinal);
+            _blockHelpers = new Dictionary<string, Config<HandlebarsBlockHelper>>(StringComparer.Ordinal);
         }
 
         public RenderHandlebars(string sourceKey, string destinationKey = null)
+            : this()
         {
             _sourceKey = sourceKey;
             _destinationKey = destinationKey;
@@ -32,9 +40,21 @@ namespace Statiq.Handlebars
             return this;
         }
 
-        public RenderHandlebars WithPartials(Config<IEnumerable<KeyValuePair<string, string>>> partials)
+        public RenderHandlebars WithPartial(string name, Config<string> partial)
         {
-            _partials = partials;
+            _partials[name] = partial;
+            return this;
+        }
+
+        public RenderHandlebars WithHelper(string name, Config<HandlebarsHelper> helper)
+        {
+            _helpers[name] = helper;
+            return this;
+        }
+
+        public RenderHandlebars WithBlockHelper(string name, Config<HandlebarsBlockHelper> blockHelper)
+        {
+            _blockHelpers[name] = blockHelper;
             return this;
         }
 
@@ -83,12 +103,21 @@ namespace Statiq.Handlebars
             IHandlebars handlebars = HandlebarsDotNet.Handlebars.Create(configuration);
 
             // Register partials
-            if (_partials != null)
+            foreach ((string name, Config<string> partial) in _partials)
             {
-                foreach (KeyValuePair<string, string> partial in await _partials.GetValueAsync(input, context))
-                {
-                    handlebars.RegisterTemplate(partial.Key, partial.Value);
-                }
+                handlebars.RegisterTemplate(name, await partial.GetValueAsync(input, context));
+            }
+
+            // Register helpers
+            foreach ((string name, Config<HandlebarsHelper> helper) in _helpers)
+            {
+                handlebars.RegisterHelper(name, await helper.GetValueAsync(input, context));
+            }
+
+            // Register block helpers
+            foreach ((string name, Config<HandlebarsBlockHelper> blockHelper) in _blockHelpers)
+            {
+                handlebars.RegisterHelper(name, await blockHelper.GetValueAsync(input, context));
             }
 
             string result = handlebars.Compile(content)(_model is null

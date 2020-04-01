@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using HandlebarsDotNet;
 using NUnit.Framework;
 using Shouldly;
 using Statiq.Common;
@@ -156,11 +158,89 @@ namespace Statiq.Handlebars.Tests
                         }
                     },
                     input);
+
                 RenderHandlebars handlebars = new RenderHandlebars()
-                    .WithPartials(Config.FromValue(new Dictionary<string, string>
+                    .WithPartial("user", Config.FromValue("<strong>{{name}}</strong>"));
+
+                // When
+                TestDocument result = await ExecuteAsync(document, handlebars).SingleAsync();
+
+                // Then
+                result.Content.ShouldBe(output, StringCompareShould.IgnoreLineEndings);
+            }
+
+            [Test]
+            public async Task RendersHandlebarsWithHelper()
+            {
+                // Given
+                const string input = @"Click here: {{link_to}}";
+                const string output = @"Click here: <a href='https://github.com/rexm/handlebars.net'>Handlebars.Net</a>";
+                TestDocument document = new TestDocument(
+                    new MetadataItems
                     {
-                        ["user"] = "<strong>{{name}}</strong>"
-                    }.AsEnumerable()));
+                        { "url", "https://github.com/rexm/handlebars.net" },
+                        { "text", "Handlebars.Net" }
+                    },
+                    input);
+
+                RenderHandlebars handlebars = new RenderHandlebars()
+                    .WithHelper(
+                        "link_to",
+                        Config.FromValue<HandlebarsHelper>((writer, context, _) =>
+                            HandlebarsExtensions.WriteSafeString(writer, "<a href='" + context.url + "'>" + context.text + "</a>")));
+
+                // When
+                TestDocument result = await ExecuteAsync(document, handlebars).SingleAsync();
+
+                // Then
+                result.Content.ShouldBe(output, StringCompareShould.IgnoreLineEndings);
+            }
+
+            [Test]
+            public async Task RendersHandlebarsWithBlockHelper()
+            {
+                // Given
+                const string input = @"{{#each animals}}
+The animal, {{name}}, {{StringEqualityBlockHelper type 'dog'}}is a dog{{else}}is not a dog{{/StringEqualityBlockHelper}}.
+{{/each}}";
+                const string output = @"The animal, Fluffy, is not a dog.
+The animal, Fido, is a dog.
+The animal, Chewy, is not a dog.
+";
+
+                TestDocument document = new TestDocument(
+                    new MetadataItems
+                    {
+                        {
+                            "animals", new[]
+                            {
+                                new { name = "Fluffy", type = "cat" },
+                                new { name = "Fido", type = "dog" },
+                                new { name = "Chewy", type = "hamster" }
+                            }
+                        }
+                    }, input);
+
+                RenderHandlebars handlebars = new RenderHandlebars()
+                    .WithBlockHelper(
+                        "StringEqualityBlockHelper",
+                        Config.FromValue<HandlebarsBlockHelper>((output, options, _, arguments) =>
+                        {
+                            if (arguments.Length != 2)
+                            {
+                                throw new HandlebarsException("{{StringEqualityBlockHelper}} helper must have exactly two argument");
+                            }
+                            string left = arguments[0] as string;
+                            string right = arguments[1] as string;
+                            if (left == right)
+                            {
+                                options.Template(output, null);
+                            }
+                            else
+                            {
+                                options.Inverse(output, null);
+                            }
+                        }));
 
                 // When
                 TestDocument result = await ExecuteAsync(document, handlebars).SingleAsync();
