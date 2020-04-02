@@ -9,6 +9,21 @@ using Statiq.Common;
 
 namespace Statiq.Handlebars
 {
+    /// <summary>
+    /// Parses, compiles, and renders Handlebars templates.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// Handlebars provides the power necessary to let you build semantic templates effectively with no frustration.
+    /// See <a href="https://handlebarsjs.com/guide/">this guide</a> for an introduction to Handlebars.
+    /// </para>
+    /// <para>
+    /// This module user <a href="https://github.com/rexm/Handlebars.Net">Handlebars.Net</a> to render Handlebars templates.
+    /// Handlebars.Net doesn't use a scripting engine to run a Javascript library - it compiles Handlebars templates directly to IL bytecode.
+    /// It also mimics the JS library's API as closely as possible.
+    /// </para>
+    /// </remarks>
+    /// <category>Templates</category>
     public class RenderHandlebars : ParallelModule
     {
         private readonly string _sourceKey;
@@ -18,8 +33,11 @@ namespace Statiq.Handlebars
         private readonly IDictionary<string, Config<HandlebarsBlockHelper>> _blockHelpers;
 
         private Config<object> _model;
-        private Func<IExecutionContext, IDocument, HandlebarsConfiguration, Task<HandlebarsConfiguration>> _configure;
+        private Func<IExecutionContext, IDocument, IHandlebars, Task> _configure;
 
+        /// <summary>
+        /// Parses Handlebars templates in each input document and outputs documents with rendered content.
+        /// </summary>
         public RenderHandlebars()
         {
             _partials = new Dictionary<string, Config<string>>(StringComparer.Ordinal);
@@ -27,6 +45,11 @@ namespace Statiq.Handlebars
             _blockHelpers = new Dictionary<string, Config<HandlebarsBlockHelper>>(StringComparer.Ordinal);
         }
 
+        /// <summary>
+        /// Parses Handlebars templates in the metadata of each input document and outputs documents with metadata containing the rendered content.
+        /// </summary>
+        /// /// <param name="sourceKey">The metadata key of the Handlebars template to process.</param>
+        /// <param name="destinationKey">The metadata key to store the rendered content (if null, it gets placed back in the source metadata key).</param>
         public RenderHandlebars(string sourceKey, string destinationKey = null)
             : this()
         {
@@ -34,43 +57,89 @@ namespace Statiq.Handlebars
             _destinationKey = destinationKey;
         }
 
+        /// <summary>
+        /// Specifies a model to use for each page based on the current input
+        /// document and context.
+        /// </summary>
+        /// <param name="model">A delegate that returns the model.</param>
+        /// <returns>The current module instance.</returns>
         public RenderHandlebars WithModel(Config<object> model)
         {
             _model = model;
             return this;
         }
 
+        /// <summary>
+        /// Specifies a partial template to be registered for each page based on the current input
+        /// document and context.
+        /// </summary>
+        /// <param name="name">The name of the partial template.</param>
+        /// <param name="partial">A delegate that returns the partial template.</param>
+        /// <returns>The current module instance.</returns>
         public RenderHandlebars WithPartial(string name, Config<string> partial)
         {
             _partials[name] = partial;
             return this;
         }
 
+        /// <summary>
+        /// Specifies a helper to be registered for each page based on the current input
+        /// document and context.
+        /// </summary>
+        /// <param name="name">The name of the helper.</param>
+        /// <param name="helper">A delegate that returns the helper.</param>
+        /// <returns>The current module instance.</returns>
         public RenderHandlebars WithHelper(string name, Config<HandlebarsHelper> helper)
         {
             _helpers[name] = helper;
             return this;
         }
 
+        /// <summary>
+        /// Specifies a block helper to be registered for each page based on the current input
+        /// document and context.
+        /// </summary>
+        /// <param name="name">The name of the block helper.</param>
+        /// <param name="blockHelper">A delegate that returns the block helper.</param>
+        /// <returns>The current module instance.</returns>
         public RenderHandlebars WithBlockHelper(string name, Config<HandlebarsBlockHelper> blockHelper)
         {
             _blockHelpers[name] = blockHelper;
             return this;
         }
 
+        /// <summary>
+        /// Specifies an extension point to configure the handlebars environment for each page based on the current input
+        /// document and context.
+        /// </summary>
+        /// <param name="configure">A delegate for configuring the handlebars environment.</param>
+        /// <returns>The current module instance.</returns>
         public RenderHandlebars Configure(
-            Func<IExecutionContext, IDocument, HandlebarsConfiguration, HandlebarsConfiguration> configure)
+            Action<IExecutionContext, IDocument, IHandlebars> configure)
         {
-            return Configure((context, document, configuration) => Task.FromResult(configure(context, document, configuration)));
+            Configure((context, document, configuration) =>
+            {
+                configure(context, document, configuration);
+                return Task.CompletedTask;
+            });
+
+            return this;
         }
 
+        /// <summary>
+        /// Specifies an extension point to configure the handlebars environment for each page based on the current input
+        /// document and context.
+        /// </summary>
+        /// <param name="configure">A delegate for configuring the handlebars environment.</param>
+        /// <returns>The current module instance.</returns>
         public RenderHandlebars Configure(
-            Func<IExecutionContext, IDocument, HandlebarsConfiguration, Task<HandlebarsConfiguration>> configure)
+            Func<IExecutionContext, IDocument, IHandlebars, Task> configure)
         {
             _configure = configure;
             return this;
         }
 
+        /// <inheritdoc />
         protected override async Task<IEnumerable<IDocument>> ExecuteInputAsync(IDocument input, IExecutionContext context)
         {
             context.LogDebug(
@@ -93,14 +162,13 @@ namespace Statiq.Handlebars
                 return input.Yield();
             }
 
+            IHandlebars handlebars = HandlebarsDotNet.Handlebars.Create();
+
             // Configure
-            HandlebarsConfiguration configuration = new HandlebarsConfiguration();
             if (_configure != null)
             {
-                configuration = await _configure(context, input, configuration);
+                await _configure(context, input, handlebars);
             }
-
-            IHandlebars handlebars = HandlebarsDotNet.Handlebars.Create(configuration);
 
             // Register partials
             foreach ((string name, Config<string> partial) in _partials)

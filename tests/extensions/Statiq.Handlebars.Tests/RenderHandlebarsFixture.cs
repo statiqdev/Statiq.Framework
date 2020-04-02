@@ -224,7 +224,7 @@ The animal, Chewy, is not a dog.
                 RenderHandlebars handlebars = new RenderHandlebars()
                     .WithBlockHelper(
                         "StringEqualityBlockHelper",
-                        Config.FromValue<HandlebarsBlockHelper>((output, options, _, arguments) =>
+                        Config.FromValue<HandlebarsBlockHelper>((writer, options, _, arguments) =>
                         {
                             if (arguments.Length != 2)
                             {
@@ -234,11 +234,124 @@ The animal, Chewy, is not a dog.
                             string right = arguments[1] as string;
                             if (left == right)
                             {
-                                options.Template(output, null);
+                                options.Template(writer, null);
                             }
                             else
                             {
-                                options.Inverse(output, null);
+                                options.Inverse(writer, null);
+                            }
+                        }));
+
+                // When
+                TestDocument result = await ExecuteAsync(document, handlebars).SingleAsync();
+
+                // Then
+                result.Content.ShouldBe(output, StringCompareShould.IgnoreLineEndings);
+            }
+
+            [Test]
+            public async Task RendersHandlebarsWithPartialUsingConfigure()
+            {
+                // Given
+                const string input = @"{{#names}}
+  {{> user}}
+{{/names}}";
+                const string output = @"<strong>Karen</strong><strong>Jon</strong>";
+                TestDocument document = new TestDocument(
+                    new MetadataItems
+                    {
+                        {
+                            "names", new[]
+                            {
+                                new
+                                {
+                                    name = "Karen"
+                                },
+                                new
+                                {
+                                    name = "Jon"
+                                }
+                            }
+                        }
+                    },
+                    input);
+
+                RenderHandlebars handlebars = new RenderHandlebars()
+                    .Configure((_, __, x) => x.RegisterTemplate("user", "<strong>{{name}}</strong>"));
+
+                // When
+                TestDocument result = await ExecuteAsync(document, handlebars).SingleAsync();
+
+                // Then
+                result.Content.ShouldBe(output, StringCompareShould.IgnoreLineEndings);
+            }
+
+            [Test]
+            public async Task RendersHandlebarsWithHelperUsingConfigure()
+            {
+                // Given
+                const string input = @"Click here: {{link_to}}";
+                const string output = @"Click here: <a href='https://github.com/rexm/handlebars.net'>Handlebars.Net</a>";
+                TestDocument document = new TestDocument(
+                    new MetadataItems
+                    {
+                        { "url", "https://github.com/rexm/handlebars.net" },
+                        { "text", "Handlebars.Net" }
+                    },
+                    input);
+
+                RenderHandlebars handlebars = new RenderHandlebars()
+                    .Configure((_, __, x) => x.RegisterHelper("link_to", (writer, context, _) =>
+                        HandlebarsExtensions.WriteSafeString(writer, "<a href='" + context.url + "'>" + context.text + "</a>")));
+
+                // When
+                TestDocument result = await ExecuteAsync(document, handlebars).SingleAsync();
+
+                // Then
+                result.Content.ShouldBe(output, StringCompareShould.IgnoreLineEndings);
+            }
+
+            [Test]
+            public async Task RendersHandlebarsWithBlockHelperUsingConfigure()
+            {
+                // Given
+                const string input = @"{{#each animals}}
+The animal, {{name}}, {{StringEqualityBlockHelper type 'dog'}}is a dog{{else}}is not a dog{{/StringEqualityBlockHelper}}.
+{{/each}}";
+                const string output = @"The animal, Fluffy, is not a dog.
+The animal, Fido, is a dog.
+The animal, Chewy, is not a dog.
+";
+
+                TestDocument document = new TestDocument(
+                    new MetadataItems
+                    {
+                        {
+                            "animals", new[]
+                            {
+                                new { name = "Fluffy", type = "cat" },
+                                new { name = "Fido", type = "dog" },
+                                new { name = "Chewy", type = "hamster" }
+                            }
+                        }
+                    }, input);
+
+                RenderHandlebars handlebars = new RenderHandlebars()
+                    .Configure((_, __, x) => x.RegisterHelper("StringEqualityBlockHelper", (writer, options, __, arguments) =>
+                        {
+                            if (arguments.Length != 2)
+                            {
+                                throw new HandlebarsException("{{StringEqualityBlockHelper}} helper must have exactly two argument");
+                            }
+                            string left = arguments[0] as string;
+                            string right = arguments[1] as string;
+                            if (left == right)
+                            {
+                                options.Template(writer, null);
+                            }
+                            else
+                            {
+                                options.Inverse(writer, null);
                             }
                         }));
 
