@@ -4,9 +4,9 @@ using Microsoft.Extensions.Logging;
 
 namespace Statiq.App
 {
-    internal static class CommandUtilities
+    public static class CommandUtilities
     {
-        internal static void WaitForControlC(Action action, ILogger logger)
+        public static void WaitForControlC(Action action, ILogger logger)
         {
             // Only wait for a key if console input has not been redirected, otherwise it's on the caller to exit
             if (!Console.IsInputRedirected)

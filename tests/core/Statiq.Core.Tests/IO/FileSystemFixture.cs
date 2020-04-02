@@ -17,7 +17,7 @@ namespace Statiq.Core.Tests.IO
                 FileSystem fileSystem = new FileSystem();
 
                 // Then
-                CollectionAssert.AreEquivalent(new[] { "theme", "input" }, fileSystem.InputPaths.Select(x => x.FullPath));
+                CollectionAssert.AreEquivalent(new[] { "input" }, fileSystem.InputPaths.Select(x => x.FullPath));
             }
         }
 

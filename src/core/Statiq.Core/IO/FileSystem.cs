@@ -15,9 +15,7 @@ namespace Statiq.Core
         public FileSystem()
         {
             FileProvider = new LocalFileProvider();
-            InputPaths = new PathCollection(
-                new NormalizedPath("theme"),
-                new NormalizedPath("input"));
+            InputPaths = new PathCollection("input");
         }
 
         public IFileProvider FileProvider { get; set; }

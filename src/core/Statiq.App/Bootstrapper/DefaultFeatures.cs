@@ -12,11 +12,10 @@ namespace Statiq.App
         EnvironmentVariables = 1 << 3,
         ConfigurationFiles = 1 << 4,
         BuildCommands = 1 << 5,
-        HostingCommands = 1 << 6,
-        CustomCommands = 1 << 7,
-        Shortcodes = 1 << 8,
-        Namespaces = 1 << 9,
-        Pipelines = 1 << 10,
+        CustomCommands = 1 << 6,
+        Shortcodes = 1 << 7,
+        Namespaces = 1 << 8,
+        Pipelines = 1 << 9,
         All =
             BootstrapperConfigurators
             | Logging
@@ -24,7 +23,6 @@ namespace Statiq.App
             | EnvironmentVariables
             | ConfigurationFiles
             | BuildCommands
-            | HostingCommands
             | CustomCommands
             | Shortcodes
             | Namespaces

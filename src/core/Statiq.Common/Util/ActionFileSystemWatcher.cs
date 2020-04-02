@@ -2,14 +2,13 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using Statiq.Common;
 
-namespace Statiq.App
+namespace Statiq.Common
 {
     /// <summary>
     /// A wrapper around <see cref="FileSystemWatcher"/> that invokes a callback action on changes.
     /// </summary>
-    internal class ActionFileSystemWatcher : IDisposable
+    public class ActionFileSystemWatcher : IDisposable
     {
         private readonly List<FileSystemWatcher> _watchers = new List<FileSystemWatcher>();
         private readonly string _outputPath;

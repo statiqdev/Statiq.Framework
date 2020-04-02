@@ -9,7 +9,7 @@ using Statiq.Common;
 namespace Statiq.App
 {
     [Description("Executes the specified pipelines.")]
-    internal class PipelinesCommand<TSettings> : EngineCommand<TSettings>
+    public class PipelinesCommand<TSettings> : EngineCommand<TSettings>
         where TSettings : BaseCommandSettings
     {
         public PipelinesCommand(
