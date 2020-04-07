@@ -1,5 +1,6 @@
 # 1.0.0-alpha.30
 
+- Moved `ForEachDocument` and `ForAllDocuments` modules to Statiq.Common so they can be used as base module classes for extensions.
 - Fixed a bug with the `SetDestination` module when a string-based path is used that starts with a "." but isn't an extension.
 - Fixed an unusual edge-case bug when evaluating scripts with assemblies that have the same simple name (I.e. LINQPad queries).
 - Added `IHtmlHelper.DocumentLink()` HTML helper extensions to Statiq.Razor.

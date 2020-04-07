@@ -1,8 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
-using Statiq.Common;
 
-namespace Statiq.Core
+namespace Statiq.Common
 {
     /// <summary>
     /// Executes the input documents one at a time against the specified child modules.

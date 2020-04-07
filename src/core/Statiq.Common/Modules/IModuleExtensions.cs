@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using Statiq.Common;
-
-namespace Statiq.Core
+﻿namespace Statiq.Common
 {
     public static class IModuleExtensions
     {
