@@ -1,5 +1,6 @@
 # 1.0.0-alpha.30
 
+- Fixed a bug with the `SetDestination` module when a string-based path is used that starts with a "." but isn't an extension.
 - Fixed an unusual edge-case bug when evaluating scripts with assemblies that have the same simple name (I.e. LINQPad queries).
 - Added `IHtmlHelper.DocumentLink()` HTML helper extensions to Statiq.Razor.
 - Removed "theme" from the set of default input paths (added by default only in Statiq Web).

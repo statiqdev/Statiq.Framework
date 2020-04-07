@@ -71,12 +71,28 @@ namespace Statiq.Core.Tests.Modules.IO
             }
 
             [TestCase("foo", "foo")]
-            [TestCase("abc/foo", "abc/foo")]
+            [TestCase("./abc/foo", "abc/foo")]
             public async Task SetsDestinationUsingPath(string path, string expected)
             {
                 // Given
                 TestDocument input = new TestDocument(new NormalizedPath("Subfolder/write-test.abc"));
                 SetDestination setDestination = new SetDestination(path);
+
+                // When
+                TestDocument result = await ExecuteAsync(input, setDestination).SingleAsync();
+
+                // Then
+                result.Destination.FullPath.ShouldBe(expected);
+            }
+
+            [TestCase("foo", "foo")]
+            [TestCase("abc/foo", "abc/foo")]
+            [TestCase("./abc/foo", "abc/foo")]
+            public async Task SetsDestinationUsingNormalizedPath(string path, string expected)
+            {
+                // Given
+                TestDocument input = new TestDocument(new NormalizedPath("Subfolder/write-test.abc"));
+                SetDestination setDestination = new SetDestination(new NormalizedPath(path));
 
                 // When
                 TestDocument result = await ExecuteAsync(input, setDestination).SingleAsync();
