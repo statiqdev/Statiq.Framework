@@ -87,5 +87,12 @@ namespace Statiq.Common
             }
             return default;  // Not found or last item
         }
+
+        public static IEnumerable<T> Concat<T>(this IEnumerable<T> source, T item) => source.Concat(Yield(item));
+
+        private static IEnumerable<T> Yield<T>(T item)
+        {
+            yield return item;
+        }
     }
 }

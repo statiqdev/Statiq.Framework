@@ -119,20 +119,31 @@ namespace Statiq.Core
                     { "CS0162", ReportDiagnostic.Suppress },
                 });
 
+            // Get reference assemblies
+            CompilationReferences references = new CompilationReferences();
+            foreach (Assembly assembly in AppDomain.CurrentDomain.GetAssemblies())
+            {
+                references.TryAddReference(assembly);
+            }
+            foreach (Assembly assembly in _executionState.ClassCatalog.GetAssemblies())
+            {
+                references.TryAddReference(assembly);
+            }
+            references.TryAddReference(Assembly.GetEntryAssembly(), true);
+            references.TryAddReference(Assembly.GetCallingAssembly(), true);
+            references.TryAddReference(Assembly.GetExecutingAssembly(), true);
+
+            // Create the compilation
+            string assemblyPath = Path.GetDirectoryName(typeof(object).Assembly.Location);
+            CSharpCompilation compilation = CSharpCompilation.Create(AssemblyName, new[] { syntaxTree }, references, compilationOptions);
+
             // For some reason, Roslyn really wants these added by filename
             // See http://stackoverflow.com/questions/23907305/roslyn-has-no-reference-to-system-runtime
-            string assemblyPath = Path.GetDirectoryName(typeof(object).Assembly.Location);
-            CSharpCompilation compilation = CSharpCompilation.Create(
-                AssemblyName,
-                new[] { syntaxTree },
-                AppDomain.CurrentDomain.GetAssemblies()
-                    .Where(x => !x.IsDynamic && !string.IsNullOrEmpty(x.Location))
-                    .Select(x => MetadataReference.CreateFromFile(x.Location)), compilationOptions)
-                    .AddReferences(
-                        MetadataReference.CreateFromFile(Path.Combine(assemblyPath, "mscorlib.dll")),
-                        MetadataReference.CreateFromFile(Path.Combine(assemblyPath, "System.dll")),
-                        MetadataReference.CreateFromFile(Path.Combine(assemblyPath, "System.Core.dll")),
-                        MetadataReference.CreateFromFile(Path.Combine(assemblyPath, "System.Runtime.dll")));
+            compilation = compilation.AddReferences(
+                MetadataReference.CreateFromFile(Path.Combine(assemblyPath, "mscorlib.dll")),
+                MetadataReference.CreateFromFile(Path.Combine(assemblyPath, "System.dll")),
+                MetadataReference.CreateFromFile(Path.Combine(assemblyPath, "System.Core.dll")),
+                MetadataReference.CreateFromFile(Path.Combine(assemblyPath, "System.Runtime.dll")));
 
             // Emit the assembly
             ILogger logger = _executionState.Services.GetRequiredService<ILogger<ScriptHelper>>();

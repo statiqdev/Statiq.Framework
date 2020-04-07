@@ -1,5 +1,6 @@
 # 1.0.0-alpha.30
 
+- Fixed an unusual edge-case bug when evaluating scripts with assemblies that have the same simple name (I.e. LINQPad queries).
 - Added `IHtmlHelper.DocumentLink()` HTML helper extensions to Statiq.Razor.
 - Removed "theme" from the set of default input paths (added by default only in Statiq Web).
 - Changed `CommandUtilities` in Statiq.App public.
