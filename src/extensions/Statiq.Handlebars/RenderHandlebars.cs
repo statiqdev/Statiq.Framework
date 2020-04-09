@@ -189,7 +189,7 @@ namespace Statiq.Handlebars
             }
 
             string result = handlebars.Compile(content)(_model is null
-                ? new DocumentWrapper(input)
+                ? input.AsDynamic()
                 : await _model.GetValueAsync(input, context));
 
             return string.IsNullOrEmpty(_sourceKey)
@@ -200,21 +200,6 @@ namespace Statiq.Handlebars
                         { string.IsNullOrEmpty(_destinationKey) ? _sourceKey : _destinationKey, result }
                     })
                     .Yield();
-        }
-
-        private class DocumentWrapper : DynamicObject
-        {
-            private readonly IDocument _document;
-
-            public DocumentWrapper(IDocument document)
-            {
-                _document = document;
-            }
-
-            public override bool TryGetMember(GetMemberBinder binder, out object result)
-            {
-                return _document.TryGetValue(binder.Name, out result);
-            }
         }
     }
 }

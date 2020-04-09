@@ -1,5 +1,7 @@
 # 1.0.0-beta.2
 
+- Added `IDocument.AsDynamic()` (moved from the `RenderHandlebars` module, thanks @mholo65).
+
 # 1.0.0-beta.1
 
 - Added Statiq.Handlebars and a `RenderHandlebars` module (#67, #90, thanks @mholo65).

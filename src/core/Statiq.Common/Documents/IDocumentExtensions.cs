@@ -83,5 +83,12 @@ namespace Statiq.Common
         /// <param name="document">The document.</param>
         /// <returns>A normalized title or <c>null</c> if the source is null.</returns>
         public static string GetTitle(this IDocument document) => document.GetString(Keys.Title) ?? document.Source.GetTitle();
+
+        /// <summary>
+        /// Presents the metadata of a document as a dynamic object.
+        /// </summary>
+        /// <param name="document">The document.</param>
+        /// <returns>A dynamic object that contains the document metadata.</returns>
+        public static dynamic AsDynamic(this IDocument document) => new DynamicDocumentWrapper(document ?? throw new ArgumentNullException(nameof(document)));
     }
 }
