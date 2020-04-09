@@ -15,26 +15,22 @@ namespace Statiq.Core
     /// metadata key) and optimizes it by removing reserved characters, white-listing characters, etc.
     /// </remarks>
     /// <category>Metadata</category>
-    public class OptimizeFileName : ParallelModule
+    public class OptimizeFileName : ParallelSyncMultiConfigModule
     {
-        private readonly List<string> _allowedCharacters = new List<string>();
-
-        internal static readonly string[] ReservedChars = new string[]
-        {
-            "-", "_", "~", ":", "/", "?", "#", "[", "]",
-            "@", "!", "$", "&", "'", "(", ")", "*", "+", ",",
-            ";", "=", "}", ";"
-        };
-
-        private static readonly Regex FileNameRegex = new Regex("^([a-zA-Z0-9])+$");
-
-        private readonly Config<string> _fileName = null;
-        private readonly string _outputKey = null;
+        // Config keys
+        private const string Path = nameof(Path); // null = Destination
+        private const string OutputKey = nameof(OutputKey); // null = Destination
+        private const string ReservedChars = nameof(ReservedChars);
+        private const string TrimDotKey = nameof(TrimDotKey);
+        private const string CollapseSpacesKey = nameof(CollapseSpacesKey);
+        private const string SpacesToDashesKey = nameof(SpacesToDashesKey);
+        private const string ToLowerKey = nameof(ToLowerKey);
 
         /// <summary>
         /// Optimizes the destination file name of each input document.
         /// </summary>
         public OptimizeFileName()
+            : base(null, true)
         {
         }
 
@@ -43,10 +39,15 @@ namespace Statiq.Core
         /// </summary>
         /// <param name="key">The key containing the file name to optimize.</param>
         public OptimizeFileName(string key)
+            : base(
+                new Dictionary<string, IConfig>
+                {
+                    { Path, Config.FromDocument<NormalizedPath>(key) },
+                    { OutputKey, Config.FromValue(key) }
+                },
+                true)
         {
             _ = key ?? throw new ArgumentNullException(nameof(key));
-            _fileName = Config.FromDocument<string>(key);
-            _outputKey = key;
         }
 
         /// <summary>
@@ -55,109 +56,91 @@ namespace Statiq.Core
         /// <param name="inputKey">The metadata key to use for the input file name.</param>
         /// <param name="outputKey">The metadata key to use for the optimized file name.</param>
         public OptimizeFileName(string inputKey, string outputKey)
+            : base(
+                  new Dictionary<string, IConfig>
+                  {
+                      { Path, Config.FromDocument<NormalizedPath>(inputKey) },
+                      { OutputKey, Config.FromValue(outputKey) }
+                  },
+                  true)
         {
             _ = inputKey ?? throw new ArgumentNullException(nameof(inputKey));
             _ = outputKey ?? throw new ArgumentNullException(nameof(outputKey));
-
-            _fileName = Config.FromDocument<string>(inputKey);
-            _outputKey = outputKey;
         }
 
         /// <summary>
         /// Optimizes the file name in the resulting path and sets the specified metadata key.
         /// </summary>
-        /// <param name="fileName">A delegate that should return a <see cref="string"/> file name to optimize.</param>
+        /// <param name="path">A delegate that should return a <see cref="NormalizedPath"/> with a file name to optimize.</param>
         /// <param name="outputKey">The metadata key to use for the optimized file name.</param>
-        public OptimizeFileName(Config<string> fileName, string outputKey)
+        public OptimizeFileName(Config<NormalizedPath> path, string outputKey)
+            : base(
+                  new Dictionary<string, IConfig>
+                  {
+                      { Path, path },
+                      { OutputKey, Config.FromValue(outputKey) }
+                  },
+                  true)
         {
-            _ = outputKey ?? throw new ArgumentNullException(outputKey);
-
-            _fileName = fileName ?? throw new ArgumentNullException(nameof(fileName));
-            _outputKey = outputKey;
+            _ = path ?? throw new ArgumentNullException(nameof(path));
+            _ = outputKey ?? throw new ArgumentNullException(nameof(outputKey));
         }
 
         /// <summary>
-        /// Specifies the characters to allow in the file name.
+        /// Specifies the characters not to allow in the file name.
         /// </summary>
-        /// <param name="allowedCharacters">The allowed characters.</param>
+        /// <param name="reservedCharacters">The reserved characters.</param>
         /// <returns>The current module instance.</returns>
-        public OptimizeFileName WithAllowedCharacters(IEnumerable<string> allowedCharacters)
-        {
-            _allowedCharacters.AddRange(allowedCharacters);
-            return this;
-        }
+        public OptimizeFileName WithReservedCharacters(Config<string> reservedCharacters) => (OptimizeFileName)SetConfig(ReservedChars, reservedCharacters);
 
-        protected override async Task<IEnumerable<IDocument>> ExecuteInputAsync(IDocument input, IExecutionContext context)
-        {
-            string fileName = _fileName == null
-                ? input.Destination.FileName.FullPath
-                : await _fileName.GetValueAsync(input, context);
+        public OptimizeFileName TrimDot(Config<bool> trimDot) => (OptimizeFileName)SetConfig(TrimDotKey, trimDot);
 
-            if (!string.IsNullOrWhiteSpace(fileName))
+        public OptimizeFileName CollapseSpaces(Config<bool> collapseSpaecs) => (OptimizeFileName)SetConfig(CollapseSpacesKey, collapseSpaecs);
+
+        public OptimizeFileName SpacesToDashes(Config<bool> spacesToDashes) => (OptimizeFileName)SetConfig(SpacesToDashesKey, spacesToDashes);
+
+        public OptimizeFileName ToLower(Config<bool> toLower) => (OptimizeFileName)SetConfig(ToLowerKey, toLower);
+
+        protected override IEnumerable<IDocument> ExecuteConfig(IDocument input, IExecutionContext context, IMetadata values)
+        {
+            // Get file name
+            NormalizedPath path = values.GetPath(Path);
+            if (path.IsNull)
             {
-                fileName = GetFileName(fileName);
-                if (!string.IsNullOrWhiteSpace(fileName))
+                if (input.Destination.IsNull)
                 {
-                    if (_fileName == null || string.IsNullOrWhiteSpace(_outputKey))
-                    {
-                        // No output key so set the destination
-                        NormalizedPath path = input.Destination.ChangeFileName(fileName);
-                        return input.Clone(path).Yield();
-                    }
-                    else
-                    {
-                        // Set the specified output key
-                        return input.Clone(
-                            new MetadataItems
-                            {
-                                    { _outputKey, fileName }
-                            })
-                            .Yield();
-                    }
+                    return input.Yield();
                 }
+                path = input.Destination.FileName;
             }
-            return input.Yield();
-        }
-
-        private string GetFileName(string fileName)
-        {
-            if (string.IsNullOrEmpty(fileName))
+            if (path.IsNull)
             {
-                return string.Empty;
+                return input.Yield();
             }
 
-            // Trim whitespace
-            fileName = fileName.Trim();
+            // Get params
+            string reservedChars = values.GetString(ReservedChars, NormalizedPath.OptimizeFileNameReservedChars);
+            bool trimDot = values.GetBool(TrimDotKey, true);
+            bool collapseSpaces = values.GetBool(CollapseSpacesKey, true);
+            bool spacesToDashes = values.GetBool(SpacesToDashesKey, true);
+            bool toLower = values.GetBool(ToLowerKey, true);
+            string outputKey = values.GetString(OutputKey);
 
-            // Remove multiple dashes
-            fileName = Regex.Replace(fileName, @"\-{2,}", string.Empty);
-
-            // Remove reserved chars - doing this as an array reads a lot better than a regex
-            foreach (string token in ReservedChars.Except(_allowedCharacters))
+            // Optimize the file name in the path
+            path = path.OptimizeFileName(reservedChars, trimDot, collapseSpaces, spacesToDashes, toLower);
+            if (string.IsNullOrWhiteSpace(outputKey))
             {
-                fileName = fileName.Replace(token, string.Empty);
+                // No output key so set the destination
+                return input.Clone(path).Yield();
             }
 
-            // Trim dot (special case, only reserved if at beginning or end)
-            if (!_allowedCharacters.Contains("."))
-            {
-                fileName = fileName.Trim('.');
-            }
-
-            // Remove multiple spaces
-            fileName = Regex.Replace(fileName, @"\s+", " ");
-
-            // Turn spaces into dashes
-            fileName = fileName.Replace(" ", "-");
-
-            // Grab letters and numbers only, use a regex to be unicode-friendly
-            if (FileNameRegex.IsMatch(fileName))
-            {
-                fileName = FileNameRegex.Matches(fileName)[0].Value;
-            }
-
-            // Urls should not be case-sensitive
-            return fileName.ToLowerInvariant();
+            // Set the output key with the optimized path
+            return input.Clone(
+                new MetadataItems
+                {
+                    { outputKey, path }
+                })
+                .Yield();
         }
     }
 }

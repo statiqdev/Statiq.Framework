@@ -1,5 +1,7 @@
 # 1.0.0-alpha.30
 
+- Refactored the `OptimizeFileName` module and added some extra configuration methods.
+- Added `NormalizedPath.OptimizeFileName()` as both an instance method and static helper to clean up and optimize file names for the web.
 - Moved `ForEachDocument` and `ForAllDocuments` modules to Statiq.Common so they can be used as base module classes for extensions.
 - Fixed a bug with the `SetDestination` module when a string-based path is used that starts with a "." but isn't an extension.
 - Fixed an unusual edge-case bug when evaluating scripts with assemblies that have the same simple name (I.e. LINQPad queries).

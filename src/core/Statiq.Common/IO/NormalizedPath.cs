@@ -4,6 +4,7 @@ using System.Globalization;
 using System.Linq;
 using System.Net;
 using System.Runtime.InteropServices;
+using System.Text.RegularExpressions;
 
 namespace Statiq.Common
 {
@@ -923,5 +924,76 @@ namespace Statiq.Common
 
         public static bool ReplaceInvalidPathChars(Span<char> path, char newChar = '-') =>
             path.Replace(System.IO.Path.GetInvalidPathChars(), newChar);
+
+        public const string OptimizeFileNameReservedChars = "-_~:/\\?#[]@!$&'()*+;=};,";
+
+        // Only letters and numbers
+        private static readonly Regex SimpleFileNameRegex = new Regex("^([a-zA-Z0-9])+$");
+
+        public static string OptimizeFileName(
+            string fileName,
+            string reservedChars = OptimizeFileNameReservedChars,
+            bool trimDot = true,
+            bool collapseSpaces = true,
+            bool spacesToDashes = true,
+            bool toLower = true)
+        {
+            if (string.IsNullOrEmpty(fileName))
+            {
+                return string.Empty;
+            }
+
+            // Trim whitespace
+            fileName = fileName.Trim();
+
+            // Remove multiple dashes
+            fileName = Regex.Replace(fileName, @"\-{2,}", string.Empty);
+
+            // Strip reserved chars
+            char[] buffer = new char[fileName.Length];
+            int index = 0;
+            foreach (char c in fileName)
+            {
+                if (reservedChars?.Contains(c) != true)
+                {
+                    buffer[index++] = c;
+                }
+            }
+            fileName = new string(buffer, 0, index);
+
+            // Trim dot (special case, only reserved if at beginning or end)
+            if (trimDot)
+            {
+                fileName = fileName.Trim('.');
+            }
+
+            // Remove multiple spaces
+            if (collapseSpaces)
+            {
+                fileName = Regex.Replace(fileName, @"\s+", " ");
+            }
+
+            // Turn spaces into dashes
+            if (spacesToDashes)
+            {
+                fileName = fileName.Replace(" ", "-");
+            }
+
+            // Convert to lower-case
+            if (toLower)
+            {
+                fileName = fileName.ToLowerInvariant();
+            }
+
+            return fileName;
+        }
+
+        public NormalizedPath OptimizeFileName(
+            string reservedChars = OptimizeFileNameReservedChars,
+            bool trimDot = true,
+            bool collapseSpaces = true,
+            bool spacesToDashes = true,
+            bool toLower = true) =>
+            ChangeFileName(OptimizeFileName(FileName.FullPath, reservedChars, trimDot, collapseSpaces, spacesToDashes, toLower));
     }
 }

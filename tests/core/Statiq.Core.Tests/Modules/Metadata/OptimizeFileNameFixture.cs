@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System.Linq;
+using System.Threading.Tasks;
 using NUnit.Framework;
 using Shouldly;
 using Statiq.Common;
@@ -53,49 +54,14 @@ namespace Statiq.Core.Tests.Modules.Metadata
                 result.Destination.FullPath.ShouldBe(output);
             }
 
-            [Test]
-            public async Task WithAllowedCharactersDoesNotReplaceProvidedCharacters()
-            {
-                // Given
-                const string input = "this-is-a-.net-tag";
-                const string output = "this-is-a-.net-tag";
-                TestDocument document = new TestDocument(new NormalizedPath(input));
-                OptimizeFileName fileName = new OptimizeFileName();
+            public static readonly char[] ReservedChars = NormalizedPath.OptimizeFileNameReservedChars.Where(x => x != '\\' && x != '/').ToArray();
 
-                // When
-                fileName = fileName.WithAllowedCharacters(new string[] { "-" });
-                TestDocument result = await ExecuteAsync(document, fileName).SingleAsync();
-
-                // Then
-                result.Destination.FullPath.ShouldBe(output);
-            }
-
-            [Test]
-            public async Task WithAllowedCharactersDoesNotReplaceDotAtEnd()
-            {
-                // Given
-                const string input = "this-is-a-.";
-                const string output = "thisisa.";
-                TestDocument document = new TestDocument(new NormalizedPath(input));
-                OptimizeFileName fileName = new OptimizeFileName();
-
-                // When
-                fileName = fileName.WithAllowedCharacters(new string[] { "." });
-                TestDocument result = await ExecuteAsync(document, fileName).SingleAsync();
-
-                // Then
-                result.Destination.FullPath.ShouldBe(output);
-            }
-
-            public static string[] ReservedChars => OptimizeFileName.ReservedChars;
-
-            [Test]
             [TestCaseSource(nameof(ReservedChars))]
-            public async Task FileNameIsConvertedCorrectlyWithReservedChar(string character)
+            public async Task FileNameIsConvertedCorrectlyWithReservedChar(char character)
             {
                 // Given
-                string manyCharactersWow = new string(character[0], 10);
-                string path = string.Format("testing {0} some of {0} these {0}", manyCharactersWow);
+                string manyCharactersWow = new string(character, 10);
+                string path = string.Format("/a/b/c/testing {0} some of {0} these {0}.foo", manyCharactersWow);
                 TestDocument document = new TestDocument()
                 {
                     new MetadataItem("MyKey", path)
@@ -106,13 +72,12 @@ namespace Statiq.Core.Tests.Modules.Metadata
                 IDocument result = await ExecuteAsync(document, fileName).SingleAsync();
 
                 // Then
-                result.GetString("MyKey").ShouldBe("testing-some-of-these-");
+                result.GetString("MyKey").ShouldBe("/a/b/c/testing-some-of-these-.foo");
             }
 
             [TestCase(null)]
             [TestCase("")]
-            [TestCase(" ")]
-            public async Task IgnoresNullOrWhiteSpaceStrings(string input)
+            public async Task IgnoresNullOrEmptyStrings(string input)
             {
                 // Given
                 TestDocument document = new TestDocument

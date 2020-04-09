@@ -90,41 +90,23 @@ namespace Statiq.Common
 
         protected bool TryGetConfig(string key, out IConfig config) => _configs.TryGetValue(key, out config);
 
-        protected MultiConfigModuleBase CombineConfig<TValue>(string key, Config<TValue> config, Func<TValue, TValue, TValue> combine)
-        {
+        protected MultiConfigModuleBase CombineConfig<TValue>(string key, Config<TValue> config, Func<TValue, TValue, TValue> combine) =>
             SetConfig(key, GetConfig<TValue>(key).CombineWith(config, combine));
-            return this;
-        }
 
-        protected MultiConfigModuleBase CombineConfig<TValue>(string key, Config<TValue> config, Func<TValue, TValue, Task<TValue>> combine)
-        {
+        protected MultiConfigModuleBase CombineConfig<TValue>(string key, Config<TValue> config, Func<TValue, TValue, Task<TValue>> combine) =>
             SetConfig(key, GetConfig<TValue>(key).CombineWith(config, combine));
-            return this;
-        }
 
-        protected MultiConfigModuleBase CombineConfig<TValue>(string key, Config<TValue> config, Func<TValue, TValue, IExecutionContext, TValue> combine)
-        {
+        protected MultiConfigModuleBase CombineConfig<TValue>(string key, Config<TValue> config, Func<TValue, TValue, IExecutionContext, TValue> combine) =>
             SetConfig(key, GetConfig<TValue>(key).CombineWith(config, combine));
-            return this;
-        }
 
-        protected MultiConfigModuleBase CombineConfig<TValue>(string key, Config<TValue> config, Func<TValue, TValue, IExecutionContext, Task<TValue>> combine)
-        {
+        protected MultiConfigModuleBase CombineConfig<TValue>(string key, Config<TValue> config, Func<TValue, TValue, IExecutionContext, Task<TValue>> combine) =>
             SetConfig(key, GetConfig<TValue>(key).CombineWith(config, combine));
-            return this;
-        }
 
-        protected MultiConfigModuleBase CombineConfig<TValue>(string key, Config<TValue> config, Func<TValue, TValue, IDocument, IExecutionContext, TValue> combine)
-        {
+        protected MultiConfigModuleBase CombineConfig<TValue>(string key, Config<TValue> config, Func<TValue, TValue, IDocument, IExecutionContext, TValue> combine) =>
             SetConfig(key, GetConfig<TValue>(key).CombineWith(config, combine));
-            return this;
-        }
 
-        protected MultiConfigModuleBase CombineConfig<TValue>(string key, Config<TValue> config, Func<TValue, TValue, IDocument, IExecutionContext, Task<TValue>> combine)
-        {
+        protected MultiConfigModuleBase CombineConfig<TValue>(string key, Config<TValue> config, Func<TValue, TValue, IDocument, IExecutionContext, Task<TValue>> combine) =>
             SetConfig(key, GetConfig<TValue>(key).CombineWith(config, combine));
-            return this;
-        }
 
         /// <inheritdoc />
         // Unused, prevent overriding in derived classes

@@ -30,7 +30,14 @@ namespace Statiq.Common
         /// <param name="hideExtensions">An array of file extensions to hide (or <c>null</c> to not hide extensions or an empty array to hide all file extensions).</param>
         /// <param name="lowercase">Indicates that the link should be rendered in all lowercase.</param>
         /// <returns>A generated link.</returns>
-        public static string GetLink(NormalizedPath path, string host, NormalizedPath root, string scheme, string[] hidePages, string[] hideExtensions, bool lowercase)
+        public static string GetLink(
+            NormalizedPath path,
+            string host,
+            NormalizedPath root,
+            string scheme,
+            string[] hidePages,
+            string[] hideExtensions,
+            bool lowercase)
         {
             string link = string.Empty;
             if (!path.IsNull)

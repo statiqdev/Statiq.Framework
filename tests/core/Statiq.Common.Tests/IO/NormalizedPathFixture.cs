@@ -1183,5 +1183,107 @@ namespace Statiq.Common.Tests.IO
                 result.ShouldBe(expected);
             }
         }
+
+        public class OptimizeFileNameTests : NormalizedPathFixture
+        {
+            [TestCase(
+                "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~:?#[]@!$&'()*+,;=",
+                "abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyz0123456789")]
+            [TestCase("Děku.jemeविकीвики-движка", "děku.jemeविकीвикидвижка")]
+            [TestCase(
+                "this is my title - and some \t\t\t\t\n   clever; (piece) of text here: [ok].",
+                "this-is-my-title-and-some-clever-piece-of-text-here-ok")]
+            [TestCase(
+                "this is my title?!! science and #firstworldproblems :* :sadface=true",
+                "this-is-my-title-science-and-firstworldproblems-sadfacetrue")]
+            [TestCase(
+                "one-two-three--four--five and a six--seven--eight-nine------ten",
+                "onetwothreefourfive-and-a-sixseveneightnineten")]
+            public void FileNameIsConvertedCorrectly(string input, string output)
+            {
+                // Given, When
+                string result = NormalizedPath.OptimizeFileName(input);
+
+                // Then
+                result.ShouldBe(output);
+            }
+
+            [Test]
+            public void FileNameShouldBeLowercase()
+            {
+                // Given, When
+                string result = NormalizedPath.OptimizeFileName("FileName With MiXeD CapS");
+
+                // Then
+                result.ShouldBe("filename-with-mixed-caps");
+            }
+
+            [Test]
+            public void CanChangeReservedCharacters()
+            {
+                // Given, When
+                string result = NormalizedPath.OptimizeFileName(
+                    "this-is-a-.net-tag",
+                    reservedChars: NormalizedPath.OptimizeFileNameReservedChars.Replace("-", string.Empty));
+
+                // Then
+                result.ShouldBe("this-is-a-.net-tag");
+            }
+
+            [Test]
+            public void DoesNotTrimDot()
+            {
+                // Given, When
+                string result = NormalizedPath.OptimizeFileName("this-is-a-.", trimDot: false);
+
+                // Then
+                result.ShouldBe("thisisa.");
+            }
+
+            [TestCase(null)]
+            [TestCase("")]
+            [TestCase(" ")]
+            public void IgnoresNullOrWhiteSpaceStrings(string input)
+            {
+                // Given, When
+                string result = NormalizedPath.OptimizeFileName(input);
+
+                // Then
+                result.ShouldBeEmpty();
+            }
+
+            [Test]
+            public void PreservesExtension()
+            {
+                // Given, When
+                string result = NormalizedPath.OptimizeFileName("myfile.html");
+
+                // Then
+                result.ShouldBe("myfile.html");
+            }
+
+            [Test]
+            public void TrimWhitespace()
+            {
+                // Given, When
+                string result = NormalizedPath.OptimizeFileName("   myfile.html   ");
+
+                // Then
+                result.ShouldBe("myfile.html");
+            }
+
+            [Test]
+            public void OptimizesInstance()
+            {
+                // Given
+                NormalizedPath path = new NormalizedPath("a/b/c/ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_~:?#[]@!$&'()*+,;=.html");
+
+                // When
+                NormalizedPath result = path.OptimizeFileName();
+
+                // Then
+                result.FullPath.ShouldBe("a/b/c/abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyz0123456789.html");
+            }
+        }
     }
 }
