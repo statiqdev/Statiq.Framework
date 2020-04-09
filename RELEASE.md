@@ -1,3 +1,5 @@
+# 1.0.0-beta.2
+
 # 1.0.0-beta.1
 
 - Added Statiq.Handlebars and a `RenderHandlebars` module (#67, #90, thanks @mholo65).
