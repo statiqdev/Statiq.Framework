@@ -1,5 +1,6 @@
-# 1.0.0-alpha.30
+# 1.0.0-beta.1
 
+- Added Statiq.Handlebars and a `RenderHandlebars` module (#67, #90, thanks @mholo65).
 - Refactored the `OptimizeFileName` module and added some extra configuration methods.
 - Added `NormalizedPath.OptimizeFileName()` as both an instance method and static helper to clean up and optimize file names for the web.
 - Moved `ForEachDocument` and `ForAllDocuments` modules to Statiq.Common so they can be used as base module classes for extensions.

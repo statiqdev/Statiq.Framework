@@ -1,12 +1,12 @@
 <Project> 
   <PropertyGroup>
-    <InformationalVersion>1.0.0-alpha.30</InformationalVersion>
+    <InformationalVersion>1.0.0-beta.1</InformationalVersion>
     <AssemblyVersion>1.0.0</AssemblyVersion>
     <FileVersion>1.0.0</FileVersion>
     <Product>Statiq Framework</Product>
     <Copyright>Copyright © Statiq/Dave Glick</Copyright>
     <Authors>Dave Glick, Other Awesome Contributors</Authors>
-    <PackageLicenseFile>LICENSE</PackageLicenseFile>
+    <PackageLicenseFile>LICENSE.md</PackageLicenseFile>
     <PackageIcon>icon.png</PackageIcon>
     <PackageProjectUrl>https://github.com/statiqdev/Statiq.Framework</PackageProjectUrl>
     <RepositoryUrl>https://github.com/statiqdev/Statiq.Framework.git</RepositoryUrl>
@@ -21,7 +21,7 @@
     <TargetFramework>netcoreapp3.1</TargetFramework>
   </PropertyGroup>
   <ItemGroup>
-    <None Include="..\..\..\LICENSE" Pack="true" PackagePath=""/>
+    <None Include="..\..\..\LICENSE.md" Pack="true" PackagePath=""/>
     <None Include="..\..\..\icon.png" Pack="true" PackagePath="\"/>
   </ItemGroup>
   <ItemGroup>
