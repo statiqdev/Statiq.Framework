@@ -111,7 +111,7 @@ namespace Statiq.Core
                 {
                     return input.Yield();
                 }
-                path = input.Destination.FileName;
+                path = input.Destination;
             }
             if (path.IsNull)
             {

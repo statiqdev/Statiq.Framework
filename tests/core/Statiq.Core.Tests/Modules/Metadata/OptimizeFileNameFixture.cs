@@ -97,12 +97,9 @@ namespace Statiq.Core.Tests.Modules.Metadata
             public async Task PreservesExtension()
             {
                 // Given
-                const string input = "myfile.html";
-                const string output = "myfile.html";
-
                 TestDocument document = new TestDocument()
                 {
-                    new MetadataItem("MyKey", input)
+                    new MetadataItem("MyKey", "myfile.html")
                 };
                 OptimizeFileName fileName = new OptimizeFileName("MyKey");
 
@@ -110,18 +107,16 @@ namespace Statiq.Core.Tests.Modules.Metadata
                 IDocument result = await ExecuteAsync(document, fileName).SingleAsync();
 
                 // Then
-                result.GetPath("MyKey").FullPath.ShouldBe(output);
+                result.GetPath("MyKey").FullPath.ShouldBe("myfile.html");
             }
 
             [Test]
             public async Task TrimWhitespace()
             {
                 // Given
-                const string input = "   myfile.html   ";
-                const string output = "myfile.html";
                 TestDocument document = new TestDocument
                 {
-                    new MetadataItem("MyKey", input)
+                    new MetadataItem("MyKey", "   myfile.html   ")
                 };
                 OptimizeFileName fileName = new OptimizeFileName("MyKey");
 
@@ -129,7 +124,38 @@ namespace Statiq.Core.Tests.Modules.Metadata
                 IDocument result = await ExecuteAsync(document, fileName).SingleAsync();
 
                 // Then
-                result.GetPath("MyKey").FullPath.ShouldBe(output);
+                result.GetPath("MyKey").FullPath.ShouldBe("myfile.html");
+            }
+
+            [Test]
+            public async Task PreservesPathForDestination()
+            {
+                // Given
+                TestDocument document = new TestDocument(new NormalizedPath("a/b/c/d_e.txt"));
+                OptimizeFileName fileName = new OptimizeFileName();
+
+                // When
+                IDocument result = await ExecuteAsync(document, fileName).SingleAsync();
+
+                // Then
+                result.Destination.ShouldBe("a/b/c/de.txt");
+            }
+
+            [Test]
+            public async Task PreservesPathForKey()
+            {
+                // Given
+                TestDocument document = new TestDocument
+                {
+                    new MetadataItem("MyKey", "a/b/c/d_e.txt")
+                };
+                OptimizeFileName fileName = new OptimizeFileName("MyKey");
+
+                // When
+                IDocument result = await ExecuteAsync(document, fileName).SingleAsync();
+
+                // Then
+                result.GetPath("MyKey").ShouldBe("a/b/c/de.txt");
             }
         }
     }

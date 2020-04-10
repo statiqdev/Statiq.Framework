@@ -1,5 +1,6 @@
 # 1.0.0-beta.2
 
+- Fixed a bug with the `OptimizeFileName` stripping the path when optimizing the destination file name (#93).
 - Added support for casting the dynamic object returned from `IDocument.AsDynamic()` back to an `IDocument`.
 - Added a new `IReadOnlyPipelineCollection` object and exposed it via `IExecutionState.Pipelines` to provide the current set of read-only pipelines during execution.
 - Added `IPipeline.GetAllDependencies()` extension methods to get the full set of `IPipeline.DependencyOf` and `IPipeline.Dependencies` for a given pipeline.
