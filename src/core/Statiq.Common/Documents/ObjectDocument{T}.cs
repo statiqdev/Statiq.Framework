@@ -170,7 +170,7 @@ namespace Statiq.Common
         }
 
         /// <inheritdoc />
-        // Enumerate the keys seperatly so we don't evaluate values
+        // Enumerate the keys separately so we don't evaluate values
         public IEnumerable<string> Keys
         {
             get
