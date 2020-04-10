@@ -36,6 +36,54 @@ namespace Statiq.Feeds.Tests
                 results.Select(x => x.Destination.FullPath).ShouldBe(new[] { "feed.rss", "feed.atom" }, true);
                 results[0].Content.ShouldContain("http://foo.com/bar/baz.png");
             }
+
+            [Test]
+            public async Task OrdersByPublish()
+            {
+                // Given
+                TestDocument a = new TestDocument(new NormalizedPath("a.txt"))
+                {
+                    { FeedKeys.Title, "A" },
+                    { FeedKeys.Published, new DateTime(2010, 1, 1) }
+                };
+                TestDocument b = new TestDocument(new NormalizedPath("b.txt"))
+                {
+                    { FeedKeys.Title, "B" },
+                    { FeedKeys.Published, new DateTime(2010, 2, 1) }
+                };
+                GenerateFeeds module = new GenerateFeeds();
+
+                // When
+                IReadOnlyList<TestDocument> results = await ExecuteAsync(new[] { a, b }, module);
+
+                // Then
+                TestDocument result = results.Single(x => x.Destination.FullPath == "feed.rss");
+                result.Content.IndexOf("<title>B</title>").ShouldBeLessThan(result.Content.IndexOf("<title>A</title>"));
+            }
+
+            [Test]
+            public async Task PreservesInputOrder()
+            {
+                // Given
+                TestDocument a = new TestDocument(new NormalizedPath("a.txt"))
+                {
+                    { FeedKeys.Title, "A" },
+                    { FeedKeys.Published, new DateTime(2010, 1, 1) }
+                };
+                TestDocument b = new TestDocument(new NormalizedPath("b.txt"))
+                {
+                    { FeedKeys.Title, "B" },
+                    { FeedKeys.Published, new DateTime(2010, 2, 1) }
+                };
+                GenerateFeeds module = new GenerateFeeds().PreserveOrdering();
+
+                // When
+                IReadOnlyList<TestDocument> results = await ExecuteAsync(new[] { a, b }, module);
+
+                // Then
+                TestDocument result = results.Single(x => x.Destination.FullPath == "feed.rss");
+                result.Content.IndexOf("<title>A</title>").ShouldBeLessThan(result.Content.IndexOf("<title>B</title>"));
+            }
         }
     }
 }

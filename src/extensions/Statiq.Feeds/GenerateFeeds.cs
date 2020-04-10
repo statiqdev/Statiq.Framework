@@ -13,9 +13,10 @@ namespace Statiq.Feeds
     /// </summary>
     /// <remarks>
     /// Each input document represents an item in the feed, up to the specified maximum number of
-    /// documents. Note that documents will be used in the order in which they are input
-    /// into this module, so a <c>OrderBy</c> module or similar should be used
-    /// to order the documents prior to this module. You should also set the <code>Settings.Host</code> value
+    /// documents. Note that documents will be sorted in descending order of their published date
+    /// to correspond with conventional feed behavior. If you want to use a different ordering,
+    /// sort the documents before using this module and call <see cref="PreserveOrdering(bool)"/>.
+    /// You should also set the <code>Settings.Host</code> value
     /// in your configuration file since that's used to create the absolute links for feed readers.
     /// This module outputs a document for each of the selected feed types. Input documents
     /// are not output by this module.
@@ -48,6 +49,7 @@ namespace Statiq.Feeds
         public static readonly NormalizedPath DefaultRdfPath = null;
 
         private int _maximumItems = 20;
+        private bool _preserveOrdering = false;
         private NormalizedPath _rssPath = DefaultRssPath;
         private NormalizedPath _atomPath = DefaultAtomPath;
         private NormalizedPath _rdfPath = DefaultRdfPath;
@@ -87,6 +89,18 @@ namespace Statiq.Feeds
         public GenerateFeeds MaximumItems(int maximumItems)
         {
             _maximumItems = maximumItems;
+            return this;
+        }
+
+        /// <summary>
+        /// By default documents are sorted in descending publish order. Use this
+        /// method to preserve their input document ordering instead.
+        /// </summary>
+        /// <param name="preserveOrdering"><c>true</c> to preserve input ordering, <c>false</c> otherwise.</param>
+        /// <returns>The current module instance.</returns>
+        public GenerateFeeds PreserveOrdering(bool preserveOrdering = true)
+        {
+            _preserveOrdering = true;
             return this;
         }
 
@@ -409,23 +423,44 @@ namespace Statiq.Feeds
                 Copyright = _feedCopyright ?? context.Settings.GetString(FeedKeys.Copyright) ?? DateTime.UtcNow.Year.ToString()
             };
 
+            // Sort the items and take the maximum items
+            List<(IDocument, DateTime?)> items = new List<(IDocument, DateTime?)>();
+            if (_preserveOrdering)
+            {
+                // Preserve the input order, take first so we don't calculate unnecessary published dates
+                foreach (IDocument input in _maximumItems <= 0 ? context.Inputs : context.Inputs.Take(_maximumItems))
+                {
+                    items.Add((input, await _itemPublished.GetValueAsync(input, context)));
+                }
+            }
+            else
+            {
+                // Order by published date then take the maximum items
+                foreach (IDocument input in context.Inputs)
+                {
+                    items.Add((input, await _itemPublished.GetValueAsync(input, context)));
+                }
+                IEnumerable<(IDocument, DateTime?)> orderedItems = items.OrderByDescending(x => x.Item2);
+                items = _maximumItems <= 0 ? orderedItems.ToList() : orderedItems.Take(_maximumItems).ToList();
+            }
+
             // Add items
-            foreach (IDocument input in _maximumItems <= 0 ? context.Inputs : context.Inputs.Take(_maximumItems))
+            foreach ((IDocument, DateTime?) item in items)
             {
                 feed.Items.Add(new FeedItem
                 {
-                    ID = await _itemId.GetValueAsync(input, context),
-                    Title = await _itemTitle.GetValueAsync(input, context),
-                    Description = await _itemDescription.GetValueAsync(input, context),
-                    Author = await _itemAuthor.GetValueAsync(input, context),
-                    Published = await _itemPublished.GetValueAsync(input, context),
-                    Updated = await _itemUpdated.GetValueAsync(input, context),
-                    Link = await _itemLink.GetValueAsync(input, context),
-                    ImageLink = await _itemImageLink.GetValueAsync(input, context),
-                    Content = await _itemContent.GetValueAsync(input, context),
-                    ThreadLink = await _itemThreadLink.GetValueAsync(input, context),
-                    ThreadCount = await _itemThreadCount.GetValueAsync(input, context),
-                    ThreadUpdated = await _itemThreadUpdated.GetValueAsync(input, context)
+                    ID = await _itemId.GetValueAsync(item.Item1, context),
+                    Title = await _itemTitle.GetValueAsync(item.Item1, context),
+                    Description = await _itemDescription.GetValueAsync(item.Item1, context),
+                    Author = await _itemAuthor.GetValueAsync(item.Item1, context),
+                    Published = item.Item2,
+                    Updated = await _itemUpdated.GetValueAsync(item.Item1, context),
+                    Link = await _itemLink.GetValueAsync(item.Item1, context),
+                    ImageLink = await _itemImageLink.GetValueAsync(item.Item1, context),
+                    Content = await _itemContent.GetValueAsync(item.Item1, context),
+                    ThreadLink = await _itemThreadLink.GetValueAsync(item.Item1, context),
+                    ThreadCount = await _itemThreadCount.GetValueAsync(item.Item1, context),
+                    ThreadUpdated = await _itemThreadUpdated.GetValueAsync(item.Item1, context)
                 });
             }
 
