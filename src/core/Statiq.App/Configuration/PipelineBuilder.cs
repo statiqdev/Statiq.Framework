@@ -77,7 +77,7 @@ namespace Statiq.App
         public PipelineBuilder AsSerial()
         {
             // Make sure not to add isolated pipelines as dependencies
-            _actions.Add(x => x.Dependencies.AddRange(_collection.Where(p => !p.Value.Isolated).Select(p => p.Key)));
+            _actions.Add(x => x.Dependencies.AddRange(_collection.AsEnumerable().Where(p => !p.Value.Isolated).Select(p => p.Key)));
             return this;
         }
 

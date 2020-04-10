@@ -99,6 +99,9 @@ namespace Statiq.Core
         public IScriptHelper ScriptHelper => _contextData.Engine.ScriptHelper;
 
         /// <inheritdoc/>
+        public IReadOnlyPipelineCollection Pipelines => _contextData.Engine.Pipelines;
+
+        /// <inheritdoc/>
         public CancellationToken CancellationToken => _contextData.Engine.CancellationToken;
 
         /// <inheritdoc/>

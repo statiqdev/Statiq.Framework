@@ -29,7 +29,7 @@ namespace Statiq.App
 
         protected override void SetPipelines(CommandContext commandContext, DeployCommandSettings commandSettings, IEngineManager engineManager)
         {
-            engineManager.Pipelines = engineManager.Engine.Pipelines.Where(x => x.Value.Deployment).Select(x => x.Key).ToArray();
+            engineManager.Pipelines = engineManager.Engine.Pipelines.AsEnumerable().Where(x => x.Value.Deployment).Select(x => x.Key).ToArray();
             engineManager.NormalPipelines = !commandSettings.OnlyDeploy;
         }
     }

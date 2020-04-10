@@ -1,5 +1,8 @@
 # 1.0.0-beta.2
 
+- Added a new `IReadOnlyPipelineCollection` object and exposed it via `IExecutionState.Pipelines` to provide the current set of read-only pipelines during execution.
+- Added `IPipeline.GetAllDependencies()` extension methods to get the full set of `IPipeline.DependencyOf` and `IPipeline.Dependencies` for a given pipeline.
+- Added `IPipeline.DependencyOf` to allow specifying which pipelines a given pipeline is a dependency of (the reverse of `IPipeline.Dependencies`).
 - Tweaked the way `NormalizedPath.OptimizeFileName()` handles dashes (it no longer removes them and does a better job of collapsing them).
 - Fixed `object.ToDocument()` and `object.ToDocuments()` extensions to construct the `ObjectDocument<T>` from the actual type of the object.
 - Added `IDocument.AsDynamic()` (moved from the `RenderHandlebars` module, thanks @mholo65).

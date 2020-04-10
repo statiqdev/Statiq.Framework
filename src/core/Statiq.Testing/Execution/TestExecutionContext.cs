@@ -155,6 +155,16 @@ namespace Statiq.Testing
         /// <inheritdoc/>
         IReadOnlyShortcodeCollection IExecutionState.Shortcodes => Shortcodes;
 
+        /// <inheritdoc />
+        public TestPipelineCollection Pipelines
+        {
+            get => Engine.Pipelines;
+            set => Engine.Pipelines = value;
+        }
+
+        /// <inheritdoc/>
+        IReadOnlyPipelineCollection IExecutionState.Pipelines => Pipelines;
+
         /// <inheritdoc/>
         public TestMemoryStreamFactory MemoryStreamFactory
         {

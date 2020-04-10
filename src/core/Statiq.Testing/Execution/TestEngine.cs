@@ -88,7 +88,13 @@ namespace Statiq.Testing
         IMemoryStreamFactory IExecutionState.MemoryStreamFactory => MemoryStreamFactory;
 
         /// <inheritdoc />
-        public IPipelineCollection Pipelines => throw new NotImplementedException();
+        public TestPipelineCollection Pipelines { get; set; } = new TestPipelineCollection();
+
+        /// <inheritdoc />
+        IPipelineCollection IEngine.Pipelines => Pipelines;
+
+        /// <inheritdoc />
+        IReadOnlyPipelineCollection IExecutionState.Pipelines => Pipelines;
 
         /// <inheritdoc />
         public TestShortcodeCollection Shortcodes { get; set; } = new TestShortcodeCollection();

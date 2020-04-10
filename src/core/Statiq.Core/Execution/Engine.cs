@@ -226,6 +226,9 @@ namespace Statiq.Core
         public IPipelineCollection Pipelines => _pipelines;
 
         /// <inheritdoc />
+        IReadOnlyPipelineCollection IExecutionState.Pipelines => Pipelines;
+
+        /// <inheritdoc />
         public INamespacesCollection Namespaces { get; } = new NamespaceCollection();
 
         /// <inheritdoc />
@@ -599,7 +602,7 @@ namespace Statiq.Core
             {
                 if (executing.Add(pipelineName))
                 {
-                    foreach (string dependency in _pipelines[pipelineName].Dependencies)
+                    foreach (string dependency in _pipelines[pipelineName].GetAllDependencies(_pipelines))
                     {
                         AddPipelineAndDependencies(dependency);
                     }
@@ -666,7 +669,7 @@ namespace Statiq.Core
                 if (pipeline.Isolated)
                 {
                     // Sanity check
-                    if (pipeline.Dependencies?.Count > 0)
+                    if (pipeline.GetAllDependencies(pipelines).Any())
                     {
                         throw new PipelineException($"Isolated pipeline {name} can not have dependencies");
                     }
@@ -685,19 +688,16 @@ namespace Statiq.Core
                 {
                     // Visit dependencies if this isn't an isolated pipeline
                     List<PipelinePhase> processDependencies = new List<PipelinePhase>();
-                    if (pipeline.Dependencies != null)
+                    foreach (string dependencyName in pipeline.GetAllDependencies(pipelines))
                     {
-                        foreach (string dependencyName in pipeline.Dependencies)
+                        if (!pipelines.TryGetValue(dependencyName, out IPipeline dependency))
                         {
-                            if (!pipelines.TryGetValue(dependencyName, out IPipeline dependency))
-                            {
-                                throw new PipelineException($"Could not find pipeline dependency {dependencyName} of {name}");
-                            }
-                            if (!dependency.Isolated)
-                            {
-                                // Only add the phase dependency if the dependency is not isolated
-                                processDependencies.Add(Visit(dependencyName, dependency).Process);
-                            }
+                            throw new PipelineException($"Could not find pipeline dependency {dependencyName} of {name}");
+                        }
+                        if (!dependency.Isolated)
+                        {
+                            // Only add the phase dependency if the dependency is not isolated
+                            processDependencies.Add(Visit(dependencyName, dependency).Process);
                         }
                     }
 

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Net.Http;
 using System.Threading;
@@ -82,6 +83,11 @@ namespace Statiq.Common
         /// Gets a helper that can compile and evaluate C# scripts.
         /// </summary>
         IScriptHelper ScriptHelper { get; }
+
+        /// <summary>
+        /// Gets the pipelines.
+        /// </summary>
+        IReadOnlyPipelineCollection Pipelines { get; }
 
         /// <summary>
         /// Gets a <see cref="Stream"/> that can be used for document content. If <paramref name="content"/>

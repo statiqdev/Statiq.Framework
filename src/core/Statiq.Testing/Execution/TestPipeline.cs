@@ -19,7 +19,11 @@ namespace Statiq.Testing
 
         public HashSet<string> Dependencies { get; set; } = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
+        public HashSet<string> DependencyOf { get; set; } = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
         IReadOnlyCollection<string> IReadOnlyPipeline.Dependencies => Dependencies;
+
+        IReadOnlyCollection<string> IReadOnlyPipeline.DependencyOf => DependencyOf;
 
         public bool Isolated { get; set; }
 

@@ -13,6 +13,11 @@ namespace Statiq.Common
         IReadOnlyCollection<string> Dependencies { get; }
 
         /// <summary>
+        /// The names of pipelines that depend on this pipeline.
+        /// </summary>
+        IReadOnlyCollection<string> DependencyOf { get; }
+
+        /// <summary>
         /// An isolated pipeline runs immediately without any dependencies and
         /// has restrictions on accessing documents from other pipelines.
         /// </summary>

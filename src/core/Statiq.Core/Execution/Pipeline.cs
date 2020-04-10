@@ -50,6 +50,9 @@ namespace Statiq.Core
         public HashSet<string> Dependencies { get; } = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
         /// <inheritdoc/>
+        public HashSet<string> DependencyOf { get; } = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
+        /// <inheritdoc/>
         public bool Isolated { get; set; }
 
         /// <inheritdoc/>
@@ -60,5 +63,8 @@ namespace Statiq.Core
 
         /// <inheritdoc/>
         IReadOnlyCollection<string> IReadOnlyPipeline.Dependencies => Dependencies;
+
+        /// <inheritdoc/>
+        IReadOnlyCollection<string> IReadOnlyPipeline.DependencyOf => DependencyOf;
     }
 }

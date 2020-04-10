@@ -41,7 +41,7 @@ namespace Statiq.Common
         /// <summary>
         /// Gets the pipelines.
         /// </summary>
-        IPipelineCollection Pipelines { get; }
+        new IPipelineCollection Pipelines { get; }
 
         /// <summary>
         /// Sets the default document type produced by this engine (and resulting <see cref="IExecutionContext"/> contexts).

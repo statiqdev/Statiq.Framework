@@ -150,12 +150,10 @@ namespace Statiq.Core.Tests.Execution
                 engine.Pipelines.Add("D", new TestPipeline
                 {
                     ExecutionPolicy = ExecutionPolicy.Manual,
-                    Dependencies = new HashSet<string>(new[] { "A" })
+                    Dependencies = new HashSet<string>(new[] { "A" }),
+                    DependencyOf = new HashSet<string>(new[] { "E" })
                 });
-                engine.Pipelines.Add("E", new TestPipeline
-                {
-                    Dependencies = new HashSet<string>(new[] { "D" })
-                });
+                engine.Pipelines.Add("E", new TestPipeline());
                 engine.Pipelines.Add("F", new TestPipeline
                 {
                     ExecutionPolicy = ExecutionPolicy.Always

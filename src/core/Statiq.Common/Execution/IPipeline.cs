@@ -36,6 +36,9 @@ namespace Statiq.Common
         new HashSet<string> Dependencies { get; }
 
         /// <inheritdoc/>
+        new HashSet<string> DependencyOf { get; }
+
+        /// <inheritdoc/>
         new bool Isolated { get; set; }
 
         /// <inheritdoc/>

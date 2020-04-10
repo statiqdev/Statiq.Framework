@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
+using System.Linq;
 using Statiq.Common;
 
 namespace Statiq.Testing
@@ -67,5 +69,27 @@ namespace Statiq.Testing
 
         IEnumerator IEnumerable.GetEnumerator() =>
             ((IDictionary<string, IPipeline>)_pipelines).GetEnumerator();
+
+        // IReadOnlyPipelineCollection
+
+        IEnumerable<string> IReadOnlyDictionary<string, IReadOnlyPipeline>.Keys => Keys;
+
+        IEnumerable<IReadOnlyPipeline> IReadOnlyDictionary<string, IReadOnlyPipeline>.Values => Values;
+
+        IReadOnlyPipeline IReadOnlyDictionary<string, IReadOnlyPipeline>.this[string key] => this[key];
+
+        public bool TryGetValue(string key, [MaybeNullWhen(false)] out IReadOnlyPipeline value)
+        {
+            if (TryGetValue(key, out IPipeline pipeline))
+            {
+                value = pipeline;
+                return true;
+            }
+            value = default;
+            return false;
+        }
+
+        IEnumerator<KeyValuePair<string, IReadOnlyPipeline>> IEnumerable<KeyValuePair<string, IReadOnlyPipeline>>.GetEnumerator() =>
+            _pipelines.Select(x => new KeyValuePair<string, IReadOnlyPipeline>(x.Key, x.Value)).GetEnumerator();
     }
 }

@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace Statiq.Common
 {
@@ -74,6 +76,20 @@ namespace Statiq.Common
             return pipeline;
         }
 
+        public static TPipeline AsDependencyOf<TPipeline>(this TPipeline pipeline, params string[] dependencyOf)
+            where TPipeline : IPipeline
+        {
+            pipeline.DependencyOf.AddRange(dependencyOf);
+            return pipeline;
+        }
+
+        public static TPipeline AsDependencyOf<TPipeline>(this TPipeline pipeline, IEnumerable<string> dependencyOf)
+            where TPipeline : IPipeline
+        {
+            pipeline.DependencyOf.AddRange(dependencyOf);
+            return pipeline;
+        }
+
         public static TPipeline AsIsolated<TPipeline>(this TPipeline pipeline, bool isolated = true)
             where TPipeline : IPipeline
         {
@@ -115,5 +131,36 @@ namespace Statiq.Common
             pipeline.ExecutionPolicy = ExecutionPolicy.Always;
             return pipeline;
         }
+
+        /// <summary>
+        /// Gets all dependencies of this pipeline including <see cref="IReadOnlyPipeline.DependencyOf"/> declarations.
+        /// </summary>
+        /// <remarks>This does not resolve nested dependencies, only the combination of
+        /// <see cref="IReadOnlyPipeline.Dependencies"/> and <see cref="IReadOnlyPipeline.DependencyOf"/> declarations.</remarks>
+        /// <param name="pipeline">The pipeline.</param>
+        /// <param name="pipelines">The current pipelines.</param>
+        /// <returns>All dependencies of the pipeline.</returns>
+        public static IEnumerable<string> GetAllDependencies(this IReadOnlyPipeline pipeline, IReadOnlyPipelineCollection pipelines)
+        {
+            _ = pipeline ?? throw new ArgumentNullException(nameof(pipeline));
+            _ = pipelines ?? throw new ArgumentNullException(nameof(pipelines));
+
+            string pipelineName = pipelines.FirstOrDefault(x => x.Value.Equals(pipeline)).Key
+                ?? throw new InvalidOperationException($"Could not find pipeline {pipeline.GetType().Name} in pipeline collection");
+            return (pipeline.Dependencies ?? (IEnumerable<string>)Array.Empty<string>())
+                .Concat(pipelines.Where(x => x.Value.DependencyOf?.Contains(pipelineName, StringComparer.OrdinalIgnoreCase) == true).Select(x => x.Key))
+                .Distinct(StringComparer.OrdinalIgnoreCase);
+        }
+
+        /// <summary>
+        /// Gets all dependencies of this pipeline including <see cref="IReadOnlyPipeline.DependencyOf"/> declarations.
+        /// </summary>
+        /// <remarks>This does not resolve nested dependencies, only the combination of
+        /// <see cref="IReadOnlyPipeline.Dependencies"/> and <see cref="IReadOnlyPipeline.DependencyOf"/> declarations.</remarks>
+        /// <param name="pipeline">The pipeline.</param>
+        /// <param name="executionState">The current execution state (usually an <see cref="IEngine"/> or <see cref="IExecutionContext"/>).</param>
+        /// <returns>All dependencies of the pipeline.</returns>
+        public static IEnumerable<string> GetAllDependencies(this IReadOnlyPipeline pipeline, IExecutionState executionState) =>
+            pipeline.GetAllDependencies((executionState ?? throw new ArgumentNullException(nameof(executionState))).Pipelines);
     }
 }

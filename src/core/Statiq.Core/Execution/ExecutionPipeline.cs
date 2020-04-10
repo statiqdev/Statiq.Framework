@@ -13,7 +13,9 @@ namespace Statiq.Core
     {
         protected ExecutionPipeline()
         {
-            Dependencies = new HashSet<string>();
+            Dependencies = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            DependencyOf = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
             if (GetType()
                 .GetMethod(nameof(ExecuteInputAsync), BindingFlags.Instance | BindingFlags.NonPublic)
                 .DeclaringType != typeof(ExecutionPipeline))
@@ -53,10 +55,16 @@ namespace Statiq.Core
         ModuleList IPipeline.OutputModules { get; } = new ModuleList();
 
         /// <inheritdoc/>
-        public virtual HashSet<string> Dependencies { get; } = new HashSet<string>();
+        public virtual HashSet<string> Dependencies { get; } = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
+        /// <inheritdoc/>
+        public virtual HashSet<string> DependencyOf { get; } = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
         /// <inheritdoc/>
         IReadOnlyCollection<string> IReadOnlyPipeline.Dependencies => Dependencies;
+
+        /// <inheritdoc/>
+        IReadOnlyCollection<string> IReadOnlyPipeline.DependencyOf => DependencyOf;
 
         /// <inheritdoc/>
         public virtual bool Isolated { get; set; }

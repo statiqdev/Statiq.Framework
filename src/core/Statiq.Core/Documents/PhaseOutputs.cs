@@ -80,6 +80,7 @@ namespace Statiq.Core
             if (_currentPhase.Phase == Phase.Output)
             {
                 return _pipelines
+                    .AsEnumerable()
                     .Where(x => !x.Value.Deployment)
                     .Select(x => KeyValuePair.Create(x.Key, GetOutputs(_phaseResults[x.Key], Phase.Output)))
                     .ToArray();
