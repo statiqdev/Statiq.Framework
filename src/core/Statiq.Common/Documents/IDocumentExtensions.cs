@@ -85,10 +85,11 @@ namespace Statiq.Common
         public static string GetTitle(this IDocument document) => document.GetString(Keys.Title) ?? document.Source.GetTitle();
 
         /// <summary>
-        /// Presents the metadata of a document as a dynamic object.
+        /// Presents the metadata of a document as a dynamic object. Cast the return object to <see cref="IDocument"/>
+        /// to convert it back to a document.
         /// </summary>
         /// <param name="document">The document.</param>
         /// <returns>A dynamic object that contains the document metadata.</returns>
-        public static dynamic AsDynamic(this IDocument document) => new DynamicDocumentWrapper(document ?? throw new ArgumentNullException(nameof(document)));
+        public static dynamic AsDynamic(this IDocument document) => new DynamicDocument(document ?? throw new ArgumentNullException(nameof(document)));
     }
 }

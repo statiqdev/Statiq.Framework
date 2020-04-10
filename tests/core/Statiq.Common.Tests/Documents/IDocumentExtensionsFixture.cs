@@ -29,6 +29,24 @@ namespace Statiq.Common.Tests.Documents
             }
 
             [Test]
+            public void DynamicObjectConvertsBackToDocument()
+            {
+                // Given
+                IDocument document = new TestDocument
+                {
+                    { "A", "a" },
+                    { "B", 2 }
+                };
+
+                // When
+                IDocument dynamicDocument = (IDocument)document.AsDynamic();
+
+                // Then
+                dynamicDocument.GetString("A").ShouldBe("a");
+                dynamicDocument["B"].ShouldBe(2);
+            }
+
+            [Test]
             public void GetsSource()
             {
                 // Given

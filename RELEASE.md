@@ -1,5 +1,6 @@
 # 1.0.0-beta.2
 
+- Added support for casting the dynamic object returned from `IDocument.AsDynamic()` back to an `IDocument`.
 - Added a new `IReadOnlyPipelineCollection` object and exposed it via `IExecutionState.Pipelines` to provide the current set of read-only pipelines during execution.
 - Added `IPipeline.GetAllDependencies()` extension methods to get the full set of `IPipeline.DependencyOf` and `IPipeline.Dependencies` for a given pipeline.
 - Added `IPipeline.DependencyOf` to allow specifying which pipelines a given pipeline is a dependency of (the reverse of `IPipeline.Dependencies`).
