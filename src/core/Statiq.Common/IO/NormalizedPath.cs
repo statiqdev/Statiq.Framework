@@ -925,7 +925,7 @@ namespace Statiq.Common
         public static bool ReplaceInvalidPathChars(Span<char> path, char newChar = '-') =>
             path.Replace(System.IO.Path.GetInvalidPathChars(), newChar);
 
-        public const string OptimizeFileNameReservedChars = "-_~:/\\?#[]@!$&'()*+;=};,";
+        public const string OptimizeFileNameReservedChars = "_~:/\\?#[]@!$&'()*+;=};,";
 
         // Only letters and numbers
         private static readonly Regex SimpleFileNameRegex = new Regex("^([a-zA-Z0-9])+$");
@@ -945,9 +945,6 @@ namespace Statiq.Common
 
             // Trim whitespace
             fileName = fileName.Trim();
-
-            // Remove multiple dashes
-            fileName = Regex.Replace(fileName, @"\-{2,}", string.Empty);
 
             // Strip reserved chars
             char[] buffer = new char[fileName.Length];
@@ -978,6 +975,9 @@ namespace Statiq.Common
             {
                 fileName = fileName.Replace(" ", "-");
             }
+
+            // Remove multiple dashes
+            fileName = Regex.Replace(fileName, @"\-+", "-");
 
             // Convert to lower-case
             if (toLower)

@@ -1187,9 +1187,9 @@ namespace Statiq.Common.Tests.IO
         public class OptimizeFileNameTests : NormalizedPathFixture
         {
             [TestCase(
-                "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~:?#[]@!$&'()*+,;=",
+                "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789._~:?#[]@!$&'()*+,;=",
                 "abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyz0123456789")]
-            [TestCase("Děku.jemeविकीвики-движка", "děku.jemeविकीвикидвижка")]
+            [TestCase("Děku.jemeविकीвики_движка", "děku.jemeविकीвикидвижка")]
             [TestCase(
                 "this is my title - and some \t\t\t\t\n   clever; (piece) of text here: [ok].",
                 "this-is-my-title-and-some-clever-piece-of-text-here-ok")]
@@ -1197,7 +1197,7 @@ namespace Statiq.Common.Tests.IO
                 "this is my title?!! science and #firstworldproblems :* :sadface=true",
                 "this-is-my-title-science-and-firstworldproblems-sadfacetrue")]
             [TestCase(
-                "one-two-three--four--five and a six--seven--eight-nine------ten",
+                "one_two_three__four__five and a six__seven__eight_nine______ten",
                 "onetwothreefourfive-and-a-sixseveneightnineten")]
             public void FileNameIsConvertedCorrectly(string input, string output)
             {
@@ -1223,18 +1223,18 @@ namespace Statiq.Common.Tests.IO
             {
                 // Given, When
                 string result = NormalizedPath.OptimizeFileName(
-                    "this-is-a-.net-tag",
-                    reservedChars: NormalizedPath.OptimizeFileNameReservedChars.Replace("-", string.Empty));
+                    "this-is_a-.net-tag",
+                    reservedChars: NormalizedPath.OptimizeFileNameReservedChars.Replace("_", string.Empty));
 
                 // Then
-                result.ShouldBe("this-is-a-.net-tag");
+                result.ShouldBe("this-is_a-.net-tag");
             }
 
             [Test]
             public void DoesNotTrimDot()
             {
                 // Given, When
-                string result = NormalizedPath.OptimizeFileName("this-is-a-.", trimDot: false);
+                string result = NormalizedPath.OptimizeFileName("this_is_a_.", trimDot: false);
 
                 // Then
                 result.ShouldBe("thisisa.");
@@ -1276,7 +1276,7 @@ namespace Statiq.Common.Tests.IO
             public void OptimizesInstance()
             {
                 // Given
-                NormalizedPath path = new NormalizedPath("a/b/c/ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_~:?#[]@!$&'()*+,;=.html");
+                NormalizedPath path = new NormalizedPath("a/b/c/ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789_~:?#[]@!$&'()*+,;=.html");
 
                 // When
                 NormalizedPath result = path.OptimizeFileName();

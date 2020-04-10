@@ -13,9 +13,9 @@ namespace Statiq.Core.Tests.Modules.Metadata
         public class ExecuteTests : OptimizeFileNameFixture
         {
             [TestCase(
-                "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~:?#[]@!$&'()*+,;=",
+                "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789._~:?#[]@!$&'()*+,;=",
                 "abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyz0123456789")]
-            [TestCase("Děku.jemeविकीвики-движка", "děku.jemeविकीвикидвижка")]
+            [TestCase("Děku.jemeविकीвики_движка", "děku.jemeविकीвикидвижка")]
             [TestCase(
                 "this is my title - and some \t\t\t\t\n   clever; (piece) of text here: [ok].",
                 "this-is-my-title-and-some-clever-piece-of-text-here-ok")]
@@ -23,7 +23,7 @@ namespace Statiq.Core.Tests.Modules.Metadata
                 "this is my title?!! science and #firstworldproblems :* :sadface=true",
                 "this-is-my-title-science-and-firstworldproblems-sadfacetrue")]
             [TestCase(
-                "one-two-three--four--five and a six--seven--eight-nine------ten",
+                "one_two_three__four__five and a six__seven__eight_nine______ten",
                 "onetwothreefourfive-and-a-sixseveneightnineten")]
             public async Task FileNameIsConvertedCorrectly(string input, string output)
             {
