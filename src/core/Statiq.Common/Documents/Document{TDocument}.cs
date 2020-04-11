@@ -128,11 +128,11 @@ namespace Statiq.Common
             CheckInitialized();
             if (!source.IsNull && !source.IsAbsolute)
             {
-                throw new ArgumentException("Document sources must be absolute", nameof(source));
+                throw new ArgumentException($"Document sources must be absolute ({source})", nameof(source));
             }
             if (!destination.IsNull && !destination.IsRelative)
             {
-                throw new ArgumentException("Document destinations must be relative to the output path", nameof(destination));
+                throw new ArgumentException($"Document destinations must be relative to the output path ({destination})", nameof(destination));
             }
 
             _baseMetadata = baseMetadata;

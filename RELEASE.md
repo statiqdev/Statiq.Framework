@@ -1,5 +1,6 @@
 # 1.0.0-beta.3
 
+- Improved document path error messages to include path.
 - Added support to `IDocument.ToDocument()` extensions to return or clone the original object if it's an `IDocument`.
 
 # 1.0.0-beta.2
