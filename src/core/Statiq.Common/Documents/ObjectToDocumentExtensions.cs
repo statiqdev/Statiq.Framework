@@ -5,7 +5,7 @@ using Statiq.Common;
 
 namespace Statiq.Common
 {
-    public static class ObjectDocumentExtensions
+    public static class ObjectToDocumentExtensions
     {
         // ToDocument
 
@@ -136,10 +136,26 @@ namespace Statiq.Common
             T obj,
             NormalizedPath source,
             NormalizedPath destination,
-            IMetadata metadata,
+            IEnumerable<KeyValuePair<string, object>> items,
             IContentProvider contentProvider = null)
         {
             _ = obj ?? throw new ArgumentNullException();
+
+            // Check if this is already an IDocument
+            if (obj is IDocument document)
+            {
+                // It's already a document so return or clone it instead of wrapping
+                if (source.IsNull && destination.IsNull && items == null && contentProvider == null)
+                {
+                    // Not setting anything new so return the same document
+                    return document;
+                }
+
+                // Clone the document with the new values
+                return document.Clone(source, destination, items, contentProvider);
+            }
+
+            // Check the actual type of the document
             Type objType = obj.GetType();
             if (typeof(T).Equals(objType))
             {
@@ -148,19 +164,19 @@ namespace Statiq.Common
                     obj,
                     source,
                     destination,
-                    metadata,
+                    items,
                     contentProvider);
             }
 
             // The generic type isn't the same as the actual type so use reflection to get it right
             return (IDocument)Activator.CreateInstance(
-                typeof(ObjectDocument<>).MakeGenericType(obj.GetType()),
+                typeof(ObjectDocument<>).MakeGenericType(objType),
                 new object[]
                 {
                     obj,
                     source,
                     destination,
-                    metadata,
+                    items,
                     contentProvider
                 });
         }
