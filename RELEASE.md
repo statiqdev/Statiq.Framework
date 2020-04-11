@@ -1,3 +1,5 @@
+# 1.0.0-beta.3
+
 # 1.0.0-beta.2
 
 - Changes the `GenerateFeeds` module to order by descending publish date to meet feed conventions and adds a `GeenrateFeeds.PreserveOrdering(bool)` method to revert to old behavior (#92).
