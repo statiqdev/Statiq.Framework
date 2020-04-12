@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using NUnit.Framework;
 using Shouldly;
@@ -273,6 +274,27 @@ namespace Statiq.Core.Tests.Modules.Control
 
                 // Then
                 results.ShouldBe(new[] { b, c, a });
+            }
+
+            [Test]
+            public async Task OrdersUsingCommonTypeConversion()
+            {
+                // Given
+                TestDocument a = new TestDocument
+                {
+                    { "Foo", "1/1/2010" }
+                };
+                TestDocument c = new TestDocument
+                {
+                    { "Foo", new DateTime(2009, 1, 1) }
+                };
+                OrderDocuments order = new OrderDocuments("Foo");
+
+                // When
+                IReadOnlyList<IDocument> results = await ExecuteAsync(new[] { a, c }, order);
+
+                // Then
+                results.ShouldBe(new[] { c, a });
             }
         }
     }

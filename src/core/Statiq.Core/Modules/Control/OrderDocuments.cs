@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Threading.Tasks;
 using Statiq.Common;
@@ -170,14 +171,14 @@ namespace Statiq.Core
                 if (orderdList == null)
                 {
                     orderdList = order.Descending
-                        ? context.Inputs.OrderByDescending(x => order.Key.GetValueAsync(x, context).GetAwaiter().GetResult(), order.Comparer)
-                        : context.Inputs.OrderBy(x => order.Key.GetValueAsync(x, context).GetAwaiter().GetResult(), order.Comparer);
+                        ? context.Inputs.OrderByDescending(x => order.GetValue(x, context), order.Comparer)
+                        : context.Inputs.OrderBy(x => order.GetValue(x, context), order.Comparer);
                 }
                 else
                 {
                     orderdList = order.Descending
-                        ? orderdList.ThenByDescending(x => order.Key.GetValueAsync(x, context).GetAwaiter().GetResult(), order.Comparer)
-                        : orderdList.ThenBy(x => order.Key.GetValueAsync(x, context).GetAwaiter().GetResult(), order.Comparer);
+                        ? orderdList.ThenByDescending(x => order.GetValue(x, context), order.Comparer)
+                        : orderdList.ThenBy(x => order.GetValue(x, context), order.Comparer);
                 }
             }
 
@@ -186,13 +187,41 @@ namespace Statiq.Core
 
         private class Order
         {
+            private IComparer<object> _comparer;
+
             public Config<object> Key { get; }
+
             public bool Descending { get; set; }
-            public IComparer<object> Comparer { get; set; }
+
+            public IComparer<object> Comparer
+            {
+                get => _comparer ?? CompatibleComparer.Instance;
+                set => _comparer = value;
+            }
 
             public Order(Config<object> key)
             {
                 Key = key;
+            }
+
+            public object GetValue(IDocument document, IExecutionContext context) =>
+                Key.GetValueAsync(document, context).GetAwaiter().GetResult();
+        }
+
+        // Compares using the type of the first object
+        private class CompatibleComparer : IComparer<object>
+        {
+            public static readonly CompatibleComparer Instance = new CompatibleComparer();
+
+            public int Compare([AllowNull] object x, [AllowNull] object y)
+            {
+                Type xType = x?.GetType();
+                Type yType = y?.GetType();
+                if (x != null && y != null && !xType.Equals(yType) && TypeHelper.TryConvert(y, xType, out object convertedY))
+                {
+                    y = convertedY;
+                }
+                return Comparer<object>.Default.Compare(x, y);
             }
         }
     }
