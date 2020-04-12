@@ -1,3 +1,5 @@
+# 1.0.0-beta.4
+
 # 1.0.0-beta.3
 
 - The `OrderDocuments` module will now attempt to convert incompatible values.
