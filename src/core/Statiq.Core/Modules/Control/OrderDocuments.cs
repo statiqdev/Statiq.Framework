@@ -195,7 +195,7 @@ namespace Statiq.Core
 
             public IComparer<object> Comparer
             {
-                get => _comparer ?? CompatibleComparer.Instance;
+                get => _comparer ?? new CompatibleComparer();
                 set => _comparer = value;
             }
 
@@ -208,20 +208,32 @@ namespace Statiq.Core
                 Key.GetValueAsync(document, context).GetAwaiter().GetResult();
         }
 
-        // Compares using the type of the first object
+        // Compares all objects using the first type seen
         private class CompatibleComparer : IComparer<object>
         {
-            public static readonly CompatibleComparer Instance = new CompatibleComparer();
+            private Type _comparisonType;
 
-            public int Compare([AllowNull] object x, [AllowNull] object y)
+            public int Compare([AllowNull] object x, [AllowNull] object y) =>
+                Comparer<object>.Default.Compare(Convert(x), Convert(y));
+
+            private object Convert([AllowNull] object obj)
             {
-                Type xType = x?.GetType();
-                Type yType = y?.GetType();
-                if (x != null && y != null && !xType.Equals(yType) && TypeHelper.TryConvert(y, xType, out object convertedY))
+                Type type = obj?.GetType();
+                if (type != null)
                 {
-                    y = convertedY;
+                    if (_comparisonType == null)
+                    {
+                        _comparisonType = type;
+                    }
+                    else if (!type.Equals(_comparisonType))
+                    {
+                        if (TypeHelper.TryConvert(obj, _comparisonType, out object converted))
+                        {
+                            obj = converted;
+                        }
+                    }
                 }
-                return Comparer<object>.Default.Compare(x, y);
+                return obj;
             }
         }
     }
