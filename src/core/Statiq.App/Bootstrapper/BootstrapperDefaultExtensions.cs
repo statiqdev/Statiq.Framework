@@ -130,6 +130,12 @@ namespace Statiq.App
                     {
                         engine.Shortcodes.Add("=", shortcode);
                     }
+
+                    // Special case for the include shortcode to register with the name "^"
+                    if (shortcode.Equals(typeof(Core.IncludeShortcode)))
+                    {
+                        engine.Shortcodes.Add("^", shortcode);
+                    }
                 }
             });
 

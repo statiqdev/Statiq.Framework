@@ -120,6 +120,9 @@ namespace Statiq.Core
         public HttpClient CreateHttpClient(HttpMessageHandler handler) => _contextData.Engine.CreateHttpClient(handler);
 
         /// <inheritdoc/>
+        public Task<HttpResponseMessage> SendHttpRequestWithRetryAsync(HttpRequestMessage request) => _contextData.Engine.SendHttpRequestWithRetryAsync(request);
+
+        /// <inheritdoc/>
         public async Task<ImmutableArray<IDocument>> ExecuteModulesAsync(IEnumerable<IModule> modules, IEnumerable<IDocument> inputs) =>
             await Engine.ExecuteModulesAsync(_contextData, this, modules, inputs?.ToImmutableArray() ?? ImmutableArray<IDocument>.Empty, this);
 

@@ -272,21 +272,9 @@ namespace Statiq.Html
 
         private static async Task<bool> ValidateAbsoluteLinkAsync(Uri uri, HttpMethod method, IExecutionContext context)
         {
-            // Retry with exponential backoff links. This helps with websites like GitHub that will give us a 429 -- TooManyRequests.
-            AsyncRetryPolicy<HttpResponseMessage> retryPolicy = Policy
-                .Handle<HttpRequestException>()
-                .OrResult<HttpResponseMessage>(r => r.StatusCode == TooManyRequests)
-                .WaitAndRetryAsync(MaxAbsoluteLinkRetry, attempt => TimeSpan.FromSeconds(0.1 * Math.Pow(2, attempt)));
-
             try
             {
-                HttpResponseMessage response = await retryPolicy.ExecuteAsync(async () =>
-                {
-                    using (HttpClient httpClient = context.CreateHttpClient())
-                    {
-                        return await httpClient.SendAsync(new HttpRequestMessage(method, uri));
-                    }
-                });
+                HttpResponseMessage response = await context.SendHttpRequestWithRetryAsync(new HttpRequestMessage(method, uri));
 
                 // Even with exponential backoff we have TooManyRequests, just skip, since we have to assume it's valid.
                 if (response.StatusCode == TooManyRequests)

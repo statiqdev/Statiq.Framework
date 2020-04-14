@@ -139,6 +139,15 @@ namespace Statiq.Testing
         public HttpClient CreateHttpClient(HttpMessageHandler handler) =>
             new HttpClient(new TestHttpMessageHandler(HttpResponseFunc, handler));
 
+        /// <inheritdoc/>
+        public async Task<HttpResponseMessage> SendHttpRequestWithRetryAsync(HttpRequestMessage request)
+        {
+            using (HttpClient httpClient = CreateHttpClient())
+            {
+                return await httpClient.SendAsync(request);
+            }
+        }
+
         /// <summary>
         /// A message handler that should be used to register <see cref="HttpResponseMessage"/>
         /// instances for a given request.

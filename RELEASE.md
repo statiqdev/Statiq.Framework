@@ -1,5 +1,11 @@
 # 1.0.0-beta.4
 
+- Added `<?#^ ... /?>` as special syntax for the `Include` shortcode with the "^" character.
+- Added support for HTTP/HTTPS schemes to the `Include` shortcode for including web content.
+- Added `HttpClient.SendWithRetryAsync()` extension methods to send an HTTP request with a retry policy when a `HttpClient` is available.
+- Added `IExecutionState.SendHttpRequestWithRetryAsync()` methods to send an HTTP request with a retry policy without needing an `HttpClient`.
+- Removed the `ProcessIncludes` module in favor of the `Include` shortcode.
+
 # 1.0.0-beta.3
 
 - The `OrderDocuments` module will now attempt to convert incompatible values.

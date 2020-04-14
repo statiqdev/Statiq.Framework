@@ -1,4 +1,6 @@
 ﻿using System.Collections.Generic;
+using System.Net;
+using System.Net.Http;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using NUnit.Framework;
@@ -14,7 +16,7 @@ namespace Statiq.Core.Tests.Shortcodes.IO
         public class ExecuteTests : IncludeShortcodeFixture
         {
             [Test]
-            public void IncludesFile()
+            public async Task IncludesFile()
             {
                 // Given
                 TestFileProvider fileProvider = new TestFileProvider();
@@ -41,14 +43,43 @@ namespace Statiq.Core.Tests.Shortcodes.IO
                 IncludeShortcode shortcode = new IncludeShortcode();
 
                 // When
-                IDocument result = shortcode.Execute(args, string.Empty, document, context);
+                IDocument result = await shortcode.ExecuteAsync(args, string.Empty, document, context);
 
                 // Then
                 result.ShouldBeOfType<TestDocument>().Content.ShouldBe("foo");
             }
 
             [Test]
-            public void EmptyResultIfFileDoesNotExist()
+            public async Task IncludesWebResource()
+            {
+                // Given
+                TestExecutionContext context = new TestExecutionContext
+                {
+                    Engine = new TestEngine
+                    {
+                        HttpResponseFunc = (_, __) => new HttpResponseMessage
+                        {
+                            StatusCode = HttpStatusCode.OK,
+                            Content = new StringContent("Hello from the other side.")
+                        }
+                    }
+                };
+                TestDocument document = new TestDocument();
+                KeyValuePair<string, string>[] args = new KeyValuePair<string, string>[]
+                {
+                    new KeyValuePair<string, string>(null, "http://foo.com/bar")
+                };
+                IncludeShortcode shortcode = new IncludeShortcode();
+
+                // When
+                IDocument result = await shortcode.ExecuteAsync(args, string.Empty, document, context);
+
+                // Then
+                result.ShouldBeOfType<TestDocument>().Content.ShouldBe("Hello from the other side.");
+            }
+
+            [Test]
+            public async Task EmptyResultIfFileDoesNotExist()
             {
                 // Given
                 TestFileProvider fileProvider = new TestFileProvider();
@@ -76,14 +107,14 @@ namespace Statiq.Core.Tests.Shortcodes.IO
                 IncludeShortcode shortcode = new IncludeShortcode();
 
                 // When
-                IDocument result = shortcode.Execute(args, string.Empty, document, context);
+                IDocument result = await shortcode.ExecuteAsync(args, string.Empty, document, context);
 
                 // Then
                 result.ShouldBeOfType<TestDocument>().Content.ShouldBeEmpty();
             }
 
             [Test]
-            public void IncludesFileRelativeToSource()
+            public async Task IncludesFileRelativeToSource()
             {
                 // Given
                 TestFileProvider fileProvider = new TestFileProvider();
@@ -111,7 +142,7 @@ namespace Statiq.Core.Tests.Shortcodes.IO
                 IncludeShortcode shortcode = new IncludeShortcode();
 
                 // When
-                IDocument result = shortcode.Execute(args, string.Empty, document, context);
+                IDocument result = await shortcode.ExecuteAsync(args, string.Empty, document, context);
 
                 // Then
                 result.ShouldBeOfType<TestDocument>().Content.ShouldBe("foo");

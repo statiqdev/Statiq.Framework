@@ -891,6 +891,15 @@ namespace Statiq.Core
         }
 
         /// <inheritdoc/>
+        public async Task<HttpResponseMessage> SendHttpRequestWithRetryAsync(HttpRequestMessage request)
+        {
+            using (HttpClient httpClient = CreateHttpClient())
+            {
+                return await httpClient.SendWithRetryAsync(request);
+            }
+        }
+
+        /// <inheritdoc/>
         public IJavaScriptEnginePool GetJavaScriptEnginePool(
             Action<IJavaScriptEngine> initializer = null,
             int startEngines = 10,

@@ -70,7 +70,7 @@ namespace Statiq.Common
         IMemoryStreamFactory MemoryStreamFactory { get; }
 
         /// <summary>
-        /// Gets the collection of outputs from all previously processed documents.
+        /// Gets the collection of outputs from all previously processed pipelines.
         /// </summary>
         IPipelineOutputs Outputs { get; }
 
@@ -113,6 +113,13 @@ namespace Statiq.Common
         /// <param name="handler">The message handler to use for this client.</param>
         /// <returns>A new <see cref="HttpClient"/> instance.</returns>
         HttpClient CreateHttpClient(HttpMessageHandler handler);
+
+        /// <summary>
+        /// Sends an <see cref="HttpRequestMessage"/> with exponential back-off.
+        /// </summary>
+        /// <param name="request">The request.</param>
+        /// <returns>The response.</returns>
+        Task<HttpResponseMessage> SendHttpRequestWithRetryAsync(HttpRequestMessage request);
 
         /// <summary>
         /// Gets a new <see cref="IJavaScriptEnginePool"/>. The returned engine pool should be disposed

@@ -1,4 +1,7 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Net.Http;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Statiq.Common;
@@ -27,17 +30,43 @@ namespace Statiq.Core
     /// &lt;?! Include "test-include.md" /?&gt;?
     /// </code>
     /// </para>
+    /// <para>You can also include HTTP/HTTPS resources</para>
+    /// <para>
+    /// <code>
+    /// &lt;?# Include "https://raw.githubusercontent.com/statiqdev/Statiq.Framework/master/README.md" /?&gt;
+    /// </code>
+    /// </para>
     /// </example>
     /// <parameter>The path to the file to include.</parameter>
-    public class IncludeShortcode : SyncDocumentShortcode
+    public class IncludeShortcode : DocumentShortcode
     {
         private NormalizedPath _sourcePath = NormalizedPath.Null;
 
         /// <inheritdoc />
-        public override IDocument Execute(KeyValuePair<string, string>[] args, string content, IDocument document, IExecutionContext context)
+        public override async Task<IDocument> ExecuteAsync(KeyValuePair<string, string>[] args, string content, IDocument document, IExecutionContext context)
         {
+            // See if this is a web include
+            string included = args.SingleValue();
+            if (included.StartsWith(Uri.UriSchemeHttp + "://") || included.StartsWith(Uri.UriSchemeHttps + "://"))
+            {
+                // This is a URI, so just get the web resource
+                HttpResponseMessage response = await context.SendHttpRequestWithRetryAsync(included);
+                if (!response.IsSuccessStatusCode)
+                {
+                    context.LogWarning($"Included web resource {included} returned {response.StatusCode}");
+                    return context.CreateDocument();
+                }
+
+                // Got the resource, copy to a stream and create a document result
+                using (Stream contentStream = await context.GetContentStreamAsync())
+                {
+                    await response.Content.CopyToAsync(contentStream);
+                    return context.CreateDocument(contentStream);
+                }
+            }
+
             // Get the included path relative to the document
-            NormalizedPath includedPath = new NormalizedPath(args.SingleValue());
+            NormalizedPath includedPath = new NormalizedPath(included);
             if (_sourcePath.IsNull)
             {
                 // Cache the source path for this shortcode instance since it'll be the same for all future shortcodes
