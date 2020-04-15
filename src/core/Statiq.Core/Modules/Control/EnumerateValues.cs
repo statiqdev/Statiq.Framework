@@ -18,9 +18,10 @@ namespace Statiq.Core
     /// to find the correct documents when the template gets rendered.
     /// </remarks>
     /// <category>Control</category>
-    public class EnumerateValues : ParallelSyncConfigModule<IEnumerable<object>>
+    public class EnumerateValues : ParallelConfigModule<IEnumerable<object>>
     {
         private string _currentKey = Keys.Current;
+        private Config<bool> _withInput = Config.FromDocument<bool>(Keys.EnumerateWithInput);
 
         /// <summary>
         /// Enumerates the values returned by the config and clones a document for each one.
@@ -38,8 +39,17 @@ namespace Statiq.Core
         /// Enumerates the values stored in the given metadata key.
         /// </summary>
         /// <param name="key">The metadata key that contains the values to enumerate.</param>
-        public EnumerateValues(string key = Keys.Enumerate)
-            : this(Config.FromDocument(doc => doc.GetList<object>(key)))
+        public EnumerateValues(Config<string> key)
+            : this(key.Transform((keyValue, doc, _) => doc.GetList<object>(keyValue)))
+        {
+            _ = key ?? throw new ArgumentNullException(nameof(key));
+        }
+
+        /// <summary>
+        /// Enumerates the values stored in the <see cref="Keys.Enumerate"/> metadata key.
+        /// </summary>
+        public EnumerateValues()
+            : this(Keys.Enumerate)
         {
         }
 
@@ -55,7 +65,19 @@ namespace Statiq.Core
             return this;
         }
 
-        protected override IEnumerable<IDocument> ExecuteConfig(IDocument input, IExecutionContext context, IEnumerable<object> value)
+        /// <summary>
+        /// If the configuration delegate returns <c>true</c> the original input document will be
+        /// included as the first result. By default, <see cref="Keys.EnumerateWithInput"/> is used.
+        /// </summary>
+        /// <param name="withInput">A configuration delegate that should return <c>true</c> to include the original document.</param>
+        /// <returns>The current module instance.</returns>
+        public EnumerateValues WithInputDocument(Config<bool> withInput)
+        {
+            _withInput = withInput ?? throw new ArgumentNullException(nameof(withInput));
+            return this;
+        }
+
+        protected override async Task<IEnumerable<IDocument>> ExecuteConfigAsync(IDocument input, IExecutionContext context, IEnumerable<object> value)
         {
             // Return the input document(s) for empty values
             if (value == null)
@@ -67,19 +89,25 @@ namespace Statiq.Core
                 return input.Yield();
             }
 
-            // If the config value didn't require a document but we have documents, clone each one with the enumeration results
+            // If the config value didn't require a document but we had inputs, clone each one with the enumeration results
             if (input == null && !context.Inputs.IsEmpty)
             {
-                return context.Inputs.SelectMany(i =>
-                    value.Select(x => i.Clone(new MetadataItems
+                return await context.Inputs.ParallelSelectManyAsync(async i =>
+                    (await _withInput.GetValueAsync(i, context) ? new[] { i } : new IDocument[] { })
+                        .Concat(
+                            value.Select(x => i.Clone(new MetadataItems
+                            {
+                                { _currentKey, x }
+                            }))));
+            }
+
+            // Otherwise clone the input document from which these values came with each value
+            return (input != null && await _withInput.GetValueAsync(input, context) ? new[] { input } : new IDocument[] { })
+                .Concat(
+                    value.Select(x => context.CloneOrCreateDocument(input, new MetadataItems
                     {
                         { _currentKey, x }
                     })));
-            }
-            return value.Select(x => context.CloneOrCreateDocument(input, new MetadataItems
-            {
-                { _currentKey, x }
-            }));
         }
     }
 }

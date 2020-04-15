@@ -77,6 +77,23 @@ namespace Statiq.Core.Tests.Modules.Control
             }
 
             [Test]
+            public async Task EnumeratesValueFromDefaultMetadataKey()
+            {
+                // Given
+                TestDocument input = new TestDocument("Foo")
+                {
+                    { Keys.Enumerate, new int[] { 1, 2 } }
+                };
+                EnumerateValues module = new EnumerateValues();
+
+                // When
+                ImmutableArray<TestDocument> results = await ExecuteAsync(input, module);
+
+                // Then
+                results.Select(x => x[Keys.Current]).ShouldBe(new object[] { 1, 2 }, true);
+            }
+
+            [Test]
             public async Task EnumeratesValueFromCustomMetadataKey()
             {
                 // Given
@@ -181,6 +198,37 @@ namespace Statiq.Core.Tests.Modules.Control
                             Tuple.Create("Bar", (object)null)
                         },
                         true);
+            }
+
+            [Test]
+            public async Task DoesNotIncludeInputDocumentIfNotAvailable()
+            {
+                // Given
+                EnumerateValues module = new EnumerateValues(Config.FromValues(1, 2, 3)).WithInputDocument(true);
+
+                // When
+                ImmutableArray<TestDocument> results = await ExecuteAsync(module);
+
+                // Then
+                results.Select(x => x[Keys.Current]).ShouldBe(new object[] { 1, 2, 3 }, true);
+            }
+
+            [Test]
+            public async Task IncludesInputDocument()
+            {
+                // Given
+                TestDocument input = new TestDocument("Foo")
+                {
+                    { Keys.Enumerate, new int[] { 1, 2 } },
+                    { Keys.EnumerateWithInput, true }
+                };
+                EnumerateValues module = new EnumerateValues();
+
+                // When
+                ImmutableArray<TestDocument> results = await ExecuteAsync(input, module);
+
+                // Then
+                results.Select(x => x.GetInt(Keys.Current, -1)).ShouldBe(new int[] { -1, 1, 2 }, true);
             }
         }
     }

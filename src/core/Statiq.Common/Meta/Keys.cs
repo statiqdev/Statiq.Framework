@@ -229,5 +229,11 @@ namespace Statiq.Common
         /// within a document.
         /// </summary>
         public const string Enumerate = nameof(Enumerate);
+
+        /// <summary>
+        /// Used to indicate that the original input should be output along with the enumerated values
+        /// when using the EnumerateValues module.
+        /// </summary>
+        public const string EnumerateWithInput = nameof(EnumerateWithInput);
     }
 }

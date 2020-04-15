@@ -1,5 +1,6 @@
 # 1.0.0-beta.4
 
+- Added `WithInputDocument()` to the `EnumerateValues` module to include the original input document in the enumeration.
 - Fixed some edge-case bugs in `LazyDocumentMetadataValue`.
 - Added `<?#^ ... /?>` as special syntax for the `Include` shortcode with the "^" character.
 - Added support for HTTP/HTTPS schemes to the `Include` shortcode for including web content.
