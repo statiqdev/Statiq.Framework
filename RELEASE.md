@@ -1,5 +1,6 @@
 # 1.0.0-beta.4
 
+- Fixed some edge-case bugs in `LazyDocumentMetadataValue`.
 - Added `<?#^ ... /?>` as special syntax for the `Include` shortcode with the "^" character.
 - Added support for HTTP/HTTPS schemes to the `Include` shortcode for including web content.
 - Added `HttpClient.SendWithRetryAsync()` extension methods to send an HTTP request with a retry policy when a `HttpClient` is available.

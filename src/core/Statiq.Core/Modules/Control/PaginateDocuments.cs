@@ -116,7 +116,7 @@ namespace Statiq.Core
                 };
                 if (results.Count > 0)
                 {
-                    items.Add(Keys.Previous, new LazyDocumentMetadataValue(results.Peek().Item1.Id));
+                    items.Add(Keys.Previous, new LazyDocumentMetadataValue(results.Peek().Item1));
                 }
                 LazyDocumentMetadataValue next = null;
                 if (c < pages.Length - 1)
@@ -130,7 +130,7 @@ namespace Statiq.Core
                     items);
                 if (results.Count > 0)
                 {
-                    results.Peek().Item2.Id = document.Id;
+                    results.Peek().Item2.OriginalDocument = document;
                 }
                 results.Push((document, next));
             }

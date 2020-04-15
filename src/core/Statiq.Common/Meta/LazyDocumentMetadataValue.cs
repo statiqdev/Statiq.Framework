@@ -32,17 +32,12 @@ namespace Statiq.Common
         {
         }
 
-        public LazyDocumentMetadataValue(IDocument document)
-            : this(document.Id)
+        public LazyDocumentMetadataValue(IDocument originalDocument)
         {
+            OriginalDocument = originalDocument;
         }
 
-        public LazyDocumentMetadataValue(Guid id)
-        {
-            Id = id;
-        }
-
-        public Guid Id { get; set; }
+        public IDocument OriginalDocument { get; set; }
 
         public object Get(IMetadata metadata)
         {
@@ -71,6 +66,9 @@ namespace Statiq.Common
                     }
                     context = context.Parent;
                 }
+
+                // Fall back to the original document
+                _result = OriginalDocument;
                 return _result;
             }
         }
@@ -86,7 +84,7 @@ namespace Statiq.Common
                 // Only process if we haven't already processed this document
                 if (visited.Add(current))
                 {
-                    if (current.Id.Equals(Id))
+                    if (current.IdEquals(OriginalDocument))
                     {
                         return current;
                     }

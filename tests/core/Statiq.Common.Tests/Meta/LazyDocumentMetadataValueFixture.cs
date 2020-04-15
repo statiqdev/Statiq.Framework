@@ -20,7 +20,7 @@ namespace Statiq.Common.Tests.Meta
                 TestDocument b = new TestDocument();
                 TestDocument c = new TestDocument();
                 TestExecutionContext context = new TestExecutionContext(a, b, c);
-                LazyDocumentMetadataValue value = new LazyDocumentMetadataValue(b.Id);
+                LazyDocumentMetadataValue value = new LazyDocumentMetadataValue(b);
 
                 // When
                 object result = value.Get(null);
@@ -41,7 +41,7 @@ namespace Statiq.Common.Tests.Meta
                 b.Add(Keys.Children, new IDocument[] { b1, b2, b3 });
                 TestDocument c = new TestDocument();
                 TestExecutionContext context = new TestExecutionContext(a, b, c);
-                LazyDocumentMetadataValue value = new LazyDocumentMetadataValue(b2.Id);
+                LazyDocumentMetadataValue value = new LazyDocumentMetadataValue(b2);
 
                 // When
                 object result = value.Get(null);
@@ -63,7 +63,7 @@ namespace Statiq.Common.Tests.Meta
                 TestExecutionContext parent = new TestExecutionContext(d, e, f);
                 TestExecutionContext context = new TestExecutionContext(a, b, c);
                 context.Parent = parent;
-                LazyDocumentMetadataValue value = new LazyDocumentMetadataValue(e.Id);
+                LazyDocumentMetadataValue value = new LazyDocumentMetadataValue(e);
 
                 // When
                 object result = value.Get(null);
@@ -90,7 +90,7 @@ namespace Statiq.Common.Tests.Meta
                 TestExecutionContext parent = new TestExecutionContext(d, e, f);
                 TestExecutionContext context = new TestExecutionContext(a, b, c);
                 context.Parent = parent;
-                LazyDocumentMetadataValue value = new LazyDocumentMetadataValue(e2.Id);
+                LazyDocumentMetadataValue value = new LazyDocumentMetadataValue(e2);
 
                 // When
                 object result = value.Get(null);
@@ -98,6 +98,38 @@ namespace Statiq.Common.Tests.Meta
                 // Then
                 result.ShouldBe(e2);
                 IExecutionContext.Current.ShouldBe(context); // Sanity check
+            }
+
+            [Test]
+            public void DoesNotThrowForNullOriginalDocument()
+            {
+                // Given
+                TestExecutionContext context = new TestExecutionContext();
+                LazyDocumentMetadataValue value = new LazyDocumentMetadataValue();
+
+                // When
+                object result = value.Get(null);
+
+                // Then
+                result.ShouldBeNull();
+            }
+
+            [Test]
+            public void ReturnsOriginalDocumentIfNotFound()
+            {
+                // Given
+                TestDocument a = new TestDocument();
+                TestDocument b = new TestDocument();
+                TestDocument c = new TestDocument();
+                TestDocument d = new TestDocument();
+                TestExecutionContext context = new TestExecutionContext(a, b, c);
+                LazyDocumentMetadataValue value = new LazyDocumentMetadataValue(d);
+
+                // When
+                object result = value.Get(null);
+
+                // Then
+                result.ShouldBe(d);
             }
         }
     }
