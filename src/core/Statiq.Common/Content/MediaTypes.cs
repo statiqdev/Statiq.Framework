@@ -13,6 +13,7 @@ namespace Statiq.Common
         // Use lookups to make sure we reflect any changes to the mapping
         public static string Css => Get(".css");
         public static string Gif => Get(".gif");
+        public static string Handlebars => Get(".hbs");
         public static string Html => Get(".html");
         public static string Jpg => Get(".jpg");
         public static string Json => Get(".json");
@@ -1053,13 +1054,16 @@ namespace Statiq.Common
                 { ".zmm", "application/vnd.handheld-entertainment+xml" },
 
                 // Additional conventional media types not registered with IANA
+                // This is a good resource for finding conventional extensions: https://github.com/github/linguist/blob/master/lib/linguist/languages.yml
                 { ".cshtml", "text/x-cshtml" },  // This is what VSCode uses: https://github.com/aspnet/AspNetCore-Tooling/blob/master/src/Razor/src/Microsoft.AspNetCore.Razor.VSCode.Extension/package.json
                 { ".md", "text/markdown" },
                 { ".sass", "text/x-sass" },
                 { ".scss", "text/x-scss" },
                 { ".yaml", "text/yaml" },
                 { ".yml", "text/yaml" },
-                { ".wasm", "application/wasm" }
+                { ".wasm", "application/wasm" },
+                { ".hbs", "text/handlebars" },
+                { ".handlebars", "text/handlebars" }
             };
 
         /// <summary>
