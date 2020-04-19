@@ -14,25 +14,26 @@ namespace Statiq.Core
     /// <parameter name="IndexKey">A key to set with the current iteration index (zero-based, optional).</parameter>
     public class ForEachShortcode : Shortcode
     {
+        private const string Key = nameof(Key);
+        private const string ValueKey = nameof(ValueKey);
+        private const string IndexKey = nameof(IndexKey);
+
         public override async Task<IEnumerable<IDocument>> ExecuteAsync(
             KeyValuePair<string, string>[] args,
             string content,
             IDocument document,
             IExecutionContext context)
         {
-            IMetadataDictionary dictionary = args.ToDictionary(
-                "Key",
-                "ValueKey",
-                "IndexKey");
-            dictionary.RequireKeys("Key", "ValueKey");
-            string valueKey = dictionary.GetString("ValueKey");
+            IMetadataDictionary dictionary = args.ToDictionary(Key, ValueKey, IndexKey);
+            dictionary.RequireKeys(Key, ValueKey);
+            string valueKey = dictionary.GetString(ValueKey);
             if (string.IsNullOrEmpty(valueKey))
             {
-                throw new ShortcodeArgumentException("Invalid ValueKey");
+                throw new ShortcodeArgumentException(ValueKey);
             }
-            string indexKey = dictionary.GetString("IndexKey");
+            string indexKey = dictionary.GetString(IndexKey);
 
-            IReadOnlyList<object> items = document.GetList<object>(dictionary.GetString("Key"));
+            IReadOnlyList<object> items = document.GetList<object>(dictionary.GetString(Key));
             if (items != null)
             {
                 List<IDocument> results = new List<IDocument>();

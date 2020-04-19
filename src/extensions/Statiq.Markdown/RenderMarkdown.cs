@@ -194,15 +194,47 @@ namespace Statiq.Markdown
                 return input.Yield();
             }
 
-            MarkdownPipeline pipeline = CreateMarkdownPipeline();
+            string result = Render(context, _configuration, _extensions, _prependLinkRoot, content);
 
-            string result;
+            if (_escapeAt)
+            {
+                result = EscapeAtRegex.Replace(result, "&#64;");
+                result = result.Replace("\\@", "@");
+            }
+
+            return string.IsNullOrEmpty(_sourceKey)
+                ? input.Clone(await context.GetContentProviderAsync(result, MediaTypes.Html)).Yield()
+                : input
+                    .Clone(new MetadataItems
+                    {
+                        { string.IsNullOrEmpty(_destinationKey) ? _sourceKey : _destinationKey, result }
+                    })
+                    .Yield();
+        }
+
+        internal static string Render(
+            IExecutionContext context,
+            string configuration,
+            OrderedList<IMarkdownExtension> extensions,
+            bool prependLinkRoot,
+            string content)
+        {
+            // Create the pipeline
+            MarkdownPipelineBuilder pipelineBuilder = new MarkdownPipelineBuilder();
+            pipelineBuilder.Configure(configuration);
+            if (extensions != null)
+            {
+                pipelineBuilder.Extensions.AddRange(extensions);
+            }
+            MarkdownPipeline pipeline = pipelineBuilder.Build();
+
+            // Render the content
             using (StringWriter writer = new StringWriter())
             {
                 HtmlRenderer htmlRenderer = new HtmlRenderer(writer);
                 pipeline.Setup(htmlRenderer);
 
-                if (_prependLinkRoot && context.Settings.ContainsKey(Keys.LinkRoot))
+                if (prependLinkRoot && context.Settings.ContainsKey(Keys.LinkRoot))
                 {
                     htmlRenderer.LinkRewriter = (link) =>
                     {
@@ -225,31 +257,8 @@ namespace Statiq.Markdown
                 MarkdownDocument document = MarkdownParser.Parse(content, pipeline);
                 htmlRenderer.Render(document);
                 writer.Flush();
-                result = writer.ToString();
+                return writer.ToString();
             }
-
-            if (_escapeAt)
-            {
-                result = EscapeAtRegex.Replace(result, "&#64;");
-                result = result.Replace("\\@", "@");
-            }
-
-            return string.IsNullOrEmpty(_sourceKey)
-                ? input.Clone(await context.GetContentProviderAsync(result, MediaTypes.Html)).Yield()
-                : input
-                    .Clone(new MetadataItems
-                    {
-                        { string.IsNullOrEmpty(_destinationKey) ? _sourceKey : _destinationKey, result }
-                    })
-                    .Yield();
-        }
-
-        private MarkdownPipeline CreateMarkdownPipeline()
-        {
-            MarkdownPipelineBuilder pipelineBuilder = new MarkdownPipelineBuilder();
-            pipelineBuilder.Configure(_configuration);
-            pipelineBuilder.Extensions.AddRange(_extensions);
-            return pipelineBuilder.Build();
         }
     }
 }

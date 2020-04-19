@@ -1,5 +1,7 @@
 # 1.0.0-beta.5
 
+- Added a `Markdown` shortcode to render Markdown content anywhere (for example, in another templating language like Razor).
+
 # 1.0.0-beta.4
 
 - Added Handlebars media types.
