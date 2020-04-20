@@ -34,9 +34,6 @@ namespace Statiq.Html
     /// <category>Input/Output</category>
     public class MirrorResources : Module
     {
-        private const int MaxAbsoluteLinkRetry = 5;
-        private const HttpStatusCode TooManyRequests = (HttpStatusCode)429;
-
         private readonly Func<Uri, NormalizedPath> _pathFunc;
 
         /// <summary>
