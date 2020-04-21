@@ -1,5 +1,7 @@
 # 1.0.0-beta.6
 
+- Added the `ILogger` interface to `IDocument` along with default implementations to support easier document logging with a document prefix (usually the source path).
+
 # 1.0.0-beta.5
 
 - Added a `Markdown` shortcode to render Markdown content anywhere (for example, in another templating language like Razor).

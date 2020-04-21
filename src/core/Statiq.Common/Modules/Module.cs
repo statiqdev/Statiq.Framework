@@ -170,8 +170,7 @@ namespace Statiq.Common
             }
             catch (Exception ex)
             {
-                string displayString = input is IDisplayable displayable ? $" [{displayable.ToSafeDisplayString()}]" : string.Empty;
-                context.LogError($"Exception while processing {input.GetType().Name}{displayString}: {ex.Message}");
+                input.LogError(ex.Message);
                 throw;
             }
         }
@@ -200,8 +199,7 @@ namespace Statiq.Common
             }
             catch (Exception ex)
             {
-                string displayString = input is IDisplayable displayable ? $" [{displayable.ToSafeDisplayString()}]" : string.Empty;
-                context.LogError($"Exception while processing {input.GetType().Name}{displayString}: {ex.Message}");
+                input.LogError(ex.Message);
                 throw;
             }
         }

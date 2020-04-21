@@ -3,13 +3,14 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 
 namespace Statiq.Common
 {
     /// <summary>
     /// Contains content and metadata for each item as it propagates through the pipeline.
     /// </summary>
-    public interface IDocument : IMetadata, IDisplayable, IContentProviderFactory
+    public interface IDocument : IMetadata, IDisplayable, IContentProviderFactory, ILogger
     {
         /// <summary>
         /// An identifier that is generated when the document is created and stays the same after cloning.
@@ -91,5 +92,18 @@ namespace Statiq.Common
 
             return hash.ToHashCode();
         }
+
+        // ILogger default implementation
+
+        void ILogger.Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception exception, Func<TState, Exception, string> formatter)
+        {
+            string displayString = this is IDisplayable displayable ? $" [{displayable.ToSafeDisplayString()}]" : string.Empty;
+            string logPrefix = $"{GetType().Name}{displayString}: ";
+            IExecutionContext.CurrentOrNull?.Log(logLevel, eventId, state, exception, (s, e) => logPrefix + formatter(s, e));
+        }
+
+        bool ILogger.IsEnabled(LogLevel logLevel) => IExecutionContext.CurrentOrNull?.IsEnabled(logLevel) ?? false;
+
+        IDisposable ILogger.BeginScope<TState>(TState state) => IExecutionContext.CurrentOrNull?.BeginScope(state);
     }
 }
