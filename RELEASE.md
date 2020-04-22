@@ -1,5 +1,6 @@
 # 1.0.0-beta.6
 
+- Refactored the `ValidateLinks` module to accept `Config<bool>` settings.
 - Changed shortcode semantics to only pass new metadata down (metadata is no longer merged up to host document, even though no existing shortcodes did that anyway).
 - Refactored shortcodes to return a new `ShortcodeResult` object that includes content and nested metadata.
 - Consolidated shortcode base types to only return variations of `ShortcodeResult` (instead of `Stream` and `string` versions as well). 

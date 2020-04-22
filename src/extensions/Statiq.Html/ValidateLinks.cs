@@ -27,12 +27,11 @@ namespace Statiq.Html
     /// <category>Input/Output</category>
     public class ValidateLinks : Module
     {
-        private const int MaxAbsoluteLinkRetry = 5;
         private const HttpStatusCode TooManyRequests = (HttpStatusCode)429;
 
-        private bool _validateAbsoluteLinks;
-        private bool _validateRelativeLinks = true;
-        private bool _asError;
+        private Config<bool> _validateAbsoluteLinks;
+        private Config<bool> _validateRelativeLinks = true;
+        private Config<bool> _asError;
 
         /// <summary>
         /// Validates absolute (often external) links. This may add a significant delay to your
@@ -43,8 +42,12 @@ namespace Statiq.Html
         /// </summary>
         /// <param name="validateAbsoluteLinks"><c>true</c> to validate absolute links.</param>
         /// <returns>The current module instance.</returns>
-        public ValidateLinks ValidateAbsoluteLinks(bool validateAbsoluteLinks = true)
+        public ValidateLinks ValidateAbsoluteLinks(Config<bool> validateAbsoluteLinks)
         {
+            if (validateAbsoluteLinks.RequiresDocument)
+            {
+                throw new ArgumentException(nameof(validateAbsoluteLinks) + " should not require a document");
+            }
             _validateAbsoluteLinks = validateAbsoluteLinks;
             return this;
         }
@@ -54,8 +57,12 @@ namespace Statiq.Html
         /// </summary>
         /// <param name="validateRelativeLinks"><c>true</c> to validate relative links.</param>
         /// <returns>The current module instance.</returns>
-        public ValidateLinks ValidateRelativeLinks(bool validateRelativeLinks = true)
+        public ValidateLinks ValidateRelativeLinks(Config<bool> validateRelativeLinks)
         {
+            if (validateRelativeLinks.RequiresDocument)
+            {
+                throw new ArgumentException(nameof(validateRelativeLinks) + " should not require a document");
+            }
             _validateRelativeLinks = validateRelativeLinks;
             return this;
         }
@@ -67,8 +74,12 @@ namespace Statiq.Html
         /// </summary>
         /// <param name="asError"><c>true</c> to report failures as an error.</param>
         /// <returns>The current module instance.</returns>
-        public ValidateLinks AsError(bool asError = true)
+        public ValidateLinks AsError(Config<bool> asError)
         {
+            if (asError.RequiresDocument)
+            {
+                throw new ArgumentException(nameof(asError) + " should not require a document");
+            }
             _asError = asError;
             return this;
         }
@@ -80,6 +91,11 @@ namespace Statiq.Html
             // Handle invalid HTTPS certificates and allow alternate security protocols (see http://stackoverflow.com/a/5670954/807064)
             ServicePointManager.ServerCertificateValidationCallback = (s, cert, chain, ssl) => true;
 #pragma warning restore RCS1163 // Unused parameter.
+
+            // Get settings
+            bool validateAbsoluteLinks = _validateAbsoluteLinks == null ? false : await _validateAbsoluteLinks.GetValueAsync(null, context);
+            bool validateRelativeLinks = _validateRelativeLinks == null ? false : await _validateRelativeLinks.GetValueAsync(null, context);
+            bool asError = _asError == null ? false : await _asError.GetValueAsync(null, context);
 
             // Key = link, Value = source, tag HTML
             ConcurrentDictionary<string, ConcurrentBag<(string documentSource, string outerHtml)>> links =
@@ -111,13 +127,13 @@ namespace Statiq.Html
                     }
 
                     // Relative
-                    if (!uri.IsAbsoluteUri && _validateRelativeLinks && !await ValidateRelativeLinkAsync(uri, context))
+                    if (!uri.IsAbsoluteUri && validateRelativeLinks && !await ValidateRelativeLinkAsync(uri, context))
                     {
                         AddOrUpdateFailure(context, link.Value, failures);
                     }
 
                     // Absolute
-                    if (uri.IsAbsoluteUri && _validateAbsoluteLinks && !await ValidateAbsoluteLinkAsync(uri, context))
+                    if (uri.IsAbsoluteUri && validateAbsoluteLinks && !await ValidateAbsoluteLinkAsync(uri, context))
                     {
                         AddOrUpdateFailure(context, link.Value, failures);
                     }
@@ -133,7 +149,7 @@ namespace Statiq.Html
                     Environment.NewLine,
                     failures.Select(x => $"{x.Key}{Environment.NewLine} - {string.Join(Environment.NewLine + " - ", x.Value)}"));
                 context.Log(
-                    _asError ? LogLevel.Error : LogLevel.Warning,
+                    asError ? LogLevel.Error : LogLevel.Warning,
                     $"{failureCount} link validation failures:{Environment.NewLine}{failureMessage}");
             }
 
