@@ -43,10 +43,10 @@ namespace Statiq.Core.Tests.Shortcodes.IO
                 IncludeShortcode shortcode = new IncludeShortcode();
 
                 // When
-                IDocument result = await shortcode.ExecuteAsync(args, string.Empty, document, context);
+                ShortcodeResult result = await shortcode.ExecuteAsync(args, string.Empty, document, context);
 
                 // Then
-                result.ShouldBeOfType<TestDocument>().Content.ShouldBe("foo");
+                result.ContentProvider.GetStream().ReadToEnd().ShouldBe("foo");
             }
 
             [Test]
@@ -72,14 +72,14 @@ namespace Statiq.Core.Tests.Shortcodes.IO
                 IncludeShortcode shortcode = new IncludeShortcode();
 
                 // When
-                IDocument result = await shortcode.ExecuteAsync(args, string.Empty, document, context);
+                ShortcodeResult result = await shortcode.ExecuteAsync(args, string.Empty, document, context);
 
                 // Then
-                result.ShouldBeOfType<TestDocument>().Content.ShouldBe("Hello from the other side.");
+                result.ContentProvider.GetStream().ReadToEnd().ShouldBe("Hello from the other side.");
             }
 
             [Test]
-            public async Task EmptyResultIfFileDoesNotExist()
+            public async Task NullResultIfFileDoesNotExist()
             {
                 // Given
                 TestFileProvider fileProvider = new TestFileProvider();
@@ -107,10 +107,10 @@ namespace Statiq.Core.Tests.Shortcodes.IO
                 IncludeShortcode shortcode = new IncludeShortcode();
 
                 // When
-                IDocument result = await shortcode.ExecuteAsync(args, string.Empty, document, context);
+                ShortcodeResult result = await shortcode.ExecuteAsync(args, string.Empty, document, context);
 
                 // Then
-                result.ShouldBeOfType<TestDocument>().Content.ShouldBeEmpty();
+                result.ShouldBeNull();
             }
 
             [Test]
@@ -142,10 +142,10 @@ namespace Statiq.Core.Tests.Shortcodes.IO
                 IncludeShortcode shortcode = new IncludeShortcode();
 
                 // When
-                IDocument result = await shortcode.ExecuteAsync(args, string.Empty, document, context);
+                ShortcodeResult result = await shortcode.ExecuteAsync(args, string.Empty, document, context);
 
                 // Then
-                result.ShouldBeOfType<TestDocument>().Content.ShouldBe("foo");
+                result.ContentProvider.GetStream().ReadToEnd().ShouldBe("foo");
             }
         }
     }

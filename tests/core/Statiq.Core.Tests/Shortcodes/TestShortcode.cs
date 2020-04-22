@@ -7,7 +7,7 @@ namespace Statiq.Core.Tests.Shortcodes
 {
     public class TestShortcode : IShortcode
     {
-        public Task<IEnumerable<IDocument>> ExecuteAsync(KeyValuePair<string, string>[] args, string content, IDocument document, IExecutionContext context)
+        public Task<IEnumerable<ShortcodeResult>> ExecuteAsync(KeyValuePair<string, string>[] args, string content, IDocument document, IExecutionContext context)
         {
             throw new NotImplementedException();
         }

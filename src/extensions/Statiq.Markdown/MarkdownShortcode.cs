@@ -27,12 +27,12 @@ namespace Statiq.Markdown
     /// By default, root-relative links, which are links starting with a '/' are left untouched.
     /// When setting this value to <c>true</c>, the <see cref="Keys.LinkRoot"/> setting value is added before the link.
     /// </parameter>
-    public class MarkdownShortcode : SyncContentShortcode
+    public class MarkdownShortcode : SyncShortcode
     {
         private const string Configuration = nameof(Configuration);
         private const string PrependLinkRoot = nameof(PrependLinkRoot);
 
-        public override string Execute(KeyValuePair<string, string>[] args, string content, IDocument document, IExecutionContext context)
+        public override ShortcodeResult Execute(KeyValuePair<string, string>[] args, string content, IDocument document, IExecutionContext context)
         {
             IMetadataDictionary dictionary = args.ToDictionary(Configuration, PrependLinkRoot);
             return RenderMarkdown.Render(context, dictionary.GetString(Configuration, RenderMarkdown.DefaultConfiguration), null, dictionary.GetBool(PrependLinkRoot), content);

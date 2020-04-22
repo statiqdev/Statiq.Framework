@@ -16,7 +16,7 @@ namespace Statiq.Core.Tests.Shortcodes.Control
         public class ExecuteTests : ForEachShortcodeFixture
         {
             [Test]
-            public async Task ReturnsNullIfMissingKey()
+            public void ReturnsNullIfMissingKey()
             {
                 // Given
                 TestExecutionContext context = new TestExecutionContext();
@@ -28,14 +28,14 @@ namespace Statiq.Core.Tests.Shortcodes.Control
                 IfShortcode shortcode = new IfShortcode();
 
                 // When
-                IDocument result = await shortcode.ExecuteAsync(args, "Fizzbuzz", document, context);
+                ShortcodeResult result = shortcode.Execute(args, "Fizzbuzz", document, context);
 
                 // Then
                 result.ShouldBeNull();
             }
 
             [Test]
-            public async Task ReturnsDocumentIfEqual()
+            public void ReturnsDocumentIfEqual()
             {
                 // Given
                 TestExecutionContext context = new TestExecutionContext();
@@ -51,14 +51,14 @@ namespace Statiq.Core.Tests.Shortcodes.Control
                 IfShortcode shortcode = new IfShortcode();
 
                 // When
-                IDocument result = await shortcode.ExecuteAsync(args, "Fizzbuzz", document, context);
+                ShortcodeResult result = shortcode.Execute(args, "Fizzbuzz", document, context);
 
                 // Then
-                result.ShouldBeOfType<TestDocument>().Content.ShouldBe("Fizzbuzz");
+                result.ContentProvider.GetStream().ReadToEnd().ShouldBe("Fizzbuzz");
             }
 
             [Test]
-            public async Task ReturnsNullIfNotEqual()
+            public void ReturnsNullIfNotEqual()
             {
                 // Given
                 TestExecutionContext context = new TestExecutionContext();
@@ -74,14 +74,14 @@ namespace Statiq.Core.Tests.Shortcodes.Control
                 IfShortcode shortcode = new IfShortcode();
 
                 // When
-                IDocument result = await shortcode.ExecuteAsync(args, "Fizzbuzz", document, context);
+                ShortcodeResult result = shortcode.Execute(args, "Fizzbuzz", document, context);
 
                 // Then
                 result.ShouldBeNull();
             }
 
             [Test]
-            public async Task ReturnsDocumentIfConvertedEqual()
+            public void ReturnsDocumentIfConvertedEqual()
             {
                 // Given
                 TestExecutionContext context = new TestExecutionContext();
@@ -97,14 +97,14 @@ namespace Statiq.Core.Tests.Shortcodes.Control
                 IfShortcode shortcode = new IfShortcode();
 
                 // When
-                IDocument result = await shortcode.ExecuteAsync(args, "Fizzbuzz", document, context);
+                ShortcodeResult result = shortcode.Execute(args, "Fizzbuzz", document, context);
 
                 // Then
-                result.ShouldBeOfType<TestDocument>().Content.ShouldBe("Fizzbuzz");
+                result.ContentProvider.GetStream().ReadToEnd().ShouldBe("Fizzbuzz");
             }
 
             [Test]
-            public async Task ReturnsNullIfConvertedNotEqual()
+            public void ReturnsNullIfConvertedNotEqual()
             {
                 // Given
                 TestExecutionContext context = new TestExecutionContext();
@@ -120,14 +120,14 @@ namespace Statiq.Core.Tests.Shortcodes.Control
                 IfShortcode shortcode = new IfShortcode();
 
                 // When
-                IDocument result = await shortcode.ExecuteAsync(args, "Fizzbuzz", document, context);
+                ShortcodeResult result = shortcode.Execute(args, "Fizzbuzz", document, context);
 
                 // Then
                 result.ShouldBeNull();
             }
 
             [Test]
-            public async Task ReturnsDocumentIfTrue()
+            public void ReturnsDocumentIfTrue()
             {
                 // Given
                 TestExecutionContext context = new TestExecutionContext();
@@ -142,14 +142,14 @@ namespace Statiq.Core.Tests.Shortcodes.Control
                 IfShortcode shortcode = new IfShortcode();
 
                 // When
-                IDocument result = await shortcode.ExecuteAsync(args, "Fizzbuzz", document, context);
+                ShortcodeResult result = shortcode.Execute(args, "Fizzbuzz", document, context);
 
                 // Then
-                result.ShouldBeOfType<TestDocument>().Content.ShouldBe("Fizzbuzz");
+                result.ContentProvider.GetStream().ReadToEnd().ShouldBe("Fizzbuzz");
             }
 
             [Test]
-            public async Task ReturnsDocumentIfConvertedTrue()
+            public void ReturnsDocumentIfConvertedTrue()
             {
                 // Given
                 TestExecutionContext context = new TestExecutionContext();
@@ -164,14 +164,14 @@ namespace Statiq.Core.Tests.Shortcodes.Control
                 IfShortcode shortcode = new IfShortcode();
 
                 // When
-                IDocument result = await shortcode.ExecuteAsync(args, "Fizzbuzz", document, context);
+                ShortcodeResult result = shortcode.Execute(args, "Fizzbuzz", document, context);
 
                 // Then
-                result.ShouldBeOfType<TestDocument>().Content.ShouldBe("Fizzbuzz");
+                result.ContentProvider.GetStream().ReadToEnd().ShouldBe("Fizzbuzz");
             }
 
             [Test]
-            public async Task ReturnsNullIfFalse()
+            public void ReturnsNullIfFalse()
             {
                 // Given
                 TestExecutionContext context = new TestExecutionContext();
@@ -186,14 +186,14 @@ namespace Statiq.Core.Tests.Shortcodes.Control
                 IfShortcode shortcode = new IfShortcode();
 
                 // When
-                IDocument result = await shortcode.ExecuteAsync(args, "Fizzbuzz", document, context);
+                ShortcodeResult result = shortcode.Execute(args, "Fizzbuzz", document, context);
 
                 // Then
                 result.ShouldBeNull();
             }
 
             [Test]
-            public async Task ReturnsNullIfConvertedFalse()
+            public void ReturnsNullIfConvertedFalse()
             {
                 // Given
                 TestExecutionContext context = new TestExecutionContext();
@@ -208,14 +208,14 @@ namespace Statiq.Core.Tests.Shortcodes.Control
                 IfShortcode shortcode = new IfShortcode();
 
                 // When
-                IDocument result = await shortcode.ExecuteAsync(args, "Fizzbuzz", document, context);
+                ShortcodeResult result = shortcode.Execute(args, "Fizzbuzz", document, context);
 
                 // Then
                 result.ShouldBeNull();
             }
 
             [Test]
-            public async Task ReturnsNullIfCanNotConvertToBool()
+            public void ReturnsNullIfCanNotConvertToBool()
             {
                 // Given
                 TestExecutionContext context = new TestExecutionContext();
@@ -230,14 +230,14 @@ namespace Statiq.Core.Tests.Shortcodes.Control
                 IfShortcode shortcode = new IfShortcode();
 
                 // When
-                IDocument result = await shortcode.ExecuteAsync(args, "Fizzbuzz", document, context);
+                ShortcodeResult result = shortcode.Execute(args, "Fizzbuzz", document, context);
 
                 // Then
                 result.ShouldBeNull();
             }
 
             [Test]
-            public async Task ReturnsNullIfCanNotConvert()
+            public void ReturnsNullIfCanNotConvert()
             {
                 // Given
                 TestExecutionContext context = new TestExecutionContext();
@@ -253,14 +253,14 @@ namespace Statiq.Core.Tests.Shortcodes.Control
                 IfShortcode shortcode = new IfShortcode();
 
                 // When
-                IDocument result = await shortcode.ExecuteAsync(args, "Fizzbuzz", document, context);
+                ShortcodeResult result = shortcode.Execute(args, "Fizzbuzz", document, context);
 
                 // Then
                 result.ShouldBeNull();
             }
 
             [Test]
-            public async Task ReturnsDocumentIfScriptEqual()
+            public void ReturnsDocumentIfScriptEqual()
             {
                 // Given
                 TestExecutionContext context = new TestExecutionContext();
@@ -277,10 +277,10 @@ namespace Statiq.Core.Tests.Shortcodes.Control
                 IfShortcode shortcode = new IfShortcode();
 
                 // When
-                IDocument result = await shortcode.ExecuteAsync(args, "Fizzbuzz", document, context);
+                ShortcodeResult result = shortcode.Execute(args, "Fizzbuzz", document, context);
 
                 // Then
-                result.ShouldBeOfType<TestDocument>().Content.ShouldBe("Fizzbuzz");
+                result.ContentProvider.GetStream().ReadToEnd().ShouldBe("Fizzbuzz");
             }
         }
     }

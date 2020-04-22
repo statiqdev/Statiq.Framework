@@ -22,10 +22,10 @@ namespace Statiq.Core.Tests.Shortcodes.Content
                 string shortcodeContent = "return 1 + 2;";
 
                 // When
-                string result = await shortcode.ExecuteAsync(null, shortcodeContent, document, context);
+                ShortcodeResult result = await shortcode.ExecuteAsync(null, shortcodeContent, document, context);
 
                 // Then
-                result.ShouldBe("3");
+                result.ContentProvider.GetStream().ReadToEnd().ShouldBe("3");
             }
 
             [Test]
@@ -38,10 +38,10 @@ namespace Statiq.Core.Tests.Shortcodes.Content
                 string shortcodeContent = "1 + 2";
 
                 // When
-                string result = await shortcode.ExecuteAsync(null, shortcodeContent, document, context);
+                ShortcodeResult result = await shortcode.ExecuteAsync(null, shortcodeContent, document, context);
 
                 // Then
-                result.ShouldBe("3");
+                result.ContentProvider.GetStream().ReadToEnd().ShouldBe("3");
             }
 
             [Test]
@@ -57,10 +57,10 @@ namespace Statiq.Core.Tests.Shortcodes.Content
                 string shortcodeContent = "return 1 + GetInt(\"Foo\");";
 
                 // When
-                string result = await shortcode.ExecuteAsync(null, shortcodeContent, document, context);
+                ShortcodeResult result = await shortcode.ExecuteAsync(null, shortcodeContent, document, context);
 
                 // Then
-                result.ShouldBe("5");
+                result.ContentProvider.GetStream().ReadToEnd().ShouldBe("5");
             }
 
             [Test]
@@ -76,10 +76,10 @@ namespace Statiq.Core.Tests.Shortcodes.Content
                 string shortcodeContent = "return 1 + (int)Foo;";
 
                 // When
-                string result = await shortcode.ExecuteAsync(null, shortcodeContent, document, context);
+                ShortcodeResult result = await shortcode.ExecuteAsync(null, shortcodeContent, document, context);
 
                 // Then
-                result.ShouldBe("5");
+                result.ContentProvider.GetStream().ReadToEnd().ShouldBe("5");
             }
         }
     }

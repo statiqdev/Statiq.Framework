@@ -28,10 +28,10 @@ namespace Statiq.Core.Tests.Shortcodes.Metadata
                 MetaShortcode shortcode = new MetaShortcode();
 
                 // When
-                string result = shortcode.Execute(args, string.Empty, document, context);
+                ShortcodeResult result = shortcode.Execute(args, string.Empty, document, context);
 
                 // Then
-                result.ShouldBe("Bar");
+                result.ContentProvider.GetStream().ReadToEnd().ShouldBe("Bar");
             }
 
             [Test]
@@ -50,7 +50,7 @@ namespace Statiq.Core.Tests.Shortcodes.Metadata
                 MetaShortcode shortcode = new MetaShortcode();
 
                 // When
-                string result = shortcode.Execute(args, string.Empty, document, context);
+                ShortcodeResult result = shortcode.Execute(args, string.Empty, document, context);
 
                 // Then
                 result.ShouldBeNull();

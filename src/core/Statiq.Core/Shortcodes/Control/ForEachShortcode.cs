@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
@@ -12,13 +13,13 @@ namespace Statiq.Core
     /// <parameter name="Key">The key that contains the sequence to iterate.</parameter>
     /// <parameter name="ValueKey">A key to set with the value for each iteration.</parameter>
     /// <parameter name="IndexKey">A key to set with the current iteration index (zero-based, optional).</parameter>
-    public class ForEachShortcode : Shortcode
+    public class ForEachShortcode : SyncMultiShortcode
     {
         private const string Key = nameof(Key);
         private const string ValueKey = nameof(ValueKey);
         private const string IndexKey = nameof(IndexKey);
 
-        public override async Task<IEnumerable<IDocument>> ExecuteAsync(
+        public override IEnumerable<ShortcodeResult> Execute(
             KeyValuePair<string, string>[] args,
             string content,
             IDocument document,
@@ -36,7 +37,7 @@ namespace Statiq.Core
             IReadOnlyList<object> items = document.GetList<object>(dictionary.GetString(Key));
             if (items != null)
             {
-                List<IDocument> results = new List<IDocument>();
+                List<ShortcodeResult> results = new List<ShortcodeResult>();
                 int index = 0;
                 foreach (object item in items)
                 {
@@ -49,7 +50,7 @@ namespace Statiq.Core
                         metadata.Add(indexKey, index);
                     }
 
-                    results.Add(await document.CloneAsync(metadata, content));
+                    results.Add(new ShortcodeResult(content, metadata));
 
                     index++;
                 }

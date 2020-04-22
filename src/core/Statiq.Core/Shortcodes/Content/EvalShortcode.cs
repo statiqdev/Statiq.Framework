@@ -13,9 +13,9 @@ namespace Statiq.Core
     /// &lt;?# Eval ?>&lt;?# return 1 + 2; ?>&lt;?#/ Eval ?>
     /// </code>
     /// </example>
-    public class EvalShortcode : ContentShortcode
+    public class EvalShortcode : Shortcode
     {
-        public override async Task<string> ExecuteAsync(KeyValuePair<string, string>[] args, string content, IDocument document, IExecutionContext context)
+        public override async Task<ShortcodeResult> ExecuteAsync(KeyValuePair<string, string>[] args, string content, IDocument document, IExecutionContext context)
         {
             byte[] assembly = context.ScriptHelper.Compile(content, document);
             object value = await context.ScriptHelper.EvaluateAsync(assembly, document);

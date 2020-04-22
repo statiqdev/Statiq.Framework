@@ -48,16 +48,19 @@ namespace Statiq.Core
             _endDelimiter = endDelimiter;
         }
 
-        protected override async Task<IEnumerable<IDocument>> ExecuteInputAsync(IDocument input, IExecutionContext context) =>
-            (await ProcessShortcodesAsync(input, context) ?? input).Yield();
+        protected override async Task<IEnumerable<IDocument>> ExecuteInputAsync(IDocument input, IExecutionContext context)
+        {
+            IContentProvider contentProvider = await ProcessShortcodesAsync(input, input.ContentProvider, context);
+            return contentProvider == null ? input.Yield() : input.Clone(contentProvider).Yield();
+        }
 
         // The inputStream will be disposed if this returns a result document but will not otherwise
-        private async Task<IDocument> ProcessShortcodesAsync(IDocument input, IExecutionContext context)
+        private async Task<IContentProvider> ProcessShortcodesAsync(IDocument input, IContentProvider contentProvider, IExecutionContext context)
         {
             // Parse the input stream looking for shortcodes
             ShortcodeParser parser = new ShortcodeParser(_startDelimiter, _endDelimiter, context.Shortcodes);
             List<ShortcodeLocation> locations;
-            using (Stream inputStream = input.GetContentStream())
+            using (Stream inputStream = contentProvider.GetStream())
             {
                 locations = parser.Parse(inputStream);
             }
@@ -79,17 +82,7 @@ namespace Statiq.Core
             List<InsertingStreamLocation> insertingLocations = new List<InsertingStreamLocation>();
             foreach (ShortcodeLocation location in locations)
             {
-                InsertingStreamLocation insertingLocation = await ExecuteShortcodesAsync(input, context, location, shortcodes);
-                insertingLocations.Add(insertingLocation);
-
-                // Accumulate metadata for the following shortcodes
-                if (insertingLocation.Documents != null)
-                {
-                    foreach (IDocument insertingDocument in insertingLocation.Documents)
-                    {
-                        input = input.Clone(insertingDocument);
-                    }
-                }
+                insertingLocations.Add(await ExecuteShortcodesAsync(input, context, location, shortcodes));
             }
 
             // Dispose any shortcodes that implement IDisposable
@@ -106,7 +99,7 @@ namespace Statiq.Core
             using (TextWriter writer = new StreamWriter(resultStream, Encoding.UTF8, 4096, true))
             {
                 // The input stream will get disposed when the reader is
-                using (TextReader reader = new StreamReader(input.GetContentStream()))
+                using (TextReader reader = new StreamReader(contentProvider.GetStream()))
                 {
                     int position = 0;
                     int length = 0;
@@ -118,18 +111,15 @@ namespace Statiq.Core
                         position += length;
 
                         // Copy the shortcode content to the result stream
-                        if (insertingLocation.Documents != null)
+                        if (insertingLocation.ContentProviders != null)
                         {
-                            foreach (IDocument insertingDocument in insertingLocation.Documents)
+                            foreach (IContentProvider insertingContentProvider in insertingLocation.ContentProviders)
                             {
                                 // This will dispose the shortcode content stream when done
-                                using (TextReader insertingReader = new StreamReader(insertingDocument.GetContentStream()))
+                                using (TextReader insertingReader = new StreamReader(insertingContentProvider.GetStream()))
                                 {
                                     Read(insertingReader, writer, null, ref buffer);
                                 }
-
-                                // Merge shortcode metadata with the current document
-                                input = input.Clone(insertingDocument);
                             }
                         }
 
@@ -143,7 +133,7 @@ namespace Statiq.Core
                     Read(reader, writer, null, ref buffer);
                 }
             }
-            return input.Clone(context.GetContentProvider(resultStream, input.ContentProvider.MediaType));
+            return context.GetContentProvider(resultStream, input.ContentProvider.MediaType);
         }
 
         private async Task<InsertingStreamLocation> ExecuteShortcodesAsync(
@@ -153,36 +143,39 @@ namespace Statiq.Core
             ImmutableDictionary<string, IShortcode> shortcodes)
         {
             // Execute the shortcode
-            IEnumerable<IDocument> shortcodeResults = await shortcodes[location.Name].ExecuteAsync(location.Arguments, location.Content, input, context);
-            if (shortcodeResults != null)
-            {
-                List<IDocument> mergedResults = new List<IDocument>();
-                foreach (IDocument shortcodeResult in shortcodeResults)
-                {
-                    if (shortcodeResult != null)
-                    {
-                        // Merge output metadata with the current input document
-                        // Creating a new document is the easiest way to ensure all the metadata from shortcodes gets accumulated correctly
-                        IDocument mergedResult = input.Clone(shortcodeResult, shortcodeResult.ContentProvider);
+            IEnumerable<ShortcodeResult> results = await shortcodes[location.Name].ExecuteAsync(location.Arguments, location.Content, input, context);
 
+            // Process the results
+            if (results != null)
+            {
+                // Iterate the result content streams
+                List<IContentProvider> resultContentProviders = new List<IContentProvider>();
+                foreach (ShortcodeResult result in results)
+                {
+                    if (result != null && result.ContentProvider != null)
+                    {
                         // Don't process nested shortcodes if it's the raw shortcode
+                        IContentProvider resultContentProvider = result.ContentProvider;
                         if (!location.Name.Equals(RawShortcode.RawShortcodeName, StringComparison.OrdinalIgnoreCase))
                         {
+                            // Clone the input document with nested metadata if we have any
+                            IDocument nestedInput = result.NestedMetadata?.Count > 0 ? input.Clone(result.NestedMetadata) : input;
+
                             // Recursively parse shortcodes
-                            IDocument nestedResult = await ProcessShortcodesAsync(mergedResult, context);
-                            if (nestedResult != null)
+                            IContentProvider nestedContentProvider = await ProcessShortcodesAsync(nestedInput, result.ContentProvider, context);
+                            if (nestedContentProvider != null)
                             {
-                                mergedResult = nestedResult;
+                                resultContentProvider = nestedContentProvider;
                             }
                         }
 
-                        mergedResults.Add(mergedResult);
+                        resultContentProviders.Add(resultContentProvider);
                     }
                 }
 
-                if (mergedResults.Count > 0)
+                if (resultContentProviders.Count > 0)
                 {
-                    return new InsertingStreamLocation(location.FirstIndex, location.LastIndex, mergedResults);
+                    return new InsertingStreamLocation(location.FirstIndex, location.LastIndex, resultContentProviders);
                 }
             }
 
@@ -214,16 +207,16 @@ namespace Statiq.Core
 
         private class InsertingStreamLocation
         {
-            public InsertingStreamLocation(int firstIndex, int lastIndex, List<IDocument> documents)
+            public InsertingStreamLocation(int firstIndex, int lastIndex, List<IContentProvider> contentProviders)
             {
                 FirstIndex = firstIndex;
                 LastIndex = lastIndex;
-                Documents = documents;
+                ContentProviders = contentProviders;
             }
 
             public int FirstIndex { get; }
             public int LastIndex { get; }
-            public IReadOnlyList<IDocument> Documents { get; }
+            public IReadOnlyList<IContentProvider> ContentProviders { get; }
         }
     }
 }

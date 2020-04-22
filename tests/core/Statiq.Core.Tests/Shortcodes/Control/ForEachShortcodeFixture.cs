@@ -16,7 +16,7 @@ namespace Statiq.Core.Tests.Shortcodes.Control
         public class ExecuteTests : ForEachShortcodeFixture
         {
             [Test]
-            public async Task ThrowsForInvalidValueKey()
+            public void ThrowsForInvalidValueKey()
             {
                 // Given
                 TestExecutionContext context = new TestExecutionContext();
@@ -29,11 +29,11 @@ namespace Statiq.Core.Tests.Shortcodes.Control
                 ForEachShortcode shortcode = new ForEachShortcode();
 
                 // When, Then
-                await Should.ThrowAsync<ShortcodeArgumentException>(async () => await shortcode.ExecuteAsync(args, string.Empty, document, context));
+                Should.Throw<ShortcodeArgumentException>(() => shortcode.Execute(args, string.Empty, document, context));
             }
 
             [Test]
-            public async Task IteratesItems()
+            public void IteratesItems()
             {
                 // Given
                 TestExecutionContext context = new TestExecutionContext();
@@ -49,15 +49,15 @@ namespace Statiq.Core.Tests.Shortcodes.Control
                 ForEachShortcode shortcode = new ForEachShortcode();
 
                 // When
-                IEnumerable<IDocument> result = await shortcode.ExecuteAsync(args, "Fizzbuzz", document, context);
+                IEnumerable<ShortcodeResult> result = shortcode.Execute(args, "Fizzbuzz", document, context);
 
                 // Then
-                result.Cast<TestDocument>().ShouldAllBe(x => x.Content == "Fizzbuzz");
-                result.Select(x => x.Get("Bar")).ShouldBe(new object[] { 5, 6, 7 });
+                result.ShouldAllBe(x => x.ContentProvider.GetStream().ReadToEnd() == "Fizzbuzz");
+                result.Select(x => x.NestedMetadata["Bar"]).ShouldBe(new object[] { 5, 6, 7 });
             }
 
             [Test]
-            public async Task IteratesSingleItem()
+            public void IteratesSingleItem()
             {
                 // Given
                 TestExecutionContext context = new TestExecutionContext();
@@ -73,15 +73,15 @@ namespace Statiq.Core.Tests.Shortcodes.Control
                 ForEachShortcode shortcode = new ForEachShortcode();
 
                 // When
-                IEnumerable<IDocument> result = await shortcode.ExecuteAsync(args, "Fizzbuzz", document, context);
+                IEnumerable<ShortcodeResult> result = shortcode.Execute(args, "Fizzbuzz", document, context);
 
                 // Then
-                result.Cast<TestDocument>().ShouldAllBe(x => x.Content == "Fizzbuzz");
-                result.Select(x => x.Get("Bar")).ShouldBe(new object[] { 5 });
+                result.ShouldAllBe(x => x.ContentProvider.GetStream().ReadToEnd() == "Fizzbuzz");
+                result.Select(x => x.NestedMetadata["Bar"]).ShouldBe(new object[] { 5 });
             }
 
             [Test]
-            public async Task MissingKey()
+            public void MissingKey()
             {
                 // Given
                 TestExecutionContext context = new TestExecutionContext();
@@ -94,14 +94,14 @@ namespace Statiq.Core.Tests.Shortcodes.Control
                 ForEachShortcode shortcode = new ForEachShortcode();
 
                 // When
-                IEnumerable<IDocument> result = await shortcode.ExecuteAsync(args, "Fizzbuzz", document, context);
+                IEnumerable<ShortcodeResult> result = shortcode.Execute(args, "Fizzbuzz", document, context);
 
                 // Then
                 result.ShouldBeNull();
             }
 
             [Test]
-            public async Task IteratesScript()
+            public void IteratesScript()
             {
                 // Given
                 TestExecutionContext context = new TestExecutionContext();
@@ -118,11 +118,11 @@ namespace Statiq.Core.Tests.Shortcodes.Control
                 ForEachShortcode shortcode = new ForEachShortcode();
 
                 // When
-                IEnumerable<IDocument> result = await shortcode.ExecuteAsync(args, "Fizzbuzz", document, context);
+                IEnumerable<ShortcodeResult> result = shortcode.Execute(args, "Fizzbuzz", document, context);
 
                 // Then
-                result.Cast<TestDocument>().ShouldAllBe(x => x.Content == "Fizzbuzz");
-                result.Select(x => x.Get("Bar")).ShouldBe(new object[] { 1, 2, 6 });
+                result.ShouldAllBe(x => x.ContentProvider.GetStream().ReadToEnd() == "Fizzbuzz");
+                result.Select(x => x.NestedMetadata["Bar"]).ShouldBe(new object[] { 1, 2, 6 });
             }
         }
     }

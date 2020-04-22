@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Threading.Tasks;
 
 namespace Statiq.Common
@@ -14,31 +15,23 @@ namespace Statiq.Common
             where TBootstrapper : IBootstrapper =>
             bootstrapper.ConfigureEngine(x => x.Shortcodes.Add(name, type));
 
-        public static TBootstrapper AddShortcode<TBootstrapper>(this TBootstrapper bootstrapper, string name, Config<string> shortcode)
+        public static TBootstrapper AddShortcode<TBootstrapper>(this TBootstrapper bootstrapper, string name, Config<ShortcodeResult> shortcode)
             where TBootstrapper : IBootstrapper =>
             bootstrapper.ConfigureEngine(x => x.Shortcodes.Add(name, shortcode));
 
-        public static TBootstrapper AddShortcode<TBootstrapper>(this TBootstrapper bootstrapper, string name, Func<KeyValuePair<string, string>[], string, IDocument, IExecutionContext, string> shortcode)
+        public static TBootstrapper AddShortcode<TBootstrapper>(this TBootstrapper bootstrapper, string name, Func<KeyValuePair<string, string>[], string, IDocument, IExecutionContext, ShortcodeResult> shortcode)
             where TBootstrapper : IBootstrapper =>
             bootstrapper.ConfigureEngine(x => x.Shortcodes.Add(name, shortcode));
 
-        public static TBootstrapper AddShortcode<TBootstrapper>(this TBootstrapper bootstrapper, string name, Func<KeyValuePair<string, string>[], string, IDocument, IExecutionContext, Task<string>> shortcode)
+        public static TBootstrapper AddShortcode<TBootstrapper>(this TBootstrapper bootstrapper, string name, Func<KeyValuePair<string, string>[], string, IDocument, IExecutionContext, IEnumerable<ShortcodeResult>> shortcode)
             where TBootstrapper : IBootstrapper =>
             bootstrapper.ConfigureEngine(x => x.Shortcodes.Add(name, shortcode));
 
-        public static TBootstrapper AddShortcode<TBootstrapper>(this TBootstrapper bootstrapper, string name, Func<KeyValuePair<string, string>[], string, IDocument, IExecutionContext, IDocument> shortcode)
+        public static TBootstrapper AddShortcode<TBootstrapper>(this TBootstrapper bootstrapper, string name, Func<KeyValuePair<string, string>[], string, IDocument, IExecutionContext, Task<ShortcodeResult>> shortcode)
             where TBootstrapper : IBootstrapper =>
             bootstrapper.ConfigureEngine(x => x.Shortcodes.Add(name, shortcode));
 
-        public static TBootstrapper AddShortcode<TBootstrapper>(this TBootstrapper bootstrapper, string name, Func<KeyValuePair<string, string>[], string, IDocument, IExecutionContext, IEnumerable<IDocument>> shortcode)
-            where TBootstrapper : IBootstrapper =>
-            bootstrapper.ConfigureEngine(x => x.Shortcodes.Add(name, shortcode));
-
-        public static TBootstrapper AddShortcode<TBootstrapper>(this TBootstrapper bootstrapper, string name, Func<KeyValuePair<string, string>[], string, IDocument, IExecutionContext, Task<IDocument>> shortcode)
-            where TBootstrapper : IBootstrapper =>
-            bootstrapper.ConfigureEngine(x => x.Shortcodes.Add(name, shortcode));
-
-        public static TBootstrapper AddShortcode<TBootstrapper>(this TBootstrapper bootstrapper, string name, Func<KeyValuePair<string, string>[], string, IDocument, IExecutionContext, Task<IEnumerable<IDocument>>> shortcode)
+        public static TBootstrapper AddShortcode<TBootstrapper>(this TBootstrapper bootstrapper, string name, Func<KeyValuePair<string, string>[], string, IDocument, IExecutionContext, Task<IEnumerable<ShortcodeResult>>> shortcode)
             where TBootstrapper : IBootstrapper =>
             bootstrapper.ConfigureEngine(x => x.Shortcodes.Add(name, shortcode));
     }

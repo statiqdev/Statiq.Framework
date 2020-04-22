@@ -1,23 +1,17 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Threading;
+using System.IO;
 using System.Threading.Tasks;
 
 namespace Statiq.Common
 {
     /// <summary>
-    /// Contains the code for a given shortcode.
+    /// A base class for synchronous shortcodes.
     /// </summary>
-    /// <remarks>
-    /// Shortcode instances are created once-per-document and reused for the life of that document.
-    /// An exception is that nested shortcodes are always processed by a new instance of the shortcode
-    /// implementation (which remains in use for that nested content). If a shortcode class also
-    /// implements <see cref="IDisposable"/>, the shortcode will be disposed at the processing conclusion.
-    /// </remarks>
-    public interface IShortcode
+    public abstract class SyncMultiShortcode : IShortcode
     {
         /// <summary>
-        /// Executes the shortcode and returns an <see cref="IDocument"/> with the shortcode result content and metadata.
+        /// Executes the shortcode and returns a <see cref="Stream"/> with the shortcode result content.
         /// </summary>
         /// <param name="args">
         /// The arguments declared with the shortcode. This contains a list of key-value pairs in the order
@@ -30,10 +24,18 @@ namespace Statiq.Common
         /// <returns>
         /// A collection of shortcode results or <c>null</c> to remove the shortcode from the document without adding replacement content.
         /// </returns>
-        Task<IEnumerable<ShortcodeResult>> ExecuteAsync(
+        public abstract IEnumerable<ShortcodeResult> Execute(
             KeyValuePair<string, string>[] args,
             string content,
             IDocument document,
             IExecutionContext context);
+
+        /// <inheritdoc />
+        Task<IEnumerable<ShortcodeResult>> IShortcode.ExecuteAsync(
+            KeyValuePair<string, string>[] args,
+            string content,
+            IDocument document,
+            IExecutionContext context) =>
+            Task.FromResult(Execute(args, content, document, context));
     }
 }

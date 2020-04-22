@@ -26,10 +26,10 @@ namespace Statiq.Markdown.Tests
                 MarkdownShortcode shortcode = new MarkdownShortcode();
 
                 // When
-                string result = shortcode.Execute(args, content, document, context);
+                ShortcodeResult result = shortcode.Execute(args, content, document, context);
 
                 // Then
-                result.ShouldBe(
+                result.ContentProvider.GetStream().ReadToEnd().ShouldBe(
                     @"<p>Line 1
 <em>Line 2</em></p>
 <h1>Line 3</h1>

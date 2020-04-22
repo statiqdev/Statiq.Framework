@@ -16,10 +16,10 @@ namespace Statiq.Core
     /// &lt;?# Raw ?>&lt;?# ThisWillBeOutputVerbatim ?>&lt;?#/ Raw ?>
     /// </code>
     /// </example>
-    public class RawShortcode : SyncContentShortcode
+    public class RawShortcode : SyncShortcode
     {
         public const string RawShortcodeName = "Raw";
 
-        public override string Execute(KeyValuePair<string, string>[] args, string content, IDocument document, IExecutionContext context) => content;
+        public override ShortcodeResult Execute(KeyValuePair<string, string>[] args, string content, IDocument document, IExecutionContext context) => content;
     }
 }

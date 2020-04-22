@@ -14,10 +14,10 @@ namespace Statiq.Core
     /// with a special syntax: <c>&lt;?#= key /?&gt;</c>.
     /// </remarks>
     /// <parameter>The key of the metadata value to render.</parameter>
-    public class MetaShortcode : SyncContentShortcode
+    public class MetaShortcode : SyncShortcode
     {
         /// <inheritdoc />
-        public override string Execute(KeyValuePair<string, string>[] args, string content, IDocument document, IExecutionContext context) =>
+        public override ShortcodeResult Execute(KeyValuePair<string, string>[] args, string content, IDocument document, IExecutionContext context) =>
             document.GetString(args.SingleValue());
     }
 }

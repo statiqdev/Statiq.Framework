@@ -38,12 +38,12 @@ namespace Statiq.Core
     /// </para>
     /// </example>
     /// <parameter>The path to the file to include.</parameter>
-    public class IncludeShortcode : DocumentShortcode
+    public class IncludeShortcode : Shortcode
     {
         private NormalizedPath _sourcePath = NormalizedPath.Null;
 
         /// <inheritdoc />
-        public override async Task<IDocument> ExecuteAsync(KeyValuePair<string, string>[] args, string content, IDocument document, IExecutionContext context)
+        public override async Task<ShortcodeResult> ExecuteAsync(KeyValuePair<string, string>[] args, string content, IDocument document, IExecutionContext context)
         {
             // See if this is a web include
             string included = args.SingleValue();
@@ -54,14 +54,14 @@ namespace Statiq.Core
                 if (!response.IsSuccessStatusCode)
                 {
                     context.LogWarning($"Included web resource {included} returned {response.StatusCode}");
-                    return context.CreateDocument();
+                    return null;
                 }
 
                 // Got the resource, copy to a stream and create a document result
                 using (Stream contentStream = await context.GetContentStreamAsync())
                 {
                     await response.Content.CopyToAsync(contentStream);
-                    return context.CreateDocument(contentStream);
+                    return contentStream;
                 }
             }
 
@@ -90,17 +90,16 @@ namespace Statiq.Core
             if (!includedFile.Exists)
             {
                 context.LogWarning($"Included file {includedPath.FullPath} does not exist");
-                return context.CreateDocument();
+                return null;
             }
 
             // Set the currently included shortcode source so nested includes can use it
-            return context
-                .CreateDocument(
-                    new MetadataItems
-                    {
-                        { "IncludeShortcodeSource", includedFile.Path.FullPath }
-                    },
-                    includedFile.GetContentProvider());
+            return new ShortcodeResult(
+                includedFile.GetContentProvider(),
+                new MetadataItems
+                {
+                    { "IncludeShortcodeSource", includedFile.Path.FullPath }
+                });
         }
     }
 }

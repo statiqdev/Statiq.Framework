@@ -11,12 +11,12 @@ namespace Statiq.Core
     /// </summary>
     /// <parameter name="Key">The key that contains the value.</parameter>
     /// <parameter name="Value">The value to compare (or <c>true</c> if not provided).</parameter>
-    public class IfShortcode : DocumentShortcode
+    public class IfShortcode : SyncShortcode
     {
         private const string Key = nameof(Key);
         private const string Value = nameof(Value);
 
-        public override async Task<IDocument> ExecuteAsync(
+        public override ShortcodeResult Execute(
             KeyValuePair<string, string>[] args,
             string content,
             IDocument document,
@@ -30,12 +30,12 @@ namespace Statiq.Core
             {
                 return TypeHelper.TryConvert(dictionary.Get(Value), keyValue.GetType(), out object value)
                     && (keyValue?.Equals(value) ?? (keyValue == null && value == null))
-                    ? await document.CloneAsync(content)
+                    ? content
                     : null;
             }
 
             return TypeHelper.TryConvert(keyValue, out bool result) && result
-                ? await document.CloneAsync(content)
+                ? content
                 : null;
         }
     }

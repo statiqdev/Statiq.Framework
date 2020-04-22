@@ -19,7 +19,7 @@ namespace Statiq.Common.Tests.Shortcodes
                 TestShortcodeCollection shortcodes = new TestShortcodeCollection();
 
                 // When
-                ((IShortcodeCollection)shortcodes).Add(typeof(FooShortcode));
+                shortcodes.Add(typeof(FooShortcode));
 
                 // Then
                 shortcodes.Keys.ShouldBe(new[] { "Foo" });
@@ -32,7 +32,7 @@ namespace Statiq.Common.Tests.Shortcodes
                 TestShortcodeCollection shortcodes = new TestShortcodeCollection();
 
                 // When
-                ((IShortcodeCollection)shortcodes).Add(typeof(Barshortcode));
+                shortcodes.Add(typeof(Barshortcode));
 
                 // Then
                 shortcodes.Keys.ShouldBe(new[] { "Bar" });
@@ -45,7 +45,7 @@ namespace Statiq.Common.Tests.Shortcodes
                 TestShortcodeCollection shortcodes = new TestShortcodeCollection();
 
                 // When
-                ((IShortcodeCollection)shortcodes).Add(typeof(BazShortcodeFoo));
+                shortcodes.Add(typeof(BazShortcodeFoo));
 
                 // Then
                 shortcodes.Keys.ShouldBe(new[] { "BazShortcodeFoo" });
@@ -58,7 +58,7 @@ namespace Statiq.Common.Tests.Shortcodes
                 TestShortcodeCollection shortcodes = new TestShortcodeCollection();
 
                 // When
-                ((IShortcodeCollection)shortcodes).Add<FooShortcode>();
+                shortcodes.Add<FooShortcode>();
 
                 // Then
                 shortcodes.Keys.ShouldBe(new[] { "Foo" });
@@ -71,7 +71,7 @@ namespace Statiq.Common.Tests.Shortcodes
                 TestShortcodeCollection shortcodes = new TestShortcodeCollection();
 
                 // When
-                ((IShortcodeCollection)shortcodes).Add<Barshortcode>();
+                shortcodes.Add<Barshortcode>();
 
                 // Then
                 shortcodes.Keys.ShouldBe(new[] { "Bar" });
@@ -84,7 +84,7 @@ namespace Statiq.Common.Tests.Shortcodes
                 TestShortcodeCollection shortcodes = new TestShortcodeCollection();
 
                 // When
-                ((IShortcodeCollection)shortcodes).Add<BazShortcodeFoo>();
+                shortcodes.Add<BazShortcodeFoo>();
 
                 // Then
                 shortcodes.Keys.ShouldBe(new[] { "BazShortcodeFoo" });
@@ -93,7 +93,7 @@ namespace Statiq.Common.Tests.Shortcodes
 
         public class FooShortcode : IShortcode
         {
-            public Task<IEnumerable<IDocument>> ExecuteAsync(KeyValuePair<string, string>[] args, string content, IDocument document, IExecutionContext context)
+            public Task<IEnumerable<ShortcodeResult>> ExecuteAsync(KeyValuePair<string, string>[] args, string content, IDocument document, IExecutionContext context)
             {
                 throw new NotImplementedException();
             }
@@ -101,7 +101,7 @@ namespace Statiq.Common.Tests.Shortcodes
 
         public class Barshortcode : IShortcode
         {
-            public Task<IEnumerable<IDocument>> ExecuteAsync(KeyValuePair<string, string>[] args, string content, IDocument document, IExecutionContext context)
+            public Task<IEnumerable<ShortcodeResult>> ExecuteAsync(KeyValuePair<string, string>[] args, string content, IDocument document, IExecutionContext context)
             {
                 throw new NotImplementedException();
             }
@@ -109,7 +109,7 @@ namespace Statiq.Common.Tests.Shortcodes
 
         public class BazShortcodeFoo : IShortcode
         {
-            public Task<IEnumerable<IDocument>> ExecuteAsync(KeyValuePair<string, string>[] args, string content, IDocument document, IExecutionContext context)
+            public Task<IEnumerable<ShortcodeResult>> ExecuteAsync(KeyValuePair<string, string>[] args, string content, IDocument document, IExecutionContext context)
             {
                 throw new NotImplementedException();
             }
