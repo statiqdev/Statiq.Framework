@@ -16,8 +16,7 @@ namespace Statiq.Feeds
     /// documents. Note that documents will be sorted in descending order of their published date
     /// to correspond with conventional feed behavior. If you want to use a different ordering,
     /// sort the documents before using this module and call <see cref="PreserveOrdering(bool)"/>.
-    /// You should also set the <code>Settings.Host</code> value
-    /// in your configuration file since that's used to create the absolute links for feed readers.
+    /// You should also configure the "Host" setting since that's used to create absolute links.
     /// This module outputs a document for each of the selected feed types. Input documents
     /// are not output by this module.
     /// </remarks>

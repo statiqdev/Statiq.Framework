@@ -1,5 +1,7 @@
 # 1.0.0-beta.7
 
+- Added a new `AbsolutizeLinks` module to `Statiq.Html` to turn all links in a document to absolute.
+
 # 1.0.0-beta.6
 
 - Refactored the `ValidateLinks` module to accept `Config<bool>` settings.
