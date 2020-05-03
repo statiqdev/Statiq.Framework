@@ -1,5 +1,6 @@
 # 1.0.0-beta.7
 
+- The `GenerateFeeds` module now replaces relative links in item descriptions and content.
 - Added a new `AbsolutizeLinks` module to `Statiq.Html` to turn all links in a document to absolute.
 
 # 1.0.0-beta.6
@@ -33,7 +34,7 @@
 
 # 1.0.0-beta.2
 
-- Changed the `GenerateFeeds` module to order by descending publish date to meet feed conventions and adds a `GeenrateFeeds.PreserveOrdering(bool)` method to revert to old behavior (#92).
+- Changed the `GenerateFeeds` module to order by descending publish date to meet feed conventions and adds a `GenerateFeeds.PreserveOrdering(bool)` method to revert to old behavior (#92).
 - Fixed a bug with the `OptimizeFileName` stripping the path when optimizing the destination file name (#93).
 - Added support for casting the dynamic object returned from `IDocument.AsDynamic()` back to an `IDocument`.
 - Added a new `IReadOnlyPipelineCollection` object and exposed it via `IExecutionState.Pipelines` to provide the current set of read-only pipelines during execution.

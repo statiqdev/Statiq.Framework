@@ -84,6 +84,48 @@ namespace Statiq.Feeds.Tests
                 TestDocument result = results.Single(x => x.Destination.FullPath == "feed.rss");
                 result.Content.IndexOf("<title>A</title>").ShouldBeLessThan(result.Content.IndexOf("<title>B</title>"));
             }
+
+            [Test]
+            public async Task MakesLinksAbsoluteInDescription()
+            {
+                // Given
+                TestExecutionContext context = new TestExecutionContext();
+                context.Settings[Keys.Host] = "statiq.dev";
+                TestDocument document = new TestDocument(new NormalizedPath("a.txt"))
+                {
+                    { FeedKeys.Title, "A" },
+                    { FeedKeys.Description, "<p>Foo <a href=\"/fizz/buzz\">Fizzbuzz</a> bar <img src=\"/abc/def.png\"> baz</p>" }
+                };
+                GenerateFeeds module = new GenerateFeeds();
+
+                // When
+                IReadOnlyList<TestDocument> results = await ExecuteAsync(document, context, module);
+
+                // Then
+                TestDocument result = results.Single(x => x.Destination.FullPath == "feed.rss");
+                result.Content.ShouldContain(@"<description>&lt;p&gt;Foo &lt;a href=""http://statiq.dev/fizz/buzz""&gt;Fizzbuzz&lt;/a&gt; bar &lt;img src=""http://statiq.dev/abc/def.png""&gt; baz&lt;/p&gt;</description>");
+            }
+
+            [Test]
+            public async Task MakesLinksAbsoluteInContent()
+            {
+                // Given
+                TestExecutionContext context = new TestExecutionContext();
+                context.Settings[Keys.Host] = "statiq.dev";
+                TestDocument document = new TestDocument(new NormalizedPath("a.txt"), "<p>Foo <a href=\"/fizz/buzz\">Fizzbuzz</a> bar <img src=\"/abc/def.png\"> baz</p>")
+                {
+                    { FeedKeys.Title, "A" },
+                    { FeedKeys.Description, "Hello" }
+                };
+                GenerateFeeds module = new GenerateFeeds();
+
+                // When
+                IReadOnlyList<TestDocument> results = await ExecuteAsync(document, context, module);
+
+                // Then
+                TestDocument result = results.Single(x => x.Destination.FullPath == "feed.rss");
+                result.Content.ShouldContain(@"<content:encoded>&lt;p&gt;Foo &lt;a href=""http://statiq.dev/fizz/buzz""&gt;Fizzbuzz&lt;/a&gt; bar &lt;img src=""http://statiq.dev/abc/def.png""&gt; baz&lt;/p&gt;</content:encoded>");
+            }
         }
     }
 }

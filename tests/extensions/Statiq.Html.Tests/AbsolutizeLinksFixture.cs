@@ -35,9 +35,40 @@ namespace Statiq.Html.Tests
 
                 // Then
                 result.Content.ShouldBe(
-                    @"<html><head></head><body>
+                    $@"<html><head></head><body>
                         <div>
-                          <p>Foo <a href=""http://statiq.dev/fizz/buzz"">Fizzbuzz</a> Bar</p>
+                          <p>Foo <a href=""{absolute}"">Fizzbuzz</a> Bar</p>
+                        </div>
+                      
+                    </body></html>", StringCompareShould.IgnoreLineEndings);
+            }
+
+            [TestCase("/fizz/buzz.jpg", "http://statiq.dev/fizz/buzz.jpg")]
+            [TestCase("//fizz/buzz.png", "http://statiq.dev/fizz/buzz.png")]
+            [TestCase("fizz/buzz.gif", "http://statiq.dev/fizz/buzz.gif")]
+            public async Task MakesImagesAbsolute(string relative, string absolute)
+            {
+                // Given
+                TestExecutionContext context = new TestExecutionContext();
+                context.Settings[Keys.Host] = "statiq.dev";
+                TestDocument document = new TestDocument(
+                    $@"<html>
+                      <body>
+                        <div>
+                          <p>Foo <img src=""{relative}""> Bar</p>
+                        </div>
+                      </body>
+                    </html>");
+                AbsolutizeLinks module = new AbsolutizeLinks();
+
+                // When
+                TestDocument result = await ExecuteAsync(document, context, module).SingleAsync();
+
+                // Then
+                result.Content.ShouldBe(
+                    $@"<html><head></head><body>
+                        <div>
+                          <p>Foo <img src=""{absolute}""> Bar</p>
                         </div>
                       
                     </body></html>", StringCompareShould.IgnoreLineEndings);

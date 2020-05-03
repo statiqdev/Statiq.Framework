@@ -27,17 +27,23 @@ namespace Statiq.Html
             ProcessHtml.ProcessElementsAsync(
                 input,
                 context,
-                "a",
+                "[href],[src]",
                 false,
                 (d, c, e, m) =>
                 {
-                    string href = e.GetAttribute("href");
-                    if (!string.IsNullOrEmpty(href)
-                        && Uri.TryCreate(href, UriKind.RelativeOrAbsolute, out Uri uri)
-                        && !uri.IsAbsoluteUri)
-                    {
-                        e.SetAttribute("href", context.GetLink(href, true));
-                    }
+                    MakeLinkAbsolute(e, "href", context);
+                    MakeLinkAbsolute(e, "src", context);
                 });
+
+        private static void MakeLinkAbsolute(IElement element, string attribute, IExecutionContext context)
+        {
+            string value = element.GetAttribute(attribute);
+            if (!string.IsNullOrEmpty(value)
+                && Uri.TryCreate(value, UriKind.RelativeOrAbsolute, out Uri uri)
+                && !uri.IsAbsoluteUri)
+            {
+                element.SetAttribute(attribute, context.GetLink(value, true));
+            }
+        }
     }
 }

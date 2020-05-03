@@ -2,9 +2,17 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Runtime.Serialization;
 using System.Threading.Tasks;
+using AngleSharp;
+using AngleSharp.Dom;
+using AngleSharp.Dom.Html;
+using AngleSharp.Extensions;
+using AngleSharp.Html;
+using AngleSharp.Parser.Html;
 using Statiq.Common;
 using Statiq.Feeds.Syndication;
+using IDocument = Statiq.Common.IDocument;
 
 namespace Statiq.Feeds
 {
@@ -49,6 +57,7 @@ namespace Statiq.Feeds
 
         private int _maximumItems = 20;
         private bool _preserveOrdering = false;
+        private bool _absolutizeLinks = true;
         private NormalizedPath _rssPath = DefaultRssPath;
         private NormalizedPath _atomPath = DefaultAtomPath;
         private NormalizedPath _rdfPath = DefaultRdfPath;
@@ -100,6 +109,17 @@ namespace Statiq.Feeds
         public GenerateFeeds PreserveOrdering(bool preserveOrdering = true)
         {
             _preserveOrdering = true;
+            return this;
+        }
+
+        /// <summary>
+        /// Indicates whether relative links in the description and content should be changed to absolute (the default is <c>true</c>).
+        /// </summary>
+        /// <param name="absolutizeLinks">Whether relative links should be changed to absolute.</param>
+        /// <returns>The current module instance.</returns>
+        public GenerateFeeds AbsolutizeLinks(bool absolutizeLinks = true)
+        {
+            _absolutizeLinks = absolutizeLinks;
             return this;
         }
 
@@ -463,6 +483,27 @@ namespace Statiq.Feeds
                 });
             }
 
+            // Make description and content links absolute
+            if (_absolutizeLinks)
+            {
+                HtmlParser parser = new HtmlParser();
+                HtmlMarkupFormatter formatter = new HtmlMarkupFormatter();
+                foreach (FeedItem feedItem in feed.Items)
+                {
+                    string description = MakeLinksAbsolute(parser, formatter, context, feedItem.Description);
+                    if (description != null)
+                    {
+                        feedItem.Description = description;
+                    }
+
+                    string content = MakeLinksAbsolute(parser, formatter, context, feedItem.Content);
+                    if (content != null)
+                    {
+                        feedItem.Content = content;
+                    }
+                }
+            }
+
             // Generate the feeds
             return new[]
             {
@@ -470,6 +511,44 @@ namespace Statiq.Feeds
                 await GenerateFeedAsync(FeedType.Atom, feed, _atomPath, context),
                 await GenerateFeedAsync(FeedType.Rdf, feed, _rdfPath, context)
             }.Where(x => x != null);
+        }
+
+        private static string MakeLinksAbsolute(HtmlParser parser, HtmlMarkupFormatter formatter, IExecutionContext context, string value)
+        {
+            if (!string.IsNullOrEmpty(value))
+            {
+                IHtmlDocument dom = parser.Parse(string.Empty);
+                INodeList nodes = parser.ParseFragment(value, dom.Body);
+                IEnumerable<IElement> elements = nodes.SelectMany(x => x.Descendents<IElement>().Where(y => y.HasAttribute("href") || y.HasAttribute("src")));
+                bool replaced = false;
+                foreach (IElement element in elements)
+                {
+                    replaced = MakeLinkAbsolute(element, "href", context) || replaced;
+                    replaced = MakeLinkAbsolute(element, "src", context) || replaced;
+                }
+                if (replaced)
+                {
+                    using (StringWriter writer = new StringWriter())
+                    {
+                        nodes.ToHtml(writer, formatter);
+                        return writer.ToString();
+                    }
+                }
+            }
+            return null;
+        }
+
+        private static bool MakeLinkAbsolute(IElement element, string attribute, IExecutionContext context)
+        {
+            string value = element.GetAttribute(attribute);
+            if (!string.IsNullOrEmpty(value)
+                && Uri.TryCreate(value, UriKind.RelativeOrAbsolute, out Uri uri)
+                && !uri.IsAbsoluteUri)
+            {
+                element.SetAttribute(attribute, context.GetLink(value, true));
+                return true;
+            }
+            return false;
         }
 
         private async Task<IDocument> GenerateFeedAsync(FeedType feedType, Feed feed, NormalizedPath path, IExecutionContext context)
