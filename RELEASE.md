@@ -1,5 +1,6 @@
 # 1.0.0-beta.7
 
+- Added a `IDocument.GetParent()` overload that uses the current execution context and doesn't require passing in a set of candidate documents.
 - The `GenerateFeeds` module now replaces relative links in item descriptions and content.
 - Added a new `AbsolutizeLinks` module to `Statiq.Html` to turn all links in a document to absolute.
 

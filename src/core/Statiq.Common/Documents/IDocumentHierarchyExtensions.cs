@@ -11,8 +11,13 @@ namespace Statiq.Common
     public static class IDocumentHierarchyExtensions
     {
         /// <summary>
-        /// Gets the first document from a sequence of documents that contains the current
-        /// document as one of it's children.
+        /// Gets the parent document of the given document from the current execution context.
+        /// </summary>
+        /// <param name="document">The document.</param>
+        public static IDocument GetParent(this IDocument document) => document.GetParent(IExecutionContext.Current.Inputs);
+
+        /// <summary>
+        /// Gets the first document from a sequence of documents that contains the given document as one of it's children.
         /// </summary>
         /// <param name="document">The document.</param>
         /// <param name="parents">The potential parent documents.</param>
