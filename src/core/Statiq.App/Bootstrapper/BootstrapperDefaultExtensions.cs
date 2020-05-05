@@ -142,14 +142,11 @@ namespace Statiq.App
         public static Bootstrapper AddDefaultNamespaces(this Bootstrapper bootstrapper) =>
             bootstrapper.ConfigureEngine(engine =>
             {
-                // Add all Statiq.Common namespaces
-                // the JetBrains.Profiler filter is needed due to DotTrace dynamically
-                // adding a reference to that assembly when running under its profiler. We want
-                // to exclude it.
-                engine.Namespaces.AddRange(typeof(IModule).Assembly.GetTypes()
-                    .Where(x => !string.IsNullOrWhiteSpace(x.Namespace) && !x.Namespace.StartsWith("JetBrains.Profiler"))
-                    .Select(x => x.Namespace)
-                    .Distinct());
+                // Add all Statiq. namespaces
+                engine.Namespaces.AddRange(
+                    bootstrapper.ClassCatalog.Keys
+                        .Where(x => x.StartsWith("Statiq."))
+                        .Select(x => x.Substring(0, x.LastIndexOf("."))));
 
                 // Add all module namespaces
                 engine.Namespaces.AddRange(
@@ -157,7 +154,7 @@ namespace Statiq.App
                         .GetTypesAssignableTo<IModule>()
                         .Select(x => x.Namespace));
 
-                // Add all namespaces from the entry app
+                // Add all namespaces from the entry application
                 Assembly entryAssembly = Assembly.GetEntryAssembly();
                 if (entryAssembly != null)
                 {

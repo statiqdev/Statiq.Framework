@@ -1,6 +1,8 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
@@ -10,11 +12,12 @@ using Microsoft.Extensions.Logging;
 namespace Statiq.Common
 {
     /// <summary>
-    /// Responsible for iterating over a set of assemblies
-    /// looking for implementations of predefined interfaces.
+    /// Contains all types in all referenced assemblies. The dictionary
+    /// key is the full type name and the value is the type.
     /// </summary>
-    public class ClassCatalog
+    public class ClassCatalog : IReadOnlyDictionary<string, Type>
     {
+        // Key: full type name
         private readonly ConcurrentDictionary<string, Type> _types = new ConcurrentDictionary<string, Type>();
 
         private readonly ConcurrentQueue<string> _debugMessages = new ConcurrentQueue<string>();
@@ -134,7 +137,7 @@ namespace Statiq.Common
 
         /// <summary>
         /// Populates the catalog. Population will only occur once and if the catalog has already been
-        /// populated this method will immediatly return.
+        /// populated this method will immediately return.
         /// </summary>
         public void Populate()
         {
@@ -222,5 +225,23 @@ namespace Statiq.Common
                 return ex.Types.Where(t => t != null).ToArray();
             }
         }
+
+        // IDictionary<string, Type>
+
+        public IEnumerable<string> Keys => ((IReadOnlyDictionary<string, Type>)_types).Keys;
+
+        public IEnumerable<Type> Values => ((IReadOnlyDictionary<string, Type>)_types).Values;
+
+        public int Count => _types.Count;
+
+        public Type this[string key] => _types[key];
+
+        public bool ContainsKey(string key) => _types.ContainsKey(key);
+
+        public bool TryGetValue(string key, [MaybeNullWhen(false)] out Type value) => _types.TryGetValue(key, out value);
+
+        public IEnumerator<KeyValuePair<string, Type>> GetEnumerator() => _types.GetEnumerator();
+
+        IEnumerator IEnumerable.GetEnumerator() => _types.GetEnumerator();
     }
 }
