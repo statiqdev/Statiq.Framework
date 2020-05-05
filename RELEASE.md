@@ -1,5 +1,6 @@
 # 1.0.0-beta.8
 
+- Removed the `ApplyDirectoryMetadata` module in favor of a more specific/powerful capability in Statiq Web (it never really made sense in Framework anyway).
 - Fixed default `GenerateSitemap` document destination to "sitemap.xml".
 
 # 1.0.0-beta.7
