@@ -109,6 +109,38 @@ namespace Statiq.Common.Tests.Documents
             }
 
             [Test]
+            public void MetadataOverridesProperties()
+            {
+                // Given
+                IDocument document = new CustomDocument(new MetadataItems { { "Foo", "xyz" } })
+                {
+                    Foo = "abc"
+                };
+
+                // When
+                string value = document.GetString("Foo");
+
+                // Then
+                value.ShouldBe("xyz");
+            }
+
+            [Test]
+            public void MetadataDoesNotOverrideIDocumentProperties()
+            {
+                // Given
+                IDocument document = new Document(new NormalizedPath("Foo.bar"));
+                IDocument cloned = document.Clone(new MetadataItems { { nameof(IDocument.Destination), new NormalizedPath("Fizz.buzz") } });
+
+                // When
+                string initialValue = document.GetString(nameof(IDocument.Destination));
+                string clonedValue = cloned.GetString(nameof(IDocument.Destination));
+
+                // Then
+                initialValue.ShouldBe("Foo.bar");
+                clonedValue.ShouldBe("Foo.bar");
+            }
+
+            [Test]
             public void IncludesBaseDocumentProperties()
             {
                 // Given, When

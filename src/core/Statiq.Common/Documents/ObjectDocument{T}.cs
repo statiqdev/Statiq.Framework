@@ -154,7 +154,8 @@ namespace Statiq.Common
 
         /// <inheritdoc />
         public bool ContainsKey(string key) =>
-            _metadata.ContainsKey(key) || PropertyMetadata<T>.For(Object).ContainsKey(key);
+            (!IDocument.Properties.Contains(key) && _metadata.ContainsKey(key))
+            || PropertyMetadata<T>.For(Object).ContainsKey(key);
 
         /// <inheritdoc />
         public object this[string key]
@@ -176,7 +177,7 @@ namespace Statiq.Common
             get
             {
                 HashSet<string> keys = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-                foreach (string key in _metadata.Keys.Concat(PropertyMetadata<T>.For(Object).Keys))
+                foreach (string key in _metadata.Keys.Where(x => !IDocument.Properties.Contains(x)).Concat(PropertyMetadata<T>.For(Object).Keys))
                 {
                     if (keys.Add(key))
                     {
@@ -191,7 +192,8 @@ namespace Statiq.Common
 
         /// <inheritdoc />
         public bool TryGetRaw(string key, out object value) =>
-            _metadata.TryGetRaw(key, out value) || PropertyMetadata<T>.For(Object).TryGetRaw(key, out value);
+            (!IDocument.Properties.Contains(key) && _metadata.TryGetRaw(key, out value))
+            || PropertyMetadata<T>.For(Object).TryGetRaw(key, out value);
 
         /// <inheritdoc />
         public bool TryGetValue(string key, out object value) => this.TryGetValue<object>(key, out value);
@@ -205,7 +207,7 @@ namespace Statiq.Common
         {
             HashSet<string> keys = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
-            foreach (KeyValuePair<string, object> item in _metadata)
+            foreach (KeyValuePair<string, object> item in _metadata.Where(x => !IDocument.Properties.Contains(x.Key)))
             {
                 if (keys.Add(item.Key))
                 {
@@ -230,7 +232,7 @@ namespace Statiq.Common
         {
             HashSet<string> keys = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
-            foreach (KeyValuePair<string, object> item in _metadata.GetRawEnumerable())
+            foreach (KeyValuePair<string, object> item in _metadata.GetRawEnumerable().Where(x => !IDocument.Properties.Contains(x.Key)))
             {
                 if (keys.Add(item.Key))
                 {

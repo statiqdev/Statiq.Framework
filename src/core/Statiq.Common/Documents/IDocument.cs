@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -105,5 +106,16 @@ namespace Statiq.Common
         bool ILogger.IsEnabled(LogLevel logLevel) => IExecutionContext.CurrentOrNull?.IsEnabled(logLevel) ?? false;
 
         IDisposable ILogger.BeginScope<TState>(TState state) => IExecutionContext.CurrentOrNull?.BeginScope(state);
+
+        /// <summary>
+        /// A hash of the property names in <see cref="IDocument"/> generated using reflection (generally intended for internal use).
+        /// </summary>
+        public static ImmutableHashSet<string> Properties = ImmutableHashSet.CreateRange(
+            StringComparer.OrdinalIgnoreCase,
+            typeof(IDocument)
+                .GetProperties()
+                .Select(x => (x.Name, x.GetGetMethod()))
+                .Where(x => x.Item2?.GetParameters().Length == 0)
+                .Select(x => x.Name));
     }
 }

@@ -264,7 +264,7 @@ namespace Statiq.Common
 
         /// <inheritdoc />
         public bool ContainsKey(string key) =>
-            (Metadata?.ContainsKey(key) ?? false)
+            (!IDocument.Properties.Contains(key) && Metadata?.ContainsKey(key) == true)
             || PropertyMetadata<TDocument>.For((TDocument)this).ContainsKey(key)
             || (BaseMetadata?.ContainsKey(key) ?? false);
 
@@ -288,36 +288,34 @@ namespace Statiq.Common
         {
             get
             {
+                HashSet<string> keys = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
+                if (Metadata != null)
                 {
-                    HashSet<string> keys = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-
-                    if (Metadata != null)
-                    {
-                        foreach (string key in Metadata.Keys)
-                        {
-                            if (keys.Add(key))
-                            {
-                                yield return key;
-                            }
-                        }
-                    }
-
-                    foreach (string key in PropertyMetadata<TDocument>.For((TDocument)this).Keys)
+                    foreach (string key in Metadata.Keys.Where(x => !IDocument.Properties.Contains(x)))
                     {
                         if (keys.Add(key))
                         {
                             yield return key;
                         }
                     }
+                }
 
-                    if (BaseMetadata != null)
+                foreach (string key in PropertyMetadata<TDocument>.For((TDocument)this).Keys)
+                {
+                    if (keys.Add(key))
                     {
-                        foreach (string key in BaseMetadata.Keys)
+                        yield return key;
+                    }
+                }
+
+                if (BaseMetadata != null)
+                {
+                    foreach (string key in BaseMetadata.Keys)
+                    {
+                        if (keys.Add(key))
                         {
-                            if (keys.Add(key))
-                            {
-                                yield return key;
-                            }
+                            yield return key;
                         }
                     }
                 }
@@ -332,7 +330,7 @@ namespace Statiq.Common
         public bool TryGetRaw(string key, out object value)
         {
             value = default;
-            return (Metadata?.TryGetRaw(key, out value) ?? false)
+            return (!IDocument.Properties.Contains(key) && Metadata?.TryGetRaw(key, out value) == true)
                 || PropertyMetadata<TDocument>.For((TDocument)this).TryGetRaw(key, out value)
                 || (BaseMetadata?.TryGetRaw(key, out value) ?? false);
         }
@@ -353,7 +351,7 @@ namespace Statiq.Common
 
             if (Metadata != null)
             {
-                foreach (KeyValuePair<string, object> item in Metadata)
+                foreach (KeyValuePair<string, object> item in Metadata.Where(x => !IDocument.Properties.Contains(x.Key)))
                 {
                     if (keys.Add(item.Key))
                     {
@@ -392,7 +390,7 @@ namespace Statiq.Common
 
             if (Metadata != null)
             {
-                foreach (KeyValuePair<string, object> item in Metadata.GetRawEnumerable())
+                foreach (KeyValuePair<string, object> item in Metadata.GetRawEnumerable().Where(x => !IDocument.Properties.Contains(x.Key)))
                 {
                     if (keys.Add(item.Key))
                     {

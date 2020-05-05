@@ -28,7 +28,7 @@ namespace Statiq.Common
                 typeof(T)
                     .GetProperties()
                     .Select(x => (x, x.GetGetMethod()))
-                    .Where(x => x.Item2 != null && x.Item2.GetParameters().Length == 0))
+                    .Where(x => x.Item2?.GetParameters().Length == 0))
             {
                 // If there's an attribute, do this in a second pass
                 PropertyMetadataAttribute attribute = property.GetCustomAttribute<PropertyMetadataAttribute>();
