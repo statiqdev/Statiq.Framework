@@ -1,5 +1,6 @@
 # 1.0.0-beta.8
 
+- Optimized `ScriptMetadataValue` metadata caching for big performance gains in certain scenarios.
 - Ensures that document metadata can't override the properties from `IDocument` (`Id`, `Source`, `Destination`, and `ContentProvider`).
 - Removed the `ApplyDirectoryMetadata` module in favor of a more specific/powerful capability in Statiq Web (it never really made sense in Framework anyway).
 - Fixed default `GenerateSitemap` document destination to "sitemap.xml".

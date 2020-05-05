@@ -1,6 +1,9 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
+using Microsoft.DotNet.PlatformAbstractions;
 using Statiq.Common;
 
 namespace Statiq.Common
@@ -16,8 +19,8 @@ namespace Statiq.Common
         private readonly string _originalPrefix;
         private readonly string _script;
         private readonly IExecutionState _executionState;
-        private HashSet<KeyValuePair<string, string>> _cachedMetadataProperties;
-        private Type _cachedScriptType;
+        private readonly ConcurrentDictionary<HashSet<KeyValuePair<string, string>>, Type> _cachedScriptTypes =
+            new ConcurrentDictionary<HashSet<KeyValuePair<string, string>>, Type>(HashSet<KeyValuePair<string, string>>.CreateSetComparer());
 
         private ScriptMetadataValue(string key, string originalPrefix, string script, IExecutionState executionState)
         {
@@ -29,29 +32,39 @@ namespace Statiq.Common
 
         public object Get(IMetadata metadata)
         {
-            // The metadata value could get resolved concurrently so we need to lock it while caching
-            lock (Lock)
+            // Check if we're excluded from evaluation
+            if (metadata.TryGetValue(Keys.ExcludeFromEvaluation, out object excludeObject)
+                && ((excludeObject is bool excludeBool && excludeBool)
+                    || metadata.GetList<string>(Keys.ExcludeFromEvaluation).Contains(_key, StringComparer.OrdinalIgnoreCase)))
             {
-                // Check if we're excluded from evaluation
-                if (metadata.TryGetValue(Keys.ExcludeFromEvaluation, out object excludeObject)
-                    && ((excludeObject is bool excludeBool && excludeBool)
-                        || metadata.GetList<string>(Keys.ExcludeFromEvaluation).Contains(_key, StringComparer.OrdinalIgnoreCase)))
-                {
-                    return _originalPrefix + _script;
-                }
-
-                // Check if we've already cached a compilation for the current set of metadata keys
-                KeyValuePair<string, string>[] metadataProperties = _executionState.ScriptHelper.GetMetadataProperties(metadata).ToArray();
-                if (_cachedMetadataProperties?.SetEquals(metadataProperties) != true)
-                {
-                    // Compilation cache miss, not cached or the metadata keys are different
-                    _cachedMetadataProperties = new HashSet<KeyValuePair<string, string>>(metadataProperties);
-                    byte[] rawAssembly = _executionState.ScriptHelper.Compile(_script, metadataProperties);
-                    _cachedScriptType = _executionState.ScriptHelper.Load(rawAssembly);
-                }
+                return _originalPrefix + _script;
             }
 
-            return _executionState.ScriptHelper.EvaluateAsync(_cachedScriptType, metadata).GetAwaiter().GetResult();
+            // Get (or compile) the script based on the current metadata
+            HashSet<KeyValuePair<string, string>> metadataProperties = _executionState.ScriptHelper
+                .GetMetadataProperties(metadata)
+                .ToHashSet(MetadataPropertyComparer.Instance);
+            Type cachedScriptType = _cachedScriptTypes.GetOrAdd(metadataProperties, x =>
+            {
+                byte[] rawAssembly = _executionState.ScriptHelper.Compile(_script, x);
+                return _executionState.ScriptHelper.Load(rawAssembly);
+            });
+
+            // Evaluate the script
+            return _executionState.ScriptHelper.EvaluateAsync(cachedScriptType, metadata).GetAwaiter().GetResult();
+        }
+
+        private class MetadataPropertyComparer : IEqualityComparer<KeyValuePair<string, string>>
+        {
+            public static readonly MetadataPropertyComparer Instance = new MetadataPropertyComparer();
+
+            public bool Equals([AllowNull] KeyValuePair<string, string> x, [AllowNull] KeyValuePair<string, string> y) =>
+                x.Key.Equals(y.Key, StringComparison.OrdinalIgnoreCase) && (x.Value?.Equals(y.Value) ?? y.Value == null);
+
+            public int GetHashCode([DisallowNull] KeyValuePair<string, string> obj) =>
+                HashCode.Combine(
+                    StringComparer.OrdinalIgnoreCase.GetHashCode(obj.Key),
+                    obj.Value?.GetHashCode() ?? 0);
         }
 
         public static bool TryGetScriptMetadataValue(string key, object value, IExecutionState executionState, out ScriptMetadataValue scriptMetadataValue)
