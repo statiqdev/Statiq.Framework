@@ -1,5 +1,6 @@
 # 1.0.0-beta.9
 
+- Fix for a `PipelineBuilder` with no actions to return an empty pipeline.
 - Added `IBootstrapper.AddDeploymentPipeline()` overloads.
 
 # 1.0.0-beta.8

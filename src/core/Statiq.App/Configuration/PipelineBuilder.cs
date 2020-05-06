@@ -24,11 +24,6 @@ namespace Statiq.App
 
         internal IPipeline Build()
         {
-            if (_actions.Count == 0)
-            {
-                return null;
-            }
-
             IPipeline pipeline = new Pipeline();
             foreach (Action<IPipeline> action in _actions)
             {
