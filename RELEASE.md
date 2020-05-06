@@ -1,5 +1,7 @@
 # 1.0.0-beta.9
 
+- Added `IBootstrapper.AddDeploymentPipeline()` overloads.
+
 # 1.0.0-beta.8
 
 - Added `IReadOnlyDictionary<string, Type>` implementation to `ClassCatalog`.

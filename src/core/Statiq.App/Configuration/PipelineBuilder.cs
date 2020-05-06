@@ -111,7 +111,7 @@ namespace Statiq.App
             return this;
         }
 
-        public PipelineBuilder WithTransformModules(IEnumerable<IModule> modules)
+        public PipelineBuilder WithPostProcessModules(IEnumerable<IModule> modules)
         {
             if (modules != null)
             {
@@ -120,7 +120,7 @@ namespace Statiq.App
             return this;
         }
 
-        public PipelineBuilder WithTransformModules(params IModule[] modules)
+        public PipelineBuilder WithPostProcessModules(params IModule[] modules)
         {
             _actions.Add(x => x.WithPostProcessModules(modules));
             return this;
