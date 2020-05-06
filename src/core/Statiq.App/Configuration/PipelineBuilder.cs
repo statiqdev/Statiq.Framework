@@ -148,9 +148,9 @@ namespace Statiq.App
             return this;
         }
 
-        public PipelineBuilder WithTransformConfig(Config<object> config)
+        public PipelineBuilder WithPostProcessConfig(Config<object> config)
         {
-            _actions.Add(x => x.WithTransformConfig(config));
+            _actions.Add(x => x.WithPostProcessConfig(config));
             return this;
         }
 

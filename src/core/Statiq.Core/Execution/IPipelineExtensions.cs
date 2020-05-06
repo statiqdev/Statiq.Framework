@@ -21,7 +21,7 @@ namespace Statiq.Core
             return pipeline;
         }
 
-        public static TPipeline WithTransformConfig<TPipeline>(this TPipeline pipeline, Config<object> config)
+        public static TPipeline WithPostProcessConfig<TPipeline>(this TPipeline pipeline, Config<object> config)
             where TPipeline : IPipeline
         {
             pipeline.PostProcessModules.Add(new ExecuteConfig(config));
