@@ -1,3 +1,5 @@
+# 1.0.0-beta.10
+
 # 1.0.0-beta.9
 
 - Fix not to reuse a `HttpRequest` during retry, changed the `HttpClient.SendWithRetryAsync()` and related methods to take a factory instead of a single request (#98).
