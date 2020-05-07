@@ -891,11 +891,11 @@ namespace Statiq.Core
         }
 
         /// <inheritdoc/>
-        public async Task<HttpResponseMessage> SendHttpRequestWithRetryAsync(HttpRequestMessage request)
+        public async Task<HttpResponseMessage> SendHttpRequestWithRetryAsync(Func<HttpRequestMessage> requestFactory)
         {
             using (HttpClient httpClient = CreateHttpClient())
             {
-                return await httpClient.SendWithRetryAsync(request);
+                return await httpClient.SendWithRetryAsync(requestFactory, CancellationToken);
             }
         }
 

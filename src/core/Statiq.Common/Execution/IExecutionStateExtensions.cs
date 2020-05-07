@@ -13,7 +13,7 @@ namespace Statiq.Common
         /// <param name="uri">The request URI.</param>
         /// <returns>The response.</returns>
         public static async Task<HttpResponseMessage> SendHttpRequestWithRetryAsync(this IExecutionState executionState, string uri) =>
-            await executionState.SendHttpRequestWithRetryAsync(new HttpRequestMessage(HttpMethod.Get, uri));
+            await executionState.SendHttpRequestWithRetryAsync(() => new HttpRequestMessage(HttpMethod.Get, uri));
 
         /// <summary>
         /// Sends a GET request with exponential back-off.
@@ -22,6 +22,6 @@ namespace Statiq.Common
         /// <param name="uri">The request URI.</param>
         /// <returns>The response.</returns>
         public static async Task<HttpResponseMessage> SendHttpRequestWithRetryAsync(this IExecutionState executionState, Uri uri) =>
-            await executionState.SendHttpRequestWithRetryAsync(new HttpRequestMessage(HttpMethod.Get, uri));
+            await executionState.SendHttpRequestWithRetryAsync(() => new HttpRequestMessage(HttpMethod.Get, uri));
     }
 }

@@ -229,7 +229,8 @@ namespace Statiq.Testing
         public HttpClient CreateHttpClient(HttpMessageHandler handler) => Engine.CreateHttpClient(handler);
 
         /// <inheritdoc/>
-        public Task<HttpResponseMessage> SendHttpRequestWithRetryAsync(HttpRequestMessage request) => Engine.SendHttpRequestWithRetryAsync(request);
+        public Task<HttpResponseMessage> SendHttpRequestWithRetryAsync(Func<HttpRequestMessage> requestFactory) =>
+            Engine.SendHttpRequestWithRetryAsync(requestFactory);
 
         /// <summary>
         /// A message handler that should be used to register <see cref="HttpResponseMessage"/>

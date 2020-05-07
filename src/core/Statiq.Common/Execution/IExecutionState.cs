@@ -117,9 +117,9 @@ namespace Statiq.Common
         /// <summary>
         /// Sends an <see cref="HttpRequestMessage"/> with exponential back-off.
         /// </summary>
-        /// <param name="request">The request.</param>
+        /// <param name="requestFactory">A factory that creates the request message to send (a fresh message is needed for each request).</param>
         /// <returns>The response.</returns>
-        Task<HttpResponseMessage> SendHttpRequestWithRetryAsync(HttpRequestMessage request);
+        Task<HttpResponseMessage> SendHttpRequestWithRetryAsync(Func<HttpRequestMessage> requestFactory);
 
         /// <summary>
         /// Gets a new <see cref="IJavaScriptEnginePool"/>. The returned engine pool should be disposed

@@ -140,11 +140,12 @@ namespace Statiq.Testing
             new HttpClient(new TestHttpMessageHandler(HttpResponseFunc, handler));
 
         /// <inheritdoc/>
-        public async Task<HttpResponseMessage> SendHttpRequestWithRetryAsync(HttpRequestMessage request)
+        public async Task<HttpResponseMessage> SendHttpRequestWithRetryAsync(Func<HttpRequestMessage> requestFactory)
         {
+            // No retry while testing
             using (HttpClient httpClient = CreateHttpClient())
             {
-                return await httpClient.SendAsync(request);
+                return await httpClient.SendAsync(requestFactory());
             }
         }
 

@@ -290,7 +290,7 @@ namespace Statiq.Html
         {
             try
             {
-                HttpResponseMessage response = await context.SendHttpRequestWithRetryAsync(new HttpRequestMessage(method, uri));
+                HttpResponseMessage response = await context.SendHttpRequestWithRetryAsync(() => new HttpRequestMessage(method, uri));
 
                 // Even with exponential backoff we have TooManyRequests, just skip, since we have to assume it's valid.
                 if (response.StatusCode == TooManyRequests)

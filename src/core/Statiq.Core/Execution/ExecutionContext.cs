@@ -120,7 +120,8 @@ namespace Statiq.Core
         public HttpClient CreateHttpClient(HttpMessageHandler handler) => _contextData.Engine.CreateHttpClient(handler);
 
         /// <inheritdoc/>
-        public Task<HttpResponseMessage> SendHttpRequestWithRetryAsync(HttpRequestMessage request) => _contextData.Engine.SendHttpRequestWithRetryAsync(request);
+        public Task<HttpResponseMessage> SendHttpRequestWithRetryAsync(Func<HttpRequestMessage> requestFactory) =>
+            _contextData.Engine.SendHttpRequestWithRetryAsync(requestFactory);
 
         /// <inheritdoc/>
         public async Task<ImmutableArray<IDocument>> ExecuteModulesAsync(IEnumerable<IModule> modules, IEnumerable<IDocument> inputs) =>

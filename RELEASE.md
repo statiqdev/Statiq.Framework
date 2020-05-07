@@ -1,5 +1,6 @@
 # 1.0.0-beta.9
 
+- Fix not to reuse a `HttpRequest` during retry, changed the `HttpClient.SendWithRetryAsync()` and related methods to take a factory instead of a single request (#98).
 - Fix for a `PipelineBuilder` with no actions to return an empty pipeline.
 - Added `IBootstrapper.AddDeploymentPipeline()` overloads.
 
