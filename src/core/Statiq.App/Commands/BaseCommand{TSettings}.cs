@@ -69,9 +69,19 @@ namespace Statiq.App
                 logger.LogInformation($"Statiq version {Engine.Version}");
                 classCatalog?.LogDebugMessagesTo(logger);
 
-                // Attach
-                if (commandSettings.Attach)
+                // Debug/Attach
+                if (commandSettings.Debug)
                 {
+                    logger.LogInformation($"Waiting to launch a debugger for process {Process.GetCurrentProcess().Id}...");
+                    Debugger.Launch();
+                }
+                if ((commandSettings.Attach || commandSettings.Debug) && !Debugger.IsAttached)
+                {
+                    if (commandSettings.Debug)
+                    {
+                        // If we got here the debug command was unsuccessful
+                        logger.LogInformation($"Could not launch a debugger, waiting for manual attach");
+                    }
                     logger.LogInformation($"Waiting for a debugger to attach to process {Process.GetCurrentProcess().Id} (or press a key to continue)...");
                     while (!Debugger.IsAttached && !Console.KeyAvailable)
                     {

@@ -14,6 +14,10 @@ namespace Statiq.App
         [Description("Pause execution at the start of the program until a debugger is attached.")]
         public bool Attach { get; set; }
 
+        [CommandOption("--debug")]
+        [Description("Allows you to select a debugger to attach.")]
+        public bool Debug { get; set; }
+
         [CommandOption("-f|--log-file <LOGFILE>")]
         [Description("Log all messages to the specified log file.")]
         public string LogFile { get; set; }

@@ -34,7 +34,8 @@ namespace Statiq.App
                 // Then try the command data or create one and either way copy over the base command settings
                 engineCommandSettings = commandContext.Data as EngineCommandSettings ?? new EngineCommandSettings();
                 engineCommandSettings.LogLevel = commandSettings.LogLevel;
-                engineCommandSettings.Attach = commandSettings.Attach;
+                engineCommandSettings.Attach = commandSettings.Debug;
+                engineCommandSettings.Debug = commandSettings.Attach;
                 engineCommandSettings.LogFile = commandSettings.LogFile;
             }
 
