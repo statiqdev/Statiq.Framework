@@ -1,48 +1,22 @@
-# How to build
+Statiq Framework is a .NET Core library and can be built using standard .NET ecosystem tools.
 
-## Using the build script
+# Building From The Command-Line
 
-Statiq uses [Cake](http://cakebuild.net/) to handle scripted build activities. Right now, Statiq is Windows-only (both build and execution). If you just want to build Statiq and all the extensions, run
+## Prerequisites
 
-from cmd
+- [.NET Core SDK](https://dotnet.microsoft.com/download/dotnet-core)
 
-```bat
-build.cmd
-```
+## Steps
 
-or from Powershell
+- Run `dotnet build`
 
-```Powershell
-.\build.ps1
-```
+# Building From Visual Studio
 
-If you want to build and run tests, run
+## Prerequisites
 
-from cmd
+- [Visual Studio](https://visualstudio.microsoft.com/downloads/)
 
-```bat
-build.cmd -target Run-Unit-Tests
-```
+## Steps
 
-from Powershell
-
-```Powershell
-.\build.ps1 -target Run-Unit-Tests
-```
-
-You can also clean the build by running
-
-from cmd
-```
-build.cmd -target Clean
-```
-
-from Powershell
-
-```
-.\build.ps1 -target Clean
-```
-
-## From Visual Studio
-
-If you want to open and build Statiq from Visual Studio, the main solution is in the root folder as `Statiq.Framework.sln`.
+- Open `Statiq.Framework.sln`
+- Build from Visual Studio
