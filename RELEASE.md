@@ -1,5 +1,6 @@
 # 1.0.0-beta.10
 
+- Better engine and pipeline exception handling and log messages.
 - Added a new `--debug` CLI flag to launch a debugger and attach it.
 
 # 1.0.0-beta.9

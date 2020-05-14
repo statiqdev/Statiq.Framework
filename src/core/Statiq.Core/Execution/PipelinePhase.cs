@@ -96,11 +96,20 @@ namespace Statiq.Core
             }
             catch (Exception ex)
             {
+                Outputs = ImmutableArray<IDocument>.Empty;
                 if (!(ex is OperationCanceledException))
                 {
-                    _logger.LogCritical($"Exception while executing pipeline {PipelineName}/{Phase}: {ex}");
+                    ExecuteModulesException executeModulesException = ex as ExecuteModulesException;
+                    if (executeModulesException != null)
+                    {
+                        ex = executeModulesException.InnerException;
+                    }
+                    _logger.LogDebug($"Exception while executing pipeline {PipelineName}/{Phase}: {ex}");
+                    if (executeModulesException != null)
+                    {
+                        throw executeModulesException.InnerException;
+                    }
                 }
-                Outputs = ImmutableArray<IDocument>.Empty;
                 throw;
             }
             finally

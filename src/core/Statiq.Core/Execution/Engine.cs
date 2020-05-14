@@ -412,14 +412,6 @@ namespace Statiq.Core
                     phaseTasks = GetPhaseTasks(executingPipelines, phaseResults);
                     await Task.WhenAll(phaseTasks);
                 }
-                catch (Exception ex)
-                {
-                    if (!(ex is OperationCanceledException))
-                    {
-                        _logger.LogCritical("Error during execution");
-                    }
-                    throw;
-                }
                 finally
                 {
                     stopwatch.Stop();
@@ -785,13 +777,17 @@ namespace Statiq.Core
                     {
                         // Otherwise, throw an exception so that this dependency is also skipped by it's dependents
                         string error = $"{phase.PipelineName}/{phase.Phase} » Skipping pipeline due to dependency error";
-                        _logger.LogError(error);
+                        _logger.LogWarning(error);
                         throw new ExecutionException(error);
                     }
                 }, CancellationToken);
         }
 
-        // This executes the specified modules with the specified input documents
+        /// <summary>
+        /// This executes the specified modules with the specified input documents.
+        /// This might throw a <see cref="ExecuteModulesException"/> which should be
+        /// unwrapped by the caller.
+        /// </summary>
         internal static async Task<ImmutableArray<IDocument>> ExecuteModulesAsync(
             ExecutionContextData contextData,
             IExecutionContext parent,
@@ -845,11 +841,12 @@ namespace Statiq.Core
                     }
                     catch (Exception ex)
                     {
-                        if (!(ex is OperationCanceledException))
+                        outputs = ImmutableArray<IDocument>.Empty;
+                        if (!(ex is OperationCanceledException) && !(ex is ExecuteModulesException))
                         {
                             logger.LogError($"Error while executing module {moduleName} in {contextData.PipelinePhase.PipelineName}/{contextData.PipelinePhase.Phase}: {ex.Message}");
+                            throw new ExecuteModulesException(ex);
                         }
-                        outputs = ImmutableArray<IDocument>.Empty;
                         throw;
                     }
                 }

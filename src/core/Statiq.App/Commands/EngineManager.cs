@@ -75,7 +75,10 @@ namespace Statiq.App
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex.Message);
+                if (!(ex is OperationCanceledException))
+                {
+                    _logger.LogCritical(ex.Message);
+                }
                 return false;
             }
             return true;
