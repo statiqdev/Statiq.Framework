@@ -175,6 +175,21 @@ namespace Statiq.App
             return this;
         }
 
+        public PipelineBuilder AsDependencyOf(params string[] dependencyOf)
+        {
+            _actions.Add(x => x.AsDependencyOf(dependencyOf));
+            return this;
+        }
+
+        public PipelineBuilder AsDependencyOf(IEnumerable<string> dependencyOf)
+        {
+            if (dependencyOf != null)
+            {
+                _actions.Add(x => x.AsDependencyOf(dependencyOf));
+            }
+            return this;
+        }
+
         public PipelineBuilder AsIsolated(bool isolated = true)
         {
             _actions.Add(x => x.AsIsolated(isolated));

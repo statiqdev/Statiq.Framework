@@ -1,5 +1,6 @@
 # 1.0.0-beta.11
 
+- Added `AsDependencyOf()` methods to `PipelineBuilder`.
 - Added a collection initializer to `TestFileProvider` to make adding test files easier.
 - Added full `NormalizedPath` support to `TestFileProvider` internals.
 
