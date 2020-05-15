@@ -1,5 +1,8 @@
 # 1.0.0-beta.11
 
+- Added a collection initializer to `TestFileProvider` to make adding test files easier.
+- Added full `NormalizedPath` support to `TestFileProvider` internals.
+
 # 1.0.0-beta.10
 
 - Better engine and pipeline exception handling and log messages.
