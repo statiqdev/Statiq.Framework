@@ -20,11 +20,11 @@ namespace Statiq.Testing
 
         NormalizedPath IFileSystemEntry.Path => Path;
 
-        public bool Exists => _fileProvider.Files.ContainsKey(Path.FullPath);
+        public bool Exists => _fileProvider.Files.ContainsKey(Path);
 
         public IDirectory Directory => new TestDirectory(_fileProvider, Path.Parent);
 
-        public long Length => _fileProvider.Files[Path.FullPath].Length;
+        public long Length => _fileProvider.Files[Path].Length;
 
         public string MediaType => Path.MediaType;
 
@@ -34,16 +34,16 @@ namespace Statiq.Testing
 
         private void CreateDirectory(bool createDirectory, IFile file)
         {
-            if (!createDirectory && !_fileProvider.Directories.Contains(file.Path.Parent.FullPath))
+            if (!createDirectory && !_fileProvider.Directories.Contains(file.Path.Parent))
             {
-                throw new IOException($"Directory {file.Path.Parent.FullPath} does not exist");
+                throw new IOException($"Directory {file.Path.Parent} does not exist");
             }
             if (createDirectory)
             {
                 NormalizedPath parent = file.Path.Parent;
-                while (!parent.IsNull)
+                while (!parent.IsNullOrEmpty)
                 {
-                    _fileProvider.Directories.Add(parent.FullPath);
+                    _fileProvider.Directories.Add(parent);
                     parent = parent.Parent;
                 }
             }
@@ -55,11 +55,11 @@ namespace Statiq.Testing
 
             if (overwrite)
             {
-                _fileProvider.Files[destination.Path.FullPath] = new StringBuilder(_fileProvider.Files[Path.FullPath].ToString());
+                _fileProvider.Files[destination.Path] = new StringBuilder(_fileProvider.Files[Path].ToString());
             }
             else
             {
-                _fileProvider.Files.TryAdd(destination.Path.FullPath, new StringBuilder(_fileProvider.Files[Path.FullPath].ToString()));
+                _fileProvider.Files.TryAdd(destination.Path, new StringBuilder(_fileProvider.Files[Path].ToString()));
             }
 
             return Task.CompletedTask;
@@ -67,33 +67,33 @@ namespace Statiq.Testing
 
         public Task MoveToAsync(IFile destination)
         {
-            if (!_fileProvider.Files.ContainsKey(Path.FullPath))
+            if (!_fileProvider.Files.ContainsKey(Path))
             {
                 throw new FileNotFoundException();
             }
 
-            if (_fileProvider.Files.TryRemove(Path.FullPath, out StringBuilder builder))
+            if (_fileProvider.Files.TryRemove(Path, out StringBuilder builder))
             {
-                _fileProvider.Files.TryAdd(destination.Path.FullPath, builder);
+                _fileProvider.Files.TryAdd(destination.Path, builder);
             }
 
             return Task.CompletedTask;
         }
 
-        public void Delete() => _fileProvider.Files.TryRemove(Path.FullPath, out StringBuilder _);
+        public void Delete() => _fileProvider.Files.TryRemove(Path, out StringBuilder _);
 
-        public Task<string> ReadAllTextAsync() => Task.FromResult(_fileProvider.Files[Path.FullPath].ToString());
+        public Task<string> ReadAllTextAsync() => Task.FromResult(_fileProvider.Files[Path].ToString());
 
         public Task WriteAllTextAsync(string contents, bool createDirectory = true)
         {
             CreateDirectory(createDirectory, this);
-            _fileProvider.Files[Path.FullPath] = new StringBuilder(contents);
+            _fileProvider.Files[Path] = new StringBuilder(contents);
             return Task.CompletedTask;
         }
 
         public Stream OpenRead()
         {
-            if (!_fileProvider.Files.TryGetValue(Path.FullPath, out StringBuilder builder))
+            if (!_fileProvider.Files.TryGetValue(Path, out StringBuilder builder))
             {
                 throw new FileNotFoundException();
             }
@@ -104,13 +104,13 @@ namespace Statiq.Testing
         public Stream OpenWrite(bool createDirectory = true)
         {
             CreateDirectory(createDirectory, this);
-            return new StringBuilderStream(_fileProvider.Files.AddOrUpdate(Path.FullPath, new StringBuilder(), (x, y) => y));
+            return new StringBuilderStream(_fileProvider.Files.AddOrUpdate(Path, new StringBuilder(), (x, y) => y));
         }
 
         public Stream OpenAppend(bool createDirectory = true)
         {
             CreateDirectory(createDirectory, this);
-            StringBuilderStream stream = new StringBuilderStream(_fileProvider.Files.AddOrUpdate(Path.FullPath, new StringBuilder(), (x, y) => y));
+            StringBuilderStream stream = new StringBuilderStream(_fileProvider.Files.AddOrUpdate(Path, new StringBuilder(), (x, y) => y));
 
             // Start appending at the end of the stream.
             stream.Position = stream.Length;
@@ -120,13 +120,13 @@ namespace Statiq.Testing
         public Stream Open(bool createDirectory = true)
         {
             CreateDirectory(createDirectory, this);
-            return new StringBuilderStream(_fileProvider.Files.AddOrUpdate(Path.FullPath, new StringBuilder(), (x, y) => y));
+            return new StringBuilderStream(_fileProvider.Files.AddOrUpdate(Path, new StringBuilder(), (x, y) => y));
         }
 
         public IContentProvider GetContentProvider() => GetContentProvider(MediaType);
 
         public IContentProvider GetContentProvider(string mediaType) =>
-            _fileProvider.Files.ContainsKey(Path.FullPath) ? (IContentProvider)new FileContent(this, mediaType) : new NullContent(mediaType);
+            _fileProvider.Files.ContainsKey(Path) ? (IContentProvider)new FileContent(this, mediaType) : new NullContent(mediaType);
 
         public override string ToString() => Path.ToString();
 

@@ -57,15 +57,12 @@ namespace Statiq.Common.Tests.IO.Globbing
             public void DoubleWildcardShouldMatchZeroOrMorePathSegments()
             {
                 // Given
-                TestFileProvider fileProvider = new TestFileProvider();
-                fileProvider.AddDirectory("/");
-                fileProvider.AddDirectory("/root");
-                fileProvider.AddDirectory("/root/a");
-                fileProvider.AddDirectory("/root/a/b");
-                fileProvider.AddDirectory("/root/d");
-                fileProvider.AddFile("/root/a/x.txt");
-                fileProvider.AddFile("/root/a/b/x.txt");
-                fileProvider.AddFile("/root/d/x.txt");
+                TestFileProvider fileProvider = new TestFileProvider
+                {
+                    { "/root/a/x.txt" },
+                    { "/root/a/b/x.txt" },
+                    { "/root/d/x.txt" }
+                };
                 IDirectory directory = fileProvider.GetDirectory("/");
 
                 // When
@@ -80,16 +77,13 @@ namespace Statiq.Common.Tests.IO.Globbing
             public void WildcardShouldMatchZeroOrMore()
             {
                 // Given
-                TestFileProvider fileProvider = new TestFileProvider();
-                fileProvider.AddDirectory("/");
-                fileProvider.AddDirectory("/root");
-                fileProvider.AddDirectory("/root/a");
-                fileProvider.AddDirectory("/root/a/b");
-                fileProvider.AddDirectory("/root/d");
-                fileProvider.AddFile("/root/a/x.txt");
-                fileProvider.AddFile("/root/a/b/x.txt");
-                fileProvider.AddFile("/root/a/b/.txt");
-                fileProvider.AddFile("/root/d/x.txt");
+                TestFileProvider fileProvider = new TestFileProvider
+                {
+                    { "/root/a/x.txt" },
+                    { "/root/a/b/x.txt" },
+                    { "/root/a/b/.txt" },
+                    { "/root/d/x.txt" }
+                };
                 IDirectory directory = fileProvider.GetDirectory("/");
 
                 // When
@@ -105,15 +99,10 @@ namespace Statiq.Common.Tests.IO.Globbing
             public void RecursiveWildcardTests(string directoryPath, string[] patterns, string[] resultPaths)
             {
                 // Given
-                TestFileProvider fileProvider = new TestFileProvider();
-                fileProvider.AddDirectory("/a");
-                fileProvider.AddDirectory("/a/b");
-                fileProvider.AddDirectory("/a/b/c");
-                fileProvider.AddDirectory("/a/b/c/d");
-                fileProvider.AddDirectory("/a/b/c/d/e");
-                fileProvider.AddDirectory("/a/b/c/d/e/1");
-                fileProvider.AddDirectory("/a/b/c/d/e/1/2");
-                fileProvider.AddFile("/a/b/c/d/e/1/2/3.txt");
+                TestFileProvider fileProvider = new TestFileProvider
+                {
+                    { "/a/b/c/d/e/1/2/3.txt" }
+                };
                 IDirectory directory = fileProvider.GetDirectory(directoryPath);
 
                 // When
@@ -132,14 +121,11 @@ namespace Statiq.Common.Tests.IO.Globbing
             public void NestedFoldersWilcard()
             {
                 // Given
-                TestFileProvider fileProvider = new TestFileProvider();
-                fileProvider.AddDirectory("/a");
-                fileProvider.AddDirectory("/a/b");
-                fileProvider.AddDirectory("/a/b/c");
-                fileProvider.AddDirectory("/a/bar");
-                fileProvider.AddDirectory("/a/bar/foo");
-                fileProvider.AddFile("/a/b/c/x.txt");
-                fileProvider.AddFile("/a/bar/foo/y.txt");
+                TestFileProvider fileProvider = new TestFileProvider
+                {
+                    { "/a/b/c/x.txt" },
+                    { "/a/bar/foo/y.txt" }
+                };
                 IDirectory directory = fileProvider.GetDirectory("/a");
 
                 // When
@@ -204,33 +190,18 @@ namespace Statiq.Common.Tests.IO.Globbing
             }
         }
 
-        private TestFileProvider GetFileProvider()
-        {
-            TestFileProvider fileProvider = new TestFileProvider();
-
-            fileProvider.AddDirectory("/a");
-            fileProvider.AddDirectory("/a/b");
-            fileProvider.AddDirectory("/a/b/c");
-            fileProvider.AddDirectory("/a/b/c/1");
-            fileProvider.AddDirectory("/a/b/d");
-            fileProvider.AddDirectory("/a/x");
-            fileProvider.AddDirectory("/a/y");
-            fileProvider.AddDirectory("/a/y/z");
-            fileProvider.AddDirectory("/a/foo");
-            fileProvider.AddDirectory("/a/foo/bar");
-            fileProvider.AddDirectory("/a/foo/baz");
-
-            fileProvider.AddFile("/a/b/c/foo.txt");
-            fileProvider.AddFile("/a/b/c/baz.txt");
-            fileProvider.AddFile("/a/b/c/1/2.txt");
-            fileProvider.AddFile("/a/b/d/baz.txt");
-            fileProvider.AddFile("/a/x/bar.txt");
-            fileProvider.AddFile("/a/x/foo.xml");
-            fileProvider.AddFile("/a/x/foo.doc");
-            fileProvider.AddFile("/a/foo/bar/a.txt");
-            fileProvider.AddFile("/a/foo/baz/b.txt");
-
-            return fileProvider;
-        }
+        private TestFileProvider GetFileProvider() =>
+            new TestFileProvider
+            {
+                { "/a/b/c/foo.txt" },
+                { "/a/b/c/baz.txt" },
+                { "/a/b/c/1/2.txt" },
+                { "/a/b/d/baz.txt" },
+                { "/a/x/bar.txt" },
+                { "/a/x/foo.xml" },
+                { "/a/x/foo.doc" },
+                { "/a/foo/bar/a.txt" },
+                { "/a/foo/baz/b.txt" }
+            };
     }
 }

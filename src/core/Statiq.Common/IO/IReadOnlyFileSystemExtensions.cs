@@ -462,7 +462,7 @@ namespace Statiq.Common
                     return Tuple.Create(directory, x);
                 });
             IEnumerable<IGrouping<IDirectory, string>> patternGroups = directoryPatterns
-                .GroupBy(x => x.Item1, x => x.Item2, new DirectoryEqualityComparer());
+                .GroupBy(x => x.Item1, x => x.Item2, DirectoryEqualityComparer.Default);
             return patternGroups.SelectMany(x => Globber.GetFiles(x.Key, x));
         }
     }

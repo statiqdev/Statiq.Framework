@@ -7,16 +7,12 @@ namespace Statiq.Common
     /// </summary>
     public class DirectoryEqualityComparer : IEqualityComparer<IDirectory>
     {
-        /// <inheritdoc />
-        public bool Equals(IDirectory x, IDirectory y)
-        {
-            return x.Path.Equals(y.Path);
-        }
+        public static DirectoryEqualityComparer Default => new DirectoryEqualityComparer();
 
         /// <inheritdoc />
-        public int GetHashCode(IDirectory obj)
-        {
-            return obj.Path.GetHashCode();
-        }
+        public bool Equals(IDirectory x, IDirectory y) => x.Path.Equals(y.Path);
+
+        /// <inheritdoc />
+        public int GetHashCode(IDirectory obj) => obj.Path.GetHashCode();
     }
 }

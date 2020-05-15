@@ -21,7 +21,7 @@ namespace Statiq.Testing
 
         NormalizedPath IFileSystemEntry.Path => Path;
 
-        public bool Exists => _fileProvider.Directories.Contains(Path.FullPath);
+        public bool Exists => _fileProvider.Directories.Contains(Path);
 
         public DateTime LastWriteTime { get; set; }
 
@@ -36,47 +36,34 @@ namespace Statiq.Testing
             }
         }
 
-        public void Create() => _fileProvider.Directories.Add(Path.FullPath);
+        public void Create() => _fileProvider.Directories.Add(Path);
 
-        public void Delete(bool recursive) => _fileProvider.Directories.Remove(Path.FullPath);
+        public void Delete(bool recursive) => _fileProvider.Directories.Remove(Path);
 
         public IEnumerable<IDirectory> GetDirectories(SearchOption searchOption = SearchOption.TopDirectoryOnly)
         {
             if (searchOption == SearchOption.TopDirectoryOnly)
             {
-                string adjustedPath = Path.FullPath.EndsWith("/", StringComparison.Ordinal)
-                    ? Path.FullPath.Substring(0, Path.FullPath.Length - 1)
-                    : Path.FullPath;
                 return _fileProvider.Directories
-                    .Where(x => x.StartsWith(adjustedPath + "/")
-                        && adjustedPath.Count(c => c == '/') == x.Count(c => c == '/') - 1
-                        && Path.FullPath != x)
-                    .Select(x => new TestDirectory(_fileProvider, x))
-                    .Cast<IDirectory>();
+                    .Where(x => Path.ContainsChild(x))
+                    .Select(x => new TestDirectory(_fileProvider, x));
             }
             return _fileProvider.Directories
-                .Where(x => x.StartsWith(Path.FullPath + "/") && Path.FullPath != x)
-                .Select(x => new TestDirectory(_fileProvider, x))
-                .Cast<IDirectory>();
+                .Where(x => Path.ContainsDescendant(x))
+                .Select(x => new TestDirectory(_fileProvider, x));
         }
 
         public IEnumerable<IFile> GetFiles(SearchOption searchOption = SearchOption.TopDirectoryOnly)
         {
             if (searchOption == SearchOption.TopDirectoryOnly)
             {
-                string adjustedPath = Path.FullPath.EndsWith("/", StringComparison.Ordinal)
-                    ? Path.FullPath.Substring(0, Path.FullPath.Length - 1)
-                    : Path.FullPath;
                 return _fileProvider.Files.Keys
-                    .Where(x => x.StartsWith(adjustedPath)
-                        && adjustedPath.Count(c => c == '/') == x.Count(c => c == '/') - 1)
-                    .Select(x => new TestFile(_fileProvider, x))
-                    .Cast<IFile>();
+                    .Where(x => Path.ContainsChild(x))
+                    .Select(x => new TestFile(_fileProvider, x));
             }
             return _fileProvider.Files.Keys
-                .Where(x => x.StartsWith(Path.FullPath))
-                .Select(x => new TestFile(_fileProvider, x))
-                .Cast<IFile>();
+                .Where(x => Path.ContainsDescendant(x))
+                .Select(x => new TestFile(_fileProvider, x));
         }
 
         public IDirectory GetDirectory(NormalizedPath path)

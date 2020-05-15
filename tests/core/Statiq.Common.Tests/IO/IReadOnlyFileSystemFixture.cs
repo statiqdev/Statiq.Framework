@@ -432,19 +432,15 @@ namespace Statiq.Common.Tests.IO
 
         private TestFileProvider GetFileProvider()
         {
-            TestFileProvider fileProvider = new TestFileProvider();
+            TestFileProvider fileProvider = new TestFileProvider
+            {
+                { "/a/b/c/foo.txt" },
+                { "/a/x/bar.txt" }
+            };
 
-            fileProvider.AddDirectory("/");
-            fileProvider.AddDirectory("/a");
-            fileProvider.AddDirectory("/a/b");
-            fileProvider.AddDirectory("/a/b/c");
+            // Directories that don't exist as files
             fileProvider.AddDirectory("/a/b/d");
-            fileProvider.AddDirectory("/a/x");
-            fileProvider.AddDirectory("/a/y");
             fileProvider.AddDirectory("/a/y/z");
-
-            fileProvider.AddFile("/a/b/c/foo.txt");
-            fileProvider.AddFile("/a/x/bar.txt");
 
             return fileProvider;
         }

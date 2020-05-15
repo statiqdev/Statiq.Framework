@@ -8,6 +8,8 @@ namespace Statiq.Common
     /// </summary>
     public sealed class PathEqualityComparer : IEqualityComparer<NormalizedPath>
     {
+        public static PathEqualityComparer Default => new PathEqualityComparer();
+
         /// <summary>
         /// Determines whether the specified <see cref="NormalizedPath"/> instances are equal.
         /// </summary>

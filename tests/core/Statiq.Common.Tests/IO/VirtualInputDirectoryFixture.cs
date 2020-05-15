@@ -284,30 +284,21 @@ namespace Statiq.Common.Tests.IO
 
         private IFileProvider GetFileProvider()
         {
-            TestFileProvider fileProvider = new TestFileProvider();
+            TestFileProvider fileProvider = new TestFileProvider
+            {
+                { "/a/b/c/foo.txt" },
+                { "/a/b/c/baz.txt" },
+                { "/a/b/c/1/2.txt" },
+                { "/a/b/d/baz.txt" },
+                { "/a/x/bar.txt" },
+                { "/foo/baz.txt" },
+                { "/foo/c/baz.txt" },
+                { "/bar/baz.txt" },
+            };
 
-            fileProvider.AddDirectory("/a");
-            fileProvider.AddDirectory("/a/b");
-            fileProvider.AddDirectory("/a/b/c");
-            fileProvider.AddDirectory("/a/b/c/1");
-            fileProvider.AddDirectory("/a/b/d");
-            fileProvider.AddDirectory("/a/x");
-            fileProvider.AddDirectory("/a/y");
+            // Directories that don't exist as files
             fileProvider.AddDirectory("/a/y/z");
-            fileProvider.AddDirectory("/foo");
-            fileProvider.AddDirectory("/foo/a");
             fileProvider.AddDirectory("/foo/a/b");
-            fileProvider.AddDirectory("/foo/c");
-            fileProvider.AddDirectory("/bar");
-
-            fileProvider.AddFile("/a/b/c/foo.txt");
-            fileProvider.AddFile("/a/b/c/baz.txt");
-            fileProvider.AddFile("/a/b/c/1/2.txt");
-            fileProvider.AddFile("/a/b/d/baz.txt");
-            fileProvider.AddFile("/a/x/bar.txt");
-            fileProvider.AddFile("/foo/baz.txt");
-            fileProvider.AddFile("/foo/c/baz.txt");
-            fileProvider.AddFile("/bar/baz.txt");
 
             return fileProvider;
         }

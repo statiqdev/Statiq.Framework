@@ -7,16 +7,12 @@ namespace Statiq.Common
     /// </summary>
     public class FileEqualityComparer : IEqualityComparer<IFile>
     {
-        /// <inheritdoc />
-        public bool Equals(IFile x, IFile y)
-        {
-            return x.Path.Equals(y.Path);
-        }
+        public static FileEqualityComparer Default => new FileEqualityComparer();
 
         /// <inheritdoc />
-        public int GetHashCode(IFile obj)
-        {
-            return obj.Path.GetHashCode();
-        }
+        public bool Equals(IFile x, IFile y) => x.Path.Equals(y.Path);
+
+        /// <inheritdoc />
+        public int GetHashCode(IFile obj) => obj.Path.GetHashCode();
     }
 }

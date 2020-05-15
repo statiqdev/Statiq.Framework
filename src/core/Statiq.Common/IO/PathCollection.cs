@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Xml.XPath;
 
 namespace Statiq.Common
 {
@@ -10,8 +11,6 @@ namespace Statiq.Common
     /// </summary>
     public class PathCollection : IReadOnlyList<NormalizedPath>
     {
-        private static readonly PathEqualityComparer _comparer = new PathEqualityComparer();
-
         private readonly object _pathsLock = new object();
         private readonly List<NormalizedPath> _paths = new List<NormalizedPath>();
 
@@ -114,7 +113,7 @@ namespace Statiq.Common
             path.ThrowIfNull(nameof(path));
             lock (_pathsLock)
             {
-                if (_paths.Contains(path, new PathEqualityComparer()))
+                if (_paths.Contains(path, PathEqualityComparer.Default))
                 {
                     return false;
                 }
@@ -135,7 +134,7 @@ namespace Statiq.Common
             {
                 foreach (NormalizedPath path in paths)
                 {
-                    if (!_paths.Contains(path, _comparer))
+                    if (!_paths.Contains(path, PathEqualityComparer.Default))
                     {
                         _paths.Add(path);
                     }
@@ -163,7 +162,7 @@ namespace Statiq.Common
         {
             lock (_pathsLock)
             {
-                return _paths.Contains(path, _comparer);
+                return _paths.Contains(path, PathEqualityComparer.Default);
             }
         }
 
@@ -233,7 +232,7 @@ namespace Statiq.Common
             path.ThrowIfNull(nameof(path));
             lock (_pathsLock)
             {
-                if (_paths.Contains(path, _comparer))
+                if (_paths.Contains(path, PathEqualityComparer.Default))
                 {
                     return false;
                 }

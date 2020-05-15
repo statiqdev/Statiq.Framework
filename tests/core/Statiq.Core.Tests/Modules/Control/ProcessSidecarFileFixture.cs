@@ -107,25 +107,17 @@ namespace Statiq.Core.Tests.Modules.Control
                     FileProvider = GetFileProvider()
                 };
 
-            private TestFileProvider GetFileProvider()
-            {
-                TestFileProvider fileProvider = new TestFileProvider();
-
-                fileProvider.AddDirectory("/");
-                fileProvider.AddDirectory("/a");
-                fileProvider.AddDirectory("/b");
-
-                fileProvider.AddFile("/a/1.md", "File a1");
-                fileProvider.AddFile("/a/1.md.meta", "data: a1");
-                fileProvider.AddFile("/a/1.md.other", "data: other");
-                fileProvider.AddFile("/a/2.md", "File a2");
-                fileProvider.AddFile("/a/2.md.meta", "data: a2");
-
-                fileProvider.AddFile("/b/1.md", "File b1");
-                fileProvider.AddFile("/b/1.md.meta", "data: b1");
-
-                return fileProvider;
-            }
+            private TestFileProvider GetFileProvider() =>
+                new TestFileProvider
+                {
+                    { "/a/1.md", "File a1" },
+                    { "/a/1.md.meta", "data: a1" },
+                    { "/a/1.md.other", "data: other" },
+                    { "/a/2.md", "File a2" },
+                    { "/a/2.md.meta", "data: a2" },
+                    { "/b/1.md", "File b1" },
+                    { "/b/1.md.meta", "data: b1" }
+                };
         }
     }
 }

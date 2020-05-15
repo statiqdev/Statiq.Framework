@@ -1,32 +1,65 @@
-﻿using System.Collections.Concurrent;
+﻿using System.Collections;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Text;
-using System.Threading.Tasks;
 using ConcurrentCollections;
 using Statiq.Common;
 
 namespace Statiq.Testing
 {
-    public class TestFileProvider : IFileProvider
+    public class TestFileProvider : IFileProvider, IEnumerable<NormalizedPath>
     {
         public TestFileProvider()
         {
         }
 
-        public TestFileProvider(params string[] directories)
+        public TestFileProvider(params NormalizedPath[] directories)
         {
             Directories.AddRange(directories);
         }
 
-        public ICollection<string> Directories { get; } = new ConcurrentHashSet<string>();
-        public ConcurrentDictionary<string, StringBuilder> Files { get; } = new ConcurrentDictionary<string, StringBuilder>();
+        public ICollection<NormalizedPath> Directories { get; } = new ConcurrentHashSet<NormalizedPath>();
 
-        public IDirectory GetDirectory(NormalizedPath path) => new TestDirectory(this, path.FullPath);
+        public ConcurrentDictionary<NormalizedPath, StringBuilder> Files { get; } = new ConcurrentDictionary<NormalizedPath, StringBuilder>();
 
-        public IFile GetFile(NormalizedPath path) => new TestFile(this, path.FullPath);
+        public IDirectory GetDirectory(NormalizedPath path) => new TestDirectory(this, path);
 
-        public void AddDirectory(string path) => Directories.Add(path);
+        public IFile GetFile(NormalizedPath path) => new TestFile(this, path);
 
-        public void AddFile(string path, string content = "") => Files[path] = new StringBuilder(content);
+        public void AddDirectory(NormalizedPath path)
+        {
+            if (path.IsNullOrEmpty)
+            {
+                return;
+            }
+
+            Directories.Add(path);
+
+            // Add all parents
+            NormalizedPath parent = path.Parent;
+            while (!parent.IsNullOrEmpty)
+            {
+                Directories.Add(parent);
+                parent = parent.Parent;
+            }
+        }
+
+        public void AddFile(NormalizedPath path, string content = "")
+        {
+            if (path.IsNullOrEmpty)
+            {
+                return;
+            }
+
+            // Add the directory (and parents)
+            Files[path] = new StringBuilder(content);
+            AddDirectory(path.Parent);
+        }
+
+        public void Add(NormalizedPath path, string content = "") => AddFile(path, content);
+
+        public IEnumerator<NormalizedPath> GetEnumerator() => Files.Keys.GetEnumerator();
+
+        IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
     }
 }
