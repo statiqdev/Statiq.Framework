@@ -28,7 +28,7 @@ namespace Statiq.App
             return Dictionary.TryGetValue(key, out value) || base.TryGetRaw(key, out value);
         }
 
-        // Enumerate the keys seperatly so we don't evaluate values
+        // Enumerate the keys separately so we don't evaluate values
         public override IEnumerable<string> Keys
         {
             get

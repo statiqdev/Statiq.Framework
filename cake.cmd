@@ -1,2 +1,2 @@
 @echo off
-powershell -ExecutionPolicy Unrestricted ./build.ps1 %CAKE_ARGS% %*
+powershell -ExecutionPolicy Unrestricted ./cake.ps1 %CAKE_ARGS% %*

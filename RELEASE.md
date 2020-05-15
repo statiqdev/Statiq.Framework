@@ -1,3 +1,5 @@
+# 1.0.0-beta.11
+
 # 1.0.0-beta.10
 
 - Better engine and pipeline exception handling and log messages.
