@@ -1,13 +1,8 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
-using NetEscapades.Extensions.Logging.RollingFile.Internal;
-using Statiq.Common;
 
 namespace Statiq.App
 {
@@ -201,17 +196,14 @@ namespace Statiq.App
                 _ => new ConsoleContent(message),
             };
 
-        // Use in a testing environment
-        internal static bool PreventDisposeAll { get; set; }
-
-        internal static void DisposeAll()
+        /// <summary>
+        /// Disposes all provider instances.
+        /// </summary>
+        public static void DisposeAll()
         {
-            if (!PreventDisposeAll)
+            while (Instances.TryTake(out ConsoleLoggerProvider instance))
             {
-                while (Instances.TryTake(out ConsoleLoggerProvider instance))
-                {
-                    instance.Dispose();
-                }
+                instance.Dispose();
             }
         }
 

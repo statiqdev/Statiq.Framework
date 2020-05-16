@@ -15,15 +15,8 @@ using Statiq.Testing;
 namespace Statiq.App.Tests.Bootstrapper
 {
     [TestFixture]
-    [NonParallelizable]
     public class BootstrapperFixture : BaseFixture
     {
-        [OneTimeSetUp]
-        public void OneTimeSetUp()
-        {
-            ConsoleLoggerProvider.PreventDisposeAll = true;
-        }
-
         public class RunTests : BootstrapperFixture
         {
             [Test]
@@ -33,16 +26,14 @@ namespace Statiq.App.Tests.Bootstrapper
                 string[] args = new[] { "build" };
                 App.Bootstrapper bootstrapper = App.Bootstrapper.Factory.Create(args);
                 bootstrapper.AddCommand<PipelinesCommand<EngineCommandSettings>>("build");
-                TestLoggerProvider provider = new TestLoggerProvider();
-                bootstrapper.ConfigureServices(services => services.AddSingleton<ILoggerProvider>(provider));
                 bootstrapper.AddPipeline("Foo");
 
                 // When
-                int exitCode = await bootstrapper.RunAsync();
+                BootstrapperTestResult result = await bootstrapper.RunTestAsync();
 
                 // Then
-                exitCode.ShouldBe((int)ExitCode.Normal);
-                provider.Messages.ShouldContain(x => x.FormattedMessage.StartsWith("Statiq version"));
+                result.ExitCode.ShouldBe((int)ExitCode.Normal);
+                result.LogMessages.ShouldContain(x => x.FormattedMessage.StartsWith("Statiq version"));
             }
 
             [Test]
@@ -52,24 +43,19 @@ namespace Statiq.App.Tests.Bootstrapper
                 string[] args = new[] { "build" };
                 App.Bootstrapper bootstrapper = App.Bootstrapper.Factory.Create(args);
                 bootstrapper.AddCommand<PipelinesCommand<EngineCommandSettings>>("build");
-                TestLoggerProvider provider = new TestLoggerProvider
-                {
-                    ThrowLogLevel = LogLevel.None
-                };
-                bootstrapper.ConfigureServices(services => services.AddSingleton<ILoggerProvider>(provider));
 
                 // When
-                int exitCode = await bootstrapper.RunAsync();
+                BootstrapperTestResult result = await bootstrapper.RunTestAsync(LogLevel.None);
 
                 // Then
-                exitCode.ShouldBe((int)ExitCode.Normal);
-                provider.Messages.ShouldContain(x =>
+                result.ExitCode.ShouldBe((int)ExitCode.Normal);
+                result.LogMessages.ShouldContain(x =>
                     x.LogLevel == LogLevel.Warning
                     && x.FormattedMessage == "No pipelines are configured or specified for execution.");
             }
 
-            [TestCase("Trace", 18)] // Includes module start/finish
-            [TestCase("Debug", 17)] // Include modules start/finish
+            [TestCase("Trace", 22)] // Includes module start/finish
+            [TestCase("Debug", 21)] // Include modules start/finish
             [TestCase("Information", 4)] // Includes pipeline finish
             [TestCase("Warning", 3)]
             [TestCase("Error", 2)]
@@ -80,11 +66,6 @@ namespace Statiq.App.Tests.Bootstrapper
                 string[] args = new[] { "build", "-l", logLevel };
                 App.Bootstrapper bootstrapper = App.Bootstrapper.Factory.Create(args);
                 bootstrapper.AddCommand<PipelinesCommand<EngineCommandSettings>>("build");
-                TestLoggerProvider provider = new TestLoggerProvider
-                {
-                    ThrowLogLevel = LogLevel.None
-                };
-                bootstrapper.ConfigureServices(services => services.AddSingleton<ILoggerProvider>(provider));
                 bootstrapper.AddPipeline(
                     "Foo",
                     new Core.LogMessage(LogLevel.Trace, "A"),
@@ -95,11 +76,11 @@ namespace Statiq.App.Tests.Bootstrapper
                     new Core.LogMessage(LogLevel.Critical, "F"));
 
                 // When
-                int exitCode = await bootstrapper.RunAsync();
+                BootstrapperTestResult result = await bootstrapper.RunTestAsync(LogLevel.None);
 
                 // Then
-                exitCode.ShouldBe((int)ExitCode.Normal);
-                provider.Messages.Count(x => x.FormattedMessage.StartsWith("Foo/Process")).ShouldBe(expected);
+                result.ExitCode.ShouldBe((int)ExitCode.Normal);
+                result.LogMessages.Count(x => x.FormattedMessage.StartsWith("Foo/Process")).ShouldBe(expected);
             }
 
             [Test]
@@ -109,17 +90,15 @@ namespace Statiq.App.Tests.Bootstrapper
                 string[] args = new[] { "build", "-l", "Debug" };
                 App.Bootstrapper bootstrapper = App.Bootstrapper.Factory.Create(args);
                 bootstrapper.AddCommand<PipelinesCommand<EngineCommandSettings>>("build");
-                TestLoggerProvider provider = new TestLoggerProvider();
-                bootstrapper.ConfigureServices(services => services.AddSingleton<ILoggerProvider>(provider));
                 bootstrapper.AddPipeline("Foo");
 
                 // When
-                int exitCode = await bootstrapper.RunAsync();
+                BootstrapperTestResult result = await bootstrapper.RunTestAsync();
 
                 // Then
-                exitCode.ShouldBe((int)ExitCode.Normal);
+                result.ExitCode.ShouldBe((int)ExitCode.Normal);
                 bootstrapper.ClassCatalog.GetTypesAssignableTo<BootstrapperFixture>().Count().ShouldBe(1);
-                provider.Messages.ShouldContain(x => x.FormattedMessage.StartsWith("Cataloging types in assembly"));
+                result.LogMessages.ShouldContain(x => x.FormattedMessage.StartsWith("Cataloging types in assembly"));
             }
         }
 
@@ -132,16 +111,14 @@ namespace Statiq.App.Tests.Bootstrapper
                 string[] args = new string[] { };
                 Environment.SetEnvironmentVariable(nameof(EnvironmentVariableConfiguration), "Foo");
                 App.Bootstrapper bootstrapper = App.Bootstrapper.Factory.CreateDefault(args);
-                TestLoggerProvider provider = new TestLoggerProvider();
-                bootstrapper.ConfigureServices(services => services.AddSingleton<ILoggerProvider>(provider));
                 object variable = null;
                 bootstrapper.AddPipeline("Foo", new ExecuteConfig(Config.FromContext(x => variable = x.Settings[nameof(EnvironmentVariableConfiguration)])));
 
                 // When
-                int exitCode = await bootstrapper.RunAsync();
+                BootstrapperTestResult result = await bootstrapper.RunTestAsync();
 
                 // Then
-                exitCode.ShouldBe((int)ExitCode.Normal);
+                result.ExitCode.ShouldBe((int)ExitCode.Normal);
                 variable.ShouldBe("Foo");
             }
 
@@ -152,16 +129,14 @@ namespace Statiq.App.Tests.Bootstrapper
                 string[] args = new string[] { "-s", $"{nameof(CommandLineSettingTakesPrecedenceOverEnvironmentVariables)}=Bar" };
                 Environment.SetEnvironmentVariable(nameof(CommandLineSettingTakesPrecedenceOverEnvironmentVariables), "Foo");
                 App.Bootstrapper bootstrapper = App.Bootstrapper.Factory.CreateDefault(args);
-                TestLoggerProvider provider = new TestLoggerProvider();
-                bootstrapper.ConfigureServices(services => services.AddSingleton<ILoggerProvider>(provider));
                 object variable = null;
                 bootstrapper.AddPipeline("Foo", new ExecuteConfig(Config.FromContext(x => variable = x.Settings[nameof(CommandLineSettingTakesPrecedenceOverEnvironmentVariables)])));
 
                 // When
-                int exitCode = await bootstrapper.RunAsync();
+                BootstrapperTestResult result = await bootstrapper.RunTestAsync();
 
                 // Then
-                exitCode.ShouldBe((int)ExitCode.Normal);
+                result.ExitCode.ShouldBe((int)ExitCode.Normal);
                 variable.ShouldBe("Bar");
             }
 
@@ -171,16 +146,14 @@ namespace Statiq.App.Tests.Bootstrapper
                 // Given
                 string[] args = new string[] { };
                 App.Bootstrapper bootstrapper = App.Bootstrapper.Factory.CreateDefault(args);
-                TestLoggerProvider provider = new TestLoggerProvider();
-                bootstrapper.ConfigureServices(services => services.AddSingleton<ILoggerProvider>(provider));
                 object variable = null;
                 bootstrapper.AddPipeline("Foo", new ExecuteConfig(Config.FromContext(x => variable = x.Settings[Keys.LinkHideIndexPages])));
 
                 // When
-                int exitCode = await bootstrapper.RunAsync();
+                BootstrapperTestResult result = await bootstrapper.RunTestAsync();
 
                 // Then
-                exitCode.ShouldBe((int)ExitCode.Normal);
+                result.ExitCode.ShouldBe((int)ExitCode.Normal);
                 variable.ShouldBe(true);
             }
 
@@ -190,16 +163,14 @@ namespace Statiq.App.Tests.Bootstrapper
                 // Given
                 string[] args = new string[] { "-s", $"{Keys.LinkHideIndexPages}=false" };
                 App.Bootstrapper bootstrapper = App.Bootstrapper.Factory.CreateDefault(args);
-                TestLoggerProvider provider = new TestLoggerProvider();
-                bootstrapper.ConfigureServices(services => services.AddSingleton<ILoggerProvider>(provider));
                 object variable = null;
                 bootstrapper.AddPipeline("Foo", new ExecuteConfig(Config.FromContext(x => variable = x.Settings[Keys.LinkHideIndexPages])));
 
                 // When
-                int exitCode = await bootstrapper.RunAsync();
+                BootstrapperTestResult result = await bootstrapper.RunTestAsync();
 
                 // Then
-                exitCode.ShouldBe((int)ExitCode.Normal);
+                result.ExitCode.ShouldBe((int)ExitCode.Normal);
                 variable.ShouldBe("false");
             }
         }
@@ -213,17 +184,15 @@ namespace Statiq.App.Tests.Bootstrapper
                 string[] args = new string[] { };
                 Environment.SetEnvironmentVariable(nameof(CanReadConfigurationValues), "Foo");
                 App.Bootstrapper bootstrapper = App.Bootstrapper.Factory.CreateDefault(args);
-                TestLoggerProvider provider = new TestLoggerProvider();
-                bootstrapper.ConfigureServices(services => services.AddSingleton<ILoggerProvider>(provider));
                 object variable = null;
                 bootstrapper.ConfigureSettings(x => variable = x[nameof(CanReadConfigurationValues)]);
                 bootstrapper.AddPipeline("Foo");
 
                 // When
-                int exitCode = await bootstrapper.RunAsync();
+                BootstrapperTestResult result = await bootstrapper.RunTestAsync();
 
                 // Then
-                exitCode.ShouldBe((int)ExitCode.Normal);
+                result.ExitCode.ShouldBe((int)ExitCode.Normal);
                 variable.ShouldBe("Foo");
             }
         }
