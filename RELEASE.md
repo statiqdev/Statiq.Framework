@@ -1,3 +1,5 @@
+# 1.0.0-beta.12
+
 # 1.0.0-beta.11
 
 - Fixed the `ProcessSidecarFile` module to pass the media type to child modules.
