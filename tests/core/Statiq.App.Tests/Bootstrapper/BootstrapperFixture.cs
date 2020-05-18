@@ -15,6 +15,7 @@ using Statiq.Testing;
 namespace Statiq.App.Tests.Bootstrapper
 {
     [TestFixture]
+    [NonParallelizable]
     public class BootstrapperFixture : BaseFixture
     {
         public class RunTests : BootstrapperFixture

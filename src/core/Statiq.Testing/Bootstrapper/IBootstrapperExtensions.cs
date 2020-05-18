@@ -10,6 +10,8 @@ namespace Statiq.Testing
     {
         /// <summary>
         /// Runs tests on the bootstrapper with the specified file system and reports the results.
+        /// It's advisable not to run bootstrapper tests in parallel (it'll work, but lock contention
+        /// will result in very slow tests).
         /// </summary>
         /// <param name="bootstrapper">The bootstrapper.</param>
         /// <param name="fileProvider">The file provider to use.</param>

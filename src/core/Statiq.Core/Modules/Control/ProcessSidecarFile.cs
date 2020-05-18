@@ -69,8 +69,8 @@ namespace Statiq.Core
                 IFile sidecarFile = context.FileSystem.GetInputFile(sidecarPath);
                 if (sidecarFile.Exists)
                 {
-                    string sidecarContent = await sidecarFile.ReadAllTextAsync();
-                    foreach (IDocument result in await context.ExecuteModulesAsync(Children, input.Clone(await context.GetContentProviderAsync(sidecarContent)).Yield()))
+                    IContentProvider sidecarContent = sidecarFile.GetContentProvider();
+                    foreach (IDocument result in await context.ExecuteModulesAsync(Children, input.Clone(sidecarContent).Yield()))
                     {
                         return input.Clone(result).Yield();
                     }

@@ -1,5 +1,6 @@
 # 1.0.0-beta.11
 
+- Fixed the `ProcessSidecarFile` module to pass the media type to child modules.
 - Added `IBootstrapper.RunTestAsync()` extensions to assist with testing entire bootstrappers.
 - Added `AsDependencyOf()` methods to `PipelineBuilder`.
 - Added a collection initializer to `TestFileProvider` to make adding test files easier.
