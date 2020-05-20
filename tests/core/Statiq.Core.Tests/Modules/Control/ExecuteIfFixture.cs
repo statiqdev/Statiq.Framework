@@ -385,6 +385,37 @@ namespace Statiq.Core.Tests.Modules.Control
             }
 
             [Test]
+            public async Task MetadataKeys()
+            {
+                // Given
+                TestDocument a = new TestDocument
+                {
+                    { "Name", "A" },
+                    { "A", "a" },
+                    { "B", "b" }
+                };
+                TestDocument b = new TestDocument
+                {
+                    { "Name", "B" },
+                    { "A", "a" }
+                };
+                SetMetadata set = new SetMetadata("C", "c");
+
+                // When
+                ImmutableArray<TestDocument> results = await ExecuteAsync(new TestDocument[] { a, b }, new ExecuteIf(new[] { "A", "B" }, set));
+
+                // Then
+                TestDocument resultA = results.Single(x => x.GetString("Name") == "A");
+                TestDocument resultB = results.Single(x => x.GetString("Name") == "B");
+                resultA["A"].ShouldBe("a");
+                resultA["B"].ShouldBe("b");
+                resultA["C"].ShouldBe("c");
+                resultB["A"].ShouldBe("a");
+                resultB.Keys.ShouldNotContain("B");
+                resultB.Keys.ShouldNotContain("C");
+            }
+
+            [Test]
             public async Task ExecutesWhenNoInputDocumentsForTrue()
             {
                 // Given

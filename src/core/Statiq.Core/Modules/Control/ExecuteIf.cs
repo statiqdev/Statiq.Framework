@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Statiq.Common;
 
@@ -54,7 +55,7 @@ namespace Statiq.Core
         /// <remarks>
         /// Only input documents will be processed and the modules will not be run if there are no input documents.
         /// </remarks>
-        /// <param name="key">A metadata key that must be present.</param>
+        /// <param name="key">A metadata key that must be present in the input document.</param>
         /// <param name="modules">The modules to execute on documents that contain the specified metadata key.</param>
         public ExecuteIf(string key, params IModule[] modules)
             : this(Config.FromDocument(doc => doc.ContainsKey(key)), modules)
@@ -67,10 +68,36 @@ namespace Statiq.Core
         /// <remarks>
         /// Only input documents will be processed and the modules will not be run if there are no input documents.
         /// </remarks>
-        /// <param name="key">A metadata key that must be present.</param>
+        /// <param name="key">A metadata key that must be present in the input document.</param>
         /// <param name="modules">The modules to execute on documents that contain the specified metadata key.</param>
         public ExecuteIf(string key, IEnumerable<IModule> modules)
             : this(Config.FromDocument(doc => doc.ContainsKey(key)), modules)
+        {
+        }
+
+        /// <summary>
+        /// Specifies child modules to be evaluated if a given metadata key is present in the input document.
+        /// </summary>
+        /// <remarks>
+        /// Only input documents will be processed and the modules will not be run if there are no input documents.
+        /// </remarks>
+        /// <param name="keys">Metadata keys that must be present in the input document.</param>
+        /// <param name="modules">The modules to execute on documents that contain the specified metadata key.</param>
+        public ExecuteIf(IEnumerable<string> keys, params IModule[] modules)
+            : this(Config.FromDocument(doc => keys.All(key => doc.ContainsKey(key))), modules)
+        {
+        }
+
+        /// <summary>
+        /// Specifies child modules to be evaluated if a given metadata key is present in the input document.
+        /// </summary>
+        /// <remarks>
+        /// Only input documents will be processed and the modules will not be run if there are no input documents.
+        /// </remarks>
+        /// <param name="keys">Metadata keys that must be present in the input document.</param>
+        /// <param name="modules">The modules to execute on documents that contain the specified metadata key.</param>
+        public ExecuteIf(IEnumerable<string> keys, IEnumerable<IModule> modules)
+            : this(Config.FromDocument(doc => keys.All(key => doc.ContainsKey(key))), modules)
         {
         }
 
