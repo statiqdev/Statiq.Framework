@@ -1,5 +1,6 @@
 # 1.0.0-beta.12
 
+- Added a `IReadOnlyDictionary<TKey, TValue>.ContainsKeys()` extension utility method.
 - Added multiple key test to the `ExecuteIf` module.
 
 # 1.0.0-beta.11

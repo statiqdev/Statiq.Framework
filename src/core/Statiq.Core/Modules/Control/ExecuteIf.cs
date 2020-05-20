@@ -84,7 +84,7 @@ namespace Statiq.Core
         /// <param name="keys">Metadata keys that must be present in the input document.</param>
         /// <param name="modules">The modules to execute on documents that contain the specified metadata key.</param>
         public ExecuteIf(IEnumerable<string> keys, params IModule[] modules)
-            : this(Config.FromDocument(doc => keys.All(key => doc.ContainsKey(key))), modules)
+            : this(Config.FromDocument(doc => doc.ContainsKeys(keys)), modules)
         {
         }
 
@@ -97,7 +97,7 @@ namespace Statiq.Core
         /// <param name="keys">Metadata keys that must be present in the input document.</param>
         /// <param name="modules">The modules to execute on documents that contain the specified metadata key.</param>
         public ExecuteIf(IEnumerable<string> keys, IEnumerable<IModule> modules)
-            : this(Config.FromDocument(doc => keys.All(key => doc.ContainsKey(key))), modules)
+            : this(Config.FromDocument(doc => doc.ContainsKeys(keys)), modules)
         {
         }
 
