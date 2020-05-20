@@ -1,5 +1,7 @@
 # 1.0.0-beta.12
 
+- Added document flattening by default when using the `DocumentFileProvider`.
+- Added document flattening by default when using `IEnumerable<TDocument>.FilterSources()` and `IEnumerable<TDocument>.FilterDestinations()` extensions.
 - Added a `IReadOnlyDictionary<TKey, TValue>.ContainsKeys()` extension utility method.
 - Added multiple key test to the `ExecuteIf` module.
 

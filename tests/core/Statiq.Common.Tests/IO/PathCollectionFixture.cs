@@ -4,6 +4,7 @@ using Statiq.Testing;
 
 namespace Statiq.Common.Tests.IO
 {
+    [TestFixture]
     public class PathCollectionFixture : BaseFixture
     {
         private readonly NormalizedPath _upperCaseA;

@@ -122,8 +122,8 @@ namespace Statiq.Common
         /// documents will be returned (I.e., if a document exists as a
         /// child of more than one parent, it will only appear once in the result set).
         /// </remarks>
-        /// <param name="documents">The documents.</param>
-        /// <param name="childrenKey">The metadata key that contains the children or <c>null</c> to flatten all documents.</param>
+        /// <param name="documents">The documents to flatten.</param>
+        /// <param name="childrenKey">The metadata key that contains the children or <c>null</c> to flatten documents in all metadata keys.</param>
         /// <returns>The flattened documents.</returns>
         public static DocumentList<IDocument> Flatten(this IEnumerable<IDocument> documents, string childrenKey = Keys.Children)
         {

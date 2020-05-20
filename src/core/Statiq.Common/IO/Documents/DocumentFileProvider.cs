@@ -14,16 +14,28 @@ namespace Statiq.Common
         /// <summary>
         /// Creates a file provider for a sequence of documents.
         /// </summary>
+        /// <remarks>
+        /// This constructor does not flatten the documents. Only the top-level sequence
+        /// (usually the parent-most documents) will be part of the file provider.
+        /// </remarks>
         /// <param name="documents">The documents to provide virtual directories and files for.</param>
         /// <param name="source">
         /// <c>true</c> to use <see cref="IDocument.Source"/> as the basis for paths,
         /// <c>false</c> to use <see cref="IDocument.Destination"/>.
         /// </param>
-        public DocumentFileProvider(IEnumerable<IDocument> documents, bool source)
+        /// <param name="flatten">
+        /// <c>true</c> to flatten the documents, <c>false</c> otherwise.
+        /// If <c>false</c> only the top-level sequence (usually the parent-most documents) will be part of the file provider.
+        /// </param>
+        /// <param name="childrenKey">
+        /// The metadata key that contains the children or <c>null</c> to flatten documents in all metadata keys.
+        /// This parameter has no effect if <paramref name="flatten"/> is <c>false</c>.
+        /// </param>
+        public DocumentFileProvider(IEnumerable<IDocument> documents, bool source, bool flatten = true, string childrenKey = Keys.Children)
         {
             if (documents != null)
             {
-                foreach (IDocument document in documents)
+                foreach (IDocument document in flatten ? documents.Flatten(childrenKey) : documents)
                 {
                     NormalizedPath path = source ? document.Source : NormalizedPath.AbsoluteRoot.Combine(document.Destination);
                     if (!path.IsNull)

@@ -71,11 +71,12 @@ namespace Statiq.Common
         /// Filters the documents by source.
         /// </summary>
         /// <remarks>
-        /// This module filters documents using "or" logic. If you want to also apply
-        /// "and" conditions, chain additional calls.
+        /// This filters documents using "or" logic. If you want to also apply
+        /// "and" conditions, chain additional calls. This also flattens the
+        /// documents using <see cref="Keys.Children"/> before filtering.
         /// </remarks>
         /// <typeparam name="TDocument">The document type.</typeparam>
-        /// <param name="documents">The documents.</param>
+        /// <param name="documents">The documents to filter.</param>
         /// <param name="patterns">The globbing pattern(s) to match.</param>
         /// <returns>The documents that match the globbing pattern(s).</returns>
         public static DocumentList<TDocument> FilterSources<TDocument>(this IEnumerable<TDocument> documents, params string[] patterns)
@@ -90,16 +91,28 @@ namespace Statiq.Common
         /// "and" conditions, chain additional calls.
         /// </remarks>
         /// <typeparam name="TDocument">The document type.</typeparam>
-        /// <param name="documents">The documents.</param>
+        /// <param name="documents">The documents to filter.</param>
         /// <param name="patterns">The globbing pattern(s) to match.</param>
+        /// <param name="flatten">
+        /// <c>true</c> to flatten the documents, <c>false</c> otherwise.
+        /// If <c>false</c> only the top-level sequence (usually the parent-most documents) will be filtered.
+        /// </param>
+        /// <param name="childrenKey">
+        /// The metadata key that contains the children or <c>null</c> to flatten documents in all metadata keys.
+        /// This parameter has no effect if <paramref name="flatten"/> is <c>false</c>.
+        /// </param>
         /// <returns>The documents that match the globbing pattern(s).</returns>
-        public static DocumentList<TDocument> FilterSources<TDocument>(this IEnumerable<TDocument> documents, IEnumerable<string> patterns)
+        public static DocumentList<TDocument> FilterSources<TDocument>(
+            this IEnumerable<TDocument> documents,
+            IEnumerable<string> patterns,
+            bool flatten = true,
+            string childrenKey = Keys.Children)
             where TDocument : IDocument
         {
             _ = documents ?? throw new ArgumentNullException(nameof(documents));
             _ = patterns ?? throw new ArgumentNullException(nameof(patterns));
 
-            DocumentFileProvider fileProvider = new DocumentFileProvider((IEnumerable<IDocument>)documents, true);
+            DocumentFileProvider fileProvider = new DocumentFileProvider((IEnumerable<IDocument>)documents, true, flatten, childrenKey);
             IEnumerable<IDirectory> directories = IExecutionContext.Current.FileSystem
                 .GetInputDirectories()
                 .Select(x => fileProvider.GetDirectory(x.Path));
@@ -112,10 +125,11 @@ namespace Statiq.Common
         /// </summary>
         /// <remarks>
         /// This module filters documents using "or" logic. If you want to also apply
-        /// "and" conditions, chain additional calls.
+        /// "and" conditions, chain additional calls. This also flattens the
+        /// documents using <see cref="Keys.Children"/> before filtering.
         /// </remarks>
         /// <typeparam name="TDocument">The document type.</typeparam>
-        /// <param name="documents">The documents.</param>
+        /// <param name="documents">The documents to filter.</param>
         /// <param name="patterns">The globbing pattern(s) to match.</param>
         /// <returns>The documents that match the globbing pattern(s).</returns>
         public static DocumentList<TDocument> FilterDestinations<TDocument>(this IEnumerable<TDocument> documents, params string[] patterns)
@@ -130,31 +144,51 @@ namespace Statiq.Common
         /// "and" conditions, chain additional calls.
         /// </remarks>
         /// <typeparam name="TDocument">The document type.</typeparam>
-        /// <param name="documents">The documents.</param>
+        /// <param name="documents">The documents to filter.</param>
         /// <param name="patterns">The globbing pattern(s) to match.</param>
+        /// <param name="flatten">
+        /// <c>true</c> to flatten the documents, <c>false</c> otherwise.
+        /// If <c>false</c> only the top-level sequence (usually the parent-most documents) will be filtered.
+        /// </param>
+        /// <param name="childrenKey">
+        /// The metadata key that contains the children or <c>null</c> to flatten documents in all metadata keys.
+        /// This parameter has no effect if <paramref name="flatten"/> is <c>false</c>.
+        /// </param>
         /// <returns>The documents that match the globbing pattern(s).</returns>
-        public static DocumentList<TDocument> FilterDestinations<TDocument>(this IEnumerable<TDocument> documents, IEnumerable<string> patterns)
+        public static DocumentList<TDocument> FilterDestinations<TDocument>(
+            this IEnumerable<TDocument> documents,
+            IEnumerable<string> patterns,
+            bool flatten = true,
+            string childrenKey = Keys.Children)
             where TDocument : IDocument
         {
             _ = documents ?? throw new ArgumentNullException(nameof(documents));
             _ = patterns ?? throw new ArgumentNullException(nameof(patterns));
 
-            DocumentFileProvider fileProvider = new DocumentFileProvider((IEnumerable<IDocument>)documents, false);
+            DocumentFileProvider fileProvider = new DocumentFileProvider((IEnumerable<IDocument>)documents, false, flatten, childrenKey);
             IEnumerable<IFile> matches = Globber.GetFiles(fileProvider.GetDirectory("/"), patterns);
             return matches.Select(x => x.Path).Distinct().Select(match => fileProvider.GetDocument(match)).Cast<TDocument>().ToDocumentList();
         }
 
-        public static TDocument FirstOrDefaultSource<TDocument>(this IEnumerable<TDocument> documents, IEnumerable<string> patterns)
+        public static TDocument FirstOrDefaultSource<TDocument>(
+            this IEnumerable<TDocument> documents,
+            IEnumerable<string> patterns,
+            bool flatten = true,
+            string childrenKey = Keys.Children)
             where TDocument : IDocument =>
-            documents.FilterSources(patterns).FirstOrDefault();
+            documents.FilterSources(patterns, flatten, childrenKey).FirstOrDefault();
 
         public static TDocument FirstOrDefaultSource<TDocument>(this IEnumerable<TDocument> documents, params string[] patterns)
             where TDocument : IDocument =>
             documents.FirstOrDefaultSource((IEnumerable<string>)patterns);
 
-        public static TDocument FirstOrDefaultDestination<TDocument>(this IEnumerable<TDocument> documents, IEnumerable<string> patterns)
+        public static TDocument FirstOrDefaultDestination<TDocument>(
+            this IEnumerable<TDocument> documents,
+            IEnumerable<string> patterns,
+            bool flatten = true,
+            string childrenKey = Keys.Children)
             where TDocument : IDocument =>
-            documents.FilterDestinations(patterns).FirstOrDefault();
+            documents.FilterDestinations(patterns, flatten, childrenKey).FirstOrDefault();
 
         public static TDocument FirstOrDefaultDestination<TDocument>(this IEnumerable<TDocument> documents, params string[] patterns)
             where TDocument : IDocument =>
