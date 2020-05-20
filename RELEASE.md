@@ -1,3 +1,5 @@
+# 1.0.0-beta.13
+
 # 1.0.0-beta.12
 
 - Added document flattening by default when using the `DocumentFileProvider`.
