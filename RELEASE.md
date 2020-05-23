@@ -1,5 +1,8 @@
 # 1.0.0-beta.13
 
+- Fixed a bug with case-insensitive settings from the command line.
+- Fixed a bug with computed metadata settings from the command line.
+
 # 1.0.0-beta.12
 
 - Added document flattening by default when using the `DocumentFileProvider`.

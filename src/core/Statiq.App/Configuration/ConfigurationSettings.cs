@@ -14,7 +14,7 @@ namespace Statiq.App
         {
         }
 
-        public IDictionary<string, object> Dictionary { get; } = new Dictionary<string, object>();
+        public IDictionary<string, object> Dictionary { get; } = new Dictionary<string, object>(StringComparer.OrdinalIgnoreCase);
 
         public override bool ContainsKey(string key)
         {

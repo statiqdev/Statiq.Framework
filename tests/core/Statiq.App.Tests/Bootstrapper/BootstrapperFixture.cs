@@ -101,6 +101,41 @@ namespace Statiq.App.Tests.Bootstrapper
                 bootstrapper.ClassCatalog.GetTypesAssignableTo<BootstrapperFixture>().Count().ShouldBe(1);
                 result.LogMessages.ShouldContain(x => x.FormattedMessage.StartsWith("Cataloging types in assembly"));
             }
+
+            [Test]
+            public async Task AddsComputedMetadataFromCommandLine()
+            {
+                // Given
+                string[] args = new[] { "--setting", "\"Foo = => 1 + 1\"" };
+                App.Bootstrapper bootstrapper = App.Bootstrapper.Factory.CreateDefault(args);
+                object value = null;
+                bootstrapper.AddPipeline(
+                    "Test",
+                    new ExecuteConfig(Config.FromSettings(x => value = x["Foo"])));
+
+                // When
+                BootstrapperTestResult result = await bootstrapper.RunTestAsync();
+
+                // Then
+                result.ExitCode.ShouldBe((int)ExitCode.Normal);
+                value.ShouldBe(2);
+            }
+
+            [Test]
+            public async Task CommandLineSettingsAreCaseInsensitive()
+            {
+                // Given
+                string[] args = new[] { "--setting", "foo=bar" };
+                App.Bootstrapper bootstrapper = App.Bootstrapper.Factory.CreateDefault(args);
+                bootstrapper.AddPipeline("Test");
+
+                // When
+                BootstrapperTestResult result = await bootstrapper.RunTestAsync();
+
+                // Then
+                result.ExitCode.ShouldBe((int)ExitCode.Normal);
+                result.Engine.Settings["Foo"].ShouldBe("bar");
+            }
         }
 
         public class CreateDefaultTests : BootstrapperFixture

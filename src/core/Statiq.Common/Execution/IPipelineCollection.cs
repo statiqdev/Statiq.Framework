@@ -12,7 +12,9 @@ namespace Statiq.Common
 
         IEnumerable<KeyValuePair<string, IPipeline>> AsEnumerable() => this;
 
-        // Avoids ambiguities between IReadOnlyPipelineCollection and IDictionary<string, IPipeline>
+        // Avoids ambiguities between multiple interfaces
+
+        new int Count { get; }
 
         new IEnumerator<KeyValuePair<string, IPipeline>> GetEnumerator();
 

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using Microsoft.Extensions.Configuration;
 using Statiq.Common;
 
@@ -19,6 +20,17 @@ namespace Statiq.Core
             _ = executionState ?? throw new ArgumentNullException(nameof(executionState));
 
             _valueOverrides = valueOverrides ?? new Dictionary<string, object>();
+
+            // Iterate over value overrides to convert any of them that are script metadata
+            foreach (KeyValuePair<string, object> item in _valueOverrides.ToArray())
+            {
+                if (ScriptMetadataValue.TryGetScriptMetadataValue(item.Key, item.Value, executionState, out ScriptMetadataValue metadataValue))
+                {
+                    _valueOverrides[item.Key] = metadataValue;
+                }
+            }
+
+            // Iterate over configuration and convert them, but only if we don't already have an override for that key
             foreach (KeyValuePair<string, string> item in configuration.AsEnumerable())
             {
                 if (!_valueOverrides.ContainsKey(item.Key)

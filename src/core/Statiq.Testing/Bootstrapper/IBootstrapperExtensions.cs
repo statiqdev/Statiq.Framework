@@ -47,6 +47,8 @@ namespace Statiq.Testing
             bootstrapper.ConfigureEngine(engine =>
             {
                 results.Engine = engine;
+
+                // Instrument every pipeline to track inputs and outputs
                 foreach (IPipeline pipeline in engine.Pipelines.Values)
                 {
                     pipeline.InputModules?.Insert(0, phaseInputs);
@@ -58,6 +60,8 @@ namespace Statiq.Testing
                     pipeline.OutputModules?.Insert(0, phaseInputs);
                     pipeline.OutputModules?.Add(phaseOutputs);
                 }
+
+                // Add the file provider
                 if (fileProvider != null)
                 {
                     engine.FileSystem.RootPath = "/";
