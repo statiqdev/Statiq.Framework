@@ -21,6 +21,11 @@ namespace Statiq.Common
         new IEventCollection Events { get; }
 
         /// <summary>
+        /// Gets the configuration and settings.
+        /// </summary>
+        new IConfigurationSettings Settings { get; }
+
+        /// <summary>
         /// Gets the file system.
         /// </summary>
         new IFileSystem FileSystem { get; }

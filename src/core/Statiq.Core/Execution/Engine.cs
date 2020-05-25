@@ -94,7 +94,10 @@ namespace Statiq.Core
         /// <param name="applicationState">The state of the application (or <c>null</c> for an empty application state).</param>
         /// <param name="serviceCollection">The service collection (or <c>null</c> for an empty default service collection).</param>
         /// <param name="configuration">The application configuration.</param>
-        public Engine(ApplicationState applicationState, IServiceCollection serviceCollection, IConfiguration configuration)
+        public Engine(
+            ApplicationState applicationState,
+            IServiceCollection serviceCollection,
+            IConfiguration configuration)
             : this(applicationState, serviceCollection, configuration, null, null)
         {
         }
@@ -104,10 +107,14 @@ namespace Statiq.Core
         /// </summary>
         /// <param name="applicationState">The state of the application (or <c>null</c> for an empty application state).</param>
         /// <param name="serviceCollection">The service collection (or <c>null</c> for an empty default service collection).</param>
-        /// <param name="configurationOverrides">Values that should override configuration values.</param>
+        /// <param name="settings">Values that should override configuration values.</param>
         /// <param name="configuration">The application configuration.</param>
-        public Engine(ApplicationState applicationState, IServiceCollection serviceCollection, IConfiguration configuration, IDictionary<string, object> configurationOverrides)
-            : this(applicationState, serviceCollection, configuration, configurationOverrides, null)
+        public Engine(
+            ApplicationState applicationState,
+            IServiceCollection serviceCollection,
+            IConfiguration configuration,
+            IEnumerable<KeyValuePair<string, object>> settings)
+            : this(applicationState, serviceCollection, configuration, settings, null)
         {
         }
 
@@ -117,19 +124,24 @@ namespace Statiq.Core
         /// <param name="applicationState">The state of the application (or <c>null</c> for an empty application state).</param>
         /// <param name="serviceCollection">The service collection (or <c>null</c> for an empty default service collection).</param>
         /// <param name="configuration">The application configuration.</param>
-        /// <param name="configurationOverrides">Values that should override configuration values.</param>
+        /// <param name="settings">Settings that should override configuration values.</param>
         /// <param name="classCatalog">A class catalog of all assemblies in scope.</param>
-        public Engine(ApplicationState applicationState, IServiceCollection serviceCollection, IConfiguration configuration, IDictionary<string, object> configurationOverrides, ClassCatalog classCatalog)
+        public Engine(
+            ApplicationState applicationState,
+            IServiceCollection serviceCollection,
+            IConfiguration configuration,
+            IEnumerable<KeyValuePair<string, object>> settings,
+            ClassCatalog classCatalog)
         {
             _pipelines = new PipelineCollection(this);
             ApplicationState = applicationState ?? new ApplicationState(null, null, null);
             ClassCatalog = classCatalog ?? new ClassCatalog();
             ClassCatalog.Populate();
             ScriptHelper = new ScriptHelper(this);
-            Settings = new ReadOnlyConfigurationSettings(
+            Settings = new ConfigurationSettings(
                 this,
                 configuration ?? new ConfigurationRoot(Array.Empty<IConfigurationProvider>()),
-                configurationOverrides);
+                settings);
             _serviceScope = GetServiceScope(serviceCollection);
             _logger = Services.GetRequiredService<ILogger<Engine>>();
             DocumentFactory = new DocumentFactory(this, Settings);
@@ -202,7 +214,10 @@ namespace Statiq.Core
         public ClassCatalog ClassCatalog { get; }
 
         /// <inheritdoc />
-        public IReadOnlyConfigurationSettings Settings { get; }
+        public IConfigurationSettings Settings { get; }
+
+        /// <inheritdoc />
+        IReadOnlyConfigurationSettings IExecutionState.Settings => Settings;
 
         /// <inheritdoc />
         public IEventCollection Events { get; } = new EventCollection();

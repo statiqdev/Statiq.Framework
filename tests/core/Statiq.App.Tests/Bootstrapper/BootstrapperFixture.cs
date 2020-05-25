@@ -209,6 +209,23 @@ namespace Statiq.App.Tests.Bootstrapper
                 result.ExitCode.ShouldBe((int)ExitCode.Normal);
                 variable.ShouldBe("false");
             }
+
+            [Test]
+            public async Task SetsFlagFromCommandLine()
+            {
+                // Given
+                string[] args = new string[] { "--noclean" };
+                App.Bootstrapper bootstrapper = App.Bootstrapper.Factory.CreateDefault(args);
+                object value = null;
+                bootstrapper.AddPipeline("Foo", new ExecuteConfig(Config.FromContext(x => value = x.Settings[Keys.CleanOutputPath])));
+
+                // When
+                BootstrapperTestResult result = await bootstrapper.RunTestAsync();
+
+                // Then
+                result.ExitCode.ShouldBe((int)ExitCode.Normal);
+                value.ShouldBe(false);
+            }
         }
 
         public class ConfigureSettingsTests : BootstrapperFixture

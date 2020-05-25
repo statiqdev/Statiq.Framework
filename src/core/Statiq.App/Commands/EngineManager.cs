@@ -41,14 +41,19 @@ namespace Statiq.App
             ApplicationState applicationState = new ApplicationState(bootstrapper.Arguments, commandContext.Name, input);
 
             // Create the engine and get a logger
-            IDictionary<string, object> configurationOverrides = (configurationSettings as ConfigurationSettings)?.Dictionary;
-            Engine = new Engine(applicationState, serviceCollection, configurationSettings.Configuration, configurationOverrides, bootstrapper.ClassCatalog);
+            // The configuration settings should not be used after this point
+            ConfigurationSettings configurationSettingsImpl = configurationSettings as ConfigurationSettings;
+            IDictionary<string, object> settings = configurationSettingsImpl?.Settings;
+            Engine = new Engine(applicationState, serviceCollection, configurationSettings.Configuration, settings, bootstrapper.ClassCatalog);
+            configurationSettingsImpl?.Dispose();
+
+            // Get the logger from the engine and store it for use during execute
             _logger = Engine.Services.GetRequiredService<ILogger<Bootstrapper>>();
 
             // Apply command settings
             if (commandSettings != null)
             {
-                ApplyCommandSettings(Engine, configurationSettings, commandSettings);
+                ApplyCommandSettings(Engine, commandSettings);
             }
 
             // Run engine configurators after command line, settings, etc. have been applied
@@ -86,7 +91,7 @@ namespace Statiq.App
 
         public void Dispose() => Engine.Dispose();
 
-        private static void ApplyCommandSettings(Engine engine, IConfigurationSettings configurationSettings, EngineCommandSettings commandSettings)
+        private static void ApplyCommandSettings(Engine engine, EngineCommandSettings commandSettings)
         {
             // Set folders
             NormalizedPath currentDirectory = Environment.CurrentDirectory;
@@ -106,13 +111,13 @@ namespace Statiq.App
             }
             if (commandSettings.NoClean)
             {
-                configurationSettings[Keys.CleanOutputPath] = false;
+                engine.Settings[Keys.CleanOutputPath] = false;
             }
 
             // Set no cache if requested
             if (commandSettings.NoCache)
             {
-                configurationSettings[Keys.UseCache] = false;
+                engine.Settings[Keys.UseCache] = false;
             }
 
             // Set serial mode

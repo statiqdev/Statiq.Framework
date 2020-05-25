@@ -15,9 +15,9 @@ using Statiq.Testing;
 namespace Statiq.Core.Tests.Execution
 {
     [TestFixture]
-    public class ReadOnlyConfigurationSettingsFixture : BaseFixture
+    public class ConfigurationSettingsFixture : BaseFixture
     {
-        public class TryGetValueTests : ReadOnlyConfigurationSettingsFixture
+        public class TryGetValueTests : ConfigurationSettingsFixture
         {
             [Test]
             public void GetsNormalValue()
@@ -29,7 +29,7 @@ namespace Statiq.Core.Tests.Execution
 }");
                 TestExecutionContext context = new TestExecutionContext();
                 context.ScriptHelper = new ScriptHelper(context);
-                ReadOnlyConfigurationSettings settings = new ReadOnlyConfigurationSettings(context, configuration, null);
+                ConfigurationSettings settings = new ConfigurationSettings(context, configuration, null);
 
                 // When
                 bool result = settings.TryGetValue("foo", out object value);
@@ -53,7 +53,7 @@ namespace Statiq.Core.Tests.Execution
                 {
                     { "foo", 123 }
                 };
-                ReadOnlyConfigurationSettings settings = new ReadOnlyConfigurationSettings(context, configuration, overrides);
+                ConfigurationSettings settings = new ConfigurationSettings(context, configuration, overrides);
 
                 // When
                 bool result = settings.TryGetValue("foo", out object value);
@@ -73,7 +73,7 @@ namespace Statiq.Core.Tests.Execution
 }");
                 TestExecutionContext context = new TestExecutionContext();
                 context.ScriptHelper = new ScriptHelper(context);
-                ReadOnlyConfigurationSettings settings = new ReadOnlyConfigurationSettings(context, configuration, null);
+                ConfigurationSettings settings = new ConfigurationSettings(context, configuration, null);
 
                 // When
                 bool result = settings.TryGetValue("foo", out object value);
@@ -93,7 +93,7 @@ namespace Statiq.Core.Tests.Execution
 }");
                 TestExecutionContext context = new TestExecutionContext();
                 context.ScriptHelper = new ScriptHelper(context);
-                ReadOnlyConfigurationSettings settings = new ReadOnlyConfigurationSettings(context, configuration, null);
+                ConfigurationSettings settings = new ConfigurationSettings(context, configuration, null);
 
                 // When
                 bool result = settings.TryGetValue("foo", out object value);
@@ -113,7 +113,7 @@ namespace Statiq.Core.Tests.Execution
 }");
                 TestExecutionContext context = new TestExecutionContext();
                 context.ScriptHelper = new ScriptHelper(context);
-                ReadOnlyConfigurationSettings settings = new ReadOnlyConfigurationSettings(context, configuration, null);
+                ConfigurationSettings settings = new ConfigurationSettings(context, configuration, null);
 
                 // When
                 bool result = settings.TryGetValue("foo", out object value);
@@ -133,7 +133,7 @@ namespace Statiq.Core.Tests.Execution
 }");
                 TestExecutionContext context = new TestExecutionContext();
                 context.ScriptHelper = new ScriptHelper(context);
-                ReadOnlyConfigurationSettings settings = new ReadOnlyConfigurationSettings(context, configuration, null);
+                ConfigurationSettings settings = new ConfigurationSettings(context, configuration, null);
 
                 // When
                 bool result = settings.TryGetValue("foo", out object value);
@@ -153,7 +153,7 @@ namespace Statiq.Core.Tests.Execution
 }");
                 TestExecutionContext context = new TestExecutionContext();
                 context.ScriptHelper = new ScriptHelper(context);
-                ReadOnlyConfigurationSettings settings = new ReadOnlyConfigurationSettings(context, configuration, null);
+                ConfigurationSettings settings = new ConfigurationSettings(context, configuration, null);
 
                 // When
                 bool result = settings.TryGetValue("foo", out object value);
@@ -175,7 +175,7 @@ namespace Statiq.Core.Tests.Execution
 }");
                 TestExecutionContext context = new TestExecutionContext();
                 context.ScriptHelper = new ScriptHelper(context);
-                ReadOnlyConfigurationSettings settings = new ReadOnlyConfigurationSettings(context, configuration, null);
+                ConfigurationSettings settings = new ConfigurationSettings(context, configuration, null);
 
                 // When
                 bool result = settings.TryGetValue("section0:foo", out object value);
@@ -197,7 +197,7 @@ namespace Statiq.Core.Tests.Execution
 }");
                 TestExecutionContext context = new TestExecutionContext();
                 context.ScriptHelper = new ScriptHelper(context);
-                ReadOnlyConfigurationSettings settings = new ReadOnlyConfigurationSettings(context, configuration, null);
+                ConfigurationSettings settings = new ConfigurationSettings(context, configuration, null);
 
                 // When
                 bool sectionResult = settings.TryGetValue<IMetadata>("section0", out IMetadata section);
@@ -205,7 +205,7 @@ namespace Statiq.Core.Tests.Execution
 
                 // Then
                 sectionResult.ShouldBeTrue();
-                section.ShouldBeOfType<ReadOnlyConfigurationSettings>();
+                section.ShouldBeOfType<ConfigurationSettings>();
                 result.ShouldBeTrue();
                 value.ShouldBe("ABC 3 XYZ");
             }
@@ -221,13 +221,79 @@ namespace Statiq.Core.Tests.Execution
 }");
                 TestExecutionContext context = new TestExecutionContext();
                 context.ScriptHelper = new ScriptHelper(context);
-                ReadOnlyConfigurationSettings settings = new ReadOnlyConfigurationSettings(context, configuration, null);
+                ConfigurationSettings settings = new ConfigurationSettings(context, configuration, null);
 
                 // When
                 bool result = settings.TryGetValue("foo", out object value);
 
                 // Then
                 result.ShouldBeTrue();
+                value.ShouldBe("ABC 3 XYZ");
+            }
+        }
+
+        public class ConstructorTests : ConfigurationSettingsFixture
+        {
+            [Test]
+            public void SettingsOverrideConfiguration()
+            {
+                // Given
+                IConfiguration configuration = GetConfiguration(@"
+{
+  ""foo"": ""fizz""
+}");
+                IDictionary<string, object> settings = new Dictionary<string, object>
+                {
+                    { "Foo", "Buzz" }
+                };
+                TestExecutionContext context = new TestExecutionContext();
+                context.ScriptHelper = new ScriptHelper(context);
+
+                // When
+                ConfigurationSettings configurationSettings = new ConfigurationSettings(context, configuration, settings);
+
+                // Then
+                configurationSettings.TryGetValue("foo", out object value).ShouldBeTrue();
+                value.ShouldBe("Buzz");
+            }
+
+            [Test]
+            public void EvaluatesSettingExpressionInCtor()
+            {
+                // Given
+                IDictionary<string, object> settings = new Dictionary<string, object>
+                {
+                    { "Foo", @"=> $""ABC {1+2} XYZ""" }
+                };
+                IConfiguration configuration = new ConfigurationRoot(Array.Empty<IConfigurationProvider>());
+                TestExecutionContext context = new TestExecutionContext();
+                context.ScriptHelper = new ScriptHelper(context);
+
+                // When
+                ConfigurationSettings configurationSettings = new ConfigurationSettings(context, configuration, settings);
+
+                // Then
+                configurationSettings.TryGetValue("foo", out object value).ShouldBeTrue();
+                value.ShouldBe("ABC 3 XYZ");
+            }
+        }
+
+        public class IndexerTests : ConfigurationSettingsFixture
+        {
+            [Test]
+            public void EvaluatesLateAddedSettingExpression()
+            {
+                // Given
+                IConfiguration configuration = new ConfigurationRoot(Array.Empty<IConfigurationProvider>());
+                TestExecutionContext context = new TestExecutionContext();
+                context.ScriptHelper = new ScriptHelper(context);
+                ConfigurationSettings configurationSettings = new ConfigurationSettings(context, configuration, null);
+
+                // When
+                configurationSettings.Add("Foo", @"=> $""ABC {1+2} XYZ""");
+
+                // Then
+                configurationSettings.TryGetValue("foo", out object value).ShouldBeTrue();
                 value.ShouldBe("ABC 3 XYZ");
             }
         }

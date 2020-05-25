@@ -56,7 +56,7 @@ namespace Statiq.Common
         }
 
         /// <inheritdoc/>
-        // Enumerate the keys seperatly so we don't evaluate values
+        // Enumerate the keys separately so we don't evaluate values
         public virtual IEnumerable<string> Keys => Configuration.AsEnumerable().Select(x => x.Key);
 
         /// <inheritdoc/>

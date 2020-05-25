@@ -7,25 +7,55 @@ using Statiq.Common;
 
 namespace Statiq.App
 {
-    internal class ConfigurationSettings : ConfigurationMetadata, IConfigurationSettings
+    /// <summary>
+    /// Contains a <see cref="IConfigurationRoot" /> with a dictionary of settings
+    /// that override the configuration values. Used by the <see cref="Bootstrapper" />
+    /// to add settings on top of configuration and passed to the
+    /// <see cref="Statiq.Core.Engine" /> as it's initial settings.
+    /// </summary>
+    /// <remarks>
+    /// This will be disposed after passing to the engine as a sanity check, it shouldn't
+    /// be used after that.
+    /// </remarks>
+    internal class ConfigurationSettings : ConfigurationMetadata, IConfigurationSettings, IDisposable
     {
+        private bool _disposed;
+
         public ConfigurationSettings(IConfigurationRoot configuration)
             : base(configuration)
         {
         }
 
-        public IDictionary<string, object> Dictionary { get; } = new Dictionary<string, object>(StringComparer.OrdinalIgnoreCase);
+        public IDictionary<string, object> Settings { get; private set; } =
+            new Dictionary<string, object>(StringComparer.OrdinalIgnoreCase);
+
+        public void Dispose()
+        {
+            _disposed = true;
+            Settings = null;
+            Configuration = null;
+        }
+
+        private void CheckDisposed()
+        {
+            if (_disposed)
+            {
+                throw new ObjectDisposedException(nameof(ConfigurationSettings));
+            }
+        }
 
         public override bool ContainsKey(string key)
         {
+            CheckDisposed();
             _ = key ?? throw new ArgumentNullException(nameof(key));
-            return Dictionary.ContainsKey(key) || base.ContainsKey(key);
+            return Settings.ContainsKey(key) || base.ContainsKey(key);
         }
 
         public override bool TryGetRaw(string key, out object value)
         {
+            CheckDisposed();
             _ = key ?? throw new ArgumentNullException(nameof(key));
-            return Dictionary.TryGetValue(key, out value) || base.TryGetRaw(key, out value);
+            return Settings.TryGetValue(key, out value) || base.TryGetRaw(key, out value);
         }
 
         // Enumerate the keys separately so we don't evaluate values
@@ -33,13 +63,14 @@ namespace Statiq.App
         {
             get
             {
-                foreach (string key in Dictionary.Keys)
+                CheckDisposed();
+                foreach (string key in Settings.Keys)
                 {
                     yield return key;
                 }
                 foreach (string previousKey in base.Keys)
                 {
-                    if (!Dictionary.ContainsKey(previousKey))
+                    if (!Settings.ContainsKey(previousKey))
                     {
                         yield return previousKey;
                     }
@@ -49,14 +80,15 @@ namespace Statiq.App
 
         public override IEnumerator<KeyValuePair<string, object>> GetEnumerator()
         {
-            foreach (KeyValuePair<string, object> item in Dictionary)
+            CheckDisposed();
+            foreach (KeyValuePair<string, object> item in Settings)
             {
                 yield return TypeHelper.ExpandKeyValuePair(item, this);
             }
             IEnumerator<KeyValuePair<string, object>> baseEnumerator = base.GetEnumerator();
             while (baseEnumerator.MoveNext())
             {
-                if (!Dictionary.ContainsKey(baseEnumerator.Current.Key))
+                if (!Settings.ContainsKey(baseEnumerator.Current.Key))
                 {
                     yield return baseEnumerator.Current;
                 }
@@ -65,14 +97,15 @@ namespace Statiq.App
 
         public override IEnumerator<KeyValuePair<string, object>> GetRawEnumerator()
         {
-            foreach (KeyValuePair<string, object> item in Dictionary)
+            CheckDisposed();
+            foreach (KeyValuePair<string, object> item in Settings)
             {
                 yield return item;
             }
             IEnumerator<KeyValuePair<string, object>> baseEnumerator = base.GetEnumerator();
             while (baseEnumerator.MoveNext())
             {
-                if (!Dictionary.ContainsKey(baseEnumerator.Current.Key))
+                if (!Settings.ContainsKey(baseEnumerator.Current.Key))
                 {
                     yield return baseEnumerator.Current;
                 }
@@ -81,8 +114,17 @@ namespace Statiq.App
 
         object IDictionary<string, object>.this[string key]
         {
-            get => this[key];
-            set => Dictionary[key] = value;
+            get
+            {
+                CheckDisposed();
+                return this[key];
+            }
+
+            set
+            {
+                CheckDisposed();
+                Settings[key] = value;
+            }
         }
 
         public bool IsReadOnly => false;
@@ -97,13 +139,30 @@ namespace Statiq.App
 
         object IConfigurationSettings.this[string key]
         {
-            get => this[key];
-            set => Dictionary[key] = value;
+            get
+            {
+                CheckDisposed();
+                return this[key];
+            }
+
+            set
+            {
+                CheckDisposed();
+                Settings[key] = value;
+            }
         }
 
-        public void Add(string key, object value) => Dictionary[key] = value;
+        public void Add(string key, object value)
+        {
+            CheckDisposed();
+            Settings[key] = value;
+        }
 
-        public void Add(KeyValuePair<string, object> item) => Dictionary.Add(item);
+        public void Add(KeyValuePair<string, object> item)
+        {
+            CheckDisposed();
+            Settings.Add(item);
+        }
 
         // Not supported because the value of the item is raw vs. the expanded values presented by the dictionary
         public void CopyTo(KeyValuePair<string, object>[] array, int arrayIndex) => throw new NotSupportedException();

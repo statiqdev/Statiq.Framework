@@ -1,5 +1,6 @@
 # 1.0.0-beta.13
 
+- Changed `IEngine.Settings` to be mutable, settings can now be added directly to the engine after instantiation.
 - Fixed a bug with case-insensitive settings from the command line.
 - Fixed a bug with computed metadata settings from the command line.
 

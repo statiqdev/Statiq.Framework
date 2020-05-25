@@ -1,23 +1,15 @@
 ﻿using System;
-using System.Collections;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Collections.Immutable;
-using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Configuration.Memory;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Primitives;
 using Statiq.Common;
 
 namespace Statiq.Testing
 {
-    public class TestConfigurationSettings : ConfigurationMetadata, IConfigurationProvider, IConfigurationSource, IDictionary<string, string>, IReadOnlyConfigurationSettings
+    public class TestConfigurationSettings : ConfigurationMetadata, IConfigurationProvider, IConfigurationSource, IConfigurationSettings
     {
-        private readonly Dictionary<string, string> _settings = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+        private readonly Dictionary<string, object> _settings = new Dictionary<string, object>(StringComparer.OrdinalIgnoreCase);
 
         private ConfigurationReloadToken _reloadToken = new ConfigurationReloadToken();
 
@@ -32,7 +24,16 @@ namespace Statiq.Testing
 
         // IConfigurationProvider (implementations from ConfigurationProvider)
 
-        public bool TryGet(string key, out string value) => _settings.TryGetValue(key, out value);
+        public bool TryGet(string key, out string value)
+        {
+            if (_settings.TryGetValue(key, out object objValue))
+            {
+                value = objValue.ToString();
+                return true;
+            }
+            value = default;
+            return false;
+        }
 
         public void Set(string key, string value) => _settings[key] = value;
 
@@ -45,7 +46,10 @@ namespace Statiq.Testing
         public IEnumerable<string> GetChildKeys(IEnumerable<string> earlierKeys, string parentPath)
         {
             string prefix = (parentPath == null) ? string.Empty : (parentPath + ConfigurationPath.KeyDelimiter);
-            return _settings.Where((KeyValuePair<string, string> kv) => kv.Key.StartsWith(prefix, StringComparison.OrdinalIgnoreCase)).Select((KeyValuePair<string, string> kv) => Segment(kv.Key, prefix.Length)).Concat(earlierKeys)
+            return _settings
+                .Where((KeyValuePair<string, object> kv) => kv.Key.StartsWith(prefix, StringComparison.OrdinalIgnoreCase))
+                .Select((KeyValuePair<string, object> kv) => Segment(kv.Key, prefix.Length))
+                .Concat(earlierKeys)
                 .OrderBy((string k) => k, ConfigurationKeyComparer.Instance);
         }
 
@@ -59,36 +63,54 @@ namespace Statiq.Testing
             return key.Substring(prefixLength);
         }
 
-        // IConfigurationSource
+        public void Add(KeyValuePair<string, object> item) => Add(item.Key, item.Value);
+
+        public void Add(string key, object value)
+        {
+            _ = key ?? throw new ArgumentNullException(nameof(key));
+
+            if (ContainsKey(key))
+            {
+                throw new ArgumentException($"The key {key} already exists");
+            }
+            this[key] = value;
+        }
+
+        /// <inheritdoc/>
+        public new object this[string key]
+        {
+            get => base[key];
+            set
+            {
+                _ = key ?? throw new ArgumentNullException(nameof(key));
+                _settings[key] = value;
+            }
+        }
+
+        public override IEnumerable<string> Keys => _settings.Keys;
 
         public IConfigurationProvider Build(IConfigurationBuilder builder) => this;
 
-        // IDictionary
+        ICollection<string> IDictionary<string, object>.Keys => Keys.ToArray();
 
-        public new string this[string key] { get => _settings[key]; set => _settings[key] = value; }
+        ICollection<object> IDictionary<string, object>.Values => Values.ToArray();
 
-        public bool IsReadOnly => ((IDictionary<string, string>)_settings).IsReadOnly;
+        ICollection<string> IConfigurationSettings.Keys => Keys.ToArray();
 
-        ICollection<string> IDictionary<string, string>.Keys => ((IDictionary<string, string>)_settings).Keys;
+        ICollection<object> IConfigurationSettings.Values => Values.ToArray();
 
-        ICollection<string> IDictionary<string, string>.Values => ((IDictionary<string, string>)_settings).Values;
+        public bool IsReadOnly => false;
 
-        public void Add(string key, string value) => _settings.Add(key, value);
+        // Not supported because the value of the item is raw vs. the expanded values presented by the dictionary
+        public void CopyTo(KeyValuePair<string, object>[] array, int arrayIndex) => throw new NotSupportedException();
 
-        public void Add(KeyValuePair<string, string> item) => ((IDictionary<string, string>)_settings).Add(item);
+        // Not supported because the value of the item is raw vs. the expanded values presented by the dictionary
+        public bool Contains(KeyValuePair<string, object> item) => throw new NotSupportedException();
 
-        public void Clear() => _settings.Clear();
+        public void Clear() => throw new NotSupportedException();
 
-        public bool Contains(KeyValuePair<string, string> item) => ((IDictionary<string, string>)_settings).Contains(item);
+        public bool Remove(string key) => throw new NotSupportedException();
 
-        public void CopyTo(KeyValuePair<string, string>[] array, int arrayIndex) => ((IDictionary<string, string>)_settings).CopyTo(array, arrayIndex);
-
-        public bool Remove(string key) => _settings.Remove(key);
-
-        public bool Remove(KeyValuePair<string, string> item) => ((IDictionary<string, string>)_settings).Remove(item);
-
-        bool IDictionary<string, string>.TryGetValue(string key, out string value) => _settings.TryGetValue(key, out value);
-
-        IEnumerator<KeyValuePair<string, string>> IEnumerable<KeyValuePair<string, string>>.GetEnumerator() => ((IDictionary<string, string>)_settings).GetEnumerator();
+        public bool Remove(KeyValuePair<string, object> item) => throw new NotSupportedException();
     }
 }

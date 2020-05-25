@@ -52,6 +52,9 @@ namespace Statiq.Testing
         public TestConfigurationSettings Settings { get; set; } = new TestConfigurationSettings();
 
         /// <inheritdoc />
+        IConfigurationSettings IEngine.Settings => Settings;
+
+        /// <inheritdoc />
         IReadOnlyConfigurationSettings IExecutionState.Settings => Settings;
 
         /// <inheritdoc />
