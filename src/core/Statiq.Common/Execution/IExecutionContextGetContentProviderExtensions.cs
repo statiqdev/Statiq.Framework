@@ -1,5 +1,6 @@
-﻿using System;
+using System;
 using System.IO;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace Statiq.Common
@@ -24,6 +25,17 @@ namespace Statiq.Common
 
             return stream == null ? null : new StreamContent(executionContext.MemoryStreamFactory, stream, mediaType);
         }
+
+        public static IContentProvider GetContentProvider(
+            this IExecutionContext executionContext,
+            byte[] buffer) =>
+            executionContext.GetContentProvider(buffer, null);
+
+        public static IContentProvider GetContentProvider(
+            this IExecutionContext executionContext,
+            byte[] buffer,
+            string mediaType) =>
+            new MemoryContent(buffer, mediaType);
 
         public static Task<IContentProvider> GetContentProviderAsync(
             this IExecutionContext executionContext,
@@ -52,10 +64,8 @@ namespace Statiq.Common
             }
 
             // Otherwise get a memory stream from the pool and use that
-            return new StreamContent(
-                executionContext.MemoryStreamFactory,
-                executionContext.MemoryStreamFactory.GetStream(content),
-                mediaType);
+            byte[] contentBytes = Encoding.UTF8.GetBytes(content);
+            return new MemoryContent(contentBytes, mediaType);
         }
     }
 }
