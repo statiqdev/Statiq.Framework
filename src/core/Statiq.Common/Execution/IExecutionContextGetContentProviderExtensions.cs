@@ -17,13 +17,29 @@ namespace Statiq.Common
             Stream stream,
             string mediaType)
         {
+            // Return null if the stream is null
+            if (stream == null)
+            {
+                return null;
+            }
+
             // Special case if this is a content stream
             if (stream is ContentStream contentStream)
             {
                 return contentStream.GetContentProvider(mediaType);
             }
 
-            return stream == null ? null : new StreamContent(executionContext.MemoryStreamFactory, stream, mediaType);
+            // Copy the stream to a buffer and use that for the content
+            if (stream.Position != 0)
+            {
+                stream.Position = 0;
+            }
+            byte[] buffer = new byte[stream.Length];
+            using (MemoryStream bufferStream = new MemoryStream(buffer))
+            {
+                stream.CopyTo(bufferStream);
+            }
+            return new MemoryContent(buffer, mediaType);
         }
 
         public static IContentProvider GetContentProvider(
@@ -36,6 +52,21 @@ namespace Statiq.Common
             byte[] buffer,
             string mediaType) =>
             new MemoryContent(buffer, mediaType);
+
+        public static IContentProvider GetContentProvider(
+            this IExecutionContext executionContext,
+            byte[] buffer,
+            int index,
+            int count) =>
+            executionContext.GetContentProvider(buffer, index, count, null);
+
+        public static IContentProvider GetContentProvider(
+            this IExecutionContext executionContext,
+            byte[] buffer,
+            int index,
+            int count,
+            string mediaType) =>
+            new MemoryContent(buffer, index, count, mediaType);
 
         public static Task<IContentProvider> GetContentProviderAsync(
             this IExecutionContext executionContext,

@@ -1,5 +1,7 @@
 # 1.0.0-beta.13
 
+- Added `IExecutionContext.GetContentProvider()` extensions that take a `byte[]` buffer.
+- Added new `MemoryContent` content provider that wraps a `byte[]` buffer.
 - Changed `IEngine.Settings` to be mutable, settings can now be added directly to the engine after instantiation.
 - Fixed a bug with case-insensitive settings from the command line.
 - Fixed a bug with computed metadata settings from the command line.
