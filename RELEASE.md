@@ -1,3 +1,5 @@
+# 1.0.0-beta.14
+
 # 1.0.0-beta.13
 
 - Removed the `StreamContent` content provider in favor of the new `MemoryContent` content provider (should also provide a nice performance boost since there's no more stream locking).
