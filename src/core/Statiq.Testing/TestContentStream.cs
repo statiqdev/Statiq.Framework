@@ -16,6 +16,6 @@ namespace Statiq.Testing
 
         public IContentProvider GetContentProvider() => GetContentProvider(null);
 
-        public IContentProvider GetContentProvider(string mediaType) => new StreamContent(_executionState.MemoryStreamFactory, this, mediaType);
+        public IContentProvider GetContentProvider(string mediaType) => new MemoryContent(((MemoryStream)Stream).ToArray(), mediaType);
     }
 }

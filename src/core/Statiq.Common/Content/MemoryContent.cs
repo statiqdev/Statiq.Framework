@@ -25,7 +25,7 @@ namespace Statiq.Common
         }
 
         public MemoryContent(byte[] buffer, string mediaType)
-            : this(buffer, 0, buffer?.Length ?? 0, null)
+            : this(buffer, 0, buffer?.Length ?? 0, mediaType)
         {
         }
 

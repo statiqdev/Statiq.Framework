@@ -20,7 +20,7 @@ namespace Statiq.Common
             // Return null if the stream is null
             if (stream == null)
             {
-                return null;
+                return new NullContent();
             }
 
             // Special case if this is a content stream
@@ -80,7 +80,7 @@ namespace Statiq.Common
         {
             if (content == null)
             {
-                return null;
+                return new NullContent();
             }
 
             if (executionContext.Settings.GetBool(Keys.UseStringContentFiles))

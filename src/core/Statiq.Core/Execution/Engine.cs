@@ -880,12 +880,12 @@ namespace Statiq.Core
                 {
                     await tempFile.WriteAllTextAsync(content);
                 }
-                return new ContentStream(x => new FileContent(tempFile, x), tempFile.Open(), true);
+                return new FileContentStream(tempFile);
             }
 
             // Otherwise get a memory stream from the pool and use that
-            Stream memoryStream = MemoryStreamFactory.GetStream(content);
-            return new ContentStream(x => new Common.StreamContent(MemoryStreamFactory, memoryStream, x), memoryStream, false);
+            MemoryStream memoryStream = MemoryStreamFactory.GetStream(content);
+            return new MemoryContentStream(memoryStream);
         }
 
         /// <inheritdoc/>

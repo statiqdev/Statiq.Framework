@@ -1,5 +1,6 @@
 # 1.0.0-beta.13
 
+- Removed the `StreamContent` content provider in favor of the new `MemoryContent` content provider (should also provide a nice performance boost since there's no more stream locking).
 - Added `IExecutionContext.GetContentProvider()` extensions that take a `byte[]` buffer.
 - Added new `MemoryContent` content provider that wraps a `byte[]` buffer.
 - Changed `IEngine.Settings` to be mutable, settings can now be added directly to the engine after instantiation.

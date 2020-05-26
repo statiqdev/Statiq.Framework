@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.IO;
+using System.Text;
 using Statiq.Common;
 
 namespace Statiq.Testing
@@ -131,14 +132,25 @@ namespace Statiq.Testing
 
         private static IContentProvider GetContentProvider(string content, string mediaType)
         {
-            TestMemoryStreamFactory memoryStreamFactory = new TestMemoryStreamFactory();
-            return content == null ? (IContentProvider)new NullContent() : new StreamContent(memoryStreamFactory, memoryStreamFactory.GetStream(content), mediaType);
+            return content == null ? (IContentProvider)new NullContent() : new MemoryContent(Encoding.UTF8.GetBytes(content), mediaType);
         }
 
-        private static IContentProvider GetContentProvider(Stream content, string mediaType)
+        private static IContentProvider GetContentProvider(Stream stream, string mediaType)
         {
-            TestMemoryStreamFactory memoryStreamFactory = new TestMemoryStreamFactory();
-            return content == null ? (IContentProvider)new NullContent() : new StreamContent(memoryStreamFactory, content, mediaType);
+            if (stream == null)
+            {
+                return new NullContent();
+            }
+            if (stream.Position != 0)
+            {
+                stream.Position = 0;
+            }
+            byte[] buffer = new byte[stream.Length];
+            using (MemoryStream bufferStream = new MemoryStream(buffer))
+            {
+                stream.CopyTo(bufferStream);
+            }
+            return new MemoryContent(buffer, mediaType);
         }
 
         private static NormalizedPath GetSourcePath(NormalizedPath path) =>
