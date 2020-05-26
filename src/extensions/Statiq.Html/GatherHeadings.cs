@@ -28,12 +28,10 @@ namespace Statiq.Html
     /// The child heading documents of the current heading document.
     /// </metadata>
     /// <category>Metadata</category>
-    public class GatherHeadings : ParallelModule
+    public class GatherHeadings : ParallelConfigModule<int>
     {
         private static readonly HtmlParser HtmlParser = new HtmlParser();
 
-        private int _level;
-        private string _query;
         private bool _nesting;
         private string _metadataKey = HtmlKeys.Headings;
         private string _levelKey = HtmlKeys.Level;
@@ -46,43 +44,9 @@ namespace Statiq.Html
         {
         }
 
-        public GatherHeadings(int level)
+        public GatherHeadings(Config<int> level)
+            : base(level, true)
         {
-            WithLevel(level);
-        }
-
-        /// <summary>
-        /// Sets the deepest heading level to get. The default is to
-        /// only query for top-level headings (level 1).
-        /// </summary>
-        /// <param name="level">The deepest heading level to get.</param>
-        /// <returns>The current module instance.</returns>
-        public GatherHeadings WithLevel(int level)
-        {
-            if (level < 1)
-            {
-                throw new ArgumentException("Level cannot be less than 1");
-            }
-            if (level > 6)
-            {
-                throw new ArgumentException("Level cannot be greater than 6");
-            }
-            _level = level;
-
-            // Build the query
-            StringBuilder query = new StringBuilder();
-            for (int l = 1; l <= _level; l++)
-            {
-                if (l > 1)
-                {
-                    query.Append(",");
-                }
-                query.Append("h");
-                query.Append(l);
-            }
-            _query = query.ToString();
-
-            return this;
         }
 
         /// <summary>
@@ -162,8 +126,9 @@ namespace Statiq.Html
             return this;
         }
 
-        protected override async Task<IEnumerable<Common.IDocument>> ExecuteInputAsync(Common.IDocument input, IExecutionContext context)
+        protected override async Task<IEnumerable<Common.IDocument>> ExecuteConfigAsync(Common.IDocument input, IExecutionContext context, int value)
         {
+            // Return the original document if no metadata key
             if (string.IsNullOrWhiteSpace(_metadataKey))
             {
                 return input.Yield();
@@ -176,10 +141,20 @@ namespace Statiq.Html
                 return input.Yield();
             }
 
+            // Validate the level
+            if (value < 1)
+            {
+                throw new ArgumentException("Heading level cannot be less than 1");
+            }
+            if (value > 6)
+            {
+                throw new ArgumentException("Heading level cannot be greater than 6");
+            }
+
             // Evaluate the query and create the holding nodes
             Heading previousHeading = null;
             List<Heading> headings = htmlDocument
-                .QuerySelectorAll(_query)
+                .QuerySelectorAll(GetHeadingQuery(value))
                 .Select(x =>
                 {
                     previousHeading = new Heading
@@ -193,7 +168,7 @@ namespace Statiq.Html
                 .ToList();
 
             // Build the tree from the bottom-up
-            for (int level = _level; level >= 1; level--)
+            for (int level = value; level >= 1; level--)
             {
                 int currentLevel = level;
                 foreach (Heading heading in headings.Where(x => x.Level == currentLevel))
@@ -259,6 +234,21 @@ namespace Statiq.Html
                     }
                 })
                 .Yield();
+        }
+
+        public static string GetHeadingQuery(int level)
+        {
+            StringBuilder query = new StringBuilder();
+            for (int l = 1; l <= level; l++)
+            {
+                if (l > 1)
+                {
+                    query.Append(",");
+                }
+                query.Append("h");
+                query.Append(l);
+            }
+            return query.ToString();
         }
 
         private class Heading
