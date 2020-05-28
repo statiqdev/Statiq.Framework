@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using NUnit.Framework;
@@ -295,6 +295,134 @@ namespace Statiq.Core.Tests.Modules.Control
 
                 // Then
                 results.ShouldBe(new[] { c, a });
+            }
+
+            [Test]
+            public async Task OrdersByIndexByDefault()
+            {
+                // Given
+                TestDocument a = new TestDocument
+                {
+                    { "Index", 1 }
+                };
+                TestDocument b = new TestDocument
+                {
+                    { "Index", 10 }
+                };
+                TestDocument c = new TestDocument
+                {
+                    { "Index", 2 }
+                };
+                OrderDocuments order = new OrderDocuments();
+
+                // When
+                IReadOnlyList<IDocument> results = await ExecuteAsync(new[] { a, b, c }, order);
+
+                // Then
+                results.ShouldBe(new[] { a, c, b });
+            }
+
+            [Test]
+            public async Task OrdersByOrderByDefault()
+            {
+                // Given
+                TestDocument a = new TestDocument
+                {
+                    { "Order", 1 }
+                };
+                TestDocument b = new TestDocument
+                {
+                    { "Order", 10 }
+                };
+                TestDocument c = new TestDocument
+                {
+                    { "Order", 2 }
+                };
+                OrderDocuments order = new OrderDocuments();
+
+                // When
+                IReadOnlyList<IDocument> results = await ExecuteAsync(new[] { a, b, c }, order);
+
+                // Then
+                results.ShouldBe(new[] { a, c, b });
+            }
+
+            [Test]
+            public async Task OrdersByIndexThenOrderByDefault()
+            {
+                // Given
+                TestDocument a = new TestDocument
+                {
+                    { "Index", 2 },
+                    { "Order", 1 }
+                };
+                TestDocument b = new TestDocument
+                {
+                    { "Index", 1 },
+                    { "Order", 2 }
+                };
+                TestDocument c = new TestDocument
+                {
+                    { "Index", 1 },
+                    { "Order", 1 }
+                };
+                OrderDocuments order = new OrderDocuments();
+
+                // When
+                IReadOnlyList<IDocument> results = await ExecuteAsync(new[] { a, b, c }, order);
+
+                // Then
+                results.ShouldBe(new[] { c, b, a });
+            }
+
+            [Test]
+            public async Task OrdersByOrderAsIntByDefault()
+            {
+                // Given
+                TestDocument a = new TestDocument
+                {
+                    { "Order", "1" }
+                };
+                TestDocument b = new TestDocument
+                {
+                    { "Order", "10" }
+                };
+                TestDocument c = new TestDocument
+                {
+                    { "Order", "2" }
+                };
+                OrderDocuments order = new OrderDocuments();
+
+                // When
+                IReadOnlyList<IDocument> results = await ExecuteAsync(new[] { a, b, c }, order);
+
+                // Then
+                results.ShouldBe(new[] { a, c, b });
+            }
+
+            [Test]
+            public async Task OrdersByIndexAsIntByDefault()
+            {
+                // Given
+                TestDocument a = new TestDocument
+                {
+                    { "Index", "1" }
+                };
+                TestDocument b = new TestDocument
+                {
+                    { "Index", "10" }
+                };
+                TestDocument c = new TestDocument
+                {
+                    { "Index", "2" }
+                };
+                OrderDocuments order = new OrderDocuments();
+
+                // When
+                IReadOnlyList<IDocument> results = await ExecuteAsync(new[] { a, b, c }, order);
+
+                // Then
+                results.ShouldBe(new[] { a, c, b });
             }
         }
     }

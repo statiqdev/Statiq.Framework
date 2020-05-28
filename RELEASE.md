@@ -1,5 +1,6 @@
 # 1.0.0-beta.14
 
+- Fixed a bug with the `OrderDocuments` module sorting by string value for default keys.
 - Changed `GatherHeadings` to take a `Config<int>` for specifying the level.
 
 # 1.0.0-beta.13

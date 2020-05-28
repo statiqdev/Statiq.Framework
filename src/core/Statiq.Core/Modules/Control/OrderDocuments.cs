@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
@@ -24,8 +24,8 @@ namespace Statiq.Core
         /// </summary>
         public OrderDocuments()
         {
-            _orders.Push(new Order(Config.FromDocument(Keys.Index)));
-            _orders.Push(new Order(Config.FromDocument(Keys.Order)));
+            _orders.Push(new Order(Config.FromDocument<int>(Keys.Index)));
+            _orders.Push(new Order(Config.FromDocument<int>(Keys.Order)));
             _orders.Push(new Order(Config.FromDocument(doc =>
                 doc.Destination.IsNull
                     ? (doc.Source.IsNull ? null : doc.Source.FileName.FullPath)
