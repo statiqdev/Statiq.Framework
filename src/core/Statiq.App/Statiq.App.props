@@ -1,0 +1,14 @@
+<Project>
+  <PropertyGroup>
+    <RunWorkingDirectory>$(MSBuildProjectDirectory)</RunWorkingDirectory>
+    <DefaultItemExcludes>$(DefaultItemExcludes);output\**</DefaultItemExcludes>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Remove="input\**" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="input\**">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+</Project>

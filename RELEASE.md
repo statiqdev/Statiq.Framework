@@ -1,5 +1,6 @@
 # 1.0.0-beta.14
 
+- Added a props file to the Statiq.App package to automatically set the default output exclusion and input content MSBuild props.
 - Fixed a bug with the `OrderDocuments` module sorting by string value for default keys.
 - Changed `GatherHeadings` to take a `Config<int>` for specifying the level.
 
