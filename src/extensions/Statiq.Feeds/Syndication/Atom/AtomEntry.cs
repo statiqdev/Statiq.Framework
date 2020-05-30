@@ -33,7 +33,7 @@ namespace Statiq.Feeds.Syndication.Atom
             // ** IFeedMetadata
 
             // ID
-            Id = source.ID.ToString();
+            Id = source.Id;
 
             // Title
             string title = source.Title;
@@ -211,8 +211,6 @@ namespace Statiq.Feeds.Syndication.Atom
             get { return _threadTotal.HasValue; }
             set { }
         }
-
-        Uri IFeedMetadata.ID => ((IUriProvider)this).Uri;
 
         string IFeedMetadata.Title
         {

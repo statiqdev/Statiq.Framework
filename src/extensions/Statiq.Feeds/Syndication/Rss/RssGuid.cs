@@ -5,14 +5,22 @@ using System.Xml.Serialization;
 namespace Statiq.Feeds.Syndication.Rss
 {
     /// <summary>
-    /// RSS 2.0 Guid
-    ///     http://blogs.law.harvard.edu/tech/rss#ltguidgtSubelementOfLtitemgt
+    /// RSS 2.0 Guid - http://blogs.law.harvard.edu/tech/rss#ltguidgtSubelementOfLtitemgt.
+    /// The value can be any string, not just a URI.
     /// </summary>
     [Serializable]
     public class RssGuid : RssBase, IUriProvider
     {
         private bool _isPermaLink = true;
-        private Uri _value = null;
+
+        public RssGuid()
+        {
+        }
+
+        public RssGuid(string value)
+        {
+            Value = value;
+        }
 
         /// <summary>
         /// Gets and sets if the identifier is a permanent URL.
@@ -21,33 +29,21 @@ namespace Statiq.Feeds.Syndication.Rss
         [XmlAttribute("isPermaLink")]
         public bool IsPermaLink
         {
-            get
-            {
-                string link = Value;
-                return _isPermaLink
-                       && (link?.StartsWith(Uri.UriSchemeHttp) == true);
-            }
-
-            set
-            {
-                _isPermaLink = value;
-            }
+            get => _isPermaLink && (Value?.StartsWith(Uri.UriSchemeHttp, StringComparison.OrdinalIgnoreCase) == true);
+            set => _isPermaLink = value;
         }
 
         /// <summary>
-        /// Gets and sets the globally unique identifier, may be an url or other unique string.
+        /// Gets and sets the globally unique identifier, may be a URL or other unique string.
+        /// If the value is a URL, this will also set <see cref="IsPermaLink"/> to <c>true</c>.
         /// </summary>
         [DefaultValue(null)]
         [XmlText]
-        public string Value
-        {
-            get { return ConvertToString(_value); }
-            set { _value = ConvertToUri(value); }
-        }
+        public string Value { get; set; }
 
         [XmlIgnore]
         public bool HasValue => !string.IsNullOrEmpty(Value);
 
-        Uri IUriProvider.Uri => _value;
+        Uri IUriProvider.Uri => ConvertToUri(Value);
     }
 }

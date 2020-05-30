@@ -32,7 +32,7 @@ namespace Statiq.Feeds.Syndication.Atom
             // ** IFeedMetadata
 
             // ID
-            Id = source.ID.ToString();
+            Id = source.Id;
 
             // Title
             string title = source.Title;
@@ -125,8 +125,6 @@ namespace Statiq.Feeds.Syndication.Atom
         string IFeed.Copyright => Rights?.StringValue;
 
         IList<IFeedItem> IFeed.Items => Entries.Cast<IFeedItem>().ToList();
-
-        Uri IFeedMetadata.ID => ((IUriProvider)this).Uri;
 
         string IFeedMetadata.Title => Title?.StringValue;
 

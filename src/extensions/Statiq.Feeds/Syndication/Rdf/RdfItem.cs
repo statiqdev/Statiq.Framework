@@ -29,7 +29,7 @@ namespace Statiq.Feeds.Syndication.Rdf
             // ** IFeedMetadata
 
             // ID
-            Link = source.ID.ToString();
+            Link = source.Id;
 
             // Title
             string title = source.Title;
@@ -204,7 +204,7 @@ namespace Statiq.Feeds.Syndication.Rdf
             }
         }
 
-        Uri IFeedMetadata.ID
+        string IFeedMetadata.Id
         {
             get
             {
@@ -213,7 +213,7 @@ namespace Statiq.Feeds.Syndication.Rdf
                 {
                     Uri.TryCreate(About, UriKind.RelativeOrAbsolute, out id);
                 }
-                return id;
+                return id?.ToString();
             }
         }
 

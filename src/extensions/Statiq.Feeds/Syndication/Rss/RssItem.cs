@@ -39,16 +39,12 @@ namespace Statiq.Feeds.Syndication.Rss
             // ** IFeedMetadata
 
             // ID
-            _guid = new RssGuid
-            {
-                Value = source.ID.ToString()
-            };
+            _guid = new RssGuid(source.Id);
 
             // Title
-            string title = source.Title;
-            if (!string.IsNullOrWhiteSpace(title))
+            if (!string.IsNullOrWhiteSpace(source.Title))
             {
-                Title = title;
+                Title = source.Title;
             }
 
             // Description
@@ -328,7 +324,7 @@ namespace Statiq.Feeds.Syndication.Rss
             }
         }
 
-        Uri IFeedMetadata.ID => ((IUriProvider)_guid)?.Uri;
+        string IFeedMetadata.Id => _guid.Value;
 
         string IFeedMetadata.Title
         {

@@ -62,7 +62,7 @@ namespace Statiq.Feeds
         private NormalizedPath _atomPath = DefaultAtomPath;
         private NormalizedPath _rdfPath = DefaultRdfPath;
 
-        private Uri _feedId;
+        private string _feedId;
         private string _feedTitle;
         private string _feedDescription;
         private string _feedAuthor;
@@ -72,7 +72,7 @@ namespace Statiq.Feeds
         private Uri _feedImageLink;
         private string _feedCopyright;
 
-        private Config<Uri> _itemId = Config.FromDocument((doc, ctx) => TypeHelper.Convert<Uri>(ctx.GetLink(doc, true)));
+        private Config<string> _itemId = Config.FromDocument((doc, ctx) => TypeHelper.Convert<string>(ctx.GetLink(doc, true)));
         private Config<string> _itemTitle = Config.FromDocument(doc => doc.GetString(FeedKeys.Title));
         private Config<string> _itemDescription = Config.FromDocument(doc => doc.GetString(FeedKeys.Description) ?? doc.GetString(FeedKeys.Excerpt));
         private Config<string> _itemAuthor = Config.FromDocument(doc => doc.GetString(FeedKeys.Author));
@@ -127,8 +127,7 @@ namespace Statiq.Feeds
         /// Sets the path to the generated RSS file. The default behavior is to generate a RSS feed with
         /// a path of "feed.rss".
         /// </summary>
-        /// <param name="rssPath">A delegate that should return a <see cref="NormalizedPath"/> for the RSS path.
-        /// If the delegate is <c>null</c> or returns <c>null</c>, no RSS file will be generated.</param>
+        /// <param name="rssPath">The RSS path. If the value is <c>null</c> no RSS file will be generated.</param>
         /// <returns>The current module instance.</returns>
         public GenerateFeeds WithRssPath(NormalizedPath rssPath)
         {
@@ -140,8 +139,7 @@ namespace Statiq.Feeds
         /// Sets the path to the generated Atom file. The default behavior is to generate a RSS feed with
         /// a path of "feed.atom".
         /// </summary>
-        /// <param name="atomPath">A delegate that should return a <see cref="NormalizedPath"/> for the Atom path.
-        /// If the delegate is <c>null</c> or returns <c>null</c>, no Atom file will be generated.</param>
+        /// <param name="atomPath">The Atom path. If the value is <c>null</c> no Atom file will be generated.</param>
         /// <returns>The current module instance.</returns>
         public GenerateFeeds WithAtomPath(NormalizedPath atomPath)
         {
@@ -152,8 +150,7 @@ namespace Statiq.Feeds
         /// <summary>
         /// Sets the path to the generated RDF file. The default behavior is not to generate a RDF feed.
         /// </summary>
-        /// <param name="rdfPath">A delegate that should return a <see cref="NormalizedPath"/> for the RDF path.
-        /// If the delegate is <c>null</c> or returns <c>null</c>, no RDF file will be generated.</param>
+        /// <param name="rdfPath">The RDF path. If the value is <c>null</c> no RDF file will be generated.</param>
         /// <returns>The current module instance.</returns>
         public GenerateFeeds WithRdfPath(NormalizedPath rdfPath)
         {
@@ -164,10 +161,9 @@ namespace Statiq.Feeds
         /// <summary>
         /// Sets the feed identifier. The default value is a link to the site.
         /// </summary>
-        /// <param name="feedId">A delegate that should return a <c>Uri</c> with
-        /// the feed identifier.</param>
+        /// <param name="feedId">The feed identifier.</param>
         /// <returns>The current module instance.</returns>
-        public GenerateFeeds WithFeedId(Uri feedId)
+        public GenerateFeeds WithFeedId(string feedId)
         {
             _feedId = feedId;
             return this;
@@ -177,8 +173,7 @@ namespace Statiq.Feeds
         /// Sets the feed title. The default value is the value for the "Title" key
         /// in the global metadata.
         /// </summary>
-        /// <param name="feedTitle">A delegate that should return a <c>string</c> with
-        /// the feed title.</param>
+        /// <param name="feedTitle">The feed title.</param>
         /// <returns>The current module instance.</returns>
         public GenerateFeeds WithFeedTitle(string feedTitle)
         {
@@ -190,8 +185,7 @@ namespace Statiq.Feeds
         /// Sets the feed description. The default value is the value for the "Description" key
         /// in the global metadata.
         /// </summary>
-        /// <param name="feedDescription">A delegate that should return a <c>string</c> with
-        /// the feed description.</param>
+        /// <param name="feedDescription">The feed description.</param>
         /// <returns>The current module instance.</returns>
         public GenerateFeeds WithFeedDescription(string feedDescription)
         {
@@ -203,8 +197,7 @@ namespace Statiq.Feeds
         /// Sets the feed author. The default value is the value for the "Author" key
         /// in the global metadata.
         /// </summary>
-        /// <param name="feedAuthor">A delegate that should return a <c>string</c> with
-        /// the feed author.</param>
+        /// <param name="feedAuthor">The feed author.</param>
         /// <returns>The current module instance.</returns>
         public GenerateFeeds WithFeedAuthor(string feedAuthor)
         {
@@ -215,8 +208,7 @@ namespace Statiq.Feeds
         /// <summary>
         /// Sets the feed published time. The default value is the current UTC time.
         /// </summary>
-        /// <param name="feedPublished">A delegate that should return a <c>DateTime</c> with
-        /// the feed published time.</param>
+        /// <param name="feedPublished">The feed published time.</param>
         /// <returns>The current module instance.</returns>
         public GenerateFeeds WithFeedPublished(DateTime? feedPublished)
         {
@@ -227,8 +219,7 @@ namespace Statiq.Feeds
         /// <summary>
         /// Sets the feed updated time. The default value is the current UTC time.
         /// </summary>
-        /// <param name="feedUpdated">A delegate that should return a <c>DateTime</c> with
-        /// the feed updated time.</param>
+        /// <param name="feedUpdated">The feed updated time.</param>
         /// <returns>The current module instance.</returns>
         public GenerateFeeds WithFeedUpdated(DateTime? feedUpdated)
         {
@@ -239,8 +230,7 @@ namespace Statiq.Feeds
         /// <summary>
         /// Sets the feed image link. The default value is the site link.
         /// </summary>
-        /// <param name="feedLink">A delegate that should return a <c>Uri</c> with
-        /// the feed link.</param>
+        /// <param name="feedLink">The feed link.</param>
         /// <returns>The current module instance.</returns>
         public GenerateFeeds WithFeedLink(Uri feedLink)
         {
@@ -252,8 +242,7 @@ namespace Statiq.Feeds
         /// Sets the feed image link. The default value is the value for the "Image" key
         /// in the global metadata.
         /// </summary>
-        /// <param name="feedImageLink">A delegate that should return a <c>Uri</c> with
-        /// the feed image link.</param>
+        /// <param name="feedImageLink">The feed image link.</param>
         /// <returns>The current module instance.</returns>
         public GenerateFeeds WithFeedImageLink(Uri feedImageLink)
         {
@@ -265,8 +254,7 @@ namespace Statiq.Feeds
         /// Sets the feed copyright. The default value is the value for the "Copyright" key
         /// in the global metadata.
         /// </summary>
-        /// <param name="feedCopyright">A delegate that should return a <c>string</c> with
-        /// the feed copyright.</param>
+        /// <param name="feedCopyright">The feed copyright.</param>
         /// <returns>The current module instance.</returns>
         public GenerateFeeds WithFeedCopyright(string feedCopyright)
         {
@@ -277,10 +265,9 @@ namespace Statiq.Feeds
         /// <summary>
         /// Sets the item identifier. The default value is the absolute link to the input document.
         /// </summary>
-        /// <param name="itemId">A delegate that should return a <c>Uri</c> with
-        /// the item identifier.</param>
+        /// <param name="itemId">The item identifier (usually a link, but can be other values).</param>
         /// <returns>The current module instance.</returns>
-        public GenerateFeeds WithItemId(Config<Uri> itemId)
+        public GenerateFeeds WithItemId(Config<string> itemId)
         {
             _itemId = itemId;
             return this;
@@ -290,8 +277,7 @@ namespace Statiq.Feeds
         /// Sets the item title. The default value is the value for the "Title" key
         /// in the input document.
         /// </summary>
-        /// <param name="itemTitle">A delegate that should return a <c>string</c> with
-        /// the item title.</param>
+        /// <param name="itemTitle">The item title.</param>
         /// <returns>The current module instance.</returns>
         public GenerateFeeds WithItemTitle(Config<string> itemTitle)
         {
@@ -303,8 +289,7 @@ namespace Statiq.Feeds
         /// Sets the item description. The default value is the value for the "Description" key
         /// in the input document.
         /// </summary>
-        /// <param name="itemDescription">A delegate that should return a <c>string</c> with
-        /// the item description.</param>
+        /// <param name="itemDescription">The item description.</param>
         /// <returns>The current module instance.</returns>
         public GenerateFeeds WithItemDescription(Config<string> itemDescription)
         {
@@ -316,8 +301,7 @@ namespace Statiq.Feeds
         /// Sets the item author. The default value is the value for the "Author" key
         /// in the input document.
         /// </summary>
-        /// <param name="itemAuthor">A delegate that should return a <c>string</c> with
-        /// the item author.</param>
+        /// <param name="itemAuthor">The item author.</param>
         /// <returns>The current module instance.</returns>
         public GenerateFeeds WithItemAuthor(Config<string> itemAuthor)
         {
@@ -329,8 +313,7 @@ namespace Statiq.Feeds
         /// Sets the item published time. The default value is the value for the "Published" key
         /// in the input document.
         /// </summary>
-        /// <param name="itemPublished">A delegate that should return a <c>DateTime</c> with
-        /// the item published time.</param>
+        /// <param name="itemPublished">The item published time.</param>
         /// <returns>The current module instance.</returns>
         public GenerateFeeds WithItemPublished(Config<DateTime?> itemPublished)
         {
@@ -342,8 +325,7 @@ namespace Statiq.Feeds
         /// Sets the item updated time. The default value is the value for the "Updated" key
         /// in the input document.
         /// </summary>
-        /// <param name="itemUpdated">A delegate that should return a <c>DateTime</c> with
-        /// the item updated time.</param>
+        /// <param name="itemUpdated">The item updated time.</param>
         /// <returns>The current module instance.</returns>
         public GenerateFeeds WithItemUpdated(Config<DateTime?> itemUpdated)
         {
@@ -354,8 +336,7 @@ namespace Statiq.Feeds
         /// <summary>
         /// Sets the item link. The default value is the absolute link to the input document.
         /// </summary>
-        /// <param name="itemLink">A delegate that should return a <c>Uri</c> with
-        /// the item link.</param>
+        /// <param name="itemLink">The item link.</param>
         /// <returns>The current module instance.</returns>
         public GenerateFeeds WithItemLink(Config<Uri> itemLink)
         {
@@ -367,8 +348,7 @@ namespace Statiq.Feeds
         /// Sets the item image link. The default value is the value for the "Image" key
         /// in the input document.
         /// </summary>
-        /// <param name="itemImageLink">A delegate that should return a <c>Uri</c> with
-        /// the item image link.</param>
+        /// <param name="itemImageLink">The item image link.</param>
         /// <returns>The current module instance.</returns>
         public GenerateFeeds WithItemImageLink(Config<Uri> itemImageLink)
         {
@@ -380,8 +360,7 @@ namespace Statiq.Feeds
         /// Sets the content of the item. The default value is the value for the "Content" key
         /// in the input document. If that is undefined, the current document content will be used.
         /// </summary>
-        /// <param name="itemContent">A delegate that should return a <c>string</c> with
-        /// the content of the item.</param>
+        /// <param name="itemContent">The content of the item.</param>
         /// <returns>The current module instance.</returns>
         public GenerateFeeds WithItemContent(Config<string> itemContent)
         {
@@ -392,8 +371,7 @@ namespace Statiq.Feeds
         /// <summary>
         /// Sets the item thread link. By default, no thread link is specified.
         /// </summary>
-        /// <param name="itemThreadLink">A delegate that should return a <c>Uri</c> with
-        /// the item thread link.</param>
+        /// <param name="itemThreadLink">The item thread link.</param>
         /// <returns>The current module instance.</returns>
         public GenerateFeeds WithItemThreadLink(Config<Uri> itemThreadLink)
         {
@@ -404,8 +382,7 @@ namespace Statiq.Feeds
         /// <summary>
         /// Sets the item thread count. By default, no thread count is specified.
         /// </summary>
-        /// <param name="itemThreadCount">A delegate that should return an <c>int</c> with
-        /// the item thread count.</param>
+        /// <param name="itemThreadCount">The item thread count.</param>
         /// <returns>The current module instance.</returns>
         public GenerateFeeds WithItemThreadCount(Config<int> itemThreadCount)
         {
@@ -416,8 +393,7 @@ namespace Statiq.Feeds
         /// <summary>
         /// Sets the item thread updated. By default, no thread updated time is specified.
         /// </summary>
-        /// <param name="itemThreadUpdated">A delegate that should return a <c>DateTime</c> with
-        /// the item thread updated time.</param>
+        /// <param name="itemThreadUpdated">The item thread updated time.</param>
         /// <returns>The current module instance.</returns>
         public GenerateFeeds WithItemThreadUpdated(Config<DateTime?> itemThreadUpdated)
         {
@@ -431,7 +407,7 @@ namespace Statiq.Feeds
             // Get the feed
             Feed feed = new Feed
             {
-                ID = _feedId ?? TypeHelper.Convert<Uri>(context.GetLink()),
+                Id = _feedId ?? context.GetLink(),
                 Title = _feedTitle ?? context.Settings.GetString(FeedKeys.Title),
                 Description = _feedDescription ?? context.Settings.GetString(FeedKeys.Description),
                 Author = _feedAuthor ?? context.Settings.GetString(FeedKeys.Author),
@@ -468,7 +444,7 @@ namespace Statiq.Feeds
             {
                 feed.Items.Add(new FeedItem
                 {
-                    ID = await _itemId.GetValueAsync(item.Item1, context),
+                    Id = await _itemId.GetValueAsync(item.Item1, context),
                     Title = await _itemTitle.GetValueAsync(item.Item1, context),
                     Description = await _itemDescription.GetValueAsync(item.Item1, context),
                     Author = await _itemAuthor.GetValueAsync(item.Item1, context),

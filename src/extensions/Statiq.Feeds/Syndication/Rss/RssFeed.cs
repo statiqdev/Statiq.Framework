@@ -29,7 +29,7 @@ namespace Statiq.Feeds.Syndication.Rss
             // ** IFeedMetadata
 
             // ID
-            Channel.Link = source.ID.ToString();
+            Channel.Link = source.Id;
 
             // Title
             string title = source.Title;
@@ -126,7 +126,7 @@ namespace Statiq.Feeds.Syndication.Rss
 
         IList<IFeedItem> IFeed.Items => Channel.Items.Cast<IFeedItem>().ToArray();
 
-        Uri IFeedMetadata.ID => ((IUriProvider)Channel).Uri;
+        string IFeedMetadata.Id => Channel.Link;
 
         string IFeedMetadata.Title => Channel.Title;
 

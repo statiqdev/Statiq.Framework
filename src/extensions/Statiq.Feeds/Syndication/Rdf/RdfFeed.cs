@@ -12,9 +12,9 @@ namespace Statiq.Feeds.Syndication.Rdf
     /// </summary>
     /// <remarks>
     /// XmlSerializer serializes public fields before public properties
-    /// and serializes base class members before derriving class members.
-    /// Since RssChannel uses a readonly field for Items it must be placed
-    /// in a derriving class in order to make sure items serialize last.
+    /// and serializes base class members before deriving class members.
+    /// Since RssChannel uses a read-only field for Items it must be placed
+    /// in a deriving class in order to make sure items serialize last.
     /// </remarks>
     [XmlRoot(RootElement, Namespace=NamespaceRdf)]
     public class RdfFeed : RdfFeedBase, IFeed
@@ -28,7 +28,7 @@ namespace Statiq.Feeds.Syndication.Rdf
             // ** IFeedMetadata
 
             // ID
-            Channel.Link = source.ID.ToString();
+            Channel.Link = source.Id;
 
             // Title
             string title = source.Title;
@@ -118,7 +118,7 @@ namespace Statiq.Feeds.Syndication.Rdf
 
         IList<IFeedItem> IFeed.Items => Items.Cast<IFeedItem>().ToArray();
 
-        Uri IFeedMetadata.ID => ((IFeedMetadata)Channel).ID;
+        string IFeedMetadata.Id => ((IFeedMetadata)Channel).Id;
 
         string IFeedMetadata.Title => ((IFeedMetadata)Channel).Title;
 
