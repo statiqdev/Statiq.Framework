@@ -1,36 +1,30 @@
-﻿using System;
-using System.IO;
-using Statiq.Common;
+﻿using System.IO;
 
 namespace Statiq.Common
 {
     internal class MemoryContentStream : ContentStream
     {
-        private MemoryStream _memoryStream;
         private byte[] _buffer;
 
         public MemoryContentStream(MemoryStream memoryStream)
             : base(memoryStream)
         {
-            _memoryStream = memoryStream;
         }
 
         protected override void Dispose(bool disposing)
         {
-            if (_memoryStream == null)
+            if (_buffer == null)
             {
-                throw new ObjectDisposedException(nameof(MemoryContentStream));
+                // Copy the buffer out of the MemoryStream before disposing it
+                _buffer = ((MemoryStream)Stream).ToArray();
             }
 
-            // Copy the buffer out of the MemoryStream before disposing it
-            _buffer = _memoryStream.ToArray();
-            _memoryStream.Dispose();
-            _memoryStream = null;
+            Stream.Dispose();
         }
 
         public override IContentProvider GetContentProvider(string mediaType) =>
-            _memoryStream == null
-                ? new MemoryContent(_buffer, mediaType)
-                : new MemoryContent(_memoryStream.ToArray(), mediaType);
+            _buffer == null
+                ? new MemoryContent(((MemoryStream)Stream).ToArray(), mediaType)
+                : new MemoryContent(_buffer, mediaType);
     }
 }

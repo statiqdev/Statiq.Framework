@@ -307,7 +307,7 @@ namespace Statiq.Core
             bool continueOnError = values.GetBool(ContinueOnErrorKey);
             using (Stream contentStream = _background || keepContent ? null : await context.GetContentStreamAsync())
             {
-                using (StreamWriter contentWriter = contentStream == null ? null : new StreamWriter(contentStream))
+                using (StreamWriter contentWriter = contentStream == null ? null : new StreamWriter(contentStream, leaveOpen: true))
                 {
                     using (StringWriter errorWriter = !_background && continueOnError ? new StringWriter() : null)
                     {

@@ -34,7 +34,7 @@ namespace Statiq.Tables
 
         public static void WriteAllRecords(IEnumerable<IEnumerable<string>> records, Stream stream)
         {
-            StreamWriter writer = new StreamWriter(stream);
+            StreamWriter writer = new StreamWriter(stream, leaveOpen: true);
             WriteAllRecords(records, writer);
             writer.Flush();
         }
