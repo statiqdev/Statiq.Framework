@@ -1,5 +1,6 @@
 # 1.0.0-beta.14
 
+- Added a `IReadOnlyPipelineCollection IExecutionState.ExecutingPipelines` property that provides the currently executing pipelines.
 - Added a new `ThrowExceptionIf` module that throws an exception if a condition is true.
 - Added a `Config<bool>.IsFalse()` extension method.
 - Added a `Config.ContainsAnySettings()` extension method.

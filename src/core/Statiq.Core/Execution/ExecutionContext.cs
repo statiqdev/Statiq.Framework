@@ -102,6 +102,9 @@ namespace Statiq.Core
         public IReadOnlyPipelineCollection Pipelines => _contextData.Engine.Pipelines;
 
         /// <inheritdoc/>
+        public IReadOnlyPipelineCollection ExecutingPipelines => _contextData.Engine.ExecutingPipelines;
+
+        /// <inheritdoc/>
         public CancellationToken CancellationToken => _contextData.Engine.CancellationToken;
 
         /// <inheritdoc/>

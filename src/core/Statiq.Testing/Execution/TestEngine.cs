@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.IO;
 using System.Net;
 using System.Net.Http;
@@ -95,6 +96,9 @@ namespace Statiq.Testing
 
         /// <inheritdoc />
         IReadOnlyPipelineCollection IExecutionState.Pipelines => Pipelines;
+
+        /// <inheritdoc />
+        public IReadOnlyPipelineCollection ExecutingPipelines => Pipelines;
 
         /// <inheritdoc />
         public TestShortcodeCollection Shortcodes { get; set; } = new TestShortcodeCollection();

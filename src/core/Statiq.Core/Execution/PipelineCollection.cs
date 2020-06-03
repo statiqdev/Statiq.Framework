@@ -15,13 +15,29 @@ namespace Statiq.Core
             new Dictionary<string, IPipeline>(StringComparer.OrdinalIgnoreCase);
         private readonly Engine _engine;
 
+        // Creates the initial pipeline collection
         public PipelineCollection(Engine engine)
         {
             _engine = engine;
         }
 
+        // Creates a read-only pipelines collection (will throw if mutated)
+        public PipelineCollection(Dictionary<string, IPipeline> pipelines)
+        {
+            // Copy them over just to be sure we use a case-insensitive comparer
+            foreach (KeyValuePair<string, IPipeline> pipeline in pipelines)
+            {
+                _pipelines[pipeline.Key] = pipeline.Value;
+            }
+        }
+
         public IPipeline Add(string name)
         {
+            if (_engine == null)
+            {
+                throw new NotSupportedException();
+            }
+
             IPipeline pipeline = new Pipeline();
             Add(name, pipeline);
             _engine.ResetPipelinePhases();
@@ -33,6 +49,11 @@ namespace Statiq.Core
             get => _pipelines[name];
             set
             {
+                if (_engine == null)
+                {
+                    throw new NotSupportedException();
+                }
+
                 _pipelines[name] = value ?? throw new ArgumentNullException(nameof(value));
                 _engine.ResetPipelinePhases();
             }
@@ -48,6 +69,11 @@ namespace Statiq.Core
 
         public void Add(string name, IPipeline value)
         {
+            if (_engine == null)
+            {
+                throw new NotSupportedException();
+            }
+
             _pipelines.Add(
                 name ?? throw new ArgumentNullException(nameof(name)),
                 value ?? throw new ArgumentNullException(nameof(value)));
@@ -56,6 +82,11 @@ namespace Statiq.Core
 
         public void Add(KeyValuePair<string, IPipeline> item)
         {
+            if (_engine == null)
+            {
+                throw new NotSupportedException();
+            }
+
             if (item.Value == null)
             {
                 throw new ArgumentNullException(nameof(item.Value));
@@ -66,6 +97,11 @@ namespace Statiq.Core
 
         public void Clear()
         {
+            if (_engine == null)
+            {
+                throw new NotSupportedException();
+            }
+
             _pipelines.Clear();
             _engine.ResetPipelinePhases();
         }
@@ -79,6 +115,11 @@ namespace Statiq.Core
 
         public bool Remove(string name)
         {
+            if (_engine == null)
+            {
+                throw new NotSupportedException();
+            }
+
             if (_pipelines.Remove(name))
             {
                 _engine.ResetPipelinePhases();
@@ -89,6 +130,11 @@ namespace Statiq.Core
 
         public bool Remove(KeyValuePair<string, IPipeline> item)
         {
+            if (_engine == null)
+            {
+                throw new NotSupportedException();
+            }
+
             if (((IDictionary<string, IPipeline>)_pipelines).Remove(item))
             {
                 _engine.ResetPipelinePhases();

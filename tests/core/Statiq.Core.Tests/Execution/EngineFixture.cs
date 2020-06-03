@@ -25,10 +25,10 @@ namespace Statiq.Core.Tests.Execution
                 Engine engine = GetEngine();
 
                 // When
-                HashSet<string> executingPipelines = engine.GetExecutingPipelines(null, false);
+                IReadOnlyPipelineCollection executingPipelines = engine.GetExecutingPipelines(null, false);
 
                 // Then
-                executingPipelines.ShouldBe(new[] { "F" }, true);
+                executingPipelines.Keys.ShouldBe(new[] { "F" }, true);
             }
 
             [Test]
@@ -38,10 +38,10 @@ namespace Statiq.Core.Tests.Execution
                 Engine engine = GetEngine();
 
                 // When
-                HashSet<string> executingPipelines = engine.GetExecutingPipelines(null, true);
+                IReadOnlyPipelineCollection executingPipelines = engine.GetExecutingPipelines(null, true);
 
                 // Then
-                executingPipelines.ShouldBe(new[] { "A", "D", "E", "F", "H" }, true);
+                executingPipelines.Keys.ShouldBe(new[] { "A", "D", "E", "F", "H" }, true);
             }
 
             [Test]
@@ -51,10 +51,10 @@ namespace Statiq.Core.Tests.Execution
                 Engine engine = GetEngine();
 
                 // When
-                HashSet<string> executingPipelines = engine.GetExecutingPipelines(Array.Empty<string>(), false);
+                IReadOnlyPipelineCollection executingPipelines = engine.GetExecutingPipelines(Array.Empty<string>(), false);
 
                 // Then
-                executingPipelines.ShouldBe(new[] { "F" }, true);
+                executingPipelines.Keys.ShouldBe(new[] { "F" }, true);
             }
 
             [Test]
@@ -64,10 +64,10 @@ namespace Statiq.Core.Tests.Execution
                 Engine engine = GetEngine();
 
                 // When
-                HashSet<string> executingPipelines = engine.GetExecutingPipelines(Array.Empty<string>(), true);
+                IReadOnlyPipelineCollection executingPipelines = engine.GetExecutingPipelines(Array.Empty<string>(), true);
 
                 // Then
-                executingPipelines.ShouldBe(new[] { "A", "D", "E", "F", "H" }, true);
+                executingPipelines.Keys.ShouldBe(new[] { "A", "D", "E", "F", "H" }, true);
             }
 
             [Test]
@@ -77,10 +77,10 @@ namespace Statiq.Core.Tests.Execution
                 Engine engine = GetEngine();
 
                 // When
-                HashSet<string> executingPipelines = engine.GetExecutingPipelines(new[] { "A", "B" }, false);
+                IReadOnlyPipelineCollection executingPipelines = engine.GetExecutingPipelines(new[] { "A", "B" }, false);
 
                 // Then
-                executingPipelines.ShouldBe(new[] { "A", "B", "F" }, true);
+                executingPipelines.Keys.ShouldBe(new[] { "A", "B", "F" }, true);
             }
 
             [Test]
@@ -90,10 +90,10 @@ namespace Statiq.Core.Tests.Execution
                 Engine engine = GetEngine();
 
                 // When
-                HashSet<string> executingPipelines = engine.GetExecutingPipelines(new[] { "A", "B" }, true);
+                IReadOnlyPipelineCollection executingPipelines = engine.GetExecutingPipelines(new[] { "A", "B" }, true);
 
                 // Then
-                executingPipelines.ShouldBe(new[] { "A", "B", "E", "D", "F", "H" }, true);
+                executingPipelines.Keys.ShouldBe(new[] { "A", "B", "E", "D", "F", "H" }, true);
             }
 
             [Test]
@@ -103,10 +103,10 @@ namespace Statiq.Core.Tests.Execution
                 Engine engine = GetEngine();
 
                 // When
-                HashSet<string> executingPipelines = engine.GetExecutingPipelines(new[] { "E" }, false);
+                IReadOnlyPipelineCollection executingPipelines = engine.GetExecutingPipelines(new[] { "E" }, false);
 
                 // Then
-                executingPipelines.ShouldBe(new[] { "A", "D", "E", "F" }, true);
+                executingPipelines.Keys.ShouldBe(new[] { "A", "D", "E", "F" }, true);
             }
 
             [Test]
@@ -116,10 +116,10 @@ namespace Statiq.Core.Tests.Execution
                 Engine engine = GetEngine();
 
                 // When
-                HashSet<string> executingPipelines = engine.GetExecutingPipelines(new[] { "E" }, true);
+                IReadOnlyPipelineCollection executingPipelines = engine.GetExecutingPipelines(new[] { "E" }, true);
 
                 // Then
-                executingPipelines.ShouldBe(new[] { "A", "D", "E", "F", "H" }, true);
+                executingPipelines.Keys.ShouldBe(new[] { "A", "D", "E", "F", "H" }, true);
             }
 
             [Test]
@@ -129,7 +129,7 @@ namespace Statiq.Core.Tests.Execution
                 Engine engine = GetEngine();
 
                 // When, Then
-                Should.Throw<ArgumentException>(() => engine.GetExecutingPipelines(new[] { "Z" }, false));
+                Should.Throw<PipelineException>(() => engine.GetExecutingPipelines(new[] { "Z" }, false));
             }
 
             private Engine GetEngine()

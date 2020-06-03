@@ -166,6 +166,9 @@ namespace Statiq.Testing
         IReadOnlyPipelineCollection IExecutionState.Pipelines => Pipelines;
 
         /// <inheritdoc/>
+        IReadOnlyPipelineCollection IExecutionState.ExecutingPipelines => Pipelines;
+
+        /// <inheritdoc/>
         public TestMemoryStreamFactory MemoryStreamFactory
         {
             get => Engine.MemoryStreamFactory;

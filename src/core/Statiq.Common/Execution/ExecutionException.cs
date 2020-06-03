@@ -3,7 +3,7 @@
 namespace Statiq.Common
 {
     /// <summary>
-    /// The exception that is thrown when there is an error during execution.
+    /// An exception that is thrown when there is an error during execution.
     /// </summary>
     public class ExecutionException : Exception
     {

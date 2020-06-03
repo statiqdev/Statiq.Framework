@@ -244,6 +244,9 @@ namespace Statiq.Core
         IReadOnlyPipelineCollection IExecutionState.Pipelines => Pipelines;
 
         /// <inheritdoc />
+        public IReadOnlyPipelineCollection ExecutingPipelines { get; private set; } = new PipelineCollection((Engine)null); // Gets set on execution
+
+        /// <inheritdoc />
         public INamespacesCollection Namespaces { get; } = new NamespaceCollection();
 
         /// <inheritdoc />
@@ -391,15 +394,15 @@ namespace Statiq.Core
                 }
 
                 // Verify pipelines
-                HashSet<string> executingPipelines = GetExecutingPipelines(pipelines, normalPipelines);
-                if (executingPipelines.Count == 0)
+                ExecutingPipelines = GetExecutingPipelines(pipelines, normalPipelines);
+                if (ExecutingPipelines.Count == 0)
                 {
                     _logger.LogWarning("No pipelines are configured or specified for execution.");
                     return Outputs;
                 }
 
                 // Log
-                _logger.LogInformation($"Executing {executingPipelines.Count} pipelines ({string.Join(", ", executingPipelines.OrderBy(x => x))})");
+                _logger.LogInformation($"Executing {ExecutingPipelines.Count} pipelines ({string.Join(", ", ExecutingPipelines.Keys.OrderBy(x => x))})");
                 _logger.LogDebug($"Execution ID {ExecutionId}");
                 System.Diagnostics.Stopwatch stopwatch = System.Diagnostics.Stopwatch.StartNew();
 
@@ -424,7 +427,7 @@ namespace Statiq.Core
                 try
                 {
                     // Get and execute all phases
-                    phaseTasks = GetPhaseTasks(executingPipelines, phaseResults);
+                    phaseTasks = GetPhaseTasks(phaseResults);
                     await Task.WhenAll(phaseTasks);
                 }
                 finally
@@ -579,7 +582,7 @@ namespace Statiq.Core
         }
 
         // Internal for testing
-        internal HashSet<string> GetExecutingPipelines(string[] pipelines, bool normalPipelines)
+        internal IReadOnlyPipelineCollection GetExecutingPipelines(string[] pipelines, bool normalPipelines)
         {
             // Validate
             if (pipelines != null)
@@ -588,12 +591,13 @@ namespace Statiq.Core
                 {
                     if (!_pipelines.ContainsKey(pipeline))
                     {
-                        throw new ArgumentException($"Pipeline {pipeline} does not exist", nameof(pipelines));
+                        throw new PipelineException($"Pipeline {pipeline} does not exist");
                     }
                 }
             }
 
-            HashSet<string> executing = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            // Check the execution policies and add pipelines
+            HashSet<string> executingPipelineNames = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
             foreach (KeyValuePair<string, IPipeline> kvp in _pipelines)
             {
                 ExecutionPolicy effectivePolicy = GetEffectiveExecutionPolicy(kvp.Value);
@@ -605,9 +609,22 @@ namespace Statiq.Core
                 }
             }
 
+            // Get the actual pipelines
+            Dictionary<string, IPipeline> executingPipelines = new Dictionary<string, IPipeline>(StringComparer.OrdinalIgnoreCase);
+            foreach (string executingPipelineName in executingPipelineNames)
+            {
+                if (!_pipelines.TryGetValue(executingPipelineName, out IPipeline pipeline))
+                {
+                    throw new PipelineException($"Pipeline {executingPipelineName} does not exist");
+                }
+                executingPipelines[executingPipelineName] = pipeline;
+            }
+            return new PipelineCollection(executingPipelines);
+
+            // Adds the pipeline and all it's dependencies to the set
             void AddPipelineAndDependencies(string pipelineName)
             {
-                if (executing.Add(pipelineName))
+                if (executingPipelineNames.Add(pipelineName))
                 {
                     foreach (string dependency in _pipelines[pipelineName].GetAllDependencies(_pipelines))
                     {
@@ -615,8 +632,6 @@ namespace Statiq.Core
                     }
                 }
             }
-
-            return executing;
         }
 
         private static ExecutionPolicy GetEffectiveExecutionPolicy(IPipeline pipeline) =>
@@ -739,12 +754,10 @@ namespace Statiq.Core
             }
         }
 
-        private Task[] GetPhaseTasks(
-            HashSet<string> executingPipelines,
-            ConcurrentDictionary<string, PhaseResult[]> phaseResults)
+        private Task[] GetPhaseTasks(ConcurrentDictionary<string, PhaseResult[]> phaseResults)
         {
             Dictionary<PipelinePhase, Task> phaseTasks = new Dictionary<PipelinePhase, Task>();
-            foreach (PipelinePhase phase in _phases.Where(x => executingPipelines.Contains(x.PipelineName)))
+            foreach (PipelinePhase phase in _phases.Where(x => ExecutingPipelines.ContainsKey(x.PipelineName)))
             {
                 Task phaseTask = GetPhaseTaskAsync(
                     phaseResults,

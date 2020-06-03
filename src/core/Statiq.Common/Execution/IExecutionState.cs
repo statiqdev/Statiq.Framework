@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.IO;
 using System.Net.Http;
 using System.Threading;
@@ -88,6 +89,11 @@ namespace Statiq.Common
         /// Gets the pipelines.
         /// </summary>
         IReadOnlyPipelineCollection Pipelines { get; }
+
+        /// <summary>
+        /// The pipelines currently being executed.
+        /// </summary>
+        IReadOnlyPipelineCollection ExecutingPipelines { get; }
 
         /// <summary>
         /// Gets a <see cref="Stream"/> that can be used for document content. If <paramref name="content"/>
