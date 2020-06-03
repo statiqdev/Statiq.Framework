@@ -56,5 +56,27 @@ namespace Statiq.Common
         /// <returns><c>true</c> if the dictionary contains all the specified keys, <c>false</c> otherwise.</returns>
         public static bool ContainsKeys<TKey, TValue>(this IReadOnlyDictionary<TKey, TValue> dictionary, IEnumerable<TKey> keys) =>
             keys.All(x => dictionary.ContainsKey(x));
+
+        /// <summary>
+        /// Determines whether the dictionary contains all the specified keys.
+        /// </summary>
+        /// <typeparam name="TKey">The type of keys.</typeparam>
+        /// <typeparam name="TValue">The type of values.</typeparam>
+        /// <param name="dictionary">The dictionary to verify.</param>
+        /// <param name="keys">The keys that must be present in the dictionary.</param>
+        /// <returns><c>true</c> if the dictionary contains all the specified keys, <c>false</c> otherwise.</returns>
+        public static bool ContainsAnyKeys<TKey, TValue>(this IReadOnlyDictionary<TKey, TValue> dictionary, params TKey[] keys) =>
+            dictionary.ContainsAnyKeys((IEnumerable<TKey>)keys);
+
+        /// <summary>
+        /// Determines whether the dictionary contains all the specified keys.
+        /// </summary>
+        /// <typeparam name="TKey">The type of keys.</typeparam>
+        /// <typeparam name="TValue">The type of values.</typeparam>
+        /// <param name="dictionary">The dictionary to verify.</param>
+        /// <param name="keys">The keys that must be present in the dictionary.</param>
+        /// <returns><c>true</c> if the dictionary contains all the specified keys, <c>false</c> otherwise.</returns>
+        public static bool ContainsAnyKeys<TKey, TValue>(this IReadOnlyDictionary<TKey, TValue> dictionary, IEnumerable<TKey> keys) =>
+            keys.Any(x => dictionary.ContainsKey(x));
     }
 }

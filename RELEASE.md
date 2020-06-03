@@ -1,5 +1,9 @@
 # 1.0.0-beta.14
 
+- Added a new `ThrowExceptionIf` module that throws an exception if a condition is true.
+- Added a `Config<bool>.IsFalse()` extension method.
+- Added a `Config.ContainsAnySettings()` extension method.
+- Added `IReadOnlyDictionary<K, V>.ContainsAnyKeys()` extension methods.
 - Fixed a bug regarding disposal of a content stream in the `StartProcess` module.
 - Fixed a bug that required feed items to have URI IDs when the specification indicates they can also be arbitrary strings.
 - Added a props file to the Statiq.App package to automatically set the default output exclusion and input content MSBuild props.

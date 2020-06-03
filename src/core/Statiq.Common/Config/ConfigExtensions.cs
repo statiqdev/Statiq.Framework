@@ -113,5 +113,7 @@ namespace Statiq.Common
             config.EnsureNonNull().RequiresDocument
                 ? throw new ArgumentException("Config must not require a document", paramName)
                 : config;
+
+        public static Config<bool> IsFalse(this Config<bool> config) => config.Transform(x => !x);
     }
 }

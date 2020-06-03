@@ -8,6 +8,21 @@ namespace Statiq.Common
     public static partial class Config
     {
         /// <summary>
+        /// Creates a config value by getting the string metadata value from the execution context of a specified key.
+        /// </summary>
+        /// <param name="key">The metadata key to get the string value from.</param>
+        /// <returns>A config object.</returns>
+        public static Config<string> FromSetting(string key) => FromSetting<string>(key);
+
+        /// <summary>
+        /// Creates a config value by getting the string metadata value from the execution context of a specified key.
+        /// </summary>
+        /// <param name="key">The metadata key to get the string value from.</param>
+        /// <param name="defaultValue">The default value to use if the key cannot be found, is null, or cannot be converted to a string.</param>
+        /// <returns>A config object.</returns>
+        public static Config<string> FromSetting(string key, string defaultValue) => FromSetting<string>(key, defaultValue);
+
+        /// <summary>
         /// Creates a config value by getting the metadata value from the execution context of a specified key.
         /// </summary>
         /// <typeparam name="TValue">The type of config value.</typeparam>
@@ -112,5 +127,13 @@ namespace Statiq.Common
         /// <returns>A config object.</returns>
         public static Config<bool> ContainsSettings(params string[] keys) =>
             FromSettings(settings => keys.All(x => settings.ContainsKey(x)));
+
+        /// <summary>
+        /// Creates a config value that returns <c>true</c> if the settings contains any of the specified keys.
+        /// </summary>
+        /// <param name="keys">The keys to check.</param>
+        /// <returns>A config object.</returns>
+        public static Config<bool> ContainsAnySettings(params string[] keys) =>
+            FromSettings(settings => keys.Any(x => settings.ContainsKey(x)));
     }
 }
