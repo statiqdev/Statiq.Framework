@@ -38,12 +38,14 @@ namespace Statiq.Common
         /// <param name="action">A delegate action to evaluate.</param>
         /// <returns>A config object.</returns>
         public static Config<TValue> FromContext<TValue>(Action<IExecutionContext> action) =>
-            new Config<TValue>((__, ctx) =>
-            {
-                _ = action ?? throw new ArgumentNullException(nameof(action));
-                action(ctx);
-                return Task.FromResult(default(TValue));
-            });
+            new Config<TValue>(
+                (__, ctx) =>
+                {
+                    _ = action ?? throw new ArgumentNullException(nameof(action));
+                    action(ctx);
+                    return Task.FromResult(default(TValue));
+                },
+                false);
 
         /// <summary>
         /// Creates a config value from an action that uses the execution context and returns
@@ -53,12 +55,14 @@ namespace Statiq.Common
         /// <param name="action">A delegate action to evaluate.</param>
         /// <returns>A config object.</returns>
         public static Config<TValue> FromContext<TValue>(Func<IExecutionContext, Task> action) =>
-            new Config<TValue>(async (__, ctx) =>
-            {
-                _ = action ?? throw new ArgumentNullException(nameof(action));
-                await action(ctx);
-                return default;
-            });
+            new Config<TValue>(
+                async (__, ctx) =>
+                {
+                    _ = action ?? throw new ArgumentNullException(nameof(action));
+                    await action(ctx);
+                    return default;
+                },
+                false);
 
         /// <summary>
         /// Creates a config value from an action that uses the execution context and returns null.
