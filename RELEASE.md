@@ -1,3 +1,5 @@
+# 1.0.0-beta.15
+
 # 1.0.0-beta.14
 
 - Fixed a bug with async context-based `Config` delegates not indicating that they don't require a document.

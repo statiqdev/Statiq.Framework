@@ -138,7 +138,7 @@ namespace Statiq.Framework.Build
                         string notes = string.Join(Environment.NewLine, lines.Skip(1).SkipWhile(x => string.IsNullOrWhiteSpace(x)));
 
                         ctx.LogInformation("Version " + version);
-                        ctx.LogInformation("Notes " + notes);
+                        ctx.LogInformation("Notes " + Environment.NewLine + notes);
 
                         // Add release to GitHub
                         GitHubClient github = new GitHubClient(new ProductHeaderValue("Statiq"))
