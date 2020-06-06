@@ -1,8 +1,9 @@
 <Project> 
   <PropertyGroup>
-    <InformationalVersion>1.0.0-beta.14</InformationalVersion>
-    <AssemblyVersion>1.0.0</AssemblyVersion>
-    <FileVersion>1.0.0</FileVersion>
+    <Version>1.0.0-beta.14</Version>
+    <InformationalVersion>$(Version)</InformationalVersion>
+    <AssemblyVersion>$(Version.Split('-')[0])</AssemblyVersion>
+    <FileVersion>$(Version.Split('-')[0])</FileVersion>
     <Product>Statiq Framework</Product>
     <Copyright>Copyright © Statiq/Dave Glick</Copyright>
     <Authors>Dave Glick, Other Awesome Contributors</Authors>
@@ -19,10 +20,11 @@
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <TargetFramework>netcoreapp3.1</TargetFramework>
+    <EmbedUntrackedSources>true</EmbedUntrackedSources>
   </PropertyGroup>
   <ItemGroup>
-    <None Include="..\..\..\LICENSE.md" Pack="true" PackagePath=""/>
-    <None Include="..\..\..\icon.png" Pack="true" PackagePath="\"/>
+    <None Include="$(SolutionDir)\LICENSE.md" Pack="true" PackagePath=""/>
+    <None Include="$(SolutionDir)\icon.png" Pack="true" PackagePath="\"/>
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0" PrivateAssets="All"/>
