@@ -4,6 +4,7 @@ using System.Linq;
 using System.Reflection;
 using Microsoft.Extensions.DependencyInjection;
 using Spectre.Cli;
+using Spectre.Cli.Unsafe;
 using Statiq.Common;
 
 namespace Statiq.App
@@ -28,11 +29,11 @@ namespace Statiq.App
 
         public static TBootstrapper AddCommand<TBootstrapper>(this TBootstrapper bootstrapper, Type commandType, string name)
             where TBootstrapper : IBootstrapper =>
-            bootstrapper.ConfigureCommands(x => x.AddCommand(commandType, name));
+            bootstrapper.ConfigureCommands(x => x.SafetyOff().AddCommand(name, commandType));
 
         public static TBootstrapper AddCommand<TBootstrapper>(this TBootstrapper bootstrapper, Type commandType, string name, string description)
             where TBootstrapper : IBootstrapper =>
-            bootstrapper.ConfigureCommands(x => x.AddCommand(commandType, name).WithDescription(description));
+            bootstrapper.ConfigureCommands(x => x.SafetyOff().AddCommand(name, commandType).WithDescription(description));
 
         public static TBootstrapper AddPipelineCommand<TBootstrapper>(
             this TBootstrapper bootstrapper,

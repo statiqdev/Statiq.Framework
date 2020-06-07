@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Spectre.Cli;
+using Spectre.Cli.Unsafe;
 using Statiq.Common;
 
 namespace Statiq.App
@@ -16,9 +17,9 @@ namespace Statiq.App
             configurator.AddCommand<TCommand>(GetCommandName(typeof(TCommand)));
 
         public static ICommandConfigurator AddCommand(this IConfigurator configurator, Type commandType) =>
-            configurator.AddCommand(
-                commandType ?? throw new ArgumentNullException(nameof(commandType)),
-                GetCommandName(commandType));
+            configurator.SafetyOff().AddCommand(
+                GetCommandName(commandType),
+                commandType ?? throw new ArgumentNullException(nameof(commandType)));
 
         private static string GetCommandName(Type commandType)
         {
@@ -29,20 +30,6 @@ namespace Statiq.App
                 name = name.Substring(0, genericParametersIndex);
             }
             return name.RemoveEnd("Command", StringComparison.OrdinalIgnoreCase).ToKebab();
-        }
-
-        public static ICommandConfigurator AddCommand(this IConfigurator configurator, Type commandType, string name)
-        {
-            _ = commandType ?? throw new ArgumentNullException(nameof(commandType));
-            _ = name ?? throw new ArgumentNullException(nameof(name));
-            if (!typeof(ICommand).IsAssignableFrom(commandType))
-            {
-                throw new ArgumentException("Provided type is not a command");
-            }
-            Type openAdapter = typeof(AddCommandAdapter<>);
-            Type closedAdapter = openAdapter.MakeGenericType(commandType);
-            IAddCommandAdapter adapter = (IAddCommandAdapter)Activator.CreateInstance(closedAdapter, new object[] { name });
-            return adapter.AddCommand(configurator);
         }
 
         public static ICommandConfigurator AddPipelineCommand(
