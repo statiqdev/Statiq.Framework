@@ -4,7 +4,7 @@
     <PackageTags>Statiq Static StaticContent StaticSite Blog BlogEngine XMP Metadata</PackageTags>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="MetadataExtractor" Version="2.0.0" />
+    <PackageReference Include="MetadataExtractor" Version="2.2.0" />
     <PackageReference Include="SharpZipLib" Version="1.2.0" />
     <PackageReference Include="XmpCore" Version="6.1.10" />
   </ItemGroup>
