@@ -1,5 +1,7 @@
 # 1.0.0-beta.16
 
+- Removed restriction on only using `IDocument` models in Razor (#108, #23, thanks @alanta).
+
 # 1.0.0-beta.15
 
 - Added the new `Statiq.App.props` file to a `buildTransitive` folder in the package so it flows transitively to consumers.
