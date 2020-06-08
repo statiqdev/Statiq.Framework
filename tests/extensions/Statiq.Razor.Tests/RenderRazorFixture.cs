@@ -120,6 +120,29 @@ namespace Statiq.Razor.Tests
             }
 
             [Test]
+            public async Task AlternateModelWithLayout()
+            {
+                // Given
+                Engine engine = new Engine();
+                TestExecutionContext context = GetExecutionContext(engine);
+                TestDocument document = GetDocument(
+                    "/ViewStartAndLayout/Test.cshtml",
+                    @"@model int[]
+<p>This is a test</p>");
+                IList<int> model = new[] { 1, 2, 3 };
+                RenderRazor razor = new RenderRazor().WithModel(Config.FromValue(model));
+
+                // When
+                TestDocument result = await ExecuteAsync(document, context, razor).SingleAsync();
+
+                // Then
+                result.Content.ShouldBe(
+                    @"LAYOUT2
+<p>This is a test</p>",
+                    StringCompareShould.IgnoreLineEndings);
+            }
+
+            [Test]
             public async Task LoadLayoutFile()
             {
                 // Given
