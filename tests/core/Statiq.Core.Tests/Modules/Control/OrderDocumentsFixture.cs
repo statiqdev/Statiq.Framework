@@ -282,11 +282,13 @@ namespace Statiq.Core.Tests.Modules.Control
                 // Given
                 TestDocument a = new TestDocument
                 {
-                    { "Foo", "1/1/2010" }
+                    // The comparison is based on the first type seen, so test with DateTime first to ensure consistency across cultures
+                    { "Foo", new DateTime(2010, 1, 1) }
                 };
                 TestDocument c = new TestDocument
                 {
-                    { "Foo", new DateTime(2009, 1, 1) }
+                    // Convert a DateTime into a string (instead of just using a string) to ensure a culture match when converting back to DateTime
+                    { "Foo", new DateTime(2009, 1, 1).ToShortDateString() }
                 };
                 OrderDocuments order = new OrderDocuments("Foo");
 
