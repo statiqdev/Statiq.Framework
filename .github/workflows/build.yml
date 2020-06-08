@@ -19,7 +19,7 @@ jobs:
       - name: Install .NET Core SDK
         uses: actions/setup-dotnet@v1
         with:
-          dotnet-version: '3.1.300'
+          dotnet-version: '3.1.x'
 
       - name: Build and Test
-        run: dotnet run --project "build\Statiq.Framework.Build" -- test
+        run: dotnet run --project "build/Statiq.Framework.Build/Statiq.Framework.Build.csproj" -- test
