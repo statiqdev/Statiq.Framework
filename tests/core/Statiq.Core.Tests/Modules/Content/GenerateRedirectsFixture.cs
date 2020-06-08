@@ -51,6 +51,7 @@ namespace Statiq.Core.Tests.Modules.Contents
 
         [TestCase("foo/bar", "foo/bar.html")]
         [TestCase("foo/bar.html", "foo/bar.html")]
+        [TestCase("foo/bar.htm", "foo/bar.htm")]
         [TestCase("foo/bar.baz", "foo/bar.baz.html")]
         public async Task AddsExtension(string input, string expected)
         {

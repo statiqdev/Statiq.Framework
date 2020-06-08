@@ -149,7 +149,8 @@ namespace Statiq.Core
 
                         // Meta refresh documents
                         NormalizedPath outputPath = fromPath;
-                        if (!string.Equals(outputPath.Extension, ".html", StringComparison.OrdinalIgnoreCase))
+                        if (!string.Equals(outputPath.Extension, ".html", StringComparison.OrdinalIgnoreCase)
+                            && !string.Equals(outputPath.Extension, ".htm", StringComparison.OrdinalIgnoreCase))
                         {
                             outputPath = outputPath.AppendExtension(".html");
                         }
