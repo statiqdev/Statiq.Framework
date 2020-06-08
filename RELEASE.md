@@ -1,5 +1,6 @@
 # 1.0.0-beta.16
 
+- Updated `Spectre.Cli` to version 0.35.0 with better internal command registration (#110, thanks @patriksvensson).
 - Removed restriction on only using `IDocument` models in Razor (#108, #23, thanks @alanta).
 
 # 1.0.0-beta.15
