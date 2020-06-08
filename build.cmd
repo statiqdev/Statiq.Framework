@@ -1,6 +1,5 @@
 @echo off
-cd "build\Statiq.Framework.Build"
-dotnet run -- %*
+dotnet run --project "build\Statiq.Framework.Build" -- %*
 set exitcode=%errorlevel%
 cd %~dp0
 exit /b %exitcode%
