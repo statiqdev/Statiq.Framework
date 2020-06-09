@@ -105,7 +105,25 @@ namespace Statiq.Common
         }
 
         /// <summary>
-        /// Gets an instance for a class of a specified assignable type and name.
+        /// Gets an instance of a specified assignable type and name.
+        /// </summary>
+        /// <param name="type">The type of instance to get.</param>
+        /// <returns>
+        /// An instance of the specified type, or the first class that can be assigned to the specified type, or <c>null</c>.
+        /// </returns>
+        public object GetInstance(Type type)
+        {
+            _ = type ?? throw new ArgumentNullException(nameof(type));
+            Populate();
+            if (!_types.TryGetValue(type.FullName, out Type match))
+            {
+                match = GetTypesAssignableTo(type).FirstOrDefault();
+            }
+            return match == null ? default : Activator.CreateInstance(type);
+        }
+
+        /// <summary>
+        /// Gets an instance of a specified assignable type and name.
         /// </summary>
         /// <param name="assignableType">The assignable type of instance to get.</param>
         /// <param name="typeName">The name of the type.</param>

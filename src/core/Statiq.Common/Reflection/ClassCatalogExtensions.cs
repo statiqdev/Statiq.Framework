@@ -26,7 +26,7 @@ namespace Statiq.Common
             classCatalog.GetInstances(typeof(T)).Cast<T>();
 
         /// <summary>
-        /// Gets an instance for a class of a specified assignable type and name.
+        /// Gets an instance of a specified assignable type and name.
         /// </summary>
         /// <typeparam name="T">The assignable type of the instance to get.</typeparam>
         /// <param name="classCatalog">The class catalog.</param>
@@ -37,5 +37,16 @@ namespace Statiq.Common
         /// </returns>
         public static T GetInstance<T>(this ClassCatalog classCatalog, string typeName, bool ignoreCase = false) =>
             (T)classCatalog.GetInstance(typeof(T), typeName, ignoreCase);
+
+        /// <summary>
+        /// Gets an instance of a specified type.
+        /// </summary>
+        /// <typeparam name="T">The type of the instance to get.</typeparam>
+        /// <param name="classCatalog">The class catalog.</param>
+        /// <returns>
+        /// An instance of the specified type, or the first class that can be assigned to the specified type, or <c>null</c>.
+        /// </returns>
+        public static T GetInstance<T>(this ClassCatalog classCatalog) =>
+            (T)classCatalog.GetInstance(typeof(T));
     }
 }
