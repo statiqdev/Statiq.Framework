@@ -112,7 +112,6 @@ namespace Statiq.App
             bootstrapper.SetDefaultCommand<PipelinesCommand<PipelinesCommandSettings>>();
             bootstrapper.AddCommand<PipelinesCommand<PipelinesCommandSettings>>();
             bootstrapper.AddCommand<DeployCommand>();
-            bootstrapper.AddCommands();
             return bootstrapper;
         }
 
