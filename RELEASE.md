@@ -1,5 +1,6 @@
 # 1.0.0-beta.16
 
+- Added `.GetInstance(Type)` and `.GetInstance<TType>()` methods to the `ClassCatalog`.
 - Fixed a bug where custom commands were being added twice (#103).
 - Fixed a bug in the `GenerateRedirects` module for original files ending in `.htm` (#105).
 - Updated `Spectre.Cli` to version 0.35.0 with better internal command registration (#110, thanks @patriksvensson).
