@@ -13,7 +13,7 @@ namespace Statiq.Html.Tests
     public class GlobalizationFixture : BaseFixture
     {
         [Test]
-        public async Task AddProperDirectionAttributesToRtlText()
+        public async Task AddProperDirectionAttributesToRtlBlocks()
         {
             // Given
             TestDocument document = new TestDocument(@"
@@ -44,6 +44,49 @@ namespace Statiq.Html.Tests
 <li>بەڵێ</li>
 <li>Yes</li>
 </ul></body></html>".Replace("'", "\"");
+
+            // Then
+            result.Content.ShouldBe(expected, StringCompareShould.IgnoreLineEndings);
+        }
+
+        [Test]
+        public async Task AddProperDirectionAttributesToRtlTable()
+        {
+            // Given
+            TestDocument document = new TestDocument(@"
+<table>
+  <tr>
+    <th>ناو</th>
+    <th>تەمەن</th>
+  </tr>
+  <tr>
+    <td>ئاراس</td>
+    <td>50</td>
+  </tr>
+  <tr>
+    <td>هەڵۆ</td>
+    <td>94</td>
+  </tr>
+</table>");
+            Globalization module = new Globalization();
+
+            // When
+            TestDocument result = await ExecuteAsync(document, module).SingleAsync();
+
+            string expected = @"<html><head></head><body><table dir='rtl' align='right'>
+  <tbody><tr>
+    <th>ناو</th>
+    <th>تەمەن</th>
+  </tr>
+  <tr>
+    <td>ئاراس</td>
+    <td>50</td>
+  </tr>
+  <tr>
+    <td>هەڵۆ</td>
+    <td>94</td>
+  </tr>
+</tbody></table></body></html>".Replace("'", "\"");
 
             // Then
             result.Content.ShouldBe(expected, StringCompareShould.IgnoreLineEndings);

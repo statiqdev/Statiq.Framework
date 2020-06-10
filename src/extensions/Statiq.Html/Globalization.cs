@@ -63,6 +63,8 @@ namespace Statiq.Html
                         direction = Direction.RightToLeft;
 
                         element.SetAttribute("dir", "rtl");
+
+                        // Tables need align=right for rtl text in order to render correctly.
                         if (element.TagName == "TABLE")
                         {
                             element.SetAttribute("align", "right");
@@ -106,7 +108,7 @@ namespace Statiq.Html
         {
             // We return true for most of the HTML block level elements defined in
             // https://developer.mozilla.org/en-US/docs/Web/HTML/Block-level_elements#Elements
-            // except for <li>, I think it should have the same directionality as its parent.
+            // except for <li>, and <dt> I think they should have the same directionality as their parent.
 
             switch (element.TagName)
             {
@@ -141,7 +143,6 @@ namespace Statiq.Html
                 case "TABLE":
                 case "DL":
                 case "HR":
-                case "DT":
                     return true;
             }
 
