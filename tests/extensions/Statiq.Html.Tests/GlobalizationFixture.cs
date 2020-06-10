@@ -27,23 +27,33 @@ namespace Statiq.Html.Tests
 <ul>
 <li>بەڵێ</li>
 <li>Yes</li>
-</ul>");
+</ul>
+
+<article>
+<h2>مانگ</h2>
+<p>مانگ ھەروەھا پێی دەوتریت ھەیڤ (بە ئینگلیزی: Moon، بە عەرەبی: القمر) بەکار ئەھێنرێت بۆ ئاماژەدان بەھەر تەنێکی ئاسمانی یان دەستکرد، کە بە خولگەیێکی دیاری کراو بەدەوری زەویدا ئەسووڕێتەوە، یان ھەر ھەسارەیەکی تر، بۆ نموونە ھەسارەی کەیوان ھەژدە مانگی - پاشکۆی ھەیە.</p>
+</article>");
             Globalization module = new Globalization();
 
             // When
             TestDocument result = await ExecuteAsync(document, module).SingleAsync();
 
-            string expected = @"<html><head></head><body><h1>Hello World <span>سڵاو جیهان</span> Hello World</h1>
-<p>This is very nice.</p>
+            string expected = @"<html><head></head><body><h1 dir='ltr'>Hello World <span>سڵاو جیهان</span> Hello World</h1>
+<p dir='ltr'>This is very nice.</p>
 <div dir='rtl'>
-  <p>اهلا و سهلا</p>
+  <p dir='rtl'>اهلا و سهلا</p>
   <p dir='ltr'>This is so cool</p>
 </div>
 
 <ul dir='rtl'>
 <li>بەڵێ</li>
 <li>Yes</li>
-</ul></body></html>".Replace("'", "\"");
+</ul>
+
+<article dir='rtl'>
+<h2 dir='rtl'>مانگ</h2>
+<p dir='rtl'>مانگ ھەروەھا پێی دەوتریت ھەیڤ (بە ئینگلیزی: Moon، بە عەرەبی: القمر) بەکار ئەھێنرێت بۆ ئاماژەدان بەھەر تەنێکی ئاسمانی یان دەستکرد، کە بە خولگەیێکی دیاری کراو بەدەوری زەویدا ئەسووڕێتەوە، یان ھەر ھەسارەیەکی تر، بۆ نموونە ھەسارەی کەیوان ھەژدە مانگی - پاشکۆی ھەیە.</p>
+</article></body></html>".Replace("'", "\"");
 
             // Then
             result.Content.ShouldBe(expected, StringCompareShould.IgnoreLineEndings);
