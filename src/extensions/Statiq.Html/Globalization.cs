@@ -51,16 +51,16 @@ namespace Statiq.Html
         {
             ITreeWalker walker = htmlDocument.CreateTreeWalker(htmlDocument.DocumentElement, FilterSettings.Element);
             IElement element = (IElement)walker.ToFirst();
-            Direction direction = Direction.LeftToRight;
+
+            // Direction direction = Direction.LeftToRight;
 
             while (element != null)
             {
                 if (IsBlockElement(element))
                 {
-                    if (direction == Direction.LeftToRight
-                     && GetTextDirection(element.TextContent) == Direction.RightToLeft)
+                    if (GetTextDirection(element.TextContent) == Direction.RightToLeft)
                     {
-                        direction = Direction.RightToLeft;
+                        // direction = Direction.RightToLeft;
 
                         element.SetAttribute("dir", "rtl");
 
@@ -70,10 +70,9 @@ namespace Statiq.Html
                             element.SetAttribute("align", "right");
                         }
                     }
-                    else if (direction == Direction.RightToLeft
-                          && GetTextDirection(element.TextContent) == Direction.LeftToRight)
+                    else if (GetTextDirection(element.TextContent) == Direction.LeftToRight)
                     {
-                        direction = Direction.LeftToRight;
+                        // direction = Direction.LeftToRight;
                         element.SetAttribute("dir", "ltr");
 
                         if (element.TagName == "TABLE")
