@@ -51,7 +51,7 @@ namespace Statiq.Html
         {
             ITreeWalker walker = htmlDocument.CreateTreeWalker(htmlDocument.DocumentElement, FilterSettings.Element);
             IElement element = (IElement)walker.ToFirst();
-            
+
             while (element != null)
             {
                 if (IsBlockElement(element))
