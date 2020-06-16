@@ -51,20 +51,16 @@ namespace Statiq.Html
         {
             ITreeWalker walker = htmlDocument.CreateTreeWalker(htmlDocument.DocumentElement, FilterSettings.Element);
             IElement element = (IElement)walker.ToFirst();
-
-            // Direction direction = Direction.LeftToRight;
-
+            
             while (element != null)
             {
                 if (IsBlockElement(element))
                 {
                     if (GetTextDirection(element.TextContent) == Direction.RightToLeft)
                     {
-                        // direction = Direction.RightToLeft;
-
                         element.SetAttribute("dir", "rtl");
 
-                        // Tables need align=right for rtl text in order to render correctly.
+                        // Tables need align="right" too for RTL text in order to render correctly.
                         if (element.TagName == "TABLE")
                         {
                             element.SetAttribute("align", "right");
@@ -72,7 +68,6 @@ namespace Statiq.Html
                     }
                     else if (GetTextDirection(element.TextContent) == Direction.LeftToRight)
                     {
-                        // direction = Direction.LeftToRight;
                         element.SetAttribute("dir", "ltr");
 
                         if (element.TagName == "TABLE")
@@ -168,8 +163,6 @@ namespace Statiq.Html
             // Generated from Table D.1 of RFC3454
             // http://www.ietf.org/rfc/rfc3454.txt
 
-            // Probably should use a binary search approach
-
             return (c >= 0x0005D0 && c <= 0x0005EA) ||
                    (c >= 0x0005F0 && c <= 0x0005F4) ||
                    (c >= 0x000621 && c <= 0x00063A) ||
@@ -205,8 +198,6 @@ namespace Statiq.Html
         {
             // Generated from Table D.2 of RFC3454
             // http://www.ietf.org/rfc/rfc3454.txt
-
-            // Probably should use a binary search approach
 
             return (c >= 0x000041 && c <= 0x00005A) ||
                    (c >= 0x000061 && c <= 0x00007A) ||
