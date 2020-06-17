@@ -10,21 +10,30 @@ namespace Statiq.Testing
     public class TestFileProvider : IFileProvider, IEnumerable<NormalizedPath>
     {
         public TestFileProvider()
+            : this((IReadOnlyFileSystem)null)
         {
         }
 
         public TestFileProvider(params NormalizedPath[] directories)
+            : this((IReadOnlyFileSystem)null, directories)
         {
+        }
+
+        public TestFileProvider(IReadOnlyFileSystem fileSystem, params NormalizedPath[] directories)
+        {
+            FileSystem = fileSystem ?? new TestFileSystem(this);
             Directories.AddRange(directories);
         }
+
+        public IReadOnlyFileSystem FileSystem { get; set; }
 
         public ICollection<NormalizedPath> Directories { get; } = new ConcurrentHashSet<NormalizedPath>();
 
         public ConcurrentDictionary<NormalizedPath, StringBuilder> Files { get; } = new ConcurrentDictionary<NormalizedPath, StringBuilder>();
 
-        public IDirectory GetDirectory(NormalizedPath path) => new TestDirectory(this, path);
+        public IDirectory GetDirectory(NormalizedPath path) => new TestDirectory(FileSystem, this, path);
 
-        public IFile GetFile(NormalizedPath path) => new TestFile(this, path);
+        public IFile GetFile(NormalizedPath path) => new TestFile(FileSystem, this, path);
 
         public void AddDirectory(NormalizedPath path)
         {

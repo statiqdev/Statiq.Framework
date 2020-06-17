@@ -137,7 +137,47 @@ namespace Statiq.Common
             return fileSystem.InputPaths
                 .Reverse()
                 .Select(x => fileSystem.RootPath.Combine(x))
-                .FirstOrDefault(x => path.Segments.StartsWith(x.Segments));
+                .FirstOrDefault(x => x.ContainsDescendantOrSelf(path));
+        }
+
+        /// <summary>
+        /// Gets a path to the specified file relative to it's containing input directory.
+        /// If no input directories contain this file, then a null path is returned.
+        /// </summary>
+        /// <returns>A path to this file relative to it's containing input directory.</returns>
+        public static NormalizedPath GetRelativeInputPath(this IReadOnlyFileSystem fileSystem, NormalizedPath path)
+        {
+            _ = fileSystem ?? throw new ArgumentNullException(nameof(fileSystem));
+            path.ThrowIfNull(nameof(path));
+
+            if (path.IsRelative)
+            {
+                return path;
+            }
+
+            NormalizedPath containingPath = fileSystem.GetContainingInputPathForAbsolutePath(path);
+            return containingPath.IsNull ? NormalizedPath.Null : containingPath.GetRelativePath(path);
+        }
+
+        /// <summary>
+        /// Gets a path to the specified file relative to the output directory.
+        /// If this path is not relative to the output directory, then a null path is returned.
+        /// </summary>
+        /// <returns>A path to this file relative to the output directory.</returns>
+        public static NormalizedPath GetRelativeOutputPath(this IReadOnlyFileSystem fileSystem, NormalizedPath path)
+        {
+            _ = fileSystem ?? throw new ArgumentNullException(nameof(fileSystem));
+            path.ThrowIfNull(nameof(path));
+
+            if (path.IsRelative)
+            {
+                return path;
+            }
+
+            NormalizedPath outputPath = fileSystem.GetOutputPath();
+            return outputPath.ContainsDescendantOrSelf(path)
+                ? outputPath.GetRelativePath(path)
+                : NormalizedPath.Null;
         }
 
         /// <summary>

@@ -10,14 +10,13 @@ namespace Statiq.Core
     // Initially based on code from Cake (http://cakebuild.net/)
     internal class LocalDirectory : IDirectory
     {
+        private readonly IReadOnlyFileSystem _fileSystem;
         private readonly System.IO.DirectoryInfo _directory;
 
-        public NormalizedPath Path { get; }
-
-        NormalizedPath IFileSystemEntry.Path => Path;
-
-        public LocalDirectory(NormalizedPath path)
+        public LocalDirectory(IReadOnlyFileSystem fileSystem, NormalizedPath path)
         {
+            _fileSystem = fileSystem ?? throw new ArgumentNullException(nameof(fileSystem));
+
             path.ThrowIfNull(nameof(path));
 
             if (path.IsRelative)
@@ -28,6 +27,10 @@ namespace Statiq.Core
             Path = path;
             _directory = new System.IO.DirectoryInfo(Path.FullPath);
         }
+
+        public NormalizedPath Path { get; }
+
+        NormalizedPath IFileSystemEntry.Path => Path;
 
         public bool Exists => _directory.Exists;
 
@@ -40,7 +43,7 @@ namespace Statiq.Core
             get
             {
                 System.IO.DirectoryInfo parent = _directory.Parent;
-                return parent == null ? null : new LocalDirectory(new NormalizedPath(parent.FullName));
+                return parent == null ? null : _fileSystem.GetDirectory(new NormalizedPath(parent.FullName));
             }
         }
 
@@ -50,11 +53,11 @@ namespace Statiq.Core
 
         public IEnumerable<IDirectory> GetDirectories(SearchOption searchOption = SearchOption.TopDirectoryOnly) =>
             LocalFileProvider.RetryPolicy.Execute(() =>
-                _directory.GetDirectories("*", searchOption).Select(directory => (IDirectory)new LocalDirectory(directory.FullName)));
+                _directory.GetDirectories("*", searchOption).Select(directory => _fileSystem.GetDirectory(directory.FullName)));
 
         public IEnumerable<IFile> GetFiles(SearchOption searchOption = SearchOption.TopDirectoryOnly) =>
             LocalFileProvider.RetryPolicy.Execute(() =>
-                _directory.GetFiles("*", searchOption).Select(file => (IFile)new LocalFile(file.FullName)));
+                _directory.GetFiles("*", searchOption).Select(file => _fileSystem.GetFile(file.FullName)));
 
         public IDirectory GetDirectory(NormalizedPath path)
         {
@@ -65,7 +68,7 @@ namespace Statiq.Core
                 throw new ArgumentException("Path must be relative", nameof(path));
             }
 
-            return new LocalDirectory(Path.Combine(path));
+            return _fileSystem.GetDirectory(Path.Combine(path));
         }
 
         public IFile GetFile(NormalizedPath path)
@@ -77,7 +80,7 @@ namespace Statiq.Core
                 throw new ArgumentException("Path must be relative", nameof(path));
             }
 
-            return new LocalFile(Path.Combine(path));
+            return _fileSystem.GetFile(Path.Combine(path));
         }
 
         public override string ToString() => Path.ToString();

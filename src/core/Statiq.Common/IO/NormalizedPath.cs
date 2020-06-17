@@ -641,7 +641,7 @@ namespace Statiq.Common
         /// Checks if this path contains the specified path as a direct child.
         /// </summary>
         /// <param name="path">The path to check.</param>
-        /// <returns><c>true</c> if the path is or contains this path, <c>false</c> otherwise.</returns>
+        /// <returns><c>true</c> if the path contains this path as a child, <c>false</c> otherwise.</returns>
         public bool ContainsChild(NormalizedPath path)
         {
             ThrowIfNull();
@@ -654,22 +654,40 @@ namespace Statiq.Common
         /// Checks if this directory contains the specified directory as a descendant.
         /// </summary>
         /// <param name="path">The directory path to check.</param>
-        /// <returns><c>true</c> if the directory is or contains this directory, <c>false</c> otherwise.</returns>
+        /// <returns><c>true</c> if the directory contains this directory as a descendant, <c>false</c> otherwise.</returns>
         public bool ContainsDescendant(NormalizedPath path)
         {
             ThrowIfNull();
             path.ThrowIfNull(nameof(path));
 
-            path = path.Parent;
-            while (!path.IsNullOrEmpty)
-            {
-                if (Equals(path))
-                {
-                    return true;
-                }
-                path = path.Parent;
-            }
-            return false;
+            NormalizedPath parent = path.Parent;
+            return !parent.IsNullOrEmpty && parent.Segments.StartsWith(Segments);
+        }
+
+        /// <summary>
+        /// Checks if this path is the specified path or if this path contains the specified path as a direct child.
+        /// </summary>
+        /// <param name="path">The path to check.</param>
+        /// <returns><c>true</c> if the path is this path or contains this path as a child, <c>false</c> otherwise.</returns>
+        public bool ContainsChildOrSelf(NormalizedPath path)
+        {
+            ThrowIfNull();
+            path.ThrowIfNull(nameof(path));
+
+            return Equals(path) || ContainsChild(path);
+        }
+
+        /// <summary>
+        /// Checks if this path is the specified path or if this directory contains the specified directory as a descendant.
+        /// </summary>
+        /// <param name="path">The directory path to check.</param>
+        /// <returns><c>true</c> if the directory is this directory or contains this directory as a descendant, <c>false</c> otherwise.</returns>
+        public bool ContainsDescendantOrSelf(NormalizedPath path)
+        {
+            ThrowIfNull();
+            path.ThrowIfNull(nameof(path));
+
+            return Equals(path) || ContainsDescendant(path);
         }
 
         /// <summary>
@@ -828,41 +846,18 @@ namespace Statiq.Common
         }
 
         /// <summary>
-        /// Gets path to this file relative to it's containing input directory in the current file system.
-        /// If no input directories contain this file, then the file name is returned.
+        /// Gets a path to this file relative to it's containing input directory in the current file system.
+        /// If no input directories contain this file, then a null path is returned.
         /// </summary>
         /// <returns>A path to this file relative to it's containing input directory in the current file system.</returns>
-        public NormalizedPath GetRelativeInputPath()
-        {
-            ThrowIfNull();
-
-            if (IsRelative)
-            {
-                return this;
-            }
-
-            NormalizedPath containingPath = IExecutionContext.Current.FileSystem.GetContainingInputPathForAbsolutePath(this);
-            return containingPath.IsNull ? FileName : containingPath.GetRelativePath(this);
-        }
+        public NormalizedPath GetRelativeInputPath() => IExecutionContext.Current.FileSystem.GetRelativeInputPath(this);
 
         /// <summary>
-        /// Gets path to this file relative to the output directory in the current file system.
-        /// If this path is not relative to the output directory, then the file name is returned.
+        /// Gets a path to this file relative to the output directory in the current file system.
+        /// If this path is not relative to the output directory, then a null path is returned.
         /// </summary>
-        /// <returns>A path to this file relative to it's containing input directory in the current file system.</returns>
-        public NormalizedPath GetRelativeOutputPath()
-        {
-            ThrowIfNull();
-
-            if (IsRelative)
-            {
-                return this;
-            }
-
-            return Parent.Segments.StartsWith(IExecutionContext.Current.FileSystem.OutputPath.Segments)
-                ? IExecutionContext.Current.FileSystem.OutputPath.GetRelativePath(this)
-                : FileName;
-        }
+        /// <returns>A path to this file relative to the output directory in the current file system.</returns>
+        public NormalizedPath GetRelativeOutputPath() => IExecutionContext.Current.FileSystem.GetRelativeOutputPath(this);
 
         private static readonly ReadOnlyMemory<char> IndexFileName = "index.".AsMemory();
 

@@ -8,14 +8,13 @@ namespace Statiq.Core
     // Initially based on code from Cake (http://cakebuild.net/)
     internal class LocalFile : IFile
     {
+        private readonly IReadOnlyFileSystem _fileSystem;
         private readonly System.IO.FileInfo _file;
 
-        public NormalizedPath Path { get; }
-
-        NormalizedPath IFileSystemEntry.Path => Path;
-
-        public LocalFile(NormalizedPath path)
+        public LocalFile(IReadOnlyFileSystem fileSystem, NormalizedPath path)
         {
+            _fileSystem = fileSystem ?? throw new ArgumentNullException(nameof(fileSystem));
+
             path.ThrowIfNull(nameof(path));
 
             if (path.IsRelative)
@@ -27,7 +26,11 @@ namespace Statiq.Core
             _file = new System.IO.FileInfo(Path.FullPath);
         }
 
-        public IDirectory Directory => new LocalDirectory(Path.Parent);
+        public NormalizedPath Path { get; }
+
+        NormalizedPath IFileSystemEntry.Path => Path;
+
+        public IDirectory Directory => _fileSystem.GetDirectory(Path.Parent);
 
         public bool Exists => _file.Exists;
 

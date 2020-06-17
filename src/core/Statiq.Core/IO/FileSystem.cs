@@ -11,14 +11,18 @@ namespace Statiq.Core
         private NormalizedPath _rootPath = Directory.GetCurrentDirectory();
         private NormalizedPath _outputPath = "output";
         private NormalizedPath _tempPath = "temp";
+        private IFileProvider _fileProvider;
 
         public FileSystem()
         {
-            FileProvider = new LocalFileProvider();
-            InputPaths = new PathCollection("input");
+            FileProvider = new LocalFileProvider(this);
         }
 
-        public IFileProvider FileProvider { get; set; }
+        public IFileProvider FileProvider
+        {
+            get => _fileProvider;
+            set => _fileProvider = new ExcludedFileProvider(this, value);
+        }
 
         public NormalizedPath RootPath
         {
@@ -37,9 +41,13 @@ namespace Statiq.Core
             }
         }
 
-        public PathCollection InputPaths { get; }
+        public PathCollection InputPaths { get; } = new PathCollection("input");
 
         IReadOnlyList<NormalizedPath> IReadOnlyFileSystem.InputPaths => InputPaths;
+
+        public PathCollection ExcludedPaths { get; } = new PathCollection();
+
+        IReadOnlyList<NormalizedPath> IReadOnlyFileSystem.ExcludedPaths => ExcludedPaths;
 
         public NormalizedPath OutputPath
         {

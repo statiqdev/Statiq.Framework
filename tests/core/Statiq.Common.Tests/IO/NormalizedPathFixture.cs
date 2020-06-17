@@ -1184,6 +1184,78 @@ namespace Statiq.Common.Tests.IO
             }
         }
 
+        public class ContainsChildOrSelfTests : NormalizedPathFixture
+        {
+            [TestCase("/a/b/c", "/a/b/test.txt", false)]
+            [TestCase("/a/b/c", "/a/b/c/test.txt", true)]
+            [TestCase("/a/b/c", "/a/b/c/d/test.txt", false)]
+            public void ShouldCheckFilePath(string directory, string path, bool expected)
+            {
+                // Given
+                NormalizedPath directoryPath = new NormalizedPath(directory);
+                NormalizedPath filePath = new NormalizedPath(path);
+
+                // When
+                bool result = directoryPath.ContainsChildOrSelf(filePath);
+
+                // Then
+                result.ShouldBe(expected);
+            }
+
+            [TestCase("/a/b/c", "/a/b", false)]
+            [TestCase("/a/b/c", "/a/b/c", true)]
+            [TestCase("/a/b/c", "/a/b/c/d", true)]
+            [TestCase("/a/b/c", "/a/b/c/d/e", false)]
+            public void ShouldCheckDirectoryPath(string directory, string path, bool expected)
+            {
+                // Given
+                NormalizedPath directoryPath = new NormalizedPath(directory);
+                NormalizedPath filePath = new NormalizedPath(path);
+
+                // When
+                bool result = directoryPath.ContainsChildOrSelf(filePath);
+
+                // Then
+                result.ShouldBe(expected);
+            }
+        }
+
+        public class ContainsDescendantOrSelfTests : NormalizedPathFixture
+        {
+            [TestCase("/a/b/c", "/a/b/test.txt", false)]
+            [TestCase("/a/b/c", "/a/b/c/test.txt", true)]
+            [TestCase("/a/b/c", "/a/b/c/d/test.txt", true)]
+            public void ShouldCheckFilePath(string directory, string path, bool expected)
+            {
+                // Given
+                NormalizedPath directoryPath = new NormalizedPath(directory);
+                NormalizedPath filePath = new NormalizedPath(path);
+
+                // When
+                bool result = directoryPath.ContainsDescendantOrSelf(filePath);
+
+                // Then
+                result.ShouldBe(expected);
+            }
+
+            [TestCase("/a/b/c", "/a/b", false)]
+            [TestCase("/a/b/c", "/a/b/c", true)]
+            [TestCase("/a/b/c", "/a/b/c/d", true)]
+            [TestCase("/a/b/c", "/a/b/c/d/e", true)]
+            public void ShouldCheckDirectoryPath(string directory, string path, bool expected)
+            {
+                // Given
+                NormalizedPath directoryPath = new NormalizedPath(directory);
+                NormalizedPath filePath = new NormalizedPath(path);
+
+                // When
+                bool result = directoryPath.ContainsDescendantOrSelf(filePath);
+
+                // Then
+                result.ShouldBe(expected);
+            }
+        }
+
         public class OptimizeFileNameTests : NormalizedPathFixture
         {
             [TestCase(

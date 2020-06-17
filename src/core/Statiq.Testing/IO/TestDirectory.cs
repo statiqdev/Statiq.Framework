@@ -9,10 +9,12 @@ namespace Statiq.Testing
 {
     public class TestDirectory : IDirectory
     {
+        private readonly IReadOnlyFileSystem _fileSystem;
         private readonly TestFileProvider _fileProvider;
 
-        public TestDirectory(TestFileProvider fileProvider, NormalizedPath path)
+        public TestDirectory(IReadOnlyFileSystem fileSystem, TestFileProvider fileProvider, NormalizedPath path)
         {
+            _fileSystem = fileSystem;
             _fileProvider = fileProvider;
             Path = path;
         }
@@ -32,7 +34,7 @@ namespace Statiq.Testing
             get
             {
                 NormalizedPath parentPath = Path.Parent;
-                return parentPath.IsNull ? null : new TestDirectory(_fileProvider, parentPath);
+                return parentPath.IsNull ? null : _fileSystem.GetDirectory(parentPath);
             }
         }
 
@@ -46,11 +48,11 @@ namespace Statiq.Testing
             {
                 return _fileProvider.Directories
                     .Where(x => Path.ContainsChild(x))
-                    .Select(x => new TestDirectory(_fileProvider, x));
+                    .Select(x => _fileSystem.GetDirectory(x));
             }
             return _fileProvider.Directories
                 .Where(x => Path.ContainsDescendant(x))
-                .Select(x => new TestDirectory(_fileProvider, x));
+                .Select(x => _fileSystem.GetDirectory(x));
         }
 
         public IEnumerable<IFile> GetFiles(SearchOption searchOption = SearchOption.TopDirectoryOnly)
@@ -59,11 +61,11 @@ namespace Statiq.Testing
             {
                 return _fileProvider.Files.Keys
                     .Where(x => Path.ContainsChild(x))
-                    .Select(x => new TestFile(_fileProvider, x));
+                    .Select(x => _fileSystem.GetFile(x));
             }
             return _fileProvider.Files.Keys
                 .Where(x => Path.ContainsDescendant(x))
-                .Select(x => new TestFile(_fileProvider, x));
+                .Select(x => _fileSystem.GetFile(x));
         }
 
         public IDirectory GetDirectory(NormalizedPath path)
@@ -75,7 +77,7 @@ namespace Statiq.Testing
                 throw new ArgumentException("Path must be relative", nameof(path));
             }
 
-            return new TestDirectory(_fileProvider, Path.Combine(path));
+            return _fileSystem.GetDirectory(Path.Combine(path));
         }
 
         public IFile GetFile(NormalizedPath path)
@@ -87,7 +89,7 @@ namespace Statiq.Testing
                 throw new ArgumentException("Path must be relative", nameof(path));
             }
 
-            return new TestFile(_fileProvider, Path.Combine(path));
+            return _fileSystem.GetFile(Path.Combine(path));
         }
 
         public override string ToString() => Path.ToString();

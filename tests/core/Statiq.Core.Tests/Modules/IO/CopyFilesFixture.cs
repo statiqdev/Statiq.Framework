@@ -88,7 +88,7 @@ namespace Statiq.Core.Tests.Modules.IO
             }
 
             [Test]
-            public async Task CopyFilesAboveInputPath()
+            public async Task DoesNotCopyFilesAboveInputPath()
             {
                 // Given
                 TestExecutionContext context = GetExecutionContext();
@@ -104,7 +104,7 @@ namespace Statiq.Core.Tests.Modules.IO
                 Assert.IsFalse(context.FileSystem.GetOutputDirectory("Subfolder").Exists);
                 Assert.IsFalse(context.FileSystem.GetOutputFile("markdown-x.md").Exists);
                 Assert.IsFalse(context.FileSystem.GetOutputFile("Subfolder/markdown-y.md").Exists);
-                Assert.IsTrue(context.FileSystem.GetOutputFile("test-above-input.txt").Exists);
+                Assert.IsFalse(context.FileSystem.GetOutputFile("test-above-input.txt").Exists);
             }
 
             [Test]
@@ -124,7 +124,7 @@ namespace Statiq.Core.Tests.Modules.IO
                 Assert.IsTrue(context.FileSystem.GetOutputDirectory("Subfolder").Exists);
                 Assert.IsFalse(context.FileSystem.GetOutputFile("markdown-x.md").Exists);
                 Assert.IsFalse(context.FileSystem.GetOutputFile("Subfolder/markdown-y.md").Exists);
-                Assert.IsTrue(context.FileSystem.GetOutputFile("test-above-input.txt").Exists);
+                Assert.IsFalse(context.FileSystem.GetOutputFile("test-above-input.txt").Exists); // Files outside an input path will not be copied
             }
 
             [Test]

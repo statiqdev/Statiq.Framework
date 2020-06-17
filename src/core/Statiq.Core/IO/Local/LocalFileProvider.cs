@@ -1,5 +1,4 @@
 using System;
-using System.Threading.Tasks;
 using Statiq.Common;
 using Polly;
 
@@ -7,6 +6,13 @@ namespace Statiq.Core
 {
     public class LocalFileProvider : IFileProvider
     {
+        private readonly IReadOnlyFileSystem _fileSystem;
+
+        public LocalFileProvider(IReadOnlyFileSystem fileSystem)
+        {
+            _fileSystem = fileSystem ?? throw new ArgumentNullException(nameof(fileSystem));
+        }
+
         internal static Policy RetryPolicy { get; } =
             Policy
                 .Handle<Exception>()
@@ -17,8 +23,8 @@ namespace Statiq.Core
                 .Handle<Exception>()
                 .WaitAndRetryAsync(3, _ => TimeSpan.FromMilliseconds(100));
 
-        public IFile GetFile(NormalizedPath path) => new LocalFile(path);
+        public IFile GetFile(NormalizedPath path) => new LocalFile(_fileSystem, path);
 
-        public IDirectory GetDirectory(NormalizedPath path) => new LocalDirectory(path);
+        public IDirectory GetDirectory(NormalizedPath path) => new LocalDirectory(_fileSystem, path);
     }
 }

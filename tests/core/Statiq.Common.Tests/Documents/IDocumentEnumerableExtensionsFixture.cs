@@ -16,6 +16,7 @@ namespace Statiq.Common.Tests.Documents
             {
                 // Given
                 TestExecutionContext context = new TestExecutionContext();
+                context.FileSystem.InputPaths.Add("theme");
                 TestDocument a = new TestDocument(new NormalizedPath("/input/Foo/a.txt"));
                 TestDocument b = new TestDocument(new NormalizedPath("/theme/Foo/Bar/b.txt"));
                 TestDocument c = new TestDocument(new NormalizedPath("/Foo/Bar/c.txt"));
@@ -37,6 +38,7 @@ namespace Statiq.Common.Tests.Documents
             {
                 // Given
                 TestExecutionContext context = new TestExecutionContext();
+                context.FileSystem.InputPaths.Add("theme");
                 TestDocument a = new TestDocument(new NormalizedPath("/input/Foo/a.txt"), new NormalizedPath("a/b/c.txt"));
                 TestDocument b = new TestDocument(new NormalizedPath("/theme/Foo/Bar/b.txt"), new NormalizedPath("a/x/y.txt"));
                 TestDocument c = new TestDocument(new NormalizedPath("/Foo/Bar/c.txt"), new NormalizedPath("l/m.txt"));
@@ -55,6 +57,7 @@ namespace Statiq.Common.Tests.Documents
             {
                 // Given
                 TestExecutionContext context = new TestExecutionContext();
+                context.FileSystem.InputPaths.Add("theme");
                 TestDocument a = new TestDocument(new NormalizedPath("/input/Foo/a.txt"), new NormalizedPath("c.txt"));
                 TestDocument b = new TestDocument(new NormalizedPath("/theme/Foo/Bar/b.txt"), new NormalizedPath("a/x/y.txt"));
                 TestDocument c = new TestDocument(new NormalizedPath("/Foo/Bar/c.txt"), new NormalizedPath("m.txt"));

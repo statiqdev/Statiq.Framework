@@ -9,9 +9,9 @@ using Statiq.Testing;
 namespace Statiq.Common.Tests.IO
 {
     [TestFixture]
-    public class IReadOnlyFileSystemFixture : BaseFixture
+    public class IReadOnlyFileSystemExtensionsFixture : BaseFixture
     {
-        public class GetInputFileTests : IReadOnlyFileSystemFixture
+        public class GetInputFileTests : IReadOnlyFileSystemExtensionsFixture
         {
             [TestCase("foo.txt", "/a/b/c/foo.txt")]
             [TestCase("bar.txt", "/a/x/bar.txt")]
@@ -81,7 +81,7 @@ namespace Statiq.Common.Tests.IO
             }
         }
 
-        public class GetInputDirectoryTests : IReadOnlyFileSystemFixture
+        public class GetInputDirectoryTests : IReadOnlyFileSystemExtensionsFixture
         {
             [Test]
             public void ReturnsVirtualInputDirectoryForRelativePath()
@@ -139,7 +139,7 @@ namespace Statiq.Common.Tests.IO
             }
         }
 
-        public class GetInputDirectoriesTests : IReadOnlyFileSystemFixture
+        public class GetInputDirectoriesTests : IReadOnlyFileSystemExtensionsFixture
         {
             [Test]
             public void ReturnsCombinedInputDirectories()
@@ -147,6 +147,7 @@ namespace Statiq.Common.Tests.IO
                 // Given
                 IFileSystem fileSystem = new TestFileSystem(GetFileProvider());
                 fileSystem.RootPath = "/a";
+                fileSystem.InputPaths.Add("theme");
                 fileSystem.InputPaths.Add("b/c");
                 fileSystem.InputPaths.Add("b/d");
                 fileSystem.InputPaths.Add("x");
@@ -171,7 +172,7 @@ namespace Statiq.Common.Tests.IO
             }
         }
 
-        public class GetContainingInputPathForAbsolutePathTests : IReadOnlyFileSystemFixture
+        public class GetContainingInputPathForAbsolutePathTests : IReadOnlyFileSystemExtensionsFixture
         {
             [Test]
             public void ThrowsForNullPath()
@@ -226,7 +227,7 @@ namespace Statiq.Common.Tests.IO
             }
         }
 
-        public class GetContainingInputPathTests : IReadOnlyFileSystemFixture
+        public class GetContainingInputPathTests : IReadOnlyFileSystemExtensionsFixture
         {
             [Test]
             public void ThrowsForNullPath()
@@ -341,7 +342,54 @@ namespace Statiq.Common.Tests.IO
             }
         }
 
-        public class GetFilesTests : IReadOnlyFileSystemFixture
+        public class GetRelativeInputPathTests : IReadOnlyFileSystemExtensionsFixture
+        {
+            [TestCase("/a/b/c/foo.txt", "c/foo.txt")]
+            [TestCase("/a/x/bar.txt", "bar.txt")]
+            [TestCase("/a/x/baz.txt", "baz.txt")]
+            [TestCase("/z/baz.txt", null)]
+            [TestCase("/a/b/c/../e/foo.txt", "e/foo.txt")]
+            [TestCase("/a/b/c", "c")]
+            [TestCase("/a/x", "")]
+            public void ShouldReturnRelativeInputPath(string path, string expected)
+            {
+                // Given
+                IFileSystem fileSystem = new TestFileSystem(GetFileProvider());
+                fileSystem.RootPath = "/a";
+                fileSystem.InputPaths.Add("b");
+                fileSystem.InputPaths.Add("x");
+
+                // When
+                NormalizedPath inputPath = fileSystem.GetRelativeInputPath(new NormalizedPath(path));
+
+                // Then
+                inputPath.FullPath.ShouldBe(expected);
+            }
+        }
+
+        public class GetRelativeOutputPathTests : IReadOnlyFileSystemExtensionsFixture
+        {
+            [TestCase("/a/b/c/foo.txt", "c/foo.txt")]
+            [TestCase("/z/baz.txt", null)]
+            [TestCase("/a/b/c/../e/foo.txt", "e/foo.txt")]
+            [TestCase("/a/b/c", "c")]
+            [TestCase("/a/b", "")]
+            public void ShouldReturnRelativeOutputPath(string path, string expected)
+            {
+                // Given
+                IFileSystem fileSystem = new TestFileSystem(GetFileProvider());
+                fileSystem.RootPath = "/a";
+                fileSystem.OutputPath = "b";
+
+                // When
+                NormalizedPath inputPath = fileSystem.GetRelativeOutputPath(new NormalizedPath(path));
+
+                // Then
+                inputPath.FullPath.ShouldBe(expected);
+            }
+        }
+
+        public class GetFilesTests : IReadOnlyFileSystemExtensionsFixture
         {
             [Test]
             public void ShouldThrowForNullDirectory()
@@ -403,8 +451,6 @@ namespace Statiq.Common.Tests.IO
             [TestCase("/", new[] { "/q/werty.txt" }, new[] { "/q/werty.txt" }, false)]
             public void ShouldReturnExistingFiles(string directory, string[] patterns, string[] expected, bool reverseSlashes)
             {
-                // TestContext.Out.WriteLine($"Patterns: {string.Join(",", patterns)}");
-
                 // Given
                 TestFileProvider fileProvider = GetFileProvider();
                 fileProvider.AddDirectory("/");
@@ -427,6 +473,33 @@ namespace Statiq.Common.Tests.IO
                     // Then
                     CollectionAssert.AreEquivalent(expected, results.Select(x => x.Path.FullPath));
                 }
+            }
+
+            [TestCase("/", "b", new[] { "/a/b/c/foo.txt" }, new[] { "/a/b/c/foo.txt" })]
+            [TestCase("/", "a", new[] { "/a/b/c/foo.txt" }, new string[] { })]
+            [TestCase("/", "a/b/c", new[] { "/a/b/c/foo.txt" }, new string[] { })]
+            [TestCase("/", "a/x", new[] { "/a/b/c/foo.txt" }, new string[] { "/a/b/c/foo.txt" })]
+            [TestCase("/", "b", new[] { "/**/*.txt" }, new[] { "/a/x/bar.txt", "/a/b/c/foo.txt", "/q/werty.txt" })]
+            [TestCase("/", "a", new[] { "/**/*.txt" }, new[] { "/q/werty.txt" })]
+            [TestCase("/", "a/b/c", new[] { "/**/*.txt" }, new[] { "/a/x/bar.txt", "/q/werty.txt" })]
+            public void ShouldNotReturnExcludedFiles(string directory, string excluded, string[] patterns, string[] expected)
+            {
+                // Given
+                TestFileProvider fileProvider = GetFileProvider();
+                fileProvider.AddDirectory("/");
+                fileProvider.AddDirectory("/q");
+                fileProvider.AddFile("/q/werty.txt");
+                IFileSystem fileSystem = new TestFileSystem(fileProvider);
+                fileSystem.InputPaths.Clear();
+                fileSystem.InputPaths.Add("/"); // Exclusions operate on relative input paths, so the input path must be defined
+                fileSystem.ExcludedPaths.Add(excluded);
+                IDirectory dir = fileSystem.GetDirectory(directory);
+
+                // When
+                IEnumerable<IFile> results = fileSystem.GetFiles(dir, patterns);
+
+                // Then
+                CollectionAssert.AreEquivalent(expected, results.Select(x => x.Path.FullPath));
             }
         }
 

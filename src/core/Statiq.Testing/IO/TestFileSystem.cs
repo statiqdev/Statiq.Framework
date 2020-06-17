@@ -8,30 +8,44 @@ namespace Statiq.Testing
     /// </summary>
     public class TestFileSystem : IFileSystem
     {
+        private IFileProvider _fileProvider;
+
         public TestFileSystem()
-            : this(new TestFileProvider("input", "theme"))
+            : this(null)
         {
         }
 
         public TestFileSystem(IFileProvider fileProvider)
         {
-            FileProvider = fileProvider;
+            FileProvider = fileProvider ?? new TestFileProvider(this, "input");
         }
 
-        /// <summary>
-        /// The file provider to use for this file system.
-        /// </summary>
-        public IFileProvider FileProvider { get; set; }
+        public IFileProvider FileProvider
+        {
+            get => _fileProvider;
+            set
+            {
+                if (value is TestFileProvider testFileProvider)
+                {
+                    // Attach the file provider to this file system
+                    testFileProvider.FileSystem = this;
+                }
+                _fileProvider = new ExcludedFileProvider(this, value);
+            }
+        }
 
         /// <inheritdoc />
         public NormalizedPath RootPath { get; set; } = NormalizedPath.AbsoluteRoot;
 
         /// <inheritdoc />
-        public PathCollection InputPaths { get; set; } = new PathCollection(
-            new NormalizedPath("theme"),
-            new NormalizedPath("input"));
+        public PathCollection InputPaths { get; set; } = new PathCollection(new NormalizedPath("input"));
 
         IReadOnlyList<NormalizedPath> IReadOnlyFileSystem.InputPaths => InputPaths;
+
+        /// <inheritdoc />
+        public PathCollection ExcludedPaths { get; set; } = new PathCollection();
+
+        IReadOnlyList<NormalizedPath> IReadOnlyFileSystem.ExcludedPaths => ExcludedPaths;
 
         /// <inheritdoc />
         public NormalizedPath OutputPath { get; set; } = "output";
