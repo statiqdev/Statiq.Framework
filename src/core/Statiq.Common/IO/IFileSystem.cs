@@ -31,6 +31,17 @@
         new PathCollection InputPaths { get; }
 
         /// <summary>
+        /// Gets the excluded paths collection which can be used
+        /// to excluded specific paths from the input paths. Any
+        /// <see cref="IDirectory"/> or <see cref="IFile"/> within
+        /// an excluded path will appear to be non-existing.
+        /// </summary>
+        /// <value>
+        /// The input paths.
+        /// </value>
+        new PathCollection ExcludedPaths { get; }
+
+        /// <summary>
         /// Gets or sets the output path.
         /// </summary>
         /// <value>

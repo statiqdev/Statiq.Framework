@@ -43,6 +43,17 @@ namespace Statiq.Common
         IReadOnlyList<NormalizedPath> InputPaths { get; }
 
         /// <summary>
+        /// Gets the excluded paths collection which can be used
+        /// to excluded specific paths from the input paths. Any
+        /// <see cref="IDirectory"/> or <see cref="IFile"/> within
+        /// an excluded path will appear to be non-existing.
+        /// </summary>
+        /// <value>
+        /// The excluded paths.
+        /// </value>
+        IReadOnlyList<NormalizedPath> ExcludedPaths { get; }
+
+        /// <summary>
         /// Gets the output path.
         /// </summary>
         /// <value>

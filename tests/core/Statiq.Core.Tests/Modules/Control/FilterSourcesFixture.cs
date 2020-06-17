@@ -16,6 +16,8 @@ namespace Statiq.Core.Tests.Modules.Control
             public async Task FiltersSources()
             {
                 // Given
+                TestExecutionContext context = new TestExecutionContext();
+                context.FileSystem.InputPaths.Add("theme");
                 TestDocument a = new TestDocument(new NormalizedPath("/input/Foo/a.txt"));
                 TestDocument b = new TestDocument(new NormalizedPath("/theme/Foo/Bar/b.txt"));
                 TestDocument c = new TestDocument(new NormalizedPath("/Foo/Bar/c.txt"));
@@ -23,7 +25,7 @@ namespace Statiq.Core.Tests.Modules.Control
                 FilterSources filter = new FilterSources("Foo/**/*.txt");
 
                 // When
-                IReadOnlyList<TestDocument> results = await ExecuteAsync(new[] { a, b, c, d }, filter);
+                IReadOnlyList<TestDocument> results = await ExecuteAsync(new[] { a, b, c, d }, context, filter);
 
                 // Then
                 results.ShouldBe(new[] { a, b }, true);

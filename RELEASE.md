@@ -1,5 +1,11 @@
 # 1.0.0-beta.16
 
+- Added `NormalizedPath.ContainsDescendantOrSelf()`.
+- Added `NormalizedPath.ContainsChildOrSelf()`.
+- Fixed several bugs with the implementation of `NormalizedPath.GetRelativeOutputPath()`.
+- Added a `IReadOnlyFileSystem.GetRelativeOutputPath()` extension.
+- Added a `IReadOnlyFileSystem.GetRelativeInputPath()` extension.
+- Added `IFileSystem.ExcludedPaths` to indicate input paths that should be excluded from processing.
 - Added `.GetInstance(Type)` and `.GetInstance<TType>()` methods to the `ClassCatalog`.
 - Fixed a bug where custom commands were being added twice (#103).
 - Fixed a bug in the `GenerateRedirects` module for original files ending in `.htm` (#105).

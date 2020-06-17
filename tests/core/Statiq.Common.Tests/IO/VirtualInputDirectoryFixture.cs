@@ -243,6 +243,22 @@ namespace Statiq.Common.Tests.IO
                 // Then
                 exists.ShouldBeFalse();
             }
+
+            [TestCase("a")]
+            [TestCase("a/b")]
+            public void ShouldReturnFalseForExcludedPath(string excluded)
+            {
+                // Given
+                TestFileSystem fileSystem = new TestFileSystem(GetFileProvider());
+                fileSystem.ExcludedPaths.Add(excluded);
+                VirtualInputDirectory directory = GetVirtualInputDirectory("a/b", fileSystem);
+
+                // When
+                bool exists = directory.Exists;
+
+                // Then
+                exists.ShouldBeFalse();
+            }
         }
 
         public class CreateTests : VirtualInputDirectoryFixture
@@ -273,9 +289,11 @@ namespace Statiq.Common.Tests.IO
             }
         }
 
-        private VirtualInputDirectory GetVirtualInputDirectory(string path)
+        private VirtualInputDirectory GetVirtualInputDirectory(string path) =>
+            GetVirtualInputDirectory(path, new TestFileSystem(GetFileProvider()));
+
+        private VirtualInputDirectory GetVirtualInputDirectory(string path, TestFileSystem fileSystem)
         {
-            TestFileSystem fileSystem = new TestFileSystem(GetFileProvider());
             fileSystem.RootPath = "/a";
             fileSystem.InputPaths.Add("b");
             fileSystem.InputPaths.Add("/foo");

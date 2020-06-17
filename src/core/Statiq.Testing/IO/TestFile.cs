@@ -8,10 +8,12 @@ namespace Statiq.Testing
 {
     public class TestFile : IFile
     {
+        private readonly IReadOnlyFileSystem _fileSystem;
         private readonly TestFileProvider _fileProvider;
 
-        public TestFile(TestFileProvider fileProvider, NormalizedPath path)
+        public TestFile(IReadOnlyFileSystem fileSystem, TestFileProvider fileProvider, NormalizedPath path)
         {
+            _fileSystem = fileSystem;
             _fileProvider = fileProvider;
             Path = path;
         }
@@ -22,7 +24,7 @@ namespace Statiq.Testing
 
         public bool Exists => _fileProvider.Files.ContainsKey(Path);
 
-        public IDirectory Directory => new TestDirectory(_fileProvider, Path.Parent);
+        public IDirectory Directory => _fileSystem.GetDirectory(Path.Parent);
 
         public long Length => _fileProvider.Files[Path].Length;
 
