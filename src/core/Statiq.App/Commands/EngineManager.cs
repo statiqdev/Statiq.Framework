@@ -62,6 +62,10 @@ namespace Statiq.App
             // Log the full environment
             _logger.LogInformation($"Root path:{Environment.NewLine}       {Engine.FileSystem.RootPath}");
             _logger.LogInformation($"Input path(s):{Environment.NewLine}       {string.Join(Environment.NewLine + "       ", Engine.FileSystem.InputPaths)}");
+            if (Engine.FileSystem.ExcludedPaths.Count > 0)
+            {
+                _logger.LogInformation($"Excluded path(s):{Environment.NewLine}       {string.Join(Environment.NewLine + "       ", Engine.FileSystem.ExcludedPaths)}");
+            }
             _logger.LogInformation($"Output path:{Environment.NewLine}       {Engine.FileSystem.OutputPath}");
             _logger.LogInformation($"Temp path:{Environment.NewLine}       {Engine.FileSystem.TempPath}");
         }
