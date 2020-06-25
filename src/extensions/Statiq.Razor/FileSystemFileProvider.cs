@@ -32,8 +32,10 @@ namespace Statiq.Razor
             {
                 return new NotFoundFileInfo(subpath);
             }
-            IFile file = StatiqFileSystem.GetInputFile(subpath.TrimStart('/'));
-            return new StatiqFileInfo(file);
+
+            string inputPath = subpath.TrimStart('/');
+            IFile file = StatiqFileSystem.GetInputFile(inputPath);
+            return !file.Exists ? new NotFoundFileInfo(subpath) : (IFileInfo)new StatiqFileInfo(file, inputPath);
         }
 
         public IDirectoryContents GetDirectoryContents(string subpath)
@@ -42,10 +44,16 @@ namespace Statiq.Razor
             {
                 return new NotFoundDirectoryContents();
             }
+
             IDirectory directory = StatiqFileSystem.GetInputDirectory(subpath);
+            if (!directory.Exists)
+            {
+                return new NotFoundDirectoryContents();
+            }
+
             List<IFileInfo> fileInfos = new List<IFileInfo>();
-            fileInfos.AddRange(directory.GetDirectories().Select(x => new StatiqDirectoryInfo(x)));
-            fileInfos.AddRange(directory.GetFiles().Select(x => new StatiqFileInfo(x)));
+            fileInfos.AddRange(directory.GetDirectories().Select(x => new StatiqDirectoryInfo(x, subpath)));
+            fileInfos.AddRange(directory.GetFiles().Select(x => new StatiqFileInfo(x, directory.Path.GetRelativePath(x.Path).FullPath)));
             return new EnumerableDirectoryContents(fileInfos);
         }
 
@@ -85,16 +93,18 @@ namespace Statiq.Razor
         {
             private readonly IFile _file;
 
-            public StatiqFileInfo(IFile file)
+            // Pass the path in separately to return the correct input-relative path
+            public StatiqFileInfo(IFile file, string path)
             {
                 _file = file;
+                PhysicalPath = path;
             }
 
             public bool Exists => _file.Exists;
 
             public long Length => _file.Length;
 
-            public string PhysicalPath => _file.Path.FullPath;
+            public string PhysicalPath { get; }
 
             public string Name => _file.Path.FileName.FullPath;
 
@@ -109,16 +119,18 @@ namespace Statiq.Razor
         {
             private readonly IDirectory _directory;
 
-            public StatiqDirectoryInfo(IDirectory directory)
+            // Pass the path in separately to return the correct input-relative path
+            public StatiqDirectoryInfo(IDirectory directory, string path)
             {
                 _directory = directory;
+                PhysicalPath = path;
             }
 
             public bool Exists => _directory.Exists;
 
             public long Length => -1L;
 
-            public string PhysicalPath => _directory.Path.FullPath;
+            public string PhysicalPath { get; }
 
             public string Name => _directory.Path.Name;
 

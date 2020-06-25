@@ -75,14 +75,17 @@ namespace Statiq.Razor.Tests
                 // Given
                 Engine engine = new Engine();
                 TestExecutionContext context = GetExecutionContext(engine);
-                TestDocument document = new TestDocument(new NormalizedPath("/Temp/temp.txt"), (NormalizedPath)null, "<p>@Document.Source</p>");
+                TestDocument document = new TestDocument(
+                    new NormalizedPath("/input/Temp/temp.txt"),
+                    (NormalizedPath)null,
+                    "<p>@Document.Source</p>");
                 RenderRazor razor = new RenderRazor();
 
                 // When
                 TestDocument result = await ExecuteAsync(document, context, razor).SingleAsync();
 
                 // Then
-                result.Content.ShouldBe("<p>/Temp/temp.txt</p>");
+                result.Content.ShouldBe("<p>/input/Temp/temp.txt</p>");
             }
 
             [Test]
@@ -91,14 +94,16 @@ namespace Statiq.Razor.Tests
                 // Given
                 Engine engine = new Engine();
                 TestExecutionContext context = GetExecutionContext(engine);
-                TestDocument document = GetDocument("/Temp/temp.txt", "<p>@Model.Source</p>");
+                TestDocument document = GetDocument(
+                    "/input/Temp/temp.txt",
+                    "<p>@Model.Source</p>");
                 RenderRazor razor = new RenderRazor();
 
                 // When
                 TestDocument result = await ExecuteAsync(document, context, razor).SingleAsync();
 
                 // Then
-                result.Content.ShouldBe("<p>/Temp/temp.txt</p>");
+                result.Content.ShouldBe("<p>/input/Temp/temp.txt</p>");
             }
 
             [Test]
@@ -107,7 +112,9 @@ namespace Statiq.Razor.Tests
                 // Given
                 Engine engine = new Engine();
                 TestExecutionContext context = GetExecutionContext(engine);
-                TestDocument document = GetDocument("/Temp/temp.txt", @"@model IList<int>
+                TestDocument document = GetDocument(
+                    "/input/Temp/temp.txt",
+                    @"@model IList<int>
 <p>@Model.Count</p>");
                 IList<int> model = new[] { 1, 2, 3 };
                 RenderRazor razor = new RenderRazor().WithModel(Config.FromValue(model));
@@ -126,7 +133,7 @@ namespace Statiq.Razor.Tests
                 Engine engine = new Engine();
                 TestExecutionContext context = GetExecutionContext(engine);
                 TestDocument document = GetDocument(
-                    "/ViewStartAndLayout/Test.cshtml",
+                    "/input/ViewStartAndLayout/Test.cshtml",
                     @"@model int[]
 <p>This is a test</p>");
                 IList<int> model = new[] { 1, 2, 3 };
@@ -149,7 +156,7 @@ namespace Statiq.Razor.Tests
                 Engine engine = new Engine();
                 TestExecutionContext context = GetExecutionContext(engine);
                 TestDocument document = GetDocument(
-                    "/Layout/Test.cshtml",
+                    "/input/Layout/Test.cshtml",
                     @"@{
 	Layout = ""_Layout.cshtml"";
 }
@@ -173,7 +180,7 @@ namespace Statiq.Razor.Tests
                 Engine engine = new Engine();
                 TestExecutionContext context = GetExecutionContext(engine);
                 TestDocument document = GetDocument(
-                    "/Layout/Test.cshtml",
+                    "/input/Layout/Test.cshtml",
                     "<p>This is a test</p>");
                 RenderRazor razor = new RenderRazor().WithLayout((NormalizedPath)"_Layout.cshtml");
 
@@ -194,7 +201,7 @@ namespace Statiq.Razor.Tests
                 Engine engine = new Engine();
                 TestExecutionContext context = GetExecutionContext(engine);
                 TestDocument document = GetDocument(
-                    "/ViewStartAndLayout/Test.cshtml",
+                    "/input/ViewStartAndLayout/Test.cshtml",
                     "<p>This is a test</p>");
                 RenderRazor razor = new RenderRazor();
 
@@ -215,7 +222,7 @@ namespace Statiq.Razor.Tests
                 Engine engine = new Engine();
                 TestExecutionContext context = GetExecutionContext(engine);
                 TestDocument document = GetDocument(
-                    "/AlternateViewStartPath/Test.cshtml",
+                    "/input/AlternateViewStartPath/Test.cshtml",
                     "<p>This is a test</p>");
                 RenderRazor razor = new RenderRazor().WithViewStart((NormalizedPath)"/AlternateViewStart/_ViewStart.cshtml");
 
@@ -236,7 +243,7 @@ namespace Statiq.Razor.Tests
                 Engine engine = new Engine();
                 TestExecutionContext context = GetExecutionContext(engine);
                 TestDocument document = GetDocument(
-                    "/AlternateViewStartPath/Test.cshtml",
+                    "/input/AlternateViewStartPath/Test.cshtml",
                     "<p>This is a test</p>");
                 RenderRazor razor = new RenderRazor().WithViewStart((NormalizedPath)"/AlternateViewStart/_ViewStartRelativeLayout.cshtml");
 
@@ -257,7 +264,7 @@ namespace Statiq.Razor.Tests
                 Engine engine = new Engine();
                 TestExecutionContext context = GetExecutionContext(engine);
                 TestDocument document = GetDocument(
-                    "/AlternateViewStartPath/Test.cshtml",
+                    "/input/AlternateViewStartPath/Test.cshtml",
                     "<p>This is a test</p>");
                 RenderRazor razor = new RenderRazor().WithViewStart((NormalizedPath)"AlternateViewStart/_ViewStartRelativeLayout.cshtml");
 
@@ -278,13 +285,13 @@ namespace Statiq.Razor.Tests
                 Engine engine = new Engine();
                 TestExecutionContext context = GetExecutionContext(engine);
                 TestDocument document1 = GetDocument(
-                    "/IgnoreUnderscores/Test.cshtml",
+                    "/input/IgnoreUnderscores/Test.cshtml",
                     @"@{
 	Layout = ""_Layout.cshtml"";
 }
 <p>This is a test</p>");
                 TestDocument document2 = GetDocument(
-                    "/IgnoreUnderscores/_Layout.cshtml",
+                    "/input/IgnoreUnderscores/_Layout.cshtml",
                     @"LAYOUT4
 @RenderBody()");
                 RenderRazor razor = new RenderRazor();
@@ -306,10 +313,10 @@ namespace Statiq.Razor.Tests
                 Engine engine = new Engine();
                 TestExecutionContext context = GetExecutionContext(engine);
                 TestDocument document1 = GetDocument(
-                    "/AlternateIgnorePrefix/Test.cshtml",
+                    "/input/AlternateIgnorePrefix/Test.cshtml",
                     "<p>This is a test</p>");
                 TestDocument document2 = GetDocument(
-                    "/AlternateIgnorePrefix/IgnoreMe.cshtml",
+                    "/input/AlternateIgnorePrefix/IgnoreMe.cshtml",
                     "<p>Ignore me</p>");
                 RenderRazor razor = new RenderRazor().IgnorePrefix("Ignore");
 
@@ -327,7 +334,7 @@ namespace Statiq.Razor.Tests
                 Engine engine = new Engine();
                 TestExecutionContext context = GetExecutionContext(engine);
                 TestDocument document = GetDocument(
-                    "/LayoutWithSection/Test.cshtml",
+                    "/input/LayoutWithSection/Test.cshtml",
                     @"@{
 	Layout = ""_Layout.cshtml"";
 }
@@ -357,7 +364,7 @@ namespace Statiq.Razor.Tests
                 Engine engine = new Engine();
                 TestExecutionContext context = GetExecutionContext(engine);
                 TestDocument document = GetDocument(
-                    "/LayoutWithSection/Test.cshtml",
+                    "/input/LayoutWithSection/Test.cshtml",
                     @"@{
 	Layout = ""_Layout.cshtml"";
 }
@@ -389,6 +396,81 @@ namespace Statiq.Razor.Tests
                     StringCompareShould.IgnoreLineEndings);
             }
 
+            [Test]
+            public async Task RenderRelativePartial()
+            {
+                // Given
+                Engine engine = new Engine();
+                TestExecutionContext context = GetExecutionContext(engine);
+                TestDocument document = GetDocument(
+                    "/input/RelativePartial/Test.cshtml",
+                    @"<p>Before</p>
+@Html.Partial(""_Partial.cshtml"")
+<p>After</p>");
+                RenderRazor razor = new RenderRazor();
+
+                // When
+                TestDocument result = await ExecuteAsync(document, context, razor).SingleAsync();
+
+                // Then
+                result.Content.ShouldBe(
+                    @"<p>Before</p>
+<div>Hi!</div>
+<p>After</p>",
+                    StringCompareShould.IgnoreLineEndings);
+            }
+
+            [Test]
+            public async Task RenderRelativePartialFromLayout()
+            {
+                // Given
+                Engine engine = new Engine();
+                TestExecutionContext context = GetExecutionContext(engine);
+                TestDocument document = GetDocument(
+                    "/input/RelativePartial/Test.cshtml",
+                    @"@{
+	Layout = ""_Layout.cshtml"";
+}
+<p>Testing</p>");
+                RenderRazor razor = new RenderRazor();
+
+                // When
+                TestDocument result = await ExecuteAsync(document, context, razor).SingleAsync();
+
+                // Then
+                result.Content.ShouldBe(
+                    @"<p>Layout before</p>
+<div>Hi!</div>
+<p>Testing</p>
+<p>Layout after</p>",
+                    StringCompareShould.IgnoreLineEndings);
+            }
+
+            // Note that the absolute root is the root of the virtual input folder
+            [Test]
+            public async Task RenderAbsolutePartial()
+            {
+                // Given
+                Engine engine = new Engine();
+                TestExecutionContext context = GetExecutionContext(engine);
+                TestDocument document = GetDocument(
+                    "/input/RootRelativePartial/Test.cshtml",
+                    @"<p>Before</p>
+@Html.Partial(""/RelativePartial/_Partial.cshtml"")
+<p>After</p>");
+                RenderRazor razor = new RenderRazor();
+
+                // When
+                TestDocument result = await ExecuteAsync(document, context, razor).SingleAsync();
+
+                // Then
+                result.Content.ShouldBe(
+                    @"<p>Before</p>
+<div>Hi!</div>
+<p>After</p>",
+                    StringCompareShould.IgnoreLineEndings);
+            }
+
             private TestDocument GetDocument(string source, string content) => new TestDocument(new NormalizedPath(source), (NormalizedPath)null, content);
 
             private TestExecutionContext GetExecutionContext(Engine engine)
@@ -402,70 +484,71 @@ namespace Statiq.Razor.Tests
                 return context;
             }
 
-            private TestFileSystem GetFileSystem()
+            private TestFileSystem GetFileSystem() => new TestFileSystem()
             {
-                TestFileProvider fileProvider = GetFileProvider();
-                return new TestFileSystem()
+                RootPath = NormalizedPath.AbsoluteRoot,
+                InputPaths = new PathCollection("input"),
+                FileProvider = GetFileProvider()
+            };
+
+            private TestFileProvider GetFileProvider() => new TestFileProvider
+            {
                 {
-                    RootPath = NormalizedPath.AbsoluteRoot,
-                    InputPaths = new PathCollection(NormalizedPath.AbsoluteRoot),
-                    FileProvider = fileProvider
-                };
-            }
-
-            private TestFileProvider GetFileProvider()
-            {
-                TestFileProvider fileProvider = new TestFileProvider();
-
-                fileProvider.AddDirectory("/");
-                fileProvider.AddDirectory("/AlternateIgnorePrefix");
-                fileProvider.AddDirectory("/AlternateViewStart");
-                fileProvider.AddDirectory("/AlternateViewStartPath");
-                fileProvider.AddDirectory("/IgnoreUnderscores");
-                fileProvider.AddDirectory("/Layout");
-                fileProvider.AddDirectory("/LayoutWithSection");
-                fileProvider.AddDirectory("/SimpleTemplate");
-                fileProvider.AddDirectory("/ViewStartAndLayout");
-
-                fileProvider.AddFile(
-                    "/Layout/_Layout.cshtml",
+                    "/input/Layout/_Layout.cshtml",
                     @"LAYOUT
-@RenderBody()");
-                fileProvider.AddFile(
-                    "/ViewStartAndLayout/_ViewStart.cshtml",
+@RenderBody()"
+                },
+                {
+                    "/input/ViewStartAndLayout/_ViewStart.cshtml",
                     @"@{
 	Layout = ""_Layout.cshtml"";
-}");
-                fileProvider.AddFile(
-                    "/ViewStartAndLayout/_Layout.cshtml",
+}"
+                },
+                {
+                    "/input/ViewStartAndLayout/_Layout.cshtml",
                     @"LAYOUT2
-@RenderBody()");
-                fileProvider.AddFile(
-                    "/AlternateViewStart/_ViewStart.cshtml",
+@RenderBody()"
+                },
+                {
+                    "/input/AlternateViewStart/_ViewStart.cshtml",
                     @"@{
 	Layout = @""/AlternateViewStart/_Layout.cshtml"";
-}");
-                fileProvider.AddFile(
-                    "/AlternateViewStart/_ViewStartRelativeLayout.cshtml",
+}"
+                },
+                {
+                    "/input/AlternateViewStart/_ViewStartRelativeLayout.cshtml",
                     @"@{
 	Layout = @""_Layout.cshtml"";
-}");
-                fileProvider.AddFile(
-                    "/AlternateViewStart/_Layout.cshtml",
+}"
+                },
+                {
+                    "/input/AlternateViewStart/_Layout.cshtml",
                     @"LAYOUT3
-@RenderBody()");
-                fileProvider.AddFile(
-                    "/IgnoreUnderscores/_Layout.cshtml",
+@RenderBody()"
+                },
+                {
+                    "/input/IgnoreUnderscores/_Layout.cshtml",
                     @"LAYOUT4
-@RenderBody()");
-                fileProvider.AddFile(
-                    "/LayoutWithSection/_Layout.cshtml",
+@RenderBody()"
+                },
+                {
+                    "/input/LayoutWithSection/_Layout.cshtml",
                     @"LAYOUT5
 @RenderSection(""MySection"", false)
-@RenderBody()");
-
-                return fileProvider;
-            }
+@RenderBody()"
+                },
+                {
+                    "/input/RelativePartial/_Partial.cshtml",
+                    "<div>Hi!</div>"
+                },
+                {
+                    "/input/RelativePartial/_Layout.cshtml",
+                    @"<p>Layout before</p>
+@Html.Partial(""_Partial.cshtml"")
+@RenderBody()
+<p>Layout after</p>"
+                }
+            };
         }
     }
 }

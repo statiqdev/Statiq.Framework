@@ -1,5 +1,7 @@
 # 1.0.0-beta.17
 
+- Fixed some bugs with input-relative path finding for Razor layouts and partials (#102)
+
 # 1.0.0-beta.16
 
 - Added `NormalizedPath.ContainsDescendantOrSelf()`.
