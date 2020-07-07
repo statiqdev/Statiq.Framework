@@ -1,6 +1,7 @@
 # 1.0.0-beta.17
 
-- Fixed some bugs with input-relative path finding for Razor layouts and partials (#102)
+- Made `RenderRazor.WithLayout()` take precedence over an available `_ViewStart.cshtml` file (by ignoring the `_ViewStart.cshtml` file entirely which previously took precedence in this case).
+- Fixed some bugs with input-relative path finding for Razor layouts and partials (#102).
 
 # 1.0.0-beta.16
 

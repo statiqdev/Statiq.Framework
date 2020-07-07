@@ -195,6 +195,69 @@ namespace Statiq.Razor.Tests
             }
 
             [Test]
+            public async Task RenderModuleDefinedRelativeLayoutFile()
+            {
+                // Given
+                Engine engine = new Engine();
+                TestExecutionContext context = GetExecutionContext(engine);
+                TestDocument document = GetDocument(
+                    "/input/Layout/Test.cshtml",
+                    "<p>This is a test</p>");
+                RenderRazor razor = new RenderRazor().WithLayout((NormalizedPath)"../ViewStartAndLayout/_Layout.cshtml");
+
+                // When
+                TestDocument result = await ExecuteAsync(document, context, razor).SingleAsync();
+
+                // Then
+                result.Content.ShouldBe(
+                    @"LAYOUT2
+<p>This is a test</p>",
+                    StringCompareShould.IgnoreLineEndings);
+            }
+
+            [Test]
+            public async Task RenderModuleDefinedViewStartFile()
+            {
+                // Given
+                Engine engine = new Engine();
+                TestExecutionContext context = GetExecutionContext(engine);
+                TestDocument document = GetDocument(
+                    "/input/Layout/Test.cshtml",
+                    "<p>This is a test</p>");
+                RenderRazor razor = new RenderRazor().WithViewStart((NormalizedPath)"/ViewStartAndLayout/_ViewStart.cshtml");
+
+                // When
+                TestDocument result = await ExecuteAsync(document, context, razor).SingleAsync();
+
+                // Then
+                result.Content.ShouldBe(
+                    @"LAYOUT2
+<p>This is a test</p>",
+                    StringCompareShould.IgnoreLineEndings);
+            }
+
+            [Test]
+            public async Task RenderModuleDefinedLayoutFileOverridesViewStart()
+            {
+                // Given
+                Engine engine = new Engine();
+                TestExecutionContext context = GetExecutionContext(engine);
+                TestDocument document = GetDocument(
+                    "/input/ViewStartAndLayout/Test.cshtml",
+                    "<p>This is a test</p>");
+                RenderRazor razor = new RenderRazor().WithLayout((NormalizedPath)"../Layout/_Layout.cshtml");
+
+                // When
+                TestDocument result = await ExecuteAsync(document, context, razor).SingleAsync();
+
+                // Then
+                result.Content.ShouldBe(
+                    @"LAYOUT
+<p>This is a test</p>",
+                    StringCompareShould.IgnoreLineEndings);
+            }
+
+            [Test]
             public async Task LoadViewStartAndLayoutFile()
             {
                 // Given
