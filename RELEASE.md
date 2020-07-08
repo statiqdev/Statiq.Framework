@@ -1,3 +1,5 @@
+# 1.0.0-beta.18
+
 # 1.0.0-beta.17
 
 - Made `RenderRazor.WithLayout()` take precedence over an available `_ViewStart.cshtml` file (by ignoring the `_ViewStart.cshtml` file entirely which previously took precedence in this case).
