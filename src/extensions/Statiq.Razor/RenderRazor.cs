@@ -36,6 +36,9 @@ namespace Statiq.Razor
         private static readonly RazorService RazorService = new RazorService();
         private static Guid _executionId = Guid.Empty;
 
+        // Not a valid file name on either Windows or Linux
+        internal const string ViewStartPlaceholder = "\0";
+
         private readonly Type _basePageType;
         private Config<NormalizedPath> _viewStartPath;
         private Config<NormalizedPath> _layoutPath;
@@ -192,7 +195,9 @@ namespace Statiq.Razor
                         // otherwise the Razor engine will default to looking up the tree for a _ViewStart.cshtml that will take precedence over the explicit layout
                         // Note that this means in this special case, anything else the ViewStart file is doing will be ignored - this therefore favors correctness of the layout over ViewStart logic
                         NormalizedPath viewStartLocationPath = _viewStartPath == null ? null : await _viewStartPath.GetValueAsync(input, context);
-                        string viewStartLocation = viewStartLocationPath.IsNull ? (layoutLocation != null ? "\0" : null) : viewStartLocationPath.FullPath;
+                        string viewStartLocation = viewStartLocationPath.IsNull
+                            ? (layoutLocation != null ? ViewStartPlaceholder + input.Source.FullPath + ViewStartPlaceholder : null)
+                            : viewStartLocationPath.FullPath;
 
                         RenderRequest request = new RenderRequest
                         {
