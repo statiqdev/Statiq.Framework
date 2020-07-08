@@ -58,6 +58,7 @@ namespace Statiq.Razor
             serviceCollection.TryAddSingleton<ObjectPoolProvider, DefaultObjectPoolProvider>();
             serviceCollection.TryAddSingleton<StatiqRazorProjectFileSystem>();
             serviceCollection.TryAddSingleton<RazorProjectFileSystem, StatiqRazorProjectFileSystem>();
+            serviceCollection.TryAddSingleton<RazorService>();
 
             // Register the view location expander if not already registered
             serviceCollection.Configure<RazorViewEngineOptions>(x =>

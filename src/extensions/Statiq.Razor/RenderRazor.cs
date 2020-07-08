@@ -4,6 +4,7 @@ using System.Collections.Immutable;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Statiq.Common;
 
@@ -33,9 +34,6 @@ namespace Statiq.Razor
     /// <category>Templates</category>
     public class RenderRazor : Module
     {
-        private static readonly RazorService RazorService = new RazorService();
-        private static Guid _executionId = Guid.Empty;
-
         // Not a valid file name on either Windows or Linux
         internal const string ViewStartPlaceholder = "\0";
 
@@ -158,14 +156,13 @@ namespace Statiq.Razor
         /// <inheritdoc />
         protected override async Task<IEnumerable<IDocument>> ExecuteContextAsync(IExecutionContext context)
         {
+            // Get the Razor service from the service collection if it's in there
+            RazorService razorService = context.GetService<RazorService>() ?? new RazorService();
+
             // Expire the internal Razor cache if this is a new execution
             // This needs to be done so that layouts/partials can be re-rendered if they've changed,
             // otherwise Razor will just use the previously cached version of them
-            if (_executionId != Guid.Empty && _executionId != context.ExecutionId)
-            {
-                RazorService.ExpireChangeTokens();
-            }
-            _executionId = context.ExecutionId;
+            razorService.ExpireChangeTokensOnNewExecution(context.ExecutionId);
 
             // Eliminate input documents that we shouldn't process
             ImmutableArray<IDocument> validInputs = context.Inputs
@@ -212,7 +209,7 @@ namespace Statiq.Razor
                             Model = _model == null ? input : await _model.GetValueAsync(input, context)
                         };
 
-                        await RazorService.RenderAsync(request);
+                        await razorService.RenderAsync(request);
                     }
 
                     return input.Clone(context.GetContentProvider(contentStream, MediaTypes.Html));
