@@ -1,4 +1,5 @@
-﻿using System.Collections.Concurrent;
+﻿using System;
+using System.Collections.Concurrent;
 using System.Threading.Tasks;
 
 namespace Statiq.Razor
@@ -10,6 +11,8 @@ namespace Statiq.Razor
     {
         private readonly ConcurrentDictionary<CompilationParameters, RazorCompiler> _compilers
             = new ConcurrentDictionary<CompilationParameters, RazorCompiler>();
+
+        private Guid _executionId = Guid.Empty;
 
         public async Task RenderAsync(RenderRequest request)
         {
@@ -23,12 +26,19 @@ namespace Statiq.Razor
             await compiler.RenderPageAsync(request);
         }
 
-        public void ExpireChangeTokens()
+        /// <summary>
+        /// Expires the change tokens if the execution ID is different than the last one
+        /// </summary>
+        public void ExpireChangeTokensOnNewExecution(Guid executionId)
         {
-            foreach (RazorCompiler compiler in _compilers.Values)
+            if (_executionId != Guid.Empty && _executionId != executionId)
             {
-                compiler.ExpireChangeTokens();
+                foreach (RazorCompiler compiler in _compilers.Values)
+                {
+                    compiler.ExpireChangeTokens();
+                }
             }
+            _executionId = executionId;
         }
     }
 }
