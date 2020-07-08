@@ -53,7 +53,8 @@ public Statiq.Common.IContentProvider ContentProvider => Metadata.Get<Statiq.Com
                 string actual = ScriptHelper.Parse(code, properties, context);
 
                 // Then
-                actual.Substring(0, expectedStart.Length).ShouldBe(expectedStart, StringCompareShould.IgnoreLineEndings);
+                actual = actual.Replace("\r\n", "\n");
+                actual.ShouldStartWith(expectedStart.Replace("\r\n", "\n"));
             }
 
             [Test]
@@ -97,7 +98,8 @@ public Statiq.Common.IContentProvider ContentProvider => Metadata.Get<Statiq.Com
                 string actual = ScriptHelper.Parse(code, properties, context);
 
                 // Then
-                actual.Substring(0, expectedStart.Length).ShouldBe(expectedStart, StringCompareShould.IgnoreLineEndings);
+                actual = actual.Replace("\r\n", "\n");
+                actual.ShouldStartWith(expectedStart.Replace("\r\n", "\n"));
             }
 
             [Test]
@@ -141,7 +143,8 @@ public Statiq.Common.IContentProvider ContentProvider => Metadata.Get<Statiq.Com
                 string actual = ScriptHelper.Parse(code, properties, context);
 
                 // Then
-                actual.Substring(0, expectedStart.Length).ShouldBe(expectedStart, StringCompareShould.IgnoreLineEndings);
+                actual = actual.Replace("\r\n", "\n");
+                actual.ShouldStartWith(expectedStart.Replace("\r\n", "\n"));
             }
 
             [Test]
@@ -185,7 +188,8 @@ public Statiq.Common.IContentProvider ContentProvider => Metadata.Get<Statiq.Com
                 string actual = ScriptHelper.Parse(code, properties, context);
 
                 // Then
-                actual.Substring(0, expectedStart.Length).ShouldBe(expectedStart, StringCompareShould.IgnoreLineEndings);
+                actual = actual.Replace("\r\n", "\n");
+                actual.ShouldStartWith(expectedStart.Replace("\r\n", "\n"));
             }
 
             [Test]
@@ -268,8 +272,9 @@ public static class ScriptExtensionMethods
                 string actual = ScriptHelper.Parse(code, properties, context);
 
                 // Then
-                actual.Substring(0, expectedStart.Length).ShouldBe(expectedStart, StringCompareShould.IgnoreLineEndings);
-                actual.Substring(actual.Length - expectedEnd.Length).ShouldBe(expectedEnd, StringCompareShould.IgnoreLineEndings);
+                actual = actual.Replace("\r\n", "\n");
+                actual.ShouldStartWith(expectedStart.Replace("\r\n", "\n"));
+                actual.ShouldEndWith(expectedEnd.Replace("\r\n", "\n"));
             }
 
             [Test]
@@ -342,8 +347,9 @@ public static class ScriptExtensionMethods
                 string actual = ScriptHelper.Parse(code, properties, context);
 
                 // Then
-                actual.Substring(0, expectedStart.Length).ShouldBe(expectedStart, StringCompareShould.IgnoreLineEndings);
-                actual.Substring(actual.Length - expectedEnd.Length).ShouldBe(expectedEnd, StringCompareShould.IgnoreLineEndings);
+                actual = actual.Replace("\r\n", "\n");
+                actual.ShouldStartWith(expectedStart.Replace("\r\n", "\n"));
+                actual.ShouldEndWith(expectedEnd.Replace("\r\n", "\n"));
             }
 
             [Test]
@@ -412,8 +418,9 @@ public static class ScriptExtensionMethods
                 string actual = ScriptHelper.Parse(code, properties, context);
 
                 // Then
-                actual.Substring(0, expectedStart.Length).ShouldBe(expectedStart, StringCompareShould.IgnoreLineEndings);
-                actual.Substring(actual.Length - expectedEnd.Length).ShouldBe(expectedEnd, StringCompareShould.IgnoreLineEndings);
+                actual = actual.Replace("\r\n", "\n");
+                actual.ShouldStartWith(expectedStart.Replace("\r\n", "\n"));
+                actual.ShouldEndWith(expectedEnd.Replace("\r\n", "\n"));
             }
 
             [Test]
@@ -482,8 +489,9 @@ public static string Self(this string x)
                 string actual = ScriptHelper.Parse(code, properties, context);
 
                 // Then
-                actual.Substring(0, expectedStart.Length).ShouldBe(expectedStart, StringCompareShould.IgnoreLineEndings);
-                actual.Substring(actual.Length - expectedEnd.Length).ShouldBe(expectedEnd, StringCompareShould.IgnoreLineEndings);
+                actual = actual.Replace("\r\n", "\n");
+                actual.ShouldStartWith(expectedStart.Replace("\r\n", "\n"));
+                actual.ShouldEndWith(expectedEnd.Replace("\r\n", "\n"));
             }
 
             [Test]
@@ -562,8 +570,9 @@ public static class ScriptExtensionMethods
                 string actual = ScriptHelper.Parse(code, properties, context);
 
                 // Then
-                actual.Substring(0, expectedStart.Length).ShouldBe(expectedStart, StringCompareShould.IgnoreLineEndings);
-                actual.Substring(actual.Length - expectedEnd.Length).ShouldBe(expectedEnd, StringCompareShould.IgnoreLineEndings);
+                actual = actual.Replace("\r\n", "\n");
+                actual.ShouldStartWith(expectedStart.Replace("\r\n", "\n"));
+                actual.ShouldEndWith(expectedEnd.Replace("\r\n", "\n"));
             }
 
             [Test]
