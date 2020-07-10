@@ -87,6 +87,7 @@ namespace Statiq.App
                 if (!(ex is OperationCanceledException))
                 {
                     _logger.LogCritical(ex.Message);
+                    _logger.LogInformation("To get more detailed logging output run with the \"-l Debug\" flag");
                 }
                 return false;
             }

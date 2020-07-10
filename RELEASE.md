@@ -1,6 +1,7 @@
 # 1.0.0-beta.18
 
 - Added containing types to the symbol ID for nested symbols in the `AnalyzeCSharp` module (#116).
+- Added a message about using a higher log level when an error occurs (#115).
 
 # 1.0.0-beta.17
 
