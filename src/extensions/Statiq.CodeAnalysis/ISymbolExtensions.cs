@@ -9,6 +9,7 @@ namespace Statiq.CodeAnalysis
         /// <summary>
         /// Gets a unique ID for the symbol. Note that the symbol ID is
         /// not fully-qualified and is therefore only unique within a namespace.
+        /// Nested types are prefixed with their parent type names.
         /// </summary>
         /// <param name="symbol">The symbol.</param>
         /// <returns>A unique (within a namespace) ID.</returns>
@@ -22,6 +23,7 @@ namespace Statiq.CodeAnalysis
             }
             if (symbol is INamespaceOrTypeSymbol)
             {
+                // Get the ID for this symbol, replacing non-alpha/numeric/-/. with _
                 char[] id = symbol.MetadataName.ToCharArray();
                 for (int c = 0; c < id.Length; c++)
                 {
@@ -30,7 +32,15 @@ namespace Statiq.CodeAnalysis
                         id[c] = '_';
                     }
                 }
-                return new string(id);
+                string symbolId = new string(id);
+
+                // Prefix with the symbol ID of the containing type if there is one
+                if (symbol.ContainingType != null)
+                {
+                    symbolId = symbol.ContainingType.GetId() + "." + symbolId;
+                }
+
+                return symbolId;
             }
 
             // Get a hash for anything other than namespaces or types

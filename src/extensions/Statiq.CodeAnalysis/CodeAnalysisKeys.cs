@@ -30,6 +30,8 @@ namespace Statiq.CodeAnalysis
 
         /// <summary>
         /// A unique ID that identifies the symbol (can be used for generating folder paths, for example).
+        /// Note that the symbol ID is not fully-qualified and is therefore only unique within a namespace.
+        /// Nested types are prefixed with their parent type names.
         /// </summary>
         /// <type><see cref="string"/></type>
         public const string SymbolId = nameof(SymbolId);
