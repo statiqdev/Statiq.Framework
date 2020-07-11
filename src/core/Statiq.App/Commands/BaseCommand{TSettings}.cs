@@ -22,19 +22,19 @@ namespace Statiq.App
     public abstract class BaseCommand<TSettings> : AsyncCommand<TSettings>
         where TSettings : BaseCommandSettings
     {
+        private readonly IConfigurationSettings _configurationSettings;
+
         protected BaseCommand(
             IConfiguratorCollection configurators,
             IConfigurationSettings configurationSettings,
             IServiceCollection serviceCollection)
         {
             Configurators = configurators;
-            ConfigurationSettings = configurationSettings;
             ServiceCollection = serviceCollection;
+            _configurationSettings = configurationSettings;
         }
 
         public IConfiguratorCollection Configurators { get; }
-
-        public IConfigurationSettings ConfigurationSettings { get; }
 
         public IServiceCollection ServiceCollection { get; }
 
@@ -104,12 +104,12 @@ namespace Statiq.App
             {
                 foreach (KeyValuePair<string, string> setting in SettingsParser.Parse(commandSettings.Settings))
                 {
-                    ConfigurationSettings[setting.Key] = setting.Value;
+                    _configurationSettings[setting.Key] = setting.Value;
                 }
             }
 
             // Configure settings after other configuration so they can use the values
-            ConfigurableSettings configurableSettings = new ConfigurableSettings(ConfigurationSettings);
+            ConfigurableSettings configurableSettings = new ConfigurableSettings(_configurationSettings);
             Configurators.Configure(configurableSettings);
 
             return await ExecuteCommandAsync(context, commandSettings);
