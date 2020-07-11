@@ -15,7 +15,7 @@ namespace Statiq.App
     /// </summary>
     /// <remarks>
     /// This will be disposed after passing to the engine as a sanity check, it shouldn't
-    /// be used after that.
+    /// be used after that since the values get copied over.
     /// </remarks>
     internal class ConfigurationSettings : ConfigurationMetadata, IConfigurationSettings, IDisposable
     {

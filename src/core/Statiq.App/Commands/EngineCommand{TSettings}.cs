@@ -9,6 +9,8 @@ namespace Statiq.App
     public abstract class EngineCommand<TSettings> : BaseCommand<TSettings>
         where TSettings : BaseCommandSettings
     {
+        private readonly IConfigurationSettings _configurationSettings;
+
         protected EngineCommand(
             IConfiguratorCollection configurators,
             IConfigurationSettings configurationSettings,
@@ -19,6 +21,7 @@ namespace Statiq.App
         {
             ConfigurationRoot = configurationRoot;
             Bootstrapper = bootstrapper;
+            _configurationSettings = configurationSettings;
         }
 
         public IConfigurationRoot ConfigurationRoot { get; }
@@ -40,11 +43,12 @@ namespace Statiq.App
             }
 
             // Execute the engine manager and dispose it when done
+            // Once the engine manager is created, the configuration settings cannot be used (they will have been copied over)
             using (EngineManager engineManager =
                 new EngineManager(
                     commandContext,
                     engineCommandSettings,
-                    ConfigurationSettings,
+                    _configurationSettings,
                     ServiceCollection,
                     Bootstrapper))
             {
