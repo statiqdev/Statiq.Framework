@@ -8,7 +8,7 @@ using Statiq.Common;
 
 namespace Statiq.Html
 {
-    public class Globalization : Module
+    public class AddRtlSupport : ParallelModule
     {
         private enum Direction
         {
@@ -17,34 +17,28 @@ namespace Statiq.Html
             Neutral
         }
 
-        protected async override Task<IEnumerable<Common.IDocument>> ExecuteContextAsync(IExecutionContext context)
+        private static readonly HtmlParser _parser = new HtmlParser();
+
+        protected override async Task<IEnumerable<Common.IDocument>> ExecuteInputAsync(Common.IDocument input, IExecutionContext context)
         {
-            List<Common.IDocument> list = new List<Common.IDocument>();
-
-            HtmlParser parser = new HtmlParser();
-            foreach (Common.IDocument input in context.Inputs)
+            IHtmlDocument htmlDocument = await input.ParseHtmlAsync(context, _parser);
+            if (htmlDocument == null)
             {
-                IHtmlDocument htmlDocument = await input.ParseHtmlAsync(context, parser);
-                if (htmlDocument == null)
-                {
-                    list.Add(input);
-                    continue;
-                }
-
-                SetAttributes(htmlDocument);
-
-                using (Stream contentStream = await context.GetContentStreamAsync())
-                {
-                    using (StreamWriter writer = contentStream.GetWriter())
-                    {
-                        htmlDocument.ToHtml(writer, ProcessingInstructionFormatter.Instance);
-                        writer.Flush();
-                        list.Add(input.Clone(context.GetContentProvider(contentStream, MediaTypes.Html)));
-                    }
-                }
+                return input.Yield();
             }
 
-            return list;
+            SetAttributes(htmlDocument);
+
+            using (Stream contentStream = await context.GetContentStreamAsync())
+            {
+                using (StreamWriter writer = contentStream.GetWriter())
+                {
+                    htmlDocument.ToHtml(writer, ProcessingInstructionFormatter.Instance);
+                    writer.Flush();
+                    Common.IDocument output = input.Clone(context.GetContentProvider(contentStream, MediaTypes.Html));
+                    return output.Yield();
+                }
+            }
         }
 
         private void SetAttributes(IHtmlDocument htmlDocument)

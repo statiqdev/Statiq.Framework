@@ -1,6 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Text;
 using System.Threading.Tasks;
 using NUnit.Framework;
 using Shouldly;
@@ -10,7 +7,7 @@ using Statiq.Testing;
 namespace Statiq.Html.Tests
 {
     [TestFixture]
-    public class GlobalizationFixture : BaseFixture
+    public class AddRtlSupportFixture : BaseFixture
     {
         [Test]
         public async Task AddProperDirectionAttributesToRtlBlocks()
@@ -33,7 +30,7 @@ namespace Statiq.Html.Tests
 <h2>مانگ</h2>
 <p>مانگ ھەروەھا پێی دەوتریت ھەیڤ (بە ئینگلیزی: Moon، بە عەرەبی: القمر) بەکار ئەھێنرێت بۆ ئاماژەدان بەھەر تەنێکی ئاسمانی یان دەستکرد، کە بە خولگەیێکی دیاری کراو بەدەوری زەویدا ئەسووڕێتەوە، یان ھەر ھەسارەیەکی تر، بۆ نموونە ھەسارەی کەیوان ھەژدە مانگی - پاشکۆی ھەیە.</p>
 </article>");
-            Globalization module = new Globalization();
+            AddRtlSupport module = new AddRtlSupport();
 
             // When
             TestDocument result = await ExecuteAsync(document, module).SingleAsync();
@@ -78,7 +75,7 @@ namespace Statiq.Html.Tests
     <td>94</td>
   </tr>
 </table>");
-            Globalization module = new Globalization();
+            AddRtlSupport module = new AddRtlSupport();
 
             // When
             TestDocument result = await ExecuteAsync(document, module).SingleAsync();
