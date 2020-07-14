@@ -1,5 +1,6 @@
 # 1.0.0-beta.18
 
+- Added `settings` as a default settings file name (with support for JSON, YAML, or XML formats).
 - Added support for `appsettings` and `statiq` YAML (`.yml` and `.yaml`) and XML (`.xml`) configuration files.
 - Added containing types to the symbol ID for nested symbols in the `AnalyzeCSharp` module (#116).
 - Added a message about using a higher log level when an error occurs (#115).
