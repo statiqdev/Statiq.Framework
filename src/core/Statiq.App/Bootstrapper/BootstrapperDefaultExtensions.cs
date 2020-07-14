@@ -103,14 +103,9 @@ namespace Statiq.App
         public static Bootstrapper AddDefaultConfigurationFiles(this Bootstrapper bootstrapper) =>
             bootstrapper.BuildConfiguration(builder => builder
                 .SetBasePath(Directory.GetCurrentDirectory())
-                .AddJsonFile("appsettings.json", true)
-                .AddYamlFile("appsettings.yml", true)
-                .AddYamlFile("appsettings.yaml", true)
-                .AddXmlFile("appsettings.xml", true)
-                .AddJsonFile("statiq.json", true)
-                .AddYamlFile("statiq.yml", true)
-                .AddYamlFile("statiq.yaml", true)
-                .AddXmlFile("statiq.xml", true));
+                .AddSettingsFile("appsettings")
+                .AddSettingsFile("settings")
+                .AddSettingsFile("statiq"));
 
         public static Bootstrapper AddBuildCommands(this Bootstrapper bootstrapper)
         {
