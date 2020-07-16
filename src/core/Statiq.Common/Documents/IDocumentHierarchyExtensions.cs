@@ -125,7 +125,27 @@ namespace Statiq.Common
         /// <param name="documents">The documents to flatten.</param>
         /// <param name="childrenKey">The metadata key that contains the children or <c>null</c> to flatten documents in all metadata keys.</param>
         /// <returns>The flattened documents.</returns>
-        public static DocumentList<IDocument> Flatten(this IEnumerable<IDocument> documents, string childrenKey = Keys.Children)
+        public static DocumentList<IDocument> Flatten(this IEnumerable<IDocument> documents, string childrenKey = Keys.Children) => Flatten(documents, false, childrenKey);
+
+        /// <summary>
+        /// Flattens a tree structure.
+        /// </summary>
+        /// <remarks>
+        /// This extension will either get all descendants of all documents from
+        /// a given metadata key (<see cref="Keys.Children"/> by default) or all
+        /// descendants from all metadata if a <c>null</c> key is specified. The
+        /// result also includes the initial documents in both cases.
+        /// </remarks>
+        /// <remarks>
+        /// The documents will be returned in no particular order and only distinct
+        /// documents will be returned (I.e., if a document exists as a
+        /// child of more than one parent, it will only appear once in the result set).
+        /// </remarks>
+        /// <param name="documents">The documents to flatten.</param>
+        /// <param name="removeTreePlaceholders"><c>true</c> to filter out documents with the <see cref="Keys.TreePlaceholder"/> metadata.</param>
+        /// <param name="childrenKey">The metadata key that contains the children or <c>null</c> to flatten documents in all metadata keys.</param>
+        /// <returns>The flattened documents.</returns>
+        public static DocumentList<IDocument> Flatten(this IEnumerable<IDocument> documents, bool removeTreePlaceholders, string childrenKey = Keys.Children)
         {
             _ = documents ?? throw new ArgumentNullException(nameof(documents));
 
@@ -151,7 +171,12 @@ namespace Statiq.Common
                     }
                 }
             }
-            return results.ToDocumentList();
+            return removeTreePlaceholders
+                ? results.RemoveTreePlaceholders().ToDocumentList()
+                : results.ToDocumentList();
         }
+
+        public static IEnumerable<IDocument> RemoveTreePlaceholders(this IEnumerable<IDocument> documents) =>
+            documents.Where(x => !x.GetBool(Keys.TreePlaceholder));
     }
 }

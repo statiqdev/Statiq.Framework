@@ -25,6 +25,7 @@ namespace Statiq.Core
     public class FlattenTree : SyncModule
     {
         private readonly string _childrenKey = Keys.Children;
+        private readonly bool _removeTreePlaceholders = false;
 
         /// <summary>
         /// Creates a new flatten module.
@@ -37,15 +38,35 @@ namespace Statiq.Core
         /// Creates a new flatten module with the specified key for child documents.
         /// Specify <c>null</c> to flatten all descendant documents regardless of key.
         /// </summary>
-        /// <param name="childrenKey">
-        /// The metadata key that contains the children or <c>null</c> to flatten all documents.
-        /// </param>
+        /// <param name="childrenKey">The metadata key that contains the children or <c>null</c> to flatten all documents.</param>
         public FlattenTree(string childrenKey)
         {
             _childrenKey = childrenKey;
         }
 
+        /// <summary>
+        /// Creates a new flatten module with the specified key for child documents.
+        /// Specify <c>null</c> to flatten all descendant documents regardless of key.
+        /// </summary>
+        /// <param name="removeTreePlaceholders"><c>true</c> to filter out documents with the <see cref="Keys.TreePlaceholder"/> metadata.</param>
+        public FlattenTree(bool removeTreePlaceholders)
+        {
+            _removeTreePlaceholders = removeTreePlaceholders;
+        }
+
+        /// <summary>
+        /// Creates a new flatten module with the specified key for child documents.
+        /// Specify <c>null</c> to flatten all descendant documents regardless of key.
+        /// </summary>
+        /// <param name="removeTreePlaceholders"><c>true</c> to filter out documents with the <see cref="Keys.TreePlaceholder"/> metadata.</param>
+        /// <param name="childrenKey">The metadata key that contains the children or <c>null</c> to flatten all documents.</param>
+        public FlattenTree(bool removeTreePlaceholders, string childrenKey)
+        {
+            _removeTreePlaceholders = removeTreePlaceholders;
+            _childrenKey = childrenKey;
+        }
+
         protected override IEnumerable<IDocument> ExecuteContext(IExecutionContext context) =>
-            context.Inputs.Flatten(_childrenKey);
+            context.Inputs.Flatten(_removeTreePlaceholders, _childrenKey);
     }
 }
