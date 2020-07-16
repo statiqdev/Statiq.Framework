@@ -1,5 +1,7 @@
 # 1.0.0-beta.18
 
+- Added a `IEnumerable<IDocument>.RemoveTreePlaceholders()` extension method.
+- Added an option to remove tree placeholder documents in the `FlattenTree` module and the `IEnumerable<IDocument>.Flatten()` extension methods.
 - Added `settings` as a default settings file name (with support for JSON, YAML, or XML formats).
 - Added support for `appsettings` and `statiq` YAML (`.yml` and `.yaml`) and XML (`.xml`) configuration files.
 - Added containing types to the symbol ID for nested symbols in the `AnalyzeCSharp` module (#116).
