@@ -418,6 +418,18 @@ namespace Statiq.Feeds
                 Copyright = _feedCopyright ?? context.Settings.GetString(FeedKeys.Copyright) ?? DateTime.UtcNow.Year.ToString()
             };
 
+            // Copy the feed metadata to document metadata for the eventual outputs
+            MetadataItems metadata = new MetadataItems
+            {
+                { FeedKeys.Title, feed.Title },
+                { FeedKeys.Description, feed.Description },
+                { FeedKeys.Author, feed.Author },
+                { FeedKeys.Published, feed.Published },
+                { FeedKeys.Updated, feed.Updated },
+                { FeedKeys.Image, feed.ImageLink },
+                { FeedKeys.Copyright, feed.Copyright }
+            };
+
             // Sort the items and take the maximum items
             List<(IDocument, DateTime?)> items = new List<(IDocument, DateTime?)>();
             if (_preserveOrdering)
@@ -483,9 +495,9 @@ namespace Statiq.Feeds
             // Generate the feeds
             return new[]
             {
-                await GenerateFeedAsync(FeedType.Rss, feed, _rssPath, context),
-                await GenerateFeedAsync(FeedType.Atom, feed, _atomPath, context),
-                await GenerateFeedAsync(FeedType.Rdf, feed, _rdfPath, context)
+                await GenerateFeedAsync(FeedType.Rss, feed, metadata, _rssPath, context),
+                await GenerateFeedAsync(FeedType.Atom, feed, metadata, _atomPath, context),
+                await GenerateFeedAsync(FeedType.Rdf, feed, metadata, _rdfPath, context)
             }.Where(x => x != null);
         }
 
@@ -527,7 +539,7 @@ namespace Statiq.Feeds
             return false;
         }
 
-        private async Task<IDocument> GenerateFeedAsync(FeedType feedType, Feed feed, NormalizedPath path, IExecutionContext context)
+        private static async Task<IDocument> GenerateFeedAsync(FeedType feedType, Feed feed, MetadataItems metadata, NormalizedPath path, IExecutionContext context)
         {
             // Get the output path
             if (path.IsNull)
@@ -543,7 +555,7 @@ namespace Statiq.Feeds
             using (Stream contentStream = await context.GetContentStreamAsync())
             {
                 FeedSerializer.SerializeXml(feedType, feed, contentStream);
-                return context.CreateDocument(path, context.GetContentProvider(contentStream, feedType.MediaType));
+                return context.CreateDocument(path, metadata, context.GetContentProvider(contentStream, feedType.MediaType));
             }
         }
     }
