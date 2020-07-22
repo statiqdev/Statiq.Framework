@@ -732,7 +732,7 @@ namespace Statiq.Common
         }
 
         /// <summary>
-        /// Gets the file extension.
+        /// Gets the file extension (including the preceding ".").
         /// </summary>
         /// <value>The file extension (including the preceding ".") or <see cref="Empty"/> if the path contains no extension.</value>
         public string Extension
