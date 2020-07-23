@@ -89,13 +89,13 @@ namespace Statiq.Testing
         public IEnumerable<string> Keys => _dictionary.Keys;
 
         /// <inhertdoc />
-        ICollection<object> IDictionary<string, object>.Values => _dictionary.Values.Select(x => TypeHelper.ExpandValue(x, this)).ToArray();
+        ICollection<object> IDictionary<string, object>.Values => _dictionary.Select(x => TypeHelper.ExpandValue(x.Key, x.Value, this)).ToArray();
 
         /// <inhertdoc />
         ICollection<string> IDictionary<string, object>.Keys => _dictionary.Keys;
 
         /// <inhertdoc />
-        public IEnumerable<object> Values => _dictionary.Values.Select(x => TypeHelper.ExpandValue(x, this)).ToArray();
+        public IEnumerable<object> Values => _dictionary.Select(x => TypeHelper.ExpandValue(x.Key, x.Value, this)).ToArray();
 
         /// <inhertdoc />
         public IEnumerator<KeyValuePair<string, object>> GetEnumerator() =>

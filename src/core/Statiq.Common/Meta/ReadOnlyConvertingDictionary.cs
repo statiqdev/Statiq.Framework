@@ -43,7 +43,7 @@ namespace Statiq.Common
         public IEnumerable<string> Keys => _dictionary.Keys;
 
         /// <inheritdoc />
-        public IEnumerable<object> Values => _dictionary.Values.Select(x => TypeHelper.ExpandValue(x, this)).ToArray();
+        public IEnumerable<object> Values => _dictionary.Select(x => TypeHelper.ExpandValue(x.Key, x.Value, this)).ToArray();
 
         /// <inheritdoc />
         public bool ContainsKey(string key) => _dictionary.ContainsKey(key);

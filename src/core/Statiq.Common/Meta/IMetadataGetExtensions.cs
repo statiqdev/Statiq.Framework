@@ -32,13 +32,13 @@ namespace Statiq.Common
                 {
                     IExecutionContext context = IExecutionContext.Current;
                     object result = context.ScriptHelper.EvaluateAsync(script, metadata).GetAwaiter().GetResult();
-                    return TypeHelper.TryExpandAndConvert(result, metadata, out value);
+                    return TypeHelper.TryExpandAndConvert(key, result, metadata, out value);
                 }
 
                 // Value
                 if (metadata.TryGetRaw(key, out object raw))
                 {
-                    return TypeHelper.TryExpandAndConvert(raw, metadata, out value);
+                    return TypeHelper.TryExpandAndConvert(key, raw, metadata, out value);
                 }
             }
 

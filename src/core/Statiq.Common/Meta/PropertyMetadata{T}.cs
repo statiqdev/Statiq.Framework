@@ -160,7 +160,7 @@ namespace Statiq.Common
                 foreach (KeyValuePair<string, IPropertyCallAdapter> item in Properties)
                 {
                     object rawValue = item.Value.GetValue(_instance);
-                    yield return new KeyValuePair<string, object>(item.Key, TypeHelper.ExpandValue(rawValue, this));
+                    yield return new KeyValuePair<string, object>(item.Key, TypeHelper.ExpandValue(item.Key, rawValue, this));
                 }
             }
 
