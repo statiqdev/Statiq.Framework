@@ -109,7 +109,7 @@ namespace Statiq.Common
                 {
                     // Only detect recursion when getting the value since we'll intentionally
                     // recursively expand the value in case it's also expandable
-                    value = metadataValue.Get(metadata);
+                    value = metadataValue.Get(key, metadata);
                 }
                 finally
                 {

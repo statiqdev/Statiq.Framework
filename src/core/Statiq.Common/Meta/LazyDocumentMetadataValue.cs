@@ -39,7 +39,7 @@ namespace Statiq.Common
 
         public IDocument OriginalDocument { get; set; }
 
-        public object Get(IMetadata metadata)
+        public object Get(string key, IMetadata metadata)
         {
             lock (Lock)
             {

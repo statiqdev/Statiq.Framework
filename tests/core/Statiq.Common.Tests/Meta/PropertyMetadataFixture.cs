@@ -83,7 +83,7 @@ namespace Statiq.Common.Tests.Meta
         private class SimpleMetadataValue : IMetadataValue
         {
             public object Value { get; set; }
-            object IMetadataValue.Get(IMetadata metadata) => Value;
+            object IMetadataValue.Get(string key, IMetadata metadata) => Value;
         }
     }
 }

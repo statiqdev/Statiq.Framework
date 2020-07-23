@@ -11,8 +11,9 @@
         /// be processed like any other metadata value. The implementation
         /// of this method must be thread-safe.
         /// </summary>
+        /// <param name="key">The metadata key being requested.</param>
         /// <param name="metadata">The metadata object requesting the value.</param>
         /// <returns>The object to use as the value.</returns>
-        object Get(IMetadata metadata);
+        object Get(string key, IMetadata metadata);
     }
 }

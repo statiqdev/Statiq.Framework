@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 
 namespace Statiq.Common
 {
@@ -8,8 +9,9 @@ namespace Statiq.Common
     /// </summary>
     public class CachedDelegateMetadataValue : DelegateMetadataValue
     {
-        private object _cachedValue;
-        private bool _cached;
+        // Cache values by key and source metadata
+        private readonly ConcurrentDictionary<(string, IMetadata), object> _cache =
+            new ConcurrentDictionary<(string, IMetadata), object>();
 
         /// <summary>
         /// Initializes a new instance of the <see cref="CachedDelegateMetadataValue"/> class.
@@ -22,21 +24,22 @@ namespace Statiq.Common
         }
 
         /// <summary>
-        /// Lazily loads a metadata value. This method will be called
-        /// for each request and the return object will
-        /// be processed like any other metadata value. The implementation
-        /// of this method must be thread-safe.
+        /// Initializes a new instance of the <see cref="CachedDelegateMetadataValue"/> class.
+        /// The specified delegate should be thread-safe.
         /// </summary>
+        /// <param name="value">The delegate that returns the metadata value.</param>
+        public CachedDelegateMetadataValue(Func<string, IMetadata, object> value)
+            : base(value)
+        {
+        }
+
+        /// <summary>
+        /// Lazily loads a metadata value and caches the value.
+        /// </summary>
+        /// <param name="key">The metadata key being requested.</param>
         /// <param name="metadata">The metadata object requesting the value.</param>
         /// <returns>The object to use as the value.</returns>
-        public override object Get(IMetadata metadata)
-        {
-            if (!_cached)
-            {
-                _cachedValue = base.Get(metadata);
-                _cached = true;
-            }
-            return _cachedValue;
-        }
+        public override object Get(string key, IMetadata metadata) =>
+            _cache.GetOrAdd((key, metadata), _ => base.Get(key, metadata));
     }
 }

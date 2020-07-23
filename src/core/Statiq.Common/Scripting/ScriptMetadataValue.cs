@@ -30,7 +30,7 @@ namespace Statiq.Common
             _executionState = executionState ?? throw new ArgumentNullException(nameof(executionState));
         }
 
-        public object Get(IMetadata metadata)
+        public object Get(string key, IMetadata metadata)
         {
             // Check if we're excluded from evaluation
             if (metadata.TryGetValue(Keys.ExcludeFromEvaluation, out object excludeObject)

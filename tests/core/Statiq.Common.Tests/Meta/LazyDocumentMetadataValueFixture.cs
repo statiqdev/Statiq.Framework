@@ -23,7 +23,7 @@ namespace Statiq.Common.Tests.Meta
                 LazyDocumentMetadataValue value = new LazyDocumentMetadataValue(b);
 
                 // When
-                object result = value.Get(null);
+                object result = value.Get(null, null);
 
                 // Then
                 result.ShouldBe(b);
@@ -44,7 +44,7 @@ namespace Statiq.Common.Tests.Meta
                 LazyDocumentMetadataValue value = new LazyDocumentMetadataValue(b2);
 
                 // When
-                object result = value.Get(null);
+                object result = value.Get(null, null);
 
                 // Then
                 result.ShouldBe(b2);
@@ -66,7 +66,7 @@ namespace Statiq.Common.Tests.Meta
                 LazyDocumentMetadataValue value = new LazyDocumentMetadataValue(e);
 
                 // When
-                object result = value.Get(null);
+                object result = value.Get(null, null);
 
                 // Then
                 result.ShouldBe(e);
@@ -93,7 +93,7 @@ namespace Statiq.Common.Tests.Meta
                 LazyDocumentMetadataValue value = new LazyDocumentMetadataValue(e2);
 
                 // When
-                object result = value.Get(null);
+                object result = value.Get(null, null);
 
                 // Then
                 result.ShouldBe(e2);
@@ -108,7 +108,7 @@ namespace Statiq.Common.Tests.Meta
                 LazyDocumentMetadataValue value = new LazyDocumentMetadataValue();
 
                 // When
-                object result = value.Get(null);
+                object result = value.Get(null, null);
 
                 // Then
                 result.ShouldBeNull();
@@ -126,7 +126,7 @@ namespace Statiq.Common.Tests.Meta
                 LazyDocumentMetadataValue value = new LazyDocumentMetadataValue(d);
 
                 // When
-                object result = value.Get(null);
+                object result = value.Get(null, null);
 
                 // Then
                 result.ShouldBe(d);
