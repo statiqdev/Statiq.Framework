@@ -67,17 +67,40 @@ namespace Statiq.Common.Tests.Documents
             }
         }
 
+        public class WithoutSettingsTests : DocumentFixture
+        {
+            [Test]
+            public void SettingsNotIncluded()
+            {
+                // Given
+                TestConfigurationSettings settings = new TestConfigurationSettings
+                {
+                    { "A", "a" }
+                };
+                IDocument document = new Document(settings, null, null, null, null);
+                IDocument cloned = document.Clone(new MetadataItems { { "A", "b" } });
+
+                // When
+                string initialValue = document.WithoutSettings().GetString("A");
+                string clonedValue = cloned.WithoutSettings().GetString("A");
+
+                // Then
+                initialValue.ShouldBeNull();
+                clonedValue.ShouldBe("b");
+            }
+        }
+
         public class MetadataTests : DocumentFixture
         {
             [Test]
             public void MetadataOverwritesSettings()
             {
                 // Given
-                MetadataItems settings = new MetadataItems
+                TestConfigurationSettings settings = new TestConfigurationSettings
                 {
                     { "A", "a" }
                 };
-                IDocument document = new Document(new Metadata(settings), null, null, null, null);
+                IDocument document = new Document(settings, null, null, null, null);
                 IDocument cloned = document.Clone(new MetadataItems { { "A", "b" } });
 
                 // When

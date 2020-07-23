@@ -38,6 +38,9 @@ namespace Statiq.Common
         /// <inheritdoc />
         public IContentProvider ContentProvider { get; }
 
+        /// <inheritdoc />
+        public IMetadata WithoutSettings() => this;
+
         public ObjectDocument(T obj)
             : this(obj, null, null, null, null)
         {

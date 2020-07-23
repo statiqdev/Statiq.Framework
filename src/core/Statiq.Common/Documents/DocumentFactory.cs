@@ -11,20 +11,20 @@ namespace Statiq.Common
     internal class DocumentFactory : IDocumentFactory
     {
         private readonly IExecutionState _executionState;
-        private readonly IMetadata _baseMetadata;
+        private readonly IReadOnlyConfigurationSettings _settings;
 
         private IFactory _defaultFactory = Factory<Document>.Instance;
 
-        public DocumentFactory(IExecutionState executionState, IMetadata baseMetadata)
+        public DocumentFactory(IExecutionState executionState, IReadOnlyConfigurationSettings settings)
         {
             _executionState = executionState ?? throw new ArgumentNullException(nameof(executionState));
-            _baseMetadata = baseMetadata ?? throw new ArgumentNullException(nameof(baseMetadata));
+            _settings = settings ?? throw new ArgumentNullException(nameof(settings));
         }
 
         private interface IFactory
         {
             IDocument CreateDocument(
-                IMetadata baseMetadata,
+                IReadOnlyConfigurationSettings settings,
                 NormalizedPath source,
                 NormalizedPath destination,
                 IMetadata metadata,
@@ -42,12 +42,12 @@ namespace Statiq.Common
             }
 
             public IDocument CreateDocument(
-                IMetadata baseMetadata,
+                IReadOnlyConfigurationSettings settings,
                 NormalizedPath source,
                 NormalizedPath destination,
                 IMetadata metadata,
                 IContentProvider contentProvider) =>
-                new TDocument().Initialize(baseMetadata, source, destination, metadata, contentProvider);
+                new TDocument().Initialize(settings, source, destination, metadata, contentProvider);
         }
 
         internal void SetDefaultDocumentType<TDocument>()
@@ -60,7 +60,7 @@ namespace Statiq.Common
             IEnumerable<KeyValuePair<string, object>> items,
             IContentProvider contentProvider) =>
             _defaultFactory.CreateDocument(
-                _baseMetadata,
+                _settings,
                 source,
                 destination,
                 new Metadata(_executionState, items),
@@ -73,7 +73,7 @@ namespace Statiq.Common
             IContentProvider contentProvider)
             where TDocument : FactoryDocument, IDocument, new() =>
             (TDocument)Factory<TDocument>.Instance.CreateDocument(
-                _baseMetadata,
+                _settings,
                 source,
                 destination,
                 new Metadata(_executionState, items),

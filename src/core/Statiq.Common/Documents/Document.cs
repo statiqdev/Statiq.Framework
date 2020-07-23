@@ -61,22 +61,22 @@ namespace Statiq.Common
         }
 
         public Document(
-            IMetadata baseMetadata,
+            IReadOnlyConfigurationSettings settings,
             NormalizedPath source,
             NormalizedPath destination,
             IEnumerable<KeyValuePair<string, object>> items,
             IContentProvider contentProvider = null)
-            : base(baseMetadata, source, destination, items, contentProvider)
+            : base(settings, source, destination, items, contentProvider)
         {
         }
 
         public Document(
-            IMetadata baseMetadata,
+            IReadOnlyConfigurationSettings settings,
             NormalizedPath source,
             NormalizedPath destination,
             IMetadata metadata,
             IContentProvider contentProvider = null)
-            : base(baseMetadata, source, destination, metadata, contentProvider)
+            : base(settings, source, destination, metadata, contentProvider)
         {
         }
     }

@@ -107,7 +107,13 @@ namespace Statiq.Common
         /// </summary>
         /// <param name="metadata">The metadata instance.</param>
         /// <returns>An enumerable over raw key-value pairs.</returns>
-        public static IEnumerable<KeyValuePair<string, object>> GetRawEnumerable(this IMetadata metadata) =>
-            new RawMetadataEnumerable(metadata ?? throw new ArgumentNullException(nameof(metadata)));
+        public static IEnumerable<KeyValuePair<string, object>> GetRawEnumerable(this IMetadata metadata)
+        {
+            if (metadata == null)
+            {
+                throw new ArgumentNullException(nameof(metadata));
+            }
+            return new EnumerableEnumerator<KeyValuePair<string, object>>(() => metadata.GetRawEnumerator());
+        }
     }
 }

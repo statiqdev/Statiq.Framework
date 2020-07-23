@@ -35,13 +35,13 @@ namespace Statiq.Testing
         {
         }
 
-        public TestDocument(IMetadata baseMetadata, NormalizedPath source, NormalizedPath destination, IEnumerable<KeyValuePair<string, object>> items, IContentProvider contentProvider = null)
-            : this(baseMetadata, source, destination, items == null ? null : new TestMetadata(items), contentProvider)
+        public TestDocument(IReadOnlyConfigurationSettings settings, NormalizedPath source, NormalizedPath destination, IEnumerable<KeyValuePair<string, object>> items, IContentProvider contentProvider = null)
+            : this(settings, source, destination, items == null ? null : new TestMetadata(items), contentProvider)
         {
         }
 
-        public TestDocument(IMetadata baseMetadata, NormalizedPath source, NormalizedPath destination, IMetadata metadata, IContentProvider contentProvider = null)
-            : base(baseMetadata, source, destination, metadata is TestMetadata ? metadata : new TestMetadata(metadata), contentProvider)
+        public TestDocument(IReadOnlyConfigurationSettings settings, NormalizedPath source, NormalizedPath destination, IMetadata metadata, IContentProvider contentProvider = null)
+            : base(settings, source, destination, metadata is TestMetadata ? metadata : new TestMetadata(metadata), contentProvider)
         {
             // All constructors lead here
         }

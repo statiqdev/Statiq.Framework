@@ -29,7 +29,7 @@ namespace Statiq.Common
     {
         private bool _initialized;
         private IMetadata _metadata;
-        private IMetadata _baseMetadata;
+        private IReadOnlyConfigurationSettings _settings;
         private IContentProvider _contentProvider;
         private NormalizedPath _destination;
         private NormalizedPath _source;
@@ -95,23 +95,23 @@ namespace Statiq.Common
         }
 
         protected Document(
-            IMetadata baseMetadata,
+            IReadOnlyConfigurationSettings settings,
             NormalizedPath source,
             NormalizedPath destination,
             IEnumerable<KeyValuePair<string, object>> items,
             IContentProvider contentProvider = null)
-            : this(baseMetadata, source, destination, items == null ? null : new Metadata(items), contentProvider)
+            : this(settings, source, destination, items == null ? null : new Metadata(items), contentProvider)
         {
         }
 
         protected Document(
-            IMetadata baseMetadata,
+            IReadOnlyConfigurationSettings settings,
             NormalizedPath source,
             NormalizedPath destination,
             IMetadata metadata,
             IContentProvider contentProvider = null)
         {
-            Initialize(baseMetadata, source, destination, metadata, contentProvider);
+            Initialize(settings, source, destination, metadata, contentProvider);
         }
 
         // Initialization has to be performed separately from construction to maintain the illusion of immutability
@@ -119,7 +119,7 @@ namespace Statiq.Common
         // overridden) which results in a new document instance before we have the chance to set properties like
         // metadata, source, and destination in the constructor
         internal override IDocument Initialize(
-            IMetadata baseMetadata,
+            IReadOnlyConfigurationSettings settings,
             NormalizedPath source,
             NormalizedPath destination,
             IMetadata metadata,
@@ -135,7 +135,7 @@ namespace Statiq.Common
                 throw new ArgumentException($"Document destinations must be relative to the output path ({destination})", nameof(destination));
             }
 
-            _baseMetadata = baseMetadata;
+            _settings = settings;
             _metadata = metadata;
             _source = source;
             _destination = destination;
@@ -157,7 +157,7 @@ namespace Statiq.Common
             document._initialized = false;  // The newly cloned document would have copied over our value for initialized
             document.Id = Id;  // Make sure it's got the same ID in case implementation overrode Clone()
             return document.Initialize(
-                _baseMetadata,
+                _settings,
                 _source.IsNull ? source : _source,
                 destination.IsNull ? _destination : destination,
                 items == null ? _metadata : new Metadata(_metadata, items),
@@ -178,17 +178,17 @@ namespace Statiq.Common
         [PropertyMetadata(null)]
         public Guid Id { get; private set; } = Guid.NewGuid();
 
-        protected IMetadata BaseMetadata
+        protected IReadOnlyConfigurationSettings Settings
         {
             get
             {
                 _initialized = true;
-                return _baseMetadata;
+                return _settings;
             }
             set
             {
                 CheckInitialized();
-                _baseMetadata = value;
+                _settings = value;
             }
         }
 
@@ -252,6 +252,10 @@ namespace Statiq.Common
         }
 
         /// <inheritdoc />
+        public IMetadata WithoutSettings() =>
+            new Metadata(new EnumerableEnumerator<KeyValuePair<string, object>>(() => GetRawEnumerator(false)));
+
+        /// <inheritdoc />
         public virtual async Task<int> GetCacheHashCodeAsync() => await IDocument.GetCacheHashCodeAsync(this);
 
         /// <inheritdoc />
@@ -266,7 +270,7 @@ namespace Statiq.Common
         public bool ContainsKey(string key) =>
             (!IDocument.Properties.Contains(key) && Metadata?.ContainsKey(key) == true)
             || PropertyMetadata<TDocument>.For((TDocument)this).ContainsKey(key)
-            || (BaseMetadata?.ContainsKey(key) ?? false);
+            || (Settings?.ContainsKey(key) ?? false);
 
         /// <inheritdoc />
         public object this[string key]
@@ -309,9 +313,9 @@ namespace Statiq.Common
                     }
                 }
 
-                if (BaseMetadata != null)
+                if (Settings != null)
                 {
-                    foreach (string key in BaseMetadata.Keys)
+                    foreach (string key in Settings.Keys)
                     {
                         if (keys.Add(key))
                         {
@@ -332,7 +336,7 @@ namespace Statiq.Common
             value = default;
             return (!IDocument.Properties.Contains(key) && Metadata?.TryGetRaw(key, out value) == true)
                 || PropertyMetadata<TDocument>.For((TDocument)this).TryGetRaw(key, out value)
-                || (BaseMetadata?.TryGetRaw(key, out value) ?? false);
+                || (Settings?.TryGetRaw(key, out value) ?? false);
         }
 
         /// <inheritdoc />
@@ -368,9 +372,9 @@ namespace Statiq.Common
                 }
             }
 
-            if (BaseMetadata != null)
+            if (Settings != null)
             {
-                foreach (KeyValuePair<string, object> item in BaseMetadata)
+                foreach (KeyValuePair<string, object> item in Settings)
                 {
                     if (keys.Add(item.Key))
                     {
@@ -384,7 +388,9 @@ namespace Statiq.Common
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
         /// <inheritdoc />
-        public IEnumerator<KeyValuePair<string, object>> GetRawEnumerator()
+        public IEnumerator<KeyValuePair<string, object>> GetRawEnumerator() => GetRawEnumerator(true);
+
+        private IEnumerator<KeyValuePair<string, object>> GetRawEnumerator(bool withSettings)
         {
             HashSet<string> keys = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
@@ -407,9 +413,9 @@ namespace Statiq.Common
                 }
             }
 
-            if (BaseMetadata != null)
+            if (withSettings && Settings != null)
             {
-                foreach (KeyValuePair<string, object> item in BaseMetadata.GetRawEnumerable())
+                foreach (KeyValuePair<string, object> item in Settings.GetRawEnumerable())
                 {
                     if (keys.Add(item.Key))
                     {
