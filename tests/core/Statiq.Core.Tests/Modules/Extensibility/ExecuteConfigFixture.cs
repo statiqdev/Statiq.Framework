@@ -66,10 +66,15 @@ namespace Statiq.Core.Tests.Modules.Extensibility
                     new TestDocument(),
                     new TestDocument()
                 };
+
+                object countLock = new object(); // ExecuteConfig runs in parallel so we need to lock on the counter
                 int count = 0;
                 ExecuteConfig execute = new ExecuteConfig(Config.FromContext(c =>
                 {
-                    count++;
+                    lock (countLock)
+                    {
+                        count++;
+                    }
                     return (object)null;
                 }));
 
@@ -181,8 +186,15 @@ namespace Statiq.Core.Tests.Modules.Extensibility
                     new TestDocument(),
                     new TestDocument()
                 };
+                object countLock = new object(); // ExecuteConfig runs in parallel so we need to lock on the counter
                 int count = 0;
-                ExecuteConfig execute = new ExecuteConfig(Config.FromDocument((d, c) => (object)count++));
+                ExecuteConfig execute = new ExecuteConfig(Config.FromDocument((d, c) =>
+                {
+                    lock (countLock)
+                    {
+                        return (object)count++;
+                    }
+                }));
 
                 // When
                 IReadOnlyList<TestDocument> results = await ExecuteAsync(inputs, execute);

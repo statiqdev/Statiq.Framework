@@ -54,6 +54,13 @@ namespace Statiq.Common
             IEnumerable<KeyValuePair<string, object>> items,
             IContentProvider contentProvider = null);
 
+        /// <summary>
+        /// Gets the direct metadata for this document without settings (if the document implementation doesn't use
+        /// settings, then all of it's metadata is returned).
+        /// </summary>
+        /// <returns>The document metadata without settings.</returns>
+        public IMetadata WithoutSettings();
+
         /// <inheritdoc />
         IContentProvider IContentProviderFactory.GetContentProvider() => ContentProvider;
 
