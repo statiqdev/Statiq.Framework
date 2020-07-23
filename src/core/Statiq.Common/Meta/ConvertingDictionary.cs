@@ -69,7 +69,7 @@ namespace Statiq.Common
         public ICollection<string> Keys => _dictionary.Keys;
 
         /// <inheritdoc />
-        public ICollection<object> Values => _dictionary.Values.Select(x => TypeHelper.ExpandValue(x, this)).ToArray();
+        public ICollection<object> Values => _dictionary.Select(x => TypeHelper.ExpandValue(x.Key, x.Value, this)).ToArray();
 
         /// <inheritdoc />
         public bool IsReadOnly => false;

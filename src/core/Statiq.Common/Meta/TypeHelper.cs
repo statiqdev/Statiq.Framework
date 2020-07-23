@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using System.Reflection;
+using ConcurrentCollections;
 using Statiq.Common;
 
 namespace Statiq.Common
@@ -72,38 +73,49 @@ namespace Statiq.Common
             TryConvert(value, out T result) ? result : (defaultValueFactory == null ? default : defaultValueFactory());
 
         /// <summary>
-        /// Trys to convert the provided value to the specified type while recursivly expanding <see cref="IMetadataValue"/>.
+        /// Tries to convert the provided value to the specified type while recursively expanding <see cref="IMetadataValue"/>.
         /// </summary>
         /// <typeparam name="T">The desired return type.</typeparam>
+        /// <param name="key">The metadata key being expanded.</param>
         /// <param name="value">The value to convert.</param>
         /// <param name="metadata">The current metadata instance.</param>
         /// <param name="result">The result of conversion.</param>
         /// <returns><c>true</c> if the value could be converted to the desired type, <c>false</c> otherwise.</returns>
-        public static bool TryExpandAndConvert<T>(object value, IMetadata metadata, out T result) => TryConvert(ExpandValue(value, metadata), out result);
+        public static bool TryExpandAndConvert<T>(string key, object value, IMetadata metadata, out T result) =>
+            TryConvert(ExpandValue(key, value, metadata), out result);
+
+        // Track metadata values being expanded and detect recursive expansion
+        private static readonly ConcurrentHashSet<(string, IMetadataValue, IMetadata)> _expanding =
+            new ConcurrentHashSet<(string, IMetadataValue, IMetadata)>();
 
         /// <summary>
         /// This resolves the value by recursively expanding <see cref="IMetadataValue"/>.
         /// </summary>
-        public static object ExpandValue(object value, IMetadata metadata)
+        /// <param name="key">The metadata key being expanded.</param>
+        /// <param name="value">The value to convert.</param>
+        /// <param name="metadata">The current metadata instance.</param>
+        /// <returns>The expanded metadata value.</returns>
+        public static object ExpandValue(string key, object value, IMetadata metadata)
         {
-            // Perform special expansions of IConfig and IMetadataValue
-            switch (value)
+            // Perform special expansions of IMetadataValue
+            if (value is IMetadataValue metadataValue)
             {
-                case IConfig config:
-                    IExecutionContext context = IExecutionContext.Current;
-                    if (config.RequiresDocument)
-                    {
-                        if (metadata is IDocument document)
-                        {
-                            return config.GetValueAsync(document, context).GetAwaiter().GetResult();
-                        }
-
-                        // The source metadata isn't a document but we need one so go ahead and create a dummy one that wraps the metadata
-                        return config.GetValueAsync(context.CreateDocument(metadata), context).GetAwaiter().GetResult();
-                    }
-                    return config.GetValueAsync(null, context).GetAwaiter().GetResult();
-                case IMetadataValue metadataValue:
-                    return ExpandValue(metadataValue.Get(metadata), metadata);
+                (string, IMetadataValue, IMetadata) expanding = (key, metadataValue, metadata);
+                if (!_expanding.Add(expanding))
+                {
+                    throw new InvalidOperationException("Recursive metadata expansion detected for key " + key);
+                }
+                try
+                {
+                    // Only detect recursion when getting the value since we'll intentionally
+                    // recursively expand the value in case it's also expandable
+                    value = metadataValue.Get(metadata);
+                }
+                finally
+                {
+                    _expanding.TryRemove(expanding);
+                }
+                return ExpandValue(key, value, metadata);
             }
 
             return value;
@@ -112,13 +124,16 @@ namespace Statiq.Common
         /// <summary>
         /// This resolves the value by recursively expanding <see cref="IMetadataValue"/>.
         /// </summary>
-        public static KeyValuePair<TKey, object> ExpandKeyValuePair<TKey>(KeyValuePair<TKey, object> item, IMetadata metadata) =>
+        /// <param name="item">The metadata key and value being expanded.</param>
+        /// <param name="metadata">The current metadata instance.</param>
+        /// <returns>The expanded metadata key and value.</returns>
+        public static KeyValuePair<string, object> ExpandKeyValuePair(KeyValuePair<string, object> item, IMetadata metadata) =>
             item.Value is IMetadataValue
-                ? new KeyValuePair<TKey, object>(item.Key, ExpandValue(item.Value, metadata))
+                ? new KeyValuePair<string, object>(item.Key, ExpandValue(item.Key, item.Value, metadata))
                 : item;
 
         /// <summary>
-        /// Trys to convert the provided value to the specified type.
+        /// Tries to convert the provided value to the specified type.
         /// </summary>
         /// <param name="value">The value to convert.</param>
         /// <param name="type">The desired return type.</param>
