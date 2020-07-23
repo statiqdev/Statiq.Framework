@@ -9,7 +9,7 @@ namespace Statiq.Common
         Task<object> GetValueAsync(IDocument document, IExecutionContext context);
 
         // IConfig values can be used as metadata
-        object IMetadataValue.Get(IMetadata metadata)
+        object IMetadataValue.Get(string key, IMetadata metadata)
         {
             IExecutionContext context = IExecutionContext.Current;
             if (RequiresDocument)

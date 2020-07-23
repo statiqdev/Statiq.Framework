@@ -695,7 +695,7 @@ namespace Statiq.Common.Tests.Meta
             public object Value { get; set; }
             public int Calls { get; set; }
 
-            object IMetadataValue.Get(IMetadata metadata)
+            object IMetadataValue.Get(string key, IMetadata metadata)
             {
                 Calls++;
                 return Value;
@@ -706,7 +706,7 @@ namespace Statiq.Common.Tests.Meta
         {
             public string Key { get; set; }
 
-            object IMetadataValue.Get(IMetadata metadata)
+            object IMetadataValue.Get(string key, IMetadata metadata)
             {
                 return metadata[Key];
             }

@@ -20,7 +20,7 @@ namespace Statiq.CodeAnalysis.Analysis
             _visitor = visitor;
         }
 
-        public object Get(IMetadata metadata)
+        public object Get(string key, IMetadata metadata)
         {
             if (!_cached)
             {

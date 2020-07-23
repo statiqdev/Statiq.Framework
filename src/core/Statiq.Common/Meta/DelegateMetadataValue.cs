@@ -7,7 +7,7 @@ namespace Statiq.Common
     /// </summary>
     public class DelegateMetadataValue : IMetadataValue
     {
-        private readonly Func<IMetadata, object> _value;
+        private readonly Func<string, IMetadata, object> _value;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="DelegateMetadataValue"/> class.
@@ -15,6 +15,16 @@ namespace Statiq.Common
         /// </summary>
         /// <param name="value">The delegate that returns the metadata value.</param>
         public DelegateMetadataValue(Func<IMetadata, object> value)
+            : this((_, metadata) => value(metadata))
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="DelegateMetadataValue"/> class.
+        /// The specified delegate should be thread-safe.
+        /// </summary>
+        /// <param name="value">The delegate that returns the metadata value.</param>
+        public DelegateMetadataValue(Func<string, IMetadata, object> value)
         {
             _value = value;
         }
@@ -25,8 +35,9 @@ namespace Statiq.Common
         /// be processed like any other metadata value. The implementation
         /// of this method must be thread-safe.
         /// </summary>
+        /// <param name="key">The metadata key being requested.</param>
         /// <param name="metadata">The metadata object requesting the value.</param>
         /// <returns>The object to use as the value.</returns>
-        public virtual object Get(IMetadata metadata) => _value(metadata);
+        public virtual object Get(string key, IMetadata metadata) => _value(key, metadata);
     }
 }
