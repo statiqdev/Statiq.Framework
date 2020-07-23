@@ -1,14 +1,21 @@
 ﻿using System;
 using System.Collections.Immutable;
+using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Html;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc.Razor;
+using Microsoft.AspNetCore.Mvc.Razor.Internal;
+using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.AspNetCore.Mvc.ViewFeatures;
+using Microsoft.Extensions.DependencyInjection;
 using Statiq.Common;
 
 namespace Statiq.Razor
 {
     public abstract class StatiqRazorPage<TModel> : RazorPage<TModel>
     {
+        private IHtmlHelper<TModel> _htmlHelper;
+
         public IDocument Document => ViewData[ViewDataKeys.StatiqDocument] as IDocument;
         public IMetadata Metadata => Document;
 
@@ -18,6 +25,22 @@ namespace Statiq.Razor
         public IPipelineOutputs Outputs => ExecutionContext.Outputs;
 
         public HttpContext HttpContext => base.Context;
+
+        /// <summary>
+        /// The <see cref="IHtmlHelper"/> isn't normally available in the page, so get one
+        /// and contextualize it from the service provider.
+        /// </summary>
+        /// <returns>The <see cref="IHtmlHelper"/>.</returns>
+        protected IHtmlHelper<TModel> GetHtmlHelper()
+        {
+            if (_htmlHelper == null)
+            {
+                IServiceProvider serviceProvider = ViewData[ViewDataKeys.StatiqServiceProvider] as IServiceProvider;
+                _htmlHelper = serviceProvider.GetRequiredService<IHtmlHelper<TModel>>();
+                (_htmlHelper as IViewContextAware)?.Contextualize(ViewContext);
+            }
+            return _htmlHelper;
+        }
 
         /// <summary>
         /// Renders the content of the specified section if it's defined.
@@ -34,5 +57,15 @@ namespace Statiq.Razor
             }
             return defaultContents(null);
         }
+
+        /// <summary>
+        /// Renders the content of the specified section if it's defined.
+        /// If the section is not defined, renders the provided partial.
+        /// </summary>
+        /// <param name="sectionName">The name of the section to render.</param>
+        /// <param name="partialName">The name of the partial to render.</param>
+        /// <returns>The HTML content.</returns>
+        public IHtmlContent RenderSectionOrPartial(string sectionName, string partialName) =>
+            IsSectionDefined(sectionName) ? RenderSection(sectionName) : GetHtmlHelper().Partial(partialName);
     }
 }

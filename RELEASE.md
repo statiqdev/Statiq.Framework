@@ -1,5 +1,6 @@
 # 1.0.0-beta.18
 
+- Added a `RenderSectionOrPartial(string sectionName, string partialName)` helper to the base Razor page.
 - Added feed metadata to the output documents from `GenerateFeeds`.
 - Added a new `AddRtlSupport` module in `Statiq.Html` that automatically adds RTL attributes to HTML elements (#113, #15, thanks @encrypt0r).
 - Added a `IEnumerable<IDocument>.RemoveTreePlaceholders()` extension method.
