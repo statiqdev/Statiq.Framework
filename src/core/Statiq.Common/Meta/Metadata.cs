@@ -40,7 +40,7 @@ namespace Statiq.Common
             {
                 Dictionary = new Dictionary<string, object>(StringComparer.OrdinalIgnoreCase);
 
-                // If items is an IMetadata, use the raw enumerable so that we don't expand IMetadataValue and Config values
+                // If items is an IMetadata, use the raw enumerable so that we don't expand IMetadataValue values
                 if (items is IMetadata metadata)
                 {
                     items = metadata.GetRawEnumerable();
@@ -123,7 +123,7 @@ namespace Statiq.Common
         }
 
         /// <inheritdoc/>
-        // Enumerate the keys seperatly so we don't evaluate values
+        // Enumerate the keys separately so we don't evaluate values
         public IEnumerable<string> Keys
         {
             get
