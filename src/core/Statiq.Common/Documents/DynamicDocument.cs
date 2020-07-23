@@ -44,9 +44,6 @@ namespace Statiq.Common
         public IEnumerable<object> Values => _document.Values;
 
         /// <inheritdoc />
-        public IMetadata WithoutSettings() => _document.WithoutSettings();
-
-        /// <inheritdoc />
         public int Count => _document.Count;
 
         /// <inheritdoc />

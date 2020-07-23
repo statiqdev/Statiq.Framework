@@ -1,7 +1,5 @@
 # 1.0.0-beta.18
 
-- Added support for `WithoutSettings()` to scripts (including script metadata so scripted settings can now exclude their own values from the script).
-- Added `IDocument.WithoutSettings()` to return the document metadata without any settings.
 - Added the key being requested to `IMetadataValue.Get()` so that metadata values can use it if needed.
 - Added recursive metadata expansion detection of `IMetadataValue` metadata values (it will now throw an error so you know which key is recursively expanding).
 - Added a `RenderSectionOrPartial(string sectionName, string partialName)` helper to the base Razor page.

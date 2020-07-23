@@ -252,10 +252,6 @@ namespace Statiq.Common
         }
 
         /// <inheritdoc />
-        public IMetadata WithoutSettings() =>
-            new Metadata(new EnumerableEnumerator<KeyValuePair<string, object>>(() => GetRawEnumerator(false)));
-
-        /// <inheritdoc />
         public virtual async Task<int> GetCacheHashCodeAsync() => await IDocument.GetCacheHashCodeAsync(this);
 
         /// <inheritdoc />

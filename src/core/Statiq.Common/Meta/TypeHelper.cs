@@ -87,10 +87,10 @@ namespace Statiq.Common
             TryConvert(ExpandValue(key, value, metadata), out result);
 
         // Track metadata values being expanded and detect recursive expansion
-        private static readonly ConcurrentHashSet<(string, IMetadataValue, IMetadata, int)> _expanding =
-            new ConcurrentHashSet<(string, IMetadataValue, IMetadata, int)>();
-        private static readonly ConcurrentHashSet<(string, IMetadataValue, IMetadata, int)> _expandingWarned =
-            new ConcurrentHashSet<(string, IMetadataValue, IMetadata, int)>();
+        private static readonly ConcurrentHashSet<(string, IMetadataValue, int)> _expanding =
+            new ConcurrentHashSet<(string, IMetadataValue, int)>();
+        private static readonly ConcurrentHashSet<(string, IMetadataValue, int)> _expandingWarned =
+            new ConcurrentHashSet<(string, IMetadataValue, int)>();
 
         /// <summary>
         /// This resolves the value by recursively expanding <see cref="IMetadataValue"/>.
@@ -105,7 +105,7 @@ namespace Statiq.Common
             if (value is IMetadataValue metadataValue)
             {
                 // Warn if this looks like a recursive call
-                (string, IMetadataValue, IMetadata, int) expanding = (key, metadataValue, metadata, Thread.CurrentThread.ManagedThreadId);
+                (string, IMetadataValue, int) expanding = (key, metadataValue, Thread.CurrentThread.ManagedThreadId);
                 if (!_expandingWarned.Contains(expanding) && !_expanding.Add(expanding))
                 {
                     string displayString = (metadata as IDocument)?.ToSafeDisplayString();
