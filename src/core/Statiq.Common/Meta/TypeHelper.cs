@@ -4,7 +4,9 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using System.Reflection;
+using System.Threading;
 using ConcurrentCollections;
+using Microsoft.Extensions.Logging;
 using Statiq.Common;
 
 namespace Statiq.Common
@@ -85,8 +87,10 @@ namespace Statiq.Common
             TryConvert(ExpandValue(key, value, metadata), out result);
 
         // Track metadata values being expanded and detect recursive expansion
-        private static readonly ConcurrentHashSet<(string, IMetadataValue, IMetadata)> _expanding =
-            new ConcurrentHashSet<(string, IMetadataValue, IMetadata)>();
+        private static readonly ConcurrentHashSet<(string, IMetadataValue, IMetadata, int)> _expanding =
+            new ConcurrentHashSet<(string, IMetadataValue, IMetadata, int)>();
+        private static readonly ConcurrentHashSet<(string, IMetadataValue, IMetadata, int)> _expandingWarned =
+            new ConcurrentHashSet<(string, IMetadataValue, IMetadata, int)>();
 
         /// <summary>
         /// This resolves the value by recursively expanding <see cref="IMetadataValue"/>.
@@ -100,11 +104,20 @@ namespace Statiq.Common
             // Perform special expansions of IMetadataValue
             if (value is IMetadataValue metadataValue)
             {
-                (string, IMetadataValue, IMetadata) expanding = (key, metadataValue, metadata);
-                if (!_expanding.Add(expanding))
+                // Warn if this looks like a recursive call
+                (string, IMetadataValue, IMetadata, int) expanding = (key, metadataValue, metadata, Thread.CurrentThread.ManagedThreadId);
+                if (!_expandingWarned.Contains(expanding) && !_expanding.Add(expanding))
                 {
-                    throw new InvalidOperationException("Recursive metadata expansion detected for key " + key);
+                    string displayString = (metadata as IDocument)?.ToSafeDisplayString();
+                    if (displayString != null)
+                    {
+                        displayString = " (" + displayString + ")";
+                    }
+                    IExecutionContext.CurrentOrNull?.LogWarning("Potential recursive metadata expansion detected for key " + key + displayString);
+                    _expandingWarned.Add(expanding);
                 }
+
+                // Expand the value
                 try
                 {
                     // Only detect recursion when getting the value since we'll intentionally
@@ -114,7 +127,9 @@ namespace Statiq.Common
                 finally
                 {
                     _expanding.TryRemove(expanding);
+                    _expandingWarned.TryRemove(expanding);
                 }
+
                 return ExpandValue(key, value, metadata);
             }
 
