@@ -34,8 +34,6 @@ namespace Statiq.Core
         public IDocument doc => Document;
 #pragma warning restore SA1300 // Element should begin with upper-case letter
 
-        public IMetadata WithoutSettings() => (Metadata as IDocument)?.WithoutSettings() ?? Metadata;
-
         public abstract Task<object> EvaluateAsync();
 
         // Manually implement IExecutionContext pass-throughs since we don't
