@@ -161,7 +161,8 @@ namespace Statiq.Razor
                 output,
                 new HtmlHelperOptions(),
                 request.Document,
-                request.Context);
+                request.Context,
+                serviceProvider);
         }
 
         /// <summary>
