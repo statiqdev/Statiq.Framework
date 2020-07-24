@@ -56,6 +56,33 @@ namespace Statiq.Core.Tests.Scripting
             }
 
             [Test]
+            public void WithoutSettings()
+            {
+                // Given
+                TestExecutionContext context = new TestExecutionContext();
+                context.ScriptHelper = new ScriptHelper(context);
+                ScriptMetadataValue.TryGetScriptMetadataValue("Foo", "=> GetString(\"A\")", context, out ScriptMetadataValue fooScriptMetadataValue);
+                ScriptMetadataValue.TryGetScriptMetadataValue("Bar", "=> WithoutSettings().GetString(\"A\")", context, out ScriptMetadataValue barScriptMetadataValue);
+                TestConfigurationSettings settings = new TestConfigurationSettings
+                {
+                    { "A", "a" }
+                };
+                TestDocument document = new TestDocument(settings, null, null, null)
+                {
+                    { "Foo", fooScriptMetadataValue },
+                    { "Bar", barScriptMetadataValue }
+                };
+
+                // When
+                object fooResult = document.Get("Foo");
+                object barResult = document.Get("Bar");
+
+                // Then
+                fooResult.ShouldBe("a");
+                barResult.ShouldBeNull();
+            }
+
+            [Test]
             public void ExcludesAllScriptEvaluation()
             {
                 // Given

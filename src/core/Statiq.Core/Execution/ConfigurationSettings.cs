@@ -121,14 +121,14 @@ namespace Statiq.Core
         {
             foreach (KeyValuePair<string, object> item in _settings)
             {
-                yield return item;
+                yield return SettingsValue.Get(item);
             }
             IEnumerator<KeyValuePair<string, object>> baseEnumerator = base.GetEnumerator();
             while (baseEnumerator.MoveNext())
             {
                 if (!_settings.ContainsKey(baseEnumerator.Current.Key))
                 {
-                    yield return baseEnumerator.Current;
+                    yield return SettingsValue.Get(baseEnumerator.Current);
                 }
             }
         }
@@ -136,12 +136,17 @@ namespace Statiq.Core
         public override bool TryGetRaw(string key, out object value)
         {
             _ = key ?? throw new ArgumentNullException(nameof(key));
-            if (_settings.TryGetValue(key, out object metadataValue))
+            if (_settings.TryGetValue(key, out value))
             {
-                value = metadataValue;
+                value = SettingsValue.Get(value);
                 return true;
             }
-            return base.TryGetRaw(key, out value);
+            if (base.TryGetRaw(key, out value))
+            {
+                value = SettingsValue.Get(value);
+                return true;
+            }
+            return false;
         }
 
         ICollection<string> IDictionary<string, object>.Keys => Keys.ToArray();

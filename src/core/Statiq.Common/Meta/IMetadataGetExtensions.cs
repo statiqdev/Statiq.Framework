@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using System.Linq;
 
 namespace Statiq.Common
 {
@@ -102,6 +103,17 @@ namespace Statiq.Common
         public static IMetadata FilterMetadata(this IMetadata metadata, params string[] keys) => new FilteredMetadata(metadata, keys);
 
         /// <summary>
+        /// Gets an enumerable that enumerates key-value pairs.
+        /// </summary>
+        /// <param name="metadata">The metadata instance.</param>
+        /// <returns>An enumerable over key-value pairs.</returns>
+        public static IEnumerable<KeyValuePair<string, object>> GetEnumerable(this IMetadata metadata)
+        {
+            _ = metadata ?? throw new ArgumentNullException(nameof(metadata));
+            return new EnumerableEnumerator<KeyValuePair<string, object>>(() => metadata.GetEnumerator());
+        }
+
+        /// <summary>
         /// Gets an enumerable that enumerates raw key-value pairs
         /// (I.e., the values have not been expanded similar to <see cref="IMetadata.TryGetRaw(string, out object)"/>).
         /// </summary>
@@ -109,11 +121,14 @@ namespace Statiq.Common
         /// <returns>An enumerable over raw key-value pairs.</returns>
         public static IEnumerable<KeyValuePair<string, object>> GetRawEnumerable(this IMetadata metadata)
         {
-            if (metadata == null)
-            {
-                throw new ArgumentNullException(nameof(metadata));
-            }
+            _ = metadata ?? throw new ArgumentNullException(nameof(metadata));
             return new EnumerableEnumerator<KeyValuePair<string, object>>(() => metadata.GetRawEnumerator());
+        }
+
+        public static IMetadata WithoutSettings(this IMetadata metadata)
+        {
+            _ = metadata ?? throw new ArgumentNullException(nameof(metadata));
+            return new Metadata(metadata.GetRawEnumerable().Where(x => !(x.Value is SettingsValue)));
         }
     }
 }

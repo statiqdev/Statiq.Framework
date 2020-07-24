@@ -51,13 +51,6 @@ namespace Statiq.App
             return Settings.ContainsKey(key) || base.ContainsKey(key);
         }
 
-        public override bool TryGetRaw(string key, out object value)
-        {
-            CheckDisposed();
-            _ = key ?? throw new ArgumentNullException(nameof(key));
-            return Settings.TryGetValue(key, out value) || base.TryGetRaw(key, out value);
-        }
-
         // Enumerate the keys separately so we don't evaluate values
         public override IEnumerable<string> Keys
         {
@@ -100,16 +93,33 @@ namespace Statiq.App
             CheckDisposed();
             foreach (KeyValuePair<string, object> item in Settings)
             {
-                yield return item;
+                yield return SettingsValue.Get(item);
             }
             IEnumerator<KeyValuePair<string, object>> baseEnumerator = base.GetEnumerator();
             while (baseEnumerator.MoveNext())
             {
                 if (!Settings.ContainsKey(baseEnumerator.Current.Key))
                 {
-                    yield return baseEnumerator.Current;
+                    yield return SettingsValue.Get(baseEnumerator.Current);
                 }
             }
+        }
+
+        public override bool TryGetRaw(string key, out object value)
+        {
+            CheckDisposed();
+            _ = key ?? throw new ArgumentNullException(nameof(key));
+            if (Settings.TryGetValue(key, out value))
+            {
+                value = SettingsValue.Get(value);
+                return true;
+            }
+            if (base.TryGetRaw(key, out value))
+            {
+                value = SettingsValue.Get(value);
+                return true;
+            }
+            return false;
         }
 
         object IDictionary<string, object>.this[string key]
