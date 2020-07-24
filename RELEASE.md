@@ -1,5 +1,6 @@
 # 1.0.0-beta.18
 
+- Added `IMetadata.WithoutSettings()` to return filtered metadata without any settings values.
 - Added the key being requested to `IMetadataValue.Get()` so that metadata values can use it if needed.
 - Added recursive metadata expansion detection of `IMetadataValue` metadata values (it will now throw an error so you know which key is recursively expanding).
 - Added a `RenderSectionOrPartial(string sectionName, string partialName)` helper to the base Razor page.

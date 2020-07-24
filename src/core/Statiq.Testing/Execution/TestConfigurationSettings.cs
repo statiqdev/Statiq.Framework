@@ -87,6 +87,54 @@ namespace Statiq.Testing
             }
         }
 
+        public override IEnumerator<KeyValuePair<string, object>> GetEnumerator()
+        {
+            foreach (KeyValuePair<string, object> item in _settings)
+            {
+                yield return TypeHelper.ExpandKeyValuePair(item, this);
+            }
+            IEnumerator<KeyValuePair<string, object>> baseEnumerator = base.GetEnumerator();
+            while (baseEnumerator.MoveNext())
+            {
+                if (!_settings.ContainsKey(baseEnumerator.Current.Key))
+                {
+                    yield return baseEnumerator.Current;
+                }
+            }
+        }
+
+        public override IEnumerator<KeyValuePair<string, object>> GetRawEnumerator()
+        {
+            foreach (KeyValuePair<string, object> item in _settings)
+            {
+                yield return SettingsValue.Get(item);
+            }
+            IEnumerator<KeyValuePair<string, object>> baseEnumerator = base.GetEnumerator();
+            while (baseEnumerator.MoveNext())
+            {
+                if (!_settings.ContainsKey(baseEnumerator.Current.Key))
+                {
+                    yield return SettingsValue.Get(baseEnumerator.Current);
+                }
+            }
+        }
+
+        public override bool TryGetRaw(string key, out object value)
+        {
+            _ = key ?? throw new ArgumentNullException(nameof(key));
+            if (_settings.TryGetValue(key, out value))
+            {
+                value = SettingsValue.Get(value);
+                return true;
+            }
+            if (base.TryGetRaw(key, out value))
+            {
+                value = SettingsValue.Get(value);
+                return true;
+            }
+            return false;
+        }
+
         public override IEnumerable<string> Keys => _settings.Keys;
 
         public IConfigurationProvider Build(IConfigurationBuilder builder) => this;

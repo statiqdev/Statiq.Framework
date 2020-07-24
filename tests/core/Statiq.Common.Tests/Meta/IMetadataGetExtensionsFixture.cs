@@ -119,5 +119,28 @@ namespace Statiq.Common.Tests.Meta
                 value.ShouldBeNull();
             }
         }
+
+        public class WithoutSettingsTests : IMetadataGetExtensionsFixture
+        {
+            [Test]
+            public void SettingsNotIncluded()
+            {
+                // Given
+                TestConfigurationSettings settings = new TestConfigurationSettings
+                {
+                    { "A", "a" }
+                };
+                IDocument document = new Document(settings, null, null, null, null);
+                IDocument cloned = document.Clone(new MetadataItems { { "A", "b" } });
+
+                // When
+                string initialValue = document.WithoutSettings().GetString("A");
+                string clonedValue = cloned.WithoutSettings().GetString("A");
+
+                // Then
+                initialValue.ShouldBeNull();
+                clonedValue.ShouldBe("b");
+            }
+        }
     }
 }
