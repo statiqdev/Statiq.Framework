@@ -72,9 +72,17 @@ namespace Statiq.Core
             IExecutionContext context,
             ImmutableArray<IDocument> childOutputs) =>
             _reverse
-                ? childOutputs.SelectMany(childOutput => context.Inputs.Select(input =>
-                    childOutput.Clone(_keepExisting ? input.GetRawEnumerable().Where(x => !childOutput.ContainsKey(x.Key)) : input)))
-                : context.Inputs.SelectMany(input => childOutputs.Select(result =>
-                    input.Clone(_keepExisting ? result.GetRawEnumerable().Where(x => !input.ContainsKey(x.Key)) : result)));
+                ? childOutputs.SelectMany(childOutput =>
+                {
+                    IMetadata childOutputWithoutSettings = childOutput.WithoutSettings();
+                    return context.Inputs.Select(input =>
+                        childOutput.Clone(_keepExisting ? input.WithoutSettings().GetRawEnumerable().Where(x => !childOutputWithoutSettings.ContainsKey(x.Key)) : input));
+                })
+                : context.Inputs.SelectMany(input =>
+                {
+                    IMetadata inputWithoutSettings = input.WithoutSettings();
+                    return childOutputs.Select(result =>
+                        input.Clone(_keepExisting ? result.WithoutSettings().GetRawEnumerable().Where(x => !inputWithoutSettings.ContainsKey(x.Key)) : result));
+                });
     }
 }
