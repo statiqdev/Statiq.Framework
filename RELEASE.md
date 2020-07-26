@@ -1,5 +1,7 @@
 # 1.0.0-beta.18
 
+- Added a `IComparer<T>.ToConvertingComparer()` extension method that converts a typed comparer into a `IComparer<object>` that performs type conversions.
+- Added a `IEqualityComparer<T>.ToConvertingComparer()` extension method that converts a typed comparer into a `IComparer<object>` that performs type conversions.
 - Added a `RemoveTreePlaceholders` module to remove tree placeholder documents without flattening.
 - The `MergeMetadata` and `MergeDocuments` modules no longer merge settings (since they're inherited by the document regardless).
 - Added `IMetadata.WithoutSettings()` to return filtered metadata without any settings values.
