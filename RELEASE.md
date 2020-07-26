@@ -1,5 +1,6 @@
 # 1.0.0-beta.18
 
+- Added a `RemoveTreePlaceholders` module to remove tree placeholder documents without flattening.
 - The `MergeMetadata` and `MergeDocuments` modules no longer merge settings (since they're inherited by the document regardless).
 - Added `IMetadata.WithoutSettings()` to return filtered metadata without any settings values.
 - Added the key being requested to `IMetadataValue.Get()` so that metadata values can use it if needed.
