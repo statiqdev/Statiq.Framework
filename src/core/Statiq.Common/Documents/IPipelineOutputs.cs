@@ -29,13 +29,10 @@ namespace Statiq.Common
         DocumentList<IDocument> ExceptPipeline(string pipelineName);
 
         /// <summary>
-        /// Gets documents from a specific pipeline.
+        /// Returns documents with destination paths from all pipelines that satisfy the globbing pattern(s).
         /// </summary>
-        /// <value>
-        /// The documents output by the specified pipeline..
-        /// </value>
-        /// <param name="pipline">The pipeline.</param>
-        /// <returns>The documents output by the specified pipeline.</returns>
-        public DocumentList<IDocument> this[string pipline] => FromPipeline(pipline);
+        /// <param name="destinationPatterns">The globbing pattern(s) to filter by (can be a single path).</param>
+        /// <returns>The documents that satisfy the pattern or <c>null</c>.</returns>
+        public IEnumerable<IDocument> this[params string[] destinationPatterns] => this.FilterDestinations(destinationPatterns);
     }
 }
