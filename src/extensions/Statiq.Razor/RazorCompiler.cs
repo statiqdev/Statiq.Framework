@@ -234,6 +234,7 @@ namespace Statiq.Razor
 
         private CompilationResult GetCompilation(RazorProjectItem projectItem)
         {
+            IExecutionContext.CurrentOrNull?.LogDebug($"Compiling " + projectItem.FilePath);
             using (IServiceScope scope = _serviceScopeFactory.CreateScope())
             {
                 IServiceProvider serviceProvider = scope.ServiceProvider;
