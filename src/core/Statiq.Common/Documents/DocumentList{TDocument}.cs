@@ -35,11 +35,11 @@ namespace Statiq.Common
         }
 
         /// <summary>
-        /// Returns the first document that satisfies the pattern.
+        /// Returns documents with destination paths that satisfy the globbing pattern(s).
         /// </summary>
-        /// <param name="destinationPattern">The globbing pattern to filter by (can be a single path).</param>
-        /// <returns>The first document that satisfies the pattern or <c>null</c>.</returns>
-        public TDocument this[string destinationPattern] => _documents.FirstOrDefaultDestination(destinationPattern);
+        /// <param name="destinationPatterns">The globbing pattern(s) to filter by (can be a single path).</param>
+        /// <returns>The documents that satisfy the pattern or <c>null</c>.</returns>
+        public IEnumerable<TDocument> this[params string[] destinationPatterns] => _documents.FilterDestinations(destinationPatterns);
 
         // IReadOnlyList<IDocument>
 

@@ -1,5 +1,10 @@
 # 1.0.0-beta.18
 
+- **Breaking change.** Changed the IPipelineOutputs` indexer to filter documents by destination path from all pipelines instead of get documents from a specified pipeline.
+  To use the previous behavior, call `IPipelineOutputs.FromPipeline(string)`. This will make the more common case (finding a document or documents among all pipelines) easier.
+  To refactor your code to match the old behavior, do a string search for "Outputs[" and replace with `Outputs.FromPipeline()`.
+- **Breaking change.** Changed the `DocumentList<TDocument>` indexer to return all matching documents instead of the first matching document. To refactor your code
+  to match the old behavior add a `.FirstOrDefault()` after the call to the indexer.
 - Added a `IComparer<T>.ToConvertingComparer()` extension method that converts a typed comparer into a `IComparer<object>` that performs type conversions.
 - Added a `IEqualityComparer<T>.ToConvertingComparer()` extension method that converts a typed comparer into a `IComparer<object>` that performs type conversions.
 - Added a `RemoveTreePlaceholders` module to remove tree placeholder documents without flattening.

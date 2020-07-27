@@ -29,7 +29,7 @@ namespace Statiq.Core.Tests.Execution
                 IPipelineOutputs outputs = await engine.ExecuteAsync(cts.Token);
 
                 // Then
-                outputs["TestExecutionPipeline"].Cast<TestDocument>().Select(x => x.Content).Single().ShouldBe("Foo");
+                outputs.FromPipeline("TestExecutionPipeline").Cast<TestDocument>().Select(x => x.Content).Single().ShouldBe("Foo");
             }
         }
 

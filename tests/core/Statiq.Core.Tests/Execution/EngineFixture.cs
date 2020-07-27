@@ -442,7 +442,7 @@ namespace Statiq.Core.Tests.Execution
 
                 // Then
                 module.ExecuteCount.ShouldBe(1);
-                outputs["TestPipeline"].Select(x => x.GetInt("Foo")).ShouldBe(new int[] { 1 });
+                outputs.FromPipeline("TestPipeline").Select(x => x.GetInt("Foo")).ShouldBe(new int[] { 1 });
             }
 
             [Test]
@@ -467,7 +467,7 @@ namespace Statiq.Core.Tests.Execution
 
                 // Then
                 module.ExecuteCount.ShouldBe(0);
-                outputs["TestPipeline"].Select(x => x.GetInt("Foo")).ShouldBe(new int[] { 123 });
+                outputs.FromPipeline("TestPipeline").Select(x => x.GetInt("Foo")).ShouldBe(new int[] { 123 });
             }
 
             [Test]
@@ -492,7 +492,7 @@ namespace Statiq.Core.Tests.Execution
 
                 // Then
                 module.ExecuteCount.ShouldBe(1);
-                outputs["TestPipeline"].Select(x => x.GetInt("Foo")).ShouldBe(new int[] { 124 });
+                outputs.FromPipeline("TestPipeline").Select(x => x.GetInt("Foo")).ShouldBe(new int[] { 124 });
             }
         }
     }
