@@ -17,8 +17,7 @@ namespace Statiq.Core
     {
         public override async Task<ShortcodeResult> ExecuteAsync(KeyValuePair<string, string>[] args, string content, IDocument document, IExecutionContext context)
         {
-            byte[] assembly = context.ScriptHelper.Compile(content, document);
-            object value = await context.ScriptHelper.EvaluateAsync(assembly, document);
+            object value = await context.ScriptHelper.EvaluateAsync(content, document);
             return value.ToString();
         }
     }

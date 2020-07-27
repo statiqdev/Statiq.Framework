@@ -15,8 +15,6 @@ namespace Statiq.Common
         private readonly string _originalPrefix;
         private readonly string _script;
         private readonly IExecutionState _executionState;
-        private readonly ConcurrentDictionary<HashSet<KeyValuePair<string, string>>, Type> _cachedScriptTypes =
-            new ConcurrentDictionary<HashSet<KeyValuePair<string, string>>, Type>(HashSet<KeyValuePair<string, string>>.CreateSetComparer());
 
         private ScriptMetadataValue(string key, string originalPrefix, string script, IExecutionState executionState)
         {
@@ -36,31 +34,8 @@ namespace Statiq.Common
                 return _originalPrefix + _script;
             }
 
-            // Get (or compile) the script based on the current metadata
-            HashSet<KeyValuePair<string, string>> metadataProperties = _executionState.ScriptHelper
-                .GetMetadataProperties(metadata)
-                .ToHashSet(MetadataPropertyComparer.Instance);
-            Type cachedScriptType = _cachedScriptTypes.GetOrAdd(metadataProperties, x =>
-            {
-                byte[] rawAssembly = _executionState.ScriptHelper.Compile(_script, x);
-                return _executionState.ScriptHelper.Load(rawAssembly);
-            });
-
             // Evaluate the script
-            return _executionState.ScriptHelper.EvaluateAsync(cachedScriptType, metadata).GetAwaiter().GetResult();
-        }
-
-        private class MetadataPropertyComparer : IEqualityComparer<KeyValuePair<string, string>>
-        {
-            public static readonly MetadataPropertyComparer Instance = new MetadataPropertyComparer();
-
-            public bool Equals([AllowNull] KeyValuePair<string, string> x, [AllowNull] KeyValuePair<string, string> y) =>
-                x.Key.Equals(y.Key, StringComparison.OrdinalIgnoreCase) && (x.Value?.Equals(y.Value) ?? y.Value == null);
-
-            public int GetHashCode([DisallowNull] KeyValuePair<string, string> obj) =>
-                HashCode.Combine(
-                    StringComparer.OrdinalIgnoreCase.GetHashCode(obj.Key),
-                    obj.Value?.GetHashCode() ?? 0);
+            return _executionState.ScriptHelper.EvaluateAsync(_script, metadata).GetAwaiter().GetResult();
         }
 
         public static bool TryGetScriptMetadataValue(string key, object value, IExecutionState executionState, out ScriptMetadataValue scriptMetadataValue)
