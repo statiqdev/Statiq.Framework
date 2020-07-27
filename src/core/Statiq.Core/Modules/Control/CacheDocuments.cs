@@ -144,7 +144,11 @@ namespace Statiq.Core
             }
             if (_dependentPipelinesHash != dependentPipelinesHash)
             {
-                context.LogInformation("Resetting cache due to changes to dependent pipeline outputs");
+                if (_dependentPipelinesHash != default)
+                {
+                    // We don't need to log if this is the first time through or cache was reset
+                    context.LogInformation($"Resetting cache due to changes to dependent pipeline outputs ({string.Join(", ", context.Pipeline.Dependencies)})");
+                }
                 ResetCache();
                 _dependentPipelinesHash = dependentPipelinesHash;
             }
@@ -233,6 +237,9 @@ namespace Statiq.Core
                     context.LogDebug(message ?? "Cache miss for documents with null source: null sources are never cached");
                     misses.AddRange(inputGroup);
                 }
+
+                // Log hits and misses
+                context.LogInformation($"Cache resulted in {outputs.Count} cache hits and {misses.Count} cache misses");
             }
 
             // Execute misses

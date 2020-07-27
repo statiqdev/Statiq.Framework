@@ -54,7 +54,7 @@ namespace Statiq.App
                 ServiceCollection.Configure<FileLoggerOptions>(options =>
                 {
                     options.FileName = commandSettings.LogFile;
-                    options.LogDirectory = string.Empty;
+                    options.LogDirectory = "logs";
                 });
             }
 

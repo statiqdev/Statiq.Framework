@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -83,14 +84,19 @@ namespace Statiq.Common
                 hash.Add(await Crc32.CalculateAsync(stream));
             }
 
-            // We exclude ContentProvider from hash as we already added CRC for content above.
-            foreach (KeyValuePair<string, object> item in document.GetRawEnumerable()
-                .Where(x => x.Key != nameof(ContentProvider)))
+            // We exclude ContentProvider from hash as we already added CRC for content above
+            // Also exclude settings and IMetadataValue implementations
+            // And try to convert to a string and hash that for consistency
+            foreach ((string key, object value) in document
+                .WithoutSettings()
+                .GetRawEnumerable()
+                .Where(x => x.Key != nameof(ContentProvider) && !(x.Value is IMetadataValue))
+                .Select(x => (x.Key, TypeHelper.TryConvert(x.Value, out string stringValue) ? stringValue : x.Value))
+                .OrderBy(x => x.Key))
             {
-                hash.Add(item.Key);
-                hash.Add(item.Value);
+                hash.Add(key);
+                hash.Add(value?.GetHashCode() ?? 0);
             }
-
             return hash.ToHashCode();
         }
 

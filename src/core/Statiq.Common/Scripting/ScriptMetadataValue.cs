@@ -3,8 +3,6 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
-using Microsoft.DotNet.PlatformAbstractions;
-using Statiq.Common;
 
 namespace Statiq.Common
 {
@@ -13,8 +11,6 @@ namespace Statiq.Common
     /// </summary>
     public sealed class ScriptMetadataValue : IMetadataValue
     {
-        private static readonly object Lock = new object();
-
         private readonly string _key;
         private readonly string _originalPrefix;
         private readonly string _script;
