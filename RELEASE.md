@@ -1,10 +1,13 @@
 # 1.0.0-beta.18
 
-- **Breaking change.** Changed the IPipelineOutputs` indexer to filter documents by destination path from all pipelines instead of get documents from a specified pipeline.
+- **Breaking change:** Changed the IPipelineOutputs` indexer to filter documents by destination path from all pipelines instead of get documents from a specified pipeline.
   To use the previous behavior, call `IPipelineOutputs.FromPipeline(string)`. This will make the more common case (finding a document or documents among all pipelines) easier.
   To refactor your code to match the old behavior, do a string search for "Outputs[" and replace with `Outputs.FromPipeline()`.
-- **Breaking change.** Changed the `DocumentList<TDocument>` indexer to return all matching documents instead of the first matching document. To refactor your code
+- **Breaking change:** Changed the `DocumentList<TDocument>` indexer to return all matching documents instead of the first matching document. To refactor your code
   to match the old behavior add a `.FirstOrDefault()` after the call to the indexer.
+- **Breaking change:** Removed the `CompileScript` module in favor of global script caching (so using the `EvaluateScript` module will also cache the script compilation, removing the need for a separate cached assembly).
+- **Breaking change:** Removed all but a single string-based evaluation method from `IScriptHelper` to promote global script compilation caching.
+- Script compilations are now globally cached, dramatically improving performance of scripted documents, metadata, and shortcodes.
 - Fixed some bugs with the `CacheDocuments` module and document hash code generation.
 - Added a `IComparer<T>.ToConvertingComparer()` extension method that converts a typed comparer into a `IComparer<object>` that performs type conversions.
 - Added a `IEqualityComparer<T>.ToConvertingComparer()` extension method that converts a typed comparer into a `IComparer<object>` that performs type conversions.

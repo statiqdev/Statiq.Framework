@@ -14,13 +14,7 @@ namespace Statiq.Core
     {
         protected override async Task<IEnumerable<IDocument>> ExecuteInputAsync(IDocument input, IExecutionContext context)
         {
-            // Get the assembly
-            byte[] assembly = input.MediaTypeEquals(CompileScript.ScriptMediaType)
-                ? await input.GetContentBytesAsync()
-                : context.ScriptHelper.Compile(await input.GetContentStringAsync(), input);
-
-            // Evaluate the script
-            object value = await context.ScriptHelper.EvaluateAsync(assembly, input);
+            object value = await context.ScriptHelper.EvaluateAsync(await input.GetContentStringAsync(), input);
             return await context.CloneOrCreateDocumentsAsync(input, input.Yield(), value ?? new NullContent());
         }
     }

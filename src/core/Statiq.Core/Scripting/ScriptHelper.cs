@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -19,9 +20,14 @@ namespace Statiq.Core
     {
         public const string AssemblyName = "ScriptAssembly";
         public const string ScriptClassName = "Script";
+        public const string FactoryClassName = ScriptClassName + "Factory";
 
         private static readonly HashSet<string> ReservedPropertyNames =
             new HashSet<string>(typeof(ScriptBase).GetMembers().Select(x => x.Name), StringComparer.OrdinalIgnoreCase);
+
+        // Keyed by script
+        private static readonly ConcurrentDictionary<string, ScriptFactoryCache> _cachedScriptFactories =
+            new ConcurrentDictionary<string, ScriptFactoryCache>();
 
         private readonly IExecutionState _executionState;
 
@@ -33,53 +39,37 @@ namespace Statiq.Core
         /// <inheritdoc/>
         public async Task<object> EvaluateAsync(string code, IMetadata metadata)
         {
-            byte[] rawAssembly = Compile(code, metadata);
-            return await EvaluateAsync(rawAssembly, metadata);
-        }
-
-        /// <inheritdoc/>
-        public async Task<object> EvaluateAsync(byte[] rawAssembly, IMetadata metadata)
-        {
-            Type scriptType = Load(rawAssembly);
-            if (scriptType == null)
-            {
-                throw new ArgumentException("The assembly does not contain a script object", nameof(rawAssembly));
-            }
-            return await EvaluateAsync(scriptType, metadata);
-        }
-
-        /// <inheritdoc/>
-        public async Task<object> EvaluateAsync(Type scriptType, IMetadata metadata)
-        {
-            _ = scriptType ?? throw new ArgumentNullException(nameof(scriptType));
-            _ = metadata ?? throw new ArgumentNullException(nameof(metadata));
-
-            if (!typeof(ScriptBase).IsAssignableFrom(scriptType))
-            {
-                throw new ArgumentException("Provided type is not a script", nameof(scriptType));
-            }
-
-            // Try to use the current execution context if there is one and fall back to the initial execution state (the engine)
-            ScriptBase script = (ScriptBase)Activator.CreateInstance(
-                scriptType,
+            ScriptFactoryCache factoryCache = _cachedScriptFactories.GetOrAdd(code, _ => new ScriptFactoryCache(this));
+            ScriptBase script = factoryCache.GetScript(
+                code,
                 metadata,
                 IExecutionContext.CurrentOrNull ?? _executionState,
                 IExecutionContext.CurrentOrNull);
             return await script.EvaluateAsync();
         }
 
-        /// <inheritdoc/>
-        public Type Load(byte[] rawAssembly)
+        /// <summary>
+        /// Loads a script factory from a raw script assembly.
+        /// </summary>
+        /// <remarks>
+        /// This loads the assembly and finds the first script factory type.
+        /// </remarks>
+        /// <param name="rawAssembly">The raw assembly bytes.</param>
+        /// <returns>The script factory or <c>null</c> if a script factory was not found in the assembly.</returns>
+        internal static Type LoadFactory(byte[] rawAssembly)
         {
             _ = rawAssembly ?? throw new ArgumentNullException(nameof(rawAssembly));
             Assembly assembly = Assembly.Load(rawAssembly);
-            return Array.Find(assembly.GetExportedTypes(), t => t.Name == ScriptClassName);
+            return Array.Find(assembly.GetExportedTypes(), t => t.Name == FactoryClassName);
         }
 
-        /// <inheritdoc/>
-        IEnumerable<KeyValuePair<string, string>> IScriptHelper.GetMetadataProperties(IMetadata metadata) => GetMetadataProperties(metadata);
-
-        public static IEnumerable<KeyValuePair<string, string>> GetMetadataProperties(IMetadata metadata)
+        /// <summary>
+        /// Gets property name and scripting types for a given <see cref="IMetadata"/> object
+        /// by mapping metadata properties to their defined types and other metadata to <see cref="object"/>.
+        /// </summary>
+        /// <param name="metadata">The metadata to get scriptable properties for.</param>
+        /// <returns>The property name and scriptable type for each property of the metadata.</returns>
+        internal static IEnumerable<KeyValuePair<string, string>> GetMetadataProperties(IMetadata metadata)
         {
             if (metadata != null)
             {
@@ -91,11 +81,19 @@ namespace Statiq.Core
             }
         }
 
-        /// <inheritdoc/>
-        public byte[] Compile(string code, IMetadata metadata) => Compile(code, GetMetadataProperties(metadata));
-
-        /// <inheritdoc/>
-        public byte[] Compile(string code, IEnumerable<KeyValuePair<string, string>> metadataPropertyKeys)
+        /// <summary>
+        /// Compiles a script into an in-memory script assembly for later evaluation.
+        /// </summary>
+        /// <param name="code">The code to compile.</param>
+        /// <param name="metadataPropertyKeys">
+        /// Metadata property keys that will be exposed as properties in the script as
+        /// the name of the key and can be used directly in the script.
+        /// The <see cref="KeyValuePair{TKey, TValue}.Key"/> should be the name of the
+        /// property and <see cref="KeyValuePair{TKey, TValue}.Value"/> should be the name
+        /// of the property type (or <c>null</c> for "object").
+        /// </param>
+        /// <returns>Raw assembly bytes.</returns>
+        internal byte[] Compile(string code, IEnumerable<KeyValuePair<string, string>> metadataPropertyKeys)
         {
             _ = code ?? throw new ArgumentNullException(nameof(code));
 
@@ -270,6 +268,13 @@ await Task.CompletedTask;
 {metadataProperties}
 {executionStateCalls}
 {metadataCalls}
+}}
+public class {FactoryClassName} : ScriptFactoryBase
+{{
+public override ScriptBase GetScript(IMetadata metadata, IExecutionState executionState, IExecutionContext executionContext)
+{{
+return new {ScriptClassName}(metadata, executionState, executionContext);
+}}
 }}
 {liftingWalker.TypeDeclarations}
 public static class ScriptExtensionMethods

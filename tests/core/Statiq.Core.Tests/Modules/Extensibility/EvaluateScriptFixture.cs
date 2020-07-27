@@ -67,26 +67,6 @@ namespace Statiq.Core.Tests.Modules.Extensibility
             }
 
             [Test]
-            public async Task CompileThenEvaluate()
-            {
-                // Given
-                TestExecutionContext context = new TestExecutionContext();
-                context.ScriptHelper = new ScriptHelper(context);
-                TestDocument document = new TestDocument("return (int)Foo + 2;")
-                {
-                    { "Foo", 5 }
-                };
-                CompileScript compileScript = new CompileScript();
-                EvaluateScript evaluateScript = new EvaluateScript();
-
-                // When
-                IReadOnlyList<TestDocument> result = await ExecuteAsync(document, context, compileScript, evaluateScript);
-
-                // Then
-                result.Single().Content.ShouldBe("7");
-            }
-
-            [Test]
             public async Task MultipleStatements()
             {
                 // Given
