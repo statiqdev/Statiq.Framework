@@ -29,12 +29,12 @@ namespace Statiq.Core.Tests.Modules.Extensibility
             }
 
             [Test]
-            public async Task CanAccessMetadataAsGlobalProperty()
+            public async Task CanAccessMetadataAsAnObject()
             {
                 // Given
                 TestExecutionContext context = new TestExecutionContext();
                 context.ScriptHelper = new ScriptHelper(context);
-                TestDocument document = new TestDocument("return (int)Foo + 2;")
+                TestDocument document = new TestDocument("return (int)Get(\"Foo\") + 2;")
                 {
                     { "Foo", 5 }
                 };
@@ -48,7 +48,7 @@ namespace Statiq.Core.Tests.Modules.Extensibility
             }
 
             [Test]
-            public async Task CanAccessMetadata()
+            public async Task CanAccessMetadataWithTypeConversion()
             {
                 // Given
                 TestExecutionContext context = new TestExecutionContext();

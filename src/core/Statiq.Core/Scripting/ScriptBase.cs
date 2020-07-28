@@ -36,6 +36,14 @@ namespace Statiq.Core
 
         public abstract Task<object> EvaluateAsync();
 
+        // IDocument pass-throughs (these will throw if not a document)
+
+        public NormalizedPath Source => Document.Source;
+
+        public NormalizedPath Destination => Document.Destination;
+
+        public IContentProvider ContentProvider => Document.ContentProvider;
+
         // Manually implement IExecutionContext pass-throughs since we don't
         // want to automatically proxy everything in IExecutionContext
 

@@ -271,7 +271,7 @@ namespace Statiq.Core.Tests.Shortcodes.Control
                 };
                 KeyValuePair<string, string>[] args = new KeyValuePair<string, string>[]
                 {
-                    new KeyValuePair<string, string>("Key", "=> (int)Foo + 1"),
+                    new KeyValuePair<string, string>("Key", "=> (int)Get(\"Foo\") + 1"),
                     new KeyValuePair<string, string>("Value", "123")
                 };
                 IfShortcode shortcode = new IfShortcode();

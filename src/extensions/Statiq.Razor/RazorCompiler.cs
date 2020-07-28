@@ -8,7 +8,6 @@ using System.Reflection;
 using System.Security.Cryptography;
 using System.Text.Encodings.Web;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Abstractions;
@@ -38,8 +37,8 @@ namespace Statiq.Razor
         private static readonly MethodInfo CompileAndEmitMethod;
         private static readonly MethodInfo CreateCompilationFailedException;
 
-        private readonly ConcurrentDictionary<CompilerCacheKey, CompilationResult> _compilationCache
-            = new ConcurrentDictionary<CompilerCacheKey, CompilationResult>();
+        private readonly ConcurrentCache<CompilerCacheKey, CompilationResult> _compilationCache
+            = new ConcurrentCache<CompilerCacheKey, CompilationResult>();
 
         private readonly IServiceScopeFactory _serviceScopeFactory;
 

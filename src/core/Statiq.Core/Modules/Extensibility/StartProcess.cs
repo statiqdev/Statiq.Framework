@@ -46,7 +46,7 @@ namespace Statiq.Core
         private const string KeepContentKey = nameof(KeepContentKey);
         private const string EnvironmentVariables = nameof(EnvironmentVariables);
 
-        private readonly ConcurrentDictionary<int, (Process, ILogger)> _processes = new ConcurrentDictionary<int, (Process, ILogger)>();
+        private readonly ConcurrentCache<int, (Process, ILogger)> _processes = new ConcurrentCache<int, (Process, ILogger)>();
 
         private bool _logOutput;
         private bool _background;

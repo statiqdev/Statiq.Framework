@@ -112,7 +112,7 @@ namespace Statiq.Core.Tests.Shortcodes.Control
                 });
                 KeyValuePair<string, string>[] args = new KeyValuePair<string, string>[]
                 {
-                    new KeyValuePair<string, string>("Key", "=> new int[] { 1, 2, (int)Foo + 1 }"),
+                    new KeyValuePair<string, string>("Key", "=> new int[] { 1, 2, (int)Get(\"Foo\") + 1 }"),
                     new KeyValuePair<string, string>("ValueKey", "Bar")
                 };
                 ForEachShortcode shortcode = new ForEachShortcode();

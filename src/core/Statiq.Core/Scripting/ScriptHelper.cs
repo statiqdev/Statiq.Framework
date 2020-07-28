@@ -22,12 +22,9 @@ namespace Statiq.Core
         public const string ScriptClassName = "Script";
         public const string FactoryClassName = ScriptClassName + "Factory";
 
-        private static readonly HashSet<string> ReservedPropertyNames =
-            new HashSet<string>(typeof(ScriptBase).GetMembers().Select(x => x.Name), StringComparer.OrdinalIgnoreCase);
-
         // Keyed by script
-        private static readonly ConcurrentDictionary<string, ScriptFactoryCache> _cachedScriptFactories =
-            new ConcurrentDictionary<string, ScriptFactoryCache>();
+        private static readonly ConcurrentCache<string, ScriptFactoryBase> _cachedScriptFactories =
+            new ConcurrentCache<string, ScriptFactoryBase>();
 
         private readonly IExecutionState _executionState;
 
@@ -39,9 +36,14 @@ namespace Statiq.Core
         /// <inheritdoc/>
         public async Task<object> EvaluateAsync(string code, IMetadata metadata)
         {
-            ScriptFactoryCache factoryCache = _cachedScriptFactories.GetOrAdd(code, _ => new ScriptFactoryCache(this));
-            ScriptBase script = factoryCache.GetScript(
-                code,
+            ScriptFactoryBase scriptFactory = _cachedScriptFactories.GetOrAdd(code, _ =>
+            {
+                IExecutionContext.CurrentOrNull?.LogDebug($"Script cache miss for script `{(code.Length > 20 ? (code.Substring(0, 19) + "...") : code)}`");
+                byte[] rawAssembly = Compile(code);
+                Type scriptFactoryType = LoadFactory(rawAssembly);
+                return (ScriptFactoryBase)Activator.CreateInstance(scriptFactoryType);
+            });
+            ScriptBase script = scriptFactory.GetScript(
                 metadata,
                 IExecutionContext.CurrentOrNull ?? _executionState,
                 IExecutionContext.CurrentOrNull);
@@ -64,41 +66,16 @@ namespace Statiq.Core
         }
 
         /// <summary>
-        /// Gets property name and scripting types for a given <see cref="IMetadata"/> object
-        /// by mapping metadata properties to their defined types and other metadata to <see cref="object"/>.
-        /// </summary>
-        /// <param name="metadata">The metadata to get scriptable properties for.</param>
-        /// <returns>The property name and scriptable type for each property of the metadata.</returns>
-        internal static IEnumerable<KeyValuePair<string, string>> GetMetadataProperties(IMetadata metadata)
-        {
-            if (metadata != null)
-            {
-                Type metadataType = metadata.GetType();
-                foreach (string key in metadata.Keys)
-                {
-                    yield return new KeyValuePair<string, string>(key, metadataType.GetProperty(key)?.PropertyType.FullName);
-                }
-            }
-        }
-
-        /// <summary>
         /// Compiles a script into an in-memory script assembly for later evaluation.
         /// </summary>
         /// <param name="code">The code to compile.</param>
-        /// <param name="metadataPropertyKeys">
-        /// Metadata property keys that will be exposed as properties in the script as
-        /// the name of the key and can be used directly in the script.
-        /// The <see cref="KeyValuePair{TKey, TValue}.Key"/> should be the name of the
-        /// property and <see cref="KeyValuePair{TKey, TValue}.Value"/> should be the name
-        /// of the property type (or <c>null</c> for "object").
-        /// </param>
         /// <returns>Raw assembly bytes.</returns>
-        internal byte[] Compile(string code, IEnumerable<KeyValuePair<string, string>> metadataPropertyKeys)
+        internal byte[] Compile(string code)
         {
             _ = code ?? throw new ArgumentNullException(nameof(code));
 
             // Parse the code
-            code = Parse(code, metadataPropertyKeys, _executionState);
+            code = Parse(code, _executionState);
 
             // Get the compilation
             CSharpParseOptions parseOptions = new CSharpParseOptions();
@@ -196,7 +173,7 @@ namespace Statiq.Core
 
         // Internal for testing
         // metadataPropertyKeys.Key = property name, metadataPropertyKeys.Value = property type
-        internal static string Parse(string code, IEnumerable<KeyValuePair<string, string>> metadataPropertyKeys, IExecutionState executionState)
+        internal static string Parse(string code, IExecutionState executionState)
         {
             // Generate a syntax tree from the code
             SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText(code, new CSharpParseOptions(kind: SourceCodeKind.Script), cancellationToken: executionState.CancellationToken);
@@ -214,17 +191,6 @@ namespace Statiq.Core
             namespaces.Add("System.Text");
             namespaces.Add("Statiq.Core");
             string usingStatements = string.Join(Environment.NewLine, namespaces.Select(x => "using " + x + ";"));
-
-            // Get the document metadata properties and add to the script host object,
-            // but only if they don't conflict with properties from ScriptBase
-            string metadataProperties =
-                metadataPropertyKeys == null
-                    ? string.Empty
-                    : string.Join(
-                        Environment.NewLine,
-                        metadataPropertyKeys
-                            .Where(x => !string.IsNullOrWhiteSpace(x.Key) && !ReservedPropertyNames.Contains(x.Key))
-                            .Select(x => $"public {x.Value ?? "object"} {GetValidIdentifier(x.Key)} => Metadata.Get<{x.Value ?? "object"}>(\"{x.Key}\");"));
 
             // Determine if we need a return statement
             string preScript = null;
@@ -265,7 +231,6 @@ await Task.CompletedTask;
 {postScript}
 }}
 {liftingWalker.MethodDeclarations}
-{metadataProperties}
 {executionStateCalls}
 {metadataCalls}
 }}

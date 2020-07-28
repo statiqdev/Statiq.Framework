@@ -10,8 +10,8 @@ namespace Statiq.Common
     public class CachedDelegateMetadataValue : DelegateMetadataValue
     {
         // Cache values by key and source metadata
-        private readonly ConcurrentDictionary<(string, IMetadata), object> _cache =
-            new ConcurrentDictionary<(string, IMetadata), object>();
+        private readonly ConcurrentCache<(string, IMetadata), object> _cache =
+            new ConcurrentCache<(string, IMetadata), object>();
 
         /// <summary>
         /// Initializes a new instance of the <see cref="CachedDelegateMetadataValue"/> class.

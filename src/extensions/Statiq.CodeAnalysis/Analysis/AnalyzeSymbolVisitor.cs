@@ -21,9 +21,10 @@ namespace Statiq.CodeAnalysis.Analysis
     {
         private static readonly object XmlDocLock = new object();
 
-        private readonly ConcurrentDictionary<string, IDocument> _namespaceDisplayNameToDocument = new ConcurrentDictionary<string, IDocument>();
-        private readonly ConcurrentDictionary<string, ConcurrentHashSet<INamespaceSymbol>> _namespaceDisplayNameToSymbols = new ConcurrentDictionary<string, ConcurrentHashSet<INamespaceSymbol>>();
-        private readonly ConcurrentDictionary<ISymbol, IDocument> _symbolToDocument = new ConcurrentDictionary<ISymbol, IDocument>();
+        private readonly ConcurrentCache<string, IDocument> _namespaceDisplayNameToDocument = new ConcurrentCache<string, IDocument>();
+        private readonly ConcurrentCache<string, ConcurrentHashSet<INamespaceSymbol>> _namespaceDisplayNameToSymbols =
+            new ConcurrentCache<string, ConcurrentHashSet<INamespaceSymbol>>();
+        private readonly ConcurrentCache<ISymbol, IDocument> _symbolToDocument = new ConcurrentCache<ISymbol, IDocument>();
         private readonly ConcurrentHashSet<IMethodSymbol> _extensionMethods = new ConcurrentHashSet<IMethodSymbol>();
 
         private readonly Compilation _compilation;
@@ -132,7 +133,7 @@ namespace Statiq.CodeAnalysis.Analysis
                     (_, existing) =>
                     {
                         // There's already a document for this symbol display name, add it to the symbol-to-document cache
-                        _symbolToDocument.TryAdd(symbol, existing);
+                        _symbolToDocument.TryAdd(symbol, () => existing);
                         return existing;
                     });
             }

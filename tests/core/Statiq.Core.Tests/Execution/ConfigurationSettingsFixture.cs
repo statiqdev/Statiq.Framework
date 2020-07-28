@@ -216,7 +216,7 @@ namespace Statiq.Core.Tests.Execution
                 // Given
                 IConfiguration configuration = GetConfiguration(@"
 {
-  ""foo"": ""=> $\""ABC {bar} XYZ\"""",
+  ""foo"": ""=> $\""ABC {Get(\""bar\"")} XYZ\"""",
   ""bar"": 3
 }");
                 TestExecutionContext context = new TestExecutionContext();

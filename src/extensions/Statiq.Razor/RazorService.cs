@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Threading.Tasks;
+using Statiq.Common;
 
 namespace Statiq.Razor
 {
@@ -9,8 +10,8 @@ namespace Statiq.Razor
     /// </summary>
     internal class RazorService
     {
-        private readonly ConcurrentDictionary<CompilationParameters, RazorCompiler> _compilers
-            = new ConcurrentDictionary<CompilationParameters, RazorCompiler>();
+        private readonly ConcurrentCache<CompilationParameters, RazorCompiler> _compilers
+            = new ConcurrentCache<CompilationParameters, RazorCompiler>();
 
         private Guid _executionId = Guid.Empty;
 

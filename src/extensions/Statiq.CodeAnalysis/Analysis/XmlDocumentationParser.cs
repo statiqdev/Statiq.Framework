@@ -18,7 +18,7 @@ namespace Statiq.CodeAnalysis.Analysis
         private readonly IExecutionContext _context;
         private readonly ISymbol _symbol;
         private readonly Compilation _compilation;
-        private readonly ConcurrentDictionary<ISymbol, IDocument> _symbolToDocument;
+        private readonly ConcurrentCache<ISymbol, IDocument> _symbolToDocument;
         private readonly ConcurrentDictionary<string, string> _cssClasses;
         private readonly object _processLock = new object();
         private List<Action> _processActions;
@@ -51,7 +51,7 @@ namespace Statiq.CodeAnalysis.Analysis
             IExecutionContext context,
             ISymbol symbol,
             Compilation compilation,
-            ConcurrentDictionary<ISymbol, IDocument> symbolToDocument,
+            ConcurrentCache<ISymbol, IDocument> symbolToDocument,
             ConcurrentDictionary<string, string> cssClasses)
         {
             _context = context;
