@@ -193,5 +193,8 @@ namespace Statiq.Common
         public static TDocument FirstOrDefaultDestination<TDocument>(this IEnumerable<TDocument> documents, params string[] patterns)
             where TDocument : IDocument =>
             documents.FirstOrDefaultDestination((IEnumerable<string>)patterns);
+
+        public static bool ContainsById(this IEnumerable<IDocument> documents, IDocument document) =>
+            documents.Contains(document, DocumentIdComparer.Instance);
     }
 }

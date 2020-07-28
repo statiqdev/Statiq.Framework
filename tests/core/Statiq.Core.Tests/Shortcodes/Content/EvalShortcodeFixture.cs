@@ -62,25 +62,6 @@ namespace Statiq.Core.Tests.Shortcodes.Content
                 // Then
                 result.ContentProvider.GetStream().ReadToEnd().ShouldBe("5");
             }
-
-            [Test]
-            public async Task CanAccessMetadataAsProperties()
-            {
-                TestExecutionContext context = new TestExecutionContext();
-                context.ScriptHelper = new ScriptHelper(context);
-                TestDocument document = new TestDocument
-                {
-                    { "Foo", 4 }
-                };
-                EvalShortcode shortcode = new EvalShortcode();
-                string shortcodeContent = "return 1 + (int)Foo;";
-
-                // When
-                ShortcodeResult result = await shortcode.ExecuteAsync(null, shortcodeContent, document, context);
-
-                // Then
-                result.ContentProvider.GetStream().ReadToEnd().ShouldBe("5");
-            }
         }
     }
 }

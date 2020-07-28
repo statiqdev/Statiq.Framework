@@ -58,7 +58,7 @@ namespace Statiq.Core.Tests.Meta
                 };
 
                 // When
-                bool result = metadata.TryGetValue("=> 1 + (int)Foo", out int value);
+                bool result = metadata.TryGetValue("=> 1 + GetInt(\"Foo\")", out int value);
 
                 // Then
                 result.ShouldBeTrue();
