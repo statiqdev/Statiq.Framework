@@ -1,14 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
-using System.IO;
-using System.Linq;
-using System.Net.Mime;
 using System.Threading.Tasks;
 using AngleSharp.Dom;
-using AngleSharp.Dom.Html;
-using AngleSharp.Parser.Html;
-using Microsoft.Extensions.Logging;
 using Statiq.Common;
 
 namespace Statiq.Html
@@ -21,7 +14,7 @@ namespace Statiq.Html
     /// as with the <c>GenerateFeeds</c> module or for use in an API.
     /// </remarks>
     /// <category>Content</category>
-    public class AbsolutizeLinks : ParallelModule
+    public class MakeLinksAbsolute : ParallelModule
     {
         protected override Task<IEnumerable<Common.IDocument>> ExecuteInputAsync(Common.IDocument input, IExecutionContext context) =>
             ProcessHtml.ProcessElementsAsync(

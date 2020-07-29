@@ -9,6 +9,8 @@
 - **Breaking change:** Removed all but a single string-based evaluation method from `IScriptHelper` to promote global script compilation caching.
 - **Breaking change:** Removed global metadata properties from scripted documents, metadata, and shortcodes due to performance penalty and inability to cache across documents.
   Uses of global properties that refer to other metadata will have to be replaced with `Get()` variants. For example, a scripted metadata value `=> Foo` should become `=> Get("Foo")`.
+- **Breaking change:** Renamed the `AbsolutizeLinks` module to `MakeLinksAbsolute` for clarity and to match with the new `MakeLinksRootRelative` module.
+- Added a new `MakeLinksRootRelative` module.
 - Added a `IEnumerable<IDocument>.ContainsById(IDocument)` extension method to determine if a sequence contains an equivalent document by ID.
 - Added a new `ConcurrentCache<TKey, TValue>` helper class that uses `Lazy<T>`, which improves performance of internals by avoiding duplicate value factory evaluation.
 - Script compilations are now globally cached, dramatically improving performance of scripted documents, metadata, and shortcodes.
