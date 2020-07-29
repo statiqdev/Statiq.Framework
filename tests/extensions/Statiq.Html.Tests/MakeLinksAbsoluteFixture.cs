@@ -8,9 +8,9 @@ using Statiq.Testing;
 namespace Statiq.Html.Tests
 {
     [TestFixture]
-    public class AbsolutizeLinksFixture : BaseFixture
+    public class MakeLinksAbsoluteFixture : BaseFixture
     {
-        public class ExecuteTests : AbsolutizeLinksFixture
+        public class ExecuteTests : MakeLinksAbsoluteFixture
         {
             [TestCase("/fizz/buzz", "http://statiq.dev/fizz/buzz")]
             [TestCase("//fizz/buzz", "http://statiq.dev/fizz/buzz")]
@@ -28,7 +28,7 @@ namespace Statiq.Html.Tests
                         </div>
                       </body>
                     </html>");
-                AbsolutizeLinks module = new AbsolutizeLinks();
+                MakeLinksAbsolute module = new MakeLinksAbsolute();
 
                 // When
                 TestDocument result = await ExecuteAsync(document, context, module).SingleAsync();
@@ -59,7 +59,7 @@ namespace Statiq.Html.Tests
                         </div>
                       </body>
                     </html>");
-                AbsolutizeLinks module = new AbsolutizeLinks();
+                MakeLinksAbsolute module = new MakeLinksAbsolute();
 
                 // When
                 TestDocument result = await ExecuteAsync(document, context, module).SingleAsync();
@@ -89,7 +89,7 @@ namespace Statiq.Html.Tests
                       </body>
                     </html>";
                 TestDocument document = new TestDocument(content);
-                AbsolutizeLinks module = new AbsolutizeLinks();
+                MakeLinksAbsolute module = new MakeLinksAbsolute();
 
                 // When
                 TestDocument result = await ExecuteAsync(document, context, module).SingleAsync();
@@ -112,7 +112,7 @@ namespace Statiq.Html.Tests
                         </div>
                       </body>
                     </html>");
-                AbsolutizeLinks module = new AbsolutizeLinks();
+                MakeLinksAbsolute module = new MakeLinksAbsolute();
 
                 // When
                 TestDocument result = await ExecuteAsync(document, context, module).SingleAsync();
@@ -144,7 +144,7 @@ namespace Statiq.Html.Tests
                         </div>
                       </body>
                     </html>");
-                AbsolutizeLinks module = new AbsolutizeLinks();
+                MakeLinksAbsolute module = new MakeLinksAbsolute();
 
                 // When
                 TestDocument result = await ExecuteAsync(document, context, module).SingleAsync();
