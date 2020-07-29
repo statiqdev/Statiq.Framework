@@ -11,9 +11,10 @@ namespace Statiq.Html.Tests
     {
         public class ExecuteTests : MakeLinksRootRelativeFixture
         {
+            [TestCase("//fizz/buzz", "/fizz/buzz")]
+            [TestCase("fizz/buzz", "/foo/bar/fizz/buzz")]
             [TestCase("../fizz/buzz", "/foo/fizz/buzz")]
             [TestCase("../fizz/buzz.html", "/foo/fizz/buzz.html")]
-            [TestCase("fizz/buzz", "/foo/bar/fizz/buzz")]
             public async Task MakesLinksRootRelative(string relative, string absolute)
             {
                 // Given
@@ -42,6 +43,7 @@ namespace Statiq.Html.Tests
                     </body></html>", StringCompareShould.IgnoreLineEndings);
             }
 
+            [TestCase("//fizz/buzz.png", "/fizz/buzz.png")]
             [TestCase("../fizz/buzz.jpg", "/foo/fizz/buzz.jpg")]
             [TestCase("fizz/buzz.png", "/foo/bar/fizz/buzz.png")]
             public async Task MakesImagesRootRelative(string relative, string absolute)
