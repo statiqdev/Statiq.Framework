@@ -24,18 +24,18 @@ namespace Statiq.Html
                 false,
                 (d, c, e, m) =>
                 {
-                    MakeLinkAbsolute(e, "href", context);
-                    MakeLinkAbsolute(e, "src", context);
+                    MakeLinkAbsolute(e, "href", d, context);
+                    MakeLinkAbsolute(e, "src", d, context);
                 });
 
-        private static void MakeLinkAbsolute(IElement element, string attribute, IExecutionContext context)
+        private static void MakeLinkAbsolute(IElement element, string attribute, Common.IDocument document, IExecutionContext context)
         {
             string value = element.GetAttribute(attribute);
             if (!string.IsNullOrEmpty(value)
                 && Uri.TryCreate(value, UriKind.RelativeOrAbsolute, out Uri uri)
                 && !uri.IsAbsoluteUri)
             {
-                element.SetAttribute(attribute, context.GetLink(value, true));
+                element.SetAttribute(attribute, context.GetLink(document.Destination.Parent.Combine(value), true));
             }
         }
     }
