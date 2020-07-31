@@ -68,6 +68,8 @@ namespace Statiq.Razor
         {
             _ = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
 
+            IExecutionContext.CurrentOrNull?.LogDebug($"Creating new {nameof(RazorCompiler)} for {parameters.BasePageType?.Name ?? "null base page type"}");
+
             // Do a check to make sure required services are registered
             RazorProjectEngine razorProjectEngine = serviceProvider.GetService<RazorProjectEngine>();
             if (razorProjectEngine == null)
