@@ -154,7 +154,7 @@ namespace Statiq.Common.Tests.IO
             [TestCase("a/b/", "..", "a")]
             [TestCase("a/b/../c", "..", "a")]
             [TestCase(".", "..", "..")]
-            [TestCase("a", "..", ".")]
+            [TestCase("a", "..", "")]
             [TestCase("a/b", "c", "a/b/c")]
             public void ShouldReturnDirectory(string virtualPath, string path, string expected)
             {

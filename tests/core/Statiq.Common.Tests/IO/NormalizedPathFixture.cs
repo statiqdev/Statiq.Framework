@@ -10,6 +10,55 @@ namespace Statiq.Common.Tests.IO
     {
         public class ConstructorTests : NormalizedPathFixture
         {
+            [TestCase("hello/temp/test/../world", "hello/temp/world")]
+            [TestCase("../hello/temp/test/../world", "../hello/temp/world")]
+            [TestCase("../hello/world", "../hello/world")]
+            [TestCase("hello/temp/test/../../world", "hello/world")]
+            [TestCase("hello/temp/../temp2/../world", "hello/world")]
+            [TestCase("/hello/temp/test/../../world", "/hello/world")]
+            [TestCase("/hello/../../../../../../temp", "/../../../../../temp")]
+            [TestCase("/hello/../../foo/../../../../temp", "/../../../../temp")]
+            [TestCase(".", ".")]
+            [TestCase("..", "..")]
+            [TestCase("/..", "/..")]
+            [TestCase("/", "/")]
+            [TestCase("/.", "/")]
+            [TestCase("/", "/")]
+            [TestCase("./.././foo", "../foo")]
+            [TestCase("../.././foo", "../../foo")]
+            [TestCase("./a", "a")]
+            [TestCase("./..", "..")]
+            [TestCase("a/./b", "a/b")]
+            [TestCase("/a/./b", "/a/b")]
+            [TestCase("//a/./b", "/a/b")]
+            [TestCase("a/.././b", "b")]
+            [TestCase("/a/.././b", "/b")]
+            [TestCase("a/b/..", "a")]
+            [TestCase("/a/b/..", "/a")]
+            [TestCase("a/b/.", "a/b")]
+            [TestCase("/a/b/.", "/a/b")]
+            [TestCase("/./a/b", "/a/b")]
+            [TestCase("/././a/b", "/a/b")]
+            [TestCase("/a/b/c/../d/baz.txt", "/a/b/d/baz.txt")]
+            [TestCase("../d/baz.txt", "../d/baz.txt")]
+            [TestCase("../a/b/c/../d/baz.txt", "../a/b/d/baz.txt")]
+            [TestCase("/a/b/c/../d", "/a/b/d")]
+            [TestCase("foo", "foo")]
+            [WindowsTestCase("c:/hello/temp/test/../../world", "c:/hello/world")]
+            [WindowsTestCase("c:/../../../../../../temp", "c:/../../../../../../temp")]
+            [WindowsTestCase("c:/../../foo/../../../../temp", "c:/../../../../../temp")]
+            [WindowsTestCase("c:/a/b/c/../d/baz.txt", "c:/a/b/d/baz.txt")]
+            [WindowsTestCase("c:/a/b/c/../d", "c:/a/b/d")]
+            public void ShouldCollapsePath(string fullPath, string expectedFullPath)
+            {
+                // Given, When
+                NormalizedPath path = new NormalizedPath(fullPath);
+
+                // Then
+                path.FullPath.ShouldBe(expectedFullPath);
+                path.Segments.ToStrings().ShouldBe(expectedFullPath.Split('/', StringSplitOptions.RemoveEmptyEntries));
+            }
+
             [Test]
             public void DefaultIsNull()
             {
@@ -180,24 +229,6 @@ namespace Statiq.Common.Tests.IO
             }
         }
 
-        public class SegmentsTests : NormalizedPathFixture
-        {
-            [TestCase("Hello/World")]
-            [TestCase("/Hello/World")]
-            [TestCase("/Hello/World/")]
-            [TestCase("./Hello/World/")]
-            public void ShouldReturnSegmentsOfPath(string pathName)
-            {
-                // Given, When
-                NormalizedPath path = new NormalizedPath(pathName);
-
-                // Then
-                path.Segments.Length.ShouldBe(2);
-                path.Segments[0].ToString().ShouldBe("Hello");
-                path.Segments[1].ToString().ShouldBe("World");
-            }
-        }
-
         public class FullPathTests : NormalizedPathFixture
         {
             [Test]
@@ -331,58 +362,21 @@ namespace Statiq.Common.Tests.IO
             }
         }
 
-        public class GetFullPathAndSegmentsTests : NormalizedPathFixture
+        public class SegmentsTests : NormalizedPathFixture
         {
-            [TestCase("hello/temp/test/../world", "hello/temp/world")]
-            [TestCase("../hello/temp/test/../world", "../hello/temp/world")]
-            [TestCase("../hello/world", "../hello/world")]
-            [TestCase("hello/temp/test/../../world", "hello/world")]
-            [TestCase("hello/temp/../temp2/../world", "hello/world")]
-            [TestCase("/hello/temp/test/../../world", "/hello/world")]
-            [TestCase("/hello/../../../../../../temp", "/../../../../../temp")]
-            [TestCase("/hello/../../foo/../../../../temp", "/../../../../temp")]
-            [TestCase(".", ".")]
-            [TestCase("..", "..")]
-            [TestCase("/..", "/..")]
-            [TestCase("/.", "/", new[] { "/" })]
-            [TestCase("/", "/")]
-            [TestCase("./.././foo", "./../foo")]
-            [TestCase("./a", "./a")]
-            [TestCase("./..", "./..")]
-            [TestCase("a/./b", "a/b")]
-            [TestCase("/a/./b", "/a/b")]
-            [TestCase("a/b/.", "a/b")]
-            [TestCase("/a/b/.", "/a/b")]
-            [TestCase("/./a/b", "/a/b")]
-            [TestCase("/././a/b", "/a/b")]
-            [TestCase("/a/b/c/../d/baz.txt", "/a/b/d/baz.txt")]
-            [TestCase("../d/baz.txt", "../d/baz.txt")]
-            [TestCase("../a/b/c/../d/baz.txt", "../a/b/d/baz.txt")]
-            [TestCase("/a/b/c/../d", "/a/b/d")]
-            [WindowsTestCase("c:/hello/temp/test/../../world", "c:/hello/world")]
-            [WindowsTestCase("c:/../../../../../../temp", "c:/../../../../../../temp")]
-            [WindowsTestCase("c:/../../foo/../../../../temp", "c:/../../../../../temp")]
-            [WindowsTestCase("c:/a/b/c/../d/baz.txt", "c:/a/b/d/baz.txt")]
-            [WindowsTestCase("c:/a/b/c/../d", "c:/a/b/d")]
-            public void ShouldCollapsePath(string fullPath, string expectedFullPath, string[] expectedSegments = null)
+            [TestCase("Hello/World")]
+            [TestCase("/Hello/World")]
+            [TestCase("/Hello/World/")]
+            [TestCase("./Hello/World/")]
+            public void ShouldReturnSegmentsOfPath(string pathName)
             {
                 // Given, When
-                (string, ReadOnlyMemory<char>[]) fullPathAndSegments = Common.NormalizedPath.GetFullPathAndSegments(fullPath.AsSpan());
+                NormalizedPath path = new NormalizedPath(pathName);
 
                 // Then
-                fullPathAndSegments.Item1.ShouldBe(expectedFullPath);
-                fullPathAndSegments.Item2.ToStrings().ShouldBe(expectedSegments ?? expectedFullPath.Split('/', StringSplitOptions.RemoveEmptyEntries));
-            }
-
-            [Test]
-            public void SegmentsShouldBeEmptyForRoot()
-            {
-                // Given, When
-                (string, ReadOnlyMemory<char>[]) fullPathAndSegments = Common.NormalizedPath.GetFullPathAndSegments("/".AsSpan());
-
-                // Then
-                fullPathAndSegments.Item1.ShouldBe("/");
-                fullPathAndSegments.Item2.ShouldBeEmpty();
+                path.Segments.Length.ShouldBe(2);
+                path.Segments[0].ToString().ShouldBe("Hello");
+                path.Segments[1].ToString().ShouldBe("World");
             }
         }
 

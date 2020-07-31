@@ -3,7 +3,9 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Net;
+using System.Net.Http.Headers;
 using System.Runtime.InteropServices;
+using System.Text;
 using System.Text.RegularExpressions;
 
 namespace Statiq.Common
@@ -31,6 +33,8 @@ namespace Statiq.Common
 
         private const string WhitespaceChars = "\r\n\t";
 
+        private static readonly char[] InvalidPathChars = System.IO.Path.GetInvalidPathChars();
+
         public static readonly NormalizedPath Null;
 
         public static readonly NormalizedPath Current = new NormalizedPath(Dot);
@@ -40,6 +44,10 @@ namespace Statiq.Common
         public static readonly NormalizedPath AbsoluteRoot = new NormalizedPath(Slash);
 
         public static readonly NormalizedPath Empty = new NormalizedPath(string.Empty);
+
+        private readonly object _segmentsLock;
+
+        private ReadOnlyMemory<char>[] _segments;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="NormalizedPath" /> class.
@@ -57,20 +65,22 @@ namespace Statiq.Common
         /// <param name="pathKind">Specifies whether the path is relative, absolute, or indeterminate.</param>
         public NormalizedPath(string path, PathKind pathKind)
         {
+            _segmentsLock = new object();
+
             if (path == null)
             {
                 throw new ArgumentNullException(nameof(path));
             }
 
             // Try known paths first
-            if (path == string.Empty)
+            if (path.Length == 0)
             {
                 if (pathKind == PathKind.Absolute)
                 {
                     throw new ArgumentException("An empty path cannot be absolute");
                 }
                 FullPath = string.Empty;
-                Segments = Array.Empty<ReadOnlyMemory<char>>();
+                _segments = Array.Empty<ReadOnlyMemory<char>>();
                 IsAbsolute = false;
             }
             else if (path == Slash || path == "\\")
@@ -80,7 +90,7 @@ namespace Statiq.Common
                     throw new ArgumentException("An absolute root path cannot be relative");
                 }
                 FullPath = Slash;
-                Segments = Array.Empty<ReadOnlyMemory<char>>();
+                _segments = Array.Empty<ReadOnlyMemory<char>>();
                 IsAbsolute = true;
             }
             else if (path == Dot || path == DotDot)
@@ -90,186 +100,175 @@ namespace Statiq.Common
                     throw new ArgumentException("A dotted relative path cannot be absolute");
                 }
                 FullPath = path;
-                Segments = new ReadOnlyMemory<char>[] { path.AsMemory() };
+                _segments = new ReadOnlyMemory<char>[] { path.AsMemory() };
                 IsAbsolute = false;
             }
             else
             {
-                ReadOnlySpan<char> fullPath = GetFullPath(path);
-                IsAbsolute = GetIsAbsolute(pathKind, fullPath);
-                (FullPath, Segments) = GetFullPathAndSegments(fullPath);
+                (FullPath, _segments, IsAbsolute) = NormalizePath(path, pathKind);
             }
         }
 
-        private static ReadOnlySpan<char> GetFullPath(string path)
+        internal static (string FullPath, ReadOnlyMemory<char>[] Segments, bool IsAbsolute) NormalizePath(string path, PathKind pathKind)
         {
             // Normalize slashes, remove invalid chars, and trim whitespace
-            // Leave spaces since they're valid path chars
-            Span<char> fullPath = path.ToSpan();
-            fullPath.Replace('\\', '/');
-            fullPath = fullPath.Trim(WhitespaceChars.AsSpan());
-            ReplaceInvalidPathChars(fullPath);
+            Span<char> pathSpan = path.ToSpan();
+            pathSpan.Replace('\\', '/');
+            pathSpan = pathSpan.Trim(WhitespaceChars.AsSpan());
+            pathSpan.Replace(InvalidPathChars, '-');
 
             // Remove relative part of a path, but only if it's not the only part
-            if (fullPath.Length > 2 && fullPath[0] == '.' && fullPath[1] == '/')
+            if (pathSpan.Length > 2 && pathSpan[0] == '.' && pathSpan[1] == '/')
             {
-                fullPath = fullPath.Slice(2);
+                pathSpan = pathSpan.Slice(2);
             }
 
             // Remove trailing slashes (as long as this isn't just a slash)
-            if (fullPath.Length > 1)
+            if (pathSpan.Length > 1)
             {
-                fullPath = fullPath.TrimEnd('/');
+                pathSpan = pathSpan.TrimEnd('/');
             }
 
             // Add a backslash if this is a windows root (I.e., ends with :)
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows)
-                && fullPath.Length > 1
-                && fullPath[fullPath.Length - 1] == ':')
+                && pathSpan.Length > 1
+                && pathSpan[^1] == ':')
             {
-                Span<char> pathSpan = new char[fullPath.Length + 1];
-                fullPath.CopyTo(pathSpan);
-                pathSpan[pathSpan.Length - 1] = '/';
-                fullPath = pathSpan;
+                pathSpan = pathSpan.Append('/');
             }
 
-            return fullPath;
-        }
-
-        private static bool GetIsAbsolute(PathKind pathKind, ReadOnlySpan<char> path) =>
-            pathKind switch
+            // Determine if the path is absolute
+            bool isAbsolute = pathKind switch
             {
-                PathKind.RelativeOrAbsolute => System.IO.Path.IsPathRooted(path),
+                PathKind.RelativeOrAbsolute => System.IO.Path.IsPathRooted(pathSpan),
                 PathKind.Absolute => true,
                 PathKind.Relative => false,
                 _ => false,
             };
 
-        // Internal for testing
-        // Splits the path on /, collapses it, and then pools the segments
-        internal static (string, ReadOnlyMemory<char>[]) GetFullPathAndSegments(ReadOnlySpan<char> path)
-        {
-            // If the path is only one character, we don't need to do anything
-            if (path.Length == 1)
+            // If the path contains no slashes, use it wholesale
+            if (!pathSpan.Contains('/'))
             {
-                switch (path[0])
-                {
-                    case '.':
-                        return (Dot, new ReadOnlyMemory<char>[] { Dot.AsMemory() });
-                    case '/':
-                        return (Slash, new ReadOnlyMemory<char>[] { });  // segments should be empty if the path is just a slash
-                }
+                string pathString = pathSpan.ToString();
+                return (pathString, new ReadOnlyMemory<char>[] { pathString.AsMemory() }, isAbsolute);
+            }
 
-                string pathString = path.ToString();
-                return (pathString, new ReadOnlyMemory<char>[] { pathString.AsMemory() });
+            // If the path is only one character, we can return special segments
+            if (pathSpan.Length == 1)
+            {
+                if (pathSpan[0] == '.')
+                {
+                    return (Dot, new ReadOnlyMemory<char>[] { Dot.AsMemory() }, isAbsolute);
+                }
+                if (pathSpan[0] == '/')
+                {
+                    // Segments should be empty if the path is just a slash
+                    return (Slash, new ReadOnlyMemory<char>[] { }, isAbsolute);
+                }
+                string pathString = pathSpan.ToString();
+                return (pathString, new ReadOnlyMemory<char>[] { pathString.AsMemory() }, isAbsolute);
             }
 
             // Special case if path is a windows drive
             // (it will always have a trailing slash because that got added earlier)
             // The segment should not have the trailing slash
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows)
-                && path.Length > 2
-                && (path[path.Length - 1] == '/' && path[path.Length - 2] == ':'))
+                && pathSpan.Length > 2
+                && pathSpan[^2] == ':'
+                && pathSpan[^1] == '/')
             {
-                string pathString = path.ToString();
-                return (pathString, new ReadOnlyMemory<char>[] { pathString.AsMemory().Slice(0, path.Length - 1) });
+                string pathString = pathSpan.ToString();
+                return (pathString, new ReadOnlyMemory<char>[] { pathString.AsMemory().Slice(0, pathString.Length - 1) }, isAbsolute);
             }
 
-            // Note if the path starts with a slash because we'll add it back in
-            bool pathStartsWithSlash = path[0] == '/';
-
-            // Split the path
-            List<(int, int)> splits = new List<(int, int)>();
-            int length = 0;
-            for (int c = 0; c < path.Length; c++)
+            // Collapse the path by crawling up ".." and removing "." and copying into a new span
+            int currentLength = 0;
+            bool startsWithSlash = pathSpan[0] == '/';
+            for (int c = startsWithSlash ? 1 : 0; c < pathSpan.Length; c++)
             {
-                if (path[c] == '/')
+                if (pathSpan[c] == '/')
                 {
-                    if (length == 0)
+                    if (currentLength == 0)
                     {
-                        continue;
+                        // If this is a double slash, remove it
+                        pathSpan = pathSpan.Remove(c, 1);
+                        c--;
                     }
-
-                    splits.Add((c - length, length));
-                    length = 0;
-                    continue;
-                }
-
-                length++;
-            }
-            if (length > 0)
-            {
-                splits.Add((path.Length - length, length));
-            }
-
-            // Collapse the path
-            length = pathStartsWithSlash ? 1 : 0;
-            List<(int, int)> segments = new List<(int, int)>();
-            for (int c = 0; c < splits.Count; c++)
-            {
-                ReadOnlySpan<char> segment = path.Slice(splits[c].Item1, splits[c].Item2);
-
-                // Crawl up, but only if we have a segment to pop, otherwise preserve the ".."
-                // Also don't pop a ".." or a "." (which would only appear in the first segment)
-                if (segments.Count > 0)
-                {
-                    ReadOnlySpan<char> last = path.Slice(segments[segments.Count - 1].Item1, segments[segments.Count - 1].Item2);
-
-                    if (
-                        segment.Equals(DotDot.AsSpan(), StringComparison.OrdinalIgnoreCase)
-                        && !last.Equals(DotDot.AsSpan(), StringComparison.OrdinalIgnoreCase)
-                        && (c > 1 || !last.Equals(Dot.AsSpan(), StringComparison.OrdinalIgnoreCase))
-                        && (segments.Count > 1 || !System.IO.Path.IsPathRooted(last)))
+                    else
                     {
-                        length -= segments[segments.Count - 1].Item2;
-                        segments.RemoveAt(segments.Count - 1);
-                        continue;
+                        // Otherwise this marks a segment
+                        (int removeStartIndex, int removeLength) = ProcessSegment(ref pathSpan, c - currentLength, currentLength);
+                        if (removeLength > 0)
+                        {
+                            pathSpan = pathSpan.Remove(removeStartIndex, removeLength);
+                            c -= removeLength;
+                        }
+                        currentLength = 0;
                     }
                 }
-
-                // If this is a ".", skip it unless it's the first segment
-                if (segment.Equals(Dot.AsSpan(), StringComparison.OrdinalIgnoreCase)
-                    && (c != 0 || pathStartsWithSlash))
+                else
                 {
-                    continue;
+                    currentLength++;
                 }
-
-                // Push this segment
-                length += splits[c].Item2;
-                segments.Add(splits[c]);
+            }
+            if (currentLength > 0)
+            {
+                // There is a final segment
+                (int removeStartIndex, int removeLength) = ProcessSegment(ref pathSpan, pathSpan.Length - currentLength, currentLength);
+                if (removeLength > 0)
+                {
+                    pathSpan = pathSpan.Remove(removeStartIndex, removeLength);
+                }
             }
 
-            // If there's nothing in the stack, figure out if we started with a slash
-            if (segments.Count == 0)
+            // Remove the initial slash if we didn't originally start with one
+            if (pathSpan.Length > 0 && pathSpan[0] == '/' && !startsWithSlash)
             {
-                return pathStartsWithSlash
-                    ? (Slash, new ReadOnlyMemory<char>[] { Slash.AsMemory() })
-                    : (Dot, new ReadOnlyMemory<char>[] { Dot.AsMemory() });
+                pathSpan = pathSpan.Slice(1);
             }
 
-            // Combine the segments back into a string
-            string fullPath = string.Create(length + (segments.Count - 1), path.ToArray(), (chars, pathChars) =>
+            // Returns the number of characters to backtrack or 0 to keep going
+            static (int RemoveStartIndex, int RemoveLength) ProcessSegment(ref Span<char> pathSpan, int start, int length)
             {
-                int i = 0;
-                for (int c = 0; c < segments.Count; c++)
+                // If this is a "..", remove this and the previous segment, but only if this isn't following an initial "./", "../", "/./", or "/../"
+                if (start > 1
+                    && length == 2
+                    && pathSpan[start] == '.'
+                    && pathSpan[start + 1] == '.'
+                    && !(start - 2 >= 0 && pathSpan[start - 2] == '.' && pathSpan[start - 1] == '/')
+                    && !(start - 3 >= 0 && pathSpan[start - 3] == '.' && pathSpan[start - 2] == '.' && pathSpan[start - 1] == '/')
+                    && !(start - 3 >= 0 && pathSpan[start - 3] == '/' && pathSpan[start - 2] == '.' && pathSpan[start - 1] == '/')
+                    && !(start - 4 >= 0 && pathSpan[start - 4] == '/' && pathSpan[start - 3] == '.' && pathSpan[start - 2] == '.' && pathSpan[start - 1] == '/')
+                    && !(start - 3 == 0 && pathSpan[0] != '/' && System.IO.Path.IsPathRooted(pathSpan.Slice(start - 3, 3))))
                 {
-                    // Add a slash prefix if the path started with one
-                    if (c != 0 || pathStartsWithSlash)
+                    int removeStart = start - 2;
+                    while (removeStart > 0 && pathSpan[removeStart] != '/')
                     {
-                        chars[i++] = '/';
+                        removeStart--;
                     }
-
-                    // Copy character over to the path string
-                    int offset = 0;
-                    for (; offset < segments[c].Item2; offset++, i++)
-                    {
-                        chars[i] = pathChars[segments[c].Item1 + offset];
-                    }
-
-                    // Record the new start location and length so we can generate new slices for the final segments
-                    segments[c] = (i - offset, segments[c].Item2);
+                    return (removeStart, start - removeStart + length);
                 }
-            });
+
+                // If this is a ".", remove it unless it's the first segment
+                if (start > 0
+                    && length == 1
+                    && pathSpan[start] == '.')
+                {
+                    // Special case for initial "/." without anything else
+                    if (start == 1 && pathSpan[0] == '/' && pathSpan.Length == 2)
+                    {
+                        return (1, 1);
+                    }
+
+                    // Otherwise remove the "." and preceding "/"
+                    return (start - 1, 2);
+                }
+
+                return default;
+            }
+
+            // Get the final full path string
+            string fullPath = pathSpan.ToString();
 
             // Do one more check if it's a windows root
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows)
@@ -278,22 +277,19 @@ namespace Statiq.Common
             {
                 // Windows path without trailing slash so add one (but not to the segments)
                 fullPath += Slash;
-                return (fullPath, new ReadOnlyMemory<char>[] { fullPath.AsMemory().Slice(0, fullPath.Length - 1) });
+                return (fullPath, new ReadOnlyMemory<char>[] { fullPath.AsMemory().Slice(0, fullPath.Length - 1) }, isAbsolute);
             }
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows)
                 && fullPath.Length > 2
-                && (fullPath[^1] == '/' && fullPath[^2] == ':'))
+                && fullPath[^1] == '/'
+                && fullPath[^2] == ':')
             {
                 // Windows path with trailing slash so remove from the segment
-                return (fullPath, new ReadOnlyMemory<char>[] { fullPath.AsMemory().Slice(0, fullPath.Length - 1) });
+                return (fullPath, new ReadOnlyMemory<char>[] { fullPath.AsMemory().Slice(0, fullPath.Length - 1) }, isAbsolute);
             }
 
-            // Get memory slices and return
-            ReadOnlyMemory<char> fullPathMemory = fullPath.AsMemory();
-            ReadOnlyMemory<char>[] fullPathSegments = segments
-                .Select(x => fullPathMemory.Slice(x.Item1, x.Item2))
-                .ToArray();
-            return (fullPath, fullPathSegments);
+            // Return without slicing segments until needed
+            return (fullPath, null, isAbsolute);
         }
 
         /// <summary>
@@ -349,7 +345,56 @@ namespace Statiq.Common
         /// segments, use <see cref="MemoryExtensions.SequenceEqual(ReadOnlyMemory{char}, ReadOnlyMemory{char})"/>.
         /// </remarks>
         /// <value>The segments making up the path.</value>
-        public ReadOnlyMemory<char>[] Segments { get; }
+        public ReadOnlyMemory<char>[] Segments
+        {
+            get
+            {
+                lock (_segmentsLock)
+                {
+                    if (_segments == null)
+                    {
+                        if (FullPath.Length == 0 || (FullPath.Length == 1 && FullPath[0] == '/'))
+                        {
+                            _segments = new ReadOnlyMemory<char>[] { };
+                        }
+                        else
+                        {
+                            ReadOnlyMemory<char> fullPathMemory = FullPath.AsMemory();
+                            int count = FullPath.Skip(1).Count(x => x == '/');
+                            if (FullPath[^1] != '/')
+                            {
+                                count++;
+                            }
+                            _segments = new ReadOnlyMemory<char>[count];
+                            int length = 0;
+                            int index = 0;
+                            for (int c = 0; c < FullPath.Length; c++)
+                            {
+                                if (FullPath[c] == '/')
+                                {
+                                    if (length == 0)
+                                    {
+                                        continue;
+                                    }
+
+                                    _segments[index++] = fullPathMemory.Slice(c - length, length);
+                                    length = 0;
+                                }
+                                else
+                                {
+                                    length++;
+                                }
+                            }
+                            if (length > 0)
+                            {
+                                _segments[index] = fullPathMemory.Slice(FullPath.Length - length, length);
+                            }
+                        }
+                    }
+                    return _segments;
+                }
+            }
+        }
 
         /// <inheritdoc />
         public string ToDisplayString() => IsNull ? string.Empty : FullPath;
