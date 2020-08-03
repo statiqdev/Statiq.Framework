@@ -38,10 +38,7 @@ namespace Statiq.Testing
         /// <inhertdoc />
         public bool ContainsKey(string key)
         {
-            if (key == null)
-            {
-                throw new ArgumentNullException(nameof(key));
-            }
+            key.ThrowIfNull(nameof(key));
             return _dictionary.ContainsKey(key);
         }
 
@@ -68,12 +65,8 @@ namespace Statiq.Testing
         {
             get
             {
-                if (key == null)
-                {
-                    throw new ArgumentNullException(nameof(key));
-                }
-                object value;
-                if (!TryGetValue(key, out value))
+                key.ThrowIfNull(nameof(key));
+                if (!TryGetValue(key, out object value))
                 {
                     throw new KeyNotFoundException();
                 }

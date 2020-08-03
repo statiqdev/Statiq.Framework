@@ -33,7 +33,7 @@ namespace Statiq.Common
         public static void Add<TShortcode>(this IShortcodeCollection shortcodes, string name)
             where TShortcode : IShortcode
         {
-            _ = shortcodes ?? throw new ArgumentNullException(nameof(shortcodes));
+            shortcodes.ThrowIfNull(nameof(shortcodes));
             shortcodes.Add(name, () => Activator.CreateInstance<TShortcode>());
         }
 
@@ -45,8 +45,8 @@ namespace Statiq.Common
         /// <param name="type">The type of the shortcode to add (must implement <see cref="IShortcode"/>).</param>
         public static void Add(this IShortcodeCollection shortcodes, string name, Type type)
         {
-            _ = shortcodes ?? throw new ArgumentNullException(nameof(shortcodes));
-            _ = type ?? throw new ArgumentNullException(nameof(type));
+            shortcodes.ThrowIfNull(nameof(shortcodes));
+            type.ThrowIfNull(nameof(type));
             if (!typeof(IShortcode).IsAssignableFrom(type))
             {
                 throw new ArgumentException("The type must implement " + nameof(IShortcode), nameof(type));
@@ -78,7 +78,7 @@ namespace Statiq.Common
             string name,
             Func<KeyValuePair<string, string>[], string, IDocument, IExecutionContext, ShortcodeResult> shortcode)
         {
-            _ = shortcodes ?? throw new ArgumentNullException(nameof(shortcodes));
+            shortcodes.ThrowIfNull(nameof(shortcodes));
             shortcodes.Add(name, (args, content, doc, ctx) => Task.FromResult(shortcode?.Invoke(args, content, doc, ctx)));
         }
 
@@ -96,7 +96,7 @@ namespace Statiq.Common
             string name,
             Func<KeyValuePair<string, string>[], string, IDocument, IExecutionContext, Task<ShortcodeResult>> shortcode)
         {
-            _ = shortcodes ?? throw new ArgumentNullException(nameof(shortcodes));
+            shortcodes.ThrowIfNull(nameof(shortcodes));
             shortcodes.Add(name, () => new FuncShortcode(shortcode));
         }
 
@@ -114,7 +114,7 @@ namespace Statiq.Common
             string name,
             Func<KeyValuePair<string, string>[], string, IDocument, IExecutionContext, IEnumerable<ShortcodeResult>> shortcode)
         {
-            _ = shortcodes ?? throw new ArgumentNullException(nameof(shortcodes));
+            shortcodes.ThrowIfNull(nameof(shortcodes));
             shortcodes.Add(name, (args, content, doc, ctx) => Task.FromResult(shortcode?.Invoke(args, content, doc, ctx)));
         }
 
@@ -132,7 +132,7 @@ namespace Statiq.Common
             string name,
             Func<KeyValuePair<string, string>[], string, IDocument, IExecutionContext, Task<IEnumerable<ShortcodeResult>>> shortcode)
         {
-            _ = shortcodes ?? throw new ArgumentNullException(nameof(shortcodes));
+            shortcodes.ThrowIfNull(nameof(shortcodes));
             shortcodes.Add(name, () => new FuncShortcode(shortcode));
         }
     }

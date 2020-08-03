@@ -54,11 +54,7 @@ namespace Statiq.Core
         /// <param name="key">The meta key representing the value to test.</param>
         public ValidateMetadata(string key)
         {
-            if (string.IsNullOrWhiteSpace(key))
-            {
-                throw new ArgumentNullException(nameof(key));
-            }
-            _key = key;
+            _key = key.ThrowIfNullOrWhiteSpace(nameof(key));
             _assertions = new List<Assertion>();
         }
 

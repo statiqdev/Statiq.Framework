@@ -128,7 +128,7 @@ namespace Statiq.Common
         /// <param name="paths">The paths to add.</param>
         public void AddRange(IEnumerable<NormalizedPath> paths)
         {
-            _ = paths ?? throw new ArgumentNullException(nameof(paths));
+            paths.ThrowIfNull(nameof(paths));
 
             lock (_pathsLock)
             {
@@ -192,7 +192,7 @@ namespace Statiq.Common
         /// <param name="paths">The paths to remove.</param>
         public void RemoveRange(IEnumerable<NormalizedPath> paths)
         {
-            _ = paths ?? throw new ArgumentNullException(nameof(paths));
+            paths.ThrowIfNull(nameof(paths));
 
             lock (_pathsLock)
             {

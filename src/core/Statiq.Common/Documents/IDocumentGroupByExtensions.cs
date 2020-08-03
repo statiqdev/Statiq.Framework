@@ -40,14 +40,8 @@ namespace Statiq.Common
             string keyMetadataKey,
             IEqualityComparer<TKey> comparer)
         {
-            if (documents == null)
-            {
-                throw new ArgumentNullException(nameof(documents));
-            }
-            if (keyMetadataKey == null)
-            {
-                throw new ArgumentNullException(nameof(keyMetadataKey));
-            }
+            documents.ThrowIfNull(nameof(documents));
+            keyMetadataKey.ThrowIfNull(nameof(keyMetadataKey));
 
             return documents
                 .Distinct()
@@ -93,18 +87,9 @@ namespace Statiq.Common
             string elementMetadataKey,
             IEqualityComparer<TKey> comparer)
         {
-            if (documents == null)
-            {
-                throw new ArgumentNullException(nameof(documents));
-            }
-            if (keyMetadataKey == null)
-            {
-                throw new ArgumentNullException(nameof(keyMetadataKey));
-            }
-            if (elementMetadataKey == null)
-            {
-                throw new ArgumentNullException(nameof(elementMetadataKey));
-            }
+            documents.ThrowIfNull(nameof(documents));
+            keyMetadataKey.ThrowIfNull(nameof(keyMetadataKey));
+            elementMetadataKey.ThrowIfNull(nameof(elementMetadataKey));
 
             return documents
                 .Distinct()
@@ -142,14 +127,8 @@ namespace Statiq.Common
             string keyMetadataKey,
             IEqualityComparer<TKey> comparer)
         {
-            if (documents == null)
-            {
-                throw new ArgumentNullException(nameof(documents));
-            }
-            if (keyMetadataKey == null)
-            {
-                throw new ArgumentNullException(nameof(keyMetadataKey));
-            }
+            documents.ThrowIfNull(nameof(documents));
+            keyMetadataKey.ThrowIfNull(nameof(keyMetadataKey));
 
             return documents
                 .Distinct()
@@ -195,18 +174,9 @@ namespace Statiq.Common
             string elementMetadataKey,
             IEqualityComparer<TKey> comparer)
         {
-            if (documents == null)
-            {
-                throw new ArgumentNullException(nameof(documents));
-            }
-            if (keyMetadataKey == null)
-            {
-                throw new ArgumentNullException(nameof(keyMetadataKey));
-            }
-            if (elementMetadataKey == null)
-            {
-                throw new ArgumentNullException(nameof(elementMetadataKey));
-            }
+            documents.ThrowIfNull(nameof(documents));
+            keyMetadataKey.ThrowIfNull(nameof(keyMetadataKey));
+            elementMetadataKey.ThrowIfNull(nameof(elementMetadataKey));
 
             return documents
                 .Distinct()
@@ -252,18 +222,9 @@ namespace Statiq.Common
             string elementMetadataKey,
             IEqualityComparer<TKey> comparer)
         {
-            if (documents == null)
-            {
-                throw new ArgumentNullException(nameof(documents));
-            }
-            if (keyMetadataKey == null)
-            {
-                throw new ArgumentNullException(nameof(keyMetadataKey));
-            }
-            if (elementMetadataKey == null)
-            {
-                throw new ArgumentNullException(nameof(elementMetadataKey));
-            }
+            documents.ThrowIfNull(nameof(documents));
+            keyMetadataKey.ThrowIfNull(nameof(keyMetadataKey));
+            elementMetadataKey.ThrowIfNull(nameof(elementMetadataKey));
 
             return documents
                 .Distinct()

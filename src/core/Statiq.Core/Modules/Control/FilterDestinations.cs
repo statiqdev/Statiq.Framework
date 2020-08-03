@@ -34,7 +34,7 @@ namespace Statiq.Core
         /// <param name="patterns">The globbing patterns to apply.</param>
         public FilterDestinations(IEnumerable<string> patterns)
         {
-            _patterns = patterns ?? throw new ArgumentNullException(nameof(patterns));
+            _patterns = patterns.ThrowIfNull(nameof(patterns));
         }
 
         /// <inheritdoc />

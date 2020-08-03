@@ -9,7 +9,7 @@ namespace Statiq.Common
 
         public FileInfo(IFile file)
         {
-            _file = file ?? throw new ArgumentNullException(nameof(file));
+            _file = file.ThrowIfNull(nameof(file));
         }
 
         public override string Name => _file.Path.FileName.FullPath;

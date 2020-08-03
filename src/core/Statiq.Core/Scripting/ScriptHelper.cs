@@ -30,7 +30,7 @@ namespace Statiq.Core
 
         public ScriptHelper(IExecutionState executionState)
         {
-            _executionState = executionState ?? throw new ArgumentNullException(nameof(executionState));
+            _executionState = executionState.ThrowIfNull(nameof(executionState));
         }
 
         /// <inheritdoc/>
@@ -60,7 +60,7 @@ namespace Statiq.Core
         /// <returns>The script factory or <c>null</c> if a script factory was not found in the assembly.</returns>
         internal static Type LoadFactory(byte[] rawAssembly)
         {
-            _ = rawAssembly ?? throw new ArgumentNullException(nameof(rawAssembly));
+            rawAssembly.ThrowIfNull(nameof(rawAssembly));
             Assembly assembly = Assembly.Load(rawAssembly);
             return Array.Find(assembly.GetExportedTypes(), t => t.Name == FactoryClassName);
         }
@@ -72,7 +72,7 @@ namespace Statiq.Core
         /// <returns>Raw assembly bytes.</returns>
         internal byte[] Compile(string code)
         {
-            _ = code ?? throw new ArgumentNullException(nameof(code));
+            code.ThrowIfNull(nameof(code));
 
             // Parse the code
             code = Parse(code, _executionState);

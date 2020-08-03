@@ -58,7 +58,7 @@ namespace Statiq.Common
         /// <returns>A config object.</returns>
         public static Config<TValue> FromSettings<TValue>(Func<IReadOnlyConfigurationSettings, TValue> func)
         {
-            _ = func ?? throw new ArgumentNullException(nameof(func));
+            func.ThrowIfNull(nameof(func));
             return new Config<TValue>((_, ctx) => Task.FromResult(func(ctx.Settings)), false);
         }
 
@@ -70,7 +70,7 @@ namespace Statiq.Common
         /// <returns>A config object.</returns>
         public static Config<TValue> FromSettings<TValue>(Func<IReadOnlyConfigurationSettings, Task<TValue>> func)
         {
-            _ = func ?? throw new ArgumentNullException(nameof(func));
+            func.ThrowIfNull(nameof(func));
             return new Config<TValue>((_, ctx) => func(ctx.Settings), false);
         }
 
@@ -81,13 +81,15 @@ namespace Statiq.Common
         /// <typeparam name="TValue">The type of config value.</typeparam>
         /// <param name="action">A delegate action to evaluate.</param>
         /// <returns>A config object.</returns>
-        public static Config<TValue> FromSettings<TValue>(Action<IReadOnlyConfigurationSettings> action) =>
-            new Config<TValue>((__, ctx) =>
+        public static Config<TValue> FromSettings<TValue>(Action<IReadOnlyConfigurationSettings> action)
+        {
+            action.ThrowIfNull(nameof(action));
+            return new Config<TValue>((__, ctx) =>
             {
-                _ = action ?? throw new ArgumentNullException(nameof(action));
                 action(ctx.Settings);
                 return Task.FromResult(default(TValue));
             });
+        }
 
         /// <summary>
         /// Creates a config value from an action that uses the settings and returns
@@ -96,13 +98,15 @@ namespace Statiq.Common
         /// <typeparam name="TValue">The type of config value.</typeparam>
         /// <param name="action">A delegate action to evaluate.</param>
         /// <returns>A config object.</returns>
-        public static Config<TValue> FromSettings<TValue>(Func<IReadOnlyConfigurationSettings, Task> action) =>
-            new Config<TValue>(async (__, ctx) =>
+        public static Config<TValue> FromSettings<TValue>(Func<IReadOnlyConfigurationSettings, Task> action)
+        {
+            action.ThrowIfNull(nameof(action));
+            return new Config<TValue>(async (__, ctx) =>
             {
-                _ = action ?? throw new ArgumentNullException(nameof(action));
                 await action(ctx.Settings);
                 return default;
             });
+        }
 
         /// <summary>
         /// Creates a config value from an action that uses the settings and returns null.

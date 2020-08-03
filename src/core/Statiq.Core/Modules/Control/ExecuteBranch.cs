@@ -29,7 +29,7 @@ namespace Statiq.Core
 
         public ExecuteBranch Branch(IEnumerable<IModule> modules)
         {
-            _branches.Add(modules ?? throw new ArgumentNullException(nameof(modules)));
+            _branches.Add(modules.ThrowIfNull(nameof(modules)));
             return this;
         }
 

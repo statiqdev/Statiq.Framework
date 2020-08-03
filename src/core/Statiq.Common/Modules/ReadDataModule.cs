@@ -44,14 +44,8 @@ namespace Statiq.Common
         /// <returns>The current module instance.</returns>
         public TModule AddKeyConversion(string originalKeyName, string newKeyName)
         {
-            if (originalKeyName == null)
-            {
-                throw new ArgumentNullException(nameof(originalKeyName));
-            }
-            if (newKeyName == null)
-            {
-                throw new ArgumentNullException(nameof(newKeyName));
-            }
+            originalKeyName.ThrowIfNull(nameof(originalKeyName));
+            newKeyName.ThrowIfNull(nameof(newKeyName));
             _keyConversions.Add(originalKeyName, newKeyName);
             return (TModule)this;
         }

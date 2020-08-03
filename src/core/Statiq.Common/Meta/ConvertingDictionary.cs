@@ -25,12 +25,12 @@ namespace Statiq.Common
 
         public ConvertingDictionary(IDictionary<string, object> dictionary)
         {
-            _dictionary = dictionary ?? throw new ArgumentNullException(nameof(dictionary));
+            _dictionary = dictionary.ThrowIfNull(nameof(dictionary));
         }
 
         public ConvertingDictionary(IEnumerable<KeyValuePair<string, object>> items)
         {
-            _ = items ?? throw new ArgumentNullException(nameof(items));
+            items.ThrowIfNull(nameof(items));
             _dictionary = new Dictionary<string, object>(StringComparer.OrdinalIgnoreCase);
 
             // Copy over in case there are duplicate keys
@@ -45,10 +45,7 @@ namespace Statiq.Common
         {
             get
             {
-                if (key == null)
-                {
-                    throw new ArgumentNullException(nameof(key));
-                }
+                key.ThrowIfNull(nameof(key));
                 if (!TryGetValue(key, out object value))
                 {
                     throw new KeyNotFoundException("The key " + key + " was not found in metadata, use Get() to provide a default value.");

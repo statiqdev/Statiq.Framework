@@ -82,10 +82,7 @@ namespace Statiq.Core
         /// <returns>The current module instance.</returns>
         public ReadWeb WithRequests(params WebRequest[] requests)
         {
-            if (requests == null)
-            {
-                throw new ArgumentNullException(nameof(requests));
-            }
+            requests.ThrowIfNull(nameof(requests));
             _requests.AddRange(requests.Where(x => x != null));
             return this;
         }

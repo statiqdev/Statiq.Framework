@@ -33,7 +33,7 @@ namespace Statiq.Core
         /// <param name="value">A delegate that returns an object to compare cases against.</param>
         public ExecuteSwitch(Config<object> value)
         {
-            _value = value ?? throw new ArgumentNullException(nameof(value));
+            _value = value.ThrowIfNull(nameof(value));
         }
 
         /// <summary>

@@ -156,7 +156,7 @@ namespace Statiq.Common
         /// <returns><c>true</c> if the value could be converted to the desired type, <c>false</c> otherwise.</returns>
         public static bool TryConvert(object value, Type type, out object result)
         {
-            _ = type ?? throw new ArgumentNullException(nameof(type));
+            type.ThrowIfNull(nameof(type));
             Type adapter = typeof(TryConvertAdapter<>).MakeGenericType(type);
             object[] args = new object[] { value, null };
             bool ret = (bool)adapter.InvokeMember(

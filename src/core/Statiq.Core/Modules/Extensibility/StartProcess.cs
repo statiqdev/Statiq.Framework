@@ -72,8 +72,8 @@ namespace Statiq.Core
             : base(
                 new Dictionary<string, IConfig>
                 {
-                    { FileName, fileName ?? throw new ArgumentNullException(nameof(fileName)) },
-                    { Arguments, arguments ?? throw new ArgumentNullException(nameof(arguments)) }
+                    { FileName, fileName.ThrowIfNull(nameof(fileName)) },
+                    { Arguments, arguments.ThrowIfNull(nameof(arguments)) }
                 },
                 false)
         {
@@ -87,7 +87,7 @@ namespace Statiq.Core
         /// <returns>The current module instance.</returns>
         public StartProcess WithArgument(Config<string> argument, bool quoted = false)
         {
-            _ = argument ?? throw new ArgumentNullException(nameof(argument));
+            argument.ThrowIfNull(nameof(argument));
             return (StartProcess)CombineConfig(Arguments, argument, (first, second) =>
             {
                 string space = first == null || second == null ? string.Empty : " ";
@@ -128,7 +128,7 @@ namespace Statiq.Core
         /// <returns>The current module instance.</returns>
         public StartProcess WithEnvironmentVariables(Config<IEnumerable<KeyValuePair<string, string>>> environmentVariables)
         {
-            _ = environmentVariables ?? throw new ArgumentNullException(nameof(environmentVariables));
+            environmentVariables.ThrowIfNull(nameof(environmentVariables));
             return (StartProcess)CombineConfig(EnvironmentVariables, environmentVariables, (first, second) => second == null ? first : first?.Concat(second) ?? second);
         }
 
@@ -139,7 +139,7 @@ namespace Statiq.Core
         /// <returns>The current module instance.</returns>
         public StartProcess WithEnvironmentVariable(Config<KeyValuePair<string, string>> environmentVariable)
         {
-            _ = environmentVariable ?? throw new ArgumentNullException(nameof(environmentVariable));
+            environmentVariable.ThrowIfNull(nameof(environmentVariable));
             return WithEnvironmentVariables(environmentVariable.MakeEnumerable());
         }
 
@@ -222,7 +222,7 @@ namespace Statiq.Core
         /// <returns>The current module instance.</returns>
         public StartProcess WithErrorExitCode(Func<int, bool> errorExitCode)
         {
-            _errorExitCode = errorExitCode ?? throw new ArgumentNullException(nameof(errorExitCode));
+            _errorExitCode = errorExitCode.ThrowIfNull(nameof(errorExitCode));
             return this;
         }
 

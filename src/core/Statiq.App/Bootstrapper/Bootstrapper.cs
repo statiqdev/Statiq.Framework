@@ -20,7 +20,7 @@ namespace Statiq.App
         // Private constructor to force factory use which returns the interface to get access to default interface implementations
         internal Bootstrapper(string[] arguments)
         {
-            Arguments = arguments ?? throw new ArgumentNullException(nameof(arguments));
+            Arguments = arguments.ThrowIfNull(nameof(arguments));
         }
 
         /// <inheritdoc/>

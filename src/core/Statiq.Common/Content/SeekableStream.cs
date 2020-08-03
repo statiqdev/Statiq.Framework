@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using Statiq.Common;
 
 namespace Statiq.Common
 {
@@ -11,12 +12,13 @@ namespace Statiq.Common
 
         public SeekableStream(Stream stream, MemoryStream bufferStream)
         {
-            if (!stream?.CanRead ?? throw new ArgumentNullException(nameof(stream)))
+            stream.ThrowIfNull(nameof(stream));
+            if (!stream.CanRead)
             {
                 throw new ArgumentException("Wrapped stream must be readable.");
             }
             _stream = stream;
-            _bufferStream = bufferStream ?? throw new ArgumentNullException(nameof(bufferStream));
+            _bufferStream = bufferStream.ThrowIfNull(nameof(bufferStream));
         }
 
         public override bool CanRead => true;

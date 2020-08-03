@@ -19,7 +19,7 @@ namespace Statiq.Core
             {
                 throw new ArgumentException(nameof(name));
             }
-            _shortcodes[name] = shortcodeFactory ?? throw new ArgumentNullException(name);
+            _shortcodes[name] = shortcodeFactory.ThrowIfNull(name);
         }
 
         public int Count => _shortcodes.Count;

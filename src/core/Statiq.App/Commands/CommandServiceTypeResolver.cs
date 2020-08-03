@@ -1,6 +1,7 @@
 ﻿using System;
 using Microsoft.Extensions.DependencyInjection;
 using Spectre.Cli;
+using Statiq.Common;
 
 namespace Statiq.App
 {
@@ -10,7 +11,7 @@ namespace Statiq.App
 
         public CommandServiceTypeResolver(IServiceProvider serviceProvider)
         {
-            _serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
+            _serviceProvider = serviceProvider.ThrowIfNull(nameof(serviceProvider));
         }
 
         public object Resolve(Type type) => _serviceProvider.GetRequiredService(type);

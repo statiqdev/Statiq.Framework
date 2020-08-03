@@ -22,7 +22,7 @@ namespace Statiq.Testing
         public IPipeline this[string name]
         {
             get => _pipelines[name];
-            set => _pipelines[name] = value ?? throw new ArgumentNullException(nameof(value));
+            set => _pipelines[name] = value.ThrowIfNull(nameof(value));
         }
 
         public ICollection<string> Keys => ((IDictionary<string, IPipeline>)_pipelines).Keys;
@@ -35,15 +35,12 @@ namespace Statiq.Testing
 
         public void Add(string name, IPipeline value) =>
             _pipelines.Add(
-                name ?? throw new ArgumentNullException(nameof(name)),
-                value ?? throw new ArgumentNullException(nameof(value)));
+                name.ThrowIfNull(nameof(name)),
+                value.ThrowIfNull(nameof(value)));
 
         public void Add(KeyValuePair<string, IPipeline> item)
         {
-            if (item.Value == null)
-            {
-                throw new ArgumentNullException(nameof(item.Value));
-            }
+            item.Value.ThrowIfNull(nameof(item.Value));
             ((IDictionary<string, IPipeline>)_pipelines).Add(item);
         }
 

@@ -22,7 +22,7 @@ namespace Statiq.Testing
 
         public DocumentList<IDocument> ExceptPipeline(string pipelineName)
         {
-            _ = pipelineName ?? throw new ArgumentNullException(nameof(pipelineName));
+            pipelineName.ThrowIfNull(nameof(pipelineName));
             return Dictionary
                 .Where(x => !x.Key.Equals(pipelineName, StringComparison.OrdinalIgnoreCase))
                 .SelectMany(x => x.Value)
@@ -31,7 +31,7 @@ namespace Statiq.Testing
 
         public DocumentList<IDocument> FromPipeline(string pipelineName)
         {
-            _ = pipelineName ?? throw new ArgumentNullException(nameof(pipelineName));
+            pipelineName.ThrowIfNull(nameof(pipelineName));
             return Dictionary.TryGetValue(pipelineName, out ImmutableArray<IDocument> results)
                 ? results.ToDocumentList()
                 : DocumentList<IDocument>.Empty;

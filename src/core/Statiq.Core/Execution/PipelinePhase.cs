@@ -27,7 +27,7 @@ namespace Statiq.Core
             PipelineName = pipelineName;
             Phase = phase;
             _modules = modules ?? new List<IModule>();
-            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            _logger = logger.ThrowIfNull(nameof(logger));
             Dependencies = dependencies ?? Array.Empty<PipelinePhase>();
         }
 

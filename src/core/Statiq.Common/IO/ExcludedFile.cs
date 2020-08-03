@@ -15,7 +15,7 @@ namespace Statiq.Common
 
         public ExcludedFile(IFileProvider fileProvider, NormalizedPath path)
         {
-            _fileProvider = fileProvider ?? throw new ArgumentNullException(nameof(fileProvider));
+            _fileProvider = fileProvider.ThrowIfNull(nameof(fileProvider));
             Path = path;
         }
 

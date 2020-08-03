@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Razor.Language;
 using Microsoft.AspNetCore.Mvc.Razor.RuntimeCompilation;
 using Microsoft.Extensions.FileProviders;
+using Statiq.Common;
 
 namespace Statiq.Razor
 {
@@ -17,13 +18,13 @@ namespace Statiq.Razor
     {
         private const string RazorFileExtension = ".cshtml";
 
-        private readonly IFileProvider _fileProvider;
+        private readonly Microsoft.Extensions.FileProviders.IFileProvider _fileProvider;
         private readonly IWebHostEnvironment _hostingEnvironment;
 
-        public StatiqRazorProjectFileSystem(IFileProvider fileProvider, IWebHostEnvironment hostingEnviroment)
+        public StatiqRazorProjectFileSystem(Microsoft.Extensions.FileProviders.IFileProvider fileProvider, IWebHostEnvironment hostingEnviroment)
         {
-            _fileProvider = fileProvider ?? throw new ArgumentNullException(nameof(fileProvider));
-            _hostingEnvironment = hostingEnviroment ?? throw new ArgumentNullException(nameof(hostingEnviroment));
+            _fileProvider = fileProvider.ThrowIfNull(nameof(fileProvider));
+            _hostingEnvironment = hostingEnviroment.ThrowIfNull(nameof(hostingEnviroment));
         }
 
         [Obsolete("Use GetItem(string path, string fileKind) instead.")]

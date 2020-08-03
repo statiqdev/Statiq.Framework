@@ -43,7 +43,7 @@ namespace Statiq.Common
         public static TBootstrapper AddPipeline<TBootstrapper>(this TBootstrapper bootstrapper, Type pipelineType)
             where TBootstrapper : IBootstrapper
         {
-            _ = pipelineType ?? throw new ArgumentNullException(nameof(pipelineType));
+            pipelineType.ThrowIfNull(nameof(pipelineType));
             if (!typeof(IPipeline).IsAssignableFrom(pipelineType))
             {
                 throw new ArgumentException("Provided type is not a pipeline");
@@ -54,7 +54,7 @@ namespace Statiq.Common
         public static TBootstrapper AddPipelines<TBootstrapper>(this TBootstrapper bootstrapper, Type parentType)
             where TBootstrapper : IBootstrapper
         {
-            _ = parentType ?? throw new ArgumentNullException(nameof(parentType));
+            parentType.ThrowIfNull(nameof(parentType));
             return bootstrapper.ConfigureServices(x =>
             {
                 foreach (Type pipelineType in parentType.GetNestedTypes().Where(t => typeof(IPipeline).IsAssignableFrom(t)))
@@ -67,7 +67,7 @@ namespace Statiq.Common
         public static TBootstrapper AddPipelines<TBootstrapper>(this TBootstrapper bootstrapper, Assembly assembly)
             where TBootstrapper : IBootstrapper
         {
-            _ = assembly ?? throw new ArgumentNullException(nameof(assembly));
+            assembly.ThrowIfNull(nameof(assembly));
             return bootstrapper.ConfigureServices(x =>
             {
                 foreach (Type pipelineType in bootstrapper.ClassCatalog.GetTypesAssignableTo<IPipeline>().Where(x => x.Assembly.Equals(assembly)))

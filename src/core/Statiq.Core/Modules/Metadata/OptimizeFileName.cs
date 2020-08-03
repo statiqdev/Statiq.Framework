@@ -47,7 +47,7 @@ namespace Statiq.Core
                 },
                 true)
         {
-            _ = key ?? throw new ArgumentNullException(nameof(key));
+            key.ThrowIfNull(nameof(key));
         }
 
         /// <summary>
@@ -64,8 +64,8 @@ namespace Statiq.Core
                   },
                   true)
         {
-            _ = inputKey ?? throw new ArgumentNullException(nameof(inputKey));
-            _ = outputKey ?? throw new ArgumentNullException(nameof(outputKey));
+            inputKey.ThrowIfNull(nameof(inputKey));
+            outputKey.ThrowIfNull(nameof(outputKey));
         }
 
         /// <summary>
@@ -82,8 +82,8 @@ namespace Statiq.Core
                   },
                   true)
         {
-            _ = path ?? throw new ArgumentNullException(nameof(path));
-            _ = outputKey ?? throw new ArgumentNullException(nameof(outputKey));
+            path.ThrowIfNull(nameof(path));
+            outputKey.ThrowIfNull(nameof(outputKey));
         }
 
         /// <summary>

@@ -23,7 +23,7 @@ namespace Statiq.Common
         /// <returns>A config object.</returns>
         public static Config<TValue> FromValue<TValue>(Task<TValue> value)
         {
-            _ = value ?? throw new ArgumentNullException(nameof(value));
+            value.ThrowIfNull(nameof(value));
             return new Config<TValue>((_, __) => value, false);
         }
 

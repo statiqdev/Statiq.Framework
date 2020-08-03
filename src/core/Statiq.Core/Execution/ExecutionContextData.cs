@@ -15,9 +15,9 @@ namespace Statiq.Core
             IReadOnlyDictionary<string, PhaseResult[]> phaseResults,
             IServiceProvider services)
         {
-            Engine = engine ?? throw new ArgumentNullException(nameof(engine));
-            PipelinePhase = pipelinePhase ?? throw new ArgumentNullException(nameof(pipelinePhase));
-            Services = services ?? throw new ArgumentNullException(nameof(services));
+            Engine = engine.ThrowIfNull(nameof(engine));
+            PipelinePhase = pipelinePhase.ThrowIfNull(nameof(pipelinePhase));
+            Services = services.ThrowIfNull(nameof(services));
             Outputs = new PhaseOutputs(phaseResults, pipelinePhase, engine.Pipelines);
         }
 

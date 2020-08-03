@@ -142,8 +142,8 @@ namespace Statiq.Common
         /// <returns>All dependencies of the pipeline.</returns>
         public static IEnumerable<string> GetAllDependencies(this IReadOnlyPipeline pipeline, IReadOnlyPipelineCollection pipelines)
         {
-            _ = pipeline ?? throw new ArgumentNullException(nameof(pipeline));
-            _ = pipelines ?? throw new ArgumentNullException(nameof(pipelines));
+            pipeline.ThrowIfNull(nameof(pipeline));
+            pipelines.ThrowIfNull(nameof(pipelines));
 
             string pipelineName = pipelines.FirstOrDefault(x => x.Value.Equals(pipeline)).Key
                 ?? throw new InvalidOperationException($"Could not find pipeline {pipeline.GetType().Name} in pipeline collection");
@@ -161,6 +161,6 @@ namespace Statiq.Common
         /// <param name="executionState">The current execution state (usually an <see cref="IEngine"/> or <see cref="IExecutionContext"/>).</param>
         /// <returns>All dependencies of the pipeline.</returns>
         public static IEnumerable<string> GetAllDependencies(this IReadOnlyPipeline pipeline, IExecutionState executionState) =>
-            pipeline.GetAllDependencies((executionState ?? throw new ArgumentNullException(nameof(executionState))).Pipelines);
+            pipeline.GetAllDependencies(executionState.ThrowIfNull(nameof(executionState)).Pipelines);
     }
 }

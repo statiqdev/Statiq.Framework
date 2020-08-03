@@ -28,7 +28,7 @@ namespace Statiq.Common
         /// <param name="seperator">The seperator to use for splitting.</param>
         public GenericStringSplitter(string seperator)
         {
-            _seperator = seperator ?? throw new ArgumentNullException(nameof(seperator));
+            _seperator = seperator.ThrowIfNull(nameof(seperator));
         }
 
         /// <summary>

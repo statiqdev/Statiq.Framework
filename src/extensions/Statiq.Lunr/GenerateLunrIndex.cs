@@ -96,7 +96,7 @@ namespace Statiq.SearchIndex
         /// <param name="enableStemming">If set to <c>true</c>, stemming is enabled.</param>
         public GenerateLunrIndex(Config<ILunrIndexItem> searchIndexItem, NormalizedPath stopwordsPath = default, bool enableStemming = false)
         {
-            _searchIndexItem = searchIndexItem ?? throw new ArgumentNullException(nameof(searchIndexItem));
+            _searchIndexItem = searchIndexItem.ThrowIfNull(nameof(searchIndexItem));
             _stopwordsPath = stopwordsPath;
             _enableStemming = enableStemming;
         }
@@ -155,7 +155,7 @@ namespace Statiq.SearchIndex
         /// <returns>The current module instance.</returns>
         public GenerateLunrIndex WithScript(Func<StringBuilder, IExecutionContext, string> script)
         {
-            _script = script ?? throw new ArgumentNullException(nameof(script));
+            _script = script.ThrowIfNull(nameof(script));
             return this;
         }
 

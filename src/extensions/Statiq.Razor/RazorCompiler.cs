@@ -66,7 +66,7 @@ namespace Statiq.Razor
         /// <param name="serviceProvider">The service provider to use.</param>
         public RazorCompiler(CompilationParameters parameters, IServiceProvider serviceProvider)
         {
-            _ = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
+            serviceProvider.ThrowIfNull(nameof(serviceProvider));
 
             IExecutionContext.CurrentOrNull?.LogDebug($"Creating new {nameof(RazorCompiler)} for {parameters.BasePageType?.Name ?? "null base page type"}");
 

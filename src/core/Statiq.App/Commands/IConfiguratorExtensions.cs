@@ -19,7 +19,7 @@ namespace Statiq.App
         public static ICommandConfigurator AddCommand(this IConfigurator configurator, Type commandType) =>
             configurator.SafetyOff().AddCommand(
                 GetCommandName(commandType),
-                commandType ?? throw new ArgumentNullException(nameof(commandType)));
+                commandType.ThrowIfNull(nameof(commandType)));
 
         private static string GetCommandName(Type commandType)
         {
@@ -54,8 +54,8 @@ namespace Statiq.App
             string name,
             EngineCommandSettings commandSettings)
         {
-            _ = name ?? throw new ArgumentNullException(nameof(name));
-            _ = commandSettings ?? throw new ArgumentNullException(nameof(commandSettings));
+            name.ThrowIfNull(nameof(name));
+            commandSettings.ThrowIfNull(nameof(commandSettings));
             return configurator
                 .AddCommand<PipelinesCommand<BaseCommandSettings>>(name)
                 .WithData(commandSettings);

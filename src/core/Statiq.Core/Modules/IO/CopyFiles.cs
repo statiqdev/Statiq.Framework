@@ -42,7 +42,7 @@ namespace Statiq.Core
         /// </summary>
         /// <param name="patterns">The globbing patterns and/or absolute paths to read.</param>
         public CopyFiles(params string[] patterns)
-            : base((Config<IEnumerable<string>>)(patterns ?? throw new ArgumentNullException(nameof(patterns))), false)
+            : base((Config<IEnumerable<string>>)patterns.ThrowIfNull(nameof(patterns)), false)
         {
         }
 
@@ -69,11 +69,7 @@ namespace Statiq.Core
         /// <returns>The current module instance.</returns>
         public CopyFiles To(Func<IFile, Task<NormalizedPath>> destinationPath)
         {
-            if (destinationPath == null)
-            {
-                throw new ArgumentNullException(nameof(destinationPath));
-            }
-
+            destinationPath.ThrowIfNull(nameof(destinationPath));
             _destinationPath = async (source, _) => await destinationPath(source);
             return this;
         }
@@ -92,7 +88,7 @@ namespace Statiq.Core
         /// <returns>The current module instance.</returns>
         public CopyFiles To(Func<IFile, IFile, Task<NormalizedPath>> destinationPath)
         {
-            _destinationPath = destinationPath ?? throw new ArgumentNullException(nameof(destinationPath));
+            _destinationPath = destinationPath.ThrowIfNull(nameof(destinationPath));
             return this;
         }
 

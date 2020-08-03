@@ -32,7 +32,7 @@ namespace Statiq.Core
 
         public ParseJson WithOptions(JsonSerializerOptions options)
         {
-            _options = options ?? throw new ArgumentNullException(nameof(options));
+            _options = options.ThrowIfNull(nameof(options));
             return this;
         }
 

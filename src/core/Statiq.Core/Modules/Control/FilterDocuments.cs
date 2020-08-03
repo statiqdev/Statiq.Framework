@@ -33,7 +33,7 @@ namespace Statiq.Core
         /// <param name="predicate">A predicate delegate that should return a <c>bool</c>.</param>
         public FilterDocuments(Config<bool> predicate)
         {
-            _predicates.Add(predicate ?? throw new ArgumentNullException(nameof(predicate)));
+            _predicates.Add(predicate.ThrowIfNull(nameof(predicate)));
         }
 
         /// <summary>
@@ -53,7 +53,7 @@ namespace Statiq.Core
         /// <returns>The current module instance.</returns>
         public FilterDocuments Or(Config<bool> predicate)
         {
-            _predicates.Add(predicate ?? throw new ArgumentNullException(nameof(predicate)));
+            _predicates.Add(predicate.ThrowIfNull(nameof(predicate)));
             return this;
         }
 

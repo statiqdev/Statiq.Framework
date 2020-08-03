@@ -23,25 +23,25 @@ namespace Statiq.Core
         public AddContentToMetadata(string key)
             : base(Array.Empty<IModule>())
         {
-            _key = key ?? throw new ArgumentNullException(nameof(key));
+            _key = key.ThrowIfNull(nameof(key));
         }
 
         public AddContentToMetadata(string key, params IModule[] modules)
             : base(modules)
         {
-            _key = key ?? throw new ArgumentNullException(nameof(key));
+            _key = key.ThrowIfNull(nameof(key));
         }
 
         public AddContentToMetadata(string key, params string[] pipelines)
             : base(new ExecuteConfig(Config.FromContext(ctx => ctx.Outputs.FromPipelines(pipelines))))
         {
-            _key = key ?? throw new ArgumentNullException(nameof(key));
+            _key = key.ThrowIfNull(nameof(key));
         }
 
         public AddContentToMetadata(string key, Config<IEnumerable<IDocument>> documents)
             : base(new ExecuteConfig(documents))
         {
-            _key = key ?? throw new ArgumentNullException(nameof(key));
+            _key = key.ThrowIfNull(nameof(key));
         }
 
         protected override async Task<IEnumerable<IDocument>> ExecuteChildrenAsync(

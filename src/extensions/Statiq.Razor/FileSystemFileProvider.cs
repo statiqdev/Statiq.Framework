@@ -27,7 +27,7 @@ namespace Statiq.Razor
 
         public FileSystemFileProvider(IReadOnlyFileSystem fileSystem)
         {
-            StatiqFileSystem = fileSystem ?? throw new ArgumentNullException(nameof(fileSystem));
+            StatiqFileSystem = fileSystem.ThrowIfNull(nameof(fileSystem));
         }
 
         public IFileInfo GetFileInfo(string subpath)

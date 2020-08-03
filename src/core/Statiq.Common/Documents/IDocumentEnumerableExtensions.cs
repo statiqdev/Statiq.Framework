@@ -109,8 +109,8 @@ namespace Statiq.Common
             string childrenKey = Keys.Children)
             where TDocument : IDocument
         {
-            _ = documents ?? throw new ArgumentNullException(nameof(documents));
-            _ = patterns ?? throw new ArgumentNullException(nameof(patterns));
+            documents.ThrowIfNull(nameof(documents));
+            patterns.ThrowIfNull(nameof(patterns));
 
             DocumentFileProvider fileProvider = new DocumentFileProvider((IEnumerable<IDocument>)documents, true, flatten, childrenKey);
             IEnumerable<IDirectory> directories = IExecutionContext.Current.FileSystem
@@ -162,8 +162,8 @@ namespace Statiq.Common
             string childrenKey = Keys.Children)
             where TDocument : IDocument
         {
-            _ = documents ?? throw new ArgumentNullException(nameof(documents));
-            _ = patterns ?? throw new ArgumentNullException(nameof(patterns));
+            documents.ThrowIfNull(nameof(documents));
+            patterns.ThrowIfNull(nameof(patterns));
 
             DocumentFileProvider fileProvider = new DocumentFileProvider((IEnumerable<IDocument>)documents, false, flatten, childrenKey);
             IEnumerable<IFile> matches = Globber.GetFiles(fileProvider.GetDirectory("/"), patterns);

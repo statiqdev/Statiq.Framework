@@ -43,7 +43,7 @@ namespace Statiq.Common
         /// <returns>All classes of the specified type.</returns>
         public IEnumerable<Type> GetTypesAssignableTo(Type assignableType)
         {
-            _ = assignableType ?? throw new ArgumentNullException(nameof(assignableType));
+            assignableType.ThrowIfNull(nameof(assignableType));
             Populate();
             return _types.Values.Where(x => assignableType.IsAssignableFrom(x));
         }
@@ -55,7 +55,7 @@ namespace Statiq.Common
         /// <returns>All types from the specified assembly.</returns>
         public IEnumerable<Type> GetTypesFromAssembly(Assembly assembly)
         {
-            _ = assembly ?? throw new ArgumentNullException(nameof(assembly));
+            assembly.ThrowIfNull(nameof(assembly));
             Populate();
             return _types.Values.Where(x => x.Assembly.Equals(assembly));
         }
@@ -67,7 +67,7 @@ namespace Statiq.Common
         /// <returns>Instances for all classes of the specified type.</returns>
         public IEnumerable<object> GetInstances(Type assignableType)
         {
-            _ = assignableType ?? throw new ArgumentNullException(nameof(assignableType));
+            assignableType.ThrowIfNull(nameof(assignableType));
             Populate();
             return GetTypesAssignableTo(assignableType).Select(Activator.CreateInstance);
         }
@@ -82,7 +82,7 @@ namespace Statiq.Common
         /// </returns>
         public Type GetType(string fullName)
         {
-            _ = fullName ?? throw new ArgumentNullException(nameof(fullName));
+            fullName.ThrowIfNull(nameof(fullName));
             Populate();
             return _types.TryGetValue(fullName, out Type type) ? type : default;
         }
@@ -97,7 +97,7 @@ namespace Statiq.Common
         /// </returns>
         public object GetInstance(string fullName)
         {
-            _ = fullName ?? throw new ArgumentNullException(nameof(fullName));
+            fullName.ThrowIfNull(nameof(fullName));
             Populate();
             return _types.TryGetValue(fullName, out Type type)
                 ? Activator.CreateInstance(type)
@@ -113,7 +113,7 @@ namespace Statiq.Common
         /// </returns>
         public object GetInstance(Type type)
         {
-            _ = type ?? throw new ArgumentNullException(nameof(type));
+            type.ThrowIfNull(nameof(type));
             Populate();
             if (!_types.TryGetValue(type.FullName, out Type match))
             {
@@ -134,7 +134,7 @@ namespace Statiq.Common
         /// </returns>
         public object GetInstance(Type assignableType, string typeName, bool ignoreCase = false)
         {
-            _ = assignableType ?? throw new ArgumentNullException(nameof(assignableType));
+            assignableType.ThrowIfNull(nameof(assignableType));
             Populate();
             Type type = GetTypesAssignableTo(assignableType).FirstOrDefault(x => x.Name.Equals(
                 typeName,

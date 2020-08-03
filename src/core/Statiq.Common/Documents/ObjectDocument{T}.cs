@@ -112,10 +112,7 @@ namespace Statiq.Common
             IMetadata metadata,
             IContentProvider contentProvider)
         {
-            if (obj == null)
-            {
-                throw new ArgumentNullException(nameof(obj));
-            }
+            obj.ThrowIfNull(nameof(obj));
             if (!source.IsNull && !source.IsAbsolute)
             {
                 throw new ArgumentException($"Document sources must be absolute ({source})", nameof(source));
@@ -162,7 +159,7 @@ namespace Statiq.Common
         {
             get
             {
-                if (!TryGetValue(key ?? throw new ArgumentNullException(nameof(key)), out object value))
+                if (!TryGetValue(key.ThrowIfNull(nameof(key)), out object value))
                 {
                     throw new KeyNotFoundException("The key " + key + " was not found in the document, use Get() to provide a default value.");
                 }

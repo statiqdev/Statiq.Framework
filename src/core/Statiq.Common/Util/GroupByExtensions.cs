@@ -84,18 +84,9 @@ namespace Statiq.Common
             Func<TSource, TElement> elementSelector,
             IEqualityComparer<TKey> comparer)
         {
-            if (source == null)
-            {
-                throw new ArgumentNullException(nameof(source));
-            }
-            if (keySelector == null)
-            {
-                throw new ArgumentNullException(nameof(keySelector));
-            }
-            if (elementSelector == null)
-            {
-                throw new ArgumentNullException(nameof(elementSelector));
-            }
+            source.ThrowIfNull(nameof(source));
+            keySelector.ThrowIfNull(nameof(keySelector));
+            elementSelector.ThrowIfNull(nameof(elementSelector));
 
             return source
                 .Select(x => new
@@ -154,18 +145,9 @@ namespace Statiq.Common
             Func<TSource, IEnumerable<TElement>> elementSelector,
             IEqualityComparer<TKey> comparer)
         {
-            if (source == null)
-            {
-                throw new ArgumentNullException(nameof(source));
-            }
-            if (keySelector == null)
-            {
-                throw new ArgumentNullException(nameof(keySelector));
-            }
-            if (elementSelector == null)
-            {
-                throw new ArgumentNullException(nameof(elementSelector));
-            }
+            source.ThrowIfNull(nameof(source));
+            keySelector.ThrowIfNull(nameof(keySelector));
+            elementSelector.ThrowIfNull(nameof(elementSelector));
 
             return source
                 .Select(x => new

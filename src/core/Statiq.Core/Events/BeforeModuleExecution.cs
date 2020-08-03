@@ -28,7 +28,7 @@ namespace Statiq.Core
 
         public void OverrideOutputs(IEnumerable<IDocument> outputs)
         {
-            _ = outputs ?? throw new ArgumentNullException(nameof(outputs));
+            outputs.ThrowIfNull(nameof(outputs));
             if (OverriddenOutputs != null)
             {
                 throw new InvalidOperationException("Only one event may override module results.");

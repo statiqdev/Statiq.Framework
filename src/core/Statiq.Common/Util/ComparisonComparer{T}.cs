@@ -13,7 +13,7 @@ namespace Statiq.Common
 
         public ComparisonComparer(Comparison<T> comparison)
         {
-            _comparison = comparison ?? throw new ArgumentNullException(nameof(comparison));
+            _comparison = comparison.ThrowIfNull(nameof(comparison));
         }
 
         public int Compare(T x, T y) => _comparison(x, y);

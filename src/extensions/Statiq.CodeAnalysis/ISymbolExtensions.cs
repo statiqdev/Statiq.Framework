@@ -15,7 +15,7 @@ namespace Statiq.CodeAnalysis
         /// <returns>A unique (within a namespace) ID.</returns>
         public static string GetId(this ISymbol symbol)
         {
-            _ = symbol ?? throw new ArgumentNullException(nameof(symbol));
+            symbol.ThrowIfNull(nameof(symbol));
 
             if (symbol is IAssemblySymbol)
             {
@@ -55,7 +55,7 @@ namespace Statiq.CodeAnalysis
         /// <returns>The full name of the symbol.</returns>
         public static string GetFullName(this ISymbol symbol)
         {
-            _ = symbol ?? throw new ArgumentNullException(nameof(symbol));
+            symbol.ThrowIfNull(nameof(symbol));
 
             return symbol.ToDisplayString(new SymbolDisplayFormat(
                 typeQualificationStyle: SymbolDisplayTypeQualificationStyle.NameAndContainingTypes,
@@ -72,7 +72,7 @@ namespace Statiq.CodeAnalysis
         /// <returns>The qualified name of the symbol.</returns>
         public static string GetQualifiedName(this ISymbol symbol)
         {
-            _ = symbol ?? throw new ArgumentNullException(nameof(symbol));
+            symbol.ThrowIfNull(nameof(symbol));
 
             return symbol.ToDisplayString(new SymbolDisplayFormat(
                 typeQualificationStyle: SymbolDisplayTypeQualificationStyle.NameAndContainingTypesAndNamespaces,

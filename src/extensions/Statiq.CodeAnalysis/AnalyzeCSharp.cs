@@ -317,10 +317,7 @@ namespace Statiq.CodeAnalysis
         /// <returns>The current module instance.</returns>
         public AnalyzeCSharp WithCssClasses(string tagName, string cssClasses)
         {
-            if (tagName == null)
-            {
-                throw new ArgumentNullException(nameof(tagName));
-            }
+            tagName.ThrowIfNull(nameof(tagName));
             if (string.IsNullOrWhiteSpace(cssClasses))
             {
                 _cssClasses.TryRemove(tagName, out cssClasses);

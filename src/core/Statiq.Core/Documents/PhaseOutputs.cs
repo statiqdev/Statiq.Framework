@@ -22,9 +22,9 @@ namespace Statiq.Core
 
         public PhaseOutputs(IReadOnlyDictionary<string, PhaseResult[]> phaseResults, PipelinePhase currentPhase, IPipelineCollection pipelines)
         {
-            _phaseResults = phaseResults ?? throw new ArgumentNullException(nameof(phaseResults));
-            _currentPhase = currentPhase ?? throw new ArgumentNullException(nameof(currentPhase));
-            _pipelines = pipelines ?? throw new ArgumentNullException(nameof(pipelines));
+            _phaseResults = phaseResults.ThrowIfNull(nameof(phaseResults));
+            _currentPhase = currentPhase.ThrowIfNull(nameof(currentPhase));
+            _pipelines = pipelines.ThrowIfNull(nameof(pipelines));
         }
 
         public DocumentList<IDocument> FromPipeline(string pipelineName)

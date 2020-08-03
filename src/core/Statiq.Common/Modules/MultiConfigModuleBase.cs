@@ -61,7 +61,7 @@ namespace Statiq.Common
         /// <returns>The current instance.</returns>
         protected MultiConfigModuleBase SetConfig(string key, IConfig config)
         {
-            _ = key ?? throw new ArgumentNullException(nameof(key));
+            key.ThrowIfNull(nameof(key));
             if (config == null)
             {
                 _configs.Remove(key);

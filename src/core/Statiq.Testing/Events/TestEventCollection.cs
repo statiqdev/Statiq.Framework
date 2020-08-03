@@ -18,17 +18,17 @@ namespace Statiq.Testing
         public void Subscribe<TEvent>(AsyncEventHandler<TEvent> handler) =>
             _events.AddOrUpdate(
                 typeof(TEvent),
-                _ => new List<Delegate> { handler ?? throw new ArgumentNullException(nameof(handler)) },
+                _ => new List<Delegate> { handler.ThrowIfNull(nameof(handler)) },
                 (_, handlers) =>
                 {
-                    handlers.Add(handler ?? throw new ArgumentNullException(nameof(handler)));
+                    handlers.Add(handler.ThrowIfNull(nameof(handler)));
                     return handlers;
                 });
 
         /// <inheritdoc />
         public async Task<bool> RaiseAsync<TEvent>(TEvent evt)
         {
-            _ = evt ?? throw new ArgumentNullException(nameof(evt));
+            evt.ThrowIfNull(nameof(evt));
             if (_events.TryGetValue(typeof(TEvent), out List<Delegate> handlers))
             {
                 foreach (Delegate handler in handlers)

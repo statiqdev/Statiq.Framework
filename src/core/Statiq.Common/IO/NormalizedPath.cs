@@ -827,7 +827,7 @@ namespace Statiq.Common
         /// <returns>A new <see cref="NormalizedPath"/> with an appended extension.</returns>
         public NormalizedPath AppendExtension(string extension)
         {
-            _ = extension ?? throw new ArgumentNullException(nameof(extension));
+            extension.ThrowIfNull(nameof(extension));
             ThrowIfNull();
 
             if (!extension.StartsWith(Dot, StringComparison.OrdinalIgnoreCase))
@@ -844,7 +844,7 @@ namespace Statiq.Common
         /// <returns>A new <see cref="NormalizedPath"/> with the specified suffix.</returns>
         public NormalizedPath InsertSuffix(string suffix)
         {
-            _ = suffix ?? throw new ArgumentNullException(nameof(suffix));
+            suffix.ThrowIfNull(nameof(suffix));
             ThrowIfNull();
 
             int extensionIndex = FullPath.LastIndexOf(Dot);
@@ -860,7 +860,7 @@ namespace Statiq.Common
         /// <returns>A new <see cref="NormalizedPath"/> with the specified prefix.</returns>
         public NormalizedPath InsertPrefix(string prefix)
         {
-            _ = prefix ?? throw new ArgumentNullException(nameof(prefix));
+            prefix.ThrowIfNull(nameof(prefix));
             ThrowIfNull();
 
             int nameIndex = FullPath.LastIndexOf(Slash);

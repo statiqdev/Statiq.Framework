@@ -46,7 +46,7 @@ namespace Statiq.Core
         /// <param name="itemXPath">The XPath expression to use to find child items. If <c>null</c>, all child elements will be used.</param>
         public ReadXml(string data, string itemXPath)
         {
-            _data = data ?? throw new ArgumentNullException(nameof(data));
+            _data = data.ThrowIfNull(nameof(data));
             _itemXPath = itemXPath;
         }
 

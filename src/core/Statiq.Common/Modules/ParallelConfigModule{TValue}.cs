@@ -31,13 +31,13 @@ namespace Statiq.Common
         /// </param>
         protected ParallelConfigModule(Config<TValue> config, bool forceDocumentExecution)
         {
-            _config = config ?? throw new ArgumentNullException(nameof(config));
+            _config = config.ThrowIfNull(nameof(config));
             _forceDocumentExecution = forceDocumentExecution;
         }
 
         protected ParallelConfigModule<TValue> SetConfig(Config<TValue> config)
         {
-            _config = config ?? throw new ArgumentNullException(nameof(config));
+            _config = config.ThrowIfNull(nameof(config));
             return this;
         }
 
