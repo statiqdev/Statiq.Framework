@@ -1,8 +1,11 @@
 ﻿using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using AngleSharp.Parser.Html;
+using Microsoft.Extensions.Logging;
 using NUnit.Framework;
+using Shouldly;
 using Statiq.Testing;
 
 namespace Statiq.Html.Tests
@@ -10,6 +13,25 @@ namespace Statiq.Html.Tests
     [TestFixture]
     public class ValidateLinksFixture : BaseFixture
     {
+        public class ExecuteTests : ValidateLinksFixture
+        {
+            [Test]
+            public async Task DoesNotThrowForInvalidLink()
+            {
+                // Given
+                TestExecutionContext context = new TestExecutionContext();
+                context.TestLoggerProvider.ThrowLogLevel = LogLevel.None;
+                TestDocument document = new TestDocument("<html><head></head><body><a href=\"http://example.com<>\">foo</a></body></html>");
+                ValidateLinks module = new ValidateLinks();
+
+                // When
+                await ExecuteAsync(document, context, module);
+
+                // Then
+                context.LogMessages.ShouldHaveSingleItem().LogLevel.ShouldBe(LogLevel.Warning);
+            }
+        }
+
         public class GatherLinksTests : ValidateLinksFixture
         {
             [TestCase("<a href=\"/foo/bar\">baz</a>", "/foo/bar")]

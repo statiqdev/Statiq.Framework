@@ -1,5 +1,8 @@
 # 1.0.0-beta.19
 
+- Lots of under-the-hood refactoring to make things faster.
+- Fix for invalid URIs in the `ValidateLinks` module (#119).
+
 # 1.0.0-beta.18
 
 - **Breaking change:** Changed the IPipelineOutputs` indexer to filter documents by destination path from all pipelines instead of get documents from a specified pipeline.

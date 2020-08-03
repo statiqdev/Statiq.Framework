@@ -93,9 +93,9 @@ namespace Statiq.Html
 #pragma warning restore RCS1163 // Unused parameter.
 
             // Get settings
-            bool validateAbsoluteLinks = _validateAbsoluteLinks is null ? false : await _validateAbsoluteLinks.GetValueAsync(null, context);
-            bool validateRelativeLinks = _validateRelativeLinks is null ? false : await _validateRelativeLinks.GetValueAsync(null, context);
-            bool asError = _asError is null ? false : await _asError.GetValueAsync(null, context);
+            bool validateAbsoluteLinks = _validateAbsoluteLinks is object && await _validateAbsoluteLinks.GetValueAsync(null, context);
+            bool validateRelativeLinks = _validateRelativeLinks is object && await _validateRelativeLinks.GetValueAsync(null, context);
+            bool asError = _asError is object && await _asError.GetValueAsync(null, context);
 
             // Key = link, Value = source, tag HTML
             ConcurrentDictionary<string, ConcurrentBag<(string documentSource, string outerHtml)>> links =
@@ -116,26 +116,30 @@ namespace Statiq.Html
                     // Attempt to parse the URI
                     if (!Uri.TryCreate(link.Key, UriKind.RelativeOrAbsolute, out Uri uri))
                     {
-                        AddOrUpdateFailure(context, link.Value, failures);
+                        AddOrUpdateFailure(context, link.Value, failures, "Invalid URI");
+                        return;
                     }
 
                     // Adjustment for double-slash link prefix which means use http:// or https:// depending on current protocol
                     // The Uri class treats these as relative, but they're really absolute
                     if (uri.ToString().StartsWith("//") && !Uri.TryCreate($"http:{link.Key}", UriKind.Absolute, out uri))
                     {
-                        AddOrUpdateFailure(context, link.Value, failures);
+                        AddOrUpdateFailure(context, link.Value, failures, "Invalid protocol-relative URI");
+                        return;
                     }
 
                     // Relative
                     if (!uri.IsAbsoluteUri && validateRelativeLinks && !await ValidateRelativeLinkAsync(uri, context))
                     {
-                        AddOrUpdateFailure(context, link.Value, failures);
+                        AddOrUpdateFailure(context, link.Value, failures, "Unable to validate relative link");
+                        return;
                     }
 
                     // Absolute
                     if (uri.IsAbsoluteUri && validateAbsoluteLinks && !await ValidateAbsoluteLinkAsync(uri, context))
                     {
-                        AddOrUpdateFailure(context, link.Value, failures);
+                        AddOrUpdateFailure(context, link.Value, failures, "Unable to validate absolute link");
+                        return;
                     }
                 }).ToArray();
 
@@ -344,7 +348,11 @@ namespace Statiq.Html
                 });
         }
 
-        private static void AddOrUpdateFailure(IExecutionContext context, ConcurrentBag<(string source, string outerHtml)> links, ConcurrentDictionary<string, ConcurrentBag<string>> failures)
+        private static void AddOrUpdateFailure(
+            IExecutionContext context,
+            ConcurrentBag<(string source, string outerHtml)> links,
+            ConcurrentDictionary<string, ConcurrentBag<string>> failures,
+            string message)
         {
             foreach ((string source, string outerHtml) in links)
             {
@@ -356,10 +364,10 @@ namespace Statiq.Html
 
                 failures.AddOrUpdate(
                     source,
-                    _ => new ConcurrentBag<string> { outerHtml },
+                    _ => new ConcurrentBag<string> { $"{outerHtml} ({message})" },
                     (_, list) =>
                     {
-                        list.Add(outerHtml);
+                        list.Add($"{outerHtml} ({message})");
                         return list;
                     });
             }
