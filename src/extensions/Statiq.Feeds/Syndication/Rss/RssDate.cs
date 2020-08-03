@@ -9,7 +9,7 @@ namespace Statiq.Feeds.Syndication.Rss
     {
         private DateTime? _value;
 
-        public RssDate(DateTime date)
+        public RssDate(in DateTime date)
         {
             _value = date;
         }
@@ -65,7 +65,7 @@ namespace Statiq.Feeds.Syndication.Rss
             }
         }
 
-        public DateTime GetValueOrDefault(DateTime defaultValue)
+        public DateTime GetValueOrDefault(in DateTime defaultValue)
         {
             if (!_value.HasValue)
             {
@@ -100,7 +100,7 @@ namespace Statiq.Feeds.Syndication.Rss
             return _value.GetHashCode();
         }
 
-        public static implicit operator RssDate(DateTime value)
+        public static implicit operator RssDate(in DateTime value)
         {
             return new RssDate(value);
         }

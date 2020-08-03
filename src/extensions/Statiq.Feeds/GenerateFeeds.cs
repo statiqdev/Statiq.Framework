@@ -129,7 +129,7 @@ namespace Statiq.Feeds
         /// </summary>
         /// <param name="rssPath">The RSS path. If the value is <c>null</c> no RSS file will be generated.</param>
         /// <returns>The current module instance.</returns>
-        public GenerateFeeds WithRssPath(NormalizedPath rssPath)
+        public GenerateFeeds WithRssPath(in NormalizedPath rssPath)
         {
             _rssPath = rssPath;
             return this;
@@ -141,7 +141,7 @@ namespace Statiq.Feeds
         /// </summary>
         /// <param name="atomPath">The Atom path. If the value is <c>null</c> no Atom file will be generated.</param>
         /// <returns>The current module instance.</returns>
-        public GenerateFeeds WithAtomPath(NormalizedPath atomPath)
+        public GenerateFeeds WithAtomPath(in NormalizedPath atomPath)
         {
             _atomPath = atomPath;
             return this;
@@ -152,7 +152,7 @@ namespace Statiq.Feeds
         /// </summary>
         /// <param name="rdfPath">The RDF path. If the value is <c>null</c> no RDF file will be generated.</param>
         /// <returns>The current module instance.</returns>
-        public GenerateFeeds WithRdfPath(NormalizedPath rdfPath)
+        public GenerateFeeds WithRdfPath(in NormalizedPath rdfPath)
         {
             _rdfPath = rdfPath;
             return this;

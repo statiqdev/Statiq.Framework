@@ -22,7 +22,7 @@ namespace Statiq.Images.Operations
         public void Invoke(Image<Rgba32> image, Stream stream) =>
             _action?.Invoke(image, stream);
 
-        public NormalizedPath GetPath(NormalizedPath path) =>
+        public NormalizedPath GetPath(in NormalizedPath path) =>
             _pathModifier == null ? path : _pathModifier(path);
     }
 }

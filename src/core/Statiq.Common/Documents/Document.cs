@@ -17,7 +17,7 @@ namespace Statiq.Common
         }
 
         public Document(
-            NormalizedPath destination,
+            in NormalizedPath destination,
             IEnumerable<KeyValuePair<string, object>> items,
             IContentProvider contentProvider = null)
             : base(destination, items, contentProvider)
@@ -25,15 +25,15 @@ namespace Statiq.Common
         }
 
         public Document(
-            NormalizedPath source,
-            NormalizedPath destination,
+            in NormalizedPath source,
+            in NormalizedPath destination,
             IContentProvider contentProvider = null)
             : base(source, destination, contentProvider)
         {
         }
 
         public Document(
-            NormalizedPath destination,
+            in NormalizedPath destination,
             IContentProvider contentProvider = null)
             : base(destination, contentProvider)
         {
@@ -52,8 +52,8 @@ namespace Statiq.Common
         }
 
         public Document(
-            NormalizedPath source,
-            NormalizedPath destination,
+            in NormalizedPath source,
+            in NormalizedPath destination,
             IEnumerable<KeyValuePair<string, object>> items,
             IContentProvider contentProvider = null)
             : base(source, destination, items, contentProvider)
@@ -62,8 +62,8 @@ namespace Statiq.Common
 
         public Document(
             IReadOnlyConfigurationSettings settings,
-            NormalizedPath source,
-            NormalizedPath destination,
+            in NormalizedPath source,
+            in NormalizedPath destination,
             IEnumerable<KeyValuePair<string, object>> items,
             IContentProvider contentProvider = null)
             : base(settings, source, destination, items, contentProvider)
@@ -72,8 +72,8 @@ namespace Statiq.Common
 
         public Document(
             IReadOnlyConfigurationSettings settings,
-            NormalizedPath source,
-            NormalizedPath destination,
+            in NormalizedPath source,
+            in NormalizedPath destination,
             IMetadata metadata,
             IContentProvider contentProvider = null)
             : base(settings, source, destination, metadata, contentProvider)

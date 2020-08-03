@@ -13,7 +13,7 @@ namespace Statiq.Core
         private readonly IReadOnlyFileSystem _fileSystem;
         private readonly System.IO.DirectoryInfo _directory;
 
-        public LocalDirectory(IReadOnlyFileSystem fileSystem, NormalizedPath path)
+        public LocalDirectory(IReadOnlyFileSystem fileSystem, in NormalizedPath path)
         {
             _fileSystem = fileSystem.ThrowIfNull(nameof(fileSystem));
 

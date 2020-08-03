@@ -21,7 +21,7 @@ namespace Statiq.Common
         /// current input paths.
         /// </param>
         /// <returns>An input file.</returns>
-        public static IFile GetInputFile(this IReadOnlyFileSystem fileSystem, NormalizedPath path)
+        public static IFile GetInputFile(this IReadOnlyFileSystem fileSystem, in NormalizedPath path)
         {
             fileSystem.ThrowIfNull(nameof(fileSystem));
             path.ThrowIfNull(nameof(path));
@@ -145,7 +145,7 @@ namespace Statiq.Common
         /// If no input directories contain this file, then a null path is returned.
         /// </summary>
         /// <returns>A path to this file relative to it's containing input directory.</returns>
-        public static NormalizedPath GetRelativeInputPath(this IReadOnlyFileSystem fileSystem, NormalizedPath path)
+        public static NormalizedPath GetRelativeInputPath(this IReadOnlyFileSystem fileSystem, in NormalizedPath path)
         {
             fileSystem.ThrowIfNull(nameof(fileSystem));
             path.ThrowIfNull(nameof(path));
@@ -164,7 +164,7 @@ namespace Statiq.Common
         /// If this path is not relative to the output directory, then a null path is returned.
         /// </summary>
         /// <returns>A path to this file relative to the output directory.</returns>
-        public static NormalizedPath GetRelativeOutputPath(this IReadOnlyFileSystem fileSystem, NormalizedPath path)
+        public static NormalizedPath GetRelativeOutputPath(this IReadOnlyFileSystem fileSystem, in NormalizedPath path)
         {
             fileSystem.ThrowIfNull(nameof(fileSystem));
             path.ThrowIfNull(nameof(path));
@@ -195,7 +195,7 @@ namespace Statiq.Common
         /// <param name="path">The path to combine with the root path and output path.
         /// If this is <see cref="NormalizedPath.Null"/>, returns the root path combined with the output path.</param>
         /// <returns>The output path.</returns>
-        public static NormalizedPath GetOutputPath(this IReadOnlyFileSystem fileSystem, NormalizedPath path)
+        public static NormalizedPath GetOutputPath(this IReadOnlyFileSystem fileSystem, in NormalizedPath path)
         {
             fileSystem.ThrowIfNull(nameof(fileSystem));
             return path.IsNull
@@ -214,7 +214,7 @@ namespace Statiq.Common
         /// current output path.
         /// </param>
         /// <returns>An output file.</returns>
-        public static IFile GetOutputFile(this IReadOnlyFileSystem fileSystem, NormalizedPath path)
+        public static IFile GetOutputFile(this IReadOnlyFileSystem fileSystem, in NormalizedPath path)
         {
             fileSystem.ThrowIfNull(nameof(fileSystem));
             return fileSystem.GetFile(fileSystem.GetOutputPath(path));
@@ -240,7 +240,7 @@ namespace Statiq.Common
         /// output directory is returned.
         /// </param>
         /// <returns>An output directory.</returns>
-        public static IDirectory GetOutputDirectory(this IReadOnlyFileSystem fileSystem, NormalizedPath path)
+        public static IDirectory GetOutputDirectory(this IReadOnlyFileSystem fileSystem, in NormalizedPath path)
         {
             fileSystem.ThrowIfNull(nameof(fileSystem));
             return fileSystem.GetDirectory(fileSystem.GetOutputPath(path));
@@ -261,7 +261,7 @@ namespace Statiq.Common
         /// <param name="path">The path to combine with the root path and temp path.
         /// If this is <see cref="NormalizedPath.Null"/>, returns the root path combined with the temp path.</param>
         /// <returns>The temp path.</returns>
-        public static NormalizedPath GetTempPath(this IReadOnlyFileSystem fileSystem, NormalizedPath path)
+        public static NormalizedPath GetTempPath(this IReadOnlyFileSystem fileSystem, in NormalizedPath path)
         {
             fileSystem.ThrowIfNull(nameof(fileSystem));
             return path.IsNull
@@ -280,7 +280,7 @@ namespace Statiq.Common
         /// current temp path.
         /// </param>
         /// <returns>A temp file.</returns>
-        public static IFile GetTempFile(this IReadOnlyFileSystem fileSystem, NormalizedPath path)
+        public static IFile GetTempFile(this IReadOnlyFileSystem fileSystem, in NormalizedPath path)
         {
             fileSystem.ThrowIfNull(nameof(fileSystem));
             return fileSystem.GetFile(fileSystem.GetTempPath(path));
@@ -317,7 +317,7 @@ namespace Statiq.Common
         /// temp directory is returned.
         /// </param>
         /// <returns>A temp directory.</returns>
-        public static IDirectory GetTempDirectory(this IReadOnlyFileSystem fileSystem, NormalizedPath path)
+        public static IDirectory GetTempDirectory(this IReadOnlyFileSystem fileSystem, in NormalizedPath path)
         {
             fileSystem.ThrowIfNull(nameof(fileSystem));
             return fileSystem.GetDirectory(fileSystem.GetTempPath(path));
@@ -334,7 +334,7 @@ namespace Statiq.Common
         /// current root path.
         /// </param>
         /// <returns>A root file.</returns>
-        public static IFile GetRootFile(this IReadOnlyFileSystem fileSystem, NormalizedPath path)
+        public static IFile GetRootFile(this IReadOnlyFileSystem fileSystem, in NormalizedPath path)
         {
             fileSystem.ThrowIfNull(nameof(fileSystem));
             return fileSystem.GetFile(fileSystem.RootPath.Combine(path));
@@ -360,7 +360,7 @@ namespace Statiq.Common
         /// root directory is returned.
         /// </param>
         /// <returns>A root directory.</returns>
-        public static IDirectory GetRootDirectory(this IReadOnlyFileSystem fileSystem, NormalizedPath path)
+        public static IDirectory GetRootDirectory(this IReadOnlyFileSystem fileSystem, in NormalizedPath path)
         {
             fileSystem.ThrowIfNull(nameof(fileSystem));
             return path.IsNull
@@ -376,7 +376,7 @@ namespace Statiq.Common
         /// The absolute path of the file.
         /// </param>
         /// <returns>A file.</returns>
-        public static IFile GetFile(this IReadOnlyFileSystem fileSystem, NormalizedPath path)
+        public static IFile GetFile(this IReadOnlyFileSystem fileSystem, in NormalizedPath path)
         {
             fileSystem.ThrowIfNull(nameof(fileSystem));
             return fileSystem.FileProvider.GetFile(path);
@@ -390,7 +390,7 @@ namespace Statiq.Common
         /// The absolute path of the directory.
         /// </param>
         /// <returns>A directory.</returns>
-        public static IDirectory GetDirectory(this IReadOnlyFileSystem fileSystem, NormalizedPath path)
+        public static IDirectory GetDirectory(this IReadOnlyFileSystem fileSystem, in NormalizedPath path)
         {
             fileSystem.ThrowIfNull(nameof(fileSystem));
             return fileSystem.FileProvider.GetDirectory(path);
@@ -417,7 +417,7 @@ namespace Statiq.Common
         /// directory aggregating all input paths is returned.
         /// </param>
         /// <returns>An input directory.</returns>
-        public static IDirectory GetInputDirectory(this IReadOnlyFileSystem fileSystem, NormalizedPath path)
+        public static IDirectory GetInputDirectory(this IReadOnlyFileSystem fileSystem, in NormalizedPath path)
         {
             fileSystem.ThrowIfNull(nameof(fileSystem));
             return path.IsNull

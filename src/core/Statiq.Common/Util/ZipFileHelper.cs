@@ -7,7 +7,7 @@ namespace Statiq.Common
 {
     public static class ZipFileHelper
     {
-        public static IFile CreateZipFile(IExecutionContext context, NormalizedPath directory)
+        public static IFile CreateZipFile(IExecutionContext context, in NormalizedPath directory)
         {
             directory.ThrowIfNull(nameof(directory));
 

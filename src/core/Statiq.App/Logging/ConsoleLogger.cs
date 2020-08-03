@@ -19,7 +19,7 @@ namespace Statiq.App
 
         public bool IsEnabled(LogLevel logLevel) => true;
 
-        public void Log<TState>(DateTimeOffset timestamp, LogLevel logLevel, EventId eventId, TState state, Exception exception, Func<TState, Exception, string> formatter) =>
+        public void Log<TState>(in DateTimeOffset timestamp, LogLevel logLevel, in EventId eventId, TState state, Exception exception, Func<TState, Exception, string> formatter) =>
             _provider.AddMessage(new LogMessage(_categoryName, timestamp, logLevel, eventId, formatter(state, exception), exception));
 
         public void Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception exception, Func<TState, Exception, string> formatter) =>

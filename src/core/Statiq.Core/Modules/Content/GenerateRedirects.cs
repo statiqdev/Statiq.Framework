@@ -80,7 +80,7 @@ namespace Statiq.Core
         /// <param name="content">A delegate that takes a dictionary with keys equal to each redirected file
         /// and values equal to the destination URL. The delegate should return the content of the output file.</param>
         /// <returns>The current module instance.</returns>
-        public GenerateRedirects WithAdditionalOutput(NormalizedPath path, Func<IDictionary<NormalizedPath, string>, string> content)
+        public GenerateRedirects WithAdditionalOutput(in NormalizedPath path, Func<IDictionary<NormalizedPath, string>, string> content)
         {
             path.ThrowIfNull(nameof(path));
             content.ThrowIfNull(nameof(content));

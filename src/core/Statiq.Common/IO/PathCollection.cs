@@ -108,7 +108,7 @@ namespace Statiq.Common
         /// <returns>
         /// <c>true</c> if the path was added; <c>false</c> if the path was already present.
         /// </returns>
-        public bool Add(NormalizedPath path)
+        public bool Add(in NormalizedPath path)
         {
             path.ThrowIfNull(nameof(path));
             lock (_pathsLock)
@@ -158,7 +158,7 @@ namespace Statiq.Common
         /// </summary>
         /// <param name="path">The path.</param>
         /// <returns><c>true</c> if the collection contains the path, otherwise <c>false</c>.</returns>
-        public bool Contains(NormalizedPath path)
+        public bool Contains(in NormalizedPath path)
         {
             lock (_pathsLock)
             {
@@ -227,7 +227,7 @@ namespace Statiq.Common
         /// <param name="index">The index where the path should be inserted.</param>
         /// <param name="path">The path to insert.</param>
         /// <returns><c>true</c> if the collection did not contain the path and it was inserted, otherwise <c>false</c></returns>
-        public bool Insert(int index, NormalizedPath path)
+        public bool Insert(int index, in NormalizedPath path)
         {
             path.ThrowIfNull(nameof(path));
             lock (_pathsLock)

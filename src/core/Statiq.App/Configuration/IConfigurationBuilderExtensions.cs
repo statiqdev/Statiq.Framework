@@ -11,7 +11,7 @@ namespace Statiq.App
         /// <param name="builder">The configuration builder.</param>
         /// <param name="path">The path or filename of the settings file to add.</param>
         /// <returns>The configuration builder with the new settings file.</returns>
-        public static IConfigurationBuilder AddSettingsFile(this IConfigurationBuilder builder, NormalizedPath path) =>
+        public static IConfigurationBuilder AddSettingsFile(this IConfigurationBuilder builder, in NormalizedPath path) =>
             builder
                 .AddJsonFile(path.ChangeExtension(".json").FullPath, true)
                 .AddYamlFile(path.ChangeExtension(".yml").FullPath, true)

@@ -45,7 +45,7 @@ namespace Statiq.Common
 
         public ObjectDocument(
             T obj,
-            NormalizedPath destination,
+            in NormalizedPath destination,
             IEnumerable<KeyValuePair<string, object>> items,
             IContentProvider contentProvider = null)
             : this(obj, null, destination, items, contentProvider)
@@ -54,8 +54,8 @@ namespace Statiq.Common
 
         public ObjectDocument(
             T obj,
-            NormalizedPath source,
-            NormalizedPath destination,
+            in NormalizedPath source,
+            in NormalizedPath destination,
             IContentProvider contentProvider = null)
             : this(obj, source, destination, null, contentProvider)
         {
@@ -63,7 +63,7 @@ namespace Statiq.Common
 
         public ObjectDocument(
             T obj,
-            NormalizedPath destination,
+            in NormalizedPath destination,
             IContentProvider contentProvider = null)
             : this(obj, null, destination, null, contentProvider)
         {
@@ -86,8 +86,8 @@ namespace Statiq.Common
 
         public ObjectDocument(
             T obj,
-            NormalizedPath source,
-            NormalizedPath destination,
+            in NormalizedPath source,
+            in NormalizedPath destination,
             IEnumerable<KeyValuePair<string, object>> items,
             IContentProvider contentProvider = null)
             : this(Guid.NewGuid(), obj, source, destination, new Metadata(items), contentProvider)
@@ -96,8 +96,8 @@ namespace Statiq.Common
 
         public ObjectDocument(
             T obj,
-            NormalizedPath source,
-            NormalizedPath destination,
+            in NormalizedPath source,
+            in NormalizedPath destination,
             IMetadata metadata,
             IContentProvider contentProvider = null)
             : this(Guid.NewGuid(), obj, source, destination, metadata, contentProvider)
@@ -107,8 +107,8 @@ namespace Statiq.Common
         private ObjectDocument(
             Guid id,
             T obj,
-            NormalizedPath source,
-            NormalizedPath destination,
+            in NormalizedPath source,
+            in NormalizedPath destination,
             IMetadata metadata,
             IContentProvider contentProvider)
         {

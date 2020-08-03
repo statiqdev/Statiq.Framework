@@ -388,7 +388,7 @@ namespace Statiq.Common
         /// <see cref="ReadOnlyMemory{T}"/> is to compare the reference
         /// equality of the underlying array, not the value equality
         /// of the items in the memory. If you want to compare two
-        /// segments, use <see cref="MemoryExtensions.SequenceEqual(ReadOnlyMemory{char}, ReadOnlyMemory{char})"/>.
+        /// segments, <c>SequenceEqual</c>.
         /// </remarks>
         /// <value>The segments making up the path.</value>
         public readonly ReadOnlyMemory<char>[] Segments;

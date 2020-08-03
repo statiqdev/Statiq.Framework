@@ -11,7 +11,7 @@ namespace Statiq.Testing
         private readonly IReadOnlyFileSystem _fileSystem;
         private readonly TestFileProvider _fileProvider;
 
-        public TestFile(IReadOnlyFileSystem fileSystem, TestFileProvider fileProvider, NormalizedPath path)
+        public TestFile(IReadOnlyFileSystem fileSystem, TestFileProvider fileProvider, in NormalizedPath path)
         {
             _fileSystem = fileSystem;
             _fileProvider = fileProvider;

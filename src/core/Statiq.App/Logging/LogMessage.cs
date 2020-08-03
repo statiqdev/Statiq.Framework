@@ -7,9 +7,9 @@ namespace Statiq.App
     {
         public LogMessage(
             string categoryName,
-            DateTimeOffset timestamp,
+            in DateTimeOffset timestamp,
             LogLevel logLevel,
-            EventId eventId,
+            in EventId eventId,
             string formattedMessage,
             Exception exception)
         {

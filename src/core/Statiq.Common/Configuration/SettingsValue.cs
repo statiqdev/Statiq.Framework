@@ -20,7 +20,7 @@ namespace Statiq.Common
         public static object Get(object value) =>
             value is SettingsValue ? value : new SettingsValue(value);
 
-        public static KeyValuePair<string, object> Get(KeyValuePair<string, object> item) =>
+        public static KeyValuePair<string, object> Get(in KeyValuePair<string, object> item) =>
             new KeyValuePair<string, object>(item.Key, item.Value is SettingsValue ? item.Value : new SettingsValue(item.Value));
     }
 }

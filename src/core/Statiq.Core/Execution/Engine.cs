@@ -337,7 +337,7 @@ namespace Statiq.Core
         /// A cancellation token that can be used to cancel the execution.
         /// </param>
         /// <returns>The output documents from each executed pipeline.</returns>
-        public Task<IPipelineOutputs> ExecuteAsync(CancellationToken cancellationToken = default) =>
+        public Task<IPipelineOutputs> ExecuteAsync(in CancellationToken cancellationToken = default) =>
             ExecuteAsync(null, true, cancellationToken);
 
         /// <summary>
@@ -350,7 +350,7 @@ namespace Statiq.Core
         /// A cancellation token that can be used to cancel the execution.
         /// </param>
         /// <returns>The output documents from each executed pipeline.</returns>
-        public Task<IPipelineOutputs> ExecuteAsync(string[] pipelines, CancellationToken cancellationToken = default) =>
+        public Task<IPipelineOutputs> ExecuteAsync(string[] pipelines, in CancellationToken cancellationToken = default) =>
             ExecuteAsync(pipelines, false, cancellationToken);
 
         /// <summary>

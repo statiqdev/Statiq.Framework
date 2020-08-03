@@ -6,21 +6,21 @@ namespace Statiq.Common
     {
         public static IDocument CreateDocument(
             this IDocumentFactory documentFactory,
-            NormalizedPath destination,
+            in NormalizedPath destination,
             IEnumerable<KeyValuePair<string, object>> items,
             IContentProvider contentProvider = null) =>
             documentFactory.CreateDocument(null, destination, items, contentProvider);
 
         public static IDocument CreateDocument(
             this IDocumentFactory documentFactory,
-            NormalizedPath source,
-            NormalizedPath destination,
+            in NormalizedPath source,
+            in NormalizedPath destination,
             IContentProvider contentProvider = null) =>
             documentFactory.CreateDocument(source, destination, null, contentProvider);
 
         public static IDocument CreateDocument(
             this IDocumentFactory documentFactory,
-            NormalizedPath destination,
+            in NormalizedPath destination,
             IContentProvider contentProvider = null) =>
             documentFactory.CreateDocument(null, destination, null, contentProvider);
 
@@ -37,7 +37,7 @@ namespace Statiq.Common
 
         public static TDocument CreateDocument<TDocument>(
             this IDocumentFactory documentFactory,
-            NormalizedPath destination,
+            in NormalizedPath destination,
             IEnumerable<KeyValuePair<string, object>> items,
             IContentProvider contentProvider = null)
             where TDocument : FactoryDocument, IDocument, new() =>
@@ -45,15 +45,15 @@ namespace Statiq.Common
 
         public static TDocument CreateDocument<TDocument>(
             this IDocumentFactory documentFactory,
-            NormalizedPath source,
-            NormalizedPath destination,
+            in NormalizedPath source,
+            in NormalizedPath destination,
             IContentProvider contentProvider = null)
             where TDocument : FactoryDocument, IDocument, new() =>
             documentFactory.CreateDocument<TDocument>(source, destination, null, contentProvider);
 
         public static TDocument CreateDocument<TDocument>(
             this IDocumentFactory documentFactory,
-            NormalizedPath destination,
+            in NormalizedPath destination,
             IContentProvider contentProvider = null)
             where TDocument : FactoryDocument, IDocument, new() =>
             documentFactory.CreateDocument<TDocument>(null, destination, null, contentProvider);
@@ -74,7 +74,7 @@ namespace Statiq.Common
         public static IDocument CloneOrCreateDocument(
             this IDocumentFactory documentFactory,
             IDocument document,
-            NormalizedPath destination,
+            in NormalizedPath destination,
             IEnumerable<KeyValuePair<string, object>> items,
             IContentProvider contentProvider = null) =>
             document?.Clone(destination, items, contentProvider)
@@ -83,8 +83,8 @@ namespace Statiq.Common
         public static IDocument CloneOrCreateDocument(
             this IDocumentFactory documentFactory,
             IDocument document,
-            NormalizedPath source,
-            NormalizedPath destination,
+            in NormalizedPath source,
+            in NormalizedPath destination,
             IContentProvider contentProvider = null) =>
             document?.Clone(source, destination, contentProvider)
                 ?? documentFactory.CreateDocument(source, destination, contentProvider);
@@ -92,7 +92,7 @@ namespace Statiq.Common
         public static IDocument CloneOrCreateDocument(
             this IDocumentFactory documentFactory,
             IDocument document,
-            NormalizedPath destination,
+            in NormalizedPath destination,
             IContentProvider contentProvider = null) =>
             document?.Clone(destination, contentProvider)
                 ?? documentFactory.CreateDocument(destination, contentProvider);
@@ -115,8 +115,8 @@ namespace Statiq.Common
         public static IDocument CloneOrCreateDocument(
             this IDocumentFactory documentFactory,
             IDocument document,
-            NormalizedPath source,
-            NormalizedPath destination,
+            in NormalizedPath source,
+            in NormalizedPath destination,
             IEnumerable<KeyValuePair<string, object>> items,
             IContentProvider contentProvider = null) =>
             document?.Clone(source, destination, items, contentProvider)
@@ -125,7 +125,7 @@ namespace Statiq.Common
         public static TDocument CloneOrCreateDocument<TDocument>(
             this IDocumentFactory documentFactory,
             TDocument document,
-            NormalizedPath destination,
+            in NormalizedPath destination,
             IEnumerable<KeyValuePair<string, object>> items,
             IContentProvider contentProvider = null)
             where TDocument : FactoryDocument, IDocument, new() =>
@@ -135,8 +135,8 @@ namespace Statiq.Common
         public static TDocument CloneOrCreateDocument<TDocument>(
             this IDocumentFactory documentFactory,
             TDocument document,
-            NormalizedPath source,
-            NormalizedPath destination,
+            in NormalizedPath source,
+            in NormalizedPath destination,
             IContentProvider contentProvider = null)
             where TDocument : FactoryDocument, IDocument, new() =>
             (TDocument)document?.Clone(source, destination, contentProvider)
@@ -145,7 +145,7 @@ namespace Statiq.Common
         public static TDocument CloneOrCreateDocument<TDocument>(
             this IDocumentFactory documentFactory,
             TDocument document,
-            NormalizedPath destination,
+            in NormalizedPath destination,
             IContentProvider contentProvider = null)
             where TDocument : FactoryDocument, IDocument, new() =>
             (TDocument)document?.Clone(destination, contentProvider)
@@ -171,8 +171,8 @@ namespace Statiq.Common
         public static TDocument CloneOrCreateDocument<TDocument>(
             this IDocumentFactory documentFactory,
             TDocument document,
-            NormalizedPath source,
-            NormalizedPath destination,
+            in NormalizedPath source,
+            in NormalizedPath destination,
             IEnumerable<KeyValuePair<string, object>> items,
             IContentProvider contentProvider = null)
             where TDocument : FactoryDocument, IDocument, new() =>

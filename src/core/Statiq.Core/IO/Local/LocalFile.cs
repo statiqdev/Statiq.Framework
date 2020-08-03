@@ -11,7 +11,7 @@ namespace Statiq.Core
         private readonly IReadOnlyFileSystem _fileSystem;
         private readonly System.IO.FileInfo _file;
 
-        public LocalFile(IReadOnlyFileSystem fileSystem, NormalizedPath path)
+        public LocalFile(IReadOnlyFileSystem fileSystem, in NormalizedPath path)
         {
             _fileSystem = fileSystem.ThrowIfNull(nameof(fileSystem));
 
