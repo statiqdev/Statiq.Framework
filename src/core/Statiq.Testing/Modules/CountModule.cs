@@ -50,14 +50,14 @@ namespace Statiq.Testing
                                 new NormalizedPath(ValueKey + sourceCount++, PathKind.Absolute),
                                 null,
                                 new Dictionary<string, object> { { ValueKey, Value } },
-                                await context.GetContentProviderAsync(inputContent == null ? Value.ToString() : inputContent + Value)));
+                                await context.GetContentProviderAsync(inputContent is null ? Value.ToString() : inputContent + Value)));
                     }
                     else
                     {
                         results.Add(
                             input.Clone(
                                 new Dictionary<string, object> { { ValueKey, Value } },
-                                await context.GetContentProviderAsync(inputContent == null ? Value.ToString() : inputContent + Value)));
+                                await context.GetContentProviderAsync(inputContent is null ? Value.ToString() : inputContent + Value)));
                     }
                 }
             }

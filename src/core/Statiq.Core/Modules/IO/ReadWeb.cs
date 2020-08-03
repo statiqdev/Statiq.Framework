@@ -83,7 +83,7 @@ namespace Statiq.Core
         public ReadWeb WithRequests(params WebRequest[] requests)
         {
             requests.ThrowIfNull(nameof(requests));
-            _requests.AddRange(requests.Where(x => x != null));
+            _requests.AddRange(requests.Where(x => x is object));
             return this;
         }
 
@@ -102,11 +102,11 @@ namespace Statiq.Core
         protected override async Task<IEnumerable<IDocument>> ExecuteContextAsync(IExecutionContext context)
         {
             List<WebResponse> responses = _cachedResponses;
-            if (responses == null)
+            if (responses is null)
             {
                 responses =
                     (await _requests.ParallelSelectAsync(async x => await GetResponseAsync(x, context)))
-                    .Where(x => x != null)
+                    .Where(x => x is object)
                     .ToList();
                 if (_cacheResponses)
                 {
@@ -137,7 +137,7 @@ namespace Statiq.Core
             // Get the HTTP client
             using (HttpClientHandler clientHandler = new HttpClientHandler())
             {
-                if (request.Credentials != null)
+                if (request.Credentials is object)
                 {
                     clientHandler.Credentials = request.Credentials;
                 }

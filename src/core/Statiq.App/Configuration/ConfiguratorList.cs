@@ -21,7 +21,7 @@ namespace Statiq.App
             get => (IConfigurator<TConfigurable>)_list[index];
             set
             {
-                if (value != null)
+                if (value is object)
                 {
                     _list[index] = value;
                 }
@@ -34,7 +34,7 @@ namespace Statiq.App
 
         public void Add(IConfigurator<TConfigurable> item)
         {
-            if (item != null)
+            if (item is object)
             {
                 _list.Add(item);
             }
@@ -54,7 +54,7 @@ namespace Statiq.App
 
         public void Insert(int index, IConfigurator<TConfigurable> item)
         {
-            if (item != null)
+            if (item is object)
             {
                 _list.Insert(index, item);
             }

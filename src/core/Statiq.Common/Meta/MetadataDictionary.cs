@@ -10,7 +10,7 @@ namespace Statiq.Common
             : base(Array.Empty<KeyValuePair<string, object>>())
         {
             // Add the items directly to the dictionary instead of through the constructor so raw values won't get interpreted
-            if (items != null)
+            if (items is object)
             {
                 Dictionary.AddRange(items);
             }

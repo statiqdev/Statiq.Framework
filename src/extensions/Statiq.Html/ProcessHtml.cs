@@ -110,7 +110,7 @@ namespace Statiq.Html
         {
             // Parse the HTML content
             IHtmlDocument htmlDocument = await input.ParseHtmlAsync(context, HtmlParser);
-            if (htmlDocument == null)
+            if (htmlDocument is null)
             {
                 return input.Yield();
             }
@@ -123,7 +123,7 @@ namespace Statiq.Html
                     IElement[] elements = first
                         ? new[] { htmlDocument.QuerySelector(querySelector) }
                         : htmlDocument.QuerySelectorAll(querySelector).ToArray();
-                    if (elements.Length > 0 && elements[0] != null)
+                    if (elements.Length > 0 && elements[0] is object)
                     {
                         INode clone = htmlDocument.Clone(true);  // Clone the document so we know if it changed
                         Dictionary<string, object> metadata = new Dictionary<string, object>();

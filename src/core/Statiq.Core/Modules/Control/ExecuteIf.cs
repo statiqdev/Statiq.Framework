@@ -219,7 +219,7 @@ namespace Statiq.Core
                 List<IDocument> matched = new List<IDocument>();
                 List<IDocument> unmatched = new List<IDocument>();
                 bool predicateResult = false;
-                if (condition.Predicate == null)
+                if (condition.Predicate is null)
                 {
                     // This is the final else without a predicate
                     matched.AddRange(documents);
@@ -254,8 +254,8 @@ namespace Statiq.Core
 
                 // Run the modules on the documents that satisfy the predicate
                 if (matched.Count > 0
-                    || (condition.Predicate == null && !hasExecuted)
-                    || (condition.Predicate != null && !condition.Predicate.RequiresDocument && predicateResult))
+                    || (condition.Predicate is null && !hasExecuted)
+                    || (condition.Predicate is object && !condition.Predicate.RequiresDocument && predicateResult))
                 {
                     hasExecuted = true; // Need to track if one of the pre-else conditions was executed
                     results.AddRange(await context.ExecuteModulesAsync(condition, matched));

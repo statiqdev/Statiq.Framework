@@ -13,7 +13,7 @@ namespace Statiq.Common
 
         protected override void Dispose(bool disposing)
         {
-            if (_buffer == null)
+            if (_buffer is null)
             {
                 // Copy the buffer out of the MemoryStream before disposing it
                 _buffer = ((MemoryStream)Stream).ToArray();
@@ -23,7 +23,7 @@ namespace Statiq.Common
         }
 
         public override IContentProvider GetContentProvider(string mediaType) =>
-            _buffer == null
+            _buffer is null
                 ? new MemoryContent(((MemoryStream)Stream).ToArray(), mediaType)
                 : new MemoryContent(_buffer, mediaType);
     }

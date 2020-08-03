@@ -100,7 +100,7 @@ namespace Statiq.Common
             in NormalizedPath destination,
             IEnumerable<KeyValuePair<string, object>> items,
             IContentProvider contentProvider = null)
-            : this(settings, source, destination, items == null ? null : new Metadata(items), contentProvider)
+            : this(settings, source, destination, items is null ? null : new Metadata(items), contentProvider)
         {
         }
 
@@ -160,7 +160,7 @@ namespace Statiq.Common
                 _settings,
                 _source.IsNull ? source : _source,
                 destination.IsNull ? _destination : destination,
-                items == null ? _metadata : new Metadata(_metadata, items),
+                items is null ? _metadata : new Metadata(_metadata, items),
                 contentProvider ?? _contentProvider);
         }
 
@@ -290,7 +290,7 @@ namespace Statiq.Common
             {
                 HashSet<string> keys = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
-                if (Metadata != null)
+                if (Metadata is object)
                 {
                     foreach (string key in Metadata.Keys.Where(x => !IDocument.Properties.Contains(x)))
                     {
@@ -309,7 +309,7 @@ namespace Statiq.Common
                     }
                 }
 
-                if (Settings != null)
+                if (Settings is object)
                 {
                     foreach (string key in Settings.Keys)
                     {
@@ -349,7 +349,7 @@ namespace Statiq.Common
         {
             HashSet<string> keys = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
-            if (Metadata != null)
+            if (Metadata is object)
             {
                 foreach (KeyValuePair<string, object> item in Metadata.Where(x => !IDocument.Properties.Contains(x.Key)))
                 {
@@ -368,7 +368,7 @@ namespace Statiq.Common
                 }
             }
 
-            if (Settings != null)
+            if (Settings is object)
             {
                 foreach (KeyValuePair<string, object> item in Settings)
                 {
@@ -390,7 +390,7 @@ namespace Statiq.Common
         {
             HashSet<string> keys = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
-            if (Metadata != null)
+            if (Metadata is object)
             {
                 foreach (KeyValuePair<string, object> item in Metadata.GetRawEnumerable().Where(x => !IDocument.Properties.Contains(x.Key)))
                 {
@@ -409,7 +409,7 @@ namespace Statiq.Common
                 }
             }
 
-            if (withSettings && Settings != null)
+            if (withSettings && Settings is object)
             {
                 foreach (KeyValuePair<string, object> item in Settings.GetRawEnumerable())
                 {

@@ -11,7 +11,7 @@ namespace Statiq.Core
     /// </summary>
     public struct SynchronizationContextRemover : INotifyCompletion
     {
-        public bool IsCompleted => SynchronizationContext.Current == null;
+        public bool IsCompleted => SynchronizationContext.Current is null;
 
         public void OnCompleted(Action continuation)
         {

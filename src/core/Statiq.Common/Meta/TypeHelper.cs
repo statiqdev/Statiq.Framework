@@ -72,7 +72,7 @@ namespace Statiq.Common
         /// <param name="defaultValueFactory">A factory to get a default value if the value cannot be converted to type T.</param>
         /// <returns>The value converted to type T or the specified default value if the value cannot be converted to type T.</returns>
         public static T Convert<T>(object value, Func<T> defaultValueFactory) =>
-            TryConvert(value, out T result) ? result : (defaultValueFactory == null ? default : defaultValueFactory());
+            TryConvert(value, out T result) ? result : (defaultValueFactory is null ? default : defaultValueFactory());
 
         /// <summary>
         /// Tries to convert the provided value to the specified type while recursively expanding <see cref="IMetadataValue"/>.
@@ -109,7 +109,7 @@ namespace Statiq.Common
                 if (!_expandingWarned.Contains(expanding) && !_expanding.Add(expanding))
                 {
                     string displayString = (metadata as IDocument)?.ToSafeDisplayString();
-                    if (displayString != null)
+                    if (displayString is object)
                     {
                         displayString = " (" + displayString + ")";
                     }
@@ -189,7 +189,7 @@ namespace Statiq.Common
         public static bool TryConvert<T>(object value, out T result)
         {
             // Check for null
-            if (value == null)
+            if (value is null)
             {
                 result = default;
                 return !typeof(T).IsValueType
@@ -206,7 +206,7 @@ namespace Statiq.Common
             // Special case if value is an enumerable that hasn't overridden .ToString() and T is a string
             // Otherwise we'd end up doing a .ToString() on the enumerable
             IEnumerable enumerableValue = value is string ? null : value as IEnumerable;
-            if (typeof(T) == typeof(string) && enumerableValue != null
+            if (typeof(T) == typeof(string) && enumerableValue is object
                 && value.GetType().GetMethod("ToString").DeclaringType == typeof(object))
             {
                 if (TryGetFirstConvertibleItem(enumerableValue, out result))
@@ -223,7 +223,7 @@ namespace Statiq.Common
             }
 
             // If value is an enumerable but the result type is not, return the first convertible item
-            if (enumerableValue != null && !typeof(IEnumerable).IsAssignableFrom(typeof(T)))
+            if (enumerableValue is object && !typeof(IEnumerable).IsAssignableFrom(typeof(T)))
             {
                 return TryGetFirstConvertibleItem(enumerableValue, out result);
             }
@@ -280,7 +280,7 @@ namespace Statiq.Common
         {
             Type elementType = elementTypeFunc(typeof(T));
             IEnumerable enumerable = value is string ? null : value as IEnumerable;
-            if (enumerable == null || (elementType.IsInstanceOfType(value) && elementType != typeof(object)))
+            if (enumerable is null || (elementType.IsInstanceOfType(value) && elementType != typeof(object)))
             {
                 enumerable = new[] { value };
             }

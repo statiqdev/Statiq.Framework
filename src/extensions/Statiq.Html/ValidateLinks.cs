@@ -93,9 +93,9 @@ namespace Statiq.Html
 #pragma warning restore RCS1163 // Unused parameter.
 
             // Get settings
-            bool validateAbsoluteLinks = _validateAbsoluteLinks == null ? false : await _validateAbsoluteLinks.GetValueAsync(null, context);
-            bool validateRelativeLinks = _validateRelativeLinks == null ? false : await _validateRelativeLinks.GetValueAsync(null, context);
-            bool asError = _asError == null ? false : await _asError.GetValueAsync(null, context);
+            bool validateAbsoluteLinks = _validateAbsoluteLinks is null ? false : await _validateAbsoluteLinks.GetValueAsync(null, context);
+            bool validateRelativeLinks = _validateRelativeLinks is null ? false : await _validateRelativeLinks.GetValueAsync(null, context);
+            bool asError = _asError is null ? false : await _asError.GetValueAsync(null, context);
 
             // Key = link, Value = source, tag HTML
             ConcurrentDictionary<string, ConcurrentBag<(string documentSource, string outerHtml)>> links =
@@ -160,7 +160,7 @@ namespace Statiq.Html
         internal static async Task GatherLinksAsync(IDocument input, IExecutionContext context, HtmlParser parser, ConcurrentDictionary<string, ConcurrentBag<(string source, string outerHtml)>> links)
         {
             IHtmlDocument htmlDocument = await input.ParseHtmlAsync(context, parser);
-            if (htmlDocument != null)
+            if (htmlDocument is object)
             {
                 // Links
                 foreach (IElement element in htmlDocument.Links)
@@ -348,7 +348,7 @@ namespace Statiq.Html
         {
             foreach ((string source, string outerHtml) in links)
             {
-                if (source == null)
+                if (source is null)
                 {
                     context.LogWarning($"Validation failure for link: unknown file for {outerHtml}.");
                     continue;

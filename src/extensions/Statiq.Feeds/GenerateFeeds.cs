@@ -479,13 +479,13 @@ namespace Statiq.Feeds
                 foreach (FeedItem feedItem in feed.Items)
                 {
                     string description = MakeLinksAbsolute(parser, formatter, context, feedItem.Description);
-                    if (description != null)
+                    if (description is object)
                     {
                         feedItem.Description = description;
                     }
 
                     string content = MakeLinksAbsolute(parser, formatter, context, feedItem.Content);
-                    if (content != null)
+                    if (content is object)
                     {
                         feedItem.Content = content;
                     }
@@ -498,7 +498,7 @@ namespace Statiq.Feeds
                 await GenerateFeedAsync(FeedType.Rss, feed, metadata, _rssPath, context),
                 await GenerateFeedAsync(FeedType.Atom, feed, metadata, _atomPath, context),
                 await GenerateFeedAsync(FeedType.Rdf, feed, metadata, _rdfPath, context)
-            }.Where(x => x != null);
+            }.Where(x => x is object);
         }
 
         private static string MakeLinksAbsolute(HtmlParser parser, HtmlMarkupFormatter formatter, IExecutionContext context, string value)

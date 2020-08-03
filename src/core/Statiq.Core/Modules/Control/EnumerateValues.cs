@@ -80,9 +80,9 @@ namespace Statiq.Core
         protected override async Task<IEnumerable<IDocument>> ExecuteConfigAsync(IDocument input, IExecutionContext context, IEnumerable<object> value)
         {
             // Return the input document(s) for empty values
-            if (value == null)
+            if (value is null)
             {
-                if (input == null && !context.Inputs.IsEmpty)
+                if (input is null && !context.Inputs.IsEmpty)
                 {
                     return context.Inputs;
                 }
@@ -90,7 +90,7 @@ namespace Statiq.Core
             }
 
             // If the config value didn't require a document but we had inputs, clone each one with the enumeration results
-            if (input == null && !context.Inputs.IsEmpty)
+            if (input is null && !context.Inputs.IsEmpty)
             {
                 return await context.Inputs.ParallelSelectManyAsync(async i =>
                     (await _withInput.GetValueAsync(i, context) ? new[] { i } : new IDocument[] { })
@@ -102,7 +102,7 @@ namespace Statiq.Core
             }
 
             // Otherwise clone the input document from which these values came with each value
-            return (input != null && await _withInput.GetValueAsync(input, context) ? new[] { input } : new IDocument[] { })
+            return (input is object && await _withInput.GetValueAsync(input, context) ? new[] { input } : new IDocument[] { })
                 .Concat(
                     value.Select(x => context.CloneOrCreateDocument(input, new MetadataItems
                     {

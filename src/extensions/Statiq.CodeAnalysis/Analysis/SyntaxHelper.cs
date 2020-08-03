@@ -83,7 +83,7 @@ namespace Statiq.CodeAnalysis.Analysis
             // Attributes
             foreach (SyntaxNode attributeListNode in symbol.GetAttributes()
                 .Select(x => x.ApplicationSyntaxReference?.GetSyntax()?.Parent)
-                .Where(x => x != null)
+                .Where(x => x is object)
                 .Distinct()
                 .Select(parent => parent.NormalizeWhitespace()))
             {
@@ -93,7 +93,7 @@ namespace Statiq.CodeAnalysis.Analysis
 
             // Accessors, etc.
             INamedTypeSymbol namedTypeSymbol = symbol as INamedTypeSymbol;
-            if (namedTypeSymbol != null)
+            if (namedTypeSymbol is object)
             {
                 builder.Append(_cSharpAccessibilityStrings[namedTypeSymbol.DeclaredAccessibility]);
                 if (namedTypeSymbol.TypeKind == TypeKind.Class)
@@ -123,11 +123,11 @@ namespace Statiq.CodeAnalysis.Analysis
             builder.Append(constraintsLocation == -1 ? symbolDisplayString : symbolDisplayString.Substring(0, constraintsLocation));
 
             // Insert base types and interfaces if a named type
-            if (namedTypeSymbol != null && namedTypeSymbol.TypeKind != TypeKind.Enum)
+            if (namedTypeSymbol is object && namedTypeSymbol.TypeKind != TypeKind.Enum)
             {
                 // Base type (exclude object base)
                 bool baseType = false;
-                if (namedTypeSymbol.BaseType != null && namedTypeSymbol.BaseType.Name != "Object")
+                if (namedTypeSymbol.BaseType is object && namedTypeSymbol.BaseType.Name != "Object")
                 {
                     builder.Append(" : ");
                     builder.Append(namedTypeSymbol.BaseType.ToDisplayString(_baseTypeDisplayFormat), true);

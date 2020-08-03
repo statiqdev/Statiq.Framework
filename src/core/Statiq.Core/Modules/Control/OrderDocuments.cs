@@ -113,7 +113,7 @@ namespace Statiq.Core
         /// <returns>The current module instance.</returns>
         public OrderDocuments WithComparer<TValue>(IComparer<TValue> comparer)
         {
-            _orders.Peek().Comparer = comparer == null ? null : new ConvertingComparer<TValue>(comparer);
+            _orders.Peek().Comparer = comparer is null ? null : new ConvertingComparer<TValue>(comparer);
             return this;
         }
 
@@ -124,7 +124,7 @@ namespace Statiq.Core
         /// <returns>The current module instance.</returns>
         public OrderDocuments WithComparison(Comparison<object> comparison)
         {
-            _orders.Peek().Comparer = comparison == null ? null : new ComparisonComparer<object>(comparison);
+            _orders.Peek().Comparer = comparison is null ? null : new ComparisonComparer<object>(comparison);
             return this;
         }
 
@@ -140,7 +140,7 @@ namespace Statiq.Core
         /// <returns>The current module instance.</returns>
         public OrderDocuments WithComparison<TValue>(Comparison<TValue> comparison)
         {
-            _orders.Peek().Comparer = comparison == null
+            _orders.Peek().Comparer = comparison is null
                 ? null
                 : new ConvertingComparer<TValue>(new ComparisonComparer<TValue>(comparison));
             return this;
@@ -152,7 +152,7 @@ namespace Statiq.Core
             IOrderedEnumerable<IDocument> orderdList = null;
             foreach (Order order in _orders.Reverse())
             {
-                if (orderdList == null)
+                if (orderdList is null)
                 {
                     orderdList = order.Descending
                         ? context.Inputs.OrderByDescending(x => order.GetValue(x, context), order.Comparer)
@@ -203,9 +203,9 @@ namespace Statiq.Core
             private object Convert([AllowNull] object obj)
             {
                 Type type = obj?.GetType();
-                if (type != null)
+                if (type is object)
                 {
-                    if (_comparisonType == null)
+                    if (_comparisonType is null)
                     {
                         _comparisonType = type;
                     }

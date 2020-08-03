@@ -165,7 +165,7 @@ namespace Statiq.Handlebars
             IHandlebars handlebars = HandlebarsDotNet.Handlebars.Create();
 
             // Configure
-            if (_configure != null)
+            if (_configure is object)
             {
                 await _configure(context, input, handlebars);
             }

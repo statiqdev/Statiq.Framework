@@ -125,7 +125,7 @@ namespace Statiq.Core
         private async Task WriteAsync(IDocument input, IExecutionContext context, NormalizedPath outputPath)
         {
             IFile outputFile = context.FileSystem.GetOutputFile(outputPath);
-            if (outputFile != null)
+            if (outputFile is object)
             {
                 using (Stream inputStream = input.GetContentStream())
                 {

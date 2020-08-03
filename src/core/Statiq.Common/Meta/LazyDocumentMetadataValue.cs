@@ -57,10 +57,10 @@ namespace Statiq.Common
                 _context = context;
                 _result = null;
                 HashSet<IDocument> visited = new HashSet<IDocument>();
-                while (context != null)
+                while (context is object)
                 {
                     _result = Find(context.Inputs, visited);
-                    if (_result != null)
+                    if (_result is object)
                     {
                         return _result;
                     }
@@ -89,9 +89,9 @@ namespace Statiq.Common
                         return current;
                     }
                     IEnumerable<IDocument> children = current.GetDocumentList(Keys.Children);
-                    if (children != null)
+                    if (children is object)
                     {
-                        foreach (IDocument child in children.Where(x => x != null))
+                        foreach (IDocument child in children.Where(x => x is object))
                         {
                             stack.Push(child);
                         }

@@ -34,11 +34,11 @@ namespace Statiq.Common
 
         public IDirectory Directory => new DocumentDirectory(_fileProvider, Path.Parent);
 
-        public bool Exists => _document != null;
+        public bool Exists => _document is object;
 
         public Stream OpenRead()
         {
-            if (_document == null)
+            if (_document is null)
             {
                 throw new FileNotFoundException();
             }
@@ -47,7 +47,7 @@ namespace Statiq.Common
 
         public async Task<string> ReadAllTextAsync()
         {
-            if (_document == null)
+            if (_document is null)
             {
                 throw new FileNotFoundException();
             }
@@ -58,7 +58,7 @@ namespace Statiq.Common
         {
             get
             {
-                if (_document == null)
+                if (_document is null)
                 {
                     throw new FileNotFoundException();
                 }

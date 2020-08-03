@@ -15,7 +15,7 @@ namespace Statiq.Common
         public DocumentList(IEnumerable<TDocument> documents)
         {
             // If it's null create an empty list
-            if (documents == null)
+            if (documents is null)
             {
                 _documents = Array.Empty<TDocument>();
             }
@@ -23,14 +23,14 @@ namespace Statiq.Common
             {
                 // If it's already a list make sure there aren't any null entries
                 _documents = documents as IReadOnlyList<TDocument>;
-                if (_documents != null && _documents.Any(x => x == null))
+                if (_documents is object && _documents.Any(x => x is null))
                 {
                     // It was a list but there were null items
                     _documents = null;
                 }
 
                 // Create a new list without the null items
-                _documents = documents.Where(x => x != null).ToArray();
+                _documents = documents.Where(x => x is object).ToArray();
             }
         }
 

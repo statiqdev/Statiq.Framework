@@ -388,7 +388,7 @@ namespace Statiq.Core
                 Outputs = new PipelineOutputs(phaseResults);
 
                 // Create the pipeline phases (this also validates the pipeline graph)
-                if (_phases == null)
+                if (_phases is null)
                 {
                     _phases = GetPipelinePhases(_pipelines, _logger);
                 }
@@ -491,12 +491,12 @@ namespace Statiq.Core
 
             long startTime = phaseResults.Values
                 .SelectMany(x => x)
-                .Where(x => x != null)
+                .Where(x => x is object)
                 .Min(x => x.StartTime)
                 .ToUnixTimeMilliseconds();
             long endTime = phaseResults.Values
                 .SelectMany(x => x)
-                .Where(x => x != null)
+                .Where(x => x is object)
                 .Max(x => x.StartTime.AddMilliseconds(x.ElapsedMilliseconds))
                 .ToUnixTimeMilliseconds();
             long duration = endTime - startTime;
@@ -518,7 +518,7 @@ namespace Statiq.Core
             return builder.ToString();
 
             static string GetPhaseResultTableString(PhaseResult result) =>
-                result == null
+                result is null
                     ? string.Empty
                     : $"{result.Outputs.Length} ({result.ElapsedMilliseconds} ms)";
 
@@ -527,7 +527,7 @@ namespace Statiq.Core
                 Queue<(Phase Phase, long Start, long End)> times =
                     new Queue<(Phase Phase, long Start, long End)>(
                         results
-                            .Where(x => x != null)
+                            .Where(x => x is object)
                             .Select(x => (x.Phase, x.StartTime.ToUnixTimeMilliseconds(), EndTime: x.StartTime.AddMilliseconds(x.ElapsedMilliseconds).ToUnixTimeMilliseconds())));
 
                 // Add a few extra columns to account for squeezing phases together
@@ -585,7 +585,7 @@ namespace Statiq.Core
         internal IReadOnlyPipelineCollection GetExecutingPipelines(string[] pipelines, bool normalPipelines)
         {
             // Validate
-            if (pipelines != null)
+            if (pipelines is object)
             {
                 foreach (string pipeline in pipelines)
                 {
@@ -792,7 +792,7 @@ namespace Statiq.Core
             return Task.Factory.ContinueWhenAll(
                 phase.Dependencies.Select(x => phaseTasks
                     .TryGetValue(x, out Task dependencyTask) ? dependencyTask : null)
-                    .Where(x => x != null)
+                    .Where(x => x is object)
                     .ToArray(),
                 dependencies =>
                 {
@@ -824,9 +824,9 @@ namespace Statiq.Core
             ILogger logger)
         {
             ImmutableArray<IDocument> outputs = ImmutableArray<IDocument>.Empty;
-            if (modules != null)
+            if (modules is object)
             {
-                foreach (IModule module in modules.Where(x => x != null))
+                foreach (IModule module in modules.Where(x => x is object))
                 {
                     string moduleName = module.GetType().Name;
 
@@ -843,7 +843,7 @@ namespace Statiq.Core
                         // Raise the before event and use overridden results if provided
                         BeforeModuleExecution beforeEvent = new BeforeModuleExecution(moduleContext);
                         bool raised = await contextData.Engine.Events.RaiseAsync(beforeEvent);
-                        if (raised && beforeEvent.OverriddenOutputs != null)
+                        if (raised && beforeEvent.OverriddenOutputs is object)
                         {
                             outputs = beforeEvent.OverriddenOutputs.ToImmutableDocumentArray();
                         }
@@ -858,7 +858,7 @@ namespace Statiq.Core
                         // Raise the after event
                         AfterModuleExecution afterEvent = new AfterModuleExecution(moduleContext, outputs, stopwatch.ElapsedMilliseconds);
                         raised = await contextData.Engine.Events.RaiseAsync(afterEvent);
-                        if (raised && afterEvent.OverriddenOutputs != null)
+                        if (raised && afterEvent.OverriddenOutputs is object)
                         {
                             outputs = afterEvent.OverriddenOutputs.ToImmutableDocumentArray();
                         }
@@ -882,7 +882,7 @@ namespace Statiq.Core
                                         logger.LogError(error + innerException.Message);
                                     }
                                     break;
-                                case TargetInvocationException invocationException when invocationException.InnerException != null:
+                                case TargetInvocationException invocationException when invocationException.InnerException is object:
                                     logger.LogError(error + invocationException.InnerException.Message);
                                     break;
                                 default:
@@ -962,7 +962,7 @@ namespace Statiq.Core
                 return;
             }
 
-            if (_phases != null)
+            if (_phases is object)
             {
                 foreach (PipelinePhase phase in _phases)
                 {

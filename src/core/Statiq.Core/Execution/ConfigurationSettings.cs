@@ -24,7 +24,7 @@ namespace Statiq.Core
             _executionState = executionState.ThrowIfNull(nameof(executionState));
 
             _settings = new Dictionary<string, object>(StringComparer.OrdinalIgnoreCase);
-            if (settings != null)
+            if (settings is object)
             {
                 foreach (KeyValuePair<string, object> setting in settings)
                 {

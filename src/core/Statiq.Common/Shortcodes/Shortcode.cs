@@ -23,7 +23,7 @@ namespace Statiq.Common
             IExecutionContext context)
         {
             ShortcodeResult result = await ExecuteAsync(args, content, document, context);
-            return result == null ? null : new[] { result };
+            return result is null ? null : new[] { result };
         }
     }
 }

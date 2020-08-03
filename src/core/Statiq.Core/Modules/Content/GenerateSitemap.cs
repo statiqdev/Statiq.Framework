@@ -100,7 +100,7 @@ namespace Statiq.Core
                     string location = sitemapItem.Location;
 
                     // Apply the location formatter if there is one
-                    if (_locationFormatter != null)
+                    if (_locationFormatter is object)
                     {
                         location = _locationFormatter(location);
                     }

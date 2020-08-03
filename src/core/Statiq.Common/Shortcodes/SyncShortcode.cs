@@ -23,7 +23,7 @@ namespace Statiq.Common
             IExecutionContext context)
         {
             ShortcodeResult result = Execute(args, content, document, context);
-            return Task.FromResult<IEnumerable<ShortcodeResult>>(result == null ? null : new[] { result });
+            return Task.FromResult<IEnumerable<ShortcodeResult>>(result is null ? null : new[] { result });
         }
     }
 }

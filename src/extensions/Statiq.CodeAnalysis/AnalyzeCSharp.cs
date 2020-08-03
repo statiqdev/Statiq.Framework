@@ -212,7 +212,7 @@ namespace Statiq.CodeAnalysis
         /// <param name="predicate">A predicate that returns <c>true</c> if the symbol should be included in the initial result set.</param>
         /// <returns>The current module instance.</returns>
         public AnalyzeCSharp WhereSymbol(Func<ISymbol, bool> predicate) =>
-            WhereSymbol(predicate == null ? (Func<ISymbol, Compilation, bool>)null : (s, _) => predicate(s));
+            WhereSymbol(predicate is null ? (Func<ISymbol, Compilation, bool>)null : (s, _) => predicate(s));
 
         /// <summary>
         /// Controls which symbols are processed as part of the initial result set.
@@ -221,10 +221,10 @@ namespace Statiq.CodeAnalysis
         /// <returns>The current module instance.</returns>
         public AnalyzeCSharp WhereSymbol(Func<ISymbol, Compilation, bool> predicate)
         {
-            if (predicate != null)
+            if (predicate is object)
             {
                 Func<ISymbol, Compilation, bool> currentPredicate = _symbolPredicate;
-                _symbolPredicate = currentPredicate == null ? predicate : (s, c) => currentPredicate(s, c) && predicate(s, c);
+                _symbolPredicate = currentPredicate is null ? predicate : (s, c) => currentPredicate(s, c) && predicate(s, c);
             }
             return this;
         }
@@ -255,7 +255,7 @@ namespace Statiq.CodeAnalysis
                 }
                 if (!(x is INamespaceSymbol namespaceSymbol))
                 {
-                    return x.ContainingNamespace != null
+                    return x.ContainingNamespace is object
                            && (namespaces.Length == 0 || namespaces.Any(y => x.ContainingNamespace.ToString().StartsWith(y)));
                 }
                 if (namespaces.Length == 0)
@@ -282,7 +282,7 @@ namespace Statiq.CodeAnalysis
                 }
                 if (!(x is INamespaceSymbol namespaceSymbol))
                 {
-                    return x.ContainingNamespace != null && predicate(x.ContainingNamespace.ToString());
+                    return x.ContainingNamespace is object && predicate(x.ContainingNamespace.ToString());
                 }
                 return predicate(namespaceSymbol.ToString());
             });
@@ -351,7 +351,7 @@ namespace Statiq.CodeAnalysis
         /// </param>
         /// <returns>The current module instance.</returns>
         public AnalyzeCSharp WithDestination(Func<ISymbol, NormalizedPath> destination) =>
-            WithDestination(destination == null ? (Func<ISymbol, Compilation, NormalizedPath>)null : (s, _) => destination(s));
+            WithDestination(destination is null ? (Func<ISymbol, Compilation, NormalizedPath>)null : (s, _) => destination(s));
 
         /// <summary>
         /// This changes the default behavior for the generated destination paths, which is to place files in a path
@@ -409,12 +409,12 @@ namespace Statiq.CodeAnalysis
             {
                 // Namespaces output to the index page in a folder of their full name
                 // If this namespace does not have a containing namespace, it's the global namespace
-                destinationPath = new NormalizedPath(containingNamespace == null ? "global/index.html" : $"{symbol.GetDisplayName()}/index.html");
+                destinationPath = new NormalizedPath(containingNamespace is null ? "global/index.html" : $"{symbol.GetDisplayName()}/index.html");
             }
             else if (symbol.Kind == SymbolKind.NamedType)
             {
                 // Types output to the index page in a folder of their SymbolId under the folder for their namespace
-                destinationPath = new NormalizedPath(containingNamespace.ContainingNamespace == null
+                destinationPath = new NormalizedPath(containingNamespace.ContainingNamespace is null
                     ? $"global/{symbol.GetId()}/index.html"
                     : $"{containingNamespace.GetDisplayName()}/{symbol.GetId()}/index.html");
             }
@@ -497,7 +497,7 @@ namespace Statiq.CodeAnalysis
             foreach (Config<IEnumerable<string>> config in globConfigs)
             {
                 IEnumerable<string> globs = await config.GetValueAsync(null, context);
-                if (globs != null)
+                if (globs is object)
                 {
                     result.AddRange(globs.Where(x => !string.IsNullOrWhiteSpace(x)));
                 }
@@ -552,7 +552,7 @@ namespace Statiq.CodeAnalysis
             foreach (IFile projectFile in projectFiles)
             {
                 Project project = workspace.CurrentSolution.Projects.FirstOrDefault(x => new NormalizedPath(x.FilePath).Equals(projectFile.Path));
-                if (project != null)
+                if (project is object)
                 {
                     context.LogDebug($"Project {projectFile.Path.FullPath} was already in the workspace");
                 }
@@ -565,7 +565,7 @@ namespace Statiq.CodeAnalysis
                         analyzer.AddBinaryLogger();
                     }
                     AnalyzerResult result = ReadWorkspace.CompileProject(context, analyzer, log);
-                    if (result != null)
+                    if (result is object)
                     {
                         project = result.AddToWorkspace(workspace);
                         if (!project.Documents.Any())
@@ -604,7 +604,7 @@ namespace Statiq.CodeAnalysis
                         }
                         return ReadWorkspace.CompileProject(context, analyzer, log);
                     })
-                    .Where(x => x != null)
+                    .Where(x => x is object)
                     .ToArray();
 
                 AdhocWorkspace workspace = new AdhocWorkspace();

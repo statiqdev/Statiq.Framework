@@ -35,7 +35,7 @@ namespace Statiq.Core
             string indexKey = dictionary.GetString(IndexKey);
 
             IReadOnlyList<object> items = document.GetList<object>(dictionary.GetString(Key));
-            if (items != null)
+            if (items is object)
             {
                 List<ShortcodeResult> results = new List<ShortcodeResult>();
                 int index = 0;

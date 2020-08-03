@@ -363,7 +363,7 @@ namespace Statiq.Common
         /// <summary>
         /// Indicates if this is a null path.
         /// </summary>
-        public bool IsNull => FullPath == null;
+        public bool IsNull => FullPath is null;
 
         /// <summary>
         /// Indicates if this is an empty path.
@@ -470,7 +470,7 @@ namespace Statiq.Common
         /// </summary>
         /// <param name="path">The path as a string.</param>
         /// <returns>The result of the conversion.</returns>
-        public static implicit operator NormalizedPath(string path) => path == null ? Null : new NormalizedPath(path);
+        public static implicit operator NormalizedPath(string path) => path is null ? Null : new NormalizedPath(path);
 
         /// <summary>
         /// Performs an explicit conversion from <see cref="NormalizedPath"/> to <see cref="string"/>.

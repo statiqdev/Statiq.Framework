@@ -42,7 +42,7 @@ namespace Statiq.Common
 
         public int Compare([AllowNull] TDocument x, [AllowNull] TDocument y) =>
             _comparer.Compare(
-                x == null ? _defaultValue : x.Get(_key, _defaultValue),
-                y == null ? _defaultValue : y.Get(_key, _defaultValue));
+                x is null ? _defaultValue : x.Get(_key, _defaultValue),
+                y is null ? _defaultValue : y.Get(_key, _defaultValue));
     }
 }

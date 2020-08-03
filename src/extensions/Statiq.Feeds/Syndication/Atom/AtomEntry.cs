@@ -75,14 +75,14 @@ namespace Statiq.Feeds.Syndication.Atom
 
             // Link
             Uri link = source.Link;
-            if (link != null)
+            if (link is object)
             {
                 Links.Add(new AtomLink(link.ToString()));
             }
 
             // ImageLink
             Uri imageLink = source.ImageLink;
-            if (imageLink != null)
+            if (imageLink is object)
             {
                 Links.Add(new AtomLink
                 {
@@ -104,7 +104,7 @@ namespace Statiq.Feeds.Syndication.Atom
             // ThreadLink
             Uri threadLink = source.ThreadLink;
             AtomLink replies = null;
-            if (threadLink != null)
+            if (threadLink is object)
             {
                 replies = new AtomLink
                 {
@@ -116,14 +116,14 @@ namespace Statiq.Feeds.Syndication.Atom
 
             // ThreadCount
             int? threadCount = source.ThreadCount;
-            if (threadCount.HasValue && replies != null)
+            if (threadCount.HasValue && replies is object)
             {
                 replies.ThreadCount = threadCount.Value;
             }
 
             // ThreadUpdated
             DateTime? threadUpdated = source.ThreadUpdated;
-            if (threadUpdated.HasValue && replies != null)
+            if (threadUpdated.HasValue && replies is object)
             {
                 replies.ThreadUpdated = threadUpdated.Value;
             }
@@ -216,7 +216,7 @@ namespace Statiq.Feeds.Syndication.Atom
         {
             get
             {
-                if (Title == null)
+                if (Title is null)
                 {
                     return null;
                 }
@@ -225,7 +225,7 @@ namespace Statiq.Feeds.Syndication.Atom
         }
 
         string IFeedMetadata.Description =>
-            _summary == null ? _content?.StringValue : _summary.StringValue;
+            _summary is null ? _content?.StringValue : _summary.StringValue;
 
         string IFeedMetadata.Author
         {
@@ -313,7 +313,7 @@ namespace Statiq.Feeds.Syndication.Atom
                         case AtomLinkRelation.Related:
                         case AtomLinkRelation.Enclosure:
                         {
-                            if (alternate == null)
+                            if (alternate is null)
                             {
                                 alternate = ((IUriProvider)link).Uri;
                             }
@@ -326,7 +326,7 @@ namespace Statiq.Feeds.Syndication.Atom
                     }
                 }
 
-                if (alternate == null && _content != null)
+                if (alternate is null && _content is object)
                 {
                     alternate = ((IUriProvider)_content).Uri;
                 }

@@ -76,7 +76,7 @@ namespace Statiq.Core
         /// <inheritdoc />
         protected override async Task<IEnumerable<IDocument>> ExecuteConfigAsync(IDocument input, IExecutionContext context, string value)
         {
-            if (value == null)
+            if (value is null)
             {
                 value = string.Empty;
             }
@@ -85,7 +85,7 @@ namespace Statiq.Core
                 return input.Yield();
             }
             string currentDocumentContent = await input.GetContentStringAsync();
-            if (_contentFinder != null)
+            if (_contentFinder is object)
             {
                 string newDocumentContent = Regex.Replace(
                     currentDocumentContent,

@@ -35,7 +35,7 @@ namespace Statiq.CodeAnalysis
                 string symbolId = new string(id);
 
                 // Prefix with the symbol ID of the containing type if there is one
-                if (symbol.ContainingType != null)
+                if (symbol.ContainingType is object)
                 {
                     symbolId = symbol.ContainingType.GetId() + "." + symbolId;
                 }
@@ -96,7 +96,7 @@ namespace Statiq.CodeAnalysis
             if (symbol.Kind == SymbolKind.Namespace)
             {
                 // Use "global" for the global namespace display name since it's a reserved keyword and it's used to refer to the global namespace in code
-                return symbol.ContainingNamespace == null ? "global" : GetQualifiedName(symbol);
+                return symbol.ContainingNamespace is null ? "global" : GetQualifiedName(symbol);
             }
             return GetFullName(symbol);
         }

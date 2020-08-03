@@ -206,7 +206,7 @@ namespace Statiq.Core.Tests.Modules.Metadata
                     document.ShouldNotBeNull();
                     document.Destination.FullPath.ShouldBe(relativeFilePath);
                     document = documents.GetNext(document);
-                    if (document == null)
+                    if (document is null)
                     {
                         break;
                     }

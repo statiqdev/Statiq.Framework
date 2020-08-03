@@ -67,7 +67,7 @@ namespace Statiq.Feeds.Syndication.Rdf
 
             // Link
             Uri link = source.Link;
-            if (link != null)
+            if (link is object)
             {
                 Channel.Link = link.ToString();
             }
@@ -86,7 +86,7 @@ namespace Statiq.Feeds.Syndication.Rdf
 
             // Items
             IList<IFeedItem> sourceItems = source.Items;
-            if (sourceItems != null)
+            if (sourceItems is object)
             {
                 Items.AddRange(sourceItems.Select(x => new RdfItem(x)));
             }

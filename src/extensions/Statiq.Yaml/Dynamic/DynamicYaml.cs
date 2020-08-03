@@ -134,7 +134,7 @@ namespace Statiq.Yaml.Dynamic
 
         private bool TryGetValueByKeyAndType(string key, Type type, out object result)
         {
-            if (_mappingNode == null)
+            if (_mappingNode is null)
             {
                 return FailToGetValue(out result);
             }
@@ -171,12 +171,12 @@ namespace Statiq.Yaml.Dynamic
 
         private static bool IsNullableType(Type type)
         {
-            return type != null && (!type.IsValueType || Nullable.GetUnderlyingType(type) != null);
+            return type is object && (!type.IsValueType || Nullable.GetUnderlyingType(type) is object);
         }
 
         private bool TryGetValueByIndex(int index, out object result)
         {
-            if (_sequenceNode == null)
+            if (_sequenceNode is null)
             {
                 return FailToGetValue(out result);
             }
@@ -202,7 +202,7 @@ namespace Statiq.Yaml.Dynamic
             }
 
             int? intKey = indices[0] as int?;
-            if (intKey != null)
+            if (intKey is object)
             {
                 if (TryGetValueByIndex(intKey.Value, out result))
                 {
@@ -237,7 +237,7 @@ namespace Statiq.Yaml.Dynamic
                 return true;
             }
 
-            if (node == null || node.Style != YamlDotNet.Core.ScalarStyle.Plain)
+            if (node is null || node.Style != YamlDotNet.Core.ScalarStyle.Plain)
             {
                 return false;
             }
@@ -252,7 +252,7 @@ namespace Statiq.Yaml.Dynamic
             {
                 return SuccessfullyGetValue(this, out result);
             }
-            if (_scalarNode == null)
+            if (_scalarNode is null)
             {
                 return isNullable ? SuccessfullyGetValue(null, out result) : FailToGetValue(out result);
             }
@@ -405,7 +405,7 @@ namespace Statiq.Yaml.Dynamic
 
             Type underlyingType = Nullable.GetUnderlyingType(type);
             bool isNullableType = IsNullableType(type);
-            if (underlyingType != null)
+            if (underlyingType is object)
             {
                 type = underlyingType;
             }
@@ -414,7 +414,7 @@ namespace Statiq.Yaml.Dynamic
 
         private bool TryConvertToDictionary(Type type, out object result)
         {
-            if (_mappingNode == null)
+            if (_mappingNode is null)
             {
                 return FailToGetValue(out result);
             }
@@ -426,7 +426,7 @@ namespace Statiq.Yaml.Dynamic
             Type dictType = typeof(Dictionary<,>).MakeGenericType(keyType, valueType);
             IDictionary dict = Activator.CreateInstance(dictType) as IDictionary;
 
-            if (dict != null)
+            if (dict is object)
             {
                 foreach (KeyValuePair<YamlNode, YamlNode> pair in _mappingNode.Children)
                 {
@@ -453,7 +453,7 @@ namespace Statiq.Yaml.Dynamic
             Type listType = typeof(List<>).MakeGenericType(elementType);
             IList list = Activator.CreateInstance(listType) as IList;
 
-            if (list != null)
+            if (list is object)
             {
                 foreach (DynamicYaml child in Children)
                 {
@@ -471,7 +471,7 @@ namespace Statiq.Yaml.Dynamic
 
         private bool TryConvertToArray(Type type, out object result)
         {
-            if (Children == null)
+            if (Children is null)
             {
                 return FailToGetValue(out result);
             }
@@ -493,12 +493,12 @@ namespace Statiq.Yaml.Dynamic
 
         private IList<DynamicYaml> GetChildren()
         {
-            if (_mappingNode != null)
+            if (_mappingNode is object)
             {
                 return _mappingNode.Children.Values.Select(node => new DynamicYaml(node)).ToList();
             }
 
-            if (_sequenceNode != null)
+            if (_sequenceNode is object)
             {
                 return _sequenceNode.Select(node => new DynamicYaml(node)).ToList();
             }

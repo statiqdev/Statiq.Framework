@@ -80,14 +80,14 @@ namespace Statiq.Feeds.Syndication.Rss
 
             // Link
             Uri link = source.Link;
-            if (link != null)
+            if (link is object)
             {
                 Link = link.ToString();
             }
 
             // ImageLink
             Uri imageLink = source.ImageLink;
-            if (imageLink != null)
+            if (imageLink is object)
             {
                 _enclosure = new RssEnclosure
                 {
@@ -107,7 +107,7 @@ namespace Statiq.Feeds.Syndication.Rss
 
             // ThreadLink
             Uri threadLink = source.ThreadLink;
-            if (threadLink != null)
+            if (threadLink is object)
             {
                 _wfwCommentRss = threadLink;
             }
@@ -315,7 +315,7 @@ namespace Statiq.Feeds.Syndication.Rss
         {
             get
             {
-                if (_dublinCore == null)
+                if (_dublinCore is null)
                 {
                     _dublinCore = new DublinCore();
                     FillExtensions(_dublinCore);
@@ -444,12 +444,12 @@ namespace Statiq.Feeds.Syndication.Rss
 
         public override void AddNamespaces(XmlSerializerNamespaces namespaces)
         {
-            if (ContentEncoded != null)
+            if (ContentEncoded is object)
             {
                 namespaces.Add(ContentPrefix, ContentNamespace);
             }
 
-            if (_wfwComment != null || _wfwCommentRss != null)
+            if (_wfwComment is object || _wfwCommentRss is object)
             {
                 namespaces.Add(WfwPrefix, WfwNamespace);
             }

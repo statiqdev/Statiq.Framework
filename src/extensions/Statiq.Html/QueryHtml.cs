@@ -184,7 +184,7 @@ namespace Statiq.Html
         {
             // Parse the HTML content
             IHtmlDocument htmlDocument = await input.ParseHtmlAsync(context, HtmlParser);
-            if (htmlDocument == null)
+            if (htmlDocument is null)
             {
                 return input.Yield();
             }
@@ -197,7 +197,7 @@ namespace Statiq.Html
                     IElement[] elements = _first
                         ? new[] { htmlDocument.QuerySelector(_querySelector) }
                         : htmlDocument.QuerySelectorAll(_querySelector).ToArray();
-                    if (elements.Length > 0 && elements[0] != null)
+                    if (elements.Length > 0 && elements[0] is object)
                     {
                         List<Common.IDocument> documents = new List<Common.IDocument>();
                         foreach (IElement element in elements)

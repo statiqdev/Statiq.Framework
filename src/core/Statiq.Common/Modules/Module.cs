@@ -123,7 +123,7 @@ namespace Statiq.Common
             foreach (IDocument input in context.Inputs)
             {
                 IEnumerable<IDocument> results = await ExecuteInputFuncAsync(input, context, ExecuteInputAsync);
-                if (results != null)
+                if (results is object)
                 {
                     aggregateResults = aggregateResults?.Concat(results) ?? results;
                 }

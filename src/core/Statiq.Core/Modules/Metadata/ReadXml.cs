@@ -88,7 +88,7 @@ namespace Statiq.Core
         protected override IEnumerable<Dictionary<string, object>> GetItems(IExecutionContext context)
         {
             // Get XML from the input documents?
-            if (_data == null)
+            if (_data is null)
             {
                 return context.Inputs.AsParallel().SelectMany(input =>
                 {
@@ -110,10 +110,10 @@ namespace Statiq.Core
         private IEnumerable<Dictionary<string, object>> GetItems(XmlDocument doc)
         {
             // Get the elements
-            XmlNodeList elements = _itemXPath == null
+            XmlNodeList elements = _itemXPath is null
                 ? doc.ChildNodes
                 : doc.SelectNodes(_itemXPath);
-            if (elements == null)
+            if (elements is null)
             {
                 return null;
             }
@@ -147,7 +147,7 @@ namespace Statiq.Core
 
                         // This key exists...
                         List<object> list = dict[key] as List<object>;
-                        if (list != null)
+                        if (list is object)
                         {
                             // It's already a list, so just add this value to the end of it
                             list.Add(childElement.InnerXml);
@@ -169,7 +169,7 @@ namespace Statiq.Core
                 foreach (KeyValuePair<string, string> metadataXPath in _metadataXPaths)
                 {
                     XmlNode node = element.SelectSingleNode(metadataXPath.Value);
-                    if (node != null)
+                    if (node is object)
                     {
                         dict[metadataXPath.Key] = node.InnerXml;
                     }

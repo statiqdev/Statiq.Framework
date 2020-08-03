@@ -39,7 +39,7 @@ namespace Statiq.Common
         private static bool TryConvertFromNull(TypeInfo destinationType, out object result, ConversionOptions options)
         {
             result = GetDefaultValueOfType(destinationType);
-            if (result == null)
+            if (result is null)
             {
                 return true;
             }
@@ -82,7 +82,7 @@ namespace Statiq.Common
         private static bool TryConvertByDefaultTypeConverters(object value, Type destinationType, CultureInfo culture, ref object result)
         {
             TypeConverter converter1 = TypeDescriptor.GetConverter(destinationType);
-            if (converter1 != null)
+            if (converter1 is object)
             {
                 if (converter1.CanConvertFrom(value.GetType()))
                 {
@@ -97,7 +97,7 @@ namespace Statiq.Common
                 }
             }
             TypeConverter converter2 = TypeDescriptor.GetConverter(value.GetType());
-            if (converter2 != null)
+            if (converter2 is object)
             {
                 if (converter2.CanConvertTo(destinationType))
                 {
@@ -117,7 +117,7 @@ namespace Statiq.Common
         private static bool TryConvertByIConvertibleImplementation(object value, Type destinationType, IFormatProvider formatProvider, ref object result)
         {
             IConvertible convertible = value as IConvertible;
-            if (convertible != null)
+            if (convertible is object)
             {
                 try
                 {
@@ -860,7 +860,7 @@ namespace Statiq.Common
         /// </summary>
         private static bool ValueRepresentsNull(object value)
         {
-            if (value != null)
+            if (value is object)
             {
                 return value == DBNull.Value;
             }
@@ -1013,7 +1013,7 @@ namespace Statiq.Common
                 List<T> objList = new List<T>();
                 foreach (object valueToConvert in GetValuesToConvert())
                 {
-                    if (valueToConvert != null || !_ignoreNullElements)
+                    if (valueToConvert is object || !_ignoreNullElements)
                     {
                         object result1;
                         if (!UniversalTypeConverter.TryConvert(valueToConvert, _destinationType, out result1, Culture, _conversionOptions))
@@ -1146,7 +1146,7 @@ namespace Statiq.Common
 
             private string ValueOrNull(string value)
             {
-                if (_nullValues == null)
+                if (_nullValues is null)
                 {
                     return value;
                 }

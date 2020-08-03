@@ -35,7 +35,7 @@ namespace Statiq.Common
             IDocument document,
             IEnumerable<IDocument> moduleInputs,
             object value) =>
-            value == null
+            value is null
                 ? document.Yield()
                 : GetDocuments(value)
                     ?? await ExecuteModulesAsync(executionContext, moduleInputs, value)
@@ -48,14 +48,14 @@ namespace Statiq.Common
         {
             // Check for a single IModule first since some modules also implement IEnumerable<IModule>
             IEnumerable<IModule> modules = value is IModule module ? new[] { module } : value as IEnumerable<IModule>;
-            return modules == null ? null : (IEnumerable<IDocument>)await context.ExecuteModulesAsync(modules, moduleInputs);
+            return modules is null ? null : (IEnumerable<IDocument>)await context.ExecuteModulesAsync(modules, moduleInputs);
         }
 
         private static async Task<IEnumerable<IDocument>> ChangeContentAsync(IExecutionContext context, IDocument document, object value)
         {
             // Check if this is a known content provider type first
             IContentProvider contentProvider = await GetContentProviderAsync(context, value, false);
-            if (contentProvider != null)
+            if (contentProvider is object)
             {
                 return context.CloneOrCreateDocument(document, contentProvider).Yield();
             }
@@ -83,7 +83,7 @@ namespace Statiq.Common
                 case string str:
                     return await context.GetContentProviderAsync(str);
             }
-            return asString && value != null ? await context.GetContentProviderAsync(value.ToString()) : null;
+            return asString && value is object ? await context.GetContentProviderAsync(value.ToString()) : null;
         }
     }
 }

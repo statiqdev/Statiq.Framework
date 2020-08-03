@@ -21,14 +21,14 @@ namespace Statiq.Core
         }
 
         public IReadOnlyDictionary<string, DocumentList<IDocument>> ByPipeline() =>
-            _phaseResults.ToDictionary(x => x.Key, x => x.Value.Last(x => x != null).Outputs.ToDocumentList());
+            _phaseResults.ToDictionary(x => x.Key, x => x.Value.Last(x => x is object).Outputs.ToDocumentList());
 
         public DocumentList<IDocument> ExceptPipeline(string pipelineName)
         {
             pipelineName.ThrowIfNull(nameof(pipelineName));
             return _phaseResults
                 .Where(x => !x.Key.Equals(pipelineName, StringComparison.OrdinalIgnoreCase))
-                .SelectMany(x => x.Value.Last(x => x != null).Outputs)
+                .SelectMany(x => x.Value.Last(x => x is object).Outputs)
                 .ToDocumentList();
         }
 
@@ -36,12 +36,12 @@ namespace Statiq.Core
         {
             pipelineName.ThrowIfNull(nameof(pipelineName));
             return _phaseResults.TryGetValue(pipelineName, out PhaseResult[] results)
-                ? results.Last(x => x != null).Outputs.ToDocumentList()
+                ? results.Last(x => x is object).Outputs.ToDocumentList()
                 : DocumentList<IDocument>.Empty;
         }
 
         public IEnumerator<IDocument> GetEnumerator() =>
-            _phaseResults.SelectMany(x => x.Value.Last(x => x != null).Outputs).GetEnumerator();
+            _phaseResults.SelectMany(x => x.Value.Last(x => x is object).Outputs).GetEnumerator();
 
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
     }

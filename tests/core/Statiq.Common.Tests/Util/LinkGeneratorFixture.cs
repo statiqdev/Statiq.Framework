@@ -23,7 +23,7 @@ namespace Statiq.Common.Tests.Util
             public void ShouldReturnLinkForFilePath(string path, string expected)
             {
                 // Given
-                NormalizedPath filePath = path == null ? null : new NormalizedPath(path);
+                NormalizedPath filePath = path is null ? null : new NormalizedPath(path);
 
                 // When
                 string link = LinkGenerator.GetLink(filePath, null, null, null, null, null, false);
@@ -46,10 +46,10 @@ namespace Statiq.Common.Tests.Util
             public void ShouldJoinHostAndRootForFilePath(string host, string root, string path, string expected)
             {
                 // Given
-                NormalizedPath filePath = path == null ? null : new NormalizedPath(path);
+                NormalizedPath filePath = path is null ? null : new NormalizedPath(path);
 
                 // When
-                string link = LinkGenerator.GetLink(filePath, host, root == null ? null : new NormalizedPath(root), null, null, null, false);
+                string link = LinkGenerator.GetLink(filePath, host, root is null ? null : new NormalizedPath(root), null, null, null, false);
 
                 // Then
                 Assert.AreEqual(expected, link);
@@ -130,10 +130,10 @@ namespace Statiq.Common.Tests.Util
             public void ShouldJoinHostAndRootForDirectoryPath(string host, string root, string path, string expected)
             {
                 // Given
-                NormalizedPath directoryPath = path == null ? null : new NormalizedPath(path);
+                NormalizedPath directoryPath = path is null ? null : new NormalizedPath(path);
 
                 // When
-                string link = LinkGenerator.GetLink(directoryPath, host, root == null ? null : new NormalizedPath(root), null, null, null, false);
+                string link = LinkGenerator.GetLink(directoryPath, host, root is null ? null : new NormalizedPath(root), null, null, null, false);
 
                 // Then
                 Assert.AreEqual(expected, link);

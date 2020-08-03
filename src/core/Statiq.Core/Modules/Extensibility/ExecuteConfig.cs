@@ -49,14 +49,14 @@ namespace Statiq.Core
         protected override Task<IEnumerable<IDocument>> ExecuteConfigAsync(IDocument input, IExecutionContext context, object value)
         {
             IEnumerable<IDocument> inputs = context.Inputs;
-            if (input != null)
+            if (input is object)
             {
                 inputs = input.Yield();
             }
 
             // This behavior is important because action-based config values always return null, so by returning
             // the input(s) when the value is null it ensures actions will execute without affecting the input documents
-            if (value == null)
+            if (value is null)
             {
                 return Task.FromResult(inputs);
             }

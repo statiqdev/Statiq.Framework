@@ -119,7 +119,7 @@ namespace Statiq.Common
             {
                 match = GetTypesAssignableTo(type).FirstOrDefault();
             }
-            return match == null ? default : Activator.CreateInstance(type);
+            return match is null ? default : Activator.CreateInstance(type);
         }
 
         /// <summary>
@@ -139,12 +139,12 @@ namespace Statiq.Common
             Type type = GetTypesAssignableTo(assignableType).FirstOrDefault(x => x.Name.Equals(
                 typeName,
                 ignoreCase ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal));
-            return type == null ? default : Activator.CreateInstance(type);
+            return type is null ? default : Activator.CreateInstance(type);
         }
 
         public void LogDebugMessagesTo(ILogger logger)
         {
-            if (logger != null)
+            if (logger is object)
             {
                 while (_debugMessages.TryDequeue(out string debugMessage))
                 {
@@ -161,7 +161,7 @@ namespace Statiq.Common
         {
             lock (_populateLock)
             {
-                if (_assemblies == null)
+                if (_assemblies is null)
                 {
                     // Add (and load) all assembly dependencies
                     HashSet<Assembly> assemblies;
@@ -240,7 +240,7 @@ namespace Statiq.Common
                 {
                     _debugMessages.Enqueue($"ReflectionTypeLoadException for assembly {assembly.FullName}: {loaderException.Message}");
                 }
-                return ex.Types.Where(t => t != null).ToArray();
+                return ex.Types.Where(t => t is object).ToArray();
             }
         }
 

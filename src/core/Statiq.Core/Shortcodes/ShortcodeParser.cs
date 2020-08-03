@@ -57,7 +57,7 @@ namespace Statiq.Core
                     char c = (char)r;
 
                     // Look for delimiters and tags
-                    if (currentTag == null && shortcode == null)
+                    if (currentTag is null && shortcode is null)
                     {
                         // Searching for open tag start delimiter
                         if (_startDelimiter.Locate(c, false))
@@ -65,7 +65,7 @@ namespace Statiq.Core
                             currentTag = new CurrentTag(i - (_startDelimiter.Text.Length - 1));
                         }
                     }
-                    else if (currentTag != null && shortcode == null)
+                    else if (currentTag is object && shortcode is null)
                     {
                         // Searching for open tag end delimiter
                         currentTag.Content.Append(c);
@@ -94,7 +94,7 @@ namespace Statiq.Core
                             currentTag = null;
                         }
                     }
-                    else if (currentTag == null && shortcode != null)
+                    else if (currentTag is null && shortcode is object)
                     {
                         content.Append(c);
 
@@ -154,7 +154,7 @@ namespace Statiq.Core
                     i++;
                 }
 
-                if (shortcode != null)
+                if (shortcode is object)
                 {
                     throw new ShortcodeParserException($"The shortcode {shortcode.Name} was not terminated");
                 }

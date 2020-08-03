@@ -96,14 +96,14 @@
             bool includeHost = false)
         {
             // Return the actual URI if it's absolute
-            if (path != null && LinkGenerator.TryGetAbsoluteHttpUri(path, out string absoluteUri))
+            if (path is object && LinkGenerator.TryGetAbsoluteHttpUri(path, out string absoluteUri))
             {
                 return absoluteUri;
             }
 
             // Otherwise process the path
             return executionContext.GetLink(
-                path == null ? NormalizedPath.Null : new NormalizedPath(path),
+                path is null ? NormalizedPath.Null : new NormalizedPath(path),
                 includeHost ? executionContext.Settings.GetString(Keys.Host) : null,
                 executionContext.Settings.GetPath(Keys.LinkRoot),
                 executionContext.Settings.GetBool(Keys.LinksUseHttps),
@@ -138,14 +138,14 @@
             bool hideExtensions)
         {
             // Return the actual URI if it's absolute
-            if (path != null && LinkGenerator.TryGetAbsoluteHttpUri(path, out string absoluteUri))
+            if (path is object && LinkGenerator.TryGetAbsoluteHttpUri(path, out string absoluteUri))
             {
                 return absoluteUri;
             }
 
             // Otherwise process the path
             return executionContext.GetLink(
-                path == null ? NormalizedPath.Null : new NormalizedPath(path),
+                path is null ? NormalizedPath.Null : new NormalizedPath(path),
                 host,
                 root,
                 useHttps,

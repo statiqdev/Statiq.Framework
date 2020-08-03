@@ -36,7 +36,7 @@ namespace Statiq.Testing
         }
 
         public TestDocument(IReadOnlyConfigurationSettings settings, in NormalizedPath source, in NormalizedPath destination, IEnumerable<KeyValuePair<string, object>> items, IContentProvider contentProvider = null)
-            : this(settings, source, destination, items == null ? null : new TestMetadata(items), contentProvider)
+            : this(settings, source, destination, items is null ? null : new TestMetadata(items), contentProvider)
         {
         }
 
@@ -132,12 +132,12 @@ namespace Statiq.Testing
 
         private static IContentProvider GetContentProvider(string content, string mediaType)
         {
-            return content == null ? (IContentProvider)new NullContent() : new MemoryContent(Encoding.UTF8.GetBytes(content), mediaType);
+            return content is null ? (IContentProvider)new NullContent() : new MemoryContent(Encoding.UTF8.GetBytes(content), mediaType);
         }
 
         private static IContentProvider GetContentProvider(Stream stream, string mediaType)
         {
-            if (stream == null)
+            if (stream is null)
             {
                 return new NullContent();
             }

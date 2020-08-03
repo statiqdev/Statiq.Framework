@@ -156,7 +156,7 @@ namespace Statiq.App
 
                 // Add all namespaces from the entry application
                 Assembly entryAssembly = Assembly.GetEntryAssembly();
-                if (entryAssembly != null)
+                if (entryAssembly is object)
                 {
                     engine.Namespaces.AddRange(
                         bootstrapper.ClassCatalog

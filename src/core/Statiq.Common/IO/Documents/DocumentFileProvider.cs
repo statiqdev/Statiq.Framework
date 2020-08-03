@@ -33,7 +33,7 @@ namespace Statiq.Common
         /// </param>
         public DocumentFileProvider(IEnumerable<IDocument> documents, bool source, bool flatten = true, string childrenKey = Keys.Children)
         {
-            if (documents != null)
+            if (documents is object)
             {
                 foreach (IDocument document in flatten ? documents.Flatten(childrenKey) : documents)
                 {

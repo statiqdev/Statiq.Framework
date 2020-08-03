@@ -59,7 +59,7 @@ namespace Statiq.Feeds.Syndication.Rss
             set
             {
                 _days = new BitVector32(EmptyDays);
-                if (value == null)
+                if (value is null)
                 {
                     return;
                 }

@@ -87,9 +87,9 @@ namespace Statiq.Common
         protected override async Task<IEnumerable<IDocument>> ExecuteContextAsync(IExecutionContext context)
         {
             IEnumerable<TItem> items = GetItems(context);
-            return items == null
+            return items is null
                 ? Array.Empty<IDocument>()
-                : await items.Where(x => x != null).Take(_limit).ParallelSelectAsync(ReadDataAsync);
+                : await items.Where(x => x is object).Take(_limit).ParallelSelectAsync(ReadDataAsync);
 
             async Task<IDocument> ReadDataAsync(TItem item)
             {

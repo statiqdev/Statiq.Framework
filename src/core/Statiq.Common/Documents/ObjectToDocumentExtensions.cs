@@ -55,7 +55,7 @@ namespace Statiq.Common
             Func<T, NormalizedPath> destinationFunc,
             Func<T, IEnumerable<KeyValuePair<string, object>>> itemsFunc,
             Func<T, IContentProvider> contentProviderFunc = null) =>
-            objs?.Select(x => x == null
+            objs?.Select(x => x is null
                 ? null
                 : GetObjectDocument(
                     x,
@@ -69,7 +69,7 @@ namespace Statiq.Common
             Func<T, NormalizedPath> sourceFunc,
             Func<T, NormalizedPath> destinationFunc,
             Func<T, IContentProvider> contentProviderFunc = null) =>
-            objs?.Select(x => x == null
+            objs?.Select(x => x is null
                 ? null
                 : GetObjectDocument(
                     x,
@@ -82,7 +82,7 @@ namespace Statiq.Common
             this IEnumerable<T> objs,
             Func<T, NormalizedPath> destinationFunc,
             Func<T, IContentProvider> contentProviderFunc = null) =>
-            objs?.Select(x => x == null
+            objs?.Select(x => x is null
                 ? null
                 : GetObjectDocument(
                     x,
@@ -95,7 +95,7 @@ namespace Statiq.Common
             this IEnumerable<T> objs,
             Func<T, IEnumerable<KeyValuePair<string, object>>> itemsFunc,
             Func<T, IContentProvider> contentProviderFunc = null) =>
-            objs?.Select(x => x == null
+            objs?.Select(x => x is null
                 ? null
                 : GetObjectDocument(
                     x,
@@ -107,7 +107,7 @@ namespace Statiq.Common
         public static IEnumerable<IDocument> ToDocuments<T>(
             this IEnumerable<T> objs,
             Func<T, IContentProvider> contentProviderFunc = null) =>
-            objs?.Select(x => x == null
+            objs?.Select(x => x is null
                 ? null
                 : GetObjectDocument(
                     x,
@@ -122,7 +122,7 @@ namespace Statiq.Common
             Func<T, NormalizedPath> destinationFunc,
             Func<T, IEnumerable<KeyValuePair<string, object>>> itemsFunc,
             Func<T, IContentProvider> contentProviderFunc = null) =>
-            objs?.Select(x => x == null
+            objs?.Select(x => x is null
                 ? null
                 : GetObjectDocument(
                     x,
@@ -145,7 +145,7 @@ namespace Statiq.Common
             if (obj is IDocument document)
             {
                 // It's already a document so return or clone it instead of wrapping
-                if (source.IsNull && destination.IsNull && items == null && contentProvider == null)
+                if (source.IsNull && destination.IsNull && items is null && contentProvider is null)
                 {
                     // Not setting anything new so return the same document
                     return document;

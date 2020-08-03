@@ -154,7 +154,7 @@ namespace Statiq.Razor
 
             TagBuilder tagBuilder = new TagBuilder("a");
             tagBuilder.InnerHtml.SetContent(linkText);
-            if (htmlAttributes != null)
+            if (htmlAttributes is object)
             {
                 tagBuilder.MergeAttributes(htmlAttributes);
             }

@@ -30,12 +30,12 @@ namespace Statiq.Common
             key.ThrowIfNull(nameof(key));
 
             IDocument parent = parents.FirstOrDefault(x => x.GetChildren(key).Contains(document));
-            if (parent == null && recursive)
+            if (parent is null && recursive)
             {
                 foreach (IDocument candidate in parents)
                 {
                     parent = document.GetParent(candidate.GetChildren(key), true, key);
-                    if (parent != null)
+                    if (parent is object)
                     {
                         break;
                     }
@@ -184,19 +184,19 @@ namespace Statiq.Common
                 // Only process if we haven't already processed this document
                 if (results.Add(current))
                 {
-                    IEnumerable<IDocument> children = childrenKey == null
+                    IEnumerable<IDocument> children = childrenKey is null
                         ? current.SelectMany(x => current.GetDocumentList(x.Key))
                         : current.GetDocumentList(childrenKey);
-                    if (children != null)
+                    if (children is object)
                     {
-                        foreach (IDocument child in children.Where(x => x != null))
+                        foreach (IDocument child in children.Where(x => x is object))
                         {
                             stack.Push(child);
                         }
                     }
                 }
             }
-            return treePlaceholderKey == null
+            return treePlaceholderKey is null
                 ? results.ToDocumentList()
                 : results.RemoveTreePlaceholders(treePlaceholderKey).ToDocumentList();
         }

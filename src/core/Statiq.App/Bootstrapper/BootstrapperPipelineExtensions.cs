@@ -25,7 +25,7 @@ namespace Statiq.App
                 PipelineBuilder builder = new PipelineBuilder(x.Pipelines, x.Settings);
                 buildAction(builder);
                 IPipeline pipeline = builder.Build();
-                if (pipeline != null)
+                if (pipeline is object)
                 {
                     x.Pipelines.Add(name, pipeline);
                 }
@@ -495,7 +495,7 @@ namespace Statiq.App
                     .WithProcessModules(processModules)
                     .WithPostProcessModules(transformModules)
                     .WithOutputModules(outputModules);
-                if (readFilesPattern != null)
+                if (readFilesPattern is object)
                 {
                     builder.WithInputReadFiles(readFilesPattern);
                 }
@@ -516,7 +516,7 @@ namespace Statiq.App
                 ConfigureBuilder(builder, dependencies, pipelineType)
                     .WithProcessModules(processModules)
                     .WithPostProcessModules(transformModules);
-                if (readFilesPattern != null)
+                if (readFilesPattern is object)
                 {
                     builder.WithInputReadFiles(readFilesPattern);
                 }
@@ -542,7 +542,7 @@ namespace Statiq.App
                     .WithProcessModules(processModules)
                     .WithPostProcessModules(transformModules)
                     .WithOutputWriteFiles(destinationExtension);
-                if (readFilesPattern != null)
+                if (readFilesPattern is object)
                 {
                     builder.WithInputReadFiles(readFilesPattern);
                 }
@@ -564,7 +564,7 @@ namespace Statiq.App
                     .WithProcessModules(processModules)
                     .WithPostProcessModules(transformModules)
                     .WithOutputWriteFiles(destinationPath);
-                if (readFilesPattern != null)
+                if (readFilesPattern is object)
                 {
                     builder.WithInputReadFiles(readFilesPattern);
                 }
@@ -572,7 +572,7 @@ namespace Statiq.App
 
         private static PipelineBuilder ConfigureBuilder(PipelineBuilder builder, IEnumerable<string> dependencies, PipelineType pipelineType)
         {
-            if (dependencies != null)
+            if (dependencies is object)
             {
                 builder.WithDependencies(dependencies);
             }

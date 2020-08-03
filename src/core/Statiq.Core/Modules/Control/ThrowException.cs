@@ -24,17 +24,17 @@ namespace Statiq.Core
         /// </summary>
         /// <param name="message">The message of the exception to throw or <c>null</c> not to throw an exception.</param>
         public ThrowException(Config<string> message)
-            : base(message.Transform(msg => msg == null ? null : (Exception)new ExecutionException(msg)), false)
+            : base(message.Transform(msg => msg is null ? null : (Exception)new ExecutionException(msg)), false)
         {
         }
 
         protected override IEnumerable<IDocument> ExecuteConfig(IDocument input, IExecutionContext context, Exception value)
         {
-            if (value != null)
+            if (value is object)
             {
                 throw value;
             }
-            return input == null ? context.Inputs : input.Yield();
+            return input is null ? context.Inputs : input.Yield();
         }
     }
 }

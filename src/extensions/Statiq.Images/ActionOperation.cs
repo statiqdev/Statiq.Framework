@@ -19,9 +19,9 @@ namespace Statiq.Images.Operations
         }
 
         public IImageProcessingContext<Rgba32> Apply(IImageProcessingContext<Rgba32> image) =>
-            _operation == null ? image : _operation(image);
+            _operation is null ? image : _operation(image);
 
         public NormalizedPath GetPath(NormalizedPath path) =>
-            _pathModifier == null ? path : _pathModifier(path);
+            _pathModifier is null ? path : _pathModifier(path);
     }
 }

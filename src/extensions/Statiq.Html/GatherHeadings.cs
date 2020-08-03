@@ -136,7 +136,7 @@ namespace Statiq.Html
 
             // Parse the HTML content
             IHtmlDocument htmlDocument = await input.ParseHtmlAsync(context, HtmlParser);
-            if (htmlDocument == null)
+            if (htmlDocument is null)
             {
                 return input.Yield();
             }
@@ -178,7 +178,7 @@ namespace Statiq.Html
                     if (currentLevel > 1)
                     {
                         parent = heading.Previous;
-                        while (parent != null && parent.Level >= currentLevel)
+                        while (parent is object && parent.Level >= currentLevel)
                         {
                             parent = parent.Previous;
                         }
@@ -186,19 +186,19 @@ namespace Statiq.Html
 
                     // Create the document
                     MetadataItems metadata = new MetadataItems();
-                    if (_levelKey != null)
+                    if (_levelKey is object)
                     {
                         metadata.Add(_levelKey, heading.Level);
                     }
-                    if (_idKey != null && heading.Element.HasAttribute("id"))
+                    if (_idKey is object && heading.Element.HasAttribute("id"))
                     {
                         metadata.Add(_idKey, heading.Element.GetAttribute("id"));
                     }
-                    if (_headingKey != null)
+                    if (_headingKey is object)
                     {
                         metadata.Add(_headingKey, heading.Element.InnerHtml);
                     }
-                    if (_childrenKey != null)
+                    if (_childrenKey is object)
                     {
                         metadata.Add(_childrenKey, heading.Children.AsReadOnly());
                     }

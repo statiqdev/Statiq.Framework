@@ -94,7 +94,7 @@ namespace Statiq.Common
                     Keys = keySelector(x),
                     Element = elementSelector(x)
                 })
-                .Where(x => x.Keys != null)
+                .Where(x => x.Keys is object)
                 .SelectMany(x => x.Keys.Select(key => new
                 {
                     Key = key,
@@ -155,7 +155,7 @@ namespace Statiq.Common
                     Keys = keySelector(x),
                     Elements = elementSelector(x)
                 })
-                .Where(x => x.Keys != null && x.Elements != null)
+                .Where(x => x.Keys is object && x.Elements is object)
                 .SelectMany(x => x.Keys
                     .SelectMany(key => x.Elements.Select(elem => new
                     {

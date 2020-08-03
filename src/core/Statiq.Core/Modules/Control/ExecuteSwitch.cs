@@ -105,7 +105,7 @@ namespace Statiq.Core
                 documents = unhandled;
             }
 
-            if (_defaultModules != null)
+            if (_defaultModules is object)
             {
                 results.AddRange(await context.ExecuteModulesAsync(_defaultModules, documents));
             }

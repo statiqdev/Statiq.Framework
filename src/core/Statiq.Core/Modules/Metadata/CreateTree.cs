@@ -176,7 +176,7 @@ namespace Statiq.Core
             Dictionary<string[], TreeNode> nodesDictionary = await context.Inputs
                 .ToAsyncEnumerable()
                 .SelectAwait(async input => new TreeNode(await _treePath.GetValueAsync(input, context), input))
-                .Where(x => x.TreePath != null)
+                .Where(x => x.TreePath is object)
                 .Distinct(treeNodeEqualityComparer)
                 .ToDictionaryAsync(x => x.TreePath, new TreePathEqualityComparer());
 
@@ -188,7 +188,7 @@ namespace Statiq.Core
 
                 // Skip root nodes
                 if (node.TreePath.Length == 0
-                    || (node.InputDocument != null && await _isRoot.GetValueAsync(node.InputDocument, context)))
+                    || (node.InputDocument is object && await _isRoot.GetValueAsync(node.InputDocument, context)))
                 {
                     continue;
                 }
@@ -214,14 +214,14 @@ namespace Statiq.Core
             }
 
             // Recursively generate child output documents
-            foreach (TreeNode node in nodesDictionary.Values.Where(x => x.Parent == null))
+            foreach (TreeNode node in nodesDictionary.Values.Where(x => x.Parent is null))
             {
                 await node.GenerateOutputDocumentsAsync(this, context);
             }
 
             // Return parent nodes or all nodes depending on nesting
             return nodesDictionary.Values
-                .Where(x => (!_nesting || x.Parent == null) && x.OutputDocument != null)
+                .Where(x => (!_nesting || x.Parent is null) && x.OutputDocument is object)
                 .Select(x => x.OutputDocument);
         }
 
@@ -257,7 +257,7 @@ namespace Statiq.Core
                 }
 
                 // We're done if we've already created the output document
-                if (OutputDocument != null)
+                if (OutputDocument is object)
                 {
                     return;
                 }
@@ -267,15 +267,15 @@ namespace Statiq.Core
 
                 // Create this output document
                 MetadataDictionary metadata = new MetadataDictionary();
-                if (tree._childrenKey != null)
+                if (tree._childrenKey is object)
                 {
                     metadata.Add(tree._childrenKey, Children.Select(x => x.OutputDocument).ToImmutableArray());
                 }
-                if (tree._treePathKey != null)
+                if (tree._treePathKey is object)
                 {
                     metadata.Add(tree._treePathKey, TreePath);
                 }
-                if (InputDocument == null)
+                if (InputDocument is null)
                 {
                     // There's no input document for this node so we need to make a placeholder
                     metadata.Add(Keys.TreePlaceholder, true);

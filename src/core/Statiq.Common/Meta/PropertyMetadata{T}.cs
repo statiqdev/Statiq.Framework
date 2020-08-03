@@ -32,7 +32,7 @@ namespace Statiq.Common
             {
                 // If there's an attribute, do this in a second pass
                 PropertyMetadataAttribute attribute = property.GetCustomAttribute<PropertyMetadataAttribute>();
-                if (attribute != null)
+                if (attribute is object)
                 {
                     // Only add the property for later processing if the new name isn't null
                     if (!string.IsNullOrEmpty(attribute.Name))

@@ -19,7 +19,7 @@ namespace Statiq.Common
         {
             collection.ThrowIfNull(nameof(collection));
 
-            if (items != null)
+            if (items is object)
             {
                 foreach (T item in items)
                 {

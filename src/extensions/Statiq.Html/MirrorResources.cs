@@ -74,7 +74,7 @@ namespace Statiq.Html
             async Task<Common.IDocument> GetDocumentAsync(Common.IDocument input)
             {
                 IHtmlDocument htmlDocument = await input.ParseHtmlAsync(context, parser);
-                if (htmlDocument != null)
+                if (htmlDocument is object)
                 {
                     bool modifiedDocument = false;
 
@@ -84,7 +84,7 @@ namespace Statiq.Html
                             .Where(x => x.HasAttribute("href") && !x.HasAttribute("data-no-mirror")))
                     {
                         string replacement = await DownloadAndReplaceAsync(element.GetAttribute("href"), mirrorCache, context);
-                        if (replacement != null)
+                        if (replacement is object)
                         {
                             element.Attributes["href"].Value = replacement;
                             modifiedDocument = true;
@@ -96,7 +96,7 @@ namespace Statiq.Html
                             .Where(x => !string.IsNullOrEmpty(x.Source) && !x.HasAttribute("data-no-mirror")))
                     {
                         string replacement = await DownloadAndReplaceAsync(element.Source, mirrorCache, context);
-                        if (replacement != null)
+                        if (replacement is object)
                         {
                             element.Source = replacement;
                             modifiedDocument = true;

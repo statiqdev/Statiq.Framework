@@ -68,7 +68,7 @@ namespace Statiq.Feeds.Syndication.Rdf
 
             // Link
             Uri link = source.Link;
-            if (link != null)
+            if (link is object)
             {
                 Link = link.ToString();
             }
@@ -87,7 +87,7 @@ namespace Statiq.Feeds.Syndication.Rdf
 
             // ThreadLink
             Uri threadLink = source.ThreadLink;
-            if (threadLink != null)
+            if (threadLink is object)
             {
                 _wfwCommentRss = threadLink;
             }
@@ -195,7 +195,7 @@ namespace Statiq.Feeds.Syndication.Rdf
         {
             get
             {
-                if (_dublinCore == null)
+                if (_dublinCore is null)
                 {
                     _dublinCore = new DublinCore();
                     FillExtensions(_dublinCore);
@@ -209,7 +209,7 @@ namespace Statiq.Feeds.Syndication.Rdf
             get
             {
                 Uri id = ((IUriProvider)this).Uri;
-                if (id == null)
+                if (id is null)
                 {
                     Uri.TryCreate(About, UriKind.RelativeOrAbsolute, out id);
                 }
@@ -311,12 +311,12 @@ namespace Statiq.Feeds.Syndication.Rdf
 
         public override void AddNamespaces(XmlSerializerNamespaces namespaces)
         {
-            if (_contentEncoded != null)
+            if (_contentEncoded is object)
             {
                 namespaces.Add(ContentPrefix, ContentNamespace);
             }
 
-            if (_wfwComment != null || _wfwCommentRss != null)
+            if (_wfwComment is object || _wfwCommentRss is object)
             {
                 namespaces.Add(WfwPrefix, WfwNamespace);
             }

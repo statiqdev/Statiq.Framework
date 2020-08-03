@@ -62,7 +62,7 @@ namespace Statiq.Common
         /// <param name="name">The name of the shortcode.</param>
         /// <param name="shortcode">The content of the shortcode.</param>
         public static void Add(this IShortcodeCollection shortcodes, string name, Config<ShortcodeResult> shortcode) =>
-            shortcodes.Add(name, async (_, __, doc, ctx) => shortcode == null ? null : await shortcode.GetValueAsync(doc, ctx));
+            shortcodes.Add(name, async (_, __, doc, ctx) => shortcode is null ? null : await shortcode.GetValueAsync(doc, ctx));
 
         /// <summary>
         /// Adds a shortcode that determines the result content

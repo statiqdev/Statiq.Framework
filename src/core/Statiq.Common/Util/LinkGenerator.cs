@@ -43,15 +43,15 @@ namespace Statiq.Common
             if (!path.IsNull)
             {
                 // Remove index pages
-                if (hidePages != null && path.FullPath != NormalizedPath.Slash
-                    && hidePages.Where(x => x != null).Select(x => x.EndsWith(NormalizedPath.Dot) ? x : x + NormalizedPath.Dot).Any(x => path.FileName.FullPath.StartsWith(x)))
+                if (hidePages is object && path.FullPath != NormalizedPath.Slash
+                    && hidePages.Where(x => x is object).Select(x => x.EndsWith(NormalizedPath.Dot) ? x : x + NormalizedPath.Dot).Any(x => path.FileName.FullPath.StartsWith(x)))
                 {
                     path = path.Parent;
                 }
 
                 // Hide extensions
-                if (hideExtensions != null
-                    && (hideExtensions.Length == 0 || hideExtensions.Where(x => x != null).Select(x => x.StartsWith(NormalizedPath.Dot) ? x : NormalizedPath.Dot + x).Contains(path.Extension)))
+                if (hideExtensions is object
+                    && (hideExtensions.Length == 0 || hideExtensions.Where(x => x is object).Select(x => x.StartsWith(NormalizedPath.Dot) ? x : NormalizedPath.Dot + x).Contains(path.Extension)))
                 {
                     path = path.ChangeExtension(null);
                 }

@@ -74,7 +74,7 @@ namespace Statiq.Feeds.Syndication.Atom
 
             // Link
             Uri link = source.Link;
-            if (link != null)
+            if (link is object)
             {
                 Links.Add(new AtomLink
                 {
@@ -85,7 +85,7 @@ namespace Statiq.Feeds.Syndication.Atom
 
             // ImageLink
             Uri imageLink = source.ImageLink;
-            if (imageLink != null)
+            if (imageLink is object)
             {
                 Logo = imageLink.ToString();
             }
@@ -101,7 +101,7 @@ namespace Statiq.Feeds.Syndication.Atom
 
             // Items
             IList<IFeedItem> sourceItems = source.Items;
-            if (sourceItems != null)
+            if (sourceItems is object)
             {
                 Entries.AddRange(sourceItems.Select(x => new AtomEntry(x)));
             }
@@ -132,7 +132,7 @@ namespace Statiq.Feeds.Syndication.Atom
         {
             get
             {
-                if (SubTitle == null)
+                if (SubTitle is null)
                 {
                     return null;
                 }
@@ -215,7 +215,7 @@ namespace Statiq.Feeds.Syndication.Atom
                     {
                         alternate = ((IUriProvider)link).Uri;
                     }
-                    else if (alternate == null && !"self".Equals(link.Rel))
+                    else if (alternate is null && !"self".Equals(link.Rel))
                     {
                         alternate = ((IUriProvider)link).Uri;
                     }
@@ -228,7 +228,7 @@ namespace Statiq.Feeds.Syndication.Atom
         {
             get
             {
-                if (LogoUri == null)
+                if (LogoUri is null)
                 {
                     return IconUri;
                 }

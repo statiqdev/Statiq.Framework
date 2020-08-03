@@ -27,7 +27,7 @@ namespace Statiq.Razor
         public override bool Equals(object obj)
         {
             NamespaceCollection other = obj as NamespaceCollection;
-            return other != null && _namespaces.SequenceEqual(other._namespaces);
+            return other is object && _namespaces.SequenceEqual(other._namespaces);
         }
 
         IEnumerator IEnumerable.GetEnumerator()

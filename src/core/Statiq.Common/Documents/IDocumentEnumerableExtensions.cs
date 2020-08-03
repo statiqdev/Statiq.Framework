@@ -23,15 +23,15 @@ namespace Statiq.Common
         public static ImmutableArray<TDocument> ToImmutableDocumentArray<TDocument>(this IEnumerable<TDocument> documents)
             where TDocument : IDocument
         {
-            if (documents == null)
+            if (documents is null)
             {
                 return ImmutableArray<TDocument>.Empty;
             }
 
             // Convert to unsorted immutable array while eliminating nulls
-            return documents is ImmutableArray<TDocument> documentsArray && !documentsArray.Any(x => x == null)
+            return documents is ImmutableArray<TDocument> documentsArray && !documentsArray.Any(x => x is null)
                 ? documentsArray
-                : documents.Where(x => x != null).ToImmutableArray();
+                : documents.Where(x => x is object).ToImmutableArray();
         }
 
         /// <summary>

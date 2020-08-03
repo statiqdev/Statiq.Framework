@@ -70,7 +70,7 @@ namespace Statiq.CodeAnalysis.Analysis
                 {
                     // Process the elements
                     XElement root = GetRootElement(documentationCommentXml);
-                    if (root != null)
+                    if (root is object)
                     {
                         lock (_processLock)
                         {
@@ -162,7 +162,7 @@ namespace Statiq.CodeAnalysis.Analysis
         {
             lock (_processLock)
             {
-                if (_processActions != null)
+                if (_processActions is object)
                 {
                     foreach (Action processAction in _processActions)
                     {
@@ -204,13 +204,13 @@ namespace Statiq.CodeAnalysis.Analysis
 
                     // Locate the appropriate symbol
                     string inheritDocElementCref = inheritDocElement.Attribute("cref")?.Value;
-                    if (inheritDocElementCref == null && inheritedSymbolCommentIds.Add(currentSymbol.GetDocumentationCommentId()))
+                    if (inheritDocElementCref is null && inheritedSymbolCommentIds.Add(currentSymbol.GetDocumentationCommentId()))
                     {
                         INamedTypeSymbol currentTypeSymbol = currentSymbol as INamedTypeSymbol;
                         IMethodSymbol currentMethodSymbol = currentSymbol as IMethodSymbol;
                         IPropertySymbol currentPropertySymbol = currentSymbol as IPropertySymbol;
                         IEventSymbol currentEventSymbol = currentSymbol as IEventSymbol;
-                        if (currentTypeSymbol != null)
+                        if (currentTypeSymbol is object)
                         {
                             // Types and interfaces, inherit from all base types
                             List<INamedTypeSymbol> baseTypeSymbols = AnalyzeSymbolVisitor.GetBaseTypes(currentTypeSymbol)
@@ -230,7 +230,7 @@ namespace Statiq.CodeAnalysis.Analysis
                                 inheritedSymbols.AddRange(interfaceSymbols);
                             }
                         }
-                        else if (currentMethodSymbol != null && currentMethodSymbol.Name == currentMethodSymbol.ContainingType.Name)
+                        else if (currentMethodSymbol is object && currentMethodSymbol.Name == currentMethodSymbol.ContainingType.Name)
                         {
                             // Constructor, check base type constructors for the same signature
                             string signature = currentMethodSymbol.GetFullName();
@@ -249,26 +249,26 @@ namespace Statiq.CodeAnalysis.Analysis
                                 }
                             }
                         }
-                        else if (currentMethodSymbol != null)
+                        else if (currentMethodSymbol is object)
                         {
                             PopulateInheritedMemberSymbols(currentMethodSymbol, x => x.OverriddenMethod, inheritedSymbolCommentIds, inheritedSymbols);
                         }
-                        else if (currentPropertySymbol != null)
+                        else if (currentPropertySymbol is object)
                         {
                             PopulateInheritedMemberSymbols(currentPropertySymbol, x => x.OverriddenProperty, inheritedSymbolCommentIds, inheritedSymbols);
                         }
-                        else if (currentEventSymbol != null)
+                        else if (currentEventSymbol is object)
                         {
                             PopulateInheritedMemberSymbols(currentEventSymbol, x => x.OverriddenEvent, inheritedSymbolCommentIds, inheritedSymbols);
                         }
                     }
-                    else if (inheritDocElementCref != null)
+                    else if (inheritDocElementCref is object)
                     {
                         // Explicit cref
                         if (inheritedSymbolCommentIds.Add(inheritDocElementCref))
                         {
                             ISymbol inheritedSymbol = DocumentationCommentId.GetFirstSymbolForDeclarationId(inheritDocElementCref, _compilation);
-                            if (inheritedSymbol != null)
+                            if (inheritedSymbol is object)
                             {
                                 inheritedSymbols.Add(inheritedSymbol);
                             }
@@ -283,7 +283,7 @@ namespace Statiq.CodeAnalysis.Analysis
                     if (!string.IsNullOrEmpty(inheritedXml))
                     {
                         XElement inheritedRoot = GetRootElement(inheritedXml);
-                        if (inheritedRoot != null)
+                        if (inheritedRoot is object)
                         {
                             // Inherit elements other than <inheritdoc>
                             List<XElement> inheritedInheritDocElements = new List<XElement>();
@@ -300,19 +300,19 @@ namespace Statiq.CodeAnalysis.Analysis
                                     bool inherit = true;
                                     foreach (XElement rootElement in root.Elements(inheritedElement.Name))
                                     {
-                                        if (inheritedElementCref == null && inheritedElementName == null)
+                                        if (inheritedElementCref is null && inheritedElementName is null)
                                         {
                                             // Don't inherit if the name is the same and there's no distinguishing attributes
                                             inherit = false;
                                             break;
                                         }
-                                        if (inheritedElementCref != null && inheritedElementCref == rootElement.Attribute("cref")?.Value)
+                                        if (inheritedElementCref is object && inheritedElementCref == rootElement.Attribute("cref")?.Value)
                                         {
                                             // Don't inherit if the cref attribute is the same
                                             inherit = false;
                                             break;
                                         }
-                                        if (inheritedElementName != null && inheritedElementName == rootElement.Attribute("name")?.Value)
+                                        if (inheritedElementName is object && inheritedElementName == rootElement.Attribute("name")?.Value)
                                         {
                                             // Don't inherit if the name attribute is the same
                                             inherit = false;
@@ -349,7 +349,7 @@ namespace Statiq.CodeAnalysis.Analysis
             {
                 // Override, get overridden method
                 overriddenMethodSymbol = getOverriddenSymbol(symbol);
-                if (overriddenMethodSymbol != null
+                if (overriddenMethodSymbol is object
                     && inheritedSymbolCommentIds.Add(overriddenMethodSymbol.GetDocumentationCommentId()))
                 {
                     inheritedSymbols.Add(overriddenMethodSymbol);
@@ -365,7 +365,7 @@ namespace Statiq.CodeAnalysis.Analysis
                     return symbol.Equals(implementationSymbol)
                            || (overriddenMethodSymbol?.Equals(implementationSymbol) == true);
                 });
-            if (interfaceSymbol != null
+            if (interfaceSymbol is object
                 && inheritedSymbolCommentIds.Add(interfaceSymbol.GetDocumentationCommentId()))
             {
                 inheritedSymbols.Add(interfaceSymbol);
@@ -432,7 +432,7 @@ namespace Statiq.CodeAnalysis.Analysis
                     reader.MoveToContent();
                     return new ReferenceComment(name, link, reader.ReadInnerXml());
                 })
-                .Where(x => x != null)
+                .Where(x => x is object)
                 .ToImmutableArray();
             }
             catch (Exception ex)
@@ -483,7 +483,7 @@ namespace Statiq.CodeAnalysis.Analysis
         {
             // Check for href
             XAttribute hrefAttribute = element.Attribute("href");
-            if (hrefAttribute != null)
+            if (hrefAttribute is object)
             {
                 link = $"<a href=\"{hrefAttribute.Value}\">{element.Value}</a>";
                 return element.Value;
@@ -491,10 +491,10 @@ namespace Statiq.CodeAnalysis.Analysis
 
             // Check for cref
             string cref = element.Attribute("cref")?.Value;
-            if (cref != null)
+            if (cref is object)
             {
                 ISymbol crefSymbol = DocumentationCommentId.GetFirstSymbolForDeclarationId(cref, _compilation);
-                if (crefSymbol != null && _symbolToDocument.TryGetValue(crefSymbol, out IDocument crefDoc))
+                if (crefSymbol is object && _symbolToDocument.TryGetValue(crefSymbol, out IDocument crefDoc))
                 {
                     string name = crefDoc.GetString(CodeAnalysisKeys.DisplayName);
                     link = $"<code><a href=\"{_context.GetLink(crefDoc)}\">{WebUtility.HtmlEncode(name)}</a></code>";
@@ -521,7 +521,7 @@ namespace Statiq.CodeAnalysis.Analysis
         private void AddCssClasses(XElement element, string cssClasses)
         {
             XAttribute classAttribute = element.Attribute("class");
-            if (classAttribute != null)
+            if (classAttribute is object)
             {
                 classAttribute.Value = classAttribute.Value + " " + cssClasses;
             }
@@ -550,7 +550,7 @@ namespace Statiq.CodeAnalysis.Analysis
         {
             // Take them one at a time in case we erase one during the processing
             XCData cdata = parentElement.DescendantNodes().OfType<XCData>().FirstOrDefault();
-            while (cdata != null)
+            while (cdata is object)
             {
                 cdata.ReplaceWith(new XText(cdata.Value.Trim()));
                 cdata = parentElement.DescendantNodes().OfType<XCData>().FirstOrDefault();

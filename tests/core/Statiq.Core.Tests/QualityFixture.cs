@@ -14,7 +14,7 @@ namespace Statiq.Core.Tests
         public void FlatNamespace()
         {
             // Given, When
-            string[] namespaces = typeof(ExecutionContext).Assembly.GetTypes().Select(x => x.Namespace).Distinct().Where(x => x != null).ToArray();
+            string[] namespaces = typeof(ExecutionContext).Assembly.GetTypes().Select(x => x.Namespace).Distinct().Where(x => x is object).ToArray();
 
             // Then
             namespaces.ShouldBe(new[] { "Statiq.Core" });

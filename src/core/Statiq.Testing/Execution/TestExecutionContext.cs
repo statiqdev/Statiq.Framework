@@ -41,7 +41,7 @@ namespace Statiq.Testing
             _documentFactory = new DocumentFactory(this, Settings);
             _documentFactory.SetDefaultDocumentType<TestDocument>();
 
-            if (inputs != null)
+            if (inputs is object)
             {
                 SetInputs(inputs);
             }
@@ -217,7 +217,7 @@ namespace Statiq.Testing
         public ImmutableArray<IDocument> Inputs { get; set; } = ImmutableArray<IDocument>.Empty;
 
         public void SetInputs(IEnumerable<IDocument> inputs) =>
-            Inputs = inputs?.Where(x => x != null).ToImmutableArray() ?? ImmutableArray<IDocument>.Empty;
+            Inputs = inputs?.Where(x => x is object).ToImmutableArray() ?? ImmutableArray<IDocument>.Empty;
 
         public void SetInputs(params IDocument[] inputs) =>
             SetInputs((IEnumerable<IDocument>)inputs);
@@ -248,7 +248,7 @@ namespace Statiq.Testing
         /// <inheritdoc/>
         public async Task<ImmutableArray<IDocument>> ExecuteModulesAsync(IEnumerable<IModule> modules, IEnumerable<IDocument> inputs)
         {
-            if (modules == null)
+            if (modules is null)
             {
                 return ImmutableArray<IDocument>.Empty;
             }
@@ -261,7 +261,7 @@ namespace Statiq.Testing
                 moduleContext.Parent = this;
                 inputs = await module.ExecuteAsync(moduleContext);
             }
-            return inputs?.Where(x => x != null).ToImmutableArray() ?? ImmutableArray<IDocument>.Empty;
+            return inputs?.Where(x => x is object).ToImmutableArray() ?? ImmutableArray<IDocument>.Empty;
         }
 
         /// <inheritdoc/>

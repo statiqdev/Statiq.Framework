@@ -22,7 +22,7 @@ namespace Statiq.Html
         protected override async Task<IEnumerable<Common.IDocument>> ExecuteInputAsync(Common.IDocument input, IExecutionContext context)
         {
             IHtmlDocument htmlDocument = await input.ParseHtmlAsync(context, _parser);
-            if (htmlDocument == null)
+            if (htmlDocument is null)
             {
                 return input.Yield();
             }
@@ -46,7 +46,7 @@ namespace Statiq.Html
             ITreeWalker walker = htmlDocument.CreateTreeWalker(htmlDocument.DocumentElement, FilterSettings.Element);
             IElement element = (IElement)walker.ToFirst();
 
-            while (element != null)
+            while (element is object)
             {
                 if (IsBlockElement(element))
                 {

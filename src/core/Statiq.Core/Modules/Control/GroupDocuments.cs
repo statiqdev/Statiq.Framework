@@ -73,7 +73,7 @@ namespace Statiq.Core
         /// <returns>The current module instance.</returns>
         public GroupDocuments WithComparer<TValue>(IEqualityComparer<TValue> comparer)
         {
-            _comparer = comparer == null ? null : new ConvertingEqualityComparer<TValue>(comparer);
+            _comparer = comparer is null ? null : new ConvertingEqualityComparer<TValue>(comparer);
             return this;
         }
 

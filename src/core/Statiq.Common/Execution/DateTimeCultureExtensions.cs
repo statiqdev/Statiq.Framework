@@ -80,7 +80,7 @@ namespace Statiq.Common
                     cultureInfo = CultureInfo.GetCultureInfo(cultureName);
                 }
             }
-            if (cultureInfo == null)
+            if (cultureInfo is null)
             {
                 CultureInfo target = CultureInfo.GetCultureInfo(targetCulture);
                 cultureInfo = CultureInfo.CurrentCulture.TwoLetterISOLanguageName.Equals(target.TwoLetterISOLanguageName, StringComparison.OrdinalIgnoreCase)

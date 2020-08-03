@@ -43,7 +43,7 @@ namespace Statiq.Core
             get
             {
                 System.IO.DirectoryInfo parent = _directory.Parent;
-                return parent == null ? null : _fileSystem.GetDirectory(new NormalizedPath(parent.FullName));
+                return parent is null ? null : _fileSystem.GetDirectory(new NormalizedPath(parent.FullName));
             }
         }
 

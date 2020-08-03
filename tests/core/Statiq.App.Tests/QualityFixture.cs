@@ -14,7 +14,7 @@ namespace Statiq.App.Tests
         public void FlatNamespace()
         {
             // Given, When
-            string[] namespaces = typeof(PipelineBuilder).Assembly.GetTypes().Select(x => x.Namespace).Distinct().Where(x => x != null).ToArray();
+            string[] namespaces = typeof(PipelineBuilder).Assembly.GetTypes().Select(x => x.Namespace).Distinct().Where(x => x is object).ToArray();
 
             // Then
             namespaces.ShouldBe(new[] { "Statiq.App" });

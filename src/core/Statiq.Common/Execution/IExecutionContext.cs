@@ -36,7 +36,7 @@ namespace Statiq.Common
         /// <summary>
         /// Returns <c>true</c> if there is a current <see cref="IExecutionContext"/>, <c>false</c> otherwise.
         /// </summary>
-        public static bool HasCurrent => _current.Value != null;
+        public static bool HasCurrent => _current.Value is object;
 
         /// <summary>
         /// Gets the current execution state.

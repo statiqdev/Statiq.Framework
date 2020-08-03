@@ -25,7 +25,7 @@ namespace Statiq.Common
         /// </param>
         internal MultiConfigModuleBase(IEnumerable<KeyValuePair<string, IConfig>> configs, bool forceDocumentExecution)
         {
-            if (configs != null)
+            if (configs is object)
             {
                 foreach (KeyValuePair<string, IConfig> config in configs)
                 {
@@ -62,7 +62,7 @@ namespace Statiq.Common
         protected MultiConfigModuleBase SetConfig(string key, IConfig config)
         {
             key.ThrowIfNull(nameof(key));
-            if (config == null)
+            if (config is null)
             {
                 _configs.Remove(key);
             }

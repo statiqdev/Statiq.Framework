@@ -25,7 +25,7 @@ namespace Statiq.CodeAnalysis.Analysis
             if (!_cached)
             {
                 _values = _symbols
-                    .Where(x => x != null)
+                    .Where(x => x is object)
                     .Select(x =>
                     {
                         IDocument document;
@@ -37,7 +37,7 @@ namespace Statiq.CodeAnalysis.Analysis
                         }
                         return document;
                     })
-                    .Where(x => x != null)
+                    .Where(x => x is object)
                     .ToImmutableArray();
                 _cached = true;
             }

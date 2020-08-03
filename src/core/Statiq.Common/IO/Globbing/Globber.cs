@@ -129,7 +129,7 @@ namespace Statiq.Common
                 }
 
                 // actually no sets, all { were escaped.
-                if (prefix == null)
+                if (prefix is null)
                 {
                     // no sets
                     return new[] { pattern };

@@ -26,14 +26,14 @@ namespace Statiq.Sass
         {
             scss = TryImportAsync(requestedFile, parentPath).GetAwaiter().GetResult();
             map = null;
-            return scss != null;
+            return scss is object;
         }
 
         public async Task<string> TryImportAsync(string requestedFile, string parentPath)
         {
             // Modify the requested file if we have an import path function
             string modifiedParentPath = null;
-            if (_importPathFunc != null)
+            if (_importPathFunc is object)
             {
                 requestedFile = _importPathFunc(requestedFile);
                 modifiedParentPath = _importPathFunc(parentPath);
@@ -49,7 +49,7 @@ namespace Statiq.Sass
             NormalizedPath requestedFilePath = new NormalizedPath(requestedFile);
             if (parentFilePath.IsRelative
                 && !_parentAbsolutePaths.TryGetValue(parentFilePath, out parentFilePath)
-                && (modifiedParentPath == null || !_parentAbsolutePaths.TryGetValue(modifiedParentPath, out parentFilePath)))
+                && (modifiedParentPath is null || !_parentAbsolutePaths.TryGetValue(modifiedParentPath, out parentFilePath)))
             {
                 // Relative parent path and no available absolute path, try with the relative path
                 parentFilePath = new NormalizedPath(parentPath);
@@ -65,14 +65,14 @@ namespace Statiq.Sass
             // Find the requested file by first combining with the parent
             NormalizedPath filePath = parentRelativePath.ChangeFileName(requestedFilePath);
             string scss = await GetFileVariationsAsync(filePath, requestedFilePath);
-            if (scss != null)
+            if (scss is object)
             {
                 return scss;
             }
 
             // That didn't work so try it again as a relative path from the input folder
             scss = await GetFileVariationsAsync(requestedFilePath, requestedFilePath);
-            if (!requestedFilePath.IsAbsolute && scss != null)
+            if (!requestedFilePath.IsAbsolute && scss is object)
             {
                 return scss;
             }
@@ -84,7 +84,7 @@ namespace Statiq.Sass
         {
             // ...as specified
             string scss = await GetFileAsync(filePath, requestedFilePath);
-            if (scss != null)
+            if (scss is object)
             {
                 return scss;
             }
@@ -94,7 +94,7 @@ namespace Statiq.Sass
             {
                 NormalizedPath extensionPath = filePath.AppendExtension(".scss");
                 scss = await GetFileAsync(extensionPath, requestedFilePath);
-                if (scss != null)
+                if (scss is object)
                 {
                     return scss;
                 }
@@ -104,7 +104,7 @@ namespace Statiq.Sass
                 {
                     extensionPath = extensionPath.ChangeFileName("_" + extensionPath.FileName.FullPath);
                     scss = await GetFileAsync(extensionPath, requestedFilePath);
-                    if (scss != null)
+                    if (scss is object)
                     {
                         return scss;
                     }
@@ -116,7 +116,7 @@ namespace Statiq.Sass
             {
                 filePath = filePath.ChangeFileName("_" + filePath.FileName.FullPath);
                 scss = await GetFileAsync(filePath, requestedFilePath);
-                if (scss != null)
+                if (scss is object)
                 {
                     return scss;
                 }

@@ -24,7 +24,7 @@ namespace Statiq.Images.Operations
         public IImageProcessingContext<Rgba32> Apply(IImageProcessingContext<Rgba32> image)
         {
             Size? size = GetSize();
-            if (size == null)
+            if (size is null)
             {
                 return image;
             }

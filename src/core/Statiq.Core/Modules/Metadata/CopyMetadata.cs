@@ -56,7 +56,7 @@ namespace Statiq.Core
         {
             if (input.TryGetValue(_fromKey, out object existingValue))
             {
-                if (_format != null)
+                if (_format is object)
                 {
                     if (existingValue is DateTime)
                     {
@@ -68,7 +68,7 @@ namespace Statiq.Core
                     }
                 }
 
-                if (_formatFunc != null)
+                if (_formatFunc is object)
                 {
                     existingValue = _formatFunc.Invoke(existingValue.ToString());
                 }

@@ -53,7 +53,7 @@ namespace Statiq.Core
                         if (method.IsDefined(typeof(ExtensionAttribute), false))
                         {
                             Type parameterType = method.GetParameters().FirstOrDefault()?.ParameterType;
-                            if (parameterType != null && parameterType.IsAssignableFrom(type))
+                            if (parameterType is object && parameterType.IsAssignableFrom(type))
                             {
                                 yield return method;
                             }
@@ -220,7 +220,7 @@ namespace Statiq.Core
         public static string TypeName(Type type)
         {
             Type nullableType = Nullable.GetUnderlyingType(type);
-            if (nullableType != null)
+            if (nullableType is object)
             {
                 return TypeName(nullableType) + "?";
             }
@@ -331,6 +331,6 @@ namespace Statiq.Core
         }
 
         private static bool IsParamArray(ParameterInfo info) =>
-            info.GetCustomAttribute(typeof(ParamArrayAttribute), true) != null;
+            info.GetCustomAttribute(typeof(ParamArrayAttribute), true) is object;
     }
 }

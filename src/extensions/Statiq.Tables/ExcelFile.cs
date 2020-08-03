@@ -27,7 +27,7 @@ namespace Statiq.Tables
         {
             ExcelAddressBase dimension = sheet.Dimension;
 
-            if (dimension == null)
+            if (dimension is null)
             {
                 return null;
             }

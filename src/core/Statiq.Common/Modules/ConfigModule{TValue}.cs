@@ -63,7 +63,7 @@ namespace Statiq.Common
 
                     // Get the results for this input document
                     IEnumerable<IDocument> results = await ExecuteInputFuncAsync(input, context, (i, c) => ExecuteConfigAsync(i, c, value));
-                    if (results != null)
+                    if (results is object)
                     {
                         aggregateResults = aggregateResults?.Concat(results) ?? results;
                     }
