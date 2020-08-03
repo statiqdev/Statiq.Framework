@@ -16,7 +16,7 @@ namespace Statiq.Common
 
         public ConvertingComparer(IComparer<T> comparer)
         {
-            _comparer = comparer ?? throw new ArgumentNullException(nameof(comparer));
+            _comparer = comparer.ThrowIfNull(nameof(comparer));
         }
 
         public int Compare(object x, object y) =>

@@ -109,7 +109,7 @@ namespace Statiq.Common
         /// <returns>An enumerable over key-value pairs.</returns>
         public static IEnumerable<KeyValuePair<string, object>> GetEnumerable(this IMetadata metadata)
         {
-            _ = metadata ?? throw new ArgumentNullException(nameof(metadata));
+            metadata.ThrowIfNull(nameof(metadata));
             return new EnumerableEnumerator<KeyValuePair<string, object>>(() => metadata.GetEnumerator());
         }
 
@@ -121,13 +121,13 @@ namespace Statiq.Common
         /// <returns>An enumerable over raw key-value pairs.</returns>
         public static IEnumerable<KeyValuePair<string, object>> GetRawEnumerable(this IMetadata metadata)
         {
-            _ = metadata ?? throw new ArgumentNullException(nameof(metadata));
+            metadata.ThrowIfNull(nameof(metadata));
             return new EnumerableEnumerator<KeyValuePair<string, object>>(() => metadata.GetRawEnumerator());
         }
 
         public static IMetadata WithoutSettings(this IMetadata metadata)
         {
-            _ = metadata ?? throw new ArgumentNullException(nameof(metadata));
+            metadata.ThrowIfNull(nameof(metadata));
             return new Metadata(metadata.GetRawEnumerable().Where(x => !(x.Value is SettingsValue)));
         }
     }

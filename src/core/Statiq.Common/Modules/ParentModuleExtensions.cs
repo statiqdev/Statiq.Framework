@@ -12,7 +12,7 @@ namespace Statiq.Common
         public static TModule WithChildren<TModule>(this TModule module, IEnumerable<IModule> modules)
             where TModule : ParentModule
         {
-            _ = module ?? throw new ArgumentNullException(nameof(module));
+            module.ThrowIfNull(nameof(module));
             module.Children.AddRange(modules);
             return module;
         }

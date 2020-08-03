@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Net;
 using System.Net.Http;
+using Statiq.Common;
 
 namespace Statiq.Core
 {
@@ -59,7 +60,7 @@ namespace Statiq.Core
         /// </summary>
         /// <param name="uri">The URI to download from.</param>
         public WebRequest(Uri uri) =>
-            Uri = uri ?? throw new ArgumentNullException(nameof(uri));
+            Uri = uri.ThrowIfNull(nameof(uri));
 
         /// <summary>
         /// Sets the request headers.
@@ -68,7 +69,7 @@ namespace Statiq.Core
         /// <returns>The current instance.</returns>
         public WebRequest WithHeaders(WebRequestHeaders headers)
         {
-            Headers = headers ?? throw new ArgumentNullException(nameof(headers));
+            Headers = headers.ThrowIfNull(nameof(headers));
             return this;
         }
 
@@ -80,11 +81,7 @@ namespace Statiq.Core
         /// <returns>The current instance.</returns>
         public WebRequest WithQueryString(string name, string value)
         {
-            if (name == null)
-            {
-                throw new ArgumentNullException(nameof(name));
-            }
-
+            name.ThrowIfNull(nameof(name));
             QueryString[name] = value;
             return this;
         }
@@ -96,7 +93,7 @@ namespace Statiq.Core
         /// <returns>The current instance.</returns>
         public WebRequest WithMethod(HttpMethod method)
         {
-            Method = method ?? throw new ArgumentNullException(nameof(method));
+            Method = method.ThrowIfNull(nameof(method));
             return this;
         }
 
@@ -118,11 +115,7 @@ namespace Statiq.Core
         /// <returns>The current instance.</returns>
         public WebRequest WithContent(string content)
         {
-            if (content == null)
-            {
-                throw new ArgumentNullException(nameof(content));
-            }
-
+            content.ThrowIfNull(nameof(content));
             Content = new StringContent(content);
             return this;
         }
@@ -134,7 +127,7 @@ namespace Statiq.Core
         /// <returns>The current instance.</returns>
         public WebRequest WithCredentials(NetworkCredential credentials)
         {
-            Credentials = credentials ?? throw new ArgumentNullException(nameof(credentials));
+            Credentials = credentials.ThrowIfNull(nameof(credentials));
             return this;
         }
 

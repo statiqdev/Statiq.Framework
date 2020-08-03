@@ -13,7 +13,7 @@ namespace Statiq.Core
 
         public LocalFile(IReadOnlyFileSystem fileSystem, NormalizedPath path)
         {
-            _fileSystem = fileSystem ?? throw new ArgumentNullException(nameof(fileSystem));
+            _fileSystem = fileSystem.ThrowIfNull(nameof(fileSystem));
 
             path.ThrowIfNull(nameof(path));
 
@@ -44,7 +44,7 @@ namespace Statiq.Core
 
         public async Task CopyToAsync(IFile destination, bool overwrite = true, bool createDirectory = true)
         {
-            _ = destination ?? throw new ArgumentNullException(nameof(destination));
+            destination.ThrowIfNull(nameof(destination));
 
             // Create the directory
             if (createDirectory)
@@ -73,7 +73,7 @@ namespace Statiq.Core
 
         public async Task MoveToAsync(IFile destination)
         {
-            _ = destination ?? throw new ArgumentNullException(nameof(destination));
+            destination.ThrowIfNull(nameof(destination));
 
             // Use the file system APIs if destination is also in the file system
             if (destination is LocalFile)

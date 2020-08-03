@@ -14,7 +14,7 @@ namespace Statiq.Common
         /// <returns>A config object.</returns>
         public static Config<TValue> FromDocument<TValue>(Func<IDocument, TValue> func)
         {
-            _ = func ?? throw new ArgumentNullException(nameof(func));
+            func.ThrowIfNull(nameof(func));
             return new Config<TValue>((doc, _) => Task.FromResult(func(doc)));
         }
 
@@ -26,7 +26,7 @@ namespace Statiq.Common
         /// <returns>A config object.</returns>
         public static Config<TValue> FromDocument<TValue>(Func<IDocument, Task<TValue>> func)
         {
-            _ = func ?? throw new ArgumentNullException(nameof(func));
+            func.ThrowIfNull(nameof(func));
             return new Config<TValue>((doc, _) => func(doc));
         }
 
@@ -37,13 +37,15 @@ namespace Statiq.Common
         /// <typeparam name="TValue">The type of config value.</typeparam>
         /// <param name="action">A delegate action to evaluate.</param>
         /// <returns>A config object.</returns>
-        public static Config<TValue> FromDocument<TValue>(Action<IDocument> action) =>
-            new Config<TValue>((doc, __) =>
+        public static Config<TValue> FromDocument<TValue>(Action<IDocument> action)
+        {
+            action.ThrowIfNull(nameof(action));
+            return new Config<TValue>((doc, __) =>
             {
-                _ = action ?? throw new ArgumentNullException(nameof(action));
                 action(doc);
                 return Task.FromResult(default(TValue));
             });
+        }
 
         /// <summary>
         /// Creates a config value from an action that uses a document and returns
@@ -52,13 +54,15 @@ namespace Statiq.Common
         /// <typeparam name="TValue">The type of config value.</typeparam>
         /// <param name="action">A delegate action to evaluate.</param>
         /// <returns>A config object.</returns>
-        public static Config<TValue> FromDocument<TValue>(Func<IDocument, Task> action) =>
-            new Config<TValue>(async (doc, __) =>
+        public static Config<TValue> FromDocument<TValue>(Func<IDocument, Task> action)
+        {
+            action.ThrowIfNull(nameof(action));
+            return new Config<TValue>(async (doc, __) =>
             {
-                _ = action ?? throw new ArgumentNullException(nameof(action));
                 await action(doc);
                 return default;
             });
+        }
 
         /// <summary>
         /// Creates a config value from an action that uses a document and returns null.
@@ -84,7 +88,7 @@ namespace Statiq.Common
         /// <returns>A config object.</returns>
         public static Config<TValue> FromDocument<TValue>(Func<IDocument, IExecutionContext, TValue> func)
         {
-            _ = func ?? throw new ArgumentNullException(nameof(func));
+            func.ThrowIfNull(nameof(func));
             return new Config<TValue>((doc, ctx) => Task.FromResult(func(doc, ctx)));
         }
 
@@ -96,7 +100,7 @@ namespace Statiq.Common
         /// <returns>A config object.</returns>
         public static Config<TValue> FromDocument<TValue>(Func<IDocument, IExecutionContext, Task<TValue>> func)
         {
-            _ = func ?? throw new ArgumentNullException(nameof(func));
+            func.ThrowIfNull(nameof(func));
             return new Config<TValue>(func);
         }
 
@@ -107,13 +111,15 @@ namespace Statiq.Common
         /// <typeparam name="TValue">The type of config value.</typeparam>
         /// <param name="action">A delegate action to evaluate.</param>
         /// <returns>A config object.</returns>
-        public static Config<TValue> FromDocument<TValue>(Action<IDocument, IExecutionContext> action) =>
-            new Config<TValue>((doc, ctx) =>
+        public static Config<TValue> FromDocument<TValue>(Action<IDocument, IExecutionContext> action)
+        {
+            action.ThrowIfNull(nameof(action));
+            return new Config<TValue>((doc, ctx) =>
             {
-                _ = action ?? throw new ArgumentNullException(nameof(action));
                 action(doc, ctx);
                 return Task.FromResult(default(TValue));
             });
+        }
 
         /// <summary>
         /// Creates a config value from an action that uses a document and the execution context and returns
@@ -122,13 +128,15 @@ namespace Statiq.Common
         /// <typeparam name="TValue">The type of config value.</typeparam>
         /// <param name="action">A delegate action to evaluate.</param>
         /// <returns>A config object.</returns>
-        public static Config<TValue> FromDocument<TValue>(Func<IDocument, IExecutionContext, Task> action) =>
-            new Config<TValue>(async (doc, ctx) =>
+        public static Config<TValue> FromDocument<TValue>(Func<IDocument, IExecutionContext, Task> action)
+        {
+            action.ThrowIfNull(nameof(action));
+            return new Config<TValue>(async (doc, ctx) =>
             {
-                _ = action ?? throw new ArgumentNullException(nameof(action));
                 await action(doc, ctx);
                 return default;
             });
+        }
 
         /// <summary>
         /// Creates a config value from an action that uses a document and the execution context and returns null.

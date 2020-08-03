@@ -17,7 +17,7 @@ namespace Statiq.Core
 
         public PipelineOutputs(IReadOnlyDictionary<string, PhaseResult[]> phaseResults)
         {
-            _phaseResults = phaseResults ?? throw new ArgumentNullException(nameof(phaseResults));
+            _phaseResults = phaseResults.ThrowIfNull(nameof(phaseResults));
         }
 
         public IReadOnlyDictionary<string, DocumentList<IDocument>> ByPipeline() =>
@@ -25,7 +25,7 @@ namespace Statiq.Core
 
         public DocumentList<IDocument> ExceptPipeline(string pipelineName)
         {
-            _ = pipelineName ?? throw new ArgumentNullException(nameof(pipelineName));
+            pipelineName.ThrowIfNull(nameof(pipelineName));
             return _phaseResults
                 .Where(x => !x.Key.Equals(pipelineName, StringComparison.OrdinalIgnoreCase))
                 .SelectMany(x => x.Value.Last(x => x != null).Outputs)
@@ -34,7 +34,7 @@ namespace Statiq.Core
 
         public DocumentList<IDocument> FromPipeline(string pipelineName)
         {
-            _ = pipelineName ?? throw new ArgumentNullException(nameof(pipelineName));
+            pipelineName.ThrowIfNull(nameof(pipelineName));
             return _phaseResults.TryGetValue(pipelineName, out PhaseResult[] results)
                 ? results.Last(x => x != null).Outputs.ToDocumentList()
                 : DocumentList<IDocument>.Empty;

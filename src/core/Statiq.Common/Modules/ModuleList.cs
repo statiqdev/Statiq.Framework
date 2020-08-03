@@ -68,10 +68,7 @@ namespace Statiq.Common
         /// <inheritdoc />
         void ICollection<IModule>.Add(IModule item)
         {
-            if (item == null)
-            {
-                throw new ArgumentNullException(nameof(item));
-            }
+            item.ThrowIfNull(nameof(item));
             _modules.Add(item);
         }
 
@@ -102,10 +99,7 @@ namespace Statiq.Common
         /// <inheritdoc />
         public void Insert(int index, IModule item)
         {
-            if (item == null)
-            {
-                throw new ArgumentNullException(nameof(item));
-            }
+            item.ThrowIfNull(nameof(item));
             _modules.Insert(index, item);
         }
 
@@ -128,7 +122,7 @@ namespace Statiq.Common
         public IModule this[int index]
         {
             get => _modules[index];
-            set => _modules[index] = value ?? throw new ArgumentNullException(nameof(value));
+            set => _modules[index] = value.ThrowIfNull(nameof(value));
         }
 
         /// <inheritdoc />
@@ -337,10 +331,7 @@ namespace Statiq.Common
         /// <returns>The current instance.</returns>
         public ModuleList Modify(int index, Action<IModule> action)
         {
-            if (action == null)
-            {
-                throw new ArgumentNullException(nameof(action));
-            }
+            action.ThrowIfNull(nameof(action));
             action(this[index]);
             return this;
         }

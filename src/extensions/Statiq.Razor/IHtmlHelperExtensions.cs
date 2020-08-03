@@ -54,7 +54,7 @@ namespace Statiq.Razor
         /// </returns>
         public static IHtmlContent DocumentLink(this IHtmlHelper htmlHelper, IDocument document, bool includeHost)
         {
-            _ = document ?? throw new ArgumentNullException(nameof(document));
+            document.ThrowIfNull(nameof(document));
             return htmlHelper.DocumentLink(document, document.GetTitle(), includeHost);
         }
 
@@ -76,7 +76,7 @@ namespace Statiq.Razor
         /// </returns>
         public static IHtmlContent DocumentLink(this IHtmlHelper htmlHelper, IDocument document, bool includeHost, IDictionary<object, object> htmlAttributes)
         {
-            _ = document ?? throw new ArgumentNullException(nameof(document));
+            document.ThrowIfNull(nameof(document));
             return htmlHelper.DocumentLink(document, document.GetTitle(), includeHost, htmlAttributes);
         }
 
@@ -149,8 +149,8 @@ namespace Statiq.Razor
         /// </returns>
         public static IHtmlContent DocumentLink(this IHtmlHelper htmlHelper, IDocument document, string linkText, bool includeHost, IDictionary<object, object> htmlAttributes)
         {
-            _ = htmlHelper ?? throw new ArgumentNullException(nameof(htmlHelper));
-            _ = document ?? throw new ArgumentNullException(nameof(document));
+            htmlHelper.ThrowIfNull(nameof(htmlHelper));
+            document.ThrowIfNull(nameof(document));
 
             TagBuilder tagBuilder = new TagBuilder("a");
             tagBuilder.InnerHtml.SetContent(linkText);

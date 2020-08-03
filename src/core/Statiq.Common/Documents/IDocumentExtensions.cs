@@ -90,6 +90,6 @@ namespace Statiq.Common
         /// </summary>
         /// <param name="document">The document.</param>
         /// <returns>A dynamic object that contains the document metadata.</returns>
-        public static dynamic AsDynamic(this IDocument document) => new DynamicDocument(document ?? throw new ArgumentNullException(nameof(document)));
+        public static dynamic AsDynamic(this IDocument document) => new DynamicDocument(document.ThrowIfNull(nameof(document)));
     }
 }

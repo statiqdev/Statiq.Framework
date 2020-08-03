@@ -57,7 +57,7 @@ namespace Statiq.Common
         /// <returns>Filtered documents where the provided predicate is true.</returns>
         public static IAsyncEnumerable<IDocument> FilterAsync(this IEnumerable<IDocument> documents, Config<bool> predicate, IExecutionContext context)
         {
-            _ = predicate ?? throw new ArgumentNullException(nameof(predicate));
+            predicate.ThrowIfNull(nameof(predicate));
             return documents.FilterAsync(new Config<bool>[] { predicate }, context);
         }
 
@@ -70,8 +70,8 @@ namespace Statiq.Common
         /// <returns>Filtered documents where at least one of the provided predicates is true.</returns>
         public static async IAsyncEnumerable<IDocument> FilterAsync(this IEnumerable<IDocument> documents, ICollection<Config<bool>> predicates, IExecutionContext context)
         {
-            _ = documents ?? throw new ArgumentNullException(nameof(documents));
-            _ = predicates ?? throw new ArgumentNullException(nameof(predicates));
+            documents.ThrowIfNull(nameof(documents));
+            predicates.ThrowIfNull(nameof(predicates));
 
             foreach (IDocument document in documents)
             {
@@ -98,7 +98,7 @@ namespace Statiq.Common
         /// <returns>The config if non-null.</returns>
         public static TConfig EnsureNonNull<TConfig>(this TConfig config, string paramName = null)
             where TConfig : IConfig =>
-            config ?? throw new ArgumentNullException(paramName);
+            config.ThrowIfNull(paramName);
 
         /// <summary>
         /// Ensures that the config is not null and doesn't require a document and throws

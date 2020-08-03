@@ -16,7 +16,7 @@ namespace Statiq.Common
 
         protected DelegatingStream(Stream stream)
         {
-            Stream = stream ?? throw new ArgumentNullException(nameof(stream));
+            Stream = stream.ThrowIfNull(nameof(stream));
         }
 
         public override async Task CopyToAsync(Stream destination, int bufferSize, CancellationToken cancellationToken) =>

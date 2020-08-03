@@ -88,7 +88,7 @@ namespace Statiq.Core
         /// <returns>The current module instance.</returns>
         public CreateTree WithPlaceholderFactory(Func<string[], IMetadata, IExecutionContext, Task<IDocument>> factory)
         {
-            _placeholderFactory = factory ?? throw new ArgumentNullException(nameof(factory));
+            _placeholderFactory = factory.ThrowIfNull(nameof(factory));
             return this;
         }
 
@@ -100,7 +100,7 @@ namespace Statiq.Core
         /// <returns>The current module instance.</returns>
         public CreateTree WithSort(Func<IDocument, IDocument, IExecutionContext, int> sort)
         {
-            _sort = sort ?? throw new ArgumentNullException(nameof(sort));
+            _sort = sort.ThrowIfNull(nameof(sort));
             return this;
         }
 
@@ -112,7 +112,7 @@ namespace Statiq.Core
         /// <returns>The current module instance.</returns>
         public CreateTree WithRoots(Config<bool> isRoot)
         {
-            _isRoot = isRoot ?? throw new ArgumentNullException(nameof(isRoot));
+            _isRoot = isRoot.ThrowIfNull(nameof(isRoot));
             return this;
         }
 
@@ -124,7 +124,7 @@ namespace Statiq.Core
         /// <returns>The current module instance.</returns>
         public CreateTree WithTreePath(Config<string[]> treePath)
         {
-            _treePath = treePath ?? throw new ArgumentNullException(nameof(treePath));
+            _treePath = treePath.ThrowIfNull(nameof(treePath));
             return this;
         }
 
@@ -236,7 +236,7 @@ namespace Statiq.Core
             // New placeholder node
             public TreeNode(string[] treePath)
             {
-                TreePath = treePath ?? throw new ArgumentNullException(nameof(treePath));
+                TreePath = treePath.ThrowIfNull(nameof(treePath));
             }
 
             // New node from an input document

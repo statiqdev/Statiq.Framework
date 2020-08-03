@@ -50,7 +50,7 @@ namespace Statiq.Core
         /// </summary>
         /// <param name="patterns">The globbing patterns and/or absolute paths to read.</param>
         public ReadFiles(params string[] patterns)
-            : base(patterns ?? throw new ArgumentNullException(nameof(patterns)), false)
+            : base(patterns.ThrowIfNull(nameof(patterns)), false)
         {
         }
 

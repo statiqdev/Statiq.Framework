@@ -47,7 +47,7 @@ namespace Statiq.App
         public override bool ContainsKey(string key)
         {
             CheckDisposed();
-            _ = key ?? throw new ArgumentNullException(nameof(key));
+            key.ThrowIfNull(nameof(key));
             return Settings.ContainsKey(key) || base.ContainsKey(key);
         }
 
@@ -108,7 +108,7 @@ namespace Statiq.App
         public override bool TryGetRaw(string key, out object value)
         {
             CheckDisposed();
-            _ = key ?? throw new ArgumentNullException(nameof(key));
+            key.ThrowIfNull(nameof(key));
             if (Settings.TryGetValue(key, out value))
             {
                 value = SettingsValue.Get(value);

@@ -17,11 +17,7 @@ namespace Statiq.Common
         public static TModule WithParallelExecution<TModule>(this TModule module, bool parallel = true)
             where TModule : IParallelModule
         {
-            if (module == null)
-            {
-                throw new ArgumentNullException(nameof(module));
-            }
-            module.Parallel = parallel;
+            module.ThrowIfNull(nameof(module)).Parallel = parallel;
             return module;
         }
     }

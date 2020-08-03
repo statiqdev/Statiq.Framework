@@ -35,7 +35,7 @@ namespace Statiq.Core
         /// <param name="groupKeys">A delegate that returns group key(s) (multiple keys can be returned for each document and they'll be aggregated).</param>
         public GroupDocuments(Config<IEnumerable<object>> groupKeys)
         {
-            _key = groupKeys ?? throw new ArgumentNullException(nameof(groupKeys));
+            _key = groupKeys.ThrowIfNull(nameof(groupKeys));
         }
 
         /// <summary>
@@ -46,11 +46,7 @@ namespace Statiq.Core
         /// <param name="metadataKey">The key metadata key.</param>
         public GroupDocuments(string metadataKey)
         {
-            if (metadataKey == null)
-            {
-                throw new ArgumentNullException(nameof(metadataKey));
-            }
-
+            metadataKey.ThrowIfNull(nameof(metadataKey));
             _key = Config.FromDocument<IEnumerable<object>>(metadataKey);
         }
 

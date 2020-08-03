@@ -44,7 +44,7 @@ namespace Statiq.Html
             Action<Common.IDocument, IExecutionContext, IElement, Dictionary<string, object>> processElement)
         {
             _querySelector = querySelector;
-            _processElement = processElement ?? throw new ArgumentNullException(nameof(processElement));
+            _processElement = processElement.ThrowIfNull(nameof(processElement));
         }
 
         /// <summary>
@@ -57,7 +57,7 @@ namespace Statiq.Html
         public ProcessHtml(string querySelector, Action<Common.IDocument, IExecutionContext, IElement> processElement)
             : this(querySelector, (d, c, e, _) => processElement(d, c, e))
         {
-            _ = processElement ?? throw new ArgumentNullException(nameof(processElement));
+            processElement.ThrowIfNull(nameof(processElement));
         }
 
         /// <summary>
@@ -71,7 +71,7 @@ namespace Statiq.Html
         public ProcessHtml(string querySelector, Action<IElement, Dictionary<string, object>> processElement)
             : this(querySelector, (_, __, e, m) => processElement(e, m))
         {
-            _ = processElement ?? throw new ArgumentNullException(nameof(processElement));
+            processElement.ThrowIfNull(nameof(processElement));
         }
 
         /// <summary>
@@ -84,7 +84,7 @@ namespace Statiq.Html
         public ProcessHtml(string querySelector, Action<IElement> processElement)
             : this(querySelector, (_, __, e, m) => processElement(e))
         {
-            _ = processElement ?? throw new ArgumentNullException(nameof(processElement));
+            processElement.ThrowIfNull(nameof(processElement));
         }
 
         /// <summary>

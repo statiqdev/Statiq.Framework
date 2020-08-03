@@ -27,7 +27,7 @@ namespace Statiq.Common
 
         public static Config<TValue> CombineWith<TValue, TFirst, TSecond>(this Config<TFirst> first, Config<TSecond> second, Func<TFirst, TSecond, TValue> combine)
         {
-            _ = combine ?? throw new ArgumentNullException(nameof(combine));
+            combine.ThrowIfNull(nameof(combine));
 
             // Don't need to check for first == null because Transform() handles that
 
@@ -42,7 +42,7 @@ namespace Statiq.Common
 
         public static Config<TValue> CombineWith<TValue, TFirst, TSecond>(this Config<TFirst> first, Config<TSecond> second, Func<TFirst, TSecond, Task<TValue>> combine)
         {
-            _ = combine ?? throw new ArgumentNullException(nameof(combine));
+            combine.ThrowIfNull(nameof(combine));
 
             // Don't need to check for first == null because Transform() handles that
 
@@ -57,7 +57,7 @@ namespace Statiq.Common
 
         public static Config<TValue> CombineWith<TValue, TFirst, TSecond>(this Config<TFirst> first, Config<TSecond> second, Func<TFirst, TSecond, IExecutionContext, TValue> combine)
         {
-            _ = combine ?? throw new ArgumentNullException(nameof(combine));
+            combine.ThrowIfNull(nameof(combine));
 
             // Don't need to check for first == null because Transform() handles that
 
@@ -72,7 +72,7 @@ namespace Statiq.Common
 
         public static Config<TValue> CombineWith<TValue, TFirst, TSecond>(this Config<TFirst> first, Config<TSecond> second, Func<TFirst, TSecond, IExecutionContext, Task<TValue>> combine)
         {
-            _ = combine ?? throw new ArgumentNullException(nameof(combine));
+            combine.ThrowIfNull(nameof(combine));
 
             // Don't need to check for first == null because Transform() handles that
 
@@ -87,7 +87,7 @@ namespace Statiq.Common
 
         public static Config<TValue> CombineWith<TValue, TFirst, TSecond>(this Config<TFirst> first, Config<TSecond> second, Func<TFirst, TSecond, IDocument, IExecutionContext, TValue> combine)
         {
-            _ = combine ?? throw new ArgumentNullException(nameof(combine));
+            combine.ThrowIfNull(nameof(combine));
 
             // Don't need to check for first == null because Transform() handles that
 
@@ -100,7 +100,7 @@ namespace Statiq.Common
 
         public static Config<TValue> CombineWith<TValue, TFirst, TSecond>(this Config<TFirst> first, Config<TSecond> second, Func<TFirst, TSecond, IDocument, IExecutionContext, Task<TValue>> combine)
         {
-            _ = combine ?? throw new ArgumentNullException(nameof(combine));
+            combine.ThrowIfNull(nameof(combine));
 
             // Don't need to check for first == null because Transform() handles that
 

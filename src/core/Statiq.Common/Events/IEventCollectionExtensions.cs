@@ -13,8 +13,8 @@ namespace Statiq.Common
         /// <param name="handler">The handler to subscribe to the event.</param>
         public static void Subscribe<TEvent>(this IEventCollection eventCollection, EventHandler<TEvent> handler)
         {
-            _ = eventCollection ?? throw new ArgumentNullException(nameof(eventCollection));
-            _ = handler ?? throw new ArgumentNullException(nameof(handler));
+            eventCollection.ThrowIfNull(nameof(eventCollection));
+            handler.ThrowIfNull(nameof(handler));
 
             eventCollection.Subscribe((AsyncEventHandler<TEvent>)(args =>
             {

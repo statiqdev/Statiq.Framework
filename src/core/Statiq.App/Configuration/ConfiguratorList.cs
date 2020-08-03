@@ -13,7 +13,7 @@ namespace Statiq.App
 
         public ConfiguratorList(List<object> list)
         {
-            _list = list ?? throw new ArgumentNullException(nameof(list));
+            _list = list.ThrowIfNull(nameof(list));
         }
 
         public IConfigurator<TConfigurable> this[int index]

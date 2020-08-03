@@ -35,7 +35,7 @@ namespace Statiq.Sass
         /// <returns>The current instance.</returns>
         public CompileSass WithInputPath(Config<NormalizedPath> inputPath)
         {
-            _inputPath = inputPath ?? throw new ArgumentNullException(nameof(inputPath));
+            _inputPath = inputPath.ThrowIfNull(nameof(inputPath));
             return this;
         }
 

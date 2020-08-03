@@ -76,12 +76,7 @@ namespace Statiq.Common
         /// <param name="concatenationOptions">Options.</param>
         public GenericStringConcatenator(string seperator, string nullValue, ConcatenationOptions concatenationOptions)
         {
-            if (seperator == null)
-            {
-                throw new ArgumentNullException(nameof(seperator));
-            }
-
-            _seperator = seperator;
+            _seperator = seperator.ThrowIfNull(nameof(seperator));
             _nullValue = nullValue;
             _concatenationOptions = concatenationOptions;
         }

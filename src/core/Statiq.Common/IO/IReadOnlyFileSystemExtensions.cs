@@ -23,7 +23,7 @@ namespace Statiq.Common
         /// <returns>An input file.</returns>
         public static IFile GetInputFile(this IReadOnlyFileSystem fileSystem, NormalizedPath path)
         {
-            _ = fileSystem ?? throw new ArgumentNullException(nameof(fileSystem));
+            fileSystem.ThrowIfNull(nameof(fileSystem));
             path.ThrowIfNull(nameof(path));
 
             if (path.IsRelative)
@@ -59,7 +59,7 @@ namespace Statiq.Common
         /// <returns>All input files that match the globbing patterns and/or absolute paths.</returns>
         public static IEnumerable<IFile> GetInputFiles(this IReadOnlyFileSystem fileSystem, params string[] patterns)
         {
-            _ = fileSystem ?? throw new ArgumentNullException(nameof(fileSystem));
+            fileSystem.ThrowIfNull(nameof(fileSystem));
             return fileSystem.GetInputFiles((IEnumerable<string>)patterns);
         }
 
@@ -72,7 +72,7 @@ namespace Statiq.Common
         /// <returns>All input files that match the globbing patterns and/or absolute paths.</returns>
         public static IEnumerable<IFile> GetInputFiles(this IReadOnlyFileSystem fileSystem, IEnumerable<string> patterns)
         {
-            _ = fileSystem ?? throw new ArgumentNullException(nameof(fileSystem));
+            fileSystem.ThrowIfNull(nameof(fileSystem));
             return fileSystem.GetFiles(fileSystem.GetInputDirectory(), patterns);
         }
 
@@ -82,7 +82,7 @@ namespace Statiq.Common
         /// <returns>The absolute input directories.</returns>
         public static IEnumerable<IDirectory> GetInputDirectories(this IReadOnlyFileSystem fileSystem)
         {
-            _ = fileSystem ?? throw new ArgumentNullException(nameof(fileSystem));
+            fileSystem.ThrowIfNull(nameof(fileSystem));
             return fileSystem.InputPaths.Select(x => fileSystem.GetRootDirectory(x)).ToImmutableArray();
         }
 
@@ -100,7 +100,7 @@ namespace Statiq.Common
         /// or <c>null</c> if no input path does.</returns>
         public static NormalizedPath GetContainingInputPath(this IReadOnlyFileSystem fileSystem, NormalizedPath path)
         {
-            _ = fileSystem ?? throw new ArgumentNullException(nameof(fileSystem));
+            fileSystem.ThrowIfNull(nameof(fileSystem));
             path.ThrowIfNull(nameof(path));
 
             if (path.IsAbsolute)
@@ -126,7 +126,7 @@ namespace Statiq.Common
 
         internal static NormalizedPath GetContainingInputPathForAbsolutePath(this IReadOnlyFileSystem fileSystem, NormalizedPath path)
         {
-            _ = fileSystem ?? throw new ArgumentNullException(nameof(fileSystem));
+            fileSystem.ThrowIfNull(nameof(fileSystem));
             path.ThrowIfNull(nameof(path));
 
             if (!path.IsAbsolute)
@@ -147,7 +147,7 @@ namespace Statiq.Common
         /// <returns>A path to this file relative to it's containing input directory.</returns>
         public static NormalizedPath GetRelativeInputPath(this IReadOnlyFileSystem fileSystem, NormalizedPath path)
         {
-            _ = fileSystem ?? throw new ArgumentNullException(nameof(fileSystem));
+            fileSystem.ThrowIfNull(nameof(fileSystem));
             path.ThrowIfNull(nameof(path));
 
             if (path.IsRelative)
@@ -166,7 +166,7 @@ namespace Statiq.Common
         /// <returns>A path to this file relative to the output directory.</returns>
         public static NormalizedPath GetRelativeOutputPath(this IReadOnlyFileSystem fileSystem, NormalizedPath path)
         {
-            _ = fileSystem ?? throw new ArgumentNullException(nameof(fileSystem));
+            fileSystem.ThrowIfNull(nameof(fileSystem));
             path.ThrowIfNull(nameof(path));
 
             if (path.IsRelative)
@@ -197,7 +197,7 @@ namespace Statiq.Common
         /// <returns>The output path.</returns>
         public static NormalizedPath GetOutputPath(this IReadOnlyFileSystem fileSystem, NormalizedPath path)
         {
-            _ = fileSystem ?? throw new ArgumentNullException(nameof(fileSystem));
+            fileSystem.ThrowIfNull(nameof(fileSystem));
             return path.IsNull
                 ? fileSystem.RootPath.Combine(fileSystem.OutputPath)
                 : fileSystem.RootPath.Combine(fileSystem.OutputPath).Combine(path);
@@ -216,7 +216,7 @@ namespace Statiq.Common
         /// <returns>An output file.</returns>
         public static IFile GetOutputFile(this IReadOnlyFileSystem fileSystem, NormalizedPath path)
         {
-            _ = fileSystem ?? throw new ArgumentNullException(nameof(fileSystem));
+            fileSystem.ThrowIfNull(nameof(fileSystem));
             return fileSystem.GetFile(fileSystem.GetOutputPath(path));
         }
 
@@ -242,7 +242,7 @@ namespace Statiq.Common
         /// <returns>An output directory.</returns>
         public static IDirectory GetOutputDirectory(this IReadOnlyFileSystem fileSystem, NormalizedPath path)
         {
-            _ = fileSystem ?? throw new ArgumentNullException(nameof(fileSystem));
+            fileSystem.ThrowIfNull(nameof(fileSystem));
             return fileSystem.GetDirectory(fileSystem.GetOutputPath(path));
         }
 
@@ -263,7 +263,7 @@ namespace Statiq.Common
         /// <returns>The temp path.</returns>
         public static NormalizedPath GetTempPath(this IReadOnlyFileSystem fileSystem, NormalizedPath path)
         {
-            _ = fileSystem ?? throw new ArgumentNullException(nameof(fileSystem));
+            fileSystem.ThrowIfNull(nameof(fileSystem));
             return path.IsNull
                 ? fileSystem.RootPath.Combine(fileSystem.TempPath)
                 : fileSystem.RootPath.Combine(fileSystem.TempPath).Combine(path);
@@ -282,7 +282,7 @@ namespace Statiq.Common
         /// <returns>A temp file.</returns>
         public static IFile GetTempFile(this IReadOnlyFileSystem fileSystem, NormalizedPath path)
         {
-            _ = fileSystem ?? throw new ArgumentNullException(nameof(fileSystem));
+            fileSystem.ThrowIfNull(nameof(fileSystem));
             return fileSystem.GetFile(fileSystem.GetTempPath(path));
         }
 
@@ -293,7 +293,7 @@ namespace Statiq.Common
         /// <returns>A temp file.</returns>
         public static IFile GetTempFile(this IReadOnlyFileSystem fileSystem)
         {
-            _ = fileSystem ?? throw new ArgumentNullException(nameof(fileSystem));
+            fileSystem.ThrowIfNull(nameof(fileSystem));
             return fileSystem.GetTempFile(Path.ChangeExtension(Path.GetRandomFileName(), "tmp"));
         }
 
@@ -319,7 +319,7 @@ namespace Statiq.Common
         /// <returns>A temp directory.</returns>
         public static IDirectory GetTempDirectory(this IReadOnlyFileSystem fileSystem, NormalizedPath path)
         {
-            _ = fileSystem ?? throw new ArgumentNullException(nameof(fileSystem));
+            fileSystem.ThrowIfNull(nameof(fileSystem));
             return fileSystem.GetDirectory(fileSystem.GetTempPath(path));
         }
 
@@ -336,7 +336,7 @@ namespace Statiq.Common
         /// <returns>A root file.</returns>
         public static IFile GetRootFile(this IReadOnlyFileSystem fileSystem, NormalizedPath path)
         {
-            _ = fileSystem ?? throw new ArgumentNullException(nameof(fileSystem));
+            fileSystem.ThrowIfNull(nameof(fileSystem));
             return fileSystem.GetFile(fileSystem.RootPath.Combine(path));
         }
 
@@ -362,7 +362,7 @@ namespace Statiq.Common
         /// <returns>A root directory.</returns>
         public static IDirectory GetRootDirectory(this IReadOnlyFileSystem fileSystem, NormalizedPath path)
         {
-            _ = fileSystem ?? throw new ArgumentNullException(nameof(fileSystem));
+            fileSystem.ThrowIfNull(nameof(fileSystem));
             return path.IsNull
                 ? fileSystem.GetDirectory(fileSystem.RootPath)
                 : fileSystem.GetDirectory(fileSystem.RootPath.Combine(path));
@@ -378,7 +378,7 @@ namespace Statiq.Common
         /// <returns>A file.</returns>
         public static IFile GetFile(this IReadOnlyFileSystem fileSystem, NormalizedPath path)
         {
-            _ = fileSystem ?? throw new ArgumentNullException(nameof(fileSystem));
+            fileSystem.ThrowIfNull(nameof(fileSystem));
             return fileSystem.FileProvider.GetFile(path);
         }
 
@@ -392,7 +392,7 @@ namespace Statiq.Common
         /// <returns>A directory.</returns>
         public static IDirectory GetDirectory(this IReadOnlyFileSystem fileSystem, NormalizedPath path)
         {
-            _ = fileSystem ?? throw new ArgumentNullException(nameof(fileSystem));
+            fileSystem.ThrowIfNull(nameof(fileSystem));
             return fileSystem.FileProvider.GetDirectory(path);
         }
 
@@ -419,7 +419,7 @@ namespace Statiq.Common
         /// <returns>An input directory.</returns>
         public static IDirectory GetInputDirectory(this IReadOnlyFileSystem fileSystem, NormalizedPath path)
         {
-            _ = fileSystem ?? throw new ArgumentNullException(nameof(fileSystem));
+            fileSystem.ThrowIfNull(nameof(fileSystem));
             return path.IsNull
                 ? new VirtualInputDirectory(fileSystem, NormalizedPath.Dot)
                 : (path.IsRelative ? new VirtualInputDirectory(fileSystem, path) : fileSystem.GetDirectory(path));
@@ -435,7 +435,7 @@ namespace Statiq.Common
         /// </returns>
         public static IEnumerable<IFile> GetFiles(this IReadOnlyFileSystem fileSystem, params string[] patterns)
         {
-            _ = fileSystem ?? throw new ArgumentNullException(nameof(fileSystem));
+            fileSystem.ThrowIfNull(nameof(fileSystem));
             return fileSystem.GetFiles(fileSystem.GetRootDirectory(), patterns);
         }
 
@@ -449,7 +449,7 @@ namespace Statiq.Common
         /// </returns>
         public static IEnumerable<IFile> GetFiles(this IReadOnlyFileSystem fileSystem, IEnumerable<string> patterns)
         {
-            _ = fileSystem ?? throw new ArgumentNullException(nameof(fileSystem));
+            fileSystem.ThrowIfNull(nameof(fileSystem));
             return fileSystem.GetFiles(fileSystem.GetRootDirectory(), patterns);
         }
 
@@ -465,7 +465,7 @@ namespace Statiq.Common
         /// </returns>
         public static IEnumerable<IFile> GetFiles(this IReadOnlyFileSystem fileSystem, IDirectory directory, params string[] patterns)
         {
-            _ = fileSystem ?? throw new ArgumentNullException(nameof(fileSystem));
+            fileSystem.ThrowIfNull(nameof(fileSystem));
             return fileSystem.GetFiles(directory, (IEnumerable<string>)patterns);
         }
 
@@ -481,8 +481,8 @@ namespace Statiq.Common
         /// </returns>
         public static IEnumerable<IFile> GetFiles(this IReadOnlyFileSystem fileSystem, IDirectory directory, IEnumerable<string> patterns)
         {
-            _ = fileSystem ?? throw new ArgumentNullException(nameof(fileSystem));
-            _ = directory ?? throw new ArgumentNullException(nameof(directory));
+            fileSystem.ThrowIfNull(nameof(fileSystem));
+            directory.ThrowIfNull(nameof(directory));
 
             IEnumerable<Tuple<IDirectory, string>> directoryPatterns = patterns
                 .Where(x => x != null)

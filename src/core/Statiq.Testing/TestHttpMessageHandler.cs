@@ -2,6 +2,7 @@
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
+using Statiq.Common;
 
 namespace Statiq.Testing
 {
@@ -14,7 +15,7 @@ namespace Statiq.Testing
             Func<HttpRequestMessage, HttpMessageHandler, HttpResponseMessage> httpResponseFunc,
             HttpMessageHandler httpMessageHandler)
         {
-            _httpResponseFunc = httpResponseFunc ?? throw new ArgumentNullException(nameof(httpResponseFunc));
+            _httpResponseFunc = httpResponseFunc.ThrowIfNull(nameof(httpResponseFunc));
             _httpMessageHandler = httpMessageHandler;
         }
 

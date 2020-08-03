@@ -10,7 +10,7 @@ namespace Statiq.Common
             this IDictionary<TKey, TValue> dictionary,
             IEnumerable<KeyValuePair<TKey, TValue>> items)
         {
-            _ = dictionary ?? throw new ArgumentNullException(nameof(dictionary));
+            dictionary.ThrowIfNull(nameof(dictionary));
 
             if (items != null)
             {
@@ -25,7 +25,7 @@ namespace Statiq.Common
             this IDictionary<TKey, TValue> dictionary,
             IEnumerable<KeyValuePair<TKey, TValue>> items)
         {
-            _ = dictionary ?? throw new ArgumentNullException(nameof(dictionary));
+            dictionary.ThrowIfNull(nameof(dictionary));
 
             if (items != null)
             {

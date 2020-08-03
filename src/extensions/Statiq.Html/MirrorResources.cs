@@ -51,7 +51,7 @@ namespace Statiq.Html
         /// <param name="pathFunc">A function that specifies where downloaded external resources should be copied to.</param>
         public MirrorResources(Func<Uri, NormalizedPath> pathFunc)
         {
-            _pathFunc = pathFunc ?? throw new ArgumentNullException(nameof(pathFunc));
+            _pathFunc = pathFunc.ThrowIfNull(nameof(pathFunc));
         }
 
         protected override async Task<IEnumerable<Common.IDocument>> ExecuteContextAsync(IExecutionContext context)

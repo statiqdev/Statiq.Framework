@@ -35,7 +35,7 @@ namespace Statiq.Core
         /// <param name="title">A delegate that must return a string.</param>
         public AddTitle(Config<string> title)
         {
-            _title = title ?? throw new ArgumentNullException(nameof(title));
+            _title = title.ThrowIfNull(nameof(title));
         }
 
         /// <summary>
@@ -46,16 +46,7 @@ namespace Statiq.Core
         /// <returns>The current module instance.</returns>
         public AddTitle WithKey(string key)
         {
-            if (key == null)
-            {
-                throw new ArgumentNullException(nameof(key));
-            }
-            if (string.IsNullOrEmpty(key))
-            {
-                throw new ArgumentException("Value cannot be null or empty.", nameof(key));
-            }
-
-            _key = key;
+            _key = key.ThrowIfNullOrEmpty(nameof(key));
             return this;
         }
 

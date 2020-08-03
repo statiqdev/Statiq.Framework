@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using System.Xml;
 using System.Xml.Serialization;
+using Statiq.Common;
 using Statiq.Feeds.Syndication.Atom;
 using Statiq.Feeds.Syndication.Rdf;
 using Statiq.Feeds.Syndication.Rss;
@@ -64,10 +65,7 @@ namespace Statiq.Feeds.Syndication
 
         public static void SerializeXml(FeedType feedType, IFeed feed, Stream output, string xsltUrl, bool prettyPrint)
         {
-            if (feedType == null)
-            {
-                throw new ArgumentNullException(nameof(feedType));
-            }
+            feedType.ThrowIfNull(nameof(feedType));
 
             // Do we need to transform the feed?
             if (feedType != feed.FeedType)

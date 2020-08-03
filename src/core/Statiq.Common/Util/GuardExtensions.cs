@@ -17,5 +17,27 @@ namespace Statiq.Common
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool IsNullOrWhiteSpace(this string str) => string.IsNullOrWhiteSpace(str);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static string ThrowIfNullOrEmpty(this string str, string paramName)
+        {
+            str.ThrowIfNull(paramName);
+            if (string.IsNullOrEmpty(str))
+            {
+                throw new ArgumentException(paramName + " cannot be empty");
+            }
+            return str;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static string ThrowIfNullOrWhiteSpace(this string str, string paramName)
+        {
+            str.ThrowIfNull(paramName);
+            if (string.IsNullOrWhiteSpace(str))
+            {
+                throw new ArgumentException(paramName + " cannot be empty or white space");
+            }
+            return str;
+        }
     }
 }

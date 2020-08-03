@@ -121,8 +121,8 @@ namespace Statiq.App
         public static TBootstrapper AddCommands<TBootstrapper>(this TBootstrapper bootstrapper, Assembly assembly)
             where TBootstrapper : IBootstrapper
         {
-            _ = bootstrapper ?? throw new ArgumentNullException(nameof(bootstrapper));
-            _ = assembly ?? throw new ArgumentNullException(nameof(assembly));
+            bootstrapper.ThrowIfNull(nameof(bootstrapper));
+            assembly.ThrowIfNull(nameof(assembly));
             foreach (Type commandType in bootstrapper.ClassCatalog.GetTypesAssignableTo<ICommand>().Where(x => x.Assembly.Equals(assembly)))
             {
                 bootstrapper.AddCommand(commandType);
@@ -144,8 +144,8 @@ namespace Statiq.App
         public static TBootstrapper AddCommands<TBootstrapper>(this TBootstrapper bootstrapper, Type parentType)
             where TBootstrapper : IBootstrapper
         {
-            _ = bootstrapper ?? throw new ArgumentNullException(nameof(bootstrapper));
-            _ = parentType ?? throw new ArgumentNullException(nameof(parentType));
+            bootstrapper.ThrowIfNull(nameof(bootstrapper));
+            parentType.ThrowIfNull(nameof(parentType));
             foreach (Type commandType in parentType.GetNestedTypes().Where(x => typeof(ICommand).IsAssignableFrom(x)))
             {
                 bootstrapper.AddCommand(commandType);

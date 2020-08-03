@@ -46,7 +46,7 @@ namespace Statiq.Core
         /// <returns>The current module instance.</returns>
         public GenerateRedirects WithPaths(Config<IReadOnlyList<NormalizedPath>> paths)
         {
-            _paths = paths ?? throw new ArgumentNullException(nameof(paths));
+            _paths = paths.ThrowIfNull(nameof(paths));
             return this;
         }
 
@@ -83,10 +83,7 @@ namespace Statiq.Core
         public GenerateRedirects WithAdditionalOutput(NormalizedPath path, Func<IDictionary<NormalizedPath, string>, string> content)
         {
             path.ThrowIfNull(nameof(path));
-            if (content == null)
-            {
-                throw new ArgumentNullException(nameof(content));
-            }
+            content.ThrowIfNull(nameof(content));
             if (!path.IsRelative)
             {
                 throw new ArgumentException("The output path must be relative");

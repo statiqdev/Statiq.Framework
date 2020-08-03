@@ -19,7 +19,7 @@ namespace Statiq.Common
                 throw new ArgumentException("Virtual input paths should always be relative", nameof(path));
             }
 
-            _fileSystem = fileSystem ?? throw new ArgumentNullException(nameof(fileSystem));
+            _fileSystem = fileSystem.ThrowIfNull(nameof(fileSystem));
             Path = path;
         }
 

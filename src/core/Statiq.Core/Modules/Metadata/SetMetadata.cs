@@ -25,7 +25,7 @@ namespace Statiq.Core
         public SetMetadata(string key, Config<object> value)
             : base(value, true)
         {
-            _key = key ?? throw new ArgumentNullException(nameof(key));
+            _key = key.ThrowIfNull(nameof(key));
         }
 
         /// <summary>

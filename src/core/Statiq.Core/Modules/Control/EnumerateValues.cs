@@ -42,7 +42,7 @@ namespace Statiq.Core
         public EnumerateValues(Config<string> key)
             : this(key.Transform((keyValue, doc, _) => doc.GetList<object>(keyValue)))
         {
-            _ = key ?? throw new ArgumentNullException(nameof(key));
+            key.ThrowIfNull(nameof(key));
         }
 
         /// <summary>
@@ -61,7 +61,7 @@ namespace Statiq.Core
         /// <returns>The current module instance.</returns>
         public EnumerateValues WithCurrentKey(string currentKey)
         {
-            _currentKey = currentKey ?? throw new ArgumentNullException(nameof(currentKey));
+            _currentKey = currentKey.ThrowIfNull(nameof(currentKey));
             return this;
         }
 
@@ -73,7 +73,7 @@ namespace Statiq.Core
         /// <returns>The current module instance.</returns>
         public EnumerateValues WithInputDocument(Config<bool> withInput)
         {
-            _withInput = withInput ?? throw new ArgumentNullException(nameof(withInput));
+            _withInput = withInput.ThrowIfNull(nameof(withInput));
             return this;
         }
 

@@ -18,10 +18,10 @@ namespace Statiq.Common
 
         private ScriptMetadataValue(string key, string originalPrefix, string script, IExecutionState executionState)
         {
-            _key = key ?? throw new ArgumentNullException(nameof(key));
-            _originalPrefix = originalPrefix ?? throw new ArgumentNullException(nameof(originalPrefix));
-            _script = script ?? throw new ArgumentNullException(nameof(script));
-            _executionState = executionState ?? throw new ArgumentNullException(nameof(executionState));
+            _key = key.ThrowIfNull(nameof(key));
+            _originalPrefix = originalPrefix.ThrowIfNull(nameof(originalPrefix));
+            _script = script.ThrowIfNull(nameof(script));
+            _executionState = executionState.ThrowIfNull(nameof(executionState));
         }
 
         public object Get(string key, IMetadata metadata)

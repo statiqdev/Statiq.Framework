@@ -17,7 +17,7 @@ namespace Statiq.App
     {
         public static Bootstrapper AddDefaults(this Bootstrapper bootstrapper, DefaultFeatures features = DefaultFeatures.All)
         {
-            _ = bootstrapper ?? throw new ArgumentNullException(nameof(bootstrapper));
+            bootstrapper.ThrowIfNull(nameof(bootstrapper));
             if (features.HasFlag(DefaultFeatures.BootstrapperConfigurators))
             {
                 bootstrapper.AddBootstrapperConfigurators();
@@ -66,7 +66,7 @@ namespace Statiq.App
 
         public static Bootstrapper AddBootstrapperConfigurators(this Bootstrapper bootstrapper)
         {
-            _ = bootstrapper ?? throw new ArgumentNullException(nameof(bootstrapper));
+            bootstrapper.ThrowIfNull(nameof(bootstrapper));
             foreach (IConfigurator<IBootstrapper> bootstraperConfigurator
                 in bootstrapper.ClassCatalog.GetInstances<IConfigurator<IBootstrapper>>())
             {
@@ -109,7 +109,7 @@ namespace Statiq.App
 
         public static Bootstrapper AddBuildCommands(this Bootstrapper bootstrapper)
         {
-            _ = bootstrapper ?? throw new ArgumentNullException(nameof(bootstrapper));
+            bootstrapper.ThrowIfNull(nameof(bootstrapper));
             bootstrapper.SetDefaultCommand<PipelinesCommand<PipelinesCommandSettings>>();
             bootstrapper.AddCommand<PipelinesCommand<PipelinesCommandSettings>>();
             bootstrapper.AddCommand<DeployCommand>();

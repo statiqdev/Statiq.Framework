@@ -13,7 +13,7 @@ namespace Statiq.Common
 
         public FilteredMetadata(IMetadata metadata, params string[] keys)
         {
-            _metadata = metadata ?? throw new ArgumentNullException(nameof(metadata));
+            _metadata = metadata.ThrowIfNull(nameof(metadata));
             _keys = keys == null
                 ? new HashSet<string>()
                 : new HashSet<string>(keys.Where(x => metadata.ContainsKey(x)), StringComparer.OrdinalIgnoreCase);
@@ -24,7 +24,7 @@ namespace Statiq.Common
         {
             get
             {
-                _ = key ?? throw new ArgumentNullException(nameof(key));
+                key.ThrowIfNull(nameof(key));
                 if (!_keys.Contains(key))
                 {
                     throw new KeyNotFoundException();
@@ -45,14 +45,14 @@ namespace Statiq.Common
         /// <inheritdoc/>
         public bool ContainsKey(string key)
         {
-            _ = key ?? throw new ArgumentNullException(nameof(key));
+            key.ThrowIfNull(nameof(key));
             return _keys.Contains(key);
         }
 
         /// <inheritdoc/>
         public bool TryGetRaw(string key, out object value)
         {
-            _ = key ?? throw new ArgumentNullException(nameof(key));
+            key.ThrowIfNull(nameof(key));
             value = default;
             return _keys.Contains(key) && _metadata.TryGetRaw(key, out value);
         }
@@ -60,7 +60,7 @@ namespace Statiq.Common
         /// <inheritdoc/>
         public bool TryGetValue(string key, out object value)
         {
-            _ = key ?? throw new ArgumentNullException(nameof(key));
+            key.ThrowIfNull(nameof(key));
             value = default;
             return _keys.Contains(key) && _metadata.TryGetValue(key, out value);
         }

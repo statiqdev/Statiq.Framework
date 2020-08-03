@@ -57,7 +57,7 @@ namespace Statiq.Core
         public ProcessSidecarFile(Config<NormalizedPath> sidecarPath, params IModule[] modules)
             : base(modules)
         {
-            _sidecarPath = sidecarPath ?? throw new ArgumentNullException(nameof(sidecarPath));
+            _sidecarPath = sidecarPath.ThrowIfNull(nameof(sidecarPath));
         }
 
         /// <inheritdoc />

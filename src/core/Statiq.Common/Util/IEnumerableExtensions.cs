@@ -26,9 +26,9 @@ namespace Statiq.Common
         /// <returns><c>true</c> if the items starts with all the specified values, <c>false</c> otherwise.</returns>
         public static bool StartsWith<T>(this IEnumerable<T> source, IEnumerable<T> values, IEqualityComparer<T> comparer)
         {
-            _ = source ?? throw new ArgumentNullException(nameof(source));
-            _ = values ?? throw new ArgumentNullException(nameof(values));
-            _ = comparer ?? throw new ArgumentNullException(nameof(comparer));
+            source.ThrowIfNull(nameof(source));
+            values.ThrowIfNull(nameof(values));
+            comparer.ThrowIfNull(nameof(comparer));
 
             IEnumerator<T> valuesEnumerator = values.GetEnumerator();
             foreach (T item in source)
@@ -50,8 +50,8 @@ namespace Statiq.Common
 
         public static T GetPrevious<T>(this IEnumerable<T> source, T item, IEqualityComparer<T> comparer)
         {
-            _ = source ?? throw new ArgumentNullException(nameof(source));
-            _ = comparer ?? throw new ArgumentNullException(nameof(comparer));
+            source.ThrowIfNull(nameof(source));
+            comparer.ThrowIfNull(nameof(comparer));
 
             T previous = default;  // If first item, will return default
             foreach (T current in source)
@@ -70,8 +70,8 @@ namespace Statiq.Common
 
         public static T GetNext<T>(this IEnumerable<T> source, T item, IEqualityComparer<T> comparer)
         {
-            _ = source ?? throw new ArgumentNullException(nameof(source));
-            _ = comparer ?? throw new ArgumentNullException(nameof(comparer));
+            source.ThrowIfNull(nameof(source));
+            comparer.ThrowIfNull(nameof(comparer));
 
             bool next = false;
             foreach (T current in source)

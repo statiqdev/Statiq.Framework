@@ -15,7 +15,7 @@ namespace Statiq.Core
 
         public LocalDirectory(IReadOnlyFileSystem fileSystem, NormalizedPath path)
         {
-            _fileSystem = fileSystem ?? throw new ArgumentNullException(nameof(fileSystem));
+            _fileSystem = fileSystem.ThrowIfNull(nameof(fileSystem));
 
             path.ThrowIfNull(nameof(path));
 

@@ -17,8 +17,8 @@ namespace Statiq.Common
 
         public DocumentFactory(IExecutionState executionState, IReadOnlyConfigurationSettings settings)
         {
-            _executionState = executionState ?? throw new ArgumentNullException(nameof(executionState));
-            _settings = settings ?? throw new ArgumentNullException(nameof(settings));
+            _executionState = executionState.ThrowIfNull(nameof(executionState));
+            _settings = settings.ThrowIfNull(nameof(settings));
         }
 
         private interface IFactory

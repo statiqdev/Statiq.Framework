@@ -34,7 +34,7 @@ namespace Statiq.Common
         /// <param name="items">The initial set of items. If null, no underlying dictionary will be created.</param>
         public Metadata(IExecutionState executionState, IEnumerable<KeyValuePair<string, object>> items = null)
         {
-            _ = executionState ?? throw new ArgumentNullException(nameof(executionState));
+            executionState.ThrowIfNull(nameof(executionState));
 
             if (items != null)
             {
@@ -93,14 +93,14 @@ namespace Statiq.Common
         /// <inheritdoc/>
         public bool ContainsKey(string key)
         {
-            _ = key ?? throw new ArgumentNullException(nameof(key));
+            key.ThrowIfNull(nameof(key));
             return (Dictionary?.ContainsKey(key) ?? false) || (_previous?.ContainsKey(key) ?? false);
         }
 
         /// <inheritdoc/>
         public bool TryGetRaw(string key, out object value)
         {
-            _ = key ?? throw new ArgumentNullException(nameof(key));
+            key.ThrowIfNull(nameof(key));
             value = default;
             return (Dictionary?.TryGetValue(key, out value) ?? false) || (_previous?.TryGetRaw(key, out value) ?? false);
         }
@@ -113,7 +113,7 @@ namespace Statiq.Common
         {
             get
             {
-                _ = key ?? throw new ArgumentNullException(nameof(key));
+                key.ThrowIfNull(nameof(key));
                 if (!TryGetValue(key, out object value))
                 {
                     throw new KeyNotFoundException("The key " + key + " was not found in metadata, use Get() to provide a default value.");

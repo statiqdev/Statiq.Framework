@@ -13,21 +13,21 @@ namespace Statiq.Common
     {
         protected internal ConfigurationMetadata(IConfiguration configuration)
         {
-            Configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
+            Configuration = configuration.ThrowIfNull(nameof(configuration));
         }
 
         public IConfiguration Configuration { get; protected set; }
 
         /// <inheritdoc/>
         public virtual bool ContainsKey(string key) =>
-            Configuration.GetSection(key ?? throw new ArgumentNullException(nameof(key))).Exists();
+            Configuration.GetSection(key.ThrowIfNull(nameof(key))).Exists();
 
         protected virtual object GetSectionMetadata(IConfigurationSection section) => new ConfigurationMetadata(section);
 
         /// <inheritdoc/>
         public virtual bool TryGetRaw(string key, out object value)
         {
-            _ = key ?? throw new ArgumentNullException(nameof(key));
+            key.ThrowIfNull(nameof(key));
             IConfigurationSection section = Configuration.GetSection(key);
             if (section.Exists())
             {
@@ -46,7 +46,7 @@ namespace Statiq.Common
         {
             get
             {
-                _ = key ?? throw new ArgumentNullException(nameof(key));
+                key.ThrowIfNull(nameof(key));
                 if (!TryGetValue(key, out object value))
                 {
                     throw new KeyNotFoundException("The key " + key + " was not found in metadata, use Get() to provide a default value.");

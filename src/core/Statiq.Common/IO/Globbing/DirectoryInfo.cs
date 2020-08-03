@@ -12,7 +12,7 @@ namespace Statiq.Common
 
         public DirectoryInfo(IDirectory directory, bool isParentPath = false)
         {
-            _directory = directory ?? throw new ArgumentNullException(nameof(directory));
+            _directory = directory.ThrowIfNull(nameof(directory));
             _isParentPath = isParentPath;
         }
 

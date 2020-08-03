@@ -24,12 +24,12 @@ namespace Statiq.Core
 
         internal ExecutionContext(ExecutionContextData contextData, IExecutionContext parent, IModule module, ImmutableArray<IDocument> inputs)
         {
-            _contextData = contextData ?? throw new ArgumentNullException(nameof(contextData));
+            _contextData = contextData.ThrowIfNull(nameof(contextData));
             _logger = contextData.Services.GetRequiredService<ILogger<ExecutionContext>>();
             _logPrefix = GetLogPrefix(parent, module, contextData.PipelinePhase);
 
             Parent = parent;
-            Module = module ?? throw new ArgumentNullException(nameof(module));
+            Module = module.ThrowIfNull(nameof(module));
             Inputs = inputs;
 
             IExecutionContext.Current = this;

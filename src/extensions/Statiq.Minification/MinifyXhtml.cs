@@ -88,13 +88,8 @@ namespace Statiq.Minification
         /// </example>
         public MinifyXhtml WithSettings(Action<XhtmlMinificationSettings> action)
         {
-            if (action == null)
-            {
-                throw new ArgumentNullException(nameof(action));
-            }
-
+            action.ThrowIfNull(nameof(action));
             action(_minificationSettings);
-
             return this;
         }
 

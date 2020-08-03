@@ -101,11 +101,7 @@ namespace Statiq.Common
             /// <inheritdoc/>
             public PropertyMetadataInstance(T instance)
             {
-                if (instance == null)
-                {
-                    throw new ArgumentNullException(nameof(instance));
-                }
-                _instance = instance;
+                _instance = instance.ThrowIfNull(nameof(instance));
             }
 
             /// <inheritdoc/>
@@ -116,10 +112,7 @@ namespace Statiq.Common
             {
                 get
                 {
-                    if (key == null)
-                    {
-                        throw new ArgumentNullException(nameof(key));
-                    }
+                    key.ThrowIfNull(nameof(key));
                     if (!TryGetValue(key, out object value))
                     {
                         throw new KeyNotFoundException("The key " + key + " was not found, use Get() to provide a default value.");

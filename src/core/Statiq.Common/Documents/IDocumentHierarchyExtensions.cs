@@ -26,8 +26,8 @@ namespace Statiq.Common
         /// <returns>The first document from <paramref name="parents"/> that contains the current document or <c>null</c>.</returns>
         public static IDocument GetParent(this IDocument document, IEnumerable<IDocument> parents, bool recursive = true, string key = Keys.Children)
         {
-            _ = parents ?? throw new ArgumentNullException(nameof(parents));
-            _ = key ?? throw new ArgumentNullException(nameof(key));
+            parents.ThrowIfNull(nameof(parents));
+            key.ThrowIfNull(nameof(key));
 
             IDocument parent = parents.FirstOrDefault(x => x.GetChildren(key).Contains(document));
             if (parent == null && recursive)
@@ -51,7 +51,7 @@ namespace Statiq.Common
         /// <param name="key">The metadata key containing child documents.</param>
         /// <returns><c>true</c> if the document contains child documents, <c>false</c> otherwise.</returns>
         public static bool HasChildren(this IDocument document, string key = Keys.Children) =>
-            document.GetDocumentList(key ?? throw new ArgumentNullException(nameof(key)))?.Count > 0;
+            document.GetDocumentList(key.ThrowIfNull(nameof(key)))?.Count > 0;
 
         /// <summary>
         /// Gets the child documents of the current document.
@@ -60,7 +60,7 @@ namespace Statiq.Common
         /// <param name="key">The metadata key containing child documents.</param>
         /// <returns>The child documents.</returns>
         public static DocumentList<IDocument> GetChildren(this IDocument document, string key = Keys.Children) =>
-            document.GetDocumentList(key ?? throw new ArgumentNullException(nameof(key))).ToDocumentList();
+            document.GetDocumentList(key.ThrowIfNull(nameof(key))).ToDocumentList();
 
         /// <summary>
         /// Gets the descendant documents of the current document.
@@ -83,7 +83,7 @@ namespace Statiq.Common
 
         private static DocumentList<IDocument> GetDescendants(IDocument document, in bool self, string key = Keys.Children)
         {
-            _ = key ?? throw new ArgumentNullException(nameof(key));
+            key.ThrowIfNull(nameof(key));
 
             ImmutableArray<IDocument>.Builder builder = ImmutableArray.CreateBuilder<IDocument>();
 
@@ -172,7 +172,7 @@ namespace Statiq.Common
         /// <returns>The flattened documents.</returns>
         public static DocumentList<IDocument> Flatten(this IEnumerable<IDocument> documents, string treePlaceholderKey, string childrenKey = Keys.Children)
         {
-            _ = documents ?? throw new ArgumentNullException(nameof(documents));
+            documents.ThrowIfNull(nameof(documents));
 
             // Use a stack so we don't overflow the call stack with recursive calls for deep trees
             Stack<IDocument> stack = new Stack<IDocument>(documents);

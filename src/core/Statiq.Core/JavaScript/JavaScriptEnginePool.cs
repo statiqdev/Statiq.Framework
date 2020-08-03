@@ -51,12 +51,8 @@ namespace Statiq.Core
 
         public void RecycleEngine(IJavaScriptEngine engine)
         {
-            if (engine == null)
-            {
-                throw new ArgumentNullException(nameof(engine));
-            }
-            PooledJavaScriptEngine pooledEngine = engine as PooledJavaScriptEngine;
-            if (pooledEngine == null)
+            engine.ThrowIfNull(nameof(engine));
+            if (!(engine is PooledJavaScriptEngine pooledEngine))
             {
                 throw new ArgumentException("The specified engine was not from a pool");
             }

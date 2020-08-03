@@ -13,7 +13,7 @@ namespace Statiq.Common
 
         internal DocumentFile(DocumentFileProvider fileProvider, NormalizedPath path)
         {
-            _fileProvider = fileProvider ?? throw new ArgumentNullException(nameof(fileProvider));
+            _fileProvider = fileProvider.ThrowIfNull(nameof(fileProvider));
             path.ThrowIfNull(nameof(path));
             if (!fileProvider.Files.TryGetValue(path, out _document))
             {

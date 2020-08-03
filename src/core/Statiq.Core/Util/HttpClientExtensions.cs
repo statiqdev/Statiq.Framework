@@ -26,8 +26,8 @@ namespace Statiq.Core
         /// <returns>The response.</returns>
         public static async Task<HttpResponseMessage> SendWithRetryAsync(this HttpClient httpClient, Func<HttpRequestMessage> requestFactory, CancellationToken cancellationToken = default)
         {
-            _ = httpClient ?? throw new ArgumentNullException(nameof(httpClient));
-            _ = requestFactory ?? throw new ArgumentNullException(nameof(requestFactory));
+            httpClient.ThrowIfNull(nameof(httpClient));
+            requestFactory.ThrowIfNull(nameof(requestFactory));
 
             AsyncRetryPolicy<HttpResponseMessage> retryPolicy = Policy
                 .Handle<HttpRequestException>()

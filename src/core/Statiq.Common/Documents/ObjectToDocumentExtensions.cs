@@ -139,7 +139,7 @@ namespace Statiq.Common
             IEnumerable<KeyValuePair<string, object>> items,
             IContentProvider contentProvider = null)
         {
-            _ = obj ?? throw new ArgumentNullException();
+            obj.ThrowIfNull(nameof(obj));
 
             // Check if this is already an IDocument
             if (obj is IDocument document)

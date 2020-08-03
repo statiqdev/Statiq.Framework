@@ -52,14 +52,8 @@ namespace Statiq.YouTube
         /// <returns>The current module instance.</returns>
         public ReadYouTube WithRequest(string key, Func<IExecutionContext, YouTubeService, object> request)
         {
-            if (string.IsNullOrEmpty(key))
-            {
-                throw new ArgumentException("Argument is null or empty", nameof(key));
-            }
-            if (request == null)
-            {
-                throw new ArgumentNullException(nameof(request));
-            }
+            key.ThrowIfNullOrEmpty(nameof(key));
+            request.ThrowIfNull(nameof(request));
 
             _requests[key] = (doc, ctx, github) => request(ctx, github);
             return this;
@@ -78,7 +72,7 @@ namespace Statiq.YouTube
                 throw new ArgumentException("Argument is null or empty", nameof(key));
             }
 
-            _requests[key] = request ?? throw new ArgumentNullException(nameof(request));
+            _requests[key] = request.ThrowIfNull(nameof(request));
             return this;
         }
 

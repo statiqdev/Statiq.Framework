@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using Statiq.Common;
 
 namespace Statiq.CodeAnalysis.Analysis
 {
@@ -65,10 +66,7 @@ namespace Statiq.CodeAnalysis.Analysis
 
         public WrappingStringBuilder Append(string value, bool wrapBefore = false)
         {
-            if (value == null)
-            {
-                throw new ArgumentNullException(nameof(value));
-            }
+            value.ThrowIfNull(nameof(value));
 
             if (value?.Length == 0)
             {
@@ -102,10 +100,7 @@ namespace Statiq.CodeAnalysis.Analysis
 
         public WrappingStringBuilder AppendLine(string value, bool wrapBefore = false)
         {
-            if (value == null)
-            {
-                throw new ArgumentNullException(nameof(value));
-            }
+            value.ThrowIfNull(nameof(value));
 
             // Append this string (and wrap if needed) then wrap again if anything is left
             Append(value, wrapBefore);

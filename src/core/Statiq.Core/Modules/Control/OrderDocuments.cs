@@ -38,11 +38,7 @@ namespace Statiq.Core
         /// <param name="key">A delegate that should return the key to use for ordering.</param>
         public OrderDocuments(Config<object> key)
         {
-            if (key == null)
-            {
-                throw new ArgumentNullException(nameof(key));
-            }
-
+            key.ThrowIfNull(nameof(key));
             _orders.Push(new Order(key));
         }
 
@@ -52,11 +48,7 @@ namespace Statiq.Core
         /// <param name="key">A metadata key to get the objects to use for comparison.</param>
         public OrderDocuments(string key)
         {
-            if (key == null)
-            {
-                throw new ArgumentNullException(nameof(key));
-            }
-
+            key.ThrowIfNull(nameof(key));
             _orders.Push(new Order(Config.FromDocument(key)));
         }
 
@@ -68,11 +60,7 @@ namespace Statiq.Core
         /// <returns>The current module instance.</returns>
         public OrderDocuments ThenBy(Config<object> key)
         {
-            if (key == null)
-            {
-                throw new ArgumentNullException(nameof(key));
-            }
-
+            key.ThrowIfNull(nameof(key));
             _orders.Push(new Order(key));
             return this;
         }
@@ -85,11 +73,7 @@ namespace Statiq.Core
         /// <returns>The current module instance.</returns>
         public OrderDocuments ThenBy(string key)
         {
-            if (key == null)
-            {
-                throw new ArgumentNullException(nameof(key));
-            }
-
+            key.ThrowIfNull(nameof(key));
             _orders.Push(new Order(Config.FromDocument(key)));
             return this;
         }

@@ -55,7 +55,7 @@ namespace Statiq.Core
         /// </param>
         public SetDestination(string pathOrExtension)
             : base(
-                (pathOrExtension ?? throw new ArgumentNullException(nameof(pathOrExtension))).StartsWith('.') && new NormalizedPath(pathOrExtension).Segments.Length <= 1
+                pathOrExtension.ThrowIfNull(nameof(pathOrExtension)).StartsWith('.') && new NormalizedPath(pathOrExtension).Segments.Length <= 1
                     ? Config.FromDocument(doc =>
                     {
                         NormalizedPath path = GetPathFromMetadata(doc);
@@ -93,7 +93,7 @@ namespace Statiq.Core
                         return path;
                     }), true)
         {
-            _ = destination ?? throw new ArgumentNullException(nameof(destination));
+            destination.ThrowIfNull(nameof(destination));
         }
 
         private static NormalizedPath GetPathFromMetadata(IDocument doc)

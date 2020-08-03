@@ -12,7 +12,7 @@ namespace Statiq.App
         public static TBootstrapper ConfigureCommands<TBootstrapper>(this TBootstrapper bootstrapper, Action<IConfigurator> action)
             where TBootstrapper : IBootstrapper
         {
-            _ = bootstrapper ?? throw new ArgumentNullException(nameof(bootstrapper));
+            bootstrapper.ThrowIfNull(nameof(bootstrapper));
             bootstrapper.Configurators.Add<ConfigurableCommands>(x => action(x.Configurator));
             return bootstrapper;
         }
@@ -20,7 +20,7 @@ namespace Statiq.App
         public static Bootstrapper Configure<TConfigurable>(this Bootstrapper bootstrapper, Action<TConfigurable> action)
             where TConfigurable : IConfigurable
         {
-            _ = bootstrapper ?? throw new ArgumentNullException(nameof(bootstrapper));
+            bootstrapper.ThrowIfNull(nameof(bootstrapper));
             bootstrapper.Configurators.Add(action);
             return bootstrapper;
         }
@@ -30,7 +30,7 @@ namespace Statiq.App
             where TConfigurable : IConfigurable
             where TConfigurator : Common.IConfigurator<TConfigurable>
         {
-            _ = bootstrapper ?? throw new ArgumentNullException(nameof(bootstrapper));
+            bootstrapper.ThrowIfNull(nameof(bootstrapper));
             bootstrapper.Configurators.Add<TConfigurable, TConfigurator>();
             return bootstrapper;
         }
@@ -40,7 +40,7 @@ namespace Statiq.App
             Common.IConfigurator<TConfigurable> configurator)
             where TConfigurable : IConfigurable
         {
-            _ = bootstrapper ?? throw new ArgumentNullException(nameof(bootstrapper));
+            bootstrapper.ThrowIfNull(nameof(bootstrapper));
             bootstrapper.Configurators.Add(configurator);
             return bootstrapper;
         }

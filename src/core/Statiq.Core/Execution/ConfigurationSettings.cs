@@ -21,7 +21,7 @@ namespace Statiq.Core
             IEnumerable<KeyValuePair<string, object>> settings)
             : base(configuration)
         {
-            _executionState = executionState ?? throw new ArgumentNullException(nameof(executionState));
+            _executionState = executionState.ThrowIfNull(nameof(executionState));
 
             _settings = new Dictionary<string, object>(StringComparer.OrdinalIgnoreCase);
             if (settings != null)
@@ -47,14 +47,14 @@ namespace Statiq.Core
         private ConfigurationSettings(IConfiguration configuration, IDictionary<string, object> valueOverrides)
             : base(configuration)
         {
-            _settings = valueOverrides ?? throw new ArgumentNullException(nameof(valueOverrides));
+            _settings = valueOverrides.ThrowIfNull(nameof(valueOverrides));
         }
 
         public void Add(KeyValuePair<string, object> item) => Add(item.Key, item.Value);
 
         public void Add(string key, object value)
         {
-            _ = key ?? throw new ArgumentNullException(nameof(key));
+            key.ThrowIfNull(nameof(key));
 
             if (ContainsKey(key))
             {
@@ -69,7 +69,7 @@ namespace Statiq.Core
             get => base[key];
             set
             {
-                _ = key ?? throw new ArgumentNullException(nameof(key));
+                key.ThrowIfNull(nameof(key));
 
                 _settings[key] = ScriptMetadataValue.TryGetScriptMetadataValue(key, value, _executionState, out ScriptMetadataValue metadataValue)
                     ? metadataValue
@@ -135,7 +135,7 @@ namespace Statiq.Core
 
         public override bool TryGetRaw(string key, out object value)
         {
-            _ = key ?? throw new ArgumentNullException(nameof(key));
+            key.ThrowIfNull(nameof(key));
             if (_settings.TryGetValue(key, out value))
             {
                 value = SettingsValue.Get(value);

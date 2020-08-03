@@ -10,7 +10,7 @@ namespace Statiq.Core
 
         public LocalFileProvider(IReadOnlyFileSystem fileSystem)
         {
-            _fileSystem = fileSystem ?? throw new ArgumentNullException(nameof(fileSystem));
+            _fileSystem = fileSystem.ThrowIfNull(nameof(fileSystem));
         }
 
         internal static Policy RetryPolicy { get; } =

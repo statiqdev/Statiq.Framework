@@ -54,7 +54,7 @@ namespace Statiq.Core
                     throw new NotSupportedException();
                 }
 
-                _pipelines[name] = value ?? throw new ArgumentNullException(nameof(value));
+                _pipelines[name] = value.ThrowIfNull(nameof(value));
                 _engine.ResetPipelinePhases();
             }
         }
@@ -75,8 +75,8 @@ namespace Statiq.Core
             }
 
             _pipelines.Add(
-                name ?? throw new ArgumentNullException(nameof(name)),
-                value ?? throw new ArgumentNullException(nameof(value)));
+                name.ThrowIfNull(nameof(name)),
+                value.ThrowIfNull(nameof(value)));
             _engine.ResetPipelinePhases();
         }
 
@@ -87,10 +87,7 @@ namespace Statiq.Core
                 throw new NotSupportedException();
             }
 
-            if (item.Value == null)
-            {
-                throw new ArgumentNullException(nameof(item.Value));
-            }
+            item.Value.ThrowIfNull(nameof(item.Value));
             ((IDictionary<string, IPipeline>)_pipelines).Add(item);
             _engine.ResetPipelinePhases();
         }

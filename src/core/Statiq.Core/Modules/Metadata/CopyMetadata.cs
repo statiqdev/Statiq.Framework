@@ -25,8 +25,8 @@ namespace Statiq.Core
         /// <param name="format">The formatting to apply to the new value.</param>
         public CopyMetadata(string fromKey, string toKey, string format = null)
         {
-            _fromKey = fromKey ?? throw new ArgumentNullException(nameof(fromKey));
-            _toKey = toKey ?? throw new ArgumentNullException(nameof(toKey));
+            _fromKey = fromKey.ThrowIfNull(nameof(fromKey));
+            _toKey = toKey.ThrowIfNull(nameof(toKey));
             _format = format;
         }
 
@@ -37,7 +37,7 @@ namespace Statiq.Core
         /// <returns>The current module instance.</returns>
         public CopyMetadata WithFormat(string format)
         {
-            _format = format ?? throw new ArgumentNullException(nameof(format));
+            _format = format.ThrowIfNull(nameof(format));
             return this;
         }
 
@@ -48,7 +48,7 @@ namespace Statiq.Core
         /// <returns>The current module instance.</returns>
         public CopyMetadata WithFormat(Func<string, string> format)
         {
-            _formatFunc = format ?? throw new ArgumentNullException(nameof(format));
+            _formatFunc = format.ThrowIfNull(nameof(format));
             return this;
         }
 

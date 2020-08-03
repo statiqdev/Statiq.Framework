@@ -22,25 +22,25 @@ namespace Statiq.Core
         public AddDocumentsToMetadata(string key)
             : base(Array.Empty<IModule>())
         {
-            _key = key ?? throw new ArgumentNullException(nameof(key));
+            _key = key.ThrowIfNull(nameof(key));
         }
 
         public AddDocumentsToMetadata(string key, params IModule[] modules)
             : base(modules)
         {
-            _key = key ?? throw new ArgumentNullException(nameof(key));
+            _key = key.ThrowIfNull(nameof(key));
         }
 
         public AddDocumentsToMetadata(string key, params string[] pipelines)
             : base(new ExecuteConfig(Config.FromContext(ctx => ctx.Outputs.FromPipelines(pipelines))))
         {
-            _key = key ?? throw new ArgumentNullException(nameof(key));
+            _key = key.ThrowIfNull(nameof(key));
         }
 
         public AddDocumentsToMetadata(string key, Config<IEnumerable<IDocument>> documents)
             : base(new ExecuteConfig(documents))
         {
-            _key = key ?? throw new ArgumentNullException(nameof(key));
+            _key = key.ThrowIfNull(nameof(key));
         }
 
         protected override IEnumerable<IDocument> ExecuteChildren(

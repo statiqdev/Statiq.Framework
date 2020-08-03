@@ -17,7 +17,7 @@ namespace Statiq.Common
         /// <param name="action">The action to call on disposal.</param>
         public ActionDisposable(Action action)
         {
-            _action = action ?? throw new ArgumentNullException(nameof(action));
+            _action = action.ThrowIfNull(nameof(action));
         }
 
         /// <summary>

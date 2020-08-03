@@ -69,7 +69,7 @@ namespace Statiq.Core
         /// getting the value of the specified metadata key.</param>
         public GenerateSitemap(Config<object> sitemapItemOrLocation, Func<string, string> locationFormatter = null)
         {
-            _sitemapItemOrLocation = sitemapItemOrLocation ?? throw new ArgumentNullException(nameof(sitemapItemOrLocation));
+            _sitemapItemOrLocation = sitemapItemOrLocation.ThrowIfNull(nameof(sitemapItemOrLocation));
             _locationFormatter = locationFormatter;
         }
 

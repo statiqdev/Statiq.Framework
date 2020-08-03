@@ -67,7 +67,7 @@ namespace Statiq.Testing
 
         public void Add(string key, object value)
         {
-            _ = key ?? throw new ArgumentNullException(nameof(key));
+            key.ThrowIfNull(nameof(key));
 
             if (ContainsKey(key))
             {
@@ -82,7 +82,7 @@ namespace Statiq.Testing
             get => base[key];
             set
             {
-                _ = key ?? throw new ArgumentNullException(nameof(key));
+                key.ThrowIfNull(nameof(key));
                 _settings[key] = value;
             }
         }
@@ -121,7 +121,7 @@ namespace Statiq.Testing
 
         public override bool TryGetRaw(string key, out object value)
         {
-            _ = key ?? throw new ArgumentNullException(nameof(key));
+            key.ThrowIfNull(nameof(key));
             if (_settings.TryGetValue(key, out value))
             {
                 value = SettingsValue.Get(value);

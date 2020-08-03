@@ -18,7 +18,7 @@ namespace Statiq.Common
 
         public EnumerableEnumerator(Func<IEnumerator<TValue>> enumeratorFunc)
         {
-            _enumeratorFunc = enumeratorFunc ?? throw new ArgumentNullException(nameof(enumeratorFunc));
+            _enumeratorFunc = enumeratorFunc.ThrowIfNull(nameof(enumeratorFunc));
         }
 
         public IEnumerator<TValue> GetEnumerator() => _enumeratorFunc();

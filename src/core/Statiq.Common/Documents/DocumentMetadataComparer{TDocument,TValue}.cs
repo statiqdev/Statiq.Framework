@@ -35,9 +35,9 @@ namespace Statiq.Common
 
         public DocumentMetadataComparer(string key, TValue defaultValue, IComparer<TValue> comparer)
         {
-            _key = key ?? throw new ArgumentNullException(nameof(key));
+            _key = key.ThrowIfNull(nameof(key));
             _defaultValue = defaultValue;
-            _comparer = comparer ?? throw new ArgumentNullException(nameof(comparer));
+            _comparer = comparer.ThrowIfNull(nameof(comparer));
         }
 
         public int Compare([AllowNull] TDocument x, [AllowNull] TDocument y) =>

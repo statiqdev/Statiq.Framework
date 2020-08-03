@@ -273,7 +273,7 @@ namespace Statiq.Common
         {
             get
             {
-                if (!TryGetValue(key ?? throw new ArgumentNullException(nameof(key)), out object value))
+                if (!TryGetValue(key.ThrowIfNull(nameof(key)), out object value))
                 {
                     throw new KeyNotFoundException("The key " + key + " was not found in the document, use Get() to provide a default value.");
                 }
