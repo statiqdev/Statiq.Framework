@@ -8,7 +8,7 @@ namespace Statiq.Common
         // See https://github.com/dotnet/runtime/issues/29758#issuecomment-498645607
 
         public static bool Replace(
-            this ref Span<char> str,
+            this in Span<char> str,
             char oldChar,
             char newChar)
         {
@@ -25,7 +25,7 @@ namespace Statiq.Common
         }
 
         public static bool Replace(
-            this ref Span<char> str,
+            this in Span<char> str,
             char[] oldChars,
             char newChar)
         {
@@ -45,7 +45,7 @@ namespace Statiq.Common
             return replaced;
         }
 
-        public static Span<char> Append(this Span<char> str, params char[] chars)
+        public static Span<char> Append(this in Span<char> str, params char[] chars)
         {
             Span<char> appended = new char[str.Length + chars.Length];
             str.CopyTo(appended);
@@ -60,7 +60,7 @@ namespace Statiq.Common
         /// Removes characters from a character span by copying over them and returning a slice.
         /// This is destructive and the original span should no longer be used.
         /// </summary>
-        public static Span<char> Remove(this ref Span<char> str, int startIndex, int length)
+        public static Span<char> Remove(this in Span<char> str, int startIndex, int length)
         {
             if (length == 0)
             {
