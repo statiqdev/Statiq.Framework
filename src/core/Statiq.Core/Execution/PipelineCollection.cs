@@ -33,7 +33,7 @@ namespace Statiq.Core
 
         public IPipeline Add(string name)
         {
-            if (_engine == null)
+            if (_engine is null)
             {
                 throw new NotSupportedException();
             }
@@ -49,7 +49,7 @@ namespace Statiq.Core
             get => _pipelines[name];
             set
             {
-                if (_engine == null)
+                if (_engine is null)
                 {
                     throw new NotSupportedException();
                 }
@@ -69,7 +69,7 @@ namespace Statiq.Core
 
         public void Add(string name, IPipeline value)
         {
-            if (_engine == null)
+            if (_engine is null)
             {
                 throw new NotSupportedException();
             }
@@ -82,7 +82,7 @@ namespace Statiq.Core
 
         public void Add(KeyValuePair<string, IPipeline> item)
         {
-            if (_engine == null)
+            if (_engine is null)
             {
                 throw new NotSupportedException();
             }
@@ -94,7 +94,7 @@ namespace Statiq.Core
 
         public void Clear()
         {
-            if (_engine == null)
+            if (_engine is null)
             {
                 throw new NotSupportedException();
             }
@@ -112,7 +112,7 @@ namespace Statiq.Core
 
         public bool Remove(string name)
         {
-            if (_engine == null)
+            if (_engine is null)
             {
                 throw new NotSupportedException();
             }
@@ -127,7 +127,7 @@ namespace Statiq.Core
 
         public bool Remove(KeyValuePair<string, IPipeline> item)
         {
-            if (_engine == null)
+            if (_engine is null)
             {
                 throw new NotSupportedException();
             }

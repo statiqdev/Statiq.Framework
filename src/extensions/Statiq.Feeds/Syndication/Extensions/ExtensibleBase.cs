@@ -48,19 +48,19 @@ namespace Statiq.Feeds.Syndication.Extensions
         /// </summary>
         public void AddExtensions(IExtensionAdapter adapter)
         {
-            if (adapter == null)
+            if (adapter is null)
             {
                 return;
             }
 
             IEnumerable<XmlAttribute> attributes = adapter.GetAttributeEntensions();
-            if (attributes != null)
+            if (attributes is object)
             {
                 AttributeExtensions.AddRange(attributes);
             }
 
             IEnumerable<XmlElement> elements = adapter.GetElementExtensions();
-            if (elements != null)
+            if (elements is object)
             {
                 ElementExtensions.AddRange(elements);
             }
@@ -71,7 +71,7 @@ namespace Statiq.Feeds.Syndication.Extensions
         /// </summary>
         protected void FillExtensions(IExtensionAdapter adapter)
         {
-            if (adapter == null)
+            if (adapter is null)
             {
                 return;
             }
@@ -118,7 +118,7 @@ namespace Statiq.Feeds.Syndication.Extensions
         }
 
         protected static string ConvertToString(Uri uri) =>
-            uri == null ? null : Uri.EscapeUriString(uri.ToString());
+            uri is null ? null : Uri.EscapeUriString(uri.ToString());
 
         protected static Uri ConvertToUri(string value)
         {

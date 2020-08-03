@@ -37,7 +37,7 @@ namespace Statiq.Common
         internal async Task<TValue> GetAndTransformValueAsync(IDocument document, IExecutionContext context, Func<TValue, TValue> transform = null)
         {
             TValue value = await _delegate(document, context);
-            return transform == null ? value : transform(value);
+            return transform is null ? value : transform(value);
         }
 
         public static implicit operator Config<TValue>(TValue value) => new Config<TValue>((_, __) => Task.FromResult(value), false);

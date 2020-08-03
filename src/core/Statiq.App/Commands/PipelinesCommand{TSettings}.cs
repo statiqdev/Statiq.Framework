@@ -47,10 +47,10 @@ namespace Statiq.App
             IEngineManager engineManager)
         {
             PipelinesCommandSettings buildSettings = commandSettings as PipelinesCommandSettings ?? commandContext.Data as PipelinesCommandSettings;
-            if (buildSettings != null)
+            if (buildSettings is object)
             {
                 engineManager.Pipelines = buildSettings.Pipelines;
-                engineManager.NormalPipelines = buildSettings.Pipelines == null || buildSettings.Pipelines.Length == 0 || buildSettings.NormalPipelines;
+                engineManager.NormalPipelines = buildSettings.Pipelines is null || buildSettings.Pipelines.Length == 0 || buildSettings.NormalPipelines;
             }
         }
     }

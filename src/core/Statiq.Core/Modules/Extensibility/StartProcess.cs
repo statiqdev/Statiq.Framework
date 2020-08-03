@@ -90,9 +90,9 @@ namespace Statiq.Core
             argument.ThrowIfNull(nameof(argument));
             return (StartProcess)CombineConfig(Arguments, argument, (first, second) =>
             {
-                string space = first == null || second == null ? string.Empty : " ";
+                string space = first is null || second is null ? string.Empty : " ";
                 first ??= string.Empty;
-                second = second == null ? string.Empty : (quoted ? "\"" + second + "\"" : second);
+                second = second is null ? string.Empty : (quoted ? "\"" + second + "\"" : second);
                 return first + space + second;
             });
         }
@@ -107,9 +107,9 @@ namespace Statiq.Core
         public StartProcess WithArgument(Config<string> name, Config<string> value, bool quoted = false) =>
             WithArgument(name.CombineWith(value, (name, value) =>
             {
-                string space = name == null || value == null ? string.Empty : " ";
+                string space = name is null || value is null ? string.Empty : " ";
                 name ??= string.Empty;
-                value = value == null ? string.Empty : (quoted ? "\"" + value + "\"" : value);
+                value = value is null ? string.Empty : (quoted ? "\"" + value + "\"" : value);
                 return name + space + value;
             }));
 
@@ -129,7 +129,7 @@ namespace Statiq.Core
         public StartProcess WithEnvironmentVariables(Config<IEnumerable<KeyValuePair<string, string>>> environmentVariables)
         {
             environmentVariables.ThrowIfNull(nameof(environmentVariables));
-            return (StartProcess)CombineConfig(EnvironmentVariables, environmentVariables, (first, second) => second == null ? first : first?.Concat(second) ?? second);
+            return (StartProcess)CombineConfig(EnvironmentVariables, environmentVariables, (first, second) => second is null ? first : first?.Concat(second) ?? second);
         }
 
         /// <summary>
@@ -307,7 +307,7 @@ namespace Statiq.Core
             bool continueOnError = values.GetBool(ContinueOnErrorKey);
             using (Stream contentStream = _background || keepContent ? null : await context.GetContentStreamAsync())
             {
-                using (StreamWriter contentWriter = contentStream == null ? null : new StreamWriter(contentStream, leaveOpen: true))
+                using (StreamWriter contentWriter = contentStream is null ? null : new StreamWriter(contentStream, leaveOpen: true))
                 {
                     using (StringWriter errorWriter = !_background && continueOnError ? new StringWriter() : null)
                     {
@@ -409,7 +409,7 @@ namespace Statiq.Core
                         return context.CloneOrCreateDocument(
                             input,
                             metadata,
-                            contentStream == null ? null : context.GetContentProvider(contentStream))
+                            contentStream is null ? null : context.GetContentProvider(contentStream))
                             .Yield();
                     }
                 }

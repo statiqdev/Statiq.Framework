@@ -59,7 +59,7 @@ namespace Statiq.CodeAnalysis
                     }
                     return CompileProject(context, analyzer, log);
                 })
-                .Where(x => x != null)
+                .Where(x => x is object)
                 .ToArray();
 
             AdhocWorkspace workspace = new AdhocWorkspace();

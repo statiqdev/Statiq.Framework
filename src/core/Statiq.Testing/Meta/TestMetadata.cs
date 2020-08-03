@@ -21,7 +21,7 @@ namespace Statiq.Testing
         public TestMetadata(IEnumerable<KeyValuePair<string, object>> items)
         {
             _dictionary = new Dictionary<string, object>(StringComparer.OrdinalIgnoreCase);
-            if (items != null)
+            if (items is object)
             {
                 foreach (KeyValuePair<string, object> item in items)
                 {

@@ -23,11 +23,11 @@ namespace Statiq.Core
         /// <inheritdoc />
         protected override async Task<IEnumerable<IDocument>> ExecuteConfigAsync(IDocument input, IExecutionContext context, string value)
         {
-            if (input == null)
+            if (input is null)
             {
                 return context.CreateDocument(await context.GetContentProviderAsync(value)).Yield();
             }
-            return value == null
+            return value is null
                 ? input.Yield()
                 : input.Clone(await context.GetContentProviderAsync(value + await input.GetContentStringAsync(), input.ContentProvider.MediaType)).Yield();
         }

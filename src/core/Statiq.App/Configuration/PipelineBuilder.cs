@@ -40,7 +40,7 @@ namespace Statiq.App
 
         public PipelineBuilder WithInputReadFiles(IEnumerable<string> patterns)
         {
-            if (patterns != null)
+            if (patterns is object)
             {
                 _actions.Add(x => x.InputModules.Add(new ReadFiles((Config<IEnumerable<string>>)patterns)));
             }
@@ -78,7 +78,7 @@ namespace Statiq.App
 
         public PipelineBuilder WithInputModules(IEnumerable<IModule> modules)
         {
-            if (modules != null)
+            if (modules is object)
             {
                 _actions.Add(x => x.WithInputModules(modules));
             }
@@ -93,7 +93,7 @@ namespace Statiq.App
 
         public PipelineBuilder WithProcessModules(IEnumerable<IModule> modules)
         {
-            if (modules != null)
+            if (modules is object)
             {
                 _actions.Add(x => x.WithProcessModules(modules));
             }
@@ -108,7 +108,7 @@ namespace Statiq.App
 
         public PipelineBuilder WithPostProcessModules(IEnumerable<IModule> modules)
         {
-            if (modules != null)
+            if (modules is object)
             {
                 _actions.Add(x => x.WithPostProcessModules(modules));
             }
@@ -123,7 +123,7 @@ namespace Statiq.App
 
         public PipelineBuilder WithOutputModules(IEnumerable<IModule> modules)
         {
-            if (modules != null)
+            if (modules is object)
             {
                 _actions.Add(x => x.WithOutputModules(modules));
             }
@@ -168,7 +168,7 @@ namespace Statiq.App
 
         public PipelineBuilder WithDependencies(IEnumerable<string> dependencies)
         {
-            if (dependencies != null)
+            if (dependencies is object)
             {
                 _actions.Add(x => x.WithDependencies(dependencies));
             }
@@ -183,7 +183,7 @@ namespace Statiq.App
 
         public PipelineBuilder AsDependencyOf(IEnumerable<string> dependencyOf)
         {
-            if (dependencyOf != null)
+            if (dependencyOf is object)
             {
                 _actions.Add(x => x.AsDependencyOf(dependencyOf));
             }

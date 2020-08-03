@@ -42,7 +42,7 @@ namespace Statiq.Core
         protected override IEnumerable<IDocument> ExecuteConfig(IDocument input, IExecutionContext context, string value)
         {
             context.Log(_logLevel, value);
-            return input == null ? context.Inputs : input.Yield();
+            return input is null ? context.Inputs : input.Yield();
         }
     }
 }

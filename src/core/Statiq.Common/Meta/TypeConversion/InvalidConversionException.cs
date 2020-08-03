@@ -16,7 +16,7 @@ namespace Statiq.Common
         /// Initializes a new instance of the <see cref="InvalidConversionException">InvalidConversionException</see> class.
         /// </summary>
         public InvalidConversionException(object valueToConvert, Type destinationType)
-          : base(string.Format("'{0}' ({1}) is not convertible to '{2}'.", valueToConvert, valueToConvert == null ? (object)(Type)null : (object)valueToConvert.GetType(), (object)destinationType))
+          : base(string.Format("'{0}' ({1}) is not convertible to '{2}'.", valueToConvert, valueToConvert is null ? (object)(Type)null : (object)valueToConvert.GetType(), (object)destinationType))
         {
         }
     }

@@ -141,7 +141,7 @@ namespace Statiq.Common
                 Object,
                 Source.IsNull ? source : Source,
                 destination.IsNull ? Destination : destination,
-                items == null ? _metadata : new Metadata(_metadata, items),
+                items is null ? _metadata : new Metadata(_metadata, items),
                 contentProvider ?? ContentProvider);
 
         /// <inheritdoc />

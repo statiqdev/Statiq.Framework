@@ -8,15 +8,15 @@ namespace Statiq.Common
     {
         public static Config<bool> CombineWith(this Config<bool> first, Config<bool> second)
         {
-            if (first == null && second == null)
+            if (first is null && second is null)
             {
                 return Config.FromValue(false);
             }
-            if (first == null)
+            if (first is null)
             {
                 return second;
             }
-            if (second == null)
+            if (second is null)
             {
                 return first;
             }
@@ -29,9 +29,9 @@ namespace Statiq.Common
         {
             combine.ThrowIfNull(nameof(combine));
 
-            // Don't need to check for first == null because Transform() handles that
+            // Don't need to check for first is null because Transform() handles that
 
-            if (second == null)
+            if (second is null)
             {
                 return first.Transform(value => combine(value, default));
             }
@@ -44,9 +44,9 @@ namespace Statiq.Common
         {
             combine.ThrowIfNull(nameof(combine));
 
-            // Don't need to check for first == null because Transform() handles that
+            // Don't need to check for first is null because Transform() handles that
 
-            if (second == null)
+            if (second is null)
             {
                 return first.Transform(value => combine(value, default));
             }
@@ -59,9 +59,9 @@ namespace Statiq.Common
         {
             combine.ThrowIfNull(nameof(combine));
 
-            // Don't need to check for first == null because Transform() handles that
+            // Don't need to check for first is null because Transform() handles that
 
-            if (second == null)
+            if (second is null)
             {
                 return first.Transform((value, ctx) => combine(value, default, ctx));
             }
@@ -74,9 +74,9 @@ namespace Statiq.Common
         {
             combine.ThrowIfNull(nameof(combine));
 
-            // Don't need to check for first == null because Transform() handles that
+            // Don't need to check for first is null because Transform() handles that
 
-            if (second == null)
+            if (second is null)
             {
                 return first.Transform((value, ctx) => combine(value, default, ctx));
             }
@@ -89,9 +89,9 @@ namespace Statiq.Common
         {
             combine.ThrowIfNull(nameof(combine));
 
-            // Don't need to check for first == null because Transform() handles that
+            // Don't need to check for first is null because Transform() handles that
 
-            if (second == null)
+            if (second is null)
             {
                 return first.Transform((value, doc, ctx) => combine(value, default, doc, ctx));
             }
@@ -102,9 +102,9 @@ namespace Statiq.Common
         {
             combine.ThrowIfNull(nameof(combine));
 
-            // Don't need to check for first == null because Transform() handles that
+            // Don't need to check for first is null because Transform() handles that
 
-            if (second == null)
+            if (second is null)
             {
                 return first.Transform((value, doc, ctx) => combine(value, default, doc, ctx));
             }

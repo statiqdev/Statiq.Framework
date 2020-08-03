@@ -87,7 +87,7 @@ namespace Statiq.Core
             }
 
             // If we're in the process phase, get outputs from the process phase only from dependencies
-            if (_cachedDependencyOutputs == null)
+            if (_cachedDependencyOutputs is null)
             {
                 HashSet<string> transientDependencies = GatherProcessPhaseDependencies(_currentPhase);
                 _cachedDependencyOutputs = _phaseResults
@@ -102,7 +102,7 @@ namespace Statiq.Core
         private static ImmutableArray<IDocument> GetOutputs(PhaseResult[] phaseResults, Phase phase)
         {
             int p = (int)phase;
-            while (p >= 0 && phaseResults[p] == null)
+            while (p >= 0 && phaseResults[p] is null)
             {
                 p--;
             }
@@ -111,7 +111,7 @@ namespace Statiq.Core
 
         private HashSet<string> GatherProcessPhaseDependencies(PipelinePhase phase, HashSet<string> transientDependencies = null)
         {
-            if (transientDependencies == null)
+            if (transientDependencies is null)
             {
                 transientDependencies = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
             }

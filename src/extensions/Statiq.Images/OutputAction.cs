@@ -23,6 +23,6 @@ namespace Statiq.Images.Operations
             _action?.Invoke(image, stream);
 
         public NormalizedPath GetPath(in NormalizedPath path) =>
-            _pathModifier == null ? path : _pathModifier(path);
+            _pathModifier is null ? path : _pathModifier(path);
     }
 }

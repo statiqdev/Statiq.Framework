@@ -36,7 +36,7 @@ namespace Statiq.Razor
 
         public bool Equals(CompilerCacheKey other)
         {
-            if (other == null || other._hashCode != _hashCode)
+            if (other is null || other._hashCode != _hashCode)
             {
                 return false;
             }

@@ -75,7 +75,7 @@ namespace Statiq.Core
 
         private void Add(string code, StringBuilder builder, bool insertLineDirective = true)
         {
-            if (code != null)
+            if (code is object)
             {
                 if (builder != _lastBuilder && insertLineDirective)
                 {

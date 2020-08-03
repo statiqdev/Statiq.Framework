@@ -41,7 +41,7 @@ namespace Statiq.Feeds.Syndication.Atom
         {
             get
             {
-                if (_src != null)
+                if (_src is object)
                 {
                     return null;
                 }

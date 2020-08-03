@@ -31,11 +31,11 @@ namespace Statiq.Common
 
         public MemoryContent(byte[] buffer, int index, int count, string mediaType)
         {
-            if (buffer == null && index != 0)
+            if (buffer is null && index != 0)
             {
                 throw new ArgumentException($"{nameof(index)} cannot be specified for null buffer");
             }
-            if (buffer == null && count != 0)
+            if (buffer is null && count != 0)
             {
                 throw new ArgumentException($"{nameof(count)} cannot be specified for null buffer");
             }
@@ -56,7 +56,7 @@ namespace Statiq.Common
         }
 
         /// <inheritdoc />
-        public Stream GetStream() => _buffer == null ? Stream.Null : new MemoryStream(_buffer, _index, _count, false);
+        public Stream GetStream() => _buffer is null ? Stream.Null : new MemoryStream(_buffer, _index, _count, false);
 
         /// <inheritdoc />
         public long Length

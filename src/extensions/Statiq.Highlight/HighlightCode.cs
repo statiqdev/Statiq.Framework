@@ -157,7 +157,7 @@ namespace Statiq.Highlight
 
                 // Check if they specified a language in their code block
                 string language = element.ClassList.FirstOrDefault(i => i.StartsWith("language"));
-                if (language != null)
+                if (language is object)
                 {
                     engine.SetVariableValue("language", language.Replace("language-", string.Empty));
                     engine.Execute("result = hljs.highlight(language, input)");

@@ -72,7 +72,7 @@ namespace Statiq.Razor
 
             // Do a check to make sure required services are registered
             RazorProjectEngine razorProjectEngine = serviceProvider.GetService<RazorProjectEngine>();
-            if (razorProjectEngine == null)
+            if (razorProjectEngine is null)
             {
                 // Razor services haven't been registered so create a new services container for this compiler
                 ServiceCollection serviceCollection = new ServiceCollection();
@@ -174,7 +174,7 @@ namespace Statiq.Razor
         {
             StatiqRazorProjectFileSystem projectFileSystem = serviceProvider.GetRequiredService<StatiqRazorProjectFileSystem>();
 
-            IEnumerable<string> viewStartLocations = request.ViewStartLocation != null
+            IEnumerable<string> viewStartLocations = request.ViewStartLocation is object
                 ? new[] { request.ViewStartLocation }
                 : projectFileSystem.FindHierarchicalItems(request.RelativePath, ViewStartFileName).Select(x => x.FilePath);
 
@@ -185,7 +185,7 @@ namespace Statiq.Razor
                 .Reverse()
                 .ToList();
 
-            if (request.LayoutLocation != null)
+            if (request.LayoutLocation is object)
             {
                 page.Layout = request.LayoutLocation;
             }

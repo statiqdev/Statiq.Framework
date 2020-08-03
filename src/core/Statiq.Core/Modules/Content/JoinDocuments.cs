@@ -65,7 +65,7 @@ namespace Statiq.Core
                 string mediaType = null;
                 foreach (IDocument document in context.Inputs)
                 {
-                    if (document == null)
+                    if (document is null)
                     {
                         continue;
                     }

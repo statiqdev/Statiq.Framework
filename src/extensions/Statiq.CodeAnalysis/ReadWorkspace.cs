@@ -36,7 +36,7 @@ namespace Statiq.CodeAnalysis
         public ReadWorkspace WhereProject(Func<string, bool> predicate)
         {
             Func<string, bool> currentPredicate = _whereProject;
-            _whereProject = currentPredicate == null ? predicate : x => currentPredicate(x) && predicate(x);
+            _whereProject = currentPredicate is null ? predicate : x => currentPredicate(x) && predicate(x);
             return this;
         }
 
@@ -48,7 +48,7 @@ namespace Statiq.CodeAnalysis
         public ReadWorkspace WhereFile(Func<IFile, bool> predicate)
         {
             Func<IFile, bool> currentPredicate = _whereFile;
-            _whereFile = currentPredicate == null ? predicate : x => currentPredicate(x) && predicate(x);
+            _whereFile = currentPredicate is null ? predicate : x => currentPredicate(x) && predicate(x);
             return this;
         }
 
@@ -96,7 +96,7 @@ namespace Statiq.CodeAnalysis
             {
                 IFile projectFile = context.FileSystem.GetInputFile(value);
                 return GetProjects(context, projectFile)
-                    .Where(project => project != null && (_whereProject == null || _whereProject(project.Name)))
+                    .Where(project => project is object && (_whereProject is null || _whereProject(project.Name)))
                     .AsParallel()
                     .SelectMany(GetProjectDocuments);
 
@@ -107,7 +107,7 @@ namespace Statiq.CodeAnalysis
                     return project.Documents
                         .Where(x => !string.IsNullOrWhiteSpace(x.FilePath))
                         .Select(x => context.FileSystem.GetInputFile(x.FilePath))
-                        .Where(x => x.Exists && (_whereFile == null || _whereFile(x)) && (_extensions?.Contains(x.Path.Extension) != false))
+                        .Where(x => x.Exists && (_whereFile is null || _whereFile(x)) && (_extensions?.Contains(x.Path.Extension) != false))
                         .Select(GetProjectDocument);
 
                     IDocument GetProjectDocument(IFile file)

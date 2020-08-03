@@ -67,7 +67,7 @@ namespace Statiq.Html
         {
             // Get the replacement content
             string content = await _content.GetValueAsync(input, context);
-            if (content == null)
+            if (content is null)
             {
                 return input.Yield();
             }

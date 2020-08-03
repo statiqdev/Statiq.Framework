@@ -136,7 +136,7 @@ namespace Statiq.Core
                 dependentPipelinesHash = await CombineCacheHashCodesAsync(
                     context.Outputs.FromPipelines(_pipelineDependencies), null);
             }
-            else if (_pipelineDependencies == null && context.Phase == Phase.Process)
+            else if (_pipelineDependencies is null && context.Phase == Phase.Process)
             {
                 // If we're in the process phase, the default behavior is to depend on all pipeline dependencies
                 dependentPipelinesHash = await CombineCacheHashCodesAsync(
@@ -166,7 +166,7 @@ namespace Statiq.Core
             _cache = new Dictionary<NormalizedPath, CacheEntry>();
 
             // Check for hits and misses
-            if (currentCache == null)
+            if (currentCache is null)
             {
                 // If the current cache is null, this is the first run through
                 misses.AddRange(context.Inputs);
@@ -203,7 +203,7 @@ namespace Statiq.Core
 
                                 // Check the user-supplied predicate against each document with this source
                                 bool invalidated = false;
-                                if (_invalidateDocuments != null)
+                                if (_invalidateDocuments is object)
                                 {
                                     foreach (IDocument input in inputGroup)
                                     {
@@ -273,15 +273,15 @@ namespace Statiq.Core
             HashCode hashCode = default;
 
             // Get document dependencies in a first pass so we can de-dupe them
-            if (context != null)
+            if (context is object)
             {
                 HashSet<IDocument> documentDependencies = new HashSet<IDocument>();
-                if (_documentDependencies != null)
+                if (_documentDependencies is object)
                 {
                     foreach (IDocument document in documents)
                     {
                         IEnumerable<IDocument> dependencies = await _documentDependencies.GetValueAsync(document, context);
-                        if (dependencies != null)
+                        if (dependencies is object)
                         {
                             foreach (IDocument dependency in dependencies)
                             {

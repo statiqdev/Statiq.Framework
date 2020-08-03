@@ -14,7 +14,7 @@ namespace Statiq.Common
         public FilteredMetadata(IMetadata metadata, params string[] keys)
         {
             _metadata = metadata.ThrowIfNull(nameof(metadata));
-            _keys = keys == null
+            _keys = keys is null
                 ? new HashSet<string>()
                 : new HashSet<string>(keys.Where(x => metadata.ContainsKey(x)), StringComparer.OrdinalIgnoreCase);
         }

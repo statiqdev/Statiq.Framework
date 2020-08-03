@@ -51,7 +51,7 @@ namespace Statiq.Core
         protected override async Task<IEnumerable<IDocument>> ExecuteInputAsync(IDocument input, IExecutionContext context)
         {
             IContentProvider contentProvider = await ProcessShortcodesAsync(input, input.ContentProvider, context);
-            return contentProvider == null ? input.Yield() : input.Clone(contentProvider).Yield();
+            return contentProvider is null ? input.Yield() : input.Clone(contentProvider).Yield();
         }
 
         // The inputStream will be disposed if this returns a result document but will not otherwise
@@ -87,7 +87,7 @@ namespace Statiq.Core
 
             // Dispose any shortcodes that implement IDisposable
             foreach (IDisposable disposableShortcode
-                in shortcodes.Values.Select(x => x as IDisposable).Where(x => x != null))
+                in shortcodes.Values.Select(x => x as IDisposable).Where(x => x is object))
             {
                 disposableShortcode.Dispose();
             }
@@ -111,7 +111,7 @@ namespace Statiq.Core
                         position += length;
 
                         // Copy the shortcode content to the result stream
-                        if (insertingLocation.ContentProviders != null)
+                        if (insertingLocation.ContentProviders is object)
                         {
                             foreach (IContentProvider insertingContentProvider in insertingLocation.ContentProviders)
                             {
@@ -146,13 +146,13 @@ namespace Statiq.Core
             IEnumerable<ShortcodeResult> results = await shortcodes[location.Name].ExecuteAsync(location.Arguments, location.Content, input, context);
 
             // Process the results
-            if (results != null)
+            if (results is object)
             {
                 // Iterate the result content streams
                 List<IContentProvider> resultContentProviders = new List<IContentProvider>();
                 foreach (ShortcodeResult result in results)
                 {
-                    if (result != null && result.ContentProvider != null)
+                    if (result is object && result.ContentProvider is object)
                     {
                         // Don't process nested shortcodes if it's the raw shortcode
                         IContentProvider resultContentProvider = result.ContentProvider;
@@ -163,7 +163,7 @@ namespace Statiq.Core
 
                             // Recursively parse shortcodes
                             IContentProvider nestedContentProvider = await ProcessShortcodesAsync(nestedInput, result.ContentProvider, context);
-                            if (nestedContentProvider != null)
+                            if (nestedContentProvider is object)
                             {
                                 resultContentProvider = nestedContentProvider;
                             }

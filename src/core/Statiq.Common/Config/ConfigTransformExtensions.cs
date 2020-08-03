@@ -10,7 +10,7 @@ namespace Statiq.Common
         {
             transform.ThrowIfNull(nameof(transform));
 
-            if (config == null)
+            if (config is null)
             {
                 return Config.FromValue(transform(default));
             }
@@ -23,7 +23,7 @@ namespace Statiq.Common
         {
             transform.ThrowIfNull(nameof(transform));
 
-            if (config == null)
+            if (config is null)
             {
                 return Config.FromValue(transform(default));
             }
@@ -36,7 +36,7 @@ namespace Statiq.Common
         {
             transform.ThrowIfNull(nameof(transform));
 
-            if (config == null)
+            if (config is null)
             {
                 return Config.FromContext(ctx => transform(default, ctx));
             }
@@ -49,7 +49,7 @@ namespace Statiq.Common
         {
             transform.ThrowIfNull(nameof(transform));
 
-            if (config == null)
+            if (config is null)
             {
                 return Config.FromContext(ctx => transform(default, ctx));
             }
@@ -62,7 +62,7 @@ namespace Statiq.Common
         {
             transform.ThrowIfNull(nameof(transform));
 
-            if (config == null)
+            if (config is null)
             {
                 return Config.FromDocument((doc, ctx) => transform(default, doc, ctx));
             }
@@ -73,7 +73,7 @@ namespace Statiq.Common
         {
             transform.ThrowIfNull(nameof(transform));
 
-            if (config == null)
+            if (config is null)
             {
                 return Config.FromDocument((doc, ctx) => transform(default, doc, ctx));
             }
@@ -88,7 +88,7 @@ namespace Statiq.Common
         /// <returns>The config value as the specified type or <c>default</c> if <paramref name="config"/> is null.</returns>
         public static Config<TValue> Cast<TValue>(this IConfig config)
         {
-            if (config == null)
+            if (config is null)
             {
                 return Config.FromValue(default(TValue));
             }

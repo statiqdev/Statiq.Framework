@@ -45,6 +45,6 @@ namespace Statiq.Core
         }
 
         protected override IEnumerable<IDocument> ExecuteConfig(IDocument input, IExecutionContext context, IContentProvider value) =>
-            value == null || value is NullContent ? input.Yield() : input.Clone(value).Yield();
+            value is null || value is NullContent ? input.Yield() : input.Clone(value).Yield();
     }
 }

@@ -31,7 +31,7 @@ namespace Statiq.Common
                 {
                     object value = valueSelectors[colIndex].Invoke(values[rowIndex - 1]);
 
-                    arrValues[rowIndex, colIndex] = value != null ? value.ToString() : "null";
+                    arrValues[rowIndex, colIndex] = value is object ? value.ToString() : "null";
                 }
             }
 

@@ -47,7 +47,7 @@ namespace Statiq.Core
         {
             XslCompiledTransform xslt = new XslCompiledTransform();
 
-            if (_xsltPath != null)
+            if (_xsltPath is object)
             {
                 NormalizedPath path = await _xsltPath.GetValueAsync(input, context);
                 if (!path.IsNull)
@@ -62,7 +62,7 @@ namespace Statiq.Core
                     }
                 }
             }
-            else if (_xsltGeneration != null)
+            else if (_xsltGeneration is object)
             {
                 IDocument xsltDocument = (await context.ExecuteModulesAsync(_xsltGeneration, input.Yield())).Single();
                 using (Stream stream = xsltDocument.GetContentStream())

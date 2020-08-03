@@ -36,7 +36,7 @@ namespace Statiq.Common
         {
             executionState.ThrowIfNull(nameof(executionState));
 
-            if (items != null)
+            if (items is object)
             {
                 Dictionary = new Dictionary<string, object>(StringComparer.OrdinalIgnoreCase);
 
@@ -128,14 +128,14 @@ namespace Statiq.Common
         {
             get
             {
-                if (Dictionary != null)
+                if (Dictionary is object)
                 {
                     foreach (string key in Dictionary.Keys)
                     {
                         yield return key;
                     }
                 }
-                if (_previous != null)
+                if (_previous is object)
                 {
                     foreach (string previousKey in _previous.Keys)
                     {
@@ -158,14 +158,14 @@ namespace Statiq.Common
         /// <inheritdoc/>
         public IEnumerator<KeyValuePair<string, object>> GetEnumerator()
         {
-            if (Dictionary != null)
+            if (Dictionary is object)
             {
                 foreach (KeyValuePair<string, object> item in Dictionary)
                 {
                     yield return TypeHelper.ExpandKeyValuePair(item, this);
                 }
             }
-            if (_previous != null)
+            if (_previous is object)
             {
                 foreach (KeyValuePair<string, object> previousItem in _previous)
                 {
@@ -183,14 +183,14 @@ namespace Statiq.Common
         /// <inheritdoc/>
         public IEnumerator<KeyValuePair<string, object>> GetRawEnumerator()
         {
-            if (Dictionary != null)
+            if (Dictionary is object)
             {
                 foreach (KeyValuePair<string, object> item in Dictionary)
                 {
                     yield return item;
                 }
             }
-            if (_previous != null)
+            if (_previous is object)
             {
                 foreach (KeyValuePair<string, object> previousItem in _previous.GetRawEnumerable())
                 {

@@ -31,7 +31,7 @@ namespace Statiq.Feeds.Syndication.Rdf
         [XmlAttribute("resource", Namespace=RdfFeedBase.NamespaceRdf)]
         public string Resource
         {
-            get { return (_target != null) ? _target.About : null; }
+            get { return (_target is object) ? _target.About : null; }
             set { }
         }
 

@@ -120,7 +120,7 @@ namespace Statiq.Markdown
         public RenderMarkdown UseExtension<TExtension>(TExtension extension)
             where TExtension : IMarkdownExtension
         {
-            if (extension != null)
+            if (extension is object)
             {
                 _extensions.AddIfNotAlready(extension);
             }
@@ -136,7 +136,7 @@ namespace Statiq.Markdown
         /// <returns>The current module instance.</returns>
         public RenderMarkdown UseExtensions(IEnumerable<Type> extensions)
         {
-            if (extensions == null)
+            if (extensions is null)
             {
                 return this;
             }
@@ -144,7 +144,7 @@ namespace Statiq.Markdown
             foreach (Type type in extensions)
             {
                 IMarkdownExtension extension = Activator.CreateInstance(type) as IMarkdownExtension;
-                if (extension != null)
+                if (extension is object)
                 {
                     // Need - public void AddIfNotAlready<TElement>(TElement telement) where TElement : T;
                     // Kind of hack'ish, but no other way to preserve types.
@@ -222,7 +222,7 @@ namespace Statiq.Markdown
             // Create the pipeline
             MarkdownPipelineBuilder pipelineBuilder = new MarkdownPipelineBuilder();
             pipelineBuilder.Configure(configuration);
-            if (extensions != null)
+            if (extensions is object)
             {
                 pipelineBuilder.Extensions.AddRange(extensions);
             }

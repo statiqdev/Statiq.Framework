@@ -29,7 +29,7 @@ namespace Statiq.Core
             if (dictionary.ContainsKey(Value))
             {
                 return TypeHelper.TryConvert(dictionary.Get(Value), keyValue.GetType(), out object value)
-                    && (keyValue?.Equals(value) ?? (keyValue == null && value == null))
+                    && (keyValue?.Equals(value) ?? (keyValue is null && value is null))
                     ? content
                     : null;
             }

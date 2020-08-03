@@ -58,7 +58,7 @@ namespace Statiq.Razor
 
         public IDirectoryContents GetDirectoryContents(string subpath)
         {
-            if (subpath == null)
+            if (subpath is null)
             {
                 return new NotFoundDirectoryContents();
             }

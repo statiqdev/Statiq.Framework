@@ -44,7 +44,7 @@ namespace Statiq.Common
                             using (StringReader lines = new StringReader(result))
                             {
                                 string line;
-                                while ((line = lines.ReadLine()) != null)
+                                while ((line = lines.ReadLine()) is object)
                                 {
                                     if (!line.StartsWith("#"))
                                     {
@@ -1081,7 +1081,7 @@ namespace Statiq.Common
                 return false;
             }
             string extension = System.IO.Path.GetExtension(path);
-            if (extension == null)
+            if (extension is null)
             {
                 mediaType = null;
                 return false;

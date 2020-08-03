@@ -32,7 +32,7 @@ namespace Statiq.Common
                 foreach (NormalizedPath inputPath in fileSystem.InputPaths.Reverse())
                 {
                     IFile file = fileSystem.GetFile(fileSystem.RootPath.Combine(inputPath).Combine(path));
-                    if (notFound == null)
+                    if (notFound is null)
                     {
                         notFound = file;
                     }
@@ -41,7 +41,7 @@ namespace Statiq.Common
                         return file;
                     }
                 }
-                if (notFound == null)
+                if (notFound is null)
                 {
                     throw new InvalidOperationException("The input paths collection must have at least one path");
                 }
@@ -485,7 +485,7 @@ namespace Statiq.Common
             directory.ThrowIfNull(nameof(directory));
 
             IEnumerable<Tuple<IDirectory, string>> directoryPatterns = patterns
-                .Where(x => x != null)
+                .Where(x => x is object)
                 .Select(x =>
                 {
                     bool negated = x[0] == '!';

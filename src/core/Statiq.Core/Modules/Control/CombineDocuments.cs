@@ -24,13 +24,13 @@ namespace Statiq.Core
             IDocument result = null;
             foreach (IDocument input in context.Inputs)
             {
-                result = result == null
+                result = result is null
                     ? input
                     : result.Clone(
                         input,
                         await context.GetContentProviderAsync(
                             await result.GetContentStringAsync() + await input.GetContentStringAsync(),
-                            result.ContentProvider.MediaType == null
+                            result.ContentProvider.MediaType is null
                                 ? null
                                 : (result.MediaTypeEquals(input.ContentProvider.MediaType) ? result.ContentProvider.MediaType : null)));
             }

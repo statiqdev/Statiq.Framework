@@ -45,7 +45,7 @@ namespace Statiq.Testing
 
         public IEnumerable<string> GetChildKeys(IEnumerable<string> earlierKeys, string parentPath)
         {
-            string prefix = (parentPath == null) ? string.Empty : (parentPath + ConfigurationPath.KeyDelimiter);
+            string prefix = (parentPath is null) ? string.Empty : (parentPath + ConfigurationPath.KeyDelimiter);
             return _settings
                 .Where((KeyValuePair<string, object> kv) => kv.Key.StartsWith(prefix, StringComparison.OrdinalIgnoreCase))
                 .Select((KeyValuePair<string, object> kv) => Segment(kv.Key, prefix.Length))

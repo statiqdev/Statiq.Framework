@@ -16,7 +16,7 @@ namespace Statiq.Common
 
         public FuncShortcode(Func<KeyValuePair<string, string>[], string, IDocument, IExecutionContext, Task<ShortcodeResult>> func)
         {
-            _func = async (a, b, c, d) => func != null ? new[] { await func(a, b, c, d) } : null;
+            _func = async (a, b, c, d) => func is object ? new[] { await func(a, b, c, d) } : null;
         }
 
         public async Task<IEnumerable<ShortcodeResult>> ExecuteAsync(

@@ -24,7 +24,7 @@ namespace Statiq.App
             new Thread(() =>
             {
                 LogMessage message;
-                while ((message = TakeMessage()) != null)
+                while ((message = TakeMessage()) is object)
                 {
                     WriteMessage(message);
                 }
@@ -153,7 +153,7 @@ namespace Statiq.App
                 }
 
                 // Write any exceptions
-                if (message.Exception != null)
+                if (message.Exception is object)
                 {
                     ConsoleContents.Add(GetLogLevelConsoleContent(LogLevel.Error, (Environment.NewLine + message.Exception.ToString()).AsMemory()));
                 }

@@ -54,7 +54,7 @@ namespace Statiq.Common
         /// <param name="args">The original shortcode arguments.</param>
         /// <returns>The argument values.</returns>
         public static string[] ToValueArray(this IEnumerable<KeyValuePair<string, string>> args) =>
-            args.Select(x => x.Key != null ? $"{x.Key}={x.Value}" : x.Value).ToArray();
+            args.Select(x => x.Key is object ? $"{x.Key}={x.Value}" : x.Value).ToArray();
 
         /// <summary>
         /// Converts the shortcode arguments into a dictionary of named parameters.

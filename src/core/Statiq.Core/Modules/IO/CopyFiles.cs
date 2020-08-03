@@ -54,7 +54,7 @@ namespace Statiq.Core
         public CopyFiles Where(Func<IFile, Task<bool>> predicate)
         {
             Func<IFile, Task<bool>> currentPredicate = _predicate;
-            _predicate = currentPredicate == null ? predicate : async x => await currentPredicate(x) && await predicate(x);
+            _predicate = currentPredicate is null ? predicate : async x => await currentPredicate(x) && await predicate(x);
             return this;
         }
 
@@ -94,10 +94,10 @@ namespace Statiq.Core
 
         protected override async Task<IEnumerable<IDocument>> ExecuteConfigAsync(IDocument input, IExecutionContext context, IEnumerable<string> value)
         {
-            if (value != null)
+            if (value is object)
             {
                 IEnumerable<IFile> inputFiles = context.FileSystem.GetInputFiles(value);
-                inputFiles = await inputFiles.ParallelWhereAsync(async x => _predicate == null || await _predicate(x));
+                inputFiles = await inputFiles.ParallelWhereAsync(async x => _predicate is null || await _predicate(x));
                 return await inputFiles
                     .ToAsyncEnumerable()
                     .SelectAwait(async file =>
@@ -109,7 +109,7 @@ namespace Statiq.Core
                             IFile destination = context.FileSystem.GetOutputFile(relativePath);
 
                             // Calculate an alternate destination if needed
-                            if (_destinationPath != null)
+                            if (_destinationPath is object)
                             {
                                 destination = context.FileSystem.GetOutputFile(await _destinationPath(file, destination));
                             }
@@ -127,7 +127,7 @@ namespace Statiq.Core
                             throw;
                         }
                     })
-                    .Where(x => x != null)
+                    .Where(x => x is object)
                     .ToListAsync(context.CancellationToken);
             }
             return null;

@@ -158,7 +158,7 @@ namespace Statiq.Sass
                     NormalizedPath containingInputPath = context.FileSystem.GetContainingInputPath(x);
                     return containingInputPath.IsNull ? null : containingInputPath.Combine(x).FullPath;
                 })
-                .Where(x => x != null);
+                .Where(x => x is object);
             options.IncludePaths.AddRange(includePaths);
             ScssResult result = Scss.ConvertToCss(content, options);
 
@@ -176,7 +176,7 @@ namespace Statiq.Sass
                 await context.GetContentProviderAsync(result.Css ?? string.Empty, MediaTypes.Css));
 
             // Generate a source map if requested
-            if (_generateSourceMap && result.SourceMap != null)
+            if (_generateSourceMap && result.SourceMap is object)
             {
                 NormalizedPath sourceMapPath = relativePath.ChangeExtension("map");
                 IDocument sourceMapDocument = input.Clone(

@@ -24,8 +24,8 @@ namespace Statiq.Feeds.Syndication.Rdf
         {
             get
             {
-                if (_target == null
-                    || _target.Items == null
+                if (_target is null
+                    || _target.Items is null
                     || _target.Items.Count == 0)
                 {
                     return null;

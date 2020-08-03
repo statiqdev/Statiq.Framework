@@ -54,7 +54,7 @@ namespace Statiq.Common
             get
             {
                 IDirectory parent = _directory.Parent;
-                return parent == null ? null : new DirectoryInfo(_directory.Parent);
+                return parent is null ? null : new DirectoryInfo(_directory.Parent);
             }
         }
     }

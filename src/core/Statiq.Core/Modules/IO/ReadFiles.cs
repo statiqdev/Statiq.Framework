@@ -62,7 +62,7 @@ namespace Statiq.Core
         public ReadFiles Where(Func<IFile, Task<bool>> predicate)
         {
             Func<IFile, Task<bool>> currentPredicate = _predicate;
-            _predicate = currentPredicate == null ? predicate : async x => await currentPredicate(x) && await predicate(x);
+            _predicate = currentPredicate is null ? predicate : async x => await currentPredicate(x) && await predicate(x);
             return this;
         }
 
@@ -79,14 +79,14 @@ namespace Statiq.Core
 
         protected override async Task<IEnumerable<IDocument>> ExecuteConfigAsync(IDocument input, IExecutionContext context, IEnumerable<string> value)
         {
-            if (value != null)
+            if (value is object)
             {
                 IEnumerable<IFile> files = context.FileSystem.GetInputFiles(value);
-                files = await files.ParallelWhereAsync(async file => _predicate == null || await _predicate(file));
+                files = await files.ParallelWhereAsync(async file => _predicate is null || await _predicate(file));
                 return files.AsParallel().Select(file =>
                 {
                     context.LogDebug($"Read file {file.Path.FullPath}");
-                    IContentProvider contentProvider = _mediaType == null
+                    IContentProvider contentProvider = _mediaType is null
                         ? file?.GetContentProvider()
                         : file?.GetContentProvider(_mediaType(file));
                     return context.CloneOrCreateDocument(input, file.Path, file.Path.GetRelativeInputPath(), contentProvider);

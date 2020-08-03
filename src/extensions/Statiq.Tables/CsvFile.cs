@@ -18,7 +18,7 @@ namespace Statiq.Tables
         public static IEnumerable<IEnumerable<string>> GetAllRecords(TextReader reader, string delimiter = null)
         {
             List<IEnumerable<string>> records = new List<IEnumerable<string>>();
-            Configuration configuration = delimiter == null ? new Configuration { HasHeaderRecord = false } : new Configuration { HasHeaderRecord = false, Delimiter = delimiter };
+            Configuration configuration = delimiter is null ? new Configuration { HasHeaderRecord = false } : new Configuration { HasHeaderRecord = false, Delimiter = delimiter };
 
             using (CsvReader csv = new CsvReader(reader, configuration))
             {
@@ -41,7 +41,7 @@ namespace Statiq.Tables
 
         public static void WriteAllRecords(IEnumerable<IEnumerable<string>> records, TextWriter writer)
         {
-            if (records == null)
+            if (records is null)
             {
                 return;
             }

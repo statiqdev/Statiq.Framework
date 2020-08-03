@@ -20,7 +20,7 @@ namespace Statiq.CodeAnalysis.Analysis
         {
             if (!_cached)
             {
-                if (_symbol == null)
+                if (_symbol is null)
                 {
                     _value = null;
                 }

@@ -72,7 +72,7 @@ namespace Statiq.Feeds.Syndication.Rss
             set
             {
                 _hours = new BitVector32(EmptyHours);
-                if (value == null)
+                if (value is null)
                 {
                     return;
                 }

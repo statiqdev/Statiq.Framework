@@ -45,7 +45,7 @@ namespace Statiq.Razor
         public static IServiceCollection AddRazor(this IServiceCollection serviceCollection, IReadOnlyFileSystem fileSystem, ClassCatalog classCatalog = null)
         {
             // Register the file system if we're not expecting one from an engine
-            if (fileSystem != null)
+            if (fileSystem is object)
             {
                 serviceCollection.TryAddSingleton(fileSystem);
             }

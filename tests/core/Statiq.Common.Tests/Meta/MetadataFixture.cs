@@ -569,7 +569,7 @@ namespace Statiq.Common.Tests.Meta
                 NormalizedPath result = metadata.GetPath("A");
 
                 // Then
-                if (expected == null)
+                if (expected is null)
                 {
                     result.IsNull.ShouldBeTrue();
                 }
@@ -609,7 +609,7 @@ namespace Statiq.Common.Tests.Meta
                 NormalizedPath result = metadata.GetPath("A");
 
                 // Then
-                if (expected == null)
+                if (expected is null)
                 {
                     result.IsNull.ShouldBeTrue();
                 }

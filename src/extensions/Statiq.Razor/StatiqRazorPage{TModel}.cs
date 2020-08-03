@@ -33,7 +33,7 @@ namespace Statiq.Razor
         /// <returns>The <see cref="IHtmlHelper"/>.</returns>
         protected IHtmlHelper<TModel> GetHtmlHelper()
         {
-            if (_htmlHelper == null)
+            if (_htmlHelper is null)
             {
                 IServiceProvider serviceProvider = ViewData[ViewDataKeys.StatiqServiceProvider] as IServiceProvider;
                 _htmlHelper = serviceProvider.GetRequiredService<IHtmlHelper<TModel>>();

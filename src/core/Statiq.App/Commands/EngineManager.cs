@@ -51,7 +51,7 @@ namespace Statiq.App
             _logger = Engine.Services.GetRequiredService<ILogger<Bootstrapper>>();
 
             // Apply command settings
-            if (commandSettings != null)
+            if (commandSettings is object)
             {
                 ApplyCommandSettings(Engine, commandSettings);
             }

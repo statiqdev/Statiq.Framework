@@ -100,12 +100,12 @@ namespace Statiq.Core
                 if (!(ex is OperationCanceledException))
                 {
                     ExecuteModulesException executeModulesException = ex as ExecuteModulesException;
-                    if (executeModulesException != null)
+                    if (executeModulesException is object)
                     {
                         ex = executeModulesException.InnerException;
                     }
                     _logger.LogDebug($"Exception while executing pipeline {PipelineName}/{Phase}: {ex}");
-                    if (executeModulesException != null)
+                    if (executeModulesException is object)
                     {
                         throw executeModulesException.InnerException;
                     }
@@ -132,7 +132,7 @@ namespace Statiq.Core
                 },
                 (_, results) =>
                 {
-                    if (results[(int)phaseResult.Phase] != null)
+                    if (results[(int)phaseResult.Phase] is object)
                     {
                         // Sanity check, we should never hit this
                         throw new InvalidOperationException($"Results for phase {phaseResult.Phase} have already been added");

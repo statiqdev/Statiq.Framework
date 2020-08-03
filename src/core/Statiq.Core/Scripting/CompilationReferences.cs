@@ -26,7 +26,7 @@ namespace Statiq.Core
         {
             // If no location or if it's a dynamic assembly, just ignore
             AssemblyName assemblyName = assembly?.GetName();
-            if (assemblyName == null || assembly.IsDynamic || string.IsNullOrEmpty(assembly.Location))
+            if (assemblyName is null || assembly.IsDynamic || string.IsNullOrEmpty(assembly.Location))
             {
                 return false;
             }

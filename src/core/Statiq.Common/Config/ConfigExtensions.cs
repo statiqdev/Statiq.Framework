@@ -20,7 +20,7 @@ namespace Statiq.Common
             IExecutionContext context,
             string errorDetails = null)
         {
-            if (config == null)
+            if (config is null)
             {
                 return default;
             }
@@ -39,7 +39,7 @@ namespace Statiq.Common
             IDocument document,
             IExecutionContext context)
         {
-            if (config == null)
+            if (config is null)
             {
                 return default;
             }

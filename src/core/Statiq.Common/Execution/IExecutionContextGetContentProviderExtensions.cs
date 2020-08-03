@@ -18,7 +18,7 @@ namespace Statiq.Common
             string mediaType)
         {
             // Return null if the stream is null
-            if (stream == null)
+            if (stream is null)
             {
                 return new NullContent();
             }
@@ -78,7 +78,7 @@ namespace Statiq.Common
             string content,
             string mediaType)
         {
-            if (content == null)
+            if (content is null)
             {
                 return new NullContent();
             }

@@ -127,7 +127,7 @@ namespace Statiq.Html
 
             // Parse the HTML content
             IHtmlDocument htmlDocument = await input.ParseHtmlAsync(context, HtmlParser);
-            if (htmlDocument == null)
+            if (htmlDocument is null)
             {
                 return input.Yield();
             }
@@ -140,7 +140,7 @@ namespace Statiq.Html
 
             // Set the metadata
             string excerpt = separatorExcerpt ?? queryExcerpt;
-            if (excerpt != null)
+            if (excerpt is object)
             {
                 return input
                     .Clone(new MetadataItems
@@ -169,13 +169,13 @@ namespace Statiq.Html
             {
                 ITreeWalker walker = htmlDocument.CreateTreeWalker(htmlDocument.DocumentElement, FilterSettings.Comment);
                 IComment comment = (IComment)walker.ToFirst();
-                while (comment != null && !_separators.Contains(comment.NodeValue.Trim(), StringComparer.OrdinalIgnoreCase))
+                while (comment is object && !_separators.Contains(comment.NodeValue.Trim(), StringComparer.OrdinalIgnoreCase))
                 {
                     comment = (IComment)walker.ToNext();
                 }
 
                 // Found the first separator
-                if (comment != null)
+                if (comment is object)
                 {
                     // Get a clone of the parent element
                     IElement parent = comment.ParentElement;
@@ -190,7 +190,7 @@ namespace Statiq.Html
                     bool remove = false;
                     Stack<INode> removeStack = new Stack<INode>();
                     INode node = walker.ToFirst();
-                    while (node != null)
+                    while (node is object)
                     {
                         if (node == comment)
                         {

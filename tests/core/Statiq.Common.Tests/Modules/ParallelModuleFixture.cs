@@ -66,7 +66,7 @@ namespace Statiq.Common.Tests.Modules
             protected override async Task<IEnumerable<IDocument>> ExecuteInputAsync(IDocument input, IExecutionContext context)
             {
                 IReadOnlyList<string> contents = input.GetList<string>("Outputs");
-                if (contents == null)
+                if (contents is null)
                 {
                     return null;
                 }

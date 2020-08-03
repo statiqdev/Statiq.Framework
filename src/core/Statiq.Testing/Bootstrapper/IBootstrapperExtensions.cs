@@ -72,7 +72,7 @@ namespace Statiq.Testing
                     }
 
                     // Add the file provider
-                    if (fileProvider != null)
+                    if (fileProvider is object)
                     {
                         engine.FileSystem.RootPath = "/";
                         engine.FileSystem.FileProvider = fileProvider;

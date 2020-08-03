@@ -117,7 +117,7 @@ namespace Statiq.Xmp
             {
                 xmpDirectory = null;
             }
-            if (xmpDirectory == null)
+            if (xmpDirectory is null)
             {
                 // Try to read sidecarfile
                 if (!input.Source.IsNull)
@@ -134,7 +134,7 @@ namespace Statiq.Xmp
                     }
                 }
             }
-            if (xmpDirectory == null)
+            if (xmpDirectory is null)
             {
                 if (_toSearch.Any(y => y.IsMandatory))
                 {
@@ -157,7 +157,7 @@ namespace Statiq.Xmp
                 {
                     TreeDirectory metadata = hierarchicalDirectory.Childrean.Find(y => search.PathWithoutNamespacePrefix == y.ElementName && search.Namespace == y.ElementNameSpace);
 
-                    if (metadata == null)
+                    if (metadata is null)
                     {
                         if (search.IsMandatory)
                         {
@@ -263,7 +263,7 @@ namespace Statiq.Xmp
             {
                 TreeDirectory root = new TreeDirectory();
 
-                TreeDirectory[] treeNodes = directories.XmpMeta.Properties.Where(x => x.Path != null).Select(x => new TreeDirectory(x)).ToArray();
+                TreeDirectory[] treeNodes = directories.XmpMeta.Properties.Where(x => x.Path is object).Select(x => new TreeDirectory(x)).ToArray();
 
                 var possibleChildrean = treeNodes.Select(x => new
                 {
@@ -313,9 +313,9 @@ namespace Statiq.Xmp
                         }
                         systemCulture = systemCulture.Parent;
                     }
-                    while (matchingString == null);
+                    while (matchingString is null);
 
-                    if (matchingString != null)
+                    if (matchingString is object)
                     {
                         return matchingString.Value;
                     }
@@ -330,7 +330,7 @@ namespace Statiq.Xmp
             else if (metadata.Element.Options.IsStruct)
             {
                 IDictionary<string, object> obj = new System.Dynamic.ExpandoObject();
-                List<TreeDirectory> properties = metadata.Childrean; // directories.XmpMeta.Properties.Where(x => x.Path != null && x.Path.StartsWith(metadata.Path))
+                List<TreeDirectory> properties = metadata.Childrean; // directories.XmpMeta.Properties.Where(x => x.Path is object && x.Path.StartsWith(metadata.Path))
 
                 foreach (TreeDirectory prop in properties)
                 {

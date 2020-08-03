@@ -26,7 +26,7 @@ namespace Statiq.Feeds.Syndication.Rdf
         {
             get
             {
-                if (_channel == null)
+                if (_channel is null)
                 {
                     _channel = new RdfChannel();
                     _channel.SetParent((RdfFeed)this);

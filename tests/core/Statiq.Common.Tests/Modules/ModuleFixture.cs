@@ -139,7 +139,7 @@ namespace Statiq.Common.Tests.Modules
                 {
                     throw new Exception();
                 }
-                if (_outputs != null)
+                if (_outputs is object)
                 {
                     return Task.FromResult(_outputs);
                 }
@@ -166,7 +166,7 @@ namespace Statiq.Common.Tests.Modules
             protected override void AfterExecution(IExecutionContext context, ExecutionOutputs outputs)
             {
                 AfterExecutionCount++;
-                if (_afterExecutionOutputs != null)
+                if (_afterExecutionOutputs is object)
                 {
                     outputs.Outputs = _afterExecutionOutputs;
                 }

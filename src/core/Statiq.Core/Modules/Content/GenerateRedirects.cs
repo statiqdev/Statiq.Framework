@@ -129,7 +129,7 @@ namespace Statiq.Core
             async IAsyncEnumerable<IDocument> GetOutputsAsync(IDocument input)
             {
                 IReadOnlyList<NormalizedPath> paths = await _paths.GetValueAsync(input, context);
-                if (paths != null)
+                if (paths is object)
                 {
                     foreach (NormalizedPath fromPath in paths.Where(x => !x.IsNull))
                     {

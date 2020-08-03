@@ -131,7 +131,7 @@ namespace Statiq.Core
                 request.AcceptLanguage.Add(new StringWithQualityHeaderValue(a));
             }
 
-            if (BasicAuthorization != null)
+            if (BasicAuthorization is object)
             {
                 Tuple<string, string> auth = BasicAuthorization;
 
@@ -196,7 +196,7 @@ namespace Statiq.Core
                 request.MaxForwards = MaxForwards;
             }
 
-            if (Referrer != null)
+            if (Referrer is object)
             {
                 request.Referrer = Referrer;
             }
@@ -214,7 +214,7 @@ namespace Statiq.Core
             foreach (KeyValuePair<string, object> header in _headers)
             {
                 IEnumerable<string> values = header.Value as IEnumerable<string>;
-                if (values != null)
+                if (values is object)
                 {
                     request.Add(header.Key, values);
                 }

@@ -50,7 +50,7 @@ namespace Statiq.Yaml.Dynamic
         internal static bool TryMapValue(object value, out object result)
         {
             YamlNode node = value as YamlNode;
-            if (node != null)
+            if (node is object)
             {
                 result = new DynamicYaml(node);
                 return true;

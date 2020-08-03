@@ -71,14 +71,14 @@ namespace Statiq.Feeds.Syndication.Rss
 
             // Link
             Uri link = source.Link;
-            if (link != null)
+            if (link is object)
             {
                 Channel.Link = link.ToString();
             }
 
             // ImageLink
             Uri imageLink = source.ImageLink;
-            if (imageLink != null)
+            if (imageLink is object)
             {
                 Channel.Image = new RssImage
                 {
@@ -97,7 +97,7 @@ namespace Statiq.Feeds.Syndication.Rss
 
             // Items
             IList<IFeedItem> sourceItems = source.Items;
-            if (sourceItems != null)
+            if (sourceItems is object)
             {
                 Channel.Items.AddRange(sourceItems.Select(x => new RssItem(x)));
             }

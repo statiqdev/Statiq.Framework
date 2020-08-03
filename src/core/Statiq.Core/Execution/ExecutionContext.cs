@@ -39,7 +39,7 @@ namespace Statiq.Core
         {
             Stack<string> modules = new Stack<string>();
             modules.Push(module.GetType().Name);
-            while (parent != null)
+            while (parent is object)
             {
                 modules.Push(parent.Module.GetType().Name);
                 parent = parent.Parent;

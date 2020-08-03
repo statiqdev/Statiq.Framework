@@ -671,7 +671,7 @@ namespace Statiq.Core.Tests.Documents
             PipelinePhase pipelinePhase = new PipelinePhase(pipeline, pipelineName, currentPhase, Array.Empty<IModule>(), NullLogger.Instance, dependencies);
             pipelines.Add(pipelineName, pipeline);
             PhaseResult[] results = new PhaseResult[4];
-            if (outputs != null)
+            if (outputs is object)
             {
                 results[(int)phaseForOutputs] = new PhaseResult(pipelineName, phaseForOutputs, outputs.ToImmutableArray(), default, 0);
             }

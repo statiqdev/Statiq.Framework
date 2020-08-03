@@ -74,7 +74,7 @@ namespace Statiq.Core
 
             // Calculate the new title
             string title = await _title.GetValueAsync(input, context);
-            return title == null
+            return title is null
                 ? input.Yield()
                 : input.Clone(new MetadataItems { { _key, title } }).Yield();
         }

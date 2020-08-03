@@ -91,7 +91,7 @@ namespace Statiq.Common
 
         private bool IgnoreValue(string value)
         {
-            return (value == null && (_concatenationOptions & ConcatenationOptions.IgnoreNull) == ConcatenationOptions.IgnoreNull) || (value == string.Empty && (_concatenationOptions & ConcatenationOptions.IgnoreEmpty) == ConcatenationOptions.IgnoreEmpty);
+            return (value is null && (_concatenationOptions & ConcatenationOptions.IgnoreNull) == ConcatenationOptions.IgnoreNull) || (value == string.Empty && (_concatenationOptions & ConcatenationOptions.IgnoreEmpty) == ConcatenationOptions.IgnoreEmpty);
         }
 
         /// <summary>

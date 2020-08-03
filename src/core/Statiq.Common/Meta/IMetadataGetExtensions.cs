@@ -26,7 +26,7 @@ namespace Statiq.Common
             string key,
             out TValue value)
         {
-            if (metadata != null && key != null)
+            if (metadata is object && key is object)
             {
                 // Script
                 if (IScriptHelper.TryGetScriptString(key, out string script))

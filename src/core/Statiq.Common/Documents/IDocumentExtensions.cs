@@ -28,7 +28,7 @@ namespace Statiq.Common
         public static async Task<string> GetContentStringAsync(this IDocument document)
         {
             Stream stream = document.GetContentStream();
-            if (stream == null || stream == Stream.Null)
+            if (stream is null || stream == Stream.Null)
             {
                 return string.Empty;
             }
@@ -49,7 +49,7 @@ namespace Statiq.Common
         {
             using (Stream stream = document.GetContentStream())
             {
-                if (stream == null || stream == Stream.Null)
+                if (stream is null || stream == Stream.Null)
                 {
                     return Array.Empty<byte>();
                 }

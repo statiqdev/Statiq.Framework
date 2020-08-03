@@ -12,7 +12,7 @@ namespace Statiq.Common
         {
             dictionary.ThrowIfNull(nameof(dictionary));
 
-            if (items != null)
+            if (items is object)
             {
                 foreach (KeyValuePair<TKey, TValue> item in items)
                 {
@@ -27,7 +27,7 @@ namespace Statiq.Common
         {
             dictionary.ThrowIfNull(nameof(dictionary));
 
-            if (items != null)
+            if (items is object)
             {
                 foreach (KeyValuePair<TKey, TValue> item in items)
                 {

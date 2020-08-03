@@ -51,7 +51,7 @@ namespace Statiq.Razor
         /// <param name="basePageType">Type of the base Razor page class, or <c>null</c> for the default base class.</param>
         public RenderRazor(Type basePageType = null)
         {
-            if (basePageType != null && !IsSubclassOfRawGeneric(typeof(StatiqRazorPage<>), basePageType))
+            if (basePageType is object && !IsSubclassOfRawGeneric(typeof(StatiqRazorPage<>), basePageType))
             {
                 throw new ArgumentException($"The Razor base page type must derive from {nameof(StatiqRazorPage<object>)}.");
             }
@@ -61,7 +61,7 @@ namespace Statiq.Razor
         // From http://stackoverflow.com/a/457708/807064
         private static bool IsSubclassOfRawGeneric(Type generic, Type toCheck)
         {
-            while (toCheck != null && toCheck != typeof(object))
+            while (toCheck is object && toCheck != typeof(object))
             {
                 Type current = toCheck.IsGenericType ? toCheck.GetGenericTypeDefinition() : toCheck;
                 if (generic == current)
@@ -166,7 +166,7 @@ namespace Statiq.Razor
 
             // Eliminate input documents that we shouldn't process
             ImmutableArray<IDocument> validInputs = context.Inputs
-                .Where(x => _ignorePrefix == null || x.Source.IsNull || !x.Source.FileName.FullPath.StartsWith(_ignorePrefix))
+                .Where(x => _ignorePrefix is null || x.Source.IsNull || !x.Source.FileName.FullPath.StartsWith(_ignorePrefix))
                 .ToImmutableArray();
 
             if (validInputs.Length < context.Inputs.Length)
@@ -185,15 +185,15 @@ namespace Statiq.Razor
                 {
                     using (Stream inputStream = input.GetContentStream())
                     {
-                        NormalizedPath layoutPath = _layoutPath == null ? NormalizedPath.Null : await _layoutPath.GetValueAsync(input, context);
+                        NormalizedPath layoutPath = _layoutPath is null ? NormalizedPath.Null : await _layoutPath.GetValueAsync(input, context);
                         string layoutLocation = layoutPath.IsNull ? null : layoutPath.FullPath;
 
                         // We need to set a non-null ViewStart location if an explicit layout is provided but an explicit ViewStart is not (using a null char which is not a valid file name on Windows or Linux)
                         // otherwise the Razor engine will default to looking up the tree for a _ViewStart.cshtml that will take precedence over the explicit layout
                         // Note that this means in this special case, anything else the ViewStart file is doing will be ignored - this therefore favors correctness of the layout over ViewStart logic
-                        NormalizedPath viewStartLocationPath = _viewStartPath == null ? null : await _viewStartPath.GetValueAsync(input, context);
+                        NormalizedPath viewStartLocationPath = _viewStartPath is null ? null : await _viewStartPath.GetValueAsync(input, context);
                         string viewStartLocation = viewStartLocationPath.IsNull
-                            ? (layoutLocation != null ? ViewStartPlaceholder + input.Source.FullPath + ViewStartPlaceholder : null)
+                            ? (layoutLocation is object ? ViewStartPlaceholder + input.Source.FullPath + ViewStartPlaceholder : null)
                             : viewStartLocationPath.FullPath;
 
                         RenderRequest request = new RenderRequest
@@ -206,7 +206,7 @@ namespace Statiq.Razor
                             LayoutLocation = layoutLocation,
                             ViewStartLocation = viewStartLocation,
                             RelativePath = GetRelativePath(input, context),
-                            Model = _model == null ? input : await _model.GetValueAsync(input, context)
+                            Model = _model is null ? input : await _model.GetValueAsync(input, context)
                         };
 
                         await razorService.RenderAsync(request);

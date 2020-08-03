@@ -125,7 +125,7 @@ namespace Statiq.CodeAnalysis.Analysis
             symbols.Add(symbol);
 
             // Create the document (but not if none of the members would be included)
-            if (ShouldIncludeSymbol(symbol, x => _symbolPredicate == null || x.GetMembers().Any(m => _symbolPredicate(m, _compilation))))
+            if (ShouldIncludeSymbol(symbol, x => _symbolPredicate is null || x.GetMembers().Any(m => _symbolPredicate(m, _compilation))))
             {
                 _namespaceDisplayNameToDocument.AddOrUpdate(
                     displayName,
@@ -166,7 +166,7 @@ namespace Statiq.CodeAnalysis.Analysis
                     { CodeAnalysisKeys.AllInterfaces, DocumentsFor(symbol.AllInterfaces) },
                     { CodeAnalysisKeys.Members, DocumentsFor(GetAccessibleMembersInThisAndBaseTypes(symbol, symbol).Where(MemberPredicate)) },
                     { CodeAnalysisKeys.Operators, DocumentsFor(GetAccessibleMembersInThisAndBaseTypes(symbol, symbol).Where(OperatorPredicate)) },
-                    { CodeAnalysisKeys.ExtensionMethods, _ => DocumentsFor(_extensionMethods.Where(x => x.ReduceExtensionMethod(symbol) != null)) },
+                    { CodeAnalysisKeys.ExtensionMethods, _ => DocumentsFor(_extensionMethods.Where(x => x.ReduceExtensionMethod(symbol) is object)) },
                     { CodeAnalysisKeys.Constructors, DocumentsFor(symbol.Constructors.Where(x => !x.IsImplicitlyDeclared)) },
                     { CodeAnalysisKeys.TypeParameters, DocumentsFor(symbol.TypeParameters) },
                     { CodeAnalysisKeys.TypeArguments, DocumentsFor(symbol.TypeArguments) },
@@ -301,7 +301,7 @@ namespace Statiq.CodeAnalysis.Analysis
             {
                 return false;
             }
-            return _finished || ((_symbolPredicate == null || _symbolPredicate(symbol, _compilation)) && (additionalCondition == null || additionalCondition(symbol)));
+            return _finished || ((_symbolPredicate is null || _symbolPredicate(symbol, _compilation)) && (additionalCondition is null || additionalCondition(symbol)));
         }
 
         // This was helpful: http://stackoverflow.com/a/30445814/807064
@@ -312,7 +312,7 @@ namespace Statiq.CodeAnalysis.Analysis
             // Remove overridden symbols
             ImmutableHashSet<ISymbol> remove = members
                 .Select(x => (ISymbol)(x as IMethodSymbol)?.OverriddenMethod ?? (x as IPropertySymbol)?.OverriddenProperty)
-                .Where(x => x != null)
+                .Where(x => x is object)
                 .ToImmutableHashSet();
             members.RemoveAll(x => remove.Contains(x));
             return members;
@@ -321,7 +321,7 @@ namespace Statiq.CodeAnalysis.Analysis
         internal static IEnumerable<INamedTypeSymbol> GetBaseTypes(ITypeSymbol type)
         {
             INamedTypeSymbol current = type.BaseType;
-            while (current != null)
+            while (current is object)
             {
                 yield return current;
                 current = current.BaseType;
@@ -430,7 +430,7 @@ namespace Statiq.CodeAnalysis.Analysis
             lock (XmlDocLock)
             {
                 // Need to lock the XML comment access or it sometimes doesn't get generated when using external XML doc files
-                documentationCommentXml = namespaceSymbol == null
+                documentationCommentXml = namespaceSymbol is null
                     ? symbol.GetDocumentationCommentXml(expandIncludes: true)
                     : GetNamespaceDocumentationCommentXml(namespaceSymbol);
             }
@@ -501,7 +501,7 @@ namespace Statiq.CodeAnalysis.Analysis
             if (string.IsNullOrEmpty(docs))
             {
                 INamespaceOrTypeSymbol namespaceDoc = symbol.GetMembers("NamespaceDoc").FirstOrDefault();
-                if (namespaceDoc != null)
+                if (namespaceDoc is object)
                 {
                     return namespaceDoc.GetDocumentationCommentXml(expandIncludes: true);
                 }
@@ -512,7 +512,7 @@ namespace Statiq.CodeAnalysis.Analysis
 
         public static string FirstLetterToUpper(string str)
         {
-            if (str == null)
+            if (str is null)
             {
                 return null;
             }
@@ -527,7 +527,7 @@ namespace Statiq.CodeAnalysis.Analysis
 
         private IReadOnlyList<IDocument> GetDerivedTypes(INamedTypeSymbol symbol) =>
             _namedTypes
-                .Where(x => x.Key.BaseType != null && SymbolEqualityComparer.Default.Equals(GetOriginalSymbolDefinition(x.Key.BaseType), GetOriginalSymbolDefinition(symbol)))
+                .Where(x => x.Key.BaseType is object && SymbolEqualityComparer.Default.Equals(GetOriginalSymbolDefinition(x.Key.BaseType), GetOriginalSymbolDefinition(symbol)))
                 .Select(x => x.Value)
                 .ToImmutableArray();
 
