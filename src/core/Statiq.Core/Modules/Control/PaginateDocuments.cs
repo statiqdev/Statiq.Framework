@@ -77,7 +77,7 @@ namespace Statiq.Core
         /// </summary>
         /// <param name="source">The source to set for the output document(s).</param>
         /// <returns>The current module instance.</returns>
-        public PaginateDocuments WithSource(NormalizedPath source)
+        public PaginateDocuments WithSource(in NormalizedPath source)
         {
             _source = source;
             return this;

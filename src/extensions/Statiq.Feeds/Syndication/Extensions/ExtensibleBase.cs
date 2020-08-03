@@ -102,7 +102,7 @@ namespace Statiq.Feeds.Syndication.Extensions
             }
         }
 
-        public static string ConvertToString(DateTime dateTime)
+        public static string ConvertToString(in DateTime dateTime)
         {
             return XmlConvert.ToString(dateTime, XmlDateTimeSerializationMode.Utc);
         }

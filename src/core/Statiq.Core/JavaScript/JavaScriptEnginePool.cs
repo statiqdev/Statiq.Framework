@@ -17,7 +17,7 @@ namespace Statiq.Core
             int startEngines,
             int maxEngines,
             int maxUsagesPerEngine,
-            TimeSpan engineTimeout)
+            in TimeSpan engineTimeout)
         {
             // First we need to check if the JsEngineSwitcher has been configured. We'll do this
             // by checking the DefaultEngineName being set. If that's there we can safely assume

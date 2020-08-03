@@ -19,7 +19,7 @@ namespace Statiq.Common
         /// <returns>A new document of the same type as this document.</returns>
         public static IDocument Clone(
             this IDocument document,
-            NormalizedPath destination,
+            in NormalizedPath destination,
             IEnumerable<KeyValuePair<string, object>> items,
             IContentProvider contentProvider = null) =>
             document.Clone(null, destination, items, contentProvider);
@@ -34,8 +34,8 @@ namespace Statiq.Common
         /// <returns>A new document of the same type as this document.</returns>
         public static IDocument Clone(
             this IDocument document,
-            NormalizedPath source,
-            NormalizedPath destination,
+            in NormalizedPath source,
+            in NormalizedPath destination,
             IContentProvider contentProvider = null) =>
             document.Clone(source, destination, null, contentProvider);
 
@@ -48,7 +48,7 @@ namespace Statiq.Common
         /// <returns>A new document of the same type as this document.</returns>
         public static IDocument Clone(
             this IDocument document,
-            NormalizedPath destination,
+            in NormalizedPath destination,
             IContentProvider contentProvider = null) =>
             document.Clone(null, destination, null, contentProvider);
 
@@ -89,7 +89,7 @@ namespace Statiq.Common
         /// <returns>A new document of the same type as this document.</returns>
         public static IDocument Clone(
             this IDocument document,
-            NormalizedPath destination,
+            in NormalizedPath destination,
             IEnumerable<KeyValuePair<string, object>> items,
             Stream stream,
             string mediaType = null) =>
@@ -106,8 +106,8 @@ namespace Statiq.Common
         /// <returns>A new document of the same type as this document.</returns>
         public static IDocument Clone(
             this IDocument document,
-            NormalizedPath source,
-            NormalizedPath destination,
+            in NormalizedPath source,
+            in NormalizedPath destination,
             Stream stream,
             string mediaType = null) =>
             document.Clone(source, destination, null, IExecutionContext.Current.GetContentProvider(stream, mediaType));
@@ -122,7 +122,7 @@ namespace Statiq.Common
         /// <returns>A new document of the same type as this document.</returns>
         public static IDocument Clone(
             this IDocument document,
-            NormalizedPath destination,
+            in NormalizedPath destination,
             Stream stream,
             string mediaType = null) =>
             document.Clone(null, destination, null, IExecutionContext.Current.GetContentProvider(stream, mediaType));

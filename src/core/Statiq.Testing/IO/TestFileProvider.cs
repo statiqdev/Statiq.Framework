@@ -35,7 +35,7 @@ namespace Statiq.Testing
 
         public IFile GetFile(NormalizedPath path) => new TestFile(FileSystem, this, path);
 
-        public void AddDirectory(NormalizedPath path)
+        public void AddDirectory(in NormalizedPath path)
         {
             if (path.IsNullOrEmpty)
             {
@@ -65,7 +65,7 @@ namespace Statiq.Testing
             AddDirectory(path.Parent);
         }
 
-        public void Add(NormalizedPath path, string content = "") => AddFile(path, content);
+        public void Add(in NormalizedPath path, string content = "") => AddFile(path, content);
 
         public IEnumerator<NormalizedPath> GetEnumerator() => Files.Keys.GetEnumerator();
 

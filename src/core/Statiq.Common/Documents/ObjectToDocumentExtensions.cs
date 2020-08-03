@@ -11,21 +11,21 @@ namespace Statiq.Common
 
         public static IDocument ToDocument<T>(
             this T obj,
-            NormalizedPath destination,
+            in NormalizedPath destination,
             IEnumerable<KeyValuePair<string, object>> items,
             IContentProvider contentProvider = null) =>
             GetObjectDocument(obj, null, destination, new Metadata(items), contentProvider);
 
         public static IDocument ToDocument<T>(
             this T obj,
-            NormalizedPath source,
-            NormalizedPath destination,
+            in NormalizedPath source,
+            in NormalizedPath destination,
             IContentProvider contentProvider = null) =>
             GetObjectDocument(obj, source, destination, null, contentProvider);
 
         public static IDocument ToDocument<T>(
             this T obj,
-            NormalizedPath destination,
+            in NormalizedPath destination,
             IContentProvider contentProvider = null) =>
             GetObjectDocument(obj, null, destination, null, contentProvider);
 
@@ -42,8 +42,8 @@ namespace Statiq.Common
 
         public static IDocument ToDocument<T>(
             this T obj,
-            NormalizedPath source,
-            NormalizedPath destination,
+            in NormalizedPath source,
+            in NormalizedPath destination,
             IEnumerable<KeyValuePair<string, object>> items,
             IContentProvider contentProvider = null) =>
             GetObjectDocument(obj, source, destination, new Metadata(items), contentProvider);
@@ -134,8 +134,8 @@ namespace Statiq.Common
         // Construct an ObjectDocument<T> from the actual type of the document
         private static IDocument GetObjectDocument<T>(
             T obj,
-            NormalizedPath source,
-            NormalizedPath destination,
+            in NormalizedPath source,
+            in NormalizedPath destination,
             IEnumerable<KeyValuePair<string, object>> items,
             IContentProvider contentProvider = null)
         {

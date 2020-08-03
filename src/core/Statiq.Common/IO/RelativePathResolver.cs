@@ -5,7 +5,7 @@ namespace Statiq.Common
 {
     internal static class RelativePathResolver
     {
-        public static NormalizedPath Resolve(NormalizedPath source, NormalizedPath target)
+        public static NormalizedPath Resolve(in NormalizedPath source, in NormalizedPath target)
         {
             source.ThrowIfNull(nameof(source));
             target.ThrowIfNull(nameof(target));

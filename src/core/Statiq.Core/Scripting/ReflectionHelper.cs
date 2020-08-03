@@ -175,6 +175,10 @@ namespace Statiq.Core
                 {
                     sigBuilder.Append("out ");
                 }
+                else if (param.IsIn)
+                {
+                    sigBuilder.Append("in ");
+                }
                 else if (param.ParameterType.IsByRef)
                 {
                     sigBuilder.Append("ref ");

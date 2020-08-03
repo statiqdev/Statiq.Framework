@@ -389,13 +389,13 @@ namespace Statiq.CodeAnalysis
         /// </summary>
         /// <param name="destinationPreview">The prefix to use for each generated destination.</param>
         /// <returns>The current module instance.</returns>
-        public AnalyzeCSharp WithDestinationPrefix(NormalizedPath destinationPreview)
+        public AnalyzeCSharp WithDestinationPrefix(in NormalizedPath destinationPreview)
         {
             _destinationPrefix = destinationPreview;
             return this;
         }
 
-        private NormalizedPath DefaultDestination(ISymbol symbol, NormalizedPath prefix)
+        private NormalizedPath DefaultDestination(ISymbol symbol, in NormalizedPath prefix)
         {
             INamespaceSymbol containingNamespace = symbol.ContainingNamespace;
             NormalizedPath destinationPath;

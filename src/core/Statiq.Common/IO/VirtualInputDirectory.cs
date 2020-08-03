@@ -10,7 +10,7 @@ namespace Statiq.Common
     {
         private readonly IReadOnlyFileSystem _fileSystem;
 
-        public VirtualInputDirectory(IReadOnlyFileSystem fileSystem, NormalizedPath path)
+        public VirtualInputDirectory(IReadOnlyFileSystem fileSystem, in NormalizedPath path)
         {
             path.ThrowIfNull(nameof(path));
 

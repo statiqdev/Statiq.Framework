@@ -142,7 +142,7 @@ namespace Statiq.Common
         /// <param name="item">The metadata key and value being expanded.</param>
         /// <param name="metadata">The current metadata instance.</param>
         /// <returns>The expanded metadata key and value.</returns>
-        public static KeyValuePair<string, object> ExpandKeyValuePair(KeyValuePair<string, object> item, IMetadata metadata) =>
+        public static KeyValuePair<string, object> ExpandKeyValuePair(in KeyValuePair<string, object> item, IMetadata metadata) =>
             item.Value is IMetadataValue
                 ? new KeyValuePair<string, object>(item.Key, ExpandValue(item.Key, item.Value, metadata))
                 : item;

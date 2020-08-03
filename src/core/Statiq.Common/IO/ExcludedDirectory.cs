@@ -13,7 +13,7 @@ namespace Statiq.Common
     {
         private readonly IFileProvider _fileProvider;
 
-        public ExcludedDirectory(IFileProvider fileProvider, NormalizedPath path)
+        public ExcludedDirectory(IFileProvider fileProvider, in NormalizedPath path)
         {
             _fileProvider = fileProvider.ThrowIfNull(nameof(fileProvider));
             Path = path;

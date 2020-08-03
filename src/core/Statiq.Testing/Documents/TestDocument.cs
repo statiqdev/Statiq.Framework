@@ -25,22 +25,22 @@ namespace Statiq.Testing
         {
         }
 
-        public TestDocument(NormalizedPath source, NormalizedPath destination, IContentProvider contentProvider = null)
+        public TestDocument(in NormalizedPath source, in NormalizedPath destination, IContentProvider contentProvider = null)
             : this(null, source, destination, null, contentProvider)
         {
         }
 
-        public TestDocument(NormalizedPath source, NormalizedPath destination, IEnumerable<KeyValuePair<string, object>> items, IContentProvider contentProvider = null)
+        public TestDocument(in NormalizedPath source, in NormalizedPath destination, IEnumerable<KeyValuePair<string, object>> items, IContentProvider contentProvider = null)
             : this(null, source, destination, items, contentProvider)
         {
         }
 
-        public TestDocument(IReadOnlyConfigurationSettings settings, NormalizedPath source, NormalizedPath destination, IEnumerable<KeyValuePair<string, object>> items, IContentProvider contentProvider = null)
+        public TestDocument(IReadOnlyConfigurationSettings settings, in NormalizedPath source, in NormalizedPath destination, IEnumerable<KeyValuePair<string, object>> items, IContentProvider contentProvider = null)
             : this(settings, source, destination, items == null ? null : new TestMetadata(items), contentProvider)
         {
         }
 
-        public TestDocument(IReadOnlyConfigurationSettings settings, NormalizedPath source, NormalizedPath destination, IMetadata metadata, IContentProvider contentProvider = null)
+        public TestDocument(IReadOnlyConfigurationSettings settings, in NormalizedPath source, in NormalizedPath destination, IMetadata metadata, IContentProvider contentProvider = null)
             : base(settings, source, destination, metadata is TestMetadata ? metadata : new TestMetadata(metadata), contentProvider)
         {
             // All constructors lead here
@@ -68,62 +68,62 @@ namespace Statiq.Testing
         {
         }
 
-        public TestDocument(NormalizedPath source, NormalizedPath destination, IEnumerable<KeyValuePair<string, object>> metadata, string content, string mediaType = null)
+        public TestDocument(in NormalizedPath source, in NormalizedPath destination, IEnumerable<KeyValuePair<string, object>> metadata, string content, string mediaType = null)
             : this(source, destination, metadata, GetContentProvider(content, mediaType))
         {
         }
 
-        public TestDocument(NormalizedPath source, NormalizedPath destination, IEnumerable<KeyValuePair<string, object>> metadata, Stream content, string mediaType = null)
+        public TestDocument(in NormalizedPath source, in NormalizedPath destination, IEnumerable<KeyValuePair<string, object>> metadata, Stream content, string mediaType = null)
             : this(source, destination, metadata, GetContentProvider(content, mediaType))
         {
         }
 
-        public TestDocument(NormalizedPath source, NormalizedPath destination, string content, string mediaType = null)
+        public TestDocument(in NormalizedPath source, in NormalizedPath destination, string content, string mediaType = null)
             : this(source, destination, GetContentProvider(content, mediaType))
         {
         }
 
-        public TestDocument(NormalizedPath source, NormalizedPath destination, Stream content, string mediaType = null)
+        public TestDocument(in NormalizedPath source, in NormalizedPath destination, Stream content, string mediaType = null)
             : this(source, destination, GetContentProvider(content, mediaType))
         {
         }
 
-        public TestDocument(NormalizedPath path)
+        public TestDocument(in NormalizedPath path)
             : this(GetSourcePath(path), GetDestinationPath(path))
         {
         }
 
-        public TestDocument(NormalizedPath path, IEnumerable<KeyValuePair<string, object>> metadata)
+        public TestDocument(in NormalizedPath path, IEnumerable<KeyValuePair<string, object>> metadata)
             : this(GetSourcePath(path), GetDestinationPath(path), metadata)
         {
         }
 
-        public TestDocument(NormalizedPath path, IEnumerable<KeyValuePair<string, object>> metadata, string content, string mediaType = null)
+        public TestDocument(in NormalizedPath path, IEnumerable<KeyValuePair<string, object>> metadata, string content, string mediaType = null)
             : this(GetSourcePath(path), GetDestinationPath(path), metadata, GetContentProvider(content, mediaType))
         {
         }
 
-        public TestDocument(NormalizedPath path, IEnumerable<KeyValuePair<string, object>> metadata, Stream content, string mediaType = null)
+        public TestDocument(in NormalizedPath path, IEnumerable<KeyValuePair<string, object>> metadata, Stream content, string mediaType = null)
             : this(GetSourcePath(path), GetDestinationPath(path), metadata, GetContentProvider(content, mediaType))
         {
         }
 
-        public TestDocument(NormalizedPath path, IEnumerable<KeyValuePair<string, object>> metadata, IContentProvider contentProvider)
+        public TestDocument(in NormalizedPath path, IEnumerable<KeyValuePair<string, object>> metadata, IContentProvider contentProvider)
             : this(GetSourcePath(path), GetDestinationPath(path), metadata, contentProvider)
         {
         }
 
-        public TestDocument(NormalizedPath path, string content, string mediaType = null)
+        public TestDocument(in NormalizedPath path, string content, string mediaType = null)
             : this(GetSourcePath(path), GetDestinationPath(path), GetContentProvider(content, mediaType))
         {
         }
 
-        public TestDocument(NormalizedPath path, Stream content, string mediaType = null)
+        public TestDocument(in NormalizedPath path, Stream content, string mediaType = null)
             : this(GetSourcePath(path), GetDestinationPath(path), GetContentProvider(content, mediaType))
         {
         }
 
-        public TestDocument(NormalizedPath path, IContentProvider contentProvider)
+        public TestDocument(in NormalizedPath path, IContentProvider contentProvider)
             : this(GetSourcePath(path), GetDestinationPath(path), contentProvider)
         {
         }
@@ -153,7 +153,7 @@ namespace Statiq.Testing
             return new MemoryContent(buffer, mediaType);
         }
 
-        private static NormalizedPath GetSourcePath(NormalizedPath path) =>
+        private static NormalizedPath GetSourcePath(in NormalizedPath path) =>
             path.IsNull ? path : path.IsAbsolute ? path : new NormalizedPath("/input").Combine(path);
 
         private static NormalizedPath GetDestinationPath(NormalizedPath path)
@@ -174,7 +174,7 @@ namespace Statiq.Testing
         [PropertyMetadata(null)]
         public TestMetadata TestMetadata => (TestMetadata)Metadata;
 
-        public void Add(KeyValuePair<string, object> item) => TestMetadata.Add(item);
+        public void Add(in KeyValuePair<string, object> item) => TestMetadata.Add(item);
 
         public void Add(string key, object value) => TestMetadata.Add(key, value);
     }

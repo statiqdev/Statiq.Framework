@@ -12,7 +12,7 @@ namespace Statiq.Common
     {
         public static IDocument CreateDocument(
             this IExecutionContext context,
-            NormalizedPath destination,
+            in NormalizedPath destination,
             IEnumerable<KeyValuePair<string, object>> items,
             Stream stream,
             string mediaType = null) =>
@@ -20,15 +20,15 @@ namespace Statiq.Common
 
         public static IDocument CreateDocument(
             this IExecutionContext context,
-            NormalizedPath source,
-            NormalizedPath destination,
+            in NormalizedPath source,
+            in NormalizedPath destination,
             Stream stream,
             string mediaType = null) =>
             context.CreateDocument(source, destination, null, context.GetContentProvider(stream, mediaType));
 
         public static IDocument CreateDocument(
             this IExecutionContext context,
-            NormalizedPath destination,
+            in NormalizedPath destination,
             Stream stream,
             string mediaType = null) =>
             context.CreateDocument(null, destination, null, context.GetContentProvider(stream, mediaType));
@@ -48,7 +48,7 @@ namespace Statiq.Common
 
         public static TDocument CreateDocument<TDocument>(
             this IExecutionContext context,
-            NormalizedPath destination,
+            in NormalizedPath destination,
             IEnumerable<KeyValuePair<string, object>> items,
             Stream stream,
             string mediaType = null)
@@ -57,8 +57,8 @@ namespace Statiq.Common
 
         public static TDocument CreateDocument<TDocument>(
             this IExecutionContext context,
-            NormalizedPath source,
-            NormalizedPath destination,
+            in NormalizedPath source,
+            in NormalizedPath destination,
             Stream stream,
             string mediaType = null)
             where TDocument : FactoryDocument, IDocument, new() =>
@@ -66,7 +66,7 @@ namespace Statiq.Common
 
         public static TDocument CreateDocument<TDocument>(
             this IExecutionContext context,
-            NormalizedPath destination,
+            in NormalizedPath destination,
             Stream stream,
             string mediaType = null)
             where TDocument : FactoryDocument, IDocument, new() =>
@@ -90,7 +90,7 @@ namespace Statiq.Common
         public static IDocument CloneOrCreateDocument(
             this IExecutionContext context,
             IDocument document,
-            NormalizedPath destination,
+            in NormalizedPath destination,
             IEnumerable<KeyValuePair<string, object>> items,
             Stream stream,
             string mediaType = null) =>
@@ -100,8 +100,8 @@ namespace Statiq.Common
         public static IDocument CloneOrCreateDocument(
             this IExecutionContext context,
             IDocument document,
-            NormalizedPath source,
-            NormalizedPath destination,
+            in NormalizedPath source,
+            in NormalizedPath destination,
             Stream stream,
             string mediaType = null) =>
             document?.Clone(source, destination, context.GetContentProvider(stream, mediaType))
@@ -110,7 +110,7 @@ namespace Statiq.Common
         public static IDocument CloneOrCreateDocument(
             this IExecutionContext context,
             IDocument document,
-            NormalizedPath destination,
+            in NormalizedPath destination,
             Stream stream,
             string mediaType = null) =>
             document?.Clone(destination, context.GetContentProvider(stream, mediaType))
@@ -136,8 +136,8 @@ namespace Statiq.Common
         public static IDocument CloneOrCreateDocument(
             this IExecutionContext context,
             IDocument document,
-            NormalizedPath source,
-            NormalizedPath destination,
+            in NormalizedPath source,
+            in NormalizedPath destination,
             IEnumerable<KeyValuePair<string, object>> items,
             Stream stream,
             string mediaType = null) =>
@@ -147,7 +147,7 @@ namespace Statiq.Common
         public static TDocument CloneOrCreateDocument<TDocument>(
             this IExecutionContext context,
             TDocument document,
-            NormalizedPath destination,
+            in NormalizedPath destination,
             IEnumerable<KeyValuePair<string, object>> items,
             Stream stream,
             string mediaType = null)
@@ -158,8 +158,8 @@ namespace Statiq.Common
         public static TDocument CloneOrCreateDocument<TDocument>(
             this IExecutionContext context,
             TDocument document,
-            NormalizedPath source,
-            NormalizedPath destination,
+            in NormalizedPath source,
+            in NormalizedPath destination,
             Stream stream,
             string mediaType = null)
             where TDocument : FactoryDocument, IDocument, new() =>
@@ -169,7 +169,7 @@ namespace Statiq.Common
         public static TDocument CloneOrCreateDocument<TDocument>(
             this IExecutionContext context,
             TDocument document,
-            NormalizedPath destination,
+            in NormalizedPath destination,
             Stream stream,
             string mediaType = null)
             where TDocument : FactoryDocument, IDocument, new() =>
@@ -198,8 +198,8 @@ namespace Statiq.Common
         public static TDocument CloneOrCreateDocument<TDocument>(
             this IExecutionContext context,
             TDocument document,
-            NormalizedPath source,
-            NormalizedPath destination,
+            in NormalizedPath source,
+            in NormalizedPath destination,
             IEnumerable<KeyValuePair<string, object>> items,
             Stream stream,
             string mediaType = null)

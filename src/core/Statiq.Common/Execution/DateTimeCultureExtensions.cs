@@ -41,7 +41,7 @@ namespace Statiq.Common
         /// <param name="targetCulture">The culture that should be used if the date display setting isn't provided. If the
         /// current culture is of the same family, then it will be used. If not, the specified target culture will be used.</param>
         /// <returns>A short date display string.</returns>
-        public static string ToShortDateString(this DateTime dateTime, IExecutionContext context, string targetCulture = "en-GB")
+        public static string ToShortDateString(this in DateTime dateTime, IExecutionContext context, string targetCulture = "en-GB")
         {
             CultureInfo culture = context.GetDateTimeDisplayCulture(targetCulture);
             return dateTime.ToString(culture.DateTimeFormat.ShortDatePattern, culture);
@@ -55,7 +55,7 @@ namespace Statiq.Common
         /// <param name="targetCulture">The culture that should be used if the date display setting isn't provided. If the
         /// current culture is of the same family, then it will be used. If not, the specified target culture will be used.</param>
         /// <returns>A long date display string.</returns>
-        public static string ToLongDateString(this DateTime dateTime, IExecutionContext context, string targetCulture = "en-GB")
+        public static string ToLongDateString(this in DateTime dateTime, IExecutionContext context, string targetCulture = "en-GB")
         {
             CultureInfo culture = context.GetDateTimeDisplayCulture(targetCulture);
             return dateTime.ToString(culture.DateTimeFormat.LongDatePattern, culture);

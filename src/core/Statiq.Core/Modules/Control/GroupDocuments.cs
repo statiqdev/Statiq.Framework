@@ -82,7 +82,7 @@ namespace Statiq.Core
         /// </summary>
         /// <param name="source">The source to set for the output document(s).</param>
         /// <returns>The current module instance.</returns>
-        public GroupDocuments WithSource(NormalizedPath source)
+        public GroupDocuments WithSource(in NormalizedPath source)
         {
             _source = source;
             return this;

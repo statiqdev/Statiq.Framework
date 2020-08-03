@@ -4,14 +4,14 @@ namespace Statiq.App
 {
     internal struct ConsoleContent
     {
-        public ConsoleContent(ConsoleColor foreground, ConsoleColor background, ReadOnlyMemory<char> message)
+        public ConsoleContent(ConsoleColor foreground, ConsoleColor background, in ReadOnlyMemory<char> message)
         {
             Foreground = foreground;
             Background = background;
             Message = message;
         }
 
-        public ConsoleContent(ReadOnlyMemory<char> message)
+        public ConsoleContent(in ReadOnlyMemory<char> message)
         {
             Foreground = ConsoleColor.Gray;
             Background = ConsoleColor.Black;

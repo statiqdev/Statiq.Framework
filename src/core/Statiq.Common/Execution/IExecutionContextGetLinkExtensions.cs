@@ -132,7 +132,7 @@
             this IExecutionContext executionContext,
             string path,
             string host,
-            NormalizedPath root,
+            in NormalizedPath root,
             bool useHttps,
             bool hideIndexPages,
             bool hideExtensions)
@@ -169,7 +169,7 @@
         /// </returns>
         public static string GetLink(
             this IExecutionContext executionContext,
-            NormalizedPath path,
+            in NormalizedPath path,
             bool includeHost = false) =>
             executionContext.GetLink(
                 path,
@@ -198,9 +198,9 @@
         /// </returns>
         public static string GetLink(
             this IExecutionContext executionContext,
-            NormalizedPath path,
+            in NormalizedPath path,
             string host,
-            NormalizedPath root,
+            in NormalizedPath root,
             bool useHttps,
             bool hideIndexPages,
             bool hideExtensions) =>
@@ -232,9 +232,9 @@
         /// </returns>
         public static string GetLink(
             this IExecutionContext executionContext,
-            NormalizedPath path,
+            in NormalizedPath path,
             string host,
-            NormalizedPath root,
+            in NormalizedPath root,
             bool useHttps,
             bool hideIndexPages,
             bool hideExtensions,

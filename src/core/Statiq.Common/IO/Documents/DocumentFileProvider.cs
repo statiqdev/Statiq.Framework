@@ -60,7 +60,7 @@ namespace Statiq.Common
 
         public IFile GetFile(NormalizedPath path) => new DocumentFile(this, path);
 
-        public IDocument GetDocument(NormalizedPath path) =>
+        public IDocument GetDocument(in NormalizedPath path) =>
             Files.TryGetValue(path, out IDocument document) ? document : throw new KeyNotFoundException();
     }
 }

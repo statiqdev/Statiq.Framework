@@ -51,7 +51,7 @@ namespace Statiq.Common
         }
 
         protected Document(
-            NormalizedPath destination,
+            in NormalizedPath destination,
             IEnumerable<KeyValuePair<string, object>> items,
             IContentProvider contentProvider = null)
             : this(null, null, destination, items, contentProvider)
@@ -59,15 +59,15 @@ namespace Statiq.Common
         }
 
         protected Document(
-            NormalizedPath source,
-            NormalizedPath destination,
+            in NormalizedPath source,
+            in NormalizedPath destination,
             IContentProvider contentProvider = null)
             : this(null, source, destination, null, contentProvider)
         {
         }
 
         protected Document(
-            NormalizedPath destination,
+            in NormalizedPath destination,
             IContentProvider contentProvider = null)
             : this(null, null, destination, null, contentProvider)
         {
@@ -86,8 +86,8 @@ namespace Statiq.Common
         }
 
         protected Document(
-            NormalizedPath source,
-            NormalizedPath destination,
+            in NormalizedPath source,
+            in NormalizedPath destination,
             IEnumerable<KeyValuePair<string, object>> items,
             IContentProvider contentProvider = null)
             : this(null, source, destination, items, contentProvider)
@@ -96,8 +96,8 @@ namespace Statiq.Common
 
         protected Document(
             IReadOnlyConfigurationSettings settings,
-            NormalizedPath source,
-            NormalizedPath destination,
+            in NormalizedPath source,
+            in NormalizedPath destination,
             IEnumerable<KeyValuePair<string, object>> items,
             IContentProvider contentProvider = null)
             : this(settings, source, destination, items == null ? null : new Metadata(items), contentProvider)
@@ -106,8 +106,8 @@ namespace Statiq.Common
 
         protected Document(
             IReadOnlyConfigurationSettings settings,
-            NormalizedPath source,
-            NormalizedPath destination,
+            in NormalizedPath source,
+            in NormalizedPath destination,
             IMetadata metadata,
             IContentProvider contentProvider = null)
         {

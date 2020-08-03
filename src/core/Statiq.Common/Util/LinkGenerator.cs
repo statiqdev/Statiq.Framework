@@ -33,7 +33,7 @@ namespace Statiq.Common
         public static string GetLink(
             NormalizedPath path,
             string host,
-            NormalizedPath root,
+            in NormalizedPath root,
             string scheme,
             string[] hidePages,
             string[] hideExtensions,

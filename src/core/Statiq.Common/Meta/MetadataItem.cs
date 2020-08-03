@@ -28,7 +28,7 @@ namespace Statiq.Common
         /// Creates a new metadata item with a specified key-value pair.
         /// </summary>
         /// <param name="pair">The key-value pair.</param>
-        public MetadataItem(KeyValuePair<string, object> pair)
+        public MetadataItem(in KeyValuePair<string, object> pair)
         {
             Pair = pair;
         }
@@ -61,7 +61,7 @@ namespace Statiq.Common
         /// Converts a key-value pair to a <see cref="MetadataItem"/>.
         /// </summary>
         /// <param name="pair">The key-value pair to convert.</param>
-        public static implicit operator MetadataItem(KeyValuePair<string, object> pair)
+        public static implicit operator MetadataItem(in KeyValuePair<string, object> pair)
         {
             return new MetadataItem(pair);
         }

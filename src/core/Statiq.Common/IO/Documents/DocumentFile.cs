@@ -11,7 +11,7 @@ namespace Statiq.Common
         private readonly DocumentFileProvider _fileProvider;
         private readonly IDocument _document;
 
-        internal DocumentFile(DocumentFileProvider fileProvider, NormalizedPath path)
+        internal DocumentFile(DocumentFileProvider fileProvider, in NormalizedPath path)
         {
             _fileProvider = fileProvider.ThrowIfNull(nameof(fileProvider));
             path.ThrowIfNull(nameof(path));

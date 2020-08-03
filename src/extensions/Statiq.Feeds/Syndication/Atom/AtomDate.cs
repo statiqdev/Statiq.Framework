@@ -12,7 +12,7 @@ namespace Statiq.Feeds.Syndication.Atom
     {
         private DateTime? _value;
 
-        public AtomDate(DateTime date)
+        public AtomDate(in DateTime date)
         {
             _value = date;
         }
@@ -67,7 +67,7 @@ namespace Statiq.Feeds.Syndication.Atom
             }
         }
 
-        public DateTime GetValueOrDefault(DateTime defaultValue)
+        public DateTime GetValueOrDefault(in DateTime defaultValue)
         {
             if (!_value.HasValue)
             {
@@ -102,7 +102,7 @@ namespace Statiq.Feeds.Syndication.Atom
             return _value.GetHashCode();
         }
 
-        public static implicit operator AtomDate(DateTime value)
+        public static implicit operator AtomDate(in DateTime value)
         {
             return new AtomDate(value);
         }

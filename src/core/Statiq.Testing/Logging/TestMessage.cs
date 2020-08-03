@@ -16,7 +16,7 @@ namespace Statiq.Testing
         public Exception Exception { get; }
         public string FormattedMessage { get; }
 
-        public TestMessage(string categoryName, LogLevel logLevel, EventId eventId, object state, Exception exception, string formatted)
+        public TestMessage(string categoryName, LogLevel logLevel, in EventId eventId, object state, Exception exception, string formatted)
         {
             CategoryName = categoryName;
             LogLevel = logLevel;
