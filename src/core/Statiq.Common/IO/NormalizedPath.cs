@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Globalization;
+using System.IO;
 using System.Linq;
 using System.Net;
 using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
+using System.Threading;
 
 namespace Statiq.Common
 {
@@ -30,7 +32,10 @@ namespace Statiq.Common
 
         private const string WhitespaceChars = "\r\n\t";
 
-        private static readonly char[] InvalidPathChars = System.IO.Path.GetInvalidPathChars();
+        private static readonly ConcurrentCache<(string, PathKind), (string FullPath, ReadOnlyMemory<char>[] Segments, bool IsAbsolute)> _cache =
+            new ConcurrentCache<(string, PathKind), (string FullPath, ReadOnlyMemory<char>[] Segments, bool IsAbsolute)>();
+
+        private static readonly char[] InvalidPathChars = Path.GetInvalidPathChars();
 
         public static readonly NormalizedPath Null;
 
@@ -41,6 +46,8 @@ namespace Statiq.Common
         public static readonly NormalizedPath AbsoluteRoot = new NormalizedPath(Slash);
 
         public static readonly NormalizedPath Empty = new NormalizedPath(string.Empty);
+
+        private readonly Lazy<NormalizedPath> _parent;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="NormalizedPath" /> class.
@@ -58,31 +65,47 @@ namespace Statiq.Common
         /// <param name="pathKind">Specifies whether the path is relative, absolute, or indeterminate.</param>
         public NormalizedPath(string path, PathKind pathKind)
         {
-            if (path == null)
-            {
-                throw new ArgumentNullException(nameof(path));
-            }
+            path.ThrowIfNull(nameof(path));
 
-            // Try known paths first
+            // Get the normalized path data
+            (string FullPath, ReadOnlyMemory<char>[] Segments, bool IsAbsolute) normalized = _cache.GetOrAdd(
+                (path, pathKind), data => NormalizePath(data.Item1, data.Item2));
+            FullPath = normalized.FullPath;
+            Segments = normalized.Segments;
+            IsAbsolute = normalized.IsAbsolute;
+
+            // Cache the parent factory since it's expensive to create a parent
+            _parent = new Lazy<NormalizedPath>(
+                () =>
+                {
+                    string directory = Path.GetDirectoryName(normalized.FullPath);
+                    if (string.IsNullOrWhiteSpace(directory))
+                    {
+                        return normalized.IsAbsolute ? Null : Empty;
+                    }
+                    return new NormalizedPath(directory);
+                },
+                LazyThreadSafetyMode.ExecutionAndPublication);
+        }
+
+        private static (string FullPath, ReadOnlyMemory<char>[] Segments, bool IsAbsolute) NormalizePath(string path, PathKind pathKind)
+        {
+            // Checks for known paths
             if (path.Length == 0)
             {
                 if (pathKind == PathKind.Absolute)
                 {
                     throw new ArgumentException("An empty path cannot be absolute");
                 }
-                FullPath = string.Empty;
-                Segments = Array.Empty<ReadOnlyMemory<char>>();
-                IsAbsolute = false;
+                return (string.Empty, Array.Empty<ReadOnlyMemory<char>>(), false);
             }
-            else if (path == Slash || path == "\\")
+            if (path == Slash || path == "\\")
             {
                 if (pathKind == PathKind.Relative)
                 {
                     throw new ArgumentException("An absolute root path cannot be relative");
                 }
-                FullPath = Slash;
-                Segments = Array.Empty<ReadOnlyMemory<char>>();
-                IsAbsolute = true;
+                return (Slash, Array.Empty<ReadOnlyMemory<char>>(), true);
             }
             else if (path == Dot || path == DotDot)
             {
@@ -90,18 +113,9 @@ namespace Statiq.Common
                 {
                     throw new ArgumentException("A dotted relative path cannot be absolute");
                 }
-                FullPath = path;
-                Segments = new ReadOnlyMemory<char>[] { path.AsMemory() };
-                IsAbsolute = false;
+                return (path, new ReadOnlyMemory<char>[] { path.AsMemory() }, false);
             }
-            else
-            {
-                (FullPath, Segments, IsAbsolute) = NormalizePath(path, pathKind);
-            }
-        }
 
-        internal static (string FullPath, ReadOnlyMemory<char>[] Segments, bool IsAbsolute) NormalizePath(string path, PathKind pathKind)
-        {
             // Normalize slashes, remove invalid chars, and trim whitespace
             Span<char> pathSpan = path.ToSpan();
             pathSpan.Replace('\\', '/');
@@ -131,7 +145,7 @@ namespace Statiq.Common
             // Determine if the path is absolute
             bool isAbsolute = pathKind switch
             {
-                PathKind.RelativeOrAbsolute => System.IO.Path.IsPathRooted(pathSpan),
+                PathKind.RelativeOrAbsolute => Path.IsPathRooted(pathSpan),
                 PathKind.Absolute => true,
                 PathKind.Relative => false,
                 _ => false,
@@ -154,7 +168,7 @@ namespace Statiq.Common
                 if (pathSpan[0] == '/')
                 {
                     // Segments should be empty if the path is just a slash
-                    return (Slash, new ReadOnlyMemory<char>[] { }, isAbsolute);
+                    return (Slash, Array.Empty<ReadOnlyMemory<char>>(), isAbsolute);
                 }
                 string pathString = pathSpan.ToString();
                 return (pathString, new ReadOnlyMemory<char>[] { pathString.AsMemory() }, isAbsolute);
@@ -230,7 +244,7 @@ namespace Statiq.Common
                     && !(start - 3 >= 0 && pathSpan[start - 3] == '.' && pathSpan[start - 2] == '.' && pathSpan[start - 1] == '/')
                     && !(start - 3 >= 0 && pathSpan[start - 3] == '/' && pathSpan[start - 2] == '.' && pathSpan[start - 1] == '/')
                     && !(start - 4 >= 0 && pathSpan[start - 4] == '/' && pathSpan[start - 3] == '.' && pathSpan[start - 2] == '.' && pathSpan[start - 1] == '/')
-                    && !(start - 3 == 0 && pathSpan[0] != '/' && System.IO.Path.IsPathRooted(pathSpan.Slice(start - 3, 3))))
+                    && !(start - 3 == 0 && pathSpan[0] != '/' && Path.IsPathRooted(pathSpan.Slice(start - 3, 3))))
                 {
                     int removeStart = start - 2;
                     while (removeStart > 0 && pathSpan[removeStart] != '/')
@@ -413,7 +427,7 @@ namespace Statiq.Common
 
         public bool Equals(NormalizedPath other) => Equals(other, DefaultComparisonType);
 
-        public bool Equals(NormalizedPath other, StringComparison comparisonType)
+        public bool Equals(in NormalizedPath other, StringComparison comparisonType)
         {
             if (other.IsNull)
             {
@@ -427,13 +441,13 @@ namespace Statiq.Common
                 && FullPath.Equals(other.FullPath, comparisonType);
         }
 
-        public static bool operator ==(NormalizedPath a, NormalizedPath b) => a.Equals(b);
+        public static bool operator ==(in NormalizedPath a, in NormalizedPath b) => a.Equals(b);
 
-        public static bool operator !=(NormalizedPath a, NormalizedPath b) => !a.Equals(b);
+        public static bool operator !=(in NormalizedPath a, in NormalizedPath b) => !a.Equals(b);
 
-        public static bool operator ==(NormalizedPath a, object b) => a.Equals(b);
+        public static bool operator ==(in NormalizedPath a, object b) => a.Equals(b);
 
-        public static bool operator !=(NormalizedPath a, object b) => !a.Equals(b);
+        public static bool operator !=(in NormalizedPath a, object b) => !a.Equals(b);
 
         /// <inheritdoc />
         public int CompareTo(object obj) => !(obj is NormalizedPath path) ? 1 : CompareTo(path);
@@ -466,7 +480,7 @@ namespace Statiq.Common
         /// </remarks>
         /// <param name="path">The path.</param>
         /// <returns>The result as a string of the conversion.</returns>
-        public static explicit operator string(NormalizedPath path) => path.ToString();
+        public static explicit operator string(in NormalizedPath path) => path.ToString();
 
         /// <summary>
         /// Combines two paths into a new path.
@@ -474,7 +488,7 @@ namespace Statiq.Common
         /// <param name="path1">The first path to combine.</param>
         /// <param name="path2">The second path to combine.</param>
         /// <returns>The combined paths.</returns>
-        public static NormalizedPath Combine(NormalizedPath path1, NormalizedPath path2)
+        public static NormalizedPath Combine(in NormalizedPath path1, in NormalizedPath path2)
         {
             path1.ThrowIfNull(nameof(path1));
             path2.ThrowIfNull(nameof(path2));
@@ -490,13 +504,13 @@ namespace Statiq.Common
                 return path2;
             }
 
-            return new NormalizedPath(System.IO.Path.Combine(path1.FullPath, path2.FullPath));
+            return new NormalizedPath(Path.Combine(path1.FullPath, path2.FullPath));
         }
 
-        public static NormalizedPath Combine(NormalizedPath path1, NormalizedPath path2, NormalizedPath path3) =>
+        public static NormalizedPath Combine(in NormalizedPath path1, in NormalizedPath path2, in NormalizedPath path3) =>
             Combine(Combine(path1, path2), path3);
 
-        public static NormalizedPath Combine(NormalizedPath path1, NormalizedPath path2, NormalizedPath path3, NormalizedPath path4) =>
+        public static NormalizedPath Combine(in NormalizedPath path1, in NormalizedPath path2, in NormalizedPath path3, in NormalizedPath path4) =>
             Combine(Combine(path1, path2), Combine(path3, path4));
 
         public static NormalizedPath Combine(params NormalizedPath[] paths)
@@ -516,7 +530,7 @@ namespace Statiq.Common
         /// <param name="path">The path.</param>
         /// <returns>A combination of the current path and the provided <see cref="NormalizedPath"/>, unless
         /// the provided <see cref="NormalizedPath"/> is absolute in which case it is returned.</returns>
-        public NormalizedPath Combine(NormalizedPath path)
+        public NormalizedPath Combine(in NormalizedPath path)
         {
             ThrowIfNull();
             path.ThrowIfNull(nameof(path));
@@ -529,25 +543,15 @@ namespace Statiq.Common
         /// <param name="path1">The first path to combine.</param>
         /// <param name="path2">The second path to combine.</param>
         /// <returns>The combined paths.</returns>
-        public static NormalizedPath operator /(NormalizedPath path1, NormalizedPath path2) => Combine(path1, path2);
+        public static NormalizedPath operator /(in NormalizedPath path1, in NormalizedPath path2) => Combine(path1, path2);
 
         // Helper properties and methods
 
-        public void ThrowIfNull(string paramName)
-        {
-            if (IsNull)
-            {
-                throw new ArgumentNullException(paramName);
-            }
-        }
+        public NormalizedPath ThrowIfNull(string paramName) =>
+            IsNull ? throw new ArgumentNullException(paramName) : this;
 
-        private void ThrowIfNull()
-        {
-            if (IsNull)
-            {
-                throw new NullReferenceException();
-            }
-        }
+        private NormalizedPath ThrowIfNull() =>
+            IsNull ? throw new NullReferenceException() : this;
 
         /// <summary>
         /// Gets the root of this path,
@@ -565,7 +569,7 @@ namespace Statiq.Common
 
                 if (IsAbsolute)
                 {
-                    string directory = System.IO.Path.GetPathRoot(FullPath);
+                    string directory = Path.GetPathRoot(FullPath);
                     if (string.IsNullOrWhiteSpace(directory))
                     {
                         return Null;
@@ -607,13 +611,7 @@ namespace Statiq.Common
             get
             {
                 ThrowIfNull();
-
-                string directory = System.IO.Path.GetDirectoryName(FullPath);
-                if (string.IsNullOrWhiteSpace(directory))
-                {
-                    return IsAbsolute ? Null : Empty;
-                }
-                return new NormalizedPath(directory);
+                return _parent.Value;
             }
         }
 
@@ -650,7 +648,7 @@ namespace Statiq.Common
         /// </summary>
         /// <param name="path">The file name to append.</param>
         /// <returns>A combination of the current path and the file name of the provided path.</returns>
-        public NormalizedPath GetFilePath(NormalizedPath path)
+        public NormalizedPath GetFilePath(in NormalizedPath path)
         {
             ThrowIfNull();
             path.ThrowIfNull(nameof(path));
@@ -663,14 +661,14 @@ namespace Statiq.Common
         /// </summary>
         /// <param name="target">The target path.</param>
         /// <returns>A <see cref="NormalizedPath"/>.</returns>
-        public NormalizedPath GetRelativePath(NormalizedPath target) => RelativePathResolver.Resolve(this, target);
+        public NormalizedPath GetRelativePath(in NormalizedPath target) => RelativePathResolver.Resolve(this, target);
 
         /// <summary>
         /// Checks if this path contains the specified path as a direct child.
         /// </summary>
         /// <param name="path">The path to check.</param>
         /// <returns><c>true</c> if the path contains this path as a child, <c>false</c> otherwise.</returns>
-        public bool ContainsChild(NormalizedPath path)
+        public bool ContainsChild(in NormalizedPath path)
         {
             ThrowIfNull();
             path.ThrowIfNull(nameof(path));
@@ -683,7 +681,7 @@ namespace Statiq.Common
         /// </summary>
         /// <param name="path">The directory path to check.</param>
         /// <returns><c>true</c> if the directory contains this directory as a descendant, <c>false</c> otherwise.</returns>
-        public bool ContainsDescendant(NormalizedPath path)
+        public bool ContainsDescendant(in NormalizedPath path)
         {
             ThrowIfNull();
             path.ThrowIfNull(nameof(path));
@@ -697,7 +695,7 @@ namespace Statiq.Common
         /// </summary>
         /// <param name="path">The path to check.</param>
         /// <returns><c>true</c> if the path is this path or contains this path as a child, <c>false</c> otherwise.</returns>
-        public bool ContainsChildOrSelf(NormalizedPath path)
+        public bool ContainsChildOrSelf(in NormalizedPath path)
         {
             ThrowIfNull();
             path.ThrowIfNull(nameof(path));
@@ -710,7 +708,7 @@ namespace Statiq.Common
         /// </summary>
         /// <param name="path">The directory path to check.</param>
         /// <returns><c>true</c> if the directory is this directory or contains this directory as a descendant, <c>false</c> otherwise.</returns>
-        public bool ContainsDescendantOrSelf(NormalizedPath path)
+        public bool ContainsDescendantOrSelf(in NormalizedPath path)
         {
             ThrowIfNull();
             path.ThrowIfNull(nameof(path));
@@ -729,7 +727,7 @@ namespace Statiq.Common
             get
             {
                 ThrowIfNull();
-                return System.IO.Path.HasExtension(FullPath);
+                return Path.HasExtension(FullPath);
             }
         }
 
@@ -742,7 +740,7 @@ namespace Statiq.Common
             get
             {
                 ThrowIfNull();
-                return new NormalizedPath(System.IO.Path.GetFileName(FullPath), PathKind.Relative);
+                return new NormalizedPath(Path.GetFileName(FullPath), PathKind.Relative);
             }
         }
 
@@ -755,7 +753,7 @@ namespace Statiq.Common
             get
             {
                 ThrowIfNull();
-                return new NormalizedPath(System.IO.Path.GetFileNameWithoutExtension(FullPath), PathKind.Relative);
+                return new NormalizedPath(Path.GetFileNameWithoutExtension(FullPath), PathKind.Relative);
             }
         }
 
@@ -768,7 +766,7 @@ namespace Statiq.Common
             get
             {
                 ThrowIfNull();
-                return System.IO.Path.GetExtension(FullPath);
+                return Path.GetExtension(FullPath);
             }
         }
 
@@ -808,7 +806,7 @@ namespace Statiq.Common
                     ? new NormalizedPath(extension)
                     : new NormalizedPath("." + extension);
             }
-            return new NormalizedPath(System.IO.Path.ChangeExtension(FullPath, extension));
+            return new NormalizedPath(Path.ChangeExtension(FullPath, extension));
         }
 
         /// <summary>
@@ -816,7 +814,7 @@ namespace Statiq.Common
         /// </summary>
         /// <param name="path">The path to combine with the <see cref="Parent"/>.</param>
         /// <returns>A new path with the specified path replacing the current file name.</returns>
-        public NormalizedPath ChangeFileName(NormalizedPath path)
+        public NormalizedPath ChangeFileName(in NormalizedPath path)
         {
             ThrowIfNull();
             return Parent.Combine(path);
@@ -936,8 +934,8 @@ namespace Statiq.Common
             return ReplaceInvalidFileNameChars(chars, newChar) ? new string(chars) : fileName;
         }
 
-        public static bool ReplaceInvalidFileNameChars(Span<char> fileName, char newChar = '-') =>
-            fileName.Replace(System.IO.Path.GetInvalidFileNameChars(), newChar);
+        public static bool ReplaceInvalidFileNameChars(in Span<char> fileName, char newChar = '-') =>
+            fileName.Replace(Path.GetInvalidFileNameChars(), newChar);
 
         public static string ReplaceInvalidPathChars(string path, char newChar = '-')
         {
@@ -945,13 +943,10 @@ namespace Statiq.Common
             return ReplaceInvalidPathChars(chars, newChar) ? new string(chars) : path;
         }
 
-        public static bool ReplaceInvalidPathChars(Span<char> path, char newChar = '-') =>
-            path.Replace(System.IO.Path.GetInvalidPathChars(), newChar);
+        public static bool ReplaceInvalidPathChars(in Span<char> path, char newChar = '-') =>
+            path.Replace(Path.GetInvalidPathChars(), newChar);
 
         public const string OptimizeFileNameReservedChars = "_~:/\\?#[]@!$&'()*+;=};,";
-
-        // Only letters and numbers
-        private static readonly Regex SimpleFileNameRegex = new Regex("^([a-zA-Z0-9])+$");
 
         public static string OptimizeFileName(
             string fileName,
