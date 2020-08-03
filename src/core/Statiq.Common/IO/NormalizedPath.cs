@@ -1,11 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Net;
-using System.Net.Http.Headers;
 using System.Runtime.InteropServices;
-using System.Text;
 using System.Text.RegularExpressions;
 
 namespace Statiq.Common
@@ -13,7 +10,7 @@ namespace Statiq.Common
     /// <summary>
     /// Provides properties and instance methods for working with paths.
     /// </summary>
-    public struct NormalizedPath : IDisplayable, IComparable<NormalizedPath>, IComparable, IEquatable<NormalizedPath>
+    public readonly struct NormalizedPath : IDisplayable, IComparable<NormalizedPath>, IComparable, IEquatable<NormalizedPath>
     {
         // Initially based on code from Cake (http://cakebuild.net/)
 
@@ -45,10 +42,6 @@ namespace Statiq.Common
 
         public static readonly NormalizedPath Empty = new NormalizedPath(string.Empty);
 
-        private readonly object _segmentsLock;
-
-        private ReadOnlyMemory<char>[] _segments;
-
         /// <summary>
         /// Initializes a new instance of the <see cref="NormalizedPath" /> class.
         /// </summary>
@@ -65,8 +58,6 @@ namespace Statiq.Common
         /// <param name="pathKind">Specifies whether the path is relative, absolute, or indeterminate.</param>
         public NormalizedPath(string path, PathKind pathKind)
         {
-            _segmentsLock = new object();
-
             if (path == null)
             {
                 throw new ArgumentNullException(nameof(path));
@@ -80,7 +71,7 @@ namespace Statiq.Common
                     throw new ArgumentException("An empty path cannot be absolute");
                 }
                 FullPath = string.Empty;
-                _segments = Array.Empty<ReadOnlyMemory<char>>();
+                Segments = Array.Empty<ReadOnlyMemory<char>>();
                 IsAbsolute = false;
             }
             else if (path == Slash || path == "\\")
@@ -90,7 +81,7 @@ namespace Statiq.Common
                     throw new ArgumentException("An absolute root path cannot be relative");
                 }
                 FullPath = Slash;
-                _segments = Array.Empty<ReadOnlyMemory<char>>();
+                Segments = Array.Empty<ReadOnlyMemory<char>>();
                 IsAbsolute = true;
             }
             else if (path == Dot || path == DotDot)
@@ -100,12 +91,12 @@ namespace Statiq.Common
                     throw new ArgumentException("A dotted relative path cannot be absolute");
                 }
                 FullPath = path;
-                _segments = new ReadOnlyMemory<char>[] { path.AsMemory() };
+                Segments = new ReadOnlyMemory<char>[] { path.AsMemory() };
                 IsAbsolute = false;
             }
             else
             {
-                (FullPath, _segments, IsAbsolute) = NormalizePath(path, pathKind);
+                (FullPath, Segments, IsAbsolute) = NormalizePath(path, pathKind);
             }
         }
 
@@ -267,36 +258,77 @@ namespace Statiq.Common
                 return default;
             }
 
+            // Do one more check if it's a windows root
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows)
+                && pathSpan.Length > 1
+                && pathSpan[^1] == ':')
+            {
+                // Windows path without trailing slash so add one (but not to the segments)
+                pathSpan = pathSpan.Append('/');
+                string pathString = pathSpan.ToString();
+                return (pathString, new ReadOnlyMemory<char>[] { pathString.AsMemory().Slice(0, pathString.Length - 1) }, isAbsolute);
+            }
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows)
+                && pathSpan.Length > 2
+                && pathSpan[^1] == '/'
+                && pathSpan[^2] == ':')
+            {
+                // Windows path with trailing slash so remove from the segment
+                string pathString = pathSpan.ToString();
+                return (pathString, new ReadOnlyMemory<char>[] { pathString.AsMemory().Slice(0, pathString.Length - 1) }, isAbsolute);
+            }
+
             // Get the final full path string
             string fullPath = pathSpan.ToString();
 
-            // Do one more check if it's a windows root
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows)
-                && fullPath.Length > 1
-                && fullPath[^1] == ':')
+            // One last check to make sure this isn't a short path
+            if (fullPath.Length == 0 || (fullPath.Length == 1 && fullPath[0] == '/'))
             {
-                // Windows path without trailing slash so add one (but not to the segments)
-                fullPath += Slash;
-                return (fullPath, new ReadOnlyMemory<char>[] { fullPath.AsMemory().Slice(0, fullPath.Length - 1) }, isAbsolute);
-            }
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows)
-                && fullPath.Length > 2
-                && fullPath[^1] == '/'
-                && fullPath[^2] == ':')
-            {
-                // Windows path with trailing slash so remove from the segment
-                return (fullPath, new ReadOnlyMemory<char>[] { fullPath.AsMemory().Slice(0, fullPath.Length - 1) }, isAbsolute);
+                return (fullPath, new ReadOnlyMemory<char>[] { }, isAbsolute);
             }
 
-            // Return without slicing segments until needed
-            return (fullPath, null, isAbsolute);
+            // Get the segment count
+            int count = fullPath.Skip(1).Count(x => x == '/');
+            if (fullPath[^1] != '/')
+            {
+                count++;
+            }
+            int length = 0;
+            int index = 0;
+
+            // Slice the segments
+            ReadOnlyMemory<char> fullPathMemory = fullPath.AsMemory();
+            ReadOnlyMemory<char>[] segments = new ReadOnlyMemory<char>[count];
+            for (int c = 0; c < fullPath.Length; c++)
+            {
+                if (fullPath[c] == '/')
+                {
+                    if (length == 0)
+                    {
+                        continue;
+                    }
+
+                    segments[index++] = fullPathMemory.Slice(c - length, length);
+                    length = 0;
+                }
+                else
+                {
+                    length++;
+                }
+            }
+            if (length > 0)
+            {
+                segments[index] = fullPathMemory.Slice(fullPath.Length - length, length);
+            }
+
+            return (fullPath, segments, isAbsolute);
         }
 
         /// <summary>
         /// Gets the full path.
         /// </summary>
         /// <value>The full path.</value>
-        public string FullPath { get; }
+        public readonly string FullPath;
 
         /// <summary>
         /// Gets a value indicating whether this path is relative.
@@ -312,7 +344,7 @@ namespace Statiq.Common
         /// <value>
         /// <c>true</c> if this path is absolute; otherwise, <c>false</c>.
         /// </value>
-        public bool IsAbsolute { get; }
+        public readonly bool IsAbsolute;
 
         /// <summary>
         /// Indicates if this is a null path.
@@ -345,56 +377,7 @@ namespace Statiq.Common
         /// segments, use <see cref="MemoryExtensions.SequenceEqual(ReadOnlyMemory{char}, ReadOnlyMemory{char})"/>.
         /// </remarks>
         /// <value>The segments making up the path.</value>
-        public ReadOnlyMemory<char>[] Segments
-        {
-            get
-            {
-                lock (_segmentsLock)
-                {
-                    if (_segments == null)
-                    {
-                        if (FullPath.Length == 0 || (FullPath.Length == 1 && FullPath[0] == '/'))
-                        {
-                            _segments = new ReadOnlyMemory<char>[] { };
-                        }
-                        else
-                        {
-                            ReadOnlyMemory<char> fullPathMemory = FullPath.AsMemory();
-                            int count = FullPath.Skip(1).Count(x => x == '/');
-                            if (FullPath[^1] != '/')
-                            {
-                                count++;
-                            }
-                            _segments = new ReadOnlyMemory<char>[count];
-                            int length = 0;
-                            int index = 0;
-                            for (int c = 0; c < FullPath.Length; c++)
-                            {
-                                if (FullPath[c] == '/')
-                                {
-                                    if (length == 0)
-                                    {
-                                        continue;
-                                    }
-
-                                    _segments[index++] = fullPathMemory.Slice(c - length, length);
-                                    length = 0;
-                                }
-                                else
-                                {
-                                    length++;
-                                }
-                            }
-                            if (length > 0)
-                            {
-                                _segments[index] = fullPathMemory.Slice(FullPath.Length - length, length);
-                            }
-                        }
-                    }
-                    return _segments;
-                }
-            }
-        }
+        public readonly ReadOnlyMemory<char>[] Segments;
 
         /// <inheritdoc />
         public string ToDisplayString() => IsNull ? string.Empty : FullPath;
