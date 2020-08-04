@@ -37,3 +37,4 @@ TestResult.xml
 .vscode
 *.pfx
 .idea
+.ionide
