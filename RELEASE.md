@@ -1,3 +1,5 @@
+# 1.0.0-beta.20
+
 # 1.0.0-beta.19
 
 - Lots of under-the-hood refactoring to make things faster.
