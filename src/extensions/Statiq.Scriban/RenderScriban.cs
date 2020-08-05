@@ -2,8 +2,6 @@
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Scriban;
-using Scriban.Parsing;
-using Scriban.Runtime;
 using Statiq.Common;
 
 namespace Statiq.Scriban
@@ -88,8 +86,8 @@ namespace Statiq.Scriban
             Template template = Template.Parse(content, input.Source.FullPath);
 
             // TODO: Use TemplateContext instead and set TemplateLoader to support partials
-            string result = template.Render(_model is null
-                ? input.AsDynamic()
+            string result = await template.RenderAsync(_model is null
+                ? new DocumentDictionary(input)
                 : await _model.GetValueAsync(input, context));
 
             return string.IsNullOrEmpty(_sourceKey)
@@ -101,51 +99,5 @@ namespace Statiq.Scriban
                     })
                     .Yield();
         }
-    }
-
-    internal class ScriptObject : IScriptObject
-    {
-        public IEnumerable<string> GetMembers()
-        {
-            throw new System.NotImplementedException();
-        }
-
-        public bool Contains(string member)
-        {
-            throw new System.NotImplementedException();
-        }
-
-        public bool TryGetValue(TemplateContext context, SourceSpan span, string member, out object value)
-        {
-            throw new System.NotImplementedException();
-        }
-
-        public bool CanWrite(string member)
-        {
-            throw new System.NotImplementedException();
-        }
-
-        public void SetValue(TemplateContext context, SourceSpan span, string member, object value, bool readOnly)
-        {
-            throw new System.NotImplementedException();
-        }
-
-        public bool Remove(string member)
-        {
-            throw new System.NotImplementedException();
-        }
-
-        public void SetReadOnly(string member, bool readOnly)
-        {
-            throw new System.NotImplementedException();
-        }
-
-        public IScriptObject Clone(bool deep)
-        {
-            throw new System.NotImplementedException();
-        }
-
-        public int Count { get; }
-        public bool IsReadOnly { get; set; }
     }
 }
