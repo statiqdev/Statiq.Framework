@@ -13,15 +13,13 @@ namespace Statiq.Scriban
     {
         private readonly IDocument _document;
 
-        private readonly ImmutableHashSet<string> _documentProperties;
         private readonly ImmutableHashSet<string> _members;
 
         public ScriptObject(IDocument document)
         {
             _document = document;
-            _documentProperties = IDocument.Properties;
             _members = document.Keys
-                .Concat(_documentProperties)
+                .Select(StandardMemberRenamer.Rename)
                 .ToImmutableHashSet(StringComparer.OrdinalIgnoreCase);
         }
 

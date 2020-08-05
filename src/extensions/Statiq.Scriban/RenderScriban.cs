@@ -2,6 +2,8 @@
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Scriban;
+using Scriban.Parsing;
+using Scriban.Runtime;
 using Statiq.Common;
 
 namespace Statiq.Scriban
@@ -85,10 +87,29 @@ namespace Statiq.Scriban
             // TODO: Expose ParserOptions and LexerOptions
             Template template = Template.Parse(content, input.Source.FullPath);
 
-            // TODO: Use TemplateContext instead and set TemplateLoader to support partials
-            string result = await template.RenderAsync(_model is null
-                ? new DocumentDictionary(input)
-                : await _model.GetValueAsync(input, context));
+            IScriptObject scriptObject;
+
+            if (_model is null)
+            {
+                scriptObject = new ScriptObject(input);
+            }
+            else
+            {
+                object model = await _model.GetValueAsync(input, context);
+                scriptObject = new global::Scriban.Runtime.ScriptObject();
+
+                if (model != null)
+                {
+                    scriptObject.Import(model, filter: null, renamer: null);
+                }
+            }
+
+            // TODO: Set TemplateLoader to support partials
+            // TODO: Expose member renamer and filter
+            TemplateContext templateContext = new TemplateContext();
+            templateContext.PushGlobal(scriptObject);
+
+            string result = await template.RenderAsync(templateContext);
 
             return string.IsNullOrEmpty(_sourceKey)
                 ? input.Clone(await context.GetContentProviderAsync(result, MediaTypes.Html)).Yield()
