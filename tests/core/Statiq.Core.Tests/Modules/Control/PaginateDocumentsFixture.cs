@@ -28,7 +28,8 @@ namespace Statiq.Core.Tests.Modules.Control
                 ForEachDocument gatherData = new ExecuteConfig(
                     Config.FromDocument(async d =>
                     {
-                        List<string> pageContent = await d.GetChildren()
+                        List<string> pageContent = await d
+                            .GetDocuments(Keys.Children)
                             .ToAsyncEnumerable()
                             .SelectAwait(async x => await x.GetContentStringAsync())
                             .ToListAsync();

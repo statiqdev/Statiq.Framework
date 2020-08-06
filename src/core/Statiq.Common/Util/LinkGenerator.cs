@@ -10,11 +10,6 @@ namespace Statiq.Common
     public static class LinkGenerator
     {
         /// <summary>
-        /// The default page names to hide in links.
-        /// </summary>
-        public static readonly string[] DefaultHidePages = { "index" };
-
-        /// <summary>
         /// The default extensions to hide in links.
         /// </summary>
         public static readonly string[] DefaultHideExtensions = { ".htm", ".html" };
@@ -26,7 +21,7 @@ namespace Statiq.Common
         /// <param name="host">The host for the link (or <c>null</c> to omit the host).</param>
         /// <param name="root">The root path for the link (or <c>null</c> for no root path).</param>
         /// <param name="scheme">The scheme for the link (or <c>null</c> for "http").</param>
-        /// <param name="hidePages">An array of page names to hide (or <c>null</c> to not hide any pages).</param>
+        /// <param name="hidePages">An array of file names to hide (or <c>null</c> to not hide any files).</param>
         /// <param name="hideExtensions">An array of file extensions to hide (or <c>null</c> to not hide extensions or an empty array to hide all file extensions).</param>
         /// <param name="lowercase">Indicates that the link should be rendered in all lowercase.</param>
         /// <returns>A generated link.</returns>
@@ -44,7 +39,7 @@ namespace Statiq.Common
             {
                 // Remove index pages
                 if (hidePages is object && path.FullPath != NormalizedPath.Slash
-                    && hidePages.Where(x => x is object).Select(x => x.EndsWith(NormalizedPath.Dot) ? x : x + NormalizedPath.Dot).Any(x => path.FileName.FullPath.StartsWith(x)))
+                    && hidePages.Any(x => x is object && path.FileName.Equals(x)))
                 {
                     path = path.Parent;
                 }

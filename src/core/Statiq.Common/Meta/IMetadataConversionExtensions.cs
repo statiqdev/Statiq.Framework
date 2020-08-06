@@ -121,6 +121,18 @@ namespace Statiq.Common
         public static IEnumerable<IDocument> GetDocuments(this IMetadata metadata, string key, IReadOnlyList<IDocument> defaultValue = null) => metadata.Get(key, defaultValue);
 
         /// <summary>
+        /// Gets the value for the specified key converted to a <c>IReadOnlyList&lt;TDocument&gt;</c>. This method never throws an exception.
+        /// It will return null if the key is not found and an empty list if the key is found but contains no items that can be converted to the specified document type.
+        /// </summary>
+        /// <param name="metadata">The metadata instance.</param>
+        /// <param name="key">The key of the documents to get.</param>
+        /// <param name="defaultValue">The default value to use if the key is not found or cannot be converted to a document list.</param>
+        /// <returns>The value for the specified key converted to a list or null.</returns>
+        public static IEnumerable<TDocument> GetDocuments<TDocument>(this IMetadata metadata, string key, IReadOnlyList<TDocument> defaultValue = null)
+            where TDocument : IDocument
+            => metadata.Get(key, defaultValue);
+
+        /// <summary>
         /// Gets the value for the specified key converted to a <see cref="DocumentList{IDocument}"/>. This method never throws an exception.
         /// It will return an empty list if the key is not found or if the key is found but contains no items that can be converted to <see cref="IDocument"/>.
         /// </summary>
@@ -128,6 +140,17 @@ namespace Statiq.Common
         /// <param name="key">The key of the documents to get.</param>
         /// <returns>The value for the specified key converted to a list or null.</returns>
         public static DocumentList<IDocument> GetDocumentList(this IMetadata metadata, string key) => metadata.GetDocuments(key).ToDocumentList();
+
+        /// <summary>
+        /// Gets the value for the specified key converted to a <see cref="DocumentList{TDocument}"/>. This method never throws an exception.
+        /// It will return an empty list if the key is not found or if the key is found but contains no items that can be converted to the specified document type.
+        /// </summary>
+        /// <param name="metadata">The metadata instance.</param>
+        /// <param name="key">The key of the documents to get.</param>
+        /// <returns>The value for the specified key converted to a list or null.</returns>
+        public static DocumentList<TDocument> GetDocumentList<TDocument>(this IMetadata metadata, string key)
+            where TDocument : IDocument =>
+            metadata.GetDocuments<TDocument>(key).ToDocumentList();
 
         /// <summary>
         /// Gets the value associated with the specified key as a dynamic object. This is equivalent

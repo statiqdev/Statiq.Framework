@@ -231,7 +231,8 @@ namespace Statiq.Html
             }
 
             // Add filenames
-            checkPaths.AddRange(LinkGenerator.DefaultHidePages.Select(x => new NormalizedPath(normalizedPath?.Length == 0 ? x : $"{normalizedPath}/{x}")));
+            string indexFileName = context.Settings.GetIndexFileName();
+            checkPaths.Add(new NormalizedPath(normalizedPath?.Length == 0 ? indexFileName : $"{normalizedPath}/{indexFileName}"));
 
             // Add extensions
             checkPaths.AddRange(LinkGenerator.DefaultHideExtensions.SelectMany(x => checkPaths.Select(y => y.AppendExtension(x))).ToArray());

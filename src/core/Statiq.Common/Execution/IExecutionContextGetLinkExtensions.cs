@@ -121,8 +121,7 @@
         /// <param name="host">The host to use for the link.</param>
         /// <param name="root">The root of the link. The value of this parameter is prepended to the path.</param>
         /// <param name="useHttps">If set to <c>true</c>, HTTPS will be used as the scheme for the link.</param>
-        /// <param name="hideIndexPages">If set to <c>true</c>, "index.htm" and "index.html" file
-        /// names will be hidden.</param>
+        /// <param name="hideIndexPages">If set to <c>true</c>, index files will be hidden.</param>
         /// <param name="hideExtensions">If set to <c>true</c>, extensions will be hidden.</param>
         /// <returns>
         /// A string representation of the path suitable for a web link with the specified
@@ -189,8 +188,7 @@
         /// <param name="host">The host to use for the link.</param>
         /// <param name="root">The root of the link. The value of this parameter is prepended to the path.</param>
         /// <param name="useHttps">If set to <c>true</c>, HTTPS will be used as the scheme for the link.</param>
-        /// <param name="hideIndexPages">If set to <c>true</c>, "index.htm" and "index.html" file
-        /// names will be hidden.</param>
+        /// <param name="hideIndexPages">If set to <c>true</c>, index files will be hidden.</param>
         /// <param name="hideExtensions">If set to <c>true</c>, extensions will be hidden.</param>
         /// <returns>
         /// A string representation of the path suitable for a web link with the specified
@@ -222,8 +220,7 @@
         /// <param name="host">The host to use for the link.</param>
         /// <param name="root">The root of the link. The value of this parameter is prepended to the path.</param>
         /// <param name="useHttps">If set to <c>true</c>, HTTPS will be used as the scheme for the link.</param>
-        /// <param name="hideIndexPages">If set to <c>true</c>, "index.htm" and "index.html" file
-        /// names will be hidden.</param>
+        /// <param name="hideIndexPages">If set to <c>true</c>, index files will be hidden.</param>
         /// <param name="hideExtensions">If set to <c>true</c>, extensions will be hidden.</param>
         /// <param name="lowercase">If set to <c>true</c>, links will be rendered in all lowercase.</param>
         /// <returns>
@@ -244,7 +241,7 @@
                 host,
                 root,
                 useHttps ? "https" : null,
-                hideIndexPages ? LinkGenerator.DefaultHidePages : null,
+                hideIndexPages ? new[] { executionContext.Settings.GetIndexFileName() } : null,
                 hideExtensions ? LinkGenerator.DefaultHideExtensions : null,
                 lowercase);
     }

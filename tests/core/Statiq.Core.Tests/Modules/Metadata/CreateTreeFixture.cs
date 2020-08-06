@@ -146,12 +146,12 @@ namespace Statiq.Core.Tests.Modules.Metadata
                 // Then
                 results.Count.ShouldBe(2);
                 VerifyTree(
-                    results[0].GetChildren().ToList(),
+                    results[0].GetDocumentList(Keys.Children),
                     results[0],
                     "root/b/index.html",
                     "root/b/4.txt");
                 VerifyTree(
-                    results[1].GetChildren().ToList(),
+                    results[1].GetDocumentList(Keys.Children),
                     results[1],
                     "index.html",
                     "root/index.html",

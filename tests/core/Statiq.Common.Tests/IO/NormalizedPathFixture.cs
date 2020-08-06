@@ -1108,6 +1108,10 @@ namespace Statiq.Common.Tests.IO
 
         public class ContainsChildTests : NormalizedPathFixture
         {
+            [TestCase("", "", false)]
+            [TestCase("", "test.txt", true)]
+            [TestCase("", "/test.txt", false)]
+            [TestCase("/", "/test.txt", true)]
             [TestCase("/a/b/c", "/a/b/test.txt", false)]
             [TestCase("/a/b/c", "/a/b/c/test.txt", true)]
             [TestCase("/a/b/c", "/a/b/c/d/test.txt", false)]
@@ -1124,6 +1128,10 @@ namespace Statiq.Common.Tests.IO
                 result.ShouldBe(expected);
             }
 
+            [TestCase("", "", false)]
+            [TestCase("", "a", true)]
+            [TestCase("", "/a", false)]
+            [TestCase("/", "/a", true)]
             [TestCase("/a/b/c", "/a/b", false)]
             [TestCase("/a/b/c", "/a/b/c", false)]
             [TestCase("/a/b/c", "/a/b/c/d", true)]
@@ -1136,6 +1144,133 @@ namespace Statiq.Common.Tests.IO
 
                 // When
                 bool result = directoryPath.ContainsChild(filePath);
+
+                // Then
+                result.ShouldBe(expected);
+            }
+        }
+
+        public class ContainsChildOrSelfTests : NormalizedPathFixture
+        {
+            [TestCase("", "", true)]
+            [TestCase("", "test.txt", true)]
+            [TestCase("", "/test.txt", false)]
+            [TestCase("/", "/test.txt", true)]
+            [TestCase("/a/b/c", "/a/b/test.txt", false)]
+            [TestCase("/a/b/c", "/a/b/c/test.txt", true)]
+            [TestCase("/a/b/c", "/a/b/c/d/test.txt", false)]
+            [TestCase("/a/b/c/test.txt", "/a/b/c/test.txt", true)]
+            public void ShouldCheckFilePath(string directory, string path, bool expected)
+            {
+                // Given
+                NormalizedPath directoryPath = new NormalizedPath(directory);
+                NormalizedPath filePath = new NormalizedPath(path);
+
+                // When
+                bool result = directoryPath.ContainsChildOrSelf(filePath);
+
+                // Then
+                result.ShouldBe(expected);
+            }
+
+            [TestCase("", "", true)]
+            [TestCase("", "a", true)]
+            [TestCase("", "/a", false)]
+            [TestCase("/", "/a", true)]
+            [TestCase("/a/b/c", "/a/b", false)]
+            [TestCase("/a/b/c", "/a/b/c", true)]
+            [TestCase("/a/b/c", "/a/b/c/d", true)]
+            [TestCase("/a/b/c", "/a/b/c/d/e", false)]
+            public void ShouldCheckDirectoryPath(string directory, string path, bool expected)
+            {
+                // Given
+                NormalizedPath directoryPath = new NormalizedPath(directory);
+                NormalizedPath filePath = new NormalizedPath(path);
+
+                // When
+                bool result = directoryPath.ContainsChildOrSelf(filePath);
+
+                // Then
+                result.ShouldBe(expected);
+            }
+        }
+
+        public class IsSiblingTests : NormalizedPathFixture
+        {
+            [TestCase("", "/test.txt", false)]
+            [TestCase("/a/b/c", "/a/test.txt", false)]
+            [TestCase("/a/b/c", "/a/b/test.txt", true)]
+            [TestCase("/a/b/c", "/a/b/c/test.txt", false)]
+            [TestCase("/a/b/c", "/a/b/c/d/test.txt", false)]
+            [TestCase("/a/b/c/test.txt", "/a/b/c/test.txt", false)]
+            public void ShouldCheckFilePath(string directory, string path, bool expected)
+            {
+                // Given
+                NormalizedPath directoryPath = new NormalizedPath(directory);
+                NormalizedPath filePath = new NormalizedPath(path);
+
+                // When
+                bool result = directoryPath.IsSibling(filePath);
+
+                // Then
+                result.ShouldBe(expected);
+            }
+
+            [TestCase("", "/a", false)]
+            [TestCase("/a/b/c", "/a/b", false)]
+            [TestCase("/a/b/c", "/a/b/c", false)]
+            [TestCase("/a/b/c", "/a/b/e", true)]
+            [TestCase("/a/b/c", "/a/b/c/d", false)]
+            [TestCase("/a/b/c", "/a/b/c/d/e", false)]
+            public void ShouldCheckDirectoryPath(string directory, string path, bool expected)
+            {
+                // Given
+                NormalizedPath directoryPath = new NormalizedPath(directory);
+                NormalizedPath filePath = new NormalizedPath(path);
+
+                // When
+                bool result = directoryPath.IsSibling(filePath);
+
+                // Then
+                result.ShouldBe(expected);
+            }
+        }
+
+        public class IsSiblingOrSelfTests : NormalizedPathFixture
+        {
+            [TestCase("", "/test.txt", false)]
+            [TestCase("/a/b/c", "/a/test.txt", false)]
+            [TestCase("/a/b/c", "/a/b/test.txt", true)]
+            [TestCase("/a/b/c", "/a/b/c/test.txt", false)]
+            [TestCase("/a/b/c", "/a/b/c/d/test.txt", false)]
+            [TestCase("/a/b/c/text.txt", "/a/b/c/test.txt", true)]
+            public void ShouldCheckFilePath(string directory, string path, bool expected)
+            {
+                // Given
+                NormalizedPath directoryPath = new NormalizedPath(directory);
+                NormalizedPath filePath = new NormalizedPath(path);
+
+                // When
+                bool result = directoryPath.IsSiblingOrSelf(filePath);
+
+                // Then
+                result.ShouldBe(expected);
+            }
+
+            [TestCase("", "/a", false)]
+            [TestCase("/a/b/c", "/a/b", false)]
+            [TestCase("/a/b/c", "/a/b/c", true)]
+            [TestCase("/a/b/c", "/a/b/e", true)]
+            [TestCase("/a/b/c", "/a/b/c/d", false)]
+            [TestCase("/a/b/c", "/a/b/c/d/e", false)]
+            public void ShouldCheckDirectoryPath(string directory, string path, bool expected)
+            {
+                // Given
+                NormalizedPath directoryPath = new NormalizedPath(directory);
+                NormalizedPath filePath = new NormalizedPath(path);
+
+                // When
+                bool result = directoryPath.IsSiblingOrSelf(filePath);
 
                 // Then
                 result.ShouldBe(expected);
@@ -1178,47 +1313,12 @@ namespace Statiq.Common.Tests.IO
             }
         }
 
-        public class ContainsChildOrSelfTests : NormalizedPathFixture
-        {
-            [TestCase("/a/b/c", "/a/b/test.txt", false)]
-            [TestCase("/a/b/c", "/a/b/c/test.txt", true)]
-            [TestCase("/a/b/c", "/a/b/c/d/test.txt", false)]
-            public void ShouldCheckFilePath(string directory, string path, bool expected)
-            {
-                // Given
-                NormalizedPath directoryPath = new NormalizedPath(directory);
-                NormalizedPath filePath = new NormalizedPath(path);
-
-                // When
-                bool result = directoryPath.ContainsChildOrSelf(filePath);
-
-                // Then
-                result.ShouldBe(expected);
-            }
-
-            [TestCase("/a/b/c", "/a/b", false)]
-            [TestCase("/a/b/c", "/a/b/c", true)]
-            [TestCase("/a/b/c", "/a/b/c/d", true)]
-            [TestCase("/a/b/c", "/a/b/c/d/e", false)]
-            public void ShouldCheckDirectoryPath(string directory, string path, bool expected)
-            {
-                // Given
-                NormalizedPath directoryPath = new NormalizedPath(directory);
-                NormalizedPath filePath = new NormalizedPath(path);
-
-                // When
-                bool result = directoryPath.ContainsChildOrSelf(filePath);
-
-                // Then
-                result.ShouldBe(expected);
-            }
-        }
-
         public class ContainsDescendantOrSelfTests : NormalizedPathFixture
         {
             [TestCase("/a/b/c", "/a/b/test.txt", false)]
             [TestCase("/a/b/c", "/a/b/c/test.txt", true)]
             [TestCase("/a/b/c", "/a/b/c/d/test.txt", true)]
+            [TestCase("/a/b/c/test.txt", "/a/b/c/test.txt", true)]
             public void ShouldCheckFilePath(string directory, string path, bool expected)
             {
                 // Given

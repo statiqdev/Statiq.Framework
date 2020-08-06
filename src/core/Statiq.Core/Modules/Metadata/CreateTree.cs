@@ -67,7 +67,7 @@ namespace Statiq.Core
             });
             _placeholderFactory = (treePath, items, context) =>
             {
-                NormalizedPath filePath = new NormalizedPath(string.Join("/", treePath.Concat(new[] { "index.html" })));
+                NormalizedPath filePath = new NormalizedPath(string.Join("/", treePath.Concat(new[] { context.Settings.GetIndexFileName() })));
                 return Task.FromResult(context.CreateDocument(context.FileSystem.GetInputFile(filePath).Path.FullPath, filePath, items));
             };
             _sort = (a, b, ctx) => ctx.Inputs.IndexOf(a, DocumentIdComparer.Instance).CompareTo(ctx.Inputs.IndexOf(b, DocumentIdComparer.Instance));
@@ -82,7 +82,7 @@ namespace Statiq.Core
         /// </summary>
         /// <remarks>
         /// You should also turn on nesting with <see cref="WithNesting(bool, bool)"/> to generate placeholder documents.
-        /// The default placeholder factory creates a document at the current tree path with a file name of <c>index.html</c>.
+        /// The default placeholder factory creates a document at the current tree path with the file name defined in <see cref="Keys.IndexFileName"/>.
         /// </remarks>
         /// <param name="factory">The factory function.</param>
         /// <returns>The current module instance.</returns>

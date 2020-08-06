@@ -14,22 +14,19 @@ namespace Statiq.Common
 
         public DocumentList(IEnumerable<TDocument> documents)
         {
-            // If it's null create an empty list
             if (documents is null)
             {
+                // If it's null create an empty list
                 _documents = Array.Empty<TDocument>();
+            }
+            else if (documents is IReadOnlyList<TDocument> list && !list.Any(x => x is null))
+            {
+                // It's already a list and doesn't contain nulls
+                _documents = list;
             }
             else
             {
-                // If it's already a list make sure there aren't any null entries
-                _documents = documents as IReadOnlyList<TDocument>;
-                if (_documents is object && _documents.Any(x => x is null))
-                {
-                    // It was a list but there were null items
-                    _documents = null;
-                }
-
-                // Create a new list without the null items
+                // Remove nulls
                 _documents = documents.Where(x => x is object).ToArray();
             }
         }
