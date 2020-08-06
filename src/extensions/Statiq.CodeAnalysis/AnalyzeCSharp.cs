@@ -342,7 +342,7 @@ namespace Statiq.CodeAnalysis
 
         /// <summary>
         /// This changes the default behavior for the generated destination paths, which is to place files in a path
-        /// with the same name as their containing namespace. Namespace documents will be named "index.html" while other type documents
+        /// with the same name as their containing namespace. Namespace documents will have the <see cref="Keys.IndexFileName"/> while other type documents
         /// will get a name equal to their SymbolId. Member documents will get the same name as their containing type plus an
         /// anchor to their SymbolId.
         /// </summary>
@@ -355,7 +355,7 @@ namespace Statiq.CodeAnalysis
 
         /// <summary>
         /// This changes the default behavior for the generated destination paths, which is to place files in a path
-        /// with the same name as their containing namespace. Namespace documents will be named "index.html" while other type documents
+        /// with the same name as their containing namespace. Namespace documents will have the <see cref="Keys.IndexFileName"/> while other type documents
         /// will get a name equal to their SymbolId. Member documents will get the same name as their containing type plus an
         /// anchor to their SymbolId.
         /// </summary>
@@ -395,7 +395,7 @@ namespace Statiq.CodeAnalysis
             return this;
         }
 
-        private NormalizedPath DefaultDestination(ISymbol symbol, in NormalizedPath prefix)
+        private static NormalizedPath GetDefaultDestination(ISymbol symbol, in NormalizedPath prefix, IExecutionContext context)
         {
             INamespaceSymbol containingNamespace = symbol.ContainingNamespace;
             NormalizedPath destinationPath;
@@ -403,25 +403,25 @@ namespace Statiq.CodeAnalysis
             if (symbol.Kind == SymbolKind.Assembly)
             {
                 // Assemblies output to the index page in a folder of their name
-                destinationPath = new NormalizedPath($"{symbol.GetDisplayName()}/index.html");
+                destinationPath = new NormalizedPath($"{symbol.GetDisplayName()}/{context.Settings.GetIndexFileName()}");
             }
             else if (symbol.Kind == SymbolKind.Namespace)
             {
                 // Namespaces output to the index page in a folder of their full name
                 // If this namespace does not have a containing namespace, it's the global namespace
-                destinationPath = new NormalizedPath(containingNamespace is null ? "global/index.html" : $"{symbol.GetDisplayName()}/index.html");
+                destinationPath = new NormalizedPath(containingNamespace is null ? $"global/{context.Settings.GetIndexFileName()}" : $"{symbol.GetDisplayName()}/index.html");
             }
             else if (symbol.Kind == SymbolKind.NamedType)
             {
                 // Types output to the index page in a folder of their SymbolId under the folder for their namespace
                 destinationPath = new NormalizedPath(containingNamespace.ContainingNamespace is null
-                    ? $"global/{symbol.GetId()}/index.html"
-                    : $"{containingNamespace.GetDisplayName()}/{symbol.GetId()}/index.html");
+                    ? $"global/{symbol.GetId()}/{context.Settings.GetIndexFileName()}"
+                    : $"{containingNamespace.GetDisplayName()}/{symbol.GetId()}/{context.Settings.GetIndexFileName()}");
             }
             else
             {
                 // Members output to a page equal to their SymbolId under the folder for their type
-                NormalizedPath containingPath = DefaultDestination(symbol.ContainingType, null);
+                NormalizedPath containingPath = GetDefaultDestination(symbol.ContainingType, null, context);
                 destinationPath = containingPath.ChangeFileName($"{symbol.GetId()}.html");
             }
 
@@ -459,7 +459,7 @@ namespace Statiq.CodeAnalysis
                 compilation,
                 context,
                 _symbolPredicate,
-                _destination ?? ((s, _) => DefaultDestination(s, _destinationPrefix)),
+                _destination ?? ((s, _) => GetDefaultDestination(s, _destinationPrefix, context)),
                 _cssClasses,
                 await _docsForImplicitSymbols.GetValueAsync(null, context),
                 _assemblySymbols,

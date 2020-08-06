@@ -1,5 +1,19 @@
 # 1.0.0-beta.20
 
+- **Breaking change:** Removed the `IDocument.GetParent()`, `IDocument.HasChildren()`, `IDocument.GetChildren()`, `IDocument.GetDescendants()`, and `IDocument.GetDescendantsAndSelf()` extension methods
+  to reduce confusion between child documents from a metadata key and child documents from file paths. Instead, the appropriate tree concept can now be accessed via an implementation
+  of the `IDocumentTree<TDocument>` interface.
+- Added a `IDocumentTree<TDocument>` interface to encapsulate different kinds of document tree traversal logic.
+- Added a `DocumentMetadataTree<TDocument>` implementation to represent document trees as the result of metadata containing child documents.
+- Added a `DocumentPathTree<TDocument>` implementation to represent document trees as the result of file paths.
+- Added a `IDocument.AsMetadataTree()` extension method to provide `GetChildren()` and `GetDescendants()` behavior for a single document based on a child metadata key.
+- Added a `IEnumerable<TDocument>.AsMetadataTree()` extension method to get a `DocumentMetadataTree<TDocument>` instance that creates a tree from document metadata containing child documents.
+- Added a `IEnumerable<TDocument>.AsDestinationTree()` extension method to get a `DocumentPathTree<TDocument>` instance that creates a tree from document destination paths.
+- Added a `IEnumerable<TDocument>.AsSourceTree()` extension method to get a `DocumentPathTree<TDocument>` instance that creates a tree from document source paths.
+- Added the `IDocumentTree<TDocument>` interface to `IPipelineOutputs` with default implementations that operate on document destination paths. This means you can call
+  methods like `Outputs.GetChildren(doc)` to get all the children across all pipelines of the given document, etc.
+- Added a new `IndexFileName` setting to control the default file name of index files (defaults to `index.html`).
+
 # 1.0.0-beta.19
 
 - Lots of under-the-hood refactoring to make things faster.

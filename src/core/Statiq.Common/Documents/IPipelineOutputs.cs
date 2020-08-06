@@ -6,7 +6,7 @@ namespace Statiq.Common
     /// <summary>
     /// Contains a collection of documents output by pipelines.
     /// </summary>
-    public interface IPipelineOutputs : IEnumerable<IDocument>
+    public interface IPipelineOutputs : IEnumerable<IDocument>, IDocumentTree<IDocument>
     {
         /// <summary>
         /// Gets documents by pipeline.
@@ -34,5 +34,15 @@ namespace Statiq.Common
         /// <param name="destinationPatterns">The globbing pattern(s) to filter by (can be a single path).</param>
         /// <returns>The documents that satisfy the pattern or <c>null</c>.</returns>
         public IEnumerable<IDocument> this[params string[] destinationPatterns] => this.FilterDestinations(destinationPatterns);
+
+        DocumentList<IDocument> IDocumentTree<IDocument>.GetAncestorsOf(IDocument document, bool includeSelf) => this.AsDestinationTree().GetAncestorsOf(document, includeSelf);
+
+        DocumentList<IDocument> IDocumentTree<IDocument>.GetChildrenOf(IDocument document) => this.AsDestinationTree().GetChildrenOf(document);
+
+        DocumentList<IDocument> IDocumentTree<IDocument>.GetDescendantsOf(IDocument document, bool includeSelf) => this.AsDestinationTree().GetDescendantsOf(document, includeSelf);
+
+        IDocument IDocumentTree<IDocument>.GetParentOf(IDocument document) => this.AsDestinationTree().GetParentOf(document);
+
+        DocumentList<IDocument> IDocumentTree<IDocument>.GetSiblingsOf(IDocument document, bool includeSelf) => this.AsDestinationTree().GetSiblingsOf(document, includeSelf);
     }
 }

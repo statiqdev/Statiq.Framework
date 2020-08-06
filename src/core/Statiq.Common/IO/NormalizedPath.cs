@@ -668,13 +668,28 @@ namespace Statiq.Common
         /// </summary>
         /// <param name="path">The path to check.</param>
         /// <returns><c>true</c> if the path contains this path as a child, <c>false</c> otherwise.</returns>
-        public bool ContainsChild(in NormalizedPath path)
-        {
-            ThrowIfNull();
-            path.ThrowIfNull(nameof(path));
+        public bool ContainsChild(in NormalizedPath path) => Equals(path.Parent) && !Equals(path);
 
-            return Equals(path.Parent);
-        }
+        /// <summary>
+        /// Checks if this path is the specified path or if this path contains the specified path as a direct child.
+        /// </summary>
+        /// <param name="path">The path to check.</param>
+        /// <returns><c>true</c> if the path is this path or contains this path as a child, <c>false</c> otherwise.</returns>
+        public bool ContainsChildOrSelf(in NormalizedPath path) => Equals(path) || ContainsChild(path);
+
+        /// <summary>
+        /// Checks if this path is a sibling of the specified path.
+        /// </summary>
+        /// <param name="path">The path to check.</param>
+        /// <returns><c>true</c> if this path is a sibling of the specified path, <c>false</c> otherwise.</returns>
+        public bool IsSibling(in NormalizedPath path) => !Equals(path) && Parent.ContainsChild(path);
+
+        /// <summary>
+        /// Checks if this path is the specified path or if this path is a sibling of the specified path.
+        /// </summary>
+        /// <param name="path">The path to check.</param>
+        /// <returns><c>true</c> if the path is this path or is a sibling of the specified path, <c>false</c> otherwise.</returns>
+        public bool IsSiblingOrSelf(in NormalizedPath path) => Equals(path) || IsSibling(path);
 
         /// <summary>
         /// Checks if this directory contains the specified directory as a descendant.
@@ -683,24 +698,16 @@ namespace Statiq.Common
         /// <returns><c>true</c> if the directory contains this directory as a descendant, <c>false</c> otherwise.</returns>
         public bool ContainsDescendant(in NormalizedPath path)
         {
-            ThrowIfNull();
-            path.ThrowIfNull(nameof(path));
-
+            if (IsNull || path.IsNull)
+            {
+                return false;
+            }
+            if (IsEmpty)
+            {
+                return true;
+            }
             NormalizedPath parent = path.Parent;
             return !parent.IsNullOrEmpty && parent.Segments.StartsWith(Segments);
-        }
-
-        /// <summary>
-        /// Checks if this path is the specified path or if this path contains the specified path as a direct child.
-        /// </summary>
-        /// <param name="path">The path to check.</param>
-        /// <returns><c>true</c> if the path is this path or contains this path as a child, <c>false</c> otherwise.</returns>
-        public bool ContainsChildOrSelf(in NormalizedPath path)
-        {
-            ThrowIfNull();
-            path.ThrowIfNull(nameof(path));
-
-            return Equals(path) || ContainsChild(path);
         }
 
         /// <summary>
@@ -708,13 +715,7 @@ namespace Statiq.Common
         /// </summary>
         /// <param name="path">The directory path to check.</param>
         /// <returns><c>true</c> if the directory is this directory or contains this directory as a descendant, <c>false</c> otherwise.</returns>
-        public bool ContainsDescendantOrSelf(in NormalizedPath path)
-        {
-            ThrowIfNull();
-            path.ThrowIfNull(nameof(path));
-
-            return Equals(path) || ContainsDescendant(path);
-        }
+        public bool ContainsDescendantOrSelf(in NormalizedPath path) => Equals(path) || ContainsDescendant(path);
 
         /// <summary>
         /// Gets a value indicating whether this path has a file extension.

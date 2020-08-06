@@ -196,5 +196,127 @@ namespace Statiq.Common
 
         public static bool ContainsById(this IEnumerable<IDocument> documents, IDocument document) =>
             documents.Contains(document, DocumentIdComparer.Instance);
+
+        /// <summary>
+        /// Flattens a tree structure.
+        /// </summary>
+        /// <remarks>
+        /// This extension will either get all descendants of all documents from
+        /// a given metadata key (<see cref="Keys.Children"/> by default) or all
+        /// descendants from all metadata if a <c>null</c> key is specified. The
+        /// result also includes the initial documents in both cases.
+        /// </remarks>
+        /// <remarks>
+        /// The documents will be returned in no particular order and only distinct
+        /// documents will be returned (I.e., if a document exists as a
+        /// child of more than one parent, it will only appear once in the result set).
+        /// </remarks>
+        /// <param name="documents">The documents to flatten.</param>
+        /// <param name="childrenKey">The metadata key that contains the children or <c>null</c> to flatten documents in all metadata keys.</param>
+        /// <returns>The flattened documents.</returns>
+        public static DocumentList<TDocument> Flatten<TDocument>(this IEnumerable<TDocument> documents, string childrenKey = Keys.Children)
+            where TDocument : IDocument =>
+            documents.Flatten(false, childrenKey);
+
+        /// <summary>
+        /// Flattens a tree structure.
+        /// </summary>
+        /// <remarks>
+        /// This extension will either get all descendants of all documents from
+        /// a given metadata key (<see cref="Keys.Children"/> by default) or all
+        /// descendants from all metadata if a <c>null</c> key is specified. The
+        /// result also includes the initial documents in both cases.
+        /// </remarks>
+        /// <remarks>
+        /// The documents will be returned in no particular order and only distinct
+        /// documents will be returned (I.e., if a document exists as a
+        /// child of more than one parent, it will only appear once in the result set).
+        /// </remarks>
+        /// <param name="documents">The documents to flatten.</param>
+        /// <param name="removeTreePlaceholders"><c>true</c> to filter out documents with the <see cref="Keys.TreePlaceholder"/> metadata.</param>
+        /// <param name="childrenKey">The metadata key that contains the children or <c>null</c> to flatten documents in all metadata keys.</param>
+        /// <returns>The flattened documents.</returns>
+        public static DocumentList<TDocument> Flatten<TDocument>(this IEnumerable<TDocument> documents, bool removeTreePlaceholders, string childrenKey = Keys.Children)
+            where TDocument : IDocument =>
+            documents.Flatten(removeTreePlaceholders ? Keys.TreePlaceholder : null, childrenKey);
+
+        /// <summary>
+        /// Flattens a tree structure.
+        /// </summary>
+        /// <remarks>
+        /// This extension will either get all descendants of all documents from
+        /// a given metadata key (<see cref="Keys.Children"/> by default) or all
+        /// descendants from all metadata if a <c>null</c> key is specified. The
+        /// result also includes the initial documents in both cases.
+        /// </remarks>
+        /// <remarks>
+        /// The documents will be returned in no particular order and only distinct
+        /// documents will be returned (I.e., if a document exists as a
+        /// child of more than one parent, it will only appear once in the result set).
+        /// </remarks>
+        /// <param name="documents">The documents to flatten.</param>
+        /// <param name="treePlaceholderKey">
+        /// The metadata key that identifies placeholder documents (<see cref="Keys.TreePlaceholder"/> by default).
+        /// If <c>null</c>, tree placeholders will not be removed.
+        /// </param>
+        /// <param name="childrenKey">The metadata key that contains the children or <c>null</c> to flatten documents in all metadata keys.</param>
+        /// <returns>The flattened documents.</returns>
+        public static DocumentList<TDocument> Flatten<TDocument>(this IEnumerable<TDocument> documents, string treePlaceholderKey, string childrenKey = Keys.Children)
+            where TDocument : IDocument
+        {
+            documents.ThrowIfNull(nameof(documents));
+
+            // Use a stack so we don't overflow the call stack with recursive calls for deep trees
+            Stack<TDocument> stack = new Stack<TDocument>(documents);
+            HashSet<TDocument> results = new HashSet<TDocument>();
+            while (stack.Count > 0)
+            {
+                TDocument current = stack.Pop();
+
+                // Only process if we haven't already processed this document
+                if (results.Add(current))
+                {
+                    IEnumerable<TDocument> children = childrenKey is null
+                        ? current.SelectMany(x => current.GetDocumentList<TDocument>(x.Key))
+                        : current.GetDocumentList<TDocument>(childrenKey);
+                    if (children is object)
+                    {
+                        foreach (TDocument child in children.Where(x => x is object))
+                        {
+                            stack.Push(child);
+                        }
+                    }
+                }
+            }
+            return treePlaceholderKey is null
+                ? results.ToDocumentList()
+                : results.RemoveTreePlaceholders(treePlaceholderKey).ToDocumentList();
+        }
+
+        /// <summary>
+        /// Removes tree placeholder documents (this method will not flatten a tree).
+        /// </summary>
+        /// <param name="documents">
+        /// The documents from which to remove the placeholder documents.
+        /// </param>
+        /// <param name="treePlaceholderKey">
+        /// The metadata key that identifies placeholder documents (<see cref="Keys.TreePlaceholder"/> by default).
+        /// </param>
+        /// <returns>The documents without placeholder documents.</returns>
+        public static IEnumerable<TDocument> RemoveTreePlaceholders<TDocument>(this IEnumerable<TDocument> documents, string treePlaceholderKey = Keys.TreePlaceholder)
+            where TDocument : IDocument =>
+            documents.Where(x => !x.GetBool(treePlaceholderKey));
+
+        public static DocumentMetadataTree<TDocument> AsMetadataTree<TDocument>(this IEnumerable<TDocument> documents, string childrenKey = Keys.Children)
+            where TDocument : IDocument =>
+            new DocumentMetadataTree<TDocument>(documents, childrenKey);
+
+        public static DocumentPathTree<TDocument> AsDestinationTree<TDocument>(this IEnumerable<TDocument> documents)
+            where TDocument : IDocument =>
+            new DocumentPathTree<TDocument>(documents, x => x.Destination);
+
+        public static DocumentPathTree<TDocument> AsSourceTree<TDocument>(this IEnumerable<TDocument> documents)
+            where TDocument : IDocument =>
+            new DocumentPathTree<TDocument>(documents, x => x.Source);
     }
 }

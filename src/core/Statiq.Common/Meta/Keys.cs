@@ -35,7 +35,7 @@ namespace Statiq.Common
         public const string LinkRoot = nameof(LinkRoot);
 
         /// <summary>
-        /// Indicates whether to hide index pages by default when generating links.
+        /// Indicates whether to hide index pages (as defined by <see cref="IndexFileName"/>) by default when generating links.
         /// </summary>
         /// <type><see cref="bool"/></type>
         public const string LinkHideIndexPages = nameof(LinkHideIndexPages);
@@ -56,6 +56,7 @@ namespace Statiq.Common
         /// This will cause temporary backing files to be created for string document content
         /// instead of storing that content in memory.
         /// </summary>
+        /// <type><see cref="bool"/></type>
         public const string UseStringContentFiles = nameof(UseStringContentFiles);
 
         /// <summary>
@@ -63,6 +64,12 @@ namespace Statiq.Common
         /// </summary>
         /// <type><see cref="bool"/></type>
         public const string UseCache = nameof(UseCache);
+
+        /// <summary>
+        /// The index file name to use for link generation, tree creation, etc. (defaults to "index.html").
+        /// </summary>
+        /// <type><see cref="bool"/></type>
+        public const string IndexFileName = nameof(IndexFileName);
 
         /// <summary>
         /// Indicates whether to clean the output path on each execution.
