@@ -21,11 +21,13 @@ namespace Statiq.Common
         {
             _pathFunc = pathFunc.ThrowIfNull(nameof(pathFunc));
             _indexFileName = indexFileName.ThrowIfNullOrEmpty(nameof(indexFileName));
-            _documents = documents
-                .ThrowIfNull(nameof(documents))
-                .Select(x => (ResolvePath(x), x))
-                .Where(x => !x.Item1.IsNull)
-                .ToArray();
+            _documents = documents is null
+                ? Array.Empty<(NormalizedPath, TDocument)>()
+                : documents
+                    .Distinct()
+                    .Select(x => (ResolvePath(x), x))
+                    .Where(x => !x.Item1.IsNull)
+                    .ToArray();
         }
 
         private NormalizedPath ResolvePath(TDocument document)
