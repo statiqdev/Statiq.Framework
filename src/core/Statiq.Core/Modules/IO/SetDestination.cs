@@ -28,8 +28,6 @@ namespace Statiq.Core
     /// <category>Input/Output</category>
     public class SetDestination : ParallelConfigModule<NormalizedPath>
     {
-        private readonly Config<NormalizedPath> _destination;
-
         /// <summary>
         /// Sets the destination of input documents according to the metadata values for
         /// <c>DestinationPath</c>, <c>DestinationFileName</c>, or <c>DestinationExtension</c>
@@ -37,9 +35,36 @@ namespace Statiq.Core
         /// destination will remain unchanged.
         /// </summary>
         public SetDestination()
-            : base(Config.FromDocument(GetPathFromMetadata), true)
+            : base(Config.FromDocument(GetCurrentDestinationFromMetadata), true)
         {
-            _destination = Config.FromDocument(GetPathFromMetadata);
+        }
+
+        /// <summary>
+        /// Changes the destination extension of input documents to the default page extension
+        /// defined in the setting <see cref="Keys.PageFileExtensions"/> (which defaults to ".html").
+        /// If <c>DestinationPath</c>, <c>DestinationFileName</c>, or <c>DestinationExtension</c>
+        /// metadata values are set, those will take precedence.
+        /// </summary>
+        /// <param name="pageFileExtension">
+        /// <c>true</c> to change the extension to the default page file extension,
+        /// <c>false</c> to only set the destination from metadata values.
+        /// </param>
+        public SetDestination(bool pageFileExtension)
+            : base(
+                pageFileExtension
+                    ? Config.FromDocument((doc, ctx) =>
+                    {
+                        string ext = ctx.Settings.GetPageFileExtensions()[0];
+                        NormalizedPath path = GetCurrentDestinationFromMetadata(doc);
+                        if (path.IsNull)
+                        {
+                            path = doc.Destination.IsNull ? NormalizedPath.Null : doc.Destination.ChangeExtension(ext);
+                        }
+                        return path;
+                    })
+                    : Config.FromDocument(GetCurrentDestinationFromMetadata),
+                true)
+        {
         }
 
         /// <summary>
@@ -58,7 +83,7 @@ namespace Statiq.Core
                 pathOrExtension.ThrowIfNull(nameof(pathOrExtension)).StartsWith('.') && new NormalizedPath(pathOrExtension).Segments.Length <= 1
                     ? Config.FromDocument(doc =>
                     {
-                        NormalizedPath path = GetPathFromMetadata(doc);
+                        NormalizedPath path = GetCurrentDestinationFromMetadata(doc);
                         if (path.IsNull)
                         {
                             path = doc.Destination.IsNull ? NormalizedPath.Null : doc.Destination.ChangeExtension(pathOrExtension);
@@ -85,7 +110,7 @@ namespace Statiq.Core
                 Config.FromDocument(
                     async (doc, ctx) =>
                     {
-                        NormalizedPath path = ignoreMetadata ? NormalizedPath.Null : GetPathFromMetadata(doc);
+                        NormalizedPath path = ignoreMetadata ? NormalizedPath.Null : GetCurrentDestinationFromMetadata(doc);
                         if (path.IsNull)
                         {
                             path = await destination.GetValueAsync(doc, ctx);
@@ -96,7 +121,7 @@ namespace Statiq.Core
             destination.ThrowIfNull(nameof(destination));
         }
 
-        private static NormalizedPath GetPathFromMetadata(IDocument doc)
+        public static NormalizedPath GetCurrentDestinationFromMetadata(IDocument doc)
         {
             NormalizedPath path = doc.GetPath(Keys.DestinationPath);
             if (!path.IsNull)
