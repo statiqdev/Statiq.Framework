@@ -96,6 +96,11 @@ namespace Statiq.Common
         /// <type><see cref="string"/> or <see cref="CultureInfo"/></type>
         public const string DateTimeDisplayCulture = nameof(DateTimeDisplayCulture);
 
+        /// <summary>
+        /// Sets a semantic version range of Statiq Framework that must be used.
+        /// </summary>
+        public const string SupportedStatiqFrameworkVersion = nameof(SupportedStatiqFrameworkVersion);
+
         // Document
 
         /// <summary>

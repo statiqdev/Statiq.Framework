@@ -24,28 +24,12 @@ namespace Statiq.Core
     /// </summary>
     public class Engine : IEngine, IDisposable
     {
-        /// <summary>
-        /// Gets the version of Statiq currently being used.
-        /// </summary>
-        public static string Version
-        {
-            get
-            {
-                if (!(Attribute.GetCustomAttribute(typeof(Engine).Assembly, typeof(AssemblyInformationalVersionAttribute)) is AssemblyInformationalVersionAttribute versionAttribute))
-                {
-                    throw new InvalidOperationException("Something went terribly wrong, could not determine Statiq version");
-                }
-                return versionAttribute.InformationalVersion;
-            }
-        }
-
         // Cache the HttpMessageHandler (the HttpClient is really just a thin wrapper around this)
         private static readonly HttpMessageHandler _httpMessageHandler = new HttpClientHandler();
 
         private readonly PipelineCollection _pipelines;
         private readonly DiagnosticsTraceListener _diagnosticsTraceListener;
         private readonly IServiceScope _serviceScope;
-        private readonly ILogger _logger;
 
         // Gets initialized on first execute and reset when the pipeline collection changes
         private PipelinePhase[] _phases;
@@ -143,9 +127,9 @@ namespace Statiq.Core
                 configuration ?? new ConfigurationRoot(Array.Empty<IConfigurationProvider>()),
                 settings);
             _serviceScope = GetServiceScope(serviceCollection);
-            _logger = Services.GetRequiredService<ILogger<Engine>>();
+            Logger = Services.GetRequiredService<ILogger<Engine>>();
             DocumentFactory = new DocumentFactory(this, Settings);
-            _diagnosticsTraceListener = new DiagnosticsTraceListener(_logger);
+            _diagnosticsTraceListener = new DiagnosticsTraceListener(Logger);
             System.Diagnostics.Trace.Listeners.Add(_diagnosticsTraceListener);
 
             // Add the service-based pipelines as late as possible so other services have been configured
@@ -215,6 +199,9 @@ namespace Statiq.Core
 
         /// <inheritdoc />
         public IConfigurationSettings Settings { get; }
+
+        /// <inheritdoc />
+        public ILogger Logger { get; }
 
         /// <inheritdoc />
         IReadOnlyConfigurationSettings IExecutionState.Settings => Settings;
@@ -303,17 +290,17 @@ namespace Statiq.Core
         {
             try
             {
-                _logger.LogDebug($"Cleaning output directory: {FileSystem.OutputPath}...");
+                Logger.LogDebug($"Cleaning output directory: {FileSystem.OutputPath}...");
                 IDirectory outputDirectory = FileSystem.GetOutputDirectory();
                 if (outputDirectory.Exists)
                 {
                     outputDirectory.Delete(true);
                 }
-                _logger.LogInformation($"Cleaned output directory: {FileSystem.OutputPath}");
+                Logger.LogInformation($"Cleaned output directory: {FileSystem.OutputPath}");
             }
             catch (Exception ex)
             {
-                _logger.LogWarning("Error while cleaning output directory: {0} - {1}", ex.GetType(), ex.Message);
+                Logger.LogWarning("Error while cleaning output directory: {0} - {1}", ex.GetType(), ex.Message);
             }
         }
 
@@ -324,18 +311,18 @@ namespace Statiq.Core
         {
             try
             {
-                _logger.LogDebug($"Cleaning temp directory: {FileSystem.TempPath}...");
+                Logger.LogDebug($"Cleaning temp directory: {FileSystem.TempPath}...");
                 IDirectory tempDirectory = FileSystem.GetTempDirectory();
                 if (tempDirectory.Exists)
                 {
                     tempDirectory.Delete(true);
                 }
                 tempDirectory.Create();
-                _logger.LogInformation($"Cleaned temp directory: {FileSystem.TempPath}");
+                Logger.LogInformation($"Cleaned temp directory: {FileSystem.TempPath}");
             }
             catch (Exception ex)
             {
-                _logger.LogWarning("Error while cleaning temp directory: {0} - {1}", ex.GetType(), ex.Message);
+                Logger.LogWarning("Error while cleaning temp directory: {0} - {1}", ex.GetType(), ex.Message);
             }
         }
 
@@ -399,20 +386,20 @@ namespace Statiq.Core
                 // Create the pipeline phases (this also validates the pipeline graph)
                 if (_phases is null)
                 {
-                    _phases = GetPipelinePhases(_pipelines, _logger);
+                    _phases = GetPipelinePhases(_pipelines, Logger);
                 }
 
                 // Verify pipelines
                 ExecutingPipelines = GetExecutingPipelines(pipelines, normalPipelines);
                 if (ExecutingPipelines.Count == 0)
                 {
-                    _logger.LogWarning("No pipelines are configured or specified for execution.");
+                    Logger.LogWarning("No pipelines are configured or specified for execution.");
                     return Outputs;
                 }
 
                 // Log
-                _logger.LogInformation($"Executing {ExecutingPipelines.Count} pipelines ({string.Join(", ", ExecutingPipelines.Keys.OrderBy(x => x))})");
-                _logger.LogDebug($"Execution ID {ExecutionId}");
+                Logger.LogInformation($"Executing {ExecutingPipelines.Count} pipelines ({string.Join(", ", ExecutingPipelines.Keys.OrderBy(x => x))})");
+                Logger.LogDebug($"Execution ID {ExecutionId}");
                 System.Diagnostics.Stopwatch stopwatch = System.Diagnostics.Stopwatch.StartNew();
 
                 // Raise before event
@@ -421,7 +408,7 @@ namespace Statiq.Core
                 // Do a check for the same input/output path
                 if (FileSystem.InputPaths.Any(x => x.Equals(FileSystem.OutputPath)))
                 {
-                    _logger.LogWarning("The output path is also one of the input paths which can cause unexpected behavior and is usually not advised");
+                    Logger.LogWarning("The output path is also one of the input paths which can cause unexpected behavior and is usually not advised");
                 }
 
                 // Clean paths
@@ -450,11 +437,11 @@ namespace Statiq.Core
                 // Log execution summary table
                 if (phaseResults.Count > 0)
                 {
-                    _logger.LogInformation(GetExecutionSummary(phaseResults));
+                    Logger.LogInformation(GetExecutionSummary(phaseResults));
                 }
 
                 // Clean up
-                _logger.LogInformation($"Finished execution in {stopwatch.ElapsedMilliseconds} ms");
+                Logger.LogInformation($"Finished execution in {stopwatch.ElapsedMilliseconds} ms");
                 return Outputs;
             }
             finally
@@ -814,7 +801,7 @@ namespace Statiq.Core
                     {
                         // Otherwise, throw an exception so that this dependency is also skipped by it's dependents
                         string error = $"{phase.PipelineName}/{phase.Phase} » Skipping pipeline due to dependency error";
-                        _logger.LogWarning(error);
+                        Logger.LogWarning(error);
                         throw new ExecutionException(error);
                     }
                 }, CancellationToken);

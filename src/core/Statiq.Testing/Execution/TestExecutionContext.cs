@@ -53,6 +53,8 @@ namespace Statiq.Testing
 
         public TestLoggerProvider TestLoggerProvider => Engine.TestLoggerProvider;
 
+        public ILogger Logger => Engine.Logger;
+
         public ConcurrentQueue<TestMessage> LogMessages => Engine.LogMessages;
 
         // IExecutionContext

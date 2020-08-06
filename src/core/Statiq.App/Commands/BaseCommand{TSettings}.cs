@@ -66,7 +66,6 @@ namespace Statiq.App
             {
                 // Log pending messages
                 ILogger logger = serviceScope.ServiceProvider.GetRequiredService<ILogger<Bootstrapper>>();
-                logger.LogInformation($"Statiq version {Engine.Version}");
                 classCatalog?.LogDebugMessagesTo(logger);
 
                 // Debug/Attach

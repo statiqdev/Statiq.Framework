@@ -5,6 +5,7 @@ using System.IO;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 
 namespace Statiq.Common
 {
@@ -86,6 +87,8 @@ namespace Statiq.Common
         /// Gets the dependency injection service provider.
         /// </summary>
         IServiceProvider Services { get; }
+
+        ILogger Logger { get; }
 
         /// <summary>
         /// Gets a helper that can compile and evaluate C# scripts.
