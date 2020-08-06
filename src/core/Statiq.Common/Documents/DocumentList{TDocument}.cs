@@ -40,7 +40,7 @@ namespace Statiq.Common
         /// </summary>
         /// <param name="destinationPatterns">The globbing pattern(s) to filter by (can be a single path).</param>
         /// <returns>The documents that satisfy the pattern or <c>null</c>.</returns>
-        public FilteredDocumentList<TDocument> this[params string[] destinationPatterns] => _documents.FilterDestinations(destinationPatterns);
+        public virtual FilteredDocumentList<TDocument> this[params string[] destinationPatterns] => _documents.FilterDestinations(destinationPatterns);
 
         // IReadOnlyList<IDocument>
 
