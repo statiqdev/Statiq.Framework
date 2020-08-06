@@ -5,13 +5,10 @@ using System.Collections.Immutable;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Logging.Abstractions;
 using Statiq.Common;
 
 namespace Statiq.Core
@@ -74,7 +71,7 @@ namespace Statiq.Core
         /// <inheritdoc />
         public FilteredDocumentList<IDocument> OutputPages =>
             new FilteredDocumentList<IDocument>(
-                _contextData.Outputs
+                Outputs
                     .Where(x => !x.Destination.IsNullOrEmpty
                         && Settings.GetPageFileExtensions().Any(e => x.Destination.Extension.Equals(e, NormalizedPath.DefaultComparisonType))),
                 x => x.Destination,

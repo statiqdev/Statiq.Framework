@@ -92,7 +92,7 @@ namespace Statiq.Core.Tests.Modules.IO
                 result.Destination.FullPath.ShouldBe(expected);
             }
 
-            public async Task SetsDestinationUsingPageExtension(string expected)
+            public async Task SetsDestinationUsingPageExtension()
             {
                 // Given
                 TestDocument input = new TestDocument(new NormalizedPath("Subfolder/write-test.abc"));
