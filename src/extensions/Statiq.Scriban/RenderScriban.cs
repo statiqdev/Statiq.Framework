@@ -2,7 +2,6 @@
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Scriban;
-using Scriban.Parsing;
 using Scriban.Runtime;
 using Statiq.Common;
 
@@ -104,9 +103,11 @@ namespace Statiq.Scriban
                 }
             }
 
-            // TODO: Set TemplateLoader to support partials
             // TODO: Expose member renamer and filter
-            TemplateContext templateContext = new TemplateContext();
+            TemplateContext templateContext = new TemplateContext
+            {
+                TemplateLoader = new TemplateLoader(context.FileSystem)
+            };
             templateContext.PushGlobal(scriptObject);
 
             string result = await template.RenderAsync(templateContext);

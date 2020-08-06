@@ -126,6 +126,67 @@ namespace Statiq.Scriban.Tests
                 // Then
                 result.ShouldBe(document);
             }
+
+            [Test]
+            public async Task ShouldSetLocalVariable()
+            {
+                // Given
+                const string input = @"{{ x = 5 ~}}
+{{ x }}
+{{ x + 1 }}";
+                const string output = "5\n6";
+                TestDocument document = new TestDocument(input);
+                RenderScriban scriban = new RenderScriban();
+
+                // When
+                TestDocument result = await ExecuteAsync(document, scriban).SingleAsync();
+
+                // Then
+                result.Content.ShouldBe(output, StringCompareShould.IgnoreLineEndings);
+            }
+
+            [Test]
+            public async Task IncludesTemplateFromFileSystem()
+            {
+                // Given
+                const string include = @"{{ y = y + 1 ~}}
+This is a string with the value {{ y }}";
+                const string input = @"{{ y = 0 ~}}
+{{include '../include/myinclude.html' }}
+{{
+x = include '../include/myinclude.html'
+x + "" modified""
+}}";
+                const string output = @"This is a string with the value 1
+This is a string with the value 2 modified";
+
+                TestFileProvider fileProvider = new TestFileProvider();
+                fileProvider.AddDirectory("/");
+                fileProvider.AddDirectory("/input");
+                fileProvider.AddDirectory("/input/include");
+                fileProvider.AddDirectory("/input/docs");
+                fileProvider.AddFile("/input/include/myinclude.html", include);
+                fileProvider.AddFile("/input/docs/test.html", input);
+                TestFileSystem fileSystem = new TestFileSystem
+                {
+                    FileProvider = fileProvider
+                };
+                TestExecutionContext context = new TestExecutionContext
+                {
+                    FileSystem = fileSystem
+                };
+                TestDocument document = new TestDocument(
+                    new NormalizedPath("/input/docs/test.html"),
+                    new NormalizedPath("docs/test.html"),
+                    input);
+                RenderScriban scriban = new RenderScriban();
+
+                // When
+                TestDocument result = await ExecuteAsync(document, context, scriban).SingleAsync();
+
+                // Then
+                result.Content.ShouldBe(output, StringCompareShould.IgnoreLineEndings);
+            }
         }
     }
 }
