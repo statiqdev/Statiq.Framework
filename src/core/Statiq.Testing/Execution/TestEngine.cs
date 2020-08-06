@@ -3,6 +3,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.IO;
+using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Threading;
@@ -123,6 +124,15 @@ namespace Statiq.Testing
 
         /// <inheritdoc />
         IPipelineOutputs IExecutionState.Outputs => Outputs;
+
+        /// <inheritdoc />
+        public FilteredDocumentList<IDocument> OutputPages =>
+            new FilteredDocumentList<IDocument>(
+                Outputs
+                    .Where(x => !x.Destination.IsNullOrEmpty
+                        && Settings.GetPageFileExtensions().Any(e => x.Destination.Extension.Equals(e, NormalizedPath.DefaultComparisonType))),
+                x => x.Destination,
+                (docs, patterns) => docs.FilterDestinations(patterns));
 
         /// <inheritdoc/>
         public IScriptHelper ScriptHelper { get; set; }

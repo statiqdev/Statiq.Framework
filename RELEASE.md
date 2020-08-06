@@ -3,6 +3,8 @@
 - **Breaking change:** Removed the `IDocument.GetParent()`, `IDocument.HasChildren()`, `IDocument.GetChildren()`, `IDocument.GetDescendants()`, and `IDocument.GetDescendantsAndSelf()` extension methods
   to reduce confusion between child documents from a metadata key and child documents from file paths. Instead, the appropriate tree concept can now be accessed via an implementation
   of the `IDocumentTree<TDocument>` interface. This change will likely break page navigation, so be sure to check that after updating.
+- Added an `OutputPages` property to the engine and execution context to make it easier to filter outputs by "pages" (by default, documents with a destination path ending in ".htm" or ".html").
+  This is what you should use to generate navigation going forward.
 - Added a `IDocumentTree<TDocument>` interface to encapsulate different kinds of document tree traversal logic.
 - Added a `DocumentMetadataTree<TDocument>` implementation to represent document trees as the result of metadata containing child documents.
 - Added a `DocumentPathTree<TDocument>` implementation to represent document trees as the result of file paths.
@@ -15,6 +17,7 @@
 - Added the `IDocumentTree<TDocument>` interface to `IPipelineOutputs` with default implementations that operate on document destination paths. This means you can call
   methods like `Outputs.GetChildren(doc)` to get all the children across all pipelines of the given document, etc.
 - Added a new `IndexFileName` setting to control the default file name of index files (defaults to `index.html`).
+- Added a new `PageFileExtensions` setting to control the default file extensions of "pages" for things like `OutputPages` filtering and link generation (defaults to ".html" and ".htm").
 
 # 1.0.0-beta.19
 

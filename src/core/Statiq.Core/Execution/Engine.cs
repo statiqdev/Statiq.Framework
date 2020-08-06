@@ -259,6 +259,15 @@ namespace Statiq.Core
         public IPipelineOutputs Outputs { get; private set; }
 
         /// <inheritdoc />
+        public FilteredDocumentList<IDocument> OutputPages =>
+            new FilteredDocumentList<IDocument>(
+                Outputs
+                    .Where(x => !x.Destination.IsNullOrEmpty
+                        && Settings.GetPageFileExtensions().Any(e => x.Destination.Extension.Equals(e, NormalizedPath.DefaultComparisonType))),
+                x => x.Destination,
+                (docs, patterns) => docs.FilterDestinations(patterns));
+
+        /// <inheritdoc />
         public bool SerialExecution { get; set; }
 
         internal DocumentFactory DocumentFactory { get; }

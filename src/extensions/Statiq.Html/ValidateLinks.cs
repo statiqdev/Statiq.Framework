@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
@@ -10,8 +9,6 @@ using AngleSharp.Dom;
 using AngleSharp.Dom.Html;
 using AngleSharp.Parser.Html;
 using Microsoft.Extensions.Logging;
-using Polly;
-using Polly.Retry;
 using Statiq.Common;
 using IDocument = Statiq.Common.IDocument;
 
@@ -235,7 +232,8 @@ namespace Statiq.Html
             checkPaths.Add(new NormalizedPath(normalizedPath?.Length == 0 ? indexFileName : $"{normalizedPath}/{indexFileName}"));
 
             // Add extensions
-            checkPaths.AddRange(LinkGenerator.DefaultHideExtensions.SelectMany(x => checkPaths.Select(y => y.AppendExtension(x))).ToArray());
+            IReadOnlyList<string> pageFileExtensions = context.Settings.GetPageFileExtensions();
+            checkPaths.AddRange(pageFileExtensions.SelectMany(x => checkPaths.Select(y => y.AppendExtension(x))).ToArray());
 
             // Check all the candidate paths
             NormalizedPath validatedPath = checkPaths.Find(x =>

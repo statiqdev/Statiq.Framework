@@ -125,6 +125,15 @@ namespace Statiq.Testing
         /// <inheritdoc/>
         IPipelineOutputs IExecutionState.Outputs => Outputs;
 
+        /// <inheritdoc />
+        public FilteredDocumentList<IDocument> OutputPages =>
+            new FilteredDocumentList<IDocument>(
+                Outputs
+                    .Where(x => !x.Destination.IsNullOrEmpty
+                        && Settings.GetPageFileExtensions().Any(e => x.Destination.Extension.Equals(e, NormalizedPath.DefaultComparisonType))),
+                x => x.Destination,
+                (docs, patterns) => docs.FilterDestinations(patterns));
+
         /// <inheritdoc/>
         public ApplicationState ApplicationState
         {

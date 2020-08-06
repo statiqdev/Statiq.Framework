@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using Statiq.Common;
 
@@ -9,11 +10,6 @@ namespace Statiq.Common
     /// </summary>
     public static class LinkGenerator
     {
-        /// <summary>
-        /// The default extensions to hide in links.
-        /// </summary>
-        public static readonly string[] DefaultHideExtensions = { ".htm", ".html" };
-
         /// <summary>
         /// Generates a normalized link given a path and other conditions.
         /// </summary>
@@ -30,8 +26,8 @@ namespace Statiq.Common
             string host,
             in NormalizedPath root,
             string scheme,
-            string[] hidePages,
-            string[] hideExtensions,
+            IReadOnlyList<string> hidePages,
+            IReadOnlyList<string> hideExtensions,
             bool lowercase)
         {
             string link = string.Empty;
@@ -46,7 +42,7 @@ namespace Statiq.Common
 
                 // Hide extensions
                 if (hideExtensions is object
-                    && (hideExtensions.Length == 0 || hideExtensions.Where(x => x is object).Select(x => x.StartsWith(NormalizedPath.Dot) ? x : NormalizedPath.Dot + x).Contains(path.Extension)))
+                    && (hideExtensions.Count == 0 || hideExtensions.Where(x => x is object).Select(x => x.StartsWith(NormalizedPath.Dot) ? x : NormalizedPath.Dot + x).Contains(path.Extension)))
                 {
                     path = path.ChangeExtension(null);
                 }
