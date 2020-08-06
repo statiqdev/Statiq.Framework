@@ -23,6 +23,7 @@ namespace Statiq.Razor
         public new IExecutionContext Context => ExecutionContext;
         public ImmutableArray<IDocument> Inputs => ExecutionContext.Inputs;
         public IPipelineOutputs Outputs => ExecutionContext.Outputs;
+        public FilteredDocumentList<IDocument> OutputPages => ExecutionContext.OutputPages;
 
         public HttpContext HttpContext => base.Context;
 

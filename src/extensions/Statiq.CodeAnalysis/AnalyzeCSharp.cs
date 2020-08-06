@@ -399,30 +399,32 @@ namespace Statiq.CodeAnalysis
         {
             INamespaceSymbol containingNamespace = symbol.ContainingNamespace;
             NormalizedPath destinationPath;
+            string indexFileName = context.Settings.GetIndexFileName();
+            string pageFileExtension = context.Settings.GetPageFileExtensions()[0]; // Includes preceding "."
 
             if (symbol.Kind == SymbolKind.Assembly)
             {
                 // Assemblies output to the index page in a folder of their name
-                destinationPath = new NormalizedPath($"{symbol.GetDisplayName()}/{context.Settings.GetIndexFileName()}");
+                destinationPath = new NormalizedPath($"{symbol.GetDisplayName()}/{indexFileName}");
             }
             else if (symbol.Kind == SymbolKind.Namespace)
             {
                 // Namespaces output to the index page in a folder of their full name
                 // If this namespace does not have a containing namespace, it's the global namespace
-                destinationPath = new NormalizedPath(containingNamespace is null ? $"global/{context.Settings.GetIndexFileName()}" : $"{symbol.GetDisplayName()}/index.html");
+                destinationPath = new NormalizedPath(containingNamespace is null ? $"global/{indexFileName}" : $"{symbol.GetDisplayName()}/{indexFileName}");
             }
             else if (symbol.Kind == SymbolKind.NamedType)
             {
                 // Types output to the index page in a folder of their SymbolId under the folder for their namespace
                 destinationPath = new NormalizedPath(containingNamespace.ContainingNamespace is null
-                    ? $"global/{symbol.GetId()}/{context.Settings.GetIndexFileName()}"
-                    : $"{containingNamespace.GetDisplayName()}/{symbol.GetId()}/{context.Settings.GetIndexFileName()}");
+                    ? $"global/{symbol.GetId()}/{indexFileName}"
+                    : $"{containingNamespace.GetDisplayName()}/{symbol.GetId()}/{indexFileName}");
             }
             else
             {
                 // Members output to a page equal to their SymbolId under the folder for their type
                 NormalizedPath containingPath = GetDefaultDestination(symbol.ContainingType, null, context);
-                destinationPath = containingPath.ChangeFileName($"{symbol.GetId()}.html");
+                destinationPath = containingPath.ChangeFileName($"{symbol.GetId()}{pageFileExtension}");
             }
 
             // Add the prefix

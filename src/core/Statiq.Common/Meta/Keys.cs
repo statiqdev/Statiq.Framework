@@ -41,7 +41,7 @@ namespace Statiq.Common
         public const string LinkHideIndexPages = nameof(LinkHideIndexPages);
 
         /// <summary>
-        /// Indicates whether to hide ".html" and ".htm" extensions by default when generating links.
+        /// Indicates whether to hide <see cref="PageFileExtensions"/> (usually ".html" and ".htm" extensions) by default when generating links.
         /// </summary>
         /// <type><see cref="bool"/></type>
         public const string LinkHideExtensions = nameof(LinkHideExtensions);
@@ -68,8 +68,15 @@ namespace Statiq.Common
         /// <summary>
         /// The index file name to use for link generation, tree creation, etc. (defaults to "index.html").
         /// </summary>
-        /// <type><see cref="bool"/></type>
+        /// <type><see cref="string"/></type>
         public const string IndexFileName = nameof(IndexFileName);
+
+        /// <summary>
+        /// The file extensions of "pages" (used by <see cref="IExecutionState.OutputPages"/>
+        /// to filter output documents (defaults to "htm" and "html").
+        /// </summary>
+        /// <type>string[]</type>
+        public const string PageFileExtensions = nameof(PageFileExtensions);
 
         /// <summary>
         /// Indicates whether to clean the output path on each execution.

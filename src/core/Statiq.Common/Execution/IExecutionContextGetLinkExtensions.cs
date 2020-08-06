@@ -242,7 +242,7 @@
                 root,
                 useHttps ? "https" : null,
                 hideIndexPages ? new[] { executionContext.Settings.GetIndexFileName() } : null,
-                hideExtensions ? LinkGenerator.DefaultHideExtensions : null,
+                hideExtensions ? executionContext.Settings.GetPageFileExtensions() : null,
                 lowercase);
     }
 }

@@ -71,9 +71,16 @@ namespace Statiq.Common
         IMemoryStreamFactory MemoryStreamFactory { get; }
 
         /// <summary>
-        /// Gets the collection of outputs from all previously processed pipelines.
+        /// Gets the collection of output documents from all previously processed pipelines.
         /// </summary>
         IPipelineOutputs Outputs { get; }
+
+        /// <summary>
+        /// Gets the collection of output documents from all previously processed pipelines,
+        /// filtered to destination paths with a <see cref="Keys.PageFileExtensions"/>
+        /// extension (which defaults to ".htm" and ".html").
+        /// </summary>
+        FilteredDocumentList<IDocument> OutputPages { get; }
 
         /// <summary>
         /// Gets the dependency injection service provider.

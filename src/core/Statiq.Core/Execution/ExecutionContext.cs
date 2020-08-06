@@ -71,6 +71,15 @@ namespace Statiq.Core
         /// <inheritdoc/>
         public IPipelineOutputs Outputs => _contextData.Outputs;
 
+        /// <inheritdoc />
+        public FilteredDocumentList<IDocument> OutputPages =>
+            new FilteredDocumentList<IDocument>(
+                _contextData.Outputs
+                    .Where(x => !x.Destination.IsNullOrEmpty
+                        && Settings.GetPageFileExtensions().Any(e => x.Destination.Extension.Equals(e, NormalizedPath.DefaultComparisonType))),
+                x => x.Destination,
+                (docs, patterns) => docs.FilterDestinations(patterns));
+
         /// <inheritdoc/>
         public IReadOnlyFileSystem FileSystem => _contextData.Engine.FileSystem;
 

@@ -146,10 +146,10 @@ namespace Statiq.Core
 
                         // Meta refresh documents
                         NormalizedPath outputPath = fromPath;
-                        if (!string.Equals(outputPath.Extension, ".html", StringComparison.OrdinalIgnoreCase)
-                            && !string.Equals(outputPath.Extension, ".htm", StringComparison.OrdinalIgnoreCase))
+                        IReadOnlyList<string> pageFileExtensions = context.Settings.GetPageFileExtensions();
+                        if (!pageFileExtensions.Any(x => outputPath.Extension.Equals(x, NormalizedPath.DefaultComparisonType)))
                         {
-                            outputPath = outputPath.AppendExtension(".html");
+                            outputPath = outputPath.AppendExtension(pageFileExtensions[0]);
                         }
 
                         if (_metaRefreshPages)
