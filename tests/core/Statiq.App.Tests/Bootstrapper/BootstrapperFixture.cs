@@ -21,23 +21,6 @@ namespace Statiq.App.Tests.Bootstrapper
         public class RunTests : BootstrapperFixture
         {
             [Test]
-            public async Task LogsVersion()
-            {
-                // Given
-                string[] args = new[] { "build" };
-                App.Bootstrapper bootstrapper = App.Bootstrapper.Factory.Create(args);
-                bootstrapper.AddCommand<PipelinesCommand<EngineCommandSettings>>("build");
-                bootstrapper.AddPipeline("Foo");
-
-                // When
-                BootstrapperTestResult result = await bootstrapper.RunTestAsync();
-
-                // Then
-                result.ExitCode.ShouldBe((int)ExitCode.Normal);
-                result.LogMessages.ShouldContain(x => x.FormattedMessage.StartsWith("Statiq version"));
-            }
-
-            [Test]
             public async Task NoPipelinesWarning()
             {
                 // Given
