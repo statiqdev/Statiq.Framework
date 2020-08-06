@@ -14,12 +14,19 @@ namespace Statiq.Common
         where TDocument : IDocument
     {
         private readonly DocumentPathTree<TDocument> _tree;
+        private readonly Func<IReadOnlyList<TDocument>, string[], FilteredDocumentList<TDocument>> _filterFunc;
 
-        internal FilteredDocumentList(IEnumerable<TDocument> documents, Func<TDocument, NormalizedPath> pathFunc)
+        internal FilteredDocumentList(
+            IEnumerable<TDocument> documents,
+            Func<TDocument, NormalizedPath> pathFunc,
+            Func<IReadOnlyList<TDocument>, string[], FilteredDocumentList<TDocument>> filterFunc)
             : base(documents)
         {
             _tree = new DocumentPathTree<TDocument>(documents, pathFunc);
+            _filterFunc = filterFunc.ThrowIfNull(nameof(filterFunc));
         }
+
+        public override FilteredDocumentList<TDocument> this[params string[] patterns] => _filterFunc(this, patterns);
 
         public DocumentList<TDocument> GetAncestorsOf(TDocument document, bool includeSelf) => _tree.GetAncestorsOf(document, includeSelf);
 
