@@ -23,7 +23,7 @@ namespace Statiq.Common
         }
 
         /// <summary>
-        /// Gets a guaranteed set of page file extensions (with a preceding "."), returning a default of ".htm" and ".html"
+        /// Gets a guaranteed set of page file extensions (with a preceding "."), returning a default of ".html", ".htm"
         /// if <see cref="Keys.PageFileExtensions"/> is not defined or is empty.
         /// </summary>
         /// <param name="settings">The settings.</param>

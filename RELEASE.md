@@ -18,6 +18,7 @@
   methods like `Outputs.GetChildren(doc)` to get all the children across all pipelines of the given document, etc.
 - Added a new `IndexFileName` setting to control the default file name of index files (defaults to `index.html`).
 - Added a new `PageFileExtensions` setting to control the default file extensions of "pages" for things like `OutputPages` filtering and link generation (defaults to ".html" and ".htm").
+- Added a new constructor to the `SetDestination` module that will change the destination of documents to the first value of the `PageFileExtensions` setting (default of ".html").
 
 # 1.0.0-beta.19
 

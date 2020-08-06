@@ -34,6 +34,28 @@ namespace Statiq.Core.Tests.Modules.IO
             }
 
             [TestCase(Keys.DestinationPath, "OtherFolder/foo.bar", "OtherFolder/foo.bar")]
+            [TestCase(Keys.DestinationFileName, "foo.bar", "Subfolder/foo.bar")]
+            [TestCase(Keys.DestinationFileName, "fizz/foo.bar", "Subfolder/fizz/foo.bar")]
+            [TestCase(Keys.DestinationFileName, "../fizz/foo.bar", "fizz/foo.bar")]
+            [TestCase(Keys.DestinationExtension, "foo", "Subfolder/write-test.foo")]
+            [TestCase(Keys.DestinationExtension, ".foo", "Subfolder/write-test.foo")]
+            public async Task SetsDestinationFromMetadataForFalsePageExtension(string key, string value, string expected)
+            {
+                // Given
+                TestDocument input = new TestDocument(new NormalizedPath("Subfolder/write-test.abc"))
+                {
+                    { key, value }
+                };
+                SetDestination setDestination = new SetDestination(false);
+
+                // When
+                TestDocument result = await ExecuteAsync(input, setDestination).SingleAsync();
+
+                // Then
+                result.Destination.FullPath.ShouldBe(expected);
+            }
+
+            [TestCase(Keys.DestinationPath, "OtherFolder/foo.bar", "OtherFolder/foo.bar")]
             [TestCase(Keys.DestinationFileName, "foo.bar", "foo.bar")]
             [TestCase(Keys.DestinationFileName, "fizz/foo.bar", "fizz/foo.bar")]
             [TestCase(Keys.DestinationFileName, "../fizz/foo.bar", "../fizz/foo.bar")]
@@ -68,6 +90,19 @@ namespace Statiq.Core.Tests.Modules.IO
 
                 // Then
                 result.Destination.FullPath.ShouldBe(expected);
+            }
+
+            public async Task SetsDestinationUsingPageExtension(string expected)
+            {
+                // Given
+                TestDocument input = new TestDocument(new NormalizedPath("Subfolder/write-test.abc"));
+                SetDestination setDestination = new SetDestination(true);
+
+                // When
+                TestDocument result = await ExecuteAsync(input, setDestination).SingleAsync();
+
+                // Then
+                result.Destination.FullPath.ShouldBe("Subfolder/write-test.html");
             }
 
             [TestCase("foo", "foo")]
@@ -115,6 +150,28 @@ namespace Statiq.Core.Tests.Modules.IO
                     { key, value }
                 };
                 SetDestination setDestination = new SetDestination(".txt");
+
+                // When
+                TestDocument result = await ExecuteAsync(input, setDestination).SingleAsync();
+
+                // Then
+                result.Destination.FullPath.ShouldBe(expected);
+            }
+
+            [TestCase(Keys.DestinationPath, "OtherFolder/foo.bar", "OtherFolder/foo.bar")]
+            [TestCase(Keys.DestinationFileName, "foo.bar", "Subfolder/foo.bar")]
+            [TestCase(Keys.DestinationFileName, "fizz/foo.bar", "Subfolder/fizz/foo.bar")]
+            [TestCase(Keys.DestinationFileName, "../fizz/foo.bar", "fizz/foo.bar")]
+            [TestCase(Keys.DestinationExtension, "foo", "Subfolder/write-test.foo")]
+            [TestCase(Keys.DestinationExtension, ".foo", "Subfolder/write-test.foo")]
+            public async Task SetsDestinationFromMetadataOverridesPageExtension(string key, string value, string expected)
+            {
+                // Given
+                TestDocument input = new TestDocument(new NormalizedPath("Subfolder/write-test.abc"))
+                {
+                    { key, value }
+                };
+                SetDestination setDestination = new SetDestination(true);
 
                 // When
                 TestDocument result = await ExecuteAsync(input, setDestination).SingleAsync();
