@@ -128,6 +128,46 @@ namespace Statiq.Scriban.Tests
             }
 
             [Test]
+            public async Task ShouldRenderBuiltInProperties()
+            {
+                // Given
+                const string input = @"id: {{ id }}
+count: {{ count }}
+keys:
+{{~ for key in keys ~}}
+  {{ key }}
+{{~ end ~}}
+values:
+{{~ for value in values ~}}
+  {{ value }}
+{{~ end ~}}
+{{ content_provider.media_type }}";
+                const string output = @"id: {0}
+count: 3
+keys:
+  source
+  destination
+  content_provider
+values:
+  /input/index.html
+  index.html
+  Statiq.Common.MemoryContent
+"; // TODO: Support nested complex objects
+
+                TestDocument document = new TestDocument(
+                    new NormalizedPath("/input/index.html"),
+                    new NormalizedPath("index.html"),
+                    input);
+                RenderScriban scriban = new RenderScriban();
+
+                // When
+                TestDocument result = await ExecuteAsync(document, scriban).SingleAsync();
+
+                // Then
+                result.Content.ShouldBe(string.Format(output, document.Id), StringCompareShould.IgnoreLineEndings);
+            }
+
+            [Test]
             public async Task ShouldSetLocalVariable()
             {
                 // Given
