@@ -33,7 +33,9 @@ namespace Statiq.Common
         /// </summary>
         /// <param name="destinationPatterns">The globbing pattern(s) to filter by (can be a single path).</param>
         /// <returns>The documents that satisfy the pattern or <c>null</c>.</returns>
-        public IEnumerable<IDocument> this[params string[] destinationPatterns] => this.FilterDestinations(destinationPatterns);
+        public FilteredDocumentList<IDocument> this[params string[] destinationPatterns] => this.FilterDestinations(destinationPatterns);
+
+        // IDocumentTree implementation - get a fresh tree on each call since the outputs change
 
         DocumentList<IDocument> IDocumentTree<IDocument>.GetAncestorsOf(IDocument document, bool includeSelf) => this.AsDestinationTree().GetAncestorsOf(document, includeSelf);
 

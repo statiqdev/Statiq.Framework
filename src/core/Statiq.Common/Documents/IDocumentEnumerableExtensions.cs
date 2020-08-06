@@ -79,9 +79,9 @@ namespace Statiq.Common
         /// <param name="documents">The documents to filter.</param>
         /// <param name="patterns">The globbing pattern(s) to match.</param>
         /// <returns>The documents that match the globbing pattern(s).</returns>
-        public static DocumentList<TDocument> FilterSources<TDocument>(this IEnumerable<TDocument> documents, params string[] patterns)
+        public static FilteredDocumentList<TDocument> FilterSources<TDocument>(this IEnumerable<TDocument> documents, params string[] patterns)
             where TDocument : IDocument =>
-            documents.FilterSources((IEnumerable<string>)patterns).ToDocumentList();
+            documents.FilterSources((IEnumerable<string>)patterns);
 
         /// <summary>
         /// Filters the documents by source.
@@ -102,7 +102,7 @@ namespace Statiq.Common
         /// This parameter has no effect if <paramref name="flatten"/> is <c>false</c>.
         /// </param>
         /// <returns>The documents that match the globbing pattern(s).</returns>
-        public static DocumentList<TDocument> FilterSources<TDocument>(
+        public static FilteredDocumentList<TDocument> FilterSources<TDocument>(
             this IEnumerable<TDocument> documents,
             IEnumerable<string> patterns,
             bool flatten = true,
@@ -117,7 +117,7 @@ namespace Statiq.Common
                 .GetInputDirectories()
                 .Select(x => fileProvider.GetDirectory(x.Path));
             IEnumerable<IFile> matches = directories.SelectMany(x => Globber.GetFiles(x, patterns));
-            return matches.Select(x => x.Path).Distinct().Select(match => fileProvider.GetDocument(match)).Cast<TDocument>().ToDocumentList();
+            return new FilteredDocumentList<TDocument>(matches.Select(x => x.Path).Distinct().Select(match => fileProvider.GetDocument(match)).Cast<TDocument>(), x => x.Source);
         }
 
         /// <summary>
@@ -132,9 +132,9 @@ namespace Statiq.Common
         /// <param name="documents">The documents to filter.</param>
         /// <param name="patterns">The globbing pattern(s) to match.</param>
         /// <returns>The documents that match the globbing pattern(s).</returns>
-        public static DocumentList<TDocument> FilterDestinations<TDocument>(this IEnumerable<TDocument> documents, params string[] patterns)
+        public static FilteredDocumentList<TDocument> FilterDestinations<TDocument>(this IEnumerable<TDocument> documents, params string[] patterns)
             where TDocument : IDocument =>
-            documents.FilterDestinations((IEnumerable<string>)patterns).ToDocumentList();
+            documents.FilterDestinations((IEnumerable<string>)patterns);
 
         /// <summary>
         /// Filters the documents by destination.
@@ -155,7 +155,7 @@ namespace Statiq.Common
         /// This parameter has no effect if <paramref name="flatten"/> is <c>false</c>.
         /// </param>
         /// <returns>The documents that match the globbing pattern(s).</returns>
-        public static DocumentList<TDocument> FilterDestinations<TDocument>(
+        public static FilteredDocumentList<TDocument> FilterDestinations<TDocument>(
             this IEnumerable<TDocument> documents,
             IEnumerable<string> patterns,
             bool flatten = true,
@@ -167,7 +167,7 @@ namespace Statiq.Common
 
             DocumentFileProvider fileProvider = new DocumentFileProvider((IEnumerable<IDocument>)documents, false, flatten, childrenKey);
             IEnumerable<IFile> matches = Globber.GetFiles(fileProvider.GetDirectory("/"), patterns);
-            return matches.Select(x => x.Path).Distinct().Select(match => fileProvider.GetDocument(match)).Cast<TDocument>().ToDocumentList();
+            return new FilteredDocumentList<TDocument>(matches.Select(x => x.Path).Distinct().Select(match => fileProvider.GetDocument(match)).Cast<TDocument>(), x => x.Destination);
         }
 
         public static TDocument FirstOrDefaultSource<TDocument>(

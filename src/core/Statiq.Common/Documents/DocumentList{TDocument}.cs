@@ -5,6 +5,10 @@ using System.Linq;
 
 namespace Statiq.Common
 {
+    /// <summary>
+    /// A list of documents.
+    /// </summary>
+    /// <typeparam name="TDocument">The document type the list contains.</typeparam>
     public class DocumentList<TDocument> : IReadOnlyList<TDocument>
         where TDocument : IDocument
     {
@@ -36,7 +40,7 @@ namespace Statiq.Common
         /// </summary>
         /// <param name="destinationPatterns">The globbing pattern(s) to filter by (can be a single path).</param>
         /// <returns>The documents that satisfy the pattern or <c>null</c>.</returns>
-        public IEnumerable<TDocument> this[params string[] destinationPatterns] => _documents.FilterDestinations(destinationPatterns);
+        public FilteredDocumentList<TDocument> this[params string[] destinationPatterns] => _documents.FilterDestinations(destinationPatterns);
 
         // IReadOnlyList<IDocument>
 
