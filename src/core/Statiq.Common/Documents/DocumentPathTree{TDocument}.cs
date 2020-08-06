@@ -5,7 +5,7 @@ using System.Linq;
 
 namespace Statiq.Common
 {
-    public class DocumentPathTree<TDocument> : IDocumentTree<TDocument>
+    public class DocumentPathTree<TDocument> : IDocumentPathTree<TDocument>
         where TDocument : IDocument
     {
         private readonly Func<TDocument, NormalizedPath> _pathFunc;
@@ -21,10 +21,14 @@ namespace Statiq.Common
         {
             _pathFunc = pathFunc.ThrowIfNull(nameof(pathFunc));
             _indexFileName = indexFileName.ThrowIfNullOrEmpty(nameof(indexFileName));
+
+            // Add them by hand instead of using .Distinct() so we can guarantee ordering
+            // and that earlier documents win (pipeline outputs are ordered with later phase results first)
+            HashSet<Guid> documentIdHashes = new HashSet<Guid>();
             _documents = documents is null
                 ? Array.Empty<(NormalizedPath, TDocument)>()
                 : documents
-                    .Distinct()
+                    .Where(x => documentIdHashes.Add(x.Id))
                     .Select(x => (ResolvePath(x), x))
                     .Where(x => !x.Item1.IsNull)
                     .ToArray();
@@ -50,6 +54,9 @@ namespace Statiq.Common
 
             return path;
         }
+
+        public TDocument Get(NormalizedPath path) =>
+            _documents.Select(x => x.Item2).FirstOrDefault(x => _pathFunc(x).Equals(path));
 
         public TDocument GetParentOf(TDocument document)
         {

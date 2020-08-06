@@ -6,11 +6,11 @@ using System.Linq;
 namespace Statiq.Common
 {
     /// <summary>
-    /// A filtered list of documents that also implements <see cref="IDocumentTree{TDocument}"/>
+    /// A filtered list of documents that also implements <see cref="IDocumentPathTree{TDocument}"/>
     /// so that the resulting documents can be easily traversed as a tree structure.
     /// </summary>
     /// <typeparam name="TDocument">The document type the list contains.</typeparam>
-    public class FilteredDocumentList<TDocument> : DocumentList<TDocument>, IDocumentTree<TDocument>
+    public class FilteredDocumentList<TDocument> : DocumentList<TDocument>, IDocumentPathTree<TDocument>
         where TDocument : IDocument
     {
         private readonly DocumentPathTree<TDocument> _tree;
@@ -27,6 +27,8 @@ namespace Statiq.Common
         }
 
         public override FilteredDocumentList<TDocument> this[params string[] patterns] => _filterFunc(this, patterns);
+
+        public TDocument Get(NormalizedPath path) => _tree.Get(path);
 
         public DocumentList<TDocument> GetAncestorsOf(TDocument document, bool includeSelf) => _tree.GetAncestorsOf(document, includeSelf);
 

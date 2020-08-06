@@ -4,6 +4,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
+using System.Threading;
 using Statiq.Common;
 
 namespace Statiq.Core
@@ -18,13 +19,16 @@ namespace Statiq.Core
         private readonly IPipelineCollection _pipelines;
 
         // Cache the dependency calculation
-        private KeyValuePair<string, ImmutableArray<IDocument>>[] _cachedDependencyOutputs;
+        private readonly Lazy<KeyValuePair<string, ImmutableArray<IDocument>>[]> _cachedDependencyOutputs;
 
         public PhaseOutputs(IReadOnlyDictionary<string, PhaseResult[]> phaseResults, PipelinePhase currentPhase, IPipelineCollection pipelines)
         {
             _phaseResults = phaseResults.ThrowIfNull(nameof(phaseResults));
             _currentPhase = currentPhase.ThrowIfNull(nameof(currentPhase));
             _pipelines = pipelines.ThrowIfNull(nameof(pipelines));
+
+            _cachedDependencyOutputs = new Lazy<KeyValuePair<string, ImmutableArray<IDocument>>[]>(
+                () => GetOutputsFromDependencies(), LazyThreadSafetyMode.ExecutionAndPublication);
         }
 
         public DocumentList<IDocument> FromPipeline(string pipelineName)
@@ -42,7 +46,7 @@ namespace Statiq.Core
         {
             ValidateCurrent();
 
-            return GetOutputsFromDependencies().ToDictionary(x => x.Key, x => x.Value.ToDocumentList());
+            return _cachedDependencyOutputs.Value.ToDictionary(x => x.Key, x => x.Value.ToDocumentList());
         }
 
         public DocumentList<IDocument> ExceptPipeline(string pipelineName)
@@ -50,7 +54,7 @@ namespace Statiq.Core
             ValidateCurrent();
             ValidateArguments(pipelineName);
 
-            return GetOutputsFromDependencies()
+            return _cachedDependencyOutputs.Value
                 .Where(x => !x.Key.Equals(pipelineName, StringComparison.OrdinalIgnoreCase))
                 .SelectMany(x => x.Value)
                 .ToDocumentList();
@@ -60,12 +64,12 @@ namespace Statiq.Core
         {
             ValidateCurrent();
 
-            return GetOutputsFromDependencies().SelectMany(x => x.Value).GetEnumerator();
+            return _cachedDependencyOutputs.Value.SelectMany(x => x.Value).GetEnumerator();
         }
 
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
-        private IEnumerable<KeyValuePair<string, ImmutableArray<IDocument>>> GetOutputsFromDependencies()
+        private KeyValuePair<string, ImmutableArray<IDocument>>[] GetOutputsFromDependencies()
         {
             // If we're in the transform phase, get outputs from all process phases including this one
             if (_currentPhase.Phase == Phase.PostProcess)
@@ -87,15 +91,11 @@ namespace Statiq.Core
             }
 
             // If we're in the process phase, get outputs from the process phase only from dependencies
-            if (_cachedDependencyOutputs is null)
-            {
-                HashSet<string> transientDependencies = GatherProcessPhaseDependencies(_currentPhase);
-                _cachedDependencyOutputs = _phaseResults
-                    .Where(x => transientDependencies.Contains(x.Key))
-                    .Select(x => KeyValuePair.Create(x.Key, GetOutputs(x.Value, Phase.Process)))
-                    .ToArray();
-            }
-            return _cachedDependencyOutputs;
+            HashSet<string> transientDependencies = GatherProcessPhaseDependencies(_currentPhase);
+            return _phaseResults
+                .Where(x => transientDependencies.Contains(x.Key))
+                .Select(x => KeyValuePair.Create(x.Key, GetOutputs(x.Value, Phase.Process)))
+                .ToArray();
         }
 
         // Crawl up the phases looking for one with outputs if the one specified below doesn't have any
@@ -156,7 +156,7 @@ namespace Statiq.Core
             }
 
             // Make sure the pipeline has results
-            if (!_phaseResults.TryGetValue(pipelineName, out PhaseResult[] phaseResults))
+            if (!_phaseResults.ContainsKey(pipelineName))
             {
                 throw new KeyNotFoundException($"The pipeline results for {pipelineName} could not be found");
             }

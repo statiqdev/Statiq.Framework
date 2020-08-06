@@ -1,12 +1,13 @@
 ﻿using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Linq;
 
 namespace Statiq.Common
 {
     /// <summary>
     /// Contains a collection of documents output by pipelines.
     /// </summary>
-    public interface IPipelineOutputs : IEnumerable<IDocument>, IDocumentTree<IDocument>
+    public interface IPipelineOutputs : IEnumerable<IDocument>, IDocumentPathTree<IDocument>
     {
         /// <summary>
         /// Gets documents by pipeline.
@@ -35,16 +36,24 @@ namespace Statiq.Common
         /// <returns>The documents that satisfy the pattern or <c>null</c>.</returns>
         public FilteredDocumentList<IDocument> this[params string[] destinationPatterns] => this.FilterDestinations(destinationPatterns);
 
-        // IDocumentTree implementation - get a fresh tree on each call since the outputs change
+        // IDocumentPathTree implementation - get a fresh tree on each call since the outputs change
 
-        DocumentList<IDocument> IDocumentTree<IDocument>.GetAncestorsOf(IDocument document, bool includeSelf) => this.AsDestinationTree().GetAncestorsOf(document, includeSelf);
+        IDocument IDocumentPathTree<IDocument>.Get(NormalizedPath destinationPath) =>
+            ((IEnumerable<IDocument>)this).FirstOrDefault(x => x.Destination.Equals(destinationPath));
 
-        DocumentList<IDocument> IDocumentTree<IDocument>.GetChildrenOf(IDocument document) => this.AsDestinationTree().GetChildrenOf(document);
+        DocumentList<IDocument> IDocumentTree<IDocument>.GetAncestorsOf(IDocument document, bool includeSelf) =>
+            this.AsDestinationTree().GetAncestorsOf(document, includeSelf);
 
-        DocumentList<IDocument> IDocumentTree<IDocument>.GetDescendantsOf(IDocument document, bool includeSelf) => this.AsDestinationTree().GetDescendantsOf(document, includeSelf);
+        DocumentList<IDocument> IDocumentTree<IDocument>.GetChildrenOf(IDocument document) =>
+            this.AsDestinationTree().GetChildrenOf(document);
 
-        IDocument IDocumentTree<IDocument>.GetParentOf(IDocument document) => this.AsDestinationTree().GetParentOf(document);
+        DocumentList<IDocument> IDocumentTree<IDocument>.GetDescendantsOf(IDocument document, bool includeSelf) =>
+            this.AsDestinationTree().GetDescendantsOf(document, includeSelf);
 
-        DocumentList<IDocument> IDocumentTree<IDocument>.GetSiblingsOf(IDocument document, bool includeSelf) => this.AsDestinationTree().GetSiblingsOf(document, includeSelf);
+        IDocument IDocumentTree<IDocument>.GetParentOf(IDocument document) =>
+            this.AsDestinationTree().GetParentOf(document);
+
+        DocumentList<IDocument> IDocumentTree<IDocument>.GetSiblingsOf(IDocument document, bool includeSelf) =>
+            this.AsDestinationTree().GetSiblingsOf(document, includeSelf);
     }
 }
