@@ -16,13 +16,12 @@ namespace Statiq.Core
     internal class ExecutionContext : IExecutionContext
     {
         private readonly ExecutionContextData _contextData;
-        private readonly ILogger _logger;
         private readonly string _logPrefix;
 
         internal ExecutionContext(ExecutionContextData contextData, IExecutionContext parent, IModule module, ImmutableArray<IDocument> inputs)
         {
             _contextData = contextData.ThrowIfNull(nameof(contextData));
-            _logger = contextData.Services.GetRequiredService<ILogger<ExecutionContext>>();
+            Logger = contextData.Services.GetRequiredService<ILogger<ExecutionContext>>();
             _logPrefix = GetLogPrefix(parent, module, contextData.PipelinePhase);
 
             Parent = parent;
@@ -67,6 +66,9 @@ namespace Statiq.Core
 
         /// <inheritdoc/>
         public IPipelineOutputs Outputs => _contextData.Outputs;
+
+        /// <inheritdoc/>
+        public ILogger Logger { get; }
 
         /// <inheritdoc />
         public FilteredDocumentList<IDocument> OutputPages =>
@@ -175,10 +177,10 @@ namespace Statiq.Core
         // ILogger
 
         public void Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception exception, Func<TState, Exception, string> formatter) =>
-            _logger.Log(logLevel, eventId, state, exception, (s, e) => _logPrefix + formatter(s, e));
+            Logger.Log(logLevel, eventId, state, exception, (s, e) => _logPrefix + formatter(s, e));
 
-        public bool IsEnabled(LogLevel logLevel) => _logger.IsEnabled(logLevel);
+        public bool IsEnabled(LogLevel logLevel) => Logger.IsEnabled(logLevel);
 
-        public IDisposable BeginScope<TState>(TState state) => _logger.BeginScope(state);
+        public IDisposable BeginScope<TState>(TState state) => Logger.BeginScope(state);
     }
 }

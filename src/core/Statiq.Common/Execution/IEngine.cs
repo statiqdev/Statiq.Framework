@@ -48,6 +48,8 @@ namespace Statiq.Common
         /// </summary>
         new IPipelineCollection Pipelines { get; }
 
+        new ILogger Logger { get; }
+
         /// <summary>
         /// Sets the default document type produced by this engine (and resulting <see cref="IExecutionContext"/> contexts).
         /// </summary>

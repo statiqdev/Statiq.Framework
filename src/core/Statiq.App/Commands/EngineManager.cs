@@ -56,6 +56,9 @@ namespace Statiq.App
                 ApplyCommandSettings(Engine, commandSettings);
             }
 
+            // Verify version
+            Engine.LogAndCheckVersion(typeof(Engine).Assembly, "Statiq Framework", Keys.SupportedStatiqFrameworkVersion);
+
             // Run engine configurators after command line, settings, etc. have been applied
             bootstrapper.Configurators.Configure<IEngine>(Engine);
 

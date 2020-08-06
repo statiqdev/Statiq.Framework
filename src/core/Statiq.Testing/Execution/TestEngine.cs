@@ -33,6 +33,8 @@ namespace Statiq.Testing
 
         public TestLoggerProvider TestLoggerProvider { get; }
 
+        public ILogger Logger => TestLoggerProvider.CreateLogger(null);
+
         public ConcurrentQueue<TestMessage> LogMessages { get; } = new ConcurrentQueue<TestMessage>();
 
         /// <inheritdoc />
