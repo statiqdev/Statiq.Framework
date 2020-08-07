@@ -14,8 +14,10 @@
             where TDocument : IDocument =>
             tree.GetAncestorsOf(document, false);
 
-        public static SingleDocumentMetadataTree AsMetadataTree(this IDocument document) => new SingleDocumentMetadataTree(document);
+        public static DocumentList<IDocument> GetChildren(this IDocument document) =>
+            document.GetChildren(Keys.Children);
 
-        public static SingleDocumentMetadataTree AsMetadataTree(this IDocument document, string childrenKey) => new SingleDocumentMetadataTree(document, childrenKey);
+        public static DocumentList<IDocument> GetChildren(this IDocument document, string childrenKey) =>
+            document.GetDocumentList<IDocument>(childrenKey);
     }
 }

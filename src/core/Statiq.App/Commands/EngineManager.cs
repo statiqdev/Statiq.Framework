@@ -4,7 +4,6 @@ using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Spectre.Cli;
@@ -57,7 +56,7 @@ namespace Statiq.App
             }
 
             // Verify version
-            Engine.LogAndCheckVersion(typeof(Engine).Assembly, "Statiq Framework", Keys.SupportedStatiqFrameworkVersion);
+            Engine.LogAndCheckVersion(typeof(Engine).Assembly, "Statiq Framework", Keys.MinimumStatiqFrameworkVersion);
 
             // Run engine configurators after command line, settings, etc. have been applied
             bootstrapper.Configurators.Configure<IEngine>(Engine);
