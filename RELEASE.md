@@ -1,14 +1,14 @@
 # 1.0.0-beta.20
 
-- **Breaking change:** Removed the `IDocument.GetParent()`, `IDocument.HasChildren()`, `IDocument.GetChildren()`, `IDocument.GetDescendants()`, and `IDocument.GetDescendantsAndSelf()` extension methods
-  to reduce confusion between child documents from a metadata key and child documents from file paths. Instead, the appropriate tree concept can now be accessed via an implementation
-  of the `IDocumentTree<TDocument>` interface. This change will likely break page navigation, so be sure to check that after updating.
+- **Breaking change:** Removed the `IDocument.GetParent()`, `IDocument.HasChildren()`, `IDocument.GetDescendants()`, and `IDocument.GetDescendantsAndSelf()` extension methods
+  (`IDocument.GetChildren()` still remains since it's fetching actual metadata values). Instead, the appropriate tree concept can now be accessed via an implementation
+  of the `IDocumentTree<TDocument>` interface. This change may break navigation, so `Outputs` or `OutputPages` should be considered for generating navigation instead.
 - Added an `OutputPages` property to the engine and execution context to make it easier to filter outputs by "pages" (by default, documents with a destination path ending in ".htm" or ".html").
   This is what you should use to generate navigation going forward.
+- Added `Outputs.Get()` and `OutputPages.Get()` to support getting a single document from those collections by destination path, which is faster than globbing.
 - Added a `IDocumentTree<TDocument>` interface to encapsulate different kinds of document tree traversal logic.
 - Added a `DocumentMetadataTree<TDocument>` implementation to represent document trees as the result of metadata containing child documents.
 - Added a `DocumentPathTree<TDocument>` implementation to represent document trees as the result of file paths.
-- Added a `IDocument.AsMetadataTree()` extension method to provide `GetChildren()` and `GetDescendants()` behavior for a single document based on a child metadata key.
 - Added a `IEnumerable<TDocument>.AsMetadataTree()` extension method to get a `DocumentMetadataTree<TDocument>` instance that creates a tree from document metadata containing child documents.
 - Added a `IEnumerable<TDocument>.AsDestinationTree()` extension method to get a `DocumentPathTree<TDocument>` instance that creates a tree from document destination paths.
 - Added a `IEnumerable<TDocument>.AsSourceTree()` extension method to get a `DocumentPathTree<TDocument>` instance that creates a tree from document source paths.
@@ -19,6 +19,9 @@
 - Added a new `IndexFileName` setting to control the default file name of index files (defaults to `index.html`).
 - Added a new `PageFileExtensions` setting to control the default file extensions of "pages" for things like `OutputPages` filtering and link generation (defaults to ".html" and ".htm").
 - Added a new constructor to the `SetDestination` module that will change the destination of documents to the first value of the `PageFileExtensions` setting (default of ".html").
+- Added a new `MinimumStatiqFrameworkVersion` key to perform a check for the minimum allowed version of Statiq Framework. If this is set to something higher than the current version
+  of Statiq Framework, an error will be logged and execution will stop. Any setting that starts will this key will be considered, so it's recommended the use of this key be
+  suffixed with a unique identifier to avoid conflicts between components (for example `MinimumStatiqFrameworkVersion-MySite`).
 
 # 1.0.0-beta.19
 

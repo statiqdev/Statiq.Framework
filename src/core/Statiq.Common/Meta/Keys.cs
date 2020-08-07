@@ -99,7 +99,7 @@ namespace Statiq.Common
         /// <summary>
         /// Sets a semantic version range of Statiq Framework that must be used.
         /// </summary>
-        public const string SupportedStatiqFrameworkVersion = nameof(SupportedStatiqFrameworkVersion);
+        public const string MinimumStatiqFrameworkVersion = nameof(MinimumStatiqFrameworkVersion);
 
         // Document
 

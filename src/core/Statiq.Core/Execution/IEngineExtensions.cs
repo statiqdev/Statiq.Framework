@@ -1,53 +1,37 @@
 ﻿using System;
-using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.Collections.Immutable;
-using System.IO;
 using System.Linq;
-using System.Net.Http;
 using System.Reflection;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
-using JavaScriptEngineSwitcher.Core;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Logging.Abstractions;
 using Statiq.Common;
 
 namespace Statiq.Core
 {
     public static class IEngineExtensions
     {
-        public static void LogAndCheckVersion(this IEngine engine, Assembly assembly, string name, string versionRangeKey)
+        public static void LogAndCheckVersion(this IEngine engine, Assembly assembly, string name, string minimumVersionKey)
         {
             if (!(Attribute.GetCustomAttribute(assembly, typeof(AssemblyInformationalVersionAttribute)) is AssemblyInformationalVersionAttribute versionAttribute))
             {
-                throw new InvalidOperationException("Something went terribly wrong, could not determine Statiq version");
+                throw new Exception($"Could not determine the {name} version from {assembly.FullName}");
             }
 
-            // Trim a "+" since intermediate builds add one
-            string version = versionAttribute.InformationalVersion;
-            int plusIndex = version.LastIndexOf('+');
-            if (plusIndex > 0)
-            {
-                version = version.Substring(0, plusIndex);
-            }
+            // Get and print the version
+            string informationalVersion = versionAttribute.InformationalVersion;
+            engine.Logger.LogInformation($"{name} version {informationalVersion}", true);
+            SemVer.Version version = new SemVer.Version(informationalVersion, true);
 
-            engine.Logger.LogInformation($"{name} version {version}");
-            if (!versionRangeKey.IsNullOrWhiteSpace())
+            // Get all version ranges
+            (string Key, SemVer.Version Version)[] minimumVersions = engine.Settings.Keys
+                .Where(k => k.StartsWith(minimumVersionKey))
+                .Select(k => (Key: k, Value: engine.Settings.GetString(k)))
+                .Where(x => !x.Value.IsNullOrWhiteSpace())
+                .Select(x => (x.Key, new SemVer.Version(x.Value, true)))
+                .ToArray();
+            foreach ((string Key, SemVer.Version Version) minimumVersion in minimumVersions)
             {
-                string versionRange = engine.Settings.GetString(versionRangeKey);
-                if (!versionRange.IsNullOrWhiteSpace())
+                if (version < minimumVersion.Version)
                 {
-                    SemVer.Version semver = new SemVer.Version(version);
-                    SemVer.Range range = new SemVer.Range(versionRange, true);
-                    if (!range.IsSatisfied(semver))
-                    {
-                        throw new Exception($"{name} {version} does not meet the version requirement of {versionRange}");
-                    }
+                    throw new Exception($"{name} {informationalVersion} does not meet the minimum version requirement of {minimumVersion.Version} defined in {minimumVersion.Key}");
                 }
             }
         }
