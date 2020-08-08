@@ -5,7 +5,7 @@ namespace Statiq.Common
     /// <summary>
     /// A disposable class that does nothing.
     /// </summary>
-    public class EmptyDisposable : IDisposable
+    public sealed class EmptyDisposable : IDisposable
     {
 #pragma warning disable SA1401 // Fields must be private
         /// <summary>
@@ -13,6 +13,10 @@ namespace Statiq.Common
         /// </summary>
         public static EmptyDisposable Instance = new EmptyDisposable();
 #pragma warning restore SA1401 // Fields must be private
+
+        private EmptyDisposable()
+        {
+        }
 
         /// <summary>
         /// Does nothing.

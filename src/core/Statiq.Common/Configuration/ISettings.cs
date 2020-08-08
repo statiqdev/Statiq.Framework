@@ -7,7 +7,7 @@ namespace Statiq.Common
     /// <summary>
     /// A combination of configuration data and settings that provides global metadata to the engine.
     /// </summary>
-    public interface IConfigurationSettings : IReadOnlyConfigurationSettings, IDictionary<string, object>
+    public interface ISettings : IReadOnlySettings, IDictionary<string, object>
     {
         // Redefine overlap between IReadOnlyDictionary<string, object> and IDictionary<string, string> to avoid ambiguity errors
 

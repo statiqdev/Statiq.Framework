@@ -61,7 +61,7 @@ namespace Statiq.Common
         }
 
         public Document(
-            IReadOnlyConfigurationSettings settings,
+            IReadOnlySettings settings,
             in NormalizedPath source,
             in NormalizedPath destination,
             IEnumerable<KeyValuePair<string, object>> items,
@@ -71,7 +71,7 @@ namespace Statiq.Common
         }
 
         public Document(
-            IReadOnlyConfigurationSettings settings,
+            IReadOnlySettings settings,
             in NormalizedPath source,
             in NormalizedPath destination,
             IMetadata metadata,

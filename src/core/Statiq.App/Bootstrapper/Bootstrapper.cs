@@ -58,17 +58,18 @@ namespace Statiq.App
             ConfigurableConfiguration configurableConfiguration = new ConfigurableConfiguration(configurationBuilder);
             Configurators.Configure(configurableConfiguration);
             IConfigurationRoot configurationRoot = configurationBuilder.Build();
-            ConfigurationSettings configurationSettings = new ConfigurationSettings(configurationRoot);
+            Settings settings = new Settings(configurationRoot);
 
             // Create the service collection
             IServiceCollection serviceCollection = CreateServiceCollection() ?? new ServiceCollection();
             serviceCollection.TryAddSingleton(this);
             serviceCollection.TryAddSingleton<IBootstrapper>(this);
             serviceCollection.TryAddSingleton(ClassCatalog);  // The class catalog is retrieved later for deferred logging once a service provider is built
-            serviceCollection.TryAddSingleton<IConfiguration>(configurationRoot);
+            serviceCollection.TryAddSingleton<IConfiguration>(settings);
+            serviceCollection.TryAddSingleton<ISettings>(settings);
 
             // Run configurators on the service collection
-            ConfigurableServices configurableServices = new ConfigurableServices(serviceCollection, configurationRoot);
+            ConfigurableServices configurableServices = new ConfigurableServices(serviceCollection, settings);
             Configurators.Configure(configurableServices);
 
             // Add simple logging to make sure it's available in commands before the engine adds in,
@@ -77,8 +78,8 @@ namespace Statiq.App
 
             // Create the stand-alone command line service container and register a few types needed for the CLI
             CommandServiceTypeRegistrar registrar = new CommandServiceTypeRegistrar();
-            registrar.RegisterInstance(typeof(IConfigurationSettings), configurationSettings);
-            registrar.RegisterInstance(typeof(IConfigurationRoot), configurationRoot);
+            registrar.RegisterInstance(typeof(Settings), settings);
+            registrar.RegisterInstance(typeof(IConfigurationRoot), settings);
             registrar.RegisterInstance(typeof(IServiceCollection), serviceCollection);
             registrar.RegisterInstance(typeof(IConfiguratorCollection), Configurators);
             registrar.RegisterInstance(typeof(Bootstrapper), this);

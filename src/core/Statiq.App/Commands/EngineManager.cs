@@ -22,7 +22,7 @@ namespace Statiq.App
         public EngineManager(
             CommandContext commandContext,
             EngineCommandSettings commandSettings,
-            IConfigurationSettings configurationSettings,
+            Settings settings,
             IServiceCollection serviceCollection,
             Bootstrapper bootstrapper)
         {
@@ -41,10 +41,7 @@ namespace Statiq.App
 
             // Create the engine and get a logger
             // The configuration settings should not be used after this point
-            ConfigurationSettings configurationSettingsImpl = configurationSettings as ConfigurationSettings;
-            IDictionary<string, object> settings = configurationSettingsImpl?.Settings;
-            Engine = new Engine(applicationState, serviceCollection, configurationSettings.Configuration, settings, bootstrapper.ClassCatalog);
-            configurationSettingsImpl?.Dispose();
+            Engine = new Engine(applicationState, serviceCollection, settings, bootstrapper.ClassCatalog);
 
             // Get the logger from the engine and store it for use during execute
             _logger = Engine.Services.GetRequiredService<ILogger<Bootstrapper>>();

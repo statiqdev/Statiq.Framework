@@ -6,11 +6,11 @@ namespace Statiq.Common
 {
     public class ConfigurableSettings : IConfigurable
     {
-        public ConfigurableSettings(IConfigurationSettings settings)
+        public ConfigurableSettings(ISettings settings)
         {
             Settings = settings;
         }
 
-        public IConfigurationSettings Settings { get; }
+        public ISettings Settings { get; }
     }
 }

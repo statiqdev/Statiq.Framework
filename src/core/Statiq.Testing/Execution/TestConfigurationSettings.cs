@@ -7,7 +7,7 @@ using Statiq.Common;
 
 namespace Statiq.Testing
 {
-    public class TestConfigurationSettings : ConfigurationMetadata, IConfigurationProvider, IConfigurationSource, IConfigurationSettings
+    public class TestConfigurationSettings : ConfigurationMetadata, IConfigurationProvider, IConfigurationSource, ISettings
     {
         private readonly Dictionary<string, object> _settings = new Dictionary<string, object>(StringComparer.OrdinalIgnoreCase);
 
@@ -143,9 +143,9 @@ namespace Statiq.Testing
 
         ICollection<object> IDictionary<string, object>.Values => Values.ToArray();
 
-        ICollection<string> IConfigurationSettings.Keys => Keys.ToArray();
+        ICollection<string> ISettings.Keys => Keys.ToArray();
 
-        ICollection<object> IConfigurationSettings.Values => Values.ToArray();
+        ICollection<object> ISettings.Values => Values.ToArray();
 
         public bool IsReadOnly => false;
 

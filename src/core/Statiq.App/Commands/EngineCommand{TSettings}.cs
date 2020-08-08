@@ -1,32 +1,28 @@
 ﻿using System.Threading.Tasks;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Spectre.Cli;
 using Statiq.Common;
+using Statiq.Core;
 
 namespace Statiq.App
 {
     public abstract class EngineCommand<TSettings> : BaseCommand<TSettings>
         where TSettings : BaseCommandSettings
     {
-        private readonly IConfigurationSettings _configurationSettings;
-
         protected EngineCommand(
             IConfiguratorCollection configurators,
-            IConfigurationSettings configurationSettings,
+            Settings settings,
             IServiceCollection serviceCollection,
-            IConfigurationRoot configurationRoot,
             Bootstrapper bootstrapper)
-            : base(configurators, configurationSettings, serviceCollection)
+            : base(configurators, settings, serviceCollection)
         {
-            ConfigurationRoot = configurationRoot;
             Bootstrapper = bootstrapper;
-            _configurationSettings = configurationSettings;
+            Settings = settings;
         }
 
-        public IConfigurationRoot ConfigurationRoot { get; }
-
         public Bootstrapper Bootstrapper { get; }
+
+        public Settings Settings { get; }
 
         public override sealed async Task<int> ExecuteCommandAsync(CommandContext commandContext, TSettings commandSettings)
         {
@@ -48,7 +44,7 @@ namespace Statiq.App
                 new EngineManager(
                     commandContext,
                     engineCommandSettings,
-                    _configurationSettings,
+                    Settings,
                     ServiceCollection,
                     Bootstrapper))
             {

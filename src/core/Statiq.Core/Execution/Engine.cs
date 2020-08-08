@@ -38,7 +38,7 @@ namespace Statiq.Core
         /// Creates an engine with empty application state, configuration, and services.
         /// </summary>
         public Engine()
-            : this(null, null, null, null, null)
+            : this(null, null, null, null)
         {
         }
 
@@ -47,7 +47,7 @@ namespace Statiq.Core
         /// </summary>
         /// <param name="serviceCollection">The service collection (or <c>null</c> for an empty default service collection).</param>
         public Engine(IServiceCollection serviceCollection)
-            : this(null, serviceCollection, null, null, null)
+            : this(null, serviceCollection, null, null)
         {
         }
 
@@ -56,7 +56,7 @@ namespace Statiq.Core
         /// </summary>
         /// <param name="applicationState">The state of the application (or <c>null</c> for an empty application state).</param>
         public Engine(ApplicationState applicationState)
-            : this(applicationState, null, null, null, null)
+            : this(applicationState, null, null, null)
         {
         }
 
@@ -66,7 +66,7 @@ namespace Statiq.Core
         /// <param name="applicationState">The state of the application (or <c>null</c> for an empty application state).</param>
         /// <param name="serviceCollection">The service collection (or <c>null</c> for an empty default service collection).</param>
         public Engine(ApplicationState applicationState, IServiceCollection serviceCollection)
-            : this(applicationState, serviceCollection, null, null, null)
+            : this(applicationState, serviceCollection, null, null)
         {
         }
 
@@ -75,12 +75,12 @@ namespace Statiq.Core
         /// </summary>
         /// <param name="applicationState">The state of the application (or <c>null</c> for an empty application state).</param>
         /// <param name="serviceCollection">The service collection (or <c>null</c> for an empty default service collection).</param>
-        /// <param name="configuration">The application configuration.</param>
+        /// <param name="settings">The collection of settings.</param>
         public Engine(
             ApplicationState applicationState,
             IServiceCollection serviceCollection,
-            IConfiguration configuration)
-            : this(applicationState, serviceCollection, configuration, null, null)
+            Settings settings)
+            : this(applicationState, serviceCollection, settings, null)
         {
         }
 
@@ -89,30 +89,12 @@ namespace Statiq.Core
         /// </summary>
         /// <param name="applicationState">The state of the application (or <c>null</c> for an empty application state).</param>
         /// <param name="serviceCollection">The service collection (or <c>null</c> for an empty default service collection).</param>
-        /// <param name="settings">Values that should override configuration values.</param>
-        /// <param name="configuration">The application configuration.</param>
-        public Engine(
-            ApplicationState applicationState,
-            IServiceCollection serviceCollection,
-            IConfiguration configuration,
-            IEnumerable<KeyValuePair<string, object>> settings)
-            : this(applicationState, serviceCollection, configuration, settings, null)
-        {
-        }
-
-        /// <summary>
-        /// Creates an engine with the specified application state, configuration, and service provider.
-        /// </summary>
-        /// <param name="applicationState">The state of the application (or <c>null</c> for an empty application state).</param>
-        /// <param name="serviceCollection">The service collection (or <c>null</c> for an empty default service collection).</param>
-        /// <param name="configuration">The application configuration.</param>
-        /// <param name="settings">Settings that should override configuration values.</param>
+        /// <param name="settings">The collection of settings.</param>
         /// <param name="classCatalog">A class catalog of all assemblies in scope.</param>
         public Engine(
             ApplicationState applicationState,
             IServiceCollection serviceCollection,
-            IConfiguration configuration,
-            IEnumerable<KeyValuePair<string, object>> settings,
+            Settings settings,
             ClassCatalog classCatalog)
         {
             _pipelines = new PipelineCollection(this);
@@ -120,11 +102,9 @@ namespace Statiq.Core
             ClassCatalog = classCatalog ?? new ClassCatalog();
             ClassCatalog.Populate();
             ScriptHelper = new ScriptHelper(this);
-            Settings = new ConfigurationSettings(
-                this,
-                configuration ?? new ConfigurationRoot(Array.Empty<IConfigurationProvider>()),
-                settings);
-            _serviceScope = GetServiceScope(serviceCollection);
+            settings = settings?.WithExecutionState(this) ?? new Settings();
+            Settings = settings;
+            _serviceScope = GetServiceScope(serviceCollection, settings);
             Logger = Services.GetRequiredService<ILogger<Engine>>();
             DocumentFactory = new DocumentFactory(this, Settings);
             _diagnosticsTraceListener = new DiagnosticsTraceListener(Logger);
@@ -144,8 +124,9 @@ namespace Statiq.Core
         /// And https://github.com/aspnet/DependencyInjection/issues/456
         /// </remarks>
         /// <param name="serviceCollection">The service collection to create a scope for.</param>
+        /// <param name="configuration">An implementation of the configuration interface (I.e. the settings).</param>
         /// <returns>A built service scope (and provider).</returns>
-        private IServiceScope GetServiceScope(IServiceCollection serviceCollection)
+        private IServiceScope GetServiceScope(IServiceCollection serviceCollection, IConfiguration configuration)
         {
             serviceCollection ??= new ServiceCollection();
 
@@ -154,8 +135,8 @@ namespace Statiq.Core
             serviceCollection.TryAddSingleton<ApplicationState>(ApplicationState);
             serviceCollection.TryAddSingleton<IReadOnlyEventCollection>(Events);
             serviceCollection.TryAddSingleton<IReadOnlyFileSystem>(FileSystem);
-            serviceCollection.TryAddSingleton<IReadOnlyConfigurationSettings>(Settings);
-            serviceCollection.TryAddSingleton<IConfiguration>(Settings.Configuration);
+            serviceCollection.TryAddSingleton<IReadOnlySettings>(Settings);
+            serviceCollection.TryAddSingleton<IConfiguration>(configuration);
             serviceCollection.TryAddSingleton<IReadOnlyShortcodeCollection>(Shortcodes);
             serviceCollection.TryAddSingleton<IMemoryStreamFactory>(MemoryStreamFactory);
             serviceCollection.TryAddSingleton<INamespacesCollection>(Namespaces);
@@ -196,13 +177,13 @@ namespace Statiq.Core
         public ClassCatalog ClassCatalog { get; }
 
         /// <inheritdoc />
-        public IConfigurationSettings Settings { get; }
+        public ISettings Settings { get; }
 
         /// <inheritdoc />
         public ILogger Logger { get; }
 
         /// <inheritdoc />
-        IReadOnlyConfigurationSettings IExecutionState.Settings => Settings;
+        IReadOnlySettings IExecutionState.Settings => Settings;
 
         /// <inheritdoc />
         public IEventCollection Events { get; } = new EventCollection();

@@ -22,11 +22,11 @@ namespace Statiq.App
     public abstract class BaseCommand<TSettings> : AsyncCommand<TSettings>
         where TSettings : BaseCommandSettings
     {
-        private readonly IConfigurationSettings _configurationSettings;
+        private readonly ISettings _configurationSettings;
 
         protected BaseCommand(
             IConfiguratorCollection configurators,
-            IConfigurationSettings configurationSettings,
+            ISettings configurationSettings,
             IServiceCollection serviceCollection)
         {
             Configurators = configurators;

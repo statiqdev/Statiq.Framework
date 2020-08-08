@@ -1,11 +1,9 @@
 ﻿using System.ComponentModel;
 using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Spectre.Cli;
 using Statiq.Common;
+using Statiq.Core;
 
 namespace Statiq.App
 {
@@ -14,15 +12,13 @@ namespace Statiq.App
     {
         public DeployCommand(
             IConfiguratorCollection configurators,
-            IConfigurationSettings configurationSettings,
+            Settings settings,
             IServiceCollection serviceCollection,
-            IConfigurationRoot configurationRoot,
             Bootstrapper bootstrapper)
             : base(
                   configurators,
-                  configurationSettings,
+                  settings,
                   serviceCollection,
-                  configurationRoot,
                   bootstrapper)
         {
         }

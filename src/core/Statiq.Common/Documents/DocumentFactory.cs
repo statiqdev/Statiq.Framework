@@ -11,11 +11,11 @@ namespace Statiq.Common
     internal class DocumentFactory : IDocumentFactory
     {
         private readonly IExecutionState _executionState;
-        private readonly IReadOnlyConfigurationSettings _settings;
+        private readonly IReadOnlySettings _settings;
 
         private IFactory _defaultFactory = Factory<Document>.Instance;
 
-        public DocumentFactory(IExecutionState executionState, IReadOnlyConfigurationSettings settings)
+        public DocumentFactory(IExecutionState executionState, IReadOnlySettings settings)
         {
             _executionState = executionState.ThrowIfNull(nameof(executionState));
             _settings = settings.ThrowIfNull(nameof(settings));
@@ -24,7 +24,7 @@ namespace Statiq.Common
         private interface IFactory
         {
             IDocument CreateDocument(
-                IReadOnlyConfigurationSettings settings,
+                IReadOnlySettings settings,
                 NormalizedPath source,
                 NormalizedPath destination,
                 IMetadata metadata,
@@ -42,7 +42,7 @@ namespace Statiq.Common
             }
 
             public IDocument CreateDocument(
-                IReadOnlyConfigurationSettings settings,
+                IReadOnlySettings settings,
                 NormalizedPath source,
                 NormalizedPath destination,
                 IMetadata metadata,

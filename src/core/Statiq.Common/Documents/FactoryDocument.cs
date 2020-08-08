@@ -13,7 +13,7 @@
         }
 
         internal abstract IDocument Initialize(
-            IReadOnlyConfigurationSettings settings,
+            IReadOnlySettings settings,
             NormalizedPath source,
             NormalizedPath destination,
             IMetadata metadata,

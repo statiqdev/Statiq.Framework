@@ -23,7 +23,7 @@ namespace Statiq.Common
         /// <summary>
         /// Gets the configuration and settings.
         /// </summary>
-        new IConfigurationSettings Settings { get; }
+        new ISettings Settings { get; }
 
         /// <summary>
         /// Gets the file system.

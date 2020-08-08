@@ -18,7 +18,7 @@ namespace Statiq.Common
 
         public static TBootstrapper AddPipelines<TBootstrapper>(
             this TBootstrapper bootstrapper,
-            Action<IReadOnlyConfigurationSettings, IPipelineCollection> action)
+            Action<IReadOnlySettings, IPipelineCollection> action)
             where TBootstrapper : IBootstrapper =>
             bootstrapper.ConfigureEngine(x => action(x.Settings, x.Pipelines));
 
@@ -32,11 +32,11 @@ namespace Statiq.Common
             where TBootstrapper : IBootstrapper =>
             bootstrapper.ConfigureEngine(x => x.Pipelines.Add(pipeline));
 
-        public static TBootstrapper AddPipeline<TBootstrapper>(this TBootstrapper bootstrapper, string name, Func<IReadOnlyConfigurationSettings, IPipeline> pipelineFunc)
+        public static TBootstrapper AddPipeline<TBootstrapper>(this TBootstrapper bootstrapper, string name, Func<IReadOnlySettings, IPipeline> pipelineFunc)
             where TBootstrapper : IBootstrapper =>
             bootstrapper.ConfigureEngine(x => x.Pipelines.Add(name, pipelineFunc(x.Settings)));
 
-        public static TBootstrapper AddPipeline<TBootstrapper>(this TBootstrapper bootstrapper, Func<IReadOnlyConfigurationSettings, IPipeline> pipelineFunc)
+        public static TBootstrapper AddPipeline<TBootstrapper>(this TBootstrapper bootstrapper, Func<IReadOnlySettings, IPipeline> pipelineFunc)
             where TBootstrapper : IBootstrapper =>
             bootstrapper.ConfigureEngine(x => x.Pipelines.Add(pipelineFunc(x.Settings)));
 

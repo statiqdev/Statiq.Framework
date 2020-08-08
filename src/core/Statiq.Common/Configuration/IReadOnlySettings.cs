@@ -3,8 +3,7 @@ using Microsoft.Extensions.Configuration;
 
 namespace Statiq.Common
 {
-    public interface IReadOnlyConfigurationSettings : IMetadata
+    public interface IReadOnlySettings : IMetadata
     {
-        IConfiguration Configuration { get; }
     }
 }

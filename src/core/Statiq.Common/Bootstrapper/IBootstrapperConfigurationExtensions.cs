@@ -6,7 +6,7 @@ namespace Statiq.Common
 {
     public static class IBootstrapperConfigurationExtensions
     {
-        public static TBootstrapper ConfigureSettings<TBootstrapper>(this TBootstrapper bootstrapper, Action<IConfigurationSettings> action)
+        public static TBootstrapper ConfigureSettings<TBootstrapper>(this TBootstrapper bootstrapper, Action<ISettings> action)
             where TBootstrapper : IBootstrapper
         {
             bootstrapper.ThrowIfNull(nameof(bootstrapper));
@@ -30,11 +30,11 @@ namespace Statiq.Common
             return bootstrapper;
         }
 
-        public static TBootstrapper ConfigureServices<TBootstrapper>(this TBootstrapper bootstrapper, Action<IServiceCollection, IConfigurationRoot> action)
+        public static TBootstrapper ConfigureServices<TBootstrapper>(this TBootstrapper bootstrapper, Action<IServiceCollection, ISettings> action)
             where TBootstrapper : IBootstrapper
         {
             bootstrapper.ThrowIfNull(nameof(bootstrapper));
-            bootstrapper.Configurators.Add<ConfigurableServices>(x => action(x.Services, x.Configuration));
+            bootstrapper.Configurators.Add<ConfigurableServices>(x => action(x.Services, x.Settings));
             return bootstrapper;
         }
 

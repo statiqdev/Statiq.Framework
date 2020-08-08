@@ -29,7 +29,7 @@ namespace Statiq.Common
     {
         private bool _initialized;
         private IMetadata _metadata;
-        private IReadOnlyConfigurationSettings _settings;
+        private IReadOnlySettings _settings;
         private IContentProvider _contentProvider;
         private NormalizedPath _destination;
         private NormalizedPath _source;
@@ -95,7 +95,7 @@ namespace Statiq.Common
         }
 
         protected Document(
-            IReadOnlyConfigurationSettings settings,
+            IReadOnlySettings settings,
             in NormalizedPath source,
             in NormalizedPath destination,
             IEnumerable<KeyValuePair<string, object>> items,
@@ -105,7 +105,7 @@ namespace Statiq.Common
         }
 
         protected Document(
-            IReadOnlyConfigurationSettings settings,
+            IReadOnlySettings settings,
             in NormalizedPath source,
             in NormalizedPath destination,
             IMetadata metadata,
@@ -119,7 +119,7 @@ namespace Statiq.Common
         // overridden) which results in a new document instance before we have the chance to set properties like
         // metadata, source, and destination in the constructor
         internal override IDocument Initialize(
-            IReadOnlyConfigurationSettings settings,
+            IReadOnlySettings settings,
             NormalizedPath source,
             NormalizedPath destination,
             IMetadata metadata,
@@ -178,7 +178,7 @@ namespace Statiq.Common
         [PropertyMetadata(null)]
         public Guid Id { get; private set; } = Guid.NewGuid();
 
-        protected IReadOnlyConfigurationSettings Settings
+        protected IReadOnlySettings Settings
         {
             get
             {

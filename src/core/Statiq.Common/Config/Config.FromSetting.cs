@@ -56,7 +56,7 @@ namespace Statiq.Common
         /// <typeparam name="TValue">The type of config value.</typeparam>
         /// <param name="func">The delegate that produces the config value.</param>
         /// <returns>A config object.</returns>
-        public static Config<TValue> FromSettings<TValue>(Func<IReadOnlyConfigurationSettings, TValue> func)
+        public static Config<TValue> FromSettings<TValue>(Func<IReadOnlySettings, TValue> func)
         {
             func.ThrowIfNull(nameof(func));
             return new Config<TValue>((_, ctx) => Task.FromResult(func(ctx.Settings)), false);
@@ -68,7 +68,7 @@ namespace Statiq.Common
         /// <typeparam name="TValue">The type of config value.</typeparam>
         /// <param name="func">The delegate that produces the config value.</param>
         /// <returns>A config object.</returns>
-        public static Config<TValue> FromSettings<TValue>(Func<IReadOnlyConfigurationSettings, Task<TValue>> func)
+        public static Config<TValue> FromSettings<TValue>(Func<IReadOnlySettings, Task<TValue>> func)
         {
             func.ThrowIfNull(nameof(func));
             return new Config<TValue>((_, ctx) => func(ctx.Settings), false);
@@ -81,7 +81,7 @@ namespace Statiq.Common
         /// <typeparam name="TValue">The type of config value.</typeparam>
         /// <param name="action">A delegate action to evaluate.</param>
         /// <returns>A config object.</returns>
-        public static Config<TValue> FromSettings<TValue>(Action<IReadOnlyConfigurationSettings> action)
+        public static Config<TValue> FromSettings<TValue>(Action<IReadOnlySettings> action)
         {
             action.ThrowIfNull(nameof(action));
             return new Config<TValue>((__, ctx) =>
@@ -98,7 +98,7 @@ namespace Statiq.Common
         /// <typeparam name="TValue">The type of config value.</typeparam>
         /// <param name="action">A delegate action to evaluate.</param>
         /// <returns>A config object.</returns>
-        public static Config<TValue> FromSettings<TValue>(Func<IReadOnlyConfigurationSettings, Task> action)
+        public static Config<TValue> FromSettings<TValue>(Func<IReadOnlySettings, Task> action)
         {
             action.ThrowIfNull(nameof(action));
             return new Config<TValue>(async (__, ctx) =>
@@ -113,7 +113,7 @@ namespace Statiq.Common
         /// </summary>
         /// <param name="action">A delegate action to evaluate.</param>
         /// <returns>A config object.</returns>
-        public static Config<object> FromSettings(Action<IReadOnlyConfigurationSettings> action) =>
+        public static Config<object> FromSettings(Action<IReadOnlySettings> action) =>
             FromSettings<object>(action);
 
         /// <summary>
@@ -121,7 +121,7 @@ namespace Statiq.Common
         /// </summary>
         /// <param name="action">A delegate action to evaluate.</param>
         /// <returns>A config object.</returns>
-        public static Config<object> FromSettings(Func<IReadOnlyConfigurationSettings, Task> action) =>
+        public static Config<object> FromSettings(Func<IReadOnlySettings, Task> action) =>
             FromSettings<object>(action);
 
         /// <summary>

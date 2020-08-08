@@ -54,7 +54,7 @@ namespace Statiq.Common
         /// <summary>
         /// The application configuration as metadata.
         /// </summary>
-        IReadOnlyConfigurationSettings Settings { get; }
+        IReadOnlySettings Settings { get; }
 
         /// <summary>
         /// Gets the available shortcodes.

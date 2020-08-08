@@ -85,7 +85,7 @@ namespace Statiq.Testing
         }
 
         /// <inheritdoc />
-        IReadOnlyConfigurationSettings IExecutionState.Settings => Settings;
+        IReadOnlySettings IExecutionState.Settings => Settings;
 
         /// <inheritdoc/>
         public TestNamespacesCollection Namespaces

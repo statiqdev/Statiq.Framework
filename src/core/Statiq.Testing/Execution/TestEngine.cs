@@ -56,10 +56,10 @@ namespace Statiq.Testing
         public TestConfigurationSettings Settings { get; set; } = new TestConfigurationSettings();
 
         /// <inheritdoc />
-        IConfigurationSettings IEngine.Settings => Settings;
+        ISettings IEngine.Settings => Settings;
 
         /// <inheritdoc />
-        IReadOnlyConfigurationSettings IExecutionState.Settings => Settings;
+        IReadOnlySettings IExecutionState.Settings => Settings;
 
         /// <inheritdoc />
         public TestEventCollection Events { get; set; } = new TestEventCollection();
