@@ -1,5 +1,5 @@
 using System.Threading.Tasks;
-using iTunesPodcastFinder.Models;
+using Newtonsoft.Json.Linq;
 using NUnit.Framework;
 using Shouldly;
 using Statiq.Common;
@@ -34,7 +34,7 @@ namespace Statiq.Itunes.Tests
                 TestDocument result = await ExecuteAsync(document, itunes).SingleAsync();
 
                 // Then
-                result[nameof(Podcast.ItunesLink)].ShouldBeOfType<string>().StartsWith(itunesUrl);
+                result[nameof(ItunesOutputKeys.ItunesLink)].ShouldBeOfType<string>().StartsWith(itunesUrl);
             }
 
             /// <summary>
@@ -54,30 +54,79 @@ namespace Statiq.Itunes.Tests
                 TestDocument result = await ExecuteAsync(document, itunes).SingleAsync();
 
                 // Then
-                result[nameof(Podcast.ItunesId)].ShouldBeOfType<string>().Equals(podcastId?.Replace("id", string.Empty));
+                result[nameof(ItunesOutputKeys.ItunesId)].ShouldBeOfType<string>().Equals(podcastId?.Replace("id", string.Empty));
             }
 
             /// <summary>
             /// Sets the metadata from the itunes podcast id with country code and output metadata keys.
             /// </summary>
             [TestCase("127976205", "us", ItunesOutputKeys.ArtWork | ItunesOutputKeys.ItunesId)]
-            public async Task SetsMetadataWithOutputKeys(string podcastId, string country, ItunesOutputKeys outputKeys)
+            public async Task SetsMetadataWithPodcastOutputKeys(string podcastId, string country, ItunesOutputKeys outputKeys)
             {
                 // Given
                 TestDocument document = new TestDocument();
                 IModule itunes = new ReadItunes()
                     .WithPodcastId(podcastId)
                     .ForCountryCode(country)
-                    .WithOutputKeys(outputKeys);
+                    .WithPodcastOutputKeys(outputKeys);
 
                 // When
                 TestDocument result = await ExecuteAsync(document, itunes).SingleAsync();
 
                 // Then
-                result.Keys.ShouldContain(nameof(Podcast.ArtWork));
-                result.Keys.ShouldContain(nameof(Podcast.ItunesId));
-                result.Keys.ShouldNotContain(nameof(Podcast.Name));
-                result[nameof(Podcast.ItunesId)].ShouldBeOfType<string>().Equals(podcastId?.Replace("id", string.Empty));
+                result.Keys.ShouldContain(nameof(ItunesOutputKeys.ArtWork));
+                result.Keys.ShouldContain(nameof(ItunesOutputKeys.ItunesId));
+                result.Keys.ShouldNotContain(nameof(ItunesOutputKeys.Name));
+                result[nameof(ItunesOutputKeys.ItunesId)].ShouldBeOfType<string>().Equals(podcastId?.Replace("id", string.Empty));
+            }
+
+            /// <summary>
+            /// Sets the metadata from the itunes podcast with serialized episodes data.
+            /// </summary>
+            [TestCase("127976205", "us", ItunesOutputKeys.FeedUrl | ItunesOutputKeys.ItunesId, ItunesEpisodeOutputKeys.Editor | ItunesEpisodeOutputKeys.FileUrl)]
+            public async Task SetsMetadataWithEpisodesConvertedToJson(string podcastId, string country, ItunesOutputKeys outputKeys, ItunesEpisodeOutputKeys episodesOutputKeys)
+            {
+                // Given
+                TestDocument document = new TestDocument();
+                IModule itunes = new ReadItunes()
+                    .WithPodcastId(podcastId)
+                    .ForCountryCode(country)
+                    .WithPodcastOutputKeys(outputKeys)
+                    .WithEpisodesOutputKeys(episodesOutputKeys, true);
+
+                // When
+                TestDocument result = await ExecuteAsync(document, itunes).SingleAsync();
+
+                // Then
+                result.Keys.ShouldContain(nameof(ItunesOutputKeys.ItunesId));
+                result.Keys.ShouldNotContain(nameof(ItunesOutputKeys.Name));
+                result.Keys.ShouldContain(nameof(ItunesKeys.Episodes));
+                result[nameof(ItunesOutputKeys.ItunesId)].ShouldBeOfType<string>().Equals(podcastId?.Replace("id", string.Empty));
+                result[nameof(ItunesKeys.Episodes)].ShouldNotBeNull();
+                JToken.Parse(result[nameof(ItunesKeys.Episodes)].ShouldBeOfType<string>());
+            }
+
+            /// <summary>
+            /// Sets the metadata from the itunes podcast serialized to Json format.
+            /// </summary>
+            [TestCase("127976205", "us", ItunesOutputKeys.FeedUrl | ItunesOutputKeys.ItunesId, ItunesEpisodeOutputKeys.Editor | ItunesEpisodeOutputKeys.FileUrl)]
+            public async Task SetsMetadataForPodcastConvertedToJson(string podcastId, string country, ItunesOutputKeys outputKeys, ItunesEpisodeOutputKeys episodesOutputKeys)
+            {
+                // Given
+                TestDocument document = new TestDocument();
+                IModule itunes = new ReadItunes()
+                    .WithPodcastId(podcastId)
+                    .ForCountryCode(country)
+                    .WithPodcastOutputKeys(outputKeys, true)
+                    .WithEpisodesOutputKeys(episodesOutputKeys);
+
+                // When
+                TestDocument result = await ExecuteAsync(document, itunes).SingleAsync();
+
+                // Then
+                result.Keys.ShouldContain(nameof(ItunesKeys.SerializedPodcastData));
+                result[nameof(ItunesKeys.SerializedPodcastData)].ShouldNotBeNull();
+                JToken.Parse(result[nameof(ItunesKeys.SerializedPodcastData)].ShouldBeOfType<string>());
             }
         }
     }

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Dynamic;
 using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
@@ -12,7 +13,7 @@ using Statiq.Common;
 namespace Statiq.Itunes
 {
     /// <summary>
-    /// iTunes metadata output keys.
+    /// iTunes podcast metadata output keys.
     /// </summary>
     [Flags]
     public enum ItunesOutputKeys
@@ -79,6 +80,53 @@ namespace Statiq.Itunes
     }
 
     /// <summary>
+    /// iTunes podcast episode metadata output keys.
+    /// </summary>
+    [Flags]
+    public enum ItunesEpisodeOutputKeys
+    {
+        /// <summary>
+        /// <see cref="PodcastEpisode.Duration"/>.
+        /// </summary>
+        Duration = 1,
+
+        /// <summary>
+        /// <see cref="PodcastEpisode.Editor"/>.
+        /// </summary>
+        Editor = 2,
+
+        /// <summary>
+        /// <see cref="PodcastEpisode.EpisodeNumber"/>.
+        /// </summary>
+        EpisodeNumber = 4,
+
+        /// <summary>
+        /// <see cref="PodcastEpisode.FileUrl"/>.
+        /// </summary>
+        FileUrl = 8,
+
+        /// <summary>
+        /// <see cref="PodcastEpisode.InnerXml"/>.
+        /// </summary>
+        InnerXml = 16,
+
+        /// <summary>
+        /// <see cref="PodcastEpisode.PublishedDate"/>.
+        /// </summary>
+        PublishedDate = 32,
+
+        /// <summary>
+        /// <see cref="PodcastEpisode.Summary"/>.
+        /// </summary>
+        Summary = 64,
+
+        /// <summary>
+        /// <see cref="PodcastEpisode.Title"/>.
+        /// </summary>
+        Title = 128
+    }
+
+    /// <summary>
     /// Outputs metadata for information from iTunes.
     /// </summary>
     /// <remarks>
@@ -97,7 +145,13 @@ namespace Statiq.Itunes
 
         private string _country;
 
-        private ItunesOutputKeys _outputKeys;
+        private bool _podcastToJson;
+
+        private bool _episodesToJson;
+
+        private ItunesOutputKeys _podcastOutputKeys;
+
+        private ItunesEpisodeOutputKeys _episodesOutputKeys;
 
         static ReadItunes()
         {
@@ -113,6 +167,8 @@ namespace Statiq.Itunes
         public ReadItunes()
         {
             _itunes = new PodcastFinder();
+            _podcastToJson = false;
+            _episodesToJson = false;
         }
 
         /// <summary>
@@ -142,13 +198,28 @@ namespace Statiq.Itunes
         }
 
         /// <summary>
-        /// Sets the output metadata keys.
+        /// Sets the output metadata keys for iTunes podcast.
         /// </summary>
-        /// <param name="outputKeys">Output metadata keys. <see cref="ItunesOutputKeys"/>.</param>
+        /// <param name="podcastOutputKeys">Output metadata keys. <see cref="ItunesOutputKeys"/>.</param>
+        /// <param name="toJson">Convert podcast data to json string.</param>
         /// <returns>The current instance.</returns>
-        public ReadItunes WithOutputKeys(ItunesOutputKeys outputKeys)
+        public ReadItunes WithPodcastOutputKeys(ItunesOutputKeys podcastOutputKeys, bool toJson = false)
         {
-            _outputKeys = outputKeys;
+            _podcastOutputKeys = podcastOutputKeys;
+            _podcastToJson = toJson;
+            return this;
+        }
+
+        /// <summary>
+        /// Sets the output metadata keys for iTunes podcast episodes.
+        /// </summary>
+        /// <param name="episodesOutputKeys">Output metadata keys. <see cref="ItunesEpisodeOutputKeys"/>.</param>
+        /// <param name="toJson">Convert collection of episodes data to json string. Ignored if the same parameter setted in WithPodcastOutputKeys extension method.</param>
+        /// <returns>The current instance.</returns>
+        public ReadItunes WithEpisodesOutputKeys(ItunesEpisodeOutputKeys episodesOutputKeys, bool toJson = false)
+        {
+            _episodesOutputKeys = episodesOutputKeys;
+            _episodesToJson = toJson;
             return this;
         }
 
@@ -166,9 +237,7 @@ namespace Statiq.Itunes
 
         private async Task GetPodcastItunesDataAsync(IDocument input, IExecutionContext context, ConcurrentDictionary<string, object> metadata)
         {
-            context.LogInformation($"Getting podcast information for {input.Source}...");
-
-            // Extract the Podcast id and country from itunes podcast Url stored in metadata
+            // Extract the Podcast id and country from itunes podcast Url stored in metadata with key "ItunesLink"
             if (input.ContainsKey(ItunesKeys.ItunesLink) && Uri.TryCreate(input.GetString(ItunesKeys.ItunesLink), UriKind.Absolute, out Uri itunesUrl)
                                                          && itunesUrl.Host.EndsWith("apple.com", StringComparison.OrdinalIgnoreCase)
                                                          && itunesUrl.Segments.Last().StartsWith("id", StringComparison.OrdinalIgnoreCase))
@@ -180,75 +249,223 @@ namespace Statiq.Itunes
             }
             else if (string.IsNullOrWhiteSpace(_podcastId))
             {
-                context.LogWarning($"Could not get podcast id from \"{ItunesKeys.ItunesLink}\" metadata key");
+                context.LogWarning("Could not get podcast id from \"{1}\" metadata key", ItunesKeys.ItunesLink);
                 return;
             }
 
             // Get the podcast data
-            context.LogInformation($"Getting podcast data for id = {_podcastId}");
             try
             {
                 Podcast podcast = await _itunes.GetPodcastAsync(_podcastId.Replace("id", string.Empty), _country ?? "us");
                 if (podcast != null)
                 {
+                    context.LogInformation("Getting podcast data with podcast id = {1}...", podcast.ItunesId);
+
                     // Set the metadata
-                    if (_outputKeys == 0 || _outputKeys.HasFlag(ItunesOutputKeys.ArtWork))
+                    if (_podcastToJson)
                     {
-                        metadata.TryAdd(nameof(podcast.ArtWork), podcast.ArtWork);
+                        metadata.TryAdd(nameof(ItunesKeys.SerializedPodcastData), Newtonsoft.Json.JsonConvert.SerializeObject(await GetPodcastDataAsync(context, podcast)));
                     }
-                    if (_outputKeys == 0 || _outputKeys.HasFlag(ItunesOutputKeys.EpisodesCount))
+                    else
                     {
-                        metadata.TryAdd(nameof(podcast.EpisodesCount), podcast.EpisodesCount);
-                    }
-                    if (_outputKeys == 0 || _outputKeys.HasFlag(ItunesOutputKeys.ReleaseDate))
-                    {
-                        metadata.TryAdd(nameof(podcast.ReleaseDate), podcast.ReleaseDate);
-                    }
-                    if (_outputKeys == 0 || _outputKeys.HasFlag(ItunesOutputKeys.Editor))
-                    {
-                        metadata.TryAdd(nameof(podcast.Editor), podcast.Editor);
-                    }
-                    if (_outputKeys == 0 || _outputKeys.HasFlag(ItunesOutputKeys.FeedUrl))
-                    {
-                        metadata.TryAdd(nameof(podcast.FeedUrl), podcast.FeedUrl);
-                    }
-                    if (_outputKeys == 0 || _outputKeys.HasFlag(ItunesOutputKeys.Genre))
-                    {
-                        metadata.TryAdd(nameof(podcast.Genre), podcast.Genre);
-                    }
-                    if (_outputKeys == 0 || _outputKeys.HasFlag(ItunesOutputKeys.ItunesLink))
-                    {
-                        metadata.TryAdd(nameof(podcast.ItunesLink), podcast.ItunesLink);
-                    }
-                    if (_outputKeys == 0 || _outputKeys.HasFlag(ItunesOutputKeys.InnerXml))
-                    {
-                        metadata.TryAdd(nameof(podcast.InnerXml), podcast.InnerXml);
-                    }
-                    if (_outputKeys == 0 || _outputKeys.HasFlag(ItunesOutputKeys.Name))
-                    {
-                        metadata.TryAdd(nameof(podcast.Name), podcast.Name);
-                    }
-                    if (_outputKeys == 0 || _outputKeys.HasFlag(ItunesOutputKeys.Summary))
-                    {
-                        metadata.TryAdd(nameof(podcast.Summary), podcast.Summary);
-                    }
-                    if (_outputKeys == 0 || _outputKeys.HasFlag(ItunesOutputKeys.FeedType))
-                    {
-                        metadata.TryAdd(nameof(podcast.FeedType), podcast.FeedType);
-                    }
-                    if (_outputKeys == 0 || _outputKeys.HasFlag(ItunesOutputKeys.ItunesId))
-                    {
-                        metadata.TryAdd(nameof(podcast.ItunesId), podcast.ItunesId);
+                        if (_podcastOutputKeys == 0 || _podcastOutputKeys.HasFlag(ItunesOutputKeys.ArtWork))
+                        {
+                            metadata.TryAdd(nameof(ItunesOutputKeys.ArtWork), podcast.ArtWork);
+                        }
+                        if (_podcastOutputKeys == 0 || _podcastOutputKeys.HasFlag(ItunesOutputKeys.EpisodesCount))
+                        {
+                            metadata.TryAdd(nameof(ItunesOutputKeys.EpisodesCount), podcast.EpisodesCount);
+                        }
+                        if (_podcastOutputKeys == 0 || _podcastOutputKeys.HasFlag(ItunesOutputKeys.ReleaseDate))
+                        {
+                            metadata.TryAdd(nameof(ItunesOutputKeys.ReleaseDate), podcast.ReleaseDate);
+                        }
+                        if (_podcastOutputKeys == 0 || _podcastOutputKeys.HasFlag(ItunesOutputKeys.Editor))
+                        {
+                            metadata.TryAdd(nameof(ItunesOutputKeys.Editor), podcast.Editor);
+                        }
+                        if (_podcastOutputKeys == 0 || _podcastOutputKeys.HasFlag(ItunesOutputKeys.FeedUrl))
+                        {
+                            metadata.TryAdd(nameof(ItunesOutputKeys.FeedUrl), podcast.FeedUrl);
+                            if (!string.IsNullOrWhiteSpace(podcast.FeedUrl) && _episodesOutputKeys != 0)
+                            {
+                                PodcastRequestResult episodes = await _itunes.GetPodcastEpisodesAsync(podcast.FeedUrl);
+                                if (episodes?.Episodes?.Any() == true)
+                                {
+                                    if (_episodesToJson)
+                                    {
+                                        metadata.TryAdd(nameof(ItunesKeys.Episodes), Newtonsoft.Json.JsonConvert.SerializeObject(GetPodcastEpisodesData(context, episodes.Episodes)));
+                                    }
+                                    else
+                                    {
+                                        metadata.TryAdd(nameof(ItunesKeys.Episodes), GetPodcastEpisodesData(context, episodes.Episodes));
+                                    }
+                                }
+                                else
+                                {
+                                    context.LogWarning("Could not get podcast episodes data for {1} = {2}", nameof(ItunesOutputKeys.FeedUrl), podcast.FeedUrl);
+                                }
+                            }
+                        }
+                        else if (_episodesOutputKeys != 0)
+                        {
+                            context.LogWarning("Could not get podcast episodes data without setting \"{1}\" podcast output metadata key", nameof(ItunesOutputKeys.FeedUrl));
+                        }
+                        if (_podcastOutputKeys == 0 || _podcastOutputKeys.HasFlag(ItunesOutputKeys.Genre))
+                        {
+                            metadata.TryAdd(nameof(ItunesOutputKeys.Genre), podcast.Genre);
+                        }
+                        if (_podcastOutputKeys == 0 || _podcastOutputKeys.HasFlag(ItunesOutputKeys.ItunesLink))
+                        {
+                            metadata.TryAdd(nameof(ItunesOutputKeys.ItunesLink), podcast.ItunesLink);
+                        }
+                        if (_podcastOutputKeys == 0 || _podcastOutputKeys.HasFlag(ItunesOutputKeys.InnerXml))
+                        {
+                            metadata.TryAdd(nameof(ItunesOutputKeys.InnerXml), podcast.InnerXml);
+                        }
+                        if (_podcastOutputKeys == 0 || _podcastOutputKeys.HasFlag(ItunesOutputKeys.Name))
+                        {
+                            metadata.TryAdd(nameof(ItunesOutputKeys.Name), podcast.Name);
+                        }
+                        if (_podcastOutputKeys == 0 || _podcastOutputKeys.HasFlag(ItunesOutputKeys.Summary))
+                        {
+                            metadata.TryAdd(nameof(ItunesOutputKeys.Summary), podcast.Summary);
+                        }
+                        if (_podcastOutputKeys == 0 || _podcastOutputKeys.HasFlag(ItunesOutputKeys.FeedType))
+                        {
+                            metadata.TryAdd(nameof(ItunesOutputKeys.FeedType), podcast.FeedType);
+                        }
+                        if (_podcastOutputKeys == 0 || _podcastOutputKeys.HasFlag(ItunesOutputKeys.ItunesId))
+                        {
+                            metadata.TryAdd(nameof(ItunesOutputKeys.ItunesId), podcast.ItunesId);
+                        }
                     }
                 }
                 else
                 {
-                    context.LogWarning($"Could not get podcast data for id = {_podcastId}");
+                    context.LogWarning("Could not get podcast data for id = {1}", _podcastId);
                 }
             }
             catch (Exception ex)
             {
-                context.LogError($"Could not get podcast data for id = {_podcastId}: {ex.Message}");
+                context.LogError("Could not get podcast data for id = {1}: {2}", _podcastId, ex.Message);
+            }
+        }
+
+        private async Task<dynamic> GetPodcastDataAsync(IExecutionContext context, Podcast podcast)
+        {
+            dynamic podcastData = new ExpandoObject();
+
+            if (_podcastOutputKeys == 0 || _podcastOutputKeys.HasFlag(ItunesOutputKeys.ArtWork))
+            {
+                podcastData.ArtWork = podcast.ArtWork;
+            }
+            if (_podcastOutputKeys == 0 || _podcastOutputKeys.HasFlag(ItunesOutputKeys.EpisodesCount))
+            {
+                podcastData.EpisodesCount = podcast.EpisodesCount;
+            }
+            if (_podcastOutputKeys == 0 || _podcastOutputKeys.HasFlag(ItunesOutputKeys.ReleaseDate))
+            {
+                podcastData.ReleaseDate = podcast.ReleaseDate;
+            }
+            if (_podcastOutputKeys == 0 || _podcastOutputKeys.HasFlag(ItunesOutputKeys.Editor))
+            {
+                podcastData.Editor = podcast.Editor;
+            }
+            if (_podcastOutputKeys == 0 || _podcastOutputKeys.HasFlag(ItunesOutputKeys.FeedUrl))
+            {
+                podcastData.FeedUrl = podcast.FeedUrl;
+                if (!string.IsNullOrWhiteSpace(podcast.FeedUrl) && _episodesOutputKeys != 0)
+                {
+                    PodcastRequestResult episodes = await _itunes.GetPodcastEpisodesAsync(podcast.FeedUrl);
+                    if (episodes?.Episodes?.Any() == true)
+                    {
+                        podcastData.Episodes = GetPodcastEpisodesData(context, episodes.Episodes);
+                    }
+                    else
+                    {
+                        context.LogWarning("Could not get podcast episodes data for {1} = {2}", nameof(ItunesOutputKeys.FeedUrl), podcast.FeedUrl);
+                    }
+                }
+            }
+            else if (_episodesOutputKeys != 0)
+            {
+                context.LogWarning("Could not get podcast episodes data without setting \"{1}\" podcast output metadata key", nameof(ItunesOutputKeys.FeedUrl));
+            }
+            if (_podcastOutputKeys == 0 || _podcastOutputKeys.HasFlag(ItunesOutputKeys.Genre))
+            {
+                podcastData.Genre = podcast.Genre;
+            }
+            if (_podcastOutputKeys == 0 || _podcastOutputKeys.HasFlag(ItunesOutputKeys.ItunesLink))
+            {
+                podcastData.ItunesLink = podcast.ItunesLink;
+            }
+            if (_podcastOutputKeys == 0 || _podcastOutputKeys.HasFlag(ItunesOutputKeys.InnerXml))
+            {
+                podcastData.InnerXml = podcast.InnerXml;
+            }
+            if (_podcastOutputKeys == 0 || _podcastOutputKeys.HasFlag(ItunesOutputKeys.Name))
+            {
+                podcastData.Name = podcast.Name;
+            }
+            if (_podcastOutputKeys == 0 || _podcastOutputKeys.HasFlag(ItunesOutputKeys.Summary))
+            {
+                podcastData.Summary = podcast.Summary;
+            }
+            if (_podcastOutputKeys == 0 || _podcastOutputKeys.HasFlag(ItunesOutputKeys.FeedType))
+            {
+                podcastData.FeedType = podcast.FeedType;
+            }
+            if (_podcastOutputKeys == 0 || _podcastOutputKeys.HasFlag(ItunesOutputKeys.ItunesId))
+            {
+                podcastData.ItunesId = podcast.ItunesId;
+            }
+
+            return podcastData;
+        }
+
+        private IEnumerable<dynamic> GetPodcastEpisodesData(IExecutionContext context, IEnumerable<PodcastEpisode> episodes)
+        {
+            foreach (PodcastEpisode episode in episodes)
+            {
+                dynamic episodeData = new ExpandoObject();
+
+                context.LogDebug("Getting podcast episode data with {1} = \"{2}\"...", nameof(episode.Title), episode.Title);
+
+                if (_episodesOutputKeys.HasFlag(ItunesEpisodeOutputKeys.Editor))
+                {
+                    episodeData.Editor = episode.Editor;
+                }
+                if (_episodesOutputKeys.HasFlag(ItunesEpisodeOutputKeys.EpisodeNumber))
+                {
+                    episodeData.EpisodeNumber = episode.EpisodeNumber;
+                }
+                if (_episodesOutputKeys.HasFlag(ItunesEpisodeOutputKeys.FileUrl))
+                {
+                    episodeData.FileUrl = episode.FileUrl;
+                }
+                if (_episodesOutputKeys.HasFlag(ItunesEpisodeOutputKeys.InnerXml))
+                {
+                    episodeData.InnerXml = episode.InnerXml;
+                }
+                if (_episodesOutputKeys.HasFlag(ItunesEpisodeOutputKeys.PublishedDate))
+                {
+                    episodeData.PublishedDate = episode.PublishedDate;
+                }
+                if (_episodesOutputKeys.HasFlag(ItunesEpisodeOutputKeys.Summary))
+                {
+                    episodeData.Summary = episode.Summary;
+                }
+                if (_episodesOutputKeys.HasFlag(ItunesEpisodeOutputKeys.Title))
+                {
+                    episodeData.Title = episode.Title;
+                }
+                if (_episodesOutputKeys.HasFlag(ItunesEpisodeOutputKeys.Duration))
+                {
+                    episodeData.Duration = episode.Duration;
+                }
+
+                yield return episodeData;
             }
         }
     }

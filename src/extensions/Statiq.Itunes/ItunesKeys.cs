@@ -10,5 +10,17 @@
         /// </summary>
         /// <type><see cref="string"/></type>
         public const string ItunesLink = nameof(ItunesLink);
+
+        /// <summary>
+        /// The default metadata key for setting the iTunes podcast data in serialized format.
+        /// </summary>
+        /// <type><see cref="string"/></type>
+        public const string SerializedPodcastData = nameof(SerializedPodcastData);
+
+        /// <summary>
+        /// The default metadata key for setting the collection of iTunes podcast episodes.
+        /// </summary>
+        /// <type><see cref="string"/></type>
+        public const string Episodes = nameof(Episodes);
     }
 }
