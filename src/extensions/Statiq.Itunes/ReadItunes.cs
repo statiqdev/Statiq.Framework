@@ -2,6 +2,7 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Http;
 using System.Threading.Tasks;
 using iTunesPodcastFinder;
 using iTunesPodcastFinder.Models;
@@ -80,6 +81,13 @@ namespace Statiq.Itunes
     /// <summary>
     /// Outputs metadata for information from iTunes.
     /// </summary>
+    /// <remarks>
+    /// This modules uses the Luandersonn.iTunesPodcastFinder library and associated types to submit requests to iTunes. Because
+    /// of the large number of different kinds of requests, this module does not attempt to provide a fully abstract wrapper
+    /// around the Luandersonn.iTunesPodcastFinder library. Instead, it simplifies the housekeeping involved in setting up an
+    /// Luandersonn.iTunesPodcastFinder client and requires you to provide podcast id or Url for only one function that fetch
+    /// podcast data.
+    /// </remarks>
     /// <category>Metadata</category>
     public class ReadItunes : ParallelModule
     {
@@ -90,6 +98,14 @@ namespace Statiq.Itunes
         private string _country;
 
         private ItunesOutputKeys _outputKeys;
+
+        static ReadItunes()
+        {
+            PodcastFinder.HttpClient = new HttpClient(new HttpClientHandler
+            {
+                ServerCertificateCustomValidationCallback = (sender, cert, chain, sslPolicyErrors) => true
+            });
+        }
 
         /// <summary>
         /// Creates a connection to the iTunes API.
