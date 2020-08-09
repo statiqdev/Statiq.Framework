@@ -404,6 +404,11 @@ namespace Statiq.Feeds
         /// <inheritdoc />
         protected override async Task<IEnumerable<IDocument>> ExecuteContextAsync(IExecutionContext context)
         {
+            if (context == null)
+            {
+                throw new ArgumentException("Argument is null", nameof(context));
+            }
+
             // Get the feed
             Feed feed = new Feed
             {

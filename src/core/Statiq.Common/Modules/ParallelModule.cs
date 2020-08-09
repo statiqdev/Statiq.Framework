@@ -14,9 +14,16 @@ namespace Statiq.Common
         public bool Parallel { get; set; } = true;
 
         /// <inheritdoc />
-        protected sealed override Task<IEnumerable<IDocument>> ExecuteContextAsync(IExecutionContext context) =>
-            Parallel && !context.SerialExecution
+        protected sealed override Task<IEnumerable<IDocument>> ExecuteContextAsync(IExecutionContext context)
+        {
+            if (context == null)
+            {
+                throw new ArgumentException("Argument is null", nameof(context));
+            }
+
+            return Parallel && !context.SerialExecution
                 ? context.Inputs.ParallelSelectManyAsync(input => ExecuteInputFuncAsync(input, context, ExecuteInputAsync), context.CancellationToken)
                 : base.ExecuteContextAsync(context);
+        }
     }
 }

@@ -15,7 +15,7 @@ namespace Statiq.Common
 
         /// <inheritdoc />
         protected sealed override Task<IEnumerable<IDocument>> ExecuteContextAsync(IExecutionContext context) =>
-            Task.FromResult(ExecuteInput(context));
+            Task.FromResult(ExecuteInput(context ?? throw new ArgumentException("Argument is null", nameof(context))));
 
         /// <inheritdoc />
         // Unused, prevent overriding in derived classes

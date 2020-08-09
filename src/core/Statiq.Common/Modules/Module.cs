@@ -120,6 +120,12 @@ namespace Statiq.Common
         protected virtual async Task<IEnumerable<IDocument>> ExecuteContextAsync(IExecutionContext context)
         {
             IEnumerable<IDocument> aggregateResults = null;
+
+            if (context == null)
+            {
+                throw new ArgumentException("Argument is null", nameof(context));
+            }
+
             foreach (IDocument input in context.Inputs)
             {
                 IEnumerable<IDocument> results = await ExecuteInputFuncAsync(input, context, ExecuteInputAsync);

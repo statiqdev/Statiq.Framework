@@ -126,6 +126,11 @@ namespace Statiq.Sass
 
         protected override async Task<IEnumerable<IDocument>> ExecuteInputAsync(IDocument input, IExecutionContext context)
         {
+            if (context == null)
+            {
+                throw new ArgumentException("Argument is null", nameof(context));
+            }
+
             context.LogDebug($"Processing Sass for {input.ToSafeDisplayString()}");
 
             NormalizedPath inputPath = await _inputPath.GetValueAsync(input, context);

@@ -137,6 +137,11 @@ namespace Statiq.Html
 
         protected override async Task<IEnumerable<Common.IDocument>> ExecuteInputAsync(Common.IDocument input, IExecutionContext context)
         {
+            if (context == null)
+            {
+                throw new ArgumentException("Argument is null", nameof(context));
+            }
+
             try
             {
                 // Get the links and HTML decode the keys (if they're encoded) since the text nodes are decoded
