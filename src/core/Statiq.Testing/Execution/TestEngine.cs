@@ -53,7 +53,7 @@ namespace Statiq.Testing
         IReadOnlyApplicationState IExecutionState.ApplicationState => ApplicationState;
 
         /// <inheritdoc />
-        public TestConfigurationSettings Settings { get; set; } = new TestConfigurationSettings();
+        public Settings Settings { get; set; } = new Settings();
 
         /// <inheritdoc />
         ISettings IEngine.Settings => Settings;

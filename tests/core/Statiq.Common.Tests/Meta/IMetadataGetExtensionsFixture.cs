@@ -126,7 +126,7 @@ namespace Statiq.Common.Tests.Meta
             public void SettingsNotIncluded()
             {
                 // Given
-                TestConfigurationSettings settings = new TestConfigurationSettings
+                Common.Settings settings = new Common.Settings
                 {
                     { "A", "a" }
                 };

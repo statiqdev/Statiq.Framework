@@ -6,9 +6,8 @@ using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Primitives;
-using Statiq.Common;
 
-namespace Statiq.Core
+namespace Statiq.Common
 {
     public class Settings : ISettings, IConfiguration
     {
@@ -25,7 +24,7 @@ namespace Statiq.Core
         {
             // Copy over the configuration, resolving nested sections and arrays
             _settings = new ConcurrentDictionary<string, object>(
-                BuildConfigurationObject(configuration, true) as IDictionary<string, object>,
+                BuildConfigurationObject(configuration, null) as IDictionary<string, object>,
                 StringComparer.OrdinalIgnoreCase);
         }
 
@@ -41,7 +40,7 @@ namespace Statiq.Core
                         return new KeyValuePair<string, object>(setting.Key, metadataValue);
                     }
 
-                    if (setting.Value is IConfigurationSettings configurationSettings)
+                    if (setting.Value is ISettingsConfiguration configurationSettings)
                     {
                         configurationSettings.ResolveScriptMetadataValues(setting.Key, executionState);
                     }
@@ -51,6 +50,37 @@ namespace Statiq.Core
         }
 
         public Settings WithExecutionState(IExecutionState executionState) => _executionState is object ? this : new Settings(executionState, _settings);
+
+        // Internal for testing, if path is null this is the root dictionary
+        internal static object BuildConfigurationObject(IConfiguration configuration, string path)
+        {
+            // Build up both a dictionary and a list until we know it's not a list
+            SettingsConfigurationDictionary dictionary = new SettingsConfigurationDictionary(path);
+            SettingsConfigurationList list = path is null ? null : new SettingsConfigurationList(path);
+            int index = 0;
+            foreach (IConfigurationSection section in configuration.GetChildren())
+            {
+                // Are we continuing the list?
+                if (list != null && (!int.TryParse(section.Key, out int indexKey) || indexKey != index++))
+                {
+                    list = null;
+                }
+
+                if (section.Value is null)
+                {
+                    object value = BuildConfigurationObject(section, section.Path);
+                    list?.Add(value);
+                    dictionary[section.Key] = value;
+                }
+                else
+                {
+                    list?.Add(section.Value);
+                    dictionary.Add(section.Key, section.Value);
+                }
+            }
+
+            return (object)list ?? dictionary;
+        }
 
         public bool ContainsKey(string key) => _settings.ContainsKey(key);
 
@@ -155,21 +185,21 @@ namespace Statiq.Core
 
         IConfigurationSection IConfiguration.GetSection(string key)
         {
-            int separator = key.IndexOf(':');
-            string rootKey = separator >= 0 ? key[.. separator] : key;
+            int firstSeparator = key.IndexOf(':');
+            string rootKey = firstSeparator >= 0 ? key[..firstSeparator] : key;
             if (TryGetRaw(rootKey, out object rawValue))
             {
                 IConfigurationSection section = GetConfigurationSection(rootKey, rawValue);
-                if (separator >= 0)
+                if (firstSeparator >= 0)
                 {
                     // This is a nested key
-                    section = section.GetSection(key[(separator + 1) ..]);
+                    section = section.GetSection(key[(firstSeparator + 1) ..]);
                 }
                 return section;
             }
 
             // This isn't a valid root key, so return a blank section
-            return new SettingsConfigurationSection(key[key.LastIndexOf(':') ..], key, default);
+            return new SettingsConfigurationSection(key[(key.LastIndexOf(':') + 1) ..], key, default);
         }
 
         IEnumerable<IConfigurationSection> IConfiguration.GetChildren() =>
@@ -184,138 +214,5 @@ namespace Statiq.Core
                         TypeHelper.TryExpandAndConvert(key, rawValue, this, out string value) ? value : default);
 
         IChangeToken IConfiguration.GetReloadToken() => SettingsReloadToken.Instance;
-
-        // TODO: Move all nested classes out
-        /// <summary>
-        /// A single setting expressed as a configuration section.
-        /// </summary>
-        internal class SettingsConfigurationSection : IConfigurationSection
-        {
-            private readonly string _value;
-
-            public SettingsConfigurationSection(string key, string path, string value)
-            {
-                Key = key.ThrowIfNull(nameof(key));
-                Path = path.ThrowIfNull(nameof(path));
-                _value = value.ThrowIfNull(nameof(value));
-            }
-
-            public string this[string key]
-            {
-                get => default;
-                set => throw new NotSupportedException();
-            }
-
-            public string Key { get; }
-
-            public string Path { get; }
-
-            public string Value
-            {
-                get => _value;
-                set => throw new NotSupportedException();
-            }
-
-            public IEnumerable<IConfigurationSection> GetChildren() => Array.Empty<IConfigurationSection>();
-
-            public IChangeToken GetReloadToken() => SettingsReloadToken.Instance;
-
-            public IConfigurationSection GetSection(string key) =>
-                new SettingsConfigurationSection(key[key.LastIndexOf(':') ..], $"{Path}:{key}", default);
-        }
-
-        internal sealed class SettingsReloadToken : IChangeToken
-        {
-#pragma warning disable SA1401 // Fields must be private
-            /// <summary>
-            /// A singleton instance of the <see cref="EmptyDisposable"/>.
-            /// </summary>
-            public static SettingsReloadToken Instance = new SettingsReloadToken();
-#pragma warning restore SA1401 // Fields must be private
-
-            private SettingsReloadToken()
-            {
-            }
-
-            public bool HasChanged => false;
-
-            public bool ActiveChangeCallbacks => false;
-
-            public IDisposable RegisterChangeCallback(Action<object> callback, object state) => EmptyDisposable.Instance;
-        }
-
-        // Used to internally store settings that came from the IConfiguration so we can scan for metadata values when applying the execution state
-
-        // Internal for testing
-        internal static object BuildConfigurationObject(IConfiguration configuration, bool forceDictionary)
-        {
-            // Build up both a dictionary and a list until we know it's not a list
-            ConfigurationDictionary dictionary = new ConfigurationDictionary();
-            ConfigurationList list = forceDictionary ? null : new ConfigurationList();
-            int index = 0;
-            foreach (IConfigurationSection section in configuration.GetChildren())
-            {
-                // Are we continuing the list?
-                if (list != null && (!int.TryParse(section.Key, out int indexKey) || indexKey != index++))
-                {
-                    list = null;
-                }
-
-                if (section.Value is null)
-                {
-                    object value = BuildConfigurationObject(section, false);
-                    list?.Add(value);
-                    dictionary[section.Key] = value;
-                }
-                else
-                {
-                    list?.Add(section.Value);
-                    dictionary.Add(section.Key, section.Value);
-                }
-            }
-
-            return (object)list ?? dictionary;
-        }
-
-        internal interface IConfigurationSettings : IConfigurationSection
-        {
-            public void ResolveScriptMetadataValues(string key, IExecutionState executionState);
-        }
-
-        internal class ConfigurationList : List<object>, IConfigurationSettings
-        {
-            public void ResolveScriptMetadataValues(string key, IExecutionState executionState)
-            {
-                for (int c = 0; c < Count; c++)
-                {
-                    if (ScriptMetadataValue.TryGetScriptMetadataValue(key, this[c], executionState, out ScriptMetadataValue metadataValue))
-                    {
-                        this[c] = metadataValue;
-                    }
-                    else if (this[c] is Settings.IConfigurationSettings configurationSettings)
-                    {
-                        configurationSettings.ResolveScriptMetadataValues(key, executionState);
-                    }
-                }
-            }
-        }
-
-        internal class ConfigurationDictionary : MetadataDictionary, IConfigurationSettings
-        {
-            public void ResolveScriptMetadataValues(string key, IExecutionState executionState)
-            {
-                foreach (KeyValuePair<string, object> item in this)
-                {
-                    if (ScriptMetadataValue.TryGetScriptMetadataValue(key, item.Value, executionState, out ScriptMetadataValue metadataValue))
-                    {
-                        this[item.Key] = metadataValue;
-                    }
-                    else if (item.Value is Settings.IConfigurationSettings configurationSettings)
-                    {
-                        configurationSettings.ResolveScriptMetadataValues(key, executionState);
-                    }
-                }
-            }
-        }
     }
 }

@@ -63,7 +63,7 @@ namespace Statiq.Core.Tests.Scripting
                 context.ScriptHelper = new ScriptHelper(context);
                 ScriptMetadataValue.TryGetScriptMetadataValue("Foo", "=> GetString(\"A\")", context, out ScriptMetadataValue fooScriptMetadataValue);
                 ScriptMetadataValue.TryGetScriptMetadataValue("Bar", "=> WithoutSettings().GetString(\"A\")", context, out ScriptMetadataValue barScriptMetadataValue);
-                TestConfigurationSettings settings = new TestConfigurationSettings
+                Settings settings = new Settings
                 {
                     { "A", "a" }
                 };

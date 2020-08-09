@@ -78,7 +78,7 @@ namespace Statiq.Testing
         IServiceProvider IExecutionState.Services => Services;
 
         /// <inheritdoc />
-        public TestConfigurationSettings Settings
+        public Settings Settings
         {
             get => Engine.Settings;
             set => Engine.Settings = value;

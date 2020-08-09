@@ -15,7 +15,7 @@ namespace Statiq.App
             _categoryName = categoryName;
         }
 
-        public IDisposable BeginScope<TState>(TState state) => new EmptyDisposable();
+        public IDisposable BeginScope<TState>(TState state) => EmptyDisposable.Instance;
 
         public bool IsEnabled(LogLevel logLevel) => true;
 

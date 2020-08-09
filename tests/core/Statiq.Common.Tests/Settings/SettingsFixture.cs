@@ -1,35 +1,72 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
 using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 using NUnit.Framework;
 using Shouldly;
-using Statiq.Common;
+using Statiq.Core;
 using Statiq.Testing;
 
-namespace Statiq.Core.Tests.Execution
+namespace Statiq.Common.Tests.Settings
 {
     [TestFixture]
-    public class ConfigurationSettingsFixture : BaseFixture
+    public class SettingsFixture : BaseFixture
     {
-        public class TryGetValueTests : ConfigurationSettingsFixture
+        public class BuildConfigurationObjectTests : SettingsFixture
+        {
+            [Test]
+            public void ConstructsObjectGraph()
+            {
+                // Given
+                IConfigurationRoot configuration = GetConfiguration();
+
+                // When
+                object graph = Common.Settings.BuildConfigurationObject(configuration, null);
+
+                // Then
+                IDictionary<string, object> root = graph.ShouldBeAssignableTo<IDictionary<string, object>>();
+                root.ShouldContainKeyAndValue("key0", "value0");
+                root.ShouldContainKey("section0");
+                root.ShouldContainKey("section1");
+                root.ShouldContainKey("section2");
+                IDictionary<string, object> dictionary = root["section0"].ShouldBeAssignableTo<IDictionary<string, object>>();
+                dictionary.ShouldContainKeyAndValue("key1", "value1");
+                dictionary.ShouldContainKey("key2");
+                IList<object> list = dictionary["key2"].ShouldBeAssignableTo<IList<object>>();
+                list.Count.ShouldBe(3);
+                list[0].ShouldBe("arr1");
+                list[1].ShouldBe("arr2");
+                dictionary = list[2].ShouldBeAssignableTo<IDictionary<string, object>>();
+                dictionary.ShouldContainKeyAndValue("foo1", "bar1");
+                dictionary.ShouldContainKeyAndValue("foo2", "bar2");
+                dictionary = root["section1"].ShouldBeAssignableTo<IDictionary<string, object>>();
+                dictionary.ShouldContainKeyAndValue("key3", "3");
+                dictionary.ShouldContainKeyAndValue("key4", "value4");
+                dictionary = root["section2"].ShouldBeAssignableTo<IDictionary<string, object>>();
+                dictionary.ShouldContainKey("subsection0");
+                IDictionary<string, object> subsection = dictionary["subsection0"].ShouldBeAssignableTo<IDictionary<string, object>>();
+                subsection.ShouldContainKeyAndValue("key5", "value5");
+                subsection.ShouldContainKeyAndValue("key6", "value6");
+                dictionary.ShouldContainKey("subsection1");
+                subsection = dictionary["subsection1"].ShouldBeAssignableTo<IDictionary<string, object>>();
+                subsection.ShouldContainKeyAndValue("key7", "value7");
+                subsection.ShouldContainKeyAndValue("key8", "value8");
+            }
+        }
+
+        public class TryGetValueTests : SettingsFixture
         {
             [Test]
             public void GetsNormalValue()
             {
                 // Given
-                IConfiguration configuration = GetConfiguration(@"
+                IConfigurationRoot configuration = GetConfiguration(@"
 {
   ""foo"": ""ABC {1+2} XYZ""
 }");
                 TestExecutionContext context = new TestExecutionContext();
                 context.ScriptHelper = new ScriptHelper(context);
-                ConfigurationSettings settings = new ConfigurationSettings(context, configuration, null);
+                Common.Settings settings = new Common.Settings(configuration).WithExecutionState(context);
 
                 // When
                 bool result = settings.TryGetValue("foo", out object value);
@@ -40,20 +77,19 @@ namespace Statiq.Core.Tests.Execution
             }
 
             [Test]
-            public void GetsOVerridenValue()
+            public void GetsOverridenValue()
             {
                 // Given
-                IConfiguration configuration = GetConfiguration(@"
+                IConfigurationRoot configuration = GetConfiguration(@"
 {
   ""foo"": ""ABC {1+2} XYZ""
 }");
                 TestExecutionContext context = new TestExecutionContext();
                 context.ScriptHelper = new ScriptHelper(context);
-                Dictionary<string, object> overrides = new Dictionary<string, object>
+                Common.Settings settings = new Common.Settings(configuration)
                 {
                     { "foo", 123 }
-                };
-                ConfigurationSettings settings = new ConfigurationSettings(context, configuration, overrides);
+                }.WithExecutionState(context);
 
                 // When
                 bool result = settings.TryGetValue("foo", out object value);
@@ -67,13 +103,13 @@ namespace Statiq.Core.Tests.Execution
             public void EvaluatesExpression()
             {
                 // Given
-                IConfiguration configuration = GetConfiguration(@"
+                IConfigurationRoot configuration = GetConfiguration(@"
 {
   ""foo"": ""=> $\""ABC {1+2} XYZ\""""
 }");
                 TestExecutionContext context = new TestExecutionContext();
                 context.ScriptHelper = new ScriptHelper(context);
-                ConfigurationSettings settings = new ConfigurationSettings(context, configuration, null);
+                Common.Settings settings = new Common.Settings(configuration).WithExecutionState(context);
 
                 // When
                 bool result = settings.TryGetValue("foo", out object value);
@@ -87,13 +123,13 @@ namespace Statiq.Core.Tests.Execution
             public void EvaluatesReturnStatement()
             {
                 // Given
-                IConfiguration configuration = GetConfiguration(@"
+                IConfigurationRoot configuration = GetConfiguration(@"
 {
   ""foo"": ""=> return $\""ABC {1+2} XYZ\"";""
 }");
                 TestExecutionContext context = new TestExecutionContext();
                 context.ScriptHelper = new ScriptHelper(context);
-                ConfigurationSettings settings = new ConfigurationSettings(context, configuration, null);
+                Common.Settings settings = new Common.Settings(configuration).WithExecutionState(context);
 
                 // When
                 bool result = settings.TryGetValue("foo", out object value);
@@ -107,13 +143,13 @@ namespace Statiq.Core.Tests.Execution
             public void EvaluatesMultipleStatements()
             {
                 // Given
-                IConfiguration configuration = GetConfiguration(@"
+                IConfigurationRoot configuration = GetConfiguration(@"
 {
   ""foo"": ""=> { int x = 1 + 2; return $\""ABC {x} XYZ\""; }""
 }");
                 TestExecutionContext context = new TestExecutionContext();
                 context.ScriptHelper = new ScriptHelper(context);
-                ConfigurationSettings settings = new ConfigurationSettings(context, configuration, null);
+                Common.Settings settings = new Common.Settings(configuration).WithExecutionState(context);
 
                 // When
                 bool result = settings.TryGetValue("foo", out object value);
@@ -127,13 +163,13 @@ namespace Statiq.Core.Tests.Execution
             public void EvaluatesMultipleStatementsWithoutBraces()
             {
                 // Given
-                IConfiguration configuration = GetConfiguration(@"
+                IConfigurationRoot configuration = GetConfiguration(@"
 {
   ""foo"": ""=> int x = 1 + 2; return $\""ABC {x} XYZ\"";""
 }");
                 TestExecutionContext context = new TestExecutionContext();
                 context.ScriptHelper = new ScriptHelper(context);
-                ConfigurationSettings settings = new ConfigurationSettings(context, configuration, null);
+                Common.Settings settings = new Common.Settings(configuration).WithExecutionState(context);
 
                 // When
                 bool result = settings.TryGetValue("foo", out object value);
@@ -147,13 +183,13 @@ namespace Statiq.Core.Tests.Execution
             public void EvaluatesIntExpression()
             {
                 // Given
-                IConfiguration configuration = GetConfiguration(@"
+                IConfigurationRoot configuration = GetConfiguration(@"
 {
   ""foo"": ""=> 1 + 2""
 }");
                 TestExecutionContext context = new TestExecutionContext();
                 context.ScriptHelper = new ScriptHelper(context);
-                ConfigurationSettings settings = new ConfigurationSettings(context, configuration, null);
+                Common.Settings settings = new Common.Settings(configuration).WithExecutionState(context);
 
                 // When
                 bool result = settings.TryGetValue("foo", out object value);
@@ -167,7 +203,7 @@ namespace Statiq.Core.Tests.Execution
             public void EvaluatesExpressionInNestedSection()
             {
                 // Given
-                IConfiguration configuration = GetConfiguration(@"
+                IConfigurationRoot configuration = GetConfiguration(@"
 {
   ""section0"": {
     ""foo"": ""=> $\""ABC {1+2} XYZ\""""
@@ -175,7 +211,7 @@ namespace Statiq.Core.Tests.Execution
 }");
                 TestExecutionContext context = new TestExecutionContext();
                 context.ScriptHelper = new ScriptHelper(context);
-                ConfigurationSettings settings = new ConfigurationSettings(context, configuration, null);
+                Common.Settings settings = new Common.Settings(configuration).WithExecutionState(context);
 
                 // When
                 bool result = settings.TryGetValue("section0:foo", out object value);
@@ -189,7 +225,7 @@ namespace Statiq.Core.Tests.Execution
             public void EvaluatesExpressionThroughNestedSection()
             {
                 // Given
-                IConfiguration configuration = GetConfiguration(@"
+                IConfigurationRoot configuration = GetConfiguration(@"
 {
   ""section0"": {
     ""foo"": ""=> $\""ABC {1+2} XYZ\""""
@@ -197,7 +233,7 @@ namespace Statiq.Core.Tests.Execution
 }");
                 TestExecutionContext context = new TestExecutionContext();
                 context.ScriptHelper = new ScriptHelper(context);
-                ConfigurationSettings settings = new ConfigurationSettings(context, configuration, null);
+                Common.Settings settings = new Common.Settings(configuration).WithExecutionState(context);
 
                 // When
                 bool sectionResult = settings.TryGetValue<IMetadata>("section0", out IMetadata section);
@@ -205,7 +241,7 @@ namespace Statiq.Core.Tests.Execution
 
                 // Then
                 sectionResult.ShouldBeTrue();
-                section.ShouldBeOfType<ConfigurationSettings>();
+                section.ShouldBeOfType<Common.Settings>();
                 result.ShouldBeTrue();
                 value.ShouldBe("ABC 3 XYZ");
             }
@@ -214,14 +250,14 @@ namespace Statiq.Core.Tests.Execution
             public void CanAccessOtherValuesInExpression()
             {
                 // Given
-                IConfiguration configuration = GetConfiguration(@"
+                IConfigurationRoot configuration = GetConfiguration(@"
 {
   ""foo"": ""=> $\""ABC {Get(\""bar\"")} XYZ\"""",
   ""bar"": 3
 }");
                 TestExecutionContext context = new TestExecutionContext();
                 context.ScriptHelper = new ScriptHelper(context);
-                ConfigurationSettings settings = new ConfigurationSettings(context, configuration, null);
+                Common.Settings settings = new Common.Settings(configuration).WithExecutionState(context);
 
                 // When
                 bool result = settings.TryGetValue("foo", out object value);
@@ -232,73 +268,27 @@ namespace Statiq.Core.Tests.Execution
             }
         }
 
-        public class ConstructorTests : ConfigurationSettingsFixture
-        {
-            [Test]
-            public void SettingsOverrideConfiguration()
-            {
-                // Given
-                IConfiguration configuration = GetConfiguration(@"
-{
-  ""foo"": ""fizz""
-}");
-                IDictionary<string, object> settings = new Dictionary<string, object>
-                {
-                    { "Foo", "Buzz" }
-                };
-                TestExecutionContext context = new TestExecutionContext();
-                context.ScriptHelper = new ScriptHelper(context);
-
-                // When
-                ConfigurationSettings configurationSettings = new ConfigurationSettings(context, configuration, settings);
-
-                // Then
-                configurationSettings.TryGetValue("foo", out object value).ShouldBeTrue();
-                value.ShouldBe("Buzz");
-            }
-
-            [Test]
-            public void EvaluatesSettingExpressionInCtor()
-            {
-                // Given
-                IDictionary<string, object> settings = new Dictionary<string, object>
-                {
-                    { "Foo", @"=> $""ABC {1+2} XYZ""" }
-                };
-                IConfiguration configuration = new ConfigurationRoot(Array.Empty<IConfigurationProvider>());
-                TestExecutionContext context = new TestExecutionContext();
-                context.ScriptHelper = new ScriptHelper(context);
-
-                // When
-                ConfigurationSettings configurationSettings = new ConfigurationSettings(context, configuration, settings);
-
-                // Then
-                configurationSettings.TryGetValue("foo", out object value).ShouldBeTrue();
-                value.ShouldBe("ABC 3 XYZ");
-            }
-        }
-
-        public class IndexerTests : ConfigurationSettingsFixture
+        public class IndexerTests : SettingsFixture
         {
             [Test]
             public void EvaluatesLateAddedSettingExpression()
             {
                 // Given
-                IConfiguration configuration = new ConfigurationRoot(Array.Empty<IConfigurationProvider>());
+                IConfigurationRoot configuration = new ConfigurationRoot(Array.Empty<IConfigurationProvider>());
                 TestExecutionContext context = new TestExecutionContext();
                 context.ScriptHelper = new ScriptHelper(context);
-                ConfigurationSettings configurationSettings = new ConfigurationSettings(context, configuration, null);
+                Common.Settings settings = new Common.Settings(configuration).WithExecutionState(context);
 
                 // When
-                configurationSettings.Add("Foo", @"=> $""ABC {1+2} XYZ""");
+                settings.Add("Foo", @"=> $""ABC {1+2} XYZ""");
 
                 // Then
-                configurationSettings.TryGetValue("foo", out object value).ShouldBeTrue();
+                settings.TryGetValue("foo", out object value).ShouldBeTrue();
                 value.ShouldBe("ABC 3 XYZ");
             }
         }
 
-        private static IConfiguration GetConfiguration(string json)
+        private static IConfigurationRoot GetConfiguration(string json = Json)
         {
             MemoryStream stream = new MemoryStream();
             StreamWriter writer = new StreamWriter(stream);
@@ -307,5 +297,34 @@ namespace Statiq.Core.Tests.Execution
             stream.Position = 0;
             return new ConfigurationBuilder().AddJsonStream(stream).Build();
         }
+
+        private const string Json = @"{
+  ""key0"": ""value0"",
+  ""section0"": {
+    ""key1"": ""value1"",
+    ""key2"": [
+      ""arr1"",
+      ""arr2"",
+      {
+        ""foo1"": ""bar1"",
+        ""foo2"": ""bar2""
+      }
+    ]
+  },
+  ""section1"": {
+    ""key3"": ""3"",
+    ""key4"": ""value4""
+  },
+  ""section2"": {
+    ""subsection0"" : {
+      ""key5"": ""value5"",
+      ""key6"": ""value6""
+    },
+    ""subsection1"" : {
+      ""key7"": ""value7"",
+      ""key8"": ""value8""
+    }
+  }
+}";
     }
 }

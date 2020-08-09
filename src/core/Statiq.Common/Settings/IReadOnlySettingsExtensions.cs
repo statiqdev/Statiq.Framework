@@ -3,7 +3,7 @@ using System.Linq;
 
 namespace Statiq.Common
 {
-    public static class IReadOnlyConfigurationSettingsExtensions
+    public static class IReadOnlySettingsExtensions
     {
         private const string DefaultIndexFileName = "index.html";
 

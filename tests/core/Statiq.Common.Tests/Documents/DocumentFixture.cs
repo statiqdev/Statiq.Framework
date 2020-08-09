@@ -73,7 +73,7 @@ namespace Statiq.Common.Tests.Documents
             public void MetadataOverwritesSettings()
             {
                 // Given
-                TestConfigurationSettings settings = new TestConfigurationSettings
+                Common.Settings settings = new Common.Settings
                 {
                     { "A", "a" }
                 };

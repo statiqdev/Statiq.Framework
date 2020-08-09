@@ -420,7 +420,7 @@ namespace Statiq.Core.Tests.Modules.Control
             {
                 // Given
                 TestExecutionContext context = new TestExecutionContext();
-                context.Settings.Set("Foo", "true");
+                context.Settings["Foo"] = "true";
                 ExecuteIf module = new ExecuteIf(Config.FromContext(x => x.Settings.GetBool("Foo")), new CreateDocuments("Bar"));
 
                 // When
@@ -435,7 +435,7 @@ namespace Statiq.Core.Tests.Modules.Control
             {
                 // Given
                 TestExecutionContext context = new TestExecutionContext();
-                context.Settings.Set("Foo", "true");
+                context.Settings["Foo"] = "true";
                 ExecuteIf module = new ExecuteIf(Config.FromContext(x => !x.Settings.GetBool("Foo")), new CreateDocuments("Bar"));
 
                 // When
