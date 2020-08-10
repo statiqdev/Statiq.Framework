@@ -86,10 +86,9 @@ namespace Statiq.Common.Tests.Settings
 }");
                 TestExecutionContext context = new TestExecutionContext();
                 context.ScriptHelper = new ScriptHelper(context);
-                Common.Settings settings = new Common.Settings(configuration)
-                {
-                    { "foo", 123 }
-                }.WithExecutionState(context);
+                Common.Settings settings = new Common.Settings(configuration);
+                settings["foo"] = 123;
+                settings = settings.WithExecutionState(context);
 
                 // When
                 bool result = settings.TryGetValue("foo", out object value);
@@ -200,53 +199,6 @@ namespace Statiq.Common.Tests.Settings
             }
 
             [Test]
-            public void EvaluatesExpressionInNestedSection()
-            {
-                // Given
-                IConfigurationRoot configuration = GetConfiguration(@"
-{
-  ""section0"": {
-    ""foo"": ""=> $\""ABC {1+2} XYZ\""""
-  }
-}");
-                TestExecutionContext context = new TestExecutionContext();
-                context.ScriptHelper = new ScriptHelper(context);
-                Common.Settings settings = new Common.Settings(configuration).WithExecutionState(context);
-
-                // When
-                bool result = settings.TryGetValue("section0:foo", out object value);
-
-                // Then
-                result.ShouldBeTrue();
-                value.ShouldBe("ABC 3 XYZ");
-            }
-
-            [Test]
-            public void EvaluatesExpressionThroughNestedSection()
-            {
-                // Given
-                IConfigurationRoot configuration = GetConfiguration(@"
-{
-  ""section0"": {
-    ""foo"": ""=> $\""ABC {1+2} XYZ\""""
-  }
-}");
-                TestExecutionContext context = new TestExecutionContext();
-                context.ScriptHelper = new ScriptHelper(context);
-                Common.Settings settings = new Common.Settings(configuration).WithExecutionState(context);
-
-                // When
-                bool sectionResult = settings.TryGetValue<IMetadata>("section0", out IMetadata section);
-                bool result = section.TryGetValue("section0:foo", out object value);
-
-                // Then
-                sectionResult.ShouldBeTrue();
-                section.ShouldBeOfType<Common.Settings>();
-                result.ShouldBeTrue();
-                value.ShouldBe("ABC 3 XYZ");
-            }
-
-            [Test]
             public void CanAccessOtherValuesInExpression()
             {
                 // Given
@@ -285,6 +237,59 @@ namespace Statiq.Common.Tests.Settings
                 // Then
                 settings.TryGetValue("foo", out object value).ShouldBeTrue();
                 value.ShouldBe("ABC 3 XYZ");
+            }
+        }
+
+        public class IConfigurationTests : SettingsFixture
+        {
+            [Test]
+            public void EvaluatesExpressionInNestedSection()
+            {
+                // Given
+                IConfigurationRoot configuration = GetConfiguration(@"
+{
+  ""section0"": {
+    ""foo"": ""=> $\""ABC {1+2} XYZ\""""
+  }
+}");
+                TestExecutionContext context = new TestExecutionContext();
+                context.ScriptHelper = new ScriptHelper(context);
+                IConfiguration settingsConfiguration = new Common.Settings(configuration).WithExecutionState(context);
+
+                // When
+                IConfigurationSection section = settingsConfiguration.GetSection("section0:foo");
+
+                // Then
+                section.Key.ShouldBe("foo");
+                section.Path.ShouldBe("section0:foo");
+                section.Value.ShouldBe("ABC 3 XYZ");
+            }
+
+            [Test]
+            public void EvaluatesExpressionThroughNestedSection()
+            {
+                // Given
+                IConfigurationRoot configuration = GetConfiguration(@"
+{
+  ""section0"": {
+    ""foo"": ""=> $\""ABC {1+2} XYZ\""""
+  }
+}");
+                TestExecutionContext context = new TestExecutionContext();
+                context.ScriptHelper = new ScriptHelper(context);
+                IConfiguration settingsConfiguration = new Common.Settings(configuration).WithExecutionState(context);
+
+                // When
+                IConfigurationSection section = settingsConfiguration.GetSection("section0");
+                IConfigurationSection result = section.GetSection("foo");
+
+                // Then
+                section.Key.ShouldBe("Section0");
+                section.Path.ShouldBe("section0");
+                section.Value.ShouldBeNull();
+                result.Key.ShouldBe("foo");
+                result.Path.ShouldBe("section0:foo");
+                result.Value.ShouldBe("ABC 3 XYZ");
             }
         }
 

@@ -16,7 +16,7 @@ namespace Statiq.Common
         {
             Key = key.ThrowIfNull(nameof(key));
             Path = path.ThrowIfNull(nameof(path));
-            _value = value.ThrowIfNull(nameof(value));
+            _value = value;
         }
 
         public string this[string key]

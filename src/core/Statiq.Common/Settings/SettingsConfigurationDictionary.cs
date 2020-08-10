@@ -4,6 +4,7 @@ using Microsoft.Extensions.Configuration;
 
 namespace Statiq.Common
 {
+    // Implements MetadataDictionary so we can call .GetMetadata() to get nested settings dictionaries
     internal class SettingsConfigurationDictionary : MetadataDictionary, ISettingsConfiguration
     {
         private readonly string _path;
@@ -15,7 +16,8 @@ namespace Statiq.Common
 
         public void ResolveScriptMetadataValues(string key, IExecutionState executionState)
         {
-            foreach (KeyValuePair<string, object> item in this)
+            // We need to enumerate a materialized list since we're changing it during enumeration
+            foreach (KeyValuePair<string, object> item in this.GetEnumerable().ToArray())
             {
                 if (ScriptMetadataValue.TryGetScriptMetadataValue(key, item.Value, executionState, out ScriptMetadataValue metadataValue))
                 {
