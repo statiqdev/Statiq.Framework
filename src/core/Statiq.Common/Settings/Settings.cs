@@ -55,7 +55,10 @@ namespace Statiq.Common
         internal static object BuildConfigurationObject(IConfiguration configuration, string path)
         {
             // Build up both a dictionary and a list until we know it's not a list
-            SettingsConfigurationDictionary dictionary = new SettingsConfigurationDictionary(path);
+            // If this is the root dictionary (path is null) use a normal dictionary
+            IDictionary<string, object> dictionary = path is null
+                ? (IDictionary<string, object>)new Dictionary<string, object>(StringComparer.OrdinalIgnoreCase)
+                : new SettingsConfigurationDictionary(path);
             SettingsConfigurationList list = path is null ? null : new SettingsConfigurationList(path);
             int index = 0;
             foreach (IConfigurationSection section in configuration.GetChildren())
@@ -189,6 +192,8 @@ namespace Statiq.Common
             string rootKey = firstSeparator >= 0 ? key[..firstSeparator] : key;
             if (TryGetRaw(rootKey, out object rawValue))
             {
+                // The rawValue will always be a SettingsValue so unwrap it
+                rawValue = ((SettingsValue)rawValue).Get(default, default);
                 IConfigurationSection section = GetConfigurationSection(rootKey, rawValue);
                 if (firstSeparator >= 0)
                 {

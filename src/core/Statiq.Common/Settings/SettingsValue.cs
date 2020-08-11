@@ -6,7 +6,7 @@ namespace Statiq.Common
     /// A simple wrapper for metadata values from settings so that they can be
     /// identified (for example, to support <see cref="IMetadataGetExtensions.WithoutSettings(IMetadata)"/>.
     /// </summary>
-    public sealed class SettingsValue : IMetadataValue
+    internal sealed class SettingsValue : IMetadataValue
     {
         private readonly object _value;
 

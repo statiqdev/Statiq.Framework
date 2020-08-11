@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using Microsoft.Extensions.Configuration;
 using NUnit.Framework;
 using Shouldly;
@@ -242,6 +243,58 @@ namespace Statiq.Common.Tests.Settings
 
         public class IConfigurationTests : SettingsFixture
         {
+            [TestCase("missing", "missing", "missing", null, 0)]
+            [TestCase("missing:missing2", "missing2", "missing:missing2", null, 0)]
+            [TestCase("section0:missing", "missing", "section0:missing", null, 0)]
+            [TestCase("key0", "key0", "key0", "value0", 0)]
+            [TestCase("section0", "section0", "section0", null, 2)]
+            [TestCase("section0:key1", "key1", "section0:key1", "value1", 0)]
+            [TestCase("section0:key2:1:foo2", "foo2", "section0:key2:1:foo2", "bar2", 0)]
+            public void GetsConfigurationSection(
+                string key,
+                string expectedKey,
+                string expectedPath,
+                string expectedValue,
+                int expectedChildrenCount)
+            {
+                // Given
+                IConfigurationRoot configuration = GetConfiguration();
+                TestExecutionContext context = new TestExecutionContext();
+                context.ScriptHelper = new ScriptHelper(context);
+                IConfiguration settings = new Common.Settings(configuration).WithExecutionState(context);
+
+                // When
+                IConfigurationSection section = settings.GetSection(key);
+
+                // Then
+                section.Key.ShouldBe(expectedKey);
+                section.Path.ShouldBe(expectedPath);
+                section.Value.ShouldBe(expectedValue);
+                section.GetChildren().Count().ShouldBe(expectedChildrenCount);
+            }
+
+            [Test]
+            public void GetsNestedSection()
+            {
+                // Given
+                IConfigurationRoot configuration = GetConfiguration();
+                TestExecutionContext context = new TestExecutionContext();
+                context.ScriptHelper = new ScriptHelper(context);
+                IConfiguration settings = new Common.Settings(configuration).WithExecutionState(context);
+
+                // When
+                IConfigurationSection section = settings.GetSection("section0");
+                IConfigurationSection result = section.GetSection("key1");
+
+                // Then
+                section.Key.ShouldBe("section0");
+                section.Path.ShouldBe("section0");
+                section.Value.ShouldBeNull();
+                result.Key.ShouldBe("key1");
+                result.Path.ShouldBe("section0:key1");
+                result.Value.ShouldBe("value1");
+            }
+
             [Test]
             public void EvaluatesExpressionInNestedSection()
             {
@@ -284,7 +337,7 @@ namespace Statiq.Common.Tests.Settings
                 IConfigurationSection result = section.GetSection("foo");
 
                 // Then
-                section.Key.ShouldBe("Section0");
+                section.Key.ShouldBe("section0");
                 section.Path.ShouldBe("section0");
                 section.Value.ShouldBeNull();
                 result.Key.ShouldBe("foo");
