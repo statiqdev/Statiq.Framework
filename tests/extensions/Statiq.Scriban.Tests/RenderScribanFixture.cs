@@ -74,6 +74,172 @@ namespace Statiq.Scriban.Tests
             }
 
             [Test]
+            public async Task AlternateComplexModel()
+            {
+                // Given
+                const string input = @"
+{{~ for post in posts ~}}
+{{ post.title }}
+{{ post.description }}
+{{ post.custom.value }}
+{{ end ~}}";
+                const string output = @"
+title1
+description1
+custom_value1
+title2
+description2
+custom_value2
+";
+
+                TestDocument document = new TestDocument(input);
+                RenderScriban scriban = new RenderScriban().WithModel(new
+                {
+                    Posts = new[]
+                    {
+                        new
+                        {
+                            Title = "title1",
+                            Description = "description1",
+                            Custom = new
+                            {
+                                Value = "custom_value1"
+                            }
+                        },
+                        new
+                        {
+                            Title = "title2",
+                            Description = "description2",
+                            Custom = new
+                            {
+                                Value = "custom_value2"
+                            }
+                        }
+                    }
+                });
+
+                // When
+                TestDocument result = await ExecuteAsync(document, scriban).SingleAsync();
+
+                // Then
+                result.Content.ShouldBe(output, StringCompareShould.IgnoreLineEndings);
+            }
+
+            [Test]
+            public async Task ComplexModelMetadata()
+            {
+                // Given
+                const string input = @"
+{{~ for post in posts ~}}
+{{ post.title }}
+{{ post.description }}
+{{ post.custom.value }}
+{{ end ~}}";
+                const string output = @"
+title1
+description1
+custom_value1
+title2
+description2
+custom_value2
+";
+
+                TestDocument document = new TestDocument(
+                    new MetadataItems
+                    {
+                        {
+                            "posts", new[]
+                            {
+                                new
+                                {
+                                    Title = "title1",
+                                    Description = "description1",
+                                    Custom = new
+                                    {
+                                        Value = "custom_value1"
+                                    }
+                                },
+                                new
+                                {
+                                    Title = "title2",
+                                    Description = "description2",
+                                    Custom = new
+                                    {
+                                        Value = "custom_value2"
+                                    }
+                                }
+                            }
+                        }
+                    }, input);
+                RenderScriban scriban = new RenderScriban();
+
+                // When
+                TestDocument result = await ExecuteAsync(document, scriban).SingleAsync();
+
+                // Then
+                result.Content.ShouldBe(output, StringCompareShould.IgnoreLineEndings);
+            }
+
+            [Test]
+            public async Task ComplexModelMetadataWithChildDocuments()
+            {
+                // Given
+                const string input = @"
+{{~ for post in posts ~}}
+{{ post.title }}
+{{ post.description }}
+{{ post.custom }}
+{{ end ~}}";
+                const string output = @"
+title1
+description1
+custom_value1
+title2
+description2
+custom_value2
+";
+
+                TestDocument document = new TestDocument(
+                    new MetadataItems
+                    {
+                        {
+                            "posts", new[]
+                            {
+                                new TestDocument(new MetadataItems
+                                {
+                                    { "Title", "title1" },
+                                    { "Description", "description1" },
+                                    {
+                                        "Custom", new TestDocument(new MetadataItems
+                                        {
+                                            { "Value", "custom_value1" }
+                                        })
+                                    }
+                                }),
+                                new TestDocument(new MetadataItems
+                                {
+                                    { "Title", "title2" },
+                                    { "Description", "description2" },
+                                    {
+                                        "Custom", new TestDocument(new MetadataItems
+                                        {
+                                            { "Value", "custom_value2" }
+                                        })
+                                    }
+                                })
+                            }
+                        }
+                    }, input);
+                RenderScriban scriban = new RenderScriban();
+
+                // When
+                TestDocument result = await ExecuteAsync(document, scriban).SingleAsync();
+
+                // Then
+                result.Content.ShouldBe(output, StringCompareShould.IgnoreLineEndings);
+            }
+
+            [Test]
             public async Task RendersScribanFromMetadata()
             {
                 // Given
@@ -152,12 +318,13 @@ values:
   /input/index.html
   index.html
   Statiq.Common.MemoryContent
-"; // TODO: Support nested complex objects
+text/html";
 
                 TestDocument document = new TestDocument(
                     new NormalizedPath("/input/index.html"),
                     new NormalizedPath("index.html"),
-                    input);
+                    input,
+                    "text/html");
                 RenderScriban scriban = new RenderScriban();
 
                 // When

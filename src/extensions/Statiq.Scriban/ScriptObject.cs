@@ -54,7 +54,23 @@ namespace Statiq.Scriban
 
             if (_metadata.TryGetValue(member, out string metadataName))
             {
-                return _document.TryGetValue(metadataName, out value);
+                if (_document.TryGetValue(metadataName, out value))
+                {
+                    Type type = value.GetType();
+
+                    if (value is IEnumerable<IDocument> documents)
+                    {
+                        value = new[] { documents.Select(document => document.AsDynamic()) };
+                    }
+                    else if (value is IDocument document)
+                    {
+                        value = document.AsDynamic();
+                    }
+
+                    return true;
+                }
+
+                return false;
             }
 
             if (_properties.TryGetValue(member, out string propertyName))
