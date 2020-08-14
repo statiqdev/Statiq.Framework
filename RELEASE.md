@@ -22,6 +22,7 @@
 - Added a new `MinimumStatiqFrameworkVersion` key to perform a check for the minimum allowed version of Statiq Framework. If this is set to something higher than the current version
   of Statiq Framework, an error will be logged and execution will stop. Any setting that starts will this key will be considered, so it's recommended the use of this key be
   suffixed with a unique identifier to avoid conflicts between components (for example `MinimumStatiqFrameworkVersion-MySite`).
+- Refactored settings and configuration implementations. You shouldn't notice anything usage-wise, but keep an eye out for anything that doesn't work as expected
 
 # 1.0.0-beta.19
 

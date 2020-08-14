@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Primitives;
 
@@ -10,10 +12,12 @@ namespace Statiq.Common
     /// </summary>
     internal class SettingsConfigurationSection : IConfigurationSection
     {
-        private readonly string _value;
+        private readonly IConfiguration _configuration;
+        private readonly object _value;
 
-        public SettingsConfigurationSection(string key, string path, string value)
+        public SettingsConfigurationSection(IConfiguration configuration, string key, string path, object value)
         {
+            _configuration = configuration.ThrowIfNull(nameof(configuration));
             Key = key.ThrowIfNull(nameof(key));
             Path = path.ThrowIfNull(nameof(path));
             _value = value;
@@ -21,7 +25,7 @@ namespace Statiq.Common
 
         public string this[string key]
         {
-            get => default;
+            get => _configuration[$"{Path}:{key}"];
             set => throw new NotSupportedException();
         }
 
@@ -31,15 +35,36 @@ namespace Statiq.Common
 
         public string Value
         {
-            get => _value;
+            get
+            {
+                string value = _value?.ToString();
+                return !value.IsNullOrEmpty() && value != _value.GetType().ToString() ? value : default;
+            }
             set => throw new NotSupportedException();
         }
 
-        public IEnumerable<IConfigurationSection> GetChildren() => Array.Empty<IConfigurationSection>();
+        public IEnumerable<IConfigurationSection> GetChildren()
+        {
+            if (_value is null || _value is string)
+            {
+                return Array.Empty<IConfigurationSection>();
+            }
+
+            if (_value is IDictionary<string, object> dictionary || TypeHelper.TryConvert(_value, out dictionary))
+            {
+                return dictionary.Select(x => new SettingsConfigurationSection(_configuration, x.Key, $"{Path}:{x.Key}", x.Value));
+            }
+
+            if (_value is IList<object> list || (_value is IEnumerable && TypeHelper.TryConvert(_value, out list)))
+            {
+                return list.Select((x, i) => new SettingsConfigurationSection(_configuration, i.ToString(), $"{Path}:{i}", x));
+            }
+
+            return Array.Empty<IConfigurationSection>();
+        }
 
         public IChangeToken GetReloadToken() => SettingsReloadToken.Instance;
 
-        public IConfigurationSection GetSection(string key) =>
-            new SettingsConfigurationSection(key[(key.LastIndexOf(':') + 1) ..], $"{Path}:{key}", default);
+        public IConfigurationSection GetSection(string key) => _configuration.GetSection($"{Path}:{key}");
     }
 }

@@ -46,7 +46,7 @@ namespace Statiq.Common.Tests.Settings
                 dictionary = root["section2"].ShouldBeAssignableTo<IDictionary<string, object>>();
                 dictionary.ShouldContainKey("subsection0");
                 IDictionary<string, object> subsection = dictionary["subsection0"].ShouldBeAssignableTo<IDictionary<string, object>>();
-                subsection.ShouldContainKeyAndValue("key5", "value5");
+                subsection.ShouldContainKeyAndValue("key5", "=> 1 + 2");
                 subsection.ShouldContainKeyAndValue("key6", "value6");
                 dictionary.ShouldContainKey("subsection1");
                 subsection = dictionary["subsection1"].ShouldBeAssignableTo<IDictionary<string, object>>();
@@ -249,7 +249,12 @@ namespace Statiq.Common.Tests.Settings
             [TestCase("key0", "key0", "key0", "value0", 0)]
             [TestCase("section0", "section0", "section0", null, 2)]
             [TestCase("section0:key1", "key1", "section0:key1", "value1", 0)]
-            [TestCase("section0:key2:1:foo2", "foo2", "section0:key2:1:foo2", "bar2", 0)]
+            [TestCase("section0:key2:0", "0", "section0:key2:0", "arr1", 0)]
+            [TestCase("section0:key2:1000", "1000", "section0:key2:1000", null, 0)]
+            [TestCase("section0:key2:1:foo2", "foo2", "section0:key2:1:foo2", null, 0)]
+            [TestCase("section0:key2:2:foo2", "foo2", "section0:key2:2:foo2", "bar2", 0)]
+            [TestCase("section0:key2:20:foo2", "foo2", "section0:key2:20:foo2", null, 0)]
+            [TestCase("section2:subsection0:key5", "key5", "section2:subsection0:key5", "3", 0)]
             public void GetsConfigurationSection(
                 string key,
                 string expectedKey,
@@ -271,6 +276,46 @@ namespace Statiq.Common.Tests.Settings
                 section.Path.ShouldBe(expectedPath);
                 section.Value.ShouldBe(expectedValue);
                 section.GetChildren().Count().ShouldBe(expectedChildrenCount);
+            }
+
+            [Test]
+            public void GetsValueAddedToSettings()
+            {
+                // Given
+                IConfigurationRoot configuration = GetConfiguration();
+                TestExecutionContext context = new TestExecutionContext();
+                context.ScriptHelper = new ScriptHelper(context);
+                Common.Settings settings = new Common.Settings(configuration).WithExecutionState(context);
+                settings.Add("newkey", "newvalue");
+
+                // When
+                IConfigurationSection section = ((IConfiguration)settings).GetSection("newkey");
+
+                // Then
+                section.Key.ShouldBe("newkey");
+                section.Path.ShouldBe("newkey");
+                section.Value.ShouldBe("newvalue");
+                section.GetChildren().Count().ShouldBe(0);
+            }
+
+            [Test]
+            public void GetsListAddedToSettings()
+            {
+                // Given
+                IConfigurationRoot configuration = GetConfiguration();
+                TestExecutionContext context = new TestExecutionContext();
+                context.ScriptHelper = new ScriptHelper(context);
+                Common.Settings settings = new Common.Settings(configuration).WithExecutionState(context);
+                settings.Add("newkey", new List<int> { 2, 4, 6, 8 });
+
+                // When
+                IConfigurationSection section = ((IConfiguration)settings).GetSection("newkey:1");
+
+                // Then
+                section.Key.ShouldBe("1");
+                section.Path.ShouldBe("newkey:1");
+                section.Value.ShouldBe("4");
+                section.GetChildren().Count().ShouldBe(0);
             }
 
             [Test]
@@ -375,7 +420,7 @@ namespace Statiq.Common.Tests.Settings
   },
   ""section2"": {
     ""subsection0"" : {
-      ""key5"": ""value5"",
+      ""key5"": ""=> 1 + 2"",
       ""key6"": ""value6""
     },
     ""subsection1"" : {

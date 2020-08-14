@@ -58,8 +58,8 @@ namespace Statiq.Common
             // If this is the root dictionary (path is null) use a normal dictionary
             IDictionary<string, object> dictionary = path is null
                 ? (IDictionary<string, object>)new Dictionary<string, object>(StringComparer.OrdinalIgnoreCase)
-                : new SettingsConfigurationDictionary(path);
-            SettingsConfigurationList list = path is null ? null : new SettingsConfigurationList(path);
+                : new SettingsConfigurationDictionary();
+            SettingsConfigurationList list = path is null ? null : new SettingsConfigurationList();
             int index = 0;
             foreach (IConfigurationSection section in configuration.GetChildren())
             {
@@ -182,41 +182,47 @@ namespace Statiq.Common
 
         string IConfiguration.this[string key]
         {
-            get => this.GetString(key);
+            get => ((IConfiguration)this).GetSection(key).Value;
             set => throw new NotSupportedException();
         }
 
         IConfigurationSection IConfiguration.GetSection(string key)
         {
-            int firstSeparator = key.IndexOf(':');
-            string rootKey = firstSeparator >= 0 ? key[..firstSeparator] : key;
-            if (TryGetRaw(rootKey, out object rawValue))
-            {
-                // The rawValue will always be a SettingsValue so unwrap it
-                rawValue = ((SettingsValue)rawValue).Get(default, default);
-                IConfigurationSection section = GetConfigurationSection(rootKey, rawValue);
-                if (firstSeparator >= 0)
-                {
-                    // This is a nested key
-                    section = section.GetSection(key[(firstSeparator + 1) ..]);
-                }
-                return section;
-            }
+            key.ThrowIfNull(nameof(key));
 
-            // This isn't a valid root key, so return a blank section
-            return new SettingsConfigurationSection(key[(key.LastIndexOf(':') + 1) ..], key, default);
+            string[] keys = key.Split(':');
+            object item = this;
+            for (int c = 0; c < keys.Length; c++)
+            {
+                if (item is null || item is string)
+                {
+                    return new SettingsConfigurationSection(this, keys[^1], key, default);
+                }
+                else if (item is IDictionary<string, object> dictionary || TypeHelper.TryConvert(item, out dictionary))
+                {
+                    if (!dictionary.TryGetValue(keys[c], out item))
+                    {
+                        return new SettingsConfigurationSection(this, keys[^1], key, default);
+                    }
+                }
+                else if (item is IList<object> list || (!(item is string) && item is IEnumerable && TypeHelper.TryConvert(item, out list)))
+                {
+                    if (!int.TryParse(keys[c], out int index) || index >= list.Count)
+                    {
+                        return new SettingsConfigurationSection(this, keys[^1], key, default);
+                    }
+                    item = list[index];
+                }
+                else
+                {
+                    return new SettingsConfigurationSection(this, keys[^1], key, default);
+                }
+            }
+            return new SettingsConfigurationSection(this, keys[^1], key, item);
         }
 
         IEnumerable<IConfigurationSection> IConfiguration.GetChildren() =>
-            this.GetRawEnumerable().Select(x => GetConfigurationSection(x.Key, x.Value));
-
-        private IConfigurationSection GetConfigurationSection(string key, object rawValue) =>
-            rawValue is IConfigurationSection configurationSection
-                    ? configurationSection
-                    : new SettingsConfigurationSection(
-                        key,
-                        key,
-                        TypeHelper.TryExpandAndConvert(key, rawValue, this, out string value) ? value : default);
+            this.Select(x => new SettingsConfigurationSection(this, x.Key, x.Key, x.Value));
 
         IChangeToken IConfiguration.GetReloadToken() => SettingsReloadToken.Instance;
     }
