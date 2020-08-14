@@ -26,10 +26,23 @@ namespace Statiq.Common
             string key,
             out TValue value)
         {
-            if (metadata is object && !key.IsNullOrEmpty() && metadata.TryGetRaw(key, out object raw))
+            if (metadata is object && key is object)
             {
-                return TypeHelper.TryExpandAndConvert(key, raw, metadata, out value);
+                // Script
+                if (IScriptHelper.TryGetScriptString(key, out string script))
+                {
+                    IExecutionContext context = IExecutionContext.Current;
+                    object result = context.ScriptHelper.EvaluateAsync(script, metadata).GetAwaiter().GetResult();
+                    return TypeHelper.TryExpandAndConvert(key, result, metadata, out value);
+                }
+
+                // Value
+                if (metadata.TryGetRaw(key, out object raw))
+                {
+                    return TypeHelper.TryExpandAndConvert(key, raw, metadata, out value);
+                }
             }
+
             value = default;
             return false;
         }
