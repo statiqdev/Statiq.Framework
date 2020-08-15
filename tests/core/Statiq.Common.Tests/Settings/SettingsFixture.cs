@@ -55,6 +55,25 @@ namespace Statiq.Common.Tests.Settings
             }
         }
 
+        public class GetMetadataTests : SettingsFixture
+        {
+            [Test]
+            public void GetsNestedMetadata()
+            {
+                // Given
+                IConfigurationRoot configuration = GetConfiguration();
+                TestExecutionContext context = new TestExecutionContext();
+                context.ScriptHelper = new ScriptHelper(context);
+                Common.Settings settings = new Common.Settings(configuration).WithExecutionState(context);
+
+                // When
+                object result = settings.GetMetadata("section2").GetMetadata("subsection1")["key7"];
+
+                // Then
+                result.ShouldBe("value7");
+            }
+        }
+
         public class TryGetValueTests : SettingsFixture
         {
             [Test]

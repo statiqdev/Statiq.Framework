@@ -1,15 +1,9 @@
 ﻿using System.Collections.Generic;
-using System.Linq;
-using Microsoft.Extensions.Configuration;
 
 namespace Statiq.Common
 {
     internal class SettingsConfigurationList : List<object>, ISettingsConfiguration
     {
-        public SettingsConfigurationList()
-        {
-        }
-
         public void ResolveScriptMetadataValues(string key, IExecutionState executionState)
         {
             for (int c = 0; c < Count; c++)

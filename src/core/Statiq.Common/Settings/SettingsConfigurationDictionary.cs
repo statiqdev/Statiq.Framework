@@ -1,16 +1,11 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using Microsoft.Extensions.Configuration;
 
 namespace Statiq.Common
 {
-    // Implements MetadataDictionary so we can call .GetMetadata() to get nested settings dictionaries
-    internal class SettingsConfigurationDictionary : MetadataDictionary, ISettingsConfiguration
+    // Implements IMetadata so we can call .GetMetadata() to get nested settings dictionaries
+    internal class SettingsConfigurationDictionary : Dictionary<string, object>, IMetadata, ISettingsConfiguration
     {
-        public SettingsConfigurationDictionary()
-        {
-        }
-
         public void ResolveScriptMetadataValues(string key, IExecutionState executionState)
         {
             // We need to enumerate a materialized list since we're changing it during enumeration
@@ -26,5 +21,9 @@ namespace Statiq.Common
                 }
             }
         }
+
+        IEnumerator<KeyValuePair<string, object>> IMetadata.GetRawEnumerator() => GetEnumerator();
+
+        bool IMetadata.TryGetRaw(string key, out object value) => TryGetValue(key, out value);
     }
 }
