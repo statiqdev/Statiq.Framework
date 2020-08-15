@@ -56,9 +56,7 @@ namespace Statiq.Common
         {
             // Build up both a dictionary and a list until we know it's not a list
             // If this is the root dictionary (path is null) use a normal dictionary
-            IDictionary<string, object> dictionary = path is null
-                ? (IDictionary<string, object>)new Dictionary<string, object>(StringComparer.OrdinalIgnoreCase)
-                : new SettingsConfigurationDictionary();
+            IDictionary<string, object> dictionary = new SettingsConfigurationDictionary();
             SettingsConfigurationList list = path is null ? null : new SettingsConfigurationList();
             int index = 0;
             foreach (IConfigurationSection section in configuration.GetChildren())

@@ -269,6 +269,7 @@ namespace Statiq.Common.Tests.Settings
             [TestCase("section0", "section0", "section0", null, 2)]
             [TestCase("section0:key1", "key1", "section0:key1", "value1", 0)]
             [TestCase("section0:key2:0", "0", "section0:key2:0", "arr1", 0)]
+            [TestCase("section0:key2:1", "1", "section0:key2:1", "arr2", 0)]
             [TestCase("section0:key2:1000", "1000", "section0:key2:1000", null, 0)]
             [TestCase("section0:key2:1:foo2", "foo2", "section0:key2:1:foo2", null, 0)]
             [TestCase("section0:key2:2:foo2", "foo2", "section0:key2:2:foo2", "bar2", 0)]
@@ -425,11 +426,11 @@ namespace Statiq.Common.Tests.Settings
   ""section0"": {
     ""key1"": ""value1"",
     ""key2"": [
-      ""arr1"",
+      ""=> \""arr1\"""",
       ""arr2"",
       {
         ""foo1"": ""bar1"",
-        ""foo2"": ""bar2""
+        ""foo2"": ""=> \""bar2\""""
       }
     ]
   },

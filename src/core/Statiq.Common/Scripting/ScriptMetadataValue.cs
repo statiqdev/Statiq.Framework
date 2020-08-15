@@ -27,7 +27,8 @@ namespace Statiq.Common
         public object Get(string key, IMetadata metadata)
         {
             // Check if we're excluded from evaluation
-            if (metadata.TryGetValue(Keys.ExcludeFromEvaluation, out object excludeObject)
+            if (metadata is object
+                && metadata.TryGetValue(Keys.ExcludeFromEvaluation, out object excludeObject)
                 && ((excludeObject is bool excludeBool && excludeBool)
                     || metadata.GetList<string>(Keys.ExcludeFromEvaluation).Contains(_key, StringComparer.OrdinalIgnoreCase)))
             {

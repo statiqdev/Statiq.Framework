@@ -37,7 +37,22 @@ namespace Statiq.Common
         {
             get
             {
-                string value = _value?.ToString();
+                // Match the logic for GetChildren() and don't return values for items that would return children
+                if (!(_value is string)
+                    && (_value is null
+                    || _value is IDictionary<string, object> _
+                    || TypeHelper.TryConvert(_value, out IDictionary<string, object> _)
+                    || _value is IList<object> _
+                    || (_value is IEnumerable && TypeHelper.TryConvert(_value, out IList<object> _))))
+                {
+                    return default;
+                }
+
+                // Now try a conversion
+                if (!TypeHelper.TryExpandAndConvert(Key, _value, null, out string value))
+                {
+                    return default;
+                }
                 return !value.IsNullOrEmpty() && value != _value.GetType().ToString() ? value : default;
             }
             set => throw new NotSupportedException();
