@@ -35,11 +35,11 @@ namespace Statiq.Common.Tests.Settings
                 dictionary.ShouldContainKey("key2");
                 IList<object> list = dictionary["key2"].ShouldBeAssignableTo<IList<object>>();
                 list.Count.ShouldBe(3);
-                list[0].ShouldBe("arr1");
+                list[0].ShouldBe("=> \"arr1\"");
                 list[1].ShouldBe("arr2");
                 dictionary = list[2].ShouldBeAssignableTo<IDictionary<string, object>>();
                 dictionary.ShouldContainKeyAndValue("foo1", "bar1");
-                dictionary.ShouldContainKeyAndValue("foo2", "bar2");
+                dictionary.ShouldContainKeyAndValue("foo2", "=> \"bar2\"");
                 dictionary = root["section1"].ShouldBeAssignableTo<IDictionary<string, object>>();
                 dictionary.ShouldContainKeyAndValue("key3", "3");
                 dictionary.ShouldContainKeyAndValue("key4", "value4");
