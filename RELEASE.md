@@ -1,3 +1,5 @@
+# 1.0.0-beta.21
+
 # 1.0.0-beta.20
 
 - **Breaking change:** Removed the `IDocument.GetParent()`, `IDocument.HasChildren()`, `IDocument.GetDescendants()`, and `IDocument.GetDescendantsAndSelf()` extension methods
