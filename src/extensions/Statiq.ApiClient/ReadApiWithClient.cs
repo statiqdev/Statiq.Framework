@@ -50,7 +50,7 @@ namespace Statiq.ApiClient
                 throw new ArgumentException("Argument is null or empty", nameof(init));
             }
 
-            init.Invoke(_client);
+            _init = (doc, ctx, client) => init(client);
             return this;
         }
 
