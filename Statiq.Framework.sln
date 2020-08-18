@@ -101,7 +101,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Statiq.Handlebars.Tests", "
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "build", "build", "{5904F60D-39EF-4521-B993-925F87264A31}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Statiq.Framework.Build", "build\Statiq.Framework.Build\Statiq.Framework.Build.csproj", "{D5FF0DD8-E009-487B-ABF1-2498E6122D67}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Statiq.Framework.Build", "build\Statiq.Framework.Build\Statiq.Framework.Build.csproj", "{D5FF0DD8-E009-487B-ABF1-2498E6122D67}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Statiq.Spotify", "src\extensions\Statiq.Spotify\Statiq.Spotify.csproj", "{1FA38B4E-AFEE-4DA8-AE51-ACC23C2EC25B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Statiq.Spotify.Tests", "tests\extensions\Statiq.Spotify.Tests\Statiq.Spotify.Tests.csproj", "{0063F851-5B0B-4942-9306-5327012219F0}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -269,6 +273,14 @@ Global
 		{D5FF0DD8-E009-487B-ABF1-2498E6122D67}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D5FF0DD8-E009-487B-ABF1-2498E6122D67}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D5FF0DD8-E009-487B-ABF1-2498E6122D67}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1FA38B4E-AFEE-4DA8-AE51-ACC23C2EC25B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1FA38B4E-AFEE-4DA8-AE51-ACC23C2EC25B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1FA38B4E-AFEE-4DA8-AE51-ACC23C2EC25B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1FA38B4E-AFEE-4DA8-AE51-ACC23C2EC25B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0063F851-5B0B-4942-9306-5327012219F0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0063F851-5B0B-4942-9306-5327012219F0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0063F851-5B0B-4942-9306-5327012219F0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0063F851-5B0B-4942-9306-5327012219F0}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -318,6 +330,8 @@ Global
 		{CD461A93-0245-45B9-A4C6-2C0D7FEDC67D} = {5A431149-2B88-40C3-9717-CA6CCF214317}
 		{3FCF3A84-35F4-49BC-B58C-098BB1B6A6DA} = {2E5842F3-4797-4BB5-9A55-F3A005B434F8}
 		{D5FF0DD8-E009-487B-ABF1-2498E6122D67} = {5904F60D-39EF-4521-B993-925F87264A31}
+		{1FA38B4E-AFEE-4DA8-AE51-ACC23C2EC25B} = {5A431149-2B88-40C3-9717-CA6CCF214317}
+		{0063F851-5B0B-4942-9306-5327012219F0} = {2E5842F3-4797-4BB5-9A55-F3A005B434F8}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {B0CD133C-B843-4178-8976-B04AE6B2021A}
