@@ -40,14 +40,17 @@ namespace Statiq.Spotify
         /// </summary>
         /// <param name="clientId">Spotify "CLIENT_ID" to use the API.</param>
         /// <param name="clientSecret">Spotify "CLIENT_SECRET" to use the API.</param>
+        /// <returns>The current module instance.</returns>
         public ReadSpotify WithRequestTokenOnDemand(string clientId, string clientSecret)
         {
+            clientId.ThrowIfNullOrEmpty(nameof(clientId));
+            clientSecret.ThrowIfNullOrEmpty(nameof(clientSecret));
+
             SpotifyClientConfig config = SpotifyClientConfig
                 .CreateDefault()
                 .WithAuthenticator(new ClientCredentialsAuthenticator(clientId, clientSecret));
 
             _spotify = new SpotifyClient(config);
-
             return this;
         }
 
@@ -74,10 +77,7 @@ namespace Statiq.Spotify
         /// <returns>The current module instance.</returns>
         public ReadSpotify WithRequest(string key, Func<IDocument, IExecutionContext, SpotifyClient, object> request)
         {
-            if (string.IsNullOrEmpty(key))
-            {
-                throw new ArgumentException("Argument is null or empty", nameof(key));
-            }
+            key.ThrowIfNullOrEmpty(nameof(key));
 
             _requests[key] = request.ThrowIfNull(nameof(request));
             return this;
