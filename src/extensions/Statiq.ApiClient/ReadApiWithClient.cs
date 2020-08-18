@@ -35,7 +35,7 @@ namespace Statiq.ApiClient
         /// <param name="client">The API client to use.</param>
         public ReadApiWithClient(TClient client)
         {
-            _client = client;
+            _client = client ?? throw new ArgumentException("Argument is null", nameof(client));
         }
 
         /// <summary>
@@ -93,7 +93,7 @@ namespace Statiq.ApiClient
         /// <returns>The current module instance.</returns>
         public ReadApiWithClient<TClient> WithClientName(string name)
         {
-            _clientName = name;
+            _clientName = name.ThrowIfNullOrWhiteSpace(nameof(name));
             return this;
         }
 
@@ -105,7 +105,7 @@ namespace Statiq.ApiClient
         /// <returns>The current module instance.</returns>
         public ReadApiWithClient<TClient> WithRequest(string key, Func<IExecutionContext, TClient, object> request)
         {
-            key.ThrowIfNullOrEmpty(nameof(key));
+            key.ThrowIfNullOrWhiteSpace(nameof(key));
             request.ThrowIfNull(nameof(request));
 
             _requests[key] = (doc, ctx, client) => request(ctx, client);
@@ -120,7 +120,7 @@ namespace Statiq.ApiClient
         /// <returns>The current module instance.</returns>
         public ReadApiWithClient<TClient> WithRequest(string key, Func<IDocument, IExecutionContext, TClient, object> request)
         {
-            key.ThrowIfNullOrEmpty(nameof(key));
+            key.ThrowIfNullOrWhiteSpace(nameof(key));
 
             _requests[key] = request.ThrowIfNull(nameof(request));
             return this;
