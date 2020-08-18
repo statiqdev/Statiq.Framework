@@ -178,7 +178,7 @@ namespace Statiq.Itunes
         /// <returns>The current instance.</returns>
         public ReadItunes WithPodcastId(string podcastId)
         {
-            _podcastId = podcastId;
+            _podcastId = podcastId.ThrowIfNullOrWhiteSpace(nameof(podcastId));
             return this;
         }
 
@@ -193,7 +193,7 @@ namespace Statiq.Itunes
         /// <returns>The current instance.</returns>
         public ReadItunes ForCountryCode(string country)
         {
-            _country = country;
+            _country = country.ThrowIfNullOrWhiteSpace(nameof(country));
             return this;
         }
 
