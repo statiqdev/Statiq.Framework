@@ -28,7 +28,7 @@ namespace Statiq.ApiClient.Tests
                 HttpClient httpClient = new HttpClient();
                 TestDocument document = new TestDocument();
                 IModule client = new ReadApiWithClient<HttpClient>(httpClient)
-                    .WithClientInitialization(c =>
+                    .WithClientInitialization((doc, ctx, c) =>
                     {
                         c.DefaultRequestHeaders.Add("Authorization", "Bearer ...");
                     })

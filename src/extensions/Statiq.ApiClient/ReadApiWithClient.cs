@@ -25,6 +25,8 @@ namespace Statiq.ApiClient
 
         private readonly TClient _client;
 
+        private Action<IDocument, IExecutionContext, TClient> _init;
+
         private string _clientName;
 
         /// <summary>
@@ -39,7 +41,7 @@ namespace Statiq.ApiClient
         /// <summary>
         /// Initialize the API client.
         /// </summary>
-        /// <param name="init">API client initialization action.</param>
+        /// <param name="init">An API client initialization action.</param>
         /// <returns>The current module instance.</returns>
         public ReadApiWithClient<TClient> WithClientInitialization(Action<TClient> init)
         {
@@ -49,6 +51,38 @@ namespace Statiq.ApiClient
             }
 
             init.Invoke(_client);
+            return this;
+        }
+
+        /// <summary>
+        /// Initialize the API client.
+        /// </summary>
+        /// <param name="init">An API client initialization action.</param>
+        /// <returns>The current module instance.</returns>
+        public ReadApiWithClient<TClient> WithClientInitialization(Action<IExecutionContext, TClient> init)
+        {
+            if (init == null)
+            {
+                throw new ArgumentException("Argument is null or empty", nameof(init));
+            }
+
+            _init = (doc, ctx, client) => init(ctx, client);
+            return this;
+        }
+
+        /// <summary>
+        /// Initialize the API client.
+        /// </summary>
+        /// <param name="init">An API client initialization action.</param>
+        /// <returns>The current module instance.</returns>
+        public ReadApiWithClient<TClient> WithClientInitialization(Action<IDocument, IExecutionContext, TClient> init)
+        {
+            if (init == null)
+            {
+                throw new ArgumentException("Argument is null or empty", nameof(init));
+            }
+
+            _init = init.ThrowIfNull(nameof(init));
             return this;
         }
 
@@ -95,6 +129,7 @@ namespace Statiq.ApiClient
         /// <inheritdoc/>
         protected override IEnumerable<IDocument> ExecuteInput(IDocument input, IExecutionContext context)
         {
+            _init?.Invoke(input, context, _client);
             ConcurrentDictionary<string, object> results = new ConcurrentDictionary<string, object>();
             System.Threading.Tasks.Parallel.ForEach(_requests, request =>
             {
