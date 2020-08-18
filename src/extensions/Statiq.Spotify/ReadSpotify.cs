@@ -43,8 +43,8 @@ namespace Statiq.Spotify
         /// <returns>The current module instance.</returns>
         public ReadSpotify WithRequestTokenOnDemand(string clientId, string clientSecret)
         {
-            clientId.ThrowIfNullOrEmpty(nameof(clientId));
-            clientSecret.ThrowIfNullOrEmpty(nameof(clientSecret));
+            clientId.ThrowIfNullOrWhiteSpace(nameof(clientId));
+            clientSecret.ThrowIfNullOrWhiteSpace(nameof(clientSecret));
 
             SpotifyClientConfig config = SpotifyClientConfig
                 .CreateDefault()
@@ -62,7 +62,7 @@ namespace Statiq.Spotify
         /// <returns>The current module instance.</returns>
         public ReadSpotify WithRequest(string key, Func<IExecutionContext, SpotifyClient, object> request)
         {
-            key.ThrowIfNullOrEmpty(nameof(key));
+            key.ThrowIfNullOrWhiteSpace(nameof(key));
             request.ThrowIfNull(nameof(request));
 
             _requests[key] = (doc, ctx, spotify) => request(ctx, spotify);
@@ -77,7 +77,7 @@ namespace Statiq.Spotify
         /// <returns>The current module instance.</returns>
         public ReadSpotify WithRequest(string key, Func<IDocument, IExecutionContext, SpotifyClient, object> request)
         {
-            key.ThrowIfNullOrEmpty(nameof(key));
+            key.ThrowIfNullOrWhiteSpace(nameof(key));
 
             _requests[key] = request.ThrowIfNull(nameof(request));
             return this;
