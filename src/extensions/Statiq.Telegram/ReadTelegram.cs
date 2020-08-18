@@ -34,7 +34,7 @@ namespace Statiq.Telegram
         /// <param name="httpClient">Http client.</param>
         public ReadTelegram(string accessToken, HttpClient httpClient = null)
         {
-            accessToken.ThrowIfNullOrEmpty(nameof(accessToken));
+            accessToken.ThrowIfNullOrWhiteSpace(nameof(accessToken));
 
             _telegram = new TelegramBotClient(accessToken, httpClient);
         }
@@ -46,7 +46,7 @@ namespace Statiq.Telegram
         /// <param name="proxy">Proxy to use Telegram API.</param>
         public ReadTelegram(string accessToken, IWebProxy proxy)
         {
-            accessToken.ThrowIfNullOrEmpty(nameof(accessToken));
+            accessToken.ThrowIfNullOrWhiteSpace(nameof(accessToken));
 
             _telegram = new TelegramBotClient(accessToken, proxy);
         }
@@ -70,7 +70,7 @@ namespace Statiq.Telegram
         /// <returns>The current module instance.</returns>
         public ReadTelegram WithRequest(string key, Func<IExecutionContext, TelegramBotClient, object> request)
         {
-            key.ThrowIfNullOrEmpty(nameof(key));
+            key.ThrowIfNullOrWhiteSpace(nameof(key));
             request.ThrowIfNull(nameof(request));
 
             _requests[key] = (doc, ctx, telegram) => request(ctx, telegram);
@@ -85,7 +85,7 @@ namespace Statiq.Telegram
         /// <returns>The current module instance.</returns>
         public ReadTelegram WithRequest(string key, Func<IDocument, IExecutionContext, TelegramBotClient, object> request)
         {
-            key.ThrowIfNullOrEmpty(nameof(key));
+            key.ThrowIfNullOrWhiteSpace(nameof(key));
 
             _requests[key] = request.ThrowIfNull(nameof(request));
             return this;
