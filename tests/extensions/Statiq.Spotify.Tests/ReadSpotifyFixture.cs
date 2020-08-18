@@ -36,6 +36,27 @@ namespace Statiq.Spotify.Tests
                 result["Foo"].ShouldBe(1);
                 result["Bar"].ShouldBe("baz");
             }
+
+            /// <summary>
+            /// Sets the metadata from the requests with request token on demand.
+            /// </summary>
+            [Test]
+            public async Task SetsMetadataWithRequestTokenOnDemand()
+            {
+                // Given
+                TestDocument document = new TestDocument();
+                IModule spotify = new ReadSpotify(string.Empty)
+                    .WithRequestTokenOnDemand("CLIENT_ID", "CLIENT_SECRET")
+                    .WithRequest("Foo", (ctx, yt) => 1)
+                    .WithRequest("Bar", (doc, ctx, yt) => "baz");
+
+                // When
+                TestDocument result = await ExecuteAsync(document, spotify).SingleAsync();
+
+                // Then
+                result["Foo"].ShouldBe(1);
+                result["Bar"].ShouldBe("baz");
+            }
         }
     }
 }

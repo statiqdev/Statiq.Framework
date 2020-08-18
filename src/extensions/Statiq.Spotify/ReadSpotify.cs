@@ -20,10 +20,10 @@ namespace Statiq.Spotify
     /// <category>Metadata</category>
     public class ReadSpotify : ParallelSyncModule
     {
-        private readonly SpotifyClient _spotify;
-
         private readonly Dictionary<string, Func<IDocument, IExecutionContext, SpotifyClient, object>> _requests
             = new Dictionary<string, Func<IDocument, IExecutionContext, SpotifyClient, object>>();
+
+        private SpotifyClient _spotify;
 
         /// <summary>
         /// Creates a connection to the Spotify API with authenticated access.
@@ -33,6 +33,22 @@ namespace Statiq.Spotify
         public ReadSpotify(string token, string tokenType = "Bearer")
         {
             _spotify = new SpotifyClient(token, tokenType);
+        }
+
+        /// <summary>
+        /// Recreate a connection to the Spotify API with authenticated access with request token on demand.
+        /// </summary>
+        /// <param name="clientId">Spotify "CLIENT_ID" to use the API.</param>
+        /// <param name="clientSecret">Spotify "CLIENT_SECRET" to use the API.</param>
+        public ReadSpotify WithRequestTokenOnDemand(string clientId, string clientSecret)
+        {
+            SpotifyClientConfig config = SpotifyClientConfig
+                .CreateDefault()
+                .WithAuthenticator(new ClientCredentialsAuthenticator(clientId, clientSecret));
+
+            _spotify = new SpotifyClient(config);
+
+            return this;
         }
 
         /// <summary>
