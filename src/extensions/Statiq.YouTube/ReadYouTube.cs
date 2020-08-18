@@ -14,7 +14,7 @@ namespace Statiq.YouTube
     /// Outputs metadata for information from YouTube.
     /// </summary>
     /// <remarks>
-    /// This modules uses the Google.Apis.YouTube.v3 library and associated types to submit requests to GitHub. Because
+    /// This modules uses the Google.Apis.YouTube.v3 library and associated types to submit requests to YouTube. Because
     /// of the large number of different kinds of requests, this module does not attempt to provide a fully abstract wrapper
     /// around the Google.Apis.YouTube.v3 library. Instead, it simplifies the housekeeping involved in setting up an
     /// Google.Apis.YouTube.v3 client and requires you to provide functions that fetch whatever data you need. Each request
@@ -55,7 +55,7 @@ namespace Statiq.YouTube
             key.ThrowIfNullOrEmpty(nameof(key));
             request.ThrowIfNull(nameof(request));
 
-            _requests[key] = (doc, ctx, github) => request(ctx, github);
+            _requests[key] = (doc, ctx, youtube) => request(ctx, youtube);
             return this;
         }
 
