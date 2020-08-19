@@ -1,10 +1,11 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Statiq.Common;
 
-namespace Statiq.ApiClient
+namespace Statiq.Core
 {
     /// <summary>
     /// Outputs metadata for information from any API with its client.
@@ -17,25 +18,44 @@ namespace Statiq.ApiClient
     /// will be sent for each input document.
     /// </remarks>
     /// <category>Metadata</category>
-    public class ReadApiWithClient<TClient> : ParallelSyncModule
+    public class ReadApi<TClient> : ParallelModule
         where TClient : class
     {
         private readonly Dictionary<string, Func<IDocument, IExecutionContext, TClient, object>> _requests
-            = new Dictionary<string, Func<IDocument, IExecutionContext, TClient, object>>();
+            = new Dictionary<string, Func<IDocument, IExecutionContext, TClient, object>>(StringComparer.OrdinalIgnoreCase);
 
-        private readonly TClient _client;
+        private readonly Func<TClient> _clientFactory;
+
+        private readonly string _clientName;
 
         private Action<IDocument, IExecutionContext, TClient> _init;
 
-        private string _clientName;
+        private int _maxDegreeOfParallelism = -1;
 
         /// <summary>
         /// Creates a connection to the API using client.
         /// </summary>
         /// <param name="client">The API client to use.</param>
-        public ReadApiWithClient(TClient client)
+        /// <param name="clientName">Client name (by default is "API").</param>
+        public ReadApi(TClient client, string clientName = "API")
         {
-            _client = client ?? throw new ArgumentException("Argument is null", nameof(client));
+            client.ThrowIfNull(nameof(client));
+            _clientName = clientName.ThrowIfNullOrWhiteSpace(nameof(clientName));
+
+            _clientFactory = () => client;
+        }
+
+        /// <summary>
+        /// Creates a connection to the API using client factory.
+        /// </summary>
+        /// <param name="clientFactory">The API client factory to use.</param>
+        /// <param name="clientName">Client name (by default is "API").</param>
+        public ReadApi(Func<TClient> clientFactory, string clientName = "API")
+        {
+            clientFactory.ThrowIfNull(nameof(clientFactory));
+            _clientName = clientName.ThrowIfNullOrWhiteSpace(nameof(clientName));
+
+            _clientFactory = clientFactory;
         }
 
         /// <summary>
@@ -43,12 +63,9 @@ namespace Statiq.ApiClient
         /// </summary>
         /// <param name="init">An API client initialization action.</param>
         /// <returns>The current module instance.</returns>
-        public ReadApiWithClient<TClient> WithClientInitialization(Action<TClient> init)
+        public ReadApi<TClient> WithClientInitialization(Action<TClient> init)
         {
-            if (init == null)
-            {
-                throw new ArgumentException("Argument is null or empty", nameof(init));
-            }
+            init.ThrowIfNull(nameof(init));
 
             _init = (doc, ctx, client) => init(client);
             return this;
@@ -59,12 +76,9 @@ namespace Statiq.ApiClient
         /// </summary>
         /// <param name="init">An API client initialization action.</param>
         /// <returns>The current module instance.</returns>
-        public ReadApiWithClient<TClient> WithClientInitialization(Action<IExecutionContext, TClient> init)
+        public ReadApi<TClient> WithClientInitialization(Action<IExecutionContext, TClient> init)
         {
-            if (init == null)
-            {
-                throw new ArgumentException("Argument is null or empty", nameof(init));
-            }
+            init.ThrowIfNull(nameof(init));
 
             _init = (doc, ctx, client) => init(ctx, client);
             return this;
@@ -75,25 +89,20 @@ namespace Statiq.ApiClient
         /// </summary>
         /// <param name="init">An API client initialization action.</param>
         /// <returns>The current module instance.</returns>
-        public ReadApiWithClient<TClient> WithClientInitialization(Action<IDocument, IExecutionContext, TClient> init)
+        public ReadApi<TClient> WithClientInitialization(Action<IDocument, IExecutionContext, TClient> init)
         {
-            if (init == null)
-            {
-                throw new ArgumentException("Argument is null or empty", nameof(init));
-            }
-
             _init = init.ThrowIfNull(nameof(init));
             return this;
         }
 
         /// <summary>
-        /// Submits the API client name (for logging).
+        /// Submits the maximum number of enabled concurrent tasks for executing requests.
         /// </summary>
-        /// <param name="name">Client name.</param>
+        /// <param name="maxDegreeOfParallelism">The maximum number of enabled concurrent tasks for executing requests. Put 1 to execute requests synchronously.</param>
         /// <returns>The current module instance.</returns>
-        public ReadApiWithClient<TClient> WithClientName(string name)
+        public ReadApi<TClient> WithMaxDegreeOfParallelism(int maxDegreeOfParallelism)
         {
-            _clientName = name.ThrowIfNullOrWhiteSpace(nameof(name));
+            _maxDegreeOfParallelism = maxDegreeOfParallelism;
             return this;
         }
 
@@ -103,7 +112,7 @@ namespace Statiq.ApiClient
         /// <param name="key">The metadata key in which to store the return value of the request function.</param>
         /// <param name="request">A function with the request to make.</param>
         /// <returns>The current module instance.</returns>
-        public ReadApiWithClient<TClient> WithRequest(string key, Func<IExecutionContext, TClient, object> request)
+        public ReadApi<TClient> WithRequest(string key, Func<IExecutionContext, TClient, object> request)
         {
             key.ThrowIfNullOrWhiteSpace(nameof(key));
             request.ThrowIfNull(nameof(request));
@@ -118,7 +127,7 @@ namespace Statiq.ApiClient
         /// <param name="key">The metadata key in which to store the return value of the request function.</param>
         /// <param name="request">A function with the request to make.</param>
         /// <returns>The current module instance.</returns>
-        public ReadApiWithClient<TClient> WithRequest(string key, Func<IDocument, IExecutionContext, TClient, object> request)
+        public ReadApi<TClient> WithRequest(string key, Func<IDocument, IExecutionContext, TClient, object> request)
         {
             key.ThrowIfNullOrWhiteSpace(nameof(key));
 
@@ -127,23 +136,28 @@ namespace Statiq.ApiClient
         }
 
         /// <inheritdoc/>
-        protected override IEnumerable<IDocument> ExecuteInput(IDocument input, IExecutionContext context)
+        protected override Task<IEnumerable<IDocument>> ExecuteInputAsync(IDocument input, IExecutionContext context)
         {
-            _init?.Invoke(input, context, _client);
-            ConcurrentDictionary<string, object> results = new ConcurrentDictionary<string, object>();
-            System.Threading.Tasks.Parallel.ForEach(_requests, request =>
+            TClient client = _clientFactory.Invoke();
+            _init?.Invoke(input, context, client);
+            ConcurrentDictionary<string, object> results = new ConcurrentDictionary<string, object>(StringComparer.OrdinalIgnoreCase);
+            System.Threading.Tasks.Parallel.ForEach(_requests, new ParallelOptions { MaxDegreeOfParallelism = _maxDegreeOfParallelism }, request =>
             {
                 context.LogDebug("Submitting {0} {1} request for {2}", request.Key, _clientName, input.ToSafeDisplayString());
                 try
                 {
-                    results[request.Key] = request.Value(input, context, _client);
+                    object requestValue = request.Value(input, context, client);
+                    if (!(requestValue is null))
+                    {
+                        results[request.Key] = requestValue;
+                    }
                 }
                 catch (Exception ex)
                 {
                     context.LogWarning("Exception while submitting {0} {1} request for {2}: {3}", request.Key, _clientName, input.ToSafeDisplayString(), ex.ToString());
                 }
             });
-            return input.Clone(results).Yield();
+            return results.Count > 0 ? input.Clone(results).YieldAsync() : input.YieldAsync();
         }
     }
 }
