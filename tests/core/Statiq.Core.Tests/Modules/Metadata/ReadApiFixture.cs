@@ -1,5 +1,7 @@
-﻿using System.Net.Http;
+﻿using System;
+using System.Net.Http;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 using NUnit.Framework;
 using Shouldly;
 using Statiq.Common;
@@ -43,6 +45,45 @@ namespace Statiq.Core.Tests.Modules.Metadata
                 // Then
                 result["Foo"].ShouldBe(1);
                 result["Bar"].ShouldBe("baz");
+            }
+
+            /// <summary>
+            /// Sets the metadata from the requests with throttling.
+            /// </summary>
+            [NonParallelizable]
+            [TestCase(-1, 1, 1000u)]
+            [TestCase(2, 1, 1000u)]
+            [TestCase(1, 2, 1000u)]
+            public async Task SetsMetadataWithThrottling(int maxDegreeOfParallelism, int requestLimit, uint requestDelay)
+            {
+                // Given
+                double epsilon = 0.6d;
+                HttpClient httpClient = new HttpClient();
+                TestDocument document = new TestDocument();
+                IModule client = new ReadApi<HttpClient>(httpClient)
+                    .WithMaxDegreeOfParallelism(maxDegreeOfParallelism)
+                    .WithRequestLimit(requestLimit)
+                    .WithRequestDelay(requestDelay)
+                    .WithRequest("Foo", (ctx, yt) =>
+                    {
+                        DateTime now = DateTime.Now;
+                        ctx.LogDebug("Foo: DateTime now is {0}", now.ToString("HH:mm:ss.fff"));
+                        return now;
+                    })
+                    .WithRequest("Bar", (doc, ctx, yt) =>
+                    {
+                        DateTime now = DateTime.Now;
+                        ctx.LogDebug("Bar: DateTime now is {0}", now.ToString("HH:mm:ss.fff"));
+                        return now;
+                    });
+
+                // When
+                TestDocument result = await ExecuteAsync(document, client).SingleAsync();
+
+                // Then
+                DateTime fooDateTime = result["Foo"].ShouldBeOfType<DateTime>();
+                DateTime barDateTime = result["Bar"].ShouldBeOfType<DateTime>();
+                Math.Abs(fooDateTime.Subtract(barDateTime).TotalMilliseconds).ShouldBeGreaterThanOrEqualTo(requestDelay - epsilon);
             }
 
             /// <summary>

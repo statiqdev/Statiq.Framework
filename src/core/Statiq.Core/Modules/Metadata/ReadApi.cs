@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Statiq.Common;
@@ -30,7 +31,11 @@ namespace Statiq.Core
 
         private Action<IDocument, IExecutionContext, TClient> _init;
 
+        private SemaphoreSlim _throttler;
+
         private int _maxDegreeOfParallelism = -1;
+
+        private uint _requestDelay;
 
         /// <summary>
         /// Creates a connection to the API using client.
@@ -107,6 +112,28 @@ namespace Statiq.Core
         }
 
         /// <summary>
+        /// Submits the limit of executing requests.
+        /// </summary>
+        /// <param name="requestLimit">The limit of executing requests.</param>
+        /// <returns>The current module instance.</returns>
+        public ReadApi<TClient> WithRequestLimit(int requestLimit)
+        {
+            _throttler = new SemaphoreSlim(requestLimit, requestLimit);
+            return this;
+        }
+
+        /// <summary>
+        /// Submits the requests delay for each request in the current instance of module.
+        /// </summary>
+        /// <param name="requestDelay">The requests delay in milliseconds.</param>
+        /// <returns>The current module instance.</returns>
+        public ReadApi<TClient> WithRequestDelay(uint requestDelay)
+        {
+            _requestDelay = requestDelay;
+            return this;
+        }
+
+        /// <summary>
         /// Submits a request to the API client. This allows you to incorporate data from the execution context in your request.
         /// </summary>
         /// <param name="key">The metadata key in which to store the return value of the request function.</param>
@@ -146,6 +173,8 @@ namespace Statiq.Core
                 context.LogDebug("Submitting {0} {1} request for {2}", request.Key, _clientName, input.ToSafeDisplayString());
                 try
                 {
+                    _throttler?.Wait();
+
                     object requestValue = request.Value(input, context, client);
                     if (!(requestValue is null))
                     {
@@ -156,7 +185,17 @@ namespace Statiq.Core
                 {
                     context.LogWarning("Exception while submitting {0} {1} request for {2}: {3}", request.Key, _clientName, input.ToSafeDisplayString(), ex.ToString());
                 }
+                finally
+                {
+                    if (_requestDelay > 0)
+                    {
+                        Task.WaitAll(Task.Delay((int)_requestDelay));
+                    }
+
+                    _throttler?.Release();
+                }
             });
+
             return results.Count > 0 ? input.Clone(results).YieldAsync() : input.YieldAsync();
         }
     }
