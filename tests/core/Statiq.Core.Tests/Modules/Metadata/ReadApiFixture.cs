@@ -57,7 +57,7 @@ namespace Statiq.Core.Tests.Modules.Metadata
             public async Task SetsMetadataWithThrottling(int maxDegreeOfParallelism, int requestLimit, uint requestDelay)
             {
                 // Given
-                double epsilon = 0.6d;
+                double epsilon = 5d;
                 HttpClient httpClient = new HttpClient();
                 TestDocument document = new TestDocument();
                 IModule client = new ReadApi<HttpClient>(httpClient)
