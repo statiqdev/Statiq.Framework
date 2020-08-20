@@ -1,7 +1,10 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Scriban;
+using Scriban.Parsing;
 using Scriban.Runtime;
 using Statiq.Common;
 
@@ -28,12 +31,15 @@ namespace Statiq.Scriban
 
         private Config<object> _model;
         private MemberRenamerDelegate _renamer;
+        private ParserOptions _parserOptions;
+        private LexerOptions _lexerOptions;
 
         /// <summary>
         /// Parses Scriban templates in each input document and outputs documents with rendered content.
         /// </summary>
         public RenderScriban()
         {
+            _lexerOptions = LexerOptions.Default;
         }
 
         /// <summary>
@@ -66,6 +72,18 @@ namespace Statiq.Scriban
             return this;
         }
 
+        public RenderScriban WithParserOptions(ParserOptions parserOptions)
+        {
+            _parserOptions = parserOptions;
+            return this;
+        }
+
+        public RenderScriban WithLexerOptions(LexerOptions lexerOptions)
+        {
+            _lexerOptions = lexerOptions;
+            return this;
+        }
+
         /// <inheritdoc />
         protected override async Task<IEnumerable<IDocument>> ExecuteInputAsync(IDocument input, IExecutionContext context)
         {
@@ -93,7 +111,29 @@ namespace Statiq.Scriban
 
             // TODO: Support Liquid
             // TODO: Expose ParserOptions and LexerOptions
-            Template template = Template.Parse(content, input.Source.FullPath);
+            Template template = Template.Parse(content, input.Source.FullPath, _parserOptions, _lexerOptions);
+
+            if (template.HasErrors)
+            {
+                throw new InvalidOperationException(
+                    $"Errors while parsing template.\n{string.Join("\n", template.Messages.Select(x => x.ToString()))}");
+            }
+
+            foreach (LogMessage message in template.Messages)
+            {
+                switch (message.Type)
+                {
+                    case ParserMessageType.Error:
+                        context.LogError(message.ToString());
+                        break;
+                    case ParserMessageType.Warning:
+                        context.LogWarning(message.ToString());
+                        break;
+                    default:
+                        context.LogInformation(message.ToString());
+                        break;
+                }
+            }
 
             IScriptObject scriptObject;
 
@@ -116,7 +156,9 @@ namespace Statiq.Scriban
             TemplateContext templateContext = new StatiqTemplateContext
             {
                 TemplateLoader = new TemplateLoader(context.FileSystem),
-                MemberRenamer = _renamer
+                MemberRenamer = _renamer,
+                TemplateLoaderLexerOptions = _lexerOptions,
+                TemplateLoaderParserOptions = _parserOptions,
             };
             templateContext.PushGlobal(scriptObject);
 

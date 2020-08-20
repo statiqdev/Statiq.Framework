@@ -1,5 +1,9 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Collections.Immutable;
+using System.Linq;
+using System.Threading.Tasks;
 using NUnit.Framework;
+using Scriban.Parsing;
 using Shouldly;
 using Statiq.Common;
 using Statiq.Testing;
@@ -463,6 +467,52 @@ This is a string with the value 2 modified";
 
                 // Then
                 result.Content.ShouldBe(output, StringCompareShould.IgnoreLineEndings);
+            }
+
+            [Test]
+            public async Task CustomLexerOptions()
+            {
+                // Given
+                const string input = "title";
+                const string output = "Hello World!";
+                TestDocument document = new TestDocument(new MetadataItems { { "title", "Hello World!" } }, input);
+                RenderScriban scriban = new RenderScriban()
+                    .WithLexerOptions(new LexerOptions
+                    {
+                        Mode = ScriptMode.ScriptOnly,
+                    });
+
+                // When
+                TestDocument result = await ExecuteAsync(document, scriban).SingleAsync();
+
+                // Then
+                result.Content.ShouldBe(output, StringCompareShould.IgnoreLineEndings);
+            }
+
+            [Test]
+            public async Task CustomParserOptions()
+            {
+                // Given
+                const string input = @"
+{{ for x in 1..10 }}
+    {{ for x in 1..10 }}
+        {{ for x in 1..10 }}
+            We should not get here.
+        {{ end }}
+    {{ end }}
+{{ end }}";
+                TestDocument document = new TestDocument(input);
+                RenderScriban scriban = new RenderScriban()
+                    .WithParserOptions(new ParserOptions
+                    {
+                        ExpressionDepthLimit = 2
+                    });
+
+                // When, Then
+                (await Should.ThrowAsync<Exception>(async () =>
+                        await ExecuteAsync(document, scriban))).
+                    Message.ShouldContain(
+                        "<input>(2,13) : error : The statement depth limit `2` was reached when parsing this statement");
             }
         }
     }
