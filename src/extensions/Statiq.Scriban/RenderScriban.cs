@@ -104,7 +104,7 @@ namespace Statiq.Scriban
             }
 
             // TODO: Expose member renamer and filter
-            TemplateContext templateContext = new TemplateContext
+            TemplateContext templateContext = new StatiqTemplateContext()
             {
                 TemplateLoader = new TemplateLoader(context.FileSystem)
             };

@@ -188,15 +188,18 @@ custom_value2
 {{~ for post in posts ~}}
 {{ post.title }}
 {{ post.description }}
-{{ post.custom }}
+{{ post.custom.value }}
+{{ post.custom.typed.foo }}
 {{ end ~}}";
                 const string output = @"
 title1
 description1
 custom_value1
+Bar
 title2
 description2
 custom_value2
+Bar2
 ";
 
                 TestDocument document = new TestDocument(
@@ -212,7 +215,8 @@ custom_value2
                                     {
                                         "Custom", new TestDocument(new MetadataItems
                                         {
-                                            { "Value", "custom_value1" }
+                                            { "Value", "custom_value1" },
+                                            { "Typed", new { Foo = "Bar" } }
                                         })
                                     }
                                 }),
@@ -223,7 +227,8 @@ custom_value2
                                     {
                                         "Custom", new TestDocument(new MetadataItems
                                         {
-                                            { "Value", "custom_value2" }
+                                            { "Value", "custom_value2" },
+                                            { "Typed", new { Foo = "Bar2" } }
                                         })
                                     }
                                 })

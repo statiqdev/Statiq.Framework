@@ -54,23 +54,7 @@ namespace Statiq.Scriban
 
             if (_metadata.TryGetValue(member, out string metadataName))
             {
-                if (_document.TryGetValue(metadataName, out value))
-                {
-                    Type type = value.GetType();
-
-                    if (value is IEnumerable<IDocument> documents)
-                    {
-                        value = new[] { documents.Select(document => document.AsDynamic()) };
-                    }
-                    else if (value is IDocument document)
-                    {
-                        value = document.AsDynamic();
-                    }
-
-                    return true;
-                }
-
-                return false;
+                return _document.TryGetValue(metadataName, out value);
             }
 
             if (_properties.TryGetValue(member, out string propertyName))
@@ -104,7 +88,7 @@ namespace Statiq.Scriban
 
         public IScriptObject Clone(bool deep) => new ScriptObject(_document.Clone(_document.ContentProvider), _locals);
 
-        public int Count => _locals.Count + _metadata.Count;
+        public int Count => _locals.Count + _metadata.Count + _properties.Count;
 
         public bool IsReadOnly { get; set; }
     }
