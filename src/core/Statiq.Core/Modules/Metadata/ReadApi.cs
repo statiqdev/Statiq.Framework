@@ -19,13 +19,17 @@ namespace Statiq.Core
     /// will be sent for each input document.
     /// </remarks>
     /// <category>Metadata</category>
-    public class ReadApi<TClient> : ParallelModule
+    public class ReadApi<TClient> : ParallelModule, IDisposable
         where TClient : class
     {
         private readonly Dictionary<string, Func<IDocument, IExecutionContext, TClient, object>> _requests
             = new Dictionary<string, Func<IDocument, IExecutionContext, TClient, object>>(StringComparer.OrdinalIgnoreCase);
 
         private readonly Func<TClient> _clientFactory;
+
+        private TClient _client;
+
+        private TClient CurrentClient => _client ??= _clientFactory?.Invoke();
 
         private readonly string _clientName;
 
@@ -61,6 +65,17 @@ namespace Statiq.Core
             _clientName = clientName.ThrowIfNullOrWhiteSpace(nameof(clientName));
 
             _clientFactory = clientFactory;
+        }
+
+        /// <summary>
+        /// Dispose API client resources.
+        /// </summary>
+        public void Dispose()
+        {
+            if (_client is IDisposable disposableClient)
+            {
+                disposableClient.Dispose();
+            }
         }
 
         /// <summary>
@@ -165,8 +180,7 @@ namespace Statiq.Core
         /// <inheritdoc/>
         protected override Task<IEnumerable<IDocument>> ExecuteInputAsync(IDocument input, IExecutionContext context)
         {
-            TClient client = _clientFactory.Invoke();
-            _init?.Invoke(input, context, client);
+            _init?.Invoke(input, context, CurrentClient);
             ConcurrentDictionary<string, object> results = new ConcurrentDictionary<string, object>(StringComparer.OrdinalIgnoreCase);
             System.Threading.Tasks.Parallel.ForEach(_requests, new ParallelOptions { MaxDegreeOfParallelism = _maxDegreeOfParallelism }, request =>
             {
@@ -175,7 +189,7 @@ namespace Statiq.Core
                 {
                     _throttler?.Wait();
 
-                    object requestValue = request.Value(input, context, client);
+                    object requestValue = request.Value(input, context, CurrentClient);
                     if (!(requestValue is null))
                     {
                         results[request.Key] = requestValue;
