@@ -245,6 +245,71 @@ Bar2
             }
 
             [Test]
+            public async Task ComplexModelMetadataWithChildDocumentsAndCustomRenamer()
+            {
+                // Given
+                const string input = @"
+{{~ for post in POSTS ~}}
+{{ post.TITLE }}
+{{ post.DESCRIPTION }}
+{{ post.CUSTOM.VALUE }}
+{{ post.CUSTOM.TYPED.FOO }}
+{{ end ~}}";
+                const string output = @"
+title1
+description1
+custom_value1
+Bar
+title2
+description2
+custom_value2
+Bar2
+";
+
+                TestDocument document = new TestDocument(
+                    new MetadataItems
+                    {
+                        {
+                            "posts", new[]
+                            {
+                                new TestDocument(new MetadataItems
+                                {
+                                    { "Title", "title1" },
+                                    { "Description", "description1" },
+                                    {
+                                        "Custom", new TestDocument(new MetadataItems
+                                        {
+                                            { "Value", "custom_value1" },
+                                            { "Typed", new { Foo = "Bar" } }
+                                        })
+                                    }
+                                }),
+                                new TestDocument(new MetadataItems
+                                {
+                                    { "Title", "title2" },
+                                    { "Description", "description2" },
+                                    {
+                                        "Custom", new TestDocument(new MetadataItems
+                                        {
+                                            { "Value", "custom_value2" },
+                                            { "Typed", new { Foo = "Bar2" } }
+                                        })
+                                    }
+                                })
+                            }
+                        }
+                    }, input);
+                RenderScriban scriban = new RenderScriban()
+                    .WithMemberRenamer(x => x.Name.ToUpperInvariant());
+
+                // When
+                TestDocument result = await ExecuteAsync(document, scriban).SingleAsync();
+
+                // Then
+                result.Content.ShouldBe(output, StringCompareShould.IgnoreLineEndings);
+            }
+
+            [Test]
             public async Task RendersScribanFromMetadata()
             {
                 // Given

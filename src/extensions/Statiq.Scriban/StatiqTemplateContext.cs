@@ -32,14 +32,15 @@ namespace Statiq.Scriban
             };
 
             private readonly IDictionary<IDocument, ImmutableDictionary<string, string>> _documentMetadataCache;
-
             private readonly ImmutableDictionary<string, string> _properties;
+            private readonly MemberRenamerDelegate _renamer;
 
             public DocumentAccessor(MemberFilterDelegate memberFilter, MemberRenamerDelegate memberRenamer)
             {
+                _renamer = memberRenamer;
                 _documentMetadataCache = new Dictionary<IDocument, ImmutableDictionary<string, string>>(DocumentIdComparer.Instance);
                 _properties = PropertyNames
-                    .ToImmutableDictionary(StandardMemberRenamer.Rename);
+                    .ToImmutableDictionary(Rename);
             }
 
             public int GetMemberCount(TemplateContext context, SourceSpan span, object target) => _properties.Count + GetMetadata(target as IDocument).Count;
@@ -70,7 +71,7 @@ namespace Statiq.Scriban
                     {
                         nameof(IDocument.Id) => document.Id,
                         nameof(IDocument.Count) => document.Count,
-                        nameof(IDocument.Keys) => document.Keys.Select(StandardMemberRenamer.Rename),
+                        nameof(IDocument.Keys) => document.Keys.Select(Rename),
                         nameof(IDocument.Values) => document.Values,
                         _ => null
                     };
@@ -93,12 +94,14 @@ namespace Statiq.Scriban
                 if (!_documentMetadataCache.TryGetValue(document, out ImmutableDictionary<string, string> metadata))
                 {
                     metadata = document.Keys
-                        .ToImmutableDictionary(StandardMemberRenamer.Rename);
+                        .ToImmutableDictionary(Rename);
                     _documentMetadataCache[document] = metadata;
                 }
 
                 return metadata;
             }
+
+            private string Rename(string member) => _renamer?.Invoke(new DocumentMemberInfo(member)) ?? member;
         }
     }
 }

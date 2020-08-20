@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using Scriban;
@@ -21,18 +20,19 @@ namespace Statiq.Scriban
         };
 
         private readonly IDocument _document;
-
         private readonly ImmutableDictionary<string, string> _properties;
         private readonly ImmutableDictionary<string, string> _metadata;
         private readonly Dictionary<string, object> _locals;
+        private readonly MemberRenamerDelegate _renamer;
 
-        public ScriptObject(IDocument document, IEnumerable<KeyValuePair<string, object>> locals = null)
+        public ScriptObject(IDocument document, MemberRenamerDelegate renamer, IEnumerable<KeyValuePair<string, object>> locals = null)
         {
             _document = document;
+            _renamer = renamer;
             _properties = PropertyNames
-                .ToImmutableDictionary(StandardMemberRenamer.Rename);
+                .ToImmutableDictionary(Rename);
             _metadata = document.Keys
-                .ToImmutableDictionary(StandardMemberRenamer.Rename);
+                .ToImmutableDictionary(Rename);
 
             _locals = locals?.ToDictionary(x => x.Key, x => x.Value) ?? new Dictionary<string, object>();
         }
@@ -63,7 +63,7 @@ namespace Statiq.Scriban
                 {
                     nameof(IDocument.Id) => _document.Id,
                     nameof(IDocument.Count) => _document.Count,
-                    nameof(IDocument.Keys) => _document.Keys.Select(StandardMemberRenamer.Rename),
+                    nameof(IDocument.Keys) => _document.Keys.Select(Rename),
                     nameof(IDocument.Values) => _document.Values,
                     _ => null
                 };
@@ -86,10 +86,12 @@ namespace Statiq.Scriban
             // TODO: We are ignoring readOnly.
         }
 
-        public IScriptObject Clone(bool deep) => new ScriptObject(_document.Clone(_document.ContentProvider), _locals);
+        public IScriptObject Clone(bool deep) => new ScriptObject(_document.Clone(_document.ContentProvider), _renamer, _locals);
 
         public int Count => _locals.Count + _metadata.Count + _properties.Count;
 
         public bool IsReadOnly { get; set; }
+
+        private string Rename(string member) => _renamer?.Invoke(new DocumentMemberInfo(member)) ?? member;
     }
 }

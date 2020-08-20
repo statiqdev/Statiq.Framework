@@ -27,6 +27,7 @@ namespace Statiq.Scriban
         private readonly string _destinationKey;
 
         private Config<object> _model;
+        private MemberRenamerDelegate _renamer;
 
         /// <summary>
         /// Parses Scriban templates in each input document and outputs documents with rendered content.
@@ -59,6 +60,12 @@ namespace Statiq.Scriban
             return this;
         }
 
+        public RenderScriban WithMemberRenamer(MemberRenamerDelegate renamer)
+        {
+            _renamer = renamer;
+            return this;
+        }
+
         /// <inheritdoc />
         protected override async Task<IEnumerable<IDocument>> ExecuteInputAsync(IDocument input, IExecutionContext context)
         {
@@ -82,6 +89,8 @@ namespace Statiq.Scriban
                 return input.Yield();
             }
 
+            _renamer ??= StandardMemberRenamer.Default;
+
             // TODO: Support Liquid
             // TODO: Expose ParserOptions and LexerOptions
             Template template = Template.Parse(content, input.Source.FullPath);
@@ -90,7 +99,7 @@ namespace Statiq.Scriban
 
             if (_model is null)
             {
-                scriptObject = new ScriptObject(input);
+                scriptObject = new ScriptObject(input, _renamer);
             }
             else
             {
@@ -99,14 +108,15 @@ namespace Statiq.Scriban
 
                 if (model != null)
                 {
-                    scriptObject.Import(model, filter: null, renamer: null);
+                    scriptObject.Import(model, filter: null, renamer: _renamer);
                 }
             }
 
-            // TODO: Expose member renamer and filter
-            TemplateContext templateContext = new StatiqTemplateContext()
+            // TODO: Expose member filter
+            TemplateContext templateContext = new StatiqTemplateContext
             {
-                TemplateLoader = new TemplateLoader(context.FileSystem)
+                TemplateLoader = new TemplateLoader(context.FileSystem),
+                MemberRenamer = _renamer
             };
             templateContext.PushGlobal(scriptObject);
 
