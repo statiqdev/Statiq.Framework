@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -26,8 +25,6 @@ namespace Statiq.Core
         private readonly Dictionary<string, Func<IDocument, IExecutionContext, TClient, Task<object>>> _requests
             = new Dictionary<string, Func<IDocument, IExecutionContext, TClient, Task<object>>>(StringComparer.OrdinalIgnoreCase);
 
-        private readonly TClient _client;
-
         private readonly Config<TClient> _clientFactory;
 
         // Controls client disposal, but only for clients from the factory. Otherwise, if _client is set,
@@ -35,6 +32,8 @@ namespace Statiq.Core
         private readonly bool _shouldDisposeFactoryClient = false;
 
         private readonly string _clientName;
+
+        private TClient _client;
 
         private Action<IDocument, IExecutionContext, TClient> _init;
 
@@ -79,7 +78,7 @@ namespace Statiq.Core
         }
 
         /// <summary>
-        /// Dispose API client resources.
+        /// Dispose the API client resources.
         /// </summary>
         public void Dispose()
         {
@@ -214,8 +213,8 @@ namespace Statiq.Core
         protected override async Task<IEnumerable<IDocument>> ExecuteInputAsync(IDocument input, IExecutionContext context)
         {
             // Get the client
-            TClient client = _client ?? await _clientFactory.GetValueAsync(input, context);
-            if (client is null)
+            _client ??= await _clientFactory.GetValueAsync(input, context);
+            if (_client is null)
             {
                 return input.Yield();
             }
@@ -223,7 +222,7 @@ namespace Statiq.Core
             try
             {
                 // Run initialization
-                _init?.Invoke(input, context, client);
+                _init?.Invoke(input, context, _client);
 
                 // Get tasks for each request so they can be executed asynchronously
                 IEnumerable<Task<KeyValuePair<string, object>>> requestTasks = _requests.Select(async request =>
@@ -235,7 +234,7 @@ namespace Statiq.Core
                     }
 
                     // Get a task to execute the request with a delay after
-                    Task<object> requestTask = ExecuteRequestAsync(request, input, context, client);
+                    Task<object> requestTask = ExecuteRequestAsync(request, input, context, _client);
                     _ = requestTask.ContinueWith(async _ =>
                     {
                         if (_requestDelay > 0)
@@ -260,7 +259,7 @@ namespace Statiq.Core
             finally
             {
                 // Dispose the factory client if requested
-                if (_shouldDisposeFactoryClient && client is IDisposable disposableClient)
+                if (_shouldDisposeFactoryClient && _client is IDisposable disposableClient)
                 {
                     disposableClient.Dispose();
                 }

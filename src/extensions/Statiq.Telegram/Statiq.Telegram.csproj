@@ -13,6 +13,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\core\Statiq.Common\Statiq.Common.csproj" />
+    <ProjectReference Include="..\..\core\Statiq.Core\Statiq.Core.csproj" />
   </ItemGroup>
 
 </Project>
