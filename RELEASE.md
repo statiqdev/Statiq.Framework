@@ -1,6 +1,8 @@
 # 1.0.0-beta.21
 
 - Updated Spectre.Cli CLI library for better console help messages.
+- Added a new `ReadApi` module for generally reading from an API client (#126, thanks @unchase).
+
 
 # 1.0.0-beta.20
 

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
@@ -22,14 +23,14 @@ namespace Statiq.Core
     public class ReadApi<TClient> : ParallelModule, IDisposable
         where TClient : class
     {
-        private readonly Dictionary<string, Func<IDocument, IExecutionContext, TClient, object>> _requests
-            = new Dictionary<string, Func<IDocument, IExecutionContext, TClient, object>>(StringComparer.OrdinalIgnoreCase);
+        private readonly Dictionary<string, Func<IDocument, IExecutionContext, TClient, Task<object>>> _requests
+            = new Dictionary<string, Func<IDocument, IExecutionContext, TClient, Task<object>>>(StringComparer.OrdinalIgnoreCase);
 
-        private readonly Func<TClient> _clientFactory;
+        private readonly TClient _client;
 
-        private TClient _client;
+        private readonly Config<TClient> _clientFactory;
 
-        private TClient CurrentClient => _client ??= _clientFactory?.Invoke();
+        private readonly bool _shouldDisposeFactoryClient = false;
 
         private readonly string _clientName;
 
@@ -37,34 +38,42 @@ namespace Statiq.Core
 
         private SemaphoreSlim _throttler;
 
-        private int _maxDegreeOfParallelism = -1;
-
-        private uint _requestDelay;
+        private int _requestDelay;
 
         /// <summary>
-        /// Creates a connection to the API using client.
+        /// Creates a connection to the API using the client.
         /// </summary>
         /// <param name="client">The API client to use.</param>
-        /// <param name="clientName">Client name (by default is "API").</param>
+        /// <param name="clientName">The client name ("API" by default).</param>
         public ReadApi(TClient client, string clientName = "API")
         {
-            client.ThrowIfNull(nameof(client));
+            _client = client.ThrowIfNull(nameof(client));
             _clientName = clientName.ThrowIfNullOrWhiteSpace(nameof(clientName));
-
-            _clientFactory = () => client;
         }
 
         /// <summary>
-        /// Creates a connection to the API using client factory.
+        /// Creates a connection to the API using the client factory.
         /// </summary>
-        /// <param name="clientFactory">The API client factory to use.</param>
-        /// <param name="clientName">Client name (by default is "API").</param>
-        public ReadApi(Func<TClient> clientFactory, string clientName = "API")
+        /// <param name="clientFactory">The API client factory to use which will be called for each document.</param>
+        /// <param name="clientName">The client name ("API" by default).</param>
+        public ReadApi(Config<TClient> clientFactory, string clientName = "API")
         {
-            clientFactory.ThrowIfNull(nameof(clientFactory));
+            _clientFactory = clientFactory.ThrowIfNull(nameof(clientFactory));
+            _shouldDisposeFactoryClient = true;
             _clientName = clientName.ThrowIfNullOrWhiteSpace(nameof(clientName));
+        }
 
-            _clientFactory = clientFactory;
+        /// <summary>
+        /// Creates a connection to the API using the client factory.
+        /// </summary>
+        /// <param name="clientFactory">The API client factory to use which will be called for each document.</param>
+        /// <param name="shouldDisposeClient"><c>true</c> to dispose the client returned by the factory after each document.</param>
+        /// <param name="clientName">The client name ("API" by default).</param>
+        public ReadApi(Config<TClient> clientFactory, bool shouldDisposeClient, string clientName = "API")
+        {
+            _clientFactory = clientFactory.ThrowIfNull(nameof(clientFactory));
+            _shouldDisposeFactoryClient = shouldDisposeClient;
+            _clientName = clientName.ThrowIfNullOrWhiteSpace(nameof(clientName));
         }
 
         /// <summary>
@@ -87,7 +96,7 @@ namespace Statiq.Core
         {
             init.ThrowIfNull(nameof(init));
 
-            _init = (doc, ctx, client) => init(client);
+            _init = (_, __, client) => init(client);
             return this;
         }
 
@@ -100,7 +109,7 @@ namespace Statiq.Core
         {
             init.ThrowIfNull(nameof(init));
 
-            _init = (doc, ctx, client) => init(ctx, client);
+            _init = (_, ctx, client) => init(ctx, client);
             return this;
         }
 
@@ -116,24 +125,16 @@ namespace Statiq.Core
         }
 
         /// <summary>
-        /// Submits the maximum number of enabled concurrent tasks for executing requests.
-        /// </summary>
-        /// <param name="maxDegreeOfParallelism">The maximum number of enabled concurrent tasks for executing requests. Put 1 to execute requests synchronously.</param>
-        /// <returns>The current module instance.</returns>
-        public ReadApi<TClient> WithMaxDegreeOfParallelism(int maxDegreeOfParallelism)
-        {
-            _maxDegreeOfParallelism = maxDegreeOfParallelism;
-            return this;
-        }
-
-        /// <summary>
         /// Submits the limit of executing requests.
         /// </summary>
         /// <param name="requestLimit">The limit of executing requests.</param>
         /// <returns>The current module instance.</returns>
         public ReadApi<TClient> WithRequestLimit(int requestLimit)
         {
-            _throttler = new SemaphoreSlim(requestLimit, requestLimit);
+            if (requestLimit > 0)
+            {
+                _throttler = new SemaphoreSlim(requestLimit);
+            }
             return this;
         }
 
@@ -142,7 +143,7 @@ namespace Statiq.Core
         /// </summary>
         /// <param name="requestDelay">The requests delay in milliseconds.</param>
         /// <returns>The current module instance.</returns>
-        public ReadApi<TClient> WithRequestDelay(uint requestDelay)
+        public ReadApi<TClient> WithRequestDelay(int requestDelay)
         {
             _requestDelay = requestDelay;
             return this;
@@ -159,7 +160,7 @@ namespace Statiq.Core
             key.ThrowIfNullOrWhiteSpace(nameof(key));
             request.ThrowIfNull(nameof(request));
 
-            _requests[key] = (doc, ctx, client) => request(ctx, client);
+            _requests[key] = (_, ctx, client) => Task.FromResult(request(ctx, client));
             return this;
         }
 
@@ -172,45 +173,116 @@ namespace Statiq.Core
         public ReadApi<TClient> WithRequest(string key, Func<IDocument, IExecutionContext, TClient, object> request)
         {
             key.ThrowIfNullOrWhiteSpace(nameof(key));
+            request.ThrowIfNull(nameof(request));
+
+            _requests[key] = (doc, ctx, client) => Task.FromResult(request(doc, ctx, client));
+            return this;
+        }
+
+        /// <summary>
+        /// Submits a request to the API client. This allows you to incorporate data from the execution context in your request.
+        /// </summary>
+        /// <param name="key">The metadata key in which to store the return value of the request function.</param>
+        /// <param name="request">A function with the request to make.</param>
+        /// <returns>The current module instance.</returns>
+        public ReadApi<TClient> WithRequest(string key, Func<IExecutionContext, TClient, Task<object>> request)
+        {
+            key.ThrowIfNullOrWhiteSpace(nameof(key));
+            request.ThrowIfNull(nameof(request));
+
+            _requests[key] = (_, ctx, client) => request(ctx, client);
+            return this;
+        }
+
+        /// <summary>
+        /// Submits a request to the API. This allows you to incorporate data from the execution context and current document in your request.
+        /// </summary>
+        /// <param name="key">The metadata key in which to store the return value of the request function.</param>
+        /// <param name="request">A function with the request to make.</param>
+        /// <returns>The current module instance.</returns>
+        public ReadApi<TClient> WithRequest(string key, Func<IDocument, IExecutionContext, TClient, Task<object>> request)
+        {
+            key.ThrowIfNullOrWhiteSpace(nameof(key));
 
             _requests[key] = request.ThrowIfNull(nameof(request));
             return this;
         }
 
         /// <inheritdoc/>
-        protected override Task<IEnumerable<IDocument>> ExecuteInputAsync(IDocument input, IExecutionContext context)
+        protected override async Task<IEnumerable<IDocument>> ExecuteInputAsync(IDocument input, IExecutionContext context)
         {
-            _init?.Invoke(input, context, CurrentClient);
-            ConcurrentDictionary<string, object> results = new ConcurrentDictionary<string, object>(StringComparer.OrdinalIgnoreCase);
-            System.Threading.Tasks.Parallel.ForEach(_requests, new ParallelOptions { MaxDegreeOfParallelism = _maxDegreeOfParallelism }, request =>
+            // Get the client
+            TClient client = _client ?? await _clientFactory.GetValueAsync(input, context);
+            if (client is null)
             {
-                context.LogDebug("Submitting {0} {1} request for {2}", request.Key, _clientName, input.ToSafeDisplayString());
-                try
-                {
-                    _throttler?.Wait();
+                return input.Yield();
+            }
 
-                    object requestValue = request.Value(input, context, CurrentClient);
-                    if (!(requestValue is null))
-                    {
-                        results[request.Key] = requestValue;
-                    }
-                }
-                catch (Exception ex)
+            try
+            {
+                // Run initialization
+                _init?.Invoke(input, context, client);
+
+                // Get tasks for each request so they can be executed asynchronously
+                IEnumerable<Task<KeyValuePair<string, object>>> requestTasks = _requests.Select(async request =>
                 {
-                    context.LogWarning("Exception while submitting {0} {1} request for {2}: {3}", request.Key, _clientName, input.ToSafeDisplayString(), ex.ToString());
-                }
-                finally
-                {
-                    if (_requestDelay > 0)
+                    // Wait for the throttler
+                    if (_throttler is object)
                     {
-                        Task.WaitAll(Task.Delay((int)_requestDelay));
+                        await _throttler.WaitAsync();
                     }
 
-                    _throttler?.Release();
-                }
-            });
+                    // Get a task to execute the request with a delay after
+                    Task<object> requestTask = ExecuteRequestAsync(request, input, context, client);
+                    _ = requestTask.ContinueWith(async _ =>
+                    {
+                        if (_requestDelay > 0)
+                        {
+                            await Task.Delay(_requestDelay);
+                        }
+                        _throttler?.Release();
+                    });
 
-            return results.Count > 0 ? input.Clone(results).YieldAsync() : input.YieldAsync();
+                    // Execute the request and return the result (null results will be filtered out)
+                    object result = await requestTask;
+                    return new KeyValuePair<string, object>(request.Key, result);
+                });
+
+                // Execute the requests
+                KeyValuePair<string, object>[] results = await Task.WhenAll(requestTasks);
+
+                // Eliminate null results and clone the document if any are left
+                results = results.Where(x => x.Value is object).ToArray();
+                return results.Length > 0 ? input.Clone(results).Yield() : input.Yield();
+            }
+            finally
+            {
+                // Dispose the factory client if requested
+                if (_shouldDisposeFactoryClient && client is IDisposable disposableClient)
+                {
+                    disposableClient.Dispose();
+                }
+            }
+        }
+
+        /// <summary>
+        /// This should be overridden in derived classes to provide preparation for each request if needed.
+        /// </summary>
+        protected virtual async Task<object> ExecuteRequestAsync(
+            KeyValuePair<string, Func<IDocument, IExecutionContext, TClient, Task<object>>> request,
+            IDocument input,
+            IExecutionContext context,
+            TClient client)
+        {
+            try
+            {
+                return await request.Value(input, context, client);
+            }
+            catch (Exception ex)
+            {
+                context.LogWarning("Exception while submitting {0} {1} request for {2}: {3}", request.Key, _clientName, input.ToSafeDisplayString(), ex.ToString());
+                return default;
+            }
         }
     }
 }
