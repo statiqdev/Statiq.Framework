@@ -69,21 +69,21 @@ namespace Statiq.Core.Tests.Modules.Metadata
                     {
                         DateTime now = DateTime.Now;
                         ctx.LogDebug("Foo: DateTime now is {0}", now.ToString("HH:mm:ss.fff"));
-                        await Task.Delay(100);
+                        await Task.Delay(150);
                         return now;
                     })
                     .WithRequest("Buz", async (doc, ctx, yt) =>
                     {
                         DateTime now = DateTime.Now;
                         ctx.LogDebug("Buz: DateTime now is {0}", now.ToString("HH:mm:ss.fff"));
-                        await Task.Delay(100);
+                        await Task.Delay(150);
                         return now;
                     })
                     .WithRequest("Bar", async (doc, ctx, yt) =>
                     {
                         DateTime now = DateTime.Now;
                         ctx.LogDebug("Bar: DateTime now is {0}", now.ToString("HH:mm:ss.fff"));
-                        await Task.Delay(100);
+                        await Task.Delay(150);
                         return now;
                     });
 
