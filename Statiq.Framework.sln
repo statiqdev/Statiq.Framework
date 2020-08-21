@@ -101,7 +101,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Statiq.Handlebars.Tests", "
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "build", "build", "{5904F60D-39EF-4521-B993-925F87264A31}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Statiq.Framework.Build", "build\Statiq.Framework.Build\Statiq.Framework.Build.csproj", "{D5FF0DD8-E009-487B-ABF1-2498E6122D67}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Statiq.Framework.Build", "build\Statiq.Framework.Build\Statiq.Framework.Build.csproj", "{D5FF0DD8-E009-487B-ABF1-2498E6122D67}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
