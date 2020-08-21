@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
 using Microsoft.Extensions.DependencyInjection;
 using Statiq.Common;
 
@@ -15,6 +13,9 @@ namespace Statiq.App
 
         public static Bootstrapper AddPipelines<TParent>(this Bootstrapper bootstrapper) =>
             bootstrapper.AddPipelines(typeof(TParent));
+
+        public static Bootstrapper ModifyPipeline(this Bootstrapper bootstrapper, string name, Action<IPipeline> action) =>
+            bootstrapper.ConfigureEngine(x => action.ThrowIfNull(nameof(action))(x.Pipelines[name.ThrowIfNullOrEmpty(nameof(name))]));
 
         // Builder
 

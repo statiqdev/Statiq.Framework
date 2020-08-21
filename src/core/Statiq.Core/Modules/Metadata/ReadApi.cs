@@ -30,6 +30,8 @@ namespace Statiq.Core
 
         private readonly Config<TClient> _clientFactory;
 
+        // Controls client disposal, but only for clients from the factory. Otherwise, if _client is set,
+        // and is disposable, it'll be disposed regardless.
         private readonly bool _shouldDisposeFactoryClient = false;
 
         private readonly string _clientName;
