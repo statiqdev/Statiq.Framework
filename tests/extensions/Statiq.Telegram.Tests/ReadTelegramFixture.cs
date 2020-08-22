@@ -28,8 +28,8 @@ namespace Statiq.Telegram.Tests
                 // Given
                 TestDocument document = new TestDocument();
                 IModule telegram = new ReadTelegram(accessToken)
-                    .WithRequest("Foo", (ctx, yt) => 1)
-                    .WithRequest("Bar", (doc, ctx, yt) => "baz");
+                    .WithRequest("Foo", (ctx, tlg) => 1)
+                    .WithRequest("Bar", (doc, ctx, tlg) => "baz");
 
                 // When
                 TestDocument result = await ExecuteAsync(document, telegram).SingleAsync();
@@ -53,8 +53,8 @@ namespace Statiq.Telegram.Tests
                             // Credentials if needed:
                             Credentials = new NetworkCredential(proxyUserName, proxyPassword)
                         })))
-                    .WithRequest("Foo", (ctx, yt) => 1)
-                    .WithRequest("Bar", (doc, ctx, yt) => "baz");
+                    .WithRequest("Foo", (ctx, tlg) => 1)
+                    .WithRequest("Bar", (doc, ctx, tlg) => "baz");
 
                 // When
                 TestDocument result = await ExecuteAsync(document, telegram).SingleAsync();
