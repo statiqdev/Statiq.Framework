@@ -1,6 +1,7 @@
 ﻿using System.Threading.Tasks;
 using NUnit.Framework;
 using Shouldly;
+using SpotifyAPI.Web;
 using Statiq.Common;
 using Statiq.Testing;
 
@@ -20,12 +21,12 @@ namespace Statiq.Spotify.Tests
             /// <summary>
             /// Sets the metadata from the requests.
             /// </summary>
-            [Test]
-            public async Task SetsMetadata()
+            [TestCase("bearer_token")]
+            public async Task SetsMetadata(string accessToken)
             {
                 // Given
                 TestDocument document = new TestDocument();
-                IModule spotify = new ReadSpotify("bearer_token")
+                IModule spotify = new ReadSpotify(accessToken)
                     .WithRequest("Foo", (ctx, yt) => 1)
                     .WithRequest("Bar", (doc, ctx, yt) => "baz");
 
@@ -40,13 +41,32 @@ namespace Statiq.Spotify.Tests
             /// <summary>
             /// Sets the metadata from the requests with request token on demand.
             /// </summary>
-            [Test]
-            public async Task SetsMetadataWithRequestTokenOnDemand()
+            [TestCase("CLIENT_ID", "CLIENT_SECRET")]
+            public async Task SetsMetadataWithRequestTokenOnDemand(string clientId, string clientSecret)
             {
                 // Given
                 TestDocument document = new TestDocument();
-                IModule spotify = new ReadSpotify(string.Empty)
-                    .WithRequestTokenOnDemand("CLIENT_ID", "CLIENT_SECRET")
+                IModule spotify = new ReadSpotify(clientId, clientSecret, null)
+                    .WithRequest("Foo", (ctx, yt) => 1)
+                    .WithRequest("Bar", (doc, ctx, yt) => "baz");
+
+                // When
+                TestDocument result = await ExecuteAsync(document, spotify).SingleAsync();
+
+                // Then
+                result["Foo"].ShouldBe(1);
+                result["Bar"].ShouldBe("baz");
+            }
+
+            /// <summary>
+            /// Sets the metadata from the requests with client factory.
+            /// </summary>
+            [TestCase("bearer_token")]
+            public async Task SetsMetadataWithClientFactory(string accessToken)
+            {
+                // Given
+                TestDocument document = new TestDocument();
+                IModule spotify = new ReadSpotify(Config.FromDocument(_ => new SpotifyClient(accessToken)))
                     .WithRequest("Foo", (ctx, yt) => 1)
                     .WithRequest("Bar", (doc, ctx, yt) => "baz");
 
