@@ -27,8 +27,8 @@ namespace Statiq.Spotify.Tests
                 // Given
                 TestDocument document = new TestDocument();
                 IModule spotify = new ReadSpotify(accessToken)
-                    .WithRequest("Foo", (ctx, yt) => 1)
-                    .WithRequest("Bar", (doc, ctx, yt) => "baz");
+                    .WithRequest("Foo", (ctx, spf) => 1)
+                    .WithRequest("Bar", (doc, ctx, spf) => "baz");
 
                 // When
                 TestDocument result = await ExecuteAsync(document, spotify).SingleAsync();
@@ -47,8 +47,8 @@ namespace Statiq.Spotify.Tests
                 // Given
                 TestDocument document = new TestDocument();
                 IModule spotify = new ReadSpotify(clientId, clientSecret, null)
-                    .WithRequest("Foo", (ctx, yt) => 1)
-                    .WithRequest("Bar", (doc, ctx, yt) => "baz");
+                    .WithRequest("Foo", (ctx, spf) => 1)
+                    .WithRequest("Bar", (doc, ctx, spf) => "baz");
 
                 // When
                 TestDocument result = await ExecuteAsync(document, spotify).SingleAsync();
@@ -67,8 +67,8 @@ namespace Statiq.Spotify.Tests
                 // Given
                 TestDocument document = new TestDocument();
                 IModule spotify = new ReadSpotify(Config.FromDocument(_ => new SpotifyClient(accessToken)))
-                    .WithRequest("Foo", (ctx, yt) => 1)
-                    .WithRequest("Bar", (doc, ctx, yt) => "baz");
+                    .WithRequest("Foo", (ctx, spf) => 1)
+                    .WithRequest("Bar", (doc, ctx, spf) => "baz");
 
                 // When
                 TestDocument result = await ExecuteAsync(document, spotify).SingleAsync();
