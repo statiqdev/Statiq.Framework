@@ -1,5 +1,6 @@
 # 1.0.0-beta.21
 
+- Fixed a bug where the `EvaluateScript` module would reset the document media type for content return values.
 - Added a new `glob eval` command to evaluate a globbing pattern against a specified directory and report all the matches.
 - Added a new `glob test` command to test a specified path against a globbing pattern to see if it matches.
 - Removes subresource attributes in `MirrorResource` (#127).

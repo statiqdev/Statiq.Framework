@@ -54,7 +54,7 @@ namespace Statiq.Common
         private static async Task<IEnumerable<IDocument>> ChangeContentAsync(IExecutionContext context, IDocument document, object value)
         {
             // Check if this is a known content provider type first
-            IContentProvider contentProvider = await GetContentProviderAsync(context, value, false);
+            IContentProvider contentProvider = await GetContentProviderAsync(context, document, value, false);
             if (contentProvider is object)
             {
                 return context.CloneOrCreateDocument(document, contentProvider).Yield();
@@ -65,25 +65,26 @@ namespace Statiq.Common
             IDocument[] results = new IDocument[valueObjects.Length];
             for (int c = 0; c < valueObjects.Length; c++)
             {
-                results[c] = context.CloneOrCreateDocument(document, await GetContentProviderAsync(context, valueObjects[c], true));
+                results[c] = context.CloneOrCreateDocument(document, await GetContentProviderAsync(context, document, valueObjects[c], true));
             }
             return results;
         }
 
-        private static async Task<IContentProvider> GetContentProviderAsync(IExecutionContext context, object value, bool asString)
+        // Preserves the original media type of the input document
+        private static async Task<IContentProvider> GetContentProviderAsync(IExecutionContext context, IDocument document, object value, bool asString)
         {
             switch (value)
             {
                 case IContentProvider contentProvider:
                     return contentProvider;
                 case IContentProviderFactory factory:
-                    return factory.GetContentProvider();
+                    return factory.GetContentProvider(document?.ContentProvider?.MediaType);
                 case Stream stream:
-                    return context.GetContentProvider(stream);
+                    return context.GetContentProvider(stream, document?.ContentProvider?.MediaType);
                 case string str:
-                    return await context.GetContentProviderAsync(str);
+                    return await context.GetContentProviderAsync(str, document?.ContentProvider?.MediaType);
             }
-            return asString && value is object ? await context.GetContentProviderAsync(value.ToString()) : null;
+            return asString && value is object ? await context.GetContentProviderAsync(value.ToString(), document?.ContentProvider?.MediaType) : null;
         }
     }
 }
