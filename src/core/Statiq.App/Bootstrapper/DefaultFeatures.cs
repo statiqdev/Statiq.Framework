@@ -16,6 +16,7 @@ namespace Statiq.App
         Shortcodes = 1 << 7,
         Namespaces = 1 << 8,
         Pipelines = 1 << 9,
+        GlobCommands = 1 << 10,
         All =
             BootstrapperConfigurators
             | Logging
@@ -27,5 +28,6 @@ namespace Statiq.App
             | Shortcodes
             | Namespaces
             | Pipelines
+            | GlobCommands
     }
 }

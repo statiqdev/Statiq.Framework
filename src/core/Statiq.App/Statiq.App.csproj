@@ -26,6 +26,7 @@
   <ItemGroup>
     <ProjectReference Include="..\Statiq.Common\Statiq.Common.csproj" />
     <ProjectReference Include="..\Statiq.Core\Statiq.Core.csproj" />
+    <ProjectReference Include="..\Statiq.Testing\Statiq.Testing.csproj" />
   </ItemGroup>
 
 </Project>

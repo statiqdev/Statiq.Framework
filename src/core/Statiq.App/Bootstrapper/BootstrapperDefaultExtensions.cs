@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -58,6 +59,10 @@ namespace Statiq.App
             {
                 bootstrapper.AddDefaultPipelines();
             }
+            if (features.HasFlag(DefaultFeatures.GlobCommands))
+            {
+                bootstrapper.AddGlobCommands();
+            }
             return bootstrapper;
         }
 
@@ -113,6 +118,18 @@ namespace Statiq.App
             bootstrapper.SetDefaultCommand<PipelinesCommand<PipelinesCommandSettings>>();
             bootstrapper.AddCommand<PipelinesCommand<PipelinesCommandSettings>>();
             bootstrapper.AddCommand<DeployCommand>();
+            return bootstrapper;
+        }
+
+        public static Bootstrapper AddGlobCommands(this Bootstrapper bootstrapper)
+        {
+            bootstrapper.ThrowIfNull(nameof(bootstrapper));
+            bootstrapper.ConfigureCommands(x => x.AddBranch<GlobCommandSettings>("glob", y =>
+            {
+                y.SetDescription("Utility commands for testing globbing patterns");
+                y.AddCommand<GlobTestCommand>("test");
+                y.AddCommand<GlobEvalCommand>("eval");
+            }));
             return bootstrapper;
         }
 
