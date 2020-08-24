@@ -1,5 +1,6 @@
 # 1.0.0-beta.21
 
+- Removes subresource attributes in `MirrorResource` (#127).
 - Updated Spectre.Cli CLI library for better console help messages.
 - Added a new `ReadApi` module for generally reading from an API client (#126, thanks @unchase).
 - Added `IBootstrapper.ModifyPipeline()` to make it easier to modify an existing pipeline via the bootstrapper.

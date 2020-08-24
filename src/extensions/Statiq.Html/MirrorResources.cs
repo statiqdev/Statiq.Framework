@@ -87,6 +87,8 @@ namespace Statiq.Html
                         if (replacement is object)
                         {
                             element.Attributes["href"].Value = replacement;
+                            element.RemoveAttribute("integrity");
+                            element.RemoveAttribute("crossorigin");
                             modifiedDocument = true;
                         }
                     }
@@ -99,6 +101,8 @@ namespace Statiq.Html
                         if (replacement is object)
                         {
                             element.Source = replacement;
+                            element.RemoveAttribute("integrity");
+                            element.RemoveAttribute("crossorigin");
                             modifiedDocument = true;
                         }
                     }

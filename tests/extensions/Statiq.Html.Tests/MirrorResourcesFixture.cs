@@ -129,8 +129,8 @@ namespace Statiq.Html.Tests
                 TestDocument document = new TestDocument(
                     @"<html>
                       <head>
-                        <script src=""https://cdn.jsdelivr.net/npm/es6-promise/dist/es6-promise.auto.min.js"" data-no-mirror></script>
-                        <link rel=""stylesheet"" href=""https://cdn.jsdelivr.net/npm/@@progress/kendo-theme-bootstrap@3.2.0/dist/all.min.css"" data-no-mirror />
+                        <script src=""https://cdn.jsdelivr.net/npm/es6-promise/dist/es6-promise.auto.min.js"" integrity=""sha384-oqVuAfXRKap7fdgcCY5uykM6+R9GqQ8K/uxy9rx7HNQlGYl1kPzQho1wx4JwY8wC"" crossorigin=""anonymous"" data-no-mirror></script>
+                        <link rel=""stylesheet"" href=""https://cdn.jsdelivr.net/npm/@@progress/kendo-theme-bootstrap@3.2.0/dist/all.min.css"" integrity=""sha384-oqVuAfXRKap7fdgcCY5uykM6+R9GqQ8K/uxy9rx7HNQlGYl1kPzQho1wx4JwY8wC"" crossorigin=""anonymous"" data-no-mirror />
                       </head>
                       <body>
                       </body>
@@ -144,8 +144,8 @@ namespace Statiq.Html.Tests
                 result.Content.ShouldBe(
                     @"<html>
                       <head>
-                        <script src=""https://cdn.jsdelivr.net/npm/es6-promise/dist/es6-promise.auto.min.js"" data-no-mirror></script>
-                        <link rel=""stylesheet"" href=""https://cdn.jsdelivr.net/npm/@@progress/kendo-theme-bootstrap@3.2.0/dist/all.min.css"" data-no-mirror />
+                        <script src=""https://cdn.jsdelivr.net/npm/es6-promise/dist/es6-promise.auto.min.js"" integrity=""sha384-oqVuAfXRKap7fdgcCY5uykM6+R9GqQ8K/uxy9rx7HNQlGYl1kPzQho1wx4JwY8wC"" crossorigin=""anonymous"" data-no-mirror></script>
+                        <link rel=""stylesheet"" href=""https://cdn.jsdelivr.net/npm/@@progress/kendo-theme-bootstrap@3.2.0/dist/all.min.css"" integrity=""sha384-oqVuAfXRKap7fdgcCY5uykM6+R9GqQ8K/uxy9rx7HNQlGYl1kPzQho1wx4JwY8wC"" crossorigin=""anonymous"" data-no-mirror />
                       </head>
                       <body>
                       </body>
@@ -173,6 +173,35 @@ namespace Statiq.Html.Tests
                 result.Content.ShouldBe(
                     @"<html><head>
                         <script src=""/foo/bar.js""></script>
+                      </head>
+                      <body>
+                      
+                    </body></html>", StringCompareShould.IgnoreLineEndings);
+            }
+
+            [Test]
+            public async Task RemovesSubresourceIntegrityValues()
+            {
+                // Given
+                TestDocument document = new TestDocument(
+                    @"<html>
+                      <head>
+                        <script src=""https://cdn.jsdelivr.net/npm/es6-promise/dist/es6-promise.auto.min.js"" integrity=""sha384-oqVuAfXRKap7fdgcCY5uykM6+R9GqQ8K/uxy9rx7HNQlGYl1kPzQho1wx4JwY8wC"" crossorigin=""anonymous""></script>
+                        <link rel=""stylesheet"" href=""https://cdn.jsdelivr.net/npm/@@progress/kendo-theme-bootstrap@3.2.0/dist/all.min.css""  integrity=""sha384-oqVuAfXRKap7fdgcCY5uykM6+R9GqQ8K/uxy9rx7HNQlGYl1kPzQho1wx4JwY8wC"" crossorigin=""anonymous"" />
+                      </head>
+                      <body>
+                      </body>
+                    </html>");
+                MirrorResources module = new MirrorResources();
+
+                // When
+                TestDocument result = await ExecuteAsync(document, module).SingleAsync();
+
+                // Then
+                result.Content.ShouldBe(
+                    @"<html><head>
+                        <script src=""/mirror/cdn.jsdelivr.net/npm/es6-promise/dist/es6-promise.auto.min.js""></script>
+                        <link rel=""stylesheet"" href=""/mirror/cdn.jsdelivr.net/npm/@@progress/kendo-theme-bootstrap@3.2.0/dist/all.min.css"">
                       </head>
                       <body>
                       
