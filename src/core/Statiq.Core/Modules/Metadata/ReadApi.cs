@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -23,8 +22,8 @@ namespace Statiq.Core
     public class ReadApi<TClient> : ParallelModule, IDisposable
         where TClient : class
     {
-        private readonly Dictionary<string, Func<IDocument, IExecutionContext, TClient, Task<object>>> _requests
-            = new Dictionary<string, Func<IDocument, IExecutionContext, TClient, Task<object>>>(StringComparer.OrdinalIgnoreCase);
+        private readonly List<Func<IDocument, IExecutionContext, TClient, Task<IEnumerable<KeyValuePair<string, object>>>>> _requests
+            = new List<Func<IDocument, IExecutionContext, TClient, Task<IEnumerable<KeyValuePair<string, object>>>>>();
 
         private readonly TClient _client;
 
@@ -162,7 +161,12 @@ namespace Statiq.Core
             key.ThrowIfNullOrWhiteSpace(nameof(key));
             request.ThrowIfNull(nameof(request));
 
-            _requests[key] = (_, ctx, client) => Task.FromResult(request(ctx, client));
+            _requests.Add((_, ctx, client) =>
+                Task.FromResult<IEnumerable<KeyValuePair<string, object>>>(
+                    new KeyValuePair<string, object>[]
+                    {
+                        new KeyValuePair<string, object>(key, request(ctx, client))
+                    }));
             return this;
         }
 
@@ -177,7 +181,12 @@ namespace Statiq.Core
             key.ThrowIfNullOrWhiteSpace(nameof(key));
             request.ThrowIfNull(nameof(request));
 
-            _requests[key] = (doc, ctx, client) => Task.FromResult(request(doc, ctx, client));
+            _requests.Add((doc, ctx, client) =>
+                Task.FromResult<IEnumerable<KeyValuePair<string, object>>>(
+                    new KeyValuePair<string, object>[]
+                    {
+                        new KeyValuePair<string, object>(key, request(doc, ctx, client))
+                    }));
             return this;
         }
 
@@ -192,7 +201,11 @@ namespace Statiq.Core
             key.ThrowIfNullOrWhiteSpace(nameof(key));
             request.ThrowIfNull(nameof(request));
 
-            _requests[key] = (_, ctx, client) => request(ctx, client);
+            _requests.Add(async (_, ctx, client) =>
+                new KeyValuePair<string, object>[]
+                {
+                    new KeyValuePair<string, object>(key, await request(ctx, client))
+                });
             return this;
         }
 
@@ -205,8 +218,65 @@ namespace Statiq.Core
         public ReadApi<TClient> WithRequest(string key, Func<IDocument, IExecutionContext, TClient, Task<object>> request)
         {
             key.ThrowIfNullOrWhiteSpace(nameof(key));
+            request.ThrowIfNull(nameof(request));
 
-            _requests[key] = request.ThrowIfNull(nameof(request));
+            _requests.Add(async (doc, ctx, client) =>
+                new KeyValuePair<string, object>[]
+                {
+                    new KeyValuePair<string, object>(key, await request(doc, ctx, client))
+                });
+            return this;
+        }
+
+        /// <summary>
+        /// Submits a request to the API client. This allows you to incorporate data from the execution context in your request.
+        /// </summary>
+        /// <param name="request">A function with the request to make.</param>
+        /// <returns>The current module instance.</returns>
+        public ReadApi<TClient> WithRequest(Func<IExecutionContext, TClient, IEnumerable<KeyValuePair<string, object>>> request)
+        {
+            request.ThrowIfNull(nameof(request));
+
+            _requests.Add((_, ctx, client) => Task.FromResult(request(ctx, client)));
+            return this;
+        }
+
+        /// <summary>
+        /// Submits a request to the API. This allows you to incorporate data from the execution context and current document in your request.
+        /// </summary>
+        /// <param name="request">A function with the request to make.</param>
+        /// <returns>The current module instance.</returns>
+        public ReadApi<TClient> WithRequest(Func<IDocument, IExecutionContext, TClient, IEnumerable<KeyValuePair<string, object>>> request)
+        {
+            request.ThrowIfNull(nameof(request));
+
+            _requests.Add((doc, ctx, client) => Task.FromResult(request(doc, ctx, client)));
+            return this;
+        }
+
+        /// <summary>
+        /// Submits a request to the API client. This allows you to incorporate data from the execution context in your request.
+        /// </summary>
+        /// <param name="request">A function with the request to make.</param>
+        /// <returns>The current module instance.</returns>
+        public ReadApi<TClient> WithRequest(Func<IExecutionContext, TClient, Task<IEnumerable<KeyValuePair<string, object>>>> request)
+        {
+            request.ThrowIfNull(nameof(request));
+
+            _requests.Add(async (_, ctx, client) => await request(ctx, client));
+            return this;
+        }
+
+        /// <summary>
+        /// Submits a request to the API. This allows you to incorporate data from the execution context and current document in your request.
+        /// </summary>
+        /// <param name="request">A function with the request to make.</param>
+        /// <returns>The current module instance.</returns>
+        public ReadApi<TClient> WithRequest(Func<IDocument, IExecutionContext, TClient, Task<IEnumerable<KeyValuePair<string, object>>>> request)
+        {
+            request.ThrowIfNull(nameof(request));
+
+            _requests.Add(request);
             return this;
         }
 
@@ -226,7 +296,7 @@ namespace Statiq.Core
                 _init?.Invoke(input, context, client);
 
                 // Get tasks for each request so they can be executed asynchronously
-                IEnumerable<Task<KeyValuePair<string, object>>> requestTasks = _requests.Select(async request =>
+                IEnumerable<Task<IEnumerable<KeyValuePair<string, object>>>> requestTasks = _requests.Select(async request =>
                 {
                     // Wait for the throttler
                     if (_throttler is object)
@@ -235,7 +305,7 @@ namespace Statiq.Core
                     }
 
                     // Get a task to execute the request with a delay after
-                    Task<object> requestTask = ExecuteRequestAsync(request, input, context, client);
+                    Task<IEnumerable<KeyValuePair<string, object>>> requestTask = ExecuteRequestAsync(request, input, context, client);
                     _ = requestTask.ContinueWith(async _ =>
                     {
                         if (_requestDelay > 0)
@@ -246,16 +316,15 @@ namespace Statiq.Core
                     });
 
                     // Execute the request and return the result (null results will be filtered out)
-                    object result = await requestTask;
-                    return new KeyValuePair<string, object>(request.Key, result);
+                    return await requestTask;
                 });
 
                 // Execute the requests
-                KeyValuePair<string, object>[] results = await Task.WhenAll(requestTasks);
+                IEnumerable<KeyValuePair<string, object>>[] results = await Task.WhenAll(requestTasks);
 
                 // Eliminate null results and clone the document if any are left
-                results = results.Where(x => x.Value is object).ToArray();
-                return results.Length > 0 ? input.Clone(results).Yield() : input.Yield();
+                KeyValuePair<string, object>[] metadata = results.Where(x => x is object).SelectMany(x => x).ToArray();
+                return results.Length > 0 ? context.CloneOrCreateDocument(input, metadata).Yield() : input.Yield();
             }
             finally
             {
@@ -270,19 +339,19 @@ namespace Statiq.Core
         /// <summary>
         /// This should be overridden in derived classes to provide preparation for each request if needed.
         /// </summary>
-        protected virtual async Task<object> ExecuteRequestAsync(
-            KeyValuePair<string, Func<IDocument, IExecutionContext, TClient, Task<object>>> request,
+        protected virtual async Task<IEnumerable<KeyValuePair<string, object>>> ExecuteRequestAsync(
+            Func<IDocument, IExecutionContext, TClient, Task<IEnumerable<KeyValuePair<string, object>>>> request,
             IDocument input,
             IExecutionContext context,
             TClient client)
         {
             try
             {
-                return await request.Value(input, context, client);
+                return await request(input, context, client);
             }
             catch (Exception ex)
             {
-                context.LogWarning("Exception while submitting {0} {1} request for {2}: {3}", request.Key, _clientName, input.ToSafeDisplayString(), ex.ToString());
+                context.LogWarning($"Exception while submitting {_clientName} request for {input.ToSafeDisplayString()}: {ex}");
                 return default;
             }
         }
