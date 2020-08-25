@@ -48,7 +48,7 @@ namespace Statiq.Razor
                 if (StatiqFileSystem.GetInputFile(inputPath).Exists
                     && _reportedViewStartOverrides.TryAdd(requestingPath, null))
                 {
-                    IExecutionContext.CurrentOrNull?.LogInformation($"Existing {inputPath} file for {requestingPath} being ignored in favor of explicit layout metadata");
+                    IExecutionContext.CurrentOrNull?.LogDebug($"Existing {inputPath} file for {requestingPath} being ignored in favor of explicit layout metadata");
                 }
                 return new NotFoundFileInfo(subpath);
             }
