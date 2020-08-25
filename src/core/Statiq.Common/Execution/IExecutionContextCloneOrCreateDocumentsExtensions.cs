@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.ComponentModel.DataAnnotations;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -16,6 +17,8 @@ namespace Statiq.Common
         /// If the value is <c>null</c> the provided document will be returned.
         /// If the value is a <see cref="IDocument"/>, <see cref="IEnumerable{IDocument}"/>, or
         /// <see cref="IAsyncEnumerable{IDocument}"/>, the document(s) will be returned.
+        /// If the value is <c>IEnumerable&lt;KeyValuePair&lt;string, object&gt;&gt;</c>,
+        /// the document will be cloned with the resulting metadata.
         /// If the value is a <see cref="IEnumerable{IModule}"/> or <see cref="IModule"/>,
         /// the module(s) will be executed with the input document(s) as their input
         /// and the results will be returned.
@@ -38,11 +41,15 @@ namespace Statiq.Common
             value is null
                 ? document.Yield()
                 : GetDocuments(value)
-                    ?? await ExecuteModulesAsync(executionContext, moduleInputs, value)
-                        ?? await ChangeContentAsync(executionContext, document, value);
+                    ?? GetDocumentFromMetadata(executionContext, document, value)
+                        ?? await ExecuteModulesAsync(executionContext, moduleInputs, value)
+                            ?? await ChangeContentAsync(executionContext, document, value);
 
         private static IEnumerable<IDocument> GetDocuments(object value) =>
             value is IDocument document ? document.Yield() : value as IEnumerable<IDocument>;
+
+        private static IEnumerable<IDocument> GetDocumentFromMetadata(IExecutionContext context, IDocument document, object value) =>
+            value is IEnumerable<KeyValuePair<string, object>> metadata ? context.CloneOrCreateDocument(document, metadata).Yield() : null;
 
         private static async Task<IEnumerable<IDocument>> ExecuteModulesAsync(IExecutionContext context, IEnumerable<IDocument> moduleInputs, object value)
         {
