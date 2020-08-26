@@ -24,6 +24,7 @@ namespace Statiq.Common
         public static string Scss => Get(".scss");
         public static string Xml => Get(".xml");
         public static string Yaml => Get(".yaml");
+        public static string CSharp => Get(".cs");
 
         /// <summary>
         /// A mapping of file extension to both registered IANA media types
@@ -1063,7 +1064,9 @@ namespace Statiq.Common
                 { ".yml", "text/yaml" },
                 { ".wasm", "application/wasm" },
                 { ".hbs", "text/handlebars" },
-                { ".handlebars", "text/handlebars" }
+                { ".handlebars", "text/handlebars" },
+                { ".cs", "text/x-csharp" },
+                { ".csx", "text/x-csharp" }
             };
 
         /// <summary>
