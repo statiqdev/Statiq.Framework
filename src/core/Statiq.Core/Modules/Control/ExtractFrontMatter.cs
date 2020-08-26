@@ -21,9 +21,11 @@ namespace Statiq.Core
     /// <category>Control</category>
     public class ExtractFrontMatter : ParentModule
     {
-        private readonly string _delimiter;
-        private readonly bool _repeated;
-        private bool _ignoreDelimiterOnFirstLine = true;
+        private readonly string _endDelimiter;
+        private readonly bool _endRepeated;
+        private bool _ignoreEndDelimiterOnFirstLine = true;
+        private string _startDelimiter;
+        private bool _startRepeated;
 
         /// <summary>
         /// Uses the default delimiter character and passes any front matter to the specified child modules for processing.
@@ -32,8 +34,8 @@ namespace Statiq.Core
         public ExtractFrontMatter(params IModule[] modules)
             : base(modules)
         {
-            _delimiter = "-";
-            _repeated = true;
+            _endDelimiter = "-";
+            _endRepeated = true;
         }
 
         /// <summary>
@@ -44,8 +46,8 @@ namespace Statiq.Core
         public ExtractFrontMatter(string delimiter, params IModule[] modules)
             : base(modules)
         {
-            _delimiter = delimiter;
-            _repeated = false;
+            _endDelimiter = delimiter;
+            _endRepeated = false;
         }
 
         /// <summary>
@@ -56,19 +58,44 @@ namespace Statiq.Core
         public ExtractFrontMatter(char delimiter, params IModule[] modules)
             : base(modules)
         {
-            _delimiter = new string(delimiter, 1);
-            _repeated = true;
+            _endDelimiter = new string(delimiter, 1);
+            _endRepeated = true;
         }
 
         /// <summary>
         /// Ignores the delimiter if it appears on the first line. This is useful when processing Jekyll style front matter that
         /// has the delimiter both above and below the front matter content. The default behavior is <c>true</c>.
+        /// This setting has no effect if a start delimiter is required.
         /// </summary>
         /// <param name="ignore">If set to <c>true</c>, ignore the delimiter if it appears on the first line.</param>
         /// <returns>The current module instance.</returns>
         public ExtractFrontMatter IgnoreDelimiterOnFirstLine(bool ignore = true)
         {
-            _ignoreDelimiterOnFirstLine = ignore;
+            _ignoreEndDelimiterOnFirstLine = ignore;
+            return this;
+        }
+
+        /// <summary>
+        /// Requires a start delimiter as the first line of the file.
+        /// </summary>
+        /// <param name="startDelimiter">The delimiter to require.</param>
+        /// <returns>The current module instance.</returns>
+        public ExtractFrontMatter RequireStartDelimiter(string startDelimiter)
+        {
+            _startDelimiter = startDelimiter;
+            _startRepeated = false;
+            return this;
+        }
+
+        /// <summary>
+        /// Requires a start delimiter as the first line of the file.
+        /// </summary>
+        /// <param name="startDelimiter">The delimiter to require.</param>
+        /// <returns>The current module instance.</returns>
+        public ExtractFrontMatter RequireStartDelimiter(char startDelimiter)
+        {
+            _startDelimiter = new string(startDelimiter, 1);
+            _startRepeated = true;
             return this;
         }
 
@@ -77,21 +104,57 @@ namespace Statiq.Core
         {
             string inputContent = await input.GetContentStringAsync();
             List<string> inputLines = inputContent.Split(new[] { '\n' }, StringSplitOptions.None).ToList();
-            int delimiterLine = inputLines.FindIndex(x =>
+            if (inputLines.Count == 0)
             {
-                string trimmed = x.TrimEnd();
-                return trimmed.Length > 0 && (_repeated ? trimmed.All(y => y == _delimiter[0]) : trimmed == _delimiter);
-            });
+                return input.Yield();
+            }
+
+            // Find the start delimiter if one is required
+            int delimiterLine = -1;
             int startLine = 0;
-            if (delimiterLine == 0 && _ignoreDelimiterOnFirstLine)
+            if (_startDelimiter is object)
             {
-                startLine = 1;
-                delimiterLine = inputLines.FindIndex(1, x =>
+                // We require a start delimiter so verify the first line
+                string trimmed = inputLines[0].TrimEnd();
+                if (trimmed.Length > 0 && (_startRepeated ? trimmed.All(y => y == _startDelimiter[0]) : trimmed == _startDelimiter))
+                {
+                    // Found the start delimiter, skip to the next line and look for the end delimiter
+                    startLine = 1;
+                    delimiterLine = inputLines.FindIndex(1, x =>
+                    {
+                        string trimmed = x.TrimEnd();
+                        return trimmed.Length > 0 && (_endRepeated ? trimmed.All(y => y == _endDelimiter[0]) : trimmed == _endDelimiter);
+                    });
+                }
+                else
+                {
+                    // No start delimiter to return the document as-is
+                    return input.Yield();
+                }
+            }
+            else
+            {
+                // Find the end delimiter
+                delimiterLine = inputLines.FindIndex(x =>
                 {
                     string trimmed = x.TrimEnd();
-                    return trimmed.Length > 0 && (_repeated ? trimmed.All(y => y == _delimiter[0]) : trimmed == _delimiter);
+                    return trimmed.Length > 0 && (_endRepeated ? trimmed.All(y => y == _endDelimiter[0]) : trimmed == _endDelimiter);
                 });
+                startLine = 0;
+
+                // If we found it on the first line and are ignoring, start search again on the next line
+                if (delimiterLine == 0 && _ignoreEndDelimiterOnFirstLine)
+                {
+                    startLine = 1;
+                    delimiterLine = inputLines.FindIndex(1, x =>
+                    {
+                        string trimmed = x.TrimEnd();
+                        return trimmed.Length > 0 && (_endRepeated ? trimmed.All(y => y == _endDelimiter[0]) : trimmed == _endDelimiter);
+                    });
+                }
             }
+
+            // If a delimiter was found, extract the front matter
             if (delimiterLine != -1)
             {
                 string frontMatter = string.Join("\n", inputLines.Skip(startLine).Take(delimiterLine - startLine)) + "\n";

@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Threading.Tasks;
 using NUnit.Framework;
+using Shouldly;
 using Statiq.Common;
 using Statiq.Testing;
 
@@ -36,14 +37,12 @@ Content2")
                 IEnumerable<IDocument> documents = await ExecuteAsync(inputs, context, frontMatter);
 
                 // Then
-                Assert.AreEqual(1, documents.Count());
-                Assert.AreEqual(
-                    @"FM1
+                documents.Count().ShouldBe(1);
+                frontMatterContent.ShouldBe(@"FM1
 FM2
-", frontMatterContent);
-                Assert.AreEqual(
-                    @"Content1
-Content2", await documents.First().GetContentStringAsync());
+");
+                (await documents.First().GetContentStringAsync()).ShouldBe(@"Content1
+Content2");
             }
 
             [Test]
@@ -72,16 +71,16 @@ Content2")
                 IEnumerable<IDocument> documents = await ExecuteAsync(inputs, context, frontMatter);
 
                 // Then
-                Assert.AreEqual(1, documents.Count());
-                Assert.AreEqual(
+                documents.Count().ShouldBe(1);
+                frontMatterContent.ShouldBe(
                     @"
-", frontMatterContent);
-                Assert.AreEqual(
+");
+                (await documents.First().GetContentStringAsync()).ShouldBe(
                     @"FM1
 FM2
 ---
 Content1
-Content2", await documents.First().GetContentStringAsync());
+Content2");
             }
 
             [Test]
@@ -109,15 +108,15 @@ Content2")
                 IEnumerable<IDocument> documents = await ExecuteAsync(inputs, context, frontMatter);
 
                 // Then
-                Assert.AreEqual(1, documents.Count());
-                Assert.AreEqual(
+                documents.Count().ShouldBe(1);
+                frontMatterContent.ShouldBe(
                     @"
 FM1
 FM2
-", frontMatterContent);
-                Assert.AreEqual(
+");
+                (await documents.First().GetContentStringAsync()).ShouldBe(
                     @"Content1
-Content2", await documents.First().GetContentStringAsync());
+Content2");
             }
 
             [Test]
@@ -144,14 +143,14 @@ Content2")
                 IEnumerable<IDocument> documents = await ExecuteAsync(inputs, context, frontMatter);
 
                 // Then
-                Assert.AreEqual(1, documents.Count());
-                Assert.IsFalse(executed);
-                Assert.AreEqual(
+                documents.Count().ShouldBe(1);
+                executed.ShouldBeFalse();
+                (await documents.First().GetContentStringAsync()).ShouldBe(
                     @"FM1
 FM2
 ---
 Content1
-Content2", await documents.First().GetContentStringAsync());
+Content2");
             }
 
             [Test]
@@ -178,14 +177,14 @@ Content2")
                 IEnumerable<IDocument> documents = await ExecuteAsync(inputs, context, frontMatter);
 
                 // Then
-                Assert.AreEqual(1, documents.Count());
-                Assert.AreEqual(
+                documents.Count().ShouldBe(1);
+                frontMatterContent.ShouldBe(
                     @"FM1
 FM2
-", frontMatterContent);
-                Assert.AreEqual(
+");
+                (await documents.First().GetContentStringAsync()).ShouldBe(
                     @"Content1
-Content2", await documents.First().GetContentStringAsync());
+Content2");
             }
 
             [Test]
@@ -212,14 +211,14 @@ Content2")
                 IEnumerable<IDocument> documents = await ExecuteAsync(inputs, context, frontMatter);
 
                 // Then
-                Assert.AreEqual(1, documents.Count());
-                Assert.AreEqual(
+                documents.Count().ShouldBe(1);
+                frontMatterContent.ShouldBe(
                     @"FM1
 FM2
-", frontMatterContent);
-                Assert.AreEqual(
+");
+                (await documents.First().GetContentStringAsync()).ShouldBe(
                     @"Content1
-Content2", await documents.First().GetContentStringAsync());
+Content2");
             }
 
             [Test]
@@ -246,14 +245,14 @@ Content2")
                 IEnumerable<IDocument> documents = await ExecuteAsync(inputs, context, frontMatter);
 
                 // Then
-                Assert.AreEqual(1, documents.Count());
-                Assert.AreEqual(
+                documents.Count().ShouldBe(1);
+                frontMatterContent.ShouldBe(
                     @"FM1
 FM2
-", frontMatterContent);
-                Assert.AreEqual(
+");
+                (await documents.First().GetContentStringAsync()).ShouldBe(
                     @"Content1
-Content2", await documents.First().GetContentStringAsync());
+Content2");
             }
 
             [Test]
@@ -280,14 +279,14 @@ Content2")
                 IEnumerable<IDocument> documents = await ExecuteAsync(inputs, context, frontMatter);
 
                 // Then
-                Assert.AreEqual(1, documents.Count());
-                Assert.IsFalse(executed);
-                Assert.AreEqual(
+                documents.Count().ShouldBe(1);
+                executed.ShouldBeFalse();
+                (await documents.First().GetContentStringAsync()).ShouldBe(
                     @"FM1
 FM2
   !!!!
 Content1
-Content2", await documents.First().GetContentStringAsync());
+Content2");
             }
 
             [Test]
@@ -316,16 +315,16 @@ Content2")
                 IEnumerable<IDocument> documents = await ExecuteAsync(inputs, context, frontMatter);
 
                 // Then
-                Assert.AreEqual(1, documents.Count());
-                Assert.AreEqual(
+                documents.Count().ShouldBe(1);
+                frontMatterContent.ShouldBe(
                     @"FM1
 FM2
 
-", frontMatterContent);
-                Assert.AreEqual(
+");
+                (await documents.First().GetContentStringAsync()).ShouldBe(
                     @"
 Content1
-Content2", await documents.First().GetContentStringAsync());
+Content2");
             }
 
             [Test]
@@ -352,14 +351,14 @@ Content2")
                 IEnumerable<IDocument> documents = await ExecuteAsync(inputs, context, frontMatter);
 
                 // Then
-                Assert.AreEqual(1, documents.Count());
-                Assert.AreEqual(
+                documents.Count().ShouldBe(1);
+                frontMatterContent.ShouldBe(
                     @"FM1
 FM2
-", frontMatterContent);
-                Assert.AreEqual(
+");
+                (await documents.First().GetContentStringAsync()).ShouldBe(
                     @"Content1
-Content2", await documents.First().GetContentStringAsync());
+Content2");
             }
 
             [Test]
@@ -387,13 +386,13 @@ YY")
                 IEnumerable<IDocument> documents = await ExecuteAsync(inputs, context, frontMatter);
 
                 // Then
-                Assert.AreEqual(2, documents.Count());
-                Assert.AreEqual(
+                documents.Count().ShouldBe(2);
+                frontMatterContent.ShouldBe(
                     @"AA
 BB
 ", frontMatterContent);
-                Assert.AreEqual("XX", await documents.First().GetContentStringAsync());
-                Assert.AreEqual("YY", await documents.Skip(1).First().GetContentStringAsync());
+                (await documents.First().GetContentStringAsync()).ShouldBe("XX");
+                (await documents.Skip(1).First().GetContentStringAsync()).ShouldBe("YY");
             }
 
             [Test]
@@ -421,14 +420,14 @@ Content2")
                 IEnumerable<IDocument> documents = await ExecuteAsync(inputs, context, frontMatter);
 
                 // Then
-                Assert.AreEqual(1, documents.Count());
-                Assert.AreEqual(
+                documents.Count().ShouldBe(1);
+                frontMatterContent.ShouldBe(
                     @"FM1
 FM2
 ", frontMatterContent);
-                Assert.AreEqual(
+                (await documents.First().GetContentStringAsync()).ShouldBe(
                     @"Content1
-Content2", await documents.First().GetContentStringAsync());
+Content2");
             }
 
             [Test]
@@ -456,14 +455,341 @@ Content2")
                 IEnumerable<IDocument> documents = await ExecuteAsync(inputs, context, frontMatter);
 
                 // Then
-                Assert.AreEqual(1, documents.Count());
-                Assert.AreEqual("\n", frontMatterContent);
-                Assert.AreEqual(
+                documents.Count().ShouldBe(1);
+                frontMatterContent.ShouldBe("\n");
+                (await documents.First().GetContentStringAsync()).ShouldBe(
                     @"FM1
 FM2
 ---
 Content1
-Content2", await documents.First().GetContentStringAsync());
+Content2");
+            }
+
+            [Test]
+            public async Task IgnoreSettingIgnoredWhenStartDelimiter()
+            {
+                // Given
+                TestExecutionContext context = new TestExecutionContext();
+                TestDocument[] inputs =
+                {
+                    new TestDocument(@"---
+FM1
+FM2
+---
+Content1
+Content2")
+                };
+                bool executed = false;
+                ExtractFrontMatter frontMatter = new ExtractFrontMatter(new ExecuteConfig(Config.FromDocument(x =>
+                {
+                    executed = true;
+                    return new[] { x };
+                })))
+                    .IgnoreDelimiterOnFirstLine(true)
+                    .RequireStartDelimiter('+');
+
+                // When
+                IEnumerable<IDocument> documents = await ExecuteAsync(inputs, context, frontMatter);
+
+                // Then
+                documents.Count().ShouldBe(1);
+                executed.ShouldBeFalse();
+                (await documents.First().GetContentStringAsync()).ShouldBe(
+                    @"---
+FM1
+FM2
+---
+Content1
+Content2");
+            }
+
+            [Test]
+            public async Task StartDelimiterNotFound()
+            {
+                // Given
+                TestExecutionContext context = new TestExecutionContext();
+                TestDocument[] inputs =
+                {
+                    new TestDocument(@"---
+FM1
+FM2
+---
+Content1
+Content2")
+                };
+                bool executed = false;
+                ExtractFrontMatter frontMatter = new ExtractFrontMatter(new ExecuteConfig(Config.FromDocument(x =>
+                {
+                    executed = true;
+                    return new[] { x };
+                })))
+                    .IgnoreDelimiterOnFirstLine(true)
+                    .RequireStartDelimiter('+');
+
+                // When
+                IEnumerable<IDocument> documents = await ExecuteAsync(inputs, context, frontMatter);
+
+                // Then
+                documents.Count().ShouldBe(1);
+                executed.ShouldBeFalse();
+                (await documents.First().GetContentStringAsync()).ShouldBe(
+                    @"---
+FM1
+FM2
+---
+Content1
+Content2");
+            }
+
+            [Test]
+            public async Task EmptyFirstLineWithStartDelimiterShouldNotMatch()
+            {
+                // Given
+                TestExecutionContext context = new TestExecutionContext();
+                TestDocument[] inputs =
+                {
+                    new TestDocument(@"
++++
+FM1
+FM2
+---
+Content1
+Content2")
+                };
+                bool executed = false;
+                ExtractFrontMatter frontMatter = new ExtractFrontMatter(new ExecuteConfig(Config.FromDocument(x =>
+                {
+                    executed = true;
+                    return new[] { x };
+                }))).RequireStartDelimiter('+');
+
+                // When
+                IEnumerable<IDocument> documents = await ExecuteAsync(inputs, context, frontMatter);
+
+                // Then
+                documents.Count().ShouldBe(1);
+                executed.ShouldBeFalse();
+                (await documents.First().GetContentStringAsync()).ShouldBe(
+                    @"
++++
+FM1
+FM2
+---
+Content1
+Content2");
+            }
+
+            [Test]
+            public async Task NoEndDelimiter()
+            {
+                // Given
+                TestExecutionContext context = new TestExecutionContext();
+                TestDocument[] inputs =
+                {
+                    new TestDocument(@"+++
+FM1
+FM2
++++
+Content1
+Content2")
+                };
+                bool executed = false;
+                ExtractFrontMatter frontMatter = new ExtractFrontMatter(new ExecuteConfig(Config.FromDocument(x =>
+                {
+                    executed = true;
+                    return new[] { x };
+                }))).RequireStartDelimiter('+');
+
+                // When
+                IEnumerable<IDocument> documents = await ExecuteAsync(inputs, context, frontMatter);
+
+                // Then
+                documents.Count().ShouldBe(1);
+                executed.ShouldBeFalse();
+                (await documents.First().GetContentStringAsync()).ShouldBe(
+                    @"+++
+FM1
+FM2
++++
+Content1
+Content2");
+            }
+
+            [Test]
+            public async Task StartDelimiterAsStringShouldMatch()
+            {
+                // Given
+                TestExecutionContext context = new TestExecutionContext();
+                TestDocument[] inputs =
+                {
+                    new TestDocument(@"123
+FM1
+FM2
+---
+Content1
+Content2")
+                };
+                string frontMatterContent = null;
+                ExtractFrontMatter frontMatter = new ExtractFrontMatter(new ExecuteConfig(Config.FromDocument(async x =>
+                {
+                    frontMatterContent = await x.GetContentStringAsync();
+                    return new[] { x };
+                }))).RequireStartDelimiter("123");
+
+                // When
+                IEnumerable<IDocument> documents = await ExecuteAsync(inputs, context, frontMatter);
+
+                // Then
+                documents.Count().ShouldBe(1);
+                frontMatterContent.ShouldBe(
+                    @"FM1
+FM2
+");
+                (await documents.First().GetContentStringAsync()).ShouldBe(
+                    @"Content1
+Content2");
+            }
+
+            [Test]
+            public async Task StartDelimiterAsRepeatedStringShouldNotMatch()
+            {
+                // Given
+                TestExecutionContext context = new TestExecutionContext();
+                TestDocument[] inputs =
+                {
+                    new TestDocument(@"123123
+FM1
+FM2
+---
+Content1
+Content2")
+                };
+                bool executed = false;
+                ExtractFrontMatter frontMatter = new ExtractFrontMatter(new ExecuteConfig(Config.FromDocument(x =>
+                {
+                    executed = true;
+                    return new[] { x };
+                }))).RequireStartDelimiter("123");
+
+                // When
+                IEnumerable<IDocument> documents = await ExecuteAsync(inputs, context, frontMatter);
+
+                // Then
+                documents.Count().ShouldBe(1);
+                executed.ShouldBeFalse();
+                (await documents.First().GetContentStringAsync()).ShouldBe(
+                    @"123123
+FM1
+FM2
+---
+Content1
+Content2");
+            }
+
+            [Test]
+            public async Task StartDelimiterAsCharShouldMatch()
+            {
+                // Given
+                TestExecutionContext context = new TestExecutionContext();
+                TestDocument[] inputs =
+                {
+                    new TestDocument(@"+
+FM1
+FM2
+---
+Content1
+Content2")
+                };
+                string frontMatterContent = null;
+                ExtractFrontMatter frontMatter = new ExtractFrontMatter(new ExecuteConfig(Config.FromDocument(async x =>
+                {
+                    frontMatterContent = await x.GetContentStringAsync();
+                    return new[] { x };
+                }))).RequireStartDelimiter('+');
+
+                // When
+                IEnumerable<IDocument> documents = await ExecuteAsync(inputs, context, frontMatter);
+
+                // Then
+                documents.Count().ShouldBe(1);
+                frontMatterContent.ShouldBe(
+                    @"FM1
+FM2
+");
+                (await documents.First().GetContentStringAsync()).ShouldBe(
+                    @"Content1
+Content2");
+            }
+
+            [Test]
+            public async Task StartDelimiterAsRepeatedCharShouldMatch()
+            {
+                // Given
+                TestExecutionContext context = new TestExecutionContext();
+                TestDocument[] inputs =
+                {
+                    new TestDocument(@"+++
+FM1
+FM2
+---
+Content1
+Content2")
+                };
+                string frontMatterContent = null;
+                ExtractFrontMatter frontMatter = new ExtractFrontMatter(new ExecuteConfig(Config.FromDocument(async x =>
+                {
+                    frontMatterContent = await x.GetContentStringAsync();
+                    return new[] { x };
+                }))).RequireStartDelimiter('+');
+
+                // When
+                IEnumerable<IDocument> documents = await ExecuteAsync(inputs, context, frontMatter);
+
+                // Then
+                documents.Count().ShouldBe(1);
+                frontMatterContent.ShouldBe(
+                    @"FM1
+FM2
+");
+                (await documents.First().GetContentStringAsync()).ShouldBe(
+                    @"Content1
+Content2");
+            }
+
+            [Test]
+            public async Task StartDelimiterAsRepeatedCharWithExtraCharsShouldNotMatch()
+            {
+                // Given
+                TestExecutionContext context = new TestExecutionContext();
+                TestDocument[] inputs =
+                {
+                    new TestDocument(@"+++---
+FM1
+FM2
+---
+Content1
+Content2")
+                };
+                bool executed = false;
+                ExtractFrontMatter frontMatter = new ExtractFrontMatter(new ExecuteConfig(Config.FromDocument(x =>
+                {
+                    executed = true;
+                    return new[] { x };
+                }))).RequireStartDelimiter('+');
+
+                // When
+                IEnumerable<IDocument> documents = await ExecuteAsync(inputs, context, frontMatter);
+
+                // Then
+                documents.Count().ShouldBe(1);
+                executed.ShouldBeFalse();
+                (await documents.First().GetContentStringAsync()).ShouldBe(
+                    @"+++---
+FM1
+FM2
+---
+Content1
+Content2");
             }
         }
     }

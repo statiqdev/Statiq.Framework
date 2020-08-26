@@ -1,5 +1,6 @@
 # 1.0.0-beta.21
 
+- Added `ExtractFrontMatter.RequireStartDelimiter()` to require the front matter to start with a specified delimiter on the first line (for example, `/*` as the opening of a comment block).
 - Added `IMetadata.ToJson()` utility extensions to serialize an `IMetadata` object to JSON.
 - Fixed a bug where the `EvaluateScript` module would reset the document media type for content return values.
 - Added a new `glob eval` command to evaluate a globbing pattern against a specified directory and report all the matches.
