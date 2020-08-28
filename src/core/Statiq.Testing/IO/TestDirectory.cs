@@ -48,11 +48,13 @@ namespace Statiq.Testing
             {
                 return _fileProvider.Directories
                     .Where(x => Path.ContainsChild(x))
-                    .Select(x => _fileSystem.GetDirectory(x));
+                    .Select(x => _fileSystem.GetDirectory(x))
+                    .Where(x => x.Exists);
             }
             return _fileProvider.Directories
                 .Where(x => Path.ContainsDescendant(x))
-                .Select(x => _fileSystem.GetDirectory(x));
+                .Select(x => _fileSystem.GetDirectory(x))
+                .Where(x => x.Exists);
         }
 
         public IEnumerable<IFile> GetFiles(SearchOption searchOption = SearchOption.TopDirectoryOnly)
@@ -61,11 +63,13 @@ namespace Statiq.Testing
             {
                 return _fileProvider.Files.Keys
                     .Where(x => Path.ContainsChild(x))
-                    .Select(x => _fileSystem.GetFile(x));
+                    .Select(x => _fileSystem.GetFile(x))
+                    .Where(x => x.Exists);
             }
             return _fileProvider.Files.Keys
                 .Where(x => Path.ContainsDescendant(x))
-                .Select(x => _fileSystem.GetFile(x));
+                .Select(x => _fileSystem.GetFile(x))
+                .Where(x => x.Exists);
         }
 
         public IDirectory GetDirectory(NormalizedPath path)

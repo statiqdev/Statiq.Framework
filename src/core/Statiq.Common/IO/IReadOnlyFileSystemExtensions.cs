@@ -484,8 +484,14 @@ namespace Statiq.Common
             fileSystem.ThrowIfNull(nameof(fileSystem));
             directory.ThrowIfNull(nameof(directory));
 
+            // Return all files if no patterns
+            if (patterns?.Any() != true)
+            {
+                return directory.GetFiles(SearchOption.AllDirectories);
+            }
+
             IEnumerable<Tuple<IDirectory, string>> directoryPatterns = patterns
-                .Where(x => x is object)
+                .Where(x => x is object && x.Length > 0)
                 .Select(x =>
                 {
                     bool negated = x[0] == '!';

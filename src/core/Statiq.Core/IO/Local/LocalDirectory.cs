@@ -52,12 +52,16 @@ namespace Statiq.Core
         public void Delete(bool recursive) => LocalFileProvider.RetryPolicy.Execute(() => _directory.Delete(recursive));
 
         public IEnumerable<IDirectory> GetDirectories(SearchOption searchOption = SearchOption.TopDirectoryOnly) =>
-            LocalFileProvider.RetryPolicy.Execute(() =>
-                _directory.GetDirectories("*", searchOption).Select(directory => _fileSystem.GetDirectory(directory.FullName)));
+            LocalFileProvider.RetryPolicy.Execute(() => _directory
+                .GetDirectories("*", searchOption)
+                .Select(directory => _fileSystem.GetDirectory(directory.FullName))
+                .Where(x => x.Exists));
 
         public IEnumerable<IFile> GetFiles(SearchOption searchOption = SearchOption.TopDirectoryOnly) =>
-            LocalFileProvider.RetryPolicy.Execute(() =>
-                _directory.GetFiles("*", searchOption).Select(file => _fileSystem.GetFile(file.FullName)));
+            LocalFileProvider.RetryPolicy.Execute(() => _directory
+                .GetFiles("*", searchOption)
+                .Select(file => _fileSystem.GetFile(file.FullName))
+                .Where(x => x.Exists));
 
         public IDirectory GetDirectory(NormalizedPath path)
         {

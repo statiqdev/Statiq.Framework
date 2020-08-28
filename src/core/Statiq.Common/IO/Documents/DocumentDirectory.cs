@@ -28,12 +28,14 @@ namespace Statiq.Common
                 return _fileProvider.Directories
                     .Where(x => !Path.Equals(x) && Path.ContainsChild(x))
                     .Select(x => new DocumentDirectory(_fileProvider, x))
+                    .Where(x => x.Exists)
                     .Cast<IDirectory>();
             }
 
             return _fileProvider.Directories
                 .Where(x => !Path.Equals(x) && Path.ContainsDescendant(x))
                 .Select(x => new DocumentDirectory(_fileProvider, x))
+                .Where(x => x.Exists)
                 .Cast<IDirectory>();
         }
 
@@ -70,12 +72,14 @@ namespace Statiq.Common
                 return _fileProvider.Files.Keys
                     .Where(x => Path.ContainsChild(x))
                     .Select(x => new DocumentFile(_fileProvider, x))
+                    .Where(x => x.Exists)
                     .Cast<IFile>();
             }
 
             return _fileProvider.Files.Keys
                 .Where(x => Path.ContainsDescendant(x))
                 .Select(x => new DocumentFile(_fileProvider, x))
+                .Where(x => x.Exists)
                 .Cast<IFile>();
         }
 

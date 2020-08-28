@@ -29,7 +29,11 @@ namespace Statiq.Core
         /// Reads all files that match the specified globbing patterns and/or absolute paths. This allows you to
         /// specify different patterns and/or paths depending on the input.
         /// </summary>
-        /// <param name="patterns">A delegate that returns one or more globbing patterns and/or absolute paths.</param>
+        /// <param name="patterns">
+        /// A delegate that returns one or more globbing patterns and/or absolute paths.
+        /// If the delegate returns a null or empty collection, all files will be read.
+        /// If the delegate returns a single pattern as null or an empty string pattern, no files will be read.
+        /// </param>
         public ReadFiles(Config<IEnumerable<string>> patterns)
             : base(patterns, false)
         {
@@ -39,18 +43,25 @@ namespace Statiq.Core
         /// Reads all files that match the specified globbing pattern and/or absolute path. This allows you to
         /// specify different patterns and/or paths depending on the input.
         /// </summary>
-        /// <param name="pattern">A delegate that returns a globbing patterns and/or absolute paths.</param>
+        /// <param name="pattern">
+        /// A delegate that returns a globbing patterns and/or absolute paths.
+        /// If the delegate returns null or an empty string pattern, no files will be read.
+        /// </param>
         public ReadFiles(Config<string> pattern)
-            : base(pattern.MakeEnumerable(), false)
+            : base(pattern.ThrowIfNull(nameof(pattern)).MakeEnumerable(), false)
         {
         }
 
         /// <summary>
         /// Reads all files that match the specified globbing patterns and/or absolute paths.
         /// </summary>
-        /// <param name="patterns">The globbing patterns and/or absolute paths to read.</param>
+        /// <param name="patterns">
+        /// The globbing patterns and/or absolute paths to read.
+        /// If a null or empty array is specified, all files will be read.
+        /// If the array contains a single pattern as null or an empty string pattern, no files will be read.
+        /// </param>
         public ReadFiles(params string[] patterns)
-            : base(patterns.ThrowIfNull(nameof(patterns)), false)
+            : base(patterns, false)
         {
         }
 
@@ -79,20 +90,16 @@ namespace Statiq.Core
 
         protected override async Task<IEnumerable<IDocument>> ExecuteConfigAsync(IDocument input, IExecutionContext context, IEnumerable<string> value)
         {
-            if (value is object)
+            IEnumerable<IFile> files = context.FileSystem.GetInputFiles(value);
+            files = await files.ParallelWhereAsync(async file => _predicate is null || await _predicate(file));
+            return files.AsParallel().Select(file =>
             {
-                IEnumerable<IFile> files = context.FileSystem.GetInputFiles(value);
-                files = await files.ParallelWhereAsync(async file => _predicate is null || await _predicate(file));
-                return files.AsParallel().Select(file =>
-                {
-                    context.LogDebug($"Read file {file.Path.FullPath}");
-                    IContentProvider contentProvider = _mediaType is null
-                        ? file?.GetContentProvider()
-                        : file?.GetContentProvider(_mediaType(file));
-                    return context.CloneOrCreateDocument(input, file.Path, file.Path.GetRelativeInputPath(), contentProvider);
-                });
-            }
-            return null;
+                context.LogDebug($"Read file {file.Path.FullPath}");
+                IContentProvider contentProvider = _mediaType is null
+                    ? file?.GetContentProvider()
+                    : file?.GetContentProvider(_mediaType(file));
+                return context.CloneOrCreateDocument(input, file.Path, file.Path.GetRelativeInputPath(), contentProvider);
+            });
         }
     }
 }

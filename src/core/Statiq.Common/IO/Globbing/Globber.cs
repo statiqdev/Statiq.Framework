@@ -30,6 +30,7 @@ namespace Statiq.Common
 
             // Expand braces
             IEnumerable<string> expandedPatterns = patterns
+                .Where(x => x.Length > 0)
                 .SelectMany(ExpandBraces)
                 .Select(f => f.Replace("\\{", "{").Replace("\\}", "}")); // Unescape braces
 

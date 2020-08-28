@@ -402,17 +402,6 @@ namespace Statiq.Common.Tests.IO
             }
 
             [Test]
-            public void ShouldThrowForNullPatterns()
-            {
-                // Given
-                IFileSystem fileSystem = new TestFileSystem(GetFileProvider());
-                IDirectory dir = fileSystem.GetDirectory("/");
-
-                // When, Then
-                Should.Throw<ArgumentNullException>(() => fileSystem.GetFiles(dir, null));
-            }
-
-            [Test]
             public void ShouldNotThrowForNullPattern()
             {
                 // Given
@@ -449,6 +438,12 @@ namespace Statiq.Common.Tests.IO
             [TestCase("/", new[] { "/**/*.txt" }, new[] { "/a/x/bar.txt", "/a/b/c/foo.txt", "/q/werty.txt" }, false)]
             [TestCase("/", new[] { "/q/werty.txt" }, new[] { "/q/werty.txt" }, true)]
             [TestCase("/", new[] { "/q/werty.txt" }, new[] { "/q/werty.txt" }, false)]
+            [TestCase("/", null, new[] { "/a/b/c/foo.txt", "/a/x/bar.txt", "/q/werty.txt" }, false)]
+            [TestCase("/", new string[] { }, new[] { "/a/b/c/foo.txt", "/a/x/bar.txt", "/q/werty.txt" }, false)]
+            [TestCase("/a", null, new[] { "/a/b/c/foo.txt", "/a/x/bar.txt" }, false)]
+            [TestCase("/a", new string[] { }, new[] { "/a/b/c/foo.txt", "/a/x/bar.txt" }, false)]
+            [TestCase("/", new string[] { "" }, new string[] { }, false)]
+            [TestCase("/a", new string[] { "" }, new string[] { }, false)]
             public void ShouldReturnExistingFiles(string directory, string[] patterns, string[] expected, bool reverseSlashes)
             {
                 // Given
@@ -482,6 +477,10 @@ namespace Statiq.Common.Tests.IO
             [TestCase("/", "b", new[] { "/**/*.txt" }, new[] { "/a/x/bar.txt", "/a/b/c/foo.txt", "/q/werty.txt" })]
             [TestCase("/", "a", new[] { "/**/*.txt" }, new[] { "/q/werty.txt" })]
             [TestCase("/", "a/b/c", new[] { "/**/*.txt" }, new[] { "/a/x/bar.txt", "/q/werty.txt" })]
+            [TestCase("/", "a/b/c", null, new[] { "/a/x/bar.txt", "/q/werty.txt" })]
+            [TestCase("/", "a/b/c", new string[] { }, new[] { "/a/x/bar.txt", "/q/werty.txt" })]
+            [TestCase("/a", "a/b/c", null, new[] { "/a/x/bar.txt" })]
+            [TestCase("/a", "a/b/c", new string[] { }, new[] { "/a/x/bar.txt" })]
             public void ShouldNotReturnExcludedFiles(string directory, string excluded, string[] patterns, string[] expected)
             {
                 // Given

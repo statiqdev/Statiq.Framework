@@ -14,17 +14,24 @@ namespace Statiq.Core.Tests.Modules.IO
         public class ConstructorTests : ReadFilesFixture
         {
             [Test]
-            public void ThrowsOnNullPathFunction()
+            public void ThrowsOnNullPathsFunction()
             {
                 // Given, When, Then
                 Should.Throw<ArgumentNullException>(() => new ReadFiles((Config<IEnumerable<string>>)null));
             }
 
             [Test]
-            public void ThrowsOnNullPatterns()
+            public void ThrowsOnNullPathFunction()
             {
                 // Given, When, Then
-                Should.Throw<ArgumentNullException>(() => new ReadFiles((string[])null));
+                Should.Throw<ArgumentNullException>(() => new ReadFiles((Config<string>)null));
+            }
+
+            [Test]
+            public void ShouldNotThrowOnNullPatterns()
+            {
+                // Given, When, Then
+                Should.NotThrow(() => new ReadFiles((string[])null));
             }
         }
 
@@ -38,17 +45,33 @@ namespace Statiq.Core.Tests.Modules.IO
             [TestCase("**/*.md", 2)]
             [TestCase("*.*", 4)]
             [TestCase("**/*.*", 6)]
+            [TestCase("", 0)]
+            [TestCase(null, 0)]
             public async Task PatternFindsCorrectFiles(string pattern, int expectedCount)
             {
                 // Given
                 TestExecutionContext context = GetExecutionContext();
-                ReadFiles readFiles = new ReadFiles(pattern);
+                ReadFiles readFiles = new ReadFiles(new string[] { pattern });
 
                 // When
                 IReadOnlyList<TestDocument> results = await ExecuteAsync(context, readFiles);
 
                 // Then
                 results.Count.ShouldBe(expectedCount);
+            }
+
+            [Test]
+            public async Task MultiplePatternsFindsCorrectFiles()
+            {
+                // Given
+                TestExecutionContext context = GetExecutionContext();
+                ReadFiles readFiles = new ReadFiles(new string[] { "*.txt", "**/*.md" });
+
+                // When
+                IReadOnlyList<TestDocument> results = await ExecuteAsync(context, readFiles);
+
+                // Then
+                results.Count.ShouldBe(4);
             }
 
             [Test]
@@ -93,7 +116,8 @@ namespace Statiq.Core.Tests.Modules.IO
                 result.Content.ShouldBe("aaa");
             }
 
-            public async Task ShouldSetSource(string key, string expected)
+            [Test]
+            public async Task ShouldSetSource()
             {
                 // Given
                 TestExecutionContext context = GetExecutionContext();
@@ -106,7 +130,8 @@ namespace Statiq.Core.Tests.Modules.IO
                 result.Source.FullPath.ShouldBe("/TestFiles/Input/Subfolder/test-c.txt");
             }
 
-            public async Task ShouldSetDestination(string key, string expected)
+            [Test]
+            public async Task ShouldSetDestination()
             {
                 // Given
                 TestExecutionContext context = GetExecutionContext();
@@ -145,6 +170,34 @@ namespace Statiq.Core.Tests.Modules.IO
 
                 // Then
                 documents.Count.ShouldBe(3);
+            }
+
+            [Test]
+            public async Task EmptyPatternsShouldReturnAllFiles()
+            {
+                // Given
+                TestExecutionContext context = GetExecutionContext();
+                ReadFiles readFiles = new ReadFiles();
+
+                // When
+                IReadOnlyList<TestDocument> documents = await ExecuteAsync(context, readFiles);
+
+                // Then
+                documents.Count.ShouldBe(6);
+            }
+
+            [Test]
+            public async Task NullPatternsShouldReturnAllFiles()
+            {
+                // Given
+                TestExecutionContext context = GetExecutionContext();
+                ReadFiles readFiles = new ReadFiles((string[])null);
+
+                // When
+                IReadOnlyList<TestDocument> documents = await ExecuteAsync(context, readFiles);
+
+                // Then
+                documents.Count.ShouldBe(6);
             }
         }
 
