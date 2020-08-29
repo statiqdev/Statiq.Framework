@@ -32,7 +32,7 @@ namespace Statiq.Core
         /// <param name="modules">The modules to execute on documents where the predicate is <c>true</c>.</param>
         public ExecuteIf(Config<bool> predicate, params IModule[] modules)
         {
-            _conditions.Add(new IfCondition(predicate, modules));
+            _conditions.Add(new IfCondition(predicate.ThrowIfNull(nameof(predicate)), modules));
         }
 
         /// <summary>
@@ -46,7 +46,7 @@ namespace Statiq.Core
         /// <param name="modules">The modules to execute on documents where the predicate is <c>true</c>.</param>
         public ExecuteIf(Config<bool> predicate, IEnumerable<IModule> modules)
         {
-            _conditions.Add(new IfCondition(predicate, modules));
+            _conditions.Add(new IfCondition(predicate.ThrowIfNull(nameof(predicate)), modules));
         }
 
         /// <summary>
@@ -120,7 +120,7 @@ namespace Statiq.Core
         /// <returns>The current module instance.</returns>
         public ExecuteIf ElseIf(Config<bool> predicate, params IModule[] modules)
         {
-            _conditions.Add(new IfCondition(predicate, modules));
+            _conditions.Add(new IfCondition(predicate.ThrowIfNull(nameof(predicate)), modules));
             return this;
         }
 
@@ -137,7 +137,7 @@ namespace Statiq.Core
         /// <returns>The current module instance.</returns>
         public ExecuteIf ElseIf(Config<bool> predicate, IEnumerable<IModule> modules)
         {
-            _conditions.Add(new IfCondition(predicate, modules));
+            _conditions.Add(new IfCondition(predicate.ThrowIfNull(nameof(predicate)), modules));
             return this;
         }
 

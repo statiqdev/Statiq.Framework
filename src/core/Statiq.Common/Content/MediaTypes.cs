@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Statiq.Common
 {
@@ -20,6 +21,7 @@ namespace Statiq.Common
         public static string Markdown => Get(".md");
         public static string Png => Get(".png");
         public static string Razor => Get(".cshtml");
+        public static string Less => Get(".less");
         public static string Sass => Get(".sass");
         public static string Scss => Get(".scss");
         public static string Xml => Get(".xml");
@@ -1109,5 +1111,13 @@ namespace Statiq.Common
         /// <returns>The media type.</returns>
         public static string Get(string path, bool defaultIfNotFound = true) =>
             TryGet(path, out string mediaType, defaultIfNotFound) ? mediaType : null;
+
+        /// <summary>
+        /// Gets the extensions for a given media type (including the preceding dot).
+        /// </summary>
+        /// <param name="mediaType">The media type to get extensions for.</param>
+        /// <returns>The extensions that result in the specified media type.</returns>
+        public static IEnumerable<string> GetExtensions(string mediaType) =>
+            ExtensionMappings.Where(x => x.Value.Equals(mediaType, StringComparison.OrdinalIgnoreCase)).Select(x => x.Key);
     }
 }

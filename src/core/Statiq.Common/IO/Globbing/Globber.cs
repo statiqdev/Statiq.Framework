@@ -26,6 +26,12 @@ namespace Statiq.Common
         /// <remarks>Initially based on code from Reliak.FileSystemGlobbingExtensions (https://github.com/reliak/Reliak.FileSystemGlobbingExtensions).</remarks>
         public static IEnumerable<IFile> GetFiles(IDirectory directory, IEnumerable<string> patterns)
         {
+            // Return all files if no patterns
+            if (patterns?.Any() != true)
+            {
+                return directory.GetFiles(SearchOption.AllDirectories);
+            }
+
             Matcher matcher = new Matcher(NormalizedPath.DefaultComparisonType);
 
             // Expand braces

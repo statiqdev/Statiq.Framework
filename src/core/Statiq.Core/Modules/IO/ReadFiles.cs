@@ -66,6 +66,19 @@ namespace Statiq.Core
         }
 
         /// <summary>
+        /// Reads all files that match the specified globbing patterns and/or absolute paths.
+        /// </summary>
+        /// <param name="patterns">
+        /// The globbing patterns and/or absolute paths to read.
+        /// If a null or empty collection is specified, all files will be read.
+        /// If the collection contains a single pattern as null or an empty string pattern, no files will be read.
+        /// </param>
+        public ReadFiles(IEnumerable<string> patterns)
+            : base(Config.FromValue(patterns), false)
+        {
+        }
+
+        /// <summary>
         /// Specifies a predicate that must be satisfied for the file to be read.
         /// </summary>
         /// <param name="predicate">A predicate that returns <c>true</c> if the file should be read.</param>
