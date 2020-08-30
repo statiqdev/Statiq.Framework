@@ -147,6 +147,44 @@ namespace Statiq.Common.Tests.IO.Globbing
                 // When, Then
                 Should.Throw<ArgumentException>(() => Globber.GetFiles(directory, new[] { pattern }));
             }
+
+            [Test]
+            public void ShouldMatchRootFile()
+            {
+                // Given
+                TestFileProvider fileProvider = new TestFileProvider
+                {
+                    { "/x.txt" },
+                    { "/b.txt" },
+                    { "/a/x.txt" }
+                };
+                IDirectory directory = fileProvider.GetDirectory("/");
+
+                // When
+                IEnumerable<IFile> matches = Globber.GetFiles(directory, new[] { "x.txt" });
+
+                // Then
+                matches.Select(x => x.Path.FullPath).ShouldBe(new[] { "/x.txt" });
+            }
+
+            [Test]
+            public void ShouldMatchRootFileWithoutExtension()
+            {
+                // Given
+                TestFileProvider fileProvider = new TestFileProvider
+                {
+                    { "/x" },
+                    { "/b" },
+                    { "/a/x" }
+                };
+                IDirectory directory = fileProvider.GetDirectory("/");
+
+                // When
+                IEnumerable<IFile> matches = Globber.GetFiles(directory, new[] { "x" });
+
+                // Then
+                matches.Select(x => x.Path.FullPath).ShouldBe(new[] { "/x" });
+            }
         }
 
         public class ExpandBracesTests : GlobberFixture

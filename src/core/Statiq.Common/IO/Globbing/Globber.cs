@@ -20,6 +20,23 @@ namespace Statiq.Common
         /// <summary>
         /// Gets files from the specified directory using globbing patterns.
         /// </summary>
+        /// <remarks>
+        /// Note that the provided patterns will be combined and any exclusions will apply to all other provided patterns.
+        /// If they should be evaluated in isolation, multiple calls should be performed.
+        /// </remarks>
+        /// <param name="directory">The directory to search.</param>
+        /// <param name="patterns">The globbing pattern(s) to use.</param>
+        /// <returns>Files that match the globbing pattern(s).</returns>
+        public static IEnumerable<IFile> GetFiles(IDirectory directory, params string[] patterns) =>
+            GetFiles(directory, (IEnumerable<string>)patterns);
+
+        /// <summary>
+        /// Gets files from the specified directory using globbing patterns.
+        /// </summary>
+        /// <remarks>
+        /// Note that the provided patterns will be combined and any exclusions will apply to all other provided patterns.
+        /// If they should be evaluated in isolation, multiple calls should be performed.
+        /// </remarks>
         /// <param name="directory">The directory to search.</param>
         /// <param name="patterns">The globbing pattern(s) to use.</param>
         /// <returns>Files that match the globbing pattern(s).</returns>

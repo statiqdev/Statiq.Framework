@@ -422,7 +422,7 @@ namespace Statiq.Common
         {
             fileSystem.ThrowIfNull(nameof(fileSystem));
             return path.IsNull
-                ? new VirtualInputDirectory(fileSystem, NormalizedPath.Dot)
+                ? new VirtualInputDirectory(fileSystem, NormalizedPath.Empty)
                 : (path.IsRelative ? new VirtualInputDirectory(fileSystem, path) : fileSystem.GetDirectory(path));
         }
 
@@ -510,7 +510,10 @@ namespace Statiq.Common
                 });
             IEnumerable<IGrouping<IDirectory, string>> patternGroups = directoryPatterns
                 .GroupBy(x => x.Item1, x => x.Item2, DirectoryEqualityComparer.Default);
-            return patternGroups.SelectMany(x => Globber.GetFiles(x.Key, x)).Distinct(new FilePathEqualityComparer());
+
+            // We need to run each pattern in isolation so that exclusions aren't global to all patterns
+            // This also means we might get duplicate results, so filter those out by path
+            return patternGroups.SelectMany(x => x.SelectMany(y => Globber.GetFiles(x.Key, y))).Distinct(new FilePathEqualityComparer());
         }
 
         private class FilePathEqualityComparer : IEqualityComparer<IFile>

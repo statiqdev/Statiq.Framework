@@ -122,7 +122,7 @@ namespace Statiq.Common.Tests.IO
 
                 // Then
                 Assert.IsInstanceOf<VirtualInputDirectory>(result);
-                Assert.AreEqual(".", result.Path.FullPath);
+                Assert.AreEqual(string.Empty, result.Path.FullPath);
             }
 
             [Test]
@@ -427,9 +427,9 @@ namespace Statiq.Common.Tests.IO
             [TestCase("/", new[] { "**/foo.txt" }, new[] { "/a/b/c/foo.txt" }, true)]
             [TestCase("/", new[] { "**/foo.txt", "/a/x/bar.txt" }, new[] { "/a/b/c/foo.txt", "/a/x/bar.txt" }, true)]
             [TestCase("/", new[] { "**/foo.txt", "/a/x/baz.txt" }, new[] { "/a/b/c/foo.txt" }, true)]
-            [TestCase("/", new[] { "**/foo.txt", "!/a/b/c/foo.txt" }, new string[] { }, true)]
+            [TestCase("/", new[] { "**/foo.txt", "!/a/b/c/foo.txt" }, new[] { "/a/b/c/foo.txt" }, true)]
             [TestCase("/", new[] { "**/foo.txt", "!/a/x/baz.txt" }, new[] { "/a/b/c/foo.txt" }, true)]
-            [TestCase("/", new[] { "**/foo.txt", "!**/foo.txt" }, new string[] { }, true)]
+            [TestCase("/", new[] { "**/foo.txt", "!**/foo.txt" }, new[] { "/a/b/c/foo.txt" }, true)]
             [TestCase("/", new[] { "**/foo.txt", "!**/bar.txt" }, new[] { "/a/b/c/foo.txt" }, true)]
             [TestCase("/", new[] { "/**/foo.txt" }, new[] { "/a/b/c/foo.txt" }, true)]
             [TestCase("/", new[] { "/a/b/c/d/../foo.txt" }, new[] { "/a/b/c/foo.txt" }, true)]
@@ -444,6 +444,8 @@ namespace Statiq.Common.Tests.IO
             [TestCase("/a", new string[] { }, new[] { "/a/b/c/foo.txt", "/a/x/bar.txt" }, false)]
             [TestCase("/", new string[] { "" }, new string[] { }, false)]
             [TestCase("/a", new string[] { "" }, new string[] { }, false)]
+            [TestCase("/", new[] { "/a/b/c/foo.txt", "!**/*.txt" }, new[] { "/a/b/c/foo.txt" }, true)] // Exclusions do not apply to every pattern
+            [TestCase("/", new[] { "/a/b/c/foo.txt", "/a/b/c/foo.txt" }, new[] { "/a/b/c/foo.txt" }, true)] // Distinct results
             public void ShouldReturnExistingFiles(string directory, string[] patterns, string[] expected, bool reverseSlashes)
             {
                 // Given
