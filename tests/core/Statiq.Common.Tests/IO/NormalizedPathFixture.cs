@@ -688,22 +688,28 @@ namespace Statiq.Common.Tests.IO
 
         public class ChangeExtensionTests : NormalizedPathFixture
         {
-            [TestCase(".dat", "temp/hello.dat")]
-            [TestCase("dat", "temp/hello.dat")]
-            [TestCase(".txt", "temp/hello.txt")]
-            [TestCase("txt", "temp/hello.txt")]
-            [TestCase("", "temp/hello.")]
-            [TestCase(null, "temp/hello")]
-            public void ShouldChangeExtension(string extension, string expected)
+            [TestCase("temp/hello.txt", ".dat", "temp/hello.dat")]
+            [TestCase("temp/hello.txt", "dat", "temp/hello.dat")]
+            [TestCase("temp/hello.txt", ".txt", "temp/hello.txt")]
+            [TestCase("temp/hello.txt", "txt", "temp/hello.txt")]
+            [TestCase("temp/hello.txt", "", "temp/hello.")]
+            [TestCase("temp/hello.txt", null, "temp/hello")]
+            [TestCase("temp/hello.txt.foo", ".dat", "temp/hello.txt.dat")]
+            [TestCase("temp/hello.txt.foo", "dat", "temp/hello.txt.dat")]
+            [TestCase("temp/hello.txt.foo", ".txt", "temp/hello.txt.txt")]
+            [TestCase("temp/hello.txt.foo", "txt", "temp/hello.txt.txt")]
+            [TestCase("temp/hello.txt.foo", "", "temp/hello.txt.")]
+            [TestCase("temp/hello.txt.foo", null, "temp/hello.txt")]
+            public void ShouldChangeExtension(string path, string extension, string expected)
             {
                 // Given
-                NormalizedPath path = new NormalizedPath("temp/hello.txt");
+                NormalizedPath normalized = new NormalizedPath(path);
 
                 // When
-                path = path.ChangeExtension(extension);
+                normalized = normalized.ChangeExtension(extension);
 
                 // Then
-                Assert.AreEqual(expected, path.ToString());
+                Assert.AreEqual(expected, normalized.ToString());
             }
 
             [TestCase("foo")]

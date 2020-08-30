@@ -482,6 +482,98 @@ namespace Statiq.Common.Tests.Meta
                 convert.ShouldBeTrue();
                 dateTime.ShouldBeOfType<DateTime>().ShouldBe(new DateTime(2016, 10, 17, 8, 0, 0));
             }
+
+            public enum ConvertEnum
+            {
+                Apple = 3,
+                Orange = 5
+            }
+
+            [Test]
+            public void ConvertsStringToEnum()
+            {
+                // Given
+                const string value = "Orange";
+
+                // When
+                bool convert = TypeHelper.TryConvert<ConvertEnum>(value, out ConvertEnum converted);
+
+                // Then
+                convert.ShouldBeTrue();
+                converted.ShouldBe(ConvertEnum.Orange);
+            }
+
+            [Test]
+            public void ConvertsIntToEnum()
+            {
+                // Given
+                const int value = 5;
+
+                // When
+                bool convert = TypeHelper.TryConvert<ConvertEnum>(value, out ConvertEnum converted);
+
+                // Then
+                convert.ShouldBeTrue();
+                converted.ShouldBe(ConvertEnum.Orange);
+            }
+
+            [Test]
+            public void DoesNotConvertUnmatchedStringToEnum()
+            {
+                // Given
+                const string value = "Banana";
+
+                // When
+                bool convert = TypeHelper.TryConvert<ConvertEnum>(value, out ConvertEnum converted);
+
+                // Then
+                convert.ShouldBeFalse();
+                converted.ShouldBe(default(ConvertEnum));
+            }
+
+            // This behavior is a little strange, so documented as a test
+            // Any int can be converted to an enum, even if a value doesn't exist for it
+            [Test]
+            public void ConvertsUnmatchedIntToEnum()
+            {
+                // Given
+                const int value = 4;
+
+                // When
+                bool convert = TypeHelper.TryConvert<ConvertEnum>(value, out ConvertEnum converted);
+
+                // Then
+                convert.ShouldBeTrue();
+                ((int)converted).ShouldBe(4);
+            }
+
+            [Test]
+            public void ConvertsEnumToString()
+            {
+                // Given
+                const ConvertEnum value = ConvertEnum.Orange;
+
+                // When
+                bool convert = TypeHelper.TryConvert<string>(value, out string converted);
+
+                // Then
+                convert.ShouldBeTrue();
+                converted.ShouldBe("Orange");
+            }
+
+            [Test]
+            public void ConvertsEnumToInt()
+            {
+                // Given
+                const ConvertEnum value = ConvertEnum.Orange;
+
+                // When
+                bool convert = TypeHelper.TryConvert<int>(value, out int converted);
+
+                // Then
+                convert.ShouldBeTrue();
+                converted.ShouldBe(5);
+            }
         }
     }
 }
