@@ -89,7 +89,7 @@ namespace Statiq.Common
                 IFile tempFile = executionContext.FileSystem.GetTempFile();
                 if (!string.IsNullOrEmpty(content))
                 {
-                    await tempFile.WriteAllTextAsync(content);
+                    await tempFile.WriteAllTextAsync(content, cancellationToken: executionContext.CancellationToken);
                 }
                 return new FileContent(tempFile, mediaType);
             }

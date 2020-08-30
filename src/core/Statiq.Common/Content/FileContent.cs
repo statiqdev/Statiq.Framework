@@ -9,8 +9,6 @@ namespace Statiq.Common
     /// </summary>
     public class FileContent : IContentProvider
     {
-        private readonly IFile _file;
-
         public FileContent(IFile file)
             : this(file, file?.MediaType)
         {
@@ -18,21 +16,26 @@ namespace Statiq.Common
 
         public FileContent(IFile file, string mediaType)
         {
-            _file = file ?? throw new ArgumentException();
+            File = file ?? throw new ArgumentException();
             MediaType = mediaType;
         }
 
-        /// <inheritdoc />
-        public Stream GetStream() => _file.OpenRead();
+        /// <summary>
+        /// The file that this content comes from.
+        /// </summary>
+        public IFile File { get; }
 
         /// <inheritdoc />
-        public long Length => _file.Length;
+        public Stream GetStream() => File.OpenRead();
+
+        /// <inheritdoc />
+        public long Length => File.Length;
 
         /// <inheritdoc />
         public string MediaType { get; }
 
         /// <inheritdoc />
         public IContentProvider CloneWithMediaType(string mediaType) =>
-            string.Equals(MediaType, mediaType, StringComparison.OrdinalIgnoreCase) ? this : new FileContent(_file, mediaType);
+            string.Equals(MediaType, mediaType, StringComparison.OrdinalIgnoreCase) ? this : new FileContent(File, mediaType);
     }
 }

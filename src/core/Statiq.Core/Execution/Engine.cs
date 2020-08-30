@@ -882,7 +882,7 @@ namespace Statiq.Core
                 IFile tempFile = FileSystem.GetTempFile();
                 if (!string.IsNullOrEmpty(content))
                 {
-                    await tempFile.WriteAllTextAsync(content);
+                    await tempFile.WriteAllTextAsync(content, cancellationToken: CancellationToken);
                 }
                 return new FileContentStream(tempFile);
             }

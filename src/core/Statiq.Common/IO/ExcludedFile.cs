@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Statiq.Common
@@ -46,19 +47,19 @@ namespace Statiq.Common
         public DateTime CreationTime =>
             throw new NotSupportedException("Not supported for an excluded path");
 
-        public Task CopyToAsync(IFile destination, bool overwrite = true, bool createDirectory = true) =>
+        public Task CopyToAsync(IFile destination, bool overwrite = true, bool createDirectory = true, CancellationToken cancellationToken = default) =>
             throw new NotSupportedException("Not supported for an excluded path");
 
-        public Task MoveToAsync(IFile destination) =>
+        public Task MoveToAsync(IFile destination, CancellationToken cancellationToken = default) =>
             throw new NotSupportedException("Not supported for an excluded path");
 
         public void Delete() =>
             throw new NotSupportedException("Not supported for an excluded path");
 
-        public Task<string> ReadAllTextAsync() =>
+        public Task<string> ReadAllTextAsync(CancellationToken cancellationToken = default) =>
             throw new NotSupportedException("Not supported for an excluded path");
 
-        public Task WriteAllTextAsync(string contents, bool createDirectory = true) =>
+        public Task WriteAllTextAsync(string contents, bool createDirectory = true, CancellationToken cancellationToken = default) =>
             throw new NotSupportedException("Not supported for an excluded path");
 
         public Stream OpenRead() =>

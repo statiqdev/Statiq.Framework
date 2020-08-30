@@ -1,5 +1,6 @@
 # 1.0.0-beta.21
 
+- Added some optimizations for async file I/O.
 - Added overloads to `FilterSources` and `FilterDestinations` modules that accept `Config<IEnumerable<string>>` for the patterns.
 - Fixed `IDirectory.GetFiles()` and `IDirectory.GetDirectories()` to make sure excluded paths are excluded from the results.
 - Creating a `ReadFiles` module without any patterns now returns all files.

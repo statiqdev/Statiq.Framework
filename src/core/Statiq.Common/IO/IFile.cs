@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Statiq.Common
@@ -47,13 +48,15 @@ namespace Statiq.Common
         /// <param name="destination">The destination file.</param>
         /// <param name="overwrite">Will overwrite existing destination file if set to <c>true</c>.</param>
         /// <param name="createDirectory">Will create any needed directories that don't already exist if set to <c>true</c>.</param>
-        Task CopyToAsync(IFile destination, bool overwrite = true, bool createDirectory = true);
+        /// <param name="cancellationToken">A cancellation token.</param>
+        Task CopyToAsync(IFile destination, bool overwrite = true, bool createDirectory = true, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Moves the file to the specified destination file.
         /// </summary>
         /// <param name="destination">The destination file.</param>
-        Task MoveToAsync(IFile destination);
+        /// <param name="cancellationToken">A cancellation token.</param>
+        Task MoveToAsync(IFile destination, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Deletes the file.
@@ -63,15 +66,17 @@ namespace Statiq.Common
         /// <summary>
         /// Reads all text from the file.
         /// </summary>
+        /// <param name="cancellationToken">A cancellation token.</param>
         /// <returns>All text in the file.</returns>
-        Task<string> ReadAllTextAsync();
+        Task<string> ReadAllTextAsync(CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Writes the specified text to a file.
         /// </summary>
         /// <param name="contents">The text to write.</param>
         /// <param name="createDirectory">Will create any needed directories that don't already exist if set to <c>true</c>.</param>
-        Task WriteAllTextAsync(string contents, bool createDirectory = true);
+        /// <param name="cancellationToken">A cancellation token.</param>
+        Task WriteAllTextAsync(string contents, bool createDirectory = true, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Opens the file for reading. If it does not exist, an exception

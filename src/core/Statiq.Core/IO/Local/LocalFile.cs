@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Threading;
 using System.Threading.Tasks;
 using Statiq.Common;
 
@@ -8,6 +9,8 @@ namespace Statiq.Core
     // Initially based on code from Cake (http://cakebuild.net/)
     internal class LocalFile : IFile
     {
+        private const int BufferSize = 8192;
+
         private readonly IReadOnlyFileSystem _fileSystem;
         private readonly System.IO.FileInfo _file;
 
@@ -42,75 +45,60 @@ namespace Statiq.Core
 
         public DateTime CreationTime => _file.CreationTime;
 
-        public async Task CopyToAsync(IFile destination, bool overwrite = true, bool createDirectory = true)
+        public async Task CopyToAsync(IFile destination, bool overwrite = true, bool createDirectory = true, CancellationToken cancellationToken = default)
         {
             destination.ThrowIfNull(nameof(destination));
 
             // Create the directory
             if (createDirectory)
             {
-                IDirectory directory = destination.Directory;
-                directory.Create();
+                destination.Directory.Create();
             }
 
-            // Use the file system APIs if destination is also in the file system
-            if (destination is LocalFile)
+            // Use streams instead of System.IO since they're async
+            if (!destination.Exists || overwrite)
             {
-                LocalFileProvider.RetryPolicy.Execute(() => _file.CopyTo(destination.Path.FullPath, overwrite));
-            }
-            else
-            {
-                // Otherwise use streams to perform the copy
                 using (Stream sourceStream = OpenRead())
                 {
                     using (Stream destinationStream = destination.OpenWrite())
                     {
-                        await sourceStream.CopyToAsync(destinationStream);
+                        await sourceStream.CopyToAsync(destinationStream, cancellationToken);
                     }
                 }
             }
         }
 
-        public async Task MoveToAsync(IFile destination)
+        public async Task MoveToAsync(IFile destination, CancellationToken cancellationToken = default)
         {
             destination.ThrowIfNull(nameof(destination));
 
-            // Use the file system APIs if destination is also in the file system
-            if (destination is LocalFile)
+            // Use streams instead of System.IO since they're async
+            using (Stream sourceStream = OpenRead())
             {
-                LocalFileProvider.RetryPolicy.Execute(() => _file.MoveTo(destination.Path.FullPath));
-            }
-            else
-            {
-                // Otherwise use streams to perform the move
-                using (Stream sourceStream = OpenRead())
+                using (Stream destinationStream = destination.OpenWrite())
                 {
-                    using (Stream destinationStream = destination.OpenWrite())
-                    {
-                        await sourceStream.CopyToAsync(destinationStream);
-                    }
+                    await sourceStream.CopyToAsync(destinationStream, cancellationToken);
                 }
-                Delete();
             }
+            Delete();
         }
 
         public void Delete() => LocalFileProvider.RetryPolicy.Execute(() => _file.Delete());
 
-        public async Task<string> ReadAllTextAsync() =>
-            await LocalFileProvider.AsyncRetryPolicy.ExecuteAsync(() => File.ReadAllTextAsync(_file.FullName));
+        public async Task<string> ReadAllTextAsync(CancellationToken cancellationToken = default) =>
+            await LocalFileProvider.AsyncRetryPolicy.ExecuteAsync(() => File.ReadAllTextAsync(_file.FullName, cancellationToken));
 
-        public async Task WriteAllTextAsync(string contents, bool createDirectory = true)
+        public async Task WriteAllTextAsync(string contents, bool createDirectory = true, CancellationToken cancellationToken = default)
         {
             if (createDirectory)
             {
                 CreateDirectory();
             }
 
-            await LocalFileProvider.AsyncRetryPolicy.ExecuteAsync(() => File.WriteAllTextAsync(_file.FullName, contents));
+            await LocalFileProvider.AsyncRetryPolicy.ExecuteAsync(() => File.WriteAllTextAsync(_file.FullName, contents, cancellationToken));
         }
 
-        public Stream OpenRead() =>
-            LocalFileProvider.RetryPolicy.Execute(() => _file.Open(FileMode.Open, FileAccess.Read, FileShare.ReadWrite));
+        public Stream OpenRead() => new FileStream(_file.FullName, FileMode.Open, FileAccess.Read, FileShare.Read, BufferSize, true);
 
         public Stream OpenWrite(bool createDirectory = true)
         {
@@ -118,7 +106,7 @@ namespace Statiq.Core
             {
                 CreateDirectory();
             }
-            return LocalFileProvider.RetryPolicy.Execute(() => _file.Open(FileMode.OpenOrCreate, FileAccess.Write, FileShare.ReadWrite));
+            return new FileStream(_file.FullName, FileMode.OpenOrCreate, FileAccess.Write, FileShare.None, BufferSize, true);
         }
 
         public Stream OpenAppend(bool createDirectory = true)
@@ -127,7 +115,7 @@ namespace Statiq.Core
             {
                 CreateDirectory();
             }
-            return LocalFileProvider.RetryPolicy.Execute(() => _file.Open(FileMode.Append, FileAccess.Write, FileShare.ReadWrite));
+            return new FileStream(_file.FullName, FileMode.Append, FileAccess.Write, FileShare.None, BufferSize, true);
         }
 
         public Stream Open(bool createDirectory = true)
@@ -136,7 +124,7 @@ namespace Statiq.Core
             {
                 CreateDirectory();
             }
-            return LocalFileProvider.RetryPolicy.Execute(() => _file.Open(FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.ReadWrite));
+            return new FileStream(_file.FullName, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.ReadWrite, BufferSize, true);
         }
 
         private void CreateDirectory() => Directory.Create();

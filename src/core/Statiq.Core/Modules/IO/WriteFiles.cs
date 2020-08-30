@@ -88,7 +88,7 @@ namespace Statiq.Core
             }
 
             // Run the write actions in parallel
-            await writesBySource.Values.ParallelForEachAsync(async x => await x.Item2());
+            await Task.WhenAll(writesBySource.Values.Select(x => x.Item2()));
 
             // Return the input documents
             return context.Inputs;
@@ -127,19 +127,28 @@ namespace Statiq.Core
             IFile outputFile = context.FileSystem.GetOutputFile(outputPath);
             if (outputFile is object)
             {
-                using (Stream inputStream = input.GetContentStream())
+                // Optimization if the input document is straight from a file
+                if (input.ContentProvider is FileContent fileContent)
                 {
-                    if (_ignoreEmptyContent && inputStream.Length == 0)
+                    await fileContent.File.CopyToAsync(outputFile, !_append, cancellationToken: context.CancellationToken);
+                }
+                else
+                {
+                    // Otherwise open an output stream for the output file and copy the input document stream to it
+                    using (Stream inputStream = input.GetContentStream())
                     {
-                        return;
-                    }
-
-                    using (Stream outputStream = _append ? outputFile.OpenAppend() : outputFile.OpenWrite())
-                    {
-                        await inputStream.CopyToAsync(outputStream);
-                        if (!_append)
+                        if (_ignoreEmptyContent && inputStream.Length == 0)
                         {
-                            outputStream.SetLength(inputStream.Length);
+                            return;
+                        }
+
+                        using (Stream outputStream = _append ? outputFile.OpenAppend() : outputFile.OpenWrite())
+                        {
+                            await inputStream.CopyToAsync(outputStream);
+                            if (!_append)
+                            {
+                                outputStream.SetLength(inputStream.Length);
+                            }
                         }
                     }
                 }

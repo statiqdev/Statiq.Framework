@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using Statiq.Common;
 
@@ -51,7 +52,7 @@ namespace Statiq.Testing
             }
         }
 
-        public Task CopyToAsync(IFile destination, bool overwrite = true, bool createDirectory = true)
+        public Task CopyToAsync(IFile destination, bool overwrite = true, bool createDirectory = true, CancellationToken cancellationToken = default)
         {
             CreateDirectory(createDirectory, destination);
 
@@ -67,7 +68,7 @@ namespace Statiq.Testing
             return Task.CompletedTask;
         }
 
-        public Task MoveToAsync(IFile destination)
+        public Task MoveToAsync(IFile destination, CancellationToken cancellationToken = default)
         {
             if (!_fileProvider.Files.ContainsKey(Path))
             {
@@ -84,9 +85,9 @@ namespace Statiq.Testing
 
         public void Delete() => _fileProvider.Files.TryRemove(Path, out StringBuilder _);
 
-        public Task<string> ReadAllTextAsync() => Task.FromResult(_fileProvider.Files[Path].ToString());
+        public Task<string> ReadAllTextAsync(CancellationToken cancellationToken = default) => Task.FromResult(_fileProvider.Files[Path].ToString());
 
-        public Task WriteAllTextAsync(string contents, bool createDirectory = true)
+        public Task WriteAllTextAsync(string contents, bool createDirectory = true, CancellationToken cancellationToken = default)
         {
             CreateDirectory(createDirectory, this);
             _fileProvider.Files[Path] = new StringBuilder(contents);

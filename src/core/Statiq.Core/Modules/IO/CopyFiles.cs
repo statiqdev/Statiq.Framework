@@ -115,7 +115,7 @@ namespace Statiq.Core
                             }
 
                             // Copy to the destination
-                            await file.CopyToAsync(destination);
+                            await file.CopyToAsync(destination, cancellationToken: context.CancellationToken);
                             context.LogDebug("Copied file {0} to {1}", file.Path.FullPath, destination.Path.FullPath);
 
                             // Return the document

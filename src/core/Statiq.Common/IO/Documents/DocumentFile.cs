@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Statiq.Common
@@ -45,7 +46,7 @@ namespace Statiq.Common
             return _document.GetContentStream();
         }
 
-        public async Task<string> ReadAllTextAsync()
+        public async Task<string> ReadAllTextAsync(CancellationToken cancellationToken = default)
         {
             if (_document is null)
             {
@@ -75,9 +76,9 @@ namespace Statiq.Common
 
         public DateTime CreationTime => throw new NotSupportedException();
 
-        public Task CopyToAsync(IFile destination, bool overwrite = true, bool createDirectory = true) => throw new NotSupportedException();
+        public Task CopyToAsync(IFile destination, bool overwrite = true, bool createDirectory = true, CancellationToken cancellationToken = default) => throw new NotSupportedException();
 
-        public Task MoveToAsync(IFile destination) => throw new NotSupportedException();
+        public Task MoveToAsync(IFile destination, CancellationToken cancellationToken = default) => throw new NotSupportedException();
 
         public void Delete() => throw new NotSupportedException();
 
@@ -87,7 +88,7 @@ namespace Statiq.Common
 
         public Stream OpenWrite(bool createDirectory = true) => throw new NotSupportedException();
 
-        public Task WriteAllTextAsync(string contents, bool createDirectory = true) => throw new NotSupportedException();
+        public Task WriteAllTextAsync(string contents, bool createDirectory = true, CancellationToken cancellationToken = default) => throw new NotSupportedException();
 
         public override string ToString() => Path.ToString();
 
