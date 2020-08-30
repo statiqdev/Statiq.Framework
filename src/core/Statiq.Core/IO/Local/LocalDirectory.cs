@@ -47,13 +47,7 @@ namespace Statiq.Core
             }
         }
 
-        public void Create()
-        {
-            if (!_directory.Exists)
-            {
-                LocalFileProvider.RetryPolicy.Execute(() => _directory.Create());
-            }
-        }
+        public void Create() => LocalFileProvider.RetryPolicy.Execute(() => _directory.Create());
 
         public void Delete(bool recursive) => LocalFileProvider.RetryPolicy.Execute(() => _directory.Delete(recursive));
 
