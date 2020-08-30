@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -509,7 +510,13 @@ namespace Statiq.Common
                 });
             IEnumerable<IGrouping<IDirectory, string>> patternGroups = directoryPatterns
                 .GroupBy(x => x.Item1, x => x.Item2, DirectoryEqualityComparer.Default);
-            return patternGroups.SelectMany(x => Globber.GetFiles(x.Key, x));
+            return patternGroups.SelectMany(x => Globber.GetFiles(x.Key, x)).Distinct(new FilePathEqualityComparer());
+        }
+
+        private class FilePathEqualityComparer : IEqualityComparer<IFile>
+        {
+            public bool Equals([AllowNull] IFile x, [AllowNull] IFile y) => x?.Path.Equals(y?.Path) == true;
+            public int GetHashCode([DisallowNull] IFile obj) => obj.Path.GetHashCode();
         }
     }
 }
