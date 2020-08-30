@@ -1086,7 +1086,7 @@ namespace Statiq.Common
                 return false;
             }
             string extension = System.IO.Path.GetExtension(path);
-            if (extension is null)
+            if (extension.IsNullOrEmpty())
             {
                 mediaType = null;
                 return false;

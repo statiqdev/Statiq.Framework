@@ -18,6 +18,6 @@ namespace Statiq.Core
         }
 
         protected override IEnumerable<IDocument> ExecuteConfig(IDocument input, IExecutionContext context, string value) =>
-            input.Clone(input.ContentProvider.CloneWithMediaType(value)).Yield();
+            input.MediaTypeEquals(value) ? input.Yield() : input.Clone(input.ContentProvider.CloneWithMediaType(value)).Yield();
     }
 }
