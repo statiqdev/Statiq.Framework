@@ -13,6 +13,7 @@
 - Updated Spectre.Cli CLI library for better console help messages.
 - Added a new `ReadApi` module for generally reading from an API client (#126, thanks @unchase).
 - Added `IBootstrapper.ModifyPipeline()` to make it easier to modify an existing pipeline via the bootstrapper.
+- Added collection initializer and list support to the `ExecuteBranch` module.
 
 # 1.0.0-beta.20
 

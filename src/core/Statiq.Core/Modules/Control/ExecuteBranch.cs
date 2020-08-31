@@ -11,9 +11,9 @@ namespace Statiq.Core
     /// Executes "branches" of modules with the input documents and concatenates their outputs.
     /// </summary>
     /// <category>Control</category>
-    public class ExecuteBranch : Module
+    public class ExecuteBranch : Module, IList<ModuleList>
     {
-        private readonly List<IEnumerable<IModule>> _branches = new List<IEnumerable<IModule>>();
+        private readonly List<ModuleList> _branches = new List<ModuleList>();
 
         public ExecuteBranch(params IModule[] modules)
             : this((IEnumerable<IModule>)modules)
@@ -29,7 +29,7 @@ namespace Statiq.Core
 
         public ExecuteBranch Branch(IEnumerable<IModule> modules)
         {
-            _branches.Add(modules.ThrowIfNull(nameof(modules)));
+            _branches.Add(new ModuleList(modules.ThrowIfNull(nameof(modules))));
             return this;
         }
 
@@ -43,5 +43,41 @@ namespace Statiq.Core
             }
             return results;
         }
+
+        /// <summary>
+        /// Adds a module to the initial condition. This method is mainly to support collection initialization of the module.
+        /// </summary>
+        /// <param name="module">The module to add.</param>
+        public void Add(IModule module) => _branches[^1].Add(module);
+
+        public int Count => _branches.Count;
+
+        public bool IsReadOnly => false;
+
+        public ModuleList this[int index]
+        {
+            get => _branches[index];
+            set => _branches[index] = value;
+        }
+
+        public int IndexOf(ModuleList item) => _branches.IndexOf(item);
+
+        public void Insert(int index, ModuleList item) => _branches.Insert(index, item);
+
+        public void RemoveAt(int index) => _branches.RemoveAt(index);
+
+        public void Add(ModuleList item) => _branches.Add(item);
+
+        public void Clear() => _branches.Clear();
+
+        public bool Contains(ModuleList item) => _branches.Contains(item);
+
+        public void CopyTo(ModuleList[] array, int arrayIndex) => _branches.CopyTo(array, arrayIndex);
+
+        public bool Remove(ModuleList item) => _branches.Remove(item);
+
+        public IEnumerator<ModuleList> GetEnumerator() => ((IEnumerable<ModuleList>)_branches).GetEnumerator();
+
+        IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
     }
 }
