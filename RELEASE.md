@@ -1,3 +1,5 @@
+# 1.0.0-beta.22
+
 # 1.0.0-beta.21
 
 - Added some optimizations for async file I/O.
