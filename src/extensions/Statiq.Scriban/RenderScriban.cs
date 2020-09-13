@@ -166,7 +166,7 @@ namespace Statiq.Scriban
 
             if (_model is null)
             {
-                scriptObject = new ScriptObject(input, _renamer);
+                scriptObject = new StatiqScriptObject(input, _renamer);
             }
             else
             {
@@ -174,7 +174,7 @@ namespace Statiq.Scriban
 
                 if (model is IDocument documentModel)
                 {
-                    scriptObject = new ScriptObject(documentModel, _renamer);
+                    scriptObject = new StatiqScriptObject(documentModel, _renamer);
                 }
                 else
                 {
