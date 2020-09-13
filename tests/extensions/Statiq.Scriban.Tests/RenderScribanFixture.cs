@@ -78,6 +78,36 @@ namespace Statiq.Scriban.Tests
             }
 
             [Test]
+            public async Task AlternateModelAsDocument()
+            {
+                // Given
+                const string input = @"<div class=""entry"">
+  <h1>{{title}}</h1>
+  <div class=""body"">
+    {{body}}
+  </div>
+</div>";
+                const string output = @"<div class=""entry"">
+  <h1>My New Post</h1>
+  <div class=""body"">
+    This is my first post!
+  </div>
+</div>";
+                TestDocument document = new TestDocument(input);
+                RenderScriban scriban = new RenderScriban().WithModel(new TestDocument(new MetadataItems
+                {
+                    { Keys.Title, "My New Post" },
+                    { "Body", "This is my first post!" }
+                }));
+
+                // When
+                TestDocument result = await ExecuteAsync(document, scriban).SingleAsync();
+
+                // Then
+                result.Content.ShouldBe(output, StringCompareShould.IgnoreLineEndings);
+            }
+
+            [Test]
             public async Task AlternateComplexModel()
             {
                 // Given

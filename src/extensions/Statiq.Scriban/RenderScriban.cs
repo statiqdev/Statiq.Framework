@@ -144,11 +144,19 @@ namespace Statiq.Scriban
             else
             {
                 object model = await _model.GetValueAsync(input, context);
-                scriptObject = new global::Scriban.Runtime.ScriptObject();
 
-                if (model != null)
+                if (model is IDocument documentModel)
                 {
-                    scriptObject.Import(model, filter: null, renamer: _renamer);
+                    scriptObject = new ScriptObject(documentModel, _renamer);
+                }
+                else
+                {
+                    scriptObject = new global::Scriban.Runtime.ScriptObject();
+
+                    if (model is object)
+                    {
+                        scriptObject.Import(model, filter: null, renamer: _renamer);
+                    }
                 }
             }
 
