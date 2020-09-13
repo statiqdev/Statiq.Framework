@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using Scriban;
@@ -14,7 +15,7 @@ namespace Statiq.Scriban
         {
             if (target is IDocument)
             {
-                return new DocumentAccessor(MemberFilter, MemberRenamer);
+                return new DocumentAccessor(MemberRenamer);
             }
 
             return base.GetMemberAccessorImpl(target);
@@ -31,14 +32,14 @@ namespace Statiq.Scriban
                 nameof(IDocument.Values)
             };
 
-            private readonly IDictionary<IDocument, ImmutableDictionary<string, string>> _documentMetadataCache;
+            private readonly ConcurrentDictionary<IDocument, ImmutableDictionary<string, string>> _documentMetadataCache;
             private readonly ImmutableDictionary<string, string> _properties;
             private readonly MemberRenamerDelegate _renamer;
 
-            public DocumentAccessor(MemberFilterDelegate memberFilter, MemberRenamerDelegate memberRenamer)
+            public DocumentAccessor(MemberRenamerDelegate memberRenamer)
             {
                 _renamer = memberRenamer;
-                _documentMetadataCache = new Dictionary<IDocument, ImmutableDictionary<string, string>>(DocumentIdComparer.Instance);
+                _documentMetadataCache = new ConcurrentDictionary<IDocument, ImmutableDictionary<string, string>>(DocumentIdComparer.Instance);
                 _properties = PropertyNames
                     .ToImmutableDictionary(Rename);
             }
@@ -91,14 +92,8 @@ namespace Statiq.Scriban
                     return ImmutableDictionary<string, string>.Empty;
                 }
 
-                if (!_documentMetadataCache.TryGetValue(document, out ImmutableDictionary<string, string> metadata))
-                {
-                    metadata = document.Keys
-                        .ToImmutableDictionary(Rename);
-                    _documentMetadataCache[document] = metadata;
-                }
-
-                return metadata;
+                return _documentMetadataCache
+                    .GetOrAdd(document, x => x.Keys.ToImmutableDictionary(Rename));
             }
 
             private string Rename(string member) => _renamer?.Invoke(new DocumentMemberInfo(member)) ?? member;

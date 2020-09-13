@@ -66,21 +66,50 @@ namespace Statiq.Scriban
             return this;
         }
 
+        /// <summary>
+        /// Specifies the member renamer used for renaming document metadata keys,
+        /// properties and methods when used in Scriban templates. The standard Scriban
+        /// member renamer will make a camel/pascalcase name changed by `_` and lowercase.
+        /// e.g `ThisIsAnExample` becomes `this_is_an_example`.
+        /// </summary>
+        /// <param name="renamer">A delegate that returns the new name of a member.</param>
+        /// <returns>The current module instance.</returns>
         public RenderScriban WithMemberRenamer(MemberRenamerDelegate renamer)
         {
             _renamer = renamer;
             return this;
         }
 
+        /// <summary>
+        /// Specifies the options used when parsing Scriban templates.
+        /// </summary>
+        /// <param name="parserOptions">The parsing options.</param>
+        /// <returns>The current module instance.</returns>
         public RenderScriban WithParserOptions(ParserOptions parserOptions)
         {
             _parserOptions = parserOptions;
             return this;
         }
 
+        /// <summary>
+        /// Specifies the options passed to the lexer.
+        /// </summary>
+        /// <param name="lexerOptions">The lexer options.</param>
+        /// <returns>The current module instance.</returns>
         public RenderScriban WithLexerOptions(LexerOptions lexerOptions)
         {
             _lexerOptions = lexerOptions;
+            return this;
+        }
+
+        /// <summary>
+        /// Specifies that templates should be treated as Liquid templates instead of Scriban.
+        /// Short for doing <code>WithLexerOptions(new LexerOptions { Mode = ScriptMode.Liquid })</code>
+        /// </summary>
+        /// <returns>The current module instance.</returns>
+        public RenderScriban AsLiquid()
+        {
+            _lexerOptions.Mode = ScriptMode.Liquid;
             return this;
         }
 
@@ -89,11 +118,11 @@ namespace Statiq.Scriban
         {
             context.LogDebug(
                    "Processing Scriban {0} for {1}",
-                   string.IsNullOrEmpty(_sourceKey) ? string.Empty : ("in" + _sourceKey),
+                   _sourceKey.IsNullOrEmpty() ? string.Empty : ("in" + _sourceKey),
                    input.ToSafeDisplayString());
 
             string content;
-            if (string.IsNullOrEmpty(_sourceKey))
+            if (_sourceKey.IsNullOrEmpty())
             {
                 content = await input.GetContentStringAsync();
             }
@@ -109,8 +138,6 @@ namespace Statiq.Scriban
 
             _renamer ??= StandardMemberRenamer.Default;
 
-            // TODO: Support Liquid
-            // TODO: Expose ParserOptions and LexerOptions
             Template template = Template.Parse(content, input.Source.FullPath, _parserOptions, _lexerOptions);
 
             if (template.HasErrors)
@@ -172,12 +199,12 @@ namespace Statiq.Scriban
 
             string result = await template.RenderAsync(templateContext);
 
-            return string.IsNullOrEmpty(_sourceKey)
+            return _sourceKey.IsNullOrEmpty()
                 ? input.Clone(await context.GetContentProviderAsync(result, MediaTypes.Html)).Yield()
                 : input
                     .Clone(new MetadataItems
                     {
-                        { string.IsNullOrEmpty(_destinationKey) ? _sourceKey : _destinationKey, result }
+                        { _destinationKey.IsNullOrEmpty() ? _sourceKey : _destinationKey, result }
                     })
                     .Yield();
         }
