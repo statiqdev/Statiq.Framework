@@ -1,5 +1,7 @@
 # 1.0.0-beta.22
 
+- Added `ExecuteDestinations` and `ExecuteSources` modules to filter documents by destination or source and then execute modules on the filtered documents.
+
 # 1.0.0-beta.21
 
 - Added some optimizations for async file I/O.

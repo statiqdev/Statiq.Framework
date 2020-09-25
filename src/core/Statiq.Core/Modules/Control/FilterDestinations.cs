@@ -18,7 +18,7 @@ namespace Statiq.Core
     public class FilterDestinations : SyncConfigModule<IEnumerable<string>>
     {
         /// <summary>
-        /// Filters input document by using globbing pattern(s) on the document source.
+        /// Filters input document by using globbing pattern(s) on the document destination.
         /// </summary>
         /// <param name="patterns">The globbing patterns to apply.</param>
         public FilterDestinations(Config<IEnumerable<string>> patterns)
@@ -27,7 +27,7 @@ namespace Statiq.Core
         }
 
         /// <summary>
-        /// Filters input document by using globbing pattern(s) on the document source.
+        /// Filters input document by using globbing pattern(s) on the document destination.
         /// </summary>
         /// <param name="pattern">The globbing pattern to apply.</param>
         public FilterDestinations(Config<string> pattern)
@@ -36,7 +36,7 @@ namespace Statiq.Core
         }
 
         /// <summary>
-        /// Filters input document by using globbing pattern(s) on the document source.
+        /// Filters input document by using globbing pattern(s) on the document destination.
         /// </summary>
         /// <param name="patterns">The globbing patterns to apply.</param>
         public FilterDestinations(params string[] patterns)
@@ -45,7 +45,7 @@ namespace Statiq.Core
         }
 
         /// <summary>
-        /// Filters input document by using globbing pattern(s) on the document source.
+        /// Filters input document by using globbing pattern(s) on the document destination.
         /// </summary>
         /// <param name="patterns">The globbing patterns to apply.</param>
         public FilterDestinations(IEnumerable<string> patterns)

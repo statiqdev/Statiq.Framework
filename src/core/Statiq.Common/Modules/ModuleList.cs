@@ -36,13 +36,7 @@ namespace Statiq.Common
         /// <param name="modules">The initial modules in the list.</param>
         public ModuleList(IEnumerable<IModule> modules)
         {
-            if (modules is object)
-            {
-                foreach (IModule module in modules.Where(x => x is object))
-                {
-                    _modules.Add(module);
-                }
-            }
+            AddRange(modules);
         }
 
         /// <summary>
@@ -59,9 +53,12 @@ namespace Statiq.Common
         /// <param name="modules">The modules to add.</param>
         public void AddRange(IEnumerable<IModule> modules)
         {
-            foreach (IModule module in modules.Where(x => x is object))
+            if (modules is object)
             {
-                _modules.Add(module);
+                foreach (IModule module in modules.Where(x => x is object))
+                {
+                    _modules.Add(module);
+                }
             }
         }
 
