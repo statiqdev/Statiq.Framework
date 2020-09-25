@@ -194,7 +194,13 @@ namespace Statiq.Markdown
                 return input.Yield();
             }
 
-            string result = Render(context, _configuration, _extensions, _prependLinkRoot, content);
+            string result = Render(
+                context,
+                _configuration,
+                _extensions,
+                _prependLinkRoot,
+                content,
+                out MarkdownDocument markdownDocument);
 
             if (_escapeAt)
             {
@@ -203,10 +209,17 @@ namespace Statiq.Markdown
             }
 
             return string.IsNullOrEmpty(_sourceKey)
-                ? input.Clone(await context.GetContentProviderAsync(result, MediaTypes.Html)).Yield()
+                ? input.Clone(
+                    new MetadataItems
+                    {
+                        { nameof(MarkdownDocument), markdownDocument }
+                    },
+                    await context.GetContentProviderAsync(result, MediaTypes.Html))
+                    .Yield()
                 : input
                     .Clone(new MetadataItems
                     {
+                        { nameof(MarkdownDocument), markdownDocument },
                         { string.IsNullOrEmpty(_destinationKey) ? _sourceKey : _destinationKey, result }
                     })
                     .Yield();
@@ -217,7 +230,8 @@ namespace Statiq.Markdown
             string configuration,
             OrderedList<IMarkdownExtension> extensions,
             bool prependLinkRoot,
-            string content)
+            string content,
+            out MarkdownDocument markdownDocument)
         {
             // Create the pipeline
             MarkdownPipelineBuilder pipelineBuilder = new MarkdownPipelineBuilder();
@@ -254,8 +268,8 @@ namespace Statiq.Markdown
                     };
                 }
 
-                MarkdownDocument document = MarkdownParser.Parse(content, pipeline);
-                htmlRenderer.Render(document);
+                markdownDocument = MarkdownParser.Parse(content, pipeline);
+                htmlRenderer.Render(markdownDocument);
                 writer.Flush();
                 return writer.ToString();
             }
