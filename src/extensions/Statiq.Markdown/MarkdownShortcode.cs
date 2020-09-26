@@ -35,7 +35,13 @@ namespace Statiq.Markdown
         public override ShortcodeResult Execute(KeyValuePair<string, string>[] args, string content, IDocument document, IExecutionContext context)
         {
             IMetadataDictionary dictionary = args.ToDictionary(Configuration, PrependLinkRoot);
-            return RenderMarkdown.Render(context, dictionary.GetString(Configuration, RenderMarkdown.DefaultConfiguration), null, dictionary.GetBool(PrependLinkRoot), content);
+            return RenderMarkdown.Render(
+                context,
+                dictionary.GetString(Configuration, RenderMarkdown.DefaultConfiguration),
+                null,
+                dictionary.GetBool(PrependLinkRoot),
+                content,
+                out _);
         }
     }
 }
