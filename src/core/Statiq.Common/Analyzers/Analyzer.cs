@@ -2,7 +2,7 @@
 
 namespace Statiq.Common
 {
-    public abstract class Validator : IValidator
+    public abstract class Analyzer : IAnalyzer
     {
         /// <inheritdoc/>
         public virtual string[] Pipelines { get; set; }
@@ -11,6 +11,6 @@ namespace Statiq.Common
         public virtual Phase[] Phases { get; set; }
 
         /// <inheritdoc/>
-        public abstract Task ValidateAsync(IValidationContext context);
+        public abstract Task AnalyzeAsync(IAnalyzerContext context);
     }
 }

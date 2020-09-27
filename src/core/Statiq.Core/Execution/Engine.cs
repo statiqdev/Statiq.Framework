@@ -98,7 +98,7 @@ namespace Statiq.Core
             ClassCatalog classCatalog)
         {
             _pipelines = new PipelineCollection(this);
-            ValidatorCollection = new ValidatorCollection(this);
+            AnalyzerCollection = new AnalyzerCollection(this);
             ApplicationState = applicationState ?? new ApplicationState(null, null, null);
             ClassCatalog = classCatalog ?? new ClassCatalog();
             ClassCatalog.Populate();
@@ -226,9 +226,9 @@ namespace Statiq.Core
         public IPipelineOutputs Outputs { get; private set; }
 
         /// <inheritdoc />
-        public IValidatorCollection Validators => ValidatorCollection;
+        public IAnalyzerCollection Analyzers => AnalyzerCollection;
 
-        internal ValidatorCollection ValidatorCollection { get; }
+        internal AnalyzerCollection AnalyzerCollection { get; }
 
         /// <inheritdoc />
         public FilteredDocumentList<IDocument> OutputPages =>

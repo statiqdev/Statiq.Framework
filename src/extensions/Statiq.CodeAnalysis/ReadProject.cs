@@ -53,7 +53,7 @@ namespace Statiq.CodeAnalysis
             {
                 analyzer.AddBinaryLogger();
             }
-            AnalyzerResult result = CompileProject(context, analyzer, log);
+            Buildalyzer.AnalyzerResult result = CompileProject(context, analyzer, log);
             AdhocWorkspace workspace = new AdhocWorkspace();
             result.AddToWorkspace(workspace);
             return workspace.CurrentSolution.Projects;

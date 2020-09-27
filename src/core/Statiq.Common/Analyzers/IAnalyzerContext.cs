@@ -3,18 +3,18 @@
 namespace Statiq.Common
 {
     /// <summary>
-    /// Tracks validation results and passes information about the current execution state to validators.
+    /// Tracks analyzer results and passes information about the current execution state to analyzers.
     /// </summary>
-    public interface IValidationContext : IExecutionState
+    public interface IAnalyzerContext : IExecutionState
     {
         /// <summary>
-        /// Adds a validation result.
+        /// Adds an analyzer result.
         /// </summary>
-        /// <param name="result">The validation result to add.</param>
-        void Add(ValidationResult result);
+        /// <param name="result">The analyzer result to add.</param>
+        void Add(AnalyzerResult result);
 
         /// <summary>
-        /// The documents to validate.
+        /// The documents to analyze.
         /// </summary>
         ImmutableArray<IDocument> Documents { get; }
 

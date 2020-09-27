@@ -53,9 +53,9 @@ namespace Statiq.Common
         public const string LinkLowercase = nameof(LinkLowercase);
 
         /// <summary>
-        /// Set to <c>true</c> to fail validation if any validators return warning results (by default validation only fails on errors).
+        /// Set to <c>true</c> to fail the generation if any analyzers return warning results (by default analyzers only fail on errors).
         /// </summary>
-        public const string FailValidationOnWarnings = nameof(FailValidationOnWarnings);
+        public const string FailOnAnalyzerWarnings = nameof(FailOnAnalyzerWarnings);
 
         /// <summary>
         /// This will cause temporary backing files to be created for string document content

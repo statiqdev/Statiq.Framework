@@ -17,7 +17,7 @@ namespace Statiq.App
         Namespaces = 1 << 8,
         Pipelines = 1 << 9,
         GlobCommands = 1 << 10,
-        Validators = 1 << 11,
+        Analyzers = 1 << 11,
         All =
             BootstrapperConfigurators
             | Logging
@@ -30,6 +30,6 @@ namespace Statiq.App
             | Namespaces
             | Pipelines
             | GlobCommands
-            | Validators
+            | Analyzers
     }
 }

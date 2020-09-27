@@ -12,21 +12,21 @@ using Statiq.Common;
 
 namespace Statiq.Core
 {
-    internal class ValidationContext : IValidationContext
+    internal class AnalyzerContext : IAnalyzerContext
     {
         private readonly Engine _engine;
         private readonly PipelinePhase _pipelinePhase;
 
-        internal ValidationContext(Engine engine, PipelinePhase pipelinePhase)
+        internal AnalyzerContext(Engine engine, PipelinePhase pipelinePhase)
         {
             _engine = engine;
             _pipelinePhase = pipelinePhase;
         }
 
-        internal ConcurrentBag<ValidationResult> Results { get; } = new ConcurrentBag<ValidationResult>();
+        internal ConcurrentBag<AnalyzerResult> Results { get; } = new ConcurrentBag<AnalyzerResult>();
 
         /// <inheritdoc/>
-        public void Add(ValidationResult result) => Results.Add(result);
+        public void Add(AnalyzerResult result) => Results.Add(result);
 
         /// <inheritdoc/>
         public ImmutableArray<IDocument> Documents => _pipelinePhase.Outputs;

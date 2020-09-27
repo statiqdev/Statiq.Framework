@@ -71,7 +71,7 @@ namespace Statiq.Core
                 _logger.LogDebug($"{PipelineName}/{Phase} » Pipeline contains no modules, skipping");
                 Outputs = GetInputs();
                 await engine.Events.RaiseAsync(new AfterPipelinePhaseExecution(engine.ExecutionId, PipelineName, Phase, Outputs, 0));
-                await engine.ValidatorCollection.ValidateAsync(this);
+                await engine.AnalyzerCollection.AnalyzeAsync(this);
                 return;
             }
 
@@ -122,8 +122,8 @@ namespace Statiq.Core
             // Raise the after event
             await engine.Events.RaiseAsync(new AfterPipelinePhaseExecution(engine.ExecutionId, PipelineName, Phase, Outputs, stopwatch.ElapsedMilliseconds));
 
-            // Run validators
-            await engine.ValidatorCollection.ValidateAsync(this);
+            // Run analyzers
+            await engine.AnalyzerCollection.AnalyzeAsync(this);
 
             // Record the results
             PhaseResult phaseResult = new PhaseResult(PipelineName, Phase, Outputs, startTime, stopwatch.ElapsedMilliseconds);

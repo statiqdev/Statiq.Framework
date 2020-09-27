@@ -51,9 +51,9 @@ namespace Statiq.Common
         new ILogger Logger { get; }
 
         /// <summary>
-        /// A collection of validators.
+        /// A collection of analyzers.
         /// </summary>
-        IValidatorCollection Validators { get; }
+        IAnalyzerCollection Analyzers { get; }
 
         /// <summary>
         /// Sets the default document type produced by this engine (and resulting <see cref="IExecutionContext"/> contexts).

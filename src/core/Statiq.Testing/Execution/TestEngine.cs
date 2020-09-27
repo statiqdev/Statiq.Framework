@@ -128,10 +128,10 @@ namespace Statiq.Testing
         IPipelineOutputs IExecutionState.Outputs => Outputs;
 
         /// <inheritdoc />
-        public TestValidatorCollection Validators { get; set; } = new TestValidatorCollection();
+        public TestAnalyzerCollection Analyzers { get; set; } = new TestAnalyzerCollection();
 
         /// <inheritdoc />
-        IValidatorCollection IEngine.Validators => Validators;
+        IAnalyzerCollection IEngine.Analyzers => Analyzers;
 
         /// <inheritdoc />
         public FilteredDocumentList<IDocument> OutputPages =>
