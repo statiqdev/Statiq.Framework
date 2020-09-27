@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using Statiq.Common;
 
-namespace Statiq.Testing.Validation
+namespace Statiq.Testing
 {
     public class TestValidatorCollection : IValidatorCollection
     {

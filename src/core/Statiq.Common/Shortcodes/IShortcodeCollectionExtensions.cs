@@ -11,9 +11,9 @@ namespace Statiq.Common
         /// Adds a shortcode by type, inferring the name from the type name and removing a trailing "Shortcode" from the type name.
         /// </summary>
         /// <param name="shortcodes">The shortcodes.</param>
-        /// <param name="type">The type of the shortcode to add (must implement <see cref="IShortcode"/>).</param>
-        public static void Add(this IShortcodeCollection shortcodes, Type type) =>
-            shortcodes.Add(type?.Name.RemoveEnd("Shortcode", StringComparison.OrdinalIgnoreCase), type);
+        /// <param name="shortcodeType">The type of the shortcode to add (must implement <see cref="IShortcode"/>).</param>
+        public static void Add(this IShortcodeCollection shortcodes, Type shortcodeType) =>
+            shortcodes.Add(shortcodeType?.Name.RemoveEnd("Shortcode", StringComparison.OrdinalIgnoreCase), shortcodeType);
 
         /// <summary>
         /// Adds a shortcode by type, inferring the name from the type name.
@@ -42,16 +42,16 @@ namespace Statiq.Common
         /// </summary>
         /// <param name="shortcodes">The shortcodes.</param>
         /// <param name="name">The name of the shortcode.</param>
-        /// <param name="type">The type of the shortcode to add (must implement <see cref="IShortcode"/>).</param>
-        public static void Add(this IShortcodeCollection shortcodes, string name, Type type)
+        /// <param name="shortcodeType">The type of the shortcode to add (must implement <see cref="IShortcode"/>).</param>
+        public static void Add(this IShortcodeCollection shortcodes, string name, Type shortcodeType)
         {
             shortcodes.ThrowIfNull(nameof(shortcodes));
-            type.ThrowIfNull(nameof(type));
-            if (!typeof(IShortcode).IsAssignableFrom(type))
+            shortcodeType.ThrowIfNull(nameof(shortcodeType));
+            if (!typeof(IShortcode).IsAssignableFrom(shortcodeType))
             {
-                throw new ArgumentException("The type must implement " + nameof(IShortcode), nameof(type));
+                throw new ArgumentException("The type must implement " + nameof(IShortcode), nameof(shortcodeType));
             }
-            shortcodes.Add(name, () => (IShortcode)Activator.CreateInstance(type));
+            shortcodes.Add(name, () => (IShortcode)Activator.CreateInstance(shortcodeType));
         }
 
         /// <summary>

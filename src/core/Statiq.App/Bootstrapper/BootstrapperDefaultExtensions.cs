@@ -63,6 +63,10 @@ namespace Statiq.App
             {
                 bootstrapper.AddGlobCommands();
             }
+            if (features.HasFlag(DefaultFeatures.Validators))
+            {
+                bootstrapper.AddValidators();
+            }
             return bootstrapper;
         }
 
