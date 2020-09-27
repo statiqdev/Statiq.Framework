@@ -47,7 +47,9 @@ namespace Statiq.Common
             this IValidatorCollection validators,
             IEnumerable<string> pipelines,
             IEnumerable<Phase> phases,
-            Action<IValidationContext> validateAction) =>
+            Action<IValidationContext> validateAction)
+        {
+            validateAction.ThrowIfNull(nameof(validateAction));
             validators.Add(
                 pipelines,
                 phases,
@@ -56,22 +58,28 @@ namespace Statiq.Common
                     validateAction(context);
                     return Task.CompletedTask;
                 });
+        }
 
         public static void Add(
             this IValidatorCollection validators,
             IEnumerable<string> pipelines,
             IEnumerable<Phase> phases,
-            Func<IDocument, IValidationContext, Task> validateFunc) =>
+            Func<IDocument, IValidationContext, Task> validateFunc)
+        {
+            validateFunc.ThrowIfNull(nameof(validateFunc));
             validators.Add(
                 pipelines,
                 phases,
                 async context => await context.Documents.ParallelForEachAsync(async doc => await validateFunc(doc, context), context.CancellationToken));
+        }
 
         public static void Add(
             this IValidatorCollection validators,
             IEnumerable<string> pipelines,
             IEnumerable<Phase> phases,
-            Action<IDocument, IValidationContext> validateAction) =>
+            Action<IDocument, IValidationContext> validateAction)
+        {
+            validateAction.ThrowIfNull(nameof(validateAction));
             validators.Add(
                 pipelines,
                 phases,
@@ -80,6 +88,7 @@ namespace Statiq.Common
                     validateAction(document, context);
                     return Task.CompletedTask;
                 });
+        }
 
         public static void Add(
             this IValidatorCollection validators,
@@ -92,8 +101,11 @@ namespace Statiq.Common
             this IValidatorCollection validators,
             string pipeline,
             Phase phase,
-            Action<IValidationContext> validateAction) =>
+            Action<IValidationContext> validateAction)
+        {
+            validateAction.ThrowIfNull(nameof(validateAction));
             validators.Add(new[] { pipeline }, new[] { phase }, validateAction);
+        }
 
         public static void Add(
             this IValidatorCollection validators,
@@ -106,7 +118,10 @@ namespace Statiq.Common
             this IValidatorCollection validators,
             string pipeline,
             Phase phase,
-            Action<IDocument, IValidationContext> validateAction) =>
+            Action<IDocument, IValidationContext> validateAction)
+        {
+            validateAction.ThrowIfNull(nameof(validateAction));
             validators.Add(new[] { pipeline }, new[] { phase }, validateAction);
+        }
     }
 }

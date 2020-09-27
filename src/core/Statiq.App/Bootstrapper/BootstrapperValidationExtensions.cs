@@ -21,64 +21,64 @@ namespace Statiq.App
             where TBootstrapper : IBootstrapper =>
             bootstrapper.ConfigureEngine(x => x.Validators.Add(validator));
 
-        public static void AddValidator<TBootstrapper>(
-            this Bootstrapper bootstrapper,
+        public static TBootstrapper Validate<TBootstrapper>(
+            this TBootstrapper bootstrapper,
             IEnumerable<string> pipelines,
             IEnumerable<Phase> phases,
             Func<IValidationContext, Task> validateFunc)
             where TBootstrapper : IBootstrapper =>
             bootstrapper.ConfigureEngine(x => x.Validators.Add(pipelines, phases, validateFunc));
 
-        public static void AddValidator<TBootstrapper>(
-            this Bootstrapper bootstrapper,
+        public static TBootstrapper Validate<TBootstrapper>(
+            this TBootstrapper bootstrapper,
             IEnumerable<string> pipelines,
             IEnumerable<Phase> phases,
             Action<IValidationContext> validateAction)
             where TBootstrapper : IBootstrapper =>
             bootstrapper.ConfigureEngine(x => x.Validators.Add(pipelines, phases, validateAction));
 
-        public static void AddValidator<TBootstrapper>(
-            this Bootstrapper bootstrapper,
+        public static TBootstrapper Validate<TBootstrapper>(
+            this TBootstrapper bootstrapper,
             IEnumerable<string> pipelines,
             IEnumerable<Phase> phases,
             Func<IDocument, IValidationContext, Task> validateFunc)
             where TBootstrapper : IBootstrapper =>
             bootstrapper.ConfigureEngine(x => x.Validators.Add(pipelines, phases, validateFunc));
 
-        public static void AddValidator<TBootstrapper>(
-            this Bootstrapper bootstrapper,
+        public static TBootstrapper Validate<TBootstrapper>(
+            this TBootstrapper bootstrapper,
             IEnumerable<string> pipelines,
             IEnumerable<Phase> phases,
             Action<IDocument, IValidationContext> validateAction)
             where TBootstrapper : IBootstrapper =>
             bootstrapper.ConfigureEngine(x => x.Validators.Add(pipelines, phases, validateAction));
 
-        public static void AddValidator<TBootstrapper>(
-            this Bootstrapper bootstrapper,
+        public static TBootstrapper Validate<TBootstrapper>(
+            this TBootstrapper bootstrapper,
             string pipeline,
             Phase phase,
             Func<IValidationContext, Task> validateFunc)
             where TBootstrapper : IBootstrapper =>
             bootstrapper.ConfigureEngine(x => x.Validators.Add(pipeline, phase, validateFunc));
 
-        public static void AddValidator<TBootstrapper>(
-            this Bootstrapper bootstrapper,
+        public static TBootstrapper Validate<TBootstrapper>(
+            this TBootstrapper bootstrapper,
             string pipeline,
             Phase phase,
             Action<IValidationContext> validateAction)
             where TBootstrapper : IBootstrapper =>
             bootstrapper.ConfigureEngine(x => x.Validators.Add(pipeline, phase, validateAction));
 
-        public static void AddValidator<TBootstrapper>(
-            this Bootstrapper bootstrapper,
+        public static TBootstrapper Validate<TBootstrapper>(
+            this TBootstrapper bootstrapper,
             string pipeline,
             Phase phase,
             Func<IDocument, IValidationContext, Task> validateFunc)
             where TBootstrapper : IBootstrapper =>
             bootstrapper.ConfigureEngine(x => x.Validators.Add(pipeline, phase, validateFunc));
 
-        public static void AddValidator<TBootstrapper>(
-            this Bootstrapper bootstrapper,
+        public static TBootstrapper Validate<TBootstrapper>(
+            this TBootstrapper bootstrapper,
             string pipeline,
             Phase phase,
             Action<IDocument, IValidationContext> validateAction)

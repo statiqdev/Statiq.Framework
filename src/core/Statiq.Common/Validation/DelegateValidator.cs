@@ -23,6 +23,6 @@ namespace Statiq.Common
         /// <inheritdoc/>
         public Phase[] Phases { get; }
 
-        public Task ValidateAsync(IValidationContext context) => _validateFunc(context);
+        public async Task ValidateAsync(IValidationContext context) => await _validateFunc(context);
     }
 }
