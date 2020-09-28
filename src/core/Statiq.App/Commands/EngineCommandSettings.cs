@@ -37,5 +37,9 @@ namespace Statiq.App
         [CommandOption("-r|--root")]
         [Description("The root folder to use.")]
         public string RootPath { get; set; }
+
+        [CommandOption("-a|--analyzer <ANALYZER>")]
+        [Description("Specifies the log level for the specified analyzer as \"[analyzer]=[log level]\" (or for all analyzers if only a log level is provided).")]
+        public string[] Analyzers { get; set; }
     }
 }

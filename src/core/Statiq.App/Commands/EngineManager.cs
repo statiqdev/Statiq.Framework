@@ -58,6 +58,9 @@ namespace Statiq.App
             // Run engine configurators after command line, settings, etc. have been applied
             bootstrapper.Configurators.Configure<IEngine>(Engine);
 
+            // Apply analyzers after configurators (since the configurators register the analyzers)
+            ApplyAnalyzers(Engine, commandSettings.Analyzers);
+
             // Log the full environment
             _logger.LogInformation($"Root path:{Environment.NewLine}       {Engine.FileSystem.RootPath}");
             _logger.LogInformation($"Input path(s):{Environment.NewLine}       {string.Join(Environment.NewLine + "       ", Engine.FileSystem.InputPaths)}");
@@ -128,6 +131,38 @@ namespace Statiq.App
             if (commandSettings.SerialExecution)
             {
                 engine.SerialExecution = true;
+            }
+        }
+
+        private static void ApplyAnalyzers(Engine engine, string[] analyzers)
+        {
+            foreach (KeyValuePair<string, string> analyzer in SettingsParser.Parse(analyzers))
+            {
+                if (analyzer.Value == "true")
+                {
+                    // Specify log level for all
+                    if (!Enum.TryParse(analyzer.Key, out LogLevel logLevel))
+                    {
+                        throw new Exception($"Invalid analyzer log level {analyzer.Key}");
+                    }
+                    foreach (IAnalyzer engineAnalyzer in engine.Analyzers.Values)
+                    {
+                        engineAnalyzer.LogLevel = logLevel;
+                    }
+                }
+                else
+                {
+                    // Specify level for single analyzer
+                    if (!engine.Analyzers.TryGetValue(analyzer.Key, out IAnalyzer engineAnalyzer))
+                    {
+                        throw new Exception($"Could not find analyzer {analyzer.Key}");
+                    }
+                    if (!Enum.TryParse(analyzer.Value, out LogLevel logLevel))
+                    {
+                        throw new Exception($"Invalid analyzer log level {analyzer.Value}");
+                    }
+                    engineAnalyzer.LogLevel = logLevel;
+                }
             }
         }
     }

@@ -23,7 +23,7 @@ namespace Statiq.App
         public string LogFile { get; set; }
 
         [CommandOption("-s|--setting <SETTING>")]
-        [Description("Specifies a setting as a key=value pair (the value can be omited).")]
+        [Description("Specifies a setting as a \"[key]=[value]\" pair (the value can be omited).")]
         public string[] Settings { get; set; }
     }
 }

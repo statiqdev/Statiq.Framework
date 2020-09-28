@@ -47,7 +47,9 @@ namespace Statiq.Core
             // Run analyzers
             ConcurrentBag<AnalyzerResult> results = new ConcurrentBag<AnalyzerResult>();
             await _analyzers
-                .Where(v => v.Value.Phases?.Contains(pipelinePhase.Phase) != false && v.Value.Pipelines?.Contains(pipelinePhase.PipelineName, StringComparer.OrdinalIgnoreCase) != false)
+                .Where(x => x.Value.Phases?.Contains(pipelinePhase.Phase) != false
+                    && x.Value.Pipelines?.Contains(pipelinePhase.PipelineName, StringComparer.OrdinalIgnoreCase) != false
+                    && x.Value.LogLevel != LogLevel.None)
                 .ParallelForEachAsync(async v => await v.Value.AnalyzeAsync(pipelinePhase.Outputs, new AnalyzerContext(_engine, pipelinePhase, v, results)));
 
             // Did we get any errors and need to fail fast?
