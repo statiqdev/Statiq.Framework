@@ -25,7 +25,7 @@ namespace Statiq.Core
             _logPrefix = GetLogPrefix(parent, module, contextData.PipelinePhase);
 
             Parent = parent;
-            Module = module.ThrowIfNull(nameof(module));
+            Module = module; // Can be null if in an analyzer
             Inputs = inputs;
 
             IExecutionContext.Current = this;
@@ -33,14 +33,19 @@ namespace Statiq.Core
 
         private static string GetLogPrefix(IExecutionContext parent, IModule module, PipelinePhase pipelinePhase)
         {
-            Stack<string> modules = new Stack<string>();
-            modules.Push(module.GetType().Name);
-            while (parent is object)
+            string moduleComponent = string.Empty;
+            if (module is object)
             {
-                modules.Push(parent.Module.GetType().Name);
-                parent = parent.Parent;
+                Stack<string> modules = new Stack<string>();
+                modules.Push(module.GetType().Name);
+                while (parent is object)
+                {
+                    modules.Push(parent.Module.GetType().Name);
+                    parent = parent.Parent;
+                }
+                moduleComponent = $"{string.Join(" » ", modules)} » ";
             }
-            return $"{pipelinePhase.PipelineName}/{pipelinePhase.Phase} » {string.Join(" » ", modules)} » ";
+            return $"{pipelinePhase.PipelineName}/{pipelinePhase.Phase} » {moduleComponent}";
         }
 
         /// <inheritdoc/>

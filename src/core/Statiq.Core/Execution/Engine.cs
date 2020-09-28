@@ -383,6 +383,7 @@ namespace Statiq.Core
                 }
 
                 // Log
+                Logger.LogInformation("========== Execution ==========");
                 Logger.LogInformation($"Executing {ExecutingPipelines.Count} pipelines ({string.Join(", ", ExecutingPipelines.Keys.OrderBy(x => x))})");
                 Logger.LogDebug($"Execution ID {ExecutionId}");
                 System.Diagnostics.Stopwatch stopwatch = System.Diagnostics.Stopwatch.StartNew();
@@ -405,10 +406,12 @@ namespace Statiq.Core
 
                 // Get and run all phase tasks
                 Task[] phaseTasks = null;
+                ConcurrentDictionary<PipelinePhase, ConcurrentBag<AnalyzerResult>> analyzerResults =
+                    new ConcurrentDictionary<PipelinePhase, ConcurrentBag<AnalyzerResult>>();
                 try
                 {
                     // Get and execute all phases
-                    phaseTasks = GetPhaseTasks(phaseResults);
+                    phaseTasks = GetPhaseTasks(phaseResults, analyzerResults);
                     await Task.WhenAll(phaseTasks);
                 }
                 finally
@@ -419,6 +422,14 @@ namespace Statiq.Core
                 // Raise after event
                 await Events.RaiseAsync(new AfterEngineExecution(this, ExecutionId, Outputs, stopwatch.ElapsedMilliseconds));
 
+                // Log analyzer results
+                AnalyzerResult[] collapsedAnalyzerResults = analyzerResults.SelectMany(x => x.Value).ToArray();
+                if (collapsedAnalyzerResults.Length > 0)
+                {
+                    Logger.LogInformation("========== Analyzer Results ==========");
+                    AnalyzerResult.LogResults(collapsedAnalyzerResults, Logger);
+                }
+
                 // Log execution summary table
                 if (phaseResults.Count > 0)
                 {
@@ -426,7 +437,15 @@ namespace Statiq.Core
                 }
 
                 // Clean up
+                Logger.LogInformation("========== Completed ==========");
                 Logger.LogInformation($"Finished execution in {stopwatch.ElapsedMilliseconds} ms");
+
+                // Throw if any analyzer errors
+                if (collapsedAnalyzerResults.Any(x => x.LogLevel >= LogLevel.Error))
+                {
+                    throw new Exception($"Analyzer error(s)");
+                }
+
                 return Outputs;
             }
             finally
@@ -441,7 +460,7 @@ namespace Statiq.Core
             const int slices = 80;
 
             StringBuilder builder = new StringBuilder();
-            builder.AppendLine("Execution summary...");
+            builder.AppendLine("========== Execution Summary ==========");
             builder.AppendLine();
 
             builder.AppendLine("Number of output documents per pipeline and phase:");
@@ -735,15 +754,12 @@ namespace Statiq.Core
             }
         }
 
-        private Task[] GetPhaseTasks(ConcurrentDictionary<string, PhaseResult[]> phaseResults)
+        private Task[] GetPhaseTasks(ConcurrentDictionary<string, PhaseResult[]> phaseResults, ConcurrentDictionary<PipelinePhase, ConcurrentBag<AnalyzerResult>> analyzerResults)
         {
             Dictionary<PipelinePhase, Task> phaseTasks = new Dictionary<PipelinePhase, Task>();
             foreach (PipelinePhase phase in _phases.Where(x => ExecutingPipelines.ContainsKey(x.PipelineName)))
             {
-                Task phaseTask = GetPhaseTaskAsync(
-                    phaseResults,
-                    phaseTasks,
-                    phase);
+                Task phaseTask = GetPhaseTaskAsync(phaseResults, analyzerResults, phaseTasks, phase);
                 if (SerialExecution)
                 {
                     // If we're running serially, immediately wait for this phase task before getting the next one
@@ -756,6 +772,7 @@ namespace Statiq.Core
 
         private Task GetPhaseTaskAsync(
             ConcurrentDictionary<string, PhaseResult[]> phaseResults,
+            ConcurrentDictionary<PipelinePhase, ConcurrentBag<AnalyzerResult>> analyzerResults,
             Dictionary<PipelinePhase, Task> phaseTasks,
             PipelinePhase phase)
         {
@@ -763,7 +780,7 @@ namespace Statiq.Core
             if (phase.Dependencies.Length == 0)
             {
                 // This will immediately queue the input phase while we continue figuring out tasks, but that's okay
-                return Task.Run(() => phase.ExecuteAsync(this, phaseResults), CancellationToken);
+                return Task.Run(() => phase.ExecuteAsync(this, phaseResults, analyzerResults), CancellationToken);
             }
 
             // We have to explicitly wait the execution task in the continuation function
@@ -780,7 +797,7 @@ namespace Statiq.Core
                     // Only run the dependent task if all the dependencies successfully completed
                     if (dependencies.All(x => x.IsCompletedSuccessfully))
                     {
-                        Task.WaitAll(new Task[] { phase.ExecuteAsync(this, phaseResults) }, CancellationToken);
+                        Task.WaitAll(new Task[] { phase.ExecuteAsync(this, phaseResults, analyzerResults) }, CancellationToken);
                     }
                     else
                     {

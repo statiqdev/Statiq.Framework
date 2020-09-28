@@ -1,10 +1,8 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Collections.Immutable;
 using System.IO;
 using System.Net.Http;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
@@ -16,20 +14,26 @@ namespace Statiq.Core
     {
         private readonly Engine _engine;
         private readonly PipelinePhase _pipelinePhase;
+        private readonly string _analyzerName;
+        private readonly LogLevel _logLevel;
+        private readonly ConcurrentBag<AnalyzerResult> _results;
 
-        internal AnalyzerContext(Engine engine, PipelinePhase pipelinePhase)
+        internal AnalyzerContext(Engine engine, PipelinePhase pipelinePhase, KeyValuePair<string, IAnalyzer> analyzerItem, ConcurrentBag<AnalyzerResult> results)
         {
             _engine = engine;
             _pipelinePhase = pipelinePhase;
+            _analyzerName = analyzerItem.Key;
+            _logLevel = analyzerItem.Value.LogLevel;
+            if (_logLevel == LogLevel.Warning && _engine.Settings.GetBool(Keys.AnalyzerWarningsAsErrors))
+            {
+                _logLevel = LogLevel.Error;
+            }
+            _results = results;
         }
 
-        internal ConcurrentBag<AnalyzerResult> Results { get; } = new ConcurrentBag<AnalyzerResult>();
-
         /// <inheritdoc/>
-        public void Add(AnalyzerResult result) => Results.Add(result);
-
-        /// <inheritdoc/>
-        public ImmutableArray<IDocument> Documents => _pipelinePhase.Outputs;
+        public void Add(IDocument document, string message) =>
+            _results.Add(new AnalyzerResult(_analyzerName, _logLevel, document, message));
 
         /// <inheritdoc/>
         public IReadOnlyPipeline Pipeline => _pipelinePhase.Pipeline;

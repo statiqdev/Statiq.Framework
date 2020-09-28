@@ -55,7 +55,10 @@ namespace Statiq.Core
         private ImmutableArray<IDocument> GetInputs() => Dependencies.Length == 0 ? ImmutableArray<IDocument>.Empty : Dependencies[0].Outputs;
 
         // This is the main execute method called by the engine
-        public async Task ExecuteAsync(Engine engine, ConcurrentDictionary<string, PhaseResult[]> phaseResults)
+        public async Task ExecuteAsync(
+            Engine engine,
+            ConcurrentDictionary<string, PhaseResult[]> phaseResults,
+            ConcurrentDictionary<PipelinePhase, ConcurrentBag<AnalyzerResult>> analyzerResults)
         {
             if (_disposed)
             {
@@ -71,7 +74,7 @@ namespace Statiq.Core
                 _logger.LogDebug($"{PipelineName}/{Phase} » Pipeline contains no modules, skipping");
                 Outputs = GetInputs();
                 await engine.Events.RaiseAsync(new AfterPipelinePhaseExecution(engine.ExecutionId, PipelineName, Phase, Outputs, 0));
-                await engine.AnalyzerCollection.AnalyzeAsync(this);
+                await RunAnalyzersAsync(engine, phaseResults, analyzerResults);
                 return;
             }
 
@@ -123,7 +126,7 @@ namespace Statiq.Core
             await engine.Events.RaiseAsync(new AfterPipelinePhaseExecution(engine.ExecutionId, PipelineName, Phase, Outputs, stopwatch.ElapsedMilliseconds));
 
             // Run analyzers
-            await engine.AnalyzerCollection.AnalyzeAsync(this);
+            await RunAnalyzersAsync(engine, phaseResults, analyzerResults);
 
             // Record the results
             PhaseResult phaseResult = new PhaseResult(PipelineName, Phase, Outputs, startTime, stopwatch.ElapsedMilliseconds);
@@ -145,6 +148,26 @@ namespace Statiq.Core
                     results[(int)phaseResult.Phase] = phaseResult;
                     return results;
                 });
+        }
+
+        private async Task RunAnalyzersAsync(
+            Engine engine,
+            ConcurrentDictionary<string, PhaseResult[]> phaseResults,
+            ConcurrentDictionary<PipelinePhase, ConcurrentBag<AnalyzerResult>> analyzerResults)
+        {
+            // We need to create an execution context so the async static instance is set for analyzers
+            IServiceScopeFactory serviceScopeFactory = engine.Services.GetRequiredService<IServiceScopeFactory>();
+            using (IServiceScope serviceScope = serviceScopeFactory.CreateScope())
+            {
+                ExecutionContextData contextData = new ExecutionContextData(
+                    this,
+                    engine,
+                    phaseResults,
+                    serviceScope.ServiceProvider);
+                ExecutionContext executionContext = new ExecutionContext(contextData, null, null, ImmutableArray<IDocument>.Empty); // Sets the async static
+                ConcurrentBag<AnalyzerResult> results = await engine.AnalyzerCollection.AnalyzeAsync(this);
+                analyzerResults.TryAdd(this, results);
+            }
         }
 
         public void Dispose()

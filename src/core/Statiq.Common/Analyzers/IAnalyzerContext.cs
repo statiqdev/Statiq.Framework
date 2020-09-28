@@ -1,6 +1,4 @@
-﻿using System.Collections.Immutable;
-
-namespace Statiq.Common
+﻿namespace Statiq.Common
 {
     /// <summary>
     /// Tracks analyzer results and passes information about the current execution state to analyzers.
@@ -10,13 +8,9 @@ namespace Statiq.Common
         /// <summary>
         /// Adds an analyzer result.
         /// </summary>
-        /// <param name="result">The analyzer result to add.</param>
-        void Add(AnalyzerResult result);
-
-        /// <summary>
-        /// The documents to analyze.
-        /// </summary>
-        ImmutableArray<IDocument> Documents { get; }
+        /// <param name="document">The document this result applies to.</param>
+        /// <param name="message">The analyzer result message to add.</param>
+        void Add(IDocument document, string message);
 
         /// <summary>
         /// Gets the current execution state.

@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 
 namespace Statiq.Common
 {
@@ -11,14 +13,22 @@ namespace Statiq.Common
     /// </summary>
     public class DelegateAnalyzer : IAnalyzer
     {
-        private readonly Func<IAnalyzerContext, Task> _analyzeFunc;
+        private readonly Func<ImmutableArray<IDocument>, IAnalyzerContext, Task> _analyzeFunc;
 
-        public DelegateAnalyzer(IEnumerable<string> pipelines, IEnumerable<Phase> phases, Func<IAnalyzerContext, Task> analyzeFunc)
+        public DelegateAnalyzer(
+            LogLevel logLevel,
+            IEnumerable<string> pipelines,
+            IEnumerable<Phase> phases,
+            Func<ImmutableArray<IDocument>, IAnalyzerContext, Task> analyzeFunc)
         {
+            LogLevel = logLevel;
             Pipelines = pipelines?.ToArray();
             Phases = phases?.ToArray();
             _analyzeFunc = analyzeFunc.ThrowIfNull(nameof(analyzeFunc));
         }
+
+        /// <inheritdoc/>
+        public LogLevel LogLevel { get; set; }
 
         /// <inheritdoc/>
         public string[] Pipelines { get; }
@@ -26,6 +36,6 @@ namespace Statiq.Common
         /// <inheritdoc/>
         public Phase[] Phases { get; }
 
-        public async Task AnalyzeAsync(IAnalyzerContext context) => await _analyzeFunc(context);
+        public async Task AnalyzeAsync(ImmutableArray<IDocument> documents, IAnalyzerContext context) => await _analyzeFunc(documents, context);
     }
 }

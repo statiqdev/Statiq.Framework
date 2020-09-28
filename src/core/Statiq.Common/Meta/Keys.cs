@@ -53,9 +53,15 @@ namespace Statiq.Common
         public const string LinkLowercase = nameof(LinkLowercase);
 
         /// <summary>
-        /// Set to <c>true</c> to fail the generation if any analyzers return warning results (by default analyzers only fail on errors).
+        /// Set to <c>true</c> to treat analyzer warnings as errors.
         /// </summary>
-        public const string FailOnAnalyzerWarnings = nameof(FailOnAnalyzerWarnings);
+        public const string AnalyzerWarningsAsErrors = nameof(AnalyzerWarningsAsErrors);
+
+        /// <summary>
+        /// Normally all analyzers are run and results are reported at the end of execution, even for failures. Setting this to <c>true</c>
+        /// fails the execution as soon as an analyzer returns an error result.
+        /// </summary>
+        public const string AnalyzerFailFast = nameof(AnalyzerFailFast);
 
         /// <summary>
         /// This will cause temporary backing files to be created for string document content

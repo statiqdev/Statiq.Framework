@@ -1,89 +1,149 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 using Statiq.Common;
 
 namespace Statiq.App
 {
     public static class BootstrapperAnalyzerExtensions
     {
-        public static Bootstrapper AddAnalyzer<TAnalyzer>(this Bootstrapper bootstrapper)
-            where TAnalyzer : IAnalyzer =>
-            bootstrapper.ConfigureEngine(x => x.Analyzers.Add<TAnalyzer>());
-
-        public static TBootstrapper AddAnalyzer<TBootstrapper>(this TBootstrapper bootstrapper, Type analyzerType)
+        public static TBootstrapper ConfigureAnalyzers<TBootstrapper>(this TBootstrapper bootstrapper, Action<IAnalyzerCollection> analyzersAction)
             where TBootstrapper : IBootstrapper =>
-            bootstrapper.ConfigureEngine(x => x.Analyzers.Add(analyzerType));
+            bootstrapper.ConfigureEngine(x => analyzersAction.ThrowIfNull(nameof(analyzersAction))(x.Analyzers));
+
+        public static TBootstrapper AddAnalyzer<TBootstrapper>(this TBootstrapper bootstrapper, string name, IAnalyzer analyzer)
+            where TBootstrapper : IBootstrapper =>
+            bootstrapper.ConfigureAnalyzers(x => x.Add(name, analyzer));
+
+        // Below extensions match up with IAnalyzerCollectionExtensions
 
         public static TBootstrapper AddAnalyzer<TBootstrapper>(this TBootstrapper bootstrapper, IAnalyzer analyzer)
             where TBootstrapper : IBootstrapper =>
-            bootstrapper.ConfigureEngine(x => x.Analyzers.Add(analyzer));
+            bootstrapper.ConfigureAnalyzers(x => x.Add(analyzer));
+
+        public static TBootstrapper AddAnalyzer<TBootstrapper>(this TBootstrapper bootstrapper, Type analyzerType)
+            where TBootstrapper : IBootstrapper =>
+            bootstrapper.ConfigureAnalyzers(x => x.Add(analyzerType));
+
+        public static Bootstrapper AddAnalyzer<TAnalyzer>(this Bootstrapper bootstrapper)
+            where TAnalyzer : IAnalyzer =>
+            bootstrapper.ConfigureAnalyzers(x => x.Add<TAnalyzer>());
+
+        public static Bootstrapper AddAnalyzer<TAnalyzer>(this Bootstrapper bootstrapper, string name)
+            where TAnalyzer : IAnalyzer =>
+            bootstrapper.ConfigureAnalyzers(x => x.Add<TAnalyzer>(name));
+
+        public static TBootstrapper AddAnalyzer<TBootstrapper>(this TBootstrapper bootstrapper, string name, Type analyzerType)
+            where TBootstrapper : IBootstrapper =>
+            bootstrapper.ConfigureAnalyzers(x => x.Add(name, analyzerType));
+
+        public static TBootstrapper AddAnalyzer<TBootstrapper>(this TBootstrapper bootstrapper, string name, LogLevel logLevel, IAnalyzer analyzer)
+            where TBootstrapper : IBootstrapper =>
+            bootstrapper.ConfigureAnalyzers(x => x.Add(name, logLevel, analyzer));
+
+        public static TBootstrapper AddAnalyzer<TBootstrapper>(this TBootstrapper bootstrapper, LogLevel logLevel, IAnalyzer analyzer)
+            where TBootstrapper : IBootstrapper =>
+            bootstrapper.ConfigureAnalyzers(x => x.Add(logLevel, analyzer));
+
+        public static TBootstrapper AddAnalyzer<TBootstrapper>(this TBootstrapper bootstrapper, LogLevel logLevel, Type analyzerType)
+            where TBootstrapper : IBootstrapper =>
+            bootstrapper.ConfigureAnalyzers(x => x.Add(logLevel, analyzerType));
+
+        public static Bootstrapper AddAnalyzer<TAnalyzer>(this Bootstrapper bootstrapper, LogLevel logLevel)
+            where TAnalyzer : IAnalyzer =>
+            bootstrapper.ConfigureAnalyzers(x => x.Add<TAnalyzer>(logLevel));
+
+        public static Bootstrapper AddAnalyzer<TAnalyzer>(this Bootstrapper bootstrapper, string name, LogLevel logLevel)
+            where TAnalyzer : IAnalyzer =>
+            bootstrapper.ConfigureAnalyzers(x => x.Add<TAnalyzer>(name, logLevel));
+
+        // DelegateAnalyzer
 
         public static TBootstrapper Analyze<TBootstrapper>(
             this TBootstrapper bootstrapper,
+            string name,
+            LogLevel logLevel,
             IEnumerable<string> pipelines,
             IEnumerable<Phase> phases,
-            Func<IAnalyzerContext, Task> analyzeFunc)
+            Func<ImmutableArray<IDocument>, IAnalyzerContext, Task> analyzeFunc)
             where TBootstrapper : IBootstrapper =>
-            bootstrapper.ConfigureEngine(x => x.Analyzers.Add(pipelines, phases, analyzeFunc));
+            bootstrapper.ConfigureAnalyzers(x => x.Add(name, logLevel, pipelines, phases, analyzeFunc));
 
         public static TBootstrapper Analyze<TBootstrapper>(
             this TBootstrapper bootstrapper,
+            string name,
+            LogLevel logLevel,
             IEnumerable<string> pipelines,
             IEnumerable<Phase> phases,
-            Action<IAnalyzerContext> analyzeAction)
+            Action<ImmutableArray<IDocument>, IAnalyzerContext> analyzeAction)
             where TBootstrapper : IBootstrapper =>
-            bootstrapper.ConfigureEngine(x => x.Analyzers.Add(pipelines, phases, analyzeAction));
+            bootstrapper.ConfigureAnalyzers(x => x.Add(name, logLevel, pipelines, phases, analyzeAction));
 
-        public static TBootstrapper Analyze<TBootstrapper>(
+        public static TBootstrapper AnalyzeDocument<TBootstrapper>(
             this TBootstrapper bootstrapper,
+            string name,
+            LogLevel logLevel,
             IEnumerable<string> pipelines,
             IEnumerable<Phase> phases,
             Func<IDocument, IAnalyzerContext, Task> analyzeFunc)
             where TBootstrapper : IBootstrapper =>
-            bootstrapper.ConfigureEngine(x => x.Analyzers.Add(pipelines, phases, analyzeFunc));
+            bootstrapper.ConfigureAnalyzers(x => x.AddDocument(name, logLevel, pipelines, phases, analyzeFunc));
 
-        public static TBootstrapper Analyze<TBootstrapper>(
+        public static TBootstrapper AnalyzeDocument<TBootstrapper>(
             this TBootstrapper bootstrapper,
+            string name,
+            LogLevel logLevel,
             IEnumerable<string> pipelines,
             IEnumerable<Phase> phases,
             Action<IDocument, IAnalyzerContext> analyzeAction)
             where TBootstrapper : IBootstrapper =>
-            bootstrapper.ConfigureEngine(x => x.Analyzers.Add(pipelines, phases, analyzeAction));
+            bootstrapper.ConfigureAnalyzers(x => x.AddDocument(name, logLevel, pipelines, phases, analyzeAction));
 
         public static TBootstrapper Analyze<TBootstrapper>(
             this TBootstrapper bootstrapper,
+            string name,
+            LogLevel logLevel,
             string pipeline,
             Phase phase,
-            Func<IAnalyzerContext, Task> analyzeFunc)
+            Func<ImmutableArray<IDocument>, IAnalyzerContext, Task> analyzeFunc)
             where TBootstrapper : IBootstrapper =>
-            bootstrapper.ConfigureEngine(x => x.Analyzers.Add(pipeline, phase, analyzeFunc));
+            bootstrapper.ConfigureAnalyzers(x => x.Add(name, logLevel, pipeline, phase, analyzeFunc));
 
         public static TBootstrapper Analyze<TBootstrapper>(
             this TBootstrapper bootstrapper,
+            string name,
+            LogLevel logLevel,
             string pipeline,
             Phase phase,
-            Action<IAnalyzerContext> analyzeAction)
+            Action<ImmutableArray<IDocument>, IAnalyzerContext> analyzeAction)
             where TBootstrapper : IBootstrapper =>
-            bootstrapper.ConfigureEngine(x => x.Analyzers.Add(pipeline, phase, analyzeAction));
+            bootstrapper.ConfigureAnalyzers(x => x.Add(name, logLevel, pipeline, phase, analyzeAction));
 
-        public static TBootstrapper Analyze<TBootstrapper>(
+        public static TBootstrapper AnalyzeDocument<TBootstrapper>(
             this TBootstrapper bootstrapper,
+            string name,
+            LogLevel logLevel,
             string pipeline,
             Phase phase,
             Func<IDocument, IAnalyzerContext, Task> analyzeFunc)
             where TBootstrapper : IBootstrapper =>
-            bootstrapper.ConfigureEngine(x => x.Analyzers.Add(pipeline, phase, analyzeFunc));
+            bootstrapper.ConfigureAnalyzers(x => x.AddDocument(name, logLevel, pipeline, phase, analyzeFunc));
 
-        public static TBootstrapper Analyze<TBootstrapper>(
+        public static TBootstrapper AnalyzeDocument<TBootstrapper>(
             this TBootstrapper bootstrapper,
+            string name,
+            LogLevel logLevel,
             string pipeline,
             Phase phase,
             Action<IDocument, IAnalyzerContext> analyzeAction)
             where TBootstrapper : IBootstrapper =>
-            bootstrapper.ConfigureEngine(x => x.Analyzers.Add(pipeline, phase, analyzeAction));
+            bootstrapper.ConfigureAnalyzers(x => x.AddDocument(name, logLevel, pipeline, phase, analyzeAction));
+
+        // Reflection
 
         /// <summary>
         /// Adds all analyzers that implement <see cref="IAnalyzer"/> from the specified assembly.

@@ -15,9 +15,10 @@ namespace Statiq.Core
 
         public void Add(string name, Func<IShortcode> shortcodeFactory)
         {
-            if (string.IsNullOrWhiteSpace(name) || name.Any(c => char.IsWhiteSpace(c)))
+            name.ThrowIfNullOrWhiteSpace(nameof(name));
+            if (name.Any(c => char.IsWhiteSpace(c)))
             {
-                throw new ArgumentException(nameof(name));
+                throw new ArgumentException("Shortcode names must not contain whitespace", nameof(name));
             }
             _shortcodes[name] = shortcodeFactory.ThrowIfNull(name);
         }

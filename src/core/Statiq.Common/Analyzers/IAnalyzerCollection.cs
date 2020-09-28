@@ -1,7 +1,9 @@
-﻿namespace Statiq.Common
+﻿using System.Collections.Generic;
+
+namespace Statiq.Common
 {
-    public interface IAnalyzerCollection
+    public interface IAnalyzerCollection : IReadOnlyDictionary<string, IAnalyzer>
     {
-        void Add(IAnalyzer analyzer);
+        void Add(string name, IAnalyzer analyzer);
     }
 }

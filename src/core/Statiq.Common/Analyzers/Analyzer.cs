@@ -1,16 +1,21 @@
-﻿using System.Threading.Tasks;
+﻿using System.Collections.Immutable;
+using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 
 namespace Statiq.Common
 {
     public abstract class Analyzer : IAnalyzer
     {
         /// <inheritdoc/>
-        public virtual string[] Pipelines { get; set; }
+        public virtual LogLevel LogLevel { get; set; } = LogLevel.Information;
 
         /// <inheritdoc/>
-        public virtual Phase[] Phases { get; set; }
+        public virtual string[] Pipelines { get; }
 
         /// <inheritdoc/>
-        public abstract Task AnalyzeAsync(IAnalyzerContext context);
+        public virtual Phase[] Phases { get; } = new Phase[] { Phase.Process };
+
+        /// <inheritdoc/>
+        public abstract Task AnalyzeAsync(ImmutableArray<IDocument> documents, IAnalyzerContext context);
     }
 }
