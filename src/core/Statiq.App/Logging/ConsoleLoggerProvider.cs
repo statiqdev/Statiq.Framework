@@ -47,7 +47,13 @@ namespace Statiq.App
             return null;
         }
 
-        internal void AddMessage(LogMessage message) => _messages.Add(message);
+        internal void AddMessage(LogMessage message)
+        {
+            if (message.LogLevel != LogLevel.None)
+            {
+                _messages.Add(message);
+            }
+        }
 
         public ILogger CreateLogger(string categoryName) => new ConsoleLogger(this, categoryName);
 

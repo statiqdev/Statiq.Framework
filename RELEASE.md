@@ -1,5 +1,7 @@
 # 1.0.0-beta.22
 
+- Added a new analyzer feature (too big to detail in release notes, documentation to be added to the site soon) (#104).
+- Fixed a bug in the console logger when logging with `LogLevel.None`.
 - Added a `--strict <LEVEL>` CLI command to fail generation and return a non-zero exit code if any log messages exceed the provided threshold (I.e. `--strict Warning`) (#101).
 - The `RenderMarkdown` module now adds `MarkdownDocument` metadata that contains the Markdig `MarkdownDocument` created during processing.
 - Added Scriban (Liquid) support via new `RenderScriban` module (#120, thanks @mholo65).

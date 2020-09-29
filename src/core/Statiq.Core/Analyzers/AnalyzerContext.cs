@@ -2,6 +2,7 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
@@ -12,6 +13,10 @@ namespace Statiq.Core
 {
     internal class AnalyzerContext : IAnalyzerContext
     {
+        // Cache analyzer overrides per document
+        private static readonly ConcurrentCache<IDocument, IReadOnlyDictionary<string, LogLevel>> _overrideCache =
+            new ConcurrentCache<IDocument, IReadOnlyDictionary<string, LogLevel>>();
+
         private readonly Engine _engine;
         private readonly PipelinePhase _pipelinePhase;
         private readonly string _analyzerName;
@@ -28,8 +33,41 @@ namespace Statiq.Core
         }
 
         /// <inheritdoc/>
-        public void Add(IDocument document, string message) =>
-            _results.Add(new AnalyzerResult(_analyzerName, _logLevel, document, message));
+        public void Add(IDocument document, string message)
+        {
+            // Check if the document contains an override for this analyzer
+            LogLevel logLevel = _logLevel;
+            if (document is object && document.ContainsKey(Keys.Analyzers))
+            {
+                IReadOnlyDictionary<string, LogLevel> overrides = _overrideCache.GetOrAdd(
+                    document,
+                    doc => SettingsParser.Parse(doc.GetList(Keys.Analyzers, Array.Empty<string>())).ToDictionary(
+                        x => x.Key,
+                        x =>
+                        {
+                            if (x.Value.Equals("true", StringComparison.OrdinalIgnoreCase))
+                            {
+                                throw new Exception($"Analyzer override log level must be provided as \"[analyzer]=[log level]\" for {_analyzerName} in document {document.ToDisplayString()}");
+                            }
+                            if (!Enum.TryParse(x.Value, out LogLevel documentLevel))
+                            {
+                                throw new Exception($"Analyzer override log level {x.Value} for {_analyzerName} in document {document.ToDisplayString()} is invalid");
+                            }
+                            return documentLevel;
+                        },
+                        StringComparer.OrdinalIgnoreCase));
+                if (overrides.TryGetValue(_analyzerName, out LogLevel overrideLevel) || overrides.TryGetValue("All", out overrideLevel))
+                {
+                    logLevel = overrideLevel;
+                }
+            }
+
+            // Log the message
+            if (logLevel != LogLevel.None)
+            {
+                _results.Add(new AnalyzerResult(_analyzerName, logLevel, document, message));
+            }
+        }
 
         /// <inheritdoc/>
         public IReadOnlyPipeline Pipeline => _pipelinePhase.Pipeline;
