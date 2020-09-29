@@ -431,7 +431,7 @@ namespace Statiq.Core
                 if (collapsedAnalyzerResults.Length > 0)
                 {
                     Logger.LogInformation("========== Analyzer Results ==========");
-                    AnalyzerResult.LogResults(collapsedAnalyzerResults, Logger);
+                    AnalyzerResult.LogResults(collapsedAnalyzerResults, this);
                 }
 
                 // Log execution summary table
