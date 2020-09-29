@@ -16,7 +16,6 @@ using Statiq.Common;
 
 namespace Statiq.Core
 {
-    // TODO: Convert to dictionary with analyzer names as the key, names cannot contains non alpha (no spaces) so a pattern "[name] [level]" can be used in settings
     internal class AnalyzerCollection : IAnalyzerCollection
     {
         private readonly Dictionary<string, IAnalyzer> _analyzers = new Dictionary<string, IAnalyzer>(StringComparer.OrdinalIgnoreCase);

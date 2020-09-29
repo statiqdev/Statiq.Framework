@@ -369,9 +369,13 @@ namespace Statiq.Core
                 Outputs = new PipelineOutputs(phaseResults);
 
                 // Create the pipeline phases (this also validates the pipeline graph)
+                // Other one-time setup code can go here as well
                 if (_phases is null)
                 {
                     _phases = GetPipelinePhases(_pipelines, Logger);
+
+                    // Apply analyzer settings
+                    ApplyAnalyzerSettings(Settings.GetList<string>(Keys.Analyzers));
                 }
 
                 // Verify pipelines
@@ -951,6 +955,52 @@ namespace Statiq.Core
                 maxEngines,
                 maxUsagesPerEngine,
                 engineTimeout ?? TimeSpan.FromSeconds(5));
+
+        /// <summary>
+        /// Applies settings for analyzers and log levels as "[analyzer]=[log level]" (log level is optional, "All" to set all analyzers).
+        /// </summary>
+        public void ApplyAnalyzerSettings(IReadOnlyList<string> analyzerSettings)
+        {
+            if (analyzerSettings is object && analyzerSettings.Count > 0)
+            {
+                foreach (KeyValuePair<string, string> analyzerSetting in SettingsParser.Parse(analyzerSettings))
+                {
+                    // Find the analyzer (either registered or as a type)
+                    IAnalyzer analyzer = null;
+                    if (!analyzerSetting.Key.Equals("All", StringComparison.OrdinalIgnoreCase)
+                        && !Analyzers.TryGetValue(analyzerSetting.Key, out analyzer))
+                    {
+                        // Analyzer not already registered, find it by type
+                        analyzer = ClassCatalog.GetInstance<IAnalyzer>(analyzerSetting.Key, true);
+                        if (analyzer is null)
+                        {
+                            throw new Exception($"Could not find analyzer {analyzerSetting.Key}");
+                        }
+                        Analyzers.Add(analyzer);
+                    }
+
+                    // Set the log level (unless it's "true" which is the default when a value is not provided)
+                    if (!analyzerSetting.Value.Equals("true", StringComparison.OrdinalIgnoreCase))
+                    {
+                        if (!Enum.TryParse(analyzerSetting.Value, out LogLevel logLevel))
+                        {
+                            throw new Exception($"Invalid analyzer log level {analyzerSetting.Value}");
+                        }
+                        if (analyzer is object)
+                        {
+                            analyzer.LogLevel = logLevel;
+                        }
+                        else
+                        {
+                            foreach (IAnalyzer existingAnalyzer in Analyzers.Values)
+                            {
+                                existingAnalyzer.LogLevel = logLevel;
+                            }
+                        }
+                    }
+                }
+            }
+        }
 
         /// <inheritdoc />
         public void Dispose()

@@ -4,12 +4,12 @@ using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 
-namespace Statiq.App
+namespace Statiq.Common
 {
     /// <summary>
     /// Parses INI-like args in key=value format.
     /// </summary>
-    internal static class SettingsParser
+    public static class SettingsParser
     {
         public static IReadOnlyDictionary<string, string> Parse(IEnumerable<string> args) =>
             args.Select(ParsePair).ToDictionary(pair => pair.Key, pair => pair.Value);

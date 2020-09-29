@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using NUnit.Framework;
 using Shouldly;
+using Statiq.Common;
 using Statiq.Testing;
 
 namespace Statiq.App.Tests.Commands

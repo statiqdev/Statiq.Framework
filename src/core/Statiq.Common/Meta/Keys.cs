@@ -112,6 +112,11 @@ namespace Statiq.Common
         /// </summary>
         public const string MinimumStatiqFrameworkVersion = nameof(MinimumStatiqFrameworkVersion);
 
+        /// <summary>
+        /// Specifies analyzers and log levels as "[analyzer]=[log level]" (log level is optional, "All" to set all analyzers).
+        /// </summary>
+        public const string Analyzers = nameof(Analyzers);
+
         // Document
 
         /// <summary>
