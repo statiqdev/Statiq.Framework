@@ -43,22 +43,12 @@ namespace Statiq.Core
 
         internal async Task<ConcurrentBag<AnalyzerResult>> AnalyzeAsync(PipelinePhase pipelinePhase)
         {
-            // Run analyzers
             ConcurrentBag<AnalyzerResult> results = new ConcurrentBag<AnalyzerResult>();
             await _analyzers
                 .Where(x => x.Value.Phases?.Contains(pipelinePhase.Phase) != false
                     && x.Value.Pipelines?.Contains(pipelinePhase.PipelineName, StringComparer.OrdinalIgnoreCase) != false
                     && x.Value.LogLevel != LogLevel.None)
                 .ParallelForEachAsync(async v => await v.Value.AnalyzeAsync(pipelinePhase.Outputs, new AnalyzerContext(_engine, pipelinePhase, v, results)));
-
-            // Did we get any errors and need to fail fast?
-            if (_engine.Settings.GetBool(Common.Keys.AnalyzerFailFast) && results.Any(x => x.LogLevel >= LogLevel.Error))
-            {
-                // Log error results and throw
-                AnalyzerResult.LogResults(results.Where(x => x.LogLevel >= LogLevel.Error), _engine.Logger);
-                throw new Exception($"Analyzer error(s) with {nameof(Common.Keys.AnalyzerFailFast)}");
-            }
-
             return results;
         }
 

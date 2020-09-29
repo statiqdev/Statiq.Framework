@@ -58,6 +58,14 @@ namespace Statiq.App
                 });
             }
 
+            // Strict mode
+            StrictLoggerProvider strictLoggerProvider = null;
+            if (commandSettings.StrictLogLevel != LogLevel.None)
+            {
+                strictLoggerProvider = new StrictLoggerProvider();
+                ServiceCollection.AddSingleton<ILoggerProvider>(strictLoggerProvider);
+            }
+
             // Build a temporary service provider so we can log
             // Make sure to place it in it's own scope so transient services get correctly disposed
             IServiceProvider services = ServiceCollection.BuildServiceProvider();
@@ -111,7 +119,21 @@ namespace Statiq.App
             ConfigurableSettings configurableSettings = new ConfigurableSettings(_configurationSettings);
             Configurators.Configure(configurableSettings);
 
-            return await ExecuteCommandAsync(context, commandSettings);
+            int exitCode = await ExecuteCommandAsync(context, commandSettings);
+
+            // Fail if in strict mode
+            if (exitCode == 0 && strictLoggerProvider is object && strictLoggerProvider.MaximumLogLevel >= commandSettings.StrictLogLevel)
+            {
+                ConsoleLoggerProvider.FlushAndWait();
+                using (IServiceScope serviceScope = services.CreateScope())
+                {
+                    ILogger logger = serviceScope.ServiceProvider.GetRequiredService<ILogger<Bootstrapper>>();
+                    logger.LogCritical($"One or more {commandSettings.StrictLogLevel} or above message(s) occurred while in strict mode");
+                }
+                exitCode = (int)ExitCode.StrictModeFailure;
+            }
+
+            return exitCode;
         }
 
         public abstract Task<int> ExecuteCommandAsync(CommandContext context, TSettings settings);

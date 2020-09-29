@@ -197,6 +197,19 @@ namespace Statiq.App
             };
 
         /// <summary>
+        /// This blocks until all console messages are written, including new ones (so don't add messages while calling this).
+        /// </summary>
+        public static void FlushAndWait()
+        {
+            foreach (ConsoleLoggerProvider instance in Instances)
+            {
+                while (instance._messages.Count > 0)
+                {
+                }
+            }
+        }
+
+        /// <summary>
         /// Disposes all provider instances.
         /// </summary>
         public static void DisposeAll()

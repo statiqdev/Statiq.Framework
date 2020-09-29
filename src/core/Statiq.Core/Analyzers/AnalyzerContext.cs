@@ -24,10 +24,6 @@ namespace Statiq.Core
             _pipelinePhase = pipelinePhase;
             _analyzerName = analyzerItem.Key;
             _logLevel = analyzerItem.Value.LogLevel;
-            if (_logLevel == LogLevel.Warning && _engine.Settings.GetBool(Keys.AnalyzerWarningsAsErrors))
-            {
-                _logLevel = LogLevel.Error;
-            }
             _results = results;
         }
 

@@ -4,8 +4,8 @@
     {
         Normal = 0,
         UnhandledError = 1,
-        CommandLineError = 2,
-        ConfigurationError = 3,
-        ExecutionError = 4
+        CommandLineError = -1, // Set by Spectre.Cli
+        ExecutionError = 4,
+        StrictModeFailure = 5
     }
 }

@@ -444,12 +444,6 @@ namespace Statiq.Core
                 Logger.LogInformation("========== Completed ==========");
                 Logger.LogInformation($"Finished execution in {stopwatch.ElapsedMilliseconds} ms");
 
-                // Throw if any analyzer errors
-                if (collapsedAnalyzerResults.Any(x => x.LogLevel >= LogLevel.Error))
-                {
-                    throw new Exception($"Analyzer error(s)");
-                }
-
                 return Outputs;
             }
             finally
