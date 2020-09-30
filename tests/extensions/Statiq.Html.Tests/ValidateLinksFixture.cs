@@ -6,6 +6,7 @@ using AngleSharp.Parser.Html;
 using Microsoft.Extensions.Logging;
 using NUnit.Framework;
 using Shouldly;
+using Statiq.Common;
 using Statiq.Testing;
 
 namespace Statiq.Html.Tests
@@ -30,6 +31,42 @@ namespace Statiq.Html.Tests
                 // Then
                 context.LogMessages.ShouldHaveSingleItem().LogLevel.ShouldBe(LogLevel.Warning);
             }
+
+            [TestCase("../target.html")]
+            [TestCase("../target.html?query=parameter")]
+            [TestCase("../target.html#fragment")]
+            [TestCase("../target.html?query=parameter#fragment")]
+            public async Task CanValidateRelativeLink(string link)
+            {
+                // Given
+                TestFileProvider fileProvider = new TestFileProvider();
+                fileProvider.AddDirectory("/");
+                fileProvider.AddDirectory("/output");
+                fileProvider.AddFile("/output/target.html", "<html><head></head><body><h1>Hello World!</h1></body></html>");
+                TestFileSystem fileSystem = new TestFileSystem
+                {
+                    FileProvider = fileProvider
+                };
+                TestExecutionContext context = new TestExecutionContext
+                {
+                    FileSystem = fileSystem
+                };
+                TestDocument target = new TestDocument(
+                    new NormalizedPath("/target.html"),
+                    new NormalizedPath("target.html"),
+                    "<html><head></head><body><h1>Hello World!</h1></body></html>");
+                TestDocument document = new TestDocument(
+                    new NormalizedPath("/test/document.html"),
+                    new NormalizedPath("test/document.html"),
+                    $"<html><head></head><body><a href=\"{link}\">foo</a></body></html>");
+                ValidateLinks module = new ValidateLinks();
+
+                // When
+                await ExecuteAsync(new[] { target, document }, context, module);
+
+                // Then
+                context.LogMessages.ShouldNotContain(x => x.LogLevel == LogLevel.Warning);
+            }
         }
 
         public class GatherLinksTests : ValidateLinksFixture
@@ -48,8 +85,8 @@ namespace Statiq.Html.Tests
                 TestExecutionContext context = new TestExecutionContext();
                 TestDocument document = new TestDocument($"<html><head></head><body>{tag}</body></html>");
                 HtmlParser parser = new HtmlParser();
-                ConcurrentDictionary<string, ConcurrentBag<(string source, string outerHtml)>> links =
-                    new ConcurrentDictionary<string, ConcurrentBag<(string source, string outerHtml)>>();
+                ConcurrentDictionary<string, ConcurrentBag<(IDocument source, string outerHtml)>> links =
+                    new ConcurrentDictionary<string, ConcurrentBag<(IDocument source, string outerHtml)>>();
 
                 // When
                 await ValidateLinks.GatherLinksAsync(document, context, parser, links);
@@ -70,8 +107,8 @@ namespace Statiq.Html.Tests
                 TestExecutionContext context = new TestExecutionContext();
                 TestDocument document = new TestDocument($"<html><head>{tag}</head><body></body></html>");
                 HtmlParser parser = new HtmlParser();
-                ConcurrentDictionary<string, ConcurrentBag<(string source, string outerHtml)>> links =
-                    new ConcurrentDictionary<string, ConcurrentBag<(string source, string outerHtml)>>();
+                ConcurrentDictionary<string, ConcurrentBag<(IDocument source, string outerHtml)>> links =
+                    new ConcurrentDictionary<string, ConcurrentBag<(IDocument source, string outerHtml)>>();
 
                 // When
                 await ValidateLinks.GatherLinksAsync(document, context, parser, links);
