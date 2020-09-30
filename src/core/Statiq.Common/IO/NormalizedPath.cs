@@ -907,7 +907,7 @@ namespace Statiq.Common
             }
 
             // Strip the extension(s)
-            int extensionIndex = titleMemory.Span.IndexOf('.');
+            int extensionIndex = titleMemory.Span.LastIndexOf('.');
             if (extensionIndex > 0)
             {
                 titleMemory = titleMemory.Slice(0, extensionIndex);

@@ -1456,6 +1456,23 @@ namespace Statiq.Common.Tests.IO
                 // Then
                 result.FullPath.ShouldBe("a/b/c/abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyz0123456789.html");
             }
+
+            [TestCase("2020.09.29.1.html", "2020.09.29.1")]
+            [TestCase("Statiq.Framework.sln.DotSettings", "Statiq.Framework.Sln")]
+            [TestCase("README.md", "README")]
+            [TestCase("FOO", "FOO")]
+            [TestCase("FOO/index.md", "FOO")]
+            public void GetTitle(string input, string expect)
+            {
+                // Given
+                NormalizedPath path = new NormalizedPath(input);
+
+                // When
+                string title = path.GetTitle();
+
+                // Then
+                title.ShouldBe(expect);
+            }
         }
     }
 }
