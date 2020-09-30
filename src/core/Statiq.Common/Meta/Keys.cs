@@ -112,6 +112,11 @@ namespace Statiq.Common
         /// </summary>
         public const string Analyzers = nameof(Analyzers);
 
+        /// <summary>
+        /// The log level at which failures should occur (defaults to LogLevel.Error).
+        /// </summary>
+        public const string FailureLogLevel = nameof(FailureLogLevel);
+
         // Document
 
         /// <summary>

@@ -1,8 +1,13 @@
 # 1.0.0-beta.22
 
-- Added a new analyzer feature (too big to detail in release notes, documentation to be added to the site soon) (#104).
+- Fixed several bugs related to cancellation and error codes.
+- Fixed a bug with `NormalizedPath.GetTitle()` when the file name contains multiple extensions (#130, #131, thanks @devlead).
+- Added support for analyzers (#104).
+- Added `Analyzer`, `SyncAnalyzer`, `DocumentAnalyzer`, and `SyncDocumentAnalyzer` base analyzer classes (#104).
+- Added `Bootstrapper.Analyze()` and `Bootstrapper.AnalyzeDocument()` for defining delegate-based analyzers (#104).
 - Fixed a bug in the console logger when logging with `LogLevel.None`.
-- Added a `--strict <LEVEL>` CLI command to fail generation and return a non-zero exit code if any log messages exceed the provided threshold (I.e. `--strict Warning`) (#101).
+- Added a `--failure-log-level <LEVEL>` CLI command to fail generation and return a non-zero exit code if any log messages exceed the provided threshold (I.e. `--failure-log-level Warning`) (#101).
+- Added a `Bootstrapper.SetFailureLogLevel()` extension to set the failure log level from code (#101).
 - The `RenderMarkdown` module now adds `MarkdownDocument` metadata that contains the Markdig `MarkdownDocument` created during processing.
 - Added Scriban (Liquid) support via new `RenderScriban` module (#120, thanks @mholo65).
 - Added `ExecuteDestinations` and `ExecuteSources` modules to filter documents by destination or source and then execute modules on the filtered documents.

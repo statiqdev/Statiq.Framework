@@ -26,8 +26,8 @@ namespace Statiq.App
         [Description("Specifies a setting as a \"[key]=[value]\" pair (the value can be omited).")]
         public string[] Settings { get; set; }
 
-        [CommandOption("--strict <LEVEL>")]
+        [CommandOption("--failure-log-level <LEVEL>")]
         [Description("Indicates that the generation should fail for all log messages above the specified level threshold.")]
-        public LogLevel StrictLogLevel { get; set; } = LogLevel.None;
+        public LogLevel FailureLogLevel { get; set; } = LogLevel.Error;
     }
 }

@@ -78,7 +78,7 @@ namespace Statiq.App
 
         public bool NormalPipelines { get; set; } = true;
 
-        public async Task<bool> ExecuteAsync(CancellationTokenSource cancellationTokenSource)
+        public async Task<ExitCode> ExecuteAsync(CancellationTokenSource cancellationTokenSource)
         {
             try
             {
@@ -86,14 +86,23 @@ namespace Statiq.App
             }
             catch (Exception ex)
             {
-                if (!(ex is OperationCanceledException))
+                if (ex is OperationCanceledException)
                 {
-                    _logger.LogCritical(ex.Message);
-                    _logger.LogError("To get more detailed logging output run with the \"-l Debug\" flag");
+                    // No log message for cancellation
+                    return ExitCode.OperationCanceled;
                 }
-                return false;
+
+                _logger.LogCritical(ex.Message);
+                _logger.LogInformation("To get more detailed logging output run with the \"-l Debug\" flag");
+
+                return ex switch
+                {
+                    LogLevelFailureException _ => ExitCode.LogLevelFailure,
+                    ExecutionException _ => ExitCode.ExecutionError,
+                    _ => ExitCode.UnhandledError,
+                };
             }
-            return true;
+            return ExitCode.Normal;
         }
 
         public void Dispose() => Engine.Dispose();

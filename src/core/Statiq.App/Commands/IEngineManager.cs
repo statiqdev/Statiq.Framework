@@ -12,6 +12,6 @@ namespace Statiq.App
 
         bool NormalPipelines { get; set; }
 
-        Task<bool> ExecuteAsync(CancellationTokenSource cancellationTokenSource);
+        Task<ExitCode> ExecuteAsync(CancellationTokenSource cancellationTokenSource);
     }
 }

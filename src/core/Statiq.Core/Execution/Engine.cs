@@ -29,6 +29,8 @@ namespace Statiq.Core
         private readonly DiagnosticsTraceListener _diagnosticsTraceListener;
         private readonly IServiceScope _serviceScope;
 
+        private FailureLoggerProvider _failureLoggerProvider;
+
         // Gets initialized on first execute and reset when the pipeline collection changes
         private PipelinePhase[] _phases;
 
@@ -143,6 +145,14 @@ namespace Statiq.Core
             serviceCollection.TryAddSingleton<INamespacesCollection>(Namespaces);
             serviceCollection.TryAddSingleton<IScriptHelper>(ScriptHelper);
             serviceCollection.TryAddSingleton<ClassCatalog>(ClassCatalog);
+
+            // Add the failure logger
+            LogLevel failureLogLevel = Settings.Get<LogLevel>(Keys.FailureLogLevel, LogLevel.Error);
+            if (failureLogLevel != LogLevel.None)
+            {
+                _failureLoggerProvider = new FailureLoggerProvider(failureLogLevel);
+                serviceCollection.AddSingleton<ILoggerProvider>(_failureLoggerProvider);
+            }
 
             IServiceProvider serviceProvider = serviceCollection.BuildServiceProvider();
             return serviceProvider.CreateScope();
@@ -363,6 +373,9 @@ namespace Statiq.Core
             CancellationToken = cancellationToken;
             try
             {
+                // Reset the failure log provider
+                _failureLoggerProvider?.Reset();
+
                 // Create the phase results for this execution
                 ConcurrentDictionary<string, PhaseResult[]> phaseResults =
                     new ConcurrentDictionary<string, PhaseResult[]>(StringComparer.OrdinalIgnoreCase);
@@ -443,6 +456,9 @@ namespace Statiq.Core
                 // Clean up
                 Logger.LogInformation("========== Completed ==========");
                 Logger.LogInformation($"Finished execution in {stopwatch.ElapsedMilliseconds} ms");
+
+                // Throw if there was a log failure
+                _failureLoggerProvider?.ThrowIfFailed();
 
                 return Outputs;
             }

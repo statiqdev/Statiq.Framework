@@ -6,7 +6,7 @@ namespace Statiq.App
 {
     public static class CommandUtilities
     {
-        public static void WaitForControlC(Action action, ILogger logger)
+        public static void WaitForControlC(Action action)
         {
             // Only wait for a key if console input has not been redirected, otherwise it's on the caller to exit
             if (!Console.IsInputRedirected)
@@ -14,7 +14,6 @@ namespace Statiq.App
                 // Start the key listening thread
                 Thread thread = new Thread(() =>
                 {
-                    logger.LogInformation("Hit Ctrl-C to exit");
                     Console.TreatControlCAsInput = true;
                     while (true)
                     {

@@ -2,6 +2,7 @@
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Spectre.Cli;
 using Statiq.Common;
 using Statiq.Core;
@@ -33,9 +34,8 @@ namespace Statiq.App
             SetPipelines(commandContext, commandSettings, engineManager);
             using (CancellationTokenSource cancellationTokenSource = new CancellationTokenSource())
             {
-                return await engineManager.ExecuteAsync(cancellationTokenSource)
-                    ? (int)ExitCode.Normal
-                    : (int)ExitCode.ExecutionError;
+                CommandUtilities.WaitForControlC(() => cancellationTokenSource.Cancel());
+                return (int)await engineManager.ExecuteAsync(cancellationTokenSource);
             }
         }
 
