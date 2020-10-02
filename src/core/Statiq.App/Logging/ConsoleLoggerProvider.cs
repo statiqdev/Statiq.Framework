@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using Microsoft.Extensions.Logging;
 
@@ -8,14 +9,12 @@ namespace Statiq.App
 {
     public class ConsoleLoggerProvider : ILoggerProvider
     {
-        private const string NamespacePrefix = nameof(Statiq) + ".";
-
         private static readonly object WriteLock = new object();
-        private static readonly List<ConsoleContent> ConsoleContents = new List<ConsoleContent>();
+        private static readonly List<ConsoleContent> ConsoleContentBuffer = new List<ConsoleContent>();
         private static readonly ConcurrentBag<ConsoleLoggerProvider> Instances = new ConcurrentBag<ConsoleLoggerProvider>();
 
-        private readonly BlockingCollection<LogMessage> _messages =
-            new BlockingCollection<LogMessage>(new ConcurrentQueue<LogMessage>());
+        private readonly BlockingCollection<ConsoleLogMessage> _messages =
+            new BlockingCollection<ConsoleLogMessage>(new ConcurrentQueue<ConsoleLogMessage>());
         private readonly AutoResetEvent _doneProcessing = new AutoResetEvent(false);
 
         public ConsoleLoggerProvider()
@@ -23,7 +22,7 @@ namespace Statiq.App
             Instances.Add(this);
             new Thread(() =>
             {
-                LogMessage message;
+                ConsoleLogMessage message;
                 while ((message = TakeMessage()) is object)
                 {
                     WriteMessage(message);
@@ -32,7 +31,7 @@ namespace Statiq.App
             }).Start();
         }
 
-        private LogMessage TakeMessage()
+        private ConsoleLogMessage TakeMessage()
         {
             if (!_messages.IsCompleted)
             {
@@ -47,7 +46,7 @@ namespace Statiq.App
             return null;
         }
 
-        internal void AddMessage(LogMessage message)
+        internal void AddMessage(ConsoleLogMessage message)
         {
             if (message.LogLevel != LogLevel.None)
             {
@@ -57,115 +56,13 @@ namespace Statiq.App
 
         public ILogger CreateLogger(string categoryName) => new ConsoleLogger(this, categoryName);
 
-        private void WriteMessage(LogMessage message)
+        private void WriteMessage(ConsoleLogMessage message)
         {
             lock (WriteLock)
             {
-                ConsoleContents.Clear();
-
-                // Add the log level message
-                string logLevelString = GetLogLevelString(message.LogLevel);
-                ConsoleContents.Add(GetLogLevelConsoleContent(message.LogLevel, logLevelString.AsMemory()));
-
-                // If this is an information message, do some fancy colorization
-                if (message.LogLevel == LogLevel.Information)
-                {
-                    // Find » and color pipelines/modules differently
-                    int lastAngle = message.FormattedMessage.LastIndexOf('»');
-                    if (lastAngle > 0)
-                    {
-                        int firstAngle = message.FormattedMessage.IndexOf('»');
-                        ConsoleContents.Add(new ConsoleContent(ConsoleColor.Blue, ConsoleColor.Black, message.FormattedMessage.AsMemory(0, firstAngle + 1)));
-                        if (firstAngle < lastAngle)
-                        {
-                            ConsoleContents.Add(new ConsoleContent(ConsoleColor.Cyan, ConsoleColor.Black, message.FormattedMessage.AsMemory(firstAngle + 1, lastAngle - (firstAngle + 1) + 1)));
-                        }
-                    }
-                    else
-                    {
-                        lastAngle = -1;
-                    }
-
-                    // Then add the category
-                    int normalStart = lastAngle + 1;
-                    if (message.CategoryName?.StartsWith(NamespacePrefix) == false)
-                    {
-                        ConsoleContents.Add(new ConsoleContent(ConsoleColor.DarkGray, ConsoleColor.Black, $"[{message.CategoryName}] ".AsMemory()));
-                        ConsoleContents.Add(new ConsoleContent(
-                            message.FormattedMessage.AsMemory(normalStart, message.FormattedMessage.Length - normalStart)));
-                    }
-                    else
-                    {
-                        // Scan for parenthesis and split into segments (but only if we're not in an external category)
-                        int openStart = -1;
-                        int openCount = 0;
-                        for (int c = normalStart; c < message.FormattedMessage.Length; c++)
-                        {
-                            if (message.FormattedMessage[c] == '(')
-                            {
-                                if (openCount == 0)
-                                {
-                                    openStart = c;
-                                }
-                                openCount++;
-                            }
-                            else if (message.FormattedMessage[c] == ')')
-                            {
-                                if (openCount > 0)
-                                {
-                                    openCount--;
-                                    if (openCount == 0)
-                                    {
-                                        // Ignore "(s)"
-                                        if (c < 2 || message.FormattedMessage[c - 1] != 's' || message.FormattedMessage[c - 2] != '(')
-                                        {
-                                            if (openStart > normalStart)
-                                            {
-                                                ConsoleContents.Add(new ConsoleContent(
-                                                    message.FormattedMessage.AsMemory(normalStart, openStart - normalStart)));
-                                            }
-
-                                            // Inside parenthesis
-                                            ConsoleContents.Add(new ConsoleContent(
-                                                ConsoleColor.DarkGray,
-                                                ConsoleColor.Black,
-                                                message.FormattedMessage.AsMemory(openStart, c - openStart + 1)));
-
-                                            normalStart = c + 1;
-                                        }
-
-                                        openStart = -1;
-                                    }
-                                }
-                            }
-                        }
-                        if (normalStart <= message.FormattedMessage.Length - 1)
-                        {
-                            ConsoleContents.Add(new ConsoleContent(
-                                message.FormattedMessage.AsMemory(normalStart, message.FormattedMessage.Length - normalStart)));
-                        }
-                    }
-                }
-                else
-                {
-                    // Add the category
-                    if (message.CategoryName?.StartsWith(NamespacePrefix) == false)
-                    {
-                        ConsoleContents.Add(new ConsoleContent(ConsoleColor.DarkGray, ConsoleColor.Black, $"[{message.CategoryName}] ".AsMemory()));
-                    }
-
-                    // Then add the message
-                    ConsoleContents.Add(GetLogLevelConsoleContent(message.LogLevel, message.FormattedMessage.AsMemory()));
-                }
-
-                // Write any exceptions
-                if (message.Exception is object)
-                {
-                    ConsoleContents.Add(GetLogLevelConsoleContent(LogLevel.Error, (Environment.NewLine + message.Exception.ToString()).AsMemory()));
-                }
-
-                // Write to the console
-                foreach (ConsoleContent content in ConsoleContents)
+                ConsoleContentBuffer.Clear();
+                message.GetConsoleContent(ConsoleContentBuffer);
+                foreach (ConsoleContent content in ConsoleContentBuffer)
                 {
                     Console.ForegroundColor = content.Foreground;
                     Console.BackgroundColor = content.Background;
@@ -175,32 +72,6 @@ namespace Statiq.App
                 Console.ResetColor();
             }
         }
-
-        private static string GetLogLevelString(LogLevel logLevel) =>
-            logLevel switch
-            {
-                LogLevel.Trace => "[TRCE] ",
-                LogLevel.Debug => "[DBUG] ",
-                LogLevel.Information => "[INFO] ",
-                LogLevel.Warning => "[WARN] ",
-                LogLevel.Error => "[ERRO] ",
-                LogLevel.Critical => "[CRIT] ",
-                _ => throw new ArgumentOutOfRangeException(nameof(logLevel)),
-            };
-
-        // We must explicitly set the background color if we are setting the foreground color,
-        // since just setting one can look bad on the users console.
-        private ConsoleContent GetLogLevelConsoleContent(LogLevel logLevel, in ReadOnlyMemory<char> message) =>
-            logLevel switch
-            {
-                LogLevel.Critical => new ConsoleContent(ConsoleColor.DarkRed, ConsoleColor.Black, message),
-                LogLevel.Error => new ConsoleContent(ConsoleColor.Red, ConsoleColor.Black, message),
-                LogLevel.Warning => new ConsoleContent(ConsoleColor.Yellow, ConsoleColor.Black, message),
-                LogLevel.Information => new ConsoleContent(ConsoleColor.DarkGreen, ConsoleColor.Black, message),
-                LogLevel.Debug => new ConsoleContent(ConsoleColor.DarkGray, ConsoleColor.Black, message),
-                LogLevel.Trace => new ConsoleContent(ConsoleColor.DarkGray, ConsoleColor.Black, message),
-                _ => new ConsoleContent(message),
-            };
 
         /// <summary>
         /// This blocks until all console messages are written, including new ones (so don't add messages while calling this).
