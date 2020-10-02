@@ -95,8 +95,8 @@ namespace Statiq.Html
             bool asError = _asError is object && await _asError.GetValueAsync(null, context);
 
             // Key = link, Value = source, tag HTML
-            ConcurrentDictionary<string, ConcurrentBag<(string documentSource, string outerHtml)>> links =
-                new ConcurrentDictionary<string, ConcurrentBag<(string documentSource, string outerHtml)>>();
+            ConcurrentDictionary<string, ConcurrentBag<(IDocument documentSource, string outerHtml)>> links =
+                new ConcurrentDictionary<string, ConcurrentBag<(IDocument documentSource, string outerHtml)>>();
 
             // Key = source, Value = tag HTML
             ConcurrentDictionary<string, ConcurrentBag<string>> failures = new ConcurrentDictionary<string, ConcurrentBag<string>>();
@@ -158,7 +158,7 @@ namespace Statiq.Html
         }
 
         // Internal for testing
-        internal static async Task GatherLinksAsync(IDocument input, IExecutionContext context, HtmlParser parser, ConcurrentDictionary<string, ConcurrentBag<(string source, string outerHtml)>> links)
+        internal static async Task GatherLinksAsync(IDocument input, IExecutionContext context, HtmlParser parser, ConcurrentDictionary<string, ConcurrentBag<(IDocument source, string outerHtml)>> links)
         {
             IHtmlDocument htmlDocument = await input.ParseHtmlAsync(context, parser);
             if (htmlDocument is object)
@@ -166,25 +166,25 @@ namespace Statiq.Html
                 // Links
                 foreach (IElement element in htmlDocument.Links)
                 {
-                    AddOrUpdateLink(element.GetAttribute("href"), element, input.Source.IsNull ? null : input.Source.FullPath, links);
+                    AddOrUpdateLink(element.GetAttribute("href"), element, input, links);
                 }
 
                 // Link element
                 foreach (IElement element in htmlDocument.GetElementsByTagName("link").Where(x => x.HasAttribute("href")))
                 {
-                    AddOrUpdateLink(element.GetAttribute("href"), element, input.Source.IsNull ? null : input.Source.FullPath, links);
+                    AddOrUpdateLink(element.GetAttribute("href"), element, input, links);
                 }
 
                 // Images
                 foreach (IHtmlImageElement element in htmlDocument.Images)
                 {
-                    AddOrUpdateLink(element.GetAttribute("src"), element, input.Source.IsNull ? null : input.Source.FullPath, links);
+                    AddOrUpdateLink(element.GetAttribute("src"), element, input, links);
                 }
 
                 // Scripts
                 foreach (IHtmlScriptElement element in htmlDocument.Scripts)
                 {
-                    AddOrUpdateLink(element.Source, element, input.Source.IsNull ? null : input.Source.FullPath, links);
+                    AddOrUpdateLink(element.Source, element, input, links);
                 }
             }
         }
@@ -330,16 +330,28 @@ namespace Statiq.Html
             }
         }
 
-        private static void AddOrUpdateLink(string link, IElement element, string source, ConcurrentDictionary<string, ConcurrentBag<(string source, string outerHtml)>> links)
+        private static void AddOrUpdateLink(string link, IElement element, IDocument source, ConcurrentDictionary<string, ConcurrentBag<(IDocument source, string outerHtml)>> links)
         {
             if (string.IsNullOrEmpty(link))
             {
                 return;
             }
 
+            // Attempt to parse the URI
+            if (Uri.TryCreate(link, UriKind.RelativeOrAbsolute, out Uri uri))
+            {
+                // If this is a relative Uri, adjust it relative to the source document.
+                // Adjustment for double-slash link prefix which means use http:// or https:// depending on current protocol
+                // The Uri class treats these as relative, but they're really absolute
+                if (!uri.IsAbsoluteUri && !uri.ToString().StartsWith("//") && !source.Destination.IsNull)
+                {
+                    link = source.Destination.Parent.Combine(new NormalizedPath(uri.ToString())).FullPath;
+                }
+            }
+
             links.AddOrUpdate(
                 link,
-                _ => new ConcurrentBag<(string, string)> { (source, ((IElement)element.Clone(false)).OuterHtml) },
+                _ => new ConcurrentBag<(IDocument, string)> { (source, ((IElement)element.Clone(false)).OuterHtml) },
                 (_, list) =>
                 {
                     list.Add((source, ((IElement)element.Clone(false)).OuterHtml));
@@ -349,20 +361,20 @@ namespace Statiq.Html
 
         private static void AddOrUpdateFailure(
             IExecutionContext context,
-            ConcurrentBag<(string source, string outerHtml)> links,
+            ConcurrentBag<(IDocument source, string outerHtml)> links,
             ConcurrentDictionary<string, ConcurrentBag<string>> failures,
             string message)
         {
-            foreach ((string source, string outerHtml) in links)
+            foreach ((IDocument source, string outerHtml) in links)
             {
-                if (source is null)
+                if (source.Source.IsNull)
                 {
                     context.LogWarning($"Validation failure for link: unknown file for {outerHtml}.");
                     continue;
                 }
 
                 failures.AddOrUpdate(
-                    source,
+                    source.Source.FullPath,
                     _ => new ConcurrentBag<string> { $"{outerHtml} ({message})" },
                     (_, list) =>
                     {
