@@ -825,7 +825,7 @@ namespace Statiq.Core
 
         /// <summary>
         /// This executes the specified modules with the specified input documents.
-        /// This might throw a <see cref="ExecuteModulesException"/> which should be
+        /// This might throw a <see cref="LoggedException"/> which should be
         /// unwrapped by the caller.
         /// </summary>
         internal static async Task<ImmutableArray<IDocument>> ExecuteModulesAsync(
@@ -882,7 +882,7 @@ namespace Statiq.Core
                     catch (Exception ex)
                     {
                         outputs = ImmutableArray<IDocument>.Empty;
-                        if (!(ex is OperationCanceledException) && !(ex is ExecuteModulesException))
+                        if (!(ex is OperationCanceledException) && !(ex is LoggedException))
                         {
                             // Unwrap aggregate and invocation exceptions
                             string error = $"Error while executing module {moduleName} in {contextData.PipelinePhase.PipelineName}/{contextData.PipelinePhase.Phase}: ";
@@ -901,7 +901,7 @@ namespace Statiq.Core
                                     logger.LogError(error + ex.Message);
                                     break;
                             }
-                            throw new ExecuteModulesException(ex);
+                            throw new LoggedException(ex);
                         }
                         throw;
                     }

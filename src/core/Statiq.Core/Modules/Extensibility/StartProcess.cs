@@ -46,10 +46,10 @@ namespace Statiq.Core
         private const string KeepContentKey = nameof(KeepContentKey);
         private const string EnvironmentVariables = nameof(EnvironmentVariables);
         private const string LogOutputKey = nameof(LogOutputKey);
-        private const string MaskCommandKey = nameof(MaskCommandKey);
+        private const string HideArgumentsKey = nameof(HideArgumentsKey);
 
-        private readonly ConcurrentCache<int, (Process Process, ILogger Logger, bool LogOutput)> _processes =
-            new ConcurrentCache<int, (Process Process, ILogger Logger, bool LogOutput)>();
+        private readonly ConcurrentCache<int, (Process Process, ILogger Logger, Action<Process> ExitedLogAction)> _processes =
+            new ConcurrentCache<int, (Process Process, ILogger Logger, Action<Process> ExitedLogAction)>();
 
         private bool _background;
         private bool _onlyOnce;
@@ -190,14 +190,11 @@ namespace Statiq.Core
         }
 
         /// <summary>
-        /// Toggles whether to mask the file and arguments.
+        /// Toggles whether to the arguments list when logging the process command.
         /// </summary>
-        /// <remarks>
-        /// By default, the file and arguments of the process are logged. Masking them with prevent their output to the log.
-        /// </remarks>
-        /// <param name="maskCommand"><c>true</c> or <c>null</c> to mask the file and arguments, <c>false</c> otherwise.</param>
+        /// <param name="hideArguments"><c>true</c> or <c>null</c> to hide the arguments, <c>false</c> otherwise.</param>
         /// <returns>The current module instance.</returns>
-        public StartProcess MaskCommand(Config<bool> maskCommand = null) => (StartProcess)SetConfig(MaskCommandKey, maskCommand ?? true);
+        public StartProcess HideArguments(Config<bool> hideArguments = null) => (StartProcess)SetConfig(HideArgumentsKey, hideArguments ?? true);
 
         /// <summary>
         /// Toggles whether to log process output.
@@ -314,7 +311,9 @@ namespace Statiq.Core
             bool keepContent = values.GetBool(KeepContentKey);
             bool continueOnError = values.GetBool(ContinueOnErrorKey);
             bool logOutput = values.GetBool(LogOutputKey);
-            bool maskCommand = values.GetBool(MaskCommandKey);
+            bool hideArguments = values.GetBool(HideArgumentsKey);
+            string logCommand = $"{process.StartInfo.FileName}{(hideArguments ? string.Empty : (" " + process.StartInfo.Arguments))}";
+            ILoggerFactory loggerFactory = context.GetService<ILoggerFactory>();
             using (Stream contentStream = _background || keepContent ? null : await context.GetContentStreamAsync())
             {
                 using (StreamWriter contentWriter = contentStream is null ? null : new StreamWriter(contentStream, leaveOpen: true))
@@ -323,14 +322,13 @@ namespace Statiq.Core
                     {
                         // Write to the stream on data received
                         // If we happen to write before we've created and added the process to the collection, go ahead and do that too
-                        ILoggerFactory loggerFactory = context.GetService<ILoggerFactory>();
                         process.OutputDataReceived += (_, e) =>
                         {
                             if (!string.IsNullOrEmpty(e.Data))
                             {
-                                (Process, ILogger, bool) item = _processes.GetOrAdd(
+                                (Process, ILogger, Action<Process>) item = _processes.GetOrAdd(
                                     process.Id,
-                                    _ => (process, loggerFactory?.CreateLogger($"{process.Id}: {Path.GetFileName(startInfo.FileName)}"), logOutput));
+                                    _ => (process, loggerFactory?.CreateLogger($"{process.Id}: {Path.GetFileName(startInfo.FileName)}"), (Action<Process>)ExitedLogAction));
                                 item.Item2?.Log(logOutput ? LogLevel.Information : LogLevel.Debug, e.Data);
                                 contentWriter?.WriteLine(e.Data);
                             }
@@ -339,9 +337,9 @@ namespace Statiq.Core
                         {
                             if (!string.IsNullOrEmpty(e.Data))
                             {
-                                (Process, ILogger, bool) item = _processes.GetOrAdd(
+                                (Process, ILogger, Action<Process>) item = _processes.GetOrAdd(
                                     process.Id,
-                                    _ => (process, loggerFactory?.CreateLogger($"{process.Id}: {Path.GetFileName(startInfo.FileName)}"), logOutput));
+                                    _ => (process, loggerFactory?.CreateLogger($"{process.Id}: {Path.GetFileName(startInfo.FileName)}"), (Action<Process>)ExitedLogAction));
                                 item.Item2?.LogError(e.Data);
                                 errorWriter?.WriteLine(e.Data);
                             }
@@ -355,13 +353,12 @@ namespace Statiq.Core
                         // Use a separate logger, but only create and add it if it wasn't already from one of the received events
                         _processes.GetOrAdd(
                             process.Id,
-                            _ => (process, loggerFactory?.CreateLogger($"{process.Id}: {Path.GetFileName(startInfo.FileName)}"), logOutput));
+                            _ => (process, loggerFactory?.CreateLogger($"{process.Id}: {Path.GetFileName(startInfo.FileName)}"), (Action<Process>)ExitedLogAction));
 
                         // Log the process command
-                        string command = maskCommand ? "***" : $"{process.StartInfo.FileName} {process.StartInfo.Arguments}";
                         context.Log(
                             logOutput ? LogLevel.Information : LogLevel.Debug,
-                            $"Started {(_background ? "background " : string.Empty)}process {process.Id}: {command}");
+                            $"Started {(_background ? "background " : string.Empty)}process {process.Id}: {logCommand}");
 
                         // If this is a background process, let it run and just return the original document
                         if (_background)
@@ -389,16 +386,17 @@ namespace Statiq.Core
                                 process.WaitForExit();
                             }
 
-                            // Log exit code and throw if non-zero
+                            // Log exit (synchronous)
                             exitCode = process.ExitCode;
-                            if (_errorExitCode(process.ExitCode))
+                            if (_processes.TryRemove(process.Id, out (Process Process, ILogger Logger, Action<Process> ExitedLogAction) item))
                             {
-                                string errorMessage = $"Process {process.Id} exited with error code {process.ExitCode}";
-                                if (!continueOnError)
-                                {
-                                    throw new ExecutionException(errorMessage);
-                                }
-                                context.LogError(errorMessage);
+                                item.ExitedLogAction(item.Process);
+                            }
+
+                            // Only throw if running synchronously
+                            if (_errorExitCode(exitCode) && !continueOnError)
+                            {
+                                throw new LoggedException(new ExecutionException(GetExitLogMessage(process, true)));
                             }
                         }
                         finally
@@ -426,22 +424,36 @@ namespace Statiq.Core
                     }
                 }
             }
+
+            // Logging that occurs on process exit
+            void ExitedLogAction(Process p)
+            {
+                bool errorExitCode = _errorExitCode(process.ExitCode);
+                string logMessage = GetExitLogMessage(p, errorExitCode);
+                if (errorExitCode)
+                {
+                    context.LogBuildServerError(logMessage);
+                }
+                context.Log(logOutput ? (errorExitCode ? LogLevel.Error : LogLevel.Information) : LogLevel.Debug, logMessage);
+            }
+
+            string GetExitLogMessage(Process p, bool errorExitCode) => $"Process {p.Id} exited with {(errorExitCode ? "error " : string.Empty)}code {p.ExitCode}: {logCommand}";
         }
 
+        // Log exit (asynchronous)
         private void ProcessExited(object sender, EventArgs e)
         {
             Process process = (Process)sender;
-            if (_processes.TryRemove(process.Id, out (Process Process, ILogger Logger, bool LogOutput) item))
+            if (_processes.TryRemove(process.Id, out (Process Process, ILogger Logger, Action<Process> ExitedLogAction) item))
             {
-                item.Logger?.Log(
-                    item.LogOutput ? LogLevel.Information : LogLevel.Debug,
-                    $"Process {process.Id} exited with code {process.ExitCode}");
+                item.ExitedLogAction(item.Process);
             }
         }
 
         public void Dispose()
         {
-            foreach ((Process Process, ILogger Logger, bool LogOutput) item in _processes.Values)
+            // Close processes that haven't already exited
+            foreach ((Process Process, ILogger Logger, Action<Process> ExitedLogAction) item in _processes.Values)
             {
                 item.Process.Close();
                 item.Process.Exited -= ProcessExited;

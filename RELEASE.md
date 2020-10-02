@@ -2,7 +2,7 @@
 
 - Added `IExecutionState.LogBuildServerWarning()` and `IExecutionState.LogBuildServerError()` extensions to log messages to the console in a format build servers can recognize for build checks (GitHub Actions and Azure Pipelines).
 - Fixes bugs with relative link validation (#128, #134, thanks @mholo65).
-- Added a `StartProcess.MaskCommand()` method to mask the file and arguments of process commands.
+- Added a `StartProcess.HideArguments()` method to hide arguments when logging process commands.
 - Fixed several bugs related to cancellation and error codes.
 - Fixed a bug with `NormalizedPath.GetTitle()` when the file name contains multiple extensions (#130, #131, thanks @devlead).
 - Added support for analyzers (#104).

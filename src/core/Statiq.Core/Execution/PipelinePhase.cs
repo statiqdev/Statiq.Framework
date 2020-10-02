@@ -104,7 +104,7 @@ namespace Statiq.Core
                 Outputs = ImmutableArray<IDocument>.Empty;
                 if (!(ex is OperationCanceledException))
                 {
-                    ExecuteModulesException executeModulesException = ex as ExecuteModulesException;
+                    LoggedException executeModulesException = ex as LoggedException;
                     if (executeModulesException is object)
                     {
                         ex = executeModulesException.InnerException;
