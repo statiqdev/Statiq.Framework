@@ -66,7 +66,7 @@ namespace Statiq.Core.Tests.Modules.Extensibility
 
                 // Then
                 context.LogMessages.Where(x => x.LogLevel == LogLevel.Debug).ShouldContain(x => x.FormattedMessage.Contains("Started process"), 2);
-                context.LogMessages.Where(x => x.LogLevel == LogLevel.Debug).ShouldContain(x => x.FormattedMessage.Contains("exited with code 0"), 2);
+                context.LogMessages.Where(x => x.LogLevel == LogLevel.Information).ShouldContain(x => x.FormattedMessage.Contains("exited with code 0"), 2);
                 context.LogMessages.Where(x => x.LogLevel == LogLevel.Debug).ShouldContain(x => x.FormattedMessage.Contains(".NET Core runtimes installed"), 2);
             }
 
