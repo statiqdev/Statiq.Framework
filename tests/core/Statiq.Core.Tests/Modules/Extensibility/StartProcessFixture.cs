@@ -83,9 +83,9 @@ namespace Statiq.Core.Tests.Modules.Extensibility
                 await ExecuteAsync(context, startProcess);
 
                 // Then
-                context.LogMessages.Where(x => x.LogLevel == LogLevel.Debug).ShouldContain(x => x.FormattedMessage.Contains("Started process"), 1);
-                context.LogMessages.Where(x => x.LogLevel == LogLevel.Debug).ShouldContain(x => x.FormattedMessage.Contains("exited with code 0"), 1);
-                context.LogMessages.Where(x => x.LogLevel == LogLevel.Debug).ShouldContain(x => x.FormattedMessage.Contains(".NET Core runtimes installed"), 1);
+                context.LogMessages.ShouldContain(x => x.FormattedMessage.Contains("Started process"), 1);
+                context.LogMessages.ShouldContain(x => x.FormattedMessage.Contains("exited with"), 1);
+                context.LogMessages.ShouldContain(x => x.FormattedMessage.Contains(".NET Core runtimes installed"), 1);
             }
 
             [Test]
