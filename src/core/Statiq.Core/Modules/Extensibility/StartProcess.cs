@@ -45,10 +45,12 @@ namespace Statiq.Core
         private const string ContinueOnErrorKey = nameof(ContinueOnErrorKey);
         private const string KeepContentKey = nameof(KeepContentKey);
         private const string EnvironmentVariables = nameof(EnvironmentVariables);
+        private const string LogOutputKey = nameof(LogOutputKey);
+        private const string MaskCommandKey = nameof(MaskCommandKey);
 
-        private readonly ConcurrentCache<int, (Process, ILogger)> _processes = new ConcurrentCache<int, (Process, ILogger)>();
+        private readonly ConcurrentCache<int, (Process Process, ILogger Logger, bool LogOutput)> _processes =
+            new ConcurrentCache<int, (Process Process, ILogger Logger, bool LogOutput)>();
 
-        private bool _logOutput;
         private bool _background;
         private bool _onlyOnce;
         private bool _executed;
@@ -188,6 +190,16 @@ namespace Statiq.Core
         }
 
         /// <summary>
+        /// Toggles whether to mask the file and arguments.
+        /// </summary>
+        /// <remarks>
+        /// By default, the file and arguments of the process are logged. Masking them with prevent their output to the log.
+        /// </remarks>
+        /// <param name="maskCommand"><c>true</c> or <c>null</c> to mask the file and arguments, <c>false</c> otherwise.</param>
+        /// <returns>The current module instance.</returns>
+        public StartProcess MaskCommand(Config<bool> maskCommand = null) => (StartProcess)SetConfig(MaskCommandKey, maskCommand ?? true);
+
+        /// <summary>
         /// Toggles whether to log process output.
         /// </summary>
         /// <remarks>
@@ -195,11 +207,7 @@ namespace Statiq.Core
         /// </remarks>
         /// <param name="logOutput"><c>true</c> or <c>null</c> to log process output, <c>false</c> otherwise.</param>
         /// <returns>The current module instance.</returns>
-        public StartProcess LogOutput(bool logOutput = true)
-        {
-            _logOutput = logOutput;
-            return this;
-        }
+        public StartProcess LogOutput(Config<bool> logOutput = null) => (StartProcess)SetConfig(LogOutputKey, logOutput ?? true);
 
         /// <summary>
         /// Toggles throwing an exception if the process exits with a non-zero exit code.
@@ -305,6 +313,8 @@ namespace Statiq.Core
             // Prepare the streams
             bool keepContent = values.GetBool(KeepContentKey);
             bool continueOnError = values.GetBool(ContinueOnErrorKey);
+            bool logOutput = values.GetBool(LogOutputKey);
+            bool maskCommand = values.GetBool(MaskCommandKey);
             using (Stream contentStream = _background || keepContent ? null : await context.GetContentStreamAsync())
             {
                 using (StreamWriter contentWriter = contentStream is null ? null : new StreamWriter(contentStream, leaveOpen: true))
@@ -318,10 +328,10 @@ namespace Statiq.Core
                         {
                             if (!string.IsNullOrEmpty(e.Data))
                             {
-                                (Process, ILogger) item = _processes.GetOrAdd(
+                                (Process, ILogger, bool) item = _processes.GetOrAdd(
                                     process.Id,
-                                    _ => (process, loggerFactory?.CreateLogger($"{process.Id}: {Path.GetFileName(startInfo.FileName)}")));
-                                item.Item2?.Log(_logOutput ? LogLevel.Information : LogLevel.Debug, e.Data);
+                                    _ => (process, loggerFactory?.CreateLogger($"{process.Id}: {Path.GetFileName(startInfo.FileName)}"), logOutput));
+                                item.Item2?.Log(logOutput ? LogLevel.Information : LogLevel.Debug, e.Data);
                                 contentWriter?.WriteLine(e.Data);
                             }
                         };
@@ -329,9 +339,9 @@ namespace Statiq.Core
                         {
                             if (!string.IsNullOrEmpty(e.Data))
                             {
-                                (Process, ILogger) item = _processes.GetOrAdd(
+                                (Process, ILogger, bool) item = _processes.GetOrAdd(
                                     process.Id,
-                                    _ => (process, loggerFactory?.CreateLogger($"{process.Id}: {Path.GetFileName(startInfo.FileName)}")));
+                                    _ => (process, loggerFactory?.CreateLogger($"{process.Id}: {Path.GetFileName(startInfo.FileName)}"), logOutput));
                                 item.Item2?.LogError(e.Data);
                                 errorWriter?.WriteLine(e.Data);
                             }
@@ -345,11 +355,13 @@ namespace Statiq.Core
                         // Use a separate logger, but only create and add it if it wasn't already from one of the received events
                         _processes.GetOrAdd(
                             process.Id,
-                            _ => (process, loggerFactory?.CreateLogger($"{process.Id}: {Path.GetFileName(startInfo.FileName)}")));
+                            _ => (process, loggerFactory?.CreateLogger($"{process.Id}: {Path.GetFileName(startInfo.FileName)}"), logOutput));
 
+                        // Log the process command
+                        string command = maskCommand ? "***" : $"{process.StartInfo.FileName} {process.StartInfo.Arguments}";
                         context.Log(
-                            _logOutput ? LogLevel.Information : LogLevel.Debug,
-                            $"Started {(_background ? "background " : string.Empty)}process {process.Id}: {process.StartInfo.FileName} {process.StartInfo.Arguments}");
+                            logOutput ? LogLevel.Information : LogLevel.Debug,
+                            $"Started {(_background ? "background " : string.Empty)}process {process.Id}: {command}");
 
                         // If this is a background process, let it run and just return the original document
                         if (_background)
@@ -419,20 +431,20 @@ namespace Statiq.Core
         private void ProcessExited(object sender, EventArgs e)
         {
             Process process = (Process)sender;
-            if (_processes.TryRemove(process.Id, out (Process, ILogger) item))
+            if (_processes.TryRemove(process.Id, out (Process Process, ILogger Logger, bool LogOutput) item))
             {
-                item.Item2?.Log(
-                    _logOutput ? LogLevel.Information : LogLevel.Debug,
+                item.Logger?.Log(
+                    item.LogOutput ? LogLevel.Information : LogLevel.Debug,
                     $"Process {process.Id} exited with code {process.ExitCode}");
             }
         }
 
         public void Dispose()
         {
-            foreach ((Process, ILogger) item in _processes.Values)
+            foreach ((Process Process, ILogger Logger, bool LogOutput) item in _processes.Values)
             {
-                item.Item1.Close();
-                item.Item1.Exited -= ProcessExited;
+                item.Process.Close();
+                item.Process.Exited -= ProcessExited;
             }
             _processes.Clear();
         }

@@ -48,16 +48,18 @@ namespace Statiq.App.Tests.Bootstrapper
             {
                 // Given
                 string[] args = new[] { "build", "-l", logLevel };
-                App.Bootstrapper bootstrapper = App.Bootstrapper.Factory.Create(args);
-                bootstrapper.AddCommand<PipelinesCommand<EngineCommandSettings>>("build");
-                bootstrapper.AddPipeline(
-                    "Foo",
-                    new Core.LogMessage(LogLevel.Trace, "A"),
-                    new Core.LogMessage(LogLevel.Debug, "B"),
-                    new Core.LogMessage(LogLevel.Information, "C"),
-                    new Core.LogMessage(LogLevel.Warning, "D"),
-                    new Core.LogMessage(LogLevel.Error, "E"),
-                    new Core.LogMessage(LogLevel.Critical, "F"));
+                App.Bootstrapper bootstrapper = App.Bootstrapper.Factory
+                    .Create(args)
+                    .AddSetting(Keys.FailureLogLevel, LogLevel.None)
+                    .AddCommand<PipelinesCommand<EngineCommandSettings>>("build")
+                    .AddPipeline(
+                        "Foo",
+                        new LogMessage(LogLevel.Trace, "A"),
+                        new LogMessage(LogLevel.Debug, "B"),
+                        new LogMessage(LogLevel.Information, "C"),
+                        new LogMessage(LogLevel.Warning, "D"),
+                        new LogMessage(LogLevel.Error, "E"),
+                        new LogMessage(LogLevel.Critical, "F"));
 
                 // When
                 BootstrapperTestResult result = await bootstrapper.RunTestAsync(LogLevel.None);
@@ -65,6 +67,51 @@ namespace Statiq.App.Tests.Bootstrapper
                 // Then
                 result.ExitCode.ShouldBe((int)ExitCode.Normal);
                 result.LogMessages.Count(x => x.FormattedMessage.StartsWith("Foo/Process")).ShouldBe(expected);
+            }
+
+            [TestCase("Trace", false)]
+            [TestCase("Debug", false)]
+            [TestCase("Information", false)]
+            [TestCase("Warning", false)]
+            [TestCase("Error", true)]
+            [TestCase("Critical", true)]
+            public async Task DefaultFailureLogLevel(LogLevel logLevel, bool expectedFailure)
+            {
+                // Given
+                string[] args = new[] { "build" };
+                App.Bootstrapper bootstrapper = App.Bootstrapper.Factory
+                    .Create(args)
+                    .AddCommand<PipelinesCommand<EngineCommandSettings>>("build")
+                    .AddPipeline("Foo", new LogMessage(logLevel, "A"));
+
+                // When
+                BootstrapperTestResult result = await bootstrapper.RunTestAsync(LogLevel.None);
+
+                // Then
+                result.ExitCode.ShouldBe(expectedFailure ? (int)ExitCode.LogLevelFailure : (int)ExitCode.Normal);
+            }
+
+            [TestCase("Trace", false)]
+            [TestCase("Debug", false)]
+            [TestCase("Information", false)]
+            [TestCase("Warning", true)]
+            [TestCase("Error", true)]
+            [TestCase("Critical", true)]
+            public async Task SetFailureLogLevel(LogLevel logLevel, bool expectedFailure)
+            {
+                // Given
+                string[] args = new[] { "build" };
+                App.Bootstrapper bootstrapper = App.Bootstrapper.Factory
+                    .Create(args)
+                    .AddSetting(Keys.FailureLogLevel, LogLevel.Warning)
+                    .AddCommand<PipelinesCommand<EngineCommandSettings>>("build")
+                    .AddPipeline("Foo", new LogMessage(logLevel, "A"));
+
+                // When
+                BootstrapperTestResult result = await bootstrapper.RunTestAsync(LogLevel.None);
+
+                // Then
+                result.ExitCode.ShouldBe(expectedFailure ? (int)ExitCode.LogLevelFailure : (int)ExitCode.Normal);
             }
 
             [Test]

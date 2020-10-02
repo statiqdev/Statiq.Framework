@@ -10,7 +10,7 @@ namespace Statiq.Common.Tests.IO
     {
         public class ConstructorTests : NormalizedPathFixture
         {
-            [TestCase("hello/temp/test/../world", "hello/temp/world2")]
+            [TestCase("hello/temp/test/../world", "hello/temp/world")]
             [TestCase("../hello/temp/test/../world", "../hello/temp/world")]
             [TestCase("../hello/world", "../hello/world")]
             [TestCase("hello/temp/test/../../world", "hello/world")]
