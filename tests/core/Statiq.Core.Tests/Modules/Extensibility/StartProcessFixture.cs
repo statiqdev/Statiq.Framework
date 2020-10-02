@@ -130,7 +130,7 @@ namespace Statiq.Core.Tests.Modules.Extensibility
                 StartProcess startProcess = new StartProcess("dotnet", "--foo").LogOutput();
 
                 // When, Then
-                await Should.ThrowAsync<ExecutionException>(async () => await ExecuteAsync(context, startProcess));
+                await Should.ThrowAsync<Exception>(async () => await ExecuteAsync(context, startProcess));
             }
 
             [Test]
