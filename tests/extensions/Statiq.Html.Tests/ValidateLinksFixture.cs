@@ -67,6 +67,39 @@ namespace Statiq.Html.Tests
                 // Then
                 context.LogMessages.ShouldNotContain(x => x.LogLevel == LogLevel.Warning);
             }
+
+            [Test]
+            public async Task CanValidateRelativeLinkWithBaseUri()
+            {
+                // Given
+                TestFileProvider fileProvider = new TestFileProvider();
+                fileProvider.AddDirectory("/");
+                fileProvider.AddDirectory("/output");
+                fileProvider.AddFile("/output/target.html", "<html><head></head><body><h1>Hello World!</h1></body></html>");
+                TestFileSystem fileSystem = new TestFileSystem
+                {
+                    FileProvider = fileProvider
+                };
+                TestExecutionContext context = new TestExecutionContext
+                {
+                    FileSystem = fileSystem
+                };
+                TestDocument target = new TestDocument(
+                    new NormalizedPath("/target.html"),
+                    new NormalizedPath("target.html"),
+                    "<html><head></head><body><h1>Hello World!</h1></body></html>");
+                TestDocument document = new TestDocument(
+                    new NormalizedPath("/test/document.html"),
+                    new NormalizedPath("test/document.html"),
+                    $"<html><head><base href=\"/\" /></head><body><a href=\"target.html\">foo</a></body></html>");
+                ValidateLinks module = new ValidateLinks();
+
+                // When
+                await ExecuteAsync(new[] { target, document }, context, module);
+
+                // Then
+                context.LogMessages.ShouldNotContain(x => x.LogLevel == LogLevel.Warning);
+            }
         }
 
         public class GatherLinksTests : ValidateLinksFixture

@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using AngleSharp.Dom;
 using AngleSharp.Dom.Html;
@@ -105,6 +107,22 @@ namespace Statiq.Html
             HtmlParser parser = new HtmlParser();
             await context.Inputs.ParallelForEachAsync(async input => await GatherLinksAsync(input, context, parser, links));
 
+            // Get existing relative output paths
+            HashSet<string> relativeOutputPaths = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            if (validateRelativeLinks)
+            {
+                foreach (NormalizedPath relativeOutputPath in context.FileSystem
+                    .GetOutputDirectory()
+                    .GetFiles(System.IO.SearchOption.AllDirectories)
+                    .Select(x => context.FileSystem.GetRelativeOutputPath(x.Path)))
+                {
+                    relativeOutputPaths.Add(relativeOutputPath.FullPath.TrimStart('/'));
+                    relativeOutputPaths.Add(context.GetLink(context.GetLink(relativeOutputPath, null, NormalizedPath.Null, false, true, false)).TrimStart('/'));
+                    relativeOutputPaths.Add(context.GetLink(context.GetLink(relativeOutputPath, null, NormalizedPath.Null, false, false, true)).TrimStart('/'));
+                    relativeOutputPaths.Add(context.GetLink(context.GetLink(relativeOutputPath, null, NormalizedPath.Null, false, true, true)).TrimStart('/'));
+                }
+            }
+
             // This policy will limit the number of executing link validations.
             // Limit the amount of concurrent link checks to avoid overwhelming servers.
             Task[] tasks = links.Select(
@@ -126,7 +144,7 @@ namespace Statiq.Html
                     }
 
                     // Relative
-                    if (!uri.IsAbsoluteUri && validateRelativeLinks && !await ValidateRelativeLinkAsync(uri, context))
+                    if (!uri.IsAbsoluteUri && validateRelativeLinks && !await ValidateRelativeLinkAsync(uri, context, relativeOutputPaths))
                     {
                         AddOrUpdateFailure(context, link.Value, failures, "Unable to validate relative link");
                         return;
@@ -163,36 +181,41 @@ namespace Statiq.Html
             IHtmlDocument htmlDocument = await input.ParseHtmlAsync(context, parser);
             if (htmlDocument is object)
             {
+                NormalizedPath basePath = string.IsNullOrEmpty(htmlDocument.BaseUri) ? NormalizedPath.Null : new NormalizedPath(htmlDocument.BaseUri);
+
                 // Links
                 foreach (IElement element in htmlDocument.Links)
                 {
-                    AddOrUpdateLink(element.GetAttribute("href"), element, input, links);
+                    AddOrUpdateLink(element.GetAttribute("href"), element, basePath, input, links);
                 }
 
                 // Link element
                 foreach (IElement element in htmlDocument.GetElementsByTagName("link").Where(x => x.HasAttribute("href")))
                 {
-                    AddOrUpdateLink(element.GetAttribute("href"), element, input, links);
+                    AddOrUpdateLink(element.GetAttribute("href"), element, basePath, input, links);
                 }
 
                 // Images
                 foreach (IHtmlImageElement element in htmlDocument.Images)
                 {
-                    AddOrUpdateLink(element.GetAttribute("src"), element, input, links);
+                    AddOrUpdateLink(element.GetAttribute("src"), element, basePath, input, links);
                 }
 
                 // Scripts
                 foreach (IHtmlScriptElement element in htmlDocument.Scripts)
                 {
-                    AddOrUpdateLink(element.Source, element, input, links);
+                    AddOrUpdateLink(element.Source, element, basePath, input, links);
                 }
             }
         }
 
         // Internal for testing
-        internal static async Task<bool> ValidateRelativeLinkAsync(Uri uri, IExecutionContext context)
+        internal static async Task<bool> ValidateRelativeLinkAsync(Uri uri, IExecutionContext context, HashSet<string> relativeOutputPaths)
         {
-            List<NormalizedPath> checkPaths = new List<NormalizedPath>();
+            if (uri.ToString().Contains("speakers"))
+            {
+                Debugger.Break();
+            }
 
             // Remove the query string and fragment, if any
             string normalizedPath = uri.ToString();
@@ -216,45 +239,12 @@ namespace Statiq.Html
             {
                 normalizedPath = normalizedPath.Substring(context.Settings.GetPath(Keys.LinkRoot).FullPath.Length);
             }
-            if (normalizedPath.StartsWith("/"))
+            normalizedPath = normalizedPath.TrimStart('/');
+
+            // See if it's in the output paths
+            if (relativeOutputPaths.Contains(normalizedPath))
             {
-                normalizedPath = normalizedPath.Length > 1 ? normalizedPath.Substring(1) : string.Empty;
-            }
-
-            // Add the base path
-            if (normalizedPath != string.Empty)
-            {
-                checkPaths.Add(new NormalizedPath(normalizedPath));
-            }
-
-            // Add filenames
-            string indexFileName = context.Settings.GetIndexFileName();
-            checkPaths.Add(new NormalizedPath(normalizedPath?.Length == 0 ? indexFileName : $"{normalizedPath}/{indexFileName}"));
-
-            // Add extensions
-            IReadOnlyList<string> pageFileExtensions = context.Settings.GetPageFileExtensions();
-            checkPaths.AddRange(pageFileExtensions.SelectMany(x => checkPaths.Select(y => y.AppendExtension(x))).ToArray());
-
-            // Check all the candidate paths
-            NormalizedPath validatedPath = checkPaths.Find(x =>
-            {
-                IFile outputFile;
-                try
-                {
-                    outputFile = context.FileSystem.GetOutputFile(x);
-                }
-                catch (Exception ex)
-                {
-                    context.LogDebug($"Could not validate path {x.FullPath} for relative link {uri}: {ex.Message}");
-                    return false;
-                }
-
-                return outputFile.Exists;
-            });
-
-            if (!validatedPath.IsNull)
-            {
-                context.LogDebug($"Validated relative link {uri} at {validatedPath.FullPath}");
+                context.LogDebug($"Validated relative link {uri}");
                 return true;
             }
 
@@ -264,7 +254,6 @@ namespace Statiq.Html
                 return await ValidateAbsoluteLinkAsync(absoluteCheckUri, context);
             }
 
-            context.LogDebug($"Validation failure for relative link {uri}: could not find output file at any of {string.Join(", ", checkPaths.Select(x => x.FullPath))}");
             return false;
         }
 
@@ -330,7 +319,7 @@ namespace Statiq.Html
             }
         }
 
-        private static void AddOrUpdateLink(string link, IElement element, IDocument source, ConcurrentDictionary<string, ConcurrentBag<(IDocument source, string outerHtml)>> links)
+        private static void AddOrUpdateLink(string link, IElement element, NormalizedPath basePath, IDocument source, ConcurrentDictionary<string, ConcurrentBag<(IDocument source, string outerHtml)>> links)
         {
             if (string.IsNullOrEmpty(link))
             {
@@ -345,7 +334,9 @@ namespace Statiq.Html
                 // The Uri class treats these as relative, but they're really absolute
                 if (!uri.IsAbsoluteUri && !uri.ToString().StartsWith("//") && !source.Destination.IsNull)
                 {
-                    link = source.Destination.Parent.Combine(new NormalizedPath(uri.ToString())).FullPath;
+                    link = basePath.IsNull
+                        ? source.Destination.Parent.Combine(new NormalizedPath(uri.ToString())).FullPath
+                        : basePath.Combine(new NormalizedPath(uri.ToString())).FullPath;
                 }
             }
 
