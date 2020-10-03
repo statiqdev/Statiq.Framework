@@ -1,3 +1,5 @@
+# 1.0.0-beta.23
+
 # 1.0.0-beta.22
 
 - Fixed a bug with the `ValidateLinks` module when using a `<base>` element on the page.
