@@ -212,11 +212,6 @@ namespace Statiq.Html
         // Internal for testing
         internal static async Task<bool> ValidateRelativeLinkAsync(Uri uri, IExecutionContext context, HashSet<string> relativeOutputPaths)
         {
-            if (uri.ToString().Contains("speakers"))
-            {
-                Debugger.Break();
-            }
-
             // Remove the query string and fragment, if any
             string normalizedPath = uri.ToString();
             if (normalizedPath.Contains("#"))

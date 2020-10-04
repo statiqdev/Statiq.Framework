@@ -1,5 +1,7 @@
 # 1.0.0-beta.23
 
+- Removed a debugging break statement that snuck into the last release.
+
 # 1.0.0-beta.22
 
 - Fixed a bug with the `ValidateLinks` module when using a `<base>` element on the page.
