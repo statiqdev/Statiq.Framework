@@ -1,3 +1,5 @@
+# 1.0.0-beta.24
+
 # 1.0.0-beta.23
 
 - Removed a debugging break statement that snuck into the last release.
