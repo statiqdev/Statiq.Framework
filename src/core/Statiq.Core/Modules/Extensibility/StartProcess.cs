@@ -46,6 +46,7 @@ namespace Statiq.Core
         private const string KeepContentKey = nameof(KeepContentKey);
         private const string EnvironmentVariables = nameof(EnvironmentVariables);
         private const string LogOutputKey = nameof(LogOutputKey);
+        private const string LogErrorsKey = nameof(LogErrorsKey);
         private const string HideArgumentsKey = nameof(HideArgumentsKey);
 
         private readonly ConcurrentCache<int, (Process Process, ILogger Logger, Action<Process> ExitedLogAction)> _processes =
@@ -75,7 +76,8 @@ namespace Statiq.Core
                 new Dictionary<string, IConfig>
                 {
                     { FileName, fileName.ThrowIfNull(nameof(fileName)) },
-                    { Arguments, arguments.ThrowIfNull(nameof(arguments)) }
+                    { Arguments, arguments.ThrowIfNull(nameof(arguments)) },
+                    { LogErrorsKey, Config.FromValue(true) }
                 },
                 false)
         {
@@ -197,14 +199,24 @@ namespace Statiq.Core
         public StartProcess HideArguments(Config<bool> hideArguments = null) => (StartProcess)SetConfig(HideArgumentsKey, hideArguments ?? true);
 
         /// <summary>
-        /// Toggles whether to log process output.
+        /// Toggles whether to log standard process output as information messages.
         /// </summary>
         /// <remarks>
-        /// By default, process output is only logged as debug messages. Output to standard error will always be logged.
+        /// By default, standard process output is only logged as debug messages.
         /// </remarks>
-        /// <param name="logOutput"><c>true</c> or <c>null</c> to log process output, <c>false</c> otherwise.</param>
+        /// <param name="logOutput"><c>true</c> or <c>null</c> to log standard process output as information messages, <c>false</c> to log them as debug messages.</param>
         /// <returns>The current module instance.</returns>
         public StartProcess LogOutput(Config<bool> logOutput = null) => (StartProcess)SetConfig(LogOutputKey, logOutput ?? true);
+
+        /// <summary>
+        /// Toggles whether to log error process output as error messages.
+        /// </summary>
+        /// <remarks>
+        /// By default, error process output is logged as error messages.
+        /// </remarks>
+        /// <param name="logOutput"><c>true</c> or <c>null</c> to log error process output as error messages, <c>false</c> to log them as debug messages.</param>
+        /// <returns>The current module instance.</returns>
+        public StartProcess LogErrors(Config<bool> logOutput = null) => (StartProcess)SetConfig(LogErrorsKey, logOutput ?? true);
 
         /// <summary>
         /// Toggles throwing an exception if the process exits with a non-zero exit code.
@@ -311,6 +323,7 @@ namespace Statiq.Core
             bool keepContent = values.GetBool(KeepContentKey);
             bool continueOnError = values.GetBool(ContinueOnErrorKey);
             bool logOutput = values.GetBool(LogOutputKey);
+            bool logErrors = values.GetBool(LogErrorsKey);
             bool hideArguments = values.GetBool(HideArgumentsKey);
             string logCommand = $"{process.StartInfo.FileName}{(hideArguments ? string.Empty : (" " + process.StartInfo.Arguments))}";
             ILoggerFactory loggerFactory = context.GetService<ILoggerFactory>();
@@ -326,10 +339,10 @@ namespace Statiq.Core
                         {
                             if (!string.IsNullOrEmpty(e.Data))
                             {
-                                (Process, ILogger, Action<Process>) item = _processes.GetOrAdd(
+                                (Process Process, ILogger Logger, Action<Process> ExitedLogAction) item = _processes.GetOrAdd(
                                     process.Id,
                                     _ => (process, loggerFactory?.CreateLogger($"{process.Id}: {Path.GetFileName(startInfo.FileName)}"), (Action<Process>)ExitedLogAction));
-                                item.Item2?.Log(logOutput ? LogLevel.Information : LogLevel.Debug, e.Data);
+                                item.Logger?.Log(logOutput ? LogLevel.Information : LogLevel.Debug, e.Data);
                                 contentWriter?.WriteLine(e.Data);
                             }
                         };
@@ -337,10 +350,14 @@ namespace Statiq.Core
                         {
                             if (!string.IsNullOrEmpty(e.Data))
                             {
-                                (Process, ILogger, Action<Process>) item = _processes.GetOrAdd(
+                                (Process Process, ILogger Logger, Action<Process> ExitedLogAction) item = _processes.GetOrAdd(
                                     process.Id,
                                     _ => (process, loggerFactory?.CreateLogger($"{process.Id}: {Path.GetFileName(startInfo.FileName)}"), (Action<Process>)ExitedLogAction));
-                                item.Item2?.LogError(e.Data);
+                                item.Logger?.Log(logErrors ? LogLevel.Error : LogLevel.Debug, e.Data);
+                                if (logErrors)
+                                {
+                                    context.LogBuildServerError(e.Data);
+                                }
                                 errorWriter?.WriteLine(e.Data);
                             }
                         };

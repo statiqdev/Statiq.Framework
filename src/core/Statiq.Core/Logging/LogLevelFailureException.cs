@@ -6,7 +6,7 @@ namespace Statiq.Core
     public class LogLevelFailureException : Exception
     {
         public LogLevelFailureException(LogLevel failureLogLevel)
-            : base($"One of more log messages were above the failure threshold of {failureLogLevel}")
+            : base($"One or more log messages were above the failure threshold of {failureLogLevel}")
         {
         }
     }

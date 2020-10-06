@@ -93,6 +93,7 @@ namespace Statiq.App
                 }
 
                 _logger.LogCritical(ex.Message);
+                Engine.LogBuildServerError(ex.Message);
                 _logger.LogInformation("To get more detailed logging output run with the \"-l Debug\" flag");
 
                 return ex switch
