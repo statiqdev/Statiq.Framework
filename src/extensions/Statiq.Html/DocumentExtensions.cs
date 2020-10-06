@@ -1,8 +1,8 @@
 ﻿using System;
 using System.IO;
 using System.Threading.Tasks;
-using AngleSharp.Dom.Html;
-using AngleSharp.Parser.Html;
+using AngleSharp.Html.Dom;
+using AngleSharp.Html.Parser;
 using Microsoft.Extensions.Logging;
 using Statiq.Common;
 
@@ -32,7 +32,7 @@ namespace Statiq.Html
             {
                 using (Stream stream = document.GetContentStream())
                 {
-                    return await parser.ParseAsync(stream);
+                    return await parser.ParseDocumentAsync(stream);
                 }
             }
             catch (Exception ex)

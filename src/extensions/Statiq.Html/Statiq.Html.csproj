@@ -4,7 +4,7 @@
     <PackageTags>Statiq Static StaticContent StaticSite Blog BlogEngine HTML</PackageTags>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="AngleSharp" Version="0.9.10" />
+    <PackageReference Include="AngleSharp" Version="0.14.0" />
     <PackageReference Include="Polly" Version="7.1.1" />
     <PackageReference Include="System.Linq.Async" Version="4.0.0" />
     <PackageReference Include="System.Net.Http" Version="4.3.4" />

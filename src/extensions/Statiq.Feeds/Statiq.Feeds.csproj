@@ -4,7 +4,7 @@
     <PackageTags>Statiq Static StaticContent StaticSite RSS Atom Syndication</PackageTags>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="AngleSharp" Version="0.9.10" />
+    <PackageReference Include="AngleSharp" Version="0.14.0" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\core\Statiq.Common\Statiq.Common.csproj" />

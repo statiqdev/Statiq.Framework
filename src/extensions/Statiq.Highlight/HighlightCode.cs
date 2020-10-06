@@ -3,10 +3,9 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-using AngleSharp.Dom.Html;
-using AngleSharp.Extensions;
+using AngleSharp.Html.Dom;
+using AngleSharp.Html.Parser;
 using AngleSharp.Html;
-using AngleSharp.Parser.Html;
 using Microsoft.Extensions.Logging;
 using Statiq.Common;
 
@@ -97,7 +96,7 @@ namespace Statiq.Highlight
                     {
                         using (Stream stream = input.GetContentStream())
                         {
-                            using (IHtmlDocument htmlDocument = await parser.ParseAsync(stream))
+                            using (IHtmlDocument htmlDocument = await parser.ParseDocumentAsync(stream))
                             {
                                 foreach (AngleSharp.Dom.IElement element in htmlDocument.QuerySelectorAll(_codeQuerySelector))
                                 {

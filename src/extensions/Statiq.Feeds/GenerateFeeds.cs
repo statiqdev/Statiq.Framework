@@ -4,12 +4,10 @@ using System.IO;
 using System.Linq;
 using System.Runtime.Serialization;
 using System.Threading.Tasks;
-using AngleSharp;
 using AngleSharp.Dom;
-using AngleSharp.Dom.Html;
-using AngleSharp.Extensions;
+using AngleSharp.Html.Dom;
+using AngleSharp.Html.Parser;
 using AngleSharp.Html;
-using AngleSharp.Parser.Html;
 using Statiq.Common;
 using Statiq.Feeds.Syndication;
 using IDocument = Statiq.Common.IDocument;
@@ -505,7 +503,7 @@ namespace Statiq.Feeds
         {
             if (!string.IsNullOrEmpty(value))
             {
-                IHtmlDocument dom = parser.Parse(string.Empty);
+                IHtmlDocument dom = parser.ParseDocument(string.Empty);
                 INodeList nodes = parser.ParseFragment(value, dom.Body);
                 IEnumerable<IElement> elements = nodes.SelectMany(x => x.Descendents<IElement>().Where(y => y.HasAttribute("href") || y.HasAttribute("src")));
                 bool replaced = false;
