@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using AngleSharp.Parser.Html;
+using AngleSharp.Html.Parser;
 using Statiq.Common;
 
 namespace Statiq.Highlight
@@ -61,7 +61,7 @@ namespace Statiq.Highlight
                 }
             }))
             {
-                AngleSharp.Dom.IDocument htmlDocument = parser.Parse(string.Empty);
+                AngleSharp.Dom.IDocument htmlDocument = parser.ParseDocument(string.Empty);
                 AngleSharp.Dom.IElement element = htmlDocument.CreateElement(dictionary.GetString("Element", "code"));
                 element.InnerHtml = content.Trim();
                 if (dictionary.ContainsKey("Language"))

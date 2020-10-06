@@ -15,17 +15,17 @@ namespace Statiq.Html
 
         public static readonly IMarkupFormatter Instance = new ProcessingInstructionFormatter();
 
-        public string Attribute(IAttr attribute) => Formatter.Attribute(attribute);
-
         public string CloseTag(IElement element, bool selfClosing) => Formatter.CloseTag(element, selfClosing);
 
         public string Doctype(IDocumentType doctype) => Formatter.Doctype(doctype);
 
         public string OpenTag(IElement element, bool selfClosing) => Formatter.OpenTag(element, selfClosing);
 
-        public string Text(string text) => Formatter.Text(text);
+        public string Text(ICharacterData text) => Formatter.Text(text);
 
         public string Processing(IProcessingInstruction processing) => Formatter.Processing(processing);
+
+        public string LiteralText(ICharacterData text) => Formatter.LiteralText(text);
 
         public string Comment(IComment comment)
         {
