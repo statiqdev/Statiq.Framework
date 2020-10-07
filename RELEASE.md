@@ -4,6 +4,8 @@
 - Added `IContentProvider.GetCacheHashCodeAsync()` to get and cache a hash code for a given content provider.
 - Updated AngleSharp to 0.14.0 (#135, #136, thanks @alanta).
 - Added `RenderMarkdown.WithMarkdownDocumentKey(string markdownDocumentKey)` to indicate where the `MarkdownDocument` should be saved, or not at all.
+- Removed `DocumentAnalyzer` and `SyncDocumentAnalyzer` in favor of combining into alternate overloads in `Analyzer` and `SyncAnalyzer` similar to how `Module` handles it
+  (this lets analyzers provide functionality before documents are processed individually).
 
 # 1.0.0-beta.23
 
