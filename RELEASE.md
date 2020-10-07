@@ -3,6 +3,7 @@
 - Added `StartProcess.LogErrors()` to configure whether standard error output is logged as debug or error messages.
 - Added `IContentProvider.GetCacheHashCodeAsync()` to get and cache a hash code for a given content provider.
 - Updated AngleSharp to 0.14.0 (#135, #136, thanks @alanta).
+- Added `RenderMarkdown.WithMarkdownDocumentKey(string markdownDocumentKey)` to indicate where the `MarkdownDocument` should be saved, or not at all.
 
 # 1.0.0-beta.23
 

@@ -40,6 +40,7 @@ namespace Statiq.Markdown
         private string _configuration = DefaultConfiguration;
         private bool _escapeAt = true;
         private bool _prependLinkRoot = false;
+        private string _markdownDocumentKey = nameof(MarkdownDocument);
 
         /// <summary>
         /// Processes Markdown in the content of the document.
@@ -172,6 +173,17 @@ namespace Statiq.Markdown
             return this;
         }
 
+        /// <summary>
+        /// Specifies a metadata key where the <see cref="MarkdownDocument"/> should be saved (by default to <c>MarkdownDocument</c>).
+        /// </summary>
+        /// <param name="markdownDocumentKey">The metadata key or <c>null</c> to not save a <see cref="MarkdownDocument"/>.</param>
+        /// <returns>The current module instance.</returns>
+        public RenderMarkdown WithMarkdownDocumentKey(string markdownDocumentKey)
+        {
+            _markdownDocumentKey = markdownDocumentKey;
+            return this;
+        }
+
         protected override async Task<IEnumerable<IDocument>> ExecuteInputAsync(IDocument input, IExecutionContext context)
         {
             context.LogDebug(
@@ -208,21 +220,27 @@ namespace Statiq.Markdown
                 result = result.Replace("\\@", "@");
             }
 
-            return string.IsNullOrEmpty(_sourceKey)
-                ? input.Clone(
-                    new MetadataItems
-                    {
-                        { nameof(MarkdownDocument), markdownDocument }
-                    },
-                    await context.GetContentProviderAsync(result, MediaTypes.Html))
-                    .Yield()
-                : input
-                    .Clone(new MetadataItems
-                    {
-                        { nameof(MarkdownDocument), markdownDocument },
-                        { string.IsNullOrEmpty(_destinationKey) ? _sourceKey : _destinationKey, result }
-                    })
+            MetadataItems metadataItems = new MetadataItems();
+            if (!_markdownDocumentKey.IsNullOrEmpty())
+            {
+                metadataItems.Add(_markdownDocumentKey, markdownDocument);
+            }
+
+            if (_sourceKey.IsNullOrEmpty())
+            {
+                // No source key so change the content
+                return input
+                    .Clone(metadataItems, await context.GetContentProviderAsync(result, MediaTypes.Html))
                     .Yield();
+            }
+            else
+            {
+                // Markdown came from metadata so don't change content
+                metadataItems.Add(string.IsNullOrEmpty(_destinationKey) ? _sourceKey : _destinationKey, result);
+                return input
+                    .Clone(metadataItems)
+                    .Yield();
+            }
         }
 
         internal static string Render(
