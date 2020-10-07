@@ -7,7 +7,7 @@ namespace Statiq.Common
     /// A helper class to quickly calculate CRC32 codes.
     /// </summary>
     /// <remarks>
-    /// The implementation was originaly taken from the ASP.NET v5 Razor caching implementation.
+    /// The implementation was originally taken from the ASP.NET v5 Razor caching implementation.
     /// </remarks>
     public static class Crc32
     {
@@ -93,6 +93,22 @@ namespace Statiq.Common
                 }
             }
 
+            return crc32 ^ 0xffffffffU;
+        }
+
+        /// <summary>
+        /// Calculates a CRC32 code from a byte array.
+        /// </summary>
+        /// <param name="bytes">The bytes.</param>
+        /// <returns>A CRC32.</returns>
+        public static uint Calculate(byte[] bytes)
+        {
+            uint crc32 = 0xffffffffU;
+            int offset = 0;
+            while (offset < bytes.Length)
+            {
+                crc32 = CrcTable[(crc32 ^ bytes[offset++]) & 0xFF] ^ (crc32 >> 8);
+            }
             return crc32 ^ 0xffffffffU;
         }
 

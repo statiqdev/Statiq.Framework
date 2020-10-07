@@ -79,10 +79,9 @@ namespace Statiq.Common
         public static async Task<int> GetCacheHashCodeAsync(IDocument document)
         {
             HashCode hash = default;
-            using (Stream stream = document.GetContentStream())
-            {
-                hash.Add(await Crc32.CalculateAsync(stream));
-            }
+
+            // Add the content hash
+            hash.Add(await document.ContentProvider.GetCacheHashCodeAsync());
 
             // We exclude ContentProvider from hash as we already added CRC for content above
             // Also exclude settings and IMetadataValue implementations

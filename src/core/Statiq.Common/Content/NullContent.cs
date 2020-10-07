@@ -35,5 +35,8 @@ namespace Statiq.Common
         /// <inheritdoc />
         public IContentProvider CloneWithMediaType(string mediaType) =>
             string.Equals(MediaType, mediaType, StringComparison.OrdinalIgnoreCase) ? this : new NullContent(mediaType);
+
+        /// <inheritdoc />
+        public Task<int> GetCacheHashCodeAsync() => Task.FromResult(0);
     }
 }

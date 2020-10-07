@@ -35,5 +35,11 @@ namespace Statiq.Common
         /// <param name="mediaType">The new media type.</param>
         /// <returns>A clone of the current content provider.</returns>
         IContentProvider CloneWithMediaType(string mediaType);
+
+        /// <summary>
+        /// Gets a hash of the content appropriate for caching.
+        /// </summary>
+        /// <returns>A hash appropriate for caching.</returns>
+        Task<int> GetCacheHashCodeAsync();
     }
 }

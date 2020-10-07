@@ -13,6 +13,8 @@ namespace Statiq.Common
         private readonly byte[] _buffer;
         private readonly int _index;
         private readonly int _count;
+        private readonly object _hashCodeLock = new object();
+        private int _hashCode;
 
         public MemoryContent(byte[] buffer)
             : this(buffer, 0, buffer?.Length ?? 0, null)
@@ -70,5 +72,19 @@ namespace Statiq.Common
         /// <inheritdoc />
         public IContentProvider CloneWithMediaType(string mediaType) =>
             new MemoryContent(_buffer, mediaType);
+
+        /// <inheritdoc />
+        public Task<int> GetCacheHashCodeAsync()
+        {
+            // Cache the hash code since the bytes can never change
+            lock (_hashCodeLock)
+            {
+                if (_hashCode == default)
+                {
+                    _hashCode = (int)Crc32.Calculate(_buffer);
+                }
+                return Task.FromResult(_hashCode);
+            }
+        }
     }
 }
