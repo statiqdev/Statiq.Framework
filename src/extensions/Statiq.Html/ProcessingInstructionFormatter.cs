@@ -9,7 +9,7 @@ namespace Statiq.Html
     /// in AngleSharp. See https://github.com/Wyamio/Statiq/issues/784.
     /// This can be removed once https://github.com/AngleSharp/AngleSharp/pull/762 is merged.
     /// </summary>
-    internal class ProcessingInstructionFormatter : IMarkupFormatter
+    public class ProcessingInstructionFormatter : IMarkupFormatter
     {
         private static readonly IMarkupFormatter Formatter = HtmlMarkupFormatter.Instance;
 

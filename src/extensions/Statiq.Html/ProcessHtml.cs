@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using AngleSharp.Dom;
+using AngleSharp.Html;
 using AngleSharp.Html.Dom;
 using AngleSharp.Html.Parser;
 using Microsoft.Extensions.Logging;
@@ -25,8 +26,6 @@ namespace Statiq.Html
     /// <category>Content</category>
     public class ProcessHtml : ParallelModule
     {
-        private static readonly HtmlParser HtmlParser = new HtmlParser();
-
         private readonly string _querySelector;
         private readonly Action<Common.IDocument, IExecutionContext, IElement, Dictionary<string, object>> _processElement;
         private bool _first;
@@ -109,7 +108,7 @@ namespace Statiq.Html
             Action<Common.IDocument, IExecutionContext, IElement, Dictionary<string, object>> processElement)
         {
             // Parse the HTML content
-            IHtmlDocument htmlDocument = await input.ParseHtmlAsync(context, HtmlParser);
+            IHtmlDocument htmlDocument = await HtmlHelper.ParseHtmlAsync(input);
             if (htmlDocument is null)
             {
                 return input.Yield();

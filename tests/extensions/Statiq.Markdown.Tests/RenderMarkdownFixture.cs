@@ -286,8 +286,10 @@ the family Rosaceae.</dd>
                 const string input = "This is a [link](/link.html)";
                 string output = @"<p>This is a <a href=""/virtual-dir/link.html"">link</a></p>" + Environment.NewLine;
                 TestExecutionContext context = new TestExecutionContext();
-                context.Settings[Keys.LinkRoot] = "/virtual-dir";
-                TestDocument document = new TestDocument(input);
+                TestDocument document = new TestDocument(input)
+                {
+                    { Keys.LinkRoot, "/virtual-dir" }
+                };
                 RenderMarkdown markdown = new RenderMarkdown().PrependLinkRoot(true);
 
                 // When

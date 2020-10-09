@@ -117,12 +117,11 @@ namespace Statiq.Html.Tests
                 // Given
                 TestExecutionContext context = new TestExecutionContext();
                 TestDocument document = new TestDocument($"<html><head></head><body>{tag}</body></html>");
-                HtmlParser parser = new HtmlParser();
                 ConcurrentDictionary<string, ConcurrentBag<(IDocument source, string outerHtml)>> links =
                     new ConcurrentDictionary<string, ConcurrentBag<(IDocument source, string outerHtml)>>();
 
                 // When
-                await ValidateLinks.GatherLinksAsync(document, context, parser, links);
+                await ValidateLinks.GatherLinksAsync(document, context, links);
 
                 // Then
                 Assert.That(links.Count, Is.EqualTo(1));
@@ -139,12 +138,11 @@ namespace Statiq.Html.Tests
                 // Given
                 TestExecutionContext context = new TestExecutionContext();
                 TestDocument document = new TestDocument($"<html><head>{tag}</head><body></body></html>");
-                HtmlParser parser = new HtmlParser();
                 ConcurrentDictionary<string, ConcurrentBag<(IDocument source, string outerHtml)>> links =
                     new ConcurrentDictionary<string, ConcurrentBag<(IDocument source, string outerHtml)>>();
 
                 // When
-                await ValidateLinks.GatherLinksAsync(document, context, parser, links);
+                await ValidateLinks.GatherLinksAsync(document, context, links);
 
                 // Then
                 Assert.That(links.Count, Is.EqualTo(1));

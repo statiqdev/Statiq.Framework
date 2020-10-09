@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using AngleSharp.Dom;
+using AngleSharp.Html;
 using AngleSharp.Html.Dom;
 using AngleSharp.Html.Parser;
 using Microsoft.Extensions.Logging;
@@ -32,8 +33,6 @@ namespace Statiq.Html
     /// <category>Metadata</category>
     public class QueryHtml : ParallelModule
     {
-        private static readonly HtmlParser HtmlParser = new HtmlParser();
-
         private readonly List<Action<IElement, Dictionary<string, object>>> _metadataActions
             = new List<Action<IElement, Dictionary<string, object>>>();
 
@@ -183,7 +182,7 @@ namespace Statiq.Html
         protected override async Task<IEnumerable<Common.IDocument>> ExecuteInputAsync(Common.IDocument input, IExecutionContext context)
         {
             // Parse the HTML content
-            IHtmlDocument htmlDocument = await input.ParseHtmlAsync(context, HtmlParser);
+            IHtmlDocument htmlDocument = await HtmlHelper.ParseHtmlAsync(input);
             if (htmlDocument is null)
             {
                 return input.Yield();

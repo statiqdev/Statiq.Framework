@@ -17,7 +17,16 @@ namespace Statiq.Common
 
         /// <inheritdoc/>
         public virtual async Task AnalyzeAsync(ImmutableArray<IDocument> documents, IAnalyzerContext context) =>
-            await documents.ParallelForEachAsync(async doc => await AnalyzeDocumentAsync(doc, new DocumentAnalyzerContext(context, doc)), context.CancellationToken);
+            await documents.ParallelForEachAsync(
+                async doc =>
+                {
+                    // Only analyze the document if it doesn't have a log level of None
+                    if (context.GetLogLevel(doc) != LogLevel.None)
+                    {
+                        await AnalyzeDocumentAsync(doc, new DocumentAnalyzerContext(context, doc));
+                    }
+                },
+                context.CancellationToken);
 
         /// <summary>
         /// Analyzes an individual document.

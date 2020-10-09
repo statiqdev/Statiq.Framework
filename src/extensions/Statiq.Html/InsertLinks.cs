@@ -5,6 +5,7 @@ using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
 using AngleSharp.Dom;
+using AngleSharp.Html;
 using AngleSharp.Html.Dom;
 using AngleSharp.Html.Parser;
 using Microsoft.Extensions.Logging;
@@ -149,7 +150,7 @@ namespace Statiq.Html
                 IHtmlDocument htmlDocument;
                 using (Stream stream = input.GetContentStream())
                 {
-                    htmlDocument = await HtmlParser.ParseDocumentAsync(stream);
+                    htmlDocument = await HtmlHelper.ParseHtmlAsync(input);
                 }
                 foreach (IElement element in htmlDocument.QuerySelectorAll(_querySelector).Where(t => !t.Ancestors<IHtmlAnchorElement>().Any()))
                 {

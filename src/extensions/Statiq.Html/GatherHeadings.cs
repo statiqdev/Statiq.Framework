@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using AngleSharp.Dom;
+using AngleSharp.Html;
 using AngleSharp.Html.Dom;
 using AngleSharp.Html.Parser;
 using Statiq.Common;
@@ -30,8 +31,6 @@ namespace Statiq.Html
     /// <category>Metadata</category>
     public class GatherHeadings : ParallelConfigModule<int>
     {
-        private static readonly HtmlParser HtmlParser = new HtmlParser();
-
         private bool _nesting;
         private string _metadataKey = HtmlKeys.Headings;
         private string _levelKey = HtmlKeys.Level;
@@ -135,7 +134,7 @@ namespace Statiq.Html
             }
 
             // Parse the HTML content
-            IHtmlDocument htmlDocument = await input.ParseHtmlAsync(context, HtmlParser);
+            IHtmlDocument htmlDocument = await HtmlHelper.ParseHtmlAsync(input);
             if (htmlDocument is null)
             {
                 return input.Yield();

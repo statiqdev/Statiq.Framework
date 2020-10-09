@@ -86,6 +86,43 @@ namespace Statiq.Html.Tests
             }
 
             [Test]
+            public async Task PreservesShortcode()
+            {
+                // Given
+                const string input =
+                    @"<html>
+                        <head>
+                            <title>Foobar</title>
+                        </head>
+                        <body>
+                            <h1>Title</h1>
+                            <p><?! Foo /?></p>
+                            <p>This is some other text</p>
+                        </body>
+                    </html>";
+                TestDocument document = new TestDocument(input);
+                ProcessHtml process = new ProcessHtml("p", x => x.Insert(AngleSharp.Dom.AdjacentPosition.AfterEnd, "Fuzz"));
+
+                // When
+                IReadOnlyList<TestDocument> results = await ExecuteAsync(document, process);
+
+                // Then
+                TestDocument result = results.ShouldHaveSingleItem();
+                result.ShouldNotBe(document);
+                result.Content.ShouldBe(
+                    @"<html><head>
+                            <title>Foobar</title>
+                        </head>
+                        <body>
+                            <h1>Title</h1>
+                            <p><?! Foo /?></p>Fuzz
+                            <p>This is some other text</p>Fuzz
+                        
+                    </body></html>",
+                    StringCompareShould.IgnoreLineEndings);
+            }
+
+            [Test]
             public async Task AddsMetadata()
             {
                 // Given

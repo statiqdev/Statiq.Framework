@@ -27,17 +27,12 @@ namespace Statiq.Markdown
     /// <category>Templates</category>
     public class RenderMarkdown : ParallelModule
     {
-        /// <summary>
-        /// The default Markdown configuration.
-        /// </summary>
-        public const string DefaultConfiguration = "common";
-
         private static readonly Regex EscapeAtRegex = new Regex("(?<!\\\\)@");
 
         private readonly string _sourceKey;
         private readonly string _destinationKey;
         private readonly OrderedList<IMarkdownExtension> _extensions = new OrderedList<IMarkdownExtension>();
-        private string _configuration = DefaultConfiguration;
+        private string _configuration = MarkdownHelper.DefaultConfiguration;
         private bool _escapeAt = true;
         private bool _prependLinkRoot = false;
         private string _markdownDocumentKey = nameof(MarkdownDocument);
@@ -191,8 +186,9 @@ namespace Statiq.Markdown
                    string.IsNullOrEmpty(_sourceKey) ? string.Empty : ("in" + _sourceKey),
                    input.ToSafeDisplayString());
 
+            // Get the content
             string content;
-            if (string.IsNullOrEmpty(_sourceKey))
+            if (_sourceKey.IsNullOrEmpty())
             {
                 content = await input.GetContentStringAsync();
             }
@@ -202,17 +198,22 @@ namespace Statiq.Markdown
             }
             else
             {
-                // Don't do anything if the key doesn't exist
+                // If the key doesn't exist, we're done
                 return input.Yield();
             }
 
-            string result = Render(
-                context,
-                _configuration,
-                _extensions,
-                _prependLinkRoot,
-                content,
-                out MarkdownDocument markdownDocument);
+            // Render the Markdown
+            string result;
+            MarkdownDocument markdownDocument;
+            using (StringWriter writer = new StringWriter())
+            {
+                markdownDocument = MarkdownHelper.RenderMarkdown(input, content, writer, _prependLinkRoot, _configuration, _extensions);
+                if (markdownDocument is null)
+                {
+                    return input.Yield();
+                }
+                result = writer.ToString();
+            }
 
             if (_escapeAt)
             {
@@ -240,56 +241,6 @@ namespace Statiq.Markdown
                 return input
                     .Clone(metadataItems)
                     .Yield();
-            }
-        }
-
-        internal static string Render(
-            IExecutionContext context,
-            string configuration,
-            OrderedList<IMarkdownExtension> extensions,
-            bool prependLinkRoot,
-            string content,
-            out MarkdownDocument markdownDocument)
-        {
-            // Create the pipeline
-            MarkdownPipelineBuilder pipelineBuilder = new MarkdownPipelineBuilder();
-            pipelineBuilder.Configure(configuration);
-            if (extensions is object)
-            {
-                pipelineBuilder.Extensions.AddRange(extensions);
-            }
-            MarkdownPipeline pipeline = pipelineBuilder.Build();
-
-            // Render the content
-            using (StringWriter writer = new StringWriter())
-            {
-                HtmlRenderer htmlRenderer = new HtmlRenderer(writer);
-                pipeline.Setup(htmlRenderer);
-
-                if (prependLinkRoot && context.Settings.ContainsKey(Keys.LinkRoot))
-                {
-                    htmlRenderer.LinkRewriter = (link) =>
-                    {
-                        if (string.IsNullOrEmpty(link))
-                        {
-                            return link;
-                        }
-
-                        if (link[0] == '/')
-                        {
-                            // root-based url, must be rewritten by prepending the LinkRoot setting value
-                            // ex: '/virtual/directory' + '/relative/abs/link.html' => '/virtual/directory/relative/abs/link.html'
-                            link = context.Settings[Keys.LinkRoot] + link;
-                        }
-
-                        return link;
-                    };
-                }
-
-                markdownDocument = MarkdownParser.Parse(content, pipeline);
-                htmlRenderer.Render(markdownDocument);
-                writer.Flush();
-                return writer.ToString();
             }
         }
     }

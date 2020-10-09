@@ -25,6 +25,8 @@ namespace Statiq.Common
         // If the document is null, use the current document
         public void Add(IDocument document, string message) => _context.Add(document ?? _document, message);
 
+        public LogLevel GetLogLevel(IDocument document) => _context.GetLogLevel(document);
+
         public IExecutionState ExecutionState => _context.ExecutionState;
 
         public string PipelineName => _context.PipelineName;

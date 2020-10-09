@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
 using AngleSharp.Dom;
+using AngleSharp.Html;
 using AngleSharp.Html.Dom;
 using AngleSharp.Html.Parser;
 using Statiq.Common;
@@ -17,11 +18,9 @@ namespace Statiq.Html
             Neutral
         }
 
-        private static readonly HtmlParser _parser = new HtmlParser();
-
         protected override async Task<IEnumerable<Common.IDocument>> ExecuteInputAsync(Common.IDocument input, IExecutionContext context)
         {
-            IHtmlDocument htmlDocument = await input.ParseHtmlAsync(context, _parser);
+            IHtmlDocument htmlDocument = await HtmlHelper.ParseHtmlAsync(input);
             if (htmlDocument is null)
             {
                 return input.Yield();

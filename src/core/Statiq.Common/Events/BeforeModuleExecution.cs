@@ -1,24 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.Immutable;
-using Statiq.Common;
 
-namespace Statiq.Core
+namespace Statiq.Common
 {
-    public class AfterModuleExecution
+    public class BeforeModuleExecution
     {
-        internal AfterModuleExecution(IExecutionContext context, ImmutableArray<IDocument> outputs, long elapsedMilliseconds)
+        internal BeforeModuleExecution(IExecutionContext context)
         {
             Context = context;
-            Outputs = outputs;
-            ElapsedMilliseconds = elapsedMilliseconds;
         }
 
         public IExecutionContext Context { get; }
-
-        public ImmutableArray<IDocument> Outputs { get; }
-
-        public long ElapsedMilliseconds { get; }
 
         internal IEnumerable<IDocument> OverriddenOutputs { get; private set; }
 

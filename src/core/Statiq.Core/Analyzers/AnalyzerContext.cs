@@ -35,7 +35,16 @@ namespace Statiq.Core
         /// <inheritdoc/>
         public void Add(IDocument document, string message)
         {
-            // Check if the document contains an override for this analyzer
+            LogLevel logLevel = GetLogLevel(document);
+            if (logLevel != LogLevel.None)
+            {
+                _results.Add(new AnalyzerResult(_analyzerName, logLevel, document, message));
+            }
+        }
+
+        /// <inheritdoc/>
+        public LogLevel GetLogLevel(IDocument document)
+        {
             LogLevel logLevel = _logLevel;
             if (document is object && document.ContainsKey(Keys.Analyzers))
             {
@@ -61,12 +70,7 @@ namespace Statiq.Core
                     logLevel = overrideLevel;
                 }
             }
-
-            // Log the message
-            if (logLevel != LogLevel.None)
-            {
-                _results.Add(new AnalyzerResult(_analyzerName, logLevel, document, message));
-            }
+            return logLevel;
         }
 
         /// <inheritdoc/>

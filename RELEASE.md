@@ -6,6 +6,9 @@
 - Added `RenderMarkdown.WithMarkdownDocumentKey(string markdownDocumentKey)` to indicate where the `MarkdownDocument` should be saved, or not at all.
 - Removed `DocumentAnalyzer` and `SyncDocumentAnalyzer` in favor of combining into alternate overloads in `Analyzer` and `SyncAnalyzer` similar to how `Module` handles it
   (this lets analyzers provide functionality before documents are processed individually).
+- Renamed `IInitializer` to `IBootstrapperInitializer`.
+- Added `IEngineInitializer` which will be instantiated and called when an engine first starts up (for example, lets you hook engine events from extensions).
+- Moved engine event classes like `BeforeEngineExecution` to `Statiq.Common` so they can be subscribed by extensions using a `IEngineInitializer`.
 
 # 1.0.0-beta.23
 

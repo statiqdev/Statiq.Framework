@@ -104,8 +104,7 @@ namespace Statiq.Html
             ConcurrentDictionary<string, ConcurrentBag<string>> failures = new ConcurrentDictionary<string, ConcurrentBag<string>>();
 
             // Gather all links
-            HtmlParser parser = new HtmlParser();
-            await context.Inputs.ParallelForEachAsync(async input => await GatherLinksAsync(input, context, parser, links));
+            await context.Inputs.ParallelForEachAsync(async input => await GatherLinksAsync(input, context, links));
 
             // Get existing relative output paths
             HashSet<string> relativeOutputPaths = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
@@ -176,9 +175,9 @@ namespace Statiq.Html
         }
 
         // Internal for testing
-        internal static async Task GatherLinksAsync(IDocument input, IExecutionContext context, HtmlParser parser, ConcurrentDictionary<string, ConcurrentBag<(IDocument source, string outerHtml)>> links)
+        internal static async Task GatherLinksAsync(IDocument input, IExecutionContext context, ConcurrentDictionary<string, ConcurrentBag<(IDocument source, string outerHtml)>> links)
         {
-            IHtmlDocument htmlDocument = await input.ParseHtmlAsync(context, parser);
+            IHtmlDocument htmlDocument = await HtmlHelper.ParseHtmlAsync(input);
             if (htmlDocument is object)
             {
                 NormalizedPath basePath = string.IsNullOrEmpty(htmlDocument.BaseUri) ? NormalizedPath.Null : new NormalizedPath(htmlDocument.BaseUri);

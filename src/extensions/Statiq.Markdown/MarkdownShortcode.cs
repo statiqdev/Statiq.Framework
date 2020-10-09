@@ -35,13 +35,11 @@ namespace Statiq.Markdown
         public override ShortcodeResult Execute(KeyValuePair<string, string>[] args, string content, IDocument document, IExecutionContext context)
         {
             IMetadataDictionary dictionary = args.ToDictionary(Configuration, PrependLinkRoot);
-            return RenderMarkdown.Render(
-                context,
-                dictionary.GetString(Configuration, RenderMarkdown.DefaultConfiguration),
-                null,
-                dictionary.GetBool(PrependLinkRoot),
-                content,
-                out _);
+            using (StringWriter writer = new StringWriter())
+            {
+                MarkdownHelper.RenderMarkdown(document, content, writer, dictionary.GetBool(PrependLinkRoot), dictionary.GetString(Configuration, MarkdownHelper.DefaultConfiguration), null);
+                return writer.ToString();
+            }
         }
     }
 }

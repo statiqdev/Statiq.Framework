@@ -6,6 +6,7 @@ using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
 using AngleSharp.Dom;
+using AngleSharp.Html;
 using AngleSharp.Html.Dom;
 using AngleSharp.Html.Parser;
 using Microsoft.Extensions.Logging;
@@ -65,7 +66,6 @@ namespace Statiq.Html
             Dictionary<string, string> mirrorCache = new Dictionary<string, string>();
 
             // Iterate the input documents synchronously so we don't download the same resource more than once
-            HtmlParser parser = new HtmlParser();
             return await context.Inputs
                 .ToAsyncEnumerable()
                 .SelectAwait(async x => await GetDocumentAsync(x))
@@ -73,7 +73,7 @@ namespace Statiq.Html
 
             async Task<Common.IDocument> GetDocumentAsync(Common.IDocument input)
             {
-                IHtmlDocument htmlDocument = await input.ParseHtmlAsync(context, parser);
+                IHtmlDocument htmlDocument = await HtmlHelper.ParseHtmlAsync(input);
                 if (htmlDocument is object)
                 {
                     bool modifiedDocument = false;

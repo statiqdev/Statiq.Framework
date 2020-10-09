@@ -1,7 +1,6 @@
 ﻿using System;
-using Statiq.Common;
 
-namespace Statiq.Core
+namespace Statiq.Common
 {
     public class BeforeEngineExecution
     {

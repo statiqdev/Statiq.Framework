@@ -25,8 +25,6 @@ namespace Statiq.Html
     /// <category>Metadata</category>
     public class GenerateExcerpt : ParallelModule
     {
-        private static readonly HtmlParser HtmlParser = new HtmlParser();
-
         private bool _keepExisting = true;
         private string[] _separators = { "more", "excerpt" };
         private string _querySelector = "p";
@@ -125,7 +123,7 @@ namespace Statiq.Html
             }
 
             // Parse the HTML content
-            IHtmlDocument htmlDocument = await input.ParseHtmlAsync(context, HtmlParser);
+            IHtmlDocument htmlDocument = await HtmlHelper.ParseHtmlAsync(input);
             if (htmlDocument is null)
             {
                 return input.Yield();

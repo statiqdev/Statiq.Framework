@@ -43,11 +43,11 @@ namespace Statiq.Core
 
         internal async Task<ConcurrentBag<AnalyzerResult>> AnalyzeAsync(PipelinePhase pipelinePhase)
         {
+            // Don't check log level here since each document could override it
             ConcurrentBag<AnalyzerResult> results = new ConcurrentBag<AnalyzerResult>();
             await _analyzers
                 .Where(x => x.Value.Phases?.Contains(pipelinePhase.Phase) != false
-                    && x.Value.Pipelines?.Contains(pipelinePhase.PipelineName, StringComparer.OrdinalIgnoreCase) != false
-                    && x.Value.LogLevel != LogLevel.None)
+                    && x.Value.Pipelines?.Contains(pipelinePhase.PipelineName, StringComparer.OrdinalIgnoreCase) != false)
                 .ParallelForEachAsync(async v => await v.Value.AnalyzeAsync(pipelinePhase.Outputs, new AnalyzerContext(_engine, pipelinePhase, v, results)));
             return results;
         }

@@ -115,6 +115,9 @@ namespace Statiq.Core
 
             // Add the service-based pipelines as late as possible so other services have been configured
             AddServicePipelines();
+
+            // Run initializers now that everything else is setup
+            RunInitializers();
         }
 
         /// <summary>
@@ -166,6 +169,14 @@ namespace Statiq.Core
             foreach (IPipeline pipeline in Services.GetServices<IPipeline>())
             {
                 Pipelines.AddIfNonExisting(pipeline);
+            }
+        }
+
+        private void RunInitializers()
+        {
+            foreach (IEngineInitializer initializer in ClassCatalog.GetInstances<IEngineInitializer>())
+            {
+                initializer.Initialize(this);
             }
         }
 

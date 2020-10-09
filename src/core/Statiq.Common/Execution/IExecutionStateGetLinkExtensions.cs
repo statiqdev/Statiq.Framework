@@ -1,18 +1,18 @@
 ﻿namespace Statiq.Common
 {
-    public static class IExecutionContextGetLinkExtensions
+    public static class IExecutionStateGetLinkExtensions
     {
         /// <summary>
         /// Gets a link for the root of the site using the host and root path specified in the settings.
         /// </summary>
-        /// <param name="executionContext">The execution context.</param>
+        /// <param name="executionState">The execution context.</param>
         /// <returns>A link for the root of the site.</returns>
-        public static string GetLink(this IExecutionContext executionContext) =>
-            executionContext.GetLink(
+        public static string GetLink(this IExecutionState executionState) =>
+            executionState.GetLink(
                 NormalizedPath.Null,
-                executionContext.Settings.GetString(Keys.Host),
-                executionContext.Settings.GetPath(Keys.LinkRoot),
-                executionContext.Settings.GetBool(Keys.LinksUseHttps),
+                executionState.Settings.GetString(Keys.Host),
+                executionState.Settings.GetPath(Keys.LinkRoot),
+                executionState.Settings.GetBool(Keys.LinksUseHttps),
                 false,
                 false);
 
@@ -23,7 +23,7 @@
         /// on if you want to generate host-specific links. By default, the host is not included so that
         /// sites work the same on any server including the preview server.
         /// </summary>
-        /// <param name="executionContext">The execution context.</param>
+        /// <param name="executionState">The execution context.</param>
         /// <param name="document">The document to generate a link for.</param>
         /// <param name="includeHost">
         /// If set to <c>true</c> the host configured in the output settings will
@@ -33,10 +33,10 @@
         /// A string representation of the path suitable for a web link.
         /// </returns>
         public static string GetLink(
-            this IExecutionContext executionContext,
+            this IExecutionState executionState,
             IDocument document,
             bool includeHost = false) =>
-            document.Destination.IsNull ? null : executionContext.GetLink(document.Destination, includeHost);
+            document.Destination.IsNull ? null : executionState.GetLink(document.Destination, includeHost);
 
         /// <summary>
         /// Gets a link for the specified metadata using the specified metadata value and the default settings from the
@@ -45,7 +45,7 @@
         /// on if you want to generate host-specific links. By default, the host is not included so that
         /// sites work the same on any server including the preview server.
         /// </summary>
-        /// <param name="executionContext">The execution context.</param>
+        /// <param name="executionState">The execution state.</param>
         /// <param name="metadata">The metadata or document to generate a link for.</param>
         /// <param name="key">The key at which a <see cref="NormalizedPath"/> can be found for generating the link.</param>
         /// <param name="includeHost">
@@ -56,7 +56,7 @@
         /// A string representation of the path suitable for a web link.
         /// </returns>
         public static string GetLink(
-            this IExecutionContext executionContext,
+            this IExecutionState executionState,
             IMetadata metadata,
             string key,
             bool includeHost = false)
@@ -71,7 +71,7 @@
 
                 // Otherwise try to process the path
                 NormalizedPath path = metadata.GetPath(key);
-                return path.IsNull ? null : executionContext.GetLink(path, includeHost);
+                return path.IsNull ? null : executionState.GetLink(path, includeHost);
             }
             return null;
         }
@@ -83,7 +83,7 @@
         /// on if you want to generate host-specific links. By default, the host is not included so that
         /// sites work the same on any server including the preview server.
         /// </summary>
-        /// <param name="executionContext">The execution context.</param>
+        /// <param name="executionState">The execution state.</param>
         /// <param name="path">The path to generate a link for.</param>
         /// <param name="includeHost">If set to <c>true</c> the host configured in the output settings will
         /// be included in the link, otherwise the host will be omitted and only the root path will be included (default).</param>
@@ -91,7 +91,7 @@
         /// A string representation of the path suitable for a web link.
         /// </returns>
         public static string GetLink(
-            this IExecutionContext executionContext,
+            this IExecutionState executionState,
             string path,
             bool includeHost = false)
         {
@@ -102,21 +102,21 @@
             }
 
             // Otherwise process the path
-            return executionContext.GetLink(
+            return executionState.GetLink(
                 path is null ? NormalizedPath.Null : new NormalizedPath(path),
-                includeHost ? executionContext.Settings.GetString(Keys.Host) : null,
-                executionContext.Settings.GetPath(Keys.LinkRoot),
-                executionContext.Settings.GetBool(Keys.LinksUseHttps),
-                executionContext.Settings.GetBool(Keys.LinkHideIndexPages),
-                executionContext.Settings.GetBool(Keys.LinkHideExtensions),
-                executionContext.Settings.GetBool(Keys.LinkLowercase));
+                includeHost ? executionState.Settings.GetString(Keys.Host) : null,
+                executionState.Settings.GetPath(Keys.LinkRoot),
+                executionState.Settings.GetBool(Keys.LinksUseHttps),
+                executionState.Settings.GetBool(Keys.LinkHideIndexPages),
+                executionState.Settings.GetBool(Keys.LinkHideExtensions),
+                executionState.Settings.GetBool(Keys.LinkLowercase));
         }
 
         /// <summary>
         /// Converts the path into a string appropriate for use as a link, overriding one or more
         /// settings from the configuration.
         /// </summary>
-        /// <param name="executionContext">The execution context.</param>
+        /// <param name="executionState">The execution state.</param>
         /// <param name="path">The path to generate a link for.</param>
         /// <param name="host">The host to use for the link.</param>
         /// <param name="root">The root of the link. The value of this parameter is prepended to the path.</param>
@@ -128,7 +128,7 @@
         /// root and hidden file name or extension.
         /// </returns>
         public static string GetLink(
-            this IExecutionContext executionContext,
+            this IExecutionState executionState,
             string path,
             string host,
             in NormalizedPath root,
@@ -143,7 +143,7 @@
             }
 
             // Otherwise process the path
-            return executionContext.GetLink(
+            return executionState.GetLink(
                 path is null ? NormalizedPath.Null : new NormalizedPath(path),
                 host,
                 root,
@@ -159,7 +159,7 @@
         /// on if you want to generate host-specific links. By default, the host is not included so that
         /// sites work the same on any server including the preview server.
         /// </summary>
-        /// <param name="executionContext">The execution context.</param>
+        /// <param name="executionState">The execution state.</param>
         /// <param name="path">The path to generate a link for.</param>
         /// <param name="includeHost">If set to <c>true</c> the host configured in the output settings will
         /// be included in the link, otherwise the host will be omitted and only the root path will be included (default).</param>
@@ -167,23 +167,23 @@
         /// A string representation of the path suitable for a web link.
         /// </returns>
         public static string GetLink(
-            this IExecutionContext executionContext,
+            this IExecutionState executionState,
             in NormalizedPath path,
             bool includeHost = false) =>
-            executionContext.GetLink(
+            executionState.GetLink(
                 path,
-                includeHost ? executionContext.Settings.GetString(Keys.Host) : null,
-                executionContext.Settings.GetPath(Keys.LinkRoot),
-                executionContext.Settings.GetBool(Keys.LinksUseHttps),
-                executionContext.Settings.GetBool(Keys.LinkHideIndexPages),
-                executionContext.Settings.GetBool(Keys.LinkHideExtensions),
-                executionContext.Settings.GetBool(Keys.LinkLowercase));
+                includeHost ? executionState.Settings.GetString(Keys.Host) : null,
+                executionState.Settings.GetPath(Keys.LinkRoot),
+                executionState.Settings.GetBool(Keys.LinksUseHttps),
+                executionState.Settings.GetBool(Keys.LinkHideIndexPages),
+                executionState.Settings.GetBool(Keys.LinkHideExtensions),
+                executionState.Settings.GetBool(Keys.LinkLowercase));
 
         /// <summary>
         /// Converts the path into a string appropriate for use as a link, overriding one or more
         /// settings from the configuration.
         /// </summary>
-        /// <param name="executionContext">The execution context.</param>
+        /// <param name="executionState">The execution state.</param>
         /// <param name="path">The path to generate a link for.</param>
         /// <param name="host">The host to use for the link.</param>
         /// <param name="root">The root of the link. The value of this parameter is prepended to the path.</param>
@@ -195,27 +195,27 @@
         /// root and hidden file name or extension.
         /// </returns>
         public static string GetLink(
-            this IExecutionContext executionContext,
+            this IExecutionState executionState,
             in NormalizedPath path,
             string host,
             in NormalizedPath root,
             bool useHttps,
             bool hideIndexPages,
             bool hideExtensions) =>
-            executionContext.GetLink(
+            executionState.GetLink(
                 path,
                 host,
                 root,
                 useHttps,
                 hideIndexPages,
                 hideExtensions,
-                executionContext.Settings.GetBool(Keys.LinkLowercase));
+                executionState.Settings.GetBool(Keys.LinkLowercase));
 
         /// <summary>
         /// Converts the path into a string appropriate for use as a link, overriding one or more
         /// settings from the configuration.
         /// </summary>
-        /// <param name="executionContext">The execution context.</param>
+        /// <param name="executionState">The execution state.</param>
         /// <param name="path">The path to generate a link for.</param>
         /// <param name="host">The host to use for the link.</param>
         /// <param name="root">The root of the link. The value of this parameter is prepended to the path.</param>
@@ -228,7 +228,7 @@
         /// root and hidden file name or extension.
         /// </returns>
         public static string GetLink(
-            this IExecutionContext executionContext,
+            this IExecutionState executionState,
             in NormalizedPath path,
             string host,
             in NormalizedPath root,
@@ -241,8 +241,8 @@
                 host,
                 root,
                 useHttps ? "https" : null,
-                hideIndexPages ? new[] { executionContext.Settings.GetIndexFileName() } : null,
-                hideExtensions ? executionContext.Settings.GetPageFileExtensions() : null,
+                hideIndexPages ? new[] { executionState.Settings.GetIndexFileName() } : null,
+                hideExtensions ? executionState.Settings.GetPageFileExtensions() : null,
                 lowercase);
     }
 }
