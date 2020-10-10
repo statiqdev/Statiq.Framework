@@ -138,6 +138,14 @@ namespace Statiq.Common
         Task<HttpResponseMessage> SendHttpRequestWithRetryAsync(Func<HttpRequestMessage> requestFactory);
 
         /// <summary>
+        /// Sends an <see cref="HttpRequestMessage"/> with exponential back-off.
+        /// </summary>
+        /// <param name="requestFactory">A factory that creates the request message to send (a fresh message is needed for each request).</param>
+        /// <param name="retryCount">The number of times to retry.</param>
+        /// <returns>The response.</returns>
+        Task<HttpResponseMessage> SendHttpRequestWithRetryAsync(Func<HttpRequestMessage> requestFactory, int retryCount);
+
+        /// <summary>
         /// Gets a new <see cref="IJavaScriptEnginePool"/>. The returned engine pool should be disposed
         /// when no longer needed.
         /// </summary>

@@ -140,6 +140,10 @@ namespace Statiq.Core
             _contextData.Engine.SendHttpRequestWithRetryAsync(requestFactory);
 
         /// <inheritdoc/>
+        public Task<HttpResponseMessage> SendHttpRequestWithRetryAsync(Func<HttpRequestMessage> requestFactory, int retryCount) =>
+            _contextData.Engine.SendHttpRequestWithRetryAsync(requestFactory, retryCount);
+
+        /// <inheritdoc/>
         public async Task<ImmutableArray<IDocument>> ExecuteModulesAsync(IEnumerable<IModule> modules, IEnumerable<IDocument> inputs) =>
             await Engine.ExecuteModulesAsync(_contextData, this, modules, inputs?.ToImmutableArray() ?? ImmutableArray<IDocument>.Empty, this);
 

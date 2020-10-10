@@ -11,31 +11,26 @@ namespace Statiq.Common
     /// <summary>
     /// An analyzer that runs a delegate.
     /// </summary>
-    public class DelegateAnalyzer : IAnalyzer
+    public class DelegateAnalyzer : Analyzer
     {
-        private readonly Func<ImmutableArray<IDocument>, IAnalyzerContext, Task> _analyzeFunc;
+        private readonly Func<IAnalyzerContext, Task> _analyzeFunc;
 
         public DelegateAnalyzer(
             LogLevel logLevel,
-            IEnumerable<string> pipelines,
-            IEnumerable<Phase> phases,
-            Func<ImmutableArray<IDocument>, IAnalyzerContext, Task> analyzeFunc)
+            IEnumerable<KeyValuePair<string, Phase>> piplinePhases,
+            Func<IAnalyzerContext, Task> analyzeFunc)
         {
             LogLevel = logLevel;
-            Pipelines = pipelines?.ToArray();
-            Phases = phases?.ToArray();
+            if (piplinePhases is object)
+            {
+                foreach (KeyValuePair<string, Phase> pipelinePhase in PipelinePhases)
+                {
+                    PipelinePhases.Add(pipelinePhase.Key, pipelinePhase.Value);
+                }
+            }
             _analyzeFunc = analyzeFunc.ThrowIfNull(nameof(analyzeFunc));
         }
 
-        /// <inheritdoc/>
-        public LogLevel LogLevel { get; set; }
-
-        /// <inheritdoc/>
-        public string[] Pipelines { get; }
-
-        /// <inheritdoc/>
-        public Phase[] Phases { get; }
-
-        public async Task AnalyzeAsync(ImmutableArray<IDocument> documents, IAnalyzerContext context) => await _analyzeFunc(documents, context);
+        public override async Task AnalyzeAsync(IAnalyzerContext context) => await _analyzeFunc(context);
     }
 }

@@ -1,4 +1,7 @@
-﻿using System.Collections.Immutable;
+﻿using System;
+using System.Collections.Generic;
+using System.Collections.Immutable;
+using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 
@@ -9,21 +12,22 @@ namespace Statiq.Common
         /// <inheritdoc/>
         public virtual LogLevel LogLevel { get; set; } = LogLevel.Information;
 
-        /// <inheritdoc/>
-        public virtual string[] Pipelines { get; }
+        /// <summary>
+        /// The pipelines and phases this analyzer will be run after.
+        /// </summary>
+        public MultiValueDictionary<string, Phase> PipelinePhases { get; } = new MultiValueDictionary<string, Phase>(false, StringComparer.OrdinalIgnoreCase);
+
+        IEnumerable<KeyValuePair<string, Phase>> IAnalyzer.PipelinePhases => PipelinePhases;
 
         /// <inheritdoc/>
-        public virtual Phase[] Phases { get; } = new Phase[] { Phase.Process };
-
-        /// <inheritdoc/>
-        public virtual async Task AnalyzeAsync(ImmutableArray<IDocument> documents, IAnalyzerContext context) =>
-            await documents.ParallelForEachAsync(
-                async doc =>
+        public virtual async Task AnalyzeAsync(IAnalyzerContext context) =>
+            await context.Inputs.ParallelForEachAsync(
+                async input =>
                 {
                     // Only analyze the document if it doesn't have a log level of None
-                    if (context.GetLogLevel(doc) != LogLevel.None)
+                    if (context.GetLogLevel(input) != LogLevel.None)
                     {
-                        await AnalyzeDocumentAsync(doc, new DocumentAnalyzerContext(context, doc));
+                        await AnalyzeDocumentAsync(input, context);
                     }
                 },
                 context.CancellationToken);
@@ -32,7 +36,7 @@ namespace Statiq.Common
         /// Analyzes an individual document.
         /// </summary>
         /// <remarks>
-        /// This method will be called for each document unless <see cref="AnalyzeAsync(ImmutableArray{IDocument}, IAnalyzerContext)"/> is overridden.
+        /// This method will be called for each document unless <see cref="AnalyzeAsync(IAnalyzerContext)"/> is overridden.
         /// </remarks>
         /// <param name="document">The document to analyze.</param>
         /// <param name="context">An analysis context that contains the documents to analyze as well as other state information.</param>

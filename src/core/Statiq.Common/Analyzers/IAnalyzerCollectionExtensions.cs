@@ -149,30 +149,27 @@ namespace Statiq.Common
             this IAnalyzerCollection analyzers,
             string name,
             LogLevel logLevel,
-            IEnumerable<string> pipelines,
-            IEnumerable<Phase> phases,
-            Func<ImmutableArray<IDocument>, IAnalyzerContext, Task> analyzeFunc) =>
+            IEnumerable<KeyValuePair<string, Phase>> pipelinePhases,
+            Func<IAnalyzerContext, Task> analyzeFunc) =>
             analyzers
                 .ThrowIfNull(nameof(analyzers))
-                .Add(name, new DelegateAnalyzer(logLevel, pipelines, phases, analyzeFunc));
+                .Add(name, new DelegateAnalyzer(logLevel, pipelinePhases, analyzeFunc));
 
         public static void Add(
             this IAnalyzerCollection analyzers,
             string name,
             LogLevel logLevel,
-            IEnumerable<string> pipelines,
-            IEnumerable<Phase> phases,
-            Action<ImmutableArray<IDocument>, IAnalyzerContext> analyzeAction)
+            IEnumerable<KeyValuePair<string, Phase>> pipelinePhases,
+            Action<IAnalyzerContext> analyzeAction)
         {
             analyzeAction.ThrowIfNull(nameof(analyzeAction));
             analyzers.Add(
                 name,
                 logLevel,
-                pipelines,
-                phases,
-                (documents, context) =>
+                pipelinePhases,
+                context =>
                 {
-                    analyzeAction(documents, context);
+                    analyzeAction(context);
                     return Task.CompletedTask;
                 });
         }
@@ -181,33 +178,29 @@ namespace Statiq.Common
             this IAnalyzerCollection analyzers,
             string name,
             LogLevel logLevel,
-            IEnumerable<string> pipelines,
-            IEnumerable<Phase> phases,
+            IEnumerable<KeyValuePair<string, Phase>> pipelinePhases,
             Func<IDocument, IAnalyzerContext, Task> analyzeFunc)
         {
             analyzeFunc.ThrowIfNull(nameof(analyzeFunc));
             analyzers.Add(
                 name,
                 logLevel,
-                pipelines,
-                phases,
-                async (documents, context) => await documents.ParallelForEachAsync(async doc => await analyzeFunc(doc, new DocumentAnalyzerContext(context, doc)), context.CancellationToken));
+                pipelinePhases,
+                async context => await context.Inputs.ParallelForEachAsync(async input => await analyzeFunc(input, context), context.CancellationToken));
         }
 
         public static void AddDocument(
             this IAnalyzerCollection analyzers,
             string name,
             LogLevel logLevel,
-            IEnumerable<string> pipelines,
-            IEnumerable<Phase> phases,
+            IEnumerable<KeyValuePair<string, Phase>> pipelinePhases,
             Action<IDocument, IAnalyzerContext> analyzeAction)
         {
             analyzeAction.ThrowIfNull(nameof(analyzeAction));
             analyzers.AddDocument(
                 name,
                 logLevel,
-                pipelines,
-                phases,
+                pipelinePhases,
                 (document, context) =>
                 {
                     analyzeAction(document, context);
@@ -221,8 +214,8 @@ namespace Statiq.Common
             LogLevel logLevel,
             string pipeline,
             Phase phase,
-            Func<ImmutableArray<IDocument>, IAnalyzerContext, Task> analyzeFunc) =>
-            analyzers.Add(name, logLevel, new[] { pipeline }, new[] { phase }, analyzeFunc);
+            Func<IAnalyzerContext, Task> analyzeFunc) =>
+            analyzers.Add(name, logLevel, new[] { new KeyValuePair<string, Phase>(pipeline, phase) }, analyzeFunc);
 
         public static void Add(
             this IAnalyzerCollection analyzers,
@@ -230,10 +223,10 @@ namespace Statiq.Common
             LogLevel logLevel,
             string pipeline,
             Phase phase,
-            Action<ImmutableArray<IDocument>, IAnalyzerContext> analyzeAction)
+            Action<IAnalyzerContext> analyzeAction)
         {
             analyzeAction.ThrowIfNull(nameof(analyzeAction));
-            analyzers.Add(name, logLevel, new[] { pipeline }, new[] { phase }, analyzeAction);
+            analyzers.Add(name, logLevel, new[] { new KeyValuePair<string, Phase>(pipeline, phase) }, analyzeAction);
         }
 
         public static void AddDocument(
@@ -243,7 +236,7 @@ namespace Statiq.Common
             string pipeline,
             Phase phase,
             Func<IDocument, IAnalyzerContext, Task> analyzeFunc) =>
-            analyzers.AddDocument(name, logLevel, new[] { pipeline }, new[] { phase }, analyzeFunc);
+            analyzers.AddDocument(name, logLevel, new[] { new KeyValuePair<string, Phase>(pipeline, phase) }, analyzeFunc);
 
         public static void AddDocument(
             this IAnalyzerCollection analyzers,
@@ -254,7 +247,7 @@ namespace Statiq.Common
             Action<IDocument, IAnalyzerContext> analyzeAction)
         {
             analyzeAction.ThrowIfNull(nameof(analyzeAction));
-            analyzers.AddDocument(name, logLevel, new[] { pipeline }, new[] { phase }, analyzeAction);
+            analyzers.AddDocument(name, logLevel, new[] { new KeyValuePair<string, Phase>(pipeline, phase) }, analyzeAction);
         }
     }
 }

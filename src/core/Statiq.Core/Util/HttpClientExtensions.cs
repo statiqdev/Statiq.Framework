@@ -14,7 +14,7 @@ namespace Statiq.Core
 {
     public static class HttpClientExtensions
     {
-        private const int MaxRetry = 5;
+        private const int DefaultRetryCount = 5;
         private const HttpStatusCode TooManyRequests = (HttpStatusCode)429;
 
         /// <summary>
@@ -22,9 +22,10 @@ namespace Statiq.Core
         /// </summary>
         /// <param name="httpClient">The client.</param>
         /// <param name="requestFactory">A factory that creates the request message to send (a fresh message is needed for each request).</param>
+        /// <param name="retryCount">The number of times to retry.</param>
         /// <param name="cancellationToken">A cancellation token.</param>
         /// <returns>The response.</returns>
-        public static async Task<HttpResponseMessage> SendWithRetryAsync(this HttpClient httpClient, Func<HttpRequestMessage> requestFactory, CancellationToken cancellationToken = default)
+        public static async Task<HttpResponseMessage> SendWithRetryAsync(this HttpClient httpClient, Func<HttpRequestMessage> requestFactory, int retryCount, CancellationToken cancellationToken = default)
         {
             httpClient.ThrowIfNull(nameof(httpClient));
             requestFactory.ThrowIfNull(nameof(requestFactory));
@@ -32,7 +33,7 @@ namespace Statiq.Core
             AsyncRetryPolicy<HttpResponseMessage> retryPolicy = Policy
                 .Handle<HttpRequestException>()
                 .OrResult<HttpResponseMessage>(r => r.StatusCode == TooManyRequests)
-                .WaitAndRetryAsync(MaxRetry, attempt =>
+                .WaitAndRetryAsync(retryCount, attempt =>
                 {
                     IExecutionContext.CurrentOrNull?.LogDebug($"HttpClient retry {attempt}");
                     return TimeSpan.FromSeconds(0.5 * Math.Pow(2, attempt));
@@ -48,6 +49,27 @@ namespace Statiq.Core
         }
 
         /// <summary>
+        /// Retries a request with exponential back-off. This helps with websites like GitHub that will give us a 429 (TooManyRequests).
+        /// </summary>
+        /// <param name="httpClient">The client.</param>
+        /// <param name="requestFactory">A factory that creates the request message to send (a fresh message is needed for each request).</param>
+        /// <param name="cancellationToken">A cancellation token.</param>
+        /// <returns>The response.</returns>
+        public static async Task<HttpResponseMessage> SendWithRetryAsync(this HttpClient httpClient, Func<HttpRequestMessage> requestFactory, CancellationToken cancellationToken = default) =>
+            await SendWithRetryAsync(httpClient, requestFactory, DefaultRetryCount, cancellationToken);
+
+        /// <summary>
+        /// Retries a GET request with exponential back-off. This helps with websites like GitHub that will give us a 429 (TooManyRequests).
+        /// </summary>
+        /// <param name="httpClient">The client.</param>
+        /// <param name="uri">The request URI.</param>
+        /// <param name="retryCount">The number of times to retry.</param>
+        /// <param name="cancellationToken">A cancellation token.</param>
+        /// <returns>The response.</returns>
+        public static async Task<HttpResponseMessage> SendWithRetryAsync(this HttpClient httpClient, string uri, int retryCount, CancellationToken cancellationToken = default) =>
+            await SendWithRetryAsync(httpClient, () => new HttpRequestMessage(HttpMethod.Get, uri), retryCount, cancellationToken);
+
+        /// <summary>
         /// Retries a GET request with exponential back-off. This helps with websites like GitHub that will give us a 429 (TooManyRequests).
         /// </summary>
         /// <param name="httpClient">The client.</param>
@@ -56,6 +78,17 @@ namespace Statiq.Core
         /// <returns>The response.</returns>
         public static async Task<HttpResponseMessage> SendWithRetryAsync(this HttpClient httpClient, string uri, CancellationToken cancellationToken = default) =>
             await SendWithRetryAsync(httpClient, () => new HttpRequestMessage(HttpMethod.Get, uri), cancellationToken);
+
+        /// <summary>
+        /// Retries a GET request with exponential back-off. This helps with websites like GitHub that will give us a 429 (TooManyRequests).
+        /// </summary>
+        /// <param name="httpClient">The client.</param>
+        /// <param name="uri">The request URI.</param>
+        /// <param name="retryCount">The number of times to retry.</param>
+        /// <param name="cancellationToken">A cancellation token.</param>
+        /// <returns>The response.</returns>
+        public static async Task<HttpResponseMessage> SendWithRetryAsync(this HttpClient httpClient, Uri uri, int retryCount, CancellationToken cancellationToken = default) =>
+            await SendWithRetryAsync(httpClient, () => new HttpRequestMessage(HttpMethod.Get, uri), retryCount, cancellationToken);
 
         /// <summary>
         /// Retries a GET request with exponential back-off. This helps with websites like GitHub that will give us a 429 (TooManyRequests).

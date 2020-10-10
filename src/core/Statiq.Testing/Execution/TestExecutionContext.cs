@@ -246,6 +246,10 @@ namespace Statiq.Testing
         public Task<HttpResponseMessage> SendHttpRequestWithRetryAsync(Func<HttpRequestMessage> requestFactory) =>
             Engine.SendHttpRequestWithRetryAsync(requestFactory);
 
+        /// <inheritdoc/>
+        public Task<HttpResponseMessage> SendHttpRequestWithRetryAsync(Func<HttpRequestMessage> requestFactory, int retryCount) =>
+            Engine.SendHttpRequestWithRetryAsync(requestFactory, retryCount);
+
         /// <summary>
         /// A message handler that should be used to register <see cref="HttpResponseMessage"/>
         /// instances for a given request.

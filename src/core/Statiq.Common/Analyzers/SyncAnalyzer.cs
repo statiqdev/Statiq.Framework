@@ -7,9 +7,9 @@ namespace Statiq.Common
 {
     public abstract class SyncAnalyzer : Analyzer
     {
-        public sealed override Task AnalyzeAsync(ImmutableArray<IDocument> documents, IAnalyzerContext context)
+        public sealed override Task AnalyzeAsync(IAnalyzerContext context)
         {
-            Analyze(documents, context);
+            Analyze(context);
             return Task.CompletedTask;
         }
 
@@ -17,14 +17,14 @@ namespace Statiq.Common
         protected sealed override Task AnalyzeDocumentAsync(IDocument document, IAnalyzerContext context) =>
             throw new NotSupportedException();
 
-        protected virtual void Analyze(ImmutableArray<IDocument> documents, IAnalyzerContext context) =>
-            documents.AsParallel().ForAll(doc => AnalyzeDocument(doc, new DocumentAnalyzerContext(context, doc)));
+        protected virtual void Analyze(IAnalyzerContext context) =>
+            context.Inputs.AsParallel().ForAll(input => AnalyzeDocument(input, new DocumentAnalyzerContext(context, input)));
 
         /// <summary>
         /// Analyzes an individual document.
         /// </summary>
         /// <remarks>
-        /// This method will be called for each document unless <see cref="Analyze(ImmutableArray{IDocument}, IAnalyzerContext)"/> is overridden.
+        /// This method will be called for each document unless <see cref="Analyze(IAnalyzerContext)"/> is overridden.
         /// </remarks>
         /// <param name="document">The document to analyze.</param>
         /// <param name="context">An analysis context that contains the documents to analyze as well as other state information.</param>

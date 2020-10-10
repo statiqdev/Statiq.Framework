@@ -950,7 +950,10 @@ namespace Statiq.Core
             {
                 Timeout = TimeSpan.FromSeconds(60)
             };
-            client.DefaultRequestHeaders.Add("User-Agent", "Statiq");
+
+            // Use a broad user agent string since some servers get picky about it (Chrome is standardizing on a general one)
+            client.DefaultRequestHeaders.Add("User-Agent", $"Mozilla/5.0 AppleWebKit/605.1.15 Chrome/87.0.4272.0 Safari/604.1 Edg/87.0.654.0");
+
             return client;
         }
 
@@ -960,6 +963,15 @@ namespace Statiq.Core
             using (HttpClient httpClient = CreateHttpClient())
             {
                 return await httpClient.SendWithRetryAsync(requestFactory, CancellationToken);
+            }
+        }
+
+        /// <inheritdoc/>
+        public async Task<HttpResponseMessage> SendHttpRequestWithRetryAsync(Func<HttpRequestMessage> requestFactory, int retryCount)
+        {
+            using (HttpClient httpClient = CreateHttpClient())
+            {
+                return await httpClient.SendWithRetryAsync(requestFactory, retryCount, CancellationToken);
             }
         }
 

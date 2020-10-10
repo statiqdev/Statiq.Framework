@@ -67,41 +67,37 @@ namespace Statiq.App
             this TBootstrapper bootstrapper,
             string name,
             LogLevel logLevel,
-            IEnumerable<string> pipelines,
-            IEnumerable<Phase> phases,
-            Func<ImmutableArray<IDocument>, IAnalyzerContext, Task> analyzeFunc)
+            IEnumerable<KeyValuePair<string, Phase>> pipelinePhases,
+            Func<IAnalyzerContext, Task> analyzeFunc)
             where TBootstrapper : IBootstrapper =>
-            bootstrapper.ConfigureAnalyzers(x => x.Add(name, logLevel, pipelines, phases, analyzeFunc));
+            bootstrapper.ConfigureAnalyzers(x => x.Add(name, logLevel, pipelinePhases, analyzeFunc));
 
         public static TBootstrapper Analyze<TBootstrapper>(
             this TBootstrapper bootstrapper,
             string name,
             LogLevel logLevel,
-            IEnumerable<string> pipelines,
-            IEnumerable<Phase> phases,
-            Action<ImmutableArray<IDocument>, IAnalyzerContext> analyzeAction)
+            IEnumerable<KeyValuePair<string, Phase>> pipelinePhases,
+            Action<IAnalyzerContext> analyzeAction)
             where TBootstrapper : IBootstrapper =>
-            bootstrapper.ConfigureAnalyzers(x => x.Add(name, logLevel, pipelines, phases, analyzeAction));
+            bootstrapper.ConfigureAnalyzers(x => x.Add(name, logLevel, pipelinePhases, analyzeAction));
 
         public static TBootstrapper AnalyzeDocument<TBootstrapper>(
             this TBootstrapper bootstrapper,
             string name,
             LogLevel logLevel,
-            IEnumerable<string> pipelines,
-            IEnumerable<Phase> phases,
+            IEnumerable<KeyValuePair<string, Phase>> pipelinePhases,
             Func<IDocument, IAnalyzerContext, Task> analyzeFunc)
             where TBootstrapper : IBootstrapper =>
-            bootstrapper.ConfigureAnalyzers(x => x.AddDocument(name, logLevel, pipelines, phases, analyzeFunc));
+            bootstrapper.ConfigureAnalyzers(x => x.AddDocument(name, logLevel, pipelinePhases, analyzeFunc));
 
         public static TBootstrapper AnalyzeDocument<TBootstrapper>(
             this TBootstrapper bootstrapper,
             string name,
             LogLevel logLevel,
-            IEnumerable<string> pipelines,
-            IEnumerable<Phase> phases,
+            IEnumerable<KeyValuePair<string, Phase>> pipelinePhases,
             Action<IDocument, IAnalyzerContext> analyzeAction)
             where TBootstrapper : IBootstrapper =>
-            bootstrapper.ConfigureAnalyzers(x => x.AddDocument(name, logLevel, pipelines, phases, analyzeAction));
+            bootstrapper.ConfigureAnalyzers(x => x.AddDocument(name, logLevel, pipelinePhases, analyzeAction));
 
         public static TBootstrapper Analyze<TBootstrapper>(
             this TBootstrapper bootstrapper,
@@ -109,7 +105,7 @@ namespace Statiq.App
             LogLevel logLevel,
             string pipeline,
             Phase phase,
-            Func<ImmutableArray<IDocument>, IAnalyzerContext, Task> analyzeFunc)
+            Func<IAnalyzerContext, Task> analyzeFunc)
             where TBootstrapper : IBootstrapper =>
             bootstrapper.ConfigureAnalyzers(x => x.Add(name, logLevel, pipeline, phase, analyzeFunc));
 
@@ -119,7 +115,7 @@ namespace Statiq.App
             LogLevel logLevel,
             string pipeline,
             Phase phase,
-            Action<ImmutableArray<IDocument>, IAnalyzerContext> analyzeAction)
+            Action<IAnalyzerContext> analyzeAction)
             where TBootstrapper : IBootstrapper =>
             bootstrapper.ConfigureAnalyzers(x => x.Add(name, logLevel, pipeline, phase, analyzeAction));
 

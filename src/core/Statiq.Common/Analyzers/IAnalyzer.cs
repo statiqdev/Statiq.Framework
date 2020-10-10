@@ -15,20 +15,14 @@ namespace Statiq.Common
         LogLevel LogLevel { get; set; }
 
         /// <summary>
-        /// The pipelines this analyzer applies to, or null to apply to all pipelines.
+        /// The pipelines and phases this analyzer will be run after.
         /// </summary>
-        string[] Pipelines { get; }
-
-        /// <summary>
-        /// The phases this analyzer applies to, or null to apply to all phases.
-        /// </summary>
-        Phase[] Phases { get; }
+        IEnumerable<KeyValuePair<string, Phase>> PipelinePhases { get; }
 
         /// <summary>
         /// Performs analysis.
         /// </summary>
-        /// <param name="documents">The documents to analyze.</param>
         /// <param name="context">An analysis context that contains the documents to analyze as well as other state information.</param>
-        Task AnalyzeAsync(ImmutableArray<IDocument> documents, IAnalyzerContext context);
+        Task AnalyzeAsync(IAnalyzerContext context);
     }
 }
