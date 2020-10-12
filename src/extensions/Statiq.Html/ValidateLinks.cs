@@ -24,6 +24,7 @@ namespace Statiq.Html
     /// by default due to the time it takes to check absolute links.
     /// </remarks>
     /// <category>Input/Output</category>
+    [Obsolete("This module will be removed in a future version, use ValidateAbsoluteLinks and ValidateRelativeLinks analyzers in Statiq Web instead or copy this module code into your own application.")]
     public class ValidateLinks : Module
     {
         private const HttpStatusCode TooManyRequests = (HttpStatusCode)429;

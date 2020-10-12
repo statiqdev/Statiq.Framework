@@ -255,7 +255,24 @@ namespace Statiq.Common
         public virtual async Task<int> GetCacheHashCodeAsync() => await IDocument.GetCacheHashCodeAsync(this);
 
         /// <inheritdoc />
-        public virtual string ToDisplayString() => Source.IsNull ? "unknown source" : Source.ToDisplayString();
+        public virtual string ToDisplayString()
+        {
+            string sourceString = Source.ToDisplayString();
+            string destinationString = Destination.ToDisplayString();
+            if (!destinationString.IsNullOrEmpty())
+            {
+                destinationString = "=> " + destinationString;
+            }
+            if (sourceString.IsNullOrEmpty() && destinationString.IsNullOrEmpty())
+            {
+                return $"ID: {Id}";
+            }
+            if (!sourceString.IsNullOrEmpty() && !destinationString.IsNullOrEmpty())
+            {
+                return $"{sourceString} {destinationString}";
+            }
+            return sourceString.IsNullOrEmpty() ? destinationString : sourceString;
+        }
 
         /// <inheritdoc />
         public override string ToString() => Source.IsNull ? string.Empty : Source.FullPath;

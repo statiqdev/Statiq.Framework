@@ -9,6 +9,10 @@
 - Renamed `IInitializer` to `IBootstrapperInitializer`.
 - Added `IEngineInitializer` which will be instantiated and called when an engine first starts up (for example, lets you hook engine events from extensions).
 - Moved engine event classes like `BeforeEngineExecution` to `Statiq.Common` so they can be subscribed by extensions using a `IEngineInitializer`.
+- Removed documents from the `IAnalyzer` methods, added `IExecutionContext` as a base interface for `IAnalyzerContext`, and analyzer documents now passed as `IAnalyzerContext.Inputs` similar to modules.
+- Added `IAnalyzer.BeforeEngineExecutionAsync(IEngine engine, Guid executionId)` to get called one-per-instance for each analyzer prior to each engine execution (for resetting caches, etc.).
+- Changed analyzer pipeline and phase specification to be a collection of `KeyValuePair<string, Phase>` instead of distinct pipeline and phase arrays.
+- Changed deployment pipelines so that none of their phases are executed until all phases of non-deployment pipelines are completed (I.e. deployment pipelines now don't start executing until all non-deployment pipelines are done).
 
 # 1.0.0-beta.23
 

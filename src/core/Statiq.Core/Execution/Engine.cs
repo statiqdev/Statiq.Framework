@@ -416,8 +416,9 @@ namespace Statiq.Core
                 Logger.LogDebug($"Execution ID {ExecutionId}");
                 System.Diagnostics.Stopwatch stopwatch = System.Diagnostics.Stopwatch.StartNew();
 
-                // Raise before event
+                // Raise before event and analyzer before method
                 await Events.RaiseAsync(new BeforeEngineExecution(this, ExecutionId));
+                await AnalyzerCollection.ParallelForEachAsync(async x => await x.Value.BeforeEngineExecutionAsync(this, ExecutionId));
 
                 // Do a check for the same input/output path
                 if (FileSystem.InputPaths.Any(x => x.Equals(FileSystem.OutputPath)))
@@ -432,41 +433,44 @@ namespace Statiq.Core
                     CleanOutputPath();
                 }
 
-                // Get and run all phase tasks
-                Task[] phaseTasks = null;
+                // Analyzer results need to be recorded separately so that they can still be reported if the phase throws
                 ConcurrentDictionary<PipelinePhase, ConcurrentBag<AnalyzerResult>> analyzerResults =
                     new ConcurrentDictionary<PipelinePhase, ConcurrentBag<AnalyzerResult>>();
+
+                // Get and run all phase tasks
+                Task[] phaseTasks = null;
                 try
                 {
                     // Get and execute all phases
                     phaseTasks = GetPhaseTasks(phaseResults, analyzerResults);
                     await Task.WhenAll(phaseTasks);
+
+                    // Raise after event
+                    await Events.RaiseAsync(new AfterEngineExecution(this, ExecutionId, Outputs, stopwatch.ElapsedMilliseconds));
                 }
                 finally
                 {
+                    // Log final information even if there was an exception
                     stopwatch.Stop();
+
+                    // Log analyzer results
+                    AnalyzerResult[] collapsedAnalyzerResults = analyzerResults.SelectMany(x => x.Value).ToArray();
+                    if (collapsedAnalyzerResults.Length > 0)
+                    {
+                        Logger.LogInformation("========== Analyzer Results ==========");
+                        AnalyzerCollection.LogResults(collapsedAnalyzerResults);
+                    }
+
+                    // Log execution summary table
+                    if (phaseResults.Count > 0)
+                    {
+                        Logger.LogInformation(GetExecutionSummary(phaseResults));
+                    }
+
+                    // Clean up
+                    Logger.LogInformation("========== Completed ==========");
+                    Logger.LogInformation($"Finished execution in {stopwatch.ElapsedMilliseconds} ms");
                 }
-
-                // Raise after event
-                await Events.RaiseAsync(new AfterEngineExecution(this, ExecutionId, Outputs, stopwatch.ElapsedMilliseconds));
-
-                // Log analyzer results
-                AnalyzerResult[] collapsedAnalyzerResults = analyzerResults.SelectMany(x => x.Value).ToArray();
-                if (collapsedAnalyzerResults.Length > 0)
-                {
-                    Logger.LogInformation("========== Analyzer Results ==========");
-                    AnalyzerResult.LogResults(collapsedAnalyzerResults, this);
-                }
-
-                // Log execution summary table
-                if (phaseResults.Count > 0)
-                {
-                    Logger.LogInformation(GetExecutionSummary(phaseResults));
-                }
-
-                // Clean up
-                Logger.LogInformation("========== Completed ==========");
-                Logger.LogInformation($"Finished execution in {stopwatch.ElapsedMilliseconds} ms");
 
                 // Throw if there was a log failure
                 _failureLoggerProvider?.ThrowIfFailed();
@@ -676,11 +680,11 @@ namespace Statiq.Core
                 Visit(pipelineEntry.Key, pipelineEntry.Value);
             }
 
-            // Make a pass through non-isolated transform phases to set dependencies to all non-isolated process phases
+            // Make a pass through non-isolated post-process phases to set dependencies to all non-isolated process phases
             foreach (PipelinePhases pipelinePhases in phasesByPipeline.Values.Where(x => !x.Pipeline.Isolated))
             {
-                pipelinePhases.Transform.Dependencies =
-                    pipelinePhases.Transform.Dependencies
+                pipelinePhases.PostProcess.Dependencies =
+                    pipelinePhases.PostProcess.Dependencies
                         .Concat(phasesByPipeline.Values.Where(x => x != pipelinePhases && !x.Pipeline.Isolated).Select(x => x.Process))
                         .ToArray();
             }
@@ -703,7 +707,7 @@ namespace Statiq.Core
             {
                 SortPhases(pipelinePhases.Input);
                 SortPhases(pipelinePhases.Process);
-                SortPhases(pipelinePhases.Transform);
+                SortPhases(pipelinePhases.PostProcess);
                 SortPhases(pipelinePhases.Output);
             }
             return sortedPhases.ToArray();
@@ -725,8 +729,8 @@ namespace Statiq.Core
                     pipelinePhases = new PipelinePhases(pipeline);
                     pipelinePhases.Input = new PipelinePhase(pipeline, name, Phase.Input, pipeline.InputModules, logger);
                     pipelinePhases.Process = new PipelinePhase(pipeline, name, Phase.Process, pipeline.ProcessModules, logger, pipelinePhases.Input);
-                    pipelinePhases.Transform = new PipelinePhase(pipeline, name, Phase.PostProcess, pipeline.PostProcessModules, logger, pipelinePhases.Process);
-                    pipelinePhases.Output = new PipelinePhase(pipeline, name, Phase.Output, pipeline.OutputModules, logger, pipelinePhases.Transform);
+                    pipelinePhases.PostProcess = new PipelinePhase(pipeline, name, Phase.PostProcess, pipeline.PostProcessModules, logger, pipelinePhases.Process);
+                    pipelinePhases.Output = new PipelinePhase(pipeline, name, Phase.Output, pipeline.OutputModules, logger, pipelinePhases.PostProcess);
                     phasesByPipeline.Add(name, pipelinePhases);
                     return pipelinePhases;
                 }
@@ -735,26 +739,45 @@ namespace Statiq.Core
                 {
                     // Visit dependencies if this isn't an isolated pipeline
                     List<PipelinePhase> processDependencies = new List<PipelinePhase>();
+                    List<PipelinePhase> outputDependencies = new List<PipelinePhase>();
                     foreach (string dependencyName in pipeline.GetAllDependencies(pipelines))
                     {
                         if (!pipelines.TryGetValue(dependencyName, out IPipeline dependency))
                         {
                             throw new PipelineException($"Could not find pipeline dependency {dependencyName} of {name}");
                         }
+
+                        // Only add the phase dependency if the dependency is not isolated
                         if (!dependency.Isolated)
                         {
-                            // Only add the phase dependency if the dependency is not isolated
                             processDependencies.Add(Visit(dependencyName, dependency).Process);
+                        }
+
+                        // Deployment pipelines depend on output phases of dependencies
+                        // Only add other deployment dependency output phases here, all other non-deployment output phases will be added later
+                        if (pipeline.Deployment && dependency.Deployment)
+                        {
+                            outputDependencies.Add(Visit(dependencyName, dependency).Output);
                         }
                     }
 
                     // Add the phases (by this time all dependencies should have been added)
                     pipelinePhases = new PipelinePhases(pipeline);
+
                     pipelinePhases.Input = new PipelinePhase(pipeline, name, Phase.Input, pipeline.InputModules, logger);
-                    processDependencies.Insert(0, pipelinePhases.Input);  // Makes sure the process phase is also dependent on it's input phase
+
+                    // Makes sure the process phase is also dependent on it's input phase
+                    processDependencies.Insert(0, pipelinePhases.Input);
                     pipelinePhases.Process = new PipelinePhase(pipeline, name, Phase.Process, pipeline.ProcessModules, logger, processDependencies.ToArray());
-                    pipelinePhases.Transform = new PipelinePhase(pipeline, name, Phase.PostProcess, pipeline.PostProcessModules, logger, pipelinePhases.Process);  // Transform dependencies will be added after all pipelines have been processed
-                    pipelinePhases.Output = new PipelinePhase(pipeline, name, Phase.Output, pipeline.OutputModules, logger, pipelinePhases.Transform);  // Output dependencies for deployment pipelines will be added after all pipelines have been processed
+
+                    // Post-process dependencies will be added after all pipelines have been processed
+                    pipelinePhases.PostProcess = new PipelinePhase(pipeline, name, Phase.PostProcess, pipeline.PostProcessModules, logger, pipelinePhases.Process);
+
+                    // The output phase is dependent on it's post-process phase
+                    // Output dependencies for deployment pipelines on non-deployment pipelines will be added after all pipelines have been processed
+                    outputDependencies.Insert(0, pipelinePhases.PostProcess);
+                    pipelinePhases.Output = new PipelinePhase(pipeline, name, Phase.Output, pipeline.OutputModules, logger, outputDependencies.ToArray());
+
                     phasesByPipeline.Add(name, pipelinePhases);
                 }
                 else if (!phasesByPipeline.TryGetValue(name, out pipelinePhases))
@@ -811,7 +834,7 @@ namespace Statiq.Core
             // We have to explicitly wait the execution task in the continuation function
             // (the continuation task doesn't wait for the tasks it continues)
             // Note that we need to check if each dependency actually has a task since some pipelines might not be in this execution
-            // For example, the transform phase of every pipeline depends on the process phase of every other pipeline, including manual ones
+            // For example, the post-process phase of every pipeline depends on the process phase of every other pipeline, including manual ones
             return Task.Factory.ContinueWhenAll(
                 phase.Dependencies.Select(x => phaseTasks
                     .TryGetValue(x, out Task dependencyTask) ? dependencyTask : null)
@@ -1083,7 +1106,7 @@ namespace Statiq.Core
             public IPipeline Pipeline { get; }
             public PipelinePhase Input { get; set; }
             public PipelinePhase Process { get; set; }
-            public PipelinePhase Transform { get; set; }
+            public PipelinePhase PostProcess { get; set; }
             public PipelinePhase Output { get; set; }
         }
     }

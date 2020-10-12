@@ -30,6 +30,8 @@ namespace Statiq.Core
         public void Add(string name, IAnalyzer analyzer)
         {
             name.ThrowIfNullOrWhiteSpace(nameof(name));
+            analyzer.ThrowIfNull(nameof(analyzer));
+
             if (name.Any(c => char.IsWhiteSpace(c)))
             {
                 throw new ArgumentException("Analyzer names must not contain whitespace", nameof(name));
@@ -38,18 +40,34 @@ namespace Statiq.Core
             {
                 throw new ArgumentException($"An analyzer with the name {name} already exists", nameof(name));
             }
-            _analyzers.Add(name, analyzer.ThrowIfNull(nameof(analyzer)));
+            _analyzers.Add(name, analyzer);
         }
 
-        internal async Task<ConcurrentBag<AnalyzerResult>> AnalyzeAsync(PipelinePhase pipelinePhase)
+        internal void LogResults(IEnumerable<AnalyzerResult> results)
         {
-            // Don't check log level here since each document could override it
-            ConcurrentBag<AnalyzerResult> results = new ConcurrentBag<AnalyzerResult>();
-            await _analyzers
-                .Where(x => x.Value.Phases?.Contains(pipelinePhase.Phase) != false
-                    && x.Value.Pipelines?.Contains(pipelinePhase.PipelineName, StringComparer.OrdinalIgnoreCase) != false)
-                .ParallelForEachAsync(async v => await v.Value.AnalyzeAsync(pipelinePhase.Outputs, new AnalyzerContext(_engine, pipelinePhase, v, results)));
-            return results;
+            if (results is object)
+            {
+                // Log the results, group by document and prefix with analyzer name
+                foreach (IGrouping<IDocument, AnalyzerResult> documentGroup in results.GroupBy(x => x.Document).OrderBy(x => x.Key.ToSafeDisplayString()))
+                {
+                    if (documentGroup.Key is object)
+                    {
+                        _engine.Logger.LogInformation(documentGroup.Key.ToDisplayString());
+                    }
+                    foreach (AnalyzerResult result in documentGroup.OrderBy(x => x.AnalyzerName))
+                    {
+                        _engine.Logger.Log(result.LogLevel, $"{result.Message} ({result.AnalyzerName})");
+                        if (result.LogLevel == LogLevel.Warning)
+                        {
+                            _engine.LogBuildServerWarning(documentGroup.Key, $"{result.Message} ({result.AnalyzerName})");
+                        }
+                        else if (result.LogLevel != LogLevel.None && result.LogLevel >= LogLevel.Error)
+                        {
+                            _engine.LogBuildServerError(documentGroup.Key, $"{result.Message} ({result.AnalyzerName})");
+                        }
+                    }
+                }
+            }
         }
 
         public IAnalyzer this[string key] => _analyzers[key];

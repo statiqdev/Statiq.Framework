@@ -81,6 +81,7 @@ namespace Statiq.Core
 
             // If we're in the output phase, get outputs from all other non-deployment output phases
             // This will only happen for deployment pipelines (otherwise we would have thrown)
+            // Note that deployment pipelines still can't get outputs from other deployment pipelines, only other non-deployment pipelines
             if (_currentPhase.Phase == Phase.Output)
             {
                 return _pipelines

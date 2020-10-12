@@ -18,8 +18,8 @@ namespace Statiq.Core
         private readonly LogLevel _logLevel;
         private readonly ConcurrentBag<AnalyzerResult> _results;
 
-        internal AnalyzerContext(ExecutionContextData contextData, IExecutionContext parent, ImmutableArray<IDocument> inputs, in KeyValuePair<string, IAnalyzer> analyzerItem, ConcurrentBag<AnalyzerResult> results)
-            : base(contextData, parent, null, inputs)
+        internal AnalyzerContext(ExecutionContextData contextData, ImmutableArray<IDocument> inputs, in KeyValuePair<string, IAnalyzer> analyzerItem, ConcurrentBag<AnalyzerResult> results)
+            : base(contextData, null, null, inputs)
         {
             _analyzerName = analyzerItem.Key;
             _logLevel = analyzerItem.Value.LogLevel;

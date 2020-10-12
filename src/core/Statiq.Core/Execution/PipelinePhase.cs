@@ -2,11 +2,13 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Polly.Caching;
 using Statiq.Common;
 
 namespace Statiq.Core
@@ -69,87 +71,92 @@ namespace Statiq.Core
             await engine.Events.RaiseAsync(new BeforePipelinePhaseExecution(engine.ExecutionId, PipelineName, Phase));
 
             // Skip the phase if there are no modules
+            DateTimeOffset startTime = DateTimeOffset.Now;
+            long elapsedMilliseconds = 0;
             if (_modules.Count == 0)
             {
-                _logger.LogDebug($"{PipelineName}/{Phase} » Pipeline contains no modules, skipping");
                 Outputs = GetInputs();
-                await engine.Events.RaiseAsync(new AfterPipelinePhaseExecution(engine.ExecutionId, PipelineName, Phase, Outputs, 0));
-                await RunAnalyzersAsync(engine, phaseResults, analyzerResults);
-                return;
+                _logger.LogDebug($"{PipelineName}/{Phase} » Pipeline contains no modules, skipping");
             }
-
-            // Execute the phase
-            ImmutableArray<IDocument> inputs = GetInputs();
-            DateTimeOffset startTime = DateTimeOffset.Now;
-            System.Diagnostics.Stopwatch stopwatch = System.Diagnostics.Stopwatch.StartNew();
-            _logger.LogInformation($"-> {PipelineName}/{Phase} » Starting {PipelineName} {Phase} phase execution... ({inputs.Length} input document(s), {_modules.Count} module(s))");
-            try
+            else
             {
-                // Execute all modules in the pipeline with a new DI scope per phase
-                IServiceScopeFactory serviceScopeFactory = engine.Services.GetRequiredService<IServiceScopeFactory>();
-                using (IServiceScope serviceScope = serviceScopeFactory.CreateScope())
+                // Execute the phase
+                ImmutableArray<IDocument> inputs = GetInputs();
+                System.Diagnostics.Stopwatch stopwatch = System.Diagnostics.Stopwatch.StartNew();
+                _logger.LogInformation($"-> {PipelineName}/{Phase} » Starting {PipelineName} {Phase} phase execution... ({inputs.Length} input document(s), {_modules.Count} module(s))");
+                try
                 {
-                    ExecutionContextData contextData = new ExecutionContextData(
-                        this,
-                        engine,
-                        phaseResults,
-                        serviceScope.ServiceProvider);
-                    Outputs = await Engine.ExecuteModulesAsync(contextData, null, _modules, inputs, _logger);
+                    // Execute all modules in the pipeline with a new DI scope per phase
+                    IServiceScopeFactory serviceScopeFactory = engine.Services.GetRequiredService<IServiceScopeFactory>();
+                    using (IServiceScope serviceScope = serviceScopeFactory.CreateScope())
+                    {
+                        ExecutionContextData contextData = new ExecutionContextData(
+                            this,
+                            engine,
+                            phaseResults,
+                            serviceScope.ServiceProvider);
+                        Outputs = await Engine.ExecuteModulesAsync(contextData, null, _modules, inputs, _logger);
+                        stopwatch.Stop();
+                        elapsedMilliseconds = stopwatch.ElapsedMilliseconds;
+                        _logger.LogInformation($"<- {PipelineName}/{Phase} » Finished {PipelineName} {Phase} phase execution ({Outputs.Length} output document(s), {stopwatch.ElapsedMilliseconds} ms)");
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Outputs = ImmutableArray<IDocument>.Empty;
+                    if (!(ex is OperationCanceledException))
+                    {
+                        LoggedException executeModulesException = ex as LoggedException;
+                        if (executeModulesException is object)
+                        {
+                            ex = executeModulesException.InnerException;
+                        }
+                        _logger.LogDebug($"Exception while executing pipeline {PipelineName}/{Phase}: {ex}");
+                        if (executeModulesException is object)
+                        {
+                            throw executeModulesException.InnerException;
+                        }
+                    }
+                    throw;
+                }
+                finally
+                {
                     stopwatch.Stop();
-                    _logger.LogInformation($"<- {PipelineName}/{Phase} » Finished {PipelineName} {Phase} phase execution ({Outputs.Length} output document(s), {stopwatch.ElapsedMilliseconds} ms)");
                 }
-            }
-            catch (Exception ex)
-            {
-                Outputs = ImmutableArray<IDocument>.Empty;
-                if (!(ex is OperationCanceledException))
-                {
-                    LoggedException executeModulesException = ex as LoggedException;
-                    if (executeModulesException is object)
-                    {
-                        ex = executeModulesException.InnerException;
-                    }
-                    _logger.LogDebug($"Exception while executing pipeline {PipelineName}/{Phase}: {ex}");
-                    if (executeModulesException is object)
-                    {
-                        throw executeModulesException.InnerException;
-                    }
-                }
-                throw;
-            }
-            finally
-            {
-                stopwatch.Stop();
             }
 
             // Raise the after event
-            await engine.Events.RaiseAsync(new AfterPipelinePhaseExecution(engine.ExecutionId, PipelineName, Phase, Outputs, stopwatch.ElapsedMilliseconds));
+            await engine.Events.RaiseAsync(new AfterPipelinePhaseExecution(engine.ExecutionId, PipelineName, Phase, Outputs, elapsedMilliseconds));
 
             // Run analyzers
             await RunAnalyzersAsync(engine, phaseResults, analyzerResults);
 
-            // Record the results
-            PhaseResult phaseResult = new PhaseResult(PipelineName, Phase, Outputs, startTime, stopwatch.ElapsedMilliseconds);
-            phaseResults.AddOrUpdate(
-                phaseResult.PipelineName,
-                _ =>
-                {
-                    PhaseResult[] results = new PhaseResult[4];
-                    results[(int)phaseResult.Phase] = phaseResult;
-                    return results;
-                },
-                (_, results) =>
-                {
-                    if (results[(int)phaseResult.Phase] is object)
+            // Record the results if execution actually ran
+            if (elapsedMilliseconds > 0)
+            {
+                PhaseResult phaseResult = new PhaseResult(PipelineName, Phase, Outputs, startTime, elapsedMilliseconds);
+                phaseResults.AddOrUpdate(
+                    phaseResult.PipelineName,
+                    _ =>
                     {
+                        PhaseResult[] results = new PhaseResult[4];
+                        results[(int)phaseResult.Phase] = phaseResult;
+                        return results;
+                    },
+                    (_, results) =>
+                    {
+                        if (results[(int)phaseResult.Phase] is object)
+                        {
                         // Sanity check, we should never hit this
                         throw new InvalidOperationException($"Results for phase {phaseResult.Phase} have already been added");
-                    }
-                    results[(int)phaseResult.Phase] = phaseResult;
-                    return results;
-                });
+                        }
+                        results[(int)phaseResult.Phase] = phaseResult;
+                        return results;
+                    });
+            }
         }
 
+        // Outputs should be set before making this call
         private async Task RunAnalyzersAsync(
             Engine engine,
             ConcurrentDictionary<string, PhaseResult[]> phaseResults,
@@ -164,9 +171,36 @@ namespace Statiq.Core
                     engine,
                     phaseResults,
                     serviceScope.ServiceProvider);
-                ExecutionContext executionContext = new ExecutionContext(contextData, null, null, ImmutableArray<IDocument>.Empty); // Sets the async static
-                ConcurrentBag<AnalyzerResult> results = await engine.AnalyzerCollection.AnalyzeAsync(this);
-                analyzerResults.TryAdd(this, results);
+                ExecutionContext executionContext = new ExecutionContext(contextData, null, null, Outputs);
+
+                // Run analyzers for this pipeline and phase, don't check log level here since each document could override it
+                ConcurrentBag<AnalyzerResult> results = new ConcurrentBag<AnalyzerResult>();
+                KeyValuePair<string, IAnalyzer>[] analyzerItems = engine.AnalyzerCollection
+                    .Where(analyzerItem => analyzerItem.Value.PipelinePhases?.Any(pipelinePhase => pipelinePhase.Key.Equals(PipelineName, StringComparison.OrdinalIgnoreCase) && pipelinePhase.Value == Phase) == true)
+                    .ToArray();
+                if (analyzerItems.Length > 0)
+                {
+                    _logger.LogInformation($"{PipelineName}/{Phase} » Running {analyzerItems.Length} analyzers ({string.Join(", ", analyzerItems.Select(x => x.Key))})");
+                    await analyzerItems
+                        .ParallelForEachAsync(async analyzerItem =>
+                        {
+                            AnalyzerContext analyzerContext = new AnalyzerContext(contextData, Outputs, analyzerItem, results);
+                            await analyzerItem.Value.AnalyzeAsync(analyzerContext);
+                        });
+                }
+
+                // Add the results before the error check so the exact results can be reported later
+                if (!analyzerResults.TryAdd(this, results))
+                {
+                    // Sanity check, should never get here
+                    throw new InvalidOperationException($"Analyzer results for pipeline {PipelineName} already added");
+                }
+
+                // Throw if any results are above error
+                if (results.Any(x => x.LogLevel != LogLevel.None && x.LogLevel >= LogLevel.Error))
+                {
+                    throw new ExecutionException("One or more analyzers produced error results, see analyzer report following execution");
+                }
             }
         }
 

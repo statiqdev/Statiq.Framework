@@ -18,7 +18,7 @@ namespace Statiq.Common
             throw new NotSupportedException();
 
         protected virtual void Analyze(IAnalyzerContext context) =>
-            context.Inputs.AsParallel().ForAll(input => AnalyzeDocument(input, new DocumentAnalyzerContext(context, input)));
+            context.Inputs.AsParallel().ForAll(input => AnalyzeDocument(input, context));
 
         /// <summary>
         /// Analyzes an individual document.

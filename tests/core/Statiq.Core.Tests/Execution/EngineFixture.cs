@@ -373,6 +373,45 @@ namespace Statiq.Core.Tests.Execution
                         ("Foo", Phase.PostProcess)
                     });
             }
+
+            [Test]
+            public void DeploymentPipelinesDependOnDependencyOutputPhases()
+            {
+                // Given
+                IPipelineCollection pipelines = new TestPipelineCollection();
+                pipelines.Add("Bar", new TestPipeline
+                {
+                    Deployment = true,
+                    Dependencies = new HashSet<string> { "Foo" }
+                });
+                pipelines.Add("Foo", new TestPipeline
+                {
+                    Deployment = true
+                });
+                ILogger logger = new TestLoggerProvider().CreateLogger(null);
+
+                // When
+                PipelinePhase[] phases = Engine.GetPipelinePhases(pipelines, logger);
+
+                // Then
+                phases
+                    .Single(x => x.Pipeline.Dependencies.Count == 1 && x.Phase == Phase.Output)
+                    .Dependencies
+                    .Select(x => (x.PipelineName, x.Phase))
+                    .ShouldBe(new (string, Phase)[]
+                    {
+                        ("Bar", Phase.PostProcess),
+                        ("Foo", Phase.Output)
+                    });
+                phases
+                    .Single(x => x.Pipeline.Dependencies.Count == 0 && x.Phase == Phase.Output)
+                    .Dependencies
+                    .Select(x => (x.PipelineName, x.Phase))
+                    .ShouldBe(new (string, Phase)[]
+                    {
+                        ("Foo", Phase.PostProcess)
+                    });
+            }
         }
 
         public class GetServiceTests : EngineFixture
