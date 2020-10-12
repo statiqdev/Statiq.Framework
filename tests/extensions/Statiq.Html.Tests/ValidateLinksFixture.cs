@@ -11,6 +11,7 @@ using Statiq.Testing;
 
 namespace Statiq.Html.Tests
 {
+#pragma warning disable CS0618 // Type or member is obsolete
     [TestFixture]
     public class ValidateLinksFixture : BaseFixture
     {
@@ -150,4 +151,5 @@ namespace Statiq.Html.Tests
             }
         }
     }
+#pragma warning restore CS0618 // Type or member is obsolete
 }

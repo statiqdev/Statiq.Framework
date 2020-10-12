@@ -276,19 +276,15 @@ namespace Statiq.Core.Tests.Execution
             }
 
             [Test]
-            public void DeploymentOutputPhaseComesAfterOthers()
+            public void DeploymentPhasesComeAfterOthers()
             {
                 // Given
                 IPipelineCollection pipelines = new TestPipelineCollection();
                 pipelines.Add("Bar", new TestPipeline
                 {
-                    Deployment = true,
-                    ExecutionPolicy = ExecutionPolicy.Manual
+                    Deployment = true
                 });
-                pipelines.Add("Foo", new TestPipeline
-                {
-                    Dependencies = new HashSet<string>(new[] { "Bar" })
-                });
+                pipelines.Add("Foo", new TestPipeline());
                 ILogger logger = new TestLoggerProvider().CreateLogger(null);
 
                 // When
@@ -297,15 +293,70 @@ namespace Statiq.Core.Tests.Execution
                 // Then
                 phases.Select(x => (x.PipelineName, x.Phase)).ShouldBe(new (string, Phase)[]
                 {
-                    ("Bar", Phase.Input),
-                    ("Bar", Phase.Process),
                     ("Foo", Phase.Input),
                     ("Foo", Phase.Process),
-                    ("Bar", Phase.PostProcess),
                     ("Foo", Phase.PostProcess),
                     ("Foo", Phase.Output),
+                    ("Bar", Phase.Input),
+                    ("Bar", Phase.Process),
+                    ("Bar", Phase.PostProcess),
                     ("Bar", Phase.Output),
                 });
+            }
+
+            [Test]
+            public void ThrowsForDependencyOnDeploymentPipeline()
+            {
+                // Given
+                IPipelineCollection pipelines = new TestPipelineCollection();
+                pipelines.Add("Bar", new TestPipeline
+                {
+                    Deployment = true
+                });
+                pipelines.Add("Foo", new TestPipeline
+                {
+                    Dependencies = new HashSet<string>(new[] { "Bar" })
+                });
+                ILogger logger = new TestLoggerProvider().CreateLogger(null);
+
+                // When, Then
+                Should.Throw<PipelineException>(() => Engine.GetPipelinePhases(pipelines, logger));
+            }
+
+            [Test]
+            public void ThrowsForDependencyOnNonDeploymentPipeline()
+            {
+                // Given
+                IPipelineCollection pipelines = new TestPipelineCollection();
+                pipelines.Add("Bar", new TestPipeline
+                {
+                    Deployment = true,
+                    Dependencies = new HashSet<string>(new[] { "Foo" })
+                });
+                pipelines.Add("Foo", new TestPipeline());
+                ILogger logger = new TestLoggerProvider().CreateLogger(null);
+
+                // When, Then
+                Should.Throw<PipelineException>(() => Engine.GetPipelinePhases(pipelines, logger));
+            }
+
+            [Test]
+            public void ThrowsForDependencyOnIsolatedPipeline()
+            {
+                // Given
+                IPipelineCollection pipelines = new TestPipelineCollection();
+                pipelines.Add("Bar", new TestPipeline
+                {
+                    Dependencies = new HashSet<string>(new[] { "Foo" })
+                });
+                pipelines.Add("Foo", new TestPipeline
+                {
+                    Isolated = true
+                });
+                ILogger logger = new TestLoggerProvider().CreateLogger(null);
+
+                // When, Then
+                Should.Throw<PipelineException>(() => Engine.GetPipelinePhases(pipelines, logger));
             }
 
             [Test]
@@ -356,61 +407,18 @@ namespace Statiq.Core.Tests.Execution
 
                 // Then
                 phases
-                    .Single(x => x.Pipeline.Deployment && x.Phase == Phase.Output)
+                    .Single(x => x.Pipeline.Deployment && x.Phase == Phase.Input)
                     .Dependencies
                     .Select(x => (x.PipelineName, x.Phase))
                     .ShouldBe(new (string, Phase)[]
                     {
-                        ("Bar", Phase.PostProcess),
                         ("Foo", Phase.Output)
                     });
                 phases
-                    .Single(x => !x.Pipeline.Deployment && x.Phase == Phase.Output)
+                    .Single(x => !x.Pipeline.Deployment && x.Phase == Phase.Input)
                     .Dependencies
                     .Select(x => (x.PipelineName, x.Phase))
-                    .ShouldBe(new (string, Phase)[]
-                    {
-                        ("Foo", Phase.PostProcess)
-                    });
-            }
-
-            [Test]
-            public void DeploymentPipelinesDependOnDependencyOutputPhases()
-            {
-                // Given
-                IPipelineCollection pipelines = new TestPipelineCollection();
-                pipelines.Add("Bar", new TestPipeline
-                {
-                    Deployment = true,
-                    Dependencies = new HashSet<string> { "Foo" }
-                });
-                pipelines.Add("Foo", new TestPipeline
-                {
-                    Deployment = true
-                });
-                ILogger logger = new TestLoggerProvider().CreateLogger(null);
-
-                // When
-                PipelinePhase[] phases = Engine.GetPipelinePhases(pipelines, logger);
-
-                // Then
-                phases
-                    .Single(x => x.Pipeline.Dependencies.Count == 1 && x.Phase == Phase.Output)
-                    .Dependencies
-                    .Select(x => (x.PipelineName, x.Phase))
-                    .ShouldBe(new (string, Phase)[]
-                    {
-                        ("Bar", Phase.PostProcess),
-                        ("Foo", Phase.Output)
-                    });
-                phases
-                    .Single(x => x.Pipeline.Dependencies.Count == 0 && x.Phase == Phase.Output)
-                    .Dependencies
-                    .Select(x => (x.PipelineName, x.Phase))
-                    .ShouldBe(new (string, Phase)[]
-                    {
-                        ("Foo", Phase.PostProcess)
-                    });
+                    .ShouldBeEmpty();
             }
         }
 

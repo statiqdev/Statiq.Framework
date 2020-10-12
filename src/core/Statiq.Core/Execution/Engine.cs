@@ -683,17 +683,21 @@ namespace Statiq.Core
             // Make a pass through non-isolated post-process phases to set dependencies to all non-isolated process phases
             foreach (PipelinePhases pipelinePhases in phasesByPipeline.Values.Where(x => !x.Pipeline.Isolated))
             {
+                // We only need to add phases from other pipelines with same deployment setting since deployment pipeline input
+                // phases are dependent on non-deloyment pipeline output phases below (I.e. deployment pipelines won't execute *any*
+                // phases until all non-deployment pipelines are completely done)
                 pipelinePhases.PostProcess.Dependencies =
                     pipelinePhases.PostProcess.Dependencies
-                        .Concat(phasesByPipeline.Values.Where(x => x != pipelinePhases && !x.Pipeline.Isolated).Select(x => x.Process))
+                        .Concat(phasesByPipeline.Values.Where(x => x != pipelinePhases && !x.Pipeline.Isolated && pipelinePhases.Pipeline.Deployment == x.Pipeline.Deployment).Select(x => x.Process))
                         .ToArray();
             }
 
-            // Make a pass through deployment pipeline output phases to set dependencies to all non-deployment output phases
+            // Make a pass through deployment pipeline input phases to set dependencies to all non-deployment output phases (including isolated)
             foreach (PipelinePhases pipelinePhases in phasesByPipeline.Values.Where(x => x.Pipeline.Deployment))
             {
-                pipelinePhases.Output.Dependencies =
-                    pipelinePhases.Output.Dependencies
+                // The existing input phases should be empty here, but we'll still concat to them just in case
+                pipelinePhases.Input.Dependencies =
+                    pipelinePhases.Input.Dependencies
                         .Concat(phasesByPipeline.Values.Where(x => x != pipelinePhases && !x.Pipeline.Deployment).Select(x => x.Output))
                         .ToArray();
             }
@@ -739,7 +743,6 @@ namespace Statiq.Core
                 {
                     // Visit dependencies if this isn't an isolated pipeline
                     List<PipelinePhase> processDependencies = new List<PipelinePhase>();
-                    List<PipelinePhase> outputDependencies = new List<PipelinePhase>();
                     foreach (string dependencyName in pipeline.GetAllDependencies(pipelines))
                     {
                         if (!pipelines.TryGetValue(dependencyName, out IPipeline dependency))
@@ -747,18 +750,22 @@ namespace Statiq.Core
                             throw new PipelineException($"Could not find pipeline dependency {dependencyName} of {name}");
                         }
 
-                        // Only add the phase dependency if the dependency is not isolated
-                        if (!dependency.Isolated)
+                        if (dependency.Isolated)
                         {
-                            processDependencies.Add(Visit(dependencyName, dependency).Process);
+                            throw new PipelineException($"Pipeline {name} cannot have a dependency on isolated pipeline {dependencyName}");
                         }
 
-                        // Deployment pipelines depend on output phases of dependencies
-                        // Only add other deployment dependency output phases here, all other non-deployment output phases will be added later
-                        if (pipeline.Deployment && dependency.Deployment)
+                        if (pipeline.Deployment && !dependency.Deployment)
                         {
-                            outputDependencies.Add(Visit(dependencyName, dependency).Output);
+                            throw new PipelineException($"Deployment pipeline {name} cannot have a dependency on non-deployment pipeline {dependencyName} (all deployment pipelines are automatically dependent on non-deployment pipelines)");
                         }
+
+                        if (dependency.Deployment && !pipeline.Deployment)
+                        {
+                            throw new PipelineException($"Non-deployment pipeline {name} cannot have a dependency on deployment pipeline {dependencyName}");
+                        }
+
+                        processDependencies.Add(Visit(dependencyName, dependency).Process);
                     }
 
                     // Add the phases (by this time all dependencies should have been added)
@@ -774,9 +781,7 @@ namespace Statiq.Core
                     pipelinePhases.PostProcess = new PipelinePhase(pipeline, name, Phase.PostProcess, pipeline.PostProcessModules, logger, pipelinePhases.Process);
 
                     // The output phase is dependent on it's post-process phase
-                    // Output dependencies for deployment pipelines on non-deployment pipelines will be added after all pipelines have been processed
-                    outputDependencies.Insert(0, pipelinePhases.PostProcess);
-                    pipelinePhases.Output = new PipelinePhase(pipeline, name, Phase.Output, pipeline.OutputModules, logger, outputDependencies.ToArray());
+                    pipelinePhases.Output = new PipelinePhase(pipeline, name, Phase.Output, pipeline.OutputModules, logger, pipelinePhases.PostProcess);
 
                     phasesByPipeline.Add(name, pipelinePhases);
                 }

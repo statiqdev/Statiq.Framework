@@ -19,7 +19,7 @@ namespace Statiq.Core
         private readonly IPipelineCollection _pipelines;
 
         // Cache the dependency calculation
-        private readonly Lazy<KeyValuePair<string, ImmutableArray<IDocument>>[]> _cachedDependencyOutputs;
+        private readonly Lazy<IEnumerable<KeyValuePair<string, ImmutableArray<IDocument>>>> _cachedDependencyOutputs;
 
         public PhaseOutputs(IReadOnlyDictionary<string, PhaseResult[]> phaseResults, PipelinePhase currentPhase, IPipelineCollection pipelines)
         {
@@ -27,7 +27,7 @@ namespace Statiq.Core
             _currentPhase = currentPhase.ThrowIfNull(nameof(currentPhase));
             _pipelines = pipelines.ThrowIfNull(nameof(pipelines));
 
-            _cachedDependencyOutputs = new Lazy<KeyValuePair<string, ImmutableArray<IDocument>>[]>(
+            _cachedDependencyOutputs = new Lazy<IEnumerable<KeyValuePair<string, ImmutableArray<IDocument>>>>(
                 () => GetOutputsFromDependencies(), LazyThreadSafetyMode.ExecutionAndPublication);
         }
 
@@ -69,34 +69,36 @@ namespace Statiq.Core
 
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
-        private KeyValuePair<string, ImmutableArray<IDocument>>[] GetOutputsFromDependencies()
+        private IEnumerable<KeyValuePair<string, ImmutableArray<IDocument>>> GetOutputsFromDependencies()
         {
-            // If we're in the transform phase, get outputs from all process phases including this one
-            if (_currentPhase.Phase == Phase.PostProcess)
-            {
-                return _phaseResults
-                    .Select(x => KeyValuePair.Create(x.Key, GetOutputs(x.Value, Phase.Process)))
-                    .ToArray();
-            }
+            List<KeyValuePair<string, ImmutableArray<IDocument>>> outputs = new List<KeyValuePair<string, ImmutableArray<IDocument>>>();
 
-            // If we're in the output phase, get outputs from all other non-deployment output phases
-            // This will only happen for deployment pipelines (otherwise we would have thrown)
-            // Note that deployment pipelines still can't get outputs from other deployment pipelines, only other non-deployment pipelines
-            if (_currentPhase.Phase == Phase.Output)
+            // If we're in a deployment pipeline, add outputs from all non-deployment output phases
+            if (_currentPhase.Pipeline.Deployment)
             {
-                return _pipelines
-                    .AsEnumerable()
-                    .Where(x => !x.Value.Deployment)
-                    .Select(x => KeyValuePair.Create(x.Key, GetOutputs(_phaseResults[x.Key], Phase.Output)))
-                    .ToArray();
+                outputs.AddRange(
+                    _pipelines.AsEnumerable().Where(x => !x.Value.Deployment).Select(x => KeyValuePair.Create(x.Key, GetOutputs(_phaseResults[x.Key], Phase.Output))));
             }
 
             // If we're in the process phase, get outputs from the process phase only from dependencies
-            HashSet<string> transientDependencies = GatherProcessPhaseDependencies(_currentPhase);
-            return _phaseResults
-                .Where(x => transientDependencies.Contains(x.Key))
-                .Select(x => KeyValuePair.Create(x.Key, GetOutputs(x.Value, Phase.Process)))
-                .ToArray();
+            if (_currentPhase.Phase == Phase.Process)
+            {
+                HashSet<string> transientDependencies = GatherProcessPhaseDependencies(_currentPhase);
+                outputs.AddRange(_phaseResults
+                    .Where(x => transientDependencies.Contains(x.Key))
+                    .Select(x => KeyValuePair.Create(x.Key, GetOutputs(x.Value, Phase.Process))));
+            }
+
+            // If we're in the transform phase, get outputs from all process phases including this one
+            // Only add from similar deployment pipelines (if a deployment pipeline, non-deployment phases were added above)
+            if (_currentPhase.Phase == Phase.PostProcess)
+            {
+                outputs.AddRange(_phaseResults
+                    .Where(x => _pipelines[x.Key].Deployment == _currentPhase.Pipeline.Deployment)
+                    .Select(x => KeyValuePair.Create(x.Key, GetOutputs(x.Value, Phase.Process))));
+            }
+
+            return outputs;
         }
 
         // Crawl up the phases looking for one with outputs if the one specified below doesn't have any
@@ -150,10 +152,16 @@ namespace Statiq.Core
                 throw new InvalidOperationException($"Cannot access documents in isolated pipeline {pipelineName}");
             }
 
-            // Make sure this pipeline isn't deployment (which it is if we're in the output phase) and we're asking for a non-deployment output phase
-            if (_currentPhase.Phase == Phase.Output && _pipelines[pipelineName].Deployment)
+            // If this is a deployment pipeline and the request pipeline is not, we can access anything
+            if (_currentPhase.Pipeline.Deployment && !_pipelines[pipelineName].Deployment)
             {
-                throw new InvalidOperationException($"Cannot access output documents from another deployment pipeline {pipelineName}");
+                return;
+            }
+
+            // Make sure this pipeline isn't deployment (which it is if we're in the output phase) and we're asking for a non-deployment output phase
+            if ((_currentPhase.Phase == Phase.Input || _currentPhase.Phase == Phase.Output) && _pipelines[pipelineName].Deployment)
+            {
+                throw new InvalidOperationException($"Cannot access documents from another deployment pipeline {pipelineName}");
             }
 
             // Make sure the pipeline has results
@@ -188,7 +196,7 @@ namespace Statiq.Core
             }
 
             // Outputs cannot be accessed from the input or output phases (unless a deployment pipeline)
-            if (_currentPhase.Phase == Phase.Input || (_currentPhase.Phase == Phase.Output && !_currentPhase.Pipeline.Deployment))
+            if ((_currentPhase.Phase == Phase.Input || _currentPhase.Phase == Phase.Output) && !_currentPhase.Pipeline.Deployment)
             {
                 throw new InvalidOperationException($"Cannot access document outputs during the {_currentPhase.Phase} phase");
             }

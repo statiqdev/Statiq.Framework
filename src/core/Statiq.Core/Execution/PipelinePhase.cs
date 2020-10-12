@@ -72,7 +72,7 @@ namespace Statiq.Core
 
             // Skip the phase if there are no modules
             DateTimeOffset startTime = DateTimeOffset.Now;
-            long elapsedMilliseconds = 0;
+            long elapsedMilliseconds = -1;
             if (_modules.Count == 0)
             {
                 Outputs = GetInputs();
@@ -98,7 +98,7 @@ namespace Statiq.Core
                         Outputs = await Engine.ExecuteModulesAsync(contextData, null, _modules, inputs, _logger);
                         stopwatch.Stop();
                         elapsedMilliseconds = stopwatch.ElapsedMilliseconds;
-                        _logger.LogInformation($"<- {PipelineName}/{Phase} » Finished {PipelineName} {Phase} phase execution ({Outputs.Length} output document(s), {stopwatch.ElapsedMilliseconds} ms)");
+                        _logger.LogInformation($"<- {PipelineName}/{Phase} » Finished {PipelineName} {Phase} phase execution ({Outputs.Length} output document(s), {elapsedMilliseconds} ms)");
                     }
                 }
                 catch (Exception ex)
@@ -126,13 +126,13 @@ namespace Statiq.Core
             }
 
             // Raise the after event
-            await engine.Events.RaiseAsync(new AfterPipelinePhaseExecution(engine.ExecutionId, PipelineName, Phase, Outputs, elapsedMilliseconds));
+            await engine.Events.RaiseAsync(new AfterPipelinePhaseExecution(engine.ExecutionId, PipelineName, Phase, Outputs, elapsedMilliseconds < 0 ? 0 : elapsedMilliseconds));
 
             // Run analyzers
             await RunAnalyzersAsync(engine, phaseResults, analyzerResults);
 
             // Record the results if execution actually ran
-            if (elapsedMilliseconds > 0)
+            if (elapsedMilliseconds >= 0)
             {
                 PhaseResult phaseResult = new PhaseResult(PipelineName, Phase, Outputs, startTime, elapsedMilliseconds);
                 phaseResults.AddOrUpdate(
@@ -147,8 +147,8 @@ namespace Statiq.Core
                     {
                         if (results[(int)phaseResult.Phase] is object)
                         {
-                        // Sanity check, we should never hit this
-                        throw new InvalidOperationException($"Results for phase {phaseResult.Phase} have already been added");
+                            // Sanity check, we should never hit this
+                            throw new InvalidOperationException($"Results for phase {phaseResult.Phase} have already been added");
                         }
                         results[(int)phaseResult.Phase] = phaseResult;
                         return results;
