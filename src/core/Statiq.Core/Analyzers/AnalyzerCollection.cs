@@ -47,25 +47,35 @@ namespace Statiq.Core
         {
             if (results is object)
             {
-                // Log the results, group by document and prefix with analyzer name
-                foreach (IGrouping<IDocument, AnalyzerResult> documentGroup in results.GroupBy(x => x.Document).OrderBy(x => x.Key.ToSafeDisplayString()))
+                // Log the document results first
+                foreach (IGrouping<IDocument, AnalyzerResult> documentGroup in results.Where(x => x.Document is object).GroupBy(x => x.Document).OrderBy(x => x.Key.ToSafeDisplayString()))
                 {
-                    if (documentGroup.Key is object)
-                    {
-                        _engine.Logger.LogInformation(documentGroup.Key.ToDisplayString());
-                    }
-                    foreach (AnalyzerResult result in documentGroup.OrderBy(x => x.AnalyzerName))
-                    {
-                        _engine.Logger.Log(result.LogLevel, $"{result.Message} ({result.AnalyzerName})");
-                        if (result.LogLevel == LogLevel.Warning)
-                        {
-                            _engine.LogBuildServerWarning(documentGroup.Key, $"{result.Message} ({result.AnalyzerName})");
-                        }
-                        else if (result.LogLevel != LogLevel.None && result.LogLevel >= LogLevel.Error)
-                        {
-                            _engine.LogBuildServerError(documentGroup.Key, $"{result.Message} ({result.AnalyzerName})");
-                        }
-                    }
+                    _engine.Logger.LogInformation(documentGroup.Key.ToDisplayString());
+                    LogResults(documentGroup.Key, documentGroup);
+                }
+
+                // Then log general results
+                AnalyzerResult[] globalResults = results.Where(x => x.Document is null).ToArray();
+                if (globalResults.Length > 0)
+                {
+                    _engine.Logger.LogInformation("Global Results");
+                    LogResults(null, globalResults);
+                }
+            }
+        }
+
+        private void LogResults(IDocument document, IEnumerable<AnalyzerResult> results)
+        {
+            foreach (AnalyzerResult result in results.OrderBy(x => x.AnalyzerName))
+            {
+                _engine.Logger.Log(result.LogLevel, $"{result.Message} ({result.AnalyzerName})");
+                if (result.LogLevel == LogLevel.Warning)
+                {
+                    _engine.LogBuildServerWarning(document, $"{result.Message} ({result.AnalyzerName})");
+                }
+                else if (result.LogLevel != LogLevel.None && result.LogLevel >= LogLevel.Error)
+                {
+                    _engine.LogBuildServerError(document, $"{result.Message} ({result.AnalyzerName})");
                 }
             }
         }
