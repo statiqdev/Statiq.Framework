@@ -1,3 +1,5 @@
+# 1.0.0-beta.25
+
 # 1.0.0-beta.24
 
 - Added `StartProcess.LogErrors()` to configure whether standard error output is logged as debug or error messages.
