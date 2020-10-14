@@ -152,7 +152,8 @@ namespace Statiq.App
         {
             bootstrapper.ThrowIfNull(nameof(bootstrapper));
             assembly.ThrowIfNull(nameof(assembly));
-            foreach (Type analyzerType in bootstrapper.ClassCatalog.GetTypesAssignableTo<IAnalyzer>().Where(x => x.Assembly.Equals(assembly)))
+            foreach (Type analyzerType in bootstrapper.ClassCatalog.GetTypesAssignableTo<IAnalyzer>()
+                .Where(x => x.Assembly.Equals(assembly) && x.GetConstructor(Type.EmptyTypes) is object))
             {
                 bootstrapper.AddAnalyzer(analyzerType);
             }
@@ -175,7 +176,8 @@ namespace Statiq.App
         {
             bootstrapper.ThrowIfNull(nameof(bootstrapper));
             parentType.ThrowIfNull(nameof(parentType));
-            foreach (Type analyzerType in parentType.GetNestedTypes().Where(x => typeof(IAnalyzer).IsAssignableFrom(x)))
+            foreach (Type analyzerType in parentType.GetNestedTypes()
+                .Where(x => typeof(IAnalyzer).IsAssignableFrom(x) && x.GetConstructor(Type.EmptyTypes) is object))
             {
                 bootstrapper.AddAnalyzer(analyzerType);
             }

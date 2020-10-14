@@ -453,18 +453,18 @@ namespace Statiq.Core
                     // Log final information even if there was an exception
                     stopwatch.Stop();
 
+                    // Log execution summary table
+                    if (phaseResults.Count > 0)
+                    {
+                        Logger.LogInformation(GetExecutionSummary(phaseResults));
+                    }
+
                     // Log analyzer results
                     AnalyzerResult[] collapsedAnalyzerResults = analyzerResults.SelectMany(x => x.Value).ToArray();
                     if (collapsedAnalyzerResults.Length > 0)
                     {
                         Logger.LogInformation("========== Analyzer Results ==========");
                         AnalyzerCollection.LogResults(collapsedAnalyzerResults);
-                    }
-
-                    // Log execution summary table
-                    if (phaseResults.Count > 0)
-                    {
-                        Logger.LogInformation(GetExecutionSummary(phaseResults));
                     }
 
                     // Clean up
