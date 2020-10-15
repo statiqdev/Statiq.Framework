@@ -2,14 +2,10 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Threading.Tasks;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Formats;
 using SixLabors.ImageSharp.PixelFormats;
 using SixLabors.ImageSharp.Processing;
-using SixLabors.ImageSharp.Processing.Filters;
-using SixLabors.ImageSharp.Processing.Overlays;
-using SixLabors.ImageSharp.Processing.Transforms;
 using Statiq.Common;
 using Statiq.Images.Operations;
 
@@ -137,7 +133,7 @@ namespace Statiq.Images
         /// <param name="pathModifier">Modifies the destination path after applying the operation.</param>
         /// <returns>The current module instance.</returns>
         public MutateImage Operation(
-            Func<IImageProcessingContext<Rgba32>, IImageProcessingContext<Rgba32>> operation,
+            Func<IImageProcessingContext, IImageProcessingContext> operation,
             Func<NormalizedPath, NormalizedPath> pathModifier = null)
         {
             _operations.Peek().Enqueue(new ActionOperation(operation, pathModifier));
@@ -222,11 +218,11 @@ namespace Statiq.Images
         }
 
         /// <summary>
-        /// Apply vignette processing to the image with specific color, e.g. <c>Vignette(Rgba32.AliceBlue)</c>.
+        /// Apply vignette processing to the image with specific color, e.g. <c>Vignette(Color.AliceBlue)</c>.
         /// </summary>
         /// <param name="color">The color to use for the vignette.</param>
         /// <returns>The current module instance.</returns>
-        public MutateImage Vignette(Rgba32 color)
+        public MutateImage Vignette(Color color)
         {
             _operations.Peek().Enqueue(new ActionOperation(
                 image => image.Vignette(color),
@@ -323,7 +319,7 @@ namespace Statiq.Images
                 IImageFormat imageFormat;
                 using (Stream stream = input.GetContentStream())
                 {
-                    image = SixLabors.ImageSharp.Image.Load(stream, out imageFormat);
+                    image = Image.Load<Rgba32>(stream, out imageFormat);
                 }
 
                 // Mutate the image with the specified operations, if there are any
@@ -331,7 +327,7 @@ namespace Statiq.Images
                 {
                     image.Mutate(imageContext =>
                     {
-                        IImageProcessingContext<Rgba32> workingImageContext = imageContext;
+                        IImageProcessingContext workingImageContext = imageContext;
                         foreach (IImageOperation operation in operations.Operations)
                         {
                             // Apply operation
