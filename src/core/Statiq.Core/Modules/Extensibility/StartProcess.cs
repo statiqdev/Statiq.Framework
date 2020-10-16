@@ -354,10 +354,6 @@ namespace Statiq.Core
                                     process.Id,
                                     _ => (process, loggerFactory?.CreateLogger($"{process.Id}: {Path.GetFileName(startInfo.FileName)}"), (Action<Process>)ExitedLogAction));
                                 item.Logger?.Log(logErrors ? LogLevel.Error : LogLevel.Debug, e.Data);
-                                if (logErrors)
-                                {
-                                    context.LogBuildServerError(e.Data);
-                                }
                                 errorWriter?.WriteLine(e.Data);
                             }
                         };
@@ -447,10 +443,6 @@ namespace Statiq.Core
             {
                 bool errorExitCode = _errorExitCode(process.ExitCode);
                 string logMessage = GetExitLogMessage(p, errorExitCode);
-                if (errorExitCode)
-                {
-                    context.LogBuildServerError(logMessage);
-                }
                 context.Log(logOutput ? (errorExitCode ? LogLevel.Error : LogLevel.Information) : LogLevel.Debug, logMessage);
             }
 

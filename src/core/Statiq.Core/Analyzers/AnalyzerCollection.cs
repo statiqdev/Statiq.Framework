@@ -1,16 +1,8 @@
 ﻿using System;
 using System.Collections;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
-using System.IO;
 using System.Linq;
-using System.Net.Http;
-using System.Security;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Statiq.Common;
 
@@ -47,20 +39,17 @@ namespace Statiq.Core
         {
             if (results is object)
             {
-                // Log the document results first
-                foreach (IGrouping<IDocument, AnalyzerResult> documentGroup in results.Where(x => x.Document is object).GroupBy(x => x.Document).OrderBy(x => x.Key.ToSafeDisplayString()))
+                // Log the document results first grouped and sorted by document
+                foreach (IGrouping<IDocument, AnalyzerResult> documentGroup in results
+                    .Where(x => x.Document is object)
+                    .GroupBy(x => x.Document)
+                    .OrderBy(x => x.Key.ToSafeDisplayString()))
                 {
-                    _engine.Logger.LogInformation(documentGroup.Key.ToDisplayString());
                     LogResults(documentGroup.Key, documentGroup);
                 }
 
                 // Then log general results
-                AnalyzerResult[] globalResults = results.Where(x => x.Document is null).ToArray();
-                if (globalResults.Length > 0)
-                {
-                    _engine.Logger.LogInformation("Global Results");
-                    LogResults(null, globalResults);
-                }
+                LogResults(null, results.Where(x => x.Document is null));
             }
         }
 
@@ -68,15 +57,7 @@ namespace Statiq.Core
         {
             foreach (AnalyzerResult result in results.OrderBy(x => x.AnalyzerName))
             {
-                _engine.Logger.Log(result.LogLevel, $"{result.Message} ({result.AnalyzerName})");
-                if (result.LogLevel == LogLevel.Warning)
-                {
-                    _engine.LogBuildServerWarning(document, $"{result.Message} ({result.AnalyzerName})");
-                }
-                else if (result.LogLevel != LogLevel.None && result.LogLevel >= LogLevel.Error)
-                {
-                    _engine.LogBuildServerError(document, $"{result.Message} ({result.AnalyzerName})");
-                }
+                _engine.Logger.Log(result.LogLevel, document, $"{result.Message} ({result.AnalyzerName})");
             }
         }
 

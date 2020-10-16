@@ -95,14 +95,14 @@ namespace Statiq.App
                 // Log exceptions not already logged (including those thrown by the engine directly)
                 Exception[] exceptions = ex.Unwrap(false).ToArray();
                 bool logged = false;
-                foreach (Exception exception in exceptions.Where(x => !(x is LoggedException)))
+                foreach (Exception exception in exceptions.Where(x => !(x is LoggedException) && !x.Message.IsNullOrWhiteSpace()))
                 {
                     _logger.LogCritical(exception.Message);
                     logged = true;
                 }
                 if (!logged)
                 {
-                    _logger.LogCritical("One or more errors occurred");
+                    _logger.Log(LogLevel.Critical, new StatiqLogState { LogToBuildServer = false }, "One or more errors occurred");
                 }
                 _logger.LogInformation("To get more detailed logging output run with the \"-l Debug\" flag");
 

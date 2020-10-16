@@ -855,9 +855,9 @@ namespace Statiq.Core
                     else
                     {
                         // Otherwise, throw an exception so that this dependency is also skipped by it's dependents
-                        string error = $"{phase.PipelineName}/{phase.Phase} » Skipping pipeline due to dependency error";
-                        Logger.LogWarning(error);
-                        throw new ExecutionException(error);
+                        string message = $"{phase.PipelineName}/{phase.Phase} » Skipping pipeline due to dependency error";
+                        Logger.LogDebug(message);
+                        throw new ExecutionException(message);
                     }
                 }, CancellationToken);
         }

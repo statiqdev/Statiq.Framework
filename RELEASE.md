@@ -1,5 +1,7 @@
 # 1.0.0-beta.25
 
+- Improved logging, _all_ error and warning messages are now output on Azure Pipelines and GitHub Actions as checks.
+
 # 1.0.0-beta.24
 
 - Added `StartProcess.LogErrors()` to configure whether standard error output is logged as debug or error messages.

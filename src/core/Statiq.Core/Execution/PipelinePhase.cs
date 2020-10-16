@@ -199,7 +199,9 @@ namespace Statiq.Core
                 // Throw if any results are above error
                 if (results.Any(x => x.LogLevel != LogLevel.None && x.LogLevel >= LogLevel.Error))
                 {
-                    throw new ExecutionException("One or more analyzers produced error results, see analyzer report following execution");
+                    const string message = "One or more analyzers produced error results, see analyzer report following execution";
+                    _logger.Log(LogLevel.Error, new StatiqLogState { LogToBuildServer = false }, message);
+                    throw new LoggedException(new ExecutionException(message));
                 }
             }
         }

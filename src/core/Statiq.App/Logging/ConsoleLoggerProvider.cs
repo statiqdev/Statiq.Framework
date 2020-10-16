@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using Microsoft.Extensions.Logging;
+using Statiq.Common;
 
 namespace Statiq.App
 {
@@ -16,9 +17,11 @@ namespace Statiq.App
         private readonly BlockingCollection<ConsoleLogMessage> _messages =
             new BlockingCollection<ConsoleLogMessage>(new ConcurrentQueue<ConsoleLogMessage>());
         private readonly AutoResetEvent _doneProcessing = new AutoResetEvent(false);
+        private readonly BuildServerLogHelper _buildServerLogHelper;
 
-        public ConsoleLoggerProvider()
+        public ConsoleLoggerProvider(IReadOnlyFileSystem fileSystem = null)
         {
+            _buildServerLogHelper = new BuildServerLogHelper(fileSystem);
             Instances.Add(this);
             new Thread(() =>
             {
@@ -60,6 +63,7 @@ namespace Statiq.App
         {
             lock (WriteLock)
             {
+                // Get and write the main message
                 ConsoleContentBuffer.Clear();
                 message.GetConsoleContent(ConsoleContentBuffer);
                 foreach (ConsoleContent content in ConsoleContentBuffer)
@@ -70,6 +74,16 @@ namespace Statiq.App
                 }
                 Console.WriteLine();
                 Console.ResetColor();
+
+                // Get and write a build server message if appropriate
+                if (_buildServerLogHelper?.IsBuildServer == true && (message.State as StatiqLogState)?.LogToBuildServer == true)
+                {
+                    string buildServerMessage = _buildServerLogHelper.GetMessage(message.LogLevel, message.State as StatiqLogState, message.FormattedMessage);
+                    if (!buildServerMessage.IsNullOrEmpty())
+                    {
+                        Console.WriteLine(buildServerMessage);
+                    }
+                }
             }
         }
 

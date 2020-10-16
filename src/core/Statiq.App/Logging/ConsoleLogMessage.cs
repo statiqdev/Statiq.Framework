@@ -16,7 +16,8 @@ namespace Statiq.App
             LogLevel logLevel,
             in EventId eventId,
             string formattedMessage,
-            Exception exception)
+            Exception exception,
+            object state)
         {
             CategoryName = categoryName;
             Timestamp = timestamp;
@@ -24,6 +25,7 @@ namespace Statiq.App
             EventId = eventId;
             FormattedMessage = formattedMessage;
             Exception = exception;
+            State = state;
         }
 
         public string CategoryName { get; }
@@ -32,11 +34,12 @@ namespace Statiq.App
         public EventId EventId { get; }
         public string FormattedMessage { get; }
         public Exception Exception { get; }
+        public object State { get; }
 
         public void GetConsoleContent(List<ConsoleContent> consoleContentBuffer)
         {
             // Add the log level message if not a build server message
-            if (CategoryName != typeof(BuildServerLogger).FullName)
+            if (CategoryName != typeof(BuildServerLogHelper).FullName)
             {
                 string logLevelString = GetLogLevelString(LogLevel);
                 consoleContentBuffer.Add(GetLogLevelConsoleContent(LogLevel, logLevelString.AsMemory()));

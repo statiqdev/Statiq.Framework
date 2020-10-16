@@ -265,7 +265,7 @@ namespace Statiq.Common
             }
             if (sourceString.IsNullOrEmpty() && destinationString.IsNullOrEmpty())
             {
-                return $"ID: {Id}";
+                return $"{GetType().Name} ID: {Id}";
             }
             if (!sourceString.IsNullOrEmpty() && !destinationString.IsNullOrEmpty())
             {

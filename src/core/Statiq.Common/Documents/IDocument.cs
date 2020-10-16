@@ -101,12 +101,8 @@ namespace Statiq.Common
 
         // ILogger default implementation
 
-        void ILogger.Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception exception, Func<TState, Exception, string> formatter)
-        {
-            string displayString = this is IDisplayable displayable ? $" [{displayable.ToSafeDisplayString()}]" : string.Empty;
-            string logPrefix = $"{GetType().Name}{displayString}: ";
-            IExecutionContext.CurrentOrNull?.Log(logLevel, eventId, state, exception, (s, e) => logPrefix + formatter(s, e));
-        }
+        void ILogger.Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception exception, Func<TState, Exception, string> formatter) =>
+            IExecutionContext.CurrentOrNull?.Log(logLevel, this, eventId, state, exception, formatter);
 
         bool ILogger.IsEnabled(LogLevel logLevel) => IExecutionContext.CurrentOrNull?.IsEnabled(logLevel) ?? false;
 

@@ -8,6 +8,72 @@ namespace Statiq.Common
 {
     public static class ILoggerExtensions
     {
+        public static void LogDebug(this ILogger logger, IDocument document, string message) =>
+            logger.Log(LogLevel.Debug, document, message);
+
+        public static void LogTrace(this ILogger logger, IDocument document, string message) =>
+            logger.Log(LogLevel.Trace, document, message);
+
+        public static void LogInformation(this ILogger logger, IDocument document, string message) =>
+            logger.Log(LogLevel.Information, document, message);
+
+        public static void LogWarning(this ILogger logger, IDocument document, string message) =>
+            logger.Log(LogLevel.Warning, document, message);
+
+        public static void LogError(this ILogger logger, IDocument document, string message) =>
+            logger.Log(LogLevel.Error, document, message);
+
+        public static void LogCritical(this ILogger logger, IDocument document, string message) =>
+            logger.Log(LogLevel.Critical, document, message);
+
+        public static void Log(this ILogger logger, LogLevel logLevel, IDocument document, string message)
+        {
+            if (document is object)
+            {
+                logger.Log(logLevel, default, new StatiqLogState { Document = document }, null, (s, _) => InsertDocumentLogContent(message, s));
+            }
+            else
+            {
+                logger.Log(logLevel, message);
+            }
+        }
+
+        public static void Log<TState>(
+            this ILogger logger,
+            LogLevel logLevel,
+            IDocument document,
+            in EventId eventId,
+            TState state,
+            Exception exception,
+            Func<TState, Exception, string> formatter)
+        {
+            if (document is object)
+            {
+                logger.Log(logLevel, eventId, new StatiqLogState<TState>(state) { Document = document }, exception, (s, e) => InsertDocumentLogContent(formatter(s.InnerState, e), s));
+            }
+            else
+            {
+                logger.Log(logLevel, eventId, state, exception, formatter);
+            }
+        }
+
+        public static void Log(this ILogger logger, LogLevel logLevel, StatiqLogState state, string message) =>
+            logger.Log(logLevel, default, state, null, (_, __) => message);
+
+        private static string InsertDocumentLogContent(string message, StatiqLogState documentLogState)
+        {
+            if (documentLogState is object && documentLogState.Document is object)
+            {
+                string displayString = documentLogState.Document is IDisplayable displayable
+                    ? displayable.ToSafeDisplayString()
+                    : documentLogState.Document.GetType().Name;
+                return message.IsNullOrEmpty()
+                    ? $"[{displayString}]"
+                    : message.Insert(0, $"[{displayString}] ");
+            }
+            return message;
+        }
+
         /// <summary>
         /// Logs an appropriate error message for the exception, unwrapping <see cref="AggregateException"/>
         /// and <see cref="TargetInvocationException"/> exceptions and ignoring <see cref="LoggedException"/>.
