@@ -92,16 +92,31 @@ namespace Statiq.App
                     return ExitCode.OperationCanceled;
                 }
 
-                _logger.LogCritical(ex.Message);
-                Engine.LogBuildServerError(ex.Message);
+                // Log exceptions not already logged (including those thrown by the engine directly)
+                Exception[] exceptions = ex.Unwrap(false).ToArray();
+                bool logged = false;
+                foreach (Exception exception in exceptions.Where(x => !(x is LoggedException)))
+                {
+                    _logger.LogCritical(exception.Message);
+                    logged = true;
+                }
+                if (!logged)
+                {
+                    _logger.LogCritical("One or more errors occurred");
+                }
                 _logger.LogInformation("To get more detailed logging output run with the \"-l Debug\" flag");
 
-                return ex switch
+                // Unwrapped logged exceptions to figure out error code
+                exceptions = exceptions.SelectMany(x => x.Unwrap(true)).ToArray();
+                if (exceptions.Any(x => x is LogLevelFailureException))
                 {
-                    LogLevelFailureException _ => ExitCode.LogLevelFailure,
-                    ExecutionException _ => ExitCode.ExecutionError,
-                    _ => ExitCode.UnhandledError,
-                };
+                    return ExitCode.LogLevelFailure;
+                }
+                if (exceptions.Any(x => x is ExecutionException))
+                {
+                    return ExitCode.ExecutionError;
+                }
+                return ExitCode.UnhandledError;
             }
             return ExitCode.Normal;
         }

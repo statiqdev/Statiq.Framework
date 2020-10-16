@@ -165,19 +165,9 @@ namespace Statiq.Common
             {
                 return (await executeFunc(input, context)) ?? Array.Empty<IDocument>();
             }
-            catch (OperationCanceledException)
-            {
-                throw;
-            }
-            catch (LoggedException)
-            {
-                // Already logged
-                throw;
-            }
             catch (Exception ex)
             {
-                LogDocumentException(input, ex);
-                throw new LoggedException(ex);
+                throw input.LogAndWrapException(ex);
             }
         }
 
@@ -199,39 +189,9 @@ namespace Statiq.Common
             {
                 return executeFunc(input, context) ?? Array.Empty<IDocument>();
             }
-            catch (OperationCanceledException)
-            {
-                throw;
-            }
-            catch (LoggedException)
-            {
-                // Already logged
-                throw;
-            }
             catch (Exception ex)
             {
-                LogDocumentException(input, ex);
-                throw new LoggedException(ex);
-            }
-        }
-
-        private static void LogDocumentException(IDocument document, Exception ex)
-        {
-            // Unwrap aggregate and invocation exceptions
-            switch (ex)
-            {
-                case AggregateException aggregateException when aggregateException.InnerExceptions.Count > 0:
-                    foreach (Exception innerException in aggregateException.InnerExceptions)
-                    {
-                        document.LogError(innerException.Message);
-                    }
-                    break;
-                case TargetInvocationException invocationException when invocationException.InnerException is object:
-                    document.LogError(invocationException.InnerException.Message);
-                    break;
-                default:
-                    document.LogError(ex.Message);
-                    break;
+                throw input.LogAndWrapException(ex);
             }
         }
     }

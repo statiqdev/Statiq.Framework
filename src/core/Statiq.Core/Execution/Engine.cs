@@ -921,28 +921,7 @@ namespace Statiq.Core
                     catch (Exception ex)
                     {
                         outputs = ImmutableArray<IDocument>.Empty;
-                        if (!(ex is OperationCanceledException) && !(ex is LoggedException))
-                        {
-                            // Unwrap aggregate and invocation exceptions
-                            string error = $"Error while executing module {moduleName} in {contextData.PipelinePhase.PipelineName}/{contextData.PipelinePhase.Phase}: ";
-                            switch (ex)
-                            {
-                                case AggregateException aggregateException when aggregateException.InnerExceptions.Count > 0:
-                                    foreach (Exception innerException in aggregateException.InnerExceptions)
-                                    {
-                                        logger.LogError(error + innerException.Message);
-                                    }
-                                    break;
-                                case TargetInvocationException invocationException when invocationException.InnerException is object:
-                                    logger.LogError(error + invocationException.InnerException.Message);
-                                    break;
-                                default:
-                                    logger.LogError(error + ex.Message);
-                                    break;
-                            }
-                            throw new LoggedException(ex);
-                        }
-                        throw;
+                        throw logger.LogAndWrapException(ex);
                     }
                 }
             }
