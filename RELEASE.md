@@ -1,5 +1,7 @@
 # 1.0.0-beta.25
 
+- **Breaking change:** Removed the `Statiq.Html.ValidateLinks` module in favor of analyzers in Statiq Web (which have already been improved beyond the module).
+  If you still need access to this module directly, copy the code from a previous version into your own project and reference the `Statiq.Html` package and it should continue to work.
 - Improved logging, _all_ error and warning messages are now output on Azure Pipelines and GitHub Actions as checks.
 
 # 1.0.0-beta.24
