@@ -1,3 +1,5 @@
+# 1.0.0-beta.26
+
 # 1.0.0-beta.25
 
 - **Breaking change:** Removed the `Statiq.Html.ValidateLinks` module in favor of analyzers in Statiq Web (which have already been improved beyond the module).
