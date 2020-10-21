@@ -45,7 +45,7 @@ namespace Statiq.Common
             return !valuesEnumerator.MoveNext();
         }
 
-        public static T GetPrevious<T>(IEnumerable<T> source, T item) =>
+        public static T GetPrevious<T>(this IEnumerable<T> source, T item) =>
             source.GetPrevious(item, EqualityComparer<T>.Default);
 
         public static T GetPrevious<T>(this IEnumerable<T> source, T item, IEqualityComparer<T> comparer)
