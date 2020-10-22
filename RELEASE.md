@@ -1,5 +1,7 @@
 # 1.0.0-beta.26
 
+- Fixed an unnecessary pipeline dependency check for deployment pipelines that prevented setting up dependency chains involving deployment pipelines and only dependent non-deployment pipelines.
+
 # 1.0.0-beta.25
 
 - **Breaking change:** Removed the `Statiq.Html.ValidateLinks` module in favor of analyzers in Statiq Web (which have already been improved beyond the module).

@@ -324,23 +324,6 @@ namespace Statiq.Core.Tests.Execution
             }
 
             [Test]
-            public void ThrowsForDependencyOnNonDeploymentPipeline()
-            {
-                // Given
-                IPipelineCollection pipelines = new TestPipelineCollection();
-                pipelines.Add("Bar", new TestPipeline
-                {
-                    Deployment = true,
-                    Dependencies = new HashSet<string>(new[] { "Foo" })
-                });
-                pipelines.Add("Foo", new TestPipeline());
-                ILogger logger = new TestLoggerProvider().CreateLogger(null);
-
-                // When, Then
-                Should.Throw<PipelineException>(() => Engine.GetPipelinePhases(pipelines, logger));
-            }
-
-            [Test]
             public void ThrowsForDependencyOnIsolatedPipeline()
             {
                 // Given

@@ -755,11 +755,6 @@ namespace Statiq.Core
                             throw new PipelineException($"Pipeline {name} cannot have a dependency on isolated pipeline {dependencyName}");
                         }
 
-                        if (pipeline.Deployment && !dependency.Deployment)
-                        {
-                            throw new PipelineException($"Deployment pipeline {name} cannot have a dependency on non-deployment pipeline {dependencyName} (all deployment pipelines are automatically dependent on non-deployment pipelines)");
-                        }
-
                         if (dependency.Deployment && !pipeline.Deployment)
                         {
                             throw new PipelineException($"Non-deployment pipeline {name} cannot have a dependency on deployment pipeline {dependencyName}");
