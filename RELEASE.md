@@ -1,3 +1,5 @@
+# 1.0.0-beta.28
+
 # 1.0.0-beta.27
 
 - Fixed a bug with deployment pipelines getting document outputs from non-deployment pipelines.
