@@ -53,8 +53,12 @@ namespace Statiq.Core
         /// <summary>
         /// The first dependency always holds the input documents for this phase.
         /// </summary>
+        /// <remarks>
+        /// Deployment pipeline input phases have a dependency on non-deployment pipeline output phases for ordering,
+        /// but we don't want to bring those in to deployment input phases so always provide an empty set of inputs to input phases.
+        /// </remarks>
         /// <returns>The input documents for this phase.</returns>
-        private ImmutableArray<IDocument> GetInputs() => Dependencies.Length == 0 ? ImmutableArray<IDocument>.Empty : Dependencies[0].Outputs;
+        private ImmutableArray<IDocument> GetInputs() => Phase == Phase.Input || Dependencies.Length == 0 ? ImmutableArray<IDocument>.Empty : Dependencies[0].Outputs;
 
         // This is the main execute method called by the engine
         public async Task ExecuteAsync(

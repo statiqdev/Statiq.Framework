@@ -824,7 +824,7 @@ namespace Statiq.Core
             Dictionary<PipelinePhase, Task> phaseTasks,
             PipelinePhase phase)
         {
-            // Only the input phase won't have dependencies, all other phases at least depend on the previous phase of their pipeline
+            // Only the non-deployment input phase won't have dependencies, all other phases at least depend on the previous phase of their pipeline
             if (phase.Dependencies.Length == 0)
             {
                 // This will immediately queue the input phase while we continue figuring out tasks, but that's okay
@@ -886,32 +886,40 @@ namespace Statiq.Core
                         ExecutionContext moduleContext = new ExecutionContext(contextData, parent, module, inputs);
                         moduleContext.LogDebug($"Starting module execution... ({inputs.Length} input document(s))");
 
-                        // Raise the before event and use overridden results if provided
-                        BeforeModuleExecution beforeEvent = new BeforeModuleExecution(moduleContext);
-                        bool raised = await contextData.Engine.Events.RaiseAsync(beforeEvent);
-                        if (raised && beforeEvent.OverriddenOutputs is object)
+                        // Raise events and execute the module
+                        try
                         {
-                            outputs = beforeEvent.OverriddenOutputs.ToImmutableDocumentArray();
-                        }
-                        else
-                        {
-                            // Execute the module
-                            IEnumerable<IDocument> moduleResult = await (module.ExecuteAsync(moduleContext) ?? Task.FromResult<IEnumerable<IDocument>>(null));  // Handle a null Task return
-                            outputs = moduleResult.ToImmutableDocumentArray();
-                        }
-                        stopwatch.Stop();
+                            // Raise the before event and use overridden results if provided
+                            BeforeModuleExecution beforeEvent = new BeforeModuleExecution(moduleContext);
+                            bool raised = await contextData.Engine.Events.RaiseAsync(beforeEvent);
+                            if (raised && beforeEvent.OverriddenOutputs is object)
+                            {
+                                outputs = beforeEvent.OverriddenOutputs.ToImmutableDocumentArray();
+                            }
+                            else
+                            {
+                                // Execute the module
+                                IEnumerable<IDocument> moduleResult = await (module.ExecuteAsync(moduleContext) ?? Task.FromResult<IEnumerable<IDocument>>(null));  // Handle a null Task return
+                                outputs = moduleResult.ToImmutableDocumentArray();
+                            }
+                            stopwatch.Stop();
 
-                        // Raise the after event
-                        AfterModuleExecution afterEvent = new AfterModuleExecution(moduleContext, outputs, stopwatch.ElapsedMilliseconds);
-                        raised = await contextData.Engine.Events.RaiseAsync(afterEvent);
-                        if (raised && afterEvent.OverriddenOutputs is object)
-                        {
-                            outputs = afterEvent.OverriddenOutputs.ToImmutableDocumentArray();
-                        }
+                            // Raise the after event
+                            AfterModuleExecution afterEvent = new AfterModuleExecution(moduleContext, outputs, stopwatch.ElapsedMilliseconds);
+                            raised = await contextData.Engine.Events.RaiseAsync(afterEvent);
+                            if (raised && afterEvent.OverriddenOutputs is object)
+                            {
+                                outputs = afterEvent.OverriddenOutputs.ToImmutableDocumentArray();
+                            }
 
-                        // Log results
-                        moduleContext.LogDebug($"Finished module execution ({outputs.Length} output document(s), {stopwatch.ElapsedMilliseconds} ms)");
-                        inputs = outputs;
+                            // Log results
+                            moduleContext.LogDebug($"Finished module execution ({outputs.Length} output document(s), {stopwatch.ElapsedMilliseconds} ms)");
+                            inputs = outputs;
+                        }
+                        catch (Exception moduleEx)
+                        {
+                            throw moduleContext.LogAndWrapException(moduleEx);
+                        }
                     }
                     catch (Exception ex)
                     {

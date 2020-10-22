@@ -1,6 +1,8 @@
 # 1.0.0-beta.27
 
-- Fixed another bug with deployment pipelines getting results from non-deployment pipelines.
+- Fixed a bug with deployment pipelines getting document outputs from non-deployment pipelines.
+- Fixed a bug where deployment pipeline input phases were starting with outputs from non-deployment pipelines (input phases should always start empty).
+- Improved exception logging when in a module to include pipeline, phase, and module name.
 
 # 1.0.0-beta.26
 
