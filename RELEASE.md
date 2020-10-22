@@ -1,5 +1,7 @@
 # 1.0.0-beta.27
 
+- Fixed another bug with deployment pipelines getting results from non-deployment pipelines.
+
 # 1.0.0-beta.26
 
 - Fixed an unnecessary pipeline dependency check for deployment pipelines that prevented setting up dependency chains involving deployment pipelines and only dependent non-deployment pipelines.

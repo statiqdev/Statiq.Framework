@@ -72,10 +72,11 @@ namespace Statiq.Core
             Dictionary<string, DocumentList<IDocument>> outputs = new Dictionary<string, DocumentList<IDocument>>(StringComparer.OrdinalIgnoreCase);
 
             // If we're in a deployment pipeline, add outputs from all non-deployment output phases
+            // Not all non-deployment pipelines may be executing though, so do a check to be sure we actually have outputs
             if (_currentPhase.Pipeline.Deployment)
             {
                 outputs.AddRange(_pipelines.AsEnumerable()
-                    .Where(x => !x.Value.Deployment)
+                    .Where(x => !x.Value.Deployment && _phaseResults.ContainsKey(x.Key))
                     .Select(x => KeyValuePair.Create(x.Key, GetOutputs(_phaseResults[x.Key], Phase.Output))));
             }
 

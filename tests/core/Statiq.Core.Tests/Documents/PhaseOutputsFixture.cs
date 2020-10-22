@@ -152,6 +152,39 @@ namespace Statiq.Core.Tests.Documents
                 // Then
                 result.ShouldBe(new[] { a1, b1, b2 }, true);
             }
+
+            [Test]
+            public void OutputPhaseFromDeploymentIgnoresNonExecutingNonDeploymentPipelines()
+            {
+                // Given
+                TestDocument a1 = new TestDocument("a1");
+                TestDocument b1 = new TestDocument("b1");
+                TestDocument b2 = new TestDocument("b2");
+                TestDocument c1 = new TestDocument("c1");
+                TestDocument d1 = new TestDocument("d1");
+                TestDocument d2 = new TestDocument("d2");
+                ConcurrentDictionary<string, PhaseResult[]> phaseResults =
+                    new ConcurrentDictionary<string, PhaseResult[]>(StringComparer.OrdinalIgnoreCase);
+                IPipelineCollection pipelines = new TestPipelineCollection();
+                PipelinePhase phaseA =
+                    GetPipelineAndPhase("A", Phase.Output, pipelines, phaseResults, new[] { a1 }, Phase.Output);
+                PipelinePhase phaseB =
+                    GetPipelineAndPhase("B", Phase.Output, pipelines, phaseResults, new[] { b1, b2 }, Phase.Output, phaseA);
+                PipelinePhase phaseC =
+                    GetPipelineAndPhase("C", Phase.Output, pipelines, phaseResults, new[] { c1 }, Phase.Output, phaseB);
+                phaseC.Pipeline.Deployment = true;
+                PipelinePhase phaseD =
+                    GetPipelineAndPhase("D", Phase.Output, pipelines, phaseResults, new[] { d1, d2 }, Phase.Output);
+                phaseD.Pipeline.Deployment = true;
+                phaseResults.Remove("A", out _);
+                PhaseOutputs documentCollection = new PhaseOutputs(phaseResults, phaseC, pipelines);
+
+                // When
+                IDocument[] result = documentCollection.ToArray();
+
+                // Then
+                result.ShouldBe(new[] { b1, b2 }, true);
+            }
         }
 
         public class ExceptPipelineTests : PhaseOutputsFixture
