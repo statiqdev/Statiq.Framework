@@ -152,6 +152,14 @@ namespace Statiq.Razor
                 Model = request.Model
             };
 
+            if (request.ViewData != null)
+            {
+                foreach (KeyValuePair<string, object> pair in request.ViewData)
+                {
+                    viewData.Add(pair);
+                }
+            }
+
             ITempDataDictionary tempData = new TempDataDictionary(actionContext.HttpContext, serviceProvider.GetRequiredService<ITempDataProvider>());
 
             return new ViewContext(

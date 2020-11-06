@@ -41,6 +41,7 @@ namespace Statiq.Razor
         private Config<NormalizedPath> _viewStartPath;
         private Config<NormalizedPath> _layoutPath;
         private Config<object> _model;
+        private IDictionary<string, Config<object>> _viewData = null;
         private string _ignorePrefix = "_";
 
         /// <summary>
@@ -140,6 +141,25 @@ namespace Statiq.Razor
         }
 
         /// <summary>
+        /// Specifies ViewData to use for each page based on the current input
+        /// document and context.
+        /// </summary>
+        /// <param name="key">The view data key.</param>
+        /// <param name="model">A delegate that returns the model.</param>
+        /// <returns>The current module instance.</returns>
+        public RenderRazor WithViewData(string key, Config<object> model)
+        {
+            if (_viewData == null)
+            {
+                _viewData = new Dictionary<string, Config<object>>();
+            }
+
+            _viewData[key] = model;
+
+            return this;
+        }
+
+        /// <summary>
         /// Specifies a file prefix to ignore. If a document has a metadata value for <c>SourceFileName</c> and
         /// that metadata value starts with the specified prefix, that document will not be processed or
         /// output by the module. By default, the Razor module ignores all documents prefixed with
@@ -206,7 +226,8 @@ namespace Statiq.Razor
                             LayoutLocation = layoutLocation,
                             ViewStartLocation = viewStartLocation,
                             RelativePath = GetRelativePath(input, context),
-                            Model = _model is null ? input : await _model.GetValueAsync(input, context)
+                            Model = _model is null ? input : await _model.GetValueAsync(input, context),
+                            ViewData = await GetViewDataAsync(_viewData, input, context),
                         };
 
                         await razorService.RenderAsync(request);
@@ -215,6 +236,30 @@ namespace Statiq.Razor
                     return input.Clone(context.GetContentProvider(contentStream, MediaTypes.Html));
                 }
             }
+        }
+
+        private async Task<IEnumerable<KeyValuePair<string, object>>> GetViewDataAsync(IDictionary<string, Config<object>> viewData, IDocument input, IExecutionContext context)
+        {
+            if (viewData == null || !viewData.Any())
+            {
+                return null;
+            }
+
+            List<KeyValuePair<string, object>> requestViewData = new List<KeyValuePair<string, object>>();
+            foreach (KeyValuePair<string, Config<object>> pair in viewData)
+            {
+                try
+                {
+                    object value = await pair.Value.GetValueAsync(input, context);
+                    requestViewData.Add(new KeyValuePair<string, object>(pair.Key, value));
+                }
+                catch (Exception ex)
+                {
+                    throw new InvalidOperationException($"Failed to get ViewData value '{pair.Key}'", ex);
+                }
+            }
+
+            return requestViewData;
         }
 
         private string GetRelativePath(IDocument document, IExecutionContext context)
