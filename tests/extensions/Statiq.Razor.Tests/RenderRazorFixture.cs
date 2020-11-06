@@ -1,15 +1,13 @@
-﻿using System.Collections.Generic;
-using System.Collections.Immutable;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 using NUnit.Framework;
 using Shouldly;
 using Statiq.Common;
 using Statiq.Core;
 using Statiq.Testing;
-using System;
 
 namespace Statiq.Razor.Tests
 {
@@ -178,12 +176,12 @@ namespace Statiq.Razor.Tests
                 TestDocument document = GetDocument(
                     "/input/Temp/temp.txt",
                     @"<p></p>");
-                
+
                 RenderRazor razor = new RenderRazor()
                     .WithViewData("Test", Config.FromContext(ctx => throw new InvalidOperationException("Kaboom")));
 
                 // When
-                var exception = await Should.ThrowAsync<InvalidOperationException>(  () => ExecuteAsync(document, context, razor).SingleAsync() );
+                InvalidOperationException exception = await Should.ThrowAsync<InvalidOperationException>(() => ExecuteAsync(document, context, razor).SingleAsync());
 
                 // Then
                 exception.Message.ShouldContain("'Test'");
