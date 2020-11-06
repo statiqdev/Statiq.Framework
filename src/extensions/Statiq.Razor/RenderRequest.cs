@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using Statiq.Common;
 
@@ -26,5 +27,7 @@ namespace Statiq.Razor
         public IExecutionContext Context { get; set; }
 
         public IDocument Document { get; set; }
+
+        public IEnumerable<KeyValuePair<string,object>> ViewData { get; set; }
     }
 }

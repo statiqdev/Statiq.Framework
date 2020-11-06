@@ -9,6 +9,7 @@ using Shouldly;
 using Statiq.Common;
 using Statiq.Core;
 using Statiq.Testing;
+using System;
 
 namespace Statiq.Razor.Tests
 {
@@ -124,6 +125,68 @@ namespace Statiq.Razor.Tests
 
                 // Then
                 result.Content.ShouldBe("<p>3</p>");
+            }
+
+            [Test]
+            public async Task ViewData()
+            {
+                // Given
+                Engine engine = new Engine();
+                TestExecutionContext context = GetExecutionContext(engine);
+                TestDocument document = GetDocument(
+                    "/input/Temp/temp.txt",
+                    @"<p>@ViewData[""Test""]</p>");
+                string model = "View data";
+                RenderRazor razor = new RenderRazor().WithViewData("Test", Config.FromValue(model));
+
+                // When
+                TestDocument result = await ExecuteAsync(document, context, razor).SingleAsync();
+
+                // Then
+                result.Content.ShouldBe("<p>View data</p>");
+            }
+
+            [Test]
+            public async Task ViewDataMultiple()
+            {
+                // Given
+                Engine engine = new Engine();
+                TestExecutionContext context = GetExecutionContext(engine);
+                TestDocument document = GetDocument(
+                    "/input/Temp/temp.txt",
+                    @"@{ var numbers = (int[])ViewData[""List""]; }
+<p>@ViewData[""Text""] @numbers[2]</p>");
+                string text = "Number :";
+                IList<int> list = new[] { 1, 2, 3 };
+                RenderRazor razor = new RenderRazor()
+                    .WithViewData("Text", Config.FromValue(text))
+                    .WithViewData("List", Config.FromValue(list));
+
+                // When
+                TestDocument result = await ExecuteAsync(document, context, razor).SingleAsync();
+
+                // Then
+                result.Content.ShouldBe("<p>Number : 3</p>");
+            }
+
+            [Test]
+            public async Task ViewDataException()
+            {
+                // Given
+                Engine engine = new Engine();
+                TestExecutionContext context = GetExecutionContext(engine);
+                TestDocument document = GetDocument(
+                    "/input/Temp/temp.txt",
+                    @"<p></p>");
+                
+                RenderRazor razor = new RenderRazor()
+                    .WithViewData("Test", Config.FromContext(ctx => throw new InvalidOperationException("Kaboom")));
+
+                // When
+                var exception = await Should.ThrowAsync<InvalidOperationException>(  () => ExecuteAsync(document, context, razor).SingleAsync() );
+
+                // Then
+                exception.Message.ShouldContain("'Test'");
             }
 
             [Test]
