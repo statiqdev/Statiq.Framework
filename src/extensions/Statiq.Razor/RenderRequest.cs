@@ -28,6 +28,6 @@ namespace Statiq.Razor
 
         public IDocument Document { get; set; }
 
-        public IEnumerable<KeyValuePair<string,object>> ViewData { get; set; }
+        public IEnumerable<KeyValuePair<string, object>> ViewData { get; set; }
     }
 }
