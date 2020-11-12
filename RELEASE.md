@@ -1,5 +1,7 @@
 # 1.0.0-beta.28
 
+- Added a new `ProcessLauncher` utility class to `Statiq.Common` that does what the `StartProcess` module does, but in a way that can be used outside of the module since it's such a general use case.
+
 # 1.0.0-beta.27
 
 - Fixed a bug with deployment pipelines getting document outputs from non-deployment pipelines.

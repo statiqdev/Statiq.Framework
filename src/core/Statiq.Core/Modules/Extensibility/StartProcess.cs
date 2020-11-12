@@ -49,13 +49,12 @@ namespace Statiq.Core
         private const string LogErrorsKey = nameof(LogErrorsKey);
         private const string HideArgumentsKey = nameof(HideArgumentsKey);
 
-        private readonly ConcurrentCache<int, (Process Process, ILogger Logger, Action<Process> ExitedLogAction)> _processes =
-            new ConcurrentCache<int, (Process Process, ILogger Logger, Action<Process> ExitedLogAction)>();
+        private readonly ConcurrentBag<ProcessLauncher> _processLaunchers = new ConcurrentBag<ProcessLauncher>();
 
         private bool _background;
         private bool _onlyOnce;
         private bool _executed;
-        private Func<int, bool> _errorExitCode = x => x != 0;
+        private Func<int, bool> _isErrorExitCode = x => x != 0;
 
         /// <summary>
         /// Starts a process for the specified file name and arguments.
@@ -192,7 +191,7 @@ namespace Statiq.Core
         }
 
         /// <summary>
-        /// Toggles whether to the arguments list when logging the process command.
+        /// Toggles whether to hide the arguments list when logging the process command.
         /// </summary>
         /// <param name="hideArguments"><c>true</c> or <c>null</c> to hide the arguments, <c>false</c> otherwise.</param>
         /// <returns>The current module instance.</returns>
@@ -235,11 +234,11 @@ namespace Statiq.Core
         /// By default any non-zero exit code is considered an error. Some processes return non-zero
         /// exit codes to indicate success and this lets you treat those as successful.
         /// </remarks>
-        /// <param name="errorExitCode">A function that determines if the exit code is an error by returning <c>true</c>.</param>
+        /// <param name="isErrorExitCode">A function that determines if the exit code is an error by returning <c>true</c>.</param>
         /// <returns>The current module instance.</returns>
-        public StartProcess WithErrorExitCode(Func<int, bool> errorExitCode)
+        public StartProcess WithErrorExitCode(Func<int, bool> isErrorExitCode)
         {
-            _errorExitCode = errorExitCode.ThrowIfNull(nameof(errorExitCode));
+            _isErrorExitCode = isErrorExitCode.ThrowIfNull(nameof(isErrorExitCode));
             return this;
         }
 
@@ -268,206 +267,92 @@ namespace Statiq.Core
 
             // Get the filename
             string fileName = values.GetString(FileName);
-            if (string.IsNullOrWhiteSpace(fileName))
+            if (fileName.IsNullOrWhiteSpace())
             {
                 context.LogDebug("Provided file name was null or empty, skipping and returning input document");
                 return input.Yield();
             }
 
-            // Create the process start info
-            ProcessStartInfo startInfo = new ProcessStartInfo
-            {
-                FileName = fileName,
-                CreateNoWindow = true,
-                UseShellExecute = false,
-                RedirectStandardOutput = true,
-                RedirectStandardError = true
-            };
-
-            // Set arguments
-            string arguments = values.GetString(Arguments);
-            if (!string.IsNullOrEmpty(arguments))
-            {
-                startInfo.Arguments = arguments;
-            }
-
-            // Set working directory
-            string workingDirectory = values.GetString(WorkingDirectory);
-            if (string.IsNullOrWhiteSpace(workingDirectory))
-            {
-                startInfo.WorkingDirectory = context.FileSystem.RootPath.FullPath;
-            }
-            else
-            {
-                startInfo.WorkingDirectory = context.FileSystem.RootPath.Combine(workingDirectory).FullPath;
-            }
-
-            // Set environment variables for the process
-            foreach (KeyValuePair<string, string> environmentVariable in values.GetList(EnvironmentVariables, Array.Empty<KeyValuePair<string, string>>()))
-            {
-                startInfo.Environment[environmentVariable.Key] = environmentVariable.Value;
-                startInfo.EnvironmentVariables[environmentVariable.Key] = environmentVariable.Value;
-            }
-
-            // Create the process
-            Process process = new Process
-            {
-                StartInfo = startInfo
-            };
-
-            // Raises Process.Exited immediately instead of when checked via .WaitForExit() or .HasExited
-            process.EnableRaisingEvents = true;
-            process.Exited += ProcessExited;
-
-            // Prepare the streams
-            bool keepContent = values.GetBool(KeepContentKey);
+            // Create the process launcher
             bool continueOnError = values.GetBool(ContinueOnErrorKey);
             bool logOutput = values.GetBool(LogOutputKey);
             bool logErrors = values.GetBool(LogErrorsKey);
             bool hideArguments = values.GetBool(HideArgumentsKey);
-            string logCommand = $"{process.StartInfo.FileName}{(hideArguments ? string.Empty : (" " + process.StartInfo.Arguments))}";
-            ILoggerFactory loggerFactory = context.GetService<ILoggerFactory>();
+            ProcessLauncher processLauncher = new ProcessLauncher(fileName)
+            {
+                IsBackground = _background,
+                ContinueOnError = continueOnError,
+                LogOutput = logOutput,
+                LogErrors = logErrors,
+                HideArguments = hideArguments,
+                IsErrorExitCode = _isErrorExitCode
+            };
+            _processLaunchers.Add(processLauncher);
+
+            // Set arguments
+            string arguments = values.GetString(Arguments);
+            if (!arguments.IsNullOrEmpty())
+            {
+                processLauncher.Arguments = arguments;
+            }
+
+            // Set working directory
+            string workingDirectory = values.GetString(WorkingDirectory);
+            if (workingDirectory.IsNullOrWhiteSpace())
+            {
+                processLauncher.WorkingDirectory = context.FileSystem.RootPath.FullPath;
+            }
+            else
+            {
+                processLauncher.WorkingDirectory = context.FileSystem.RootPath.Combine(workingDirectory).FullPath;
+            }
+
+            // Set environment variables for the process
+            processLauncher.WithEnvironmentVariables(values.GetList(EnvironmentVariables, Array.Empty<KeyValuePair<string, string>>()));
+
+            // Start the process
+            bool keepContent = values.GetBool(KeepContentKey);
             using (Stream contentStream = _background || keepContent ? null : await context.GetContentStreamAsync())
             {
-                using (StreamWriter contentWriter = contentStream is null ? null : new StreamWriter(contentStream, leaveOpen: true))
+                ProcessLauncherResult result;
+                try
                 {
-                    using (StringWriter errorWriter = !_background && continueOnError ? new StringWriter() : null)
-                    {
-                        // Write to the stream on data received
-                        // If we happen to write before we've created and added the process to the collection, go ahead and do that too
-                        process.OutputDataReceived += (_, e) =>
-                        {
-                            if (!string.IsNullOrEmpty(e.Data))
-                            {
-                                (Process Process, ILogger Logger, Action<Process> ExitedLogAction) item = _processes.GetOrAdd(
-                                    process.Id,
-                                    _ => (process, loggerFactory?.CreateLogger($"{process.Id}: {Path.GetFileName(startInfo.FileName)}"), (Action<Process>)ExitedLogAction));
-                                item.Logger?.Log(logOutput ? LogLevel.Information : LogLevel.Debug, e.Data);
-                                contentWriter?.WriteLine(e.Data);
-                            }
-                        };
-                        process.ErrorDataReceived += (_, e) =>
-                        {
-                            if (!string.IsNullOrEmpty(e.Data))
-                            {
-                                (Process Process, ILogger Logger, Action<Process> ExitedLogAction) item = _processes.GetOrAdd(
-                                    process.Id,
-                                    _ => (process, loggerFactory?.CreateLogger($"{process.Id}: {Path.GetFileName(startInfo.FileName)}"), (Action<Process>)ExitedLogAction));
-                                item.Logger?.Log(logErrors ? LogLevel.Error : LogLevel.Debug, e.Data);
-                                errorWriter?.WriteLine(e.Data);
-                            }
-                        };
-
-                        // Start the process
-                        process.Start();
-                        process.BeginOutputReadLine();
-                        process.BeginErrorReadLine();
-
-                        // Use a separate logger, but only create and add it if it wasn't already from one of the received events
-                        _processes.GetOrAdd(
-                            process.Id,
-                            _ => (process, loggerFactory?.CreateLogger($"{process.Id}: {Path.GetFileName(startInfo.FileName)}"), (Action<Process>)ExitedLogAction));
-
-                        // Log the process command
-                        context.Log(
-                            logOutput ? LogLevel.Information : LogLevel.Debug,
-                            $"Started {(_background ? "background " : string.Empty)}process {process.Id}: {logCommand}");
-
-                        // If this is a background process, let it run and just return the original document
-                        if (_background)
-                        {
-                            return input.Yield();
-                        }
-
-                        // Otherwise wait for exit
-                        int timeout = values.GetInt(Timeout);
-                        int exitCode = 0;
-                        try
-                        {
-                            if (timeout > 0)
-                            {
-                                if (process.WaitForExit(timeout))
-                                {
-                                    // To ensure that asynchronous event handling has been completed, call the WaitForExit() overload that takes no parameter after receiving a true from this overload.
-                                    // From https://docs.microsoft.com/en-us/dotnet/api/system.diagnostics.process.waitforexit?redirectedfrom=MSDN&view=netcore-3.1#System_Diagnostics_Process_WaitForExit_System_Int32_
-                                    // See also https://github.com/dotnet/runtime/issues/27128
-                                    process.WaitForExit();
-                                }
-                            }
-                            else
-                            {
-                                process.WaitForExit();
-                            }
-
-                            // Log exit (synchronous)
-                            exitCode = process.ExitCode;
-                            if (_processes.TryRemove(process.Id, out (Process Process, ILogger Logger, Action<Process> ExitedLogAction) item))
-                            {
-                                item.ExitedLogAction(item.Process);
-                            }
-
-                            // Only throw if running synchronously
-                            if (_errorExitCode(exitCode) && !continueOnError)
-                            {
-                                throw new LoggedException(new ExecutionException(GetExitLogMessage(process, true)));
-                            }
-                        }
-                        finally
-                        {
-                            process.Close();
-                        }
-
-                        // Finish the stream and return a document with output as content
-                        contentWriter?.Flush();
-                        errorWriter?.Flush();
-                        string errorData = errorWriter?.ToString();
-                        MetadataItems metadata = new MetadataItems
-                        {
-                            { ExitCode, exitCode }
-                        };
-                        if (!string.IsNullOrEmpty(errorData))
-                        {
-                            metadata.Add(ErrorData, errorData);
-                        }
-                        return context.CloneOrCreateDocument(
-                            input,
-                            metadata,
-                            contentStream is null ? null : context.GetContentProvider(contentStream))
-                            .Yield();
-                    }
+                    result = processLauncher.Start(contentStream, context.Logger, context);
                 }
-            }
+                catch (Exception ex)
+                {
+                    throw new LoggedException(ex);
+                }
 
-            // Logging that occurs on process exit
-            void ExitedLogAction(Process p)
-            {
-                bool errorExitCode = _errorExitCode(process.ExitCode);
-                string logMessage = GetExitLogMessage(p, errorExitCode);
-                context.Log(logOutput ? (errorExitCode ? LogLevel.Error : LogLevel.Information) : LogLevel.Debug, logMessage);
-            }
+                // If this is a background process, let it run and just return the original document
+                if (processLauncher.IsBackground)
+                {
+                    return input.Yield();
+                }
 
-            string GetExitLogMessage(Process p, bool errorExitCode) => $"Process {p.Id} exited with {(errorExitCode ? "error " : string.Empty)}code {p.ExitCode}: {logCommand}";
-        }
-
-        // Log exit (asynchronous)
-        private void ProcessExited(object sender, EventArgs e)
-        {
-            Process process = (Process)sender;
-            if (_processes.TryRemove(process.Id, out (Process Process, ILogger Logger, Action<Process> ExitedLogAction) item))
-            {
-                item.ExitedLogAction(item.Process);
+                // Set the metadata items and return
+                MetadataItems metadata = new MetadataItems
+                {
+                    { ExitCode, result.ExitCode }
+                };
+                if (!result.ErrorData.IsNullOrEmpty())
+                {
+                    metadata.Add(ErrorData, result.ErrorData);
+                }
+                return context.CloneOrCreateDocument(
+                    input,
+                    metadata,
+                    contentStream is null ? null : context.GetContentProvider(contentStream))
+                    .Yield();
             }
         }
 
         public void Dispose()
         {
-            // Close processes that haven't already exited
-            foreach ((Process Process, ILogger Logger, Action<Process> ExitedLogAction) item in _processes.Values)
+            foreach (ProcessLauncher processLauncher in _processLaunchers)
             {
-                item.Process.Close();
-                item.Process.Exited -= ProcessExited;
+                processLauncher.Dispose();
             }
-            _processes.Clear();
         }
     }
 }
