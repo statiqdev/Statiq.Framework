@@ -1,5 +1,6 @@
 # 1.0.0-beta.28
 
+- Added support for specifying `ViewData` in the `RenderRazor` module (#145, #146, thanks @alanta).
 - Added a new `BeforeDeployment` event that gets raised before any deployment pipelines are run (or at the end of execution if there are no deployment pipelines).
 - Added a new `ProcessLauncher` utility class to `Statiq.Common` that does what the `StartProcess` module does, but in a way that can be used outside of the module since it's such a general use case.
 

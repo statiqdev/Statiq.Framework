@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Razor.TagHelpers;
 using Microsoft.Extensions.DependencyInjection;
 using NUnit.Framework;
 using Shouldly;
@@ -591,6 +592,56 @@ namespace Statiq.Razor.Tests
                 result.Content.ShouldBe(
                     @"<p>Before</p>
 <div>Hi!</div>
+<p>After</p>",
+                    StringCompareShould.IgnoreLineEndings);
+            }
+
+            [Test]
+            public async Task PartialTagHelper()
+            {
+                // Given
+                Engine engine = new Engine();
+                TestExecutionContext context = GetExecutionContext(engine);
+                TestDocument document = GetDocument(
+                    "/input/RelativePartial/Test.cshtml",
+                    @"@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+<p>Before</p>
+<partial name=""_Partial.cshtml"">
+<p>After</p>");
+                RenderRazor razor = new RenderRazor();
+
+                // When
+                TestDocument result = await ExecuteAsync(document, context, razor).SingleAsync();
+
+                // Then
+                result.Content.ShouldBe(
+                    @"<p>Before</p>
+<div>Hi!</div>
+<p>After</p>",
+                    StringCompareShould.IgnoreLineEndings);
+            }
+
+            [Test]
+            public async Task CustomTagHelper()
+            {
+                // Given
+                Engine engine = new Engine();
+                TestExecutionContext context = GetExecutionContext(engine);
+                TestDocument document = GetDocument(
+                    "/input/RelativePartial/Test.cshtml",
+                    $@"@addTagHelper *, {typeof(RenderRazorFixture).Assembly.GetName().Name}
+<p>Before</p>
+<email>bar</email>
+<p>After</p>");
+                RenderRazor razor = new RenderRazor();
+
+                // When
+                TestDocument result = await ExecuteAsync(document, context, razor).SingleAsync();
+
+                // Then
+                result.Content.ShouldBe(
+                    @"<p>Before</p>
+<a href=""mailto:bar@foo.com"">bar@foo.com</a>
 <p>After</p>",
                     StringCompareShould.IgnoreLineEndings);
             }
