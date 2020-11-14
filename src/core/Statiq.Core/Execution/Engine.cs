@@ -380,8 +380,11 @@ namespace Statiq.Core
             {
                 throw new ExecutionException($"Execution with ID {ExecutionId} is already executing, only one execution can be run at once");
             }
+
+            // Initialize some stuff
             ExecutionId = Guid.NewGuid();
             CancellationToken = cancellationToken;
+
             try
             {
                 // Reset the failure log provider
@@ -804,25 +807,55 @@ namespace Statiq.Core
 
         private Task[] GetPhaseTasks(ConcurrentDictionary<string, PhaseResult[]> phaseResults, ConcurrentDictionary<PipelinePhase, ConcurrentBag<AnalyzerResult>> analyzerResults)
         {
+            Task beforeDeploymentEventTask = null;
             Dictionary<PipelinePhase, Task> phaseTasks = new Dictionary<PipelinePhase, Task>();
             foreach (PipelinePhase phase in _phases.Where(x => ExecutingPipelines.ContainsKey(x.PipelineName)))
             {
-                Task phaseTask = GetPhaseTaskAsync(phaseResults, analyzerResults, phaseTasks, phase);
+                // If this is a deployment pipeline, create the before deployment event task
+                // We can rely on seeing the first deployment pipeline after all non-deployment pipeline phases
+                // since the phases are ordered by dependency and all deployment pipelines depend on all non-deployment pipelines
+                if (phase.Pipeline.Deployment && beforeDeploymentEventTask is null)
+                {
+                    beforeDeploymentEventTask = GetBeforeDeploymentEventTaskAsync(phaseTasks);
+                }
+
+                // Get the task for this pipeline phase
+                Task phaseTask = GetPhaseTaskAsync(phaseResults, analyzerResults, phaseTasks, phase, beforeDeploymentEventTask);
+
+                // If we're running serially, immediately wait for this phase task before getting the next one
                 if (SerialExecution)
                 {
-                    // If we're running serially, immediately wait for this phase task before getting the next one
                     phaseTask.Wait(CancellationToken);
                 }
+
                 phaseTasks.Add(phase, phaseTask);
             }
-            return phaseTasks.Values.ToArray();
+
+            // If we didn't have any deployment pipelines, then create the before deployment event task
+            if (beforeDeploymentEventTask is null)
+            {
+                beforeDeploymentEventTask = GetBeforeDeploymentEventTaskAsync(phaseTasks);
+            }
+
+            return phaseTasks.Values.Concat(beforeDeploymentEventTask).ToArray();
+        }
+
+        private Task GetBeforeDeploymentEventTaskAsync(Dictionary<PipelinePhase, Task> phaseTasks)
+        {
+            Task[] nonDeploymentTasks = phaseTasks.Where(x => !x.Key.Pipeline.Deployment).Select(x => x.Value).ToArray();
+            return nonDeploymentTasks.Length == 0
+                ? Events.RaiseAsync(new BeforeDeployment(this, ExecutionId))
+                : Task.Factory.ContinueWhenAll(
+                    nonDeploymentTasks,
+                    _ => Task.WaitAll(new Task[] { Events.RaiseAsync(new BeforeDeployment(this, ExecutionId)) }, CancellationToken));
         }
 
         private Task GetPhaseTaskAsync(
             ConcurrentDictionary<string, PhaseResult[]> phaseResults,
             ConcurrentDictionary<PipelinePhase, ConcurrentBag<AnalyzerResult>> analyzerResults,
             Dictionary<PipelinePhase, Task> phaseTasks,
-            PipelinePhase phase)
+            PipelinePhase phase,
+            Task beforeDeploymentEventTask)
         {
             // Only the non-deployment input phase won't have dependencies, all other phases at least depend on the previous phase of their pipeline
             if (phase.Dependencies.Length == 0)
@@ -838,6 +871,7 @@ namespace Statiq.Core
             return Task.Factory.ContinueWhenAll(
                 phase.Dependencies.Select(x => phaseTasks
                     .TryGetValue(x, out Task dependencyTask) ? dependencyTask : null)
+                    .Concat(beforeDeploymentEventTask) // This will be null if we haven't seen a deployment pipeline yet
                     .Where(x => x is object)
                     .ToArray(),
                 dependencies =>
@@ -854,7 +888,8 @@ namespace Statiq.Core
                         Logger.LogDebug(message);
                         throw new ExecutionException(message);
                     }
-                }, CancellationToken);
+                },
+                CancellationToken);
         }
 
         /// <summary>

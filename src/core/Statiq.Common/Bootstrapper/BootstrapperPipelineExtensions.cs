@@ -6,7 +6,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Statiq.Common
 {
-    public static class IBootstrapperPipelineExtensions
+    public static class BootstrapperPipelineExtensions
     {
         // Directly
 

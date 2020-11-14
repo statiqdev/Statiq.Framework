@@ -2,7 +2,7 @@
 
 namespace Statiq.Common
 {
-    public static class IBootstrapperSettingExtensions
+    public static class BootstrapperSettingExtensions
     {
         public static TBootstrapper AddSettings<TBootstrapper>(this TBootstrapper bootstrapper, IEnumerable<KeyValuePair<string, object>> settings)
             where TBootstrapper : IBootstrapper =>

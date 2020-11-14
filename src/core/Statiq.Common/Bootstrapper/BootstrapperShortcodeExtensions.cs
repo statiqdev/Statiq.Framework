@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace Statiq.Common
 {
-    public static class IBootstrapperShortcodeExtensions
+    public static class BootstrapperShortcodeExtensions
     {
         public static TBootstrapper AddShortcode<TBootstrapper>(this TBootstrapper bootstrapper, Type type)
             where TBootstrapper : IBootstrapper =>

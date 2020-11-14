@@ -4,7 +4,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Statiq.Common
 {
-    public static class IBootstrapperConfigurationExtensions
+    public static class BootstrapperConfigurationExtensions
     {
         public static TBootstrapper ConfigureSettings<TBootstrapper>(this TBootstrapper bootstrapper, Action<ISettings> action)
             where TBootstrapper : IBootstrapper

@@ -312,38 +312,45 @@ namespace Statiq.Core
 
             // Start the process
             bool keepContent = values.GetBool(KeepContentKey);
-            using (Stream contentStream = _background || keepContent ? null : await context.GetContentStreamAsync())
+            using (Stream outputStream = _background || keepContent ? null : await context.GetContentStreamAsync())
             {
-                ProcessLauncherResult result;
-                try
+                using (StreamWriter outputWriter = outputStream == null ? null : new StreamWriter(outputStream, leaveOpen: true))
                 {
-                    result = processLauncher.Start(contentStream, context.Logger, context);
-                }
-                catch (Exception ex)
-                {
-                    throw new LoggedException(ex);
-                }
+                    using (StringWriter errorWriter = !_background && continueOnError ? new StringWriter() : null)
+                    {
+                        int exitCode;
+                        try
+                        {
+                            exitCode = processLauncher.StartNew(outputWriter, errorWriter, context.Logger, context, context.CancellationToken);
+                        }
+                        catch (Exception ex)
+                        {
+                            throw new LoggedException(ex);
+                        }
 
-                // If this is a background process, let it run and just return the original document
-                if (processLauncher.IsBackground)
-                {
-                    return input.Yield();
-                }
+                        // If this is a background process, let it run and just return the original document
+                        if (processLauncher.IsBackground)
+                        {
+                            return input.Yield();
+                        }
 
-                // Set the metadata items and return
-                MetadataItems metadata = new MetadataItems
-                {
-                    { ExitCode, result.ExitCode }
-                };
-                if (!result.ErrorData.IsNullOrEmpty())
-                {
-                    metadata.Add(ErrorData, result.ErrorData);
+                        // Set the metadata items and return
+                        MetadataItems metadata = new MetadataItems
+                        {
+                            { ExitCode, exitCode }
+                        };
+                        string errorContent = errorWriter?.ToString();
+                        if (!errorContent.IsNullOrEmpty())
+                        {
+                            metadata.Add(ErrorData, errorContent);
+                        }
+                        return context.CloneOrCreateDocument(
+                            input,
+                            metadata,
+                            outputStream is null ? null : context.GetContentProvider(outputStream))
+                            .Yield();
+                    }
                 }
-                return context.CloneOrCreateDocument(
-                    input,
-                    metadata,
-                    contentStream is null ? null : context.GetContentProvider(contentStream))
-                    .Yield();
             }
         }
 

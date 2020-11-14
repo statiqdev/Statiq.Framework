@@ -524,6 +524,106 @@ namespace Statiq.Core.Tests.Execution
                 module.ExecuteCount.ShouldBe(1);
                 outputs.FromPipeline("TestPipeline").Select(x => x.GetInt("Foo")).ShouldBe(new int[] { 124 });
             }
+
+            [Test]
+            public async Task RaisesBeforeDeploymentEventWhenDeploymentPipelinesAreNotRun()
+            {
+                // Given
+                Engine engine = new Engine();
+                List<string> results = new List<string>();
+                IPipeline deploymentPipeline = engine.Pipelines.Add("DeploymentPipeline");
+                deploymentPipeline.Deployment = true;
+                deploymentPipeline.ProcessModules.Add(new ExecuteConfig(Config.FromContext(ctx => results.Add(ctx.PipelineName))));
+                IPipeline normalPipeline = engine.Pipelines.Add("NormalPipeline");
+                normalPipeline.ProcessModules.Add(new ExecuteConfig(Config.FromContext(ctx => results.Add(ctx.PipelineName))));
+                CancellationTokenSource cts = new CancellationTokenSource();
+                engine.Events.Subscribe<BeforeDeployment>(_ => results.Add("Event"));
+
+                // When
+                IPipelineOutputs outputs = await engine.ExecuteAsync(cts.Token);
+
+                // Then
+                results.ShouldBe(new[] { "NormalPipeline", "Event" });
+            }
+
+            [Test]
+            public async Task RaisesBeforeDeploymentEventWhenDeploymentPipelinesAreRun()
+            {
+                // Given
+                Engine engine = new Engine();
+                List<string> results = new List<string>();
+                IPipeline deploymentPipeline = engine.Pipelines.Add("DeploymentPipeline");
+                deploymentPipeline.Deployment = true;
+                deploymentPipeline.ProcessModules.Add(new ExecuteConfig(Config.FromContext(ctx => results.Add(ctx.PipelineName))));
+                IPipeline normalPipeline = engine.Pipelines.Add("NormalPipeline");
+                normalPipeline.ProcessModules.Add(new ExecuteConfig(Config.FromContext(ctx => results.Add(ctx.PipelineName))));
+                CancellationTokenSource cts = new CancellationTokenSource();
+                engine.Events.Subscribe<BeforeDeployment>(_ => results.Add("Event"));
+
+                // When
+                IPipelineOutputs outputs = await engine.ExecuteAsync(new[] { "DeploymentPipeline", "NormalPipeline" }, cts.Token);
+
+                // Then
+                results.ShouldBe(new[] { "NormalPipeline", "Event", "DeploymentPipeline" });
+            }
+
+            [Test]
+            public async Task RaisesBeforeDeploymentEventWhenOnlyDeploymentPipelinesAreRun()
+            {
+                // Given
+                Engine engine = new Engine();
+                List<string> results = new List<string>();
+                IPipeline deploymentPipeline = engine.Pipelines.Add("DeploymentPipeline");
+                deploymentPipeline.Deployment = true;
+                deploymentPipeline.ProcessModules.Add(new ExecuteConfig(Config.FromContext(ctx => results.Add(ctx.PipelineName))));
+                IPipeline normalPipeline = engine.Pipelines.Add("NormalPipeline");
+                normalPipeline.ProcessModules.Add(new ExecuteConfig(Config.FromContext(ctx => results.Add(ctx.PipelineName))));
+                CancellationTokenSource cts = new CancellationTokenSource();
+                engine.Events.Subscribe<BeforeDeployment>(_ => results.Add("Event"));
+
+                // When
+                IPipelineOutputs outputs = await engine.ExecuteAsync(new[] { "DeploymentPipeline" }, cts.Token);
+
+                // Then
+                results.ShouldBe(new[] { "Event", "DeploymentPipeline" });
+            }
+
+            [Test]
+            public async Task RaisesBeforeDeploymentEventWhenNoDeploymentPipelines()
+            {
+                // Given
+                Engine engine = new Engine();
+                List<string> results = new List<string>();
+                IPipeline normalPipeline = engine.Pipelines.Add("NormalPipeline");
+                normalPipeline.ProcessModules.Add(new ExecuteConfig(Config.FromContext(ctx => results.Add(ctx.PipelineName))));
+                CancellationTokenSource cts = new CancellationTokenSource();
+                engine.Events.Subscribe<BeforeDeployment>(_ => results.Add("Event"));
+
+                // When
+                IPipelineOutputs outputs = await engine.ExecuteAsync(cts.Token);
+
+                // Then
+                results.ShouldBe(new[] { "NormalPipeline", "Event" });
+            }
+
+            [Test]
+            public async Task RaisesBeforeDeploymentEventWhenOnlyDeploymentPipelines()
+            {
+                // Given
+                Engine engine = new Engine();
+                List<string> results = new List<string>();
+                IPipeline deploymentPipeline = engine.Pipelines.Add("DeploymentPipeline");
+                deploymentPipeline.Deployment = true;
+                deploymentPipeline.ProcessModules.Add(new ExecuteConfig(Config.FromContext(ctx => results.Add(ctx.PipelineName))));
+                CancellationTokenSource cts = new CancellationTokenSource();
+                engine.Events.Subscribe<BeforeDeployment>(_ => results.Add("Event"));
+
+                // When
+                IPipelineOutputs outputs = await engine.ExecuteAsync(new[] { "DeploymentPipeline" }, cts.Token);
+
+                // Then
+                results.ShouldBe(new[] { "Event", "DeploymentPipeline" });
+            }
         }
     }
 }
