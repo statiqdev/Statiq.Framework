@@ -207,6 +207,29 @@ namespace Statiq.Html.Tests
                 // Then
                 result.GetDocumentList(HtmlKeys.Headings).Select(x => x.GetString(HtmlKeys.HeadingId)).ShouldBe(new[] { null, "bar" });
             }
+
+            [Test]
+            public async Task GetsTextContent()
+            {
+                // Given
+                const string input = @"<html>
+                        <head>
+                            <title>Foobar</title>
+                        </head>
+                        <body>
+                            <h1>Foo <a href=""bar"">Bar</a></h1>
+                        </body>
+                    </html>";
+                TestDocument document = new TestDocument(input);
+                GatherHeadings headings = new GatherHeadings().WithHeadingKey("HContent");
+
+                // When
+                IDocument result = await ExecuteAsync(document, headings).SingleAsync();
+
+                // Then
+                result.GetDocumentList(HtmlKeys.Headings).Cast<TestDocument>().Select(x => x.Content).ShouldBe(new[] { "Foo Bar" });
+                result.GetDocumentList(HtmlKeys.Headings).Select(x => x.GetString("HContent")).ShouldBe(new[] { "Foo Bar" });
+            }
         }
     }
 }

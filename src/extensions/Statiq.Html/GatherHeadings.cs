@@ -195,22 +195,14 @@ namespace Statiq.Html
                     }
                     if (_headingKey is object)
                     {
-                        metadata.Add(_headingKey, heading.Element.InnerHtml);
+                        metadata.Add(_headingKey, heading.Element.TextContent);
                     }
                     if (_childrenKey is object)
                     {
                         metadata.Add(_childrenKey, heading.Children.AsReadOnly());
                     }
 
-                    using (Stream contentStream = await context.GetContentStreamAsync())
-                    {
-                        using (StreamWriter writer = contentStream.GetWriter())
-                        {
-                            heading.Element.ChildNodes.ToHtml(writer, ProcessingInstructionFormatter.Instance);
-                            writer.Flush();
-                            heading.Document = context.CreateDocument(metadata, context.GetContentProvider(contentStream, MediaTypes.Html));
-                        }
-                    }
+                    heading.Document = await context.CreateDocumentAsync(metadata, heading.Element.TextContent);
 
                     // Add to parent
                     parent?.Children.Add(heading.Document);
