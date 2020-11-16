@@ -791,6 +791,43 @@ FM2
 Content1
 Content2");
             }
+
+            [Test]
+            public async Task PreservesFrontMatter()
+            {
+                // Given
+                TestExecutionContext context = new TestExecutionContext();
+                TestDocument[] inputs =
+                {
+                    new TestDocument(@"FM1
+FM2
+---
+Content1
+Content2")
+                };
+                string frontMatterContent = null;
+                ExtractFrontMatter frontMatter = new ExtractFrontMatter(new ExecuteConfig(Config.FromDocument(async x =>
+                {
+                    frontMatterContent = await x.GetContentStringAsync();
+                    return new[] { x };
+                }))).PreserveFrontMatter();
+
+                // When
+                IEnumerable<IDocument> documents = await ExecuteAsync(inputs, context, frontMatter);
+
+                // Then
+                documents.Count().ShouldBe(1);
+                frontMatterContent.ShouldBe(
+                    @"FM1
+FM2
+", frontMatterContent);
+                (await documents.First().GetContentStringAsync()).ShouldBe(
+                    @"FM1
+FM2
+---
+Content1
+Content2");
+            }
         }
     }
 }

@@ -26,6 +26,7 @@ namespace Statiq.Core
         private bool _ignoreEndDelimiterOnFirstLine = true;
         private string _startDelimiter;
         private bool _startRepeated;
+        private bool _preserveFrontMatter;
 
         /// <summary>
         /// Uses the default delimiter character and passes any front matter to the specified child modules for processing.
@@ -99,6 +100,18 @@ namespace Statiq.Core
             return this;
         }
 
+        /// <summary>
+        /// By default the front matter is removed from the source file. This allows you to preserve
+        /// it in the file for further processing.
+        /// </summary>
+        /// <param name="preserveFrontMatter">Set to <c>true</c> to preserve the front matter, <c>false</c> to remove it.</param>
+        /// <returns>The current module instance.</returns>
+        public ExtractFrontMatter PreserveFrontMatter(bool preserveFrontMatter = true)
+        {
+            _preserveFrontMatter = preserveFrontMatter;
+            return this;
+        }
+
         /// <inheritdoc />
         protected override async Task<IEnumerable<IDocument>> ExecuteInputAsync(IDocument input, IExecutionContext context)
         {
@@ -158,11 +171,15 @@ namespace Statiq.Core
             if (delimiterLine != -1)
             {
                 string frontMatter = string.Join("\n", inputLines.Skip(startLine).Take(delimiterLine - startLine)) + "\n";
-                inputLines.RemoveRange(0, delimiterLine + 1);
-                string content = string.Join("\n", inputLines);
+                if (!_preserveFrontMatter)
+                {
+                    inputLines.RemoveRange(0, delimiterLine + 1);
+                }
                 foreach (IDocument result in await context.ExecuteModulesAsync(Children, input.Clone(await context.GetContentProviderAsync(frontMatter)).Yield()))
                 {
-                    return result.Clone(await context.GetContentProviderAsync(content, input.ContentProvider.MediaType)).Yield();
+                    return result.Clone(
+                        _preserveFrontMatter ? input.ContentProvider : await context.GetContentProviderAsync(string.Join("\n", inputLines), input.ContentProvider.MediaType))
+                        .Yield();
                 }
             }
             else
