@@ -1,5 +1,8 @@
+# 1.0.0-beta.29
+
 # 1.0.0-beta.28
 
+- Added a `.PreserveFrontMatter()` configuration method to the `ExtractFrontMatter` module that preserves the front matter content.
 - Fixed a bug with gathered headings where HTML was included in the heading text (#142).
 - Added support for specifying `ViewData` in the `RenderRazor` module (#145, #146, thanks @alanta).
 - Added a new `BeforeDeployment` event that gets raised before any deployment pipelines are run (or at the end of execution if there are no deployment pipelines).
