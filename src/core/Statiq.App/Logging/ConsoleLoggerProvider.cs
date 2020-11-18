@@ -3,6 +3,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
+using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Statiq.Common;
 
@@ -24,22 +25,25 @@ namespace Statiq.App
         {
             _buildServerLogHelper = new BuildServerLogHelper(fileSystem);
             Instances.Add(this);
-            new Thread(() =>
+            Task.Run(MessagePumpAsync);
+        }
+
+        private Task MessagePumpAsync()
+        {
+            ConsoleLogMessage message;
+            while ((message = TakeMessage()) is object)
             {
-                ConsoleLogMessage message;
-                while ((message = TakeMessage()) is object)
+                try
                 {
-                    try
-                    {
-                        WriteMessage(message);
-                    }
-                    finally
-                    {
-                        _doneWriting.Set();
-                    }
+                    WriteMessage(message);
                 }
-                _doneProcessing.Set();
-            }).Start();
+                finally
+                {
+                    _doneWriting.Set();
+                }
+            }
+            _doneProcessing.Set();
+            return Task.CompletedTask;
         }
 
         private ConsoleLogMessage TakeMessage()

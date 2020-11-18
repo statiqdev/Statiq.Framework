@@ -2,14 +2,15 @@
 using System.Collections.Generic;
 using System.Text;
 using System.Threading;
+using System.Threading.Tasks;
 using Statiq.Common;
 
 namespace Statiq.App
 {
     public class ConsoleListener
     {
-        private readonly Action _cancelAction;
-        private readonly Action<string> _readLineAction;
+        private readonly Func<Task> _onCancel;
+        private readonly Func<string, Task> _onReadLine;
         private readonly InterlockedBool _readingLines = new InterlockedBool();
         private readonly List<string> _history = new List<string>();
         private readonly object _bufferLock = new object();
@@ -20,19 +21,16 @@ namespace Statiq.App
         private int _historyIndex;
 
         // Note that the callbacks will get invoked on a different thread
-        public ConsoleListener(Action cancelAction, Action<string> readLineAction = null, bool startReadingLines = false)
+        public ConsoleListener(Func<Task> onCancel, Func<string, Task> onReadLine = null, bool startReadingLines = false)
         {
-            _cancelAction = cancelAction;
-            _readLineAction = readLineAction;
+            _onCancel = onCancel;
+            _onReadLine = onReadLine;
 
             // Only listen if console input has not been redirected, otherwise it's on the caller
             if (!Console.IsInputRedirected)
             {
                 Console.TreatControlCAsInput = true;
-                new Thread(Read)
-                {
-                    IsBackground = true
-                }.Start();
+                Task.Run(ReadAsync);
             }
 
             if (startReadingLines)
@@ -42,7 +40,7 @@ namespace Statiq.App
         }
 
         // Inspired by https://stackoverflow.com/a/49511467
-        private void Read()
+        private async Task ReadAsync()
         {
             while (true)
             {
@@ -56,7 +54,7 @@ namespace Statiq.App
                 {
                     _readingLines.Unset();
                     Console.WriteLine();
-                    _cancelAction?.Invoke();
+                    await _onCancel?.Invoke();
                 }
 
                 // Are we reading?
@@ -173,7 +171,7 @@ namespace Statiq.App
                 {
                     // We won't have gotten a line unless we're reading, and we don't read unless there's an action
                     // so we don't need to check the action here for null before invoking it
-                    _readLineAction(line);
+                    await _onReadLine(line);
 
                     // Add to history, but only if not empty
                     if (line != string.Empty)
@@ -271,7 +269,7 @@ namespace Statiq.App
 
         public void StartReadingLines()
         {
-            if (!_readingLines && _readLineAction is object)
+            if (!_readingLines && _onReadLine is object)
             {
                 ResetBuffer();
                 _readingLines.Set();
