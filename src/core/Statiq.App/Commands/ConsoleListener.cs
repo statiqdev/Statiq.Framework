@@ -54,7 +54,14 @@ namespace Statiq.App
                 {
                     _readingLines.Unset();
                     Console.WriteLine();
-                    await _onCancel?.Invoke();
+                    try
+                    {
+                        await _onCancel?.Invoke();
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine(ex.ToString());
+                    }
                 }
 
                 // Are we reading?
@@ -171,7 +178,14 @@ namespace Statiq.App
                 {
                     // We won't have gotten a line unless we're reading, and we don't read unless there's an action
                     // so we don't need to check the action here for null before invoking it
-                    await _onReadLine(line);
+                    try
+                    {
+                        await _onReadLine(line);
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine(ex.ToString());
+                    }
 
                     // Add to history, but only if not empty
                     if (line != string.Empty)
