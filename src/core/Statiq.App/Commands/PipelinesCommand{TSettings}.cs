@@ -34,7 +34,7 @@ namespace Statiq.App
             SetPipelines(commandContext, commandSettings, engineManager);
             using (CancellationTokenSource cancellationTokenSource = new CancellationTokenSource())
             {
-                CommandUtilities.WaitForControlC(() => cancellationTokenSource.Cancel());
+                new ConsoleListener(() => cancellationTokenSource.Cancel());
                 return (int)await engineManager.ExecuteAsync(cancellationTokenSource);
             }
         }
