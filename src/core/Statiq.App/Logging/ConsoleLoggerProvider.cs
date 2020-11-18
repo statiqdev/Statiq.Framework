@@ -16,7 +16,8 @@ namespace Statiq.App
 
         private readonly BlockingCollection<ConsoleLogMessage> _messages =
             new BlockingCollection<ConsoleLogMessage>(new ConcurrentQueue<ConsoleLogMessage>());
-        private readonly AutoResetEvent _doneProcessing = new AutoResetEvent(false);
+        private readonly ManualResetEvent _doneWriting = new ManualResetEvent(true);
+        private readonly ManualResetEvent _doneProcessing = new ManualResetEvent(false);
         private readonly BuildServerLogHelper _buildServerLogHelper;
 
         public ConsoleLoggerProvider(IReadOnlyFileSystem fileSystem = null)
@@ -28,7 +29,14 @@ namespace Statiq.App
                 ConsoleLogMessage message;
                 while ((message = TakeMessage()) is object)
                 {
-                    WriteMessage(message);
+                    try
+                    {
+                        WriteMessage(message);
+                    }
+                    finally
+                    {
+                        _doneWriting.Set();
+                    }
                 }
                 _doneProcessing.Set();
             }).Start();
@@ -40,10 +48,13 @@ namespace Statiq.App
             {
                 try
                 {
-                    return _messages.Take();
+                    ConsoleLogMessage message = _messages.Take();
+                    _doneWriting.Reset();
+                    return message;
                 }
                 catch (InvalidOperationException)
                 {
+                    // The message collection was completed while waiting
                 }
             }
             return null;
@@ -97,6 +108,7 @@ namespace Statiq.App
                 while (instance._messages.Count > 0)
                 {
                 }
+                instance._doneWriting.WaitOne();
             }
         }
 
@@ -125,6 +137,7 @@ namespace Statiq.App
                 }
                 _messages.Dispose();
                 _doneProcessing.Dispose();
+                _doneWriting.Dispose();
             }
         }
     }
