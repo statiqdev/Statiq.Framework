@@ -18,7 +18,7 @@ namespace Statiq.Core
     /// per simple name to Roslyn, so use the highest version (and give preference to
     /// the calling assemblies). See also https://github.com/dotnet/roslyn/issues/5657.
     /// </summary>
-    internal class CompilationReferences : IEnumerable<MetadataReference>
+    internal class CompilationReferences : IEnumerable<Assembly>
     {
         private readonly Dictionary<string, Assembly> _referencesBySimpleName = new Dictionary<string, Assembly>();
 
@@ -44,8 +44,7 @@ namespace Statiq.Core
             return true;
         }
 
-        public IEnumerator<MetadataReference> GetEnumerator() =>
-            _referencesBySimpleName.Values.Select(x => MetadataReference.CreateFromFile(x.Location)).GetEnumerator();
+        public IEnumerator<Assembly> GetEnumerator() => _referencesBySimpleName.Values.GetEnumerator();
 
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
     }

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Reflection;
 using System.Threading.Tasks;
 using Statiq.Common;
 
@@ -48,5 +49,9 @@ namespace Statiq.Common
             }
             return false;
         }
+
+        IEnumerable<Assembly> GetScriptReferences();
+
+        IEnumerable<string> GetScriptNamespaces();
     }
 }

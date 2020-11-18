@@ -94,22 +94,9 @@ namespace Statiq.Core
                     { "CS0162", ReportDiagnostic.Suppress },
                 });
 
-            // Get reference assemblies
-            CompilationReferences references = new CompilationReferences();
-            foreach (Assembly assembly in AppDomain.CurrentDomain.GetAssemblies())
-            {
-                references.TryAddReference(assembly);
-            }
-            foreach (Assembly assembly in _executionState.ClassCatalog.GetAssemblies())
-            {
-                references.TryAddReference(assembly);
-            }
-            references.TryAddReference(Assembly.GetEntryAssembly(), true);
-            references.TryAddReference(Assembly.GetCallingAssembly(), true);
-            references.TryAddReference(Assembly.GetExecutingAssembly(), true);
-
             // Create the compilation
             string assemblyPath = Path.GetDirectoryName(typeof(object).Assembly.Location);
+            IEnumerable<MetadataReference> references = GetScriptReferences().Select(x => MetadataReference.CreateFromFile(x.Location));
             CSharpCompilation compilation = CSharpCompilation.Create(AssemblyName, new[] { syntaxTree }, references, compilationOptions);
 
             // For some reason, Roslyn really wants these added by filename
@@ -165,6 +152,37 @@ namespace Statiq.Core
             }
         }
 
+        public IEnumerable<Assembly> GetScriptReferences()
+        {
+            CompilationReferences references = new CompilationReferences();
+            foreach (Assembly assembly in AppDomain.CurrentDomain.GetAssemblies())
+            {
+                references.TryAddReference(assembly);
+            }
+            foreach (Assembly assembly in _executionState.ClassCatalog.GetAssemblies())
+            {
+                references.TryAddReference(assembly);
+            }
+            references.TryAddReference(Assembly.GetEntryAssembly(), true);
+            references.TryAddReference(Assembly.GetCallingAssembly(), true);
+            references.TryAddReference(Assembly.GetExecutingAssembly(), true);
+            return references;
+        }
+
+        public IEnumerable<string> GetScriptNamespaces() => GetScriptNamespaces(_executionState);
+
+        private static IEnumerable<string> GetScriptNamespaces(IExecutionState executionState)
+        {
+            HashSet<string> namespaces = new HashSet<string>(executionState.Namespaces);
+            namespaces.Add("System");
+            namespaces.Add("System.Collections");
+            namespaces.Add("System.Collections.Generic");
+            namespaces.Add("System.Linq");
+            namespaces.Add("System.Text");
+            namespaces.Add("Statiq.Core");
+            return namespaces;
+        }
+
         private static string GetCompilationErrorMessage(Diagnostic diagnostic)
         {
             string line = diagnostic.Location.IsInSource ? "Line " + (diagnostic.Location.GetMappedLineSpan().Span.Start.Line + 1) : "Metadata";
@@ -183,14 +201,7 @@ namespace Statiq.Core
             liftingWalker.Visit(syntaxTree.GetRoot(executionState.CancellationToken));
 
             // Get the using statements
-            HashSet<string> namespaces = new HashSet<string>(executionState.Namespaces);
-            namespaces.Add("System");
-            namespaces.Add("System.Collections");
-            namespaces.Add("System.Collections.Generic");
-            namespaces.Add("System.Linq");
-            namespaces.Add("System.Text");
-            namespaces.Add("Statiq.Core");
-            string usingStatements = string.Join(Environment.NewLine, namespaces.Select(x => "using " + x + ";"));
+            string usingStatements = string.Join(Environment.NewLine, GetScriptNamespaces(executionState).Select(x => "using " + x + ";"));
 
             // Determine if we need a return statement
             string preScript = null;
