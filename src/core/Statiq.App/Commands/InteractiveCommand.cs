@@ -78,14 +78,17 @@ namespace Statiq.App
                     // Wait for activity
                     while (true)
                     {
-                        _triggerExecutionEvent.WaitOne(); // Blocks the current thread until a signal
+                        // Blocks the current thread until a signal
+                        _triggerExecutionEvent.WaitOne();
+
+                        // Stop listening while we run again
+                        consoleListener.StopReadingLines();
+
+                        // Break here before running if we're exiting
                         if (_exit)
                         {
                             break;
                         }
-
-                        // Stop listening while we run again
-                        consoleListener.StopReadingLines();
 
                         // Execute
                         exitCode = await ExecutionTriggeredAsync(commandContext, commandSettings, engineManager, exitCode, _cancellationTokenSource);

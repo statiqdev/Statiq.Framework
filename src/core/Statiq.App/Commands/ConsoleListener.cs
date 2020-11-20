@@ -193,7 +193,8 @@ namespace Statiq.App
                         _history.Add(line);
                     }
 
-                    ResetBuffer();
+                    // Only prompt if we didn't stop reading inside the action
+                    ResetBuffer(_readingLines);
                 }
             }
         }
@@ -268,14 +269,17 @@ namespace Statiq.App
             }
         }
 
-        private void ResetBuffer()
+        private void ResetBuffer(bool prompt)
         {
             lock (_bufferLock)
             {
                 _buffer.Clear();
                 _index = 0;
                 _historyIndex = _history.Count;
-                Console.Write("> ");
+                if (prompt)
+                {
+                    Console.Write("> ");
+                }
                 _startingLeft = Console.CursorLeft;
                 _startingTop = Console.CursorTop;
             }
@@ -285,7 +289,7 @@ namespace Statiq.App
         {
             if (!_readingLines && _onReadLine is object)
             {
-                ResetBuffer();
+                ResetBuffer(true);
                 _readingLines.Set();
             }
         }
