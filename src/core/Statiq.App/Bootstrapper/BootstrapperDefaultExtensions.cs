@@ -1,15 +1,11 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Reflection;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Logging.Debug;
-using Microsoft.Extensions.Options;
 using Statiq.Common;
 
 namespace Statiq.App
@@ -121,6 +117,7 @@ namespace Statiq.App
             bootstrapper.ThrowIfNull(nameof(bootstrapper));
             bootstrapper.SetDefaultCommand<PipelinesCommand<PipelinesCommandSettings>>();
             bootstrapper.AddCommand<PipelinesCommand<PipelinesCommandSettings>>();
+            bootstrapper.AddCommand<InteractiveCommand<PipelinesCommandSettings>>();
             bootstrapper.AddCommand<DeployCommand>();
             return bootstrapper;
         }
