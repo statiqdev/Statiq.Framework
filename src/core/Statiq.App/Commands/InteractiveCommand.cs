@@ -79,6 +79,7 @@ namespace Statiq.App
                     while (true)
                     {
                         // Blocks the current thread until a signal
+                        // This will also reset the event (since it's an AutoResetEvent) so any triggering will cause a following execution
                         _triggerExecutionEvent.WaitOne();
 
                         // Stop listening while we run again
@@ -98,7 +99,6 @@ namespace Statiq.App
                         {
                             break;
                         }
-                        _triggerExecutionEvent.Reset();
 
                         // Log that we're ready and start waiting on input (again)
                         logger.LogInformation(prompt);
