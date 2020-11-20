@@ -22,21 +22,14 @@ namespace Statiq.Common
         /// <summary>
         /// The current execution context.
         /// </summary>
-        public static IExecutionContext Current
+        /// <remarks>
+        /// This will return an empty execution context with default values if not currently executing.
+        /// </remarks>
+        public static new IExecutionContext Current
         {
-            get => _current.Value ?? throw new ExecutionException("Could not get current execution context");
+            get => _current.Value ?? CurrentEmptyExecutionContext;
             internal set => _current.Value = value;
         }
-
-        /// <summary>
-        /// The current execution context or <c>null</c> if a current context is unavailable.
-        /// </summary>
-        public static IExecutionContext CurrentOrNull => _current.Value;
-
-        /// <summary>
-        /// Returns <c>true</c> if there is a current <see cref="IExecutionContext"/>, <c>false</c> otherwise.
-        /// </summary>
-        public static bool HasCurrent => _current.Value is object;
 
         /// <summary>
         /// Gets the current execution state.

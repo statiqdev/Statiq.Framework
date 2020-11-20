@@ -18,6 +18,8 @@ namespace Statiq.Testing
     {
         public TestEngine()
         {
+            IExecutionState.Current = this;
+
             _documentFactory = new DocumentFactory(this, Settings);
             _documentFactory.SetDefaultDocumentType<TestDocument>();
 

@@ -43,10 +43,6 @@ namespace Statiq.Common
         {
             lock (Lock)
             {
-                if (!IExecutionContext.HasCurrent)
-                {
-                    return null;
-                }
                 IExecutionContext context = IExecutionContext.Current;
                 if (context == _context)
                 {

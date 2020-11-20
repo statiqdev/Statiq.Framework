@@ -68,7 +68,7 @@ namespace Statiq.Razor
         {
             serviceProvider.ThrowIfNull(nameof(serviceProvider));
 
-            IExecutionContext.CurrentOrNull?.LogDebug($"Creating new {nameof(RazorCompiler)} for {parameters.BasePageType?.Name ?? "null base page type"}");
+            IExecutionContext.Current.LogDebug($"Creating new {nameof(RazorCompiler)} for {parameters.BasePageType?.Name ?? "null base page type"}");
 
             // Do a check to make sure required services are registered
             RazorProjectEngine razorProjectEngine = serviceProvider.GetService<RazorProjectEngine>();
@@ -243,7 +243,7 @@ namespace Statiq.Razor
 
         private CompilationResult GetCompilation(RazorProjectItem projectItem)
         {
-            IExecutionContext.CurrentOrNull?.LogDebug($"Compiling " + projectItem.FilePath);
+            IExecutionContext.Current.LogDebug($"Compiling " + projectItem.FilePath);
             using (IServiceScope scope = _serviceScopeFactory.CreateScope())
             {
                 IServiceProvider serviceProvider = scope.ServiceProvider;

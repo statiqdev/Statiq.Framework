@@ -38,15 +38,12 @@ namespace Statiq.Core
         {
             ScriptFactoryBase scriptFactory = _cachedScriptFactories.GetOrAdd(code, _ =>
             {
-                IExecutionContext.CurrentOrNull?.LogDebug($"Script cache miss for script `{(code.Length > 20 ? (code.Substring(0, 19) + "...") : code)}`");
+                IExecutionContext.Current.LogDebug($"Script cache miss for script `{(code.Length > 20 ? (code.Substring(0, 19) + "...") : code)}`");
                 byte[] rawAssembly = Compile(code);
                 Type scriptFactoryType = LoadFactory(rawAssembly);
                 return (ScriptFactoryBase)Activator.CreateInstance(scriptFactoryType);
             });
-            ScriptBase script = scriptFactory.GetScript(
-                metadata,
-                IExecutionContext.CurrentOrNull ?? _executionState,
-                IExecutionContext.CurrentOrNull);
+            ScriptBase script = scriptFactory.GetScript(metadata, _executionState, IExecutionContext.Current);
             return await script.EvaluateAsync();
         }
 

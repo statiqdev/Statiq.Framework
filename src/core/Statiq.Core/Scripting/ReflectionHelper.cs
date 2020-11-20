@@ -11,7 +11,7 @@ namespace Statiq.Core
 {
     // From https://gist.github.com/jamietre/4476307
     // See also https://stackoverflow.com/a/13318056
-    internal static class ReflectionHelper
+    public static class ReflectionHelper
     {
         public static IEnumerable<string> GetCallSignatures(Type type, string callThrough, bool extensions = true)
         {
@@ -21,15 +21,17 @@ namespace Statiq.Core
 
             // Methods
             HashSet<string> signatures = new HashSet<string>(
-                types.SelectMany(t => t.GetMethods()
-                    .Where(m => !m.IsSpecialName && !m.DeclaringType.Equals(typeof(object)))
+                types.SelectMany(t => GetCallableMethods(t)
                     .Select(m => $"{GetMethodSignature(m)} => {callThrough}.{GetMethodSignature(m, true)};")));
 
             // Properties
             signatures.AddRange(
-                types.SelectMany(t => t.GetProperties()
-                    .Where(m => !m.IsSpecialName && !m.DeclaringType.Equals(typeof(object)))
-                    .Select(p => $"public {TypeName(p.PropertyType)} {PropertyName(p, false)} => {callThrough}{PropertyName(p, true)};")));
+                types.SelectMany(t => GetCallableProperties(t)
+                    .Select(p =>
+                    {
+                        string callableSignature = GetPropertySignature(p, true);
+                        return $"{GetPropertySignature(p)} => {callThrough}{(callableSignature.Contains('[') ? string.Empty : ".")}{callableSignature};";
+                    })));
 
             // Extensions
             if (extensions)
@@ -41,6 +43,18 @@ namespace Statiq.Core
 
             return signatures;
         }
+
+        // Always returns public methods
+        public static IEnumerable<MethodInfo> GetCallableMethods(Type type) =>
+            type.GetMethods()
+                .Where(m => !m.IsSpecialName && !m.DeclaringType.Equals(typeof(object)) && !m.IsStatic)
+                .Distinct();
+
+        // Always returns public properties
+        public static IEnumerable<PropertyInfo> GetCallableProperties(Type type) =>
+            type.GetProperties()
+                .Where(p => !p.IsSpecialName && !p.DeclaringType.Equals(typeof(object)) && !p.GetAccessors().Any(a => a.IsStatic))
+                .Distinct();
 
         public static IEnumerable<MethodInfo> GetExtensionMethods(Type type)
         {
@@ -63,15 +77,40 @@ namespace Statiq.Core
             }
         }
 
-        private static string PropertyName(PropertyInfo propertyInfo, bool callable)
+        public static string GetPropertySignature(PropertyInfo propertyInfo, bool callable = false, bool getterAndSetter = false)
         {
+            string visibility = GetVisibility(propertyInfo, out string getterVisibility, out string setterVisibility);
             ParameterInfo[] parameters = propertyInfo.GetIndexParameters();
             if (parameters.Length > 0)
             {
                 // Indexer
-                return $"{(callable ? string.Empty : "this")}[{BuildParameterSignature(parameters, null, callable, false)}]";
+                return $"{(callable ? string.Empty : $"{visibility} {GetTypeName(propertyInfo.PropertyType)} this")}[{BuildParameterSignature(parameters, null, callable, false)}]";
             }
-            return $"{(callable ? "." : string.Empty)}{propertyInfo.Name}";
+            StringBuilder builder = new StringBuilder($"{(callable ? string.Empty : $"{visibility} {GetTypeName(propertyInfo.PropertyType)} ")}{propertyInfo.Name}");
+            if (getterAndSetter)
+            {
+                builder.Append(" { ");
+                if (getterVisibility is object)
+                {
+                    if (getterVisibility != visibility)
+                    {
+                        builder.Append(getterVisibility);
+                        builder.Append(" ");
+                    }
+                    builder.Append("get;");
+                }
+                if (setterVisibility is object)
+                {
+                    if (setterVisibility != visibility)
+                    {
+                        builder.Append(setterVisibility);
+                        builder.Append(" ");
+                    }
+                    builder.Append("set;");
+                }
+                builder.Append(" } ");
+            }
+            return builder.ToString();
         }
 
         /// <summary>
@@ -98,7 +137,7 @@ namespace Statiq.Core
             {
                 return callable
                     ? "GetEnumerator()"
-                    : $"{TypeName(method.ReturnType)} {TypeName(method.DeclaringType)}.GetEnumerator()";
+                    : $"{GetTypeName(method.ReturnType)} {GetTypeName(method.DeclaringType)}.GetEnumerator()";
             }
 
             StringBuilder sigBuilder = new StringBuilder();
@@ -116,7 +155,7 @@ namespace Statiq.Core
                 List<string> constraints = new List<string>();
                 foreach (Type constraint in arg.GetGenericParameterConstraints())
                 {
-                    constraints.Add(TypeName(constraint));
+                    constraints.Add(GetTypeName(constraint));
                 }
 
                 GenericParameterAttributes attrs = arg.GenericParameterAttributes;
@@ -135,7 +174,7 @@ namespace Statiq.Core
                 }
                 if (constraints.Count > 0 && !callable)
                 {
-                    sigBuilder.Append(" where " + TypeName(arg) + ": " + string.Join(", ", constraints));
+                    sigBuilder.Append(" where " + GetTypeName(arg) + ": " + string.Join(", ", constraints));
                 }
             }
 
@@ -191,7 +230,7 @@ namespace Statiq.Core
 
                 if (!callable)
                 {
-                    sigBuilder.Append(TypeName(param.ParameterType));
+                    sigBuilder.Append(GetTypeName(param.ParameterType));
                     sigBuilder.Append(' ');
                 }
 
@@ -217,19 +256,19 @@ namespace Statiq.Core
         /// <returns>
         /// Full type name, fully qualified namespaces.
         /// </returns>
-        public static string TypeName(Type type)
+        public static string GetTypeName(Type type)
         {
             Type nullableType = Nullable.GetUnderlyingType(type);
             if (nullableType is object)
             {
-                return TypeName(nullableType) + "?";
+                return GetTypeName(nullableType) + "?";
             }
 
             if (!type.IsGenericType)
             {
                 if (type.IsArray)
                 {
-                    return TypeName(type.GetElementType()) + "[]";
+                    return GetTypeName(type.GetElementType()) + "[]";
                 }
 
                 string name = type.Name.TrimEnd('&');
@@ -261,7 +300,7 @@ namespace Statiq.Core
                     sb.Append(',');
                 }
 
-                sb.Append(TypeName(t));
+                sb.Append(GetTypeName(t));
                 first = false;
             }
             sb.Append('>');
@@ -273,14 +312,14 @@ namespace Statiq.Core
             bool firstParam = true;
             if (!callable)
             {
-                sigBuilder.Append(Visibility(method)).Append(' ');
+                sigBuilder.Append(GetVisibility(method)).Append(' ');
 
                 if (method.IsStatic && (method?.IsDefined(typeof(ExtensionAttribute), false) == false || !convertExtensionsToInstance))
                 {
                     sigBuilder.Append("static ");
                 }
 
-                sigBuilder.Append(TypeName(method.ReturnType));
+                sigBuilder.Append(GetTypeName(method.ReturnType));
                 sigBuilder.Append(' ');
             }
             sigBuilder.Append(method.Name);
@@ -300,34 +339,77 @@ namespace Statiq.Core
                         sigBuilder.Append(", ");
                     }
 
-                    sigBuilder.Append(TypeName(g));
+                    sigBuilder.Append(GetTypeName(g));
                 }
                 sigBuilder.Append(">");
             }
         }
 
-        private static string Visibility(MethodInfo method)
+        private static string GetVisibility(MethodInfo methodInfo)
         {
-            if (method.IsPublic)
+            if (methodInfo.IsPublic)
             {
                 return "public";
             }
-            else if (method.IsPrivate)
+
+            if (methodInfo.IsAssembly)
             {
-                return "private";
-            }
-            else if (method.IsAssembly)
-            {
+                if (methodInfo.IsFamily)
+                {
+                    return "protected internal";
+                }
+
                 return "internal";
             }
-            else if (method.IsFamily)
+
+            if (methodInfo.IsFamily)
             {
                 return "protected";
             }
-            else
+
+            if (methodInfo.IsPrivate)
             {
-                throw new Exception("I wasn't able to parse the visibility of this method.");
+                return "private";
             }
+
+            throw new Exception($"Unable to parse the visibility of method {methodInfo.Name}.");
+        }
+
+        // Returns the most accessible visibility, each out param is the visibility of that method (or null if method doesn't exist)
+        private static string GetVisibility(PropertyInfo propertyInfo, out string getterVisibility, out string setterVisibility)
+        {
+            MethodInfo getMethod = propertyInfo.GetGetMethod();
+            MethodInfo setMethod = propertyInfo.GetSetMethod();
+
+            getterVisibility = getMethod == null ? null : GetVisibility(getMethod);
+            setterVisibility = setMethod == null ? null : GetVisibility(setMethod);
+
+            if (getterVisibility == "public" || setterVisibility == "public")
+            {
+                return "public";
+            }
+
+            if (getterVisibility == "protected internal" || setterVisibility == "protected internal")
+            {
+                return "protected internal";
+            }
+
+            if (getterVisibility == "internal" || setterVisibility == "internal")
+            {
+                return "internal";
+            }
+
+            if (getterVisibility == "protected" || setterVisibility == "protected")
+            {
+                return "protected";
+            }
+
+            if (getterVisibility == "private" || setterVisibility == "private")
+            {
+                return "private";
+            }
+
+            throw new Exception($"Unable to parse the visibility of property {propertyInfo.Name}.");
         }
 
         private static bool IsParamArray(ParameterInfo info) =>

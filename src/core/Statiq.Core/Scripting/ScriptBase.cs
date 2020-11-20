@@ -47,16 +47,16 @@ namespace Statiq.Core
         // Manually implement IExecutionContext pass-throughs since we don't
         // want to automatically proxy everything in IExecutionContext
 
-        public string PipelineName => Context?.PipelineName;
+        public string PipelineName => Context.PipelineName;
 
-        public IReadOnlyPipeline Pipeline => Context?.Pipeline;
+        public IReadOnlyPipeline Pipeline => Context.Pipeline;
 
-        public Phase Phase => Context?.Phase ?? default;
+        public Phase Phase => Context.Phase;
 
-        public IExecutionContext Parent => Context?.Parent;
+        public IExecutionContext Parent => Context.Parent;
 
-        public IModule Module => Context?.Module;
+        public IModule Module => Context.Module;
 
-        public ImmutableArray<IDocument> Inputs => Context?.Inputs ?? default;
+        public ImmutableArray<IDocument> Inputs => Context.Inputs;
     }
 }

@@ -66,5 +66,7 @@ namespace Statiq.Core
             }
             return logLevel;
         }
+
+        public override IModule Module => throw new NotSupportedException("Not supported in an analyzer execution context");
     }
 }

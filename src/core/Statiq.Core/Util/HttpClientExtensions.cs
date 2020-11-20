@@ -35,7 +35,7 @@ namespace Statiq.Core
                 .OrResult<HttpResponseMessage>(r => r.StatusCode == TooManyRequests)
                 .WaitAndRetryAsync(retryCount, attempt =>
                 {
-                    IExecutionContext.CurrentOrNull?.LogDebug($"HttpClient retry {attempt}");
+                    IExecutionContext.Current.LogDebug($"HttpClient retry {attempt}");
                     return TimeSpan.FromSeconds(0.5 * Math.Pow(2, attempt));
                 });
 

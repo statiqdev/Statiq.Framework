@@ -14,6 +14,32 @@ namespace Statiq.Common
     /// </summary>
     public interface IExecutionState : IDocumentFactory
     {
+        private static readonly AsyncLocal<IExecutionState> _current = new AsyncLocal<IExecutionState>();
+        private static readonly AsyncLocal<IExecutionContext> _currentEmptyExecutionContext = new AsyncLocal<IExecutionContext>();
+
+        /// <summary>
+        /// The current execution state (which is the <see cref="IExecutionContext"/> if there is one, and usually the <see cref="IEngine"/> if not).
+        /// </summary>
+        public static IExecutionState Current
+        {
+            get
+            {
+                IExecutionContext context = IExecutionContext.Current;
+
+                // If we got back the current empty execution context, then return the current execution state instead
+                return context == _currentEmptyExecutionContext.Value ? _current.Value : context;
+            }
+
+            internal set
+            {
+                _current.Value = value;
+                _currentEmptyExecutionContext.Value = new EmptyExecutionContext(value);
+            }
+        }
+
+        internal static IExecutionContext CurrentEmptyExecutionContext =>
+            _currentEmptyExecutionContext.Value ?? throw new ExecutionException("Could not get current execution state");
+
         /// <summary>
         /// Uniquely identifies the current execution cycle. This can be used to initialize and/or
         /// reset static data for a module on new generations (I.e., due to watching).

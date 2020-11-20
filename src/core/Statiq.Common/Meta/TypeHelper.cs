@@ -113,7 +113,7 @@ namespace Statiq.Common
                     {
                         displayString = " (" + displayString + ")";
                     }
-                    IExecutionContext.CurrentOrNull?.LogWarning("Potential recursive metadata expansion detected for key " + key + displayString);
+                    IExecutionContext.Current.LogWarning("Potential recursive metadata expansion detected for key " + key + displayString);
                     _expandingWarned.Add(expanding);
                 }
 

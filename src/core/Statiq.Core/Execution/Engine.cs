@@ -99,6 +99,8 @@ namespace Statiq.Core
             Settings settings,
             ClassCatalog classCatalog)
         {
+            IExecutionState.Current = this;
+
             _pipelines = new PipelineCollection(this);
             AnalyzerCollection = new AnalyzerCollection(this);
             ApplicationState = applicationState ?? new ApplicationState(null, null, null);

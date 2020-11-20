@@ -124,7 +124,7 @@ namespace Statiq.Core
         public IExecutionContext Parent { get; }
 
         /// <inheritdoc/>
-        public IModule Module { get; }
+        public virtual IModule Module { get; }
 
         /// <inheritdoc/>
         public ImmutableArray<IDocument> Inputs { get; }
