@@ -5,6 +5,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using Statiq.Common;
 
 namespace Statiq.App
@@ -20,10 +21,12 @@ namespace Statiq.App
         private readonly ManualResetEvent _doneWriting = new ManualResetEvent(true);
         private readonly ManualResetEvent _doneProcessing = new ManualResetEvent(false);
         private readonly BuildServerLogHelper _buildServerLogHelper;
+        private readonly LoggerFilterOptions _filterOptions;
 
-        public ConsoleLoggerProvider(IReadOnlyFileSystem fileSystem = null)
+        public ConsoleLoggerProvider(IReadOnlyFileSystem fileSystem = null, IOptions<LoggerFilterOptions> filterOptions = null)
         {
             _buildServerLogHelper = new BuildServerLogHelper(fileSystem);
+            _filterOptions = filterOptions.Value ?? new LoggerFilterOptions();
             Instances.Add(this);
             Task.Run(MessagePumpAsync);
         }
@@ -72,7 +75,7 @@ namespace Statiq.App
             }
         }
 
-        public ILogger CreateLogger(string categoryName) => new ConsoleLogger(this, categoryName);
+        public ILogger CreateLogger(string categoryName) => new ConsoleLogger(this, categoryName, GetFilter(categoryName));
 
         private void WriteMessage(ConsoleLogMessage message)
         {
@@ -100,6 +103,53 @@ namespace Statiq.App
                     }
                 }
             }
+        }
+
+        public Func<LogLevel, bool> GetFilter(string name)
+        {
+            foreach (string prefix in GetKeyPrefixes(name))
+            {
+                if (TryGetSwitch(prefix, out LogLevel level))
+                {
+                    return l => l >= level;
+                }
+            }
+            return l => l >= _filterOptions.MinLevel;
+        }
+
+        private IEnumerable<string> GetKeyPrefixes(string name)
+        {
+            while (!string.IsNullOrEmpty(name))
+            {
+                yield return name;
+                int lastIndexOfDot = name.LastIndexOf('.');
+                if (lastIndexOfDot == -1)
+                {
+                    yield return "Default";
+                    break;
+                }
+                name = name.Substring(0, lastIndexOfDot);
+            }
+        }
+
+        private bool TryGetSwitch(string name, out LogLevel level)
+        {
+            // If we don't have any rules, return false
+            if (_filterOptions.Rules.Count == 0)
+            {
+                level = LogLevel.None;
+                return false;
+            }
+
+            // Match the rule name or a null rule name for "Default"
+            LogLevel? value = _filterOptions.Rules.FirstOrDefault(s => s.CategoryName == name || (name == "Default" && s.CategoryName is null))?.LogLevel;
+            if (value is null)
+            {
+                level = LogLevel.None;
+                return false;
+            }
+            level = value.Value;
+            return true;
         }
 
         /// <summary>

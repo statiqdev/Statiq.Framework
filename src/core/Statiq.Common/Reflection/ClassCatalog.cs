@@ -159,6 +159,8 @@ namespace Statiq.Common
         /// </summary>
         public void Populate()
         {
+            //TODO: Populate abstract types in a separate collection and then include flags to include them or not
+            // Include them in InteractiveGlobals when printing extensions
             lock (_populateLock)
             {
                 if (_assemblies is null)

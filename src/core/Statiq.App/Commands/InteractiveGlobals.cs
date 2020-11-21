@@ -17,7 +17,7 @@ namespace Statiq.App
         private readonly Action _triggerExecution;
         private readonly Action _triggerExit;
 
-        internal InteractiveGlobals(IEngine engine, Action triggerExecution, Action triggerExit)
+        public InteractiveGlobals(IEngine engine, Action triggerExecution, Action triggerExit)
         {
             Engine = engine;
             _triggerExecution = triggerExecution;
@@ -77,7 +77,7 @@ namespace Statiq.App
         {
             // Methods
             List<MethodInfo> methodInfos = ReflectionHelper.GetCallableMethods(type)
-                .Concat(ReflectionHelper.GetExtensionMethods(type))
+                .Concat(ReflectionHelper.GetExtensionMethods(type, Engine.ClassCatalog.Values))
                 .Where(m => filter is null || m.Name.Contains(filter, StringComparison.OrdinalIgnoreCase))
                 .ToList();
             if (methodInfos.Count > 0)

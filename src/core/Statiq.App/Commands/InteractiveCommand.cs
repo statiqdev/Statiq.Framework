@@ -59,7 +59,7 @@ namespace Statiq.App
                         TriggerExit();
                         return Task.CompletedTask;
                     },
-                    input => EvaluateScriptAsync(input, engineManager));
+                    input => EvaluateScriptAsync(input, commandContext, commandSettings, engineManager));
 
                 // Execute the engine for the first time
                 exitCode = await engineManager.ExecuteAsync(_cancellationTokenSource);
@@ -145,7 +145,17 @@ namespace Statiq.App
             IEngineManager engineManager) =>
             Task.CompletedTask;
 
-        private async Task EvaluateScriptAsync(string code, IEngineManager engineManager)
+        protected virtual InteractiveGlobals GetInteractiveGlobals(
+            CommandContext commandContext,
+            TSettings commandSettings,
+            IEngineManager engineManager) =>
+            new InteractiveGlobals(engineManager.Engine, TriggerExecution, TriggerExit);
+
+        private async Task EvaluateScriptAsync(
+            string code,
+            CommandContext commandContext,
+            TSettings commandSettings,
+            IEngineManager engineManager)
         {
             if (!code.IsNullOrWhiteSpace())
             {
@@ -164,8 +174,8 @@ namespace Statiq.App
                 {
                     if (_scriptState is null)
                     {
-                        InteractiveGlobals scriptGlobals = new InteractiveGlobals(engineManager.Engine, TriggerExecution, TriggerExit);
-                        _scriptState = await CSharpScript.RunAsync(code, _scriptOptions, globals: scriptGlobals, cancellationToken: _cancellationTokenSource.Token);
+                        InteractiveGlobals interactiveGlobals = GetInteractiveGlobals(commandContext, commandSettings, engineManager);
+                        _scriptState = await CSharpScript.RunAsync(code, _scriptOptions, globals: interactiveGlobals, cancellationToken: _cancellationTokenSource.Token);
                     }
                     else
                     {

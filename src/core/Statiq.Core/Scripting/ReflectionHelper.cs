@@ -56,10 +56,15 @@ namespace Statiq.Core
                 .Where(p => !p.IsSpecialName && !p.DeclaringType.Equals(typeof(object)) && !p.GetAccessors().Any(a => a.IsStatic))
                 .Distinct();
 
-        public static IEnumerable<MethodInfo> GetExtensionMethods(Type type)
+        public static IEnumerable<MethodInfo> GetExtensionMethods(Type type, IEnumerable<Type> candidateTypes = null)
         {
-            foreach (Type candidateType in type.Assembly.GetTypes())
+            foreach (Type candidateType in candidateTypes ?? type.Assembly.GetTypes())
             {
+                if (candidateType.Name.EndsWith("Extensions"))
+                {
+                    int test = 0;
+                    test++;
+                }
                 if (candidateType.IsSealed && !candidateType.IsGenericType && !candidateType.IsNested)
                 {
                     foreach (MethodInfo method in candidateType.GetMethods(BindingFlags.Static | BindingFlags.Public))

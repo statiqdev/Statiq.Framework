@@ -182,6 +182,12 @@ namespace Statiq.App
                             .Select(x => x.Namespace)
                             .Distinct());
                 }
+
+                // Add Microsoft.Extensions namespaces
+                engine.Namespaces.AddRange(
+                    bootstrapper.ClassCatalog.Keys
+                        .Where(x => x.StartsWith("Microsoft.Extensions."))
+                        .Select(x => x.Substring(0, x.LastIndexOf("."))));
             });
 
         public static Bootstrapper AddDefaultPipelines(this Bootstrapper bootstrapper) => bootstrapper.AddPipelines();
