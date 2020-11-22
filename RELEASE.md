@@ -1,3 +1,5 @@
+# 1.0.0-beta.30
+
 # 1.0.0-beta.29
 
 - Added a new `interactive` command that provides a REPL (read-eval-print prompt) after execution, useful for inspecting the state of the engine and debugging the generation.
