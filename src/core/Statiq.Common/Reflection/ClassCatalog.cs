@@ -12,13 +12,13 @@ using Microsoft.Extensions.Logging;
 namespace Statiq.Common
 {
     /// <summary>
-    /// Contains all types in all referenced assemblies. The dictionary
-    /// key is the full type name and the value is the type.
+    /// Contains all classes in all referenced assemblies. The dictionary
+    /// key is the full class name and the value is the class type.
     /// </summary>
     public class ClassCatalog : IReadOnlyDictionary<string, Type>
     {
         // Key: full type name
-        private readonly ConcurrentDictionary<string, Type> _types = new ConcurrentDictionary<string, Type>();
+        private readonly ConcurrentDictionary<string, Type> _classTypes = new ConcurrentDictionary<string, Type>();
 
         private readonly ConcurrentQueue<string> _debugMessages = new ConcurrentQueue<string>();
 
@@ -40,29 +40,34 @@ namespace Statiq.Common
         /// Gets all types assignable to a specified type.
         /// </summary>
         /// <param name="assignableType">The type of classes to get.</param>
+        /// <param name="includeAbstract"><c>true</c> to include abstract class types, <c>false</c> otherwise.</param>
         /// <returns>All classes of the specified type.</returns>
-        public IEnumerable<Type> GetTypesAssignableTo(Type assignableType)
+        public IEnumerable<Type> GetTypesAssignableTo(Type assignableType, bool includeAbstract = false)
         {
             assignableType.ThrowIfNull(nameof(assignableType));
             Populate();
-            return _types.Values.Where(x => assignableType.IsAssignableFrom(x));
+            return _classTypes.Values.Where(x => (includeAbstract || !x.IsAbstract) && assignableType.IsAssignableFrom(x));
         }
 
         /// <summary>
         /// Gets all types from a specified assembly.
         /// </summary>
         /// <param name="assembly">The assembly to get types from.</param>
+        /// <param name="includeAbstract"><c>true</c> to include abstract class types, <c>false</c> otherwise.</param>
         /// <returns>All types from the specified assembly.</returns>
-        public IEnumerable<Type> GetTypesFromAssembly(Assembly assembly)
+        public IEnumerable<Type> GetTypesFromAssembly(Assembly assembly, bool includeAbstract = false)
         {
             assembly.ThrowIfNull(nameof(assembly));
             Populate();
-            return _types.Values.Where(x => x.Assembly.Equals(assembly));
+            return _classTypes.Values.Where(x => (includeAbstract || !x.IsAbstract) && x.Assembly.Equals(assembly));
         }
 
         /// <summary>
         /// Gets instances for all classes of a specified assignable type.
         /// </summary>
+        /// <remarks>
+        /// This will throw an exception if any matching types do not have a parameterless constructor.
+        /// </remarks>
         /// <param name="assignableType">The type of instances to get.</param>
         /// <returns>Instances for all classes of the specified type.</returns>
         public IEnumerable<object> GetInstances(Type assignableType)
@@ -84,7 +89,7 @@ namespace Statiq.Common
         {
             fullName.ThrowIfNull(nameof(fullName));
             Populate();
-            return _types.TryGetValue(fullName, out Type type) ? type : default;
+            return _classTypes.TryGetValue(fullName, out Type type) ? type : default;
         }
 
         /// <summary>
@@ -99,7 +104,7 @@ namespace Statiq.Common
         {
             fullName.ThrowIfNull(nameof(fullName));
             Populate();
-            return _types.TryGetValue(fullName, out Type type)
+            return _classTypes.TryGetValue(fullName, out Type type)
                 ? Activator.CreateInstance(type)
                 : default;
         }
@@ -115,7 +120,7 @@ namespace Statiq.Common
         {
             type.ThrowIfNull(nameof(type));
             Populate();
-            if (!_types.TryGetValue(type.FullName, out Type match))
+            if (!_classTypes.TryGetValue(type.FullName, out Type match))
             {
                 match = GetTypesAssignableTo(type).FirstOrDefault();
             }
@@ -159,8 +164,6 @@ namespace Statiq.Common
         /// </summary>
         public void Populate()
         {
-            //TODO: Populate abstract types in a separate collection and then include flags to include them or not
-            // Include them in InteractiveGlobals when printing extensions
             lock (_populateLock)
             {
                 if (_assemblies is null)
@@ -190,9 +193,9 @@ namespace Statiq.Common
                     Parallel.ForEach(assemblies, assembly =>
                     {
                         _debugMessages.Enqueue($"Cataloging types in assembly {assembly.FullName}");
-                        foreach (Type type in GetLoadableTypes(assembly).Where(x => x.IsPublic && !x.IsAbstract && x.IsClass))
+                        foreach (Type type in GetLoadableTypes(assembly).Where(x => x.IsPublic && x.IsClass))
                         {
-                            _types.TryAdd(type.FullName, type);
+                            _classTypes.TryAdd(type.FullName, type);
                         }
                     });
 
@@ -248,20 +251,20 @@ namespace Statiq.Common
 
         // IDictionary<string, Type>
 
-        public IEnumerable<string> Keys => ((IReadOnlyDictionary<string, Type>)_types).Keys;
+        public IEnumerable<string> Keys => ((IReadOnlyDictionary<string, Type>)_classTypes).Keys;
 
-        public IEnumerable<Type> Values => ((IReadOnlyDictionary<string, Type>)_types).Values;
+        public IEnumerable<Type> Values => ((IReadOnlyDictionary<string, Type>)_classTypes).Values;
 
-        public int Count => _types.Count;
+        public int Count => _classTypes.Count;
 
-        public Type this[string key] => _types[key];
+        public Type this[string key] => _classTypes[key];
 
-        public bool ContainsKey(string key) => _types.ContainsKey(key);
+        public bool ContainsKey(string key) => _classTypes.ContainsKey(key);
 
-        public bool TryGetValue(string key, [MaybeNullWhen(false)] out Type value) => _types.TryGetValue(key, out value);
+        public bool TryGetValue(string key, [MaybeNullWhen(false)] out Type value) => _classTypes.TryGetValue(key, out value);
 
-        public IEnumerator<KeyValuePair<string, Type>> GetEnumerator() => _types.GetEnumerator();
+        public IEnumerator<KeyValuePair<string, Type>> GetEnumerator() => _classTypes.GetEnumerator();
 
-        IEnumerator IEnumerable.GetEnumerator() => _types.GetEnumerator();
+        IEnumerator IEnumerable.GetEnumerator() => _classTypes.GetEnumerator();
     }
 }

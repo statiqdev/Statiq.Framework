@@ -178,7 +178,7 @@ namespace Statiq.App
                 {
                     engine.Namespaces.AddRange(
                         bootstrapper.ClassCatalog
-                            .GetTypesFromAssembly(entryAssembly)
+                            .GetTypesFromAssembly(entryAssembly, true)
                             .Select(x => x.Namespace)
                             .Distinct());
                 }

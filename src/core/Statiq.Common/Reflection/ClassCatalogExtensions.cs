@@ -12,9 +12,10 @@ namespace Statiq.Common
         /// </summary>
         /// <typeparam name="T">The type of classes to get.</typeparam>
         /// <param name="classCatalog">The class catalog.</param>
+        /// <param name="includeAbstract"><c>true</c> to include abstract class types, <c>false</c> otherwise.</param>
         /// <returns>All classes of type <c>T</c>.</returns>
-        public static IEnumerable<Type> GetTypesAssignableTo<T>(this ClassCatalog classCatalog) =>
-            classCatalog.GetTypesAssignableTo(typeof(T));
+        public static IEnumerable<Type> GetTypesAssignableTo<T>(this ClassCatalog classCatalog, bool includeAbstract = false) =>
+            classCatalog.GetTypesAssignableTo(typeof(T), includeAbstract);
 
         /// <summary>
         /// Gets instances for all classes of a specified assignable type..
