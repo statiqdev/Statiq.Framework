@@ -1,5 +1,9 @@
 # 1.0.0-beta.30
 
+- Added a new `CleanMode` enumeration and corresponding setting to control which output files are cleaned on execution (#152).
+- Added a `--clean-mode` command-line option to control the cleaning mode.
+- Changed the default cleaning behavior to `CleanMode.Self` which only cleans files written during execution and not those written by external processes, for example.
+
 # 1.0.0-beta.29
 
 - Added a new `interactive` command that provides a REPL (read-eval-print prompt) after execution, useful for inspecting the state of the engine and debugging the generation.

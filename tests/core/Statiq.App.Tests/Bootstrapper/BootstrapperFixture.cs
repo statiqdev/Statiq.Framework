@@ -247,14 +247,14 @@ namespace Statiq.App.Tests.Bootstrapper
                 string[] args = new string[] { "--noclean" };
                 App.Bootstrapper bootstrapper = App.Bootstrapper.Factory.CreateDefault(args);
                 object value = null;
-                bootstrapper.AddPipeline("Foo", new ExecuteConfig(Config.FromContext(x => value = x.Settings[Keys.CleanOutputPath])));
+                bootstrapper.AddPipeline("Foo", new ExecuteConfig(Config.FromContext(x => value = x.Settings[Keys.CleanMode])));
 
                 // When
                 BootstrapperTestResult result = await bootstrapper.RunTestAsync();
 
                 // Then
                 result.ExitCode.ShouldBe((int)ExitCode.Normal);
-                value.ShouldBe(false);
+                value.ShouldBe(CleanMode.None);
             }
         }
 

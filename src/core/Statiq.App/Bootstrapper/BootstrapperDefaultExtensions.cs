@@ -99,7 +99,7 @@ namespace Statiq.App
                     { Keys.LinkHideIndexPages, true },
                     { Keys.LinkHideExtensions, true },
                     { Keys.UseCache, true },
-                    { Keys.CleanOutputPath, true }
+                    { Keys.CleanMode, CleanMode.Self }
                 });
 
         public static Bootstrapper AddEnvironmentVariables(this Bootstrapper bootstrapper) =>

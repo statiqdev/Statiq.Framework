@@ -25,6 +25,7 @@ namespace Statiq.Core
         // Cache the HttpMessageHandler (the HttpClient is really just a thin wrapper around this)
         private static readonly HttpMessageHandler _httpMessageHandler = new HttpClientHandler();
 
+        private readonly FileSystem _fileSystem = new FileSystem();
         private readonly PipelineCollection _pipelines;
         private readonly DiagnosticsTraceListener _diagnosticsTraceListener;
         private readonly IServiceScope _serviceScope;
@@ -216,7 +217,7 @@ namespace Statiq.Core
         IReadOnlyEventCollection IExecutionState.Events => Events;
 
         /// <inheritdoc />
-        public IFileSystem FileSystem { get; } = new FileSystem();
+        public IFileSystem FileSystem => _fileSystem;
 
         /// <inheritdoc />
         IReadOnlyFileSystem IExecutionState.FileSystem => FileSystem;
@@ -292,49 +293,6 @@ namespace Statiq.Core
             DocumentFactory.CreateDocument<TDocument>(source, destination, items, contentProvider);
 
         /// <summary>
-        /// Deletes the output path and all files it contains.
-        /// </summary>
-        public void CleanOutputPath()
-        {
-            try
-            {
-                Logger.LogDebug($"Cleaning output directory: {FileSystem.OutputPath}...");
-                IDirectory outputDirectory = FileSystem.GetOutputDirectory();
-                if (outputDirectory.Exists)
-                {
-                    outputDirectory.Delete(true);
-                }
-                Logger.LogInformation($"Cleaned output directory: {FileSystem.OutputPath}");
-            }
-            catch (Exception ex)
-            {
-                Logger.LogWarning("Error while cleaning output directory: {0} - {1}", ex.GetType(), ex.Message);
-            }
-        }
-
-        /// <summary>
-        /// Deletes the temp path and all files it contains.
-        /// </summary>
-        public void CleanTempPath()
-        {
-            try
-            {
-                Logger.LogDebug($"Cleaning temp directory: {FileSystem.TempPath}...");
-                IDirectory tempDirectory = FileSystem.GetTempDirectory();
-                if (tempDirectory.Exists)
-                {
-                    tempDirectory.Delete(true);
-                }
-                tempDirectory.Create();
-                Logger.LogInformation($"Cleaned temp directory: {FileSystem.TempPath}");
-            }
-            catch (Exception ex)
-            {
-                Logger.LogWarning("Error while cleaning temp directory: {0} - {1}", ex.GetType(), ex.Message);
-            }
-        }
-
-        /// <summary>
         /// Executes pipelines with <see cref="ExecutionPolicy.Normal"/> and <see cref="ExecutionPolicy.Always"/> policies.
         /// </summary>
         /// <param name="cancellationToken">
@@ -399,8 +357,12 @@ namespace Statiq.Core
 
                 // Create the pipeline phases (this also validates the pipeline graph)
                 // Other one-time setup code can go here as well
+                bool firstExecution = false;
                 if (_phases is null)
                 {
+                    firstExecution = true;
+
+                    // Create all the phases
                     _phases = GetPipelinePhases(_pipelines, Logger);
 
                     // Apply analyzer settings
@@ -421,22 +383,28 @@ namespace Statiq.Core
                 Logger.LogDebug($"Execution ID {ExecutionId}");
                 System.Diagnostics.Stopwatch stopwatch = System.Diagnostics.Stopwatch.StartNew();
 
-                // Raise before event and analyzer before method
-                await Events.RaiseAsync(new BeforeEngineExecution(this, ExecutionId));
-                await AnalyzerCollection.ParallelForEachAsync(async x => await x.Value.BeforeEngineExecutionAsync(this, ExecutionId));
-
                 // Do a check for the same input/output path
                 if (FileSystem.InputPaths.Any(x => x.Equals(FileSystem.OutputPath)))
                 {
                     Logger.LogWarning("The output path is also one of the input paths which can cause unexpected behavior and is usually not advised");
                 }
 
-                // Clean paths
-                CleanTempPath();
-                if (Settings.GetBool(Keys.CleanOutputPath))
+                // Clean paths and reset written files collection (do this before events since the events might kick off processes that write to the output path)
+                CleanDirectory(FileSystem.GetTempDirectory(), "temp");
+                CleanMode cleanMode = Settings.Get(Keys.CleanMode, CleanMode.Self);
+                if (cleanMode == CleanMode.Full || firstExecution)
                 {
-                    CleanOutputPath();
+                    CleanDirectory(FileSystem.GetOutputDirectory(), "output");
                 }
+                else if (cleanMode == CleanMode.Self)
+                {
+                    CleanWrittenFiles();
+                }
+                _fileSystem.WrittenFiles.Clear();
+
+                // Raise before event and analyzer before method
+                await Events.RaiseAsync(new BeforeEngineExecution(this, ExecutionId));
+                await AnalyzerCollection.ParallelForEachAsync(async x => await x.Value.BeforeEngineExecutionAsync(this, ExecutionId));
 
                 // Analyzer results need to be recorded separately so that they can still be reported if the phase throws
                 ConcurrentDictionary<PipelinePhase, ConcurrentBag<AnalyzerResult>> analyzerResults =
@@ -1082,6 +1050,59 @@ namespace Statiq.Core
             }
         }
 
+        /// <summary>
+        /// Deletes all files we wrote on the last execution.
+        /// </summary>
+        public void CleanWrittenFiles()
+        {
+            IDirectory directory = FileSystem.GetOutputDirectory();
+
+            try
+            {
+                Logger.LogDebug($"Cleaning files written to output directory: {directory.Path.FullPath}...");
+                int count = 0;
+                foreach (IFile file in _fileSystem.WrittenFiles)
+                {
+                    if (directory.Path.ContainsDescendant(file.Path) && file.Exists)
+                    {
+                        file.Delete();
+                        count++;
+                    }
+                }
+                Logger.LogInformation($"Cleaned {count} files written to output directory: {directory.Path.FullPath}");
+            }
+            catch (Exception ex)
+            {
+                Logger.LogWarning($"Error while cleaning files written to output directory {directory.Path.FullPath}: {0} - {1}", ex.GetType(), ex.Message);
+            }
+        }
+
+        /// <summary>
+        /// Recursively deletes a directory and then recreates it.
+        /// </summary>
+        /// <param name="directory">The directory to clean.</param>
+        /// <param name="name">A name for logging purposes.</param>
+        public void CleanDirectory(IDirectory directory, string name = null)
+        {
+            _ = directory ?? throw new ArgumentNullException(nameof(directory));
+
+            name = name is null ? string.Empty : (name + " ");
+            try
+            {
+                Logger.LogDebug($"Cleaning {name}directory: {directory.Path.FullPath}...");
+                if (directory.Exists)
+                {
+                    directory.Delete(true);
+                }
+                directory.Create();
+                Logger.LogInformation($"Cleaned {name}directory: {directory.Path.FullPath}");
+            }
+            catch (Exception ex)
+            {
+                Logger.LogWarning($"Error while cleaning {name}directory {directory.Path.FullPath}: {0} - {1}", ex.GetType(), ex.Message);
+            }
+        }
+
         /// <inheritdoc />
         public void Dispose()
         {
@@ -1107,7 +1128,7 @@ namespace Statiq.Core
             }
 
             System.Diagnostics.Trace.Listeners.Remove(_diagnosticsTraceListener);
-            CleanTempPath();
+            CleanDirectory(FileSystem.GetTempDirectory(), "temp");
             _serviceScope.Dispose();
             _disposed = true;
         }

@@ -141,9 +141,12 @@ namespace Statiq.App
             {
                 engine.FileSystem.OutputPath = commandSettings.OutputPath;
             }
+
+            // Clean mode
+            engine.Settings[Keys.CleanMode] = CleanMode.Self;
             if (commandSettings.NoClean)
             {
-                engine.Settings[Keys.CleanOutputPath] = false;
+                engine.Settings[Keys.CleanMode] = CleanMode.None;
             }
 
             // Set no cache if requested

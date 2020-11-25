@@ -1,17 +1,21 @@
 using System;
 using Statiq.Common;
 using Polly;
+using ConcurrentCollections;
 
 namespace Statiq.Core
 {
     public class LocalFileProvider : IFileProvider
     {
-        private readonly IReadOnlyFileSystem _fileSystem;
-
-        public LocalFileProvider(IReadOnlyFileSystem fileSystem)
+        public LocalFileProvider(IReadOnlyFileSystem fileSystem, ConcurrentHashSet<IFile> writtenFiles = null)
         {
-            _fileSystem = fileSystem.ThrowIfNull(nameof(fileSystem));
+            FileSystem = fileSystem.ThrowIfNull(nameof(fileSystem));
+            WrittenFiles = writtenFiles ?? new ConcurrentHashSet<IFile>();
         }
+
+        public IReadOnlyFileSystem FileSystem { get; }
+
+        public ConcurrentHashSet<IFile> WrittenFiles { get; }
 
         internal static Policy RetryPolicy { get; } =
             Policy
@@ -23,8 +27,8 @@ namespace Statiq.Core
                 .Handle<Exception>()
                 .WaitAndRetryAsync(3, _ => TimeSpan.FromMilliseconds(100));
 
-        public IFile GetFile(NormalizedPath path) => new LocalFile(_fileSystem, path);
+        public IFile GetFile(NormalizedPath path) => new LocalFile(this, path);
 
-        public IDirectory GetDirectory(NormalizedPath path) => new LocalDirectory(_fileSystem, path);
+        public IDirectory GetDirectory(NormalizedPath path) => new LocalDirectory(this, path);
     }
 }

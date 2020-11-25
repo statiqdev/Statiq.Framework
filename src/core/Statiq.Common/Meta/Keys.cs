@@ -88,7 +88,14 @@ namespace Statiq.Common
         /// Indicates whether to clean the output path on each execution.
         /// </summary>
         /// <type><see cref="bool"/></type>
+        [Obsolete("Use CleanMode instead")]
         public const string CleanOutputPath = nameof(CleanOutputPath);
+
+        /// <summary>
+        /// Indicates how to clean the output path on each execution.
+        /// </summary>
+        /// <type><see cref="CleanMode"/></type>
+        public const string CleanMode = nameof(CleanMode);
 
         /// <summary>
         /// Indicates the culture to use for reading and interpreting dates as input.

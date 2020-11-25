@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using ConcurrentCollections;
 using Statiq.Common;
 
 namespace Statiq.Core
@@ -68,5 +69,10 @@ namespace Statiq.Core
                 _tempPath = value;
             }
         }
+
+        /// <summary>
+        /// Keeps track of the files opened for writing for a given execution (reset by the engine before execution).
+        /// </summary>
+        public ConcurrentHashSet<IFile> WrittenFiles { get; } = new ConcurrentHashSet<IFile>();
     }
 }

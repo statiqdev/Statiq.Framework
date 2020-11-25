@@ -44,11 +44,11 @@ namespace Statiq.Common.Tests.Util
                 int count = 0;
                 while (processLauncher.AreAnyRunning)
                 {
-                    Thread.Sleep(100);
+                    Thread.Sleep(1000);
                     count++;
                     if (count > 10)
                     {
-                        throw new Exception("Process never returned");
+                        throw new Exception("Process never returned: " + outputWriter.ToString());
                     }
                 }
                 errorWriter.ToString().ShouldContain("Couldn't find a project to run.");
@@ -138,7 +138,7 @@ namespace Statiq.Common.Tests.Util
                     count++;
                     if (count > 10)
                     {
-                        throw new Exception("Process never returned");
+                        throw new Exception("Process never returned: " + outputWriter.ToString());
                     }
                 }
                 outputWriter.ToString().ShouldNotContain("Finished");

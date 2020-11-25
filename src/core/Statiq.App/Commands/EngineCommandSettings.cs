@@ -19,8 +19,12 @@ namespace Statiq.App
         public string OutputPath { get; set; }
 
         [CommandOption("--noclean")]
-        [Description("Prevents cleaning of the output path on each execution.")]
+        [Description("Prevents cleaning of the output path on each execution (same as \"--clean-mode None\").")]
         public bool NoClean { get; set; }
+
+        [CommandOption("--clean-mode")]
+        [Description("Specifies how the output path will be cleaned between each execution.")]
+        public CleanMode CleanMode { get; set; }
 
         [CommandOption("--nocache")]
         [Description("Prevents caching information during execution (less memory usage but slower execution).")]

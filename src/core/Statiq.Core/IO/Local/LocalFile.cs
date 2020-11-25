@@ -11,12 +11,12 @@ namespace Statiq.Core
     {
         private const int BufferSize = 8192;
 
-        private readonly IReadOnlyFileSystem _fileSystem;
+        private readonly LocalFileProvider _fileProvider;
         private readonly System.IO.FileInfo _file;
 
-        public LocalFile(IReadOnlyFileSystem fileSystem, in NormalizedPath path)
+        public LocalFile(LocalFileProvider fileProvider, in NormalizedPath path)
         {
-            _fileSystem = fileSystem.ThrowIfNull(nameof(fileSystem));
+            _fileProvider = fileProvider.ThrowIfNull(nameof(fileProvider));
 
             path.ThrowIfNull(nameof(path));
 
@@ -33,7 +33,7 @@ namespace Statiq.Core
 
         NormalizedPath IFileSystemEntry.Path => Path;
 
-        public IDirectory Directory => _fileSystem.GetDirectory(Path.Parent);
+        public IDirectory Directory => _fileProvider.FileSystem.GetDirectory(Path.Parent);
 
         public bool Exists => _file.Exists;
 
@@ -90,6 +90,8 @@ namespace Statiq.Core
 
         public async Task WriteAllTextAsync(string contents, bool createDirectory = true, CancellationToken cancellationToken = default)
         {
+            _fileProvider.WrittenFiles.Add(this);
+
             if (createDirectory)
             {
                 CreateDirectory();
@@ -102,28 +104,38 @@ namespace Statiq.Core
 
         public Stream OpenWrite(bool createDirectory = true)
         {
+            _fileProvider.WrittenFiles.Add(this);
+
             if (createDirectory)
             {
                 CreateDirectory();
             }
+
             return new FileStream(_file.FullName, FileMode.OpenOrCreate, FileAccess.Write, FileShare.None, BufferSize, true);
         }
 
         public Stream OpenAppend(bool createDirectory = true)
         {
+            _fileProvider.WrittenFiles.Add(this);
+
             if (createDirectory)
             {
                 CreateDirectory();
             }
+
             return new FileStream(_file.FullName, FileMode.Append, FileAccess.Write, FileShare.None, BufferSize, true);
         }
 
         public Stream Open(bool createDirectory = true)
         {
+            // We don't actually know if this is going to be used for writing, so include it just in case
+            _fileProvider.WrittenFiles.Add(this);
+
             if (createDirectory)
             {
                 CreateDirectory();
             }
+
             return new FileStream(_file.FullName, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.ReadWrite, BufferSize, true);
         }
 
