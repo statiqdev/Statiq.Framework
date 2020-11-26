@@ -4,6 +4,7 @@
 - Added a `--clean-mode` command-line option to control the cleaning mode.
 - Changed the default cleaning behavior to `CleanMode.Self` which only cleans files written during execution and not those written by external processes, for example.
 - Added the `IServiceProvider` to the `PipelineBuilder` so services are available when building pipelines (#150).
+- Added new `IReadOnlyFileSystem.GetRootPath()` extensions.
 
 # 1.0.0-beta.29
 

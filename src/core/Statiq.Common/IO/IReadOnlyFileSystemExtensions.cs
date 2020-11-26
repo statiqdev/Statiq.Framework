@@ -325,6 +325,29 @@ namespace Statiq.Common
         }
 
         /// <summary>
+        /// Gets the root path.
+        /// </summary>
+        /// <param name="fileSystem">The file system.</param>
+        /// <returns>The root path.</returns>
+        public static NormalizedPath GetRootPath(this IReadOnlyFileSystem fileSystem) =>
+            fileSystem.GetRootPath(NormalizedPath.Null);
+
+        /// <summary>
+        /// Gets a path by combining it with the root path.
+        /// </summary>
+        /// <param name="fileSystem">The file system.</param>
+        /// <param name="path">The path to combine with the root path.
+        /// If this is <see cref="NormalizedPath.Null"/>, returns the root path.</param>
+        /// <returns>The path.</returns>
+        public static NormalizedPath GetRootPath(this IReadOnlyFileSystem fileSystem, in NormalizedPath path)
+        {
+            fileSystem.ThrowIfNull(nameof(fileSystem));
+            return path.IsNull
+                ? fileSystem.RootPath
+                : fileSystem.RootPath.Combine(path);
+        }
+
+        /// <summary>
         /// Gets a file representing a root file.
         /// </summary>
         /// <param name="fileSystem">The file system.</param>
