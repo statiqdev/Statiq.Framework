@@ -23,7 +23,7 @@ namespace Statiq.App
             where TBootstrapper : IBootstrapper =>
             bootstrapper.ConfigureEngine(x =>
             {
-                PipelineBuilder builder = new PipelineBuilder(x.Pipelines, x.Settings);
+                PipelineBuilder builder = new PipelineBuilder(x.Pipelines, x.Settings, x.Services);
                 buildAction(builder);
                 IPipeline pipeline = builder.Build();
                 if (pipeline is object)
