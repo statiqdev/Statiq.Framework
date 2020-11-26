@@ -531,7 +531,7 @@ namespace Statiq.Common.Tests.IO
             {
                 // Given, When
                 NormalizedPath first = new NormalizedPath("shaders/basic.vert");
-                string second = "shaders/basic.vert";
+                const string second = "shaders/basic.vert";
 
                 // Then
                 (first == second).ShouldBeTrue();
@@ -542,7 +542,7 @@ namespace Statiq.Common.Tests.IO
             {
                 // Given, When
                 NormalizedPath first = new NormalizedPath("shaders/basic.vert");
-                string second = "shaders/basic.frag";
+                const string second = "shaders/basic.frag";
 
                 // Then
                 (first == second).ShouldBeFalse();
@@ -553,7 +553,7 @@ namespace Statiq.Common.Tests.IO
             {
                 // Given, When
                 NormalizedPath first = new NormalizedPath("shaders/basic.vert");
-                string second = "/shaders/basic.frag";
+                const string second = "/shaders/basic.frag";
 
                 // Then
                 (first == second).ShouldBeFalse();
@@ -564,7 +564,7 @@ namespace Statiq.Common.Tests.IO
             {
                 // Given, When
                 NormalizedPath first = new NormalizedPath("/shaders/basic.vert");
-                string second = "shaders/basic.frag";
+                const string second = "shaders/basic.frag";
 
                 // Then
                 (first == second).ShouldBeFalse();

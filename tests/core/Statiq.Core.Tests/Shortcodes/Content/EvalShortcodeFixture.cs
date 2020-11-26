@@ -19,7 +19,7 @@ namespace Statiq.Core.Tests.Shortcodes.Content
                 context.ScriptHelper = new ScriptHelper(context);
                 TestDocument document = new TestDocument();
                 EvalShortcode shortcode = new EvalShortcode();
-                string shortcodeContent = "return 1 + 2;";
+                const string shortcodeContent = "return 1 + 2;";
 
                 // When
                 ShortcodeResult result = await shortcode.ExecuteAsync(null, shortcodeContent, document, context);
@@ -35,7 +35,7 @@ namespace Statiq.Core.Tests.Shortcodes.Content
                 context.ScriptHelper = new ScriptHelper(context);
                 TestDocument document = new TestDocument();
                 EvalShortcode shortcode = new EvalShortcode();
-                string shortcodeContent = "1 + 2";
+                const string shortcodeContent = "1 + 2";
 
                 // When
                 ShortcodeResult result = await shortcode.ExecuteAsync(null, shortcodeContent, document, context);
@@ -54,7 +54,7 @@ namespace Statiq.Core.Tests.Shortcodes.Content
                     { "Foo", "4" }
                 };
                 EvalShortcode shortcode = new EvalShortcode();
-                string shortcodeContent = "return 1 + GetInt(\"Foo\");";
+                const string shortcodeContent = "return 1 + GetInt(\"Foo\");";
 
                 // When
                 ShortcodeResult result = await shortcode.ExecuteAsync(null, shortcodeContent, document, context);

@@ -70,7 +70,7 @@ namespace Statiq.App
                     await AfterInitialExecutionAsync(commandContext, commandSettings, engineManager, _cancellationTokenSource);
 
                     // Log that we're ready and start waiting on input
-                    string prompt = "Type Ctrl-C or \"Exit()\" to exit and \"Help()\" for global methods and properties";
+                    const string prompt = "Type Ctrl-C or \"Exit()\" to exit and \"Help()\" for global methods and properties";
                     logger.LogInformation(prompt);
                     ConsoleLoggerProvider.FlushAndWait();
                     consoleListener.StartReadingLines();

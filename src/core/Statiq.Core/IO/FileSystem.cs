@@ -16,7 +16,7 @@ namespace Statiq.Core
 
         public FileSystem()
         {
-            FileProvider = new LocalFileProvider(this);
+            FileProvider = new LocalFileProvider(this, WrittenFiles);
         }
 
         public IFileProvider FileProvider

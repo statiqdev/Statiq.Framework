@@ -1059,7 +1059,7 @@ namespace Statiq.Core
 
             try
             {
-                Logger.LogDebug($"Cleaning files written to output directory: {directory.Path.FullPath}...");
+                Logger.LogDebug($"Cleaning files written to output directory {directory.Path.FullPath} during previous execution...");
                 int count = 0;
                 foreach (IFile file in _fileSystem.WrittenFiles)
                 {
@@ -1069,11 +1069,11 @@ namespace Statiq.Core
                         count++;
                     }
                 }
-                Logger.LogInformation($"Cleaned {count} files written to output directory: {directory.Path.FullPath}");
+                Logger.LogInformation($"Cleaned {count} files written to output directory {directory.Path.FullPath} during previous execution");
             }
             catch (Exception ex)
             {
-                Logger.LogWarning($"Error while cleaning files written to output directory {directory.Path.FullPath}: {0} - {1}", ex.GetType(), ex.Message);
+                Logger.LogWarning($"Error while cleaning files written to output directory {directory.Path.FullPath} during previous execution: {0} - {1}", ex.GetType(), ex.Message);
             }
         }
 
@@ -1089,13 +1089,13 @@ namespace Statiq.Core
             name = name is null ? string.Empty : (name + " ");
             try
             {
-                Logger.LogDebug($"Cleaning {name}directory: {directory.Path.FullPath}...");
+                Logger.LogDebug($"Cleaning {name}directory {directory.Path.FullPath}...");
                 if (directory.Exists)
                 {
                     directory.Delete(true);
                 }
                 directory.Create();
-                Logger.LogInformation($"Cleaned {name}directory: {directory.Path.FullPath}");
+                Logger.LogInformation($"Cleaned {name}directory {directory.Path.FullPath}");
             }
             catch (Exception ex)
             {

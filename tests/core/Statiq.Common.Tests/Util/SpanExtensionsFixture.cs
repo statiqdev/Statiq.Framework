@@ -17,7 +17,7 @@ namespace Statiq.Common.Tests.Util
             public void RemovesFromSpan(int startIndex, int length, string expected)
             {
                 // Given
-                string str = "abcde";
+                const string str = "abcde";
                 Span<char> chars = new char[str.Length];
                 str.AsSpan().CopyTo(chars);
 

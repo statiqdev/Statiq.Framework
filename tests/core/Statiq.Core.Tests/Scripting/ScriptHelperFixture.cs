@@ -20,8 +20,8 @@ namespace Statiq.Core.Tests.Scripting
                 {
                     Namespaces = new TestNamespacesCollection(new[] { "Foo.Bar" })
                 };
-                string code = "int x = 0;";
-                string expectedStart =
+                const string code = "int x = 0;";
+                const string expectedStart =
 @"using Foo.Bar;
 using System;
 using System.Collections;
@@ -59,8 +59,8 @@ return null;
                 {
                     Namespaces = new TestNamespacesCollection(new[] { "Foo.Bar" })
                 };
-                string code = "1 + 2";
-                string expectedStart =
+                const string code = "1 + 2";
+                const string expectedStart =
 @"using Foo.Bar;
 using System;
 using System.Collections;
@@ -98,8 +98,8 @@ return
                 {
                     Namespaces = new TestNamespacesCollection(new[] { "Foo.Bar" })
                 };
-                string code = "1 + 2;";
-                string expectedStart =
+                const string code = "1 + 2;";
+                const string expectedStart =
 @"using Foo.Bar;
 using System;
 using System.Collections;
@@ -137,8 +137,8 @@ return null;
                 {
                     Namespaces = new TestNamespacesCollection(new[] { "Foo.Bar" })
                 };
-                string code = "return 0;";
-                string expectedStart =
+                const string code = "return 0;";
+                const string expectedStart =
 @"using Foo.Bar;
 using System;
 using System.Collections;
@@ -176,7 +176,7 @@ return null;
                 {
                     Namespaces = new TestNamespacesCollection(new[] { "Foo.Bar" })
                 };
-                string code =
+                const string code =
 @"public class Foo
 {
     int X { get; set; }
@@ -193,7 +193,7 @@ Pipelines.Add(Content());
 public class Baz
 {
 }";
-                string expectedStart =
+                const string expectedStart =
 @"using Foo.Bar;
 using System;
 using System.Collections;
@@ -216,7 +216,7 @@ Pipelines.Add(Content());
 
 return null;
 }";
-                string expectedEnd =
+                const string expectedEnd =
 @"#line 1
 public class Foo
 {
@@ -255,7 +255,7 @@ public static class ScriptExtensionMethods
                 {
                     Namespaces = new TestNamespacesCollection(new[] { "Foo.Bar" })
                 };
-                string code =
+                const string code =
 @"using Red.Blue;
 using Yellow;
 public static class Foo
@@ -267,7 +267,7 @@ public string Self(string x)
 {
     return x.ToLower();
 }";
-                string expectedStart =
+                const string expectedStart =
 @"using Foo.Bar;
 using System;
 using System.Collections;
@@ -297,7 +297,7 @@ public string Self(string x)
     return x.ToLower();
 }";
 
-                string expectedEnd =
+                const string expectedEnd =
 @"#line 3
 public static class Foo
 {
@@ -326,7 +326,7 @@ public static class ScriptExtensionMethods
                 {
                     Namespaces = new TestNamespacesCollection(new[] { "Foo.Bar" })
                 };
-                string code =
+                const string code =
 @"public static class Foo
 {
     public static string Bar(this string x) => x;
@@ -336,7 +336,7 @@ public string Self(string x)
 {
     return x.ToLower();
 }";
-                string expectedStart =
+                const string expectedStart =
 @"using Foo.Bar;
 using System;
 using System.Collections;
@@ -364,7 +364,7 @@ public string Self(string x)
     return x.ToLower();
 }";
 
-                string expectedEnd =
+                const string expectedEnd =
 @"#line 1
 public static class Foo
 {
@@ -393,7 +393,7 @@ public static class ScriptExtensionMethods
                 {
                     Namespaces = new TestNamespacesCollection(new[] { "Foo.Bar" })
                 };
-                string code =
+                const string code =
 @"public static class Foo
 {
     public static string Bar(this string x) => x;
@@ -403,7 +403,7 @@ public static string Self(this string x)
 {
     return x.ToLower();
 }";
-                string expectedStart =
+                const string expectedStart =
 @"using Foo.Bar;
 using System;
 using System.Collections;
@@ -426,7 +426,7 @@ Pipelines.Add(Content());
 return null;
 }";
 
-                string expectedEnd =
+                const string expectedEnd =
 @"#line 1
 public static class Foo
 {
@@ -459,7 +459,7 @@ public static string Self(this string x)
                 {
                     Namespaces = new TestNamespacesCollection(new[] { "Foo.Bar" })
                 };
-                string code =
+                const string code =
 @"// XYZ
 public class Foo
 {
@@ -474,7 +474,7 @@ public string Self(string x)
     // RTY
     return x.ToLower();
 }";
-                string expectedStart =
+                const string expectedStart =
 @"using Foo.Bar;
 using System;
 using System.Collections;
@@ -505,7 +505,7 @@ public string Self(string x)
     return x.ToLower();
 }";
 
-                string expectedEnd =
+                const string expectedEnd =
 @"#line 1
 // XYZ
 public class Foo
@@ -536,7 +536,7 @@ public static class ScriptExtensionMethods
                 {
                     Namespaces = new TestNamespacesCollection(new[] { "Foo.Bar" })
                 };
-                string code = "int x = 0;";
+                const string code = "int x = 0;";
 
                 // When
                 string actual = ScriptHelper.Parse(code, context);
