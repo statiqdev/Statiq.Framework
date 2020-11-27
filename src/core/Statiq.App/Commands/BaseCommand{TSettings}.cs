@@ -1,17 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 using NetEscapades.Extensions.Logging.RollingFile;
 using Spectre.Cli;
 using Statiq.Common;
-using Statiq.Core;
 
 namespace Statiq.App
 {
@@ -19,7 +15,7 @@ namespace Statiq.App
     /// A base command type that sets up logging and debugging.
     /// </summary>
     /// <typeparam name="TSettings">The type of settings this command uses.</typeparam>
-    public abstract class BaseCommand<TSettings> : AsyncCommand<TSettings>
+    public abstract class BaseCommand<TSettings> : AsyncCommand<TSettings>, IBaseCommand
         where TSettings : BaseCommandSettings
     {
         private readonly ISettings _configurationSettings;
@@ -61,12 +57,15 @@ namespace Statiq.App
             // Set failure log level
             _configurationSettings.Add(Keys.FailureLogLevel, commandSettings.FailureLogLevel.ToString());
 
-            // Build a temporary service provider so we can log
+            // Build a temporary service provider so we can log and do some other stuff
             // Make sure to place it in it's own scope so transient services get correctly disposed
             IServiceProvider services = ServiceCollection.BuildServiceProvider();
             ClassCatalog classCatalog = services.GetService<ClassCatalog>();
             using (IServiceScope serviceScope = services.CreateScope())
             {
+                // Set the command in the bootstrapper
+                serviceScope.ServiceProvider.GetRequiredService<Bootstrapper>().Command = this;
+
                 // Log pending messages
                 ILogger logger = serviceScope.ServiceProvider.GetRequiredService<ILogger<Bootstrapper>>();
                 classCatalog?.LogDebugMessagesTo(logger);

@@ -15,6 +15,11 @@ namespace Statiq.Common
         IConfiguratorCollection Configurators { get; }
 
         /// <summary>
+        /// Gets the command that was run.
+        /// </summary>
+        IBaseCommand Command { get; }
+
+        /// <summary>
         /// Executes the engine.
         /// </summary>
         /// <returns>The exit code (0 for success).</returns>

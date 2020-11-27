@@ -109,6 +109,9 @@ namespace Statiq.App
         /// <returns>A service collection for use by the bootstrapper.</returns>
         protected virtual IServiceCollection CreateServiceCollection() => null;
 
+        /// <inheritdoc/>
+        public IBaseCommand Command { get; internal set; }
+
         // Factory
 
         public static readonly BootstrapperFactory Factory = new BootstrapperFactory();
