@@ -15,7 +15,8 @@ namespace Statiq.Common
     /// </summary>
     public class ProcessLauncher : IDisposable
     {
-        private readonly ConcurrentCache<int, StartedProcess> _startedProcesses = new ConcurrentCache<int, StartedProcess>();
+        private readonly ConcurrentCache<int, StartedProcess> _runningProcesses = new ConcurrentCache<int, StartedProcess>();
+        private readonly ManualResetEvent _allProcessesExited = new ManualResetEvent(true);
 
         public ProcessLauncher()
         {
@@ -88,9 +89,15 @@ namespace Statiq.Common
         /// <summary>
         /// Returns <c>true</c> if any processes launched by this launcher are currently running.
         /// </summary>
-        public bool AreAnyRunning => _startedProcesses.Count > 0;
+        public bool AreAnyRunning => _runningProcesses.Count > 0;
 
-        public IEnumerable<Process> RunningProcesses => _startedProcesses.Select(x => x.Value.Process);
+        public IEnumerable<Process> RunningProcesses => _runningProcesses.Select(x => x.Value.Process);
+
+        /// <summary>
+        /// Waits for all launched processes to exit (useful for background processes).
+        /// If any processes are launched while waiting, those will also be waited on.
+        /// </summary>
+        public void WaitForRunningProcesses() => _allProcessesExited.WaitOne();
 
         public ProcessLauncher WithArgument(string argument, bool quoted = false)
         {
@@ -148,7 +155,10 @@ namespace Statiq.Common
                 return 0;
             }
 
-            // USe a default exit code function if one isn't provided
+            // Block waiters until the process exits
+            _allProcessesExited.Reset();
+
+            // Use a default exit code function if one isn't provided
             Func<int, bool> isErrorExitCode = IsErrorExitCode ?? (x => x != 0);
 
             // Create the process start info
@@ -203,7 +213,7 @@ namespace Statiq.Common
             {
                 if (!e.Data.IsNullOrEmpty())
                 {
-                    StartedProcess startedProcess = _startedProcesses.GetOrAdd(
+                    StartedProcess startedProcess = _runningProcesses.GetOrAdd(
                         process.Id,
                         _ => new StartedProcess(process, loggerFactory, ExitedLogAction));
                     startedProcess.Logger?.Log(LogOutput ? LogLevel.Information : LogLevel.Debug, e.Data);
@@ -214,7 +224,7 @@ namespace Statiq.Common
             {
                 if (!e.Data.IsNullOrEmpty())
                 {
-                    StartedProcess startedProcess = _startedProcesses.GetOrAdd(
+                    StartedProcess startedProcess = _runningProcesses.GetOrAdd(
                         process.Id,
                         _ => new StartedProcess(process, loggerFactory, ExitedLogAction));
                     startedProcess.Logger?.Log(LogErrors ? LogLevel.Error : LogLevel.Debug, e.Data);
@@ -232,10 +242,10 @@ namespace Statiq.Common
 
             // Use a separate logger, but only create and add it if it wasn't already from one of the received events
             // Either way, register a cancellation handler and set the cancellation token registration here
-            _startedProcesses.GetOrAdd(process.Id, _ => new StartedProcess(process, loggerFactory, ExitedLogAction))
+            _runningProcesses.GetOrAdd(process.Id, _ => new StartedProcess(process, loggerFactory, ExitedLogAction))
                 .CancellationTokenRegistration = cancellationToken.Register(() =>
                 {
-                    if (_startedProcesses.TryRemove(process.Id, out StartedProcess startedProcess))
+                    if (_runningProcesses.TryRemove(process.Id, out StartedProcess startedProcess))
                     {
                         try
                         {
@@ -246,6 +256,12 @@ namespace Statiq.Common
                         }
                         startedProcess.Process.Exited -= ProcessExited;
                         startedProcess.CancellationTokenRegistration.Dispose();
+                    }
+
+                    // Allow waiters to run if there are no more processes
+                    if (_runningProcesses.Count == 0)
+                    {
+                        _allProcessesExited.Set();
                     }
                 });
 
@@ -281,7 +297,7 @@ namespace Statiq.Common
 
                 // Log exit (synchronous)
                 exitCode = process.ExitCode;
-                if (_startedProcesses.TryRemove(process.Id, out StartedProcess startedProcess))
+                if (_runningProcesses.TryRemove(process.Id, out StartedProcess startedProcess))
                 {
                     startedProcess.ExitedLogAction(startedProcess.Process);
                 }
@@ -295,6 +311,12 @@ namespace Statiq.Common
             finally
             {
                 process.Close();
+
+                // Allow waiters to run if there are no more processes
+                if (_runningProcesses.Count == 0)
+                {
+                    _allProcessesExited.Set();
+                }
             }
 
             // Finish the stream and return a document with output as content
@@ -316,17 +338,24 @@ namespace Statiq.Common
         // Log exit (asynchronous)
         private void ProcessExited(object sender, EventArgs e)
         {
+            // Remove the process and log exit
             Process process = (Process)sender;
-            if (_startedProcesses.TryRemove(process.Id, out StartedProcess startedProcess))
+            if (_runningProcesses.TryRemove(process.Id, out StartedProcess startedProcess))
             {
                 startedProcess.ExitedLogAction(startedProcess.Process);
+            }
+
+            // Allow waiters to run if there are no more processes
+            if (_runningProcesses.Count == 0)
+            {
+                _allProcessesExited.Set();
             }
         }
 
         public void Dispose()
         {
             // Kill processes that haven't already exited
-            foreach (StartedProcess startedProcess in _startedProcesses.Values)
+            foreach (StartedProcess startedProcess in _runningProcesses.Values)
             {
                 try
                 {
@@ -338,7 +367,8 @@ namespace Statiq.Common
                 startedProcess.Process.Exited -= ProcessExited;
                 startedProcess.CancellationTokenRegistration.Dispose();
             }
-            _startedProcesses.Clear();
+            _runningProcesses.Clear();
+            _allProcessesExited.Set();
         }
 
         private class StartedProcess

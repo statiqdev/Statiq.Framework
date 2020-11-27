@@ -5,6 +5,7 @@
 - Changed the default cleaning behavior to `CleanMode.Self` which only cleans files written during execution and not those written by external processes, for example.
 - Added the `IServiceProvider` to the `PipelineBuilder` so services are available when building pipelines (#150).
 - Added new `IReadOnlyFileSystem.GetRootPath()` extensions.
+- Added `ProcessLauncher.WaitForRunningProcesses()` that allows waiting until all running processes have exited.
 
 # 1.0.0-beta.29
 
