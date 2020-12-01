@@ -2,6 +2,7 @@
 
 - Added some additional retry policies to file operations to avoid file lock exceptions under certain conditions (#151).
 - Added ability to customize the body of meta-refresh redirect HTML files using the `RedirectBody` key (#153).
+- Added `.fhtml` as a media type to mean HTML fragments (needed so that we can treat full HTML and HTML fragments differently when applying layouts in Statiq Web).
 
 # 1.0.0-beta.30
 

@@ -12,21 +12,22 @@ namespace Statiq.Common
     {
         // Some common and relevant media types
         // Use lookups to make sure we reflect any changes to the mapping
+        public static string CSharp => Get(".cs");
         public static string Css => Get(".css");
         public static string Gif => Get(".gif");
         public static string Handlebars => Get(".hbs");
         public static string Html => Get(".html");
+        public static string HtmlFragment => Get(".fhtml");
         public static string Jpg => Get(".jpg");
         public static string Json => Get(".json");
+        public static string Less => Get(".less");
         public static string Markdown => Get(".md");
         public static string Png => Get(".png");
         public static string Razor => Get(".cshtml");
-        public static string Less => Get(".less");
         public static string Sass => Get(".sass");
         public static string Scss => Get(".scss");
         public static string Xml => Get(".xml");
         public static string Yaml => Get(".yaml");
-        public static string CSharp => Get(".cs");
 
         /// <summary>
         /// A mapping of file extension to both registered IANA media types
@@ -1058,17 +1059,18 @@ namespace Statiq.Common
 
                 // Additional conventional media types not registered with IANA
                 // This is a good resource for finding conventional extensions: https://github.com/github/linguist/blob/master/lib/linguist/languages.yml
+                { ".cs", "text/x-csharp" },
                 { ".cshtml", "text/x-cshtml" },  // This is what VSCode uses: https://github.com/aspnet/AspNetCore-Tooling/blob/master/src/Razor/src/Microsoft.AspNetCore.Razor.VSCode.Extension/package.json
+                { ".csx", "text/x-csharp" },
+                { ".fhtml", "text/x-fhtml" }, // HTML fragment, discussion at https://stackoverflow.com/q/811887
+                { ".handlebars", "text/handlebars" },
+                { ".hbs", "text/handlebars" },
                 { ".md", "text/markdown" },
                 { ".sass", "text/x-sass" },
                 { ".scss", "text/x-scss" },
-                { ".yaml", "text/yaml" },
-                { ".yml", "text/yaml" },
                 { ".wasm", "application/wasm" },
-                { ".hbs", "text/handlebars" },
-                { ".handlebars", "text/handlebars" },
-                { ".cs", "text/x-csharp" },
-                { ".csx", "text/x-csharp" }
+                { ".yaml", "text/yaml" },
+                { ".yml", "text/yaml" }
             };
 
         /// <summary>
