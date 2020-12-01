@@ -18,10 +18,18 @@ namespace Statiq.Common
         private readonly ConcurrentCache<int, StartedProcess> _runningProcesses = new ConcurrentCache<int, StartedProcess>();
         private readonly ManualResetEvent _allProcessesExited = new ManualResetEvent(true);
 
+        /// <summary>
+        /// Creates a new process launcher without a defined file name or arguments.
+        /// </summary>
         public ProcessLauncher()
         {
         }
 
+        /// <summary>
+        /// Creates a new process launcher with the specified file name and arguments.
+        /// </summary>
+        /// <param name="fileName">The file name of the process to start.</param>
+        /// <param name="arguments">The arguments to pass to the process.</param>
         public ProcessLauncher(string fileName, params string[] arguments)
         {
             FileName = fileName;
