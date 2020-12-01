@@ -160,5 +160,23 @@ namespace Statiq.Core.Tests.Modules.Contents
             // Then
             results.Select(x => x.Destination.FullPath).ShouldBe(new[] { "a/b" });
         }
+
+        [Test]
+        public async Task DifferentBody()
+        {
+            // Given
+            TestDocument redirected = new TestDocument(new MetadataItems
+            {
+                { Keys.RedirectFrom, new List<NormalizedPath> { new NormalizedPath("foo.html") } },
+                { Keys.RedirectBody, "<p>FOOBAR</p>" }
+            });
+            GenerateRedirects redirect = new GenerateRedirects();
+
+            // When
+            IReadOnlyList<TestDocument> results = await ExecuteAsync(new[] { redirected }, redirect);
+
+            // Then
+            results.Single().Content.ShouldContain("<p>FOOBAR</p>");
+        }
     }
 }

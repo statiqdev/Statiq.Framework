@@ -1,6 +1,7 @@
 # 1.0.0-beta.31
 
 - Added some additional retry policies to file operations to avoid file lock exceptions under certain conditions (#151).
+- Added ability to customize the body of meta-refresh redirect HTML files using the `RedirectBody` key (#153).
 
 # 1.0.0-beta.30
 

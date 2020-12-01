@@ -242,6 +242,12 @@ namespace Statiq.Common
         public const string RedirectFrom = nameof(RedirectFrom);
 
         /// <summary>
+        /// Replaces the default body of meta-refresh redirect HTML files with the specified body
+        /// (it will be included raw so don't escape HTML).
+        /// </summary>
+        public const string RedirectBody = nameof(RedirectBody);
+
+        /// <summary>
         /// Entirely disables cache modules, both during runtime and the persistent cache.
         /// </summary>
         public const string DisableCache = nameof(DisableCache);
