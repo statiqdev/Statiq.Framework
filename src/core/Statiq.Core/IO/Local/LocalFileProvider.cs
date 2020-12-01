@@ -20,12 +20,12 @@ namespace Statiq.Core
         internal static Policy RetryPolicy { get; } =
             Policy
                 .Handle<Exception>()
-                .WaitAndRetry(3, _ => TimeSpan.FromMilliseconds(100));
+                .WaitAndRetry(5, retry => retry * TimeSpan.FromMilliseconds(100));
 
         internal static AsyncPolicy AsyncRetryPolicy { get; } =
             Policy
                 .Handle<Exception>()
-                .WaitAndRetryAsync(3, _ => TimeSpan.FromMilliseconds(100));
+                .WaitAndRetryAsync(5, retry => retry * TimeSpan.FromMilliseconds(100));
 
         public IFile GetFile(NormalizedPath path) => new LocalFile(this, path);
 

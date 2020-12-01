@@ -100,7 +100,7 @@ namespace Statiq.Core
             await LocalFileProvider.AsyncRetryPolicy.ExecuteAsync(() => File.WriteAllTextAsync(_file.FullName, contents, cancellationToken));
         }
 
-        public Stream OpenRead() => new FileStream(_file.FullName, FileMode.Open, FileAccess.Read, FileShare.Read, BufferSize, true);
+        public Stream OpenRead() => LocalFileProvider.RetryPolicy.Execute(() => new FileStream(_file.FullName, FileMode.Open, FileAccess.Read, FileShare.Read, BufferSize, true));
 
         public Stream OpenWrite(bool createDirectory = true)
         {
@@ -111,7 +111,7 @@ namespace Statiq.Core
                 CreateDirectory();
             }
 
-            return new FileStream(_file.FullName, FileMode.OpenOrCreate, FileAccess.Write, FileShare.None, BufferSize, true);
+            return LocalFileProvider.RetryPolicy.Execute(() => new FileStream(_file.FullName, FileMode.OpenOrCreate, FileAccess.Write, FileShare.None, BufferSize, true));
         }
 
         public Stream OpenAppend(bool createDirectory = true)
@@ -123,7 +123,7 @@ namespace Statiq.Core
                 CreateDirectory();
             }
 
-            return new FileStream(_file.FullName, FileMode.Append, FileAccess.Write, FileShare.None, BufferSize, true);
+            return LocalFileProvider.RetryPolicy.Execute(() => new FileStream(_file.FullName, FileMode.Append, FileAccess.Write, FileShare.None, BufferSize, true));
         }
 
         public Stream Open(bool createDirectory = true)
@@ -136,7 +136,7 @@ namespace Statiq.Core
                 CreateDirectory();
             }
 
-            return new FileStream(_file.FullName, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.ReadWrite, BufferSize, true);
+            return LocalFileProvider.RetryPolicy.Execute(() => new FileStream(_file.FullName, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.ReadWrite, BufferSize, true));
         }
 
         private void CreateDirectory() => Directory.Create();

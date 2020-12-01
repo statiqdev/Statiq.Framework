@@ -1,5 +1,7 @@
 # 1.0.0-beta.31
 
+- Added some additional retry policies to file operations to avoid file lock exceptions under certain conditions (#151).
+
 # 1.0.0-beta.30
 
 - Added a new `CleanMode` enumeration and corresponding setting to control which output files are cleaned on execution (#152).
