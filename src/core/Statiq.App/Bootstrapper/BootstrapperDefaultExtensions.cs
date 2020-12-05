@@ -27,13 +27,13 @@ namespace Statiq.App
             {
                 bootstrapper.AddDefaultSettings();
             }
-            if (features.HasFlag(DefaultFeatures.EnvironmentVariables))
-            {
-                bootstrapper.AddEnvironmentVariables();
-            }
             if (features.HasFlag(DefaultFeatures.ConfigurationFiles))
             {
                 bootstrapper.AddDefaultConfigurationFiles();
+            }
+            if (features.HasFlag(DefaultFeatures.EnvironmentVariables))
+            {
+                bootstrapper.AddEnvironmentVariables();
             }
             if (features.HasFlag(DefaultFeatures.BuildCommands))
             {
@@ -102,15 +102,15 @@ namespace Statiq.App
                     { Keys.CleanMode, CleanMode.Self }
                 });
 
-        public static Bootstrapper AddEnvironmentVariables(this Bootstrapper bootstrapper) =>
-            bootstrapper.BuildConfiguration(builder => builder.AddEnvironmentVariables());
-
         public static Bootstrapper AddDefaultConfigurationFiles(this Bootstrapper bootstrapper) =>
             bootstrapper.BuildConfiguration(builder => builder
                 .SetBasePath(Directory.GetCurrentDirectory())
                 .AddSettingsFile("appsettings")
                 .AddSettingsFile("settings")
                 .AddSettingsFile("statiq"));
+
+        public static Bootstrapper AddEnvironmentVariables(this Bootstrapper bootstrapper) =>
+            bootstrapper.BuildConfiguration(builder => builder.AddEnvironmentVariables());
 
         public static Bootstrapper AddBuildCommands(this Bootstrapper bootstrapper)
         {

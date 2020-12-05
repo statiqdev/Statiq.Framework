@@ -1,5 +1,7 @@
 # 1.0.0-beta.32
 
+- Changes the precedence of environment variables to overwrite configuration from settings files to match expected ASP.NET Core conventions (#154).
+
 # 1.0.0-beta.31
 
 - Added some additional retry policies to file operations to avoid file lock exceptions under certain conditions (#151).
