@@ -154,7 +154,7 @@ namespace Statiq.Core
 
                         if (_metaRefreshPages)
                         {
-                            string body = input.GetString(Keys.RedirectBody, $@"<p>This page has moved to a <a href=""{url}"">{url}</a></p>");
+                            string body = input.GetString(Keys.RedirectBody, $@"<p>This page has moved to <a href=""{url}"">{url}</a></p>");
                             yield return context.CreateDocument(
                                 outputPath,
                                 await context.GetContentProviderAsync(
