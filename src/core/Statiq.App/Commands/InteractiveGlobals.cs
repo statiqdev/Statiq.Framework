@@ -55,7 +55,7 @@ namespace Statiq.App
         public void Quit() => Exit();
 
         [Description("Prints the global methods and properties.")]
-        public void Help() => Help(typeof(InteractiveGlobals));
+        public void Help() => Help(GetType());
 
         [Description("Reflects over an object to print its methods and properties (optionally filtering to members that contain a string).")]
         public void Help(object obj, string filter = null)
