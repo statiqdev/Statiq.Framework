@@ -1,6 +1,7 @@
 # 1.0.0-beta.32
 
 - Changes the precedence of environment variables to overwrite configuration from settings files to match expected ASP.NET Core conventions (#154).
+- Fixes some bugs with the `ProcessLauncher` on Linux and Mac by ensuring the entire process tree is killed (#156).
 
 # 1.0.0-beta.31
 

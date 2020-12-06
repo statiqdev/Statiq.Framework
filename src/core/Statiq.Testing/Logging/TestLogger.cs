@@ -30,7 +30,7 @@ namespace Statiq.Testing
             TestContext.Out.WriteLine(formatted);
             if ((int)logLevel >= (int)_provider.ThrowLogLevel)
             {
-                throw new Exception(formatted);
+                throw new Exception($"Log level of {logLevel} exceeds {nameof(TestLoggerProvider)} {nameof(TestLoggerProvider.ThrowLogLevel)} of {_provider.ThrowLogLevel}, log message: {formatted}");
             }
         }
 

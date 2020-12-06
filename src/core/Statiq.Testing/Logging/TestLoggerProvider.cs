@@ -26,6 +26,10 @@ namespace Statiq.Testing
 
         public ILogger CreateLogger(string categoryName) => new TestLogger(this, categoryName, Messages);
 
+        public ILogger CreateLogger() => new TestLogger(this, null, Messages);
+
+        public ILoggerFactory CreateLoggerFactory() => new LoggerFactory(new ILoggerProvider[] { this });
+
         public void Dispose()
         {
         }

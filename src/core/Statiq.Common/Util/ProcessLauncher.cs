@@ -150,13 +150,13 @@ namespace Statiq.Common
         public int StartNew(TextWriter outputWriter, TextWriter errorWriter, IServiceProvider serviceProvider, CancellationToken cancellationToken = default) =>
             StartNew(outputWriter, errorWriter, serviceProvider?.GetService<ILoggerFactory>(), cancellationToken);
 
-        public int StartNew(TextWriter outputWriter, TextWriter errorWriter, ILoggerFactory loggerFactory, CancellationToken cancellationToken = default) =>
-            StartNew(outputWriter, errorWriter, null, loggerFactory, cancellationToken);
+        public int StartNew(TextWriter outputWriter, TextWriter errorWriter, ILogger logger, CancellationToken cancellationToken = default) =>
+            StartNew(outputWriter, errorWriter, new LoggerFactoryLoggerWrapper(logger), cancellationToken);
 
         public int StartNew(TextWriter outputWriter, TextWriter errorWriter, ILogger logger, IServiceProvider serviceProvider, CancellationToken cancellationToken = default) =>
-            StartNew(outputWriter, errorWriter, logger, serviceProvider?.GetService<ILoggerFactory>(), cancellationToken);
+            StartNew(outputWriter, errorWriter, serviceProvider?.GetService<ILoggerFactory>() ?? new LoggerFactoryLoggerWrapper(logger), cancellationToken);
 
-        public int StartNew(TextWriter outputWriter, TextWriter errorWriter, ILogger logger, ILoggerFactory loggerFactory, CancellationToken cancellationToken = default)
+        public int StartNew(TextWriter outputWriter, TextWriter errorWriter, ILoggerFactory loggerFactory, CancellationToken cancellationToken = default)
         {
             if (FileName.IsNullOrWhiteSpace())
             {
@@ -212,7 +212,7 @@ namespace Statiq.Common
             process.Exited += ProcessExited;
 
             // Prepare the streams
-            logger ??= loggerFactory?.CreateLogger<ProcessLauncher>();
+            ILogger logger = loggerFactory?.CreateLogger<ProcessLauncher>();
             string logCommand = $"{process.StartInfo.FileName}{(HideArguments ? string.Empty : (" " + process.StartInfo.Arguments))}";
 
             // Write to the stream on data received
@@ -257,10 +257,11 @@ namespace Statiq.Common
                     {
                         try
                         {
-                            process.Kill();
+                            process.Kill(true);
                         }
-                        catch
+                        catch (Exception ex)
                         {
+                            logger?.LogWarning($"Could not kill process {process.Id}: {ex.Message}");
                         }
                         startedProcess.Process.Exited -= ProcessExited;
                         startedProcess.CancellationTokenRegistration.Dispose();
@@ -367,7 +368,7 @@ namespace Statiq.Common
             {
                 try
                 {
-                    startedProcess.Process.Kill();
+                    startedProcess.Process.Kill(true);
                 }
                 catch
                 {
@@ -398,6 +399,27 @@ namespace Statiq.Common
             public Action<Process> ExitedLogAction { get; }
 
             public CancellationTokenRegistration CancellationTokenRegistration { get; set; }
+        }
+
+        /// <summary>
+        /// Always provides a wrapped <see cref="ILogger"/>.
+        /// </summary>
+        private class LoggerFactoryLoggerWrapper : ILoggerFactory
+        {
+            private readonly ILogger _logger;
+
+            public LoggerFactoryLoggerWrapper(ILogger logger)
+            {
+                _logger = logger;
+            }
+
+            public void Dispose()
+            {
+            }
+
+            public ILogger CreateLogger(string categoryName) => _logger;
+
+            public void AddProvider(ILoggerProvider provider) => throw new NotSupportedException();
         }
     }
 }

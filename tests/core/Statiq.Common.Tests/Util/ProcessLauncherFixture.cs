@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Threading;
+using Microsoft.Extensions.Logging;
 using NUnit.Framework;
 using Shouldly;
 using Statiq.Testing;
@@ -19,9 +20,10 @@ namespace Statiq.Common.Tests.Util
                 ProcessLauncher processLauncher = new ProcessLauncher("dotnet", "run foobar");
                 StringWriter outputWriter = new StringWriter();
                 StringWriter errorWriter = new StringWriter();
+                TestLoggerProvider testLoggerProvider = new TestLoggerProvider(LogLevel.None);
 
                 // When, Then
-                Should.Throw<Exception>(() => processLauncher.StartNew(outputWriter, errorWriter));
+                Should.Throw<Exception>(() => processLauncher.StartNew(outputWriter, errorWriter, testLoggerProvider.CreateLoggerFactory()));
                 errorWriter.ToString().ShouldContain("Couldn't find a project to run.");
             }
 
@@ -35,9 +37,10 @@ namespace Statiq.Common.Tests.Util
                 };
                 StringWriter outputWriter = new StringWriter();
                 StringWriter errorWriter = new StringWriter();
+                TestLoggerProvider testLoggerProvider = new TestLoggerProvider(LogLevel.None);
 
                 // When
-                int exitCode = processLauncher.StartNew(outputWriter, errorWriter);
+                int exitCode = processLauncher.StartNew(outputWriter, errorWriter, testLoggerProvider.CreateLoggerFactory());
 
                 // Then
                 exitCode.ShouldBe(0);
@@ -63,9 +66,10 @@ namespace Statiq.Common.Tests.Util
                 ProcessLauncher processLauncher = new ProcessLauncher("dotnet", $"run --project \"{projectPath.FullPath}\"");
                 StringWriter outputWriter = new StringWriter();
                 StringWriter errorWriter = new StringWriter();
+                TestLoggerProvider testLoggerProvider = new TestLoggerProvider();
 
                 // When
-                int exitCode = processLauncher.StartNew(outputWriter, errorWriter);
+                int exitCode = processLauncher.StartNew(outputWriter, errorWriter, testLoggerProvider.CreateLoggerFactory());
 
                 // Then
                 exitCode.ShouldBe(0);
@@ -84,9 +88,10 @@ namespace Statiq.Common.Tests.Util
                 };
                 StringWriter outputWriter = new StringWriter();
                 StringWriter errorWriter = new StringWriter();
+                TestLoggerProvider testLoggerProvider = new TestLoggerProvider();
 
                 // When
-                int exitCode = processLauncher.StartNew(outputWriter, errorWriter);
+                int exitCode = processLauncher.StartNew(outputWriter, errorWriter, testLoggerProvider.CreateLoggerFactory());
 
                 // Then
                 exitCode.ShouldBe(123);
@@ -103,9 +108,10 @@ namespace Statiq.Common.Tests.Util
                 StringWriter outputWriter = new StringWriter();
                 StringWriter errorWriter = new StringWriter();
                 CancellationTokenSource cts = new CancellationTokenSource(5000);
+                TestLoggerProvider testLoggerProvider = new TestLoggerProvider();
 
                 // When
-                Should.Throw<Exception>(() => processLauncher.StartNew(outputWriter, errorWriter, cts.Token));
+                Should.Throw<Exception>(() => processLauncher.StartNew(outputWriter, errorWriter, testLoggerProvider.CreateLoggerFactory(), cts.Token));
 
                 // Then
                 outputWriter.ToString().ShouldNotContain("Finished");
@@ -125,9 +131,10 @@ namespace Statiq.Common.Tests.Util
                 StringWriter outputWriter = new StringWriter();
                 StringWriter errorWriter = new StringWriter();
                 CancellationTokenSource cts = new CancellationTokenSource(5000);
+                TestLoggerProvider testLoggerProvider = new TestLoggerProvider();
 
                 // When
-                int exitCode = processLauncher.StartNew(outputWriter, errorWriter, cts.Token);
+                int exitCode = processLauncher.StartNew(outputWriter, errorWriter, testLoggerProvider.CreateLoggerFactory(), cts.Token);
 
                 // Then
                 exitCode.ShouldBe(0);
