@@ -8,6 +8,8 @@ using Statiq.Testing;
 
 namespace Statiq.Common.Tests.Util
 {
+    // Some platforms don't like building/running the test console app project in parallel
+    [NonParallelizable]
     [TestFixture]
     public class ProcessLauncherFixture : BaseFixture
     {
