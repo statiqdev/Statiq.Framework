@@ -66,7 +66,7 @@ namespace Statiq.Common.Tests.Util
                 ProcessLauncher processLauncher = new ProcessLauncher("dotnet", $"run --project \"{projectPath.FullPath}\"");
                 StringWriter outputWriter = new StringWriter();
                 StringWriter errorWriter = new StringWriter();
-                TestLoggerProvider testLoggerProvider = new TestLoggerProvider();
+                TestLoggerProvider testLoggerProvider = new TestLoggerProvider(LogLevel.None);
 
                 // When
                 int exitCode = processLauncher.StartNew(outputWriter, errorWriter, testLoggerProvider.CreateLoggerFactory());
@@ -88,7 +88,7 @@ namespace Statiq.Common.Tests.Util
                 };
                 StringWriter outputWriter = new StringWriter();
                 StringWriter errorWriter = new StringWriter();
-                TestLoggerProvider testLoggerProvider = new TestLoggerProvider();
+                TestLoggerProvider testLoggerProvider = new TestLoggerProvider(LogLevel.None);
 
                 // When
                 int exitCode = processLauncher.StartNew(outputWriter, errorWriter, testLoggerProvider.CreateLoggerFactory());
@@ -108,7 +108,7 @@ namespace Statiq.Common.Tests.Util
                 StringWriter outputWriter = new StringWriter();
                 StringWriter errorWriter = new StringWriter();
                 CancellationTokenSource cts = new CancellationTokenSource(5000);
-                TestLoggerProvider testLoggerProvider = new TestLoggerProvider();
+                TestLoggerProvider testLoggerProvider = new TestLoggerProvider(LogLevel.None);
 
                 // When
                 Should.Throw<Exception>(() => processLauncher.StartNew(outputWriter, errorWriter, testLoggerProvider.CreateLoggerFactory(), cts.Token));
@@ -131,7 +131,7 @@ namespace Statiq.Common.Tests.Util
                 StringWriter outputWriter = new StringWriter();
                 StringWriter errorWriter = new StringWriter();
                 CancellationTokenSource cts = new CancellationTokenSource(5000);
-                TestLoggerProvider testLoggerProvider = new TestLoggerProvider();
+                TestLoggerProvider testLoggerProvider = new TestLoggerProvider(LogLevel.None);
 
                 // When
                 int exitCode = processLauncher.StartNew(outputWriter, errorWriter, testLoggerProvider.CreateLoggerFactory(), cts.Token);
