@@ -31,7 +31,7 @@ namespace Statiq.Core.Tests.Modules.Extensibility
 
                 // Then
                 context.LogMessages.Where(x => x.LogLevel == LogLevel.Debug).ShouldContain(x => x.FormattedMessage.Contains("Started process"));
-                context.LogMessages.Where(x => x.LogLevel == LogLevel.Debug).ShouldContain(x => x.FormattedMessage.Contains(".NET Core runtimes installed"));
+                context.LogMessages.Where(x => x.LogLevel == LogLevel.Debug).ShouldContain(x => x.FormattedMessage.Contains("runtimes installed"));
             }
 
             [Test]
@@ -47,7 +47,7 @@ namespace Statiq.Core.Tests.Modules.Extensibility
 
                 // Then
                 context.LogMessages.Where(x => x.LogLevel == LogLevel.Information).ShouldContain(x => x.FormattedMessage.Contains("Started process"));
-                context.LogMessages.Where(x => x.LogLevel == LogLevel.Information).ShouldContain(x => x.FormattedMessage.Contains(".NET Core runtimes installed"));
+                context.LogMessages.Where(x => x.LogLevel == LogLevel.Information).ShouldContain(x => x.FormattedMessage.Contains("runtimes installed"));
             }
 
             [Test]
@@ -64,7 +64,7 @@ namespace Statiq.Core.Tests.Modules.Extensibility
 
                 // Then
                 context.LogMessages.Where(x => x.LogLevel == LogLevel.Debug).ShouldContain(x => x.FormattedMessage.Contains("Started process"), 2);
-                context.LogMessages.Where(x => x.LogLevel == LogLevel.Debug).ShouldContain(x => x.FormattedMessage.Contains(".NET Core runtimes installed"), 2);
+                context.LogMessages.Where(x => x.LogLevel == LogLevel.Debug).ShouldContain(x => x.FormattedMessage.Contains("runtimes installed"), 2);
             }
 
             [Test]
@@ -81,7 +81,7 @@ namespace Statiq.Core.Tests.Modules.Extensibility
 
                 // Then
                 context.LogMessages.Where(x => x.LogLevel == LogLevel.Debug).ShouldContain(x => x.FormattedMessage.Contains("Started process"), 1);
-                context.LogMessages.Where(x => x.LogLevel == LogLevel.Debug).ShouldContain(x => x.FormattedMessage.Contains(".NET Core runtimes installed"), 1);
+                context.LogMessages.Where(x => x.LogLevel == LogLevel.Debug).ShouldContain(x => x.FormattedMessage.Contains("runtimes installed"), 1);
             }
 
             [Test]
@@ -96,7 +96,7 @@ namespace Statiq.Core.Tests.Modules.Extensibility
                 ImmutableArray<TestDocument> results = await ExecuteAsync(context, startProcess);
 
                 // Then
-                results.Single().Content.ShouldStartWith(".NET Core SDK");
+                results.Single().Content.ShouldStartWith(".NET");
                 results.Single().Content.ShouldContain(Environment.NewLine);
                 ((IDocument)results.Single()).GetInt(StartProcess.ExitCode).ShouldBe(0);
             }
@@ -113,7 +113,7 @@ namespace Statiq.Core.Tests.Modules.Extensibility
                 ImmutableArray<TestDocument> results = await ExecuteAsync(context, startProcess);
 
                 // Then
-                results.Single().Content.ShouldNotStartWith(".NET Core SDK");
+                results.Single().Content.ShouldNotStartWith(".NET");
                 ((IDocument)results.Single()).GetInt(StartProcess.ExitCode).ShouldBe(0);
             }
 
@@ -141,7 +141,7 @@ namespace Statiq.Core.Tests.Modules.Extensibility
                 ImmutableArray<TestDocument> results = await ExecuteAsync(context, startProcess);
 
                 // Then
-                results.Single().Content.ShouldStartWith(".NET Core SDK");
+                results.Single().Content.ShouldStartWith(".NET");
                 results.Single().Content.ShouldContain(Environment.NewLine);
                 ((IDocument)results.Single()).GetString(StartProcess.ErrorData).ShouldStartWith("Unknown option");
                 ((IDocument)results.Single()).GetInt(StartProcess.ExitCode).ShouldNotBe(0);
