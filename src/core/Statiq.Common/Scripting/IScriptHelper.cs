@@ -34,18 +34,29 @@ namespace Statiq.Common
         /// <returns><c>true</c> if the candidate string is a script string, <c>false</c> otherwise.</returns>
         public static bool TryGetScriptString(string str, out string script)
         {
-            script = str;
-            if (!string.IsNullOrWhiteSpace(str))
+            script = null;
+            int c = 0;
+            int s = 0;
+            for (; c < str.Length; c++)
             {
-                script = str.TrimStart();
-                if (script.StartsWith(ScriptStringPrefix))
+                if (s < ScriptStringPrefix.Length)
                 {
-                    script = script.Substring(2);
-                    if (!string.IsNullOrWhiteSpace(script))
+                    if (s == 0 && char.IsWhiteSpace(str[c]))
                     {
-                        return true;
+                        continue;
+                    }
+                    if (str[c] == ScriptStringPrefix[s])
+                    {
+                        s++;
+                        continue;
                     }
                 }
+                break;
+            }
+            if (s == ScriptStringPrefix.Length)
+            {
+                script = str[c..];
+                return true;
             }
             return false;
         }
