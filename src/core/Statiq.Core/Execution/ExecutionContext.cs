@@ -18,11 +18,22 @@ namespace Statiq.Core
         private readonly ExecutionContextData _contextData;
         private readonly string _logPrefix;
 
+        // Cache the output pages per-context for performance
+        private readonly Lazy<FilteredDocumentList<IDocument>> _outputPages;
+
         internal ExecutionContext(ExecutionContextData contextData, IExecutionContext parent, IModule module, ImmutableArray<IDocument> inputs)
         {
             _contextData = contextData.ThrowIfNull(nameof(contextData));
             Logger = contextData.Services.GetRequiredService<ILogger<ExecutionContext>>();
             _logPrefix = GetLogPrefix(parent, module, contextData.PipelinePhase);
+
+            _outputPages = new Lazy<FilteredDocumentList<IDocument>>(
+                () => new FilteredDocumentList<IDocument>(
+                    Outputs
+                        .Where(x => !x.Destination.IsNullOrEmpty
+                            && Settings.GetPageFileExtensions().Any(e => x.Destination.Extension.Equals(e, NormalizedPath.DefaultComparisonType))),
+                    x => x.Destination,
+                    (docs, patterns) => docs.FilterDestinations(patterns)));
 
             Parent = parent;
             Module = module; // Can be null if in an analyzer
@@ -76,13 +87,7 @@ namespace Statiq.Core
         public ILogger Logger { get; }
 
         /// <inheritdoc />
-        public FilteredDocumentList<IDocument> OutputPages =>
-            new FilteredDocumentList<IDocument>(
-                Outputs
-                    .Where(x => !x.Destination.IsNullOrEmpty
-                        && Settings.GetPageFileExtensions().Any(e => x.Destination.Extension.Equals(e, NormalizedPath.DefaultComparisonType))),
-                x => x.Destination,
-                (docs, patterns) => docs.FilterDestinations(patterns));
+        public FilteredDocumentList<IDocument> OutputPages => _outputPages.Value;
 
         /// <inheritdoc/>
         public IReadOnlyFileSystem FileSystem => _contextData.Engine.FileSystem;
