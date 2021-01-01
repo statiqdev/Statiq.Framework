@@ -824,49 +824,81 @@ namespace Statiq.Common.Tests.IO
 
         public class FileNameTests : NormalizedPathFixture
         {
-            [Test]
-            public void CanGetFilenameFromPath()
+            [TestCase("/input/test.txt", "test.txt")]
+            [TestCase("input/test.txt", "test.txt")]
+            [TestCase("test.txt", "test.txt")]
+            [TestCase("/test.txt", "test.txt")]
+            [TestCase("/input/test", "test")]
+            [TestCase("input/test", "test")]
+            [TestCase("test", "test")]
+            [TestCase("/test", "test")]
+            [TestCase("/input/test.txt.foo", "test.txt.foo")]
+            [TestCase("input/test.txt.foo", "test.txt.foo")]
+            [TestCase("test.txt.foo", "test.txt.foo")]
+            [TestCase("/test.txt.foo", "test.txt.foo")]
+            [TestCase("", "")]
+            [TestCase("/", "")]
+            [TestCase("test.", "test.")]
+            [TestCase("/input/test.", "test.")]
+            [TestCase("input/test.", "test.")]
+            [TestCase("/test.", "test.")]
+            public void GetsFileName(string fullPath, string expected)
             {
                 // Given
-                NormalizedPath path = new NormalizedPath("/input/test.txt");
+                NormalizedPath normalizedPath = new NormalizedPath(fullPath);
 
                 // When
-                NormalizedPath result = path.FileName;
+                NormalizedPath result = normalizedPath.FileName;
 
                 // Then
-                Assert.AreEqual("test.txt", result.FullPath);
+                result.FullPath.ShouldBe(expected);
             }
 
             [Test]
-            public void GetsFileNameIfJustFileName()
+            public void ResultIsRelative()
             {
                 // Given
-                NormalizedPath path = new NormalizedPath("test.txt");
+                NormalizedPath path = new NormalizedPath("/foo/bar.txt");
 
                 // When
                 NormalizedPath result = path.FileName;
 
                 // Then
-                Assert.AreEqual("test.txt", result.FullPath);
+                path.IsAbsolute.ShouldBeTrue();
+                result.IsAbsolute.ShouldBeFalse();
             }
         }
 
         public class FileNameWithoutExtensionTests : NormalizedPathFixture
         {
             [TestCase("/input/test.txt", "test")]
-            [TestCase("/input/test", "test")]
+            [TestCase("input/test.txt", "test")]
             [TestCase("test.txt", "test")]
+            [TestCase("/test.txt", "test")]
+            [TestCase("/input/test", "test")]
+            [TestCase("input/test", "test")]
             [TestCase("test", "test")]
+            [TestCase("/test", "test")]
+            [TestCase("/input/test.txt.foo", "test.txt")]
+            [TestCase("input/test.txt.foo", "test.txt")]
+            [TestCase("test.txt.foo", "test.txt")]
+            [TestCase("/test.txt.foo", "test.txt")]
+            [TestCase("", "")]
+            [TestCase("/", "")]
+            [TestCase("test.", "test")]
+            [TestCase("/input/test.", "test")]
+            [TestCase("input/test.", "test")]
+            [TestCase("/test.", "test")]
             public void ShouldReturnFilenameWithoutExtensionFromPath(string fullPath, string expected)
             {
                 // Given
-                NormalizedPath path = new NormalizedPath(fullPath);
+                NormalizedPath normalizedPath = new NormalizedPath(fullPath);
 
                 // When
-                NormalizedPath result = path.FileNameWithoutExtension;
+                NormalizedPath result = normalizedPath.FileNameWithoutExtension;
 
                 // Then
-                Assert.AreEqual(expected, result.FullPath);
+                result.FullPath.ShouldBe(expected);
             }
 
             [TestCase("/input/.test")]
@@ -881,6 +913,20 @@ namespace Statiq.Common.Tests.IO
 
                 // Then
                 result.FullPath.ShouldBeEmpty();
+            }
+
+            [Test]
+            public void ResultIsRelative()
+            {
+                // Given
+                NormalizedPath path = new NormalizedPath("/foo/bar.txt");
+
+                // When
+                NormalizedPath result = path.FileNameWithoutExtension;
+
+                // Then
+                path.IsAbsolute.ShouldBeTrue();
+                result.IsAbsolute.ShouldBeFalse();
             }
         }
 

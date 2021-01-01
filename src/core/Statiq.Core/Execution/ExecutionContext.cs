@@ -33,7 +33,8 @@ namespace Statiq.Core
                         .Where(x => !x.Destination.IsNullOrEmpty
                             && Settings.GetPageFileExtensions().Any(e => x.Destination.Extension.Equals(e, NormalizedPath.DefaultComparisonType))),
                     x => x.Destination,
-                    (docs, patterns) => docs.FilterDestinations(patterns)));
+                    (docs, patterns) => docs.FilterDestinations(patterns)),
+                LazyThreadSafetyMode.ExecutionAndPublication);
 
             Parent = parent;
             Module = module; // Can be null if in an analyzer
