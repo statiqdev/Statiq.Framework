@@ -35,6 +35,7 @@ namespace Statiq.Html
                     htmlDocument.ToHtml(writer, ProcessingInstructionFormatter.Instance);
                     writer.Flush();
                     Common.IDocument output = input.Clone(context.GetContentProvider(contentStream, MediaTypes.Html));
+                    await HtmlHelper.AddOrUpdateCacheAsync(output, htmlDocument);
                     return output.Yield();
                 }
             }

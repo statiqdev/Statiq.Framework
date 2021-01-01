@@ -21,11 +21,13 @@ namespace Statiq.Html
         /// Gets an <see cref="IHtmlDocument"/> by parsing the content of an <see cref="IDocument"/>.
         /// </summary>
         /// <param name="document">The document to parse.</param>
+        /// <param name="clone">Set to <c>true</c> if potentially modifying the result, <c>false</c> if only using as read-only.</param>
         /// <returns>The parsed HTML document.</returns>
         // Since the results are cached, we have to be careful to use the same HtmlParser. If an alternate set
         // of parser options are needed, the content will need to be parsed manually.
-        public static async Task<IHtmlDocument> ParseHtmlAsync(IDocument document) =>
-            await _htmlDocumentCache.GetOrAdd(
+        public static async Task<IHtmlDocument> ParseHtmlAsync(IDocument document, bool clone = true)
+        {
+            IHtmlDocument htmlDocument = await _htmlDocumentCache.GetOrAdd(
                 document.ContentProvider,
                 async _ =>
                 {
@@ -42,5 +44,14 @@ namespace Statiq.Html
                     }
                     return null;
                 });
+            if (clone)
+            {
+                htmlDocument = (IHtmlDocument)htmlDocument.Clone();
+            }
+            return htmlDocument;
+        }
+
+        public static async Task AddOrUpdateCacheAsync(IDocument document, IHtmlDocument htmlDocument) =>
+            await _htmlDocumentCache.AddOrUpdate(document.ContentProvider, _ => Task.FromResult(htmlDocument), (_, __) => Task.FromResult(htmlDocument));
     }
 }

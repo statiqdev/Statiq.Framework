@@ -108,8 +108,8 @@ namespace Statiq.Html
             Action<Common.IDocument, IExecutionContext, IElement, Dictionary<string, object>> processElement)
         {
             // Parse the HTML content
-            IHtmlDocument htmlDocument = await HtmlHelper.ParseHtmlAsync(input);
-            if (htmlDocument is null)
+            IHtmlDocument originalHtmlDocument = await HtmlHelper.ParseHtmlAsync(input, false);
+            if (originalHtmlDocument is null)
             {
                 return input.Yield();
             }
@@ -119,19 +119,19 @@ namespace Statiq.Html
             {
                 if (!string.IsNullOrWhiteSpace(querySelector))
                 {
+                    IHtmlDocument htmlDocument = (IHtmlDocument)originalHtmlDocument.Clone(true); // Clone the document so we know if it changed
                     IElement[] elements = first
                         ? new[] { htmlDocument.QuerySelector(querySelector) }
                         : htmlDocument.QuerySelectorAll(querySelector).ToArray();
                     if (elements.Length > 0 && elements[0] is object)
                     {
-                        INode clone = htmlDocument.Clone(true);  // Clone the document so we know if it changed
                         Dictionary<string, object> metadata = new Dictionary<string, object>();
                         foreach (IElement element in elements)
                         {
                             processElement(input, context, element, metadata);
                         }
 
-                        if (htmlDocument.Equals(clone))
+                        if (originalHtmlDocument.Equals(htmlDocument))
                         {
                             // Elements were not edited so return the original document or clone it with new metadata
                             return metadata.Count == 0 ? input.Yield() : input.Clone(metadata).Yield();
@@ -145,9 +145,11 @@ namespace Statiq.Html
                                 htmlDocument.ToHtml(writer, ProcessingInstructionFormatter.Instance);
                                 writer.Flush();
                                 IContentProvider contentProvider = context.GetContentProvider(contentStream, MediaTypes.Html);
-                                return metadata.Count == 0
-                                    ? input.Clone(contentProvider).Yield()
-                                    : input.Clone(metadata, contentProvider).Yield();
+                                Common.IDocument output = metadata.Count == 0
+                                    ? input.Clone(contentProvider)
+                                    : input.Clone(metadata, contentProvider);
+                                await HtmlHelper.AddOrUpdateCacheAsync(output, htmlDocument);
+                                return output.Yield();
                             }
                         }
                     }

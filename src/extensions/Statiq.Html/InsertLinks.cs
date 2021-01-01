@@ -147,11 +147,7 @@ namespace Statiq.Html
 
                 // Enumerate all elements that match the query selector not already in a link element
                 List<KeyValuePair<IText, string>> replacements = new List<KeyValuePair<IText, string>>();
-                IHtmlDocument htmlDocument;
-                using (Stream stream = input.GetContentStream())
-                {
-                    htmlDocument = await HtmlHelper.ParseHtmlAsync(input);
-                }
+                IHtmlDocument htmlDocument = await HtmlHelper.ParseHtmlAsync(input);
                 foreach (IElement element in htmlDocument.QuerySelectorAll(_querySelector).Where(t => !t.Ancestors<IHtmlAnchorElement>().Any()))
                 {
                     // Enumerate all descendant text nodes not already in a link element
@@ -179,7 +175,9 @@ namespace Statiq.Html
                         {
                             htmlDocument.ToHtml(writer, ProcessingInstructionFormatter.Instance);
                             writer.Flush();
-                            return input.Clone(context.GetContentProvider(contentStream, MediaTypes.Html)).Yield();
+                            Common.IDocument output = input.Clone(context.GetContentProvider(contentStream, MediaTypes.Html));
+                            await HtmlHelper.AddOrUpdateCacheAsync(output, htmlDocument);
+                            return output.Yield();
                         }
                     }
                 }

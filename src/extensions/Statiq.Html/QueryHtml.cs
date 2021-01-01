@@ -182,7 +182,7 @@ namespace Statiq.Html
         protected override async Task<IEnumerable<Common.IDocument>> ExecuteInputAsync(Common.IDocument input, IExecutionContext context)
         {
             // Parse the HTML content
-            IHtmlDocument htmlDocument = await HtmlHelper.ParseHtmlAsync(input);
+            IHtmlDocument htmlDocument = await HtmlHelper.ParseHtmlAsync(input, false);
             if (htmlDocument is null)
             {
                 return input.Yield();

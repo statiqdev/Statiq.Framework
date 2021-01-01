@@ -116,7 +116,9 @@ namespace Statiq.Html
                             {
                                 htmlDocument.ToHtml(writer, ProcessingInstructionFormatter.Instance);
                                 writer.Flush();
-                                return input.Clone(context.GetContentProvider(contentStream, MediaTypes.Html));
+                                Common.IDocument output = input.Clone(context.GetContentProvider(contentStream, MediaTypes.Html));
+                                await HtmlHelper.AddOrUpdateCacheAsync(output, htmlDocument);
+                                return output;
                             }
                         }
                     }

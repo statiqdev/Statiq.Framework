@@ -134,7 +134,7 @@ namespace Statiq.Html
             }
 
             // Parse the HTML content
-            IHtmlDocument htmlDocument = await HtmlHelper.ParseHtmlAsync(input);
+            IHtmlDocument htmlDocument = await HtmlHelper.ParseHtmlAsync(input, false);
             if (htmlDocument is null)
             {
                 return input.Yield();
