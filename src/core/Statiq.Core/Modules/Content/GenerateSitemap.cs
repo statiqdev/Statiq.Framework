@@ -1,7 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Globalization;
+using System.IO;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using Statiq.Common;
 
@@ -76,70 +77,69 @@ namespace Statiq.Core
         /// <inheritdoc />
         protected override async Task<IEnumerable<IDocument>> ExecuteContextAsync(IExecutionContext context)
         {
-            StringBuilder sb = new StringBuilder();
-            sb.Append("<?xml version=\"1.0\" encoding=\"UTF-8\"?><urlset xmlns=\"http://www.sitemaps.org/schemas/sitemap/0.9\">");
+            HashSet<string> locations = new HashSet<string>(); // Remove duplicate locations
+            List<string> content = new List<string>();
+            content.Add("<?xml version=\"1.0\" encoding=\"UTF-8\"?><urlset xmlns=\"http://www.sitemaps.org/schemas/sitemap/0.9\">");
             foreach (IDocument input in context.Inputs)
             {
-                await AddToSiteMapAsync(input);
+                (string formattedLocation, SitemapItem item) = await GetSitemapItemAsync(input, context);
+                AddSitemapItemContent(content, formattedLocation, item, locations);
             }
-            sb.Append("</urlset>");
+            content.Add("</urlset>");
 
             // Always output the site map document, even if it's empty
-            return context.CreateDocument("sitemap.xml", await context.GetContentProviderAsync(sb.ToString(), MediaTypes.Xml)).Yield();
+            return context.CreateDocument("sitemap.xml", context.GetContentProvider(() => new StringItemStream(content), MediaTypes.Xml)).Yield();
+        }
 
-            async Task AddToSiteMapAsync(IDocument input)
+        private void AddSitemapItemContent(List<string> content, string formattedLocation, SitemapItem sitemapItem, HashSet<string> locations)
+        {
+            if (!formattedLocation.IsNullOrWhiteSpace() && locations.Add(formattedLocation))
             {
-                // Try to get a SitemapItem
-                object delegateResult = await _sitemapItemOrLocation.GetValueAsync(input, context);
-                SitemapItem sitemapItem = delegateResult as SitemapItem
-                    ?? new SitemapItem((delegateResult as string) ?? context.GetLink(input));
-
-                // Add a site map entry if we got an item and valid location
-                if (!string.IsNullOrWhiteSpace(sitemapItem?.Location))
+                content.Add($"<url><loc>{formattedLocation}</loc>");
+                if (sitemapItem.LastModUtc.HasValue)
                 {
-                    string location = sitemapItem.Location;
+                    content.Add($"<lastmod>{sitemapItem.LastModUtc.Value.ToString("yyyy-MM-ddTHH:mm:ssZ")}</lastmod>");
+                }
+                if (sitemapItem.ChangeFrequency.HasValue)
+                {
+                    content.Add($"<changefreq>{ChangeFrequencies[(int)sitemapItem.ChangeFrequency.Value]}</changefreq>");
+                }
+                if (sitemapItem.Priority.HasValue)
+                {
+                    content.Add($"<priority>{sitemapItem.Priority.Value}</priority>");
+                }
+                content.Add("</url>");
+            }
+        }
 
-                    // Apply the location formatter if there is one
-                    if (_locationFormatter is object)
-                    {
-                        location = _locationFormatter(location);
-                    }
+        private async Task<(string FormattedLocation, SitemapItem Item)> GetSitemapItemAsync(IDocument input, IExecutionContext context)
+        {
+            // Try to get a SitemapItem
+            object delegateResult = await _sitemapItemOrLocation.GetValueAsync(input, context);
+            SitemapItem sitemapItem = delegateResult as SitemapItem
+                ?? new SitemapItem((delegateResult as string) ?? context.GetLink(input));
 
-                    // Apply the host name if defined (and the location formatter didn't already set a host name)
-                    if (!string.IsNullOrWhiteSpace(location))
-                    {
-                        if (!location.StartsWith("http://", StringComparison.InvariantCultureIgnoreCase)
-                            && !location.StartsWith("https://", StringComparison.InvariantCultureIgnoreCase))
-                        {
-                            location = context.GetLink(new NormalizedPath(location), true);
-                        }
-                    }
+            // Add a site map entry if we got an item and valid location
+            string location = null;
+            if (!string.IsNullOrWhiteSpace(sitemapItem?.Location))
+            {
+                location = sitemapItem.Location;
 
-                    // Location being null signals that this document should not be included in the site map
-                    if (!string.IsNullOrWhiteSpace(location))
-                    {
-                        sb.Append("<url>");
-                        sb.AppendFormat("<loc>{0}</loc>", location);
+                // Apply the location formatter if there is one
+                if (_locationFormatter is object)
+                {
+                    location = _locationFormatter(location);
+                }
 
-                        if (sitemapItem.LastModUtc.HasValue)
-                        {
-                            sb.AppendFormat("<lastmod>{0}</lastmod>", sitemapItem.LastModUtc.Value.ToString("yyyy-MM-ddTHH:mm:ssZ"));
-                        }
-
-                        if (sitemapItem.ChangeFrequency.HasValue)
-                        {
-                            sb.AppendFormat("<changefreq>{0}</changefreq>", ChangeFrequencies[(int)sitemapItem.ChangeFrequency.Value]);
-                        }
-
-                        if (sitemapItem.Priority.HasValue)
-                        {
-                            sb.AppendFormat(CultureInfo.InvariantCulture, "<priority>{0}</priority>", sitemapItem.Priority.Value);
-                        }
-
-                        sb.Append("</url>");
-                    }
+                // Apply the host name if defined (and the location formatter didn't already set a host name)
+                if (!string.IsNullOrWhiteSpace(location)
+                    && !location.StartsWith("http://", StringComparison.InvariantCultureIgnoreCase)
+                    && !location.StartsWith("https://", StringComparison.InvariantCultureIgnoreCase))
+                {
+                    location = context.GetLink(new NormalizedPath(location), true);
                 }
             }
+            return (location, sitemapItem);
         }
     }
 }

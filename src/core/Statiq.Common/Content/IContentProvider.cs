@@ -15,11 +15,6 @@ namespace Statiq.Common
         Stream GetStream();
 
         /// <summary>
-        /// Gets the length in bytes of the content stream.
-        /// </summary>
-        long Length { get; }
-
-        /// <summary>
         /// Gets the media type of the content.
         /// </summary>
         /// <remarks>

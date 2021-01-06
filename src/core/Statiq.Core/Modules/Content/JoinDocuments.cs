@@ -70,26 +70,23 @@ namespace Statiq.Core
                         continue;
                     }
 
-                    if (document.ContentProvider.Length > 0)
+                    if (first)
                     {
-                        if (first)
+                        first = false;
+                        mediaType = document.ContentProvider.MediaType;
+                    }
+                    else
+                    {
+                        await contentStream.WriteAsync(delimeterBytes, 0, delimeterBytes.Length);
+                        if (!document.MediaTypeEquals(mediaType))
                         {
-                            first = false;
-                            mediaType = document.ContentProvider.MediaType;
+                            mediaType = null;
                         }
-                        else
-                        {
-                            await contentStream.WriteAsync(delimeterBytes, 0, delimeterBytes.Length);
-                            if (!document.MediaTypeEquals(mediaType))
-                            {
-                                mediaType = null;
-                            }
-                        }
+                    }
 
-                        using (Stream inputStream = document.GetContentStream())
-                        {
-                            await inputStream.CopyToAsync(contentStream);
-                        }
+                    using (Stream inputStream = document.GetContentStream())
+                    {
+                        await inputStream.CopyToAsync(contentStream);
                     }
                 }
 

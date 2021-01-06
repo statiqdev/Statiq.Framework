@@ -7,11 +7,24 @@ namespace Statiq.Common
 {
     public static class IExecutionContextGetContentProviderExtensions
     {
+        /// <summary>
+        /// creates a content provider from a <see cref="Stream"/> by reading the stream into
+        /// a buffer and then providing that buffer when content is requested.
+        /// </summary>
+        /// <param name="executionContext">The execution context.</param>
+        /// <param name="stream">A seekable stream from which to buffer content.</param>
         public static IContentProvider GetContentProvider(
             this IExecutionContext executionContext,
             Stream stream) =>
             executionContext.GetContentProvider(stream, null);
 
+        /// <summary>
+        /// creates a content provider from a <see cref="Stream"/> by reading the stream into
+        /// a buffer and then providing that buffer when content is requested.
+        /// </summary>
+        /// <param name="executionContext">The execution context.</param>
+        /// <param name="stream">A seekable stream from which to buffer content.</param>
+        /// <param name="mediaType">The media type of the content provider.</param>
         public static IContentProvider GetContentProvider(
             this IExecutionContext executionContext,
             Stream stream,
@@ -41,6 +54,27 @@ namespace Statiq.Common
             }
             return new MemoryContent(buffer, mediaType);
         }
+
+        /// <summary>
+        /// Creates a content provider from a delegate that returns a <see cref="Stream"/>
+        /// to use on each content request. A new stream should be returned on each request
+        /// since it may be read concurrently.
+        /// </summary>
+        public static IContentProvider GetContentProvider(
+            this IExecutionContext executionContext,
+            Func<Stream> getStream) =>
+            executionContext.GetContentProvider(getStream, null);
+
+        /// <summary>
+        /// Creates a content provider from a delegate that returns a <see cref="Stream"/>
+        /// to use on each content request. A new stream should be returned on each request
+        /// since it may be read concurrently.
+        /// </summary>
+        public static IContentProvider GetContentProvider(
+            this IExecutionContext executionContext,
+            Func<Stream> getStream,
+            string mediaType) =>
+            new DelegateContent(getStream, mediaType);
 
         public static IContentProvider GetContentProvider(
             this IExecutionContext executionContext,

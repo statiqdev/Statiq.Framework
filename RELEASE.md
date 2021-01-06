@@ -4,6 +4,7 @@
 - Fixes some bugs with the `ProcessLauncher` on Linux and Mac by ensuring the entire process tree is killed (#156).
 - Added some performance caching for `IExecutionProcess.OutputPages`.
 - Refactored `NormalizedPath` to reduce use of strings.
+- Added some performance enhancements to caching of AngleSharp HTML documents.
 
 # 1.0.0-beta.31
 

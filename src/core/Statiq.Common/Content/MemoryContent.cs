@@ -61,12 +61,6 @@ namespace Statiq.Common
         public Stream GetStream() => _buffer is null ? Stream.Null : new MemoryStream(_buffer, _index, _count, false);
 
         /// <inheritdoc />
-        public long Length
-        {
-            get => _count;
-        }
-
-        /// <inheritdoc />
         public string MediaType { get; }
 
         /// <inheritdoc />

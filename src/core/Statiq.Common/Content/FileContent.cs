@@ -29,9 +29,6 @@ namespace Statiq.Common
         public Stream GetStream() => File.OpenRead();
 
         /// <inheritdoc />
-        public long Length => File.Length;
-
-        /// <inheritdoc />
         public string MediaType { get; }
 
         /// <inheritdoc />
