@@ -3,7 +3,7 @@ using NUnit.Framework;
 using Shouldly;
 using Statiq.Testing;
 
-namespace Statiq.Common.Tests
+namespace Statiq.Common.Tests.Util
 {
     [TestFixture]
     public class StringExtensionsFixture : BaseFixture

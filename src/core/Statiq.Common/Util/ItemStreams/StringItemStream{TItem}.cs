@@ -1,12 +1,18 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Statiq.Common
 {
+    /// <summary>
+    /// A read-only, non-seeking string-based stream produced by iterating over a collection of arbitrary objects.
+    /// </summary>
     public abstract class StringItemStream<TItem> : ItemStream<TItem>
     {
-        private readonly Encoding _encoding;
+        private readonly Encoder _encoder;
         private byte[] _buffer = new byte[256];
 
         protected StringItemStream(IEnumerable<TItem> items)
@@ -17,7 +23,13 @@ namespace Statiq.Common
         protected StringItemStream(IEnumerable<TItem> items, Encoding encoding)
             : base(items)
         {
-            _encoding = encoding ?? throw new ArgumentNullException(nameof(encoding));
+            _encoder = (encoding ?? throw new ArgumentNullException(nameof(encoding))).GetEncoder();
+        }
+
+        public override void Reset()
+        {
+            base.Reset();
+            _encoder.Reset();
         }
 
         protected sealed override ReadOnlyMemory<byte> GetItemMemory(TItem item)
@@ -27,13 +39,13 @@ namespace Statiq.Common
             {
                 return default;
             }
-            int byteCount = _encoding.GetByteCount(itemString);
+            int byteCount = _encoder.GetByteCount(itemString, false);
             if (_buffer.Length < byteCount)
             {
                 _buffer = new byte[byteCount];
             }
             Memory<byte> memory = new Memory<byte>(_buffer, 0, byteCount);
-            _encoding.GetBytes(itemString, memory.Span);
+            _encoder.GetBytes(itemString, memory.Span, false);
             return memory;
         }
 

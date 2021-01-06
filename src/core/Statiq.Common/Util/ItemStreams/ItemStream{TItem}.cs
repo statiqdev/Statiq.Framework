@@ -7,14 +7,12 @@ using System.Threading.Tasks;
 namespace Statiq.Common
 {
     /// <summary>
-    /// Produces a read-only, non-seeking stream from a collection of arbitrary objects.
+    /// A read-only, non-seeking stream produced by iterating over a collection of arbitrary objects.
     /// </summary>
     public abstract class ItemStream<TItem> : Stream
     {
         private readonly IEnumerable<TItem> _items;
-
         private ReadOnlyMemory<byte> _itemMemory;
-
         private IEnumerator<TItem> _itemEnumerator;
 
         protected ItemStream(IEnumerable<TItem> items)
@@ -74,13 +72,19 @@ namespace Statiq.Common
         {
         }
 
-        protected virtual void Reset()
+        public virtual void Reset()
         {
             _itemEnumerator = null;
             _itemMemory = default;
         }
 
         public sealed override int Read(byte[] buffer, int offset, int count) => Read(buffer.AsSpan().Slice(offset, count));
+
+        public override Task<int> ReadAsync(byte[] buffer, int offset, int count, CancellationToken cancellationToken)
+            => Task.FromResult(Read(new Span<byte>(buffer, offset, count)));
+
+        public override ValueTask<int> ReadAsync(Memory<byte> memory, CancellationToken cancellationToken)
+            => new ValueTask<int>(Read(memory.Span));
 
         public sealed override int Read(Span<byte> buffer)
         {
@@ -101,7 +105,7 @@ namespace Statiq.Common
             while (true)
             {
                 // Do we need to get more bytes?
-                if (_itemMemory.Length == 0)
+                if (_itemMemory.IsEmpty)
                 {
                     // Have we reached the end?
                     if (!_itemEnumerator.MoveNext())
@@ -118,7 +122,7 @@ namespace Statiq.Common
                 }
 
                 // Read the bytes if we have some
-                if (_itemMemory.Length > 0)
+                if (!_itemMemory.IsEmpty)
                 {
                     // If we have exactly the number of bytes to fill the remaining buffer, copy to the buffer and return
                     if (_itemMemory.Length == buffer.Length)
@@ -185,10 +189,6 @@ namespace Statiq.Common
 
         [Obsolete]
         protected sealed override void ObjectInvariant() => base.ObjectInvariant();
-
-        public sealed override Task<int> ReadAsync(byte[] buffer, int offset, int count, CancellationToken cancellationToken) => base.ReadAsync(buffer, offset, count, cancellationToken);
-
-        public sealed override ValueTask<int> ReadAsync(Memory<byte> buffer, CancellationToken cancellationToken = default) => base.ReadAsync(buffer, cancellationToken);
 
         public sealed override int ReadByte() => base.ReadByte();
 

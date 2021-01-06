@@ -3,6 +3,9 @@ using System.Collections.Generic;
 
 namespace Statiq.Common
 {
+    /// <summary>
+    /// A read-only, non-seeking stream produced by iterating over a collection of arbitrary objects.
+    /// </summary>
     public class DelegateItemStream<TItem> : ItemStream<TItem>
     {
         private readonly Func<TItem, ReadOnlyMemory<byte>> _getBytes;
