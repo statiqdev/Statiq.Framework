@@ -237,7 +237,7 @@ namespace Statiq.Html
                     }
                 }
             }
-            return escaped ? input.Clone(await context.GetContentProviderAsync(outputString.ToString(), input.ContentProvider.MediaType)).Yield() : input.Yield();
+            return escaped ? input.Clone(context.GetContentProvider(outputString.ToString(), input.ContentProvider.MediaType)).Yield() : input.Yield();
         }
     }
 }

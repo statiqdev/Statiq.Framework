@@ -43,11 +43,9 @@ namespace Statiq.Testing
 
         public override void Flush()
         {
-            if (!_buffer.TryGetBuffer(out ArraySegment<byte> segment))
-            {
-                throw new Exception("Unexpected failure to get buffer");
-            }
-            string content = Encoding.UTF8.GetString(segment.Array, segment.Offset, segment.Count);
+            string content = _buffer.TryGetBuffer(out ArraySegment<byte> segment)
+                ? Encoding.UTF8.GetString(segment.Array, segment.Offset, segment.Count)
+                : Encoding.UTF8.GetString(_buffer.ToArray());
             _resultBuilder.Clear();
             _resultBuilder.Append(content);
         }

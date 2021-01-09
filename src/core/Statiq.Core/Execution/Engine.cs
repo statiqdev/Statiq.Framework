@@ -937,23 +937,7 @@ namespace Statiq.Core
         }
 
         /// <inheritdoc />
-        public async Task<Stream> GetContentStreamAsync(string content = null)
-        {
-            if (Settings.GetBool(Keys.UseStringContentFiles))
-            {
-                // Use a temp file for strings
-                IFile tempFile = FileSystem.GetTempFile();
-                if (!string.IsNullOrEmpty(content))
-                {
-                    await tempFile.WriteAllTextAsync(content, cancellationToken: CancellationToken);
-                }
-                return new FileContentStream(tempFile);
-            }
-
-            // Otherwise get a memory stream from the pool and use that
-            MemoryStream memoryStream = MemoryStreamFactory.GetStream(content);
-            return new MemoryContentStream(memoryStream);
-        }
+        public Stream GetContentStream(string content = null) => new MemoryContentStream(MemoryStreamFactory.GetStream(content));
 
         /// <inheritdoc/>
         public HttpClient CreateHttpClient() => CreateHttpClient(_httpMessageHandler);

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Buffers;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
@@ -9,50 +10,43 @@ namespace Statiq.Common
 {
     public class StringStream : Stream
     {
-        private const int DefaultBufferCharCount = 256;  // The number of characters to encode and buffer at a time
+        private const int DefaultBufferCharCount = 512;  // The number of characters to encode and buffer at a time
 
         private readonly Encoding _encoding;
         private readonly int _bufferCharCount;
-        private Memory<byte> _outputBuffer;
+        private byte[] _outputBuffer;
         private Encoder _encoder;
-        private ReadOnlyMemory<char> _pendingSource;
-        private Memory<byte> _pendingOutput;
+        private ReadOnlyMemory<char> _pendingString;
+        private ReadOnlyMemory<byte> _pendingOutput;
 
-        public StringStream(string source)
-            : this(source, Encoding.Default)
+        public StringStream(string str)
+            : this(str, Encoding.Default)
         {
         }
 
-        public StringStream(string source, Encoding encoding)
-            : this(source?.AsMemory() ?? default, encoding)
+        public StringStream(string str, Encoding encoding)
+            : this(str, encoding, DefaultBufferCharCount)
         {
         }
 
-        public StringStream(string source, Encoding encoding, int bufferCharCount)
-            : this(source?.AsMemory() ?? default, encoding, bufferCharCount)
+        public StringStream(string str, Encoding encoding, int bufferCharCount)
         {
-        }
-
-        public StringStream(in ReadOnlyMemory<char> source)
-            : this(source, Encoding.Default)
-        {
-        }
-
-        public StringStream(in ReadOnlyMemory<char> source, Encoding encoding)
-            : this(source, encoding, DefaultBufferCharCount)
-        {
-        }
-
-        public StringStream(in ReadOnlyMemory<char> source, Encoding encoding, int bufferCharCount)
-        {
-            Source = source;
-            _pendingSource = Source;
+            String = str;
+            _pendingString = String?.AsMemory() ?? default;
             _encoding = encoding ?? throw new ArgumentNullException(nameof(encoding));
             _bufferCharCount = bufferCharCount;
-            _outputBuffer = new byte[_encoding.GetMaxByteCount(_bufferCharCount)];
+            _outputBuffer = ArrayPool<byte>.Shared.Rent(_encoding.GetMaxByteCount(_bufferCharCount));
         }
 
-        public ReadOnlyMemory<char> Source { get; }
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                ArrayPool<byte>.Shared.Return(_outputBuffer);
+            }
+        }
+
+        public string String { get; }
 
         public override bool CanRead => true;
 
@@ -60,7 +54,7 @@ namespace Statiq.Common
 
         public override bool CanWrite => false;
 
-        public override long Length => _encoding.GetByteCount(Source.Span);
+        public override long Length => throw new NotSupportedException();
 
         public override long Position
         {
@@ -102,7 +96,7 @@ namespace Statiq.Common
         public virtual void Reset()
         {
             _encoder = null;
-            _pendingSource = Source;
+            _pendingString = String?.AsMemory() ?? default;
             _pendingOutput = default;
         }
 
@@ -137,10 +131,11 @@ namespace Statiq.Common
                         {
                             // The output buffer isn't big enough for the remaining preamble, so expand it
                             // This should only happen if the bufferCharCount is really small
-                            _outputBuffer = new byte[preamble.Length];
+                            ArrayPool<byte>.Shared.Return(_outputBuffer);
+                            _outputBuffer = ArrayPool<byte>.Shared.Rent(preamble.Length);
                         }
-                        preamble.CopyTo(_outputBuffer.Span);
-                        _pendingOutput = _outputBuffer.Slice(0, preamble.Length);
+                        preamble.CopyTo(_outputBuffer);
+                        _pendingOutput = _outputBuffer.AsMemory().Slice(0, preamble.Length);
                         return buffer.Length;
                     }
 
@@ -164,20 +159,20 @@ namespace Statiq.Common
                 if (_pendingOutput.IsEmpty)
                 {
                     // Are we out of data to buffer?
-                    if (_pendingSource.IsEmpty)
+                    if (_pendingString.IsEmpty)
                     {
                         return read;
                     }
 
                     // We've got more source left so encode and buffer it
-                    ReadOnlySpan<char> encodeChars = _pendingSource.Length > _bufferCharCount ? _pendingSource.Slice(0, _bufferCharCount).Span : _pendingSource.Span;
-                    _pendingSource = _pendingSource.Slice(encodeChars.Length);
-                    int encodedLength = _encoder.GetBytes(encodeChars, _outputBuffer.Span, false);
-                    _pendingOutput = _outputBuffer.Slice(0, encodedLength);
+                    ReadOnlySpan<char> encodeChars = _pendingString.Length > _bufferCharCount ? _pendingString.Slice(0, _bufferCharCount).Span : _pendingString.Span;
+                    _pendingString = _pendingString.Slice(encodeChars.Length);
+                    int encodedLength = _encoder.GetBytes(encodeChars, _outputBuffer, false);
+                    _pendingOutput = _outputBuffer.AsMemory().Slice(0, encodedLength);
                 }
 
                 // Fill the buffer with the pending output
-                Span<byte> pendingSlice = _pendingOutput.Length > buffer.Length ? _pendingOutput.Slice(0, buffer.Length).Span : _pendingOutput.Span;
+                ReadOnlySpan<byte> pendingSlice = _pendingOutput.Length > buffer.Length ? _pendingOutput.Slice(0, buffer.Length).Span : _pendingOutput.Span;
                 pendingSlice.CopyTo(buffer);
                 read += pendingSlice.Length;
                 buffer = buffer.Slice(pendingSlice.Length);

@@ -125,7 +125,7 @@ namespace Statiq.Xmp
                     IFile sidecarFile = context.FileSystem.GetInputFile(input.Source.AppendExtension(".xmp"));
                     if (sidecarFile.Exists)
                     {
-                        MemoryStream xmpBytes = new MemoryStream();
+                        MemoryStream xmpBytes = context.MemoryStreamFactory.GetStream();
                         using (Stream xmpStream = sidecarFile.OpenRead())
                         {
                             await xmpStream.CopyToAsync(xmpBytes);

@@ -14,9 +14,9 @@ namespace Statiq.Tables
     /// The output CSV content uses <c>,</c> as separator and encloses every value in <c>"</c>.
     /// </remarks>
     /// <category>Content</category>
-    public class ConvertExcelToCsv : ParallelModule
+    public class ConvertExcelToCsv : ParallelSyncModule
     {
-        protected override async Task<IEnumerable<IDocument>> ExecuteInputAsync(IDocument input, IExecutionContext context)
+        protected override IEnumerable<IDocument> ExecuteInput(IDocument input, IExecutionContext context)
         {
             IEnumerable<IEnumerable<string>> records;
             using (Stream stream = input.GetContentStream())
@@ -24,7 +24,7 @@ namespace Statiq.Tables
                 records = ExcelFile.GetAllRecords(stream);
             }
 
-            using (Stream contentStream = await context.GetContentStreamAsync())
+            using (Stream contentStream = context.GetContentStream())
             {
                 CsvFile.WriteAllRecords(records, contentStream);
                 return input.Clone(context.GetContentProvider(contentStream, MediaTypes.Get(".csv"))).Yield();

@@ -58,7 +58,7 @@ namespace Statiq.Core
                 return context.CreateDocument().Yield();
             }
 
-            using (Stream contentStream = await context.GetContentStreamAsync())
+            using (Stream contentStream = context.GetContentStream())
             {
                 bool first = true;
                 byte[] delimeterBytes = Encoding.UTF8.GetBytes(_delimiter);

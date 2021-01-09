@@ -173,7 +173,7 @@ namespace Statiq.Sass
             NormalizedPath cssPath = relativePath.ChangeExtension("css");
             IDocument cssDocument = input.Clone(
                 cssPath,
-                await context.GetContentProviderAsync(result.Css ?? string.Empty, MediaTypes.Css));
+                context.GetContentProvider(result.Css ?? string.Empty, MediaTypes.Css));
 
             // Generate a source map if requested
             if (_generateSourceMap && result.SourceMap is object)
@@ -181,7 +181,7 @@ namespace Statiq.Sass
                 NormalizedPath sourceMapPath = relativePath.ChangeExtension("map");
                 IDocument sourceMapDocument = input.Clone(
                     sourceMapPath,
-                    await context.GetContentProviderAsync(result.SourceMap));
+                    context.GetContentProvider(result.SourceMap));
                 return new[] { cssDocument, sourceMapDocument };
             }
 

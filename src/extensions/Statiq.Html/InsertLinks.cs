@@ -169,7 +169,7 @@ namespace Statiq.Html
                         replacement.Key.Replace(HtmlParser.ParseFragment(replacement.Value, replacement.Key.ParentElement).ToArray());
                     }
 
-                    using (Stream contentStream = await context.GetContentStreamAsync())
+                    using (Stream contentStream = context.GetContentStream())
                     {
                         using (StreamWriter writer = contentStream.GetWriter())
                         {

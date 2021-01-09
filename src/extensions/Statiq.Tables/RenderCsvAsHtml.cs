@@ -16,7 +16,7 @@ namespace Statiq.Tables
     /// content must use <c>,</c> as separator and enclose every value in <c>"</c>.
     /// </remarks>
     /// <category>Content</category>
-    public class RenderCsvAsHtml : ParallelModule
+    public class RenderCsvAsHtml : ParallelSyncModule
     {
         private bool _firstLineHeader = false;
 
@@ -30,7 +30,7 @@ namespace Statiq.Tables
             return this;
         }
 
-        protected override async Task<IEnumerable<IDocument>> ExecuteInputAsync(IDocument input, IExecutionContext context)
+        protected override IEnumerable<IDocument> ExecuteInput(IDocument input, IExecutionContext context)
         {
             IEnumerable<IEnumerable<string>> records;
             using (Stream stream = input.GetContentStream())
@@ -59,7 +59,7 @@ namespace Statiq.Tables
                 firstLine = false;
             }
             builder.Append("</table>");
-            return input.Clone(await context.GetContentProviderAsync(builder.ToString(), MediaTypes.Html)).Yield();
+            return input.Clone(context.GetContentProvider(builder.ToString(), MediaTypes.Html)).Yield();
         }
     }
 }

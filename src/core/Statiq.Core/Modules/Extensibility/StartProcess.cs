@@ -25,7 +25,7 @@ namespace Statiq.Core
     /// but no output document will be generated and it will log with a debug level.
     /// </remarks>
     /// <category>Extensibility</category>
-    public class StartProcess : ParallelMultiConfigModule, IDisposable
+    public class StartProcess : ParallelSyncMultiConfigModule, IDisposable
     {
         /// <summary>
         /// A metadata key that contains the process exit code.
@@ -255,7 +255,7 @@ namespace Statiq.Core
         /// <returns>The current module instance.</returns>
         public StartProcess KeepContent(Config<bool> keepContent = null) => (StartProcess)SetConfig(KeepContentKey, keepContent ?? true);
 
-        protected override async Task<IEnumerable<IDocument>> ExecuteConfigAsync(IDocument input, IExecutionContext context, IMetadata values)
+        protected override IEnumerable<IDocument> ExecuteConfig(IDocument input, IExecutionContext context, IMetadata values)
         {
             // Only execute once if requested
             if (_onlyOnce && _executed)
@@ -312,7 +312,7 @@ namespace Statiq.Core
 
             // Start the process
             bool keepContent = values.GetBool(KeepContentKey);
-            using (Stream outputStream = _background || keepContent ? null : await context.GetContentStreamAsync())
+            using (Stream outputStream = _background || keepContent ? null : context.GetContentStream())
             {
                 using (StreamWriter outputWriter = outputStream == null ? null : new StreamWriter(outputStream, leaveOpen: true))
                 {

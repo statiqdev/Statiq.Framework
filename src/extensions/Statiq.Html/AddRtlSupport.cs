@@ -28,7 +28,7 @@ namespace Statiq.Html
 
             SetAttributes(htmlDocument);
 
-            using (Stream contentStream = await context.GetContentStreamAsync())
+            using (Stream contentStream = context.GetContentStream())
             {
                 using (StreamWriter writer = contentStream.GetWriter())
                 {

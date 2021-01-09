@@ -26,11 +26,11 @@ namespace Statiq.Core
         {
             if (input is null)
             {
-                return context.CreateDocument(await context.GetContentProviderAsync(value)).Yield();
+                return context.CreateDocument(context.GetContentProvider(value)).Yield();
             }
             return value is null
                 ? input.Yield()
-                : input.Clone(await context.GetContentProviderAsync(await input.GetContentStringAsync() + value, input.ContentProvider.MediaType)).Yield();
+                : input.Clone(context.GetContentProvider(await input.GetContentStringAsync() + value, input.ContentProvider.MediaType)).Yield();
         }
     }
 }

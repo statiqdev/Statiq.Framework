@@ -354,7 +354,7 @@ namespace Statiq.Images
                     {
                         formatPath = destinationPath;
                     }
-                    MemoryStream outputStream = new MemoryStream();
+                    MemoryStream outputStream = context.MemoryStreamFactory.GetStream();
                     action.Invoke(image, outputStream);
                     outputStream.Seek(0, SeekOrigin.Begin);
                     return input.Clone(formatPath, context.GetContentProvider(outputStream, formatPath.MediaType));

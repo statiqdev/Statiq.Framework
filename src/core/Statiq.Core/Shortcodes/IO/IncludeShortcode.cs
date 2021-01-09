@@ -58,7 +58,7 @@ namespace Statiq.Core
                 }
 
                 // Got the resource, copy to a stream and create a document result
-                using (Stream contentStream = await context.GetContentStreamAsync())
+                using (Stream contentStream = context.GetContentStream())
                 {
                     await response.Content.CopyToAsync(contentStream);
                     return contentStream;

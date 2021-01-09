@@ -153,7 +153,7 @@ namespace Statiq.Testing
         private readonly DocumentFactory _documentFactory;
 
         /// <inheritdoc/>
-        public Task<Stream> GetContentStreamAsync(string content = null) => Task.FromResult<Stream>(new TestContentStream(this, content));
+        public Stream GetContentStream(string content = null) => new TestContentStream(this, content);
 
         /// <inheritdoc/>
         public HttpClient CreateHttpClient() =>

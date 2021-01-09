@@ -141,7 +141,7 @@ namespace Statiq.Common
         /// <remarks>The position is set to the beginning of the stream when returned.</remarks>
         /// <param name="content">Content to initialize the stream with.</param>
         /// <returns>A stream for document content.</returns>
-        Task<Stream> GetContentStreamAsync(string content = null);
+        Stream GetContentStream(string content = null);
 
         /// <summary>
         /// Creates a <see cref="HttpClient"/> instance that should be used for all HTTP communication.

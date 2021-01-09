@@ -61,9 +61,9 @@ namespace Statiq.Common.Tests.Modules
             }
         }
 
-        private class TestModule : ParallelModule
+        private class TestModule : ParallelSyncModule
         {
-            protected override async Task<IEnumerable<IDocument>> ExecuteInputAsync(IDocument input, IExecutionContext context)
+            protected override IEnumerable<IDocument> ExecuteInput(IDocument input, IExecutionContext context)
             {
                 IReadOnlyList<string> contents = input.GetList<string>("Outputs");
                 if (contents is null)
@@ -73,7 +73,7 @@ namespace Statiq.Common.Tests.Modules
                 List<IDocument> outputs = new List<IDocument>();
                 foreach (string content in contents)
                 {
-                    outputs.Add(input.Clone(await context.GetContentProviderAsync(content)));
+                    outputs.Add(input.Clone(context.GetContentProvider(content)));
                 }
                 return outputs;
             }

@@ -43,7 +43,7 @@ namespace Statiq.Common
                 : GetDocuments(value)
                     ?? GetDocumentFromMetadata(executionContext, document, value)
                         ?? await ExecuteModulesAsync(executionContext, moduleInputs, value)
-                            ?? await ChangeContentAsync(executionContext, document, value);
+                            ?? ChangeContent(executionContext, document, value);
 
         private static IEnumerable<IDocument> GetDocuments(object value) =>
             value is IDocument document ? document.Yield() : value as IEnumerable<IDocument>;
@@ -58,10 +58,10 @@ namespace Statiq.Common
             return modules is null ? null : (IEnumerable<IDocument>)await context.ExecuteModulesAsync(modules, moduleInputs);
         }
 
-        private static async Task<IEnumerable<IDocument>> ChangeContentAsync(IExecutionContext context, IDocument document, object value)
+        private static IEnumerable<IDocument> ChangeContent(IExecutionContext context, IDocument document, object value)
         {
             // Check if this is a known content provider type first
-            IContentProvider contentProvider = await GetContentProviderAsync(context, document, value, false);
+            IContentProvider contentProvider = GetContentProvider(context, document, value, false);
             if (contentProvider is object)
             {
                 return context.CloneOrCreateDocument(document, contentProvider).Yield();
@@ -72,13 +72,13 @@ namespace Statiq.Common
             IDocument[] results = new IDocument[valueObjects.Length];
             for (int c = 0; c < valueObjects.Length; c++)
             {
-                results[c] = context.CloneOrCreateDocument(document, await GetContentProviderAsync(context, document, valueObjects[c], true));
+                results[c] = context.CloneOrCreateDocument(document, GetContentProvider(context, document, valueObjects[c], true));
             }
             return results;
         }
 
         // Preserves the original media type of the input document
-        private static async Task<IContentProvider> GetContentProviderAsync(IExecutionContext context, IDocument document, object value, bool asString)
+        private static IContentProvider GetContentProvider(IExecutionContext context, IDocument document, object value, bool asString)
         {
             switch (value)
             {
@@ -89,9 +89,9 @@ namespace Statiq.Common
                 case Stream stream:
                     return context.GetContentProvider(stream, document?.ContentProvider?.MediaType);
                 case string str:
-                    return await context.GetContentProviderAsync(str, document?.ContentProvider?.MediaType);
+                    return context.GetContentProvider(str, document?.ContentProvider?.MediaType);
             }
-            return asString && value is object ? await context.GetContentProviderAsync(value.ToString(), document?.ContentProvider?.MediaType) : null;
+            return asString && value is object ? context.GetContentProvider(value.ToString(), document?.ContentProvider?.MediaType) : null;
         }
     }
 }

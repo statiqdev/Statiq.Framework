@@ -493,9 +493,9 @@ namespace Statiq.Feeds
             // Generate the feeds
             return new[]
             {
-                await GenerateFeedAsync(FeedType.Rss, feed, metadata, _rssPath, context),
-                await GenerateFeedAsync(FeedType.Atom, feed, metadata, _atomPath, context),
-                await GenerateFeedAsync(FeedType.Rdf, feed, metadata, _rdfPath, context)
+                GenerateFeed(FeedType.Rss, feed, metadata, _rssPath, context),
+                GenerateFeed(FeedType.Atom, feed, metadata, _atomPath, context),
+                GenerateFeed(FeedType.Rdf, feed, metadata, _rdfPath, context)
             }.Where(x => x is object);
         }
 
@@ -537,7 +537,7 @@ namespace Statiq.Feeds
             return false;
         }
 
-        private static async Task<IDocument> GenerateFeedAsync(FeedType feedType, Feed feed, MetadataItems metadata, NormalizedPath path, IExecutionContext context)
+        private static IDocument GenerateFeed(FeedType feedType, Feed feed, MetadataItems metadata, NormalizedPath path, IExecutionContext context)
         {
             // Get the output path
             if (path.IsNull)
@@ -550,7 +550,7 @@ namespace Statiq.Feeds
             }
 
             // Generate the feed and document
-            using (Stream contentStream = await context.GetContentStreamAsync())
+            using (Stream contentStream = context.GetContentStream())
             {
                 FeedSerializer.SerializeXml(feedType, feed, contentStream);
                 return context.CreateDocument(path, metadata, context.GetContentProvider(contentStream, feedType.MediaType));

@@ -175,10 +175,10 @@ namespace Statiq.Core
                 {
                     inputLines.RemoveRange(0, delimiterLine + 1);
                 }
-                foreach (IDocument result in await context.ExecuteModulesAsync(Children, input.Clone(await context.GetContentProviderAsync(frontMatter)).Yield()))
+                foreach (IDocument result in await context.ExecuteModulesAsync(Children, input.Clone(context.GetContentProvider(frontMatter)).Yield()))
                 {
                     return result.Clone(
-                        _preserveFrontMatter ? input.ContentProvider : await context.GetContentProviderAsync(string.Join("\n", inputLines), input.ContentProvider.MediaType))
+                        _preserveFrontMatter ? input.ContentProvider : context.GetContentProvider(string.Join("\n", inputLines), input.ContentProvider.MediaType))
                         .Yield();
                 }
             }

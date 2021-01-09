@@ -1,5 +1,7 @@
 # 1.0.0-beta.32
 
+- **Breaking change:** Refactored the `IExecutionContext.GetContentProviderAsync(string)` extension and overloads to `IExecutionContext.GetContentProvider(string)` and removed the `UseStringContentFiles` option because it's no longer needed with more efficient string and stream processing. This unifies the extensions to get content providers.
+- **Breaking change:** The change to string-based content above also allowed the refactoring of `IDocument.CloseAsync(string)` and related extensions to `IDocument.Clone(string)` and similar and unifies the clone methods into a single set of overloads.
 - Changes the precedence of environment variables to overwrite configuration from settings files to match expected ASP.NET Core conventions (#154).
 - Fixes some bugs with the `ProcessLauncher` on Linux and Mac by ensuring the entire process tree is killed (#156).
 - Added some performance caching for `IExecutionProcess.OutputPages`.

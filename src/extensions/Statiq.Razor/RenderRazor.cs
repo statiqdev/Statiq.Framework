@@ -201,7 +201,7 @@ namespace Statiq.Razor
             {
                 context.LogDebug("Processing Razor for {0}", input.ToSafeDisplayString());
 
-                using (Stream contentStream = await context.GetContentStreamAsync())
+                using (Stream contentStream = context.GetContentStream())
                 {
                     using (Stream inputStream = input.GetContentStream())
                     {

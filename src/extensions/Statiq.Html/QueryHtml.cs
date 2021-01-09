@@ -211,7 +211,7 @@ namespace Statiq.Html
                             // Clone the document and optionally change content to the HTML element
                             if (_outerHtmlContent.HasValue)
                             {
-                                using (Stream contentStream = await context.GetContentStreamAsync())
+                                using (Stream contentStream = context.GetContentStream())
                                 {
                                     using (StreamWriter writer = contentStream.GetWriter())
                                     {

@@ -15,7 +15,7 @@ namespace Statiq.Common
     /// <typeparam name="TItem">
     /// The type of items this module is designed to process.
     /// </typeparam>
-    public abstract class ReadDataModule<TModule, TItem> : Module
+    public abstract class ReadDataModule<TModule, TItem> : SyncModule
         where TModule : ReadDataModule<TModule, TItem>
         where TItem : class
     {
@@ -84,14 +84,14 @@ namespace Statiq.Common
         }
 
         /// <inheritdoc />
-        protected override async Task<IEnumerable<IDocument>> ExecuteContextAsync(IExecutionContext context)
+        protected override IEnumerable<IDocument> ExecuteContext(IExecutionContext context)
         {
             IEnumerable<TItem> items = GetItems(context);
             return items is null
-                ? Array.Empty<IDocument>()
-                : await items.Where(x => x is object).Take(_limit).ParallelSelectAsync(ReadDataAsync);
+                ? (IEnumerable<IDocument>)Array.Empty<IDocument>()
+                : items.Where(x => x is object).Take(_limit).AsParallel().Select(ReadData);
 
-            async Task<IDocument> ReadDataAsync(TItem item)
+            IDocument ReadData(TItem item)
             {
                 string content = string.Empty;
                 List<KeyValuePair<string, object>> meta = new List<KeyValuePair<string, object>>();
@@ -123,13 +123,13 @@ namespace Statiq.Common
                     }
                 }
 
-                return context.CreateDocument(meta, await context.GetContentProviderAsync(content));
+                return context.CreateDocument(meta, context.GetContentProvider(content));
             }
         }
 
         /// <inheritdoc />
         // Unused, prevent overriding in derived classes
-        protected sealed override Task<IEnumerable<IDocument>> ExecuteInputAsync(IDocument input, IExecutionContext context) =>
+        protected sealed override IEnumerable<IDocument> ExecuteInput(IDocument input, IExecutionContext context) =>
             throw new NotSupportedException();
 
         /// <summary>

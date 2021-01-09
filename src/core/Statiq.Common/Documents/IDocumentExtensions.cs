@@ -56,7 +56,17 @@ namespace Statiq.Common
                 {
                     return Array.Empty<byte>();
                 }
-                MemoryStream memory = new MemoryStream();
+
+                // Special case if this is a memory stream
+                if (stream is MemoryStream memoryStream && memoryStream.TryGetBuffer(out ArraySegment<byte> segment))
+                {
+                    byte[] bytes = new byte[segment.Count];
+                    segment.CopyTo(bytes);
+                    return bytes;
+                }
+
+                // Otherwise read the stream to get the bytes
+                MemoryStream memory = IExecutionState.Current.MemoryStreamFactory.GetStream();
                 await stream.CopyToAsync(memory);
                 return memory.ToArray();
             }

@@ -110,7 +110,7 @@ namespace Statiq.Html
                     // Return a new document with the replacements if we performed any
                     if (modifiedDocument)
                     {
-                        using (Stream contentStream = await context.GetContentStreamAsync())
+                        using (Stream contentStream = context.GetContentStream())
                         {
                             using (StreamWriter writer = contentStream.GetWriter())
                             {

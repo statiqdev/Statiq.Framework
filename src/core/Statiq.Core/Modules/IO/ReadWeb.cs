@@ -162,7 +162,7 @@ namespace Statiq.Core
                         using (HttpContent content = response.Content)
                         {
                             Stream result = await content.ReadAsStreamAsync();
-                            MemoryStream memoryStream = new MemoryStream();
+                            MemoryStream memoryStream = context.MemoryStreamFactory.GetStream();
                             await result.CopyToAsync(memoryStream);
                             Dictionary<string, string> headers = content.Headers.ToDictionary(
                                 x => CultureInfo.CurrentCulture.TextInfo.ToTitleCase(x.Key), x => string.Join(",", x.Value));

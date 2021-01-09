@@ -234,7 +234,7 @@ namespace Statiq.Testing
             SetInputs((IEnumerable<IDocument>)inputs);
 
         /// <inheritdoc/>
-        public Task<Stream> GetContentStreamAsync(string content = null) => Engine.GetContentStreamAsync(content);
+        public Stream GetContentStream(string content = null) => Engine.GetContentStream(content);
 
         /// <inheritdoc/>
         public HttpClient CreateHttpClient() => Engine.CreateHttpClient();

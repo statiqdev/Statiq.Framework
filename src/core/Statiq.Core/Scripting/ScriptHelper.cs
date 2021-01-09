@@ -106,9 +106,9 @@ namespace Statiq.Core
 
             // Emit the assembly
             ILogger logger = _executionState.Services.GetRequiredService<ILogger<ScriptHelper>>();
-            using (MemoryStream ms = new MemoryStream())
+            using (MemoryStream memoryStream = _executionState.MemoryStreamFactory.GetStream())
             {
-                EmitResult result = compilation.Emit(ms);
+                EmitResult result = compilation.Emit(memoryStream);
 
                 // Log warnings
                 List<string> warningMessages = result.Diagnostics
@@ -144,8 +144,8 @@ namespace Statiq.Core
                     throw new ScriptCompilationException(errorMessages);
                 }
 
-                ms.Seek(0, SeekOrigin.Begin);
-                return ms.ToArray();
+                memoryStream.Seek(0, SeekOrigin.Begin);
+                return memoryStream.ToArray();
             }
         }
 

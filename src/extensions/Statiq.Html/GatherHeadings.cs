@@ -202,7 +202,7 @@ namespace Statiq.Html
                         metadata.Add(_childrenKey, heading.Children.AsReadOnly());
                     }
 
-                    heading.Document = await context.CreateDocumentAsync(metadata, heading.Element.TextContent);
+                    heading.Document = context.CreateDocument(metadata, heading.Element.TextContent);
 
                     // Add to parent
                     parent?.Children.Add(heading.Document);

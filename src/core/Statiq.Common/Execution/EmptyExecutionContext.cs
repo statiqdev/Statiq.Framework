@@ -80,8 +80,7 @@ namespace Statiq.Common
         public Task<ImmutableArray<IDocument>> ExecuteModulesAsync(IEnumerable<IModule> modules, IEnumerable<IDocument> inputs) =>
             throw new NotSupportedException("Not supported in an empty execution context");
 
-        public Task<Stream> GetContentStreamAsync(string content = null) =>
-            ExecutionState.GetContentStreamAsync(content);
+        public Stream GetContentStream(string content = null) => ExecutionState.GetContentStream(content);
 
         public IJavaScriptEnginePool GetJavaScriptEnginePool(Action<IJavaScriptEngine> initializer = null, int startEngines = 10, int maxEngines = 25, int maxUsagesPerEngine = 100, TimeSpan? engineTimeout = null) =>
             ExecutionState.GetJavaScriptEnginePool(initializer, startEngines, maxEngines, maxUsagesPerEngine, engineTimeout);

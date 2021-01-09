@@ -40,7 +40,7 @@ namespace Statiq.Core
         /// <param name="content">A delegate that returns the content to set.</param>
         /// <param name="mediaType">The media type of the new content.</param>
         public SetContent(Config<string> content, Config<string> mediaType)
-            : base(content.CombineWith(mediaType, async (c, m, ctx) => await ctx.GetContentProviderAsync(c, m)), true)
+            : base(content.CombineWith(mediaType, (c, m, ctx) => ctx.GetContentProvider(c, m)), true)
         {
         }
 

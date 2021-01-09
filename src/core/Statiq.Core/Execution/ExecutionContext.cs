@@ -154,8 +154,7 @@ namespace Statiq.Core
             await Engine.ExecuteModulesAsync(_contextData, this, modules, inputs?.ToImmutableArray() ?? ImmutableArray<IDocument>.Empty, this);
 
         /// <inheritdoc/>
-        public Task<Stream> GetContentStreamAsync(string content = null) =>
-            _contextData.Engine.GetContentStreamAsync(content);
+        public Stream GetContentStream(string content = null) => _contextData.Engine.GetContentStream(content);
 
         /// <inheritdoc/>
         public IJavaScriptEnginePool GetJavaScriptEnginePool(

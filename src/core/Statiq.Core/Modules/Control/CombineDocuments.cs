@@ -28,7 +28,7 @@ namespace Statiq.Core
                     ? input
                     : result.Clone(
                         input,
-                        await context.GetContentProviderAsync(
+                        context.GetContentProvider(
                             await result.GetContentStringAsync() + await input.GetContentStringAsync(),
                             result.ContentProvider.MediaType is null
                                 ? null

@@ -94,13 +94,13 @@ namespace Statiq.Core
                     _regexOptions);
                 return (currentDocumentContent == newDocumentContent
                     ? input
-                    : input.Clone(await context.GetContentProviderAsync(newDocumentContent, input.ContentProvider.MediaType)))
+                    : input.Clone(context.GetContentProvider(newDocumentContent, input.ContentProvider.MediaType)))
                     .Yield();
             }
             string replaced = _isRegex
                 ? Regex.Replace(currentDocumentContent, _search, value, _regexOptions)
                 : currentDocumentContent.Replace(_search, value);
-            return input.Clone(await context.GetContentProviderAsync(replaced, input.ContentProvider.MediaType)).Yield();
+            return input.Clone(context.GetContentProvider(replaced, input.ContentProvider.MediaType)).Yield();
         }
     }
 }

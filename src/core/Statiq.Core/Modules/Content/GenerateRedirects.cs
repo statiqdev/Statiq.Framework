@@ -119,7 +119,7 @@ namespace Statiq.Core
                         outputs.Add(
                             context.CreateDocument(
                                 additionalOutput.Key,
-                                await context.GetContentProviderAsync(content)));
+                                context.GetContentProvider(content)));
                     }
                 }
             }
@@ -157,7 +157,7 @@ namespace Statiq.Core
                             string body = input.GetString(Keys.RedirectBody, $@"<p>This page has moved to <a href=""{url}"">{url}</a></p>");
                             yield return context.CreateDocument(
                                 outputPath,
-                                await context.GetContentProviderAsync(
+                                context.GetContentProvider(
                                     $@"
 < !doctype html>
 <html>    

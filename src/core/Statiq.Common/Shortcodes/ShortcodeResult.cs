@@ -19,7 +19,7 @@ namespace Statiq.Common
         }
 
         public ShortcodeResult(string content, IEnumerable<KeyValuePair<string, object>> nestedMetadata = null)
-            : this(content is null ? null : IExecutionContext.Current.MemoryStreamFactory.GetStream(content), nestedMetadata)
+            : this(content is null ? null : IExecutionContext.Current.GetContentProvider(content), nestedMetadata)
         {
         }
 

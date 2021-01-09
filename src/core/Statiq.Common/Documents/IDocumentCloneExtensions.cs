@@ -166,13 +166,13 @@ namespace Statiq.Common
         /// <param name="content">The new content.</param>
         /// <param name="mediaType">The media type of the content.</param>
         /// <returns>A new document of the same type as this document.</returns>
-        public static async Task<IDocument> CloneAsync(
+        public static IDocument Clone(
             this IDocument document,
             NormalizedPath destination,
             IEnumerable<KeyValuePair<string, object>> items,
             string content,
             string mediaType = null) =>
-            document.Clone(null, destination, items, await IExecutionContext.Current.GetContentProviderAsync(content, mediaType));
+            document.Clone(null, destination, items, IExecutionContext.Current.GetContentProvider(content, mediaType));
 
         /// <summary>
         /// Clones this document.
@@ -183,13 +183,13 @@ namespace Statiq.Common
         /// <param name="content">The new content.</param>
         /// <param name="mediaType">The media type of the content.</param>
         /// <returns>A new document of the same type as this document.</returns>
-        public static async Task<IDocument> CloneAsync(
+        public static IDocument Clone(
             this IDocument document,
             NormalizedPath source,
             NormalizedPath destination,
             string content,
             string mediaType = null) =>
-            document.Clone(source, destination, null, await IExecutionContext.Current.GetContentProviderAsync(content, mediaType));
+            document.Clone(source, destination, null, IExecutionContext.Current.GetContentProvider(content, mediaType));
 
         /// <summary>
         /// Clones this document.
@@ -199,12 +199,12 @@ namespace Statiq.Common
         /// <param name="content">The new content.</param>
         /// <param name="mediaType">The media type of the content.</param>
         /// <returns>A new document of the same type as this document.</returns>
-        public static async Task<IDocument> CloneAsync(
+        public static IDocument Clone(
             this IDocument document,
             NormalizedPath destination,
             string content,
             string mediaType = null) =>
-            document.Clone(null, destination, null, await IExecutionContext.Current.GetContentProviderAsync(content, mediaType));
+            document.Clone(null, destination, null, IExecutionContext.Current.GetContentProvider(content, mediaType));
 
         /// <summary>
         /// Clones this document.
@@ -214,12 +214,12 @@ namespace Statiq.Common
         /// <param name="content">The new content.</param>
         /// <param name="mediaType">The media type of the content.</param>
         /// <returns>A new document of the same type as this document.</returns>
-        public static async Task<IDocument> CloneAsync(
+        public static IDocument Clone(
             this IDocument document,
             IEnumerable<KeyValuePair<string, object>> items,
             string content,
             string mediaType = null) =>
-            document.Clone(null, null, items, await IExecutionContext.Current.GetContentProviderAsync(content, mediaType));
+            document.Clone(null, null, items, IExecutionContext.Current.GetContentProvider(content, mediaType));
 
         /// <summary>
         /// Clones this document.
@@ -228,10 +228,10 @@ namespace Statiq.Common
         /// <param name="content">The new content.</param>
         /// <param name="mediaType">The media type of the content.</param>
         /// <returns>A new document of the same type as this document.</returns>
-        public static async Task<IDocument> CloneAsync(
+        public static IDocument Clone(
             this IDocument document,
             string content,
             string mediaType = null) =>
-            document.Clone(null, null, null, await IExecutionContext.Current.GetContentProviderAsync(content, mediaType));
+            document.Clone(null, null, null, IExecutionContext.Current.GetContentProvider(content, mediaType));
     }
 }

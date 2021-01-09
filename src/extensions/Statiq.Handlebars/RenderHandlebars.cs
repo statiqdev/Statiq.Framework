@@ -193,7 +193,7 @@ namespace Statiq.Handlebars
                 : await _model.GetValueAsync(input, context));
 
             return string.IsNullOrEmpty(_sourceKey)
-                ? input.Clone(await context.GetContentProviderAsync(result, MediaTypes.Html)).Yield()
+                ? input.Clone(context.GetContentProvider(result, MediaTypes.Html)).Yield()
                 : input
                     .Clone(new MetadataItems
                     {

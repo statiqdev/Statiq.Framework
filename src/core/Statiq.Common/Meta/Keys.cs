@@ -59,13 +59,6 @@ namespace Statiq.Common
         public const string Strict = nameof(Strict);
 
         /// <summary>
-        /// This will cause temporary backing files to be created for string document content
-        /// instead of storing that content in memory.
-        /// </summary>
-        /// <type><see cref="bool"/></type>
-        public const string UseStringContentFiles = nameof(UseStringContentFiles);
-
-        /// <summary>
         /// Indicates whether caching should be used.
         /// </summary>
         /// <type><see cref="bool"/></type>

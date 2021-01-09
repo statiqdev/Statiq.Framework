@@ -23,7 +23,7 @@ namespace Statiq.Tables
     /// +--------------+-------------+
     /// </remarks>
     /// <category>Content</category>
-    public class RenderCsvAsMarkdown : ParallelModule
+    public class RenderCsvAsMarkdown : ParallelSyncModule
     {
         private bool _firstLineHeader = false;
 
@@ -37,7 +37,7 @@ namespace Statiq.Tables
             return this;
         }
 
-        protected override async Task<IEnumerable<IDocument>> ExecuteInputAsync(IDocument input, IExecutionContext context)
+        protected override IEnumerable<IDocument> ExecuteInput(IDocument input, IExecutionContext context)
         {
             IEnumerable<IEnumerable<string>> records;
             using (Stream stream = input.GetContentStream())
@@ -77,7 +77,7 @@ namespace Statiq.Tables
                 firstLine = false;
             }
 
-            return input.Clone(await context.GetContentProviderAsync(builder.ToString(), MediaTypes.Markdown)).Yield();
+            return input.Clone(context.GetContentProvider(builder.ToString(), MediaTypes.Markdown)).Yield();
         }
 
         private static void WriteLine(StringBuilder builder, int[] columnSize, bool isHeader = false)

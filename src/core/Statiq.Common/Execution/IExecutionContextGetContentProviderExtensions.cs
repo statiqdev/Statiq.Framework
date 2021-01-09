@@ -42,7 +42,13 @@ namespace Statiq.Common
                 return contentStream.GetContentProvider(mediaType);
             }
 
-            // Use the stream outright if it's a memory stream and the memory is exposed
+            // Special case if this is a string stream
+            if (stream is StringStream stringStream)
+            {
+                return new StringContent(stringStream.String, mediaType);
+            }
+
+            // Special case if this is a memory stream
             if (stream is MemoryStream memoryStream && memoryStream.TryGetBuffer(out ArraySegment<byte> segment))
             {
                 return new MemoryContent(segment.Array, segment.Offset, segment.Count, mediaType);
@@ -53,14 +59,19 @@ namespace Statiq.Common
             {
                 stream.Position = 0;
             }
-            using (MemoryStream bufferStream = stream.CanSeek ? new MemoryStream((int)stream.Length) : new MemoryStream())
+            using (MemoryStream bufferStream = stream.CanSeek ? new MemoryStream((int)stream.Length) : executionContext.MemoryStreamFactory.GetStream())
             {
                 stream.CopyTo(bufferStream);
-                if (!bufferStream.TryGetBuffer(out ArraySegment<byte> bufferSegment))
+
+                // First try getting a buffer segment
+                if (bufferStream.TryGetBuffer(out ArraySegment<byte> bufferSegment))
                 {
-                    throw new Exception("Unexpected inability to get stream buffer");
+                    return new MemoryContent(bufferSegment.Array, bufferSegment.Offset, bufferSegment.Count, mediaType);
                 }
-                return new MemoryContent(bufferSegment.Array, bufferSegment.Offset, bufferSegment.Count, mediaType);
+
+                // If that fails, copy it to an array
+                byte[] buffer = bufferStream.ToArray();
+                return new MemoryContent(buffer, mediaType);
             }
         }
 
@@ -111,35 +122,14 @@ namespace Statiq.Common
             string mediaType) =>
             new MemoryContent(buffer, index, count, mediaType);
 
-        public static Task<IContentProvider> GetContentProviderAsync(
+        public static IContentProvider GetContentProvider(
             this IExecutionContext executionContext,
             string content) =>
-            executionContext.GetContentProviderAsync(content, null);
+            executionContext.GetContentProvider(content, null);
 
-        public static async Task<IContentProvider> GetContentProviderAsync(
+        public static IContentProvider GetContentProvider(
             this IExecutionContext executionContext,
             string content,
-            string mediaType)
-        {
-            if (content is null)
-            {
-                return new NullContent();
-            }
-
-            // How should the string be stored?
-            if (executionContext.Settings.GetBool(Keys.UseStringContentFiles))
-            {
-                // Use a temp file for strings
-                IFile tempFile = executionContext.FileSystem.GetTempFile();
-                if (!string.IsNullOrEmpty(content))
-                {
-                    await tempFile.WriteAllTextAsync(content, cancellationToken: executionContext.CancellationToken);
-                }
-                return new FileContent(tempFile, mediaType);
-            }
-
-            // Otherwise use the string that's already in memory
-            return new StringContent(content, mediaType);
-        }
+            string mediaType) => content is null ? new NullContent() : (IContentProvider)new StringContent(content, mediaType);
     }
 }

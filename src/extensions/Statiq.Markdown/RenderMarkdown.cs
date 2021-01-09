@@ -231,7 +231,7 @@ namespace Statiq.Markdown
             {
                 // No source key so change the content
                 return input
-                    .Clone(metadataItems, await context.GetContentProviderAsync(result, MediaTypes.Html))
+                    .Clone(metadataItems, context.GetContentProvider(result, MediaTypes.Html))
                     .Yield();
             }
             else

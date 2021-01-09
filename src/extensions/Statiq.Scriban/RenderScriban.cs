@@ -200,7 +200,7 @@ namespace Statiq.Scriban
             string result = await template.RenderAsync(templateContext);
 
             return _sourceKey.IsNullOrEmpty()
-                ? input.Clone(await context.GetContentProviderAsync(result, MediaTypes.Html)).Yield()
+                ? input.Clone(context.GetContentProvider(result, MediaTypes.Html)).Yield()
                 : input
                     .Clone(new MetadataItems
                     {

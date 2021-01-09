@@ -23,7 +23,7 @@ namespace Statiq.Core
         /// <param name="mediaType">The media type of the output document.</param>
         public CreateDocuments(Config<string> content, string mediaType = null)
             : base(
-                content.Transform(async (content, ctx) => ctx.CreateDocument(await ctx.GetContentProviderAsync(content, mediaType)).Yield()),
+                content.Transform((content, ctx) => ctx.CreateDocument(ctx.GetContentProvider(content, mediaType)).Yield()),
                 false)
         {
         }
@@ -35,11 +35,7 @@ namespace Statiq.Core
         /// <param name="mediaType">The media type of each output document.</param>
         public CreateDocuments(Config<IEnumerable<string>> content, string mediaType = null)
             : base(
-                content.Transform(async (content, ctx) =>
-                    (IEnumerable<IDocument>)await content
-                        .ToAsyncEnumerable()
-                        .SelectAwait(async x => ctx.CreateDocument(await ctx.GetContentProviderAsync(x, mediaType)))
-                        .ToListAsync(ctx.CancellationToken)),
+                content.Transform((content, ctx) => content.Select(x => ctx.CreateDocument(ctx.GetContentProvider(x, mediaType)))),
                 false)
         {
         }
@@ -79,11 +75,7 @@ namespace Statiq.Core
         /// <param name="mediaType">The media type of each output document.</param>
         public CreateDocuments(IEnumerable<string> content, string mediaType = null)
             : base(
-                Config.FromContext(async ctx =>
-                    (IEnumerable<IDocument>)await content
-                        .ToAsyncEnumerable()
-                        .SelectAwait(async x => ctx.CreateDocument(await ctx.GetContentProviderAsync(x, mediaType)))
-                        .ToListAsync(ctx.CancellationToken)),
+                Config.FromContext(ctx => content.Select(x => ctx.CreateDocument(ctx.GetContentProvider(x, mediaType)))),
                 false)
         {
         }
@@ -122,11 +114,7 @@ namespace Statiq.Core
         /// <param name="mediaType">The media type of each output document.</param>
         public CreateDocuments(IEnumerable<Tuple<string, IEnumerable<KeyValuePair<string, object>>>> contentAndMetadata, string mediaType = null)
             : base(
-                Config.FromContext(async ctx =>
-                    (IEnumerable<IDocument>)await contentAndMetadata
-                        .ToAsyncEnumerable()
-                        .SelectAwait(async x => ctx.CreateDocument(x.Item2, await ctx.GetContentProviderAsync(x.Item1, mediaType)))
-                        .ToListAsync(ctx.CancellationToken)),
+                Config.FromContext(ctx => contentAndMetadata.Select(x => ctx.CreateDocument(x.Item2, ctx.GetContentProvider(x.Item1, mediaType)))),
                 false)
         {
         }

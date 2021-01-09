@@ -62,7 +62,7 @@ namespace Statiq.Common
                     }
 
                     // If the stream isn't seekable the only way to get length is to copy it out and see how long it is
-                    using (MemoryStream buffer = new MemoryStream())
+                    using (MemoryStream buffer = IExecutionState.Current.MemoryStreamFactory.GetStream())
                     {
                         stream.CopyTo(buffer);
                         return buffer.Length;
