@@ -27,6 +27,9 @@ namespace Statiq.Common
         public Stream GetStream() => Stream.Null;
 
         /// <inheritdoc />
+        public TextReader GetTextReader() => TextReader.Null;
+
+        /// <inheritdoc />
         public string MediaType { get; }
 
         /// <inheritdoc />

@@ -137,17 +137,22 @@ namespace Statiq.Core
                     // Otherwise open an output stream for the output file and copy the input document stream to it
                     using (Stream inputStream = input.GetContentStream())
                     {
-                        if (_ignoreEmptyContent && inputStream.Length == 0)
+                        // Peek the stream to see if it contains any content
+                        byte[] firstByte = new byte[1];
+                        if (_ignoreEmptyContent && await inputStream.ReadAsync(firstByte, context.CancellationToken) == 0)
                         {
                             return;
                         }
 
                         using (Stream outputStream = _append ? outputFile.OpenAppend() : outputFile.OpenWrite())
                         {
-                            await inputStream.CopyToAsync(outputStream);
+                            long initialPosition = outputStream.Position;
+                            await outputStream.WriteAsync(firstByte, context.CancellationToken);
+                            await inputStream.CopyToAsync(outputStream, context.CancellationToken);
+                            long length = outputStream.Position - initialPosition;
                             if (!_append)
                             {
-                                outputStream.SetLength(inputStream.Length);
+                                outputStream.SetLength(length);
                             }
                         }
                     }

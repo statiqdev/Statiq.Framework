@@ -10,15 +10,13 @@ namespace Statiq.Testing
     public class StringBuilderStream : Stream
     {
         private readonly Random _random = new Random();
-        private readonly MemoryStream _buffer;
-        private readonly MemoryStream _content;
-        private readonly StreamReader _bufferReader;
         private readonly StringBuilder _resultBuilder;
+        private readonly MemoryStream _buffer;
 
         public StringBuilderStream(StringBuilder resultBuilder)
         {
+            _resultBuilder = resultBuilder;
             _buffer = new MemoryStream();
-            _content = new MemoryStream();
 
             // Copy the old result into the current buffer.
             using (StreamWriter writer = new StreamWriter(_buffer, Encoding.Default, 2048, true))
@@ -27,9 +25,6 @@ namespace Statiq.Testing
                 writer.Flush();
             }
             _buffer.Position = 0;
-
-            _bufferReader = new StreamReader(_buffer, true);
-            _resultBuilder = resultBuilder;
         }
 
         public override bool CanRead => false;
@@ -48,25 +43,20 @@ namespace Statiq.Testing
 
         public override void Flush()
         {
-            _buffer.Position = 0;
+            if (!_buffer.TryGetBuffer(out ArraySegment<byte> segment))
+            {
+                throw new Exception("Unexpected failure to get buffer");
+            }
+            string content = Encoding.UTF8.GetString(segment.Array, segment.Offset, segment.Count);
             _resultBuilder.Clear();
-            _resultBuilder.Append(_bufferReader.ReadToEnd());
+            _resultBuilder.Append(content);
         }
 
-        public override long Seek(long offset, SeekOrigin origin)
-        {
-            throw new NotSupportedException();
-        }
+        public override long Seek(long offset, SeekOrigin origin) => throw new NotSupportedException();
 
-        public override void SetLength(long value)
-        {
-            _buffer.SetLength(value);
-        }
+        public override void SetLength(long value) => _buffer.SetLength(value);
 
-        public override int Read(byte[] buffer, int offset, int count)
-        {
-            throw new NotSupportedException();
-        }
+        public override int Read(byte[] buffer, int offset, int count) => throw new NotSupportedException();
 
         public override void Write(byte[] buffer, int offset, int count)
         {

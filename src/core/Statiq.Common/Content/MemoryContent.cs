@@ -61,11 +61,14 @@ namespace Statiq.Common
         public Stream GetStream() => _buffer is null ? Stream.Null : new MemoryStream(_buffer, _index, _count, false);
 
         /// <inheritdoc />
+        public TextReader GetTextReader() => _buffer is null ? TextReader.Null : new StreamReader(GetStream());
+
+        /// <inheritdoc />
         public string MediaType { get; }
 
         /// <inheritdoc />
         public IContentProvider CloneWithMediaType(string mediaType) =>
-            new MemoryContent(_buffer, mediaType);
+            new MemoryContent(_buffer, _index, _count, mediaType);
 
         /// <inheritdoc />
         public Task<int> GetCacheHashCodeAsync()

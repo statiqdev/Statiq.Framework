@@ -62,6 +62,7 @@ namespace Statiq.Core
             {
                 bool first = true;
                 byte[] delimeterBytes = Encoding.UTF8.GetBytes(_delimiter);
+                byte[] firstContentByte = new byte[1];
                 string mediaType = null;
                 foreach (IDocument document in context.Inputs)
                 {
@@ -70,28 +71,33 @@ namespace Statiq.Core
                         continue;
                     }
 
-                    if (first)
-                    {
-                        first = false;
-                        mediaType = document.ContentProvider.MediaType;
-                    }
-                    else
-                    {
-                        await contentStream.WriteAsync(delimeterBytes, 0, delimeterBytes.Length);
-                        if (!document.MediaTypeEquals(mediaType))
-                        {
-                            mediaType = null;
-                        }
-                    }
-
                     using (Stream inputStream = document.GetContentStream())
                     {
-                        await inputStream.CopyToAsync(contentStream);
+                        // Peek the first byte to see if this document has content
+                        if (await inputStream.ReadAsync(firstContentByte, context.CancellationToken) == 1)
+                        {
+                            if (first)
+                            {
+                                first = false;
+                                mediaType = document.ContentProvider.MediaType;
+                            }
+                            else
+                            {
+                                await contentStream.WriteAsync(delimeterBytes, 0, delimeterBytes.Length, context.CancellationToken);
+                                if (!document.MediaTypeEquals(mediaType))
+                                {
+                                    mediaType = null;
+                                }
+                            }
+
+                            await contentStream.WriteAsync(firstContentByte, context.CancellationToken);
+                            await inputStream.CopyToAsync(contentStream, context.CancellationToken);
+                        }
                     }
                 }
 
                 return context.CreateDocument(
-                    MetadataForOutputDocument(context.Inputs),
+                    GetMetadataForOutputDocument(context.Inputs),
                     context.GetContentProvider(contentStream, mediaType))
                     .Yield();
             }
@@ -102,7 +108,7 @@ namespace Statiq.Core
         /// </summary>
         /// <param name="inputs">The list of input documents.</param>
         /// <returns>The set of metadata for all input documents.</returns>
-        private IEnumerable<KeyValuePair<string, object>> MetadataForOutputDocument(ImmutableArray<IDocument> inputs)
+        private IEnumerable<KeyValuePair<string, object>> GetMetadataForOutputDocument(ImmutableArray<IDocument> inputs)
         {
             switch (_metaDataMode)
             {

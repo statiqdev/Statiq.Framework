@@ -116,7 +116,7 @@ namespace Statiq.Core
         public WebRequest WithContent(string content)
         {
             content.ThrowIfNull(nameof(content));
-            Content = new StringContent(content);
+            Content = new System.Net.Http.StringContent(content);
             return this;
         }
 

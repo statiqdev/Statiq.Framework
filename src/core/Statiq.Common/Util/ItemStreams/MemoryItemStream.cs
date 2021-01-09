@@ -13,6 +13,6 @@ namespace Statiq.Common
         {
         }
 
-        protected sealed override ReadOnlyMemory<byte> GetItemMemory(byte[] item) => item;
+        protected sealed override ReadOnlySpan<byte> GetItemBytes(byte[] item) => item;
     }
 }

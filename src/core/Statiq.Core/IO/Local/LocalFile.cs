@@ -139,6 +139,8 @@ namespace Statiq.Core
             return LocalFileProvider.RetryPolicy.Execute(() => new FileStream(_file.FullName, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.ReadWrite, BufferSize, true));
         }
 
+        public TextReader OpenText() => LocalFileProvider.RetryPolicy.Execute(() => File.OpenText(_file.FullName));
+
         private void CreateDirectory() => Directory.Create();
 
         public IContentProvider GetContentProvider() => GetContentProvider(MediaType);

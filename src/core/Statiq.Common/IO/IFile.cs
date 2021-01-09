@@ -79,11 +79,16 @@ namespace Statiq.Common
         Task WriteAllTextAsync(string contents, bool createDirectory = true, CancellationToken cancellationToken = default);
 
         /// <summary>
-        /// Opens the file for reading. If it does not exist, an exception
-        /// will be thrown.
+        /// Opens the file for reading. If it does not exist, an exception will be thrown.
         /// </summary>
-        /// <returns>The stream.</returns>
+        /// <returns>A <see cref="Stream"/> for the file.</returns>
         Stream OpenRead();
+
+        /// <summary>
+        /// Opens the file for reading as text. If it does not exist, an exception will be thrown.
+        /// </summary>
+        /// <returns>A <see cref="TextReader"/> for the file.</returns>
+        TextReader OpenText();
 
         /// <summary>
         /// Opens the file for writing. This will either create the file

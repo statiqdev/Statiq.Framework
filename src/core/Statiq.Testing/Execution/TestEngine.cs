@@ -185,7 +185,7 @@ namespace Statiq.Testing
             = (_, __) => new HttpResponseMessage
             {
                 StatusCode = HttpStatusCode.OK,
-                Content = new StringContent(string.Empty)
+                Content = new System.Net.Http.StringContent(string.Empty)
             };
 
         /// <inheritdoc/>

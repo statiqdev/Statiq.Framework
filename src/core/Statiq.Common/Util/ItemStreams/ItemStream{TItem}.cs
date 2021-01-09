@@ -11,14 +11,17 @@ namespace Statiq.Common
     /// </summary>
     public abstract class ItemStream<TItem> : Stream
     {
-        private readonly IEnumerable<TItem> _items;
-        private ReadOnlyMemory<byte> _itemMemory;
+        private ReadOnlyMemory<byte> _remainingMemory;
         private IEnumerator<TItem> _itemEnumerator;
+        private byte[] _remainingBuffer = Array.Empty<byte>();
+        private bool _readPrefix;
+        private bool _readSuffix;
 
         protected ItemStream(IEnumerable<TItem> items)
         {
-            _items = items;
+            Items = items;
         }
+        public IEnumerable<TItem> Items { get; }
 
         public sealed override bool CanRead => true;
 
@@ -75,84 +78,115 @@ namespace Statiq.Common
         public virtual void Reset()
         {
             _itemEnumerator = null;
-            _itemMemory = default;
+            _remainingMemory = default;
+            _readPrefix = false;
+            _readSuffix = false;
         }
 
         public sealed override int Read(byte[] buffer, int offset, int count) => Read(buffer.AsSpan().Slice(offset, count));
 
-        public override Task<int> ReadAsync(byte[] buffer, int offset, int count, CancellationToken cancellationToken)
+        public sealed override Task<int> ReadAsync(byte[] buffer, int offset, int count, CancellationToken cancellationToken)
             => Task.FromResult(Read(new Span<byte>(buffer, offset, count)));
 
-        public override ValueTask<int> ReadAsync(Memory<byte> memory, CancellationToken cancellationToken)
+        public sealed override ValueTask<int> ReadAsync(Memory<byte> memory, CancellationToken cancellationToken)
             => new ValueTask<int>(Read(memory.Span));
 
         public sealed override int Read(Span<byte> buffer)
         {
-            // If we don't have items, return 0
-            if (_items is null)
-            {
-                return 0;
-            }
-
-            // If we're not already enumerating, get an enumerator
-            if (_itemEnumerator is null)
-            {
-                _itemEnumerator = _items.GetEnumerator();
-            }
-
             // Read until we've filled the buffer with the requested count
             int read = 0;
             while (true)
             {
-                // Do we need to get more bytes?
-                if (_itemMemory.IsEmpty)
+                // Get the next chunk of data
+                ReadOnlySpan<byte> itemBytes;
+                if (!_readPrefix)
                 {
-                    // Have we reached the end?
-                    if (!_itemEnumerator.MoveNext())
+                    // Read the prefix if we haven't already
+                    itemBytes = GetPrefix();
+                    _readPrefix = true;
+                }
+                else
+                {
+                    // Do we have leftover bytes?
+                    itemBytes = _remainingMemory.Span;
+                    _remainingMemory = default;
+                    if (itemBytes.IsEmpty)
                     {
-                        return read;
-                    }
+                        // If we've already read the suffix then we're done
+                        if (_readSuffix)
+                        {
+                            return read;
+                        }
 
-                    // Get the current item and bytes (the item might be null, in which case we'll loop back here and go to the next)
-                    TItem item = _itemEnumerator.Current;
-                    if (item is object)
-                    {
-                        _itemMemory = GetItemMemory(item);
+                        // If we're not already enumerating, get an enumerator
+                        if (_itemEnumerator is null)
+                        {
+                            _itemEnumerator = Items?.GetEnumerator();
+                        }
+
+                        // Do we actually have an enumerator (or have we reached the end)?
+                        if (_itemEnumerator?.MoveNext() != true)
+                        {
+                            // We're at the end or the enumerator was null, so read the suffix
+                            itemBytes = GetSuffix();
+                            _readSuffix = true;
+                        }
+                        else
+                        {
+                            // Get the current item bytes
+                            itemBytes = GetItemBytes(_itemEnumerator.Current);
+                        }
                     }
                 }
 
                 // Read the bytes if we have some
-                if (!_itemMemory.IsEmpty)
+                if (!itemBytes.IsEmpty)
                 {
                     // If we have exactly the number of bytes to fill the remaining buffer, copy to the buffer and return
-                    if (_itemMemory.Length == buffer.Length)
+                    if (itemBytes.Length == buffer.Length)
                     {
-                        _itemMemory.Span.CopyTo(buffer);
-                        read += _itemMemory.Length;
-                        _itemMemory = default;
+                        itemBytes.CopyTo(buffer);
+                        read += itemBytes.Length;
                         return read;
                     }
 
                     // If we have more bytes than we need, slice and retain the rest
-                    if (_itemMemory.Length > buffer.Length)
+                    if (itemBytes.Length > buffer.Length)
                     {
-                        ReadOnlyMemory<byte> copyBytes = _itemMemory.Slice(0, buffer.Length);
-                        _itemMemory = _itemMemory.Slice(buffer.Length);
-                        copyBytes.Span.CopyTo(buffer);
+                        ReadOnlySpan<byte> copyBytes = itemBytes.Slice(0, buffer.Length);
+                        copyBytes.CopyTo(buffer);
                         read += copyBytes.Length;
+
+                        // Save remaining bytes
+                        ReadOnlySpan<byte> remainingSlice = itemBytes.Slice(buffer.Length);
+                        if (_remainingBuffer.Length < remainingSlice.Length)
+                        {
+                            _remainingBuffer = new byte[remainingSlice.Length];
+                        }
+                        remainingSlice.CopyTo(_remainingBuffer);
+                        _remainingMemory = _remainingBuffer.AsMemory(0, remainingSlice.Length);
+
                         return read;
                     }
 
                     // We have fewer bytes than we need, fill what we can and slice the destination buffer to continue trying to fill it
-                    _itemMemory.Span.CopyTo(buffer);
-                    read += _itemMemory.Length;
-                    buffer = buffer.Slice(_itemMemory.Length);
-                    _itemMemory = default;
+                    itemBytes.CopyTo(buffer);
+                    read += itemBytes.Length;
+                    buffer = buffer.Slice(itemBytes.Length);
                 }
             }
         }
 
-        protected abstract ReadOnlyMemory<byte> GetItemMemory(TItem item);
+        /// <summary>
+        /// Gets the memory for a given item.
+        /// </summary>
+        /// <param name="item">The item to get memory for (can be <c>default</c>/<c>null</c>).</param>
+        /// <returns>Memory that represents the item.</returns>
+        protected abstract ReadOnlySpan<byte> GetItemBytes(TItem item);
+
+        protected virtual ReadOnlySpan<byte> GetPrefix() => default;
+
+        protected virtual ReadOnlySpan<byte> GetSuffix() => default;
 
         // Seal the rest to avoid confusion
 

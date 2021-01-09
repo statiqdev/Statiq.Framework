@@ -9,9 +9,8 @@ namespace Statiq.Common
 {
     public class StringStream : Stream
     {
-        private const int DefaultBufferCharCount = 256;  // The number of characters to buffer at a time
+        private const int DefaultBufferCharCount = 256;  // The number of characters to encode and buffer at a time
 
-        private readonly ReadOnlyMemory<char> _source;
         private readonly Encoding _encoding;
         private readonly int _bufferCharCount;
         private Memory<byte> _outputBuffer;
@@ -20,7 +19,7 @@ namespace Statiq.Common
         private Memory<byte> _pendingOutput;
 
         public StringStream(string source)
-            : this(source, Encoding.UTF8)
+            : this(source, Encoding.Default)
         {
         }
 
@@ -35,7 +34,7 @@ namespace Statiq.Common
         }
 
         public StringStream(in ReadOnlyMemory<char> source)
-            : this(source, Encoding.UTF8)
+            : this(source, Encoding.Default)
         {
         }
 
@@ -46,12 +45,14 @@ namespace Statiq.Common
 
         public StringStream(in ReadOnlyMemory<char> source, Encoding encoding, int bufferCharCount)
         {
-            _source = source;
-            _pendingSource = _source;
+            Source = source;
+            _pendingSource = Source;
             _encoding = encoding ?? throw new ArgumentNullException(nameof(encoding));
             _bufferCharCount = bufferCharCount;
             _outputBuffer = new byte[_encoding.GetMaxByteCount(_bufferCharCount)];
         }
+
+        public ReadOnlyMemory<char> Source { get; }
 
         public override bool CanRead => true;
 
@@ -59,7 +60,7 @@ namespace Statiq.Common
 
         public override bool CanWrite => false;
 
-        public override long Length => throw new NotSupportedException();
+        public override long Length => _encoding.GetByteCount(Source.Span);
 
         public override long Position
         {
@@ -101,7 +102,7 @@ namespace Statiq.Common
         public virtual void Reset()
         {
             _encoder = null;
-            _pendingSource = _source;
+            _pendingSource = Source;
             _pendingOutput = default;
         }
 

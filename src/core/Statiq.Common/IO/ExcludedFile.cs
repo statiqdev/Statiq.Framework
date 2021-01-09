@@ -65,6 +65,9 @@ namespace Statiq.Common
         public Stream OpenRead() =>
             throw new NotSupportedException("Not supported for an excluded path");
 
+        public TextReader OpenText() =>
+            throw new NotSupportedException("Not supported for an excluded path");
+
         public Stream OpenWrite(bool createDirectory = true) =>
             throw new NotSupportedException("Not supported for an excluded path");
 

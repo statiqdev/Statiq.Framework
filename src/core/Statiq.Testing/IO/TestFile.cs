@@ -104,6 +104,15 @@ namespace Statiq.Testing
             return new MemoryStream(bytes);
         }
 
+        public TextReader OpenText()
+        {
+            if (!_fileProvider.Files.TryGetValue(Path, out StringBuilder builder))
+            {
+                throw new FileNotFoundException();
+            }
+            return new StringReader(builder.ToString());
+        }
+
         public Stream OpenWrite(bool createDirectory = true)
         {
             CreateDirectory(createDirectory, this);

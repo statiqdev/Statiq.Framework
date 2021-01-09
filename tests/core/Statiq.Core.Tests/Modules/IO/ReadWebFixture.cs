@@ -27,7 +27,7 @@ namespace Statiq.Core.Tests.Modules.IO
                         HttpResponseMessage response = new HttpResponseMessage
                         {
                             StatusCode = HttpStatusCode.OK,
-                            Content = new StringContent("Fizz")
+                            Content = new System.Net.Http.StringContent("Fizz")
                         };
                         response.Headers.Add("Foo", "Bar");
                         return response;
@@ -65,7 +65,7 @@ namespace Statiq.Core.Tests.Modules.IO
                         HttpResponseMessage response = new HttpResponseMessage
                         {
                             StatusCode = HttpStatusCode.OK,
-                            Content = new StringContent("Fizz")
+                            Content = new System.Net.Http.StringContent("Fizz")
                         };
                         response.Headers.Add("Foo", "Bar");
                         return response;

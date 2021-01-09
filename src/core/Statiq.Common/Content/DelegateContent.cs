@@ -37,6 +37,10 @@ namespace Statiq.Common
             }
         }
 
-        public Stream GetStream() => _getStream();
+        /// <inheritdoc />
+        public Stream GetStream() => _getStream() ?? Stream.Null;
+
+        /// <inheritdoc />
+        public TextReader GetTextReader() => new StreamReader(GetStream());
     }
 }

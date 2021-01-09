@@ -16,6 +16,6 @@ namespace Statiq.Common
             _getBytes = getBytes ?? throw new ArgumentNullException(nameof(getBytes));
         }
 
-        protected override ReadOnlyMemory<byte> GetItemMemory(TItem item) => _getBytes(item);
+        protected override ReadOnlySpan<byte> GetItemBytes(TItem item) => _getBytes(item).Span;
     }
 }

@@ -11,12 +11,20 @@ namespace Statiq.Common
     {
         /// <summary>
         /// Gets the content associated with this document as a <see cref="Stream"/>.
-        /// The underlying stream will be reset to position 0 each time this method is called.
         /// The stream you get from this call must be disposed as soon as reading is complete.
         /// </summary>
         /// <param name="document">The document.</param>
         /// <returns>A <see cref="Stream"/> of the content associated with this document.</returns>
         public static Stream GetContentStream(this IDocument document) => document.ContentProvider.GetStream();
+
+        /// <summary>
+        /// Gets the content associated with this document as a <see cref="TextReader"/>. This is prefered
+        /// over reading the stream as text since it might be optimized for text-based use cases.
+        /// The <see cref="TextReader"/> you get from this call must be disposed as soon as reading is complete.
+        /// </summary>
+        /// <param name="document">The document.</param>
+        /// <returns>A <see cref="TextReader"/> of the content associated with this document.</returns>
+        public static TextReader GetContentTextReader(this IDocument document) => document.ContentProvider.GetTextReader();
 
         /// <summary>
         /// Gets the content associated with this document as a string.
@@ -27,12 +35,7 @@ namespace Statiq.Common
         /// <value>The content associated with this document.</value>
         public static async Task<string> GetContentStringAsync(this IDocument document)
         {
-            Stream stream = document.GetContentStream();
-            if (stream is null || stream == Stream.Null)
-            {
-                return string.Empty;
-            }
-            using (StreamReader reader = new StreamReader(stream))
+            using (TextReader reader = document.GetContentTextReader())
             {
                 return await reader.ReadToEndAsync();
             }

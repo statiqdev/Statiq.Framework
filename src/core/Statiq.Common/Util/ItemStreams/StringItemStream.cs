@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Text;
 
 namespace Statiq.Common
 {
@@ -8,7 +9,12 @@ namespace Statiq.Common
     public class StringItemStream : StringItemStream<string>
     {
         public StringItemStream(IEnumerable<string> items)
-            : base(items)
+            : this(items, Encoding.Default)
+        {
+        }
+
+        public StringItemStream(IEnumerable<string> items, Encoding encoding)
+            : base(items, encoding)
         {
         }
 

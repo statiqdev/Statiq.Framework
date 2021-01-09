@@ -19,6 +19,6 @@ namespace Statiq.Common
         /// <param name="leaveOpen"><c>true</c> to leave the underlying stream open on disposal.</param>
         /// <returns>A new <see cref="StreamWriter"/> for the specified stream.</returns>
         public static StreamWriter GetWriter(this Stream stream, bool leaveOpen = true) =>
-            new StreamWriter(stream, Encoding.UTF8, 1024, leaveOpen);
+            new StreamWriter(stream, Encoding.Default, 1024, leaveOpen);
     }
 }

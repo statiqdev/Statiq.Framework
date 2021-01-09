@@ -42,17 +42,26 @@ namespace Statiq.Common
                 return contentStream.GetContentProvider(mediaType);
             }
 
+            // Use the stream outright if it's a memory stream and the memory is exposed
+            if (stream is MemoryStream memoryStream && memoryStream.TryGetBuffer(out ArraySegment<byte> segment))
+            {
+                return new MemoryContent(segment.Array, segment.Offset, segment.Count, mediaType);
+            }
+
             // Copy the stream to a buffer and use that for the content
-            if (stream.Position != 0)
+            if (stream.CanSeek)
             {
                 stream.Position = 0;
             }
-            byte[] buffer = new byte[stream.Length];
-            using (MemoryStream bufferStream = new MemoryStream(buffer))
+            using (MemoryStream bufferStream = stream.CanSeek ? new MemoryStream((int)stream.Length) : new MemoryStream())
             {
                 stream.CopyTo(bufferStream);
+                if (!bufferStream.TryGetBuffer(out ArraySegment<byte> bufferSegment))
+                {
+                    throw new Exception("Unexpected inability to get stream buffer");
+                }
+                return new MemoryContent(bufferSegment.Array, bufferSegment.Offset, bufferSegment.Count, mediaType);
             }
-            return new MemoryContent(buffer, mediaType);
         }
 
         /// <summary>
@@ -117,6 +126,7 @@ namespace Statiq.Common
                 return new NullContent();
             }
 
+            // How should the string be stored?
             if (executionContext.Settings.GetBool(Keys.UseStringContentFiles))
             {
                 // Use a temp file for strings
@@ -128,9 +138,8 @@ namespace Statiq.Common
                 return new FileContent(tempFile, mediaType);
             }
 
-            // Otherwise get a memory stream from the pool and use that
-            byte[] contentBytes = Encoding.UTF8.GetBytes(content);
-            return new MemoryContent(contentBytes, mediaType);
+            // Otherwise use the string that's already in memory
+            return new StringContent(content, mediaType);
         }
     }
 }

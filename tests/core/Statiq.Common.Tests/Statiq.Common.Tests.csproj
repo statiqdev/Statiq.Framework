@@ -9,5 +9,6 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Scripting\" />
+    <Folder Include="Util\ItemStreams\" />
   </ItemGroup>
 </Project>

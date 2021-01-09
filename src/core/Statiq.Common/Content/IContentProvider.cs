@@ -1,4 +1,5 @@
 ﻿using System.IO;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Statiq.Common
@@ -13,6 +14,14 @@ namespace Statiq.Common
         /// </summary>
         /// <returns>The content stream for a document.</returns>
         Stream GetStream();
+
+        /// <summary>
+        /// Gets an appropriate <see cref="TextReader"/> for the content. This is prefered
+        /// over reading the stream as text since it might be optimized for text-based use cases.
+        /// The returned <see cref="TextReader"/> should be disposed after use.
+        /// </summary>
+        /// <returns>A <see cref="TextReader"/> for the content.</returns>
+        TextReader GetTextReader();
 
         /// <summary>
         /// Gets the media type of the content.

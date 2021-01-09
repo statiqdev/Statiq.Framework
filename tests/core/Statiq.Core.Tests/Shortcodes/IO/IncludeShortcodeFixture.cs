@@ -60,7 +60,7 @@ namespace Statiq.Core.Tests.Shortcodes.IO
                         HttpResponseFunc = (_, __) => new HttpResponseMessage
                         {
                             StatusCode = HttpStatusCode.OK,
-                            Content = new StringContent("Hello from the other side.")
+                            Content = new System.Net.Http.StringContent("Hello from the other side.")
                         }
                     }
                 };

@@ -23,7 +23,7 @@ namespace Statiq.Core.Tests.Modules.IO
                 // Given
                 const string fileName = "test.txt";
                 const string oldContent = "TestTest";
-                const string newContent = "Test";
+                const string newContent = "Zxcv";
                 TestDocument input = new TestDocument(
                     new NormalizedPath(fileName),
                     newContent);

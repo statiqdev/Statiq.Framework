@@ -37,23 +37,14 @@ namespace Statiq.Common
 
         public bool Exists => _document is object;
 
-        public Stream OpenRead()
-        {
-            if (_document is null)
-            {
-                throw new FileNotFoundException();
-            }
-            return _document.GetContentStream();
-        }
+        public Stream OpenRead() =>
+            _document is null ? throw new FileNotFoundException() : _document.GetContentStream();
 
-        public async Task<string> ReadAllTextAsync(CancellationToken cancellationToken = default)
-        {
-            if (_document is null)
-            {
-                throw new FileNotFoundException();
-            }
-            return await _document.GetContentStringAsync();
-        }
+        public TextReader OpenText() =>
+            _document is null ? throw new FileNotFoundException() : _document.GetContentTextReader();
+
+        public async Task<string> ReadAllTextAsync(CancellationToken cancellationToken = default) =>
+            _document is null ? throw new FileNotFoundException() : await _document.GetContentStringAsync();
 
         public long Length
         {
@@ -65,7 +56,17 @@ namespace Statiq.Common
                 }
                 using (Stream stream = _document.GetContentStream())
                 {
-                    return stream.Length;
+                    if (stream.CanSeek)
+                    {
+                        return stream.Length;
+                    }
+
+                    // If the stream isn't seekable the only way to get length is to copy it out and see how long it is
+                    using (MemoryStream buffer = new MemoryStream())
+                    {
+                        stream.CopyTo(buffer);
+                        return buffer.Length;
+                    }
                 }
             }
         }
