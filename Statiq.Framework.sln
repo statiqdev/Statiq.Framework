@@ -107,7 +107,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Statiq.Scriban", "src\exten
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Statiq.Scriban.Tests", "tests\extensions\Statiq.Scriban.Tests\Statiq.Scriban.Tests.csproj", "{31430424-368E-4CE5-A4C4-6C8372278725}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestConsoleApp", "tests\core\TestConsoleApp\TestConsoleApp.csproj", "{B27DDE2E-69B4-415A-9DB2-46506C7A5372}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TestConsoleApp", "tests\core\TestConsoleApp\TestConsoleApp.csproj", "{B27DDE2E-69B4-415A-9DB2-46506C7A5372}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
