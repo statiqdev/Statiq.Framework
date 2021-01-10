@@ -1,7 +1,8 @@
 # 1.0.0-beta.32
 
-- **Breaking change:** Refactored the `IExecutionContext.GetContentProviderAsync(string)` extension and overloads to `IExecutionContext.GetContentProvider(string)` and removed the `UseStringContentFiles` option because it's no longer needed with more efficient string and stream processing. This unifies the extensions to get content providers.
-- **Breaking change:** The change to string-based content above also allowed the refactoring of `IDocument.CloseAsync(string)` and related extensions to `IDocument.Clone(string)` and similar and unifies the clone methods into a single set of overloads.
+- **Breaking change:** Refactored the `IExecutionContext.GetContentProviderAsync(string)` extension (and overloads) to be non-async and unified related extensions that get content providers.
+- **Breaking change:** Refactored `IDocument.CloseAsync(string)` and related extensions to be non-async and unified related clone methods into a single set of overloads.
+- **Breaking change:** Removed the `UseStringContentFiles` option because it's no longer relevant with the new string and stream processing.
 - Updated the Razor engine from 3.0.0 to 3.1.10.
 - Updated the Roslyn libraries from 3.4.0 to 3.8.0.
 - Changed the precedence of environment variables to overwrite configuration from settings files to match expected ASP.NET Core conventions (#154).
