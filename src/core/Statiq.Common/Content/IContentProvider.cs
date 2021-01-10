@@ -24,6 +24,12 @@ namespace Statiq.Common
         TextReader GetTextReader();
 
         /// <summary>
+        /// Gets the length of the content in bytes.
+        /// </summary>
+        /// <returns>The length of the content in bytes.</returns>
+        long GetLength();
+
+        /// <summary>
         /// Gets the media type of the content.
         /// </summary>
         /// <remarks>

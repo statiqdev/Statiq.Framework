@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -30,6 +31,9 @@ namespace Statiq.Common
 
         /// <inheritdoc />
         public TextReader GetTextReader() => _content is null ? TextReader.Null : new StringReader(_content);
+
+        /// <inheritdoc />
+        public long GetLength() => Encoding.Default.GetByteCount(_content);
 
         /// <inheritdoc />
         public string MediaType { get; }

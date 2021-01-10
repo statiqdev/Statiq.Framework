@@ -42,5 +42,24 @@ namespace Statiq.Common
 
         /// <inheritdoc />
         public TextReader GetTextReader() => new StreamReader(GetStream());
+
+        /// <inheritdoc />
+        public long GetLength()
+        {
+            using (Stream stream = GetStream())
+            {
+                if (stream.CanSeek)
+                {
+                    return stream.Length;
+                }
+
+                // If the stream isn't seekable the only way to get length is to copy it out and see how long it is
+                using (MemoryStream buffer = IExecutionState.Current.MemoryStreamFactory.GetStream())
+                {
+                    stream.CopyTo(buffer);
+                    return buffer.Length;
+                }
+            }
+        }
     }
 }

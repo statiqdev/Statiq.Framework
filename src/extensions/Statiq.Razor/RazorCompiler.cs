@@ -127,7 +127,7 @@ namespace Statiq.Razor
             using (IServiceScope scope = _serviceScopeFactory.CreateScope())
             {
                 IServiceProvider serviceProvider = scope.ServiceProvider;
-                IRazorPage page = GetPageFromStream(serviceProvider, request);
+                IRazorPage page = await GetPageFromStreamAsync(serviceProvider, request);
                 IView view = GetViewFromStream(serviceProvider, request, page);
 
                 using (StreamWriter writer = request.Output.GetWriter())
@@ -211,7 +211,7 @@ namespace Statiq.Razor
         /// DefaultRazorPageFactory and CompilerCache. Note that we don't actually bother
         /// with caching the page if it's from a live stream.
         /// </summary>
-        private IRazorPage GetPageFromStream(IServiceProvider serviceProvider, RenderRequest request)
+        private async Task<IRazorPage> GetPageFromStreamAsync(IServiceProvider serviceProvider, RenderRequest request)
         {
             string relativePath = request.RelativePath;
 
@@ -223,21 +223,18 @@ namespace Statiq.Razor
 
             // Get the file info by combining the stream content with info found at the document's original location (if any)
             StatiqRazorProjectFileSystem projectFileSystem = serviceProvider.GetRequiredService<StatiqRazorProjectFileSystem>();
-            RazorProjectItem projectItem = projectFileSystem.GetItem(relativePath, request.Input);
+            RazorProjectItem projectItem = projectFileSystem.GetItem(relativePath, request.Document);
 
             // Compute a hash for the content since pipelines could have changed it from the underlying file
-            // We have to pre-compute the hash (I.e., no CryptoStream) since we need to check for a hit before reading/compiling the view
-            byte[] hash = SHA512.Create().ComputeHash(request.Input);
-            request.Input.Position = 0;
+            int hashCode = await request.Document.ContentProvider.GetCacheHashCodeAsync();
 
-            CompilationResult compilationResult = CompilePage(request, hash, projectItem);
-
+            CompilationResult compilationResult = CompilePage(request, hashCode, projectItem);
             return compilationResult.GetPage(request.RelativePath);
         }
 
-        private CompilationResult CompilePage(RenderRequest request, byte[] hash, RazorProjectItem projectItem)
+        private CompilationResult CompilePage(RenderRequest request, int hashCode, RazorProjectItem projectItem)
         {
-            CompilerCacheKey cacheKey = new CompilerCacheKey(request, hash);
+            CompilerCacheKey cacheKey = new CompilerCacheKey(request, hashCode);
             return _compilationCache.GetOrAdd(cacheKey, _ => GetCompilation(projectItem));
         }
 

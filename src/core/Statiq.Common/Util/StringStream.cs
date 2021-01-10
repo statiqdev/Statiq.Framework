@@ -54,7 +54,7 @@ namespace Statiq.Common
 
         public override bool CanWrite => false;
 
-        public override long Length => throw new NotSupportedException();
+        public override long Length => _encoding.GetByteCount(String);
 
         public override long Position
         {

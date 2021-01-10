@@ -12,10 +12,10 @@ namespace Statiq.Razor
     internal class CompilerCacheKey : IEquatable<CompilerCacheKey>
     {
         private readonly RenderRequest _request;
-        private readonly byte[] _fileHash;
+        private readonly int _fileHash;
         private readonly int _hashCode;
 
-        public CompilerCacheKey(RenderRequest request, byte[] fileHash)
+        public CompilerCacheKey(RenderRequest request, int fileHash)
         {
             _request = request;
             _fileHash = fileHash;
@@ -24,10 +24,7 @@ namespace Statiq.Razor
             _hashCode = 17;
             _hashCode = (_hashCode * 31) + (_request.LayoutLocation?.GetHashCode() ?? 0);
             _hashCode = (_hashCode * 31) + (_request.ViewStartLocation?.GetHashCode() ?? 0);
-            foreach (byte b in _fileHash)
-            {
-                _hashCode = (_hashCode * 31) ^ b;
-            }
+            _hashCode = (_hashCode * 31) + fileHash;
         }
 
         public override int GetHashCode() => _hashCode;
@@ -42,7 +39,7 @@ namespace Statiq.Razor
             }
             return _request.LayoutLocation == other._request.LayoutLocation
                 && _request.ViewStartLocation == other._request.ViewStartLocation
-                && _fileHash.SequenceEqual(other._fileHash);
+                && _fileHash == other._fileHash;
         }
     }
 }

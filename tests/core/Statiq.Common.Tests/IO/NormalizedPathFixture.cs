@@ -86,7 +86,7 @@ namespace Statiq.Common.Tests.IO
                 path.FullPath.ShouldBe(string.Empty);
                 path.Segments.ShouldBeEmpty();
                 path.IsAbsolute.ShouldBeFalse();
-                path.IsEmpty.ShouldBeTrue();
+                path.IsNullOrEmpty.ShouldBeTrue();
             }
 
             [Test]
@@ -97,7 +97,7 @@ namespace Statiq.Common.Tests.IO
 
                 // Then
                 path.FullPath.ShouldBe(" ");
-                path.IsEmpty.ShouldBeFalse();
+                path.IsNullOrEmpty.ShouldBeFalse();
                 path.Segments.Length.ShouldBe(1);
                 path.Segments[0].ToString().ShouldBe(" ");
                 path.IsAbsolute.ShouldBeFalse();
@@ -135,7 +135,7 @@ namespace Statiq.Common.Tests.IO
 
                 // Then
                 path.FullPath.ShouldBe(" ");
-                path.IsEmpty.ShouldBeFalse();
+                path.IsNullOrEmpty.ShouldBeFalse();
             }
 
             [Test]
@@ -1132,16 +1132,30 @@ namespace Statiq.Common.Tests.IO
             [TestCase("assets/shaders/", "simple", "assets/shaders/simple")]
             [TestCase("/assets/shaders/", "simple", "/assets/shaders/simple")]
             [TestCase("assets", "/other/assets", "/other/assets")]
+            [TestCase("assets", "", "assets")]
+            [TestCase("", "other", "other")]
+            [TestCase("foo/assets", "", "foo/assets")]
+            [TestCase("", "foo/other", "foo/other")]
+            [TestCase("/foo/assets", "", "/foo/assets")]
+            [TestCase("", "/foo/other", "/foo/other")]
+            [TestCase("assets", "/", "/")]
+            [TestCase("/", "other", "/other")]
+            [TestCase("foo/assets", "/", "/")]
+            [TestCase("/", "foo/other", "/foo/other")]
+            [TestCase("/foo/assets", "/", "/")]
+            [TestCase("/", "/foo/other", "/foo/other")]
             public void ShouldCombinePaths(string first, string second, string expected)
             {
                 // Given
-                NormalizedPath path = new NormalizedPath(first);
+                NormalizedPath firstPath = new NormalizedPath(first);
+                NormalizedPath secondPath = new NormalizedPath(second);
 
                 // When
-                NormalizedPath result = path.Combine(new NormalizedPath(second));
+                NormalizedPath result = firstPath.Combine(secondPath);
 
                 // Then
-                Assert.AreEqual(expected, result.FullPath);
+                result.FullPath.ShouldBe(expected);
+                result.FullPath.ShouldBe(System.IO.Path.Combine(first, second).Replace("\\", "/"));
             }
 
             [Test]

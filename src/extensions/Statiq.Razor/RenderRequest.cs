@@ -10,8 +10,6 @@ namespace Statiq.Razor
     /// </summary>
     internal class RenderRequest
     {
-        public Stream Input { get; set; }
-
         public Stream Output { get; set; }
 
         public string RelativePath { get; set; }

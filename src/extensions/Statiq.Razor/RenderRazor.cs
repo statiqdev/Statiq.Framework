@@ -203,35 +203,31 @@ namespace Statiq.Razor
 
                 using (Stream contentStream = context.GetContentStream())
                 {
-                    using (Stream inputStream = input.GetContentStream())
+                    NormalizedPath layoutPath = _layoutPath is null ? NormalizedPath.Null : await _layoutPath.GetValueAsync(input, context);
+                    string layoutLocation = layoutPath.IsNull ? null : layoutPath.FullPath;
+
+                    // We need to set a non-null ViewStart location if an explicit layout is provided but an explicit ViewStart is not (using a null char which is not a valid file name on Windows or Linux)
+                    // otherwise the Razor engine will default to looking up the tree for a _ViewStart.cshtml that will take precedence over the explicit layout
+                    // Note that this means in this special case, anything else the ViewStart file is doing will be ignored - this therefore favors correctness of the layout over ViewStart logic
+                    NormalizedPath viewStartLocationPath = _viewStartPath is null ? null : await _viewStartPath.GetValueAsync(input, context);
+                    string viewStartLocation = viewStartLocationPath.IsNull
+                        ? (layoutLocation is object ? ViewStartPlaceholder + input.Source.FullPath + ViewStartPlaceholder : null)
+                        : viewStartLocationPath.FullPath;
+
+                    RenderRequest request = new RenderRequest
                     {
-                        NormalizedPath layoutPath = _layoutPath is null ? NormalizedPath.Null : await _layoutPath.GetValueAsync(input, context);
-                        string layoutLocation = layoutPath.IsNull ? null : layoutPath.FullPath;
+                        Output = contentStream,
+                        BaseType = _basePageType,
+                        Context = context,
+                        Document = input,
+                        LayoutLocation = layoutLocation,
+                        ViewStartLocation = viewStartLocation,
+                        RelativePath = GetRelativePath(input, context),
+                        Model = _model is null ? input : await _model.GetValueAsync(input, context),
+                        ViewData = await GetViewDataAsync(_viewData, input, context),
+                    };
 
-                        // We need to set a non-null ViewStart location if an explicit layout is provided but an explicit ViewStart is not (using a null char which is not a valid file name on Windows or Linux)
-                        // otherwise the Razor engine will default to looking up the tree for a _ViewStart.cshtml that will take precedence over the explicit layout
-                        // Note that this means in this special case, anything else the ViewStart file is doing will be ignored - this therefore favors correctness of the layout over ViewStart logic
-                        NormalizedPath viewStartLocationPath = _viewStartPath is null ? null : await _viewStartPath.GetValueAsync(input, context);
-                        string viewStartLocation = viewStartLocationPath.IsNull
-                            ? (layoutLocation is object ? ViewStartPlaceholder + input.Source.FullPath + ViewStartPlaceholder : null)
-                            : viewStartLocationPath.FullPath;
-
-                        RenderRequest request = new RenderRequest
-                        {
-                            Input = inputStream,
-                            Output = contentStream,
-                            BaseType = _basePageType,
-                            Context = context,
-                            Document = input,
-                            LayoutLocation = layoutLocation,
-                            ViewStartLocation = viewStartLocation,
-                            RelativePath = GetRelativePath(input, context),
-                            Model = _model is null ? input : await _model.GetValueAsync(input, context),
-                            ViewData = await GetViewDataAsync(_viewData, input, context),
-                        };
-
-                        await razorService.RenderAsync(request);
-                    }
+                    await razorService.RenderAsync(request);
 
                     return input.Clone(context.GetContentProvider(contentStream, MediaTypes.Html));
                 }

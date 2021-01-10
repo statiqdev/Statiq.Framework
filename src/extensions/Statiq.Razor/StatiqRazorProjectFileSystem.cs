@@ -41,11 +41,11 @@ namespace Statiq.Razor
             return new FileProviderRazorProjectItem(fileInfo, basePath: string.Empty, filePath: path, root: _hostingEnvironment.ContentRootPath, fileKind);
         }
 
-        public RazorProjectItem GetItem(string path, Stream stream)
+        public RazorProjectItem GetItem(string path, IDocument document)
         {
             FileProviderRazorProjectItem projectItem = (FileProviderRazorProjectItem)GetItem(path, fileKind: null);
             return new FileProviderRazorProjectItem(
-                new StreamFileInfo(projectItem.FileInfo, stream),
+                new DocumentFileInfo(projectItem.FileInfo, document),
                 projectItem.BasePath,
                 projectItem.FilePath,
                 _hostingEnvironment.ContentRootPath);

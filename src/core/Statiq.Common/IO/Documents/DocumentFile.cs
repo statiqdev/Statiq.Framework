@@ -46,32 +46,9 @@ namespace Statiq.Common
         public async Task<string> ReadAllTextAsync(CancellationToken cancellationToken = default) =>
             _document is null ? throw new FileNotFoundException() : await _document.GetContentStringAsync();
 
-        public long Length
-        {
-            get
-            {
-                if (_document is null)
-                {
-                    throw new FileNotFoundException();
-                }
-                using (Stream stream = _document.GetContentStream())
-                {
-                    if (stream.CanSeek)
-                    {
-                        return stream.Length;
-                    }
+        public long Length => _document?.ContentProvider.GetLength() ?? throw new FileNotFoundException();
 
-                    // If the stream isn't seekable the only way to get length is to copy it out and see how long it is
-                    using (MemoryStream buffer = IExecutionState.Current.MemoryStreamFactory.GetStream())
-                    {
-                        stream.CopyTo(buffer);
-                        return buffer.Length;
-                    }
-                }
-            }
-        }
-
-        public string MediaType => _document?.ContentProvider.MediaType;
+        public string MediaType => _document?.ContentProvider.MediaType ?? throw new FileNotFoundException();
 
         public DateTime LastWriteTime => throw new NotSupportedException();
 

@@ -32,6 +32,9 @@ namespace Statiq.Common
         public TextReader GetTextReader() => File.OpenText();
 
         /// <inheritdoc />
+        public long GetLength() => File.Length;
+
+        /// <inheritdoc />
         public string MediaType { get; }
 
         /// <inheritdoc />

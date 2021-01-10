@@ -48,28 +48,16 @@ namespace Statiq.Common
                 return new StringContent(stringStream.String, mediaType);
             }
 
-            // Special case if this is a memory stream
-            if (stream is MemoryStream memoryStream && memoryStream.TryGetBuffer(out ArraySegment<byte> segment))
+            // If the stream is seekable, we'll just wrap it
+            if (stream.CanSeek)
             {
-                return new MemoryContent(segment.Array, segment.Offset, segment.Count, mediaType);
+                return new StreamContent(stream, mediaType);
             }
 
             // Copy the stream to a buffer and use that for the content
-            if (stream.CanSeek)
-            {
-                stream.Position = 0;
-            }
             using (MemoryStream bufferStream = stream.CanSeek ? new MemoryStream((int)stream.Length) : executionContext.MemoryStreamFactory.GetStream())
             {
                 stream.CopyTo(bufferStream);
-
-                // First try getting a buffer segment
-                if (bufferStream.TryGetBuffer(out ArraySegment<byte> bufferSegment))
-                {
-                    return new MemoryContent(bufferSegment.Array, bufferSegment.Offset, bufferSegment.Count, mediaType);
-                }
-
-                // If that fails, copy it to an array
                 byte[] buffer = bufferStream.ToArray();
                 return new MemoryContent(buffer, mediaType);
             }

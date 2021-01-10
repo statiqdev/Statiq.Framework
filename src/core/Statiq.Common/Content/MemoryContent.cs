@@ -64,6 +64,9 @@ namespace Statiq.Common
         public TextReader GetTextReader() => _buffer is null ? TextReader.Null : new StreamReader(GetStream());
 
         /// <inheritdoc />
+        public long GetLength() => _buffer?.Length ?? 0;
+
+        /// <inheritdoc />
         public string MediaType { get; }
 
         /// <inheritdoc />

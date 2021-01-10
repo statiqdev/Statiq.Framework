@@ -95,7 +95,7 @@ namespace Statiq.Common
                 return DocumentList<TDocument>.Empty;
             }
 
-            return _documents.Where(x => !x.Item1.IsEmpty && path.IsSiblingOrSelf(x.Item1) && (includeSelf || !x.Item2.IdEquals(document))).Select(x => x.Item2).ToDocumentList();
+            return _documents.Where(x => !x.Item1.IsNullOrEmpty && path.IsSiblingOrSelf(x.Item1) && (includeSelf || !x.Item2.IdEquals(document))).Select(x => x.Item2).ToDocumentList();
         }
 
         public DocumentList<TDocument> GetDescendantsOf(TDocument document, bool includeSelf)
@@ -135,7 +135,7 @@ namespace Statiq.Common
                 {
                     ancestors.Add(ancestor.Item2);
                 }
-                if (path.IsEmpty)
+                if (path.IsNullOrEmpty)
                 {
                     break;
                 }

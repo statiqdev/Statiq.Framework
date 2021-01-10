@@ -37,15 +37,15 @@ namespace Statiq.Common
 
         private static readonly char[] InvalidPathChars = Path.GetInvalidPathChars();
 
-        private static readonly PathData NullData = new PathData(null, null, null, false);
+        private static readonly PathData NullData = new PathData(null, null, false);
 
-        private static readonly PathData EmptyData = new PathData(string.Empty, string.Empty.AsMemory(), Array.Empty<ReadOnlyMemory<char>>(), false);
+        private static readonly PathData EmptyData = new PathData(string.Empty, Array.Empty<ReadOnlyMemory<char>>(), false);
 
-        private static readonly PathData SlashData = new PathData(Slash, Slash.AsMemory(), Array.Empty<ReadOnlyMemory<char>>(), true);
+        private static readonly PathData SlashData = new PathData(Slash, Array.Empty<ReadOnlyMemory<char>>(), true);
 
-        private static readonly PathData DotData = new PathData(Dot, Dot.AsMemory(), new ReadOnlyMemory<char>[] { Dot.AsMemory() }, false);
+        private static readonly PathData DotData = new PathData(Dot, false);
 
-        private static readonly PathData DotDotData = new PathData(DotDot, DotDot.AsMemory(), new ReadOnlyMemory<char>[] { DotDot.AsMemory() }, false);
+        private static readonly PathData DotDotData = new PathData(DotDot, false);
 
         public static readonly NormalizedPath Null = new NormalizedPath(NullData);
 
@@ -61,33 +61,23 @@ namespace Statiq.Common
 
         private readonly struct PathData
         {
-            public PathData(string fullPath, in ReadOnlyMemory<char> memory, ReadOnlyMemory<char>[] segments, bool isAbsolute)
-                : this(new Lazy<string>(fullPath), memory, segments, isAbsolute)
+            public PathData(string fullPath, bool isAbsolute)
+                : this(fullPath, new ReadOnlyMemory<char>[] { fullPath.AsMemory() }, isAbsolute)
             {
             }
 
-            public PathData(ReadOnlyMemory<char> memory, ReadOnlyMemory<char>[] segments, bool isAbsolute)
-                : this(new Lazy<string>(() => memory.ToString(), LazyThreadSafetyMode.ExecutionAndPublication), memory, segments, isAbsolute)
+            public PathData(string fullPath, ReadOnlyMemory<char>[] segments, bool isAbsolute)
             {
-            }
-
-            public PathData(ReadOnlyMemory<char> memory, bool isAbsolute)
-                : this(new Lazy<string>(() => memory.ToString(), LazyThreadSafetyMode.ExecutionAndPublication), memory, new ReadOnlyMemory<char>[] { memory }, isAbsolute)
-            {
-            }
-
-            private PathData(Lazy<string> fullPath, ReadOnlyMemory<char> memory, ReadOnlyMemory<char>[] segments, bool isAbsolute)
-            {
-                FullPath = fullPath;
-                Memory = memory;
                 Segments = segments;
                 IsAbsolute = isAbsolute;
+
+                FullPath = fullPath;
 
                 // Cache the parent since it's expensive
                 Parent = new Lazy<NormalizedPath>(
                 () =>
                 {
-                    string directory = Path.GetDirectoryName(fullPath.Value);
+                    string directory = Path.GetDirectoryName(fullPath);
                     if (directory.IsNullOrWhiteSpace())
                     {
                         return isAbsolute ? Null : Empty;
@@ -97,9 +87,12 @@ namespace Statiq.Common
                 LazyThreadSafetyMode.ExecutionAndPublication);
             }
 
-            public readonly Lazy<string> FullPath { get; }
-
-            public readonly ReadOnlyMemory<char> Memory { get; }
+            /// <summary>
+            /// The full path as a string. Attempts were made at storing the raw ReadOnlyMemory version
+            /// of the full path and only converting to a string lazily, but every path ended up converting
+            /// to a string at some point so might as well get it over with and store it directly.
+            /// </summary>
+            public readonly string FullPath { get; }
 
             public readonly ReadOnlyMemory<char>[] Segments { get; }
 
@@ -206,7 +199,7 @@ namespace Statiq.Common
             // If the path contains no slashes, use it wholesale
             if (!memory.Span.Contains('/'))
             {
-                return new PathData(memory, isAbsolute);
+                return new PathData(memory.ToString(), isAbsolute);
             }
 
             // If the path is only one character, we can return special segments
@@ -221,7 +214,7 @@ namespace Statiq.Common
                     // Segments should be empty if the path is just a slash
                     return SlashData;
                 }
-                return new PathData(memory, isAbsolute);
+                return new PathData(memory.ToString(), isAbsolute);
             }
 
             // Special case if path is a windows drive
@@ -232,7 +225,7 @@ namespace Statiq.Common
                 && memory.Span[^2] == ':'
                 && memory.Span[^1] == '/')
             {
-                return new PathData(memory, new ReadOnlyMemory<char>[] { memory[0..^1] }, isAbsolute);
+                return new PathData(memory.ToString(), new ReadOnlyMemory<char>[] { memory[0..^1] }, isAbsolute);
             }
 
             // Collapse the path by crawling up ".." and removing "." and copying into a new span
@@ -330,7 +323,7 @@ namespace Statiq.Common
             {
                 // Windows path without trailing slash so add one (but not to the segments)
                 memory = memory.Append('/');
-                return new PathData(memory, new ReadOnlyMemory<char>[] { memory[0..^1] }, isAbsolute);
+                return new PathData(memory.ToString(), new ReadOnlyMemory<char>[] { memory[0..^1] }, isAbsolute);
             }
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows)
                 && memory.Length > 2
@@ -338,13 +331,13 @@ namespace Statiq.Common
                 && memory.Span[^2] == ':')
             {
                 // Windows path with trailing slash so remove from the segment
-                return new PathData(memory, new ReadOnlyMemory<char>[] { memory[0..^1] }, isAbsolute);
+                return new PathData(memory.ToString(), new ReadOnlyMemory<char>[] { memory[0..^1] }, isAbsolute);
             }
 
             // One last check to make sure this isn't a short path
             if (memory.Length == 0 || (memory.Length == 1 && memory.Span[0] == '/'))
             {
-                return new PathData(memory, new ReadOnlyMemory<char>[] { }, isAbsolute);
+                return new PathData(memory.ToString(), new ReadOnlyMemory<char>[] { }, isAbsolute);
             }
 
             // Get the segment count
@@ -387,16 +380,14 @@ namespace Statiq.Common
                 segments[index] = memory.Slice(memory.Length - length, length);
             }
 
-            return new PathData(memory, segments, isAbsolute);
+            return new PathData(memory.ToString(), segments, isAbsolute);
         }
 
         /// <summary>
-        /// Gets the full path.
+        /// Gets the full path as a string.
         /// </summary>
         /// <value>The full path.</value>
-        public string FullPath => _data.FullPath?.Value;
-
-        public ReadOnlyMemory<char> Memory => _data.Memory;
+        public string FullPath => _data.FullPath;
 
         /// <summary>
         /// Gets a value indicating whether this path is relative.
@@ -420,14 +411,9 @@ namespace Statiq.Common
         public bool IsNull => FullPath is null;
 
         /// <summary>
-        /// Indicates if this is an empty path.
-        /// </summary>
-        public bool IsEmpty => FullPath?.Length == 0;
-
-        /// <summary>
         /// Indicates if this is a null or empty path.
         /// </summary>
-        public bool IsNullOrEmpty => IsNull || IsEmpty;
+        public bool IsNullOrEmpty => IsNull || FullPath.Length == 0;
 
         /// <summary>
         /// Gets the segments making up the path. These are slices of the
@@ -547,7 +533,7 @@ namespace Statiq.Common
             path1.ThrowIfNull(nameof(path1));
             path2.ThrowIfNull(nameof(path2));
 
-            if (path1.IsEmpty && path2.IsEmpty)
+            if (path1.IsNullOrEmpty && path2.IsNullOrEmpty)
             {
                 return Empty;
             }
@@ -558,7 +544,17 @@ namespace Statiq.Common
                 return path2;
             }
 
-            return new NormalizedPath(Path.Combine(path1.FullPath, path2.FullPath));
+            // Return the other path if one of them is empty
+            if (path1.IsNullOrEmpty)
+            {
+                return path2;
+            }
+            if (path2.IsNullOrEmpty)
+            {
+                return path1;
+            }
+
+            return new NormalizedPath(string.Concat(path1.FullPath, Slash, path2.FullPath));
         }
 
         public static NormalizedPath Combine(in NormalizedPath path1, in NormalizedPath path2, in NormalizedPath path3) =>
@@ -756,7 +752,7 @@ namespace Statiq.Common
             {
                 return false;
             }
-            if (IsEmpty)
+            if (IsNullOrEmpty)
             {
                 return true;
             }
@@ -799,7 +795,7 @@ namespace Statiq.Common
                 {
                     return Empty;
                 }
-                return new NormalizedPath(new PathData(_data.Segments[^1], new ReadOnlyMemory<char>[] { _data.Segments[^1] }, false));
+                return new NormalizedPath(new PathData(_data.Segments[^1].ToString(), false));
             }
         }
 
@@ -834,7 +830,7 @@ namespace Statiq.Common
                     fileName = fileName.Slice(0, dot);
                 }
 
-                return new NormalizedPath(new PathData(fileName, new ReadOnlyMemory<char>[] { fileName }, false));
+                return new NormalizedPath(new PathData(fileName.ToString(), false));
             }
         }
 
@@ -881,7 +877,7 @@ namespace Statiq.Common
         public NormalizedPath ChangeExtension(string extension)
         {
             ThrowIfNull();
-            if (IsEmpty)
+            if (IsNullOrEmpty)
             {
                 return extension.StartsWith('.')
                     ? new NormalizedPath(extension)
