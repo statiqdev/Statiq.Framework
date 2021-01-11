@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel;
 using Microsoft.Extensions.Logging;
-using Spectre.Cli;
+using Spectre.Console.Cli;
 
 namespace Statiq.App
 {

@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using NetEscapades.Extensions.Logging.RollingFile;
-using Spectre.Cli;
+using Spectre.Console.Cli;
 using Statiq.Common;
 
 namespace Statiq.App

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using System.Threading.Tasks;
-using Spectre.Cli;
+using Spectre.Console.Cli;
 using Statiq.Common;
 using Statiq.Testing;
 

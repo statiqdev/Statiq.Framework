@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
-using Spectre.Cli;
+using Spectre.Console.Cli;
 
 namespace Statiq.App
 {
