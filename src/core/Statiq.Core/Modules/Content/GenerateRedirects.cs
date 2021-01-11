@@ -159,7 +159,7 @@ namespace Statiq.Core
                                 outputPath,
                                 context.GetContentProvider(
                                     $@"
-< !doctype html>
+<!doctype html>
 <html>    
   <head>      
     <title>Redirected</title>      
