@@ -10,7 +10,7 @@ using Microsoft.CodeAnalysis.CSharp.Scripting;
 using Microsoft.CodeAnalysis.Scripting;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Spectre.Cli;
+using Spectre.Console.Cli;
 using Statiq.Common;
 
 namespace Statiq.App

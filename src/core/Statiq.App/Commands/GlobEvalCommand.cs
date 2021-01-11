@@ -5,7 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.VisualBasic;
-using Spectre.Cli;
+using Spectre.Console.Cli;
 using Statiq.Common;
 using Statiq.Core;
 

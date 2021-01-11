@@ -6,7 +6,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Spectre.Cli;
+using Spectre.Console.Cli;
 using Statiq.Common;
 using Statiq.Core;
 

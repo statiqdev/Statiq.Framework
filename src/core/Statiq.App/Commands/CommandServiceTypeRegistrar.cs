@@ -1,7 +1,7 @@
 ﻿using System;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Spectre.Cli;
+using Spectre.Console.Cli;
 
 namespace Statiq.App
 {

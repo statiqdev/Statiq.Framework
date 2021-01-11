@@ -1,6 +1,6 @@
 ﻿using System;
-using Spectre.Cli;
-using Spectre.Cli.Unsafe;
+using Spectre.Console.Cli;
+using Spectre.Console.Cli.Unsafe;
 using Statiq.Common;
 
 namespace Statiq.App

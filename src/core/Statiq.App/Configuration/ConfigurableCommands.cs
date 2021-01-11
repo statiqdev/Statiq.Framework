@@ -6,11 +6,11 @@ namespace Statiq.App
 {
     public class ConfigurableCommands : IConfigurable
     {
-        internal ConfigurableCommands(Spectre.Cli.IConfigurator configurator)
+        internal ConfigurableCommands(Spectre.Console.Cli.IConfigurator configurator)
         {
             Configurator = configurator;
         }
 
-        public Spectre.Cli.IConfigurator Configurator { get; }
+        public Spectre.Console.Cli.IConfigurator Configurator { get; }
     }
 }
