@@ -1,5 +1,7 @@
 # 1.0.0-beta.33
 
+- Added the `GenerateJson` module back in (it got dropped a while ago when Statiq.Json was merged with Statiq.Core).
+
 # 1.0.0-beta.32
 
 - **Breaking change:** Refactored the `IExecutionContext.GetContentProviderAsync(string)` extension (and overloads) to be non-async and unified related extensions that get content providers.
