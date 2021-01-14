@@ -400,26 +400,5 @@ namespace Statiq.Common
 
             public CancellationTokenRegistration CancellationTokenRegistration { get; set; }
         }
-
-        /// <summary>
-        /// Always provides a wrapped <see cref="ILogger"/>.
-        /// </summary>
-        private class LoggerFactoryLoggerWrapper : ILoggerFactory
-        {
-            private readonly ILogger _logger;
-
-            public LoggerFactoryLoggerWrapper(ILogger logger)
-            {
-                _logger = logger;
-            }
-
-            public void Dispose()
-            {
-            }
-
-            public ILogger CreateLogger(string categoryName) => _logger;
-
-            public void AddProvider(ILoggerProvider provider) => throw new NotSupportedException();
-        }
     }
 }

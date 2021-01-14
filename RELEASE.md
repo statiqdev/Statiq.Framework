@@ -1,6 +1,7 @@
 # 1.0.0-beta.33
 
 - Added the `GenerateJson` module back in (it got dropped a while ago when Statiq.Json was merged with Statiq.Core).
+- Added a utility `LoggerFactoryLoggerWrapper` class that can wrap the context (or any other `ILogger`) and provide it as an `ILoggerFactory` that always logs to the underlying logger.
 
 # 1.0.0-beta.32
 
