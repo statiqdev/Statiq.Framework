@@ -10,8 +10,25 @@ namespace Statiq.Common
         public static bool StartsWith(this in ReadOnlyMemory<char> item, in ReadOnlyMemory<char> value) =>
             value.Length > item.Length ? false : item.Slice(0, value.Length).Span.SequenceEqual(value.Span);
 
-        public static bool StartsWith(this IEnumerable<ReadOnlyMemory<char>> items, IEnumerable<ReadOnlyMemory<char>> values) =>
-            items.StartsWith(values, new MemoryStringEqualityComparer());
+        public static bool StartsWith(this IEnumerable<ReadOnlyMemory<char>> items, IEnumerable<ReadOnlyMemory<char>> values)
+        {
+            IEnumerator<ReadOnlyMemory<char>> valueEnumerator = values.GetEnumerator();
+            foreach (ReadOnlyMemory<char> item in items)
+            {
+                if (valueEnumerator.MoveNext())
+                {
+                    if (!item.SequenceEqual(valueEnumerator.Current))
+                    {
+                        return false;
+                    }
+                }
+                else
+                {
+                    return true;
+                }
+            }
+            return !valueEnumerator.MoveNext();
+        }
 
         public static bool SequenceEqual(this in ReadOnlyMemory<char> item, in ReadOnlyMemory<char> value) => item.Span.SequenceEqual(value.Span);
 

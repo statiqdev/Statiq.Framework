@@ -2,6 +2,7 @@
 
 - Added the `GenerateJson` module back in (it got dropped a while ago when Statiq.Json was merged with Statiq.Core).
 - Added a utility `LoggerFactoryLoggerWrapper` class that can wrap the context (or any other `ILogger`) and provide it as an `ILoggerFactory` that always logs to the underlying logger.
+- Fixed a bug with the generated doctype element in redirects (#160, #161, thanks @gep13).
 
 # 1.0.0-beta.32
 
