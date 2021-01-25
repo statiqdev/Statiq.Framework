@@ -127,6 +127,20 @@ namespace Statiq.Common.Tests.IO
             }
 
             [Test]
+            public void FileGetsVirtualParent()
+            {
+                // Given
+                VirtualInputDirectory directory = GetVirtualInputDirectory("c");
+
+                // When
+                IFile file = directory.GetFile("baz.txt");
+
+                // Then
+                IDirectory parent = file.Directory;
+                parent.GetFiles(SearchOption.TopDirectoryOnly).Select(x => x.Path.FullPath).ShouldBe(new[] { "/a/b/c/foo.txt", "/foo/c/baz.txt" }, true);
+            }
+
+            [Test]
             public void ThrowsForNullPath()
             {
                 // Given

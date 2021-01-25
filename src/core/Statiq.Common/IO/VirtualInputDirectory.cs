@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Statiq.Common
@@ -72,12 +73,12 @@ namespace Statiq.Common
         public IEnumerable<IFile> GetFiles(SearchOption searchOption = SearchOption.TopDirectoryOnly)
         {
             // Get all the files for each input directory, replacing earlier ones with later ones
-            Dictionary<NormalizedPath, IFile> files = new Dictionary<NormalizedPath, IFile>();
+            Dictionary<NormalizedPath, VirtualInputFile> files = new Dictionary<NormalizedPath, VirtualInputFile>();
             foreach (IDirectory directory in GetExistingDirectories())
             {
                 foreach (IFile file in directory.GetFiles(searchOption))
                 {
-                    files[directory.Path.GetRelativePath(file.Path)] = file;
+                    files[directory.Path.GetRelativePath(file.Path)] = new VirtualInputFile(file, this);
                 }
             }
             return files.Values;
@@ -106,7 +107,7 @@ namespace Statiq.Common
                 throw new ArgumentException("Path must be relative", nameof(path));
             }
 
-            return _fileSystem.GetInputFile(Path.Combine(path));
+            return new VirtualInputFile(_fileSystem.GetInputFile(Path.Combine(path)), this);
         }
 
         /// <summary>
