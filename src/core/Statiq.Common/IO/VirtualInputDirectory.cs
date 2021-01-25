@@ -120,20 +120,10 @@ namespace Statiq.Common
         /// </summary>
         // Internal for testing
         internal IEnumerable<IDirectory> GetExistingInputDirectories() =>
-            _fileSystem.InputPaths
-                .Select(x =>
-                {
-                    // Is this input path mapped?
-                    if (_fileSystem.InputPathMappings.TryGetValue(x, out NormalizedPath mappedInputPath))
-                    {
-                        return mappedInputPath.ContainsDescendantOrSelf(Path)
-                            ? _fileSystem.GetRootDirectory(x.Combine(mappedInputPath.GetRelativePath(Path)))
-                            : null;
-                    }
-
-                    return _fileSystem.GetRootDirectory(x.Combine(Path));
-                })
-                .Where(x => x is object && x.Exists);
+            _fileSystem
+                .GetUnmappedInputPaths(Path)
+                .Select(x => _fileSystem.GetDirectory(x))
+                .Where(x => x.Exists);
 
         public override string ToString() => Path.ToString();
 

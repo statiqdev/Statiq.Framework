@@ -12,6 +12,37 @@ namespace Statiq.Common
     public static class IReadOnlyFileSystemExtensions
     {
         /// <summary>
+        /// Given a relative input path this "unmaps" it for each input path.
+        /// </summary>
+        /// <param name="fileSystem">The file system.</param>
+        /// <param name="path">The path to "unmap".</param>
+        /// <returns>The "unmapped" input paths.</returns>
+        public static IEnumerable<NormalizedPath> GetUnmappedInputPaths(this IReadOnlyFileSystem fileSystem, NormalizedPath path)
+        {
+            fileSystem.ThrowIfNull(nameof(fileSystem));
+            path.ThrowIfNull(nameof(path));
+            if (!path.IsRelative)
+            {
+                throw new ArgumentException("The input path to unmap must be relative", nameof(path));
+            }
+
+            return fileSystem.InputPaths
+                .Select(x =>
+                {
+                    // Is this input path mapped?
+                    if (fileSystem.InputPathMappings.TryGetValue(x, out NormalizedPath mappedInputPath))
+                    {
+                        return mappedInputPath.ContainsDescendantOrSelf(path)
+                            ? fileSystem.RootPath.Combine(x).Combine(mappedInputPath.GetRelativePath(path))
+                            : null;
+                    }
+
+                    return fileSystem.RootPath.Combine(x).Combine(path);
+                })
+                .Where(x => !x.IsNull);
+        }
+
+        /// <summary>
         /// Gets a file representing an input.
         /// </summary>
         /// <param name="fileSystem">The file system.</param>
@@ -30,9 +61,9 @@ namespace Statiq.Common
             if (path.IsRelative)
             {
                 IFile notFound = null;
-                foreach (NormalizedPath inputPath in fileSystem.InputPaths.Reverse())
+                foreach (NormalizedPath inputPath in fileSystem.GetUnmappedInputPaths(path).Reverse())
                 {
-                    IFile file = fileSystem.GetFile(fileSystem.RootPath.Combine(inputPath).Combine(path));
+                    IFile file = fileSystem.GetFile(inputPath);
                     if (notFound is null)
                     {
                         notFound = file;
@@ -117,12 +148,12 @@ namespace Statiq.Common
             }
 
             // Then try to find a directory
-            IEnumerable<(NormalizedPath x, IDirectory)> rootDirectories =
-                fileSystem.InputPaths
-                    .Reverse()
-                    .Select(x => (x, fileSystem.GetRootDirectory(x.Combine(path))));
-            IEnumerable<(NormalizedPath x, IDirectory)> existingRootDirectories = rootDirectories.Where(x => x.Item2.Exists);
-            return existingRootDirectories.Select(x => fileSystem.RootPath.Combine(x.Item1)).FirstOrDefault();
+            return fileSystem.GetUnmappedInputPaths(path)
+                .Reverse()
+                .Select(x => (x, fileSystem.GetDirectory(x)))
+                .Where(x => x.Item2.Exists)
+                .Select(x => x.Item1.Parent)
+                .FirstOrDefault();
         }
 
         internal static NormalizedPath GetContainingInputPathForAbsolutePath(this IReadOnlyFileSystem fileSystem, NormalizedPath path)

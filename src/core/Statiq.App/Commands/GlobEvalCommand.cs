@@ -42,11 +42,13 @@ namespace Statiq.App
 
             public NormalizedPath RootPath { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
             public PathCollection InputPaths => throw new NotImplementedException();
+            public IDictionary<NormalizedPath, NormalizedPath> InputPathMappings => throw new NotImplementedException();
             public PathCollection ExcludedPaths => throw new NotImplementedException();
             public NormalizedPath OutputPath { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
             public NormalizedPath TempPath { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
             NormalizedPath IReadOnlyFileSystem.RootPath => throw new NotImplementedException();
             IReadOnlyList<NormalizedPath> IReadOnlyFileSystem.InputPaths => throw new NotImplementedException();
+            IReadOnlyDictionary<NormalizedPath, NormalizedPath> IReadOnlyFileSystem.InputPathMappings => throw new NotImplementedException();
             IReadOnlyList<NormalizedPath> IReadOnlyFileSystem.ExcludedPaths => throw new NotImplementedException();
             NormalizedPath IReadOnlyFileSystem.OutputPath => throw new NotImplementedException();
             NormalizedPath IReadOnlyFileSystem.TempPath => throw new NotImplementedException();

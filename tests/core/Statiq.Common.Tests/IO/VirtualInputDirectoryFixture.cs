@@ -163,6 +163,30 @@ namespace Statiq.Common.Tests.IO
                 Assert.AreEqual(expectedExists, file.Exists);
             }
 
+            [TestCase(".", "x/y/z/foo.txt", "/root/a/x/y/z/foo.txt", true)]
+            [TestCase(".", "x/y/z/buzz.txt", "/root/d/e/y/z/buzz.txt", true)]
+            [TestCase("x", "y/z/foo.txt", "/root/a/x/y/z/foo.txt", true)]
+            [TestCase("x", "y/z/buzz.txt", "/root/d/e/y/z/buzz.txt", true)]
+            [TestCase("x", "qwerty.txt", "/root/d/e/qwerty.txt", false)]
+            [TestCase("x/y", "z/foo.txt", "/root/a/x/y/z/foo.txt", true)]
+            [TestCase("x/y", "z/buzz.txt", "/root/d/e/y/z/buzz.txt", true)]
+            [TestCase("x/y", "qwerty.txt", "/root/d/e/y/qwerty.txt", false)]
+            [TestCase("x/y/z", "foo.txt", "/root/a/x/y/z/foo.txt", true)]
+            [TestCase("x/y/z", "buzz.txt", "/root/d/e/y/z/buzz.txt", true)]
+            [TestCase("x/y/z", "qwerty.txt", "/root/d/e/y/z/qwerty.txt", false)]
+            public void GetsMappedInputFile(string virtualPath, string filePath, string expectedPath, bool expectedExists)
+            {
+                // Given
+                VirtualInputDirectory directory = GetMappedVirtualInputDirectory(virtualPath);
+
+                // When
+                IFile file = directory.GetFile(filePath);
+
+                // Then
+                Assert.AreEqual(expectedPath, file.Path.FullPath);
+                Assert.AreEqual(expectedExists, file.Exists);
+            }
+
             [Test]
             public void GetsInputFileAboveInputDirectory()
             {
@@ -178,6 +202,19 @@ namespace Statiq.Common.Tests.IO
 
                 // Then
                 Assert.AreEqual("/a/b/c/foo.txt", file.Path.FullPath);
+            }
+
+            [Test]
+            public void GetsMappedInputFileAboveInputDirectory()
+            {
+                // Given
+                VirtualInputDirectory directory = GetMappedVirtualInputDirectory("x/y/q/w");
+
+                // When
+                IFile file = directory.GetFile("../../z/fizz.txt");
+
+                // Then
+                Assert.AreEqual("/root/c/z/fizz.txt", file.Path.FullPath);
             }
 
             [Test]
