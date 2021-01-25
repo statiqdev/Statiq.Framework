@@ -13,7 +13,7 @@ namespace Statiq.Common
         public DelegateStringItemStream(IEnumerable<TItem> items, Func<TItem, string> getString)
             : base(items)
         {
-            _getString = getString ?? throw new ArgumentNullException(nameof(getString));
+            _getString = getString.ThrowIfNull(nameof(getString));
         }
 
         protected override string GetItemString(TItem item) => _getString(item);

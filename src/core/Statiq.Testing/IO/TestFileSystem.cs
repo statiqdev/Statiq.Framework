@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System.Collections.Concurrent;
+using System.Collections.Generic;
 using Statiq.Common;
 
 namespace Statiq.Testing
@@ -41,6 +42,10 @@ namespace Statiq.Testing
         public PathCollection InputPaths { get; set; } = new PathCollection(new NormalizedPath("input"));
 
         IReadOnlyList<NormalizedPath> IReadOnlyFileSystem.InputPaths => InputPaths;
+
+        public IDictionary<NormalizedPath, NormalizedPath> InputPathMappings { get; set; } = new ConcurrentDictionary<NormalizedPath, NormalizedPath>();
+
+        IReadOnlyDictionary<NormalizedPath, NormalizedPath> IReadOnlyFileSystem.InputPathMappings => (IReadOnlyDictionary<NormalizedPath, NormalizedPath>)InputPathMappings;
 
         /// <inheritdoc />
         public PathCollection ExcludedPaths { get; set; } = new PathCollection();

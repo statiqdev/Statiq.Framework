@@ -13,7 +13,7 @@ namespace Statiq.Common
         public DelegateItemStream(IEnumerable<TItem> items, Func<TItem, ReadOnlyMemory<byte>> getBytes)
             : base(items)
         {
-            _getBytes = getBytes ?? throw new ArgumentNullException(nameof(getBytes));
+            _getBytes = getBytes.ThrowIfNull(nameof(getBytes));
         }
 
         protected override ReadOnlySpan<byte> GetItemBytes(TItem item) => _getBytes(item).Span;

@@ -24,7 +24,7 @@ namespace Statiq.Common
         protected StringItemStream(IEnumerable<TItem> items, Encoding encoding)
             : base(items)
         {
-            _encoding = encoding ?? throw new ArgumentNullException(nameof(encoding));
+            _encoding = encoding.ThrowIfNull(nameof(encoding));
             _encoder = _encoding.GetEncoder();
         }
 

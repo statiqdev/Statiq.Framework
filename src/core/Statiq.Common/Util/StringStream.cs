@@ -33,7 +33,7 @@ namespace Statiq.Common
         {
             String = str;
             _pendingString = String?.AsMemory() ?? default;
-            _encoding = encoding ?? throw new ArgumentNullException(nameof(encoding));
+            _encoding = encoding.ThrowIfNull(nameof(encoding));
             _bufferCharCount = bufferCharCount;
             _outputBuffer = ArrayPool<byte>.Shared.Rent(_encoding.GetMaxByteCount(_bufferCharCount));
         }

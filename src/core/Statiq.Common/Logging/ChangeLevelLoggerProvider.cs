@@ -13,7 +13,7 @@ namespace Statiq.Common
         public ChangeLevelLoggerProvider(ILoggerProvider provider, Func<LogLevel, LogLevel> changeLevel)
             : base(provider)
         {
-            _changeLevel = changeLevel ?? throw new ArgumentNullException(nameof(changeLevel));
+            _changeLevel = changeLevel.ThrowIfNull(nameof(changeLevel));
         }
 
         protected override void Log<TState>(

@@ -19,7 +19,7 @@ namespace Statiq.Common
 
         public DelegateContent(Func<Stream> getStream, string mediaType)
         {
-            _getStream = getStream ?? throw new ArgumentNullException(nameof(getStream));
+            _getStream = getStream.ThrowIfNull(nameof(getStream));
         }
 
         /// <inheritdoc />

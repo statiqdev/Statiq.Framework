@@ -65,6 +65,42 @@ namespace Statiq.Common.Tests.IO
                 // Then
                 CollectionAssert.AreEquivalent(expectedPaths, directories.Select(x => x.Path.FullPath));
             }
+
+            [TestCase("x", SearchOption.TopDirectoryOnly, new[] { "x/y" })]
+            [TestCase("x", SearchOption.AllDirectories, new[] { "x/y", "x/y/z" })]
+            [TestCase("x/y", SearchOption.TopDirectoryOnly, new[] { "x/y/z" })]
+            [TestCase("x/y", SearchOption.AllDirectories, new[] { "x/y/z" })]
+            [TestCase("x/y/z", SearchOption.TopDirectoryOnly, new string[] { })]
+            [TestCase("x/y/z", SearchOption.AllDirectories, new string[] { })]
+            public void GetsMappedDirectories(string virtualPath, SearchOption searchOption, string[] expectedPaths)
+            {
+                // Given
+                VirtualInputDirectory directory = GetMappedVirtualInputDirectory(virtualPath);
+
+                // When
+                IEnumerable<IDirectory> directories = directory.GetDirectories(searchOption);
+
+                // Then
+                directories.Select(x => x.Path.FullPath).ShouldBe(expectedPaths, true);
+            }
+        }
+
+        public class GetExistingInputDirectoriesTests : VirtualInputDirectoryFixture
+        {
+            [TestCase("x", new[] { "/root/a/x", "/root/b/x", "/root/d/e" })]
+            [TestCase("x/y", new[] { "/root/a/x/y", "/root/c", "/root/d/e/y" })]
+            [TestCase("x/y/z", new[] { "/root/a/x/y/z", "/root/c/z", "/root/d/e/y/z" })]
+            public void GetsMappedDirectories(string virtualPath, string[] expectedPaths)
+            {
+                // Given
+                VirtualInputDirectory directory = GetMappedVirtualInputDirectory(virtualPath);
+
+                // When
+                IEnumerable<IDirectory> directories = directory.GetExistingInputDirectories();
+
+                // Then
+                directories.Select(x => x.Path.FullPath).ShouldBe(expectedPaths, true);
+            }
         }
 
         public class GetFilesTests : VirtualInputDirectoryFixture
@@ -83,6 +119,24 @@ namespace Statiq.Common.Tests.IO
 
                 // Then
                 CollectionAssert.AreEquivalent(expectedPaths, files.Select(x => x.Path.FullPath));
+            }
+
+            [TestCase("x", SearchOption.TopDirectoryOnly, new[] { "/root/b/x/bar.txt" })]
+            [TestCase("x", SearchOption.AllDirectories, new[] { "/root/a/x/y/z/foo.txt", "/root/b/x/bar.txt", "/root/d/e/y/z/buzz.txt" })]
+            [TestCase("x/y", SearchOption.TopDirectoryOnly, new string[] { })]
+            [TestCase("x/y", SearchOption.AllDirectories, new[] { "/root/a/x/y/z/foo.txt", "/root/c/z/fizz.txt", "/root/d/e/y/z/buzz.txt" })]
+            [TestCase("x/y/z", SearchOption.TopDirectoryOnly, new[] { "/root/a/x/y/z/foo.txt", "/root/c/z/fizz.txt", "/root/d/e/y/z/buzz.txt" })]
+            [TestCase("x/y/z", SearchOption.AllDirectories, new[] { "/root/a/x/y/z/foo.txt", "/root/c/z/fizz.txt", "/root/d/e/y/z/buzz.txt" })]
+            public void GetsMappedFiles(string virtualPath, SearchOption searchOption, string[] expectedPaths)
+            {
+                // Given
+                VirtualInputDirectory directory = GetMappedVirtualInputDirectory(virtualPath);
+
+                // When
+                IEnumerable<IFile> files = directory.GetFiles(searchOption);
+
+                // Then
+                files.Select(x => x.Path.FullPath).ShouldBe(expectedPaths, true);
             }
         }
 
@@ -333,6 +387,25 @@ namespace Statiq.Common.Tests.IO
             fileProvider.AddDirectory("/foo/a/b");
 
             return fileProvider;
+        }
+
+        private VirtualInputDirectory GetMappedVirtualInputDirectory(string path)
+        {
+            TestFileSystem fileSystem = new TestFileSystem(new TestFileProvider
+            {
+                { "/root/a/x/y/z/foo.txt" },
+                { "/root/b/x/bar.txt" },
+                { "/root/c/z/fizz.txt" },
+                { "/root/d/e/y/z/buzz.txt" }
+            });
+            fileSystem.RootPath = "/root";
+            fileSystem.InputPaths.Add("a");
+            fileSystem.InputPaths.Add("b");
+            fileSystem.InputPaths.Add("c");
+            fileSystem.InputPaths.Add("d/e");
+            fileSystem.InputPathMappings.Add("c", "x/y");
+            fileSystem.InputPathMappings.Add("d/e", "x");
+            return new VirtualInputDirectory(fileSystem, path);
         }
     }
 }

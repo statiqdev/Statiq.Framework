@@ -421,10 +421,10 @@ namespace Statiq.Common
         }
 
         /// <summary>
-        /// Gets a directory representing an input.
+        /// Gets the root virtual input directory.
         /// </summary>
         /// <param name="fileSystem">The file system.</param>
-        /// <returns>An input directory.</returns>
+        /// <returns>The root virtual input.</returns>
         public static IDirectory GetInputDirectory(this IReadOnlyFileSystem fileSystem) =>
             fileSystem.GetInputDirectory(NormalizedPath.Null);
 
@@ -433,14 +433,11 @@ namespace Statiq.Common
         /// </summary>
         /// <param name="fileSystem">The file system.</param>
         /// <param name="path">
-        /// The path of the input directory. If this is an absolute path,
-        /// then a directory representing the specified path is returned.
-        /// If it's a relative path, then the returned directory will
-        /// be a virtual directory that aggregates all input
-        /// paths. If this is <c>null</c> then a virtual
-        /// directory aggregating all input paths is returned.
+        /// The relative path of the virtual input directory or a null path
+        /// for the root virtual input directory. This method will throw
+        /// for an absolute path.
         /// </param>
-        /// <returns>An input directory.</returns>
+        /// <returns>A virtual input directory.</returns>
         public static IDirectory GetInputDirectory(this IReadOnlyFileSystem fileSystem, in NormalizedPath path)
         {
             fileSystem.ThrowIfNull(nameof(fileSystem));

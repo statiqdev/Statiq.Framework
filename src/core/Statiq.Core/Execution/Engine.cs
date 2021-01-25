@@ -1068,7 +1068,7 @@ namespace Statiq.Core
         /// <param name="name">A name for logging purposes.</param>
         public void CleanDirectory(IDirectory directory, string name = null)
         {
-            _ = directory ?? throw new ArgumentNullException(nameof(directory));
+            _ = directory.ThrowIfNull(nameof(directory));
 
             name = name is null ? string.Empty : (name + " ");
             try

@@ -43,6 +43,14 @@ namespace Statiq.Common
         IReadOnlyList<NormalizedPath> InputPaths { get; }
 
         /// <summary>
+        /// Maps input paths to their location in the virtual file system.
+        /// The key should be a <see cref="NormalizedPath"/> that exists in
+        /// <see cref="InputPaths"/>. The value should be a relative path
+        /// where the input path should be mapped within the virtual folder heirarchy.
+        /// </summary>
+        IReadOnlyDictionary<NormalizedPath, NormalizedPath> InputPathMappings { get; }
+
+        /// <summary>
         /// Gets the excluded paths collection which can be used
         /// to excluded specific paths from the input paths. Any
         /// <see cref="IDirectory"/> or <see cref="IFile"/> within

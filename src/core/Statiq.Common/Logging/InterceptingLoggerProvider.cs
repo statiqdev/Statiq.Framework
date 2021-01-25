@@ -12,7 +12,7 @@ namespace Statiq.Common
 
         public InterceptingLoggerProvider(ILoggerProvider provider)
         {
-            _provider = provider ?? throw new ArgumentNullException(nameof(provider));
+            _provider = provider.ThrowIfNull(nameof(provider));
         }
 
         public ILogger CreateLogger(string categoryName) =>
@@ -36,8 +36,8 @@ namespace Statiq.Common
 
             public InterceptingLogger(InterceptingLoggerProvider provider, ILogger logger)
             {
-                _provider = provider ?? throw new ArgumentNullException(nameof(provider));
-                _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+                _provider = provider.ThrowIfNull(nameof(provider));
+                _logger = logger.ThrowIfNull(nameof(logger));
             }
 
             public IDisposable BeginScope<TState>(TState state) => _logger.BeginScope(state);

@@ -1,4 +1,6 @@
-﻿namespace Statiq.Common
+﻿using System.Collections.Generic;
+
+namespace Statiq.Common
 {
     /// <summary>
     /// A file system that can be configured.
@@ -29,6 +31,12 @@
         /// The input paths.
         /// </value>
         new PathCollection InputPaths { get; }
+
+        /// <summary>
+        /// Gets the input path mapping dictionary which can be used
+        /// to add or remove input path mappings.
+        /// </summary>
+        new IDictionary<NormalizedPath, NormalizedPath> InputPathMappings { get; }
 
         /// <summary>
         /// Gets the excluded paths collection which can be used

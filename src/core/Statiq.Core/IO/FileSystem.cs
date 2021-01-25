@@ -1,5 +1,8 @@
 ﻿using System;
+using System.Collections;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using ConcurrentCollections;
 using Statiq.Common;
@@ -45,6 +48,10 @@ namespace Statiq.Core
         public PathCollection InputPaths { get; } = new PathCollection("input");
 
         IReadOnlyList<NormalizedPath> IReadOnlyFileSystem.InputPaths => InputPaths;
+
+        public IDictionary<NormalizedPath, NormalizedPath> InputPathMappings { get; set; } = new InputPathMappingDictionary();
+
+        IReadOnlyDictionary<NormalizedPath, NormalizedPath> IReadOnlyFileSystem.InputPathMappings => (IReadOnlyDictionary<NormalizedPath, NormalizedPath>)InputPathMappings;
 
         public PathCollection ExcludedPaths { get; } = new PathCollection();
 

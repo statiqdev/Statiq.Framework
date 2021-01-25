@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using NUnit.Framework;
+using Shouldly;
 using Statiq.Testing;
 
 namespace Statiq.Core.Tests.IO
@@ -80,6 +81,42 @@ namespace Statiq.Core.Tests.IO
 
                 // Then
                 Assert.AreEqual("/foo/bar", fileSystem.OutputPath.FullPath);
+            }
+        }
+
+        public class InputPathMappingTests : FileSystemFixture
+        {
+            [Test]
+            public void CanAddInputPathMapping()
+            {
+                // Given
+                FileSystem fileSystem = new FileSystem();
+
+                // When
+                fileSystem.InputPathMappings.Add("foo", "bar");
+
+                // Then
+                fileSystem.InputPathMappings.ShouldContainKeyAndValue("foo", "bar");
+            }
+
+            [Test]
+            public void AddingAbsoluteMappingThrows()
+            {
+                // Given
+                FileSystem fileSystem = new FileSystem();
+
+                // When, Then
+                Should.Throw<ArgumentException>(() => fileSystem.InputPathMappings.Add("foo", "/bar"));
+            }
+
+            [Test]
+            public void AddingAbsoluteMappingViaIndexerThrows()
+            {
+                // Given
+                FileSystem fileSystem = new FileSystem();
+
+                // When, Then
+                Should.Throw<ArgumentException>(() => fileSystem.InputPathMappings["foo"] = "/bar");
             }
         }
     }

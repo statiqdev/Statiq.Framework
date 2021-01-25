@@ -15,7 +15,7 @@ namespace Statiq.Common
         public SignalingStream(Stream stream, EventWaitHandle waitHandle)
             : base(stream)
         {
-            _waitHandle = waitHandle ?? throw new ArgumentNullException(nameof(waitHandle));
+            _waitHandle = waitHandle.ThrowIfNull(nameof(waitHandle));
         }
 
         protected override void Dispose(bool disposing)

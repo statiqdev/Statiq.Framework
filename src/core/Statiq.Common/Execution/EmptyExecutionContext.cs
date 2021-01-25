@@ -13,7 +13,7 @@ namespace Statiq.Common
     {
         public EmptyExecutionContext(IExecutionState executionState)
         {
-            ExecutionState = executionState ?? throw new ArgumentNullException(nameof(executionState));
+            ExecutionState = executionState.ThrowIfNull(nameof(executionState));
         }
 
         public IExecutionState ExecutionState { get; }
