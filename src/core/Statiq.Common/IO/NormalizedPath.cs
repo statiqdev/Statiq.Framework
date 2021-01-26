@@ -718,7 +718,7 @@ namespace Statiq.Common
         /// </summary>
         /// <param name="path">The path to check.</param>
         /// <returns><c>true</c> if the path contains this path as a child, <c>false</c> otherwise.</returns>
-        public bool ContainsChild(in NormalizedPath path) => Equals(path.Parent) && !Equals(path);
+        public bool ContainsChild(in NormalizedPath path) => (Equals(path.Parent) && !Equals(path)) || Equals(Current);
 
         /// <summary>
         /// Checks if this path is the specified path or if this path contains the specified path as a direct child.
@@ -732,7 +732,7 @@ namespace Statiq.Common
         /// </summary>
         /// <param name="path">The path to check.</param>
         /// <returns><c>true</c> if this path is a sibling of the specified path, <c>false</c> otherwise.</returns>
-        public bool IsSibling(in NormalizedPath path) => !Equals(path) && Parent.ContainsChild(path);
+        public bool IsSibling(in NormalizedPath path) => (!Equals(path) && Parent.ContainsChild(path)) || Equals(Current);
 
         /// <summary>
         /// Checks if this path is the specified path or if this path is a sibling of the specified path.
@@ -752,7 +752,7 @@ namespace Statiq.Common
             {
                 return false;
             }
-            if (IsNullOrEmpty)
+            if (IsNullOrEmpty || Equals(Current))
             {
                 return true;
             }

@@ -66,12 +66,18 @@ namespace Statiq.Common.Tests.IO
                 CollectionAssert.AreEquivalent(expectedPaths, directories.Select(x => x.Path.FullPath));
             }
 
+            [TestCase("", SearchOption.TopDirectoryOnly, new[] { "x", "i" })]
+            [TestCase("", SearchOption.AllDirectories, new[] { "x", "x/y", "x/y/z", "i", "i/h" })]
+            [TestCase(".", SearchOption.TopDirectoryOnly, new[] { "x", "i" })]
+            [TestCase(".", SearchOption.AllDirectories, new[] { "x", "x/y", "x/y/z", "i", "i/h" })]
             [TestCase("x", SearchOption.TopDirectoryOnly, new[] { "x/y" })]
             [TestCase("x", SearchOption.AllDirectories, new[] { "x/y", "x/y/z" })]
             [TestCase("x/y", SearchOption.TopDirectoryOnly, new[] { "x/y/z" })]
             [TestCase("x/y", SearchOption.AllDirectories, new[] { "x/y/z" })]
             [TestCase("x/y/z", SearchOption.TopDirectoryOnly, new string[] { })]
             [TestCase("x/y/z", SearchOption.AllDirectories, new string[] { })]
+            [TestCase("q", SearchOption.TopDirectoryOnly, new string[] { })]
+            [TestCase("q", SearchOption.AllDirectories, new string[] { })]
             public void GetsMappedDirectories(string virtualPath, SearchOption searchOption, string[] expectedPaths)
             {
                 // Given
@@ -87,7 +93,9 @@ namespace Statiq.Common.Tests.IO
 
         public class GetExistingInputDirectoriesTests : VirtualInputDirectoryFixture
         {
-            [TestCase("x", new[] { "/root/a/x", "/root/b/x", "/root/d/e" })]
+            [TestCase("", new[] { "/root/a", "/root/b", "x", "i" })]
+            [TestCase(".", new[] { "/root/a", "/root/b", "x", "i" })]
+            [TestCase("x", new[] { "/root/a/x", "/root/b/x", "/root/d/e", "x/y" })] // Includes a virtual x/y directory
             [TestCase("x/y", new[] { "/root/a/x/y", "/root/c", "/root/d/e/y" })]
             [TestCase("x/y/z", new[] { "/root/a/x/y/z", "/root/c/z", "/root/d/e/y/z" })]
             public void GetsMappedDirectories(string virtualPath, string[] expectedPaths)
@@ -105,10 +113,10 @@ namespace Statiq.Common.Tests.IO
 
         public class GetFilesTests : VirtualInputDirectoryFixture
         {
-            [TestCase(".", SearchOption.AllDirectories, new[] { "/a/b/c/foo.txt", "/a/b/c/1/2.txt", "/a/b/d/baz.txt", "/foo/baz.txt", "/foo/c/baz.txt" })]
+            [TestCase(".", SearchOption.AllDirectories, new[] { "/a/b/c/foo.txt", "/a/b/c/baz.txt", "/a/b/c/1/2.txt", "/a/b/d/baz.txt", "/foo/baz.txt", "/foo/c/baz.txt" })]
             [TestCase(".", SearchOption.TopDirectoryOnly, new[] { "/foo/baz.txt" })]
-            [TestCase("c", SearchOption.AllDirectories, new[] { "/a/b/c/foo.txt", "/a/b/c/1/2.txt", "/foo/c/baz.txt" })]
-            [TestCase("c", SearchOption.TopDirectoryOnly, new[] { "/a/b/c/foo.txt", "/foo/c/baz.txt" })]
+            [TestCase("c", SearchOption.AllDirectories, new[] { "/a/b/c/foo.txt", "/a/b/c/baz.txt", "/a/b/c/1/2.txt", "/foo/c/baz.txt" })]
+            [TestCase("c", SearchOption.TopDirectoryOnly, new[] { "/a/b/c/foo.txt", "/a/b/c/baz.txt", "/foo/c/baz.txt" })]
             public void GetsFiles(string virtualPath, SearchOption searchOption, string[] expectedPaths)
             {
                 // Given
@@ -121,12 +129,18 @@ namespace Statiq.Common.Tests.IO
                 CollectionAssert.AreEquivalent(expectedPaths, files.Select(x => x.Path.FullPath));
             }
 
+            [TestCase("", SearchOption.TopDirectoryOnly, new string[] { })]
+            [TestCase("", SearchOption.AllDirectories, new[] { "/root/a/x/y/z/foo.txt", "/root/b/x/bar.txt", "/root/c/z/fizz.txt", "/root/d/e/y/z/buzz.txt", "/f/g/h/bazz.txt" })]
+            [TestCase(".", SearchOption.TopDirectoryOnly, new string[] { })]
+            [TestCase(".", SearchOption.AllDirectories, new[] { "/root/a/x/y/z/foo.txt", "/root/b/x/bar.txt", "/root/c/z/fizz.txt", "/root/d/e/y/z/buzz.txt", "/f/g/h/bazz.txt" })]
             [TestCase("x", SearchOption.TopDirectoryOnly, new[] { "/root/b/x/bar.txt" })]
-            [TestCase("x", SearchOption.AllDirectories, new[] { "/root/a/x/y/z/foo.txt", "/root/b/x/bar.txt", "/root/d/e/y/z/buzz.txt" })]
+            [TestCase("x", SearchOption.AllDirectories, new[] { "/root/a/x/y/z/foo.txt", "/root/b/x/bar.txt", "/root/c/z/fizz.txt", "/root/d/e/y/z/buzz.txt" })]
             [TestCase("x/y", SearchOption.TopDirectoryOnly, new string[] { })]
             [TestCase("x/y", SearchOption.AllDirectories, new[] { "/root/a/x/y/z/foo.txt", "/root/c/z/fizz.txt", "/root/d/e/y/z/buzz.txt" })]
             [TestCase("x/y/z", SearchOption.TopDirectoryOnly, new[] { "/root/a/x/y/z/foo.txt", "/root/c/z/fizz.txt", "/root/d/e/y/z/buzz.txt" })]
             [TestCase("x/y/z", SearchOption.AllDirectories, new[] { "/root/a/x/y/z/foo.txt", "/root/c/z/fizz.txt", "/root/d/e/y/z/buzz.txt" })]
+            [TestCase("q", SearchOption.TopDirectoryOnly, new string[] { })]
+            [TestCase("q", SearchOption.AllDirectories, new string[] { })]
             public void GetsMappedFiles(string virtualPath, SearchOption searchOption, string[] expectedPaths)
             {
                 // Given
@@ -163,6 +177,8 @@ namespace Statiq.Common.Tests.IO
                 Assert.AreEqual(expectedExists, file.Exists);
             }
 
+            [TestCase("", "x/y/z/foo.txt", "/root/a/x/y/z/foo.txt", true)]
+            [TestCase("", "x/y/z/buzz.txt", "/root/d/e/y/z/buzz.txt", true)]
             [TestCase(".", "x/y/z/foo.txt", "/root/a/x/y/z/foo.txt", true)]
             [TestCase(".", "x/y/z/buzz.txt", "/root/d/e/y/z/buzz.txt", true)]
             [TestCase("x", "y/z/foo.txt", "/root/a/x/y/z/foo.txt", true)]
@@ -174,6 +190,10 @@ namespace Statiq.Common.Tests.IO
             [TestCase("x/y/z", "foo.txt", "/root/a/x/y/z/foo.txt", true)]
             [TestCase("x/y/z", "buzz.txt", "/root/d/e/y/z/buzz.txt", true)]
             [TestCase("x/y/z", "qwerty.txt", "/root/d/e/y/z/qwerty.txt", false)]
+            [TestCase("", "i/h/bazz.txt", "/f/g/h/bazz.txt", true)]
+            [TestCase(".", "i/h/bazz.txt", "/f/g/h/bazz.txt", true)]
+            [TestCase("i", "h/bazz.txt", "/f/g/h/bazz.txt", true)]
+            [TestCase("i/h", "bazz.txt", "/f/g/h/bazz.txt", true)]
             public void GetsMappedInputFile(string virtualPath, string filePath, string expectedPath, bool expectedExists)
             {
                 // Given
@@ -228,7 +248,10 @@ namespace Statiq.Common.Tests.IO
 
                 // Then
                 IDirectory parent = file.Directory;
-                parent.GetFiles(SearchOption.TopDirectoryOnly).Select(x => x.Path.FullPath).ShouldBe(new[] { "/a/b/c/foo.txt", "/foo/c/baz.txt" }, true);
+                parent
+                    .GetFiles(SearchOption.TopDirectoryOnly)
+                    .Select(x => x.Path.FullPath)
+                    .ShouldBe(new[] { "/a/b/c/foo.txt", "/a/b/c/baz.txt", "/foo/c/baz.txt" }, true);
             }
 
             [Test]
@@ -433,15 +456,18 @@ namespace Statiq.Common.Tests.IO
                 { "/root/a/x/y/z/foo.txt" },
                 { "/root/b/x/bar.txt" },
                 { "/root/c/z/fizz.txt" },
-                { "/root/d/e/y/z/buzz.txt" }
+                { "/root/d/e/y/z/buzz.txt" },
+                { "/f/g/h/bazz.txt" }
             });
             fileSystem.RootPath = "/root";
             fileSystem.InputPaths.Add("a");
             fileSystem.InputPaths.Add("b");
             fileSystem.InputPaths.Add("c");
             fileSystem.InputPaths.Add("d/e");
+            fileSystem.InputPaths.Add("../f/g");
             fileSystem.InputPathMappings.Add("c", "x/y");
             fileSystem.InputPathMappings.Add("d/e", "x");
+            fileSystem.InputPathMappings.Add("../f/g", "i");
             return new VirtualInputDirectory(fileSystem, path);
         }
     }

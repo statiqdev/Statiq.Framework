@@ -16,6 +16,14 @@ namespace Statiq.Common
                 throw new ArgumentException("Paths must both be relative or both be absolute");
             }
 
+            // Special case if source is dot
+            if (source.Segments.Length == 1
+                && source.Segments[0].SequenceEqual(NormalizedPath.Dot.ToMemory())
+                && target.Segments.Length != 0)
+            {
+                return target;
+            }
+
             // Check if they're the same path
             if (source.FullPath == target.FullPath)
             {
@@ -28,8 +36,16 @@ namespace Statiq.Common
                 return new NormalizedPath(string.Join(NormalizedPath.Slash, target.Segments));
             }
 
-            // Check if they share the same root
-            if (target.Segments.Length == 0 || !source.Segments[0].SequenceEqual(target.Segments[0]))
+            // If target is empty return source
+            if (target.IsNullOrEmpty)
+            {
+                return source;
+            }
+
+            // Check if source is empty or they share the same root
+            if (target.Segments.Length == 0
+                || source.Segments.Length == 0
+                || !source.Segments[0].SequenceEqual(target.Segments[0]))
             {
                 return target;
             }

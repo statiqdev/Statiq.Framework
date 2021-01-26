@@ -20,15 +20,13 @@ namespace Statiq.Common
         {
             if (_directory.Exists)
             {
-                foreach (IDirectory childDirectory in _directory.GetDirectories())
-                {
-                    yield return new DirectoryInfo(childDirectory);
-                }
-                foreach (IFile childFile in _directory.GetFiles())
-                {
-                    yield return new FileInfo(childFile);
-                }
+                FileSystemInfoBase[] fileSystemInfos = _directory
+                    .GetDirectories().Select(x => (FileSystemInfoBase)new DirectoryInfo(x))
+                    .Concat(_directory.GetFiles().Select(x => new FileInfo(x)))
+                    .ToArray();
+                return fileSystemInfos;
             }
+            return Array.Empty<FileSystemInfoBase>();
         }
 
         public override DirectoryInfoBase GetDirectory(string name)

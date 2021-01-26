@@ -54,11 +54,30 @@ namespace Statiq.Common
             Dictionary<NormalizedPath, VirtualInputDirectory> directories = new Dictionary<NormalizedPath, VirtualInputDirectory>();
             foreach (IDirectory existing in GetExistingInputDirectories())
             {
-                foreach (IDirectory childDirectory in existing.GetDirectories(searchOption))
+                // Add this one if it's virtual (assumption is that real directories will already exist)
+                if (existing is VirtualInputDirectory)
                 {
-                    // Get the relative path starting from the current directory path to use as a key so we don't end up with duplicates
-                    NormalizedPath relativePath = existing.Path.GetRelativePath(childDirectory.Path);
-                    directories[relativePath] = new VirtualInputDirectory(_fileSystem, Path.Combine(relativePath));
+                    NormalizedPath relativePath = Path.GetRelativePath(existing.Path);
+                    if (!directories.ContainsKey(relativePath))
+                    {
+                        directories[relativePath] = new VirtualInputDirectory(_fileSystem, Path.Combine(relativePath));
+                    }
+                }
+
+                // Only descend virtual directories if we're getting all directories
+                if (!(existing is VirtualInputDirectory) || searchOption != SearchOption.TopDirectoryOnly)
+                {
+                    foreach (IDirectory childDirectory in existing.GetDirectories(searchOption))
+                    {
+                        // Get the relative path starting from the current directory path
+                        NormalizedPath relativePath = existing is VirtualInputDirectory
+                            ? Path.GetRelativePath(childDirectory.Path)
+                            : existing.Path.GetRelativePath(childDirectory.Path);
+                        if (!directories.ContainsKey(relativePath))
+                        {
+                            directories[relativePath] = new VirtualInputDirectory(_fileSystem, Path.Combine(relativePath));
+                        }
+                    }
                 }
             }
             return directories.Values;
@@ -71,11 +90,16 @@ namespace Statiq.Common
             Dictionary<NormalizedPath, VirtualInputFile> files = new Dictionary<NormalizedPath, VirtualInputFile>();
             foreach (IDirectory existing in GetExistingInputDirectories())
             {
-                foreach (IFile file in existing.GetFiles(searchOption))
+                // Only descend virtual directories if we're getting all files
+                if (!(existing is VirtualInputDirectory) || searchOption != SearchOption.TopDirectoryOnly)
                 {
-                    // Get the relative path starting from the current directory path to use as a key so we don't end up with duplicates
-                    NormalizedPath relativePath = existing.Path.GetRelativePath(file.Path);
-                    files[relativePath] = new VirtualInputFile(file, this);
+                    foreach (IFile file in existing.GetFiles(searchOption))
+                    {
+                        if (!files.ContainsKey(file.Path))
+                        {
+                            files[file.Path] = new VirtualInputFile(file, this);
+                        }
+                    }
                 }
             }
             return files.Values;
@@ -117,13 +141,19 @@ namespace Statiq.Common
 
         /// <summary>
         /// Gets this path under each input directory and returns the ones that exist.
+        /// Also returns virtual input directories for any of the mapped paths that don't actually exist.
         /// </summary>
         // Internal for testing
         internal IEnumerable<IDirectory> GetExistingInputDirectories() =>
             _fileSystem
-                .GetUnmappedInputPaths(Path)
+                .GetUnmappedInputPaths(Path, out HashSet<NormalizedPath> nonExistingMappedPaths)
                 .Select(x => _fileSystem.GetDirectory(x))
-                .Where(x => x.Exists);
+                .Where(x => x.Exists)
+                .Concat(nonExistingMappedPaths
+                    .Where(x => Path.ContainsDescendantOrSelf(x))
+                    .Select(x => Path.Combine(Path.GetRelativePath(x).Segments.FirstOrDefault().ToString()))
+                    .Distinct()
+                    .Select(x => new VirtualInputDirectory(_fileSystem, x)));
 
         public override string ToString() => Path.ToString();
 

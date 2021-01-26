@@ -16,8 +16,15 @@ namespace Statiq.Common
         /// </summary>
         /// <param name="fileSystem">The file system.</param>
         /// <param name="path">The path to "unmap".</param>
+        /// <param name="nonExistingMappedPaths">
+        /// Some input paths won't map directly to a path in the file system (I.e. if the mapped
+        /// path is deeper than the real one). This contains all the mapped input paths that couldn't be unmapped.
+        /// </param>
         /// <returns>The "unmapped" input paths.</returns>
-        public static IEnumerable<NormalizedPath> GetUnmappedInputPaths(this IReadOnlyFileSystem fileSystem, NormalizedPath path)
+        public static IEnumerable<NormalizedPath> GetUnmappedInputPaths(
+            this IReadOnlyFileSystem fileSystem,
+            in NormalizedPath path,
+            out HashSet<NormalizedPath> nonExistingMappedPaths)
         {
             fileSystem.ThrowIfNull(nameof(fileSystem));
             path.ThrowIfNull(nameof(path));
@@ -26,20 +33,31 @@ namespace Statiq.Common
                 throw new ArgumentException("The input path to unmap must be relative", nameof(path));
             }
 
-            return fileSystem.InputPaths
-                .Select(x =>
+            List<NormalizedPath> unmappedInputPaths = new List<NormalizedPath>();
+            nonExistingMappedPaths = new HashSet<NormalizedPath>();
+            foreach (NormalizedPath inputPath in fileSystem.InputPaths)
+            {
+                // Is this input path mapped?
+                if (fileSystem.InputPathMappings.TryGetValue(inputPath, out NormalizedPath mappedInputPath))
                 {
-                    // Is this input path mapped?
-                    if (fileSystem.InputPathMappings.TryGetValue(x, out NormalizedPath mappedInputPath))
+                    // Does this path exist under the mapped path (I.e. it's a real path)
+                    if (mappedInputPath.ContainsDescendantOrSelf(path))
                     {
-                        return mappedInputPath.ContainsDescendantOrSelf(path)
-                            ? fileSystem.RootPath.Combine(x).Combine(mappedInputPath.GetRelativePath(path))
-                            : null;
+                        unmappedInputPaths.Add(fileSystem.RootPath.Combine(inputPath).Combine(mappedInputPath.GetRelativePath(path)));
                     }
-
-                    return fileSystem.RootPath.Combine(x).Combine(path);
-                })
-                .Where(x => !x.IsNull);
+                    else
+                    {
+                        // Otherwise it's a virtual path that doesn't actually exist
+                        nonExistingMappedPaths.Add(mappedInputPath);
+                    }
+                }
+                else
+                {
+                    // Just a normal input path
+                    unmappedInputPaths.Add(fileSystem.RootPath.Combine(inputPath).Combine(path));
+                }
+            }
+            return unmappedInputPaths;
         }
 
         /// <summary>
@@ -61,7 +79,7 @@ namespace Statiq.Common
             if (path.IsRelative)
             {
                 IFile notFound = null;
-                foreach (NormalizedPath inputPath in fileSystem.GetUnmappedInputPaths(path).Reverse())
+                foreach (NormalizedPath inputPath in fileSystem.GetUnmappedInputPaths(path, out _).Reverse())
                 {
                     IFile file = fileSystem.GetFile(inputPath);
                     if (notFound is null)
@@ -148,7 +166,7 @@ namespace Statiq.Common
             }
 
             // Then try to find a directory
-            return fileSystem.GetUnmappedInputPaths(path)
+            return fileSystem.GetUnmappedInputPaths(path, out _)
                 .Reverse()
                 .Select(x => (x, fileSystem.GetDirectory(x)))
                 .Where(x => x.Item2.Exists)

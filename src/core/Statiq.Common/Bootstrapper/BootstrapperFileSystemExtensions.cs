@@ -28,6 +28,5 @@ namespace Statiq.Common
         public static TBootstrapper AddExcludedPath<TBootstrapper>(this TBootstrapper bootstrapper, NormalizedPath excludedPath)
             where TBootstrapper : IBootstrapper =>
             bootstrapper.ConfigureFileSystem(x => x.ExcludedPaths.Add(excludedPath));
-
     }
 }

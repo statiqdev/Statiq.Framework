@@ -55,6 +55,16 @@ namespace Statiq.Common.Tests.IO
             [TestCase("C/A/B/C", "D/A/B/C", "D/A/B/C")]
             [TestCase("C/A/B", "D/E/", "D/E")]
             [TestCase("C/", "B/", "B")]
+            [TestCase("C/A/B", "", "C/A/B")]
+            [TestCase("", "C/A/B", "C/A/B")]
+            [TestCase("C/A/B", ".", ".")]
+            [TestCase(".", "C/A/B", "C/A/B")]
+            [TestCase("C/A/B", "C/.", "../..")]
+            [TestCase("C/.", "C/A/B", "A/B")]
+            [TestCase("", "", "")]
+            [TestCase(".", "", ".")]
+            [TestCase("", ".", ".")]
+            [TestCase(".", ".", ".")]
 
             public void ShouldReturnRelativePathWithDirectoryPath(string source, string target, string expected)
             {
@@ -66,7 +76,7 @@ namespace Statiq.Common.Tests.IO
                 NormalizedPath relativePath = RelativePathResolver.Resolve(sourcePath, targetPath);
 
                 // Then
-                expected.ShouldBe((string)relativePath);
+                ((string)relativePath).ShouldBe(expected);
                 if (targetPath.IsAbsolute)
                 {
                     sourcePath.Combine(relativePath).ShouldBe(targetPath);
