@@ -12,7 +12,7 @@ namespace Statiq.Core
     /// <summary>
     /// Maps input paths to virtual paths while ensuring the destination path is relative.
     /// </summary>
-    internal class InputPathMappingDictionary : IDictionary<NormalizedPath, NormalizedPath>
+    internal class InputPathMappingDictionary : IDictionary<NormalizedPath, NormalizedPath>, IReadOnlyDictionary<NormalizedPath, NormalizedPath>
     {
         private readonly ConcurrentDictionary<NormalizedPath, NormalizedPath> _dictionary = new ConcurrentDictionary<NormalizedPath, NormalizedPath>();
 
@@ -33,6 +33,10 @@ namespace Statiq.Core
         public int Count => _dictionary.Count;
 
         public bool IsReadOnly => false;
+
+        IEnumerable<NormalizedPath> IReadOnlyDictionary<NormalizedPath, NormalizedPath>.Keys => ((IReadOnlyDictionary<NormalizedPath, NormalizedPath>)_dictionary).Keys;
+
+        IEnumerable<NormalizedPath> IReadOnlyDictionary<NormalizedPath, NormalizedPath>.Values => ((IReadOnlyDictionary<NormalizedPath, NormalizedPath>)_dictionary).Values;
 
         public void Add(NormalizedPath key, NormalizedPath value)
         {
