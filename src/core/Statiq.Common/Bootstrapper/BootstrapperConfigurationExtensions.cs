@@ -10,6 +10,7 @@ namespace Statiq.Common
             where TBootstrapper : IBootstrapper
         {
             bootstrapper.ThrowIfNull(nameof(bootstrapper));
+            action.ThrowIfNull(nameof(action));
             bootstrapper.Configurators.Add<ConfigurableSettings>(x => action(x.Settings));
             return bootstrapper;
         }
@@ -18,6 +19,7 @@ namespace Statiq.Common
             where TBootstrapper : IBootstrapper
         {
             bootstrapper.ThrowIfNull(nameof(bootstrapper));
+            action.ThrowIfNull(nameof(action));
             bootstrapper.Configurators.Add<ConfigurableConfiguration>(x => action(x.Builder));
             return bootstrapper;
         }
@@ -26,6 +28,7 @@ namespace Statiq.Common
             where TBootstrapper : IBootstrapper
         {
             bootstrapper.ThrowIfNull(nameof(bootstrapper));
+            action.ThrowIfNull(nameof(action));
             bootstrapper.Configurators.Add<ConfigurableServices>(x => action(x.Services));
             return bootstrapper;
         }
@@ -34,6 +37,7 @@ namespace Statiq.Common
             where TBootstrapper : IBootstrapper
         {
             bootstrapper.ThrowIfNull(nameof(bootstrapper));
+            action.ThrowIfNull(nameof(action));
             bootstrapper.Configurators.Add<ConfigurableServices>(x => action(x.Services, x.Settings));
             return bootstrapper;
         }
@@ -42,6 +46,7 @@ namespace Statiq.Common
             where TBootstrapper : IBootstrapper
         {
             bootstrapper.ThrowIfNull(nameof(bootstrapper));
+            action.ThrowIfNull(nameof(action));
             bootstrapper.Configurators.Add<IEngine>(x => action(x));
             return bootstrapper;
         }
