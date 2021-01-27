@@ -184,14 +184,14 @@ namespace Statiq.Common.Tests.IO
                 Should.Throw<ArgumentNullException>(() => fileSystem.GetContainingInputPathForAbsolutePath(null));
             }
 
-            [TestCase("/a/b/c/foo.txt", "/a/b")]
-            [TestCase("/a/x/bar.txt", "/a/x")]
-            [TestCase("/a/x/baz.txt", "/a/x")]
-            [TestCase("/z/baz.txt", null)]
-            [TestCase("/a/b/c/../e/foo.txt", "/a/b")]
-            [TestCase("/a/b/c", "/a/b")]
-            [TestCase("/a/x", "/a/x")]
-            public void ShouldReturnContainingPathForAbsolutePath(string path, string expected)
+            [TestCase("/a/b/c/foo.txt", "b", "/a/b")]
+            [TestCase("/a/x/bar.txt", "x", "/a/x")]
+            [TestCase("/a/x/baz.txt", "x", "/a/x")]
+            [TestCase("/z/baz.txt", null, null)]
+            [TestCase("/a/b/c/../e/foo.txt", "b", "/a/b")]
+            [TestCase("/a/b/c", "b", "/a/b")]
+            [TestCase("/a/x", "x", "/a/x")]
+            public void ShouldReturnContainingPathForAbsolutePath(string path, string expectedInputPath, string expectedAbsolutePath)
             {
                 // Given
                 IFileSystem fileSystem = new TestFileSystem(GetFileProvider());
@@ -200,18 +200,19 @@ namespace Statiq.Common.Tests.IO
                 fileSystem.InputPaths.Add("x");
 
                 // When
-                NormalizedPath inputPath = fileSystem.GetContainingInputPathForAbsolutePath(new NormalizedPath(path));
+                (NormalizedPath inputPath, NormalizedPath absoluteInputPath) = fileSystem.GetContainingInputPathForAbsolutePath(new NormalizedPath(path));
 
                 // Then
-                inputPath.FullPath.ShouldBe(expected);
+                inputPath.FullPath.ShouldBe(expectedInputPath);
+                absoluteInputPath.FullPath.ShouldBe(expectedAbsolutePath);
             }
 
-            [TestCase("/a/b/c/foo.txt", "/a/b")]
-            [TestCase("/a/x/bar.txt", "/a/x")]
-            [TestCase("/a/x/baz.txt", "/a/x")]
-            [TestCase("/z/baz.txt", null)]
-            [TestCase("/a/b/c/../e/foo.txt", "/a/b")]
-            public void ShouldReturnContainingPathForInputPathAboveRootPath(string path, string expected)
+            [TestCase("/a/b/c/foo.txt", "../b", "/a/b")]
+            [TestCase("/a/x/bar.txt", "../x", "/a/x")]
+            [TestCase("/a/x/baz.txt", "../x", "/a/x")]
+            [TestCase("/z/baz.txt", null, null)]
+            [TestCase("/a/b/c/../e/foo.txt", "../b", "/a/b")]
+            public void ShouldReturnContainingPathForInputPathAboveRootPath(string path, string expectedInputPath, string expectedAbsolutePath)
             {
                 // Given
                 IFileSystem fileSystem = new TestFileSystem(GetFileProvider());
@@ -220,10 +221,11 @@ namespace Statiq.Common.Tests.IO
                 fileSystem.InputPaths.Add("../x");
 
                 // When
-                NormalizedPath inputPath = fileSystem.GetContainingInputPathForAbsolutePath(new NormalizedPath(path));
+                (NormalizedPath inputPath, NormalizedPath absoluteInputPath) = fileSystem.GetContainingInputPathForAbsolutePath(new NormalizedPath(path));
 
                 // Then
-                inputPath.FullPath.ShouldBe(expected);
+                inputPath.FullPath.ShouldBe(expectedInputPath);
+                absoluteInputPath.FullPath.ShouldBe(expectedAbsolutePath);
             }
         }
 
@@ -358,6 +360,30 @@ namespace Statiq.Common.Tests.IO
                 fileSystem.RootPath = "/a";
                 fileSystem.InputPaths.Add("b");
                 fileSystem.InputPaths.Add("x");
+
+                // When
+                NormalizedPath inputPath = fileSystem.GetRelativeInputPath(new NormalizedPath(path));
+
+                // Then
+                inputPath.FullPath.ShouldBe(expected);
+            }
+
+            [TestCase("/a/b/c/foo.txt", "bb/bbb/c/foo.txt")]
+            [TestCase("/a/x/bar.txt", "xx/bar.txt")]
+            [TestCase("/a/x/baz.txt", "xx/baz.txt")]
+            [TestCase("/z/baz.txt", null)]
+            [TestCase("/a/b/c/../e/foo.txt", "bb/bbb/e/foo.txt")]
+            [TestCase("/a/b/c", "bb/bbb/c")]
+            [TestCase("/a/x", "xx")]
+            public void ShouldReturnRelativeMappedInputPath(string path, string expected)
+            {
+                // Given
+                IFileSystem fileSystem = new TestFileSystem(GetFileProvider());
+                fileSystem.RootPath = "/a";
+                fileSystem.InputPaths.Add("b");
+                fileSystem.InputPaths.Add("x");
+                fileSystem.InputPathMappings.Add("b", "bb/bbb");
+                fileSystem.InputPathMappings.Add("x", "xx");
 
                 // When
                 NormalizedPath inputPath = fileSystem.GetRelativeInputPath(new NormalizedPath(path));

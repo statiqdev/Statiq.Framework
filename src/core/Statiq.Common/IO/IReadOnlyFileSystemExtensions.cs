@@ -155,7 +155,7 @@ namespace Statiq.Common
 
             if (path.IsAbsolute)
             {
-                return fileSystem.GetContainingInputPathForAbsolutePath(path);
+                return fileSystem.GetContainingInputPathForAbsolutePath(path).AbsoluteInputPath;
             }
 
             // Try to find a file first
@@ -174,7 +174,7 @@ namespace Statiq.Common
                 .FirstOrDefault();
         }
 
-        internal static NormalizedPath GetContainingInputPathForAbsolutePath(this IReadOnlyFileSystem fileSystem, NormalizedPath path)
+        internal static (NormalizedPath InputPath, NormalizedPath AbsoluteInputPath) GetContainingInputPathForAbsolutePath(this IReadOnlyFileSystem fileSystem, NormalizedPath path)
         {
             fileSystem.ThrowIfNull(nameof(fileSystem));
             path.ThrowIfNull(nameof(path));
@@ -186,8 +186,8 @@ namespace Statiq.Common
 
             return fileSystem.InputPaths
                 .Reverse()
-                .Select(x => fileSystem.RootPath.Combine(x))
-                .FirstOrDefault(x => x.ContainsDescendantOrSelf(path));
+                .Select(x => (x, fileSystem.RootPath.Combine(x)))
+                .FirstOrDefault(x => x.Item2.ContainsDescendantOrSelf(path));
         }
 
         /// <summary>
@@ -205,8 +205,11 @@ namespace Statiq.Common
                 return path;
             }
 
-            NormalizedPath containingPath = fileSystem.GetContainingInputPathForAbsolutePath(path);
-            return containingPath.IsNull ? NormalizedPath.Null : containingPath.GetRelativePath(path);
+            (NormalizedPath inputPath, NormalizedPath absoluteInputPath) = fileSystem.GetContainingInputPathForAbsolutePath(path);
+            NormalizedPath relativeInputPath = absoluteInputPath.IsNull ? NormalizedPath.Null : absoluteInputPath.GetRelativePath(path);
+            return fileSystem.InputPathMappings.TryGetValue(inputPath, out NormalizedPath mappedInputPath)
+                ? mappedInputPath.Combine(relativeInputPath)
+                : relativeInputPath;
         }
 
         /// <summary>
