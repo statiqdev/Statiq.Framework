@@ -1,3 +1,5 @@
+# 1.0.0-beta.34
+
 # 1.0.0-beta.33
 
 - Added ability to "map" input folders to subfolders in the virtual folder hierarchy (so not every input folder has to be at the root now).
