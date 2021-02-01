@@ -86,29 +86,55 @@ namespace Statiq.Razor
 
             _serviceScopeFactory = serviceProvider.GetRequiredService<IServiceScopeFactory>();
 
-            // Calculate the base page type
-            Type basePageType = parameters.BasePageType ?? typeof(StatiqRazorPage<>);
-            string baseClassName = basePageType.FullName;
-            int tickIndex = baseClassName.IndexOf('`');
-            if (tickIndex > 0)
-            {
-                baseClassName = baseClassName.Substring(0, tickIndex);
-            }
-            string baseType = basePageType.IsGenericTypeDefinition ? $"{baseClassName}<TModel>" : baseClassName;
-
             // We need to register a new document classifier phase because builder.SetBaseType() (which uses builder.ConfigureClass())
             // use the DefaultRazorDocumentClassifierPhase which stops applying document classifier passes after DocumentIntermediateNode.DocumentKind is set
             // (which gets set by the Razor document classifier passes registered in RazorExtensions.Register())
             // Also need to add it just after the DocumentClassifierPhase, otherwise it'll miss the C# lowering phase
+            string basePageType = GetBasePageType(parameters.BasePageType);
             List<IRazorEnginePhase> phases = razorProjectEngine.Engine.Phases.ToList();
             phases.Insert(
                 phases.IndexOf(phases.OfType<IRazorDocumentClassifierPhase>().Last()) + 1,
-                new StatiqDocumentPhase(baseType, parameters.Namespaces)
+                new StatiqDocumentPhase(basePageType, parameters.Namespaces, parameters.Model)
                 {
                     Engine = razorProjectEngine.Engine
                 });
             FieldInfo phasesField = razorProjectEngine.Engine.GetType().GetField("<Phases>k__BackingField", BindingFlags.Instance | BindingFlags.NonPublic);
             phasesField.SetValue(razorProjectEngine.Engine, phases.ToArray());
+        }
+
+        /// <summary>
+        /// Gets the type string for the base page type so it can be injected into the page source code by the <see cref="StatiqDocumentPhase"/>.
+        /// </summary>
+        private static string GetBasePageType(Type basePageType)
+        {
+            if (basePageType is null)
+            {
+                return null;
+            }
+
+            string baseType = basePageType.ToString();
+
+            // Open generic
+            if (basePageType.IsGenericTypeDefinition)
+            {
+                if (basePageType.GenericTypeArguments.Length > 1)
+                {
+                    throw new ArgumentException($"Open generic Razor base pages should only have a single generic type argument, {baseType} has {basePageType.GenericTypeArguments.Length}");
+                }
+                int tickIndex = baseType.IndexOf('`');
+                return $"{baseType.Substring(0, tickIndex)}<TModel>";
+            }
+
+            // Closed generic
+            if (basePageType.IsGenericType)
+            {
+                int tickIndex = baseType.IndexOf('`');
+                int openBraceIndex = baseType.IndexOf('[');
+                return $"{baseType.Substring(0, tickIndex)}<{baseType.Substring(openBraceIndex + 1, baseType.Length - openBraceIndex - 2)}>";
+            }
+
+            // Regular type
+            return baseType;
         }
 
         public void ExpireChangeTokens()

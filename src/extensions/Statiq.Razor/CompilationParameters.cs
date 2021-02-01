@@ -7,5 +7,6 @@ namespace Statiq.Razor
     {
         public NamespaceCollection Namespaces { get; set; }
         public Type BasePageType { get; set; }
+        public object Model { get; set; }
     }
 }

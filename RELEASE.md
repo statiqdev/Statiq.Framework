@@ -1,5 +1,8 @@
 # 1.0.0-beta.34
 
+- Added better error logging of Razor rendering failures.
+- Changed the default Razor model type to `IDocument` from `dynamic` if no explicit model or base type is specified.
+
 # 1.0.0-beta.33
 
 - Added ability to "map" input folders to subfolders in the virtual folder hierarchy (so not every input folder has to be at the root now).

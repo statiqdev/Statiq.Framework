@@ -214,20 +214,32 @@ namespace Statiq.Razor
                         ? (layoutLocation is object ? ViewStartPlaceholder + input.Source.FullPath + ViewStartPlaceholder : null)
                         : viewStartLocationPath.FullPath;
 
+                    // Get the model
+                    object model = _model is null ? input : await _model.GetValueAsync(input, context);
+
+                    // Create the request
                     RenderRequest request = new RenderRequest
                     {
                         Output = contentStream,
-                        BaseType = _basePageType,
+                        BaseType = _basePageType, // null indicates the default base page type
                         Context = context,
                         Document = input,
                         LayoutLocation = layoutLocation,
                         ViewStartLocation = viewStartLocation,
                         RelativePath = GetRelativePath(input, context),
-                        Model = _model is null ? input : await _model.GetValueAsync(input, context),
+                        Model = model,
                         ViewData = await GetViewDataAsync(_viewData, input, context),
                     };
 
-                    await razorService.RenderAsync(request);
+                    // Try to render the page
+                    try
+                    {
+                        await razorService.RenderAsync(request);
+                    }
+                    catch (Exception ex)
+                    {
+                        throw input.LogAndWrapException(ex);
+                    }
 
                     return input.Clone(context.GetContentProvider(contentStream, MediaTypes.Html));
                 }
