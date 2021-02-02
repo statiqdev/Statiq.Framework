@@ -33,13 +33,13 @@ namespace Statiq.Core
         }
 
         /// <summary>
-        /// Orders the input documents using the specified delegate to get the ordering key.
+        /// Orders the input documents using the specified delegate to get the ordering value.
         /// </summary>
-        /// <param name="key">A delegate that should return the key to use for ordering.</param>
-        public OrderDocuments(Config<object> key)
+        /// <param name="value">A delegate that should return the value to use for ordering.</param>
+        public OrderDocuments(Config<object> value)
         {
-            key.ThrowIfNull(nameof(key));
-            _orders.Push(new Order(key));
+            value.ThrowIfNull(nameof(value));
+            _orders.Push(new Order(value));
         }
 
         /// <summary>
@@ -53,15 +53,15 @@ namespace Statiq.Core
         }
 
         /// <summary>
-        /// Orders the input documents using the specified delegate to get a secondary ordering key.
+        /// Orders the input documents using the specified delegate to get a secondary ordering value.
         /// You can chain as many <c>ThenBy</c> calls together as needed.
         /// </summary>
-        /// <param name="key">A delegate that should return the key to use for ordering.</param>
+        /// <param name="value">A delegate that should return the value to use for ordering.</param>
         /// <returns>The current module instance.</returns>
-        public OrderDocuments ThenBy(Config<object> key)
+        public OrderDocuments ThenBy(Config<object> value)
         {
-            key.ThrowIfNull(nameof(key));
-            _orders.Push(new Order(key));
+            value.ThrowIfNull(nameof(value));
+            _orders.Push(new Order(value));
             return this;
         }
 
@@ -173,7 +173,7 @@ namespace Statiq.Core
         {
             private IComparer<object> _comparer;
 
-            public Config<object> Key { get; }
+            public Config<object> Value { get; }
 
             public bool Descending { get; set; }
 
@@ -183,13 +183,13 @@ namespace Statiq.Core
                 set => _comparer = value;
             }
 
-            public Order(Config<object> key)
+            public Order(Config<object> value)
             {
-                Key = key;
+                Value = value;
             }
 
             public object GetValue(IDocument document, IExecutionContext context) =>
-                Key.GetValueAsync(document, context).GetAwaiter().GetResult();
+                Value.GetValueAsync(document, context).GetAwaiter().GetResult();
         }
 
         // Compares all objects using the first type seen
