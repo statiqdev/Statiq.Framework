@@ -23,10 +23,10 @@ namespace Statiq.Common
         /// escaped with quotes.
         /// </summary>
         /// <param name="args">The original shortcode arguments.</param>
-        /// <param name="count">The count of expected arguments.</param>
+        /// <param name="expectedCount">The count of expected arguments.</param>
         /// <returns>The argument values.</returns>
-        public static string[] ToValueArray(this KeyValuePair<string, string>[] args, int count) =>
-            ToValueArray(args, count, count);
+        public static string[] ToValueArray(this KeyValuePair<string, string>[] args, int expectedCount) =>
+            ToValueArray(args, expectedCount, expectedCount);
 
         /// <summary>
         /// Validates that the correct number of arguments have been used and returns them as an array.
@@ -60,7 +60,7 @@ namespace Statiq.Common
         /// Converts the shortcode arguments into a dictionary of named parameters.
         /// This will match un-named positional parameters with their expected position
         /// after which named parameters will be included. If an un-named positional
-        /// parameter follows named parameters and exception will be thrown.
+        /// parameter follows named parameters an exception will be thrown.
         /// </summary>
         /// <param name="args">The original shortcode arguments.</param>
         /// <param name="keys">The parameter names in expected order.</param>

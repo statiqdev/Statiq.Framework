@@ -1,3 +1,5 @@
+# 1.0.0-beta.35
+
 # 1.0.0-beta.34
 
 - Added better error logging of Razor rendering failures.
