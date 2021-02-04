@@ -21,7 +21,7 @@ namespace Statiq.Razor
             {
                 BasePageType = request.BaseType,
                 Namespaces = new NamespaceCollection(request.Context.Namespaces),
-                Model = request.Model
+                IsDocumentModel = request.Model is IDocument
             };
 
             RazorCompiler compiler = _compilers.GetOrAdd(parameters, _ => new RazorCompiler(parameters, request.Context));

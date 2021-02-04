@@ -215,9 +215,8 @@ namespace Statiq.Razor
                         : viewStartLocationPath.FullPath;
 
                     // Get the model
-                    object model = _model is null ? input : await _model.GetValueAsync(input, context);
+                    object model = _model is null ? input : ((await _model.GetValueAsync(input, context)) ?? input);
 
-                    // Create the request
                     RenderRequest request = new RenderRequest
                     {
                         Output = contentStream,

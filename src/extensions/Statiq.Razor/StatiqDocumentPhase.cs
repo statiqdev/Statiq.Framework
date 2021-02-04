@@ -1,7 +1,7 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using Microsoft.AspNetCore.Mvc.Razor.Extensions;
 using Microsoft.AspNetCore.Razor.Language;
-using Microsoft.AspNetCore.Razor.Language.Extensions;
 using Microsoft.AspNetCore.Razor.Language.Intermediate;
 using Statiq.Common;
 
@@ -9,51 +9,26 @@ namespace Statiq.Razor
 {
     internal class StatiqDocumentPhase : RazorEnginePhaseBase
     {
-        private readonly string _baseType; // null indicates the default StatiqRazorPage<>
+        private readonly string _baseType;  // null indicates the default StatiqRazorPage<>
         private readonly NamespaceCollection _namespaces;
-        private readonly object _model;
+        private readonly bool _isDocumentModel;
 
-        public StatiqDocumentPhase(string baseType, NamespaceCollection namespaces, object model)
+        public StatiqDocumentPhase(string baseType, NamespaceCollection namespaces, bool isDocumentModel)
         {
             _baseType = baseType;
-            _namespaces = namespaces;
-            _model = model;
+            _namespaces = namespaces ?? throw new ArgumentNullException(nameof(namespaces));
+            _isDocumentModel = isDocumentModel;
         }
 
         protected override void ExecuteCore(RazorCodeDocument codeDocument)
         {
+            // Get the class declaration and set the base type
             DocumentIntermediateNode documentNode = codeDocument.GetDocumentIntermediateNode();
-
             NamespaceDeclarationIntermediateNode namespaceDeclaration =
                 documentNode.Children.OfType<NamespaceDeclarationIntermediateNode>().Single();
-
-            // Get the model type (will return "dynamic" if there's no model directive)
-            string modelType = ModelDirective.GetModelType(documentNode);
-
-            // Set the base page type and perform default model type substitution here
             ClassDeclarationIntermediateNode classDeclaration =
                 namespaceDeclaration.Children.OfType<ClassDeclarationIntermediateNode>().Single();
-            MethodDeclarationIntermediateNode methodDeclaration = classDeclaration.Children.OfType<MethodDeclarationIntermediateNode>().Single();
-            if (methodDeclaration.Children.OfType<DirectiveIntermediateNode>().FirstOrDefault(x => x.DirectiveName == "inherits") is null)
-            {
-                if (_baseType is null)
-                {
-                    // If this is a dynamic model and the model type is IDocument use IDocument as the model type so that extensions, etc. work as expected
-                    if (modelType == "dynamic" && _model is IDocument)
-                    {
-                        classDeclaration.BaseType = $"Statiq.Razor.StatiqRazorPage<IDocument>";
-                    }
-                    else
-                    {
-                        classDeclaration.BaseType = $"Statiq.Razor.StatiqRazorPage<{modelType}>";
-                    }
-                }
-                else
-                {
-                    // Replace the model generic type if there is one
-                    classDeclaration.BaseType = _baseType.Replace("<TModel>", "<" + modelType + ">");
-                }
-            }
+            classDeclaration.BaseType = GetBaseType(documentNode);
 
             // Add namespaces
             int insertIndex = namespaceDeclaration.Children.IndexOf(
@@ -69,6 +44,27 @@ namespace Statiq.Razor
             }
 
             codeDocument.SetDocumentIntermediateNode(documentNode);
+        }
+
+        private string GetBaseType(DocumentIntermediateNode documentNode)
+        {
+            // Get the model type (will return "dynamic" if there's no model directive)
+            string modelType = ModelDirective.GetModelType(documentNode);
+
+            // Null indicates the default base page
+            if (_baseType is null)
+            {
+                // Use IDocument as the model type if not otherwise specified so that extensions, etc. work as expected
+                if (modelType == "dynamic" && _isDocumentModel)
+                {
+                    return "Statiq.Razor.StatiqRazorPage<Statiq.Common.IDocument>";
+                }
+
+                return $"Statiq.Razor.StatiqRazorPage<{modelType}>";
+            }
+
+            // An explicit base page type was specified, so just replace the model generic type if there is one
+            return _baseType.Replace("<TModel>", "<" + modelType + ">");
         }
     }
 }

@@ -94,7 +94,7 @@ namespace Statiq.Razor
             List<IRazorEnginePhase> phases = razorProjectEngine.Engine.Phases.ToList();
             phases.Insert(
                 phases.IndexOf(phases.OfType<IRazorDocumentClassifierPhase>().Last()) + 1,
-                new StatiqDocumentPhase(basePageType, parameters.Namespaces, parameters.Model)
+                new StatiqDocumentPhase(basePageType, parameters.Namespaces, parameters.IsDocumentModel)
                 {
                     Engine = razorProjectEngine.Engine
                 });
@@ -107,6 +107,7 @@ namespace Statiq.Razor
         /// </summary>
         private static string GetBasePageType(Type basePageType)
         {
+            // We need to distinguish between the default base type and an explicit base type that happens to be the same generic class, so return null for the default
             if (basePageType is null)
             {
                 return null;
