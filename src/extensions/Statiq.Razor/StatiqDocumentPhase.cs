@@ -1,6 +1,7 @@
 ﻿using System.Linq;
 using Microsoft.AspNetCore.Mvc.Razor.Extensions;
 using Microsoft.AspNetCore.Razor.Language;
+using Microsoft.AspNetCore.Razor.Language.Extensions;
 using Microsoft.AspNetCore.Razor.Language.Intermediate;
 using Statiq.Common;
 
@@ -32,24 +33,26 @@ namespace Statiq.Razor
             // Set the base page type and perform default model type substitution here
             ClassDeclarationIntermediateNode classDeclaration =
                 namespaceDeclaration.Children.OfType<ClassDeclarationIntermediateNode>().Single();
-            if (_baseType is null)
+            MethodDeclarationIntermediateNode methodDeclaration = classDeclaration.Children.OfType<MethodDeclarationIntermediateNode>().Single();
+            if (methodDeclaration.Children.OfType<DirectiveIntermediateNode>().FirstOrDefault(x => x.DirectiveName == "inherits") is null)
             {
-                // Default base page
-                if (modelType == "dynamic" && _model is IDocument)
+                if (_baseType is null)
                 {
-                    // Use IDocument as the model type if not otherwise specified so that extensions, etc. work as expected
-                    // Note that nameof does not include the generic type argument so we have to add it to the string
-                    classDeclaration.BaseType = "Statiq.Razor.StatiqRazorPage<IDocument>";
+                    // If this is a dynamic model and the model type is IDocument use IDocument as the model type so that extensions, etc. work as expected
+                    if (modelType == "dynamic" && _model is IDocument)
+                    {
+                        classDeclaration.BaseType = $"Statiq.Razor.StatiqRazorPage<IDocument>";
+                    }
+                    else
+                    {
+                        classDeclaration.BaseType = $"Statiq.Razor.StatiqRazorPage<{modelType}>";
+                    }
                 }
                 else
                 {
-                    classDeclaration.BaseType = $"Statiq.Razor.StatiqRazorPage<{modelType}>";
+                    // Replace the model generic type if there is one
+                    classDeclaration.BaseType = _baseType.Replace("<TModel>", "<" + modelType + ">");
                 }
-            }
-            else
-            {
-                // Replace the model generic type if there is one
-                classDeclaration.BaseType = _baseType.Replace("<TModel>", "<" + modelType + ">");
             }
 
             // Add namespaces
