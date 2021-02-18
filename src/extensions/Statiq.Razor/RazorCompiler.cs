@@ -92,18 +92,15 @@ namespace Statiq.Razor
             // Also need to add it just after the DocumentClassifierPhase, otherwise it'll miss the C# lowering phase
             string basePageType = GetBasePageType(parameters.BasePageType);
             List<IRazorEnginePhase> phases = razorProjectEngine.Engine.Phases.ToList();
-            phases.Insert(
-                phases.IndexOf(phases.OfType<IRazorDocumentClassifierPhase>().Last()) + 1,
-                new StatiqDocumentPhase(basePageType, parameters.Namespaces, parameters.IsDocumentModel)
-                {
-                    Engine = razorProjectEngine.Engine
-                });
+            StatiqDocumentClassifierPhase phase =
+                new StatiqDocumentClassifierPhase(basePageType, parameters.Namespaces, parameters.IsDocumentModel, razorProjectEngine.Engine);
+            phases.Insert(phases.IndexOf(phases.OfType<IRazorDocumentClassifierPhase>().Last()) + 1, phase);
             FieldInfo phasesField = razorProjectEngine.Engine.GetType().GetField("<Phases>k__BackingField", BindingFlags.Instance | BindingFlags.NonPublic);
             phasesField.SetValue(razorProjectEngine.Engine, phases.ToArray());
         }
 
         /// <summary>
-        /// Gets the type string for the base page type so it can be injected into the page source code by the <see cref="StatiqDocumentPhase"/>.
+        /// Gets the type string for the base page type so it can be injected into the page source code by the <see cref="StatiqDocumentClassifierPhase"/>.
         /// </summary>
         private static string GetBasePageType(Type basePageType)
         {

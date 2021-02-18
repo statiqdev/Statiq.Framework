@@ -646,6 +646,22 @@ namespace Statiq.Razor.Tests
                     StringCompareShould.IgnoreLineEndings);
             }
 
+            [Test]
+            public async Task IgnoresTildeLinks()
+            {
+                // Given
+                Engine engine = new Engine();
+                TestExecutionContext context = GetExecutionContext(engine);
+                TestDocument document = new TestDocument("<p><a href=\"~/foo\">Foo</a></p>");
+                RenderRazor razor = new RenderRazor();
+
+                // When
+                TestDocument result = await ExecuteAsync(document, context, razor).SingleAsync();
+
+                // Then
+                result.Content.ShouldBe("<p><a href=\"~/foo\">Foo</a></p>");
+            }
+
             private TestDocument GetDocument(string source, string content) => new TestDocument(new NormalizedPath(source), (NormalizedPath)null, content);
 
             private TestExecutionContext GetExecutionContext(Engine engine)

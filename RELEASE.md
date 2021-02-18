@@ -1,5 +1,6 @@
 # 1.0.0-beta.36
 
+- Removes the `UrlResolutionTagHelper` from Razor processing so that `~/` links don't get processed (#170).
 
 # 1.0.0-beta.35
 
