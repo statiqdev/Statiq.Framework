@@ -43,7 +43,7 @@ namespace Statiq.Common
         /// <param name="root">The root to use if the URL starts with ~/.</param>
         public RelativeUrl(string url, string root = "")
         {
-            if (url?.IndexOf(':') > -1)
+            if (!IsRelative(url))
             {
                 throw new InvalidOperationException($"Absolute URL '{url}' cannot be used for a RelativeUrl.");
             }
@@ -92,6 +92,17 @@ namespace Statiq.Common
             Path = new NormalizedPath(url);
         }
 
+        /// <summary>
+        /// Determines if the given <paramref name="url"/> is relative.
+        /// </summary>
+        /// <param name="url">The URL.</param>
+        /// <returns><c>true</c> if the URL is relative, otherwise <c>false</c>.</returns>
+        public static bool IsRelative(string url)
+        {
+            return url == null ? true : url.IndexOf(':') == -1;
+        }
+
+        /// <inheritdoc/>
         public override string ToString()
         {
             StringBuilder url = new StringBuilder();
