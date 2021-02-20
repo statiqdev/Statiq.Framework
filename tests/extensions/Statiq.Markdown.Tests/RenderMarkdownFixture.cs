@@ -280,6 +280,7 @@ the family Rosaceae.</dd>
             }
 
             [Test]
+            [Obsolete]
             public async Task UsePrependLinkRootSetting()
             {
                 // Given
@@ -297,6 +298,26 @@ the family Rosaceae.</dd>
 
                 // Then
                 result.Content.ShouldBe(output, StringCompareShould.IgnoreLineEndings);
+            }
+
+            [Test]
+            public async Task UsingTildeAddsLinkRoot()
+            {
+                // Given
+                const string input = "[link](~/foo)";
+                string expected = "<p><a href=\"/virtual-dir/foo\">link</a></p>" + Environment.NewLine;
+                TestExecutionContext context = new TestExecutionContext();
+                TestDocument document = new TestDocument(input)
+                {
+                    { Keys.LinkRoot, "/virtual-dir" }
+                };
+                RenderMarkdown markdown = new RenderMarkdown();
+
+                // When
+                TestDocument result = await ExecuteAsync(document, context, markdown).SingleAsync();
+
+                // Then
+                result.Content.ShouldBe(expected, StringCompareShould.IgnoreLineEndings);
             }
         }
     }

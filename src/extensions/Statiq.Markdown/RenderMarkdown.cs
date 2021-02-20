@@ -162,6 +162,7 @@ namespace Statiq.Markdown
         /// </summary>
         /// <param name="prependLinkRoot">If set to <c>true</c>, the <see cref="Keys.LinkRoot"/> setting value is added before any root-relative link (eg. stating with a '/').</param>
         /// <returns>The current module instance.</returns>
+        [Obsolete("Use ~/ to prepend the link root instead. e.g. ~/foo/bar", false)]
         public RenderMarkdown PrependLinkRoot(bool prependLinkRoot = false)
         {
             _prependLinkRoot = prependLinkRoot;
