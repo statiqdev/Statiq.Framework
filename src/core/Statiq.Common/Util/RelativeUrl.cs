@@ -43,7 +43,7 @@ namespace Statiq.Common
         /// <param name="root">The root to use if the URL starts with ~/.</param>
         public RelativeUrl(string url, string root = "")
         {
-            if (Uri.TryCreate(url, UriKind.Absolute, out Uri _))
+            if (url?.IndexOf(':') > -1)
             {
                 throw new InvalidOperationException($"Absolute URL '{url}' cannot be used for a RelativeUrl.");
             }
