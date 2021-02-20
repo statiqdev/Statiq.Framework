@@ -51,7 +51,7 @@ namespace Statiq.Markdown
                         return link;
                     }
 
-                    if (LinkGenerator.TryGetAbsoluteHttpUri(link, out string absoluteUri))
+                    if (!RelativeUrl.IsRelative(link) && LinkGenerator.TryGetAbsoluteHttpUri(link, out string absoluteUri))
                     {
                         return absoluteUri;
                     }
