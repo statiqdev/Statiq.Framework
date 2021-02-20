@@ -43,25 +43,35 @@ namespace Statiq.Markdown
                 // Render the content
                 HtmlRenderer htmlRenderer = new HtmlRenderer(writer);
                 pipeline.Setup(htmlRenderer);
-                if (prependLinkRoot && document.ContainsKey(Keys.LinkRoot))
+
+                htmlRenderer.LinkRewriter = (link) =>
                 {
-                    htmlRenderer.LinkRewriter = (link) =>
+                    if (string.IsNullOrEmpty(link))
                     {
-                        if (string.IsNullOrEmpty(link))
-                        {
-                            return link;
-                        }
-
-                        if (link[0] == '/')
-                        {
-                            // root-based url, must be rewritten by prepending the LinkRoot setting value
-                            // ex: '/virtual/directory' + '/relative/abs/link.html' => '/virtual/directory/relative/abs/link.html'
-                            link = document[Keys.LinkRoot] + link;
-                        }
-
                         return link;
-                    };
-                }
+                    }
+
+                    if (LinkGenerator.TryGetAbsoluteHttpUri(link, out string absoluteUri))
+                    {
+                        return absoluteUri;
+                    }
+
+                    // TODO: Remove when RenderMarkdown.PrependLinkRoot goes away.
+                    if (prependLinkRoot)
+                    {
+                        if (!link.StartsWith("/"))
+                        {
+                            link = "/" + link;
+                        }
+
+                        link = "~" + link;
+                    }
+
+                    RelativeUrl relativeUrl = new RelativeUrl(link, document.GetString(Keys.LinkRoot));
+
+                    return relativeUrl.ToString();
+                };
+
                 MarkdownDocument markdownDocument = MarkdownParser.Parse(content, pipeline);
                 htmlRenderer.Render(markdownDocument);
                 writer.Flush();
