@@ -1,6 +1,7 @@
 # 1.0.0-beta.36
 
 - Removes the `UrlResolutionTagHelper` from Razor processing so that `~/` links don't get processed (#170).
+- Adds support for `~/` link resolution to Markdown files, note that this is an interim feature and will be removed again in favor of a new module that handles `~/` links for all template engines soon (#170, #171, thanks @JoshClose).
 
 # 1.0.0-beta.35
 
