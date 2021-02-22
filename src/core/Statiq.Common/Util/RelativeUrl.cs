@@ -70,7 +70,7 @@ namespace Statiq.Common
             int fragmentIndex = url.IndexOf('#');
             if (fragmentIndex > -1)
             {
-                Fragment = url.Substring(fragmentIndex + 1);
+                Fragment = url.Substring(fragmentIndex);
                 url = url.Substring(0, fragmentIndex);
             }
             else
@@ -81,7 +81,7 @@ namespace Statiq.Common
             int queryIndex = url.IndexOf('?');
             if (queryIndex > -1)
             {
-                Query = url.Substring(queryIndex + 1);
+                Query = url.Substring(queryIndex);
                 url = url.Substring(0, queryIndex);
             }
             else
@@ -118,13 +118,11 @@ namespace Statiq.Common
 
             if (!string.IsNullOrEmpty(Query))
             {
-                url.Append("?");
                 url.Append(Query);
             }
 
             if (!string.IsNullOrEmpty(Fragment))
             {
-                url.Append("#");
                 url.Append(Fragment);
             }
 
