@@ -151,11 +151,21 @@ namespace Statiq.Common.Tests.Util
             [TestCase("~/foo?a=b#fragment", "root", "/root/foo?a=b#fragment")]
             public void ShouldCreateUrl(string url, string root, string expected)
             {
-                // When
+                // Wheny
                 RelativeUrl relativeUrl = new RelativeUrl(url, root);
 
                 // Then
                 Assert.AreEqual(expected, relativeUrl.ToString());
+            }
+
+            [Test]
+            public void ImplicitOperatorShouldMatchToString()
+            {
+                // When
+                RelativeUrl relativeUrl = new RelativeUrl("~/foo?a=b#fragment", "root");
+
+                // Then
+                Assert.AreEqual(relativeUrl.ToString(), (string)relativeUrl);
             }
         }
     }

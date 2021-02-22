@@ -128,5 +128,11 @@ namespace Statiq.Common
 
             return url.ToString();
         }
+
+        /// <inheritdoc/>
+        public static implicit operator string(RelativeUrl url)
+        {
+            return url.ToString();
+        }
     }
 }
