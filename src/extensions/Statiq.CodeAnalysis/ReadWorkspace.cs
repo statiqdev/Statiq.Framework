@@ -72,13 +72,13 @@ namespace Statiq.CodeAnalysis
         /// <returns>A sequence of Roslyn <see cref="Project"/> instances in the workspace.</returns>
         protected abstract IEnumerable<Project> GetProjects(IExecutionContext context, IFile file);
 
-        protected internal static Buildalyzer.AnalyzerResult CompileProject(IExecutionContext context, ProjectAnalyzer analyzer, StringWriter log)
+        protected internal static IAnalyzerResult CompileProject(IExecutionContext context, IProjectAnalyzer analyzer, StringWriter log)
         {
             log.GetStringBuilder().Clear();
             context.LogDebug($"Building project {analyzer.ProjectFile.Path}");
             Stopwatch sw = new Stopwatch();
             sw.Start();
-            Buildalyzer.AnalyzerResult result = analyzer.Build().FirstOrDefault();
+            IAnalyzerResult result = analyzer.Build().FirstOrDefault();
             sw.Stop();
             context.LogDebug($"Project {analyzer.ProjectFile.Path} built in {sw.ElapsedMilliseconds} ms");
             if (result?.Succeeded != true)

@@ -423,7 +423,7 @@ namespace Statiq.CodeAnalysis.Tests
                 // Then
                 Assert.AreEqual("Class", results.Single(x => x["Name"].Equals("Green"))["SpecificKind"]);
                 Assert.AreEqual("Class", results.Single(x => x["Name"].Equals("Blue"))["SpecificKind"]);
-                Assert.AreEqual("Struct", results.Single(x => x["Name"].Equals("Red"))["SpecificKind"]);
+                Assert.AreEqual("Structure", results.Single(x => x["Name"].Equals("Red"))["SpecificKind"]);
                 Assert.AreEqual("Enum", results.Single(x => x["Name"].Equals("Yellow"))["SpecificKind"]);
             }
 

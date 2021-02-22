@@ -561,12 +561,12 @@ namespace Statiq.CodeAnalysis
                 else
                 {
                     context.LogDebug($"Creating workspace project for {projectFile.Path.FullPath}");
-                    ProjectAnalyzer analyzer = manager.GetProject(projectFile.Path.FullPath);
+                    IProjectAnalyzer analyzer = manager.GetProject(projectFile.Path.FullPath);
                     if (context.Settings.GetBool(CodeAnalysisKeys.OutputBuildLog))
                     {
                         analyzer.AddBinaryLogger();
                     }
-                    Buildalyzer.AnalyzerResult result = ReadWorkspace.CompileProject(context, analyzer, log);
+                    IAnalyzerResult result = ReadWorkspace.CompileProject(context, analyzer, log);
                     if (result is object)
                     {
                         project = result.AddToWorkspace(workspace);
@@ -597,7 +597,7 @@ namespace Statiq.CodeAnalysis
                         LogWriter = log
                     });
 
-                Buildalyzer.AnalyzerResult[] results = manager.Projects.Values
+                IAnalyzerResult[] results = manager.Projects.Values
                     .Select(analyzer =>
                     {
                         if (context.Settings.GetBool(CodeAnalysisKeys.OutputBuildLog))
@@ -610,7 +610,7 @@ namespace Statiq.CodeAnalysis
                     .ToArray();
 
                 AdhocWorkspace workspace = new AdhocWorkspace();
-                foreach (Buildalyzer.AnalyzerResult result in results)
+                foreach (IAnalyzerResult result in results)
                 {
                     result.AddToWorkspace(workspace);
                 }
