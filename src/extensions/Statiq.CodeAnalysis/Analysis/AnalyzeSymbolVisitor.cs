@@ -40,6 +40,8 @@ namespace Statiq.CodeAnalysis.Analysis
         private readonly MethodInfo _documentationCommentCompilerDefaultVisit;
         private readonly MethodInfo _diagnosticBagGetInstance;
         private readonly MethodInfo _diagnosticBagFree;
+        private readonly Type _publicModelSymbol;
+        private readonly PropertyInfo _publicModelSymbolUnderlyingType;
 
         private ImmutableArray<KeyValuePair<INamedTypeSymbol, IDocument>> _namedTypes;  // This contains all of the NamedType symbols and documents obtained during the initial processing
         private bool _finished; // When this is true, we're visiting external symbols and should omit certain metadata and don't descend
@@ -72,6 +74,9 @@ namespace Statiq.CodeAnalysis.Analysis
             reflectedAssembly = typeof(CSharpCompilation).Assembly;
             _documentationCommentCompiler = reflectedAssembly.GetType("Microsoft.CodeAnalysis.CSharp.DocumentationCommentCompiler");
             _documentationCommentCompilerDefaultVisit = _documentationCommentCompiler.GetMethod("DefaultVisit");
+
+            _publicModelSymbol = reflectedAssembly.GetType("Microsoft.CodeAnalysis.CSharp.Symbols.PublicModel.Symbol");
+            _publicModelSymbolUnderlyingType = _publicModelSymbol.GetProperty("UnderlyingSymbol", BindingFlags.Instance | BindingFlags.NonPublic);
 
             reflectedAssembly = typeof(Diagnostic).Assembly;
             reflectedType = reflectedAssembly.GetType("Microsoft.CodeAnalysis.DiagnosticBag");
@@ -493,7 +498,8 @@ namespace Statiq.CodeAnalysis.Analysis
                     ct
                 },
                 null);
-            _documentationCommentCompilerDefaultVisit.Invoke(documentationCompiler, new object[] { symbol });
+            object underlyingSymbol = _publicModelSymbolUnderlyingType.GetValue(symbol);
+            _documentationCommentCompilerDefaultVisit.Invoke(documentationCompiler, new object[] { underlyingSymbol });
             _diagnosticBagFree.Invoke(diagnosticBag, new object[] { });
             string docs = writer.ToString();
 

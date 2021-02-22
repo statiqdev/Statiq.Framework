@@ -50,7 +50,7 @@ namespace Statiq.CodeAnalysis
                 LogWriter = log
             });
 
-            Buildalyzer.AnalyzerResult[] results = manager.Projects.Values
+            IAnalyzerResult[] results = manager.Projects.Values
                 .Select(analyzer =>
                 {
                     if (context.Settings.GetBool(CodeAnalysisKeys.OutputBuildLog))
@@ -63,7 +63,7 @@ namespace Statiq.CodeAnalysis
                 .ToArray();
 
             AdhocWorkspace workspace = new AdhocWorkspace();
-            foreach (Buildalyzer.AnalyzerResult result in results)
+            foreach (IAnalyzerResult result in results)
             {
                 result.AddToWorkspace(workspace);
             }

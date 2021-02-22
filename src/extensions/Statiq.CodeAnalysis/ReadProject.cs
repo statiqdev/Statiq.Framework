@@ -48,12 +48,12 @@ namespace Statiq.CodeAnalysis
             {
                 LogWriter = log
             });
-            ProjectAnalyzer analyzer = manager.GetProject(file.Path.FullPath);
+            IProjectAnalyzer analyzer = manager.GetProject(file.Path.FullPath);
             if (context.Settings.GetBool(CodeAnalysisKeys.OutputBuildLog))
             {
                 analyzer.AddBinaryLogger();
             }
-            Buildalyzer.AnalyzerResult result = CompileProject(context, analyzer, log);
+            IAnalyzerResult result = CompileProject(context, analyzer, log);
             AdhocWorkspace workspace = new AdhocWorkspace();
             result.AddToWorkspace(workspace);
             return workspace.CurrentSolution.Projects;
