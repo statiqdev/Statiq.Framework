@@ -1,9 +1,12 @@
 # 1.0.0-beta.37
 
+- Updated Buildalyzer to the most recent version and resolves Roslyn version incompatibilities in the `AnalyzeCSharp` module (#174, thanks @mholo65).
+- Added an optional `makeAbsolute` parameter to `LinkGenerator.GetLink()` that allows keeping links as relative (#170).
+
 # 1.0.0-beta.36
 
-- Removes the `UrlResolutionTagHelper` from Razor processing so that `~/` links don't get processed (#170).
-- Adds support for `~/` link resolution to Markdown files, note that this is an interim feature and will be removed again in favor of a new module that handles `~/` links for all template engines soon (#170, #171, thanks @JoshClose).
+- Removed the `UrlResolutionTagHelper` from Razor processing so that `~/` links don't get processed (#170).
+- Added support for `~/` link resolution to Markdown files, note that this is an interim feature and will be removed again in favor of a new module that handles `~/` links for all template engines soon (#170, #171, thanks @JoshClose).
 
 # 1.0.0-beta.35
 

@@ -20,6 +20,13 @@ namespace Statiq.Common
         /// <param name="hidePages">An array of file names to hide (or <c>null</c> to not hide any files).</param>
         /// <param name="hideExtensions">An array of file extensions to hide (or <c>null</c> to not hide extensions or an empty array to hide all file extensions).</param>
         /// <param name="lowercase">Indicates that the link should be rendered in all lowercase.</param>
+        /// <param name="makeAbsolute">
+        /// If <paramref name="path"/> is relative, setting this to <c>true</c> (the default value) will assume the path relative from the root of the site
+        /// and make it absolute by prepending a slash and <paramref name="root"/> to the path. Otherwise, <c>false</c> will leave relative paths as relative
+        /// and won't prepend a slash (but <paramref name="host"/>, <paramref name="scheme"/>, and <paramref name="root"/> will have no effect).
+        /// If <paramref name="path"/> is absolute, this value has no effect and <paramref name="host"/>, <paramref name="scheme"/>, and <paramref name="root"/>
+        /// will be applied as appropriate.
+        /// </param>
         /// <returns>A generated link.</returns>
         public static string GetLink(
             NormalizedPath path,
@@ -28,7 +35,8 @@ namespace Statiq.Common
             string scheme,
             IReadOnlyList<string> hidePages,
             IReadOnlyList<string> hideExtensions,
-            bool lowercase)
+            bool lowercase,
+            bool makeAbsolute = true)
         {
             string link = string.Empty;
             if (!path.IsNull)
@@ -40,6 +48,13 @@ namespace Statiq.Common
                     path = path.Parent;
                 }
 
+                // Special case if this is relative and we removed the entire path
+                if (!makeAbsolute && path.IsNullOrEmpty)
+                {
+                    // The "." indicates to a browser to link to the current directory, which is what we want
+                    return ".";
+                }
+
                 // Hide extensions
                 if (hideExtensions is object
                     && (hideExtensions.Count == 0 || hideExtensions.Where(x => x is object).Select(x => x.StartsWith(NormalizedPath.Dot) ? x : NormalizedPath.Dot + x).Contains(path.Extension)))
@@ -49,14 +64,25 @@ namespace Statiq.Common
 
                 // Collapse the link to a string
                 link = path.FullPath;
-                if (string.IsNullOrWhiteSpace(link) || link == NormalizedPath.Dot)
+
+                // Prepend a slash, but only if we want to make the path absolute
+                if (makeAbsolute)
                 {
-                    link = NormalizedPath.Slash;
+                    if (string.IsNullOrWhiteSpace(link) || link == NormalizedPath.Dot)
+                    {
+                        link = NormalizedPath.Slash;
+                    }
+                    if (!link.StartsWith(NormalizedPath.Slash))
+                    {
+                        link = NormalizedPath.Slash + link;
+                    }
                 }
-                if (!link.StartsWith(NormalizedPath.Slash))
-                {
-                    link = NormalizedPath.Slash + link;
-                }
+            }
+
+            // If we're not making it absolute then we're done if this isn't already an absolute path
+            if (!makeAbsolute && (link.Length == 0 || link[0] != NormalizedPath.Slash[0]))
+            {
+                return link;
             }
 
             // Collapse the root and combine
