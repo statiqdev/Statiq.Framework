@@ -23,6 +23,9 @@
         /// on if you want to generate host-specific links. By default, the host is not included so that
         /// sites work the same on any server including the preview server.
         /// </summary>
+        /// <remarks>
+        /// To add a query and/or fragment to the document link, use <see cref="IDocumentGetLinkExtensions.GetLink(IDocument, string, bool)"/>.
+        /// </remarks>
         /// <param name="executionState">The execution context.</param>
         /// <param name="document">The document to generate a link for.</param>
         /// <param name="includeHost">
@@ -59,19 +62,42 @@
             this IExecutionState executionState,
             IMetadata metadata,
             string key,
+            bool includeHost = false) =>
+            executionState.GetLink(metadata, key, null, includeHost);
+
+        /// <summary>
+        /// Gets a link for the specified metadata using the specified metadata value and the default settings from the
+        /// configuration. This version should be used inside modules to ensure
+        /// consistent link generation. Note that you can optionally include the host or not depending
+        /// on if you want to generate host-specific links. By default, the host is not included so that
+        /// sites work the same on any server including the preview server.
+        /// </summary>
+        /// <param name="executionState">The execution state.</param>
+        /// <param name="metadata">The metadata or document to generate a link for.</param>
+        /// <param name="key">The key at which a <see cref="NormalizedPath"/> can be found for generating the link.</param>
+        /// <param name="queryAndFragment">
+        /// Appends a query and/or fragment to the URL from the metadata value. If a value is provided for this parameter
+        /// and it does not start with "?" or "#" then it will be assumed a query and a "?" will be prefixed.
+        /// </param>
+        /// <param name="includeHost">
+        /// If set to <c>true</c> the host configured in the output settings will
+        /// be included in the link, otherwise the host will be omitted and only the root path will be included (default).
+        /// </param>
+        /// <returns>
+        /// A string representation of the path suitable for a web link.
+        /// </returns>
+        public static string GetLink(
+            this IExecutionState executionState,
+            IMetadata metadata,
+            string key,
+            string queryAndFragment,
             bool includeHost = false)
         {
             if (metadata?.ContainsKey(key) == true)
             {
                 // Return the actual URI if it's absolute
-                if (LinkGenerator.TryGetAbsoluteHttpUri(metadata.GetString(key), out string absoluteUri))
-                {
-                    return absoluteUri;
-                }
-
-                // Otherwise try to process the path
-                NormalizedPath path = metadata.GetPath(key);
-                return path.IsNull ? null : executionState.GetLink(path, includeHost);
+                string path = metadata.GetString(key);
+                return path is null ? null : executionState.GetLink(LinkGenerator.AddQueryAndFragment(path, queryAndFragment), includeHost);
             }
             return null;
         }

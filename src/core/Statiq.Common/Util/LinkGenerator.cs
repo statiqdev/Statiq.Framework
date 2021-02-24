@@ -170,5 +170,51 @@ namespace Statiq.Common
             absoluteUri = null;
             return false;
         }
+
+        /// <summary>
+        /// Adds a query and/or fragment to a URL or path.
+        /// </summary>
+        /// <param name="path">The path or URL.</param>
+        /// <param name="queryAndFragment">
+        /// The query and/or fragment to add. If a value is provided for this parameter
+        /// and it does not start with "?" or "#" then it will be assumed a query and a "?" will be prefixed.
+        /// </param>
+        /// <returns>The path or URL with an appended query and/or fragment.</returns>
+        public static string AddQueryAndFragment(string path, string queryAndFragment)
+        {
+            if (!string.IsNullOrEmpty(queryAndFragment))
+            {
+                // If we have a query and fragment, make sure it starts with ? or #
+                if (queryAndFragment[0] == '?' || queryAndFragment[0] == '#')
+                {
+                    return path + queryAndFragment;
+                }
+                return path + "?" + queryAndFragment;
+            }
+            return path;
+        }
+
+        /// <summary>
+        /// Adds a query and/or fragment to a path.
+        /// </summary>
+        /// <param name="path">The path.</param>
+        /// <param name="queryAndFragment">
+        /// The query and/or fragment to add. If a value is provided for this parameter
+        /// and it does not start with "?" or "#" then it will be assumed a query and a "?" will be prefixed.
+        /// </param>
+        /// <returns>The path with an appended query and/or fragment.</returns>
+        public static NormalizedPath AddQueryAndFragment(NormalizedPath path, string queryAndFragment)
+        {
+            if (!string.IsNullOrEmpty(queryAndFragment))
+            {
+                // If we have a query and fragment, make sure it starts with ? or #
+                if (queryAndFragment[0] == '?' || queryAndFragment[0] == '#')
+                {
+                    return new NormalizedPath(path.FullPath + queryAndFragment);
+                }
+                return new NormalizedPath(path.FullPath + "?" + queryAndFragment);
+            }
+            return path;
+        }
     }
 }
