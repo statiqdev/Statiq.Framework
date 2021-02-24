@@ -4,6 +4,7 @@
 - Added an optional `makeAbsolute` parameter to `LinkGenerator.GetLink()` that allows keeping links as relative (#170).
 - Fixed fragment support in the Markdown link rewriter (#170, #175, thanks @JoshClose).
 - Fixed `LinkGenerator` behavior when using query and/or fragment components (#170).
+- Added `makeAbsolute` parameters to `IExecutionState.GetLink()` extension methods as appropriate (#170).
 
 # 1.0.0-beta.36
 

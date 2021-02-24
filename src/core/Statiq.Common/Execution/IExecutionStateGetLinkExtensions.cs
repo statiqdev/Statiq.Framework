@@ -244,5 +244,48 @@
                 hideIndexPages ? new[] { executionState.Settings.GetIndexFileName() } : null,
                 hideExtensions ? executionState.Settings.GetPageFileExtensions() : null,
                 lowercase);
+
+        /// <summary>
+        /// Converts the path into a string appropriate for use as a link, overriding one or more
+        /// settings from the configuration.
+        /// </summary>
+        /// <param name="executionState">The execution state.</param>
+        /// <param name="path">The path to generate a link for.</param>
+        /// <param name="host">The host to use for the link.</param>
+        /// <param name="root">The root of the link. The value of this parameter is prepended to the path.</param>
+        /// <param name="useHttps">If set to <c>true</c>, HTTPS will be used as the scheme for the link.</param>
+        /// <param name="hideIndexPages">If set to <c>true</c>, index files will be hidden.</param>
+        /// <param name="hideExtensions">If set to <c>true</c>, extensions will be hidden.</param>
+        /// <param name="lowercase">If set to <c>true</c>, links will be rendered in all lowercase.</param>
+        /// <param name="makeAbsolute">
+        /// If <paramref name="path"/> is relative, setting this to <c>true</c> (the default value) will assume the path relative from the root of the site
+        /// and make it absolute by prepending a slash and <paramref name="root"/> to the path. Otherwise, <c>false</c> will leave relative paths as relative
+        /// and won't prepend a slash (but <paramref name="host"/>, <paramref name="useHttps"/>, and <paramref name="root"/> will have no effect).
+        /// If <paramref name="path"/> is absolute, this value has no effect and <paramref name="host"/>, <paramref name="useHttps"/>, and <paramref name="root"/>
+        /// will be applied as appropriate.
+        /// </param>
+        /// <returns>
+        /// A string representation of the path suitable for a web link with the specified
+        /// root and hidden file name or extension.
+        /// </returns>
+        public static string GetLink(
+            this IExecutionState executionState,
+            in NormalizedPath path,
+            string host,
+            in NormalizedPath root,
+            bool useHttps,
+            bool hideIndexPages,
+            bool hideExtensions,
+            bool lowercase,
+            bool makeAbsolute) =>
+            LinkGenerator.GetLink(
+                path,
+                host,
+                root,
+                useHttps ? "https" : null,
+                hideIndexPages ? new[] { executionState.Settings.GetIndexFileName() } : null,
+                hideExtensions ? executionState.Settings.GetPageFileExtensions() : null,
+                lowercase,
+                makeAbsolute);
     }
 }
