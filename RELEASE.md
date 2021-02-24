@@ -2,6 +2,8 @@
 
 - Updated Buildalyzer to the most recent version and resolves Roslyn version incompatibilities in the `AnalyzeCSharp` module (#174, thanks @mholo65).
 - Added an optional `makeAbsolute` parameter to `LinkGenerator.GetLink()` that allows keeping links as relative (#170).
+- Fixed fragment support in the Markdown link rewriter (#170, #175, thanks @JoshClose).
+- Fixed `LinkGenerator` behavior when using query and/or fragment components (#170).
 
 # 1.0.0-beta.36
 

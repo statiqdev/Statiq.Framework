@@ -79,33 +79,72 @@ namespace Statiq.Common
                 }
             }
 
-            // If we're not making it absolute then we're done if this isn't already an absolute path
-            if (!makeAbsolute && (link.Length == 0 || link[0] != NormalizedPath.Slash[0]))
+            // Extract the fragment
+            int fragmentIndex = link.IndexOf('#');
+            string fragment = null;
+            if (fragmentIndex > -1)
             {
-                return link;
+                fragment = link.Substring(fragmentIndex);
+                link = link.Substring(0, fragmentIndex);
             }
 
-            // Collapse the root and combine
-            string rootLink = root.IsNull ? string.Empty : root.FullPath;
-            if (rootLink.EndsWith(NormalizedPath.Slash))
+            // Extract the query
+            int queryIndex = link.IndexOf('?');
+            string query = null;
+            if (queryIndex > -1)
             {
-                rootLink = rootLink.Substring(0, rootLink.Length - 1);
+                query = link.Substring(queryIndex);
+                link = link.Substring(0, queryIndex);
+            }
+
+            // If we're not making it absolute and it doesn't start with a slash, make sure to remove the slash when we're done,
+            // otherwise collapse with the root path and combine them
+            bool makeRelative = false;
+            if (!makeAbsolute && (link.Length == 0 || link[0] != NormalizedPath.Slash[0]))
+            {
+                makeRelative = true;
+            }
+            else
+            {
+                string rootLink = root.IsNull ? string.Empty : root.FullPath;
+                if (rootLink.EndsWith(NormalizedPath.Slash))
+                {
+                    rootLink = rootLink.Substring(0, rootLink.Length - 1);
+                }
+                link = rootLink + link;
             }
 
             // Add the host and convert to URI for escaping
             UriBuilder builder = new UriBuilder
             {
-                Path = rootLink + link,
-                Scheme = scheme ?? "http"
+                Scheme = scheme ?? "http",
+                Path = link,
+                Query = query,
+                Fragment = fragment
             };
             bool hasHost = false;
-            if (!string.IsNullOrWhiteSpace(host))
+            if (!makeRelative && !string.IsNullOrWhiteSpace(host))
             {
                 builder.Host = host;
                 hasHost = true;
             }
             Uri uri = builder.Uri;
-            string renderedLink = hasHost ? uri.AbsoluteUri : uri.AbsolutePath;
+            string renderedLink = hasHost
+                ? uri.AbsoluteUri
+                : uri.GetComponents(UriComponents.Path | UriComponents.Query | UriComponents.Fragment, UriFormat.SafeUnescaped);
+
+            // Remove the slash prefix if we have one
+            if (makeRelative && renderedLink[0] == '/')
+            {
+                renderedLink = renderedLink.Substring(1);
+
+                // If the link started with a dot, add it back in
+                if (link.Length > 0 && link[0] == '.' && (renderedLink.Length == 0 || renderedLink[0] != '.'))
+                {
+                    renderedLink = "." + renderedLink;
+                }
+            }
+
             return lowercase ? renderedLink.ToLowerInvariant() : renderedLink;
         }
 
