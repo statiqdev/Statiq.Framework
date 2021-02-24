@@ -1,3 +1,5 @@
+# 1.0.0-beta.38
+
 # 1.0.0-beta.37
 
 - Updated Buildalyzer to the most recent version and resolves Roslyn version incompatibilities in the `AnalyzeCSharp` module (#174, thanks @mholo65).
