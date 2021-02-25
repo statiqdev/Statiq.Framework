@@ -1,5 +1,7 @@
 # 1.0.0-beta.38
 
+- Fixed a bug when both a debugger was attached and the log level was set to debug by removing the `DebugLogger` (#176).
+
 # 1.0.0-beta.37
 
 - Updated Buildalyzer to the most recent version and resolves Roslyn version incompatibilities in the `AnalyzeCSharp` module (#174, thanks @mholo65).

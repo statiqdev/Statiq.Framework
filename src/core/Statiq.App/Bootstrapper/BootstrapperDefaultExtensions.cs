@@ -89,7 +89,6 @@ namespace Statiq.App
             bootstrapper.ConfigureServices(services =>
             {
                 services.AddSingleton<ILoggerProvider, ConsoleLoggerProvider>();
-                services.AddLogging(logging => logging.AddDebug());
             });
 
         public static Bootstrapper AddDefaultSettings(this Bootstrapper bootstrapper) =>
