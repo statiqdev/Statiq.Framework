@@ -1,3 +1,5 @@
+# 1.0.0-beta.39
+
 # 1.0.0-beta.38
 
 - Fixed a bug when both a debugger was attached and the log level was set to debug by removing the `DebugLogger` (#176).
