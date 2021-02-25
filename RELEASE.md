@@ -2,6 +2,7 @@
 
 - Fixed a bug when both a debugger was attached and the log level was set to debug by removing the `DebugLogger` (#176).
 - Added a `RedirectTo` metadata value to documents output from `GenerateRedirects`.
+- Fixed a regression with the `DocumentLink()` HTML helper in Razor (#177).
 
 # 1.0.0-beta.37
 

@@ -281,7 +281,7 @@ namespace Statiq.Razor
             {
                 tagBuilder.MergeAttributes(htmlAttributes);
             }
-            tagBuilder.MergeAttribute("href", IExecutionContext.Current.GetLink(document, queryAndFragment, includeHost));
+            tagBuilder.MergeAttribute("href", document.GetLink(queryAndFragment, includeHost));
             return tagBuilder;
         }
     }
