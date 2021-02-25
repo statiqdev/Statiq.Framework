@@ -8,14 +8,14 @@ using Statiq.Testing;
 
 namespace Statiq.Common.Tests.Util
 {
-    // Some platforms don't like building/running the test console app project in parallel
+    // The process launcher tests only seem reliable on Windows (though they work intermittently on other platforms so the launcher itself seems okay)
     [NonParallelizable]
     [TestFixture]
     public class ProcessLauncherFixture : BaseFixture
     {
         public class StartNewTests : ProcessLauncherFixture
         {
-            [Test]
+            [WindowsTest]
             public void ThrowsForSynchronousError()
             {
                 // Given
@@ -29,7 +29,7 @@ namespace Statiq.Common.Tests.Util
                 errorWriter.ToString().ShouldContain("Couldn't find a project to run.");
             }
 
-            [Test]
+            [WindowsTest]
             public void DoesNotThrowForBackgroundError()
             {
                 // Given
@@ -59,7 +59,7 @@ namespace Statiq.Common.Tests.Util
                 errorWriter.ToString().ShouldContain("Couldn't find a project to run.");
             }
 
-            [Test]
+            [WindowsTest]
             public void LaunchesProcess()
             {
                 // Given
@@ -78,7 +78,7 @@ namespace Statiq.Common.Tests.Util
                 outputWriter.ToString().ShouldContain("Finished");
             }
 
-            [Test]
+            [WindowsTest]
             public void ReturnsExitCode()
             {
                 // Given
@@ -100,7 +100,7 @@ namespace Statiq.Common.Tests.Util
                 outputWriter.ToString().ShouldContain("Finished");
             }
 
-            [Test]
+            [WindowsTest]
             public void SupportsCancellation()
             {
                 // Given
@@ -120,7 +120,7 @@ namespace Statiq.Common.Tests.Util
                 processLauncher.AreAnyRunning.ShouldBeFalse();
             }
 
-            [Test]
+            [WindowsTest]
             public void SupportsBackgroundCancellation()
             {
                 // Given
