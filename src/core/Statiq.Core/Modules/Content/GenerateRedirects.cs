@@ -142,34 +142,41 @@ namespace Statiq.Core
 
                         // Record the redirect for additional processing
                         string url = context.GetLink(input, _includeHost);
-                        redirects.TryAdd(fromPath, url);
-
-                        // Meta refresh documents
-                        NormalizedPath outputPath = fromPath;
-                        IReadOnlyList<string> pageFileExtensions = context.Settings.GetPageFileExtensions();
-                        if (!pageFileExtensions.Any(x => outputPath.Extension.Equals(x, NormalizedPath.DefaultComparisonType)))
+                        if (url is object)
                         {
-                            outputPath = outputPath.AppendExtension(pageFileExtensions[0]);
-                        }
+                            redirects.TryAdd(fromPath, url);
 
-                        if (_metaRefreshPages)
-                        {
-                            string body = input.GetString(Keys.RedirectBody, $@"<p>This page has moved to <a href=""{url}"">{url}</a></p>");
-                            yield return context.CreateDocument(
-                                outputPath,
-                                context.GetContentProvider(
-                                    $@"
+                            // Meta refresh documents
+                            NormalizedPath outputPath = fromPath;
+                            IReadOnlyList<string> pageFileExtensions = context.Settings.GetPageFileExtensions();
+                            if (!pageFileExtensions.Any(x => outputPath.Extension.Equals(x, NormalizedPath.DefaultComparisonType)))
+                            {
+                                outputPath = outputPath.AppendExtension(pageFileExtensions[0]);
+                            }
+
+                            if (_metaRefreshPages)
+                            {
+                                string body = input.GetString(Keys.RedirectBody, $@"<p>This page has moved to <a href=""{url}"">{url}</a></p>");
+                                yield return context.CreateDocument(
+                                    outputPath,
+                                    new MetadataItems
+                                    {
+                                        { Keys.RedirectTo, input.Destination }
+                                    },
+                                    context.GetContentProvider(
+                                        $@"
 <!doctype html>
 <html>    
-  <head>      
+    <head>      
     <title>Redirected</title>      
     <meta http-equiv=""refresh"" content=""0;url='{url}'"" />    
-  </head>    
-  <body> 
+    </head>    
+    <body> 
     {body}
-  </body>  
+    </body>  
 </html>",
-                                    MediaTypes.Html));
+                                        MediaTypes.Html));
+                            }
                         }
                     }
                 }

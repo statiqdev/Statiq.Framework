@@ -235,6 +235,13 @@ namespace Statiq.Common
         public const string RedirectFrom = nameof(RedirectFrom);
 
         /// <summary>
+        /// Added to a document created as the source of redirection and contains the path where the redirection is to.
+        /// You can check if a document contains this key to see if it's the source of a redirection.
+        /// </summary>
+        /// <type><see cref="NormalizedPath"/></type>
+        public const string RedirectTo = nameof(RedirectTo);
+
+        /// <summary>
         /// Replaces the default body of meta-refresh redirect HTML files with the specified body
         /// (it will be included raw so don't escape HTML).
         /// </summary>
