@@ -1,5 +1,7 @@
 # 1.0.0-beta.39
 
+- Added caching for `IEnumerable<TDocument>.GetDestinationTree()` and `IEnumerable<TDocument>.GetSourceTree()` which results in a significant performance improvement in some cases for large sites.
+
 # 1.0.0-beta.38
 
 - Fixed a bug when both a debugger was attached and the log level was set to debug by removing the `DebugLogger` (#176).

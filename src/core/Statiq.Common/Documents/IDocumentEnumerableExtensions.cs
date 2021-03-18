@@ -315,12 +315,20 @@ namespace Statiq.Common
             where TDocument : IDocument =>
             new DocumentMetadataTree<TDocument>(documents, childrenKey);
 
+        // Cache the destination and source trees since creating them is a bit expensive
+        private static readonly ConcurrentCache<(int, Type), object> DestinationTrees = new ConcurrentCache<(int, Type), object>();
+        private static readonly ConcurrentCache<(int, Type), object> SourceTrees = new ConcurrentCache<(int, Type), object>();
+
         public static DocumentPathTree<TDocument> AsDestinationTree<TDocument>(this IEnumerable<TDocument> documents)
             where TDocument : IDocument =>
-            new DocumentPathTree<TDocument>(documents, x => x.Destination);
+            (DocumentPathTree<TDocument>)DestinationTrees.GetOrAdd(
+                (documents.GetHashCode(), typeof(TDocument)),
+                _ => new DocumentPathTree<TDocument>(documents, x => x.Destination));
 
         public static DocumentPathTree<TDocument> AsSourceTree<TDocument>(this IEnumerable<TDocument> documents)
             where TDocument : IDocument =>
-            new DocumentPathTree<TDocument>(documents, x => x.Source);
+            (DocumentPathTree<TDocument>)SourceTrees.GetOrAdd(
+                (documents.GetHashCode(), typeof(TDocument)),
+                _ => new DocumentPathTree<TDocument>(documents, x => x.Source));
     }
 }

@@ -8,6 +8,9 @@ namespace Statiq.Common
     public class DocumentPathTree<TDocument> : IDocumentPathTree<TDocument>
         where TDocument : IDocument
     {
+        // Cache the documents by their path for faster lookups
+        private readonly Dictionary<NormalizedPath, TDocument> _documentsByPath = new Dictionary<NormalizedPath, TDocument>();
+
         private readonly Func<TDocument, NormalizedPath> _pathFunc;
         private readonly string _indexFileName;
         private readonly (NormalizedPath, TDocument)[] _documents;
@@ -30,7 +33,18 @@ namespace Statiq.Common
                 : documents
                     .Where(x => documentIdHashes.Add(x.Id))
                     .Select(x => (ResolvePath(x), x))
-                    .Where(x => !x.Item1.IsNull)
+                    .Where(x =>
+                    {
+                        if (!x.Item1.IsNull)
+                        {
+                            // Cache the path if we're saving this one
+                            // Do it in the Where clause so we don't have to loop again
+                            // Use TryAdd so behavior matches FirstOrDefault on the array of documents if there are more than one
+                            _documentsByPath.TryAdd(x.Item1, x.x);
+                            return true;
+                        }
+                        return false;
+                    })
                     .ToArray();
         }
 
@@ -67,9 +81,7 @@ namespace Statiq.Common
             {
                 return default;
             }
-
-            path = path.Parent;
-            return Array.Find(_documents, x => x.Item1.Equals(path)).Item2;
+            return _documentsByPath.TryGetValue(path.Parent, out TDocument parent) ? parent : default;
         }
 
         public DocumentList<TDocument> GetChildrenOf(TDocument document)
@@ -130,10 +142,9 @@ namespace Statiq.Common
             path = path.Parent;
             while (!path.IsNull)
             {
-                (NormalizedPath, TDocument) ancestor = Array.Find(_documents, x => x.Item1.Equals(path));
-                if (ancestor.Item2 is object && !ancestor.Item2.IdEquals(document))
+                if (_documentsByPath.TryGetValue(path, out TDocument parent) && !parent.IdEquals(document))
                 {
-                    ancestors.Add(ancestor.Item2);
+                    ancestors.Add(parent);
                 }
                 if (path.IsNullOrEmpty)
                 {
